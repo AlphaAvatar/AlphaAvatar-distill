@@ -125,3 +125,67 @@ def test_the_committed_audit_record_matches_the_live_one(rec):
     assert committed["digest"] == rec["digest"], (
         "the committed skip-predicate audit no longer describes this tree; "
         "re-run scripts/autoinit/audit_skip_predicates.py --write")
+
+
+# --- strict CPU-test parity ---------------------------------------------------
+#
+# "Classified" is not "strictly comparable". Attempt 5's `--strict` comparison
+# was correct machinery pointed at two different machines, and would have
+# refused a healthy L40S for being one.
+
+def test_strict_parity_is_ready(rec):
+    assert rec["parity_unresolved"] == [], rec["parity_unresolved"]
+    assert rec["strict_cpu_test_parity_ready"] == "PASS"
+
+
+def test_every_predicate_has_a_parity_resolution(rec):
+    assert "UNRESOLVED" not in rec["parity_by_resolution"]
+    assert "REFUSED" not in rec["parity_by_resolution"]
+    assert sum(rec["parity_by_resolution"].values()) == rec["n_predicates"]
+
+
+def test_the_audit_binds_the_cpu_test_environment_it_resolved_against(rec):
+    """A parity verdict against an environment that has since moved is not a
+    verdict. The contract's digest travels with the record."""
+    from aadistill.autoinit import cpu_test_env as cte
+    assert rec["cpu_test_environment"]["digest"] == cte.digest()
+    assert rec["cpu_test_environment"]["set"]["CUDA_VISIBLE_DEVICES"] == ""
+
+
+def test_an_image_difference_is_not_evidence_of_dependency_equality(rec):
+    """Every optional dependency must NAME what guarantees it on both machines."""
+    deps = [p for p in rec["predicates"] if p["signal"] == "optional_dependency"]
+    assert len(deps) == 9
+    for p in deps:
+        assert p["parity"] == "guaranteed_dependency", p["nodeid"]
+        why = p["parity_why"]
+        assert "not the dev box's venv" not in why
+        assert any(k in why for k in ("committed at", "by construction")), why
+
+
+def test_an_unresolvable_dependency_refuses_rather_than_waiving(monkeypatch):
+    """Mutation: an optional dependency with no named guarantee must NOT pass."""
+    monkeypatch.setattr(A, "DEPENDENCY_EVIDENCE", {})
+    mutated = A.audit(REPO)
+    assert mutated["strict_cpu_test_parity_ready"] == "REVIEW"
+    assert any(sig == "optional_dependency"
+               for _n, sig, _w in mutated["parity_unresolved"])
+
+
+def test_removing_the_gpu_normalization_breaks_parity(monkeypatch):
+    """Mutation: without `CUDA_VISIBLE_DEVICES=""` the GPU predicate decides the
+    opposite way on the pod, and the audit must say so rather than pass."""
+    rules = {k: v for k, v in A.PARITY_BY_SIGNAL.items() if k != "gpu"}
+    monkeypatch.setattr(A, "PARITY_BY_SIGNAL", rules)
+    mutated = A.audit(REPO)
+    assert mutated["strict_cpu_test_parity_ready"] == "REVIEW"
+    assert any(sig == "gpu" for _n, sig, _w in mutated["parity_unresolved"])
+
+
+def test_a_simulator_marker_can_never_satisfy_parity(monkeypatch):
+    """It is refused explicitly, not merely absent."""
+    fake = dict(nodeid="tests/x.py::t", signal="simulator_marker", verdict="differs_on_pod",
+                expanded="os.environ.get('AAD_SYNTHETIC_HF_TOKEN')", why="", file="tests/x.py",
+                line=1)
+    res, why = A.parity_of(fake, {}, set())
+    assert res == "REFUSED" and "never" in why

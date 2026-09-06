@@ -43,7 +43,12 @@ from aadistill.autoinit.continuation import (  # noqa: E402
 from aadistill.autoinit.recovery import RecoveryAdmissionError  # noqa: E402
 
 RECORDS = REPO / "logs/autoinit_permanent_controls"
-STAGED = Path("/home/ecs-user/aad-artifacts/autoinit")
+# Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
+# under a fresh empty HOME so host-local state is invisible on BOTH machines.
+# An absolute literal is immune to that, which is what let host-local cases run
+# in the launch-bound diagnostic and skip on the pod. On the real dev box this
+# resolves identically. Precedent: verify_c1_scoring_equivalence.EVIDENCE_ROOTS.
+STAGED = Path.home() / "aad-artifacts/autoinit"
 CONTROLS = ("preflight_ctl_r0860k_sa", "preflight_ctl_r0860k_sb")
 
 have_controls = pytest.mark.skipif(

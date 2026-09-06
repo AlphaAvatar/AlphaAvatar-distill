@@ -474,8 +474,22 @@ tt0=$(date -u +%s)
 # and it is the only way to name every skip. Attempt 5's grep named both failures
 # exactly and not one of the 99 skips, and the counts prove a skip divergence
 # that is still unexplained because that list died with the pod.
+# The CPU-test environment, COMMAND-SCOPED. Everything above ran in the real one
+# — the pinned venv, the teacher download, both RoPE checks — and everything
+# below re-asserts it. Only pytest runs neutralized, because the launch-bound
+# diagnostic runs on a CPU box with an empty HF cache while this machine is an
+# L40S with the teacher already downloaded, and comparing their skip sets exactly
+# would refuse a HEALTHY pod for being one. The variables are declared once in
+# `aadistill.autoinit.cpu_test_env` and emitted here, so the pod and the
+# simulator cannot drift apart into two prose lists.
+CPU_TEST_HOME=$(mktemp -d /workspace/cpu_test_scope.XXXXXX)
+mkdir -p "$CPU_TEST_HOME/home" "$CPU_TEST_HOME/hf/hub"
+CPU_TEST_ENV=$(/opt/train/bin/python "$REPO/scripts/pod/cpu_test_env_args.py" \
+  --home "$CPU_TEST_HOME")
+say "CPU-test scope: env $CPU_TEST_ENV"
 OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREADS \
   taskset -c "$CPUS" \
+  env $CPU_TEST_ENV \
   timeout "${TESTS_MAX_S:-2700}" /opt/train/bin/python -m pytest tests/ -q \
   --junitxml=/workspace/pytest_junit.xml \
   ${SESSION_TEST_IGNORES:-} > /workspace/pytest.log 2>&1
@@ -507,6 +521,15 @@ set +e
   --repo "$REPO" --strict
 SUMMARY_RC=$?
 set -e
+# The isolation was command-scoped; prove it did not leak into the science
+# runtime. Both are cheap and neither redownloads anything: the teacher is
+# already on disk and this only asks whether it is still there.
+/opt/train/bin/python -c 'import torch; assert torch.cuda.is_available()' \
+  || { say "CPU-test isolation leaked: CUDA is gone after the gate"; exit 1; }
+REAL_HF_HUB="${HF_HOME:-$HOME/.cache/huggingface}/hub"
+[ -d "$REAL_HF_HUB" ] || { say "CPU-test isolation leaked: $REAL_HF_HUB is gone"; exit 1; }
+say "real runtime intact after the CPU-test scope: CUDA available, teacher cache at $REAL_HF_HUB"
+rm -rf "$CPU_TEST_HOME"
 if [ "$RC" -eq 124 ]; then
   say "COLD HOST: the CPU test suite did not finish in ${TESTS_MAX_S:-2700}s"
   mark "HOST_COLD:tests:${TESTS_MAX_S:-2700}s:$(nproc)vcpu:cpuset${CPUS}"

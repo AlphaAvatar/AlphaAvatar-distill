@@ -347,6 +347,131 @@ def known_classification(nodeid: str) -> str | None:
     return None
 
 
+
+# --- strict CPU-test parity ---------------------------------------------------
+#
+# "Classified" is not "strictly comparable". The audit above answers whether a
+# human has accounted for a predicate; this answers whether the DIAGNOSTIC and
+# the PAID POD must decide it the same way, once both run under
+# `aadistill.autoinit.cpu_test_env`.
+#
+# Attempt 5's `--strict` comparison was correct machinery pointed at two
+# different machines, and would have refused a healthy L40S.
+
+#: signal -> (how the contract resolves it, the evidence)
+PARITY_BY_SIGNAL: dict[str, tuple[str, str]] = {
+    "gpu": ("normalized_by_contract",
+            'CUDA_VISIBLE_DEVICES="" is set for the pytest command on BOTH '
+            "machines, so torch reports no accelerator on the L40S too. The one "
+            "such predicate RUNS without CUDA and SKIPS with it, so without this "
+            "it would have decided the OPPOSITE way on the pod."),
+    "home_directory": ("normalized_by_contract",
+                       "HOME is a fresh empty directory for the pytest command on "
+                       "both machines, so host-local state under it is invisible "
+                       "to both"),
+    "credential": ("normalized_by_contract",
+                   "HF_TOKEN is non-empty on both — real on the pod, synthetic in "
+                   "the simulation — and is deliberately NOT isolated. Only "
+                   "PRESENCE can be read; a predicate keyed on whether the token "
+                   "is real is a simulator marker and is refused separately."),
+    "filesystem_premise_onpod": ("same_on_pod",
+                                 "every path it inspects is tracked or staged"),
+    "staged_artifact": ("same_on_pod", "C1's manifest stages it"),
+    "repository_content": ("same_on_pod", "the bundle checkout carries it"),
+}
+
+#: Optional dependencies, each resolved by NAMING what guarantees it on both
+#: machines. "the pod's image is not the dev box's venv" is not evidence.
+DEPENDENCY_EVIDENCE: dict[str, str] = {
+    "aadistill.evaluation.paired_stats": (
+        "committed at src/aadistill/evaluation/paired_stats.py, so the bundle "
+        "checkout carries it; the test prepends REPO/src to sys.path, and pod "
+        "setup additionally installs the project editable into /opt/train "
+        "(`uv pip install --no-deps -e $REPO`)"),
+    "analyze_e8b_behaviour": (
+        "committed at scripts/evaluation/analyze_e8b_behaviour.py; the test "
+        "prepends REPO/scripts/evaluation to sys.path, so the bundle checkout "
+        "is sufficient on both machines"),
+    'shutil.which("bash")': (
+        "the pod's setup script IS executed as `bash "
+        "/workspace/autoinit_preflight_setup.sh` by SessionRunner, and the "
+        "simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both "
+        "machines bash is present by construction before pytest starts"),
+}
+
+
+def dependency_parity(condition: str) -> tuple[str, str] | None:
+    for needle, why in DEPENDENCY_EVIDENCE.items():
+        if needle in condition:
+            return "guaranteed_dependency", why
+    return None
+
+
+CLASS_PARITY: dict | None = None
+
+
+def path_parity(p: dict, hidden: set[str]) -> tuple[str, str] | None:
+    """Resolve a PATH premise by mechanism, computed rather than asserted.
+
+    Two mechanisms make both machines decide a host-local path the same way:
+
+    * it is located through `$HOME`, which the contract points at a fresh empty
+      directory on both;
+    * it is a gitignored repo path the simulator HIDES and the pod never
+      receives, so it is absent in both.
+
+    Anything else is a real directional difference and stays UNRESOLVED.
+    """
+    text = p["expanded"]
+    if "Path.home()" in text or "home_local_store" in text:
+        return ("normalized_by_contract",
+                "located through $HOME, which the CPU-test contract points at a "
+                "fresh empty directory on both machines")
+    paths = set(PATH_LITERAL.findall(text))
+    inspected = [q for q in paths if q.startswith("artifacts/")]
+    if inspected and all(any(h == q or h.startswith(q.rstrip("/") + "/")
+                             for h in hidden) for q in inspected):
+        return ("hidden_in_both",
+                "a gitignored repo artifact the simulator moves aside and the "
+                f"pod never receives: {sorted(inspected)[:3]}")
+    return None
+
+
+def parity_of(p: dict, registered: dict, hidden: set[str]) -> tuple[str, str]:
+    """(resolution, evidence) for one predicate under the CPU-test contract."""
+    entry = registered.get(p["nodeid"]) or {}
+    if p["signal"] == "simulator_marker":
+        return "REFUSED", "a simulator marker can never be a parity premise"
+    if p["signal"] == "optional_dependency":
+        got = dependency_parity(p["expanded"]) or dependency_parity(p["condition"])
+        if got:
+            return got
+        return ("UNRESOLVED",
+                "an optional dependency with no named guarantee. Determine "
+                "whether the project install, requirements-cu128.txt, the "
+                "wheelhouse or the base image provides it — an image/venv "
+                "difference is not evidence of equality.")
+    if p["signal"] in PARITY_BY_SIGNAL:
+        return PARITY_BY_SIGNAL[p["signal"]]
+    if p["verdict"] == "same_on_pod":
+        return "same_on_pod", p["why"]
+    computed = path_parity(p, hidden)
+    if computed:
+        return computed
+    if entry.get("parity"):
+        return "registered_parity", entry["parity"]
+    cls = entry.get("class")
+    if cls:
+        by_class = (CLASS_PARITY or {}).get(cls)
+        if by_class:
+            head, _, rest = by_class.partition(": ")
+            return (head if head in ("normalized_by_contract", "same_on_pod")
+                    else "registered_parity"), rest or by_class
+    return ("UNRESOLVED",
+            f"signal {p['signal']!r} is classified but nothing says the two "
+            "machines must decide it the same way")
+
+
 def audit(repo: Path = REPO) -> dict:
     files, ignores = c1_selected_modules(repo)
     tracked, staged = repo_inventory(repo)
@@ -369,17 +494,39 @@ def audit(repo: Path = REPO) -> dict:
     # registered it explicitly.
     registry = json.loads((repo / REGISTRY).read_text())
     registered = registry["predicates"]
+    global CLASS_PARITY
+    CLASS_PARITY = {k: v.get("parity") for k, v in registry["classes"].items()}
     AUTO = ("gpu", "optional_dependency", "network", "credential")
     for p in predicates:
-        key = f"{p['file']}:{p['line']}"
-        p["registered_as"] = registered.get(key, {}).get("class")
+        # Keyed by NODEID: a `file:line` key went stale the first time a comment
+        # was inserted above a constant, so the registry reported six false
+        # staleness hits for a whitespace change.
+        p["registered_as"] = registered.get(p["nodeid"], {}).get("class")
 
     needs_a_word = [p for p in predicates
                     if p["verdict"] != "same_on_pod" and p["signal"] not in AUTO]
     unaccounted = [p for p in needs_a_word
                    if not p["readiness_group"] and not p["registered_as"]]
-    live_keys = {f"{p['file']}:{p['line']}" for p in needs_a_word}
+    live_keys = {p["nodeid"] for p in needs_a_word}
     stale = sorted(k for k in registered if k not in live_keys)
+
+    from aadistill.autoinit import cpu_test_env as cte
+    from aadistill.autoinit import staging_contract as sc
+    from session_specs import load_session_launcher, session_args
+    _mod = load_session_launcher("autoinit_c1_launch")
+    _contract = sc.derive_contract(_mod.spec(session_args(_mod)).setup,
+                                   session_id="autoinit-c1")
+    hidden = set(sc.hidden_files(_contract, repo))
+    for p in predicates:
+        p["parity"], p["parity_why"] = parity_of(p, registered, hidden)
+    parity_unresolved = sorted(
+        {(p["nodeid"], p["signal"], p["parity_why"][:120])
+         for p in predicates if p["parity"] in ("UNRESOLVED", "REFUSED")})
+    parity_counts: dict[str, int] = {}
+    for p in predicates:
+        parity_counts[p["parity"]] = parity_counts.get(p["parity"], 0) + 1
+    strict_ready = ("PASS" if not parity_unresolved and not unaccounted
+                    and not stale else "REVIEW")
 
     body = {
         "schema": SCHEMA,
@@ -399,6 +546,17 @@ def audit(repo: Path = REPO) -> dict:
             c: sorted(k for k, v in registered.items() if v["class"] == c)
             for c in sorted(registry["classes"])},
         "stale_registry_entries": stale,
+        "cpu_test_environment": cte.describe(),
+        "strict_cpu_test_parity_ready": strict_ready,
+        "parity_by_resolution": dict(sorted(parity_counts.items())),
+        "parity_unresolved": parity_unresolved,
+        "parity_rules": {k: {"resolution": v[0], "evidence": v[1]}
+                         for k, v in PARITY_BY_SIGNAL.items()},
+        "dependency_evidence": DEPENDENCY_EVIDENCE,
+        "parity_not_executable_at_zero_cost": (
+            'that CUDA_VISIBLE_DEVICES="" hides an L40S cannot be executed on a '
+            "CPU dev box. The contract is applied and the decision is proven "
+            "stable here; the GPU half is first exercised on the next pod."),
         "unaccounted": sorted(
             {(p["nodeid"], p["signal"]) for p in unaccounted}),
         "unrecognised": sorted({p["nodeid"] for p in unknown}),
@@ -432,10 +590,15 @@ def main() -> int:
     for nodeid, sig in rec["unaccounted"]:
         print(f"    {sig:<20} {nodeid}")
     print(f"verdict        : {rec['verdict']}")
+    print(f"parity         : {rec['strict_cpu_test_parity_ready']}  "
+          f"{rec['parity_by_resolution']}")
+    for nodeid, sig, why in rec["parity_unresolved"]:
+        print(f"    UNRESOLVED {sig:<20} {nodeid}\n        {why}")
     if a.write:
         (REPO / RECORD).write_text(json.dumps(rec, indent=1) + "\n")
         print(f"wrote {RECORD} ({rec['digest'][:12]}…)")
-    return 0 if rec["verdict"] == "PASS" else 1
+    return 0 if (rec["verdict"] == "PASS"
+                 and rec["strict_cpu_test_parity_ready"] == "PASS") else 1
 
 
 if __name__ == "__main__":

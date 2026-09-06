@@ -30,8 +30,13 @@ from aadistill.autoinit.c1_authorization import (  # noqa: E402
 from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
 from session_specs import load_session_launcher, session_args  # noqa: E402
 
-CANDIDATE = Path("/home/ecs-user/aad-scratch/sessions/c1-candidate"
-                 "/candidate_authorization.json")
+# Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
+# under a fresh empty HOME so host-local state is invisible on BOTH machines.
+# An absolute literal is immune to that, which is what let host-local cases run
+# in the launch-bound diagnostic and skip on the pod. On the real dev box this
+# resolves identically. Precedent: verify_c1_scoring_equivalence.EVIDENCE_ROOTS.
+CANDIDATE = (Path.home() / "aad-scratch/sessions/c1-candidate"
+             / "candidate_authorization.json")
 
 
 @pytest.fixture(scope="module")

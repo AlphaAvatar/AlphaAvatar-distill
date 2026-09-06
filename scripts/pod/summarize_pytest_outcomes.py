@@ -14,12 +14,17 @@ This reads the JUnit report the gate already writes and produces:
 * a deterministic digest over the complete skip set;
 * the exact set difference against the launch-bound record's skip set.
 
-Two differences matter and are printed separately:
+Two differences matter and are printed separately. Attempt 5 produced
+BOTH, and they must not be conflated:
 
 * `expected_but_ran` — the sweep skipped it and the pod EXECUTED it. This is
-  attempt 5's shape exactly.
-* `unexpected_skip` — the pod skipped something the sweep ran. This is the shape
-  of the divergence attempt 5 never identified.
+  attempt 5's two FAILURES: the sweep recorded both staging-contract cases as
+  expected skips, and the pod ran them and failed.
+* `unexpected_skip` — the pod skipped something the sweep ran. This is attempt
+  5's unexplained RESIDUAL: sweep 2770 passed / 100 skipped against pod 2769 /
+  99, so after the two skip→fail transitions one test the sweep PASSED must have
+  SKIPPED on the pod. It has never been named, because the pod's skip list was
+  not captured.
 
     python scripts/pod/summarize_pytest_outcomes.py --junit X --out Y \
         [--expected logs/c1_pod_environment_verification.json] [--strict]

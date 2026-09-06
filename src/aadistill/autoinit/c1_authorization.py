@@ -67,6 +67,10 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # PASSED is nonetheless refused for skipping a different set than the sweep,
     # so it is part of what a grant measures.
     "scripts/pod/summarize_pytest_outcomes.py",
+    # The CPU-test environment the gate runs pytest under. It decides which
+    # tests skip on the pod, and therefore whether the strict comparison above
+    # can be met at all — measured for the same reason the summary is.
+    "scripts/pod/cpu_test_env_args.py",
     "scripts/pod/start_job.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
@@ -117,6 +121,7 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "src/aadistill/autoinit/c1_session.py",
     "src/aadistill/autoinit/c1_isolation.py",
     "src/aadistill/autoinit/c1_authorization.py",
+    "src/aadistill/autoinit/cpu_test_env.py",
     "src/aadistill/autoinit/authorization.py",
     # both package __init__ files execute on import, and the operators one
     # decides what `attention_activation` resolves to

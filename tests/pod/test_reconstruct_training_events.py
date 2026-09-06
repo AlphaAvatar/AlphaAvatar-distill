@@ -15,7 +15,12 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "scripts/pod/reconstruct_training_events.py"
-E6B = Path("/home/ecs-user/aad-artifacts/e6b")
+# Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
+# under a fresh empty HOME so host-local state is invisible on BOTH machines.
+# An absolute literal is immune to that, which is what let host-local cases run
+# in the launch-bound diagnostic and skip on the pod. On the real dev box this
+# resolves identically. Precedent: verify_c1_scoring_equivalence.EVIDENCE_ROOTS.
+E6B = Path.home() / "aad-artifacts/e6b"
 COMMITTED = REPO / "logs/e6b_reconstructed_training_events.json"
 
 RUN_LOG = """[17:25:51] $ /opt/train/bin/python scripts/training/train_stage3.py --config /workspace/aad/configs/stage3/e6b/{name}.json

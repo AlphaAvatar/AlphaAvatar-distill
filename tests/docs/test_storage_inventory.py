@@ -71,7 +71,7 @@ def test_the_registry_covers_the_out_of_tree_store():
     """The first version of the registry saw only `artifacts/` and reported 4.47
     GiB while 81 GiB sat in /home/ecs-user/aad-artifacts. If that store exists,
     the registry must be looking at it."""
-    external = Path("/home/ecs-user/aad-artifacts")
+    external = Path.home() / "aad-artifacts"   # through $HOME; see cpu_test_env
     if not external.is_dir():
         pytest.skip("no out-of-tree store on this machine")
     stores = load(REGISTRY)["local"]["by_store"]

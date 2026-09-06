@@ -58,11 +58,11 @@
   "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
  },
  "latest_verification": {
-  "utc": "2026-09-05T00:00:00Z",
+  "utc": "2026-09-06T00:00:00Z",
   "owned_by": "logs/c1_pod_environment_verification.json",
   "owns": "record_kind, swept_base_commit, staging-contract digest, setup environment, counts, both digests and verdict. Read them THERE.",
   "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
-  "last_paid_attempt_owned_by": "logs/autoinit_c1_attempt4/test_gate_failures.json"
+  "last_paid_attempt_owned_by": "logs/autoinit_c1_attempt5/test_gate_failures.json"
  },
  "abandoned": [
   "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
@@ -126,17 +126,17 @@
    "status": "IMPLEMENTED / SIX PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-5 grant CONSUMED at the pod test gate",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json c5a19b6bd4e0 at head_commit 9bb2650d; harness 8b4dd4c0a00b over 69 files; 12 pre-provider gates",
+   "execution_prereg": "logs/phase_c1_execution_preregistration.json 49b76c8d1631 at head_commit 216c8733; harness 9c798b19498c over 72 files; 12 pre-provider gates",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempts": "5 attempt LABELS: 1, 2, 3, 3R, 4, 5. FIVE created paid provider resources; attempt 3 created none ($0.00). $1.5417 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
+   "attempts": "SIX attempt LABELS: 1, 2, 3, 3R, 4, 5. FIVE of them created a paid provider resource; attempt 3 created none ($0.00, the launcher declined on price). $1.5417 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
    "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-   "blocker": "Attempt 5 aborted at the pod CPU test gate (2 failed / 2769 passed / 99 skipped). REPAIRED at $0 on 2026-09-06: the two guards now ask the filesystem for their premise instead of the simulator's AAD_SYNTHETIC_HF_TOKEN; a 95-predicate skip audit closes the class (45 registered, 0 unaccounted, 0 stale); and the pod gate now names every skip and fails closed on a skip-set divergence. C1 has still NEVER been measured. No grant.",
-   "needs": "a reviewer decision on the postmortem repair -- especially the fail-closed skip-set comparison, which has never run on a pod -- and only then on a further grant.",
+   "blocker": "CPU-TEST PARITY, repaired at $0 on 2026-09-06 and not yet exercised on a pod. The new strict skip-set comparison compared a CPU diagnostic against an L40S with the teacher downloaded and would have false-aborted a HEALTHY pod. Both now run pytest under one declared command-scoped environment (cpu_test_env). C1 has still NEVER been measured.",
+   "needs": "a reviewer decision on the CPU-test parity contract -- its GPU half cannot be executed on a CPU dev box -- and only then on a further grant.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
    "evidence": "logs/autoinit_c1_attempt5/ (test_gate_failures.json carries the root cause and the unexplained skip)",
-   "readiness": "the committed record is STALE BY CONSTRUCTION -- the repair moved the harness digest, so a new sweep is owed before any launch. logs/c1_renderer_parity.json (7/7) and logs/c1_skip_predicate_audit.json (PASS) are current."
+   "readiness": "logs/c1_skip_predicate_audit.json: 97 predicates across 144 selected modules, strict_cpu_test_parity_ready=PASS, 0 unaccounted, 0 stale. The committed pod-environment record is a DIAGNOSTIC; a launch-bound sweep is owed before any launch."
   },
   "c2": {
    "status": "NOT STARTED",

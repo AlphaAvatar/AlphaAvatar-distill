@@ -1,6 +1,42 @@
 **Updated:** 2026-09-06 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 ATTEMPT 5 ABORTED AT THE POD TEST GATE, POSTMORTEM REPAIRED AT `$0` —
-STILL NEVER MEASURED**
+PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
+
+> **CPU-test parity, 2026-09-06 — `$0.0000`, no pod, no grant.** The strict
+> skip-set comparison added after attempt 5 was correct machinery pointed at two
+> DIFFERENT machines: a CPU diagnostic with an empty HF cache against an L40S
+> with the pinned teacher downloaded. It would have refused a HEALTHY pod. The
+> one GPU predicate in the selected suite RUNS without CUDA and SKIPS with it —
+> the opposite decision there — and the tokenizer cases skip here on an empty
+> cache and would have run there.
+>
+> The comparison is kept. What changed is that both sides now run pytest under
+> ONE declared, **command-scoped** environment,
+> `aadistill.autoinit.cpu_test_env`: `CUDA_VISIBLE_DEVICES=""`, a fresh empty
+> `HOME`, an isolated empty `HF_HOME`/`HF_HUB_CACHE`, and `HUGGINGFACE_HUB_CACHE`
+> / `HF_DATASETS_CACHE` / `TRANSFORMERS_CACHE` / `XDG_CACHE_HOME` cleared. The
+> real `HF_TOKEN` is kept — the cache is what differs, never the credential, and
+> `AAD_SYNTHETIC_HF_TOKEN` is never set on a pod. Nothing is exported over setup:
+> the pinned install, the teacher download and the CUDA proof still run for real,
+> and CUDA plus the teacher cache are re-asserted immediately after the gate.
+>
+> **The fresh `HOME` had to be made to matter.** Host-local stores were
+> hardcoded as `/home/ecs-user/aad-artifacts`, which is immune to it — so those
+> cases ran in the diagnostic and skipped on the pod. They now resolve through
+> `Path.home()`, the pattern `verify_c1_scoring_equivalence.EVIDENCE_ROOTS`
+> already used. On the real dev box this resolves identically.
+>
+> `strict_cpu_test_parity_ready = **PASS**`: 97 predicates across 144 selected
+> modules — 50 same-on-pod, 29 normalized by the contract, 9 hidden in both, 9
+> guaranteed dependencies, **0 unresolved**. Each of the nine optional
+> dependencies names what guarantees it on both machines; "the pod's image is not
+> the dev box's venv" is explicitly rejected as evidence.
+>
+> **One claim cannot be executed at `$0`:** that `CUDA_VISIBLE_DEVICES=""` hides
+> an L40S. A CPU dev box cannot prove it. The contract is applied and the
+> decision is proven stable here; the GPU half is first exercised on the next pod.
+
+> **Attempt 5 remains an INFRASTRUCTURE ABORT with ZERO C1 measurement**, and is
+> not reinterpreted as ATTENTION evidence by anything here.
 
 > **Postmortem repair, 2026-09-06 — `$0.0000`, no pod, no grant.** Three things
 > closed, none of them scientific:

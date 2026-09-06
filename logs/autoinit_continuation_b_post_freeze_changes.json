@@ -1,32 +1,28 @@
 {
  "schema": "aadistill.autoinit.continuation_b_post_freeze_changes/v1",
- "generated_utc": "2026-09-06T04:30:00+00:00",
+ "generated_utc": "2026-09-06T06:00:00Z",
  "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "676a41afce5a6ae6ca548c90251a5763e82cf8e011290d6eacfad7570c43c1d5",
+ "post_freeze_digest": "7b0f1f4cf97fb1a74702aa45f54d87b83e41ffe31800a025ff079c30f2bc3298",
  "changed_files": [
-  "scripts/pod/autoinit_preflight_setup.sh",
-  "src/aadistill/infrastructure/session.py",
-  "src/aadistill/infrastructure/session_runner.py"
+  "scripts/pod/autoinit_preflight_setup.sh"
  ],
  "change": {
-  "what": "the C1 attempt-5 postmortem repair: the pod CPU test gate now writes a JUnit report and runs scripts/pod/summarize_pytest_outcomes.py, which names every FAILED, ERROR and SKIPPED nodeid with reasons and compares the pod's skip set against the launch-bound sweep's. SessionSpec gained an optional `setup_failure_files`, and SessionRunner reads those files off the pod on a setup failure before teardown.",
-  "why": "C1 attempt 5 died at this gate for $0.3150 with 2 failed / 2769 passed / 99 skipped. The existing grep named both failures exactly and not one of the 99 skips, and the counts force a third divergence -- one test the sweep PASSED that the pod SKIPPED -- which cannot be named because that list died with the pod. A setup abort never reaches artifact collection and the launcher's own window is `tail -40`, so the summary has to be pulled while the pod exists.",
+  "what": "the CPU-test parity repair: the pytest command in the gate now runs under `env $(cpu_test_env_args.py --home <fresh temp>)`, and the real runtime is re-asserted immediately afterwards (CUDA available, teacher cache present) before TESTS_OK.",
+  "why": "the launch-bound diagnostic runs on a CPU box with an empty HF cache and the pod is an L40S with the pinned teacher downloaded. The new exact skip-set comparison would have REFUSED a healthy pod: the one GPU predicate runs without CUDA and skips with it, and the tokenizer cases skip on an empty cache and would have run on the pod.",
   "additive_only": true,
-  "behaviour_change": "one: a pod whose suite PASSES is now refused if its skip set differs from the launch-bound sweep's. That is a NEW way for a session to stop at setup cost, and it has never run on a pod. It cannot make a session run MORE than it would have.",
-  "scope": "this entry describes the CHANGE BEING DECLARED NOW. Earlier declared changes are in `history`.",
-  "declared_at_commit": "2fad306932ee247afb1058b60c2977de0566d105",
-  "lines_added": 65,
+  "lines_added": 23,
   "lines_removed": 0,
-  "numstat_this_change": "24 0 scripts/pod/autoinit_preflight_setup.sh; 12 0 src/aadistill/infrastructure/session.py; 29 0 src/aadistill/infrastructure/session_runner.py"
+  "scope_note": "COMMAND-scoped, via `env`. Nothing is exported over setup, so the pinned install, the teacher download and the CUDA proof still happen in the real environment.",
+  "declared_at_commit": "216c87331aef67488042861fc7b59fb283990be8"
  },
  "pre_existing_branches_unchanged": true,
  "pre_existing_branches_note": "the phase_a, phase_b, continuation_b and recovery_continuation branches are byte-identical; the c1 branch was inserted before recovery_continuation and changed no other line",
  "preregistration_rewritten": false,
  "scientific_impact": "NONE. No Phase-A/B result, metric, hash or artifact changes.",
- "declared_at_commit": "2fad306932ee247afb1058b60c2977de0566d105",
- "post_freeze_digest_previous": "09378a35860d504829ad8dfba2315a14c2e664a2f20e9b8ac5adbb37c507a562",
+ "declared_at_commit": "216c87331aef67488042861fc7b59fb283990be8",
+ "post_freeze_digest_previous": "676a41afce5a6ae6ca548c90251a5763e82cf8e011290d6eacfad7570c43c1d5",
  "history": [
   {
    "utc": "2026-09-04T00:00:00Z",
@@ -46,6 +42,26 @@
    "change": "SUPERSEDED as the latest entry -- see `history`. Two declared changes now: the SESSION_KIND=c1 branch (2026-09-02) and the test-gate failure summary (2026-09-04). Both additive, neither touching a pre-existing branch.",
    "changed_files": [
     "scripts/pod/autoinit_preflight_setup.sh"
+   ]
+  },
+  {
+   "post_freeze_digest": "676a41afce5a6ae6ca548c90251a5763e82cf8e011290d6eacfad7570c43c1d5",
+   "post_freeze_digest_previous": "09378a35860d504829ad8dfba2315a14c2e664a2f20e9b8ac5adbb37c507a562",
+   "change": {
+    "what": "the C1 attempt-5 postmortem repair: the pod CPU test gate now writes a JUnit report and runs scripts/pod/summarize_pytest_outcomes.py, which names every FAILED, ERROR and SKIPPED nodeid with reasons and compares the pod's skip set against the launch-bound sweep's. SessionSpec gained an optional `setup_failure_files`, and SessionRunner reads those files off the pod on a setup failure before teardown.",
+    "why": "C1 attempt 5 died at this gate for $0.3150 with 2 failed / 2769 passed / 99 skipped. The existing grep named both failures exactly and not one of the 99 skips, and the counts force a third divergence -- one test the sweep PASSED that the pod SKIPPED -- which cannot be named because that list died with the pod. A setup abort never reaches artifact collection and the launcher's own window is `tail -40`, so the summary has to be pulled while the pod exists.",
+    "additive_only": true,
+    "behaviour_change": "one: a pod whose suite PASSES is now refused if its skip set differs from the launch-bound sweep's. That is a NEW way for a session to stop at setup cost, and it has never run on a pod. It cannot make a session run MORE than it would have.",
+    "scope": "this entry describes the CHANGE BEING DECLARED NOW. Earlier declared changes are in `history`.",
+    "declared_at_commit": "2fad306932ee247afb1058b60c2977de0566d105",
+    "lines_added": 65,
+    "lines_removed": 0,
+    "numstat_this_change": "24 0 scripts/pod/autoinit_preflight_setup.sh; 12 0 src/aadistill/infrastructure/session.py; 29 0 src/aadistill/infrastructure/session_runner.py"
+   },
+   "changed_files": [
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_runner.py"
    ]
   }
  ],

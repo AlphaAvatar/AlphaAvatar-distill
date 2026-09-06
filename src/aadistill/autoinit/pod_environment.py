@@ -309,9 +309,10 @@ def compare_skip_sets(expected: Sequence[str], actual: Sequence[str]
                       ) -> dict[str, Any]:
     """Which tests changed their mind between two machines.
 
-    `expected_but_ran` is the attempt-5 shape exactly: a test the sweep skipped
-    that the pod executed. `unexpected_skip` is the converse, and is the shape of
-    the one divergence attempt 5 never identified.
+    `expected_but_ran` — the sweep skipped it, the pod ran it. That is attempt
+    5's two FAILURES. `unexpected_skip` — the pod skipped what the sweep ran.
+    That is attempt 5's unexplained RESIDUAL (sweep 2770/100 vs pod 2769/99: one
+    test the sweep PASSED skipped on the pod, and was never named).
     """
     exp, act = set(expected), set(actual)
     ran = sorted(exp - act)

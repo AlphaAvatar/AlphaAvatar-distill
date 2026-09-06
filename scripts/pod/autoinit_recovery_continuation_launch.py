@@ -79,7 +79,12 @@ FROZEN_SCIENCE_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
 STAGE1_EVIDENCE = REPO_ROOT / "logs/autoinit_phase_a_attempt12"
 #: The canonical local checkpoint store. Still the scientific owner: the
 #: transport repo is a delivery path and nothing more.
-CKPT_STORE = Path("/home/ecs-user/aad-artifacts/autoinit/phase_a")
+# Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
+# under a fresh empty HOME so host-local state is invisible on BOTH machines.
+# An absolute literal is immune to that, which is what let host-local cases run
+# in the launch-bound diagnostic and skip on the pod. On the real dev box this
+# resolves identically. Precedent: verify_c1_scoring_equivalence.EVIDENCE_ROOTS.
+CKPT_STORE = Path.home() / "aad-artifacts/autoinit/phase_a"
 #: Transport only, private, and verified at $0 before any paid session may use
 #: it -- see logs/autoinit_selected_leaf_transport_manifest.json.
 TRANSPORT_REPO = "AlphaAvatar/aadistill-transport"

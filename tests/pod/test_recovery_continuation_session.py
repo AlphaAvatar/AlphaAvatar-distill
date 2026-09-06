@@ -319,7 +319,12 @@ def test_the_preserved_leaf_gate_is_wired_into_the_spec(spec, launcher):
 #: pod. Scoping them by the session kind the simulation actually declares fixes
 #: that without pretending the external store is a C1 input, and without
 #: silencing them anywhere else.
-HOST_LOCAL_PHASE_A_STORE = Path("/home/ecs-user/aad-artifacts/autoinit/phase_a")
+# Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
+# under a fresh empty HOME so host-local state is invisible on BOTH machines.
+# An absolute literal is immune to that, which is what let host-local cases run
+# in the launch-bound diagnostic and skip on the pod. On the real dev box this
+# resolves identically. Precedent: verify_c1_scoring_equivalence.EVIDENCE_ROOTS.
+HOST_LOCAL_PHASE_A_STORE = Path.home() / "aad-artifacts/autoinit/phase_a"
 
 
 def skip_if_c1_session(store: Path = HOST_LOCAL_PHASE_A_STORE) -> None:
@@ -353,8 +358,7 @@ def test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off(
     mod = load(DRIVER, "rc_driver_exec")
     # The leaves are staged into the repo on a pod; here they already exist in
     # the canonical store, so point the driver at it.
-    monkeypatch.setattr(mod, "STAGED_LEAVES",
-                        Path("/home/ecs-user/aad-artifacts/autoinit/phase_a"))
+    monkeypatch.setattr(mod, "STAGED_LEAVES", HOST_LOCAL_PHASE_A_STORE)
     monkeypatch.setattr(mod, "AUDIT", tmp_path / "audit")
     (tmp_path / "audit").mkdir(parents=True, exist_ok=True)
     monkeypatch.setattr(mod, "mark", lambda *_a, **_k: None)

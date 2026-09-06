@@ -105,7 +105,8 @@ PODSIM_TOKEN=${PODSIM_HF_TOKEN:-"hf_podEquivalentSyntheticToken000000000"}
 #: Anything that could point the process back at the dev box's real HF state.
 #: `AAD_SYNTHETIC_HF_TOKEN` is the flag that says so out loud -- see below.
 ISOLATED_VARS="HOME HF_HOME HF_HUB_CACHE HF_TOKEN HUGGINGFACE_HUB_CACHE \
-HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME AAD_SYNTHETIC_HF_TOKEN"
+HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME AAD_SYNTHETIC_HF_TOKEN \
+CUDA_VISIBLE_DEVICES"
 
 SAVED_ENV=""
 save_env() {
@@ -232,9 +233,29 @@ echo "pruned $pruned director(ies) the hiding emptied"
 save_env
 rm -rf "$ENVROOT"
 mkdir -p "$ENVROOT/home" "$ENVROOT/hf/hub" || exit 5
-export HOME="$ENVROOT/home"
-export HF_HOME="$ENVROOT/hf"
-export HF_HUB_CACHE="$ENVROOT/hf/hub"
+# ONE declaration, shared with the pod's setup gate: `aadistill.autoinit.cpu_test_env`.
+# Hand-writing the list here is how the diagnostic and the paid pod came to run
+# the same command under different environments -- the pod has an L40S and the
+# teacher downloaded, so an exact skip-set comparison would refuse a healthy pod.
+# The pod applies the same contract with `env` (one command); this subshell is
+# isolated wholesale and put back by the EXIT trap.
+# The emitter ships WITH this script, so it is resolved against the script's own
+# directory -- not `PODSIM_ROOT`, which the restore tests point at a synthetic
+# tree that has neither a venv nor a copy of the emitter. The interpreter is
+# absolute for the same reason a relative `.venv/bin/python` is wrong: it would
+# resolve against the caller's directory.
+PODSIM_SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+PODSIM_PY="$PODSIM_SCRIPT_DIR/../../.venv/bin/python"
+[ -x "$PODSIM_PY" ] || PODSIM_PY=$(command -v python3)
+# Captured and checked SEPARATELY: `eval "$(cmd)"` reports the status of `eval`,
+# not of `cmd`, so a failed emission would leave HOME pointing at the real one
+# and the isolation would silently not happen.
+PODSIM_ENV_SH=$("$PODSIM_PY" "$PODSIM_SCRIPT_DIR/cpu_test_env_args.py" \
+                --home "$ENVROOT" --format sh) || {
+  echo "REFUSING: could not emit the CPU-test environment contract" >&2; exit 5; }
+[ -n "$PODSIM_ENV_SH" ] || {
+  echo "REFUSING: the CPU-test environment contract emitted nothing" >&2; exit 5; }
+eval "$PODSIM_ENV_SH"
 export HF_TOKEN="$PODSIM_TOKEN"
 # Say out loud that the credential is a fake. A pod's token is real, so gates and
 # tests that AUTHENTICATE to the private relay work there and cannot work here --
@@ -243,9 +264,6 @@ export HF_TOKEN="$PODSIM_TOKEN"
 # token, which would hide any test that had quietly started needing one, or to
 # let those few declare the requirement. This flag lets them declare it.
 export AAD_SYNTHETIC_HF_TOKEN=1
-# These would each defeat the isolation on their own by naming the real cache.
-unset HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME
-
 # Assert the isolation instead of assuming it: a simulation that silently kept
 # the dev box's cache is the exact failure this dimension exists to prevent.
 if [ -e "$HOME/.cache/huggingface" ]; then

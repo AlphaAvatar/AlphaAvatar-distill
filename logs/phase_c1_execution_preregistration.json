@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "2fad306932ee247afb1058b60c2977de0566d105",
+ "head_commit": "216c87331aef67488042861fc7b59fb283990be8",
  "executable_source": {
   "digest": "7c5a9856f90e79c18382bf3a4a58b2fb647b62ac83be5bdbf3f7e6643d981795",
   "files": [
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "e3fb53b76c30c55a92f70e07b6d0480219a0c61d062882394a0f0b6db9b5faa1",
+  "digest": "4b100f709389562bfe4864fb96e7df02f2b7ee1d66fba6f418e81fa01353c26c",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -115,8 +115,8 @@
    },
    {
     "path": "scripts/pod/autoinit_preflight_setup.sh",
-    "sha256": "9abeff63b4d1af33b50e3b315b4112892a1515e1a4b5125f10d6012cfc4f80ff",
-    "bytes": 36493
+    "sha256": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
+    "bytes": 38021
    },
    {
     "path": "scripts/pod/autoinit_science_inputs.py",
@@ -129,14 +129,19 @@
     "bytes": 8994
    },
    {
+    "path": "scripts/pod/cpu_test_env_args.py",
+    "sha256": "a8577c1eb3a306b3bba6cd175233548bced6d8279d105384155b290adef552d4",
+    "bytes": 1028
+   },
+   {
     "path": "scripts/pod/start_job.py",
     "sha256": "cfd9496b943dcfc83e0e2a8911abd048f1ee1514110676889cc163ce895f58ba",
     "bytes": 3872
    },
    {
     "path": "scripts/pod/summarize_pytest_outcomes.py",
-    "sha256": "e19dbd2cabc972f5ddcb6a2eac5131490d3a7ad83d2caf8afa10d3eeb14faf47",
-    "bytes": 5955
+    "sha256": "16be81d4bd9f932ba994d29da05b66e9483e36b34143e287f4a1e0c655a44b72",
+    "bytes": 6319
    },
    {
     "path": "scripts/pod/watchdog.py",
@@ -175,8 +180,8 @@
    },
    {
     "path": "src/aadistill/autoinit/c1_authorization.py",
-    "sha256": "dfeacbf4dd9d018c5c0e7ebd3de593699cf8a3c3fd5a7732379369e6726c7c7d",
-    "bytes": 18696
+    "sha256": "f19eb0cabac8f54d306162834601ec1b28b0eb282e2c01aca823e85f05262cdf",
+    "bytes": 19010
    },
    {
     "path": "src/aadistill/autoinit/c1_bundle.py",
@@ -212,6 +217,11 @@
     "path": "src/aadistill/autoinit/calibration.py",
     "sha256": "cd4ec4bb0288d5f26b464abfdec2d8c150864de898b8a9f83d189a8e35d8ec21",
     "bytes": 21304
+   },
+   {
+    "path": "src/aadistill/autoinit/cpu_test_env.py",
+    "sha256": "4996abbf848225c40b4c8cebd937c4accbd5b1335a4f042311cd8125f9c32279",
+    "bytes": 6334
    },
    {
     "path": "src/aadistill/autoinit/device.py",
@@ -280,8 +290,8 @@
    },
    {
     "path": "src/aadistill/autoinit/pod_environment.py",
-    "sha256": "4219b22f36943297231b560fbd1ae217faf91dabfe0cb7237dc03f3d41157d7a",
-    "bytes": 32647
+    "sha256": "9c1581d5079e5971a3ed0ed0449db9f3f3ecc16906be73111a505d3d6a869ee9",
+    "bytes": 32744
    },
    {
     "path": "src/aadistill/autoinit/recovery.py",
@@ -404,7 +414,7 @@
     "bytes": 3567
    }
   ],
-  "n_files": 70,
+  "n_files": 72,
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set",
   "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
  },
@@ -414,7 +424,7 @@
   "session_kind": "c1",
   "allows_phase_a": false,
   "allows_beam_search": false,
-  "n_harness_files": 70,
+  "n_harness_files": 72,
   "status": "NO GRANT EXISTS. No authorization has been issued."
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
@@ -917,5 +927,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "fa32cc99bb13c07e9494954e80337ba1de2b2dd26031da52b0409e5287e9facd"
+ "preregistration_sha256": "94f637530cb2001e5bc6da7f2eb64ccdf100fe2903f963ed9c58dacb4d4b3c3e"
 }

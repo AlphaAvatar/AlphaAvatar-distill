@@ -342,7 +342,11 @@ def test_the_default_command_matches_the_pod_gates_selection():
 def test_the_environment_is_saved_before_it_is_changed():
     """`save_env` must precede the first export, or the trap restores nothing."""
     src = SCRIPT.read_text()
-    assert src.index("save_env\n") < src.index('export HOME="$ENVROOT/home"')
+    # The first change is now the CPU-test contract eval rather than a literal
+    # `export HOME=...`: the variables are declared once in
+    # `aadistill.autoinit.cpu_test_env` and shared with the pod's gate, so the
+    # diagnostic and the paid pod cannot drift into two different environments.
+    assert src.index("save_env\n") < src.index('eval "$PODSIM_ENV_SH"')
     assert src.index("restore_env") < src.index('for p in "$HIDE"/*')
 
 

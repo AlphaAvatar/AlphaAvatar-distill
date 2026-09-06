@@ -40,6 +40,7 @@ to appear below.
 | `autoinit_engine_probe.py` | vLLM engine identity probe, run at stage 0 |
 | `watchdog.py` | the independent provider-side kill switch |
 | `collect_artifacts.py` | artifact manifest, gate and collection |
+| `cpu_test_env_args.py` | emits the C1 CPU-test environment as `env(1)` arguments, from the one declaration in `aadistill.autoinit.cpu_test_env`. The pod's gate and the dev-box simulator both consume it, so the diagnostic and the paid pod run pytest under the same hardware- and cache-neutral scope |
 | `summarize_pytest_outcomes.py` | the CPU gate's complete outcome — every FAILED, ERROR and SKIPPED nodeid with reasons, a skip-set digest, and the exact set difference against the launch-bound sweep. `--strict` refuses a pod whose suite passed but whose skip set is not the one the sweep certified |
 | `simulate_pod_env.sh` | runs the pod's exact test command locally with pod-absent artifacts hidden |
 | `retain_checkpoints.py` | per-run checkpoint retention: derives the keep set from a run's own log |

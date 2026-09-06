@@ -139,9 +139,8 @@
  },
  "reconciliation": {
   "sum_of_freed_bytes": 12203954176,
-  "observed_free_delta": 12206215168,
-  "difference": 2261,
-  "unit_note": "bytes*1024 in df terms; ~2.2 MB",
-  "why": "df was sampled between deletions on a live box, so the two disagree by about 2.2 MB of unrelated churn. Reported rather than reconciled away."
+  "observed_free_delta_bytes": 12206215168,
+  "observed_free_delta_minus_sum_of_freed_bytes": 2260992,
+  "why": "df was sampled between deletions on a live box, so the two disagree by 2,260,992 bytes of unrelated churn. One unit throughout: the earlier entry reported `difference: 2261` with a unit-conversion note, which is not a reconciliation."
  }
 }

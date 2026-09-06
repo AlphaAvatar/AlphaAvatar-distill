@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 143,
+ "modules_scanned": 144,
  "test_ignores": [
   "tests/data/test_recovery_corpus_pipeline.py",
   "tests/pod/test_phase_a_stages1_5_execute.py",
@@ -22,70 +22,123 @@
  },
  "n_differs_on_pod": 25,
  "n_unrecognised": 30,
- "n_registered": 45,
+ "n_registered": 36,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
-   "tests/autoinit/test_c1_confirmation_scoring.py:106",
-   "tests/autoinit/test_c1_confirmation_scoring.py:145",
-   "tests/autoinit/test_c1_confirmation_scoring.py:157",
-   "tests/autoinit/test_c1_confirmation_scoring.py:192",
-   "tests/autoinit/test_c1_confirmation_scoring.py:97",
-   "tests/autoinit/test_frozen_records.py:115",
-   "tests/autoinit/test_frozen_records.py:54",
-   "tests/autoinit/test_frozen_records.py:68",
-   "tests/autoinit/test_frozen_records.py:78",
-   "tests/data/test_e7_streams.py:21",
-   "tests/docs/test_repository_structure.py:139",
-   "tests/docs/test_storage_inventory.py:76",
-   "tests/evaluation/test_capability.py:357",
-   "tests/evaluation/test_e6_analysis.py:28",
-   "tests/evaluation/test_e6_registration.py:101",
-   "tests/evaluation/test_perf_trend.py:76",
-   "tests/evaluation/test_strict_answer.py:141",
-   "tests/pod/test_c1_driver_execution.py:202",
-   "tests/pod/test_c1_session_contract.py:275",
-   "tests/pod/test_continuation_rehearsal.py:49",
-   "tests/pod/test_reconstruct_training_events.py:149",
-   "tests/pod/test_recovery_continuation_session.py:215",
-   "tests/pod/test_recovery_continuation_session.py:348",
-   "tests/pod/test_recovery_continuation_session.py:418",
-   "tests/pod/test_session_architecture.py:156",
-   "tests/training/test_e8_arms.py:150",
-   "tests/training/test_e8_arms.py:158"
+   "tests/autoinit/test_c1_confirmation_scoring.py",
+   "tests/autoinit/test_frozen_records.py",
+   "tests/data/test_e7_streams.py",
+   "tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists",
+   "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store",
+   "tests/evaluation/test_capability.py",
+   "tests/evaluation/test_e6_analysis.py",
+   "tests/evaluation/test_e6_registration.py",
+   "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards",
+   "tests/evaluation/test_strict_answer.py::test_gold_target_is_the_rendered_span_not_the_content_field",
+   "tests/pod/test_c1_driver_execution.py::_summary_template",
+   "tests/pod/test_c1_session_contract.py",
+   "tests/pod/test_continuation_rehearsal.py",
+   "tests/pod/test_reconstruct_training_events.py",
+   "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
+   "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
+   "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
+   "tests/pod/test_session_architecture.py::test_every_declared_asset_is_a_directory_the_launcher_can_actually_send",
+   "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init"
   ],
   "local_hf_cache": [
-   "tests/data/test_dataset.py:32",
-   "tests/data/test_sessions.py:56",
-   "tests/evaluation/test_oracle_reasoning.py:31",
-   "tests/training/test_train.py:358"
+   "tests/data/test_dataset.py::tokenizer",
+   "tests/data/test_sessions.py::tokenizer",
+   "tests/evaluation/test_oracle_reasoning.py::tok",
+   "tests/training/test_train.py::teacher_tokenizer"
   ],
   "machine_capability": [
-   "tests/pod/test_setup_end_to_end.py:144"
+   "tests/pod/test_setup_end_to_end.py::sandbox"
   ],
   "manifest_derived": [
-   "tests/pod/test_operational_hardening.py:60",
-   "tests/pod/test_pod_script_paths.py:147",
-   "tests/pod/test_recovery_continuation_session.py:126",
-   "tests/pod/test_recovery_continuation_session.py:160",
-   "tests/pod/test_recovery_continuation_session.py:232",
-   "tests/pod/test_session_architecture.py:455",
-   "tests/pod/test_session_architecture.py:485"
+   "tests/pod/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers",
+   "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file",
+   "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
+   "tests/pod/test_recovery_continuation_session.py::test_the_five_leaves_are_declared_in_the_selected_order",
+   "tests/pod/test_recovery_continuation_session.py::test_the_leaves_are_staged_through_the_declared_relay_contract",
+   "tests/pod/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
+   "tests/pod/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it"
   ],
   "pinned_snapshot_source": [
-   "tests/autoinit/test_c1_readiness_gates.py:96",
-   "tests/data/test_c1_battery.py:260",
-   "tests/data/test_c1_battery.py:63",
-   "tests/data/test_c1_battery.py:66"
+   "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
+   "tests/data/test_c1_battery.py::require_role",
+   "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte"
   ],
   "session_semantics": [
-   "tests/pod/test_recovery_continuation_session.py:330"
+   "tests/pod/test_recovery_continuation_session.py::skip_if_c1_session"
   ],
   "staging_premise_property": [
-   "tests/autoinit/test_staging_contract.py:77"
+   "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible"
   ]
  },
  "stale_registry_entries": [],
+ "cpu_test_environment": {
+  "contract": "aadistill.autoinit.c1_cpu_test_env/v1",
+  "digest": "0708122244bf20b3c009e25adbc00dfa3ae2a4dda80827af0a99509353935bb2",
+  "scope_root": "<SCOPE>",
+  "set": {
+   "CUDA_VISIBLE_DEVICES": "",
+   "HOME": "<SCOPE>/home",
+   "HF_HOME": "<SCOPE>/hf",
+   "HF_HUB_CACHE": "<SCOPE>/hf/hub"
+  },
+  "unset": [
+   "HUGGINGFACE_HUB_CACHE",
+   "HF_DATASETS_CACHE",
+   "TRANSFORMERS_CACHE",
+   "XDG_CACHE_HOME"
+  ],
+  "preserved_not_isolated": [
+   "HF_TOKEN",
+   "SESSION_KIND",
+   "SESSION_TEST_IGNORES"
+  ]
+ },
+ "strict_cpu_test_parity_ready": "PASS",
+ "parity_by_resolution": {
+  "guaranteed_dependency": 9,
+  "hidden_in_both": 9,
+  "normalized_by_contract": 29,
+  "same_on_pod": 50
+ },
+ "parity_unresolved": [],
+ "parity_rules": {
+  "gpu": {
+   "resolution": "normalized_by_contract",
+   "evidence": "CUDA_VISIBLE_DEVICES=\"\" is set for the pytest command on BOTH machines, so torch reports no accelerator on the L40S too. The one such predicate RUNS without CUDA and SKIPS with it, so without this it would have decided the OPPOSITE way on the pod."
+  },
+  "home_directory": {
+   "resolution": "normalized_by_contract",
+   "evidence": "HOME is a fresh empty directory for the pytest command on both machines, so host-local state under it is invisible to both"
+  },
+  "credential": {
+   "resolution": "normalized_by_contract",
+   "evidence": "HF_TOKEN is non-empty on both \u2014 real on the pod, synthetic in the simulation \u2014 and is deliberately NOT isolated. Only PRESENCE can be read; a predicate keyed on whether the token is real is a simulator marker and is refused separately."
+  },
+  "filesystem_premise_onpod": {
+   "resolution": "same_on_pod",
+   "evidence": "every path it inspects is tracked or staged"
+  },
+  "staged_artifact": {
+   "resolution": "same_on_pod",
+   "evidence": "C1's manifest stages it"
+  },
+  "repository_content": {
+   "resolution": "same_on_pod",
+   "evidence": "the bundle checkout carries it"
+  }
+ },
+ "dependency_evidence": {
+  "aadistill.evaluation.paired_stats": "committed at src/aadistill/evaluation/paired_stats.py, so the bundle checkout carries it; the test prepends REPO/src to sys.path, and pod setup additionally installs the project editable into /opt/train (`uv pip install --no-deps -e $REPO`)",
+  "analyze_e8b_behaviour": "committed at scripts/evaluation/analyze_e8b_behaviour.py; the test prepends REPO/scripts/evaluation to sys.path, so the bundle checkout is sufficient on both machines",
+  "shutil.which(\"bash\")": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
+ },
+ "parity_not_executable_at_zero_cost": "that CUDA_VISIBLE_DEVICES=\"\" hides an L40S cannot be executed on a CPU dev box. The contract is applied and the decision is proven stable here; the GPU half is first exercised on the next pod.",
  "unaccounted": [],
  "unrecognised": [
   "tests/autoinit/test_c1_confirmation_scoring.py",
@@ -126,7 +179,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/autoinit/test_c1_confirmation_scoring.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
@@ -140,7 +195,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/autoinit/test_c1_confirmation_scoring.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
@@ -154,7 +211,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/autoinit/test_c1_confirmation_scoring.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
@@ -168,7 +227,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/autoinit/test_c1_confirmation_scoring.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
@@ -182,7 +243,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/autoinit/test_c1_confirmation_scoring.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
@@ -196,7 +259,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
    "readiness_group": null,
-   "registered_as": "pinned_snapshot_source"
+   "registered_as": "pinned_snapshot_source",
+   "parity": "normalized_by_contract",
+   "parity_why": "the seven pinned snapshots live in the Hugging Face hub cache. The contract sets HF_HOME/HF_HUB_CACHE to an empty isolated root and clears HUGGINGFACE_HUB_CACHE, HF_DATASETS_CACHE, TRANSFORMERS_CACHE and XDG_CACHE_HOME, so the cache is empty on the pod too and the same cases skip."
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
@@ -210,7 +275,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
@@ -224,7 +291,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_c1_readiness_gates.py::test_the_recorded_swept_commit_is_a_real_commit_in_this_repository",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_causal_depth_measurement_job.py",
@@ -238,7 +307,9 @@
    "why": "the pod has an L40S and the dev box has none, so this decides the OPPOSITE way there \u2014 it skips here and runs on the pod",
    "nodeid": "tests/autoinit/test_causal_depth_measurement_job.py::test_the_entrypoint_refuses_a_host_run_when_no_hardware_is_injected",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "normalized_by_contract",
+   "parity_why": "CUDA_VISIBLE_DEVICES=\"\" is set for the pytest command on BOTH machines, so torch reports no accelerator on the L40S too. The one such predicate RUNS without CUDA and SKIPS with it, so without this it would have decided the OPPOSITE way on the pod."
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
@@ -252,7 +323,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_cost_and_recovery.py::test_the_preregistration_binds_the_scoring_contract_and_supersession",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
@@ -266,7 +339,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_cost_and_recovery.py::test_the_historical_controls_are_not_labelled_as_valid_controls",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
@@ -280,7 +355,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_cost_and_recovery.py::test_the_availability_report_does_not_claim_a_matched_control",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_datasets_and_calibration.py",
@@ -294,7 +371,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_datasets_and_calibration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_frozen_assets.py",
@@ -308,7 +387,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_frozen_assets.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
@@ -322,7 +403,9 @@
    "why": "inspects artifacts/stage1/qwen3_0p6b_init_v0/manifest.json \u2014 neither tracked nor staged, so absent on a pod",
    "nodeid": "tests/autoinit/test_frozen_records.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage1/qwen3_0p6b_init_v0/manifest.json']"
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
@@ -336,7 +419,9 @@
    "why": "inspects artifacts/stage1/e8_depth_search \u2014 neither tracked nor staged, so absent on a pod",
    "nodeid": "tests/autoinit/test_frozen_records.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage1/e8_depth_search']"
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
@@ -350,7 +435,9 @@
    "why": "inspects artifacts/stage1/e8_depth_search \u2014 neither tracked nor staged, so absent on a pod",
    "nodeid": "tests/autoinit/test_frozen_records.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage1/e8_depth_search']"
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
@@ -364,7 +451,9 @@
    "why": "inspects artifacts/stage1/e8_depth_search \u2014 neither tracked nor staged, so absent on a pod",
    "nodeid": "tests/autoinit/test_frozen_records.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage1/e8_depth_search']"
   },
   {
    "file": "tests/autoinit/test_leaf_durability.py",
@@ -378,7 +467,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_leaf_durability.py::test_a_copy_that_acquires_a_tokenizer_is_refused",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
@@ -392,7 +483,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_phase_b_plan.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
@@ -406,7 +499,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_phase_b_plan.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
@@ -420,7 +515,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_phase_b_plan.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
@@ -434,7 +531,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_phase_b_plan.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
@@ -448,7 +547,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_phase_b_plan.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
@@ -462,7 +563,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_phase_b_plan.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_reasoning_heavy_v2.py",
@@ -476,7 +579,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_reasoning_heavy_v2.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_recovery_continuation_authorization.py",
@@ -490,7 +595,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_recovery_continuation_authorization.py::test_the_committed_phase_a_artifact_cannot_be_read_as_a_continuation_one",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_recovery_search_scoring.py",
@@ -504,7 +611,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_recovery_search_scoring.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_skip_predicate_audit.py",
@@ -518,7 +627,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_staging_contract.py",
@@ -532,7 +643,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
    "readiness_group": "devbox_only",
-   "registered_as": "staging_premise_property"
+   "registered_as": "staging_premise_property",
+   "parity": "normalized_by_contract",
+   "parity_why": "these ask the filesystem for unstaged artifacts. The simulator has moved them aside and the pod never received them, so both skip for the same stated reason."
   },
   {
    "file": "tests/autoinit/test_staging_contract.py",
@@ -546,7 +659,9 @@
    "why": "C1's manifest stages exactly this, so the premise travels",
    "nodeid": "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
    "readiness_group": "devbox_only",
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "C1's manifest stages it"
   },
   {
    "file": "tests/autoinit/test_staging_contract.py",
@@ -560,7 +675,9 @@
    "why": "C1's manifest stages exactly this, so the premise travels",
    "nodeid": "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
    "readiness_group": "devbox_only",
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "C1's manifest stages it"
   },
   {
    "file": "tests/autoinit/test_staging_contract.py",
@@ -574,7 +691,9 @@
    "why": "C1's manifest stages exactly this, so the premise travels",
    "nodeid": "tests/autoinit/test_staging_contract.py::test_the_dev_box_satisfies_both_premises_and_so_both_tests_run",
    "readiness_group": "devbox_only",
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "C1's manifest stages it"
   },
   {
    "file": "tests/data/test_c1_battery.py",
@@ -588,7 +707,9 @@
    "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
    "nodeid": "tests/data/test_c1_battery.py::require_role",
    "readiness_group": null,
-   "registered_as": "pinned_snapshot_source"
+   "registered_as": "pinned_snapshot_source",
+   "parity": "normalized_by_contract",
+   "parity_why": "the seven pinned snapshots live in the Hugging Face hub cache. The contract sets HF_HOME/HF_HUB_CACHE to an empty isolated root and clears HUGGINGFACE_HUB_CACHE, HF_DATASETS_CACHE, TRANSFORMERS_CACHE and XDG_CACHE_HOME, so the cache is empty on the pod too and the same cases skip."
   },
   {
    "file": "tests/data/test_c1_battery.py",
@@ -602,7 +723,9 @@
    "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
    "nodeid": "tests/data/test_c1_battery.py::require_role",
    "readiness_group": null,
-   "registered_as": "pinned_snapshot_source"
+   "registered_as": "pinned_snapshot_source",
+   "parity": "normalized_by_contract",
+   "parity_why": "the seven pinned snapshots live in the Hugging Face hub cache. The contract sets HF_HOME/HF_HUB_CACHE to an empty isolated root and clears HUGGINGFACE_HUB_CACHE, HF_DATASETS_CACHE, TRANSFORMERS_CACHE and XDG_CACHE_HOME, so the cache is empty on the pod too and the same cases skip."
   },
   {
    "file": "tests/data/test_c1_battery.py",
@@ -616,7 +739,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
    "readiness_group": "renderer_parity",
-   "registered_as": "pinned_snapshot_source"
+   "registered_as": "pinned_snapshot_source",
+   "parity": "normalized_by_contract",
+   "parity_why": "the seven pinned snapshots live in the Hugging Face hub cache. The contract sets HF_HOME/HF_HUB_CACHE to an empty isolated root and clears HUGGINGFACE_HUB_CACHE, HF_DATASETS_CACHE, TRANSFORMERS_CACHE and XDG_CACHE_HOME, so the cache is empty on the pod too and the same cases skip."
   },
   {
    "file": "tests/data/test_dataset.py",
@@ -630,7 +755,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/data/test_dataset.py::tokenizer",
    "readiness_group": null,
-   "registered_as": "local_hf_cache"
+   "registered_as": "local_hf_cache",
+   "parity": "normalized_by_contract",
+   "parity_why": "the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
   },
   {
    "file": "tests/data/test_e7_streams.py",
@@ -644,7 +771,9 @@
    "why": "inspects artifacts/stage3/e7_fineweb_kd \u2014 neither tracked nor staged, so absent on a pod",
    "nodeid": "tests/data/test_e7_streams.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage3/e7_fineweb_kd']"
   },
   {
    "file": "tests/data/test_sessions.py",
@@ -658,7 +787,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/data/test_sessions.py::tokenizer",
    "readiness_group": null,
-   "registered_as": "local_hf_cache"
+   "registered_as": "local_hf_cache",
+   "parity": "normalized_by_contract",
+   "parity_why": "the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
   },
   {
    "file": "tests/docs/test_repository_structure.py",
@@ -672,7 +803,9 @@
    "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
    "nodeid": "tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/docs/test_storage_inventory.py",
@@ -680,13 +813,15 @@
    "kind": "pytest.skip",
    "function": "test_the_registry_covers_the_out_of_tree_store",
    "condition": "not external.is_dir()",
-   "expanded": "not external.is_dir() | external=Path(\"/home/ecs-user/aad-artifacts\")",
+   "expanded": "not external.is_dir() | external=Path.home() / \"aad-artifacts\"",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
   },
   {
    "file": "tests/evaluation/test_capability.py",
@@ -700,7 +835,9 @@
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/evaluation/test_capability.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/eval/battery_v2']"
   },
   {
    "file": "tests/evaluation/test_e6_analysis.py",
@@ -714,7 +851,9 @@
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/evaluation/test_e6_analysis.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/audit/three_mode', 'artifacts/stage3/corpus_v2/sessions.jsonl']"
   },
   {
    "file": "tests/evaluation/test_e6_registration.py",
@@ -728,7 +867,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/evaluation/test_e6_registration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": "devbox_only_artifact",
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/evaluation/test_e6_registration.py",
@@ -742,7 +883,9 @@
    "why": "inspects artifacts/audit/three_mode \u2014 neither tracked nor staged, so absent on a pod",
    "nodeid": "tests/evaluation/test_e6_registration.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/audit/three_mode']"
   },
   {
    "file": "tests/evaluation/test_e8b_behaviour_analysis.py",
@@ -756,7 +899,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/evaluation/test_e8b_behaviour_analysis.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "committed at src/aadistill/evaluation/paired_stats.py, so the bundle checkout carries it; the test prepends REPO/src to sys.path, and pod setup additionally installs the project editable into /opt/train (`uv pip install --no-deps -e $REPO`)"
   },
   {
    "file": "tests/evaluation/test_e8b_behaviour_analysis.py",
@@ -770,7 +915,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/evaluation/test_e8b_behaviour_analysis.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "committed at scripts/evaluation/analyze_e8b_behaviour.py; the test prepends REPO/scripts/evaluation to sys.path, so the bundle checkout is sufficient on both machines"
   },
   {
    "file": "tests/evaluation/test_oracle_reasoning.py",
@@ -784,7 +931,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/evaluation/test_oracle_reasoning.py::tok",
    "readiness_group": null,
-   "registered_as": "local_hf_cache"
+   "registered_as": "local_hf_cache",
+   "parity": "normalized_by_contract",
+   "parity_why": "the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
   },
   {
    "file": "tests/evaluation/test_perf_trend.py",
@@ -798,7 +947,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/evaluation/test_strict_answer.py",
@@ -812,7 +963,9 @@
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/evaluation/test_strict_answer.py::test_gold_target_is_the_rendered_span_not_the_content_field",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "hidden_in_both",
+   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage3/corpus_v2/sessions.jsonl']"
   },
   {
    "file": "tests/models/test_tokenizer_contract.py",
@@ -826,7 +979,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/models/test_tokenizer_contract.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_autoinit_preflight_rehearsal.py",
@@ -840,7 +995,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_autoinit_preflight_rehearsal.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_c1_driver_execution.py",
@@ -854,21 +1011,25 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_c1_driver_execution.py::_summary_template",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/pod/test_c1_session_contract.py",
-   "line": 275,
+   "line": 280,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not CANDIDATE.is_file()",
-   "expanded": "not CANDIDATE.is_file() | CANDIDATE=Path(\"/home/ecs-user/aad-scratch/sessions/c1-candidate\"\n                 \"/candidate_authorization.json\")",
+   "expanded": "not CANDIDATE.is_file() | CANDIDATE=Path.home() / \"aad-scratch/sessions/c1-candidate\"\n             / \"candidate_authorization.json\"",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/pod/test_c1_session_contract.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
   },
   {
    "file": "tests/pod/test_continuation_b_executes.py",
@@ -882,7 +1043,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_continuation_b_executes.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_continuation_b_executes.py",
@@ -896,25 +1059,29 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_continuation_b_executes.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 49,
+   "line": 54,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (STAGED / CONTROLS[0] / \"step_001023/model/model.safetensors\").is_file()",
-   "expanded": "not (STAGED / CONTROLS[0] / \"step_001023/model/model.safetensors\").is_file() | CONTROLS=(\"preflight_ctl_r0860k_sa\", \"preflight_ctl_r0860k_sb\") | STAGED=Path(\"/home/ecs-user/aad-artifacts/autoinit\")",
+   "expanded": "not (STAGED / CONTROLS[0] / \"step_001023/model/model.safetensors\").is_file() | CONTROLS=(\"preflight_ctl_r0860k_sa\", \"preflight_ctl_r0860k_sb\") | STAGED=Path.home() / \"aad-artifacts/autoinit\"",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/pod/test_continuation_rehearsal.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 840,
+   "line": 845,
    "kind": "pytest.skip",
    "function": "test_the_session_commit_is_verified_against_the_authorization",
    "condition": "not auth_path.is_file()",
@@ -924,11 +1091,13 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_continuation_rehearsal.py::test_the_session_commit_is_verified_against_the_authorization",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 944,
+   "line": 949,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (REPO / \"artifacts/stage3/recovery_search_v2/manifest.json\").is_file()",
@@ -938,7 +1107,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_continuation_rehearsal.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": "devbox_only_artifact",
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_launcher_forwards_setup_env.py",
@@ -952,7 +1123,9 @@
    "why": "tracked content the bundle checkout carries",
    "nodeid": "tests/pod/test_launcher_forwards_setup_env.py::test_launcher_forwards_every_variable_the_setup_reads",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "the bundle checkout carries it"
   },
   {
    "file": "tests/pod/test_launcher_forwards_setup_env.py",
@@ -966,7 +1139,9 @@
    "why": "tracked content the bundle checkout carries",
    "nodeid": "tests/pod/test_launcher_forwards_setup_env.py::test_forwarded_variables_have_a_launcher_side_default",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "the bundle checkout carries it"
   },
   {
    "file": "tests/pod/test_observed_protocol_rehearsal.py",
@@ -980,7 +1155,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_observed_protocol_rehearsal.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_operational_hardening.py",
@@ -994,7 +1171,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers",
    "readiness_group": null,
-   "registered_as": "manifest_derived"
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/pod/test_phase_a_stage0_executes.py",
@@ -1008,7 +1187,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_phase_a_stage0_executes.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_pod_script_paths.py",
@@ -1022,11 +1203,13 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file",
    "readiness_group": null,
-   "registered_as": "manifest_derived"
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/pod/test_reconstruct_training_events.py",
-   "line": 129,
+   "line": 134,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not COMMITTED.is_file()",
@@ -1036,21 +1219,25 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_reconstruct_training_events.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": "devbox_only_artifact",
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_reconstruct_training_events.py",
-   "line": 149,
+   "line": 154,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (E6B / \"e6b_run.log\").is_file()",
-   "expanded": "not (E6B / \"e6b_run.log\").is_file() | E6B=Path(\"/home/ecs-user/aad-artifacts/e6b\")",
+   "expanded": "not (E6B / \"e6b_run.log\").is_file() | E6B=Path.home() / \"aad-artifacts/e6b\"",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/pod/test_reconstruct_training_events.py",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
   },
   {
    "file": "tests/pod/test_recovery_continuation_session.py",
@@ -1064,7 +1251,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_five_leaves_are_declared_in_the_selected_order",
    "readiness_group": null,
-   "registered_as": "manifest_derived"
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/pod/test_recovery_continuation_session.py",
@@ -1078,7 +1267,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_leaves_are_staged_through_the_declared_relay_contract",
    "readiness_group": null,
-   "registered_as": "manifest_derived"
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/pod/test_recovery_continuation_session.py",
@@ -1092,7 +1283,9 @@
    "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/pod/test_recovery_continuation_session.py",
@@ -1106,11 +1299,13 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
    "readiness_group": "known_non_environment",
-   "registered_as": "manifest_derived"
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/pod/test_recovery_continuation_session.py",
-   "line": 330,
+   "line": 335,
    "kind": "pytest.skip",
    "function": "skip_if_c1_session",
    "condition": "os.environ.get(\"SESSION_KIND\") == \"c1\"",
@@ -1120,35 +1315,41 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::skip_if_c1_session",
    "readiness_group": null,
-   "registered_as": "session_semantics"
+   "registered_as": "session_semantics",
+   "parity": "same_on_pod",
+   "parity_why": "keyed on SESSION_KIND, which SessionSpec.setup_environment sets identically for the simulator and the pod. This is the CORRECT shape of an environment guard."
   },
   {
    "file": "tests/pod/test_recovery_continuation_session.py",
-   "line": 348,
+   "line": 353,
    "kind": "pytest.skip",
    "function": "test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
    "condition": "not HOST_LOCAL_PHASE_A_STORE.is_dir()",
-   "expanded": "not HOST_LOCAL_PHASE_A_STORE.is_dir() | HOST_LOCAL_PHASE_A_STORE=Path(\"/home/ecs-user/aad-artifacts/autoinit/phase_a\")",
+   "expanded": "not HOST_LOCAL_PHASE_A_STORE.is_dir() | HOST_LOCAL_PHASE_A_STORE=Path.home() / \"aad-artifacts/autoinit/phase_a\"",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
    "readiness_group": "host_local_c1",
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
   },
   {
    "file": "tests/pod/test_recovery_continuation_session.py",
-   "line": 418,
+   "line": 422,
    "kind": "pytest.skip",
    "function": "test_the_entrypoint_refuses_a_substituted_leaf",
    "condition": "not store.is_dir()",
-   "expanded": "not store.is_dir() | store=HOST_LOCAL_PHASE_A_STORE | HOST_LOCAL_PHASE_A_STORE=Path(\"/home/ecs-user/aad-artifacts/autoinit/phase_a\")",
+   "expanded": "not store.is_dir() | store=HOST_LOCAL_PHASE_A_STORE | HOST_LOCAL_PHASE_A_STORE=Path.home() / \"aad-artifacts/autoinit/phase_a\"",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
    "readiness_group": "host_local_c1",
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
   },
   {
    "file": "tests/pod/test_session_architecture.py",
@@ -1162,7 +1363,9 @@
    "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
    "nodeid": "tests/pod/test_session_architecture.py::test_every_declared_asset_is_a_directory_the_launcher_can_actually_send",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/pod/test_session_architecture.py",
@@ -1176,7 +1379,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
    "readiness_group": null,
-   "registered_as": "manifest_derived"
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/pod/test_session_architecture.py",
@@ -1190,7 +1395,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
    "readiness_group": null,
-   "registered_as": "manifest_derived"
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/pod/test_session_architecture.py",
@@ -1204,7 +1411,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_session_architecture.py::test_the_c1_checkpoint_inputs_land_where_the_rope_gate_globs",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_session_architecture.py",
@@ -1218,7 +1427,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_session_architecture.py::test_the_real_rope_check_accepts_the_canonical_config",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_session_architecture.py",
@@ -1232,7 +1443,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_session_architecture.py::test_the_real_rope_check_refuses_a_wrong_stored_base",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/pod/test_setup_end_to_end.py",
@@ -1246,7 +1459,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_setup_end_to_end.py::sandbox",
    "readiness_group": null,
-   "registered_as": "machine_capability"
+   "registered_as": "machine_capability",
+   "parity": "normalized_by_contract",
+   "parity_why": "`_skip_reason()` needs bubblewrap, `.venv/bin/python`, the canonical `model.safetensors` and a 196-wheel wheelhouse at `expanduser(\"~/aad-artifacts/...\")`. Under the contract's fresh HOME the wheelhouse is empty and the checkpoint is hidden/unstaged, so the dev box skips for the same reason the pod does. (bwrap is present here and likely absent on the pod, but the decision is already SKIP on both before that matters.)"
   },
   {
    "file": "tests/pod/test_setup_gate_calibration.py",
@@ -1260,7 +1475,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/pod/test_setup_gate_calibration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/pod/test_setup_gate_calibration.py",
@@ -1274,7 +1491,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/pod/test_setup_gate_calibration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/pod/test_setup_gate_calibration.py",
@@ -1288,7 +1507,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/pod/test_setup_gate_calibration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/pod/test_setup_gate_calibration.py",
@@ -1302,7 +1523,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/pod/test_setup_gate_calibration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/pod/test_setup_gate_calibration.py",
@@ -1316,7 +1539,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/pod/test_setup_gate_calibration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/pod/test_setup_gate_calibration.py",
@@ -1330,7 +1555,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/pod/test_setup_gate_calibration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/pod/test_setup_gate_calibration.py",
@@ -1344,7 +1571,9 @@
    "why": "the pod's image is not the dev box's venv",
    "nodeid": "tests/pod/test_setup_gate_calibration.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/training/test_e4_configs.py",
@@ -1358,7 +1587,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/training/test_e4_configs.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/training/test_e4_configs.py",
@@ -1372,7 +1603,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/training/test_e4_configs.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/training/test_e4_configs.py",
@@ -1386,7 +1619,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/training/test_e4_configs.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/training/test_e6b_arms.py",
@@ -1400,7 +1635,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/training/test_e6b_arms.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/training/test_e8_arms.py",
@@ -1414,7 +1651,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/training/test_e8_arms.py::test_the_token_budget_the_arms_will_consume_is_what_the_pack_holds",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/training/test_e8_arms.py",
@@ -1428,7 +1667,9 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/training/test_e8_arms.py",
    "readiness_group": null,
-   "registered_as": null
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/training/test_e8_arms.py",
@@ -1442,7 +1683,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/training/test_e8_arms.py",
@@ -1456,7 +1699,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init",
    "readiness_group": null,
-   "registered_as": "devbox_only_artifact"
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/training/test_train.py",
@@ -1470,7 +1715,9 @@
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/training/test_train.py::teacher_tokenizer",
    "readiness_group": null,
-   "registered_as": "local_hf_cache"
+   "registered_as": "local_hf_cache",
+   "parity": "normalized_by_contract",
+   "parity_why": "the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
   }
  ],
  "signal_definitions": {
@@ -1520,5 +1767,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "4aaa3c833283df2225b354c300160deb6ef0f008944dae384cf5ca455c9d2619"
+ "digest": "509ee507ad321ba9647c270f5e53d528772d9770d89eeff183f9a9f068f04024"
 }

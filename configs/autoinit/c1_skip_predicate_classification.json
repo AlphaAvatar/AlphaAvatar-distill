@@ -5,170 +5,152 @@
  "classes": {
   "devbox_only_artifact": {
    "decides_on_pod": "SKIP",
-   "why": "the premise is a gitignored artifact from an earlier experiment that C1's SetupManifest does not stage. A pod never receives it, so the test skips there by design. This is the SAME class as the two attempt-5 failures \u2014 the difference is that these ask the FILESYSTEM whether the artifact is present, so the pod and the simulation both answer correctly, while attempt 5's asked for a simulator marker the pod does not set."
+   "why": "the premise is a gitignored artifact from an earlier experiment that C1's SetupManifest does not stage. A pod never receives it, so the test skips there by design. This is the SAME class as the two attempt-5 failures \u2014 the difference is that these ask the FILESYSTEM whether the artifact is present, so the pod and the simulation both answer correctly, while attempt 5's asked for a simulator marker the pod does not set.",
+   "parity": "normalized_by_contract: the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   "pinned_snapshot_source": {
    "decides_on_pod": "SKIP",
-   "why": "depends on the seven pinned HF dataset snapshots, which live in the host HF cache and are not staged. Already a named readiness group (renderer parity / battery source); the sweep expects these skips."
+   "why": "depends on the seven pinned HF dataset snapshots, which live in the host HF cache and are not staged. Already a named readiness group (renderer parity / battery source); the sweep expects these skips.",
+   "parity": "normalized_by_contract: the seven pinned snapshots live in the Hugging Face hub cache. The contract sets HF_HOME/HF_HUB_CACHE to an empty isolated root and clears HUGGINGFACE_HUB_CACHE, HF_DATASETS_CACHE, TRANSFORMERS_CACHE and XDG_CACHE_HOME, so the cache is empty on the pod too and the same cases skip."
   },
   "local_hf_cache": {
    "decides_on_pod": "SKIP or RUN, machine-dependent",
-   "why": "needs the teacher tokenizer from the local HF cache. The pod exports HF_TOKEN and can populate it; the bare dev box may not have it. Skips cleanly either way and asserts nothing about the code."
+   "why": "needs the teacher tokenizer from the local HF cache. The pod exports HF_TOKEN and can populate it; the bare dev box may not have it. Skips cleanly either way and asserts nothing about the code.",
+   "parity": "normalized_by_contract: the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
   },
   "staging_premise_property": {
    "decides_on_pod": "SKIP",
-   "why": "the repaired attempt-5 guards. They ask the filesystem for the property they need, so the dev box runs them and the pod and the simulation skip them for the same stated reason."
+   "why": "the repaired attempt-5 guards. They ask the filesystem for the property they need, so the dev box runs them and the pod and the simulation skip them for the same stated reason.",
+   "parity": "normalized_by_contract: these ask the filesystem for unstaged artifacts. The simulator has moved them aside and the pod never received them, so both skip for the same stated reason."
   },
   "session_semantics": {
    "decides_on_pod": "SKIP",
-   "why": "keyed on SESSION_KIND, which the SetupManifest sets identically in the simulation and on the pod. This is the CORRECT shape of an environment guard: the session declares it, so both agree."
+   "why": "keyed on SESSION_KIND, which the SetupManifest sets identically in the simulation and on the pod. This is the CORRECT shape of an environment guard: the session declares it, so both agree.",
+   "parity": "same_on_pod: keyed on SESSION_KIND, which SessionSpec.setup_environment sets identically for the simulator and the pod. This is the CORRECT shape of an environment guard."
   },
   "manifest_derived": {
    "decides_on_pod": "same as here",
-   "why": "decided by the SessionSpec or by tracked source text, not by the machine, so the sweep's verdict is the pod's verdict."
+   "why": "decided by the SessionSpec or by tracked source text, not by the machine, so the sweep's verdict is the pod's verdict.",
+   "parity": "same_on_pod: decided by the SessionSpec or by tracked source text, not by the machine."
   },
   "machine_capability": {
    "decides_on_pod": "SKIP or RUN, machine-dependent",
-   "why": "needs bubblewrap, the repo venv, the canonical checkpoint and a 196-wheel vLLM wheelhouse. A rehearsal harness, not a claim about C1; it skips with the specific capability it lacks."
+   "why": "needs bubblewrap, the repo venv, the canonical checkpoint and a 196-wheel vLLM wheelhouse. A rehearsal harness, not a claim about C1; it skips with the specific capability it lacks.",
+   "parity": "normalized_by_contract: `_skip_reason()` needs bubblewrap, `.venv/bin/python`, the canonical `model.safetensors` and a 196-wheel wheelhouse at `expanduser(\"~/aad-artifacts/...\")`. Under the contract's fresh HOME the wheelhouse is empty and the checkpoint is hidden/unstaged, so the dev box skips for the same reason the pod does. (bwrap is present here and likely absent on the pod, but the decision is already SKIP on both before that matters.)"
   }
  },
  "predicates": {
-  "tests/autoinit/test_c1_confirmation_scoring.py:106": {
+  "tests/autoinit/test_c1_confirmation_scoring.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/autoinit/test_c1_confirmation_scoring.py:145": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/autoinit/test_c1_confirmation_scoring.py:157": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/autoinit/test_c1_confirmation_scoring.py:192": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/autoinit/test_c1_confirmation_scoring.py:97": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/autoinit/test_c1_readiness_gates.py:96": {
+  "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host": {
    "class": "pinned_snapshot_source"
   },
-  "tests/autoinit/test_frozen_records.py:115": {
+  "tests/autoinit/test_frozen_records.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/autoinit/test_frozen_records.py:54": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/autoinit/test_frozen_records.py:68": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/autoinit/test_frozen_records.py:78": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/autoinit/test_staging_contract.py:77": {
+  "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible": {
    "class": "staging_premise_property",
    "note": "the other two guards in this module (the destination-absent and nothing-undeclared premises) need NO entry: they resolve automatically to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint, which C1's manifest stages, so the audit proves the premise travels."
   },
-  "tests/data/test_c1_battery.py:260": {
+  "tests/data/test_c1_battery.py::require_role": {
    "class": "pinned_snapshot_source"
   },
-  "tests/data/test_c1_battery.py:63": {
+  "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte": {
    "class": "pinned_snapshot_source"
   },
-  "tests/data/test_c1_battery.py:66": {
-   "class": "pinned_snapshot_source"
-  },
-  "tests/data/test_dataset.py:32": {
+  "tests/data/test_dataset.py::tokenizer": {
    "class": "local_hf_cache"
   },
-  "tests/data/test_e7_streams.py:21": {
+  "tests/data/test_e7_streams.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/data/test_sessions.py:56": {
+  "tests/data/test_sessions.py::tokenizer": {
    "class": "local_hf_cache"
   },
-  "tests/docs/test_repository_structure.py:139": {
+  "tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists": {
    "class": "devbox_only_artifact"
   },
-  "tests/docs/test_storage_inventory.py:76": {
+  "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store": {
    "class": "devbox_only_artifact"
   },
-  "tests/evaluation/test_capability.py:357": {
+  "tests/evaluation/test_capability.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/evaluation/test_e6_analysis.py:28": {
+  "tests/evaluation/test_e6_analysis.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/evaluation/test_e6_registration.py:101": {
+  "tests/evaluation/test_e6_registration.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/evaluation/test_oracle_reasoning.py:31": {
+  "tests/evaluation/test_oracle_reasoning.py::tok": {
    "class": "local_hf_cache"
   },
-  "tests/evaluation/test_perf_trend.py:76": {
+  "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards": {
    "class": "devbox_only_artifact"
   },
-  "tests/evaluation/test_strict_answer.py:141": {
+  "tests/evaluation/test_strict_answer.py::test_gold_target_is_the_rendered_span_not_the_content_field": {
    "class": "devbox_only_artifact"
   },
-  "tests/pod/test_c1_driver_execution.py:202": {
+  "tests/pod/test_c1_driver_execution.py::_summary_template": {
    "class": "devbox_only_artifact"
   },
-  "tests/pod/test_c1_session_contract.py:275": {
+  "tests/pod/test_c1_session_contract.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/pod/test_continuation_rehearsal.py:49": {
+  "tests/pod/test_continuation_rehearsal.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/pod/test_operational_hardening.py:60": {
+  "tests/pod/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers": {
    "class": "manifest_derived"
   },
-  "tests/pod/test_pod_script_paths.py:147": {
+  "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file": {
    "class": "manifest_derived"
   },
-  "tests/pod/test_reconstruct_training_events.py:149": {
+  "tests/pod/test_reconstruct_training_events.py": {
    "class": "devbox_only_artifact"
   },
-  "tests/pod/test_recovery_continuation_session.py:126": {
-   "class": "manifest_derived"
-  },
-  "tests/pod/test_recovery_continuation_session.py:160": {
-   "class": "manifest_derived"
-  },
-  "tests/pod/test_recovery_continuation_session.py:215": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/pod/test_recovery_continuation_session.py:232": {
-   "class": "manifest_derived"
-  },
-  "tests/pod/test_recovery_continuation_session.py:330": {
+  "tests/pod/test_recovery_continuation_session.py::skip_if_c1_session": {
    "class": "session_semantics"
   },
-  "tests/pod/test_recovery_continuation_session.py:348": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/pod/test_recovery_continuation_session.py:418": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/pod/test_session_architecture.py:156": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/pod/test_session_architecture.py:455": {
+  "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs": {
    "class": "manifest_derived"
   },
-  "tests/pod/test_session_architecture.py:485": {
+  "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_recovery_continuation_session.py::test_the_five_leaves_are_declared_in_the_selected_order": {
    "class": "manifest_derived"
   },
-  "tests/pod/test_setup_end_to_end.py:144": {
+  "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_recovery_continuation_session.py::test_the_leaves_are_staged_through_the_declared_relay_contract": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it": {
+   "class": "manifest_derived"
+  },
+  "tests/pod/test_session_architecture.py::test_every_declared_asset_is_a_directory_the_launcher_can_actually_send": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/pod/test_setup_end_to_end.py::sandbox": {
    "class": "machine_capability"
   },
-  "tests/training/test_e8_arms.py:150": {
+  "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init": {
    "class": "devbox_only_artifact"
   },
-  "tests/training/test_e8_arms.py:158": {
-   "class": "devbox_only_artifact"
-  },
-  "tests/training/test_train.py:358": {
+  "tests/training/test_train.py::teacher_tokenizer": {
    "class": "local_hf_cache"
   }
  },
- "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle."
+ "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",
+ "_keying": "keyed by NODEID, not file:line. Line keys went stale the first time a comment was inserted above a constant, and a registry that goes stale on a whitespace change reports noise instead of drift.",
+ "_parity": "`parity` says why the DIAGNOSTIC and the PAID POD must decide a predicate the same way once both run under aadistill.autoinit.cpu_test_env. 'Classified' is not 'strictly comparable': attempt 5's --strict comparison was correct machinery pointed at two different machines."
 }
