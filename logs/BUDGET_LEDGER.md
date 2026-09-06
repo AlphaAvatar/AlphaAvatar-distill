@@ -1661,3 +1661,52 @@ did not cause this abort and must not be assumed benign.
 The diagnostic that *did* pay off: the `grep '^FAILED'` added after attempt 3R
 delivered both nodeids exactly, where attempt 3R lost fourteen failures to a
 four-line tail.
+
+---
+
+## 2026-09-06 — C1 attempt 6: the strict comparison earns its keep, `$0.3665`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 6: launch-bound readiness, 12/12 gates re-run by the launcher, 20.17 min, **INFRASTRUCTURE ABORT at the pod CPU test gate**. No replay, no training, no evaluation, no decision | $0.3665 | `logs/autoinit_c1_attempt6/` |
+
+**Cumulative: $265.7679 of $283.7600.** `$17.9921` uncommitted. The attempt-6
+grant is CONSUMED — pod `n71opk7lv4fhzf` was created — and it permits no retry
+and no replacement pod.
+
+Cost is the provider-polled watchdog tick (20.17 min → `$0.3665`) rather than the
+launcher's 19.4 min → `$0.35`, on the standing rule that the provider's figure
+wins and the larger reading is the honest one.
+
+**Pod `2791 passed / 113 skipped / 18 failed`; the sweep, on the same 2922
+selected tests, `2808 / 114 / 0`.** The strict skip-set comparison fired and
+named all three divergences exactly:
+
+| shape | nodeid | cause |
+| --- | --- | --- |
+| expected-skip-but-RAN | `test_the_committed_record_still_binds_the_live_executable` | the recorder MOVES THE RECORD ASIDE during a sweep so it cannot certify itself, so the record is absent here and present on a pod |
+| expected-skip-but-RAN | `test_the_recorded_swept_commit_is_a_real_commit_in_this_repository` | same mechanism |
+| unexpected POD-ONLY skip | `test_every_path_named_in_the_repo_layout_exists` | `REPO_LAYOUT.md` names `/home/ecs-user/aad-artifacts/` as an absolute literal, which a fresh `HOME` cannot neutralize |
+
+**Two of these are mine and one is structural.** The `REPO_LAYOUT` case is a
+registry error: I gave the class `devbox_only_artifact` ONE parity claim and
+asserted it for every member, and it is false for a test that reads absolute
+paths out of a Markdown file. That is precisely the excuse list the registry
+exists to prevent. The record-stashing pair is worse than a bug — it is a
+permanent consequence of how the sweep avoids self-reference, and no
+classification can make the two machines agree.
+
+The 18 failures are all in `test_simulator_restore.py`, the one module the
+parity repair made shell out to `cpu_test_env_args.py` via a `.venv` path a pod
+does not have. **Attributed, not proven:** the outcomes file records skip reasons
+but only failure NODEIDS, so nothing says why. At `$0` the fallback was shown
+unsafe — this box's `/usr/bin/python3` is 3.6.8 and cannot parse the emitter —
+which proves the fallback is untested, not that it is what failed there.
+
+**What the money bought.** The evidence survived: `setup_failure_files` pulled
+`pytest_outcomes.json` off the pod before teardown, 36,728 characters naming all
+113 skips with reasons and all 18 failures — where attempt 5's list died with the
+pod. The CPU-test isolation did not leak: after the gate, on the real L40S, CUDA
+was available again and the teacher cache was intact. And the GPU predicate
+appears in neither divergence list, so `CUDA_VISIBLE_DEVICES=""` did hide an
+L40S — the one claim that could not be tested on a CPU box.

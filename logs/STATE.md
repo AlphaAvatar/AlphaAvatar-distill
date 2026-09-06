@@ -35,7 +35,40 @@ PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
 > an L40S. A CPU dev box cannot prove it. The contract is applied and the
 > decision is proven stable here; the GPU half is first exercised on the next pod.
 
-> **Attempt-6 grant APPROVED, 2026-09-06 — not yet issued, nothing running.**
+> **Attempt 6, 2026-09-06 — LAUNCHED, ABORTED at the pod CPU test gate.** Pod
+> `n71opk7lv4fhzf`, created at `$1.09/h`, deleted at 20.17 min for **`$0.3665`**,
+> provider confirms gone. Cumulative **`$265.7679`** of `$283.7600`, leaving
+> `$17.9921`. **No
+> scientific stage ran — no replay, no training, no evaluation, no decision.**
+>
+> **The strict skip-set comparison did exactly its job, on its first real L40S.**
+> Pod `2791 passed / 113 skipped / 18 failed` against the sweep's
+> `2808 / 114 / 0` on the same 2922 selected tests. It named all three
+> divergences and refused at `$0.37` rather than after six trainings:
+>
+> 1. two tests the sweep skips **only because the recorder moves its own record
+>    aside** so a sweep cannot certify itself — so they are absent here and
+>    present on any pod. Structural: no classification can make the two machines
+>    agree.
+> 2. one test that skips on a pod because `REPO_LAYOUT.md` names
+>    `/home/ecs-user/aad-artifacts/` as an **absolute literal in Markdown**,
+>    which a fresh `HOME` cannot neutralize. **My error**: the registry gave the
+>    class `devbox_only_artifact` ONE parity claim and asserted it for every
+>    member. That is the excuse list the registry exists to prevent.
+> 3. 18 failures, all in the single module the parity repair made shell out to
+>    `cpu_test_env_args.py` through a `.venv` path a pod does not have.
+>    **Attributed, not proven** — the outcomes file keeps skip reasons but only
+>    failure nodeids.
+>
+> **What the money bought.** `setup_failure_files` pulled `pytest_outcomes.json`
+> off the pod before teardown — 36,728 characters naming all 113 skips with
+> reasons and all 18 failures, where attempt 5's list died with the pod. The
+> CPU-test isolation did not leak: after the gate, on the real L40S, CUDA was
+> available again and the teacher cache was intact. And the GPU predicate is in
+> neither divergence list, so `CUDA_VISIBLE_DEVICES=""` **did** hide an L40S —
+> the one claim that could not be tested on a CPU box.
+
+> **Attempt-6 grant CONSUMED, 2026-09-06 — a provider resource was created.**
 > A NEW one-use grant ([`autoinit_c1_attempt6_grant.json`](autoinit_c1_attempt6_grant.json)).
 > Attempt 5's grant and authorization remain CONSUMED and are not reused. Spend
 > stays `$265.4014` of `$283.7600`; one full `$15.1475` ceiling still fits,

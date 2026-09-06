@@ -1,0 +1,54 @@
+[11:18:35] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[11:18:35] NVIDIA L40S $1.09/h, stock Medium
+[11:18:35] session commit 47fbfe8cce23 verified: harness digests to 21d959131745…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[11:18:35] C1 harness 21d959131745… over 72 files
+[11:18:35] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[11:18:35] preregistration b4a74f8f7c34… (self-hash verified), harness 21d959131745…
+[11:18:35] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[11:18:35] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[11:18:35] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[11:18:35] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[11:18:37] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[11:18:39] aad_autoinit_47fbfe8c.bundle (7780618 bytes, b5e781dba27c…) round-trips to 47fbfe8cce23… carrying this authorization and harness 21d959131745…
+[11:18:42] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[11:18:42] pod sweep 2808 passed / 114 skipped / 0 failed, 7 renderer skips, leaf transport 5/5, binds harness 21d959131745… and environment 3f32aee85c83…, staging contract 9ef2356ee807…, swept at b82a2b13 with only ['logs/autoinit_c1_authorization.json', 'logs/c1_pod_environment_verification.json'] differs from the swept base
+[11:18:43] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[11:18:44] created n71opk7lv4fhzf at $1.09/h
+[11:18:44] watchdog detached — hard 834 min = $15.15
+[11:19:37]   starting (60s) — $0.02
+[11:20:40] TCP 22 at 64.247.206.229:11703 after 1.9 min
+[11:20:43] draw 1: ssh reachable — $0.04
+[11:21:36] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[11:21:36] draw 1: running setup
+[11:37:55] setup did not reach SETUP_DONE:
+restore.py::test_restoration_survives_a_command_that_exits_the_shell
+FAILED tests/pod/test_simulator_restore.py::test_restore_reproduces_the_exact_pre_state_when_the_run_recreates_it
+FAILED tests/pod/test_simulator_restore.py::test_the_default_log_path_is_per_invocation_not_a_shared_file
+FAILED tests/pod/test_simulator_restore.py::test_the_dev_box_hf_cache_is_not_visible
+FAILED tests/pod/test_simulator_restore.py::test_the_isolation_is_torn_down_after_a_normal_run
+FAILED tests/pod/test_simulator_restore.py::test_the_isolation_is_torn_down_even_when_the_suite_fails
+FAILED tests/pod/test_simulator_restore.py::test_the_junit_flag_reaches_the_suite_but_not_its_children
+FAILED tests/pod/test_simulator_restore.py::test_the_lock_is_released_after_a_normal_run
+FAILED tests/pod/test_simulator_restore.py::test_the_recreated_content_is_quarantined_not_deleted
+FAILED tests/pod/test_simulator_restore.py::test_the_simulated_home_is_a_fresh_empty_directory
+FAILED tests/pod/test_simulator_restore.py::test_the_suite_exit_code_reaches_the_caller
+FAILED tests/pod/test_simulator_restore.py::test_variables_that_would_defeat_the_isolation_are_unset
+skip set digest: 5c517f51012ac88b… (113 skipped, all named in the JSON)
+skip-set comparison: DIFFERS from the launch-bound sweep (114 expected vs 113 actual)
+  2 expected-skip-but-RAN:
+    tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable
+    tests/autoinit/test_c1_readiness_gates.py::test_the_recorded_swept_commit_is_a_real_commit_in_this_repository
+  1 unexpected POD-ONLY skip:
+    tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists
+REFUSING: the pod's skip set is not the launch-bound sweep's. The sweep therefore did not certify this machine, which is the condition that cost attempt 5 a grant.
+[11:37:49] real runtime intact after the CPU-test scope: CUDA available, teacher cache at /root/.cache/huggingface/hub
+[11:37:49] test suite failed rc=1
+SETUP_RC=1
+
+[11:37:59]   preserved setup-failure evidence off-pod: /workspace/pytest_outcomes.json
+[11:37:59] ABORT after draw 1: setup_failed
+[11:37:59] deleting pod (setup setup_failed)
+[11:38:10] pod deleted — 19.4 min, $0.35; provider confirms gone: True
+
+autoinit-c1 INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search.
+LAUNCHER_EXIT=11

@@ -1,0 +1,118 @@
+{
+  "schema": "aadistill.autoinit.c1_test_gate_failures/v1",
+  "attempt": 6,
+  "pod_id": "n71opk7lv4fhzf",
+  "session_commit": "47fbfe8cce238676d6a1af92e50b5b0215651658",
+  "_what_this_is": "the complete enumeration of what the pod CPU test gate refused, from pytest_outcomes.json — which the launcher pulled OFF THE POD before teardown via SessionSpec.setup_failure_files. Attempt 5's 99 skip identities died with the pod; this time all 113 survived, with the exact three-way set difference.",
+
+  "counts": {
+    "pod": {"passed": 2791, "skipped": 113, "failed": 18, "error": 0, "total": 2922},
+    "launch_bound_sweep": {"passed": 2808, "skipped": 114, "failed": 0, "error": 0, "total": 2922},
+    "note": "the same 2922 tests were selected in both. The launch-bound sweep certified this exact tree at b82a2b13, 19 minutes of pod time earlier."
+  },
+
+  "skip_set": {
+    "pod_digest": "5c517f51012ac88bedb0aa295c82ea82b893f82633bc658f1839aece4620b09f",
+    "launch_bound_digest": "ee74f9e3dd305c5d09e68d06cf068bd62cc8266644a2384e4431aeca2ac4db37",
+    "identical": false,
+    "expected_but_ran": [
+      "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
+      "tests/autoinit/test_c1_readiness_gates.py::test_the_recorded_swept_commit_is_a_real_commit_in_this_repository"
+    ],
+    "unexpected_skip": [
+      "tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists"
+    ]
+  },
+
+  "divergences": [
+    {
+      "shape": "expected_but_ran",
+      "nodeids": [
+        "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
+        "tests/autoinit/test_c1_readiness_gates.py::test_the_recorded_swept_commit_is_a_real_commit_in_this_repository"
+      ],
+      "cause": "STRUCTURAL, and caused by the recorder itself. Both skip when pe.RECORD_PATH is absent. record_pod_environment.py MOVES THE PREVIOUS RECORD ASIDE for the duration of the sweep — 'moved the previous record aside -> /tmp/podsim-record-*' — precisely so the sweep cannot certify itself. So during any launch-bound sweep the record is absent and these two SKIP; on any pod the committed record is present and they RUN.",
+      "generalisation": "a sweep that hides an input to avoid self-reference guarantees a permanent skip divergence for every test that reads that input. This cannot be fixed by classification: the two machines genuinely differ, by construction of the measurement.",
+      "status": "UNRESOLVED — needs a decision, not a waiver."
+    },
+    {
+      "shape": "unexpected_skip",
+      "nodeids": ["tests/docs/test_repository_structure.py::test_every_path_named_in_the_repo_layout_exists"],
+      "pod_skip_reason": "declared host-local storage roots not on this machine: ['/home/ecs-user/aad-artifacts/', '/home/ecs-user/aad-scratch/']",
+      "cause": "the paths are ABSOLUTE LITERALS IN docs/REPO_LAYOUT.md, read out of the Markdown. They are not located through Path.home(), so the CPU-test contract's fresh empty HOME cannot neutralize them: the dev box has them whatever HOME says, and the pod does not.",
+      "my_error": "the skip-predicate registry gave the class `devbox_only_artifact` a single parity claim — 'reached either through $HOME or as a gitignored repo artifact' — and asserted it for every member. It is false for this member. A per-CLASS parity claim is exactly the excuse list the registry was built to avoid; parity has to be established per predicate, the way `path_parity` already does for the ones it can resolve.",
+      "status": "UNRESOLVED."
+    },
+    {
+      "shape": "failures",
+      "count": 18,
+      "nodeids_module": "tests/pod/test_simulator_restore.py",
+      "all_18": [
+        "test_a_clean_run_that_recreates_nothing_still_restores_exactly",
+        "test_a_junit_report_is_requested_when_asked",
+        "test_a_nested_simulation_does_not_inherit_this_ones_control_variables",
+        "test_a_pod_equivalent_token_is_exported_and_never_printed",
+        "test_failing_nodeids_are_reported_before_the_tail",
+        "test_hf_hub_cache_sits_under_the_isolated_hf_home",
+        "test_restoration_survives_a_command_that_exits_the_shell",
+        "test_restore_reproduces_the_exact_pre_state_when_the_run_recreates_it",
+        "test_the_default_log_path_is_per_invocation_not_a_shared_file",
+        "test_the_dev_box_hf_cache_is_not_visible",
+        "test_the_isolation_is_torn_down_after_a_normal_run",
+        "test_the_isolation_is_torn_down_even_when_the_suite_fails",
+        "test_the_junit_flag_reaches_the_suite_but_not_its_children",
+        "test_the_lock_is_released_after_a_normal_run",
+        "test_the_recreated_content_is_quarantined_not_deleted",
+        "test_the_simulated_home_is_a_fresh_empty_directory",
+        "test_the_suite_exit_code_reaches_the_caller",
+        "test_variables_that_would_defeat_the_isolation_are_unset"
+      ],
+      "cause": "ATTRIBUTED, NOT PROVEN — see evidence_gap below. Every one of the 18 is in the single module that drives `simulate_pod_env.sh` as a subprocess, and that module PASSED on attempt 5's pod (2769 passed, 2 failed, both staging-contract). The only thing that changed is the CPU-test parity repair, which made the simulator shell out to `cpu_test_env_args.py`: `PODSIM_PY=$PODSIM_SCRIPT_DIR/../../.venv/bin/python`, falling back to `command -v python3`. A pod has no repo `.venv` — it uses /opt/train — so the pod always takes the fallback, which the dev box never exercises.",
+      "what_was_reproduced_at_zero_cost": "the fallback is not a safe fallback. This dev box's /usr/bin/python3 is Python 3.6.8 and cannot even parse the emitter: `SyntaxError: future feature annotations is not defined`. That proves the fallback path is untested and interpreter-dependent; it does not prove the pod's python3 is what failed there.",
+      "status": "UNRESOLVED, and the mechanism is unconfirmed."
+    }
+  ],
+
+  "evidence_gap": {
+    "what": "pytest_outcomes.json records skip REASONS but only failure NODEIDS — no failure messages or tracebacks.",
+    "consequence": "the pod named all 18 failures exactly and none of them says WHY, so the mechanism above is an attribution rather than a finding. The launcher's own window is `tail -40`, and the 18-line failure list plus the comparison block consumed it, so the pytest summary tail did not survive either.",
+    "note": "this is the same class as attempt 3R's four-line tail and attempt 5's missing skip list: each repair captured one more layer and stopped short of the next."
+  },
+
+  "what_worked": {
+    "evidence_off_pod": "SessionSpec.setup_failure_files pulled /workspace/pytest_outcomes.json before teardown — 36,728 characters, all 113 skip nodeids with reasons, all 18 failures, and the computed set difference. Attempt 5's equivalent died with the pod.",
+    "strict_comparison": "it fired, named all three divergences exactly, and refused at $0.35 instead of after six trainings. This was its first real exercise on an L40S.",
+    "cpu_test_isolation": "the command-scoped contract did not leak: after the gate, on the real pod, `torch.cuda.is_available()` was TRUE again and the teacher cache was present at /root/.cache/huggingface/hub. That is the one claim that could not be proven on a CPU dev box, and it held.",
+    "gpu_predicate": "tests/autoinit/test_causal_depth_measurement_job.py::test_the_entrypoint_refuses_a_host_run_when_no_hardware_is_injected is NOT in either divergence list, so CUDA_VISIBLE_DEVICES=\"\" did hide the L40S and it decided the same way on both machines."
+  },
+
+  "setup_markers_observed": {
+    "sequence": ["ssh reachable 11:20:43", "image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03 11:21:36", "running setup 11:21:36", "real runtime intact after the CPU-test scope 11:37:49", "test suite failed rc=1 11:37:49", "SETUP_RC=1"],
+    "caveat": "no MARKER: line survived the launcher's tail -40 window this time, because the 18-line failure list and the comparison block filled it. VLLM_READY / TEACHER_READY / ROPE_OK are neither confirmed nor denied by this record — do not transcribe them from a previous attempt."
+  },
+
+  "cost": {
+    "provider_polled_last_watchdog_tick": {"usd": 0.3665, "elapsed_minutes": 20.17, "at": "2026-09-06T11:38:55Z"},
+    "launcher_at_deletion": {"usd": 0.35, "elapsed_minutes": 19.4},
+    "recorded": 0.3665,
+    "rule": "the provider-polled watchdog reading is the honest one, and it is also the larger"
+  },
+
+  "timestamps": {
+    "created_utc": "2026-09-06T11:18:44Z",
+    "deleted_utc": "2026-09-06T11:38:10Z",
+    "watchdog_saw_terminated_utc": "2026-09-06T11:38:55Z",
+    "watchdog_end": "pod_gone after 21 ticks"
+  },
+
+  "scientific_status": {
+    "replay_parent": "NOT REACHED",
+    "replay_incumbent": "NOT REACHED",
+    "recovery_training_began": false,
+    "probes_trained": 0,
+    "probes_evaluated": 0,
+    "confirmation_admissions": 0,
+    "decision": "none",
+    "verdict": "C1 attempt 6 is an INFRASTRUCTURE ABORT. It is not evidence for or against the ATTENTION isolation and must not be read as any C1 result."
+  }
+}

@@ -8,17 +8,18 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods confirmed via GraphQL myself{pods}, not the CLI field; e2ghwfuerdrvni deleted, provider confirms gone"
+  "note": "zero pods confirmed via GraphQL myself{pods}; n71opk7lv4fhzf deleted, provider confirms gone"
  },
  "authorized": {
   "any": false,
-  "note": "NO GRANT IS LIVE. The attempt-5 grant and its authorization are CONSUMED -- pod e2ghwfuerdrvni was created -- and permit no retry. A sixth attempt needs a new maintainer decision.",
+  "note": "NO GRANT IS LIVE. The attempt-6 grant and its authorization are CONSUMED -- pod n71opk7lv4fhzf was created -- and permit no retry and no replacement pod.",
   "c1_attempt1": "CONSUMED. $0.0786, bundle fetch.",
   "c1_attempt2": "CONSUMED. $0.1013, ROPE_OK.",
   "c1_attempt3": "SUPERSEDED UNLAUNCHED by the reprice. $0.00, no pod.",
   "c1_attempt3r": "CONSUMED. $0.3482, pod CPU test gate; ROPE_OK passed.",
   "c1_attempt4": "CONSUMED. $0.6986, aborted at the pod CPU test gate.",
-  "c1_attempt5": "CONSUMED. $0.3150, pod CPU test gate; ROPE_OK passed."
+  "c1_attempt5": "CONSUMED. $0.3150, pod CPU test gate; ROPE_OK passed.",
+  "c1_attempt6": "CONSUMED. $0.3665, pod CPU test gate; strict skip-set comparison refused."
  },
  "prepared_launch": {
   "any": false,
@@ -26,14 +27,14 @@
   "note": "aad_autoinit_79c18adb.bundle 2d1865ae7973 remains on the relay from the consumed attempt 5; it authorizes nothing."
  },
  "budget": {
-  "cumulative_spend_usd": 265.4014,
+  "cumulative_spend_usd": 265.7679,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 18.3586,
+  "remaining_usd": 17.9921,
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 $1.5417 across five PAID attempts (1, 2, 3R, 4, 5) plus attempt 3 at $0.00, all infrastructure aborts with zero measurement.",
-  "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $18.3586 remains, so one full attempt fits with about $3.21 reserve. Headroom is not permission."
+  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 $1.9082 across six PAID attempts (1, 2, 3R, 4, 5, 6) plus attempt 3 at $0.00, all infrastructure aborts with zero measurement.",
+  "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $17.9921 remains, so one full attempt fits with about $2.84 reserve. Headroom is not permission."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -71,9 +72,9 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "CPU-test parity repaired at $0 and verified. No C1 measurement exists; nothing is authorized.",
-  "the_ask": "a maintainer decision on a further one-use grant.",
-  "budget": "$265.4014 spent of the unchanged $283.7600 cap; $18.3586 uncommitted."
+  "status": "Attempt 6 launched and aborted at the pod CPU test gate. No C1 measurement exists.",
+  "the_ask": "reviewer decision on the three divergences, two of which are mine and one structural.",
+  "budget": "$265.7679 spent of the unchanged $283.7600 cap; $17.9921 uncommitted."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -123,20 +124,20 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / SIX PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-5 grant CONSUMED at the pod test gate",
+   "status": "IMPLEMENTED / SEVEN PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-6 grant CONSUMED at the pod CPU test gate",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json b4a74f8f7c34 at head_commit 577c5cdc; harness 21d959131745 over 72 files; 12 pre-provider gates",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempts": "SIX attempt LABELS: 1, 2, 3, 3R, 4, 5. FIVE of them created a paid provider resource; attempt 3 created none ($0.00, the launcher declined on price). $1.5417 of C1 infrastructure spend, ZERO science. Ledger: BUDGET_LEDGER.md.",
+   "attempts": "SEVEN attempt LABELS: 1, 2, 3, 3R, 4, 5, 6. SIX created a paid provider resource; attempt 3 created none ($0.00). $1.9082 of C1 infrastructure spend, ZERO science.",
    "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-   "blocker": "NONE technical. The CPU-test parity repair is COMPLETE: the pod gate and the launch-bound diagnostic run pytest under one declared command-scoped environment (cpu_test_env 0708122244bf), so a strict skip-set comparison compares like with like instead of refusing a healthy L40S. strict_cpu_test_parity_ready=PASS; the final diagnostic is PASS with 0 failed / 0 error. C1 has still NEVER been measured and there is NO live authorization.",
-   "needs": "a maintainer grant. Everything $0 is closed: parity audit PASS, diagnostic PASS, renderer parity 7/7, battery isolation clean. A launch-bound sweep and an issuance are owed before any launch.",
+   "blocker": "Attempt 6 aborted at the pod CPU test gate: 2791 passed / 113 skipped / 18 failed against the sweep's 2808 / 114 / 0. The strict skip-set comparison WORKED and named three divergences: two tests the sweep skips only because the recorder stashes its own record (structural), one that skips on a pod because REPO_LAYOUT.md names absolute /home/ecs-user paths a fresh HOME cannot neutralize (a registry error: one parity claim asserted for a whole class). The 18 failures are all in the module the parity repair made shell out to cpu_test_env_args.py; ATTRIBUTED, not proven -- the outcomes file keeps skip reasons but only failure nodeids.",
+   "needs": "a reviewer decision. The grant, the authorization and the launch attempt are all consumed.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
-   "evidence": "logs/autoinit_c1_attempt5/ (test_gate_failures.json carries the root cause and the unexplained skip)",
-   "readiness": "logs/c1_skip_predicate_audit.json: 97 predicates across 144 selected modules, strict_cpu_test_parity_ready=PASS, 0 unaccounted, 0 stale. logs/c1_pod_environment_verification.json is a DIAGNOSTIC (2808 passed / 114 skipped / 0 failed), so a launch-bound sweep is owed before any launch."
+   "evidence": "logs/autoinit_c1_attempt6/ (test_gate_failures.json and pod_pytest_outcomes.json)",
+   "readiness": "the committed launch-bound record is CONSUMED by attempt 6 and its skip set is now known to differ from a pod's by three nodeids. A new sweep AND a resolution of the three divergences are owed before any launch."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -167,7 +168,7 @@
   "free_space_note": "12.01 GiB free after the 2026-09-06 limited P12 cleanup of rebuildable caches and ephemeral residue ONLY; before it 0.64 GiB failed the suite with ENOSPC. aad-artifacts unchanged, the seven pinned snapshots intact. Every deletion: logs/c1_storage_recovery.json.",
   "free_bytes": 12897964032
  },
- "blocker": "No C1 grant exists. Attempt 5 aborted at the pod CPU test gate with 2 failures from a simulator-keyed skip guard, plus one unexplained skip divergence. C1 has still never been measured.",
+ "blocker": "No C1 grant exists. Attempt 6 aborted at the pod CPU test gate on three named skip-set divergences and 18 failures. C1 has still never been measured.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision"
