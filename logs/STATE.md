@@ -35,6 +35,15 @@ PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
 > an L40S. A CPU dev box cannot prove it. The contract is applied and the
 > decision is proven stable here; the GPU half is first exercised on the next pod.
 
+> **Attempt-7 grant APPROVED, 2026-09-06 — not yet issued, nothing running.**
+> A NEW one-use grant ([`autoinit_c1_attempt7_grant.json`](autoinit_c1_attempt7_grant.json)).
+> Attempt 6's grant and authorization remain CONSUMED and are not reused. Spend
+> stays `$265.7679` of `$283.7600` with `$17.9921` uncommitted; one full
+> `$15.1475` ceiling fits, leaving about `$2.8446` — **which is not
+> authorization for another run**, and an early termination still requires a
+> completely new review. This commit is the frozen pre-authorization tree:
+> after it, only the readiness record and the authorization artifact may move.
+>
 > **Attempt-6 postmortem repair, 2026-09-06 — `$0.0000`, no pod, no grant.**
 > Four repairs, none scientific. The strict complete skip-set comparison is
 > KEPT: it worked, and it refused three real divergences.

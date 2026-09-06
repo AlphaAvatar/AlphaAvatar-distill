@@ -1,0 +1,67 @@
+{
+ "schema": "aadistill.autoinit.c1_grant/v1",
+ "_what_this_is": "the maintainer decision permitting ONE Phase-C1 session -- attempt 7. An INPUT to the issuer, which derives every identity from the committed objects and refuses a grant that asserts one. This states only what a maintainer owns: who permitted what, at what cumulative spend, and what it does not authorize.",
+ "granted_for": "Phase C1 fixed-path ATTENTION isolation -- attempt 7",
+ "granted_by": "maintainer, C1 attempt-6 postmortem review 2026-09-06. Attempt 6 established two things on a real L40S that are now accepted: the command-scoped CPU-test environment hid CUDA during pytest and restored the real CUDA/teacher environment afterwards, and the strict complete skip-set comparison worked and correctly refused three real divergences. All four repairs are ACCEPTED: measurement scope for the two readiness-record self-consumers, a portable REPO_LAYOUT test, an explicit PODSIM_PYTHON with no ambient fallback, and failure message/traceback capture. GO for a new one-use grant.",
+ "covers": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475: the existing fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh seeds = exactly six recovery probes, one confirmation evaluation per probe only after ALL SIX trainings complete, each admitted against its own observed generation protocol before scoring, followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision.",
+ "one_use": {
+  "issuances_permitted": 1,
+  "launch_attempts_permitted": 1,
+  "consumed_when": "a PROVIDER RESOURCE is created, not when the launcher is invoked. Attempt 3 invoked the launcher twice, created nothing, cost $0.00 and was not consumed; attempts 1, 2, 3R, 4, 5 and 6 each created a pod and were.",
+  "no_retry": "an abort of any kind -- infrastructure, gate, price or scientific -- ends this grant. A further attempt needs a completely new maintainer review and a new grant. Attempt 6 was refused at the pod CPU gate by the strict skip-set comparison and was not retried."
+ },
+ "does_not_authorize": [
+  "any retry",
+  "any replacement pod",
+  "a second provider-created attempt",
+  "another attempt",
+  "Phase A",
+  "Phase B search",
+  "beam search",
+  "any search",
+  "any ranking",
+  "arm elimination",
+  "successive halving",
+  "any extra seed",
+  "any adaptive rerun",
+  "Phase C2",
+  "formal Stage-2/Stage-3 recovery",
+  "canonical Stage-1 NLL",
+  "any follow-on work",
+  "any scientific or protocol change",
+  "price-chasing the market upward",
+  "any hard-ceiling increase beyond $15.1475",
+  "any project-cap increase"
+ ],
+ "authorizes_nothing_by_itself": "this document permits an ISSUANCE. It creates no pod, reserves no provider resource and spends nothing.",
+ "price": {
+  "accepted_secure_l40s_usd_per_hour": 1.09,
+  "price_field": "gpuTypes[0].securePrice -- the field session_runner prices on",
+  "launch_condition": "launch only if the live securePrice is <= $1.09/h. --max-price DERIVES from the hash-verified logs/phase_c1_pricing.json and is not restated here.",
+  "above_that": "abort at $0 and return for review. Do not raise --max-price, do not amend the pricing record, do not chase the market and do not chase stock.",
+  "hard_ceiling_usd": 15.1475
+ },
+ "cumulative_spend_at_approval_usd": 265.7679,
+ "cumulative_cap_usd": 283.76,
+ "cap_note": "The project cumulative cap remains $283.7600 and is NOT raised. $17.9921 is available at approval; worst case after one complete attempt at the $15.1475 ceiling is $280.9154 spent, leaving approximately $2.8446. THAT REMAINDER IS NOT AUTHORIZATION FOR ANOTHER RUN -- it is under a fifth of one, and an early termination still requires a completely new review and grant.",
+ "current_state_during_the_window": "NO C1 measurement exists. Seven attempt labels -- 1, 2, 3, 3R, 4, 5, 6 -- of which SIX created a paid provider resource and attempt 3 created none. $1.9082 of C1 infrastructure spend, ZERO science. The canonical authorization artifact currently holds the CONSUMED attempt-6 grant.",
+ "supersedes": {
+  "attempt_6": "grant logs/autoinit_c1_attempt6_grant.json and its authorization are CONSUMED and are not reused. Attempt 6 created pod n71opk7lv4fhzf, was refused at the pod CPU test gate for $0.3665 with zero scientific stages, and its three skip-set divergences and 18 failures are recorded in logs/autoinit_c1_attempt6/test_gate_failures.json."
+ },
+ "issuance_order": {
+  "_why": "session_commit_gate requires the session commit to differ from authorized_session_commit by exactly the authorization path, so a launch-bound sweep run AFTER issuance adds a second path to the lineage diff and the gate refuses.",
+  "order": [
+   "1. this grant + all final metadata committed",
+   "2. that clean pre-authorization tree frozen",
+   "3. real --kind launch_bound pod-like sweep on THAT tree",
+   "4. readiness-record-only commit",
+   "5. issue against that clean readiness commit, --require-clean",
+   "6. authorization-only commit",
+   "7. canonical bundle staging and round-trip",
+   "8. all 12 $0 pre-provider gates",
+   "9. live secure L40S price re-check",
+   "10. STOP for the final paid-launch decision"
+  ],
+  "frozen_after_this_commit": "no source, test, preregistration, state, catalog, decision or README path may move between this commit and launch. Exactly two tracked paths may: logs/c1_pod_environment_verification.json and logs/autoinit_c1_authorization.json."
+ }
+}
