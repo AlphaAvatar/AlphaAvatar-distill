@@ -187,5 +187,21 @@ def test_a_simulator_marker_can_never_satisfy_parity(monkeypatch):
     fake = dict(nodeid="tests/x.py::t", signal="simulator_marker", verdict="differs_on_pod",
                 expanded="os.environ.get('AAD_SYNTHETIC_HF_TOKEN')", why="", file="tests/x.py",
                 line=1)
-    res, why = A.parity_of(fake, {}, set())
+    res, why = A.parity_of(fake, {}, set(), set())
     assert res == "REFUSED" and "never" in why
+
+
+def test_the_audit_digest_does_not_depend_on_this_machines_artifacts(monkeypatch):
+    """It once did, and the diagnostic caught it.
+
+    `path_parity` asked the LIVE hidden set, so inside the simulation — where the
+    artifacts have already been moved aside and the hidden set is empty — the
+    audit produced a different digest than on the bare dev box, and the committed
+    record failed its own equality check. Parity is derived from the git index
+    and the SetupManifest, both of which are the same in either place.
+    """
+    src = (REPO / "scripts/autoinit/audit_skip_predicates.py").read_text()
+    assert "hidden_files(" not in src, (
+        "the audit reads the live hidden set again; its digest would depend on "
+        "whether the simulator has run")
+    assert "def path_parity(p: dict, tracked: set[str], staged: set[str])" in src

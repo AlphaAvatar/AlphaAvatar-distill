@@ -156,6 +156,15 @@ DEVBOX_ONLY_NODEIDS: tuple[str, ...] = (
 #: different reason: not "this source is absent here" but "this session does not
 #: own that store". On a real pod they also skip, via their own store check.
 HOST_LOCAL_C1_NODEIDS: tuple[str, ...] = (
+    # Added 2026-09-06 with the CPU-test parity contract. `launcher.CKPT_STORE`
+    # is located through `$HOME` now, so the canonical leaf store is invisible
+    # under the contract's fresh empty HOME -- on the dev box AND on the pod,
+    # which is the point. Before that it was a hardcoded absolute path, so this
+    # case RAN in the diagnostic and would have SKIPPED on the pod: an
+    # `unexpected_skip` that the strict comparison would have refused a healthy
+    # pod for.
+    "tests/pod/test_recovery_continuation_session.py::"
+    "test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
     "tests/pod/test_recovery_continuation_session.py::"
     "test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
     "tests/pod/test_recovery_continuation_session.py::"

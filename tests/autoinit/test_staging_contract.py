@@ -563,7 +563,7 @@ def test_a_mismatched_invocation_refuses_before_a_pass_record_exists():
 def test_the_host_local_cases_are_named_separately_from_the_source_skips():
     """They skip for a different reason and must not be folded into that count."""
     from aadistill.autoinit import pod_environment as pe
-    assert len(pe.HOST_LOCAL_C1_NODEIDS) == 2
+    assert len(pe.HOST_LOCAL_C1_NODEIDS) == 3
     assert not (set(pe.HOST_LOCAL_C1_NODEIDS)
                 & (set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
                    | set(pe.DEVBOX_ONLY_NODEIDS)))

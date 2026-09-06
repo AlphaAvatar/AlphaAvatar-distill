@@ -1,13 +1,13 @@
 {
   "_what_this_is": "one complete pod-like sweep of the CPU test suite: the condition a fresh C1 pod is actually in, which is what C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run.",
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
-  "c1_harness_digest": "e3fb53b76c30c55a92f70e07b6d0480219a0c61d062882394a0f0b6db9b5faa1",
-  "c1_harness_n_files": 70,
+  "c1_harness_digest": "21d9591317459f1baa5c5ea9fed7e21f26e427be477e2f75d3438d34a841ab6d",
+  "c1_harness_n_files": 72,
   "counts": {
     "error": 0,
     "failed": 0,
-    "passed": 2802,
-    "skipped": 101
+    "passed": 2808,
+    "skipped": 114
   },
   "environment": {
     "artifact_hiding": "manifest-derived positive staged view: 28 files visible from the C1 SetupManifest, 1020 hidden as the computed complement. NOT the simulator's generic default.",
@@ -36,6 +36,7 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]",
     "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
+    "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
     "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
   ],
   "expected_renderer_parity_skips": [
@@ -93,6 +94,7 @@
       "tests/data/test_sessions.py::test_render_session_rejects_a_session_over_the_limit",
       "tests/data/test_sessions.py::test_render_session_round_trips_through_the_official_template",
       "tests/data/test_sessions.py::test_source_system_prompt_is_preserved_in_the_render",
+      "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store",
       "tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set",
       "tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set",
       "tests/evaluation/test_capability.py::test_every_frozen_answerability_pair_is_complete",
@@ -133,6 +135,16 @@
       "tests/pod/test_c1_driver_execution.py::test_the_decision_consumes_all_six_probes_and_the_real_rule",
       "tests/pod/test_c1_driver_execution.py::test_the_full_session_runs_b_through_i_in_order",
       "tests/pod/test_c1_driver_execution.py::test_the_session_writes_every_report_the_launcher_fetches",
+      "tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate",
+      "tests/pod/test_continuation_rehearsal.py::test_a_checkpoint_that_is_not_there_is_refused",
+      "tests/pod/test_continuation_rehearsal.py::test_a_control_binding_that_disagrees_is_refused",
+      "tests/pod/test_continuation_rehearsal.py::test_a_control_that_never_verified_cannot_be_imported",
+      "tests/pod/test_continuation_rehearsal.py::test_missing_material_evidence_is_refused_and_named",
+      "tests/pod/test_continuation_rehearsal.py::test_no_run_evidence_is_refused_in_strict_mode",
+      "tests/pod/test_continuation_rehearsal.py::test_run_evidence_that_reconstructs_a_different_protocol_is_refused",
+      "tests/pod/test_continuation_rehearsal.py::test_the_real_permanent_controls_import",
+      "tests/pod/test_continuation_rehearsal.py::test_two_copies_of_the_fingerprint_must_agree",
+      "tests/pod/test_continuation_rehearsal.py::test_wrong_imported_weights_hash_is_refused",
       "tests/pod/test_launcher_forwards_setup_env.py::test_forwarded_variables_have_a_launcher_side_default[autoinit_preflight_launch.py-autoinit_preflight_setup.sh]",
       "tests/pod/test_launcher_forwards_setup_env.py::test_launcher_forwards_every_variable_the_setup_reads[autoinit_preflight_launch.py-autoinit_preflight_setup.sh]",
       "tests/pod/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers[e3_launch.sh]",
@@ -141,8 +153,10 @@
       "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file[e2diag]",
       "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file[e2p1]",
       "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file[e8b]",
+      "tests/pod/test_reconstruct_training_events.py::test_it_reproduces_from_the_surviving_console_log",
       "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
       "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
+      "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
       "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
       "tests/pod/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without[autoinit_c1_launch-]",
       "tests/pod/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it[autoinit_continuation_launch-]",
@@ -163,8 +177,8 @@
     "counts": {
       "error": 0,
       "failed": 0,
-      "passed": 2802,
-      "skipped": 101
+      "passed": 2808,
+      "skipped": 114
     },
     "devbox_only_expected_skips": {
       "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible": "skipped",
@@ -187,11 +201,13 @@
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]",
       "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
+      "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
       "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
     ],
     "failed_nodeids": [],
     "host_local_c1_expected_skips": {
       "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": "skipped",
+      "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists": "skipped",
       "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off": "skipped"
     },
     "host_local_c1_skipped_as_expected": true,
@@ -206,7 +222,7 @@
       "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
     },
     "leaf_transport_all_passed": true,
-    "n_skipped": 101,
+    "n_skipped": 114,
     "problems": [],
     "renderer_parity_expected_skips": {
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
@@ -267,6 +283,7 @@
       "tests/data/test_sessions.py::test_render_session_rejects_a_session_over_the_limit": "teacher tokenizer not in local HF cache",
       "tests/data/test_sessions.py::test_render_session_round_trips_through_the_official_template": "teacher tokenizer not in local HF cache",
       "tests/data/test_sessions.py::test_source_system_prompt_is_preserved_in_the_render": "teacher tokenizer not in local HF cache",
+      "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store": "no out-of-tree store on this machine",
       "tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set": "frozen battery is a gitignored artifact; rebuild with scripts/data/build_capability_battery.py",
       "tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set": "frozen battery is a gitignored artifact; rebuild with scripts/data/build_capability_battery.py",
       "tests/evaluation/test_capability.py::test_every_frozen_answerability_pair_is_complete": "frozen battery is a gitignored artifact; rebuild with scripts/data/build_capability_battery.py",
@@ -307,6 +324,16 @@
       "tests/pod/test_c1_driver_execution.py::test_the_decision_consumes_all_six_probes_and_the_real_rule": "no retained generation summary to model the fake on",
       "tests/pod/test_c1_driver_execution.py::test_the_full_session_runs_b_through_i_in_order": "no retained generation summary to model the fake on",
       "tests/pod/test_c1_driver_execution.py::test_the_session_writes_every_report_the_launcher_fetches": "no retained generation summary to model the fake on",
+      "tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate": "no candidate authorization on this machine",
+      "tests/pod/test_continuation_rehearsal.py::test_a_checkpoint_that_is_not_there_is_refused": "the permanent controls are local artifacts, not tracked in git",
+      "tests/pod/test_continuation_rehearsal.py::test_a_control_binding_that_disagrees_is_refused": "the permanent controls are local artifacts, not tracked in git",
+      "tests/pod/test_continuation_rehearsal.py::test_a_control_that_never_verified_cannot_be_imported": "the permanent controls are local artifacts, not tracked in git",
+      "tests/pod/test_continuation_rehearsal.py::test_missing_material_evidence_is_refused_and_named": "the permanent controls are local artifacts, not tracked in git",
+      "tests/pod/test_continuation_rehearsal.py::test_no_run_evidence_is_refused_in_strict_mode": "the permanent controls are local artifacts, not tracked in git",
+      "tests/pod/test_continuation_rehearsal.py::test_run_evidence_that_reconstructs_a_different_protocol_is_refused": "the permanent controls are local artifacts, not tracked in git",
+      "tests/pod/test_continuation_rehearsal.py::test_the_real_permanent_controls_import": "the permanent controls are local artifacts, not tracked in git",
+      "tests/pod/test_continuation_rehearsal.py::test_two_copies_of_the_fingerprint_must_agree": "the permanent controls are local artifacts, not tracked in git",
+      "tests/pod/test_continuation_rehearsal.py::test_wrong_imported_weights_hash_is_refused": "the permanent controls are local artifacts, not tracked in git",
       "tests/pod/test_launcher_forwards_setup_env.py::test_forwarded_variables_have_a_launcher_side_default[autoinit_preflight_launch.py-autoinit_preflight_setup.sh]": "the shared setup's values come from a session manifest, checked above against the environment that is really built",
       "tests/pod/test_launcher_forwards_setup_env.py::test_launcher_forwards_every_variable_the_setup_reads[autoinit_preflight_launch.py-autoinit_preflight_setup.sh]": "checked against every session's manifest below, not against the one launcher the naming rule pairs it with",
       "tests/pod/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers[e3_launch.sh]": "frozen record: E3 complete 2026-08-06; checkpoints deleted 2026-08-09",
@@ -315,9 +342,11 @@
       "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file[e2diag]": "e2diag: fewer than two components reference a status file",
       "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file[e2p1]": "e2p1: fewer than two components reference a status file",
       "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file[e8b]": "e8b: fewer than two components reference a status file",
+      "tests/pod/test_reconstruct_training_events.py::test_it_reproduces_from_the_surviving_console_log": "E6b console log is not on this box",
       "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs": "the transport is verified; the empty branch is not live",
-      "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": "SESSION_KIND=c1: the retained Phase-A leaf store at /home/ecs-user/aad-artifacts/autoinit/phase_a is host-local and is NOT a declared C1 staged input. This case runs on the dev box and in the continuation context, where the store really exists.",
-      "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off": "SESSION_KIND=c1: the retained Phase-A leaf store at /home/ecs-user/aad-artifacts/autoinit/phase_a is host-local and is NOT a declared C1 staged input. This case runs on the dev box and in the continuation context, where the store really exists.",
+      "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": "SESSION_KIND=c1: the retained Phase-A leaf store at /home/ecs-user/aad-scratch/podsim_hidden.env/home/aad-artifacts/autoinit/phase_a is host-local and is NOT a declared C1 staged input. This case runs on the dev box and in the continuation context, where the store really exists.",
+      "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists": "the canonical leaves are not on this host",
+      "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off": "SESSION_KIND=c1: the retained Phase-A leaf store at /home/ecs-user/aad-scratch/podsim_hidden.env/home/aad-artifacts/autoinit/phase_a is host-local and is NOT a declared C1 staged input. This case runs on the dev box and in the continuation context, where the store really exists.",
       "tests/pod/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without[autoinit_c1_launch-]": "autoinit_c1_launch stages no loadable checkpoint from the canonical init",
       "tests/pod/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it[autoinit_continuation_launch-]": "autoinit_continuation_launch does not ask for ROPE_OK",
       "tests/pod/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it[autoinit_device_canary_launch-]": "autoinit_device_canary_launch does not ask for ROPE_OK",
@@ -326,7 +355,7 @@
       "tests/pod/test_setup_end_to_end.py::test_the_real_setup_runs_to_SETUP_DONE_and_the_launcher_reads_it": "the canonical checkpoint is not staged locally",
       "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init": "the baseline initialization is absent, so the validator exits 1 before it can produce a gated report"
     },
-    "skip_set_digest": "bf53c0697a8a387c2982e723f797ea7392ecab3418b8c21a454c20e2ed5b2849",
+    "skip_set_digest": "ee74f9e3dd305c5d09e68d06cf068bd62cc8266644a2384e4431aeca2ac4db37",
     "skip_set_is_forensic_not_scientific": "the complete skip list exists so a pod/sweep divergence can be NAMED. The total is not a target and carries no scientific content; only the named groups above express C1 expectations.",
     "unexpected_environment_skips": [],
     "verdict": "PASS"
@@ -372,9 +401,9 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught",
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory"
   ],
-  "n_tests": 2903,
-  "pod_test_environment_digest": "ba5782599aedd8dc8ae8d8787d6b68a5f5e9e5a2b401c8dfbc4182fe585863c9",
-  "pod_test_environment_n_files": 155,
+  "n_tests": 2922,
+  "pod_test_environment_digest": "3f32aee85c8360c70143887d25ae636d6c82f643a6906c41152338dff1ee1bf4",
+  "pod_test_environment_n_files": 156,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
     "scripts/autoinit/publish_selected_leaves.py",
@@ -388,13 +417,13 @@
   "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
   "renderer_parity_skipped_as_expected": true,
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 648.9,
-  "self_sha256": "55d1353056b2db7690f86369ab07c759c6a15472266cc3b85080b1574b9afa63",
+  "seconds": 664.9,
+  "self_sha256": "fe54328dc2947443c7967d9d3ec8bf6b2d2ac2d9b48ce3e7a22d5f98f85e22f1",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_132e7f6a.bundle",
+    "BUNDLE_NAME": "aad_autoinit_577c5cdc.bundle",
     "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
     "SESSION_AUTH_PATH": "logs/autoinit_c1_authorization.json",
-    "SESSION_COMMIT": "132e7f6af172be712f5c155d8134b6736d684131",
+    "SESSION_COMMIT": "577c5cdcec5d59ac2249b86410de572ae7e3d597",
     "SESSION_KIND": "c1",
     "SESSION_PLAN_HASH": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
     "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
@@ -438,8 +467,8 @@
   },
   "staging_contract_digest": "9ef2356ee80752978ca7dba78956383051135ea0a4cf23fa4b32abcb6269a9ab",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "132e7f6af172be712f5c155d8134b6736d684131",
-  "tree_clean": true,
+  "swept_base_commit": "577c5cdcec5d59ac2249b86410de572ae7e3d597",
+  "tree_clean": false,
   "unexpected_environment_skips": [],
   "verdict": "PASS"
 }

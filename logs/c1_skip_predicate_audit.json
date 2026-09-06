@@ -101,8 +101,8 @@
  },
  "strict_cpu_test_parity_ready": "PASS",
  "parity_by_resolution": {
+  "absent_on_both": 9,
   "guaranteed_dependency": 9,
-  "hidden_in_both": 9,
   "normalized_by_contract": 29,
   "same_on_pod": 50
  },
@@ -404,8 +404,8 @@
    "nodeid": "tests/autoinit/test_frozen_records.py",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage1/qwen3_0p6b_init_v0/manifest.json']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage1/qwen3_0p6b_init_v0/manifest.json']"
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
@@ -420,8 +420,8 @@
    "nodeid": "tests/autoinit/test_frozen_records.py",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage1/e8_depth_search']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage1/e8_depth_search']"
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
@@ -436,8 +436,8 @@
    "nodeid": "tests/autoinit/test_frozen_records.py",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage1/e8_depth_search']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage1/e8_depth_search']"
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
@@ -452,8 +452,8 @@
    "nodeid": "tests/autoinit/test_frozen_records.py",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage1/e8_depth_search']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage1/e8_depth_search']"
   },
   {
    "file": "tests/autoinit/test_leaf_durability.py",
@@ -772,8 +772,8 @@
    "nodeid": "tests/data/test_e7_streams.py",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage3/e7_fineweb_kd']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage3/e7_fineweb_kd']"
   },
   {
    "file": "tests/data/test_sessions.py",
@@ -836,8 +836,8 @@
    "nodeid": "tests/evaluation/test_capability.py",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/eval/battery_v2']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/eval/battery_v2']"
   },
   {
    "file": "tests/evaluation/test_e6_analysis.py",
@@ -852,8 +852,8 @@
    "nodeid": "tests/evaluation/test_e6_analysis.py",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/audit/three_mode', 'artifacts/stage3/corpus_v2/sessions.jsonl']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/audit/three_mode', 'artifacts/stage3/corpus_v2/sessions.jsonl']"
   },
   {
    "file": "tests/evaluation/test_e6_registration.py",
@@ -884,8 +884,8 @@
    "nodeid": "tests/evaluation/test_e6_registration.py",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/audit/three_mode']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/audit/three_mode']"
   },
   {
    "file": "tests/evaluation/test_e8b_behaviour_analysis.py",
@@ -964,8 +964,8 @@
    "nodeid": "tests/evaluation/test_strict_answer.py::test_gold_target_is_the_rendered_span_not_the_content_field",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "hidden_in_both",
-   "parity_why": "a gitignored repo artifact the simulator moves aside and the pod never receives: ['artifacts/stage3/corpus_v2/sessions.jsonl']"
+   "parity": "absent_on_both",
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage3/corpus_v2/sessions.jsonl']"
   },
   {
    "file": "tests/models/test_tokenizer_contract.py",
@@ -1282,7 +1282,7 @@
    "verdict": "unknown",
    "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
-   "readiness_group": null,
+   "readiness_group": "host_local_c1",
    "registered_as": "devbox_only_artifact",
    "parity": "normalized_by_contract",
    "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
@@ -1767,5 +1767,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "509ee507ad321ba9647c270f5e53d528772d9770d89eeff183f9a9f068f04024"
+ "digest": "4d182a8a44f9df992ee7ea36a29e8dd62e5d0ea0e02b69a05259e9a3b2099abb"
 }

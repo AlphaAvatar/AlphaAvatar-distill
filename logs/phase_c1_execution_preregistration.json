@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "216c87331aef67488042861fc7b59fb283990be8",
+ "head_commit": "577c5cdcec5d59ac2249b86410de572ae7e3d597",
  "executable_source": {
   "digest": "7c5a9856f90e79c18382bf3a4a58b2fb647b62ac83be5bdbf3f7e6643d981795",
   "files": [
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "4b100f709389562bfe4864fb96e7df02f2b7ee1d66fba6f418e81fa01353c26c",
+  "digest": "21d9591317459f1baa5c5ea9fed7e21f26e427be477e2f75d3438d34a841ab6d",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -290,8 +290,8 @@
    },
    {
     "path": "src/aadistill/autoinit/pod_environment.py",
-    "sha256": "9c1581d5079e5971a3ed0ed0449db9f3f3ecc16906be73111a505d3d6a869ee9",
-    "bytes": 32744
+    "sha256": "0f6faccf1052c10f7b6796a1be1952ff85f9e255088c4a64b2503733e55d7997",
+    "bytes": 33354
    },
    {
     "path": "src/aadistill/autoinit/recovery.py",
@@ -927,5 +927,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "94f637530cb2001e5bc6da7f2eb64ccdf100fe2903f963ed9c58dacb4d4b3c3e"
+ "preregistration_sha256": "b4a74f8f7c341eb4bacb25d3e34f16135258f05d5485879cc4aa09428a2a3071"
 }

@@ -410,34 +410,40 @@ def dependency_parity(condition: str) -> tuple[str, str] | None:
 CLASS_PARITY: dict | None = None
 
 
-def path_parity(p: dict, hidden: set[str]) -> tuple[str, str] | None:
+def path_parity(p: dict, tracked: set[str], staged: set[str]) -> tuple[str, str] | None:
     """Resolve a PATH premise by mechanism, computed rather than asserted.
 
     Two mechanisms make both machines decide a host-local path the same way:
 
     * it is located through `$HOME`, which the contract points at a fresh empty
       directory on both;
-    * it is a gitignored repo path the simulator HIDES and the pod never
-      receives, so it is absent in both.
+    * it is a repo path that neither the bundle nor the manifest puts on a pod,
+      and that the simulator therefore hides here too.
+
+    Derived from the git index and the SetupManifest, NEVER from what happens to
+    be on this disk. A first draft asked the live hidden set, which made this
+    record's digest depend on the machine: inside the simulation the artifacts
+    are already moved aside, the hidden set is empty, and the audit produced a
+    different digest than it had on the bare dev box.
 
     Anything else is a real directional difference and stays UNRESOLVED.
     """
     text = p["expanded"]
-    if "Path.home()" in text or "home_local_store" in text:
+    if "Path.home()" in text or "host_local_store" in text:
         return ("normalized_by_contract",
                 "located through $HOME, which the CPU-test contract points at a "
                 "fresh empty directory on both machines")
     paths = set(PATH_LITERAL.findall(text))
     inspected = [q for q in paths if q.startswith("artifacts/")]
-    if inspected and all(any(h == q or h.startswith(q.rstrip("/") + "/")
-                             for h in hidden) for q in inspected):
-        return ("hidden_in_both",
-                "a gitignored repo artifact the simulator moves aside and the "
-                f"pod never receives: {sorted(inspected)[:3]}")
+    if inspected and all(not _reaches_pod(q, tracked, staged) for q in inspected):
+        return ("absent_on_both",
+                "neither tracked nor staged, so a pod never receives it and the "
+                f"simulator hides it here: {sorted(inspected)[:3]}")
     return None
 
 
-def parity_of(p: dict, registered: dict, hidden: set[str]) -> tuple[str, str]:
+def parity_of(p: dict, registered: dict, tracked: set[str],
+              staged: set[str]) -> tuple[str, str]:
     """(resolution, evidence) for one predicate under the CPU-test contract."""
     entry = registered.get(p["nodeid"]) or {}
     if p["signal"] == "simulator_marker":
@@ -455,7 +461,7 @@ def parity_of(p: dict, registered: dict, hidden: set[str]) -> tuple[str, str]:
         return PARITY_BY_SIGNAL[p["signal"]]
     if p["verdict"] == "same_on_pod":
         return "same_on_pod", p["why"]
-    computed = path_parity(p, hidden)
+    computed = path_parity(p, tracked, staged)
     if computed:
         return computed
     if entry.get("parity"):
@@ -511,14 +517,8 @@ def audit(repo: Path = REPO) -> dict:
     stale = sorted(k for k in registered if k not in live_keys)
 
     from aadistill.autoinit import cpu_test_env as cte
-    from aadistill.autoinit import staging_contract as sc
-    from session_specs import load_session_launcher, session_args
-    _mod = load_session_launcher("autoinit_c1_launch")
-    _contract = sc.derive_contract(_mod.spec(session_args(_mod)).setup,
-                                   session_id="autoinit-c1")
-    hidden = set(sc.hidden_files(_contract, repo))
     for p in predicates:
-        p["parity"], p["parity_why"] = parity_of(p, registered, hidden)
+        p["parity"], p["parity_why"] = parity_of(p, registered, tracked, staged)
     parity_unresolved = sorted(
         {(p["nodeid"], p["signal"], p["parity_why"][:120])
          for p in predicates if p["parity"] in ("UNRESOLVED", "REFUSED")})

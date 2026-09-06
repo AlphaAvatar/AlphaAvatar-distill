@@ -958,8 +958,8 @@ def test_the_c1_readiness_owned_skip_set_is_exact():
     assert len(pe.RENDERER_PARITY_NODEIDS) == 7
     assert len(pe.BATTERY_SOURCE_NODEIDS) == 3
     assert len(pe.DEVBOX_ONLY_NODEIDS) == 3
-    assert len(pe.HOST_LOCAL_C1_NODEIDS) == 2
-    assert len(expected) == 15
+    assert len(pe.HOST_LOCAL_C1_NODEIDS) == 3
+    assert len(expected) == 16
     assert pe.BATTERY_STAGED_ROLE_NODEID not in expected
     findings = pe.evaluate_sweep(_outcomes())
     assert findings["expected_environment_skips"] == sorted(expected)
