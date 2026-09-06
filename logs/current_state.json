@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-06T17:30:00Z",
+ "generated_utc": "2026-09-07T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -26,7 +26,7 @@
  "prepared_launch": {
   "any": false,
   "bundles": 1,
-  "note": "aad_autoinit_79c18adb.bundle 2d1865ae7973 remains on the relay from the consumed attempt 5; it authorizes nothing."
+  "note": "aad_autoinit_3f553c33.bundle f31736b3bd14 remains on the relay from the consumed attempt 8; it authorizes nothing and its commit is already superseded."
  },
  "budget": {
   "cumulative_spend_usd": 266.8158,
@@ -61,7 +61,7 @@
   "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
  },
  "latest_verification": {
-  "utc": "2026-09-06T16:18:23Z",
+  "utc": "2026-09-07T00:00:00Z",
   "owned_by": "logs/c1_pod_environment_verification.json",
   "owns": "record_kind, swept_base_commit, staging-contract digest, setup environment, counts, both digests and verdict. Read them THERE.",
   "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
@@ -74,8 +74,8 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt 8 started the driver; stage D crashed on the depth-operator item contract.",
-  "the_ask": "reviewer decision on which side of the input_ids item contract is wrong.",
+  "status": "Attempt 8's stage-D crash is repaired at $0 and the executable identity rebound. C1 remains SCIENTIFICALLY UNMEASURED: no completed replay, no training, no evaluation, no decision.",
+  "the_ask": "scientific review of the calibration-boundary and root-device repair.",
   "budget": "$266.8158 spent of the unchanged $283.7600 cap; $16.9442 uncommitted."
  },
  "read_order": [
@@ -126,20 +126,20 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / NINE PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-8 grant CONSUMED, stage D crashed",
+   "status": "IMPLEMENTED / NINE PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt-8 grant CONSUMED; the stage-D crash is REPAIRED at $0 and UNMEASURED on hardware",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered; margin in phase_b_result.",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json 1cdc49f3e847 at head_commit 5a57fd5a; harness 85329e7e701b over 72 files; 12 pre-provider gates",
+   "execution_prereg": "logs/phase_c1_execution_preregistration.json a7ba9bbcc764 at head_commit 208b2865; harness d342b499238d over 73 files; 12 pre-provider gates",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (derived from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
-   "attempts": "NINE LABELS: 1, 2, 3, 3R, 4, 5, 6, 7, 8 -- EIGHT created a paid provider resource, attempt 3 created none ($0.00). $2.9561 spent, ZERO science. Attempt 8 is the FIRST whose driver executed a stage.",
+   "attempts": "NINE LABELS: 1, 2, 3, 3R, 4, 5, 6, 7, 8 -- EIGHT created a paid provider resource, attempt 3 created none ($0.00). $2.9561 spent, ZERO science. Attempt 8 is the first whose driver ran a stage.",
    "gates": "12 pre-provider gates. Detail: STATE.md, decisions.md 2026-09-04.",
-   "blocker": "Attempt 8 passed setup and the CPU gate, started the driver, passed stages B (teacher verify) and C (operator register), then stage D raised KeyError: 'input_ids' at operators/depth.py:176 via materialize_fixed_path -> depth.apply, after 398 shards loaded. NOT a replay digest mismatch -- no digest was compared, and the launcher's canned summary line saying otherwise is corrected in logs/autoinit_c1_attempt8/failure.json. Open: whether calibration items lack input_ids on this path, or depth.apply reads a key its supplier never promised. UNREPAIRED.",
-   "needs": "a reviewer decision. The grant, the authorization and the launch attempt are all consumed.",
+   "blocker": "REPAIRED AT $0, UNMEASURED ON HARDWARE. Attempt 8's KeyError: 'input_ids' is CONFIRMED as a lost preparation boundary -- frozen mixtures store tokens under 'ids', operators read 'input_ids', and the conversion lived only in a Phase-A script; calibration_items.py is now the one boundary. Second defect: stage D's root loaded on CPU under a cuda declaration. NOT a replay mismatch: no digest was compared. See STATE.md.",
+   "needs": "scientific review of the $0 repair, then a maintainer decision on a ninth attempt. Grant, authorization and attempt are consumed.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network and have not run locally",
-   "evidence": "logs/autoinit_c1_attempt8/ (failure.json and c1_evidence.json with the full traceback)",
-   "readiness": "logs/c1_skip_predicate_audit.json PASS. The committed pod-environment record is CONSUMED by attempt 7; a new sweep is owed before any launch."
+   "evidence": "logs/autoinit_c1_attempt8/; the repair is commits 208b2865..",
+   "readiness": "logs/c1_skip_predicate_audit.json PASS. The pod-environment record is DIAGNOSTIC on the repaired tree; a launch_bound sweep is owed before any launch."
   },
   "c2": {
    "status": "NOT STARTED",

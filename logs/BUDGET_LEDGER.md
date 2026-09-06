@@ -1803,7 +1803,23 @@ false claim about the frozen path's reproducibility into the record, for exactly
 the property C1 exists to test. The driver's own `c1_evidence.json` carries the
 truth, which is why it is the artifact and the launcher line is not.
 
-What remains open is which side of the item contract is wrong: whether the
-calibration items are built without `input_ids` on this path, or `depth.apply`
-reads a key its supplier never promised. That is a `$0` question and this entry
-does not answer it.
+**That open question is now ANSWERED, at `$0` and with no pod (2026-09-07).**
+Neither side "reads a key its supplier never promised": the supplier and the
+consumer were correct and the **boundary between them was missing from this
+path**. A materialized mixture stores tokens under `ids` — the form the pinned
+`d65c1f40…` content identity is defined over — and every calibrated operator
+reads `input_ids`. The conversion existed only in
+`scripts/autoinit/phase_a_search.as_operator_items`, a *script*, so the search
+had it and `fixed_path` did not. `src/aadistill/autoinit/calibration_items.py`
+is now the single boundary.
+
+A **second** defect was found beside it and would have cost the rest of the
+ceiling rather than aborting: stage D declared `cuda` and loaded its root with a
+bare `AutoModelForCausalLM.from_pretrained(...).eval()`, no transfer, so the
+whole parent replay would have run on the host CPU inside a paid GPU hour.
+
+**No money was spent answering this.** `$0.0000`, no pod, no grant, no
+authorization. Cumulative stays **`$266.8158`** of `$283.7600`, `$16.9442`
+uncommitted. The repair is **unmeasured on hardware** and C1 remains
+scientifically unmeasured: no completed replay, no training, no evaluation, no
+decision.

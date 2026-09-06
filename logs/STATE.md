@@ -1,5 +1,83 @@
-**Updated:** 2026-09-06 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
+**Updated:** 2026-09-07 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
+PHASE C1 STAGE-D CONTRACT REPAIRED AT `$0` — STILL NEVER MEASURED**
+
+> **Attempt-8 stage-D repair, 2026-09-07 — `$0.0000`, no pod, no grant, no
+> authorization.** Three defects closed, none scientific. **C1 is still
+> SCIENTIFICALLY UNMEASURED**: no completed parent replay, no incumbent replay,
+> no recovery training, no confirmation generation, no `correct_overall`, no
+> `usable_rollout`, no Stage-I decision. Nothing here is ATTENTION evidence.
+>
+> **1. The calibration preparation boundary was missing from the fixed path.**
+> Confirmed from source, not assumed. A materialized mixture stores each item's
+> tokens under **`ids`** — that is what `mixture_content_sha256` hashes and what
+> the pinned `d65c1f40…` identity is defined over — while `depth.py:176`,
+> `ffn.py:85`, `width.py:96` and `attention_activation.py:177` all read
+> `item["input_ids"]`. The conversion existed only in
+> `scripts/autoinit/phase_a_search.as_operator_items`, a **script**, so the
+> search had it and `fixed_path` did not.
+>
+> [`calibration_items.py`](../src/aadistill/autoinit/calibration_items.py) is now
+> the single boundary, and `materialize_fixed_path` runs **both**
+> profile-resolved and caller-supplied items through it — so no operator gets an
+> `ids` fallback of its own, and a caller cannot route around the contract by
+> passing items itself. Raw metadata and raw `ids` are preserved untouched; only
+> `input_ids` is added. An item carrying both must agree token for token.
+>
+> **No frozen calibration asset was modified.** `resolve()` still returns raw
+> evidence, asserted directly against both real mixtures, and neither items file,
+> manifest, profile hash, content hash nor token sequence moved.
+> `as_operator_items` is inside three CLOSED preregistrations and is therefore
+> **not** edited to remove the duplication; a test requires the two to agree
+> token for token on the real mixture instead, and fails at `$0` if they drift.
+>
+> **2. Stage D's root was loaded on the CPU under a `cuda` declaration.** Found
+> by auditing beside the first defect. `build_arm_specs(workdir_device="cuda")`
+> declares the device, and the loader was a bare
+> `AutoModelForCausalLM.from_pretrained(...).eval()` with no transfer — while
+> `depth.apply` reads `model_device(model)`, the fact rather than the intent. The
+> entire parent replay would have executed on the host CPU inside a paid GPU
+> hour, and nothing would have said so. Both roots now load through the adapter
+> that already owns path/dtype/device, on their own arm's declared device (stage
+> F's second literal `"cuda"` is derived too), and `materialize_fixed_path`
+> refuses a root that is not on `spec.device` **before the first operator runs**,
+> reading weights rather than `ctx.device`.
+>
+> **3. The launcher narrated a replay mismatch it had not observed.**
+> `SessionRunner` prints `failure_note` for **any** marker in `markers.failure`;
+> it is one constant string chosen before the run. On attempt 8 it announced that
+> the frozen path *"did not reproduce its recorded digest"* against a `KeyError`,
+> when nothing had been compared — a false claim about exactly the property C1
+> exists to test. The note is now neutral. The explicit path is untouched:
+> `C1Driver.replay_mismatch` writes the evidence, reads it back, and only then
+> emits `MARKER:C1_REPLAY_MISMATCH`, and it remains the **only** emitter.
+>
+> **Why no `$0` gate caught any of it.** Every `test_fixed_path` case passes
+> `calibration_items=`; `conftest.make_items()` builds items already carrying
+> `input_ids`; `test_c1_driver_execution` monkeypatches `stage_de` whole. The
+> resolve-a-real-profile branch and both root loaders had **never executed**. The
+> new tests refuse the override, build a REAL materialized profile from temporary
+> JSONL through the production hash rules, and run DEPTH → FFN → WIDTH →
+> ATTENTION on a tiny Qwen model — recording from inside `execute` what the
+> operators actually received. **43 new cases; nine mutations of the production
+> lines were each confirmed to turn them red**, including restoring attempt 8's
+> exact launcher sentence and re-inserting the raw-items line, which reproduces
+> `KeyError: 'input_ids'` verbatim.
+>
+> **Both expected replay digests are unchanged and deliberately not
+> "repaired".** The working runtime has never materialized this path. If it now
+> produces a different digest, that is a REAL mismatch and must stop before
+> training; pre-adjusting an expected value to match new code is the one edit
+> that would make the gate meaningless.
+>
+> **Frozen science did not move.** Only the C1 harness: `85329e7e701b…` →
+> `d342b499238d…`, 72 → 73 files. By set, the delta is exactly the five files
+> touched — one added, four changed, none removed. Phase A, Phase B and
+> continuation-B source sets contain none of them, so **no post-freeze
+> declaration is owed**. The preregistration was rewritten for executable
+> identity only (`1cdc49f3e847` → `a7ba9bbcc764`): a field-level diff shows
+> **scientific fields moved = 0**, with the C0 protocol, session contract, both
+> path hashes, arms, seeds, ATTENTION definition, recovery recipe, both replay
+> digests, battery, generation protocol, scoring and decision rule byte-identical.
 
 > **CPU-test parity, 2026-09-06 — `$0.0000`, no pod, no grant.** The strict
 > skip-set comparison added after attempt 5 was correct machinery pointed at two
@@ -323,12 +401,12 @@ PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
 # Current state
 
 > **NOT CURRENTLY AUTHORIZED. Nothing is running, no pod exists, and no grant is
-> live.** The Attempt-5 grant and its authorization are CONSUMED — a provider
-> resource was created — and permit no retry. Spend is `$265.4014` of
-> `$283.7600`, leaving `$18.3586`: one full `$15.1475` ceiling still fits, with
-> `$3.2111` after it, **which is not authorization for another attempt.** A
-> sixth attempt needs a new maintainer decision, and the skip-guard defect above
-> is unrepaired.
+> live.** The Attempt-8 grant and its authorization are CONSUMED — pod
+> `fbuggw0x9efqsz` was created — and permit no retry and no replacement pod.
+> Spend is `$266.8158` of `$283.7600`, leaving `$16.9442`: one full `$15.1475`
+> ceiling still fits, with about `$1.80` after it, **which is not authorization
+> for another attempt.** A ninth attempt needs a new maintainer decision. The
+> stage-D defects above are repaired at `$0` and **unmeasured on hardware**.
 
 
 The **human view of [`current_state.json`](current_state.json)**. That file owns
@@ -336,10 +414,11 @@ the live facts; this one says the same things in prose and adds nothing it does
 not carry. If the two disagree, a structural test fails.
 
 **Nothing is running. Nothing is billing. No pod exists. Nothing is authorized.**
-Pod `pj3c870n6yx70z` was created at `$1.09/h`, ran 18.85 min, and was deleted;
-the provider confirms it is gone. That creation **consumed** the Attempt-3R
-authorization `9b562e0a…`, so **nothing is prepared for launch** and a further C1 attempt needs a new maintainer grant.
-Spend is `$265.0864` of the `$283.7600` cap, `$18.6736` remaining.
+Pod `fbuggw0x9efqsz` was created at `$1.09/h`, ran 34.39 min, and was deleted;
+the provider confirms it is gone. That creation **consumed** the Attempt-8
+authorization, so **nothing is prepared for launch** and a further C1 attempt
+needs a new maintainer grant. Spend is `$266.8158` of the `$283.7600` cap,
+`$16.9442` remaining.
 
 C1 was repriced to the secure L40S rate the launcher actually pays — `$1.09/h`,
 `securePrice`, not the `$0.79` `communityPrice` I once misreported — with every
@@ -351,14 +430,19 @@ minute assumption unchanged. Attempt 3, priced at `$0.99/h`, is
 | Phase A | **COMPLETE / FROZEN** |
 | Phase B | **COMPLETE / RESOLVED / FROZEN** |
 | Phase C0 | **COMPLETE / APPROVED / FROZEN** |
-| Phase C1 | **IMPLEMENTED / REPRICED / FOUR LAUNCH ATTEMPTS / NEVER MEASURED** |
+| Phase C1 | **IMPLEMENTED / REPRICED / NINE LAUNCH-ATTEMPT LABELS / NEVER MEASURED** |
 | Phase C2 | **NOT STARTED** |
 | formal recovery evidence | **NONE** |
 
 **Phase C1 is REPRICED and has now consumed compute — but still no science.**
 Floor **$13.4401** · soft stop **$14.7841** · one-attempt ceiling **$15.1475** at
-the secure `$1.09/h`, against **$18.6736** headroom: one more full attempt
-fits, by about `$3.53`. **Headroom is not permission: no grant exists.**
+the secure `$1.09/h`, against **$16.9442** headroom: one more full attempt
+fits, by about `$1.80`. **Headroom is not permission: no grant exists.**
+
+> The attempt table immediately below covers labels 1–4 and is kept as written.
+> Labels 5, 6, 7 and 8 are recorded in the blockquotes at the top of this file
+> and in [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md); C1 infrastructure spend across
+> all eight paid labels is **`$2.9561`**, still for **zero scientific stages**.
 
 Five attempt labels — 1, 2, 3, 3R, 4 — of which **four created paid provider
 resources**; attempt 3 created none and cost `$0.00`. `$1.2267` of C1
@@ -647,7 +731,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `c5a19b6bd4e0c50d…` at `head_commit 9bb2650` · harness `8b4dd4c0a00b…` over 69 files · every earlier revision moved only executable identity; no scientific field has ever moved |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `a7ba9bbcc764…` at `head_commit 208b2865` · harness `d342b499238d…` over 73 files · every revision so far moved only executable identity; **no scientific field has ever moved**, and the 2026-09-07 rewrite was diffed field by field to show it |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |
