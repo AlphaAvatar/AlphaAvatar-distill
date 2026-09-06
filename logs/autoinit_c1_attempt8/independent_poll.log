@@ -1,0 +1,4 @@
+2026-09-06T16:37:52Z | fbuggw0x9efqsz RUNNING $1.09/h up=27s | [16:37:51] draw 1: ssh reachable — $0.01
+2026-09-06T16:47:54Z | fbuggw0x9efqsz RUNNING $1.09/h up=627s | [16:39:50] draw 1: running setup
+2026-09-06T16:57:55Z | fbuggw0x9efqsz RUNNING $1.09/h up=1227s | [16:39:50] draw 1: running setup
+2026-09-06T17:07:57Z | fbuggw0x9efqsz RUNNING $1.09/h up=1827s | [17:06:24] driver detached, pid 12676, confirmed by descriptor_probe — $0.53

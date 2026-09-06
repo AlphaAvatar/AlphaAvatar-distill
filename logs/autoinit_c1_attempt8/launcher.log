@@ -1,0 +1,35 @@
+[16:36:56] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[16:36:56] NVIDIA L40S $1.09/h, stock Low
+[16:36:56] session commit 3f553c3383c8 verified: harness digests to 85329e7e701b…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[16:36:56] C1 harness 85329e7e701b… over 72 files
+[16:36:56] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[16:36:56] preregistration 1cdc49f3e847… (self-hash verified), harness 85329e7e701b…
+[16:36:56] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[16:36:56] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[16:36:56] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[16:36:56] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[16:36:58] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[16:37:00] aad_autoinit_3f553c33.bundle (7864114 bytes, f31736b3bd14…) round-trips to 3f553c3383c8… carrying this authorization and harness 85329e7e701b…
+[16:37:03] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[16:37:03] pod sweep 2825 passed / 114 skipped / 0 failed, 7 renderer skips, leaf transport 5/5, binds harness 85329e7e701b… and environment 647a6e40fc09…, staging contract 9ef2356ee807…, swept at 79d4b925 with only ['logs/autoinit_c1_authorization.json', 'logs/c1_pod_environment_verification.json'] differs from the swept base
+[16:37:04] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[16:37:05] created fbuggw0x9efqsz at $1.09/h
+[16:37:05] watchdog detached — hard 834 min = $15.15
+[16:37:48] TCP 22 at 82.221.170.242:37113 after 0.7 min
+[16:37:51] draw 1: ssh reachable — $0.01
+[16:39:50] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[16:39:50] draw 1: running setup
+[17:06:19] draw 1: setup complete — $0.53
+[17:06:24] driver detached, pid 12676, confirmed by descriptor_probe — $0.53
+[17:08:35]   2026-09-06T17:06:41Z MARKER:C1_FAILED — $0.57
+[17:08:35] a blocking stage failed — collecting evidence, then tearing down. C1_REPLAY_MISMATCH is the scientific stop: the frozen path did not reproduce its recorded digest, no recovery training was started, and the mismatch evidence is the session's product.
+[17:08:35] polling ended: C1_FAILED — $0.57
+[17:10:09]   manifest rc=0
+5 file(s) across 3 class(es) -> /workspace/manifest.json
+  final_required: 5 · mutable_snapshot: 0 · final_streams_quiescent: True
+[17:10:40] teardown gate: allowed=True failed=training_complete
+[17:10:40] deleting pod (gate passed after C1_FAILED)
+[17:10:51] pod deleted — 33.8 min, $0.61; provider confirms gone: True
+
+autoinit-c1 INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search.
+LAUNCHER_EXIT=11

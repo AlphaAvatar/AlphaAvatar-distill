@@ -35,7 +35,39 @@ PHASE C1 CPU-TEST PARITY REPAIRED AT `$0` — STILL NEVER MEASURED**
 > an L40S. A CPU dev box cannot prove it. The contract is applied and the
 > decision is proven stable here; the GPU half is first exercised on the next pod.
 
-> **Attempt-8 grant APPROVED, 2026-09-06 — not yet issued, nothing running.**
+> **Attempt 8, 2026-09-06 — the driver RAN; stage D crashed.** Pod
+> `fbuggw0x9efqsz`, created at `$1.09/h`, deleted at 34.39 min for **`$0.6248`**,
+> provider confirms gone. Cumulative **`$266.8158`** of `$283.7600`, leaving
+> `$16.9442`. **No scientific stage completed — no finished replay, no training,
+> no evaluation, no decision.**
+>
+> **The first C1 attempt whose driver executed a stage.** The CLI-seam repair
+> held: `MARKER:DRIVER_START` fired, **stage B passed** (teacher
+> `768f209d9ea8`, 3 shards) and **stage C passed** (registered
+> `attention.activation_importance_v1` `1171f3b791e2`). The CPU gate passed again
+> at 1352 s with the strict skip-set comparison silent — a second consecutive
+> exact sweep/pod agreement.
+>
+> **Then stage D crashed**, with a full traceback preserved:
+> `KeyError: 'input_ids'` at `operators/depth.py:176`, reached through
+> `stage_de` → `materialize_fixed_path` → `depth.apply`, after 398 weight shards
+> had loaded.
+>
+> **The launcher's own summary line is WRONG and is corrected in the record.** It
+> printed *"C1_REPLAY_MISMATCH … the frozen path did not reproduce its recorded
+> digest"* — a canned sentence it emits for any blocking-stage failure. **No
+> digest was compared.** The stage raised before any replay digest could be
+> computed, so the frozen parent path has neither reproduced nor failed to
+> reproduce its recorded value. Recording a mismatch would put a false claim
+> about reproducibility into the record for exactly the property C1 exists to
+> test. The driver's own `c1_evidence.json` is the artifact; the launcher line is
+> not.
+>
+> **Open, and not answered here:** whether the calibration items are built
+> without `input_ids` on this path, or `depth.apply` reads a key its supplier
+> never promised.
+
+> **Attempt-8 grant CONSUMED, 2026-09-06 — a provider resource was created.**
 > A NEW one-use grant ([`autoinit_c1_attempt8_grant.json`](autoinit_c1_attempt8_grant.json)).
 > Attempt 7's grant and authorization remain CONSUMED and are not reused.
 > Spend stays `$266.1910` of `$283.7600` with `$17.5690` uncommitted; one

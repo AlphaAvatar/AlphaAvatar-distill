@@ -1761,3 +1761,49 @@ seam was left without the equivalent.
 The failure-detail capture added after attempt 6 is what made this diagnosable in
 minutes: the driver's stderr came home in `relay/autoinit_c1_run.log`. Nothing is
 repaired here.
+
+---
+
+## 2026-09-06 — C1 attempt 8: the driver ran, and stage D crashed, `$0.6248`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 8: launch-bound readiness, 12/12 gates, 34.39 min, **INFRASTRUCTURE ABORT inside stage D**. No completed replay, no training, no evaluation, no decision | $0.6248 | `logs/autoinit_c1_attempt8/` |
+
+**Cumulative: $266.8158 of $283.7600.** `$16.9442` uncommitted. The attempt-8
+grant is CONSUMED — pod `fbuggw0x9efqsz` was created — and it permits no retry
+and no replacement pod.
+
+**The first C1 attempt whose DRIVER executed a stage.** Attempt 7 reached
+`SETUP_DONE` and died at the driver's argument parse; the CLI-seam repair held,
+`MARKER:DRIVER_START` fired, and stages B and C passed: the teacher verified at
+`768f209d9ea8` with 3 shards, and `attention.activation_importance_v1`
+(`1171f3b791e2`) registered against scorer `77507935f21f83eb` and battery
+`a285d61f88de`. The CPU gate passed again at 1352 s with the strict skip-set
+comparison silent — a second consecutive exact sweep/pod agreement.
+
+**Then stage D crashed.** Root cause CONFIRMED with a full traceback:
+
+```
+src/aadistill/autoinit/operators/depth.py:176
+    targets = [item["input_ids"][0, 1:].to(compute) for item in items]
+KeyError: 'input_ids'
+```
+
+reached through `stage_de` → `materialize_fixed_path` → `impl.execute` →
+`depth.apply`, after 398 weight shards had loaded.
+
+**The launcher's own summary line is wrong, and this matters.** It printed
+*"C1_REPLAY_MISMATCH is the scientific stop: the frozen path did not reproduce
+its recorded digest"* — a canned sentence it emits for any blocking-stage
+failure. **No digest was compared.** The stage raised before any replay digest
+could be computed, so the frozen parent path has neither reproduced nor failed
+to reproduce its recorded value. Recording a replay mismatch here would put a
+false claim about the frozen path's reproducibility into the record, for exactly
+the property C1 exists to test. The driver's own `c1_evidence.json` carries the
+truth, which is why it is the artifact and the launcher line is not.
+
+What remains open is which side of the item contract is wrong: whether the
+calibration items are built without `input_ids` on this path, or `depth.apply`
+reads a key its supplier never promised. That is a `$0` question and this entry
+does not answer it.

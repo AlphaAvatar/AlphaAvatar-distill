@@ -1,0 +1,109 @@
+{
+  "schema": "aadistill.autoinit.c1_attempt_failure/v1",
+  "attempt": 8,
+  "pod_id": "fbuggw0x9efqsz",
+  "session_commit": "3f553c3383c872a9e5e16ad54ae25caee5804329",
+  "_what_this_is": "the first C1 attempt whose DRIVER ran. It reached stage D and crashed there. This record exists partly to correct the launcher's own summary line, which is wrong.",
+
+  "correction_to_the_launcher_message": {
+    "what_the_launcher_printed": "a blocking stage failed — collecting evidence, then tearing down. C1_REPLAY_MISMATCH is the scientific stop: the frozen path did not reproduce its recorded digest, no recovery training was started, and the mismatch evidence is the session's product.",
+    "why_that_is_WRONG": "no digest was compared. Stage D raised KeyError: 'input_ids' inside materialize_fixed_path, BEFORE any replay digest could be computed or checked. The launcher prints one canned sentence for any blocking-stage failure and it names the scientific stop it was designed to expect.",
+    "the_correct_reading": "this is an INFRASTRUCTURE ABORT inside the replay stage, not a scientific replay mismatch. The frozen parent path was never replayed to completion, so it has neither reproduced nor failed to reproduce its recorded digest.",
+    "consequence_if_believed": "recording a replay MISMATCH would be a scientific claim about the frozen path's reproducibility that this run does not support, and would put a false result into the record for the one thing C1 exists to test."
+  },
+
+  "root_cause": {
+    "status": "CONFIRMED — full traceback preserved in c1_evidence.json stages.D.traceback",
+    "reason": "KeyError: 'input_ids'",
+    "site": "src/aadistill/autoinit/operators/depth.py:176",
+    "line": "targets = [item[\"input_ids\"][0, 1:].to(compute) for item in items]",
+    "call_path": [
+      "scripts/pod/autoinit_c1_driver.py:978 run() -> fn()",
+      "scripts/pod/autoinit_c1_driver.py:448 stage_de()",
+      "src/aadistill/autoinit/fixed_path.py:310 materialize_fixed_path() -> impl.execute(ctx)",
+      "src/aadistill/autoinit/operators/base.py:284 execute() -> self.apply(ctx)",
+      "src/aadistill/autoinit/operators/depth.py:176 apply()"
+    ],
+    "what_it_means": "the DEPTH operator's apply() expects every calibration item to carry an `input_ids` tensor, and the items it received in this session do not have that key. The teacher loaded (398 weight shards) and the operator registered cleanly first, so this is the item CONTRACT between whatever supplies calibration items and what depth.apply consumes.",
+    "not_yet_established": "which side is wrong — whether the items are built without `input_ids` for this path, or `depth.apply` reads a key its supplier never promised. That is the next $0 question and this record does not answer it."
+  },
+
+  "how_far_it_got": {
+    "first_ever": "the first C1 attempt whose driver executed a stage. Attempt 7 reached SETUP_DONE and died at the driver's argument parse.",
+    "stages_completed": ["B teacher_fetch_verify", "C register_operator"],
+    "B": "teacher Qwen/Qwen3-4B-Thinking-2507@768f209d9ea8 verified, 3 shards, at 13 s",
+    "C": "registered attention.activation_importance_v1 (1171f3b791e2), scoring c1_confirmation_scoring@v1 77507935f21f83eb, battery a285d61f88de",
+    "D": "STAGE_FAILED after 3 s, having loaded 398 weight shards"
+  },
+
+  "setup_markers_observed": [
+    "2026-09-06T16:40:00Z MARKER:ENV_READY",
+    "2026-09-06T16:40:27Z MARKER:REPO_READY",
+    "2026-09-06T16:40:33Z MARKER:ASSETS_STAGED",
+    "2026-09-06T16:41:35Z MARKER:TRAIN_ENV",
+    "2026-09-06T16:41:38Z MARKER:ASSETS_READY",
+    "2026-09-06T16:42:53Z MARKER:VLLM_READY",
+    "2026-09-06T16:43:22Z MARKER:TEACHER_READY",
+    "2026-09-06T16:43:37Z MARKER:ROPE_OK",
+    "2026-09-06T17:06:13Z MARKER:TESTS_OK:1352s",
+    "2026-09-06T17:06:16Z MARKER:AUTHORIZATION_OK",
+    "2026-09-06T17:06:16Z MARKER:SETUP_DONE",
+    "2026-09-06T17:06:23Z MARKER:DRIVER_START",
+    "2026-09-06T17:06:23Z MARKER:STAGE_START:B",
+    "2026-09-06T17:06:36Z MARKER:STAGE_PASSED:B",
+    "2026-09-06T17:06:36Z MARKER:STAGE_START:C",
+    "2026-09-06T17:06:38Z MARKER:STAGE_PASSED:C",
+    "2026-09-06T17:06:38Z MARKER:STAGE_START:D",
+    "2026-09-06T17:06:41Z MARKER:STAGE_FAILED:D",
+    "2026-09-06T17:06:41Z MARKER:C1_FAILED"
+  ],
+
+  "cpu_test_gate": {
+    "verdict": "PASS",
+    "duration_s": 1352,
+    "skip_set_comparison": "the gate runs --strict and refuses on ANY difference; it did not fire, so the pod's complete skip set equalled the launch-bound record's 114 nodeids at ee74f9e3dd305c5d09e68d06cf068bd62cc8266644a2384e4431aeca2ac4db37. Second consecutive exact sweep/pod agreement.",
+    "note": "the launcher->driver CLI seam repair also held: the driver started and ran, which is what attempt 7 could not do."
+  },
+
+  "real_runtime_restoration": "PASSED — setup cannot reach AUTHORIZATION_OK and SETUP_DONE without the committed post-gate assertions that CUDA is available again and the real teacher cache is present.",
+
+  "scientific_status": {
+    "replay_parent": "NOT COMPLETED — the stage crashed before any digest was computed. NOT a mismatch.",
+    "replay_incumbent": "NOT REACHED — stage E never started.",
+    "recovery_training_began": false,
+    "probes_trained": 0,
+    "probes_evaluated": 0,
+    "confirmation_admissions": 0,
+    "correct_overall": [],
+    "usable_rollout": [],
+    "paired_bootstrap_evidence": "none",
+    "decision_ran": false,
+    "decision": "none",
+    "runs_a_search": false,
+    "eliminates_arms": false,
+    "formal_recovery_evidence": "OUT OF SCOPE",
+    "verdict": "C1 attempt 8 is an INFRASTRUCTURE ABORT inside stage D. It is not evidence for or against the ATTENTION isolation, and it is NOT evidence about the frozen path's reproducibility."
+  },
+
+  "artifact_gate": {
+    "manifest_rc": 0,
+    "collected": "5 files across 3 classes, final_streams_quiescent true — including audit/autoinit_c1/c1_evidence.json, which carries the stage table and the full traceback.",
+    "note": "the failure spec presupposes no training, and that is what happened."
+  },
+
+  "cost": {
+    "provider_polled_last_watchdog_tick": {"usd": 0.6248, "elapsed_minutes": 34.39, "at": "2026-09-06T17:11:29Z"},
+    "launcher_at_deletion": {"usd": 0.6135, "elapsed_minutes": 33.77},
+    "driver_internal_at_failure": {"usd": 0.5363, "elapsed_min": 0.29},
+    "recorded": 0.6248,
+    "rule": "the provider-polled watchdog reading is the honest one and is also the largest"
+  },
+
+  "timestamps": {
+    "created_utc": "2026-09-06T16:37:05Z",
+    "deleted_utc": "2026-09-06T17:10:51Z",
+    "watchdog_end": "pod_gone after 35 ticks, 2026-09-06T17:11:29Z"
+  },
+
+  "not_repaired_here": "the depth-operator item contract is untouched. The grant is consumed and permits no retry and no replacement pod."
+}

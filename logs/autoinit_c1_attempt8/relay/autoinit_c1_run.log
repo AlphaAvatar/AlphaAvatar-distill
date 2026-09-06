@@ -1,0 +1,25 @@
+[17:06:23] C1: 6 probes, ceiling $15.1475, soft stop $14.7841
+[17:06:23]   A: session_setup
+[17:06:23]   B: teacher_fetch_verify   [blocks training on failure]
+[17:06:23]   C: register_operator   [blocks training on failure]
+[17:06:23]   D: replay_parent   [blocks training on failure]
+[17:06:23]   E: replay_incumbent   [blocks training on failure]
+[17:06:23]   F: materialize_arms   [blocks training on failure]
+[17:06:23]   G: recovery_probes
+[17:06:23]   H: evaluate
+[17:06:23]   I: decide
+[17:06:23]   J: collect_teardown
+2026-09-06T17:06:23Z MARKER:DRIVER_START
+2026-09-06T17:06:23Z MARKER:STAGE_START:B
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 13 files:   8%|▊         | 1/13 [00:00<00:05,  2.06it/s]Fetching 13 files: 100%|██████████| 13/13 [00:00<00:00, 26.72it/s]
+[17:06:36] teacher Qwen/Qwen3-4B-Thinking-2507@768f209d9ea8 verified, 3 shards
+2026-09-06T17:06:36Z MARKER:STAGE_PASSED:B
+2026-09-06T17:06:36Z MARKER:STAGE_START:C
+[17:06:36] registered attention.activation_importance_v1 (1171f3b791e2)
+2026-09-06T17:06:38Z MARKER:STAGE_PASSED:C
+2026-09-06T17:06:38Z MARKER:STAGE_START:D
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:  93%|█████████▎| 372/398 [00:00<00:00, 3718.55it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 3722.87it/s]
+2026-09-06T17:06:41Z MARKER:STAGE_FAILED:D
+[17:06:41] STAGE D FAILED: KeyError: 'input_ids'
+2026-09-06T17:06:41Z MARKER:C1_FAILED
