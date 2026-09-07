@@ -148,18 +148,46 @@ def treatment_registered():
     attention_activation.unregister()
 
 
+#: The two frozen pins a SUCCESSFUL incumbent replay carries. Both, not just the
+#: parent: stage E now requires its own step to have matched before it passes,
+#: so a fake that pins only step 2 no longer models a successful replay.
+_PINS = {2: D.CS.EXPECTED_PARENT_DIGEST, 3: D.CS.EXPECTED_INCUMBENT_DIGEST}
+
+
 class _FakeStep:
     def __init__(self, i):
         self.index = i
-        self.digest_expected = D.CS.EXPECTED_PARENT_DIGEST if i == 2 else None
-        self.digest_matches = True if i == 2 else None
+        self.digest_expected = _PINS.get(i)
+        self.digest_matches = True if i in _PINS else None
         self.identity = types.SimpleNamespace(
-            artifact_digest=(D.CS.EXPECTED_PARENT_DIGEST if i == 2 else "d" * 64))
+            artifact_digest=_PINS.get(i, "d" * 64))
         self.checkpoint_path = f"/tmp/ckpt{i}"
         self.result_spec_hash = "s" * 64
+        self.selection = {"step": i}
 
     def as_dict(self):
-        return {"index": self.index}
+        return {"index": self.index,
+                "artifact_digest": self.identity.artifact_digest,
+                "digest_expected": self.digest_expected,
+                "digest_matches": self.digest_matches}
+
+
+def _write_valid_replay_record(spec, results, path, **kw):
+    """A stub that writes what the REAL writer would, so the readback is real.
+
+    Stubbing this to `/dev/null` would make `require_replay_record` fail on a
+    missing file — which is the check working, and useless as a fixture.
+    """
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps({
+        "schema": "aadistill.autoinit.fixed_path_replay/v1",
+        "path_hash": spec.spec_hash,
+        "steps": [r.as_dict() for r in results],
+        "all_pinned_digests_matched": True,
+        "n_pinned": sum(1 for r in results if r.digest_expected is not None),
+    }))
+    return p
 
 
 def _capture_root(monkeypatch, driver):
@@ -184,7 +212,11 @@ def _capture_root(monkeypatch, driver):
         seen["spec_device"] = spec.device
         seen["deadline"] = kw.get("deadline")
         root_loader()                       # the closure under test
-        return [_FakeStep(i) for i in range(4)]
+        steps = [_FakeStep(i) for i in range(4)]
+        for s in steps:                     # the real materializer calls this
+            if on_step is not None:
+                on_step(s)
+        return steps
 
     def fake_suffix(spec, *, adapter, root_loader, workdir, verified,
                     repo_root=".", on_step=None, **kw):
@@ -200,8 +232,7 @@ def _capture_root(monkeypatch, driver):
 
     monkeypatch.setattr(D, "materialize_fixed_path", fake_materialize)
     monkeypatch.setattr(D, "materialize_fixed_path_suffix", fake_suffix)
-    monkeypatch.setattr(D, "write_replay_record",
-                        lambda *a, **k: Path("/dev/null"))
+    monkeypatch.setattr(D, "write_replay_record", _write_valid_replay_record)
     return seen
 
 
@@ -209,6 +240,10 @@ def test_stage_d_loads_its_root_on_the_arm_declared_device(
         harness, monkeypatch, treatment_registered):
     driver = D.C1Driver(_args())
     driver.teacher_path = str(harness.tmp / "teacher")
+    #: stage_de now completes BOTH D and E through the real stage-order
+    #: contract, so the two stages before them must have happened. Declared,
+    #: not faked away — an ordering regression must still be visible here.
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C")]
     seen = _capture_root(monkeypatch, driver)
 
     driver.stage_de()
@@ -226,13 +261,16 @@ def test_stage_f_loads_its_root_on_its_own_arm_device(
         harness, monkeypatch, treatment_registered):
     driver = D.C1Driver(_args())
     driver.teacher_path = str(harness.tmp / "teacher")
+    #: stage_de now completes BOTH D and E through the real stage-order
+    #: contract, so the two stages before them must have happened. Declared,
+    #: not faked away — an ordering regression must still be visible here.
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C")]
     _capture_root(monkeypatch, driver)
     driver.stage_de()
     driver.parent = _FakeStep(2)
-    #: Stage F's own `complete("F")` runs the REAL order contract, so the four
-    #: stages that precede it must have happened. Declared rather than faked
-    #: away — a stage-order regression must still be visible here.
-    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+    assert driver.completed == [D.CS.stage(x).stage_id
+                                for x in ("B", "C", "D", "E")], (
+        "stage_de must have completed both replay gates by now")
 
     seen = _capture_root(monkeypatch, driver)
     driver.stage_f()
@@ -252,10 +290,15 @@ def test_stage_f_asks_for_the_frozen_suffix_and_nothing_else(
     """
     driver = D.C1Driver(_args())
     driver.teacher_path = str(harness.tmp / "teacher")
+    #: stage_de now completes BOTH D and E through the real stage-order
+    #: contract, so the two stages before them must have happened. Declared,
+    #: not faked away — an ordering regression must still be visible here.
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C")]
     _capture_root(monkeypatch, driver)
     driver.stage_de()
     driver.parent = _FakeStep(2)
-    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+    assert driver.completed == [D.CS.stage(x).stage_id
+                                for x in ("B", "C", "D", "E")]
 
     seen = _capture_root(monkeypatch, driver)
     driver.stage_f()
@@ -275,10 +318,15 @@ def test_stage_f_writes_a_treatment_record_that_claims_no_replay(
         harness, monkeypatch, treatment_registered):
     driver = D.C1Driver(_args())
     driver.teacher_path = str(harness.tmp / "teacher")
+    #: stage_de now completes BOTH D and E through the real stage-order
+    #: contract, so the two stages before them must have happened. Declared,
+    #: not faked away — an ordering regression must still be visible here.
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C")]
     _capture_root(monkeypatch, driver)
     driver.stage_de()
     driver.parent = _FakeStep(2)
-    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+    assert driver.completed == [D.CS.stage(x).stage_id
+                                for x in ("B", "C", "D", "E")]
     _capture_root(monkeypatch, driver)
 
     driver.stage_f()
@@ -302,10 +350,15 @@ def test_stage_f_refuses_to_report_success_if_more_than_the_suffix_ran(
     """The driver re-checks the executor's answer instead of assuming it."""
     driver = D.C1Driver(_args())
     driver.teacher_path = str(harness.tmp / "teacher")
+    #: stage_de now completes BOTH D and E through the real stage-order
+    #: contract, so the two stages before them must have happened. Declared,
+    #: not faked away — an ordering regression must still be visible here.
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C")]
     _capture_root(monkeypatch, driver)
     driver.stage_de()
     driver.parent = _FakeStep(2)
-    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+    assert driver.completed == [D.CS.stage(x).stage_id
+                                for x in ("B", "C", "D", "E")]
     _capture_root(monkeypatch, driver)
 
     monkeypatch.setattr(
@@ -395,13 +448,18 @@ def test_both_materializers_are_given_the_deadline(harness, monkeypatch,
                                                    treatment_registered):
     driver = D.C1Driver(_args())
     driver.teacher_path = str(harness.tmp / "teacher")
+    #: stage_de now completes BOTH D and E through the real stage-order
+    #: contract, so the two stages before them must have happened. Declared,
+    #: not faked away — an ordering regression must still be visible here.
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C")]
 
     seen = _capture_root(monkeypatch, driver)
     driver.stage_de()
     assert isinstance(seen["deadline"], D.C1OperatorDeadline)
 
     driver.parent = _FakeStep(2)
-    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C", "D", "E")]
+    assert driver.completed == [D.CS.stage(x).stage_id
+                                for x in ("B", "C", "D", "E")]
     seen = _capture_root(monkeypatch, driver)
     driver.stage_f()
     assert isinstance(seen["deadline"], D.C1OperatorDeadline)
@@ -1005,3 +1063,238 @@ def test_probe_results_refuse_a_probe_with_no_admitted_protocol():
     with pytest.raises(C1ResultsError, match="not the attested"):
         build_probe_results(good, plan_hash="p", seeds=SEEDS, inputs=inputs,
                             attested_evaluation_protocol_hash="z" * 64)
+
+
+# --- D versus E: which gate actually failed ---------------------------------
+#
+# `run()` walks `(("DE", self.stage_de), ...)` and reports `self.fail(letter[0])`,
+# so EVERY ordinary exception inside that method is written as `STAGE_FAILED:D`.
+# But `stage_de` owns two observable gates: the moment the parent digest matches
+# it calls `complete("D")` and emits `STAGE_START:E`. So a failure during the
+# INCUMBENT step was recorded against D — overwriting a Stage-D entry that had
+# already passed, while `stages_completed` still carried `replay_parent`. The
+# session's own evidence then contradicted itself about which gate held.
+#
+# These drive the REAL `stage_de` with a faked materializer, so the on_step
+# callback, the completion order and the record write are all production code.
+
+#: Captured before anything patches it, so the cases below can restore the REAL
+#: `stage_de` after `_fake_hardware` has replaced it for every other stage.
+_REAL_STAGE_DE = D.C1Driver.stage_de
+
+
+class _ReplayStep:
+    """A `StepResult` as far as `stage_de` and `write_replay_record` read one."""
+
+    def __init__(self, index, expected=None, actual=None, matches=None):
+        self.index = index
+        self.impl_id = f"op{index}"
+        self.profile_id = "calib.none@v1"
+        self.kind = ("DEPTH", "FFN", "RESIDUAL_WIDTH", "ATTENTION")[index]
+        self.result_spec_hash = "s" * 64
+        self.identity = types.SimpleNamespace(artifact_digest=actual or "d" * 64)
+        self.checkpoint_path = f"/tmp/ckpt{index}"
+        self.seconds = 0.0
+        self.selection = {"step": index}
+        self.trace = {}
+        self.digest_expected = expected
+        self.digest_matches = matches
+
+    def as_dict(self):
+        return {"index": self.index, "impl_id": self.impl_id,
+                "artifact_digest": self.identity.artifact_digest,
+                "digest_expected": self.digest_expected,
+                "digest_matches": self.digest_matches,
+                "checkpoint_path": self.checkpoint_path}
+
+
+def _replay_plan(*, stop_after=None, mismatch_at=None):
+    """The four steps the incumbent replay emits, with the two frozen pins."""
+    pins = {2: D.CS.EXPECTED_PARENT_DIGEST, 3: D.CS.EXPECTED_INCUMBENT_DIGEST}
+    out = []
+    for i in range(4):
+        exp = pins.get(i)
+        if exp is None:
+            out.append(_ReplayStep(i))
+        elif mismatch_at == i:
+            out.append(_ReplayStep(i, expected=exp, actual="0" * 64, matches=False))
+        else:
+            out.append(_ReplayStep(i, expected=exp, actual=exp, matches=True))
+        if stop_after is not None and i == stop_after:
+            break
+    return out
+
+
+def _drive_replay(monkeypatch, harness, *, stop_after=None, mismatch_at=None,
+                  boom=None, record_write=None):
+    """Install a materializer that feeds the REAL `stage_de`."""
+    _fake_hardware(monkeypatch, harness)
+    monkeypatch.setattr(D.C1Driver, "stage_de", _REAL_STAGE_DE)
+
+    steps = _replay_plan(stop_after=stop_after, mismatch_at=mismatch_at)
+
+    def fake_materialize(spec, *, adapter, root_loader, workdir, repo_root,
+                         on_step=None, **kw):
+        for s in steps:
+            if on_step is not None:
+                on_step(s)
+            if s.digest_matches is False:
+                raise D.FixedPathDigestMismatch(
+                    s.index, f"step{s.index}", s.digest_expected,
+                    s.identity.artifact_digest, {"steps": []})
+        if boom is not None:
+            raise boom
+        return steps
+
+    monkeypatch.setattr(D, "materialize_fixed_path", fake_materialize)
+    from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
+    monkeypatch.setattr(QWEN3_ADAPTER, "load",
+                        lambda *a, **k: types.SimpleNamespace())
+    if record_write is not None:
+        monkeypatch.setattr(D, "write_replay_record", record_write)
+
+    def stage_b(self):
+        self.teacher_path = str(harness.tmp / "teacher")
+        self.complete("B", repo_id="fake", revision=D.CS.TEACHER_REVISION)
+    monkeypatch.setattr(D.C1Driver, "stage_b", stage_b)
+
+    driver = D.C1Driver(_args())
+    code = driver.run()
+    return code, driver, (harness.tmp / "c1.status").read_text()
+
+
+def test_A_an_ordinary_failure_before_the_parent_match_is_stage_D(
+        harness, monkeypatch):
+    code, driver, status = _drive_replay(
+        monkeypatch, harness, stop_after=1,
+        boom=RuntimeError("CUDA OOM while loading shard 2"))
+
+    assert code == 40
+    assert "MARKER:STAGE_FAILED:D" in status
+    assert "MARKER:STAGE_PASSED:D" not in status
+    assert "MARKER:STAGE_START:E" not in status
+    assert "E" not in driver.ev["stages"]
+    assert driver.ev["stages"]["D"]["passed"] is False
+    assert "MARKER:C1_FAILED" in status
+    assert "C1_REPLAY_MISMATCH" not in status
+    assert not (D.AUDIT / "c1_replay_record.json").exists()
+    assert "replay_parent" not in driver.completed
+
+
+def test_B_an_ordinary_failure_after_the_parent_match_is_stage_E(
+        harness, monkeypatch):
+    """The defect: this used to be written as STAGE_FAILED:D, on top of a
+    Stage-D entry that had already passed."""
+    code, driver, status = _drive_replay(
+        monkeypatch, harness, stop_after=2,
+        boom=RuntimeError("CUDA OOM during the incumbent ATTENTION"))
+
+    assert code == 40
+    assert status.index("MARKER:STAGE_PASSED:D") < status.index("MARKER:STAGE_START:E")
+    assert "MARKER:STAGE_FAILED:E" in status
+    assert "MARKER:STAGE_FAILED:D" not in status
+    assert "MARKER:STAGE_PASSED:E" not in status
+
+    assert driver.ev["stages"]["D"]["passed"] is True
+    assert driver.ev["stages"]["E"]["passed"] is False
+    assert "replay_parent" in driver.completed
+    assert "replay_incumbent" not in driver.completed
+    assert driver.ev["stages_completed"] == driver.completed
+
+    assert "MARKER:C1_FAILED" in status
+    assert "C1_REPLAY_MISMATCH" not in status
+    assert "mismatch" not in driver.ev["stages"]["E"]["reason"].lower()
+
+
+def test_C_a_replay_record_that_cannot_be_written_fails_stage_E_only(
+        harness, monkeypatch):
+    def explode(*a, **k):
+        raise OSError("No space left on device")
+
+    code, driver, status = _drive_replay(monkeypatch, harness,
+                                         record_write=explode)
+
+    assert code == 40
+    assert driver.ev["stages"]["D"]["passed"] is True
+    assert driver.ev["stages"]["E"]["passed"] is False
+    assert "MARKER:STAGE_PASSED:E" not in status
+    assert "MARKER:C1_FAILED" in status
+    assert "C1_REPLAY_MISMATCH" not in status
+    assert "replay_incumbent" not in driver.completed
+
+
+def test_C2_a_replay_record_that_reads_back_wrong_fails_stage_E_only(
+        harness, monkeypatch):
+    """Written, readable, and WRONG. The readback must be a check, not a ritual."""
+    def bad_record(spec, results, path, **k):
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        Path(path).write_text(json.dumps(
+            {"schema": "aadistill.autoinit.fixed_path_replay/v1",
+             "path_hash": "0" * 64,            # not this path
+             "all_pinned_digests_matched": True, "n_pinned": 2, "steps": []}))
+        return Path(path)
+
+    code, driver, status = _drive_replay(monkeypatch, harness,
+                                         record_write=bad_record)
+    assert code == 40
+    assert driver.ev["stages"]["D"]["passed"] is True
+    assert driver.ev["stages"]["E"]["passed"] is False
+    assert "MARKER:STAGE_PASSED:E" not in status
+    assert "C1_REPLAY_MISMATCH" not in status
+
+
+def test_D_a_complete_replay_marks_E_only_after_the_record_is_readable(
+        harness, monkeypatch):
+    order: list = []
+    real = D.write_replay_record
+
+    def watched(*a, **k):
+        order.append("record_written")
+        return real(*a, **k)
+    monkeypatch.setattr(D, "write_replay_record", watched)
+
+    code, driver, status = _drive_replay(monkeypatch, harness)
+
+    assert status.count("MARKER:STAGE_PASSED:D") == 1
+    assert status.count("MARKER:STAGE_PASSED:E") == 1
+    assert "STAGE_FAILED" not in status
+    assert "C1_REPLAY_MISMATCH" not in status
+    assert order == ["record_written"]
+
+    doc = json.loads((D.AUDIT / "c1_replay_record.json").read_text())
+    assert doc["schema"] == "aadistill.autoinit.fixed_path_replay/v1"
+    assert doc["all_pinned_digests_matched"] is True
+    assert doc["n_pinned"] == 2
+    assert driver.completed.index("replay_parent") < \
+        driver.completed.index("replay_incumbent")
+    assert driver.ev["stages"]["E"]["replay_record"].endswith(
+        "c1_replay_record.json")
+    assert driver.ev["stages"]["E"]["all_pinned_digests_matched"] is True
+
+
+def test_E_a_step2_mismatch_is_still_stage_D_and_a_replay_mismatch(
+        harness, monkeypatch):
+    code, driver, status = _drive_replay(monkeypatch, harness, mismatch_at=2)
+    assert code == 30
+    assert "MARKER:STAGE_FAILED:D" in status
+    assert "MARKER:STAGE_PASSED:D" not in status
+    assert status.index("MARKER:STAGE_FAILED:D") < status.index(
+        "MARKER:C1_REPLAY_MISMATCH")
+    rec = json.loads((D.AUDIT / "c1_replay_record.json").read_text())
+    assert rec["schema"] == "aadistill.autoinit.c1_replay_mismatch/v1"
+    assert rec["stage"] == "D"
+
+
+def test_E2_a_step3_mismatch_is_stage_E_and_a_replay_mismatch(
+        harness, monkeypatch):
+    code, driver, status = _drive_replay(monkeypatch, harness, mismatch_at=3)
+    assert code == 30
+    assert status.index("MARKER:STAGE_PASSED:D") < status.index(
+        "MARKER:STAGE_FAILED:E")
+    assert "MARKER:STAGE_FAILED:D" not in status
+    assert status.index("MARKER:STAGE_FAILED:E") < status.index(
+        "MARKER:C1_REPLAY_MISMATCH")
+    rec = json.loads((D.AUDIT / "c1_replay_record.json").read_text())
+    assert rec["schema"] == "aadistill.autoinit.c1_replay_mismatch/v1"
+    assert rec["stage"] == "E"
+    assert driver.ev["stages"]["D"]["passed"] is True

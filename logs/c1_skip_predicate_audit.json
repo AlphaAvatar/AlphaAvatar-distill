@@ -1005,7 +1005,7 @@
   },
   {
    "file": "tests/pod/test_c1_driver_execution.py",
-   "line": 503,
+   "line": 561,
    "kind": "pytest.skip",
    "function": "_summary_template",
    "condition": "pytest.skip(\"no retained generation summary to model the fake on\")",
@@ -1775,5 +1775,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "a91a2922109b535298db89149b5e6b1b02b5e4553c6271b93c64fc1cab34f384"
+ "digest": "1bda403f48576a7a9b773cec2c0cef2ed2e193b649da1b18c6117159cdff1994"
 }

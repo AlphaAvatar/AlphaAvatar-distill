@@ -275,6 +275,19 @@ class C1Driver:
         self.evaluation_protocol = None
         self.seeds = derive_recovery_seeds()
 
+        #: WHICH observable gate is in flight, as explicit state rather than as
+        #: something inferred from the loop key or scraped from the status log.
+        #:
+        #: `run()` walks `("DE", self.stage_de)` because one method owns TWO
+        #: gates, and it used to report `self.fail(letter[0])` — so every
+        #: ordinary exception in that method was written as `STAGE_FAILED:D`,
+        #: including failures that happened after the parent digest had matched
+        #: and `complete("D")` had already recorded a PASS. The failure
+        #: overwrote the passing entry while `stages_completed` still carried
+        #: `replay_parent`, leaving the session's own evidence self-contradictory
+        #: about which gate held.
+        self.active_gate: str | None = None
+
         for d in (AUDIT, AUDIT / "probes", AUDIT / "configs", TRAIN, EVAL, WORK):
             d.mkdir(parents=True, exist_ok=True)
 
@@ -477,6 +490,7 @@ class C1Driver:
         mark("STAGE_START:D")
         from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
 
+        self.active_gate = "D"
         self.arms = CS.build_arm_specs(workdir_device="cuda")
         if not CS.arm_prefix_is_shared(self.arms):
             raise C1DriverError("the two arms do not share their prefix")
@@ -498,12 +512,13 @@ class C1Driver:
                               expected=result.digest_expected,
                               selection=result.selection, runtime=runtime)
                 mark("STAGE_START:E")
-            elif result.index == 3:
-                say(f"E: incumbent {result.identity.artifact_digest[:12]} matches")
-                self.complete("E", step_index=result.index,
-                              artifact_digest=result.identity.artifact_digest,
-                              expected=result.digest_expected,
-                              selection=result.selection, runtime=runtime)
+                #: From here on, an ordinary exception belongs to E. D has
+                #: already PASSED and must keep that entry.
+                self.active_gate = "E"
+            #: Index 3 completes NOTHING here. Stage E's evidence is its replay
+            #: record, and that record has not been written yet — passing E
+            #: before it exists is how a write failure could leave a session
+            #: claiming a replay it could not show.
 
         # Through the adapter, on the arm's OWN declared device. The teacher was
         # loaded here by a raw `AutoModelForCausalLM.from_pretrained(...).eval()`
@@ -524,11 +539,71 @@ class C1Driver:
             self.replay_mismatch(exc, runtime, seen)
             raise C1ReplayMismatch(str(exc)) from exc
 
-        write_replay_record(self.arms["incumbent"], steps,
-                            AUDIT / "c1_replay_record.json", runtime=runtime,
+        # Stage E passes only when its evidence is on disk AND reads back as the
+        # replay it just recorded. `complete("E")` used to fire from `on_step`,
+        # before the record was written, so a write or a truncation could leave a
+        # session with STAGE_PASSED:E and no replay record to show for it.
+        if steps[3].digest_matches is not True:
+            raise C1DriverError(
+                "the incumbent step returned without recording a digest match; "
+                "materialize_fixed_path must raise on a mismatch rather than "
+                "return one, so this is a contract break, not a mismatch")
+        path = AUDIT / "c1_replay_record.json"
+        write_replay_record(self.arms["incumbent"], steps, path, runtime=runtime,
                             root_binding=json.loads(TEACHER_BINDING.read_text()))
+        doc = self.require_replay_record(path)
+        say(f"E: incumbent {steps[3].identity.artifact_digest[:12]} matches")
+        self.complete("E", step_index=3,
+                      artifact_digest=steps[3].identity.artifact_digest,
+                      expected=steps[3].digest_expected,
+                      selection=steps[3].selection, runtime=runtime,
+                      replay_record=_rel(path),
+                      replay_record_sha256=sha256_file(path),
+                      all_pinned_digests_matched=doc["all_pinned_digests_matched"])
         self.parent = steps[2]
         self.incumbent_step = steps[3]
+
+    def require_replay_record(self, path: Path) -> dict:
+        """Read the SUCCESSFUL replay record back, and check what it says.
+
+        The mismatch path has proved its evidence lands since attempt 5; the
+        success path never did. A record that cannot be written, or that is
+        written and says something other than what happened, must fail stage E
+        as ordinary infrastructure — D keeps its pass, no E pass marker is
+        emitted, and nothing claims a replay mismatch, because both digests DID
+        match in memory. Same schema as the writer produces; no third schema is
+        introduced for this.
+        """
+        doc = json.loads(Path(path).read_text())
+        problems = []
+        if doc.get("schema") != "aadistill.autoinit.fixed_path_replay/v1":
+            problems.append(f"schema is {doc.get('schema')!r}")
+        if doc.get("path_hash") != self.arms["incumbent"].spec_hash:
+            problems.append("path_hash is not this arm's frozen path")
+        if doc.get("all_pinned_digests_matched") is not True:
+            problems.append("all_pinned_digests_matched is not true")
+        if doc.get("n_pinned") != 2:
+            problems.append(f"n_pinned is {doc.get('n_pinned')!r}, want 2")
+        by_index = {s.get("index"): s for s in doc.get("steps", [])}
+        for idx, expected in ((2, CS.EXPECTED_PARENT_DIGEST),
+                              (3, CS.EXPECTED_INCUMBENT_DIGEST)):
+            s = by_index.get(idx)
+            if s is None:
+                problems.append(f"step {idx} is absent")
+                continue
+            if s.get("digest_expected") != expected:
+                problems.append(f"step {idx} was not pinned to the frozen digest")
+            if s.get("digest_matches") is not True:
+                problems.append(f"step {idx} did not record a match")
+            if s.get("artifact_digest") != expected:
+                problems.append(f"step {idx} realized a different digest")
+        if problems:
+            raise C1DriverError(
+                f"{_rel(path)} does not read back as the replay it just "
+                f"recorded: {'; '.join(problems)}. Stage E is NOT passed. This "
+                "is an infrastructure failure, not a replay mismatch — both "
+                "frozen digests matched in memory.")
+        return doc
 
     def replay_mismatch(self, exc, runtime: dict, seen: list) -> None:
         """Write the evidence, PROVE it landed, and only then mark the outcome.
@@ -1091,16 +1166,22 @@ class C1Driver:
         stages = (("B", self.stage_b), ("C", self.stage_c), ("DE", self.stage_de),
                   ("F", self.stage_f), ("G", self.stage_g), ("H", self.stage_h),
                   ("I", self.stage_i))
-        for letter, fn in stages:
+        for key, fn in stages:
+            #: The gate that will be blamed if this raises. `stage_de` advances
+            #: it to "E" the moment stage D has PASSED, so a failure in the
+            #: incumbent step is recorded against E and cannot overwrite D's
+            #: passing entry. Read from driver state, never from the status log.
+            self.active_gate = key[0]
             try:
                 fn()
             except C1ReplayMismatch:
                 self.finish("C1_REPLAY_MISMATCH")
                 return 30
             except Exception as exc:                              # noqa: BLE001
-                self.fail(letter[0], f"{type(exc).__name__}: {exc}",
+                letter = self.active_gate or key[0]
+                self.fail(letter, f"{type(exc).__name__}: {exc}",
                           traceback=traceback.format_exc()[-6000:])
-                blocking = CS.stage(letter[0]).blocks_training
+                blocking = CS.stage(letter).blocks_training
                 outcome = ("C1_FAILED" if blocking or not self.ev["training_started"]
                            else "C1_INCOMPLETE")
                 mark(outcome)
