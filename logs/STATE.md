@@ -100,6 +100,18 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 > **Not observed on a GPU.** The repair is verified logically, at `$0`. Nothing
 > here is ATTENTION evidence, and attempt 9 remains **NO DECISION after a
 > pre-treatment infrastructure abort**.
+>
+> **One item left open, deliberately.**
+> `test_every_gate_but_the_commit_binding_passes_against_the_candidate` FAILS:
+> `c1_harness_gate` compares the harness digest inside the scratch **candidate**
+> authorization (`~/aad-scratch/sessions/c1-candidate/`, pinned at
+> `4437074249d5…`) against the live tree, now `a3566eec79b3…`. The gate is right
+> and the fixture is stale. Refreshing it means running the authorization
+> **issuer**, which this session is prohibited from doing — so it is reported
+> rather than fixed. It confers nothing either way: the launcher reads
+> `logs/autoinit_c1_authorization.json`, gate 1 binds a real issued commit and
+> gate 10 needs an uploaded bundle for it. The pod-like sweep is unaffected,
+> because the simulated `$HOME` has no candidate and the test skips there.
 
 > **Post-provider ownership repair and the P12 record-rule split, 2026-09-07 —
 > `$0.0000`, no pod, no GPU, no provider resource.** The second authorization

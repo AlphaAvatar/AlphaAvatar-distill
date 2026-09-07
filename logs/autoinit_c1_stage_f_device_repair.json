@@ -183,5 +183,59 @@
   "any provider resource, pod or GPU work",
   "any claim that the treatment operator works on a GPU \u2014 the repair is verified logically, at $0, and has never executed on an accelerator",
   "any restatement of attempt 9 as an ATTENTION result"
- ]
+ ],
+ "preregistration_rebinding": {
+  "_what_this_is": "the old-vs-new field diff of logs/phase_c1_execution_preregistration.json across the repair, computed leaf by leaf over the flattened document rather than eyeballed.",
+  "total_leaf_fields": 274,
+  "fields_moved": 6,
+  "scientific_fields_moved": 0,
+  "moved": {
+   "head_commit": {
+    "old": "5dc0fd2517a438e5202ba0de3d13cd972636c317",
+    "new": "828fba0536eed8231f22a8d91546834ef5af3474"
+   },
+   "executable_source.digest": {
+    "old": "ead856cf8ef9fff0ade258f8a143b78de4f16bf8c2e810e5ecf1a2c55ced1317",
+    "new": "22466f13b215a86f399cd4bf692e4590e622226e3c14d1d91dc0e413dfe4d93b"
+   },
+   "c1_harness.digest": {
+    "old": "4437074249d5ca3a64906180f600f9a6f8a65f62b420eb7c13b8d0094e69ab7c",
+    "new": "a3566eec79b3439ce1e7ac75d305a92d890f7daf7b44b1b4a9d67086c9a5aa95"
+   },
+   "preregistration_sha256": {
+    "old": "82db0710d0d32565b5d826f0538fa8e62fb5960f2548fb1d4c91e48e4b3aef91",
+    "new": "4e6f4d34b41f3f00e3d7af4f0f028aa1d156a947b90d6539c897850857c4032d"
+   },
+   "executable_source.files": "2 of 8 entries differ",
+   "c1_harness.files": "2 of 73 entries differ"
+  },
+  "the_only_file_entries_that_moved": [
+   "src/aadistill/autoinit/operators/attention_activation.py",
+   "src/aadistill/init/attention_stats.py"
+  ],
+  "file_set_membership": "IDENTICAL in both blocks \u2014 8/8 and 73/73, same paths. Only the two repaired files' sha256 values changed; nothing was added to or removed from either declared set.",
+  "verified_unchanged": [
+   "the C0 protocol digest and every field derived from it",
+   "both complete arm specs and both path hashes (incumbent 8b0bb455bfba069f, treatment 3a233a9017b3b8a7)",
+   "both fail-stop replay digests (parent eea90c91346a0745, incumbent c313d1b4081b9a3b)",
+   "the three seeds 1635674081, 1656475568, 696460635",
+   "both calibration mixtures and their content hashes",
+   "the treatment objective, formula, impl id, signature and ATTENTION_STATS_SPEC identity",
+   "the recovery recipe",
+   "the battery, 950 total / 850 scorable, content a285d61f88de9da8",
+   "the generation protocol",
+   "the scoring contract and its digest",
+   "the decision rule",
+   "the session-contract hash and the isolation-plan hash"
+  ],
+  "note": "the four moved scalars are precisely the bindings whose PURPOSE is to move when the executable moves. A preregistration that kept them would be describing code that no longer exists."
+ },
+ "one_item_deliberately_left_open": {
+  "what": "tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate FAILS.",
+  "why_it_fails": "c1_harness_gate compares the harness digest inside the CANDIDATE authorization at ~/aad-scratch/sessions/c1-candidate/candidate_authorization.json against the live tree. That fixture pins 4437074249d5\u2026, the pre-repair digest; the live tree is now a3566eec79b3\u2026. The gate is behaving correctly \u2014 the fixture is stale.",
+  "why_i_did_not_fix_it": "refreshing that fixture means running scripts/autoinit/issue_c1_authorization.py, and this session's instructions prohibit issuing an authorization. logs/decisions.md (2026-09-06) does classify the candidate as a $0 fixture 'outside the repository \u2026 Never live, never committed', and refreshing it alongside a harness change is the established pattern \u2014 but it is still the authorization issuer, and the cheaper failure mode is one maintainer command rather than a governance violation in a session told not to issue.",
+  "it_confers_nothing_either_way": "the launcher reads logs/autoinit_c1_authorization.json, not this file; gate 1 binds a real issued commit and gate 10 needs an uploaded bundle for it. A stale or fresh candidate changes neither.",
+  "the_fix_when_a_maintainer_wants_it": "re-issue the candidate against the current tree into ~/aad-scratch/sessions/c1-candidate/, exactly as it was produced before.",
+  "does_not_affect_the_sweep": "under simulate_pod_env.sh the fake HOME has no candidate, so the test skips there and the pod-like sweep is unaffected."
+ }
 }
