@@ -2,8 +2,8 @@
  "schema": "aadistill.autoinit.c1_authorization/v1",
  "authorization_id": "autoinit.v1.phase_c1",
  "version": 1,
- "granted_utc": "2026-09-06T16:32:24+00:00",
- "granted_by": "maintainer, C1 attempt-7 postmortem review 2026-09-06. Attempt 7 was the FIRST to clear the pod CPU test gate: complete setup to TESTS_OK, strict complete skip-set parity matched exactly, the CPU-test scope behaved correctly, the explicit PODSIM_PYTHON worked on the pod, CUDA and the teacher cache were restored after the isolated scope, and AUTHORIZATION_OK and SETUP_DONE were reached. The single remaining blocker -- the launcher->driver CLI seam, where the launcher supplied `--stage all` and the driver's parser did not accept it -- is repaired by removing the flag and covered by a regression that parses the generated argv with the driver's OWN parser. GO for a new one-use grant.",
+ "granted_utc": "2026-09-07T13:33:28+00:00",
+ "granted_by": "maintainer, C1 attempt-8 postmortem scientific review 2026-09-07, at origin/main 5956a5fd. Attempt 8 was a PRE-MEASUREMENT INFRASTRUCTURE ABORT: it produced no completed parent replay comparison, no incumbent replay comparison, no recovery training, no confirmation evaluation and no C1 endpoint. Four material runtime and evidence defects were found and repaired at $0.0000 with no pod, no GPU and no provider resource, and all four are ACCEPTED by this review: (1) the raw-calibration -> operator-ready runtime preparation boundary, which was missing from the fixed path and which attempt 8 died on with KeyError: 'input_ids'; (2) declared-device root loading through the adapter, with exhaustive parameter and buffer placement verification, closing a defect that would have run the parent replay on the host CPU inside a paid GPU hour; (3) Stage-F verified treatment SUFFIX execution keeping the full four-step arm identity, its treatment execution record, the success artifact gate that requires it, and the operator budget fail-stop; (4) correct Stage-D versus Stage-E ordinary-failure attribution and atomic Stage-E replay evidence. GO to record ONE new one-use grant and produce its launch-bound readiness record. (That decision also said no additional source repair was authorized; the independent authorization review recorded below SUPERSEDES that sentence by authorizing exactly one further narrow $0 repair.)",
  "plan_id": "autoinit.v1.phase_c1",
  "phase_a_session_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
  "phase_a_science_plan_hash": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
@@ -25,11 +25,11 @@
   "decision": "stage I requires six complete admitted and scored probes",
   "retry": "none. One launch attempt; no automatic retry, no second attempt, no automatic ceiling increase."
  },
- "scope_note": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh seeds = exactly six recovery probes, one confirmation evaluation per probe only after ALL SIX trainings complete, each admitted against its own observed generation protocol before scoring, followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision.",
+ "scope_note": "exactly one C1 launch under the UNCHANGED frozen C1 protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh paired seeds = exactly six E1_KD_HEAVY_0860K recovery trainings; ALL SIX trainings complete before any confirmation evaluation begins; exactly one frozen confirmation evaluation per completed probe, each admitted against its own observed generation protocol before scoring; followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision rule. Nothing in the protocol, the arms, the seeds, the battery, the recovery recipe, the generation protocol, the scoring contract, the endpoints or the decision rule is modified by this grant.",
  "phase_a_authorized": false,
  "automatic_followon_start": false,
- "authorized_session_commit": "b5733168a7c713894d92cc6b9d55e46fa182d9f5",
- "harness_source_digest": "85329e7e701b1b3464b30ee8c35cdda710105323398007c993ef1c1003a5a0ab",
+ "authorized_session_commit": "224fa817c40353f26d93967604249ed8999cf7a1",
+ "harness_source_digest": "4437074249d5ca3a64906180f600f9a6f8a65f62b420eb7c13b8d0094e69ab7c",
  "harness_source_files": [
   "scripts/pod/autoinit_c1_launch.py",
   "scripts/pod/autoinit_c1_driver.py",
@@ -84,6 +84,7 @@
   "src/aadistill/autoinit/arch.py",
   "src/aadistill/autoinit/artifact.py",
   "src/aadistill/autoinit/calibration.py",
+  "src/aadistill/autoinit/calibration_items.py",
   "src/aadistill/autoinit/device.py",
   "src/aadistill/autoinit/metrics.py",
   "src/aadistill/autoinit/stats.py",
@@ -105,23 +106,24 @@
   "src/aadistill/infrastructure/artifact_gate.py"
  ],
  "per_launch_hard_usd": 15.1475,
- "provenance_commit": "b5733168a7c713894d92cc6b9d55e46fa182d9f5",
+ "provenance_commit": "224fa817c40353f26d93967604249ed8999cf7a1",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
  "allows_phase_a": false,
  "allows_beam_search": false,
  "authorizes_c1_isolation": true,
  "scope": "2 arms x 3 fresh seeds = 6 fixed 0.86M recovery probes on one frozen path, evaluated once each on c1_confirmation_v1. No search, no ranking, no successive halving, no tie-breaking, no arm elimination, and no formal Stage-2/3 recovery.",
  "grant": {
-  "path": "logs/autoinit_c1_attempt8_grant.json",
-  "sha256": "d1af9dd8da49933b6f174340a159f027167a4aecfde222af1a1d540184cb9b08",
-  "granted_by": "maintainer, C1 attempt-7 postmortem review 2026-09-06. Attempt 7 was the FIRST to clear the pod CPU test gate: complete setup to TESTS_OK, strict complete skip-set parity matched exactly, the CPU-test scope behaved correctly, the explicit PODSIM_PYTHON worked on the pod, CUDA and the teacher cache were restored after the isolated scope, and AUTHORIZATION_OK and SETUP_DONE were reached. The single remaining blocker -- the launcher->driver CLI seam, where the launcher supplied `--stage all` and the driver's parser did not accept it -- is repaired by removing the flag and covered by a regression that parses the generated argv with the driver's OWN parser. GO for a new one-use grant.",
-  "covers": "exactly one C1 launch under the unchanged frozen protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh seeds = exactly six recovery probes, one confirmation evaluation per probe only after ALL SIX trainings complete, each admitted against its own observed generation protocol before scoring, followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision.",
-  "cumulative_spend_at_approval_usd": 266.191,
+  "path": "logs/autoinit_c1_attempt9_grant.json",
+  "sha256": "f7490bb0aca85701b7c0524ed758f2214f79ea6182d41db5a3611bdebf968a09",
+  "granted_by": "maintainer, C1 attempt-8 postmortem scientific review 2026-09-07, at origin/main 5956a5fd. Attempt 8 was a PRE-MEASUREMENT INFRASTRUCTURE ABORT: it produced no completed parent replay comparison, no incumbent replay comparison, no recovery training, no confirmation evaluation and no C1 endpoint. Four material runtime and evidence defects were found and repaired at $0.0000 with no pod, no GPU and no provider resource, and all four are ACCEPTED by this review: (1) the raw-calibration -> operator-ready runtime preparation boundary, which was missing from the fixed path and which attempt 8 died on with KeyError: 'input_ids'; (2) declared-device root loading through the adapter, with exhaustive parameter and buffer placement verification, closing a defect that would have run the parent replay on the host CPU inside a paid GPU hour; (3) Stage-F verified treatment SUFFIX execution keeping the full four-step arm identity, its treatment execution record, the success artifact gate that requires it, and the operator budget fail-stop; (4) correct Stage-D versus Stage-E ordinary-failure attribution and atomic Stage-E replay evidence. GO to record ONE new one-use grant and produce its launch-bound readiness record. (That decision also said no additional source repair was authorized; the independent authorization review recorded below SUPERSEDES that sentence by authorizing exactly one further narrow $0 repair.)",
+  "covers": "exactly one C1 launch under the UNCHANGED frozen C1 protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh paired seeds = exactly six E1_KD_HEAVY_0860K recovery trainings; ALL SIX trainings complete before any confirmation evaluation begins; exactly one frozen confirmation evaluation per completed probe, each admitted against its own observed generation protocol before scoring; followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision rule. Nothing in the protocol, the arms, the seeds, the battery, the recovery recipe, the generation protocol, the scoring contract, the endpoints or the decision rule is modified by this grant.",
+  "cumulative_spend_at_approval_usd": 266.8158,
   "cumulative_cap_usd": 283.76,
   "does_not_authorize": [
    "any retry",
    "any replacement pod",
    "a second provider-created attempt",
+   "a second provider resource of any kind",
    "another attempt",
    "Phase A",
    "Phase B search",
@@ -133,6 +135,7 @@
    "any extra seed",
    "any adaptive rerun",
    "partial-stage execution",
+   "any reduced or canary run",
    "Phase C2",
    "formal Stage-2/Stage-3 recovery",
    "canonical Stage-1 NLL",
@@ -144,10 +147,10 @@
   ]
  },
  "bound": {
-  "execution_preregistration": "1cdc49f3e8478e0a13f08873a01cfecaa72d91d6c4b372644f1bf8c8807ca601",
-  "execution_preregistration_head_commit": "5a57fd5a25085a1f304c4fc6abcdcd361614fa89",
-  "c1_harness_digest": "85329e7e701b1b3464b30ee8c35cdda710105323398007c993ef1c1003a5a0ab",
-  "c1_harness_n_files": 72,
+  "execution_preregistration": "82db0710d0d32565b5d826f0538fa8e62fb5960f2548fb1d4c91e48e4b3aef91",
+  "execution_preregistration_head_commit": "5dc0fd2517a438e5202ba0de3d13cd972636c317",
+  "c1_harness_digest": "4437074249d5ca3a64906180f600f9a6f8a65f62b420eb7c13b8d0094e69ab7c",
+  "c1_harness_n_files": 73,
   "isolation_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
   "c0_preregistration": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
   "battery": {
@@ -180,7 +183,7 @@
    "soft_stop_usd": 14.7841,
    "hard_ceiling_usd": 15.1475,
    "cumulative_cap_usd": 283.76,
-   "cumulative_spend_at_approval_usd": 266.191
+   "cumulative_spend_at_approval_usd": 266.8158
   }
  },
  "one_use": "ONE grant, ONE issuance, ONE launch attempt. No automatic retry, no second attempt, no automatic ceiling increase. A failure is the attempt's result and needs a new maintainer review.",
@@ -188,6 +191,7 @@
   "any retry",
   "any replacement pod",
   "a second provider-created attempt",
+  "a second provider resource of any kind",
   "another attempt",
   "Phase A",
   "Phase B search",
@@ -199,6 +203,7 @@
   "any extra seed",
   "any adaptive rerun",
   "partial-stage execution",
+  "any reduced or canary run",
   "Phase C2",
   "formal Stage-2/Stage-3 recovery",
   "canonical Stage-1 NLL",
@@ -208,5 +213,5 @@
   "any hard-ceiling increase beyond $15.1475",
   "any cumulative-cap increase"
  ],
- "authorization_sha256": "0b15a9204172c924772df539ee279cb3b21ce184431d9a6fe5c70c32e6eafcf9"
+ "authorization_sha256": "a65fd7e67da347ca119912772479254b1625238924d0be27da1af0185ea1155a"
 }
