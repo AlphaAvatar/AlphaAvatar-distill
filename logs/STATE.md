@@ -1,6 +1,72 @@
 **Updated:** 2026-09-07 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
 ATTEMPT-9 GRANT RECORDED — NOT AUTHORIZED, STILL NEVER MEASURED**
 
+> **Post-provider ownership repair and the P12 record-rule split, 2026-09-07 —
+> `$0.0000`, no pod, no GPU, no provider resource.** The second authorization
+> review found one more material defect and, because repairing it collided with
+> a frozen-set contract, approved a narrow amendment to how that contract is
+> accounted for.
+>
+> **The defect.** `SessionRunner.create()` judged the returned `costPerHr`
+> **before** registering the resource: a one-shot unconfirmed
+> `remove pod <pid>` and `return False`, all above `self.pod_id = pid`.
+> Everything downstream keys on `pod_id`, so that path had **no watchdog, no
+> `teardown_now`, no `provider_confirms_gone`, no cost** — and nothing for
+> `run_session`'s handler to tear down — while a pod billed. It recorded itself
+> exactly like a `$0` pre-provider refusal, and the one-use grant would have
+> been reported unconsumed after being consumed.
+>
+> **The boundary is the first non-empty pod id.** Registration is now
+> unconditional and saved first — id, start epoch, actual price,
+> `provider_resource_created`, `one_use_grant_consumed` — and the detached
+> watchdog starts *there*, not after `create()` returns success, so a rejected
+> pod is still under an independent hard-cap backstop. `launch_watchdog` is
+> idempotent per pod id, so the accepted path gets exactly one; `run()` no
+> longer starts it. Over-price is then a **post-provider consumed abort**: no
+> setup, no driver, no retry, no redraw, canonical `teardown_now()` with
+> confirmation polling, and `is_zero_dollar_pre_provider_refusal: false` written
+> as a field. If confirmation fails, `provider_confirms_gone` stays false, the id
+> and cost stay, and the watchdog remains the backstop.
+>
+> **Why this needed a maintainer.** `session_runner.py` sits in **five**
+> hash-bound sets, and the repair removes lines Phase B ran — measured, `29/0`
+> became `73/5` against the Phase-B baseline. It is genuinely **not additive**,
+> and the sealed declaration says a non-additive change *"must fail the gate
+> rather than be appended to this list"*. Declaring it additive would have been
+> false; leaving it undeclared would have left an unexplained digest. The session
+> stopped there and asked.
+>
+> **The approved split.** Historical accounting and launch compatibility are now
+> different questions with different mechanisms:
+>
+> | question | mechanism | answer here |
+> | --- | --- | --- |
+> | is the drift explained? | `post_freeze.historical_accounted_for` over the new append-only ledger | **TRUE** |
+> | may Phase B launch against this tree? | `post_freeze.accounted_for`, unchanged | **FALSE** |
+>
+> That pair is the required invariant, and it is asserted as a test.
+> [`autoinit_phase_b_historical_amendments.json`](autoinit_phase_b_historical_amendments.json)
+> is append-only, anchored by hash to the immutable preregistration and to the
+> sealed v1 note, chained by entry hash, and it **confers nothing** — every entry
+> asserts `launch_compatible_with_frozen_preregistration: false`, and the paid
+> gate is asserted never to read it. Nothing in it is believed: the numstat, the
+> patch hash, the per-file after-hashes and the sealed note's hash are all
+> re-derived from git and the tree.
+>
+> **Both immutable Phase-B records are byte-identical to `bd4e5880`**, asserted
+> by test. `record_phase_b_post_freeze.py` is **sealed read-only** — run once on
+> 2026-09-07 it silently dropped four accumulated `history` entries and moved
+> `c1` out of `pre_existing_unchanged`, making the gate it feeds refuse its own
+> output. The continuation-B declaration, whose rule has no additive
+> requirement, was **appended** to honestly.
+>
+> **Verification.** 19 ownership cases and 23 ledger cases. Six ownership
+> mutations red — raw remove before registration, `pod_id` below the price check,
+> confirmation suppressed, watchdog delayed, a second watchdog, a second create.
+> Fourteen ledger falsifications refused, including the additive lie, a false
+> patch hash, a broken chain and `launch_compatible: true`. Frozen science: 43
+> rows, **MOVED = 0**.
+
 > **Authorization review, 2026-09-07 — issuance NO-GO, one narrow `$0` repair.**
 > The Attempt-9 grant and its first launch-bound record were reviewed at
 > `origin/main 414a3fa` and accepted as genuine `$0` evidence. **Issuance was

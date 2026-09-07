@@ -343,10 +343,40 @@ def test_the_prechecks_refuse_before_a_pod_exists(spec):
     assert ok, why
 
 
-def test_the_preregistration_gate_binds_the_executable_and_both_mixtures():
+def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
+    """It used to assert this gate PASSES. That expectation is now inverted, and
+    inverting it is the point of the 2026-09-07 P12 amendment.
+
+    A reviewed post-provider ownership repair to `session_runner.py` — a shared
+    runtime file inside the Phase-B set — removed lines Phase B ran. The frozen
+    preregistration therefore no longer describes this tree, and the gate that
+    guards a paid Phase-B launch must say so. Historical accounting moved to
+    `logs/autoinit_phase_b_historical_amendments.json`; launch compatibility
+    stayed here and stayed strict.
+
+    Asserting `ok` again would mean the amendment had quietly become permission.
+    """
+    from aadistill.autoinit.phase_b import phase_b_source_digest
+    from aadistill.autoinit.post_freeze import historical_accounted_for
+
+    prereg = json.loads(
+        (REPO / "logs/autoinit_phase_b_preregistration.json").read_text())
+    frozen = prereg["executable_source"]["digest"]
+    live = phase_b_source_digest(REPO)["digest"]
+
     ok, why = pbl.preregistration_gate(types.SimpleNamespace())
-    assert ok, why
-    assert "binds this executable and both mixtures" in why
+    if frozen == live:
+        assert ok, why
+        assert "binds this executable and both mixtures" in why
+        return
+
+    assert not ok, ("the paid Phase-B gate accepted a tree the frozen "
+                    f"preregistration does not describe: {why}")
+    assert "not declared" in why or "additive" in why
+
+    # ...and the same drift IS explained, through the ledger the gate cannot read
+    accounted, _ = historical_accounted_for(frozen, live, REPO)
+    assert accounted, "the drift is refused for launch AND unexplained"
 
 
 def test_the_reuse_gate_proves_the_ten_probe_budget():

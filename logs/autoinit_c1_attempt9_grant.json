@@ -85,29 +85,65 @@
   "this_session_stops_at": "step 5. Issuance, bundle staging, the pre-provider gates and the launch are all OUT OF SCOPE and explicitly not permitted here.",
   "frozen_after_this_commit": "no source, test, preregistration, state, catalog, decision or README path may move between this commit and launch. Exactly two tracked paths may: logs/c1_pod_environment_verification.json and logs/autoinit_c1_authorization.json."
  },
- "authorization_review": {
-  "_what_this_is": "the independent authorization review of this grant and its first launch-bound record, at origin/main 414a3fa.",
-  "verdict": "ISSUANCE NO-GO. The grant and the launch-bound record are accepted as genuine $0 evidence; issuance is withheld.",
-  "four_runtime_repairs": "REMAIN ACCEPTED, unchanged and not reopened.",
-  "defects_found": [
-   "the C1 acquisition contract did not enforce this grant's own terms: the launcher defaulted to --create-attempts 8 and --host-draws 3, so a cold or endpoint-less first pod would have been deleted and a SECOND drawn -- a replacement pod this grant forbids -- and a create failure would have slept 300 s and retried against changing stock.",
-   "logs/current_state.json simultaneously declared this grant present and stated in three live fields that no C1 grant exists."
-  ],
-  "authorized_at_zero_dollars": [
-   "one narrow fifth OPERATIONAL repair: the C1 launcher now fixes create_attempts and host_draws at 1 by argparse type AND at spec construction, so exactly one provider resource is possible, the cold/no_endpoint redraw branch is unreachable, and there is no stock wait. SessionRunner is untouched; other phases keep multi-draw.",
-   "the current-state correction, with a structural regression that refuses a snapshot which declares a grant and denies one."
-  ],
-  "issuance": "REMAINS ABSENT, and is conditional on a FRESH launch-bound review: the acquisition repair moves the executable, so the readiness record swept before it no longer describes this tree.",
-  "unchanged_by_this_review": [
-   "one issuance",
-   "one launch attempt",
-   "one provider resource",
-   "consumption on provider-resource creation, with no retry and no replacement pod",
-   "accepted secure L40S price <= $1.09/h",
-   "hard ceiling $15.1475",
-   "cumulative cap $283.7600",
-   "the frozen scientific scope, in full"
-  ],
-  "experiment_label": "Attempt 9. The grant is superseded in TEXT only -- no authorization was issued and no provider resource was created, so there is nothing to retire and no Attempt 10."
- }
+ "authorization_review_history": [
+  {
+   "utc": "2026-09-07T06:00:00Z",
+   "_what_this_is": "the independent authorization review of this grant and its first launch-bound record, at origin/main 414a3fa.",
+   "verdict": "ISSUANCE NO-GO. The grant and the launch-bound record are accepted as genuine $0 evidence; issuance is withheld.",
+   "four_runtime_repairs": "REMAIN ACCEPTED, unchanged and not reopened.",
+   "defects_found": [
+    "the C1 acquisition contract did not enforce this grant's own terms: the launcher defaulted to --create-attempts 8 and --host-draws 3, so a cold or endpoint-less first pod would have been deleted and a SECOND drawn -- a replacement pod this grant forbids -- and a create failure would have slept 300 s and retried against changing stock.",
+    "logs/current_state.json simultaneously declared this grant present and stated in three live fields that no C1 grant exists."
+   ],
+   "authorized_at_zero_dollars": [
+    "one narrow fifth OPERATIONAL repair: the C1 launcher now fixes create_attempts and host_draws at 1 by argparse type AND at spec construction, so exactly one provider resource is possible, the cold/no_endpoint redraw branch is unreachable, and there is no stock wait. SessionRunner is untouched; other phases keep multi-draw.",
+    "the current-state correction, with a structural regression that refuses a snapshot which declares a grant and denies one."
+   ],
+   "issuance": "REMAINS ABSENT, and is conditional on a FRESH launch-bound review: the acquisition repair moves the executable, so the readiness record swept before it no longer describes this tree.",
+   "unchanged_by_this_review": [
+    "one issuance",
+    "one launch attempt",
+    "one provider resource",
+    "consumption on provider-resource creation, with no retry and no replacement pod",
+    "accepted secure L40S price <= $1.09/h",
+    "hard ceiling $15.1475",
+    "cumulative cap $283.7600",
+    "the frozen scientific scope, in full"
+   ],
+   "experiment_label": "Attempt 9. The grant is superseded in TEXT only -- no authorization was issued and no provider resource was created, so there is nothing to retire and no Attempt 10."
+  },
+  {
+   "utc": "2026-09-07T12:00:00Z",
+   "_what_this_is": "the second independent authorization review, at origin/main bd4e5880.",
+   "verdict": "ISSUANCE NO-GO. One narrow $0 repair authorized under P12.",
+   "finding": "SessionRunner.create() judged the returned costPerHr BEFORE registering the provider resource, so a created, billing pod that failed the price check had no pod_id, no watchdog, no verified teardown and no evidence, and recorded itself as a $0 pre-provider refusal while the one-use grant was in fact consumed.",
+   "claude_stopped_correctly": "the repair is non-additive to the frozen Phase-B executable set (measured: 29/0 became 73/5 against the Phase-B baseline). Claude refused to declare it additive, refused to leave dead unreachable code to satisfy numstat, refused to weaken the gate, refused to overwrite the accumulated post-freeze history with the stale generator, and refused a C1-only ownership bypass. That stop was correct and is the reason this review exists.",
+   "p12_decision": "historical accounting and live launch compatibility are SEPARATED. A new append-only ledger records reviewed post-completion drift; the paid Phase-B gate keeps refusing non-additive drift. Required invariant: historically accounted for = true AND launch-compatible with the old frozen Phase-B preregistration = false.",
+   "authorized_at_zero_dollars": [
+    "the shared SessionRunner post-provider ownership and watchdog repair",
+    "logs/autoinit_phase_b_historical_amendments.json and its writer",
+    "sealing scripts/autoinit/record_phase_b_post_freeze.py read-only"
+   ],
+   "not_authorized": [
+    "re-freezing Phase B",
+    "running Phase B",
+    "issuance",
+    "relay bundle staging",
+    "the 12 pre-provider gates",
+    "any live price or stock check",
+    "Attempt 10"
+   ],
+   "issuance": "REMAINS ABSENT and conditional on a FRESH launch-bound review: this repair moves the executable again.",
+   "unchanged_by_this_review": [
+    "one issuance",
+    "one launch attempt",
+    "one provider resource",
+    "consumption at provider-resource creation",
+    "accepted secure L40S price <= $1.09/h",
+    "hard ceiling $15.1475",
+    "cumulative cap $283.7600",
+    "the frozen scientific scope, in full"
+   ]
+  }
+ ]
 }

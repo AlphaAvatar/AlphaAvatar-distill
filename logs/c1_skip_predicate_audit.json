@@ -1,22 +1,22 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 149,
+ "modules_scanned": 151,
  "test_ignores": [
   "tests/data/test_recovery_corpus_pipeline.py",
   "tests/pod/test_phase_a_stages1_5_execute.py",
   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
   "tests/autoinit/test_stage1_import.py"
  ],
- "n_predicates": 97,
+ "n_predicates": 101,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 37,
+  "filesystem_premise_onpod": 40,
   "filesystem_premise_unresolved": 4,
   "gpu": 1,
   "optional_dependency": 9,
-  "repository_content": 2,
+  "repository_content": 3,
   "staged_artifact": 3,
   "unrecognised": 25,
   "unstaged_artifact": 9
@@ -105,7 +105,7 @@
   "absent_on_both": 9,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 29,
-  "same_on_pod": 50
+  "same_on_pod": 54
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -574,6 +574,70 @@
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
    "line": 356,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "not PREREG.is_file()",
+   "expanded": "not PREREG.is_file() | PREREG=REPO / \"logs/autoinit_phase_b_preregistration.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/autoinit/test_phase_b_plan.py",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/autoinit/test_phase_b_plan.py",
+   "line": 379,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "not PREREG.is_file()",
+   "expanded": "not PREREG.is_file() | PREREG=REPO / \"logs/autoinit_phase_b_preregistration.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/autoinit/test_phase_b_plan.py",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/autoinit/test_phase_b_plan.py",
+   "line": 395,
+   "kind": "pytest.skip",
+   "function": "test_nonadditive_historical_amendment_does_not_make_phase_b_launchable",
+   "condition": "frozen == live",
+   "expanded": "frozen == live | frozen=prereg[\"executable_source\"][\"digest\"] | live=phase_b_source_digest(REPO)[\"digest\"] | REPO=Path(__file__).resolve().parents[2] | prereg=json.loads(PREREG.read_text()) | PREREG=REPO / \"logs/autoinit_phase_b_preregistration.json\"",
+   "signal": "repository_content",
+   "verdict": "same_on_pod",
+   "why": "tracked content the bundle checkout carries",
+   "nodeid": "tests/autoinit/test_phase_b_plan.py::test_nonadditive_historical_amendment_does_not_make_phase_b_launchable",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "the bundle checkout carries it"
+  },
+  {
+   "file": "tests/autoinit/test_phase_b_plan.py",
+   "line": 403,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "not PREREG.is_file()",
+   "expanded": "not PREREG.is_file() | PREREG=REPO / \"logs/autoinit_phase_b_preregistration.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/autoinit/test_phase_b_plan.py",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/autoinit/test_phase_b_plan.py",
+   "line": 420,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -1775,5 +1839,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "6511753f233b93a8ebd35bbc7dbdfd3e1098cdec0711dd731c506ef71243f33b"
+ "digest": "663f23c16f40e6255edcec0d85c8abd308de449d93248099d799f3f8887b9dd7"
 }

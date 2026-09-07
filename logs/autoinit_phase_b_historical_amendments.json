@@ -1,0 +1,72 @@
+{
+ "schema": "aadistill.autoinit.phase_b_historical_amendments/v1",
+ "_what_this_is": "an APPEND-ONLY ledger of reviewed, post-completion drift in the Phase-B executable source set. It exists because 'this tree may not launch Phase B' and 'nobody explained why the digest moved' are different facts and the repository had one mechanism for both. It records history and confers nothing.",
+ "consumed_by_a_paid_launch_gate": false,
+ "launch_compatibility_owner": "scripts/pod/autoinit_phase_b_launch.py::preregistration_gate, via aadistill.autoinit.post_freeze.accounted_for \u2014 which is unchanged and still refuses non-additive drift",
+ "immutability": "logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_post_freeze_changes.json are anchored by hash above and are never rewritten by this command.",
+ "anchors": {
+  "phase_b_preregistration": "logs/autoinit_phase_b_preregistration.json",
+  "phase_b_preregistration_sha256": "65162317a298f6108b9902e7dce4b45a66b4d8e770406a2400e80d6e0dc2edc2",
+  "phase_b_frozen_source_digest": "3d3b5d0717723cd3bf81bd9e8da1cedb0d78dc927e52d310e43b1d3a7d66f993",
+  "phase_b_frozen_set_version": 6,
+  "sealed_legacy_note": "logs/autoinit_phase_b_post_freeze_changes.json",
+  "sealed_legacy_note_sha256": "c152e625ee38cb3d44fb06d1fed238499d6941947620130b11b046846e95a53f",
+  "legacy_post_freeze_digest": "03b2f0f20068494b91479b0d52a0a12d606b27f293c75573d16b211e61fe7058",
+  "_why": "the ledger begins where the sealed v1 note stopped. That note is anchored by hash and never rewritten; this file appends the facts it cannot express."
+ },
+ "amendments": [
+  {
+   "amendment_id": "PHB-HA-001",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-07T11:41:17+00:00",
+   "reviewed_base_commit": "bd4e5880e458cdf57d5cffb2fdf89014e82ba50c",
+   "source_repair_commit": "5dc0fd2517a438e5202ba0de3d13cd972636c317",
+   "source_repair_parent": "bd4e5880e458cdf57d5cffb2fdf89014e82ba50c",
+   "previous_live_digest": "03b2f0f20068494b91479b0d52a0a12d606b27f293c75573d16b211e61fe7058",
+   "new_live_digest": "372c1f2438ad0b1698a2ceacbfa4e76acbb9147e38e735bc4d0152c6f894bbc3",
+   "changed_files": [
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/infrastructure/session_runner.py": "e8087c0ae41423b51139ac8a9806f3d259a26f3471168d9255a979acf55edb31"
+   },
+   "file_sha256_after": {
+    "src/aadistill/infrastructure/session_runner.py": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91"
+   },
+   "patch_sha256": "1dd6022d5bf476332103204c119fdc47b092d33e4ad73fe8950c64fb4fa1c2c8",
+   "numstat": {
+    "src/aadistill/infrastructure/session_runner.py": [
+     69,
+     8
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 8,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "post-provider resource ownership in SessionRunner.create(): the pod id, start epoch, actual costPerHr, provider_resource_created and one_use_grant_consumed are assigned, persisted and saved, and the detached watchdog is started, BEFORE the returned price is judged. An over-price resource is then classified as a post-provider consumed abort and torn down through the canonical teardown_now() with provider confirmation, instead of a one-shot unconfirmed 'remove pod' issued before the resource was ever registered.",
+   "why_the_owner_is_shared_session_runner": "the defect is in SessionRunner.create(), the only place a returned provider id is parsed, and registration must happen at that parse. Every downstream owner -- the watchdog, teardown_now, run_session's exception handler -- keys on self.pod_id, so no caller can repair it from outside. Phase A, Phase B, the continuations and the preflight share this code and share the defect.",
+   "why_a_c1_only_override_was_rejected": "a C1-only create() override would leave every other session with an unowned billing pod on the same path, and would create a second deletion implementation beside teardown_now -- the exact duplication the review forbade.",
+   "maintainer_authorization": "MAINTAINER P12 DECISION, 2026-09-07, at origin/main bd4e5880: the stop at the non-additive frozen-set contract was correct; historical accounting and live launch compatibility are hereby SEPARATED; this one narrow shared-runner ownership repair is authorized at $0. Not permission to re-freeze Phase B and not permission to run it.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": null,
+   "also_affected_hash_bound_sets": [
+    "aadistill.autoinit.authorization.HARNESS_SOURCE_FILES_V1",
+    "aadistill.autoinit.c1_authorization.C1_HARNESS_SOURCE_FILES_V1",
+    "aadistill.autoinit.phase_a.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "aadistill.autoinit.phase_b_continuation.CONTINUATION_SOURCE_FILES_V2"
+   ],
+   "entry_sha256": "6f5e1fd5e4986374d9b0086bf427aae5c12536e5235ec2c1517a630daaff4db6"
+  }
+ ]
+}

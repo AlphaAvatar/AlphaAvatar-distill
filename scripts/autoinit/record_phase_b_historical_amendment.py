@@ -35,8 +35,18 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from aadistill.autoinit.authorization import (  # noqa: E402
+    HARNESS_SOURCE_FILES_V1,
+)
+from aadistill.autoinit.phase_a import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
 from aadistill.autoinit.phase_b import (  # noqa: E402
     PHASE_B_EXECUTABLE_SOURCE_FILES_V1, phase_b_source_digest,
+)
+from aadistill.autoinit.phase_b_continuation import (  # noqa: E402
+    CONTINUATION_SOURCE_FILES_V2,
+)
+from aadistill.autoinit.c1_authorization import (  # noqa: E402
+    C1_HARNESS_SOURCE_FILES_V1,
 )
 from aadistill.autoinit.post_freeze import (  # noqa: E402
     HISTORICAL_LEDGER_PATH, HISTORICAL_LEDGER_SCHEMA, SEALED_LEGACY_NOTE,
@@ -168,6 +178,19 @@ def main() -> int:
             "any relaxation of autoinit_phase_b_launch.preregistration_gate",
         ],
         "previous_entry_sha256": existing[-1]["entry_sha256"] if existing else None,
+        #: The same shared file sits in other hash-bound sets. Derived, so the
+        #: blast radius is recorded here rather than discovered later.
+        "also_affected_hash_bound_sets": sorted(
+            name for name, files in (
+                ("aadistill.autoinit.phase_a.PHASE_A_HARNESS_SOURCE_FILES_V1",
+                 PHASE_A_HARNESS_SOURCE_FILES_V1),
+                ("aadistill.autoinit.phase_b_continuation."
+                 "CONTINUATION_SOURCE_FILES_V2", CONTINUATION_SOURCE_FILES_V2),
+                ("aadistill.autoinit.authorization.HARNESS_SOURCE_FILES_V1",
+                 HARNESS_SOURCE_FILES_V1),
+                ("aadistill.autoinit.c1_authorization."
+                 "C1_HARNESS_SOURCE_FILES_V1", C1_HARNESS_SOURCE_FILES_V1),
+            ) if set(changed) & set(files)),
     }
     entry["entry_sha256"] = entry_self_hash(entry)
 

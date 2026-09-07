@@ -1,29 +1,35 @@
 {
  "schema": "aadistill.autoinit.continuation_b_post_freeze_changes/v1",
- "generated_utc": "2026-09-06T06:00:00Z",
+ "generated_utc": "2026-09-07T12:00:00Z",
  "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "7b0f1f4cf97fb1a74702aa45f54d87b83e41ffe31800a025ff079c30f2bc3298",
+ "post_freeze_digest": "47efaf30a7919fc61b64db6483ab6022db385ad103273b95dae22b7eedbf1122",
  "changed_files": [
-  "scripts/pod/autoinit_preflight_setup.sh"
+  "scripts/pod/autoinit_preflight_setup.sh",
+  "src/aadistill/infrastructure/session_runner.py"
  ],
  "change": {
-  "what": "the CPU-test parity repair: the pytest command in the gate now runs under `env $(cpu_test_env_args.py --home <fresh temp>)`, and the real runtime is re-asserted immediately afterwards (CUDA available, teacher cache present) before TESTS_OK.",
-  "why": "the launch-bound diagnostic runs on a CPU box with an empty HF cache and the pod is an L40S with the pinned teacher downloaded. The new exact skip-set comparison would have REFUSED a healthy pod: the one GPU predicate runs without CUDA and skips with it, and the tokenizer cases skip on an empty cache and would have run on the pod.",
-  "additive_only": true,
-  "lines_added": 23,
-  "lines_removed": 0,
-  "scope_note": "COMMAND-scoped, via `env`. Nothing is exported over setup, so the pinned install, the teacher download and the CUDA proof still happen in the real environment.",
-  "declared_at_commit": "216c87331aef67488042861fc7b59fb283990be8"
+  "what": "post-provider resource ownership in SessionRunner.create(): the pod id, start epoch, actual costPerHr and consumed-grant evidence are assigned, persisted and saved, and the detached watchdog is started, BEFORE the returned price is judged; an over-price resource is torn down through the canonical teardown_now() with provider confirmation instead of a one-shot unconfirmed remove issued before the resource was ever registered.",
+  "why": "the boundary is the first non-empty provider pod id. Registering after the price check left a created, billing pod with no watchdog, no verified teardown and no evidence, recorded as though it were a $0 pre-provider refusal.",
+  "additive_only": false,
+  "lines_removed": 8,
+  "numstat": "69\t8\tsrc/aadistill/infrastructure/session_runner.py",
+  "why_this_is_recorded_here_and_not_claimed_additive": "it is NOT additive: it removes lines the continuation ran. This declaration has no additive requirement -- it requires the change to be declared, the digest to be current and the preregistration not to have been rewritten. Phase B's declaration DOES require additivity, which is why the same change is recorded there through the separate append-only historical amendment ledger instead."
  },
  "pre_existing_branches_unchanged": true,
- "pre_existing_branches_note": "the phase_a, phase_b, continuation_b and recovery_continuation branches are byte-identical; the c1 branch was inserted before recovery_continuation and changed no other line",
+ "pre_existing_branches_note": "unchanged by this amendment: no SESSION_KIND branch was touched. The dispatcher is byte-identical; only session_runner.py moved.",
  "preregistration_rewritten": false,
- "scientific_impact": "NONE. No Phase-A/B result, metric, hash or artifact changes.",
- "declared_at_commit": "216c87331aef67488042861fc7b59fb283990be8",
- "post_freeze_digest_previous": "676a41afce5a6ae6ca548c90251a5763e82cf8e011290d6eacfad7570c43c1d5",
+ "scientific_impact": "NONE. No Phase-A/B/continuation result, metric, hash or artifact changes. Operational ownership only.",
+ "declared_at_commit": "5dc0fd2517a438e5202ba0de3d13cd972636c317",
+ "post_freeze_digest_previous": "7b0f1f4cf97fb1a74702aa45f54d87b83e41ffe31800a025ff079c30f2bc3298",
  "history": [
+  {
+   "utc": "2026-09-06T06:00:00Z",
+   "declared_at_commit": "216c87331aef67488042861fc7b59fb283990be8",
+   "digest_moved": "676a41afce5a6ae6 -> 7b0f1f4cf97fb1a7",
+   "change": "the CPU-test parity repair: the pytest command in the gate now runs under `env $(cpu_test_env_args.py --home <fresh temp>)`, and the real runtime is re-asserted immediately afterwards (CUDA available, teacher cache present) before TESTS_OK."
+  },
   {
    "utc": "2026-09-04T00:00:00Z",
    "declared_at_commit": "cd5cb7d3447db6e3a9a238c3c4f19c27fd4e7b0c",
@@ -71,5 +77,7 @@
   "continuation_b": "cf5fe9e05c6b20220b97f9d8d8e29bcefa16314b7f21f5c309d2a9a417cb02a6",
   "c1": "2b044b95a4570bc82d83683d9807cfbeeaae02ba5beee50f9085f047a67ea6e8",
   "recovery_continuation": "fb0f99e2ffa2aba3259e2ffda849350c779e90598749f4787b47b4996243b890"
- }
+ },
+ "launch_compatible": false,
+ "launch_compatible_note": "the continuation is CLOSED and CONSUMED; its authorization binds a non-HEAD commit, so no continuation-B session can launch again. This records history and confers nothing."
 }
