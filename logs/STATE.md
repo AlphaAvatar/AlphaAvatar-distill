@@ -1,5 +1,80 @@
 **Updated:** 2026-09-07 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-PHASE C1 STAGE-D CONTRACT REPAIRED AT `$0` — STILL NEVER MEASURED**
+FOUR C1 DEFECTS REPAIRED AT `$0` — STILL NEVER MEASURED**
+
+> **Stage-F and D/E repairs, 2026-09-07 — `$0.0000`, no pod, no grant, no
+> authorization.** Two more defects closed after the stage-D work below. **C1 is
+> still SCIENTIFICALLY UNMEASURED**: no completed replay, no treatment execution
+> on real weights, no training, no evaluation, no `correct_overall`, no
+> `usable_rollout`, no decision. Nothing here is ATTENTION evidence.
+>
+> *The stage-F repair was previously recorded only in `current_state.json`,
+> `BUDGET_LEDGER.md` and `CATALOG.md`. This file is the human view and it did not
+> carry it at all; that gap is closed here.*
+>
+> **3. Stage F could not run.** `self.parent` is the incumbent's **step-2**
+> output — after DEPTH, FFN and WIDTH — and `self.arms["treatment"]` is the full
+> **four**-step path, and `materialize_fixed_path` starts at step 0. Reproduced
+> at `$0` before it was repaired:
+>
+> ```
+> step 0 (depth.causal_kl_greedy_v1): not applicable to qwen3(…) —
+> num_hidden_layers already at target (4)
+> ```
+>
+> So it was not a wasted-prefix inefficiency; the stage raised. The repair is
+> `materialize_fixed_path_suffix`, which takes the **unchanged** full spec, checks
+> its hash against the frozen one and narrows only the executed index range —
+> `StepResult.index` stays 3 and the checkpoint stays `03_attention`. A
+> synthesized one-step spec was rejected as the fix: it would hash differently,
+> and an arm's identity **is** its full frozen path. Eight premises are refused
+> before any operator runs, plus checkpoint re-identification from disk, the
+> loaded model's ArchSpec, and root placement. `TREATMENT_SUFFIX_START_INDEX` is
+> `len(PREFIX_STEPS)`, derived, never written as `3`.
+>
+> The treatment arm now writes its own record, `c1_treatment_record.json`, and
+> the success artifact spec **requires both arm records**. It is deliberately not
+> called a replay: the treatment output was never pinned, so
+> `output_digest_was_pre_pinned` is an explicit `false` rather than an absent
+> field. Device verification became exhaustive at the same time — every parameter
+> and buffer, refusing meta tensors, mixed types, mixed CUDA ordinals and a wrong
+> exact ordinal, without moving the model. And the fixed path finally passes a
+> deadline: `OperatorContext.deadline` had existed for a long time and the search
+> passed one while the fixed path did not, so `depth.causal_kl_greedy_v1`'s
+> per-candidate check was a no-op on the C1 path. `C1OperatorDeadline` invents no
+> timeout and adds no second clock — it reads `usd()` and `soft_stop_usd`.
+>
+> **4. A stage-E failure was recorded against stage D.** `run()` walks
+> `("DE", self.stage_de)` because one method owns **two** observable gates, and
+> reported `self.fail(letter[0], …)`. So any ordinary exception in that method
+> was written as `STAGE_FAILED:D` — including one after the parent digest had
+> matched and `complete("D")` had recorded a PASS. It **overwrote** the passing
+> entry while `stages_completed` still carried `replay_parent`, so the session's
+> own evidence contradicted itself about which gate held. Reproduced before
+> repair; the unrepaired driver printed `STAGE_START:E` then `STAGE_FAILED:D`.
+>
+> Attribution now follows explicit driver state (`active_gate`), advanced to `E`
+> at the same point `STAGE_START:E` is emitted — never parsed from the status
+> log. And stage E's evidence is atomic: `complete("E")` used to fire from
+> `on_step` **before** the replay record was written, so a write failure could
+> leave `STAGE_PASSED:E` with no record to show. E now passes only after the
+> record is written **and reads back** — schema, path hash, both pinned steps'
+> expected and realized digests, `all_pinned_digests_matched`. If that fails, D
+> keeps its pass, E fails as ordinary infrastructure, and nothing claims a
+> mismatch, because both digests did match in memory.
+>
+> | | ordinary failure in the incumbent step | complete successful replay |
+> | --- | --- | --- |
+> | markers | `START:D → PASSED:D → START:E → FAILED:E → C1_FAILED` | `START:D → PASSED:D → START:E → PASSED:E → ALL_DONE` |
+>
+> **Verification.** Full suite **3067 passed / 16 skipped**, the only failures
+> being provenance records regenerated in the following commits. Fourteen
+> mutations of the production lines were each confirmed to turn the tests red —
+> eleven for the suffix and device work, and for this one: restoring
+> `self.fail(letter[0])`, moving `complete("E")` before the record, and neutering
+> the readback. Frozen science did not move: a 43-row table comparing
+> live-computed values against `git show eedd8ee:` reported **MOVED = 0**, and
+> the preregistration diff reports **scientific fields moved = 0** for both
+> rewrites. Neither expected replay digest was touched.
 
 > **Attempt-8 stage-D repair, 2026-09-07 — `$0.0000`, no pod, no grant, no
 > authorization.** Three defects closed, none scientific. **C1 is still
@@ -731,7 +806,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `a7ba9bbcc764…` at `head_commit 208b2865` · harness `d342b499238d…` over 73 files · every revision so far moved only executable identity; **no scientific field has ever moved**, and the 2026-09-07 rewrite was diffed field by field to show it |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `d8483467d361…` at `head_commit e87ab4c7` · harness `f7f29468d221…` over 73 files · executable source `ead856cf8ef9…` · every revision so far moved only executable identity; **no scientific field has ever moved**, and each 2026-09-07 rewrite was diffed field by field to show it |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |

@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "a20ba202a90a077fe8ed37c36798c7dd7bd85e89",
+ "head_commit": "e87ab4c71a4a22b19b3b0f9db2b3b01a8f9ecad9",
  "executable_source": {
   "digest": "ead856cf8ef9fff0ade258f8a143b78de4f16bf8c2e810e5ecf1a2c55ced1317",
   "files": [
@@ -51,7 +51,7 @@
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "b07afcd2a1a9603abcac3c9ce6b6e5ec03ce6599f0a65963b12cbce5640cf019",
+  "digest": "f7f29468d22112aa66d4973ef77a930ba1e62cf24db09803ecca0ccc52d089ae",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -100,8 +100,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_driver.py",
-    "sha256": "79193e1541b5e1ba045cdc4c368ca683c12d1a413857859f1c2d98e6f5596cd9",
-    "bytes": 56750
+    "sha256": "cb2adb26f072d314de5f8984ce86291c2e8d5369c5616711bcedd6633903e467",
+    "bytes": 61543
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
@@ -932,5 +932,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "f2a44303d5b37bf2fe360ae73b7723c1076b1de21202d3638f99f660c5ce35d2"
+ "preregistration_sha256": "d8483467d3612332e1ba9cd36ab3e7093173841ff29955e73e5b959e5904f57f"
 }
