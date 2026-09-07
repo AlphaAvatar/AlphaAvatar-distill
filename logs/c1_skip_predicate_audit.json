@@ -300,7 +300,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 786,
+   "line": 800,
    "kind": "pytest.skip",
    "function": "test_the_recorded_swept_commit_is_a_real_commit_in_this_repository",
    "condition": "not path.is_file()",
@@ -1822,5 +1822,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "3db3416cf2af69770473155b515b2ad4eacb6417002b5c1c651b86632b8f00de"
+ "digest": "1a9be33061225e6d78b7dd120e2f90a0742a847054b9ce89c554e72ea9fd1c82"
 }
