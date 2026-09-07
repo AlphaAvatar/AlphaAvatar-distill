@@ -11,6 +11,22 @@ must track the code — a stale note is refused by
 Running this does NOT make a change acceptable. It records the change so the gate
 can check it, and the gate still refuses a non-additive change, a change that
 touches a pre-existing dispatch branch, or a branch hash that does not re-derive.
+LEGACY / READ-ONLY as of 2026-09-07.
+
+    This command REFUSES to run when the v1 declaration already exists.
+
+It regenerates ONE v1 body from the tree. That was right when there was one
+change to declare; it is wrong now, because the file has accumulated four
+`history` entries, a `declared_at_commit`, a measured cumulative numstat and a
+`post_freeze_digest_previous` that this generator does not reproduce. Running it
+on 2026-09-07 silently dropped all of them, and its branch parser also moved
+`c1` out of `pre_existing_unchanged`, which made the very gate it feeds refuse
+the result.
+
+Post-completion drift is now appended by
+`scripts/autoinit/record_phase_b_historical_amendment.py`, which reads every
+existing entry and adds exactly one. The v1 note is SEALED: it is anchored by
+hash from the amendment ledger, and rewriting it breaks that anchor by design.
 """
 
 from __future__ import annotations
@@ -55,6 +71,17 @@ def branch_bodies(text: str) -> dict[str, str]:
 
 
 def main() -> None:
+    #: Sealed. A generator that cannot express the accumulated history must not
+    #: be able to overwrite it — this is the check, not a comment asking for one.
+    note = REPO_ROOT / "logs/autoinit_phase_b_post_freeze_changes.json"
+    if note.is_file():
+        raise SystemExit(
+            "refusing: logs/autoinit_phase_b_post_freeze_changes.json is the "
+            "SEALED v1 declaration and this generator rebuilds a single v1 body "
+            "rather than preserving its accumulated history. Running it here "
+            "would drop entries and break the hash the amendment ledger anchors "
+            "it by. Append post-completion drift with "
+            "scripts/autoinit/record_phase_b_historical_amendment.py instead.")
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="logs/autoinit_phase_b_post_freeze_changes.json")
     args = ap.parse_args()

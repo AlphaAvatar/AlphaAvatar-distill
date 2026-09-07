@@ -354,26 +354,82 @@ def test_the_operator_branching_rule_is_frozen_with_the_reasons():
 
 
 @pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
-def test_any_post_freeze_change_to_the_phase_b_executable_is_recorded_and_additive():
-    """The frozen digest may move, but only for a recorded, reviewed reason.
+def test_completed_phase_b_drift_is_historically_accounted_for():
+    """Every move of the frozen digest has a reviewed explanation.
 
-    `autoinit_preflight_setup.sh` is in the Phase-B source set AND is the single
-    `SESSION_KIND` dispatcher for every session this repository can launch, so
-    adding the behavioural continuation necessarily touched it. Three responses
-    were available and two are wrong: rewriting the preregistration destroys the
-    evidence of what attempt 5 ran, and deleting this assertion destroys its
-    meaning.
+    This used to be one test asserting the whole live drift was ADDITIVE, and
+    that claim became false on 2026-09-07: a reviewed post-provider ownership
+    repair to `session_runner.py` — a shared runtime file inside the Phase-B set
+    — removes five lines that Phase B ran. Measured, `29 0` became `73 5`.
 
-    The rule itself lives in `aadistill.autoinit.post_freeze` because the paid
-    launcher's `preregistration_gate` enforces exactly the same one. A test that
-    reimplemented it would be free to drift from the gate it claims to describe.
+    Declaring that additive would have been a lie, and leaving it undeclared
+    would have left an unexplained digest. So the two questions the single test
+    conflated are now separate: this one asks whether the drift is EXPLAINED,
+    and `test_nonadditive_historical_amendment_does_not_make_phase_b_launchable`
+    asks whether it is LAUNCHABLE. The answers are yes and no.
+    """
+    from aadistill.autoinit.post_freeze import historical_accounted_for
+
+    prereg = json.loads(PREREG.read_text())
+    ok, why = historical_accounted_for(prereg["executable_source"]["digest"],
+                                       phase_b_source_digest(REPO)["digest"], REPO)
+    assert ok, why
+
+
+@pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
+def test_nonadditive_historical_amendment_does_not_make_phase_b_launchable():
+    """Accounting for history must never become permission to run.
+
+    `accounted_for` is what the paid launcher's `preregistration_gate` calls. It
+    is unchanged and still refuses non-additive drift, so the current tree is
+    NOT launch-compatible with the frozen Phase-B preregistration — which is the
+    correct answer, because that preregistration describes code this tree no
+    longer contains.
     """
     from aadistill.autoinit.post_freeze import accounted_for
 
     prereg = json.loads(PREREG.read_text())
-    ok, why = accounted_for(prereg["executable_source"]["digest"],
-                            phase_b_source_digest(REPO)["digest"], REPO)
-    assert ok, why
+    frozen = prereg["executable_source"]["digest"]
+    live = phase_b_source_digest(REPO)["digest"]
+    if frozen == live:
+        pytest.skip("the tree has not drifted; there is nothing to refuse")
+    ok, why = accounted_for(frozen, live, REPO)
+    assert not ok, (
+        "the strict launch-compatibility rule accepted a tree the historical "
+        f"ledger records as non-additive: {why}")
+    assert "additive" in why or "further change" in why
+
+
+@pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
+def test_the_historical_ledger_cannot_be_read_as_launch_permission():
+    """Belt and braces: the ledger says it of itself, in a field."""
+    from aadistill.autoinit.post_freeze import HISTORICAL_LEDGER_PATH
+
+    led = json.loads((REPO / HISTORICAL_LEDGER_PATH).read_text())
+    assert led["consumed_by_a_paid_launch_gate"] is False
+    for e in led["amendments"]:
+        assert e["launch_compatible_with_frozen_preregistration"] is False
+        assert e["phase_b_science_changed"] is False
+        assert e["historical_only"] is True
+
+    gate_src = (REPO / "scripts/pod/autoinit_phase_b_launch.py").read_text()
+    assert "historical_accounted_for" not in gate_src
+    assert HISTORICAL_LEDGER_PATH not in gate_src
+
+
+@pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
+def test_the_immutable_phase_b_records_are_byte_identical_to_the_reviewed_base():
+    """The preregistration and the sealed v1 note are evidence, not state."""
+    import subprocess
+
+    for rel in ("logs/autoinit_phase_b_preregistration.json",
+                "logs/autoinit_phase_b_post_freeze_changes.json"):
+        at_base = subprocess.run(
+            ["git", "-C", str(REPO), "show", f"bd4e5880:{rel}"],
+            capture_output=True).stdout
+        assert at_base, f"{rel} is missing at the reviewed base"
+        assert (REPO / rel).read_bytes() == at_base, (
+            f"{rel} changed; it is anchored by hash and must stay identical")
 
 
 def test_the_drift_rule_refuses_everything_it_should():

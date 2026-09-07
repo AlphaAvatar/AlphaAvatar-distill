@@ -155,6 +155,9 @@ class SessionRunner:
         self.ev.update(dict(spec.evidence_fields))
         self.pod_id = ""
         self.start_epoch = 0.0
+        #: The provider resource the detached watchdog already owns, so a second
+        #: call cannot start a second backstop against the same pod.
+        self._watchdog_for = ""
         self.price = None
         self.plan = None
         self.endpoint = ("", "")
@@ -345,17 +348,25 @@ class SessionRunner:
                 m = re.search(r'"id"\s*:\s*"([^"]+)"', raw.stdout + raw.stderr)
                 pid = m.group(1) if m else ""
             if pid:
+                #: THE PROVIDER BOUNDARY IS THE ID, NOT THE PRICE CHECK.
+                #:
+                #: A non-empty id means a resource EXISTS and is billing. Until
+                #: 2026-09-07 the over-price branch ran BEFORE any of this:
+                #: `remove pod <pid>` one-shot, unconfirmed, then `return False`
+                #: — so `pod_id` was never set, no watchdog was launched, the
+                #: exception path in `run_session` had nothing to tear down, and
+                #: a session that had created and been billed for a pod recorded
+                #: itself exactly like a `$0` pre-provider refusal. The one-use
+                #: grant would have been reported unconsumed after consuming it.
+                #:
+                #: So registration comes first, unconditionally, and is SAVED
+                #: before anything can reject the resource.
                 try:
                     actual = json.loads(raw.stdout).get("costPerHr")
                     if actual is not None:
                         self.price = float(actual)
                 except Exception:
                     pass
-                if self.price > self.a.max_price:
-                    self.say(f"ABORT: provisioned at ${self.price}/h — deleting")
-                    subprocess.run([self.cli, "remove", "pod", pid],
-                                   capture_output=True, timeout=120)
-                    return False
                 if not self.start_epoch:
                     self.start_epoch = time.time()
                     (self.scr / "pod_start_epoch").write_text(str(self.start_epoch))
@@ -364,6 +375,42 @@ class SessionRunner:
                 self.ev["pod_id"] = pid
                 self.ev["actual_price_per_hour"] = self.price
                 self.ev["terminate_after_utc"] = deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
+                self.ev["provider_resource_created"] = True
+                self.ev["one_use_grant_consumed"] = True
+                #: The independent backstop starts HERE, not after `create()`
+                #: returns success. A pod rejected on its returned price is
+                #: still a billing pod, and the watchdog is the only thing that
+                #: survives this process dying mid-teardown.
+                self.launch_watchdog()
+                self.save()
+
+                if self.price > self.a.max_price:
+                    #: A POST-PROVIDER abort. Not a price refusal — the refusal
+                    #: that costs nothing happens in `check_gpu_offered`, before
+                    #: `create` is called at all. Here the money has started.
+                    self.say(f"ABORT: provisioned at ${self.price}/h, above the "
+                             f"${self.a.max_price}/h ceiling — a provider "
+                             f"resource EXISTS ({pid}) and the one-use grant is "
+                             "CONSUMED. Tearing down with confirmation.")
+                    self.ev["post_provider_abort"] = {
+                        "reason": "returned costPerHr above max_price",
+                        "returned_price_per_hour": self.price,
+                        "max_price_per_hour": self.a.max_price,
+                        "provider_resource_created": True,
+                        "one_use_grant_consumed": True,
+                        "is_zero_dollar_pre_provider_refusal": False,
+                        "setup_started": False,
+                        "driver_started": False,
+                        "retried": False,
+                        "replaced": False,
+                        "note": ("the pod id is retained after termination: an "
+                                 "abort that deletes its own evidence cannot be "
+                                 "ledgered, and this one has a real cost."),
+                    }
+                    self.teardown_now(
+                        f"provisioned at ${self.price}/h above ${self.a.max_price}/h")
+                    return False
+
                 self.say(f"created {pid} at ${self.price}/h")
                 return True
             self.say(f"attempt {attempt}: create failed — "
@@ -374,8 +421,18 @@ class SessionRunner:
         return False
 
     def launch_watchdog(self) -> Path:
-        """Independent of the driver and of this runner, by construction."""
+        """Independent of the driver and of this runner, by construction.
+
+        IDEMPOTENT per provider resource. `create()` starts the backstop the
+        moment a pod id exists, because that is when billing starts; `run()`
+        used to start it afterwards. Two call sites for one resource would mean
+        two detached processes racing to terminate the same pod, so the second
+        call returns the journal it already owns. A genuine redraw gets a new
+        pod id and therefore a new watchdog.
+        """
         journal = self.scr / "watchdog.jsonl"
+        if self._watchdog_for and self._watchdog_for == self.pod_id:
+            return journal
         cmd = [sys.executable, str(self.repo_root / "scripts/pod/watchdog.py"),
                "--pod-id", self.pod_id,
                "--session-start-epoch", str(self.start_epoch),
@@ -388,6 +445,9 @@ class SessionRunner:
                          stdin=subprocess.DEVNULL, cwd=self.repo_root,
                          env={**os.environ, "PYTHONPATH": str(self.repo_root / "src")},
                          start_new_session=True)
+        self._watchdog_for = self.pod_id
+        self.ev.setdefault("watchdog_journals", []).append(str(journal))
+        self.ev["watchdog_owns_pod"] = self.pod_id
         self.say(f"watchdog detached — hard {self.plan.hard_terminate_minutes:.0f} min "
                  f"= ${self.plan.hard_terminate_usd:.2f}")
         return journal
@@ -598,8 +658,9 @@ class SessionRunner:
         for draw in range(1, self.a.host_draws + 1):
             if not self.create():
                 return False
-            self.ev.setdefault("watchdog_journals", []).append(
-                str(self.launch_watchdog()))
+            #: The watchdog is NOT started here any more. `create()` starts it
+            #: at the moment the provider returns an id, so a resource rejected
+            #: after creation is still under an independent hard-cap backstop.
             self.save()
             outcome = self.setup_on_draw(draw)
             if outcome == "ok":
