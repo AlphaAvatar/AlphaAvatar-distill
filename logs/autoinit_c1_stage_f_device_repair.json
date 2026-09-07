@@ -1,0 +1,187 @@
+{
+ "schema": "aadistill.autoinit.c1_stage_f_device_repair/v1",
+ "written_utc": "2026-09-08T00:00:00Z",
+ "_contract": "The provenance of the $0 repair to the Phase-C1 treatment operator's device boundary, and \u2014 explicitly \u2014 the boundary between what attempt 9 OBSERVED and what this repair CHANGED. AUTHORIZES NOTHING: no grant, no authorization, no launch, no tenth attempt.",
+ "authorizes": "nothing",
+ "what_attempt_9_observed": {
+  "_why_this_section_exists": "the repair was chosen from a stack trace, not from a result. A future reader must not be able to mistake this file for evidence that the treatment works, or that the repair was validated against a treatment outcome.",
+  "observed": [
+   "step 2 width.global_pca_v0 realized eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722 == the pinned parent digest",
+   "step 3 attention.weight_proxy_v0 realized c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6 == the pinned incumbent digest",
+   "all_pinned_digests_matched: true, n_pinned: 2, on an NVIDIA L40S under torch 2.11.0+cu128 / transformers 5.13.1 / CUDA 12.8"
+  ],
+  "not_observed": [
+   "the treatment operator produced NO completed output: it raised inside head_write_energy before returning a child model",
+   "zero probes trained (training_started false, probes_trained 0)",
+   "zero probes evaluated (probes_evaluated 0)",
+   "no endpoint, no decision (decision_ran false)"
+  ],
+  "treatment_efficacy_evidence_available_when_the_repair_was_chosen": "NONE. The repair is a response to an exception, and the operator's numerical behaviour on real hardware has never been measured.",
+  "classification_of_attempt_9": "NO DECISION after a pre-treatment infrastructure abort. NOT an ATTENTION result, and NOT a frozen-rule INCONCLUSIVE.",
+  "immutable_evidence": "logs/autoinit_c1_attempt9/ \u2014 outcome.json, c1_evidence.json, c1_replay_record.json, artifact_manifest.json, launcher.log, driver_run.log, driver_status.txt, setup.log, watchdog.jsonl, independent_poll.log, pod_id, the consumed authorization, the consumed grant record and the consumed bundle record. NOT rewritten by this repair, and it must never be restated as though attempt 9 had used the repaired implementation."
+ },
+ "the_two_defects": [
+  {
+   "n": 1,
+   "site": "src/aadistill/autoinit/operators/attention_activation.py, AttentionActivationImportanceV1.apply",
+   "precise_description": "a host-resident statistics snapshot missing its compute-device working copy. NOT a mutation of the persistent StatsCache policy: `AttentionHeadStatsCollector.state()` returns host-resident tensors BY DESIGN \u2014 that is the evidence and cache form \u2014 and the operator passed that snapshot directly into `head_write_energy`, where it met `o_proj.weight` on cuda:0.",
+   "observed_as": "RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! at src/aadistill/init/attention_stats.py:146",
+   "repair": "host_stats = collector.state(); collector.release(); stats = stats_to(host_stats, compute). Exactly one per-invocation working copy on model_device(parent), built with the existing aadistill.autoinit.device.stats_to.",
+   "explicitly_not_done": [
+    "model weights were NOT moved to CPU",
+    "the persistent cache was NOT made CUDA-resident",
+    "no new cache abstraction was introduced",
+    "head_write_energy was NOT taught to guess or transfer silently"
+   ],
+   "release_rationale": "state() copies the (layers, heads, d, d) float64 accumulator to the host; without release() the device original, the host snapshot and the new working copy are all alive at once. release() frees the collector's device accumulator between the snapshot and the working copy, so at most two exist. state() after release() raises rather than returning a stale or absent accumulator."
+  },
+  {
+   "n": 2,
+   "site": "src/aadistill/init/attention_stats.py, head_write_energy",
+   "precise_description": "a fresh factory with no placement. `scores = torch.empty(num_heads, dtype=torch.float64)` defaults to CPU, so on a GPU the first `scores[h] = ...` store is a second cross-device use \u2014 latent behind defect 1 and unreachable until it was fixed.",
+   "repair": "placement is derived from the tensor the vector meets: `device=w.device`. All scores are computed on the compute device and the small (num_heads,) vector is moved to the host exactly once, after it is built, because every caller ranks, sums and tie-breaks on the host.",
+   "fail_closed": "head_write_energy now raises when m.device != w.device instead of transferring. A silent repair there would make the function guess which device the caller meant and would hide a caller that forgot its working copy; the co-location is the CALLER's contract, and the error names aadistill.autoinit.device.stats_to as the remedy."
+  }
+ ],
+ "what_this_repair_changed": {
+  "scope": "device realization only",
+  "mathematical_operator_fields_moved": 0,
+  "unchanged_and_asserted": {
+   "score_formula": "score_h = <W_o,h^T W_o,h, M_h>_F / n_tokens, i.e. mean_t ||W_o,h a_h(t)||^2",
+   "accumulation_dtype": "float64",
+   "head_grouping": "per-GQA-group top-k, KV heads and head_dim preserved",
+   "tie_break": "ascending head index, stated rather than inherited from sort stability",
+   "retained_share_metrics": "op.attention.retained_write_energy_mean and _min, and per_layer_retained_share",
+   "child_weight_slicing": "q_proj rows and o_proj columns for the kept heads",
+   "impl_id": "attention.activation_importance_v1",
+   "impl_version": 1,
+   "operator_signature": "modifies {num_attention_heads}; preserves hidden_size, num_hidden_layers, intermediate_size, num_key_value_heads, head_dim, vocab_size, tie_word_embeddings",
+   "attention_stats_spec": "attention_head_output_second_moment v1, spec_hash 4dd0e23a6b8b9e92dce711c597a9ebd7d7a3b477ffa59eb296a08850472ed134",
+   "device_contract_version": 1
+  },
+  "source_diff": {
+   "src/aadistill/autoinit/operators/attention_activation.py": {
+    "lines_added": 17,
+    "lines_removed": 2
+   },
+   "src/aadistill/init/attention_stats.py": {
+    "lines_added": 47,
+    "lines_removed": 2
+   }
+  },
+  "frozen_c1_identities_reasserted": {
+   "incumbent_path_hash": "8b0bb455bfba069f2dcc1b4555cf40ecb7efe4cf53121a14937e7028131ae08d",
+   "treatment_path_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+   "expected_parent_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+   "expected_incumbent_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+   "seeds": [
+    1635674081,
+    1656475568,
+    696460635
+   ],
+   "battery": "950 total / 850 scorable",
+   "calibration": "calib.domain_balanced@v1 and calib.reasoning_heavy@v2, unchanged",
+   "recovery_recipe": "unchanged",
+   "generation_protocol": "unchanged",
+   "scoring": "c1_confirmation_scoring@v1, unchanged",
+   "decision_rule": "unchanged"
+  }
+ },
+ "why_no_zero_dollar_gate_caught_it": {
+  "cause": "attention.activation_importance_v1 is the C1 TREATMENT operator and had never executed on a GPU. Every $0 regression ran it on CPU, where a host-resident snapshot and host-resident weights are trivially co-located, and no prior attempt reached stage F at all.",
+  "second_cause": "the suffix-entry-point tests exercised stage F, and the operator tests exercised the operator, but nothing exercised the COMPOSITION on more than one device \u2014 which is exactly what stage F is."
+ },
+ "new_regressions": {
+  "tests/autoinit/test_attention_operator_device_split.py": "the operator's transfer boundary and the score-vector placement, using the repository's existing logical instruments (device_split.HostCacheTensor / on_cache_device / CrossDeviceUse and factory_placement.RecordFactories). 11 tests.",
+  "tests/autoinit/test_attention_treatment_science_invariance.py": "the treatment recomputed from its DEFINITION \u2014 every a_h(t) retained, brute force \u2014 and required to agree with the streamed second moment, the selection, the tie-break, the GQA grouping, the child slices, the local metrics and the trace. Deliberately not a comparison against a stored pre-repair number, which would only prove the repair reproduces itself. 7 tests.",
+  "tests/autoinit/test_stage_f_treatment_integration.py": "stage F end to end: the real four-step frozen path, the real materialize_fixed_path_suffix, the real registered operator, no stand-in. The prefix is proven unexecuted FROM THE CHECKPOINTS ON DISK rather than from patched execute methods, and substituting a fake operator makes the module red. 7 tests.",
+  "tests/pod/test_c1_driver_execution.py": "a DEVICE failure in stage F is C1_FAILED and never a replay mismatch; the passing stage-D/E replay record survives it unchanged; no treatment record, arm identities or decision are written; and the REAL stage_f writes nothing when the materializer raises. 4 tests.",
+  "tests/pod/test_c1_artifact_specs.py": "an attempt-9-shaped tree (replay PASSED, no treatment record) collects under the failure spec and is REFUSED by the full-success spec. 2 tests.",
+  "tests/docs/test_budget_arithmetic.py": "full_attempt_fits and reserve_after_ceiling derived from the recorded inputs, with prose required to agree. 8 tests."
+ },
+ "mutations_run": [
+  {
+   "mutation": "replace stats_to(host_stats, compute) with host_stats",
+   "result": "RED",
+   "note": "reproduces the attempt-9 error from inside materialize_fixed_path_suffix, in the same call chain the driver logged"
+  },
+  {
+   "mutation": "restore the unplaced torch.empty(num_heads, dtype=torch.float64)",
+   "result": "RED",
+   "note": "caught even though the CPU arithmetic still succeeds \u2014 the case a value-only test cannot see"
+  },
+  {
+   "mutation": "remove the m.device != w.device co-location check",
+   "result": "RED"
+  },
+  {
+   "mutation": "alter the score formula (/ n -> / (n + 1))",
+   "result": "RED",
+   "note": "the exact-science test fails against the brute-force definition"
+  },
+  {
+   "mutation": "drop collector.release()",
+   "result": "RED"
+  },
+  {
+   "mutation": "substitute a pass-through stand-in for the stage-F operator",
+   "result": "RED",
+   "note": "asserted inside test_D4; the production path refuses it with 'is not the planned'"
+  }
+ ],
+ "frozen_source_set_inventory": {
+  "_method": "mechanical membership test of every changed path against every declared source-set tuple in the tree, re-run after each new file was touched. Not a judgement about which phases 'feel' affected \u2014 the one file that was NOT obviously historical turned out to be inside two completed sets.",
+  "changed_files": [
+   "src/aadistill/autoinit/operators/attention_activation.py",
+   "src/aadistill/init/attention_stats.py"
+  ],
+  "sets_checked": [
+   {
+    "set": "PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "n_files": 16,
+    "contains_a_changed_file": false
+   },
+   {
+    "set": "PHASE_B_EXECUTABLE_SOURCE_FILES_V1",
+    "n_files": 60,
+    "contains_a_changed_file": false
+   },
+   {
+    "set": "CONTINUATION_SOURCE_FILES_V2",
+    "n_files": 62,
+    "contains_a_changed_file": false
+   },
+   {
+    "set": "CONTINUATION_HARNESS_SOURCE_FILES_V1",
+    "n_files": 11,
+    "contains_a_changed_file": false
+   },
+   {
+    "set": "HARNESS_SOURCE_FILES_V1",
+    "n_files": 12,
+    "contains_a_changed_file": false
+   },
+   {
+    "set": "C1_HARNESS_SOURCE_FILES_V1",
+    "n_files": 73,
+    "contains_a_changed_file": true
+   }
+  ],
+  "conclusion": "NO historical amendment is created. Neither changed file is inside any COMPLETED Phase-A, Phase-B or continuation source set, so no frozen historical document describes code this repair moved. Only the live C1 harness digest moves, and that is rebound here rather than amended. This is the outcome attention_activation.py's own module docstring predicted: it was placed in a NEW module precisely so that extending the operator surface could not disturb CONTINUATION_SOURCE_FILES_V2.",
+  "amendment_created": false,
+  "a_third_file_was_considered_and_reverted": {
+   "file": "src/aadistill/autoinit/device.py",
+   "change_considered": "a docstring clarification distinguishing head_write_energy's device-coupled score vector from the two intentional host-only per-head score vectors the contract already names (operators/attention.py and init.sandwich.select_q_heads), so a future reader cannot 'restore' the CPU default by citing them.",
+   "why_reverted": "the mechanical inventory shows device.py is inside PHASE_B_EXECUTABLE_SOURCE_FILES_V1 (60 files) and CONTINUATION_SOURCE_FILES_V2 (62 files) \u2014 both COMPLETED and FROZEN. Editing it would move two historical digests and require the P12 historical-amendment machinery for a comment. Not worth it.",
+   "where_the_note_went_instead": "src/aadistill/init/attention_stats.py, at the torch.empty call site \u2014 a file this repair already changes and which is in no completed set.",
+   "note": "this is why the inventory is run mechanically rather than by judgement: device.py 'felt' like a C1-only file and is not."
+  }
+ },
+ "what_this_does_not_authorize": [
+  "any tenth attempt",
+  "any grant or authorization",
+  "any provider resource, pod or GPU work",
+  "any claim that the treatment operator works on a GPU \u2014 the repair is verified logically, at $0, and has never executed on an accelerator",
+  "any restatement of attempt 9 as an ATTENTION result"
+ ]
+}

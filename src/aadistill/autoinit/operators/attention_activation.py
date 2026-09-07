@@ -50,7 +50,7 @@ import torch
 
 from ...init.attention_stats import AttentionHeadStatsCollector, head_write_energy
 from ..arch import ArchitectureAdapter, ArchSpec, Capability
-from ..device import model_device
+from ..device import model_device, stats_to
 from ..metrics import OperatorLocalMetrics
 from ..stats import StatsSpec
 from ._common import (
@@ -177,7 +177,22 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                 collector.process(item["input_ids"].to(compute))
         finally:
             collector.close()
-        stats = collector.state()
+        #: THE TRANSFER BOUNDARY, and the defect C1 attempt 9 died on.
+        #:
+        #: `state()` returns a HOST-RESIDENT snapshot on purpose — that is the
+        #: evidence/cache form, and it is what gets hashed and kept. Attempt 9
+        #: then handed it straight to `head_write_energy`, where it met
+        #: `o_proj.weight` on cuda:0: `RuntimeError: Expected all tensors to be
+        #: on the same device`. Nothing about the persistent cache POLICY was
+        #: wrong; what was missing was the per-invocation working copy.
+        #:
+        #: So: snapshot to the host, release the collector's device accumulator,
+        #: and only then build ONE working copy on the compute device. In that
+        #: order there are never three copies of the (layers, heads, d, d)
+        #: float64 tensor alive at once.
+        host_stats = collector.state()
+        collector.release()
+        stats = stats_to(host_stats, compute)
 
         new_spec = ctx.parent_spec.replace(**{HEADS_FIELD: keep_q})
         builder = ChildBuilder(adapter, parent, new_spec, seed=ctx.seed)

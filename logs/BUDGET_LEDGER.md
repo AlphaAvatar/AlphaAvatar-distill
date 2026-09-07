@@ -1770,10 +1770,32 @@ repaired here.
 | --- | --- | --- |
 | C1 attempt 9: 12/12 gates, one L40S at $1.09/h, 57.47 min, **both frozen replay gates PASSED**, then an infrastructure failure in stage F. No training, no evaluation, no decision | $1.0440 | `logs/autoinit_c1_attempt9/` |
 
-**Cumulative: $267.8598 of $283.7600.** `$15.9002` uncommitted — which is
-**below the `$15.1475` per-attempt ceiling by only `$0.7527`**, so a further
-full attempt no longer fits under the cap. The attempt-9 grant and its
-authorization are CONSUMED; neither permits a retry or a replacement pod.
+**Cumulative: $267.8598 of $283.7600.** `$15.9002` uncommitted. The attempt-9
+grant and its authorization are CONSUMED; neither permits a retry or a
+replacement pod.
+
+```
+remaining              = 283.7600 - 267.8598 = 15.9002
+per-attempt ceiling    =                       15.1475
+reserve after one      =  15.9002 - 15.1475 =   0.7527   >= 0  ->  IT FITS
+worst case if launched = 267.8598 + 15.1475 = 283.0073   <= 283.7600
+```
+
+**Exactly one ceiling-sized attempt still fits under the cap.** It would leave
+`$0.7527` and permit no second one. Headroom is not permission: whether a tenth
+attempt happens is a maintainer decision against this ledger.
+
+> **CORRECTED 2026-09-08.** As first written this entry read "`$15.9002`
+> uncommitted — which is **below the `$15.1475` per-attempt ceiling by only
+> `$0.7527`**, so a further full attempt no longer fits under the cap." That is
+> the negation of its own arithmetic: `15.9002 - 15.1475 = +0.7527` is the
+> amount by which the remaining budget CLEARS the ceiling, not a shortfall. The
+> same sentence had been copied into `logs/STATE.md` and
+> `logs/current_state.json`; all three are corrected, and
+> `tests/docs/test_budget_arithmetic.py` now derives `full_attempt_fits` and
+> `reserve_after_ceiling` from the recorded inputs rather than trusting prose.
+> No money moved — only the conclusion drawn from it, which would have told a
+> maintainer that Phase C1 was over for budget reasons when it is not.
 
 **THE FIRST C1 SCIENTIFIC OBSERVATION, after nine attempt labels and nine paid
 provider resources.** Setup completed, the driver ran, and stages B, C, D and E

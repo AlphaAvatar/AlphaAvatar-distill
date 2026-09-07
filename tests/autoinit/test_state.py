@@ -269,10 +269,32 @@ def _at(doc: dict, path: tuple[str, ...]):
     return doc if isinstance(doc, str) else None
 
 
-def _declares_a_grant(doc: dict) -> bool:
-    """Does the snapshot say an Attempt-9 grant is PRESENT?"""
+#: Phrases that mark the grant as SPENT rather than live. A consumed grant is a
+#: third state, and the original two-valued reading could not express it: after
+#: attempt 9 the snapshot must say the grant existed, that it was used, and that
+#: nothing live remains — all three at once, without any of them reading as a
+#: denial of the others.
+CONSUMED_MARKERS = ("grant and its authorization are consumed",
+                    "grant/authorization: consumed",
+                    "attempt-9 grant and its authorization are consumed",
+                    "grant consumed", "consumed. $", "grant is consumed")
+
+
+def _grant_is_consumed(doc: dict) -> bool:
     blob = json.dumps(doc).lower()
-    return "attempt-9 grant" in blob or "autoinit_c1_attempt9_grant.json" in blob
+    return any(m in blob for m in CONSUMED_MARKERS)
+
+
+def _declares_a_grant(doc: dict) -> bool:
+    """Does the snapshot say an Attempt-9 grant is LIVE?
+
+    A grant recorded as CONSUMED is not a live grant, and the fields below are
+    then *required* to say nothing is available — so treating it as declared
+    would invert this test the moment a grant is spent.
+    """
+    blob = json.dumps(doc).lower()
+    named = "attempt-9 grant" in blob or "autoinit_c1_attempt9_grant.json" in blob
+    return named and not _grant_is_consumed(doc)
 
 
 def test_a_declared_grant_is_not_denied_by_any_live_field():
@@ -314,3 +336,35 @@ def test_a_declared_grant_is_never_called_an_authorization():
     assert doc["running"]["paid_compute"] is False
     assert doc["running"]["pods"] == 0
     assert doc["prepared_launch"]["any"] is False
+
+
+def test_a_consumed_grant_is_recorded_as_spent_rather_than_absent():
+    """The state attempt 9 left: the grant EXISTED, was USED, and is not live.
+
+    Recording it as simply absent would erase that a provider resource was
+    created under it — the one fact that makes the spend auditable — and would
+    also make a future reader think a fresh grant is still in hand.
+    """
+    doc = _snapshot()
+    blob = json.dumps(doc).lower()
+    if "attempt-9 grant" not in blob and "autoinit_c1_attempt9_grant.json" not in blob:
+        return                                   # nothing named, nothing owed
+
+    if not _grant_is_consumed(doc):
+        return                                   # a live grant; the test above rules
+
+    #: Consumed. Then all three must hold together.
+    assert doc["authorized"]["any"] is False
+    assert doc["prepared_launch"]["any"] is False
+    assert doc["running"]["pods"] == 0
+
+    #: It must not be described as never having existed.
+    for path in (("blocker",), ("authorized", "note")):
+        text = (_at(doc, path) or "").lower()
+        for erasure in ("no grant was ever", "never granted", "no grant has been"):
+            assert erasure not in text, f"{'.'.join(path)}: {erasure!r}"
+
+    #: And the file it names must still be on disk, so the spend is traceable.
+    grant = SNAPSHOT.parent / "autoinit_c1_attempt9_grant.json"
+    assert grant.is_file(), f"{grant} is named as consumed and is absent"
+    assert json.loads(grant.read_text())["schema"] == "aadistill.autoinit.c1_grant/v1"

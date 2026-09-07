@@ -1313,3 +1313,107 @@ def test_E2_a_step3_mismatch_is_stage_E_and_a_replay_mismatch(
     assert rec["schema"] == "aadistill.autoinit.c1_replay_mismatch/v1"
     assert rec["stage"] == "E"
     assert driver.ev["stages"]["D"]["passed"] is True
+
+
+# --- a DEVICE failure in stage F: what attempt 9 actually was ----------------
+#
+# Attempt 9 passed both replay gates and then died inside the treatment operator
+# with `Expected all tensors to be on the same device`. Nothing compared a digest
+# after that, so classifying it as a replay mismatch would have put a false claim
+# about the frozen path's reproducibility into the record — and the record it had
+# already written says the opposite: both digests MATCHED.
+#
+# The launcher's neutral failure prose was repaired for this, but prose is not a
+# gate. These tests hold the driver to the classification and to the artifacts,
+# for the exact exception the L40S raised.
+
+ATTEMPT_9_ERROR = ("Expected all tensors to be on the same device, but found at "
+                   "least two devices, cuda:0 and cpu!")
+
+
+def _drive_stage_f_device_failure(monkeypatch, harness):
+    """Replay passes, then the treatment operator raises on device placement."""
+    _fake_hardware(monkeypatch, harness)
+
+    def exploding_stage_f(self):
+        D.mark("STAGE_START:F")
+        raise RuntimeError(ATTEMPT_9_ERROR)
+    monkeypatch.setattr(D.C1Driver, "stage_f", exploding_stage_f)
+
+    driver = D.C1Driver(_args())
+    return driver.run(), driver, D.STATUS.read_text()
+
+
+def test_a_stage_f_device_failure_is_C1_FAILED_and_never_a_replay_mismatch(
+        harness, monkeypatch):
+    code, driver, status = _drive_stage_f_device_failure(monkeypatch, harness)
+
+    assert code == 40
+    assert "MARKER:C1_FAILED" in status
+    assert "C1_REPLAY_MISMATCH" not in status
+    assert "MARKER:STAGE_FAILED:F" in status
+    assert driver.ev["outcome"] == "C1_FAILED"
+    assert driver.ev["training_started"] is False
+
+    stage = driver.ev["stages"]["F"]
+    assert stage["passed"] is False
+    assert "RuntimeError" in stage["reason"] and "same device" in stage["reason"]
+    assert "mismatch_record" not in stage, (
+        "a device failure compared no digest; it cannot cite mismatch evidence")
+
+
+def test_a_stage_f_device_failure_leaves_the_passing_replay_record_intact(
+        harness, monkeypatch):
+    """The stage-D/E product must survive stage F, and must still say PASSED.
+
+    This is the half of attempt 9 that IS a scientific observation: both frozen
+    digests reproduced under a real runtime. A stage-F failure must not overwrite
+    it, downgrade it, or convert it into a mismatch record.
+    """
+    _drive_stage_f_device_failure(monkeypatch, harness)
+
+    rec = json.loads((D.AUDIT / "c1_replay_record.json").read_text())
+    assert rec["schema"] == "aadistill.autoinit.fixed_path_replay/v1"
+    assert rec["all_pinned_digests_matched"] is True
+    assert rec["schema"] != "aadistill.autoinit.c1_replay_mismatch/v1"
+
+
+def test_a_stage_f_device_failure_writes_no_treatment_artifacts(
+        harness, monkeypatch):
+    """Nothing may suggest a treatment arm exists when the operator never returned."""
+    _, driver, _ = _drive_stage_f_device_failure(monkeypatch, harness)
+
+    assert not (D.AUDIT / "c1_treatment_record.json").exists()
+    assert not (D.AUDIT / "c1_arm_identities.json").exists()
+    assert not (D.AUDIT / "c1_decision.json").exists()
+    assert driver.ev["stages"]["F"]["passed"] is False
+    assert "G" not in driver.ev["stages"], "stage G must not have been entered"
+
+
+def test_the_real_stage_f_writes_no_record_when_the_operator_raises(
+        harness, monkeypatch, treatment_registered):
+    """The REAL `stage_f`, with the materializer raising the attempt-9 error.
+
+    `_fake_hardware` replaces stage F wholesale, so the test above proves the
+    run-loop classification but not that the real stage writes its record only
+    after materialization succeeds. This drives the production `stage_f`.
+    """
+    driver = D.C1Driver(_args())
+    driver.teacher_path = str(harness.tmp / "teacher")
+    driver.completed = [D.CS.stage(x).stage_id for x in ("B", "C")]
+    _capture_root(monkeypatch, driver)
+    driver.stage_de()
+    driver.parent = _FakeStep(2)
+    _capture_root(monkeypatch, driver)
+
+    def exploding(*a, **kw):
+        raise RuntimeError(ATTEMPT_9_ERROR)
+    monkeypatch.setattr(D, "materialize_fixed_path_suffix", exploding)
+
+    with pytest.raises(RuntimeError, match="same device"):
+        driver.stage_f()
+
+    assert not (D.AUDIT / "c1_treatment_record.json").exists()
+    assert not (D.AUDIT / "c1_arm_identities.json").exists()
+    assert not driver.arm_init, (
+        f"stage F registered arms after the operator raised: {driver.arm_init}")

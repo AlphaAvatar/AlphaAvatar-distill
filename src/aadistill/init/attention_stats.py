@@ -112,8 +112,23 @@ class AttentionHeadStatsCollector:
             h.remove()
         self._hooks = []
 
+    def release(self) -> None:
+        """Drop the device-resident accumulator once its snapshot has been taken.
+
+        `state()` copies `head_sqsum` to the host; until this is called the
+        original stays on the model device, so the working copy the caller then
+        builds is a THIRD copy of a `(layers, heads, d, d)` float64 tensor.
+        Freeing here keeps at most two alive at once. `state()` afterwards
+        raises rather than returning a stale or absent accumulator.
+        """
+        self.head_sqsum = None
+
     def state(self) -> dict[str, torch.Tensor]:
         """Host-resident sufficient statistics. Moved once, at the end."""
+        if self.head_sqsum is None:
+            raise ValueError(
+                "the accumulator was released; state() must be called before "
+                "release(), and exactly once")
         if self.token_count == 0:
             raise ValueError(
                 "no tokens were processed; refusing to return an all-zero "
@@ -139,9 +154,38 @@ def head_write_energy(state: dict[str, torch.Tensor], layer: int,
         raise ValueError(
             f"o_proj input width {w.shape[-1]} != num_heads*head_dim "
             f"({num_heads * head_dim})")
-    scores = torch.empty(num_heads, dtype=torch.float64)
+    # FAIL CLOSED, and do not repair it here. C1 attempt 9 died on this exact
+    # product with the statistics on the host and `o_proj.weight` on cuda:0.
+    # Transferring silently would make this function guess which device the
+    # caller meant, and hide a caller that forgot to build a working copy; the
+    # co-location is the CALLER's contract (`attention_activation.apply` moves
+    # the snapshot with `stats_to`), so a mismatch is reported, not absorbed.
+    if m.device != w.device:
+        raise ValueError(
+            f"attention statistics are on {m.device} and o_proj.weight is on "
+            f"{w.device}. `head_write_energy` does not transfer: the caller "
+            "owns the compute-device working copy — see "
+            "`aadistill.autoinit.device.stats_to`.")
+    # Placed from the tensor it meets. A bare `torch.empty(num_heads,
+    # dtype=torch.float64)` defaults to CPU, so on a GPU the very first
+    # `scores[h] = ...` assignment is a second cross-device use — latent behind
+    # the first one, and invisible on a single-device box.
+    #
+    # DO NOT "restore" this to a host tensor by citing `autoinit/device.py`'s
+    # list of intentional host-only per-head score vectors. Those two —
+    # `operators/attention.py` and `init.sandwich.select_q_heads` — are
+    # `torch.tensor([float(...), ...])` over comprehensions that have ALREADY
+    # reduced each element to a Python float, so their buffers never receive a
+    # device tensor. This one is filled with `(gram * m[h]).sum() / n`, a 0-dim
+    # DEVICE tensor, which makes it device-coupled under the same contract.
+    # Two per-head score vectors, opposite categories: read the store, not the
+    # variable name.
+    scores = torch.empty(num_heads, dtype=torch.float64, device=w.device)
     for h in range(num_heads):
         wh = w[:, h * head_dim:(h + 1) * head_dim]             # (hidden, d)
         gram = wh.T @ wh                                       # (d, d)
         scores[h] = (gram * m[h]).sum() / n
-    return scores
+    # ONE transfer of a `num_heads`-element vector, after the whole vector is
+    # built. Every caller ranks, sums and tie-breaks these on the host, and that
+    # deterministic selection path is unchanged by this repair.
+    return scores.to("cpu")

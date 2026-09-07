@@ -442,3 +442,53 @@ def test_preregistration_binds_both_spec_hashes():
     assert block["failed"]["path"] == FAILED
     assert block["success"]["sha256"] == sha256_file(REPO / SUCCESS)
     assert block["failed"]["sha256"] == sha256_file(REPO / FAILED)
+
+
+# --- the tree attempt 9 actually left ---------------------------------------
+
+def _attempt_9_tree(root: Path) -> None:
+    """Replay PASSED, stage F died in the operator, nothing trained.
+
+    Not `_replay_tree`: that one models a MISMATCH, whose record says the frozen
+    path did not reproduce. Attempt 9's record says the opposite — both digests
+    matched — and then the treatment operator raised on device placement. The
+    collector has to bring that home just as readily, and must not demand a
+    treatment record for an arm that never returned.
+    """
+    audit = root / "audit/autoinit_c1"
+    _write(audit / "c1_evidence.json", json.dumps(
+        {"outcome": "C1_FAILED", "training_started": False}))
+    _write(audit / "c1_replay_record.json", json.dumps(
+        {"schema": "aadistill.autoinit.fixed_path_replay/v1",
+         "all_pinned_digests_matched": True, "n_pinned": 2,
+         "runtime": {"torch": "2.11.0+cu128"}, "steps": []}))
+    _write(audit / "engine_probe.json", "{}")
+    _write(audit / "c1_device_handoff.json", "{}")
+    _write(audit / "session/autoinit_c1_run.log", "log\n")
+
+
+def test_a_stage_f_device_failure_collects_under_the_failure_spec(tmp_path):
+    root = tmp_path / "artifacts"
+    _attempt_9_tree(root)
+    assert not (root / "audit/autoinit_c1/c1_treatment_record.json").exists()
+
+    rc, out = _collect(tmp_path, root, FAILED)
+    assert rc == 0, out
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    classes = {e["artifact_class"] for e in manifest["entries"]}
+    assert "replay_record" in classes
+    assert "treatment_record" not in classes
+
+
+def test_the_success_spec_refuses_a_stage_f_device_failure_tree(tmp_path):
+    """A pre-treatment abort can never satisfy the full-success contract.
+
+    The guard against classifying attempt 9 as anything but NO DECISION: the
+    success spec requires the treatment record, the probes and the generations,
+    and none of them exist.
+    """
+    root = tmp_path / "artifacts"
+    _attempt_9_tree(root)
+    rc, out = _collect(tmp_path, root, SUCCESS)
+    assert rc != 0
+    assert "treatment_record" in out

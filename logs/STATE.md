@@ -3,7 +3,13 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 
 > **C1 attempt 9, 2026-09-07 — `$1.0440`, pod `8gtnsbigpgaz76`, 57.47 min,
 > provider confirms gone.** Cumulative **`$267.8598`** of `$283.7600`, leaving
-> **`$15.9002`** — which no longer covers a full `$15.1475` attempt.
+> **`$15.9002`**. Against the `$15.1475` per-attempt ceiling that is a reserve of
+> **`$0.7527`**, so **exactly one** ceiling-sized attempt still fits (worst case
+> `$283.0073` of `$283.7600`) — and no second one. Headroom is not permission.
+> *(Corrected 2026-09-08: this line previously said `$15.9002` "no longer covers
+> a full `$15.1475` attempt", which contradicts its own subtraction. See the
+> attempt-9 entry in `logs/BUDGET_LEDGER.md` and
+> `tests/docs/test_budget_arithmetic.py`.)*
 >
 > **THE FIRST C1 SCIENTIFIC OBSERVATION, after nine attempt labels and nine paid
 > pods.** Setup completed, the driver ran, and **stages B, C, D and E all
@@ -32,7 +38,8 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 > multiplies the two without co-locating them. **That operator had never executed
 > on a GPU** — every `$0` regression runs it on CPU, where host stats and host
 > weights are trivially co-located, and no earlier attempt reached stage F.
-> UNREPAIRED, and this session is not authorized to repair it.
+> **REPAIRED at `$0` on 2026-09-08** — see the entry below. The repair has not
+> been observed on a GPU, and nothing about it is a treatment result.
 >
 > **Three repairs were observed working on real hardware.** The launcher's
 > neutral failure note refused to call this a replay mismatch. `watchdog
@@ -46,6 +53,53 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 > limit, and an independent read-only poller recorded an empty inventory at
 > `15:20:22Z`. The grant and authorization are **CONSUMED** and permit no retry
 > and no replacement pod.
+
+> **Stage-F device repair and closeout normalization, 2026-09-08 — `$0.0000`, no
+> pod, no GPU, no provider resource, no grant, no authorization.**
+>
+> **Two device defects, one behind the other.** The first is the one attempt 9
+> hit: `AttentionHeadStatsCollector.state()` returns a **host-resident** snapshot
+> *by design* — that is the evidence form — and `apply()` handed it straight to
+> `head_write_energy`, where it met `o_proj.weight` on `cuda:0`. The persistent
+> cache POLICY was never wrong; what was missing was the **per-invocation working
+> copy**. `apply()` now snapshots to the host, releases the collector's device
+> accumulator, and builds exactly one working copy on `model_device(parent)` with
+> the existing `aadistill.autoinit.device.stats_to`. No new cache abstraction, no
+> model weights moved to CPU, and the cache is not made CUDA-resident.
+>
+> The second was latent behind the first and would have failed the very next
+> line: `scores = torch.empty(num_heads, dtype=torch.float64)` defaults to CPU,
+> so on a GPU the first `scores[h] = …` is a second cross-device store. It now
+> derives placement from the tensor it meets (`device=w.device`), and
+> `head_write_energy` **fails closed** on a mismatch rather than transferring —
+> silently repairing it there would hide a caller that forgot its working copy.
+> The whole score vector moves to the host once, after it is built.
+>
+> **The science did not move.** Same formula
+> `score_h = <W_o,h^T W_o,h, M_h>_F / n_tokens`, same float64 accumulation, same
+> per-GQA top-k, same ascending-index tie-break, same child slicing, same local
+> metrics, same `impl_id`, `version` and `ATTENTION_STATS_SPEC`.
+> `DEVICE_CONTRACT_VERSION` is unchanged.
+> `tests/autoinit/test_attention_treatment_science_invariance.py` proves it by
+> recomputing the treatment from its definition — every `a_h(t)` retained,
+> brute force — rather than against a stored number from before the repair.
+>
+> **Why no `$0` gate caught it, and what now would.** Every prior regression ran
+> the treatment operator on **one device**, where host stats and host weights are
+> trivially co-located, and no attempt had ever reached stage F. Three new
+> modules close that: the operator's device boundary
+> (`test_attention_operator_device_split.py`), the science
+> (`…_science_invariance.py`), and **stage F end to end**
+> (`test_stage_f_treatment_integration.py`) — the real four-step path, the real
+> `materialize_fixed_path_suffix`, the real registered operator, with the prefix
+> proven unexecuted **from the checkpoints on disk** rather than from patched
+> `execute` methods. Restoring the old operator makes that integration raise the
+> attempt-9 error from inside the materializer. Five source mutations were
+> applied and each turned the suite red.
+>
+> **Not observed on a GPU.** The repair is verified logically, at `$0`. Nothing
+> here is ATTENTION evidence, and attempt 9 remains **NO DECISION after a
+> pre-treatment infrastructure abort**.
 
 > **Post-provider ownership repair and the P12 record-rule split, 2026-09-07 —
 > `$0.0000`, no pod, no GPU, no provider resource.** The second authorization

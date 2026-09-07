@@ -7347,3 +7347,81 @@ on a paid pod.
 - **State of Attempt 3:** authorization `955c9288…` LIVE, session commit
   `ca519e67`, bundle staged and verified, 10/10 gates passing. Blocked only by
   the secure rate. Not looped, `--max-price` not raised, no second grant.
+
+## 2026-09-08 — The Stage-F device boundary, and one arithmetic error worth a gate
+
+- **Context:** C1 attempt 9 reached stage F on an L40S, passed both frozen replay
+  gates, and then died inside the treatment operator with `Expected all tensors
+  to be on the same device, but found at least two devices, cuda:0 and cpu!` at
+  `init/attention_stats.py:146`. The scientific review classified it as **NO
+  DECISION after a pre-treatment infrastructure abort** — not an ATTENTION
+  result, not a frozen-rule INCONCLUSIVE — and authorized a narrow `$0` repair.
+- **Decision:** repair the device *realization* and nothing else. `apply()` takes
+  the host-resident snapshot, releases the collector's device accumulator, and
+  builds exactly one per-invocation working copy with the existing
+  `device.stats_to`; `head_write_energy` places its score vector from the tensor
+  it meets and **fails closed** on a mismatch rather than transferring. No
+  mathematical operator field moved — same formula, dtype, grouping, tie-break,
+  slicing, metrics, `impl_id` and `ATTENTION_STATS_SPEC`;
+  `DEVICE_CONTRACT_VERSION` stays at 1.
+- **The precise defect, because the imprecise version is wrong.** This was a
+  *host-resident statistics snapshot missing its compute-device working copy*.
+  It was **not** a mutation of the persistent `StatsCache` policy: `state()`
+  returns host tensors deliberately — that is the evidence form — and the fix is
+  to add the working copy, not to move the cache onto the GPU or the weights onto
+  the host.
+- **A second defect sat behind the first**, unreachable until it was fixed:
+  `torch.empty(num_heads, dtype=torch.float64)` defaults to CPU, so the very next
+  line would have been another cross-device store. Repairing one defect exposed
+  the next; a fix validated only by "the exception is gone" would have shipped it.
+- **Alternatives considered:** transfer silently inside `head_write_energy`
+  (rejected — it makes the function guess which device the caller meant and hides
+  a caller that forgot its working copy); make the persistent cache CUDA-resident
+  (rejected — changes cache policy to fix a call-site bug, and the snapshot is
+  what gets hashed and kept); a new cache abstraction (rejected — the repair
+  needs one `stats_to` call, not a layer).
+- **Why no `$0` gate caught it.** The operator had never executed on a GPU: every
+  regression ran it on CPU, where host stats and host weights are trivially
+  co-located, and no attempt had reached stage F. Separately, the operator tests
+  covered the operator and the suffix tests covered stage F, but nothing covered
+  the **composition on more than one device** — which is what stage F is. The new
+  `test_stage_f_treatment_integration.py` is that composition, and it proves the
+  prefix unexecuted **from the checkpoints on disk** rather than from patched
+  `execute` methods, because a monkeypatched recorder proves what the patch saw.
+- **The arithmetic error.** The attempt-9 closeout wrote, in three documents,
+  "`$15.9002` uncommitted — which is **below the `$15.1475` per-attempt ceiling
+  by only `$0.7527`**, so a further full attempt no longer fits under the cap."
+  `15.9002 - 15.1475 = +0.7527` is the amount by which it **clears** the ceiling.
+  Exactly one ceiling-sized attempt still fits (worst case `$283.0073` of
+  `$283.7600`), leaving `$0.7527` and permitting no second one. A maintainer
+  reading the original would have concluded Phase C1 was over for budget reasons.
+  It was reviewed by a human and by me and neither caught it, because "clears by
+  only $0.75" and "no longer fits" sound like the same pessimism.
+- **So the fix is a derivation, not a correction.**
+  `tests/docs/test_budget_arithmetic.py` computes `full_attempt_fits` and
+  `reserve_after_ceiling` from the three recorded inputs and requires the prose
+  to agree. It deliberately does not hard-code the answer: a test asserting
+  `fits = True` would need editing on the next spend, which is exactly when it
+  would stop being checked.
+- **Two narrowings in that guard, both tested.** It scans only text near the
+  ceiling figure — the ledger truthfully says "16.9 GiB does not fit in 66% of
+  20.3 GiB free" about *disk*, and a guard that fires on that teaches the next
+  agent to delete accurate history for a green suite. And it ignores text inside
+  a marked correction, because a correction that may not quote the error it
+  corrects is a correction that erases the record. Both exemptions have mutation
+  tests that put a live claim inside them and require it to still be caught.
+- **No historical amendment.** A mechanical membership test of both changed files
+  against all six declared source-set tuples found them in `C1_HARNESS_SOURCE_FILES_V1`
+  only — not in any completed Phase-A, Phase-B or continuation set. This is what
+  `attention_activation.py`'s module docstring predicted: it lives in its own
+  module precisely so extending the operator surface cannot disturb
+  `CONTINUATION_SOURCE_FILES_V2`.
+- **Expected upside:** stage F can execute. Nothing more.
+- **Risks:** the repair is verified **logically, at `$0`**, and has never run on
+  an accelerator. `stats_to` was chosen because it is the existing boundary, but
+  the working copy is a second `(layers, heads, d, d)` float64 tensor — at the
+  C1 parent that is 117 MiB, freed on the collector side by `release()` before it
+  is allocated, and unmeasured on real hardware. There is still **no treatment
+  efficacy evidence of any kind**.
+- **Revisit when:** a maintainer decides whether the one remaining ceiling-sized
+  slot is worth spending. Nothing in this session authorizes that.
