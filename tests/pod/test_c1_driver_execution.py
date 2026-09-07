@@ -1126,8 +1126,16 @@ def _replay_plan(*, stop_after=None, mismatch_at=None):
 
 
 def _drive_replay(monkeypatch, harness, *, stop_after=None, mismatch_at=None,
-                  boom=None, record_write=None):
-    """Install a materializer that feeds the REAL `stage_de`."""
+                  boom=None, record_write=None, through_de_only=False):
+    """Install a materializer that feeds the REAL `stage_de`.
+
+    `through_de_only` runs B, C and DE instead of the whole session. The
+    successful case needs that: a full `run()` reaches stage H's `attest()`,
+    which models its fake on a RETAINED generation summary that exists only on
+    the dev box — so the case would SKIP under the pod simulation, and the one
+    test proving stage E waits for its record would not run on the machine that
+    matters. The failing cases stop inside DE anyway and are unaffected.
+    """
     _fake_hardware(monkeypatch, harness)
     monkeypatch.setattr(D.C1Driver, "stage_de", _REAL_STAGE_DE)
 
@@ -1159,7 +1167,13 @@ def _drive_replay(monkeypatch, harness, *, stop_after=None, mismatch_at=None,
     monkeypatch.setattr(D.C1Driver, "stage_b", stage_b)
 
     driver = D.C1Driver(_args())
-    code = driver.run()
+    if through_de_only:
+        driver.stage_b()
+        driver.stage_c()
+        driver.stage_de()
+        code = 0
+    else:
+        code = driver.run()
     return code, driver, (harness.tmp / "c1.status").read_text()
 
 
@@ -1253,7 +1267,8 @@ def test_D_a_complete_replay_marks_E_only_after_the_record_is_readable(
         return real(*a, **k)
     monkeypatch.setattr(D, "write_replay_record", watched)
 
-    code, driver, status = _drive_replay(monkeypatch, harness)
+    code, driver, status = _drive_replay(monkeypatch, harness,
+                                         through_de_only=True)
 
     assert status.count("MARKER:STAGE_PASSED:D") == 1
     assert status.count("MARKER:STAGE_PASSED:E") == 1
