@@ -113,6 +113,61 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 > gate 10 needs an uploaded bundle for it. The pod-like sweep is unaffected,
 > because the simulated `$HOME` has no candidate and the test skips there.
 
+> **Pre-Attempt-10 platform closure, 2026-09-08 — `$0.0000`, no pod, no GPU, no
+> provider resource, no grant, no authorization, no bundle.** Three engineering
+> closures the review required before grant review.
+>
+> **1. The candidate authorization is in-repo.** `test_c1_session_contract.py`
+> drove the real pre-provider gates from `~/aad-scratch/sessions/c1-candidate/`,
+> a hand-issued file outside the repository: it skipped under the empty `$HOME`
+> the pod contract uses, and on the dev box it pinned a harness digest that went
+> stale the moment the harness moved — so a CORRECT gate reported a false alarm.
+> The payload derivation now lives in
+> `src/aadistill/autoinit/c1_authorization_payload.py`, pure (no git, no clock,
+> no writing); the CLI issuer keeps the effects and calls the same builder, so a
+> test candidate and a live authorization cannot diverge. `CANDIDATE` and the
+> whole-test `skipif` are gone. **113 skips in the sweep, down from 114** — that
+> single number is the closure.
+>
+> **2. The treatment path resolves through the adapter.** The statistics
+> collector took `model.model.layers` and `layer.self_attn.o_proj`; the operator
+> reached through `adapter.attention(block).q_proj`. Both now use role maps —
+> `stream_out_projections()["attn_out"]`, `stream_in_projections()["q"]` — and
+> the collector receives its hook modules rather than finding them.
+> **`arch.py` and `adapters/qwen3.py` are untouched**, which matters because the
+> mechanical inventory shows both sit inside two COMPLETED frozen sets; they
+> already exposed everything needed. Geometry matrix: 4Q/2KV, 8Q/2KV, 12Q/3KV,
+> MQA 8Q/1KV and 6Q/1KV, head_dim 4/8/16, 1–6 layers. An MHA reduction now
+> refuses by NAME — each query head owns its KV head, so preserving KV heads is
+> impossible — instead of being rejected by a modulo test that hid the reason.
+>
+> **3. run-layout-v2, future-only.** `logs/runs/<experiment_id>/<attempt_id>/`
+> with manifest, `governance/`, `runtime/`, `evidence/`, `closeout/`. Generic:
+> C1, Stage 4 and Stage 5 use the same `RunLayout`, and nothing branches on
+> model, geometry, ratio, stage or attempt. **Nothing was moved or copied** —
+> `logs/runs/index.json` registers **77 legacy-v1 references** with digests, so
+> "byte-for-byte unchanged" is checkable. It also exposed a latent bug:
+> `.gitignore` had a bare `runs/` that silently swallowed the whole evidence
+> root, so every future manifest would have been written and never committed.
+>
+> **The science did not move.** 274 preregistration leaf fields, 6 moved,
+> **scientific fields moved = 0**; file sets identical at 8/8 and 73/73, with
+> only the two refactored files' hashes differing.
+>
+> **Two process failures of mine, both instructive.** I edited a test module and
+> did not re-run it, so a text-scanning defect reached the sweep — the sweep
+> caught it, which is what it is for. Then I killed a running sweep to reclaim
+> disk; that outran its EXIT trap and left **1020 repo artifacts moved aside**
+> with `git status` still clean. Restored by hand and confirmed with
+> `verify_frozen_assets.py`. The rules: reclaim disk before a sweep, never kill
+> one, and regenerate the skip audit and sweep after the last test edit.
+>
+> **GPU engineering validation was NOT run.** This box has no CUDA device
+> (`nvidia-smi` absent, `torch 2.13.0+cpu`), so it needs a paid provider, and
+> this session was told to stop and propose a contract rather than spend. The
+> Stage-F device repair therefore remains verified logically, at `$0`, and has
+> still never executed on an accelerator.
+
 > **Post-provider ownership repair and the P12 record-rule split, 2026-09-07 —
 > `$0.0000`, no pod, no GPU, no provider resource.** The second authorization
 > review found one more material defect and, because repairing it collided with
