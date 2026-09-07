@@ -3,9 +3,9 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "828fba0536eed8231f22a8d91546834ef5af3474",
+ "head_commit": "0f0b6690096752bdab65ff85151a68e207aa80c5",
  "executable_source": {
-  "digest": "22466f13b215a86f399cd4bf692e4590e622226e3c14d1d91dc0e413dfe4d93b",
+  "digest": "c0ccaa3e47b1cf74a38378ab247a98c8f0fee5b75f45a5f9aad58d754cad0905",
   "files": [
    {
     "path": "scripts/autoinit/verify_c1_battery_isolation.py",
@@ -39,19 +39,19 @@
    },
    {
     "path": "src/aadistill/autoinit/operators/attention_activation.py",
-    "sha256": "5a2ea77a37c8d441a676396aac3978f2d2aff451813e84d7bcc2092672a0c3e8",
-    "bytes": 12204
+    "sha256": "45af4095a7035cffb2a92f0ef72d9cdc26a2df495c10433b3e51571b8d1490cc",
+    "bytes": 15174
    },
    {
     "path": "src/aadistill/init/attention_stats.py",
-    "sha256": "19900c18b23bae052eaa698dabc27b33984b562ec0a0c22aa6e5d6a72bf6a1e2",
-    "bytes": 9037
+    "sha256": "74d6df9c1bb1674342e2e67307bf50ce908d1cd947612aa29e17c5de917a43f5",
+    "bytes": 9927
    }
   ],
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "a3566eec79b3439ce1e7ac75d305a92d890f7daf7b44b1b4a9d67086c9a5aa95",
+  "digest": "6ac5120f7a5667a97a4f08653367f736f6b9db57fb5313d1352f925147797b14",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -270,8 +270,8 @@
    },
    {
     "path": "src/aadistill/autoinit/operators/attention_activation.py",
-    "sha256": "5a2ea77a37c8d441a676396aac3978f2d2aff451813e84d7bcc2092672a0c3e8",
-    "bytes": 12204
+    "sha256": "45af4095a7035cffb2a92f0ef72d9cdc26a2df495c10433b3e51571b8d1490cc",
+    "bytes": 15174
    },
    {
     "path": "src/aadistill/autoinit/operators/base.py",
@@ -385,8 +385,8 @@
    },
    {
     "path": "src/aadistill/init/attention_stats.py",
-    "sha256": "19900c18b23bae052eaa698dabc27b33984b562ec0a0c22aa6e5d6a72bf6a1e2",
-    "bytes": 9037
+    "sha256": "74d6df9c1bb1674342e2e67307bf50ce908d1cd947612aa29e17c5de917a43f5",
+    "bytes": 9927
    },
    {
     "path": "src/aadistill/init/collect.py",
@@ -932,5 +932,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "4e6f4d34b41f3f00e3d7af4f0f028aa1d156a947b90d6539c897850857c4032d"
+ "preregistration_sha256": "1618c57a83b1a2d949a49fe2c66fd748c0a629bf14f8c8453890a70718948f02"
 }
