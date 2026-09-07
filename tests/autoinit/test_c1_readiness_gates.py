@@ -517,9 +517,21 @@ def test_gate_twelve_is_excluded_from_the_candidate_sweep_for_a_stated_reason():
     convenience — but an exclusion list is exactly where a real gate goes to die
     quietly, so both the membership and the reason are pinned here.
     """
-    src = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
-    assert '"pod_environment_gate"]' in src, (
+    #: Membership read as DATA. The literal `'"pod_environment_gate"]'` was
+    #: matched in source text until 2026-09-08, which broke the moment the list
+    #: became a named constant — and would equally have broken on a reformat.
+    #: What is being protected is that the exclusion set is exactly these three
+    #: and that each one's reason is still written down.
+    import sys
+
+    sys.path.insert(0, str(REPO / "tests/pod"))
+    from test_c1_session_contract import ALWAYS_STRUCTURALLY_UNAVAILABLE
+
+    assert set(ALWAYS_STRUCTURALLY_UNAVAILABLE) == {
+        "session_commit_and_lineage", "bundle_staged_gate", "pod_environment_gate"}, (
         "the exclusion set changed shape; re-read why each member is in it")
+
+    src = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
     assert "genuine\n    circularity" in src, "the reason for excluding gate 12 is gone"
     assert "It is not left unexercised" in src, (
         "the pointer to gate 12's real coverage is gone")
@@ -534,30 +546,32 @@ def test_the_only_conditional_exclusion_is_the_synthetic_credential():
     run, and an unconditional exclusion would retire the check that closed attempt
     2 and the guarantee that replaced the skippable parity cases.
     """
-    #: Checked as a PROPERTY, not as source text. This asserted the literal
-    #: `if os.environ.get("AAD_SYNTHETIC_HF_TOKEN"):` until 2026-09-08, when the
-    #: exclusion was re-keyed on the CONDITION — is a real credential and a
-    #: populated hub cache actually absent? — because the simulator marker
-    #: describes one particular simulator, and the moment that test could also
-    #: run under a bare empty $HOME the marker stopped covering it.
+    #: Checked against the module's own CONSTANTS, never its source text.
     #:
-    #: The protective content is unchanged and is what is asserted here: the two
-    #: gates must never become UNCONDITIONAL exclusions, the simulator must still
-    #: force them, and on a machine that has the inputs they must run.
+    #: This asserted the literal `if os.environ.get("AAD_SYNTHETIC_HF_TOKEN"):`
+    #: until 2026-09-08, when the exclusion was re-keyed on the CONDITION — are
+    #: a real credential and a populated hub cache actually absent? — because the
+    #: marker describes one particular simulator, and the moment that test could
+    #: also run under a bare empty $HOME the marker stopped covering it.
+    #:
+    #: The first rewrite still sliced source text to find the base list, and the
+    #: slice picked up the explanatory comment beside it, which names
+    #: `rope_input_gate` — so the guard reported an unconditional exclusion that
+    #: did not exist. It failed only in the pod sweep, because that is where the
+    #: whole suite runs. The lists are module constants now and are read as data.
     import os
     import sys
 
     sys.path.insert(0, str(REPO / "tests/pod"))
-    src = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
-    assert 'structurally_unavailable += ["rope_input_gate", "renderer_parity_gate"]' in src
+    from test_c1_session_contract import (
+        ALWAYS_STRUCTURALLY_UNAVAILABLE, HF_DEPENDENT_GATES, hf_inputs_are_absent,
+    )
 
-    base = src[src.index("structurally_unavailable = ["):
-               src.index("structurally_unavailable += [")]
-    assert "rope_input_gate" not in base, (
-        "rope_input_gate became an unconditional exclusion; attempt 2 died at "
-        "ROPE_OK and this gate is what closed that gap")
-
-    from test_c1_session_contract import hf_inputs_are_absent
+    for gate in HF_DEPENDENT_GATES:
+        assert gate not in ALWAYS_STRUCTURALLY_UNAVAILABLE, (
+            f"{gate} became an unconditional exclusion; attempt 2 died at "
+            "ROPE_OK and this gate is what closed that gap")
+    assert set(HF_DEPENDENT_GATES) == {"rope_input_gate", "renderer_parity_gate"}
 
     before = os.environ.get("AAD_SYNTHETIC_HF_TOKEN")
     os.environ["AAD_SYNTHETIC_HF_TOKEN"] = "1"

@@ -315,6 +315,24 @@ def test_the_session_declares_that_it_neither_searches_nor_eliminates(spec):
 
 # --- the pre-provider gates -------------------------------------------------
 
+#: Gates that can never run here, with a reason each, so widening this list is a
+#: decision somebody makes. A module constant rather than a local, so
+#: `test_c1_readiness_gates` can assert against the LIST instead of scanning this
+#: file's source — a text scan matched the explanatory comment beside it and
+#: reported `rope_input_gate` as unconditionally excluded when it is not.
+#:
+#: `session_commit_and_lineage` binds a real issued commit; `bundle_staged_gate`
+#: needs a bundle for that commit uploaded to the relay; `pod_environment_gate`
+#: consumes the sweep's own output and so cannot be a precondition of the suite
+#: that produces it.
+ALWAYS_STRUCTURALLY_UNAVAILABLE = (
+    "session_commit_and_lineage", "bundle_staged_gate", "pod_environment_gate")
+
+#: Excluded only when their inputs are genuinely absent. NEVER unconditional:
+#: attempt 2 died at ROPE_OK and `rope_input_gate` is what closed that gap.
+HF_DEPENDENT_GATES = ("rope_input_gate", "renderer_parity_gate")
+
+
 def hf_inputs_are_absent() -> bool:
     """Is a real Hugging Face credential AND a populated hub cache missing?
 
@@ -364,9 +382,7 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(
                                 auth=auth, evidence={}, image_digest="candidate",
                                 price=0.99, spent_usd=0.0)
 
-    #: Named, with a reason each, so widening this is a decision somebody makes.
-    structurally_unavailable = ["session_commit_and_lineage", "bundle_staged_gate",
-                                "pod_environment_gate"]
+    structurally_unavailable = list(ALWAYS_STRUCTURALLY_UNAVAILABLE)
     #: Two gates need a real Hugging Face credential and a populated hub cache.
     #: `rope_input_gate` authenticates to the private relay to download and hash
     #: the pinned checkpoint config; `renderer_parity_gate` reads the seven
@@ -381,7 +397,7 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(
     #: actually there is true in the simulator, true under an empty HOME, and
     #: FALSE on a real dev box, where both gates still run for real.
     if hf_inputs_are_absent():
-        structurally_unavailable += ["rope_input_gate", "renderer_parity_gate"]
+        structurally_unavailable += list(HF_DEPENDENT_GATES)
     failures = []
     for gate in spec.precheck:
         name = getattr(gate, "__name__", "session_commit_and_lineage")
