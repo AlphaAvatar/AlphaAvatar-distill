@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-07T08:00:00Z",
+ "generated_utc": "2026-09-07T10:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -67,8 +67,8 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Four $0 repairs are in and the executable identity is rebound. C1 remains SCIENTIFICALLY UNMEASURED: no completed replay, no treatment execution on real weights, no training, no evaluation, no decision.",
-  "the_ask": "scientific review of the four repairs. No pod, grant or authorization was created for any of them.",
+  "status": "The Attempt-9 grant is recorded and unconsumed, and a fifth $0 repair makes the C1 acquisition contract enforce it: one provider resource, no replacement pod, no stock chasing. C1 remains SCIENTIFICALLY UNMEASURED.",
+  "the_ask": "independent authorization review, on a REGENERATED launch-bound record. The Attempt-9 grant is PRESENT and unconsumed; the authorization is ABSENT, and no pod or provider resource was created.",
   "budget": "$266.8158 spent of the unchanged $283.7600 cap; $16.9442 uncommitted."
  },
  "read_order": [
@@ -119,20 +119,20 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / NINE PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- Attempt-9 GRANT recorded (a grant is not an authorization); four $0 repairs accepted, none measured on hardware",
+   "status": "IMPLEMENTED / NINE PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- Attempt-9 GRANT present and unconsumed (a grant is not an authorization); five $0 repairs, none measured on hardware",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered.",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json d8483467d361 at head_commit e87ab4c7; harness f7f29468d221 over 73 files; executable_source ead856cf8ef9; 12 pre-provider gates",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
-   "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
+   "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL. @v2 and battery untouched.",
    "attempts": "NINE LABELS, EIGHT paid ($2.9561), ZERO science. Detail: BUDGET_LEDGER.md.",
    "gates": "12 pre-provider gates. Detail: STATE.md.",
-   "needs": "independent authorization review of the Attempt-9 grant and its launch-bound readiness record. Issuance, bundle staging, the 12 pre-provider gates and the launch are all still owed.",
-   "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network",
+   "needs": "independent authorization review on a regenerated launch-bound record. Issuance, bundle staging, the 12 pre-provider gates and the launch are all still owed.",
+   "not_built": "authorization ABSENT and no Attempt-9 bundle staged; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network. The Attempt-9 grant IS present and unconsumed.",
    "evidence": "logs/autoinit_c1_attempt8/; the repairs are commits 208b2865..e87ab4c7",
-   "readiness": "skip-predicate audit PASS. A launch_bound record is produced on the grant commit; the earlier diagnostic is useful evidence but is INSUFFICIENT for a paid launch.",
-   "repaired_at_zero_dollars": "FOUR defects, all $0, all UNMEASURED ON HARDWARE: (1) the raw-calibration -> operator boundary, missing from the fixed path; (2) stage-D root placement, CPU under a cuda declaration; (3) stage F handing the full four-step spec a step-2 parent, repaired by verified SUFFIX execution that keeps the full path identity, with a treatment record and an artifact gate requiring it; (4) a post-parent-match failure written as STAGE_FAILED:D over a passed D, and non-atomic stage-E evidence. Mechanism: STATE.md."
+   "readiness": "skip-predicate audit PASS. The launch_bound record is OWED AGAIN: the acquisition repair moved the executable, so the record swept before it no longer describes this tree.",
+   "repaired_at_zero_dollars": "FIVE defects, all $0, all UNMEASURED ON HARDWARE: the raw-calibration boundary; stage-D root placement; stage-F full-path execution (repaired by verified suffix execution); stage-D/E attribution and atomic stage-E evidence; and the acquisition contract, which defaulted to 8 create attempts and 3 host draws against a ONE-provider-resource grant. Mechanism: STATE.md."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -150,20 +150,17 @@
   "scratch_state": "the 2026-08-31 closeout retired the five $HOME/phase_b_*_scr roots ONLY; see STATE.md for the 2026-09-01 audit.",
   "preserved_scratch_20260901": {
    "path": "/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/",
-   "manifest_sha256": "3e1a72e2ade2fde610b95e41e147f7f93d37fd4418a4a2d9f61ae58d27cca0b7",
-   "n_files": 359,
-   "verified": "359/359 re-hashed, 0 mismatched",
-   "sources_retained": "YES -- aad-scratch originals are NOT deleted"
+   "owned_by": "MANIFEST.json in that directory; 359 files, 12.95 MiB, all re-hashed."
   },
   "checkpoints_deleted": 0,
   "scientific_artifacts_deleted": 0,
   "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
   "closeout": "logs/storage_closeout_20260831.json",
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
-  "free_space_note": "12.01 GiB free after the 2026-09-06 limited P12 cleanup of rebuildable caches and ephemeral residue ONLY; before it 0.64 GiB failed the suite with ENOSPC. aad-artifacts unchanged, the seven pinned snapshots intact. Every deletion: logs/c1_storage_recovery.json.",
+  "free_space_note": "12.01 GiB free after the limited P12 cleanup of rebuildable caches. Detail: c1_storage_recovery.json.",
   "free_bytes": 12897964032
  },
- "blocker": "No C1 grant exists. Attempt 8 ran the driver for the first time and crashed in stage D. C1 has still never been measured.",
+ "blocker": "NOT AUTHORIZED. The Attempt-9 GRANT is present, one-use and UNCONSUMED; a grant permits an ISSUANCE, not a launch. Authorization is ABSENT, no Attempt-9 relay bundle is staged, and the launch-bound readiness record must be REGENERATED because executable and state paths moved after it was swept. C1 has still never been measured.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/HANDOFF_next_session.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision"

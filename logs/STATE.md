@@ -1,6 +1,57 @@
 **Updated:** 2026-09-07 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
 ATTEMPT-9 GRANT RECORDED — NOT AUTHORIZED, STILL NEVER MEASURED**
 
+> **Authorization review, 2026-09-07 — issuance NO-GO, one narrow `$0` repair.**
+> The Attempt-9 grant and its first launch-bound record were reviewed at
+> `origin/main 414a3fa` and accepted as genuine `$0` evidence. **Issuance was
+> withheld**, on two material pre-authorization defects.
+>
+> **1. The launcher did not enforce the grant it was launched under.** The grant
+> permits exactly one provider resource and says in as many words that there is
+> no replacement pod — and `autoinit_c1_launch.py` defaulted to
+> `--create-attempts 8` and `--host-draws 3`. A cold or endpoint-less first pod
+> would have been deleted and a **second drawn**; a create failure would have
+> slept 300 s and retried, seven more times, against the stock the grant says not
+> to chase. Neither reads as a violation in a transcript — both look like
+> ordinary resilience.
+>
+> Both values are now fixed at **1**, by argparse *type* and again at spec
+> construction, so neither a command line nor a hand-built namespace can raise
+> them. That makes `draw < host_draws` false by construction, so the
+> cold/`no_endpoint` **redraw branch is unreachable** and every abort falls
+> through to `teardown_now`; and `attempt < create_attempts` false, so there is
+> exactly **one** provider-create invocation and **no sleep**. The same field
+> bounds the zero-provider price READ, which becomes a single `$0` read that
+> returns for review — it cannot create a resource or wait for stock.
+>
+> **`SessionRunner` is untouched.** Phase A, Phase B, both continuations and the
+> preflight keep multi-draw acquisition, which is correct for them: they have no
+> one-resource grant. 20 cases cover it, and three mutations were confirmed red —
+> restoring `host_draws` to 3, restoring `create_attempts` to 8, and letting the
+> cold branch redraw regardless of the budget.
+>
+> **2. The snapshot declared a grant and denied one.** `current_state.json` said
+> the Attempt-9 grant was present and one-use, while `blocker`,
+> `phase_c.c1.not_built` and `next_starting_point.the_ask` still read *"No C1
+> grant exists"* / *"no grant"* / *"No pod, grant or authorization was created"*.
+> Three fields had simply not been updated. All are corrected, and
+> `tests/autoinit/test_state.py` now refuses a snapshot that declares a grant and
+> denies one in any owned live field — verified by putting each of the three
+> denials back and watching it fail.
+>
+> Those guards were first written with `pytest.skip`, and the skip-predicate
+> audit refused to resolve them: a skip keyed on repository content is one more
+> thing the pod/sweep comparison must account for. They are conditionals now, not
+> skips, and the audit is back to **0 unaccounted, 0 stale, PASS**.
+>
+> **Issuance remains ABSENT** and is conditional on a **fresh** launch-bound
+> review: this repair moves the executable, so the readiness record swept before
+> it no longer describes this tree. Unchanged by the review: one issuance, one
+> launch attempt, one provider resource, the consumption semantics, `$1.09/h`,
+> `$15.1475`, `$283.7600`, and the frozen scientific scope in full. The label
+> stays **Attempt 9** — nothing was issued and no resource was created, so there
+> is nothing to retire and no Attempt 10.
+
 > **Attempt-9 grant, 2026-09-07 — `$0.0000`, no pod, no GPU, no provider
 > resource.** The four post-attempt-8 `$0` repairs were reviewed at `origin/main
 > 5956a5fd` and **ACCEPTED**: the raw-calibration → operator-ready boundary;
@@ -842,7 +893,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | teacher shard binding | [`phase_c1_teacher_binding.json`](phase_c1_teacher_binding.json) |
 
 | ten-stage session contract + the two fail-stop replay gates | `autoinit/c1_session.py` |
-| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · `d8483467d361…` at `head_commit e87ab4c7` · harness `f7f29468d221…` over 73 files · executable source `ead856cf8ef9…` · every revision so far moved only executable identity; **no scientific field has ever moved**, and each 2026-09-07 rewrite was diffed field by field to show it |
+| execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · rebound after the acquisition repair; the live values are in the file and in [`current_state.json`](current_state.json) · harness over 73 files · executable source `ead856cf8ef9…` · every revision so far moved only executable identity; **no scientific field has ever moved**, and each 2026-09-07 rewrite was diffed field by field to show it |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |

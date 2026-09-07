@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -215,3 +216,101 @@ def test_pruned_states_stay_auditable(tmp_path, teacher_spec, target_spec):
     assert latest["artifact_digest"] == state.artifact_digest
     assert latest["evaluation"]["values"] == VALUES
     assert len(store.records()) == 2
+
+
+# --- the live snapshot must not deny a grant it also declares ---------------
+#
+# On 2026-09-07 `logs/current_state.json` said BOTH that the Attempt-9 grant was
+# present and one-use, and — in `blocker` and `phase_c.c1.not_built` — that "No
+# C1 grant exists" / "no grant". Three fields had simply not been updated when
+# the grant landed. A handoff document that contradicts itself about whether a
+# grant exists is worse than a stale one, because both halves look authoritative.
+#
+# Deliberately NOT a natural-language framework. It covers the owned live fields
+# that produced this contradiction and nothing else.
+
+SNAPSHOT = Path(__file__).resolve().parents[2] / "logs/current_state.json"
+
+#: Phrases that DENY a grant. "the grant exists" must not match, so each is a
+#: negation, not a keyword.
+GRANT_DENIALS = (
+    "no c1 grant",
+    "no grant exists",
+    "no grant is live",
+    "no grant;",
+    "no pod, grant or authorization",
+    "grant: absent",
+    "no grant or authorization",
+)
+
+#: The live fields that must agree. Named, because these are the ones that
+#: actually went stale — `authorized.note`, `phase_c.c1.status`,
+#: `next_starting_point.the_ask`, `phase_c.c1.not_built` and `blocker`.
+LIVE_GRANT_FIELDS = (
+    ("blocker",),
+    ("authorized", "note"),
+    ("phase_c", "c1", "status"),
+    ("phase_c", "c1", "not_built"),
+    ("phase_c", "c1", "needs"),
+    ("next_starting_point", "the_ask"),
+    ("next_starting_point", "status"),
+)
+
+
+def _snapshot() -> dict:
+    return json.loads(SNAPSHOT.read_text())
+
+
+def _at(doc: dict, path: tuple[str, ...]):
+    for key in path:
+        if not isinstance(doc, dict) or key not in doc:
+            return None
+        doc = doc[key]
+    return doc if isinstance(doc, str) else None
+
+
+def _declares_a_grant(doc: dict) -> bool:
+    """Does the snapshot say an Attempt-9 grant is PRESENT?"""
+    blob = json.dumps(doc).lower()
+    return "attempt-9 grant" in blob or "autoinit_c1_attempt9_grant.json" in blob
+
+
+def test_a_declared_grant_is_not_denied_by_any_live_field():
+    #: Conditional by nature, and expressed WITHOUT `pytest.skip`: a skip
+    #: predicate keyed on repository content is one more thing the pod/sweep
+    #: skip-set comparison has to account for, and the audit correctly refused to
+    #: resolve it. When no grant is declared the rule is vacuous, so the
+    #: offender list is simply empty and the assertion still runs.
+    doc = _snapshot()
+    offenders = []
+    for path in (LIVE_GRANT_FIELDS if _declares_a_grant(doc) else ()):
+        text = _at(doc, path)
+        if text is None:
+            continue
+        for denial in GRANT_DENIALS:
+            if denial in text.lower():
+                offenders.append(f"{'.'.join(path)}: {denial!r} in {text[:90]!r}")
+    assert not offenders, (
+        "the snapshot declares an Attempt-9 grant AND denies one:\n  "
+        + "\n  ".join(offenders))
+
+
+def test_the_grant_file_the_snapshot_names_actually_exists():
+    doc = _snapshot()
+    grant = SNAPSHOT.parent / "autoinit_c1_attempt9_grant.json"
+    if not _declares_a_grant(doc):
+        assert not grant.is_file() or True      # nothing is claimed, nothing owed
+        return
+    assert grant.is_file(), f"{grant} is named by the snapshot and absent"
+    assert json.loads(grant.read_text())["schema"] == "aadistill.autoinit.c1_grant/v1"
+
+
+def test_a_declared_grant_is_never_called_an_authorization():
+    """A grant permits an ISSUANCE. The two must stay distinguishable."""
+    doc = _snapshot()
+    if not _declares_a_grant(doc):
+        return
+    assert doc["authorized"]["any"] is False
+    assert doc["running"]["paid_compute"] is False
+    assert doc["running"]["pods"] == 0
+    assert doc["prepared_launch"]["any"] is False

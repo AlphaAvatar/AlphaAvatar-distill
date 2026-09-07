@@ -1,8 +1,8 @@
 {
  "schema": "aadistill.autoinit.c1_grant/v1",
  "_what_this_is": "the maintainer decision permitting ONE Phase-C1 session -- attempt 9. An INPUT to the issuer, which derives every identity from the committed objects and refuses a grant that asserts one. It states only what a maintainer owns: who permitted what, at what cumulative spend, and what it does not authorize.",
- "granted_for": "Phase C1 fixed-path ATTENTION isolation — Attempt 9",
- "granted_by": "maintainer, C1 attempt-8 postmortem scientific review 2026-09-07, at origin/main 5956a5fd. Attempt 8 was a PRE-MEASUREMENT INFRASTRUCTURE ABORT: it produced no completed parent replay comparison, no incumbent replay comparison, no recovery training, no confirmation evaluation and no C1 endpoint. Four material runtime and evidence defects were found and repaired at $0.0000 with no pod, no GPU and no provider resource, and all four are ACCEPTED by this review: (1) the raw-calibration -> operator-ready runtime preparation boundary, which was missing from the fixed path and which attempt 8 died on with KeyError: 'input_ids'; (2) declared-device root loading through the adapter, with exhaustive parameter and buffer placement verification, closing a defect that would have run the parent replay on the host CPU inside a paid GPU hour; (3) Stage-F verified treatment SUFFIX execution keeping the full four-step arm identity, its treatment execution record, the success artifact gate that requires it, and the operator budget fail-stop; (4) correct Stage-D versus Stage-E ordinary-failure attribution and atomic Stage-E replay evidence. No additional source repair, canary or rehearsal is authorized. GO to record ONE new one-use grant and produce its launch-bound readiness record.",
+ "granted_for": "Phase C1 fixed-path ATTENTION isolation \u2014 Attempt 9",
+ "granted_by": "maintainer, C1 attempt-8 postmortem scientific review 2026-09-07, at origin/main 5956a5fd. Attempt 8 was a PRE-MEASUREMENT INFRASTRUCTURE ABORT: it produced no completed parent replay comparison, no incumbent replay comparison, no recovery training, no confirmation evaluation and no C1 endpoint. Four material runtime and evidence defects were found and repaired at $0.0000 with no pod, no GPU and no provider resource, and all four are ACCEPTED by this review: (1) the raw-calibration -> operator-ready runtime preparation boundary, which was missing from the fixed path and which attempt 8 died on with KeyError: 'input_ids'; (2) declared-device root loading through the adapter, with exhaustive parameter and buffer placement verification, closing a defect that would have run the parent replay on the host CPU inside a paid GPU hour; (3) Stage-F verified treatment SUFFIX execution keeping the full four-step arm identity, its treatment execution record, the success artifact gate that requires it, and the operator budget fail-stop; (4) correct Stage-D versus Stage-E ordinary-failure attribution and atomic Stage-E replay evidence. GO to record ONE new one-use grant and produce its launch-bound readiness record. (That decision also said no additional source repair was authorized; the independent authorization review recorded below SUPERSEDES that sentence by authorizing exactly one further narrow $0 repair.)",
  "covers": "exactly one C1 launch under the UNCHANGED frozen C1 protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh paired seeds = exactly six E1_KD_HEAVY_0860K recovery trainings; ALL SIX trainings complete before any confirmation evaluation begins; exactly one frozen confirmation evaluation per completed probe, each admitted against its own observed generation protocol before scoring; followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision rule. Nothing in the protocol, the arms, the seeds, the battery, the recovery recipe, the generation protocol, the scoring contract, the endpoints or the decision rule is modified by this grant.",
  "one_use": {
   "issuances_permitted": 1,
@@ -84,5 +84,30 @@
   ],
   "this_session_stops_at": "step 5. Issuance, bundle staging, the pre-provider gates and the launch are all OUT OF SCOPE and explicitly not permitted here.",
   "frozen_after_this_commit": "no source, test, preregistration, state, catalog, decision or README path may move between this commit and launch. Exactly two tracked paths may: logs/c1_pod_environment_verification.json and logs/autoinit_c1_authorization.json."
+ },
+ "authorization_review": {
+  "_what_this_is": "the independent authorization review of this grant and its first launch-bound record, at origin/main 414a3fa.",
+  "verdict": "ISSUANCE NO-GO. The grant and the launch-bound record are accepted as genuine $0 evidence; issuance is withheld.",
+  "four_runtime_repairs": "REMAIN ACCEPTED, unchanged and not reopened.",
+  "defects_found": [
+   "the C1 acquisition contract did not enforce this grant's own terms: the launcher defaulted to --create-attempts 8 and --host-draws 3, so a cold or endpoint-less first pod would have been deleted and a SECOND drawn -- a replacement pod this grant forbids -- and a create failure would have slept 300 s and retried against changing stock.",
+   "logs/current_state.json simultaneously declared this grant present and stated in three live fields that no C1 grant exists."
+  ],
+  "authorized_at_zero_dollars": [
+   "one narrow fifth OPERATIONAL repair: the C1 launcher now fixes create_attempts and host_draws at 1 by argparse type AND at spec construction, so exactly one provider resource is possible, the cold/no_endpoint redraw branch is unreachable, and there is no stock wait. SessionRunner is untouched; other phases keep multi-draw.",
+   "the current-state correction, with a structural regression that refuses a snapshot which declares a grant and denies one."
+  ],
+  "issuance": "REMAINS ABSENT, and is conditional on a FRESH launch-bound review: the acquisition repair moves the executable, so the readiness record swept before it no longer describes this tree.",
+  "unchanged_by_this_review": [
+   "one issuance",
+   "one launch attempt",
+   "one provider resource",
+   "consumption on provider-resource creation, with no retry and no replacement pod",
+   "accepted secure L40S price <= $1.09/h",
+   "hard ceiling $15.1475",
+   "cumulative cap $283.7600",
+   "the frozen scientific scope, in full"
+  ],
+  "experiment_label": "Attempt 9. The grant is superseded in TEXT only -- no authorization was issued and no provider resource was created, so there is nothing to retire and no Attempt 10."
  }
 }

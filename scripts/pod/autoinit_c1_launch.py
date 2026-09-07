@@ -32,6 +32,7 @@ at `$0.2300`, one step after its test gate passed.
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sys
@@ -182,6 +183,64 @@ TEACHER_BINDING = "logs/phase_c1_teacher_binding.json"
 #: Written by scripts/autoinit/stage_c1_bundle.py; the local half of the
 #: transport check. The gate verifies the REMOTE object against it.
 BUNDLE_RECORD = "logs/autoinit_c1_bundle.json"
+
+#: EXACTLY ONE provider resource, for the whole session.
+#:
+#: The C1 grant permits one issuance, one launch attempt and one provider
+#: resource, and says in as many words that after consumption there is no retry
+#: and no replacement pod. The launcher did not enforce any of that: it defaulted
+#: to `--create-attempts 8` and `--host-draws 3`, so a cold or endpoint-less
+#: first pod would be deleted and a SECOND one drawn — a replacement pod the
+#: grant forbids — and a create failure would sleep 300 s and try again, up to
+#: seven times, waiting on stock the grant says not to chase.
+#:
+#: `host_draws = 1` makes `if outcome in ("cold","no_endpoint") and draw <
+#: host_draws` false by construction, so the redraw branch is unreachable and
+#: every abort falls through to `teardown_now`. `create_attempts = 1` makes
+#: `if attempt < create_attempts` false, so there is exactly one provider-create
+#: invocation and no sleep. The same field also bounds `check_gpu_offered`'s
+#: zero-provider price READ, which therefore becomes a single `$0` read that
+#: returns for review — the simpler of the two options the review allowed, and
+#: it cannot create a resource or wait for stock.
+#:
+#: Enforced by TYPE, not by default: a default only helps if every future launch
+#: command remembers to pass two flags. `SessionRunner` is untouched, so Phase A,
+#: Phase B, the continuations and the preflight keep multi-draw acquisition.
+C1_PROVIDER_RESOURCES = 1
+
+
+def _exactly_one(flag: str):
+    """An argparse type that accepts only 1, and says why."""
+    def parse(raw: str) -> int:
+        try:
+            value = int(raw)
+        except ValueError:
+            raise argparse.ArgumentTypeError(f"{flag} must be an integer") from None
+        if value != C1_PROVIDER_RESOURCES:
+            raise argparse.ArgumentTypeError(
+                f"{flag}={value} would permit more than one provider resource. "
+                "The C1 grant permits exactly one, with no replacement pod and "
+                f"no stock chasing, so {flag} is fixed at {C1_PROVIDER_RESOURCES}.")
+        return value
+    return parse
+
+
+def require_one_provider_resource(args) -> None:
+    """The same rule where a hand-built namespace cannot slip past the parser.
+
+    Device-canary attempt 1 died at `$0.0603` on an attribute a real parser
+    defined and a hand-written namespace did not, so an argparse type alone is
+    not the whole guard. This runs during spec construction, before
+    `run_session` and therefore before anything can be created.
+    """
+    for name, flag in (("create_attempts", "--create-attempts"),
+                       ("host_draws", "--host-draws")):
+        value = getattr(args, name, None)
+        if value != C1_PROVIDER_RESOURCES:
+            raise SystemExit(
+                f"refusing to build the C1 session: {name}={value!r}. The grant "
+                "permits exactly one provider resource and no replacement pod; "
+                f"{flag} is fixed at {C1_PROVIDER_RESOURCES}.")
 
 #: Dev-box-only assets the launcher scp's. The battery is 3.26 MiB and the
 #: reasoning-heavy mixture 0.76 MiB, so both fit the observed 0.44-0.72 MB/s
@@ -727,6 +786,9 @@ def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
 
 
 def spec(args) -> SessionSpec:
+    #: Before anything can be created. A namespace that would permit a second
+    #: provider resource never becomes a SessionSpec.
+    require_one_provider_resource(args)
     return SessionSpec(
         session_id="autoinit-c1",
         schema="aadistill.autoinit.c1_session/v1",
@@ -851,7 +913,6 @@ def _plan_hash() -> str:
 
 def build_parser():
     """C1's session command line. No search flag exists to be set."""
-    import argparse
     import os
 
     ap = argparse.ArgumentParser(
@@ -884,8 +945,15 @@ def build_parser():
     ap.add_argument("--uv-max-s", type=int, default=1500)
     ap.add_argument("--tests-max-s", type=int, default=2700)
     ap.add_argument("--startup-limit-min", type=float, default=15.0)
-    ap.add_argument("--create-attempts", type=int, default=8)
-    ap.add_argument("--host-draws", type=int, default=3)
+    #: ONE. Not a default a launch command has to remember to pass — the type
+    #: itself refuses anything else. See `C1_PROVIDER_RESOURCES`.
+    ap.add_argument("--create-attempts", type=_exactly_one("--create-attempts"),
+                    default=C1_PROVIDER_RESOURCES)
+    ap.add_argument("--host-draws", type=_exactly_one("--host-draws"),
+                    default=C1_PROVIDER_RESOURCES)
+    #: Unreachable with one attempt (`if attempt < create_attempts` is never
+    #: true), and kept only because the runner argument contract requires the
+    #: field. C1 never sleeps against changing stock.
     ap.add_argument("--create-retry-seconds", type=float, default=300.0)
     ap.add_argument("--setup-timeout-s", type=float, default=5400.0)
     ap.add_argument("--poll-seconds", type=float, default=120.0)
