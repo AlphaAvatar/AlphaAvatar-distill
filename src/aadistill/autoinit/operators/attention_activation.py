@@ -49,7 +49,9 @@ from typing import Any
 import torch
 
 from ...init.attention_stats import AttentionHeadStatsCollector, head_write_energy
-from ..arch import ArchitectureAdapter, ArchSpec, Capability
+from ..arch import (
+    ArchitectureAdapter, ArchSpec, Capability, UnsupportedCapability,
+)
 from ..device import model_device, stats_to
 from ..metrics import OperatorLocalMetrics
 from ..stats import StatsSpec
@@ -82,6 +84,40 @@ ATTENTION_STATS_SPEC = StatsSpec(
     accumulation_dtype="float64",
     quantities=("attn_head_sqsum", "attn_token_count"),
 )
+
+
+#: The adapter role names this operator consumes. Family module-tree knowledge —
+#: `.model.layers`, `.self_attn`, `.q_proj`, `.o_proj` — lives in the adapter and
+#: nowhere else, so adding an architecture means writing an adapter rather than
+#: editing an operator. These two constants are the whole coupling.
+ATTN_OUT_ROLE = "attn_out"
+QUERY_ROLE = "q"
+
+
+def attention_out_projection(adapter: ArchitectureAdapter, block: Any) -> Any:
+    """The linear that writes attention's result into the residual stream."""
+    roles = adapter.stream_out_projections(block)
+    if ATTN_OUT_ROLE not in roles:
+        raise UnsupportedCapability(
+            f"the {adapter.family} adapter exposes stream-out roles "
+            f"{sorted(roles)} and not {ATTN_OUT_ROLE!r}; this operator scores "
+            "heads by what they write through that projection and cannot "
+            "proceed without it")
+    return roles[ATTN_OUT_ROLE]
+
+
+def query_projection(adapter: ArchitectureAdapter, block: Any) -> Any:
+    """The linear that reads the residual stream into query space."""
+    roles = adapter.stream_in_projections(block)
+    if QUERY_ROLE not in roles:
+        raise UnsupportedCapability(
+            f"the {adapter.family} adapter exposes stream-in roles "
+            f"{sorted(roles)} and not {QUERY_ROLE!r}; this operator selects "
+            "query heads and cannot proceed without it")
+    #: role -> (linear, preceding norm). Only the linear is sliced here; the
+    #: norm is untouched, because selecting query heads changes the output width
+    #: of this projection and not the residual width it reads.
+    return roles[QUERY_ROLE][0]
 
 
 def select_q_heads_by_score(scores: Sequence[float] | torch.Tensor, n_q_heads: int,
@@ -138,12 +174,27 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         ok, reason = super().applicable(spec, target, adapter)
         if not ok:
             return ok, reason
-        n_kv = spec["num_key_value_heads"]
-        if target[HEADS_FIELD] % n_kv:
-            return False, (f"target {target[HEADS_FIELD]} query heads is not divisible "
-                           f"by {n_kv} KV heads")
-        if target[HEADS_FIELD] > spec[HEADS_FIELD]:
+        n_q, n_kv, _ = adapter.head_groups(spec)
+        keep_q = target[HEADS_FIELD]
+        if keep_q > n_q:
             return False, "cannot add query heads"
+        #: Named before the divisibility test, which would otherwise refuse this
+        #: with an arithmetic message that hides the real reason. Under MHA every
+        #: query head owns its KV head, so dropping a query head necessarily
+        #: drops a KV head — and this operator's contract is that KV heads,
+        #: head_dim and the GQA grouping are PRESERVED. There is no approximation
+        #: to fall back on, so it refuses rather than silently redefining the
+        #: transformation.
+        if n_kv == n_q and keep_q != n_q:
+            return False, (
+                f"multi-head attention ({n_q}Q/{n_kv}KV): reducing to {keep_q} "
+                f"query heads cannot preserve {n_kv} KV heads, because under MHA "
+                "each query head has its own. This operator preserves KV heads by "
+                "contract; reducing them is a different transformation and needs "
+                "a different operator.")
+        if keep_q % n_kv:
+            return False, (f"target {keep_q} query heads is not divisible "
+                           f"by {n_kv} KV heads")
         return True, "ok"
 
     def plan(self, spec: ArchSpec, target: ArchSpec, adapter: ArchitectureAdapter,
@@ -170,8 +221,12 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         # path ATTENTION runs once, and the other ATTENTION implementation reads
         # no calibration at all.
         compute = model_device(parent)
-        collector = AttentionHeadStatsCollector(parent, num_heads=n_q,
-                                                head_dim=head_dim)
+        #: Resolved through the adapter, in block order, and handed to the
+        #: collector. The collector does not look for them.
+        out_projections = [attention_out_projection(adapter, b)
+                           for b in adapter.blocks(parent)]
+        collector = AttentionHeadStatsCollector(parent, out_projections,
+                                                num_heads=n_q, head_dim=head_dim)
         try:
             for item in ctx.calibration_items:
                 collector.process(item["input_ids"].to(compute))
@@ -200,18 +255,20 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         retained, kept_per_layer = [], []
         for idx, (src, dst) in enumerate(zip(adapter.blocks(parent),
                                              adapter.blocks(builder.model))):
-            s_attn, d_attn = adapter.attention(src), adapter.attention(dst)
-            scores = head_write_energy(stats, idx, s_attn.o_proj.weight, n_q, head_dim)
+            s_out, d_out = (attention_out_projection(adapter, src),
+                            attention_out_projection(adapter, dst))
+            s_q, d_q = query_projection(adapter, src), query_projection(adapter, dst)
+            scores = head_write_energy(stats, idx, s_out.weight, n_q, head_dim)
             kept = select_q_heads_by_score(scores, n_q, n_kv, keep_q)
-            rows = head_rows(kept, head_dim, device=s_attn.q_proj.weight.device)
+            rows = head_rows(kept, head_dim, device=s_q.weight.device)
 
             total = float(scores.sum())
             retained.append(float(scores[kept].sum() / total) if total > 0 else 0.0)
             kept_per_layer.append(list(kept))
 
-            transformed = {id(d_attn.q_proj.weight), id(d_attn.o_proj.weight)}
-            builder.assign(d_attn.q_proj.weight, s_attn.q_proj.weight[rows])
-            builder.assign(d_attn.o_proj.weight, s_attn.o_proj.weight[:, rows])
+            transformed = {id(d_q.weight), id(d_out.weight)}
+            builder.assign(d_q.weight, s_q.weight[rows])
+            builder.assign(d_out.weight, s_out.weight[:, rows])
             copy_module_except(builder, src, dst, skip=transformed)
 
         copy_embeddings_and_final_norm(builder, adapter, parent)

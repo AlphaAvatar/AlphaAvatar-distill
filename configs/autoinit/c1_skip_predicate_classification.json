@@ -92,9 +92,6 @@
   "tests/pod/test_c1_driver_execution.py::_summary_template": {
    "class": "devbox_only_artifact"
   },
-  "tests/pod/test_c1_session_contract.py": {
-   "class": "devbox_only_artifact"
-  },
   "tests/pod/test_continuation_rehearsal.py": {
    "class": "devbox_only_artifact"
   },

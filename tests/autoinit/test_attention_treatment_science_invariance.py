@@ -48,6 +48,14 @@ from aadistill.init.attention_stats import (  # noqa: E402
 ADAPTER = get_adapter("qwen3")
 IMPL = "attention.activation_importance_v1"
 
+def out_projections_of(model):
+    """The attention-output projections, resolved the way production does."""
+    from aadistill.autoinit.operators.attention_activation import (
+        attention_out_projection,
+    )
+    return [attention_out_projection(ADAPTER, b) for b in ADAPTER.blocks(model)]
+
+
 
 @pytest.fixture(autouse=True)
 def registered():
@@ -124,8 +132,8 @@ def test_C_the_streamed_second_moment_equals_the_direct_write_energy(
     n_heads, head_dim = geo["num_attention_heads"], geo["head_dim"]
     direct = _brute_force_scores(teacher, calibration_items, n_heads, head_dim)
 
-    collector = AttentionHeadStatsCollector(teacher, num_heads=n_heads,
-                                            head_dim=head_dim)
+    collector = AttentionHeadStatsCollector(teacher, out_projections_of(teacher),
+                                            num_heads=n_heads, head_dim=head_dim)
     try:
         for item in calibration_items:
             collector.process(item["input_ids"])
@@ -144,7 +152,8 @@ def test_C2_the_accumulation_dtype_is_float64_end_to_end(teacher, geo,
                                                          calibration_items):
     """A repair that dropped to float32 would still pass a loose comparison."""
     assert ATTENTION_STATS_SPEC.accumulation_dtype == "float64"
-    c = AttentionHeadStatsCollector(teacher, num_heads=geo["num_attention_heads"],
+    c = AttentionHeadStatsCollector(teacher, out_projections_of(teacher),
+                                    num_heads=geo["num_attention_heads"],
                                     head_dim=geo["head_dim"])
     try:
         c.process(calibration_items[0]["input_ids"])

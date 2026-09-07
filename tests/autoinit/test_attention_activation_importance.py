@@ -23,6 +23,7 @@ from aadistill.autoinit.operators import get_implementation  # noqa: E402
 from aadistill.autoinit.operators import attention_activation  # noqa: E402
 from aadistill.autoinit.operators.attention_activation import (  # noqa: E402
     ATTENTION_STATS_SPEC,
+    attention_out_projection,
     select_q_heads_by_score,
 )
 from aadistill.autoinit.operators.base import OperatorContext  # noqa: E402
@@ -32,7 +33,11 @@ from aadistill.init.attention_stats import (  # noqa: E402
     head_write_energy,
 )
 
+from aadistill.autoinit.arch import get_adapter  # noqa: E402
+
 from conftest import build_tiny_model  # noqa: E402
+
+ADAPTER = get_adapter("qwen3")
 
 #: 4 query heads over 2 KV groups, so each group keeps 2 of 2 -> use 8/2 to get a
 #: real 4-of-2 choice per group. Mirrors the C1 geometry's 4-per-group -> keep 2.
@@ -205,7 +210,9 @@ def test_the_score_is_the_exact_mean_squared_residual_write():
     captured: list[torch.Tensor] = []
     o_proj = QWEN3_ADAPTER.attention(QWEN3_ADAPTER.blocks(model)[0]).o_proj
     h = o_proj.register_forward_pre_hook(lambda _m, a: captured.append(a[0].detach()))
-    collector = AttentionHeadStatsCollector(model, num_heads=n_q, head_dim=hd)
+    collector = AttentionHeadStatsCollector(
+        model, [attention_out_projection(ADAPTER, b) for b in ADAPTER.blocks(model)],
+        num_heads=n_q, head_dim=hd)
     try:
         for it in calib:
             collector.process(it["input_ids"])
@@ -282,7 +289,9 @@ def test_the_attention_stats_spec_cannot_collide_with_the_ffn_width_cache():
 def test_the_collector_refuses_to_report_zero_tokens():
     model = build_tiny_model(GEOMETRY)
     n_q, _, hd = QWEN3_ADAPTER.head_groups(ArchSpec.of("qwen3", GEOMETRY))
-    c = AttentionHeadStatsCollector(model, num_heads=n_q, head_dim=hd)
+    c = AttentionHeadStatsCollector(
+        model, [attention_out_projection(ADAPTER, b) for b in ADAPTER.blocks(model)],
+        num_heads=n_q, head_dim=hd)
     c.close()
     with pytest.raises(ValueError, match="no tokens"):
         c.state()

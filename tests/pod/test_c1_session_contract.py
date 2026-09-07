@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -30,13 +31,50 @@ from aadistill.autoinit.c1_authorization import (  # noqa: E402
 from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
 from session_specs import load_session_launcher, session_args  # noqa: E402
 
-# Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
-# under a fresh empty HOME so host-local state is invisible on BOTH machines.
-# An absolute literal is immune to that, which is what let host-local cases run
-# in the launch-bound diagnostic and skip on the pod. On the real dev box this
-# resolves identically. Precedent: verify_c1_scoring_equivalence.EVIDENCE_ROOTS.
-CANDIDATE = (Path.home() / "aad-scratch/sessions/c1-candidate"
-             / "candidate_authorization.json")
+#: A candidate authorization, built here, deterministically, into `tmp_path`.
+#:
+#: This used to be `Path.home() / "aad-scratch/sessions/c1-candidate/..."`, a
+#: hand-issued artifact outside the repository. Locating it through `$HOME`
+#: rather than an absolute literal was already an improvement — it made the file
+#: invisible under the empty HOME the pod contract uses — but it traded one
+#: failure for another: on the dev box the fixture existed and pinned a harness
+#: digest that went stale the moment the harness moved, so a CORRECT gate
+#: reported a false alarm, while on the pod the whole test skipped. A test whose
+#: subject lives outside the repository is tested nowhere and trusted anyway.
+#:
+#: The payload derivation now lives in `c1_authorization_payload`, so the CLI
+#: issuer and this fixture cannot diverge. Building one is not issuing one:
+#: nothing below reads a clock, runs git, writes to `logs/`, stages a bundle or
+#: touches a provider — the timestamp and commit are fixed strings, and the file
+#: is written into `tmp_path`.
+TEST_GRANTED_UTC = "2026-01-01T00:00:00+00:00"
+TEST_SESSION_COMMIT = "0" * 40
+
+#: The maintainer-stated half. Deliberately not copied from any real grant: this
+#: names a fictional approver and says, in the artifact itself, what it is.
+TEST_GRANT = {
+    "granted_by": "TEST FIXTURE — not a maintainer, not a grant, not a permission",
+    "covers": ("an ephemeral candidate used to drive the real pre-provider gates "
+               "at $0. It permits nothing and is never written to logs/."),
+    "cumulative_spend_at_approval_usd": 0.0,
+    "cumulative_cap_usd": 283.76,
+    "does_not_authorize": ["anything at all"],
+}
+
+
+def write_candidate(tmp_path, **over):
+    """A deterministic candidate authorization in `tmp_path`. Returns its path."""
+    from aadistill.autoinit.c1_authorization_payload import (
+        build_c1_authorization_payload,
+    )
+
+    payload = build_c1_authorization_payload(
+        grant=TEST_GRANT, session_commit=TEST_SESSION_COMMIT,
+        granted_utc=TEST_GRANTED_UTC, repo_root=REPO,
+        grant_path="<test fixture>", **over)
+    path = tmp_path / "candidate_authorization.json"
+    path.write_text(json.dumps(payload, indent=1) + "\n")
+    return path
 
 
 @pytest.fixture(scope="module")
@@ -277,10 +315,23 @@ def test_the_session_declares_that_it_neither_searches_nor_eliminates(spec):
 
 # --- the pre-provider gates -------------------------------------------------
 
-@pytest.mark.skipif(not CANDIDATE.is_file(),
-                    reason="no candidate authorization on this machine")
-def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher,
-                                                                        spec):
+def hf_inputs_are_absent() -> bool:
+    """Is a real Hugging Face credential AND a populated hub cache missing?
+
+    Named and shared so the predicate can be asserted directly, rather than
+    being an inline condition nobody can check. See its use below for why it is
+    keyed on the condition instead of on `AAD_SYNTHETIC_HF_TOKEN`.
+    """
+    hub = Path(os.environ.get("HF_HOME") or (Path.home() / ".cache/huggingface"))
+    hub = hub / "hub"
+    return bool(os.environ.get("AAD_SYNTHETIC_HF_TOKEN")
+                or not (os.environ.get("HF_TOKEN") or os.environ.get("HF_HUB_TOKEN"))
+                or not hub.is_dir()
+                or not any(hub.glob("datasets--*")))
+
+
+def test_every_gate_but_the_commit_binding_passes_against_the_candidate(
+        launcher, spec, tmp_path):
     """Every `$0` gate must pass against the candidate except the three that
     structurally cannot here.
 
@@ -308,35 +359,28 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(launcher
     """
     import types
 
-    auth = C1Authorization.load(CANDIDATE)
+    auth = C1Authorization.load(write_candidate(tmp_path))
     ctx = types.SimpleNamespace(scr=Path("/tmp/c1gate"), args=session_args(launcher),
                                 auth=auth, evidence={}, image_digest="candidate",
                                 price=0.99, spent_usd=0.0)
-    import os
 
     #: Named, with a reason each, so widening this is a decision somebody makes.
     structurally_unavailable = ["session_commit_and_lineage", "bundle_staged_gate",
                                 "pod_environment_gate"]
-    if os.environ.get("AAD_SYNTHETIC_HF_TOKEN"):
-        # Inside `simulate_pod_env.sh`: the credential is deliberately a fake and
-        # the Hugging Face cache is deliberately empty. Two gates need the real
-        # ones and cannot do otherwise there.
-        #
-        # `rope_input_gate` authenticates to the private relay to download and hash
-        # the pinned checkpoint config, and gets 401. `renderer_parity_gate` reads
-        # the seven pinned dataset snapshots, which the isolated cache does not
-        # have — that emptiness is the very condition the simulation exists to
-        # create, and it is why the seven parity cases skip there.
-        #
-        # Both are statements about the simulated environment, not about the gates.
-        # On a pod the token is real (`ROPE_OK` passed in attempt 3R) and this test
-        # does not run at all, because the candidate fixture is a dev-box scratch
-        # path. Handing the simulation the operator's real token and cache would
-        # defeat its purpose and hide any test that had started needing them.
-        #
-        # Neither is left unexercised: both run unconditionally on a real dev box —
-        # the run directly above this one, with no flag set — and gate 11 is driven
-        # against refusals in `test_c1_readiness_gates.py`.
+    #: Two gates need a real Hugging Face credential and a populated hub cache.
+    #: `rope_input_gate` authenticates to the private relay to download and hash
+    #: the pinned checkpoint config; `renderer_parity_gate` reads the seven
+    #: pinned dataset snapshots.
+    #:
+    #: Keyed on the CONDITION, not on `AAD_SYNTHETIC_HF_TOKEN`. That marker is
+    #: set by `simulate_pod_env.sh` and by nothing else, so a guard reading it
+    #: describes one particular simulator rather than the requirement — and it
+    #: silently stopped covering this test the moment the test could also run
+    #: under a bare empty `$HOME`, which is exactly what removing the host-local
+    #: candidate made possible. A predicate that asks whether the inputs are
+    #: actually there is true in the simulator, true under an empty HOME, and
+    #: FALSE on a real dev box, where both gates still run for real.
+    if hf_inputs_are_absent():
         structurally_unavailable += ["rope_input_gate", "renderer_parity_gate"]
     failures = []
     for gate in spec.precheck:
@@ -435,3 +479,138 @@ def test_the_launcher_fetches_the_report_the_driver_actually_writes(spec):
     driver_src = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
     for name in spec.artifacts.report_names:
         assert f'"{name}"' in driver_src, name
+
+
+# --- the candidate is deterministic, in-tree, and provably load-bearing -----
+#
+# Three claims, because the host-local fixture failed all three: it was not
+# reproducible, it was not visible to review, and when it went stale nobody
+# could tell a stale fixture from a broken gate.
+
+def test_the_candidate_is_byte_identical_across_builds(tmp_path):
+    """Deterministic: same inputs, same bytes. The old fixture never was."""
+    first, second = tmp_path / "a", tmp_path / "b"
+    first.mkdir()
+    second.mkdir()
+    assert write_candidate(first).read_bytes() == write_candidate(second).read_bytes()
+
+
+def test_the_candidate_needs_no_host_local_state(tmp_path, monkeypatch):
+    """It must build with `$HOME` pointing at an empty directory.
+
+    This is the pod contract: the C1 CPU test gate runs pytest under a fresh
+    empty HOME precisely so host-local state cannot decide a result. The old
+    fixture lived in `$HOME` and therefore vanished exactly there.
+    """
+    empty = tmp_path / "empty_home"
+    empty.mkdir()
+    monkeypatch.setenv("HOME", str(empty))
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: empty))
+
+    auth = C1Authorization.load(write_candidate(tmp_path))
+    assert auth.harness_source_digest == c1_harness_digest(REPO)["digest"]
+    assert list(empty.iterdir()) == [], "the candidate wrote into $HOME"
+
+
+def test_building_a_candidate_writes_nothing_outside_tmp_path(tmp_path):
+    """Building is not issuing. `logs/` must be untouched, byte for byte."""
+    logs = REPO / "logs"
+    before = {p: p.stat().st_mtime_ns for p in logs.rglob("*") if p.is_file()}
+    write_candidate(tmp_path)
+    after = {p: p.stat().st_mtime_ns for p in logs.rglob("*") if p.is_file()}
+    assert before == after, "building a test candidate modified logs/"
+
+
+def test_the_candidate_describes_this_tree_not_a_remembered_one(tmp_path):
+    """The property whose absence produced the false alarm.
+
+    The host-local fixture pinned `4437074249d5…` and the tree moved to
+    `a3566eec79b3…`; `c1_harness_gate` refused, correctly, and the failure read
+    like a broken gate. A candidate derived from the live tree cannot go stale.
+    """
+    auth = C1Authorization.load(write_candidate(tmp_path))
+    assert auth.harness_source_digest == c1_harness_digest(REPO)["digest"]
+    assert tuple(auth.harness_source_files) == C1_HARNESS_SOURCE_FILES_V1
+
+
+def test_mutation_a_stale_candidate_is_refused_by_the_harness_gate(launcher, spec,
+                                                                   tmp_path):
+    """The gate must still fire. A fixture that can never be stale proves nothing
+    unless a stale one is shown to be caught."""
+    import types
+
+    stale = write_candidate(tmp_path, harness_digest_override="0" * 64)
+    auth = C1Authorization.load(stale)
+    ctx = types.SimpleNamespace(scr=Path("/tmp/c1gate"), args=session_args(launcher),
+                                auth=auth, evidence={}, image_digest="candidate",
+                                price=0.99, spent_usd=0.0)
+    gates = {getattr(g, "__name__", ""): g for g in spec.precheck}
+    ok, msg = gates["c1_harness_gate"](ctx)
+    assert not ok, "a candidate pinning 000…0 was accepted as describing this tree"
+    assert "0000000000" in msg and c1_harness_digest(REPO)["digest"][:12] in msg
+
+
+def test_mutation_a_host_local_candidate_dependency_is_visible_here():
+    """The portability claim, checked from BEHAVIOUR rather than source text.
+
+    My first attempt scanned this file for `Path.home() / "aad-scratch"` and
+    failed against its own explanatory comment — a text scan cannot tell a
+    comment from a dependency, and the fix is not a cleverer regex. What
+    actually matters is two runtime properties:
+
+      * no module-level constant resolves a candidate under `$HOME`; and
+      * the gate test carries no skip marker, so it cannot report success by
+        not running.
+
+    Restoring the old design breaks both, and neither can be satisfied by prose.
+    """
+    #: Scoped to "outside the repository", not "under $HOME": on this box the
+    #: checkout itself lives under $HOME, so a $HOME test flags `REPO` and says
+    #: nothing. The property that matters is that every module-level input comes
+    #: from the tree under review or from `tmp_path` — never from host-local
+    #: state a reviewer cannot see and CI does not have.
+    module = sys.modules[__name__]
+    outside = []
+    for name, value in vars(module).items():
+        if not isinstance(value, Path):
+            continue
+        try:
+            value.resolve().relative_to(REPO.resolve())
+        except ValueError:
+            outside.append(f"{name}={value}")
+    assert not outside, f"module-level paths outside the repository: {outside}"
+
+    fn = test_every_gate_but_the_commit_binding_passes_against_the_candidate
+    marks = [m.name for m in getattr(fn, "pytestmark", [])]
+    assert "skipif" not in marks and "skip" not in marks, (
+        f"the gate test carries {marks}; it must execute on the dev box, under "
+        "an empty HOME, and in simulate_pod_env.sh")
+
+
+def test_the_hf_predicate_does_not_excuse_the_gates_on_a_real_dev_box(monkeypatch,
+                                                                      tmp_path):
+    """A condition-keyed exemption is only safe if it is FALSE where it matters.
+
+    The danger of replacing a simulator marker with a predicate is that the
+    predicate quietly becomes true everywhere, and two real gates stop being
+    exercised without anyone noticing. So both directions are pinned.
+    """
+    real = Path(os.environ.get("HF_HOME") or (Path.home() / ".cache/huggingface"))
+    have_real_inputs = (real / "hub").is_dir() and any(
+        (real / "hub").glob("datasets--*"))
+    if have_real_inputs and (os.environ.get("HF_TOKEN")
+                             or os.environ.get("HF_HUB_TOKEN")):
+        assert not hf_inputs_are_absent(), (
+            "this machine HAS a credential and a populated hub cache, yet the "
+            "predicate excuses rope_input_gate and renderer_parity_gate")
+
+    # And it must be TRUE when the inputs really are gone.
+    empty = tmp_path / "hf"
+    empty.mkdir()
+    monkeypatch.setenv("HF_HOME", str(empty))
+    assert hf_inputs_are_absent()
+
+    # The simulator's marker still forces it, so the pod path is unchanged.
+    monkeypatch.delenv("HF_HOME", raising=False)
+    monkeypatch.setenv("AAD_SYNTHETIC_HF_TOKEN", "1")
+    assert hf_inputs_are_absent()

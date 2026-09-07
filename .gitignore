@@ -52,6 +52,21 @@ datasets/
 wandb/
 runs/
 
+# ...but `logs/runs/` is the run-layout-v2 EVIDENCE root, not a training output.
+# The bare `runs/` above matches a directory of that name at any depth, so it
+# silently swallowed the run index and would have swallowed every future run
+# manifest — evidence written and never tracked, which is the one failure mode a
+# provenance layout must not have. Reviewable records only: manifests, governance
+# and closeout JSON and the status stream. Anything heavy under a run is still
+# excluded by the patterns below (*.safetensors, *.pt, …) and by the explicit
+# training/evaluation exclusions here.
+!logs/runs/
+!logs/runs/**/
+logs/runs/**/evidence/training/
+logs/runs/**/evidence/evaluation/
+!logs/runs/**/*.json
+!logs/runs/**/*.jsonl
+
 # Model weights anywhere in the tree (small metadata/manifests stay tracked)
 *.safetensors
 *.bin

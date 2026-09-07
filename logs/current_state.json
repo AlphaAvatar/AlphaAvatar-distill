@@ -90,9 +90,7 @@
   "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
   "decision_status": "unresolved_equivalence",
   "winner": null,
-  "kind": "SELECTION experiment, 0.86M probes. The small absolute rates are NOT recovered capability.",
-  "record": "logs/autoinit_recovery_continuation_attempt7/",
-  "metrics_owned_by": "logs/autoinit_recovery_continuation_attempt7/"
+  "record": "logs/autoinit_recovery_continuation_attempt7/"
  },
  "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
  "phase_b_result": {
@@ -107,8 +105,8 @@
   "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510",
   "authorizes": "nothing",
   "record": "logs/autoinit_continuation_b_attempt5.json",
-  "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved but not comfortable.",
-  "metrics_owned_by": "logs/autoinit_continuation_b_attempt5.json"
+  "metrics_owned_by": "logs/autoinit_continuation_b_attempt5.json",
+  "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved but not comfortable."
  },
  "phase_c": {
   "c0": {
@@ -147,12 +145,9 @@
    "canonical artifacts": "/home/ecs-user/aad-artifacts",
    "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>"
   },
-  "roots_note": "the ONLY working roots. The five $HOME/phase_b_*_scr are gone.",
-  "scratch_state": "the 2026-08-31 closeout retired the five $HOME/phase_b_*_scr roots ONLY; see STATE.md for the 2026-09-01 audit.",
   "checkpoints_deleted": 0,
   "scientific_artifacts_deleted": 0,
   "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
-  "closeout": "logs/storage_closeout_20260831.json",
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
   "free_space_note": "12.01 GiB free after the limited P12 cleanup of rebuildable caches. Detail: c1_storage_recovery.json.",
   "free_bytes": 12897964032,
@@ -165,5 +160,13 @@
  },
  "handoff": "logs/HANDOFF_next_session.md",
  "history": "per-attempt records, failure patterns and cost history: logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run dirs.",
- "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed."
+ "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed.",
+ "latest_run": {
+  "experiment_id": "phase_c1",
+  "attempt_id": "attempt9",
+  "layout_version": 1,
+  "root": "logs/autoinit_c1_attempt9",
+  "index": "logs/runs/index.json",
+  "note": "legacy-v1 by path, registered in the run index. run-layout-v2 is FUTURE-only; the next C1 attempt is the first v2 run."
+ }
 }

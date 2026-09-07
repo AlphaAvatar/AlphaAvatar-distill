@@ -47,6 +47,14 @@ from factory_placement import RecordFactories  # noqa: E402
 ADAPTER = get_adapter("qwen3")
 IMPL = "attention.activation_importance_v1"
 
+def out_projections_of(model):
+    """The attention-output projections, resolved the way production does."""
+    from aadistill.autoinit.operators.attention_activation import (
+        attention_out_projection,
+    )
+    return [attention_out_projection(ADAPTER, b) for b in ADAPTER.blocks(model)]
+
+
 
 @pytest.fixture(autouse=True)
 def registered():
@@ -172,7 +180,8 @@ def test_A4_the_device_accumulator_is_released_after_the_snapshot(
 def test_A5_a_released_collector_refuses_to_report_state(teacher, geo):
     from aadistill.init.attention_stats import AttentionHeadStatsCollector
 
-    c = AttentionHeadStatsCollector(teacher, num_heads=geo["num_attention_heads"],
+    c = AttentionHeadStatsCollector(teacher, out_projections_of(teacher),
+                                    num_heads=geo["num_attention_heads"],
                                     head_dim=geo["head_dim"])
     c.close()
     c.release()

@@ -29,9 +29,17 @@ a comment earned the hard way: accumulating anywhere else is a cross-device add,
 and that is what killed Phase-A attempt 7. The same rule applies here, and
 `state()` moves the result to the host once, at the end.
 
-Hooking `o_proj`'s *input* is deliberate: it already holds the concatenated
-per-head outputs, so nothing about the attention kernel, the GQA grouping or the
-RoPE basis has to change to observe it.
+Hooking the attention-output projection's *input* is deliberate: it already holds
+the concatenated per-head outputs, so nothing about the attention kernel, the GQA
+grouping or the RoPE basis has to change to observe it.
+
+**Which modules those are is not this file's business.** The collector is given
+an ordered sequence of projection modules and knows only: the model to run, where
+to hook, `num_heads`, and `head_dim`. It does not walk `.model.layers` and does
+not read `.self_attn.o_proj`. Family module-tree knowledge belongs to
+`ArchitectureAdapter` (`blocks()`, `stream_out_projections()`), and a statistics
+collector that duplicates it is a second place to update when a family is added
+and a silent wrong answer when only one of them is.
 """
 
 from __future__ import annotations
@@ -39,27 +47,35 @@ from __future__ import annotations
 import torch
 
 
-def _decoder_layers(model):
-    """The decoder blocks, without assuming a wrapper class."""
-    inner = getattr(model, "model", model)
-    layers = getattr(inner, "layers", None)
-    if layers is None:
-        raise ValueError("model has no .model.layers; unsupported architecture")
-    return layers
-
-
 class AttentionHeadStatsCollector:
     """Streaming per-head second moments of each block's attention output.
 
     Mirrors the shape of `init.collect.ActivationStatsCollector`: construct,
     `process(input_ids)` repeatedly, `close()`, then `state()`.
+
+    `out_projections` is the ordered sequence of attention-output projection
+    modules — one per block, in block order — resolved by the caller's
+    `ArchitectureAdapter`. Passing them in rather than discovering them is the
+    whole point: this class then contains no family knowledge at all, and a new
+    architecture is supported by writing an adapter rather than by editing here.
     """
 
-    def __init__(self, model, *, num_heads: int, head_dim: int):
+    def __init__(self, model, out_projections, *, num_heads: int, head_dim: int):
+        modules = list(out_projections)
+        if not modules:
+            raise ValueError(
+                "no attention-output projections were supplied; the caller "
+                "resolves them from its adapter (`stream_out_projections`) and "
+                "this collector cannot discover them")
+        for i, m in enumerate(modules):
+            if not hasattr(m, "register_forward_pre_hook"):
+                raise ValueError(
+                    f"out_projections[{i}] is {type(m).__name__}, which cannot be "
+                    "hooked; expected a module with register_forward_pre_hook")
+
         self.model = model
         self.device = next(model.parameters()).device
-        layers = _decoder_layers(model)
-        self.num_layers = len(layers)
+        self.num_layers = len(modules)
         self.num_heads = int(num_heads)
         self.head_dim = int(head_dim)
         if self.num_heads <= 0 or self.head_dim <= 0:
@@ -71,15 +87,8 @@ class AttentionHeadStatsCollector:
             dtype=torch.float64, device=self.device)
         self.token_count = 0
 
-        self._hooks = []
-        for idx, layer in enumerate(layers):
-            attn = getattr(layer, "self_attn", None)
-            o_proj = getattr(attn, "o_proj", None) if attn is not None else None
-            if o_proj is None:
-                raise ValueError(
-                    f"Layer {idx} has no self_attn.o_proj; unsupported architecture")
-            self._hooks.append(
-                o_proj.register_forward_pre_hook(self._make_hook(idx)))
+        self._hooks = [m.register_forward_pre_hook(self._make_hook(i))
+                       for i, m in enumerate(modules)]
 
     def _make_hook(self, idx: int):
         def hook(_module, args):

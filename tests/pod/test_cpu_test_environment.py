@@ -220,8 +220,20 @@ def test_the_host_local_store_is_located_through_home(tmp_path, monkeypatch):
             ("tests/pod/test_recovery_continuation_session.py", "HOST_LOCAL_PHASE_A_STORE"),
             ("tests/pod/test_reconstruct_training_events.py", "E6B"),
             ("tests/pod/test_continuation_rehearsal.py", "STAGED"),
-            ("tests/pod/test_c1_session_contract.py", "CANDIDATE"),
             ("scripts/pod/autoinit_recovery_continuation_launch.py", "CKPT_STORE")):
         text = (REPO / module).read_text()
         line = next(ln for ln in text.splitlines() if ln.startswith(f"{name} ="))
         assert "Path.home()" in line, f"{module}::{name} still hardcodes a host path"
+
+    #: `test_c1_session_contract.py::CANDIDATE` was in that list until
+    #: 2026-09-08. It is not there now because the constant is GONE: the C1
+    #: candidate authorization is built deterministically into `tmp_path` from
+    #: the same payload builder the CLI issuer uses, so there is no host-local
+    #: store to locate through anything. That is the stronger outcome — a fresh
+    #: HOME neutralizes a `Path.home()` path, but it cannot make a stale fixture
+    #: describe the current tree, which is how a correct gate came to report a
+    #: false alarm.
+    contract = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
+    assert not any(ln.startswith("CANDIDATE =") for ln in contract.splitlines()), (
+        "a host-local CANDIDATE constant is back in test_c1_session_contract.py; "
+        "the candidate is built into tmp_path and must stay in-repo")

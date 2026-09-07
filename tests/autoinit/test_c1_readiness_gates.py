@@ -534,15 +534,49 @@ def test_the_only_conditional_exclusion_is_the_synthetic_credential():
     run, and an unconditional exclusion would retire the check that closed attempt
     2 and the guarantee that replaced the skippable parity cases.
     """
+    #: Checked as a PROPERTY, not as source text. This asserted the literal
+    #: `if os.environ.get("AAD_SYNTHETIC_HF_TOKEN"):` until 2026-09-08, when the
+    #: exclusion was re-keyed on the CONDITION — is a real credential and a
+    #: populated hub cache actually absent? — because the simulator marker
+    #: describes one particular simulator, and the moment that test could also
+    #: run under a bare empty $HOME the marker stopped covering it.
+    #:
+    #: The protective content is unchanged and is what is asserted here: the two
+    #: gates must never become UNCONDITIONAL exclusions, the simulator must still
+    #: force them, and on a machine that has the inputs they must run.
+    import os
+    import sys
+
+    sys.path.insert(0, str(REPO / "tests/pod"))
     src = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
-    assert 'if os.environ.get("AAD_SYNTHETIC_HF_TOKEN"):' in src
     assert 'structurally_unavailable += ["rope_input_gate", "renderer_parity_gate"]' in src
-    # Conditional, not a member of the base list.
+
     base = src[src.index("structurally_unavailable = ["):
-               src.index('if os.environ.get("AAD_SYNTHETIC_HF_TOKEN")')]
+               src.index("structurally_unavailable += [")]
     assert "rope_input_gate" not in base, (
         "rope_input_gate became an unconditional exclusion; attempt 2 died at "
         "ROPE_OK and this gate is what closed that gap")
+
+    from test_c1_session_contract import hf_inputs_are_absent
+
+    before = os.environ.get("AAD_SYNTHETIC_HF_TOKEN")
+    os.environ["AAD_SYNTHETIC_HF_TOKEN"] = "1"
+    try:
+        assert hf_inputs_are_absent(), (
+            "the simulator no longer forces the exclusion; the pod path would "
+            "then fail on a 401 it cannot avoid")
+    finally:
+        if before is None:
+            os.environ.pop("AAD_SYNTHETIC_HF_TOKEN", None)
+        else:
+            os.environ["AAD_SYNTHETIC_HF_TOKEN"] = before
+
+    hub = Path(os.environ.get("HF_HOME") or (Path.home() / ".cache/huggingface")) / "hub"
+    if hub.is_dir() and any(hub.glob("datasets--*")) and (
+            os.environ.get("HF_TOKEN") or os.environ.get("HF_HUB_TOKEN")):
+        assert not hf_inputs_are_absent(), (
+            "this machine has the inputs, so both gates must RUN here; an "
+            "exclusion that is true everywhere retires them")
 
 
 def test_the_simulator_announces_that_its_credential_is_synthetic():
