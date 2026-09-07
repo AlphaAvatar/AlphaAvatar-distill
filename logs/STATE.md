@@ -1,5 +1,40 @@
 **Updated:** 2026-09-07 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-FOUR C1 DEFECTS REPAIRED AT `$0` — STILL NEVER MEASURED**
+ATTEMPT-9 GRANT RECORDED — NOT AUTHORIZED, STILL NEVER MEASURED**
+
+> **Attempt-9 grant, 2026-09-07 — `$0.0000`, no pod, no GPU, no provider
+> resource.** The four post-attempt-8 `$0` repairs were reviewed at `origin/main
+> 5956a5fd` and **ACCEPTED**: the raw-calibration → operator-ready boundary;
+> declared-device root loading with exhaustive parameter/buffer placement
+> verification; Stage-F verified treatment suffix execution with its treatment
+> record and operator budget fail-stop; and correct Stage-D/Stage-E
+> ordinary-failure attribution with atomic Stage-E replay evidence. No further
+> source repair, canary or rehearsal is authorized.
+>
+> **[`autoinit_c1_attempt9_grant.json`](autoinit_c1_attempt9_grant.json) is a
+> GRANT, not an authorization.** It permits ONE issuance. It creates no pod,
+> reserves no provider resource, stages no bundle and spends nothing. The
+> canonical authorization artifact is untouched and still holds the CONSUMED
+> attempt-8 issuance.
+>
+> | | |
+> | --- | --- |
+> | spend at approval | **`$266.8158`** of the unchanged **`$283.7600`** cap |
+> | per-attempt hard ceiling | **`$15.1475`** |
+> | worst case after one full attempt | **`$281.9633`**, leaving **`$1.7967`** |
+> | accepted secure L40S price | **≤ `$1.09/h`**, `securePrice`, no chasing |
+>
+> That `$1.7967` reserve is **about a ninth of one attempt and is not
+> authorization for another**. A pre-provider price, stock or gate refusal spends
+> `$0.0000`, leaves the grant unconsumed, and permits no repricing and no
+> different GPU product. Consumption is the creation of a **provider resource**,
+> not the invocation of the launcher — and after it there is no retry and no
+> replacement pod.
+>
+> **What is still absent:** the authorization, an Attempt-9 relay bundle (the one
+> on record is attempt 8's, stale and for a superseded commit), the 12 `$0`
+> pre-provider gates, the live price re-check, and the launch itself. **C1 remains
+> SCIENTIFICALLY UNMEASURED** — no completed replay, no training, no evaluation,
+> no `correct_overall`, no `usable_rollout`, no decision.
 
 > **Stage-F and D/E repairs, 2026-09-07 — `$0.0000`, no pod, no grant, no
 > authorization.** Two more defects closed after the stage-D work below. **C1 is
@@ -475,9 +510,10 @@ FOUR C1 DEFECTS REPAIRED AT `$0` — STILL NEVER MEASURED**
 
 # Current state
 
-> **NOT CURRENTLY AUTHORIZED. Nothing is running, no pod exists, and no grant is
-> live.** The Attempt-8 grant and its authorization are CONSUMED — pod
-> `fbuggw0x9efqsz` was created — and permit no retry and no replacement pod.
+> **NOT AUTHORIZED. Nothing is running and no pod exists. An Attempt-9 GRANT is
+> recorded and unconsumed — a grant permits an ISSUANCE, not a launch.** The
+> Attempt-8 grant and its authorization are CONSUMED — pod `fbuggw0x9efqsz` was
+> created — and permit no retry and no replacement pod.
 > Spend is `$266.8158` of `$283.7600`, leaving `$16.9442`: one full `$15.1475`
 > ceiling still fits, with about `$1.80` after it, **which is not authorization
 > for another attempt.** A ninth attempt needs a new maintainer decision. The

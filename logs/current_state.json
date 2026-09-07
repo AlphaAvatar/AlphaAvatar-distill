@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-07T06:00:00Z",
+ "generated_utc": "2026-09-07T08:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -8,25 +8,18 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods confirmed via GraphQL myself{pods}; fbuggw0x9efqsz deleted, provider confirms gone"
+  "note": "zero pods and zero launchers confirmed at the Attempt-9 grant commit; fbuggw0x9efqsz deleted after attempt 8, provider confirms gone. No paid compute has run since."
  },
  "authorized": {
   "any": false,
-  "note": "NO GRANT IS LIVE. The attempt-8 grant and its authorization are CONSUMED -- pod fbuggw0x9efqsz was created -- and permit no retry and no replacement pod.",
-  "c1_attempt1": "CONSUMED. $0.0786, bundle fetch.",
-  "c1_attempt2": "CONSUMED. $0.1013, ROPE_OK.",
-  "c1_attempt3": "SUPERSEDED UNLAUNCHED by the reprice. $0.00, no pod.",
-  "c1_attempt3r": "CONSUMED. $0.3482, pod CPU test gate; ROPE_OK passed.",
-  "c1_attempt4": "CONSUMED. $0.6986, aborted at the pod CPU test gate.",
-  "c1_attempt5": "CONSUMED. $0.3150, pod CPU test gate; ROPE_OK passed.",
-  "c1_attempt6": "CONSUMED. $0.3665, pod CPU test gate; strict skip-set comparison refused.",
-  "c1_attempt7": "CONSUMED. $0.4231, driver exit 2 after TESTS_OK.",
-  "c1_attempt8": "CONSUMED. $0.6248, stage D KeyError after DRIVER_START."
+  "note": "NO AUTHORIZATION EXISTS. An Attempt-9 GRANT is present and one-use (logs/autoinit_c1_attempt9_grant.json) -- a grant permits an ISSUANCE, not a launch. The canonical authorization artifact still holds the CONSUMED attempt-8 issuance and is untouched.",
+  "c1_attempt9_grant": "PRESENT, ONE-USE, UNCONSUMED. Not an authorization and not launch permission. Consumed only when a provider resource is created.",
+  "c1_attempts_1_to_8": "ALL CONSUMED, $2.9561, zero science; 8 died at attempt-8 stage D. Detail: BUDGET_LEDGER.md."
  },
  "prepared_launch": {
   "any": false,
   "bundles": 1,
-  "note": "aad_autoinit_3f553c33.bundle f31736b3bd14 remains on the relay from the consumed attempt 8; it authorizes nothing and its commit is already superseded."
+  "note": "NO Attempt-9 bundle exists and staging one is not permitted by the grant. aad_autoinit_3f553c33.bundle f31736b3bd14 remains on the relay from the CONSUMED attempt 8; it is STALE, authorizes nothing, and names a commit this review has superseded."
  },
  "budget": {
   "cumulative_spend_usd": 266.8158,
@@ -126,7 +119,7 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / NINE PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- four $0 repairs since attempt 8, none measured on hardware",
+   "status": "IMPLEMENTED / NINE PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- Attempt-9 GRANT recorded (a grant is not an authorization); four $0 repairs accepted, none measured on hardware",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 fresh seeds = 6 E1_KD_HEAVY_0860K probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c783bbc6fe276a78c851c6, digest c313d1b4081b. NOT recovered.",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json d8483467d361 at head_commit e87ab4c7; harness f7f29468d221 over 73 files; executable_source ead856cf8ef9; 12 pre-provider gates",
@@ -135,10 +128,10 @@
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL over 15 probes. @v2 808080a7 and battery a285d61f untouched.",
    "attempts": "NINE LABELS, EIGHT paid ($2.9561), ZERO science. Detail: BUDGET_LEDGER.md.",
    "gates": "12 pre-provider gates. Detail: STATE.md.",
-   "needs": "scientific review of the four $0 repairs, then a maintainer decision on a ninth attempt. Grant, authorization and attempt are consumed.",
+   "needs": "independent authorization review of the Attempt-9 grant and its launch-bound readiness record. Issuance, bundle staging, the 12 pre-provider gates and the launch are all still owed.",
    "not_built": "no grant; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network",
    "evidence": "logs/autoinit_c1_attempt8/; the repairs are commits 208b2865..e87ab4c7",
-   "readiness": "skip-predicate audit PASS. The pod-environment record is DIAGNOSTIC on the repaired tree; a launch_bound sweep is owed ONLY AFTER a future grant, never before one.",
+   "readiness": "skip-predicate audit PASS. A launch_bound record is produced on the grant commit; the earlier diagnostic is useful evidence but is INSUFFICIENT for a paid launch.",
    "repaired_at_zero_dollars": "FOUR defects, all $0, all UNMEASURED ON HARDWARE: (1) the raw-calibration -> operator boundary, missing from the fixed path; (2) stage-D root placement, CPU under a cuda declaration; (3) stage F handing the full four-step spec a step-2 parent, repaired by verified SUFFIX execution that keeps the full path identity, with a treatment record and an artifact gate requiring it; (4) a post-parent-match failure written as STAGE_FAILED:D over a passed D, and non-atomic stage-E evidence. Mechanism: STATE.md."
   },
   "c2": {

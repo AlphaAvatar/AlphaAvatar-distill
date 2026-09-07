@@ -1,0 +1,88 @@
+{
+ "schema": "aadistill.autoinit.c1_grant/v1",
+ "_what_this_is": "the maintainer decision permitting ONE Phase-C1 session -- attempt 9. An INPUT to the issuer, which derives every identity from the committed objects and refuses a grant that asserts one. It states only what a maintainer owns: who permitted what, at what cumulative spend, and what it does not authorize.",
+ "granted_for": "Phase C1 fixed-path ATTENTION isolation — Attempt 9",
+ "granted_by": "maintainer, C1 attempt-8 postmortem scientific review 2026-09-07, at origin/main 5956a5fd. Attempt 8 was a PRE-MEASUREMENT INFRASTRUCTURE ABORT: it produced no completed parent replay comparison, no incumbent replay comparison, no recovery training, no confirmation evaluation and no C1 endpoint. Four material runtime and evidence defects were found and repaired at $0.0000 with no pod, no GPU and no provider resource, and all four are ACCEPTED by this review: (1) the raw-calibration -> operator-ready runtime preparation boundary, which was missing from the fixed path and which attempt 8 died on with KeyError: 'input_ids'; (2) declared-device root loading through the adapter, with exhaustive parameter and buffer placement verification, closing a defect that would have run the parent replay on the host CPU inside a paid GPU hour; (3) Stage-F verified treatment SUFFIX execution keeping the full four-step arm identity, its treatment execution record, the success artifact gate that requires it, and the operator budget fail-stop; (4) correct Stage-D versus Stage-E ordinary-failure attribution and atomic Stage-E replay evidence. No additional source repair, canary or rehearsal is authorized. GO to record ONE new one-use grant and produce its launch-bound readiness record.",
+ "covers": "exactly one C1 launch under the UNCHANGED frozen C1 protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh paired seeds = exactly six E1_KD_HEAVY_0860K recovery trainings; ALL SIX trainings complete before any confirmation evaluation begins; exactly one frozen confirmation evaluation per completed probe, each admitted against its own observed generation protocol before scoring; followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision rule. Nothing in the protocol, the arms, the seeds, the battery, the recovery recipe, the generation protocol, the scoring contract, the endpoints or the decision rule is modified by this grant.",
+ "one_use": {
+  "issuances_permitted": 1,
+  "launch_attempts_permitted": 1,
+  "provider_resources_permitted": 1,
+  "consumed_when": "a PROVIDER RESOURCE is created, not when the launcher is invoked. Attempt 3 invoked the launcher twice, created nothing, cost $0.00 and was not consumed; attempts 1, 2, 3R, 4, 5, 6, 7 and 8 each created a pod and were.",
+  "no_retry": "an abort of any kind -- infrastructure, gate, price or scientific -- ends this grant. After consumption there is NO retry and NO replacement pod. A further attempt needs a completely new maintainer review and a completely new grant."
+ },
+ "pre_provider_refusal": {
+  "_why": "a refusal before any provider resource exists is the cheap outcome the gates are for, and it must not become a negotiation.",
+  "spends": "$0.0000",
+  "outcome": "the launcher returns for review and the grant remains unconsumed, because no provider resource was created.",
+  "does_not_permit": [
+   "raising --max-price",
+   "amending logs/phase_c1_pricing.json",
+   "chasing the market upward",
+   "chasing stock",
+   "substituting a different GPU product",
+   "substituting a different region or provider",
+   "re-running the launcher against a moved price"
+  ]
+ },
+ "does_not_authorize": [
+  "any retry",
+  "any replacement pod",
+  "a second provider-created attempt",
+  "a second provider resource of any kind",
+  "another attempt",
+  "Phase A",
+  "Phase B search",
+  "beam search",
+  "any search",
+  "any ranking",
+  "arm elimination",
+  "successive halving",
+  "any extra seed",
+  "any adaptive rerun",
+  "partial-stage execution",
+  "any reduced or canary run",
+  "Phase C2",
+  "formal Stage-2/Stage-3 recovery",
+  "canonical Stage-1 NLL",
+  "any follow-on work",
+  "any scientific or protocol modification",
+  "price-chasing the market upward",
+  "any hard-ceiling increase beyond $15.1475",
+  "any cumulative-cap increase"
+ ],
+ "authorizes_nothing_by_itself": "this document permits an ISSUANCE and nothing else. It is not an authorization, it creates no pod, it reserves no provider resource, it stages no bundle and it spends nothing. The canonical authorization artifact is NOT written by this grant.",
+ "price": {
+  "accepted_secure_l40s_usd_per_hour": 1.09,
+  "price_field": "gpuTypes[0].securePrice -- the field session_runner prices on, not communityPrice",
+  "launch_condition": "launch only if the live securePrice is <= $1.09/h. --max-price DERIVES from the hash-verified logs/phase_c1_pricing.json and is not restated here.",
+  "above_that": "abort at $0 and return for review. Do not raise --max-price, do not amend the pricing record, do not chase the market and do not chase stock.",
+  "hard_ceiling_usd": 15.1475
+ },
+ "cumulative_spend_at_approval_usd": 266.8158,
+ "cumulative_cap_usd": 283.76,
+ "cap_note": "The project cumulative cap remains $283.7600 and is NOT raised. $16.9442 is available at approval. Worst case after one complete attempt at the $15.1475 hard ceiling is $281.9633 spent, leaving a reserve of $1.7967. THAT RESERVE IS NOT AUTHORIZATION FOR ANOTHER ATTEMPT -- it is about a ninth of one, and an early termination still requires a completely new review and a completely new grant.",
+ "current_state_during_the_window": "NO C1 measurement exists. Nine attempt labels -- 1, 2, 3, 3R, 4, 5, 6, 7, 8 -- of which EIGHT created a paid provider resource and attempt 3 created none. $2.9561 of C1 infrastructure spend, ZERO science: no completed replay, no training, no evaluation, no correct_overall, no usable_rollout and no decision. The canonical authorization artifact currently holds the CONSUMED attempt-8 grant, and the relay bundle on record is attempt 8's, for a commit this review has superseded.",
+ "supersedes": {
+  "attempt_8": "grant logs/autoinit_c1_attempt8_grant.json and its authorization are CONSUMED and cannot be reused. Attempt 8 created pod fbuggw0x9efqsz, was the first C1 attempt whose driver executed a stage -- B and C passed -- and then crashed in stage D with KeyError: 'input_ids' for $0.6248 with zero scientific stages. Evidence: logs/autoinit_c1_attempt8/.",
+  "attempt_8_bundle": "the staged relay bundle recorded in logs/autoinit_c1_bundle.json is attempt 8's and is STALE. No Attempt-9 bundle exists, and staging one is not permitted by this grant."
+ },
+ "issuance_order": {
+  "_why": "session_commit_gate requires the session commit to differ from authorized_session_commit by exactly the authorization path, so a launch-bound sweep run AFTER issuance adds a second path to the lineage diff and the gate refuses.",
+  "order": [
+   "1. this grant + all final metadata committed",
+   "2. that clean pre-authorization tree frozen",
+   "3. real --kind launch_bound pod-like sweep on THAT tree",
+   "4. readiness-record-only commit",
+   "5. STOP for independent authorization review",
+   "6. issue against that clean readiness commit, --require-clean",
+   "7. authorization-only commit",
+   "8. canonical bundle staging and round-trip",
+   "9. all 12 $0 pre-provider gates",
+   "10. live secure L40S price re-check",
+   "11. STOP for the final paid-launch decision"
+  ],
+  "this_session_stops_at": "step 5. Issuance, bundle staging, the pre-provider gates and the launch are all OUT OF SCOPE and explicitly not permitted here.",
+  "frozen_after_this_commit": "no source, test, preregistration, state, catalog, decision or README path may move between this commit and launch. Exactly two tracked paths may: logs/c1_pod_environment_verification.json and logs/autoinit_c1_authorization.json."
+ }
+}
