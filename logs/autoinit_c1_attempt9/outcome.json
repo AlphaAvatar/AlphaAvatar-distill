@@ -1,0 +1,108 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the measured closeout of C1 attempt 9, built from the collected provider and driver evidence beside it. Nothing here is inferred from a log line that was not preserved.",
+
+ "attempt": 9,
+ "terminal_marker": "C1_FAILED",
+ "classification": "INFRASTRUCTURE FAILURE in stage F. Not an efficacy result, and not a replay mismatch.",
+
+ "the_first_c1_scientific_observation": {
+  "_why_this_matters": "nine attempt labels and eight paid provider resources produced no scientific stage before this one. Attempt 9 is the first to reach, execute and PASS both frozen replay gates.",
+  "parent_replay": "PASSED. step 2 width.global_pca_v0 realized eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722, the pinned value, digest_matches true.",
+  "incumbent_replay": "PASSED. step 3 attention.weight_proxy_v0 realized c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6, the pinned value, digest_matches true.",
+  "all_pinned_digests_matched": true,
+  "n_pinned": 2,
+  "path_hash": "8b0bb455bfba069f2dcc1b4555cf40ecb7efe4cf53121a14937e7028131ae08d",
+  "meaning": "the frozen fe9683 path REPRODUCES its recorded identity under a real runtime on real hardware. That is what C1's two fail-stop gates exist to test, and it is now observed rather than assumed.",
+  "does_not_mean": "nothing about ATTENTION efficacy. No arm was trained, no probe was evaluated, and no endpoint was computed."
+ },
+
+ "runtime_the_replay_reproduced_under": {
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+  "gpu": "NVIDIA L40S",
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1",
+  "cuda_runtime": "12.8"
+ },
+
+ "stages": {
+  "setup": "COMPLETE. ENV_READY, REPO_READY, ASSETS_STAGED, TRAIN_ENV, ASSETS_READY, VLLM_READY, TEACHER_READY, ROPE_OK, TESTS_OK:895, AUTHORIZATION_OK, SETUP_DONE.",
+  "B": "PASSED — teacher_fetch_verify",
+  "C": "PASSED — register_operator",
+  "D": "PASSED — replay_parent",
+  "E": "PASSED — replay_incumbent",
+  "F": "FAILED — materialize_arms",
+  "G": "NOT REACHED. training_started false, probes_trained 0.",
+  "H": "NOT REACHED. probes_evaluated 0.",
+  "I": "NOT REACHED. decision_ran false."
+ },
+
+ "stage_f_failure": {
+  "error": "RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!",
+  "site": "src/aadistill/init/attention_stats.py:146, head_write_energy: `scores[h] = (gram * m[h]).sum() / n`",
+  "call_chain": "stage_f -> materialize_fixed_path_suffix -> _run_steps -> impl.execute -> attention_activation.apply -> head_write_energy",
+  "diagnosis": "the treatment operator attention.activation_importance_v1 multiplies activation statistics against s_attn.o_proj.weight without placing both on one device. The persistent StatsCache lives on the host by design (autoinit/device.py: 'the persistent cache stays on the host; this is the per-invocation working copy'), while the model weights are on cuda:0. The operator does not call stats_to() for this product.",
+  "why_no_earlier_run_caught_it": "attention.activation_importance_v1 is the C1 TREATMENT operator. It had never executed on a GPU: every $0 regression runs it on CPU, where host stats and host weights are trivially co-located, and no prior attempt reached stage F at all.",
+  "what_it_is_not": [
+   "not a replay mismatch: both frozen digests MATCHED before this, and no digest comparison failed",
+   "not an efficacy observation: no probe was trained or evaluated",
+   "not the verified-suffix contract failing: the suffix premise verified, the parent loaded on cuda, and execution began at original step index 3 as designed"
+  ]
+ },
+
+ "provider": {
+  "pod_id": "8gtnsbigpgaz76",
+  "quoted_price_per_hour": 1.09,
+  "quoted_stock_status": "Medium",
+  "returned_actual_price_per_hour": 1.09,
+  "above_ceiling": false,
+  "provider_create_calls": 1,
+  "second_resource_created": false,
+  "redraws": 0,
+  "watchdogs_started": 1,
+  "watchdog_outcome": "watchdog_end reason=pod_gone after 58 ticks; final poll pod_exists false, pod_billing false, over_hard_limit false, action none",
+  "elapsed_minutes": 57.47,
+  "actual_usd": 1.044,
+  "within_authorization": true,
+  "provider_confirms_gone": true,
+  "final_pod_state": {"exists": false, "desired_status": "TERMINATED", "billing": false},
+  "independent_poll_confirms": "the read-only observer recorded the pod at 15:18:21Z and an empty inventory at 15:20:22Z, independently of the launcher's own teardown claim"
+ },
+
+ "ownership_repairs_observed_working": {
+  "watchdog_before_create_line": "the launcher logged 'watchdog detached' at 14:22:25 BEFORE 'created 8gtnsbigpgaz76', because create() now starts the backstop at registration rather than after it returns success",
+  "one_use_evidence": "provider_resource_created true and one_use_grant_consumed true are both recorded in the session record",
+  "watchdog_owns_pod": "8gtnsbigpgaz76, exactly one journal",
+  "neutral_failure_prose": "the launcher printed 'a blocking C1 stage failed - collecting evidence, then tearing down. Classify from the explicit terminal marker and the collected driver evidence; this line asserts nothing about which stage failed or why.' It did NOT claim a replay mismatch, which is the repair that would otherwise have mislabelled this run.",
+  "verified_suffix": "stage F reached the treatment operator, so the suffix premise, the parent re-identification and the device gate all passed; the failure is inside the operator."
+ },
+
+ "artifact_collection": {
+  "manifest_rc": 0,
+  "files": 6,
+  "classes": 4,
+  "final_streams_quiescent": true,
+  "teardown_gate": "allowed=True, failed=training_complete (correct: no training ran)",
+  "archive": "c1_artifacts.tar.gz collected and extracted; contents verified by the collector"
+ },
+
+ "budget": {
+  "cumulative_before": 266.8158,
+  "this_attempt": 1.044,
+  "cumulative_after": 267.8598,
+  "cap": 283.76,
+  "remaining": 15.9002,
+  "per_attempt_ceiling": 15.1475
+ },
+
+ "grant_and_authorization": {
+  "grant": "logs/autoinit_c1_attempt9_grant.json — CONSUMED. A provider resource was created.",
+  "authorization": "autoinit.v1.phase_c1, sha256 a65fd7e67da347ca119912772479254b1625238924d0be27da1af0185ea1155a, authorized base 224fa817c40353f26d93967604249ed8999cf7a1, carried by commit c338a76bc260ccc0cf4a18e99e259cdfc1bd53a6 — CONSUMED.",
+  "bundle": "aad_autoinit_c338a76b.bundle, 8030873 bytes, 5c1384bb41c3395def207b4bf51d2e94085993e6e915c3de72c7642ca5a006a1",
+  "retry_permitted": false,
+  "replacement_pod_permitted": false,
+  "note": "there is no retry under this authorization. A tenth attempt needs a completely new maintainer review and a completely new grant."
+ },
+
+ "what_this_authorizes": "nothing. No follow-on work, no formal recovery, no Phase C2, no additional seed, and no re-run of any stage."
+}

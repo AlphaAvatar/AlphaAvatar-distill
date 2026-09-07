@@ -1764,6 +1764,55 @@ repaired here.
 
 ---
 
+## 2026-09-07 — C1 attempt 9: BOTH REPLAY GATES PASSED, then stage F, `$1.0440`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 9: 12/12 gates, one L40S at $1.09/h, 57.47 min, **both frozen replay gates PASSED**, then an infrastructure failure in stage F. No training, no evaluation, no decision | $1.0440 | `logs/autoinit_c1_attempt9/` |
+
+**Cumulative: $267.8598 of $283.7600.** `$15.9002` uncommitted — which is
+**below the `$15.1475` per-attempt ceiling by only `$0.7527`**, so a further
+full attempt no longer fits under the cap. The attempt-9 grant and its
+authorization are CONSUMED; neither permits a retry or a replacement pod.
+
+**THE FIRST C1 SCIENTIFIC OBSERVATION, after nine attempt labels and nine paid
+provider resources.** Setup completed, the driver ran, and stages B, C, D and E
+all PASSED. Both fail-stop replay gates matched their frozen values exactly:
+
+```
+step 2  width.global_pca_v0        eea90c91346a0745…  expected eea90c91346a0745…  MATCHED
+step 3  attention.weight_proxy_v0  c313d1b4081b9a3b…  expected c313d1b4081b9a3b…  MATCHED
+all_pinned_digests_matched: true   n_pinned: 2
+```
+
+The frozen `fe9683` path **reproduces its recorded identity** on an NVIDIA L40S
+under torch 2.11.0+cu128, transformers 5.13.1 and CUDA 12.8. That is precisely
+the property C1's two fail-stop gates exist to test, and it is now **measured
+rather than assumed**. It says **nothing** about ATTENTION efficacy: no probe was
+trained, none evaluated, and no endpoint computed.
+
+**Stage F then failed** — `RuntimeError: Expected all tensors to be on the same
+device, but found at least two devices, cuda:0 and cpu!` at
+`src/aadistill/init/attention_stats.py:146`, inside the treatment operator
+`attention.activation_importance_v1`. The persistent `StatsCache` lives on the
+host **by design**; the model weights are on `cuda:0`; `head_write_energy`
+multiplies the two without co-locating them. That operator had never executed on
+a GPU — every `$0` regression runs it on CPU, where host stats and host weights
+are trivially co-located, and no earlier attempt reached stage F at all.
+
+**The launcher did not call this a replay mismatch**, and that is the repair
+working: it printed *"a blocking C1 stage failed … this line asserts nothing
+about which stage failed or why."* The post-provider ownership repair also held
+on real hardware — `watchdog detached` was logged **before**
+`created 8gtnsbigpgaz76`, `provider_resource_created` and
+`one_use_grant_consumed` are both recorded, and exactly one watchdog owned the
+pod for its whole life.
+
+Pod `8gtnsbigpgaz76` deleted at 57.47 min; `provider_confirms_gone: true`, final
+state `TERMINATED`/not billing, and an **independent read-only poller**
+separately recorded an empty inventory at `15:20:22Z`. The watchdog ended
+`pod_gone` after 58 ticks, never over the hard limit.
+
 ## 2026-09-06 — C1 attempt 8: the driver ran, and stage D crashed, `$0.6248`
 
 | what | cost | evidence |

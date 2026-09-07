@@ -1,0 +1,36 @@
+[14:22:15] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[14:22:16] NVIDIA L40S $1.09/h, stock Medium
+[14:22:16] session commit c338a76bc260 verified: harness digests to 4437074249d5…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[14:22:16] C1 harness 4437074249d5… over 73 files
+[14:22:16] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[14:22:16] preregistration 82db0710d0d3… (self-hash verified), harness 4437074249d5…
+[14:22:16] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[14:22:16] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[14:22:16] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[14:22:16] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[14:22:18] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[14:22:20] aad_autoinit_c338a76b.bundle (8030873 bytes, 5c1384bb41c3…) round-trips to c338a76bc260… carrying this authorization and harness 4437074249d5…
+[14:22:23] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[14:22:23] pod sweep 2987 passed / 114 skipped / 0 failed, 7 renderer skips, leaf transport 5/5, binds harness 4437074249d5… and environment 2e03822521b1…, staging contract 9ef2356ee807…, swept at 2911bf1e with only ['logs/autoinit_c1_authorization.json', 'logs/c1_pod_environment_verification.json'] differs from the swept base
+[14:22:24] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[14:22:25] watchdog detached — hard 834 min = $15.15
+[14:22:25] created 8gtnsbigpgaz76 at $1.09/h
+[14:23:17]   starting (60s) — $0.02
+[14:23:59] TCP 22 at 64.247.206.212:15768 after 1.6 min
+[14:24:03] draw 1: ssh reachable — $0.03
+[14:24:57] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[14:24:57] draw 1: running setup
+[14:42:44] draw 1: setup complete — $0.37
+[14:42:50] driver detached, pid 12547, confirmed by descriptor_probe — $0.37
+[14:45:04]   2026-09-07T14:42:58Z MARKER:STAGE_START:D — $0.41
+[15:17:04]   2026-09-07T15:15:51Z MARKER:C1_FAILED — $0.99
+[15:17:04] a blocking C1 stage failed — collecting evidence, then tearing down. Classify from the explicit terminal marker and the collected driver evidence; this line asserts nothing about which stage failed or why.
+[15:17:04] polling ended: C1_FAILED — $0.99
+[15:19:01]   manifest rc=0
+6 file(s) across 4 class(es) -> /workspace/manifest.json
+  final_required: 6 · mutable_snapshot: 0 · final_streams_quiescent: True
+[15:19:41] teardown gate: allowed=True failed=training_complete
+[15:19:41] deleting pod (gate passed after C1_FAILED)
+[15:19:53] pod deleted — 57.5 min, $1.04; provider confirms gone: True
+
+autoinit-c1 INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search.

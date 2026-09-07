@@ -1,5 +1,51 @@
 **Updated:** 2026-09-07 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-ATTEMPT-9 GRANT RECORDED — NOT AUTHORIZED, STILL NEVER MEASURED**
+ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
+
+> **C1 attempt 9, 2026-09-07 — `$1.0440`, pod `8gtnsbigpgaz76`, 57.47 min,
+> provider confirms gone.** Cumulative **`$267.8598`** of `$283.7600`, leaving
+> **`$15.9002`** — which no longer covers a full `$15.1475` attempt.
+>
+> **THE FIRST C1 SCIENTIFIC OBSERVATION, after nine attempt labels and nine paid
+> pods.** Setup completed, the driver ran, and **stages B, C, D and E all
+> PASSED**. Both fail-stop replay gates matched exactly:
+>
+> | step | operator | realized | expected | |
+> | --- | --- | --- | --- | --- |
+> | 2 | `width.global_pca_v0` | `eea90c91346a0745…` | `eea90c91346a0745…` | **MATCHED** |
+> | 3 | `attention.weight_proxy_v0` | `c313d1b4081b9a3b…` | `c313d1b4081b9a3b…` | **MATCHED** |
+>
+> `all_pinned_digests_matched: true`, `n_pinned: 2`, path hash
+> `8b0bb455bfba069f…`. **The frozen `fe9683` path reproduces its recorded
+> identity** on an NVIDIA L40S under torch 2.11.0+cu128, transformers 5.13.1 and
+> CUDA 12.8. That is exactly what C1's two gates exist to test, and it is now
+> measured rather than assumed.
+>
+> **It says nothing about ATTENTION.** No probe was trained, none evaluated, no
+> endpoint computed. `training_started: false`, `probes_trained: 0`,
+> `probes_evaluated: 0`, `decision_ran: false`.
+>
+> **Stage F failed** — `RuntimeError: Expected all tensors to be on the same
+> device, but found at least two devices, cuda:0 and cpu!` at
+> `init/attention_stats.py:146`, inside the treatment operator
+> `attention.activation_importance_v1`. The persistent `StatsCache` is
+> host-resident **by design**; the weights are on `cuda:0`; `head_write_energy`
+> multiplies the two without co-locating them. **That operator had never executed
+> on a GPU** — every `$0` regression runs it on CPU, where host stats and host
+> weights are trivially co-located, and no earlier attempt reached stage F.
+> UNREPAIRED, and this session is not authorized to repair it.
+>
+> **Three repairs were observed working on real hardware.** The launcher's
+> neutral failure note refused to call this a replay mismatch. `watchdog
+> detached` was logged **before** `created 8gtnsbigpgaz76`, so the backstop owned
+> the resource from its first instant. And `provider_resource_created` and
+> `one_use_grant_consumed` are both recorded — the grant is honestly marked
+> consumed. Exactly one provider-create call, one watchdog, zero redraws.
+>
+> **Nothing is running.** Pod deleted, `provider_confirms_gone: true`, final
+> state `TERMINATED`/not billing, watchdog ended `pod_gone` never over the hard
+> limit, and an independent read-only poller recorded an empty inventory at
+> `15:20:22Z`. The grant and authorization are **CONSUMED** and permit no retry
+> and no replacement pod.
 
 > **Post-provider ownership repair and the P12 record-rule split, 2026-09-07 —
 > `$0.0000`, no pod, no GPU, no provider resource.** The second authorization

@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-07T12:45:00Z",
+ "generated_utc": "2026-09-07T15:30:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "LAST TESTED IMPLEMENTATION is OWNED by the readiness record's swept_base_commit and deliberately not duplicated here. This snapshot cannot name a commit that does not exist until after it is written, and gate 12 now forbids editing state after the sweep -- so a copy here could only ever go stale. It did: 4f85ecda vs the record's 0457bab.",
@@ -8,28 +8,28 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods and zero launchers confirmed at the Attempt-9 grant commit; fbuggw0x9efqsz deleted after attempt 8, provider confirms gone. No paid compute has run since."
+  "note": "zero pods: 8gtnsbigpgaz76 deleted at 57.47 min, provider_confirms_gone true, and an independent read-only poller recorded an empty inventory at 15:20:22Z."
  },
  "authorized": {
   "any": false,
-  "note": "NO AUTHORIZATION EXISTS. An Attempt-9 GRANT is present and one-use (logs/autoinit_c1_attempt9_grant.json) -- a grant permits an ISSUANCE, not a launch. The canonical authorization artifact still holds the CONSUMED attempt-8 issuance and is untouched.",
-  "c1_attempt9_grant": "PRESENT, ONE-USE, UNCONSUMED. Not an authorization and not launch permission. Consumed only when a provider resource is created.",
-  "c1_attempts_1_to_8": "ALL CONSUMED, $2.9561, zero science; 8 died at attempt-8 stage D. Detail: BUDGET_LEDGER.md."
+  "note": "NO LIVE AUTHORIZATION. The Attempt-9 grant AND its authorization are CONSUMED -- provider resource 8gtnsbigpgaz76 was created. Neither permits a retry or a replacement pod. A tenth attempt needs a completely new maintainer review and a new grant.",
+  "c1_attempts_1_to_8": "ALL CONSUMED, $2.9561, zero science. See BUDGET_LEDGER.md.",
+  "c1_attempt9": "CONSUMED. $1.0440, 57.47 min. BOTH REPLAY GATES PASSED; stage F failed on a device-placement defect in the treatment operator."
  },
  "prepared_launch": {
   "any": false,
   "bundles": 1,
-  "note": "NO Attempt-9 bundle exists and staging one is not permitted by the grant. aad_autoinit_3f553c33.bundle f31736b3bd14 remains on the relay from the CONSUMED attempt 8; it is STALE, authorizes nothing, and names a commit this review has superseded."
+  "note": "aad_autoinit_c338a76b.bundle 5c1384bb41c3 was consumed by attempt 9 and authorizes nothing further."
  },
  "budget": {
-  "cumulative_spend_usd": 266.8158,
+  "cumulative_spend_usd": 267.8598,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 16.9442,
+  "remaining_usd": 15.9002,
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "Phase-B 1-5 $30.0200; continuation 1-5 $3.8047 and CLOSED Phase B; C1 $2.9561 across eight PAID attempts plus attempt 3 at $0.00, all infrastructure aborts with zero measurement.",
-  "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. $16.9442 remains, so one full attempt fits with about $1.80 reserve. Headroom is not permission."
+  "headroom_note": "$15.9002 remains against a $15.1475 per-attempt ceiling -- clears it by only $0.7527. A further FULL attempt no longer fits under the cap.",
+  "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. Headroom is not permission and is now nearly exhausted."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -67,9 +67,9 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "The shared post-provider ownership repair and the P12 record-rule amendment are COMPLETE at $0. The Attempt-9 grant is present and unconsumed. C1 remains SCIENTIFICALLY UNMEASURED.",
-  "the_ask": "independent authorization review on the regenerated launch-bound record. The Attempt-9 grant is PRESENT and unconsumed; the authorization is ABSENT, and no pod or provider resource was created.",
-  "budget": "$266.8158 spent of the unchanged $283.7600 cap; $16.9442 uncommitted."
+  "status": "Attempt 9 produced C1's FIRST scientific observation -- both frozen replay gates PASSED -- then failed in stage F on a device defect in the treatment operator. No training, no evaluation, no decision.",
+  "the_ask": "scientific interpretation of the replay result, and a maintainer decision on whether a tenth attempt is affordable at all.",
+  "budget": "$267.8598 spent of the unchanged $283.7600 cap; $15.9002 uncommitted."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -119,7 +119,7 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / NINE PAID-ATTEMPT LABELS / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- Attempt-9 GRANT present and unconsumed (a grant is not an authorization); five $0 repairs, none measured on hardware",
+   "status": "IMPLEMENTED / TEN LABELS, NINE PAID / NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt 9 PASSED both replay gates (C1's first scientific observation) and then failed in stage F; no probe was trained or evaluated, so no C1 endpoint exists",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json OWNS the live preregistration, harness and head identities; read them THERE rather than copying them here.",
@@ -127,12 +127,13 @@
    "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL.",
    "attempts": "NINE LABELS, EIGHT paid ($2.9561), ZERO science. See BUDGET_LEDGER.md.",
-   "needs": "independent authorization review on a regenerated launch-bound record. Issuance, bundle staging, the 12 gates and the launch are all still owed.",
+   "needs": "a new maintainer review and a NEW grant for any tenth attempt -- and the $15.9002 remaining no longer covers a full $15.1475 attempt.",
    "not_built": "authorization ABSENT and no Attempt-9 bundle; the pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network. The Attempt-9 grant IS present.",
    "evidence": "logs/autoinit_c1_attempt8/; the repairs are commits 208b2865..e87ab4c7",
-   "readiness": "skip-predicate audit PASS. The launch_bound record is OWED AGAIN: the shared-runner repair moved the executable, so any record swept before it no longer describes this tree.",
-   "repaired_at_zero_dollars": "SIX defects, all $0, all UNMEASURED ON HARDWARE: raw-calibration boundary; stage-D root placement; stage-F full-path execution; stage-D/E attribution and atomic stage-E evidence; the acquisition contract; and post-provider OWNERSHIP -- a created, billing pod rejected on its returned price had no watchdog, no verified teardown and no evidence. See STATE.md.",
-   "record_rule_amendment": "P12-APPROVED 2026-09-07: historical accounting and launch compatibility SEPARATED. logs/autoinit_phase_b_historical_amendments.json is append-only and confers nothing; the paid Phase-B gate still refuses non-additive drift. Invariant: accounted=TRUE, launch-compatible=FALSE."
+   "readiness": "the launch_bound record and the 12 gates were consumed by attempt 9. Both are owed again for any future launch.",
+   "repaired_at_zero_dollars": "SIX defects repaired at $0 before attempt 9; three were observed working on real hardware (neutral failure prose, watchdog-at-registration, consumed-grant evidence). See STATE.md.",
+   "first_scientific_observation": "ATTEMPT 9: the frozen fe9683 path REPRODUCES its recorded identity on an L40S. Parent eea90c91 and incumbent c313d1b4 both MATCHED, all_pinned_digests_matched true. Says NOTHING about ATTENTION efficacy: no probe trained, none evaluated, no endpoint. See logs/autoinit_c1_attempt9/.",
+   "blocker": "Stage F: cuda:0 vs cpu at init/attention_stats.py:146 inside attention.activation_importance_v1 -- the host-resident StatsCache times cuda weights, never co-located. That operator had never run on a GPU. UNREPAIRED."
   },
   "c2": {
    "status": "NOT STARTED",
