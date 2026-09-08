@@ -175,10 +175,21 @@ def calibration_subset(n: int):
 
 def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
           n_calibration_items=6):
-    """The real driver with only the four boundaries substituted."""
+    """The real driver with only the four boundaries substituted.
+
+    CATEGORY A throughout: stage 0 is executed for real, against a binding built
+    from THIS tree. See tests/support/fixture_categories.py -- the historical
+    binding is exercised as category C in test_phase_a_stage0_executes.py, which
+    is where the refusal belongs.
+    """
     import phase_a_search
+    from support.fixture_categories import (
+        current_tree_stage3_binding, use_current_tree_binding)
 
     mod = load_driver(tmp_path)
+    use_current_tree_binding(mod, tmp_path)
+    mod.BOUND_STAGE3_HASH = current_tree_stage3_binding(
+        mod, tmp_path)["evaluation_protocol_hash"]
     mod.PhaseADriver.__init__(
         driver := mod.PhaseADriver.__new__(mod.PhaseADriver), Args())
 
@@ -526,8 +537,10 @@ def test_stage5_writes_a_report_bound_to_the_plan_and_the_protocol(driven):
     driver, mod, _ = driven
     report = json.loads((mod.AUDIT / "phase_a_result.json").read_text())
     assert report["science_plan_hash"] == driver.plan.plan_hash
-    assert report["evaluation_protocol_hash"] == (
-        "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4")
+    # The protocol THIS run bound. Under category A that is the current tree's,
+    # and the check that matters is unchanged: the report cites the same
+    # protocol the driver measured under, not a constant transcribed beside it.
+    assert report["evaluation_protocol_hash"] == mod.BOUND_STAGE3_HASH
     assert report["equivalence_interval"] == pytest.approx(0.011695296982299022)
     assert report["feasibility_floor"] == pytest.approx(0.30)
     assert report["decision_status"] in (

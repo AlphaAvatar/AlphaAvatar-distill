@@ -75,58 +75,13 @@ class Args:
     probe_battery_minutes = 9.82
 
 
-#: --- the three fixture categories --------------------------------------------
-#:
-#: The initialization migration split one question into three, and a test that
-#: does not say which one it is asking gets a confusing answer. Every test below
-#: names its category.
-#:
-#:   A. CURRENT IMPLEMENTATION BEHAVIOUR — does the driver's real stage-0 body
-#:      work, on this tree, against a binding built from this tree? Uses an
-#:      ephemeral expectation in `tmp_path`.
-#:   B. HISTORICAL EVIDENCE VALIDITY — are the completed run's recorded bytes
-#:      still intact and self-consistent? Reads `logs/` and asserts nothing
-#:      about whether this tree could run it.
-#:   C. HISTORICAL LAUNCH COMPATIBILITY — fed the immutable historical document,
-#:      does the migrated live gate REFUSE? It must.
-#:
-#: Category A never writes to `logs/`, never issues a grant or authorization and
-#: never stages a bundle: it is a test of implementation behaviour, and an
-#: artifact it left behind would eventually be read as a record of a run.
+from support.fixture_categories import (  # noqa: E402
+    TEST_TIMESTAMP, current_tree_expectation, current_tree_stage3_binding,
+    use_current_tree_binding)
 
-#: A fixed stamp, so a category-A binding is reproducible and two runs of the
-#: same test produce the same document.
-TEST_TIMESTAMP = "2026-09-08T00:00:00+00:00"
-
-
-def current_tree_expectation(tmp_path: Path) -> Path:
-    """CATEGORY A: what this tree's own identity is, written to `tmp_path`.
-
-    The scientific configuration is unchanged -- the same assets, the same
-    roots, the same hash conventions. What differs from the historical document
-    is only the *implementation* identity: the scoring contract this tree
-    computes, which the migration moved from v2 to v3 without moving any number
-    it produces.
-    """
-    sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    import verify_frozen_assets as vfa
-    from aadistill.initialization.planning.recovery import recovery_scoring_contract
-
-    contract = recovery_scoring_contract(REPO)
-    doc = {
-        "schema": "aadistill.autoinit.frozen_asset_expectation/v1",
-        "_category": "A -- current implementation behaviour. NOT a "
-                     "preregistration, and it authorizes nothing.",
-        "generated_utc": TEST_TIMESTAMP,
-        "assets": vfa.FROZEN,
-        "scoring_contract": {"contract": contract["contract"],
-                             "digest": contract["digest"]},
-        "authorizes": "nothing",
-    }
-    out = tmp_path / "current_expectation.json"
-    out.write_text(json.dumps(doc, indent=1))
-    return out
-
+#: Every test below names its category -- A (current implementation behaviour),
+#: B (historical evidence validity) or C (historical launch compatibility).
+#: See `tests/support/fixture_categories.py` for what each one means.
 
 def build(tmp_path, *, probe_override=None, probe_missing=None,
           runtime_override=None, expectation="current"):
@@ -140,7 +95,12 @@ def build(tmp_path, *, probe_override=None, probe_missing=None,
     """
     mod = load_driver(tmp_path)
     if expectation == "current":
-        mod.FROZEN_ASSETS_EXPECTATION = str(current_tree_expectation(tmp_path))
+        use_current_tree_binding(mod, tmp_path)
+        # The Stage-3 protocol hash THIS binding pins. Under category A it is
+        # the current tree's, not the historical constant: same science, this
+        # implementation.
+        mod.BOUND_STAGE3_HASH = current_tree_stage3_binding(
+            mod, tmp_path)["evaluation_protocol_hash"]
     elif expectation != "historical":
         raise ValueError(f"unknown expectation category {expectation!r}")
     d = mod.PhaseADriver.__new__(mod.PhaseADriver)
@@ -186,8 +146,8 @@ def test_the_real_stage0_body_runs_end_to_end_and_writes_the_attestation(tmp_pat
 
     # It reached the end: the attestation exists and is bound both ways.
     attested = json.loads((mod.AUDIT / "attested_evaluation_protocol.json").read_text())
-    assert attested["evaluation_protocol_hash"] == STAGE3_HASH
-    assert attested["stage3_evaluation_protocol_hash"] == STAGE3_HASH
+    assert attested["evaluation_protocol_hash"] == mod.BOUND_STAGE3_HASH
+    assert attested["stage3_evaluation_protocol_hash"] == mod.BOUND_STAGE3_HASH
     assert attested["bound_to_stage3_thresholds"] is True
 
     # The frozen science plan was bound, and the thresholds are the Stage-3 ones.
@@ -196,8 +156,12 @@ def test_the_real_stage0_body_runs_end_to_end_and_writes_the_attestation(tmp_pat
     assert attested["equivalence_interval"] == pytest.approx(0.011695296982299022)
     assert attested["feasibility_floor"] == pytest.approx(0.30)
 
-    # And the live object the later stages use is the same protocol.
-    assert d.evaluation_protocol.evaluation_protocol_hash == STAGE3_HASH
+    # And the live object the later stages use is the same protocol. Note what
+    # this proves under category A: the protocol the driver BUILT from this tree
+    # equals the one the binding declared, so the two were computed
+    # independently and agree -- which is the property that matters, and is
+    # exactly what the historical constant used to check.
+    assert d.evaluation_protocol.evaluation_protocol_hash == mod.BOUND_STAGE3_HASH
     assert d.plan.plan_hash == attested["science_plan_hash"]
 
 
@@ -221,7 +185,7 @@ def test_a_protocol_that_is_not_the_stage3_one_is_refused(tmp_path):
     reason = d.ev["stages"]["0"]["reason"]
     assert "not comparable" in reason
     assert "generation_runtime_comparability@v2" in reason
-    assert STAGE3_HASH in reason
+    assert mod.BOUND_STAGE3_HASH in reason
     assert not (mod.AUDIT / "attested_evaluation_protocol.json").is_file(), (
         "a refused stage 0 must not leave an attestation behind")
 
@@ -331,8 +295,9 @@ def test_the_attempt4_driver_patch_now_passes(tmp_path):
     assert c["driver_patch_differs"] is True
     assert c["live_driver"] == "580.126.09"
     assert c["historical_driver"] == "580.159.03"
-    # The thresholds still bind to the UNTOUCHED historical protocol.
-    assert att["stage3_evaluation_protocol_hash"] == STAGE3_HASH
+    # The thresholds still bind to the protocol this run bound, not to
+    # whatever the session happened to observe.
+    assert att["stage3_evaluation_protocol_hash"] == mod.BOUND_STAGE3_HASH
 
 
 def test_a_driver_branch_change_still_fails_closed(tmp_path):
@@ -499,3 +464,70 @@ def test_an_unexpected_in_process_failure_keeps_its_traceback(tmp_path):
     assert entry["traceback_file"] == "stage0_traceback.log"
     assert "in inner" in written
     assert written.startswith("stage 0: RuntimeError:")
+
+
+# --- CATEGORY B: historical evidence validity --------------------------------
+#
+# Do the completed run's recorded bytes still say what they said? These assert
+# nothing about whether this tree could execute it.
+
+def test_B_the_historical_stage3_attestation_is_intact():
+    """The bytes the migration must not have touched."""
+    att = json.loads(
+        (REPO / "logs/autoinit_stage3_complete"
+         / "attested_evaluation_protocol.json").read_text())
+    assert att["evaluation_protocol_hash"] == STAGE3_HASH
+    assert att["evaluation_protocol"]["scoring_contract"] == "recovery_search_scoring@v2"
+    assert att["evaluation_protocol"]["battery"]["artifact"] == "recovery_search_v2"
+
+
+def test_B_the_historical_thresholds_still_bind_the_historical_protocol():
+    thresholds = json.loads(
+        (REPO / "logs/autoinit_stage3_complete"
+         / "materialized_thresholds.json").read_text())
+    assert thresholds["evaluation_protocol_hash"] == STAGE3_HASH
+
+
+def test_B_the_historical_protocol_records_v2_and_is_not_rewritten_to_v3():
+    """The migration bumped the LIVE contract; the record keeps saying v2."""
+    from aadistill.initialization.planning.recovery import recovery_scoring_contract
+    att = json.loads(
+        (REPO / "logs/autoinit_stage3_complete"
+         / "attested_evaluation_protocol.json").read_text())
+    live = recovery_scoring_contract(REPO)
+    assert att["evaluation_protocol"]["scoring_contract"] == "recovery_search_scoring@v2"
+    assert live["contract"] == "recovery_search_scoring@v3"
+    assert att["evaluation_protocol"]["scoring_digest"] != live["digest"], (
+        "the historical record must keep the digest it recorded; rewriting it "
+        "to the live one would claim the completed run executed this tree")
+
+
+# --- CATEGORY C: historical launch compatibility -----------------------------
+#
+# Fed the immutable historical documents, the migrated live gate must REFUSE.
+
+def test_C_stage0_refuses_against_the_historical_binding(tmp_path):
+    """The whole point of the fail-closed property, executed rather than claimed."""
+    d, mod = build(tmp_path, expectation="historical")
+    assert mod.PhaseADriver.stage0(d) is False, (
+        "an old preregistration must not validate against the migrated tree")
+    reason = d.ev["stages"]["0"]["reason"]
+    assert "frozen assets" in reason and "recovery_search_scoring@v3" in reason
+    assert not (mod.AUDIT / "attested_evaluation_protocol.json").is_file(), (
+        "a refused stage 0 must not leave an attestation behind")
+
+
+def test_C_the_frozen_assets_gate_refuses_on_its_production_default(tmp_path):
+    """No --expect: exactly what a pod runs."""
+    out = subprocess.run(
+        [sys.executable, str(REPO / "scripts/autoinit/verify_frozen_assets.py"),
+         "--out", str(tmp_path / "report.json")],
+        cwd=REPO, capture_output=True, text=True,
+        env={"PYTHONPATH": "src:scripts", "PATH": "/usr/bin:/bin",
+             "HOME": str(REPO)})
+    assert out.returncode == 1, "the production default must fail closed"
+    report = json.loads((tmp_path / "report.json").read_text())
+    assert report["passed"] is False
+    assert any("scoring contract" in p for p in report["problems"])
+    assert report["scoring_contract"]["expected"] == "recovery_search_scoring@v2"
+    assert report["scoring_contract"]["observed"] == "recovery_search_scoring@v3"
