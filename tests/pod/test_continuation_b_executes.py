@@ -399,8 +399,18 @@ def build(tmp_path, monkeypatch, *, tie: bool):
     import phase_a_search
 
     import autoinit_phase_a_driver as parent
+    from support.fixture_categories import (
+        current_tree_stage3_binding, use_current_tree_binding)
 
     mod = load_continuation(tmp_path)
+
+    # CATEGORY A: stage 0 runs for real against a binding built from THIS tree.
+    # Patched through `monkeypatch` because `parent` is imported once and shared
+    # -- a bare assignment would leak into every later test in the session.
+    use_current_tree_binding(parent, tmp_path, monkeypatch)
+    mod.BOUND_STAGE3_HASH = current_tree_stage3_binding(
+        parent, tmp_path, monkeypatch)["evaluation_protocol_hash"]
+
     ckpts = build_checkpoints(tmp_path)
     ev = write_evidence(tmp_path, ckpts, tie=tie)
 
@@ -979,14 +989,30 @@ def test_the_frozen_source_set_IS_the_real_import_closure():
 
 
 def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
-    """Explicitly: these ARE in the digest, and that is correct."""
+    """What the continuation loads is in the digest; what it cannot reach is not.
+
+    This used to assert that `search.py`, `ranking.py` and the operator modules
+    WERE in the set, because the old `aadistill.autoinit` package `__init__`
+    imported them for every consumer whether or not anyone used them. Removing
+    that import-time coupling made the continuation's executable genuinely
+    smaller, and the guarantee correspondingly stronger: the module that defines
+    `BeamSearch` is no longer even loaded.
+    """
     from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
 
-    for loaded in ("src/aadistill/initialization/planning/search.py",
-                   "src/aadistill/initialization/planning/ranking.py",
-                   "src/aadistill/initialization/operators/depth.py",
-                   "scripts/pod/autoinit_phase_a_driver.py"):
+    for loaded in ("scripts/pod/autoinit_phase_a_driver.py",
+                   "scripts/pod/autoinit_continuation_b_driver.py",
+                   "src/aadistill/initialization/planning/recovery.py",
+                   "src/aadistill/initialization/planning/generation.py"):
         assert loaded in CONTINUATION_SOURCE_FILES_V2, loaded
+
+    for unreachable in ("src/aadistill/initialization/planning/search.py",
+                        "src/aadistill/initialization/planning/ranking.py",
+                        "src/aadistill/initialization/operators/depth.py"):
+        assert unreachable not in CONTINUATION_SOURCE_FILES_V2, (
+            f"{unreachable} is in the declared set but the continuation does "
+            "not load it; a digest over files that cannot run overstates what "
+            "is pinned")
 
 
 def test_only_the_known_neutralized_file_holds_a_search_call_site():
@@ -1171,7 +1197,7 @@ def test_the_shared_gate_refuses_a_set_with_a_file_omitted():
     from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
 
     short = tuple(f for f in CONTINUATION_SOURCE_FILES_V2
-                  if f != "src/aadistill/initialization/planning/search.py")
+                  if f != "src/aadistill/initialization/planning/recovery.py")
     assert len(short) == len(CONTINUATION_SOURCE_FILES_V2) - 1
     partial = continuation_source_digest(REPO, files=short)["digest"]
     # Declared as the FULL set but digested over one fewer file.

@@ -63,11 +63,24 @@ def current_tree_expectation(tmp_path: Path) -> Path:
     return out
 
 
-def use_current_tree_binding(driver_module, tmp_path: Path) -> Path:
-    """Point a loaded Phase-A driver module at a category-A binding."""
+def use_current_tree_binding(driver_module, tmp_path: Path,
+                             monkeypatch=None) -> Path:
+    """Point a loaded Phase-A driver module at a category-A binding.
+
+    Pass `monkeypatch` when the module is SHARED -- a subclassing driver imports
+    the parent once, so a bare assignment would leak into every later test in
+    the session and be invisible when it did.
+    """
     path = current_tree_expectation(tmp_path)
-    driver_module.FROZEN_ASSETS_EXPECTATION = str(path)
+    _set(driver_module, "FROZEN_ASSETS_EXPECTATION", str(path), monkeypatch)
     return path
+
+
+def _set(module, name: str, value, monkeypatch=None) -> None:
+    if monkeypatch is not None:
+        monkeypatch.setattr(module, name, value, raising=False)
+    else:
+        setattr(module, name, value)
 
 
 def historical_document(relative: str) -> dict:
@@ -75,7 +88,8 @@ def historical_document(relative: str) -> dict:
     return json.loads((REPO / relative).read_text())
 
 
-def current_tree_stage3_binding(driver_module, tmp_path: Path) -> dict:
+def current_tree_stage3_binding(driver_module, tmp_path: Path,
+                                monkeypatch=None) -> dict:
     """CATEGORY A: a Stage-3 reference this tree is comparable to.
 
     The stage-0 body binds the selection thresholds to the protocol the Stage-3
@@ -148,10 +162,10 @@ def current_tree_stage3_binding(driver_module, tmp_path: Path) -> dict:
         out.write_text(json.dumps(doc, indent=1))
         paths[name] = out
 
-    driver_module.STAGE3_ATTESTATION = paths["attestation"]
-    driver_module.STAGE3_THRESHOLDS = paths["thresholds"]
-    driver_module.COMPAT_V2 = paths["compat"]
-    driver_module.STAGE3_EVALUATION_PROTOCOL_HASH = new_hash
+    _set(driver_module, "STAGE3_ATTESTATION", paths["attestation"], monkeypatch)
+    _set(driver_module, "STAGE3_THRESHOLDS", paths["thresholds"], monkeypatch)
+    _set(driver_module, "COMPAT_V2", paths["compat"], monkeypatch)
+    _set(driver_module, "STAGE3_EVALUATION_PROTOCOL_HASH", new_hash, monkeypatch)
     return {"paths": paths, "evaluation_protocol_hash": new_hash}
 
 
