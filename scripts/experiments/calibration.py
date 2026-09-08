@@ -54,6 +54,19 @@ REASONING_HEAVY_V2 = get_profile("calib.reasoning_heavy@v2")
 #: exactly this set, and the distinction is theirs rather than the core's.
 V1_PROFILES = (STAGE0_CURRENT_V1, DOMAIN_BALANCED_V1, REASONING_HEAVY_V1)
 
+#: The v2 mixture's specification, DERIVED from the profile rather than restated
+#: beside it. Several callers want one field without the whole object, and two
+#: copies of a token budget is how they drift.
+REASONING_HEAVY_V2_TOKEN_BUDGET = REASONING_HEAVY_V2.token_budget
+REASONING_HEAVY_V2_SEED = REASONING_HEAVY_V2.seed
+REASONING_HEAVY_V2_DOMAIN_WEIGHTS = dict(REASONING_HEAVY_V2.domain_weights)
+REASONING_HEAVY_V2_SAMPLE_RULE = REASONING_HEAVY_V2.sample_rule
+
+#: E8a's five domains, in the order the mixture declares them.
+E8A_DOMAINS = tuple(REASONING_HEAVY_V2.domain_weights)
+
 __all__ = ["PROFILE_CONFIG", "register_builtin_profiles", "PROFILES",
            "V1_PROFILES", "STAGE0_CURRENT_V1", "DOMAIN_BALANCED_V1",
-           "REASONING_HEAVY_V1", "REASONING_HEAVY_V2"]
+           "REASONING_HEAVY_V1", "REASONING_HEAVY_V2", "E8A_DOMAINS",
+           "REASONING_HEAVY_V2_TOKEN_BUDGET", "REASONING_HEAVY_V2_SEED",
+           "REASONING_HEAVY_V2_DOMAIN_WEIGHTS", "REASONING_HEAVY_V2_SAMPLE_RULE"]

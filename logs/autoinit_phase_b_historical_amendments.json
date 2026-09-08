@@ -125,6 +125,127 @@
     "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2"
    ],
    "entry_sha256": "9ab2696fac5fa8e814af7f8ba71506e13528fa5f8fad30a858f3ba7f2aab1a24"
+  },
+  {
+   "amendment_id": "PHB-HA-003",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-08T09:28:21+00:00",
+   "reviewed_base_commit": "x",
+   "source_repair_commit": "90919912177eebf0e5226b8be8d97acc793656fa",
+   "source_repair_parent": "c9bf3cbadea76dd2fa2ae0fe189933128a939575",
+   "previous_live_digest": "37954ab4bc9d2fa2caedff016f7a35aa236086a466ac3812de2237cd00f0326f",
+   "new_live_digest": "0aa612fc28d42fa07e07b444a8d86211dfe5571b82e8e6912c15bd77f028f654",
+   "changed_files": [
+    "scripts/autoinit/phase_a_search.py",
+    "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/autoinit/verify_historical_probe_reuse.py",
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/pod/autoinit_phase_a_driver.py",
+    "scripts/pod/autoinit_phase_b_driver.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/specs/arch.py"
+   ],
+   "file_sha256_before": {
+    "scripts/autoinit/phase_a_search.py": "a3520274bed40fb71dfa7a2fa112339c8190701d9fe9d86da345a7b48a1c1ef5",
+    "scripts/autoinit/verify_frozen_assets.py": "427974c0305ab4937a80ae0c68c125670eec9d182b041b5eb8caf99944d89dba",
+    "scripts/autoinit/verify_historical_probe_reuse.py": "933f213e5474176962a93a45e6208e581ecce7f4d18aed1900f22e1d846d0167",
+    "scripts/autoinit/write_preregistration.py": "16023bd4f69e1c22399550648846c4f5c5aa4d469f0f45efbafe7e6cd4802d3d",
+    "scripts/pod/autoinit_phase_a_driver.py": "060332010ae557f6961a1c6d906eea015c374f4021662791615a72a1f70297e9",
+    "scripts/pod/autoinit_phase_b_driver.py": "d3f2fc7ae78c320d2250ab8836eb9f43c5e9ebd931556b561672424ccd6e15f9",
+    "scripts/pod/autoinit_phase_b_launch.py": "364ea1ec4f5b66a6e94b5db894fed43838a6d87d512867c0992fedb752aa8db8",
+    "src/aadistill/initialization/adapters/__init__.py": "ed587526e11457ea4b7d6eef440afae5833e373350024f2a30b53e40c47674c7",
+    "src/aadistill/initialization/adapters/qwen3.py": "b2fa5f08d64fee784c3315e345655c2165ab8a266d6fca341fefe84de84b1ca2",
+    "src/aadistill/initialization/calibration/profiles.py": "3836d53717336b3c1359fb486ba1f7e70c3db65474ca23e822aa7075ba71b92e",
+    "src/aadistill/initialization/specs/arch.py": "5dddc9038e5c43c2fc5e6d8112c3a8f7b3b45c95bcf0e999cff2c52dd0b1fecd"
+   },
+   "file_sha256_after": {
+    "scripts/autoinit/phase_a_search.py": "594121996ec6bc8679646e8545dd037558be263a5245a27a765e520fed4ab0f5",
+    "scripts/autoinit/verify_frozen_assets.py": "0c39aea1c8b91e0af939d6a4ab8b4f903dff0b56353d02ce2fadeb7407508583",
+    "scripts/autoinit/verify_historical_probe_reuse.py": "cfc7ef1f234e731a3ee7d25f9833829019543413114d9b73663ccc91e26b032d",
+    "scripts/autoinit/write_preregistration.py": "af54385682b7ee2f827f32fb7c5397006a5e35608e408f3aa311893b2d783b7c",
+    "scripts/pod/autoinit_phase_a_driver.py": "c830fcb227e32ac59da3dd8c23c73754e7765989b9cd8af9db39039785e01eb9",
+    "scripts/pod/autoinit_phase_b_driver.py": "31af23861a3be5faa731d9b6ddc4883b91a0b59ef919e641cdc2c7089c748993",
+    "scripts/pod/autoinit_phase_b_launch.py": "dfc5f4f67c2e3b443f5606d721ec52c3ba617e6cf07fffec46c8f62a8290830c",
+    "src/aadistill/initialization/adapters/__init__.py": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5",
+    "src/aadistill/initialization/adapters/qwen3.py": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa",
+    "src/aadistill/initialization/calibration/profiles.py": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7",
+    "src/aadistill/initialization/specs/arch.py": "92bc5c45cd8b50f05a83aad172cc11d15d4bb57f8cb67f1615214d301a18c078"
+   },
+   "patch_sha256": "36c0b499f753cbf46af63dc4723d56f2b99625beba4890c2c71b9e4a897e7c49",
+   "numstat": {
+    "scripts/autoinit/phase_a_search.py": [
+     5,
+     1
+    ],
+    "scripts/autoinit/verify_frozen_assets.py": [
+     31,
+     8
+    ],
+    "scripts/autoinit/verify_historical_probe_reuse.py": [
+     4,
+     0
+    ],
+    "scripts/autoinit/write_preregistration.py": [
+     6,
+     4
+    ],
+    "scripts/pod/autoinit_phase_a_driver.py": [
+     13,
+     1
+    ],
+    "scripts/pod/autoinit_phase_b_driver.py": [
+     1,
+     4
+    ],
+    "scripts/pod/autoinit_phase_b_launch.py": [
+     1,
+     4
+    ],
+    "src/aadistill/initialization/adapters/__init__.py": [
+     51,
+     22
+    ],
+    "src/aadistill/initialization/adapters/qwen3.py": [
+     15,
+     4
+    ],
+    "src/aadistill/initialization/calibration/profiles.py": [
+     49,
+     159
+    ],
+    "src/aadistill/initialization/specs/arch.py": [
+     78,
+     32
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 239,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "x",
+   "why_the_owner_is_shared_session_runner": "x",
+   "why_a_c1_only_override_was_rejected": "x",
+   "maintainer_authorization": "x",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "9ab2696fac5fa8e814af7f8ba71506e13528fa5f8fad30a858f3ba7f2aab1a24",
+   "also_affected_hash_bound_sets": [
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2"
+   ],
+   "entry_sha256": "f9f3891696f32451209388c2f2f9d30cbdb43e683813f1a8ca5e83e5929b0633"
   }
  ]
 }
