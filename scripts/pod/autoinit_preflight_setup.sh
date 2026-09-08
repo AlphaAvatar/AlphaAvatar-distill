@@ -480,7 +480,7 @@ tt0=$(date -u +%s)
 # diagnostic runs on a CPU box with an empty HF cache while this machine is an
 # L40S with the teacher already downloaded, and comparing their skip sets exactly
 # would refuse a HEALTHY pod for being one. The variables are declared once in
-# `aadistill.autoinit.cpu_test_env` and emitted here, so the pod and the
+# `aadistill.runtime.cpu_test_env` and emitted here, so the pod and the
 # simulator cannot drift apart into two prose lists.
 CPU_TEST_HOME=$(mktemp -d /workspace/cpu_test_scope.XXXXXX)
 mkdir -p "$CPU_TEST_HOME/home" "$CPU_TEST_HOME/hf/hub"

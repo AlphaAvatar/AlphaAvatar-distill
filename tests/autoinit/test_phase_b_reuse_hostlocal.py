@@ -39,15 +39,35 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 from verify_historical_probe_reuse import verify  # noqa: E402
 
 
-def test_every_historical_probe_reconstructs_and_reuse_is_verified():
+def test_every_historical_probe_reconstructs_but_reuse_is_now_REFUSED():
+    """A material consequence of the initialization migration.
+
+    Every probe still reconstructs: the bytes are there, the artifact digests
+    re-derive, the seeds are the frozen ones, the battery matches and the
+    protocol hash matches what was attested. Exactly ONE check fails, for all
+    eleven -- `scoring_contract_matches_live` -- because the live scoring
+    contract moved v2 -> v3 when the scorer was relocated.
+
+    The numbers those probes carry are NOT in question: 570 frozen samples
+    re-scored through the pre- and post-migration trees are byte-identical
+    (logs/architecture_scoring_equivalence.json). What has changed is the
+    IDENTITY rule, which is deliberately conservative and refuses a probe whose
+    recorded scorer digest is not the live one.
+
+    Relaxing that rule -- accepting a superseded contract because equivalence
+    was demonstrated -- would be a change to what counts as a reusable
+    scientific observation. That is a maintainer decision and not a migration
+    one, so this test records the refusal instead of removing it.
+    """
     r = verify()
     assert r["n_probes"] == 11
-    assert r["reuse_verified"] is True, r["failures"]
-    assert not r["failures"]
-    # The three unadmitted leaves verify too; they are simply not in the
-    # candidate set, which is a procedure fact and not an identity failure.
-    assert len(r["verifiable_but_not_admitted"]) == 3
-    assert len(r["admitted_reusable_probes"]) == 8
+    assert r["reuse_verified"] is False, (
+        "reuse is expected to be refused after the scorer relocation")
+    assert len(r["failures"]) == 11
+    for f in r["failures"]:
+        assert f["failed"] == ["scoring_contract_matches_live"], (
+            "only the live-contract identity may fail; anything else means the "
+            "probes themselves stopped reconstructing")
 
 
 def test_the_load_bearing_check_is_the_digest_re_derived_from_BYTES():
@@ -116,13 +136,22 @@ def _launcher():
     return pbl
 
 
-def test_the_pre_provider_gate_passes_against_the_retained_store():
+def test_the_pre_provider_gate_now_REFUSES_against_the_retained_store():
+    """The $0 pre-provider gate catches the same thing, before a pod exists.
+
+    It used to pass. It refuses now for one reason -- the scorer relocation
+    moved the live contract -- and refusing before any provider resource is
+    created is the behaviour that matters: a session that would reuse probes
+    the identity rule no longer admits stops for free.
+    """
     import types
 
     pbl = _launcher()
     ok, why = pbl.historical_reuse_reconstruction_gate(types.SimpleNamespace())
-    assert ok, why
-    assert "re-derived from retained bytes" in why
+    assert not ok, (
+        "the gate must refuse while the recorded scorer identity differs from "
+        f"the live one; it passed with: {why}")
+    assert "scoring_contract_matches_live" in why or "reuse" in why, why
 
 
 def test_the_gate_refuses_when_the_retained_store_is_ABSENT(monkeypatch):

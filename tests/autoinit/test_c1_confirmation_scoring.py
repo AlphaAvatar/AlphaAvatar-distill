@@ -43,11 +43,21 @@ HISTORICAL = EQ.find_generations()
 # --- identity ---------------------------------------------------------------
 
 def test_the_frozen_assets_are_untouched():
-    """Neither historical asset may move because C1 needed a scorer."""
+    """Neither historical asset may move because C1 needed a scorer.
+
+    The pinned digest moved once, at the initialization migration, from v2's
+    808080a7c5d8… to v3's — the same six files at current paths. That is a
+    relocation and not a change of scorer: 570 frozen samples re-scored through
+    the pre- and post-migration trees are byte-identical
+    (logs/architecture_scoring_equivalence.json). The battery hashes below did
+    not move at all, which is the other half of what this asserts.
+    """
     from aadistill.initialization.planning.recovery import recovery_scoring_contract
 
-    assert recovery_scoring_contract(REPO)["digest"] == (
-        "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be")
+    contract = recovery_scoring_contract(REPO)
+    assert contract["contract"] == "recovery_search_scoring@v3"
+    assert contract["digest"] == (
+        "f88ce7780f24aee6e825275334356f4d2fd3d151e0c9e28164a4605c04419f6f")
     manifest, manifest_sha = C1S.battery_manifest(C1_BATTERY)
     assert manifest_sha == C1_BATTERY_MANIFEST_SHA256
     assert manifest["content_sha256"] == C1_BATTERY_CONTENT_SHA256

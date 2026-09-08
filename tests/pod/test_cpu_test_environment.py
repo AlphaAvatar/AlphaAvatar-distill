@@ -102,7 +102,11 @@ def test_both_runners_consume_the_one_declaration():
     """Not two prose lists. Two lists drifting apart IS the defect."""
     setup, sim = SETUP.read_text(), SIM.read_text()
     assert "cpu_test_env_args.py" in setup and "cpu_test_env_args.py" in sim
-    assert EMITTER.read_text().count("from aadistill.autoinit.cpu_test_env import") == 1
+    # `aadistill.runtime.cpu_test_env` since the cutover. One import, so the
+    # pod and the simulator cannot drift onto two lists -- which is the defect
+    # this asserts, and is unaffected by where the module lives.
+    assert EMITTER.read_text().count(
+        "from aadistill.runtime.cpu_test_env import") == 1
     # The pod scopes it to one command; the simulator isolates its own subshell.
     assert "env $CPU_TEST_ENV" in setup
     assert "--format sh" in sim
