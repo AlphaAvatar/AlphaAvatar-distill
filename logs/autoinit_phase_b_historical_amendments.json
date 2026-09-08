@@ -71,12 +71,12 @@
   {
    "amendment_id": "PHB-HA-002",
    "schema_version": 1,
-   "recorded_utc": "2026-09-08T11:51:43+00:00",
+   "recorded_utc": "2026-09-08T13:30:08+00:00",
    "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
-   "source_repair_commit": "92d97b9aaf584c8d19f81504d6e71eee688705e6",
+   "source_repair_commit": "ae68c3fa8682356f43484099bd91d56ad75dcdf7",
    "source_repair_parent": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
    "previous_live_digest": "372c1f2438ad0b1698a2ceacbfa4e76acbb9147e38e735bc4d0152c6f894bbc3",
-   "new_live_digest": "9073093bcf1a845385d349e78834c13e747c666318fccda83265a5211407ca57",
+   "new_live_digest": "1ae2f53d92ee143456d570961f8501bfeb9ba6b3e2b1b0dd529adc08ec3e608a",
    "changed_files": [
     "scripts/autoinit/load_state_eval.py",
     "scripts/autoinit/phase_a_search.py",
@@ -91,8 +91,10 @@
     "scripts/pod/autoinit_phase_a_launch.py",
     "scripts/pod/autoinit_phase_b_driver.py",
     "scripts/pod/autoinit_phase_b_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
     "scripts/pod/autoinit_science_inputs.py",
     "src/aadistill/governance/authorization.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
     "src/aadistill/infrastructure/session_runner.py",
     "src/aadistill/initialization/adapters/__init__.py",
     "src/aadistill/initialization/adapters/qwen3.py",
@@ -139,8 +141,10 @@
     "scripts/pod/autoinit_phase_a_launch.py": "ea080b2e901facd32985d0eb21ae8757eb77d2db7d8aefa0af5c01d72537f83e",
     "scripts/pod/autoinit_phase_b_driver.py": "5e7fa37687684cafe0dd500ffd5e7b7654e7da43a4726f6bd2312c1e42ffefdc",
     "scripts/pod/autoinit_phase_b_launch.py": "1451b369b817f5b2f9b67f401e1a662b57e8fa8bbbff1375c59f991a75b61b86",
+    "scripts/pod/autoinit_preflight_setup.sh": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
     "scripts/pod/autoinit_science_inputs.py": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
     "src/aadistill/governance/authorization.py": null,
+    "src/aadistill/infrastructure/session_prechecks.py": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
     "src/aadistill/infrastructure/session_runner.py": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
     "src/aadistill/initialization/adapters/__init__.py": null,
     "src/aadistill/initialization/adapters/qwen3.py": null,
@@ -187,8 +191,10 @@
     "scripts/pod/autoinit_phase_a_launch.py": "7edddabcb2eaeb834bc690f3e7c538e1ad702d41dddb24f4a1e4a7542c533ccd",
     "scripts/pod/autoinit_phase_b_driver.py": "31af23861a3be5faa731d9b6ddc4883b91a0b59ef919e641cdc2c7089c748993",
     "scripts/pod/autoinit_phase_b_launch.py": "dfc5f4f67c2e3b443f5606d721ec52c3ba617e6cf07fffec46c8f62a8290830c",
+    "scripts/pod/autoinit_preflight_setup.sh": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778",
     "scripts/pod/autoinit_science_inputs.py": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e",
     "src/aadistill/governance/authorization.py": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694",
+    "src/aadistill/infrastructure/session_prechecks.py": "1a6efcfd9fdbc122781a6879eb8251431952ddd8f5165a7fc60994b93021c159",
     "src/aadistill/infrastructure/session_runner.py": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33",
     "src/aadistill/initialization/adapters/__init__.py": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5",
     "src/aadistill/initialization/adapters/qwen3.py": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa",
@@ -221,7 +227,7 @@
     "src/aadistill/runtime/device_handoff.py": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
     "src/aadistill/runtime/leaf_durability.py": "024967267f9ededb651437d7b660395c642a191c09d8dd1e8a3bf6946214a017"
    },
-   "patch_sha256": "80a63cf94c5c44639ced41b0738355c569a5d27861d0e1800033af6b3ec595f8",
+   "patch_sha256": "e431d0880afecd451353050ef05aed9c8f6db451ebdd8899697fa5554d5edb46",
    "numstat": {
     "scripts/autoinit/load_state_eval.py": [
      1,
@@ -275,12 +281,20 @@
      7,
      11
     ],
+    "scripts/pod/autoinit_preflight_setup.sh": [
+     17,
+     14
+    ],
     "scripts/pod/autoinit_science_inputs.py": [
      1,
      1
     ],
     "src/aadistill/governance/authorization.py": [
      278,
+     0
+    ],
+    "src/aadistill/infrastructure/session_prechecks.py": [
+     18,
      0
     ],
     "src/aadistill/infrastructure/session_runner.py": [
@@ -410,7 +424,7 @@
    },
    "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
    "additive_only": false,
-   "lines_removed": 80,
+   "lines_removed": 94,
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "phase_b_science_changed": false,
@@ -434,7 +448,7 @@
     "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
-   "entry_sha256": "39a69753cd25abe6ec55796d938f5caa8e80e42f1d705365d57e6fda4cce5385"
+   "entry_sha256": "d9fc34a463bdc0f745206e9f0d3ba0d581a76bd270e5379fbd89159b9d254919"
   }
  ]
 }
