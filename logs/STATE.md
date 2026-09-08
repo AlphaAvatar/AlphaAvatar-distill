@@ -60,7 +60,7 @@ REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION IN PROGRESS, BRANCH IS RED**
 > grant, no authorization, no bundle.** The work is on branch
 > **`migration/initialization-milestone-a`**. **`main` is untouched.**
 >
-> **Do not merge this branch.** Full suite on it: **105 failed, 3202 passed, 16
+> **Do not merge this branch.** Full suite on it: **95 failed, 3223 passed, 16
 > skipped, 16 errors** — from 213 failed / 64 errors when the cutover landed. A
 > red branch is not a completed migration checkpoint.
 >
@@ -97,7 +97,7 @@ REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION IN PROGRESS, BRANCH IS RED**
 > completed runs recorded, and `C1_HARNESS_SOURCE_FILES_V1` refuses outright.
 > That is the intended fail-closed property, not a defect to paper over.
 >
-> **The remaining 105 failures are one problem with six symptoms:** test
+> **The remaining 95 failures are one problem with six symptoms:** test
 > fixtures load the *historical* preregistrations and authorizations, so a test
 > now fails at a contract-mismatch gate before reaching its own assertion. The
 > fix is to build a current-tree preregistration inside the fixture — preserving
