@@ -1,5 +1,6 @@
-**Updated:** 2026-09-07 · branch `main` · **PHASE B CLOSED · PHASE C0 FROZEN ·
-ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
+**Updated:** 2026-09-08 · branch `migration/initialization-milestone-a` (`main` unchanged) ·
+**PHASE B CLOSED · PHASE C0 FROZEN · ATTEMPT 9 RAN — THE FROZEN PATH
+REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION IN PROGRESS, BRANCH IS RED**
 
 > **C1 attempt 9, 2026-09-07 — `$1.0440`, pod `8gtnsbigpgaz76`, 57.47 min,
 > provider confirms gone.** Cumulative **`$267.8598`** of `$283.7600`, leaving
@@ -53,6 +54,72 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 > limit, and an independent read-only poller recorded an empty inventory at
 > `15:20:22Z`. The grant and authorization are **CONSUMED** and permit no retry
 > and no replacement pod.
+
+> **MILESTONE A — THE INITIALIZATION MIGRATION IS IMPLEMENTED BUT NOT
+> MERGEABLE, 2026-09-08 — `$0.0000`, no pod, no GPU, no provider resource, no
+> grant, no authorization, no bundle.** The work is on branch
+> **`migration/initialization-milestone-a`**. **`main` is untouched.**
+>
+> **Do not merge this branch.** Full suite on it: **105 failed, 3202 passed, 16
+> skipped, 16 errors** — from 213 failed / 64 errors when the cutover landed. A
+> red branch is not a completed migration checkpoint.
+>
+> **Done and verified:** 59 modules moved into `src/aadistill/initialization/`
+> (specs · adapters · calibration/statistics/device · transforms · operators ·
+> planning); both `aadistill.init` and `aadistill.autoinit` deleted; ~1000
+> imports rewritten; experiment instances under `scripts/experiments/`.
+> **Package cycles 3 → 0** — it was 1 before the migration — by moving
+> `planning.metrics`' 309 lines of contract types down to `specs.metrics`, and
+> `CalibrationNeed` down to the calibration layer. Not by local imports: the two
+> functions that needed it were already reaching for it inside their own bodies,
+> which hides a cycle from the import graph without removing it.
+>
+> **Adapter registration now has one owner.** It used to be a side effect of
+> importing the old package, so `get_adapter("qwen3")` resolved only if
+> something had already imported the adapter module. Under `pytest-randomly`
+> that made whole test files fail at collection in some orders and not others.
+>
+> **The C1 executable identity is derived from the import graph, not listed.**
+> That found four reachable modules the hand-written list omitted — among them
+> `provider.py`, `remote.py` and `log_relay.py`, which create, reach and tear
+> down billed pods.
+>
+> **The scoring relocation moved no numbers.** 570 frozen Phase-A samples across
+> 3 search paths, re-scored through the pre- and post-migration trees, are
+> byte-identical; the contract digest legitimately moves v2 → v3. Evidence:
+> `logs/architecture_scoring_equivalence.json`, reproducible via
+> `scripts/architecture/compare_scoring_across_migration.py`. Coverage is
+> recorded rather than implied — the evidence exercises the `behavior_v0` record
+> schema only, established by mutation, not assumed.
+>
+> **Old authorizations cannot be revalidated here**, which is why much of the
+> suite is red. The repointed declarations compute a different digest than the
+> completed runs recorded, and `C1_HARNESS_SOURCE_FILES_V1` refuses outright.
+> That is the intended fail-closed property, not a defect to paper over.
+>
+> **The remaining 105 failures are one problem with six symptoms:** test
+> fixtures load the *historical* preregistrations and authorizations, so a test
+> now fails at a contract-mismatch gate before reaching its own assertion. The
+> fix is to build a current-tree preregistration inside the fixture — preserving
+> what each test actually asserts — and to add explicit tests that the
+> historical documents are refused. The historical `logs/` bytes must not be
+> rewritten. **Exact next edit:**
+> `tests/pod/test_phase_a_stage0_executes.py::build()`, which 26 of the failures
+> go through.
+>
+> **Still owed:** that fixture work; historical-amendment ledger entries for the
+> migration, which need maintainer-owned `--what` and `--maintainer` values that
+> an agent must not invent; moving the remaining experiment-instance content
+> into `configs/`; one diagnostic sweep once source, tests and metadata are
+> settled. **MILESTONE B** (production RunLayout integration) and **MILESTONE C**
+> (real CUDA execution) are not started, by instruction.
+>
+> **The CUDA entry point exists and reports NOT RUN on this host.**
+> `scripts/validation/cuda_engineering_check.py` with
+> `configs/validation/cuda_engineering.json`. Its entire body is executed at
+> `$0` by `tests/validation/`, which substitutes only the device gate; that
+> found three defects that would otherwise have surfaced on a paid pod. No GPU
+> was used, and no paid request is made here.
 
 > **Architecture inventory, all-stage runtime layout, and the first experiment
 > extraction, 2026-09-08 — `$0.0000`, no pod, no GPU, no provider resource, no
@@ -174,7 +241,7 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 > the pod contract uses, and on the dev box it pinned a harness digest that went
 > stale the moment the harness moved — so a CORRECT gate reported a false alarm.
 > The payload derivation now lives in
-> `src/aadistill/autoinit/c1_authorization_payload.py`, pure (no git, no clock,
+> `src/aadistill/initialization/c1_authorization_payload.py`, pure (no git, no clock,
 > no writing); the CLI issuer keeps the effects and calls the same builder, so a
 > test candidate and a live authorization cannot diverge. `CANDIDATE` and the
 > whole-test `skipif` are gone. **113 skips in the sweep, down from 114** — that
@@ -461,7 +528,7 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 > `scripts/autoinit/phase_a_search.as_operator_items`, a **script**, so the
 > search had it and `fixed_path` did not.
 >
-> [`calibration_items.py`](../src/aadistill/autoinit/calibration_items.py) is now
+> [`calibration_items.py`](../src/aadistill/initialization/calibration/items.py) is now
 > the single boundary, and `materialize_fixed_path` runs **both**
 > profile-resolved and caller-supplied items through it — so no operator gets an
 > `ids` fallback of its own, and a caller cannot route around the contract by

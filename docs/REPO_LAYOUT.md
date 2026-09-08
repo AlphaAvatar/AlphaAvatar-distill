@@ -43,24 +43,24 @@ and their contents inventoried in
 
 | path | responsibility |
 | --- | --- |
-| `src/aadistill/autoinit/` | the AutoInitializer: search, operators, ranking, recovery, authorization |
-| `src/aadistill/autoinit/device.py` | **the Stage-1 device contract**, `autoinit.stage1_device_contract@v1` |
-| `src/aadistill/autoinit/search.py` | the beam engine and the materialize → reload → validate → measure cycle |
-| `src/aadistill/autoinit/operators/` | the five frozen operator kinds and their implementations |
-| `src/aadistill/autoinit/recovery.py` | the successive-halving plan, pooling, selection rules |
-| `src/aadistill/autoinit/generation.py`, `src/aadistill/autoinit/generation_compat.py` | evaluation-protocol identity and `generation_runtime_comparability@v2` |
-| `src/aadistill/autoinit/authorization.py` | `SpendAuthorization` — the type whose `allows_phase_a` is always `False` |
-| `src/aadistill/autoinit/phase_a.py` | the Phase-A **schema and frozen plan**. Carries no grant prose |
-| `src/aadistill/autoinit/phase_b.py` | the Phase-B session plan, its own executable-source identity, and the `PhaseBAuthorization` type whose `allows_phase_a` is False by type |
-| `src/aadistill/autoinit/reweight.py` | the R1–R5 calibration reweighting rule. Build-time only; the pod never runs it |
-| `src/aadistill/autoinit/fixed_path.py` | **Phase C1**: replays one frozen operator sequence with a fail-stop artifact-digest gate. Not a search — no enumeration, ranking, pruning or profile branching |
-| `src/aadistill/autoinit/c1_authorization.py` | **Phase C1**: the `C1Authorization` type (hard-`False` `allows_phase_a`/`allows_beam_search`, refused by schema at load), the declared C1 harness file set, and `c1_budget_spec` — which derives the enforceable ceiling from `logs/phase_c1_pricing.json` so it exists in one place |
-| `src/aadistill/autoinit/c1_bundle.py` | **Phase C1**: the transport identity — the canonical bundle name derived from the session commit, the staging build/verify/upload (which may mutate the relay and refuses to overwrite a different object), and the READ-ONLY round-trip the pre-provider gate runs: download the object the pod would fetch, hash it, `git bundle verify`, clone, check out the session commit, and require the authorization and harness digest inside it to be the authorized ones |
-| `src/aadistill/autoinit/c1_session.py` | **Phase C1**: the ten-stage session contract, the two fail-stop replay gates, and `build_arm_specs`, which refuses to construct the treatment arm until the operator has been explicitly registered |
-| `src/aadistill/autoinit/c1_isolation.py` | **Phase C1**: the two-arm isolation plan (no rungs, no survivors, no tie-break), the seed-derivation rule, the paired prompt-cluster bootstrap and the frozen three-way decision |
-| `src/aadistill/autoinit/operators/attention_activation.py` | `attention.activation_importance_v1`. A **separate module** because `src/aadistill/autoinit/operators/attention.py` and its package `__init__` are members of `CONTINUATION_SOURCE_FILES_V2`; editing either moves a frozen Phase-B digest. **Import is inert** — a consumer calls `register()` explicitly. Staying outside `V1_IMPLEMENTATIONS` is not sufficient on its own, because an unrestricted `BeamSearch` enumerates the whole registry |
-| `src/aadistill/init/attention_stats.py` | streaming per-head second moments of the attention output — the exact sufficient statistic for the C1 head score |
-| `src/aadistill/init/` | Stage-0/1 primitives: activation statistics, contribution, sandwich init |
+| `src/aadistill/initialization/` | the AutoInitializer: search, operators, ranking, recovery, authorization |
+| `src/aadistill/initialization/device.py` | **the Stage-1 device contract**, `autoinit.stage1_device_contract@v1` |
+| `src/aadistill/initialization/planning/search.py` | the beam engine and the materialize → reload → validate → measure cycle |
+| `src/aadistill/initialization/operators/` | the five frozen operator kinds and their implementations |
+| `src/aadistill/initialization/planning/recovery.py` | the successive-halving plan, pooling, selection rules |
+| `src/aadistill/initialization/planning/generation.py`, `src/aadistill/initialization/planning/generation_compat.py` | evaluation-protocol identity and `generation_runtime_comparability@v2` |
+| `src/aadistill/governance/authorization.py` | `SpendAuthorization` — the type whose `allows_phase_a` is always `False` |
+| `scripts/experiments/phase_a/plan.py` | the Phase-A **schema and frozen plan**. Carries no grant prose |
+| `scripts/experiments/phase_b/plan.py` | the Phase-B session plan, its own executable-source identity, and the `PhaseBAuthorization` type whose `allows_phase_a` is False by type |
+| `src/aadistill/initialization/statistics/reweight.py` | the R1–R5 calibration reweighting rule. Build-time only; the pod never runs it |
+| `src/aadistill/initialization/planning/fixed_path.py` | **Phase C1**: replays one frozen operator sequence with a fail-stop artifact-digest gate. Not a search — no enumeration, ranking, pruning or profile branching |
+| `scripts/experiments/phase_c1/authorization.py` | **Phase C1**: the `C1Authorization` type (hard-`False` `allows_phase_a`/`allows_beam_search`, refused by schema at load), the declared C1 harness file set, and `c1_budget_spec` — which derives the enforceable ceiling from `logs/phase_c1_pricing.json` so it exists in one place |
+| `scripts/experiments/phase_c1/bundle.py` | **Phase C1**: the transport identity — the canonical bundle name derived from the session commit, the staging build/verify/upload (which may mutate the relay and refuses to overwrite a different object), and the READ-ONLY round-trip the pre-provider gate runs: download the object the pod would fetch, hash it, `git bundle verify`, clone, check out the session commit, and require the authorization and harness digest inside it to be the authorized ones |
+| `scripts/experiments/phase_c1/session.py` | **Phase C1**: the ten-stage session contract, the two fail-stop replay gates, and `build_arm_specs`, which refuses to construct the treatment arm until the operator has been explicitly registered |
+| `scripts/experiments/phase_c1/isolation.py` | **Phase C1**: the two-arm isolation plan (no rungs, no survivors, no tie-break), the seed-derivation rule, the paired prompt-cluster bootstrap and the frozen three-way decision |
+| `src/aadistill/initialization/operators/attention_activation.py` | `attention.activation_importance_v1`. A **separate module** because `src/aadistill/initialization/operators/attention.py` and its package `__init__` are members of `CONTINUATION_SOURCE_FILES_V2`; editing either moves a frozen Phase-B digest. **Import is inert** — a consumer calls `register()` explicitly. Staying outside `V1_IMPLEMENTATIONS` is not sufficient on its own, because an unrestricted `BeamSearch` enumerates the whole registry |
+| `src/aadistill/initialization/statistics/attention.py` | streaming per-head second moments of the attention output — the exact sufficient statistic for the C1 head score |
+| `src/aadistill/initialization/` | Stage-0/1 primitives: activation statistics, contribution, sandwich init |
 | `src/aadistill/data/`, `src/aadistill/evaluation/`, `src/aadistill/models/`, `src/aadistill/rollout/` | corpora, scorers, student construction, rollout |
 | `src/aadistill/infrastructure/` | provider, budget, watchdog, artifact gate, log relay, manifests |
 | `src/aadistill/infrastructure/session.py` | the typed, immutable `SessionSpec` a paid session IS |
