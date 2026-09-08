@@ -32,11 +32,8 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from aadistill.governance.authorization import (  # noqa: E402
-    AuthorizationError,
-    MICRO_PREFLIGHT_AUTHORIZATION,
-    SpendAuthorization,
-)
+from aadistill.governance.authorization import AuthorizationError, SpendAuthorization
+from experiments.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
 from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_harness_digest  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 

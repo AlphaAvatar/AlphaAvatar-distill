@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "b1ec0ce504a74261c716006a13649a17679c6d12",
+ "head_commit": "3e18d9d77d4820f86f24f13570df92c5de8d83ee",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -75,7 +75,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 89,
-  "digest": "c98422e6fdf08d9dcf7fd23e19b6c80f166c9cc20c2cd3b28e0b54369cb1ff92",
+  "digest": "f33ed469228192eb095aeb2af4b563fbebd0c8af171fb2ebfac2435ed0ca4138",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -275,8 +275,8 @@
    },
    {
     "path": "src/aadistill/governance/authorization.py",
-    "sha256": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694",
-    "bytes": 13639
+    "sha256": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b",
+    "bytes": 13263
    },
    {
     "path": "src/aadistill/governance/closure.py",
@@ -325,8 +325,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/session.py",
-    "sha256": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
-    "bytes": 31227
+    "sha256": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386",
+    "bytes": 32019
    },
    {
     "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -335,8 +335,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
-    "sha256": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33",
-    "bytes": 50420
+    "sha256": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50",
+    "bytes": 51457
    },
    {
     "path": "src/aadistill/infrastructure/watchdog.py",
@@ -430,8 +430,8 @@
    },
    {
     "path": "src/aadistill/initialization/planning/recovery.py",
-    "sha256": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5",
-    "bytes": 104685
+    "sha256": "3905b2c3a318b4ef80eddf16923a8653f192bdedb9d54499da9fe96a18072ea8",
+    "bytes": 104842
    },
    {
     "path": "src/aadistill/initialization/specs/arch.py",
@@ -778,7 +778,7 @@
   "contract": "c1_confirmation_scoring@v1",
   "contract_id": "c1_confirmation_scoring",
   "version": 1,
-  "digest": "eeb9fd4a6c0f1f0cca5e9a6ef97f0a526f8dd3a6c2e8a8851fcdfcd68976c651",
+  "digest": "dd9ab3c103585813a7fff5cfd7304f1304db8ef54bc1c027c771c5bd1a6bd1b5",
   "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
   "semantic_parent": "recovery_search_scoring@v2",
   "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
@@ -1036,5 +1036,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "9569b44d05f259a2fb00a4fe846345672b2915ee79d807708da5f4295b915591"
+ "preregistration_sha256": "cac336e4fba90cad8d92975fac47dc054a7f97eab4e7eec5b9b529f456529a6d"
 }

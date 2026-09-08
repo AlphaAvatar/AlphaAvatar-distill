@@ -19,10 +19,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.governance.authorization import (  # noqa: E402
-    MICRO_PREFLIGHT_AUTHORIZATION,
-    harness_source_digest,
-)
+from aadistill.governance.authorization import harness_source_digest
+from experiments.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
 from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1  # noqa: E402
 
 

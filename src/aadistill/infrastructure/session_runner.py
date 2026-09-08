@@ -108,6 +108,30 @@ def parse_setup_probe(stdout: str) -> dict:
     return out
 
 
+def provider_cli_fallbacks() -> tuple[str, ...]:
+    """Where to look for the provider CLI when it is not on PATH.
+
+    Declared in `configs/infrastructure/provider_cli.json` rather than here.
+    An empty list is legitimate: it means this deployment expects the CLI on
+    PATH and would rather fail than search someone's home directory.
+    """
+    import json
+
+    config = (Path(__file__).resolve().parents[3]
+              / "configs/infrastructure/provider_cli.json")
+    if not config.is_file():
+        return ()
+    return tuple(os.path.expanduser(p)
+                 for p in json.loads(config.read_text())["fallback_paths"])
+
+
+def _first_existing(paths) -> str | None:
+    for candidate in paths:
+        if Path(candidate).is_file():
+            return candidate
+    return None
+
+
 class SessionRunner:
     """Runs one `SessionSpec`. Not a base class; there is nothing to override."""
 
@@ -137,9 +161,12 @@ class SessionRunner:
         self.harness = self.auth.require_harness(self.repo_root)
         self.key = os.environ.get("RUNPOD_API_KEY") or read_api_key(args.runpod_config)
         self.provider = RunPodProvider(self.key)
-        self.cli = shutil.which("runpodctl") or os.path.expanduser(
-            "~/.local/bin/runpodctl")
-        if not Path(self.cli).is_file():
+        #: PATH first, then the fallbacks the deployment declares. The home
+        #: path used to be written here, which made the reusable core name one
+        #: machine's layout; where a CLI is installed is a deployment fact.
+        self.cli = shutil.which("runpodctl") or _first_existing(
+            provider_cli_fallbacks())
+        if not self.cli or not Path(self.cli).is_file():
             raise SystemExit("runpodctl not found")
 
         self.ev: dict = {

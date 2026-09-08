@@ -44,10 +44,9 @@ from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     SCHEDULE_V1,
 )
-from aadistill.initialization.planning.recovery import (  # noqa: E402
+from aadistill.initialization.planning.recovery import (
     CAPABILITY_SCHEMA_V1,
     CATASTROPHIC_V1,
-    E1_KD_HEAVY_0860K,
     PREFLIGHT_PLAN_V1,
     TRAINER_SOURCE_FILES_V1,
     FeasibilityRule,
@@ -62,6 +61,7 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     EquivalenceRule,
     SuccessiveHalvingPlan,
 )
+from experiments.recipes import E1_KD_HEAVY_0860K
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Explicit: importing an adapter module no longer registers it.

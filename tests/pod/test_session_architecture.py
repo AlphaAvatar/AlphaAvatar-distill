@@ -216,7 +216,7 @@ def test_no_attempt_specific_grant_prose_in_executable_source():
     # `granted_by` field rather than on free text: a module docstring listing
     # what past attempts cost is failure history, which AGENTS.md P11 requires
     # to stay, and is not a permission.
-    from aadistill.governance.authorization import MICRO_PREFLIGHT_AUTHORIZATION
+    from experiments.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
     from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
 
     for label, constant in (("micro-preflight", MICRO_PREFLIGHT_AUTHORIZATION),

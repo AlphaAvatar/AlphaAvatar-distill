@@ -57,12 +57,31 @@ HEX16 = re.compile(r"^[0-9a-f]{16}$")
 #: `logs/runs`, `governance/grant.json` and `aadistill.x/v1` — every one a
 #: false positive, and a gate built on those would be noise.
 REPO_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*$")
+#: Shapes that LOOK like `owner/name` and are not a model repo id. Without these
+#: the rule reported MIME types, a TCP port spec and a slash-joined label -- and
+#: a gate whose findings are mostly noise stops being read, which is worse than
+#: no gate. Every exclusion is a form, not a specific string: `application/json`
+#: is excluded because it is a MIME type, not because it is that MIME type.
 NOT_REPO_ID = re.compile(
     r"(^(logs|configs|artifacts|data|scripts|src|tests|docs|governance|runtime"
     r"|evidence|closeout|stage[0-9])/)|(\.(json|jsonl|py|md|sh|txt|yaml|yml|"
-    r"safetensors|bin|log)$)|(/v[0-9]+$)")
+    r"safetensors|bin|log)$)|(/v[0-9]+$)"
+    #: MIME types: a registered IANA top-level type followed by a subtype.
+    r"|(^(application|text|image|audio|video|multipart|message|model|font)/)"
+    #: A port specification, as Docker and RunPod write them: `22/tcp`.
+    r"|(^[0-9]+/(tcp|udp)$)"
+    #: An alternation label -- `E6/E6b`, `sa/sb` -- where both sides share a
+    #: prefix or are single tokens of the same short shape. A model repo id
+    #: names an owner and a model, which do not look like that.
+    r"|(^[A-Za-z][A-Za-z0-9]{0,4}/[A-Za-z][A-Za-z0-9]{0,4}$)")
 GIT_SHA = re.compile(r"^[0-9a-f]{40}$")
-PATHY = re.compile(r"(^|[\"' ])(logs/|configs/|artifacts/|data/|scripts/|~/|/home/|/tmp/)")
+#: A path a core module should not be naming: run evidence, artifact storage,
+#: someone's home directory, a temp location. `configs/` is deliberately NOT
+#: here -- it is where the maintainer's rules say experiment data belongs, so a
+#: core module reading a declared configuration path is the intended design
+#: rather than a violation of it. `scripts/` and `data/` stay, because a core
+#: module naming an executable or a dataset location is reaching outward.
+PATHY = re.compile(r"(^|[\"' ])(logs/|artifacts/|data/|scripts/|~/|/home/|/tmp/)")
 
 #: Model-family attribute chains. A core module reaching through these is
 #: bypassing the adapter; an adapter doing it is the adapter's whole job.

@@ -1,0 +1,19 @@
+{
+ "schema": "aadistill.recovery_recipes/v1",
+ "_contract": "The concrete recovery recipes this project has frozen. EXPERIMENT DATA -- specific loss weights, token counts, packs and their hashes -- which used to be written out in src/aadistill. Transcribed without edit, so every field is what it was. AUTHORIZES NOTHING.",
+ "recipes": [
+  {
+   "recipe_id": "e1_p1_kd_heavy@0.86M",
+   "ce_weight": 0.25,
+   "kd_weight": 1.0,
+   "temperature": 1.0,
+   "kd_scope": "all",
+   "tokens": 860000,
+   "pack": "artifacts/stage3/ladder_uniform_probe",
+   "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "block_len": 8192,
+   "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations."
+  }
+ ],
+ "authorizes": "nothing"
+}

@@ -33,7 +33,7 @@ from aadistill.initialization.calibration.profiles import get_profile  # noqa: E
 from experiments.calibration import register_builtin_profiles  # noqa: E402
 from aadistill.initialization.operators import attention_activation  # noqa: E402
 from aadistill.initialization.operators.attention_activation import ATTENTION_STATS_SPEC  # noqa: E402
-from aadistill.initialization.planning.recovery import E1_KD_HEAVY_0860K  # noqa: E402
+from experiments.recipes import E1_KD_HEAVY_0860K  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Explicit: importing the core no longer registers a mixture.

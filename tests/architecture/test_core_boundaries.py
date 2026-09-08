@@ -114,6 +114,15 @@ def _violations(inventory: dict) -> dict[str, list[str]]:
                 out["family_access_outside_adapters"].append(
                     f"{rel}::{a['owner']}::{_discriminator(a['chain'])}")
         for c in m["import_time_calls"]:
+            #: A concrete INSTANCE registering itself at import is the defect:
+            #: it makes the registry's contents depend on who imported what
+            #: first. Registering a KIND is not -- an operator taxonomy
+            #: (`DEPTH`, `FFN`, `ATTENTION`, `RESIDUAL_WIDTH`) is framework
+            #: vocabulary, in the same category as a schema name, and there is
+            #: nothing for a caller to inject. Matching on the word "register"
+            #: alone conflated the two.
+            if c["call"] in TAXONOMY_REGISTRATIONS:
+                continue
             if "register" in c["call"]:
                 out["import_time_registration"].append(
                     f"{rel}::<module>::{_discriminator(c['call'])}")
@@ -125,6 +134,11 @@ def _violations(inventory: dict) -> dict[str, list[str]]:
 
     out["package_cycles"] = ["<->".join(c) for c in inventory["graph"]["package_cycles"]]
     return {k: sorted(v) for k, v in out.items()}
+
+
+#: Registrations that declare framework VOCABULARY rather than a concrete
+#: instance. Named explicitly, so adding one is a visible decision.
+TAXONOMY_REGISTRATIONS = frozenset({"register_kind"})
 
 
 # --- the ratchet ------------------------------------------------------------

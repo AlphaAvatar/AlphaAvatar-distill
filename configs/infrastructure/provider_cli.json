@@ -1,0 +1,6 @@
+{
+ "schema": "aadistill.provider_cli/v1",
+ "_contract": "Where to look for the provider CLI when it is not on PATH. A DEPLOYMENT fact -- one machine's install layout -- which the reusable core should not name. An empty list is legitimate and means 'PATH or fail'. AUTHORIZES NOTHING.",
+ "fallback_paths": ["~/.local/bin/runpodctl"],
+ "authorizes": "nothing"
+}

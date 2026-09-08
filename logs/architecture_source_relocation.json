@@ -3,7 +3,7 @@
  "_contract": "How the initialization cutover stands against every frozen source set. Historical declarations keep naming the OLD paths because that is what those runs executed; this records where each file went, proves the bytes did not change, and EXERCISES the refusal that makes an old authorization unusable here. AUTHORIZES NOTHING.",
  "historical_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
  "_base_commit_meaning": "the commit that owns the old paths. Every old_sha256 below is the blob at THAT commit, so a reader can check any of them against the tree as it actually was, not as it is now.",
- "migrated_commit": "b1ec0ce504a74261c716006a13649a17679c6d12",
+ "migrated_commit": "3e18d9d77d4820f86f24f13570df92c5de8d83ee",
  "counts": {
   "files_moved": 59,
   "moved_with_identical_bytes": 10,
@@ -27,7 +27,7 @@
    "moves_with_edits": [],
    "deletions": [],
    "computes": true,
-   "current_digest": "3a6980967fd9eae96e571c26832fba871038b8484c93e8e8fb826187d26457c0"
+   "current_digest": "762d764b62b241dd08df2d885d34a14d2c65afeba0aa484acaca214aeb1e1dbd"
   },
   {
    "declaration": "PHASE_A_HARNESS_SOURCE_FILES_V1",
@@ -43,7 +43,7 @@
    "moves_with_edits": [],
    "deletions": [],
    "computes": true,
-   "current_digest": "ecf489a9926ae427e13e208d5777dbe7f7f66f2aa9afe52322b84e4b2c36dd35"
+   "current_digest": "31bf8e7774745179d3c28b9cc247f0836efe2ce6cfded2ec9e522a1f664d56dd"
   },
   {
    "declaration": "PHASE_B_EXECUTABLE_SOURCE_FILES_V1",
@@ -59,7 +59,7 @@
    "moves_with_edits": [],
    "deletions": [],
    "computes": true,
-   "current_digest": "c65489b5eaf7336d00a3aed52c5ced09a1a8c2988d6349e1e32013af1bed41f5"
+   "current_digest": "a1f80f3ad53b49c338e0563b64ecaf36c720254141676916f19c407e2e7677a5"
   },
   {
    "declaration": "CONTINUATION_SOURCE_FILES_V2",
@@ -75,7 +75,7 @@
    "moves_with_edits": [],
    "deletions": [],
    "computes": true,
-   "current_digest": "2f731111fe2b61e95f4c02ba12a22a5a03f1d468a44efa43a659dda35637e74b"
+   "current_digest": "418035a80b4c546d392f26a2299b55c9bba1e5481af6d7d2eab4a766a9646809"
   },
   {
    "declaration": "CONTINUATION_HARNESS_SOURCE_FILES_V1",
@@ -192,7 +192,7 @@
      "from": "src/aadistill/autoinit/authorization.py",
      "to": "src/aadistill/governance/authorization.py",
      "old_sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-     "new_sha256": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694"
+     "new_sha256": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b"
     },
     {
      "from": "src/aadistill/autoinit/operators/__init__.py",
@@ -312,7 +312,7 @@
      "from": "src/aadistill/autoinit/recovery.py",
      "to": "src/aadistill/initialization/planning/recovery.py",
      "old_sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
-     "new_sha256": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5"
+     "new_sha256": "3905b2c3a318b4ef80eddf16923a8653f192bdedb9d54499da9fe96a18072ea8"
     },
     {
      "from": "src/aadistill/autoinit/generation.py",

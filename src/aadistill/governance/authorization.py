@@ -245,34 +245,29 @@ class SpendAuthorization:
             version=int(raw.get("version", 1)))
 
 
-MICRO_PREFLIGHT_AUTHORIZATION = SpendAuthorization(
-    authorization_id="autoinit.micro_preflight.2026-08-13",
-    granted_utc="2026-08-13T00:00:00Z",
-    granted_by="maintainer (session authorization)",
-    plan_id="autoinit.micro_preflight",
-    # Moved 2026-08-14 with the recovery_search_v2 migration: the plan's
-    # Stage-3 description names the battery, so the battery change moves the
-    # plan hash. The stages, their order and their stop conditions are
-    # unchanged.
-    plan_hash="afd08be777e1f84e29350ff6c65daaf9b8f72d8f7ea593ca92f0129572264295",
-    expected_usd=4.20,
-    hard_cap_usd=8.60,
-    authorized_stages=(0, 1, 2, 3),
-    stage_conditions={
-        "0": "runtime attestation; protocol and generation-protocol materialization",
-        "1": "cheap machine gates; any blocking failure stops the session",
-        "2": "permanent canonical sa/sb controls, ONLY if stages 0 and 1 passed",
-        "3": "control characterization; materializes the frozen thresholds",
-        "teardown": "delete the pod, verify from the provider that it is gone, STOP",
-    },
-    # Filled by scripts/autoinit/issue_authorization.py at issue time, against
-    # the rehearsed harness.
-    authorized_session_commit=None,
-    harness_source_digest=None,
-    scope_note=(
-        "micro-preflight only. If Stage 0/1 indicates that hardware, runtime, "
-        "storage strategy, trainer semantics, evaluation semantics or any frozen "
-        "identity must change, stop before permanent controls and return for "
-        "review. Phase A remains separately unauthorized and must not start "
-        "automatically."),
-)
+#: MICRO_PREFLIGHT_AUTHORIZATION moved to
+#: `configs/experiments/micro_preflight/authorization.json`, loaded by
+#: `scripts/experiments/micro_preflight.py`. A specific maintainer grant --
+#: dollar amounts, a granted date, a plan hash -- is experiment instance data,
+#: and the reusable core should describe what an authorization IS without
+#: carrying one.
+
+
+def authorization_from_dict(doc) -> "SpendAuthorization":
+    """One authorization from a document holding this dataclass's own fields.
+
+    Distinct from `SpendAuthorization.load`, which reads the ON-DISK GRANT
+    schema and verifies its self-hash. This is the declaration form: the same
+    values that used to be written out in this module, now supplied by the
+    application. It grants nothing that the record it came from did not.
+    """
+    fields = dict(doc)
+    for key in ("authorized_stages",):
+        if fields.get(key) is not None:
+            fields[key] = tuple(fields[key])
+    for key in ("stage_conditions",):
+        if fields.get(key) is not None:
+            fields[key] = dict(fields[key])
+    if fields.get("harness_source_files") is not None:
+        fields["harness_source_files"] = tuple(fields["harness_source_files"])
+    return SpendAuthorization(**fields)

@@ -90,15 +90,21 @@ class RecoveryRecipe:
 
 #: E1/P1 at the 0.86M probe rung. Frozen: AutoInitializer v1 changes the
 #: initialization, not the recovery objective (handoff 5.1 item 18).
-E1_KD_HEAVY_0860K = RecoveryRecipe(
-    recipe_id="e1_p1_kd_heavy@0.86M",
-    ce_weight=0.25, kd_weight=1.0, temperature=1.0, kd_scope="all",
-    tokens=860_000, pack="artifacts/stage3/ladder_uniform_probe",
-    pack_sha256="6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
-    description=("The recovery recipe every E1 arm used, at the rung the frozen "
-                 "battery was sampled from. Held fixed so a difference between two "
-                 "probes is a difference between two initializations."),
-)
+#: The concrete recipes moved to `configs/recipes/recovery.json`: specific loss
+#: weights, token counts and a pack hash are experiment data, not framework.
+#: `scripts/experiments/recipes.py` loads them.
+
+
+def recipe_from_dict(doc) -> "RecoveryRecipe":
+    """One recipe from its serialized form. Field names are the dataclass's."""
+    return RecoveryRecipe(**dict(doc))
+
+
+def load_recipes(document) -> tuple["RecoveryRecipe", ...]:
+    if document.get("schema") != "aadistill.recovery_recipes/v1":
+        raise RecoveryAdmissionError(
+            f"expected a recovery-recipes document, got {document.get('schema')!r}")
+    return tuple(recipe_from_dict(d) for d in document["recipes"])
 
 @dataclass(frozen=True)
 class SeedAggregation:

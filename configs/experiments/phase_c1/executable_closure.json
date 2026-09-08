@@ -23,7 +23,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 89,
- "digest": "c98422e6fdf08d9dcf7fd23e19b6c80f166c9cc20c2cd3b28e0b54369cb1ff92",
+ "digest": "f33ed469228192eb095aeb2af4b563fbebd0c8af171fb2ebfac2435ed0ca4138",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -223,8 +223,8 @@
   },
   {
    "path": "src/aadistill/governance/authorization.py",
-   "sha256": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694",
-   "bytes": 13639
+   "sha256": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b",
+   "bytes": 13263
   },
   {
    "path": "src/aadistill/governance/closure.py",
@@ -273,8 +273,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session.py",
-   "sha256": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
-   "bytes": 31227
+   "sha256": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386",
+   "bytes": 32019
   },
   {
    "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -283,8 +283,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "sha256": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33",
-   "bytes": 50420
+   "sha256": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50",
+   "bytes": 51457
   },
   {
    "path": "src/aadistill/infrastructure/watchdog.py",
@@ -378,8 +378,8 @@
   },
   {
    "path": "src/aadistill/initialization/planning/recovery.py",
-   "sha256": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5",
-   "bytes": 104685
+   "sha256": "3905b2c3a318b4ef80eddf16923a8653f192bdedb9d54499da9fe96a18072ea8",
+   "bytes": 104842
   },
   {
    "path": "src/aadistill/initialization/specs/arch.py",

@@ -49,7 +49,7 @@ from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     SCHEDULE_V1,
 )
-from aadistill.initialization.planning.recovery import E1_KD_HEAVY_0860K  # noqa: E402
+from experiments.recipes import E1_KD_HEAVY_0860K  # noqa: E402
 
 #: Explicit: importing an operator module no longer registers it.
 register_builtin_operators()

@@ -47,12 +47,12 @@ from aadistill.initialization.planning.ranking import (  # noqa: E402
     SCHEDULE_V1,
     BeamSchedule,
 )
-from aadistill.initialization.planning.recovery import (  # noqa: E402
-    E1_KD_HEAVY_0860K,
+from aadistill.initialization.planning.recovery import (
     SuccessiveHalvingPlan,
     admit_leaves,
     probe_configs,
 )
+from experiments.recipes import E1_KD_HEAVY_0860K
 from aadistill.initialization.planning.search import (  # noqa: E402
     BeamSearch,
     SearchConfig,

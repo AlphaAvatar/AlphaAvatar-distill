@@ -32,9 +32,8 @@ from aadistill.runtime.cost import (  # noqa: E402
 )
 from aadistill.initialization.specs.metrics import StateEvaluation  # noqa: E402
 from aadistill.initialization.operators import V1_IMPLEMENTATIONS  # noqa: E402
-from aadistill.initialization.planning.recovery import (  # noqa: E402
+from aadistill.initialization.planning.recovery import (
     CATASTROPHIC_V1,
-    E1_KD_HEAVY_0860K,
     PREFLIGHT_PLAN_V1,
     SEED_SA,
     SEED_SB,
@@ -46,6 +45,7 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     assert_preregistered,
     probe_configs,
 )
+from experiments.recipes import E1_KD_HEAVY_0860K
 from aadistill.initialization.specs.state import (  # noqa: E402
     child_state,
     make_root_state,

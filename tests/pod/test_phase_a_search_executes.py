@@ -165,11 +165,11 @@ def test_the_searched_leaves_and_control_pass_the_recovery_gate(searched):
     from aadistill.initialization.planning.recovery import (
         CAPABILITY_SCHEMA_V1,
         CATASTROPHIC_V1,
-        E1_KD_HEAVY_0860K,
         EquivalenceRule,
         FeasibilityRule,
         SuccessiveHalvingPlan,
     )
+    from experiments.recipes import E1_KD_HEAVY_0860K
 
     leaves = list(searched.leaves)
     plan = SuccessiveHalvingPlan(

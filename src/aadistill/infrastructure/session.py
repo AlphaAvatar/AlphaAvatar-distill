@@ -78,7 +78,26 @@ def _bad_repo_dir(dest: str) -> list[str]:
 #: The artifact store every declaration has always meant. Named once so a
 #: session that needs a *different* repository says so in its manifest rather
 #: than in a fetch block nobody declared.
-MAIN_RELAY = "AlphaAvatar/aadistill-artifacts"
+#:
+#: Read from `configs/infrastructure/artifact_store.json`, not written here: a
+#: concrete repository id in the reusable core makes the framework name one
+#: organisation's storage, and a second deployment would edit the framework
+#: rather than its own configuration. Resolved once, at import, because it is
+#: a deployment constant rather than a per-session choice.
+def _main_relay() -> str:
+    import json
+    from pathlib import Path as _Path
+
+    config = (_Path(__file__).resolve().parents[3]
+              / "configs/infrastructure/artifact_store.json")
+    if not config.is_file():
+        raise FileNotFoundError(
+            f"{config} is missing; the artifact store is a deployment fact and "
+            "this module will not guess one")
+    return json.loads(config.read_text())["main_relay"]
+
+
+MAIN_RELAY = _main_relay()
 
 
 @dataclass(frozen=True)

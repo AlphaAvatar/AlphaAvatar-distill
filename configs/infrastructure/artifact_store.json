@@ -1,0 +1,7 @@
+{
+ "schema": "aadistill.artifact_store/v1",
+ "_contract": "Which artifact repository this deployment's sessions fetch from and publish to. A DEPLOYMENT fact, not a framework one: the reusable core describes what a relay input IS, and this says where the objects live. AUTHORIZES NOTHING.",
+ "main_relay": "AlphaAvatar/aadistill-artifacts",
+ "_why_not_in_src": "a concrete repository id in src/aadistill would make the reusable core name one organisation's storage; a second deployment would have to edit the framework rather than its own configuration.",
+ "authorizes": "nothing"
+}

@@ -5,27 +5,18 @@
  "derived_by": "scripts/architecture/inventory.py (AST; docstrings excluded, comments absent), keyed by tests/architecture/test_core_boundaries.py::_violations",
  "counts": {
   "experiment_named_modules": 0,
-  "sha256_literals": 2,
-  "repo_id_literals": 5,
-  "path_literals": 26,
+  "sha256_literals": 0,
+  "repo_id_literals": 0,
+  "path_literals": 23,
   "family_access_outside_adapters": 0,
-  "import_time_registration": 5,
+  "import_time_registration": 0,
   "package_cycles": 0,
   "core_imports_scripts": 0
  },
  "allow": {
   "experiment_named_modules": [],
-  "sha256_literals": [
-   "src/aadistill/governance/authorization.py::<module>::cd6cfb74f0",
-   "src/aadistill/initialization/planning/recovery.py::<module>::1d8a84fd77"
-  ],
-  "repo_id_literals": [
-   "src/aadistill/infrastructure/provider.py::RunPodProvider._gql::7b7d64c249",
-   "src/aadistill/infrastructure/session.py::<module>::d22bd18393",
-   "src/aadistill/infrastructure/session_runner.py::SessionRunner.create::0f5ac1e01b",
-   "src/aadistill/rollout/engines.py::SGLangServerEngine._post::7b7d64c249",
-   "src/aadistill/rollout/engines.py::VLLMServerEngine._post::7b7d64c249"
-  ],
+  "sha256_literals": [],
+  "repo_id_literals": [],
   "path_literals": [
    "src/aadistill/governance/authorization.py::<module>::0cc2e5713d",
    "src/aadistill/governance/authorization.py::<module>::43685baf76",
@@ -38,13 +29,10 @@
    "src/aadistill/governance/post_freeze.py::<module>::6eb242bff8",
    "src/aadistill/governance/post_freeze.py::<module>::d1acd7cb7f",
    "src/aadistill/governance/post_freeze.py::historical_accounted_for::49a78455be",
-   "src/aadistill/infrastructure/session_runner.py::SessionRunner.__init__::2f6a9edf2c",
    "src/aadistill/infrastructure/session_runner.py::SessionRunner.collect_and_teardown::fec9a8c24b",
    "src/aadistill/infrastructure/session_runner.py::SessionRunner.launch_watchdog::0cc2e5713d",
    "src/aadistill/infrastructure/session_runner.py::SessionRunner.setup_on_draw::6eb242bff8",
-   "src/aadistill/initialization/operators/base.py::<module>::c75c3a994a",
    "src/aadistill/initialization/planning/generation.py::<module>::6eacf0ca14",
-   "src/aadistill/initialization/planning/recovery.py::<module>::250841e731",
    "src/aadistill/initialization/planning/recovery.py::<module>::36db752202",
    "src/aadistill/initialization/planning/recovery.py::<module>::36db752202",
    "src/aadistill/initialization/planning/recovery.py::<module>::9a3318f0b9",
@@ -55,13 +43,7 @@
    "src/aadistill/runtime/pod_environment.py::<module>::6dab96aeeb"
   ],
   "family_access_outside_adapters": [],
-  "import_time_registration": [
-   "src/aadistill/initialization/operators/base.py::<module>::4326ccb298",
-   "src/aadistill/initialization/operators/base.py::<module>::4326ccb298",
-   "src/aadistill/initialization/operators/base.py::<module>::4326ccb298",
-   "src/aadistill/initialization/operators/base.py::<module>::4326ccb298",
-   "src/aadistill/initialization/operators/composite.py::<module>::4326ccb298"
-  ],
+  "import_time_registration": [],
   "package_cycles": [],
   "core_imports_scripts": []
  },
@@ -107,5 +89,6 @@
   "measured_by": "scripts/architecture/inventory.py at both revisions"
  },
  "accepted_revision": "2c9a1b847946739c53d632f2759a27c5c6d439e0",
- "_accepted_revision_meaning": "the commit whose allowance this one may not exceed. Growing a list means committing the wider baseline and then pointing this field at it, so the widening is a diff of its own rather than a line inside the change that wanted it."
+ "_accepted_revision_meaning": "the commit whose allowance this one may not exceed. Growing a list means committing the wider baseline and then pointing this field at it, so the widening is a diff of its own rather than a line inside the change that wanted it.",
+ "_remaining_debt": "path_literals only. Every other rule is at zero. What is left is the reusable core naming (a) which log a phase's accounting lives in and (b) which scripts the session runner executes. Both should be injected by the caller; both are on the paid-pod path, so the change deserves its own review rather than the tail of a migration."
 }
