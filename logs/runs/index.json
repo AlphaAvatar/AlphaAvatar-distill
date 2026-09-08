@@ -1,744 +1,626 @@
 {
- "schema": "aadistill.autoinit.run_index/v1",
- "_contract": "Every run this repository has recorded, in one place. Legacy-v1 entries are REFERENCES: nothing was moved, renamed or copied, and each carries a digest so that can be proven. Registering a run confers nothing \u2014 this file authorizes no spend, no launch and no attempt.",
- "layout": {
-  "current_version": 2,
-  "root": "logs/runs/<experiment_id>/<attempt_id>/",
-  "rule": "run-layout-v2 is FUTURE-ONLY. Historical runs keep their paths; new runs are created under logs/runs/ and are not dual-written anywhere else."
- },
+ "schema": "aadistill.runtime.run_index/v2",
+ "_contract": "Every run this repository has recorded, ONE ENTRY PER LOGICAL RUN. A legacy run references its surviving components in place: nothing was moved, renamed or copied, and each component carries a digest so that is checkable. Registering a run confers nothing.",
+ "granularity": "one entry per (experiment_id, run_id). The v1 index counted artifact roots, so an attempt with an evidence directory and a grant file appeared twice.",
  "counts": {
-  "legacy_v1": 77,
-  "v2": 0
+  "runs_legacy_v1": 41,
+  "runs_current": 0,
+  "legacy_components": 77,
+  "by_experiment": {
+   "continuation_b": 5,
+   "device_canary": 2,
+   "measurement": 3,
+   "phase_a": 8,
+   "phase_b": 5,
+   "phase_c1": 10,
+   "recovery_continuation": 8
+  }
  },
  "runs": [
   {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt4",
+   "experiment_id": "continuation_b",
+   "run_id": "attempt1",
    "layout_version": 1,
-   "kind": "file",
-   "role": "evidence.replay",
-   "root": "logs/autoinit_attempt4_probe_reuse.json",
-   "digest": "7738f5e123881028d5dc85ca1f4d91ed0f6cce878b95ed20ffb5708adc76338a",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt5",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "evidence.replay",
-   "root": "logs/autoinit_attempt5_probe_reuse.json",
-   "digest": "7b1331fcf8360769b598006090e0695ea37f9eb2916d022ee77d801b0d9f0ea0",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt5",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "evidence.replay",
-   "root": "logs/autoinit_attempt5_retention_verification.json",
-   "digest": "17008a1d20dfed15c443ce36a8cec90795057754eb41b6dd386ec236795e818c",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt1",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt1",
-   "digest": "87258355640dba9f7bbbfbe65b7a237d87ea7718f5a88d94556983a63ddbbcfe",
-   "n_files": 5
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt2",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt2",
-   "digest": "885ffb44fdb1a92b310f7ca0ad2423c958f3d401317d6b741d093c99625a6619",
-   "n_files": 7
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt2",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt2_grant.json",
-   "digest": "43b252d5301fed7a8919bd1d5b4e7ccd21b854d6bb972d137a7fb93ee93b435e",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt3",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt3",
-   "digest": "a2ef41cddf72ef00322577de5fc81b721ca294523de1e95e8b8e2620c646084a",
-   "n_files": 6
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt3",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt3_grant.json",
-   "digest": "74cf9f258b0b725c6e84f4fc1cac116b14fbe00d9ed9ffa8455892218dde3a2c",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt3r",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt3r",
-   "digest": "104dd51f52a6e72744ce74a76766636d8df6bd396f25b5e2e4f531403ef7bd10",
-   "n_files": 10
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt3r",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt3r_grant.json",
-   "digest": "551e27eb246d1ee1832f10d701676de77b63f650b9a5b4908ecf05a8d6a5339b",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt4",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt4",
-   "digest": "c275ed0e17e2896093041f8f5be4e88c36080cebd44aba168be56a870ba1aa4b",
-   "n_files": 6
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt4",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt4_grant.json",
-   "digest": "b6824bee08658fb6488e2ed7ed3383e47817663dac3fbbdc61ecaadf5566c12c",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt5",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt5",
-   "digest": "06d9c7ef33781924538bcc676c522d617899c404b6a4ea4a88a90413de728f82",
-   "n_files": 11
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt5",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt5_grant.json",
-   "digest": "099894f16d255530511d4a08aac55d717bf16bc8297a0ed33d5b62ce916efeaf",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt6",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt6",
-   "digest": "6f0e53fed09fe8f817475c2759247f44c11eaeb68a311d264d613cc939e3e539",
-   "n_files": 11
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt6",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt6_grant.json",
-   "digest": "80c420379cf3ca14e7631acc47c2d7ecd94f8eec1b5f6995aabb8266027af2ee",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt7",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt7",
-   "digest": "18e01c2d2e9ba26374e1e9a0531eff40f07943fb2b92ca5e7f503ee99af18659",
-   "n_files": 13
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt7",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt7_grant.json",
-   "digest": "86ab754ef448cf028bbd34ea002f68694a1f898354da12e84ae2dd1a6e99eaf3",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt8",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt8",
-   "digest": "8eaa2502857d3c7104e4fa768f8418ff015c0639054f99a0e406d93fd4f1a62f",
-   "n_files": 15
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt8",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt8_grant.json",
-   "digest": "00b1ac471273b19a6a08c4d253300f7f0c382400f3d595c223b8652dacd3834b",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt9",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_c1_attempt9",
-   "digest": "417684047d8e56322751954e9ff2a13fb49c5cdbb35682fe694ad4648f0bc2d5",
-   "n_files": 14
-  },
-  {
-   "experiment_id": "phase_c1",
-   "attempt_id": "attempt9",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_c1_attempt9_grant.json",
-   "digest": "97c22c7cc2d622445132cd7d22e2c4e5888d255f530c82f3eddca4b59e975dee",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "legacy_aggregate",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_continuation_attempts",
-   "digest": "7bb9028b3ac56b03216aafc3635626b8cf516d2f684536110a840c7120f26735",
-   "n_files": 35
+   "components": {
+    "outcome": "logs/autoinit_continuation_b_attempt1.json",
+    "root": "logs/autoinit_continuation_b_attempt1"
+   },
+   "component_digests": {
+    "outcome": "988e92960f031f9420e18e1c10de1d153ca63158000bc0978eeeab8f1a24665d",
+    "root": "ce2b07fffc9b446128bc6de0fccc11712fa195a46b3b13a0603d8ac8b8f11847"
+   },
+   "aggregate_digest": "07cef426c704d6d4c48d882913d7dc1f5a0b05c8b1ca7e8af556a85111ac0af5",
+   "n_components": 2
   },
   {
    "experiment_id": "continuation_b",
-   "attempt_id": "attempt1",
+   "run_id": "attempt2",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_continuation_b_attempt1",
-   "digest": "ce2b07fffc9b446128bc6de0fccc11712fa195a46b3b13a0603d8ac8b8f11847",
-   "n_files": 6
+   "components": {
+    "outcome": "logs/autoinit_continuation_b_attempt2.json",
+    "root": "logs/autoinit_continuation_b_attempt2"
+   },
+   "component_digests": {
+    "outcome": "32f7b71504280ba8f07584f5e5cbec35ddf528661995661130fb1f577ae3a9a0",
+    "root": "0eb5770b4a9a5db640e587cbeaf1ebf00f172e779585797240b4a96c6f4b7f69"
+   },
+   "aggregate_digest": "cb807041721a4e791e4b3e04aafd647d18fb3dc61a76c0f8e71fac2127f81880",
+   "n_components": 2
   },
   {
    "experiment_id": "continuation_b",
-   "attempt_id": "attempt1",
+   "run_id": "attempt3",
    "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_continuation_b_attempt1.json",
-   "digest": "988e92960f031f9420e18e1c10de1d153ca63158000bc0978eeeab8f1a24665d",
-   "n_files": 1
+   "components": {
+    "outcome": "logs/autoinit_continuation_b_attempt3.json",
+    "root": "logs/autoinit_continuation_b_attempt3"
+   },
+   "component_digests": {
+    "outcome": "f867b92ec9659daefd1ee9ed4faa6f0a0d95bddbd2cb7aba13575d96d9db0d07",
+    "root": "37e16019fa59ad79af0fb06b81ce95124032abdd0ce65623155a47a80c0101b6"
+   },
+   "aggregate_digest": "0cee72093f61dff22583a2c28f0929a855e9737590766d88f9d10024066c15fa",
+   "n_components": 2
   },
   {
    "experiment_id": "continuation_b",
-   "attempt_id": "attempt2",
+   "run_id": "attempt4",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_continuation_b_attempt2",
-   "digest": "0eb5770b4a9a5db640e587cbeaf1ebf00f172e779585797240b4a96c6f4b7f69",
-   "n_files": 8
+   "components": {
+    "outcome": "logs/autoinit_continuation_b_attempt4.json",
+    "root": "logs/autoinit_continuation_b_attempt4"
+   },
+   "component_digests": {
+    "outcome": "6f7bd62429ed3c97ef35d45a3890b50a74ec270dc21a83c8228db635a924a451",
+    "root": "853907f5767160311e315837af03d852c99b211739ad08bcf00ef32b3918a15b"
+   },
+   "aggregate_digest": "7918c80d0f2744a9f8f50429072fccf90f23e6880f719d09ce5b1204848fcf07",
+   "n_components": 2
   },
   {
    "experiment_id": "continuation_b",
-   "attempt_id": "attempt2",
+   "run_id": "attempt5",
    "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_continuation_b_attempt2.json",
-   "digest": "32f7b71504280ba8f07584f5e5cbec35ddf528661995661130fb1f577ae3a9a0",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "continuation_b",
-   "attempt_id": "attempt3",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_continuation_b_attempt3",
-   "digest": "37e16019fa59ad79af0fb06b81ce95124032abdd0ce65623155a47a80c0101b6",
-   "n_files": 7
-  },
-  {
-   "experiment_id": "continuation_b",
-   "attempt_id": "attempt3",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_continuation_b_attempt3.json",
-   "digest": "f867b92ec9659daefd1ee9ed4faa6f0a0d95bddbd2cb7aba13575d96d9db0d07",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "continuation_b",
-   "attempt_id": "attempt4",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_continuation_b_attempt4",
-   "digest": "853907f5767160311e315837af03d852c99b211739ad08bcf00ef32b3918a15b",
-   "n_files": 22
-  },
-  {
-   "experiment_id": "continuation_b",
-   "attempt_id": "attempt4",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_continuation_b_attempt4.json",
-   "digest": "6f7bd62429ed3c97ef35d45a3890b50a74ec270dc21a83c8228db635a924a451",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "continuation_b",
-   "attempt_id": "attempt5",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_continuation_b_attempt5",
-   "digest": "b28b3648db9eea3f62addb7482893149f13907f49075703e6719190caf28140a",
-   "n_files": 23
-  },
-  {
-   "experiment_id": "continuation_b",
-   "attempt_id": "attempt5",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_continuation_b_attempt5.json",
-   "digest": "7f673dae1a884d2f97d4cf271d4e2bf7d2cc35cfc75fa78689d9cf2d2d5d9078",
-   "n_files": 1
+   "components": {
+    "outcome": "logs/autoinit_continuation_b_attempt5.json",
+    "root": "logs/autoinit_continuation_b_attempt5"
+   },
+   "component_digests": {
+    "outcome": "7f673dae1a884d2f97d4cf271d4e2bf7d2cc35cfc75fa78689d9cf2d2d5d9078",
+    "root": "b28b3648db9eea3f62addb7482893149f13907f49075703e6719190caf28140a"
+   },
+   "aggregate_digest": "6e35f98cb64071d2aca352759dfc60795b90a46359f83d47a115a8a56980d474",
+   "n_components": 2
   },
   {
    "experiment_id": "device_canary",
-   "attempt_id": "attempt1",
+   "run_id": "attempt1",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_device_canary_attempt1",
-   "digest": "c32796c97b799611ce28764d8381bf4c3f73547093b37da005d59f5736596c92",
-   "n_files": 3
+   "components": {
+    "root": "logs/autoinit_device_canary_attempt1"
+   },
+   "component_digests": {
+    "root": "c32796c97b799611ce28764d8381bf4c3f73547093b37da005d59f5736596c92"
+   },
+   "aggregate_digest": "62c62397997baeb2a594275203bb17de357cd7b8b9c394c7f51130b1fdbe9eae",
+   "n_components": 1
   },
   {
    "experiment_id": "device_canary",
-   "attempt_id": "attempt2",
+   "run_id": "attempt2",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_device_canary_attempt2",
-   "digest": "559f1e5917f3b9867583227bc404b0ab3b14c59bd8a4532cdb0913cc777e8373",
-   "n_files": 3
+   "components": {
+    "root": "logs/autoinit_device_canary_attempt2"
+   },
+   "component_digests": {
+    "root": "559f1e5917f3b9867583227bc404b0ab3b14c59bd8a4532cdb0913cc777e8373"
+   },
+   "aggregate_digest": "467e2c64c88666d452348225272f2b85b19dfda2777146b6de13126ec19f785b",
+   "n_components": 1
   },
   {
    "experiment_id": "measurement",
-   "attempt_id": "attempt1",
+   "run_id": "attempt1",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_measurement_attempt1",
-   "digest": "a31a02123fa4b8900dd6a00e10cd0a25c9c76fe344797987b86bab21356b7bf0",
-   "n_files": 5
+   "components": {
+    "root": "logs/autoinit_measurement_attempt1"
+   },
+   "component_digests": {
+    "root": "a31a02123fa4b8900dd6a00e10cd0a25c9c76fe344797987b86bab21356b7bf0"
+   },
+   "aggregate_digest": "fc72c1c0a3167cfce599675de4667027028770ac017fb6b5bddc1395d7d5442e",
+   "n_components": 1
   },
   {
    "experiment_id": "measurement",
-   "attempt_id": "attempt2",
+   "run_id": "attempt2",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_measurement_attempt2",
-   "digest": "39467cd275d00dbe39c2eadb2f1a228708ab462bd9431b71239d4ab54ae3590d",
-   "n_files": 7
+   "components": {
+    "root": "logs/autoinit_measurement_attempt2"
+   },
+   "component_digests": {
+    "root": "39467cd275d00dbe39c2eadb2f1a228708ab462bd9431b71239d4ab54ae3590d"
+   },
+   "aggregate_digest": "c85aa062fe56c68ac247468f76e42a94de96c90f2ff16720a54ccf85f47c20ea",
+   "n_components": 1
   },
   {
    "experiment_id": "measurement",
-   "attempt_id": "attempt3",
+   "run_id": "attempt3",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_measurement_attempt3",
-   "digest": "d795222d1b0856256082d79c799dc3e20387e10bb4a62f68fbfe642bd56ca9cd",
-   "n_files": 10
+   "components": {
+    "root": "logs/autoinit_measurement_attempt3"
+   },
+   "component_digests": {
+    "root": "d795222d1b0856256082d79c799dc3e20387e10bb4a62f68fbfe642bd56ca9cd"
+   },
+   "aggregate_digest": "6d4028716c50e5bfdd215fb70fcbf85ea1fa2e902752447668d07b59cc821dfc",
+   "n_components": 1
   },
   {
    "experiment_id": "phase_a",
-   "attempt_id": "attempt10",
+   "run_id": "attempt10",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_a_attempt10",
-   "digest": "cff24a5f8f6bce94442ac7ec65bf85a8852cd5d2544c4d96724e09f7f22f01f7",
-   "n_files": 10
+   "components": {
+    "grant": "logs/autoinit_phase_a_attempt10_grant.json",
+    "root": "logs/autoinit_phase_a_attempt10"
+   },
+   "component_digests": {
+    "grant": "a87a4863acffbcd9ce26e84b18ebca797577d0d4be8e08c969c7a6a36e59006f",
+    "root": "cff24a5f8f6bce94442ac7ec65bf85a8852cd5d2544c4d96724e09f7f22f01f7"
+   },
+   "aggregate_digest": "d93122f4d3d083a9ad638fbbbb0b7c2eabe77a4d425993a1dd8760feea84eff0",
+   "n_components": 2
   },
   {
    "experiment_id": "phase_a",
-   "attempt_id": "attempt10",
+   "run_id": "attempt11",
    "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_phase_a_attempt10_grant.json",
-   "digest": "a87a4863acffbcd9ce26e84b18ebca797577d0d4be8e08c969c7a6a36e59006f",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_phase_a_attempt11_grant.json",
+    "root": "logs/autoinit_phase_a_attempt11"
+   },
+   "component_digests": {
+    "grant": "d77d7466fa23f1d5904da1608b1fc5c6f7fe1d17b2b6b2009a28e2a02f022a8c",
+    "root": "d62be19586a7e47a89b1ed3bf8883c09afbb7b1ac48d15466a9f914bb4a9983a"
+   },
+   "aggregate_digest": "cd4d6ed82f1581106d69d4fead904ef64d30aa8743998e999865e8a42076a21f",
+   "n_components": 2
   },
   {
    "experiment_id": "phase_a",
-   "attempt_id": "attempt11",
+   "run_id": "attempt12",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_a_attempt11",
-   "digest": "d62be19586a7e47a89b1ed3bf8883c09afbb7b1ac48d15466a9f914bb4a9983a",
-   "n_files": 17
+   "components": {
+    "grant": "logs/autoinit_phase_a_attempt12_grant.json",
+    "root": "logs/autoinit_phase_a_attempt12"
+   },
+   "component_digests": {
+    "grant": "8bc6f0333581138b56453755d3a376ee63687495b9812c257a31bdf7c30cb82a",
+    "root": "3fd1fb8593385b2bbfbd0027351a5ea44af823541ac02cb8a844cf3b27bf1e9e"
+   },
+   "aggregate_digest": "51983dbb7e2e53a8a72d93a2287eec3693a39237903bd2b5319597d4f3f4bf9b",
+   "n_components": 2
   },
   {
    "experiment_id": "phase_a",
-   "attempt_id": "attempt11",
+   "run_id": "attempt6",
    "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_phase_a_attempt11_grant.json",
-   "digest": "d77d7466fa23f1d5904da1608b1fc5c6f7fe1d17b2b6b2009a28e2a02f022a8c",
-   "n_files": 1
+   "components": {
+    "root": "logs/autoinit_phase_a_attempt6"
+   },
+   "component_digests": {
+    "root": "218fda3eea5b5400c613a910d511f120261bb64859d716efedefe640013679d4"
+   },
+   "aggregate_digest": "162291fba5abb3cc6ed46b48056fc777858c748bfea8b792be81fb39581839bd",
+   "n_components": 1
   },
   {
    "experiment_id": "phase_a",
-   "attempt_id": "attempt12",
+   "run_id": "attempt7",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_a_attempt12",
-   "digest": "3fd1fb8593385b2bbfbd0027351a5ea44af823541ac02cb8a844cf3b27bf1e9e",
-   "n_files": 16
+   "components": {
+    "root": "logs/autoinit_phase_a_attempt7"
+   },
+   "component_digests": {
+    "root": "9ec9e00830d6dceaa933dad9f621adfea8b00e4649f8ff6ae6279f329701a13b"
+   },
+   "aggregate_digest": "d68822f716ee367531a16f811ad6cc52e33d5cddb809c0168480a2f04a3cc06f",
+   "n_components": 1
   },
   {
    "experiment_id": "phase_a",
-   "attempt_id": "attempt12",
+   "run_id": "attempt8",
    "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_phase_a_attempt12_grant.json",
-   "digest": "8bc6f0333581138b56453755d3a376ee63687495b9812c257a31bdf7c30cb82a",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_phase_a_attempt8_grant.json",
+    "root": "logs/autoinit_phase_a_attempt8"
+   },
+   "component_digests": {
+    "grant": "0f6d5b80958cc18c236636c2993002c9150fd4a07ed616bd44f35ad82cee072d",
+    "root": "88193e5e8a15e9c3a8c3e031298bc1fa1560108a915d24bed6dbb71e485f281f"
+   },
+   "aggregate_digest": "e27ceca29235b11306820f671722ac0c262ae063e5ac7c9e706ac4061ea7612d",
+   "n_components": 2
   },
   {
    "experiment_id": "phase_a",
-   "attempt_id": "attempt6",
+   "run_id": "attempt9",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_a_attempt6",
-   "digest": "218fda3eea5b5400c613a910d511f120261bb64859d716efedefe640013679d4",
-   "n_files": 7
+   "components": {
+    "grant": "logs/autoinit_phase_a_attempt9_grant.json",
+    "root": "logs/autoinit_phase_a_attempt9"
+   },
+   "component_digests": {
+    "grant": "877700864cc7763a745deedbaf77f8f0c677b46e20d2bb75c4a656f30d20b1fc",
+    "root": "400792e43d840cb5bc083e06964f47a60615e2251050d041dee7b7c4456fbf96"
+   },
+   "aggregate_digest": "6af561006590e28ef5f03c1317e13fc11cb8ee4bce18993a81c86024039c6630",
+   "n_components": 2
   },
   {
    "experiment_id": "phase_a",
-   "attempt_id": "attempt7",
+   "run_id": "legacy_aggregate",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_a_attempt7",
-   "digest": "9ec9e00830d6dceaa933dad9f621adfea8b00e4649f8ff6ae6279f329701a13b",
-   "n_files": 9
-  },
-  {
-   "experiment_id": "phase_a",
-   "attempt_id": "attempt8",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_a_attempt8",
-   "digest": "88193e5e8a15e9c3a8c3e031298bc1fa1560108a915d24bed6dbb71e485f281f",
-   "n_files": 5
-  },
-  {
-   "experiment_id": "phase_a",
-   "attempt_id": "attempt8",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_phase_a_attempt8_grant.json",
-   "digest": "0f6d5b80958cc18c236636c2993002c9150fd4a07ed616bd44f35ad82cee072d",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_a",
-   "attempt_id": "attempt9",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_a_attempt9",
-   "digest": "400792e43d840cb5bc083e06964f47a60615e2251050d041dee7b7c4456fbf96",
-   "n_files": 9
-  },
-  {
-   "experiment_id": "phase_a",
-   "attempt_id": "attempt9",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_phase_a_attempt9_grant.json",
-   "digest": "877700864cc7763a745deedbaf77f8f0c677b46e20d2bb75c4a656f30d20b1fc",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "phase_a",
-   "attempt_id": "legacy_aggregate",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_a_attempts",
-   "digest": "643d3b9b69b939e6684113687484d8abc3c3d52e481118e64295ee834a699407",
-   "n_files": 4
+   "components": {
+    "root": "logs/autoinit_phase_a_attempts"
+   },
+   "component_digests": {
+    "root": "643d3b9b69b939e6684113687484d8abc3c3d52e481118e64295ee834a699407"
+   },
+   "aggregate_digest": "fd8c11bbf14ead565829d721933c5f595597d1d9741b776790a8bc3445ae044d",
+   "n_components": 1
   },
   {
    "experiment_id": "phase_b",
-   "attempt_id": "attempt1",
+   "run_id": "attempt1",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_b_attempt1",
-   "digest": "77071f7094d3b8964ff772756e7ecea5c23e012cf95d587964a93ab29f81a913",
-   "n_files": 10
+   "components": {
+    "outcome": "logs/autoinit_phase_b_attempt1.json",
+    "root": "logs/autoinit_phase_b_attempt1"
+   },
+   "component_digests": {
+    "outcome": "29c96c22645d5215918d67cce23d5bcf2dfb524b1603aabb3816914d0649ef49",
+    "root": "77071f7094d3b8964ff772756e7ecea5c23e012cf95d587964a93ab29f81a913"
+   },
+   "aggregate_digest": "aaf810e3d11b889f670aa647104bac56f437450543b0399e4f60469be3654961",
+   "n_components": 2
   },
   {
    "experiment_id": "phase_b",
-   "attempt_id": "attempt1",
+   "run_id": "attempt2",
    "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_phase_b_attempt1.json",
-   "digest": "29c96c22645d5215918d67cce23d5bcf2dfb524b1603aabb3816914d0649ef49",
-   "n_files": 1
+   "components": {
+    "outcome": "logs/autoinit_phase_b_attempt2.json",
+    "root": "logs/autoinit_phase_b_attempt2"
+   },
+   "component_digests": {
+    "outcome": "802e043aae44157ed44d78d013c87eb57c0bbfe4663124a6f2dd72618809bd8a",
+    "root": "413b086dbe1810feb6acb32a503af54c6fcb36b71f09de4479b38a8a04c0ed70"
+   },
+   "aggregate_digest": "3b213f65a393a87727ef6a9d2f90c9336c61b12251f59c320c971124e624f48d",
+   "n_components": 2
   },
   {
    "experiment_id": "phase_b",
-   "attempt_id": "attempt2",
+   "run_id": "attempt3",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_b_attempt2",
-   "digest": "413b086dbe1810feb6acb32a503af54c6fcb36b71f09de4479b38a8a04c0ed70",
-   "n_files": 11
+   "components": {
+    "grant": "logs/autoinit_phase_b_grant_attempt3.json",
+    "outcome": "logs/autoinit_phase_b_attempt3.json",
+    "root": "logs/autoinit_phase_b_attempt3"
+   },
+   "component_digests": {
+    "grant": "91067139db7a1b726bc1a217701f252e73e88d8f07615804c55b178d045b9280",
+    "outcome": "eb3adad33087dae2339d40b1082a4c8ca5b22fcfd68949dab41418a9edce81a5",
+    "root": "7599d1bf4df95819317be9e2871ce4b52ea416267ebf469e64e70d3800c6437a"
+   },
+   "aggregate_digest": "2b827aa00aea913ca8e875497160354b0e2b7910667f84a6702743409f963e25",
+   "n_components": 3
   },
   {
    "experiment_id": "phase_b",
-   "attempt_id": "attempt2",
+   "run_id": "attempt4",
    "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_phase_b_attempt2.json",
-   "digest": "802e043aae44157ed44d78d013c87eb57c0bbfe4663124a6f2dd72618809bd8a",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_phase_b_grant_attempt4.json",
+    "outcome": "logs/autoinit_phase_b_attempt4.json",
+    "root": "logs/autoinit_phase_b_attempt4"
+   },
+   "component_digests": {
+    "grant": "71801a5b3d977f4de43ac14e91a401fcab26361e755bd064d6b53235a9ecba2e",
+    "outcome": "477277ca6b78a4378f5e21eaa6182dd1347b243fdb96e3358585a47188d907e0",
+    "root": "4690beb6d14617e145c22ee27f46c315ba3e595cbfcaf32f4e8d9cbebe32db00"
+   },
+   "aggregate_digest": "c0028dab2f6c806368625f7b94cbd92e95559dc8eeb8d807b00ec515360f2576",
+   "n_components": 3
   },
   {
    "experiment_id": "phase_b",
-   "attempt_id": "attempt3",
+   "run_id": "attempt5",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_b_attempt3",
-   "digest": "7599d1bf4df95819317be9e2871ce4b52ea416267ebf469e64e70d3800c6437a",
-   "n_files": 25
+   "components": {
+    "grant": "logs/autoinit_phase_b_grant_attempt5.json",
+    "outcome": "logs/autoinit_phase_b_attempt5.json",
+    "root": "logs/autoinit_phase_b_attempt5"
+   },
+   "component_digests": {
+    "grant": "c93f255182853d9d6de6a1082cf1e6e8dddf1cf542564524111fae0a58b3b930",
+    "outcome": "ed365e9fb4b7103445fa749f5798b6c8310dff08382549da8be56d14d34b019f",
+    "root": "61d3782b9c06add6a8a9c3bae9062cb68a65abb940dfd062e8c5b504bec90948"
+   },
+   "aggregate_digest": "5e99b75cb7ea248f062eb1431af8101fb105d71e3c36041aca83c51ae53abd65",
+   "n_components": 3
   },
   {
-   "experiment_id": "phase_b",
-   "attempt_id": "attempt3",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt1",
    "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_phase_b_attempt3.json",
-   "digest": "eb3adad33087dae2339d40b1082a4c8ca5b22fcfd68949dab41418a9edce81a5",
-   "n_files": 1
+   "components": {
+    "root": "logs/autoinit_c1_attempt1"
+   },
+   "component_digests": {
+    "root": "87258355640dba9f7bbbfbe65b7a237d87ea7718f5a88d94556983a63ddbbcfe"
+   },
+   "aggregate_digest": "d849430dc63a6c9a649f78b957ceb50f089135b17249fc8900b9ece9ff2f82a5",
+   "n_components": 1
   },
   {
-   "experiment_id": "phase_b",
-   "attempt_id": "attempt4",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt2",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_b_attempt4",
-   "digest": "4690beb6d14617e145c22ee27f46c315ba3e595cbfcaf32f4e8d9cbebe32db00",
-   "n_files": 25
+   "components": {
+    "grant": "logs/autoinit_c1_attempt2_grant.json",
+    "root": "logs/autoinit_c1_attempt2"
+   },
+   "component_digests": {
+    "grant": "43b252d5301fed7a8919bd1d5b4e7ccd21b854d6bb972d137a7fb93ee93b435e",
+    "root": "885ffb44fdb1a92b310f7ca0ad2423c958f3d401317d6b741d093c99625a6619"
+   },
+   "aggregate_digest": "8ef83091e3a618c90d3983a547ab43511a80fa0e1cf53d8524ac72deb5ad25e8",
+   "n_components": 2
   },
   {
-   "experiment_id": "phase_b",
-   "attempt_id": "attempt4",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt3",
    "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_phase_b_attempt4.json",
-   "digest": "477277ca6b78a4378f5e21eaa6182dd1347b243fdb96e3358585a47188d907e0",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_c1_attempt3_grant.json",
+    "root": "logs/autoinit_c1_attempt3"
+   },
+   "component_digests": {
+    "grant": "74cf9f258b0b725c6e84f4fc1cac116b14fbe00d9ed9ffa8455892218dde3a2c",
+    "root": "a2ef41cddf72ef00322577de5fc81b721ca294523de1e95e8b8e2620c646084a"
+   },
+   "aggregate_digest": "acb31b5287d3baeae70ed1c0634b1b6a298d52555ef745373647a24224c713a6",
+   "n_components": 2
   },
   {
-   "experiment_id": "phase_b",
-   "attempt_id": "attempt5",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt3r",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_phase_b_attempt5",
-   "digest": "61d3782b9c06add6a8a9c3bae9062cb68a65abb940dfd062e8c5b504bec90948",
-   "n_files": 34
+   "components": {
+    "grant": "logs/autoinit_c1_attempt3r_grant.json",
+    "root": "logs/autoinit_c1_attempt3r"
+   },
+   "component_digests": {
+    "grant": "551e27eb246d1ee1832f10d701676de77b63f650b9a5b4908ecf05a8d6a5339b",
+    "root": "104dd51f52a6e72744ce74a76766636d8df6bd396f25b5e2e4f531403ef7bd10"
+   },
+   "aggregate_digest": "12525bf51d038c1110d0c84ff8e6b9ca2f9a9a71848a8c94a7ab7914ad59003a",
+   "n_components": 2
   },
   {
-   "experiment_id": "phase_b",
-   "attempt_id": "attempt5",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt4",
    "layout_version": 1,
-   "kind": "file",
-   "role": "closeout.outcome",
-   "root": "logs/autoinit_phase_b_attempt5.json",
-   "digest": "ed365e9fb4b7103445fa749f5798b6c8310dff08382549da8be56d14d34b019f",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_c1_attempt4_grant.json",
+    "root": "logs/autoinit_c1_attempt4"
+   },
+   "component_digests": {
+    "grant": "b6824bee08658fb6488e2ed7ed3383e47817663dac3fbbdc61ecaadf5566c12c",
+    "root": "c275ed0e17e2896093041f8f5be4e88c36080cebd44aba168be56a870ba1aa4b"
+   },
+   "aggregate_digest": "c75516fe7a3f12abf990572adb1e765addc294938e10919f2ef946743883f741",
+   "n_components": 2
   },
   {
-   "experiment_id": "phase_b",
-   "attempt_id": "attempt3",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt5",
    "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_phase_b_grant_attempt3.json",
-   "digest": "91067139db7a1b726bc1a217701f252e73e88d8f07615804c55b178d045b9280",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_c1_attempt5_grant.json",
+    "root": "logs/autoinit_c1_attempt5"
+   },
+   "component_digests": {
+    "grant": "099894f16d255530511d4a08aac55d717bf16bc8297a0ed33d5b62ce916efeaf",
+    "root": "06d9c7ef33781924538bcc676c522d617899c404b6a4ea4a88a90413de728f82"
+   },
+   "aggregate_digest": "bd4055501e5e8866e9230dccf09e6a7f1ece0fd8f32d6013db1bdef2460e5882",
+   "n_components": 2
   },
   {
-   "experiment_id": "phase_b",
-   "attempt_id": "attempt4",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt6",
    "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_phase_b_grant_attempt4.json",
-   "digest": "71801a5b3d977f4de43ac14e91a401fcab26361e755bd064d6b53235a9ecba2e",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_c1_attempt6_grant.json",
+    "root": "logs/autoinit_c1_attempt6"
+   },
+   "component_digests": {
+    "grant": "80c420379cf3ca14e7631acc47c2d7ecd94f8eec1b5f6995aabb8266027af2ee",
+    "root": "6f0e53fed09fe8f817475c2759247f44c11eaeb68a311d264d613cc939e3e539"
+   },
+   "aggregate_digest": "7d2c03fda64b32cb8a26a36de29ee068a096d938f0539604a78b3b65df9ee082",
+   "n_components": 2
   },
   {
-   "experiment_id": "phase_b",
-   "attempt_id": "attempt5",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt7",
    "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_phase_b_grant_attempt5.json",
-   "digest": "c93f255182853d9d6de6a1082cf1e6e8dddf1cf542564524111fae0a58b3b930",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_c1_attempt7_grant.json",
+    "root": "logs/autoinit_c1_attempt7"
+   },
+   "component_digests": {
+    "grant": "86ab754ef448cf028bbd34ea002f68694a1f898354da12e84ae2dd1a6e99eaf3",
+    "root": "18e01c2d2e9ba26374e1e9a0531eff40f07943fb2b92ca5e7f503ee99af18659"
+   },
+   "aggregate_digest": "bf102cc02853530b66615c1bfeed57ba9cc8a0293c4638bc61a4be1c5baaa67b",
+   "n_components": 2
   },
   {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt1",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt8",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_recovery_continuation_attempt1",
-   "digest": "fa3358d4ecae98221f8d3cab4c4444abddb588bf1ebb2d06331373422f81f772",
-   "n_files": 9
+   "components": {
+    "grant": "logs/autoinit_c1_attempt8_grant.json",
+    "root": "logs/autoinit_c1_attempt8"
+   },
+   "component_digests": {
+    "grant": "00b1ac471273b19a6a08c4d253300f7f0c382400f3d595c223b8652dacd3834b",
+    "root": "8eaa2502857d3c7104e4fa768f8418ff015c0639054f99a0e406d93fd4f1a62f"
+   },
+   "aggregate_digest": "3cbd699e2f9324531f1cae8abb691328ddd06e67fce0e09c840ed35582442102",
+   "n_components": 2
   },
   {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt2",
+   "experiment_id": "phase_c1",
+   "run_id": "attempt9",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_recovery_continuation_attempt2",
-   "digest": "5bb8a3bbfcf89e9d541127d4cdd13c1f8ede74750dd0f1d9a891c209df35f1e5",
-   "n_files": 8
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt2",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_recovery_continuation_attempt2_grant.json",
-   "digest": "5fd3e39e509a2ba0d5257d7ac2f8695fdd82345e8c7e45b19fea47a15173c41e",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt3",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_recovery_continuation_attempt3",
-   "digest": "e60de9b9123ca930565e200a9f7dbdba773996130d4dedaf85c51e1af42afed7",
-   "n_files": 6
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt3",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_recovery_continuation_attempt3_grant.json",
-   "digest": "9766453e1a1dcf3615f96798819f4ac8de59b57ba15ce9b885f88694de3ed580",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt4",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_recovery_continuation_attempt4",
-   "digest": "1891a3987c0c786ebd1fb9a7e798f7fd6e272b480422ee7f58c919197a296c91",
-   "n_files": 13
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt4",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_recovery_continuation_attempt4_grant.json",
-   "digest": "ce6744cedeff254409921ea4f5e2051f3cd815590239465712c36a9973f29ee6",
-   "n_files": 1
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt5",
-   "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_recovery_continuation_attempt5",
-   "digest": "fea2460ceb2d340404bcf79b74851aecb38bf94a1a3505a3c14c74ac4e8847a3",
-   "n_files": 12
-  },
-  {
-   "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt5",
-   "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_recovery_continuation_attempt5_grant.json",
-   "digest": "c04d21d09c7717978fe6d209388b5637e503821c868a461aa885d96cd214a560",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_c1_attempt9_grant.json",
+    "root": "logs/autoinit_c1_attempt9"
+   },
+   "component_digests": {
+    "grant": "97c22c7cc2d622445132cd7d22e2c4e5888d255f530c82f3eddca4b59e975dee",
+    "root": "417684047d8e56322751954e9ff2a13fb49c5cdbb35682fe694ad4648f0bc2d5"
+   },
+   "aggregate_digest": "e4c9c003caa06c05cacf9f611f677bf139a4fcc90c8766464e48bec87e2f6bc4",
+   "n_components": 2
   },
   {
    "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt6",
+   "run_id": "attempt1",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_recovery_continuation_attempt6",
-   "digest": "3c26b3fca3066a41d11bd4893b3805b02959706b45923584ae15e6244f9ea215",
-   "n_files": 12
+   "components": {
+    "root": "logs/autoinit_recovery_continuation_attempt1"
+   },
+   "component_digests": {
+    "root": "fa3358d4ecae98221f8d3cab4c4444abddb588bf1ebb2d06331373422f81f772"
+   },
+   "aggregate_digest": "b89ea04613bc57839d4045ed56e1aae32c42e260e2bb0887d4fff4658ff13987",
+   "n_components": 1
   },
   {
    "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt6",
+   "run_id": "attempt2",
    "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_recovery_continuation_attempt6_grant.json",
-   "digest": "c5674c0e93fd6728b2efa60b6063def922cbd760f7ba2022632bb4536198fc2f",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_recovery_continuation_attempt2_grant.json",
+    "root": "logs/autoinit_recovery_continuation_attempt2"
+   },
+   "component_digests": {
+    "grant": "5fd3e39e509a2ba0d5257d7ac2f8695fdd82345e8c7e45b19fea47a15173c41e",
+    "root": "5bb8a3bbfcf89e9d541127d4cdd13c1f8ede74750dd0f1d9a891c209df35f1e5"
+   },
+   "aggregate_digest": "45a45488208a1eafa1928ee41c277082435a94de5a7677ffc39d6425668fb56f",
+   "n_components": 2
   },
   {
    "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt7",
+   "run_id": "attempt3",
    "layout_version": 1,
-   "kind": "directory",
-   "root": "logs/autoinit_recovery_continuation_attempt7",
-   "digest": "13bb4fcdfbac5fe1833790b752293f3c20d2891718d89b4425f08004eb90444b",
-   "n_files": 26
+   "components": {
+    "grant": "logs/autoinit_recovery_continuation_attempt3_grant.json",
+    "root": "logs/autoinit_recovery_continuation_attempt3"
+   },
+   "component_digests": {
+    "grant": "9766453e1a1dcf3615f96798819f4ac8de59b57ba15ce9b885f88694de3ed580",
+    "root": "e60de9b9123ca930565e200a9f7dbdba773996130d4dedaf85c51e1af42afed7"
+   },
+   "aggregate_digest": "5989aeb485a961f513263662671044b6115784c62af4ce903b1e9aff588ffa08",
+   "n_components": 2
   },
   {
    "experiment_id": "recovery_continuation",
-   "attempt_id": "attempt7",
+   "run_id": "attempt4",
    "layout_version": 1,
-   "kind": "file",
-   "role": "governance.grant",
-   "root": "logs/autoinit_recovery_continuation_attempt7_grant.json",
-   "digest": "20ac203d6fcda3747f01dae917eb57e357f69ca8b9c62b95bf271a1d728f4b2e",
-   "n_files": 1
+   "components": {
+    "grant": "logs/autoinit_recovery_continuation_attempt4_grant.json",
+    "probe_reuse": "logs/autoinit_attempt4_probe_reuse.json",
+    "root": "logs/autoinit_recovery_continuation_attempt4"
+   },
+   "component_digests": {
+    "grant": "ce6744cedeff254409921ea4f5e2051f3cd815590239465712c36a9973f29ee6",
+    "probe_reuse": "7738f5e123881028d5dc85ca1f4d91ed0f6cce878b95ed20ffb5708adc76338a",
+    "root": "1891a3987c0c786ebd1fb9a7e798f7fd6e272b480422ee7f58c919197a296c91"
+   },
+   "aggregate_digest": "f9b0d82f163e3441a0640f9d64502ffa308571de3122815467caf678ec15dc21",
+   "n_components": 3
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt5",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/autoinit_recovery_continuation_attempt5_grant.json",
+    "probe_reuse": "logs/autoinit_attempt5_probe_reuse.json",
+    "retention": "logs/autoinit_attempt5_retention_verification.json",
+    "root": "logs/autoinit_recovery_continuation_attempt5"
+   },
+   "component_digests": {
+    "grant": "c04d21d09c7717978fe6d209388b5637e503821c868a461aa885d96cd214a560",
+    "probe_reuse": "7b1331fcf8360769b598006090e0695ea37f9eb2916d022ee77d801b0d9f0ea0",
+    "retention": "17008a1d20dfed15c443ce36a8cec90795057754eb41b6dd386ec236795e818c",
+    "root": "fea2460ceb2d340404bcf79b74851aecb38bf94a1a3505a3c14c74ac4e8847a3"
+   },
+   "aggregate_digest": "c374a0f6e662b3ae07780af48149d374857ad61047a36b90f0223518d32cd800",
+   "n_components": 4
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt6",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/autoinit_recovery_continuation_attempt6_grant.json",
+    "root": "logs/autoinit_recovery_continuation_attempt6"
+   },
+   "component_digests": {
+    "grant": "c5674c0e93fd6728b2efa60b6063def922cbd760f7ba2022632bb4536198fc2f",
+    "root": "3c26b3fca3066a41d11bd4893b3805b02959706b45923584ae15e6244f9ea215"
+   },
+   "aggregate_digest": "bce5c4b87ae0cc89664d320febc917402e241e96dba159f662ba0b9f6ac98150",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt7",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/autoinit_recovery_continuation_attempt7_grant.json",
+    "root": "logs/autoinit_recovery_continuation_attempt7"
+   },
+   "component_digests": {
+    "grant": "20ac203d6fcda3747f01dae917eb57e357f69ca8b9c62b95bf271a1d728f4b2e",
+    "root": "13bb4fcdfbac5fe1833790b752293f3c20d2891718d89b4425f08004eb90444b"
+   },
+   "aggregate_digest": "021964c2c8bef4c9d740050dd7da29170de8fef65312fd209f2bad4603dcb6ad",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "legacy_aggregate",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/autoinit_continuation_attempts"
+   },
+   "component_digests": {
+    "root": "7bb9028b3ac56b03216aafc3635626b8cf516d2f684536110a840c7120f26735"
+   },
+   "aggregate_digest": "d91d560c844582c0af01e8f56e67e0ddbb1ee4423d53c32e3d60a1424a462b95",
+   "n_components": 1
   }
  ],
  "authorizes": "nothing"

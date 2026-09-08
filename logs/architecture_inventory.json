@@ -3,14 +3,14 @@
  "_contract": "A mechanical inventory of src/aadistill, derived from the syntax tree. Docstrings are excluded from literal collection and comments are not in the AST at all, so no finding here can be produced by prose. Reports ownership; decides no policy. AUTHORIZES NOTHING.",
  "root": "src/aadistill",
  "counts": {
-  "modules": 113,
-  "lines": 34180,
+  "modules": 114,
+  "lines": 34133,
   "classifications": {
    "generic_architecture_spec": 1,
    "model_family_adapter": 2,
    "generic_statistics": 7,
    "generic_operator": 9,
-   "generic_planning_execution": 69,
+   "generic_planning_execution": 70,
    "generic_governance_runtime": 11,
    "model_instance_recipe": 0,
    "experiment_instance": 14,
@@ -18,7 +18,7 @@
   },
   "sha256_literals": 19,
   "repo_id_literals": 12,
-  "path_literals": 127,
+  "path_literals": 125,
   "experiment_named_modules": 14,
   "family_access_outside_adapters": 37,
   "import_time_registration": 19,
@@ -944,18 +944,6 @@
     "value": "NO GRANT. This is the recovery-continuation authorization SCHEMA, not a grant. scripts/autoinit/issue_recovery_continuation_authorization.py requires --grant naming a one-use continuation grant docume"
    },
    {
-    "path": "src/aadistill/autoinit/run_layout.py",
-    "owner": "<module>",
-    "line": 51,
-    "value": "logs/runs"
-   },
-   {
-    "path": "src/aadistill/autoinit/run_layout.py",
-    "owner": "build_run_manifest",
-    "line": 229,
-    "value": "The index of ONE run. Every reference is inside this run's own directory; nothing here is written anywhere else in logs/, and nothing here authorizes anything."
-   },
-   {
     "path": "src/aadistill/infrastructure/session_runner.py",
     "owner": "SessionRunner.__init__",
     "line": 141,
@@ -1084,7 +1072,7 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.q_proj.weight.to",
-    "probe": "self_attn",
+    "probe": "q_proj",
     "owner": "init_student",
     "line": 231
    },
@@ -1098,21 +1086,21 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.q_proj.weight.device",
-    "probe": "self_attn",
+    "probe": "q_proj",
     "owner": "init_student",
     "line": 240
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.q_proj.weight.copy_",
-    "probe": "self_attn",
+    "probe": "q_proj",
     "owner": "init_student",
     "line": 241
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.q_proj.weight",
-    "probe": "self_attn",
+    "probe": "q_proj",
     "owner": "init_student",
     "line": 242
    },
@@ -1133,14 +1121,14 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.v_proj.weight.copy_",
-    "probe": "v_proj",
+    "probe": "self_attn",
     "owner": "init_student",
     "line": 245
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.v_proj.weight",
-    "probe": "v_proj",
+    "probe": "self_attn",
     "owner": "init_student",
     "line": 246
    },
@@ -1182,7 +1170,7 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.down_proj.weight",
-    "probe": "mlp",
+    "probe": "down_proj",
     "owner": "init_student",
     "line": 254
    },
@@ -1210,28 +1198,28 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.up_proj.weight.copy_",
-    "probe": "mlp",
+    "probe": "up_proj",
     "owner": "init_student",
     "line": 259
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.up_proj.weight",
-    "probe": "mlp",
+    "probe": "up_proj",
     "owner": "init_student",
     "line": 260
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.down_proj.weight.copy_",
-    "probe": "mlp",
+    "probe": "down_proj",
     "owner": "init_student",
     "line": 261
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.down_proj.weight.to",
-    "probe": "mlp",
+    "probe": "down_proj",
     "owner": "init_student",
     "line": 262
    },
@@ -1693,9 +1681,6 @@
     "aadistill.infrastructure.manifest"
    ],
    "aadistill.autoinit.reweight": [],
-   "aadistill.autoinit.run_layout": [
-    "aadistill.infrastructure.manifest"
-   ],
    "aadistill.autoinit.search": [
     "aadistill.autoinit.arch",
     "aadistill.autoinit.artifact",
@@ -1825,6 +1810,10 @@
    ],
    "aadistill.rollout.generate": [],
    "aadistill.rollout.snapshots": [],
+   "aadistill.runtime": [],
+   "aadistill.runtime.run_layout": [
+    "aadistill.infrastructure.manifest"
+   ],
    "aadistill.training": [],
    "aadistill.training.lora": [],
    "aadistill.training.train": [
@@ -1988,9 +1977,6 @@
     "aadistill.autoinit.phase_a",
     "aadistill.infrastructure.manifest"
    ],
-   "aadistill.autoinit.run_layout": [
-    "aadistill.infrastructure.manifest"
-   ],
    "aadistill.autoinit.search": [
     "aadistill.autoinit.arch",
     "aadistill.autoinit.artifact",
@@ -2081,6 +2067,9 @@
    ],
    "aadistill.rollout.engines": [
     "aadistill.rollout.generate"
+   ],
+   "aadistill.runtime.run_layout": [
+    "aadistill.infrastructure.manifest"
    ],
    "aadistill.training.train": [
     "aadistill.data.dataset",
@@ -2431,7 +2420,7 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 192
     },
@@ -2443,7 +2432,7 @@
     },
     {
      "chain": "self_attn.v_proj",
-     "probe": "v_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 194
     },
@@ -2455,7 +2444,7 @@
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 196
     },
@@ -15099,246 +15088,6 @@
    "import_time_calls": [],
    "classification": "generic_statistics"
   },
-  "src/aadistill/autoinit/run_layout.py": {
-   "module": "aadistill.autoinit.run_layout",
-   "path": "src/aadistill/autoinit/run_layout.py",
-   "lines": 334,
-   "imports": [
-    {
-     "target": "__future__",
-     "line": 41,
-     "relative": 0,
-     "names": [
-      "annotations"
-     ]
-    },
-    {
-     "target": "hashlib",
-     "line": 43,
-     "relative": 0
-    },
-    {
-     "target": "json",
-     "line": 44,
-     "relative": 0
-    },
-    {
-     "target": "re",
-     "line": 45,
-     "relative": 0
-    },
-    {
-     "target": "dataclasses",
-     "line": 46,
-     "relative": 0,
-     "names": [
-      "dataclass"
-     ]
-    },
-    {
-     "target": "pathlib",
-     "line": 47,
-     "relative": 0,
-     "names": [
-      "Path"
-     ]
-    },
-    {
-     "target": "typing",
-     "line": 48,
-     "relative": 0,
-     "names": [
-      "Any",
-      "Iterable",
-      "Mapping"
-     ]
-    },
-    {
-     "target": "aadistill.infrastructure.manifest",
-     "line": 203,
-     "relative": 2,
-     "names": [
-      "sha256_json"
-     ]
-    },
-    {
-     "target": "aadistill.infrastructure.manifest",
-     "line": 255,
-     "relative": 2,
-     "names": [
-      "sha256_json"
-     ]
-    }
-   ],
-   "internal_imports": [
-    "aadistill.infrastructure.manifest"
-   ],
-   "literals": [
-    {
-     "value": "logs/runs",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 51,
-     "experiment_tokens": []
-    },
-    {
-     "value": "attempt_id",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "RunLayout.__post_init__",
-     "line": 116,
-     "experiment_tokens": [
-      "attempt"
-     ]
-    },
-    {
-     "value": "attempt_id",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_run_manifest",
-     "line": 233,
-     "experiment_tokens": [
-      "attempt"
-     ]
-    },
-    {
-     "value": "The index of ONE run. Every reference is inside this run's own directory; nothing here is written anywhere else in logs/, and nothing here authorizes anything.",
-     "kinds": [
-      "path"
-     ],
-     "owner": "build_run_manifest",
-     "line": 229,
-     "experiment_tokens": []
-    },
-    {
-     "value": "attempt_id",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "verify_run_manifest",
-     "line": 264,
-     "experiment_tokens": [
-      "attempt"
-     ]
-    },
-    {
-     "value": "attempt_id",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "resolve_run",
-     "line": 328,
-     "experiment_tokens": [
-      "attempt"
-     ]
-    }
-   ],
-   "family_attribute_access": [],
-   "definitions": [
-    {
-     "name": "RunLayoutError",
-     "kind": "class",
-     "qualname": "RunLayoutError",
-     "line": 90
-    },
-    {
-     "name": "_check_id",
-     "kind": "function",
-     "qualname": "_check_id",
-     "line": 94
-    },
-    {
-     "name": "RunLayout",
-     "kind": "class",
-     "qualname": "RunLayout",
-     "line": 105
-    },
-    {
-     "name": "__post_init__",
-     "kind": "function",
-     "qualname": "RunLayout.__post_init__",
-     "line": 114
-    },
-    {
-     "name": "rel_root",
-     "kind": "function",
-     "qualname": "RunLayout.rel_root",
-     "line": 119
-    },
-    {
-     "name": "root",
-     "kind": "function",
-     "qualname": "RunLayout.root",
-     "line": 123
-    },
-    {
-     "name": "path",
-     "kind": "function",
-     "qualname": "RunLayout.path",
-     "line": 126
-    },
-    {
-     "name": "rel",
-     "kind": "function",
-     "qualname": "RunLayout.rel",
-     "line": 140
-    },
-    {
-     "name": "contains",
-     "kind": "function",
-     "qualname": "RunLayout.contains",
-     "line": 144
-    },
-    {
-     "name": "create",
-     "kind": "function",
-     "qualname": "RunLayout.create",
-     "line": 155
-    },
-    {
-     "name": "directory_digest",
-     "kind": "function",
-     "qualname": "directory_digest",
-     "line": 164
-    },
-    {
-     "name": "build_run_manifest",
-     "kind": "function",
-     "qualname": "build_run_manifest",
-     "line": 186
-    },
-    {
-     "name": "section",
-     "kind": "function",
-     "qualname": "build_run_manifest.section",
-     "line": 220
-    },
-    {
-     "name": "verify_run_manifest",
-     "kind": "function",
-     "qualname": "verify_run_manifest",
-     "line": 252
-    },
-    {
-     "name": "load_index",
-     "kind": "function",
-     "qualname": "load_index",
-     "line": 301
-    },
-    {
-     "name": "resolve_run",
-     "kind": "function",
-     "qualname": "resolve_run",
-     "line": 308
-    }
-   ],
-   "import_time_calls": [],
-   "classification": "generic_planning_execution"
-  },
   "src/aadistill/autoinit/search.py": {
    "module": "aadistill.autoinit.search",
    "path": "src/aadistill/autoinit/search.py",
@@ -22751,7 +22500,7 @@
     },
     {
      "chain": "self_attn.q_proj.weight.to",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "init_student",
      "line": 231
     },
@@ -22763,19 +22512,19 @@
     },
     {
      "chain": "self_attn.q_proj.weight.device",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "init_student",
      "line": 240
     },
     {
      "chain": "self_attn.q_proj.weight.copy_",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "init_student",
      "line": 241
     },
     {
      "chain": "self_attn.q_proj.weight",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "init_student",
      "line": 242
     },
@@ -22793,13 +22542,13 @@
     },
     {
      "chain": "self_attn.v_proj.weight.copy_",
-     "probe": "v_proj",
+     "probe": "self_attn",
      "owner": "init_student",
      "line": 245
     },
     {
      "chain": "self_attn.v_proj.weight",
-     "probe": "v_proj",
+     "probe": "self_attn",
      "owner": "init_student",
      "line": 246
     },
@@ -22835,7 +22584,7 @@
     },
     {
      "chain": "mlp.down_proj.weight",
-     "probe": "mlp",
+     "probe": "down_proj",
      "owner": "init_student",
      "line": 254
     },
@@ -22859,25 +22608,25 @@
     },
     {
      "chain": "mlp.up_proj.weight.copy_",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "init_student",
      "line": 259
     },
     {
      "chain": "mlp.up_proj.weight",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "init_student",
      "line": 260
     },
     {
      "chain": "mlp.down_proj.weight.copy_",
-     "probe": "mlp",
+     "probe": "down_proj",
      "owner": "init_student",
      "line": 261
     },
     {
      "chain": "mlp.down_proj.weight.to",
-     "probe": "mlp",
+     "probe": "down_proj",
      "owner": "init_student",
      "line": 262
     },
@@ -23903,6 +23652,202 @@
      "kind": "function",
      "qualname": "read_snapshot",
      "line": 231
+    }
+   ],
+   "import_time_calls": [],
+   "classification": "generic_planning_execution"
+  },
+  "src/aadistill/runtime/__init__.py": {
+   "module": "aadistill.runtime",
+   "path": "src/aadistill/runtime/__init__.py",
+   "lines": 6,
+   "imports": [],
+   "internal_imports": [],
+   "literals": [],
+   "family_attribute_access": [],
+   "definitions": [],
+   "import_time_calls": [],
+   "classification": "generic_planning_execution"
+  },
+  "src/aadistill/runtime/run_layout.py": {
+   "module": "aadistill.runtime.run_layout",
+   "path": "src/aadistill/runtime/run_layout.py",
+   "lines": 281,
+   "imports": [
+    {
+     "target": "__future__",
+     "line": 30,
+     "relative": 0,
+     "names": [
+      "annotations"
+     ]
+    },
+    {
+     "target": "hashlib",
+     "line": 32,
+     "relative": 0
+    },
+    {
+     "target": "json",
+     "line": 33,
+     "relative": 0
+    },
+    {
+     "target": "re",
+     "line": 34,
+     "relative": 0
+    },
+    {
+     "target": "dataclasses",
+     "line": 35,
+     "relative": 0,
+     "names": [
+      "dataclass",
+      "field"
+     ]
+    },
+    {
+     "target": "pathlib",
+     "line": 36,
+     "relative": 0,
+     "names": [
+      "Path"
+     ]
+    },
+    {
+     "target": "typing",
+     "line": 37,
+     "relative": 0,
+     "names": [
+      "Any",
+      "Iterable",
+      "Mapping"
+     ]
+    },
+    {
+     "target": "aadistill.infrastructure.manifest",
+     "line": 201,
+     "relative": 2,
+     "names": [
+      "sha256_json"
+     ]
+    },
+    {
+     "target": "aadistill.infrastructure.manifest",
+     "line": 248,
+     "relative": 2,
+     "names": [
+      "sha256_json"
+     ]
+    }
+   ],
+   "internal_imports": [
+    "aadistill.infrastructure.manifest"
+   ],
+   "literals": [],
+   "family_attribute_access": [],
+   "definitions": [
+    {
+     "name": "RunLayoutError",
+     "kind": "class",
+     "qualname": "RunLayoutError",
+     "line": 51
+    },
+    {
+     "name": "_check",
+     "kind": "function",
+     "qualname": "_check",
+     "line": 55
+    },
+    {
+     "name": "ArtifactSpec",
+     "kind": "class",
+     "qualname": "ArtifactSpec",
+     "line": 66
+    },
+    {
+     "name": "__post_init__",
+     "kind": "function",
+     "qualname": "ArtifactSpec.__post_init__",
+     "line": 80
+    },
+    {
+     "name": "known",
+     "kind": "function",
+     "qualname": "ArtifactSpec.known",
+     "line": 90
+    },
+    {
+     "name": "check",
+     "kind": "function",
+     "qualname": "ArtifactSpec.check",
+     "line": 93
+    },
+    {
+     "name": "RunLayout",
+     "kind": "class",
+     "qualname": "RunLayout",
+     "line": 106
+    },
+    {
+     "name": "__post_init__",
+     "kind": "function",
+     "qualname": "RunLayout.__post_init__",
+     "line": 114
+    },
+    {
+     "name": "rel_root",
+     "kind": "function",
+     "qualname": "RunLayout.rel_root",
+     "line": 119
+    },
+    {
+     "name": "root",
+     "kind": "function",
+     "qualname": "RunLayout.root",
+     "line": 124
+    },
+    {
+     "name": "path",
+     "kind": "function",
+     "qualname": "RunLayout.path",
+     "line": 127
+    },
+    {
+     "name": "contains",
+     "kind": "function",
+     "qualname": "RunLayout.contains",
+     "line": 138
+    },
+    {
+     "name": "create",
+     "kind": "function",
+     "qualname": "RunLayout.create",
+     "line": 148
+    },
+    {
+     "name": "sha256_file",
+     "kind": "function",
+     "qualname": "sha256_file",
+     "line": 158
+    },
+    {
+     "name": "digest_of",
+     "kind": "function",
+     "qualname": "digest_of",
+     "line": 166
+    },
+    {
+     "name": "build_run_manifest",
+     "kind": "function",
+     "qualname": "build_run_manifest",
+     "line": 184
+    },
+    {
+     "name": "verify_run_manifest",
+     "kind": "function",
+     "qualname": "verify_run_manifest",
+     "line": 244
     }
    ],
    "import_time_calls": [],

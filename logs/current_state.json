@@ -163,10 +163,10 @@
  "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed.",
  "latest_run": {
   "experiment_id": "phase_c1",
-  "attempt_id": "attempt9",
   "layout_version": 1,
   "root": "logs/autoinit_c1_attempt9",
   "index": "logs/runs/index.json",
-  "note": "legacy-v1 by path, registered in the run index. run-layout-v2 is FUTURE-only; the next C1 attempt is the first v2 run."
+  "note": "legacy-v1 by path, ONE entry in logs/runs/index.json with its grant as a second component. run-layout-v3 is FUTURE-only.",
+  "run_id": "attempt9"
  }
 }
