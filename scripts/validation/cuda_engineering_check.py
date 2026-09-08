@@ -194,13 +194,13 @@ def main() -> int:
     from aadistill.initialization.specs.arch import get_adapter
     from aadistill.runtime.run_layout import ArtifactSpec, RunLayout
 
-    # Import the operator modules so the registry is populated, then check every
-    # declared id BEFORE any device work: a typo should cost nothing.
-    import importlib
-    for mod in ("depth", "width", "ffn", "attention", "attention_activation",
-                "composite"):
-        importlib.import_module(f"aadistill.initialization.operators.{mod}")
+    # Register explicitly, then check every declared id BEFORE any device work:
+    # a typo should cost nothing. Importing the modules is no longer enough --
+    # and relying on that was the coupling this bootstrap removed.
+    from aadistill.initialization.operators.register import register_builtin_operators
+
     register_builtin_adapters()
+    register_builtin_operators()
     known = set(registered_implementations())
     declared = [o["impl_id"] for o in cfg["operators"]]
     unknown = [i for i in declared if i not in known]

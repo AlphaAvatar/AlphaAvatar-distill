@@ -212,7 +212,16 @@ class ArchitectureAdapter(ABC):
         raise UnsupportedCapability(
             f"{self.family} adapter does not expose a block list")
 
-    def set_blocks(self, model: Any, blocks: Iterable[Any]) -> None:
+    def set_blocks(self, model: Any, blocks: Iterable[Any], *,
+                   update_config: bool = True) -> None:
+        """Replace the block list.
+
+        `update_config=False` swaps the blocks and leaves
+        `config.num_hidden_layers` alone. Temporary bypassing needs that:
+        rewriting the layer count would change what the config hash and any
+        downstream mask construction describe, for a change that is meant to
+        last only as long as a `with` block.
+        """
         raise UnsupportedCapability(
             f"{self.family} adapter does not expose a block list")
 
@@ -238,6 +247,15 @@ class ArchitectureAdapter(ABC):
 
     def attn_norm(self, block: Any) -> Any:
         raise UnsupportedCapability(f"{self.family} adapter has no attention norm")
+
+    def attention_subnorms(self, block: Any) -> dict[str, Any]:
+        """Per-head norms INSIDE attention, by role. Empty when a family has none.
+
+        Qwen3 normalizes q and k before RoPE; a family without them returns {}.
+        They are copied across a width change rather than transformed, because
+        they act on the head dimension, which width compression does not touch.
+        """
+        return {}
 
     def ffn_norm(self, block: Any) -> Any:
         raise UnsupportedCapability(f"{self.family} adapter has no FFN norm")

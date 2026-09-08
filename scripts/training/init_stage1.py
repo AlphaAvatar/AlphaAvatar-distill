@@ -30,10 +30,14 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
 from aadistill.initialization.transforms.sandwich import init_student
 from aadistill.models.student import build_student, build_student_config
 from aadistill.models.teacher import load_teacher
+
+#: Explicit: importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 
 def forward_smoke(model, tokenizer) -> dict:

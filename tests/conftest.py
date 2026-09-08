@@ -32,8 +32,16 @@ for root in (REPO / "src", REPO / "scripts", REPO / "tests"):
 #: `get_adapter` call in a test file then failed at COLLECTION, taking its whole
 #: file with it, in some orders and not others.
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
+from aadistill.initialization.operators.register import (  # noqa: E402
+    register_builtin_operators)
 
 register_builtin_adapters()
+register_builtin_operators()
+
+#: The frozen dataset assets, likewise: `experiments.datasets` is the
+#: application bootstrap and registering is its import-time job, not the core's.
+import experiments.datasets  # noqa: E402,F401
+import experiments.calibration  # noqa: E402,F401
 
 
 @pytest.fixture

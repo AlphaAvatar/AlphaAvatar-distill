@@ -43,6 +43,7 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 import torch  # noqa: E402
 
 from aadistill.initialization import device as device_contract
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from experiments.calibration import DOMAIN_BALANCED_V1  # noqa: E402
@@ -53,6 +54,9 @@ from aadistill.initialization.operators.base import (  # noqa: E402
     get_implementation,
 )
 from aadistill.initialization.statistics.spec import StatsCache  # noqa: E402
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 #: Explicit, because importing an adapter module no longer registers it.
 register_builtin_adapters()

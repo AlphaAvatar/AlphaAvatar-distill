@@ -55,6 +55,7 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     frozen_science_plan_gate, session_commit_gate,
 )
 from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
@@ -65,6 +66,9 @@ from autoinit_phase_a_launch import (  # noqa: E402
     continuation_budget, finalists_to_fetch, probe_streams,
     selected_leaves_secured,
 )
+
+#: Explicit: importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 STATUS = f"{WS}/autoinit_recovery_continuation.status"
 RUN_LOG = f"{WS}/autoinit_recovery_continuation_run.log"

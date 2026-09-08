@@ -56,6 +56,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.device import apply_cpu_budget  # noqa: E402
@@ -92,6 +93,9 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     recovery_scoring_contract,
 )
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 #: Explicit, because importing an adapter module no longer registers it.
 register_builtin_adapters()

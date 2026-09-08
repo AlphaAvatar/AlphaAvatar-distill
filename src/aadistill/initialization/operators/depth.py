@@ -55,7 +55,6 @@ from aadistill.initialization.operators.base import (
     OperatorImplementation,
     OperatorOutcome,
     OperatorPlan,
-    register_implementation,
 )
 
 DEPTH_FIELD = "num_hidden_layers"
@@ -548,5 +547,9 @@ def _host_available_memory_bytes() -> tuple[int | None, str]:
     return min(candidates)
 
 
-DEPTH_POSITIONAL_V0 = register_implementation(DepthPositionalV0())
-DEPTH_CAUSAL_KL_GREEDY_V1 = register_implementation(DepthCausalKLGreedyV1())
+#: The instance, NOT a registration. Registering at import made the registry's
+#: contents depend on who had imported what first, which is the same coupling
+#: the adapter bootstrap removed. `aadistill.initialization.operators.register`
+#: is the one place the shipped operators are registered.
+DEPTH_POSITIONAL_V0 = DepthPositionalV0()
+DEPTH_CAUSAL_KL_GREEDY_V1 = DepthCausalKLGreedyV1()

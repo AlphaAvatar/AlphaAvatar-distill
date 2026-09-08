@@ -50,11 +50,34 @@ import torch
 import torch.nn.functional as F
 
 
+def _adapter_for(model):
+    """The registered adapter for this model's family. Refuses if there is none.
+
+    `bypassed_blocks` is called from four places, none of which hands in an
+    adapter, so this resolves one rather than changing four signatures for a
+    swap that is purely structural.
+
+    There is deliberately no fallback to `model.model.layers`. A guess about
+    where a family keeps its blocks is family knowledge living outside an
+    adapter, and one that happened to be wrong would bypass the wrong modules
+    and report a contribution measurement for a model nobody built.
+    """
+    from aadistill.initialization.specs.arch import adapter_for_config
+    return adapter_for_config(model.config)
+
+
 def _decoder_layers(model):
-    layers = getattr(getattr(model, "model", None), "layers", None)
-    if layers is None:
-        raise ValueError(f"Cannot locate decoder layers on {type(model).__name__}")
-    return layers
+    return _adapter_for(model).blocks(model)
+
+
+def _set_decoder_layers(model, blocks) -> None:
+    """Replace the block list WITHOUT touching config.num_hidden_layers.
+
+    Rewriting `num_hidden_layers` would change what the config hash and any
+    downstream mask construction describe, for a swap that lasts only as long as
+    a `with` block -- so the adapter is asked not to.
+    """
+    _adapter_for(model).set_blocks(model, blocks, update_config=False)
 
 
 @contextmanager
@@ -88,11 +111,11 @@ def bypassed_blocks(model, skip: Collection[int]):
     if getattr(model.config, "use_cache", False):
         raise ValueError("bypassed_blocks requires config.use_cache=False")
     kept = [layers[i] for i in range(n) if i not in skip]
-    model.model.layers = torch.nn.ModuleList(kept)
+    _set_decoder_layers(model, kept)
     try:
         yield model
     finally:
-        model.model.layers = layers
+        _set_decoder_layers(model, layers)
 
 
 # --- distributional distortion -------------------------------------------------

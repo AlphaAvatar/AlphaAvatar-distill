@@ -179,10 +179,12 @@ class Qwen3Adapter(ArchitectureAdapter):
     def blocks(self, model: Any) -> list[Any]:
         return list(model.model.layers)
 
-    def set_blocks(self, model: Any, blocks) -> None:
+    def set_blocks(self, model: Any, blocks, *, update_config: bool = True) -> None:
         kept = list(blocks)
-        model.model.layers = torch.nn.ModuleList(kept)
-        model.config.num_hidden_layers = len(kept)
+        model.model.layers = (blocks if isinstance(blocks, torch.nn.ModuleList)
+                              else torch.nn.ModuleList(kept))
+        if update_config:
+            model.config.num_hidden_layers = len(kept)
 
     def attention(self, block: Any) -> Any:
         return block.self_attn
@@ -205,6 +207,9 @@ class Qwen3Adapter(ArchitectureAdapter):
 
     def attn_norm(self, block: Any) -> Any:
         return block.input_layernorm
+
+    def attention_subnorms(self, block: Any) -> dict[str, Any]:
+        return {"q": block.self_attn.q_norm, "k": block.self_attn.k_norm}
 
     def ffn_norm(self, block: Any) -> Any:
         return block.post_attention_layernorm

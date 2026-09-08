@@ -45,7 +45,6 @@ from aadistill.initialization.operators.base import (
     OperatorImplementation,
     OperatorOutcome,
     OperatorPlan,
-    register_implementation,
 )
 
 WIDTH_FIELD = "hidden_size"
@@ -164,4 +163,8 @@ class WidthGlobalPCAV0(OperatorImplementation):
         )
 
 
-WIDTH_GLOBAL_PCA_V0 = register_implementation(WidthGlobalPCAV0())
+#: The instance, NOT a registration. Registering at import made the registry's
+#: contents depend on who had imported what first, which is the same coupling
+#: the adapter bootstrap removed. `aadistill.initialization.operators.register`
+#: is the one place the shipped operators are registered.
+WIDTH_GLOBAL_PCA_V0 = WidthGlobalPCAV0()

@@ -284,51 +284,45 @@ def check_role_isolation(
     return report
 
 
-# --- the assets this project already froze ---------------------------------
+# --- loading concrete assets ------------------------------------------------
+#
+# The three assets this project froze used to be written out here and registered
+# at import. That put experiment DATA -- prompt counts, artifact paths, content
+# hashes, leakage proofs -- inside the reusable core, and made merely importing
+# this module change global state.
+#
+# They now live in `configs/datasets/assets.json`, loaded by
+# `scripts/experiments/datasets.py`. This module keeps only the mechanism.
 
-FROZEN_PROMOTION_BATTERY = register_asset(DatasetAsset(
-    asset_id="battery.frozen_promotion_150",
-    role=DatasetRole.FINAL_PROMOTION,
-    path=None,
-    description=(
-        "The 150-prompt frozen promotion battery sampled from the 0.86M rung; "
-        "inclusion mask sha256 d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba. "
-        "Retained reference: usable_rollout 0.7300, correct_overall 0.1867."),
-    n_items=150,
-    protected=True,
-    metadata={"inclusion_mask_sha256":
-              "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
-              "source": "E6/E6b"},
-))
+ASSET_DOCUMENT_SCHEMA = "aadistill.dataset_assets/v1"
 
-CAPABILITY_BATTERY_V2 = register_asset(DatasetAsset(
-    asset_id="battery.capability_v2_846",
-    role=DatasetRole.FINAL_PROMOTION,
-    path=None,
-    description=(
-        "capability-v2, 846 prompts across 7 sets, 0 leakage collisions at build "
-        "time. Superset the 150-prompt promotion battery is drawn from, so it "
-        "carries the same protection."),
-    n_items=846,
-    protected=True,
-    metadata={"builder": "scripts/data/build_capability_battery.py"},
-))
 
-E8A_CALIBRATION = register_asset(DatasetAsset(
-    asset_id="calib.e8a_domain_balanced_67",
-    role=DatasetRole.OPERATOR_CALIBRATION,
-    path="artifacts/stage1/e8_calibration_v1/items.jsonl",
-    description=(
-        "E8a's frozen 67-item, 5-domain, 59,763-position calibration mixture. "
-        "Already leakage-checked against the recovery rung and validation slice."),
-    n_items=67,
-    # The items *file* hash. The mixture's token-level identity is the separate
-    # d65c1f40... content hash carried by the calibration profile.
-    content_sha256="c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
-    metadata={"leakage_proof": "artifacts/stage1/e8_calibration_v1/leakage.json",
-              "mixture_content_sha256":
-                  "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"},
-))
+def asset_from_dict(doc: Mapping[str, Any]) -> DatasetAsset:
+    """One asset from its serialized form. Field names are the dataclass's."""
+    fields = dict(doc)
+    if fields.get("role") is not None:
+        fields["role"] = DatasetRole(fields["role"])
+    if fields.get("metadata") is not None:
+        fields["metadata"] = dict(fields["metadata"])
+    return DatasetAsset(**fields)
+
+
+def load_assets(document: Mapping[str, Any], *,
+                register: bool = True) -> tuple[DatasetAsset, ...]:
+    """Build the assets a document declares, and register them by default.
+
+    Registration stays refusable: re-registering an id whose specification
+    differs raises, so a document that redefines a frozen asset is an error
+    rather than a silent swap.
+    """
+    if document.get("schema") != ASSET_DOCUMENT_SCHEMA:
+        raise DatasetRoleViolation(
+            f"expected a {ASSET_DOCUMENT_SCHEMA} document, got "
+            f"{document.get('schema')!r}")
+    built = tuple(asset_from_dict(d) for d in document["assets"])
+    if register:
+        built = tuple(register_asset(a) for a in built)
+    return built
 
 
 def protected_assets() -> list[DatasetAsset]:

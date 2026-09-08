@@ -3,25 +3,25 @@
  "_contract": "A mechanical inventory of src/aadistill, derived from the syntax tree. Docstrings are excluded from literal collection and comments are not in the AST at all, so no finding here can be produced by prose. Reports ownership; decides no policy. AUTHORIZES NOTHING.",
  "root": "src/aadistill",
  "counts": {
-  "modules": 108,
-  "lines": 29603,
+  "modules": 109,
+  "lines": 29756,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
    "generic_statistics": 5,
-   "generic_operator": 9,
+   "generic_operator": 10,
    "generic_planning_execution": 80,
    "generic_governance_runtime": 10,
    "model_instance_recipe": 0,
    "experiment_instance": 0,
    "historical_compatibility": 0
   },
-  "sha256_literals": 5,
-  "repo_id_literals": 6,
-  "path_literals": 29,
+  "sha256_literals": 2,
+  "repo_id_literals": 5,
+  "path_literals": 26,
   "experiment_named_modules": 0,
-  "family_access_outside_adapters": 37,
-  "import_time_registration": 14,
+  "family_access_outside_adapters": 1,
+  "import_time_registration": 5,
   "big_int_literals": 10,
   "package_cycles": 0
  },
@@ -32,24 +32,6 @@
     "owner": "<module>",
     "line": 257,
     "value": "afd08be777e1f84e29350ff6c65daaf9b8f72d8f7ea593ca92f0129572264295"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "owner": "<module>",
-    "line": 300,
-    "value": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "owner": "<module>",
-    "line": 327,
-    "value": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "owner": "<module>",
-    "line": 330,
-    "value": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
    },
    {
     "path": "src/aadistill/initialization/planning/recovery.py",
@@ -76,12 +58,6 @@
     "owner": "SessionRunner.create",
     "line": 340,
     "value": "22/tcp"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "owner": "<module>",
-    "line": 301,
-    "value": "E6/E6b"
    },
    {
     "path": "src/aadistill/rollout/engines.py",
@@ -188,24 +164,6 @@
     "value": "/src /opt/train/bin/python scripts/pod/collect_artifacts.py"
    },
    {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "owner": "<module>",
-    "line": 314,
-    "value": "scripts/data/build_capability_battery.py"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "owner": "<module>",
-    "line": 320,
-    "value": "artifacts/stage1/e8_calibration_v1/items.jsonl"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "owner": "<module>",
-    "line": 328,
-    "value": "artifacts/stage1/e8_calibration_v1/leakage.json"
-   },
-   {
     "path": "src/aadistill/initialization/operators/base.py",
     "owner": "<module>",
     "line": 411,
@@ -275,286 +233,14 @@
   "experiment_named_modules": [],
   "family_access_outside_adapters": [
    {
-    "path": "src/aadistill/initialization/operators/attention.py",
-    "chain": "q_proj.weight.to",
-    "probe": "q_proj",
-    "owner": "AttentionWeightProxyV0.apply",
-    "line": 108
-   },
-   {
-    "path": "src/aadistill/initialization/operators/attention.py",
-    "chain": "o_proj.weight.to",
-    "probe": "o_proj",
-    "owner": "AttentionWeightProxyV0.apply",
-    "line": 109
-   },
-   {
-    "path": "src/aadistill/initialization/operators/attention.py",
-    "chain": "q_proj.weight.device",
-    "probe": "q_proj",
-    "owner": "AttentionWeightProxyV0.apply",
-    "line": 112
-   },
-   {
-    "path": "src/aadistill/initialization/operators/attention.py",
-    "chain": "q_proj.weight",
-    "probe": "q_proj",
-    "owner": "AttentionWeightProxyV0.apply",
-    "line": 123
-   },
-   {
-    "path": "src/aadistill/initialization/operators/attention.py",
-    "chain": "q_proj.weight",
-    "probe": "q_proj",
-    "owner": "AttentionWeightProxyV0.apply",
-    "line": 124
-   },
-   {
-    "path": "src/aadistill/initialization/operators/attention.py",
-    "chain": "o_proj.weight",
-    "probe": "o_proj",
-    "owner": "AttentionWeightProxyV0.apply",
-    "line": 125
-   },
-   {
-    "path": "src/aadistill/initialization/operators/ffn.py",
-    "chain": "down_proj.weight",
-    "probe": "down_proj",
-    "owner": "FFNActivationImportanceV0.apply",
-    "line": 99
-   },
-   {
     "path": "src/aadistill/initialization/statistics/contribution.py",
     "chain": "model.layers",
     "probe": "model.layers",
-    "owner": "bypassed_blocks",
-    "line": 91
-   },
-   {
-    "path": "src/aadistill/initialization/statistics/contribution.py",
-    "chain": "model.layers",
-    "probe": "model.layers",
-    "owner": "bypassed_blocks",
-    "line": 95
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "model.embed_tokens.weight.dtype",
-    "probe": "embed_tokens",
-    "owner": "init_student",
-    "line": 197
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "model.layers",
-    "probe": "model.layers",
-    "owner": "init_student",
-    "line": 227
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "input_layernorm.weight",
-    "probe": "input_layernorm",
-    "owner": "init_student",
-    "line": 233
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.q_proj.weight.to",
-    "probe": "q_proj",
-    "owner": "init_student",
-    "line": 235
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.o_proj.weight.to",
-    "probe": "o_proj",
-    "owner": "init_student",
-    "line": 237
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.q_proj.weight.device",
-    "probe": "q_proj",
-    "owner": "init_student",
-    "line": 244
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.q_proj.weight.copy_",
-    "probe": "q_proj",
-    "owner": "init_student",
-    "line": 245
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.q_proj.weight",
-    "probe": "q_proj",
-    "owner": "init_student",
-    "line": 246
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.k_proj.weight.copy_",
-    "probe": "k_proj",
-    "owner": "init_student",
-    "line": 247
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.k_proj.weight",
-    "probe": "k_proj",
-    "owner": "init_student",
-    "line": 248
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.v_proj.weight.copy_",
-    "probe": "v_proj",
-    "owner": "init_student",
-    "line": 249
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.v_proj.weight",
-    "probe": "v_proj",
-    "owner": "init_student",
-    "line": 250
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.o_proj.weight.copy_",
-    "probe": "o_proj",
-    "owner": "init_student",
-    "line": 251
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.o_proj.weight.to",
-    "probe": "o_proj",
-    "owner": "init_student",
-    "line": 252
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.q_norm.weight.copy_",
-    "probe": "self_attn",
-    "owner": "init_student",
-    "line": 253
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "self_attn.k_norm.weight.copy_",
-    "probe": "self_attn",
-    "owner": "init_student",
-    "line": 254
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "input_layernorm.weight.fill_",
-    "probe": "input_layernorm",
-    "owner": "init_student",
-    "line": 255
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "mlp.down_proj.weight",
-    "probe": "mlp",
-    "owner": "init_student",
-    "line": 258
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "post_attention_layernorm.weight",
-    "probe": "post_attention_layernorm",
-    "owner": "init_student",
-    "line": 260
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "mlp.gate_proj.weight.copy_",
-    "probe": "mlp",
-    "owner": "init_student",
-    "line": 261
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "mlp.gate_proj.weight",
-    "probe": "mlp",
-    "owner": "init_student",
-    "line": 262
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "mlp.up_proj.weight.copy_",
-    "probe": "up_proj",
-    "owner": "init_student",
-    "line": 263
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "mlp.up_proj.weight",
-    "probe": "up_proj",
-    "owner": "init_student",
-    "line": 264
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "mlp.down_proj.weight.copy_",
-    "probe": "mlp",
-    "owner": "init_student",
-    "line": 265
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "mlp.down_proj.weight.to",
-    "probe": "mlp",
-    "owner": "init_student",
-    "line": 266
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "post_attention_layernorm.weight.fill_",
-    "probe": "post_attention_layernorm",
-    "owner": "init_student",
-    "line": 267
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "model.embed_tokens.weight.copy_",
-    "probe": "embed_tokens",
-    "owner": "init_student",
-    "line": 277
-   },
-   {
-    "path": "src/aadistill/initialization/transforms/sandwich.py",
-    "chain": "model.embed_tokens.weight.to",
-    "probe": "embed_tokens",
-    "owner": "init_student",
-    "line": 278
+    "owner": "_set_decoder_layers",
+    "line": 90
    }
   ],
   "import_time_registration": [
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "call": "register_asset",
-    "line": 289
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "call": "register_asset",
-    "line": 304
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/datasets.py",
-    "call": "register_asset",
-    "line": 317
-   },
-   {
-    "path": "src/aadistill/initialization/operators/attention.py",
-    "call": "register_implementation",
-    "line": 148
-   },
    {
     "path": "src/aadistill/initialization/operators/base.py",
     "call": "register_kind",
@@ -578,32 +264,7 @@
    {
     "path": "src/aadistill/initialization/operators/composite.py",
     "call": "register_kind",
-    "line": 55
-   },
-   {
-    "path": "src/aadistill/initialization/operators/composite.py",
-    "call": "register_implementation",
-    "line": 179
-   },
-   {
-    "path": "src/aadistill/initialization/operators/depth.py",
-    "call": "register_implementation",
-    "line": 551
-   },
-   {
-    "path": "src/aadistill/initialization/operators/depth.py",
-    "call": "register_implementation",
-    "line": 552
-   },
-   {
-    "path": "src/aadistill/initialization/operators/ffn.py",
-    "call": "register_implementation",
-    "line": 138
-   },
-   {
-    "path": "src/aadistill/initialization/operators/width.py",
-    "call": "register_implementation",
-    "line": 167
+    "line": 54
    }
   ],
   "big_int_literals": [
@@ -845,6 +506,14 @@
     "aadistill.initialization.specs.metrics",
     "aadistill.initialization.transforms.project"
    ],
+   "aadistill.initialization.operators.register": [
+    "aadistill.initialization.operators.attention",
+    "aadistill.initialization.operators.base",
+    "aadistill.initialization.operators.composite",
+    "aadistill.initialization.operators.depth",
+    "aadistill.initialization.operators.ffn",
+    "aadistill.initialization.operators.width"
+   ],
    "aadistill.initialization.operators.width": [
     "aadistill.initialization.calibration.profiles",
     "aadistill.initialization.device",
@@ -925,7 +594,9 @@
    "aadistill.initialization.statistics": [],
    "aadistill.initialization.statistics.attention": [],
    "aadistill.initialization.statistics.collect": [],
-   "aadistill.initialization.statistics.contribution": [],
+   "aadistill.initialization.statistics.contribution": [
+    "aadistill.initialization.specs.arch"
+   ],
    "aadistill.initialization.statistics.reweight": [],
    "aadistill.initialization.statistics.spec": [
     "aadistill.infrastructure.manifest"
@@ -934,6 +605,7 @@
    "aadistill.initialization.transforms.nll_gate": [],
    "aadistill.initialization.transforms.project": [],
    "aadistill.initialization.transforms.sandwich": [
+    "aadistill.initialization.specs.arch",
     "aadistill.initialization.transforms.project"
    ],
    "aadistill.models": [],
@@ -1069,7 +741,11 @@
     "aadistill.infrastructure.manifest"
    ],
    "aadistill.initialization.statistics": [
-    "aadistill.infrastructure.manifest"
+    "aadistill.infrastructure.manifest",
+    "aadistill.initialization.specs"
+   ],
+   "aadistill.initialization.transforms": [
+    "aadistill.initialization.specs"
    ],
    "aadistill.models.tokenizer_contract": [
     "aadistill.models.teacher"
@@ -7424,7 +7100,7 @@
   "src/aadistill/initialization/adapters/qwen3.py": {
    "module": "aadistill.initialization.adapters.qwen3",
    "path": "src/aadistill/initialization/adapters/qwen3.py",
-   "lines": 241,
+   "lines": 246,
    "imports": [
     {
      "target": "__future__",
@@ -7491,7 +7167,7 @@
     },
     {
      "target": "aadistill.initialization.specs.arch",
-     "line": 239,
+     "line": 244,
      "relative": 0,
      "names": [
       "DEFAULT_REGISTRY"
@@ -7521,73 +7197,79 @@
      "chain": "self_attn",
      "probe": "self_attn",
      "owner": "Qwen3Adapter.attention",
-     "line": 188
+     "line": 190
     },
     {
      "chain": "mlp",
      "probe": "mlp",
      "owner": "Qwen3Adapter.ffn",
-     "line": 191
+     "line": 193
     },
     {
      "chain": "post_attention_layernorm",
      "probe": "post_attention_layernorm",
      "owner": "Qwen3Adapter.stream_in_projections",
-     "line": 194
+     "line": 196
     },
     {
      "chain": "self_attn.q_proj",
      "probe": "q_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
-     "line": 196
+     "line": 198
     },
     {
      "chain": "self_attn.k_proj",
-     "probe": "k_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
-     "line": 197
+     "line": 199
     },
     {
      "chain": "self_attn.v_proj",
-     "probe": "v_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
-     "line": 198
+     "line": 200
     },
     {
      "chain": "mlp.gate_proj",
      "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
-     "line": 199
+     "line": 201
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "up_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
-     "line": 200
+     "line": 202
     },
     {
      "chain": "self_attn.o_proj",
-     "probe": "o_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_out_projections",
-     "line": 204
+     "line": 206
     },
     {
      "chain": "input_layernorm",
      "probe": "input_layernorm",
      "owner": "Qwen3Adapter.attn_norm",
-     "line": 207
+     "line": 209
+    },
+    {
+     "chain": "self_attn.q_norm",
+     "probe": "self_attn",
+     "owner": "Qwen3Adapter.attention_subnorms",
+     "line": 212
     },
     {
      "chain": "post_attention_layernorm",
      "probe": "post_attention_layernorm",
      "owner": "Qwen3Adapter.ffn_norm",
-     "line": 210
+     "line": 215
     },
     {
      "chain": "model.embed_tokens",
      "probe": "embed_tokens",
      "owner": "Qwen3Adapter.embedding",
-     "line": 213
+     "line": 218
     }
    ],
    "definitions": [
@@ -7667,67 +7349,73 @@
      "name": "attention",
      "kind": "function",
      "qualname": "Qwen3Adapter.attention",
-     "line": 187
+     "line": 189
     },
     {
      "name": "ffn",
      "kind": "function",
      "qualname": "Qwen3Adapter.ffn",
-     "line": 190
+     "line": 192
     },
     {
      "name": "stream_in_projections",
      "kind": "function",
      "qualname": "Qwen3Adapter.stream_in_projections",
-     "line": 193
+     "line": 195
     },
     {
      "name": "stream_out_projections",
      "kind": "function",
      "qualname": "Qwen3Adapter.stream_out_projections",
-     "line": 203
+     "line": 205
     },
     {
      "name": "attn_norm",
      "kind": "function",
      "qualname": "Qwen3Adapter.attn_norm",
-     "line": 206
+     "line": 208
+    },
+    {
+     "name": "attention_subnorms",
+     "kind": "function",
+     "qualname": "Qwen3Adapter.attention_subnorms",
+     "line": 211
     },
     {
      "name": "ffn_norm",
      "kind": "function",
      "qualname": "Qwen3Adapter.ffn_norm",
-     "line": 209
+     "line": 214
     },
     {
      "name": "embedding",
      "kind": "function",
      "qualname": "Qwen3Adapter.embedding",
-     "line": 212
+     "line": 217
     },
     {
      "name": "final_norm",
      "kind": "function",
      "qualname": "Qwen3Adapter.final_norm",
-     "line": 215
+     "line": 220
     },
     {
      "name": "head_groups",
      "kind": "function",
      "qualname": "Qwen3Adapter.head_groups",
-     "line": 218
+     "line": 223
     },
     {
      "name": "stats_collector",
      "kind": "function",
      "qualname": "Qwen3Adapter.stats_collector",
-     "line": 221
+     "line": 226
     },
     {
      "name": "register_qwen3",
      "kind": "function",
      "qualname": "register_qwen3",
-     "line": 232
+     "line": 237
     }
    ],
    "import_time_calls": [],
@@ -7748,7 +7436,7 @@
   "src/aadistill/initialization/calibration/datasets.py": {
    "module": "aadistill.initialization.calibration.datasets",
    "path": "src/aadistill/initialization/calibration/datasets.py",
-   "lines": 339,
+   "lines": 333,
    "imports": [
     {
      "target": "__future__",
@@ -7818,117 +7506,7 @@
    "internal_imports": [
     "aadistill.data.extra_stream"
    ],
-   "literals": [
-    {
-     "value": "The 150-prompt frozen promotion battery sampled from the 0.86M rung; inclusion mask sha256 d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba. Retained reference: usable_rollout 0.7300, ",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 294,
-     "experiment_tokens": [
-      "rung"
-     ]
-    },
-    {
-     "value": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
-     "kinds": [
-      "sha256"
-     ],
-     "owner": "<module>",
-     "line": 300,
-     "experiment_tokens": []
-    },
-    {
-     "value": "E6/E6b",
-     "kinds": [
-      "repo_id_shape",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 301,
-     "experiment_tokens": [
-      "e6b"
-     ]
-    },
-    {
-     "value": "scripts/data/build_capability_battery.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 314,
-     "experiment_tokens": []
-    },
-    {
-     "value": "calib.e8a_domain_balanced_67",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 318,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "artifacts/stage1/e8_calibration_v1/items.jsonl",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 320,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "E8a's frozen 67-item, 5-domain, 59,763-position calibration mixture. Already leakage-checked against the recovery rung and validation slice.",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 322,
-     "experiment_tokens": [
-      "rung",
-      "e8"
-     ]
-    },
-    {
-     "value": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
-     "kinds": [
-      "sha256",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 327,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "artifacts/stage1/e8_calibration_v1/leakage.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 328,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
-     "kinds": [
-      "sha256"
-     ],
-     "owner": "<module>",
-     "line": 330,
-     "experiment_tokens": []
-    }
-   ],
+   "literals": [],
    "family_attribute_access": [],
    "definitions": [
     {
@@ -8028,32 +7606,31 @@
      "line": 207
     },
     {
+     "name": "asset_from_dict",
+     "kind": "function",
+     "qualname": "asset_from_dict",
+     "line": 300
+    },
+    {
+     "name": "load_assets",
+     "kind": "function",
+     "qualname": "load_assets",
+     "line": 310
+    },
+    {
      "name": "protected_assets",
      "kind": "function",
      "qualname": "protected_assets",
-     "line": 334
+     "line": 328
     },
     {
      "name": "role_summary",
      "kind": "function",
      "qualname": "role_summary",
-     "line": 338
+     "line": 332
     }
    ],
-   "import_time_calls": [
-    {
-     "call": "register_asset",
-     "line": 289
-    },
-    {
-     "call": "register_asset",
-     "line": 304
-    },
-    {
-     "call": "register_asset",
-     "line": 317
-    }
-   ],
+   "import_time_calls": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/calibration/items.py": {
@@ -8450,11 +8027,11 @@
   "src/aadistill/initialization/operators/__init__.py": {
    "module": "aadistill.initialization.operators",
    "path": "src/aadistill/initialization/operators/__init__.py",
-   "lines": 74,
+   "lines": 79,
    "imports": [
     {
      "target": "aadistill.initialization.operators.attention",
-     "line": 9,
+     "line": 14,
      "relative": 0,
      "names": [
       "ATTENTION_WEIGHT_PROXY_V0"
@@ -8462,7 +8039,7 @@
     },
     {
      "target": "aadistill.initialization.calibration.profiles",
-     "line": 10,
+     "line": 15,
      "relative": 0,
      "names": [
       "CalibrationNeed"
@@ -8470,7 +8047,7 @@
     },
     {
      "target": "aadistill.initialization.operators.base",
-     "line": 11,
+     "line": 16,
      "relative": 0,
      "names": [
       "ATTENTION",
@@ -8500,7 +8077,7 @@
     },
     {
      "target": "aadistill.initialization.operators.composite",
-     "line": 36,
+     "line": 41,
      "relative": 0,
      "names": [
       "COMPOSITE_STAGE1",
@@ -8509,7 +8086,7 @@
     },
     {
      "target": "aadistill.initialization.operators.depth",
-     "line": 40,
+     "line": 45,
      "relative": 0,
      "names": [
       "DEPTH_CAUSAL_KL_GREEDY_V1",
@@ -8518,7 +8095,7 @@
     },
     {
      "target": "aadistill.initialization.operators.ffn",
-     "line": 44,
+     "line": 49,
      "relative": 0,
      "names": [
       "FFN_ACTIVATION_IMPORTANCE_V0"
@@ -8526,7 +8103,7 @@
     },
     {
      "target": "aadistill.initialization.operators.width",
-     "line": 45,
+     "line": 50,
      "relative": 0,
      "names": [
       "WIDTH_GLOBAL_PCA_V0"
@@ -8657,7 +8234,7 @@
   "src/aadistill/initialization/operators/attention.py": {
    "module": "aadistill.initialization.operators.attention",
    "path": "src/aadistill/initialization/operators/attention.py",
-   "lines": 148,
+   "lines": 155,
    "imports": [
     {
      "target": "__future__",
@@ -8741,8 +8318,7 @@
       "OperatorContext",
       "OperatorImplementation",
       "OperatorOutcome",
-      "OperatorPlan",
-      "register_implementation"
+      "OperatorPlan"
      ]
     }
    ],
@@ -8755,76 +8331,34 @@
     "aadistill.initialization.transforms.sandwich"
    ],
    "literals": [],
-   "family_attribute_access": [
-    {
-     "chain": "q_proj.weight.to",
-     "probe": "q_proj",
-     "owner": "AttentionWeightProxyV0.apply",
-     "line": 108
-    },
-    {
-     "chain": "o_proj.weight.to",
-     "probe": "o_proj",
-     "owner": "AttentionWeightProxyV0.apply",
-     "line": 109
-    },
-    {
-     "chain": "q_proj.weight.device",
-     "probe": "q_proj",
-     "owner": "AttentionWeightProxyV0.apply",
-     "line": 112
-    },
-    {
-     "chain": "q_proj.weight",
-     "probe": "q_proj",
-     "owner": "AttentionWeightProxyV0.apply",
-     "line": 123
-    },
-    {
-     "chain": "q_proj.weight",
-     "probe": "q_proj",
-     "owner": "AttentionWeightProxyV0.apply",
-     "line": 124
-    },
-    {
-     "chain": "o_proj.weight",
-     "probe": "o_proj",
-     "owner": "AttentionWeightProxyV0.apply",
-     "line": 125
-    }
-   ],
+   "family_attribute_access": [],
    "definitions": [
     {
      "name": "AttentionWeightProxyV0",
      "kind": "class",
      "qualname": "AttentionWeightProxyV0",
-     "line": 52
+     "line": 51
     },
     {
      "name": "applicable",
      "kind": "function",
      "qualname": "AttentionWeightProxyV0.applicable",
-     "line": 73
+     "line": 72
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "AttentionWeightProxyV0.plan",
-     "line": 86
+     "line": 85
     },
     {
      "name": "apply",
      "kind": "function",
      "qualname": "AttentionWeightProxyV0.apply",
-     "line": 95
+     "line": 94
     }
    ],
-   "import_time_calls": [
-    {
-     "call": "register_implementation",
-     "line": 148
-    }
-   ],
+   "import_time_calls": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/attention_activation.py": {
@@ -9360,7 +8894,7 @@
   "src/aadistill/initialization/operators/composite.py": {
    "module": "aadistill.initialization.operators.composite",
    "path": "src/aadistill/initialization/operators/composite.py",
-   "lines": 179,
+   "lines": 182,
    "imports": [
     {
      "target": "__future__",
@@ -9454,7 +8988,6 @@
       "OperatorKindSpec",
       "OperatorOutcome",
       "OperatorPlan",
-      "register_implementation",
       "register_kind"
      ]
     }
@@ -9475,7 +9008,7 @@
       "experiment_token"
      ],
      "owner": "CompositeStage1SandwichV0",
-     "line": 71,
+     "line": 70,
      "experiment_tokens": [
       "e8"
      ]
@@ -9487,35 +9020,31 @@
      "name": "CompositeStage1SandwichV0",
      "kind": "class",
      "qualname": "CompositeStage1SandwichV0",
-     "line": 66
+     "line": 65
     },
     {
      "name": "applicable",
      "kind": "function",
      "qualname": "CompositeStage1SandwichV0.applicable",
-     "line": 93
+     "line": 92
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "CompositeStage1SandwichV0.plan",
-     "line": 112
+     "line": 111
     },
     {
      "name": "apply",
      "kind": "function",
      "qualname": "CompositeStage1SandwichV0.apply",
-     "line": 121
+     "line": 120
     }
    ],
    "import_time_calls": [
     {
      "call": "register_kind",
-     "line": 55
-    },
-    {
-     "call": "register_implementation",
-     "line": 179
+     "line": 54
     }
    ],
    "classification": "generic_operator"
@@ -9523,7 +9052,7 @@
   "src/aadistill/initialization/operators/depth.py": {
    "module": "aadistill.initialization.operators.depth",
    "path": "src/aadistill/initialization/operators/depth.py",
-   "lines": 552,
+   "lines": 555,
    "imports": [
     {
      "target": "__future__",
@@ -9645,8 +9174,7 @@
       "OperatorError",
       "OperatorImplementation",
       "OperatorOutcome",
-      "OperatorPlan",
-      "register_implementation"
+      "OperatorPlan"
      ]
     }
    ],
@@ -9667,7 +9195,7 @@
       "experiment_token"
      ],
      "owner": "DepthCausalKLGreedyV1",
-     "line": 131,
+     "line": 130,
      "experiment_tokens": [
       "e8"
      ]
@@ -9678,7 +9206,7 @@
       "float"
      ],
      "owner": "DepthCausalKLGreedyV1.apply.on_candidate",
-     "line": 252,
+     "line": 251,
      "experiment_tokens": []
     },
     {
@@ -9687,7 +9215,7 @@
       "float"
      ],
      "owner": "_ReferenceLogits",
-     "line": 374,
+     "line": 373,
      "experiment_tokens": []
     },
     {
@@ -9696,7 +9224,7 @@
       "float"
      ],
      "owner": "_ReferenceLogits.__init__",
-     "line": 427,
+     "line": 426,
      "experiment_tokens": []
     }
    ],
@@ -9706,133 +9234,124 @@
      "name": "_build_child_with_layers",
      "kind": "function",
      "qualname": "_build_child_with_layers",
-     "line": 64
+     "line": 63
     },
     {
      "name": "DepthPositionalV0",
      "kind": "class",
      "qualname": "DepthPositionalV0",
-     "line": 77
+     "line": 76
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "DepthPositionalV0.plan",
-     "line": 97
+     "line": 96
     },
     {
      "name": "apply",
      "kind": "function",
      "qualname": "DepthPositionalV0.apply",
-     "line": 106
+     "line": 105
     },
     {
      "name": "DepthCausalKLGreedyV1",
      "kind": "class",
      "qualname": "DepthCausalKLGreedyV1",
-     "line": 126
+     "line": 125
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "DepthCausalKLGreedyV1.plan",
-     "line": 149
+     "line": 148
     },
     {
      "name": "apply",
      "kind": "function",
      "qualname": "DepthCausalKLGreedyV1.apply",
-     "line": 167
+     "line": 166
     },
     {
      "name": "score",
      "kind": "function",
      "qualname": "DepthCausalKLGreedyV1.apply.score",
-     "line": 206
+     "line": 205
     },
     {
      "name": "on_candidate",
      "kind": "function",
      "qualname": "DepthCausalKLGreedyV1.apply.on_candidate",
-     "line": 250
+     "line": 249
     },
     {
      "name": "on_round",
      "kind": "function",
      "qualname": "DepthCausalKLGreedyV1.apply.on_round",
-     "line": 264
+     "line": 263
     },
     {
      "name": "_domain_map",
      "kind": "function",
      "qualname": "_domain_map",
-     "line": 312
+     "line": 311
     },
     {
      "name": "_forward_logits",
      "kind": "function",
      "qualname": "_forward_logits",
-     "line": 322
+     "line": 321
     },
     {
      "name": "_ReferenceLogits",
      "kind": "class",
      "qualname": "_ReferenceLogits",
-     "line": 348
+     "line": 347
     },
     {
      "name": "__init__",
      "kind": "function",
      "qualname": "_ReferenceLogits.__init__",
-     "line": 376
+     "line": 375
     },
     {
      "name": "get",
      "kind": "function",
      "qualname": "_ReferenceLogits.get",
-     "line": 442
+     "line": 441
     },
     {
      "name": "decision",
      "kind": "function",
      "qualname": "_ReferenceLogits.decision",
-     "line": 456
+     "line": 455
     },
     {
      "name": "counters",
      "kind": "function",
      "qualname": "_ReferenceLogits.counters",
-     "line": 478
+     "line": 477
     },
     {
      "name": "_available_memory_bytes",
      "kind": "function",
      "qualname": "_available_memory_bytes",
-     "line": 484
+     "line": 483
     },
     {
      "name": "_host_available_memory_bytes",
      "kind": "function",
      "qualname": "_host_available_memory_bytes",
-     "line": 513
+     "line": 512
     }
    ],
-   "import_time_calls": [
-    {
-     "call": "register_implementation",
-     "line": 551
-    },
-    {
-     "call": "register_implementation",
-     "line": 552
-    }
-   ],
+   "import_time_calls": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/ffn.py": {
    "module": "aadistill.initialization.operators.ffn",
    "path": "src/aadistill/initialization/operators/ffn.py",
-   "lines": 138,
+   "lines": 143,
    "imports": [
     {
      "target": "__future__",
@@ -9925,8 +9444,7 @@
       "OperatorContext",
       "OperatorImplementation",
       "OperatorOutcome",
-      "OperatorPlan",
-      "register_implementation"
+      "OperatorPlan"
      ]
     }
    ],
@@ -9940,46 +9458,118 @@
     "aadistill.initialization.transforms.project"
    ],
    "literals": [],
-   "family_attribute_access": [
-    {
-     "chain": "down_proj.weight",
-     "probe": "down_proj",
-     "owner": "FFNActivationImportanceV0.apply",
-     "line": 99
-    }
-   ],
+   "family_attribute_access": [],
    "definitions": [
     {
      "name": "FFNActivationImportanceV0",
      "kind": "class",
      "qualname": "FFNActivationImportanceV0",
-     "line": 48
+     "line": 47
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "FFNActivationImportanceV0.plan",
-     "line": 69
+     "line": 68
     },
     {
      "name": "apply",
      "kind": "function",
      "qualname": "FFNActivationImportanceV0.apply",
-     "line": 79
+     "line": 78
     }
    ],
-   "import_time_calls": [
+   "import_time_calls": [],
+   "classification": "generic_operator"
+  },
+  "src/aadistill/initialization/operators/register.py": {
+   "module": "aadistill.initialization.operators.register",
+   "path": "src/aadistill/initialization/operators/register.py",
+   "lines": 54,
+   "imports": [
     {
-     "call": "register_implementation",
-     "line": 138
+     "target": "__future__",
+     "line": 19,
+     "relative": 0,
+     "names": [
+      "annotations"
+     ]
+    },
+    {
+     "target": "aadistill.initialization.operators.attention",
+     "line": 21,
+     "relative": 0,
+     "names": [
+      "ATTENTION_WEIGHT_PROXY_V0"
+     ]
+    },
+    {
+     "target": "aadistill.initialization.operators.base",
+     "line": 22,
+     "relative": 0,
+     "names": [
+      "register_implementation"
+     ]
+    },
+    {
+     "target": "aadistill.initialization.operators.composite",
+     "line": 23,
+     "relative": 0,
+     "names": [
+      "COMPOSITE_STAGE1_SANDWICH_V0"
+     ]
+    },
+    {
+     "target": "aadistill.initialization.operators.depth",
+     "line": 25,
+     "relative": 0,
+     "names": [
+      "DEPTH_CAUSAL_KL_GREEDY_V1",
+      "DEPTH_POSITIONAL_V0"
+     ]
+    },
+    {
+     "target": "aadistill.initialization.operators.ffn",
+     "line": 27,
+     "relative": 0,
+     "names": [
+      "FFN_ACTIVATION_IMPORTANCE_V0"
+     ]
+    },
+    {
+     "target": "aadistill.initialization.operators.width",
+     "line": 28,
+     "relative": 0,
+     "names": [
+      "WIDTH_GLOBAL_PCA_V0"
+     ]
     }
    ],
+   "internal_imports": [
+    "aadistill.initialization.operators.attention",
+    "aadistill.initialization.operators.base",
+    "aadistill.initialization.operators.composite",
+    "aadistill.initialization.operators.depth",
+    "aadistill.initialization.operators.ffn",
+    "aadistill.initialization.operators.width"
+   ],
+   "literals": [],
+   "family_attribute_access": [],
+   "definitions": [
+    {
+     "name": "register_builtin_operators",
+     "kind": "function",
+     "qualname": "register_builtin_operators",
+     "line": 43
+    }
+   ],
+   "import_time_calls": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/width.py": {
    "module": "aadistill.initialization.operators.width",
    "path": "src/aadistill/initialization/operators/width.py",
-   "lines": 167,
+   "lines": 170,
    "imports": [
     {
      "target": "__future__",
@@ -10079,8 +9669,7 @@
       "OperatorContext",
       "OperatorImplementation",
       "OperatorOutcome",
-      "OperatorPlan",
-      "register_implementation"
+      "OperatorPlan"
      ]
     }
    ],
@@ -10101,7 +9690,7 @@
       "float"
      ],
      "owner": "WidthGlobalPCAV0.apply",
-     "line": 112,
+     "line": 111,
      "experiment_tokens": []
     },
     {
@@ -10110,7 +9699,7 @@
       "float"
      ],
      "owner": "WidthGlobalPCAV0.apply",
-     "line": 112,
+     "line": 111,
      "experiment_tokens": []
     },
     {
@@ -10119,7 +9708,7 @@
       "float"
      ],
      "owner": "WidthGlobalPCAV0.apply",
-     "line": 112,
+     "line": 111,
      "experiment_tokens": []
     },
     {
@@ -10128,7 +9717,7 @@
       "float"
      ],
      "owner": "WidthGlobalPCAV0.apply",
-     "line": 115,
+     "line": 114,
      "experiment_tokens": []
     }
    ],
@@ -10138,27 +9727,22 @@
      "name": "WidthGlobalPCAV0",
      "kind": "class",
      "qualname": "WidthGlobalPCAV0",
-     "line": 54
+     "line": 53
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "WidthGlobalPCAV0.plan",
-     "line": 78
+     "line": 77
     },
     {
      "name": "apply",
      "kind": "function",
      "qualname": "WidthGlobalPCAV0.apply",
-     "line": 89
+     "line": 88
     }
    ],
-   "import_time_calls": [
-    {
-     "call": "register_implementation",
-     "line": 167
-    }
-   ],
+   "import_time_calls": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/planning/__init__.py": {
@@ -13057,7 +12641,7 @@
   "src/aadistill/initialization/specs/arch.py": {
    "module": "aadistill.initialization.specs.arch",
    "path": "src/aadistill/initialization/specs/arch.py",
-   "lines": 372,
+   "lines": 390,
    "imports": [
     {
      "target": "__future__",
@@ -13270,145 +12854,151 @@
      "name": "attention",
      "kind": "function",
      "qualname": "ArchitectureAdapter.attention",
-     "line": 219
+     "line": 228
     },
     {
      "name": "ffn",
      "kind": "function",
      "qualname": "ArchitectureAdapter.ffn",
-     "line": 222
+     "line": 231
     },
     {
      "name": "stream_in_projections",
      "kind": "function",
      "qualname": "ArchitectureAdapter.stream_in_projections",
-     "line": 225
+     "line": 234
     },
     {
      "name": "stream_out_projections",
      "kind": "function",
      "qualname": "ArchitectureAdapter.stream_out_projections",
-     "line": 235
+     "line": 244
     },
     {
      "name": "attn_norm",
      "kind": "function",
      "qualname": "ArchitectureAdapter.attn_norm",
-     "line": 239
+     "line": 248
+    },
+    {
+     "name": "attention_subnorms",
+     "kind": "function",
+     "qualname": "ArchitectureAdapter.attention_subnorms",
+     "line": 251
     },
     {
      "name": "ffn_norm",
      "kind": "function",
      "qualname": "ArchitectureAdapter.ffn_norm",
-     "line": 242
+     "line": 260
     },
     {
      "name": "embedding",
      "kind": "function",
      "qualname": "ArchitectureAdapter.embedding",
-     "line": 245
+     "line": 263
     },
     {
      "name": "final_norm",
      "kind": "function",
      "qualname": "ArchitectureAdapter.final_norm",
-     "line": 248
+     "line": 266
     },
     {
      "name": "head_groups",
      "kind": "function",
      "qualname": "ArchitectureAdapter.head_groups",
-     "line": 251
+     "line": 269
     },
     {
      "name": "stats_collector",
      "kind": "function",
      "qualname": "ArchitectureAdapter.stats_collector",
-     "line": 255
+     "line": 273
     },
     {
      "name": "requires",
      "kind": "function",
      "qualname": "ArchitectureAdapter.requires",
-     "line": 262
+     "line": 280
     },
     {
      "name": "identity",
      "kind": "function",
      "qualname": "ArchitectureAdapter.identity",
-     "line": 268
+     "line": 286
     },
     {
      "name": "AdapterRegistry",
      "kind": "class",
      "qualname": "AdapterRegistry",
-     "line": 289
+     "line": 307
     },
     {
      "name": "__init__",
      "kind": "function",
      "qualname": "AdapterRegistry.__init__",
-     "line": 292
+     "line": 310
     },
     {
      "name": "register",
      "kind": "function",
      "qualname": "AdapterRegistry.register",
-     "line": 295
+     "line": 313
     },
     {
      "name": "get",
      "kind": "function",
      "qualname": "AdapterRegistry.get",
-     "line": 322
+     "line": 340
     },
     {
      "name": "for_config",
      "kind": "function",
      "qualname": "AdapterRegistry.for_config",
-     "line": 332
+     "line": 350
     },
     {
      "name": "families",
      "kind": "function",
      "qualname": "AdapterRegistry.families",
-     "line": 338
+     "line": 356
     },
     {
      "name": "drop",
      "kind": "function",
      "qualname": "AdapterRegistry.drop",
-     "line": 341
+     "line": 359
     },
     {
      "name": "register_adapter",
      "kind": "function",
      "qualname": "register_adapter",
-     "line": 351
+     "line": 369
     },
     {
      "name": "get_adapter",
      "kind": "function",
      "qualname": "get_adapter",
-     "line": 357
+     "line": 375
     },
     {
      "name": "adapter_for_config",
      "kind": "function",
      "qualname": "adapter_for_config",
-     "line": 362
+     "line": 380
     },
     {
      "name": "registered_families",
      "kind": "function",
      "qualname": "registered_families",
-     "line": 366
+     "line": 384
     },
     {
      "name": "unregister_adapter",
      "kind": "function",
      "qualname": "unregister_adapter",
-     "line": 370
+     "line": 388
     }
    ],
    "import_time_calls": [],
@@ -14407,7 +13997,7 @@
   "src/aadistill/initialization/statistics/contribution.py": {
    "module": "aadistill.initialization.statistics.contribution",
    "path": "src/aadistill/initialization/statistics/contribution.py",
-   "lines": 343,
+   "lines": 377,
    "imports": [
     {
      "target": "__future__",
@@ -14459,84 +14049,100 @@
      "target": "torch.nn.functional",
      "line": 50,
      "relative": 0
+    },
+    {
+     "target": "aadistill.initialization.specs.arch",
+     "line": 62,
+     "relative": 0,
+     "names": [
+      "adapter_for_config"
+     ]
     }
    ],
-   "internal_imports": [],
+   "internal_imports": [
+    "aadistill.initialization.specs.arch"
+   ],
    "literals": [],
    "family_attribute_access": [
     {
      "chain": "model.layers",
      "probe": "model.layers",
-     "owner": "bypassed_blocks",
-     "line": 91
-    },
-    {
-     "chain": "model.layers",
-     "probe": "model.layers",
-     "owner": "bypassed_blocks",
-     "line": 95
+     "owner": "_set_decoder_layers",
+     "line": 90
     }
    ],
    "definitions": [
     {
+     "name": "_adapter_for",
+     "kind": "function",
+     "qualname": "_adapter_for",
+     "line": 53
+    },
+    {
      "name": "_decoder_layers",
      "kind": "function",
      "qualname": "_decoder_layers",
-     "line": 53
+     "line": 69
+    },
+    {
+     "name": "_set_decoder_layers",
+     "kind": "function",
+     "qualname": "_set_decoder_layers",
+     "line": 79
     },
     {
      "name": "bypassed_blocks",
      "kind": "function",
      "qualname": "bypassed_blocks",
-     "line": 61
+     "line": 95
     },
     {
      "name": "DistortionSums",
      "kind": "class",
      "qualname": "DistortionSums",
-     "line": 102
+     "line": 136
     },
     {
      "name": "add_tagged",
      "kind": "function",
      "qualname": "DistortionSums.add_tagged",
-     "line": 118
+     "line": 152
     },
     {
      "name": "merge",
      "kind": "function",
      "qualname": "DistortionSums.merge",
-     "line": 123
+     "line": 157
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "DistortionSums.as_dict",
-     "line": 133
+     "line": 167
     },
     {
      "name": "distortion",
      "kind": "function",
      "qualname": "distortion",
-     "line": 154
+     "line": 188
     },
     {
      "name": "domain_balanced_score",
      "kind": "function",
      "qualname": "domain_balanced_score",
-     "line": 208
+     "line": 242
     },
     {
      "name": "greedy_removal",
      "kind": "function",
      "qualname": "greedy_removal",
-     "line": 236
+     "line": 270
     },
     {
      "name": "expected_evaluations",
      "kind": "function",
      "qualname": "expected_evaluations",
-     "line": 341
+     "line": 375
     }
    ],
    "import_time_calls": [],
@@ -14930,7 +14536,7 @@
   "src/aadistill/initialization/transforms/sandwich.py": {
    "module": "aadistill.initialization.transforms.sandwich",
    "path": "src/aadistill/initialization/transforms/sandwich.py",
-   "lines": 302,
+   "lines": 324,
    "imports": [
     {
      "target": "__future__",
@@ -14967,9 +14573,18 @@
       "final_norm_weights",
       "stream_projection"
      ]
+    },
+    {
+     "target": "aadistill.initialization.specs.arch",
+     "line": 205,
+     "relative": 0,
+     "names": [
+      "adapter_for_config"
+     ]
     }
    ],
    "internal_imports": [
+    "aadistill.initialization.specs.arch",
     "aadistill.initialization.transforms.project"
    ],
    "literals": [
@@ -14988,7 +14603,7 @@
       "float"
      ],
      "owner": "init_student",
-     "line": 206,
+     "line": 220,
      "experiment_tokens": []
     },
     {
@@ -14997,7 +14612,7 @@
       "float"
      ],
      "owner": "init_student",
-     "line": 206,
+     "line": 220,
      "experiment_tokens": []
     },
     {
@@ -15006,7 +14621,7 @@
       "float"
      ],
      "owner": "init_student",
-     "line": 206,
+     "line": 220,
      "experiment_tokens": []
     },
     {
@@ -15015,7 +14630,7 @@
       "float"
      ],
      "owner": "init_student",
-     "line": 255,
+     "line": 276,
      "experiment_tokens": []
     },
     {
@@ -15024,180 +14639,11 @@
       "float"
      ],
      "owner": "init_student",
-     "line": 267,
+     "line": 288,
      "experiment_tokens": []
     }
    ],
-   "family_attribute_access": [
-    {
-     "chain": "model.embed_tokens.weight.dtype",
-     "probe": "embed_tokens",
-     "owner": "init_student",
-     "line": 197
-    },
-    {
-     "chain": "model.layers",
-     "probe": "model.layers",
-     "owner": "init_student",
-     "line": 227
-    },
-    {
-     "chain": "input_layernorm.weight",
-     "probe": "input_layernorm",
-     "owner": "init_student",
-     "line": 233
-    },
-    {
-     "chain": "self_attn.q_proj.weight.to",
-     "probe": "q_proj",
-     "owner": "init_student",
-     "line": 235
-    },
-    {
-     "chain": "self_attn.o_proj.weight.to",
-     "probe": "o_proj",
-     "owner": "init_student",
-     "line": 237
-    },
-    {
-     "chain": "self_attn.q_proj.weight.device",
-     "probe": "q_proj",
-     "owner": "init_student",
-     "line": 244
-    },
-    {
-     "chain": "self_attn.q_proj.weight.copy_",
-     "probe": "q_proj",
-     "owner": "init_student",
-     "line": 245
-    },
-    {
-     "chain": "self_attn.q_proj.weight",
-     "probe": "q_proj",
-     "owner": "init_student",
-     "line": 246
-    },
-    {
-     "chain": "self_attn.k_proj.weight.copy_",
-     "probe": "k_proj",
-     "owner": "init_student",
-     "line": 247
-    },
-    {
-     "chain": "self_attn.k_proj.weight",
-     "probe": "k_proj",
-     "owner": "init_student",
-     "line": 248
-    },
-    {
-     "chain": "self_attn.v_proj.weight.copy_",
-     "probe": "v_proj",
-     "owner": "init_student",
-     "line": 249
-    },
-    {
-     "chain": "self_attn.v_proj.weight",
-     "probe": "v_proj",
-     "owner": "init_student",
-     "line": 250
-    },
-    {
-     "chain": "self_attn.o_proj.weight.copy_",
-     "probe": "o_proj",
-     "owner": "init_student",
-     "line": 251
-    },
-    {
-     "chain": "self_attn.o_proj.weight.to",
-     "probe": "o_proj",
-     "owner": "init_student",
-     "line": 252
-    },
-    {
-     "chain": "self_attn.q_norm.weight.copy_",
-     "probe": "self_attn",
-     "owner": "init_student",
-     "line": 253
-    },
-    {
-     "chain": "self_attn.k_norm.weight.copy_",
-     "probe": "self_attn",
-     "owner": "init_student",
-     "line": 254
-    },
-    {
-     "chain": "input_layernorm.weight.fill_",
-     "probe": "input_layernorm",
-     "owner": "init_student",
-     "line": 255
-    },
-    {
-     "chain": "mlp.down_proj.weight",
-     "probe": "mlp",
-     "owner": "init_student",
-     "line": 258
-    },
-    {
-     "chain": "post_attention_layernorm.weight",
-     "probe": "post_attention_layernorm",
-     "owner": "init_student",
-     "line": 260
-    },
-    {
-     "chain": "mlp.gate_proj.weight.copy_",
-     "probe": "mlp",
-     "owner": "init_student",
-     "line": 261
-    },
-    {
-     "chain": "mlp.gate_proj.weight",
-     "probe": "mlp",
-     "owner": "init_student",
-     "line": 262
-    },
-    {
-     "chain": "mlp.up_proj.weight.copy_",
-     "probe": "up_proj",
-     "owner": "init_student",
-     "line": 263
-    },
-    {
-     "chain": "mlp.up_proj.weight",
-     "probe": "up_proj",
-     "owner": "init_student",
-     "line": 264
-    },
-    {
-     "chain": "mlp.down_proj.weight.copy_",
-     "probe": "mlp",
-     "owner": "init_student",
-     "line": 265
-    },
-    {
-     "chain": "mlp.down_proj.weight.to",
-     "probe": "mlp",
-     "owner": "init_student",
-     "line": 266
-    },
-    {
-     "chain": "post_attention_layernorm.weight.fill_",
-     "probe": "post_attention_layernorm",
-     "owner": "init_student",
-     "line": 267
-    },
-    {
-     "chain": "model.embed_tokens.weight.copy_",
-     "probe": "embed_tokens",
-     "owner": "init_student",
-     "line": 277
-    },
-    {
-     "chain": "model.embed_tokens.weight.to",
-     "probe": "embed_tokens",
-     "owner": "init_student",
-     "line": 278
-    }
-   ],
+   "family_attribute_access": [],
    "definitions": [
     {
      "name": "depth_span_map",

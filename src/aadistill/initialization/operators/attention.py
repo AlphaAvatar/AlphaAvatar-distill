@@ -43,7 +43,6 @@ from aadistill.initialization.operators.base import (
     OperatorImplementation,
     OperatorOutcome,
     OperatorPlan,
-    register_implementation,
 )
 
 HEADS_FIELD = "num_attention_heads"
@@ -103,13 +102,17 @@ class AttentionWeightProxyV0(OperatorImplementation):
 
         retained, kept_per_layer = [], []
         for src, dst in zip(adapter.blocks(parent), adapter.blocks(builder.model)):
-            s_attn, d_attn = adapter.attention(src), adapter.attention(dst)
+            # By ROLE, through the adapter. Reaching `.q_proj`/`.o_proj` on the
+            # attention module put one family's names in a generic operator.
+            s_q = adapter.stream_in_projections(src)["q"][0]
+            d_q = adapter.stream_in_projections(dst)["q"][0]
+            s_o = adapter.stream_out_projections(src)["attn_out"]
+            d_o = adapter.stream_out_projections(dst)["attn_out"]
             norm_w = adapter.attn_norm(src).weight.to(torch.float64)
-            q64 = s_attn.q_proj.weight.to(torch.float64)
-            o64 = s_attn.o_proj.weight.to(torch.float64)
+            q64 = s_q.weight.to(torch.float64)
+            o64 = s_o.weight.to(torch.float64)
             kept = select_q_heads(q64 * norm_w[None, :], o64, n_q, n_kv, keep_q, head_dim)
-            rows = head_rows(kept, head_dim,
-                             device=s_attn.q_proj.weight.device)
+            rows = head_rows(kept, head_dim, device=s_q.weight.device)
 
             # A host diagnostic, deliberately: these are reduced to Python
             # floats immediately below and never meet a parameter again.
@@ -120,9 +123,9 @@ class AttentionWeightProxyV0(OperatorImplementation):
             retained.append(float(scores[kept].sum() / scores.sum()))
             kept_per_layer.append(list(kept))
 
-            transformed = {id(d_attn.q_proj.weight), id(d_attn.o_proj.weight)}
-            builder.assign(d_attn.q_proj.weight, s_attn.q_proj.weight[rows])
-            builder.assign(d_attn.o_proj.weight, s_attn.o_proj.weight[:, rows])
+            transformed = {id(d_q.weight), id(d_o.weight)}
+            builder.assign(d_q.weight, s_q.weight[rows])
+            builder.assign(d_o.weight, s_o.weight[:, rows])
             copy_module_except(builder, src, dst, skip=transformed)
 
         copy_embeddings_and_final_norm(builder, adapter, parent)
@@ -145,4 +148,8 @@ class AttentionWeightProxyV0(OperatorImplementation):
         )
 
 
-ATTENTION_WEIGHT_PROXY_V0 = register_implementation(AttentionWeightProxyV0())
+#: The instance, NOT a registration. Registering at import made the registry's
+#: contents depend on who had imported what first, which is the same coupling
+#: the adapter bootstrap removed. `aadistill.initialization.operators.register`
+#: is the one place the shipped operators are registered.
+ATTENTION_WEIGHT_PROXY_V0 = AttentionWeightProxyV0()

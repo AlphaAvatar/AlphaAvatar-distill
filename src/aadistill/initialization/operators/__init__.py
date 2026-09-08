@@ -1,9 +1,14 @@
 """Operator kinds and implementations.
 
-Importing this package registers the v1 library. An implementation defined
-elsewhere joins by calling ``register_implementation`` (and ``register_kind``
-first, if it introduces a new structural dimension) — no edit here, and none to
-the search engine.
+Importing this package registers NOTHING. It used to register the v1 library,
+so which operators `get_implementation` could resolve depended on who had
+imported what first -- the same coupling the adapter bootstrap removed. An
+application calls `aadistill.initialization.operators.register.
+register_builtin_operators()`.
+
+An implementation defined elsewhere joins by calling ``register_implementation``
+(and ``register_kind`` first, if it introduces a new structural dimension) -- no
+edit here, and none to the search engine.
 """
 
 from aadistill.initialization.operators.attention import ATTENTION_WEIGHT_PROXY_V0

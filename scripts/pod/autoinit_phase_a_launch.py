@@ -56,6 +56,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, RelayInput,
     SessionContext, SessionSpec, SetupManifest, TeardownPolicy,
@@ -67,6 +68,9 @@ from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noq
 from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
+
+#: Explicit: importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 STATUS = f"{WS}/autoinit_phase_a.status"
 RUN_LOG = f"{WS}/autoinit_phase_a_run.log"

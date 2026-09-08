@@ -51,6 +51,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.specs.identity_collapse import (  # noqa: E402
     IdentityCollapseError,
     collapse,
@@ -67,6 +68,9 @@ import autoinit_phase_a_driver as _phase_a  # noqa: E402
 from autoinit_phase_a_driver import (  # noqa: E402
     AUDIT, PhaseADriver, WS, mark, say,
 )
+
+#: Explicit: importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 STATUS = WS / "autoinit_continuation_b.status"
 

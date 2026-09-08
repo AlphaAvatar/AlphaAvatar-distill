@@ -521,7 +521,7 @@ def test_the_calibration_pin_matches_the_registry_that_already_carried_it():
     sys.path.insert(0, str(POD))
     from autoinit_science_inputs import CALIBRATION_V1
 
-    from aadistill.initialization.calibration.datasets import E8A_CALIBRATION
+    from experiments.datasets import E8A_CALIBRATION
 
     pins = {r.sha256 for r in CALIBRATION_V1 if r.sha256}
     assert pins == {E8A_CALIBRATION.content_sha256}, (

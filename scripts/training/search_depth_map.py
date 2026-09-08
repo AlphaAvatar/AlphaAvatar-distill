@@ -57,8 +57,12 @@ from aadistill.initialization.statistics.contribution import (  # noqa: E402
     greedy_removal,
 )
 from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.infrastructure.env import code_state, hardware_report  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
+
+#: Explicit: importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 SELF_KL_TOLERANCE = 1e-6
 

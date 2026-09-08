@@ -42,6 +42,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.runtime.device_handoff import (  # noqa: E402
     DeviceHandoffError,
     complete_release,
@@ -64,6 +65,9 @@ from phase_a_frozen import (  # noqa: E402
 from autoinit_phase_a_driver import (  # noqa: E402
     AUDIT, RECOVERY_TRAINER_BYTES, STATE_EVAL, PhaseADriver, mark, say,
 )
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 #: Where the launcher stages attempt 12's five preserved leaves.
 STAGED_LEAVES = REPO / "artifacts/autoinit/phase_a_selected"

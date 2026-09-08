@@ -40,8 +40,12 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_json
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec
 from aadistill.initialization.planning.fixed_path import FixedPathSpec, FixedPathStep
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 SCHEMA = "aadistill.autoinit.c1_session/v1"
 

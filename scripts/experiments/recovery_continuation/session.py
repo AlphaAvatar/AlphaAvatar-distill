@@ -28,8 +28,12 @@ from pathlib import Path
 from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_json
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.governance.authorization import AuthorizationError
 from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PhaseAAuthorization, phase_a_harness_digest
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 SCHEMA = "aadistill.autoinit.recovery_continuation_authorization/v1"
 

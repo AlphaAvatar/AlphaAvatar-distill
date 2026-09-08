@@ -48,7 +48,6 @@ from aadistill.initialization.operators.base import (
     OperatorKindSpec,
     OperatorOutcome,
     OperatorPlan,
-    register_implementation,
     register_kind,
 )
 
@@ -176,4 +175,8 @@ class CompositeStage1SandwichV0(OperatorImplementation):
         )
 
 
-COMPOSITE_STAGE1_SANDWICH_V0 = register_implementation(CompositeStage1SandwichV0())
+#: The instance, NOT a registration. Registering at import made the registry's
+#: contents depend on who had imported what first, which is the same coupling
+#: the adapter bootstrap removed. `aadistill.initialization.operators.register`
+#: is the one place the shipped operators are registered.
+COMPOSITE_STAGE1_SANDWICH_V0 = CompositeStage1SandwichV0()

@@ -165,6 +165,7 @@ def init_student(
     teacher, student, state: dict[str, torch.Tensor],
     proj_override: torch.Tensor | None = None,
     kept_layers: list[int] | None = None,
+    adapter=None,
 ) -> dict:
     """Initialize a student Qwen3-style model in place from the teacher.
 
@@ -191,10 +192,23 @@ def init_student(
     if not s_cfg.tie_word_embeddings:
         raise ValueError("Recipe v0 assumes tied student embeddings")
 
+    #: Every model-family access below goes through the adapter. It used to
+    #: reach `.self_attn.q_proj`, `.mlp.down_proj`, `.input_layernorm` and
+    #: `.model.layers` directly, which put one family's module names in a
+    #: transform that is supposed to be family-agnostic -- a second family would
+    #: have meant editing this file rather than writing an adapter.
+    #:
+    #: Injected rather than resolved here: which adapter applies is the caller's
+    #: fact. `None` resolves the teacher's declared family from the registry,
+    #: which the application has already filled.
+    if adapter is None:
+        from aadistill.initialization.specs.arch import adapter_for_config
+        adapter = adapter_for_config(teacher.config)
+
     d_t, d_s = t_cfg.hidden_size, s_cfg.hidden_size
     head_dim = t_cfg.head_dim
     scale = math.sqrt(d_t / d_s)
-    dtype = student.model.embed_tokens.weight.dtype
+    dtype = adapter.embedding(student).weight.dtype
 
     # All pre-norm stream states plus the post-final-norm point, with the two
     # end points upweighted: the tied embedding reads point 0 and the tied lm
@@ -224,47 +238,54 @@ def init_student(
             )
         spans = explicit_depth_map(list(kept_layers), t_cfg.num_hidden_layers)
         depth_source = "explicit_kept_layers"
-    t_layers, s_layers = teacher.model.layers, student.model.layers
+    t_layers, s_layers = adapter.blocks(teacher), adapter.blocks(student)
     layer_records = []
     for span in spans:
         tl = t_layers[span["representative"]]
         sl = s_layers[span["student"]]
 
-        w_att_norm = tl.input_layernorm.weight
+        t_in, s_in = (adapter.stream_in_projections(tl),
+                      adapter.stream_in_projections(sl))
+        t_out, s_out = (adapter.stream_out_projections(tl),
+                        adapter.stream_out_projections(sl))
+
+        w_att_norm = adapter.attn_norm(tl).weight
         kept_q = select_q_heads(
-            (tl.self_attn.q_proj.weight.to(torch.float64)
+            (t_in["q"][0].weight.to(torch.float64)
              * w_att_norm.to(torch.float64)[None, :]),
-            tl.self_attn.o_proj.weight.to(torch.float64),
+            t_out["attn_out"].weight.to(torch.float64),
             t_cfg.num_attention_heads, t_cfg.num_key_value_heads,
             s_cfg.num_attention_heads, head_dim,
         )
         # Indexes the parent's own weights, below and two lines further down, so
         # it is built where they are.
         q_rows = _head_rows(kept_q, head_dim,
-                            device=tl.self_attn.q_proj.weight.device)
-        sl.self_attn.q_proj.weight.copy_(
-            _in_proj(tl.self_attn.q_proj.weight, w_att_norm, proj, scale)[q_rows].to(dtype))
-        sl.self_attn.k_proj.weight.copy_(
-            _in_proj(tl.self_attn.k_proj.weight, w_att_norm, proj, scale).to(dtype))
-        sl.self_attn.v_proj.weight.copy_(
-            _in_proj(tl.self_attn.v_proj.weight, w_att_norm, proj, scale).to(dtype))
-        sl.self_attn.o_proj.weight.copy_(
-            (proj.T @ tl.self_attn.o_proj.weight.to(torch.float64)[:, q_rows]).to(dtype))
-        sl.self_attn.q_norm.weight.copy_(tl.self_attn.q_norm.weight.to(dtype))
-        sl.self_attn.k_norm.weight.copy_(tl.self_attn.k_norm.weight.to(dtype))
-        sl.input_layernorm.weight.fill_(1.0)
+                            device=t_in["q"][0].weight.device)
+        s_in["q"][0].weight.copy_(
+            _in_proj(t_in["q"][0].weight, w_att_norm, proj, scale)[q_rows].to(dtype))
+        s_in["k"][0].weight.copy_(
+            _in_proj(t_in["k"][0].weight, w_att_norm, proj, scale).to(dtype))
+        s_in["v"][0].weight.copy_(
+            _in_proj(t_in["v"][0].weight, w_att_norm, proj, scale).to(dtype))
+        s_out["attn_out"].weight.copy_(
+            (proj.T @ t_out["attn_out"].weight.to(torch.float64)[:, q_rows]).to(dtype))
+        t_sub, s_sub = (adapter.attention_subnorms(tl),
+                        adapter.attention_subnorms(sl))
+        for role, norm in s_sub.items():
+            norm.weight.copy_(t_sub[role].weight.to(dtype))
+        adapter.attn_norm(sl).weight.fill_(1.0)
 
         importance = ffn_neuron_importance(
-            state, span["representative"], tl.mlp.down_proj.weight)
+            state, span["representative"], t_out["ffn_out"].weight)
         kept_n = torch.topk(importance, s_cfg.intermediate_size).indices.sort().values
-        w_ffn_norm = tl.post_attention_layernorm.weight
-        sl.mlp.gate_proj.weight.copy_(
-            _in_proj(tl.mlp.gate_proj.weight, w_ffn_norm, proj, scale)[kept_n].to(dtype))
-        sl.mlp.up_proj.weight.copy_(
-            _in_proj(tl.mlp.up_proj.weight, w_ffn_norm, proj, scale)[kept_n].to(dtype))
-        sl.mlp.down_proj.weight.copy_(
-            (proj.T @ tl.mlp.down_proj.weight.to(torch.float64)[:, kept_n]).to(dtype))
-        sl.post_attention_layernorm.weight.fill_(1.0)
+        w_ffn_norm = adapter.ffn_norm(tl).weight
+        s_in["gate"][0].weight.copy_(
+            _in_proj(t_in["gate"][0].weight, w_ffn_norm, proj, scale)[kept_n].to(dtype))
+        s_in["up"][0].weight.copy_(
+            _in_proj(t_in["up"][0].weight, w_ffn_norm, proj, scale)[kept_n].to(dtype))
+        s_out["ffn_out"].weight.copy_(
+            (proj.T @ t_out["ffn_out"].weight.to(torch.float64)[:, kept_n]).to(dtype))
+        adapter.ffn_norm(sl).weight.fill_(1.0)
 
         layer_records.append({
             "student_layer": span["student"],
@@ -274,13 +295,14 @@ def init_student(
             "ffn_kept_frac": len(kept_n) / t_cfg.intermediate_size,
         })
 
-    student.model.embed_tokens.weight.copy_(
-        (teacher.model.embed_tokens.weight.to(torch.float64) @ proj).to(dtype))
+    adapter.embedding(student).weight.copy_(
+        (adapter.embedding(teacher).weight.to(torch.float64) @ proj).to(dtype))
     student.tie_weights()
 
     w_final = final_norm_weights(
-        state, proj, teacher.model.norm.weight, post_norm_point=t_cfg.num_hidden_layers)
-    student.model.norm.weight.copy_((scale * w_final).to(dtype))
+        state, proj, adapter.final_norm(teacher).weight,
+        post_norm_point=t_cfg.num_hidden_layers)
+    adapter.final_norm(student).weight.copy_((scale * w_final).to(dtype))
 
     return {
         "projection": proj_diag,

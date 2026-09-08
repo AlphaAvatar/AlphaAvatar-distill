@@ -28,6 +28,10 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
 from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, CONTINUATION_SOURCE_SET_VERSION, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, continuation_source_digest, search_call_site_owners  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 AMENDMENT = REPO_ROOT / "logs/autoinit_phase_b_identity_collapse_amendment.json"
 PRICING = REPO_ROOT / "logs/autoinit_behavioural_continuation_pricing.json"

@@ -39,6 +39,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 from load_state_eval import load as load_suite  # noqa: E402
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
 from experiments.calibration import DOMAIN_BALANCED_V1  # noqa: E402
@@ -67,6 +68,9 @@ from phase_a_frozen import (  # noqa: E402,F401
     CANONICAL_INIT, CANONICAL_INIT_SHA256, SEARCH_SEED, TARGET_GEOMETRY,
     TEACHER_ID, TEACHER_REVISION,
 )
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 #: Explicit: importing an adapter module no longer registers it.
 register_builtin_adapters()

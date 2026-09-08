@@ -37,12 +37,16 @@ from pathlib import Path
 from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_json
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.infrastructure.source_identity import (
     CANONICAL_DIGEST_ALGORITHM,
     canonical_source_digest,
 )
 from aadistill.governance.authorization import AuthorizationError
 from aadistill.initialization.planning.recovery import PreflightPlan, PreflightStage
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 SCHEMA = "aadistill.autoinit.continuation_authorization/v1"
 

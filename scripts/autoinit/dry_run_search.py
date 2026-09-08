@@ -28,6 +28,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.calibration.profiles import (  # noqa: E402
     CalibrationProfile,
@@ -59,6 +60,9 @@ from aadistill.initialization.planning.search import (  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
 from aadistill.initialization.specs.state import make_control_state  # noqa: E402
 from aadistill.infrastructure.env import code_state, hardware_report  # noqa: E402
+
+#: Explicit: importing an operator module no longer registers it.
+register_builtin_operators()
 
 #: Explicit: importing an adapter module no longer registers it.
 register_builtin_adapters()

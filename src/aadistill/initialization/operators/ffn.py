@@ -39,7 +39,6 @@ from aadistill.initialization.operators.base import (
     OperatorImplementation,
     OperatorOutcome,
     OperatorPlan,
-    register_implementation,
 )
 
 FFN_FIELD = "intermediate_size"
@@ -96,7 +95,9 @@ class FFNActivationImportanceV0(OperatorImplementation):
         for idx, (src, dst) in enumerate(zip(adapter.blocks(parent),
                                              adapter.blocks(builder.model))):
             src_ffn, dst_ffn = adapter.ffn(src), adapter.ffn(dst)
-            importance = ffn_neuron_importance(state, idx, src_ffn.down_proj.weight)
+            # By role: `down_proj` is Qwen3's name for the FFN's stream writer.
+            src_down = adapter.stream_out_projections(src)["ffn_out"]
+            importance = ffn_neuron_importance(state, idx, src_down.weight)
             kept = torch.topk(importance, keep).indices.sort().values
             retained_shares.append(float(importance[kept].sum() / importance.sum()))
             kept_per_layer.append(kept.tolist())
@@ -135,4 +136,8 @@ class FFNActivationImportanceV0(OperatorImplementation):
         )
 
 
-FFN_ACTIVATION_IMPORTANCE_V0 = register_implementation(FFNActivationImportanceV0())
+#: The instance, NOT a registration. Registering at import made the registry's
+#: contents depend on who had imported what first, which is the same coupling
+#: the adapter bootstrap removed. `aadistill.initialization.operators.register`
+#: is the one place the shipped operators are registered.
+FFN_ACTIVATION_IMPORTANCE_V0 = FFNActivationImportanceV0()
