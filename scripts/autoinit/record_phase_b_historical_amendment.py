@@ -81,12 +81,24 @@ def main() -> int:
     ap.add_argument("--maintainer", required=True,
                     help="the human/P12 decision authorizing this amendment")
     ap.add_argument("--reviewed-base", required=True)
+    ap.add_argument("--parent", default=None, help=(
+        "the commit the change is measured FROM. Defaults to <commit>^, which "
+        "is right for a single repair. A change that spans several commits -- "
+        "the initialization migration spans thirteen -- must name its base, or "
+        "the amendment reports one commit's numstat while claiming to account "
+        "for all of them."))
+    ap.add_argument("--ledger", default=None, help=(
+        "write to this ledger instead of the committed one. For tests: a test "
+        "that points the recorder at the repository can append to a governance "
+        "artifact whenever its 'this will be refused' precondition stops "
+        "holding, which is exactly what happened during the initialization "
+        "migration."))
     args = ap.parse_args()
 
     commit = git("rev-parse", args.commit).strip()
-    parent = git("rev-parse", f"{commit}^").strip()
+    parent = git("rev-parse", args.parent or f"{commit}^").strip()
 
-    ledger_path = REPO_ROOT / HISTORICAL_LEDGER_PATH
+    ledger_path = Path(args.ledger) if args.ledger else REPO_ROOT / HISTORICAL_LEDGER_PATH
     prereg_doc = json.loads((REPO_ROOT / PREREG).read_text())
     frozen = prereg_doc["executable_source"]["digest"]
     live = phase_b_source_digest(REPO_ROOT)["digest"]

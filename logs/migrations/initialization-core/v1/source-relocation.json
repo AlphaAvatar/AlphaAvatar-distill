@@ -1,0 +1,2911 @@
+{
+ "schema": "aadistill.migration_source_relocation/v1",
+ "_contract": "How one source relocation stands against every declaration it touched. Records CURRENT-CODE MOVEMENT ONLY. It authorizes no experiment, no provider resource, no grant and no reinterpretation of any prior result, and no historical experiment ran the relocated implementation. AUTHORIZES NOTHING.",
+ "migration": "initialization-core",
+ "version": "v1",
+ "base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+ "tip_commit": "92d97b9aaf584c8d19f81504d6e71eee688705e6",
+ "commits": [
+  "92d97b9aaf584c8d19f81504d6e71eee688705e6 Milestone A step 12: the C1 closure covers what a paid session actually reaches",
+  "2982621c0ebc63d331c5bfde5f63c18d5677d71a Milestone A step 11b: the continuation set version pin follows the bump",
+  "65e4e2ec0bb5d995fb2e42a7d6e79bd28af0c366 Milestone A step 11: the continuation's closure follows what it loads",
+  "0ace7cbb7be4d2db57c00f84ce5a8f2d0e464ea2 Milestone A step 10: the three fixture categories, on the Phase-A clusters",
+  "cde4d47847fc2f0f79639690e2893dd71d35e6be Milestone A step 9b: the v2 mixture's constants follow its profile",
+  "90919912177eebf0e5226b8be8d97acc793656fa Milestone A step 9: explicit adapter and profile ownership; core stops importing scripts",
+  "c9bf3cbadea76dd2fa2ae0fe189933128a939575 Milestone A: record the measured final suite result",
+  "e29de00e6572a27ff3bda8ac24c7e3f25fccb5c2 Milestone A step 8: STATE.md, the layout and the catalog describe this tree",
+  "6843076f9f00559eeb397a8989942e4c47dd6c42 Milestone A step 7: a config-driven CUDA engineering check, executed at $0",
+  "bd6313c1851801e40dab72f2ecf5a469a801e0b1 Milestone A step 6: repair the split's stragglers and the script path shims",
+  "d1b6171f464bcc3920e9e1510178263f6d992f89 Milestone A step 5: zero package cycles, and a ratchet that counts honestly",
+  "2c9a1b847946739c53d632f2759a27c5c6d439e0 Milestone A step 5a: re-identify the ratchet baseline at precise identities",
+  "cec3fd07e88bf636f1d05a9256134292d8283a78 Milestone A step 4: repoint the declarations, and give registration one owner",
+  "b392ad88ff69d5c1dc25c607cc5b1e540245bf9e Milestone A step 3: relocate the live scoring contract, and show it moved nothing",
+  "ff1f27e36c71abd46c4ed1760f9b1b55c4f3eda1 Milestone A step 2: derive the current executable set instead of listing it",
+  "5f4c400a2cd761e85691932cd4cdbb4ed90e7a94 Milestone A step 1: move all 59 modules, rewrite 871 imports"
+ ],
+ "what": "All-stage initialization-core consolidation and core/application separation: relocate reusable implementation from aadistill.init and aadistill.autoinit into aadistill.initialization; extract model-instance and experiment-instance policy into configs and experiment scripts; replace import-time adapter registration with explicit application bootstrap; update current callers and executable dependency closures while preserving mathematical behavior and historical evidence.",
+ "maintainer_decision": "MAINTAINER P12 DECISION, 2026-09-08:\n\nThe non-additive all-stage initialization package relocation on\nmigration/initialization-milestone-a is approved for historical accounting.\n\nHistorical preregistrations, raw results, replay digests, grants,\nauthorizations and scientific observations remain immutable. No historical\nexperiment may be described as having run the relocated implementation.\nOld grants and authorizations remain unusable against the migrated tree.\n\nThis approval records current-code movement only. It authorizes no\nexperiment, no GPU/provider resource, no Attempt-10 grant or authorization,\nno scientific field change and no reinterpretation of prior results.",
+ "totals": {
+  "files_relocated": 59,
+  "files_touched_in_span": 262,
+  "lines_added": 20219,
+  "lines_removed": 19572,
+  "declarations_examined": 11
+ },
+ "numstat": {
+  "configs/architecture/core_boundary_baseline.json": [
+   144,
+   81
+  ],
+  "configs/calibration/profiles.json": [
+   283,
+   0
+  ],
+  "configs/experiments/phase_c1/executable_closure.json": [
+   477,
+   0
+  ],
+  "configs/validation/cuda_engineering.json": [
+   96,
+   0
+  ],
+  "docs/REPO_LAYOUT.md": [
+   18,
+   18
+  ],
+  "logs/CATALOG.md": [
+   3,
+   0
+  ],
+  "logs/STATE.md": [
+   71,
+   4
+  ],
+  "logs/architecture_declaration_history.json": [
+   717,
+   0
+  ],
+  "logs/architecture_inventory.json": [
+   11897,
+   17122
+  ],
+  "logs/architecture_scoring_equivalence.json": [
+   69,
+   0
+  ],
+  "logs/architecture_source_relocation.json": [
+   368,
+   0
+  ],
+  "logs/autoinit_phase_b_historical_amendments.json": [
+   179,
+   0
+  ],
+  "logs/c1_renderer_parity.json": [
+   3,
+   3
+  ],
+  "scripts/architecture/compare_scoring_across_migration.py": [
+   204,
+   0
+  ],
+  "scripts/architecture/derive_closure.py": [
+   80,
+   0
+  ],
+  "scripts/architecture/migration_map.py": [
+   198,
+   0
+  ],
+  "scripts/architecture/record_source_relocation.py": [
+   221,
+   0
+  ],
+  "scripts/architecture/relocate_declarations.py": [
+   202,
+   0
+  ],
+  "scripts/architecture/rewrite_imports.py": [
+   139,
+   0
+  ],
+  "scripts/autoinit/attest_protocol.py": [
+   1,
+   1
+  ],
+  "scripts/autoinit/audit_skip_predicates.py": [
+   4,
+   4
+  ],
+  "scripts/autoinit/characterize_thresholds.py": [
+   16,
+   5
+  ],
+  "scripts/autoinit/compare_recovery_fingerprints.py": [
+   1,
+   1
+  ],
+  "scripts/autoinit/dry_run_search.py": [
+   29,
+   10
+  ],
+  "scripts/autoinit/emit_protocol_compat_v2.py": [
+   9,
+   6
+  ],
+  "scripts/autoinit/issue_authorization.py": [
+   4,
+   3
+  ],
+  "scripts/autoinit/issue_c1_authorization.py": [
+   2,
+   1
+  ],
+  "scripts/autoinit/issue_continuation_authorization.py": [
+   3,
+   5
+  ],
+  "scripts/autoinit/issue_continuation_b_authorization.py": [
+   8,
+   11
+  ],
+  "scripts/autoinit/issue_measurement_authorization.py": [
+   8,
+   9
+  ],
+  "scripts/autoinit/issue_phase_a_authorization.py": [
+   3,
+   5
+  ],
+  "scripts/autoinit/issue_phase_b_authorization.py": [
+   7,
+   10
+  ],
+  "scripts/autoinit/issue_recovery_continuation_authorization.py": [
+   3,
+   6
+  ],
+  "scripts/autoinit/load_state_eval.py": [
+   1,
+   1
+  ],
+  "scripts/autoinit/measure_causal_depth_runtime.py": [
+   10,
+   5
+  ],
+  "scripts/autoinit/measure_state_repeatability.py": [
+   8,
+   4
+  ],
+  "scripts/autoinit/phase_a_search.py": [
+   17,
+   10
+  ],
+  "scripts/autoinit/plan_search.py": [
+   17,
+   6
+  ],
+  "scripts/autoinit/price_behavioural_continuation.py": [
+   1,
+   1
+  ],
+  "scripts/autoinit/price_phase_b.py": [
+   2,
+   2
+  ],
+  "scripts/autoinit/probe_peak_memory.py": [
+   5,
+   1
+  ],
+  "scripts/autoinit/publish_selected_leaves.py": [
+   6,
+   2
+  ],
+  "scripts/autoinit/record_phase_b_historical_amendment.py": [
+   17,
+   22
+  ],
+  "scripts/autoinit/record_phase_b_post_freeze.py": [
+   9,
+   7
+  ],
+  "scripts/autoinit/record_pod_environment.py": [
+   20,
+   10
+  ],
+  "scripts/autoinit/renderer_parity_gate.py": [
+   2,
+   1
+  ],
+  "scripts/autoinit/score_c1_confirmation.py": [
+   6,
+   6
+  ],
+  "scripts/autoinit/score_recovery_search.py": [
+   1,
+   1
+  ],
+  "scripts/autoinit/stage_c1_bundle.py": [
+   2,
+   4
+  ],
+  "scripts/autoinit/validate_recovery_scoring.py": [
+   1,
+   1
+  ],
+  "scripts/autoinit/verify_attempt4_probe_reuse.py": [
+   10,
+   4
+  ],
+  "scripts/autoinit/verify_attempt5_probe_reuse.py": [
+   10,
+   4
+  ],
+  "scripts/autoinit/verify_c1_scoring_equivalence.py": [
+   3,
+   5
+  ],
+  "scripts/autoinit/verify_control_checkpoints.py": [
+   1,
+   1
+  ],
+  "scripts/autoinit/verify_depth_backend_equivalence.py": [
+   5,
+   2
+  ],
+  "scripts/autoinit/verify_frozen_assets.py": [
+   33,
+   10
+  ],
+  "scripts/autoinit/verify_historical_probe_reuse.py": [
+   11,
+   4
+  ],
+  "scripts/autoinit/write_c1_execution_preregistration.py": [
+   16,
+   35
+  ],
+  "scripts/autoinit/write_continuation_b_preregistration.py": [
+   3,
+   8
+  ],
+  "scripts/autoinit/write_phase_b_preregistration.py": [
+   14,
+   12
+  ],
+  "scripts/autoinit/write_preregistration.py": [
+   14,
+   6
+  ],
+  "scripts/data/build_reasoning_heavy_calibration.py": [
+   14,
+   6
+  ],
+  "scripts/evaluation/measure_init_nll.py": [
+   3,
+   2
+  ],
+  "scripts/evaluation/uncapped_eval.py": [
+   1,
+   1
+  ],
+  "scripts/experiments/__init__.py": [
+   1,
+   0
+  ],
+  "scripts/experiments/calibration.py": [
+   72,
+   0
+  ],
+  "scripts/experiments/measurement/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/autoinit/measurement.py => scripts/experiments/measurement/plan.py": [
+   4,
+   4
+  ],
+  "scripts/experiments/phase_a/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/autoinit/phase_a.py => scripts/experiments/phase_a/plan.py": [
+   13,
+   7
+  ],
+  "scripts/experiments/phase_b/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/autoinit/phase_b_continuation.py => scripts/experiments/phase_b/continuation.py": [
+   42,
+   48
+  ],
+  "src/aadistill/autoinit/phase_b.py => scripts/experiments/phase_b/plan.py": [
+   43,
+   38
+  ],
+  "scripts/experiments/phase_c1/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/autoinit/c1_authorization.py => scripts/experiments/phase_c1/authorization.py": [
+   106,
+   8
+  ],
+  "scripts/experiments/phase_c1/authorization_payload.py": [
+   8,
+   14
+  ],
+  "src/aadistill/autoinit/c1_bundle.py => scripts/experiments/phase_c1/bundle.py": [
+   0,
+   0
+  ],
+  "src/aadistill/autoinit/c1_isolation.py => scripts/experiments/phase_c1/isolation.py": [
+   1,
+   1
+  ],
+  "src/aadistill/autoinit/c1_packaging.py => scripts/experiments/phase_c1/packaging.py": [
+   1,
+   1
+  ],
+  "src/aadistill/autoinit/c1_probe_results.py => scripts/experiments/phase_c1/probe_results.py": [
+   1,
+   1
+  ],
+  "src/aadistill/autoinit/c1_scoring.py => scripts/experiments/phase_c1/scoring.py": [
+   3,
+   3
+  ],
+  "src/aadistill/autoinit/c1_session.py => scripts/experiments/phase_c1/session.py": [
+   4,
+   4
+  ],
+  "scripts/experiments/recovery_continuation/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/autoinit/continuation.py => scripts/experiments/recovery_continuation/plan.py": [
+   6,
+   6
+  ],
+  "src/aadistill/autoinit/recovery_continuation.py => scripts/experiments/recovery_continuation/session.py": [
+   7,
+   10
+  ],
+  "scripts/pod/autoinit_c1_driver.py": [
+   28,
+   26
+  ],
+  "scripts/pod/autoinit_c1_launch.py": [
+   13,
+   20
+  ],
+  "scripts/pod/autoinit_continuation_b_driver.py": [
+   13,
+   9
+  ],
+  "scripts/pod/autoinit_continuation_b_launch.py": [
+   4,
+   10
+  ],
+  "scripts/pod/autoinit_continuation_driver.py": [
+   17,
+   13
+  ],
+  "scripts/pod/autoinit_continuation_launch.py": [
+   3,
+   4
+  ],
+  "scripts/pod/autoinit_device_canary.py": [
+   17,
+   12
+  ],
+  "scripts/pod/autoinit_device_canary_launch.py": [
+   5,
+   2
+  ],
+  "scripts/pod/autoinit_engine_probe.py": [
+   1,
+   1
+  ],
+  "scripts/pod/autoinit_measurement_launch.py": [
+   3,
+   2
+  ],
+  "scripts/pod/autoinit_phase_a_driver.py": [
+   47,
+   19
+  ],
+  "scripts/pod/autoinit_phase_a_launch.py": [
+   7,
+   6
+  ],
+  "scripts/pod/autoinit_phase_b_driver.py": [
+   4,
+   8
+  ],
+  "scripts/pod/autoinit_phase_b_launch.py": [
+   7,
+   11
+  ],
+  "scripts/pod/autoinit_preflight_driver.py": [
+   9,
+   5
+  ],
+  "scripts/pod/autoinit_preflight_launch.py": [
+   2,
+   2
+  ],
+  "scripts/pod/autoinit_recovery_continuation_driver.py": [
+   16,
+   10
+  ],
+  "scripts/pod/autoinit_recovery_continuation_launch.py": [
+   6,
+   9
+  ],
+  "scripts/pod/autoinit_science_inputs.py": [
+   1,
+   1
+  ],
+  "scripts/pod/cpu_test_env_args.py": [
+   1,
+   1
+  ],
+  "scripts/pod/summarize_pytest_outcomes.py": [
+   1,
+   1
+  ],
+  "scripts/training/build_and_stage_e8_init.py": [
+   2,
+   2
+  ],
+  "scripts/training/build_depth_only_init.py": [
+   2,
+   2
+  ],
+  "scripts/training/collect_stage0.py": [
+   4,
+   1
+  ],
+  "scripts/training/init_stage1.py": [
+   2,
+   2
+  ],
+  "scripts/training/search_depth_map.py": [
+   2,
+   2
+  ],
+  "scripts/training/train_stage3.py": [
+   1,
+   1
+  ],
+  "scripts/training/validate_e8_arms.py": [
+   7,
+   4
+  ],
+  "scripts/training/validate_e8b_arms.py": [
+   6,
+   3
+  ],
+  "scripts/validation/cuda_engineering_check.py": [
+   289,
+   0
+  ],
+  "src/aadistill/autoinit/__init__.py": [
+   0,
+   102
+  ],
+  "src/aadistill/autoinit/adapters/__init__.py": [
+   0,
+   11
+  ],
+  "src/aadistill/autoinit/metrics.py": [
+   0,
+   492
+  ],
+  "src/aadistill/{autoinit/manifest.py => governance/artifact_manifest.py}": [
+   11,
+   7
+  ],
+  "src/aadistill/{autoinit => governance}/authorization.py": [
+   3,
+   3
+  ],
+  "src/aadistill/governance/closure.py": [
+   286,
+   0
+  ],
+  "src/aadistill/{autoinit => governance}/post_freeze.py": [
+   0,
+   0
+  ],
+  "src/aadistill/infrastructure/session_runner.py": [
+   1,
+   1
+  ],
+  "src/aadistill/init/__init__.py": [
+   0,
+   1
+  ],
+  "src/aadistill/initialization/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/initialization/adapters/__init__.py": [
+   60,
+   0
+  ],
+  "src/aadistill/{autoinit => initialization}/adapters/qwen3.py": [
+   24,
+   4
+  ],
+  "src/aadistill/initialization/calibration/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/{autoinit => initialization/calibration}/datasets.py": [
+   1,
+   1
+  ],
+  "src/aadistill/{autoinit/calibration_items.py => initialization/calibration/items.py}": [
+   0,
+   0
+  ],
+  "src/aadistill/{autoinit/calibration.py => initialization/calibration/profiles.py}": [
+   66,
+   164
+  ],
+  "src/aadistill/{autoinit => initialization}/device.py": [
+   0,
+   0
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/__init__.py": [
+   13,
+   7
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/_common.py": [
+   1,
+   1
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/attention.py": [
+   10,
+   6
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/attention_activation.py": [
+   16,
+   10
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/base.py": [
+   4,
+   11
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/composite.py": [
+   15,
+   8
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/depth.py": [
+   16,
+   8
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/ffn.py": [
+   11,
+   7
+  ],
+  "src/aadistill/{autoinit => initialization}/operators/width.py": [
+   18,
+   8
+  ],
+  "src/aadistill/initialization/planning/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/{autoinit => initialization/planning}/fixed_path.py": [
+   16,
+   8
+  ],
+  "src/aadistill/{autoinit => initialization/planning}/generation.py": [
+   2,
+   2
+  ],
+  "src/aadistill/{autoinit => initialization/planning}/generation_compat.py": [
+   1,
+   1
+  ],
+  "src/aadistill/initialization/planning/metrics.py": [
+   211,
+   0
+  ],
+  "src/aadistill/{autoinit => initialization/planning}/ranking.py": [
+   2,
+   2
+  ],
+  "src/aadistill/{autoinit => initialization/planning}/recovery.py": [
+   43,
+   11
+  ],
+  "src/aadistill/{autoinit => initialization/planning}/search.py": [
+   28,
+   12
+  ],
+  "src/aadistill/{autoinit => initialization/planning}/stage1_import.py": [
+   9,
+   6
+  ],
+  "src/aadistill/{autoinit => initialization/planning}/stage1_selection.py": [
+   1,
+   1
+  ],
+  "src/aadistill/initialization/specs/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/{autoinit => initialization/specs}/arch.py": [
+   78,
+   32
+  ],
+  "src/aadistill/{autoinit => initialization/specs}/artifact.py": [
+   2,
+   2
+  ],
+  "src/aadistill/{autoinit => initialization/specs}/identity_collapse.py": [
+   1,
+   1
+  ],
+  "src/aadistill/initialization/specs/metrics.py": [
+   288,
+   0
+  ],
+  "src/aadistill/{autoinit => initialization/specs}/state.py": [
+   7,
+   3
+  ],
+  "src/aadistill/initialization/statistics/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/{init/attention_stats.py => initialization/statistics/attention.py}": [
+   1,
+   1
+  ],
+  "src/aadistill/{init => initialization/statistics}/collect.py": [
+   1,
+   1
+  ],
+  "src/aadistill/{init => initialization/statistics}/contribution.py": [
+   0,
+   0
+  ],
+  "src/aadistill/{autoinit => initialization/statistics}/reweight.py": [
+   0,
+   0
+  ],
+  "src/aadistill/{autoinit/stats.py => initialization/statistics/spec.py}": [
+   1,
+   1
+  ],
+  "src/aadistill/initialization/transforms/__init__.py": [
+   1,
+   0
+  ],
+  "src/aadistill/{init => initialization/transforms}/nll_gate.py": [
+   0,
+   0
+  ],
+  "src/aadistill/{init => initialization/transforms}/project.py": [
+   0,
+   0
+  ],
+  "src/aadistill/{init => initialization/transforms}/sandwich.py": [
+   6,
+   2
+  ],
+  "src/aadistill/{autoinit => runtime}/cost.py": [
+   4,
+   4
+  ],
+  "src/aadistill/{autoinit => runtime}/cpu_test_env.py": [
+   0,
+   0
+  ],
+  "src/aadistill/{autoinit => runtime}/device_handoff.py": [
+   0,
+   0
+  ],
+  "src/aadistill/{autoinit => runtime}/leaf_durability.py": [
+   6,
+   3
+  ],
+  "src/aadistill/{autoinit => runtime}/pod_environment.py": [
+   14,
+   4
+  ],
+  "src/aadistill/{autoinit => runtime}/staging_contract.py": [
+   0,
+   0
+  ],
+  "src/aadistill/{autoinit => runtime}/telemetry.py": [
+   0,
+   0
+  ],
+  "tests/architecture/test_adapter_bootstrap.py": [
+   200,
+   0
+  ],
+  "tests/architecture/test_closure.py": [
+   210,
+   0
+  ],
+  "tests/architecture/test_core_boundaries.py": [
+   87,
+   14
+  ],
+  "tests/architecture/test_executable_closure_moves.py": [
+   207,
+   0
+  ],
+  "tests/architecture/test_ratchet_precision.py": [
+   207,
+   0
+  ],
+  "tests/autoinit/conftest.py": [
+   7,
+   4
+  ],
+  "tests/autoinit/device_split.py": [
+   1,
+   1
+  ],
+  "tests/autoinit/fake_family.py": [
+   8,
+   4
+  ],
+  "tests/autoinit/test_attention_activation_importance.py": [
+   12,
+   12
+  ],
+  "tests/autoinit/test_attention_adapter_boundary.py": [
+   14,
+   10
+  ],
+  "tests/autoinit/test_attention_operator_device_split.py": [
+   12,
+   13
+  ],
+  "tests/autoinit/test_attention_treatment_science_invariance.py": [
+   13,
+   12
+  ],
+  "tests/autoinit/test_c1_confirmation_scoring.py": [
+   5,
+   10
+  ],
+  "tests/autoinit/test_c1_isolation.py": [
+   2,
+   15
+  ],
+  "tests/autoinit/test_c1_readiness_gates.py": [
+   56,
+   41
+  ],
+  "tests/autoinit/test_c1_session.py": [
+   7,
+   5
+  ],
+  "tests/autoinit/test_calibration_item_preparation.py": [
+   11,
+   14
+  ],
+  "tests/autoinit/test_causal_depth_measurement_job.py": [
+   8,
+   5
+  ],
+  "tests/autoinit/test_causal_depth_runtime.py": [
+   10,
+   9
+  ],
+  "tests/autoinit/test_corrections.py": [
+   22,
+   19
+  ],
+  "tests/autoinit/test_cost_and_recovery.py": [
+   76,
+   49
+  ],
+  "tests/autoinit/test_cost_model_replay.py": [
+   11,
+   10
+  ],
+  "tests/autoinit/test_datasets_and_calibration.py": [
+   21,
+   15
+  ],
+  "tests/autoinit/test_depth_partial_reference_cache.py": [
+   4,
+   4
+  ],
+  "tests/autoinit/test_depth_reference_cache.py": [
+   4,
+   4
+  ],
+  "tests/autoinit/test_device_handoff.py": [
+   12,
+   8
+  ],
+  "tests/autoinit/test_fixed_path.py": [
+   7,
+   7
+  ],
+  "tests/autoinit/test_fixed_path_verified_suffix.py": [
+   8,
+   7
+  ],
+  "tests/autoinit/test_frozen_assets.py": [
+   3,
+   3
+  ],
+  "tests/autoinit/test_frozen_records.py": [
+   19,
+   10
+  ],
+  "tests/autoinit/test_identity_collapse.py": [
+   6,
+   3
+  ],
+  "tests/autoinit/test_leaf_durability.py": [
+   6,
+   4
+  ],
+  "tests/autoinit/test_operators.py": [
+   13,
+   10
+  ],
+  "tests/autoinit/test_phase_b_historical_amendments.py": [
+   7,
+   4
+  ],
+  "tests/autoinit/test_phase_b_plan.py": [
+   24,
+   32
+  ],
+  "tests/autoinit/test_ranking.py": [
+   12,
+   5
+  ],
+  "tests/autoinit/test_reasoning_heavy_v2.py": [
+   26,
+   8
+  ],
+  "tests/autoinit/test_recovery_continuation_authorization.py": [
+   11,
+   19
+  ],
+  "tests/autoinit/test_recovery_search_scoring.py": [
+   6,
+   3
+  ],
+  "tests/autoinit/test_registry.py": [
+   6,
+   6
+  ],
+  "tests/autoinit/test_search.py": [
+   34,
+   15
+  ],
+  "tests/autoinit/test_search_materialize_device_boundary.py": [
+   13,
+   7
+  ],
+  "tests/autoinit/test_search_operator_device_split.py": [
+   17,
+   13
+  ],
+  "tests/autoinit/test_skip_predicate_audit.py": [
+   3,
+   3
+  ],
+  "tests/autoinit/test_stage1_factory_placement.py": [
+   9,
+   6
+  ],
+  "tests/autoinit/test_stage1_import.py": [
+   7,
+   6
+  ],
+  "tests/autoinit/test_stage1_probes_execute.py": [
+   5,
+   3
+  ],
+  "tests/autoinit/test_stage_f_treatment_integration.py": [
+   7,
+   6
+  ],
+  "tests/autoinit/test_staging_contract.py": [
+   18,
+   9
+  ],
+  "tests/autoinit/test_state.py": [
+   7,
+   4
+  ],
+  "tests/autoinit/test_stats_cache_two_profiles.py": [
+   5,
+   5
+  ],
+  "tests/autoinit/test_two_profile_search.py": [
+   12,
+   6
+  ],
+  "tests/conftest.py": [
+   47,
+   0
+  ],
+  "tests/init/test_collect.py": [
+   4,
+   1
+  ],
+  "tests/init/test_contribution.py": [
+   2,
+   2
+  ],
+  "tests/init/test_depth_search_driver.py": [
+   2,
+   2
+  ],
+  "tests/init/test_nll_gate.py": [
+   5,
+   2
+  ],
+  "tests/init/test_stage1.py": [
+   6,
+   2
+  ],
+  "tests/pod/test_autoinit_preflight_rehearsal.py": [
+   13,
+   8
+  ],
+  "tests/pod/test_c1_artifact_specs.py": [
+   2,
+   4
+  ],
+  "tests/pod/test_c1_bundle_transport.py": [
+   4,
+   7
+  ],
+  "tests/pod/test_c1_driver_execution.py": [
+   11,
+   17
+  ],
+  "tests/pod/test_c1_session_contract.py": [
+   9,
+   18
+  ],
+  "tests/pod/test_c1_source_closure.py": [
+   49,
+   36
+  ],
+  "tests/pod/test_continuation_b_executes.py": [
+   80,
+   51
+  ],
+  "tests/pod/test_continuation_b_one_probe_contract.py": [
+   7,
+   7
+  ],
+  "tests/pod/test_continuation_b_product_contract.py": [
+   5,
+   8
+  ],
+  "tests/pod/test_continuation_rehearsal.py": [
+   21,
+   30
+  ],
+  "tests/pod/test_cpu_test_environment.py": [
+   1,
+   1
+  ],
+  "tests/pod/test_cpu_test_outcome_evidence.py": [
+   3,
+   3
+  ],
+  "tests/pod/test_device_canary_argument_contract.py": [
+   2,
+   2
+  ],
+  "tests/pod/test_driver_authorization_wiring.py": [
+   5,
+   7
+  ],
+  "tests/pod/test_measurement_session.py": [
+   4,
+   4
+  ],
+  "tests/pod/test_observed_protocol_rehearsal.py": [
+   7,
+   6
+  ],
+  "tests/pod/test_phase_a_rehearsal.py": [
+   16,
+   16
+  ],
+  "tests/pod/test_phase_a_search_executes.py": [
+   18,
+   11
+  ],
+  "tests/pod/test_phase_a_search_profile_seam.py": [
+   3,
+   2
+  ],
+  "tests/pod/test_phase_a_stage0_executes.py": [
+   110,
+   12
+  ],
+  "tests/pod/test_phase_a_stages1_5_execute.py": [
+   18,
+   5
+  ],
+  "tests/pod/test_phase_b_driver_and_launcher.py": [
+   23,
+   28
+  ],
+  "tests/pod/test_phase_b_stage1_executes.py": [
+   6,
+   8
+  ],
+  "tests/pod/test_recovery_continuation_session.py": [
+   2,
+   2
+  ],
+  "tests/pod/test_session_architecture.py": [
+   8,
+   14
+  ],
+  "tests/pod/test_setup_end_to_end.py": [
+   1,
+   1
+  ],
+  "tests/support/__init__.py": [
+   0,
+   0
+  ],
+  "tests/support/fixture_categories.py": [
+   179,
+   0
+  ],
+  "tests/training/test_e8_arms.py": [
+   1,
+   1
+  ],
+  "tests/validation/test_cuda_engineering_check.py": [
+   176,
+   0
+  ]
+ },
+ "numstat_rule": "git diff --numstat <base> <tip>",
+ "patch_sha256": "76549c8981dec0f394cc5214499e0ecac88e84b642ee0ab1d7e1be7587126df4",
+ "patch_rule": "sha256 of git diff <base> <tip>",
+ "declarations": [
+  {
+   "declaration": "HARNESS_SOURCE_FILES_V1",
+   "declared_in": "aadistill.governance.authorization",
+   "n_declared": 12,
+   "dispositions": {
+    "modified_in_place": 5,
+    "unchanged_path": 5,
+    "declared_path_absent_at_base": 2
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 5 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": null,
+   "identity_now": "8e5a2d6a55ea217534cab8d45d75110443f843898d2b3d0f1fb7f2c419d5c35c",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/pod/autoinit_preflight_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "30083bd08a343f7011d08a1a6a11738ad4eb889f1b9adf1424bd128039c6353d",
+     "sha256_now": "cbeac1719fd1a24da8f3ef993522338aae16e13f93667ca3514e0db34a9f6a7a"
+    },
+    {
+     "path": "scripts/pod/autoinit_preflight_driver.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "1aa7b1bf69b537c228651465f008bac6fbb98d227313418cdef84c3b462c67f4",
+     "sha256_now": "281eaae898573702db3ecf6fffd855210a7e8934ce9bbc79a1efcd6325659b9b"
+    },
+    {
+     "path": "scripts/pod/autoinit_preflight_setup.sh",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
+     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+    },
+    {
+     "path": "scripts/pod/autoinit_science_inputs.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
+     "sha256_now": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e"
+    },
+    {
+     "path": "scripts/pod/autoinit_engine_probe.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "97fef0e555a6adfa857b75bdf826b2cad9567a70038cf267acc62b6d5ab07a0f",
+     "sha256_now": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38"
+    },
+    {
+     "path": "scripts/pod/watchdog.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f",
+     "sha256_now": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f"
+    },
+    {
+     "path": "scripts/pod/collect_artifacts.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c",
+     "sha256_now": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
+     "sha256_now": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_runner.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
+     "sha256_now": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_prechecks.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
+     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+    },
+    {
+     "path": "src/aadistill/governance/authorization.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/generation.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+    }
+   ],
+   "live_digest_computes": true,
+   "live_digest": "8e5a2d6a55ea217534cab8d45d75110443f843898d2b3d0f1fb7f2c419d5c35c",
+   "old_document_would_fail_by": "digest mismatch"
+  },
+  {
+   "declaration": "PHASE_A_HARNESS_SOURCE_FILES_V1",
+   "declared_in": "experiments.phase_a.plan",
+   "n_declared": 16,
+   "dispositions": {
+    "modified_in_place": 7,
+    "unchanged_path": 5,
+    "declared_path_absent_at_base": 4
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 7 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": null,
+   "identity_now": "573a04b8b9f7c96e017c1ffe802e6a5d467719132822db3bed4fa883f0112c3b",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/pod/autoinit_phase_a_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "ea080b2e901facd32985d0eb21ae8757eb77d2db7d8aefa0af5c01d72537f83e",
+     "sha256_now": "7edddabcb2eaeb834bc690f3e7c538e1ad702d41dddb24f4a1e4a7542c533ccd"
+    },
+    {
+     "path": "scripts/pod/autoinit_phase_a_driver.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "3296a6b749bd01886258dbd0bf1a527ce4db564b18e3bd6c1e59b510007d6d1a",
+     "sha256_now": "c830fcb227e32ac59da3dd8c23c73754e7765989b9cd8af9db39039785e01eb9"
+    },
+    {
+     "path": "scripts/pod/autoinit_preflight_setup.sh",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
+     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+    },
+    {
+     "path": "scripts/pod/autoinit_science_inputs.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
+     "sha256_now": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e"
+    },
+    {
+     "path": "scripts/pod/autoinit_engine_probe.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "97fef0e555a6adfa857b75bdf826b2cad9567a70038cf267acc62b6d5ab07a0f",
+     "sha256_now": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38"
+    },
+    {
+     "path": "scripts/pod/watchdog.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f",
+     "sha256_now": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f"
+    },
+    {
+     "path": "scripts/pod/collect_artifacts.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c",
+     "sha256_now": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
+     "sha256_now": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_runner.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
+     "sha256_now": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_prechecks.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
+     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+    },
+    {
+     "path": "scripts/autoinit/phase_a_search.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "d4edf2122328396a171a38d30e3537fd0ba771e033d841f41157ea91ce085dec",
+     "sha256_now": "594121996ec6bc8679646e8545dd037558be263a5245a27a765e520fed4ab0f5"
+    },
+    {
+     "path": "scripts/autoinit/write_preregistration.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "55938e534f0d5b7afe61359cea35486d702e5da2695f9e9f2d688a5b844ebfa6",
+     "sha256_now": "af54385682b7ee2f827f32fb7c5397006a5e35608e408f3aa311893b2d783b7c"
+    },
+    {
+     "path": "src/aadistill/governance/authorization.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/generation_compat.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0"
+    },
+    {
+     "path": "scripts/experiments/phase_a/plan.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/generation.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+    }
+   ],
+   "live_digest_computes": true,
+   "live_digest": "573a04b8b9f7c96e017c1ffe802e6a5d467719132822db3bed4fa883f0112c3b",
+   "old_document_would_fail_by": "digest mismatch"
+  },
+  {
+   "declaration": "PHASE_B_EXECUTABLE_SOURCE_FILES_V1",
+   "declared_in": "experiments.phase_b.plan",
+   "n_declared": 59,
+   "dispositions": {
+    "modified_in_place": 13,
+    "unchanged_path": 13,
+    "declared_path_absent_at_base": 33
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 13 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": null,
+   "identity_now": "9073093bcf1a845385d349e78834c13e747c666318fccda83265a5211407ca57",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/autoinit/load_state_eval.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "5207f77727fe859d721d78625af0843bb95ebbda5c10c761acf60983d9a7bb4b",
+     "sha256_now": "5e276bfcfcbf62acc03e06ed137f544a3551a68e9153ee7e5e3712980eb5a0a0"
+    },
+    {
+     "path": "scripts/autoinit/phase_a_frozen.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "78fa6da9c3f8d7b78eedc86afe8ff119c726057ae3127777a12af70b14e82519",
+     "sha256_now": "78fa6da9c3f8d7b78eedc86afe8ff119c726057ae3127777a12af70b14e82519"
+    },
+    {
+     "path": "scripts/autoinit/phase_a_search.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "d4edf2122328396a171a38d30e3537fd0ba771e033d841f41157ea91ce085dec",
+     "sha256_now": "594121996ec6bc8679646e8545dd037558be263a5245a27a765e520fed4ab0f5"
+    },
+    {
+     "path": "scripts/autoinit/price_phase_b.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "4a9747bf34e0627a12d4cd1a8eeb0263f54982e47ab9c16749c3f79a88c66cf4",
+     "sha256_now": "7e013552818bc2c9979d74a559b3ac1e36391025780d92d1aa614b54a88bc310"
+    },
+    {
+     "path": "scripts/autoinit/verify_frozen_assets.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "7b43b9b63172c3acb10b1d5f7dd6c2077bfb5767aaf3e6aab1f2852b32f5b551",
+     "sha256_now": "0c39aea1c8b91e0af939d6a4ab8b4f903dff0b56353d02ce2fadeb7407508583"
+    },
+    {
+     "path": "scripts/autoinit/verify_historical_probe_reuse.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "742bad28f81bafafdcf8a3249f5c2078b581b6b82672f318baa3bcde2cec42c0",
+     "sha256_now": "cfc7ef1f234e731a3ee7d25f9833829019543413114d9b73663ccc91e26b032d"
+    },
+    {
+     "path": "scripts/autoinit/write_preregistration.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "55938e534f0d5b7afe61359cea35486d702e5da2695f9e9f2d688a5b844ebfa6",
+     "sha256_now": "af54385682b7ee2f827f32fb7c5397006a5e35608e408f3aa311893b2d783b7c"
+    },
+    {
+     "path": "scripts/pod/autoinit_engine_probe.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "97fef0e555a6adfa857b75bdf826b2cad9567a70038cf267acc62b6d5ab07a0f",
+     "sha256_now": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38"
+    },
+    {
+     "path": "scripts/pod/autoinit_phase_a_driver.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "3296a6b749bd01886258dbd0bf1a527ce4db564b18e3bd6c1e59b510007d6d1a",
+     "sha256_now": "c830fcb227e32ac59da3dd8c23c73754e7765989b9cd8af9db39039785e01eb9"
+    },
+    {
+     "path": "scripts/pod/autoinit_phase_a_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "ea080b2e901facd32985d0eb21ae8757eb77d2db7d8aefa0af5c01d72537f83e",
+     "sha256_now": "7edddabcb2eaeb834bc690f3e7c538e1ad702d41dddb24f4a1e4a7542c533ccd"
+    },
+    {
+     "path": "scripts/pod/autoinit_phase_b_driver.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "5e7fa37687684cafe0dd500ffd5e7b7654e7da43a4726f6bd2312c1e42ffefdc",
+     "sha256_now": "31af23861a3be5faa731d9b6ddc4883b91a0b59ef919e641cdc2c7089c748993"
+    },
+    {
+     "path": "scripts/pod/autoinit_phase_b_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "1451b369b817f5b2f9b67f401e1a662b57e8fa8bbbff1375c59f991a75b61b86",
+     "sha256_now": "dfc5f4f67c2e3b443f5606d721ec52c3ba617e6cf07fffec46c8f62a8290830c"
+    },
+    {
+     "path": "scripts/pod/autoinit_preflight_setup.sh",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
+     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+    },
+    {
+     "path": "scripts/pod/autoinit_science_inputs.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
+     "sha256_now": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e"
+    },
+    {
+     "path": "scripts/pod/collect_artifacts.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c",
+     "sha256_now": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c"
+    },
+    {
+     "path": "scripts/pod/watchdog.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f",
+     "sha256_now": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f"
+    },
+    {
+     "path": "src/aadistill/initialization/adapters/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5"
+    },
+    {
+     "path": "src/aadistill/initialization/adapters/qwen3.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/arch.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "92bc5c45cd8b50f05a83aad172cc11d15d4bb57f8cb67f1615214d301a18c078"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/artifact.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9"
+    },
+    {
+     "path": "src/aadistill/governance/authorization.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694"
+    },
+    {
+     "path": "src/aadistill/initialization/calibration/profiles.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7"
+    },
+    {
+     "path": "src/aadistill/runtime/cost.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "9cdecf509df78968f043a720e32a033239dd66285124b8ffd335ee045aa617b6"
+    },
+    {
+     "path": "src/aadistill/initialization/calibration/datasets.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "586781a762f1f2417d2ac6a9d95653c0045db69d32a9ca3e165b68c116980352"
+    },
+    {
+     "path": "src/aadistill/initialization/device.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb"
+    },
+    {
+     "path": "src/aadistill/runtime/device_handoff.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/generation.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/identity_collapse.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "823bb9784c77d8364dd1f197cc2b5bf26254773c1d60563f86191b4730978583"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/generation_compat.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0"
+    },
+    {
+     "path": "src/aadistill/runtime/leaf_durability.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "024967267f9ededb651437d7b660395c642a191c09d8dd1e8a3bf6946214a017"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/metrics.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "a6dd5d5641ac158266c379fd604dae2e4ff5f4d70599f9597da014ce212b5add"
+    },
+    {
+     "path": "src/aadistill/initialization/operators/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "5ce3022e198eb31e95924e6210abe9bedb6f3f27e37e580fb45ff1fe4017f4e1"
+    },
+    {
+     "path": "src/aadistill/initialization/operators/_common.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "d065241b735b0193817caadf97f94ab16bbfa3f624ecf123915041fc9a15615b"
+    },
+    {
+     "path": "src/aadistill/initialization/operators/attention.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "ec26b991ee0983ee8e7a681d90ba53d390539ba4e1202f14c460d4758e2908af"
+    },
+    {
+     "path": "src/aadistill/initialization/operators/base.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "c37f4c58e8ae5f149c0b9cefd1b4faae563590fa4017d05c14fcbc650f48d6cd"
+    },
+    {
+     "path": "src/aadistill/initialization/operators/composite.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "da2a0e5b86ecf347fdf7941cdd4dd5c49e6d5eaa5fbb3733243d55ac7ceed0aa"
+    },
+    {
+     "path": "src/aadistill/initialization/operators/depth.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "f5306c9af40ab5ce2dcfaf26c42a90099d1fd44ee926a425351a549653c0ccec"
+    },
+    {
+     "path": "src/aadistill/initialization/operators/ffn.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "67ac31fbec0dc5b6520ccf5182576793df151db801f5cd5a80bc81ebbcdfbcc4"
+    },
+    {
+     "path": "src/aadistill/initialization/operators/width.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "efbb5cba7840c5099df09384670a8e4436c6a92def10d7443821ae551cba147c"
+    },
+    {
+     "path": "scripts/experiments/phase_a/plan.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b"
+    },
+    {
+     "path": "scripts/experiments/phase_b/plan.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "65c71f785552caa05b95460fd04ba89d666ede4eef187c40d802642d4bccfe8d"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/ranking.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "33df4e53f74da0c301aaa8228ab43e3ea2ca4ae57ef59ddcd7e0631bd5c94a20"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/search.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "a02fa31f1b2764184c052fad3f00189768b7f041ffb63c92deb7e4d7ed29e498"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/stage1_selection.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "178b3c486750faca2cdf387315c9b5bd885b79a404980edd7f93990f4eadbfc8"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/state.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "fa8289755d8ad0fe64628caa5ea3ca315f7b8eb0416860e2f6bd86b7b70df498"
+    },
+    {
+     "path": "src/aadistill/initialization/statistics/spec.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "951c4da15063de8d9193896a8b045efee9e175a1cab349dc4cc833c6d268bdda"
+    },
+    {
+     "path": "src/aadistill/data/extra_stream.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "3f778021d307aa1859008299423c45b04fcf81f29c3462f9eb91dc279a98066c",
+     "sha256_now": "3f778021d307aa1859008299423c45b04fcf81f29c3462f9eb91dc279a98066c"
+    },
+    {
+     "path": "src/aadistill/infrastructure/artifact_gate.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "22332ab2b23c0b47513374075086def3aabc61a038e149d9dda7f768b48f173b",
+     "sha256_now": "22332ab2b23c0b47513374075086def3aabc61a038e149d9dda7f768b48f173b"
+    },
+    {
+     "path": "src/aadistill/infrastructure/budget.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "5931865c89b213ee3c9eccc6536f51e6d66dd9e445ea8b5c85af67b39530cd1a",
+     "sha256_now": "5931865c89b213ee3c9eccc6536f51e6d66dd9e445ea8b5c85af67b39530cd1a"
+    },
+    {
+     "path": "src/aadistill/infrastructure/log_relay.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "a418c92223b83ea067343c34c84a7f7b3b65856cdff92616db3eb820a62d449f",
+     "sha256_now": "a418c92223b83ea067343c34c84a7f7b3b65856cdff92616db3eb820a62d449f"
+    },
+    {
+     "path": "src/aadistill/infrastructure/manifest.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2",
+     "sha256_now": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2"
+    },
+    {
+     "path": "src/aadistill/infrastructure/provider.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "ab640477b99efd179896d4a0ad934804757867eaac22742c96e8752129a87e3e",
+     "sha256_now": "ab640477b99efd179896d4a0ad934804757867eaac22742c96e8752129a87e3e"
+    },
+    {
+     "path": "src/aadistill/infrastructure/remote.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "3db055894e523ef9c13d39329c8cd24b2070d4b8ec43180700c2dea921e21bf9",
+     "sha256_now": "3db055894e523ef9c13d39329c8cd24b2070d4b8ec43180700c2dea921e21bf9"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
+     "sha256_now": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_prechecks.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
+     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_runner.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
+     "sha256_now": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33"
+    },
+    {
+     "path": "src/aadistill/initialization/statistics/contribution.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565"
+    },
+    {
+     "path": "src/aadistill/initialization/transforms/project.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36"
+    },
+    {
+     "path": "src/aadistill/initialization/transforms/sandwich.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "8ccd3771166166e3b332b15ab09eb9894651d2d3b38b5c405ac67c8d098e2f95"
+    }
+   ],
+   "live_digest_computes": true,
+   "live_digest": "9073093bcf1a845385d349e78834c13e747c666318fccda83265a5211407ca57",
+   "old_document_would_fail_by": "digest mismatch"
+  },
+  {
+   "declaration": "CONTINUATION_SOURCE_FILES_V2",
+   "declared_in": "experiments.phase_b.continuation",
+   "n_declared": 55,
+   "dispositions": {
+    "declared_path_absent_at_base": 30,
+    "modified_in_place": 7,
+    "unchanged_path": 18
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 7 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": null,
+   "identity_now": "127685ca7b5fa29cb349a99b271c3157fd0e95fd07e697eab1e387b81a0bfc09",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/experiments/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "bbe9ffbd86277729a3e93c5e6a34500a614e701b56246d31dfee4f9332fb5442"
+    },
+    {
+     "path": "scripts/experiments/calibration.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "371c51813f1d1a6871c7ae9c542fec03818dc016cec3d4417e0983b694684cd9"
+    },
+    {
+     "path": "scripts/experiments/phase_a/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "c1b21f798da24f20b2a09afdd95ab09bad53b6e350572482074741560e603da7"
+    },
+    {
+     "path": "scripts/experiments/phase_a/plan.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b"
+    },
+    {
+     "path": "scripts/experiments/phase_b/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "c1b21f798da24f20b2a09afdd95ab09bad53b6e350572482074741560e603da7"
+    },
+    {
+     "path": "scripts/experiments/phase_b/continuation.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "67ce6a4ea12981efe7a59b0067bdb2d14bf7c58be1ddd3ecadd01f593044ec09"
+    },
+    {
+     "path": "scripts/experiments/recovery_continuation/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "c1b21f798da24f20b2a09afdd95ab09bad53b6e350572482074741560e603da7"
+    },
+    {
+     "path": "scripts/experiments/recovery_continuation/session.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "7f1476620a9ba9bf48f4aab66d2c6e9725605a88d3e87bfc3b0965ff973d3e03"
+    },
+    {
+     "path": "scripts/pod/autoinit_continuation_b_driver.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "2915329780199d818755c798a2ee7afee4df65994e6c1f3e93408ea3d9d2327e",
+     "sha256_now": "abcd9f87c0844210878bff591f7d1ceb1db9f8ce02c011adfdc9cb5f88363bea"
+    },
+    {
+     "path": "scripts/pod/autoinit_continuation_b_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "242f289070f0e5ba6d803207da7b8b24db60020900afc55b333fefd1af3f0960",
+     "sha256_now": "21dc797dd6f15eaecef6ae08a7b1769f0197818c28efe6a262d8e3583cd6de24"
+    },
+    {
+     "path": "scripts/pod/autoinit_phase_a_driver.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "3296a6b749bd01886258dbd0bf1a527ce4db564b18e3bd6c1e59b510007d6d1a",
+     "sha256_now": "c830fcb227e32ac59da3dd8c23c73754e7765989b9cd8af9db39039785e01eb9"
+    },
+    {
+     "path": "scripts/pod/autoinit_phase_a_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "ea080b2e901facd32985d0eb21ae8757eb77d2db7d8aefa0af5c01d72537f83e",
+     "sha256_now": "7edddabcb2eaeb834bc690f3e7c538e1ad702d41dddb24f4a1e4a7542c533ccd"
+    },
+    {
+     "path": "scripts/pod/autoinit_preflight_setup.sh",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
+     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+    },
+    {
+     "path": "scripts/pod/autoinit_recovery_continuation_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "dd68cc30bd6215e04a0e7a08d4eb568c067a3585c24ed11d8b6534dc9e061072",
+     "sha256_now": "9a0684e1e387babcb23d389b79f2d86c3ee0a92321edc089e20eb091d7b27651"
+    },
+    {
+     "path": "scripts/pod/autoinit_science_inputs.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
+     "sha256_now": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e"
+    },
+    {
+     "path": "scripts/pod/collect_artifacts.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c",
+     "sha256_now": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c"
+    },
+    {
+     "path": "scripts/pod/watchdog.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f",
+     "sha256_now": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f"
+    },
+    {
+     "path": "src/aadistill/__init__.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "cc44609cee34df65a1a2fd94e13e1d6d93165a85eed3f8f2f51badee2dcdff26",
+     "sha256_now": "cc44609cee34df65a1a2fd94e13e1d6d93165a85eed3f8f2f51badee2dcdff26"
+    },
+    {
+     "path": "src/aadistill/data/__init__.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "cc4420bafedf857f256154e1c68ffb77b5390ef840e27fa060fc3e7f463e4d44",
+     "sha256_now": "cc4420bafedf857f256154e1c68ffb77b5390ef840e27fa060fc3e7f463e4d44"
+    },
+    {
+     "path": "src/aadistill/data/extra_stream.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "3f778021d307aa1859008299423c45b04fcf81f29c3462f9eb91dc279a98066c",
+     "sha256_now": "3f778021d307aa1859008299423c45b04fcf81f29c3462f9eb91dc279a98066c"
+    },
+    {
+     "path": "src/aadistill/governance/__init__.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "2ab6329b5604a7d3f6b75c621ad6f36b33a7d4bde1c54f921abcf360c382c1c0",
+     "sha256_now": "2ab6329b5604a7d3f6b75c621ad6f36b33a7d4bde1c54f921abcf360c382c1c0"
+    },
+    {
+     "path": "src/aadistill/governance/authorization.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694"
+    },
+    {
+     "path": "src/aadistill/infrastructure/__init__.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "12e8b5cadb864c6cb53b34737153649f0a4a83184802b892d55e1bd9b2078682",
+     "sha256_now": "12e8b5cadb864c6cb53b34737153649f0a4a83184802b892d55e1bd9b2078682"
+    },
+    {
+     "path": "src/aadistill/infrastructure/artifact_gate.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "22332ab2b23c0b47513374075086def3aabc61a038e149d9dda7f768b48f173b",
+     "sha256_now": "22332ab2b23c0b47513374075086def3aabc61a038e149d9dda7f768b48f173b"
+    },
+    {
+     "path": "src/aadistill/infrastructure/budget.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "5931865c89b213ee3c9eccc6536f51e6d66dd9e445ea8b5c85af67b39530cd1a",
+     "sha256_now": "5931865c89b213ee3c9eccc6536f51e6d66dd9e445ea8b5c85af67b39530cd1a"
+    },
+    {
+     "path": "src/aadistill/infrastructure/log_relay.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "a418c92223b83ea067343c34c84a7f7b3b65856cdff92616db3eb820a62d449f",
+     "sha256_now": "a418c92223b83ea067343c34c84a7f7b3b65856cdff92616db3eb820a62d449f"
+    },
+    {
+     "path": "src/aadistill/infrastructure/manifest.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2",
+     "sha256_now": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2"
+    },
+    {
+     "path": "src/aadistill/infrastructure/provider.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "ab640477b99efd179896d4a0ad934804757867eaac22742c96e8752129a87e3e",
+     "sha256_now": "ab640477b99efd179896d4a0ad934804757867eaac22742c96e8752129a87e3e"
+    },
+    {
+     "path": "src/aadistill/infrastructure/remote.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "3db055894e523ef9c13d39329c8cd24b2070d4b8ec43180700c2dea921e21bf9",
+     "sha256_now": "3db055894e523ef9c13d39329c8cd24b2070d4b8ec43180700c2dea921e21bf9"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
+     "sha256_now": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_prechecks.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
+     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_runner.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
+     "sha256_now": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33"
+    },
+    {
+     "path": "src/aadistill/infrastructure/source_identity.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "b0d42aa04c234e5d1e1d26bececdc30c91f8d35a6207597249e767abf565d722",
+     "sha256_now": "b0d42aa04c234e5d1e1d26bececdc30c91f8d35a6207597249e767abf565d722"
+    },
+    {
+     "path": "src/aadistill/initialization/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "5ed897c6addfb4605d736ab3da9e62d958cf1b7815f4294ffe84c8a8a7554ba4"
+    },
+    {
+     "path": "src/aadistill/initialization/adapters/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5"
+    },
+    {
+     "path": "src/aadistill/initialization/adapters/qwen3.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa"
+    },
+    {
+     "path": "src/aadistill/initialization/calibration/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "5ed897c6addfb4605d736ab3da9e62d958cf1b7815f4294ffe84c8a8a7554ba4"
+    },
+    {
+     "path": "src/aadistill/initialization/calibration/datasets.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "586781a762f1f2417d2ac6a9d95653c0045db69d32a9ca3e165b68c116980352"
+    },
+    {
+     "path": "src/aadistill/initialization/calibration/profiles.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7"
+    },
+    {
+     "path": "src/aadistill/initialization/device.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "5ed897c6addfb4605d736ab3da9e62d958cf1b7815f4294ffe84c8a8a7554ba4"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/generation.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/generation_compat.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/recovery.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "5ed897c6addfb4605d736ab3da9e62d958cf1b7815f4294ffe84c8a8a7554ba4"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/arch.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "92bc5c45cd8b50f05a83aad172cc11d15d4bb57f8cb67f1615214d301a18c078"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/artifact.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/identity_collapse.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "823bb9784c77d8364dd1f197cc2b5bf26254773c1d60563f86191b4730978583"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/metrics.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "994db46abe61f9912344b64bccc411a9f59be5b4a6a11f49fa9e7f38f7c65fb2"
+    },
+    {
+     "path": "src/aadistill/initialization/specs/state.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "fa8289755d8ad0fe64628caa5ea3ca315f7b8eb0416860e2f6bd86b7b70df498"
+    },
+    {
+     "path": "src/aadistill/initialization/statistics/__init__.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "5ed897c6addfb4605d736ab3da9e62d958cf1b7815f4294ffe84c8a8a7554ba4"
+    },
+    {
+     "path": "src/aadistill/initialization/statistics/collect.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "0ee4f8ee7fed72cd849dea7767262d4cadd711c0b774edbe43ec2aa2adc15f21"
+    },
+    {
+     "path": "src/aadistill/runtime/__init__.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "9ab9b982b521e72ec4f56e3ed744acb897cf1ae9270a035a8c8bd614226239a8",
+     "sha256_now": "9ab9b982b521e72ec4f56e3ed744acb897cf1ae9270a035a8c8bd614226239a8"
+    },
+    {
+     "path": "src/aadistill/runtime/device_handoff.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd"
+    },
+    {
+     "path": "src/aadistill/runtime/leaf_durability.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "024967267f9ededb651437d7b660395c642a191c09d8dd1e8a3bf6946214a017"
+    }
+   ],
+   "live_digest_computes": true,
+   "live_digest": "127685ca7b5fa29cb349a99b271c3157fd0e95fd07e697eab1e387b81a0bfc09",
+   "old_document_would_fail_by": "digest mismatch"
+  },
+  {
+   "declaration": "CONTINUATION_HARNESS_SOURCE_FILES_V1",
+   "declared_in": "experiments.recovery_continuation.plan",
+   "n_declared": 11,
+   "dispositions": {
+    "modified_in_place": 5,
+    "unchanged_path": 3,
+    "declared_path_absent_at_base": 3
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 5 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": null,
+   "identity_now": "7069517313ea16e56381c088d6f9ea5e2da172fa72db59111acfe3d80d0c71cd",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/pod/autoinit_continuation_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "085a0eb1b10827d308e993c7148c8899a7f89db44de0b2bb68ae84a6369e1d74",
+     "sha256_now": "88c5668e0242bcf8826a2475905fdef195192b96631f931d683346e95d60b192"
+    },
+    {
+     "path": "scripts/pod/autoinit_continuation_driver.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "fddf042ddfe54bedef5977393bb4e994f4f7d7203d74206cd9d6f0d876ccf5f1",
+     "sha256_now": "a2fb3b21ad0359bca0c32b95d4bd2de85bff345a212351fe28143af74738a8d3"
+    },
+    {
+     "path": "scripts/pod/autoinit_preflight_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "30083bd08a343f7011d08a1a6a11738ad4eb889f1b9adf1424bd128039c6353d",
+     "sha256_now": "cbeac1719fd1a24da8f3ef993522338aae16e13f93667ca3514e0db34a9f6a7a"
+    },
+    {
+     "path": "scripts/pod/autoinit_preflight_setup.sh",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
+     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+    },
+    {
+     "path": "scripts/pod/autoinit_science_inputs.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
+     "sha256_now": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e"
+    },
+    {
+     "path": "scripts/pod/autoinit_engine_probe.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "97fef0e555a6adfa857b75bdf826b2cad9567a70038cf267acc62b6d5ab07a0f",
+     "sha256_now": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38"
+    },
+    {
+     "path": "scripts/pod/watchdog.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f",
+     "sha256_now": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f"
+    },
+    {
+     "path": "scripts/pod/collect_artifacts.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c",
+     "sha256_now": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c"
+    },
+    {
+     "path": "src/aadistill/governance/authorization.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694"
+    },
+    {
+     "path": "scripts/experiments/recovery_continuation/plan.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "0b4be365529d8d448f5b5edfac09d0f38fafef832273f91145160f9a82ccf169"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/generation.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+    }
+   ]
+  },
+  {
+   "declaration": "C1_HARNESS_SOURCE_FILES_V1",
+   "declared_in": "experiments.phase_c1.authorization",
+   "n_declared": 73,
+   "dispositions": {
+    "modified_in_place": 13,
+    "unchanged_path": 23,
+    "renamed": 8,
+    "renamed_and_modified": 28,
+    "removed": 1
+   },
+   "additive_only": false,
+   "_accounting": "8 renamed with identical bytes, 28 renamed AND modified, 13 modified in place, 1 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": "6ac5120f7a5667a97a4f08653367f736f6b9db57fb5313d1352f925147797b14",
+   "identity_now": null,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/pod/autoinit_c1_launch.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "1df6dc91243cf32bf13a68a6c531f01818dc784fdc12e0af79c061b9769774fe",
+     "sha256_now": "fb6266ae416908287d6fd79ed3256085b36bb4dafee5bd4c71282279ca5d02b9"
+    },
+    {
+     "path": "scripts/pod/autoinit_c1_driver.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "cb2adb26f072d314de5f8984ce86291c2e8d5369c5616711bcedd6633903e467",
+     "sha256_now": "02b7145aaa2895cef9bb04e115d61a38febeba5bdd7edefa5f84d3f36839cdff"
+    },
+    {
+     "path": "scripts/pod/autoinit_preflight_setup.sh",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
+     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+    },
+    {
+     "path": "scripts/pod/summarize_pytest_outcomes.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "e9aeb39cfe97512b5681ceb1ba053842e93ffce53afa8bc5b4ba64ea18dbd5c4",
+     "sha256_now": "56c5f15d54ecad5a92410fbdd75a0f5f2f3d63206d449074da0ada7b3f41dfac"
+    },
+    {
+     "path": "scripts/pod/cpu_test_env_args.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "a8577c1eb3a306b3bba6cd175233548bced6d8279d105384155b290adef552d4",
+     "sha256_now": "263921a1ddcc9f754f0782739950cf8881a2c7b7ab5b4ebd812ec8737ce2ecc7"
+    },
+    {
+     "path": "scripts/pod/start_job.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "cfd9496b943dcfc83e0e2a8911abd048f1ee1514110676889cc163ce895f58ba",
+     "sha256_now": "cfd9496b943dcfc83e0e2a8911abd048f1ee1514110676889cc163ce895f58ba"
+    },
+    {
+     "path": "scripts/pod/watchdog.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f",
+     "sha256_now": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f"
+    },
+    {
+     "path": "scripts/pod/collect_artifacts.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c",
+     "sha256_now": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c"
+    },
+    {
+     "path": "scripts/pod/autoinit_science_inputs.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
+     "sha256_now": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e"
+    },
+    {
+     "path": "src/aadistill/autoinit/c1_bundle.py",
+     "new_path": "scripts/experiments/phase_c1/bundle.py",
+     "disposition": "renamed",
+     "sha256_at_base": "7b159d818206cf5c12c8e6bde721f9532494218585cc5af5000585d1cf0794a0",
+     "sha256_now": "7b159d818206cf5c12c8e6bde721f9532494218585cc5af5000585d1cf0794a0"
+    },
+    {
+     "path": "scripts/autoinit/stage_c1_bundle.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "ac74fca2f2c2851200c2d05df5c22225501fd596609a13bf14f3c525f388d404",
+     "sha256_now": "d61ae817a908f37eb23ea2957f0d85d8b4fa0cae8f6d736997efe15116c769f7"
+    },
+    {
+     "path": "src/aadistill/models/student.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44",
+     "sha256_now": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44"
+    },
+    {
+     "path": "scripts/autoinit/renderer_parity_gate.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "6d0b242a3d23d471994fb738aa8d7c0ed1749c440c0f151833c6ce631bd7b26e",
+     "sha256_now": "7d87ec76432694a8523678abc326e00ac7c2abf42bb0e01a40e4dd96e88671b8"
+    },
+    {
+     "path": "scripts/data/battery_render.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "20eea99fc20dbd8608b86f301960cfeef09388234634aa90a34cccdc1866e725",
+     "sha256_now": "20eea99fc20dbd8608b86f301960cfeef09388234634aa90a34cccdc1866e725"
+    },
+    {
+     "path": "src/aadistill/autoinit/pod_environment.py",
+     "new_path": "src/aadistill/runtime/pod_environment.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "88ca930ecddbbb43c23f6bad2e207995439c42109a28299d9259644afa9e917a",
+     "sha256_now": "4036aeef7e65793f6d6bd8edbc262532749a54d2ed8cc593680db3d0d1e43b85"
+    },
+    {
+     "path": "src/aadistill/autoinit/staging_contract.py",
+     "new_path": "src/aadistill/runtime/staging_contract.py",
+     "disposition": "renamed",
+     "sha256_at_base": "cc5bc68e1919315229033adae6b934fe952aed4325b37d42bad2df9aafdcfad7",
+     "sha256_now": "cc5bc68e1919315229033adae6b934fe952aed4325b37d42bad2df9aafdcfad7"
+    },
+    {
+     "path": "configs/autoinit/c1_artifacts.json",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "39576ead0ef2e510386b9baf7d8640241607df667189f54c71f388c359ea271c",
+     "sha256_now": "39576ead0ef2e510386b9baf7d8640241607df667189f54c71f388c359ea271c"
+    },
+    {
+     "path": "configs/autoinit/c1_artifacts_failed.json",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c21bb89dd7fc12ed3d0105d344696010df5c07e1487fcfe369bfa2822c539e97",
+     "sha256_now": "c21bb89dd7fc12ed3d0105d344696010df5c07e1487fcfe369bfa2822c539e97"
+    },
+    {
+     "path": "scripts/autoinit/score_c1_confirmation.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "5bb1265b2033b6caf6fa9bfc794e2d5002840b1ed3d9d610fee17d7df9a6dad2",
+     "sha256_now": "d617817ff9322e3ba4cc8407ec2451c80b7f3622305602c8a85518c9d22578f3"
+    },
+    {
+     "path": "src/aadistill/autoinit/c1_scoring.py",
+     "new_path": "scripts/experiments/phase_c1/scoring.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "9528dbd7ce24964f6ae7645cb0cd928076bb22a9c34b60b3c2839f01dbb90dfa",
+     "sha256_now": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd"
+    },
+    {
+     "path": "scripts/autoinit/audit_tool_scoring.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "5cf55651d826509648f9d040405017bb8958fb31b6e352a19b60ab22c0fd6f41",
+     "sha256_now": "5cf55651d826509648f9d040405017bb8958fb31b6e352a19b60ab22c0fd6f41"
+    },
+    {
+     "path": "src/aadistill/data/tools.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+     "sha256_now": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a"
+    },
+    {
+     "path": "src/aadistill/data/verify.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "1860b77f93ac78ad8d50c014f596cb23696a98cc666d7aa6fe359ed0dc718af1",
+     "sha256_now": "1860b77f93ac78ad8d50c014f596cb23696a98cc666d7aa6fe359ed0dc718af1"
+    },
+    {
+     "path": "src/aadistill/autoinit/c1_packaging.py",
+     "new_path": "scripts/experiments/phase_c1/packaging.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "41035e193dd183223342d17a31c141292461610bdadd9bacb80b5f578aefd8d5",
+     "sha256_now": "eee453c2a57ede97bc6ab496059f6da5a031865f99299d3e45e73f71252e5847"
+    },
+    {
+     "path": "src/aadistill/autoinit/c1_probe_results.py",
+     "new_path": "scripts/experiments/phase_c1/probe_results.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "25d214ba92d58c7c2608c986eb9c23244eddb660e0e3226c61f120d15f6a7c68",
+     "sha256_now": "4e0cba89c8ab092cae57c736ddb81146fef99dfa75fac88c217f65efdc092378"
+    },
+    {
+     "path": "src/aadistill/autoinit/device_handoff.py",
+     "new_path": "src/aadistill/runtime/device_handoff.py",
+     "disposition": "renamed",
+     "sha256_at_base": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
+     "sha256_now": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd"
+    },
+    {
+     "path": "src/aadistill/models/teacher.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+     "sha256_now": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da"
+    },
+    {
+     "path": "scripts/pod/autoinit_engine_probe.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "97fef0e555a6adfa857b75bdf826b2cad9567a70038cf267acc62b6d5ab07a0f",
+     "sha256_now": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38"
+    },
+    {
+     "path": "scripts/training/train_stage3.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "b23265cdae9196e1b192c531eaef37fc6a4d8605a6120344e6d3498176cdd72b",
+     "sha256_now": "32ca0c9df4719e024dc091407745bab336ea79310c960f16a331ea0ba900b2ec"
+    },
+    {
+     "path": "src/aadistill/autoinit/c1_session.py",
+     "new_path": "scripts/experiments/phase_c1/session.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "c7acca1ede92e25b581c4befb58ea7c69ac425d2530e14eb67d701165be9f662",
+     "sha256_now": "c7077f67b29e0accb9e778c76c08c609111b888892bb59b6138775e92c1fe4cf"
+    },
+    {
+     "path": "src/aadistill/autoinit/c1_isolation.py",
+     "new_path": "scripts/experiments/phase_c1/isolation.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "46e8b097690b20171c43fb2d151fc7928e5f7cb0df8e4c9eec6a6d3e8a5bd9cc",
+     "sha256_now": "cae93301babb0a725917e20f629ebe315e90e5df86decacb3b0c27f3c544fb04"
+    },
+    {
+     "path": "src/aadistill/autoinit/c1_authorization.py",
+     "new_path": "scripts/experiments/phase_c1/authorization.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "89346808b0bb1e1ec748a41c6da63850ffe44921b7c24d9480c60dc9b820f0f9",
+     "sha256_now": "eeffc8c1994533330ecdbe1deb70c8cd5ff9c879f349bcd823c4c53abbb51b53"
+    },
+    {
+     "path": "src/aadistill/autoinit/cpu_test_env.py",
+     "new_path": "src/aadistill/runtime/cpu_test_env.py",
+     "disposition": "renamed",
+     "sha256_at_base": "e05cff79deb2cc0d9247e593ce420c27423b5eb9638e5d57f82a2394597865b2",
+     "sha256_now": "e05cff79deb2cc0d9247e593ce420c27423b5eb9638e5d57f82a2394597865b2"
+    },
+    {
+     "path": "src/aadistill/autoinit/authorization.py",
+     "new_path": "src/aadistill/governance/authorization.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
+     "sha256_now": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694"
+    },
+    {
+     "path": "src/aadistill/autoinit/__init__.py",
+     "disposition": "removed",
+     "sha256_at_base": "f49a851b6d77c8fd9d184732acd0224fcb3ce8cc0f28fb19ba2f9e112c00ae1c",
+     "sha256_now": null
+    },
+    {
+     "path": "src/aadistill/autoinit/operators/__init__.py",
+     "new_path": "src/aadistill/initialization/operators/__init__.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "27b9707650416f7694c1b14bd83935de18fa0e3434c6cdeefb24724195f645c2",
+     "sha256_now": "5ce3022e198eb31e95924e6210abe9bedb6f3f27e37e580fb45ff1fe4017f4e1"
+    },
+    {
+     "path": "src/aadistill/autoinit/fixed_path.py",
+     "new_path": "src/aadistill/initialization/planning/fixed_path.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "35a1fae4beea29b38b5469c32c8f0abf97aaa5fdc0694d8ed58764ad7aeeb014",
+     "sha256_now": "94698e18efcf7f17eebac3ea849a796615a3ac6fd4b12a1a4560c47dc3060d57"
+    },
+    {
+     "path": "src/aadistill/autoinit/operators/attention_activation.py",
+     "new_path": "src/aadistill/initialization/operators/attention_activation.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "45af4095a7035cffb2a92f0ef72d9cdc26a2df495c10433b3e51571b8d1490cc",
+     "sha256_now": "b2ea83eefbc23b0472d7299669b019b0a34344c40b6a6c7e9694a5cd27b82d3a"
+    },
+    {
+     "path": "src/aadistill/init/attention_stats.py",
+     "new_path": "src/aadistill/initialization/statistics/attention.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "74d6df9c1bb1674342e2e67307bf50ce908d1cd947612aa29e17c5de917a43f5",
+     "sha256_now": "017ca640688a050e0266425b36e703efb2035121c02989a9708136c582b69da9"
+    },
+    {
+     "path": "src/aadistill/autoinit/operators/attention.py",
+     "new_path": "src/aadistill/initialization/operators/attention.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "55beca67a349fe579d7bdb33f21cf19fd18f3de93ccda33223297960cc67c6ef",
+     "sha256_now": "ec26b991ee0983ee8e7a681d90ba53d390539ba4e1202f14c460d4758e2908af"
+    },
+    {
+     "path": "src/aadistill/autoinit/operators/base.py",
+     "new_path": "src/aadistill/initialization/operators/base.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "3cb0ee88495166cb7324a951ac3ec6a1e8e5bb01811fd2368812b437ee13417c",
+     "sha256_now": "c37f4c58e8ae5f149c0b9cefd1b4faae563590fa4017d05c14fcbc650f48d6cd"
+    },
+    {
+     "path": "src/aadistill/autoinit/operators/depth.py",
+     "new_path": "src/aadistill/initialization/operators/depth.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "345b530289a0a0a13d756d9e8f14ef07c504bf80ac886a5e968044cd506f9a1c",
+     "sha256_now": "f5306c9af40ab5ce2dcfaf26c42a90099d1fd44ee926a425351a549653c0ccec"
+    },
+    {
+     "path": "src/aadistill/autoinit/operators/ffn.py",
+     "new_path": "src/aadistill/initialization/operators/ffn.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "d8e0b35e5d9fef785f5e740e1e489d4f4799353fb19cefe30a946ab6d7323bfe",
+     "sha256_now": "67ac31fbec0dc5b6520ccf5182576793df151db801f5cd5a80bc81ebbcdfbcc4"
+    },
+    {
+     "path": "src/aadistill/autoinit/operators/width.py",
+     "new_path": "src/aadistill/initialization/operators/width.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "e4e18bb3246520b3ccf09296bc2d137807b4507fb1843c0c7bbc9d32889230b0",
+     "sha256_now": "efbb5cba7840c5099df09384670a8e4436c6a92def10d7443821ae551cba147c"
+    },
+    {
+     "path": "src/aadistill/autoinit/operators/_common.py",
+     "new_path": "src/aadistill/initialization/operators/_common.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "362418c6b5d2a7730b7b5308f5d43d7c0a6ec8f402040f1f1eaa8bd22b82b7c1",
+     "sha256_now": "d065241b735b0193817caadf97f94ab16bbfa3f624ecf123915041fc9a15615b"
+    },
+    {
+     "path": "src/aadistill/init/contribution.py",
+     "new_path": "src/aadistill/initialization/statistics/contribution.py",
+     "disposition": "renamed",
+     "sha256_at_base": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565",
+     "sha256_now": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565"
+    },
+    {
+     "path": "src/aadistill/init/project.py",
+     "new_path": "src/aadistill/initialization/transforms/project.py",
+     "disposition": "renamed",
+     "sha256_at_base": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36",
+     "sha256_now": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36"
+    },
+    {
+     "path": "src/aadistill/init/sandwich.py",
+     "new_path": "src/aadistill/initialization/transforms/sandwich.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "c6e05bcaf55f0e0219e4f1d2bab044f0d13ed09d24cba0d126f865869b784bc3",
+     "sha256_now": "8ccd3771166166e3b332b15ab09eb9894651d2d3b38b5c405ac67c8d098e2f95"
+    },
+    {
+     "path": "src/aadistill/init/collect.py",
+     "new_path": "src/aadistill/initialization/statistics/collect.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "fa3ff8f1a5064e363c15bc33cb95e570efbce4486cc71d5b878550968259587d",
+     "sha256_now": "0ee4f8ee7fed72cd849dea7767262d4cadd711c0b774edbe43ec2aa2adc15f21"
+    },
+    {
+     "path": "src/aadistill/autoinit/adapters/qwen3.py",
+     "new_path": "src/aadistill/initialization/adapters/qwen3.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "dd36a77b0b5ec0969cf22ad66a7444d1ccee21b8e0cb956db16caa0999a41fc7",
+     "sha256_now": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa"
+    },
+    {
+     "path": "src/aadistill/autoinit/arch.py",
+     "new_path": "src/aadistill/initialization/specs/arch.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "5dddc9038e5c43c2fc5e6d8112c3a8f7b3b45c95bcf0e999cff2c52dd0b1fecd",
+     "sha256_now": "92bc5c45cd8b50f05a83aad172cc11d15d4bb57f8cb67f1615214d301a18c078"
+    },
+    {
+     "path": "src/aadistill/autoinit/artifact.py",
+     "new_path": "src/aadistill/initialization/specs/artifact.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "a35e9a36c1d0ca2e98c1a1e07175c1f9e68649b1ab9bf31adc6a8c23332b2a40",
+     "sha256_now": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9"
+    },
+    {
+     "path": "src/aadistill/autoinit/calibration.py",
+     "new_path": "src/aadistill/initialization/calibration/profiles.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "cd4ec4bb0288d5f26b464abfdec2d8c150864de898b8a9f83d189a8e35d8ec21",
+     "sha256_now": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7"
+    },
+    {
+     "path": "src/aadistill/autoinit/calibration_items.py",
+     "new_path": "src/aadistill/initialization/calibration/items.py",
+     "disposition": "renamed",
+     "sha256_at_base": "8a4d38bbdd7067cc69c9b90863afaf9f7c199b9f23d86f9c05ddbf33dedeb675",
+     "sha256_now": "8a4d38bbdd7067cc69c9b90863afaf9f7c199b9f23d86f9c05ddbf33dedeb675"
+    },
+    {
+     "path": "src/aadistill/autoinit/device.py",
+     "new_path": "src/aadistill/initialization/device.py",
+     "disposition": "renamed",
+     "sha256_at_base": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
+     "sha256_now": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb"
+    },
+    {
+     "path": "src/aadistill/autoinit/metrics.py",
+     "new_path": "src/aadistill/initialization/planning/metrics.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "8a199452ad21b56171a8aa5aa78d88926a18ab0221d3f072ba46c7c589ebbe7f",
+     "sha256_now": "a6dd5d5641ac158266c379fd604dae2e4ff5f4d70599f9597da014ce212b5add"
+    },
+    {
+     "path": "src/aadistill/autoinit/stats.py",
+     "new_path": "src/aadistill/initialization/statistics/spec.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "0cd11ececab0bda49174c7b05107a47faf43267338af53fcf476034d29434b59",
+     "sha256_now": "951c4da15063de8d9193896a8b045efee9e175a1cab349dc4cc833c6d268bdda"
+    },
+    {
+     "path": "src/aadistill/autoinit/recovery.py",
+     "new_path": "src/aadistill/initialization/planning/recovery.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+     "sha256_now": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5"
+    },
+    {
+     "path": "src/aadistill/autoinit/generation.py",
+     "new_path": "src/aadistill/initialization/planning/generation.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "24cf6e3d5dd897e6ab0c3213e83f9a218a21c47052e6fe0cfc48cbda8762cc91",
+     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+    },
+    {
+     "path": "scripts/autoinit/score_recovery_search.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+     "sha256_now": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b"
+    },
+    {
+     "path": "scripts/evaluation/uncapped_eval.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
+     "sha256_now": "d0e49c4ac198212ae68911199ae302d90c6af5c8e343a66348cc2bd67e4ee45e"
+    },
+    {
+     "path": "src/aadistill/evaluation/usable_rollout.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+     "sha256_now": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca"
+    },
+    {
+     "path": "src/aadistill/evaluation/strict_answer.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+     "sha256_now": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3"
+    },
+    {
+     "path": "src/aadistill/evaluation/behavior.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+     "sha256_now": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2"
+    },
+    {
+     "path": "src/aadistill/evaluation/capability.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+     "sha256_now": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad"
+    },
+    {
+     "path": "src/aadistill/evaluation/degeneration.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+     "sha256_now": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
+     "sha256_now": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_runner.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
+     "sha256_now": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33"
+    },
+    {
+     "path": "src/aadistill/infrastructure/session_prechecks.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
+     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+    },
+    {
+     "path": "src/aadistill/infrastructure/budget.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "5931865c89b213ee3c9eccc6536f51e6d66dd9e445ea8b5c85af67b39530cd1a",
+     "sha256_now": "5931865c89b213ee3c9eccc6536f51e6d66dd9e445ea8b5c85af67b39530cd1a"
+    },
+    {
+     "path": "src/aadistill/infrastructure/manifest.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2",
+     "sha256_now": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2"
+    },
+    {
+     "path": "src/aadistill/infrastructure/provider.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "ab640477b99efd179896d4a0ad934804757867eaac22742c96e8752129a87e3e",
+     "sha256_now": "ab640477b99efd179896d4a0ad934804757867eaac22742c96e8752129a87e3e"
+    },
+    {
+     "path": "src/aadistill/infrastructure/artifact_gate.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "22332ab2b23c0b47513374075086def3aabc61a038e149d9dda7f768b48f173b",
+     "sha256_now": "22332ab2b23c0b47513374075086def3aabc61a038e149d9dda7f768b48f173b"
+    }
+   ],
+   "live_digest_computes": false,
+   "live_digest": null,
+   "old_document_would_fail_by": "refusal: declared C1 harness source 'src/aadistill/autoinit/__init__.py' is missing; refusing to produce a digest that describes a smaller harness than the one that would run"
+  },
+  {
+   "declaration": "C1_SCORING_FILES_V1",
+   "declared_in": "experiments.phase_c1.scoring",
+   "n_declared": 11,
+   "dispositions": {
+    "modified_in_place": 2,
+    "declared_path_absent_at_base": 2,
+    "unchanged_path": 7
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 2 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": null,
+   "identity_now": "eeb9fd4a6c0f1f0cca5e9a6ef97f0a526f8dd3a6c2e8a8851fcdfcd68976c651",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/autoinit/score_c1_confirmation.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "5bb1265b2033b6caf6fa9bfc794e2d5002840b1ed3d9d610fee17d7df9a6dad2",
+     "sha256_now": "d617817ff9322e3ba4cc8407ec2451c80b7f3622305602c8a85518c9d22578f3"
+    },
+    {
+     "path": "scripts/experiments/phase_c1/scoring.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd"
+    },
+    {
+     "path": "scripts/autoinit/score_recovery_search.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+     "sha256_now": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/recovery.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5"
+    },
+    {
+     "path": "src/aadistill/evaluation/usable_rollout.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+     "sha256_now": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca"
+    },
+    {
+     "path": "src/aadistill/evaluation/strict_answer.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+     "sha256_now": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3"
+    },
+    {
+     "path": "src/aadistill/evaluation/behavior.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+     "sha256_now": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2"
+    },
+    {
+     "path": "src/aadistill/evaluation/capability.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+     "sha256_now": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad"
+    },
+    {
+     "path": "scripts/autoinit/audit_tool_scoring.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "5cf55651d826509648f9d040405017bb8958fb31b6e352a19b60ab22c0fd6f41",
+     "sha256_now": "5cf55651d826509648f9d040405017bb8958fb31b6e352a19b60ab22c0fd6f41"
+    },
+    {
+     "path": "src/aadistill/data/tools.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+     "sha256_now": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a"
+    },
+    {
+     "path": "src/aadistill/data/verify.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "1860b77f93ac78ad8d50c014f596cb23696a98cc666d7aa6fe359ed0dc718af1",
+     "sha256_now": "1860b77f93ac78ad8d50c014f596cb23696a98cc666d7aa6fe359ed0dc718af1"
+    }
+   ]
+  },
+  {
+   "declaration": "GENERATION_SOURCE_FILES_V1",
+   "declared_in": "aadistill.initialization.planning.generation",
+   "n_declared": 3,
+   "dispositions": {
+    "modified_in_place": 1,
+    "unchanged_path": 2
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 1 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
+   "identity_now": "02478a3492437c024987a72b06f27ca2caf05c73ec64cc3ab7f44ebebbc55ac6",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/evaluation/uncapped_eval.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
+     "sha256_now": "d0e49c4ac198212ae68911199ae302d90c6af5c8e343a66348cc2bd67e4ee45e"
+    },
+    {
+     "path": "src/aadistill/evaluation/degeneration.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+     "sha256_now": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961"
+    },
+    {
+     "path": "src/aadistill/evaluation/behavior.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+     "sha256_now": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2"
+    }
+   ]
+  },
+  {
+   "declaration": "TRAINER_SOURCE_FILES_V1",
+   "declared_in": "aadistill.initialization.planning.recovery",
+   "n_declared": 7,
+   "dispositions": {
+    "modified_in_place": 1,
+    "unchanged_path": 6
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 1 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": "2e63e2e230c09af7e33e4c2acc02aed59e4ea489c364447b032d30bd678dd1dc",
+   "identity_now": "813194ffdd22426c90993776a771b827c36b455917b97505b5eb80d4ccbf0dbd",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/training/train_stage3.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "b23265cdae9196e1b192c531eaef37fc6a4d8605a6120344e6d3498176cdd72b",
+     "sha256_now": "32ca0c9df4719e024dc091407745bab336ea79310c960f16a331ea0ba900b2ec"
+    },
+    {
+     "path": "src/aadistill/training/train.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "4d409b161b244ab5cc388f1615a87de5ce7481c3a2a3e8349b78822878508313",
+     "sha256_now": "4d409b161b244ab5cc388f1615a87de5ce7481c3a2a3e8349b78822878508313"
+    },
+    {
+     "path": "src/aadistill/training/lora.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+     "sha256_now": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333"
+    },
+    {
+     "path": "src/aadistill/data/ladder.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca",
+     "sha256_now": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca"
+    },
+    {
+     "path": "src/aadistill/data/dataset.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+     "sha256_now": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66"
+    },
+    {
+     "path": "src/aadistill/models/teacher.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+     "sha256_now": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da"
+    },
+    {
+     "path": "src/aadistill/models/student.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44",
+     "sha256_now": "90f60257f51d9bb1e3f51ddb5c70719cad09a43f5663cb68a73dbf4fec6e5e44"
+    }
+   ]
+  },
+  {
+   "declaration": "RECOVERY_SCORING_FILES_V2",
+   "declared_in": "aadistill.initialization.planning.recovery",
+   "n_declared": 6,
+   "dispositions": {
+    "modified_in_place": 1,
+    "unchanged_path": 4,
+    "renamed_and_modified": 1
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 1 renamed AND modified, 1 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+   "identity_now": "f88ce7780f24aee6e825275334356f4d2fd3d151e0c9e28164a4605c04419f6f",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/autoinit/score_recovery_search.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+     "sha256_now": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b"
+    },
+    {
+     "path": "src/aadistill/evaluation/usable_rollout.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+     "sha256_now": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca"
+    },
+    {
+     "path": "src/aadistill/evaluation/strict_answer.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+     "sha256_now": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3"
+    },
+    {
+     "path": "src/aadistill/evaluation/behavior.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+     "sha256_now": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2"
+    },
+    {
+     "path": "src/aadistill/evaluation/capability.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+     "sha256_now": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad"
+    },
+    {
+     "path": "src/aadistill/autoinit/recovery.py",
+     "new_path": "src/aadistill/initialization/planning/recovery.py",
+     "disposition": "renamed_and_modified",
+     "sha256_at_base": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
+     "sha256_now": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5"
+    }
+   ]
+  },
+  {
+   "declaration": "RECOVERY_SCORING_FILES_V3",
+   "declared_in": "aadistill.initialization.planning.recovery",
+   "n_declared": 6,
+   "dispositions": {
+    "modified_in_place": 1,
+    "unchanged_path": 4,
+    "declared_path_absent_at_base": 1
+   },
+   "additive_only": false,
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 1 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "identity_at_base": null,
+   "identity_now": "f88ce7780f24aee6e825275334356f4d2fd3d151e0c9e28164a4605c04419f6f",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "scientific_fields_changed": 0,
+   "files": [
+    {
+     "path": "scripts/autoinit/score_recovery_search.py",
+     "disposition": "modified_in_place",
+     "sha256_at_base": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
+     "sha256_now": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b"
+    },
+    {
+     "path": "src/aadistill/evaluation/usable_rollout.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+     "sha256_now": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca"
+    },
+    {
+     "path": "src/aadistill/evaluation/strict_answer.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+     "sha256_now": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3"
+    },
+    {
+     "path": "src/aadistill/evaluation/behavior.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+     "sha256_now": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2"
+    },
+    {
+     "path": "src/aadistill/evaluation/capability.py",
+     "disposition": "unchanged_path",
+     "sha256_at_base": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+     "sha256_now": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad"
+    },
+    {
+     "path": "src/aadistill/initialization/planning/recovery.py",
+     "disposition": "declared_path_absent_at_base",
+     "sha256_at_base": null,
+     "sha256_now": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5"
+    }
+   ]
+  }
+ ],
+ "historical_evidence": {
+  "files_moved_or_rewritten": 0,
+  "rule": "no file under logs/ was moved, renamed or rewritten by this migration; logs/runs/index.json verifies that independently by directory digest"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "285374ebf518d4247963f03c6a0f2e699bd77af9d5dc52ac78de01f973f8e9b1"
+}

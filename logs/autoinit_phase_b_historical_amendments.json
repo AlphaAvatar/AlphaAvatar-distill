@@ -2,7 +2,7 @@
  "schema": "aadistill.autoinit.phase_b_historical_amendments/v1",
  "_what_this_is": "an APPEND-ONLY ledger of reviewed, post-completion drift in the Phase-B executable source set. It exists because 'this tree may not launch Phase B' and 'nobody explained why the digest moved' are different facts and the repository had one mechanism for both. It records history and confers nothing.",
  "consumed_by_a_paid_launch_gate": false,
- "launch_compatibility_owner": "scripts/pod/autoinit_phase_b_launch.py::preregistration_gate, via aadistill.autoinit.post_freeze.accounted_for \u2014 which is unchanged and still refuses non-additive drift",
+ "launch_compatibility_owner": "scripts/pod/autoinit_phase_b_launch.py::preregistration_gate, via aadistill.governance.post_freeze.accounted_for \u2014 which is unchanged and still refuses non-additive drift",
  "immutability": "logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_post_freeze_changes.json are anchored by hash above and are never rewritten by this command.",
  "anchors": {
   "phase_b_preregistration": "logs/autoinit_phase_b_preregistration.json",
@@ -71,47 +71,355 @@
   {
    "amendment_id": "PHB-HA-002",
    "schema_version": 1,
-   "recorded_utc": "2026-09-08T08:06:39+00:00",
-   "reviewed_base_commit": "x",
-   "source_repair_commit": "d1b6171f464bcc3920e9e1510178263f6d992f89",
-   "source_repair_parent": "2c9a1b847946739c53d632f2759a27c5c6d439e0",
+   "recorded_utc": "2026-09-08T11:51:43+00:00",
+   "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+   "source_repair_commit": "92d97b9aaf584c8d19f81504d6e71eee688705e6",
+   "source_repair_parent": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
    "previous_live_digest": "372c1f2438ad0b1698a2ceacbfa4e76acbb9147e38e735bc4d0152c6f894bbc3",
-   "new_live_digest": "37954ab4bc9d2fa2caedff016f7a35aa236086a466ac3812de2237cd00f0326f",
+   "new_live_digest": "9073093bcf1a845385d349e78834c13e747c666318fccda83265a5211407ca57",
    "changed_files": [
+    "scripts/autoinit/load_state_eval.py",
+    "scripts/autoinit/phase_a_search.py",
+    "scripts/autoinit/price_phase_b.py",
+    "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/autoinit/verify_historical_probe_reuse.py",
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/experiments/phase_a/plan.py",
+    "scripts/experiments/phase_b/plan.py",
+    "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/autoinit_phase_a_driver.py",
     "scripts/pod/autoinit_phase_a_launch.py",
     "scripts/pod/autoinit_phase_b_driver.py",
     "scripts/pod/autoinit_phase_b_launch.py",
-    "src/aadistill/initialization/planning/metrics.py"
+    "scripts/pod/autoinit_science_inputs.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite.py",
+    "src/aadistill/initialization/operators/depth.py",
+    "src/aadistill/initialization/operators/ffn.py",
+    "src/aadistill/initialization/operators/width.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/leaf_durability.py"
    ],
    "file_sha256_before": {
-    "scripts/pod/autoinit_phase_a_driver.py": "10c7b62055cfeff265cb7fe33b4b40fbdc0a8b9e0688f045dd53d0964bde6fd1",
-    "scripts/pod/autoinit_phase_a_launch.py": "38f34805a5e4773f182960aa95610b0a8d50ff1c31a96b7fc6f9702ae9d78918",
-    "scripts/pod/autoinit_phase_b_driver.py": "98b1b6b0c8efb5e6f40647ad9812f29138edc14624e9497da954798ef7e9c722",
-    "scripts/pod/autoinit_phase_b_launch.py": "9b88751a93c05fdfb0d270d3583ed10ea028c7a54494dc8a26bbf7f04953d13a",
-    "src/aadistill/initialization/planning/metrics.py": "01fea071e3ba16a0509edf1d727f212684ea95ac20a8bdb757b6764a7450f4a8"
+    "scripts/autoinit/load_state_eval.py": "5207f77727fe859d721d78625af0843bb95ebbda5c10c761acf60983d9a7bb4b",
+    "scripts/autoinit/phase_a_search.py": "d4edf2122328396a171a38d30e3537fd0ba771e033d841f41157ea91ce085dec",
+    "scripts/autoinit/price_phase_b.py": "4a9747bf34e0627a12d4cd1a8eeb0263f54982e47ab9c16749c3f79a88c66cf4",
+    "scripts/autoinit/verify_frozen_assets.py": "7b43b9b63172c3acb10b1d5f7dd6c2077bfb5767aaf3e6aab1f2852b32f5b551",
+    "scripts/autoinit/verify_historical_probe_reuse.py": "742bad28f81bafafdcf8a3249f5c2078b581b6b82672f318baa3bcde2cec42c0",
+    "scripts/autoinit/write_preregistration.py": "55938e534f0d5b7afe61359cea35486d702e5da2695f9e9f2d688a5b844ebfa6",
+    "scripts/experiments/phase_a/plan.py": null,
+    "scripts/experiments/phase_b/plan.py": null,
+    "scripts/pod/autoinit_engine_probe.py": "97fef0e555a6adfa857b75bdf826b2cad9567a70038cf267acc62b6d5ab07a0f",
+    "scripts/pod/autoinit_phase_a_driver.py": "3296a6b749bd01886258dbd0bf1a527ce4db564b18e3bd6c1e59b510007d6d1a",
+    "scripts/pod/autoinit_phase_a_launch.py": "ea080b2e901facd32985d0eb21ae8757eb77d2db7d8aefa0af5c01d72537f83e",
+    "scripts/pod/autoinit_phase_b_driver.py": "5e7fa37687684cafe0dd500ffd5e7b7654e7da43a4726f6bd2312c1e42ffefdc",
+    "scripts/pod/autoinit_phase_b_launch.py": "1451b369b817f5b2f9b67f401e1a662b57e8fa8bbbff1375c59f991a75b61b86",
+    "scripts/pod/autoinit_science_inputs.py": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
+    "src/aadistill/governance/authorization.py": null,
+    "src/aadistill/infrastructure/session_runner.py": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
+    "src/aadistill/initialization/adapters/__init__.py": null,
+    "src/aadistill/initialization/adapters/qwen3.py": null,
+    "src/aadistill/initialization/calibration/datasets.py": null,
+    "src/aadistill/initialization/calibration/profiles.py": null,
+    "src/aadistill/initialization/device.py": null,
+    "src/aadistill/initialization/operators/__init__.py": null,
+    "src/aadistill/initialization/operators/_common.py": null,
+    "src/aadistill/initialization/operators/attention.py": null,
+    "src/aadistill/initialization/operators/base.py": null,
+    "src/aadistill/initialization/operators/composite.py": null,
+    "src/aadistill/initialization/operators/depth.py": null,
+    "src/aadistill/initialization/operators/ffn.py": null,
+    "src/aadistill/initialization/operators/width.py": null,
+    "src/aadistill/initialization/planning/generation.py": null,
+    "src/aadistill/initialization/planning/generation_compat.py": null,
+    "src/aadistill/initialization/planning/metrics.py": null,
+    "src/aadistill/initialization/planning/ranking.py": null,
+    "src/aadistill/initialization/planning/search.py": null,
+    "src/aadistill/initialization/planning/stage1_selection.py": null,
+    "src/aadistill/initialization/specs/arch.py": null,
+    "src/aadistill/initialization/specs/artifact.py": null,
+    "src/aadistill/initialization/specs/identity_collapse.py": null,
+    "src/aadistill/initialization/specs/state.py": null,
+    "src/aadistill/initialization/statistics/contribution.py": null,
+    "src/aadistill/initialization/statistics/spec.py": null,
+    "src/aadistill/initialization/transforms/project.py": null,
+    "src/aadistill/initialization/transforms/sandwich.py": null,
+    "src/aadistill/runtime/cost.py": null,
+    "src/aadistill/runtime/device_handoff.py": null,
+    "src/aadistill/runtime/leaf_durability.py": null
    },
    "file_sha256_after": {
-    "scripts/pod/autoinit_phase_a_driver.py": "060332010ae557f6961a1c6d906eea015c374f4021662791615a72a1f70297e9",
+    "scripts/autoinit/load_state_eval.py": "5e276bfcfcbf62acc03e06ed137f544a3551a68e9153ee7e5e3712980eb5a0a0",
+    "scripts/autoinit/phase_a_search.py": "594121996ec6bc8679646e8545dd037558be263a5245a27a765e520fed4ab0f5",
+    "scripts/autoinit/price_phase_b.py": "7e013552818bc2c9979d74a559b3ac1e36391025780d92d1aa614b54a88bc310",
+    "scripts/autoinit/verify_frozen_assets.py": "0c39aea1c8b91e0af939d6a4ab8b4f903dff0b56353d02ce2fadeb7407508583",
+    "scripts/autoinit/verify_historical_probe_reuse.py": "cfc7ef1f234e731a3ee7d25f9833829019543413114d9b73663ccc91e26b032d",
+    "scripts/autoinit/write_preregistration.py": "af54385682b7ee2f827f32fb7c5397006a5e35608e408f3aa311893b2d783b7c",
+    "scripts/experiments/phase_a/plan.py": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b",
+    "scripts/experiments/phase_b/plan.py": "65c71f785552caa05b95460fd04ba89d666ede4eef187c40d802642d4bccfe8d",
+    "scripts/pod/autoinit_engine_probe.py": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38",
+    "scripts/pod/autoinit_phase_a_driver.py": "c830fcb227e32ac59da3dd8c23c73754e7765989b9cd8af9db39039785e01eb9",
     "scripts/pod/autoinit_phase_a_launch.py": "7edddabcb2eaeb834bc690f3e7c538e1ad702d41dddb24f4a1e4a7542c533ccd",
-    "scripts/pod/autoinit_phase_b_driver.py": "d3f2fc7ae78c320d2250ab8836eb9f43c5e9ebd931556b561672424ccd6e15f9",
-    "scripts/pod/autoinit_phase_b_launch.py": "364ea1ec4f5b66a6e94b5db894fed43838a6d87d512867c0992fedb752aa8db8",
-    "src/aadistill/initialization/planning/metrics.py": "a6dd5d5641ac158266c379fd604dae2e4ff5f4d70599f9597da014ce212b5add"
+    "scripts/pod/autoinit_phase_b_driver.py": "31af23861a3be5faa731d9b6ddc4883b91a0b59ef919e641cdc2c7089c748993",
+    "scripts/pod/autoinit_phase_b_launch.py": "dfc5f4f67c2e3b443f5606d721ec52c3ba617e6cf07fffec46c8f62a8290830c",
+    "scripts/pod/autoinit_science_inputs.py": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e",
+    "src/aadistill/governance/authorization.py": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694",
+    "src/aadistill/infrastructure/session_runner.py": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33",
+    "src/aadistill/initialization/adapters/__init__.py": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5",
+    "src/aadistill/initialization/adapters/qwen3.py": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa",
+    "src/aadistill/initialization/calibration/datasets.py": "586781a762f1f2417d2ac6a9d95653c0045db69d32a9ca3e165b68c116980352",
+    "src/aadistill/initialization/calibration/profiles.py": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7",
+    "src/aadistill/initialization/device.py": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
+    "src/aadistill/initialization/operators/__init__.py": "5ce3022e198eb31e95924e6210abe9bedb6f3f27e37e580fb45ff1fe4017f4e1",
+    "src/aadistill/initialization/operators/_common.py": "d065241b735b0193817caadf97f94ab16bbfa3f624ecf123915041fc9a15615b",
+    "src/aadistill/initialization/operators/attention.py": "ec26b991ee0983ee8e7a681d90ba53d390539ba4e1202f14c460d4758e2908af",
+    "src/aadistill/initialization/operators/base.py": "c37f4c58e8ae5f149c0b9cefd1b4faae563590fa4017d05c14fcbc650f48d6cd",
+    "src/aadistill/initialization/operators/composite.py": "da2a0e5b86ecf347fdf7941cdd4dd5c49e6d5eaa5fbb3733243d55ac7ceed0aa",
+    "src/aadistill/initialization/operators/depth.py": "f5306c9af40ab5ce2dcfaf26c42a90099d1fd44ee926a425351a549653c0ccec",
+    "src/aadistill/initialization/operators/ffn.py": "67ac31fbec0dc5b6520ccf5182576793df151db801f5cd5a80bc81ebbcdfbcc4",
+    "src/aadistill/initialization/operators/width.py": "efbb5cba7840c5099df09384670a8e4436c6a92def10d7443821ae551cba147c",
+    "src/aadistill/initialization/planning/generation.py": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc",
+    "src/aadistill/initialization/planning/generation_compat.py": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0",
+    "src/aadistill/initialization/planning/metrics.py": "a6dd5d5641ac158266c379fd604dae2e4ff5f4d70599f9597da014ce212b5add",
+    "src/aadistill/initialization/planning/ranking.py": "33df4e53f74da0c301aaa8228ab43e3ea2ca4ae57ef59ddcd7e0631bd5c94a20",
+    "src/aadistill/initialization/planning/search.py": "a02fa31f1b2764184c052fad3f00189768b7f041ffb63c92deb7e4d7ed29e498",
+    "src/aadistill/initialization/planning/stage1_selection.py": "178b3c486750faca2cdf387315c9b5bd885b79a404980edd7f93990f4eadbfc8",
+    "src/aadistill/initialization/specs/arch.py": "92bc5c45cd8b50f05a83aad172cc11d15d4bb57f8cb67f1615214d301a18c078",
+    "src/aadistill/initialization/specs/artifact.py": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9",
+    "src/aadistill/initialization/specs/identity_collapse.py": "823bb9784c77d8364dd1f197cc2b5bf26254773c1d60563f86191b4730978583",
+    "src/aadistill/initialization/specs/state.py": "fa8289755d8ad0fe64628caa5ea3ca315f7b8eb0416860e2f6bd86b7b70df498",
+    "src/aadistill/initialization/statistics/contribution.py": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565",
+    "src/aadistill/initialization/statistics/spec.py": "951c4da15063de8d9193896a8b045efee9e175a1cab349dc4cc833c6d268bdda",
+    "src/aadistill/initialization/transforms/project.py": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36",
+    "src/aadistill/initialization/transforms/sandwich.py": "8ccd3771166166e3b332b15ab09eb9894651d2d3b38b5c405ac67c8d098e2f95",
+    "src/aadistill/runtime/cost.py": "9cdecf509df78968f043a720e32a033239dd66285124b8ffd335ee045aa617b6",
+    "src/aadistill/runtime/device_handoff.py": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
+    "src/aadistill/runtime/leaf_durability.py": "024967267f9ededb651437d7b660395c642a191c09d8dd1e8a3bf6946214a017"
    },
-   "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-   "numstat": {},
+   "patch_sha256": "80a63cf94c5c44639ced41b0738355c569a5d27861d0e1800033af6b3ec595f8",
+   "numstat": {
+    "scripts/autoinit/load_state_eval.py": [
+     1,
+     1
+    ],
+    "scripts/autoinit/phase_a_search.py": [
+     17,
+     10
+    ],
+    "scripts/autoinit/price_phase_b.py": [
+     2,
+     2
+    ],
+    "scripts/autoinit/verify_frozen_assets.py": [
+     33,
+     10
+    ],
+    "scripts/autoinit/verify_historical_probe_reuse.py": [
+     11,
+     4
+    ],
+    "scripts/autoinit/write_preregistration.py": [
+     14,
+     6
+    ],
+    "scripts/experiments/phase_a/plan.py": [
+     528,
+     0
+    ],
+    "scripts/experiments/phase_b/plan.py": [
+     608,
+     0
+    ],
+    "scripts/pod/autoinit_engine_probe.py": [
+     1,
+     1
+    ],
+    "scripts/pod/autoinit_phase_a_driver.py": [
+     47,
+     19
+    ],
+    "scripts/pod/autoinit_phase_a_launch.py": [
+     7,
+     6
+    ],
+    "scripts/pod/autoinit_phase_b_driver.py": [
+     4,
+     8
+    ],
+    "scripts/pod/autoinit_phase_b_launch.py": [
+     7,
+     11
+    ],
+    "scripts/pod/autoinit_science_inputs.py": [
+     1,
+     1
+    ],
+    "src/aadistill/governance/authorization.py": [
+     278,
+     0
+    ],
+    "src/aadistill/infrastructure/session_runner.py": [
+     1,
+     1
+    ],
+    "src/aadistill/initialization/adapters/__init__.py": [
+     60,
+     0
+    ],
+    "src/aadistill/initialization/adapters/qwen3.py": [
+     241,
+     0
+    ],
+    "src/aadistill/initialization/calibration/datasets.py": [
+     339,
+     0
+    ],
+    "src/aadistill/initialization/calibration/profiles.py": [
+     386,
+     0
+    ],
+    "src/aadistill/initialization/device.py": [
+     236,
+     0
+    ],
+    "src/aadistill/initialization/operators/__init__.py": [
+     74,
+     0
+    ],
+    "src/aadistill/initialization/operators/_common.py": [
+     140,
+     0
+    ],
+    "src/aadistill/initialization/operators/attention.py": [
+     148,
+     0
+    ],
+    "src/aadistill/initialization/operators/base.py": [
+     487,
+     0
+    ],
+    "src/aadistill/initialization/operators/composite.py": [
+     179,
+     0
+    ],
+    "src/aadistill/initialization/operators/depth.py": [
+     552,
+     0
+    ],
+    "src/aadistill/initialization/operators/ffn.py": [
+     138,
+     0
+    ],
+    "src/aadistill/initialization/operators/width.py": [
+     167,
+     0
+    ],
+    "src/aadistill/initialization/planning/generation.py": [
+     590,
+     0
+    ],
+    "src/aadistill/initialization/planning/generation_compat.py": [
+     219,
+     0
+    ],
+    "src/aadistill/initialization/planning/metrics.py": [
+     211,
+     0
+    ],
+    "src/aadistill/initialization/planning/ranking.py": [
+     599,
+     0
+    ],
+    "src/aadistill/initialization/planning/search.py": [
+     753,
+     0
+    ],
+    "src/aadistill/initialization/planning/stage1_selection.py": [
+     163,
+     0
+    ],
+    "src/aadistill/initialization/specs/arch.py": [
+     372,
+     0
+    ],
+    "src/aadistill/initialization/specs/artifact.py": [
+     220,
+     0
+    ],
+    "src/aadistill/initialization/specs/identity_collapse.py": [
+     167,
+     0
+    ],
+    "src/aadistill/initialization/specs/state.py": [
+     486,
+     0
+    ],
+    "src/aadistill/initialization/statistics/contribution.py": [
+     343,
+     0
+    ],
+    "src/aadistill/initialization/statistics/spec.py": [
+     122,
+     0
+    ],
+    "src/aadistill/initialization/transforms/project.py": [
+     141,
+     0
+    ],
+    "src/aadistill/initialization/transforms/sandwich.py": [
+     302,
+     0
+    ],
+    "src/aadistill/runtime/cost.py": [
+     898,
+     0
+    ],
+    "src/aadistill/runtime/device_handoff.py": [
+     218,
+     0
+    ],
+    "src/aadistill/runtime/leaf_durability.py": [
+     211,
+     0
+    ]
+   },
    "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
    "additive_only": false,
-   "lines_removed": 0,
+   "lines_removed": 80,
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "phase_b_science_changed": false,
    "phase_b_results_changed": false,
    "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
-   "what": "x",
-   "why_the_owner_is_shared_session_runner": "x",
-   "why_a_c1_only_override_was_rejected": "x",
-   "maintainer_authorization": "x",
+   "what": "All-stage initialization-core consolidation and core/application separation: relocate reusable implementation from aadistill.init and aadistill.autoinit into aadistill.initialization; extract model-instance and experiment-instance policy into configs and experiment scripts; replace import-time adapter registration with explicit application bootstrap; update current callers and executable dependency closures while preserving mathematical behavior and historical evidence.",
+   "why_the_owner_is_shared_session_runner": "The Phase-B executable set and the C1 harness share infrastructure modules,\nso a relocation of those modules moves both identities at once. The shared\nowner is the initialization package boundary itself rather than any one\nphase: aadistill.init and aadistill.autoinit were the shared root, and the\nconsolidation replaces them with aadistill.initialization for every consumer.",
+   "why_a_c1_only_override_was_rejected": "This is not a C1 override. C1's launch compatibility is unchanged and remains\nfalse: C1_HARNESS_SOURCE_FILES_V1 is deliberately not repointed and still\nrefuses to produce a digest, and C1's live identity is the separately derived\nexecutable closure. This amendment records movement in the Phase-B executable\nsource set only, and confers nothing on C1.",
+   "maintainer_authorization": "MAINTAINER P12 DECISION, 2026-09-08:\n\nThe non-additive all-stage initialization package relocation on\nmigration/initialization-milestone-a is approved for historical accounting.\n\nHistorical preregistrations, raw results, replay digests, grants,\nauthorizations and scientific observations remain immutable. No historical\nexperiment may be described as having run the relocated implementation.\nOld grants and authorizations remain unusable against the migrated tree.\n\nThis approval records current-code movement only. It authorizes no\nexperiment, no GPU/provider resource, no Attempt-10 grant or authorization,\nno scientific field change and no reinterpretation of prior results.",
    "does_not_authorize": [
     "any Phase-B execution",
     "re-freezing the Phase-B preregistration",
@@ -121,131 +429,12 @@
    ],
    "previous_entry_sha256": "6f5e1fd5e4986374d9b0086bf427aae5c12536e5235ec2c1517a630daaff4db6",
    "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
     "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
-    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2"
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
-   "entry_sha256": "9ab2696fac5fa8e814af7f8ba71506e13528fa5f8fad30a858f3ba7f2aab1a24"
-  },
-  {
-   "amendment_id": "PHB-HA-003",
-   "schema_version": 1,
-   "recorded_utc": "2026-09-08T09:28:21+00:00",
-   "reviewed_base_commit": "x",
-   "source_repair_commit": "90919912177eebf0e5226b8be8d97acc793656fa",
-   "source_repair_parent": "c9bf3cbadea76dd2fa2ae0fe189933128a939575",
-   "previous_live_digest": "37954ab4bc9d2fa2caedff016f7a35aa236086a466ac3812de2237cd00f0326f",
-   "new_live_digest": "0aa612fc28d42fa07e07b444a8d86211dfe5571b82e8e6912c15bd77f028f654",
-   "changed_files": [
-    "scripts/autoinit/phase_a_search.py",
-    "scripts/autoinit/verify_frozen_assets.py",
-    "scripts/autoinit/verify_historical_probe_reuse.py",
-    "scripts/autoinit/write_preregistration.py",
-    "scripts/pod/autoinit_phase_a_driver.py",
-    "scripts/pod/autoinit_phase_b_driver.py",
-    "scripts/pod/autoinit_phase_b_launch.py",
-    "src/aadistill/initialization/adapters/__init__.py",
-    "src/aadistill/initialization/adapters/qwen3.py",
-    "src/aadistill/initialization/calibration/profiles.py",
-    "src/aadistill/initialization/specs/arch.py"
-   ],
-   "file_sha256_before": {
-    "scripts/autoinit/phase_a_search.py": "a3520274bed40fb71dfa7a2fa112339c8190701d9fe9d86da345a7b48a1c1ef5",
-    "scripts/autoinit/verify_frozen_assets.py": "427974c0305ab4937a80ae0c68c125670eec9d182b041b5eb8caf99944d89dba",
-    "scripts/autoinit/verify_historical_probe_reuse.py": "933f213e5474176962a93a45e6208e581ecce7f4d18aed1900f22e1d846d0167",
-    "scripts/autoinit/write_preregistration.py": "16023bd4f69e1c22399550648846c4f5c5aa4d469f0f45efbafe7e6cd4802d3d",
-    "scripts/pod/autoinit_phase_a_driver.py": "060332010ae557f6961a1c6d906eea015c374f4021662791615a72a1f70297e9",
-    "scripts/pod/autoinit_phase_b_driver.py": "d3f2fc7ae78c320d2250ab8836eb9f43c5e9ebd931556b561672424ccd6e15f9",
-    "scripts/pod/autoinit_phase_b_launch.py": "364ea1ec4f5b66a6e94b5db894fed43838a6d87d512867c0992fedb752aa8db8",
-    "src/aadistill/initialization/adapters/__init__.py": "ed587526e11457ea4b7d6eef440afae5833e373350024f2a30b53e40c47674c7",
-    "src/aadistill/initialization/adapters/qwen3.py": "b2fa5f08d64fee784c3315e345655c2165ab8a266d6fca341fefe84de84b1ca2",
-    "src/aadistill/initialization/calibration/profiles.py": "3836d53717336b3c1359fb486ba1f7e70c3db65474ca23e822aa7075ba71b92e",
-    "src/aadistill/initialization/specs/arch.py": "5dddc9038e5c43c2fc5e6d8112c3a8f7b3b45c95bcf0e999cff2c52dd0b1fecd"
-   },
-   "file_sha256_after": {
-    "scripts/autoinit/phase_a_search.py": "594121996ec6bc8679646e8545dd037558be263a5245a27a765e520fed4ab0f5",
-    "scripts/autoinit/verify_frozen_assets.py": "0c39aea1c8b91e0af939d6a4ab8b4f903dff0b56353d02ce2fadeb7407508583",
-    "scripts/autoinit/verify_historical_probe_reuse.py": "cfc7ef1f234e731a3ee7d25f9833829019543413114d9b73663ccc91e26b032d",
-    "scripts/autoinit/write_preregistration.py": "af54385682b7ee2f827f32fb7c5397006a5e35608e408f3aa311893b2d783b7c",
-    "scripts/pod/autoinit_phase_a_driver.py": "c830fcb227e32ac59da3dd8c23c73754e7765989b9cd8af9db39039785e01eb9",
-    "scripts/pod/autoinit_phase_b_driver.py": "31af23861a3be5faa731d9b6ddc4883b91a0b59ef919e641cdc2c7089c748993",
-    "scripts/pod/autoinit_phase_b_launch.py": "dfc5f4f67c2e3b443f5606d721ec52c3ba617e6cf07fffec46c8f62a8290830c",
-    "src/aadistill/initialization/adapters/__init__.py": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5",
-    "src/aadistill/initialization/adapters/qwen3.py": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa",
-    "src/aadistill/initialization/calibration/profiles.py": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7",
-    "src/aadistill/initialization/specs/arch.py": "92bc5c45cd8b50f05a83aad172cc11d15d4bb57f8cb67f1615214d301a18c078"
-   },
-   "patch_sha256": "36c0b499f753cbf46af63dc4723d56f2b99625beba4890c2c71b9e4a897e7c49",
-   "numstat": {
-    "scripts/autoinit/phase_a_search.py": [
-     5,
-     1
-    ],
-    "scripts/autoinit/verify_frozen_assets.py": [
-     31,
-     8
-    ],
-    "scripts/autoinit/verify_historical_probe_reuse.py": [
-     4,
-     0
-    ],
-    "scripts/autoinit/write_preregistration.py": [
-     6,
-     4
-    ],
-    "scripts/pod/autoinit_phase_a_driver.py": [
-     13,
-     1
-    ],
-    "scripts/pod/autoinit_phase_b_driver.py": [
-     1,
-     4
-    ],
-    "scripts/pod/autoinit_phase_b_launch.py": [
-     1,
-     4
-    ],
-    "src/aadistill/initialization/adapters/__init__.py": [
-     51,
-     22
-    ],
-    "src/aadistill/initialization/adapters/qwen3.py": [
-     15,
-     4
-    ],
-    "src/aadistill/initialization/calibration/profiles.py": [
-     49,
-     159
-    ],
-    "src/aadistill/initialization/specs/arch.py": [
-     78,
-     32
-    ]
-   },
-   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
-   "additive_only": false,
-   "lines_removed": 239,
-   "historical_only": true,
-   "launch_compatible_with_frozen_preregistration": false,
-   "phase_b_science_changed": false,
-   "phase_b_results_changed": false,
-   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
-   "what": "x",
-   "why_the_owner_is_shared_session_runner": "x",
-   "why_a_c1_only_override_was_rejected": "x",
-   "maintainer_authorization": "x",
-   "does_not_authorize": [
-    "any Phase-B execution",
-    "re-freezing the Phase-B preregistration",
-    "reinterpreting the completed Phase-B result",
-    "launch compatibility with the frozen preregistration",
-    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
-   ],
-   "previous_entry_sha256": "9ab2696fac5fa8e814af7f8ba71506e13528fa5f8fad30a858f3ba7f2aab1a24",
-   "also_affected_hash_bound_sets": [
-    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
-    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2"
-   ],
-   "entry_sha256": "f9f3891696f32451209388c2f2f9d30cbdb43e683813f1a8ca5e83e5929b0633"
+   "entry_sha256": "39a69753cd25abe6ec55796d938f5caa8e80e42f1d705365d57e6fda4cce5385"
   }
  ]
 }

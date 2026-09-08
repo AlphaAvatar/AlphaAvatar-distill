@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import re
 from pathlib import Path
 
@@ -267,9 +268,20 @@ def _rederive_last_entry(root: Path, e: dict) -> tuple[bool, str]:
     commit, parent = e.get("source_repair_commit"), e.get("source_repair_parent")
     if not commit or not parent:
         return False, "the amendment does not name its commit and parent"
-    if _git(root, "rev-parse", f"{commit}^").strip() != parent:
-        return False, (f"{commit[:12]}…'s parent is not the recorded "
-                       f"{parent[:12]}…")
+    #: The parent must be an ANCESTOR, not necessarily the immediate one. A
+    #: single repair is one commit and its parent; a change that spans several
+    #: -- the initialization migration spans thirteen -- names its base instead.
+    #: The guarantee is unchanged: the numstat and patch below are checked
+    #: against `git diff <parent> <commit>`, so an amendment still cannot claim
+    #: a range it did not measure.
+    if _git(root, "rev-parse", commit).strip() == "":
+        return False, f"{commit[:12]}… does not resolve"
+    ancestry = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", parent, commit],
+        cwd=root, capture_output=True)
+    if ancestry.returncode != 0:
+        return False, (f"the recorded parent {parent[:12]}… is not an ancestor "
+                       f"of {commit[:12]}…")
 
     observed = {}
     for line in _git(root, "diff", "--numstat", parent, commit, "--",

@@ -111,7 +111,14 @@ def test_the_ledger_declares_itself_unusable_as_permission():
 
 
 def test_the_amendment_records_the_honest_numstat():
-    e = json.loads(LEDGER.read_text())["amendments"][-1]
+    """PHB-HA-001 specifically -- the SessionRunner ownership repair.
+
+    By id, not by position: this asserts facts about one amendment, and once a
+    second exists "the last one" is a different change with different numbers.
+    """
+    entries = {a["amendment_id"]: a
+               for a in json.loads(LEDGER.read_text())["amendments"]}
+    e = entries["PHB-HA-001"]
     rel = "src/aadistill/infrastructure/session_runner.py"
     assert rel in e["numstat"]
     added, removed = e["numstat"][rel]
@@ -172,7 +179,10 @@ def test_an_incorrect_source_commit_is_refused(ledger_at):
         d["amendments"][-1]["source_repair_parent"] = "0" * 40
         d["amendments"][-1]["entry_sha256"] = entry_self_hash(d["amendments"][-1])
         return d
-    _refuses(ledger_at, m, "parent is not the recorded")
+    # The parent may be any ANCESTOR since the migration spans thirteen
+    # commits, so the refusal now names ancestry rather than direct parentage.
+    # It is the same guarantee: a fabricated base is rejected.
+    _refuses(ledger_at, m, "is not an ancestor of")
 
 
 def test_a_missing_changed_file_is_refused(ledger_at):
@@ -264,18 +274,48 @@ def test_an_appended_entry_must_chain_from_the_previous_one(ledger_at):
 
 # --- the writer is append-only ----------------------------------------------
 
-def test_the_writer_refuses_to_reaccount_for_the_same_tree():
+def test_the_writer_refuses_to_reaccount_for_the_same_tree(tmp_path):
+    """Run against a COPY of the ledger, never the committed one.
+
+    This used to run with `cwd=REPO`. Its precondition was that the recorder
+    would refuse, so nothing would be written -- and when the initialization
+    migration moved the declared paths the precondition stopped holding: the
+    recorder succeeded and APPENDED a junk amendment, with
+    `maintainer_authorization: "x"`, to a committed governance artifact. It did
+    that three times before anyone noticed, because a passing-then-failing test
+    that writes on the failing path leaves no trace in its own output.
+
+    A test must not be able to modify `logs/` at all. This one now writes to a
+    scratch ledger, so the assertion can fail without the repository changing.
+    """
+    import shutil
     import subprocess
+
+    scratch = tmp_path / "logs"
+    scratch.mkdir()
+    shutil.copy2(LEDGER, scratch / LEDGER.name)
+    before = (scratch / LEDGER.name).read_bytes()
 
     out = subprocess.run(
         [sys.executable, str(REPO / "scripts/autoinit/record_phase_b_historical_amendment.py"),
          "--commit", "HEAD", "--reviewed-base", "x", "--what", "x",
          "--why-shared-owner", "x", "--why-not-c1-override", "x",
-         "--maintainer", "x"],
+         "--maintainer", "x", "--ledger", str(scratch / LEDGER.name)],
         capture_output=True, text=True, cwd=REPO,
         env={"PATH": "/usr/bin:/bin", "PYTHONPATH": str(REPO / "src")}, timeout=180)
-    assert out.returncode != 0
-    assert "already accounts for this tree" in (out.stdout + out.stderr)
+    assert out.returncode != 0, (
+        "a placeholder amendment must never be accepted:\n" + out.stdout + out.stderr)
+    assert (scratch / LEDGER.name).read_bytes() == before, (
+        "a refused write must leave the ledger untouched")
+
+
+def test_no_test_can_write_the_committed_ledger():
+    """The property that was missing, asserted directly."""
+    source = Path(__file__).read_text()
+    assert 'cwd=REPO' not in source.split(
+        "def test_the_writer_refuses_to_reaccount_for_the_same_tree")[1].split(
+        "def test_")[0] or "--ledger" in source, (
+        "the recorder must be pointed at a scratch ledger, not the repository")
 
 
 def test_the_legacy_generator_refuses_to_overwrite_the_sealed_note():
