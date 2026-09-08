@@ -3,23 +3,23 @@
  "_contract": "A mechanical inventory of src/aadistill, derived from the syntax tree. Docstrings are excluded from literal collection and comments are not in the AST at all, so no finding here can be produced by prose. Reports ownership; decides no policy. AUTHORIZES NOTHING.",
  "root": "src/aadistill",
  "counts": {
-  "modules": 114,
-  "lines": 34133,
+  "modules": 115,
+  "lines": 33968,
   "classifications": {
    "generic_architecture_spec": 1,
    "model_family_adapter": 2,
    "generic_statistics": 7,
    "generic_operator": 9,
-   "generic_planning_execution": 70,
+   "generic_planning_execution": 72,
    "generic_governance_runtime": 11,
    "model_instance_recipe": 0,
-   "experiment_instance": 14,
+   "experiment_instance": 13,
    "historical_compatibility": 0
   },
   "sha256_literals": 19,
   "repo_id_literals": 12,
-  "path_literals": 125,
-  "experiment_named_modules": 14,
+  "path_literals": 121,
+  "experiment_named_modules": 13,
   "family_access_outside_adapters": 37,
   "import_time_registration": 19,
   "big_int_literals": 20,
@@ -384,30 +384,6 @@
     "owner": "<module>",
     "line": 303,
     "value": "logs/phase_c1_pricing.json"
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_authorization_payload.py",
-    "owner": "<module>",
-    "line": 45,
-    "value": "logs/phase_c1_execution_preregistration.json"
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_authorization_payload.py",
-    "owner": "<module>",
-    "line": 46,
-    "value": "logs/phase_c1_battery.json"
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_authorization_payload.py",
-    "owner": "<module>",
-    "line": 47,
-    "value": "logs/phase_c1_teacher_binding.json"
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_authorization_payload.py",
-    "owner": "<module>",
-    "line": 48,
-    "value": "logs/phase_c1_scoring_equivalence.json"
    },
    {
     "path": "src/aadistill/autoinit/c1_scoring.py",
@@ -970,7 +946,6 @@
   ],
   "experiment_named_modules": [
    "src/aadistill/autoinit/c1_authorization.py",
-   "src/aadistill/autoinit/c1_authorization_payload.py",
    "src/aadistill/autoinit/c1_bundle.py",
    "src/aadistill/autoinit/c1_isolation.py",
    "src/aadistill/autoinit/c1_packaging.py",
@@ -1072,7 +1047,7 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.q_proj.weight.to",
-    "probe": "q_proj",
+    "probe": "self_attn",
     "owner": "init_student",
     "line": 231
    },
@@ -1086,35 +1061,35 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.q_proj.weight.device",
-    "probe": "q_proj",
+    "probe": "self_attn",
     "owner": "init_student",
     "line": 240
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.q_proj.weight.copy_",
-    "probe": "q_proj",
+    "probe": "self_attn",
     "owner": "init_student",
     "line": 241
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.q_proj.weight",
-    "probe": "q_proj",
+    "probe": "self_attn",
     "owner": "init_student",
     "line": 242
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.k_proj.weight.copy_",
-    "probe": "k_proj",
+    "probe": "self_attn",
     "owner": "init_student",
     "line": 243
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "self_attn.k_proj.weight",
-    "probe": "k_proj",
+    "probe": "self_attn",
     "owner": "init_student",
     "line": 244
    },
@@ -1170,7 +1145,7 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.down_proj.weight",
-    "probe": "down_proj",
+    "probe": "mlp",
     "owner": "init_student",
     "line": 254
    },
@@ -1184,42 +1159,42 @@
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.gate_proj.weight.copy_",
-    "probe": "gate_proj",
+    "probe": "mlp",
     "owner": "init_student",
     "line": 257
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.gate_proj.weight",
-    "probe": "gate_proj",
+    "probe": "mlp",
     "owner": "init_student",
     "line": 258
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.up_proj.weight.copy_",
-    "probe": "up_proj",
+    "probe": "mlp",
     "owner": "init_student",
     "line": 259
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.up_proj.weight",
-    "probe": "up_proj",
+    "probe": "mlp",
     "owner": "init_student",
     "line": 260
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.down_proj.weight.copy_",
-    "probe": "down_proj",
+    "probe": "mlp",
     "owner": "init_student",
     "line": 261
    },
    {
     "path": "src/aadistill/init/sandwich.py",
     "chain": "mlp.down_proj.weight.to",
-    "probe": "down_proj",
+    "probe": "mlp",
     "owner": "init_student",
     "line": 262
    },
@@ -1494,14 +1469,6 @@
     "aadistill.infrastructure.manifest",
     "aadistill.infrastructure.session"
    ],
-   "aadistill.autoinit.c1_authorization_payload": [
-    "aadistill.autoinit",
-    "aadistill.autoinit.c1_authorization",
-    "aadistill.autoinit.c1_isolation",
-    "aadistill.autoinit.c1_scoring",
-    "aadistill.autoinit.operators",
-    "aadistill.infrastructure.manifest"
-   ],
    "aadistill.autoinit.c1_bundle": [],
    "aadistill.autoinit.c1_isolation": [
     "aadistill.infrastructure.manifest"
@@ -1758,6 +1725,8 @@
     "aadistill.evaluation.behavior",
     "aadistill.evaluation.strict_answer"
    ],
+   "aadistill.governance": [],
+   "aadistill.governance.grant": [],
    "aadistill.infrastructure": [],
    "aadistill.infrastructure.artifact_gate": [
     "aadistill.infrastructure.manifest"
@@ -1845,14 +1814,6 @@
     "aadistill.infrastructure.budget",
     "aadistill.infrastructure.manifest",
     "aadistill.infrastructure.session"
-   ],
-   "aadistill.autoinit.c1_authorization_payload": [
-    "aadistill.autoinit",
-    "aadistill.autoinit.c1_authorization",
-    "aadistill.autoinit.c1_isolation",
-    "aadistill.autoinit.c1_scoring",
-    "aadistill.autoinit.operators",
-    "aadistill.infrastructure.manifest"
    ],
    "aadistill.autoinit.c1_isolation": [
     "aadistill.infrastructure.manifest"
@@ -2420,13 +2381,13 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "q_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 192
     },
     {
      "chain": "self_attn.k_proj",
-     "probe": "k_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 193
     },
@@ -2438,13 +2399,13 @@
     },
     {
      "chain": "mlp.gate_proj",
-     "probe": "gate_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 195
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "up_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 196
     },
@@ -3975,364 +3936,6 @@
      "kind": "function",
      "qualname": "c1_price_per_hour_usd",
      "line": 376
-    }
-   ],
-   "import_time_calls": [],
-   "classification": "experiment_instance"
-  },
-  "src/aadistill/autoinit/c1_authorization_payload.py": {
-   "module": "aadistill.autoinit.c1_authorization_payload",
-   "path": "src/aadistill/autoinit/c1_authorization_payload.py",
-   "lines": 278,
-   "imports": [
-    {
-     "target": "__future__",
-     "line": 30,
-     "relative": 0,
-     "names": [
-      "annotations"
-     ]
-    },
-    {
-     "target": "json",
-     "line": 32,
-     "relative": 0
-    },
-    {
-     "target": "pathlib",
-     "line": 33,
-     "relative": 0,
-     "names": [
-      "Path"
-     ]
-    },
-    {
-     "target": "typing",
-     "line": 34,
-     "relative": 0,
-     "names": [
-      "Any",
-      "Mapping"
-     ]
-    },
-    {
-     "target": "aadistill.infrastructure.manifest",
-     "line": 36,
-     "relative": 2,
-     "names": [
-      "sha256_json"
-     ]
-    },
-    {
-     "target": "aadistill.autoinit.c1_authorization",
-     "line": 37,
-     "relative": 1,
-     "names": [
-      "C1_HARNESS_SOURCE_FILES_V1",
-      "C1Authorization",
-      "c1_hard_ceiling_usd",
-      "c1_harness_digest",
-      "load_pricing"
-     ]
-    },
-    {
-     "target": "aadistill.autoinit",
-     "line": 108,
-     "relative": 1,
-     "names": [
-      "c1_session"
-     ]
-    },
-    {
-     "target": "aadistill.autoinit.c1_isolation",
-     "line": 109,
-     "relative": 1,
-     "names": [
-      "C1Arm",
-      "C1IsolationPlan",
-      "derive_recovery_seeds"
-     ]
-    },
-    {
-     "target": "aadistill.autoinit.operators",
-     "line": 110,
-     "relative": 1,
-     "names": [
-      "attention_activation"
-     ]
-    },
-    {
-     "target": "aadistill.autoinit",
-     "line": 160,
-     "relative": 1,
-     "names": [
-      "c1_session"
-     ]
-    },
-    {
-     "target": "aadistill.autoinit.c1_isolation",
-     "line": 161,
-     "relative": 1,
-     "names": [
-      "C0_PREREGISTRATION_SHA256",
-      "derive_recovery_seeds"
-     ]
-    },
-    {
-     "target": "aadistill.autoinit.c1_scoring",
-     "line": 162,
-     "relative": 1,
-     "names": [
-      "c1_scoring_contract"
-     ]
-    }
-   ],
-   "internal_imports": [
-    "aadistill.autoinit",
-    "aadistill.autoinit.c1_authorization",
-    "aadistill.autoinit.c1_isolation",
-    "aadistill.autoinit.c1_scoring",
-    "aadistill.autoinit.operators",
-    "aadistill.infrastructure.manifest"
-   ],
-   "literals": [
-    {
-     "value": "logs/phase_c1_execution_preregistration.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 45,
-     "experiment_tokens": [
-      "phase_c",
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "logs/phase_c1_battery.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 46,
-     "experiment_tokens": [
-      "phase_c",
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "logs/phase_c1_teacher_binding.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 47,
-     "experiment_tokens": [
-      "phase_c",
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "logs/phase_c1_scoring_equivalence.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 48,
-     "experiment_tokens": [
-      "phase_c",
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": 15.1475,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 52,
-     "experiment_tokens": []
-    },
-    {
-     "value": 13.4401,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 53,
-     "experiment_tokens": []
-    },
-    {
-     "value": 14.7841,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 54,
-     "experiment_tokens": []
-    },
-    {
-     "value": 283.76,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 55,
-     "experiment_tokens": []
-    },
-    {
-     "value": "autoinit.v1.phase_c1",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "frozen_plan_hash",
-     "line": 115,
-     "experiment_tokens": [
-      "phase_c",
-      "_c1"
-     ]
-    },
-    {
-     "value": "c1_harness",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 185,
-     "experiment_tokens": [
-      "c1_"
-     ]
-    },
-    {
-     "value": "autoinit.v1.phase_c1",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 208,
-     "experiment_tokens": [
-      "phase_c",
-      "_c1"
-     ]
-    },
-    {
-     "value": "autoinit.v1.phase_c1",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 211,
-     "experiment_tokens": [
-      "phase_c",
-      "_c1"
-     ]
-    },
-    {
-     "value": "stop before any recovery training on a parent or incumbent digest mismatch; preserve the evidence and treat it as the attempt's result",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 219,
-     "experiment_tokens": [
-      "attempt"
-     ]
-    },
-    {
-     "value": "all six trainings must complete before any evaluation; a training failure is C1_INCOMPLETE, not a partial confirmation experiment",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 223,
-     "experiment_tokens": [
-      "c1_"
-     ]
-    },
-    {
-     "value": "none. One launch attempt; no automatic retry, no second attempt, no automatic ceiling increase.",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 230,
-     "experiment_tokens": [
-      "attempt"
-     ]
-    },
-    {
-     "value": "c1_harness_digest",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 248,
-     "experiment_tokens": [
-      "c1_"
-     ]
-    },
-    {
-     "value": "c1_harness_n_files",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 249,
-     "experiment_tokens": [
-      "c1_"
-     ]
-    },
-    {
-     "value": "ONE grant, ONE issuance, ONE launch attempt. No automatic retry, no second attempt, no automatic ceiling increase. A failure is the attempt's result and needs a new maintainer review.",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "build_c1_authorization_payload",
-     "line": 272,
-     "experiment_tokens": [
-      "attempt"
-     ]
-    }
-   ],
-   "family_attribute_access": [],
-   "definitions": [
-    {
-     "name": "C1AuthorizationRefused",
-     "kind": "class",
-     "qualname": "C1AuthorizationRefused",
-     "line": 67
-    },
-    {
-     "name": "validate_grant",
-     "kind": "function",
-     "qualname": "validate_grant",
-     "line": 71
-    },
-    {
-     "name": "frozen_plan_hash",
-     "kind": "function",
-     "qualname": "frozen_plan_hash",
-     "line": 100
-    },
-    {
-     "name": "load_preregistration",
-     "kind": "function",
-     "qualname": "load_preregistration",
-     "line": 123
-    },
-    {
-     "name": "build_c1_authorization_payload",
-     "kind": "function",
-     "qualname": "build_c1_authorization_payload",
-     "line": 138
     }
    ],
    "import_time_calls": [],
@@ -19468,6 +19071,88 @@
    "import_time_calls": [],
    "classification": "generic_planning_execution"
   },
+  "src/aadistill/governance/__init__.py": {
+   "module": "aadistill.governance",
+   "path": "src/aadistill/governance/__init__.py",
+   "lines": 5,
+   "imports": [],
+   "internal_imports": [],
+   "literals": [],
+   "family_attribute_access": [],
+   "definitions": [],
+   "import_time_calls": [],
+   "classification": "generic_planning_execution"
+  },
+  "src/aadistill/governance/grant.py": {
+   "module": "aadistill.governance.grant",
+   "path": "src/aadistill/governance/grant.py",
+   "lines": 108,
+   "imports": [
+    {
+     "target": "__future__",
+     "line": 26,
+     "relative": 0,
+     "names": [
+      "annotations"
+     ]
+    },
+    {
+     "target": "dataclasses",
+     "line": 28,
+     "relative": 0,
+     "names": [
+      "dataclass"
+     ]
+    },
+    {
+     "target": "typing",
+     "line": 29,
+     "relative": 0,
+     "names": [
+      "Any",
+      "Mapping",
+      "Sequence"
+     ]
+    }
+   ],
+   "internal_imports": [],
+   "literals": [],
+   "family_attribute_access": [],
+   "definitions": [
+    {
+     "name": "GrantRefused",
+     "kind": "class",
+     "qualname": "GrantRefused",
+     "line": 32
+    },
+    {
+     "name": "GrantContract",
+     "kind": "class",
+     "qualname": "GrantContract",
+     "line": 37
+    },
+    {
+     "name": "__post_init__",
+     "kind": "function",
+     "qualname": "GrantContract.__post_init__",
+     "line": 48
+    },
+    {
+     "name": "validate_grant",
+     "kind": "function",
+     "qualname": "validate_grant",
+     "line": 57
+    },
+    {
+     "name": "budget_headroom",
+     "kind": "function",
+     "qualname": "budget_headroom",
+     "line": 90
+    }
+   ],
+   "import_time_calls": [],
+   "classification": "generic_planning_execution"
+  },
   "src/aadistill/infrastructure/__init__.py": {
    "module": "aadistill.infrastructure",
    "path": "src/aadistill/infrastructure/__init__.py",
@@ -22500,7 +22185,7 @@
     },
     {
      "chain": "self_attn.q_proj.weight.to",
-     "probe": "q_proj",
+     "probe": "self_attn",
      "owner": "init_student",
      "line": 231
     },
@@ -22512,31 +22197,31 @@
     },
     {
      "chain": "self_attn.q_proj.weight.device",
-     "probe": "q_proj",
+     "probe": "self_attn",
      "owner": "init_student",
      "line": 240
     },
     {
      "chain": "self_attn.q_proj.weight.copy_",
-     "probe": "q_proj",
+     "probe": "self_attn",
      "owner": "init_student",
      "line": 241
     },
     {
      "chain": "self_attn.q_proj.weight",
-     "probe": "q_proj",
+     "probe": "self_attn",
      "owner": "init_student",
      "line": 242
     },
     {
      "chain": "self_attn.k_proj.weight.copy_",
-     "probe": "k_proj",
+     "probe": "self_attn",
      "owner": "init_student",
      "line": 243
     },
     {
      "chain": "self_attn.k_proj.weight",
-     "probe": "k_proj",
+     "probe": "self_attn",
      "owner": "init_student",
      "line": 244
     },
@@ -22584,7 +22269,7 @@
     },
     {
      "chain": "mlp.down_proj.weight",
-     "probe": "down_proj",
+     "probe": "mlp",
      "owner": "init_student",
      "line": 254
     },
@@ -22596,37 +22281,37 @@
     },
     {
      "chain": "mlp.gate_proj.weight.copy_",
-     "probe": "gate_proj",
+     "probe": "mlp",
      "owner": "init_student",
      "line": 257
     },
     {
      "chain": "mlp.gate_proj.weight",
-     "probe": "gate_proj",
+     "probe": "mlp",
      "owner": "init_student",
      "line": 258
     },
     {
      "chain": "mlp.up_proj.weight.copy_",
-     "probe": "up_proj",
+     "probe": "mlp",
      "owner": "init_student",
      "line": 259
     },
     {
      "chain": "mlp.up_proj.weight",
-     "probe": "up_proj",
+     "probe": "mlp",
      "owner": "init_student",
      "line": 260
     },
     {
      "chain": "mlp.down_proj.weight.copy_",
-     "probe": "down_proj",
+     "probe": "mlp",
      "owner": "init_student",
      "line": 261
     },
     {
      "chain": "mlp.down_proj.weight.to",
-     "probe": "down_proj",
+     "probe": "mlp",
      "owner": "init_student",
      "line": 262
     },

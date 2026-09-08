@@ -4,10 +4,10 @@
  "direction": "may only shrink",
  "derived_by": "scripts/architecture/inventory.py (AST; docstrings excluded, comments absent)",
  "counts": {
-  "experiment_named_modules": 14,
+  "experiment_named_modules": 13,
   "sha256_literals": 8,
   "repo_id_literals": 9,
-  "path_literals": 24,
+  "path_literals": 23,
   "family_access_outside_adapters": 4,
   "import_time_registration": 10,
   "package_cycles": 1,
@@ -16,7 +16,6 @@
  "allow": {
   "experiment_named_modules": [
    "src/aadistill/autoinit/c1_authorization.py",
-   "src/aadistill/autoinit/c1_authorization_payload.py",
    "src/aadistill/autoinit/c1_bundle.py",
    "src/aadistill/autoinit/c1_isolation.py",
    "src/aadistill/autoinit/c1_packaging.py",
@@ -54,7 +53,6 @@
   "path_literals": [
    "src/aadistill/autoinit/authorization.py::<module>",
    "src/aadistill/autoinit/c1_authorization.py::<module>",
-   "src/aadistill/autoinit/c1_authorization_payload.py::<module>",
    "src/aadistill/autoinit/c1_scoring.py::<module>",
    "src/aadistill/autoinit/c1_scoring.py::c1_scoring_contract",
    "src/aadistill/autoinit/c1_session.py::<module>",

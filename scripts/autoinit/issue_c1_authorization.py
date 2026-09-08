@@ -47,10 +47,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+sys.path.insert(0, str(REPO_ROOT / "scripts/experiments/phase_c1"))
+
 from aadistill.autoinit.c1_authorization import C1Authorization  # noqa: E402
-from aadistill.autoinit.c1_authorization_payload import (  # noqa: E402
-    CUMULATIVE_CAP_USD, GRANT_FIELDS, HARD_CEILING_USD, PLANNING_FLOOR_USD,
-    SOFT_STOP_USD, C1AuthorizationRefused, build_c1_authorization_payload,
+from authorization_payload import (  # noqa: E402
+    C1AuthorizationRefused, build_c1_authorization_payload, load_config,
 )
 
 OUT = "logs/autoinit_c1_authorization.json"
@@ -105,7 +106,8 @@ def main() -> int:
     # Round-trip through the real loader: an artifact this issuer wrote but the
     # driver cannot load is worse than none.
     reloaded = C1Authorization.load(out)
-    assert reloaded.hard_cap_usd == HARD_CEILING_USD
+    assert reloaded.hard_cap_usd == float(
+        load_config(REPO_ROOT)["accepted_pricing"]["hard_ceiling_usd"])
     assert reloaded.plan_hash == payload["bound"]["isolation_plan_hash"]
     assert reloaded.allows_phase_a is False
     assert reloaded.allows_beam_search is False
@@ -126,11 +128,13 @@ def main() -> int:
         print(f"  preregistration    {bound['execution_preregistration']}")
         print(f"  scoring            {bound['scoring_contract']['contract']} "
               f"{bound['scoring_contract']['digest'][:16]}")
+        money = load_config(REPO_ROOT)["accepted_pricing"]
         print(f"  ceiling            ${payload['hard_cap_usd']:.4f}  "
-              f"(floor ${PLANNING_FLOOR_USD:.4f}, soft stop ${SOFT_STOP_USD:.4f})")
+              f"(floor ${money['planning_floor_usd']:.4f}, "
+              f"soft stop ${money['soft_stop_usd']:.4f})")
         print(f"  cumulative         "
               f"${float(grant['cumulative_spend_at_approval_usd']):.4f}"
-              f" spent of ${CUMULATIVE_CAP_USD:.4f}")
+              f" spent of ${money['cumulative_cap_usd']:.4f}")
         print("  ISSUING IS NOT LAUNCHING.")
     return 0
 

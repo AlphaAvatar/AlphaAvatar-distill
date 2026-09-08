@@ -64,9 +64,8 @@ TEST_GRANT = {
 
 def write_candidate(tmp_path, **over):
     """A deterministic candidate authorization in `tmp_path`. Returns its path."""
-    from aadistill.autoinit.c1_authorization_payload import (
-        build_c1_authorization_payload,
-    )
+    sys.path.insert(0, str(REPO / "scripts/experiments/phase_c1"))
+    from authorization_payload import build_c1_authorization_payload
 
     payload = build_c1_authorization_payload(
         grant=TEST_GRANT, session_commit=TEST_SESSION_COMMIT,
