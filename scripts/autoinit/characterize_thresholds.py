@@ -37,6 +37,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
 from aadistill.initialization.planning.metrics import (  # noqa: E402
     StateEvalSuite,
@@ -52,6 +53,9 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     FeasibilityRule,
 )
 from aadistill.infrastructure.env import hardware_report  # noqa: E402
+
+#: Explicit, because importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 TEACHER_GEOMETRY = dict(hidden_size=64, num_hidden_layers=6, intermediate_size=128,
                         num_attention_heads=4, num_key_value_heads=2, head_dim=16,

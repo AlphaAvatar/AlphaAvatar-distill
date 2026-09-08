@@ -57,22 +57,22 @@ def test_the_source_set_covers_what_a_paid_P2_SEARCH_actually_executes():
     covered = set(PHASE_B_EXECUTABLE_SOURCE_FILES_V1)
     for required in (
             "scripts/autoinit/phase_a_search.py",          # the entrypoint
-            "src/aadistill/autoinit/search.py",            # the beam engine
-            "src/aadistill/autoinit/ranking.py",           # objectives and schedule
-            "src/aadistill/autoinit/calibration.py",       # profiles and resolve()
-            "src/aadistill/autoinit/operators/base.py",    # operator contracts
-            "src/aadistill/autoinit/arch.py",              # ArchSpec, adapter registry
-            "src/aadistill/autoinit/adapters/qwen3.py",    # the family boundary
-            "src/aadistill/autoinit/metrics.py",           # state evaluation
-            "src/aadistill/autoinit/state.py",             # state identity
-            "src/aadistill/autoinit/phase_b.py"):          # the plan itself
+            "src/aadistill/initialization/planning/search.py",            # the beam engine
+            "src/aadistill/initialization/planning/ranking.py",           # objectives and schedule
+            "src/aadistill/initialization/calibration/profiles.py",       # profiles and resolve()
+            "src/aadistill/initialization/operators/base.py",    # operator contracts
+            "src/aadistill/initialization/specs/arch.py",              # ArchSpec, adapter registry
+            "src/aadistill/initialization/adapters/qwen3.py",    # the family boundary
+            "src/aadistill/initialization/planning/metrics.py",           # state evaluation
+            "src/aadistill/initialization/specs/state.py",             # state identity
+            "scripts/experiments/phase_b/plan.py"):          # the plan itself
         assert required in covered, required
     # Every concrete operator that can execute, not just the base class.
     for operator in ("attention", "composite", "depth", "ffn", "width"):
         assert f"src/aadistill/autoinit/operators/{operator}.py" in covered, operator
     # The adapter package __init__ registers the adapter; the AST closure of
     # search.py alone never reaches it.
-    assert "src/aadistill/autoinit/adapters/__init__.py" in covered
+    assert "src/aadistill/initialization/adapters/__init__.py" in covered
     assert "src/aadistill/autoinit/__init__.py" in covered
 
 
@@ -80,17 +80,17 @@ def test_the_set_is_provenance_closure_not_a_maximal_file_list():
     """What is absent is absent for a stated reason, not by oversight."""
     covered = set(PHASE_B_EXECUTABLE_SOURCE_FILES_V1)
     # The pod consumes a materialized mixture; it never runs the builder.
-    assert "src/aadistill/autoinit/reweight.py" not in covered
+    assert "src/aadistill/initialization/statistics/reweight.py" not in covered
     assert "scripts/data/build_reasoning_heavy_calibration.py" not in covered
     # The probe path is bound elsewhere, and the record says by what.
     # `recovery.py` is inside RECOVERY_SCORING_FILES_V2, which the driver binds
     # at stage 0, so a change to the selection rules it holds is still detected.
-    assert "src/aadistill/autoinit/recovery.py" not in covered
+    assert "src/aadistill/initialization/planning/recovery.py" not in covered
     # `autoinit/generation.py` IS covered: it is not in GENERATION_SOURCE_FILES_V1
     # (that set is the evaluator), and it decides the protocol hash and the
     # comparability verdict the whole Stage-0 gate turns on.
-    assert "src/aadistill/autoinit/generation.py" in covered
-    assert "src/aadistill/autoinit/generation_compat.py" in covered
+    assert "src/aadistill/initialization/planning/generation.py" in covered
+    assert "src/aadistill/initialization/planning/generation_compat.py" in covered
     for topic in ("probe training", "probe generation", "probe scoring",
                   "the calibration mixtures"):
         assert topic in PHASE_B_DELEGATED_IDENTITIES, topic
@@ -133,7 +133,7 @@ def test_the_digest_moves_when_a_covered_file_moves():
     a = phase_b_source_digest(REPO)["digest"]
     b = phase_b_source_digest(
         REPO, files=tuple(f for f in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
-                          if f != "src/aadistill/autoinit/search.py"))["digest"]
+                          if f != "src/aadistill/initialization/planning/search.py"))["digest"]
     assert a != b
 
 

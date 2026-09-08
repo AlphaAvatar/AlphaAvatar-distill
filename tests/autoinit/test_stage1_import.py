@@ -211,7 +211,7 @@ def test_there_is_no_permissive_state_deserializer():
     assert not hasattr(InitializationState, "from_dict"), (
         "a permissive deserializer appeared; the strict import exists so the "
         "journal never becomes a trusted input")
-    src = (REPO / "src/aadistill/autoinit/stage1_import.py").read_text()
+    src = (REPO / "src/aadistill/initialization/planning/stage1_import.py").read_text()
     assert "from_dict" not in src.split('"""')[2], (
         "the import gained a from_dict path")
 

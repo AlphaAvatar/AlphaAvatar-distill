@@ -54,8 +54,8 @@ HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "src/aadistill/infrastructure/session.py",
     "src/aadistill/infrastructure/session_runner.py",
     "src/aadistill/infrastructure/session_prechecks.py",
-    "src/aadistill/autoinit/authorization.py",
-    "src/aadistill/autoinit/generation.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/initialization/planning/generation.py",
 )
 #: Bumped with the three session modules. A digest computed over set 1 and one
 #: computed over set 2 are not comparable, and the version is what says so.

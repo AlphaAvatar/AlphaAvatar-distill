@@ -71,7 +71,7 @@ FROZEN_SCORING_CONTRACT = "recovery_search_scoring@v2"
 #: version stays at 2 because the metric did not move.
 #:
 #: Earlier note, still true: the contract is a digest
-#: over whole files, and `src/aadistill/autoinit/recovery.py` gained the strict
+#: over whole files, and `src/aadistill/initialization/planning/recovery.py` gained the strict
 #: observed-protocol reconstruction (`observe_recovery_protocol`,
 #: `from_run_artifacts`) that the Stage-2 verification needs. No scoring function
 #: changed, and that is not asserted but measured: re-running

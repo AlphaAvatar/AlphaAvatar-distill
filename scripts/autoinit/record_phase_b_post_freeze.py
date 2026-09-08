@@ -150,7 +150,7 @@ def main() -> None:
             "branch, which is byte-identical to the frozen one. The added branch is "
             "unreachable from a Phase-B session by construction."),
         "new_runtime_module_not_in_the_frozen_set": {
-            "module": "src/aadistill/autoinit/post_freeze.py",
+            "module": "src/aadistill/governance/post_freeze.py",
             "loaded_by": ("autoinit_phase_b_launch.preregistration_gate, which "
                           "imports it at call time"),
             "why_not_added_to_the_set": (
@@ -167,8 +167,8 @@ def main() -> None:
                      "COMPLETE and their authorizations are consumed, so no live "
                      "gate binds them; recorded here so the blast radius is not "
                      "discovered later."),
-            "sets": ["aadistill.autoinit.authorization.HARNESS_SOURCE_FILES_V1",
-                     "aadistill.autoinit.recovery_continuation.PHASE_A_HARNESS_SOURCE_FILES_V1"],
+            "sets": ["aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+                     "experiments.recovery_continuation.session.PHASE_A_HARNESS_SOURCE_FILES_V1"],
         },
         "not_a_licence": (
             "This does NOT authorize further edits to the Phase-B source set. Any "

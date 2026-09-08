@@ -3,14 +3,14 @@
  "_contract": "How the initialization cutover stands against every frozen source set. Historical declarations keep naming the OLD paths because that is what those runs executed; this records where each file went, proves the bytes did not change, and EXERCISES the refusal that makes an old authorization unusable here. AUTHORIZES NOTHING.",
  "historical_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
  "_base_commit_meaning": "the commit that owns the old paths. Every old_sha256 below is the blob at THAT commit, so a reader can check any of them against the tree as it actually was, not as it is now.",
- "migrated_commit": "5f4c400a2cd761e85691932cd4cdbb4ed90e7a94",
+ "migrated_commit": "b392ad88ff69d5c1dc25c607cc5b1e540245bf9e",
  "counts": {
   "files_moved": 59,
   "moved_with_identical_bytes": 15,
   "moved_with_edits": 44,
   "sets_examined": 8,
-  "sets_fail_closed": 6,
-  "sets_still_computable": 0
+  "sets_computable": 4,
+  "sets_refusing": 1
  },
  "sets": [
   {
@@ -18,580 +18,78 @@
    "declared_in": "aadistill.governance.authorization",
    "n_declared": 12,
    "moved_unchanged_bytes": 0,
-   "moved_and_edited": 2,
-   "still_at_declared_path": 10,
+   "moved_and_edited": 0,
+   "still_at_declared_path": 12,
    "deleted": 0,
-   "additive_only": false,
-   "_why_not_additive": "files were MOVED and two package shells were DELETED. Claiming additive-only over removals would be false, and the approved accounting split exists precisely so a non-additive change can be recorded instead of disguised.",
+   "additive_only": true,
+   "_accounting": "this declaration names paths that all exist; its relocation is accounted for in logs/architecture_declaration_history.json",
    "moves": [],
-   "moves_with_edits": [
-    {
-     "from": "src/aadistill/autoinit/authorization.py",
-     "to": "src/aadistill/governance/authorization.py",
-     "old_sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-     "new_sha256": "9971cac2c0615bc9c7beff3de8d8d289d58bf3c5cc9072b29d3f36fb34b5e124"
-    },
-    {
-     "from": "src/aadistill/autoinit/generation.py",
-     "to": "src/aadistill/initialization/planning/generation.py",
-     "old_sha256": "24cf6e3d5dd897e6ab0c3213e83f9a218a21c47052e6fe0cfc48cbda8762cc91",
-     "new_sha256": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
-    }
-   ],
+   "moves_with_edits": [],
    "deletions": [],
-   "fail_closed": true,
-   "current_digest": null,
-   "fail_closed_error": "AttributeError: module 'aadistill.governance.authorization' has no attribute 'harness_digest'"
+   "computes": true,
+   "current_digest": "00a62961dcae51b02537e61371cf0b3412b2ff4d06759a52e8d8fa86635c6c2f"
   },
   {
    "declaration": "PHASE_A_HARNESS_SOURCE_FILES_V1",
    "declared_in": "experiments.phase_a.plan",
    "n_declared": 16,
    "moved_unchanged_bytes": 0,
-   "moved_and_edited": 4,
-   "still_at_declared_path": 12,
+   "moved_and_edited": 0,
+   "still_at_declared_path": 16,
    "deleted": 0,
-   "additive_only": false,
-   "_why_not_additive": "files were MOVED and two package shells were DELETED. Claiming additive-only over removals would be false, and the approved accounting split exists precisely so a non-additive change can be recorded instead of disguised.",
+   "additive_only": true,
+   "_accounting": "this declaration names paths that all exist; its relocation is accounted for in logs/architecture_declaration_history.json",
    "moves": [],
-   "moves_with_edits": [
-    {
-     "from": "src/aadistill/autoinit/authorization.py",
-     "to": "src/aadistill/governance/authorization.py",
-     "old_sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-     "new_sha256": "9971cac2c0615bc9c7beff3de8d8d289d58bf3c5cc9072b29d3f36fb34b5e124"
-    },
-    {
-     "from": "src/aadistill/autoinit/generation_compat.py",
-     "to": "src/aadistill/initialization/planning/generation_compat.py",
-     "old_sha256": "9bb8e436ca303803ec5d13c661e259eec62a384efd34f977c97742cbf5f21ea1",
-     "new_sha256": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0"
-    },
-    {
-     "from": "src/aadistill/autoinit/phase_a.py",
-     "to": "scripts/experiments/phase_a/plan.py",
-     "old_sha256": "705df4cc574d173fa306dadd6da62ff03849c95d37df74d6bcd987a5c5f53515",
-     "new_sha256": "525eca183cced5064e6d555c69839321c19d8c4843c2c8e66d0acceaf64be53e"
-    },
-    {
-     "from": "src/aadistill/autoinit/generation.py",
-     "to": "src/aadistill/initialization/planning/generation.py",
-     "old_sha256": "24cf6e3d5dd897e6ab0c3213e83f9a218a21c47052e6fe0cfc48cbda8762cc91",
-     "new_sha256": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
-    }
-   ],
+   "moves_with_edits": [],
    "deletions": [],
-   "fail_closed": true,
-   "current_digest": null,
-   "fail_closed_error": "AuthorizationError: declared Phase-A harness source 'src/aadistill/autoinit/authorization.py' is missing; refusing to authorize a digest over a smaller harness than the one that runs"
+   "computes": true,
+   "current_digest": "a7ab6f5a912a05d568c03aebae08dfbde88dd06002342bf481d11db05ef48429"
   },
   {
    "declaration": "PHASE_B_EXECUTABLE_SOURCE_FILES_V1",
    "declared_in": "experiments.phase_b.plan",
-   "n_declared": 60,
-   "moved_unchanged_bytes": 5,
-   "moved_and_edited": 28,
-   "still_at_declared_path": 26,
-   "deleted": 1,
-   "additive_only": false,
-   "_why_not_additive": "files were MOVED and two package shells were DELETED. Claiming additive-only over removals would be false, and the approved accounting split exists precisely so a non-additive change can be recorded instead of disguised.",
-   "moves": [
-    {
-     "from": "src/aadistill/autoinit/arch.py",
-     "to": "src/aadistill/initialization/specs/arch.py",
-     "old_sha256": "5dddc9038e5c43c2fc5e6d8112c3a8f7b3b45c95bcf0e999cff2c52dd0b1fecd",
-     "new_sha256": "5dddc9038e5c43c2fc5e6d8112c3a8f7b3b45c95bcf0e999cff2c52dd0b1fecd"
-    },
-    {
-     "from": "src/aadistill/autoinit/device.py",
-     "to": "src/aadistill/initialization/device.py",
-     "old_sha256": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
-     "new_sha256": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb"
-    },
-    {
-     "from": "src/aadistill/autoinit/device_handoff.py",
-     "to": "src/aadistill/runtime/device_handoff.py",
-     "old_sha256": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
-     "new_sha256": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd"
-    },
-    {
-     "from": "src/aadistill/init/contribution.py",
-     "to": "src/aadistill/initialization/statistics/contribution.py",
-     "old_sha256": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565",
-     "new_sha256": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565"
-    },
-    {
-     "from": "src/aadistill/init/project.py",
-     "to": "src/aadistill/initialization/transforms/project.py",
-     "old_sha256": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36",
-     "new_sha256": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36"
-    }
-   ],
-   "moves_with_edits": [
-    {
-     "from": "src/aadistill/autoinit/adapters/__init__.py",
-     "to": "src/aadistill/initialization/adapters/__init__.py",
-     "old_sha256": "bbabb92f5612c62758d9a2164eb7bf37a82b0a04073e5e9ec531549e21743d23",
-     "new_sha256": "5c7fa210d5b60e29f31f68e169f06c7264051a5c634a0894130af287c56b1b84"
-    },
-    {
-     "from": "src/aadistill/autoinit/adapters/qwen3.py",
-     "to": "src/aadistill/initialization/adapters/qwen3.py",
-     "old_sha256": "dd36a77b0b5ec0969cf22ad66a7444d1ccee21b8e0cb956db16caa0999a41fc7",
-     "new_sha256": "d494b34958f1f08287feb92dada6ccc27af9e5006038d8f86bc19cbcc63031f6"
-    },
-    {
-     "from": "src/aadistill/autoinit/artifact.py",
-     "to": "src/aadistill/initialization/specs/artifact.py",
-     "old_sha256": "a35e9a36c1d0ca2e98c1a1e07175c1f9e68649b1ab9bf31adc6a8c23332b2a40",
-     "new_sha256": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9"
-    },
-    {
-     "from": "src/aadistill/autoinit/authorization.py",
-     "to": "src/aadistill/governance/authorization.py",
-     "old_sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-     "new_sha256": "9971cac2c0615bc9c7beff3de8d8d289d58bf3c5cc9072b29d3f36fb34b5e124"
-    },
-    {
-     "from": "src/aadistill/autoinit/calibration.py",
-     "to": "src/aadistill/initialization/calibration/profiles.py",
-     "old_sha256": "cd4ec4bb0288d5f26b464abfdec2d8c150864de898b8a9f83d189a8e35d8ec21",
-     "new_sha256": "fc4f1ba9c10b75183c4970a0d43090509ba686ff280d9395f7b995dbd3088133"
-    },
-    {
-     "from": "src/aadistill/autoinit/cost.py",
-     "to": "src/aadistill/runtime/cost.py",
-     "old_sha256": "b1fb556c7d1c341eaf9e156f8c97b8c7edb78c7c0e1f13ca1b543892ff3196df",
-     "new_sha256": "54218b8a5f27f77bf60903e3c00a211fdcd779f91b4e0fb1d2384e40eff41e7f"
-    },
-    {
-     "from": "src/aadistill/autoinit/datasets.py",
-     "to": "src/aadistill/initialization/calibration/datasets.py",
-     "old_sha256": "cbb1b02a926e9e5a2b2c274d3011a599c6cd6d72dbbda0cedb3fe03566c91943",
-     "new_sha256": "586781a762f1f2417d2ac6a9d95653c0045db69d32a9ca3e165b68c116980352"
-    },
-    {
-     "from": "src/aadistill/autoinit/generation.py",
-     "to": "src/aadistill/initialization/planning/generation.py",
-     "old_sha256": "24cf6e3d5dd897e6ab0c3213e83f9a218a21c47052e6fe0cfc48cbda8762cc91",
-     "new_sha256": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
-    },
-    {
-     "from": "src/aadistill/autoinit/identity_collapse.py",
-     "to": "src/aadistill/initialization/specs/identity_collapse.py",
-     "old_sha256": "a5a3e11d08978bd38e7039ada952337f056134d25ec784a80441f9b62db429b8",
-     "new_sha256": "823bb9784c77d8364dd1f197cc2b5bf26254773c1d60563f86191b4730978583"
-    },
-    {
-     "from": "src/aadistill/autoinit/generation_compat.py",
-     "to": "src/aadistill/initialization/planning/generation_compat.py",
-     "old_sha256": "9bb8e436ca303803ec5d13c661e259eec62a384efd34f977c97742cbf5f21ea1",
-     "new_sha256": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0"
-    },
-    {
-     "from": "src/aadistill/autoinit/leaf_durability.py",
-     "to": "src/aadistill/runtime/leaf_durability.py",
-     "old_sha256": "4ac09c23962ec91d66ac009ffe4c96f74b47dedec13915191aa8c89a2d167966",
-     "new_sha256": "024967267f9ededb651437d7b660395c642a191c09d8dd1e8a3bf6946214a017"
-    },
-    {
-     "from": "src/aadistill/autoinit/metrics.py",
-     "to": "src/aadistill/initialization/planning/metrics.py",
-     "old_sha256": "8a199452ad21b56171a8aa5aa78d88926a18ab0221d3f072ba46c7c589ebbe7f",
-     "new_sha256": "e58c651bef3ee897ca0b8eb419d7a7166c17ed55944353f00834efbde475e927"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/__init__.py",
-     "to": "src/aadistill/initialization/operators/__init__.py",
-     "old_sha256": "27b9707650416f7694c1b14bd83935de18fa0e3434c6cdeefb24724195f645c2",
-     "new_sha256": "8c4313d9693095fe00b21227d9c14b37c4985b1c9ca3c750034f335dbcdf1e9f"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/_common.py",
-     "to": "src/aadistill/initialization/operators/_common.py",
-     "old_sha256": "362418c6b5d2a7730b7b5308f5d43d7c0a6ec8f402040f1f1eaa8bd22b82b7c1",
-     "new_sha256": "d065241b735b0193817caadf97f94ab16bbfa3f624ecf123915041fc9a15615b"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/attention.py",
-     "to": "src/aadistill/initialization/operators/attention.py",
-     "old_sha256": "55beca67a349fe579d7bdb33f21cf19fd18f3de93ccda33223297960cc67c6ef",
-     "new_sha256": "0ceafff5feaf479fa30788ffcace17ddf6fa786eb87df2518f31df7ba4bcf6e9"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/base.py",
-     "to": "src/aadistill/initialization/operators/base.py",
-     "old_sha256": "3cb0ee88495166cb7324a951ac3ec6a1e8e5bb01811fd2368812b437ee13417c",
-     "new_sha256": "6ef30d6af28f9c842f802fac34b3a5a084d829d0ade340c3eafdb47523b1e3c9"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/composite.py",
-     "to": "src/aadistill/initialization/operators/composite.py",
-     "old_sha256": "ae4390e09d190fec366438abe67755c18ac63b5932e10869cdd2d57ab4d22224",
-     "new_sha256": "795fca32b5ea9aa9834de6f5ee42b5ac4bbec7261a041b76ea9f99da53dffd6a"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/depth.py",
-     "to": "src/aadistill/initialization/operators/depth.py",
-     "old_sha256": "345b530289a0a0a13d756d9e8f14ef07c504bf80ac886a5e968044cd506f9a1c",
-     "new_sha256": "e0f5198d83bda1c87dfa27e760c0c595c44e7e5697cfab445f3efd09fc8f1a5b"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/ffn.py",
-     "to": "src/aadistill/initialization/operators/ffn.py",
-     "old_sha256": "d8e0b35e5d9fef785f5e740e1e489d4f4799353fb19cefe30a946ab6d7323bfe",
-     "new_sha256": "1e14b29e9ffe54f4e742274779910ac500ebab28cdcebab2d9b8791ee81372a8"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/width.py",
-     "to": "src/aadistill/initialization/operators/width.py",
-     "old_sha256": "e4e18bb3246520b3ccf09296bc2d137807b4507fb1843c0c7bbc9d32889230b0",
-     "new_sha256": "b3be10fae95ebe6853ca328f303c4e2cba3aa9588eaf0f7280f4d03de625944a"
-    },
-    {
-     "from": "src/aadistill/autoinit/phase_a.py",
-     "to": "scripts/experiments/phase_a/plan.py",
-     "old_sha256": "705df4cc574d173fa306dadd6da62ff03849c95d37df74d6bcd987a5c5f53515",
-     "new_sha256": "525eca183cced5064e6d555c69839321c19d8c4843c2c8e66d0acceaf64be53e"
-    },
-    {
-     "from": "src/aadistill/autoinit/phase_b.py",
-     "to": "scripts/experiments/phase_b/plan.py",
-     "old_sha256": "50560cd206ce2c1abc56653cfed038f274401a48fd9fb436ccf3b9c857d2095b",
-     "new_sha256": "c0e0400961cf344a24418a261960fbc8099783c8ff53865f24189e60232be825"
-    },
-    {
-     "from": "src/aadistill/autoinit/ranking.py",
-     "to": "src/aadistill/initialization/planning/ranking.py",
-     "old_sha256": "618e1ccce1a23e26fc750726b6a6fa80ea278b98701ade47229e50cdc2cbac75",
-     "new_sha256": "c4ea7106050da0801c8712e9d6c70e189c45c823b8d0cb98e9add0b5f9bc3ba9"
-    },
-    {
-     "from": "src/aadistill/autoinit/search.py",
-     "to": "src/aadistill/initialization/planning/search.py",
-     "old_sha256": "604c5db2c830e1078b41c5c9b17a33a29460bd8809df582a87c528ac0dc89df6",
-     "new_sha256": "87ba41029a0bd344fc1a3e4af6b0f80ac035d05460b43b3555f51d5831853b26"
-    },
-    {
-     "from": "src/aadistill/autoinit/stage1_selection.py",
-     "to": "src/aadistill/initialization/planning/stage1_selection.py",
-     "old_sha256": "d3e1a3aa2cae760852b828f24cbb4182264cefb9119fc3be8a6c0de028f2a2d0",
-     "new_sha256": "178b3c486750faca2cdf387315c9b5bd885b79a404980edd7f93990f4eadbfc8"
-    },
-    {
-     "from": "src/aadistill/autoinit/state.py",
-     "to": "src/aadistill/initialization/specs/state.py",
-     "old_sha256": "ccb5b13b6d3ad0b9f63f3d7fb014648c5ddbf13f33b21267bda614c0ade13eae",
-     "new_sha256": "056bcdab3407774ca5b2c22a7d8a45ffe84645dcdda024bf1f65f0a2b6768637"
-    },
-    {
-     "from": "src/aadistill/autoinit/stats.py",
-     "to": "src/aadistill/initialization/statistics/spec.py",
-     "old_sha256": "0cd11ececab0bda49174c7b05107a47faf43267338af53fcf476034d29434b59",
-     "new_sha256": "951c4da15063de8d9193896a8b045efee9e175a1cab349dc4cc833c6d268bdda"
-    },
-    {
-     "from": "src/aadistill/init/sandwich.py",
-     "to": "src/aadistill/initialization/transforms/sandwich.py",
-     "old_sha256": "c6e05bcaf55f0e0219e4f1d2bab044f0d13ed09d24cba0d126f865869b784bc3",
-     "new_sha256": "074561f13489171a6059c007510f67a0b8bc5e96dcbf165b7bbd3844102a586c"
-    }
-   ],
-   "deletions": [
-    {
-     "path": "src/aadistill/autoinit/__init__.py",
-     "old_sha256": "f49a851b6d77c8fd9d184732acd0224fcb3ce8cc0f28fb19ba2f9e112c00ae1c"
-    }
-   ],
-   "fail_closed": true,
-   "current_digest": null,
-   "fail_closed_error": "AttributeError: module 'experiments.phase_b.plan' has no attribute 'phase_b_executable_digest'"
+   "n_declared": 59,
+   "moved_unchanged_bytes": 0,
+   "moved_and_edited": 0,
+   "still_at_declared_path": 59,
+   "deleted": 0,
+   "additive_only": true,
+   "_accounting": "this declaration names paths that all exist; its relocation is accounted for in logs/architecture_declaration_history.json",
+   "moves": [],
+   "moves_with_edits": [],
+   "deletions": [],
+   "computes": true,
+   "current_digest": "52c403609bee249e5cb342b36e953f219a085e799d7bf64dcc513d1155ce06d2"
   },
   {
    "declaration": "CONTINUATION_SOURCE_FILES_V2",
    "declared_in": "experiments.phase_b.continuation",
-   "n_declared": 62,
-   "moved_unchanged_bytes": 7,
-   "moved_and_edited": 30,
-   "still_at_declared_path": 23,
-   "deleted": 2,
-   "additive_only": false,
-   "_why_not_additive": "files were MOVED and two package shells were DELETED. Claiming additive-only over removals would be false, and the approved accounting split exists precisely so a non-additive change can be recorded instead of disguised.",
-   "moves": [
-    {
-     "from": "src/aadistill/autoinit/arch.py",
-     "to": "src/aadistill/initialization/specs/arch.py",
-     "old_sha256": "5dddc9038e5c43c2fc5e6d8112c3a8f7b3b45c95bcf0e999cff2c52dd0b1fecd",
-     "new_sha256": "5dddc9038e5c43c2fc5e6d8112c3a8f7b3b45c95bcf0e999cff2c52dd0b1fecd"
-    },
-    {
-     "from": "src/aadistill/autoinit/device.py",
-     "to": "src/aadistill/initialization/device.py",
-     "old_sha256": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
-     "new_sha256": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb"
-    },
-    {
-     "from": "src/aadistill/autoinit/device_handoff.py",
-     "to": "src/aadistill/runtime/device_handoff.py",
-     "old_sha256": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
-     "new_sha256": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd"
-    },
-    {
-     "from": "src/aadistill/autoinit/telemetry.py",
-     "to": "src/aadistill/runtime/telemetry.py",
-     "old_sha256": "e0aabed6c218e737902d9c8d4c591e862d8562b79273ded269eaf8f61fee798b",
-     "new_sha256": "e0aabed6c218e737902d9c8d4c591e862d8562b79273ded269eaf8f61fee798b"
-    },
-    {
-     "from": "src/aadistill/init/collect.py",
-     "to": "src/aadistill/initialization/statistics/collect.py",
-     "old_sha256": "fa3ff8f1a5064e363c15bc33cb95e570efbce4486cc71d5b878550968259587d",
-     "new_sha256": "fa3ff8f1a5064e363c15bc33cb95e570efbce4486cc71d5b878550968259587d"
-    },
-    {
-     "from": "src/aadistill/init/contribution.py",
-     "to": "src/aadistill/initialization/statistics/contribution.py",
-     "old_sha256": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565",
-     "new_sha256": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565"
-    },
-    {
-     "from": "src/aadistill/init/project.py",
-     "to": "src/aadistill/initialization/transforms/project.py",
-     "old_sha256": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36",
-     "new_sha256": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36"
-    }
-   ],
-   "moves_with_edits": [
-    {
-     "from": "src/aadistill/autoinit/adapters/__init__.py",
-     "to": "src/aadistill/initialization/adapters/__init__.py",
-     "old_sha256": "bbabb92f5612c62758d9a2164eb7bf37a82b0a04073e5e9ec531549e21743d23",
-     "new_sha256": "5c7fa210d5b60e29f31f68e169f06c7264051a5c634a0894130af287c56b1b84"
-    },
-    {
-     "from": "src/aadistill/autoinit/adapters/qwen3.py",
-     "to": "src/aadistill/initialization/adapters/qwen3.py",
-     "old_sha256": "dd36a77b0b5ec0969cf22ad66a7444d1ccee21b8e0cb956db16caa0999a41fc7",
-     "new_sha256": "d494b34958f1f08287feb92dada6ccc27af9e5006038d8f86bc19cbcc63031f6"
-    },
-    {
-     "from": "src/aadistill/autoinit/artifact.py",
-     "to": "src/aadistill/initialization/specs/artifact.py",
-     "old_sha256": "a35e9a36c1d0ca2e98c1a1e07175c1f9e68649b1ab9bf31adc6a8c23332b2a40",
-     "new_sha256": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9"
-    },
-    {
-     "from": "src/aadistill/autoinit/authorization.py",
-     "to": "src/aadistill/governance/authorization.py",
-     "old_sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-     "new_sha256": "9971cac2c0615bc9c7beff3de8d8d289d58bf3c5cc9072b29d3f36fb34b5e124"
-    },
-    {
-     "from": "src/aadistill/autoinit/calibration.py",
-     "to": "src/aadistill/initialization/calibration/profiles.py",
-     "old_sha256": "cd4ec4bb0288d5f26b464abfdec2d8c150864de898b8a9f83d189a8e35d8ec21",
-     "new_sha256": "fc4f1ba9c10b75183c4970a0d43090509ba686ff280d9395f7b995dbd3088133"
-    },
-    {
-     "from": "src/aadistill/autoinit/cost.py",
-     "to": "src/aadistill/runtime/cost.py",
-     "old_sha256": "b1fb556c7d1c341eaf9e156f8c97b8c7edb78c7c0e1f13ca1b543892ff3196df",
-     "new_sha256": "54218b8a5f27f77bf60903e3c00a211fdcd779f91b4e0fb1d2384e40eff41e7f"
-    },
-    {
-     "from": "src/aadistill/autoinit/datasets.py",
-     "to": "src/aadistill/initialization/calibration/datasets.py",
-     "old_sha256": "cbb1b02a926e9e5a2b2c274d3011a599c6cd6d72dbbda0cedb3fe03566c91943",
-     "new_sha256": "586781a762f1f2417d2ac6a9d95653c0045db69d32a9ca3e165b68c116980352"
-    },
-    {
-     "from": "src/aadistill/autoinit/generation.py",
-     "to": "src/aadistill/initialization/planning/generation.py",
-     "old_sha256": "24cf6e3d5dd897e6ab0c3213e83f9a218a21c47052e6fe0cfc48cbda8762cc91",
-     "new_sha256": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
-    },
-    {
-     "from": "src/aadistill/autoinit/generation_compat.py",
-     "to": "src/aadistill/initialization/planning/generation_compat.py",
-     "old_sha256": "9bb8e436ca303803ec5d13c661e259eec62a384efd34f977c97742cbf5f21ea1",
-     "new_sha256": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0"
-    },
-    {
-     "from": "src/aadistill/autoinit/identity_collapse.py",
-     "to": "src/aadistill/initialization/specs/identity_collapse.py",
-     "old_sha256": "a5a3e11d08978bd38e7039ada952337f056134d25ec784a80441f9b62db429b8",
-     "new_sha256": "823bb9784c77d8364dd1f197cc2b5bf26254773c1d60563f86191b4730978583"
-    },
-    {
-     "from": "src/aadistill/autoinit/leaf_durability.py",
-     "to": "src/aadistill/runtime/leaf_durability.py",
-     "old_sha256": "4ac09c23962ec91d66ac009ffe4c96f74b47dedec13915191aa8c89a2d167966",
-     "new_sha256": "024967267f9ededb651437d7b660395c642a191c09d8dd1e8a3bf6946214a017"
-    },
-    {
-     "from": "src/aadistill/autoinit/manifest.py",
-     "to": "src/aadistill/governance/artifact_manifest.py",
-     "old_sha256": "f2e54a31f023d19a889adc625aef5322b3c3901f3c8d33c7702b0c05d09fb3a9",
-     "new_sha256": "40373a9c15f17e22b8abb2a7362133f44e25f7cbea285938188b0fbcb50e17a9"
-    },
-    {
-     "from": "src/aadistill/autoinit/metrics.py",
-     "to": "src/aadistill/initialization/planning/metrics.py",
-     "old_sha256": "8a199452ad21b56171a8aa5aa78d88926a18ab0221d3f072ba46c7c589ebbe7f",
-     "new_sha256": "e58c651bef3ee897ca0b8eb419d7a7166c17ed55944353f00834efbde475e927"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/__init__.py",
-     "to": "src/aadistill/initialization/operators/__init__.py",
-     "old_sha256": "27b9707650416f7694c1b14bd83935de18fa0e3434c6cdeefb24724195f645c2",
-     "new_sha256": "8c4313d9693095fe00b21227d9c14b37c4985b1c9ca3c750034f335dbcdf1e9f"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/_common.py",
-     "to": "src/aadistill/initialization/operators/_common.py",
-     "old_sha256": "362418c6b5d2a7730b7b5308f5d43d7c0a6ec8f402040f1f1eaa8bd22b82b7c1",
-     "new_sha256": "d065241b735b0193817caadf97f94ab16bbfa3f624ecf123915041fc9a15615b"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/attention.py",
-     "to": "src/aadistill/initialization/operators/attention.py",
-     "old_sha256": "55beca67a349fe579d7bdb33f21cf19fd18f3de93ccda33223297960cc67c6ef",
-     "new_sha256": "0ceafff5feaf479fa30788ffcace17ddf6fa786eb87df2518f31df7ba4bcf6e9"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/base.py",
-     "to": "src/aadistill/initialization/operators/base.py",
-     "old_sha256": "3cb0ee88495166cb7324a951ac3ec6a1e8e5bb01811fd2368812b437ee13417c",
-     "new_sha256": "6ef30d6af28f9c842f802fac34b3a5a084d829d0ade340c3eafdb47523b1e3c9"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/composite.py",
-     "to": "src/aadistill/initialization/operators/composite.py",
-     "old_sha256": "ae4390e09d190fec366438abe67755c18ac63b5932e10869cdd2d57ab4d22224",
-     "new_sha256": "795fca32b5ea9aa9834de6f5ee42b5ac4bbec7261a041b76ea9f99da53dffd6a"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/depth.py",
-     "to": "src/aadistill/initialization/operators/depth.py",
-     "old_sha256": "345b530289a0a0a13d756d9e8f14ef07c504bf80ac886a5e968044cd506f9a1c",
-     "new_sha256": "e0f5198d83bda1c87dfa27e760c0c595c44e7e5697cfab445f3efd09fc8f1a5b"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/ffn.py",
-     "to": "src/aadistill/initialization/operators/ffn.py",
-     "old_sha256": "d8e0b35e5d9fef785f5e740e1e489d4f4799353fb19cefe30a946ab6d7323bfe",
-     "new_sha256": "1e14b29e9ffe54f4e742274779910ac500ebab28cdcebab2d9b8791ee81372a8"
-    },
-    {
-     "from": "src/aadistill/autoinit/operators/width.py",
-     "to": "src/aadistill/initialization/operators/width.py",
-     "old_sha256": "e4e18bb3246520b3ccf09296bc2d137807b4507fb1843c0c7bbc9d32889230b0",
-     "new_sha256": "b3be10fae95ebe6853ca328f303c4e2cba3aa9588eaf0f7280f4d03de625944a"
-    },
-    {
-     "from": "src/aadistill/autoinit/phase_a.py",
-     "to": "scripts/experiments/phase_a/plan.py",
-     "old_sha256": "705df4cc574d173fa306dadd6da62ff03849c95d37df74d6bcd987a5c5f53515",
-     "new_sha256": "525eca183cced5064e6d555c69839321c19d8c4843c2c8e66d0acceaf64be53e"
-    },
-    {
-     "from": "src/aadistill/autoinit/phase_b_continuation.py",
-     "to": "scripts/experiments/phase_b/continuation.py",
-     "old_sha256": "73413ca097535392d1a3eb6a914ae102b40cc37eee01fe5b9258074a68408f5b",
-     "new_sha256": "d3fb2c54d739814951d319e34943e564af28ff1e28cf2eb8180994b956e7e7b6"
-    },
-    {
-     "from": "src/aadistill/autoinit/ranking.py",
-     "to": "src/aadistill/initialization/planning/ranking.py",
-     "old_sha256": "618e1ccce1a23e26fc750726b6a6fa80ea278b98701ade47229e50cdc2cbac75",
-     "new_sha256": "c4ea7106050da0801c8712e9d6c70e189c45c823b8d0cb98e9add0b5f9bc3ba9"
-    },
-    {
-     "from": "src/aadistill/autoinit/recovery.py",
-     "to": "src/aadistill/initialization/planning/recovery.py",
-     "old_sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
-     "new_sha256": "f1989d536d3853203c05846b3388e10fd81a8d1505240fefa6d234b6e0d2d6e2"
-    },
-    {
-     "from": "src/aadistill/autoinit/recovery_continuation.py",
-     "to": "scripts/experiments/recovery_continuation/session.py",
-     "old_sha256": "517e6ea724ad255b7badda6bc7a2f83248d037d1f7b0b4b2190dd5cabc590340",
-     "new_sha256": "3f3d6a57212c753f87840bbf6258992edd50e53267432dc5cd94a9fdfede416d"
-    },
-    {
-     "from": "src/aadistill/autoinit/search.py",
-     "to": "src/aadistill/initialization/planning/search.py",
-     "old_sha256": "604c5db2c830e1078b41c5c9b17a33a29460bd8809df582a87c528ac0dc89df6",
-     "new_sha256": "87ba41029a0bd344fc1a3e4af6b0f80ac035d05460b43b3555f51d5831853b26"
-    },
-    {
-     "from": "src/aadistill/autoinit/state.py",
-     "to": "src/aadistill/initialization/specs/state.py",
-     "old_sha256": "ccb5b13b6d3ad0b9f63f3d7fb014648c5ddbf13f33b21267bda614c0ade13eae",
-     "new_sha256": "056bcdab3407774ca5b2c22a7d8a45ffe84645dcdda024bf1f65f0a2b6768637"
-    },
-    {
-     "from": "src/aadistill/autoinit/stats.py",
-     "to": "src/aadistill/initialization/statistics/spec.py",
-     "old_sha256": "0cd11ececab0bda49174c7b05107a47faf43267338af53fcf476034d29434b59",
-     "new_sha256": "951c4da15063de8d9193896a8b045efee9e175a1cab349dc4cc833c6d268bdda"
-    },
-    {
-     "from": "src/aadistill/init/sandwich.py",
-     "to": "src/aadistill/initialization/transforms/sandwich.py",
-     "old_sha256": "c6e05bcaf55f0e0219e4f1d2bab044f0d13ed09d24cba0d126f865869b784bc3",
-     "new_sha256": "074561f13489171a6059c007510f67a0b8bc5e96dcbf165b7bbd3844102a586c"
-    }
-   ],
-   "deletions": [
-    {
-     "path": "src/aadistill/autoinit/__init__.py",
-     "old_sha256": "f49a851b6d77c8fd9d184732acd0224fcb3ce8cc0f28fb19ba2f9e112c00ae1c"
-    },
-    {
-     "path": "src/aadistill/init/__init__.py",
-     "old_sha256": "b0139af363006d89eb7b4a6732dbc270b5e441b7c6321b49acbdc7192a2fa277"
-    }
-   ],
-   "fail_closed": true,
-   "current_digest": null,
-   "fail_closed_error": "AttributeError: module 'experiments.phase_b.continuation' has no attribute 'continuation_executable_digest'"
+   "n_declared": 60,
+   "moved_unchanged_bytes": 0,
+   "moved_and_edited": 0,
+   "still_at_declared_path": 60,
+   "deleted": 0,
+   "additive_only": true,
+   "_accounting": "this declaration names paths that all exist; its relocation is accounted for in logs/architecture_declaration_history.json",
+   "moves": [],
+   "moves_with_edits": [],
+   "deletions": [],
+   "computes": true,
+   "current_digest": "510e5fe398121a55c79bb00601943dcf20b1fc13f6b1bf922d9fd9db6b5a4d4a"
   },
   {
    "declaration": "CONTINUATION_HARNESS_SOURCE_FILES_V1",
    "declared_in": "experiments.recovery_continuation.plan",
    "n_declared": 11,
    "moved_unchanged_bytes": 0,
-   "moved_and_edited": 3,
-   "still_at_declared_path": 8,
+   "moved_and_edited": 0,
+   "still_at_declared_path": 11,
    "deleted": 0,
-   "additive_only": false,
-   "_why_not_additive": "files were MOVED and two package shells were DELETED. Claiming additive-only over removals would be false, and the approved accounting split exists precisely so a non-additive change can be recorded instead of disguised.",
+   "additive_only": true,
+   "_accounting": "this declaration names paths that all exist; its relocation is accounted for in logs/architecture_declaration_history.json",
    "moves": [],
-   "moves_with_edits": [
-    {
-     "from": "src/aadistill/autoinit/authorization.py",
-     "to": "src/aadistill/governance/authorization.py",
-     "old_sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-     "new_sha256": "9971cac2c0615bc9c7beff3de8d8d289d58bf3c5cc9072b29d3f36fb34b5e124"
-    },
-    {
-     "from": "src/aadistill/autoinit/continuation.py",
-     "to": "scripts/experiments/recovery_continuation/plan.py",
-     "old_sha256": "aaf8deb53c716438f2b9678069853eb7b3de65595324acf15f0e713ab7519353",
-     "new_sha256": "a91f6e17b82a6fd4c27474a7191338d597ed982d4b12300dcc9472a1e1b07799"
-    },
-    {
-     "from": "src/aadistill/autoinit/generation.py",
-     "to": "src/aadistill/initialization/planning/generation.py",
-     "old_sha256": "24cf6e3d5dd897e6ab0c3213e83f9a218a21c47052e6fe0cfc48cbda8762cc91",
-     "new_sha256": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
-    }
-   ],
-   "deletions": [],
-   "fail_closed": true,
-   "current_digest": null,
-   "fail_closed_error": "AttributeError: module 'experiments.recovery_continuation.plan' has no attribute 'continuation_harness_digest'"
+   "moves_with_edits": [],
+   "deletions": []
   },
   {
    "declaration": "C1_HARNESS_SOURCE_FILES_V1",
@@ -602,7 +100,7 @@
    "still_at_declared_path": 36,
    "deleted": 1,
    "additive_only": false,
-   "_why_not_additive": "files were MOVED and two package shells were DELETED. Claiming additive-only over removals would be false, and the approved accounting split exists precisely so a non-additive change can be recorded instead of disguised.",
+   "_accounting": "36 file(s) MOVED and 1 DELETED relative to what this declaration names. Claiming additive-only over removals would be false.",
    "moves": [
     {
      "from": "src/aadistill/autoinit/c1_bundle.py",
@@ -682,7 +180,7 @@
      "from": "src/aadistill/autoinit/c1_scoring.py",
      "to": "scripts/experiments/phase_c1/scoring.py",
      "old_sha256": "9528dbd7ce24964f6ae7645cb0cd928076bb22a9c34b60b3c2839f01dbb90dfa",
-     "new_sha256": "5b2ebc13657e6ac5647a430d9dd321f4c13de81ac24f9a18555eead08e6698ad"
+     "new_sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd"
     },
     {
      "from": "src/aadistill/autoinit/c1_packaging.py",
@@ -712,13 +210,13 @@
      "from": "src/aadistill/autoinit/c1_authorization.py",
      "to": "scripts/experiments/phase_c1/authorization.py",
      "old_sha256": "89346808b0bb1e1ec748a41c6da63850ffe44921b7c24d9480c60dc9b820f0f9",
-     "new_sha256": "817fec6bd1254b0765ac3e2ad6e04c78c32f2eef3aafdaf27bb04c5287d3bc53"
+     "new_sha256": "52ef0b9c5bca94d58312e9dc927cd5ce05bf316b80409eb208fc485073e96b89"
     },
     {
      "from": "src/aadistill/autoinit/authorization.py",
      "to": "src/aadistill/governance/authorization.py",
      "old_sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-     "new_sha256": "9971cac2c0615bc9c7beff3de8d8d289d58bf3c5cc9072b29d3f36fb34b5e124"
+     "new_sha256": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694"
     },
     {
      "from": "src/aadistill/autoinit/operators/__init__.py",
@@ -814,7 +312,7 @@
      "from": "src/aadistill/autoinit/recovery.py",
      "to": "src/aadistill/initialization/planning/recovery.py",
      "old_sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
-     "new_sha256": "f1989d536d3853203c05846b3388e10fd81a8d1505240fefa6d234b6e0d2d6e2"
+     "new_sha256": "779b6ee7a8bdb6cbb7ce0fb955716ca106a3a97a3969b2f1b2028346570bb375"
     },
     {
      "from": "src/aadistill/autoinit/generation.py",
@@ -829,9 +327,9 @@
      "old_sha256": "f49a851b6d77c8fd9d184732acd0224fcb3ce8cc0f28fb19ba2f9e112c00ae1c"
     }
    ],
-   "fail_closed": true,
+   "computes": false,
    "current_digest": null,
-   "fail_closed_error": "AuthorizationError: declared C1 harness source 'src/aadistill/autoinit/__init__.py' is missing; refusing to produce a digest that describes a smaller harness than the one that would run"
+   "refusal": "AuthorizationError: declared C1 harness source 'src/aadistill/autoinit/__init__.py' is missing; refusing to produce a digest that describes a smaller harness than the one that would run"
   },
   {
    "declaration": "GENERATION_SOURCE_FILES_V1",
@@ -841,8 +339,8 @@
    "moved_and_edited": 0,
    "still_at_declared_path": 3,
    "deleted": 0,
-   "additive_only": false,
-   "_why_not_additive": "files were MOVED and two package shells were DELETED. Claiming additive-only over removals would be false, and the approved accounting split exists precisely so a non-additive change can be recorded instead of disguised.",
+   "additive_only": true,
+   "_accounting": "this declaration names paths that all exist; its relocation is accounted for in logs/architecture_declaration_history.json",
    "moves": [],
    "moves_with_edits": [],
    "deletions": []
@@ -855,8 +353,8 @@
    "moved_and_edited": 0,
    "still_at_declared_path": 7,
    "deleted": 0,
-   "additive_only": false,
-   "_why_not_additive": "files were MOVED and two package shells were DELETED. Claiming additive-only over removals would be false, and the approved accounting split exists precisely so a non-additive change can be recorded instead of disguised.",
+   "additive_only": true,
+   "_accounting": "this declaration names paths that all exist; its relocation is accounted for in logs/architecture_declaration_history.json",
    "moves": [],
    "moves_with_edits": [],
    "deletions": []

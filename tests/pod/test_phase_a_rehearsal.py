@@ -165,7 +165,7 @@ def test_the_harness_set_covers_the_code_that_actually_runs():
                      # Imported by the driver, so just as much the executable.
                      "scripts/autoinit/phase_a_search.py",
                      "scripts/autoinit/write_preregistration.py",
-                     "src/aadistill/autoinit/phase_a.py"):
+                     "scripts/experiments/phase_a/plan.py"):
         assert required in PHASE_A_HARNESS_SOURCE_FILES_V1, required
     for rel in PHASE_A_HARNESS_SOURCE_FILES_V1:
         assert (REPO / rel).is_file(), f"declared harness source {rel} is missing"

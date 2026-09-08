@@ -71,7 +71,7 @@ class HostCacheTensor(torch.Tensor):
                     f"{len(model_side)} model-side tensor(s). On a GPU this is "
                     "'Expected all tensors to be on the same device'. Move the "
                     "working copy explicitly at the compute boundary — see "
-                    "aadistill.autoinit.device.stats_to.")
+                    "aadistill.initialization.device.stats_to.")
         return super().__torch_function__(func, types, args, kwargs)
 
 

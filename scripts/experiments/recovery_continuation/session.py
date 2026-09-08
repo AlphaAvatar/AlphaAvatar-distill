@@ -55,13 +55,13 @@ CONTINUATION_ONLY_HARNESS_FILES: tuple[str, ...] = (
     # geometry, canonical init and seed without importing the beam.
     "scripts/autoinit/phase_a_frozen.py",
     # What replaces the search, and what hands the card to recovery.
-    "src/aadistill/autoinit/stage1_import.py",
-    "src/aadistill/autoinit/device_handoff.py",
+    "src/aadistill/initialization/planning/stage1_import.py",
+    "src/aadistill/runtime/device_handoff.py",
     # Executed on both sides of the transfer: the launcher's $0 precheck
     # re-identifies the five leaves with it, and the driver reads them with it.
-    "src/aadistill/autoinit/leaf_durability.py",
+    "src/aadistill/runtime/leaf_durability.py",
     # This module: the schema, the refusals, and this list.
-    "src/aadistill/autoinit/recovery_continuation.py",
+    "scripts/experiments/recovery_continuation/session.py",
 )
 
 #: THE EXECUTABLE CONTINUATION CLOSURE — what this session actually runs.

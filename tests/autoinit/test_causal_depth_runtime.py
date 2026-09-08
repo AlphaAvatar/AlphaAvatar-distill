@@ -76,7 +76,7 @@ def test_the_operator_source_carries_no_cpu_transfer_on_the_scoring_path():
     every number is identical. Only the wall clock changes, and only on a GPU."""
     import re
 
-    src = (REPO / "src/aadistill/autoinit/operators/depth.py").read_text()
+    src = (REPO / "src/aadistill/initialization/operators/depth.py").read_text()
     code = "\n".join(l for l in src.splitlines()
                      if not l.lstrip().startswith("#"))
     # Docstrings explain the removed transfer; strip them before looking.
@@ -185,7 +185,7 @@ def test_the_budget_is_not_read_from_the_visible_cpu_count():
     import ast
     import re
 
-    src = (REPO / "src/aadistill/autoinit/device.py").read_text()
+    src = (REPO / "src/aadistill/initialization/device.py").read_text()
     fn = next(n for n in ast.parse(src).body
               if isinstance(n, ast.FunctionDef) and n.name == "cpu_budget")
     # The docstring says "NOT os.cpu_count()", which a naive text search reads as

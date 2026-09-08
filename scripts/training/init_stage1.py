@@ -5,7 +5,7 @@ Usage:
 
 Consumes the Stage 0 activation-statistics cache, initializes the student via
 global activation-PCA stream projection + sandwich init (see
-src/aadistill/init/sandwich.py), and writes:
+src/aadistill/initialization/transforms/sandwich.py), and writes:
 
     <output_dir>/checkpoint/          initialized student (+ tokenizer)
     <output_dir>/random_baseline/     same geometry, standard random init

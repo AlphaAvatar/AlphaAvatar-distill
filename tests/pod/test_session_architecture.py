@@ -198,7 +198,7 @@ def test_the_runner_is_not_subclassed_anywhere():
 def test_no_attempt_specific_grant_prose_in_executable_source():
     """A grant is a one-use decision and goes stale where code does not.
 
-    `src/aadistill/autoinit/phase_a.py` carried attempt-7's grant — which attempt
+    `scripts/experiments/phase_a/plan.py` carried attempt-7's grant — which attempt
     it covered, the cumulative spend at approval, what it did not authorize —
     inside the authorization constant, where it still read as current after the
     attempt was over. The schema stays; the grant arrives at issue time.

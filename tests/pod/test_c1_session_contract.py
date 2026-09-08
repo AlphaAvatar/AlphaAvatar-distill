@@ -217,12 +217,12 @@ def test_the_harness_set_covers_the_launcher_driver_and_c1_science():
                      # `autoinit_preflight_setup.sh` unmeasured. A regression that
                      # accepts either file cannot detect the wrong one.
                      "scripts/pod/autoinit_preflight_setup.sh",
-                     "src/aadistill/autoinit/c1_session.py",
-                     "src/aadistill/autoinit/c1_isolation.py",
-                     "src/aadistill/autoinit/fixed_path.py",
-                     "src/aadistill/autoinit/operators/attention_activation.py",
-                     "src/aadistill/init/attention_stats.py",
-                     "src/aadistill/autoinit/recovery.py",
+                     "scripts/experiments/phase_c1/session.py",
+                     "scripts/experiments/phase_c1/isolation.py",
+                     "src/aadistill/initialization/planning/fixed_path.py",
+                     "src/aadistill/initialization/operators/attention_activation.py",
+                     "src/aadistill/initialization/statistics/attention.py",
+                     "src/aadistill/initialization/planning/recovery.py",
                      "scripts/autoinit/score_recovery_search.py"):
         assert required in C1_HARNESS_SOURCE_FILES_V1, required
 

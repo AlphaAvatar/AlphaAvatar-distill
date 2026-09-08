@@ -48,11 +48,11 @@ SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 #: failure mode as the other source-digest sets: a missing declared file raises
 #: rather than yielding a digest over a smaller contract.
 C1_SOURCE_FILES: tuple[str, ...] = (
-    "src/aadistill/autoinit/c1_isolation.py",
-    "src/aadistill/autoinit/c1_session.py",
-    "src/aadistill/autoinit/fixed_path.py",
-    "src/aadistill/autoinit/operators/attention_activation.py",
-    "src/aadistill/init/attention_stats.py",
+    "scripts/experiments/phase_c1/isolation.py",
+    "scripts/experiments/phase_c1/session.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/operators/attention_activation.py",
+    "src/aadistill/initialization/statistics/attention.py",
     "scripts/data/battery_render.py",
     "scripts/data/build_c1_confirmation_battery.py",
     "scripts/autoinit/verify_c1_battery_isolation.py",
@@ -168,7 +168,7 @@ def main() -> None:
         },
         "authorization": {
             "schema": C1_AUTH_SCHEMA,
-            "type": "aadistill.autoinit.c1_authorization.C1Authorization",
+            "type": "experiments.phase_c1.authorization.C1Authorization",
             "session_kind": "c1",
             "allows_phase_a": False,
             "allows_beam_search": False,

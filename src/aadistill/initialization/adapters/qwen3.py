@@ -25,7 +25,6 @@ from aadistill.initialization.specs.arch import (
     ArchitectureAdapter,
     ArchSpec,
     Capability,
-    register_adapter,
 )
 
 #: Config keys that describe *structure*. Anything outside this list (rope base,
@@ -223,4 +222,9 @@ class Qwen3Adapter(ArchitectureAdapter):
         return ActivationStatsCollector(model)
 
 
-QWEN3_ADAPTER = register_adapter(Qwen3Adapter())
+#: The instance, NOT a registration. Registering here made the registry's
+#: contents depend on who had imported this module first: under randomized test
+#: ordering the same test would resolve an adapter in one run and see an empty
+#: registry in the next. Registration is now an explicit call with one owner --
+#: `aadistill.initialization.adapters.register_builtin_adapters`.
+QWEN3_ADAPTER = Qwen3Adapter()

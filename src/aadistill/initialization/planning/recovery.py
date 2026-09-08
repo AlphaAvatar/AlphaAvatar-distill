@@ -724,7 +724,7 @@ def recovery_scoring_contract(repo_root: str | Path = ".", *,
         "supersedes": {
             "contract": f"{RECOVERY_SCORING_CONTRACT_ID}@v2",
             "identity_was": ("the same six files, with the last at "
-                             "src/aadistill/autoinit/recovery.py"),
+                             "src/aadistill/initialization/planning/recovery.py"),
             "why": ("the initialization cutover moved that module, so v2 names "
                     "a path that no longer exists. This is a relocation, not a "
                     "change of scorer: four files are byte-identical and the "

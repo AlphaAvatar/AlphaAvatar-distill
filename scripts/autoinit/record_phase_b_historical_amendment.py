@@ -176,13 +176,13 @@ def main() -> int:
         #: blast radius is recorded here rather than discovered later.
         "also_affected_hash_bound_sets": sorted(
             name for name, files in (
-                ("aadistill.autoinit.phase_a.PHASE_A_HARNESS_SOURCE_FILES_V1",
+                ("experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
                  PHASE_A_HARNESS_SOURCE_FILES_V1),
-                ("aadistill.autoinit.phase_b_continuation."
+                ("experiments.phase_b.continuation."
                  "CONTINUATION_SOURCE_FILES_V2", CONTINUATION_SOURCE_FILES_V2),
-                ("aadistill.autoinit.authorization.HARNESS_SOURCE_FILES_V1",
+                ("aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
                  HARNESS_SOURCE_FILES_V1),
-                ("aadistill.autoinit.c1_authorization."
+                ("experiments.phase_c1.authorization."
                  "C1_HARNESS_SOURCE_FILES_V1", C1_HARNESS_SOURCE_FILES_V1),
             ) if set(changed) & set(files)),
     }

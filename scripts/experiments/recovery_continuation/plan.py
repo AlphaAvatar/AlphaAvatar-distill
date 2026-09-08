@@ -418,9 +418,9 @@ CONTINUATION_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/pod/autoinit_engine_probe.py",
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
-    "src/aadistill/autoinit/authorization.py",
-    "src/aadistill/autoinit/continuation.py",
-    "src/aadistill/autoinit/generation.py",
+    "src/aadistill/governance/authorization.py",
+    "scripts/experiments/recovery_continuation/plan.py",
+    "src/aadistill/initialization/planning/generation.py",
 )
 
 #: The narrow authorization this session runs under. Characterization only: it

@@ -44,6 +44,7 @@ import torch  # noqa: E402
 
 from aadistill.initialization import device as device_contract
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1  # noqa: E402
 from aadistill.initialization.device import model_device, stats_bytes  # noqa: E402
 from aadistill.initialization.planning.metrics import (  # noqa: E402
@@ -55,6 +56,9 @@ from aadistill.initialization.operators.base import (  # noqa: E402
     get_implementation,
 )
 from aadistill.initialization.statistics.spec import StatsCache  # noqa: E402
+
+#: Explicit, because importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 CANONICAL = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 #: The launcher watches this file and decides the session's terminal state from

@@ -135,10 +135,10 @@ C1_METRIC_CONTRACT: dict[str, Any] = {
 C1_SCORING_FILES_V1: tuple[str, ...] = (
     # the C1 binding: pins, validation, result schema, this contract
     "scripts/autoinit/score_c1_confirmation.py",
-    "src/aadistill/autoinit/c1_scoring.py",
+    "scripts/experiments/phase_c1/scoring.py",
     # the historical implementation whose rules it imports
     "scripts/autoinit/score_recovery_search.py",
-    "src/aadistill/autoinit/recovery.py",
+    "src/aadistill/initialization/planning/recovery.py",
     "src/aadistill/evaluation/usable_rollout.py",
     "src/aadistill/evaluation/strict_answer.py",
     "src/aadistill/evaluation/behavior.py",

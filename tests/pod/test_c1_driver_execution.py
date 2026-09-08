@@ -103,7 +103,7 @@ def test_the_driver_owns_run_and_imports_no_phase_a_operational_module():
         elif isinstance(node, ast.ImportFrom):
             imported.add(node.module or "")
     for forbidden in ("autoinit_phase_a_driver", "autoinit_phase_a_launch",
-                      "phase_a_search", "aadistill.autoinit.phase_a"):
+                      "phase_a_search", "experiments.phase_a.plan"):
         assert forbidden not in imported, forbidden
     assert "PHASE_A_PLAN_V1" not in _executable_text(DRIVER_SRC)
 
@@ -481,7 +481,7 @@ def test_the_driver_uses_the_real_fixed_path_executor_and_its_device_gate():
 
     assert D.materialize_fixed_path is fixed_path.materialize_fixed_path
     assert "require_root_on_declared_device" in \
-        (REPO / "src/aadistill/autoinit/fixed_path.py").read_text()
+        (REPO / "src/aadistill/initialization/planning/fixed_path.py").read_text()
 
 
 def test_the_trainer_headroom_is_derived_from_the_committed_measurement():

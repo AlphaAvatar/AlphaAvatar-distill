@@ -347,7 +347,7 @@ def test_2c_the_pack_hash_is_recomputed_not_trusted(real_run, tmp_path):
 
 def test_2d_the_strict_path_does_not_inherit_the_permissive_helpers_defaults():
     """`historical_protocol` backfills; the strict path must not, ever."""
-    source = (REPO / "src/aadistill/autoinit/recovery.py").read_text()
+    source = (REPO / "src/aadistill/initialization/planning/recovery.py").read_text()
     reconstruct = source[source.index("def observe_recovery_protocol"):
                          source.index("class RecoveryProbeIdentity")]
     for backfill in ('"AdamW"', '512', 'PACK_BLOCKS_SHA', 'cosine to min_lr_frac'):

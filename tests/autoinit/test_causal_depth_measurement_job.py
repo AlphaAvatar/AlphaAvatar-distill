@@ -360,7 +360,7 @@ def test_the_production_peak_is_read_before_the_comparison_peak():
 # --- 7. the ENTRYPOINT, executed ------------------------------------------
 #
 # Measurement attempt 2 died at $0.18 on `ImportError: cannot import name
-# 'as_operator_items' from 'aadistill.autoinit.datasets'` — a line inside
+# 'as_operator_items' from 'aadistill.initialization.calibration.datasets'` — a line inside
 # `main()`, which refuses to start without CUDA, so no $0 path had ever reached
 # it. `run_measurement` had a seam and was hammered; `main()` did not, and that
 # is exactly where the defect was.
@@ -460,7 +460,7 @@ def test_the_entrypoint_imports_as_operator_items_from_its_real_owner():
     assert spec is not None
     owner = (REPO / "scripts/autoinit/phase_a_search.py").read_text()
     assert "def as_operator_items(" in owner
-    datasets = (REPO / "src/aadistill/autoinit/datasets.py").read_text()
+    datasets = (REPO / "src/aadistill/initialization/calibration/datasets.py").read_text()
     assert "def as_operator_items(" not in datasets, (
         "as_operator_items moved; the import in the measurement job needs "
         "re-deriving rather than this test relaxing")

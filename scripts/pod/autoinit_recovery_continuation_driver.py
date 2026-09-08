@@ -82,8 +82,11 @@ class RecoveryContinuationDriver(PhaseADriver):
     def stage1(self) -> bool:
         """Import the verified Stage-1 result. No search is reachable from here."""
         self.enter(1)
+        from aadistill.initialization.adapters import register_builtin_adapters
         from aadistill.initialization.specs.arch import get_adapter
 
+        # Explicit, because importing an adapter module no longer registers it.
+        register_builtin_adapters()
         adapter = get_adapter("qwen3")
         result = json.loads((EVIDENCE / "search_result.json").read_text())
         durability = json.loads(

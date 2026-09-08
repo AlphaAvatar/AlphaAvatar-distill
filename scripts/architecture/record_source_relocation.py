@@ -20,11 +20,14 @@ all three from the tree and from git rather than asserting them:
    move PLUS an edit and is reported as such. Additions and removals are
    counted separately — this never claims additive-only over removals.
 
-3. **Old launch compatibility is fail-closed.** With declared files missing,
-   the digest helpers refuse to produce a digest at all, so an old grant or
-   authorization cannot be revalidated against the migrated tree. That refusal
-   is exercised here, per set, and its message recorded — a claim of
-   fail-closed that nobody executed is not evidence.
+3. **Old launch compatibility is fail-closed.** A declaration repointed at
+   current paths computes a DIFFERENT digest than the one a completed run
+   recorded, so an old grant or authorization still fails its own check — by
+   mismatch rather than by exception, which is the check those documents were
+   always meant to fail. `C1_HARNESS_SOURCE_FILES_V1` is not repointed and
+   still refuses outright, because C1's live contract is the derived closure.
+   Both behaviours are exercised here rather than asserted, and only a refusal
+   raised by the digest rule itself is counted as one.
 
 The historical commit that owns the old paths is recorded so a reader can check
 any old hash against the tree as it actually was.
@@ -44,6 +47,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/architecture"))
 
+from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from migration_map import MAP  # noqa: E402
 
 OUT = "logs/architecture_source_relocation.json"
@@ -53,17 +57,17 @@ SCHEMA = "aadistill.architecture_source_relocation/v1"
 #: fail-closed claim can be exercised rather than asserted.
 SETS = [
     ("HARNESS_SOURCE_FILES_V1", "aadistill.governance.authorization",
-     "harness_digest"),
+     "harness_source_digest"),
     ("PHASE_A_HARNESS_SOURCE_FILES_V1", "experiments.phase_a.plan",
      "phase_a_harness_digest"),
     ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "experiments.phase_b.plan",
-     "phase_b_executable_digest"),
+     "phase_b_source_digest"),
     ("CONTINUATION_SOURCE_FILES_V2", "experiments.phase_b.continuation",
-     "continuation_executable_digest"),
+     "continuation_source_digest"),
     ("CONTINUATION_HARNESS_SOURCE_FILES_V1", "experiments.recovery_continuation.plan",
-     "continuation_harness_digest"),
+     None),
     ("C1_HARNESS_SOURCE_FILES_V1", "experiments.phase_c1.authorization",
-     "c1_harness_digest"),
+     "c1_historical_harness_digest"),
     ("GENERATION_SOURCE_FILES_V1", "aadistill.initialization.planning.generation",
      None),
     ("TRAINER_SOURCE_FILES_V1", "aadistill.initialization.planning.recovery",
@@ -119,27 +123,38 @@ def account_set(name: str, module: str, digest_fn: str | None,
         "declaration": name, "declared_in": module, "n_declared": len(declared),
         "moved_unchanged_bytes": len(moved), "moved_and_edited": len(edited),
         "still_at_declared_path": len(unchanged), "deleted": len(deleted),
-        "additive_only": False,
-        "_why_not_additive": (
-            "files were MOVED and two package shells were DELETED. Claiming "
-            "additive-only over removals would be false, and the approved "
-            "accounting split exists precisely so a non-additive change can be "
-            "recorded instead of disguised."),
+        "additive_only": not (moved or edited or deleted),
+        "_accounting": (
+            (f"{len(moved) + len(edited)} file(s) MOVED and {len(deleted)} "
+             "DELETED relative to what this declaration names. Claiming "
+             "additive-only over removals would be false.")
+            if (moved or edited or deleted) else
+            #: A repointed declaration names current paths, so nothing here is
+            #: outstanding. Its move history is not lost — it is recorded in
+            #: logs/architecture_declaration_history.json, which holds the old
+            #: path list and the digest the completed runs bound.
+            "this declaration names paths that all exist; its relocation is "
+            "accounted for in logs/architecture_declaration_history.json"),
         "moves": moved, "moves_with_edits": edited, "deletions": deleted,
     }
     if digest_fn:
+        #: Resolve the name FIRST, outside the try. An earlier revision of this
+        #: script wrapped the lookup in `except Exception` along with the call,
+        #: so three mistyped function names were recorded as "fail_closed": a
+        #: typo was being reported as evidence that an old grant could not be
+        #: revalidated. A name that does not exist is a bug in this script, and
+        #: it must crash here rather than become a reassuring line in a log.
+        fn = getattr(importlib.import_module(module), digest_fn)
         try:
-            fn = getattr(importlib.import_module(module), digest_fn)
             d = fn(str(REPO))
+            entry["computes"] = True
             entry["current_digest"] = d["digest"] if isinstance(d, dict) else d
-            entry["fail_closed"] = False
-            entry["fail_closed_note"] = (
-                "THE DIGEST STILL COMPUTES. An old authorization could be "
-                "revalidated against this tree; that is a blocker, not a pass.")
-        except Exception as exc:                              # noqa: BLE001
-            entry["fail_closed"] = True
+        except AuthorizationError as exc:
+            #: Only a refusal from the digest rule itself counts. Any other
+            #: exception is a defect, and is left to propagate.
+            entry["computes"] = False
             entry["current_digest"] = None
-            entry["fail_closed_error"] = f"{type(exc).__name__}: {exc}"
+            entry["refusal"] = f"{type(exc).__name__}: {exc}"
     return entry
 
 
@@ -174,9 +189,8 @@ def main() -> int:
             "moved_with_edits": sum(
                 1 for r in table.values() if not r["content_identical"]),
             "sets_examined": len(sets),
-            "sets_fail_closed": sum(1 for s in sets if s.get("fail_closed")),
-            "sets_still_computable": sum(
-                1 for s in sets if s.get("fail_closed") is False),
+            "sets_computable": sum(1 for s in sets if s.get("computes")),
+            "sets_refusing": sum(1 for s in sets if s.get("computes") is False),
         },
         "sets": sets,
         "historical_evidence": {
@@ -190,8 +204,8 @@ def main() -> int:
     }
     print(json.dumps(doc["counts"], indent=1))
     for s in sets:
-        state = ("FAIL-CLOSED" if s.get("fail_closed")
-                 else "computable" if s.get("fail_closed") is False else "n/a")
+        state = ("computable" if s.get("computes")
+                 else "REFUSES" if s.get("computes") is False else "n/a")
         print(f"  {s['declaration']:42} declared={s['n_declared']:>3} "
               f"moved={s['moved_unchanged_bytes'] + s['moved_and_edited']:>3} "
               f"(of which edited={s['moved_and_edited']:>2}) "

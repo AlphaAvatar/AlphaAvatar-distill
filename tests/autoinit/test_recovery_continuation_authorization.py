@@ -37,8 +37,8 @@ from experiments.recovery_continuation.session import CONTINUATION_ONLY_HARNESS_
 ISSUER = REPO / "scripts/autoinit/issue_recovery_continuation_authorization.py"
 LAUNCH = "scripts/pod/autoinit_recovery_continuation_launch.py"
 DRIVER = "scripts/pod/autoinit_recovery_continuation_driver.py"
-IMPORTER = "src/aadistill/autoinit/stage1_import.py"
-HANDOFF = "src/aadistill/autoinit/device_handoff.py"
+IMPORTER = "src/aadistill/initialization/planning/stage1_import.py"
+HANDOFF = "src/aadistill/runtime/device_handoff.py"
 SEARCH = "scripts/autoinit/phase_a_search.py"
 
 
@@ -103,9 +103,9 @@ def test_the_continuation_set_is_the_phase_a_set_minus_search_plus_its_own():
 
 def test_the_continuation_set_covers_what_this_session_executes():
     for rel in (LAUNCH, DRIVER, IMPORTER, HANDOFF,
-                "src/aadistill/autoinit/leaf_durability.py",
+                "src/aadistill/runtime/leaf_durability.py",
                 "scripts/autoinit/phase_a_frozen.py",
-                "src/aadistill/autoinit/recovery_continuation.py"):
+                "scripts/experiments/recovery_continuation/session.py"):
         assert rel in RECOVERY_CONTINUATION_HARNESS_FILES_V1, rel
 
 

@@ -167,7 +167,7 @@ def test_the_module_carries_no_search_machinery():
     import ast
 
     path = (Path(__file__).resolve().parents[2]
-            / "src/aadistill/autoinit/c1_session.py")
+            / "scripts/experiments/phase_c1/session.py")
     imported: set[str] = set()
     for node in ast.walk(ast.parse(path.read_text())):
         if isinstance(node, ast.ImportFrom):

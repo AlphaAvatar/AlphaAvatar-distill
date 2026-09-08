@@ -320,7 +320,7 @@ def test_no_defaults_are_invented_for_missing_capability_values():
     """'missing -> 1.0' or 'missing -> 0.0' would turn a data bug into a pass."""
     from aadistill.initialization.planning.recovery import CAPABILITY_SCHEMA_V1
 
-    source = (REPO / "src/aadistill/autoinit/recovery.py").read_text()
+    source = (REPO / "src/aadistill/initialization/planning/recovery.py").read_text()
     body = source[source.index("    def validate(self, result"):
                   source.index("    def validate_all(")]
     # `.get(` is legitimate for reading the optional label and the breakdown
@@ -864,7 +864,7 @@ def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
                      "src/aadistill/evaluation/behavior.py",
                      "src/aadistill/evaluation/capability.py",
                      # the rule relating two numbers is part of the metric
-                     "src/aadistill/autoinit/recovery.py"):
+                     "src/aadistill/initialization/planning/recovery.py"):
         assert required in covered, required
     assert covered == set(RECOVERY_SCORING_FILES_V2)
     assert contract["supersedes"]["contract"] == "recovery_search_scoring@v1"

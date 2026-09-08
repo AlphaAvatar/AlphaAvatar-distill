@@ -817,7 +817,7 @@ def test_the_swept_base_helper_delegates_rather_than_reimplementing():
     """
     from aadistill.infrastructure import session_prechecks as sp
 
-    src = (REPO / "src/aadistill/autoinit/pod_environment.py").read_text()
+    src = (REPO / "src/aadistill/runtime/pod_environment.py").read_text()
     assert "from ..infrastructure.session_prechecks import " \
            "lineage_from_authorized_base" in src, "it no longer delegates"
     for forbidden in ("merge-base", "--is-ancestor", "git diff"):
@@ -995,7 +995,7 @@ def test_the_pricing_record_is_hash_verified_before_the_rate_is_used():
     """A rate read from a tampered record would be worse than a stale literal."""
     from experiments.phase_c1.authorization import PRICING_PATH, load_pricing
 
-    src = (REPO / "src/aadistill/autoinit/c1_authorization.py").read_text()
+    src = (REPO / "scripts/experiments/phase_c1/authorization.py").read_text()
     assert "pricing_sha256" in src
     doc = load_pricing(REPO)
     assert doc["hardware"]["price_per_hour_usd"] == 1.09
@@ -1114,7 +1114,7 @@ def test_the_prereg_states_the_canonical_issuance_ordering():
 def test_the_launch_bound_refusal_names_the_pre_authorization_tree():
     """Load-bearing operator guidance: the wrong wording produced a backwards
     issuance order that session_commit_gate would have refused at $0."""
-    src = (REPO / "src/aadistill/autoinit/pod_environment.py").read_text()
+    src = (REPO / "src/aadistill/runtime/pod_environment.py").read_text()
     assert "PRE-AUTHORIZATION tree" in src
     assert "on the final authorized tree" not in src
     rec = _valid_record(Path("/tmp"), "diagnostic")

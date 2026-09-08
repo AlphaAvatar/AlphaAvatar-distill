@@ -85,10 +85,10 @@ PHASE_A_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # edit to either changes what a paid run does.
     "scripts/autoinit/phase_a_search.py",
     "scripts/autoinit/write_preregistration.py",
-    "src/aadistill/autoinit/authorization.py",
-    "src/aadistill/autoinit/generation_compat.py",
-    "src/aadistill/autoinit/phase_a.py",
-    "src/aadistill/autoinit/generation.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "scripts/experiments/phase_a/plan.py",
+    "src/aadistill/initialization/planning/generation.py",
 )
 #: Bumped with the session machinery: a digest over set 1 (which named
 #: the launcher Phase A subclassed) and one over set 2 are not comparable.

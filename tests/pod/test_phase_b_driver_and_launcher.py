@@ -749,7 +749,7 @@ def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     # It is the Phase-B set, not Phase A's.
     paths = {e["path"] for e in observed["files"]}
     assert "scripts/pod/autoinit_phase_b_driver.py" in paths
-    assert "src/aadistill/autoinit/phase_b.py" in paths
+    assert "scripts/experiments/phase_b/plan.py" in paths
 
     stale, _ = _issued(tmp_path / "stale", source_digest="0" * 64)
     with pytest.raises(AuthorizationError, match="Re-rehearse and re-issue"):
@@ -962,10 +962,10 @@ def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
     assert "scripts/autoinit/price_phase_b.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
     # And the Stage-1 selection artifact: written inside the paid search, read by
     # the failed-run collector, so it decides what survives a failure.
-    assert "src/aadistill/autoinit/stage1_selection.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
+    assert "src/aadistill/initialization/planning/stage1_selection.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
     # And identity collapse: it decides which candidates are distinct, which IS
     # the behavioural universe.
-    assert "src/aadistill/autoinit/identity_collapse.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
+    assert "src/aadistill/initialization/specs/identity_collapse.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
     assert PHASE_B_SOURCE_SET_VERSION == 6
 
 

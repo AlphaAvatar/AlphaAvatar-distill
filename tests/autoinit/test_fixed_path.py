@@ -191,7 +191,7 @@ def test_the_module_does_not_depend_on_the_beam():
     import ast
 
     path = (Path(__file__).resolve().parents[2]
-            / "src/aadistill/autoinit/fixed_path.py")
+            / "src/aadistill/initialization/planning/fixed_path.py")
     tree = ast.parse(path.read_text())
     imported: set[str] = set()
     for node in ast.walk(tree):

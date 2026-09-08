@@ -783,7 +783,7 @@ def test_the_authorization_binds_the_code_that_actually_runs():
     files = set(CONTINUATION_HARNESS_SOURCE_FILES_V1)
     for executable in ("scripts/pod/autoinit_continuation_launch.py",
                        "scripts/pod/autoinit_continuation_driver.py",
-                       "src/aadistill/autoinit/continuation.py"):
+                       "scripts/experiments/recovery_continuation/plan.py"):
         assert executable in files
         assert executable not in HARNESS_SOURCE_FILES_V1   # the gap that existed
     assert CONTINUATION_AUTHORIZATION.harness_source_files == \

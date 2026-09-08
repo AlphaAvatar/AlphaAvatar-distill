@@ -435,9 +435,17 @@ def build(tmp_path, monkeypatch, *, tie: bool):
     search = Detonator("run_phase_a_search")
     monkeypatch.setattr(phase_a_search, "run_phase_a_search", search)
     monkeypatch.setattr(parent, "run_phase_a_search", search, raising=False)
-    import aadistill.initialization as autoinit_pkg
-    monkeypatch.setattr(autoinit_pkg, "BeamSearch", beam)
-    monkeypatch.setattr("aadistill.autoinit.search.BeamSearch", beam)
+    # Both the definition and the consumer's own binding. `phase_a_search` does
+    # `from ...planning.search import BeamSearch` at import time, so it holds a
+    # reference of its own that patching the defining module cannot reach.
+    #
+    # This used to also patch the attribute on the `aadistill.autoinit` package,
+    # which re-exported it. `aadistill.initialization` deliberately does not
+    # re-export anything, so that line was patching a name nothing resolves and
+    # is gone rather than carried over with `raising=False` — a patch that
+    # cannot fire is worse than no patch, because it reads like coverage.
+    monkeypatch.setattr("aadistill.initialization.planning.search.BeamSearch", beam)
+    monkeypatch.setattr(phase_a_search, "BeamSearch", beam, raising=False)
 
     # -- the toy target geometry -------------------------------------------
     import phase_a_frozen
@@ -977,9 +985,9 @@ def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
     """Explicitly: these ARE in the digest, and that is correct."""
     from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
 
-    for loaded in ("src/aadistill/autoinit/search.py",
-                   "src/aadistill/autoinit/ranking.py",
-                   "src/aadistill/autoinit/operators/depth.py",
+    for loaded in ("src/aadistill/initialization/planning/search.py",
+                   "src/aadistill/initialization/planning/ranking.py",
+                   "src/aadistill/initialization/operators/depth.py",
                    "scripts/pod/autoinit_phase_a_driver.py"):
         assert loaded in CONTINUATION_SOURCE_FILES_V2, loaded
 
@@ -1166,7 +1174,7 @@ def test_the_shared_gate_refuses_a_set_with_a_file_omitted():
     from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
 
     short = tuple(f for f in CONTINUATION_SOURCE_FILES_V2
-                  if f != "src/aadistill/autoinit/search.py")
+                  if f != "src/aadistill/initialization/planning/search.py")
     assert len(short) == len(CONTINUATION_SOURCE_FILES_V2) - 1
     partial = continuation_source_digest(REPO, files=short)["digest"]
     # Declared as the FULL set but digested over one fewer file.
@@ -1179,7 +1187,7 @@ def test_the_shared_gate_refuses_a_stale_executable_digest():
     """A grant bound to an older tree cannot launch the current one."""
     ok, why, record = _run_shared_gate(
         "88e1ef576d810514e855c94f03dbc36a1d818a065c37ff5b6140da128e5e7e55",
-        __import__("aadistill.autoinit.phase_b_continuation", fromlist=["x"]
+        __import__("experiments.phase_b.continuation", fromlist=["x"]
                    ).CONTINUATION_SOURCE_FILES_V2)
     assert record["harness_matches"] is False
     assert not ok

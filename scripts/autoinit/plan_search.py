@@ -29,6 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.calibration.profiles import (  # noqa: E402
     V1_PROFILES,
     profile_summary,
@@ -50,6 +51,9 @@ from aadistill.initialization.planning.ranking import (  # noqa: E402
     SCHEDULE_V1,
 )
 from aadistill.initialization.planning.recovery import E1_KD_HEAVY_0860K  # noqa: E402
+
+#: Explicit, because importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 ADAPTER = get_adapter("qwen3")
 

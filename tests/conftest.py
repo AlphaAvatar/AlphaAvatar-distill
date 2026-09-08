@@ -23,6 +23,19 @@ for root in (REPO / "src", REPO / "scripts"):
         sys.path.insert(0, str(root))
 
 
+#: Register the shipped architecture adapters once, for the whole suite.
+#:
+#: This used to happen as a side effect of importing the old `aadistill.autoinit`
+#: package. Nothing imports the new one, so whether `get_adapter("qwen3")`
+#: resolved depended on whether an earlier test had pulled the adapter module
+#: in -- and with `pytest-randomly` active, that varied per run. A module-scope
+#: `get_adapter` call in a test file then failed at COLLECTION, taking its whole
+#: file with it, in some orders and not others.
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
+
+register_builtin_adapters()
+
+
 @pytest.fixture
 def repo_root() -> Path:
     """The repository, for the few assertions that are about the real tree.

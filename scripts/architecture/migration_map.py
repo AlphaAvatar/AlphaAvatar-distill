@@ -154,8 +154,8 @@ def module_map() -> dict[str, str]:
     """old module -> new module, longest first so prefixes rewrite correctly."""
     out = {module_of(o): module_of(n) for o, n in MAP.items()}
     # the packages themselves
-    out["aadistill.autoinit.operators"] = "aadistill.initialization.operators"
-    out["aadistill.autoinit.adapters"] = "aadistill.initialization.adapters"
+    out["aadistill.initialization.operators"] = "aadistill.initialization.operators"
+    out["aadistill.initialization.adapters"] = "aadistill.initialization.adapters"
     return dict(sorted(out.items(), key=lambda kv: -len(kv[0])))
 
 

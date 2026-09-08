@@ -5,7 +5,7 @@
 
 Run AFTER the rehearsal passes and the harness is committed.
 
-**The grant is an input, not a constant.** `src/aadistill/autoinit/phase_a.py`
+**The grant is an input, not a constant.** `scripts/experiments/phase_a/plan.py`
 carries the authorization SCHEMA — caps, stages, stage conditions, scope — and
 nothing about a particular permission. Until 2026-08-18 it also carried the
 attempt-7 grant prose: which attempt it covered, the cumulative spend at

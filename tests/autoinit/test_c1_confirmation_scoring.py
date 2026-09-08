@@ -70,7 +70,7 @@ def test_the_c1_closure_covers_the_three_files_v2_omits():
     assert not (holes & set(RECOVERY_SCORING_FILES_V2))   # the historical hole
     assert holes <= set(C1_SCORING_FILES_V1)              # not repeated here
     assert "scripts/autoinit/score_c1_confirmation.py" in C1_SCORING_FILES_V1
-    assert "src/aadistill/autoinit/c1_scoring.py" in C1_SCORING_FILES_V1
+    assert "scripts/experiments/phase_c1/scoring.py" in C1_SCORING_FILES_V1
 
 
 def test_every_declared_scoring_source_exists_and_a_missing_one_refuses():
