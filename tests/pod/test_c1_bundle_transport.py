@@ -103,8 +103,15 @@ def _harness(commit: str, files: tuple[str, ...], *, allow_missing: bool = False
 
 @pytest.fixture(scope="module")
 def files() -> tuple[str, ...]:
-    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
-    return C1_HARNESS_SOURCE_FILES_V1
+    """The LIVE executable set, derived.
+
+    `C1_HARNESS_SOURCE_FILES_V1` is the historical declaration and still names
+    the pre-migration paths, so digesting it at HEAD fails on the first member
+    that no longer exists -- which is the fail-closed behaviour that set is for,
+    and not what a transport round-trip is testing.
+    """
+    from experiments.phase_c1.authorization import c1_current_executable
+    return tuple(r["path"] for r in c1_current_executable(REPO)["files"])
 
 
 def _serve(path: Path):
