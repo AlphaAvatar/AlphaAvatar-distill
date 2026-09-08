@@ -115,6 +115,24 @@ def session_commit_gate(repo_root: Path, auth_path: str, *,
             entries.append({"path": rel,
                             "sha256": hashlib.sha256(blob.stdout).hexdigest()})
         if missing:
+            #: Recorded, not just returned. This branch used to leave no
+            #: evidence at all, so a refusal here was invisible to anything
+            #: reading `session_commit_check` -- and after the initialization
+            #: migration it is the branch an authorization naming pre-migration
+            #: paths lands on. A gate that refuses silently is the hardest kind
+            #: to audit afterwards.
+            ctx.evidence["session_commit_check"] = {
+                "session_commit": commit,
+                "authorized_session_commit": ctx.auth.authorized_session_commit,
+                "harness_digest_at_commit": None,
+                "authorized_harness_digest": ctx.auth.harness_source_digest,
+                "harness_matches": False,
+                "missing_at_commit": missing,
+                "commit_carries_this_authorization": None,
+                "rule": ("a declared harness file is absent at this commit, so "
+                         "no digest can be computed over the set the "
+                         "authorization names"),
+            }
             return False, f"{commit} does not contain {missing}"
         digest = hashlib.sha256(
             "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()

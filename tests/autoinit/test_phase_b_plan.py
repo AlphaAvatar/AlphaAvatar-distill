@@ -67,11 +67,14 @@ def test_the_source_set_covers_what_a_paid_P2_SEARCH_actually_executes():
         assert required in covered, required
     # Every concrete operator that can execute, not just the base class.
     for operator in ("attention", "composite", "depth", "ffn", "width"):
-        assert f"src/aadistill/autoinit/operators/{operator}.py" in covered, operator
-    # The adapter package __init__ registers the adapter; the AST closure of
-    # search.py alone never reaches it.
+        assert f"src/aadistill/initialization/operators/{operator}.py" in covered, operator
+    # The adapter package __init__ is in the set because it is loaded. It no
+    # longer REGISTERS the adapter -- registration is an explicit call now -- and
+    # `src/aadistill/autoinit/__init__.py`, which used to be here for the same
+    # reason, was deleted by the consolidation and is recorded as a removal in
+    # logs/migrations/initialization-core/v1/source-relocation.json.
     assert "src/aadistill/initialization/adapters/__init__.py" in covered
-    assert "src/aadistill/autoinit/__init__.py" in covered
+    assert "src/aadistill/autoinit/__init__.py" not in covered
 
 
 def test_the_set_is_provenance_closure_not_a_maximal_file_list():

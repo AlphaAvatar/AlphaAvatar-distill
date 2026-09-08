@@ -573,7 +573,7 @@ if [ "$SESSION_KIND" = "phase_a" ]; then
   cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from aadistill.autoinit.phase_a import PhaseAAuthorization
+from experiments.phase_a.plan import PhaseAAuthorization
 a = PhaseAAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.allows_phase_a is True, 'a Phase-A session needs a Phase-A authorization'
@@ -599,7 +599,7 @@ elif [ "$SESSION_KIND" = "phase_b" ]; then
   cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from aadistill.autoinit.phase_b import PhaseBAuthorization
+from experiments.phase_b.plan import PhaseBAuthorization
 a = PhaseBAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.allows_phase_b is True, 'a Phase-B session needs a Phase-B authorization'
@@ -623,7 +623,7 @@ elif [ "$SESSION_KIND" = "continuation_b" ]; then
   cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from aadistill.autoinit.phase_b_continuation import ContinuationAuthorization
+from experiments.phase_b.continuation import ContinuationAuthorization
 a = ContinuationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.runs_search is False, 'the continuation cannot purchase Stage 1 again'
@@ -648,7 +648,7 @@ elif [ "$SESSION_KIND" = "c1" ]; then
   cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from aadistill.autoinit.c1_authorization import C1Authorization
+from experiments.phase_c1.authorization import C1Authorization
 a = C1Authorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_c1_isolation is True, 'a C1 session needs a C1 authorization'
@@ -667,7 +667,7 @@ elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from aadistill.autoinit.recovery_continuation import RecoveryContinuationAuthorization
+from experiments.recovery_continuation.session import RecoveryContinuationAuthorization
 a = RecoveryContinuationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_recovery_continuation is True
@@ -681,7 +681,7 @@ else
   cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from aadistill.autoinit.authorization import SpendAuthorization
+from aadistill.governance.authorization import SpendAuthorization
 a = SpendAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'

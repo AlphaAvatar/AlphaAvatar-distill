@@ -1002,7 +1002,10 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
         assert {"usable", "n", "usable_rollout_rate"} <= set(sa["per_capability"][cap])
         assert cap in sb["per_capability"]
     # The identities stage 3 binds each result to.
-    assert sa["scoring_contract"]["contract"] == "recovery_search_scoring@v2"
+    # v3 since the scorer relocation. The contract this run BINDS is the live
+    # one; the historical records keep saying v2, which is what makes an old
+    # result refuse rather than silently mix identities.
+    assert sa["scoring_contract"]["contract"] == "recovery_search_scoring@v3"
     assert {"artifact", "manifest_sha256", "content_sha256"} <= set(sa["battery"])
 
 

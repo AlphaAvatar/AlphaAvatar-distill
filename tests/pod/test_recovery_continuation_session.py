@@ -238,7 +238,7 @@ def test_an_unverified_transport_declares_no_leaf_inputs(launcher):
 def test_the_driver_uses_the_shared_importer_not_its_own(launcher):
     """No second reconstruction implementation."""
     src = DRIVER.read_text()
-    assert "from aadistill.autoinit.stage1_import import" in src
+    assert "from aadistill.initialization.planning.stage1_import import" in src
     tree = ast.parse(src)
     defs = {n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)}
     assert not {d for d in defs if "reconstruct" in d or "rebuild" in d}, (
