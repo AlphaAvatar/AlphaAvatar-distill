@@ -10,21 +10,21 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 import aadistill.initialization  # noqa: F401,E402
-from aadistill.initialization.planning.metrics import (# noqa: E402
+from aadistill.initialization.planning.metrics import (  # noqa: E402
     MetricNamespaceError,
     StateEvaluation,
 )
-from aadistill.initialization.planning.ranking import (# noqa: E402
+from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     BeamRankingPolicy,
     Objective,
     RankingError,
 )
-from aadistill.initialization.specs.artifact import (# noqa: E402
+from aadistill.initialization.specs.artifact import (  # noqa: E402
     CheckpointIdentity,
     ShardRecord,
 )
-from aadistill.initialization.specs.state import (# noqa: E402
+from aadistill.initialization.specs.state import (  # noqa: E402
     OperatorStep,
     child_state,
     make_root_state,

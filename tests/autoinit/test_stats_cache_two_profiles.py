@@ -31,7 +31,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.initialization.statistics.spec import (# noqa: E402
+from aadistill.initialization.statistics.spec import (  # noqa: E402
     DEFAULT_STATS_SPEC,
     StatsCache,
     stats_cache_key,

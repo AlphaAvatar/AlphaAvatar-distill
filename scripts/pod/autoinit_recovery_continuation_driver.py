@@ -41,7 +41,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.runtime.device_handoff import (# noqa: E402
+from aadistill.runtime.device_handoff import (  # noqa: E402
     DeviceHandoffError,
     complete_release,
     cuda_memory,
@@ -50,7 +50,7 @@ from aadistill.runtime.device_handoff import (# noqa: E402
 )
 from aadistill.initialization.planning.recovery import admit_leaves  # noqa: E402
 from experiments.recovery_continuation.session import RecoveryContinuationAuthorization  # noqa: E402
-from aadistill.initialization.planning.stage1_import import (# noqa: E402
+from aadistill.initialization.planning.stage1_import import (  # noqa: E402
     Stage1ImportError,
     import_stage1_result,
 )

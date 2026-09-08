@@ -37,7 +37,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from aadistill.initialization.calibration.profiles import (# noqa: E402
+from aadistill.initialization.calibration.profiles import (  # noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V2,
 )

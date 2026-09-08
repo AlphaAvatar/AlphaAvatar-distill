@@ -25,12 +25,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.initialization.planning.generation import (# noqa: E402
+from aadistill.initialization.planning.generation import (  # noqa: E402
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
     generation_source_digest,
 )
-from aadistill.initialization.planning.generation_compat import (# noqa: E402
+from aadistill.initialization.planning.generation_compat import (  # noqa: E402
     GENERATION_RUNTIME_COMPARABILITY_V2,
     comparable_generation_identity,
     require_comparable,

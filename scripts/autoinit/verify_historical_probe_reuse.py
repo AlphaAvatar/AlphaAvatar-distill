@@ -46,7 +46,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
-from aadistill.initialization.planning.recovery import (# noqa: E402
+from aadistill.initialization.planning.recovery import (  # noqa: E402
     SEED_SA,
     SEED_SB,
     SEED_SC,

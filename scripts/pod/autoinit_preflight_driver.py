@@ -39,22 +39,22 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from aadistill.governance.authorization import (# noqa: E402
+from aadistill.governance.authorization import (  # noqa: E402
     AuthorizationError,
     SpendAuthorization,
 )
-from aadistill.initialization.planning.generation import (# noqa: E402
+from aadistill.initialization.planning.generation import (  # noqa: E402
     GenerationProtocolError,
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
     generation_source_digest,
     observe_generation_protocol,
 )
-from aadistill.initialization.planning.ranking import (# noqa: E402
+from aadistill.initialization.planning.ranking import (  # noqa: E402
     EPSILON_RESPONSE_V1,
     PARETO_V1,
 )
-from aadistill.initialization.planning.recovery import (# noqa: E402
+from aadistill.initialization.planning.recovery import (  # noqa: E402
     CATASTROPHIC_V1,
     POOLED_COUNTS_V2,
     PREFLIGHT_PLAN_V1,

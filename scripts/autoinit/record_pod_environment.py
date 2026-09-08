@@ -41,7 +41,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from experiments.phase_c1.authorization import c1_harness_digest  # noqa: E402
-from aadistill.runtime.pod_environment import (# noqa: E402
+from aadistill.runtime.pod_environment import (  # noqa: E402
     LEAF_TRANSPORT_NODEIDS,
     RECORD_PATH,
     RENDERER_PARITY_NODEIDS,
@@ -54,7 +54,7 @@ from aadistill.runtime.pod_environment import (# noqa: E402
     tree_is_clean,
 )
 
-from aadistill.runtime.staging_contract import (# noqa: E402
+from aadistill.runtime.staging_contract import (  # noqa: E402
     derive_contract,
     describe,
     hidden_files,

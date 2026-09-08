@@ -69,7 +69,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "training"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.initialization.device import apply_cpu_budget  # noqa: E402
-from aadistill.initialization.statistics.contribution import (# noqa: E402
+from aadistill.initialization.statistics.contribution import (  # noqa: E402
     DistortionSums,
     distortion,
     domain_balanced_score,

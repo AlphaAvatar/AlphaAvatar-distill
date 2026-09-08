@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 import aadistill.initialization  # noqa: F401,E402
 from aadistill.initialization.specs.arch import ArchSpec, Capability  # noqa: E402
-from aadistill.initialization.operators.base import (# noqa: E402
+from aadistill.initialization.operators.base import (  # noqa: E402
     CalibrationNeed,
     OperatorError,
     OperatorImplementation,

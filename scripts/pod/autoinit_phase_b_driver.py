@@ -53,7 +53,7 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from aadistill.initialization.calibration.profiles import (# noqa: E402
+from aadistill.initialization.calibration.profiles import (  # noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V2,
 )

@@ -36,7 +36,7 @@ sys.path.insert(0, str(REPO / "src"))
 from aadistill.initialization.operators import attention_activation  # noqa: E402
 from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
-from aadistill.initialization.calibration.profiles import (# noqa: E402
+from aadistill.initialization.calibration.profiles import (  # noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V2,
     CalibrationProfile,
@@ -45,14 +45,14 @@ from aadistill.initialization.calibration.profiles import (# noqa: E402
     register_profile,
     unregister_profile,
 )
-from aadistill.initialization.calibration.items import (# noqa: E402
+from aadistill.initialization.calibration.items import (  # noqa: E402
     CalibrationItemError,
     prepare_calibration_items,
 )
 from aadistill.initialization.calibration.datasets import DatasetRole  # noqa: E402
 from aadistill.initialization.operators.base import get_implementation  # noqa: E402
 from aadistill.initialization.planning import fixed_path as FP
-from aadistill.initialization.planning.fixed_path import (# noqa: E402
+from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathRootDeviceMismatch,
     FixedPathSpec,
     FixedPathStep,

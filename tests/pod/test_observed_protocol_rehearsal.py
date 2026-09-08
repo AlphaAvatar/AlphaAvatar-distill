@@ -37,14 +37,14 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.initialization.planning.generation import (# noqa: E402
+from aadistill.initialization.planning.generation import (  # noqa: E402
     GENERATION_V1_DECLARED,
     ObservedGenerationError,
     declared_generation_protocol,
     generation_runtime_fingerprint,
     observe_generation_protocol,
 )
-from aadistill.initialization.planning.recovery import (# noqa: E402
+from aadistill.initialization.planning.recovery import (  # noqa: E402
     ObservedProtocolError,
     RecoveryProtocolFingerprint,
     observe_recovery_protocol,

@@ -40,7 +40,7 @@ from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E4
 from experiments.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, phase_b_source_digest  # noqa: E402
 from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2  # noqa: E402
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
-from aadistill.governance.post_freeze import (# noqa: E402
+from aadistill.governance.post_freeze import (  # noqa: E402
     HISTORICAL_LEDGER_PATH,
     HISTORICAL_LEDGER_SCHEMA,
     SEALED_LEGACY_NOTE,

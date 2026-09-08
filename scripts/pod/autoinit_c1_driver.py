@@ -63,7 +63,7 @@ from experiments.phase_c1.isolation import C0_PREREGISTRATION_SHA256, C1Arm, C1I
 from experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
 from experiments.phase_c1.probe_results import ARMS, C1ProbeRecord, build_probe_results, decision_inputs  # noqa: E402
 from experiments.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
-from aadistill.runtime.device_handoff import (# noqa: E402
+from aadistill.runtime.device_handoff import (  # noqa: E402
     DeviceHandoffError,
     complete_release,
     cuda_memory,
@@ -71,7 +71,7 @@ from aadistill.runtime.device_handoff import (# noqa: E402
     require_released,
 )
 from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
-from aadistill.initialization.planning.fixed_path import (# noqa: E402
+from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathDigestMismatch,
     VerifiedSuffix,
     materialize_fixed_path,
@@ -79,7 +79,7 @@ from aadistill.initialization.planning.fixed_path import (# noqa: E402
     write_replay_record,
     write_suffix_execution_record,
 )
-from aadistill.initialization.planning.generation import (# noqa: E402
+from aadistill.initialization.planning.generation import (  # noqa: E402
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
     generation_source_digest,

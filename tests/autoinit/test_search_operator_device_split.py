@@ -31,14 +31,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import aadistill.initialization  # noqa: F401,E402
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
-from aadistill.initialization.device import (# noqa: E402
+from aadistill.initialization.device import (  # noqa: E402
     DEVICE_CONTRACT_ID,
     model_device,
     stats_bytes,
     stats_to,
 )
 from aadistill.initialization.operators._common import collect_activation_stats  # noqa: E402
-from aadistill.initialization.operators.base import (# noqa: E402
+from aadistill.initialization.operators.base import (  # noqa: E402
     OperatorContext,
     get_implementation,
 )

@@ -1,0 +1,69 @@
+{
+ "schema": "aadistill.architecture_scoring_equivalence/v1",
+ "_contract": "Frozen Phase-A generations re-scored through the pre- and post-migration trees. Shows that relocating the recovery scorer moved its contract digest WITHOUT moving any number it produces. AUTHORIZES NOTHING and is not a new experimental result \u2014 no model ran, and the generations are unmodified evidence from a completed run.",
+ "base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+ "migrated_commit": "ff1f27e36c71abd46c4ed1760f9b1b55c4f3eda1",
+ "evidence_root": "/home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a",
+ "training_seed": "20260726",
+ "expected_to_differ": {
+  "contract_fields": [
+   "contract",
+   "digest",
+   "files",
+   "scoring_contract",
+   "supersedes",
+   "version"
+  ],
+  "why": "the contract digest is over 'path:sha256' lines; two of the six declared files moved or changed import lines, so v3 MUST report a different digest than v2",
+  "provenance_fields": [
+   "command",
+   "created_utc",
+   "out",
+   "repo_root",
+   "result_sha256"
+  ]
+ },
+ "must_not_differ": "every score, count, rate and per-sample record",
+ "coverage": {
+  "generation_schemas_exercised": [
+   "behavior_v0"
+  ],
+  "limitation": "usable_rollout reads two record schemas and this evidence exercises only the one(s) named above. Inverting a component in the OTHER branch does not move these numbers, so this comparison would not detect it. Verified by mutation, not assumed: inverting no_severe_repetition in _from_behavior_v0 turns all three paths to MISMATCH, while the same inversion in _from_three_mode leaves them identical."
+ },
+ "paths_compared": 3,
+ "total_samples": 570,
+ "all_scores_identical": true,
+ "results": [
+  {
+   "search_path": "ab7632b00788",
+   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.ab7632b00788.sa --label ab7632b00788 --seed 20260726 --out /tmp/aad-migration-cmp-yap54fwy/old/ab7632b00788.json --per-sample /tmp/aad-migration-cmp-yap54fwy/old/ab7632b00788.persample.json --allow-missing-sets",
+   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.ab7632b00788.sa --label ab7632b00788 --seed 20260726 --out /tmp/aad-migration-cmp-yap54fwy/new/ab7632b00788.json --per-sample /tmp/aad-migration-cmp-yap54fwy/new/ab7632b00788.persample.json --allow-missing-sets",
+   "n_samples": 190,
+   "summary_scores_identical": true,
+   "per_sample_identical": true,
+   "contract_digest_old": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+   "contract_digest_new": "b12aff0f4a7a071e32b094ffa3778a6711b028ce46993b8637580063135a4e40"
+  },
+  {
+   "search_path": "bf5ae3b6ae00",
+   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa --label bf5ae3b6ae00 --seed 20260726 --out /tmp/aad-migration-cmp-yap54fwy/old/bf5ae3b6ae00.json --per-sample /tmp/aad-migration-cmp-yap54fwy/old/bf5ae3b6ae00.persample.json --allow-missing-sets",
+   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa --label bf5ae3b6ae00 --seed 20260726 --out /tmp/aad-migration-cmp-yap54fwy/new/bf5ae3b6ae00.json --per-sample /tmp/aad-migration-cmp-yap54fwy/new/bf5ae3b6ae00.persample.json --allow-missing-sets",
+   "n_samples": 190,
+   "summary_scores_identical": true,
+   "per_sample_identical": true,
+   "contract_digest_old": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+   "contract_digest_new": "b12aff0f4a7a071e32b094ffa3778a6711b028ce46993b8637580063135a4e40"
+  },
+  {
+   "search_path": "fe9683e6a9c7",
+   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa --label fe9683e6a9c7 --seed 20260726 --out /tmp/aad-migration-cmp-yap54fwy/old/fe9683e6a9c7.json --per-sample /tmp/aad-migration-cmp-yap54fwy/old/fe9683e6a9c7.persample.json --allow-missing-sets",
+   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa --label fe9683e6a9c7 --seed 20260726 --out /tmp/aad-migration-cmp-yap54fwy/new/fe9683e6a9c7.json --per-sample /tmp/aad-migration-cmp-yap54fwy/new/fe9683e6a9c7.persample.json --allow-missing-sets",
+   "n_samples": 190,
+   "summary_scores_identical": true,
+   "per_sample_identical": true,
+   "contract_digest_old": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+   "contract_digest_new": "b12aff0f4a7a071e32b094ffa3778a6711b028ce46993b8637580063135a4e40"
+  }
+ ],
+ "authorizes": "nothing"
+}

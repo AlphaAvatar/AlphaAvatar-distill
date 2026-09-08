@@ -48,7 +48,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402
 
-from aadistill.initialization.statistics.contribution import (# noqa: E402
+from aadistill.initialization.statistics.contribution import (  # noqa: E402
     DistortionSums,
     bypassed_blocks,
     distortion,

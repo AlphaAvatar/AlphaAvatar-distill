@@ -20,7 +20,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.initialization.specs.identity_collapse import (# noqa: E402
+from aadistill.initialization.specs.identity_collapse import (  # noqa: E402
     IdentityCollapseError,
     ROLE_PRECEDENCE,
     collapse,

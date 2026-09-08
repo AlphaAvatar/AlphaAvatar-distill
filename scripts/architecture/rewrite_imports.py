@@ -95,7 +95,7 @@ def rewrite_file(path: Path, old_rel: str | None = None) -> tuple[str, int]:
             indent = " " * node.col_offset
             tail = ""
             raw = "".join(lines[node.lineno - 1:node.end_lineno])
-            if "# noqa" in raw:
+            if "  # noqa" in raw:
                 tail = "  # noqa: E402"
             stmt = f"{indent}from {new} import {names}{tail}\n"
             if len(stmt) > 88 and len(node.names) > 1:

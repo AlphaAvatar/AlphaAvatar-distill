@@ -25,7 +25,7 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 import autoinit_phase_a_launch as pal  # noqa: E402
 import autoinit_phase_b_driver as pbd  # noqa: E402
 import autoinit_phase_b_launch as pbl  # noqa: E402
-from aadistill.initialization.calibration.profiles import (# noqa: E402
+from aadistill.initialization.calibration.profiles import (  # noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V2,
 )

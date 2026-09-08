@@ -48,7 +48,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.governance.authorization import SpendAuthorization  # noqa: E402
-from aadistill.initialization.planning.recovery import (# noqa: E402
+from aadistill.initialization.planning.recovery import (  # noqa: E402
     PreflightPlan,
     PreflightStage,
 )

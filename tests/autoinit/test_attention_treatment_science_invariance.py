@@ -35,15 +35,15 @@ sys.path.insert(0, str(REPO / "src"))
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.device import model_device  # noqa: E402
 from aadistill.initialization.operators import attention_activation  # noqa: E402
-from aadistill.initialization.operators.attention_activation import (# noqa: E402
+from aadistill.initialization.operators.attention_activation import (  # noqa: E402
     ATTENTION_STATS_SPEC,
     select_q_heads_by_score,
 )
-from aadistill.initialization.operators.base import (# noqa: E402
+from aadistill.initialization.operators.base import (  # noqa: E402
     OperatorContext,
     get_implementation,
 )
-from aadistill.initialization.statistics.attention import (# noqa: E402
+from aadistill.initialization.statistics.attention import (  # noqa: E402
     AttentionHeadStatsCollector,
     head_write_energy,
 )

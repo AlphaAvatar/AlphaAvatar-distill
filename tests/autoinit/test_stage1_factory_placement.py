@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from factory_placement import RecordFactories                      # noqa: E402
 
 from aadistill.initialization.transforms.project import stream_projection  # noqa: E402
-from aadistill.initialization.transforms.sandwich import (# noqa: E402
+from aadistill.initialization.transforms.sandwich import (  # noqa: E402
     _head_rows,
     init_student,
 )

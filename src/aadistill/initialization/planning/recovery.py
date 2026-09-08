@@ -656,8 +656,31 @@ RECOVERY_SCORING_FILES_V2: tuple[str, ...] = (
                                                    # schema, pooled aggregation,
                                                    # thresholds
 )
+
+#: v2 relocated. The initialization cutover moved this module out of
+#: `aadistill.autoinit`, so v2 names a path that no longer exists and can no
+#: longer be computed — which is correct for a historical record, and wrong for
+#: the contract a *future* run has to bind. v3 is v2 at current paths.
+#:
+#: This is a relocation, not a change of scorer. Four of the six files are
+#: byte-identical across the move; the two that differ differ only in `import`
+#: lines, and `tests/architecture/test_scoring_relocation.py` re-scores frozen
+#: evidence through both to show the numbers do not move. A version bump is
+#: still required, because the digest is over `path:sha256` lines and both
+#: components changed — a contract that silently kept its old identity across a
+#: real byte change would be worth less than one that moves honestly.
+RECOVERY_SCORING_FILES_V3: tuple[str, ...] = (
+    "scripts/autoinit/score_recovery_search.py",   # the recovery-search contract
+    "src/aadistill/evaluation/usable_rollout.py",  # the five behaviour components
+    "src/aadistill/evaluation/strict_answer.py",   # protocol validity, extraction
+    "src/aadistill/evaluation/behavior.py",        # split, tool-call diagnostics
+    "src/aadistill/evaluation/capability.py",      # per-set correctness scorers
+    "src/aadistill/initialization/planning/recovery.py",  # correct=>usable,
+                                                   # capability schema, pooled
+                                                   # aggregation, thresholds
+)
 RECOVERY_SCORING_CONTRACT_ID = "recovery_search_scoring"
-RECOVERY_SCORING_CONTRACT_VERSION = 2
+RECOVERY_SCORING_CONTRACT_VERSION = 3
 
 
 def recovery_scoring_contract(repo_root: str | Path = ".", *,
@@ -669,7 +692,7 @@ def recovery_scoring_contract(repo_root: str | Path = ".", *,
     declared file raises rather than yielding a digest over a smaller contract.
     """
     root = Path(repo_root)
-    declared = tuple(files) if files is not None else RECOVERY_SCORING_FILES_V2
+    declared = tuple(files) if files is not None else RECOVERY_SCORING_FILES_V3
     entries = []
     for rel in sorted(declared):
         path = root / rel
@@ -699,13 +722,22 @@ def recovery_scoring_contract(repo_root: str | Path = ".", *,
                    "pooled_counts seed aggregation",
                    "the threshold formulas materialized from control data"],
         "supersedes": {
-            "contract": f"{RECOVERY_SCORING_CONTRACT_ID}@v1",
-            "identity_was": ("a single hash of "
-                             "src/aadistill/evaluation/capability.py"),
-            "why": ("v1 could not see a defect in the composition. A prompted "
-                    "tool call was rejected as unexpected_tool_call, so the tool "
-                    "capability read a structural 0.0000 for every arm while "
-                    "capability.py itself was unchanged and its hash matched."),
+            "contract": f"{RECOVERY_SCORING_CONTRACT_ID}@v2",
+            "identity_was": ("the same six files, with the last at "
+                             "src/aadistill/autoinit/recovery.py"),
+            "why": ("the initialization cutover moved that module, so v2 names "
+                    "a path that no longer exists. This is a relocation, not a "
+                    "change of scorer: four files are byte-identical and the "
+                    "other two differ only in import lines. Results recorded "
+                    "under v2 keep their v2 digest — it describes the tree they "
+                    "actually ran on."),
+            "behaviour_unchanged_evidence":
+                "tests/architecture/test_scoring_relocation.py",
+            "v1": ("a single hash of src/aadistill/evaluation/capability.py, "
+                   "which could not see a defect in the composition: a prompted "
+                   "tool call was rejected as unexpected_tool_call, so the tool "
+                   "capability read a structural 0.0000 for every arm while "
+                   "capability.py itself was unchanged and its hash matched."),
         },
     }
 

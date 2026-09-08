@@ -43,7 +43,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from aadistill.initialization.transforms.nll_gate import (# noqa: E402
+from aadistill.initialization.transforms.nll_gate import (  # noqa: E402
     REQUIRED_MEASUREMENTS,
     InitNllGateError,
     checkpoint_fingerprint,

@@ -30,7 +30,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.device import apply_cpu_budget, cpu_budget  # noqa: E402
 from aadistill.initialization.operators.depth import _forward_logits  # noqa: E402
-from aadistill.initialization.planning.search import (# noqa: E402
+from aadistill.initialization.planning.search import (  # noqa: E402
     Deadline,
     SearchDeadlineExceeded,
 )

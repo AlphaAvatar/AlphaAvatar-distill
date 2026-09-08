@@ -50,14 +50,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from aadistill.initialization.specs.identity_collapse import (# noqa: E402
+from aadistill.initialization.specs.identity_collapse import (  # noqa: E402
     IdentityCollapseError,
     collapse,
     universe_identity,
 )
 from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
-from aadistill.initialization.specs.state import (# noqa: E402
+from aadistill.initialization.specs.state import (  # noqa: E402
     make_control_state,
     make_retained_state,
 )

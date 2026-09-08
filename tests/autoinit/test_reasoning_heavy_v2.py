@@ -18,7 +18,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.initialization.calibration.profiles import (# noqa: E402
+from aadistill.initialization.calibration.profiles import (  # noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V1,
     REASONING_HEAVY_V2,
@@ -30,7 +30,7 @@ from aadistill.initialization.calibration.profiles import (# noqa: E402
     buildable_profiles,
     mixture_content_sha256,
 )
-from aadistill.initialization.statistics.reweight import (# noqa: E402
+from aadistill.initialization.statistics.reweight import (  # noqa: E402
     MAX_SUPPORT,
     NEAREST,
     ReweightError,

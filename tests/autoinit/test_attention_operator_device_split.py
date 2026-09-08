@@ -36,7 +36,7 @@ sys.path.insert(0, str(REPO / "src"))
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
 from aadistill.initialization.device import model_device  # noqa: E402
 from aadistill.initialization.operators import attention_activation  # noqa: E402
-from aadistill.initialization.operators.base import (# noqa: E402
+from aadistill.initialization.operators.base import (  # noqa: E402
     OperatorContext,
     get_implementation,
 )

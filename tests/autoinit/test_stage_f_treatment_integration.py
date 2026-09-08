@@ -36,7 +36,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
-from aadistill.initialization.planning.fixed_path import (# noqa: E402
+from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathError,
     write_suffix_execution_record,
 )

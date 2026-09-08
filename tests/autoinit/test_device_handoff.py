@@ -26,7 +26,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.runtime.device_handoff import (# noqa: E402
+from aadistill.runtime.device_handoff import (  # noqa: E402
     DeviceHandoffError,
     LIVE_RETENTION_LIMIT_BYTES,
     complete_release,

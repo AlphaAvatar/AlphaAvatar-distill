@@ -14,20 +14,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import aadistill.initialization  # noqa: F401,E402
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.governance.artifact_manifest import (# noqa: E402
+from aadistill.governance.artifact_manifest import (  # noqa: E402
     build_manifest,
     verify_manifest,
 )
-from aadistill.initialization.planning.metrics import (# noqa: E402
+from aadistill.initialization.planning.metrics import (  # noqa: E402
     StateEvaluation,
     StateEvaluator,
 )
-from aadistill.initialization.planning.ranking import (# noqa: E402
+from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     SCHEDULE_V1,
     BeamSchedule,
 )
-from aadistill.initialization.planning.search import (# noqa: E402
+from aadistill.initialization.planning.search import (  # noqa: E402
     BeamSearch,
     SearchConfig,
 )

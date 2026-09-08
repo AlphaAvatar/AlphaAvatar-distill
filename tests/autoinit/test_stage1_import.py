@@ -22,7 +22,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
-from aadistill.initialization.planning.stage1_import import (# noqa: E402
+from aadistill.initialization.planning.stage1_import import (  # noqa: E402
     Stage1ImportError,
     import_stage1_result,
 )

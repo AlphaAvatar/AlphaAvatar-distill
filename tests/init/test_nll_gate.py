@@ -18,7 +18,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.initialization.transforms.nll_gate import (# noqa: E402
+from aadistill.initialization.transforms.nll_gate import (  # noqa: E402
     REQUIRED_MEASUREMENTS,
     InitNllGateError,
     checkpoint_fingerprint,
