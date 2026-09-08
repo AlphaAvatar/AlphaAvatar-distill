@@ -850,12 +850,17 @@ def test_a_docs_only_change_does_not_move_the_trainer_digest():
 def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
     """v1 pinned `capability.py` alone, which is how the defect hid."""
     from aadistill.initialization.planning.recovery import (
-        RECOVERY_SCORING_FILES_V2,
+        RECOVERY_SCORING_FILES_V3,
         recovery_scoring_contract,
     )
 
     contract = recovery_scoring_contract(REPO)
-    assert contract["contract"] == "recovery_search_scoring@v2"
+    # v3 since the initialization migration: the same six files at current
+    # paths. Not a change of scorer -- four are byte-identical, the other two
+    # differ only in import lines, and 570 frozen samples re-scored through
+    # both trees are byte-identical
+    # (logs/architecture_scoring_equivalence.json).
+    assert contract["contract"] == "recovery_search_scoring@v3"
     assert len(contract["digest"]) == 64
     covered = {e["path"] for e in contract["files"]}
     for required in ("scripts/autoinit/score_recovery_search.py",
@@ -866,8 +871,8 @@ def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
                      # the rule relating two numbers is part of the metric
                      "src/aadistill/initialization/planning/recovery.py"):
         assert required in covered, required
-    assert covered == set(RECOVERY_SCORING_FILES_V2)
-    assert contract["supersedes"]["contract"] == "recovery_search_scoring@v1"
+    assert covered == set(RECOVERY_SCORING_FILES_V3)
+    assert contract["supersedes"]["contract"] == "recovery_search_scoring@v2"
     # Same failure mode as the trainer digest: never a smaller contract.
     with pytest.raises(RecoveryAdmissionError, match="is missing"):
         recovery_scoring_contract(
@@ -875,12 +880,25 @@ def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
                          "src/aadistill/evaluation/does_not_exist.py"))
     # A change anywhere in the set moves the digest.
     subset = recovery_scoring_contract(
-        REPO, files=tuple(f for f in RECOVERY_SCORING_FILES_V2
+        REPO, files=tuple(f for f in RECOVERY_SCORING_FILES_V3
                           if not f.endswith("recovery.py")))
     assert subset["digest"] != contract["digest"]
 
 
 def test_the_preregistration_binds_the_scoring_contract_and_supersession():
+    """CATEGORY B/C: the historical preregistration keeps binding v2.
+
+    This used to require the recorded digest to equal the live one. That is the
+    right check while the code and the record describe the same tree, and the
+    wrong one afterwards: `logs/autoinit_phase_a_preregistration.json` is the
+    record of a COMPLETED run, so re-emitting it to match today's code would
+    claim that run executed the relocated implementation.
+
+    So the assertion is inverted deliberately. The record still says v2; the
+    live contract says v3; they differ, and that difference is what makes an
+    old launch fail closed rather than proceed against thresholds measured
+    under different code.
+    """
     path = REPO / "logs/autoinit_phase_a_preregistration.json"
     if not path.is_file():
         pytest.skip("preregistration not present")
@@ -888,9 +906,12 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
 
     prereg = json.loads(path.read_text())
     contract = prereg["recovery_scoring_contract"]
-    assert contract["digest"] == recovery_scoring_contract(REPO)["digest"], (
-        "the preregistration is bound to a scoring contract that no longer "
-        "matches the code; re-emit it")
+    live = recovery_scoring_contract(REPO)
+    assert contract["contract"] == "recovery_search_scoring@v2"
+    assert live["contract"] == "recovery_search_scoring@v3"
+    assert contract["digest"] != live["digest"], (
+        "the historical record must keep the digest it recorded; matching the "
+        "live one would mean it had been rewritten")
     sup = contract["supersession"]
     assert sup["superseded"] == "recovery_search_scoring@v1"
     assert "before any paid measurement" in sup["statement"]
