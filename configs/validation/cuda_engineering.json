@@ -1,0 +1,96 @@
+{
+ "schema": "aadistill.cuda_engineering_validation/v1",
+ "_contract": "Inputs for a CUDA engineering check of the migrated initialization code. This is ENGINEERING validation, not science: it answers 'do the operators execute on a real device without a placement or dtype error', and nothing about model quality. It produces no result, ranks nothing, and every artifact it writes is disposable. AUTHORIZES NOTHING.",
+ "validation_id": "cuda_engineering_v1",
+ "model": {
+  "_why_a_fixture": "A tiny randomly-initialized model, built from a config rather than downloaded. The defects this looks for are about WHERE tensors are and what dtype they carry, not how large they are, so a fixture exercises the same lines at a fraction of the load time and with no checkpoint dependency.",
+  "family": "qwen3",
+  "adapter": "qwen3",
+  "fixture": {
+   "hidden_size": 128,
+   "intermediate_size": 256,
+   "num_hidden_layers": 4,
+   "num_attention_heads": 4,
+   "num_key_value_heads": 2,
+   "head_dim": 32,
+   "vocab_size": 512,
+   "max_position_embeddings": 512,
+   "rope_theta": 1000000.0,
+   "tie_word_embeddings": true
+  },
+  "_why_tied_embeddings": "The real Qwen3 students tie the lm head to the embedding, and the operators rely on it: with an untied head the surgery guard correctly refuses, because lm_head.weight would be left holding random values. An untied fixture would therefore test a model this project does not build."
+ },
+ "source_structure": {
+  "hidden_size": 128,
+  "intermediate_size": 256,
+  "num_hidden_layers": 4,
+  "num_attention_heads": 4,
+  "num_key_value_heads": 2
+ },
+ "_why_two_geometries": "One geometry can pass by accident when a shape happens to divide evenly. Two that differ in the dimensions the operators actually reshape -- depth, width, FFN and head grouping -- make a coincidence far less likely, and the directive asks for at least two.",
+ "target_geometries": [
+  {
+   "geometry_id": "narrow",
+   "hidden_size": 64,
+   "intermediate_size": 128,
+   "num_hidden_layers": 2,
+   "num_attention_heads": 2,
+   "num_key_value_heads": 1
+  },
+  {
+   "geometry_id": "shallow_wide",
+   "hidden_size": 96,
+   "intermediate_size": 192,
+   "num_hidden_layers": 3,
+   "num_attention_heads": 4,
+   "num_key_value_heads": 1,
+   "_why_this_grouping": "4 Q heads over 1 KV head: a valid GQA grouping that still differs from the parent's 4/2 and from `narrow`'s 2/1, so the head-grouping path is exercised at a second ratio. 3/3 was rejected by the operator because 4 parent Q heads do not group into 3 -- the refusal was correct and the geometry was wrong."
+  }
+ ],
+ "calibration": {
+  "_why_synthetic": "Random token ids under a fixed seed. The real mixture is a licensed artifact and its content is irrelevant to a placement check; a synthetic batch keeps this runnable anywhere and makes the check reproducible from the config alone.",
+  "synthetic": true,
+  "seed": 20260908,
+  "n_items": 4,
+  "sequence_length": 64
+ },
+ "execution": {
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "_device_is_not_negotiable": "If CUDA is absent this reports NOT RUN. It must never fall back to CPU and report a pass, because CPU execution cannot observe the cross-device and dtype defects this exists to find."
+ },
+ "operators": [
+  {
+   "operator": "depth",
+   "impl_id": "depth.positional_v0"
+  },
+  {
+   "operator": "width",
+   "impl_id": "width.global_pca_v0"
+  },
+  {
+   "operator": "ffn",
+   "impl_id": "ffn.activation_importance_v0"
+  },
+  {
+   "operator": "attention",
+   "impl_id": "attention.weight_proxy_v0"
+  }
+ ],
+ "run": {
+  "run_root": "artifacts/validation",
+  "experiment_id": "cuda_engineering",
+  "artifact_spec_id": "cuda_engineering_v1",
+  "_roles_are_declared_by_the_caller": "RunLayout holds no vocabulary of its own; these are this validation's roles and their paths inside the run.",
+  "required_roles": {
+   "report": "report.json",
+   "environment": "environment.json"
+  },
+  "optional_roles": {
+   "per_operator": "operators/",
+   "child_configs": "children/"
+  }
+ },
+ "authorizes": "nothing",
+ "_operator_ids_are_the_registered_ones": "checked against aadistill.initialization.operators.base.registered_implementations(); an unknown id is refused before any device work, so a typo costs nothing rather than failing partway through a paid session"
+}
