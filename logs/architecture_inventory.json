@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 109,
-  "lines": 29756,
+  "lines": 29745,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -20,7 +20,7 @@
   "repo_id_literals": 5,
   "path_literals": 26,
   "experiment_named_modules": 0,
-  "family_access_outside_adapters": 1,
+  "family_access_outside_adapters": 0,
   "import_time_registration": 5,
   "big_int_literals": 10,
   "package_cycles": 0
@@ -231,15 +231,7 @@
    }
   ],
   "experiment_named_modules": [],
-  "family_access_outside_adapters": [
-   {
-    "path": "src/aadistill/initialization/statistics/contribution.py",
-    "chain": "model.layers",
-    "probe": "model.layers",
-    "owner": "_set_decoder_layers",
-    "line": 90
-   }
-  ],
+  "family_access_outside_adapters": [],
   "import_time_registration": [
    {
     "path": "src/aadistill/initialization/operators/base.py",
@@ -7213,7 +7205,7 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "q_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 198
     },
@@ -7231,13 +7223,13 @@
     },
     {
      "chain": "mlp.gate_proj",
-     "probe": "mlp",
+     "probe": "gate_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 201
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 202
     },
@@ -13997,7 +13989,7 @@
   "src/aadistill/initialization/statistics/contribution.py": {
    "module": "aadistill.initialization.statistics.contribution",
    "path": "src/aadistill/initialization/statistics/contribution.py",
-   "lines": 377,
+   "lines": 366,
    "imports": [
     {
      "target": "__future__",
@@ -14052,7 +14044,7 @@
     },
     {
      "target": "aadistill.initialization.specs.arch",
-     "line": 62,
+     "line": 65,
      "relative": 0,
      "names": [
       "adapter_for_config"
@@ -14063,14 +14055,7 @@
     "aadistill.initialization.specs.arch"
    ],
    "literals": [],
-   "family_attribute_access": [
-    {
-     "chain": "model.layers",
-     "probe": "model.layers",
-     "owner": "_set_decoder_layers",
-     "line": 90
-    }
-   ],
+   "family_attribute_access": [],
    "definitions": [
     {
      "name": "_adapter_for",
@@ -14088,61 +14073,61 @@
      "name": "_set_decoder_layers",
      "kind": "function",
      "qualname": "_set_decoder_layers",
-     "line": 79
+     "line": 73
     },
     {
      "name": "bypassed_blocks",
      "kind": "function",
      "qualname": "bypassed_blocks",
-     "line": 95
+     "line": 84
     },
     {
      "name": "DistortionSums",
      "kind": "class",
      "qualname": "DistortionSums",
-     "line": 136
+     "line": 125
     },
     {
      "name": "add_tagged",
      "kind": "function",
      "qualname": "DistortionSums.add_tagged",
-     "line": 152
+     "line": 141
     },
     {
      "name": "merge",
      "kind": "function",
      "qualname": "DistortionSums.merge",
-     "line": 157
+     "line": 146
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "DistortionSums.as_dict",
-     "line": 167
+     "line": 156
     },
     {
      "name": "distortion",
      "kind": "function",
      "qualname": "distortion",
-     "line": 188
+     "line": 177
     },
     {
      "name": "domain_balanced_score",
      "kind": "function",
      "qualname": "domain_balanced_score",
-     "line": 242
+     "line": 231
     },
     {
      "name": "greedy_removal",
      "kind": "function",
      "qualname": "greedy_removal",
-     "line": 270
+     "line": 259
     },
     {
      "name": "expected_evaluations",
      "kind": "function",
      "qualname": "expected_evaluations",
-     "line": 375
+     "line": 364
     }
    ],
    "import_time_calls": [],
