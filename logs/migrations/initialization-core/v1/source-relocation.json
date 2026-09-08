@@ -4,8 +4,19 @@
  "migration": "initialization-core",
  "version": "v1",
  "base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
- "tip_commit": "92d97b9aaf584c8d19f81504d6e71eee688705e6",
+ "tip_commit": "bbe07e8f295f591bb2fcdc6a21905294430bcedf",
  "commits": [
+  "bbe07e8f295f591bb2fcdc6a21905294430bcedf Milestone A step 22: record the ledger amendment against the settled tree",
+  "ae68c3fa8682356f43484099bd91d56ad75dcdf7 Milestone A step 21: the setup shell's inline Python needs the scripts root",
+  "87509eaa66e1d72a5719baf16514c2e0ffee8cf4 Milestone A step 20: imports embedded in a shell script, and a silent gate",
+  "6bbe88ec8f5da47f48419aad24344bfa336c4d1e Milestone A step 19: the long tail of stale expectations",
+  "533bd0b6b6e2bc89b9e0babc24f4b21794a89c27 Milestone A step 18: record the probe-reuse consequence rather than removing it",
+  "e7f1bad9bc425d5158adeb5e0e1be6c18fdb2bcf Milestone A step 17: catalog the migrations tree; v2 pins that mean v3",
+  "84f0b546bb440ed680818bdd63befee0664ce8f0 Milestone A step 16: the transport round-trip digests the live set",
+  "bce440abc153fb9aac7cd5778465446ac89c4dc8 Milestone A: re-emit the preregistration at the settled commit",
+  "8c46ba32c5aebc61e46a011348a304ab812ae335 Milestone A step 15: the preregistration cannot be inside the digest it records",
+  "2af5329fc019f66294d7c709aa8c27afbe5e4d94 Milestone A step 14: re-emit the prospective C1 preregistration",
+  "a9fe04bd6acadbcb1d25112d96caa136c78e67fa Milestone A step 13: the migration record, and a test that was writing to logs/",
   "92d97b9aaf584c8d19f81504d6e71eee688705e6 Milestone A step 12: the C1 closure covers what a paid session actually reaches",
   "2982621c0ebc63d331c5bfde5f63c18d5677d71a Milestone A step 11b: the continuation set version pin follows the bump",
   "65e4e2ec0bb5d995fb2e42a7d6e79bd28af0c366 Milestone A step 11: the continuation's closure follows what it loads",
@@ -27,9 +38,9 @@
  "maintainer_decision": "MAINTAINER P12 DECISION, 2026-09-08:\n\nThe non-additive all-stage initialization package relocation on\nmigration/initialization-milestone-a is approved for historical accounting.\n\nHistorical preregistrations, raw results, replay digests, grants,\nauthorizations and scientific observations remain immutable. No historical\nexperiment may be described as having run the relocated implementation.\nOld grants and authorizations remain unusable against the migrated tree.\n\nThis approval records current-code movement only. It authorizes no\nexperiment, no GPU/provider resource, no Attempt-10 grant or authorization,\nno scientific field change and no reinterpretation of prior results.",
  "totals": {
   "files_relocated": 59,
-  "files_touched_in_span": 262,
-  "lines_added": 20219,
-  "lines_removed": 19572,
+  "files_touched_in_span": 269,
+  "lines_added": 24252,
+  "lines_removed": 19853,
   "declarations_examined": 11
  },
  "numstat": {
@@ -42,7 +53,7 @@
    0
   ],
   "configs/experiments/phase_c1/executable_closure.json": [
-   477,
+   476,
    0
   ],
   "configs/validation/cuda_engineering.json": [
@@ -54,7 +65,7 @@
    18
   ],
   "logs/CATALOG.md": [
-   3,
+   4,
    0
   ],
   "logs/STATE.md": [
@@ -77,13 +88,25 @@
    368,
    0
   ],
+  "logs/autoinit_continuation_b_post_freeze_changes.json": [
+   42,
+   3
+  ],
   "logs/autoinit_phase_b_historical_amendments.json": [
-   179,
-   0
+   383,
+   1
   ],
   "logs/c1_renderer_parity.json": [
    3,
    3
+  ],
+  "logs/migrations/initialization-core/v1/source-relocation.json": [
+   2911,
+   0
+  ],
+  "logs/phase_c1_execution_preregistration.json": [
+   319,
+   215
   ],
   "scripts/architecture/compare_scoring_across_migration.py": [
    204,
@@ -95,6 +118,10 @@
   ],
   "scripts/architecture/migration_map.py": [
    198,
+   0
+  ],
+  "scripts/architecture/record_migration.py": [
+   266,
    0
   ],
   "scripts/architecture/record_source_relocation.py": [
@@ -202,8 +229,8 @@
    2
   ],
   "scripts/autoinit/record_phase_b_historical_amendment.py": [
-   17,
-   22
+   31,
+   24
   ],
   "scripts/autoinit/record_phase_b_post_freeze.py": [
    9,
@@ -262,7 +289,7 @@
    4
   ],
   "scripts/autoinit/write_c1_execution_preregistration.py": [
-   16,
+   20,
    35
   ],
   "scripts/autoinit/write_continuation_b_preregistration.py": [
@@ -330,7 +357,7 @@
    0
   ],
   "src/aadistill/autoinit/c1_authorization.py => scripts/experiments/phase_c1/authorization.py": [
-   106,
+   111,
    8
   ],
   "scripts/experiments/phase_c1/authorization_payload.py": [
@@ -374,7 +401,7 @@
    10
   ],
   "scripts/pod/autoinit_c1_driver.py": [
-   28,
+   32,
    26
   ],
   "scripts/pod/autoinit_c1_launch.py": [
@@ -436,6 +463,10 @@
   "scripts/pod/autoinit_preflight_launch.py": [
    2,
    2
+  ],
+  "scripts/pod/autoinit_preflight_setup.sh": [
+   17,
+   14
   ],
   "scripts/pod/autoinit_recovery_continuation_driver.py": [
    16,
@@ -518,7 +549,11 @@
    0
   ],
   "src/aadistill/{autoinit => governance}/post_freeze.py": [
-   0,
+   15,
+   3
+  ],
+  "src/aadistill/infrastructure/session_prechecks.py": [
+   18,
    0
   ],
   "src/aadistill/infrastructure/session_runner.py": [
@@ -742,7 +777,7 @@
    14
   ],
   "tests/architecture/test_executable_closure_moves.py": [
-   207,
+   229,
    0
   ],
   "tests/architecture/test_ratchet_precision.py": [
@@ -778,8 +813,8 @@
    12
   ],
   "tests/autoinit/test_c1_confirmation_scoring.py": [
-   5,
-   10
+   18,
+   13
   ],
   "tests/autoinit/test_c1_isolation.py": [
    2,
@@ -810,8 +845,8 @@
    19
   ],
   "tests/autoinit/test_cost_and_recovery.py": [
-   76,
-   49
+   104,
+   56
   ],
   "tests/autoinit/test_cost_model_replay.py": [
    11,
@@ -862,12 +897,16 @@
    10
   ],
   "tests/autoinit/test_phase_b_historical_amendments.py": [
-   7,
-   4
+   53,
+   10
   ],
   "tests/autoinit/test_phase_b_plan.py": [
-   24,
-   32
+   31,
+   36
+  ],
+  "tests/autoinit/test_phase_b_reuse_hostlocal.py": [
+   39,
+   10
   ],
   "tests/autoinit/test_ranking.py": [
    12,
@@ -962,24 +1001,24 @@
    2
   ],
   "tests/pod/test_autoinit_preflight_rehearsal.py": [
-   13,
-   8
+   22,
+   11
   ],
   "tests/pod/test_c1_artifact_specs.py": [
    2,
    4
   ],
   "tests/pod/test_c1_bundle_transport.py": [
-   4,
-   7
+   12,
+   8
   ],
   "tests/pod/test_c1_driver_execution.py": [
    11,
    17
   ],
   "tests/pod/test_c1_session_contract.py": [
-   9,
-   18
+   18,
+   20
   ],
   "tests/pod/test_c1_source_closure.py": [
    49,
@@ -998,12 +1037,12 @@
    8
   ],
   "tests/pod/test_continuation_rehearsal.py": [
-   21,
-   30
+   25,
+   31
   ],
   "tests/pod/test_cpu_test_environment.py": [
-   1,
-   1
+   6,
+   2
   ],
   "tests/pod/test_cpu_test_outcome_evidence.py": [
    3,
@@ -1022,8 +1061,8 @@
    4
   ],
   "tests/pod/test_observed_protocol_rehearsal.py": [
-   7,
-   6
+   26,
+   9
   ],
   "tests/pod/test_phase_a_rehearsal.py": [
    16,
@@ -1046,16 +1085,16 @@
    5
   ],
   "tests/pod/test_phase_b_driver_and_launcher.py": [
-   23,
-   28
+   27,
+   29
   ],
   "tests/pod/test_phase_b_stage1_executes.py": [
    6,
    8
   ],
   "tests/pod/test_recovery_continuation_session.py": [
-   2,
-   2
+   3,
+   3
   ],
   "tests/pod/test_session_architecture.py": [
    8,
@@ -1083,7 +1122,7 @@
   ]
  },
  "numstat_rule": "git diff --numstat <base> <tip>",
- "patch_sha256": "76549c8981dec0f394cc5214499e0ecac88e84b642ee0ab1d7e1be7587126df4",
+ "patch_sha256": "aa6b81541dcda5b4c5aa1fbcad9b874ba911f77d965cdd3cc59fe4d7fb948887",
  "patch_rule": "sha256 of git diff <base> <tip>",
  "declarations": [
   {
@@ -1091,14 +1130,14 @@
    "declared_in": "aadistill.governance.authorization",
    "n_declared": 12,
    "dispositions": {
-    "modified_in_place": 5,
-    "unchanged_path": 5,
+    "modified_in_place": 7,
+    "unchanged_path": 3,
     "declared_path_absent_at_base": 2
    },
    "additive_only": false,
-   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 5 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 7 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "8e5a2d6a55ea217534cab8d45d75110443f843898d2b3d0f1fb7f2c419d5c35c",
+   "identity_now": "3a6980967fd9eae96e571c26832fba871038b8484c93e8e8fb826187d26457c0",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -1117,9 +1156,9 @@
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
-     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+     "sha256_now": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778"
     },
     {
      "path": "scripts/pod/autoinit_science_inputs.py",
@@ -1159,9 +1198,9 @@
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
-     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+     "sha256_now": "1a6efcfd9fdbc122781a6879eb8251431952ddd8f5165a7fc60994b93021c159"
     },
     {
      "path": "src/aadistill/governance/authorization.py",
@@ -1177,7 +1216,7 @@
     }
    ],
    "live_digest_computes": true,
-   "live_digest": "8e5a2d6a55ea217534cab8d45d75110443f843898d2b3d0f1fb7f2c419d5c35c",
+   "live_digest": "3a6980967fd9eae96e571c26832fba871038b8484c93e8e8fb826187d26457c0",
    "old_document_would_fail_by": "digest mismatch"
   },
   {
@@ -1185,14 +1224,14 @@
    "declared_in": "experiments.phase_a.plan",
    "n_declared": 16,
    "dispositions": {
-    "modified_in_place": 7,
-    "unchanged_path": 5,
+    "modified_in_place": 9,
+    "unchanged_path": 3,
     "declared_path_absent_at_base": 4
    },
    "additive_only": false,
-   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 7 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 9 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "573a04b8b9f7c96e017c1ffe802e6a5d467719132822db3bed4fa883f0112c3b",
+   "identity_now": "db69fcc1781fd5d7c0e4f7279aeadc16a83504d1a130fe6892c2206e4925ebbe",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -1211,9 +1250,9 @@
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
-     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+     "sha256_now": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778"
     },
     {
      "path": "scripts/pod/autoinit_science_inputs.py",
@@ -1253,9 +1292,9 @@
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
-     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+     "sha256_now": "1a6efcfd9fdbc122781a6879eb8251431952ddd8f5165a7fc60994b93021c159"
     },
     {
      "path": "scripts/autoinit/phase_a_search.py",
@@ -1295,7 +1334,7 @@
     }
    ],
    "live_digest_computes": true,
-   "live_digest": "573a04b8b9f7c96e017c1ffe802e6a5d467719132822db3bed4fa883f0112c3b",
+   "live_digest": "db69fcc1781fd5d7c0e4f7279aeadc16a83504d1a130fe6892c2206e4925ebbe",
    "old_document_would_fail_by": "digest mismatch"
   },
   {
@@ -1303,14 +1342,14 @@
    "declared_in": "experiments.phase_b.plan",
    "n_declared": 59,
    "dispositions": {
-    "modified_in_place": 13,
-    "unchanged_path": 13,
+    "modified_in_place": 15,
+    "unchanged_path": 11,
     "declared_path_absent_at_base": 33
    },
    "additive_only": false,
-   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 13 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 15 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "9073093bcf1a845385d349e78834c13e747c666318fccda83265a5211407ca57",
+   "identity_now": "1ae2f53d92ee143456d570961f8501bfeb9ba6b3e2b1b0dd529adc08ec3e608a",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -1389,9 +1428,9 @@
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
-     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+     "sha256_now": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778"
     },
     {
      "path": "scripts/pod/autoinit_science_inputs.py",
@@ -1641,9 +1680,9 @@
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
-     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+     "sha256_now": "1a6efcfd9fdbc122781a6879eb8251431952ddd8f5165a7fc60994b93021c159"
     },
     {
      "path": "src/aadistill/infrastructure/session_runner.py",
@@ -1671,7 +1710,7 @@
     }
    ],
    "live_digest_computes": true,
-   "live_digest": "9073093bcf1a845385d349e78834c13e747c666318fccda83265a5211407ca57",
+   "live_digest": "1ae2f53d92ee143456d570961f8501bfeb9ba6b3e2b1b0dd529adc08ec3e608a",
    "old_document_would_fail_by": "digest mismatch"
   },
   {
@@ -1680,13 +1719,13 @@
    "n_declared": 55,
    "dispositions": {
     "declared_path_absent_at_base": 30,
-    "modified_in_place": 7,
-    "unchanged_path": 18
+    "modified_in_place": 9,
+    "unchanged_path": 16
    },
    "additive_only": false,
-   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 7 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 9 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "127685ca7b5fa29cb349a99b271c3157fd0e95fd07e697eab1e387b81a0bfc09",
+   "identity_now": "00028221a044a703d7b038a4b669eb22bf4ce0d9e7d79f03cb9a9c907ea35298",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -1765,9 +1804,9 @@
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
-     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+     "sha256_now": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778"
     },
     {
      "path": "scripts/pod/autoinit_recovery_continuation_launch.py",
@@ -1873,9 +1912,9 @@
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
-     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+     "sha256_now": "1a6efcfd9fdbc122781a6879eb8251431952ddd8f5165a7fc60994b93021c159"
     },
     {
      "path": "src/aadistill/infrastructure/session_runner.py",
@@ -2023,7 +2062,7 @@
     }
    ],
    "live_digest_computes": true,
-   "live_digest": "127685ca7b5fa29cb349a99b271c3157fd0e95fd07e697eab1e387b81a0bfc09",
+   "live_digest": "00028221a044a703d7b038a4b669eb22bf4ce0d9e7d79f03cb9a9c907ea35298",
    "old_document_would_fail_by": "digest mismatch"
   },
   {
@@ -2031,14 +2070,14 @@
    "declared_in": "experiments.recovery_continuation.plan",
    "n_declared": 11,
    "dispositions": {
-    "modified_in_place": 5,
-    "unchanged_path": 3,
+    "modified_in_place": 6,
+    "unchanged_path": 2,
     "declared_path_absent_at_base": 3
    },
    "additive_only": false,
-   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 5 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 6 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "7069517313ea16e56381c088d6f9ea5e2da172fa72db59111acfe3d80d0c71cd",
+   "identity_now": "217113d92439021e089449a04089eeae67ab0dbd8a03f779932559b691164200",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -2063,9 +2102,9 @@
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
-     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+     "sha256_now": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778"
     },
     {
      "path": "scripts/pod/autoinit_science_inputs.py",
@@ -2116,14 +2155,14 @@
    "declared_in": "experiments.phase_c1.authorization",
    "n_declared": 73,
    "dispositions": {
-    "modified_in_place": 13,
-    "unchanged_path": 23,
+    "modified_in_place": 15,
+    "unchanged_path": 21,
     "renamed": 8,
     "renamed_and_modified": 28,
     "removed": 1
    },
    "additive_only": false,
-   "_accounting": "8 renamed with identical bytes, 28 renamed AND modified, 13 modified in place, 1 removed. Recording this as additive would be false wherever anything was removed.",
+   "_accounting": "8 renamed with identical bytes, 28 renamed AND modified, 15 modified in place, 1 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": "6ac5120f7a5667a97a4f08653367f736f6b9db57fb5313d1352f925147797b14",
    "identity_now": null,
    "historical_only": true,
@@ -2140,13 +2179,13 @@
      "path": "scripts/pod/autoinit_c1_driver.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "cb2adb26f072d314de5f8984ce86291c2e8d5369c5616711bcedd6633903e467",
-     "sha256_now": "02b7145aaa2895cef9bb04e115d61a38febeba5bdd7edefa5f84d3f36839cdff"
+     "sha256_now": "ab03f7b19965b4a182922d61ad1dfe9af56ca8efa5b95faac1da3bc8af349873"
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
-     "sha256_now": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68"
+     "sha256_now": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778"
     },
     {
      "path": "scripts/pod/summarize_pytest_outcomes.py",
@@ -2330,7 +2369,7 @@
      "new_path": "scripts/experiments/phase_c1/authorization.py",
      "disposition": "renamed_and_modified",
      "sha256_at_base": "89346808b0bb1e1ec748a41c6da63850ffe44921b7c24d9480c60dc9b820f0f9",
-     "sha256_now": "eeffc8c1994533330ecdbe1deb70c8cd5ff9c879f349bcd823c4c53abbb51b53"
+     "sha256_now": "5ae7812c439fe53e7dea30dce7b3c4717606ef02e485631143204054cec8e6fb"
     },
     {
      "path": "src/aadistill/autoinit/cpu_test_env.py",
@@ -2576,9 +2615,9 @@
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
-     "sha256_now": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96"
+     "sha256_now": "1a6efcfd9fdbc122781a6879eb8251431952ddd8f5165a7fc60994b93021c159"
     },
     {
      "path": "src/aadistill/infrastructure/budget.py",
@@ -2907,5 +2946,5 @@
   "rule": "no file under logs/ was moved, renamed or rewritten by this migration; logs/runs/index.json verifies that independently by directory digest"
  },
  "authorizes": "nothing",
- "self_sha256": "285374ebf518d4247963f03c6a0f2e699bd77af9d5dc52ac78de01f973f8e9b1"
+ "self_sha256": "468faef76609a09d0a7916d0c3a448c85e53816d71b2c2f38efb54a3d3815a8d"
 }

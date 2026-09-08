@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 158,
+ "modules_scanned": 163,
  "test_ignores": [
   "tests/data/test_recovery_corpus_pipeline.py",
   "tests/pod/test_phase_a_stages1_5_execute.py",
@@ -172,7 +172,7 @@
  "predicates": [
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 97,
+   "line": 102,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -188,7 +188,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 106,
+   "line": 111,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -204,7 +204,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 145,
+   "line": 150,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -220,7 +220,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 157,
+   "line": 162,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -236,7 +236,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 192,
+   "line": 197,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -252,7 +252,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 97,
+   "line": 98,
    "kind": "pytest.skip",
    "function": "test_the_gate_runs_the_seven_real_groups_on_this_host",
    "condition": "record[\"counts\"][\"SOURCE_ABSENT\"]",
@@ -268,7 +268,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 442,
+   "line": 443,
    "kind": "pytest.skip",
    "function": "_skip_if_inside_the_measured_suite",
    "condition": "CTE.in_cpu_test_scope()",
@@ -284,7 +284,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 470,
+   "line": 471,
    "kind": "pytest.skip",
    "function": "test_the_committed_record_still_binds_the_live_executable",
    "condition": "not path.is_file()",
@@ -300,7 +300,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 800,
+   "line": 810,
    "kind": "pytest.skip",
    "function": "test_the_recorded_swept_commit_is_a_real_commit_in_this_repository",
    "condition": "not path.is_file()",
@@ -316,7 +316,7 @@
   },
   {
    "file": "tests/autoinit/test_causal_depth_measurement_job.py",
-   "line": 490,
+   "line": 493,
    "kind": "pytest.skip",
    "function": "test_the_entrypoint_refuses_a_host_run_when_no_hardware_is_injected",
    "condition": "torch.cuda.is_available()",
@@ -332,7 +332,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 867,
+   "line": 904,
    "kind": "pytest.skip",
    "function": "test_the_preregistration_binds_the_scoring_contract_and_supersession",
    "condition": "not path.is_file()",
@@ -348,7 +348,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 957,
+   "line": 997,
    "kind": "pytest.skip",
    "function": "test_the_historical_controls_are_not_labelled_as_valid_controls",
    "condition": "not audit_path.is_file()",
@@ -364,7 +364,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 983,
+   "line": 1023,
    "kind": "pytest.skip",
    "function": "test_the_availability_report_does_not_claim_a_matched_control",
    "condition": "not path.is_file()",
@@ -380,7 +380,7 @@
   },
   {
    "file": "tests/autoinit/test_datasets_and_calibration.py",
-   "line": 43,
+   "line": 46,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not CALIB_ITEMS.is_file()",
@@ -412,7 +412,7 @@
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
-   "line": 54,
+   "line": 60,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (REPO / \"artifacts/stage1/qwen3_0p6b_init_v0/manifest.json\").is_file()",
@@ -428,7 +428,7 @@
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
-   "line": 68,
+   "line": 74,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (E8A_DIR / \"e8_frozen_depth_map.json\").is_file()",
@@ -444,7 +444,7 @@
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
-   "line": 78,
+   "line": 84,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (E8A_DIR / \"rounds.jsonl\").is_file()",
@@ -460,7 +460,7 @@
   },
   {
    "file": "tests/autoinit/test_frozen_records.py",
-   "line": 115,
+   "line": 121,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (E8A_DIR / \"rounds.jsonl\").is_file()",
@@ -476,7 +476,7 @@
   },
   {
    "file": "tests/autoinit/test_leaf_durability.py",
-   "line": 95,
+   "line": 97,
    "kind": "pytest.skip",
    "function": "test_a_copy_that_acquires_a_tokenizer_is_refused",
    "condition": "not (canonical / \"tokenizer.json\").is_file()",
@@ -492,7 +492,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 272,
+   "line": 267,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -508,7 +508,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 287,
+   "line": 282,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -524,7 +524,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 299,
+   "line": 294,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -540,7 +540,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 323,
+   "line": 318,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -556,7 +556,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 345,
+   "line": 340,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -572,7 +572,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 356,
+   "line": 351,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -588,7 +588,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 379,
+   "line": 374,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -604,7 +604,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 395,
+   "line": 390,
    "kind": "pytest.skip",
    "function": "test_nonadditive_historical_amendment_does_not_make_phase_b_launchable",
    "condition": "frozen == live",
@@ -620,7 +620,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 403,
+   "line": 398,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -636,7 +636,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_b_plan.py",
-   "line": 420,
+   "line": 415,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PREREG.is_file()",
@@ -652,7 +652,7 @@
   },
   {
    "file": "tests/autoinit/test_reasoning_heavy_v2.py",
-   "line": 33,
+   "line": 51,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not ITEMS.is_file()",
@@ -668,7 +668,7 @@
   },
   {
    "file": "tests/autoinit/test_recovery_continuation_authorization.py",
-   "line": 385,
+   "line": 378,
    "kind": "pytest.skip",
    "function": "test_the_committed_phase_a_artifact_cannot_be_read_as_a_continuation_one",
    "condition": "not stale.is_file()",
@@ -716,7 +716,7 @@
   },
   {
    "file": "tests/autoinit/test_staging_contract.py",
-   "line": 77,
+   "line": 86,
    "kind": "pytest.skip",
    "function": "test_an_artifact_c1_does_not_stage_is_invisible",
    "condition": "absent",
@@ -732,7 +732,7 @@
   },
   {
    "file": "tests/autoinit/test_staging_contract.py",
-   "line": 115,
+   "line": 124,
    "kind": "pytest.skip",
    "function": "test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
    "condition": "undeclared is None",
@@ -748,7 +748,7 @@
   },
   {
    "file": "tests/autoinit/test_staging_contract.py",
-   "line": 118,
+   "line": 127,
    "kind": "pytest.skip",
    "function": "test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
    "condition": "not undeclared",
@@ -764,7 +764,7 @@
   },
   {
    "file": "tests/autoinit/test_staging_contract.py",
-   "line": 176,
+   "line": 185,
    "kind": "pytest.skip",
    "function": "test_the_dev_box_satisfies_both_premises_and_so_both_tests_run",
    "condition": "absent or not undeclared",
@@ -1052,7 +1052,7 @@
   },
   {
    "file": "tests/pod/test_autoinit_preflight_rehearsal.py",
-   "line": 52,
+   "line": 53,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (REPO / \"artifacts/stage3/recovery_search_v2/manifest.json\").is_file()",
@@ -1068,7 +1068,7 @@
   },
   {
    "file": "tests/pod/test_c1_driver_execution.py",
-   "line": 561,
+   "line": 559,
    "kind": "pytest.skip",
    "function": "_summary_template",
    "condition": "pytest.skip(\"no retained generation summary to model the fake on\")",
@@ -1100,7 +1100,7 @@
   },
   {
    "file": "tests/pod/test_continuation_b_executes.py",
-   "line": 835,
+   "line": 857,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not PRICING.is_file()",
@@ -1116,7 +1116,7 @@
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 54,
+   "line": 46,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (STAGED / CONTROLS[0] / \"step_001023/model/model.safetensors\").is_file()",
@@ -1132,7 +1132,7 @@
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 845,
+   "line": 836,
    "kind": "pytest.skip",
    "function": "test_the_session_commit_is_verified_against_the_authorization",
    "condition": "not auth_path.is_file()",
@@ -1148,7 +1148,7 @@
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 949,
+   "line": 940,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (REPO / \"artifacts/stage3/recovery_search_v2/manifest.json\").is_file()",
@@ -1196,7 +1196,7 @@
   },
   {
    "file": "tests/pod/test_observed_protocol_rehearsal.py",
-   "line": 534,
+   "line": 535,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not FROZEN_PRESENT",
@@ -1420,7 +1420,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 455,
+   "line": 449,
    "kind": "pytest.skip",
    "function": "test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
    "condition": "\"model.safetensors\" not in staged",
@@ -1436,7 +1436,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 485,
+   "line": 479,
    "kind": "pytest.skip",
    "function": "test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
    "condition": "\"ROPE_OK\" not in tuple(spec.setup.setup_markers)",
@@ -1452,7 +1452,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 819,
+   "line": 813,
    "kind": "pytest.skip",
    "function": "test_the_c1_checkpoint_inputs_land_where_the_rope_gate_globs",
    "condition": "not src.is_file()",
@@ -1468,7 +1468,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 851,
+   "line": 845,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_accepts_the_canonical_config",
    "condition": "not src.is_file()",
@@ -1484,7 +1484,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 874,
+   "line": 868,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_refuses_a_wrong_stored_base",
    "condition": "not src.is_file()",
@@ -1822,5 +1822,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "759712833f016505b29f78b333a27ddbb2a7f7f7266fcbd16613499b09ad1264"
+ "digest": "ab76ac3fb7d176e304463ba88f8ae34eace9e8fe9931ef77a50349c43ed63ea3"
 }

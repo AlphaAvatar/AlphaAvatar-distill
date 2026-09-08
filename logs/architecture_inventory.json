@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 108,
-  "lines": 29515,
+  "lines": 29603,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -16,13 +16,13 @@
    "experiment_instance": 0,
    "historical_compatibility": 0
   },
-  "sha256_literals": 9,
-  "repo_id_literals": 10,
-  "path_literals": 37,
+  "sha256_literals": 5,
+  "repo_id_literals": 6,
+  "path_literals": 29,
   "experiment_named_modules": 0,
   "family_access_outside_adapters": 37,
-  "import_time_registration": 18,
-  "big_int_literals": 15,
+  "import_time_registration": 14,
+  "big_int_literals": 10,
   "package_cycles": 0
  },
  "findings": {
@@ -50,30 +50,6 @@
     "owner": "<module>",
     "line": 330,
     "value": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 371,
-    "value": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 372,
-    "value": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 460,
-    "value": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 461,
-    "value": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"
    },
    {
     "path": "src/aadistill/initialization/planning/recovery.py",
@@ -106,30 +82,6 @@
     "owner": "<module>",
     "line": 301,
     "value": "E6/E6b"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 340,
-    "value": "aadistill/warmup_v1"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 360,
-    "value": "aadistill/e8_calibration_v1"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 389,
-    "value": "aadistill/e8_calibration_v1"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 450,
-    "value": "aadistill/e8_calibration_v1"
    },
    {
     "path": "src/aadistill/rollout/engines.py",
@@ -190,25 +142,25 @@
    {
     "path": "src/aadistill/governance/post_freeze.py",
     "owner": "<module>",
-    "line": 31,
+    "line": 32,
     "value": "logs/autoinit_phase_b_post_freeze_changes.json"
    },
    {
     "path": "src/aadistill/governance/post_freeze.py",
     "owner": "<module>",
-    "line": 33,
+    "line": 34,
     "value": "scripts/pod/autoinit_preflight_setup.sh"
    },
    {
     "path": "src/aadistill/governance/post_freeze.py",
     "owner": "<module>",
-    "line": 137,
+    "line": 138,
     "value": "logs/autoinit_phase_b_historical_amendments.json"
    },
    {
     "path": "src/aadistill/governance/post_freeze.py",
     "owner": "historical_accounted_for",
-    "line": 202,
+    "line": 203,
     "value": "logs/autoinit_phase_b_preregistration.json"
    },
    {
@@ -252,54 +204,6 @@
     "owner": "<module>",
     "line": 328,
     "value": "artifacts/stage1/e8_calibration_v1/leakage.json"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 335,
-    "value": "The historical Stage-0 warm-up mixture that produced artifacts/stage0/qwen3_4b_thinking_v1 (949,859 tokens). Represented so a search path can select the incumbent mixture; the item list still has to b"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 341,
-    "value": "rebuild via scripts/data/build_warmup_v1.py"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 348,
-    "value": "artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 370,
-    "value": "artifacts/stage1/e8_calibration_v1/items.jsonl"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 375,
-    "value": "artifacts/stage1/e8_calibration_v1/leakage.json"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 376,
-    "value": "artifacts/stage1/e8_calibration_v1/manifest.json"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 459,
-    "value": "artifacts/stage1/reasoning_heavy_v2/items.jsonl"
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 468,
-    "value": "artifacts/stage1/reasoning_heavy_v2/manifest.json"
    },
    {
     "path": "src/aadistill/initialization/operators/base.py",
@@ -457,7 +361,7 @@
    {
     "path": "src/aadistill/initialization/transforms/sandwich.py",
     "chain": "self_attn.q_proj.weight.to",
-    "probe": "self_attn",
+    "probe": "q_proj",
     "owner": "init_student",
     "line": 235
    },
@@ -471,21 +375,21 @@
    {
     "path": "src/aadistill/initialization/transforms/sandwich.py",
     "chain": "self_attn.q_proj.weight.device",
-    "probe": "self_attn",
+    "probe": "q_proj",
     "owner": "init_student",
     "line": 244
    },
    {
     "path": "src/aadistill/initialization/transforms/sandwich.py",
     "chain": "self_attn.q_proj.weight.copy_",
-    "probe": "self_attn",
+    "probe": "q_proj",
     "owner": "init_student",
     "line": 245
    },
    {
     "path": "src/aadistill/initialization/transforms/sandwich.py",
     "chain": "self_attn.q_proj.weight",
-    "probe": "self_attn",
+    "probe": "q_proj",
     "owner": "init_student",
     "line": 246
    },
@@ -506,14 +410,14 @@
    {
     "path": "src/aadistill/initialization/transforms/sandwich.py",
     "chain": "self_attn.v_proj.weight.copy_",
-    "probe": "self_attn",
+    "probe": "v_proj",
     "owner": "init_student",
     "line": 249
    },
    {
     "path": "src/aadistill/initialization/transforms/sandwich.py",
     "chain": "self_attn.v_proj.weight",
-    "probe": "self_attn",
+    "probe": "v_proj",
     "owner": "init_student",
     "line": 250
    },
@@ -583,14 +487,14 @@
    {
     "path": "src/aadistill/initialization/transforms/sandwich.py",
     "chain": "mlp.up_proj.weight.copy_",
-    "probe": "mlp",
+    "probe": "up_proj",
     "owner": "init_student",
     "line": 263
    },
    {
     "path": "src/aadistill/initialization/transforms/sandwich.py",
     "chain": "mlp.up_proj.weight",
-    "probe": "mlp",
+    "probe": "up_proj",
     "owner": "init_student",
     "line": 264
    },
@@ -645,26 +549,6 @@
     "path": "src/aadistill/initialization/calibration/datasets.py",
     "call": "register_asset",
     "line": 317
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "call": "register_profile",
-    "line": 331
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "call": "register_profile",
-    "line": 352
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "call": "register_profile",
-    "line": 380
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "call": "register_profile",
-    "line": 439
    },
    {
     "path": "src/aadistill/initialization/operators/attention.py",
@@ -752,36 +636,6 @@
     "owner": "SessionRunner._collect_setup_failure_evidence",
     "line": 648,
     "value": 400000
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 344,
-    "value": 949859
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 346,
-    "value": 20260713
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 368,
-    "value": 20260810
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 397,
-    "value": 20260812
-   },
-   {
-    "path": "src/aadistill/initialization/calibration/profiles.py",
-    "owner": "<module>",
-    "line": 410,
-    "value": 20260812
    },
    {
     "path": "src/aadistill/initialization/planning/recovery.py",
@@ -4711,7 +4565,7 @@
   "src/aadistill/governance/closure.py": {
    "module": "aadistill.governance.closure",
    "path": "src/aadistill/governance/closure.py",
-   "lines": 214,
+   "lines": 286,
    "imports": [
     {
      "target": "__future__",
@@ -4732,8 +4586,13 @@
      "relative": 0
     },
     {
-     "target": "pathlib",
+     "target": "re",
      "line": 32,
+     "relative": 0
+    },
+    {
+     "target": "pathlib",
+     "line": 33,
      "relative": 0,
      "names": [
       "Path"
@@ -4748,61 +4607,67 @@
      "name": "ClosureError",
      "kind": "class",
      "qualname": "ClosureError",
-     "line": 44
+     "line": 45
     },
     {
      "name": "_candidates",
      "kind": "function",
      "qualname": "_candidates",
-     "line": 48
+     "line": 49
     },
     {
      "name": "_resolve",
      "kind": "function",
      "qualname": "_resolve",
-     "line": 54
+     "line": 55
     },
     {
      "name": "_absolutize",
      "kind": "function",
      "qualname": "_absolutize",
-     "line": 61
+     "line": 62
     },
     {
      "name": "_imports_of",
      "kind": "function",
      "qualname": "_imports_of",
-     "line": 83
+     "line": 84
+    },
+    {
+     "name": "_subprocess_targets",
+     "kind": "function",
+     "qualname": "_subprocess_targets",
+     "line": 117
     },
     {
      "name": "walk",
      "kind": "function",
      "qualname": "walk",
-     "line": 111
+     "line": 171
     },
     {
      "name": "sha256_of",
      "kind": "function",
      "qualname": "sha256_of",
-     "line": 139
+     "line": 211
     },
     {
      "name": "digest_of",
      "kind": "function",
      "qualname": "digest_of",
-     "line": 143
+     "line": 215
     },
     {
      "name": "derive",
      "kind": "function",
      "qualname": "derive",
-     "line": 149
+     "line": 221
     },
     {
      "name": "compare",
      "kind": "function",
      "qualname": "compare",
-     "line": 196
+     "line": 268
     }
    ],
    "import_time_calls": [],
@@ -4881,7 +4746,7 @@
   "src/aadistill/governance/post_freeze.py": {
    "module": "aadistill.governance.post_freeze",
    "path": "src/aadistill/governance/post_freeze.py",
-   "lines": 287,
+   "lines": 299,
    "imports": [
     {
      "target": "__future__",
@@ -4902,13 +4767,18 @@
      "relative": 0
     },
     {
-     "target": "re",
+     "target": "subprocess",
      "line": 26,
      "relative": 0
     },
     {
-     "target": "pathlib",
+     "target": "re",
      "line": 27,
+     "relative": 0
+    },
+    {
+     "target": "pathlib",
+     "line": 28,
      "relative": 0,
      "names": [
       "Path"
@@ -4916,7 +4786,7 @@
     },
     {
      "target": "subprocess",
-     "line": 157,
+     "line": 158,
      "relative": 0
     }
    ],
@@ -4929,7 +4799,7 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 31,
+     "line": 32,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4940,7 +4810,7 @@
       "path"
      ],
      "owner": "<module>",
-     "line": 33,
+     "line": 34,
      "experiment_tokens": []
     },
     {
@@ -4950,7 +4820,7 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 137,
+     "line": 138,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4961,7 +4831,7 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 138,
+     "line": 139,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4972,7 +4842,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 197,
+     "line": 198,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4983,7 +4853,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 199,
+     "line": 200,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4995,7 +4865,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 202,
+     "line": 203,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -5006,7 +4876,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 205,
+     "line": 206,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -5017,7 +4887,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 233,
+     "line": 234,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -5029,43 +4899,43 @@
      "name": "dispatch_branch_hashes",
      "kind": "function",
      "qualname": "dispatch_branch_hashes",
-     "line": 44
+     "line": 45
     },
     {
      "name": "accounted_for",
      "kind": "function",
      "qualname": "accounted_for",
-     "line": 63
+     "line": 64
     },
     {
      "name": "_sha_file",
      "kind": "function",
      "qualname": "_sha_file",
-     "line": 145
+     "line": 146
     },
     {
      "name": "entry_self_hash",
      "kind": "function",
      "qualname": "entry_self_hash",
-     "line": 149
+     "line": 150
     },
     {
      "name": "_git",
      "kind": "function",
      "qualname": "_git",
-     "line": 156
+     "line": 157
     },
     {
      "name": "historical_accounted_for",
      "kind": "function",
      "qualname": "historical_accounted_for",
-     "line": 164
+     "line": 165
     },
     {
      "name": "_rederive_last_entry",
      "kind": "function",
      "qualname": "_rederive_last_entry",
-     "line": 252
+     "line": 253
     }
    ],
    "import_time_calls": [],
@@ -6638,7 +6508,7 @@
   "src/aadistill/infrastructure/session_prechecks.py": {
    "module": "aadistill.infrastructure.session_prechecks",
    "path": "src/aadistill/infrastructure/session_prechecks.py",
-   "lines": 202,
+   "lines": 220,
    "imports": [
     {
      "target": "__future__",
@@ -6716,25 +6586,25 @@
      "name": "frozen_science_plan_gate",
      "kind": "function",
      "qualname": "frozen_science_plan_gate",
-     "line": 164
+     "line": 182
     },
     {
      "name": "check",
      "kind": "function",
      "qualname": "frozen_science_plan_gate.check",
-     "line": 170
+     "line": 188
     },
     {
      "name": "local_files_gate",
      "kind": "function",
      "qualname": "local_files_gate",
-     "line": 186
+     "line": 204
     },
     {
      "name": "check",
      "kind": "function",
      "qualname": "local_files_gate.check",
-     "line": 194
+     "line": 212
     }
    ],
    "import_time_calls": [],
@@ -7507,23 +7377,24 @@
   "src/aadistill/initialization/adapters/__init__.py": {
    "module": "aadistill.initialization.adapters",
    "path": "src/aadistill/initialization/adapters/__init__.py",
-   "lines": 31,
+   "lines": 60,
    "imports": [
     {
      "target": "aadistill.initialization.adapters.qwen3",
-     "line": 15,
+     "line": 24,
      "relative": 0,
      "names": [
       "QWEN3_ADAPTER",
-      "Qwen3Adapter"
+      "Qwen3Adapter",
+      "register_qwen3"
      ]
     },
     {
      "target": "aadistill.initialization.specs.arch",
-     "line": 16,
+     "line": 26,
      "relative": 0,
      "names": [
-      "register_adapter"
+      "AdapterRegistry"
      ]
     }
    ],
@@ -7535,10 +7406,16 @@
    "family_attribute_access": [],
    "definitions": [
     {
+     "name": "build_registry",
+     "kind": "function",
+     "qualname": "build_registry",
+     "line": 35
+    },
+    {
      "name": "register_builtin_adapters",
      "kind": "function",
      "qualname": "register_builtin_adapters",
-     "line": 21
+     "line": 46
     }
    ],
    "import_time_calls": [],
@@ -7547,7 +7424,7 @@
   "src/aadistill/initialization/adapters/qwen3.py": {
    "module": "aadistill.initialization.adapters.qwen3",
    "path": "src/aadistill/initialization/adapters/qwen3.py",
-   "lines": 230,
+   "lines": 241,
    "imports": [
     {
      "target": "__future__",
@@ -7611,6 +7488,14 @@
      "names": [
       "Qwen3ForCausalLM"
      ]
+    },
+    {
+     "target": "aadistill.initialization.specs.arch",
+     "line": 239,
+     "relative": 0,
+     "names": [
+      "DEFAULT_REGISTRY"
+     ]
     }
    ],
    "internal_imports": [
@@ -7652,7 +7537,7 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 196
     },
@@ -7664,7 +7549,7 @@
     },
     {
      "chain": "self_attn.v_proj",
-     "probe": "self_attn",
+     "probe": "v_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 198
     },
@@ -7676,7 +7561,7 @@
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 200
     },
@@ -7837,6 +7722,12 @@
      "kind": "function",
      "qualname": "Qwen3Adapter.stats_collector",
      "line": 221
+    },
+    {
+     "name": "register_qwen3",
+     "kind": "function",
+     "qualname": "register_qwen3",
+     "line": 232
     }
    ],
    "import_time_calls": [],
@@ -8236,7 +8127,7 @@
   "src/aadistill/initialization/calibration/profiles.py": {
    "module": "aadistill.initialization.calibration.profiles",
    "path": "src/aadistill/initialization/calibration/profiles.py",
-   "lines": 496,
+   "lines": 386,
    "imports": [
     {
      "target": "__future__",
@@ -8318,358 +8209,6 @@
      ],
      "owner": "CalibrationProfile.__post_init__",
      "line": 142,
-     "experiment_tokens": []
-    },
-    {
-     "value": "The historical Stage-0 warm-up mixture that produced artifacts/stage0/qwen3_4b_thinking_v1 (949,859 tokens). Represented so a search path can select the incumbent mixture; the item list still has to b",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 335,
-     "experiment_tokens": []
-    },
-    {
-     "value": "aadistill/warmup_v1",
-     "kinds": [
-      "repo_id_shape"
-     ],
-     "owner": "<module>",
-     "line": 340,
-     "experiment_tokens": []
-    },
-    {
-     "value": "rebuild via scripts/data/build_warmup_v1.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 341,
-     "experiment_tokens": []
-    },
-    {
-     "value": 1.0,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 343,
-     "experiment_tokens": []
-    },
-    {
-     "value": 949859,
-     "kinds": [
-      "big_int"
-     ],
-     "owner": "<module>",
-     "line": 344,
-     "experiment_tokens": []
-    },
-    {
-     "value": 20260713,
-     "kinds": [
-      "big_int"
-     ],
-     "owner": "<module>",
-     "line": 346,
-     "experiment_tokens": []
-    },
-    {
-     "value": "artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 348,
-     "experiment_tokens": []
-    },
-    {
-     "value": "E8a's frozen 67-item mixture: five domains, 59,763 prediction positions, leakage-checked against the recovery rung, the validation slice and prompt-content collisions. The only v1 profile that is alre",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 356,
-     "experiment_tokens": [
-      "rung",
-      "e8"
-     ]
-    },
-    {
-     "value": "aadistill/e8_calibration_v1",
-     "kinds": [
-      "repo_id_shape",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 360,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": 1.0,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 364,
-     "experiment_tokens": []
-    },
-    {
-     "value": 20260810,
-     "kinds": [
-      "big_int"
-     ],
-     "owner": "<module>",
-     "line": 368,
-     "experiment_tokens": []
-    },
-    {
-     "value": "artifacts/stage1/e8_calibration_v1/items.jsonl",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 370,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
-     "kinds": [
-      "sha256"
-     ],
-     "owner": "<module>",
-     "line": 371,
-     "experiment_tokens": []
-    },
-    {
-     "value": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
-     "kinds": [
-      "sha256",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 372,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "ladder_uniform_probe.rung",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 373,
-     "experiment_tokens": [
-      "rung"
-     ]
-    },
-    {
-     "value": "artifacts/stage1/e8_calibration_v1/leakage.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 375,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "artifacts/stage1/e8_calibration_v1/manifest.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 376,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "E8a",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 377,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "aadistill/e8_calibration_v1",
-     "kinds": [
-      "repo_id_shape",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 389,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": 0.1,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 393,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.35,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 393,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.25,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 393,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.2,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 394,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.1,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 394,
-     "experiment_tokens": []
-    },
-    {
-     "value": 20260812,
-     "kinds": [
-      "big_int"
-     ],
-     "owner": "<module>",
-     "line": 397,
-     "experiment_tokens": []
-    },
-    {
-     "value": 20260812,
-     "kinds": [
-      "big_int"
-     ],
-     "owner": "<module>",
-     "line": 410,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.1,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 412,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.35,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 412,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.25,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 412,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.2,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 412,
-     "experiment_tokens": []
-    },
-    {
-     "value": 0.1,
-     "kinds": [
-      "float"
-     ],
-     "owner": "<module>",
-     "line": 412,
-     "experiment_tokens": []
-    },
-    {
-     "value": "aadistill/e8_calibration_v1",
-     "kinds": [
-      "repo_id_shape",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 450,
-     "experiment_tokens": [
-      "e8"
-     ]
-    },
-    {
-     "value": "artifacts/stage1/reasoning_heavy_v2/items.jsonl",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 459,
-     "experiment_tokens": []
-    },
-    {
-     "value": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
-     "kinds": [
-      "sha256"
-     ],
-     "owner": "<module>",
-     "line": 460,
-     "experiment_tokens": []
-    },
-    {
-     "value": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4",
-     "kinds": [
-      "sha256"
-     ],
-     "owner": "<module>",
-     "line": 461,
-     "experiment_tokens": []
-    },
-    {
-     "value": "artifacts/stage1/reasoning_heavy_v2/manifest.json",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 468,
      "experiment_tokens": []
     }
    ],
@@ -8796,36 +8335,31 @@
      "line": 318
     },
     {
+     "name": "profile_from_dict",
+     "kind": "function",
+     "qualname": "profile_from_dict",
+     "line": 335
+    },
+    {
+     "name": "load_profiles",
+     "kind": "function",
+     "qualname": "load_profiles",
+     "line": 350
+    },
+    {
      "name": "buildable_profiles",
      "kind": "function",
      "qualname": "buildable_profiles",
-     "line": 481
+     "line": 371
     },
     {
      "name": "profile_summary",
      "kind": "function",
      "qualname": "profile_summary",
-     "line": 486
+     "line": 376
     }
    ],
-   "import_time_calls": [
-    {
-     "call": "register_profile",
-     "line": 331
-    },
-    {
-     "call": "register_profile",
-     "line": 352
-    },
-    {
-     "call": "register_profile",
-     "line": 380
-    },
-    {
-     "call": "register_profile",
-     "line": 439
-    }
-   ],
+   "import_time_calls": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/device.py": {
@@ -9936,7 +9470,7 @@
    ],
    "literals": [
     {
-     "value": "aadistill.init.sandwich.init_student verbatim: global activation-PCA stream projection, norm folding with sqrt(d_t/d_s) compensation, per-group query head selection, per-layer activation-importance FF",
+     "value": "aadistill.initialization.transforms.sandwich.init_student verbatim: global activation-PCA stream projection, norm folding with sqrt(d_t/d_s) compensation, per-group query head selection, per-layer act",
      "kinds": [
       "experiment_token"
      ],
@@ -11344,7 +10878,7 @@
   "src/aadistill/initialization/planning/metrics.py": {
    "module": "aadistill.initialization.planning.metrics",
    "path": "src/aadistill/initialization/planning/metrics.py",
-   "lines": 220,
+   "lines": 211,
    "imports": [
     {
      "target": "__future__",
@@ -11400,6 +10934,7 @@
      "line": 18,
      "relative": 0,
      "names": [
+      "_jsonable",
       "DEFAULT_REFERENCE_CACHE_BUDGET_BYTES",
       "MeasurementError",
       "ReferenceStrategy",
@@ -11411,7 +10946,7 @@
     },
     {
      "target": "aadistill.initialization.statistics.contribution",
-     "line": 27,
+     "line": 28,
      "relative": 0,
      "names": [
       "DistortionSums",
@@ -11431,43 +10966,37 @@
      "name": "StateEvaluator",
      "kind": "class",
      "qualname": "StateEvaluator",
-     "line": 34
+     "line": 35
     },
     {
      "name": "__init__",
      "kind": "function",
      "qualname": "StateEvaluator.__init__",
-     "line": 43
+     "line": 44
     },
     {
      "name": "prime_reference",
      "kind": "function",
      "qualname": "StateEvaluator.prime_reference",
-     "line": 91
+     "line": 92
     },
     {
      "name": "_reference_for",
      "kind": "function",
      "qualname": "StateEvaluator._reference_for",
-     "line": 101
+     "line": 102
     },
     {
      "name": "evaluate",
      "kind": "function",
      "qualname": "StateEvaluator.evaluate",
-     "line": 108
+     "line": 109
     },
     {
      "name": "_per_domain_ce",
      "kind": "function",
      "qualname": "_per_domain_ce",
-     "line": 194
-    },
-    {
-     "name": "_jsonable",
-     "kind": "function",
-     "qualname": "_jsonable",
-     "line": 211
+     "line": 195
     }
    ],
    "import_time_calls": [],
@@ -13528,7 +13057,7 @@
   "src/aadistill/initialization/specs/arch.py": {
    "module": "aadistill.initialization.specs.arch",
    "path": "src/aadistill/initialization/specs/arch.py",
-   "lines": 326,
+   "lines": 372,
    "imports": [
     {
      "target": "__future__",
@@ -13810,34 +13339,76 @@
      "line": 268
     },
     {
+     "name": "AdapterRegistry",
+     "kind": "class",
+     "qualname": "AdapterRegistry",
+     "line": 289
+    },
+    {
+     "name": "__init__",
+     "kind": "function",
+     "qualname": "AdapterRegistry.__init__",
+     "line": 292
+    },
+    {
+     "name": "register",
+     "kind": "function",
+     "qualname": "AdapterRegistry.register",
+     "line": 295
+    },
+    {
+     "name": "get",
+     "kind": "function",
+     "qualname": "AdapterRegistry.get",
+     "line": 322
+    },
+    {
+     "name": "for_config",
+     "kind": "function",
+     "qualname": "AdapterRegistry.for_config",
+     "line": 332
+    },
+    {
+     "name": "families",
+     "kind": "function",
+     "qualname": "AdapterRegistry.families",
+     "line": 338
+    },
+    {
+     "name": "drop",
+     "kind": "function",
+     "qualname": "AdapterRegistry.drop",
+     "line": 341
+    },
+    {
      "name": "register_adapter",
      "kind": "function",
      "qualname": "register_adapter",
-     "line": 282
+     "line": 351
     },
     {
      "name": "get_adapter",
      "kind": "function",
      "qualname": "get_adapter",
-     "line": 305
+     "line": 357
     },
     {
      "name": "adapter_for_config",
      "kind": "function",
      "qualname": "adapter_for_config",
-     "line": 313
+     "line": 362
     },
     {
      "name": "registered_families",
      "kind": "function",
      "qualname": "registered_families",
-     "line": 320
+     "line": 366
     },
     {
      "name": "unregister_adapter",
      "kind": "function",
      "qualname": "unregister_adapter",
-     "line": 324
+     "line": 370
     }
    ],
    "import_time_calls": [],
@@ -14125,7 +13696,7 @@
   "src/aadistill/initialization/specs/metrics.py": {
    "module": "aadistill.initialization.specs.metrics",
    "path": "src/aadistill/initialization/specs/metrics.py",
-   "lines": 279,
+   "lines": 288,
    "imports": [
     {
      "target": "__future__",
@@ -14326,6 +13897,12 @@
      "kind": "function",
      "qualname": "reference_cache_bytes",
      "line": 273
+    },
+    {
+     "name": "_jsonable",
+     "kind": "function",
+     "qualname": "_jsonable",
+     "line": 279
     }
    ],
    "import_time_calls": [],
@@ -15472,7 +15049,7 @@
     },
     {
      "chain": "self_attn.q_proj.weight.to",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "init_student",
      "line": 235
     },
@@ -15484,19 +15061,19 @@
     },
     {
      "chain": "self_attn.q_proj.weight.device",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "init_student",
      "line": 244
     },
     {
      "chain": "self_attn.q_proj.weight.copy_",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "init_student",
      "line": 245
     },
     {
      "chain": "self_attn.q_proj.weight",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "init_student",
      "line": 246
     },
@@ -15514,13 +15091,13 @@
     },
     {
      "chain": "self_attn.v_proj.weight.copy_",
-     "probe": "self_attn",
+     "probe": "v_proj",
      "owner": "init_student",
      "line": 249
     },
     {
      "chain": "self_attn.v_proj.weight",
-     "probe": "self_attn",
+     "probe": "v_proj",
      "owner": "init_student",
      "line": 250
     },
@@ -15580,13 +15157,13 @@
     },
     {
      "chain": "mlp.up_proj.weight.copy_",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "init_student",
      "line": 263
     },
     {
      "chain": "mlp.up_proj.weight",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "init_student",
      "line": 264
     },
@@ -17435,7 +17012,7 @@
   "src/aadistill/runtime/pod_environment.py": {
    "module": "aadistill.runtime.pod_environment",
    "path": "src/aadistill/runtime/pod_environment.py",
-   "lines": 659,
+   "lines": 669,
    "imports": [
     {
      "target": "__future__",
@@ -17470,6 +17047,7 @@
      "line": 46,
      "relative": 0,
      "names": [
+      "Callable",
       "Sequence"
      ]
     },
@@ -17495,14 +17073,6 @@
      "relative": 0,
      "names": [
       "lineage_from_authorized_base"
-     ]
-    },
-    {
-     "target": "experiments.phase_c1.authorization",
-     "line": 563,
-     "relative": 0,
-     "names": [
-      "c1_harness_digest"
      ]
     }
    ],
@@ -17741,7 +17311,7 @@
       "experiment_token"
      ],
      "owner": "verify_record",
-     "line": 591,
+     "line": 601,
      "experiment_tokens": [
       "attempt"
      ]
@@ -17752,7 +17322,7 @@
       "experiment_token"
      ],
      "owner": "verify_record",
-     "line": 621,
+     "line": 631,
      "experiment_tokens": [
       "c1_"
      ]
@@ -17763,7 +17333,7 @@
       "experiment_token"
      ],
      "owner": "verify_record",
-     "line": 623,
+     "line": 633,
      "experiment_tokens": [
       "c1_"
      ]
@@ -17847,7 +17417,7 @@
      "name": "load_record",
      "kind": "function",
      "qualname": "load_record",
-     "line": 658
+     "line": 668
     }
    ],
    "import_time_calls": [],

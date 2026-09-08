@@ -219,8 +219,12 @@ def test_an_allowance_never_grows_against_the_accepted_revision(rule, descriptio
     change that needed it.
     """
     accepted, rev = _accepted_baseline(baseline)
-    if accepted is None:
-        pytest.skip(f"cannot compare: {rev}")
+    # Not a skip. A baseline that names a revision nothing can resolve has no
+    # accepted state to compare against, which is a failure of its own claim
+    # rather than a reason to stop checking -- and a skip here would decide
+    # differently on a pod, whose checkout may not carry the same history.
+    assert accepted is not None, (
+        f"the baseline's accepted_revision cannot be read: {rev}")
     was = Counter(accepted["allow"].get(rule, []))
     now = Counter(baseline["allow"][rule])
     grew = sorted((now - was).elements())
