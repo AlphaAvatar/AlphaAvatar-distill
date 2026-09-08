@@ -1,6 +1,6 @@
-**Updated:** 2026-09-08 · branch `migration/initialization-milestone-a` (`main` unchanged) ·
+**Updated:** 2026-09-09 · branch `migration/initialization-milestone-a` (`main` unchanged) ·
 **PHASE B CLOSED · PHASE C0 FROZEN · ATTEMPT 9 RAN — THE FROZEN PATH
-REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION IN PROGRESS, BRANCH IS RED**
+REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION GREEN, AWAITING MERGE REVIEW**
 
 > **C1 attempt 9, 2026-09-07 — `$1.0440`, pod `8gtnsbigpgaz76`, 57.47 min,
 > provider confirms gone.** Cumulative **`$267.8598`** of `$283.7600`, leaving
@@ -55,71 +55,85 @@ REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION IN PROGRESS, BRANCH IS RED**
 > `15:20:22Z`. The grant and authorization are **CONSUMED** and permit no retry
 > and no replacement pod.
 
-> **MILESTONE A — THE INITIALIZATION MIGRATION IS IMPLEMENTED BUT NOT
-> MERGEABLE, 2026-09-08 — `$0.0000`, no pod, no GPU, no provider resource, no
-> grant, no authorization, no bundle.** The work is on branch
-> **`migration/initialization-milestone-a`**. **`main` is untouched.**
+> **MILESTONE A — THE INITIALIZATION MIGRATION IS GREEN AND AWAITING MERGE
+> REVIEW, 2026-09-09 — `$0.0000`, no pod, no GPU, no provider resource, no
+> grant, no authorization, no bundle.** Branch
+> **`migration/initialization-milestone-a`**, pushed. **`main` is untouched.**
 >
-> **Do not merge this branch.** Full suite on it: **95 failed, 3223 passed, 16
-> skipped, 16 errors** — from 213 failed / 64 errors when the cutover landed. A
-> red branch is not a completed migration checkpoint.
+> **Full suite: 3375 passed, 16 skipped, 0 failed, 0 errors** — from 213 failed
+> / 64 errors when the cutover landed. **Pod-environment sweep: PASS** (3223
+> passed, 0 failed, 0 error) with 1020 repo artifacts hidden and only the staged
+> set visible.
 >
-> **Done and verified:** 59 modules moved into `src/aadistill/initialization/`
+> **The package cutover.** 59 modules into `src/aadistill/initialization/`
 > (specs · adapters · calibration/statistics/device · transforms · operators ·
-> planning); both `aadistill.init` and `aadistill.autoinit` deleted; ~1000
-> imports rewritten; experiment instances under `scripts/experiments/`.
-> **Package cycles 3 → 0** — it was 1 before the migration — by moving
-> `planning.metrics`' 309 lines of contract types down to `specs.metrics`, and
-> `CalibrationNeed` down to the calibration layer. Not by local imports: the two
-> functions that needed it were already reaching for it inside their own bodies,
-> which hides a cycle from the import graph without removing it.
+> planning); `aadistill.init` and `aadistill.autoinit` deleted; production
+> imports of either **0**; no forwarding wrappers. **Dependency cycles 3 → 0**
+> (it was 1 *before* the migration).
 >
-> **Adapter registration now has one owner.** It used to be a side effect of
-> importing the old package, so `get_adapter("qwen3")` resolved only if
-> something had already imported the adapter module. Under `pytest-randomly`
-> that made whole test files fail at collection in some orders and not others.
+> **Core boundary: seven of eight rules at zero.** experiment-named modules 0,
+> sha256 literals 0, repo-id literals 0, family access outside adapters 0,
+> import-time instance registration 0, package cycles 0, core-imports-scripts 0.
+> **path_literals 23** is the only remaining debt: the core naming which log a
+> phase's accounting lives in, and which scripts the session runner executes.
+> Both should be caller-injected; both are on the paid-pod path, so that change
+> wants its own review rather than the tail of a migration.
 >
-> **The C1 executable identity is derived from the import graph, not listed.**
-> That found four reachable modules the hand-written list omitted — among them
-> `provider.py`, `remote.py` and `log_relay.py`, which create, reach and tear
-> down billed pods.
+> **Registration is explicit everywhere.** Adapters, operators, calibration
+> profiles and dataset assets no longer register by import side effect —
+> `get_adapter("qwen3")` used to resolve only if something had already imported
+> the right module, which under `pytest-randomly` made whole test files fail at
+> collection in some orders and not others. Order-independence is checked in
+> **fresh subprocesses**, the only place it can be.
 >
-> **The scoring relocation moved no numbers.** 570 frozen Phase-A samples across
-> 3 search paths, re-scored through the pre- and post-migration trees, are
-> byte-identical; the contract digest legitimately moves v2 → v3. Evidence:
-> `logs/architecture_scoring_equivalence.json`, reproducible via
-> `scripts/architecture/compare_scoring_across_migration.py`. Coverage is
-> recorded rather than implied — the evidence exercises the `behavior_v0` record
-> schema only, established by mutation, not assumed.
+> **Two behaviour-preservation proofs, both mutation-checked:**
+> * the recovery scorer relocation (v2 → v3) moved **no number**: 570 frozen
+>   Phase-A samples re-scored through the pre- and post-migration trees are
+>   byte-identical. `logs/architecture_scoring_equivalence.json`.
+> * routing 28 model-family accesses out of `sandwich.py` changed **no
+>   parameter**: every weight `init_student` produces is bit-identical across
+>   three geometries. `logs/architecture_sandwich_equivalence.json`.
 >
-> **Old authorizations cannot be revalidated here**, which is why much of the
-> suite is red. The repointed declarations compute a different digest than the
-> completed runs recorded, and `C1_HARNESS_SOURCE_FILES_V1` refuses outright.
-> That is the intended fail-closed property, not a defect to paper over.
+> **The C1 executable identity is derived, not listed** — 89 files, up from a
+> hand-written 73 that was wrong in both directions. It had omitted
+> `provider.py`, `remote.py` and `log_relay.py`, the modules that create, reach
+> and tear down billed pods. Ten mutation tests require an edit to provider
+> creation, remote execution, the log relay, the runner, the watchdog module or
+> script, the setup shell, the execution config, the artifact contract or the
+> preregistration to move the identity.
 >
-> **The remaining 95 failures are one problem with six symptoms:** test
-> fixtures load the *historical* preregistrations and authorizations, so a test
-> now fails at a contract-mismatch gate before reaching its own assertion. The
-> fix is to build a current-tree preregistration inside the fixture — preserving
-> what each test actually asserts — and to add explicit tests that the
-> historical documents are refused. The historical `logs/` bytes must not be
-> rewritten. **Exact next edit:**
-> `tests/pod/test_phase_a_stage0_executes.py::build()`, which 26 of the failures
-> go through.
+> **Historical evidence is unchanged and old launch paths fail closed.** No file
+> under `logs/` was moved, renamed or rewritten. `C1_HARNESS_SOURCE_FILES_V1`
+> still names pre-migration paths and refuses outright; the repointed
+> declarations fail by digest mismatch. Both are exercised, not asserted.
+> Accounting: `logs/migrations/initialization-core/v1/source-relocation.json`
+> (eleven declarations) and Phase-B ledger amendment **PHB-HA-002** under the
+> maintainer's P12 decision of 2026-09-08. **Scientific fields moved: 0** — the
+> C1 preregistration's path hashes, seeds, battery and pricing are byte-identical.
 >
-> **Still owed:** that fixture work; historical-amendment ledger entries for the
-> migration, which need maintainer-owned `--what` and `--maintainer` values that
-> an agent must not invent; moving the remaining experiment-instance content
-> into `configs/`; one diagnostic sweep once source, tests and metadata are
-> settled. **MILESTONE B** (production RunLayout integration) and **MILESTONE C**
-> (real CUDA execution) are not started, by instruction.
+> **⚠ ONE MAINTAINER DECISION IS OWED.** All eleven historical probes still
+> reconstruct — bytes, artifact digests, seeds, battery, protocol hash — but
+> **reuse is now refused**, for one reason: `scoring_contract_matches_live`. The
+> live contract moved v2 → v3 with the scorer's path. The *numbers* are provably
+> unchanged (570 samples), so this is the conservative identity rule, not a
+> defect. Relaxing it — admitting a superseded contract because equivalence was
+> demonstrated — would change what counts as a reusable scientific observation,
+> which the P12 decision explicitly does not authorize. The refusal is recorded
+> at both the verifier and the `$0` pre-provider gate.
 >
-> **The CUDA entry point exists and reports NOT RUN on this host.**
+> **Three latent defects the work surfaced**, each of which would have cost a
+> paid session: a test that appended junk to a committed governance ledger
+> whenever its "this will be refused" premise stopped holding; six Python
+> imports embedded in the setup **shell** script, invisible to every AST
+> rewriter; and an unanchored `datasets/` gitignore rule that silently refused
+> to track a config the pod must read — caught by the sweep, at `$0`.
+>
+> **CUDA validation is ready and NOT RUN.**
 > `scripts/validation/cuda_engineering_check.py` with
-> `configs/validation/cuda_engineering.json`. Its entire body is executed at
-> `$0` by `tests/validation/`, which substitutes only the device gate; that
-> found three defects that would otherwise have surfaced on a paid pod. No GPU
-> was used, and no paid request is made here.
+> `configs/validation/cuda_engineering.json`. No CUDA here → NOT RUN, exit 3,
+> **no artifact written**. Its whole body is executed at `$0` by
+> `tests/validation/`, which substitutes only the device gate. **No paid
+> resource is requested or authorized.**
 
 > **Architecture inventory, all-stage runtime layout, and the first experiment
 > extraction, 2026-09-08 — `$0.0000`, no pod, no GPU, no provider resource, no
