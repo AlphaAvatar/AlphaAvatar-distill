@@ -1006,9 +1006,18 @@ def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
                    "src/aadistill/initialization/planning/generation.py"):
         assert loaded in CONTINUATION_SOURCE_FILES_V2, loaded
 
+    # The operator modules ARE loaded again -- `register_builtin_operators`
+    # imports every shipped implementation, which is the price of registering
+    # explicitly instead of by import side effect. That does not weaken the
+    # guarantee: what the continuation must not be able to do is SEARCH, and
+    # the modules that could are still absent.
+    for reachable in ("src/aadistill/initialization/operators/depth.py",
+                      "src/aadistill/initialization/operators/register.py"):
+        assert reachable in CONTINUATION_SOURCE_FILES_V2, reachable
+
     for unreachable in ("src/aadistill/initialization/planning/search.py",
                         "src/aadistill/initialization/planning/ranking.py",
-                        "src/aadistill/initialization/operators/depth.py"):
+                        "scripts/autoinit/phase_a_search.py"):
         assert unreachable not in CONTINUATION_SOURCE_FILES_V2, (
             f"{unreachable} is in the declared set but the continuation does "
             "not load it; a digest over files that cannot run overstates what "
