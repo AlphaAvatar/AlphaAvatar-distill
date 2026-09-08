@@ -274,6 +274,9 @@ uv pip install --python /opt/train/bin/python --offline --no-index \
 # trove-classifiers, packaging, tomlkit) are in the wheelhouse for exactly that,
 # so build isolation resolves offline too. Installing the project rather than
 # leaning on PYTHONPATH keeps `import aadistill` meaning what it meant before.
+# `scripts` is on it too since the initialization migration: the experiment
+# instances moved out of src/aadistill, so the authorization types these
+# snippets import now live under `experiments.`.
 uv pip install --python /opt/train/bin/python --offline --no-index \
   --find-links "$WHEELHOUSE" --no-deps -e "$REPO" \
   || { say "PROJECT INSTALL FAILED"; mark "PROJECT_INSTALL_FAILED"; exit 95; }
@@ -299,7 +302,7 @@ mark TRAIN_ENV
 # still well before Stage 0: the driver has not started.
 say "verifying the frozen assets against the preregistered constants"
 FROZEN_RC=0
-FROZEN_OUT=$(cd "$REPO" && PYTHONPATH=src /opt/train/bin/python \
+FROZEN_OUT=$(cd "$REPO" && PYTHONPATH=src:scripts /opt/train/bin/python \
     scripts/autoinit/verify_frozen_assets.py 2>&1) || FROZEN_RC=$?
 if [ "$FROZEN_RC" -ne 0 ]; then
   say "FROZEN ASSET GATE FAILED -- output follows verbatim, because 'the "
@@ -570,7 +573,7 @@ if [ "$SESSION_KIND" = "phase_a" ]; then
   # launcher supplied. The driver's Stage 0 rebuilds the plan and calls
   # `require_science_plan` on the rebuilt object, which is strictly stronger, and
   # it also runs `assert_preregistered` against the frozen artifact.
-  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
 from experiments.phase_a.plan import PhaseAAuthorization
@@ -596,7 +599,7 @@ elif [ "$SESSION_KIND" = "phase_b" ]; then
   # the artifact carried those keys: `SpendAuthorization.load` falls back to
   # `HARNESS_SOURCE_FILES_V1` when `harness_source_files` is absent, so the check
   # would pass while binding Phase B to PHASE A's file list.
-  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
 from experiments.phase_b.plan import PhaseBAuthorization
@@ -620,7 +623,7 @@ elif [ "$SESSION_KIND" = "continuation_b" ]; then
   # otherwise. `PhaseBAuthorization.load` would reject a continuation artifact on
   # schema, and the spend default would raise the attempt-2 KeyError; neither is
   # a safe place for this session to land.
-  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
 from experiments.phase_b.continuation import ContinuationAuthorization
@@ -645,7 +648,7 @@ elif [ "$SESSION_KIND" = "c1" ]; then
   # This branch exists because a missing one is not a type error: SESSION_KIND
   # falls through to `spend`, and attempt 2 of Phase B proved what that costs
   # ($0.2300, a KeyError one step after the test gate passed).
-  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
 from experiments.phase_c1.authorization import C1Authorization
@@ -664,7 +667,7 @@ elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend
   # branch below would refuse it — and the phase_a branch above would accept a
   # full-search authorization in its place, at the search's ceiling.
-  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
 from experiments.recovery_continuation.session import RecoveryContinuationAuthorization
@@ -678,7 +681,7 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'followon {a.automatic_followon_start}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 else
-  cd "$REPO" && PYTHONPATH=src SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
 from aadistill.governance.authorization import SpendAuthorization
