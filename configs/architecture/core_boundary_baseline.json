@@ -1,0 +1,106 @@
+{
+ "schema": "aadistill.core_boundary_baseline/v1",
+ "_contract": "The architecture DEBT that src/aadistill carries today, listed site by site so it is countable. This is not permission: each rule may only shrink, and tests/architecture/test_core_boundaries.py fails both when a new site appears and when a listed site is fixed without lowering the count. Every entry is a piece of the migration the maintainer has asked for.",
+ "direction": "may only shrink",
+ "derived_by": "scripts/architecture/inventory.py (AST; docstrings excluded, comments absent)",
+ "counts": {
+  "experiment_named_modules": 14,
+  "sha256_literals": 8,
+  "repo_id_literals": 9,
+  "path_literals": 26,
+  "family_access_outside_adapters": 4,
+  "import_time_registration": 10,
+  "package_cycles": 1,
+  "core_imports_scripts": 0
+ },
+ "allow": {
+  "experiment_named_modules": [
+   "src/aadistill/autoinit/c1_authorization.py",
+   "src/aadistill/autoinit/c1_authorization_payload.py",
+   "src/aadistill/autoinit/c1_bundle.py",
+   "src/aadistill/autoinit/c1_isolation.py",
+   "src/aadistill/autoinit/c1_packaging.py",
+   "src/aadistill/autoinit/c1_probe_results.py",
+   "src/aadistill/autoinit/c1_scoring.py",
+   "src/aadistill/autoinit/c1_session.py",
+   "src/aadistill/autoinit/continuation.py",
+   "src/aadistill/autoinit/measurement.py",
+   "src/aadistill/autoinit/phase_a.py",
+   "src/aadistill/autoinit/phase_b.py",
+   "src/aadistill/autoinit/phase_b_continuation.py",
+   "src/aadistill/autoinit/recovery_continuation.py"
+  ],
+  "sha256_literals": [
+   "src/aadistill/autoinit/authorization.py::<module>",
+   "src/aadistill/autoinit/c1_isolation.py::<module>",
+   "src/aadistill/autoinit/c1_scoring.py::<module>",
+   "src/aadistill/autoinit/c1_session.py::<module>",
+   "src/aadistill/autoinit/calibration.py::<module>",
+   "src/aadistill/autoinit/continuation.py::<module>",
+   "src/aadistill/autoinit/datasets.py::<module>",
+   "src/aadistill/autoinit/recovery.py::<module>"
+  ],
+  "repo_id_literals": [
+   "src/aadistill/autoinit/c1_bundle.py::<module>",
+   "src/aadistill/autoinit/c1_session.py::<module>",
+   "src/aadistill/autoinit/calibration.py::<module>",
+   "src/aadistill/autoinit/datasets.py::<module>",
+   "src/aadistill/infrastructure/provider.py::RunPodProvider._gql",
+   "src/aadistill/infrastructure/session.py::<module>",
+   "src/aadistill/infrastructure/session_runner.py::SessionRunner.create",
+   "src/aadistill/rollout/engines.py::SGLangServerEngine._post",
+   "src/aadistill/rollout/engines.py::VLLMServerEngine._post"
+  ],
+  "path_literals": [
+   "src/aadistill/autoinit/authorization.py::<module>",
+   "src/aadistill/autoinit/c1_authorization.py::<module>",
+   "src/aadistill/autoinit/c1_authorization_payload.py::<module>",
+   "src/aadistill/autoinit/c1_scoring.py::<module>",
+   "src/aadistill/autoinit/c1_scoring.py::c1_scoring_contract",
+   "src/aadistill/autoinit/c1_session.py::<module>",
+   "src/aadistill/autoinit/calibration.py::<module>",
+   "src/aadistill/autoinit/continuation.py::<module>",
+   "src/aadistill/autoinit/datasets.py::<module>",
+   "src/aadistill/autoinit/generation.py::<module>",
+   "src/aadistill/autoinit/operators/base.py::<module>",
+   "src/aadistill/autoinit/phase_a.py::<module>",
+   "src/aadistill/autoinit/phase_b.py::<module>",
+   "src/aadistill/autoinit/phase_b_continuation.py::<module>",
+   "src/aadistill/autoinit/phase_b_continuation.py::derive_continuation_closure",
+   "src/aadistill/autoinit/pod_environment.py::<module>",
+   "src/aadistill/autoinit/post_freeze.py::<module>",
+   "src/aadistill/autoinit/post_freeze.py::historical_accounted_for",
+   "src/aadistill/autoinit/recovery.py::<module>",
+   "src/aadistill/autoinit/recovery_continuation.py::<module>",
+   "src/aadistill/autoinit/run_layout.py::<module>",
+   "src/aadistill/autoinit/run_layout.py::build_run_manifest",
+   "src/aadistill/infrastructure/session_runner.py::SessionRunner.__init__",
+   "src/aadistill/infrastructure/session_runner.py::SessionRunner.collect_and_teardown",
+   "src/aadistill/infrastructure/session_runner.py::SessionRunner.launch_watchdog",
+   "src/aadistill/infrastructure/session_runner.py::SessionRunner.setup_on_draw"
+  ],
+  "family_access_outside_adapters": [
+   "src/aadistill/autoinit/operators/attention.py::AttentionWeightProxyV0.apply",
+   "src/aadistill/autoinit/operators/ffn.py::FFNActivationImportanceV0.apply",
+   "src/aadistill/init/contribution.py::bypassed_blocks",
+   "src/aadistill/init/sandwich.py::init_student"
+  ],
+  "import_time_registration": [
+   "src/aadistill/autoinit/adapters/qwen3.py::register_adapter",
+   "src/aadistill/autoinit/calibration.py::register_profile",
+   "src/aadistill/autoinit/datasets.py::register_asset",
+   "src/aadistill/autoinit/operators/attention.py::register_implementation",
+   "src/aadistill/autoinit/operators/base.py::register_kind",
+   "src/aadistill/autoinit/operators/composite.py::register_implementation",
+   "src/aadistill/autoinit/operators/composite.py::register_kind",
+   "src/aadistill/autoinit/operators/depth.py::register_implementation",
+   "src/aadistill/autoinit/operators/ffn.py::register_implementation",
+   "src/aadistill/autoinit/operators/width.py::register_implementation"
+  ],
+  "package_cycles": [
+   "aadistill.autoinit.calibration<->aadistill.autoinit.operators"
+  ],
+  "core_imports_scripts": []
+ },
+ "authorizes": "nothing"
+}
