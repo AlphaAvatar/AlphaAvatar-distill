@@ -46,7 +46,7 @@ def test_it_cannot_start_phase_a(spec):
     assert owner.__name__ == "SpendAuthorization"
     # `allows_phase_a` is a property, so it must be read off an INSTANCE; on the
     # class it is the property object and `is False` would be vacuously wrong.
-    from aadistill.autoinit.measurement import MEASUREMENT_AUTHORIZATION
+    from scripts.experiments.measurement.plan import MEASUREMENT_AUTHORIZATION
     assert MEASUREMENT_AUTHORIZATION.allows_phase_a is False, (
         "the measurement's authorization can authorize Phase A")
     assert spec.evidence_fields["phase_a_reachable_from_this_launcher"] is False
@@ -54,8 +54,8 @@ def test_it_cannot_start_phase_a(spec):
 
 
 def test_it_uses_its_own_authorization_and_plan_not_phase_as(spec):
-    from aadistill.autoinit.measurement import MEASUREMENT_PLAN_V1
-    from aadistill.autoinit.phase_a import PHASE_A_PLAN_V1
+    from scripts.experiments.measurement.plan import MEASUREMENT_PLAN_V1
+    from scripts.experiments.phase_a.plan import PHASE_A_PLAN_V1
 
     assert spec.plan_hash == MEASUREMENT_PLAN_V1.plan_hash
     assert spec.plan_hash != PHASE_A_PLAN_V1.plan_hash
@@ -90,7 +90,7 @@ def test_its_budget_is_under_the_authorized_ceiling(spec):
     plan = spec.budget.plan(price_per_hour=0.99, authorized_usd=1.6294)
     assert plan.hard_terminate_usd <= 1.6294, "the plan exceeds the ceiling"
     assert plan.expected_usd < plan.soft_stop_usd < plan.hard_terminate_usd
-    from aadistill.autoinit.measurement import MEASUREMENT_AUTHORIZATION as A
+    from scripts.experiments.measurement.plan import MEASUREMENT_AUTHORIZATION as A
     assert A.hard_cap_usd == 1.6294 and A.per_launch_hard_usd == 1.6294
     assert A.authorized_stages == (0,)
 

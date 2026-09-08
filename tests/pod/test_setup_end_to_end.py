@@ -248,7 +248,7 @@ PYTHONPATH="{fetch_stubs}:${{PYTHONPATH:-}}" exec {sys.executable} "$@"
 
 
 def _run_setup(box: dict, **env_extra) -> subprocess.CompletedProcess:
-    from aadistill.autoinit.continuation import CONTINUATION_PLAN_V1
+    from scripts.experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
 
     ws, home, bin_ = box["ws"], box["home"], box["bin"]
     wh_vllm = "/workspace/whv/transfer/wheelhouse_vllm_cp312"

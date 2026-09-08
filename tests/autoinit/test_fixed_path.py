@@ -9,14 +9,14 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.autoinit.operators import attention_activation  # noqa: E402
-from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
-from aadistill.autoinit.arch import ArchSpec  # noqa: E402
-from aadistill.autoinit.calibration import (  # noqa: E402
+from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
+from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
+from aadistill.initialization.calibration.profiles import (# noqa: E402
     register_profile,
     unregister_profile,
 )
-from aadistill.autoinit.fixed_path import (  # noqa: E402
+from aadistill.initialization.planning.fixed_path import (# noqa: E402
     FixedPathDigestMismatch,
     FixedPathError,
     FixedPathSpec,
@@ -205,7 +205,7 @@ def test_the_module_does_not_depend_on_the_beam():
                        or f".{forbidden}." in m for m in imported), \
             f"fixed_path imports {forbidden}: {sorted(imported)}"
 
-    import aadistill.autoinit.fixed_path as fp
+    import aadistill.initialization.planning.fixed_path as fp
     assert not hasattr(fp, "BeamSearch") and not hasattr(fp, "SearchConfig")
 
 

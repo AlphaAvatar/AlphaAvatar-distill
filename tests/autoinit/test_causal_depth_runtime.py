@@ -28,12 +28,13 @@ import torch
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.device import apply_cpu_budget, cpu_budget  # noqa: E402
-from aadistill.autoinit.operators.depth import _forward_logits  # noqa: E402
-from aadistill.autoinit.search import (  # noqa: E402
-    Deadline, SearchDeadlineExceeded,
+from aadistill.initialization.device import apply_cpu_budget, cpu_budget  # noqa: E402
+from aadistill.initialization.operators.depth import _forward_logits  # noqa: E402
+from aadistill.initialization.planning.search import (# noqa: E402
+    Deadline,
+    SearchDeadlineExceeded,
 )
-from aadistill.init.contribution import greedy_removal  # noqa: E402
+from aadistill.initialization.statistics.contribution import greedy_removal  # noqa: E402
 
 
 # --- 1. the scoring tensors stay where the model is ------------------------
@@ -123,7 +124,7 @@ def test_the_deadline_is_not_part_of_the_search_identity():
     every re-pricing a different search."""
     from dataclasses import fields
 
-    from aadistill.autoinit.search import SearchConfig
+    from aadistill.initialization.planning.search import SearchConfig
 
     names = {f.name for f in fields(SearchConfig)}
     assert "deadline" not in names and "search_minutes" not in names
@@ -206,7 +207,7 @@ def test_the_budget_is_not_read_from_the_visible_cpu_count():
 def test_moving_the_reduction_changes_no_removal_decision():
     """The full artifact is `verify_depth_backend_equivalence.py`; this keeps the
     claim in the suite so a later edit cannot quietly break it."""
-    from aadistill.init.contribution import distortion
+    from aadistill.initialization.statistics.contribution import distortion
 
     torch.manual_seed(11)
     ref = torch.randn(40, 32)

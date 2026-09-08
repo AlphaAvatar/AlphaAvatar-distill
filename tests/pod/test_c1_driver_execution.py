@@ -35,11 +35,12 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
 import autoinit_c1_driver as D  # noqa: E402
 
-from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
-from aadistill.autoinit.c1_probe_results import (  # noqa: E402
-    C1ResultsError, decision_inputs,
+from scripts.experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+from scripts.experiments.phase_c1.probe_results import (# noqa: E402
+    C1ResultsError,
+    decision_inputs,
 )
-from aadistill.autoinit.c1_scoring import C1_BATTERY_SETS  # noqa: E402
+from scripts.experiments.phase_c1.scoring import C1_BATTERY_SETS  # noqa: E402
 
 SEEDS = derive_recovery_seeds()
 BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
@@ -141,7 +142,7 @@ def test_all_c1_paths_are_c1_owned():
 
 @pytest.fixture
 def treatment_registered():
-    from aadistill.autoinit.operators import attention_activation
+    from aadistill.initialization.operators import attention_activation
 
     attention_activation.register(replace=True)
     yield
@@ -197,7 +198,7 @@ def _capture_root(monkeypatch, driver):
     stage F uses the verified-suffix one — the point of these cases is the
     root_loader closure and the device it names, which is real either way.
     """
-    from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
+    from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
 
     seen: dict = {}
 
@@ -479,7 +480,7 @@ def test_no_c1_root_is_loaded_outside_the_adapter():
 
 def test_the_driver_uses_the_real_fixed_path_executor_and_its_device_gate():
     """The refusal only protects the driver if the driver calls that function."""
-    from aadistill.autoinit import fixed_path
+    from aadistill.initialization.planning import fixed_path
 
     assert D.materialize_fixed_path is fixed_path.materialize_fixed_path
     assert "require_root_on_declared_device" in \
@@ -574,8 +575,11 @@ def harness(tmp_path, monkeypatch):
         d.mkdir(parents=True, exist_ok=True)
 
     # A structurally valid C1 authorization, at a scratch path outside the repo.
-    from aadistill.autoinit.c1_authorization import (
-        C1Authorization, c1_harness_digest, c1_hard_ceiling_usd, load_pricing,
+    from scripts.experiments.phase_c1.authorization import (
+        C1Authorization,
+        c1_harness_digest,
+        c1_hard_ceiling_usd,
+        load_pricing,
     )
     import importlib.util
     spec = importlib.util.spec_from_file_location(
@@ -1034,8 +1038,11 @@ def test_admission_runs_before_the_scorer_in_source_order():
 
 def test_probe_results_refuse_a_probe_with_no_admitted_protocol():
     """Mutation target: dropping the admission would leave these fields empty."""
-    from aadistill.autoinit.c1_probe_results import (
-        C1ProbeRecord, C1ResultsError, build_probe_results, decision_inputs,
+    from scripts.experiments.phase_c1.probe_results import (
+        C1ProbeRecord,
+        C1ResultsError,
+        build_probe_results,
+        decision_inputs,
     )
     rows = _rows()
     ps = {(a, s): rows for a in ("incumbent", "treatment") for s in SEEDS}
@@ -1155,7 +1162,7 @@ def _drive_replay(monkeypatch, harness, *, stop_after=None, mismatch_at=None,
         return steps
 
     monkeypatch.setattr(D, "materialize_fixed_path", fake_materialize)
-    from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
+    from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
     monkeypatch.setattr(QWEN3_ADAPTER, "load",
                         lambda *a, **k: types.SimpleNamespace())
     if record_write is not None:

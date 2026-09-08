@@ -192,7 +192,7 @@ def known_attributes() -> dict[str, str]:
 
     Derived, never transcribed: if `RECORD_PATH` moves, this moves with it.
     """
-    from aadistill.autoinit import pod_environment as pe
+    from aadistill.runtime import pod_environment as pe
     # Quoted, because the expansion is read back by a literal-path regex: an
     # unquoted value expands and then resolves to nothing.
     return {k: f'"{v}"' for k, v in (
@@ -222,7 +222,7 @@ def repo_inventory(repo: Path) -> tuple[set[str], set[str]]:
     The authoritative answer to "does a pod hold this path?", replacing a
     keyword guess with the two mechanisms that actually put files on a pod.
     """
-    from aadistill.autoinit import staging_contract as sc
+    from aadistill.runtime import staging_contract as sc
     from session_specs import load_session_launcher, session_args
     out = subprocess.run(["git", "-C", str(repo), "ls-files"],
                          capture_output=True, text=True, check=True)
@@ -341,7 +341,7 @@ def predicates_in(path: Path, repo: Path, tracked: set[str] | None = None,
 
 def known_classification(nodeid: str) -> str | None:
     """Groups the readiness contract already names, by nodeid."""
-    from aadistill.autoinit import pod_environment as pe
+    from aadistill.runtime import pod_environment as pe
     for group, members in (
             ("renderer_parity", pe.RENDERER_PARITY_NODEIDS),
             ("battery_source", pe.BATTERY_SOURCE_NODEIDS),
@@ -527,7 +527,7 @@ def audit(repo: Path = REPO) -> dict:
     live_keys = {p["nodeid"] for p in needs_a_word}
     stale = sorted(k for k in registered if k not in live_keys)
 
-    from aadistill.autoinit import cpu_test_env as cte
+    from aadistill.runtime import cpu_test_env as cte
     for p in predicates:
         p["parity"], p["parity_why"] = parity_of(p, registered, tracked, staged)
     parity_unresolved = sorted(

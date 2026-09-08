@@ -17,9 +17,9 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.calibration import mixture_content_sha256  # noqa: E402
-from aadistill.autoinit.metrics import StateEvalSuite  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.calibration.profiles import mixture_content_sha256  # noqa: E402
+from aadistill.initialization.planning.metrics import StateEvalSuite  # noqa: E402
 
 STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
 #: The battery that is actually staged to a pod and actually evaluated. It was

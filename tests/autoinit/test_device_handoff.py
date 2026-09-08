@@ -26,9 +26,13 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.device_handoff import (  # noqa: E402
-    DeviceHandoffError, LIVE_RETENTION_LIMIT_BYTES, complete_release, cuda_memory,
-    require_headroom, require_released,
+from aadistill.runtime.device_handoff import (# noqa: E402
+    DeviceHandoffError,
+    LIVE_RETENTION_LIMIT_BYTES,
+    complete_release,
+    cuda_memory,
+    require_headroom,
+    require_released,
 )
 
 GIB = 2 ** 30
@@ -256,7 +260,7 @@ def test_the_release_helper_accepts_no_objects_it_cannot_release():
     """
     import inspect
 
-    from aadistill.autoinit import device_handoff
+    from aadistill.runtime import device_handoff
 
     assert not hasattr(device_handoff, "release_to_subprocess"), (
         "the API that claimed to drop the caller's references is back")
@@ -432,7 +436,7 @@ def test_a_probe_that_wrote_no_checkpoint_is_named_not_a_bare_oserror(tmp_path):
     """By this point a probe has been paid for; the message is the diagnosis."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
     from autoinit_phase_a_driver import trained_model_dir
-    from aadistill.autoinit.recovery import RecoveryAdmissionError
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     out_dir = tmp_path / "probe"
     (out_dir / "checkpoints").mkdir(parents=True)
@@ -443,7 +447,7 @@ def test_a_probe_that_wrote_no_checkpoint_is_named_not_a_bare_oserror(tmp_path):
 def test_an_index_pointing_at_a_missing_tag_is_distinguished(tmp_path):
     sys.path.insert(0, str(REPO / "scripts/pod"))
     from autoinit_phase_a_driver import trained_model_dir
-    from aadistill.autoinit.recovery import RecoveryAdmissionError
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     out_dir = tmp_path / "probe"
     (out_dir / "checkpoints").mkdir(parents=True)
@@ -524,7 +528,7 @@ def test_a_conflicting_sidecar_fails_closed_rather_than_being_overwritten(tmp_pa
     """Which tokenizer the probe was scored against must stay recoverable."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
     from autoinit_phase_a_driver import materialize_eval_tokenizer
-    from aadistill.autoinit.recovery import RecoveryAdmissionError
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     src = _canonical_tokenizer(tmp_path / "canonical")
     model = tmp_path / "model"
@@ -540,7 +544,7 @@ def test_a_conflicting_sidecar_fails_closed_rather_than_being_overwritten(tmp_pa
 def test_a_missing_canonical_sidecar_fails_closed(tmp_path):
     sys.path.insert(0, str(REPO / "scripts/pod"))
     from autoinit_phase_a_driver import materialize_eval_tokenizer
-    from aadistill.autoinit.recovery import RecoveryAdmissionError
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     src = _canonical_tokenizer(tmp_path / "canonical")
     (src / "chat_template.jinja").unlink()

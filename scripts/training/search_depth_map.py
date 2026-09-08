@@ -48,7 +48,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402
 
-from aadistill.init.contribution import (  # noqa: E402
+from aadistill.initialization.statistics.contribution import (# noqa: E402
     DistortionSums,
     bypassed_blocks,
     distortion,
@@ -56,7 +56,7 @@ from aadistill.init.contribution import (  # noqa: E402
     expected_evaluations,
     greedy_removal,
 )
-from aadistill.init.sandwich import depth_span_map  # noqa: E402
+from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa: E402
 from aadistill.infrastructure.env import code_state, hardware_report  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 

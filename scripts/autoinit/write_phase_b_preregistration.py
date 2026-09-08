@@ -33,19 +33,34 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, NO_CALIBRATION, REASONING_HEAVY_V2,
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    NO_CALIBRATION,
+    REASONING_HEAVY_V2,
 )
-from aadistill.autoinit.operators import V1_IMPLEMENTATIONS  # noqa: E402
-from aadistill.autoinit.operators.base import CalibrationNeed  # noqa: E402
-from aadistill.autoinit.phase_b import (  # noqa: E402
-    CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_EXCLUSION_RULE,
-    PHASE_A_IMPORTED_FINALISTS, PHASE_B_DELEGATED_IDENTITIES, PHASE_B_PLAN_V1,
-    PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED, SURVIVORS_AT_SB,
+from aadistill.initialization.operators import V1_IMPLEMENTATIONS  # noqa: E402
+from aadistill.initialization.operators.base import CalibrationNeed  # noqa: E402
+from scripts.experiments.phase_b.plan import (# noqa: E402
+    CANONICAL_CONTROL,
+    PHASE_A_EXCLUDED_LEAVES,
+    PHASE_A_EXCLUSION_RULE,
+    PHASE_A_IMPORTED_FINALISTS,
+    PHASE_B_DELEGATED_IDENTITIES,
+    PHASE_B_PLAN_V1,
+    PHASE_B_SEARCHED_LEAVES,
+    PHASE_B_UNCOVERED,
+    SURVIVORS_AT_SB,
     phase_b_source_digest,
 )
-from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1  # noqa: E402
-from aadistill.autoinit.recovery import SEED_SA, SEED_SB, SEED_SC  # noqa: E402
+from aadistill.initialization.planning.ranking import (# noqa: E402
+    PARETO_V1,
+    SCHEDULE_V1,
+)
+from aadistill.initialization.planning.recovery import (# noqa: E402
+    SEED_SA,
+    SEED_SB,
+    SEED_SC,
+)
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 FROZEN_SCIENCE_PLAN = REPO_ROOT / "logs/autoinit_phase_a_recovery_plan_frozen.json"

@@ -22,9 +22,13 @@ from typing import Any
 import torch
 from safetensors.torch import load_file, save_file
 
-from aadistill.autoinit.arch import ArchitectureAdapter, ArchSpec, Capability
-from aadistill.autoinit.metrics import OperatorLocalMetrics
-from aadistill.autoinit.operators.base import (
+from aadistill.initialization.specs.arch import (
+    ArchitectureAdapter,
+    ArchSpec,
+    Capability,
+)
+from aadistill.initialization.planning.metrics import OperatorLocalMetrics
+from aadistill.initialization.operators.base import (
     CalibrationNeed,
     OperatorImplementation,
     OperatorKindSpec,

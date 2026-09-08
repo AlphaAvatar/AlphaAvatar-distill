@@ -36,10 +36,11 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.authorization import (  # noqa: E402
-    AuthorizationError, SpendAuthorization,
+from aadistill.governance.authorization import (# noqa: E402
+    AuthorizationError,
+    SpendAuthorization,
 )
-from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1  # noqa: E402
+from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1  # noqa: E402
 
 DRIVER_PATH = REPO / "scripts/pod/autoinit_preflight_driver.py"
 LAUNCH_PATH = REPO / "scripts/pod/autoinit_preflight_launch.py"
@@ -182,8 +183,12 @@ def build(tmp_path, *, stage0=True, gates=None, controls_ok=True,
             return d.record(3, False, "preflight_ctl_r0860k_sa generation rc=1")
         if stage3 == "contract_drift":
             return d.record(3, False, "scored under a different scoring contract")
-        from aadistill.autoinit.recovery import (
-            CATASTROPHIC_V1, POOLED_COUNTS_V2, EquivalenceRule, FeasibilityRule)
+        from aadistill.initialization.planning.recovery import (
+            CATASTROPHIC_V1,
+            POOLED_COUNTS_V2,
+            EquivalenceRule,
+            FeasibilityRule,
+        )
         sa, sb = fake_result(0.62, 0.31, mod.SEED_SA), fake_result(0.58, 0.29, mod.SEED_SB)
         pooled = POOLED_COUNTS_V2.pool([
             {"seed": mod.SEED_SA,
@@ -254,7 +259,7 @@ def test_a_blocking_gate_never_reaches_the_permanent_controls(
 
 def test_the_plan_itself_refuses_stage_2_after_a_failed_gate(tmp_path):
     """Belt and braces: even if a caller skipped the check, the plan refuses."""
-    from aadistill.autoinit.recovery import RecoveryAdmissionError
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     with pytest.raises(RecoveryAdmissionError, match="did not pass"):
         PREFLIGHT_PLAN_V1.advance_to(
@@ -373,7 +378,7 @@ def test_the_micro_preflight_authorization_is_retired_by_its_own_gate():
 
 def test_an_unrehearsed_harness_cannot_consume_the_authorization(tmp_path):
     """The executable identity is enforced, not merely recorded."""
-    from aadistill.autoinit.authorization import harness_source_digest
+    from aadistill.governance.authorization import harness_source_digest
 
     auth = SpendAuthorization.load(AUTH_PATH)
     assert auth.authorized_session_commit
@@ -407,7 +412,7 @@ def test_the_launcher_checks_the_harness_before_a_pod_can_exist():
 
 def test_every_engine_observed_generation_field_is_required():
     """A field cannot be part of the comparison and allowed to stay null."""
-    from aadistill.autoinit.generation import declared_generation_protocol
+    from aadistill.initialization.planning.generation import declared_generation_protocol
 
     required = declared_generation_protocol().MATERIALIZATION_REQUIRED
     for field in ("max_num_seqs", "max_num_batched_tokens", "enforce_eager",

@@ -32,11 +32,17 @@ import torch
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.operators.base import OperatorContext, get_implementation  # noqa: E402
-from aadistill.init.contribution import greedy_removal  # noqa: E402
-from aadistill.init.sandwich import depth_span_map, init_student  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.operators.base import (# noqa: E402
+    OperatorContext,
+    get_implementation,
+)
+from aadistill.initialization.statistics.contribution import greedy_removal  # noqa: E402
+from aadistill.initialization.transforms.sandwich import (# noqa: E402
+    depth_span_map,
+    init_student,
+)
 
 ADAPTER = get_adapter("qwen3")
 E8A_DIR = REPO / "artifacts/stage1/e8_depth_search"
@@ -116,7 +122,7 @@ def test_e8a_depth_map_replays_from_its_frozen_rounds():
                     reason="E8a search journal not present")
 def test_the_frozen_map_is_what_an_explicit_depth_map_would_build():
     """The map feeds Stage 1 through `kept_layers`, unchanged by the abstraction."""
-    from aadistill.init.sandwich import explicit_depth_map
+    from aadistill.initialization.transforms.sandwich import explicit_depth_map
 
     frozen = json.loads((E8A_DIR / "e8_frozen_depth_map.json").read_text())
     spans = explicit_depth_map(frozen["kept_teacher_layers"], 36)
@@ -134,7 +140,7 @@ def test_the_composite_operator_is_the_incumbent_recipe_bitwise(
     algorithm that produced 86fbba78..., and every manifest citing that id
     becomes wrong about what it ran.
     """
-    from aadistill.autoinit.operators._common import collect_activation_stats
+    from aadistill.initialization.operators._common import collect_activation_stats
 
     state = collect_activation_stats(
         ADAPTER, teacher, (i["input_ids"] for i in calibration_items), "cpu")
@@ -161,7 +167,7 @@ def test_the_composite_operator_is_the_incumbent_recipe_bitwise(
 def test_the_composite_accepts_a_contribution_map_as_the_single_variable(
         teacher, teacher_spec, target_spec, calibration_items, profile):
     """E8's design: only `kept_layers` changes between control and treatment."""
-    from aadistill.autoinit.operators._common import collect_activation_stats
+    from aadistill.initialization.operators._common import collect_activation_stats
 
     state = collect_activation_stats(
         ADAPTER, teacher, (i["input_ids"] for i in calibration_items), "cpu")
@@ -191,8 +197,11 @@ def test_the_composite_accepts_a_contribution_map_as_the_single_variable(
 def test_the_causal_depth_wrapper_does_not_change_the_greedy_rule(
         teacher, teacher_spec, target_spec, calibration_items, profile):
     """The operator's kept set equals a direct `greedy_removal` on the same scores."""
-    from aadistill.init.contribution import (
-        bypassed_blocks, distortion, domain_balanced_score)
+    from aadistill.initialization.statistics.contribution import (
+        bypassed_blocks,
+        distortion,
+        domain_balanced_score,
+    )
 
     impl = get_implementation("depth.causal_kl_greedy_v1")
     outcome = impl.execute(OperatorContext(

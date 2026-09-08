@@ -68,9 +68,11 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "training"))
 # `as_operator_items` -- lives here.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.autoinit.device import apply_cpu_budget  # noqa: E402
-from aadistill.init.contribution import (  # noqa: E402
-    DistortionSums, distortion, domain_balanced_score,
+from aadistill.initialization.device import apply_cpu_budget  # noqa: E402
+from aadistill.initialization.statistics.contribution import (# noqa: E402
+    DistortionSums,
+    distortion,
+    domain_balanced_score,
 )
 
 #: Written when this runs as a paid session, so the launcher can classify the
@@ -185,7 +187,10 @@ def run_measurement(model, items, device, *, n_layers: int,
     have died inside lines no $0 path had ever run; a measurement job whose body
     only ever runs on a GPU would be the fifth.
     """
-    from aadistill.autoinit.operators.depth import _forward_logits, _ReferenceLogits
+    from aadistill.initialization.operators.depth import (
+        _forward_logits,
+        _ReferenceLogits,
+    )
 
     # Injectable so the ORDER of the two peak reads is testable on a box with one
     # device. Both are None on CPU, so a test that only compared their values
@@ -395,7 +400,7 @@ def resolve_calibration(repo_root):
     ids and all, into a field labelled with a path. The path is
     `profile.items_path`, and it is 81 characters.
     """
-    from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1
+    from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1
     from phase_a_search import as_operator_items
 
     rows = DOMAIN_BALANCED_V1.resolve(repo_root)

@@ -16,7 +16,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.init.sandwich import depth_span_map  # noqa: E402
+from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa: E402
 
 ARMS = json.loads((REPO / "configs/stage3/e8/arms.json").read_text())
 ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}

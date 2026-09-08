@@ -43,8 +43,8 @@ import torch  # noqa: E402
 
 from aadistill.infrastructure.env import code_state, hardware_report  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from aadistill.init.contribution import bypassed_blocks  # noqa: E402
-from aadistill.init.sandwich import depth_span_map  # noqa: E402
+from aadistill.initialization.statistics.contribution import bypassed_blocks  # noqa: E402
+from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa: E402
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"

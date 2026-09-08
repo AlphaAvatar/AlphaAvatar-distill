@@ -40,15 +40,24 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.c1_authorization import c1_harness_digest  # noqa: E402
-from aadistill.autoinit.pod_environment import (  # noqa: E402
-    LEAF_TRANSPORT_NODEIDS, RECORD_PATH, RENDERER_PARITY_NODEIDS, SCHEMA,
-    evaluate_sweep, head_commit, pod_test_environment_digest, read_junit,
-    self_hash, tree_is_clean,
+from scripts.experiments.phase_c1.authorization import c1_harness_digest  # noqa: E402
+from aadistill.runtime.pod_environment import (# noqa: E402
+    LEAF_TRANSPORT_NODEIDS,
+    RECORD_PATH,
+    RENDERER_PARITY_NODEIDS,
+    SCHEMA,
+    evaluate_sweep,
+    head_commit,
+    pod_test_environment_digest,
+    read_junit,
+    self_hash,
+    tree_is_clean,
 )
 
-from aadistill.autoinit.staging_contract import (  # noqa: E402
-    derive_contract, describe, hidden_files,
+from aadistill.runtime.staging_contract import (# noqa: E402
+    derive_contract,
+    describe,
+    hidden_files,
 )
 
 SIMULATOR = "scripts/pod/simulate_pod_env.sh"
@@ -78,7 +87,7 @@ def derive_c1_session():
     _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
     _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
     from session_specs import load_session_launcher, session_args
-    from aadistill.autoinit.c1_bundle import canonical_bundle_name
+    from scripts.experiments.phase_c1.bundle import canonical_bundle_name
 
     launcher = load_session_launcher("autoinit_c1_launch")
     spec = launcher.spec(session_args(launcher))

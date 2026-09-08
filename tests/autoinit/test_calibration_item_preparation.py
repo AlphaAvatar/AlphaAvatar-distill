@@ -33,10 +33,10 @@ import torch
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.operators import attention_activation  # noqa: E402
-from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
-from aadistill.autoinit.arch import ArchSpec  # noqa: E402
-from aadistill.autoinit.calibration import (  # noqa: E402
+from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
+from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
+from aadistill.initialization.calibration.profiles import (# noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V2,
     CalibrationProfile,
@@ -45,14 +45,14 @@ from aadistill.autoinit.calibration import (  # noqa: E402
     register_profile,
     unregister_profile,
 )
-from aadistill.autoinit.calibration_items import (  # noqa: E402
+from aadistill.initialization.calibration.items import (# noqa: E402
     CalibrationItemError,
     prepare_calibration_items,
 )
-from aadistill.autoinit.datasets import DatasetRole  # noqa: E402
-from aadistill.autoinit.operators.base import get_implementation  # noqa: E402
-from aadistill.autoinit import fixed_path as FP  # noqa: E402
-from aadistill.autoinit.fixed_path import (  # noqa: E402
+from aadistill.initialization.calibration.datasets import DatasetRole  # noqa: E402
+from aadistill.initialization.operators.base import get_implementation  # noqa: E402
+from aadistill.initialization.planning import fixed_path as FP
+from aadistill.initialization.planning.fixed_path import (# noqa: E402
     FixedPathRootDeviceMismatch,
     FixedPathSpec,
     FixedPathStep,
@@ -196,8 +196,10 @@ def test_the_c1_prefix_profiles_are_the_ones_this_covers():
     Otherwise this module could pass while the fixed path resolves something
     nobody prepared.
     """
-    from aadistill.autoinit.c1_session import (
-        INCUMBENT_ATTENTION, PREFIX_STEPS, TREATMENT_ATTENTION,
+    from scripts.experiments.phase_c1.session import (
+        INCUMBENT_ATTENTION,
+        PREFIX_STEPS,
+        TREATMENT_ATTENTION,
     )
 
     named = {p for _, p in (*PREFIX_STEPS, INCUMBENT_ATTENTION,

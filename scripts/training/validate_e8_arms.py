@@ -43,11 +43,14 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from aadistill.init.nll_gate import (  # noqa: E402
-    REQUIRED_MEASUREMENTS, InitNllGateError, checkpoint_fingerprint,
-    gate_summary, require_init_nll,
+from aadistill.initialization.transforms.nll_gate import (# noqa: E402
+    REQUIRED_MEASUREMENTS,
+    InitNllGateError,
+    checkpoint_fingerprint,
+    gate_summary,
+    require_init_nll,
 )
-from aadistill.init.sandwich import depth_span_map  # noqa: E402
+from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa: E402
 
 ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
 EXPECTED_UNIQUE_CE = 2_960_507

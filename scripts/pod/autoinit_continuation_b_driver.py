@@ -49,15 +49,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 #: frozen target geometry and teacher identity live.
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
-from aadistill.autoinit.identity_collapse import (  # noqa: E402
-    IdentityCollapseError, collapse, universe_identity,
+from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from aadistill.initialization.specs.identity_collapse import (# noqa: E402
+    IdentityCollapseError,
+    collapse,
+    universe_identity,
 )
-from aadistill.autoinit.phase_b_continuation import (  # noqa: E402
-    CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest,
+from scripts.experiments.phase_b.continuation import (# noqa: E402
+    CONTINUATION_PLAN_V1,
+    ContinuationAuthorization,
+    continuation_source_digest,
 )
-from aadistill.autoinit.recovery import RecoveryAdmissionError  # noqa: E402
-from aadistill.autoinit.state import make_control_state, make_retained_state  # noqa: E402
+from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
+from aadistill.initialization.specs.state import (# noqa: E402
+    make_control_state,
+    make_retained_state,
+)
 
 import autoinit_phase_a_driver as _phase_a  # noqa: E402
 from autoinit_phase_a_driver import (  # noqa: E402
@@ -459,8 +466,8 @@ class ContinuationDriver(PhaseADriver):
         from transformers import AutoConfig
 
         import phase_a_frozen
-        from aadistill.autoinit.arch import ArchSpec, get_adapter
-        from aadistill.autoinit.artifact import identify_checkpoint
+        from aadistill.initialization.specs.arch import ArchSpec, get_adapter
+        from aadistill.initialization.specs.artifact import identify_checkpoint
 
         adapter = get_adapter("qwen3")
         target = ArchSpec.of("qwen3", phase_a_frozen.TARGET_GEOMETRY)

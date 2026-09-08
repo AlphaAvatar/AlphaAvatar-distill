@@ -37,14 +37,19 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V2,
 )
-from aadistill.autoinit.cost import L40S_MEASURED, price_search  # noqa: E402
-from aadistill.autoinit.ranking import SCHEDULE_V1  # noqa: E402
-from aadistill.autoinit.phase_b import (  # noqa: E402
-    CANONICAL_CONTROL, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1,
-    PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization, phase_b_source_digest,
+from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
+from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
+from scripts.experiments.phase_b.plan import (# noqa: E402
+    CANONICAL_CONTROL,
+    PHASE_A_IMPORTED_FINALISTS,
+    PHASE_B_PLAN_V1,
+    PHASE_B_SEARCHED_LEAVES,
+    PhaseBAuthorization,
+    phase_b_source_digest,
 )
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, LocalAsset, MarkerPolicy, RelayInput, SessionContext,
@@ -338,7 +343,7 @@ def stage1_selection_records(ctx: SessionContext) -> list[dict]:
     means the search completed whatever failed afterwards. It arrives in the
     extracted archive, which the collector unpacks before fetching products.
     """
-    from aadistill.autoinit import stage1_selection
+    from aadistill.initialization.planning import stage1_selection
 
     path = ctx.scr / STAGE1_SELECTION_IN_ARCHIVE
     if not path.is_file():
@@ -497,7 +502,7 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
     # preregistration would destroy the record of what attempt 5 executed, so
     # declared additive drift that leaves every pre-existing branch
     # byte-identical is accepted and everything else still fails closed.
-    from aadistill.autoinit.post_freeze import accounted_for
+    from aadistill.governance.post_freeze import accounted_for
 
     ok, why = accounted_for(prereg["executable_source"]["digest"], observed,
                             REPO_ROOT)

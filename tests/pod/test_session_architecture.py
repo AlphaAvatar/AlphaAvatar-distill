@@ -203,8 +203,9 @@ def test_no_attempt_specific_grant_prose_in_executable_source():
     inside the authorization constant, where it still read as current after the
     attempt was over. The schema stays; the grant arrives at issue time.
     """
-    from aadistill.autoinit.phase_a import (
-        GRANT_PROSE_REQUIRED, PHASE_A_AUTHORIZATION,
+    from scripts.experiments.phase_a.plan import (
+        GRANT_PROSE_REQUIRED,
+        PHASE_A_AUTHORIZATION,
     )
 
     assert PHASE_A_AUTHORIZATION.granted_by == GRANT_PROSE_REQUIRED, (
@@ -218,8 +219,8 @@ def test_no_attempt_specific_grant_prose_in_executable_source():
     # `granted_by` field rather than on free text: a module docstring listing
     # what past attempts cost is failure history, which AGENTS.md P11 requires
     # to stay, and is not a permission.
-    from aadistill.autoinit.authorization import MICRO_PREFLIGHT_AUTHORIZATION
-    from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION
+    from aadistill.governance.authorization import MICRO_PREFLIGHT_AUTHORIZATION
+    from scripts.experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
 
     for label, constant in (("micro-preflight", MICRO_PREFLIGHT_AUTHORIZATION),
                             ("continuation", CONTINUATION_AUTHORIZATION),
@@ -294,11 +295,13 @@ def test_the_recovery_continuation_shares_the_science_and_not_the_session():
         assert getattr(cont, field) != getattr(phase_a, field), field
 
     # Its own authorization TYPE and harness, not Phase A's.
-    from aadistill.autoinit.recovery_continuation import (
-        RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization,
+    from scripts.experiments.recovery_continuation.session import (
+        RECOVERY_CONTINUATION_HARNESS_FILES_V1,
+        RecoveryContinuationAuthorization,
     )
-    from aadistill.autoinit.phase_a import (
-        PHASE_A_HARNESS_SOURCE_FILES_V1, PhaseAAuthorization,
+    from scripts.experiments.phase_a.plan import (
+        PHASE_A_HARNESS_SOURCE_FILES_V1,
+        PhaseAAuthorization,
     )
     assert cont.authorization_loader == RecoveryContinuationAuthorization.load
     assert phase_a.authorization_loader == PhaseAAuthorization.load
@@ -527,7 +530,7 @@ def test_the_calibration_pin_matches_the_registry_that_already_carried_it():
     sys.path.insert(0, str(POD))
     from autoinit_science_inputs import CALIBRATION_V1
 
-    from aadistill.autoinit.datasets import E8A_CALIBRATION
+    from aadistill.initialization.calibration.datasets import E8A_CALIBRATION
 
     pins = {r.sha256 for r in CALIBRATION_V1 if r.sha256}
     assert pins == {E8A_CALIBRATION.content_sha256}, (

@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch
 
-from aadistill.autoinit.recovery import (
+from aadistill.initialization.planning.recovery import (
     RuntimeEnvironmentFingerprint,
     trainer_source_digest,
 )

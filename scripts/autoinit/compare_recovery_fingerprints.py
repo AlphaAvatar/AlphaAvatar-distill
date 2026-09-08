@@ -24,7 +24,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.recovery import (  # noqa: E402
+from aadistill.initialization.planning.recovery import (# noqa: E402
     HistoricalRunAudit,
     normalize_trainable_patterns,
     RecoveryProbeIdentity,

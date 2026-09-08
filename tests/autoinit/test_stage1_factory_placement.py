@@ -29,8 +29,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from factory_placement import RecordFactories                      # noqa: E402
 
-from aadistill.init.project import stream_projection               # noqa: E402
-from aadistill.init.sandwich import _head_rows, init_student       # noqa: E402
+from aadistill.initialization.transforms.project import stream_projection  # noqa: E402
+from aadistill.initialization.transforms.sandwich import (# noqa: E402
+    _head_rows,
+    init_student,
+)
 
 
 # --- fixtures: the real tiny teacher the Stage-1 tests already use ----------
@@ -48,7 +51,7 @@ def tiny_teacher(seed: int = 7):
 
 
 def collect_stats(model, seed: int = 11, n_seqs: int = 4, seq_len: int = 32):
-    from aadistill.init.collect import ActivationStatsCollector
+    from aadistill.initialization.statistics.collect import ActivationStatsCollector
 
     torch.manual_seed(seed)
     collector = ActivationStatsCollector(model)
@@ -144,7 +147,7 @@ def test_init_student_builds_its_head_index_on_the_weights_it_slices(
     """The call site is the contract. `q_rows` indexes the parent's q_proj and
     o_proj, so it is built on their device — the defect `_common.head_rows`
     already fixed in the operator path and this one had not."""
-    import aadistill.init.sandwich as sandwich
+    import aadistill.initialization.transforms.sandwich as sandwich
 
     teacher, state = teacher_and_state
     from aadistill.models.student import build_student, build_student_config
@@ -193,8 +196,8 @@ def test_the_audited_host_only_allocations_are_still_host_only():
     """
     import inspect
 
-    from aadistill.autoinit.operators import attention as attn_op
-    from aadistill.init import sandwich as sw
+    from aadistill.initialization.operators import attention as attn_op
+    from aadistill.initialization.transforms import sandwich as sw
 
     for mod, marker in ((attn_op, "A host diagnostic, deliberately"),
                         (sw, "select_q_heads")):

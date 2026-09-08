@@ -35,21 +35,18 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.authorization import (  # noqa: E402
-    HARNESS_SOURCE_FILES_V1,
+from aadistill.governance.authorization import HARNESS_SOURCE_FILES_V1  # noqa: E402
+from scripts.experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from scripts.experiments.phase_b.plan import (# noqa: E402
+    PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
+    phase_b_source_digest,
 )
-from aadistill.autoinit.phase_a import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
-from aadistill.autoinit.phase_b import (  # noqa: E402
-    PHASE_B_EXECUTABLE_SOURCE_FILES_V1, phase_b_source_digest,
-)
-from aadistill.autoinit.phase_b_continuation import (  # noqa: E402
-    CONTINUATION_SOURCE_FILES_V2,
-)
-from aadistill.autoinit.c1_authorization import (  # noqa: E402
-    C1_HARNESS_SOURCE_FILES_V1,
-)
-from aadistill.autoinit.post_freeze import (  # noqa: E402
-    HISTORICAL_LEDGER_PATH, HISTORICAL_LEDGER_SCHEMA, SEALED_LEGACY_NOTE,
+from scripts.experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2  # noqa: E402
+from scripts.experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from aadistill.governance.post_freeze import (# noqa: E402
+    HISTORICAL_LEDGER_PATH,
+    HISTORICAL_LEDGER_SCHEMA,
+    SEALED_LEGACY_NOTE,
     entry_self_hash,
 )
 

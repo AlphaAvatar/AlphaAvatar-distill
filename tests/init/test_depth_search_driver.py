@@ -25,7 +25,7 @@ import torch
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.init.contribution import distortion  # noqa: E402
+from aadistill.initialization.statistics.contribution import distortion  # noqa: E402
 
 DRIVER = REPO / "scripts/training/search_depth_map.py"
 
@@ -208,7 +208,7 @@ def test_a_nondeterministic_objective_stops_the_search(tmp_path):
     """The self-consistency gate is the thing standing between a ranking and noise."""
     import types
 
-    from aadistill.init.contribution import DistortionSums
+    from aadistill.initialization.statistics.contribution import DistortionSums
 
     class Jittery:
         def __init__(self):

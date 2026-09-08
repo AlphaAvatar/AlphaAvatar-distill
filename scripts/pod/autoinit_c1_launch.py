@@ -40,13 +40,14 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))   # experiments.* live here
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 # `renderer_parity_gate` lives with the other dev-box verifiers, and the eleventh
 # pre-provider gate executes it directly rather than trusting a transcript of it.
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from aadistill.autoinit import c1_session as CS  # noqa: E402
-from aadistill.autoinit.c1_authorization import (  # noqa: E402
+from experiments.phase_c1 import session as CS
+from scripts.experiments.phase_c1.authorization import (# noqa: E402
     C1_HARNESS_SOURCE_FILES_V1,
     C1Authorization,
     c1_budget_spec,
@@ -54,15 +55,21 @@ from aadistill.autoinit.c1_authorization import (  # noqa: E402
     c1_harness_digest,
     c1_price_per_hour_usd,
 )
-from aadistill.autoinit.c1_bundle import (  # noqa: E402
-    RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name,
-    hf_download, require_canonical_bundle_arg, roundtrip,
+from scripts.experiments.phase_c1.bundle import (# noqa: E402
+    RELAY_REPO as RELAY_REPO_ID,
+    C1BundleError,
+    canonical_bundle_name,
+    hf_download,
+    require_canonical_bundle_arg,
+    roundtrip,
 )
-from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
-from aadistill.autoinit.staging_contract import derive_contract  # noqa: E402
-from aadistill.autoinit.pod_environment import (  # noqa: E402
-    LAUNCH_BOUND, RECORD_PATH as POD_ENV_RECORD,
-    load_record as load_pod_env_record, verify_record as verify_pod_env_record,
+from scripts.experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+from aadistill.runtime.staging_contract import derive_contract  # noqa: E402
+from aadistill.runtime.pod_environment import (# noqa: E402
+    LAUNCH_BOUND,
+    RECORD_PATH as POD_ENV_RECORD,
+    load_record as load_pod_env_record,
+    verify_record as verify_pod_env_record,
 )
 from aadistill.infrastructure.manifest import (  # noqa: E402
     sha256_file, sha256_json,
@@ -897,8 +904,8 @@ def spec(args) -> SessionSpec:
 
 def _plan_hash() -> str:
     """The frozen C1IsolationPlan's hash, rebuilt rather than transcribed."""
-    from aadistill.autoinit.c1_isolation import C1Arm, C1IsolationPlan
-    from aadistill.autoinit.operators import attention_activation
+    from scripts.experiments.phase_c1.isolation import C1Arm, C1IsolationPlan
+    from aadistill.initialization.operators import attention_activation
 
     attention_activation.register(replace=True)
     battery = json.loads((REPO_ROOT / BATTERY_IDENTITY).read_text())

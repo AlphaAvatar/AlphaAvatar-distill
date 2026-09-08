@@ -114,7 +114,7 @@ def test_the_runner_refuses_a_namespace_missing_an_argument(name, extra, tmp_pat
     exercises the refusal `SessionRunner.__init__` performs, which is the one
     that stands between a bad namespace and a billing pod.
     """
-    from aadistill.autoinit.authorization import AuthorizationError
+    from aadistill.governance.authorization import AuthorizationError
     from aadistill.infrastructure.session_runner import SessionRunner
 
     mod = load_session_launcher(name)
@@ -181,7 +181,7 @@ def test_an_empty_local_asset_declaration_is_honoured_by_the_setup():
 
 def test_the_canary_still_fetches_nothing_and_cannot_authorize_phase_a():
     """The two properties the session must not have quietly changed."""
-    from aadistill.autoinit.authorization import SpendAuthorization
+    from aadistill.governance.authorization import SpendAuthorization
     from aadistill.infrastructure.session import SessionContext
 
     specs = {name: spec for name, _m, _a, spec in all_specs()}

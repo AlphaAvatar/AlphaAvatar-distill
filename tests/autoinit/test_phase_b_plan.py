@@ -16,18 +16,26 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
+from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V2,
 )
-from aadistill.autoinit.phase_a import (  # noqa: E402
-    PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1,
+from scripts.experiments.phase_a.plan import (# noqa: E402
+    PHASE_A_AUTHORIZATION,
+    PHASE_A_HARNESS_SOURCE_FILES_V1,
 )
-from aadistill.autoinit.phase_b import (  # noqa: E402
-    CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS,
-    PHASE_B_DELEGATED_IDENTITIES, PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
-    PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED,
-    PhaseBAuthorization, phase_b_source_digest,
+from scripts.experiments.phase_b.plan import (# noqa: E402
+    CANONICAL_CONTROL,
+    PHASE_A_EXCLUDED_LEAVES,
+    PHASE_A_IMPORTED_FINALISTS,
+    PHASE_B_DELEGATED_IDENTITIES,
+    PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
+    PHASE_B_PLAN_V1,
+    PHASE_B_SEARCHED_LEAVES,
+    PHASE_B_UNCOVERED,
+    PhaseBAuthorization,
+    phase_b_source_digest,
 )
 
 PREREG = REPO / "logs/autoinit_phase_b_preregistration.json"
@@ -368,7 +376,7 @@ def test_completed_phase_b_drift_is_historically_accounted_for():
     and `test_nonadditive_historical_amendment_does_not_make_phase_b_launchable`
     asks whether it is LAUNCHABLE. The answers are yes and no.
     """
-    from aadistill.autoinit.post_freeze import historical_accounted_for
+    from aadistill.governance.post_freeze import historical_accounted_for
 
     prereg = json.loads(PREREG.read_text())
     ok, why = historical_accounted_for(prereg["executable_source"]["digest"],
@@ -386,7 +394,7 @@ def test_nonadditive_historical_amendment_does_not_make_phase_b_launchable():
     correct answer, because that preregistration describes code this tree no
     longer contains.
     """
-    from aadistill.autoinit.post_freeze import accounted_for
+    from aadistill.governance.post_freeze import accounted_for
 
     prereg = json.loads(PREREG.read_text())
     frozen = prereg["executable_source"]["digest"]
@@ -403,7 +411,7 @@ def test_nonadditive_historical_amendment_does_not_make_phase_b_launchable():
 @pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
 def test_the_historical_ledger_cannot_be_read_as_launch_permission():
     """Belt and braces: the ledger says it of itself, in a field."""
-    from aadistill.autoinit.post_freeze import HISTORICAL_LEDGER_PATH
+    from aadistill.governance.post_freeze import HISTORICAL_LEDGER_PATH
 
     led = json.loads((REPO / HISTORICAL_LEDGER_PATH).read_text())
     assert led["consumed_by_a_paid_launch_gate"] is False
@@ -436,7 +444,7 @@ def test_the_drift_rule_refuses_everything_it_should():
     """Guards the guard: an allowance that allows everything is not a gate."""
     import json as _json
 
-    from aadistill.autoinit.post_freeze import NOTE_PATH, accounted_for
+    from aadistill.governance.post_freeze import NOTE_PATH, accounted_for
 
     note_path = REPO / NOTE_PATH
     note = _json.loads(note_path.read_text())

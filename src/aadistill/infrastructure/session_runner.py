@@ -39,7 +39,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from ..autoinit.authorization import AuthorizationError
+from aadistill.governance.authorization import AuthorizationError
 from .artifact_gate import ArtifactManifest, evaluate_teardown, verify_extracted
 from .log_relay import LogRelay, RelaySpec
 from .provider import RunPodProvider, read_api_key

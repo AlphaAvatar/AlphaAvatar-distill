@@ -12,13 +12,26 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.manifest import build_manifest, verify_manifest  # noqa: E402
-from aadistill.autoinit.metrics import StateEvaluation, StateEvaluator  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1, BeamSchedule  # noqa: E402
-from aadistill.autoinit.search import BeamSearch, SearchConfig  # noqa: E402
-from aadistill.autoinit.state import StateValidity  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.governance.artifact_manifest import (# noqa: E402
+    build_manifest,
+    verify_manifest,
+)
+from aadistill.initialization.planning.metrics import (# noqa: E402
+    StateEvaluation,
+    StateEvaluator,
+)
+from aadistill.initialization.planning.ranking import (# noqa: E402
+    PARETO_V1,
+    SCHEDULE_V1,
+    BeamSchedule,
+)
+from aadistill.initialization.planning.search import (# noqa: E402
+    BeamSearch,
+    SearchConfig,
+)
+from aadistill.initialization.specs.state import StateValidity  # noqa: E402
 from conftest import TARGET_GEOMETRY, TEACHER_GEOMETRY, build_tiny_model  # noqa: E402
 
 ADAPTER = get_adapter("qwen3")
@@ -51,7 +64,7 @@ def make_search(tmp_path, teacher, target_spec, eval_suite, suite_items, profile
 def dry_run(tmp_path_factory):
     """One real search, reused by the assertions below (it takes a few seconds)."""
     from conftest import make_items, make_profile
-    from aadistill.autoinit.metrics import StateEvalSuite, SuiteItem
+    from aadistill.initialization.planning.metrics import StateEvalSuite, SuiteItem
 
     tmp_path = tmp_path_factory.mktemp("dryrun")
     teacher = build_tiny_model(TEACHER_GEOMETRY)
@@ -246,9 +259,12 @@ def test_a_new_family_and_a_new_operator_kind_need_no_core_edit(tmp_path):
     """A non-transformers MoE family with fields the core has never seen."""
     import inspect
 
-    import aadistill.autoinit.search as search_module
-    from aadistill.autoinit.arch import register_adapter, unregister_adapter
-    from aadistill.autoinit.operators.base import unregister_implementation
+    import aadistill.initialization.planning.search as search_module
+    from aadistill.initialization.specs.arch import (
+        register_adapter,
+        unregister_adapter,
+    )
+    from aadistill.initialization.operators.base import unregister_implementation
     from fake_family import TOY_FAMILY, ToyAdapter, ToyConfig, register_all
 
     # Scan the executable core, not the prose: the module docstring names DEPTH
@@ -311,8 +327,10 @@ def test_a_new_family_and_a_new_operator_kind_need_no_core_edit(tmp_path):
 
 def test_an_mla_attention_implementation_is_not_offered_to_a_gqa_adapter(
         teacher_spec, target_spec):
-    from aadistill.autoinit.operators.base import (
-        applicable_implementations, unregister_implementation)
+    from aadistill.initialization.operators.base import (
+        applicable_implementations,
+        unregister_implementation,
+    )
     from fake_family import register_all
 
     register_all()
@@ -330,7 +348,10 @@ def test_an_mla_attention_implementation_is_not_offered_to_a_gqa_adapter(
 
 
 def _toy_profile():
-    from aadistill.autoinit.calibration import CalibrationProfile, CalibrationSource
+    from aadistill.initialization.calibration.profiles import (
+        CalibrationProfile,
+        CalibrationSource,
+    )
     return CalibrationProfile(
         profile_id="toy.calib", version=1, description="toy",
         sources=(CalibrationSource("toy", "local", "general", 1),),
@@ -338,6 +359,6 @@ def _toy_profile():
 
 
 def _toy_suite():
-    from aadistill.autoinit.metrics import StateEvalSuite
+    from aadistill.initialization.planning.metrics import StateEvalSuite
     return StateEvalSuite(suite_id="toy", version=1, domains=("general",),
                           subtypes={"general": ("text",)}, critical_tags=())

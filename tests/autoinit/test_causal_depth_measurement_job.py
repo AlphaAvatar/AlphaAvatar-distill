@@ -91,7 +91,7 @@ def test_the_schedule_is_the_real_one():
     """36,35,...,29 summing to 260 — the greedy rounds, not a guess."""
     assert JOB.SCHEDULE == {1: 36, 2: 35, 3: 34, 4: 33, 5: 32, 6: 31, 7: 30, 8: 29}
     assert sum(JOB.SCHEDULE.values()) == 260
-    from aadistill.init.contribution import expected_evaluations
+    from aadistill.initialization.statistics.contribution import expected_evaluations
     assert sum(JOB.SCHEDULE.values()) == expected_evaluations(36, 8)
 
 
@@ -141,7 +141,7 @@ def test_the_job_uses_the_operators_own_reference_cache():
 
 
 def test_the_cache_decision_is_reported_and_is_the_operators_own():
-    from aadistill.autoinit.operators.depth import _ReferenceLogits
+    from aadistill.initialization.operators.depth import _ReferenceLogits
 
     model = tiny_teacher()
     items = toy_items(model.config.vocab_size)
@@ -223,7 +223,10 @@ def test_the_e8a_pairing_compares_per_item_and_reports_the_aggregation_gap():
 def test_the_declared_aggregation_difference_is_real_and_would_mislead():
     """If this ever becomes zero the framing above is wrong and the report's
     explanation must change — so it is pinned rather than assumed."""
-    from aadistill.init.contribution import DistortionSums, distortion
+    from aadistill.initialization.statistics.contribution import (
+        DistortionSums,
+        distortion,
+    )
 
     torch.manual_seed(3)
     per_item = []

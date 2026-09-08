@@ -31,7 +31,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.autoinit.stats import (  # noqa: E402
+from aadistill.initialization.statistics.spec import (# noqa: E402
     DEFAULT_STATS_SPEC,
     StatsCache,
     stats_cache_key,
@@ -159,9 +159,9 @@ def test_the_search_sizes_the_cache_from_the_ACTIVE_profiles(
         teacher, teacher_spec, target_spec, eval_suite, two_profiles, profile,
         tmp_path):
     """The wiring, not just the container: P=2 gets 2, P=1 still gets 1."""
-    from aadistill.autoinit.arch import get_adapter
-    from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1
-    from aadistill.autoinit.search import BeamSearch, SearchConfig
+    from aadistill.initialization.specs.arch import get_adapter
+    from aadistill.initialization.planning.ranking import PARETO_V1, SCHEDULE_V1
+    from aadistill.initialization.planning.search import BeamSearch, SearchConfig
 
     def build(profiles, name):
         config = SearchConfig(
@@ -186,7 +186,7 @@ def test_the_search_drops_the_previous_parents_statistics():
     """
     import inspect
 
-    from aadistill.autoinit import search as search_module
+    from aadistill.initialization.planning import search as search_module
 
     source = inspect.getsource(search_module.BeamSearch.run)
     assert "self.stats_cache.clear()" in source

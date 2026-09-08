@@ -29,14 +29,18 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
-from aadistill.autoinit.device import (  # noqa: E402
-    DEVICE_CONTRACT_ID, model_device, stats_bytes, stats_to,
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
+from aadistill.initialization.device import (# noqa: E402
+    DEVICE_CONTRACT_ID,
+    model_device,
+    stats_bytes,
+    stats_to,
 )
-from aadistill.autoinit.operators._common import collect_activation_stats  # noqa: E402
-from aadistill.autoinit.operators.base import (  # noqa: E402
-    OperatorContext, get_implementation,
+from aadistill.initialization.operators._common import collect_activation_stats  # noqa: E402
+from aadistill.initialization.operators.base import (# noqa: E402
+    OperatorContext,
+    get_implementation,
 )
 from device_split import CrossDeviceUse, on_cache_device  # noqa: E402
 
@@ -93,7 +97,7 @@ def test_the_split_actually_bites_when_the_transfer_is_removed(
     chance to transfer, by pre-labelling them AFTER `stats_to` would have run —
     and requires the split to catch it.
     """
-    from aadistill.autoinit.operators import width as width_module
+    from aadistill.initialization.operators import width as width_module
 
     labelled = on_cache_device(real_stats(teacher, calibration_items))
     original = width_module.stats_to
@@ -115,7 +119,7 @@ def test_the_collector_allocates_its_accumulators_on_the_model(teacher):
     passes. A model on the meta device gives the assertion something to say,
     and needs no GPU and no memory — only the allocation is under test.
     """
-    from aadistill.init.collect import ActivationStatsCollector
+    from aadistill.initialization.statistics.collect import ActivationStatsCollector
 
     collector = ActivationStatsCollector(teacher.to("meta"))
     assert collector.device == torch.device("meta")
@@ -137,7 +141,7 @@ def test_the_collector_transfers_every_accumulator_to_the_host(
     returns `self`. The transfer is a named seam, and this asserts the seam was
     crossed for every accumulator.
     """
-    from aadistill.init.collect import ActivationStatsCollector
+    from aadistill.initialization.statistics.collect import ActivationStatsCollector
 
     collector = ActivationStatsCollector(teacher)
     try:
@@ -185,7 +189,7 @@ def test_the_depth_operator_keeps_its_reference_and_ablations_together(
     """`depth.causal_kl_greedy_v1` reads no statistics, so the split says
     nothing about it. What applies to it is that the reference logits it caches
     and the ablated forwards it compares them against are on one device."""
-    from aadistill.autoinit.operators import depth as depth_module
+    from aadistill.initialization.operators import depth as depth_module
 
     impl = get_implementation("depth.causal_kl_greedy_v1")
     ctx = OperatorContext(
@@ -209,7 +213,7 @@ def test_the_depth_operator_keeps_its_reference_and_ablations_together(
 def test_the_attention_index_lands_on_the_weight_it_slices():
     """Category 3: an index built from a Python list is host-side whatever it
     is about to slice."""
-    from aadistill.autoinit.operators._common import head_rows
+    from aadistill.initialization.operators._common import head_rows
 
     weight = torch.zeros(8, 4)
     rows = head_rows([0, 2], 2, device=weight.device)

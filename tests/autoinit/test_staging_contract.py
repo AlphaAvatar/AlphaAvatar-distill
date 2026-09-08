@@ -26,7 +26,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "tests/pod"))
 
-from aadistill.autoinit import staging_contract as sc  # noqa: E402
+from aadistill.runtime import staging_contract as sc
 from session_specs import load_session_launcher, session_args  # noqa: E402
 
 
@@ -374,8 +374,8 @@ def test_the_recorder_derives_and_never_falls_back(contract):
 
 
 def test_a_launch_bound_record_without_a_staging_contract_is_refused():
-    from aadistill.autoinit import pod_environment as pe
-    from aadistill.autoinit.c1_authorization import c1_harness_digest
+    from aadistill.runtime import pod_environment as pe
+    from scripts.experiments.phase_c1.authorization import c1_harness_digest
 
     rec = {"schema": pe.SCHEMA, "swept_base_commit": pe.head_commit(REPO),
            "tree_clean": True,
@@ -389,8 +389,8 @@ def test_a_launch_bound_record_without_a_staging_contract_is_refused():
 
 
 def test_a_record_swept_under_a_different_staging_contract_is_refused(contract):
-    from aadistill.autoinit import pod_environment as pe
-    from aadistill.autoinit.c1_authorization import c1_harness_digest
+    from aadistill.runtime import pod_environment as pe
+    from scripts.experiments.phase_c1.authorization import c1_harness_digest
 
     rec = {"schema": pe.SCHEMA, "swept_base_commit": pe.head_commit(REPO),
            "tree_clean": True,
@@ -562,7 +562,7 @@ def test_a_mismatched_invocation_refuses_before_a_pass_record_exists():
 
 def test_the_host_local_cases_are_named_separately_from_the_source_skips():
     """They skip for a different reason and must not be folded into that count."""
-    from aadistill.autoinit import pod_environment as pe
+    from aadistill.runtime import pod_environment as pe
     assert len(pe.HOST_LOCAL_C1_NODEIDS) == 3
     assert not (set(pe.HOST_LOCAL_C1_NODEIDS)
                 & (set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
@@ -585,7 +585,7 @@ def test_the_record_embeds_the_whole_findings_block():
     be remembered in two places and the second was forgotten."""
     src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
     assert '"findings": findings,' in src
-    from aadistill.autoinit import pod_environment as pe
+    from aadistill.runtime import pod_environment as pe
     keys = set(pe.evaluate_sweep({}))
     for group in ("battery_source_skipped_as_expected",
                   "host_local_c1_skipped_as_expected",

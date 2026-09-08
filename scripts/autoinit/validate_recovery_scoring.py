@@ -31,7 +31,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.recovery import recovery_scoring_contract  # noqa: E402
+from aadistill.initialization.planning.recovery import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 TESTS = REPO_ROOT / "tests/autoinit/test_recovery_search_scoring.py"

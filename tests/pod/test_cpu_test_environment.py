@@ -28,7 +28,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit import cpu_test_env as CTE  # noqa: E402
+from aadistill.runtime import cpu_test_env as CTE
 
 SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
 SIM = REPO / "scripts/pod/simulate_pod_env.sh"

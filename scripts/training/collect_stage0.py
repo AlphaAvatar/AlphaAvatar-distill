@@ -26,7 +26,10 @@ import torch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.init.collect import ActivationStatsCollector, residual_covariance
+from aadistill.initialization.statistics.collect import (
+    ActivationStatsCollector,
+    residual_covariance,
+)
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
 from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
 from aadistill.models.teacher import load_teacher

@@ -54,29 +54,45 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
-from aadistill.autoinit.device import apply_cpu_budget  # noqa: E402
-from aadistill.autoinit.device_handoff import (  # noqa: E402
-    DeviceHandoffError, complete_release, cuda_memory, require_headroom,
+from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
+from aadistill.initialization.device import apply_cpu_budget  # noqa: E402
+from aadistill.runtime.device_handoff import (# noqa: E402
+    DeviceHandoffError,
+    complete_release,
+    cuda_memory,
+    require_headroom,
     require_released,
 )
-from aadistill.autoinit.leaf_durability import (  # noqa: E402
-    LeafDurabilityError, persist_selected_leaves,
+from aadistill.runtime.leaf_durability import (# noqa: E402
+    LeafDurabilityError,
+    persist_selected_leaves,
 )
-from aadistill.autoinit.generation import (  # noqa: E402
-    RecoveryEvaluationProtocol, declared_generation_protocol,
-    generation_source_digest, observe_generation_protocol,
+from aadistill.initialization.planning.generation import (# noqa: E402
+    RecoveryEvaluationProtocol,
+    declared_generation_protocol,
+    generation_source_digest,
+    observe_generation_protocol,
 )
-from aadistill.autoinit.generation_compat import (  # noqa: E402
-    ComparabilityError, comparable_generation_identity, require_comparable,
+from aadistill.initialization.planning.generation_compat import (# noqa: E402
+    ComparabilityError,
+    comparable_generation_identity,
+    require_comparable,
 )
-from aadistill.autoinit.phase_a import (  # noqa: E402
-    PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_manifest,
+from scripts.experiments.phase_a.plan import (# noqa: E402
+    PHASE_A_PLAN_V1,
+    PHASE_A_SCOPE,
+    PhaseAAuthorization,
+    phase_a_manifest,
 )
-from aadistill.autoinit.recovery import (  # noqa: E402
-    POOLED_COUNTS_V2, RecoveryAdmissionError, RuntimeEnvironmentFingerprint,
-    admit_leaves, assert_preregistered, probe_configs, recovery_scoring_contract,
+from aadistill.initialization.planning.recovery import (# noqa: E402
+    POOLED_COUNTS_V2,
+    RecoveryAdmissionError,
+    RuntimeEnvironmentFingerprint,
+    admit_leaves,
+    assert_preregistered,
+    probe_configs,
+    recovery_scoring_contract,
 )
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 

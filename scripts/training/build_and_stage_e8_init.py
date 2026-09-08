@@ -37,8 +37,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
-from aadistill.init.nll_gate import checkpoint_fingerprint  # noqa: E402
-from aadistill.init.sandwich import depth_span_map  # noqa: E402
+from aadistill.initialization.transforms.nll_gate import checkpoint_fingerprint  # noqa: E402
+from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa: E402
 
 RELAY = "AlphaAvatar/aadistill-artifacts"
 PREFIX = "e8_init_20260810"

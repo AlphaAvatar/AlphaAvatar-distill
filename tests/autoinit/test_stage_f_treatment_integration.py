@@ -35,12 +35,13 @@ import torch
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
-from aadistill.autoinit.fixed_path import (  # noqa: E402
-    FixedPathError, write_suffix_execution_record,
+from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
+from aadistill.initialization.planning.fixed_path import (# noqa: E402
+    FixedPathError,
+    write_suffix_execution_record,
 )
-from aadistill.autoinit.operators import attention_activation  # noqa: E402
-from aadistill.autoinit.operators.base import get_implementation  # noqa: E402
+from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.base import get_implementation  # noqa: E402
 
 from device_split import CrossDeviceUse, on_cache_device  # noqa: E402
 
@@ -166,7 +167,7 @@ def test_D4_mutation_a_stand_in_stage_f_operator_makes_this_module_red(
         """Returns the parent unchanged — a plausible-looking stub."""
 
         def execute(self, ctx):
-            from aadistill.autoinit.operators.base import OperatorOutcome
+            from aadistill.initialization.operators.base import OperatorOutcome
             return OperatorOutcome(model=ctx.model, local_metrics=None,
                                    trace={}, artifacts={})
 

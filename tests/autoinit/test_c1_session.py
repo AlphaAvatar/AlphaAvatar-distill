@@ -7,11 +7,13 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 
-from aadistill.autoinit import c1_session as C  # noqa: E402
-from aadistill.autoinit.operators import attention_activation  # noqa: E402
-from aadistill.autoinit.operators import registered_implementations  # noqa: E402
+from experiments.phase_c1 import session as C  # noqa: E402
+from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators import registered_implementations  # noqa: E402
 
 
 @pytest.fixture

@@ -11,8 +11,8 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.calibration import (  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.calibration.profiles import (# noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V1,
     STAGE0_CURRENT_V1,
@@ -23,7 +23,7 @@ from aadistill.autoinit.calibration import (  # noqa: E402
     register_profile,
     unregister_profile,
 )
-from aadistill.autoinit.datasets import (  # noqa: E402
+from aadistill.initialization.calibration.datasets import (# noqa: E402
     DatasetAsset,
     DatasetRole,
     DatasetRoleViolation,
@@ -218,7 +218,7 @@ def test_an_unbuilt_profile_refuses_to_resolve():
 @needs_calibration
 def test_the_built_profile_resolves_and_re_derives_the_frozen_mixture_hash():
     """The E8a mixture identity is recomputed from the tokens, not trusted."""
-    from aadistill.autoinit.calibration import mixture_content_sha256
+    from aadistill.initialization.calibration.profiles import mixture_content_sha256
 
     items = DOMAIN_BALANCED_V1.resolve(REPO)
     assert len(items) == 67
@@ -274,7 +274,10 @@ def test_reasoning_heavy_v1_cannot_be_drawn_from_its_declared_pool():
 
 @needs_calibration
 def test_a_tampered_mixture_is_rejected_even_at_the_right_file_hash():
-    from aadistill.autoinit.calibration import CalibrationError, mixture_content_sha256
+    from aadistill.initialization.calibration.profiles import (
+        CalibrationError,
+        mixture_content_sha256,
+    )
 
     items = DOMAIN_BALANCED_V1.resolve(REPO)
     swapped = [{**items[0], "ids": items[1]["ids"]}, *items[1:]]

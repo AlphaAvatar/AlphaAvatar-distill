@@ -27,10 +27,10 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
-from aadistill.autoinit.operators import depth as depth_module  # noqa: E402
-from aadistill.autoinit.operators.base import (  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
+from aadistill.initialization.operators import depth as depth_module  # noqa: E402
+from aadistill.initialization.operators.base import (# noqa: E402
     OperatorContext,
     get_implementation,
 )

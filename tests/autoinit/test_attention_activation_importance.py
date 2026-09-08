@@ -16,24 +16,24 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
-from aadistill.autoinit.arch import ArchSpec  # noqa: E402
-from aadistill.autoinit.calibration import NO_CALIBRATION  # noqa: E402
-from aadistill.autoinit.operators import get_implementation  # noqa: E402
-from aadistill.autoinit.operators import attention_activation  # noqa: E402
-from aadistill.autoinit.operators.attention_activation import (  # noqa: E402
+from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
+from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
+from aadistill.initialization.calibration.profiles import NO_CALIBRATION  # noqa: E402
+from aadistill.initialization.operators import get_implementation  # noqa: E402
+from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention_activation import (# noqa: E402
     ATTENTION_STATS_SPEC,
     attention_out_projection,
     select_q_heads_by_score,
 )
-from aadistill.autoinit.operators.base import OperatorContext  # noqa: E402
-from aadistill.autoinit.stats import DEFAULT_STATS_SPEC  # noqa: E402
-from aadistill.init.attention_stats import (  # noqa: E402
+from aadistill.initialization.operators.base import OperatorContext  # noqa: E402
+from aadistill.initialization.statistics.spec import DEFAULT_STATS_SPEC  # noqa: E402
+from aadistill.initialization.statistics.attention import (# noqa: E402
     AttentionHeadStatsCollector,
     head_write_energy,
 )
 
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
 
 from conftest import build_tiny_model  # noqa: E402
 
@@ -254,7 +254,7 @@ def test_the_phase_a_b_operator_identities_did_not_move(impl_id, prefix):
 
 def test_the_new_operator_is_not_in_the_frozen_search_library():
     """Absent from `V1_IMPLEMENTATIONS`, so it cannot enter the frozen library."""
-    from aadistill.autoinit.operators import V1_IMPLEMENTATIONS
+    from aadistill.initialization.operators import V1_IMPLEMENTATIONS
 
     ids = [i.impl_id for i in V1_IMPLEMENTATIONS]
     assert "attention.activation_importance_v1" not in ids
@@ -268,7 +268,7 @@ def test_importing_the_module_does_not_register_anything():
     ATTENTION branch to every search in the process. Staying out of
     `V1_IMPLEMENTATIONS` is not enough on its own — the full suite caught exactly
     this. Import must therefore be inert."""
-    from aadistill.autoinit.operators import registered_implementations
+    from aadistill.initialization.operators import registered_implementations
 
     attention_activation.unregister()
     try:

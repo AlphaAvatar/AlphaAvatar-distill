@@ -32,11 +32,17 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.metrics import StateEvaluator  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1, BeamSchedule  # noqa: E402
-from aadistill.autoinit.search import BeamSearch, SearchConfig  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.planning.metrics import StateEvaluator  # noqa: E402
+from aadistill.initialization.planning.ranking import (# noqa: E402
+    PARETO_V1,
+    BeamSchedule,
+)
+from aadistill.initialization.planning.search import (# noqa: E402
+    BeamSearch,
+    SearchConfig,
+)
 from conftest import TARGET_GEOMETRY, build_tiny_model, make_items, make_profile  # noqa: E402
 
 ADAPTER = get_adapter("qwen3")
@@ -49,7 +55,7 @@ SCHEDULE = BeamSchedule("test.beam.p2", 1, "two-profile", warmup_levels=1, width
 @pytest.fixture(scope="module")
 def p2(tmp_path_factory):
     """One executed P=2 search, reused by the assertions below."""
-    from aadistill.autoinit.metrics import StateEvalSuite, SuiteItem
+    from aadistill.initialization.planning.metrics import StateEvalSuite, SuiteItem
 
     teacher = build_tiny_model({"hidden_size": 32, "num_hidden_layers": 6,
                                 "intermediate_size": 48, "num_attention_heads": 4,

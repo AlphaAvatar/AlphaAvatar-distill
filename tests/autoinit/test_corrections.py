@@ -17,30 +17,33 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.artifact import (  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.specs.artifact import (# noqa: E402
     ArtifactError,
     CheckpointIdentity,
     ShardRecord,
     identify_checkpoint,
     verify_frozen_single_file_hash,
 )
-from aadistill.autoinit.calibration import (  # noqa: E402
+from aadistill.initialization.calibration.profiles import (# noqa: E402
     NO_CALIBRATION,
     consumes_calibration,
     profile_for,
 )
-from aadistill.autoinit.metrics import (  # noqa: E402
+from aadistill.initialization.planning.metrics import (# noqa: E402
     MeasurementError,
     ReferenceStrategy,
     StateEvalSuite,
     StateEvaluator,
     reference_cache_bytes,
 )
-from aadistill.autoinit.operators.base import get_implementation  # noqa: E402
-from aadistill.autoinit.ranking import SCHEDULE_V1, BeamSchedule  # noqa: E402
-from aadistill.autoinit.stats import (  # noqa: E402
+from aadistill.initialization.operators.base import get_implementation  # noqa: E402
+from aadistill.initialization.planning.ranking import (# noqa: E402
+    SCHEDULE_V1,
+    BeamSchedule,
+)
+from aadistill.initialization.statistics.spec import (# noqa: E402
     DEFAULT_STATS_SPEC,
     StatsCache,
     stats_cache_key,
@@ -73,7 +76,7 @@ def test_no_calibration_operators_use_the_canonical_sentinel():
 
 
 def test_the_sentinel_is_a_single_object_that_never_resolves():
-    from aadistill.autoinit.calibration import CalibrationError
+    from aadistill.initialization.calibration.profiles import CalibrationError
 
     assert NO_CALIBRATION.is_no_calibration
     assert NO_CALIBRATION.qualified_id == "calib.none@v1"
@@ -213,7 +216,7 @@ def test_the_search_measures_a_sharded_checkpoint_end_to_end(
 
 
 def test_a_control_is_injected_by_artifact_not_regenerated(tmp_path, target_spec):
-    from aadistill.autoinit.state import StateError, make_control_state
+    from aadistill.initialization.specs.state import StateError, make_control_state
 
     model = build_tiny_model(TARGET_GEOMETRY)
     path = tmp_path / "canonical"
@@ -242,7 +245,7 @@ def test_a_control_is_injected_by_artifact_not_regenerated(tmp_path, target_spec
 
 
 def test_a_control_must_already_be_at_the_target(tmp_path, teacher_spec, target_spec):
-    from aadistill.autoinit.state import StateError, make_control_state
+    from aadistill.initialization.specs.state import StateError, make_control_state
 
     model = build_tiny_model(TEACHER_GEOMETRY)
     path = tmp_path / "wrongsize"
@@ -285,7 +288,7 @@ def test_a_suite_with_no_general_domain_emits_no_general_nll(teacher):
     suite = StateEvalSuite(
         suite_id="mathonly", version=1, domains=("math",),
         subtypes={"math": ("arith",)}, critical_tags=(), general_domain=None)
-    from aadistill.autoinit.metrics import SuiteItem
+    from aadistill.initialization.planning.metrics import SuiteItem
 
     items = [SuiteItem(item_id=i["item_id"], input_ids=i["input_ids"],
                        domain="math", subtype="arith", tags={})
@@ -320,7 +323,7 @@ def test_the_v1_schedule_retains_everything_at_level_zero():
 
 
 def test_a_warmup_level_prunes_nothing_and_says_so(teacher_spec, target_spec):
-    from aadistill.autoinit.ranking import PARETO_V1
+    from aadistill.initialization.planning.ranking import PARETO_V1
     from test_ranking import make_state
 
     states = [make_state(teacher_spec, target_spec, n, kl, 0.5, 3.0)
@@ -337,7 +340,7 @@ def test_a_warmup_level_prunes_nothing_and_says_so(teacher_spec, target_spec):
 def test_epsilon_dominance_protects_a_practically_equivalent_state(teacher_spec,
                                                                    target_spec):
     """A 1e-9 edge is a floating-point accident, not a reason to kill a path."""
-    from aadistill.autoinit.ranking import PARETO_V1, BeamRankingPolicy
+    from aadistill.initialization.planning.ranking import PARETO_V1, BeamRankingPolicy
     from test_ranking import make_state
 
     a = make_state(teacher_spec, target_spec, "a", 0.500000000, 0.5, 3.0)
@@ -354,7 +357,7 @@ def test_epsilon_dominance_protects_a_practically_equivalent_state(teacher_spec,
 
 def test_diversity_keeps_distinct_lineages_in_the_beam(teacher_spec, target_spec):
     """A beam must not fill with variants of one hypothesis."""
-    from aadistill.autoinit.ranking import PARETO_V1
+    from aadistill.initialization.planning.ranking import PARETO_V1
     from test_ranking import make_state
 
     # Three refinements of lineage A, all better than the single B; a plain
@@ -399,7 +402,7 @@ def test_the_stats_key_separates_parents_profiles_specs_and_numerics():
 def test_width_and_ffn_share_one_pass_on_the_same_parent_and_never_across_parents(
         tmp_path, teacher, teacher_spec, target_spec, calibration_items, profile):
     """The reuse boundary, exercised through the real operators."""
-    from aadistill.autoinit.operators.base import OperatorContext
+    from aadistill.initialization.operators.base import OperatorContext
 
     cache = StatsCache()
     key_a = stats_cache_key(parent_artifact_digest="parentA",
@@ -434,7 +437,7 @@ def test_width_and_ffn_share_one_pass_on_the_same_parent_and_never_across_parent
 def test_an_operator_without_a_cache_still_collects(teacher, teacher_spec,
                                                     target_spec, calibration_items,
                                                     profile):
-    from aadistill.autoinit.operators.base import OperatorContext
+    from aadistill.initialization.operators.base import OperatorContext
 
     outcome = get_implementation("ffn.activation_importance_v0").execute(
         OperatorContext(adapter=ADAPTER, model=teacher, parent_spec=teacher_spec,
@@ -515,7 +518,7 @@ def test_resume_refuses_a_journal_measured_under_a_different_suite(
     Without this check the beam would rank this run's states on last run's
     questions, silently, and the manifest would report them as measured.
     """
-    from aadistill.autoinit.metrics import StateEvalSuite
+    from aadistill.initialization.planning.metrics import StateEvalSuite
     from test_search import make_search
 
     suite_a = StateEvalSuite(

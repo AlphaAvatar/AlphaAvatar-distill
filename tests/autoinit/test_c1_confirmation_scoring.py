@@ -33,10 +33,16 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 import score_c1_confirmation as C1S  # noqa: E402
 import verify_c1_scoring_equivalence as EQ  # noqa: E402
 
-from aadistill.autoinit.c1_scoring import (  # noqa: E402
-    C1_BATTERY_CONTENT_SHA256, C1_BATTERY_MANIFEST_SHA256, C1_BATTERY_SETS,
-    C1_METRIC_CONTRACT, C1_N_PROMPTS, C1_N_SCORABLE_PROMPTS,
-    C1_SCORING_FILES_V1, C1ScoringError, c1_scoring_contract,
+from scripts.experiments.phase_c1.scoring import (# noqa: E402
+    C1_BATTERY_CONTENT_SHA256,
+    C1_BATTERY_MANIFEST_SHA256,
+    C1_BATTERY_SETS,
+    C1_METRIC_CONTRACT,
+    C1_N_PROMPTS,
+    C1_N_SCORABLE_PROMPTS,
+    C1_SCORING_FILES_V1,
+    C1ScoringError,
+    c1_scoring_contract,
     validate_c1_battery,
 )
 
@@ -49,7 +55,7 @@ HISTORICAL = EQ.find_generations()
 
 def test_the_frozen_assets_are_untouched():
     """Neither historical asset may move because C1 needed a scorer."""
-    from aadistill.autoinit.recovery import recovery_scoring_contract
+    from aadistill.initialization.planning.recovery import recovery_scoring_contract
 
     assert recovery_scoring_contract(REPO)["digest"] == (
         "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be")
@@ -67,7 +73,7 @@ def test_the_c1_contract_is_a_new_name_not_a_new_metric():
 
 def test_the_c1_closure_covers_the_three_files_v2_omits():
     """V2 omits three files that decide numbers. Do not repeat the hole."""
-    from aadistill.autoinit.recovery import RECOVERY_SCORING_FILES_V2
+    from aadistill.initialization.planning.recovery import RECOVERY_SCORING_FILES_V2
 
     holes = {"scripts/autoinit/audit_tool_scoring.py",
              "src/aadistill/data/tools.py",
@@ -178,7 +184,7 @@ def test_the_equivalence_gate_cannot_cover_correct_implies_usable(monkeypatch,
 
 def test_correct_implies_usable_is_enforced_by_the_frozen_row_contract():
     """C1 imports this function unmodified; this is where the rule is covered."""
-    from aadistill.autoinit.recovery import score_recovery_row
+    from aadistill.initialization.planning.recovery import score_recovery_row
 
     unusable = score_recovery_row(usable=False, scorer_correct=True, scorable=True)
     assert unusable["correct"] is False

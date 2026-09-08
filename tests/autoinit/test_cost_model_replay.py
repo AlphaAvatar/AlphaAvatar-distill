@@ -31,7 +31,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 import price_phase_b as pb  # noqa: E402
-from aadistill.autoinit.cost import (  # noqa: E402
+from aadistill.runtime.cost import (# noqa: E402
     L40S_MEASURED,
     REFERENCE_MODES,
     conservative_hard_seconds,
@@ -42,7 +42,7 @@ from aadistill.autoinit.cost import (  # noqa: E402
     price_search,
     profile_multiplicity,
 )
-from aadistill.autoinit.ranking import SCHEDULE_V1  # noqa: E402
+from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 
 # --- what attempt 3 actually did --------------------------------------------
 
@@ -281,7 +281,7 @@ def test_statistics_are_charged_once_per_parent_and_profile():
     three times; charging one pass for the whole parent would ignore the second
     profile.
     """
-    from aadistill.autoinit.cost import Expansion, stats_collections
+    from aadistill.runtime.cost import Expansion, stats_collections
 
     def expansion(impl_id, consumes, mult=2):
         return Expansion(level=1, parent_spec_hash="p", impl_id=impl_id,
@@ -311,8 +311,8 @@ def test_the_ROOT_cannot_share_and_is_priced_accordingly():
     """
     import inspect
 
-    from aadistill.autoinit import search as search_module
-    from aadistill.autoinit.cost import Expansion, stats_collections
+    from aadistill.initialization.planning import search as search_module
+    from aadistill.runtime.cost import Expansion, stats_collections
 
     source = inspect.getsource(search_module.BeamSearch._stats_key)
     assert "if parent.artifact_digest is None:" in source
@@ -340,8 +340,8 @@ def test_the_ROOT_cannot_share_and_is_priced_accordingly():
 
 def test_causal_depth_is_not_counted_as_a_statistics_consumer():
     """It consumes calibration but collects no statistics; it runs its own forwards."""
-    from aadistill.autoinit.cost import consumes_activation_stats
-    from aadistill.autoinit.operators.base import get_implementation
+    from aadistill.runtime.cost import consumes_activation_stats
+    from aadistill.initialization.operators.base import get_implementation
 
     assert not consumes_activation_stats(get_implementation("depth.causal_kl_greedy_v1"))
     assert consumes_activation_stats(get_implementation("composite.stage1_sandwich_v0"))
@@ -354,8 +354,9 @@ def test_causal_depth_is_not_counted_as_a_statistics_consumer():
 
 def test_materialization_overhead_is_explicit_and_scales_with_the_checkpoint():
     """The hardware anchor was measured on forward compute and does not cover I/O."""
-    from aadistill.autoinit.cost import (
-        CHECKPOINT_IO_PASSES, PER_CHILD_FIXED_SECONDS,
+    from aadistill.runtime.cost import (
+        CHECKPOINT_IO_PASSES,
+        PER_CHILD_FIXED_SECONDS,
         materialization_overhead_seconds,
     )
 
@@ -369,7 +370,7 @@ def test_materialization_overhead_is_explicit_and_scales_with_the_checkpoint():
 
 def test_the_overhead_actually_reaches_the_priced_total():
     """A component nothing multiplies is a comment, not a model."""
-    import aadistill.autoinit.cost as cost_module
+    import aadistill.runtime.cost as cost_module
 
     baseline = estimate(2, OBSERVED_CACHED_FRACTION).seconds_hard
     original = cost_module.PER_CHILD_FIXED_SECONDS

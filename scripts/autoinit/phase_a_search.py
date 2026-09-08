@@ -38,17 +38,20 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from load_state_eval import load as load_suite  # noqa: E402
 
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.artifact import identify_checkpoint  # noqa: E402
-from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1  # noqa: E402
-from aadistill.autoinit.metrics import StateEvaluator  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1
-from aadistill.autoinit import stage1_selection  # noqa: E402
-from aadistill.autoinit.search import (  # noqa: E402
-    BeamSearch, Deadline, SearchConfig,
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
+from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1  # noqa: E402
+from aadistill.initialization.planning.metrics import StateEvaluator  # noqa: E402
+from aadistill.initialization.planning.ranking import PARETO_V1, SCHEDULE_V1
+from aadistill.initialization.planning import stage1_selection
+from aadistill.initialization.planning.search import (# noqa: E402
+    BeamSearch,
+    Deadline,
+    SearchConfig,
 )
-from aadistill.autoinit.state import (  # noqa: E402
-    make_control_state, make_retained_state,
+from aadistill.initialization.specs.state import (# noqa: E402
+    make_control_state,
+    make_retained_state,
 )
 
 #: Imported, not restated. They live in `phase_a_frozen` so a recovery

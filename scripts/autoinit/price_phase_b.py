@@ -52,8 +52,8 @@ from plan_search import (  # noqa: E402
     TARGET, TEACHER, probe_cost,
 )
 
-from aadistill.autoinit.cost import L40S_MEASURED, price_search  # noqa: E402
-from aadistill.autoinit.ranking import SCHEDULE_V1  # noqa: E402
+from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
+from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 
 #: Attempt 7's probe records — the only Phase-A behavioural evidence that exists.
 PROBES = REPO_ROOT / "logs/autoinit_recovery_continuation_attempt7/probes"

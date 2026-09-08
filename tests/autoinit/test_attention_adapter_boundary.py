@@ -33,17 +33,21 @@ import torch
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.device import model_device  # noqa: E402
-from aadistill.autoinit.operators import attention_activation  # noqa: E402
-from aadistill.autoinit.operators.attention_activation import (  # noqa: E402
-    ATTN_OUT_ROLE, QUERY_ROLE, attention_out_projection, query_projection,
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.device import model_device  # noqa: E402
+from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention_activation import (# noqa: E402
+    ATTN_OUT_ROLE,
+    QUERY_ROLE,
+    attention_out_projection,
+    query_projection,
     select_q_heads_by_score,
 )
-from aadistill.autoinit.operators.base import (  # noqa: E402
-    OperatorContext, get_implementation,
+from aadistill.initialization.operators.base import (# noqa: E402
+    OperatorContext,
+    get_implementation,
 )
-from aadistill.init.attention_stats import AttentionHeadStatsCollector  # noqa: E402
+from aadistill.initialization.statistics.attention import AttentionHeadStatsCollector  # noqa: E402
 
 ADAPTER = get_adapter("qwen3")
 IMPL = "attention.activation_importance_v1"
@@ -137,7 +141,7 @@ def test_the_collector_refuses_something_it_cannot_hook():
 
 def test_mutation_the_collector_source_names_no_family_attribute():
     """Reintroducing the walk must be visible, not merely unlikely."""
-    import aadistill.init.attention_stats as AS
+    import aadistill.initialization.statistics.attention as AS
 
     src = Path(AS.__file__).read_text()
     code = "\n".join(line for line in src.splitlines()
@@ -162,7 +166,7 @@ def test_the_operator_resolves_projections_through_role_maps(teacher,
 
 def test_a_family_without_the_roles_fails_closed():
     """An adapter that cannot name these roles is refused, not guessed around."""
-    from aadistill.autoinit.arch import UnsupportedCapability
+    from aadistill.initialization.specs.arch import UnsupportedCapability
 
     class _RolelessAdapter:
         family = "roleless"

@@ -46,16 +46,21 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V2,
 )
-from aadistill.autoinit.generation import generation_source_digest  # noqa: E402
-from aadistill.autoinit.phase_b_continuation import (  # noqa: E402
-    BOUND_EVIDENCE, CONTINUATION_PLAN_V1, CONTINUATION_SOURCE_FILES_V2,
-    ContinuationAuthorization, continuation_source_digest,
+from aadistill.initialization.planning.generation import generation_source_digest  # noqa: E402
+from scripts.experiments.phase_b.continuation import (# noqa: E402
+    BOUND_EVIDENCE,
+    CONTINUATION_PLAN_V1,
+    CONTINUATION_SOURCE_FILES_V2,
+    ContinuationAuthorization,
+    continuation_source_digest,
 )
-from aadistill.autoinit.recovery import (  # noqa: E402
-    recovery_scoring_contract, trainer_source_digest,
+from aadistill.initialization.planning.recovery import (# noqa: E402
+    recovery_scoring_contract,
+    trainer_source_digest,
 )
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 

@@ -39,13 +39,21 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V2_DOMAIN_WEIGHTS,
-    REASONING_HEAVY_V2_SAMPLE_RULE, REASONING_HEAVY_V2_SEED,
-    REASONING_HEAVY_V2_TOKEN_BUDGET, mixture_content_sha256,
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V2_DOMAIN_WEIGHTS,
+    REASONING_HEAVY_V2_SAMPLE_RULE,
+    REASONING_HEAVY_V2_SEED,
+    REASONING_HEAVY_V2_TOKEN_BUDGET,
+    mixture_content_sha256,
 )
-from aadistill.autoinit.reweight import (  # noqa: E402
-    MAX_SUPPORT, NEAREST, largest_remainder, realize, repair_quotas, summarize,
+from aadistill.initialization.statistics.reweight import (# noqa: E402
+    MAX_SUPPORT,
+    NEAREST,
+    largest_remainder,
+    realize,
+    repair_quotas,
+    summarize,
 )
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 

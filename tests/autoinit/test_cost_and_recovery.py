@@ -11,10 +11,13 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.artifact import CheckpointIdentity, ShardRecord  # noqa: E402
-from aadistill.autoinit.cost import (  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.specs.artifact import (# noqa: E402
+    CheckpointIdentity,
+    ShardRecord,
+)
+from aadistill.runtime.cost import (# noqa: E402
     A100_80GB_ESTIMATED,
     CPU_STATS_SECONDS_PER_TOKEN,
     L40S_MEASURED,
@@ -27,9 +30,9 @@ from aadistill.autoinit.cost import (  # noqa: E402
     price_search,
     profile_multiplicity,
 )
-from aadistill.autoinit.metrics import StateEvaluation  # noqa: E402
-from aadistill.autoinit.operators import V1_IMPLEMENTATIONS  # noqa: E402
-from aadistill.autoinit.recovery import (  # noqa: E402
+from aadistill.initialization.planning.metrics import StateEvaluation  # noqa: E402
+from aadistill.initialization.operators import V1_IMPLEMENTATIONS  # noqa: E402
+from aadistill.initialization.planning.recovery import (# noqa: E402
     CATASTROPHIC_V1,
     E1_KD_HEAVY_0860K,
     PREFLIGHT_PLAN_V1,
@@ -43,8 +46,11 @@ from aadistill.autoinit.recovery import (  # noqa: E402
     assert_preregistered,
     probe_configs,
 )
-from aadistill.autoinit.state import child_state, make_root_state  # noqa: E402
-from aadistill.autoinit.state import OperatorStep  # noqa: E402
+from aadistill.initialization.specs.state import (# noqa: E402
+    child_state,
+    make_root_state,
+)
+from aadistill.initialization.specs.state import OperatorStep  # noqa: E402
 from test_frozen_records import TARGET_596M, TEACHER_36  # noqa: E402
 
 ADAPTER = get_adapter("qwen3")
@@ -232,7 +238,7 @@ def test_the_equivalence_interval_is_seed_aware():
 
 
 def test_the_feasibility_floor_is_seed_aware_and_has_an_absolute_guard():
-    from aadistill.autoinit.recovery import FeasibilityRule
+    from aadistill.initialization.planning.recovery import FeasibilityRule
 
     rule = FeasibilityRule(n_pooled=380)
     tight = rule.components(0.73, 0.73, 0.73)
@@ -258,7 +264,7 @@ def test_selection_refuses_to_run_before_the_control_is_characterized():
 
 
 def caps(**overrides):
-    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1
+    from aadistill.initialization.planning.recovery import CAPABILITY_SCHEMA_V1
 
     base = {c: {"usable_rollout_rate": 0.6, "n": 30, "usable": 18}
             for c in CAPABILITY_SCHEMA_V1.expected}
@@ -267,7 +273,10 @@ def caps(**overrides):
 
 
 def test_a_missing_capability_breakdown_raises_rather_than_passing():
-    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1, CapabilitySchemaError
+    from aadistill.initialization.planning.recovery import (
+        CAPABILITY_SCHEMA_V1,
+        CapabilitySchemaError,
+    )
 
     p = plan(capability_schema=CAPABILITY_SCHEMA_V1)
     rows = [{"state_id": "c", "usable_rollout_rate": 0.8, "correct_overall": 0.2}]
@@ -289,7 +298,10 @@ def test_a_missing_capability_breakdown_raises_rather_than_passing():
      "capability set"),
 ])
 def test_malformed_capability_metrics_fail_closed(mutation, pattern):
-    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1, CapabilitySchemaError
+    from aadistill.initialization.planning.recovery import (
+        CAPABILITY_SCHEMA_V1,
+        CapabilitySchemaError,
+    )
 
     breakdown = caps()
     for key, value in mutation.items():
@@ -306,7 +318,7 @@ def test_malformed_capability_metrics_fail_closed(mutation, pattern):
 
 def test_no_defaults_are_invented_for_missing_capability_values():
     """'missing -> 1.0' or 'missing -> 0.0' would turn a data bug into a pass."""
-    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1
+    from aadistill.initialization.planning.recovery import CAPABILITY_SCHEMA_V1
 
     source = (REPO / "src/aadistill/autoinit/recovery.py").read_text()
     body = source[source.index("    def validate(self, result"):
@@ -326,7 +338,7 @@ def test_no_defaults_are_invented_for_missing_capability_values():
 
 def test_the_catastrophic_capability_rule_is_enforced_at_both_rungs():
     """A candidate that collapses on one capability is excluded mechanically."""
-    from aadistill.autoinit.recovery import CapabilitySchema
+    from aadistill.initialization.planning.recovery import CapabilitySchema
 
     p = plan(capability_schema=CapabilitySchema(expected=("tool", "gsm8k"),
                                                 required_counts=()))
@@ -377,7 +389,7 @@ def test_without_a_capability_contract_the_rule_is_disabled_not_silently_passing
 
 def test_the_catastrophic_rule_needs_the_control_to_fire():
     """No control row means no reference; the report says so rather than passing."""
-    from aadistill.autoinit.recovery import CapabilitySchema
+    from aadistill.initialization.planning.recovery import CapabilitySchema
 
     p = plan(capability_schema=CapabilitySchema(expected=("tool",),
                                                 required_counts=()))
@@ -391,7 +403,7 @@ def test_the_catastrophic_rule_needs_the_control_to_fire():
 
 def test_the_rule_does_not_fire_when_the_control_is_also_weak():
     """A capability the incumbent cannot do either is not the candidate's failure."""
-    from aadistill.autoinit.recovery import CapabilitySchema
+    from aadistill.initialization.planning.recovery import CapabilitySchema
 
     p = plan(capability_schema=CapabilitySchema(expected=("tool",),
                                                 required_counts=()))
@@ -406,7 +418,7 @@ def test_the_rule_does_not_fire_when_the_control_is_also_weak():
 
 
 def test_the_catastrophic_rule_is_part_of_the_plan_hash():
-    from aadistill.autoinit.recovery import CatastrophicCapabilityRule
+    from aadistill.initialization.planning.recovery import CatastrophicCapabilityRule
 
     base = plan()
     looser = plan(catastrophic=CatastrophicCapabilityRule(candidate_max=0.01))
@@ -466,7 +478,7 @@ def test_a_clear_lead_resolves(teacher_spec, target_spec):
 
 
 def test_correctness_is_defined_as_correct_in_a_usable_rollout():
-    from aadistill.autoinit.recovery import score_recovery_row
+    from aadistill.initialization.planning.recovery import score_recovery_row
 
     answered_then_looped = score_recovery_row(usable=False, scorer_correct=True)
     assert answered_then_looped["correct"] is False
@@ -480,7 +492,10 @@ def test_correctness_is_defined_as_correct_in_a_usable_rollout():
 
 
 def test_the_scoring_contract_names_the_offending_prompt():
-    from aadistill.autoinit.recovery import ScoringContractError, validate_scored_rows
+    from aadistill.initialization.planning.recovery import (
+        ScoringContractError,
+        validate_scored_rows,
+    )
 
     good = [{"id": "a", "usable": True, "correct": True, "scorable": True}]
     assert validate_scored_rows(good)["correct"] == 1
@@ -588,7 +603,7 @@ def test_the_third_seed_is_offered_to_a_tied_control_too():
 
 def test_pooled_counts_are_not_averaged_rates():
     """The distortion the frozen definition exists to prevent."""
-    from aadistill.autoinit.recovery import POOLED_COUNTS_V1
+    from aadistill.initialization.planning.recovery import POOLED_COUNTS_V1
 
     per_seed = [
         {"seed": SEED_SA, "n": 100, "usable": 30, "correct": 12},
@@ -607,7 +622,7 @@ def test_pooled_counts_are_not_averaged_rates():
 
 
 def test_pooling_extends_to_a_third_seed_and_refuses_bad_input():
-    from aadistill.autoinit.recovery import SEED_SC, POOLED_COUNTS_V1
+    from aadistill.initialization.planning.recovery import SEED_SC, POOLED_COUNTS_V1
 
     three = POOLED_COUNTS_V1.pool([
         {"seed": SEED_SA, "n": 50, "usable": 25, "correct": 10},
@@ -626,7 +641,7 @@ def test_pooling_extends_to_a_third_seed_and_refuses_bad_input():
 
 
 def test_a_candidate_with_no_usable_rollouts_has_no_conditional_accuracy():
-    from aadistill.autoinit.recovery import POOLED_COUNTS_V1
+    from aadistill.initialization.planning.recovery import POOLED_COUNTS_V1
 
     pooled = POOLED_COUNTS_V1.pool([{"seed": SEED_SA, "n": 50, "usable": 0,
                                      "correct": 0}])
@@ -635,7 +650,7 @@ def test_a_candidate_with_no_usable_rollouts_has_no_conditional_accuracy():
 
 
 def test_the_aggregation_is_part_of_the_frozen_plan_identity():
-    from aadistill.autoinit.recovery import SeedAggregation
+    from aadistill.initialization.planning.recovery import SeedAggregation
 
     base = plan()
     other = plan(aggregation=SeedAggregation(aggregation_id="averaged_rates",
@@ -737,7 +752,7 @@ def test_probe_descriptors_are_identical_except_for_the_initialization(teacher_s
 
 
 def _protocol(**overrides):
-    from aadistill.autoinit.recovery import RecoveryProtocolFingerprint
+    from aadistill.initialization.planning.recovery import RecoveryProtocolFingerprint
 
     base = dict(
         pack="ladder_uniform_probe", pack_blocks_sha256="6f324cb0", rung=860_000,
@@ -772,7 +787,7 @@ def test_the_protocol_identity_excludes_the_treatment_and_the_replicate():
 
 
 def test_a_matched_pair_is_same_protocol_same_seed_different_init():
-    from aadistill.autoinit.recovery import RecoveryProbeIdentity
+    from aadistill.initialization.planning.recovery import RecoveryProbeIdentity
 
     protocol = _protocol()
     control = RecoveryProbeIdentity(protocol=protocol,
@@ -794,7 +809,7 @@ def test_a_matched_pair_is_same_protocol_same_seed_different_init():
     ({"protocol": "different"}, "protocol differs"),
 ])
 def test_a_pair_that_is_not_single_variable_is_refused(mutation, reason):
-    from aadistill.autoinit.recovery import RecoveryProbeIdentity
+    from aadistill.initialization.planning.recovery import RecoveryProbeIdentity
 
     protocol = _protocol()
     control = RecoveryProbeIdentity(protocol=protocol,
@@ -814,8 +829,10 @@ def test_a_pair_that_is_not_single_variable_is_refused(mutation, reason):
 
 def test_a_docs_only_change_does_not_move_the_trainer_digest():
     """Whole-repo HEAD must not be the material identity."""
-    from aadistill.autoinit.recovery import (
-        TRAINER_SOURCE_FILES_V1, trainer_source_digest)
+    from aadistill.initialization.planning.recovery import (
+        TRAINER_SOURCE_FILES_V1,
+        trainer_source_digest,
+    )
 
     first = trainer_source_digest(REPO)
     second = trainer_source_digest(REPO)
@@ -832,8 +849,10 @@ def test_a_docs_only_change_does_not_move_the_trainer_digest():
 
 def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
     """v1 pinned `capability.py` alone, which is how the defect hid."""
-    from aadistill.autoinit.recovery import (
-        RECOVERY_SCORING_FILES_V2, recovery_scoring_contract)
+    from aadistill.initialization.planning.recovery import (
+        RECOVERY_SCORING_FILES_V2,
+        recovery_scoring_contract,
+    )
 
     contract = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v2"
@@ -865,7 +884,7 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
     path = REPO / "logs/autoinit_phase_a_preregistration.json"
     if not path.is_file():
         pytest.skip("preregistration not present")
-    from aadistill.autoinit.recovery import recovery_scoring_contract
+    from aadistill.initialization.planning.recovery import recovery_scoring_contract
 
     prereg = json.loads(path.read_text())
     contract = prereg["recovery_scoring_contract"]
@@ -887,7 +906,7 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
 
 
 def test_a_missing_trainer_source_file_raises_rather_than_shrinking_the_digest():
-    from aadistill.autoinit.recovery import trainer_source_digest
+    from aadistill.initialization.planning.recovery import trainer_source_digest
 
     with pytest.raises(RecoveryAdmissionError, match="is missing"):
         trainer_source_digest(REPO, files=("src/aadistill/training/train.py",
@@ -898,7 +917,7 @@ def test_a_missing_trainer_source_file_raises_rather_than_shrinking_the_digest()
 
 
 def test_the_runtime_fingerprint_needs_more_than_a_torch_version():
-    from aadistill.autoinit.recovery import RuntimeEnvironmentFingerprint
+    from aadistill.initialization.planning.recovery import RuntimeEnvironmentFingerprint
 
     rt = RuntimeEnvironmentFingerprint.observe(image_digest="sha256:deadbeef")
     payload = rt.as_dict()
@@ -919,7 +938,7 @@ def test_the_runtime_fingerprint_needs_more_than_a_torch_version():
 
 def test_permanent_controls_cannot_be_trained_before_the_gates_pass():
     """The ordering exists so a failed gate does not cost $2.80 of dead controls."""
-    from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
+    from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1
 
     plan_ = PREFLIGHT_PLAN_V1
     assert [s.stage for s in plan_.stages] == [0, 1, 2, 3]
@@ -938,7 +957,7 @@ def test_permanent_controls_cannot_be_trained_before_the_gates_pass():
 
 
 def test_the_preflight_plan_is_hashable_and_orders_money_last():
-    from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
+    from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1
 
     assert len(PREFLIGHT_PLAN_V1.plan_hash) == 64
     names = [s.name for s in PREFLIGHT_PLAN_V1.stages]
@@ -1023,7 +1042,7 @@ def test_unknown_on_both_sides_is_never_reported_as_matched():
 @pytest.mark.parametrize("missing", [
     "trainer_source_digest", "trainer_source_set_version", "runtime_digest"])
 def test_an_unmaterialized_protocol_cannot_produce_a_matched_pair(missing):
-    from aadistill.autoinit.recovery import RecoveryProbeIdentity
+    from aadistill.initialization.planning.recovery import RecoveryProbeIdentity
 
     protocol = _protocol(**{missing: None})
     assert protocol.is_materialized is False
@@ -1047,7 +1066,7 @@ def test_an_unmaterialized_protocol_cannot_produce_a_matched_pair(missing):
 
 
 def test_materialization_fills_only_what_was_unknown_and_refuses_drift():
-    from aadistill.autoinit.recovery import RuntimeEnvironmentFingerprint
+    from aadistill.initialization.planning.recovery import RuntimeEnvironmentFingerprint
 
     runtime = RuntimeEnvironmentFingerprint.observe(image_digest="sha256:aa")
     trainer = {"digest": "trainer-1", "set_version": 1}
@@ -1074,8 +1093,10 @@ def test_materialization_fills_only_what_was_unknown_and_refuses_drift():
 
 
 def test_stage_2_compares_against_the_attested_hash_not_the_preregistered_one():
-    from aadistill.autoinit.recovery import (
-        RecoveryProbeIdentity, RuntimeEnvironmentFingerprint)
+    from aadistill.initialization.planning.recovery import (
+        RecoveryProbeIdentity,
+        RuntimeEnvironmentFingerprint,
+    )
 
     preregistered = _protocol(runtime_digest=None)
     attested = preregistered.materialized(
@@ -1106,7 +1127,7 @@ def test_stage_2_compares_against_the_attested_hash_not_the_preregistered_one():
 
 def test_stage_0_produces_the_frozen_protocol_artifact_before_controls():
     """The handshake is in the plan, not only in prose."""
-    from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
+    from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1
 
     stage0 = PREFLIGHT_PLAN_V1.stages[0]
     produced = " ".join(stage0.produces)
@@ -1119,7 +1140,7 @@ def test_stage_0_produces_the_frozen_protocol_artifact_before_controls():
 
 def test_every_preflight_stop_condition_is_a_whole_string():
     """A missing trailing comma serializes as one entry per character."""
-    from aadistill.autoinit.recovery import PreflightStage
+    from aadistill.initialization.planning.recovery import PreflightStage
 
     stage3 = PREFLIGHT_PLAN_V1.stages[3].as_dict()
     assert len(stage3["stop_conditions"]) == 1
@@ -1145,7 +1166,10 @@ def test_v1_pooled_correctness_over_the_wrong_denominator():
     `code` items have no oracle. v1 pools `correct` over `n`, so two seeds are
     divided by 380 when the scorer divided each seed by 170.
     """
-    from aadistill.autoinit.recovery import POOLED_COUNTS_V1, POOLED_COUNTS_V2
+    from aadistill.initialization.planning.recovery import (
+        POOLED_COUNTS_V1,
+        POOLED_COUNTS_V2,
+    )
 
     per_seed_v1 = [
         {"seed": SEED_SA, "n": 190, "usable": 120, "correct": 60},
@@ -1173,7 +1197,7 @@ def test_v1_pooled_correctness_over_the_wrong_denominator():
 
 def test_v2_refuses_a_row_that_omits_a_denominator():
     """A v1-shaped call must fail loudly, not default to `n` and `usable`."""
-    from aadistill.autoinit.recovery import POOLED_COUNTS_V2
+    from aadistill.initialization.planning.recovery import POOLED_COUNTS_V2
 
     with pytest.raises(ValueError, match="n_scorable is missing"):
         POOLED_COUNTS_V2.pool([{"seed": SEED_SA, "n": 190, "usable": 120,
@@ -1184,7 +1208,7 @@ def test_v2_refuses_a_row_that_omits_a_denominator():
 
 
 def test_v2_enforces_the_subset_relationships_between_denominators():
-    from aadistill.autoinit.recovery import POOLED_COUNTS_V2
+    from aadistill.initialization.planning.recovery import POOLED_COUNTS_V2
 
     def pool(**over):
         row = {"seed": SEED_SA, "n": 190, "usable": 120, "n_scorable": 170,
@@ -1203,7 +1227,7 @@ def test_v2_enforces_the_subset_relationships_between_denominators():
 
 
 def test_v2_leaves_a_candidate_with_no_scorable_usable_rollouts_undefined():
-    from aadistill.autoinit.recovery import POOLED_COUNTS_V2
+    from aadistill.initialization.planning.recovery import POOLED_COUNTS_V2
 
     pooled = POOLED_COUNTS_V2.pool([{"seed": SEED_SA, "n": 190, "usable": 20,
                                      "n_scorable": 170, "usable_scorable": 0,
@@ -1215,7 +1239,10 @@ def test_v2_leaves_a_candidate_with_no_scorable_usable_rollouts_undefined():
 
 def test_v1_is_preserved_unmodified_for_provenance():
     """Artifacts were written under v1; it stays readable and stays wrong."""
-    from aadistill.autoinit.recovery import POOLED_COUNTS_V1, POOLED_COUNTS_V2
+    from aadistill.initialization.planning.recovery import (
+        POOLED_COUNTS_V1,
+        POOLED_COUNTS_V2,
+    )
 
     assert POOLED_COUNTS_V1.version == 1 and POOLED_COUNTS_V2.version == 2
     assert POOLED_COUNTS_V1.as_dict()["formulas"]["correct_overall"] == \

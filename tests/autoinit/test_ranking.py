@@ -9,16 +9,26 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.metrics import MetricNamespaceError, StateEvaluation  # noqa: E402
-from aadistill.autoinit.ranking import (  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.planning.metrics import (# noqa: E402
+    MetricNamespaceError,
+    StateEvaluation,
+)
+from aadistill.initialization.planning.ranking import (# noqa: E402
     PARETO_V1,
     BeamRankingPolicy,
     Objective,
     RankingError,
 )
-from aadistill.autoinit.artifact import CheckpointIdentity, ShardRecord  # noqa: E402
-from aadistill.autoinit.state import OperatorStep, child_state, make_root_state  # noqa: E402
+from aadistill.initialization.specs.artifact import (# noqa: E402
+    CheckpointIdentity,
+    ShardRecord,
+)
+from aadistill.initialization.specs.state import (# noqa: E402
+    OperatorStep,
+    child_state,
+    make_root_state,
+)
 
 KL = "state.teacher_kl.equal_domain_mean"
 WORST = "state.teacher_kl.worst_domain"

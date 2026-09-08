@@ -362,9 +362,11 @@ def test_a_real_content_digest_is_material_in_full(tmp_path):
     branch treat `sha256:...` as a driver went undetected, because nothing ran
     it. Exercised directly here rather than waiting for a host that provides one.
     """
-    from aadistill.autoinit.generation_compat import (
-        ComparabilityError, comparable_generation_identity,
-        require_comparable, split_image_identity,
+    from aadistill.initialization.planning.generation_compat import (
+        ComparabilityError,
+        comparable_generation_identity,
+        require_comparable,
+        split_image_identity,
     )
 
     a = split_image_identity("runpod/pytorch:1.0@sha256:" + "a" * 64)

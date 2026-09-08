@@ -33,7 +33,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.recovery import recovery_scoring_contract  # noqa: E402
+from aadistill.initialization.planning.recovery import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Frozen at preregistration 1d70a91a... (9b4229c8 before the 2026-08-13

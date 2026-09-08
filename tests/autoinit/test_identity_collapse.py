@@ -20,8 +20,11 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.autoinit.identity_collapse import (  # noqa: E402
-    IdentityCollapseError, ROLE_PRECEDENCE, collapse, observations_per_seed,
+from aadistill.initialization.specs.identity_collapse import (# noqa: E402
+    IdentityCollapseError,
+    ROLE_PRECEDENCE,
+    collapse,
+    observations_per_seed,
     universe_identity,
 )
 
@@ -55,7 +58,7 @@ def test_collapse_never_consults_a_score_or_a_name():
     """The property that lets an amendment be written after the collision."""
     import inspect
 
-    from aadistill.autoinit import identity_collapse
+    from aadistill.initialization.specs import identity_collapse
 
     source = inspect.getsource(identity_collapse.collapse)
     for forbidden in ("correct_overall", "score", "rank", "path_label", "name"):

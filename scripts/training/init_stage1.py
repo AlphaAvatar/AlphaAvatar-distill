@@ -31,7 +31,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
 from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
-from aadistill.init.sandwich import init_student
+from aadistill.initialization.transforms.sandwich import init_student
 from aadistill.models.student import build_student, build_student_config
 from aadistill.models.teacher import load_teacher
 

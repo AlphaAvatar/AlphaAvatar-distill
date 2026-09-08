@@ -31,7 +31,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.continuation import (  # noqa: E402
+from scripts.experiments.recovery_continuation.plan import (# noqa: E402
     CONTINUATION_AUTHORIZATION,
     CONTINUATION_PLAN_V1,
     CONTINUATION_SCOPE,
@@ -40,7 +40,7 @@ from aadistill.autoinit.continuation import (  # noqa: E402
     continuation_manifest,
     import_permanent_control,
 )
-from aadistill.autoinit.recovery import RecoveryAdmissionError  # noqa: E402
+from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
 RECORDS = REPO / "logs/autoinit_permanent_controls"
 # Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
@@ -286,14 +286,14 @@ def test_the_continuation_does_not_train_and_cannot_reach_phase_a():
     assert manifest["manifest_sha256"]
     assert manifest["import_required_fields"] == list(IMPORT_REQUIRED_FIELDS)
     # It is a different plan from the preflight, not a mutation of it.
-    from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
+    from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1
     assert CONTINUATION_PLAN_V1.plan_hash != PREFLIGHT_PLAN_V1.plan_hash
     assert CONTINUATION_PLAN_V1.plan_id != PREFLIGHT_PLAN_V1.plan_id
 
 
 def test_advance_to_was_not_weakened():
     """The preflight gate must still refuse what it refused before."""
-    from aadistill.autoinit.recovery import PREFLIGHT_PLAN_V1
+    from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1
 
     with pytest.raises(RecoveryAdmissionError, match="no recorded result"):
         PREFLIGHT_PLAN_V1.advance_to(3, {0: {"passed": True}, 1: {"passed": True}})
@@ -544,7 +544,7 @@ def bare_launcher(mod, **overrides):
     then set explicitly, which is what makes it visible when the runner starts
     reading something new.
     """
-    from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION
+    from scripts.experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
     from aadistill.infrastructure.session_runner import SessionRunner
 
     args = launch_args(mod, **overrides)
@@ -782,11 +782,13 @@ def test_the_continuation_fetches_no_checkpoints_and_waits_on_no_train_log():
 def test_the_authorization_binds_the_code_that_actually_runs():
     """It digested the preflight's files, so an edited continuation driver —
     the executable that spends the money — passed the gate unnoticed."""
-    from aadistill.autoinit.authorization import (
-        HARNESS_SOURCE_FILES_V1, harness_source_digest,
+    from aadistill.governance.authorization import (
+        HARNESS_SOURCE_FILES_V1,
+        harness_source_digest,
     )
-    from aadistill.autoinit.continuation import (
-        CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1,
+    from scripts.experiments.recovery_continuation.plan import (
+        CONTINUATION_AUTHORIZATION,
+        CONTINUATION_HARNESS_SOURCE_FILES_V1,
     )
 
     files = set(CONTINUATION_HARNESS_SOURCE_FILES_V1)
@@ -807,8 +809,8 @@ def test_the_authorization_binds_the_code_that_actually_runs():
 
 
 def test_the_continuation_authorization_is_narrow_and_cannot_train():
-    from aadistill.autoinit.authorization import AuthorizationError
-    from aadistill.autoinit.continuation import CONTINUATION_AUTHORIZATION as auth
+    from aadistill.governance.authorization import AuthorizationError
+    from scripts.experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION as auth
 
     # Raised to $4.82/$5.12 after the attempt-7 review. The cap is CUMULATIVE
     # over the continuation -- $3.4244 spent across seven attempts plus one more
@@ -844,7 +846,7 @@ def test_the_session_commit_is_verified_against_the_authorization():
     if not auth_path.is_file():
         pytest.skip("no continuation authorization has been issued yet")
 
-    from aadistill.autoinit.authorization import SpendAuthorization
+    from aadistill.governance.authorization import SpendAuthorization
     auth = SpendAuthorization.load(auth_path)
     head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                           text=True, cwd=REPO).stdout.strip()
@@ -961,8 +963,10 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     import importlib.util
     import subprocess
 
-    from aadistill.autoinit.recovery import (
-        EquivalenceRule, FeasibilityRule, POOLED_COUNTS_V2,
+    from aadistill.initialization.planning.recovery import (
+        EquivalenceRule,
+        FeasibilityRule,
+        POOLED_COUNTS_V2,
     )
 
     spec = importlib.util.spec_from_file_location(
@@ -1196,7 +1200,7 @@ def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
     import sys
     import tempfile
 
-    from aadistill.autoinit.continuation import CONTINUATION_PLAN_V1
+    from scripts.experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
 
     setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
     lines = setup.splitlines(True)
@@ -1361,9 +1365,11 @@ def test_stage0_checks_evaluation_readiness_separately_from_identity():
     which control this is, readiness says whether the frozen evaluator can use
     the package.
     """
-    from aadistill.autoinit.continuation import (
-        EVALUATION_READY_ASSETS_V1, EvaluationReadinessError,
-        check_evaluation_ready)
+    from scripts.experiments.recovery_continuation.plan import (
+        EVALUATION_READY_ASSETS_V1,
+        EvaluationReadinessError,
+        check_evaluation_ready,
+    )
 
     assert set(EVALUATION_READY_ASSETS_V1) == {
         "chat_template.jinja", "tokenizer.json", "tokenizer_config.json"}
@@ -1395,7 +1401,7 @@ def test_stage0_checks_evaluation_readiness_separately_from_identity():
     assert driver.index("check_evaluation_ready(control.checkpoint_dir)") < \
         driver.index("def stage1"), "readiness must be gated in stage 0"
     # Kept out of the recovery identity, not folded into it.
-    from aadistill.autoinit.continuation import ImportedControl
+    from scripts.experiments.recovery_continuation.plan import ImportedControl
     assert not any("chat_template" in f or "tokenizer" in f
                    for f in ImportedControl.__dataclass_fields__)
 
@@ -1404,7 +1410,7 @@ def test_each_launcher_names_its_own_authorization_to_setup():
     """The preflight and the continuation must not share a binding."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
     import autoinit_continuation_launch as C
-    from aadistill.autoinit.continuation import CONTINUATION_PLAN_V1
+    from scripts.experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
 
     import importlib.util
 

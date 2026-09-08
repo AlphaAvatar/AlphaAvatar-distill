@@ -42,7 +42,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve()
 sys.path.insert(0, str(HERE.parents[2] / "src"))
 
-from aadistill.autoinit import pod_environment as pe  # noqa: E402
+from aadistill.runtime import pod_environment as pe
 
 #: stdout is a `tail -40` window on a failing setup, so the full lists go to the
 #: JSON and only what a human must see immediately is printed.

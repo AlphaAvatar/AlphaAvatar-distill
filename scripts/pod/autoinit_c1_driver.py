@@ -53,37 +53,56 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
-from aadistill.autoinit import c1_session as CS  # noqa: E402
-from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
-from aadistill.autoinit.c1_authorization import C1Authorization  # noqa: E402
-from aadistill.autoinit.c1_isolation import (  # noqa: E402
-    C0_PREREGISTRATION_SHA256, C1Arm, C1IsolationPlan, decide,
-    derive_recovery_seeds, paired_differences, stratified_cluster_bootstrap,
+from experiments.phase_c1 import session as CS
+from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from scripts.experiments.phase_c1.authorization import C1Authorization  # noqa: E402
+from scripts.experiments.phase_c1.isolation import (# noqa: E402
+    C0_PREREGISTRATION_SHA256,
+    C1Arm,
+    C1IsolationPlan,
+    decide,
+    derive_recovery_seeds,
+    paired_differences,
+    stratified_cluster_bootstrap,
 )
-from aadistill.autoinit.c1_packaging import build_evaluation_package  # noqa: E402
-from aadistill.autoinit.c1_probe_results import (  # noqa: E402
-    ARMS, C1ProbeRecord, build_probe_results, decision_inputs,
+from scripts.experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
+from scripts.experiments.phase_c1.probe_results import (# noqa: E402
+    ARMS,
+    C1ProbeRecord,
+    build_probe_results,
+    decision_inputs,
 )
-from aadistill.autoinit.c1_scoring import (  # noqa: E402
-    C1_BATTERY_CONTENT_SHA256, C1_METRIC_CONTRACT, c1_scoring_contract,
+from scripts.experiments.phase_c1.scoring import (# noqa: E402
+    C1_BATTERY_CONTENT_SHA256,
+    C1_METRIC_CONTRACT,
+    c1_scoring_contract,
 )
-from aadistill.autoinit.device_handoff import (  # noqa: E402
-    DeviceHandoffError, complete_release, cuda_memory, require_headroom,
+from aadistill.runtime.device_handoff import (# noqa: E402
+    DeviceHandoffError,
+    complete_release,
+    cuda_memory,
+    require_headroom,
     require_released,
 )
-from aadistill.autoinit.calibration import get_profile  # noqa: E402
-from aadistill.autoinit.fixed_path import (  # noqa: E402
-    FixedPathDigestMismatch, VerifiedSuffix, materialize_fixed_path,
-    materialize_fixed_path_suffix, write_replay_record,
+from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
+from aadistill.initialization.planning.fixed_path import (# noqa: E402
+    FixedPathDigestMismatch,
+    VerifiedSuffix,
+    materialize_fixed_path,
+    materialize_fixed_path_suffix,
+    write_replay_record,
     write_suffix_execution_record,
 )
-from aadistill.autoinit.generation import (  # noqa: E402
-    RecoveryEvaluationProtocol, declared_generation_protocol,
-    generation_source_digest, observe_generation_protocol,
+from aadistill.initialization.planning.generation import (# noqa: E402
+    RecoveryEvaluationProtocol,
+    declared_generation_protocol,
+    generation_source_digest,
+    observe_generation_protocol,
 )
-from aadistill.autoinit.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators import attention_activation  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 WS = Path("/workspace")
@@ -488,7 +507,7 @@ class C1Driver:
     # -- D and E: one replay, two individually observable gates -------------
     def stage_de(self) -> None:
         mark("STAGE_START:D")
-        from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
+        from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
 
         self.active_gate = "D"
         self.arms = CS.build_arm_specs(workdir_device="cuda")
@@ -646,7 +665,7 @@ class C1Driver:
     # -- F: the treatment arm, from the SAME verified parent ----------------
     def stage_f(self) -> None:
         mark("STAGE_START:F")
-        from aadistill.autoinit.adapters.qwen3 import QWEN3_ADAPTER
+        from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
 
         # Derived from the arm, not a second literal `"cuda"`: the two agreed,
         # but only because somebody kept them agreeing. Same rule as stage D.

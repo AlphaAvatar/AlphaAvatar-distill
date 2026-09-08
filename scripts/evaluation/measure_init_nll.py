@@ -51,8 +51,9 @@ from aadistill.evaluation.general_text import general_text_metrics  # noqa: E402
 from aadistill.evaluation.init_nll import masked_teacher_native_metrics  # noqa: E402
 from aadistill.infrastructure.env import code_state, hardware_report  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from aadistill.init.nll_gate import (  # noqa: E402
-    REQUIRED_MEASUREMENTS, checkpoint_fingerprint,
+from aadistill.initialization.transforms.nll_gate import (# noqa: E402
+    REQUIRED_MEASUREMENTS,
+    checkpoint_fingerprint,
 )
 
 sys.path.insert(0, str(REPO_ROOT / "scripts/evaluation"))

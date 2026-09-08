@@ -48,10 +48,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "pod"))
 
-from aadistill.autoinit.phase_a import PHASE_A_PLAN_V1  # noqa: E402
-from aadistill.autoinit.recovery_continuation import (  # noqa: E402
-    CONTINUATION_GRANT_PROSE_REQUIRED, RECOVERY_CONTINUATION_AUTHORIZATION,
-    RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization,
+from scripts.experiments.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
+from scripts.experiments.recovery_continuation.session import (# noqa: E402
+    CONTINUATION_GRANT_PROSE_REQUIRED,
+    RECOVERY_CONTINUATION_AUTHORIZATION,
+    RECOVERY_CONTINUATION_HARNESS_FILES_V1,
+    RecoveryContinuationAuthorization,
     recovery_continuation_harness_digest,
 )
 

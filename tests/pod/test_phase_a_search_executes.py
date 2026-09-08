@@ -22,13 +22,19 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.calibration import (  # noqa: E402
-    CalibrationProfile, CalibrationSource,
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    CalibrationProfile,
+    CalibrationSource,
 )
-from aadistill.autoinit.metrics import StateEvalSuite, SuiteItem  # noqa: E402
-from aadistill.autoinit.recovery import (  # noqa: E402
-    RecoveryAdmissionError, admit_leaves, probe_configs,
+from aadistill.initialization.planning.metrics import (# noqa: E402
+    StateEvalSuite,
+    SuiteItem,
+)
+from aadistill.initialization.planning.recovery import (# noqa: E402
+    RecoveryAdmissionError,
+    admit_leaves,
+    probe_configs,
 )
 
 TEACHER_GEOMETRY = dict(hidden_size=32, num_hidden_layers=6, intermediate_size=48,
@@ -159,9 +165,13 @@ def test_the_searched_leaves_and_control_pass_the_recovery_gate(searched):
     Running them here means the boundary between the search and the rungs is
     executed at $0 rather than discovered at hour four of a paid session.
     """
-    from aadistill.autoinit.recovery import (
-        CAPABILITY_SCHEMA_V1, CATASTROPHIC_V1, E1_KD_HEAVY_0860K,
-        EquivalenceRule, FeasibilityRule, SuccessiveHalvingPlan,
+    from aadistill.initialization.planning.recovery import (
+        CAPABILITY_SCHEMA_V1,
+        CATASTROPHIC_V1,
+        E1_KD_HEAVY_0860K,
+        EquivalenceRule,
+        FeasibilityRule,
+        SuccessiveHalvingPlan,
     )
 
     leaves = list(searched.leaves)
@@ -190,8 +200,8 @@ def test_the_searched_leaves_and_control_pass_the_recovery_gate(searched):
 def test_a_control_that_is_not_the_retained_checkpoint_is_refused(tmp_path):
     """The frozen-hash injection, exercised. A control that is not the retained
     checkpoint is not a control."""
-    from aadistill.autoinit.artifact import identify_checkpoint
-    from aadistill.autoinit.state import StateError, make_control_state
+    from aadistill.initialization.specs.artifact import identify_checkpoint
+    from aadistill.initialization.specs.state import StateError, make_control_state
 
     adapter = get_adapter("qwen3")
     teacher = _teacher()

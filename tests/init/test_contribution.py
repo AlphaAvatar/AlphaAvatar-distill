@@ -27,14 +27,14 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.init.contribution import (  # noqa: E402
+from aadistill.initialization.statistics.contribution import (# noqa: E402
     bypassed_blocks,
     distortion,
     domain_balanced_score,
     expected_evaluations,
     greedy_removal,
 )
-from aadistill.init.sandwich import (  # noqa: E402
+from aadistill.initialization.transforms.sandwich import (# noqa: E402
     depth_span_map,
     explicit_depth_map,
     init_student,

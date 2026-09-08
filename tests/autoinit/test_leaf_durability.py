@@ -23,10 +23,12 @@ import torch
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
-from aadistill.autoinit.artifact import identify_checkpoint  # noqa: E402
-from aadistill.autoinit.leaf_durability import (  # noqa: E402
-    LeafDurabilityError, free_bytes_at, persist_selected_leaves,
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
+from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
+from aadistill.runtime.leaf_durability import (# noqa: E402
+    LeafDurabilityError,
+    free_bytes_at,
+    persist_selected_leaves,
 )
 
 

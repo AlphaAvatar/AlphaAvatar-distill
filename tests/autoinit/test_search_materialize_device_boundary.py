@@ -34,13 +34,19 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import ArchSpec  # noqa: E402
-from aadistill.autoinit.metrics import StateEvaluation  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1, BeamSchedule  # noqa: E402
-from aadistill.autoinit.device import model_device  # noqa: E402
-from aadistill.autoinit.search import BeamSearch, SearchConfig  # noqa: E402
-from aadistill.autoinit.state import StateValidity  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
+from aadistill.initialization.planning.metrics import StateEvaluation  # noqa: E402
+from aadistill.initialization.planning.ranking import (# noqa: E402
+    PARETO_V1,
+    BeamSchedule,
+)
+from aadistill.initialization.device import model_device  # noqa: E402
+from aadistill.initialization.planning.search import (# noqa: E402
+    BeamSearch,
+    SearchConfig,
+)
+from aadistill.initialization.specs.state import StateValidity  # noqa: E402
 # `fake_family` is imported INSIDE the helpers below, never at module scope.
 # Importing it registers the toy kinds globally, and
 # `test_registry.py::test_the_kind_set_is_open` asserts they are absent. Two

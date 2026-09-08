@@ -37,14 +37,14 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.generation import (  # noqa: E402
+from aadistill.initialization.planning.generation import (# noqa: E402
     GENERATION_V1_DECLARED,
     ObservedGenerationError,
     declared_generation_protocol,
     generation_runtime_fingerprint,
     observe_generation_protocol,
 )
-from aadistill.autoinit.recovery import (  # noqa: E402
+from aadistill.initialization.planning.recovery import (# noqa: E402
     ObservedProtocolError,
     RecoveryProtocolFingerprint,
     observe_recovery_protocol,
@@ -488,8 +488,9 @@ def test_4c_every_material_field_is_actually_written_by_the_generator():
     A mapping that names a key the generator never writes fails closed on a real
     pod at Stage 3 — after both permanent controls have been paid for.
     """
-    from aadistill.autoinit.generation import (
-        NULLABLE_SUMMARY_FIELDS, SUMMARY_FIELD_PATHS,
+    from aadistill.initialization.planning.generation import (
+        NULLABLE_SUMMARY_FIELDS,
+        SUMMARY_FIELD_PATHS,
     )
 
     sys.path.insert(0, str(REPO / "scripts/evaluation"))
@@ -544,7 +545,7 @@ def frozen_repo(tmp_path: Path) -> Path:
                     repo / "artifacts/stage1/state_eval_v1")
     shutil.copytree(REPO / "artifacts/stage3/recovery_search_v2",
                     repo / "artifacts/stage3/recovery_search_v2")
-    from aadistill.autoinit.recovery import RECOVERY_SCORING_FILES_V2
+    from aadistill.initialization.planning.recovery import RECOVERY_SCORING_FILES_V2
     for rel in RECOVERY_SCORING_FILES_V2:
         dst = repo / rel
         dst.parent.mkdir(parents=True, exist_ok=True)

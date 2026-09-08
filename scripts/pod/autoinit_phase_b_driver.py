@@ -52,13 +52,18 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.autoinit.authorization import AuthorizationError  # noqa: E402
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
+from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V2,
 )
-from aadistill.autoinit.phase_b import (  # noqa: E402
-    CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS,
-    PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest,
+from scripts.experiments.phase_b.plan import (# noqa: E402
+    CANONICAL_CONTROL,
+    PHASE_A_EXCLUDED_LEAVES,
+    PHASE_A_IMPORTED_FINALISTS,
+    PHASE_B_PLAN_V1,
+    PhaseBAuthorization,
+    phase_b_source_digest,
 )
 #: Deliberately the SAME audit root the Phase-A driver and the recovery
 #: continuation write to. It is a per-pod scratch directory that the session

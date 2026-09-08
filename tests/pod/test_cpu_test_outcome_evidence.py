@@ -20,7 +20,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 
-from aadistill.autoinit import pod_environment as pe  # noqa: E402
+from aadistill.runtime import pod_environment as pe
 import summarize_pytest_outcomes as S  # noqa: E402
 
 SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
@@ -252,7 +252,7 @@ def test_the_junit_parser_keeps_the_reason_not_just_the_status(tmp_path):
 
 def test_the_summariser_is_inside_the_measured_harness():
     """It can refuse a pod whose suite passed, so a grant must measure it."""
-    from aadistill.autoinit.c1_authorization import C1_HARNESS_SOURCE_FILES_V1
+    from scripts.experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
     assert "scripts/pod/summarize_pytest_outcomes.py" in C1_HARNESS_SOURCE_FILES_V1
 
 
@@ -323,7 +323,7 @@ def test_the_reason_is_printed_not_only_stored(tmp_path, capsys):
 
 def test_mutation_dropping_failure_capture_is_caught(tmp_path, monkeypatch):
     """If read_junit stopped recording bodies, these tests must go red."""
-    from aadistill.autoinit import pod_environment as pe_mod
+    from aadistill.runtime import pod_environment as pe_mod
     real = pe_mod.read_junit
 
     def stripped(*a, **k):

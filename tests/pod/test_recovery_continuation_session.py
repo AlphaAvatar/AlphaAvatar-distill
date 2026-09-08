@@ -352,7 +352,7 @@ def test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off(
     if not HOST_LOCAL_PHASE_A_STORE.is_dir():
         pytest.skip("the preserved leaves are not on this host")
 
-    from aadistill.autoinit.metrics import StateEvaluator  # noqa: F401
+    from aadistill.initialization.planning.metrics import StateEvaluator  # noqa: E402
     from write_preregistration import build_frozen_plan
 
     mod = load(DRIVER, "rc_driver_exec")
@@ -381,7 +381,7 @@ def test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off(
 
     # The one substitution: a real StateEvaluation bound to the control's own
     # artifact digest, which is exactly what a GPU measurement would produce.
-    from aadistill.autoinit.state import StateEvaluation
+    from aadistill.initialization.specs.state import StateEvaluation
 
     def toy_measure(control, adapter):
         ev = StateEvaluation(

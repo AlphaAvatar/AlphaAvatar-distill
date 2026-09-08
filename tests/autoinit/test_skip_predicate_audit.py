@@ -42,7 +42,7 @@ def test_the_registry_holds_no_stale_entry(rec):
 
 def test_the_audit_covers_the_session_s_own_selection(rec):
     """Not `tests/` — the modules C1 actually runs, from its own manifest."""
-    from aadistill.autoinit import staging_contract as sc  # noqa: F401
+    from aadistill.runtime import staging_contract as sc
     assert rec["modules_scanned"] > 100
     assert rec["test_ignores"] == [
         "tests/data/test_recovery_corpus_pipeline.py",
@@ -147,7 +147,7 @@ def test_every_predicate_has_a_parity_resolution(rec):
 def test_the_audit_binds_the_cpu_test_environment_it_resolved_against(rec):
     """A parity verdict against an environment that has since moved is not a
     verdict. The contract's digest travels with the record."""
-    from aadistill.autoinit import cpu_test_env as cte
+    from aadistill.runtime import cpu_test_env as cte
     assert rec["cpu_test_environment"]["digest"] == cte.digest()
     assert rec["cpu_test_environment"]["set"]["CUDA_VISIBLE_DEVICES"] == ""
 
@@ -214,7 +214,7 @@ def test_the_measurement_scope_marker_is_not_a_simulator_marker(rec):
     predicate keyed on it decides the same way on both. `AAD_SYNTHETIC_HF_TOKEN`
     is set by one, which is why keying an artifact premise on it cost a grant.
     """
-    from aadistill.autoinit import cpu_test_env as cte
+    from aadistill.runtime import cpu_test_env as cte
     assert cte.SCOPE_MARKER == "AAD_C1_CPU_TEST_SCOPE"
     assert cte.SCOPE_MARKER in cte.overlay("/x"), (
         "the scope marker must be part of the shared contract, not set by one side")

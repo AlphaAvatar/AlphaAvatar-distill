@@ -29,10 +29,11 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.c1_authorization import (  # noqa: E402
-    C1_HARNESS_SOURCE_FILES_V1, c1_harness_digest,
+from scripts.experiments.phase_c1.authorization import (# noqa: E402
+    C1_HARNESS_SOURCE_FILES_V1,
+    c1_harness_digest,
 )
-from aadistill.autoinit.c1_scoring import C1_SCORING_FILES_V1  # noqa: E402
+from scripts.experiments.phase_c1.scoring import C1_SCORING_FILES_V1  # noqa: E402
 
 ENTRY_POINTS = ("scripts/pod/autoinit_c1_launch.py",
                 "scripts/pod/autoinit_c1_driver.py")

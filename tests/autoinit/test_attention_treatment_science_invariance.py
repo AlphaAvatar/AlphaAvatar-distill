@@ -32,17 +32,20 @@ import torch
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.device import model_device  # noqa: E402
-from aadistill.autoinit.operators import attention_activation  # noqa: E402
-from aadistill.autoinit.operators.attention_activation import (  # noqa: E402
-    ATTENTION_STATS_SPEC, select_q_heads_by_score,
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.device import model_device  # noqa: E402
+from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention_activation import (# noqa: E402
+    ATTENTION_STATS_SPEC,
+    select_q_heads_by_score,
 )
-from aadistill.autoinit.operators.base import (  # noqa: E402
-    OperatorContext, get_implementation,
+from aadistill.initialization.operators.base import (# noqa: E402
+    OperatorContext,
+    get_implementation,
 )
-from aadistill.init.attention_stats import (  # noqa: E402
-    AttentionHeadStatsCollector, head_write_energy,
+from aadistill.initialization.statistics.attention import (# noqa: E402
+    AttentionHeadStatsCollector,
+    head_write_energy,
 )
 
 ADAPTER = get_adapter("qwen3")
@@ -50,9 +53,7 @@ IMPL = "attention.activation_importance_v1"
 
 def out_projections_of(model):
     """The attention-output projections, resolved the way production does."""
-    from aadistill.autoinit.operators.attention_activation import (
-        attention_out_projection,
-    )
+    from aadistill.initialization.operators.attention_activation import attention_out_projection
     return [attention_out_projection(ADAPTER, b) for b in ADAPTER.blocks(model)]
 
 

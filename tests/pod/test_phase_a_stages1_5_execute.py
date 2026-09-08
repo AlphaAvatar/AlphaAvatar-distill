@@ -167,7 +167,7 @@ def calibration_subset(n: int):
     adaptation. Only the count is reduced, and only because a full-mixture
     depth pass is tens of minutes of CPU at a 151,936 vocabulary.
     """
-    from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1
+    from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1
     from phase_a_search import as_operator_items
 
     return as_operator_items(DOMAIN_BALANCED_V1.resolve(REPO))[:n]
@@ -199,7 +199,7 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
     if n_suite_items:
         items = items[:n_suite_items]
     control_dir = tmp_path / "canonical_control"
-    from aadistill.autoinit.arch import ArchSpec, get_adapter
+    from aadistill.initialization.specs.arch import ArchSpec, get_adapter
 
     adapter = get_adapter("qwen3")
     target_spec = ArchSpec.of("qwen3", TARGET_GEOMETRY)

@@ -10,16 +10,16 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-import aadistill.autoinit  # noqa: F401,E402
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
-from aadistill.autoinit.metrics import (  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
+from aadistill.initialization.planning.metrics import (# noqa: E402
     MetricLevel,
     MetricNamespaceError,
     OperatorLocalMetrics,
     metric_level,
 )
-from aadistill.autoinit.operators._common import SurgeryError  # noqa: E402
-from aadistill.autoinit.operators.base import (  # noqa: E402
+from aadistill.initialization.operators._common import SurgeryError  # noqa: E402
+from aadistill.initialization.operators.base import (# noqa: E402
     CalibrationNeed,
     ContractViolation,
     OperatorContext,
@@ -111,7 +111,7 @@ def test_depth_positional_reproduces_the_incumbent_map(teacher, teacher_spec,
                                                        target_spec, calibration_items,
                                                        profile):
     """The 6 -> 4 map here is the same rule that gives 36 -> 28 in production."""
-    from aadistill.init.sandwich import depth_span_map
+    from aadistill.initialization.transforms.sandwich import depth_span_map
 
     _, outcome = run("depth.positional_v0", teacher, teacher_spec, target_spec,
                      calibration_items, profile)
@@ -189,7 +189,7 @@ def test_width_projection_is_orthonormal_and_folds_the_norms(
 def test_a_child_with_an_unassigned_parameter_is_refused(teacher, teacher_spec,
                                                          target_spec):
     """The guard that stops a random tensor shipping inside a real checkpoint."""
-    from aadistill.autoinit.operators._common import ChildBuilder
+    from aadistill.initialization.operators._common import ChildBuilder
 
     builder = ChildBuilder(ADAPTER, teacher, teacher_spec.replace(num_hidden_layers=4),
                            seed=3)
@@ -216,8 +216,11 @@ class _Liar(OperatorImplementation):
         return OperatorPlan(self.impl_id, spec.replace(num_hidden_layers=4), 0, 0)
 
     def apply(self, ctx):
-        from aadistill.autoinit.operators._common import (
-            ChildBuilder, copy_embeddings_and_final_norm, copy_module_except)
+        from aadistill.initialization.operators._common import (
+            ChildBuilder,
+            copy_embeddings_and_final_norm,
+            copy_module_except,
+        )
 
         spec = ctx.parent_spec.replace(num_hidden_layers=4, intermediate_size=24)
         builder = ChildBuilder(ctx.adapter, ctx.model, spec, seed=1)
@@ -276,7 +279,7 @@ def test_an_operator_that_returns_its_parent_is_caught(
 
 def test_a_calibrated_operator_refuses_to_run_on_nothing(teacher, teacher_spec,
                                                          target_spec, profile):
-    from aadistill.autoinit.operators.base import OperatorError
+    from aadistill.initialization.operators.base import OperatorError
 
     impl = get_implementation("width.global_pca_v0")
     ctx = OperatorContext(adapter=ADAPTER, model=teacher, parent_spec=teacher_spec,

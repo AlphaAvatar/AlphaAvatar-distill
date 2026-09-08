@@ -46,8 +46,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
-from aadistill.autoinit.leaf_durability import verify_transferred_leaf  # noqa: E402
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
+from aadistill.runtime.leaf_durability import verify_transferred_leaf  # noqa: E402
 
 #: Transport only. Private. Not a scientific owner.
 TRANSPORT_REPO = "AlphaAvatar/aadistill-transport"

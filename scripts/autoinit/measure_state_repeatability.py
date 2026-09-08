@@ -24,10 +24,10 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from load_state_eval import load  # noqa: E402
 
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
-from aadistill.autoinit.artifact import identify_checkpoint  # noqa: E402
-from aadistill.autoinit.metrics import StateEvaluator  # noqa: E402
-from aadistill.autoinit.ranking import PARETO_V1  # noqa: E402
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
+from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
+from aadistill.initialization.planning.metrics import StateEvaluator  # noqa: E402
+from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"

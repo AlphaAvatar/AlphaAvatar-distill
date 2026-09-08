@@ -256,7 +256,10 @@ def test_code_is_behaviour_only_and_never_enters_correctness(scored):
 
 
 def test_the_capability_schema_is_enforced_not_defaulted(scored):
-    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1, CapabilitySchemaError
+    from aadistill.initialization.planning.recovery import (
+        CAPABILITY_SCHEMA_V1,
+        CapabilitySchemaError,
+    )
 
     result = scored["oracle"]
     assert result["capability_schema_enforced"] is True
@@ -333,7 +336,7 @@ def test_the_tool_usable_gate_separates_executability_from_correctness(scored):
 
 def test_an_argument_schema_failure_is_not_a_usability_failure(scored):
     """`tool_args_schema_ok` stays diagnostic, by explicit decision."""
-    from aadistill.autoinit.recovery import recovery_scoring_contract  # noqa: F401
+    from aadistill.initialization.planning.recovery import recovery_scoring_contract  # noqa: E402
 
     import json as _json
     gate = _json.loads(_json.dumps(
@@ -390,7 +393,7 @@ def test_an_unprompted_tool_call_is_still_a_protocol_violation(scored):
 
 def test_counts_not_rates_reach_the_pooled_aggregation(scored):
     """`pooled_counts@v1` refuses a float; the scorer must emit integers."""
-    from aadistill.autoinit.recovery import POOLED_COUNTS_V1
+    from aadistill.initialization.planning.recovery import POOLED_COUNTS_V1
 
     sa, sb = scored["oracle"], scored["contentless_perfect"]
     for result in (sa, sb):

@@ -338,8 +338,9 @@ def test_the_failure_archive_still_supports_diagnosis(cont, args):
 
 # 7. the no-search guarantee survives the repair.
 def test_the_no_search_guarantee_is_intact(cont, args):
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_OWN_PATH_FILES, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES,
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_OWN_PATH_FILES,
+        KNOWN_NEUTRALIZED_SEARCH_CALL_SITES,
         search_call_site_owners,
     )
 
@@ -614,8 +615,8 @@ def test_build_finalist_states_succeeds_when_only_the_staged_bytes_exist(
     from transformers import AutoConfig
 
     import autoinit_continuation_b_driver as drv
-    from aadistill.autoinit.arch import ArchSpec, get_adapter
-    from aadistill.autoinit.artifact import identify_checkpoint
+    from aadistill.initialization.specs.arch import ArchSpec, get_adapter
+    from aadistill.initialization.specs.artifact import identify_checkpoint
 
     repo = tmp_path / "pod_repo"
     monkeypatch.setattr(drv, "REPO", repo)
@@ -668,8 +669,8 @@ def test_a_staged_checkpoint_whose_identity_moved_still_fails_closed(
     from transformers import AutoConfig
 
     import autoinit_continuation_b_driver as drv
-    from aadistill.autoinit.arch import ArchSpec, get_adapter
-    from aadistill.autoinit.identity_collapse import IdentityCollapseError
+    from aadistill.initialization.specs.arch import ArchSpec, get_adapter
+    from aadistill.initialization.specs.identity_collapse import IdentityCollapseError
 
     import phase_a_frozen
 

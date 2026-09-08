@@ -159,8 +159,8 @@ def build_checkpoints(tmp_path: Path) -> dict[str, dict]:
     """
     from transformers import AutoConfig
 
-    from aadistill.autoinit.arch import ArchSpec, get_adapter
-    from aadistill.autoinit.artifact import identify_checkpoint
+    from aadistill.initialization.specs.arch import ArchSpec, get_adapter
+    from aadistill.initialization.specs.artifact import identify_checkpoint
 
     adapter = get_adapter("qwen3")
     target = ArchSpec.of("qwen3", TARGET_GEOMETRY)
@@ -215,7 +215,10 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
     `tie` controls only the battery numbers, so which branch of stage 4 runs is
     a property of the measurements rather than of a flag inside the driver.
     """
-    from aadistill.autoinit.identity_collapse import collapse, universe_identity
+    from aadistill.initialization.specs.identity_collapse import (
+        collapse,
+        universe_identity,
+    )
     from aadistill.infrastructure.manifest import sha256_json
 
     logs = tmp_path / "evidence"
@@ -356,9 +359,14 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
 
 
 def make_auth(evidence: dict, tmp_path: Path):
-    from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest,
+    from aadistill.initialization.calibration.profiles import (
+        DOMAIN_BALANCED_V1,
+        REASONING_HEAVY_V2,
+    )
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_PLAN_V1,
+        ContinuationAuthorization,
+        continuation_source_digest,
     )
 
     frozen = json.loads(FROZEN_PLAN.read_text())
@@ -431,7 +439,7 @@ def build(tmp_path, monkeypatch, *, tie: bool):
     search = Detonator("run_phase_a_search")
     monkeypatch.setattr(phase_a_search, "run_phase_a_search", search)
     monkeypatch.setattr(parent, "run_phase_a_search", search, raising=False)
-    import aadistill.autoinit as autoinit_pkg
+    import aadistill.initialization as autoinit_pkg
     monkeypatch.setattr(autoinit_pkg, "BeamSearch", beam)
     monkeypatch.setattr("aadistill.autoinit.search.BeamSearch", beam)
 
@@ -735,7 +743,7 @@ def test_a_moved_identity_fails_before_any_probe_is_reachable(
     assert driver.stage_bind() is False, (
         f"{field} moved and stage 0 passed anyway")
     assert not driver._trained, "a probe was bought despite unbound evidence"
-    from aadistill.autoinit.recovery import RecoveryAdmissionError
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
     with pytest.raises(RecoveryAdmissionError):
         driver.stage3()
 
@@ -765,7 +773,10 @@ def test_a_finalist_whose_BYTES_moved_fails_before_it_is_probed(
 
 def test_one_state_id_with_two_digests_is_refused_not_merged():
     """Collapse decides on materialized identity, and fails closed on conflict."""
-    from aadistill.autoinit.identity_collapse import IdentityCollapseError, collapse
+    from aadistill.initialization.specs.identity_collapse import (
+        IdentityCollapseError,
+        collapse,
+    )
 
     with pytest.raises(IdentityCollapseError, match="broken identity"):
         collapse([{"state_id": "s", "artifact_digest": "a" * 64, "role": "searched"},
@@ -792,7 +803,7 @@ def test_the_continuation_stage_map_contains_no_search_stage(resolved):
 
 @pytest.mark.parametrize("method", ["stage1", "run_search"])
 def test_the_inherited_search_entry_points_refuse(method, tmp_path, monkeypatch):
-    from aadistill.autoinit.recovery import RecoveryAdmissionError
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     driver, _, _ = build(tmp_path, monkeypatch, tie=False)
     with pytest.raises(RecoveryAdmissionError, match="continuation"):
@@ -803,7 +814,7 @@ def test_the_authorization_cannot_be_made_to_permit_a_search(tmp_path, monkeypat
     """`runs_search` is False BY TYPE — there is no field to set."""
     from dataclasses import fields
 
-    from aadistill.autoinit.phase_b_continuation import ContinuationAuthorization
+    from scripts.experiments.phase_b.continuation import ContinuationAuthorization
 
     driver, _, ev = build(tmp_path, monkeypatch, tie=False)
     assert driver.auth.runs_search is False
@@ -821,7 +832,7 @@ def test_the_parent_driver_contract_is_fully_satisfied():
     """
     import re
 
-    from aadistill.autoinit.phase_b_continuation import ContinuationAuthorization
+    from scripts.experiments.phase_b.continuation import ContinuationAuthorization
 
     source = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
     required = set(re.findall(r"self\.auth\.([a-z_]+)", source))
@@ -953,8 +964,9 @@ def test_the_frozen_source_set_IS_the_real_import_closure():
     Derived in a subprocess and compared, so adding an import without updating
     the set fails here rather than under a grant.
     """
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_RUNTIME_ONLY_FILES, CONTINUATION_SOURCE_FILES_V2,
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_RUNTIME_ONLY_FILES,
+        CONTINUATION_SOURCE_FILES_V2,
         derive_continuation_closure,
     )
 
@@ -971,7 +983,7 @@ def test_the_frozen_source_set_IS_the_real_import_closure():
 
 def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
     """Explicitly: these ARE in the digest, and that is correct."""
-    from aadistill.autoinit.phase_b_continuation import CONTINUATION_SOURCE_FILES_V2
+    from scripts.experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
 
     for loaded in ("src/aadistill/autoinit/search.py",
                    "src/aadistill/autoinit/ranking.py",
@@ -982,8 +994,9 @@ def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
 
 def test_only_the_known_neutralized_file_holds_a_search_call_site():
     """A call site appearing anywhere else fails, including in a library."""
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_OWN_PATH_FILES, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES,
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_OWN_PATH_FILES,
+        KNOWN_NEUTRALIZED_SEARCH_CALL_SITES,
         search_call_site_owners,
     )
 
@@ -1087,8 +1100,9 @@ def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
     the claim under test is the DIGEST contract, and the lineage half is
     exercised at the real launch commit.
     """
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_SOURCE_FILES_V2, continuation_source_digest,
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_SOURCE_FILES_V2,
+        continuation_source_digest,
     )
 
     observed = continuation_source_digest(REPO)
@@ -1104,10 +1118,11 @@ def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
 
 def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
     """One formula, three producers. Asserted on VALUES, not on shared imports."""
-    from aadistill.autoinit.authorization import harness_source_digest
-    from aadistill.autoinit.phase_b import phase_b_source_digest
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_SOURCE_FILES_V2, continuation_source_digest,
+    from aadistill.governance.authorization import harness_source_digest
+    from scripts.experiments.phase_b.plan import phase_b_source_digest
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_SOURCE_FILES_V2,
+        continuation_source_digest,
     )
     from aadistill.infrastructure.source_identity import canonical_source_digest
 
@@ -1119,7 +1134,7 @@ def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
 
     # And the shared helper is that same value, so the six remaining inlined
     # copies are byte-equivalent rather than merely believed to be.
-    from aadistill.autoinit.phase_a import sha256_file
+    from scripts.experiments.phase_a.plan import sha256_file
     entries = [{"path": r, "sha256": sha256_file(REPO / r)} for r in probe]
     assert canonical_source_digest(entries) == a
 
@@ -1131,8 +1146,8 @@ def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
 
 def test_the_shared_gate_refuses_a_digest_from_the_OLD_formula():
     """The exact defect, re-created. Must fail through the shared gate."""
-    from aadistill.autoinit.phase_a import sha256_file
-    from aadistill.autoinit.phase_b_continuation import CONTINUATION_SOURCE_FILES_V2
+    from scripts.experiments.phase_a.plan import sha256_file
+    from scripts.experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
     from aadistill.infrastructure.manifest import sha256_json
 
     stale = sha256_json([{"path": r, "sha256": sha256_file(REPO / r),
@@ -1150,8 +1165,8 @@ def test_the_shared_gate_refuses_a_reordered_file_set():
     A producer that preserved declaration order would agree only by luck, so the
     helper sorts rather than trusting the caller.
     """
-    from aadistill.autoinit.phase_a import sha256_file
-    from aadistill.autoinit.phase_b_continuation import CONTINUATION_SOURCE_FILES_V2
+    from scripts.experiments.phase_a.plan import sha256_file
+    from scripts.experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
     import hashlib
 
     reversed_files = tuple(reversed(sorted(CONTINUATION_SOURCE_FILES_V2)))
@@ -1166,8 +1181,9 @@ def test_the_shared_gate_refuses_a_reordered_file_set():
 
 def test_the_shared_gate_refuses_a_set_with_a_file_omitted():
     """A digest over a smaller executable than the one that runs."""
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_SOURCE_FILES_V2, continuation_source_digest,
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_SOURCE_FILES_V2,
+        continuation_source_digest,
     )
 
     short = tuple(f for f in CONTINUATION_SOURCE_FILES_V2
@@ -1192,8 +1208,9 @@ def test_the_shared_gate_refuses_a_stale_executable_digest():
 
 def test_the_gate_probe_itself_can_fail():
     """Guards the guard: a probe that always reports False proves nothing."""
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_SOURCE_FILES_V2, continuation_source_digest,
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_SOURCE_FILES_V2,
+        continuation_source_digest,
     )
 
     ok, _, record = _run_shared_gate(continuation_source_digest(REPO)["digest"],

@@ -32,14 +32,19 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from aadistill.autoinit.authorization import (  # noqa: E402
-    AuthorizationError, MICRO_PREFLIGHT_AUTHORIZATION, SpendAuthorization,
+from aadistill.governance.authorization import (# noqa: E402
+    AuthorizationError,
+    MICRO_PREFLIGHT_AUTHORIZATION,
+    SpendAuthorization,
 )
-from aadistill.autoinit.phase_a import (  # noqa: E402
-    PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PHASE_A_SCOPE,
-    PhaseAAuthorization, phase_a_harness_digest,
+from scripts.experiments.phase_a.plan import (# noqa: E402
+    PHASE_A_HARNESS_SOURCE_FILES_V1,
+    PHASE_A_PLAN_V1,
+    PHASE_A_SCOPE,
+    PhaseAAuthorization,
+    phase_a_harness_digest,
 )
-from aadistill.autoinit.recovery import RecoveryAdmissionError  # noqa: E402
+from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
 
 # --- the plan ---------------------------------------------------------------
@@ -186,7 +191,7 @@ def test_the_executing_plan_reproduces_the_frozen_one():
     `assert_preregistered` compares hashes, so a builder that produced a
     near-copy would fail the gate in a way that looks like tampering.
     """
-    from aadistill.autoinit.recovery import assert_preregistered
+    from aadistill.initialization.planning.recovery import assert_preregistered
     from write_preregistration import build_frozen_plan
 
     frozen = REPO / "logs/autoinit_phase_a_recovery_plan_frozen.json"
@@ -492,7 +497,7 @@ def test_a_pooled_row_satisfies_the_real_capability_schema(tmp_path):
     roughly seven hours of paid compute. Checked here against the REAL frozen
     schema rather than a hand-written shape.
     """
-    from aadistill.autoinit.recovery import CAPABILITY_SCHEMA_V1
+    from aadistill.initialization.planning.recovery import CAPABILITY_SCHEMA_V1
 
     mod = load_driver(tmp_path)
     # The capability names and counts the real scorer emits, per the Stage-3
@@ -527,8 +532,9 @@ def test_a_pooled_row_satisfies_the_real_capability_schema(tmp_path):
 
 def test_a_pooled_row_missing_a_capability_is_refused(tmp_path):
     """Proves the check above is load-bearing rather than decorative."""
-    from aadistill.autoinit.recovery import (
-        CAPABILITY_SCHEMA_V1, CapabilitySchemaError,
+    from aadistill.initialization.planning.recovery import (
+        CAPABILITY_SCHEMA_V1,
+        CapabilitySchemaError,
     )
 
     mod = load_driver(tmp_path)
@@ -724,7 +730,7 @@ def test_the_authorization_constant_matches_what_make_plan_prices():
     """The runner calls `require_within_cap(plan.hard_terminate_usd)`. If the
     granted cap is below the priced threshold the launcher aborts at $0 — safe,
     but only discovered at launch. Checked here instead."""
-    from aadistill.autoinit.phase_a import PHASE_A_AUTHORIZATION as A
+    from scripts.experiments.phase_a.plan import PHASE_A_AUTHORIZATION as A
 
     plan = phase_a_plan(authorized_usd=A.hard_cap_usd)
     A.require_within_cap(plan.hard_terminate_usd, what="planned hard threshold")
@@ -751,7 +757,7 @@ def test_the_authorization_constant_still_carries_its_placeholders():
     """The constant is a template; the issuer fills identity and time. If these
     were pre-filled, an artifact could be issued with a back-dated grant or a
     stale science-plan hash."""
-    from aadistill.autoinit.phase_a import PHASE_A_AUTHORIZATION as A
+    from scripts.experiments.phase_a.plan import PHASE_A_AUTHORIZATION as A
 
     assert A.granted_utc == "PLACEHOLDER"
     assert A.science_plan_hash == "PLACEHOLDER"
@@ -969,7 +975,7 @@ def test_the_launcher_declares_a_phase_a_authorization_not_a_spend_one():
     no module global to retarget now, and this asserts both halves: the right
     type is named, and the old mechanism is gone.
     """
-    from aadistill.autoinit.phase_a import PHASE_A_PLAN_V1, PhaseAAuthorization
+    from scripts.experiments.phase_a.plan import PHASE_A_PLAN_V1, PhaseAAuthorization
 
     spec = phase_a_spec()
     assert spec.authorization_loader.__self__ is PhaseAAuthorization
@@ -1375,7 +1381,7 @@ def test_the_deadline_derivation_moves_no_frozen_identity():
     """
     import json
 
-    from aadistill.autoinit.phase_a import PHASE_A_PLAN_V1
+    from scripts.experiments.phase_a.plan import PHASE_A_PLAN_V1
 
     SESSION = "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
     SCIENCE = "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"

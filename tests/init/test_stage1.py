@@ -15,8 +15,12 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.init.collect import ActivationStatsCollector
-from aadistill.init.sandwich import depth_span_map, init_student, select_q_heads
+from aadistill.initialization.statistics.collect import ActivationStatsCollector
+from aadistill.initialization.transforms.sandwich import (
+    depth_span_map,
+    init_student,
+    select_q_heads,
+)
 from aadistill.models.student import build_student, build_student_config
 
 

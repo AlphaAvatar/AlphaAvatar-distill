@@ -17,7 +17,10 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.init.collect import ActivationStatsCollector, residual_covariance
+from aadistill.initialization.statistics.collect import (
+    ActivationStatsCollector,
+    residual_covariance,
+)
 
 VOCAB = 128
 

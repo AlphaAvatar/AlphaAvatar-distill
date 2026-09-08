@@ -44,12 +44,15 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.autoinit.phase_a import (  # noqa: E402
-    PHASE_A_PLAN_V1, PHASE_A_SCOPE,
+from scripts.experiments.phase_a.plan import (# noqa: E402
+    PHASE_A_PLAN_V1,
+    PHASE_A_SCOPE,
 )
-from aadistill.autoinit.recovery_continuation import (  # noqa: E402
-    RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization,
-    SEARCH_ONLY_HARNESS_FILES, recovery_continuation_harness_digest,
+from scripts.experiments.recovery_continuation.session import (# noqa: E402
+    RECOVERY_CONTINUATION_HARNESS_FILES_V1,
+    RecoveryContinuationAuthorization,
+    SEARCH_ONLY_HARNESS_FILES,
+    recovery_continuation_harness_digest,
 )
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,
@@ -328,8 +331,8 @@ def selected_leaves_present_gate(ctx: SessionContext) -> tuple[bool, str]:
     does not duplicate it.
     """
     sys.path.insert(0, str(REPO_ROOT / "src"))
-    from aadistill.autoinit.arch import get_adapter
-    from aadistill.autoinit.leaf_durability import verify_transferred_leaf
+    from aadistill.initialization.specs.arch import get_adapter
+    from aadistill.runtime.leaf_durability import verify_transferred_leaf
 
     dur = json.loads((STAGE1_EVIDENCE / "selected_leaf_durability.json").read_text())
     adapter = get_adapter("qwen3")

@@ -36,10 +36,8 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "pod"))
 
-from aadistill.autoinit.c1_authorization import (  # noqa: E402
-    C1_HARNESS_SOURCE_FILES_V1,
-)
-from aadistill.autoinit.c1_isolation import derive_recovery_seeds  # noqa: E402
+from scripts.experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from scripts.experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
 from collect_artifacts import load_specs  # noqa: E402
 
 SUCCESS = "configs/autoinit/c1_artifacts.json"

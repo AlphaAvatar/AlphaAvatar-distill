@@ -21,9 +21,10 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
-from aadistill.autoinit.arch import get_adapter  # noqa: E402
-from aadistill.autoinit.stage1_import import (  # noqa: E402
-    Stage1ImportError, import_stage1_result,
+from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
+from aadistill.initialization.planning.stage1_import import (# noqa: E402
+    Stage1ImportError,
+    import_stage1_result,
 )
 
 D = REPO / "logs/autoinit_phase_a_attempt12"
@@ -101,7 +102,7 @@ def test_the_control_arrives_unmeasured_and_the_gate_says_so(frozen, evidence):
     continuation must measure it on the suite rather than invent it.
 
     The gate refusing here is the guarantee that it cannot be skipped."""
-    from aadistill.autoinit.state import StateError
+    from aadistill.initialization.specs.state import StateError
 
     out = run_import(frozen, *evidence)
     assert out.verification["control_is_unmeasured"] is True
@@ -205,7 +206,7 @@ def test_there_is_no_permissive_state_deserializer():
     a live candidate. The import reconstructs field by field from values it has
     re-derived instead.
     """
-    from aadistill.autoinit.state import InitializationState
+    from aadistill.initialization.specs.state import InitializationState
 
     assert not hasattr(InitializationState, "from_dict"), (
         "a permissive deserializer appeared; the strict import exists so the "

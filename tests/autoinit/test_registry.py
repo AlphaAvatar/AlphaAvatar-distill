@@ -9,9 +9,9 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-import aadistill.autoinit  # noqa: F401,E402  (registers the v1 library)
-from aadistill.autoinit.arch import ArchSpec, Capability  # noqa: E402
-from aadistill.autoinit.operators.base import (  # noqa: E402
+import aadistill.initialization  # noqa: F401,E402
+from aadistill.initialization.specs.arch import ArchSpec, Capability  # noqa: E402
+from aadistill.initialization.operators.base import (# noqa: E402
     CalibrationNeed,
     OperatorError,
     OperatorImplementation,
@@ -113,7 +113,7 @@ def test_the_committed_ledger_matches_the_live_registry():
 
 
 def test_dispatch_is_by_capability_not_by_name(teacher_spec, target_spec):
-    from aadistill.autoinit.arch import get_adapter
+    from aadistill.initialization.specs.arch import get_adapter
 
     adapter = get_adapter("qwen3")
     options = applicable_implementations(adapter, teacher_spec, target_spec)
@@ -135,7 +135,7 @@ def test_dispatch_is_by_capability_not_by_name(teacher_spec, target_spec):
 
 def test_an_operator_declaring_unmanaged_fields_is_not_applicable(target_spec):
     """Declaration is checked against the adapter, not assumed."""
-    from aadistill.autoinit.arch import get_adapter
+    from aadistill.initialization.specs.arch import get_adapter
 
     adapter = get_adapter("qwen3")
 
@@ -159,7 +159,7 @@ def test_an_operator_declaring_unmanaged_fields_is_not_applicable(target_spec):
 
 
 def test_an_operator_whose_field_is_already_at_target_is_not_offered(target_spec):
-    from aadistill.autoinit.arch import get_adapter
+    from aadistill.initialization.specs.arch import get_adapter
 
     adapter = get_adapter("qwen3")
     at_target_depth = target_spec.replace(hidden_size=64, intermediate_size=48,

@@ -38,11 +38,12 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 
 import phase_a_search  # noqa: E402
-from aadistill.autoinit import stage1_selection  # noqa: E402
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.artifact import identify_checkpoint  # noqa: E402
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
+from aadistill.initialization.planning import stage1_selection
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V2,
 )
 
 ADAPTER = get_adapter("qwen3")
@@ -82,7 +83,7 @@ def items_for(profile, n: int):
 
 @pytest.fixture(scope="module")
 def suite_bundle():
-    from aadistill.autoinit.metrics import StateEvalSuite
+    from aadistill.initialization.planning.metrics import StateEvalSuite
 
     suite, items, manifest = phase_a_search.load_suite(
         REPO / "artifacts/stage1/state_eval_v1")
@@ -129,7 +130,7 @@ def run_stage1(workdir, retained, *, top_n=5, n_items=2):
     control_dir = Path(workdir) / "control"
     ADAPTER.save(toy_model(TARGET_GEOMETRY, 4242), str(control_dir))
     teacher = toy_model(TEACHER_GEOMETRY, 7)
-    from aadistill.autoinit.metrics import StateEvalSuite  # noqa: F401
+    from aadistill.initialization.planning.metrics import StateEvalSuite  # noqa: E402
 
     return phase_a_search.run_phase_a_search(
         workdir=Path(workdir) / "search",

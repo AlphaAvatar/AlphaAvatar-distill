@@ -47,11 +47,14 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V2,
 )
-from aadistill.autoinit.phase_b_continuation import (  # noqa: E402
-    CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest,
+from scripts.experiments.phase_b.continuation import (# noqa: E402
+    CONTINUATION_PLAN_V1,
+    ContinuationAuthorization,
+    continuation_source_digest,
 )
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,
@@ -297,9 +300,11 @@ def no_search_gate(ctx: SessionContext) -> tuple[bool, str]:
        `stage1` the continuation overrides with a raise and never binds into
        its stage map. A call site appearing anywhere else fails here.
     """
-    from aadistill.autoinit.phase_b_continuation import (
-        CONTINUATION_OWN_PATH_FILES, FORBIDDEN_CALLS,
-        KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners,
+    from scripts.experiments.phase_b.continuation import (
+        CONTINUATION_OWN_PATH_FILES,
+        FORBIDDEN_CALLS,
+        KNOWN_NEUTRALIZED_SEARCH_CALL_SITES,
+        search_call_site_owners,
     )
 
     own = search_call_site_owners(REPO_ROOT, files=CONTINUATION_OWN_PATH_FILES)

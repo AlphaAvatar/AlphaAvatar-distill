@@ -51,7 +51,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from audit_tool_scoring import as_openai_calls, as_openai_tools  # noqa: E402
 
-from aadistill.autoinit.recovery import (  # noqa: E402
+from aadistill.initialization.planning.recovery import (# noqa: E402
     CAPABILITY_SCHEMA_V1,
     recovery_scoring_contract,
     score_recovery_row,

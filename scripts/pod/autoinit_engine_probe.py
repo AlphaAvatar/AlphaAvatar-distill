@@ -39,7 +39,7 @@ def main() -> None:
     from transformers import AutoConfig, AutoTokenizer
     from vllm import LLM
 
-    from aadistill.autoinit.generation import generation_runtime_fingerprint
+    from aadistill.initialization.planning.generation import generation_runtime_fingerprint
 
     from uncapped_eval import engine_config, resolve_context, resolve_stop_ids
 

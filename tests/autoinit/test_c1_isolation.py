@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.autoinit.c1_isolation import (  # noqa: E402
+from scripts.experiments.phase_c1.isolation import (# noqa: E402
     BOOTSTRAP_ITERATIONS,
     C0_PREREGISTRATION_SHA256,
     HISTORICAL_SEEDS,
@@ -92,7 +92,7 @@ def test_elimination_is_absent_from_the_type_not_merely_rejected():
 
 
 def test_it_does_not_subclass_the_phase_a_b_plan():
-    from aadistill.autoinit.recovery import SuccessiveHalvingPlan
+    from aadistill.initialization.planning.recovery import SuccessiveHalvingPlan
     assert not issubclass(C1IsolationPlan, SuccessiveHalvingPlan)
 
 

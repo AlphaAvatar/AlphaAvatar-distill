@@ -53,8 +53,10 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.autoinit.phase_a import (  # noqa: E402
-    PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization,
+from scripts.experiments.phase_a.plan import (# noqa: E402
+    PHASE_A_PLAN_V1,
+    PHASE_A_SCOPE,
+    PhaseAAuthorization,
 )
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
@@ -278,7 +280,7 @@ def _retained_digest(directory, adapter) -> tuple[str | None, str | None]:
     try:
         from transformers import AutoConfig
 
-        from aadistill.autoinit.artifact import identify_checkpoint
+        from aadistill.initialization.specs.artifact import identify_checkpoint
 
         spec = adapter.spec_from_config(AutoConfig.from_pretrained(str(directory)))
         return identify_checkpoint(
@@ -317,8 +319,8 @@ def fetch_selected_leaves(ctx: SessionContext, *, records: list | None = None,
         return []
 
     sys.path.insert(0, str(REPO_ROOT / "src"))
-    from aadistill.autoinit.arch import get_adapter
-    from aadistill.autoinit.leaf_durability import verify_transferred_leaf
+    from aadistill.initialization.specs.arch import get_adapter
+    from aadistill.runtime.leaf_durability import verify_transferred_leaf
 
     adapter = get_adapter("qwen3")
     staged = staged or f"{REPO}/artifacts/audit/autoinit_phase_a/selected_leaves"

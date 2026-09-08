@@ -25,12 +25,15 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 import autoinit_phase_a_launch as pal  # noqa: E402
 import autoinit_phase_b_driver as pbd  # noqa: E402
 import autoinit_phase_b_launch as pbl  # noqa: E402
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V2,
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V2,
 )
-from aadistill.autoinit.phase_a import PHASE_A_PLAN_V1  # noqa: E402
-from aadistill.autoinit.phase_b import (  # noqa: E402
-    PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest,
+from scripts.experiments.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
+from scripts.experiments.phase_b.plan import (# noqa: E402
+    PHASE_B_PLAN_V1,
+    PhaseBAuthorization,
+    phase_b_source_digest,
 )
 from autoinit_phase_a_driver import PhaseADriver  # noqa: E402
 
@@ -85,8 +88,8 @@ def test_it_is_governed_by_the_phase_b_plan_and_grant(driver):
 
 
 def test_a_phase_a_grant_cannot_govern_this_driver(tmp_path, monkeypatch):
-    from aadistill.autoinit.authorization import AuthorizationError
-    from aadistill.autoinit.phase_a import PHASE_A_AUTHORIZATION
+    from aadistill.governance.authorization import AuthorizationError
+    from scripts.experiments.phase_a.plan import PHASE_A_AUTHORIZATION
 
     path = tmp_path / "phase_a.json"
     path.write_text(json.dumps(PHASE_A_AUTHORIZATION.as_dict()))
@@ -104,7 +107,7 @@ def test_the_constructor_leaves_no_inherited_contract_unset(driver, tmp_path,
     monkeypatch.setattr("autoinit_phase_a_driver.AUDIT", tmp_path / "audit_a")
     monkeypatch.setattr(PhaseADriver, "AUTHORIZATION_PATH",
                         str(_auth_file(tmp_path / "a" if False else tmp_path)))
-    from aadistill.autoinit.phase_a import PhaseAAuthorization  # noqa: F401
+    from scripts.experiments.phase_a.plan import PhaseAAuthorization  # noqa: E402
 
     parent_attrs = {"a", "t0", "results", "evaluation_protocol", "plan",
                     "search_result", "leaves", "control_state", "rung1",
@@ -117,7 +120,7 @@ def test_stage_ordering_advances_through_the_phase_b_plan(driver, tmp_path,
                                                           monkeypatch):
     """`enter` must consult Phase B's plan, not Phase A's."""
     import autoinit_phase_a_driver as pad
-    from aadistill.autoinit.recovery import RecoveryAdmissionError
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     monkeypatch.setattr(pad, "STATUS", tmp_path / "phase_b.status")
     with pytest.raises(RecoveryAdmissionError):
@@ -356,8 +359,8 @@ def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
 
     Asserting `ok` again would mean the amendment had quietly become permission.
     """
-    from aadistill.autoinit.phase_b import phase_b_source_digest
-    from aadistill.autoinit.post_freeze import historical_accounted_for
+    from scripts.experiments.phase_b.plan import phase_b_source_digest
+    from aadistill.governance.post_freeze import historical_accounted_for
 
     prereg = json.loads(
         (REPO / "logs/autoinit_phase_b_preregistration.json").read_text())
@@ -439,7 +442,7 @@ def test_stage2_actually_receives_EIGHT_candidate_descriptors(driver):
     candidate, so without this the run would seed eight citations, use three, and
     compare a different set from the one the preregistration froze.
     """
-    from aadistill.autoinit.recovery import probe_configs
+    from aadistill.initialization.planning.recovery import probe_configs
 
     driver.leaves = [_FakeState(f"phaseb{i:026d}") for i in range(5)]
     driver.imported_finalists = [
@@ -512,7 +515,7 @@ def test_it_fails_closed_when_an_imported_finalist_lacks_its_evidence(
 
 def test_an_imported_finalist_with_contradicting_bytes_is_refused():
     """The digest decides, not the record."""
-    from aadistill.autoinit.state import StateError, make_retained_state
+    from aadistill.initialization.specs.state import StateError, make_retained_state
 
     artifact = types.SimpleNamespace(artifact_digest="actual", path="/pod/x",
                                      single_shard_sha256=None, is_sharded=False)
@@ -525,7 +528,7 @@ def test_an_imported_finalist_with_contradicting_bytes_is_refused():
 
 
 def test_an_imported_candidate_may_not_masquerade_as_the_control():
-    from aadistill.autoinit.state import StateError, make_retained_state
+    from aadistill.initialization.specs.state import StateError, make_retained_state
 
     artifact = types.SimpleNamespace(artifact_digest="d", path="/pod/x")
     with pytest.raises(StateError, match="use make_control_state"):
@@ -712,7 +715,7 @@ def test_the_secured_gate_refuses_a_FAILED_or_UNMATCHED_transfer(tmp_path):
 
 def _issued(tmp_path, **over):
     """A real, self-verifying authorization artifact, loaded back off disk."""
-    from aadistill.autoinit.phase_b import phase_b_source_digest
+    from scripts.experiments.phase_b.plan import phase_b_source_digest
 
     fields = dict(
         authorization_id="seam-test", granted_utc="2026-08-27T00:00:00Z",
@@ -739,8 +742,8 @@ def _issued(tmp_path, **over):
 def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     """Not an alias returning a stored string: the real derivation, over the real
     60 files, failing closed when it disagrees."""
-    from aadistill.autoinit.authorization import AuthorizationError
-    from aadistill.autoinit.phase_b import phase_b_source_digest
+    from aadistill.governance.authorization import AuthorizationError
+    from scripts.experiments.phase_b.plan import phase_b_source_digest
 
     auth, _ = _issued(tmp_path)
     observed = auth.require_harness(REPO)
@@ -955,8 +958,9 @@ def test_the_required_citations_are_the_eight_the_budget_assumes():
 
 def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
     """It decides whether a pod is created, so it is executable, not provenance."""
-    from aadistill.autoinit.phase_b import (
-        PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_SOURCE_SET_VERSION,
+    from scripts.experiments.phase_b.plan import (
+        PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
+        PHASE_B_SOURCE_SET_VERSION,
     )
     assert "scripts/autoinit/verify_historical_probe_reuse.py" in \
         PHASE_B_EXECUTABLE_SOURCE_FILES_V1
@@ -982,7 +986,7 @@ def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
 
 def _selection(scr: Path, state_ids, checkpoint_root="/workspace/aad/x"):
     """A real, self-verifying selection artifact where the collector looks."""
-    from aadistill.autoinit import stage1_selection
+    from aadistill.initialization.planning import stage1_selection
     from aadistill.infrastructure.manifest import sha256_json
 
     body = {
@@ -1065,7 +1069,7 @@ def test_the_failed_collector_FETCHES_the_selected_checkpoints(tmp_path, monkeyp
     monkeypatch.setattr(pal.subprocess, "run", fake_run)
     # Patched at its SOURCE: `fetch_selected_leaves` imports it inside the
     # function, so a name bound on the launcher module would never be consulted.
-    from aadistill.autoinit import leaf_durability
+    from aadistill.runtime import leaf_durability
 
     monkeypatch.setattr(leaf_durability, "verify_transferred_leaf",
                         lambda dest, rec, adapter: {
@@ -1107,7 +1111,8 @@ def test_the_selection_writer_produces_every_field_transfer_verification_reads()
     import inspect
     import re
 
-    from aadistill.autoinit import leaf_durability, stage1_selection
+    from aadistill.runtime import leaf_durability
+    from aadistill.initialization.planning import stage1_selection
 
     source = inspect.getsource(leaf_durability.verify_transferred_leaf)
     required = set(re.findall(r'record\["(\w+)"\]', source))

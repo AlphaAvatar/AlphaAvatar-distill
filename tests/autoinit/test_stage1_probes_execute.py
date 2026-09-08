@@ -84,7 +84,7 @@ def run(script: str, args: list[str], timeout: int = 900):
 def test_the_repeatability_probe_runs_and_reports_the_beam_objectives(
         tiny_teacher, tiny_suite, tmp_path):
     """The defect that cost a pod: it must read `values`, and report all three."""
-    from aadistill.autoinit.ranking import PARETO_V1
+    from aadistill.initialization.planning.ranking import PARETO_V1
 
     out = tmp_path / "rep.json"
     run("scripts/autoinit/measure_state_repeatability.py",
@@ -169,8 +169,10 @@ def test_the_generator_module_imports_and_its_identity_helpers_work(tiny_teacher
     import uncapped_eval as ue
     from transformers import AutoConfig
 
-    from aadistill.autoinit.generation import (
-        CONTEXT_RESOLUTION_RULE, GENERATION_DTYPE, MAX_TOKENS_RULE,
+    from aadistill.initialization.planning.generation import (
+        CONTEXT_RESOLUTION_RULE,
+        GENERATION_DTYPE,
+        MAX_TOKENS_RULE,
     )
 
     assert ue.SAMPLING == {"temperature": 0.0, "top_p": 1.0, "top_k": -1,

@@ -41,16 +41,18 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.autoinit.device_handoff import (  # noqa: E402
-    DeviceHandoffError, complete_release, cuda_memory, require_headroom,
+from aadistill.runtime.device_handoff import (# noqa: E402
+    DeviceHandoffError,
+    complete_release,
+    cuda_memory,
+    require_headroom,
     require_released,
 )
-from aadistill.autoinit.recovery import admit_leaves  # noqa: E402
-from aadistill.autoinit.recovery_continuation import (  # noqa: E402
-    RecoveryContinuationAuthorization,
-)
-from aadistill.autoinit.stage1_import import (  # noqa: E402
-    Stage1ImportError, import_stage1_result,
+from aadistill.initialization.planning.recovery import admit_leaves  # noqa: E402
+from scripts.experiments.recovery_continuation.session import RecoveryContinuationAuthorization  # noqa: E402
+from aadistill.initialization.planning.stage1_import import (# noqa: E402
+    Stage1ImportError,
+    import_stage1_result,
 )
 #: The frozen identities WITHOUT the search module. Importing `phase_a_search`
 #: here would put `run_phase_a_search` one attribute lookup away.
@@ -80,7 +82,7 @@ class RecoveryContinuationDriver(PhaseADriver):
     def stage1(self) -> bool:
         """Import the verified Stage-1 result. No search is reachable from here."""
         self.enter(1)
-        from aadistill.autoinit.arch import get_adapter
+        from aadistill.initialization.specs.arch import get_adapter
 
         adapter = get_adapter("qwen3")
         result = json.loads((EVIDENCE / "search_result.json").read_text())
@@ -171,7 +173,7 @@ class RecoveryContinuationDriver(PhaseADriver):
         import torch
         from transformers import AutoModelForCausalLM
 
-        from aadistill.autoinit.metrics import StateEvaluator
+        from aadistill.initialization.planning.metrics import StateEvaluator
         from load_state_eval import load as load_suite
 
         suite, items, _manifest = load_suite(STATE_EVAL)

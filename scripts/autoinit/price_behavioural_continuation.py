@@ -50,7 +50,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from price_phase_b import probe_cost  # noqa: E402
-from aadistill.autoinit.cost import L40S_MEASURED  # noqa: E402
+from aadistill.runtime.cost import L40S_MEASURED  # noqa: E402
 
 HISTORICAL = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
 ATTEMPT5 = REPO_ROOT / "logs/autoinit_attempt5_probe_reuse.json"

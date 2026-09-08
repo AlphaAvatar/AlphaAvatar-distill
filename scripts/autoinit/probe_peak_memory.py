@@ -16,7 +16,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"

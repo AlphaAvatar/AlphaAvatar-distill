@@ -18,15 +18,28 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from aadistill.autoinit.calibration import (  # noqa: E402
-    DOMAIN_BALANCED_V1, REASONING_HEAVY_V1, REASONING_HEAVY_V2,
-    REASONING_HEAVY_V2_SAMPLE_RULE, REASONING_HEAVY_V2_SEED, CalibrationError,
-    CalibrationProfile, CalibrationSource, buildable_profiles,
+from aadistill.initialization.calibration.profiles import (# noqa: E402
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V1,
+    REASONING_HEAVY_V2,
+    REASONING_HEAVY_V2_SAMPLE_RULE,
+    REASONING_HEAVY_V2_SEED,
+    CalibrationError,
+    CalibrationProfile,
+    CalibrationSource,
+    buildable_profiles,
     mixture_content_sha256,
 )
-from aadistill.autoinit.reweight import (  # noqa: E402
-    MAX_SUPPORT, NEAREST, ReweightError, largest_remainder, max_distinct_upto,
-    realize, repair_quotas, seed_order, summarize,
+from aadistill.initialization.statistics.reweight import (# noqa: E402
+    MAX_SUPPORT,
+    NEAREST,
+    ReweightError,
+    largest_remainder,
+    max_distinct_upto,
+    realize,
+    repair_quotas,
+    seed_order,
+    summarize,
 )
 
 ITEMS = REPO / "artifacts/stage1/reasoning_heavy_v2/items.jsonl"

@@ -41,9 +41,10 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.autoinit.authorization import SpendAuthorization  # noqa: E402
-from aadistill.autoinit.continuation import (  # noqa: E402
-    CONTINUATION_PLAN_V1, CONTINUATION_SCOPE,
+from aadistill.governance.authorization import SpendAuthorization  # noqa: E402
+from scripts.experiments.recovery_continuation.plan import (# noqa: E402
+    CONTINUATION_PLAN_V1,
+    CONTINUATION_SCOPE,
 )
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402

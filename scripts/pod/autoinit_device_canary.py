@@ -42,15 +42,19 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 import torch  # noqa: E402
 
-from aadistill.autoinit import device as device_contract  # noqa: E402
-from aadistill.autoinit.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.autoinit.calibration import DOMAIN_BALANCED_V1  # noqa: E402
-from aadistill.autoinit.device import model_device, stats_bytes  # noqa: E402
-from aadistill.autoinit.metrics import StateEvalSuite, SuiteItem  # noqa: E402
-from aadistill.autoinit.operators.base import (  # noqa: E402
-    OperatorContext, get_implementation,
+from aadistill.initialization import device as device_contract
+from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1  # noqa: E402
+from aadistill.initialization.device import model_device, stats_bytes  # noqa: E402
+from aadistill.initialization.planning.metrics import (# noqa: E402
+    StateEvalSuite,
+    SuiteItem,
 )
-from aadistill.autoinit.stats import StatsCache  # noqa: E402
+from aadistill.initialization.operators.base import (# noqa: E402
+    OperatorContext,
+    get_implementation,
+)
+from aadistill.initialization.statistics.spec import StatsCache  # noqa: E402
 
 CANONICAL = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 #: The launcher watches this file and decides the session's terminal state from
@@ -129,10 +133,10 @@ def main() -> int:
         raise SystemExit("this canary exists to run on CUDA; refusing to "
                          "certify anything from a CPU run")
 
-    from aadistill.autoinit.metrics import StateEvaluator
-    from aadistill.autoinit.search import BeamSearch, SearchConfig
-    from aadistill.autoinit.ranking import PARETO_V1, SCHEDULE_V1
-    from aadistill.autoinit.state import make_root_state
+    from aadistill.initialization.planning.metrics import StateEvaluator
+    from aadistill.initialization.planning.search import BeamSearch, SearchConfig
+    from aadistill.initialization.planning.ranking import PARETO_V1, SCHEDULE_V1
+    from aadistill.initialization.specs.state import make_root_state
 
     started = time.time()
     mark("CANARY_START")
