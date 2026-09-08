@@ -48,7 +48,12 @@ data/stage3_pilot/*/val/
 # Heavy local artifacts (activation caches, checkpoints, datasets, run outputs)
 artifacts/
 checkpoints/
-datasets/
+# Anchored, for the same reason `runs/` needed the exception below: unanchored,
+# it matched `configs/datasets/` and silently refused to track the dataset-asset
+# DECLARATIONS -- a small reviewable JSON that the pod must be able to read. The
+# file was written, never committed, and the pod simulation then hid it and
+# failed every test at conftest import. Heavy datasets live at the repo root.
+/datasets/
 wandb/
 runs/
 

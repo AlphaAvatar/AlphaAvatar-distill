@@ -1,0 +1,46 @@
+{
+ "schema": "aadistill.dataset_assets/v1",
+ "_contract": "The concrete datasets this project has frozen. EXPERIMENT DATA -- specific prompt counts, artifact paths, content hashes and leakage proofs -- which used to live in src/aadistill and register as a side effect of import. A caller loads this document explicitly. AUTHORIZES NOTHING.",
+ "_bytes_are_transcribed": "Every field is copied from the previous in-code declarations without edit, so every asset identity is unchanged.",
+ "assets": [
+  {
+   "asset_id": "battery.frozen_promotion_150",
+   "role": "final_promotion",
+   "path": null,
+   "description": "The 150-prompt frozen promotion battery sampled from the 0.86M rung; inclusion mask sha256 d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba. Retained reference: usable_rollout 0.7300, correct_overall 0.1867.",
+   "n_items": 150,
+   "content_sha256": null,
+   "protected": true,
+   "metadata": {
+    "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
+    "source": "E6/E6b"
+   }
+  },
+  {
+   "asset_id": "battery.capability_v2_846",
+   "role": "final_promotion",
+   "path": null,
+   "description": "capability-v2, 846 prompts across 7 sets, 0 leakage collisions at build time. Superset the 150-prompt promotion battery is drawn from, so it carries the same protection.",
+   "n_items": 846,
+   "content_sha256": null,
+   "protected": true,
+   "metadata": {
+    "builder": "scripts/data/build_capability_battery.py"
+   }
+  },
+  {
+   "asset_id": "calib.e8a_domain_balanced_67",
+   "role": "operator_calibration",
+   "path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+   "description": "E8a's frozen 67-item, 5-domain, 59,763-position calibration mixture. Already leakage-checked against the recovery rung and validation slice.",
+   "n_items": 67,
+   "content_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+   "protected": false,
+   "metadata": {
+    "leakage_proof": "artifacts/stage1/e8_calibration_v1/leakage.json",
+    "mixture_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+   }
+  }
+ ],
+ "authorizes": "nothing"
+}
