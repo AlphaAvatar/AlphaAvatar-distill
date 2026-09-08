@@ -36,13 +36,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.governance.authorization import HARNESS_SOURCE_FILES_V1  # noqa: E402
-from scripts.experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
-from scripts.experiments.phase_b.plan import (# noqa: E402
-    PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
-    phase_b_source_digest,
-)
-from scripts.experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2  # noqa: E402
-from scripts.experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from experiments.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, phase_b_source_digest  # noqa: E402
+from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2  # noqa: E402
+from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
 from aadistill.governance.post_freeze import (# noqa: E402
     HISTORICAL_LEDGER_PATH,
     HISTORICAL_LEDGER_SCHEMA,

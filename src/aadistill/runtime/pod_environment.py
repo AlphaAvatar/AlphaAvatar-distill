@@ -560,7 +560,7 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
     other change — `logs/**`, docs, README, preregistration, state, tests,
     source — means the sweep is owed again.
     """
-    from scripts.experiments.phase_c1.authorization import c1_harness_digest
+    from experiments.phase_c1.authorization import c1_harness_digest
 
     if record.get("schema") != SCHEMA:
         return False, f"unexpected schema {record.get('schema')!r}"

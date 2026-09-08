@@ -45,13 +45,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from scripts.experiments.phase_a.plan import (# noqa: E402
-    GRANT_PROSE_REQUIRED,
-    PHASE_A_AUTHORIZATION,
-    PHASE_A_HARNESS_SOURCE_FILES_V1,
-    PHASE_A_PLAN_V1,
-    phase_a_harness_digest,
-)
+from experiments.phase_a.plan import GRANT_PROSE_REQUIRED, PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, phase_a_harness_digest  # noqa: E402
 
 FROZEN_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
 

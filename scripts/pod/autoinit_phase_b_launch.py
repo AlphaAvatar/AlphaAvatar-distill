@@ -43,14 +43,7 @@ from aadistill.initialization.calibration.profiles import (# noqa: E402
 )
 from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
-from scripts.experiments.phase_b.plan import (# noqa: E402
-    CANONICAL_CONTROL,
-    PHASE_A_IMPORTED_FINALISTS,
-    PHASE_B_PLAN_V1,
-    PHASE_B_SEARCHED_LEAVES,
-    PhaseBAuthorization,
-    phase_b_source_digest,
-)
+from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, LocalAsset, MarkerPolicy, RelayInput, SessionContext,
     SessionSpec, SetupManifest, TeardownPolicy,

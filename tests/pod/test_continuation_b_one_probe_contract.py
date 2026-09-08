@@ -68,7 +68,7 @@ def descriptor(candidate: str, rung: int, seed: int):
 # --- 1. the attempt-4 reuse digest is AUTHORIZATION-bound -------------------
 
 def test_the_attempt4_reuse_digest_is_bound_evidence(drv):
-    from scripts.experiments.phase_b.continuation import BOUND_EVIDENCE
+    from experiments.phase_b.continuation import BOUND_EVIDENCE
 
     assert "attempt4_reuse_probes_dir_digest" in BOUND_EVIDENCE, (
         "Attempt 4's probe is a necessary citation — without it the session has "
@@ -84,7 +84,7 @@ def test_a_moved_attempt4_digest_fails_before_any_probe(drv, monkeypatch, tmp_pa
     """`require_evidence` is what stage 0 and the launcher's evidence gate call.
     A moved record must be refused there, not discovered on a pod."""
     from aadistill.governance.authorization import AuthorizationError
-    from scripts.experiments.phase_b.continuation import ContinuationAuthorization
+    from experiments.phase_b.continuation import ContinuationAuthorization
 
     observed = dict(drv.ContinuationDriver.observed_evidence())
     auth = ContinuationAuthorization(
@@ -232,7 +232,7 @@ def test_a_whitelist_that_names_the_wrong_probe_is_refused(launcher, drv,
 # --- the session plan says what the session does ---------------------------
 
 def test_the_session_plan_describes_the_one_probe_scope():
-    from scripts.experiments.phase_b.continuation import CONTINUATION_PLAN_V1
+    from experiments.phase_b.continuation import CONTINUATION_PLAN_V1
 
     assert CONTINUATION_PLAN_V1.version == 3, (
         "version 2 described 'one missing sb and at most two conditional sc', "
@@ -258,7 +258,7 @@ def test_the_session_plan_describes_the_one_probe_scope():
 # The stale value was only ever in the preregistration.
 
 def test_the_preregistration_binds_the_live_executable_digest():
-    from scripts.experiments.phase_b.continuation import continuation_source_digest
+    from experiments.phase_b.continuation import continuation_source_digest
 
     prereg = json.loads(
         (REPO / "logs/autoinit_continuation_b_preregistration.json").read_text())
@@ -295,7 +295,7 @@ def test_the_preregistration_binds_the_live_executable_digest():
 
 
 def test_the_preregistration_binds_the_live_session_plan_and_pricing():
-    from scripts.experiments.phase_b.continuation import CONTINUATION_PLAN_V1
+    from experiments.phase_b.continuation import CONTINUATION_PLAN_V1
 
     prereg = json.loads(
         (REPO / "logs/autoinit_continuation_b_preregistration.json").read_text())

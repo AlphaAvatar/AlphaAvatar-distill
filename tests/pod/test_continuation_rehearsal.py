@@ -31,15 +31,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from scripts.experiments.recovery_continuation.plan import (# noqa: E402
-    CONTINUATION_AUTHORIZATION,
-    CONTINUATION_PLAN_V1,
-    CONTINUATION_SCOPE,
-    IMPORT_REQUIRED_FIELDS,
-    ControlImportError,
-    continuation_manifest,
-    import_permanent_control,
-)
+from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, IMPORT_REQUIRED_FIELDS, ControlImportError, continuation_manifest, import_permanent_control  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
 RECORDS = REPO / "logs/autoinit_permanent_controls"
@@ -544,7 +536,7 @@ def bare_launcher(mod, **overrides):
     then set explicitly, which is what makes it visible when the runner starts
     reading something new.
     """
-    from scripts.experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
+    from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
     from aadistill.infrastructure.session_runner import SessionRunner
 
     args = launch_args(mod, **overrides)
@@ -786,10 +778,7 @@ def test_the_authorization_binds_the_code_that_actually_runs():
         HARNESS_SOURCE_FILES_V1,
         harness_source_digest,
     )
-    from scripts.experiments.recovery_continuation.plan import (
-        CONTINUATION_AUTHORIZATION,
-        CONTINUATION_HARNESS_SOURCE_FILES_V1,
-    )
+    from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1
 
     files = set(CONTINUATION_HARNESS_SOURCE_FILES_V1)
     for executable in ("scripts/pod/autoinit_continuation_launch.py",
@@ -810,7 +799,7 @@ def test_the_authorization_binds_the_code_that_actually_runs():
 
 def test_the_continuation_authorization_is_narrow_and_cannot_train():
     from aadistill.governance.authorization import AuthorizationError
-    from scripts.experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION as auth
+    from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION as auth
 
     # Raised to $4.82/$5.12 after the attempt-7 review. The cap is CUMULATIVE
     # over the continuation -- $3.4244 spent across seven attempts plus one more
@@ -1200,7 +1189,7 @@ def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
     import sys
     import tempfile
 
-    from scripts.experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
+    from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
 
     setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
     lines = setup.splitlines(True)
@@ -1365,11 +1354,7 @@ def test_stage0_checks_evaluation_readiness_separately_from_identity():
     which control this is, readiness says whether the frozen evaluator can use
     the package.
     """
-    from scripts.experiments.recovery_continuation.plan import (
-        EVALUATION_READY_ASSETS_V1,
-        EvaluationReadinessError,
-        check_evaluation_ready,
-    )
+    from experiments.recovery_continuation.plan import EVALUATION_READY_ASSETS_V1, EvaluationReadinessError, check_evaluation_ready
 
     assert set(EVALUATION_READY_ASSETS_V1) == {
         "chat_template.jinja", "tokenizer.json", "tokenizer_config.json"}
@@ -1401,7 +1386,7 @@ def test_stage0_checks_evaluation_readiness_separately_from_identity():
     assert driver.index("check_evaluation_ready(control.checkpoint_dir)") < \
         driver.index("def stage1"), "readiness must be gated in stage 0"
     # Kept out of the recovery identity, not folded into it.
-    from scripts.experiments.recovery_continuation.plan import ImportedControl
+    from experiments.recovery_continuation.plan import ImportedControl
     assert not any("chat_template" in f or "tokenizer" in f
                    for f in ImportedControl.__dataclass_fields__)
 
@@ -1410,7 +1395,7 @@ def test_each_launcher_names_its_own_authorization_to_setup():
     """The preflight and the continuation must not share a binding."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
     import autoinit_continuation_launch as C
-    from scripts.experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
+    from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
 
     import importlib.util
 

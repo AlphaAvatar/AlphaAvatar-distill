@@ -16,7 +16,7 @@ silently and still reads as though it applies.
 from __future__ import annotations
 
 from aadistill.governance.authorization import SpendAuthorization
-from scripts.experiments.phase_a.plan import GRANT_PROSE_REQUIRED
+from experiments.phase_a.plan import GRANT_PROSE_REQUIRED
 from aadistill.initialization.planning.recovery import PreflightPlan, PreflightStage
 
 #: One stage. The plan exists because an authorization binds to a plan hash, and

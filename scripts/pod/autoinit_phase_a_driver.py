@@ -79,12 +79,7 @@ from aadistill.initialization.planning.generation_compat import (# noqa: E402
     comparable_generation_identity,
     require_comparable,
 )
-from scripts.experiments.phase_a.plan import (# noqa: E402
-    PHASE_A_PLAN_V1,
-    PHASE_A_SCOPE,
-    PhaseAAuthorization,
-    phase_a_manifest,
-)
+from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_manifest  # noqa: E402
 from aadistill.initialization.planning.recovery import (# noqa: E402
     POOLED_COUNTS_V2,
     RecoveryAdmissionError,

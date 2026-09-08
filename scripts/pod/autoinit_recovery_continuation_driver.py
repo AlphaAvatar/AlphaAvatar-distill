@@ -49,7 +49,7 @@ from aadistill.runtime.device_handoff import (# noqa: E402
     require_released,
 )
 from aadistill.initialization.planning.recovery import admit_leaves  # noqa: E402
-from scripts.experiments.recovery_continuation.session import RecoveryContinuationAuthorization  # noqa: E402
+from experiments.recovery_continuation.session import RecoveryContinuationAuthorization  # noqa: E402
 from aadistill.initialization.planning.stage1_import import (# noqa: E402
     Stage1ImportError,
     import_stage1_result,

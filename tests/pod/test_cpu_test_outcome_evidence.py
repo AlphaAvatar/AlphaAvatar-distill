@@ -252,7 +252,7 @@ def test_the_junit_parser_keeps_the_reason_not_just_the_status(tmp_path):
 
 def test_the_summariser_is_inside_the_measured_harness():
     """It can refuse a pod whose suite passed, so a grant must measure it."""
-    from scripts.experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
+    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
     assert "scripts/pod/summarize_pytest_outcomes.py" in C1_HARNESS_SOURCE_FILES_V1
 
 

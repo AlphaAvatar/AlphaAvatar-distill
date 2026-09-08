@@ -29,12 +29,8 @@ from aadistill.initialization.calibration.profiles import (# noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V2,
 )
-from scripts.experiments.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
-from scripts.experiments.phase_b.plan import (# noqa: E402
-    PHASE_B_PLAN_V1,
-    PhaseBAuthorization,
-    phase_b_source_digest,
-)
+from experiments.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
+from experiments.phase_b.plan import PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 from autoinit_phase_a_driver import PhaseADriver  # noqa: E402
 
 HISTORICAL = REPO / "logs/autoinit_recovery_continuation_attempt7/probes"
@@ -89,7 +85,7 @@ def test_it_is_governed_by_the_phase_b_plan_and_grant(driver):
 
 def test_a_phase_a_grant_cannot_govern_this_driver(tmp_path, monkeypatch):
     from aadistill.governance.authorization import AuthorizationError
-    from scripts.experiments.phase_a.plan import PHASE_A_AUTHORIZATION
+    from experiments.phase_a.plan import PHASE_A_AUTHORIZATION
 
     path = tmp_path / "phase_a.json"
     path.write_text(json.dumps(PHASE_A_AUTHORIZATION.as_dict()))
@@ -107,7 +103,7 @@ def test_the_constructor_leaves_no_inherited_contract_unset(driver, tmp_path,
     monkeypatch.setattr("autoinit_phase_a_driver.AUDIT", tmp_path / "audit_a")
     monkeypatch.setattr(PhaseADriver, "AUTHORIZATION_PATH",
                         str(_auth_file(tmp_path / "a" if False else tmp_path)))
-    from scripts.experiments.phase_a.plan import PhaseAAuthorization  # noqa: E402
+    from experiments.phase_a.plan import PhaseAAuthorization  # noqa: E402
 
     parent_attrs = {"a", "t0", "results", "evaluation_protocol", "plan",
                     "search_result", "leaves", "control_state", "rung1",
@@ -359,7 +355,7 @@ def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
 
     Asserting `ok` again would mean the amendment had quietly become permission.
     """
-    from scripts.experiments.phase_b.plan import phase_b_source_digest
+    from experiments.phase_b.plan import phase_b_source_digest
     from aadistill.governance.post_freeze import historical_accounted_for
 
     prereg = json.loads(
@@ -715,7 +711,7 @@ def test_the_secured_gate_refuses_a_FAILED_or_UNMATCHED_transfer(tmp_path):
 
 def _issued(tmp_path, **over):
     """A real, self-verifying authorization artifact, loaded back off disk."""
-    from scripts.experiments.phase_b.plan import phase_b_source_digest
+    from experiments.phase_b.plan import phase_b_source_digest
 
     fields = dict(
         authorization_id="seam-test", granted_utc="2026-08-27T00:00:00Z",
@@ -743,7 +739,7 @@ def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     """Not an alias returning a stored string: the real derivation, over the real
     60 files, failing closed when it disagrees."""
     from aadistill.governance.authorization import AuthorizationError
-    from scripts.experiments.phase_b.plan import phase_b_source_digest
+    from experiments.phase_b.plan import phase_b_source_digest
 
     auth, _ = _issued(tmp_path)
     observed = auth.require_harness(REPO)
@@ -958,10 +954,7 @@ def test_the_required_citations_are_the_eight_the_budget_assumes():
 
 def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
     """It decides whether a pod is created, so it is executable, not provenance."""
-    from scripts.experiments.phase_b.plan import (
-        PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
-        PHASE_B_SOURCE_SET_VERSION,
-    )
+    from experiments.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_SOURCE_SET_VERSION
     assert "scripts/autoinit/verify_historical_probe_reuse.py" in \
         PHASE_B_EXECUTABLE_SOURCE_FILES_V1
     # And the pricing module, for the same reason: the launcher imports it to

@@ -40,7 +40,7 @@ from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.governance.authorization import AuthorizationError
-from scripts.experiments.phase_a.plan import sha256_file
+from experiments.phase_a.plan import sha256_file
 from aadistill.initialization.planning.recovery import (
     PreflightPlan,
     PreflightStage,

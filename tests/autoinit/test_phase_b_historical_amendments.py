@@ -28,7 +28,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from scripts.experiments.phase_b.plan import phase_b_source_digest  # noqa: E402
+from experiments.phase_b.plan import phase_b_source_digest  # noqa: E402
 from aadistill.governance.post_freeze import (# noqa: E402
     HISTORICAL_LEDGER_PATH,
     HISTORICAL_LEDGER_SCHEMA,

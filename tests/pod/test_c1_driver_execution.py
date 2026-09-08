@@ -35,12 +35,9 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
 import autoinit_c1_driver as D  # noqa: E402
 
-from scripts.experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
-from scripts.experiments.phase_c1.probe_results import (# noqa: E402
-    C1ResultsError,
-    decision_inputs,
-)
-from scripts.experiments.phase_c1.scoring import C1_BATTERY_SETS  # noqa: E402
+from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+from experiments.phase_c1.probe_results import C1ResultsError, decision_inputs  # noqa: E402
+from experiments.phase_c1.scoring import C1_BATTERY_SETS  # noqa: E402
 
 SEEDS = derive_recovery_seeds()
 BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
@@ -575,12 +572,7 @@ def harness(tmp_path, monkeypatch):
         d.mkdir(parents=True, exist_ok=True)
 
     # A structurally valid C1 authorization, at a scratch path outside the repo.
-    from scripts.experiments.phase_c1.authorization import (
-        C1Authorization,
-        c1_harness_digest,
-        c1_hard_ceiling_usd,
-        load_pricing,
-    )
+    from experiments.phase_c1.authorization import C1Authorization, c1_harness_digest, c1_hard_ceiling_usd, load_pricing
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "c1l_h", REPO / "scripts/pod/autoinit_c1_launch.py")
@@ -1038,12 +1030,7 @@ def test_admission_runs_before_the_scorer_in_source_order():
 
 def test_probe_results_refuse_a_probe_with_no_admitted_protocol():
     """Mutation target: dropping the admission would leave these fields empty."""
-    from scripts.experiments.phase_c1.probe_results import (
-        C1ProbeRecord,
-        C1ResultsError,
-        build_probe_results,
-        decision_inputs,
-    )
+    from experiments.phase_c1.probe_results import C1ProbeRecord, C1ResultsError, build_probe_results, decision_inputs
     rows = _rows()
     ps = {(a, s): rows for a in ("incumbent", "treatment") for s in SEEDS}
     inputs = decision_inputs(ps, seeds=SEEDS)

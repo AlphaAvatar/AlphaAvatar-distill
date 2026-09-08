@@ -45,15 +45,7 @@ from aadistill.governance.authorization import (# noqa: E402
     AuthorizationError,
     SpendAuthorization,
 )
-from scripts.experiments.recovery_continuation.plan import (# noqa: E402
-    CONTINUATION_PLAN_V1,
-    CONTINUATION_SCOPE,
-    ControlImportError,
-    EvaluationReadinessError,
-    check_evaluation_ready,
-    continuation_manifest,
-    import_permanent_control,
-)
+from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, ControlImportError, EvaluationReadinessError, check_evaluation_ready, continuation_manifest, import_permanent_control  # noqa: E402
 from aadistill.initialization.planning.generation import (# noqa: E402
     GenerationProtocolError,
     RecoveryEvaluationProtocol,

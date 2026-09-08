@@ -338,11 +338,7 @@ def test_the_failure_archive_still_supports_diagnosis(cont, args):
 
 # 7. the no-search guarantee survives the repair.
 def test_the_no_search_guarantee_is_intact(cont, args):
-    from scripts.experiments.phase_b.continuation import (
-        CONTINUATION_OWN_PATH_FILES,
-        KNOWN_NEUTRALIZED_SEARCH_CALL_SITES,
-        search_call_site_owners,
-    )
+    from experiments.phase_b.continuation import CONTINUATION_OWN_PATH_FILES, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners
 
     assert search_call_site_owners(REPO, files=CONTINUATION_OWN_PATH_FILES) == ()
     owners = search_call_site_owners(REPO)

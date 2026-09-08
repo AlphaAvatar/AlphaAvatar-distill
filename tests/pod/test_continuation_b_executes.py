@@ -363,11 +363,7 @@ def make_auth(evidence: dict, tmp_path: Path):
         DOMAIN_BALANCED_V1,
         REASONING_HEAVY_V2,
     )
-    from scripts.experiments.phase_b.continuation import (
-        CONTINUATION_PLAN_V1,
-        ContinuationAuthorization,
-        continuation_source_digest,
-    )
+    from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest
 
     frozen = json.loads(FROZEN_PLAN.read_text())
     science = frozen.get("plan_hash") or frozen["plan"]["plan_hash"]
@@ -814,7 +810,7 @@ def test_the_authorization_cannot_be_made_to_permit_a_search(tmp_path, monkeypat
     """`runs_search` is False BY TYPE — there is no field to set."""
     from dataclasses import fields
 
-    from scripts.experiments.phase_b.continuation import ContinuationAuthorization
+    from experiments.phase_b.continuation import ContinuationAuthorization
 
     driver, _, ev = build(tmp_path, monkeypatch, tie=False)
     assert driver.auth.runs_search is False
@@ -832,7 +828,7 @@ def test_the_parent_driver_contract_is_fully_satisfied():
     """
     import re
 
-    from scripts.experiments.phase_b.continuation import ContinuationAuthorization
+    from experiments.phase_b.continuation import ContinuationAuthorization
 
     source = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
     required = set(re.findall(r"self\.auth\.([a-z_]+)", source))
@@ -964,11 +960,7 @@ def test_the_frozen_source_set_IS_the_real_import_closure():
     Derived in a subprocess and compared, so adding an import without updating
     the set fails here rather than under a grant.
     """
-    from scripts.experiments.phase_b.continuation import (
-        CONTINUATION_RUNTIME_ONLY_FILES,
-        CONTINUATION_SOURCE_FILES_V2,
-        derive_continuation_closure,
-    )
+    from experiments.phase_b.continuation import CONTINUATION_RUNTIME_ONLY_FILES, CONTINUATION_SOURCE_FILES_V2, derive_continuation_closure
 
     derived = derive_continuation_closure(REPO)
     assert derived == tuple(sorted(CONTINUATION_SOURCE_FILES_V2)), (
@@ -983,7 +975,7 @@ def test_the_frozen_source_set_IS_the_real_import_closure():
 
 def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
     """Explicitly: these ARE in the digest, and that is correct."""
-    from scripts.experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
+    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
 
     for loaded in ("src/aadistill/autoinit/search.py",
                    "src/aadistill/autoinit/ranking.py",
@@ -994,11 +986,7 @@ def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
 
 def test_only_the_known_neutralized_file_holds_a_search_call_site():
     """A call site appearing anywhere else fails, including in a library."""
-    from scripts.experiments.phase_b.continuation import (
-        CONTINUATION_OWN_PATH_FILES,
-        KNOWN_NEUTRALIZED_SEARCH_CALL_SITES,
-        search_call_site_owners,
-    )
+    from experiments.phase_b.continuation import CONTINUATION_OWN_PATH_FILES, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners
 
     assert search_call_site_owners(REPO, files=CONTINUATION_OWN_PATH_FILES) == ()
     assert search_call_site_owners(REPO) == tuple(
@@ -1100,10 +1088,7 @@ def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
     the claim under test is the DIGEST contract, and the lineage half is
     exercised at the real launch commit.
     """
-    from scripts.experiments.phase_b.continuation import (
-        CONTINUATION_SOURCE_FILES_V2,
-        continuation_source_digest,
-    )
+    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
 
     observed = continuation_source_digest(REPO)
     ok, why, record = _run_shared_gate(observed["digest"],
@@ -1119,11 +1104,8 @@ def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
 def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
     """One formula, three producers. Asserted on VALUES, not on shared imports."""
     from aadistill.governance.authorization import harness_source_digest
-    from scripts.experiments.phase_b.plan import phase_b_source_digest
-    from scripts.experiments.phase_b.continuation import (
-        CONTINUATION_SOURCE_FILES_V2,
-        continuation_source_digest,
-    )
+    from experiments.phase_b.plan import phase_b_source_digest
+    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
     from aadistill.infrastructure.source_identity import canonical_source_digest
 
     probe = ("README.md", "AGENTS.md")
@@ -1134,7 +1116,7 @@ def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
 
     # And the shared helper is that same value, so the six remaining inlined
     # copies are byte-equivalent rather than merely believed to be.
-    from scripts.experiments.phase_a.plan import sha256_file
+    from experiments.phase_a.plan import sha256_file
     entries = [{"path": r, "sha256": sha256_file(REPO / r)} for r in probe]
     assert canonical_source_digest(entries) == a
 
@@ -1146,8 +1128,8 @@ def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
 
 def test_the_shared_gate_refuses_a_digest_from_the_OLD_formula():
     """The exact defect, re-created. Must fail through the shared gate."""
-    from scripts.experiments.phase_a.plan import sha256_file
-    from scripts.experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
+    from experiments.phase_a.plan import sha256_file
+    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
     from aadistill.infrastructure.manifest import sha256_json
 
     stale = sha256_json([{"path": r, "sha256": sha256_file(REPO / r),
@@ -1165,8 +1147,8 @@ def test_the_shared_gate_refuses_a_reordered_file_set():
     A producer that preserved declaration order would agree only by luck, so the
     helper sorts rather than trusting the caller.
     """
-    from scripts.experiments.phase_a.plan import sha256_file
-    from scripts.experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
+    from experiments.phase_a.plan import sha256_file
+    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
     import hashlib
 
     reversed_files = tuple(reversed(sorted(CONTINUATION_SOURCE_FILES_V2)))
@@ -1181,10 +1163,7 @@ def test_the_shared_gate_refuses_a_reordered_file_set():
 
 def test_the_shared_gate_refuses_a_set_with_a_file_omitted():
     """A digest over a smaller executable than the one that runs."""
-    from scripts.experiments.phase_b.continuation import (
-        CONTINUATION_SOURCE_FILES_V2,
-        continuation_source_digest,
-    )
+    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
 
     short = tuple(f for f in CONTINUATION_SOURCE_FILES_V2
                   if f != "src/aadistill/autoinit/search.py")
@@ -1208,10 +1187,7 @@ def test_the_shared_gate_refuses_a_stale_executable_digest():
 
 def test_the_gate_probe_itself_can_fail():
     """Guards the guard: a probe that always reports False proves nothing."""
-    from scripts.experiments.phase_b.continuation import (
-        CONTINUATION_SOURCE_FILES_V2,
-        continuation_source_digest,
-    )
+    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
 
     ok, _, record = _run_shared_gate(continuation_source_digest(REPO)["digest"],
                                      CONTINUATION_SOURCE_FILES_V2)

@@ -33,18 +33,7 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 import score_c1_confirmation as C1S  # noqa: E402
 import verify_c1_scoring_equivalence as EQ  # noqa: E402
 
-from scripts.experiments.phase_c1.scoring import (# noqa: E402
-    C1_BATTERY_CONTENT_SHA256,
-    C1_BATTERY_MANIFEST_SHA256,
-    C1_BATTERY_SETS,
-    C1_METRIC_CONTRACT,
-    C1_N_PROMPTS,
-    C1_N_SCORABLE_PROMPTS,
-    C1_SCORING_FILES_V1,
-    C1ScoringError,
-    c1_scoring_contract,
-    validate_c1_battery,
-)
+from experiments.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_BATTERY_MANIFEST_SHA256, C1_BATTERY_SETS, C1_METRIC_CONTRACT, C1_N_PROMPTS, C1_N_SCORABLE_PROMPTS, C1_SCORING_FILES_V1, C1ScoringError, c1_scoring_contract, validate_c1_battery  # noqa: E402
 
 C1_BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
 SCORER = REPO / "scripts/autoinit/score_c1_confirmation.py"

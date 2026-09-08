@@ -29,11 +29,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.governance.authorization import harness_source_digest  # noqa: E402
-from scripts.experiments.measurement.plan import (# noqa: E402
-    MEASUREMENT_AUTHORIZATION,
-    MEASUREMENT_PLAN_V1,
-)
-from scripts.experiments.phase_a.plan import GRANT_PROSE_REQUIRED  # noqa: E402
+from experiments.measurement.plan import MEASUREMENT_AUTHORIZATION, MEASUREMENT_PLAN_V1  # noqa: E402
+from experiments.phase_a.plan import GRANT_PROSE_REQUIRED  # noqa: E402
 
 #: What the measurement session actually executes. NOT the Phase-A set: this
 #: session runs its own launcher and its own job, and digesting Phase-A's files

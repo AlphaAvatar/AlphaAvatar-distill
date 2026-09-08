@@ -47,23 +47,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from experiments.phase_c1 import session as CS
-from scripts.experiments.phase_c1.authorization import (# noqa: E402
-    C1_HARNESS_SOURCE_FILES_V1,
-    C1Authorization,
-    c1_budget_spec,
-    c1_hard_ceiling_usd,
-    c1_harness_digest,
-    c1_price_per_hour_usd,
-)
-from scripts.experiments.phase_c1.bundle import (# noqa: E402
-    RELAY_REPO as RELAY_REPO_ID,
-    C1BundleError,
-    canonical_bundle_name,
-    hf_download,
-    require_canonical_bundle_arg,
-    roundtrip,
-)
-from scripts.experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
+from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
+from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
 from aadistill.runtime.staging_contract import derive_contract  # noqa: E402
 from aadistill.runtime.pod_environment import (# noqa: E402
     LAUNCH_BOUND,
@@ -904,7 +890,7 @@ def spec(args) -> SessionSpec:
 
 def _plan_hash() -> str:
     """The frozen C1IsolationPlan's hash, rebuilt rather than transcribed."""
-    from scripts.experiments.phase_c1.isolation import C1Arm, C1IsolationPlan
+    from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan
     from aadistill.initialization.operators import attention_activation
 
     attention_activation.register(replace=True)

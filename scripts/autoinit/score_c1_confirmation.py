@@ -47,13 +47,7 @@ from score_recovery_search import (  # noqa: E402
     TOOL_STRUCTURAL_GATE, group, scorer_correct, summarize,
 )
 
-from scripts.experiments.phase_c1.scoring import (# noqa: E402
-    C1_BATTERY_PATH,
-    C1_METRIC_CONTRACT,
-    SCHEMA,
-    c1_scoring_contract,
-    validate_c1_battery,
-)
+from experiments.phase_c1.scoring import C1_BATTERY_PATH, C1_METRIC_CONTRACT, SCHEMA, c1_scoring_contract, validate_c1_battery  # noqa: E402
 from aadistill.initialization.planning.recovery import (# noqa: E402
     CAPABILITY_SCHEMA_V1,
     score_recovery_row,

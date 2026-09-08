@@ -49,7 +49,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 sys.path.insert(0, str(REPO_ROOT / "scripts/experiments/phase_c1"))
 
-from scripts.experiments.phase_c1.authorization import C1Authorization  # noqa: E402
+from experiments.phase_c1.authorization import C1Authorization  # noqa: E402
 from authorization_payload import (  # noqa: E402
     C1AuthorizationRefused, build_c1_authorization_payload, load_config,
 )

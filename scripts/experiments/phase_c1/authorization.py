@@ -34,7 +34,7 @@ from aadistill.infrastructure.budget import Phase
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.infrastructure.session import BudgetSpec
 from aadistill.governance.authorization import AuthorizationError
-from scripts.experiments.phase_a.plan import PhaseAAuthorization
+from experiments.phase_a.plan import PhaseAAuthorization
 
 SCHEMA = "aadistill.autoinit.c1_authorization/v1"
 
@@ -177,10 +177,94 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
 )
 
 
+#: The entry points a C1 session actually starts from. This is an
+#: experiment-instance fact, so it lives with the experiment; the walker that
+#: consumes it is generic and lives in `aadistill.governance.closure`.
+C1_ENTRY_POINTS: tuple[str, ...] = (
+    "scripts/pod/autoinit_c1_launch.py",
+    "scripts/pod/autoinit_c1_driver.py",
+    "scripts/experiments/phase_c1/authorization_payload.py",
+    "scripts/autoinit/issue_c1_authorization.py",
+    "scripts/pod/collect_artifacts.py",
+)
+
+#: Files no import edge reaches, whose bytes still decide what runs or what is
+#: authorized. Named explicitly and hashed identically to the modules.
+C1_DECLARED_INPUTS: tuple[str, ...] = (
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "configs/experiments/phase_c1/authorization.json",
+    "configs/autoinit/c1_artifacts.json",
+    "configs/autoinit/c1_artifacts_failed.json",
+)
+
+#: A recorded snapshot of the derived closure, for reporting drift. Never the
+#: source of truth — see `c1_current_executable`.
+CURRENT_CLOSURE_SNAPSHOT = "configs/experiments/phase_c1/executable_closure.json"
+
+
+def c1_current_executable(repo_root: str | Path = ".") -> dict[str, Any]:
+    """What a session would execute NOW, derived live from the tree.
+
+    `C1_HARNESS_SOURCE_FILES_V1` below is a HISTORICAL declaration: it names the
+    paths the completed attempts executed, and after the initialization cutover
+    those paths no longer exist. Keeping it pointed at the old tree is correct —
+    it is the record of what ran — and it is why
+    `c1_historical_harness_digest` now refuses, which is what stops an old
+    authorization being revalidated against a tree it never ran on.
+
+    The current set is DERIVED, not listed. A hand-maintained list cannot
+    promise completeness — the previous one named a setup script nothing had
+    executed for months — and a *recorded* list is worse still, because it goes
+    stale on the first edit and then reports a confident identity for the wrong
+    set of files. The walk runs here, now, against these entry points.
+    """
+    from aadistill.governance.closure import ClosureError, derive
+
+    try:
+        return derive(repo_root, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS)
+    except ClosureError as exc:
+        raise AuthorizationError(f"cannot derive the C1 executable set: {exc}") from exc
+
+
+def c1_closure_drift(repo_root: str | Path = ".") -> dict[str, Any] | None:
+    """How the live closure differs from the recorded snapshot, or None.
+
+    Reported, never gated on: an edited file is ordinary work, whereas a file
+    appearing in or vanishing from the set is a change in what would run.
+    """
+    from aadistill.governance.closure import compare
+
+    path = Path(repo_root) / CURRENT_CLOSURE_SNAPSHOT
+    if not path.is_file():
+        return None
+    return compare(c1_current_executable(repo_root), json.loads(path.read_text()))
+
+
 def c1_harness_digest(repo_root: str | Path = ".",
-                      files: tuple[str, ...] = C1_HARNESS_SOURCE_FILES_V1,
+                      files: tuple[str, ...] | None = None,
                       ) -> dict[str, Any]:
-    """The digest a C1 grant binds. A missing declared file raises.
+    """The digest a C1 grant binds — the CURRENT executable unless told otherwise.
+
+    Passing an explicit `files` tuple computes over that set instead, which is
+    how the historical declaration is still checked (and refused).
+    """
+    if files is None:
+        return c1_current_executable(repo_root)
+    return _digest_over(repo_root, files)
+
+
+def c1_historical_harness_digest(repo_root: str | Path = ".") -> dict[str, Any]:
+    """The digest the COMPLETED attempts bound. Refuses after the cutover.
+
+    Kept as an explicit entry point so "an old authorization cannot be
+    revalidated on the migrated tree" is a thing a test can execute rather than
+    a claim in a comment.
+    """
+    return _digest_over(repo_root, C1_HARNESS_SOURCE_FILES_V1)
+
+
+def _digest_over(repo_root: str | Path, files: tuple[str, ...]) -> dict[str, Any]:
+    """Digest a named set. A missing declared file raises.
 
     Same rule and same failure mode as every other source-identity set in this
     project: refusing is the point, because a digest computed over a smaller set

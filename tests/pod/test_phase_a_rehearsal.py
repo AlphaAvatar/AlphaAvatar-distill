@@ -37,13 +37,7 @@ from aadistill.governance.authorization import (# noqa: E402
     MICRO_PREFLIGHT_AUTHORIZATION,
     SpendAuthorization,
 )
-from scripts.experiments.phase_a.plan import (# noqa: E402
-    PHASE_A_HARNESS_SOURCE_FILES_V1,
-    PHASE_A_PLAN_V1,
-    PHASE_A_SCOPE,
-    PhaseAAuthorization,
-    phase_a_harness_digest,
-)
+from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_harness_digest  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
 
@@ -730,7 +724,7 @@ def test_the_authorization_constant_matches_what_make_plan_prices():
     """The runner calls `require_within_cap(plan.hard_terminate_usd)`. If the
     granted cap is below the priced threshold the launcher aborts at $0 — safe,
     but only discovered at launch. Checked here instead."""
-    from scripts.experiments.phase_a.plan import PHASE_A_AUTHORIZATION as A
+    from experiments.phase_a.plan import PHASE_A_AUTHORIZATION as A
 
     plan = phase_a_plan(authorized_usd=A.hard_cap_usd)
     A.require_within_cap(plan.hard_terminate_usd, what="planned hard threshold")
@@ -757,7 +751,7 @@ def test_the_authorization_constant_still_carries_its_placeholders():
     """The constant is a template; the issuer fills identity and time. If these
     were pre-filled, an artifact could be issued with a back-dated grant or a
     stale science-plan hash."""
-    from scripts.experiments.phase_a.plan import PHASE_A_AUTHORIZATION as A
+    from experiments.phase_a.plan import PHASE_A_AUTHORIZATION as A
 
     assert A.granted_utc == "PLACEHOLDER"
     assert A.science_plan_hash == "PLACEHOLDER"
@@ -975,7 +969,7 @@ def test_the_launcher_declares_a_phase_a_authorization_not_a_spend_one():
     no module global to retarget now, and this asserts both halves: the right
     type is named, and the old mechanism is gone.
     """
-    from scripts.experiments.phase_a.plan import PHASE_A_PLAN_V1, PhaseAAuthorization
+    from experiments.phase_a.plan import PHASE_A_PLAN_V1, PhaseAAuthorization
 
     spec = phase_a_spec()
     assert spec.authorization_loader.__self__ is PhaseAAuthorization
@@ -1381,7 +1375,7 @@ def test_the_deadline_derivation_moves_no_frozen_identity():
     """
     import json
 
-    from scripts.experiments.phase_a.plan import PHASE_A_PLAN_V1
+    from experiments.phase_a.plan import PHASE_A_PLAN_V1
 
     SESSION = "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
     SCIENCE = "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"

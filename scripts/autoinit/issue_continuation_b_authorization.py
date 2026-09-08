@@ -51,13 +51,7 @@ from aadistill.initialization.calibration.profiles import (# noqa: E402
     REASONING_HEAVY_V2,
 )
 from aadistill.initialization.planning.generation import generation_source_digest  # noqa: E402
-from scripts.experiments.phase_b.continuation import (# noqa: E402
-    BOUND_EVIDENCE,
-    CONTINUATION_PLAN_V1,
-    CONTINUATION_SOURCE_FILES_V2,
-    ContinuationAuthorization,
-    continuation_source_digest,
-)
+from experiments.phase_b.continuation import BOUND_EVIDENCE, CONTINUATION_PLAN_V1, CONTINUATION_SOURCE_FILES_V2, ContinuationAuthorization, continuation_source_digest  # noqa: E402
 from aadistill.initialization.planning.recovery import (# noqa: E402
     recovery_scoring_contract,
     trainer_source_digest,

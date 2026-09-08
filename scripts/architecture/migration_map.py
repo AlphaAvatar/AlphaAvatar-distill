@@ -139,7 +139,11 @@ def module_of(path: str) -> str:
     """Import path for a repo-relative file, for src/ and scripts/ alike."""
     p = Path(path).with_suffix("")
     parts = list(p.parts)
-    if parts[0] == "src":
+    #: `src` and `scripts` are both roots that callers put on sys.path, so
+    #: neither belongs in the importable name: src/aadistill/x.py is
+    #: `aadistill.x`, scripts/experiments/phase_a/plan.py is
+    #: `experiments.phase_a.plan`.
+    if parts[0] in ("src", "scripts"):
         parts = parts[1:]
     if parts[-1] == "__init__":
         parts.pop()

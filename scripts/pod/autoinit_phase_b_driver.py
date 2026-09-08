@@ -57,14 +57,7 @@ from aadistill.initialization.calibration.profiles import (# noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V2,
 )
-from scripts.experiments.phase_b.plan import (# noqa: E402
-    CANONICAL_CONTROL,
-    PHASE_A_EXCLUDED_LEAVES,
-    PHASE_A_IMPORTED_FINALISTS,
-    PHASE_B_PLAN_V1,
-    PhaseBAuthorization,
-    phase_b_source_digest,
-)
+from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 #: Deliberately the SAME audit root the Phase-A driver and the recovery
 #: continuation write to. It is a per-pod scratch directory that the session
 #: archives wholesale; giving Phase B its own would fork the artifact policy for

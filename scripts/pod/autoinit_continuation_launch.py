@@ -42,10 +42,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.governance.authorization import SpendAuthorization  # noqa: E402
-from scripts.experiments.recovery_continuation.plan import (# noqa: E402
-    CONTINUATION_PLAN_V1,
-    CONTINUATION_SCOPE,
-)
+from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, RelayInput,

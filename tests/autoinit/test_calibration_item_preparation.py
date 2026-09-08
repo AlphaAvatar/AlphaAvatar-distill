@@ -196,11 +196,7 @@ def test_the_c1_prefix_profiles_are_the_ones_this_covers():
     Otherwise this module could pass while the fixed path resolves something
     nobody prepared.
     """
-    from scripts.experiments.phase_c1.session import (
-        INCUMBENT_ATTENTION,
-        PREFIX_STEPS,
-        TREATMENT_ATTENTION,
-    )
+    from experiments.phase_c1.session import INCUMBENT_ATTENTION, PREFIX_STEPS, TREATMENT_ATTENTION
 
     named = {p for _, p in (*PREFIX_STEPS, INCUMBENT_ATTENTION,
                             TREATMENT_ATTENTION)}

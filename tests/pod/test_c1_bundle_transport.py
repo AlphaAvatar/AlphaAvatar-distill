@@ -30,16 +30,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "pod"))
 
-from scripts.experiments.phase_c1.bundle import (# noqa: E402
-    BUNDLE_PREFIX,
-    C1BundleError,
-    build_bundle,
-    canonical_bundle_name,
-    canonical_repo_path,
-    require_canonical_bundle_arg,
-    roundtrip,
-    sha256_bytes,
-)
+from experiments.phase_c1.bundle import BUNDLE_PREFIX, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, require_canonical_bundle_arg, roundtrip, sha256_bytes  # noqa: E402
 
 AUTH_PATH = "logs/autoinit_c1_authorization.json"
 
@@ -112,7 +103,7 @@ def _harness(commit: str, files: tuple[str, ...], *, allow_missing: bool = False
 
 @pytest.fixture(scope="module")
 def files() -> tuple[str, ...]:
-    from scripts.experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
+    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
     return C1_HARNESS_SOURCE_FILES_V1
 
 
@@ -253,7 +244,7 @@ def test_mutation_dropping_canonical_name_enforcement_is_caught():
 def test_mutation_dropping_the_checkout_commit_check_is_caught(tmp_path, files,
                                                                monkeypatch):
     """Without the HEAD equality, the stale-bundle case passes silently."""
-    import scripts.experiments.phase_c1.bundle as B
+    import experiments.phase_c1.bundle as B
 
     parent = _git("rev-parse", f"{AUTH_COMMIT}^", cwd=REPO)
     built = build_bundle(REPO, parent, tmp_path / "stale.bundle")
@@ -336,6 +327,6 @@ def test_preparation_is_a_separate_command_that_may_mutate_the_relay():
 def test_stage_refuses_to_overwrite_a_different_remote_object():
     import inspect
 
-    from scripts.experiments.phase_c1.bundle import stage_bundle
+    from experiments.phase_c1.bundle import stage_bundle
     src = inspect.getsource(stage_bundle)
     assert "Refusing to overwrite" in src

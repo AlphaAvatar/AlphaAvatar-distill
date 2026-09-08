@@ -41,13 +41,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))   # experiments.* live here
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from scripts.experiments.phase_c1.authorization import (# noqa: E402
-    C1_HARNESS_SOURCE_FILES_V1,
-    C1Authorization,
-    c1_hard_ceiling_usd,
-    c1_harness_digest,
-    load_pricing,
-)
+from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_hard_ceiling_usd, c1_harness_digest, load_pricing  # noqa: E402
 from aadistill.governance.grant import (  # noqa: E402
     GrantContract, GrantRefused, validate_grant,
 )
@@ -82,11 +76,7 @@ def frozen_plan_hash(repo_root: str | Path = ".") -> str:
     enumerates the whole registry.
     """
     from experiments.phase_c1 import session as CS
-    from scripts.experiments.phase_c1.isolation import (
-        C1Arm,
-        C1IsolationPlan,
-        derive_recovery_seeds,
-    )
+    from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan, derive_recovery_seeds
     from aadistill.initialization.operators import attention_activation
 
     cfg = load_config(repo_root)
@@ -141,11 +131,8 @@ def build_c1_authorization_payload(
     is precisely what such a test needs.
     """
     from experiments.phase_c1 import session as CS
-    from scripts.experiments.phase_c1.isolation import (
-        C0_PREREGISTRATION_SHA256,
-        derive_recovery_seeds,
-    )
-    from scripts.experiments.phase_c1.scoring import c1_scoring_contract
+    from experiments.phase_c1.isolation import C0_PREREGISTRATION_SHA256, derive_recovery_seeds
+    from experiments.phase_c1.scoring import c1_scoring_contract
 
     root = Path(repo_root)
     cfg = load_config(root)

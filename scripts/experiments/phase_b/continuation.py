@@ -605,7 +605,7 @@ def search_call_site_owners(repo_root: str | Path = ".",
 def continuation_source_digest(repo_root: str | Path = ".", *,
                                files: tuple[str, ...] | None = None) -> dict[str, Any]:
     """Digest the declared continuation source. Fails closed on a gap."""
-    from scripts.experiments.phase_a.plan import sha256_file
+    from experiments.phase_a.plan import sha256_file
 
     root = Path(repo_root)
     declared = tuple(files) if files is not None else CONTINUATION_SOURCE_FILES_V2

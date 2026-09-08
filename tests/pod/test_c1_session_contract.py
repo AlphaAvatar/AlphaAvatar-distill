@@ -20,14 +20,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from scripts.experiments.phase_c1.authorization import (# noqa: E402
-    C1_HARNESS_SOURCE_FILES_V1,
-    SCHEMA as C1_SCHEMA,
-    C1Authorization,
-    c1_budget_spec,
-    c1_hard_ceiling_usd,
-    c1_harness_digest,
-)
+from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_SCHEMA, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest  # noqa: E402
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from session_specs import load_session_launcher, session_args  # noqa: E402
 
@@ -198,11 +191,7 @@ def test_a_superseded_committed_authorization_cannot_authorize():
     if it is not current then at least one identity gate must refuse it. A
     current authorization passes them all, which is what a launch requires.
     """
-    from scripts.experiments.phase_c1.authorization import (
-        C1Authorization,
-        c1_hard_ceiling_usd,
-        c1_harness_digest,
-    )
+    from experiments.phase_c1.authorization import C1Authorization, c1_hard_ceiling_usd, c1_harness_digest
 
     p = REPO / "logs/autoinit_c1_authorization.json"
     assert p.is_file(), "the authorization record must be retained"

@@ -29,12 +29,7 @@ from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.governance.authorization import AuthorizationError
-from scripts.experiments.phase_a.plan import (
-    PHASE_A_HARNESS_SOURCE_FILES_V1,
-    PHASE_A_PLAN_V1,
-    PhaseAAuthorization,
-    phase_a_harness_digest,
-)
+from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PhaseAAuthorization, phase_a_harness_digest
 
 SCHEMA = "aadistill.autoinit.recovery_continuation_authorization/v1"
 

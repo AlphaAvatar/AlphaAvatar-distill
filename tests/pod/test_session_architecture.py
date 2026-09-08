@@ -203,10 +203,7 @@ def test_no_attempt_specific_grant_prose_in_executable_source():
     inside the authorization constant, where it still read as current after the
     attempt was over. The schema stays; the grant arrives at issue time.
     """
-    from scripts.experiments.phase_a.plan import (
-        GRANT_PROSE_REQUIRED,
-        PHASE_A_AUTHORIZATION,
-    )
+    from experiments.phase_a.plan import GRANT_PROSE_REQUIRED, PHASE_A_AUTHORIZATION
 
     assert PHASE_A_AUTHORIZATION.granted_by == GRANT_PROSE_REQUIRED, (
         "the Phase-A authorization schema carries grant prose again")
@@ -220,7 +217,7 @@ def test_no_attempt_specific_grant_prose_in_executable_source():
     # what past attempts cost is failure history, which AGENTS.md P11 requires
     # to stay, and is not a permission.
     from aadistill.governance.authorization import MICRO_PREFLIGHT_AUTHORIZATION
-    from scripts.experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
+    from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
 
     for label, constant in (("micro-preflight", MICRO_PREFLIGHT_AUTHORIZATION),
                             ("continuation", CONTINUATION_AUTHORIZATION),
@@ -295,14 +292,8 @@ def test_the_recovery_continuation_shares_the_science_and_not_the_session():
         assert getattr(cont, field) != getattr(phase_a, field), field
 
     # Its own authorization TYPE and harness, not Phase A's.
-    from scripts.experiments.recovery_continuation.session import (
-        RECOVERY_CONTINUATION_HARNESS_FILES_V1,
-        RecoveryContinuationAuthorization,
-    )
-    from scripts.experiments.phase_a.plan import (
-        PHASE_A_HARNESS_SOURCE_FILES_V1,
-        PhaseAAuthorization,
-    )
+    from experiments.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization
+    from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PhaseAAuthorization
     assert cont.authorization_loader == RecoveryContinuationAuthorization.load
     assert phase_a.authorization_loader == PhaseAAuthorization.load
     assert (set(RECOVERY_CONTINUATION_HARNESS_FILES_V1)

@@ -105,7 +105,7 @@ def test_the_gate_runs_the_seven_real_groups_on_this_host():
 
 def _valid_record(tmp_path: Path, kind: str = "diagnostic") -> dict:
     """A record that binds the LIVE tree, so only the field under test differs."""
-    from scripts.experiments.phase_c1.authorization import c1_harness_digest
+    from experiments.phase_c1.authorization import c1_harness_digest
 
     rec = {
         "schema": pe.SCHEMA,
@@ -187,7 +187,7 @@ def test_the_two_measured_sets_are_disjoint():
     `renderer_parity_gate.py` were double-bound until 2026-09-04 and now live in
     the harness alone, where the paid session's own grant measures them.
     """
-    from scripts.experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
+    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
 
     overlap = sorted(set(pe.POD_TEST_ENVIRONMENT_FILES_V1)
                      & set(C1_HARNESS_SOURCE_FILES_V1))
@@ -203,7 +203,7 @@ def test_the_pod_setup_script_is_measured_by_the_harness_not_by_this_record():
     readiness record left a paid session whose own setup script could change
     without moving the digest the authorization checks.
     """
-    from scripts.experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
+    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
 
     assert "scripts/pod/autoinit_preflight_setup.sh" in C1_HARNESS_SOURCE_FILES_V1
     assert "scripts/pod/autoinit_preflight_setup.sh" \
@@ -975,7 +975,7 @@ def test_the_max_price_default_comes_from_the_pricing_record():
     price lived in two places.
     """
     import sys as _sys
-    from scripts.experiments.phase_c1.authorization import c1_price_per_hour_usd
+    from experiments.phase_c1.authorization import c1_price_per_hour_usd
 
     _sys.path.insert(0, str(REPO / "tests/pod"))
     from session_specs import load_session_launcher, session_args
@@ -993,7 +993,7 @@ def test_the_max_price_default_comes_from_the_pricing_record():
 
 def test_the_pricing_record_is_hash_verified_before_the_rate_is_used():
     """A rate read from a tampered record would be worse than a stale literal."""
-    from scripts.experiments.phase_c1.authorization import PRICING_PATH, load_pricing
+    from experiments.phase_c1.authorization import PRICING_PATH, load_pricing
 
     src = (REPO / "src/aadistill/autoinit/c1_authorization.py").read_text()
     assert "pricing_sha256" in src

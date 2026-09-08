@@ -41,11 +41,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from score_c1_confirmation import battery_manifest, score_battery  # noqa: E402
 
-from scripts.experiments.phase_c1.scoring import (# noqa: E402
-    C1_SCORING_SEMANTIC_PARENT,
-    C1_SCORING_SEMANTIC_PARENT_DIGEST,
-    c1_scoring_contract,
-)
+from experiments.phase_c1.scoring import C1_SCORING_SEMANTIC_PARENT, C1_SCORING_SEMANTIC_PARENT_DIGEST, c1_scoring_contract  # noqa: E402
 from aadistill.initialization.planning.recovery import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 

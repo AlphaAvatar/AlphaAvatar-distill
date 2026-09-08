@@ -21,22 +21,8 @@ from aadistill.initialization.calibration.profiles import (# noqa: E402
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V2,
 )
-from scripts.experiments.phase_a.plan import (# noqa: E402
-    PHASE_A_AUTHORIZATION,
-    PHASE_A_HARNESS_SOURCE_FILES_V1,
-)
-from scripts.experiments.phase_b.plan import (# noqa: E402
-    CANONICAL_CONTROL,
-    PHASE_A_EXCLUDED_LEAVES,
-    PHASE_A_IMPORTED_FINALISTS,
-    PHASE_B_DELEGATED_IDENTITIES,
-    PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
-    PHASE_B_PLAN_V1,
-    PHASE_B_SEARCHED_LEAVES,
-    PHASE_B_UNCOVERED,
-    PhaseBAuthorization,
-    phase_b_source_digest,
-)
+from experiments.phase_a.plan import PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS, PHASE_B_DELEGATED_IDENTITIES, PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 
 PREREG = REPO / "logs/autoinit_phase_b_preregistration.json"
 

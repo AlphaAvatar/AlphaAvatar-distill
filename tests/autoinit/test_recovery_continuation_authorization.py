@@ -31,22 +31,8 @@ for p in ("src", "scripts/pod", "scripts/autoinit"):
     sys.path.insert(0, str(REPO / p))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from scripts.experiments.phase_a.plan import (# noqa: E402
-    PHASE_A_AUTHORIZATION,
-    PHASE_A_HARNESS_SOURCE_FILES_V1,
-    PHASE_A_PLAN_V1,
-    PhaseAAuthorization,
-    phase_a_harness_digest,
-)
-from scripts.experiments.recovery_continuation.session import (# noqa: E402
-    CONTINUATION_ONLY_HARNESS_FILES,
-    RECOVERY_CONTINUATION_AUTHORIZATION,
-    RECOVERY_CONTINUATION_HARNESS_FILES_V1,
-    SCHEMA,
-    SEARCH_ONLY_HARNESS_FILES,
-    RecoveryContinuationAuthorization,
-    recovery_continuation_harness_digest,
-)
+from experiments.phase_a.plan import PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PhaseAAuthorization, phase_a_harness_digest  # noqa: E402
+from experiments.recovery_continuation.session import CONTINUATION_ONLY_HARNESS_FILES, RECOVERY_CONTINUATION_AUTHORIZATION, RECOVERY_CONTINUATION_HARNESS_FILES_V1, SCHEMA, SEARCH_ONLY_HARNESS_FILES, RecoveryContinuationAuthorization, recovery_continuation_harness_digest  # noqa: E402
 
 ISSUER = REPO / "scripts/autoinit/issue_recovery_continuation_authorization.py"
 LAUNCH = "scripts/pod/autoinit_recovery_continuation_launch.py"
@@ -239,7 +225,7 @@ def test_the_schema_string_is_what_does_the_refusing(tmp_path):
     This payload is a valid continuation authorization in every respect except
     the schema string, so nothing else can refuse it.
     """
-    from scripts.experiments.phase_a.plan import SCHEMA as PHASE_A_SCHEMA
+    from experiments.phase_a.plan import SCHEMA as PHASE_A_SCHEMA
     from aadistill.infrastructure.manifest import sha256_json
 
     payload = issued(REPO).as_dict()
@@ -311,7 +297,7 @@ def test_the_artifact_round_trips_and_is_tamper_evident(tmp_path):
 
 
 def test_the_schema_string_is_distinct():
-    from scripts.experiments.phase_a.plan import SCHEMA as PHASE_A_SCHEMA
+    from experiments.phase_a.plan import SCHEMA as PHASE_A_SCHEMA
     assert SCHEMA != PHASE_A_SCHEMA
     assert RECOVERY_CONTINUATION_AUTHORIZATION.as_dict()["schema"] == SCHEMA
 
@@ -371,7 +357,7 @@ def test_the_pod_driver_loads_the_continuation_artifact_not_the_phase_a_one():
     silently wrong number, 38% too high.
     """
     drv = load_module(DRIVER, "rca_driver")
-    from scripts.experiments.phase_a.plan import PhaseAAuthorization as PA
+    from experiments.phase_a.plan import PhaseAAuthorization as PA
 
     assert drv.RecoveryContinuationDriver.AUTHORIZATION_TYPE is (
         RecoveryContinuationAuthorization)
@@ -580,7 +566,7 @@ def test_the_issuer_defaults_to_the_continuation_artifact_path():
 def test_the_module_carries_no_grant_prose():
     """A grant is a one-use decision about a particular attempt at a particular
     cumulative spend; in executable source it goes stale silently."""
-    from scripts.experiments.recovery_continuation.session import CONTINUATION_GRANT_PROSE_REQUIRED
+    from experiments.recovery_continuation.session import CONTINUATION_GRANT_PROSE_REQUIRED
     assert (RECOVERY_CONTINUATION_AUTHORIZATION.granted_by
             == CONTINUATION_GRANT_PROSE_REQUIRED)
     assert "NO GRANT" in CONTINUATION_GRANT_PROSE_REQUIRED

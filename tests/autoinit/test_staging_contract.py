@@ -375,7 +375,7 @@ def test_the_recorder_derives_and_never_falls_back(contract):
 
 def test_a_launch_bound_record_without_a_staging_contract_is_refused():
     from aadistill.runtime import pod_environment as pe
-    from scripts.experiments.phase_c1.authorization import c1_harness_digest
+    from experiments.phase_c1.authorization import c1_harness_digest
 
     rec = {"schema": pe.SCHEMA, "swept_base_commit": pe.head_commit(REPO),
            "tree_clean": True,
@@ -390,7 +390,7 @@ def test_a_launch_bound_record_without_a_staging_contract_is_refused():
 
 def test_a_record_swept_under_a_different_staging_contract_is_refused(contract):
     from aadistill.runtime import pod_environment as pe
-    from scripts.experiments.phase_c1.authorization import c1_harness_digest
+    from experiments.phase_c1.authorization import c1_harness_digest
 
     rec = {"schema": pe.SCHEMA, "swept_base_commit": pe.head_commit(REPO),
            "tree_clean": True,

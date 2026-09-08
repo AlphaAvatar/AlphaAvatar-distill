@@ -26,28 +26,9 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 
 from experiments.phase_c1 import session as CS
-from scripts.experiments.phase_c1.isolation import (# noqa: E402
-    BOOTSTRAP_ALGORITHM,
-    BOOTSTRAP_ITERATIONS,
-    BOOTSTRAP_QUANTILE_CONVENTION,
-    BOOTSTRAP_STRATUM_CONVENTION,
-    C0_PREREGISTRATION_SHA256,
-    HISTORICAL_SEEDS,
-    C1Arm,
-    C1IsolationPlan,
-    bootstrap_seed,
-    derive_recovery_seeds,
-)
-from scripts.experiments.phase_c1.authorization import (# noqa: E402
-    C1_HARNESS_SOURCE_FILES_V1,
-    SCHEMA as C1_AUTH_SCHEMA,
-    c1_harness_digest,
-    load_pricing,
-)
-from scripts.experiments.phase_c1.scoring import (# noqa: E402
-    C1_METRIC_CONTRACT,
-    c1_scoring_contract,
-)
+from experiments.phase_c1.isolation import BOOTSTRAP_ALGORITHM, BOOTSTRAP_ITERATIONS, BOOTSTRAP_QUANTILE_CONVENTION, BOOTSTRAP_STRATUM_CONVENTION, C0_PREREGISTRATION_SHA256, HISTORICAL_SEEDS, C1Arm, C1IsolationPlan, bootstrap_seed, derive_recovery_seeds  # noqa: E402
+from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_AUTH_SCHEMA, c1_harness_digest, load_pricing  # noqa: E402
+from experiments.phase_c1.scoring import C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
 from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
 from aadistill.initialization.operators import attention_activation  # noqa: E402
 from aadistill.initialization.operators.attention_activation import ATTENTION_STATS_SPEC  # noqa: E402

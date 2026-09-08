@@ -9,20 +9,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from scripts.experiments.phase_c1.isolation import (# noqa: E402
-    BOOTSTRAP_ITERATIONS,
-    C0_PREREGISTRATION_SHA256,
-    HISTORICAL_SEEDS,
-    C1Arm,
-    C1IsolationPlan,
-    C1PlanError,
-    assert_preregistered,
-    bootstrap_seed,
-    decide,
-    derive_recovery_seeds,
-    paired_differences,
-    stratified_cluster_bootstrap,
-)
+from experiments.phase_c1.isolation import BOOTSTRAP_ITERATIONS, C0_PREREGISTRATION_SHA256, HISTORICAL_SEEDS, C1Arm, C1IsolationPlan, C1PlanError, assert_preregistered, bootstrap_seed, decide, derive_recovery_seeds, paired_differences, stratified_cluster_bootstrap  # noqa: E402
 
 INCUMBENT = C1Arm("c1.incumbent", "incumbent", "attention.weight_proxy_v0",
                   "calib.none@v1")

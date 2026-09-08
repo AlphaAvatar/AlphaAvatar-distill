@@ -44,16 +44,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from scripts.experiments.phase_a.plan import (# noqa: E402
-    PHASE_A_PLAN_V1,
-    PHASE_A_SCOPE,
-)
-from scripts.experiments.recovery_continuation.session import (# noqa: E402
-    RECOVERY_CONTINUATION_HARNESS_FILES_V1,
-    RecoveryContinuationAuthorization,
-    SEARCH_ONLY_HARNESS_FILES,
-    recovery_continuation_harness_digest,
-)
+from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE  # noqa: E402
+from experiments.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization, SEARCH_ONLY_HARNESS_FILES, recovery_continuation_harness_digest  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,
     SetupManifest, TeardownPolicy,

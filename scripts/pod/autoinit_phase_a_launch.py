@@ -53,11 +53,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from scripts.experiments.phase_a.plan import (# noqa: E402
-    PHASE_A_PLAN_V1,
-    PHASE_A_SCOPE,
-    PhaseAAuthorization,
-)
+from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, RelayInput,

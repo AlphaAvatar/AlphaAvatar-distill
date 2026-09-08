@@ -63,7 +63,7 @@ def _tree_is_clean() -> bool:
 
 
 def _harness_digest() -> str:
-    from scripts.experiments.phase_c1.authorization import c1_harness_digest
+    from experiments.phase_c1.authorization import c1_harness_digest
 
     return c1_harness_digest(REPO_ROOT)["digest"]
 

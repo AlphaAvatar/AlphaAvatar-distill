@@ -55,11 +55,7 @@ from aadistill.initialization.specs.identity_collapse import (# noqa: E402
     collapse,
     universe_identity,
 )
-from scripts.experiments.phase_b.continuation import (# noqa: E402
-    CONTINUATION_PLAN_V1,
-    ContinuationAuthorization,
-    continuation_source_digest,
-)
+from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 from aadistill.initialization.specs.state import (# noqa: E402
     make_control_state,

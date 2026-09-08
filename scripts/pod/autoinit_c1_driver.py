@@ -58,28 +58,11 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
 from experiments.phase_c1 import session as CS
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from scripts.experiments.phase_c1.authorization import C1Authorization  # noqa: E402
-from scripts.experiments.phase_c1.isolation import (# noqa: E402
-    C0_PREREGISTRATION_SHA256,
-    C1Arm,
-    C1IsolationPlan,
-    decide,
-    derive_recovery_seeds,
-    paired_differences,
-    stratified_cluster_bootstrap,
-)
-from scripts.experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
-from scripts.experiments.phase_c1.probe_results import (# noqa: E402
-    ARMS,
-    C1ProbeRecord,
-    build_probe_results,
-    decision_inputs,
-)
-from scripts.experiments.phase_c1.scoring import (# noqa: E402
-    C1_BATTERY_CONTENT_SHA256,
-    C1_METRIC_CONTRACT,
-    c1_scoring_contract,
-)
+from experiments.phase_c1.authorization import C1Authorization  # noqa: E402
+from experiments.phase_c1.isolation import C0_PREREGISTRATION_SHA256, C1Arm, C1IsolationPlan, decide, derive_recovery_seeds, paired_differences, stratified_cluster_bootstrap  # noqa: E402
+from experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
+from experiments.phase_c1.probe_results import ARMS, C1ProbeRecord, build_probe_results, decision_inputs  # noqa: E402
+from experiments.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
 from aadistill.runtime.device_handoff import (# noqa: E402
     DeviceHandoffError,
     complete_release,

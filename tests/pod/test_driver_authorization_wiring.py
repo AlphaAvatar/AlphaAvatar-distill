@@ -54,11 +54,7 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 #: It is still a genuine `ContinuationAuthorization` written to disk and parsed
 #: by the real loader — nothing here is a stub.
 def fixture_auth_payload() -> dict:
-    from scripts.experiments.phase_b.continuation import (
-        BOUND_EVIDENCE,
-        CONTINUATION_PLAN_V1,
-        ContinuationAuthorization,
-    )
+    from experiments.phase_b.continuation import BOUND_EVIDENCE, CONTINUATION_PLAN_V1, ContinuationAuthorization
 
     return ContinuationAuthorization(
         authorization_id="autoinit.continuation_b.FIXTURE",
@@ -112,7 +108,7 @@ def constructed(tmp_path, monkeypatch):
 # --- the continuation's own wiring ------------------------------------------
 
 def test_the_constructor_loads_a_continuation_authorization(constructed):
-    from scripts.experiments.phase_b.continuation import ContinuationAuthorization
+    from experiments.phase_b.continuation import ContinuationAuthorization
 
     mod, driver = constructed
     assert isinstance(driver.auth, ContinuationAuthorization), (
@@ -136,7 +132,7 @@ def test_it_came_from_the_continuation_authorization_path(constructed):
 
 def test_it_validates_the_continuation_plan_and_rejects_phase_a(constructed):
     from aadistill.governance.authorization import AuthorizationError
-    from scripts.experiments.phase_b.continuation import CONTINUATION_PLAN_V1
+    from experiments.phase_b.continuation import CONTINUATION_PLAN_V1
 
     mod, driver = constructed
     assert mod.ContinuationDriver.PLAN is CONTINUATION_PLAN_V1
@@ -201,7 +197,7 @@ def test_the_mutation_that_caused_attempt_2_is_caught(tmp_path, monkeypatch):
     A guard that has only ever seen the fixed code is not known to be able to
     fail — which is precisely how the original slipped through.
     """
-    from scripts.experiments.phase_b.continuation import ContinuationAuthorization
+    from experiments.phase_b.continuation import ContinuationAuthorization
 
     mod = load("autoinit_continuation_b_driver")
     import autoinit_phase_a_driver as parent

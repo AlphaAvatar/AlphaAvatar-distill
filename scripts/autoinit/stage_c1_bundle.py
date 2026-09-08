@@ -36,14 +36,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from scripts.experiments.phase_c1.bundle import (# noqa: E402
-    RELAY_REPO,
-    C1BundleError,
-    build_bundle,
-    canonical_bundle_name,
-    canonical_repo_path,
-    stage_bundle,
-)
+from experiments.phase_c1.bundle import RELAY_REPO, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, stage_bundle  # noqa: E402
 
 AUTH_PATH = "logs/autoinit_c1_authorization.json"
 
