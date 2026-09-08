@@ -25,10 +25,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
 
-from aadistill.initialization.calibration.profiles import (  # noqa: E402
-    DOMAIN_BALANCED_V1,
-    REASONING_HEAVY_V2,
-)
+from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, CONTINUATION_SOURCE_SET_VERSION, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, continuation_source_digest, search_call_site_owners  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 

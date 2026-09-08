@@ -75,10 +75,74 @@ class Args:
     probe_battery_minutes = 9.82
 
 
+#: --- the three fixture categories --------------------------------------------
+#:
+#: The initialization migration split one question into three, and a test that
+#: does not say which one it is asking gets a confusing answer. Every test below
+#: names its category.
+#:
+#:   A. CURRENT IMPLEMENTATION BEHAVIOUR — does the driver's real stage-0 body
+#:      work, on this tree, against a binding built from this tree? Uses an
+#:      ephemeral expectation in `tmp_path`.
+#:   B. HISTORICAL EVIDENCE VALIDITY — are the completed run's recorded bytes
+#:      still intact and self-consistent? Reads `logs/` and asserts nothing
+#:      about whether this tree could run it.
+#:   C. HISTORICAL LAUNCH COMPATIBILITY — fed the immutable historical document,
+#:      does the migrated live gate REFUSE? It must.
+#:
+#: Category A never writes to `logs/`, never issues a grant or authorization and
+#: never stages a bundle: it is a test of implementation behaviour, and an
+#: artifact it left behind would eventually be read as a record of a run.
+
+#: A fixed stamp, so a category-A binding is reproducible and two runs of the
+#: same test produce the same document.
+TEST_TIMESTAMP = "2026-09-08T00:00:00+00:00"
+
+
+def current_tree_expectation(tmp_path: Path) -> Path:
+    """CATEGORY A: what this tree's own identity is, written to `tmp_path`.
+
+    The scientific configuration is unchanged -- the same assets, the same
+    roots, the same hash conventions. What differs from the historical document
+    is only the *implementation* identity: the scoring contract this tree
+    computes, which the migration moved from v2 to v3 without moving any number
+    it produces.
+    """
+    sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    import verify_frozen_assets as vfa
+    from aadistill.initialization.planning.recovery import recovery_scoring_contract
+
+    contract = recovery_scoring_contract(REPO)
+    doc = {
+        "schema": "aadistill.autoinit.frozen_asset_expectation/v1",
+        "_category": "A -- current implementation behaviour. NOT a "
+                     "preregistration, and it authorizes nothing.",
+        "generated_utc": TEST_TIMESTAMP,
+        "assets": vfa.FROZEN,
+        "scoring_contract": {"contract": contract["contract"],
+                             "digest": contract["digest"]},
+        "authorizes": "nothing",
+    }
+    out = tmp_path / "current_expectation.json"
+    out.write_text(json.dumps(doc, indent=1))
+    return out
+
+
 def build(tmp_path, *, probe_override=None, probe_missing=None,
-          runtime_override=None):
-    """The real driver, with only the two boundaries substituted."""
+          runtime_override=None, expectation="current"):
+    """The real driver, with only the two boundaries substituted.
+
+    `expectation="current"` is CATEGORY A: the frozen-assets gate is pointed at
+    an ephemeral binding for this tree, so the tests that follow exercise the
+    stage-0 body rather than stopping at a contract mismatch the migration
+    created. `expectation="historical"` is CATEGORY C: the gate keeps its
+    production default and must refuse.
+    """
     mod = load_driver(tmp_path)
+    if expectation == "current":
+        mod.FROZEN_ASSETS_EXPECTATION = str(current_tree_expectation(tmp_path))
+    elif expectation != "historical":
+        raise ValueError(f"unknown expectation category {expectation!r}")
     d = mod.PhaseADriver.__new__(mod.PhaseADriver)
     d.a = Args()
     d.t0 = __import__("time").time()

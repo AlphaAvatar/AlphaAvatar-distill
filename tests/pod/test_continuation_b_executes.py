@@ -359,10 +359,7 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
 
 
 def make_auth(evidence: dict, tmp_path: Path):
-    from aadistill.initialization.calibration.profiles import (
-        DOMAIN_BALANCED_V1,
-        REASONING_HEAVY_V2,
-    )
+    from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
     from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest
 
     frozen = json.loads(FROZEN_PLAN.read_text())

@@ -12,16 +12,18 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
 import aadistill.initialization  # noqa: F401,E402
-from aadistill.initialization.calibration.profiles import (  # noqa: E402
-    DOMAIN_BALANCED_V1,
-    REASONING_HEAVY_V1,
-    STAGE0_CURRENT_V1,
+from aadistill.initialization.calibration.profiles import (
     CalibrationError,
     CalibrationProfile,
     CalibrationSource,
     buildable_profiles,
     register_profile,
     unregister_profile,
+)
+from experiments.calibration import (
+    DOMAIN_BALANCED_V1,
+    REASONING_HEAVY_V1,
+    STAGE0_CURRENT_V1,
 )
 from aadistill.initialization.calibration.datasets import (  # noqa: E402
     DatasetAsset,

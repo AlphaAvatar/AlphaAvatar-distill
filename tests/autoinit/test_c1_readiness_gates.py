@@ -128,7 +128,7 @@ def _valid_record(tmp_path: Path, kind: str = "diagnostic") -> dict:
 
 
 def test_a_record_binding_the_live_tree_is_accepted(tmp_path):
-    ok, why = pe.verify_record(_valid_record(tmp_path), REPO)
+    ok, why = pe.verify_record(_valid_record(tmp_path), REPO, harness_digest=c1_digest)
     assert ok, why
 
 
@@ -136,7 +136,7 @@ def test_a_record_made_against_a_different_harness_is_refused(tmp_path):
     rec = _valid_record(tmp_path)
     rec["c1_harness_digest"] = "f" * 64
     rec["self_sha256"] = pe.self_hash(rec)
-    ok, why = pe.verify_record(rec, REPO)
+    ok, why = pe.verify_record(rec, REPO, harness_digest=c1_digest)
     assert not ok and "harness" in why and "owed again" in why
 
 
@@ -146,7 +146,7 @@ def test_a_record_made_against_a_different_test_environment_is_refused(tmp_path)
     rec = _valid_record(tmp_path)
     rec["pod_test_environment_digest"] = "e" * 64
     rec["self_sha256"] = pe.self_hash(rec)
-    ok, why = pe.verify_record(rec, REPO)
+    ok, why = pe.verify_record(rec, REPO, harness_digest=c1_digest)
     assert not ok and "pod test environment" in why and "owed again" in why
 
 
@@ -156,7 +156,7 @@ def test_a_tampered_record_is_refused(tmp_path):
     rec["verdict"] = "PASS"
     rec["problems"] = []
     rec["self_sha256"] = "0" * 64
-    ok, why = pe.verify_record(rec, REPO)
+    ok, why = pe.verify_record(rec, REPO, harness_digest=c1_digest)
     assert not ok and "self-hash" in why
 
 
@@ -165,7 +165,7 @@ def test_a_failed_sweep_is_refused(tmp_path):
     rec["verdict"] = "FAIL"
     rec["problems"] = ["3 failed/errored"]
     rec["self_sha256"] = pe.self_hash(rec)
-    ok, why = pe.verify_record(rec, REPO)
+    ok, why = pe.verify_record(rec, REPO, harness_digest=c1_digest)
     assert not ok and "FAIL" in why
 
 
@@ -173,7 +173,7 @@ def test_a_sweep_recorded_against_a_dirty_tree_is_refused(tmp_path):
     rec = _valid_record(tmp_path)
     rec["tree_clean"] = False
     rec["self_sha256"] = pe.self_hash(rec)
-    ok, why = pe.verify_record(rec, REPO)
+    ok, why = pe.verify_record(rec, REPO, harness_digest=c1_digest)
     assert not ok and "dirty" in why
 
 
@@ -451,7 +451,7 @@ def _skip_if_inside_the_measured_suite() -> None:
 def test_the_committed_record_still_binds_the_live_executable():
     """Gate 12 itself, run as a test — with the gate's OWN argument contract.
 
-    Until 2026-09-05 this called `verify_record(record, REPO)` and omitted
+    Until 2026-09-05 this called `verify_record(record, REPO, harness_digest=c1_digest)` and omitted
     `authorization_path`, so only the readiness record counted as a permitted
     post-sweep path. That is not the shape a pod is ever in: a pod checks out the
     SESSION commit, which by construction also carries
@@ -470,7 +470,7 @@ def test_the_committed_record_still_binds_the_live_executable():
     if not path.is_file():
         pytest.skip(f"{pe.RECORD_PATH} has not been produced yet")
     ok, why = pe.verify_record(json.loads(path.read_text()), REPO,
-                               authorization_path=C1_AUTH_PATH)
+                               authorization_path=C1_AUTH_PATH, harness_digest=c1_digest)
     assert ok, why
 
 
@@ -490,7 +490,7 @@ def test_a_pre_authorization_tree_is_accepted_with_the_record_alone(tmp_path,
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     head = _commit(root, pe.RECORD_PATH, '{"r": 1}\n', "record the sweep")
     ok, why = pe.verify_record(rec, root, session_commit=head,
-                               authorization_path=C1_AUTH_PATH)
+                               authorization_path=C1_AUTH_PATH, harness_digest=c1_digest)
     assert ok, why
 
 
@@ -502,11 +502,11 @@ def test_an_issued_session_tree_is_accepted_with_record_and_authorization(
     _commit(root, pe.RECORD_PATH, '{"r": 1}\n', "record the sweep")
     head = _commit(root, C1_AUTH_PATH, '{"auth": 1}\n', "issue")
     ok, why = pe.verify_record(rec, root, session_commit=head,
-                               authorization_path=C1_AUTH_PATH)
+                               authorization_path=C1_AUTH_PATH, harness_digest=c1_digest)
     assert ok, why
     # And the omission that caused the abort still refuses, so the fix is the
     # argument and not a loosened rule.
-    ok2, why2 = pe.verify_record(rec, root, session_commit=head)
+    ok2, why2 = pe.verify_record(rec, root, session_commit=head, harness_digest=c1_digest)
     assert not ok2 and "post-sweep drift" in why2
 
 
@@ -620,6 +620,15 @@ def test_the_simulator_announces_that_its_credential_is_synthetic():
 
 import subprocess
 
+#: The C1 experiment's harness digest, injected into the generic verifier.
+#: `verify_record` no longer imports an experiment package to find this out --
+#: which harness a readiness record describes is the caller's fact.
+def c1_digest(repo_root):
+    from experiments.phase_c1.authorization import c1_harness_digest
+    return c1_harness_digest(repo_root)["digest"]
+
+
+
 
 def _git(root, *args):
     return subprocess.run(["git", "-C", str(root), *args],
@@ -669,7 +678,7 @@ def _commit(root, rel, text, msg):
 
 def test_a_tree_identical_to_the_swept_commit_is_accepted(tmp_path, monkeypatch):
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
-    ok, why = pe.verify_record(rec, root, session_commit=base)
+    ok, why = pe.verify_record(rec, root, session_commit=base, harness_digest=c1_digest)
     assert ok, why
 
 
@@ -678,7 +687,7 @@ def test_a_readiness_record_only_delta_is_accepted(tmp_path, monkeypatch):
     so its own commit can never be inside the swept tree."""
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     head = _commit(root, pe.RECORD_PATH, '{"record": true}\n', "record the sweep")
-    ok, why = pe.verify_record(rec, root, session_commit=head)
+    ok, why = pe.verify_record(rec, root, session_commit=head, harness_digest=c1_digest)
     assert ok, why
 
 
@@ -692,11 +701,11 @@ def test_the_canonical_authorization_is_accepted_only_in_the_issued_shape(
     head = _commit(root, auth, '{"authorization": true}\n', "issue")
 
     ok, why = pe.verify_record(rec, root, session_commit=head,
-                               authorization_path=auth)
+                               authorization_path=auth, harness_digest=c1_digest)
     assert ok, why
 
     # Without an issued session it is just another log file, and refused.
-    ok2, why2 = pe.verify_record(rec, root, session_commit=head)
+    ok2, why2 = pe.verify_record(rec, root, session_commit=head, harness_digest=c1_digest)
     assert not ok2 and "post-sweep drift" in why2 and auth in why2
 
 
@@ -704,7 +713,7 @@ def test_changing_current_state_after_the_sweep_is_refused(tmp_path, monkeypatch
     """The exact 2026-09-04 hole: the pod suite reads this file."""
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     head = _commit(root, "logs/current_state.json", '{"a": 2}\n', "normalize state")
-    ok, why = pe.verify_record(rec, root, session_commit=head)
+    ok, why = pe.verify_record(rec, root, session_commit=head, harness_digest=c1_digest)
     assert not ok
     assert "post-sweep drift" in why and "logs/current_state.json" in why
 
@@ -712,7 +721,7 @@ def test_changing_current_state_after_the_sweep_is_refused(tmp_path, monkeypatch
 def test_changing_state_md_after_the_sweep_is_refused(tmp_path, monkeypatch):
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     head = _commit(root, "logs/STATE.md", "rewritten\n", "update the handoff")
-    ok, why = pe.verify_record(rec, root, session_commit=head)
+    ok, why = pe.verify_record(rec, root, session_commit=head, harness_digest=c1_digest)
     assert not ok
     assert "post-sweep drift" in why and "logs/STATE.md" in why
 
@@ -723,7 +732,7 @@ def test_an_arbitrary_second_log_or_doc_file_is_refused(tmp_path, monkeypatch):
     _commit(root, pe.RECORD_PATH, '{"record": true}\n', "record the sweep")
     head = _commit(root, "logs/some_other_note.json", "{}\n", "add a note")
     ok, why = pe.verify_record(rec, root, session_commit=head,
-                               authorization_path="logs/autoinit_c1_authorization.json")
+                               authorization_path="logs/autoinit_c1_authorization.json", harness_digest=c1_digest)
     assert not ok
     assert "post-sweep drift" in why and "logs/some_other_note.json" in why
 
@@ -740,7 +749,7 @@ def test_changing_a_test_or_source_file_is_refused_by_the_digests(tmp_path,
     head = _commit(root, "tests/test_x.py", "def test_a(): assert True\n", "edit")
     monkeypatch.setattr(pe, "pod_test_environment_digest",
                         lambda r=".": {"digest": "9" * 64, "n_files": 1})
-    ok, why = pe.verify_record(rec, root, session_commit=head)
+    ok, why = pe.verify_record(rec, root, session_commit=head, harness_digest=c1_digest)
     assert not ok
     assert "pod test environment" in why and "owed again" in why
 
@@ -750,7 +759,7 @@ def test_a_record_without_a_swept_base_commit_is_refused(tmp_path, monkeypatch):
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     rec.pop("swept_base_commit")
     rec["self_sha256"] = pe.self_hash(rec)
-    ok, why = pe.verify_record(rec, root, session_commit=base)
+    ok, why = pe.verify_record(rec, root, session_commit=base, harness_digest=c1_digest)
     assert not ok and "swept_base_commit" in why
 
 
@@ -761,7 +770,7 @@ def test_a_session_commit_off_the_swept_line_of_history_is_refused(tmp_path,
     _git(root, "checkout", "-q", "--orphan", "elsewhere")
     _commit(root, "logs/STATE.md", "different history\n", "orphan")
     head = _git(root, "rev-parse", "HEAD")
-    ok, why = pe.verify_record(rec, root, session_commit=head)
+    ok, why = pe.verify_record(rec, root, session_commit=head, harness_digest=c1_digest)
     assert not ok and "post-sweep drift" in why
 
 
@@ -818,8 +827,13 @@ def test_the_swept_base_helper_delegates_rather_than_reimplementing():
     from aadistill.infrastructure import session_prechecks as sp
 
     src = (REPO / "src/aadistill/runtime/pod_environment.py").read_text()
-    assert "from ..infrastructure.session_prechecks import " \
-           "lineage_from_authorized_base" in src, "it no longer delegates"
+    # Absolute since the initialization cutover moved this module to a
+    # different depth; the claim being checked is that it DELEGATES, not which
+    # spelling the import uses.
+    assert ("from aadistill.infrastructure.session_prechecks import "
+            "lineage_from_authorized_base" in src
+            or "from ..infrastructure.session_prechecks import "
+               "lineage_from_authorized_base" in src), "it no longer delegates"
     for forbidden in ("merge-base", "--is-ancestor", "git diff"):
         assert forbidden not in src, (
             f"pod_environment re-implements git plumbing ({forbidden!r}); it must "
@@ -894,14 +908,14 @@ def test_a_diagnostic_record_is_valid_readiness_evidence(tmp_path):
     The repair must not make diagnostic verification impossible — that would
     delete the cheap check the machinery was built around.
     """
-    ok, why = pe.verify_record(_valid_record(tmp_path, "diagnostic"), REPO)
+    ok, why = pe.verify_record(_valid_record(tmp_path, "diagnostic"), REPO, harness_digest=c1_digest)
     assert ok, why
 
 
 def test_a_diagnostic_record_is_refused_by_the_paid_launch_gate(tmp_path):
     """The defect this closes: sound tree, wrong warrant."""
     ok, why = pe.verify_record(_valid_record(tmp_path, "diagnostic"), REPO,
-                               required_kind=pe.LAUNCH_BOUND)
+                               required_kind=pe.LAUNCH_BOUND, harness_digest=c1_digest)
     assert not ok
     assert "'diagnostic'" in why and "launch_bound" in why
     assert "--kind launch_bound" in why, "the refusal must say how to fix it"
@@ -909,7 +923,7 @@ def test_a_diagnostic_record_is_refused_by_the_paid_launch_gate(tmp_path):
 
 def test_a_launch_bound_record_is_accepted_by_the_paid_launch_gate(tmp_path):
     ok, why = pe.verify_record(_valid_record(tmp_path, pe.LAUNCH_BOUND), REPO,
-                               required_kind=pe.LAUNCH_BOUND)
+                               required_kind=pe.LAUNCH_BOUND, harness_digest=c1_digest)
     assert ok, why
 
 
@@ -918,7 +932,7 @@ def test_a_missing_record_kind_is_refused(tmp_path):
     rec.pop("record_kind")
     rec["self_sha256"] = pe.self_hash(rec)
     for required in (None, pe.LAUNCH_BOUND):
-        ok, why = pe.verify_record(rec, REPO, required_kind=required)
+        ok, why = pe.verify_record(rec, REPO, required_kind=required, harness_digest=c1_digest)
         assert not ok and "record_kind" in why and "cannot say what it is" in why
 
 
@@ -928,7 +942,7 @@ def test_an_unknown_record_kind_is_refused(tmp_path):
     rec["record_kind"] = "provisional"
     rec["self_sha256"] = pe.self_hash(rec)
     for required in (None, pe.LAUNCH_BOUND):
-        ok, why = pe.verify_record(rec, REPO, required_kind=required)
+        ok, why = pe.verify_record(rec, REPO, required_kind=required, harness_digest=c1_digest)
         assert not ok and "'provisional'" in why
 
 
@@ -938,7 +952,7 @@ def test_promoting_the_kind_in_place_is_caught_as_tampering(tmp_path):
     message names the right offence."""
     rec = _valid_record(tmp_path, "diagnostic")
     rec["record_kind"] = pe.LAUNCH_BOUND            # no re-hash: the whole point
-    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND)
+    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND, harness_digest=c1_digest)
     assert not ok
     assert "self-hash" in why, why
     assert "launch_bound" not in why, (
@@ -1118,6 +1132,6 @@ def test_the_launch_bound_refusal_names_the_pre_authorization_tree():
     assert "PRE-AUTHORIZATION tree" in src
     assert "on the final authorized tree" not in src
     rec = _valid_record(Path("/tmp"), "diagnostic")
-    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND)
+    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND, harness_digest=c1_digest)
     assert not ok
     assert "PRE-AUTHORIZATION" in why and "BEFORE the authorization is issued" in why

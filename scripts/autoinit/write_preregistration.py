@@ -25,10 +25,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
-from aadistill.initialization.calibration.profiles import (  # noqa: E402
-    DOMAIN_BALANCED_V1,
-    NO_CALIBRATION,
-)
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
+from aadistill.initialization.calibration.profiles import NO_CALIBRATION
+from experiments.calibration import DOMAIN_BALANCED_V1
 from aadistill.runtime.cost import (  # noqa: E402
     L40S_MEASURED,
     activation_stats_bytes,
@@ -64,6 +63,9 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     SuccessiveHalvingPlan,
 )
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
+
+#: Explicit: importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 ADAPTER = get_adapter("qwen3")
 TEACHER = ArchSpec.of("qwen3", dict(

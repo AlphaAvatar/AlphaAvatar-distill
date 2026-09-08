@@ -99,16 +99,39 @@ def main() -> int:
     ap.add_argument("--repo", default=str(REPO_ROOT))
     ap.add_argument("--out", default="artifacts/audit/autoinit_preflight/"
                                      "frozen_asset_verification.json")
+    ap.add_argument("--expect", default=None, help=(
+        "a JSON document supplying {assets, scoring_contract} to check against, "
+        "instead of the historical constants in this file. The production "
+        "default is None -- a pod checks the constants, exactly as before."))
     args = ap.parse_args()
     repo = Path(args.repo)
 
+    # What this run is checking AGAINST. The default is the historical
+    # expectation compiled in above, so a pod behaves exactly as it did.
+    #
+    # `--expect` exists because "does this tree match the completed run's
+    # preregistration" and "does this tree match its own current identity" are
+    # different questions, and the initialization migration made their answers
+    # differ. A caller that wants the second must say so; nothing infers it.
+    if args.expect:
+        supplied = json.loads(Path(args.expect).read_text())
+        expected_assets = supplied["assets"]
+        expected_contract = supplied["scoring_contract"]["contract"]
+        expected_digest = supplied["scoring_contract"]["digest"]
+        expected_from = f"the expectation document {args.expect}"
+    else:
+        expected_assets = FROZEN
+        expected_contract = FROZEN_SCORING_CONTRACT
+        expected_digest = FROZEN_SCORING_DIGEST
+        expected_from = ("preregistered constants in this file, NOT from "
+                         "the manifests on disk")
+
     report = {"schema": "aadistill.autoinit.frozen_asset_verification/v1",
               "generated_utc": datetime.now(timezone.utc).isoformat(),
-              "expected_from": ("preregistered constants in this file, NOT from "
-                                "the manifests on disk"),
+              "expected_from": expected_from,
               "assets": {}, "problems": []}
 
-    for name, frozen in FROZEN.items():
+    for name, frozen in expected_assets.items():
         root = repo / frozen["root"]
         entry = {"root": frozen["root"], "present": root.is_dir(), "checks": {}}
         if not entry["present"]:
@@ -161,16 +184,16 @@ def main() -> int:
 
     contract = recovery_scoring_contract(repo)
     report["scoring_contract"] = {
-        "expected": FROZEN_SCORING_CONTRACT,
-        "expected_digest": FROZEN_SCORING_DIGEST,
+        "expected": expected_contract,
+        "expected_digest": expected_digest,
         "observed": contract["contract"], "observed_digest": contract["digest"],
-        "match": (contract["contract"] == FROZEN_SCORING_CONTRACT
-                  and contract["digest"] == FROZEN_SCORING_DIGEST),
+        "match": (contract["contract"] == expected_contract
+                  and contract["digest"] == expected_digest),
     }
     if not report["scoring_contract"]["match"]:
         report["problems"].append(
             f"scoring contract is {contract['contract']} {contract['digest']}, "
-            f"expected {FROZEN_SCORING_CONTRACT} {FROZEN_SCORING_DIGEST}")
+            f"expected {expected_contract} {expected_digest}")
 
     report["passed"] = not report["problems"]
     report["report_sha256"] = sha256_json(report)

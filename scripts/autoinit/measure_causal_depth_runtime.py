@@ -400,7 +400,7 @@ def resolve_calibration(repo_root):
     ids and all, into a field labelled with a path. The path is
     `profile.items_path`, and it is 81 characters.
     """
-    from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1
+    from experiments.calibration import DOMAIN_BALANCED_V1
     from phase_a_search import as_operator_items
 
     rows = DOMAIN_BALANCED_V1.resolve(repo_root)

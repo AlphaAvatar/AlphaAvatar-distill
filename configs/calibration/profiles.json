@@ -1,0 +1,283 @@
+{
+ "schema": "aadistill.calibration_profiles/v1",
+ "_contract": "The concrete calibration mixtures this project has defined. These are EXPERIMENT DATA -- specific token budgets, seeds, item lists, source datasets and leakage proofs -- and they used to live in src/aadistill, where importing the module registered them as a side effect. A caller loads this document explicitly. AUTHORIZES NOTHING.",
+ "_hashes_are_unchanged": "Every field is transcribed from the previous in-code definitions without edit, so each profile_hash is identical to what it was. A changed mixture needs a new version, not a redefinition.",
+ "profile_hashes_at_extraction": {
+  "calib.stage0_current@v1": "36a09847e0266141ebabbe8da28a1bff4ce205a7b502020eff254abe3cf997f5",
+  "calib.domain_balanced@v1": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+  "calib.reasoning_heavy@v1": "f4d4ba673ffe3f8f86798321bb890e5ca7cc1ca8f11ae1c81869e2fade47b889",
+  "calib.reasoning_heavy@v2": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd"
+ },
+ "profiles": [
+  {
+   "profile_id": "calib.stage0_current",
+   "version": 1,
+   "description": "The historical Stage-0 warm-up mixture that produced artifacts/stage0/qwen3_4b_thinking_v1 (949,859 tokens). Represented so a search path can select the incumbent mixture; the item list still has to be re-rendered from scripts/data/build_warmup_v1.py before use.",
+   "sources": [
+    {
+     "dataset_id": "aadistill/warmup_v1",
+     "revision": "local",
+     "domain": "mixed",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "rebuild via scripts/data/build_warmup_v1.py"
+    }
+   ],
+   "domain_weights": {
+    "mixed": 1.0
+   },
+   "token_budget": 949859,
+   "sample_rule": "warmup_v1 builder order, seed-fixed",
+   "seed": 20260713,
+   "role": "operator_calibration",
+   "materialized": false,
+   "items_path": null,
+   "rendered_manifest_sha256": null,
+   "content_sha256": null,
+   "items_file_sha256": null,
+   "leakage_exclusions": [],
+   "leakage_proof_path": null,
+   "metadata": {
+    "activation_stats": "artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+    "activation_stats_sha256_prefix": "aaeb2e4c"
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.domain_balanced",
+   "version": 1,
+   "description": "E8a's frozen 67-item mixture: five domains, 59,763 prediction positions, leakage-checked against the recovery rung, the validation slice and prompt-content collisions. The only v1 profile that is already built.",
+   "sources": [
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "general",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "per-domain counts in the mixture manifest"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "math",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "per-domain counts in the mixture manifest"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "rag_multihop",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "per-domain counts in the mixture manifest"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "code",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "per-domain counts in the mixture manifest"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "tool",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "per-domain counts in the mixture manifest"
+    }
+   ],
+   "domain_weights": {
+    "general": 0.2,
+    "math": 0.2,
+    "rag_multihop": 0.2,
+    "code": 0.2,
+    "tool": 0.2
+   },
+   "token_budget": 59763,
+   "sample_rule": "frozen item list; unweighted mean over domains of the unweighted mean over each domain's sub-types",
+   "seed": 20260810,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+   "leakage_exclusions": [
+    "ladder_uniform_probe.rung",
+    "ladder_uniform_probe.val",
+    "prompt_content_collisions"
+   ],
+   "leakage_proof_path": "artifacts/stage1/e8_calibration_v1/leakage.json",
+   "metadata": {
+    "manifest": "artifacts/stage1/e8_calibration_v1/manifest.json",
+    "frozen_by": "E8a"
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.reasoning_heavy",
+   "version": 1,
+   "description": "A reasoning-weighted counterpart to the domain-balanced mixture, for the hypothesis that an operator should be calibrated on the capability the recipe actually targets (AGENTS.md P3/P10.1) rather than on a uniform domain average. Not built.",
+   "sources": [
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "general",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "reweighted draw from the same item pool"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "math",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "reweighted draw from the same item pool"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "rag_multihop",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "reweighted draw from the same item pool"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "code",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "reweighted draw from the same item pool"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "tool",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "reweighted draw from the same item pool"
+    }
+   ],
+   "domain_weights": {
+    "general": 0.1,
+    "math": 0.35,
+    "rag_multihop": 0.25,
+    "code": 0.2,
+    "tool": 0.1
+   },
+   "token_budget": 59763,
+   "sample_rule": "weighted draw from the domain-balanced pool, deterministic by seed",
+   "seed": 20260812,
+   "role": "operator_calibration",
+   "materialized": false,
+   "items_path": null,
+   "rendered_manifest_sha256": null,
+   "content_sha256": null,
+   "items_file_sha256": null,
+   "leakage_exclusions": [],
+   "leakage_proof_path": null,
+   "metadata": {
+    "pool": "calib.domain_balanced@v1"
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.reasoning_heavy",
+   "version": 2,
+   "description": "A reasoning-weighted counterpart to the domain-balanced mixture, for the hypothesis that an operator should be calibrated on the capability the recipe actually targets (AGENTS.md P3/P10.1) rather than on a uniform domain average. Supersedes v1, which was UNBUILDABLE: its weights needed more code and math positions than the pool holds, and its budget was the whole pool, so a draw without replacement was the identity.",
+   "sources": [
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "general",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "with-replacement reweighted draw from the same pool"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "math",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "with-replacement reweighted draw from the same pool"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "rag_multihop",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "with-replacement reweighted draw from the same pool"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "code",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "with-replacement reweighted draw from the same pool"
+    },
+    {
+     "dataset_id": "aadistill/e8_calibration_v1",
+     "revision": "2026-08-10",
+     "domain": "tool",
+     "n_items": 0,
+     "content_sha256": null,
+     "license": null,
+     "note": "with-replacement reweighted draw from the same pool"
+    }
+   ],
+   "domain_weights": {
+    "general": 0.1,
+    "math": 0.35,
+    "rag_multihop": 0.25,
+    "code": 0.2,
+    "tool": 0.1
+   },
+   "token_budget": 59763,
+   "sample_rule": "Deterministic with-replacement reweighting of calib.domain_balanced@v1's frozen 67-item pool, in five steps. R1 DOMAIN APPORTIONMENT: largest-remainder (Hamilton) over the declared domain weights, in prediction positions, remainder ties by ascending domain id; sums to token_budget exactly. R2 UNREACHABLE DOMAIN QUOTA: a quota no whole-item multiset can hit moves to the nearest reachable value, ties toward the LOWER, and the difference is transferred to the reachable domain with the most negative apportionment remainder (ties by ascending id); the budget total is conserved. Nearest, because a domain's deviation distorts the weights this profile declares. R3 SUB-TYPE APPORTIONMENT: within each domain, largest-remainder over the SOURCE POOL's own sub-type position shares, so only the domain mix changes and within-domain composition is held fixed. R4 UNREACHABLE SUB-TYPE QUOTA: repaired INSIDE its own domain, so no domain weight moves; among reachable values at or below the quota, take the one admitting the most distinct sessions, ties by smallest deviation. Support rather than nearest, because here the deviation is absorbed by a sibling. R5 REALIZATION: among all exact whole-item multisets for a sub-type quota, the one maximizing distinct sessions, then minimizing multiset size, then broken by the SEED-DERIVED item order sha256(f'{seed}:{item_id}') ascending. No session is ever truncated. Items are emitted once per draw, ordered by (domain, subtype, item_id, draw_index). Implemented in aadistill.autoinit.reweight; built by scripts/data/build_reasoning_heavy_calibration.py.",
+   "seed": 20260812,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stage1/reasoning_heavy_v2/items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+   "items_file_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4",
+   "leakage_exclusions": [
+    "ladder_uniform_probe.rung",
+    "ladder_uniform_probe.val",
+    "prompt_content_collisions"
+   ],
+   "leakage_proof_path": "artifacts/stage1/e8_calibration_v1/leakage.json",
+   "metadata": {
+    "pool": "calib.domain_balanced@v1",
+    "manifest": "artifacts/stage1/reasoning_heavy_v2/manifest.json",
+    "supersedes": "calib.reasoning_heavy@v1",
+    "seed_note": "the seed breaks R5 ties by construction; on THIS pool every sub-type optimum is unique, so no tie is exercised and the seed does not change the bytes -- verified by brute force, and recorded rather than implied"
+   },
+   "is_null": false
+  }
+ ],
+ "authorizes": "nothing"
+}

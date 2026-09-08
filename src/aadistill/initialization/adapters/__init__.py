@@ -1,31 +1,60 @@
 """Architecture adapters, and the one place the shipped ones are registered.
 
-Importing this package does NOT register anything. It used to: the concrete
-adapter called `register_adapter` at module scope, so whether `get_adapter`
-resolved a family depended on whether some earlier import had happened to pull
-that module in. The initialization cutover removed the package `__init__` that
-had been doing so as a side effect, and the failure surfaced as a test that
-passed or failed according to the order the suite happened to run in.
+Importing this package registers nothing. It used to: the concrete adapter
+called `register_adapter` at module scope, so whether `get_adapter` resolved a
+family depended on whether some earlier import had happened to pull that module
+in. The initialization cutover removed the package `__init__` that had been
+doing so as a side effect, and the failure surfaced as test files that passed or
+failed according to the order the suite happened to run in.
 
-So registration is an explicit call with a single owner. A caller that needs to
-resolve adapters calls `register_builtin_adapters()` first; a family defined
-elsewhere calls `aadistill.initialization.specs.arch.register_adapter` itself.
+Registration is now something a caller DOES:
+
+    from aadistill.initialization.adapters import build_registry
+    registry = build_registry()                 # its own, shared explicitly
+    adapter = registry.get("qwen3")
+
+or, for an application content to use the process default:
+
+    register_builtin_adapters()
+
+A family defined elsewhere ships its own `register_<family>(registry)` beside
+its adapter and never edits this file.
 """
 
-from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER, Qwen3Adapter
-from aadistill.initialization.specs.arch import register_adapter
+from aadistill.initialization.adapters.qwen3 import (
+    QWEN3_ADAPTER, Qwen3Adapter, register_qwen3)
+from aadistill.initialization.specs.arch import AdapterRegistry
 
-__all__ = ["QWEN3_ADAPTER", "Qwen3Adapter", "register_builtin_adapters"]
+__all__ = ["QWEN3_ADAPTER", "Qwen3Adapter", "register_qwen3",
+           "BUILTIN_FAMILIES", "build_registry", "register_builtin_adapters"]
+
+#: family -> its registration function. The only list of what ships.
+BUILTIN_FAMILIES = {"qwen3": register_qwen3}
 
 
-def register_builtin_adapters() -> tuple[str, ...]:
-    """Register the adapters this project ships. Idempotent; returns families.
+def build_registry(families=None) -> AdapterRegistry:
+    """A NEW registry holding the named families. Nothing global is touched."""
+    registry = AdapterRegistry()
+    for name in (families if families is not None else BUILTIN_FAMILIES):
+        if name not in BUILTIN_FAMILIES:
+            raise KeyError(f"no builtin adapter for family {name!r}; "
+                           f"known: {sorted(BUILTIN_FAMILIES)}")
+        BUILTIN_FAMILIES[name](registry)
+    return registry
 
-    Idempotent because `register_adapter` returns the existing entry when the
-    same family is re-registered at the same version, so calling this from
-    several entry points in one process is safe. A version CHANGE still raises,
-    which is the check that stops a manifest describing an adapter that is no
-    longer what ran.
+
+def register_builtin_adapters(families=None) -> tuple[str, ...]:
+    """Fill the process-default registry. Idempotent; returns the families.
+
+    Idempotent because registering the same family at the same version returns
+    the existing entry, so several entry points may call this in one process. A
+    version CHANGE still raises -- that is the check which stops a manifest
+    describing an adapter that is no longer what ran.
     """
-    register_adapter(QWEN3_ADAPTER)
-    return (QWEN3_ADAPTER.family,)
+    names = tuple(families if families is not None else BUILTIN_FAMILIES)
+    for name in names:
+        if name not in BUILTIN_FAMILIES:
+            raise KeyError(f"no builtin adapter for family {name!r}; "
+                           f"known: {sorted(BUILTIN_FAMILIES)}")
+        BUILTIN_FAMILIES[name](None)
+    return names

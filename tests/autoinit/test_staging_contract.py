@@ -29,6 +29,15 @@ sys.path.insert(0, str(REPO / "tests/pod"))
 from aadistill.runtime import staging_contract as sc
 from session_specs import load_session_launcher, session_args  # noqa: E402
 
+#: The C1 experiment's harness digest, injected into the generic verifier.
+#: `verify_record` no longer imports an experiment package to find this out --
+#: which harness a readiness record describes is the caller's fact.
+def c1_digest(repo_root):
+    from experiments.phase_c1.authorization import c1_harness_digest
+    return c1_harness_digest(repo_root)["digest"]
+
+
+
 
 @pytest.fixture(scope="module")
 def c1_setup():
@@ -384,7 +393,7 @@ def test_a_launch_bound_record_without_a_staging_contract_is_refused():
            "counts": {"passed": 1, "skipped": 0, "failed": 0, "error": 0},
            "verdict": "PASS", "record_kind": pe.LAUNCH_BOUND, "problems": []}
     rec["self_sha256"] = pe.self_hash(rec)
-    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND)
+    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND, harness_digest=c1_digest)
     assert not ok and "staging_contract_digest" in why
 
 
@@ -401,7 +410,7 @@ def test_a_record_swept_under_a_different_staging_contract_is_refused(contract):
            "staging_contract_digest": "0" * 64}
     rec["self_sha256"] = pe.self_hash(rec)
     ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND,
-                               staging_contract_digest=contract["digest"])
+                               staging_contract_digest=contract["digest"], harness_digest=c1_digest)
     assert not ok and "staging contract" in why and "owed again" in why
 
 

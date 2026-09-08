@@ -25,7 +25,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 sys.path.insert(0, str(REPO / "tests/autoinit"))
 
-from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1  # noqa: E402
+from experiments.calibration import DOMAIN_BALANCED_V1  # noqa: E402
 from conftest import make_profile  # noqa: E402
 from phase_a_search import build_calibration_loader, resolve_profiles  # noqa: E402
 
@@ -86,10 +86,8 @@ def test_a_bare_sequence_is_accepted_for_one_profile_and_bound_to_it():
 def test_the_omitted_case_resolves_each_profile_itself_rather_than_defaulting():
     """The defect, at its narrowest: an unbuilt profile must NOT silently
     resolve to the domain-balanced mixture."""
-    from aadistill.initialization.calibration.profiles import (
-        REASONING_HEAVY_V1,
-        CalibrationError,
-    )
+    from aadistill.initialization.calibration.profiles import CalibrationError
+    from experiments.calibration import REASONING_HEAVY_V1
 
     load = build_calibration_loader((REASONING_HEAVY_V1,), None, REPO)
     with pytest.raises(CalibrationError, match="not built"):

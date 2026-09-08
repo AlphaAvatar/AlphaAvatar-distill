@@ -320,6 +320,11 @@ def say(msg: str) -> None:
     print(f"[{datetime.now(timezone.utc):%H:%M:%S}] {msg}", flush=True)
 
 
+#: What the frozen-assets gate checks against. None -- the production value --
+#: means the historical constants compiled into `verify_frozen_assets.py`.
+FROZEN_ASSETS_EXPECTATION: str | None = None
+
+
 class PhaseADriver:
     #: WHICH artifact governs this run, and what type may govern it. Class
     #: attributes rather than a hard-coded path because the recovery
@@ -444,8 +449,15 @@ class PhaseADriver:
             image_digest=self.a.image_digest)
         scoring = recovery_scoring_contract(REPO)
 
+        # `FROZEN_ASSETS_EXPECTATION` is None on a pod, so the gate checks the
+        # completed run's preregistered constants exactly as it always has. A
+        # caller that wants this tree checked against its OWN current identity
+        # -- which is a different question, and has a different answer since the
+        # initialization migration -- sets it explicitly.
         assets = self.gate("frozen_assets",
-                           [str(REPO / "scripts/autoinit/verify_frozen_assets.py")],
+                           [str(REPO / "scripts/autoinit/verify_frozen_assets.py"),
+                            *(["--expect", str(FROZEN_ASSETS_EXPECTATION)]
+                              if FROZEN_ASSETS_EXPECTATION else [])],
                            timeout=900)
         if assets.returncode != 0:
             return self.record(0, False,

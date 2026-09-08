@@ -48,10 +48,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from aadistill.initialization.calibration.profiles import (  # noqa: E402
-    DOMAIN_BALANCED_V1,
-    REASONING_HEAVY_V2,
-)
+from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,

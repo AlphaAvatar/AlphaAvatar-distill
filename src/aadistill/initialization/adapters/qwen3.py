@@ -222,9 +222,20 @@ class Qwen3Adapter(ArchitectureAdapter):
         return ActivationStatsCollector(model)
 
 
-#: The instance, NOT a registration. Registering here made the registry's
+#: The instance, NOT a registration. Registering at import made the registry's
 #: contents depend on who had imported this module first: under randomized test
-#: ordering the same test would resolve an adapter in one run and see an empty
-#: registry in the next. Registration is now an explicit call with one owner --
-#: `aadistill.initialization.adapters.register_builtin_adapters`.
+#: ordering the same test resolved an adapter in one run and saw an empty
+#: registry in the next.
 QWEN3_ADAPTER = Qwen3Adapter()
+
+
+def register_qwen3(registry=None):
+    """Register this family. Beside the adapter, because it owns its own name.
+
+    A registry defined elsewhere -- another application, a test -- registers by
+    calling this with its own `AdapterRegistry`. Passing None uses the process
+    default, which is what the application bootstrap does.
+    """
+    from aadistill.initialization.specs.arch import DEFAULT_REGISTRY
+
+    return (registry or DEFAULT_REGISTRY).register(QWEN3_ADAPTER)

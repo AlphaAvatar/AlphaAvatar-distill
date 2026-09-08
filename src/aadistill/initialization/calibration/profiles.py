@@ -320,170 +320,60 @@ def unregister_profile(qualified_id: str) -> None:
     _PROFILES.pop(qualified_id, None)
 
 
-# --- the three v1 profiles -------------------------------------------------
+# --- loading concrete profiles ---------------------------------------------
 #
-# Only the second is built. The other two are representable so a path may name
-# them and the cost model may price them; `resolve()` refuses them until they
-# exist.
-
-E8A_DOMAINS = ("general", "math", "rag_multihop", "code", "tool")
-
-STAGE0_CURRENT_V1 = register_profile(CalibrationProfile(
-    profile_id="calib.stage0_current",
-    version=1,
-    description=(
-        "The historical Stage-0 warm-up mixture that produced "
-        "artifacts/stage0/qwen3_4b_thinking_v1 (949,859 tokens). Represented so a "
-        "search path can select the incumbent mixture; the item list still has to "
-        "be re-rendered from scripts/data/build_warmup_v1.py before use."),
-    sources=(
-        CalibrationSource("aadistill/warmup_v1", "local", "mixed", 0,
-                          note="rebuild via scripts/data/build_warmup_v1.py"),
-    ),
-    domain_weights={"mixed": 1.0},
-    token_budget=949_859,
-    sample_rule="warmup_v1 builder order, seed-fixed",
-    seed=20260713,
-    materialized=False,
-    metadata={"activation_stats": "artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
-              "activation_stats_sha256_prefix": "aaeb2e4c"},
-))
-
-DOMAIN_BALANCED_V1 = register_profile(CalibrationProfile(
-    profile_id="calib.domain_balanced",
-    version=1,
-    description=(
-        "E8a's frozen 67-item mixture: five domains, 59,763 prediction positions, "
-        "leakage-checked against the recovery rung, the validation slice and "
-        "prompt-content collisions. The only v1 profile that is already built."),
-    sources=tuple(
-        CalibrationSource("aadistill/e8_calibration_v1", "2026-08-10", d, 0,
-                          note="per-domain counts in the mixture manifest")
-        for d in E8A_DOMAINS
-    ),
-    domain_weights={d: 1.0 / len(E8A_DOMAINS) for d in E8A_DOMAINS},
-    token_budget=59_763,
-    sample_rule="frozen item list; unweighted mean over domains of the unweighted "
-                "mean over each domain's sub-types",
-    seed=20260810,
-    materialized=True,
-    items_path="artifacts/stage1/e8_calibration_v1/items.jsonl",
-    content_sha256="d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
-    items_file_sha256="c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
-    leakage_exclusions=("ladder_uniform_probe.rung", "ladder_uniform_probe.val",
-                        "prompt_content_collisions"),
-    leakage_proof_path="artifacts/stage1/e8_calibration_v1/leakage.json",
-    metadata={"manifest": "artifacts/stage1/e8_calibration_v1/manifest.json",
-              "frozen_by": "E8a"},
-))
-
-REASONING_HEAVY_V1 = register_profile(CalibrationProfile(
-    profile_id="calib.reasoning_heavy",
-    version=1,
-    description=(
-        "A reasoning-weighted counterpart to the domain-balanced mixture, for the "
-        "hypothesis that an operator should be calibrated on the capability the "
-        "recipe actually targets (AGENTS.md P3/P10.1) rather than on a uniform "
-        "domain average. Not built."),
-    sources=tuple(
-        CalibrationSource("aadistill/e8_calibration_v1", "2026-08-10", d, 0,
-                          note="reweighted draw from the same item pool")
-        for d in E8A_DOMAINS
-    ),
-    domain_weights={"general": 0.10, "math": 0.35, "rag_multihop": 0.25,
-                    "code": 0.20, "tool": 0.10},
-    token_budget=59_763,
-    sample_rule="weighted draw from the domain-balanced pool, deterministic by seed",
-    seed=20260812,
-    materialized=False,
-    metadata={"pool": "calib.domain_balanced@v1"},
-))
-
-#: v2's specification, declared as constants because the builder and the profile
-#: must not be able to disagree about it: `sample_rule` is inside `profile_hash`,
-#: so a rule the builder does not actually follow would still be certified.
-#:
-#: The rule is stated in full rather than named. A `sample_rule` reading
-#: "weighted draw, deterministic by seed" is what v1 said, and it described three
-#: mutually incompatible procedures.
-REASONING_HEAVY_V2_TOKEN_BUDGET = 59_763
-REASONING_HEAVY_V2_SEED = 20260812
-REASONING_HEAVY_V2_DOMAIN_WEIGHTS = {
-    "general": 0.10, "math": 0.35, "rag_multihop": 0.25, "code": 0.20, "tool": 0.10}
-REASONING_HEAVY_V2_SAMPLE_RULE = (
-    "Deterministic with-replacement reweighting of calib.domain_balanced@v1's "
-    "frozen 67-item pool, in five steps. "
-    "R1 DOMAIN APPORTIONMENT: largest-remainder (Hamilton) over the declared "
-    "domain weights, in prediction positions, remainder ties by ascending domain "
-    "id; sums to token_budget exactly. "
-    "R2 UNREACHABLE DOMAIN QUOTA: a quota no whole-item multiset can hit moves to "
-    "the nearest reachable value, ties toward the LOWER, and the difference is "
-    "transferred to the reachable domain with the most negative apportionment "
-    "remainder (ties by ascending id); the budget total is conserved. Nearest, "
-    "because a domain's deviation distorts the weights this profile declares. "
-    "R3 SUB-TYPE APPORTIONMENT: within each domain, largest-remainder over the "
-    "SOURCE POOL's own sub-type position shares, so only the domain mix changes "
-    "and within-domain composition is held fixed. "
-    "R4 UNREACHABLE SUB-TYPE QUOTA: repaired INSIDE its own domain, so no domain "
-    "weight moves; among reachable values at or below the quota, take the one "
-    "admitting the most distinct sessions, ties by smallest deviation. Support "
-    "rather than nearest, because here the deviation is absorbed by a sibling. "
-    "R5 REALIZATION: among all exact whole-item multisets for a sub-type quota, "
-    "the one maximizing distinct sessions, then minimizing multiset size, then "
-    "broken by the SEED-DERIVED item order sha256(f'{seed}:{item_id}') ascending. "
-    "No session is ever truncated. Items are emitted once per draw, ordered by "
-    "(domain, subtype, item_id, draw_index). "
-    "Implemented in aadistill.autoinit.reweight; built by "
-    "scripts/data/build_reasoning_heavy_calibration.py.")
-
-REASONING_HEAVY_V2 = register_profile(CalibrationProfile(
-    profile_id="calib.reasoning_heavy",
-    version=2,
-    description=(
-        "A reasoning-weighted counterpart to the domain-balanced mixture, for the "
-        "hypothesis that an operator should be calibrated on the capability the "
-        "recipe actually targets (AGENTS.md P3/P10.1) rather than on a uniform "
-        "domain average. Supersedes v1, which was UNBUILDABLE: its weights needed "
-        "more code and math positions than the pool holds, and its budget was the "
-        "whole pool, so a draw without replacement was the identity."),
-    sources=tuple(
-        CalibrationSource("aadistill/e8_calibration_v1", "2026-08-10", d, 0,
-                          note="with-replacement reweighted draw from the same pool")
-        for d in E8A_DOMAINS
-    ),
-    domain_weights=REASONING_HEAVY_V2_DOMAIN_WEIGHTS,
-    token_budget=REASONING_HEAVY_V2_TOKEN_BUDGET,
-    sample_rule=REASONING_HEAVY_V2_SAMPLE_RULE,
-    seed=REASONING_HEAVY_V2_SEED,
-    materialized=True,
-    items_path="artifacts/stage1/reasoning_heavy_v2/items.jsonl",
-    content_sha256="cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
-    items_file_sha256="a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4",
-    # Inherited, not re-proved: every token here is a token of the source
-    # mixture, and reweighting a leakage-checked pool cannot introduce a leak the
-    # pool does not have.
-    leakage_exclusions=DOMAIN_BALANCED_V1.leakage_exclusions,
-    leakage_proof_path=DOMAIN_BALANCED_V1.leakage_proof_path,
-    metadata={"pool": DOMAIN_BALANCED_V1.qualified_id,
-              "manifest": "artifacts/stage1/reasoning_heavy_v2/manifest.json",
-              "supersedes": "calib.reasoning_heavy@v1",
-              "seed_note": ("the seed breaks R5 ties by construction; on THIS pool "
-                            "every sub-type optimum is unique, so no tie is "
-                            "exercised and the seed does not change the bytes -- "
-                            "verified by brute force, and recorded rather than "
-                            "implied")},
-))
-
-V1_PROFILES = (STAGE0_CURRENT_V1, DOMAIN_BALANCED_V1, REASONING_HEAVY_V1)
-PROFILES = (*V1_PROFILES, REASONING_HEAVY_V2)
+# The four concrete mixtures this project has defined used to be written out
+# here and registered at import. That put experiment DATA -- specific token
+# budgets, seeds, item paths, source datasets and leakage proofs -- inside the
+# reusable core, and made merely importing this module change global state.
+#
+# They now live in `configs/calibration/profiles.json`, and a caller loads them.
+# This module keeps only the mechanism: what a profile IS, and how to build one
+# from a document.
 
 
-def buildable_profiles() -> list[CalibrationProfile]:
-    """Profiles a run can actually use today."""
-    return [p for p in PROFILES if p.materialized]
+def profile_from_dict(doc: Mapping[str, Any]) -> CalibrationProfile:
+    """One profile from its serialized form. Field names are the dataclass's."""
+    fields = dict(doc)
+    fields["sources"] = tuple(CalibrationSource(**s) for s in fields.get("sources", ()))
+    if fields.get("role") is not None:
+        fields["role"] = DatasetRole(fields["role"])
+    for key in ("domain_weights", "metadata"):
+        if fields.get(key) is not None:
+            fields[key] = dict(fields[key])
+    for key in ("leakage_exclusions",):
+        if fields.get(key) is not None:
+            fields[key] = tuple(fields[key])
+    return CalibrationProfile(**fields)
 
 
-def profile_summary(profiles: Sequence[CalibrationProfile] = V1_PROFILES) -> list[dict[str, Any]]:
+def load_profiles(document: Mapping[str, Any], *,
+                  register: bool = True) -> tuple[CalibrationProfile, ...]:
+    """Build the profiles a document declares, and register them by default.
+
+    Registration stays refusable: re-registering a qualified id whose
+    specification differs raises, so loading a document that redefines an
+    existing mixture is an error rather than a silent swap.
+    """
+    if document.get("schema") != PROFILE_DOCUMENT_SCHEMA:
+        raise CalibrationError(
+            f"expected a {PROFILE_DOCUMENT_SCHEMA} document, got "
+            f"{document.get('schema')!r}")
+    built = tuple(profile_from_dict(d) for d in document["profiles"])
+    if register:
+        built = tuple(register_profile(p) for p in built)
+    return built
+
+
+PROFILE_DOCUMENT_SCHEMA = "aadistill.calibration_profiles/v1"
+
+
+def buildable_profiles(profiles: Sequence[CalibrationProfile]) -> list[CalibrationProfile]:
+    """Of the profiles given, those a run can actually use today."""
+    return [p for p in profiles if p.materialized]
+
+
+def profile_summary(profiles: Sequence[CalibrationProfile]) -> list[dict[str, Any]]:
     return [
         {
             "qualified_id": p.qualified_id,

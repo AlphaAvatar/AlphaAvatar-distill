@@ -43,7 +43,7 @@ import hashlib
 import json
 import subprocess
 import xml.etree.ElementTree as ET
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -537,6 +537,7 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
                   authorization_path: str | None = None,
                   required_kind: str | None = None,
                   staging_contract_digest: str | None = None,
+                  harness_digest: "Callable[[Path], str] | None" = None,
                   ) -> tuple[bool, str]:
     """The cheap pre-provider check: does this record still describe live code?
 
@@ -560,7 +561,16 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
     other change — `logs/**`, docs, README, preregistration, state, tests,
     source — means the sweep is owed again.
     """
-    from experiments.phase_c1.authorization import c1_harness_digest
+    # `harness_digest` is INJECTED. Which harness a readiness record describes
+    # is an experiment-instance fact, and the core reaching into
+    # `experiments.phase_c1` to find out inverted the dependency -- the reusable
+    # runtime would have named one experiment, and adding a second would have
+    # meant editing this file.
+    if harness_digest is None:
+        return False, (
+            "no harness_digest provider was supplied; which harness this record "
+            "describes is the caller's fact, and this function will not guess "
+            "it. Pass the experiment's digest function.")
 
     if record.get("schema") != SCHEMA:
         return False, f"unexpected schema {record.get('schema')!r}"
@@ -613,7 +623,7 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
             "that ordering was once reported backwards.")
 
     try:
-        live_harness = c1_harness_digest(repo_root)["digest"]
+        live_harness = harness_digest(repo_root)
         live_env = pod_test_environment_digest(repo_root)["digest"]
     except Exception as exc:                                   # noqa: BLE001
         return False, f"cannot digest the live tree: {exc}"

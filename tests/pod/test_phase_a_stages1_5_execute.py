@@ -167,7 +167,7 @@ def calibration_subset(n: int):
     adaptation. Only the count is reduced, and only because a full-mixture
     depth pass is tens of minutes of CPU at a 151,936 vocabulary.
     """
-    from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1
+    from experiments.calibration import DOMAIN_BALANCED_V1
     from phase_a_search import as_operator_items
 
     return as_operator_items(DOMAIN_BALANCED_V1.resolve(REPO))[:n]

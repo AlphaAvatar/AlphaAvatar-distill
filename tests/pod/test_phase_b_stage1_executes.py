@@ -41,10 +41,7 @@ import phase_a_search  # noqa: E402
 from aadistill.initialization.planning import stage1_selection
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
-from aadistill.initialization.calibration.profiles import (  # noqa: E402
-    DOMAIN_BALANCED_V1,
-    REASONING_HEAVY_V2,
-)
+from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 
 ADAPTER = get_adapter("qwen3")
 

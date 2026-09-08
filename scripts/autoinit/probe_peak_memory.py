@@ -17,7 +17,11 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
+
+#: Explicit: importing an adapter module no longer registers it.
+register_builtin_adapters()
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 REVISION = "768f209d9ea81521153ed38c47d515654e938aea"

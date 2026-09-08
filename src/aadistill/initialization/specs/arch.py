@@ -275,52 +275,98 @@ class ArchitectureAdapter(ABC):
 
 
 # --- adapter registry ------------------------------------------------------
+#
+# An explicit, instantiable registry. It used to be a module-level dict that the
+# concrete adapter populated at import time, which meant `get_adapter("qwen3")`
+# resolved only if something, somewhere, had already imported that module. Under
+# randomized test ordering whole files failed at collection in one run and
+# passed in the next, and the failure mode on a pod would have been worse: a
+# driver resolving an adapter because of an unrelated import three modules away.
+#
+# Registration is now something a caller DOES, not something importing causes.
 
-_ADAPTERS: dict[str, ArchitectureAdapter] = {}
 
+class AdapterRegistry:
+    """Families that have been explicitly registered. Owns no import side effects."""
 
-def register_adapter(adapter: ArchitectureAdapter, *, replace: bool = False) -> ArchitectureAdapter:
-    """Register an adapter under its family name.
+    def __init__(self) -> None:
+        self._adapters: dict[str, ArchitectureAdapter] = {}
 
-    Re-registering the same family with a different adapter version is refused
-    unless ``replace`` is passed, because a search manifest records the adapter
-    version it ran under and a silent swap would invalidate that record.
-    """
-    if not adapter.family:
-        raise ValueError("adapter must declare a family")
-    if not adapter.adapter_version:
-        raise ValueError(f"{adapter.family} adapter must declare an adapter_version")
-    existing = _ADAPTERS.get(adapter.family)
-    if existing is not None and not replace:
-        if existing.adapter_version != adapter.adapter_version:
+    def register(self, adapter: ArchitectureAdapter, *,
+                 replace: bool = False) -> ArchitectureAdapter:
+        """Register under the adapter's family name.
+
+        Idempotent for the same family at the same version, so several entry
+        points may bootstrap in one process. Re-registering a family at a
+        DIFFERENT version is refused unless `replace` is passed: a search
+        manifest records the adapter version it ran under, and a silent swap
+        would invalidate that record.
+        """
+        if not adapter.family:
+            raise ValueError("adapter must declare a family")
+        if not adapter.adapter_version:
             raise ValueError(
-                f"family {adapter.family!r} is already registered at version "
-                f"{existing.adapter_version!r}; registering {adapter.adapter_version!r} "
-                "would change what an existing manifest describes")
-        return existing
-    _ADAPTERS[adapter.family] = adapter
-    return adapter
+                f"{adapter.family} adapter must declare an adapter_version")
+        existing = self._adapters.get(adapter.family)
+        if existing is not None and not replace:
+            if existing.adapter_version != adapter.adapter_version:
+                raise ValueError(
+                    f"family {adapter.family!r} is already registered at version "
+                    f"{existing.adapter_version!r}; registering "
+                    f"{adapter.adapter_version!r} would change what an existing "
+                    "manifest describes")
+            return existing
+        self._adapters[adapter.family] = adapter
+        return adapter
+
+    def get(self, family: str) -> ArchitectureAdapter:
+        if family not in self._adapters:
+            raise KeyError(
+                f"no architecture adapter registered for family {family!r}; "
+                f"registered: {sorted(self._adapters)}. Registration is "
+                "explicit: call "
+                "aadistill.initialization.adapters.register_builtin_adapters() "
+                "(or build your own AdapterRegistry) before resolving one.")
+        return self._adapters[family]
+
+    def for_config(self, config: Any) -> ArchitectureAdapter:
+        family = getattr(config, "model_type", None)
+        if family is None:
+            raise ValueError("config has no model_type; cannot select an adapter")
+        return self.get(family)
+
+    def families(self) -> list[str]:
+        return sorted(self._adapters)
+
+    def drop(self, family: str) -> None:
+        """Test-only: forget a family so a fixture adapter cannot leak."""
+        self._adapters.pop(family, None)
+
+
+#: The registry an application shares across its own modules. Empty until a
+#: caller fills it; nothing here populates it as a side effect of import.
+DEFAULT_REGISTRY = AdapterRegistry()
+
+
+def register_adapter(adapter: ArchitectureAdapter, *,
+                     replace: bool = False) -> ArchitectureAdapter:
+    """Register into `DEFAULT_REGISTRY`. Prefer an explicit registry."""
+    return DEFAULT_REGISTRY.register(adapter, replace=replace)
 
 
 def get_adapter(family: str) -> ArchitectureAdapter:
-    if family not in _ADAPTERS:
-        raise KeyError(
-            f"no architecture adapter registered for family {family!r}; "
-            f"registered: {sorted(_ADAPTERS)}")
-    return _ADAPTERS[family]
+    """Resolve from `DEFAULT_REGISTRY`, which a caller must have filled."""
+    return DEFAULT_REGISTRY.get(family)
 
 
 def adapter_for_config(config: Any) -> ArchitectureAdapter:
-    family = getattr(config, "model_type", None)
-    if family is None:
-        raise ValueError("config has no model_type; cannot select an adapter")
-    return get_adapter(family)
+    return DEFAULT_REGISTRY.for_config(config)
 
 
 def registered_families() -> list[str]:
-    return sorted(_ADAPTERS)
+    return DEFAULT_REGISTRY.families()
 
 
 def unregister_adapter(family: str) -> None:
     """Test-only: drop a family so a fixture adapter cannot leak between tests."""
-    _ADAPTERS.pop(family, None)
+    DEFAULT_REGISTRY.drop(family)

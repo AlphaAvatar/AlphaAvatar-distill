@@ -30,10 +30,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
-from aadistill.initialization.calibration.profiles import (  # noqa: E402
-    V1_PROFILES,
-    profile_summary,
-)
+from aadistill.initialization.calibration.profiles import profile_summary
+from experiments.calibration import V1_PROFILES
 from aadistill.runtime.cost import (  # noqa: E402
     A100_80GB_ESTIMATED,
     L40S_MEASURED,
