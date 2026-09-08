@@ -13,8 +13,7 @@
   "scripts/pod/autoinit_preflight_setup.sh",
   "configs/experiments/phase_c1/authorization.json",
   "configs/autoinit/c1_artifacts.json",
-  "configs/autoinit/c1_artifacts_failed.json",
-  "logs/phase_c1_execution_preregistration.json"
+  "configs/autoinit/c1_artifacts_failed.json"
  ],
  "source_roots": [
   "src",
@@ -24,7 +23,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 89,
- "digest": "92c397854fe0fd65ce3da36923db3a1a6da08f916e142b71ed58ecd9ac573539",
+ "digest": "c57e21ddedfe57f6d5415f047ad16a5ef118c03dacfdf2495376ccf34769da80",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -41,11 +40,6 @@
    "path": "configs/experiments/phase_c1/authorization.json",
    "sha256": "63753b3cede0336b6d247b2b9f7635208d80d09ca6d8bdbba0304fa921d888d5",
    "bytes": 3006
-  },
-  {
-   "path": "logs/phase_c1_execution_preregistration.json",
-   "sha256": "836501412f32ed34fd2fdf0cca59689531134d66645013f59267a16653497167",
-   "bytes": 42016
   },
   {
    "path": "scripts/autoinit/audit_tool_scoring.py",
@@ -83,6 +77,11 @@
    "bytes": 28682
   },
   {
+   "path": "scripts/experiments/calibration.py",
+   "sha256": "371c51813f1d1a6871c7ae9c542fec03818dc016cec3d4417e0983b694684cd9",
+   "bytes": 3308
+  },
+  {
    "path": "scripts/experiments/phase_a/plan.py",
    "sha256": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b",
    "bytes": 27736
@@ -94,8 +93,8 @@
   },
   {
    "path": "scripts/experiments/phase_c1/authorization.py",
-   "sha256": "eeffc8c1994533330ecdbe1deb70c8cd5ff9c879f349bcd823c4c53abbb51b53",
-   "bytes": 24132
+   "sha256": "5ae7812c439fe53e7dea30dce7b3c4717606ef02e485631143204054cec8e6fb",
+   "bytes": 24419
   },
   {
    "path": "scripts/experiments/phase_c1/authorization_payload.py",
@@ -134,8 +133,8 @@
   },
   {
    "path": "scripts/pod/autoinit_c1_driver.py",
-   "sha256": "02b7145aaa2895cef9bb04e115d61a38febeba5bdd7edefa5f84d3f36839cdff",
-   "bytes": 61658
+   "sha256": "ab03f7b19965b4a182922d61ad1dfe9af56ca8efa5b95faac1da3bc8af349873",
+   "bytes": 61826
   },
   {
    "path": "scripts/pod/autoinit_c1_launch.py",

@@ -87,9 +87,6 @@ class TestTheClosureCoversWhatSpendsMoney:
         ("configs/autoinit/c1_artifacts.json",
          "{", '{"_mutated": true,',
          "the artifact contract"),
-        ("logs/phase_c1_execution_preregistration.json",
-         "{", '{"_mutated": true,',
-         "the execution preregistration"),
     ], ids=lambda v: v if isinstance(v, str) and " " in v else None)
     def test_editing_it_moves_the_future_identity(self, scratch_repo, tmp_path,
                                                   rel, find, replace, what):
@@ -180,9 +177,34 @@ class TestTheRealClosure:
                     "src/aadistill/infrastructure/watchdog.py",
                     "scripts/pod/watchdog.py",
                     "scripts/pod/autoinit_preflight_setup.sh",
-                    "configs/experiments/phase_c1/authorization.json",
-                    "logs/phase_c1_execution_preregistration.json"):
+                    "configs/experiments/phase_c1/authorization.json"):
             assert rel in paths, f"{rel} decides what a paid session does"
+
+    def test_the_preregistration_is_bound_by_its_own_hash_not_by_the_closure(self):
+        """The one runtime input that CANNOT be in the digest.
+
+        It records the harness digest, so including its bytes in that digest is
+        a fixed point with no solution: writing the document changes the value
+        it has to contain. Two other checks bind it instead, and both are
+        exercised here rather than asserted.
+        """
+        import json
+
+        from experiments.phase_c1.authorization import c1_harness_digest
+
+        live = derive(REPO, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
+                      roots=C1_SOURCE_ROOTS)
+        rel = "logs/phase_c1_execution_preregistration.json"
+        assert rel not in {r["path"] for r in live["files"]}, (
+            "including it would make the digest unreachable")
+
+        doc = json.loads((REPO / rel).read_text())
+        # 1. it carries its own self-hash
+        assert doc["preregistration_sha256"], "nothing would pin its bytes"
+        # 2. and it must record the LIVE harness, which is what makes a stale
+        #    preregistration refusable -- the payload gate compares these.
+        assert doc["c1_harness"]["digest"] == c1_harness_digest(REPO)["digest"], (
+            "re-emit it: scripts/autoinit/write_c1_execution_preregistration.py")
 
     def test_it_does_not_reach_another_phase_driver(self):
         """C1 has its own launcher and driver; reaching Phase A's would be wrong."""

@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "a9fe04bd6acadbcb1d25112d96caa136c78e67fa",
+ "head_commit": "2af5329fc019f66294d7c709aa8c27afbe5e4d94",
  "executable_source": {
   "digest": "c8c5281f447015ece6c943acfe3adffc582813fbe66a8da7b7b7e3d1f5e1f31c",
   "files": [
@@ -65,8 +65,7 @@
    "scripts/pod/autoinit_preflight_setup.sh",
    "configs/experiments/phase_c1/authorization.json",
    "configs/autoinit/c1_artifacts.json",
-   "configs/autoinit/c1_artifacts_failed.json",
-   "logs/phase_c1_execution_preregistration.json"
+   "configs/autoinit/c1_artifacts_failed.json"
   ],
   "source_roots": [
    "src",
@@ -75,8 +74,8 @@
    "scripts/autoinit"
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
-  "n_files": 90,
-  "digest": "d95bff7b89edf909d9389be7d0fff156a51330f75828c94d67b1772b6f4164d9",
+  "n_files": 89,
+  "digest": "c57e21ddedfe57f6d5415f047ad16a5ef118c03dacfdf2495376ccf34769da80",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -93,11 +92,6 @@
     "path": "configs/experiments/phase_c1/authorization.json",
     "sha256": "63753b3cede0336b6d247b2b9f7635208d80d09ca6d8bdbba0304fa921d888d5",
     "bytes": 3006
-   },
-   {
-    "path": "logs/phase_c1_execution_preregistration.json",
-    "sha256": "332151d8b732d605996daecb517113bea69b1074985b4bc0ece7a54bdfdd5717",
-    "bytes": 46434
    },
    {
     "path": "scripts/autoinit/audit_tool_scoring.py",
@@ -151,8 +145,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/authorization.py",
-    "sha256": "eeffc8c1994533330ecdbe1deb70c8cd5ff9c879f349bcd823c4c53abbb51b53",
-    "bytes": 24132
+    "sha256": "5ae7812c439fe53e7dea30dce7b3c4717606ef02e485631143204054cec8e6fb",
+    "bytes": 24419
    },
    {
     "path": "scripts/experiments/phase_c1/authorization_payload.py",
@@ -1042,5 +1036,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "7a569a8a7a0afa4f99630554fe7f5b11cfadddbc0c85f7f28acd217ce39afff1"
+ "preregistration_sha256": "dded6f1e95fe0de93d739a8168ad98f217a9569879c50a297a054de8302820ad"
 }

@@ -190,15 +190,20 @@ C1_ENTRY_POINTS: tuple[str, ...] = (
 
 #: Files no import edge reaches, whose bytes still decide what runs or what is
 #: authorized. Named explicitly and hashed identically to the modules.
+#: The execution preregistration is deliberately NOT here, and it is the one
+#: runtime input that cannot be. It RECORDS this digest, so including its bytes
+#: in the digest is a fixed point with no solution: writing the document changes
+#: the value it must contain. It is bound instead by its own
+#: `preregistration_sha256`, which the launcher checks, and the payload gate
+#: compares its recorded harness digest against the live one -- so a stale
+#: preregistration is refused either way.
+#:
+#: Everything else a session loads and cannot reach by import IS here.
 C1_DECLARED_INPUTS: tuple[str, ...] = (
     "scripts/pod/autoinit_preflight_setup.sh",
     "configs/experiments/phase_c1/authorization.json",
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",
-    #: The execution preregistration the launcher loads and binds against. Its
-    #: bytes decide what the session is permitted to do, so they belong in the
-    #: identity of what would run even though no import reaches them.
-    "logs/phase_c1_execution_preregistration.json",
 )
 
 #: A recorded snapshot of the derived closure, for reporting drift. Never the
