@@ -3,7 +3,7 @@
  "_contract": "How the initialization cutover stands against every frozen source set. Historical declarations keep naming the OLD paths because that is what those runs executed; this records where each file went, proves the bytes did not change, and EXERCISES the refusal that makes an old authorization unusable here. AUTHORIZES NOTHING.",
  "historical_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
  "_base_commit_meaning": "the commit that owns the old paths. Every old_sha256 below is the blob at THAT commit, so a reader can check any of them against the tree as it actually was, not as it is now.",
- "migrated_commit": "3e18d9d77d4820f86f24f13570df92c5de8d83ee",
+ "migrated_commit": "a13b27efa754c829acb69e6d5601b8fbf4988079",
  "counts": {
   "files_moved": 59,
   "moved_with_identical_bytes": 10,
@@ -64,10 +64,10 @@
   {
    "declaration": "CONTINUATION_SOURCE_FILES_V2",
    "declared_in": "experiments.phase_b.continuation",
-   "n_declared": 55,
+   "n_declared": 68,
    "moved_unchanged_bytes": 0,
    "moved_and_edited": 0,
-   "still_at_declared_path": 55,
+   "still_at_declared_path": 68,
    "deleted": 0,
    "additive_only": true,
    "_accounting": "this declaration names paths that all exist; its relocation is accounted for in logs/architecture_declaration_history.json",
@@ -75,7 +75,7 @@
    "moves_with_edits": [],
    "deletions": [],
    "computes": true,
-   "current_digest": "418035a80b4c546d392f26a2299b55c9bba1e5481af6d7d2eab4a766a9646809"
+   "current_digest": "dd0f76332b762b91568fff4cd88bdfad06bf358a80d5a3c0a9bbd34ce157592d"
   },
   {
    "declaration": "CONTINUATION_HARNESS_SOURCE_FILES_V1",

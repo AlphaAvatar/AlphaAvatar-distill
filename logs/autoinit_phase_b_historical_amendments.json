@@ -71,9 +71,9 @@
   {
    "amendment_id": "PHB-HA-002",
    "schema_version": 1,
-   "recorded_utc": "2026-09-08T16:36:44+00:00",
+   "recorded_utc": "2026-09-08T19:53:25+00:00",
    "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
-   "source_repair_commit": "6cd3fa0e970f19d14b80948ad72b61a6efa08ffc",
+   "source_repair_commit": "a13b27efa754c829acb69e6d5601b8fbf4988079",
    "source_repair_parent": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
    "previous_live_digest": "372c1f2438ad0b1698a2ceacbfa4e76acbb9147e38e735bc4d0152c6f894bbc3",
    "new_live_digest": "a1f80f3ad53b49c338e0563b64ecaf36c720254141676916f19c407e2e7677a5",
@@ -455,7 +455,7 @@
     "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
-   "entry_sha256": "682371dd8040da66b0175eb9f3555e6d9a598e48f22e541bc9ea2688be4b426d"
+   "entry_sha256": "d45bbabebefe26d2caf811fa4923d9830200c2c51631e25e22e04cecd1dacf6d"
   }
  ]
 }
