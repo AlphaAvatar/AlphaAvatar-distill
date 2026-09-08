@@ -21,7 +21,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 62,
- "digest": "d462cbf918f2091b4920eb6e4de263cddb84d4bec94941860b8f6918cf5b11ab",
+ "digest": "e129c2e0fcde0ee92bf662570f80d8e80982ec3c64280df44849a5b43dd6f2b3",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -46,8 +46,8 @@
   },
   {
    "path": "scripts/experiments/phase_a/plan.py",
-   "sha256": "525eca183cced5064e6d555c69839321c19d8c4843c2c8e66d0acceaf64be53e",
-   "bytes": 27702
+   "sha256": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b",
+   "bytes": 27736
   },
   {
    "path": "scripts/experiments/phase_c1/__init__.py",
@@ -86,8 +86,8 @@
   },
   {
    "path": "scripts/experiments/phase_c1/scoring.py",
-   "sha256": "5b2ebc13657e6ac5647a430d9dd321f4c13de81ac24f9a18555eead08e6698ad",
-   "bytes": 12038
+   "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+   "bytes": 12056
   },
   {
    "path": "scripts/experiments/phase_c1/session.py",
@@ -96,13 +96,13 @@
   },
   {
    "path": "scripts/pod/autoinit_c1_driver.py",
-   "sha256": "6645f96a718588389bfd70f960321326e38f403b15d2df0678f6085870cd924d",
-   "bytes": 61652
+   "sha256": "02b7145aaa2895cef9bb04e115d61a38febeba5bdd7edefa5f84d3f36839cdff",
+   "bytes": 61658
   },
   {
    "path": "scripts/pod/autoinit_c1_launch.py",
-   "sha256": "64fb5dc98a80241dc73c987125a25ce4c8522d327d1f025c3ef7ce05a3a50590",
-   "bytes": 50785
+   "sha256": "fb6266ae416908287d6fd79ed3256085b36bb4dafee5bd4c71282279ca5d02b9",
+   "bytes": 50787
   },
   {
    "path": "scripts/pod/autoinit_preflight_setup.sh",
@@ -121,8 +121,8 @@
   },
   {
    "path": "src/aadistill/governance/authorization.py",
-   "sha256": "9971cac2c0615bc9c7beff3de8d8d289d58bf3c5cc9072b29d3f36fb34b5e124",
-   "bytes": 13622
+   "sha256": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694",
+   "bytes": 13639
   },
   {
    "path": "src/aadistill/governance/closure.py",
@@ -181,8 +181,8 @@
   },
   {
    "path": "src/aadistill/initialization/adapters/qwen3.py",
-   "sha256": "d494b34958f1f08287feb92dada6ccc27af9e5006038d8f86bc19cbcc63031f6",
-   "bytes": 9543
+   "sha256": "b2fa5f08d64fee784c3315e345655c2165ab8a266d6fca341fefe84de84b1ca2",
+   "bytes": 9882
   },
   {
    "path": "src/aadistill/initialization/calibration/datasets.py",
@@ -196,8 +196,8 @@
   },
   {
    "path": "src/aadistill/initialization/calibration/profiles.py",
-   "sha256": "fc4f1ba9c10b75183c4970a0d43090509ba686ff280d9395f7b995dbd3088133",
-   "bytes": 21388
+   "sha256": "3836d53717336b3c1359fb486ba1f7e70c3db65474ca23e822aa7075ba71b92e",
+   "bytes": 21840
   },
   {
    "path": "src/aadistill/initialization/device.py",
@@ -206,8 +206,8 @@
   },
   {
    "path": "src/aadistill/initialization/operators/__init__.py",
-   "sha256": "8c4313d9693095fe00b21227d9c14b37c4985b1c9ca3c750034f335dbcdf1e9f",
-   "bytes": 2732
+   "sha256": "5ce3022e198eb31e95924e6210abe9bedb6f3f27e37e580fb45ff1fe4017f4e1",
+   "bytes": 2785
   },
   {
    "path": "src/aadistill/initialization/operators/_common.py",
@@ -216,38 +216,38 @@
   },
   {
    "path": "src/aadistill/initialization/operators/attention.py",
-   "sha256": "0ceafff5feaf479fa30788ffcace17ddf6fa786eb87df2518f31df7ba4bcf6e9",
-   "bytes": 6414
+   "sha256": "ec26b991ee0983ee8e7a681d90ba53d390539ba4e1202f14c460d4758e2908af",
+   "bytes": 6464
   },
   {
    "path": "src/aadistill/initialization/operators/attention_activation.py",
-   "sha256": "8e43dea0f41711bd66225cb186a93a88f0687cddae7b2816317380c75fe43f2d",
-   "bytes": 15440
+   "sha256": "b2ea83eefbc23b0472d7299669b019b0a34344c40b6a6c7e9694a5cd27b82d3a",
+   "bytes": 15490
   },
   {
    "path": "src/aadistill/initialization/operators/base.py",
-   "sha256": "6ef30d6af28f9c842f802fac34b3a5a084d829d0ade340c3eafdb47523b1e3c9",
-   "bytes": 19581
+   "sha256": "c37f4c58e8ae5f149c0b9cefd1b4faae563590fa4017d05c14fcbc650f48d6cd",
+   "bytes": 19455
   },
   {
    "path": "src/aadistill/initialization/operators/composite.py",
-   "sha256": "795fca32b5ea9aa9834de6f5ee42b5ac4bbec7261a041b76ea9f99da53dffd6a",
-   "bytes": 8545
+   "sha256": "c4dd6e267c6a2ee7a7b6f9de8bc92302a27e4612595f2a6989b7eb63a06f4843",
+   "bytes": 8595
   },
   {
    "path": "src/aadistill/initialization/operators/depth.py",
-   "sha256": "e0f5198d83bda1c87dfa27e760c0c595c44e7e5697cfab445f3efd09fc8f1a5b",
-   "bytes": 27125
+   "sha256": "f5306c9af40ab5ce2dcfaf26c42a90099d1fd44ee926a425351a549653c0ccec",
+   "bytes": 27175
   },
   {
    "path": "src/aadistill/initialization/operators/ffn.py",
-   "sha256": "1e14b29e9ffe54f4e742274779910ac500ebab28cdcebab2d9b8791ee81372a8",
-   "bytes": 6007
+   "sha256": "67ac31fbec0dc5b6520ccf5182576793df151db801f5cd5a80bc81ebbcdfbcc4",
+   "bytes": 6057
   },
   {
    "path": "src/aadistill/initialization/operators/width.py",
-   "sha256": "b3be10fae95ebe6853ca328f303c4e2cba3aa9588eaf0f7280f4d03de625944a",
-   "bytes": 8171
+   "sha256": "efbb5cba7840c5099df09384670a8e4436c6a92def10d7443821ae551cba147c",
+   "bytes": 8221
   },
   {
    "path": "src/aadistill/initialization/planning/fixed_path.py",
@@ -260,14 +260,9 @@
    "bytes": 27755
   },
   {
-   "path": "src/aadistill/initialization/planning/metrics.py",
-   "sha256": "e58c651bef3ee897ca0b8eb419d7a7166c17ed55944353f00834efbde475e927",
-   "bytes": 21069
-  },
-  {
    "path": "src/aadistill/initialization/planning/recovery.py",
-   "sha256": "f1989d536d3853203c05846b3388e10fd81a8d1505240fefa6d234b6e0d2d6e2",
-   "bytes": 102490
+   "sha256": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5",
+   "bytes": 104685
   },
   {
    "path": "src/aadistill/initialization/specs/arch.py",
@@ -280,9 +275,14 @@
    "bytes": 8819
   },
   {
+   "path": "src/aadistill/initialization/specs/metrics.py",
+   "sha256": "1e7488141617febcdae90e0865a67bb9aac2bb61a54b4b85acf796e597a520d6",
+   "bytes": 10483
+  },
+  {
    "path": "src/aadistill/initialization/specs/state.py",
-   "sha256": "056bcdab3407774ca5b2c22a7d8a45ffe84645dcdda024bf1f65f0a2b6768637",
-   "bytes": 22044
+   "sha256": "fa8289755d8ad0fe64628caa5ea3ca315f7b8eb0416860e2f6bd86b7b70df498",
+   "bytes": 22041
   },
   {
    "path": "src/aadistill/initialization/statistics/attention.py",

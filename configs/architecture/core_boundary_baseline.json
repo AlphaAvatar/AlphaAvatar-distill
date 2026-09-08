@@ -179,5 +179,7 @@
   },
   "reading": "[before the migration, after], counted the OLD way",
   "measured_by": "scripts/architecture/inventory.py at both revisions"
- }
+ },
+ "accepted_revision": "2c9a1b847946739c53d632f2759a27c5c6d439e0",
+ "_accepted_revision_meaning": "the commit whose allowance this one may not exceed. Growing a list means committing the wider baseline and then pointing this field at it, so the widening is a diff of its own rather than a line inside the change that wanted it."
 }
