@@ -31,13 +31,13 @@ from aadistill.initialization.calibration.profiles import (  # noqa: E402
     consumes_calibration,
     profile_for,
 )
-from aadistill.initialization.planning.metrics import (  # noqa: E402
+from aadistill.initialization.specs.metrics import (
     MeasurementError,
     ReferenceStrategy,
     StateEvalSuite,
-    StateEvaluator,
     reference_cache_bytes,
 )
+from aadistill.initialization.planning.metrics import StateEvaluator
 from aadistill.initialization.operators.base import get_implementation  # noqa: E402
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     SCHEDULE_V1,
@@ -288,7 +288,7 @@ def test_a_suite_with_no_general_domain_emits_no_general_nll(teacher):
     suite = StateEvalSuite(
         suite_id="mathonly", version=1, domains=("math",),
         subtypes={"math": ("arith",)}, critical_tags=(), general_domain=None)
-    from aadistill.initialization.planning.metrics import SuiteItem
+    from aadistill.initialization.specs.metrics import SuiteItem
 
     items = [SuiteItem(item_id=i["item_id"], input_ids=i["input_ids"],
                        domain="math", subtype="arith", tags={})
@@ -518,7 +518,7 @@ def test_resume_refuses_a_journal_measured_under_a_different_suite(
     Without this check the beam would rank this run's states on last run's
     questions, silently, and the manifest would report them as measured.
     """
-    from aadistill.initialization.planning.metrics import StateEvalSuite
+    from aadistill.initialization.specs.metrics import StateEvalSuite
     from test_search import make_search
 
     suite_a = StateEvalSuite(

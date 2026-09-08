@@ -143,7 +143,7 @@ def consumes_activation_stats(impl: OperatorImplementation) -> bool:
     statistics — `depth.causal_kl_greedy_v1` runs its own forwards — so it must
     not be counted as a consumer of the shared pass.
     """
-    from aadistill.initialization.operators.base import CalibrationNeed
+    from aadistill.initialization.calibration.profiles import CalibrationNeed
 
     return getattr(impl, "calibration", None) is CalibrationNeed.ACTIVATION_STATS
 

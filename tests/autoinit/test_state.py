@@ -15,10 +15,7 @@ from aadistill.initialization.specs.artifact import (  # noqa: E402
     CheckpointIdentity,
     ShardRecord,
 )
-from aadistill.initialization.planning.metrics import (  # noqa: E402
-    MeasurementError,
-    StateEvaluation,
-)
+from aadistill.initialization.specs.metrics import MeasurementError, StateEvaluation
 from aadistill.initialization.specs.state import (  # noqa: E402
     InitializationState,
     OperatorStep,

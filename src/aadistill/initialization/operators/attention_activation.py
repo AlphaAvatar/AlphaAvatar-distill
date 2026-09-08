@@ -59,7 +59,7 @@ from aadistill.initialization.specs.arch import (
     UnsupportedCapability,
 )
 from aadistill.initialization.device import model_device, stats_to
-from aadistill.initialization.planning.metrics import OperatorLocalMetrics
+from aadistill.initialization.specs.metrics import OperatorLocalMetrics
 from aadistill.initialization.statistics.spec import StatsSpec
 from aadistill.initialization.operators._common import (
     ChildBuilder,
@@ -67,8 +67,8 @@ from aadistill.initialization.operators._common import (
     copy_module_except,
     head_rows,
 )
+from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
-    CalibrationNeed,
     OperatorContext,
     OperatorImplementation,
     OperatorOutcome,

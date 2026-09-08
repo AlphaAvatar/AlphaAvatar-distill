@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import aadistill.initialization  # noqa: F401,E402
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
-from aadistill.initialization.planning.metrics import StateEvaluation  # noqa: E402
+from aadistill.initialization.specs.metrics import StateEvaluation  # noqa: E402
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     BeamSchedule,

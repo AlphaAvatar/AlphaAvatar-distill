@@ -38,11 +38,8 @@ from aadistill.governance.artifact_manifest import (  # noqa: E402
     verify_manifest,
     write_manifest,
 )
-from aadistill.initialization.planning.metrics import (  # noqa: E402
-    StateEvalSuite,
-    StateEvaluator,
-    SuiteItem,
-)
+from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
+from aadistill.initialization.planning.metrics import StateEvaluator
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     SCHEDULE_V1,

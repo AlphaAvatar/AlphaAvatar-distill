@@ -23,10 +23,7 @@ from aadistill.initialization.calibration.profiles import (  # noqa: E402
     CalibrationSource,
 )
 from aadistill.initialization.calibration.datasets import DatasetRole  # noqa: E402
-from aadistill.initialization.planning.metrics import (  # noqa: E402
-    StateEvalSuite,
-    SuiteItem,
-)
+from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
 
 TEACHER_GEOMETRY = dict(
     hidden_size=32, num_hidden_layers=6, intermediate_size=48,

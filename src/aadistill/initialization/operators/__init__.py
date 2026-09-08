@@ -7,12 +7,12 @@ the search engine.
 """
 
 from aadistill.initialization.operators.attention import ATTENTION_WEIGHT_PROXY_V0
+from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
     ATTENTION,
     DEPTH,
     FFN,
     RESIDUAL_WIDTH,
-    CalibrationNeed,
     ContractViolation,
     OperatorContext,
     OperatorError,

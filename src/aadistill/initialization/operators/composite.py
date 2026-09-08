@@ -34,14 +34,14 @@ from aadistill.initialization.specs.arch import (
     ArchSpec,
     Capability,
 )
-from aadistill.initialization.planning.metrics import OperatorLocalMetrics
+from aadistill.initialization.specs.metrics import OperatorLocalMetrics
 from aadistill.initialization.device import model_device, stats_to
 from aadistill.initialization.operators._common import (
     collect_activation_stats,
     model_dtype,
 )
+from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
-    CalibrationNeed,
     OperatorContext,
     OperatorError,
     OperatorImplementation,

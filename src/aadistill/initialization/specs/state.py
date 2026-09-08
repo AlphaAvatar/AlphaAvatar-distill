@@ -43,7 +43,7 @@ from typing import Any
 
 from aadistill.initialization.specs.arch import ArchSpec
 from aadistill.initialization.specs.artifact import CheckpointIdentity
-from aadistill.initialization.planning.metrics import (
+from aadistill.initialization.specs.metrics import (
     MeasurementError,
     OperatorLocalMetrics,
     StateEvaluation,

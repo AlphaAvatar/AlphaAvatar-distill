@@ -47,10 +47,7 @@ from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.calibration.profiles import DOMAIN_BALANCED_V1  # noqa: E402
 from aadistill.initialization.device import model_device, stats_bytes  # noqa: E402
-from aadistill.initialization.planning.metrics import (  # noqa: E402
-    StateEvalSuite,
-    SuiteItem,
-)
+from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
 from aadistill.initialization.operators.base import (  # noqa: E402
     OperatorContext,
     get_implementation,

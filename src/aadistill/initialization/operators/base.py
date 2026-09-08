@@ -44,7 +44,8 @@ from typing import Any
 
 from aadistill.initialization.specs.arch import ArchitectureAdapter, ArchSpec
 from aadistill.initialization.calibration.profiles import CalibrationProfile
-from aadistill.initialization.planning.metrics import OperatorLocalMetrics
+from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.specs.metrics import OperatorLocalMetrics
 
 
 class OperatorError(RuntimeError):
@@ -53,14 +54,6 @@ class OperatorError(RuntimeError):
 
 class ContractViolation(OperatorError):
     """An operator did something other than what it declared."""
-
-
-class CalibrationNeed(Enum):
-    """What an implementation must be fed to make its decision."""
-
-    NONE = "none"
-    ACTIVATION_STATS = "activation_stats"
-    FORWARD_LOGITS = "forward_logits"
 
 
 # --- operator kinds ---------------------------------------------------------

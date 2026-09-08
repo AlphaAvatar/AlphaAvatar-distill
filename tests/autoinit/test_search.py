@@ -18,10 +18,8 @@ from aadistill.governance.artifact_manifest import (  # noqa: E402
     build_manifest,
     verify_manifest,
 )
-from aadistill.initialization.planning.metrics import (  # noqa: E402
-    StateEvaluation,
-    StateEvaluator,
-)
+from aadistill.initialization.specs.metrics import StateEvaluation
+from aadistill.initialization.planning.metrics import StateEvaluator
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     SCHEDULE_V1,
@@ -64,7 +62,7 @@ def make_search(tmp_path, teacher, target_spec, eval_suite, suite_items, profile
 def dry_run(tmp_path_factory):
     """One real search, reused by the assertions below (it takes a few seconds)."""
     from conftest import make_items, make_profile
-    from aadistill.initialization.planning.metrics import StateEvalSuite, SuiteItem
+    from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
 
     tmp_path = tmp_path_factory.mktemp("dryrun")
     teacher = build_tiny_model(TEACHER_GEOMETRY)
@@ -359,6 +357,6 @@ def _toy_profile():
 
 
 def _toy_suite():
-    from aadistill.initialization.planning.metrics import StateEvalSuite
+    from aadistill.initialization.specs.metrics import StateEvalSuite
     return StateEvalSuite(suite_id="toy", version=1, domains=("general",),
                           subtypes={"general": ("text",)}, critical_tags=())

@@ -25,7 +25,7 @@ from aadistill.initialization.specs.arch import (
     ArchSpec,
     Capability,
 )
-from aadistill.initialization.planning.metrics import OperatorLocalMetrics
+from aadistill.initialization.specs.metrics import OperatorLocalMetrics
 from aadistill.initialization.device import model_device, stats_to
 from aadistill.initialization.operators._common import (
     ChildBuilder,
@@ -33,8 +33,8 @@ from aadistill.initialization.operators._common import (
     copy_embeddings_and_final_norm,
     copy_module_except,
 )
+from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
-    CalibrationNeed,
     OperatorContext,
     OperatorImplementation,
     OperatorOutcome,

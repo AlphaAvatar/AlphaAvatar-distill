@@ -10,10 +10,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 import aadistill.initialization  # noqa: F401,E402
-from aadistill.initialization.planning.metrics import (  # noqa: E402
-    MetricNamespaceError,
-    StateEvaluation,
-)
+from aadistill.initialization.specs.metrics import MetricNamespaceError, StateEvaluation
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     BeamRankingPolicy,

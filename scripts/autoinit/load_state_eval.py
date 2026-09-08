@@ -13,7 +13,7 @@ from pathlib import Path
 def load(root: str | Path):
     import torch
 
-    from aadistill.initialization.planning.metrics import StateEvalSuite, SuiteItem
+    from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
 
     root = Path(root)
     manifest = json.loads((root / "manifest.json").read_text())

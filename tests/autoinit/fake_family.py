@@ -27,9 +27,9 @@ from aadistill.initialization.specs.arch import (
     ArchSpec,
     Capability,
 )
-from aadistill.initialization.planning.metrics import OperatorLocalMetrics
+from aadistill.initialization.specs.metrics import OperatorLocalMetrics
+from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
-    CalibrationNeed,
     OperatorImplementation,
     OperatorKindSpec,
     OperatorOutcome,

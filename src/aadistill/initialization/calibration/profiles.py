@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping, Sequence
+from enum import Enum
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -255,22 +256,33 @@ NO_CALIBRATION = CalibrationProfile(
 )
 
 
+class CalibrationNeed(Enum):
+    """What an implementation must be fed to make its decision.
+
+    Defined here rather than beside the operator base class because both
+    `profile_for` and `consumes_calibration` below branch on it, and importing
+    it from `operators` closed a `calibration <-> operators` cycle. The two
+    functions were reaching for it through local imports inside their bodies,
+    which hid the cycle from the import graph without removing it.
+    """
+
+    NONE = "none"
+    ACTIVATION_STATS = "activation_stats"
+    FORWARD_LOGITS = "forward_logits"
+
+
 def profile_for(implementation, profile: CalibrationProfile) -> CalibrationProfile:
     """The profile an implementation is actually invoked with.
 
     One place decides this, so the search engine, the cost model and the
     branching estimate cannot disagree about how many states exist.
     """
-    from aadistill.initialization.operators.base import CalibrationNeed
-
     if implementation.calibration is CalibrationNeed.NONE:
         return NO_CALIBRATION
     return profile
 
 
 def consumes_calibration(implementation) -> bool:
-    from aadistill.initialization.operators.base import CalibrationNeed
-
     return implementation.calibration is not CalibrationNeed.NONE
 
 

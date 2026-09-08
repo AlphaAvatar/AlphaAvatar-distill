@@ -41,7 +41,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from aadistill.initialization.planning.metrics import require_state_metric
+from aadistill.initialization.specs.metrics import require_state_metric
 from aadistill.initialization.specs.state import InitializationState, StateValidity
 
 STATE_ID_TIEBREAK = "state_id"

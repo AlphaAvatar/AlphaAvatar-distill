@@ -55,7 +55,7 @@ SCHEDULE = BeamSchedule("test.beam.p2", 1, "two-profile", warmup_levels=1, width
 @pytest.fixture(scope="module")
 def p2(tmp_path_factory):
     """One executed P=2 search, reused by the assertions below."""
-    from aadistill.initialization.planning.metrics import StateEvalSuite, SuiteItem
+    from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
 
     teacher = build_tiny_model({"hidden_size": 32, "num_hidden_layers": 6,
                                 "intermediate_size": 48, "num_attention_heads": 4,

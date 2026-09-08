@@ -27,10 +27,7 @@ from aadistill.initialization.calibration.profiles import (  # noqa: E402
     CalibrationProfile,
     CalibrationSource,
 )
-from aadistill.initialization.planning.metrics import (  # noqa: E402
-    StateEvalSuite,
-    SuiteItem,
-)
+from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
 from aadistill.initialization.planning.recovery import (  # noqa: E402
     RecoveryAdmissionError,
     admit_leaves,

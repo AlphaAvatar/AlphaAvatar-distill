@@ -30,7 +30,7 @@ from aadistill.runtime.cost import (  # noqa: E402
     price_search,
     profile_multiplicity,
 )
-from aadistill.initialization.planning.metrics import StateEvaluation  # noqa: E402
+from aadistill.initialization.specs.metrics import StateEvaluation  # noqa: E402
 from aadistill.initialization.operators import V1_IMPLEMENTATIONS  # noqa: E402
 from aadistill.initialization.planning.recovery import (  # noqa: E402
     CATASTROPHIC_V1,

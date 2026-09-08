@@ -50,7 +50,7 @@ from aadistill.initialization.calibration.profiles import (
     consumes_calibration,
     profile_for,
 )
-from aadistill.initialization.planning.metrics import StateEvalSuite, StateEvaluation
+from aadistill.initialization.specs.metrics import StateEvalSuite, StateEvaluation
 from aadistill.initialization.device import model_device
 from aadistill.initialization.statistics.spec import (
     DEFAULT_STATS_SPEC,

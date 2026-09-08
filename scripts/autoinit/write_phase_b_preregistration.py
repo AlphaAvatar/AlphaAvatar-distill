@@ -39,7 +39,7 @@ from aadistill.initialization.calibration.profiles import (  # noqa: E402
     REASONING_HEAVY_V2,
 )
 from aadistill.initialization.operators import V1_IMPLEMENTATIONS  # noqa: E402
-from aadistill.initialization.operators.base import CalibrationNeed  # noqa: E402
+from aadistill.initialization.calibration.profiles import CalibrationNeed  # noqa: E402
 from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_EXCLUSION_RULE, PHASE_A_IMPORTED_FINALISTS, PHASE_B_DELEGATED_IDENTITIES, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED, SURVIVORS_AT_SB, phase_b_source_digest  # noqa: E402
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,

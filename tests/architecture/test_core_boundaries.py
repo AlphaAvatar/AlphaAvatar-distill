@@ -29,9 +29,11 @@ The baseline is debt, not permission. Its counts are the remaining work.
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
 
 import pytest
@@ -69,8 +71,26 @@ def baseline() -> dict:
     return json.loads(BASELINE.read_text())
 
 
+def _discriminator(value: object) -> str:
+    """A short, stable id for the offending CONTENT.
+
+    Not the line number: a site must keep its identity when unrelated code above
+    it moves, or every edit would churn the baseline and reviewers would stop
+    reading it. Not the owner alone either -- that was the defect this replaces.
+    Keying on `file::owner` and then de-duplicating meant a SECOND hard-coded
+    path in an already-listed function was invisible, because the identity it
+    produced was one the baseline already contained.
+    """
+    return hashlib.sha256(repr(value).encode()).hexdigest()[:10]
+
+
 def _violations(inventory: dict) -> dict[str, list[str]]:
-    """Every rule, evaluated. Keys match the baseline's."""
+    """Every rule, evaluated. Keys match the baseline's.
+
+    Returns a LIST, deliberately not a set: two identical violations in one
+    owner are two violations, and collapsing them would let one be added for
+    free. Multiplicity is compared with `collections.Counter` below.
+    """
     mods = inventory["modules"]
     out: dict[str, list[str]] = {k: [] for k in (
         "experiment_named_modules", "sha256_literals", "repo_id_literals",
@@ -82,7 +102,7 @@ def _violations(inventory: dict) -> dict[str, list[str]]:
             out["experiment_named_modules"].append(rel)
         is_adapter = m["classification"] == "model_family_adapter"
         for lit in m["literals"]:
-            site = f"{rel}::{lit['owner']}"
+            site = f"{rel}::{lit['owner']}::{_discriminator(lit['value'])}"
             if "sha256" in lit["kinds"] or "git_sha" in lit["kinds"]:
                 out["sha256_literals"].append(site)
             if "repo_id_shape" in lit["kinds"]:
@@ -92,17 +112,19 @@ def _violations(inventory: dict) -> dict[str, list[str]]:
         if not is_adapter:
             for a in m["family_attribute_access"]:
                 out["family_access_outside_adapters"].append(
-                    f"{rel}::{a['owner']}")
+                    f"{rel}::{a['owner']}::{_discriminator(a['chain'])}")
         for c in m["import_time_calls"]:
             if "register" in c["call"]:
-                out["import_time_registration"].append(f"{rel}::{c['call']}")
+                out["import_time_registration"].append(
+                    f"{rel}::<module>::{_discriminator(c['call'])}")
         for imp in m["imports"]:
             t = imp["target"]
             if t.startswith(("scripts.", "tests.")) or t in ("scripts", "tests"):
-                out["core_imports_scripts"].append(f"{rel}::{t}")
+                out["core_imports_scripts"].append(
+                    f"{rel}::<module>::{_discriminator(t)}")
 
     out["package_cycles"] = ["<->".join(c) for c in inventory["graph"]["package_cycles"]]
-    return {k: sorted(set(v)) for k, v in out.items()}
+    return {k: sorted(v) for k, v in out.items()}
 
 
 # --- the ratchet ------------------------------------------------------------
@@ -130,13 +152,19 @@ RULES = (
 @pytest.mark.parametrize("rule,description", RULES, ids=[r[0] for r in RULES])
 def test_no_new_violation_of_a_core_boundary(rule, description, inventory,
                                              baseline):
-    """The ratchet. New violations fail; existing debt is named, not hidden."""
-    observed = _violations(inventory)[rule]
-    allowed = set(baseline["allow"][rule])
-    novel = sorted(set(observed) - allowed)
+    """The ratchet. New violations fail; existing debt is named, not hidden.
+
+    Compared by multiset. A site is novel when it is absent from the baseline
+    OR occurs more often than the baseline allows -- so a second offending
+    literal inside an already-listed function is caught, which the previous
+    `set()` comparison could not do.
+    """
+    observed = Counter(_violations(inventory)[rule])
+    allowed = Counter(baseline["allow"][rule])
+    novel = sorted((observed - allowed).elements())
     assert not novel, (
         f"NEW violation — {description}:\n  " + "\n  ".join(novel) +
-        f"\n\nThis rule allows {len(allowed)} known site(s), listed in "
+        f"\n\nThis rule allows {sum(allowed.values())} known site(s), listed in "
         f"{BASELINE.relative_to(REPO)}. That list is debt, not permission: it "
         "may shrink, never grow. If this site is genuinely generic, the fix is "
         "to make the inventory recognise it, not to append it here.")
@@ -150,12 +178,57 @@ def test_the_baseline_only_shrinks(rule, description, inventory, baseline):
     paid off and the allowance would silently stay, ready to absorb a future
     regression at the same site.
     """
-    observed = set(_violations(inventory)[rule])
-    allowed = set(baseline["allow"][rule])
-    stale = sorted(allowed - observed)
+    observed = Counter(_violations(inventory)[rule])
+    allowed = Counter(baseline["allow"][rule])
+    stale = sorted((allowed - observed).elements())
     assert not stale, (
         f"{len(stale)} baselined site(s) for {rule!r} no longer violate it — "
         "lower the baseline in this commit:\n  " + "\n  ".join(stale))
+
+
+def _accepted_baseline(baseline: dict) -> tuple[dict | None, str]:
+    """The baseline at the revision this one names as accepted.
+
+    The revision is named IN the baseline (`accepted_revision`) rather than
+    taken as HEAD, so widening an allowance cannot ride along inside the commit
+    that needed it: the wider list has to be committed first, and then pointed
+    at deliberately. Bumping that field is a one-line, greppable diff a reviewer
+    can see on its own.
+    """
+    rev = baseline.get("accepted_revision")
+    if not rev:
+        return None, "no accepted_revision recorded"
+    out = subprocess.run(
+        ["git", "show", f"{rev}:{BASELINE.relative_to(REPO)}"],
+        cwd=REPO, capture_output=True, text=True)
+    if out.returncode != 0:
+        return None, f"accepted_revision {rev[:12]} does not resolve"
+    return json.loads(out.stdout), rev
+
+
+@pytest.mark.parametrize("rule,description", RULES, ids=[r[0] for r in RULES])
+def test_an_allowance_never_grows_against_the_accepted_revision(rule, description,
+                                                                baseline):
+    """Widening the allowance is checked against COMMITTED debt, not the tree.
+
+    Both the source and the baseline are editable, so a rule that only compares
+    them to each other is satisfied by editing both -- add a violation, add its
+    site to the allow list, and the ratchet reports nothing. The accepted
+    revision is the one at HEAD: raising an allowance therefore has to be its
+    own reviewable commit, rather than something that rides along inside a
+    change that needed it.
+    """
+    accepted, rev = _accepted_baseline(baseline)
+    if accepted is None:
+        pytest.skip(f"cannot compare: {rev}")
+    was = Counter(accepted["allow"].get(rule, []))
+    now = Counter(baseline["allow"][rule])
+    grew = sorted((now - was).elements())
+    assert not grew, (
+        f"the allowance for {rule!r} grew against the accepted revision "
+        f"({rev[:12]}) by {len(grew)} site(s):\n  " + "\n  ".join(grew) +
+        "\n\nDebt may only shrink. If this genuinely has to be accepted, it "
+        "belongs in its own commit that says so and nothing else.")
 
 
 def test_the_baseline_records_its_own_counts_honestly(inventory, baseline):
