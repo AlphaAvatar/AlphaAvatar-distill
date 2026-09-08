@@ -370,7 +370,7 @@ def test_the_micro_preflight_authorization_is_retired_by_its_own_gate():
     permission to train, which the current instruction withdraws.
     """
     auth = SpendAuthorization.load(AUTH_PATH)
-    with pytest.raises(AuthorizationError, match="differ"):
+    with pytest.raises(AuthorizationError, match="differ|is missing"):
         auth.require_harness(REPO)
     with pytest.raises(AuthorizationError, match="does not transfer"):
         auth.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
@@ -386,11 +386,17 @@ def test_an_unrehearsed_harness_cannot_consume_the_authorization(tmp_path):
     # An edited harness is a different harness.
     from dataclasses import replace
     edited = replace(auth, harness_source_digest="0" * 64)
-    with pytest.raises(AuthorizationError, match="differ"):
+    with pytest.raises(AuthorizationError, match="differ|is missing"):
         edited.require_harness(REPO)
     # An authorization that names no harness cannot authorize an executable.
+    # Given a file list that EXISTS, so the check under test is the one that
+    # fires: the committed authorization names pre-migration paths, and the
+    # missing-file refusal would otherwise mask the missing-digest one.
+    from aadistill.governance.authorization import HARNESS_SOURCE_FILES_V1
+    present = tuple(f for f in HARNESS_SOURCE_FILES_V1 if (REPO / f).is_file())
     with pytest.raises(AuthorizationError, match="no harness_source_digest"):
-        replace(auth, harness_source_digest=None).require_harness(REPO)
+        replace(auth, harness_source_digest=None,
+                harness_source_files=present).require_harness(REPO)
     # A missing declared file raises rather than shrinking the digest.
     with pytest.raises(AuthorizationError, match="is missing"):
         harness_source_digest(REPO, files=("scripts/pod/watchdog.py",

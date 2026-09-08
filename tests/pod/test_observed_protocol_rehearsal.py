@@ -545,8 +545,11 @@ def frozen_repo(tmp_path: Path) -> Path:
                     repo / "artifacts/stage1/state_eval_v1")
     shutil.copytree(REPO / "artifacts/stage3/recovery_search_v2",
                     repo / "artifacts/stage3/recovery_search_v2")
-    from aadistill.initialization.planning.recovery import RECOVERY_SCORING_FILES_V2
-    for rel in RECOVERY_SCORING_FILES_V2:
+    # V3: the same six files at current paths. V2 is the historical
+    # declaration and names the pre-migration ones, so copying it into a
+    # scratch tree fails on the first file that no longer exists.
+    from aadistill.initialization.planning.recovery import RECOVERY_SCORING_FILES_V3
+    for rel in RECOVERY_SCORING_FILES_V3:
         dst = repo / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(REPO / rel, dst)
@@ -554,12 +557,25 @@ def frozen_repo(tmp_path: Path) -> Path:
 
 
 def verify_frozen(repo: Path) -> tuple[int, dict]:
+    """CATEGORY A: check the scratch tree against ITS OWN identity.
+
+    Without `--expect` the verifier checks the completed run's preregistered
+    constants, which name the pre-migration scoring contract -- so an unmodified
+    scratch tree would fail for a reason this test is not about. The assets and
+    their hash conventions are checked exactly as strictly either way; only the
+    scoring-contract expectation differs. `tests/pod/test_phase_a_stage0_
+    executes.py` exercises the historical expectation as category C.
+    """
+    from support.fixture_categories import current_tree_expectation
+
     out = repo / "report.json"
     rc = subprocess.run(
         [sys.executable, str(REPO / "scripts/autoinit/verify_frozen_assets.py"),
-         "--repo", str(repo), "--out", "report.json"],
+         "--repo", str(repo), "--out", "report.json",
+         "--expect", str(current_tree_expectation(repo))],
         capture_output=True, text=True, cwd=REPO, timeout=300,
-        env={"PYTHONPATH": str(REPO / "src"), "PATH": "/usr/bin:/bin"})
+        env={"PYTHONPATH": f"{REPO / 'src'}:{REPO / 'scripts'}",
+             "PATH": "/usr/bin:/bin"})
     return rc.returncode, json.loads(out.read_text())
 
 
