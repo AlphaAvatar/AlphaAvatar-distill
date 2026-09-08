@@ -54,6 +54,57 @@ ATTEMPT 9 RAN — THE FROZEN PATH REPRODUCES; STAGE F FAILED**
 > `15:20:22Z`. The grant and authorization are **CONSUMED** and permit no retry
 > and no replacement pod.
 
+> **Architecture inventory, all-stage runtime layout, and the first experiment
+> extraction, 2026-09-08 — `$0.0000`, no pod, no GPU, no provider resource, no
+> grant, no authorization, no bundle.** Four of the maintainer's ten sections;
+> the rest is measured and reported, not attempted.
+>
+> **The core is now measured, not argued about.**
+> `scripts/architecture/inventory.py` reads `src/aadistill` from the SYNTAX
+> TREE — literals carry the module/class/function that owns them, docstrings are
+> excluded, comments are absent from the AST by construction. Two detector bugs
+> were found and fixed before any gate was built on it: `logs/runs` and
+> `governance/grant.json` were scoring as model repo ids (65 findings, all
+> false), and a chain like `self_attn.q_proj.weight` was counted once per
+> matching probe rather than once per access (roughly 4x inflation). The honest
+> debt is in `configs/architecture/core_boundary_baseline.json`.
+>
+> **The gates are a ratchet, not a refusal.** A flat refusal would be red for the
+> whole migration and stop carrying information. Instead: observed <= baseline,
+> and every observed site already listed. A NEW violation fails at once; a FIXED
+> violation ALSO fails, demanding the baseline drop in the same commit — which it
+> did three times today, unprompted, as files were removed.
+>
+> **run-layout-v2 was compression-shaped.** It hard-coded `logs/runs`, fixed the
+> roles to replay/treatment/training/evaluation/decision, and required
+> `adapter`/`source_spec_hash`/`compression`/`operator_path` in every manifest. A
+> dataset build has no operator path. `src/aadistill/runtime/run_layout.py`
+> knows only that a run is `(experiment_id, run_id)` under a CALLER-supplied
+> root with a caller-declared role -> path map; an `ArtifactSpec` supplied by the
+> experiment says which roles are required. Ten stages — including one
+> deliberately unnamed — build and verify through it with no source change.
+>
+> **The index was counting artifact roots.** It said 77 runs; `…attempt9` and
+> `…attempt9_grant.json` are ONE attempt with two components. It is now **41
+> logical runs over 77 components**, `phase_c1` = 10 (attempts 1-9 plus 3r).
+> Nothing was moved, renamed or copied, and every component digest is checked
+> against the tree.
+>
+> **No frozen set was disturbed.** All eight declarations were tested against the
+> 20 changed files: no member changed, and the C1 harness digest is still
+> `6ac5120f…`. No historical amendment is owed and no preregistration was
+> regenerated. **Scientific fields moved = 0** — nothing scientific was touched.
+>
+> **What was NOT done, and why.** The initialization consolidation
+> (`init` + `autoinit` -> `initialization`) and the production-writer integration
+> are measured, not attempted: **164 files import those two packages across 54
+> core modules**, and every frozen source-set declaration lists paths that would
+> all move. A half-migrated tree with three packages and broken frozen sets is
+> worse than today's, and forwarding wrappers are prohibited. Remaining core debt:
+> 13 experiment-named modules, 23 path literals, 10 import-time registrations, 9
+> repo ids, 8 digests, 4 adapter-boundary escapes, 1 package cycle
+> (`calibration <-> operators`).
+
 > **Stage-F device repair and closeout normalization, 2026-09-08 — `$0.0000`, no
 > pod, no GPU, no provider resource, no grant, no authorization.**
 >
