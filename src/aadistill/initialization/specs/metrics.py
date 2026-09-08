@@ -276,4 +276,13 @@ def reference_cache_bytes(items: Sequence["SuiteItem"], vocab_size: int,
     positions = sum(int(i.input_ids.shape[1]) - 1 for i in items)
     return positions * vocab_size * bytes_per_value
 
-
+def _jsonable(obj: Any) -> Any:
+    if isinstance(obj, Mapping):
+        return {str(k): _jsonable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_jsonable(v) for v in obj]
+    if isinstance(obj, torch.Tensor):
+        return obj.tolist()
+    if isinstance(obj, (int, float, str, bool)) or obj is None:
+        return obj
+    return str(obj)

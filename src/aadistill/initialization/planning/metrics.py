@@ -16,6 +16,7 @@ from typing import Any
 import torch
 
 from aadistill.initialization.specs.metrics import (
+    _jsonable,
     DEFAULT_REFERENCE_CACHE_BUDGET_BYTES,
     MeasurementError,
     ReferenceStrategy,
@@ -208,13 +209,3 @@ def _per_domain_ce(per_subtype: Mapping[str, DistortionSums],
     return out
 
 
-def _jsonable(obj: Any) -> Any:
-    if isinstance(obj, Mapping):
-        return {str(k): _jsonable(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
-        return [_jsonable(v) for v in obj]
-    if isinstance(obj, torch.Tensor):
-        return obj.tolist()
-    if isinstance(obj, (int, float, str, bool)) or obj is None:
-        return obj
-    return str(obj)

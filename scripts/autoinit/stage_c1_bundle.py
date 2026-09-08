@@ -35,6 +35,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from experiments.phase_c1.bundle import RELAY_REPO, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, stage_bundle  # noqa: E402
 

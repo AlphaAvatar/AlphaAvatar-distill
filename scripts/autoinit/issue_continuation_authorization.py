@@ -22,6 +22,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.governance.authorization import harness_source_digest  # noqa: E402
 from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1, CONTINUATION_PLAN_V1  # noqa: E402

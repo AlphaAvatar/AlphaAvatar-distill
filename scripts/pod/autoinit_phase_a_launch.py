@@ -48,6 +48,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # The sibling science-input declarations. Present when this file is run
 # directly; absent when a test loads it by path, which is how the
 # structural checks load every launcher.
@@ -315,6 +316,8 @@ def fetch_selected_leaves(ctx: SessionContext, *, records: list | None = None,
         return []
 
     sys.path.insert(0, str(REPO_ROOT / "src"))
+
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
     from aadistill.initialization.specs.arch import get_adapter
     from aadistill.runtime.leaf_durability import verify_transferred_leaf
 

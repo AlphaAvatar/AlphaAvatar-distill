@@ -42,6 +42,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE  # noqa: E402
@@ -323,6 +324,7 @@ def selected_leaves_present_gate(ctx: SessionContext) -> tuple[bool, str]:
     does not duplicate it.
     """
     sys.path.insert(0, str(REPO_ROOT / "src"))
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
     from aadistill.initialization.specs.arch import get_adapter
     from aadistill.runtime.leaf_durability import verify_transferred_leaf
 
