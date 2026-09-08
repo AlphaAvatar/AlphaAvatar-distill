@@ -21,7 +21,8 @@
   "path_literals": 23,
   "experiment_named_modules": 0,
   "family_access_outside_adapters": 0,
-  "import_time_registration": 5,
+  "import_time_registration": 0,
+  "import_time_taxonomy": 5,
   "big_int_literals": 9,
   "package_cycles": 0
  },
@@ -170,7 +171,8 @@
   ],
   "experiment_named_modules": [],
   "family_access_outside_adapters": [],
-  "import_time_registration": [
+  "import_time_registration": [],
+  "import_time_taxonomy": [
    {
     "path": "src/aadistill/initialization/operators/base.py",
     "call": "register_kind",
@@ -7122,7 +7124,7 @@
     },
     {
      "chain": "self_attn.k_proj",
-     "probe": "self_attn",
+     "probe": "k_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 199
     },
@@ -7134,19 +7136,19 @@
     },
     {
      "chain": "mlp.gate_proj",
-     "probe": "mlp",
+     "probe": "gate_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 201
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 202
     },
     {
      "chain": "self_attn.o_proj",
-     "probe": "self_attn",
+     "probe": "o_proj",
      "owner": "Qwen3Adapter.stream_out_projections",
      "line": 206
     },

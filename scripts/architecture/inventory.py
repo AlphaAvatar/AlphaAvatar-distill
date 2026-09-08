@@ -85,6 +85,10 @@ PATHY = re.compile(r"(^|[\"' ])(logs/|artifacts/|data/|scripts/|~/|/home/|/tmp/)
 
 #: Model-family attribute chains. A core module reaching through these is
 #: bypassing the adapter; an adapter doing it is the adapter's whole job.
+#: Registrations that declare framework vocabulary rather than a concrete
+#: instance. Kept in step with tests/architecture/test_core_boundaries.py.
+TAXONOMY_REGISTRATIONS = frozenset({"register_kind"})
+
 FAMILY_ATTRS = {
     ("model", "layers"), ("self_attn",), ("o_proj",), ("q_proj",), ("k_proj",),
     ("v_proj",), ("mlp",), ("gate_proj",), ("up_proj",), ("down_proj",),
@@ -338,7 +342,8 @@ def main() -> int:
     findings = {
         "sha256_literals": [], "repo_id_literals": [], "path_literals": [],
         "experiment_named_modules": [], "family_access_outside_adapters": [],
-        "import_time_registration": [], "big_int_literals": [],
+        "import_time_registration": [], "import_time_taxonomy": [],
+        "big_int_literals": [],
     }
     for rel, m in modules.items():
         is_adapter = m["classification"] == "model_family_adapter"
@@ -360,7 +365,13 @@ def main() -> int:
                 findings["family_access_outside_adapters"].append(
                     {"path": rel, **a})
         for c in m["import_time_calls"]:
-            if "register" in c["call"]:
+            if c["call"] in TAXONOMY_REGISTRATIONS:
+                #: Framework VOCABULARY, reported separately. Registering an
+                #: operator kind is not an instance registering itself: there is
+                #: nothing for a caller to inject, and counting it alongside the
+                #: real thing made the two rules disagree about the same tree.
+                findings["import_time_taxonomy"].append({"path": rel, **c})
+            elif "register" in c["call"]:
                 findings["import_time_registration"].append({"path": rel, **c})
 
     doc = {
