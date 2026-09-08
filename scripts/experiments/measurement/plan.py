@@ -3,7 +3,7 @@
 Separate from Phase A on purpose. This session measures a **rate** and validates
 a **backend**; it runs no greedy search, selects no depth map and writes no
 checkpoint, and its authorization is the ordinary
-:class:`~aadistill.autoinit.authorization.SpendAuthorization`, whose
+:class:`~aadistill.governance.authorization.SpendAuthorization`, whose
 ``allows_phase_a`` is a hard ``False``. A measurement pointed at the wrong
 artifact therefore *cannot* start Phase A — a property, not a promise.
 

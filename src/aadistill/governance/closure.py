@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import re
 from pathlib import Path
 
 SCHEMA = "aadistill.executable_closure/v1"
@@ -108,9 +109,74 @@ def _imports_of(repo: Path, rel: str, roots: tuple[str, ...]) -> tuple[set[str],
     return definite, probes
 
 
+#: A repository-relative script path written as a string literal. This is how a
+#: subprocess target is named, and an import walk cannot see it.
+_SCRIPT_LITERAL = re.compile(r"^(?:scripts|src|configs)/[\w./-]+\.(?:py|sh)$")
+
+
+def _subprocess_targets(repo: Path, rel: str) -> set[str]:
+    """In-repo scripts this file names as a string, i.e. runs rather than imports.
+
+    `session_runner` starts the watchdog with `[sys.executable,
+    str(repo_root / "scripts/pod/watchdog.py"), ...]`, and the C1 driver shells
+    out to the engine probe and the uncapped evaluator the same way. Every one of
+    those decides what a paid session does, and none is reachable by following
+    `import` edges -- which is exactly why a hand-written list kept missing them.
+    """
+    try:
+        tree = ast.parse((repo / rel).read_text())
+    except (SyntaxError, UnicodeDecodeError):
+        return set()
+
+    #: A script path is a TARGET when the code composes a path from it or hands
+    #: it to a call -- `REPO / "scripts/x.py"`, `str(root / "scripts/x.py")`,
+    #: `self.gate("name", "scripts/x.py", ...)`. It is not a target when it is
+    #: merely a member of a list that DECLARES other files, which is how
+    #: `pod_environment` names the tools its own digest covers; counting those
+    #: would pull half the repository into the closure.
+    #:
+    #: Prose is excluded first. A module explaining that it supersedes some
+    #: script is not running it, and a matcher that cannot tell the difference
+    #: repeats the mistake of a guard that greps for a name and matches the
+    #: comment saying why the name is there.
+    prose: set[int] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) \
+                and isinstance(node.value.value, str):
+            prose.add(id(node.value))
+
+    used: set[int] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            for side in (node.left, node.right):
+                for sub in ast.walk(side):
+                    if isinstance(sub, ast.Constant):
+                        used.add(id(sub))
+        elif isinstance(node, ast.Call):
+            for arg in list(node.args) + [k.value for k in node.keywords]:
+                for sub in ast.walk(arg):
+                    if isinstance(sub, ast.Constant):
+                        used.add(id(sub))
+
+    out = set()
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Constant) and isinstance(node.value, str)
+                and id(node) in used and id(node) not in prose):
+            candidate = node.value.strip()
+            if _SCRIPT_LITERAL.match(candidate) and (repo / candidate).is_file():
+                out.add(candidate)
+    return out
+
+
 def walk(repo_root: str | Path, entry_points: tuple[str, ...],
-         roots: tuple[str, ...] = DEFAULT_ROOTS) -> tuple[list[str], list[str]]:
-    """(files reachable from the entry points, unresolved internal modules)."""
+         roots: tuple[str, ...] = DEFAULT_ROOTS,
+         follow_subprocess_targets: bool = True) -> tuple[list[str], list[str]]:
+    """(files reachable from the entry points, unresolved internal modules).
+
+    Follows `import` edges and, by default, in-repo scripts named as string
+    literals -- a subprocess target is part of what executes whether or not
+    anything imports it.
+    """
     repo = Path(repo_root)
     missing = [e for e in entry_points if not (repo / e).is_file()]
     if missing:
@@ -133,6 +199,12 @@ def walk(repo_root: str | Path, entry_points: tuple[str, ...],
             if target not in seen:
                 seen.add(target)
                 stack.append(target)
+        if follow_subprocess_targets:
+            for target in _subprocess_targets(repo, rel):
+                if target not in seen:
+                    seen.add(target)
+                    #: A .py target is itself walked -- what IT imports also runs.
+                    stack.append(target)
     return sorted(seen), sorted(unresolved)
 
 

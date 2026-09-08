@@ -12,7 +12,7 @@ A readiness record whose command field was typed by hand is a claim, not
 evidence.
 
 The sweep takes about thirteen minutes. That is why the record exists:
-`aadistill.autoinit.pod_environment.verify_record` re-checks in milliseconds that
+`aadistill.runtime.pod_environment.verify_record` re-checks in milliseconds that
 the recorded proof still describes the live executable, so a pre-provider gate
 never has to re-run this while a pod waits.
 

@@ -141,7 +141,7 @@ def select_q_heads(
 def _head_rows(heads: list[int], head_dim: int, device: Any = None) -> torch.Tensor:
     """Row indices for a set of attention heads, on the device they will index.
 
-    The older sibling of `aadistill.autoinit.operators._common.head_rows`, which
+    The older sibling of `aadistill.initialization.operators._common.head_rows`, which
     grew the `device` argument when the operator path was audited and this one
     did not — the two are deliberately not merged, because `init` is the lower
     layer and importing an operator helper here would invert that.

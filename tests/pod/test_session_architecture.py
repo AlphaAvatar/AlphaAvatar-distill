@@ -512,7 +512,7 @@ def test_c1_stages_the_canonical_rope_config_specifically():
 def test_the_calibration_pin_matches_the_registry_that_already_carried_it():
     """One hash, two homes, and they may not drift.
 
-    `aadistill.autoinit.datasets.E8A_CALIBRATION` has carried this file's hash
+    `aadistill.initialization.calibration.datasets.E8A_CALIBRATION` has carried this file's hash
     since E8a. The shared setup carried a second copy of it, and nothing compared
     them.
     """

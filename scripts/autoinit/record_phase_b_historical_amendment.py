@@ -13,7 +13,7 @@ separate command rather than a flag on that one.
 
 It records HISTORY. It confers nothing: every entry it writes asserts
 `launch_compatible_with_frozen_preregistration: false`, and
-`aadistill.autoinit.post_freeze.historical_accounted_for` refuses a ledger that
+`aadistill.governance.post_freeze.historical_accounted_for` refuses a ledger that
 says otherwise. The paid Phase-B launch gate never reads this file.
 
 Every quantity is DERIVED from git and from the tree — numstat including honest
@@ -200,7 +200,7 @@ def main() -> int:
         "consumed_by_a_paid_launch_gate": False,
         "launch_compatibility_owner": (
             "scripts/pod/autoinit_phase_b_launch.py::preregistration_gate, via "
-            "aadistill.autoinit.post_freeze.accounted_for — which is unchanged "
+            "aadistill.governance.post_freeze.accounted_for — which is unchanged "
             "and still refuses non-additive drift"),
         "immutability": (
             f"{PREREG} and {SEALED_LEGACY_NOTE} are anchored by hash above and "

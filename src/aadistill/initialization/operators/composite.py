@@ -68,7 +68,7 @@ class CompositeStage1SandwichV0(OperatorImplementation):
     kind = "COMPOSITE_STAGE1"
     version = 0
     description = (
-        "aadistill.init.sandwich.init_student verbatim: global activation-PCA stream "
+        "aadistill.initialization.transforms.sandwich.init_student verbatim: global activation-PCA stream "
         "projection, norm folding with sqrt(d_t/d_s) compensation, per-group query "
         "head selection, per-layer activation-importance FFN top-k, and either the "
         "positional depth map or an explicit kept-layer list. The recipe that "

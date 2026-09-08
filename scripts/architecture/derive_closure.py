@@ -29,10 +29,10 @@ from aadistill.governance.closure import compare, derive  # noqa: E402
 OUT_DIR = "configs/experiments"
 
 
-def _phase_c1() -> tuple[tuple[str, ...], tuple[str, ...]]:
+def _phase_c1():
     from experiments.phase_c1.authorization import (
-        C1_DECLARED_INPUTS, C1_ENTRY_POINTS)
-    return C1_ENTRY_POINTS, C1_DECLARED_INPUTS
+        C1_DECLARED_INPUTS, C1_ENTRY_POINTS, C1_SOURCE_ROOTS)
+    return C1_ENTRY_POINTS, C1_DECLARED_INPUTS, C1_SOURCE_ROOTS
 
 
 #: experiment id -> callable returning (entry points, declared non-python inputs)
@@ -45,8 +45,8 @@ def main() -> int:
     ap.add_argument("--write", action="store_true")
     args = ap.parse_args()
 
-    entries, declared = EXPERIMENTS[args.experiment]()
-    doc = derive(REPO, args.experiment, entries, declared)
+    entries, declared, roots = EXPERIMENTS[args.experiment]()
+    doc = derive(REPO, args.experiment, entries, declared, roots=roots)
     print(f"{args.experiment}: {doc['n_files']} files, digest {doc['digest'][:16]}…")
 
     by_area: dict[str, int] = {}

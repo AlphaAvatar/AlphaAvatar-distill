@@ -195,10 +195,23 @@ C1_DECLARED_INPUTS: tuple[str, ...] = (
     "configs/experiments/phase_c1/authorization.json",
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",
+    #: The execution preregistration the launcher loads and binds against. Its
+    #: bytes decide what the session is permitted to do, so they belong in the
+    #: identity of what would run even though no import reaches them.
+    "logs/phase_c1_execution_preregistration.json",
 )
 
 #: A recorded snapshot of the derived closure, for reporting drift. Never the
 #: source of truth — see `c1_current_executable`.
+#: The sys.path roots the C1 entry points insert. They import several helpers by
+#: BARE NAME -- `from autoinit_science_inputs import ...`, `from
+#: renderer_parity_gate import ...` -- which resolve only because the scripts put
+#: these directories on the path. A walk that did not know them silently missed
+#: those files: an unresolvable bare name looks like a third-party import rather
+#: than a gap.
+C1_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
+                                    "scripts/autoinit")
+
 CURRENT_CLOSURE_SNAPSHOT = "configs/experiments/phase_c1/executable_closure.json"
 
 
@@ -221,7 +234,8 @@ def c1_current_executable(repo_root: str | Path = ".") -> dict[str, Any]:
     from aadistill.governance.closure import ClosureError, derive
 
     try:
-        return derive(repo_root, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS)
+        return derive(repo_root, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
+                      roots=C1_SOURCE_ROOTS)
     except ClosureError as exc:
         raise AuthorizationError(f"cannot derive the C1 executable set: {exc}") from exc
 

@@ -10,7 +10,7 @@ labelled with it raises the moment it meets a model-side tensor without having
 been transferred, which is what CUDA does. Each operator below is run through
 its real `execute()` with a labelled cache; passing means the operator performs
 the explicit transfer the contract requires
-(`aadistill.autoinit.device.stats_to`), not that a single device hid the
+(`aadistill.initialization.device.stats_to`), not that a single device hid the
 question.
 
 `depth.causal_kl_greedy_v1` consumes no statistics and is covered instead on the

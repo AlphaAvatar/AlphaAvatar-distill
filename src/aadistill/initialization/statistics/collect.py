@@ -120,7 +120,7 @@ class ActivationStatsCollector:
         The persistent cache holds one of these and it is 1.81 GiB at a 4B
         parent, so it does not live in VRAM between operator invocations. A
         consumer that needs it for compute moves a working copy back with
-        `aadistill.autoinit.device.stats_to`, for the duration of one call.
+        `aadistill.initialization.device.stats_to`, for the duration of one call.
         """
         return {
             "residual_sum": self._to_host(self.res_sum),

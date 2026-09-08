@@ -174,7 +174,7 @@ def head_write_energy(state: dict[str, torch.Tensor], layer: int,
             f"attention statistics are on {m.device} and o_proj.weight is on "
             f"{w.device}. `head_write_energy` does not transfer: the caller "
             "owns the compute-device working copy — see "
-            "`aadistill.autoinit.device.stats_to`.")
+            "`aadistill.initialization.device.stats_to`.")
     # Placed from the tensor it meets. A bare `torch.empty(num_heads,
     # dtype=torch.float64)` defaults to CPU, so on a GPU the very first
     # `scores[h] = ...` assignment is a second cross-device use — latent behind

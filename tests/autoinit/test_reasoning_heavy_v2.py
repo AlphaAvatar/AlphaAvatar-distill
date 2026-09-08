@@ -26,6 +26,7 @@ from aadistill.initialization.calibration.profiles import (
     mixture_content_sha256,
 )
 from experiments.calibration import (
+    PROFILES,
     REASONING_HEAVY_V2_SAMPLE_RULE,
     REASONING_HEAVY_V2_SEED,
 )
@@ -138,7 +139,7 @@ def test_v1_is_superseded_and_still_refuses_to_resolve():
 
 
 def test_both_search_profiles_are_now_buildable():
-    assert [p.qualified_id for p in buildable_profiles()] == [
+    assert [p.qualified_id for p in buildable_profiles(PROFILES)] == [
         "calib.domain_balanced@v1", "calib.reasoning_heavy@v2"]
 
 

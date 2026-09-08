@@ -6,7 +6,7 @@
 Regenerates `logs/autoinit_phase_b_post_freeze_changes.json` from the tree as it
 actually is. A generator rather than a hand-edited file because the declaration
 must track the code — a stale note is refused by
-`aadistill.autoinit.post_freeze.accounted_for`, which is the point.
+`aadistill.governance.post_freeze.accounted_for`, which is the point.
 
 Running this does NOT make a change acceptable. It records the change so the gate
 can check it, and the gate still refuses a non-additive change, a change that

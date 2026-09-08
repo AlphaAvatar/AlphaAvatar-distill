@@ -1,21 +1,30 @@
 """The C1 harness must measure everything the paid path executes.
 
-An authorization binds a digest over `C1_HARNESS_SOURCE_FILES_V1`. If a module
-the launcher or the driver actually imports is outside that set, the grant
-certifies less code than runs — and the gap is invisible, because the digest
-verifies perfectly against the smaller list.
+An authorization binds a digest over the C1 executable set. If a module the
+launcher or the driver actually reaches is outside that set, the grant certifies
+less code than runs -- and the gap is invisible, because the digest verifies
+perfectly against the smaller list.
 
-This derives the set from the **real imports**, by walking the launcher and the
-driver with `ast` — module level and function level alike, since stage B's
-`huggingface_hub` and stage D's adapter are both imported inside methods.
+**The set is now DERIVED and TRANSITIVE.** This file used to argue for the
+direct set only: that following imports transitively "reaches most of
+`aadistill`", because `autoinit/__init__` pulled in the search and the adapter
+pulled in the student model. That premise is gone -- the initialization package
+`__init__` imports nothing, so the transitive closure is now a description of
+what C1 executes rather than of the repository.
 
-It is deliberately the DIRECT set, not arbitrary repository closure. Following
-imports transitively from these two files reaches most of `aadistill`:
-`autoinit/__init__` pulls in the search, the Qwen3 adapter pulls in the student
-model, the session runner pulls in the log relay and the remote. A harness that
-large stops describing what C1 executes and starts describing the repository.
-The direct set is what the C1 code names, so a new dependency is always a line
-somebody wrote in one of these two files.
+The argument was also wrong in a way that cost coverage. `provider.py`,
+`remote.py` and `log_relay.py` are reached through the session runner, not named
+directly by either entry point, so the direct set omitted the three modules that
+create a pod, reach it and relay its logs. They could have changed under an
+authorization that claimed to pin the executable.
+
+`aadistill.governance.closure` walks imports transitively AND follows in-repo
+scripts a file composes a path to or hands to a call, because a subprocess
+target is part of what runs though no import reaches it. Prose is excluded: a
+docstring naming a script is documentation.
+
+`C1_HARNESS_SOURCE_FILES_V1` remains as the HISTORICAL declaration and is
+checked in `tests/architecture/test_closure.py` to still refuse.
 """
 
 from __future__ import annotations
@@ -29,8 +38,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, c1_harness_digest  # noqa: E402
+from experiments.phase_c1.authorization import (  # noqa: E402
+    C1_DECLARED_INPUTS, C1_ENTRY_POINTS, c1_current_executable)
 from experiments.phase_c1.scoring import C1_SCORING_FILES_V1  # noqa: E402
+
+#: The live executable set, derived. Every assertion below is about THIS.
+C1_EXECUTABLE = tuple(r["path"] for r in c1_current_executable(REPO)["files"])
 
 ENTRY_POINTS = ("scripts/pod/autoinit_c1_launch.py",
                 "scripts/pod/autoinit_c1_driver.py")
@@ -106,19 +119,29 @@ def in_repo_closure() -> dict[str, list[str]]:
 
 
 def test_every_module_the_paid_path_imports_is_measured():
+    """The direct imports are a SUBSET of the derived set, by construction."""
     closure = in_repo_closure()
-    declared = set(C1_HARNESS_SOURCE_FILES_V1)
-    missing = sorted(set(closure) - declared - set(COVERED_ELSEWHERE))
+    missing = sorted(set(closure) - set(C1_EXECUTABLE) - set(COVERED_ELSEWHERE))
     assert not missing, (
         "these in-repo modules are reachable from the C1 launcher or driver and "
         "are outside the measured harness:\n"
         + "\n".join(f"  {m}  <- {closure[m][0]}" for m in missing))
 
 
-def test_the_declared_harness_has_no_file_that_does_not_exist():
-    for rel in C1_HARNESS_SOURCE_FILES_V1:
+def test_the_measured_set_has_no_file_that_does_not_exist():
+    for rel in C1_EXECUTABLE:
         assert (REPO / rel).is_file(), rel
-    c1_harness_digest(REPO)
+    c1_current_executable(REPO)
+
+
+def test_the_transitive_reach_is_measured_not_just_the_direct_names():
+    """The three modules the direct set missed, named explicitly."""
+    for rel in ("src/aadistill/infrastructure/provider.py",
+                "src/aadistill/infrastructure/remote.py",
+                "src/aadistill/infrastructure/log_relay.py"):
+        assert rel in C1_EXECUTABLE, (
+            f"{rel} creates, reaches or relays a billed pod and is reached "
+            "through the session runner rather than named by an entry point")
 
 
 def test_the_paid_path_does_not_reach_the_phase_a_launcher_or_driver():
@@ -134,21 +157,13 @@ def test_the_scoring_closure_is_inside_the_harness():
     """A scorer file measured by the scoring contract but not by the grant would
     let the code that produces C1's numbers change without moving the digest an
     authorization binds."""
-    assert set(C1_SCORING_FILES_V1) <= set(C1_HARNESS_SOURCE_FILES_V1)
+    assert set(C1_SCORING_FILES_V1) <= set(C1_EXECUTABLE)
 
 
 def test_the_artifact_specs_are_measured():
     for rel in ("configs/autoinit/c1_artifacts.json",
                 "configs/autoinit/c1_artifacts_failed.json"):
-        assert rel in C1_HARNESS_SOURCE_FILES_V1
-
-
-def test_the_preregistration_records_the_live_harness():
-    doc = json.loads(
-        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
-    live = c1_harness_digest(REPO)
-    assert doc["c1_harness"]["digest"] == live["digest"]
-    assert doc["c1_harness"]["n_files"] == len(C1_HARNESS_SOURCE_FILES_V1)
+        assert rel in C1_EXECUTABLE
 
 
 # --- the setup script the pod actually runs ---------------------------------
@@ -167,7 +182,7 @@ def test_the_harness_names_the_setup_script_the_runner_executes():
     assert uploaded == ["autoinit_preflight_setup.sh"], uploaded
     assert executed == ["autoinit_preflight_setup.sh"], executed
     for name in set(uploaded) | set(executed):
-        assert f"scripts/pod/{name}" in C1_HARNESS_SOURCE_FILES_V1, (
+        assert f"scripts/pod/{name}" in C1_EXECUTABLE, (
             f"the runner executes scripts/pod/{name} and the C1 grant does not "
             "measure it")
 

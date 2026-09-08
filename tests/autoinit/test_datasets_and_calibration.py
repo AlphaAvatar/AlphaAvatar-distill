@@ -21,6 +21,7 @@ from aadistill.initialization.calibration.profiles import (
     unregister_profile,
 )
 from experiments.calibration import (
+    PROFILES,
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V1,
     STAGE0_CURRENT_V1,
@@ -56,7 +57,7 @@ def source(domain="general", n=1):
 
 def test_the_final_promotion_battery_is_not_reachable_from_the_search():
     """The mechanical form of 'the final battery is isolated from the search'."""
-    assert DatasetRole.FINAL_PROMOTION not in aadistill.autoinit.datasets.SEARCH_VISIBLE_ROLES
+    assert DatasetRole.FINAL_PROMOTION not in aadistill.initialization.calibration.datasets.SEARCH_VISIBLE_ROLES
     with pytest.raises(DatasetRoleViolation, match="may not"):
         assert_search_visible("battery.frozen_promotion_150")
     with pytest.raises(DatasetRoleViolation, match="may not"):
@@ -67,7 +68,7 @@ def test_the_final_promotion_battery_is_not_reachable_from_the_search():
 def test_the_frozen_batteries_are_registered_as_protected():
     ids = {a.asset_id for a in protected_assets()}
     assert ids == {"battery.frozen_promotion_150", "battery.capability_v2_846"}
-    battery = aadistill.autoinit.datasets.get_asset("battery.frozen_promotion_150")
+    battery = aadistill.initialization.calibration.datasets.get_asset("battery.frozen_promotion_150")
     assert battery.metadata["inclusion_mask_sha256"] == (
         "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba")
 
@@ -80,7 +81,7 @@ def test_an_asset_cannot_be_used_outside_its_declared_role():
 
 
 def test_moving_an_asset_between_roles_is_refused():
-    original = aadistill.autoinit.datasets.get_asset("calib.e8a_domain_balanced_67")
+    original = aadistill.initialization.calibration.datasets.get_asset("calib.e8a_domain_balanced_67")
     moved = DatasetAsset(asset_id=original.asset_id, role=DatasetRole.FINAL_PROMOTION,
                          path=original.path, description=original.description)
     with pytest.raises(DatasetRoleViolation, match="already registered in role"):
@@ -134,14 +135,14 @@ def test_an_unreadable_item_shape_raises_instead_of_hashing_the_empty_string(tmp
                                 "weird.jsonl", "test"), replace=True)
     try:
         with pytest.raises(DatasetRoleViolation, match="cannot derive any comparable"):
-            aadistill.autoinit.datasets.get_asset("t.weird").identity_sets(tmp_path)
+            aadistill.initialization.calibration.datasets.get_asset("t.weird").identity_sets(tmp_path)
     finally:
         unregister_asset("t.weird")
 
 
 @needs_calibration
 def test_the_real_e8a_calibration_mixture_is_still_where_the_record_says():
-    asset = aadistill.autoinit.datasets.get_asset("calib.e8a_domain_balanced_67")
+    asset = aadistill.initialization.calibration.datasets.get_asset("calib.e8a_domain_balanced_67")
     items = asset.load_items(REPO)
     assert len(items) == 67
     # It is pre-tokenized, so its comparable identity is the token sequence and
@@ -202,10 +203,10 @@ def test_the_three_v1_profiles_are_representable_and_only_one_is_built():
                                    REASONING_HEAVY_V1)] == [
         "calib.stage0_current", "calib.domain_balanced", "calib.reasoning_heavy"]
     # Of the v1 generation, still exactly one. `calib.reasoning_heavy@v2` is now
-    # built too and appears in `buildable_profiles()`; v1 remains unbuildable by
+    # built too and appears in `buildable_profiles(PROFILES)`; v1 remains unbuildable by
     # arithmetic, which is why there is a v2 at all — see
     # tests/autoinit/test_reasoning_heavy_v2.py.
-    v1_buildable = [p.qualified_id for p in buildable_profiles()
+    v1_buildable = [p.qualified_id for p in buildable_profiles(PROFILES)
                     if p.qualified_id.endswith("@v1")]
     assert v1_buildable == ["calib.domain_balanced@v1"]
 
