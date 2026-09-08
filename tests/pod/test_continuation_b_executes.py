@@ -1128,7 +1128,12 @@ def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
         f"the shared gate re-derived {record['harness_digest_at_commit']} but the "
         f"continuation produces {record['authorized_harness_digest']}. {why}")
     assert record["harness_digest_at_commit"] == observed["digest"]
-    assert observed["set_version"] == 3
+    # 4 since the initialization migration: the membership changed, not just
+    # the paths -- 18 files the continuation no longer loads left the set and
+    # the package __init__ files it does load joined it. A literal here is the
+    # guard against an ACCIDENTAL change, so a deliberate one updates it in the
+    # same commit.
+    assert observed["set_version"] == 4
     assert observed["algorithm"] == "sha256-over-sorted-path-colon-sha256-lines/v1"
 
 
