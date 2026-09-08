@@ -71,6 +71,7 @@ from aadistill.runtime.device_handoff import (  # noqa: E402
     require_released,
 )
 from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
+from experiments.calibration import register_builtin_profiles  # noqa: E402
 from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathDigestMismatch,
     VerifiedSuffix,
@@ -87,6 +88,9 @@ from aadistill.initialization.planning.generation import (  # noqa: E402
 )
 from aadistill.initialization.operators import attention_activation  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
+
+#: Explicit: importing the core no longer registers a mixture.
+register_builtin_profiles()
 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_c1.status"

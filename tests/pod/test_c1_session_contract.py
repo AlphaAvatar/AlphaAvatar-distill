@@ -20,9 +20,14 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
+from experiments.phase_c1.authorization import c1_current_executable  # noqa: E402
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_SCHEMA, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest  # noqa: E402
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from session_specs import load_session_launcher, session_args  # noqa: E402
+
+#: The LIVE executable set. `C1_HARNESS_SOURCE_FILES_V1` is the
+#: historical declaration and deliberately still names the old paths.
+C1_EXECUTABLE = tuple(r["path"] for r in c1_current_executable(REPO)["files"])
 
 #: A candidate authorization, built here, deterministically, into `tmp_path`.
 #:
@@ -87,7 +92,9 @@ def test_the_session_loads_the_c1_type_and_nothing_else(spec):
     # object from this test's import even though both are the same source.
     loader = spec.authorization_loader
     assert loader.__qualname__ == "C1Authorization.load"
-    assert loader.__module__.endswith("c1_authorization")
+    # `phase_c1.authorization` since the cutover; it was `c1_authorization`
+    # when C1 policy lived under src/aadistill.
+    assert loader.__module__.endswith("authorization")
     assert loader.__self__.__name__ == C1Authorization.__name__
     assert spec.setup.env["SESSION_KIND"] == "c1"
 
@@ -224,7 +231,7 @@ def test_the_harness_set_covers_the_launcher_driver_and_c1_science():
                      "src/aadistill/initialization/statistics/attention.py",
                      "src/aadistill/initialization/planning/recovery.py",
                      "scripts/autoinit/score_recovery_search.py"):
-        assert required in C1_HARNESS_SOURCE_FILES_V1, required
+        assert required in C1_EXECUTABLE, required
 
 
 def test_a_missing_harness_file_raises_rather_than_shrinking_the_digest():

@@ -3,9 +3,9 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "0f0b6690096752bdab65ff85151a68e207aa80c5",
+ "head_commit": "a9fe04bd6acadbcb1d25112d96caa136c78e67fa",
  "executable_source": {
-  "digest": "c0ccaa3e47b1cf74a38378ab247a98c8f0fee5b75f45a5f9aad58d754cad0905",
+  "digest": "c8c5281f447015ece6c943acfe3adffc582813fbe66a8da7b7b7e3d1f5e1f31c",
   "files": [
    {
     "path": "scripts/autoinit/verify_c1_battery_isolation.py",
@@ -23,35 +23,61 @@
     "bytes": 13309
    },
    {
-    "path": "src/aadistill/autoinit/c1_isolation.py",
-    "sha256": "46e8b097690b20171c43fb2d151fc7928e5f7cb0df8e4c9eec6a6d3e8a5bd9cc",
-    "bytes": 19594
+    "path": "scripts/experiments/phase_c1/isolation.py",
+    "sha256": "cae93301babb0a725917e20f629ebe315e90e5df86decacb3b0c27f3c544fb04",
+    "bytes": 19602
    },
    {
-    "path": "src/aadistill/autoinit/c1_session.py",
-    "sha256": "c7acca1ede92e25b581c4befb58ea7c69ac425d2530e14eb67d701165be9f662",
-    "bytes": 13858
+    "path": "scripts/experiments/phase_c1/session.py",
+    "sha256": "c7077f67b29e0accb9e778c76c08c609111b888892bb59b6138775e92c1fe4cf",
+    "bytes": 13953
    },
    {
-    "path": "src/aadistill/autoinit/fixed_path.py",
-    "sha256": "35a1fae4beea29b38b5469c32c8f0abf97aaa5fdc0694d8ed58764ad7aeeb014",
-    "bytes": 34990
+    "path": "src/aadistill/initialization/operators/attention_activation.py",
+    "sha256": "b2ea83eefbc23b0472d7299669b019b0a34344c40b6a6c7e9694a5cd27b82d3a",
+    "bytes": 15490
    },
    {
-    "path": "src/aadistill/autoinit/operators/attention_activation.py",
-    "sha256": "45af4095a7035cffb2a92f0ef72d9cdc26a2df495c10433b3e51571b8d1490cc",
-    "bytes": 15174
+    "path": "src/aadistill/initialization/planning/fixed_path.py",
+    "sha256": "94698e18efcf7f17eebac3ea849a796615a3ac6fd4b12a1a4560c47dc3060d57",
+    "bytes": 35231
    },
    {
-    "path": "src/aadistill/init/attention_stats.py",
-    "sha256": "74d6df9c1bb1674342e2e67307bf50ce908d1cd947612aa29e17c5de917a43f5",
-    "bytes": 9927
+    "path": "src/aadistill/initialization/statistics/attention.py",
+    "sha256": "017ca640688a050e0266425b36e703efb2035121c02989a9708136c582b69da9",
+    "bytes": 9933
    }
   ],
   "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
  },
  "c1_harness": {
-  "digest": "6ac5120f7a5667a97a4f08653367f736f6b9db57fb5313d1352f925147797b14",
+  "schema": "aadistill.executable_closure/v1",
+  "_contract": "What a CURRENT session would execute, derived by walking import edges from the declared entry points, plus the non-python inputs that decide execution or authorization. Derived live from the tree at the moment it was computed. This is NOT a historical record and describes no completed run. AUTHORIZES NOTHING.",
+  "experiment_id": "phase_c1",
+  "entry_points": [
+   "scripts/pod/autoinit_c1_launch.py",
+   "scripts/pod/autoinit_c1_driver.py",
+   "scripts/experiments/phase_c1/authorization_payload.py",
+   "scripts/autoinit/issue_c1_authorization.py",
+   "scripts/pod/collect_artifacts.py"
+  ],
+  "declared_non_python_inputs": [
+   "scripts/pod/autoinit_preflight_setup.sh",
+   "configs/experiments/phase_c1/authorization.json",
+   "configs/autoinit/c1_artifacts.json",
+   "configs/autoinit/c1_artifacts_failed.json",
+   "logs/phase_c1_execution_preregistration.json"
+  ],
+  "source_roots": [
+   "src",
+   "scripts",
+   "scripts/pod",
+   "scripts/autoinit"
+  ],
+  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
+  "n_files": 90,
+  "digest": "d95bff7b89edf909d9389be7d0fff156a51330f75828c94d67b1772b6f4164d9",
+  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
     "path": "configs/autoinit/c1_artifacts.json",
@@ -64,54 +90,119 @@
     "bytes": 6412
    },
    {
+    "path": "configs/experiments/phase_c1/authorization.json",
+    "sha256": "63753b3cede0336b6d247b2b9f7635208d80d09ca6d8bdbba0304fa921d888d5",
+    "bytes": 3006
+   },
+   {
+    "path": "logs/phase_c1_execution_preregistration.json",
+    "sha256": "332151d8b732d605996daecb517113bea69b1074985b4bc0ece7a54bdfdd5717",
+    "bytes": 46434
+   },
+   {
     "path": "scripts/autoinit/audit_tool_scoring.py",
     "sha256": "5cf55651d826509648f9d040405017bb8958fb31b6e352a19b60ab22c0fd6f41",
     "bytes": 10252
    },
    {
+    "path": "scripts/autoinit/issue_c1_authorization.py",
+    "sha256": "b0123a320429a82a1d3d65afd550deeafe00b731b495956cc0b1c1247b68ab81",
+    "bytes": 6524
+   },
+   {
     "path": "scripts/autoinit/renderer_parity_gate.py",
-    "sha256": "6d0b242a3d23d471994fb738aa8d7c0ed1749c440c0f151833c6ce631bd7b26e",
-    "bytes": 6518
+    "sha256": "7d87ec76432694a8523678abc326e00ac7c2abf42bb0e01a40e4dd96e88671b8",
+    "bytes": 6564
    },
    {
     "path": "scripts/autoinit/score_c1_confirmation.py",
-    "sha256": "5bb1265b2033b6caf6fa9bfc794e2d5002840b1ed3d9d610fee17d7df9a6dad2",
-    "bytes": 14543
+    "sha256": "d617817ff9322e3ba4cc8407ec2451c80b7f3622305602c8a85518c9d22578f3",
+    "bytes": 14599
    },
    {
     "path": "scripts/autoinit/score_recovery_search.py",
-    "sha256": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
-    "bytes": 21518
+    "sha256": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b",
+    "bytes": 21533
    },
    {
-    "path": "scripts/autoinit/stage_c1_bundle.py",
-    "sha256": "ac74fca2f2c2851200c2d05df5c22225501fd596609a13bf14f3c525f388d404",
-    "bytes": 4591
-   },
-   {
-    "path": "scripts/data/battery_render.py",
-    "sha256": "20eea99fc20dbd8608b86f301960cfeef09388234634aa90a34cccdc1866e725",
-    "bytes": 15885
+    "path": "scripts/data/build_capability_battery.py",
+    "sha256": "a1d260e1963ea89c585c600847154297a137661b0da2d91341dc92704fcea0d0",
+    "bytes": 23553
    },
    {
     "path": "scripts/evaluation/uncapped_eval.py",
-    "sha256": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
-    "bytes": 28667
+    "sha256": "d0e49c4ac198212ae68911199ae302d90c6af5c8e343a66348cc2bd67e4ee45e",
+    "bytes": 28682
+   },
+   {
+    "path": "scripts/experiments/calibration.py",
+    "sha256": "371c51813f1d1a6871c7ae9c542fec03818dc016cec3d4417e0983b694684cd9",
+    "bytes": 3308
+   },
+   {
+    "path": "scripts/experiments/phase_a/plan.py",
+    "sha256": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b",
+    "bytes": 27736
+   },
+   {
+    "path": "scripts/experiments/phase_c1/__init__.py",
+    "sha256": "c1b21f798da24f20b2a09afdd95ab09bad53b6e350572482074741560e603da7",
+    "bytes": 80
+   },
+   {
+    "path": "scripts/experiments/phase_c1/authorization.py",
+    "sha256": "eeffc8c1994533330ecdbe1deb70c8cd5ff9c879f349bcd823c4c53abbb51b53",
+    "bytes": 24132
+   },
+   {
+    "path": "scripts/experiments/phase_c1/authorization_payload.py",
+    "sha256": "973c08f9a59cfc4c25f21c15a6703df3c1ef9448906939ead2e0ee058abf79d3",
+    "bytes": 11771
+   },
+   {
+    "path": "scripts/experiments/phase_c1/bundle.py",
+    "sha256": "7b159d818206cf5c12c8e6bde721f9532494218585cc5af5000585d1cf0794a0",
+    "bytes": 12983
+   },
+   {
+    "path": "scripts/experiments/phase_c1/isolation.py",
+    "sha256": "cae93301babb0a725917e20f629ebe315e90e5df86decacb3b0c27f3c544fb04",
+    "bytes": 19602
+   },
+   {
+    "path": "scripts/experiments/phase_c1/packaging.py",
+    "sha256": "eee453c2a57ede97bc6ab496059f6da5a031865f99299d3e45e73f71252e5847",
+    "bytes": 6154
+   },
+   {
+    "path": "scripts/experiments/phase_c1/probe_results.py",
+    "sha256": "4e0cba89c8ab092cae57c736ddb81146fef99dfa75fac88c217f65efdc092378",
+    "bytes": 14338
+   },
+   {
+    "path": "scripts/experiments/phase_c1/scoring.py",
+    "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+    "bytes": 12056
+   },
+   {
+    "path": "scripts/experiments/phase_c1/session.py",
+    "sha256": "c7077f67b29e0accb9e778c76c08c609111b888892bb59b6138775e92c1fe4cf",
+    "bytes": 13953
    },
    {
     "path": "scripts/pod/autoinit_c1_driver.py",
-    "sha256": "cb2adb26f072d314de5f8984ce86291c2e8d5369c5616711bcedd6633903e467",
-    "bytes": 61543
+    "sha256": "ab03f7b19965b4a182922d61ad1dfe9af56ca8efa5b95faac1da3bc8af349873",
+    "bytes": 61826
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "1df6dc91243cf32bf13a68a6c531f01818dc784fdc12e0af79c061b9769774fe",
-    "bytes": 50761
+    "sha256": "fb6266ae416908287d6fd79ed3256085b36bb4dafee5bd4c71282279ca5d02b9",
+    "bytes": 50787
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
-    "sha256": "97fef0e555a6adfa857b75bdf826b2cad9567a70038cf267acc62b6d5ab07a0f",
-    "bytes": 3920
+    "sha256": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38",
+    "bytes": 3935
    },
    {
     "path": "scripts/pod/autoinit_preflight_setup.sh",
@@ -120,28 +211,13 @@
    },
    {
     "path": "scripts/pod/autoinit_science_inputs.py",
-    "sha256": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
-    "bytes": 4002
+    "sha256": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e",
+    "bytes": 4020
    },
    {
     "path": "scripts/pod/collect_artifacts.py",
     "sha256": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c",
     "bytes": 8994
-   },
-   {
-    "path": "scripts/pod/cpu_test_env_args.py",
-    "sha256": "a8577c1eb3a306b3bba6cd175233548bced6d8279d105384155b290adef552d4",
-    "bytes": 1028
-   },
-   {
-    "path": "scripts/pod/start_job.py",
-    "sha256": "cfd9496b943dcfc83e0e2a8911abd048f1ee1514110676889cc163ce895f58ba",
-    "bytes": 3872
-   },
-   {
-    "path": "scripts/pod/summarize_pytest_outcomes.py",
-    "sha256": "e9aeb39cfe97512b5681ceb1ba053842e93ffce53afa8bc5b4ba64ea18dbd5c4",
-    "bytes": 6959
    },
    {
     "path": "scripts/pod/watchdog.py",
@@ -150,168 +226,23 @@
    },
    {
     "path": "scripts/training/train_stage3.py",
-    "sha256": "b23265cdae9196e1b192c531eaef37fc6a4d8605a6120344e6d3498176cdd72b",
-    "bytes": 15110
+    "sha256": "32ca0c9df4719e024dc091407745bab336ea79310c960f16a331ea0ba900b2ec",
+    "bytes": 15125
    },
    {
-    "path": "src/aadistill/autoinit/__init__.py",
-    "sha256": "f49a851b6d77c8fd9d184732acd0224fcb3ce8cc0f28fb19ba2f9e112c00ae1c",
-    "bytes": 4065
+    "path": "src/aadistill/data/dataset.py",
+    "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+    "bytes": 18533
    },
    {
-    "path": "src/aadistill/autoinit/adapters/qwen3.py",
-    "sha256": "dd36a77b0b5ec0969cf22ad66a7444d1ccee21b8e0cb956db16caa0999a41fc7",
-    "bytes": 9458
+    "path": "src/aadistill/data/extra_stream.py",
+    "sha256": "3f778021d307aa1859008299423c45b04fcf81f29c3462f9eb91dc279a98066c",
+    "bytes": 8110
    },
    {
-    "path": "src/aadistill/autoinit/arch.py",
-    "sha256": "5dddc9038e5c43c2fc5e6d8112c3a8f7b3b45c95bcf0e999cff2c52dd0b1fecd",
-    "bytes": 13214
-   },
-   {
-    "path": "src/aadistill/autoinit/artifact.py",
-    "sha256": "a35e9a36c1d0ca2e98c1a1e07175c1f9e68649b1ab9bf31adc6a8c23332b2a40",
-    "bytes": 8781
-   },
-   {
-    "path": "src/aadistill/autoinit/authorization.py",
-    "sha256": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-    "bytes": 13614
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_authorization.py",
-    "sha256": "89346808b0bb1e1ec748a41c6da63850ffe44921b7c24d9480c60dc9b820f0f9",
-    "bytes": 19493
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_bundle.py",
-    "sha256": "7b159d818206cf5c12c8e6bde721f9532494218585cc5af5000585d1cf0794a0",
-    "bytes": 12983
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_isolation.py",
-    "sha256": "46e8b097690b20171c43fb2d151fc7928e5f7cb0df8e4c9eec6a6d3e8a5bd9cc",
-    "bytes": 19594
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_packaging.py",
-    "sha256": "41035e193dd183223342d17a31c141292461610bdadd9bacb80b5f578aefd8d5",
-    "bytes": 6146
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_probe_results.py",
-    "sha256": "25d214ba92d58c7c2608c986eb9c23244eddb660e0e3226c61f120d15f6a7c68",
-    "bytes": 14330
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_scoring.py",
-    "sha256": "9528dbd7ce24964f6ae7645cb0cd928076bb22a9c34b60b3c2839f01dbb90dfa",
-    "bytes": 12030
-   },
-   {
-    "path": "src/aadistill/autoinit/c1_session.py",
-    "sha256": "c7acca1ede92e25b581c4befb58ea7c69ac425d2530e14eb67d701165be9f662",
-    "bytes": 13858
-   },
-   {
-    "path": "src/aadistill/autoinit/calibration.py",
-    "sha256": "cd4ec4bb0288d5f26b464abfdec2d8c150864de898b8a9f83d189a8e35d8ec21",
-    "bytes": 21304
-   },
-   {
-    "path": "src/aadistill/autoinit/calibration_items.py",
-    "sha256": "8a4d38bbdd7067cc69c9b90863afaf9f7c199b9f23d86f9c05ddbf33dedeb675",
-    "bytes": 7576
-   },
-   {
-    "path": "src/aadistill/autoinit/cpu_test_env.py",
-    "sha256": "e05cff79deb2cc0d9247e593ce420c27423b5eb9638e5d57f82a2394597865b2",
-    "bytes": 7885
-   },
-   {
-    "path": "src/aadistill/autoinit/device.py",
-    "sha256": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
-    "bytes": 12044
-   },
-   {
-    "path": "src/aadistill/autoinit/device_handoff.py",
-    "sha256": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
-    "bytes": 9993
-   },
-   {
-    "path": "src/aadistill/autoinit/fixed_path.py",
-    "sha256": "35a1fae4beea29b38b5469c32c8f0abf97aaa5fdc0694d8ed58764ad7aeeb014",
-    "bytes": 34990
-   },
-   {
-    "path": "src/aadistill/autoinit/generation.py",
-    "sha256": "24cf6e3d5dd897e6ab0c3213e83f9a218a21c47052e6fe0cfc48cbda8762cc91",
-    "bytes": 27714
-   },
-   {
-    "path": "src/aadistill/autoinit/metrics.py",
-    "sha256": "8a199452ad21b56171a8aa5aa78d88926a18ab0221d3f072ba46c7c589ebbe7f",
-    "bytes": 21023
-   },
-   {
-    "path": "src/aadistill/autoinit/operators/__init__.py",
-    "sha256": "27b9707650416f7694c1b14bd83935de18fa0e3434c6cdeefb24724195f645c2",
-    "bytes": 2502
-   },
-   {
-    "path": "src/aadistill/autoinit/operators/_common.py",
-    "sha256": "362418c6b5d2a7730b7b5308f5d43d7c0a6ec8f402040f1f1eaa8bd22b82b7c1",
-    "bytes": 6280
-   },
-   {
-    "path": "src/aadistill/autoinit/operators/attention.py",
-    "sha256": "55beca67a349fe579d7bdb33f21cf19fd18f3de93ccda33223297960cc67c6ef",
-    "bytes": 6240
-   },
-   {
-    "path": "src/aadistill/autoinit/operators/attention_activation.py",
-    "sha256": "45af4095a7035cffb2a92f0ef72d9cdc26a2df495c10433b3e51571b8d1490cc",
-    "bytes": 15174
-   },
-   {
-    "path": "src/aadistill/autoinit/operators/base.py",
-    "sha256": "3cb0ee88495166cb7324a951ac3ec6a1e8e5bb01811fd2368812b437ee13417c",
-    "bytes": 19488
-   },
-   {
-    "path": "src/aadistill/autoinit/operators/depth.py",
-    "sha256": "345b530289a0a0a13d756d9e8f14ef07c504bf80ac886a5e968044cd506f9a1c",
-    "bytes": 26883
-   },
-   {
-    "path": "src/aadistill/autoinit/operators/ffn.py",
-    "sha256": "d8e0b35e5d9fef785f5e740e1e489d4f4799353fb19cefe30a946ab6d7323bfe",
-    "bytes": 5810
-   },
-   {
-    "path": "src/aadistill/autoinit/operators/width.py",
-    "sha256": "e4e18bb3246520b3ccf09296bc2d137807b4507fb1843c0c7bbc9d32889230b0",
-    "bytes": 7920
-   },
-   {
-    "path": "src/aadistill/autoinit/pod_environment.py",
-    "sha256": "88ca930ecddbbb43c23f6bad2e207995439c42109a28299d9259644afa9e917a",
-    "bytes": 34097
-   },
-   {
-    "path": "src/aadistill/autoinit/recovery.py",
-    "sha256": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
-    "bytes": 102452
-   },
-   {
-    "path": "src/aadistill/autoinit/staging_contract.py",
-    "sha256": "cc5bc68e1919315229033adae6b934fe952aed4325b37d42bad2df9aafdcfad7",
-    "bytes": 11018
-   },
-   {
-    "path": "src/aadistill/autoinit/stats.py",
-    "sha256": "0cd11ececab0bda49174c7b05107a47faf43267338af53fcf476034d29434b59",
-    "bytes": 4827
+    "path": "src/aadistill/data/ladder.py",
+    "sha256": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca",
+    "bytes": 7055
    },
    {
     "path": "src/aadistill/data/tools.py",
@@ -322,6 +253,11 @@
     "path": "src/aadistill/data/verify.py",
     "sha256": "1860b77f93ac78ad8d50c014f596cb23696a98cc666d7aa6fe359ed0dc718af1",
     "bytes": 7567
+   },
+   {
+    "path": "src/aadistill/evaluation/__init__.py",
+    "sha256": "ef0d31ab3f8eb1e7c98749f9015b6ed4c7d0aa8164bf9885a64e9ee9aad6ff9e",
+    "bytes": 27
    },
    {
     "path": "src/aadistill/evaluation/behavior.py",
@@ -349,6 +285,21 @@
     "bytes": 6155
    },
    {
+    "path": "src/aadistill/governance/authorization.py",
+    "sha256": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694",
+    "bytes": 13639
+   },
+   {
+    "path": "src/aadistill/governance/closure.py",
+    "sha256": "2f352c785b4f5076f6290d8ff04c75b87016eef8dfdd4b2ce9ec7d607532bc8c",
+    "bytes": 12492
+   },
+   {
+    "path": "src/aadistill/governance/grant.py",
+    "sha256": "bb0514dc1b91d1b65975a978e2bdaf9458938c8bca07c9fc0ca2646a457df07b",
+    "bytes": 4787
+   },
+   {
     "path": "src/aadistill/infrastructure/artifact_gate.py",
     "sha256": "22332ab2b23c0b47513374075086def3aabc61a038e149d9dda7f768b48f173b",
     "bytes": 25387
@@ -359,6 +310,16 @@
     "bytes": 12037
    },
    {
+    "path": "src/aadistill/infrastructure/env.py",
+    "sha256": "28af5663171568aa8e74d02556084e2932a6b8cc6e7f94f5e3cd0f58b3142be8",
+    "bytes": 4368
+   },
+   {
+    "path": "src/aadistill/infrastructure/log_relay.py",
+    "sha256": "a418c92223b83ea067343c34c84a7f7b3b65856cdff92616db3eb820a62d449f",
+    "bytes": 7320
+   },
+   {
     "path": "src/aadistill/infrastructure/manifest.py",
     "sha256": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2",
     "bytes": 897
@@ -367,6 +328,11 @@
     "path": "src/aadistill/infrastructure/provider.py",
     "sha256": "ab640477b99efd179896d4a0ad934804757867eaac22742c96e8752129a87e3e",
     "bytes": 15733
+   },
+   {
+    "path": "src/aadistill/infrastructure/remote.py",
+    "sha256": "3db055894e523ef9c13d39329c8cd24b2070d4b8ec43180700c2dea921e21bf9",
+    "bytes": 13428
    },
    {
     "path": "src/aadistill/infrastructure/session.py",
@@ -380,33 +346,148 @@
    },
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
-    "sha256": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
-    "bytes": 50410
+    "sha256": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33",
+    "bytes": 50420
    },
    {
-    "path": "src/aadistill/init/attention_stats.py",
-    "sha256": "74d6df9c1bb1674342e2e67307bf50ce908d1cd947612aa29e17c5de917a43f5",
-    "bytes": 9927
+    "path": "src/aadistill/infrastructure/watchdog.py",
+    "sha256": "e05860e9a9215c5bc6cae223e7f3c160a636eacd6925b3074b5fb209a087ba5f",
+    "bytes": 14145
    },
    {
-    "path": "src/aadistill/init/collect.py",
-    "sha256": "fa3ff8f1a5064e363c15bc33cb95e570efbce4486cc71d5b878550968259587d",
-    "bytes": 7666
+    "path": "src/aadistill/initialization/adapters/qwen3.py",
+    "sha256": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa",
+    "bytes": 10240
    },
    {
-    "path": "src/aadistill/init/contribution.py",
+    "path": "src/aadistill/initialization/calibration/datasets.py",
+    "sha256": "586781a762f1f2417d2ac6a9d95653c0045db69d32a9ca3e165b68c116980352",
+    "bytes": 13876
+   },
+   {
+    "path": "src/aadistill/initialization/calibration/items.py",
+    "sha256": "8a4d38bbdd7067cc69c9b90863afaf9f7c199b9f23d86f9c05ddbf33dedeb675",
+    "bytes": 7576
+   },
+   {
+    "path": "src/aadistill/initialization/calibration/profiles.py",
+    "sha256": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7",
+    "bytes": 15612
+   },
+   {
+    "path": "src/aadistill/initialization/device.py",
+    "sha256": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
+    "bytes": 12044
+   },
+   {
+    "path": "src/aadistill/initialization/operators/__init__.py",
+    "sha256": "5ce3022e198eb31e95924e6210abe9bedb6f3f27e37e580fb45ff1fe4017f4e1",
+    "bytes": 2785
+   },
+   {
+    "path": "src/aadistill/initialization/operators/_common.py",
+    "sha256": "d065241b735b0193817caadf97f94ab16bbfa3f624ecf123915041fc9a15615b",
+    "bytes": 6309
+   },
+   {
+    "path": "src/aadistill/initialization/operators/attention.py",
+    "sha256": "ec26b991ee0983ee8e7a681d90ba53d390539ba4e1202f14c460d4758e2908af",
+    "bytes": 6464
+   },
+   {
+    "path": "src/aadistill/initialization/operators/attention_activation.py",
+    "sha256": "b2ea83eefbc23b0472d7299669b019b0a34344c40b6a6c7e9694a5cd27b82d3a",
+    "bytes": 15490
+   },
+   {
+    "path": "src/aadistill/initialization/operators/base.py",
+    "sha256": "c37f4c58e8ae5f149c0b9cefd1b4faae563590fa4017d05c14fcbc650f48d6cd",
+    "bytes": 19455
+   },
+   {
+    "path": "src/aadistill/initialization/operators/composite.py",
+    "sha256": "da2a0e5b86ecf347fdf7941cdd4dd5c49e6d5eaa5fbb3733243d55ac7ceed0aa",
+    "bytes": 8616
+   },
+   {
+    "path": "src/aadistill/initialization/operators/depth.py",
+    "sha256": "f5306c9af40ab5ce2dcfaf26c42a90099d1fd44ee926a425351a549653c0ccec",
+    "bytes": 27175
+   },
+   {
+    "path": "src/aadistill/initialization/operators/ffn.py",
+    "sha256": "67ac31fbec0dc5b6520ccf5182576793df151db801f5cd5a80bc81ebbcdfbcc4",
+    "bytes": 6057
+   },
+   {
+    "path": "src/aadistill/initialization/operators/width.py",
+    "sha256": "efbb5cba7840c5099df09384670a8e4436c6a92def10d7443821ae551cba147c",
+    "bytes": 8221
+   },
+   {
+    "path": "src/aadistill/initialization/planning/fixed_path.py",
+    "sha256": "94698e18efcf7f17eebac3ea849a796615a3ac6fd4b12a1a4560c47dc3060d57",
+    "bytes": 35231
+   },
+   {
+    "path": "src/aadistill/initialization/planning/generation.py",
+    "sha256": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc",
+    "bytes": 27755
+   },
+   {
+    "path": "src/aadistill/initialization/planning/recovery.py",
+    "sha256": "8f687483a18a615bf570fcfd38d51a4ae8f070073edf3eee3640ac8beed8f7c5",
+    "bytes": 104685
+   },
+   {
+    "path": "src/aadistill/initialization/specs/arch.py",
+    "sha256": "92bc5c45cd8b50f05a83aad172cc11d15d4bb57f8cb67f1615214d301a18c078",
+    "bytes": 15402
+   },
+   {
+    "path": "src/aadistill/initialization/specs/artifact.py",
+    "sha256": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9",
+    "bytes": 8819
+   },
+   {
+    "path": "src/aadistill/initialization/specs/metrics.py",
+    "sha256": "994db46abe61f9912344b64bccc411a9f59be5b4a6a11f49fa9e7f38f7c65fb2",
+    "bytes": 10860
+   },
+   {
+    "path": "src/aadistill/initialization/specs/state.py",
+    "sha256": "fa8289755d8ad0fe64628caa5ea3ca315f7b8eb0416860e2f6bd86b7b70df498",
+    "bytes": 22041
+   },
+   {
+    "path": "src/aadistill/initialization/statistics/attention.py",
+    "sha256": "017ca640688a050e0266425b36e703efb2035121c02989a9708136c582b69da9",
+    "bytes": 9933
+   },
+   {
+    "path": "src/aadistill/initialization/statistics/collect.py",
+    "sha256": "0ee4f8ee7fed72cd849dea7767262d4cadd711c0b774edbe43ec2aa2adc15f21",
+    "bytes": 7672
+   },
+   {
+    "path": "src/aadistill/initialization/statistics/contribution.py",
     "sha256": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565",
     "bytes": 14573
    },
    {
-    "path": "src/aadistill/init/project.py",
+    "path": "src/aadistill/initialization/statistics/spec.py",
+    "sha256": "951c4da15063de8d9193896a8b045efee9e175a1cab349dc4cc833c6d268bdda",
+    "bytes": 4835
+   },
+   {
+    "path": "src/aadistill/initialization/transforms/project.py",
     "sha256": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36",
     "bytes": 6277
    },
    {
-    "path": "src/aadistill/init/sandwich.py",
-    "sha256": "c6e05bcaf55f0e0219e4f1d2bab044f0d13ed09d24cba0d126f865869b784bc3",
-    "bytes": 14210
+    "path": "src/aadistill/initialization/transforms/sandwich.py",
+    "sha256": "8ccd3771166166e3b332b15ab09eb9894651d2d3b38b5c405ac67c8d098e2f95",
+    "bytes": 14268
    },
    {
     "path": "src/aadistill/models/student.py",
@@ -417,15 +498,44 @@
     "path": "src/aadistill/models/teacher.py",
     "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
     "bytes": 3567
+   },
+   {
+    "path": "src/aadistill/models/tokenizer_contract.py",
+    "sha256": "dc6a3664149ae0b6613d974424c74642db56f623aca9aaeeb4a5cf41d5c51e2b",
+    "bytes": 6933
+   },
+   {
+    "path": "src/aadistill/runtime/device_handoff.py",
+    "sha256": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
+    "bytes": 9993
+   },
+   {
+    "path": "src/aadistill/runtime/pod_environment.py",
+    "sha256": "4036aeef7e65793f6d6bd8edbc262532749a54d2ed8cc593680db3d0d1e43b85",
+    "bytes": 34732
+   },
+   {
+    "path": "src/aadistill/runtime/staging_contract.py",
+    "sha256": "cc5bc68e1919315229033adae6b934fe952aed4325b37d42bad2df9aafdcfad7",
+    "bytes": 11018
+   },
+   {
+    "path": "src/aadistill/training/lora.py",
+    "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+    "bytes": 10657
+   },
+   {
+    "path": "src/aadistill/training/train.py",
+    "sha256": "4d409b161b244ab5cc388f1615a87de5ce7481c3a2a3e8349b78822878508313",
+    "bytes": 62990
    }
   ],
-  "n_files": 73,
-  "rule": "sha256 over sorted 'path:sha256' lines of the declared set",
+  "authorizes": "nothing",
   "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
  },
  "authorization": {
   "schema": "aadistill.autoinit.c1_authorization/v1",
-  "type": "aadistill.autoinit.c1_authorization.C1Authorization",
+  "type": "experiments.phase_c1.authorization.C1Authorization",
   "session_kind": "c1",
   "allows_phase_a": false,
   "allows_beam_search": false,
@@ -674,7 +784,7 @@
   "contract": "c1_confirmation_scoring@v1",
   "contract_id": "c1_confirmation_scoring",
   "version": 1,
-  "digest": "77507935f21f83ebf77fb35aa52256b26e89b623b3622563f63c4296efd44d2b",
+  "digest": "eeb9fd4a6c0f1f0cca5e9a6ef97f0a526f8dd3a6c2e8a8851fcdfcd68976c651",
   "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
   "semantic_parent": "recovery_search_scoring@v2",
   "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
@@ -685,14 +795,14 @@
    "scripts/autoinit/audit_tool_scoring.py",
    "scripts/autoinit/score_c1_confirmation.py",
    "scripts/autoinit/score_recovery_search.py",
-   "src/aadistill/autoinit/c1_scoring.py",
-   "src/aadistill/autoinit/recovery.py",
+   "scripts/experiments/phase_c1/scoring.py",
    "src/aadistill/data/tools.py",
    "src/aadistill/data/verify.py",
    "src/aadistill/evaluation/behavior.py",
    "src/aadistill/evaluation/capability.py",
    "src/aadistill/evaluation/strict_answer.py",
-   "src/aadistill/evaluation/usable_rollout.py"
+   "src/aadistill/evaluation/usable_rollout.py",
+   "src/aadistill/initialization/planning/recovery.py"
   ],
   "metric_contract": {
    "contract": "c1_confirmation_scoring@v1",
@@ -932,5 +1042,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "1618c57a83b1a2d949a49fe2c66fd748c0a629bf14f8c8453890a70718948f02"
+ "preregistration_sha256": "7a569a8a7a0afa4f99630554fe7f5b11cfadddbc0c85f7f28acd217ce39afff1"
 }
