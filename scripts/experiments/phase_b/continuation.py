@@ -463,6 +463,15 @@ CONTINUATION_SOURCE_FILES_V2: tuple[str, ...] = (
     "src/aadistill/initialization/calibration/datasets.py",
     "src/aadistill/initialization/calibration/profiles.py",
     "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite.py",
+    "src/aadistill/initialization/operators/depth.py",
+    "src/aadistill/initialization/operators/ffn.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width.py",
     "src/aadistill/initialization/planning/__init__.py",
     "src/aadistill/initialization/planning/generation.py",
     "src/aadistill/initialization/planning/generation_compat.py",
@@ -475,6 +484,10 @@ CONTINUATION_SOURCE_FILES_V2: tuple[str, ...] = (
     "src/aadistill/initialization/specs/state.py",
     "src/aadistill/initialization/statistics/__init__.py",
     "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/transforms/__init__.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
     "src/aadistill/runtime/__init__.py",
     "src/aadistill/runtime/device_handoff.py",
     "src/aadistill/runtime/leaf_durability.py",
@@ -490,7 +503,7 @@ CONTINUATION_SOURCE_FILES_V2: tuple[str, ...] = (
 #:
 #: This is an executable/provenance identity only. No scientific protocol is
 #: versioned by it.
-CONTINUATION_SOURCE_SET_VERSION = 4
+CONTINUATION_SOURCE_SET_VERSION = 5
 CONTINUATION_SOURCE_DIGEST_ALGORITHM = CANONICAL_DIGEST_ALGORITHM
 
 

@@ -1133,7 +1133,7 @@ def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
     # the package __init__ files it does load joined it. A literal here is the
     # guard against an ACCIDENTAL change, so a deliberate one updates it in the
     # same commit.
-    assert observed["set_version"] == 4
+    assert observed["set_version"] == 5
     assert observed["algorithm"] == "sha256-over-sorted-path-colon-sha256-lines/v1"
 
 

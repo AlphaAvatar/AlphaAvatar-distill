@@ -57,7 +57,7 @@ def test_the_frozen_assets_are_untouched():
     contract = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v3"
     assert contract["digest"] == (
-        "f88ce7780f24aee6e825275334356f4d2fd3d151e0c9e28164a4605c04419f6f")
+        "b63e1cd9d4ec9e77d27cd4d9366ad7258f33fa71ad2f59dcad2c1c2af82a8883")
     manifest, manifest_sha = C1S.battery_manifest(C1_BATTERY)
     assert manifest_sha == C1_BATTERY_MANIFEST_SHA256
     assert manifest["content_sha256"] == C1_BATTERY_CONTENT_SHA256

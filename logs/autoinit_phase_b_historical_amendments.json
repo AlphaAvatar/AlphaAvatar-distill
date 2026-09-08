@@ -71,12 +71,12 @@
   {
    "amendment_id": "PHB-HA-002",
    "schema_version": 1,
-   "recorded_utc": "2026-09-08T13:30:08+00:00",
+   "recorded_utc": "2026-09-08T16:36:44+00:00",
    "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
-   "source_repair_commit": "ae68c3fa8682356f43484099bd91d56ad75dcdf7",
+   "source_repair_commit": "6cd3fa0e970f19d14b80948ad72b61a6efa08ffc",
    "source_repair_parent": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
    "previous_live_digest": "372c1f2438ad0b1698a2ceacbfa4e76acbb9147e38e735bc4d0152c6f894bbc3",
-   "new_live_digest": "1ae2f53d92ee143456d570961f8501bfeb9ba6b3e2b1b0dd529adc08ec3e608a",
+   "new_live_digest": "a1f80f3ad53b49c338e0563b64ecaf36c720254141676916f19c407e2e7677a5",
    "changed_files": [
     "scripts/autoinit/load_state_eval.py",
     "scripts/autoinit/phase_a_search.py",
@@ -94,6 +94,7 @@
     "scripts/pod/autoinit_preflight_setup.sh",
     "scripts/pod/autoinit_science_inputs.py",
     "src/aadistill/governance/authorization.py",
+    "src/aadistill/infrastructure/session.py",
     "src/aadistill/infrastructure/session_prechecks.py",
     "src/aadistill/infrastructure/session_runner.py",
     "src/aadistill/initialization/adapters/__init__.py",
@@ -144,6 +145,7 @@
     "scripts/pod/autoinit_preflight_setup.sh": "e19ed3d811a04e6c0bc365593e62276b40ef9872eba352b52123f852e6302f68",
     "scripts/pod/autoinit_science_inputs.py": "474ba7b82f3141955ca8c6d06a15019eae8ee6776fb4f47e18aa5218b20dbbca",
     "src/aadistill/governance/authorization.py": null,
+    "src/aadistill/infrastructure/session.py": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
     "src/aadistill/infrastructure/session_prechecks.py": "e2f1f8022e39ddec0769737587276807af594e265ee6962108bd87722f11ac96",
     "src/aadistill/infrastructure/session_runner.py": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
     "src/aadistill/initialization/adapters/__init__.py": null,
@@ -179,62 +181,63 @@
    },
    "file_sha256_after": {
     "scripts/autoinit/load_state_eval.py": "5e276bfcfcbf62acc03e06ed137f544a3551a68e9153ee7e5e3712980eb5a0a0",
-    "scripts/autoinit/phase_a_search.py": "594121996ec6bc8679646e8545dd037558be263a5245a27a765e520fed4ab0f5",
+    "scripts/autoinit/phase_a_search.py": "2e23d44d0a9474263d1cf7fb47c68907a1dda43b090bf80556833eed3797b5a5",
     "scripts/autoinit/price_phase_b.py": "7e013552818bc2c9979d74a559b3ac1e36391025780d92d1aa614b54a88bc310",
     "scripts/autoinit/verify_frozen_assets.py": "0c39aea1c8b91e0af939d6a4ab8b4f903dff0b56353d02ce2fadeb7407508583",
     "scripts/autoinit/verify_historical_probe_reuse.py": "cfc7ef1f234e731a3ee7d25f9833829019543413114d9b73663ccc91e26b032d",
-    "scripts/autoinit/write_preregistration.py": "af54385682b7ee2f827f32fb7c5397006a5e35608e408f3aa311893b2d783b7c",
+    "scripts/autoinit/write_preregistration.py": "0fa2d8d1e799bdc3e0f1653b7205b4e36cb2acc277cf711f5d64b6fae5b56d73",
     "scripts/experiments/phase_a/plan.py": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b",
     "scripts/experiments/phase_b/plan.py": "65c71f785552caa05b95460fd04ba89d666ede4eef187c40d802642d4bccfe8d",
     "scripts/pod/autoinit_engine_probe.py": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38",
-    "scripts/pod/autoinit_phase_a_driver.py": "c830fcb227e32ac59da3dd8c23c73754e7765989b9cd8af9db39039785e01eb9",
-    "scripts/pod/autoinit_phase_a_launch.py": "7edddabcb2eaeb834bc690f3e7c538e1ad702d41dddb24f4a1e4a7542c533ccd",
-    "scripts/pod/autoinit_phase_b_driver.py": "31af23861a3be5faa731d9b6ddc4883b91a0b59ef919e641cdc2c7089c748993",
+    "scripts/pod/autoinit_phase_a_driver.py": "fcbd3f5a0a429e8d638c2486d18f66c55b66e7f965105cec1da59a52b816853f",
+    "scripts/pod/autoinit_phase_a_launch.py": "54d8363e35f5ca79ae9b66400a05e33f0a94aa37b2d8aeebc059b78f219a5181",
+    "scripts/pod/autoinit_phase_b_driver.py": "f253d261e9e388c5b7c0bd18115598e7a3d811e19dc3206a5cf4b819b4cbae9a",
     "scripts/pod/autoinit_phase_b_launch.py": "dfc5f4f67c2e3b443f5606d721ec52c3ba617e6cf07fffec46c8f62a8290830c",
     "scripts/pod/autoinit_preflight_setup.sh": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778",
     "scripts/pod/autoinit_science_inputs.py": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e",
-    "src/aadistill/governance/authorization.py": "746b9233f7d52c8eea3eb195a5bc9c635ea86e463778545634cdc6eebfe81694",
+    "src/aadistill/governance/authorization.py": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b",
+    "src/aadistill/infrastructure/session.py": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386",
     "src/aadistill/infrastructure/session_prechecks.py": "1a6efcfd9fdbc122781a6879eb8251431952ddd8f5165a7fc60994b93021c159",
-    "src/aadistill/infrastructure/session_runner.py": "cb6d9b2b65978b447fa3ac8ae8c3b7a50ea3f74c658d060bb5079f072ec49f33",
+    "src/aadistill/infrastructure/session_runner.py": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50",
     "src/aadistill/initialization/adapters/__init__.py": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5",
-    "src/aadistill/initialization/adapters/qwen3.py": "b5d749d20eb1c652df2c5c355cb0a9778fbcc2bcb5f979b45e3c5b799c8fa5aa",
-    "src/aadistill/initialization/calibration/datasets.py": "586781a762f1f2417d2ac6a9d95653c0045db69d32a9ca3e165b68c116980352",
+    "src/aadistill/initialization/adapters/qwen3.py": "2e247cd8f59f2003aa4fec5fda5a90ae825373d6f2a845b8c711a11dd2e8fd4c",
+    "src/aadistill/initialization/calibration/datasets.py": "d28922994a4e790d5442817a0466ab0ea0e289e6bec20c88d9dd5957ad5ab149",
     "src/aadistill/initialization/calibration/profiles.py": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7",
     "src/aadistill/initialization/device.py": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
-    "src/aadistill/initialization/operators/__init__.py": "5ce3022e198eb31e95924e6210abe9bedb6f3f27e37e580fb45ff1fe4017f4e1",
+    "src/aadistill/initialization/operators/__init__.py": "489552813827388c121c3c7c0d3b032cd7a2abe172af8aaa8096c82b7b11c819",
     "src/aadistill/initialization/operators/_common.py": "d065241b735b0193817caadf97f94ab16bbfa3f624ecf123915041fc9a15615b",
-    "src/aadistill/initialization/operators/attention.py": "ec26b991ee0983ee8e7a681d90ba53d390539ba4e1202f14c460d4758e2908af",
+    "src/aadistill/initialization/operators/attention.py": "5e3d3e17b3e001f027271ffd06392bf044411a4d2387b1f209a79018d0704a84",
     "src/aadistill/initialization/operators/base.py": "c37f4c58e8ae5f149c0b9cefd1b4faae563590fa4017d05c14fcbc650f48d6cd",
-    "src/aadistill/initialization/operators/composite.py": "da2a0e5b86ecf347fdf7941cdd4dd5c49e6d5eaa5fbb3733243d55ac7ceed0aa",
-    "src/aadistill/initialization/operators/depth.py": "f5306c9af40ab5ce2dcfaf26c42a90099d1fd44ee926a425351a549653c0ccec",
-    "src/aadistill/initialization/operators/ffn.py": "67ac31fbec0dc5b6520ccf5182576793df151db801f5cd5a80bc81ebbcdfbcc4",
-    "src/aadistill/initialization/operators/width.py": "efbb5cba7840c5099df09384670a8e4436c6a92def10d7443821ae551cba147c",
+    "src/aadistill/initialization/operators/composite.py": "4bc00f6739ca644a3db7cccfb5dae7a1790d1d2b6df95a64f98a32eca20e6e68",
+    "src/aadistill/initialization/operators/depth.py": "ecffe2e537b2f998d682edd22459c10309474e8554e8c361e602751c275e70d1",
+    "src/aadistill/initialization/operators/ffn.py": "89d2e5ecb5c5331cac17002d0f13f966629466a3a38d662680fb34faa83798ba",
+    "src/aadistill/initialization/operators/width.py": "9790b60fa9cf12dbd52565b3e6c5380985694aa43277b245db41f9a614744647",
     "src/aadistill/initialization/planning/generation.py": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc",
     "src/aadistill/initialization/planning/generation_compat.py": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0",
     "src/aadistill/initialization/planning/metrics.py": "a6dd5d5641ac158266c379fd604dae2e4ff5f4d70599f9597da014ce212b5add",
     "src/aadistill/initialization/planning/ranking.py": "33df4e53f74da0c301aaa8228ab43e3ea2ca4ae57ef59ddcd7e0631bd5c94a20",
     "src/aadistill/initialization/planning/search.py": "a02fa31f1b2764184c052fad3f00189768b7f041ffb63c92deb7e4d7ed29e498",
     "src/aadistill/initialization/planning/stage1_selection.py": "178b3c486750faca2cdf387315c9b5bd885b79a404980edd7f93990f4eadbfc8",
-    "src/aadistill/initialization/specs/arch.py": "92bc5c45cd8b50f05a83aad172cc11d15d4bb57f8cb67f1615214d301a18c078",
+    "src/aadistill/initialization/specs/arch.py": "52d8224d96740b599006a7995cd629eb8d531dac1db81a37a6a2cdfba7851f5f",
     "src/aadistill/initialization/specs/artifact.py": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9",
     "src/aadistill/initialization/specs/identity_collapse.py": "823bb9784c77d8364dd1f197cc2b5bf26254773c1d60563f86191b4730978583",
     "src/aadistill/initialization/specs/state.py": "fa8289755d8ad0fe64628caa5ea3ca315f7b8eb0416860e2f6bd86b7b70df498",
-    "src/aadistill/initialization/statistics/contribution.py": "6cd138cd9e4ccca133fcff99b908859e0762f2141623a39b84cdf7d59cd24565",
+    "src/aadistill/initialization/statistics/contribution.py": "984a4ed3a277e26c5c50d8f75ca5319049d7b8b219726bc705f1bc176b3f29c3",
     "src/aadistill/initialization/statistics/spec.py": "951c4da15063de8d9193896a8b045efee9e175a1cab349dc4cc833c6d268bdda",
     "src/aadistill/initialization/transforms/project.py": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36",
-    "src/aadistill/initialization/transforms/sandwich.py": "8ccd3771166166e3b332b15ab09eb9894651d2d3b38b5c405ac67c8d098e2f95",
+    "src/aadistill/initialization/transforms/sandwich.py": "ac7af66a466d5b0ca059b0a290e290756b30b2de64ad4202530a8566ce84074f",
     "src/aadistill/runtime/cost.py": "9cdecf509df78968f043a720e32a033239dd66285124b8ffd335ee045aa617b6",
     "src/aadistill/runtime/device_handoff.py": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
     "src/aadistill/runtime/leaf_durability.py": "024967267f9ededb651437d7b660395c642a191c09d8dd1e8a3bf6946214a017"
    },
-   "patch_sha256": "e431d0880afecd451353050ef05aed9c8f6db451ebdd8899697fa5554d5edb46",
+   "patch_sha256": "7aa6dfd49aae5d7ce6b9ae1e944f321d5dae6acd6e4ae8e1250073db46ab4687",
    "numstat": {
     "scripts/autoinit/load_state_eval.py": [
      1,
      1
     ],
     "scripts/autoinit/phase_a_search.py": [
-     17,
+     21,
      10
     ],
     "scripts/autoinit/price_phase_b.py": [
@@ -250,8 +253,8 @@
      4
     ],
     "scripts/autoinit/write_preregistration.py": [
-     14,
-     6
+     15,
+     7
     ],
     "scripts/experiments/phase_a/plan.py": [
      528,
@@ -266,15 +269,15 @@
      1
     ],
     "scripts/pod/autoinit_phase_a_driver.py": [
-     47,
+     51,
      19
     ],
     "scripts/pod/autoinit_phase_a_launch.py": [
-     7,
+     11,
      6
     ],
     "scripts/pod/autoinit_phase_b_driver.py": [
-     4,
+     8,
      8
     ],
     "scripts/pod/autoinit_phase_b_launch.py": [
@@ -290,27 +293,31 @@
      1
     ],
     "src/aadistill/governance/authorization.py": [
-     278,
+     273,
      0
+    ],
+    "src/aadistill/infrastructure/session.py": [
+     20,
+     1
     ],
     "src/aadistill/infrastructure/session_prechecks.py": [
      18,
      0
     ],
     "src/aadistill/infrastructure/session_runner.py": [
-     1,
-     1
+     31,
+     4
     ],
     "src/aadistill/initialization/adapters/__init__.py": [
      60,
      0
     ],
     "src/aadistill/initialization/adapters/qwen3.py": [
-     241,
+     246,
      0
     ],
     "src/aadistill/initialization/calibration/datasets.py": [
-     339,
+     333,
      0
     ],
     "src/aadistill/initialization/calibration/profiles.py": [
@@ -322,7 +329,7 @@
      0
     ],
     "src/aadistill/initialization/operators/__init__.py": [
-     74,
+     79,
      0
     ],
     "src/aadistill/initialization/operators/_common.py": [
@@ -330,7 +337,7 @@
      0
     ],
     "src/aadistill/initialization/operators/attention.py": [
-     148,
+     155,
      0
     ],
     "src/aadistill/initialization/operators/base.py": [
@@ -338,19 +345,19 @@
      0
     ],
     "src/aadistill/initialization/operators/composite.py": [
-     179,
+     182,
      0
     ],
     "src/aadistill/initialization/operators/depth.py": [
-     552,
+     555,
      0
     ],
     "src/aadistill/initialization/operators/ffn.py": [
-     138,
+     143,
      0
     ],
     "src/aadistill/initialization/operators/width.py": [
-     167,
+     170,
      0
     ],
     "src/aadistill/initialization/planning/generation.py": [
@@ -378,7 +385,7 @@
      0
     ],
     "src/aadistill/initialization/specs/arch.py": [
-     372,
+     390,
      0
     ],
     "src/aadistill/initialization/specs/artifact.py": [
@@ -394,7 +401,7 @@
      0
     ],
     "src/aadistill/initialization/statistics/contribution.py": [
-     343,
+     366,
      0
     ],
     "src/aadistill/initialization/statistics/spec.py": [
@@ -406,7 +413,7 @@
      0
     ],
     "src/aadistill/initialization/transforms/sandwich.py": [
-     302,
+     324,
      0
     ],
     "src/aadistill/runtime/cost.py": [
@@ -424,7 +431,7 @@
    },
    "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
    "additive_only": false,
-   "lines_removed": 94,
+   "lines_removed": 99,
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "phase_b_science_changed": false,
@@ -448,7 +455,7 @@
     "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
-   "entry_sha256": "d9fc34a463bdc0f745206e9f0d3ba0d581a76bd270e5379fbd89159b9d254919"
+   "entry_sha256": "682371dd8040da66b0175eb9f3555e6d9a598e48f22e541bc9ea2688be4b426d"
   }
  ]
 }
