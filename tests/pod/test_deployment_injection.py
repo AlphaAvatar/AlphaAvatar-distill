@@ -49,7 +49,13 @@ def base_spec():
     for name, _mod, _args, spec in all_specs():
         if name == "autoinit_c1_launch":
             return spec
-    pytest.skip("no C1 launcher spec available")
+    #: Not a skip. Every launcher this repository can run is enumerated by
+    #: `all_specs`, so a missing C1 spec is a broken enumeration, and a skip
+    #: here would hide it -- as well as adding an unregistered skip predicate
+    #: to a suite whose pod/dev-box parity is audited.
+    raise AssertionError(
+        "all_specs() enumerates no autoinit_c1_launch spec; the launcher "
+        "enumeration is broken, which is a failure and not a skip")
 
 
 def runner_for(layout: dict):

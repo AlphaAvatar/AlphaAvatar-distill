@@ -1,0 +1,53 @@
+{
+ "schema": "aadistill.engineering_validation_authorization/v1",
+ "_contract": "The maintainer's approval for ONE real-CUDA engineering validation. It is recorded HERE, under the engineering run's governance evidence, and deliberately NOT in the canonical formal C1 authorization artifact: this permits an engineering observation and confers nothing on Phase C1.",
+ "authorization_id": "cuda_stage_f_engineering.2026-09-10",
+ "granted_utc": "2026-09-10T00:00:00Z",
+ "granted_by": "maintainer decision of 2026-09-10, on branch tip 1e4999c77aa65e03cec4603a9235a53a20a45f2d",
+ "subject": "CUDA stage-F engineering validation of attention.activation_importance_v1",
+ "resource_contract": {
+  "provider_resources_max": 1,
+  "provider_create_attempts_max": 1,
+  "retries_or_replacement_pods": 0,
+  "engineering_soft_cap_usd": 0.25,
+  "total_resource_cost_ceiling_usd": 0.4,
+  "teardown_reserve_usd": 0.15,
+  "_teardown_reserve": "WITHIN the 0.40 ceiling, not added to it."
+ },
+ "capability_requirement": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 2,
+  "_why": "the config runs bfloat16 because that is what C1 would run; bf16 needs cc >= 8.0, so a Turing card cannot satisfy it. The dtype, operator and workload must NOT be changed to make a cheaper unsupported device pass."
+ },
+ "authorizes": [
+  "one real-CUDA engineering validation of the migrated production composition, at the stated resource and budget contract"
+ ],
+ "does_not_authorize": [
+  "an Attempt-10 grant or authorization",
+  "reuse of any consumed C1 grant or authorization",
+  "a formal C1 bundle or launcher invocation",
+  "formal recovery training",
+  "the confirmation battery",
+  "a formal C1 decision",
+  "additional seeds, trials, resources or replacement attempts",
+  "merging the branch into main"
+ ],
+ "budget_context": {
+  "cumulative_spend_before_usd": 267.8598,
+  "authorized_cap_usd": 283.76,
+  "remaining_before_usd": 15.9002,
+  "reserved_formal_c1_ceiling_usd": 15.1475,
+  "worst_case_cumulative_after_usd": 268.2598,
+  "worst_case_remaining_after_usd": 15.5002,
+  "reserve_after_formal_ceiling_usd": 0.3527,
+  "_note": "feasibility arithmetic, not permission to execute the formal C1 experiment. Verified against logs/BUDGET_LEDGER.md and logs/phase_c1_pricing.json before provider creation."
+ },
+ "formal_c1_status_unchanged": {
+  "replay": "MEASURED, 2/2 PASS",
+  "formal_treatment": "UNMEASURED",
+  "recovery_endpoint": "UNMEASURED",
+  "attempt_9": "NO DECISION"
+ },
+ "authorization_sha256": "a23416687d69209b55b059953e79a6e6b1499072d70f4aaa624c46a699d3f7ef"
+}

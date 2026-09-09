@@ -1,0 +1,14 @@
+{
+ "schema": "aadistill.cuda_engineering_deployment/v1",
+ "_contract": "The image this ENGINEERING validation runs in. Deliberately not configs/infrastructure/pod_image.json: that describes the image a formal C1 session uses, which builds /opt/train/bin/python during a long setup this run does not perform. A stock PyTorch image already carries torch and CUDA, so the run installs one package and starts. AUTHORIZES NOTHING.",
+ "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+ "_image": "torch 2.9.1 built against CUDA 13.0. The validation runs bfloat16, which needs compute capability >= 8.0; the image does not relax that, the device must provide it.",
+ "remote_python": "python",
+ "_remote_python": "The image's own interpreter, on PATH. /opt/train/bin/python does not exist here -- it is built by the C1 setup script, which this run does not execute.",
+ "min_cuda_version": "13.0",
+ "_min_cuda_version": "Matches the image's CUDA build so the provider only offers hosts whose driver can run it.",
+ "container_disk_gb": 20,
+ "pip_deps": ["transformers", "numpy"],
+ "_pip_deps": "transformers pulls safetensors. numpy is named explicitly because the initialization core imports it and a missing one would fail after the pod is already billing.",
+ "authorizes": "nothing"
+}

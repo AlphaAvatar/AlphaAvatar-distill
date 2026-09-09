@@ -8,7 +8,7 @@
   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
   "tests/autoinit/test_stage1_import.py"
  ],
- "n_predicates": 103,
+ "n_predicates": 102,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
@@ -18,11 +18,11 @@
   "optional_dependency": 9,
   "repository_content": 3,
   "staged_artifact": 3,
-  "unrecognised": 26,
+  "unrecognised": 25,
   "unstaged_artifact": 8
  },
  "n_differs_on_pod": 24,
- "n_unrecognised": 30,
+ "n_unrecognised": 29,
  "n_registered": 34,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
@@ -99,21 +99,14 @@
    "SESSION_TEST_IGNORES"
   ]
  },
- "strict_cpu_test_parity_ready": "REVIEW",
+ "strict_cpu_test_parity_ready": "PASS",
  "parity_by_resolution": {
-  "UNRESOLVED": 1,
   "absent_on_both": 9,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 28,
   "same_on_pod": 56
  },
- "parity_unresolved": [
-  [
-   "tests/pod/test_deployment_injection.py::base_spec",
-   "unrecognised",
-   "signal 'unrecognised' is classified but nothing says the two machines must decide it the same way"
-  ]
- ],
+ "parity_unresolved": [],
  "parity_rules": {
   "gpu": {
    "resolution": "normalized_by_contract",
@@ -150,12 +143,7 @@
   "shutil.which(\"bash\")": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
  },
  "parity_not_executable_at_zero_cost": "that CUDA_VISIBLE_DEVICES=\"\" hides an L40S cannot be executed on a CPU dev box. The contract is applied and the decision is proven stable here; the GPU half is first exercised on the next pod.",
- "unaccounted": [
-  [
-   "tests/pod/test_deployment_injection.py::base_spec",
-   "unrecognised"
-  ]
- ],
+ "unaccounted": [],
  "unrecognised": [
   "tests/autoinit/test_c1_confirmation_scoring.py",
   "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
@@ -167,7 +155,6 @@
   "tests/evaluation/test_oracle_reasoning.py::tok",
   "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards",
   "tests/pod/test_c1_driver_execution.py::_summary_template",
-  "tests/pod/test_deployment_injection.py::base_spec",
   "tests/pod/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers",
   "tests/pod/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file",
   "tests/pod/test_recovery_continuation_session.py::skip_if_c1_session",
@@ -1208,22 +1195,6 @@
    "parity_why": "every path it inspects is tracked or staged"
   },
   {
-   "file": "tests/pod/test_deployment_injection.py",
-   "line": 52,
-   "kind": "pytest.skip",
-   "function": "base_spec",
-   "condition": "pytest.skip(\"no C1 launcher spec available\")",
-   "expanded": "pytest.skip(\"no C1 launcher spec available\")",
-   "signal": "unrecognised",
-   "verdict": "unknown",
-   "why": "no known signal matched; a human must say whether a pod sees the same premise",
-   "nodeid": "tests/pod/test_deployment_injection.py::base_spec",
-   "readiness_group": null,
-   "registered_as": null,
-   "parity": "UNRESOLVED",
-   "parity_why": "signal 'unrecognised' is classified but nothing says the two machines must decide it the same way"
-  },
-  {
    "file": "tests/pod/test_launcher_forwards_setup_env.py",
    "line": 119,
    "kind": "pytest.skip",
@@ -1882,6 +1853,6 @@
    "why": "tracked content the bundle checkout carries"
   }
  },
- "verdict": "REVIEW",
- "digest": "a5abc61ba6fdf6ed2e2de610ac3ff44809d76725d134de708a2988fda56a93a7"
+ "verdict": "PASS",
+ "digest": "1fa8fb48c7b61f7efe2970733321df93f21d68d76b5b6bde37106155fcf60772"
 }
