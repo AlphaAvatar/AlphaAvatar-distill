@@ -1,18 +1,18 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 167,
+ "modules_scanned": 168,
  "test_ignores": [
   "tests/data/test_recovery_corpus_pipeline.py",
   "tests/pod/test_phase_a_stages1_5_execute.py",
   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
   "tests/autoinit/test_stage1_import.py"
  ],
- "n_predicates": 101,
+ "n_predicates": 102,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 41,
+  "filesystem_premise_onpod": 42,
   "filesystem_premise_unresolved": 4,
   "gpu": 1,
   "optional_dependency": 9,
@@ -104,7 +104,7 @@
   "absent_on_both": 9,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 28,
-  "same_on_pod": 55
+  "same_on_pod": 56
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -171,6 +171,22 @@
  ],
  "predicates": [
   {
+   "file": "tests/architecture/test_core_ownership.py",
+   "line": 301,
+   "kind": "pytest.skip",
+   "function": "test_the_recorded_report_agrees_with_a_live_scan",
+   "condition": "not path.is_file()",
+   "expanded": "not path.is_file() | path=REPO / \"logs/architecture_core_ownership.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/architecture/test_core_ownership.py::test_the_recorded_report_agrees_with_a_live_scan",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
    "file": "tests/architecture/test_semantic_hardcode.py",
    "line": 169,
    "kind": "pytest.skip",
@@ -188,7 +204,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 119,
+   "line": 120,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -204,7 +220,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 128,
+   "line": 129,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -220,7 +236,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 167,
+   "line": 168,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -236,7 +252,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 179,
+   "line": 180,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -252,7 +268,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 214,
+   "line": 215,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -348,7 +364,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 901,
+   "line": 902,
    "kind": "pytest.skip",
    "function": "test_the_preregistration_binds_the_scoring_contract_and_supersession",
    "condition": "not path.is_file()",
@@ -364,7 +380,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 994,
+   "line": 995,
    "kind": "pytest.skip",
    "function": "test_the_historical_controls_are_not_labelled_as_valid_controls",
    "condition": "not audit_path.is_file()",
@@ -380,7 +396,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 1020,
+   "line": 1021,
    "kind": "pytest.skip",
    "function": "test_the_availability_report_does_not_claim_a_matched_control",
    "condition": "not path.is_file()",
@@ -1420,7 +1436,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 156,
+   "line": 158,
    "kind": "pytest.skip",
    "function": "test_every_declared_asset_is_a_directory_the_launcher_can_actually_send",
    "condition": "not path.exists()",
@@ -1436,7 +1452,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 449,
+   "line": 451,
    "kind": "pytest.skip",
    "function": "test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
    "condition": "\"model.safetensors\" not in staged",
@@ -1452,7 +1468,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 479,
+   "line": 481,
    "kind": "pytest.skip",
    "function": "test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
    "condition": "\"ROPE_OK\" not in tuple(spec.setup.setup_markers)",
@@ -1468,7 +1484,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 813,
+   "line": 815,
    "kind": "pytest.skip",
    "function": "test_the_c1_checkpoint_inputs_land_where_the_rope_gate_globs",
    "condition": "not src.is_file()",
@@ -1484,7 +1500,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 845,
+   "line": 847,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_accepts_the_canonical_config",
    "condition": "not src.is_file()",
@@ -1500,7 +1516,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 868,
+   "line": 870,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_refuses_a_wrong_stored_base",
    "condition": "not src.is_file()",
@@ -1838,5 +1854,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "8b1fa45f230b5eb777b38073f8da6400d7f65e8d6ac6fc89c1bc0179786697c3"
+ "digest": "8cd3fd18ad844c4167f7d454bc26011b89fffe66b0e3624e9165939afe72b43b"
 }
