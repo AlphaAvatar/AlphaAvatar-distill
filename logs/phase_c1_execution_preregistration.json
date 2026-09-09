@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "b1c699d0822f8f340b2f0915fe85c64453005f1d",
+ "head_commit": "4b3e6772325a67b0a700457a03ac714f7451605a",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -75,7 +75,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 94,
-  "digest": "064ae260424455aadc71a726b60c4e399c5fc4441c85d341440630bdc9ae0d0d",
+  "digest": "e70e3cf09574efc0188050c7ca428af1014421f83f7e308b1e53991b6ed01412",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -165,8 +165,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/pod_environment.py",
-    "sha256": "6e6cea50041ea179d0f41ecb8801fc5e7acd55bfecdb549d7389317484d63561",
-    "bytes": 3356
+    "sha256": "efc39332a30f10c78a060ff4373f5a3c1df11864c6138b9c3f591353097449c1",
+    "bytes": 12278
    },
    {
     "path": "scripts/experiments/phase_c1/probe_results.py",
@@ -530,8 +530,8 @@
    },
    {
     "path": "src/aadistill/runtime/pod_environment.py",
-    "sha256": "078b502209d7fe894238192162896a653237ee3a47fc677cf527a6a5ee6ade18",
-    "bytes": 33980
+    "sha256": "6fe502493be4a9018bc583401eaa0aa9a60db43251af345960007c0cefd56c3d",
+    "bytes": 28170
    },
    {
     "path": "src/aadistill/runtime/staging_contract.py",
@@ -1061,5 +1061,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "2b6ff02245428b4e14687cbb2ade2b272c9ffcf44c98fcc9e8a8a957cd8dabcf"
+ "preregistration_sha256": "6d848aea9fc94c6242f8f6cc9cf9747e9c147cc89ab2fa457cf5926d19b4f870"
 }

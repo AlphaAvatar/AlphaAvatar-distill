@@ -43,7 +43,8 @@ import hashlib
 import json
 import subprocess
 import xml.etree.ElementTree as ET
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -55,124 +56,41 @@ SCHEMA = "aadistill.autoinit.c1_pod_environment_verification/v1"
 #: `scripts/experiments/phase_c1/pod_environment.py`.
 
 
-#: The seven parametrized cases that legitimately skip on a pod: they re-open the
-#: pinned Hugging Face source snapshots, which are a dev-box readiness input and
-#: never a C1 runtime or scientific one. Renderer parity itself is proved at $0 by
-#: `scripts/autoinit/renderer_parity_gate.py`, which refuses a skip.
-RENDERER_PARITY_NODEIDS: tuple[str, ...] = tuple(
-    "tests/data/test_c1_battery.py::"
-    f"test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[{g}]"
-    for g in ("code", "gsm8k", "knowledge", "math_verified", "multihop", "rag",
-              "tool"))
-
-#: Five tests that must PASS, never skip, under an empty HOME and an isolated
-#: HF cache. Every one uses monkeypatched network calls, so none is a test of
-#: possessing a real credential.
+#: The readiness contract a caller declares. The nine node-id groups that used
+#: to sit here were C1's -- concrete test node ids, one session's expectation
+#: about which of its own tests skip on a pod and which must pass. A reusable
+#: runtime cannot own that: a second session watches different tests, and its
+#: refusal messages would still have said "C1".
 #:
-#: They are NOT the five unexplained attempt-3R failures. A $0 reproduction once
-#: attributed those to this module, but it ran with no `HF_TOKEN` — a state no
-#: pod is in, since setup exports one before the gate — and under the real pod
-#: condition all five PASS. That attribution is WITHDRAWN and the five actual
-#: failure identities remain unknown. This stays a mandatory regression set on
-#: its own merits: it is the shape of failure that aborted recovery continuation
-#: attempt 3 at $0.2011.
-LEAF_TRANSPORT_NODEIDS: tuple[str, ...] = tuple(
-    f"tests/autoinit/test_leaf_transport_publish.py::{n}" for n in (
-        "test_a_corrupted_remote_file_is_caught_by_the_round_trip",
-        "test_a_size_mismatch_at_the_far_end_is_caught",
-        "test_an_lfs_oid_that_disagrees_is_caught_without_downloading",
-        "test_a_file_absent_from_the_far_end_is_caught",
-        "test_the_round_trip_needs_no_dev_box_directory"))
+#: So the groups are the CALLER's, and this module holds only what they mean.
+#: `scripts/experiments/phase_c1/pod_environment.py` declares C1's.
+@dataclass(frozen=True)
+class ReadinessGroups:
+    """Which node ids a session expects to skip, and which must pass.
 
-#: C1 construction-source cases that intentionally skip when their historical
-#: source role is absent — which is every pod, because those roles are isolation
-#: evidence and not C1 runtime inputs. They SKIP with the role named; they must
-#: never pass vacuously, which is exactly what the `battery_v2` parameter did
-#: until 2026-09-05 (an absent directory globbed to zero rows and the
-#: disjointness assertions held trivially).
-#:
-#: `recovery_search_v2` is deliberately NOT here: C1 stages it as a local asset,
-#: so its parameter of the same test must PASS on a pod.
-BATTERY_SOURCE_NODEIDS: tuple[str, ...] = (
-    "tests/data/test_c1_battery.py::"
-    "test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content"
-    "[artifacts/eval/battery_v2]",
-    "tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus",
-    "tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read",
-)
+    Every field is required. A default would make one session's contract the
+    silent answer for every other, which is the defect this extraction closes --
+    and an empty default would be worse, because a group of zero node ids passes
+    its check vacuously.
+    """
 
-#: The parameter that must still PASS on a pod, because C1 stages its source.
-BATTERY_STAGED_ROLE_NODEID = (
-    "tests/data/test_c1_battery.py::"
-    "test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content"
-    "[artifacts/stage3/recovery_search_v2]")
+    #: Must SKIP: their source is a readiness input the session does not stage.
+    expected_skips: Mapping[str, Sequence[str]]
+    #: Must PASS: named groups whose absence or skip is a finding.
+    must_pass: Mapping[str, Sequence[str]]
+    #: A single node id that must pass because the session DOES stage its source.
+    staged_role_nodeid: str
+    #: Legitimate skips inside a watched module that are not environment-driven.
+    known_non_environment_skips: Sequence[str]
+    #: Extra context appended to a group's refusal, by group name. The
+    #: session owns the explanation -- "recovery_search_v2 is a local asset"
+    #: is a fact about C1's staging, not about sweeps.
+    refusal_notes: Mapping[str, str] = field(default_factory=dict)
+    #: Import path prefixes whose skips are watched at all.
+    watched: Sequence[str] = ()
 
-#: The staging-contract self-tests that describe the DEV BOX's staged/hidden
-#: split. A pod never received the unstaged artifacts and the simulation has
-#: moved them aside, so in both there is nothing left to prove hidden and they
-#: skip. Declared here so they are exact rather than merely unnoticed.
-#:
-#: They skip because each ASKS THE FILESYSTEM for its own premise. Until the C1
-#: attempt-5 postmortem they skipped because of `AAD_SYNTHETIC_HF_TOKEN`, a flag
-#: the simulator sets and the pod does not — so this group was recorded
-#: `skipped_as_expected: true` by a sweep while the same tests RAN on the pod and
-#: failed. A group that names WHICH tests skipped cannot ask WHY, which is why
-#: the reason now lives in the test and the complete skip set is recorded beside
-#: this one.
-DEVBOX_ONLY_NODEIDS: tuple[str, ...] = (
-    "tests/autoinit/test_staging_contract.py::"
-    "test_an_artifact_c1_does_not_stage_is_invisible",
-    "tests/autoinit/test_staging_contract.py::"
-    "test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
-    "tests/autoinit/test_staging_contract.py::"
-    "test_the_dev_box_satisfies_both_premises_and_so_both_tests_run",
-)
-
-#: Host-local Phase-A integration cases, scoped by `SESSION_KIND=c1`. Their
-#: premise is the retained leaf store at an absolute dev-box path that is
-#: deliberately never staged to a pod. They are named SEPARATELY from the other
-#: expected skips rather than folded into that count, because they skip for a
-#: different reason: not "this source is absent here" but "this session does not
-#: own that store". On a real pod they also skip, via their own store check.
-HOST_LOCAL_C1_NODEIDS: tuple[str, ...] = (
-    # Added 2026-09-06 with the CPU-test parity contract. `launcher.CKPT_STORE`
-    # is located through `$HOME` now, so the canonical leaf store is invisible
-    # under the contract's fresh empty HOME -- on the dev box AND on the pod,
-    # which is the point. Before that it was a hardcoded absolute path, so this
-    # case RAN in the diagnostic and would have SKIPPED on the pod: an
-    # `unexpected_skip` that the strict comparison would have refused a healthy
-    # pod for.
-    "tests/pod/test_recovery_continuation_session.py::"
-    "test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
-    "tests/pod/test_recovery_continuation_session.py::"
-    "test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
-    "tests/pod/test_recovery_continuation_session.py::"
-    "test_the_entrypoint_refuses_a_substituted_leaf",
-)
-
-#: A legitimate skip inside a WATCHED module that is not environment-driven and
-#: so is not part of the readiness-owned expected set. It is named rather than
-#: silenced: widening the watch to that module surfaced it, and the honest answer
-#: is an exemption with a reason, not a narrower watch that would also stop
-#: noticing real staging skips there.
-#:
-#: `test_an_unverified_transport_declares_no_leaf_inputs` covers the branch taken
-#: when NO verified transport exists. The transport IS verified, so the branch is
-#: not live and the case skips — on the dev box exactly as in the simulation. It
-#: has nothing to do with HOME, HF or staging.
-KNOWN_NON_ENVIRONMENT_SKIPS: tuple[str, ...] = (
-    "tests/pod/test_recovery_continuation_session.py::"
-    "test_an_unverified_transport_declares_no_leaf_inputs",
-)
-
-#: Structural tests that failed on the pod for repository-state reasons and are
-#: reported separately, because "fixed" was claimed for them once already.
-REPOSITORY_STATE_NODEIDS: tuple[str, ...] = (
-    "tests/docs/test_repository_structure.py::"
-    "test_every_log_is_classified_in_the_catalog",
-    "tests/pod/test_continuation_b_one_probe_contract.py::"
-    "test_the_live_snapshot_records_the_terminal_phase_b_state",
-)
+    def all_expected_skips(self) -> set[str]:
+        return {n for g in self.expected_skips.values() for n in g}
 
 
 def _sha256_file(path: Path) -> str:
@@ -330,86 +248,74 @@ def compare_skip_sets(expected: Sequence[str], actual: Sequence[str]
 
 
 def evaluate_sweep(outcomes: dict[str, str],
-                   skip_reasons: dict[str, str] | None = None) -> dict[str, Any]:
-    """Turn per-nodeid outcomes into the pass/fail findings the record asserts."""
+                   skip_reasons: dict[str, str] | None = None,
+                   *, groups: ReadinessGroups) -> dict[str, Any]:
+    """Turn per-nodeid outcomes into the pass/fail findings the record asserts.
+
+    `groups` is REQUIRED and comes from the session. This function used to name
+    nine C1 node-id tuples directly, so a reusable runtime carried one
+    experiment's expectations and refused in its vocabulary -- "host-local
+    Phase-A cases did not skip under SESSION_KIND=c1" is not something a generic
+    module can say.
+
+    The output keys are derived from the caller's own group names, so the record
+    schema is the session's too. C1's names reproduce the existing keys exactly.
+    """
     counts = {s: sum(1 for v in outcomes.values() if v == s)
               for s in ("passed", "skipped", "failed", "error")}
     failed = sorted(n for n, s in outcomes.items() if s in ("failed", "error"))
 
-    renderer = {n: outcomes.get(n, "ABSENT") for n in RENDERER_PARITY_NODEIDS}
-    renderer_ok = all(s == "skipped" for s in renderer.values())
-
-    leaf = {n: outcomes.get(n, "ABSENT") for n in LEAF_TRANSPORT_NODEIDS}
-    leaf_ok = all(s == "passed" for s in leaf.values())
-
-    repo_state = {n: outcomes.get(n, "ABSENT") for n in REPOSITORY_STATE_NODEIDS}
-    repo_state_ok = all(s == "passed" for s in repo_state.values())
-
-    hostlocal = {n: outcomes.get(n, "ABSENT") for n in HOST_LOCAL_C1_NODEIDS}
-    hostlocal_ok = all(v == "skipped" for v in hostlocal.values())
-    devbox = {n: outcomes.get(n, "ABSENT") for n in DEVBOX_ONLY_NODEIDS}
-    devbox_ok = all(v == "skipped" for v in devbox.values())
-    battery = {n: outcomes.get(n, "ABSENT") for n in BATTERY_SOURCE_NODEIDS}
-    battery_ok = all(s == "skipped" for s in battery.values())
-    staged_role = outcomes.get(BATTERY_STAGED_ROLE_NODEID, "ABSENT")
-    staged_role_ok = staged_role == "passed"
-
-    # Any OTHER skip in the two modules the environment repair touched is an
-    # unexpected environment skip: a test that quietly stopped running under an
-    # empty HOME is indistinguishable from one that never existed.
-    watched = ("tests/data/test_c1_battery.py",
-               "tests/autoinit/test_leaf_transport_publish.py",
-               "tests/autoinit/test_staging_contract.py",
-               "tests/pod/test_recovery_continuation_session.py")
-    expected_skips = (set(RENDERER_PARITY_NODEIDS) | set(BATTERY_SOURCE_NODEIDS)
-                      | set(DEVBOX_ONLY_NODEIDS) | set(HOST_LOCAL_C1_NODEIDS))
-    unexpected = sorted(
-        n for n, s in outcomes.items()
-        if s == "skipped" and n.startswith(watched)
-        and n not in expected_skips and n not in KNOWN_NON_ENVIRONMENT_SKIPS)
-
+    out: dict[str, Any] = {"counts": counts, "failed_nodeids": failed}
     problems: list[str] = []
     if failed:
         problems.append(f"{len(failed)} failed/errored: {failed[:10]}")
-    if not renderer_ok:
-        problems.append(f"renderer-parity skip set is not the expected 7: {renderer}")
-    if not leaf_ok:
-        problems.append(f"leaf transport did not pass 5/5: {leaf}")
-    if not repo_state_ok:
-        problems.append(f"repository-state tests did not pass: {repo_state}")
-    if not hostlocal_ok:
-        problems.append(f"host-local Phase-A cases did not skip under "
-                        f"SESSION_KIND=c1: {hostlocal}")
-    if not devbox_ok:
-        problems.append(f"dev-box-only staging self-tests did not skip inside the "
-                        f"simulation: {devbox}")
-    if not battery_ok:
-        problems.append(f"battery construction-source skip set is not the "
-                        f"expected {len(BATTERY_SOURCE_NODEIDS)}: {battery}")
-    if not staged_role_ok:
+
+    def note(name: str) -> str:
+        extra = groups.refusal_notes.get(name, "")
+        return f" {extra}" if extra else ""
+
+    #: A group of zero node ids would pass its own check vacuously, which is the
+    #: `battery_v2` defect in a different costume. An empty declared group is a
+    #: refusal, not a pass.
+    for name, ids in groups.must_pass.items():
+        seen = {n: outcomes.get(n, "ABSENT") for n in ids}
+        ok = bool(ids) and all(v == "passed" for v in seen.values())
+        out[name] = seen
+        out[f"{name}_all_passed"] = ok
+        if not ok:
+            problems.append(
+                f"{name}: did not pass {len(ids)}/{len(ids)}: {seen}." + note(name))
+
+    for name, ids in groups.expected_skips.items():
+        seen = {n: outcomes.get(n, "ABSENT") for n in ids}
+        ok = bool(ids) and all(v == "skipped" for v in seen.values())
+        out[f"{name}_expected_skips"] = seen
+        out[f"{name}_skipped_as_expected"] = ok
+        if not ok:
+            problems.append(
+                f"{name}: expected {len(ids)} skip(s), got {seen}." + note(name))
+
+    staged_role = outcomes.get(groups.staged_role_nodeid, "ABSENT")
+    if staged_role != "passed":
         problems.append(
-            f"the battery role C1 DOES stage did not pass: {staged_role!r}. "
-            "recovery_search_v2 is a local asset, so its disjointness parameter "
-            "must run on a pod, not skip.")
+            f"the staged-role case did not pass: {staged_role!r} for "
+            f"{groups.staged_role_nodeid!r}." + note("staged_role"))
+
+    # Any OTHER skip in a watched module is an unexpected environment skip: a
+    # test that quietly stopped running under an empty HOME is
+    # indistinguishable from one that never existed.
+    watched = tuple(groups.watched)
+    expected = groups.all_expected_skips()
+    unexpected = sorted(
+        n for n, s in outcomes.items()
+        if s == "skipped" and watched and n.startswith(watched)
+        and n not in expected
+        and n not in set(groups.known_non_environment_skips))
     if unexpected:
         problems.append(f"unexpected environment skips: {unexpected}")
 
-    return {
-        "counts": counts,
-        "failed_nodeids": failed,
-        "renderer_parity_expected_skips": renderer,
-        "renderer_parity_skipped_as_expected": renderer_ok,
-        "leaf_transport": leaf,
-        "leaf_transport_all_passed": leaf_ok,
-        "repository_state": repo_state,
-        "repository_state_all_passed": repo_state_ok,
-        "host_local_c1_expected_skips": hostlocal,
-        "host_local_c1_skipped_as_expected": hostlocal_ok,
-        "devbox_only_expected_skips": devbox,
-        "devbox_only_skipped_as_expected": devbox_ok,
-        "battery_source_expected_skips": battery,
-        "battery_source_skipped_as_expected": battery_ok,
-        "battery_staged_role_nodeid": BATTERY_STAGED_ROLE_NODEID,
+    out.update({
+        "battery_staged_role_nodeid": groups.staged_role_nodeid,
         "battery_staged_role_outcome": staged_role,
         "all_skipped_nodeids": sorted(n for n, s in outcomes.items()
                                       if s == "skipped"),
@@ -420,13 +326,14 @@ def evaluate_sweep(outcomes: dict[str, str],
         "skip_set_is_forensic_not_scientific":
             "the complete skip list exists so a pod/sweep divergence can be "
             "NAMED. The total is not a target and carries no scientific "
-            "content; only the named groups above express C1 expectations.",
-        "expected_environment_skips": sorted(expected_skips),
-        "known_non_environment_skips": list(KNOWN_NON_ENVIRONMENT_SKIPS),
+            "content; only the declared groups above express expectations.",
+        "expected_environment_skips": sorted(expected),
+        "known_non_environment_skips": list(groups.known_non_environment_skips),
         "unexpected_environment_skips": unexpected,
         "problems": problems,
         "verdict": "PASS" if not problems else "FAIL",
-    }
+    })
+    return out
 
 
 # --- the record and the gate that reads it ----------------------------------

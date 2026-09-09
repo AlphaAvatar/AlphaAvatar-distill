@@ -297,7 +297,7 @@ def test_a_leaf_transport_skip_is_a_problem_not_a_pass():
     findings = pe.evaluate_sweep(
         _outcomes(**{pe.LEAF_TRANSPORT_NODEIDS[0]: "skipped"}))
     assert findings["verdict"] == "FAIL"
-    assert any("leaf transport" in p for p in findings["problems"])
+    assert any("leaf_transport" in p for p in findings["problems"])
 
 
 def test_an_unexpected_environment_skip_is_detected():
@@ -322,7 +322,7 @@ def test_a_renderer_case_that_passed_is_also_wrong():
     findings = pe.evaluate_sweep(
         _outcomes(**{pe.RENDERER_PARITY_NODEIDS[0]: "passed"}))
     assert findings["verdict"] == "FAIL"
-    assert any("renderer-parity skip set" in p for p in findings["problems"])
+    assert any("renderer_parity" in p for p in findings["problems"])
 
 
 def test_any_failure_is_a_problem():
@@ -1031,7 +1031,7 @@ def test_a_battery_source_case_that_passed_means_the_role_leaked(tmp_path):
     findings = pe.evaluate_sweep(
         _outcomes(**{pe.BATTERY_SOURCE_NODEIDS[0]: "passed"}))
     assert findings["verdict"] == "FAIL"
-    assert any("battery construction-source skip set" in p
+    assert any("battery_source" in p
                for p in findings["problems"])
 
 
@@ -1041,7 +1041,11 @@ def test_the_staged_battery_role_must_not_skip(tmp_path):
     findings = pe.evaluate_sweep(
         _outcomes(**{pe.BATTERY_STAGED_ROLE_NODEID: "skipped"}))
     assert findings["verdict"] == "FAIL"
-    assert any("role C1 DOES stage" in p for p in findings["problems"])
+    # The refusal names the node id, and C1's own `refusal_notes` supply the
+    # reason -- the mechanism cannot know that recovery_search_v2 is staged.
+    assert any("staged-role case did not pass" in p
+               and "recovery_search_v2" in p for p in findings["problems"]), (
+        findings["problems"])
 
 
 def test_the_c1_readiness_owned_skip_set_is_exact():

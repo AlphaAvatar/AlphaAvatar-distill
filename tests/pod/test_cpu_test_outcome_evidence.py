@@ -204,13 +204,30 @@ def test_a_missing_junit_report_does_not_mask_the_suite_exit_code(tmp_path):
     assert "no JUnit report" in proc.stdout
 
 
+#: A synthetic readiness contract. `evaluate_sweep` no longer owns C1's nine
+#: node-id groups, so these tests declare their own -- which is the stronger
+#: test: a mechanism that only ever runs against one session's contract has not
+#: been shown to be a mechanism.
+GROUPS = pe.ReadinessGroups(
+    expected_skips={"renderer_parity": ("tests/g.py::r",),
+                    "battery_source": ("tests/g.py::b",),
+                    "devbox_only": ("tests/g.py::d",),
+                    "host_local_c1": ("tests/g.py::h",)},
+    must_pass={"leaf_transport": ("tests/g.py::l",)},
+    staged_role_nodeid="tests/g.py::staged",
+    known_non_environment_skips=(),
+    watched=("tests/watched.py",),
+)
+
+
 # --- the readiness record carries the whole set ------------------------------
 
 def test_the_record_carries_the_complete_skip_set_and_its_digest():
     outcomes = {"tests/a.py::test_p": "passed",
                 "tests/a.py::test_s": "skipped",
                 "tests/b.py::test_s2": "skipped"}
-    findings = pe.evaluate_sweep(outcomes, {"tests/a.py::test_s": "because"})
+    findings = pe.evaluate_sweep(outcomes, {"tests/a.py::test_s": "because"},
+                                groups=GROUPS)
     assert findings["all_skipped_nodeids"] == ["tests/a.py::test_s",
                                                "tests/b.py::test_s2"]
     assert findings["n_skipped"] == 2
@@ -220,9 +237,13 @@ def test_the_record_carries_the_complete_skip_set_and_its_digest():
 
 
 def test_the_named_groups_are_kept_beside_the_raw_set():
-    """The complete list is forensic. The fourteen named groups are the ones that
-    express C1 expectations, and a raw total must not replace them."""
-    findings = pe.evaluate_sweep({})
+    """The complete list is forensic. The named groups are the ones that express
+    the session's expectations, and a raw total must not replace them.
+
+    The group NAMES come from the caller, and the record's keys are derived from
+    them -- which is how C1 reproduces the existing schema while the mechanism
+    itself names no experiment."""
+    findings = pe.evaluate_sweep({}, groups=GROUPS)
     for group in ("renderer_parity_skipped_as_expected",
                   "battery_source_skipped_as_expected",
                   "devbox_only_skipped_as_expected",
@@ -239,8 +260,9 @@ def test_a_new_unclassified_skip_moves_the_digest(tmp_path):
     and compare equal — which is the failure this whole section exists to end.
     """
     base = {"tests/a.py::test_p": "passed", "tests/a.py::test_s": "skipped"}
-    before = pe.evaluate_sweep(base)["skip_set_digest"]
-    after = pe.evaluate_sweep({**base, "tests/a.py::test_p": "skipped"})
+    before = pe.evaluate_sweep(base, groups=GROUPS)["skip_set_digest"]
+    after = pe.evaluate_sweep({**base, "tests/a.py::test_p": "skipped"},
+                              groups=GROUPS)
     assert after["skip_set_digest"] != before
     assert after["n_skipped"] == 2
     cmp = pe.compare_skip_sets(
@@ -268,7 +290,7 @@ def test_the_summariser_is_inside_the_measured_harness():
 def test_the_recorder_writes_the_new_fields(field):
     src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
     assert '"findings": findings,' in src, "the record embeds findings wholesale"
-    assert field in json.dumps(pe.evaluate_sweep({}, {}))
+    assert field in json.dumps(pe.evaluate_sweep({}, {}, groups=GROUPS))
 
 
 # --- failure DETAIL, not just failure names ----------------------------------

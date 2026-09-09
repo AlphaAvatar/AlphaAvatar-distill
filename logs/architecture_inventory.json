@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 109,
-  "lines": 29800,
+  "lines": 29708,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -2233,7 +2233,7 @@
   "src/aadistill/data/sessions.py": {
    "module": "aadistill.data.sessions",
    "path": "src/aadistill/data/sessions.py",
-   "lines": 530,
+   "lines": 531,
    "imports": [
     {
      "target": "__future__",
@@ -6752,7 +6752,7 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 198
     },
@@ -6782,7 +6782,7 @@
     },
     {
      "chain": "self_attn.o_proj",
-     "probe": "self_attn",
+     "probe": "o_proj",
      "owner": "Qwen3Adapter.stream_out_projections",
      "line": 206
     },
@@ -15820,7 +15820,7 @@
   "src/aadistill/runtime/pod_environment.py": {
    "module": "aadistill.runtime.pod_environment",
    "path": "src/aadistill/runtime/pod_environment.py",
-   "lines": 659,
+   "lines": 566,
    "imports": [
     {
      "target": "__future__",
@@ -15856,12 +15856,22 @@
      "relative": 0,
      "names": [
       "Callable",
+      "Mapping",
       "Sequence"
      ]
     },
     {
-     "target": "pathlib",
+     "target": "dataclasses",
      "line": 47,
+     "relative": 0,
+     "names": [
+      "dataclass",
+      "field"
+     ]
+    },
+    {
+     "target": "pathlib",
+     "line": 48,
      "relative": 0,
      "names": [
       "Path"
@@ -15869,7 +15879,7 @@
     },
     {
      "target": "typing",
-     "line": 48,
+     "line": 49,
      "relative": 0,
      "names": [
       "Any"
@@ -15877,7 +15887,7 @@
     },
     {
      "target": "aadistill.infrastructure.session_prechecks",
-     "line": 479,
+     "line": 386,
      "relative": 0,
      "names": [
       "lineage_from_authorized_base"
@@ -15894,184 +15904,9 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 50,
+     "line": 51,
      "experiment_tokens": [
       "c1_"
-     ]
-    },
-    {
-     "value": "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 63,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 97,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 100,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 101,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/stage3/recovery_search_v2]",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 106,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 123,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 145,
-     "experiment_tokens": [
-      "continuation"
-     ]
-    },
-    {
-     "value": "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 147,
-     "experiment_tokens": [
-      "continuation"
-     ]
-    },
-    {
-     "value": "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 149,
-     "experiment_tokens": [
-      "continuation"
-     ]
-    },
-    {
-     "value": "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 164,
-     "experiment_tokens": [
-      "continuation"
-     ]
-    },
-    {
-     "value": "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 173,
-     "experiment_tokens": [
-      "phase_b",
-      "continuation"
-     ]
-    },
-    {
-     "value": "tests/data/test_c1_battery.py",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "evaluate_sweep",
-     "line": 360,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "tests/pod/test_recovery_continuation_session.py",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "evaluate_sweep",
-     "line": 363,
-     "experiment_tokens": [
-      "continuation"
-     ]
-    },
-    {
-     "value": "host_local_c1_expected_skips",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "evaluate_sweep",
-     "line": 406,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
-     ]
-    },
-    {
-     "value": "host_local_c1_skipped_as_expected",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "evaluate_sweep",
-     "line": 407,
-     "experiment_tokens": [
-      "c1_",
-      "_c1"
      ]
     },
     {
@@ -16080,7 +15915,7 @@
       "experiment_token"
      ],
      "owner": "verify_record",
-     "line": 587,
+     "line": 494,
      "experiment_tokens": [
       "attempt"
      ]
@@ -16091,7 +15926,7 @@
       "experiment_token"
      ],
      "owner": "verify_record",
-     "line": 618,
+     "line": 525,
      "experiment_tokens": [
       "c1_"
      ]
@@ -16102,7 +15937,7 @@
       "experiment_token"
      ],
      "owner": "verify_record",
-     "line": 620,
+     "line": 527,
      "experiment_tokens": [
       "c1_"
      ]
@@ -16111,88 +15946,106 @@
    "family_attribute_access": [],
    "definitions": [
     {
+     "name": "ReadinessGroups",
+     "kind": "class",
+     "qualname": "ReadinessGroups",
+     "line": 68
+    },
+    {
+     "name": "all_expected_skips",
+     "kind": "function",
+     "qualname": "ReadinessGroups.all_expected_skips",
+     "line": 92
+    },
+    {
      "name": "_sha256_file",
      "kind": "function",
      "qualname": "_sha256_file",
-     "line": 178
+     "line": 96
     },
     {
      "name": "pod_test_environment_digest",
      "kind": "function",
      "qualname": "pod_test_environment_digest",
-     "line": 186
+     "line": 104
     },
     {
      "name": "_nodeid",
      "kind": "function",
      "qualname": "_nodeid",
-     "line": 217
+     "line": 135
     },
     {
      "name": "read_junit",
      "kind": "function",
      "qualname": "read_junit",
-     "line": 244
+     "line": 162
     },
     {
      "name": "skip_set_digest",
      "kind": "function",
      "qualname": "skip_set_digest",
-     "line": 298
+     "line": 216
     },
     {
      "name": "compare_skip_sets",
      "kind": "function",
      "qualname": "compare_skip_sets",
-     "line": 310
+     "line": 228
     },
     {
      "name": "evaluate_sweep",
      "kind": "function",
      "qualname": "evaluate_sweep",
-     "line": 332
+     "line": 250
+    },
+    {
+     "name": "note",
+     "kind": "function",
+     "qualname": "evaluate_sweep.note",
+     "line": 273
     },
     {
      "name": "self_hash",
      "kind": "function",
      "qualname": "self_hash",
-     "line": 434
+     "line": 341
     },
     {
      "name": "head_commit",
      "kind": "function",
      "qualname": "head_commit",
-     "line": 440
+     "line": 347
     },
     {
      "name": "tree_is_clean",
      "kind": "function",
      "qualname": "tree_is_clean",
-     "line": 446
+     "line": 353
     },
     {
      "name": "permitted_post_sweep_paths",
      "kind": "function",
      "qualname": "permitted_post_sweep_paths",
-     "line": 452
+     "line": 359
     },
     {
      "name": "lineage_from_swept_base",
      "kind": "function",
      "qualname": "lineage_from_swept_base",
-     "line": 462
+     "line": 369
     },
     {
      "name": "verify_record",
      "kind": "function",
      "qualname": "verify_record",
-     "line": 519
+     "line": 426
     },
     {
      "name": "load_record",
      "kind": "function",
      "qualname": "load_record",
-     "line": 658
+     "line": 565
     }
    ],
    "import_time_calls": [],
