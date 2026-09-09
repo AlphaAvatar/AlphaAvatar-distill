@@ -52,7 +52,16 @@
   "synthetic": true,
   "seed": 20260908,
   "n_items": 4,
-  "sequence_length": 64
+  "sequence_length": 64,
+  "_materialized_profile": "The suffix case resolves a REAL materialized CalibrationProfile: JSONL written to disk, both hashes computed from those bytes, so CalibrationProfile.resolve() runs its full fail-closed check. Passing calibration_items= directly would skip that branch, and skipping it is how it first executed on a paid pod.",
+  "domains": [
+   "general",
+   "math"
+  ],
+  "items_relpath": "artifacts/cuda_validation_calibration/items.jsonl",
+  "profile_id": "validation.cuda_synthetic",
+  "profile_version": 1,
+  "source_id": "validation/synthetic"
  },
  "execution": {
   "device": "cuda",
@@ -84,13 +93,52 @@
   "_roles_are_declared_by_the_caller": "RunLayout holds no vocabulary of its own; these are this validation's roles and their paths inside the run.",
   "required_roles": {
    "report": "report.json",
-   "environment": "environment.json"
+   "environment": "environment.json",
+   "suffix_evidence": "suffix_evidence.json"
   },
   "optional_roles": {
    "per_operator": "operators/",
-   "child_configs": "children/"
+   "child_configs": "children/",
+   "suffix_case": "suffix/"
   }
  },
  "authorizes": "nothing",
- "_operator_ids_are_the_registered_ones": "checked against aadistill.initialization.operators.base.registered_implementations(); an unknown id is refused before any device work, so a typo costs nothing rather than failing partway through a paid session"
+ "_operator_ids_are_the_registered_ones": "checked against aadistill.initialization.operators.base.registered_implementations(); an unknown id is refused before any device work, so a typo costs nothing rather than failing partway through a paid session",
+ "suffix_case": {
+  "_what_this_is": "Stage F end to end, through production code: the two-arm world is built the way the session builds it, the incumbent arm is run PINNED so its step-2 output is a genuinely gated parent, and the treatment arm's tail is executed from that parent through materialize_fixed_path_suffix. This is the composition attempt 9 died in; the per-operator matrix above cannot reach it, and does not even execute the treatment operator.",
+  "_not_this": "No Attempt-9 checkpoint, no formal C1 seeds, no confirmation battery, no Stage G/H/I, no efficacy comparison. Nothing here trains or evaluates anything, and nothing here is a decision.",
+  "path_id_prefix": "validation.cuda_suffix",
+  "root_repo_id": "validation/fixture",
+  "root_revision": "synthetic",
+  "prefix_impl_ids": [
+   "depth.causal_kl_greedy_v1",
+   "ffn.activation_importance_v0",
+   "width.global_pca_v0"
+  ],
+  "incumbent_impl_id": "attention.weight_proxy_v0",
+  "_incumbent_reads_no_calibration": "exactly as C1's incumbent arm does, so its step carries the null profile",
+  "incumbent_profile_id": "calib.none@v1",
+  "treatment_impl_id": "attention.activation_importance_v1",
+  "_treatment_is_not_a_builtin": "register_builtin_operators() does not register it; the session registers it explicitly and so does this harness, rather than relying on an import side effect.",
+  "_why_two_geometries": "One geometry can pass because a shape happened to divide evenly. Both of these reduce the Q head count, because an ATTENTION step that keeps every head would exercise the selection path without ever discarding anything.",
+  "geometries": [
+   {
+    "geometry_id": "suffix_narrow",
+    "hidden_size": 64,
+    "intermediate_size": 128,
+    "num_hidden_layers": 2,
+    "num_attention_heads": 2,
+    "num_key_value_heads": 1
+   },
+   {
+    "geometry_id": "suffix_mid",
+    "hidden_size": 96,
+    "intermediate_size": 192,
+    "num_hidden_layers": 3,
+    "num_attention_heads": 2,
+    "num_key_value_heads": 2,
+    "_why": "a second depth, width and FFN target with the same 4->2 head reduction over a DIFFERENT kv grouping (2 kept, not 1), so head grouping is exercised at two ratios"
+   }
+  ]
+ }
 }

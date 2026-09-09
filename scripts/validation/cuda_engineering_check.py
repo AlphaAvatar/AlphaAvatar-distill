@@ -168,6 +168,238 @@ def device_of(model) -> str | None:
     return None
 
 
+# --- the end-to-end case: stage F, on a real device -------------------------
+#
+# The per-operator matrix above calls each operator directly. That is a useful
+# breadth check and it is exactly what could not have caught attempt 9: the
+# failure was in the COMPOSITION -- `materialize_fixed_path_suffix` ->
+# `_run_steps` -> `impl.execute` -> `apply` -> `head_write_energy` -- and it was
+# the treatment operator, `attention.activation_importance_v1`, that the matrix
+# does not even execute. So this second case builds the two-arm world the way
+# the session builds it and runs the tail through the production entry point.
+
+
+def write_calibration_profile(root: Path, cfg: dict, geometry_vocab: int):
+    """A REAL materialized profile: JSONL on disk, both hashes from those bytes.
+
+    Built through the production rules rather than around them, so
+    `CalibrationProfile.resolve()` runs its full fail-closed check here exactly
+    as it does against the frozen mixtures. This is deliberate: passing
+    `calibration_items=` directly would skip the resolve branch, and skipping
+    that branch is how it first executed on a paid pod.
+    """
+    import hashlib
+
+    import torch
+    from aadistill.initialization.calibration.profiles import (
+        CalibrationProfile, CalibrationSource, DatasetRole,
+        mixture_content_sha256)
+
+    c = cfg["calibration"]
+    seq, n = c["sequence_length"], c["n_items"]
+    g = torch.Generator().manual_seed(c["seed"])
+    items = []
+    for domain in c["domains"]:
+        for k in range(n):
+            ids = torch.randint(0, geometry_vocab, (seq,), generator=g).tolist()
+            items.append({"item_id": f"{domain}-{k}", "ids": ids,
+                          "domain": domain, "subtype": domain,
+                          "n_prediction_positions": len(ids) - 1})
+
+    rel = c["items_relpath"]
+    path = root / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(i) + "\n" for i in items))
+
+    weight = 1.0 / len(c["domains"])
+    return CalibrationProfile(
+        profile_id=c["profile_id"], version=c["profile_version"],
+        description="synthetic materialized mixture for CUDA validation",
+        sources=tuple(CalibrationSource(c["source_id"], "local", d, n)
+                      for d in c["domains"]),
+        domain_weights={d: weight for d in c["domains"]},
+        token_budget=seq * len(items), sample_rule="fixed", seed=c["seed"],
+        role=DatasetRole.OPERATOR_CALIBRATION,
+        materialized=True, items_path=rel,
+        content_sha256=mixture_content_sha256(items),
+        items_file_sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+
+
+def run_suffix_case(cfg: dict, *, device: str, dtype_name: str,
+                    geometry: dict, root: Path, adapter, build_root) -> dict:
+    """Stage F, end to end, through production code. Returns its evidence.
+
+    `device` is a parameter rather than a constant so the harness itself can be
+    exercised at `$0`. That CPU run validates THIS FILE and nothing about
+    placement: on one device every co-location claim is trivially true, which is
+    exactly the substitution that let attempt 9 through. The report says so.
+    """
+    from aadistill.initialization.calibration.profiles import (
+        register_profile, unregister_profile)
+    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.planning.fixed_path import (
+        VerifiedSuffix, materialize_fixed_path, materialize_fixed_path_suffix,
+        write_suffix_execution_record)
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from device_observations import observing
+
+    case = cfg["suffix_case"]
+    work = root / f"suffix_{geometry['geometry_id']}"
+    work.mkdir(parents=True, exist_ok=True)
+
+    profile = write_calibration_profile(work, cfg, cfg["model"]["fixture"]["vocab_size"])
+    register_profile(profile, replace=True)
+    # The treatment operator is not a builtin: the session registers it
+    # explicitly and so does this, rather than relying on an import side effect.
+    attention_activation.register(replace=True)
+    try:
+        return _suffix_body(
+            cfg, case, geometry, work, profile, adapter, build_root,
+            device=device, dtype_name=dtype_name,
+            observing=observing, VerifiedSuffix=VerifiedSuffix,
+            materialize=materialize_fixed_path,
+            materialize_suffix=materialize_fixed_path_suffix,
+            write_record=write_suffix_execution_record)
+    finally:
+        attention_activation.unregister()
+        unregister_profile(profile.qualified_id)
+
+
+def _suffix_body(cfg, case, geometry, work, profile, adapter, build_root, *,
+                 device, dtype_name, observing, VerifiedSuffix,
+                 materialize, materialize_suffix, write_record) -> dict:
+    import torch
+    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.planning.fixed_path import (
+        FixedPathSpec, FixedPathStep)
+    from aadistill.initialization.specs.arch import ArchSpec
+
+    fixture = cfg["model"]["fixture"]
+    family = cfg["model"]["family"]
+    pid = profile.qualified_id
+    target = spec_from(geometry, fixture, family)
+    prefix_ids = list(case["prefix_impl_ids"])
+    start = len(prefix_ids)
+    treatment_id = case["treatment_impl_id"]
+
+    def spec(steps, path_id):
+        return FixedPathSpec(
+            path_id=path_id, family=family, target_spec=target,
+            steps=tuple(steps), root_repo_id=case["root_repo_id"],
+            root_revision=case["root_revision"], device=device)
+
+    prefix = [FixedPathStep(i, pid) for i in prefix_ids]
+    inc_tail = FixedPathStep(case["incumbent_impl_id"], case["incumbent_profile_id"])
+
+    # 1. unpinned probe -- learn the digests.
+    probe = spec([*prefix, inc_tail], f"{case['path_id_prefix']}.probe")
+    observed = materialize(probe, adapter=adapter, root_loader=build_root,
+                           workdir=work / "probe", repo_root=work)
+    parent_digest = observed[start - 1].identity.artifact_digest
+    incumbent_digest = observed[start].identity.artifact_digest
+
+    # 2. the PINNED incumbent -- this is stage D, and it gates the parent.
+    pinned_prefix = [*prefix[:start - 1],
+                     FixedPathStep(prefix_ids[-1], pid,
+                                   expected_artifact_digest=parent_digest,
+                                   label="pre-ATTENTION parent")]
+    incumbent = spec(
+        [*pinned_prefix,
+         FixedPathStep(case["incumbent_impl_id"], case["incumbent_profile_id"],
+                       expected_artifact_digest=incumbent_digest,
+                       label="incumbent")],
+        f"{case['path_id_prefix']}.incumbent")
+    inc_steps = materialize(incumbent, adapter=adapter, root_loader=build_root,
+                            workdir=work / "incumbent", repo_root=work)
+    parent = inc_steps[start - 1]
+
+    # 3. the treatment arm, by replace_tail, so the prefix is shared by
+    #    construction.
+    treatment = incumbent.replace_tail(
+        start, FixedPathStep(treatment_id, pid, label="treatment ATTENTION"),
+        path_id=f"{case['path_id_prefix']}.treatment")
+
+    verified = VerifiedSuffix(
+        start_index=start, parent=parent,
+        expected_parent_artifact_digest=parent_digest,
+        expected_path_hash=treatment.spec_hash,
+        prefix_reference_steps=tuple(incumbent.steps[:start]),
+        expected_suffix_steps=((treatment_id, pid),))
+
+    stage_f = work / "stage_f"
+    with observing(attention_activation) as obs:
+        results, evidence = materialize_suffix(
+            treatment, adapter=adapter,
+            root_loader=lambda: adapter.load(parent.checkpoint_path,
+                                             device=device),
+            workdir=stage_f, verified=verified, repo_root=work)
+
+    # The record, written and READ BACK: a writer that returns without raising
+    # has not shown that what landed on disk is loadable or correct.
+    rec_path = write_record(
+        treatment, results, stage_f / "treatment_record.json",
+        runtime={"torch": torch.__version__, "device": device,
+                 "dtype": dtype_name},
+        suffix_evidence=evidence, calibration={"profile_id": pid})
+    record = json.loads(rec_path.read_text())
+
+    r = results[0]
+    steps_on_disk = sorted(p.name for p in (stage_f / "steps").iterdir()
+                           if p.is_dir())
+    proofs = obs.report(device)
+
+    checks = {
+        "the_treatment_operator_executed": r.impl_id == treatment_id,
+        "the_original_suffix_index_is_retained": r.index == start,
+        "the_checkpoint_keeps_its_original_number": (
+            Path(r.checkpoint_path).name.startswith(f"{start:02d}_")),
+        "the_prefix_did_not_execute_again": (
+            steps_on_disk == [Path(r.checkpoint_path).name]),
+        "the_prefix_indices_are_recorded_as_skipped": (
+            evidence["prefix_step_indices_not_executed"] == list(range(start))),
+        "the_output_stays_bound_to_the_full_frozen_path": (
+            record["path_hash"] == treatment.spec_hash),
+        "the_record_is_not_a_replay": (
+            record["is_replay"] is False
+            and record["output_digest_was_pre_pinned"] is False
+            and record["n_pinned"] == 0),
+        "the_record_names_the_executed_step": (
+            record["executed_step_indices"] == [start]
+            and record["output"]["impl_id"] == treatment_id
+            and record["output"]["artifact_digest"] == r.identity.artifact_digest),
+        "the_parent_was_genuinely_gated": (
+            parent.digest_matches is True
+            and parent.digest_expected == parent_digest),
+        "the_treatment_did_its_own_work": (
+            "op.attention.retained_write_energy_mean" in (r.local_metrics or {})
+            if isinstance(r.local_metrics, dict) else
+            "op.attention.retained_write_energy_mean" in
+            (getattr(r.local_metrics, "values", None) or {})),
+    }
+
+    return {
+        "geometry_id": geometry["geometry_id"],
+        "device": device,
+        "device_proofs_are_meaningful": device.split(":")[0] == "cuda",
+        "_why": (
+            "on a single-device host every co-location claim below is "
+            "trivially true. A CPU run exercises this harness and proves "
+            "nothing about placement -- that substitution is what let attempt "
+            "9 reach a paid pod."),
+        "treatment_impl_id": treatment_id,
+        "executed_step_indices": evidence["executed_step_indices"],
+        "steps_written": steps_on_disk,
+        "path_hash": treatment.spec_hash,
+        "parent_artifact_digest": parent_digest,
+        "output_artifact_digest": r.identity.artifact_digest,
+        "record": str(rec_path.relative_to(work)),
+        "device_proofs": proofs,
+        "checks": checks,
+        "passed": all(checks.values()) and all(p["holds"] for p in proofs.values()),
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="configs/validation/cuda_engineering.json")
@@ -258,6 +490,33 @@ def main() -> int:
 
     passed = [r for r in results if r.get("applied")
               and r.get("child_on_requested_device") is not False]
+
+    # --- the end-to-end case, per declared geometry -------------------------
+    suffix_root = layout.path(run_cfg["optional_roles"]["suffix_case"])
+    suffix_root.mkdir(parents=True, exist_ok=True)
+    suffix: list[dict] = []
+    for geometry in cfg["suffix_case"]["geometries"]:
+        gid = geometry["geometry_id"]
+        row = {"geometry_id": gid}
+        try:
+            row = run_suffix_case(
+                cfg, device=device, dtype_name=cfg["execution"]["dtype"],
+                geometry=geometry, root=suffix_root, adapter=adapter,
+                build_root=lambda: build_fixture(
+                    cfg, device, cfg["execution"]["dtype"]))
+        except Exception as exc:                                  # noqa: BLE001
+            row.update({"passed": False,
+                        "error": f"{type(exc).__name__}: {exc}",
+                        "traceback": traceback.format_exc()[-4000:]})
+        suffix.append(row)
+        print(f"  suffix {gid:22} {'ok' if row.get('passed') else 'FAILED'}")
+
+    suffix_ok = bool(suffix) and all(r.get("passed") for r in suffix)
+    layout.path(run_cfg["required_roles"]["suffix_evidence"]).write_text(
+        json.dumps({"schema": "aadistill.cuda_suffix_evidence/v1",
+                    "scientific_use": False, "authorizes": "nothing",
+                    "cases": suffix}, indent=1) + "\n")
+
     report.update({
         "validation_id": cfg["validation_id"],
         "config": args.config,
@@ -267,12 +526,25 @@ def main() -> int:
         "operators": declared,
         "n_cases": len(results),
         "n_passed": len(passed),
-        "passed": len(passed) == len(results),
+        "operator_matrix_passed": len(passed) == len(results),
+        "suffix_case_passed": suffix_ok,
+        "suffix_geometries": [g["geometry_id"]
+                              for g in cfg["suffix_case"]["geometries"]],
+        "suffix_case": suffix,
+        "passed": len(passed) == len(results) and suffix_ok,
         "results": results,
         "_what_a_pass_means": (
             "every declared operator planned and applied on a real CUDA device "
-            "for every declared geometry, and left its child on that device. It "
-            "says nothing about whether the initialization is any good."),
+            "for every declared geometry and left its child on that device; "
+            "AND, for each suffix geometry, `attention.activation_importance_v1` "
+            "executed through the real `materialize_fixed_path_suffix` from a "
+            "genuinely gated parent, with the five device placements observed "
+            "rather than assumed. It says nothing about whether the "
+            "initialization is any good, and it is not a C1 result."),
+        "_what_it_still_does_not_cover": (
+            "the treatment operator's NUMERICAL behaviour, any efficacy "
+            "comparison, and the Attempt-9 checkpoint, seeds and battery -- "
+            "none of which this may touch."),
     })
     out = layout.path(run_cfg["required_roles"]["report"])
     out.write_text(json.dumps(report, indent=1) + "\n")
