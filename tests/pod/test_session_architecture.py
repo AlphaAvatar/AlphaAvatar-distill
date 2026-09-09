@@ -30,7 +30,9 @@ import pytest
 from session_specs import (SESSION_LAUNCHERS, all_specs,
                            load_session_launcher, session_args)
 
-from aadistill.infrastructure.session import MAIN_RELAY
+#: The store this deployment means. It was a core module constant computed
+#: at import from configs/; it belongs to the application now.
+from experiments.deployment import MAIN_RELAY
 
 REPO = Path(__file__).resolve().parents[2]
 POD = REPO / "scripts/pod"
@@ -115,7 +117,7 @@ def test_validate_refuses_the_same_input_declared_twice():
     from aadistill.infrastructure.session import RelayInput, SessionSpecError
 
     _name, _mod, _args, spec = all_specs()[0]
-    r = RelayInput("stage1/x/model.safetensors", dest="artifacts/stage1/x")
+    r = RelayInput("stage1/x/model.safetensors", dest="artifacts/stage1/x", repo=MAIN_RELAY)
     manifest = dataclasses.replace(spec.setup, relay_inputs=(r, r))
     with pytest.raises(SessionSpecError, match="declared twice"):
         dataclasses.replace(spec, setup=manifest).validate()

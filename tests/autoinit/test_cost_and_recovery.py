@@ -41,6 +41,7 @@ from aadistill.initialization.planning.recovery import (
     probe_configs,
 )
 from experiments.recovery_policy import (
+    CORRECT_IN_USABLE_ROLLOUT,
     plan_policy,
     CATASTROPHIC_V1,
     PREFLIGHT_PLAN_V1,
@@ -202,7 +203,7 @@ def test_the_plan_requires_two_seeds_and_stated_rules():
 
 def test_the_feasibility_constraint_and_the_objective_must_be_different_metrics():
     """No weighted usable+correct score, structurally."""
-    with pytest.raises(ValueError, match="blind to correctness"):
+    with pytest.raises(ValueError, match="a constraint that is also the objective cannot gate it"):
         plan(primary_metric="usable_rollout_rate")
     p = plan()
     assert p.feasibility_metric == "usable_rollout_rate"
@@ -483,15 +484,15 @@ def test_a_clear_lead_resolves(teacher_spec, target_spec):
 def test_correctness_is_defined_as_correct_in_a_usable_rollout():
     from aadistill.initialization.planning.recovery import score_recovery_row
 
-    answered_then_looped = score_recovery_row(usable=False, scorer_correct=True)
+    answered_then_looped = score_recovery_row(usable=False, scorer_correct=True, rule=CORRECT_IN_USABLE_ROLLOUT)
     assert answered_then_looped["correct"] is False
     assert answered_then_looped["correct_but_unusable"] is True, (
         "the gap between 'the scorer found an answer' and 'we counted it' must be "
         "visible, not absorbed")
-    assert score_recovery_row(usable=True, scorer_correct=True)["correct"] is True
+    assert score_recovery_row(usable=True, scorer_correct=True, rule=CORRECT_IN_USABLE_ROLLOUT)["correct"] is True
     # A behaviour-only row can never be correct.
     assert score_recovery_row(usable=True, scorer_correct=True,
-                              scorable=False)["correct"] is False
+                              scorable=False, rule=CORRECT_IN_USABLE_ROLLOUT)["correct"] is False
 
 
 def test_the_scoring_contract_names_the_offending_prompt():

@@ -45,7 +45,6 @@ from aadistill.initialization.operators import (  # noqa: E402
     registry_ledger,
 )
 from aadistill.initialization.planning.ranking import (  # noqa: E402
-    EPSILON_RESPONSE_V1,
     PARETO_V1,
     SCHEDULE_V1,
 )

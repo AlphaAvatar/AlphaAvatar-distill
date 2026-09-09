@@ -32,8 +32,12 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.infrastructure import session_runner as SR  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
-    MAIN_RELAY, RelayInput, SetupManifest,
+    RelayInput, SetupManifest,
 )
+#: The store THIS deployment means. It was a module constant in the core,
+#: computed at import by reading `configs/infrastructure/artifact_store.json`,
+#: so importing the framework read the repository.
+from experiments.deployment import MAIN_RELAY  # noqa: E402
 
 SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
 RUNNER = REPO / "src/aadistill/infrastructure/session_runner.py"
@@ -42,9 +46,19 @@ TRANSPORT = "AlphaAvatar/aadistill-transport"
 
 # --- the declaration carries the repository ---------------------------------
 
-def test_a_relay_input_defaults_to_the_main_relay():
-    """Every existing declaration keeps its meaning without being touched."""
-    r = RelayInput(path="a/b.bin", dest="artifacts/x")
+def test_a_relay_input_must_state_its_repository():
+    """It DEFAULTED to the main relay until the Milestone-A closure.
+
+    That default is what made the reusable core name one organisation's storage
+    -- and it was computed at import from `configs/`, so merely importing the
+    framework read this repository. A declaration says which store it means.
+    """
+    import pytest
+
+    with pytest.raises(TypeError, match="repo"):
+        RelayInput(path="a/b.bin", dest="artifacts/x")      # noqa: F821 - the point
+
+    r = RelayInput(path="a/b.bin", dest="artifacts/x", repo=MAIN_RELAY)
     assert r.repo == MAIN_RELAY == "AlphaAvatar/aadistill-artifacts"
     assert r.as_record()["repo"] == MAIN_RELAY
 
@@ -61,7 +75,7 @@ def test_the_serialized_env_carries_the_repo():
     """`SESSION_RELAY_INPUTS` is what setup consumes; a repo it does not carry
     is a repo the shell would have to know, which is the defect."""
     man = SetupManifest(relay_inputs=(
-        RelayInput(path="sci/a.bin", dest="artifacts/sci"),
+        RelayInput(path="sci/a.bin", dest="artifacts/sci", repo=MAIN_RELAY),
         RelayInput(path="leaf/m.safetensors", dest="artifacts/leaf",
                    repo=TRANSPORT)))
     items = json.loads(man.relay_env())
@@ -128,7 +142,7 @@ def runner_with(inputs, present_by_repo, monkeypatch, local=()):
 
 
 def test_every_declared_repository_is_listed(monkeypatch):
-    inputs = [RelayInput(path="sci/a.bin", dest="artifacts/sci"),
+    inputs = [RelayInput(path="sci/a.bin", dest="artifacts/sci", repo=MAIN_RELAY),
               RelayInput(path="leaf/m.bin", dest="artifacts/leaf", repo=TRANSPORT)]
     r, asked = runner_with(
         inputs, {MAIN_RELAY: ["sci/a.bin"], TRANSPORT: ["leaf/m.bin"]}, monkeypatch)

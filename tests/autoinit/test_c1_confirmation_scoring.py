@@ -33,6 +33,7 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 import score_c1_confirmation as C1S  # noqa: E402
 import verify_c1_scoring_equivalence as EQ  # noqa: E402
 
+from experiments.recovery_policy import CORRECT_IN_USABLE_ROLLOUT  # noqa: E402
 from experiments.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_BATTERY_MANIFEST_SHA256, C1_BATTERY_SETS, C1_METRIC_CONTRACT, C1_N_PROMPTS, C1_N_SCORABLE_PROMPTS, C1_SCORING_FILES_V1, C1ScoringError, c1_scoring_contract, validate_c1_battery  # noqa: E402
 
 C1_BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
@@ -68,7 +69,7 @@ def test_the_frozen_assets_are_untouched():
     contract = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v3"
     assert contract["digest"] == (
-        "18ce628faba704bfa1e8b53f9c912da2962e878742d0115db2f88c0b16269ca3")
+        "933dfc60670e762f91b486c32648ef465c84d78ef9404914fb048cb428967ea6")
 
     # The pinned digest is only allowed to move because this holds. Read it,
     # rather than trusting the docstring above.
@@ -189,7 +190,7 @@ def test_the_equivalence_gate_cannot_cover_correct_implies_usable(monkeypatch,
     recorded in `logs/phase_c1_scoring_equivalence.json`.
     """
     def mutate(mp):
-        def naive(*, usable, scorer_correct, scorable=True):
+        def naive(*, usable, scorer_correct, scorable=True, rule=None):
             return {"usable": bool(usable), "scorable": bool(scorable),
                     "scorer_correct": bool(scorer_correct),
                     "correct": bool(scorer_correct) and bool(scorable),
@@ -202,13 +203,13 @@ def test_correct_implies_usable_is_enforced_by_the_frozen_row_contract():
     """C1 imports this function unmodified; this is where the rule is covered."""
     from aadistill.initialization.planning.recovery import score_recovery_row
 
-    unusable = score_recovery_row(usable=False, scorer_correct=True, scorable=True)
+    unusable = score_recovery_row(usable=False, scorer_correct=True, scorable=True, rule=CORRECT_IN_USABLE_ROLLOUT)
     assert unusable["correct"] is False
     assert unusable["correct_but_unusable"] is True
     assert score_recovery_row(usable=True, scorer_correct=True,
-                              scorable=True)["correct"] is True
+                              scorable=True, rule=CORRECT_IN_USABLE_ROLLOUT)["correct"] is True
     assert score_recovery_row(usable=True, scorer_correct=True,
-                              scorable=False)["correct"] is False
+                              scorable=False, rule=CORRECT_IN_USABLE_ROLLOUT)["correct"] is False
 
 
 @pytest.mark.skipif(not HISTORICAL, reason="no retained historical generations")

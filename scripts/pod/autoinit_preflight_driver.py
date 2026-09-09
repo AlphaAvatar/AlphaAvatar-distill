@@ -46,6 +46,7 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 from aadistill.governance.authorization import (  # noqa: E402
     AuthorizationError,
 )
+from experiments.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
 from experiments.preflight import (  # noqa: E402
     PreflightAuthorization as SpendAuthorization,
 )
@@ -57,7 +58,6 @@ from aadistill.initialization.planning.generation import (
 )
 from experiments.source_sets import generation_source_digest
 from aadistill.initialization.planning.ranking import (  # noqa: E402
-    EPSILON_RESPONSE_V1,
     PARETO_V1,
 )
 from aadistill.initialization.planning.recovery import (
