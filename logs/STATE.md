@@ -62,11 +62,35 @@ how the snapshot came to disagree with itself.
 > byte-identical relocation outputs across 570 samples, and a refused live
 > reuse. Nothing was relaxed and no equivalence bypass exists.
 >
-> **Accounting:** Phase-B ledger amendment **PHB-HA-003** (14 files, +236/−125,
-> every quantity re-derived from git), and the migration record extended to the
-> branch tip over 52 commits. **Scientific fields moved: 0** of 94 examined in
-> the C1 preregistration — seeds, battery, both path hashes, isolation plan,
-> recipe, geometry and pricing all byte-identical.
+> **The readiness contract left the runtime too.** Nine tuples of concrete test
+> node ids — one session's expectation about which of its own tests skip on a
+> pod — were the last thing `pod_environment.py` owned that was C1's. Neither
+> `path_literals` nor the semantic gate looks at a node id, and the module was
+> still refusing in C1's vocabulary. `evaluate_sweep` now takes a caller-declared
+> `ReadinessGroups`, and the record's keys are DERIVED from the caller's group
+> names, so C1 reproduces the existing schema exactly.
+>
+> **The shell dispatch table was a consumer nobody rewrote — and it was
+> pod-fatal.** `autoinit_preflight_setup.sh`'s default `SESSION_KIND` branch
+> loaded the bare `SpendAuthorization` and read `allows_phase_a`. §1 removed
+> that property and made the bare primitive refuse without an `ActionPolicy`, so
+> the branch would have **raised on a paid pod, after setup**. Every import
+> rewriter here walks Python; this is embedded Python inside a heredoc. Four
+> launchers were half-repaired the same way — three importing
+> `PreflightAuthorization as SpendAuthorization`, correct behaviour under a name
+> that says the opposite. The test that should have caught it had the literal
+> string `SpendAuthorization` in it, so it went stale in the same commit; it now
+> derives the narrow type from the launchers themselves.
+>
+> **Accounting:** Phase-B ledger amendments **PHB-HA-003**, **004** and **005**
+> — three, because the closure continued after each was written, and one entry
+> rewritten to cover later work would be a declaration whose numstat no longer
+> matches the diff it names. Continuation B re-declared twice. The migration
+> record runs to the branch tip over 52 commits. **Scientific fields moved: 0**
+> of 94 examined in the C1 preregistration — seeds, battery, both path hashes,
+> isolation plan, recipe, geometry and pricing all byte-identical; and the
+> 570-sample scoring comparison, regenerated at this tree, is still identical
+> per sample and in aggregate.
 >
 
 > **C1 attempt 9, 2026-09-07 — `$1.0440`, pod `8gtnsbigpgaz76`, 57.47 min,
