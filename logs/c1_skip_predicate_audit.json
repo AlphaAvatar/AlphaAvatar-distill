@@ -1152,7 +1152,7 @@
    "kind": "pytest.skip",
    "function": "test_the_session_commit_is_verified_against_the_authorization",
    "condition": "not auth_path.is_file()",
-   "expanded": "not auth_path.is_file() | auth=SpendAuthorization.load(auth_path) | auth_path=REPO / \"logs/autoinit_continuation_authorization.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "not auth_path.is_file() | auth=PreflightAuthorization.load(auth_path) | auth_path=REPO / \"logs/autoinit_continuation_authorization.json\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -1164,7 +1164,7 @@
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 942,
+   "line": 945,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (REPO / \"artifacts/stage3/recovery_search_v2/manifest.json\").is_file()",
@@ -1838,5 +1838,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "1ef3a54f9fe2e28b747e767a684d53399f0f1e1a4bbe05ef437f17d6e2349aba"
+ "digest": "8b1fa45f230b5eb777b38073f8da6400d7f65e8d6ac6fc89c1bc0179786697c3"
 }

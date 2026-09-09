@@ -653,6 +653,59 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "6efc682cd0d177af9f5e06dd7ed54c12488e1fa7ca2b30416575c68ecd7a62b8"
+  },
+  {
+   "amendment_id": "PHB-HA-005",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-09T10:47:27+00:00",
+   "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+   "source_repair_commit": "59db0f112e85e7a25dcdd82f6d79bea519ec1f2f",
+   "source_repair_parent": "c1a1d40a82b0d4de2a4742a7e28281c0a8295d79",
+   "previous_live_digest": "93659b25d49e3605e712cd7e32d6da05b277c39813486ccdee539a0d4c5734ed",
+   "new_live_digest": "f7bc9cea17585602050e8ff5434446f6c4efd9fed859ad22e5e54fe07323dc16",
+   "changed_files": [
+    "scripts/pod/autoinit_preflight_setup.sh"
+   ],
+   "file_sha256_before": {
+    "scripts/pod/autoinit_preflight_setup.sh": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778"
+   },
+   "file_sha256_after": {
+    "scripts/pod/autoinit_preflight_setup.sh": "25cb1f298564d1b606666d4c6e2016cfda9764af9f3723156d3948cafebe7308"
+   },
+   "patch_sha256": "559a08a030158bbca6497a4d9f52e2d970f757aaf9c3b51de5422e76fa60df5a",
+   "numstat": {
+    "scripts/pod/autoinit_preflight_setup.sh": [
+     16,
+     10
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 10,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "Milestone-A merge-review closure, third accounting round: the pod-fatal shell dispatch repair. autoinit_preflight_setup.sh's default SESSION_KIND branch loaded the bare SpendAuthorization and read allows_phase_a; \u00a71 removed that property and made the bare primitive refuse without an ActionPolicy, so the branch would have raised on a paid pod. Four launchers repointed to PreflightAuthorization, and two application modules added to continuation B's declared source set because the continuation now loads them.",
+   "why_the_owner_is_shared_session_runner": "autoinit_preflight_setup.sh is THE shared setup script: every launchable session runs it, so it belongs to Phase A's, Phase B's, the preflight's, the continuation's and C1's frozen sets at once. A repair to its dispatch table moves every one of those digests, including closed Phase B's.",
+   "why_a_c1_only_override_was_rejected": "Nothing is conferred on C1. C1_HARNESS_SOURCE_FILES_V1 still names pre-migration paths and refuses outright. No grant, authorization or bundle is live, and this entry asserts launch_compatible_with_frozen_preregistration: false.",
+   "maintainer_authorization": "MAINTAINER MERGE REVIEW DECISION, 2026-09-09, on branch tip dc566fce7b1b8e2d7fac1ade359af2846108aeb3. The same decision behind PHB-HA-003 and PHB-HA-004, which directs the \u00a71 ownership changes on this branch and permits appending accounting entries only. This third entry records a defect the \u00a71 change INTRODUCED and this round repaired: a shell heredoc is a consumer no import rewriter walks. No Attempt-10 grant or formal authorization is authorized.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "6efc682cd0d177af9f5e06dd7ed54c12488e1fa7ca2b30416575c68ecd7a62b8",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "7d926ded2413425fac9bcbcdb671464020d317a9b477120028d0d6d3a355f4a0"
   }
  ]
 }

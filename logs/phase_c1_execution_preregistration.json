@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "6207c83971870b0161ba244c975f0c957c7e9ee9",
+ "head_commit": "59db0f112e85e7a25dcdd82f6d79bea519ec1f2f",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -75,7 +75,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 94,
-  "digest": "26cbc86ceda7dfdd72df018185ca439b7a8a0c1373d0428691f8dc7d548a1466",
+  "digest": "16170ed7bf359010aa3111bf65aa35fee7be15cfe66a0504a5b882576c998271",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -210,8 +210,8 @@
    },
    {
     "path": "scripts/pod/autoinit_preflight_setup.sh",
-    "sha256": "d8e8640ad057f6843848f40e61ffe9d345caf3f6b823d3987f343992c70d3778",
-    "bytes": 38265
+    "sha256": "25cb1f298564d1b606666d4c6e2016cfda9764af9f3723156d3948cafebe7308",
+    "bytes": 38635
    },
    {
     "path": "scripts/pod/autoinit_science_inputs.py",
@@ -1061,5 +1061,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "9f24c8926a1ae047f8944e9069faf3df36fc459362bf4b9d8fbe5e75a3a6f538"
+ "preregistration_sha256": "c5e9de807f4c8660f333449b39d3f234c8324ec5e1edf4bec139eee04da39c70"
 }
