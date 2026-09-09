@@ -1,0 +1,15 @@
+3020fc4d44bdb9f1b53c3d6fb82fd42901544f4e
+
+The commit whose tree the CUDA stage-F validation runs against.
+
+It names the commit that CONTAINS the entry point
+(scripts/validation/cuda_engineering_check.py), its config
+(configs/validation/cuda_engineering.json) and the operator under test. Written
+into the commit that FOLLOWS it, because a file cannot contain its own commit's
+hash -- the same ordering logs/current_state.json records for its
+baseline_commit.
+
+Full-suite result at this tree: 3512 passed, 16 skipped, 0 failed.
+Clean-tree diagnostic sweep: PASS (3354 passed, 113 skipped, 0 failed).
+
+This binds a REQUEST. It is not an authorization and permits no launch.
