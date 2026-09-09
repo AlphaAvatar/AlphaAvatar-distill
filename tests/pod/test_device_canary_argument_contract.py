@@ -181,7 +181,7 @@ def test_an_empty_local_asset_declaration_is_honoured_by_the_setup():
 
 def test_the_canary_still_fetches_nothing_and_cannot_authorize_phase_a():
     """The two properties the session must not have quietly changed."""
-    from aadistill.governance.authorization import SpendAuthorization
+    from experiments.preflight import PreflightAuthorization as SpendAuthorization
     from aadistill.infrastructure.session import SessionContext
 
     specs = {name: spec for name, _m, _a, spec in all_specs()}
@@ -199,7 +199,7 @@ def test_the_canary_still_fetches_nothing_and_cannot_authorize_phase_a():
 
     auth = SpendAuthorization.load(
         REPO / "logs/autoinit_device_canary_authorization.json")
-    assert auth.allows_phase_a is False, (
+    assert not auth.allows("phase_a"), (
         "a canary grant must never permit Phase A")
 
 

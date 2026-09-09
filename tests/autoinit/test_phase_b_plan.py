@@ -398,7 +398,7 @@ def test_nonadditive_historical_amendment_does_not_make_phase_b_launchable():
 @pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
 def test_the_historical_ledger_cannot_be_read_as_launch_permission():
     """Belt and braces: the ledger says it of itself, in a field."""
-    from aadistill.governance.post_freeze import HISTORICAL_LEDGER_PATH
+    from experiments.phase_b.post_freeze import HISTORICAL_LEDGER_PATH
 
     led = json.loads((REPO / HISTORICAL_LEDGER_PATH).read_text())
     assert led["consumed_by_a_paid_launch_gate"] is False
@@ -431,7 +431,7 @@ def test_the_drift_rule_refuses_everything_it_should():
     """Guards the guard: an allowance that allows everything is not a gate."""
     import json as _json
 
-    from aadistill.governance.post_freeze import NOTE_PATH, accounted_for
+    from experiments.phase_b.post_freeze import NOTE_PATH, accounted_for
 
     note_path = REPO / NOTE_PATH
     note = _json.loads(note_path.read_text())

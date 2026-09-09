@@ -351,7 +351,7 @@ def test_the_authorization_bounds_the_session(tmp_path):
         auth.require_within_cap(8.61, what="session")
     with pytest.raises(AuthorizationError, match="separately unauthorized"):
         auth.refuse("phase_a")
-    assert auth.allows_phase_a is False
+    assert not auth.allows("phase_a")
     assert auth.automatic_phase_a_start is False
 
 

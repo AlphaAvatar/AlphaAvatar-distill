@@ -32,6 +32,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
 from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, IMPORT_REQUIRED_FIELDS, ControlImportError, continuation_manifest, import_permanent_control  # noqa: E402
+from aadistill.initialization.planning.recovery import EquivalenceRule  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
 RECORDS = REPO / "logs/autoinit_permanent_controls"

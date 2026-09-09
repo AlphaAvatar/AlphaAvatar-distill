@@ -34,20 +34,22 @@ def test_it_validates_and_names_itself(spec):
 
 
 def test_it_cannot_start_phase_a(spec):
-    """A property of the type, not a promise. `SpendAuthorization.allows_phase_a`
-    is a hard False, so this session refuses a Phase-A artifact rather than
-    running it."""
+    """A property of the TYPE's policy, not a promise.
+
+    The loader's class carries an `ActionPolicy` that lists `phase_a` in
+    neither `allowed` nor anywhere else, so absence of permission is the
+    denial and there is no flag anyone could set.
+    """
     # By property, not by object identity: the launcher and this test resolve
-    # `SpendAuthorization` through different sys.path entries, so `is` compares
-    # two class objects that are the same class by every meaning that matters.
+    # the type through different sys.path entries, so `is` would compare two
+    # class objects that are the same class by every meaning that matters.
     loader = spec.authorization_loader
-    assert loader.__qualname__ == "SpendAuthorization.load"
+    assert loader.__qualname__.endswith("Authorization.load")
     owner = loader.__self__                       # the class the loader belongs to
-    assert owner.__name__ == "SpendAuthorization"
-    # `allows_phase_a` is a property, so it must be read off an INSTANCE; on the
-    # class it is the property object and `is False` would be vacuously wrong.
+    assert not owner.POLICY.allows("phase_a"), (
+        f"{owner.__name__}'s policy grants phase_a")
     from experiments.measurement.plan import MEASUREMENT_AUTHORIZATION
-    assert MEASUREMENT_AUTHORIZATION.allows_phase_a is False, (
+    assert not MEASUREMENT_AUTHORIZATION.allows("phase_a"), (
         "the measurement's authorization can authorize Phase A")
     assert spec.evidence_fields["phase_a_reachable_from_this_launcher"] is False
     assert spec.evidence_fields["phase_a_launched"] is False
