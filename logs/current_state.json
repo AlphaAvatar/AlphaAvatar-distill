@@ -82,7 +82,7 @@
   "phase_a": "COMPLETE / FROZEN",
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
-  "phase_c1": "IMPLEMENTED / REPRICED / NINE LABELS, EIGHT PAID / NEVER MEASURED / NOT CURRENTLY AUTHORIZED",
+  "phase_c1": "IMPLEMENTED / NOT AUTHORIZED -- status owned by phase_c.c1",
   "phase_c2": "NOT STARTED",
   "formal_recovery_evidence": "NONE"
  },
@@ -117,21 +117,20 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "IMPLEMENTED / TEN LABELS, NINE PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT NOT SCIENTIFICALLY EXECUTED / NOT CURRENTLY AUTHORIZED -- attempt 9 passed both replay gates, then aborted in stage F before any treatment output; no probe was trained or evaluated",
+   "status": "IMPLEMENTED / TEN LABELS, NINE PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / NO CURRENT GRANT OR AUTHORIZATION",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json OWNS the live preregistration, harness and head identities; read them THERE rather than copying them here.",
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL.",
-   "attempts": "TEN LABELS, NINE paid ($4.0001). See BUDGET_LEDGER.md.",
-   "needs": "a new maintainer review and a NEW grant for any tenth attempt. The $15.9002 remaining DOES cover one full $15.1475 attempt, with $0.7527 left and no room for a second.",
-   "not_built": "grant CONSUMED, authorization CONSUMED, bundle CONSUMED -- all by attempt 9, and none of them is live. A tenth attempt would need a new grant, a new authorization, a fresh bundle and a fresh launch_bound readiness record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
+   "needs": "a new maintainer review and a NEW grant for any tenth attempt. Headroom is not permission; see budget.",
+   "not_built": "grant, authorization and bundle all CONSUMED by attempt 9; none is live. A tenth attempt needs a new grant, a new authorization, a fresh bundle and a fresh launch_bound record. The parent rebuild and ~8 GB teacher weights need GPU/network.",
    "evidence": "logs/autoinit_c1_attempt9/ (attempt 8: logs/autoinit_c1_attempt8/)",
    "readiness": "the launch_bound record and the 12 gates were consumed by attempt 9. Both are owed again for any future launch.",
    "blocker": "CLEARED at $0 on 2026-09-08. The stage-F device boundary in attention.activation_importance_v1 is repaired: apply() now builds a compute-device working copy via device.stats_to, and head_write_energy places its score vector and fails closed on a mismatch. Science unmoved (formula, impl id, spec, seeds, digests). NOT observed on a GPU. The remaining blocker is the absence of a grant, not the code.",
    "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, on an L40S). treatment + endpoint: UNMEASURED -- zero probes trained, zero evaluated, no decision. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort: not an ATTENTION result and not a frozen-rule INCONCLUSIVE.",
-   "repairs": "SIX defects repaired at $0 before attempt 9 (three observed working on hardware); the stage-F device boundary repaired at $0 after it. Detail: logs/STATE.md."
+   "repairs": "SIX defects repaired at $0 before attempt 9 (three observed working on hardware); the stage-F device boundary repaired at $0 after it. That repair is LOGICAL / CPU-STRUCTURAL EVIDENCE ONLY and remains so until the CUDA validation runs -- the defect was a cross-device placement, which a single-device machine cannot observe. Detail: logs/STATE.md."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -168,5 +167,9 @@
   "index": "logs/runs/index.json",
   "note": "legacy-v1 by path, ONE entry in logs/runs/index.json with its grant as a second component. run-layout-v3 is FUTURE-only.",
   "run_id": "attempt9"
+ },
+ "architecture_migration": {
+  "status": "CURRENT ENGINEERING ACTIVITY -- initialization-core consolidation and core/application separation. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
+  "record": "logs/migrations/initialization-core/v1/"
  }
 }

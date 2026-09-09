@@ -2,6 +2,23 @@
 **PHASE B CLOSED · PHASE C0 FROZEN · ATTEMPT 9 RAN — THE FROZEN PATH
 REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION GREEN, AWAITING MERGE REVIEW**
 
+# Current state
+
+[`current_state.json`](current_state.json) owns these facts; this list names them
+and points at their owners rather than restating them, because a second copy is
+how the snapshot came to disagree with itself.
+
+| | |
+| --- | --- |
+| C1 attempts | **ten labels** (1, 2, 3, 3R, 4–9), **nine paid**, `$4.0001` — attempt 3 created no resource. [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) |
+| replay | **MEASURED — 2/2 PASS** on an L40S (parent `eea90c91`, incumbent `c313d1b4`) |
+| treatment | **UNMEASURED** — zero probes trained |
+| endpoint | **UNMEASURED** — zero evaluated, no decision |
+| attempt 9 | **NO DECISION** — a pre-treatment infrastructure abort, not an ATTENTION result and not a frozen-rule `INCONCLUSIVE` |
+| authorization | **none** — no live grant, no live authorization, no staged bundle |
+| stage-F device repair | **logical / CPU-structural evidence only** until the CUDA validation runs; the defect is a cross-device placement, which a single-device machine cannot observe |
+| architecture migration | a **current engineering activity**, not a C1 result and no evidence about ATTENTION. Record: [`migrations/initialization-core/v1/`](migrations/initialization-core/v1/) |
+
 > **C1 attempt 9, 2026-09-07 — `$1.0440`, pod `8gtnsbigpgaz76`, 57.47 min,
 > provider confirms gone.** Cumulative **`$267.8598`** of `$283.7600`, leaving
 > **`$15.9002`**. Against the `$15.1475` per-attempt ceiling that is a reserve of
@@ -12,9 +29,13 @@ REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION GREEN, AWAITING MERGE REVIEW
 > attempt-9 entry in `logs/BUDGET_LEDGER.md` and
 > `tests/docs/test_budget_arithmetic.py`.)*
 >
-> **THE FIRST C1 SCIENTIFIC OBSERVATION, after nine attempt labels and nine paid
-> pods.** Setup completed, the driver ran, and **stages B, C, D and E all
-> PASSED**. Both fail-stop replay gates matched exactly:
+> **THE FIRST C1 SCIENTIFIC OBSERVATION, after ten attempt labels and nine paid
+> pods.** (Ten labels — 1, 2, 3, 3R, 4–9 — but **nine paid**: at attempt 3 the
+> launcher declined to create a pod on price, so that label spent `$0.0000` and
+> no provider resource existed. The nine paid attempts sum to `$4.0001`;
+> `logs/BUDGET_LEDGER.md` owns the per-attempt accounting.) Setup completed, the
+> driver ran, and **stages B, C, D
+> and E all PASSED**. Both fail-stop replay gates matched exactly:
 >
 > | step | operator | realized | expected | |
 > | --- | --- | --- | --- | --- |
@@ -924,7 +945,17 @@ REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION GREEN, AWAITING MERGE REVIEW
 > [`autoinit_c1_attempt5/test_gate_failures.json`](autoinit_c1_attempt5/test_gate_failures.json).
 > **Nothing is repaired** — this closeout is metadata only.
 
-# Current state
+# Superseded: the current state as of attempt 8 (2026-09-06)
+
+> **This section is kept as written and is no longer current.** It was headed
+> `# Current state` while claiming to be "the human view of
+> `current_state.json`", and attempt 9 then made it stale by one attempt: its
+> spend (`$266.8158`), its phase table ("NINE LAUNCH-ATTEMPT LABELS / NEVER
+> MEASURED") and its unconsumed Attempt-9 grant are all pre-attempt-9. It
+> promised that "if the two disagree, a structural test fails" — they did
+> disagree, and no test existed to notice. The live state is
+> [`current_state.json`](current_state.json) and the top of this file; the
+> disagreement is now checked by `tests/docs/test_current_state_consistency.py`.
 
 > **NOT AUTHORIZED. Nothing is running and no pod exists. An Attempt-9 GRANT is
 > recorded and unconsumed — a grant permits an ISSUANCE, not a launch.** The

@@ -1797,8 +1797,10 @@ attempt happens is a maintainer decision against this ledger.
 > No money moved — only the conclusion drawn from it, which would have told a
 > maintainer that Phase C1 was over for budget reasons when it is not.
 
-**THE FIRST C1 SCIENTIFIC OBSERVATION, after nine attempt labels and nine paid
-provider resources.** Setup completed, the driver ran, and stages B, C, D and E
+**THE FIRST C1 SCIENTIFIC OBSERVATION, after ten attempt labels and nine paid
+provider resources.** (Attempt 3 spent `$0.0000` — the launcher declined on
+price and created no resource — so the ten labels 1, 2, 3, 3R, 4–9 bought nine
+pods, totalling `$4.0001`.) Setup completed, the driver ran, and stages B, C, D and E
 all PASSED. Both fail-stop replay gates matched their frozen values exactly:
 
 ```
