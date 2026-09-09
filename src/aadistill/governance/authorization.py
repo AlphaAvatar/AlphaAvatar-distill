@@ -55,6 +55,23 @@ class ActionPolicy:
     wire_claims: dict[str, str] = field(default_factory=dict)
     #: action -> what to tell someone who asked for it. Optional.
     refusal_notes: dict[str, str] = field(default_factory=dict)
+    #: The ON-DISK identity of a serialized authorization under this policy.
+    #: All three were hard-coded in `as_dict`, which made a generic serializer
+    #: name one project's schema, one session's key for its plan hash
+    #: (`preflight_plan_hash` -- the preflight's word, not a governance
+    #: concept), and one phase in its enforcement sentence.
+    #:
+    #: Empty `wire_schema` is not a default schema: `as_dict` REFUSES, because
+    #: an artifact serialized under no declared identity is one nobody can
+    #: later verify they are reading correctly.
+    wire_schema: str = ""
+    #: The key `plan_hash` is written under. Historical artifacts use
+    #: `preflight_plan_hash`, so their issuer keeps declaring exactly that and
+    #: their bytes are unchanged.
+    plan_hash_key: str = "plan_hash"
+    #: What the issuer says this artifact makes the launcher do. Experiment
+    #: prose, supplied by whoever issues it.
+    enforcement: str = ""
 
     def allows(self, action: str) -> bool:
         return action in self.allowed
@@ -159,14 +176,28 @@ class SpendAuthorization:
         self.action_policy.refuse(action)
 
     def as_dict(self) -> dict[str, Any]:
+        """Serialize under the POLICY's declared wire identity.
+
+        The schema string, the plan-hash key and the enforcement sentence used
+        to be literals here, so this generic serializer named one project's
+        schema and stated "no code path to Phase A" for every artifact any
+        experiment would ever write.
+        """
+        policy = self.action_policy
+        if not policy.wire_schema:
+            raise AuthorizationError(
+                f"policy {policy.policy_id!r} declares no wire_schema, so this "
+                "authorization cannot be serialized: an artifact written under "
+                "no declared identity cannot be verified by whoever reads it. "
+                "Declare the schema in the application policy.")
         payload = {
-            "schema": "aadistill.autoinit.spend_authorization/v1",
+            "schema": policy.wire_schema,
             "authorization_id": self.authorization_id,
             "version": self.version,
             "granted_utc": self.granted_utc,
             "granted_by": self.granted_by,
             "plan_id": self.plan_id,
-            "preflight_plan_hash": self.plan_hash,
+            policy.plan_hash_key: self.plan_hash,
             "expected_usd": self.expected_usd,
             "hard_cap_usd": self.hard_cap_usd,
             "authorized_stages": list(self.authorized_stages),
@@ -179,10 +210,7 @@ class SpendAuthorization:
             "harness_source_files": list(self.harness_source_files),
             "per_launch_hard_usd": self.per_launch_hard_usd,
             "provenance_commit": self.provenance_commit,
-            "enforcement": (
-                "the launcher loads this artifact and refuses to create a pod "
-                "whose priced hard threshold exceeds hard_cap_usd, refuses a "
-                "stage not in authorized_stages, and has no code path to Phase A"),
+            "enforcement": policy.enforcement,
         }
         payload["authorization_sha256"] = sha256_json(payload)
         return payload
@@ -191,7 +219,7 @@ class SpendAuthorization:
     def require_plan(self, plan_hash: str) -> None:
         if plan_hash != self.plan_hash:
             raise AuthorizationError(
-                f"this authorization is bound to preflight plan {self.plan_hash} "
+                f"this authorization is bound to plan {self.plan_hash} "
                 f"but the plan about to run hashes to {plan_hash}. An "
                 "authorization does not transfer to a plan that changed.")
 
@@ -265,10 +293,18 @@ class SpendAuthorization:
                 f"{path} does not match its own authorization_sha256; it has "
                 "been edited since it was granted")
         resolved.check_claims(raw, where=str(path))
+        #: The SAME key the policy serializes under, so a reader and a writer
+        #: cannot disagree. Hard-coding `preflight_plan_hash` here made the
+        #: generic loader able to read exactly one experiment's artifacts.
+        if resolved.plan_hash_key not in raw:
+            raise AuthorizationError(
+                f"{path} has no {resolved.plan_hash_key!r}; policy "
+                f"{resolved.policy_id!r} serializes the plan hash under that "
+                "key, so this artifact was written by a different issuer")
         return cls(
             authorization_id=raw["authorization_id"],
             granted_utc=raw["granted_utc"], granted_by=raw["granted_by"],
-            plan_id=raw["plan_id"], plan_hash=raw["preflight_plan_hash"],
+            plan_id=raw["plan_id"], plan_hash=raw[resolved.plan_hash_key],
             expected_usd=float(raw["expected_usd"]),
             hard_cap_usd=float(raw["hard_cap_usd"]),
             authorized_stages=tuple(raw["authorized_stages"]),
@@ -298,7 +334,8 @@ class SpendAuthorization:
 #: carrying one.
 
 
-def authorization_from_dict(doc) -> "SpendAuthorization":
+def authorization_from_dict(doc, *,
+                            policy: ActionPolicy | None = None) -> "SpendAuthorization":
     """One authorization from a document holding this dataclass's own fields.
 
     Distinct from `SpendAuthorization.load`, which reads the ON-DISK GRANT
@@ -315,4 +352,9 @@ def authorization_from_dict(doc) -> "SpendAuthorization":
             fields[key] = dict(fields[key])
     if fields.get("harness_source_files") is not None:
         fields["harness_source_files"] = tuple(fields["harness_source_files"])
+    #: Declared, not defaulted. Without a policy the object grants nothing AND
+    #: cannot be serialized, which is the honest state for a declaration whose
+    #: caller never said what it may express.
+    if policy is not None:
+        fields["action_policy"] = policy
     return SpendAuthorization(**fields)

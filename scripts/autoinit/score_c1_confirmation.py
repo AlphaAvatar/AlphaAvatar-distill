@@ -53,7 +53,11 @@ from aadistill.initialization.planning.recovery import (
     score_recovery_row,
     validate_scored_rows,
 )
-from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
+#: The scientific rule this scorer applies. It lived inside
+#: `score_recovery_row`, which made a generic planning module state
+#: what THIS battery means by correct. The arithmetic is unchanged.
+from experiments.recovery_policy import (
+    CAPABILITY_SCHEMA_V1, CORRECT_IN_USABLE_ROLLOUT)
 from aadistill.evaluation import usable_rollout  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
@@ -131,6 +135,7 @@ def score_battery(*, battery: Path, gen_dir: Path, label: str, seed: int,
                 structural = {k: bool(verdict.get(k)) for k in TOOL_STRUCTURAL_GATE}
                 is_usable = is_usable and all(structural.values())
             row = score_recovery_row(usable=is_usable, scorer_correct=correct,
+                                     rule=CORRECT_IN_USABLE_ROLLOUT,
                                      scorable=scorable)
             row.update({"set": name, "id": record["id"],
                         "domain": spec["domain"], **components})
@@ -154,7 +159,8 @@ def score_battery(*, battery: Path, gen_dir: Path, label: str, seed: int,
         "rows": rows,
         "per_sample": per_sample,
         "per_set": per_set,
-        "row_contract": validate_scored_rows(rows),
+        "row_contract": validate_scored_rows(
+            rows, rule=CORRECT_IN_USABLE_ROLLOUT),
         "totals": summarize(rows, scorable=None),
         "per_domain": group(rows, "domain"),
         "per_capability": {name: per_set[name]

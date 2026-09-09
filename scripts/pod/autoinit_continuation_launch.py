@@ -42,6 +42,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from experiments.deployment import MAIN_RELAY, provider_cli_candidates  # noqa: E402
 from experiments.preflight import PreflightAuthorization  # noqa: E402
 from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
@@ -201,7 +202,7 @@ def spec(args) -> SessionSpec:
         #: these. `materialize_inputs` does, by the route `--transport` names,
         #: and the declaration buys them the $0 relay precheck. It can no longer
         #: mean "the shell knows where this goes" — the shell knows nothing.
-        relay_inputs += [RelayInput(f"permanent_controls/{c}/model/model.safetensors")
+        relay_inputs += [RelayInput(f"permanent_controls/{c}/model/model.safetensors", repo=MAIN_RELAY)
                          for c in CONTROLS]
     return SessionSpec(
         session_id="autoinit-continuation",
@@ -214,7 +215,8 @@ def spec(args) -> SessionSpec:
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py"),
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            provider_cli_candidates=provider_cli_candidates()),
         plan_id=CONTINUATION_PLAN_V1.plan_id,
         plan_hash=CONTINUATION_PLAN_V1.plan_hash,
         budget=BudgetSpec(

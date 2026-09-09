@@ -54,6 +54,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from experiments.deployment import provider_cli_candidates  # noqa: E402
 from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
@@ -431,7 +432,7 @@ def fetch_finalists(ctx: SessionContext) -> list:
     until it is destroyed, and what survives them is `leaf_retention.json`.
     """
     fetched: list = []
-    if not ctx.stage2_passed:
+    if not ctx.products_eligible:
         return fetched
     if ctx.args.stage_leaves_to_relay:
         rc = ctx.target.run(
@@ -571,7 +572,8 @@ def spec(args) -> SessionSpec:
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py"),
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            provider_cli_candidates=provider_cli_candidates()),
         plan_id=PHASE_A_PLAN_V1.plan_id,
         plan_hash=PHASE_A_PLAN_V1.plan_hash,
         budget=budget(args),
@@ -602,6 +604,16 @@ def spec(args) -> SessionSpec:
             success="ALL_DONE",
             failure=("PHASE_A_FAILED", "PHASE_A_INCOMPLETE"),
             incomplete=("PHASE_A_INCOMPLETE",),
+            #: When this session's products EXIST. Its driver records stage "2",
+            #: after which the trained checkpoints are on the pod whether or not
+            #: the run went on to succeed -- so eligibility is broader than
+            #: success, which is the distinction that cost $2.82 on 2026-08-13.
+            #:
+            #: The stage NUMBER is this driver's fact. `MarkerPolicy` used to
+            #: read `driver_stages.get("2")` itself, which made generic
+            #: infrastructure know one driver's numbering.
+            products_eligible=lambda terminal, stages: bool(
+                stages.get("2")) or terminal in ("ALL_DONE", "PHASE_A_INCOMPLETE"),
             failure_note=("a blocking stage failed — collecting evidence, then "
                           "tearing down. Completed probes are journalled and the "
                           "permanent controls are inputs here and untouched.")),

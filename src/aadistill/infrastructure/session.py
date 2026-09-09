@@ -75,31 +75,6 @@ def _bad_repo_dir(dest: str) -> list[str]:
 # what a session needs staged before its driver starts
 # ---------------------------------------------------------------------------
 
-#: The artifact store every declaration has always meant. Named once so a
-#: session that needs a *different* repository says so in its manifest rather
-#: than in a fetch block nobody declared.
-#:
-#: Read from `configs/infrastructure/artifact_store.json`, not written here: a
-#: concrete repository id in the reusable core makes the framework name one
-#: organisation's storage, and a second deployment would edit the framework
-#: rather than its own configuration. Resolved once, at import, because it is
-#: a deployment constant rather than a per-session choice.
-def _main_relay() -> str:
-    import json
-    from pathlib import Path as _Path
-
-    config = (_Path(__file__).resolve().parents[3]
-              / "configs/infrastructure/artifact_store.json")
-    if not config.is_file():
-        raise FileNotFoundError(
-            f"{config} is missing; the artifact store is a deployment fact and "
-            "this module will not guess one")
-    return json.loads(config.read_text())["main_relay"]
-
-
-MAIN_RELAY = _main_relay()
-
-
 @dataclass(frozen=True)
 class RelayInput:
     """One object the pod fetches from the artifact store.
@@ -141,7 +116,11 @@ class RelayInput:
     #: block for the same reason ``dest`` does. A hidden second fetch path would
     #: be exactly the defect this type was created to remove: staging the
     #: manifest does not declare.
-    repo: str = MAIN_RELAY
+    #: WHICH artifact repository holds it. REQUIRED: it defaulted to a
+    #: module-level `MAIN_RELAY` computed at import from
+    #: `configs/infrastructure/artifact_store.json`, so importing this module
+    #: read the repository and the framework named one organisation's storage.
+    repo: str
     #: Repository-relative DIRECTORY it is staged into on the pod. ``None`` means
     #: setup does not stage it — the continuation's two permanent controls arrive
     #: by ``--transport``, and this entry buys them the $0 precheck. It can no
@@ -228,6 +207,13 @@ class ExecutionCommands:
     #: see the class docstring for why this one is defaulted and the others are
     #: not.
     remote_python: str = "/opt/train/bin/python"
+    #: Ordered places to look for the provider CLI, PATH first, RESOLVED BY THE
+    #: CALLER. The runner used to call `shutil.which("runpodctl")` and read
+    #: `configs/infrastructure/provider_cli.json` itself, so reusable
+    #: infrastructure named one provider's binary and reached into this
+    #: repository's config tree. Empty means "no candidate was resolved", and
+    #: the runner refuses rather than searching anywhere of its own choosing.
+    provider_cli_candidates: tuple[str, ...] = ()
 
     def as_dict(self) -> dict[str, str]:
         return {"watchdog": self.watchdog, "setup_script": self.setup_script,
@@ -306,10 +292,81 @@ class MarkerPolicy:
     def is_incomplete(self, terminal: str) -> bool:
         return terminal in self.incomplete
 
-    def stage2_passed(self, terminal: str, driver_stages: Mapping[str, Any]) -> bool:
-        return bool(driver_stages.get("2")
-                    or terminal == self.success
-                    or self.is_incomplete(terminal))
+    #: Are this session's products worth fetching? Optional and CALLER-DECLARED.
+    #:
+    #: This was `stage2_passed`, which asked `driver_stages.get("2")` -- a
+    #: generic marker policy reading one driver's stage NUMBER. A session whose
+    #: products become available at a different stage, or that numbers its
+    #: stages differently, had no way to say so.
+    products_eligible: Callable[[str, Mapping[str, Any]], bool] | None = None
+
+    def products_are_eligible(self, terminal: str,
+                              driver_stages: Mapping[str, Any]) -> bool:
+        """Do this session's products EXIST and therefore need fetching?
+
+        Distinct from "did the session succeed". Products are fetched whenever
+        they exist, which is whenever the blocking stages passed -- this was
+        `if terminal == "ALL_DONE"` on 2026-08-13 and it destroyed both
+        controls of a $2.82 session.
+
+        The generic answer uses only what a `MarkerPolicy` already declares:
+        the success terminal and the incomplete terminals. A session that knows
+        more -- because its own driver records a stage after which products
+        exist -- supplies `products_eligible` and says so.
+        """
+        if self.products_eligible is not None:
+            return bool(self.products_eligible(terminal, driver_stages))
+        return terminal == self.success or self.is_incomplete(terminal)
+
+
+@dataclass(frozen=True)
+class ProductFetchResult:
+    """One `fetch_products` entry, with its kind stated rather than inferred.
+
+    `fetch_products` returns two different things and the runner used to tell
+    them apart by asking `isinstance(entry, dict)` -- so ANY non-dict counted as
+    a success. That is one experiment's artifact protocol (`finalists_to_fetch`
+    returns `canonical_id` strings) compiled into a generic runner, and it fails
+    OPEN: a policy that returned `None`, or an error object, or a bare path,
+    would have been recorded as a completed transfer.
+
+    * `transfer` -- something was copied. `rc` decides, and a failed transfer
+      must fail closed.
+    * `identifier` -- nothing was copied. These name bytes that are already
+      off-pod, so there is no `rc`; inventing a failure would be as wrong as
+      inventing a success.
+    """
+
+    kind: str
+    detail: Any
+    rc: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.kind not in ("transfer", "identifier"):
+            raise ValueError(
+                f"kind must be 'transfer' or 'identifier', not {self.kind!r}")
+        if self.kind == "transfer" and self.rc is None:
+            raise ValueError("a transfer must report an rc")
+
+    @property
+    def ok(self) -> bool:
+        return True if self.kind == "identifier" else self.rc == 0
+
+
+def default_fetch_result_ok(entry: object) -> bool:
+    """Fail-closed classification for an entry whose policy declared none.
+
+    A `ProductFetchResult` answers for itself. A bare dict is read as a
+    transfer, which is what every transfer-producing policy already returns.
+    ANYTHING ELSE IS A FAILURE -- the runner cannot know that an unrecognized
+    object represents a completed transfer, and guessing "yes" is how an
+    unfetched product gets recorded as secured.
+    """
+    if isinstance(entry, ProductFetchResult):
+        return entry.ok
+    if isinstance(entry, dict):
+        return entry.get("rc") == 0
+    return False
 
 
 @dataclass(frozen=True)
@@ -343,6 +400,10 @@ class ArtifactPolicy:
     #: answer for a run that produces no weights — not a reason to skip the gate.
     products_secured: Callable[..., tuple[bool, str]] = \
         lambda ctx, fetched: (True, "this session owes no off-pod products")
+    #: Did ONE `fetch_products` entry represent a successful transfer? The
+    #: default is fail-closed; a policy whose entries are not dicts or
+    #: `ProductFetchResult`s must say how to read them.
+    fetch_result_ok: Callable[[object], bool] = default_fetch_result_ok
     #: Extra `(remote_path, local_filename)` pairs the log relay pulls while the
     #: driver runs, beyond the run log, the status file and the evidence. The
     #: preflight relays both controls' training streams; the continuation, which
@@ -425,7 +486,9 @@ class SessionContext:
     host: str = ""
     target: Any = None
     scp: tuple[str, ...] = ()
-    stage2_passed: bool = False
+    #: Whether this session's products exist and should be fetched. Named for
+    #: the QUESTION, not for one driver's stage number.
+    products_eligible: bool = False
     plan: BudgetPlan | None = None
     price: float | None = None
     image_digest: str = ""

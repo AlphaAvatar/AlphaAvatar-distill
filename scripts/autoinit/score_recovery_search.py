@@ -59,7 +59,11 @@ from aadistill.initialization.planning.recovery import (
     score_recovery_row,
     validate_scored_rows,
 )
-from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
+#: The scientific rule this scorer applies. It lived inside
+#: `score_recovery_row`, which made a generic planning module state
+#: what THIS battery means by correct. The arithmetic is unchanged.
+from experiments.recovery_policy import (
+    CAPABILITY_SCHEMA_V1, CORRECT_IN_USABLE_ROLLOUT)
 from experiments.source_sets import recovery_scoring_contract
 from aadistill.evaluation import usable_rollout  # noqa: E402
 from aadistill.data.tools import normalize_tools  # noqa: E402
@@ -239,6 +243,7 @@ def main() -> None:
                 structural = {k: bool(verdict.get(k)) for k in TOOL_STRUCTURAL_GATE}
                 is_usable = is_usable and all(structural.values())
             row = score_recovery_row(usable=is_usable, scorer_correct=correct,
+                                     rule=CORRECT_IN_USABLE_ROLLOUT,
                                      scorable=scorable)
             row.update({"set": name, "id": record["id"],
                         "domain": spec["domain"], **components})
@@ -267,7 +272,7 @@ def main() -> None:
             f"no generations for {sorted(missing_sets)}; refusing to report a "
             "rate over a subset of the battery as if it were the battery")
 
-    contract = validate_scored_rows(rows)
+    contract = validate_scored_rows(rows, rule=CORRECT_IN_USABLE_ROLLOUT)
     result = {
         "schema": "aadistill.autoinit.recovery_search_result/v1",
         "created_utc": datetime.now(timezone.utc).isoformat(),

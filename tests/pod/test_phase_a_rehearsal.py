@@ -138,11 +138,15 @@ def test_the_narrow_type_still_answers_no(tmp_path):
     a = MICRO_PREFLIGHT_AUTHORIZATION
     assert not a.allows("phase_a")
     assert not a.allows("automatic_phase_a_start")
-    # This one is stricter still: its policy is DENY_ALL, so it grants nothing
-    # and CLAIMS nothing -- there is no `phase_a_authorized` key on the wire to
-    # be read as a permission at all.
+    # It reads and writes under the preflight's WIRE contract -- same schema,
+    # same key names -- while granting nothing: `allowed` is empty, which is
+    # the half that decides permission. So the claims DO appear on the wire,
+    # and they appear as False. That is the honest artifact: a reader sees the
+    # refusal recorded rather than having to infer it from an absent key.
     assert a.action_policy.allowed == frozenset()
-    assert not any("phase_a" in k for k in a.as_dict()), sorted(a.as_dict())
+    d = a.as_dict()
+    assert d["phase_a_authorized"] is False
+    assert d["automatic_phase_a_start"] is False
 
 
 def test_phase_a_cannot_authorize_a_follow_on(tmp_path):

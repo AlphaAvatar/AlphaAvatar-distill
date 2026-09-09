@@ -40,6 +40,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from experiments.deployment import provider_cli_candidates  # noqa: E402
 from experiments.preflight import PreflightAuthorization  # noqa: E402
 from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
@@ -84,7 +85,7 @@ def fetch_controls(ctx: SessionContext) -> list:
     controls on 2026-08-13 for want of that distinction.
     """
     fetched: list = []
-    if not ctx.stage2_passed:
+    if not ctx.products_eligible:
         return fetched
     for name in CONTROLS:
         dest = Path(ctx.args.ckpt_store) / name
@@ -134,7 +135,8 @@ def spec(args) -> SessionSpec:
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py"),
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            provider_cli_candidates=provider_cli_candidates()),
         plan_id=PREFLIGHT_PLAN_V1.plan_id,
         plan_hash=PREFLIGHT_PLAN_V1.plan_hash,
         budget=BudgetSpec(
@@ -174,6 +176,16 @@ def spec(args) -> SessionSpec:
             success="ALL_DONE",
             failure=("PREFLIGHT_FAILED", "PREFLIGHT_INCOMPLETE"),
             incomplete=("PREFLIGHT_INCOMPLETE",),
+            #: When this session's products EXIST. Its driver records stage "2",
+            #: after which the trained checkpoints are on the pod whether or not
+            #: the run went on to succeed -- so eligibility is broader than
+            #: success, which is the distinction that cost $2.82 on 2026-08-13.
+            #:
+            #: The stage NUMBER is this driver's fact. `MarkerPolicy` used to
+            #: read `driver_stages.get("2")` itself, which made generic
+            #: infrastructure know one driver's numbering.
+            products_eligible=lambda terminal, stages: bool(
+                stages.get("2")) or terminal in ("ALL_DONE", "PREFLIGHT_INCOMPLETE"),
             failure_note=("a blocking stage failed — collecting evidence, then "
                           "tearing down. Permanent controls were not trained "
                           "under a configuration that has to change.")),

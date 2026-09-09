@@ -408,7 +408,11 @@ def rejected_implementations(
 
 # --- the immutability ledger ------------------------------------------------
 
-LEDGER_PATH = Path("configs/autoinit/operator_ledger.json")
+#: WHERE the ledger lives is the application's fact -- `configs/autoinit/...`
+#: is this repository's layout, and a core module naming it makes the framework
+#: depend on the tree it is supposed to be reusable inside. Callers pass the
+#: path; `scripts/experiments/operator_ledger.py` declares this project's.
+DEFAULT_LEDGER_PATH: Path | None = None
 
 
 def registry_ledger() -> dict[str, Any]:
@@ -421,7 +425,7 @@ def registry_ledger() -> dict[str, Any]:
     }
 
 
-def verify_ledger(path: str | Path = LEDGER_PATH, *,
+def verify_ledger(path: str | Path, *,
                   repo_root: str | Path = ".") -> dict[str, Any]:
     """Compare the live registry against the committed ledger.
 
@@ -458,7 +462,7 @@ def verify_ledger(path: str | Path = LEDGER_PATH, *,
     return report
 
 
-def write_ledger(path: str | Path = LEDGER_PATH, *, repo_root: str | Path = ".") -> Path:
+def write_ledger(path: str | Path, *, repo_root: str | Path = ".") -> Path:
     p = Path(repo_root) / path
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(registry_ledger(), indent=2, sort_keys=True) + "\n")

@@ -53,8 +53,13 @@ STUDY_B = dict(
     capability_schema=CapabilitySchema(expected=("alpha", "beta")),
     aggregation=SeedAggregation(),
     feasibility_metric="b_feasible",
+    feasibility_min=0.31,
     primary_metric="b_primary",
     secondary_metric="b_secondary",
+    #: Study B runs NO canonical control. That is the point of naming it: a
+    #: search without a control is a valid search, so a plan cannot default to
+    #: having one.
+    include_canonical_control=False,
 )
 
 #: `__post_init__` requires both rules to be stated before the run -- "a rule
@@ -103,6 +108,18 @@ class TestTwoCallersGetTwoPlans:
         b = plan(STUDY_B)
         assert (b.feasibility_metric, b.primary_metric, b.secondary_metric) == \
             ("b_feasible", "b_primary", "b_secondary")
+        assert b.feasibility_min == 0.31
+
+    def test_the_control_choice_is_the_callers(self, study_a):
+        """Study A advances a canonical control; study B does not. It defaulted
+        to True, so every plan silently had one and the probe counts were
+        computed from a design nobody stated."""
+        a, b = plan(study_a), plan(STUDY_B)
+        assert a.include_canonical_control is True
+        assert b.include_canonical_control is False
+        # It is load-bearing: the control is an EXTRA probe at each rung.
+        assert a.rung1_probes == a.searched_leaves + 1
+        assert b.rung1_probes == b.searched_leaves
 
     def test_the_aggregation_is_the_callers(self, study_a):
         a, b = plan(study_a), plan(STUDY_B)
@@ -126,6 +143,8 @@ class TestAbsentPolicyIsRefused:
     @pytest.mark.parametrize("missing", [
         "seeds", "tie_break_seed", "reported_components", "equivalence",
         "catastrophic", "capability_schema", "aggregation",
+        "feasibility_metric", "feasibility_min", "primary_metric",
+        "secondary_metric", "include_canonical_control",
     ])
     def test_omitting_a_policy_field_raises(self, study_a, missing):
         policy = {k: v for k, v in study_a.items() if k != missing}

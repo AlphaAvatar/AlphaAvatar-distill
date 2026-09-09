@@ -2,7 +2,7 @@
  "schema": "aadistill.architecture_scoring_equivalence/v1",
  "_contract": "Frozen Phase-A generations re-scored through the pre- and post-migration trees. Shows that relocating the recovery scorer moved its contract digest WITHOUT moving any number it produces. AUTHORIZES NOTHING and is not a new experimental result \u2014 no model ran, and the generations are unmodified evidence from a completed run.",
  "base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
- "migrated_commit": "bf0944f3ab487b0116494f60a73fa17d21cefac9",
+ "migrated_commit": "701f9d62dfed430ae74893c83ba91847553b0937",
  "evidence_root": "/home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a",
  "training_seed": "20260726",
  "expected_to_differ": {
@@ -36,33 +36,33 @@
  "results": [
   {
    "search_path": "ab7632b00788",
-   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.ab7632b00788.sa --label ab7632b00788 --seed 20260726 --out /tmp/aad-migration-cmp-6effs811/old/ab7632b00788.json --per-sample /tmp/aad-migration-cmp-6effs811/old/ab7632b00788.persample.json --allow-missing-sets",
-   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.ab7632b00788.sa --label ab7632b00788 --seed 20260726 --out /tmp/aad-migration-cmp-6effs811/new/ab7632b00788.json --per-sample /tmp/aad-migration-cmp-6effs811/new/ab7632b00788.persample.json --allow-missing-sets",
+   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.ab7632b00788.sa --label ab7632b00788 --seed 20260726 --out /tmp/aad-migration-cmp-x44mqdga/old/ab7632b00788.json --per-sample /tmp/aad-migration-cmp-x44mqdga/old/ab7632b00788.persample.json --allow-missing-sets",
+   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.ab7632b00788.sa --label ab7632b00788 --seed 20260726 --out /tmp/aad-migration-cmp-x44mqdga/new/ab7632b00788.json --per-sample /tmp/aad-migration-cmp-x44mqdga/new/ab7632b00788.persample.json --allow-missing-sets",
    "n_samples": 190,
    "summary_scores_identical": true,
    "per_sample_identical": true,
    "contract_digest_old": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
-   "contract_digest_new": "18ce628faba704bfa1e8b53f9c912da2962e878742d0115db2f88c0b16269ca3"
+   "contract_digest_new": "933dfc60670e762f91b486c32648ef465c84d78ef9404914fb048cb428967ea6"
   },
   {
    "search_path": "bf5ae3b6ae00",
-   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa --label bf5ae3b6ae00 --seed 20260726 --out /tmp/aad-migration-cmp-6effs811/old/bf5ae3b6ae00.json --per-sample /tmp/aad-migration-cmp-6effs811/old/bf5ae3b6ae00.persample.json --allow-missing-sets",
-   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa --label bf5ae3b6ae00 --seed 20260726 --out /tmp/aad-migration-cmp-6effs811/new/bf5ae3b6ae00.json --per-sample /tmp/aad-migration-cmp-6effs811/new/bf5ae3b6ae00.persample.json --allow-missing-sets",
+   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa --label bf5ae3b6ae00 --seed 20260726 --out /tmp/aad-migration-cmp-x44mqdga/old/bf5ae3b6ae00.json --per-sample /tmp/aad-migration-cmp-x44mqdga/old/bf5ae3b6ae00.persample.json --allow-missing-sets",
+   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa --label bf5ae3b6ae00 --seed 20260726 --out /tmp/aad-migration-cmp-x44mqdga/new/bf5ae3b6ae00.json --per-sample /tmp/aad-migration-cmp-x44mqdga/new/bf5ae3b6ae00.persample.json --allow-missing-sets",
    "n_samples": 190,
    "summary_scores_identical": true,
    "per_sample_identical": true,
    "contract_digest_old": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
-   "contract_digest_new": "18ce628faba704bfa1e8b53f9c912da2962e878742d0115db2f88c0b16269ca3"
+   "contract_digest_new": "933dfc60670e762f91b486c32648ef465c84d78ef9404914fb048cb428967ea6"
   },
   {
    "search_path": "fe9683e6a9c7",
-   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa --label fe9683e6a9c7 --seed 20260726 --out /tmp/aad-migration-cmp-6effs811/old/fe9683e6a9c7.json --per-sample /tmp/aad-migration-cmp-6effs811/old/fe9683e6a9c7.persample.json --allow-missing-sets",
-   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa --label fe9683e6a9c7 --seed 20260726 --out /tmp/aad-migration-cmp-6effs811/new/fe9683e6a9c7.json --per-sample /tmp/aad-migration-cmp-6effs811/new/fe9683e6a9c7.persample.json --allow-missing-sets",
+   "old_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa --label fe9683e6a9c7 --seed 20260726 --out /tmp/aad-migration-cmp-x44mqdga/old/fe9683e6a9c7.json --per-sample /tmp/aad-migration-cmp-x44mqdga/old/fe9683e6a9c7.persample.json --allow-missing-sets",
+   "new_command": "/home/ecs-user/AlphaAvatar-distill/.venv/bin/python scripts/autoinit/score_recovery_search.py --generations /home/ecs-user/aad-artifacts/autoinit/phase_b/attempt5/raw_evidence/eval/phase_a/autoinit.v1.phase_a.rung1.fe9683e6a9c7.sa --label fe9683e6a9c7 --seed 20260726 --out /tmp/aad-migration-cmp-x44mqdga/new/fe9683e6a9c7.json --per-sample /tmp/aad-migration-cmp-x44mqdga/new/fe9683e6a9c7.persample.json --allow-missing-sets",
    "n_samples": 190,
    "summary_scores_identical": true,
    "per_sample_identical": true,
    "contract_digest_old": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
-   "contract_digest_new": "18ce628faba704bfa1e8b53f9c912da2962e878742d0115db2f88c0b16269ca3"
+   "contract_digest_new": "933dfc60670e762f91b486c32648ef465c84d78ef9404914fb048cb428967ea6"
   }
  ],
  "authorizes": "nothing"

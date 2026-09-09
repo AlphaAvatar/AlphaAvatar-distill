@@ -46,6 +46,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 # pre-provider gate executes it directly rather than trusting a transcript of it.
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
+from experiments.deployment import MAIN_RELAY, provider_cli_candidates  # noqa: E402
 from experiments.phase_c1 import session as CS
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
 from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
@@ -91,7 +92,7 @@ from autoinit_science_inputs import CALIBRATION_V1, RECOVERY_LADDER  # noqa: E40
 #: `chat_template.jinja` at all.
 C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
     RelayInput(f"stage1/qwen3_0p6b_init_v0/checkpoint/{name}",
-               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint", sha256=sha)
+               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint", sha256=sha, repo=MAIN_RELAY)
     for name, sha in (
         ("tokenizer.json",
          "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"),
@@ -119,7 +120,7 @@ C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
 C1_ROPE_INPUT: tuple[RelayInput, ...] = (
     RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
                dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-               sha256="a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054"),
+               sha256="a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054", repo=MAIN_RELAY),
 )
 #: What `stored_rope_base` must report for the staged config, in both venvs.
 C1_ROPE_BASE = 5_000_000
@@ -797,7 +798,8 @@ def spec(args) -> SessionSpec:
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py"),
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            provider_cli_candidates=provider_cli_candidates()),
         plan_id="autoinit.v1.phase_c1",
         #: The isolation plan's own hash, not Phase A's. C1 is different science,
         #: not a different operational identity for the same science.

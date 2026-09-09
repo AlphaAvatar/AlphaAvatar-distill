@@ -47,7 +47,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1565,7 +1565,10 @@ class PreflightPlan:
     """
 
     stages: tuple[PreflightStage, ...]
-    plan_id: str = "autoinit.micro_preflight"
+    #: REQUIRED. It defaulted to "autoinit.micro_preflight", so any plan built
+    #: without an id silently claimed that session's identity -- and plan_hash
+    #: is computed FROM it, so two different plans could hash as one.
+    plan_id: str = field(kw_only=True)
     version: int = 1
 
     @property
@@ -1607,30 +1610,45 @@ class ScoringContractError(RuntimeError):
     """A scored recovery row violates the metric contract."""
 
 
-def score_recovery_row(*, usable: bool, scorer_correct: bool,
-                       scorable: bool = True) -> dict[str, bool]:
-    """One scored rollout, with ``correct => usable`` true **by construction**.
+@dataclass(frozen=True)
+class CorrectnessRule:
+    """How a scored rollout becomes `correct`. Supplied by the caller.
 
-    The semantic question is real and is resolved here rather than left for the
-    aggregator to trip over. A rollout can contain an extractable correct answer
-    and still be unusable: it can hit the context limit after answering, or fall
-    into a repetition loop, or break protocol. So a scorer alone *can* say
-    "correct" about a rollout the behaviour metric calls unusable.
+    The RULE is a scientific decision about one battery; the row shape, the
+    counting and the invariant checking are mechanism. They were one function,
+    so a generic planning module stated that "this battery defines correct as
+    'correct in a usable rollout'" -- a sentence about a specific evaluation,
+    compiled into reusable code.
 
-    **This battery defines ``correct`` as "correct in a usable rollout".** A
-    checkpoint that emits the right answer and then loops forever cannot produce
-    trajectories for Stage 5, and counting it as correct would let the primary
-    metric reward the exact failure that dominates this project — ~31% of rollouts
-    hitting the context limit. `correct_given_usable` then means what it says, and
-    `correct_overall` means "answered correctly, in a rollout we could actually
-    use".
-
-    The rejected alternative is recorded: scoring correctness independently of
-    usability would make `correct_overall` a measure of latent capability rather
-    than of deployable behaviour, and would break `correct <= usable` in the
-    aggregate.
+    `decide` takes the three observed facts and returns the battery's verdict.
+    `note` is what a violation report says, because the reason a row is illegal
+    is the rule's reason, not this module's.
     """
-    correct = bool(scorable and usable and scorer_correct)
+
+    rule_id: str
+    decide: Callable[[bool, bool, bool], bool]
+    note: str
+    #: Whether the rule guarantees `correct => usable`. A rule that scores
+    #: correctness independently does NOT, and the aggregate invariant must not
+    #: then be enforced as if it did.
+    correct_implies_usable: bool = True
+
+
+def score_recovery_row(*, usable: bool, scorer_correct: bool,
+                       scorable: bool = True,
+                       rule: CorrectnessRule) -> dict[str, bool]:
+    """One scored rollout, under the CALLER's correctness rule.
+
+    Mechanism only: the observed facts are recorded as typed booleans, the
+    rule decides `correct`, and `correct_but_unusable` is recorded so the gap
+    between "the scorer found an answer" and "we counted it" stays visible
+    rather than being silently absorbed.
+
+    `rule` is required. A default would make one battery's definition of
+    `correct` the answer for every battery that forgot to state its own.
+    """
+    correct = bool(rule.decide(bool(scorable), bool(usable),
+                               bool(scorer_correct)))
     return {
         "usable": bool(usable),
         "scorer_correct": bool(scorer_correct),
@@ -1642,7 +1660,8 @@ def score_recovery_row(*, usable: bool, scorer_correct: bool,
     }
 
 
-def validate_scored_rows(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+def validate_scored_rows(rows: Sequence[Mapping[str, Any]], *,
+                         rule: CorrectnessRule | None = None) -> dict[str, Any]:
     """Enforce the contract on scored rows **before** they are aggregated.
 
     `SeedAggregation.pool` also refuses `correct > usable`, but by then the
@@ -1661,8 +1680,12 @@ def validate_scored_rows(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         if row.get("correct") and not row.get("usable"):
             violations.append({
                 "id": row.get("id"), "set": row.get("set"),
-                "reason": ("correct=True with usable=False; this battery defines "
-                           "correct as 'correct in a usable rollout'")})
+                #: The rule's own words. This module does not know why a
+                #: battery calls such a row illegal -- only that the caller
+                #: said it is.
+                "reason": ("correct=True with usable=False; "
+                           + (rule.note if rule else
+                              "the caller's correctness rule forbids it"))})
         if row.get("correct") and not row.get("scorable", True):
             violations.append({
                 "id": row.get("id"), "set": row.get("set"),
@@ -1693,15 +1716,18 @@ class SuccessiveHalvingPlan:
     #: built without arguments was that study whether or not anyone said so.
     seeds: tuple[int, ...] = field(kw_only=True)
     tie_break_seed: int | None = field(kw_only=True)
-    include_canonical_control: bool = True
+    #: REQUIRED. Whether a canonical control advances unconditionally is this
+    #: study's design, not successive-halving mathematics: a search with no
+    #: control is a valid search.
+    include_canonical_control: bool = field(kw_only=True)
     #: Feasibility constraint. Blind to correctness by construction, so it gates
     #: rather than scores.
-    feasibility_metric: str = "usable_rollout_rate"
-    feasibility_min: float = 0.0
+    feasibility_metric: str = field(kw_only=True)
+    feasibility_min: float = field(kw_only=True)
     #: The capability objective, applied among feasible candidates only.
-    primary_metric: str = "correct_overall"
+    primary_metric: str = field(kw_only=True)
     #: Reported to explain a ranking; never changes one.
-    secondary_metric: str = "correct_given_usable"
+    secondary_metric: str = field(kw_only=True)
     reported_components: tuple[str, ...] = field(kw_only=True)
     #: The behaviour equivalence interval. A rule, not a constant: the formula is
     #: frozen now, the numeric value comes from the control characterization.
@@ -1737,14 +1763,19 @@ class SuccessiveHalvingPlan:
                 f"searched_leaves ({self.searched_leaves}); otherwise rung 1 "
                 "selects nothing")
         if len(self.seeds) < 2:
+            #: The MATHEMATICAL requirement: one seed cannot separate two
+            #: candidates whose difference is smaller than seed noise. How
+            #: large that noise is, is an empirical fact about one metric on
+            #: one study -- 0.1290 for behavior_v0 -- and it belongs to that
+            #: study's policy, not to this constructor.
             raise ValueError(
-                "one seed cannot rank close candidates: the behaviour metric's "
-                "seed-only spread is 0.1290")
+                "successive halving needs at least 2 seeds: one seed cannot "
+                "rank candidates separated by less than seed-only variance")
         if self.feasibility_metric == self.primary_metric:
             raise ValueError(
-                "the feasibility constraint and the capability objective must be "
-                "different metrics; usable_rollout is blind to correctness by "
-                "construction, which is exactly why it gates rather than ranks")
+                "the feasibility constraint and the capability objective must "
+                "be different metrics: a constraint that is also the objective "
+                "cannot gate it")
 
         if not self.survivor_rule or not self.winner_rule:
             raise ValueError(

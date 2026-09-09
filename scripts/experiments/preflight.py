@@ -48,6 +48,17 @@ PREFLIGHT_POLICY = ActionPolicy(
     allowed=frozenset(),
     wire_claims={"phase_a_authorized": "phase_a",
                  "automatic_phase_a_start": "automatic_phase_a_start"},
+    #: The on-disk identity, transcribed from the serializer that used to hold
+    #: it. Every byte is what it always was: the schema string, the key the
+    #: plan hash appears under, and the enforcement sentence -- including the
+    #: Phase-A clause, which is a statement about THIS session and belongs to
+    #: it, not to a governance primitive that must serve other experiments.
+    wire_schema="aadistill.autoinit.spend_authorization/v1",
+    plan_hash_key="preflight_plan_hash",
+    enforcement=("the launcher loads this artifact and refuses to create a pod "
+                 "whose priced hard threshold exceeds hard_cap_usd, refuses a "
+                 "stage not in authorized_stages, and has no code path to "
+                 "Phase A"),
     refusal_notes={
         "phase_a": ("Phase A is separately unauthorized and is not reachable "
                     "from the preflight. Stop, report, and obtain a new "

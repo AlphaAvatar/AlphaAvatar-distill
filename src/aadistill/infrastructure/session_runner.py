@@ -46,6 +46,14 @@ from .provider import RunPodProvider, read_api_key
 from .remote import JobSpec, SSHTarget, probe, start_detached
 from .session import SessionContext, SessionSpec, missing_arguments
 
+#: The pod's workspace and checkout roots. These are DEPLOYMENT facts about
+#: the image a session runs in, and they remain module constants deliberately:
+#: they are consumed inside f-strings that build remote shell commands, so a
+#: session that ran a different image would need its own runner rather than a
+#: different value. `SessionSpec.validate` refuses absolute repository-relative
+#: destinations for exactly this reason -- a declaration must not carry the
+#: pod's layout. If a second image is ever needed, they move to
+#: `ExecutionCommands` beside `remote_python`, which is the same kind of fact.
 WS = "/workspace"
 REPO = f"{WS}/aad"
 
@@ -68,36 +76,6 @@ class ImageIdentityUnavailable(RuntimeError):
     """
 
 
-def fetch_result_ok(entry: object) -> bool:
-    """Did one `fetch_products` entry represent a successful transfer?
-
-    `fetch_products` returns two shapes, and only one of them is a transfer:
-
-    * a **transfer result** — `fetch_controls` and `fetch_selected_leaves` scp
-      something and report `{"rc": ..., ...}`. Its `rc` must be 0, and a failed
-      transfer must fail closed here;
-    * an **identifier** — `finalists_to_fetch` returns `canonical_id` strings
-      naming the initializations that earn permanent retention. It performs no
-      transfer, because those bytes are already off-pod; there is no `rc` to
-      check, and inventing a failure for one would be as wrong as inventing a
-      success for a broken scp.
-
-    Until 2026-08-24 this was `f.get("rc") == 0` applied to both, so a string
-    raised `AttributeError`. The line is only reached with a non-empty list on a
-    **successful** Phase A, which is why seven attempts never touched it: recovery
-    continuation attempt 7 completed all six stages, collected every artifact, and
-    was then recorded `INCOMPLETE` because the status computation crashed.
-
-    Whether a session actually secured what it OWES is a different question,
-    asked separately by `ArtifactPolicy.products_secured` — precisely because
-    `all([])` is vacuously true. This predicate only judges transfers that
-    happened.
-    """
-    if isinstance(entry, dict):
-        return entry.get("rc") == 0
-    return True
-
-
 def parse_setup_probe(stdout: str) -> dict:
     """Read the probe by LABEL, never by line position (see e8b: a $0.19 misread)."""
     out = {"setup_done": "0", "host_cold": "0", "setup_rc": "", "tail": ""}
@@ -106,23 +84,6 @@ def parse_setup_probe(stdout: str) -> dict:
         if key.strip().lower() in out:
             out[key.strip().lower()] = value.strip()
     return out
-
-
-def provider_cli_fallbacks() -> tuple[str, ...]:
-    """Where to look for the provider CLI when it is not on PATH.
-
-    Declared in `configs/infrastructure/provider_cli.json` rather than here.
-    An empty list is legitimate: it means this deployment expects the CLI on
-    PATH and would rather fail than search someone's home directory.
-    """
-    import json
-
-    config = (Path(__file__).resolve().parents[3]
-              / "configs/infrastructure/provider_cli.json")
-    if not config.is_file():
-        return ()
-    return tuple(os.path.expanduser(p)
-                 for p in json.loads(config.read_text())["fallback_paths"])
 
 
 def _first_existing(paths) -> str | None:
@@ -161,13 +122,15 @@ class SessionRunner:
         self.harness = self.auth.require_harness(self.repo_root)
         self.key = os.environ.get("RUNPOD_API_KEY") or read_api_key(args.runpod_config)
         self.provider = RunPodProvider(self.key)
-        #: PATH first, then the fallbacks the deployment declares. The home
-        #: path used to be written here, which made the reusable core name one
-        #: machine's layout; where a CLI is installed is a deployment fact.
-        self.cli = shutil.which("runpodctl") or _first_existing(
-            provider_cli_fallbacks())
+        #: The first candidate that exists, from the list the SESSION supplied.
+        #: This used to call `shutil.which("runpodctl")` and then read a config
+        #: file under `configs/` -- so reusable infrastructure knew one
+        #: provider's binary name and this repository's directory layout.
+        self.cli = _first_existing(self.spec.commands.provider_cli_candidates)
         if not self.cli or not Path(self.cli).is_file():
-            raise SystemExit("runpodctl not found")
+            raise SystemExit(
+                "no provider CLI found among the candidates this session "
+                f"declared: {list(self.spec.commands.provider_cli_candidates)}")
 
         self.ev: dict = {
             "schema": spec.schema,
@@ -836,7 +799,7 @@ class SessionRunner:
         # blocking stages passed — not only when the whole session succeeded.
         # This was `if terminal == "ALL_DONE"` on 2026-08-13, and it destroyed
         # both controls of a $2.82 session.
-        stage2_passed = self.spec.markers.stage2_passed(
+        eligible = self.spec.markers.products_are_eligible(
             terminal, self.ev.get("driver_stages") or {})
         # The reports are fetched BEFORE the products: Phase A's
         # `fetch_products` reads `leaf_retention.json` to decide which
@@ -848,14 +811,14 @@ class SessionRunner:
                 self.ev.setdefault("fetched_reports", []).append(name)
         fetched = art.fetch_products(
             self.context(host=host, target=target, scp=tuple(scp),
-                         stage2_passed=stage2_passed))
+                         products_eligible=eligible))
         self.ev["checkpoints_fetched"] = fetched
         # Did this session secure what it OWES off-pod? Asked separately from
         # `checkpoint_hashes_matched`, which is `all([])` and therefore vacuously
         # true when the fetch returned nothing at all.
         secured_ok, secured_why = art.products_secured(
             self.context(host=host, target=target, scp=tuple(scp),
-                         stage2_passed=stage2_passed), fetched)
+                         products_eligible=eligible), fetched)
         self.ev["required_products_secured"] = {"ok": bool(secured_ok),
                                                 "why": secured_why}
         if not secured_ok:
@@ -892,7 +855,8 @@ class SessionRunner:
             "archive_contents_verified": r_ver.returncode == 0,
             "transfer_complete": (store / art.archive_basename).is_file(),
             "local_hashes_verified": local_ok,
-            "checkpoint_hashes_matched": all(fetch_result_ok(f) for f in fetched),
+            "checkpoint_hashes_matched": all(
+                self.spec.artifacts.fetch_result_ok(f) for f in fetched),
             "report_inputs_verified": local_ok,
             "required_products_secured": bool(secured_ok),
         }

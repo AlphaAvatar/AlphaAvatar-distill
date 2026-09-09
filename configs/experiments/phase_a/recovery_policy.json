@@ -39,5 +39,9 @@
  "feasibility_metric": "usable_rollout_rate",
  "primary_metric": "correct_overall",
  "secondary_metric": "correct_given_usable",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "include_canonical_control": true,
+ "_why_a_canonical_control": "Phase A advances a canonical control unconditionally so every rung has a fixed reference. That is this study's design; a search without a control is a valid search, so the plan cannot default to it.",
+ "feasibility_min": 0.0,
+ "_why_feasibility_min_zero": "The PLAN declares no floor; the floor is materialized from the measured control by FeasibilityRule at run time. 0.0 is 'not yet materialized', which is a study decision and not a generic default."
 }

@@ -49,7 +49,7 @@ _LADDER_MIRROR = "artifacts/stage3/ladder_uniform"
 CANONICAL_INIT: tuple[RelayInput, ...] = tuple(
     RelayInput(f"stage1/qwen3_0p6b_init_v0/checkpoint/{name}",
                dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-               sha256=sha)
+               sha256=sha, repo=MAIN_RELAY)
     for name, sha in (
         ("model.safetensors",
          "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"),
@@ -64,7 +64,7 @@ CANONICAL_INIT: tuple[RelayInput, ...] = tuple(
 #: The Stage-3 recovery pack, staged under both names it is read by.
 RECOVERY_LADDER: tuple[RelayInput, ...] = tuple(
     RelayInput(f"stage3_recovery_corpus_v2/ladder_uniform/{name}",
-               dest=_LADDER_PROBE, also_stage_to=_LADDER_MIRROR, sha256=sha)
+               dest=_LADDER_PROBE, also_stage_to=_LADDER_MIRROR, sha256=sha, repo=MAIN_RELAY)
     for name, sha in (
         ("blocks.npz",
          "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"),
@@ -82,5 +82,5 @@ CALIBRATION_V1: tuple[RelayInput, ...] = (
     RelayInput("e8_inputs_20260810/calibration_v1/items.jsonl",
                dest="artifacts/stage1/e8_calibration_v1",
                sha256="c7202338109e459b17b70456461e8f304fadea"
-                      "7929ea547accee21adbbe7fd0b"),
+                      "7929ea547accee21adbbe7fd0b", repo=MAIN_RELAY),
 )

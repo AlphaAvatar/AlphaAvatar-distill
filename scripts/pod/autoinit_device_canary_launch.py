@@ -52,6 +52,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from experiments.deployment import provider_cli_candidates  # noqa: E402
 from experiments.preflight import PreflightAuthorization  # noqa: E402
 from aadistill.initialization.planning.recovery import (  # noqa: E402
     PreflightPlan,
@@ -147,7 +148,8 @@ def spec(args) -> SessionSpec:
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py"),
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            provider_cli_candidates=provider_cli_candidates()),
         plan_id=CANARY_PLAN_V1.plan_id,
         plan_hash=CANARY_PLAN_V1.plan_hash,
         budget=BudgetSpec(

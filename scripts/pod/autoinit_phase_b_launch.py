@@ -38,6 +38,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
+from experiments.deployment import provider_cli_candidates  # noqa: E402
 from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
@@ -613,7 +614,8 @@ def spec(args) -> SessionSpec:
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py"),
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            provider_cli_candidates=provider_cli_candidates()),
         plan_id=PHASE_B_PLAN_V1.plan_id,
         plan_hash=PHASE_B_PLAN_V1.plan_hash,
         budget=phase_b_budget(args),
