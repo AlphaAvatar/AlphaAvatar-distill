@@ -102,8 +102,9 @@ def accounted_for(frozen_digest: str, observed_digest: str,
                        f"{branches['pre_existing_changed']}. Existing sessions run "
                        "that code")
 
-    # Re-derived, not believed.
-    observed_branches = dispatch_branch_hashes(root)
+    # Re-derived, not believed -- from the caller's script, since this function
+    # no longer knows which script a session dispatches on.
+    observed_branches = dispatch_branch_hashes(root, setup_script=setup_script)
     for kind, recorded in (branches.get("pre_existing_unchanged") or {}).items():
         if observed_branches.get(kind) != recorded:
             return False, (f"the {kind!r} dispatch branch does not hash to what "

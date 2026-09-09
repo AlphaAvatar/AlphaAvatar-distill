@@ -1,18 +1,18 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 163,
+ "modules_scanned": 166,
  "test_ignores": [
   "tests/data/test_recovery_corpus_pipeline.py",
   "tests/pod/test_phase_a_stages1_5_execute.py",
   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
   "tests/autoinit/test_stage1_import.py"
  ],
- "n_predicates": 100,
+ "n_predicates": 101,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 40,
+  "filesystem_premise_onpod": 41,
   "filesystem_premise_unresolved": 4,
   "gpu": 1,
   "optional_dependency": 9,
@@ -104,7 +104,7 @@
   "absent_on_both": 9,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 28,
-  "same_on_pod": 54
+  "same_on_pod": 55
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -170,6 +170,22 @@
   "tests/training/test_train.py::teacher_tokenizer"
  ],
  "predicates": [
+  {
+   "file": "tests/architecture/test_semantic_hardcode.py",
+   "line": 169,
+   "kind": "pytest.skip",
+   "function": "test_the_recorded_report_agrees_with_a_live_scan",
+   "condition": "not path.is_file()",
+   "expanded": "not path.is_file() | path=REPO / \"logs/architecture_semantic_hardcode.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/architecture/test_semantic_hardcode.py::test_the_recorded_report_agrees_with_a_live_scan",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
    "line": 102,
@@ -300,7 +316,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 810,
+   "line": 819,
    "kind": "pytest.skip",
    "function": "test_the_recorded_swept_commit_is_a_real_commit_in_this_repository",
    "condition": "not path.is_file()",
@@ -332,7 +348,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 904,
+   "line": 901,
    "kind": "pytest.skip",
    "function": "test_the_preregistration_binds_the_scoring_contract_and_supersession",
    "condition": "not path.is_file()",
@@ -348,7 +364,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 997,
+   "line": 994,
    "kind": "pytest.skip",
    "function": "test_the_historical_controls_are_not_labelled_as_valid_controls",
    "condition": "not audit_path.is_file()",
@@ -364,7 +380,7 @@
   },
   {
    "file": "tests/autoinit/test_cost_and_recovery.py",
-   "line": 1023,
+   "line": 1020,
    "kind": "pytest.skip",
    "function": "test_the_availability_report_does_not_claim_a_matched_control",
    "condition": "not path.is_file()",
@@ -1052,7 +1068,7 @@
   },
   {
    "file": "tests/pod/test_autoinit_preflight_rehearsal.py",
-   "line": 53,
+   "line": 58,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (REPO / \"artifacts/stage3/recovery_search_v2/manifest.json\").is_file()",
@@ -1116,7 +1132,7 @@
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 46,
+   "line": 47,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (STAGED / CONTROLS[0] / \"step_001023/model/model.safetensors\").is_file()",
@@ -1132,7 +1148,7 @@
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 836,
+   "line": 838,
    "kind": "pytest.skip",
    "function": "test_the_session_commit_is_verified_against_the_authorization",
    "condition": "not auth_path.is_file()",
@@ -1148,7 +1164,7 @@
   },
   {
    "file": "tests/pod/test_continuation_rehearsal.py",
-   "line": 940,
+   "line": 942,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (REPO / \"artifacts/stage3/recovery_search_v2/manifest.json\").is_file()",
@@ -1822,5 +1838,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "ab76ac3fb7d176e304463ba88f8ae34eace9e8fe9931ef77a50349c43ed63ea3"
+ "digest": "6a1f75583c1f8e0467eab145cd67e851a2990155d2edd14b6edc3305fb0c36f1"
 }
