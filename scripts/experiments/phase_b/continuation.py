@@ -429,6 +429,15 @@ CONTINUATION_SOURCE_FILES_V2: tuple[str, ...] = (
     "scripts/experiments/phase_a/plan.py",
     "scripts/experiments/phase_b/__init__.py",
     "scripts/experiments/phase_b/continuation.py",
+    #: Added at the Milestone-A closure. `planning/recovery.py` gave up this
+    #: study's seeds, capability names and thresholds, and its source-set
+    #: declarations, so the modules that now hold them are LOADED by the
+    #: continuation and must be measured by its digest. A set that omits a
+    #: loaded file lets that file change under a grant claiming to pin the
+    #: executable — which is the defect this whole declaration exists to
+    #: prevent. Additive: nothing was removed.
+    "scripts/experiments/recovery_policy.py",
+    "scripts/experiments/source_sets.py",
     "scripts/experiments/recovery_continuation/__init__.py",
     "scripts/experiments/recovery_continuation/session.py",
     "scripts/pod/autoinit_continuation_b_driver.py",

@@ -16,8 +16,8 @@ That cost three paid pods, every one to the same defect: a session inheriting a
 requirement it never declared. Nothing here is inherited now, so nothing can be
 inherited silently.
 
-Phase A is not reachable from this session. It names `SpendAuthorization`, whose
-`allows_phase_a` is a hard `False`, so that is a property of the declaration
+Phase A is not reachable from this session. It names `PreflightAuthorization`, which
+grants nothing, so that is a property of the declaration
 rather than a promise about the code.
 """
 
@@ -40,7 +40,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.preflight import PreflightAuthorization as SpendAuthorization  # noqa: E402
+from experiments.preflight import PreflightAuthorization  # noqa: E402
 from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (
@@ -130,7 +130,7 @@ def spec(args) -> SessionSpec:
         description=("the AutoInitializer micro-preflight: attestation, machine "
                      "gates, two permanent controls, and their characterization"),
         authorization_path=AUTH_PATH,
-        authorization_loader=SpendAuthorization.load,
+        authorization_loader=PreflightAuthorization.load,
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",

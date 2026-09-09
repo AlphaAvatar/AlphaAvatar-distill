@@ -169,22 +169,46 @@ def test_the_artifact_specs_are_measured():
 # --- the setup script the pod actually runs ---------------------------------
 
 def test_the_harness_names_the_setup_script_the_runner_executes():
-    """Derived from the runner, not transcribed from a list.
+    """Derived from the C1 SESSION, not transcribed from a list.
 
     Until 2026-09-04 the C1 set named `scripts/pod/setup.sh` and the pod ran
-    `scripts/pod/autoinit_preflight_setup.sh`. The grant therefore measured a file
-    that never executes and left the one that does unmeasured — and the digest
-    verified perfectly the whole time, because it was a digest of the wrong thing.
+    `scripts/pod/autoinit_preflight_setup.sh`. The grant therefore measured a
+    file that never executes and left the one that does unmeasured — and the
+    digest verified perfectly the whole time, because it was a digest of the
+    wrong thing.
+
+    The derivation moved with the fact. The runner no longer names any
+    repository script: it uploads and executes whatever `ExecutionCommands`
+    carries, so asking the runner what it runs now returns nothing. Asking C1's
+    own spec is the same question at its new owner, and the chain is checked in
+    both directions — the session names it, the runner uploads and executes
+    exactly that, and the harness measures it.
     """
+    launcher = REPO / "scripts/pod/autoinit_c1_launch.py"
+    commands = [
+        {kw.arg: kw.value.value for kw in node.keywords
+         if isinstance(kw.value, ast.Constant)}
+        for node in ast.walk(ast.parse(launcher.read_text()))
+        if isinstance(node, ast.Call)
+        and getattr(node.func, "id", "") == "ExecutionCommands"]
+    assert len(commands) == 1, (
+        f"{launcher.name} builds {len(commands)} ExecutionCommands; this test "
+        "cannot say which one the session runs")
+    setup = commands[0]["setup_script"]
+    assert setup == "scripts/pod/autoinit_preflight_setup.sh", setup
+    assert (REPO / setup).is_file()
+
+    # The runner uses the SPEC's value for both the upload and the execution.
+    # A runner that uploaded the spec's script and executed a hard-coded one
+    # would be the same defect wearing the fix.
     runner = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
-    uploaded = re.findall(r'"scripts/pod/(\w+\.sh)"', runner)
-    executed = re.findall(r"bash \{WS\}/(\w+\.sh)", runner)
-    assert uploaded == ["autoinit_preflight_setup.sh"], uploaded
-    assert executed == ["autoinit_preflight_setup.sh"], executed
-    for name in set(uploaded) | set(executed):
-        assert f"scripts/pod/{name}" in C1_EXECUTABLE, (
-            f"the runner executes scripts/pod/{name} and the C1 grant does not "
-            "measure it")
+    assert "self.repo_root / self.spec.commands.setup_script" in runner
+    assert "Path(self.spec.commands.setup_script).name" in runner
+    assert not re.findall(r'"scripts/pod/(\w+\.sh)"', runner), (
+        "the runner names a repository setup script again")
+
+    assert setup in C1_EXECUTABLE, (
+        f"the C1 session executes {setup} and the grant does not measure it")
 
 
 def test_no_session_can_substitute_a_different_setup_script():

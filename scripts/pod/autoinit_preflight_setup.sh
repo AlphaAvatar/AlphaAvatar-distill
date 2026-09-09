@@ -559,12 +559,18 @@ mark "TESTS_OK:${tt}s"
 : "${SESSION_AUTH_PATH:?the launcher must name the session authorization}"
 : "${SESSION_PLAN_HASH:?the launcher must name the session plan hash}"
 # Which artifact TYPE this session's authorization is. The default is the narrow
-# `SpendAuthorization`, whose `allows_phase_a` is a hard False — so the assertion
-# guarding the preflight and the continuation is unchanged, and a Phase-A
-# artifact still cannot be loaded by them (its `phase_a_authorized` trips
-# `SpendAuthorization.load`). Only a session that explicitly declares
-# SESSION_KIND=phase_a gets the type that can say yes, and that type refuses
-# anything not issued under the Phase-A schema.
+# `PreflightAuthorization`, which grants NOTHING: `phase_a` is absent from its
+# policy's allowed set, so `a.allows("phase_a")` is false and there is no flag
+# anyone could set. A Phase-A artifact still cannot be loaded by it — its
+# `phase_a_authorized` claim trips the policy check. Only a session that
+# explicitly declares SESSION_KIND=phase_a gets the type that can say yes, and
+# that type refuses anything not issued under the Phase-A schema.
+#
+# It was `SpendAuthorization` until the Milestone-A closure moved the harness
+# declaration and the Phase-A properties out of the governance primitive. That
+# bare type now REFUSES to load without a policy, so this branch would have
+# raised on a pod — a shell dispatch table is a consumer too, and it is the one
+# no import rewriter touches.
 SESSION_KIND="${SESSION_KIND:-spend}"
 say "verifying $SESSION_AUTH_PATH binds to this session's plan (kind=$SESSION_KIND)"
 if [ "$SESSION_KIND" = "phase_a" ]; then
@@ -684,12 +690,12 @@ else
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from aadistill.governance.authorization import SpendAuthorization
-a = SpendAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+from experiments.preflight import PreflightAuthorization
+a = PreflightAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
-assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert not a.allows('phase_a'), 'this artifact claims Phase A authorization'
 print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
-      f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows_phase_a}')
+      f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows(\"phase_a\")}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 fi
 mark AUTHORIZATION_OK

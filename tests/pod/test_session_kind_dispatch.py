@@ -133,9 +133,24 @@ def test_the_probe_sees_the_sessions_this_repository_can_actually_launch():
 
 
 def test_the_scripts_default_is_the_narrow_spend_path():
+    """The narrow type is DERIVED from the launchers that use the default kind.
+
+    This named `SpendAuthorization` literally until the Milestone-A closure moved
+    the harness declaration and the Phase-A properties out of the governance
+    primitive; the narrow type became `PreflightAuthorization`, the bare core
+    class started refusing to load without a policy, and this assertion went
+    stale in the same commit that would have made the pod raise.
+
+    Asking the launchers instead means the next rename fails the branch that is
+    actually wrong, rather than this line.
+    """
     assert default_kind_from_script() == DEFAULT_KIND
     assert DEFAULT_KIND in BRANCHES
-    assert "SpendAuthorization" in code_only(BRANCHES[DEFAULT_KIND])
+    narrow = {loader for kind, loader in LAUNCHERS.values() if kind == DEFAULT_KIND}
+    assert len(narrow) == 1, (
+        f"the default-kind launchers disagree about their type: {sorted(narrow)}. "
+        "One shell branch cannot read two artifact types correctly.")
+    assert narrow.pop() in code_only(BRANCHES[DEFAULT_KIND])
 
 
 @pytest.mark.parametrize("module", sorted(LAUNCHERS))

@@ -42,7 +42,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.governance.authorization import SpendAuthorization  # noqa: E402
+from experiments.preflight import PreflightAuthorization  # noqa: E402
 from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (
@@ -210,7 +210,7 @@ def spec(args) -> SessionSpec:
                      "permanent controls, trains nothing, materializes the "
                      "frozen thresholds"),
         authorization_path=AUTH_PATH,
-        authorization_loader=SpendAuthorization.load,
+        authorization_loader=PreflightAuthorization.load,
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",

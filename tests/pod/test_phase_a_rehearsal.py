@@ -32,7 +32,8 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from aadistill.governance.authorization import AuthorizationError, SpendAuthorization
+from aadistill.governance.authorization import AuthorizationError
+from experiments.preflight import PreflightAuthorization
 from experiments.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
 from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_harness_digest  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
@@ -104,16 +105,44 @@ def test_a_spend_authorization_cannot_be_loaded_as_a_phase_a_grant(tmp_path):
 
 
 def test_a_phase_a_grant_cannot_be_loaded_by_the_narrow_type(tmp_path):
-    """The gate that guards the preflight and the continuation, unchanged."""
+    """The gate that guards the preflight and the continuation, unchanged.
+
+    The narrow type is `PreflightAuthorization` now -- the bare governance
+    primitive has no policy and refuses to load anything at all, which is a
+    different (and stricter) refusal than the one this guards.
+    """
     p = tmp_path / "phase_a.json"
     p.write_text(json.dumps(_auth().as_dict()))
-    with pytest.raises(AuthorizationError, match="Phase A authorization"):
+    # The refusal now NAMES the claim and the policy that will not grant it,
+    # instead of one hard-coded sentence about Phase A.
+    with pytest.raises(AuthorizationError,
+                       match=r"claims \['phase_a_authorized'\].*does not grant"):
+        PreflightAuthorization.load(p)
+
+
+def test_the_bare_primitive_refuses_without_a_policy(tmp_path):
+    """And it is not a fallback either. A policy-less load has nothing to check
+    an artifact's claims against, so it refuses rather than admitting them."""
+    from aadistill.governance.authorization import SpendAuthorization
+
+    p = tmp_path / "phase_a.json"
+    p.write_text(json.dumps(_auth().as_dict()))
+    with pytest.raises(AuthorizationError, match="needs an ActionPolicy"):
         SpendAuthorization.load(p)
 
 
 def test_the_narrow_type_still_answers_no(tmp_path):
-    assert MICRO_PREFLIGHT_AUTHORIZATION.allows_phase_a is False
-    assert MICRO_PREFLIGHT_AUTHORIZATION.automatic_phase_a_start is False
+    """`allows_phase_a` was a hard-`False` property; it is now the ABSENCE of
+    the action from the policy, which is the stronger statement -- there is no
+    flag left for anyone to set."""
+    a = MICRO_PREFLIGHT_AUTHORIZATION
+    assert not a.allows("phase_a")
+    assert not a.allows("automatic_phase_a_start")
+    # This one is stricter still: its policy is DENY_ALL, so it grants nothing
+    # and CLAIMS nothing -- there is no `phase_a_authorized` key on the wire to
+    # be read as a permission at all.
+    assert a.action_policy.allowed == frozenset()
+    assert not any("phase_a" in k for k in a.as_dict()), sorted(a.as_dict())
 
 
 def test_phase_a_cannot_authorize_a_follow_on(tmp_path):

@@ -15,7 +15,8 @@ questions a CPU box cannot:
    gate decide at the frozen mixture?
 3. does the repaired port compute what E8a computes, per item, on one GPU?
 
-It names `SpendAuthorization`, whose `allows_phase_a` is a hard `False`, so this
+It names `PreflightAuthorization`, which grants NOTHING -- `phase_a` is absent
+from its policy's allowed set, so this
 session **cannot** start Phase A whatever artifact it is pointed at — a property
 of the type, not a promise in a comment. `fetch_products` is empty: no weights
 come home because none are produced.
@@ -41,7 +42,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.preflight import PreflightAuthorization as SpendAuthorization  # noqa: E402
+from experiments.preflight import PreflightAuthorization  # noqa: E402
 from experiments.measurement.plan import MEASUREMENT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (
@@ -111,9 +112,9 @@ def spec(args) -> SessionSpec:
                      "rate and a per-item comparison against E8a. No search, no "
                      "depth map, no checkpoint, no follow-on"),
         authorization_path=AUTH_PATH,
-        #: The ordinary type. `allows_phase_a` is a hard False, so a measurement
+        #: The narrow type. It grants nothing, so a measurement
         #: pointed at a Phase-A artifact refuses it rather than running it.
-        authorization_loader=SpendAuthorization.load,
+        authorization_loader=PreflightAuthorization.load,
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",

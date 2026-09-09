@@ -27,7 +27,8 @@ specification form actually removed:
 * `SESSION_KIND` cannot leak in from another session, because there is no module
   global for it to leak through.
 
-It names `SpendAuthorization`, whose `allows_phase_a` is a hard `False`, so this
+It names `PreflightAuthorization`, which grants NOTHING -- `phase_a` is absent
+from its policy's allowed set, so this
 session cannot start Phase A whatever it is pointed at. Nothing it produces may
 enter scientific selection: there is no `fetch_products` and no checkpoint comes
 home. Its children are compressions of the canonical student toward a geometry
@@ -51,7 +52,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.preflight import PreflightAuthorization as SpendAuthorization  # noqa: E402
+from experiments.preflight import PreflightAuthorization  # noqa: E402
 from aadistill.initialization.planning.recovery import (  # noqa: E402
     PreflightPlan,
     PreflightStage,
@@ -139,10 +140,10 @@ def spec(args) -> SessionSpec:
         description=("one invocation of each frozen operator on real CUDA, "
                      "through the production lifecycle. TERMINATED path"),
         authorization_path=AUTH_PATH,
-        #: The ordinary type, deliberately. Its `allows_phase_a` is a hard False,
+        #: The narrow type, deliberately. It grants nothing,
         #: so this session cannot start Phase A even if pointed at the wrong
         #: artifact. The canary is infrastructure, not science.
-        authorization_loader=SpendAuthorization.load,
+        authorization_loader=PreflightAuthorization.load,
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
@@ -172,8 +173,8 @@ def spec(args) -> SessionSpec:
             #: its specification may misdescribe the run it would perform.
             relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *CALIBRATION_V1),
             #: Empty, and now honoured. `SESSION_KIND` is absent too, which
-            #: routes setup to `SpendAuthorization` — whose
-            #: `assert a.allows_phase_a is False` is exactly the assertion this
+            #: routes setup to `PreflightAuthorization` — which
+            #: `assert not a.allows("phase_a")` is exactly the assertion this
             #: session wants to pass.
             local_assets=LOCAL_ASSETS,
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",

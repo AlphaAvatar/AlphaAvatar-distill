@@ -32,7 +32,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
 from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, IMPORT_REQUIRED_FIELDS, ControlImportError, continuation_manifest, import_permanent_control  # noqa: E402
-from aadistill.initialization.planning.recovery import EquivalenceRule  # noqa: E402
+from aadistill.initialization.planning.recovery import EquivalenceRule, FeasibilityRule  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
 RECORDS = REPO / "logs/autoinit_permanent_controls"
@@ -837,8 +837,11 @@ def test_the_session_commit_is_verified_against_the_authorization():
     if not auth_path.is_file():
         pytest.skip("no continuation authorization has been issued yet")
 
-    from aadistill.governance.authorization import SpendAuthorization
-    auth = SpendAuthorization.load(auth_path)
+    # The continuation's own type, not the bare primitive. `SpendAuthorization`
+    # has no policy and now refuses to load anything at all, which would make
+    # this test fail for a reason that has nothing to do with the commit gate.
+    from experiments.preflight import PreflightAuthorization
+    auth = PreflightAuthorization.load(auth_path)
     head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                           text=True, cwd=REPO).stdout.strip()
 
