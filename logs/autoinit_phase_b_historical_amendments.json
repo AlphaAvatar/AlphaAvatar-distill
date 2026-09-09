@@ -456,6 +456,150 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "d45bbabebefe26d2caf811fa4923d9830200c2c51631e25e22e04cecd1dacf6d"
+  },
+  {
+   "amendment_id": "PHB-HA-003",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-09T08:11:45+00:00",
+   "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+   "source_repair_commit": "00385745f7befce8c7b433c9fcd69dd4fc5e5ae5",
+   "source_repair_parent": "a13b27efa754c829acb69e6d5601b8fbf4988079",
+   "previous_live_digest": "a1f80f3ad53b49c338e0563b64ecaf36c720254141676916f19c407e2e7677a5",
+   "new_live_digest": "bb3fd1845b210870a66bfb17d95e708141ce95a893b58bb72ddb6092827a37ab",
+   "changed_files": [
+    "scripts/autoinit/phase_a_frozen.py",
+    "scripts/autoinit/phase_a_search.py",
+    "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/autoinit/verify_historical_probe_reuse.py",
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/experiments/phase_a/plan.py",
+    "scripts/experiments/phase_b/plan.py",
+    "scripts/pod/autoinit_phase_a_driver.py",
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/initialization/planning/generation.py"
+   ],
+   "file_sha256_before": {
+    "scripts/autoinit/phase_a_frozen.py": "78fa6da9c3f8d7b78eedc86afe8ff119c726057ae3127777a12af70b14e82519",
+    "scripts/autoinit/phase_a_search.py": "2e23d44d0a9474263d1cf7fb47c68907a1dda43b090bf80556833eed3797b5a5",
+    "scripts/autoinit/verify_frozen_assets.py": "0c39aea1c8b91e0af939d6a4ab8b4f903dff0b56353d02ce2fadeb7407508583",
+    "scripts/autoinit/verify_historical_probe_reuse.py": "cfc7ef1f234e731a3ee7d25f9833829019543413114d9b73663ccc91e26b032d",
+    "scripts/autoinit/write_preregistration.py": "0fa2d8d1e799bdc3e0f1653b7205b4e36cb2acc277cf711f5d64b6fae5b56d73",
+    "scripts/experiments/phase_a/plan.py": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b",
+    "scripts/experiments/phase_b/plan.py": "65c71f785552caa05b95460fd04ba89d666ede4eef187c40d802642d4bccfe8d",
+    "scripts/pod/autoinit_phase_a_driver.py": "fcbd3f5a0a429e8d638c2486d18f66c55b66e7f965105cec1da59a52b816853f",
+    "scripts/pod/autoinit_phase_a_launch.py": "54d8363e35f5ca79ae9b66400a05e33f0a94aa37b2d8aeebc059b78f219a5181",
+    "scripts/pod/autoinit_phase_b_launch.py": "dfc5f4f67c2e3b443f5606d721ec52c3ba617e6cf07fffec46c8f62a8290830c",
+    "src/aadistill/governance/authorization.py": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b",
+    "src/aadistill/infrastructure/session.py": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386",
+    "src/aadistill/infrastructure/session_runner.py": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50",
+    "src/aadistill/initialization/planning/generation.py": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+   },
+   "file_sha256_after": {
+    "scripts/autoinit/phase_a_frozen.py": "b2958335d7d8e48327b10ff315679ef9f10fbfd54ecbb8696bde9957f0fab51b",
+    "scripts/autoinit/phase_a_search.py": "78fd24d3983b9e4f0978790c42950773f1aa607986f4148c7b3bcd4f97ded76b",
+    "scripts/autoinit/verify_frozen_assets.py": "1552298b95e16a3562e6f13005a764616d9d08f237b24033cdff78874fd30a20",
+    "scripts/autoinit/verify_historical_probe_reuse.py": "bdcc6dabe8e4e2eadce97abe9e9ab134491498e61484fdfe69c08db469695e84",
+    "scripts/autoinit/write_preregistration.py": "723344a777a2c6ad070c11353c7536e009e827dd52a18a81bec1f26f2c5cfa0d",
+    "scripts/experiments/phase_a/plan.py": "7b98df036b349c690585b5d82460d669d8439822bed14e4297464a5f010fedd5",
+    "scripts/experiments/phase_b/plan.py": "cb67de8c053ed121bcd322a864d689171e1f9dde82175249692452ad5b636bb0",
+    "scripts/pod/autoinit_phase_a_driver.py": "8f5a57e908fa5f36408bcf9cf9a8aa13e57ca723faad9fae85940d9bda5afa75",
+    "scripts/pod/autoinit_phase_a_launch.py": "0d210cf9d3b2e57ab5f3d9b9c38716d9b2adea04956005c5ed4e60c742561d5d",
+    "scripts/pod/autoinit_phase_b_launch.py": "94616029b1fe501fa9f4c244b0fd5baa413e37a6ca85e002edbcc2cd8980403b",
+    "src/aadistill/governance/authorization.py": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b",
+    "src/aadistill/infrastructure/session.py": "a35abc1a78d35132575fedb2cad273df4185c7d70088af91bdeb0cc4ef3226be",
+    "src/aadistill/infrastructure/session_runner.py": "5d89e329daaa0af03ada76cc9cb93e3e3fb1ef567915fc8359d197e3eef8713a",
+    "src/aadistill/initialization/planning/generation.py": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f"
+   },
+   "patch_sha256": "3bbdefce33a7350864e15997189596a9be4023db937cc96e37eab35435f6979e",
+   "numstat": {
+    "scripts/autoinit/phase_a_frozen.py": [
+     5,
+     1
+    ],
+    "scripts/autoinit/phase_a_search.py": [
+     4,
+     0
+    ],
+    "scripts/autoinit/verify_frozen_assets.py": [
+     5,
+     1
+    ],
+    "scripts/autoinit/verify_historical_probe_reuse.py": [
+     13,
+     7
+    ],
+    "scripts/autoinit/write_preregistration.py": [
+     22,
+     13
+    ],
+    "scripts/experiments/phase_a/plan.py": [
+     2,
+     7
+    ],
+    "scripts/experiments/phase_b/plan.py": [
+     2,
+     7
+    ],
+    "scripts/pod/autoinit_phase_a_driver.py": [
+     5,
+     5
+    ],
+    "scripts/pod/autoinit_phase_a_launch.py": [
+     6,
+     1
+    ],
+    "scripts/pod/autoinit_phase_b_launch.py": [
+     7,
+     2
+    ],
+    "src/aadistill/governance/authorization.py": [
+     109,
+     64
+    ],
+    "src/aadistill/infrastructure/session.py": [
+     37,
+     3
+    ],
+    "src/aadistill/infrastructure/session_runner.py": [
+     12,
+     7
+    ],
+    "src/aadistill/initialization/planning/generation.py": [
+     9,
+     7
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 125,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "Milestone-A merge-review closure on the same branch: move the last repository/application path literals and the remaining semantic experiment policy out of the reusable core. governance/authorization.py keeps only generic authorization, source-binding and budget mechanism (ActionPolicy supplies allowed actions and wire claims; absence of permission remains fail-closed); governance/post_freeze.py takes its note, setup-script and preregistration paths from the caller; infrastructure/session_runner.py executes the commands a SessionSpec carries rather than repository script names it knows; initialization/planning/recovery.py keeps the mechanisms and none of this study's seeds, capability names, thresholds or source lists; runtime/pod_environment.py takes its record path and named files from the application layer. Also: the CUDA validation harness now executes attention.activation_importance_v1 through materialize_fixed_path_suffix, and one stale internal caller of dispatch_branch_hashes was repaired.",
+   "why_the_owner_is_shared_session_runner": "These files are shared infrastructure: Phase B's frozen executable set names them, and so do Phase A's, the preflight's and C1's. A change to session_runner.py, session.py, authorization.py or post_freeze.py therefore moves Phase B's live digest even though the change was made for the Milestone-A separation and Phase B is closed. The drift is accounted here rather than hidden, exactly as PHB-HA-001 and PHB-HA-002 accounted theirs.",
+   "why_a_c1_only_override_was_rejected": "This confers nothing on C1. C1_HARNESS_SOURCE_FILES_V1 still names pre-migration paths and refuses outright; the repointed declarations fail by digest mismatch. No grant, authorization or bundle is live, and this entry asserts launch_compatible_with_frozen_preregistration: false like every other.",
+   "maintainer_authorization": "MAINTAINER MERGE REVIEW DECISION, 2026-09-09, on branch tip dc566fce7b1b8e2d7fac1ade359af2846108aeb3 against public base 4f7b38be: the branch is green and contains a real initialization cutover but is NOT mergeable, for four stated reasons. The decision directs the ownership changes above on the SAME branch, forbids rebasing, squashing, force-pushing or rewriting the existing 43 commits, and directs: 'Use the already-approved source-relocation accounting. Do not modify historical preregistrations, results, grants, authorizations or replay digests. Append only additional relocation/accounting entries.' No Attempt-10 grant, formal authorization, formal bundle or formal experiment is authorized.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "d45bbabebefe26d2caf811fa4923d9830200c2c51631e25e22e04cecd1dacf6d",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "8374dd9ec0133099b3c7f5b31c9cfe21884cd840d2ba1c8b1884af6923adbfa3"
   }
  ]
 }

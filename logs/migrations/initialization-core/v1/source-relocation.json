@@ -4,8 +4,19 @@
  "migration": "initialization-core",
  "version": "v1",
  "base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
- "tip_commit": "a13b27efa754c829acb69e6d5601b8fbf4988079",
+ "tip_commit": "00385745f7befce8c7b433c9fcd69dd4fc5e5ae5",
  "commits": [
+  "00385745f7befce8c7b433c9fcd69dd4fc5e5ae5 Milestone A: regenerate the derived metadata, and one stale internal caller",
+  "b1c699d0822f8f340b2f0915fe85c64453005f1d Milestone A: the four reuse conclusions, derived in one place",
+  "6da917c233bb591343c4cd2fe4f91f41d51d64d4 Milestone A: the CUDA check now runs the stage that actually failed",
+  "4924b0ab23e64b51839e3b35c45e26937a7bd063 Milestone A: the snapshot stops contradicting itself about C1",
+  "b057f7b85d7fed0baeeb2d5b6c3f9decc3f4aba1 Milestone A: pin the semantic gate in both directions",
+  "9b1d38aa7ec8627f4fcff209b4cbe168425ccf6a Milestone A: semantic experiment policy detected by shape, and removed",
+  "6bb9913b4ba23ea65655472609cdb6e1a4e7e521 Milestone A: repoint the remaining callers of the moved policy",
+  "85164eb7e564a5f118d2ec3aed9393fce420ca80 Milestone A: semantic experiment policy leaves the core",
+  "a43139285eeed9e3c289de4a64ffab479e3bdcb2 Milestone A: repository paths leave four core modules",
+  "dc566fce7b1b8e2d7fac1ade359af2846108aeb3 Milestone A: the final diagnostic, after every record settled",
+  "dae80bc4bd1a9acb680ed651b188089144f4ac4d Milestone A: the migration record covers the whole migration",
   "a13b27efa754c829acb69e6d5601b8fbf4988079 Milestone A: the sweep, re-run after the documentation settled",
   "ec5c0c461af8bd0e47e93ffe3a83205809f97c80 Milestone A: STATE.md records the green branch and the decision it owes",
   "5d77cf9f0f0b0f9c8d654d9d4832b6010477e050 Milestone A: the final diagnostic, on the settled tree",
@@ -48,13 +59,13 @@
   "ff1f27e36c71abd46c4ed1760f9b1b55c4f3eda1 Milestone A step 2: derive the current executable set instead of listing it",
   "5f4c400a2cd761e85691932cd4cdbb4ed90e7a94 Milestone A step 1: move all 59 modules, rewrite 871 imports"
  ],
- "what": "All-stage initialization-core consolidation and core/application separation: relocate reusable implementation from aadistill.init and aadistill.autoinit into aadistill.initialization; extract model-instance and experiment-instance policy into configs and experiment scripts; replace import-time adapter registration with explicit application bootstrap; update current callers and executable dependency closures while preserving mathematical behavior and historical evidence.",
- "maintainer_decision": "MAINTAINER P12 DECISION, 2026-09-08:\n\nThe non-additive all-stage initialization package relocation on\nmigration/initialization-milestone-a is approved for historical accounting.\n\nHistorical preregistrations, raw results, replay digests, grants,\nauthorizations and scientific observations remain immutable. No historical\nexperiment may be described as having run the relocated implementation.\nOld grants and authorizations remain unusable against the migrated tree.\n\nThis approval records current-code movement only. It authorizes no\nexperiment, no GPU/provider resource, no Attempt-10 grant or authorization,\nno scientific field change and no reinterpretation of prior results.",
+ "what": "All-stage initialization-core consolidation and core/application separation,\nthrough Milestone-A merge-review closure.\n\nFirst: relocate reusable implementation out of aadistill.init and\naadistill.autoinit into a single aadistill.initialization domain, removing both\nold packages and the dependency cycle between them.\n\nThen, in this closure round: move the remaining repository/application path\nliterals and the remaining semantic experiment policy out of the reusable core\ninto scripts/experiments/ and configs/experiments/. The core now holds mechanism\nonly. Every experiment instance -- search seeds, capability names, collapse\nthresholds, pooled counts, harness and trainer source-file lists, accounting log\npaths, and the names of the scripts a session executes -- is supplied by the\ncaller, and a dataclass constructed with no arguments can no longer silently\nbecome the current study.\n\nRecords CURRENT-CODE MOVEMENT ONLY.",
+ "maintainer_decision": "MAINTAINER MERGE REVIEW DECISION, 2026-09-09, on branch tip\ndc566fce7b1b8e2d7fac1ade359af2846108aeb3 against public base 4f7b38be.\n\nExtends the P12 decision of 2026-09-08, which approved the non-additive\nall-stage relocation for historical accounting. The merge review found the\nbranch green and containing a real initialization cutover, but NOT mergeable,\nfor four stated reasons, and directs the remaining ownership changes on the SAME\nbranch: generic authorization and source-binding mechanism only in\ngovernance/authorization.py; caller-supplied accounting paths in\ngovernance/post_freeze.py; caller-supplied execution commands in\ninfrastructure/session_runner.py; recovery planning split so no dataclass\ndefault instantiates the current experiment; caller-supplied readiness owners\nand record paths in runtime/pod_environment.py.\n\nIt forbids rebasing, squashing, force-pushing or rewriting the existing 43\ncommits, because the relocation records bind branch history. It permits\nappending additional relocation/accounting entries only, and forbids modifying\nhistorical preregistrations, results, grants, authorizations or replay digests.\n\nIt authorizes no experiment, no grant, no formal bundle and no paid resource.\nNo Attempt-10 grant exists.",
  "totals": {
   "files_relocated": 59,
-  "files_touched_in_span": 285,
-  "lines_added": 24658,
-  "lines_removed": 20538,
+  "files_touched_in_span": 314,
+  "lines_added": 27551,
+  "lines_removed": 21033,
   "declarations_examined": 11
  },
  "numstat": {
@@ -63,8 +74,8 @@
    1
   ],
   "configs/architecture/core_boundary_baseline.json": [
-   80,
-   88
+   59,
+   91
   ],
   "configs/calibration/profiles.json": [
    283,
@@ -74,12 +85,32 @@
    46,
    0
   ],
+  "configs/experiments/e5/nested_rung.json": [
+   8,
+   0
+  ],
   "configs/experiments/micro_preflight/authorization.json": [
    47,
    0
   ],
+  "configs/experiments/phase_a/preflight_plan.json": [
+   80,
+   0
+  ],
+  "configs/experiments/phase_a/recovery_policy.json": [
+   43,
+   0
+  ],
+  "configs/experiments/phase_a/source_sets.json": [
+   46,
+   0
+  ],
   "configs/experiments/phase_c1/executable_closure.json": [
-   476,
+   501,
+   0
+  ],
+  "configs/experiments/preflight/harness.json": [
+   21,
    0
   ],
   "configs/infrastructure/artifact_store.json": [
@@ -95,28 +126,32 @@
    0
   ],
   "configs/validation/cuda_engineering.json": [
-   96,
+   144,
    0
   ],
   "docs/REPO_LAYOUT.md": [
    18,
    18
   ],
+  "logs/BUDGET_LEDGER.md": [
+   4,
+   2
+  ],
   "logs/CATALOG.md": [
-   5,
+   7,
    0
   ],
   "logs/STATE.md": [
-   85,
-   4
+   120,
+   8
   ],
   "logs/architecture_declaration_history.json": [
    717,
    0
   ],
   "logs/architecture_inventory.json": [
-   11177,
-   17572
+   10843,
+   17693
   ],
   "logs/architecture_sandwich_equivalence.json": [
    160,
@@ -126,6 +161,10 @@
    69,
    0
   ],
+  "logs/architecture_semantic_hardcode.json": [
+   9,
+   0
+  ],
   "logs/architecture_source_relocation.json": [
    368,
    0
@@ -133,6 +172,10 @@
   "logs/autoinit_continuation_b_post_freeze_changes.json": [
    57,
    3
+  ],
+  "logs/autoinit_historical_reuse_position.json": [
+   45,
+   0
   ],
   "logs/autoinit_phase_b_historical_amendments.json": [
    390,
@@ -147,16 +190,20 @@
    3
   ],
   "logs/c1_skip_predicate_audit.json": [
-   49,
-   49
+   68,
+   52
+  ],
+  "logs/current_state.json": [
+   9,
+   6
   ],
   "logs/migrations/initialization-core/v1/source-relocation.json": [
-   2950,
+   3106,
    0
   ],
   "logs/phase_c1_execution_preregistration.json": [
-   323,
-   219
+   346,
+   217
   ],
   "scripts/architecture/compare_scoring_across_migration.py": [
    204,
@@ -194,12 +241,16 @@
    164,
    0
   ],
+  "scripts/architecture/semantic_hardcode.py": [
+   346,
+   0
+  ],
   "scripts/autoinit/attest_protocol.py": [
-   1,
-   1
+   7,
+   3
   ],
   "scripts/autoinit/audit_skip_predicates.py": [
-   4,
+   8,
    4
   ],
   "scripts/autoinit/characterize_thresholds.py": [
@@ -207,20 +258,24 @@
    5
   ],
   "scripts/autoinit/compare_recovery_fingerprints.py": [
-   1,
-   1
+   6,
+   2
   ],
   "scripts/autoinit/dry_run_search.py": [
-   34,
+   40,
    11
   ],
   "scripts/autoinit/emit_protocol_compat_v2.py": [
-   9,
-   6
+   15,
+   8
+  ],
+  "scripts/autoinit/historical_reuse_position.py": [
+   181,
+   0
   ],
   "scripts/autoinit/issue_authorization.py": [
-   3,
-   4
+   8,
+   5
   ],
   "scripts/autoinit/issue_c1_authorization.py": [
    2,
@@ -231,7 +286,7 @@
    5
   ],
   "scripts/autoinit/issue_continuation_b_authorization.py": [
-   8,
+   5,
    11
   ],
   "scripts/autoinit/issue_measurement_authorization.py": [
@@ -243,8 +298,8 @@
    5
   ],
   "scripts/autoinit/issue_phase_b_authorization.py": [
-   7,
-   10
+   5,
+   11
   ],
   "scripts/autoinit/issue_recovery_continuation_authorization.py": [
    3,
@@ -255,19 +310,23 @@
    1
   ],
   "scripts/autoinit/measure_causal_depth_runtime.py": [
-   10,
+   14,
    5
   ],
   "scripts/autoinit/measure_state_repeatability.py": [
    8,
    4
   ],
+  "scripts/autoinit/phase_a_frozen.py": [
+   5,
+   1
+  ],
   "scripts/autoinit/phase_a_search.py": [
-   21,
+   25,
    10
   ],
   "scripts/autoinit/plan_search.py": [
-   21,
+   25,
    6
   ],
   "scripts/autoinit/price_behavioural_continuation.py": [
@@ -287,7 +346,7 @@
    2
   ],
   "scripts/autoinit/record_phase_b_historical_amendment.py": [
-   31,
+   33,
    24
   ],
   "scripts/autoinit/record_phase_b_post_freeze.py": [
@@ -307,31 +366,31 @@
    6
   ],
   "scripts/autoinit/score_recovery_search.py": [
-   1,
-   1
+   7,
+   3
   ],
   "scripts/autoinit/stage_c1_bundle.py": [
    2,
    4
   ],
   "scripts/autoinit/validate_recovery_scoring.py": [
-   1,
+   5,
    1
   ],
   "scripts/autoinit/verify_attempt4_probe_reuse.py": [
-   10,
-   4
+   13,
+   6
   ],
   "scripts/autoinit/verify_attempt5_probe_reuse.py": [
-   10,
-   4
+   13,
+   6
   ],
   "scripts/autoinit/verify_c1_scoring_equivalence.py": [
    3,
    5
   ],
   "scripts/autoinit/verify_control_checkpoints.py": [
-   1,
+   5,
    1
   ],
   "scripts/autoinit/verify_depth_backend_equivalence.py": [
@@ -339,12 +398,12 @@
    2
   ],
   "scripts/autoinit/verify_frozen_assets.py": [
-   33,
+   37,
    10
   ],
   "scripts/autoinit/verify_historical_probe_reuse.py": [
-   11,
-   4
+   20,
+   7
   ],
   "scripts/autoinit/write_c1_execution_preregistration.py": [
    20,
@@ -355,24 +414,36 @@
    8
   ],
   "scripts/autoinit/write_phase_b_preregistration.py": [
-   14,
-   12
+   11,
+   13
   ],
   "scripts/autoinit/write_preregistration.py": [
-   15,
-   7
+   38,
+   21
   ],
   "scripts/data/build_reasoning_heavy_calibration.py": [
-   14,
-   6
+   19,
+   7
+  ],
+  "scripts/evaluation/analyze_e4.py": [
+   7,
+   3
+  ],
+  "scripts/evaluation/analyze_e6.py": [
+   5,
+   1
+  ],
+  "scripts/evaluation/analyze_e6b.py": [
+   5,
+   1
   ],
   "scripts/evaluation/measure_init_nll.py": [
    3,
    2
   ],
   "scripts/evaluation/uncapped_eval.py": [
-   1,
-   1
+   6,
+   2
   ],
   "scripts/experiments/__init__.py": [
    1,
@@ -403,7 +474,7 @@
    0
   ],
   "src/aadistill/autoinit/phase_a.py => scripts/experiments/phase_a/plan.py": [
-   13,
+   8,
    7
   ],
   "scripts/experiments/phase_b/__init__.py": [
@@ -415,8 +486,12 @@
    48
   ],
   "src/aadistill/autoinit/phase_b.py => scripts/experiments/phase_b/plan.py": [
-   43,
+   38,
    38
+  ],
+  "scripts/experiments/phase_b/post_freeze.py": [
+   54,
+   0
   ],
   "scripts/experiments/phase_c1/__init__.py": [
    1,
@@ -442,6 +517,10 @@
    1,
    1
   ],
+  "scripts/experiments/phase_c1/pod_environment.py": [
+   85,
+   0
+  ],
   "src/aadistill/autoinit/c1_probe_results.py => scripts/experiments/phase_c1/probe_results.py": [
    1,
    1
@@ -453,6 +532,10 @@
   "src/aadistill/autoinit/c1_session.py => scripts/experiments/phase_c1/session.py": [
    8,
    4
+  ],
+  "scripts/experiments/preflight.py": [
+   73,
+   0
   ],
   "scripts/experiments/recipes.py": [
    29,
@@ -470,81 +553,89 @@
    11,
    10
   ],
+  "scripts/experiments/recovery_policy.py": [
+   108,
+   0
+  ],
+  "scripts/experiments/source_sets.py": [
+   68,
+   0
+  ],
   "scripts/pod/autoinit_c1_driver.py": [
    32,
    26
   ],
   "scripts/pod/autoinit_c1_launch.py": [
-   13,
-   20
+   19,
+   21
   ],
   "scripts/pod/autoinit_continuation_b_driver.py": [
    17,
    9
   ],
   "scripts/pod/autoinit_continuation_b_launch.py": [
-   4,
-   10
+   10,
+   11
   ],
   "scripts/pod/autoinit_continuation_driver.py": [
    17,
-   13
+   14
   ],
   "scripts/pod/autoinit_continuation_launch.py": [
-   3,
-   4
+   9,
+   5
   ],
   "scripts/pod/autoinit_device_canary.py": [
-   21,
+   25,
    12
   ],
   "scripts/pod/autoinit_device_canary_launch.py": [
-   5,
-   2
+   15,
+   3
   ],
   "scripts/pod/autoinit_engine_probe.py": [
    1,
    1
   ],
   "scripts/pod/autoinit_measurement_launch.py": [
-   3,
-   2
+   9,
+   3
   ],
   "scripts/pod/autoinit_phase_a_driver.py": [
    51,
    19
   ],
   "scripts/pod/autoinit_phase_a_launch.py": [
-   11,
-   6
+   17,
+   7
   ],
   "scripts/pod/autoinit_phase_b_driver.py": [
    8,
    8
   ],
   "scripts/pod/autoinit_phase_b_launch.py": [
-   7,
-   11
+   13,
+   12
   ],
   "scripts/pod/autoinit_preflight_driver.py": [
-   9,
-   5
+   24,
+   13
   ],
   "scripts/pod/autoinit_preflight_launch.py": [
-   2,
-   2
+   12,
+   3
   ],
   "scripts/pod/autoinit_preflight_setup.sh": [
    17,
    14
   ],
   "scripts/pod/autoinit_recovery_continuation_driver.py": [
-   20,
-   10
+   24,
+   12
   ],
   "scripts/pod/autoinit_recovery_continuation_launch.py": [
-   10,
-   9
+   16,
+   10
   ],
   "scripts/pod/autoinit_science_inputs.py": [
    1,
@@ -579,8 +670,8 @@
    2
   ],
   "scripts/training/train_stage3.py": [
-   1,
-   1
+   6,
+   4
   ],
   "scripts/training/validate_e8_arms.py": [
    7,
@@ -591,7 +682,11 @@
    3
   ],
   "scripts/validation/cuda_engineering_check.py": [
-   289,
+   561,
+   0
+  ],
+  "scripts/validation/device_observations.py": [
+   182,
    0
   ],
   "src/aadistill/autoinit/__init__.py": [
@@ -606,33 +701,41 @@
    0,
    492
   ],
+  "src/aadistill/data/paired_corpus.py": [
+   4,
+   5
+  ],
+  "src/aadistill/evaluation/paired_stats.py": [
+   1,
+   1
+  ],
   "src/aadistill/{autoinit/manifest.py => governance/artifact_manifest.py}": [
    11,
    7
   ],
   "src/aadistill/{autoinit => governance}/authorization.py": [
-   29,
-   34
+   138,
+   98
   ],
   "src/aadistill/governance/closure.py": [
    286,
    0
   ],
   "src/aadistill/{autoinit => governance}/post_freeze.py": [
-   15,
-   3
+   49,
+   33
   ],
   "src/aadistill/infrastructure/session.py": [
-   20,
-   1
+   57,
+   4
   ],
   "src/aadistill/infrastructure/session_prechecks.py": [
    18,
    0
   ],
   "src/aadistill/infrastructure/session_runner.py": [
-   31,
-   4
+   43,
+   11
   ],
   "src/aadistill/init/__init__.py": [
    0,
@@ -719,8 +822,8 @@
    8
   ],
   "src/aadistill/{autoinit => initialization/planning}/generation.py": [
-   2,
-   2
+   11,
+   9
   ],
   "src/aadistill/{autoinit => initialization/planning}/generation_compat.py": [
    1,
@@ -735,16 +838,16 @@
    2
   ],
   "src/aadistill/{autoinit => initialization/planning}/recovery.py": [
-   58,
-   20
+   83,
+   118
   ],
   "src/aadistill/{autoinit => initialization/planning}/search.py": [
    28,
    12
   ],
   "src/aadistill/{autoinit => initialization/planning}/stage1_import.py": [
-   9,
-   6
+   10,
+   7
   ],
   "src/aadistill/{autoinit => initialization/planning}/stage1_selection.py": [
    1,
@@ -831,8 +934,8 @@
    3
   ],
   "src/aadistill/{autoinit => runtime}/pod_environment.py": [
-   14,
-   4
+   41,
+   41
   ],
   "src/aadistill/{autoinit => runtime}/staging_contract.py": [
    0,
@@ -855,11 +958,15 @@
    14
   ],
   "tests/architecture/test_executable_closure_moves.py": [
-   229,
+   230,
    0
   ],
   "tests/architecture/test_ratchet_precision.py": [
    207,
+   0
+  ],
+  "tests/architecture/test_semantic_hardcode.py": [
+   172,
    0
   ],
   "tests/autoinit/conftest.py": [
@@ -899,8 +1006,8 @@
    15
   ],
   "tests/autoinit/test_c1_readiness_gates.py": [
-   56,
-   41
+   69,
+   45
   ],
   "tests/autoinit/test_c1_session.py": [
    7,
@@ -923,8 +1030,8 @@
    19
   ],
   "tests/autoinit/test_cost_and_recovery.py": [
-   105,
-   57
+   104,
+   65
   ],
   "tests/autoinit/test_cost_model_replay.py": [
    11,
@@ -975,7 +1082,7 @@
    10
   ],
   "tests/autoinit/test_phase_b_historical_amendments.py": [
-   53,
+   57,
    10
   ],
   "tests/autoinit/test_phase_b_plan.py": [
@@ -983,7 +1090,7 @@
    36
   ],
   "tests/autoinit/test_phase_b_reuse_hostlocal.py": [
-   39,
+   150,
    10
   ],
   "tests/autoinit/test_ranking.py": [
@@ -999,7 +1106,7 @@
    19
   ],
   "tests/autoinit/test_recovery_search_scoring.py": [
-   6,
+   4,
    3
   ],
   "tests/autoinit/test_registry.py": [
@@ -1027,8 +1134,8 @@
    6
   ],
   "tests/autoinit/test_stage1_import.py": [
-   7,
-   6
+   11,
+   7
   ],
   "tests/autoinit/test_stage1_probes_execute.py": [
    5,
@@ -1058,6 +1165,14 @@
    55,
    0
   ],
+  "tests/docs/test_current_state_consistency.py": [
+   210,
+   0
+  ],
+  "tests/evaluation/test_paired_stats.py": [
+   5,
+   5
+  ],
   "tests/init/test_collect.py": [
    4,
    1
@@ -1079,8 +1194,8 @@
    2
   ],
   "tests/pod/test_autoinit_preflight_rehearsal.py": [
-   22,
-   11
+   26,
+   14
   ],
   "tests/pod/test_c1_artifact_specs.py": [
    2,
@@ -1093,6 +1208,10 @@
   "tests/pod/test_c1_driver_execution.py": [
    11,
    17
+  ],
+  "tests/pod/test_c1_one_provider_resource.py": [
+   8,
+   1
   ],
   "tests/pod/test_c1_session_contract.py": [
    18,
@@ -1115,40 +1234,40 @@
    8
   ],
   "tests/pod/test_continuation_rehearsal.py": [
-   25,
-   31
+   30,
+   37
   ],
   "tests/pod/test_cpu_test_environment.py": [
    6,
    2
   ],
   "tests/pod/test_cpu_test_outcome_evidence.py": [
-   3,
-   3
+   11,
+   4
   ],
   "tests/pod/test_device_canary_argument_contract.py": [
-   2,
-   2
+   3,
+   3
   ],
   "tests/pod/test_driver_authorization_wiring.py": [
    5,
    7
   ],
   "tests/pod/test_measurement_session.py": [
-   4,
-   4
+   16,
+   14
   ],
   "tests/pod/test_observed_protocol_rehearsal.py": [
    26,
    9
   ],
   "tests/pod/test_phase_a_rehearsal.py": [
-   14,
-   17
+   13,
+   18
   ],
   "tests/pod/test_phase_a_search_executes.py": [
    18,
-   11
+   13
   ],
   "tests/pod/test_phase_a_search_profile_seam.py": [
    3,
@@ -1169,6 +1288,10 @@
   "tests/pod/test_phase_b_stage1_executes.py": [
    6,
    8
+  ],
+  "tests/pod/test_post_provider_ownership.py": [
+   7,
+   0
   ],
   "tests/pod/test_recovery_continuation_session.py": [
    3,
@@ -1197,15 +1320,19 @@
   "tests/validation/test_cuda_engineering_check.py": [
    176,
    0
+  ],
+  "tests/validation/test_cuda_suffix_case.py": [
+   280,
+   0
   ]
  },
  "numstat_rule": "git diff --numstat <base> <tip>",
- "patch_sha256": "b367c4de76cee6cf13f091f645872a6e09dc9f54462bcf4501b06ac0576db47b",
+ "patch_sha256": "4c985e12d7c820ac8851a5731fbb85faa0fa819d67894cce74b312acaea3845c",
  "patch_rule": "sha256 of git diff <base> <tip>",
  "declarations": [
   {
    "declaration": "HARNESS_SOURCE_FILES_V1",
-   "declared_in": "aadistill.governance.authorization",
+   "declared_in": "experiments.preflight",
    "n_declared": 12,
    "dispositions": {
     "modified_in_place": 8,
@@ -1215,7 +1342,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 8 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "762d764b62b241dd08df2d885d34a14d2c65afeba0aa484acaca214aeb1e1dbd",
+   "identity_now": "77da1e0fd72b2c5c0b6e6d2e660ff140df63c4868192668c589ea69c096e0a8b",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -1224,13 +1351,13 @@
      "path": "scripts/pod/autoinit_preflight_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "30083bd08a343f7011d08a1a6a11738ad4eb889f1b9adf1424bd128039c6353d",
-     "sha256_now": "cbeac1719fd1a24da8f3ef993522338aae16e13f93667ca3514e0db34a9f6a7a"
+     "sha256_now": "0703979362376ba66ddb682ebd62f9cd351e69f2a916fd2ede0c83e609f9dc5e"
     },
     {
      "path": "scripts/pod/autoinit_preflight_driver.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "1aa7b1bf69b537c228651465f008bac6fbb98d227313418cdef84c3b462c67f4",
-     "sha256_now": "281eaae898573702db3ecf6fffd855210a7e8934ce9bbc79a1efcd6325659b9b"
+     "sha256_now": "095bc425c49923c79562f73a219760065e28365aed72d678867655f7e2da572f"
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
@@ -1266,13 +1393,13 @@
      "path": "src/aadistill/infrastructure/session.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
-     "sha256_now": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386"
+     "sha256_now": "a35abc1a78d35132575fedb2cad273df4185c7d70088af91bdeb0cc4ef3226be"
     },
     {
      "path": "src/aadistill/infrastructure/session_runner.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
-     "sha256_now": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50"
+     "sha256_now": "5d89e329daaa0af03ada76cc9cb93e3e3fb1ef567915fc8359d197e3eef8713a"
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -1284,17 +1411,17 @@
      "path": "src/aadistill/governance/authorization.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b"
+     "sha256_now": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b"
     },
     {
      "path": "src/aadistill/initialization/planning/generation.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+     "sha256_now": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f"
     }
    ],
    "live_digest_computes": true,
-   "live_digest": "762d764b62b241dd08df2d885d34a14d2c65afeba0aa484acaca214aeb1e1dbd",
+   "live_digest": "77da1e0fd72b2c5c0b6e6d2e660ff140df63c4868192668c589ea69c096e0a8b",
    "old_document_would_fail_by": "digest mismatch"
   },
   {
@@ -1309,7 +1436,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 10 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "31bf8e7774745179d3c28b9cc247f0836efe2ce6cfded2ec9e522a1f664d56dd",
+   "identity_now": "51df01c4880c5fee20ee7b5f53a7921df3ea78f3c88716afd736365e7df2aa76",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -1318,13 +1445,13 @@
      "path": "scripts/pod/autoinit_phase_a_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "ea080b2e901facd32985d0eb21ae8757eb77d2db7d8aefa0af5c01d72537f83e",
-     "sha256_now": "54d8363e35f5ca79ae9b66400a05e33f0a94aa37b2d8aeebc059b78f219a5181"
+     "sha256_now": "0d210cf9d3b2e57ab5f3d9b9c38716d9b2adea04956005c5ed4e60c742561d5d"
     },
     {
      "path": "scripts/pod/autoinit_phase_a_driver.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "3296a6b749bd01886258dbd0bf1a527ce4db564b18e3bd6c1e59b510007d6d1a",
-     "sha256_now": "fcbd3f5a0a429e8d638c2486d18f66c55b66e7f965105cec1da59a52b816853f"
+     "sha256_now": "8f5a57e908fa5f36408bcf9cf9a8aa13e57ca723faad9fae85940d9bda5afa75"
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
@@ -1360,13 +1487,13 @@
      "path": "src/aadistill/infrastructure/session.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
-     "sha256_now": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386"
+     "sha256_now": "a35abc1a78d35132575fedb2cad273df4185c7d70088af91bdeb0cc4ef3226be"
     },
     {
      "path": "src/aadistill/infrastructure/session_runner.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
-     "sha256_now": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50"
+     "sha256_now": "5d89e329daaa0af03ada76cc9cb93e3e3fb1ef567915fc8359d197e3eef8713a"
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -1378,19 +1505,19 @@
      "path": "scripts/autoinit/phase_a_search.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "d4edf2122328396a171a38d30e3537fd0ba771e033d841f41157ea91ce085dec",
-     "sha256_now": "2e23d44d0a9474263d1cf7fb47c68907a1dda43b090bf80556833eed3797b5a5"
+     "sha256_now": "78fd24d3983b9e4f0978790c42950773f1aa607986f4148c7b3bcd4f97ded76b"
     },
     {
      "path": "scripts/autoinit/write_preregistration.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "55938e534f0d5b7afe61359cea35486d702e5da2695f9e9f2d688a5b844ebfa6",
-     "sha256_now": "0fa2d8d1e799bdc3e0f1653b7205b4e36cb2acc277cf711f5d64b6fae5b56d73"
+     "sha256_now": "723344a777a2c6ad070c11353c7536e009e827dd52a18a81bec1f26f2c5cfa0d"
     },
     {
      "path": "src/aadistill/governance/authorization.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b"
+     "sha256_now": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b"
     },
     {
      "path": "src/aadistill/initialization/planning/generation_compat.py",
@@ -1402,17 +1529,17 @@
      "path": "scripts/experiments/phase_a/plan.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b"
+     "sha256_now": "7b98df036b349c690585b5d82460d669d8439822bed14e4297464a5f010fedd5"
     },
     {
      "path": "src/aadistill/initialization/planning/generation.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+     "sha256_now": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f"
     }
    ],
    "live_digest_computes": true,
-   "live_digest": "31bf8e7774745179d3c28b9cc247f0836efe2ce6cfded2ec9e522a1f664d56dd",
+   "live_digest": "51df01c4880c5fee20ee7b5f53a7921df3ea78f3c88716afd736365e7df2aa76",
    "old_document_would_fail_by": "digest mismatch"
   },
   {
@@ -1420,14 +1547,14 @@
    "declared_in": "experiments.phase_b.plan",
    "n_declared": 59,
    "dispositions": {
-    "modified_in_place": 16,
-    "unchanged_path": 10,
+    "modified_in_place": 17,
+    "unchanged_path": 9,
     "declared_path_absent_at_base": 33
    },
    "additive_only": false,
-   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 16 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
+   "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 17 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "a1f80f3ad53b49c338e0563b64ecaf36c720254141676916f19c407e2e7677a5",
+   "identity_now": "bb3fd1845b210870a66bfb17d95e708141ce95a893b58bb72ddb6092827a37ab",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -1440,15 +1567,15 @@
     },
     {
      "path": "scripts/autoinit/phase_a_frozen.py",
-     "disposition": "unchanged_path",
+     "disposition": "modified_in_place",
      "sha256_at_base": "78fa6da9c3f8d7b78eedc86afe8ff119c726057ae3127777a12af70b14e82519",
-     "sha256_now": "78fa6da9c3f8d7b78eedc86afe8ff119c726057ae3127777a12af70b14e82519"
+     "sha256_now": "b2958335d7d8e48327b10ff315679ef9f10fbfd54ecbb8696bde9957f0fab51b"
     },
     {
      "path": "scripts/autoinit/phase_a_search.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "d4edf2122328396a171a38d30e3537fd0ba771e033d841f41157ea91ce085dec",
-     "sha256_now": "2e23d44d0a9474263d1cf7fb47c68907a1dda43b090bf80556833eed3797b5a5"
+     "sha256_now": "78fd24d3983b9e4f0978790c42950773f1aa607986f4148c7b3bcd4f97ded76b"
     },
     {
      "path": "scripts/autoinit/price_phase_b.py",
@@ -1460,19 +1587,19 @@
      "path": "scripts/autoinit/verify_frozen_assets.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "7b43b9b63172c3acb10b1d5f7dd6c2077bfb5767aaf3e6aab1f2852b32f5b551",
-     "sha256_now": "0c39aea1c8b91e0af939d6a4ab8b4f903dff0b56353d02ce2fadeb7407508583"
+     "sha256_now": "1552298b95e16a3562e6f13005a764616d9d08f237b24033cdff78874fd30a20"
     },
     {
      "path": "scripts/autoinit/verify_historical_probe_reuse.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "742bad28f81bafafdcf8a3249f5c2078b581b6b82672f318baa3bcde2cec42c0",
-     "sha256_now": "cfc7ef1f234e731a3ee7d25f9833829019543413114d9b73663ccc91e26b032d"
+     "sha256_now": "bdcc6dabe8e4e2eadce97abe9e9ab134491498e61484fdfe69c08db469695e84"
     },
     {
      "path": "scripts/autoinit/write_preregistration.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "55938e534f0d5b7afe61359cea35486d702e5da2695f9e9f2d688a5b844ebfa6",
-     "sha256_now": "0fa2d8d1e799bdc3e0f1653b7205b4e36cb2acc277cf711f5d64b6fae5b56d73"
+     "sha256_now": "723344a777a2c6ad070c11353c7536e009e827dd52a18a81bec1f26f2c5cfa0d"
     },
     {
      "path": "scripts/pod/autoinit_engine_probe.py",
@@ -1484,13 +1611,13 @@
      "path": "scripts/pod/autoinit_phase_a_driver.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "3296a6b749bd01886258dbd0bf1a527ce4db564b18e3bd6c1e59b510007d6d1a",
-     "sha256_now": "fcbd3f5a0a429e8d638c2486d18f66c55b66e7f965105cec1da59a52b816853f"
+     "sha256_now": "8f5a57e908fa5f36408bcf9cf9a8aa13e57ca723faad9fae85940d9bda5afa75"
     },
     {
      "path": "scripts/pod/autoinit_phase_a_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "ea080b2e901facd32985d0eb21ae8757eb77d2db7d8aefa0af5c01d72537f83e",
-     "sha256_now": "54d8363e35f5ca79ae9b66400a05e33f0a94aa37b2d8aeebc059b78f219a5181"
+     "sha256_now": "0d210cf9d3b2e57ab5f3d9b9c38716d9b2adea04956005c5ed4e60c742561d5d"
     },
     {
      "path": "scripts/pod/autoinit_phase_b_driver.py",
@@ -1502,7 +1629,7 @@
      "path": "scripts/pod/autoinit_phase_b_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "1451b369b817f5b2f9b67f401e1a662b57e8fa8bbbff1375c59f991a75b61b86",
-     "sha256_now": "dfc5f4f67c2e3b443f5606d721ec52c3ba617e6cf07fffec46c8f62a8290830c"
+     "sha256_now": "94616029b1fe501fa9f4c244b0fd5baa413e37a6ca85e002edbcc2cd8980403b"
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
@@ -1556,7 +1683,7 @@
      "path": "src/aadistill/governance/authorization.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b"
+     "sha256_now": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b"
     },
     {
      "path": "src/aadistill/initialization/calibration/profiles.py",
@@ -1592,7 +1719,7 @@
      "path": "src/aadistill/initialization/planning/generation.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+     "sha256_now": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f"
     },
     {
      "path": "src/aadistill/initialization/specs/identity_collapse.py",
@@ -1670,13 +1797,13 @@
      "path": "scripts/experiments/phase_a/plan.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b"
+     "sha256_now": "7b98df036b349c690585b5d82460d669d8439822bed14e4297464a5f010fedd5"
     },
     {
      "path": "scripts/experiments/phase_b/plan.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "65c71f785552caa05b95460fd04ba89d666ede4eef187c40d802642d4bccfe8d"
+     "sha256_now": "cb67de8c053ed121bcd322a864d689171e1f9dde82175249692452ad5b636bb0"
     },
     {
      "path": "src/aadistill/initialization/planning/ranking.py",
@@ -1754,7 +1881,7 @@
      "path": "src/aadistill/infrastructure/session.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
-     "sha256_now": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386"
+     "sha256_now": "a35abc1a78d35132575fedb2cad273df4185c7d70088af91bdeb0cc4ef3226be"
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -1766,7 +1893,7 @@
      "path": "src/aadistill/infrastructure/session_runner.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
-     "sha256_now": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50"
+     "sha256_now": "5d89e329daaa0af03ada76cc9cb93e3e3fb1ef567915fc8359d197e3eef8713a"
     },
     {
      "path": "src/aadistill/initialization/statistics/contribution.py",
@@ -1788,7 +1915,7 @@
     }
    ],
    "live_digest_computes": true,
-   "live_digest": "a1f80f3ad53b49c338e0563b64ecaf36c720254141676916f19c407e2e7677a5",
+   "live_digest": "bb3fd1845b210870a66bfb17d95e708141ce95a893b58bb72ddb6092827a37ab",
    "old_document_would_fail_by": "digest mismatch"
   },
   {
@@ -1803,7 +1930,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 10 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "dd0f76332b762b91568fff4cd88bdfad06bf358a80d5a3c0a9bbd34ce157592d",
+   "identity_now": "a9066b0c38f181151a1ba53200eb76cff47342921990a1d76cb64e2e6bb4ce7a",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -1830,7 +1957,7 @@
      "path": "scripts/experiments/phase_a/plan.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "c35b461df7598f61871ec77e5ac2e1ac1269489a0b1948f7151a1c5b18fb260b"
+     "sha256_now": "7b98df036b349c690585b5d82460d669d8439822bed14e4297464a5f010fedd5"
     },
     {
      "path": "scripts/experiments/phase_b/__init__.py",
@@ -1866,19 +1993,19 @@
      "path": "scripts/pod/autoinit_continuation_b_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "242f289070f0e5ba6d803207da7b8b24db60020900afc55b333fefd1af3f0960",
-     "sha256_now": "21dc797dd6f15eaecef6ae08a7b1769f0197818c28efe6a262d8e3583cd6de24"
+     "sha256_now": "d3feed4c73e8958123c7634dfcac853045e9755f74b9e5c34dd3573e2e4a83e8"
     },
     {
      "path": "scripts/pod/autoinit_phase_a_driver.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "3296a6b749bd01886258dbd0bf1a527ce4db564b18e3bd6c1e59b510007d6d1a",
-     "sha256_now": "fcbd3f5a0a429e8d638c2486d18f66c55b66e7f965105cec1da59a52b816853f"
+     "sha256_now": "8f5a57e908fa5f36408bcf9cf9a8aa13e57ca723faad9fae85940d9bda5afa75"
     },
     {
      "path": "scripts/pod/autoinit_phase_a_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "ea080b2e901facd32985d0eb21ae8757eb77d2db7d8aefa0af5c01d72537f83e",
-     "sha256_now": "54d8363e35f5ca79ae9b66400a05e33f0a94aa37b2d8aeebc059b78f219a5181"
+     "sha256_now": "0d210cf9d3b2e57ab5f3d9b9c38716d9b2adea04956005c5ed4e60c742561d5d"
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
@@ -1890,7 +2017,7 @@
      "path": "scripts/pod/autoinit_recovery_continuation_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "dd68cc30bd6215e04a0e7a08d4eb568c067a3585c24ed11d8b6534dc9e061072",
-     "sha256_now": "627b33783433c7dc4165f39d7ac59e6761dfa781799a77997f481f074c5e4790"
+     "sha256_now": "4f959c43365e0217e102855da1928c3e4aa7822277ebc461006b9cc656c50331"
     },
     {
      "path": "scripts/pod/autoinit_science_inputs.py",
@@ -1938,7 +2065,7 @@
      "path": "src/aadistill/governance/authorization.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b"
+     "sha256_now": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b"
     },
     {
      "path": "src/aadistill/infrastructure/__init__.py",
@@ -1986,7 +2113,7 @@
      "path": "src/aadistill/infrastructure/session.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
-     "sha256_now": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386"
+     "sha256_now": "a35abc1a78d35132575fedb2cad273df4185c7d70088af91bdeb0cc4ef3226be"
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -1998,7 +2125,7 @@
      "path": "src/aadistill/infrastructure/session_runner.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
-     "sha256_now": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50"
+     "sha256_now": "5d89e329daaa0af03ada76cc9cb93e3e3fb1ef567915fc8359d197e3eef8713a"
     },
     {
      "path": "src/aadistill/infrastructure/source_identity.py",
@@ -2112,7 +2239,7 @@
      "path": "src/aadistill/initialization/planning/generation.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+     "sha256_now": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f"
     },
     {
      "path": "src/aadistill/initialization/planning/generation_compat.py",
@@ -2124,7 +2251,7 @@
      "path": "src/aadistill/initialization/planning/recovery.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "3905b2c3a318b4ef80eddf16923a8653f192bdedb9d54499da9fe96a18072ea8"
+     "sha256_now": "66221b476c6d9ef8fe89bfa3a0ea0f52d7a308d6f80f03d23a3133851dda7bf0"
     },
     {
      "path": "src/aadistill/initialization/specs/__init__.py",
@@ -2218,7 +2345,7 @@
     }
    ],
    "live_digest_computes": true,
-   "live_digest": "dd0f76332b762b91568fff4cd88bdfad06bf358a80d5a3c0a9bbd34ce157592d",
+   "live_digest": "a9066b0c38f181151a1ba53200eb76cff47342921990a1d76cb64e2e6bb4ce7a",
    "old_document_would_fail_by": "digest mismatch"
   },
   {
@@ -2233,7 +2360,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 6 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "652ed73b396fa24eb8a9934c04e831c2b96f850bbe1a17efa41f9cd300593d67",
+   "identity_now": "5a1b843236ebfbc50c622e4e9340c258d63a07616a0f11bba252d0c5d61591a1",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -2242,19 +2369,19 @@
      "path": "scripts/pod/autoinit_continuation_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "085a0eb1b10827d308e993c7148c8899a7f89db44de0b2bb68ae84a6369e1d74",
-     "sha256_now": "88c5668e0242bcf8826a2475905fdef195192b96631f931d683346e95d60b192"
+     "sha256_now": "08b60b9eb63916b78b25cb9130ca22b360485e5bf60a8fa93ec03837b39ded9e"
     },
     {
      "path": "scripts/pod/autoinit_continuation_driver.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "fddf042ddfe54bedef5977393bb4e994f4f7d7203d74206cd9d6f0d876ccf5f1",
-     "sha256_now": "a2fb3b21ad0359bca0c32b95d4bd2de85bff345a212351fe28143af74738a8d3"
+     "sha256_now": "e4ab63b032af9aac0c315aeea84bddf07c27135ab2ac7a165bb581083f8a54bd"
     },
     {
      "path": "scripts/pod/autoinit_preflight_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "30083bd08a343f7011d08a1a6a11738ad4eb889f1b9adf1424bd128039c6353d",
-     "sha256_now": "cbeac1719fd1a24da8f3ef993522338aae16e13f93667ca3514e0db34a9f6a7a"
+     "sha256_now": "0703979362376ba66ddb682ebd62f9cd351e69f2a916fd2ede0c83e609f9dc5e"
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
@@ -2290,7 +2417,7 @@
      "path": "src/aadistill/governance/authorization.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b"
+     "sha256_now": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b"
     },
     {
      "path": "scripts/experiments/recovery_continuation/plan.py",
@@ -2302,7 +2429,7 @@
      "path": "src/aadistill/initialization/planning/generation.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+     "sha256_now": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f"
     }
    ]
   },
@@ -2329,13 +2456,13 @@
      "path": "scripts/pod/autoinit_c1_launch.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "1df6dc91243cf32bf13a68a6c531f01818dc784fdc12e0af79c061b9769774fe",
-     "sha256_now": "fb6266ae416908287d6fd79ed3256085b36bb4dafee5bd4c71282279ca5d02b9"
+     "sha256_now": "cfa38c763496fa534f13310e56130f296f8352f0a1271197c1cf7f14d914925c"
     },
     {
      "path": "scripts/pod/autoinit_c1_driver.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "cb2adb26f072d314de5f8984ce86291c2e8d5369c5616711bcedd6633903e467",
-     "sha256_now": "ab03f7b19965b4a182922d61ad1dfe9af56ca8efa5b95faac1da3bc8af349873"
+     "sha256_now": "a52b55c00f67597d43a8a6c93961aba51cc41b8f3f50866603f38fd857b98e19"
     },
     {
      "path": "scripts/pod/autoinit_preflight_setup.sh",
@@ -2415,7 +2542,7 @@
      "new_path": "src/aadistill/runtime/pod_environment.py",
      "disposition": "renamed_and_modified",
      "sha256_at_base": "88ca930ecddbbb43c23f6bad2e207995439c42109a28299d9259644afa9e917a",
-     "sha256_now": "4036aeef7e65793f6d6bd8edbc262532749a54d2ed8cc593680db3d0d1e43b85"
+     "sha256_now": "078b502209d7fe894238192162896a653237ee3a47fc677cf527a6a5ee6ade18"
     },
     {
      "path": "src/aadistill/autoinit/staging_contract.py",
@@ -2440,7 +2567,7 @@
      "path": "scripts/autoinit/score_c1_confirmation.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "5bb1265b2033b6caf6fa9bfc794e2d5002840b1ed3d9d610fee17d7df9a6dad2",
-     "sha256_now": "d617817ff9322e3ba4cc8407ec2451c80b7f3622305602c8a85518c9d22578f3"
+     "sha256_now": "94297de0252011164e3b88648a2616bbccc905fc17072357f6e0e84458cdc21c"
     },
     {
      "path": "src/aadistill/autoinit/c1_scoring.py",
@@ -2504,7 +2631,7 @@
      "path": "scripts/training/train_stage3.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "b23265cdae9196e1b192c531eaef37fc6a4d8605a6120344e6d3498176cdd72b",
-     "sha256_now": "32ca0c9df4719e024dc091407745bab336ea79310c960f16a331ea0ba900b2ec"
+     "sha256_now": "72786942a48014fbea92b197070e7d7c5677154847f1233f99cdffc94e25cfa0"
     },
     {
      "path": "src/aadistill/autoinit/c1_session.py",
@@ -2539,7 +2666,7 @@
      "new_path": "src/aadistill/governance/authorization.py",
      "disposition": "renamed_and_modified",
      "sha256_at_base": "c144412e88015c00cc25dbb53b9233c43720d87b128997888e5791189194f80c",
-     "sha256_now": "293d4d047262199ab16ab5b939637365ceb0d10de4df9310f952aeb7aa01bf9b"
+     "sha256_now": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b"
     },
     {
      "path": "src/aadistill/autoinit/__init__.py",
@@ -2706,26 +2833,26 @@
      "new_path": "src/aadistill/initialization/planning/recovery.py",
      "disposition": "renamed_and_modified",
      "sha256_at_base": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
-     "sha256_now": "3905b2c3a318b4ef80eddf16923a8653f192bdedb9d54499da9fe96a18072ea8"
+     "sha256_now": "66221b476c6d9ef8fe89bfa3a0ea0f52d7a308d6f80f03d23a3133851dda7bf0"
     },
     {
      "path": "src/aadistill/autoinit/generation.py",
      "new_path": "src/aadistill/initialization/planning/generation.py",
      "disposition": "renamed_and_modified",
      "sha256_at_base": "24cf6e3d5dd897e6ab0c3213e83f9a218a21c47052e6fe0cfc48cbda8762cc91",
-     "sha256_now": "6610075fb2bb85b643a572ca1e689cc40aac6485a4274805f36566d0715c7cdc"
+     "sha256_now": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f"
     },
     {
      "path": "scripts/autoinit/score_recovery_search.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
-     "sha256_now": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b"
+     "sha256_now": "2afd5b27a5b33c4479b661356d15be0349373d77bf8af803266318ad6db79339"
     },
     {
      "path": "scripts/evaluation/uncapped_eval.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
-     "sha256_now": "d0e49c4ac198212ae68911199ae302d90c6af5c8e343a66348cc2bd67e4ee45e"
+     "sha256_now": "41b0de8ddf59b10a4cb09d9ea4af3f93683ab2c8b860ff519fff243073c16d02"
     },
     {
      "path": "src/aadistill/evaluation/usable_rollout.py",
@@ -2761,13 +2888,13 @@
      "path": "src/aadistill/infrastructure/session.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "972ee61ffffc3adebd770e8a0c95c5e0d7c76a8574ab9035786f51a06065cb1b",
-     "sha256_now": "bdf492f6cd2437addcb2a81abd9d5dcf03383a806b856ef4d9d5144f23b22386"
+     "sha256_now": "a35abc1a78d35132575fedb2cad273df4185c7d70088af91bdeb0cc4ef3226be"
     },
     {
      "path": "src/aadistill/infrastructure/session_runner.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "6fd3950a9c6feb85595518f7f5a9f6c8946e8082d5de7e178b596ad8d3c3fc91",
-     "sha256_now": "52e1375622618a3bd45dae8443559f14972cebede8e42dd5cbe02b97b21f4f50"
+     "sha256_now": "5d89e329daaa0af03ada76cc9cb93e3e3fb1ef567915fc8359d197e3eef8713a"
     },
     {
      "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -2816,7 +2943,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 2 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "dd9ab3c103585813a7fff5cfd7304f1304db8ef54bc1c027c771c5bd1a6bd1b5",
+   "identity_now": "834de3ebe95d415d144c065600ee0b919f3d58430fe33299d477db0616d3efdc",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -2825,7 +2952,7 @@
      "path": "scripts/autoinit/score_c1_confirmation.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "5bb1265b2033b6caf6fa9bfc794e2d5002840b1ed3d9d610fee17d7df9a6dad2",
-     "sha256_now": "d617817ff9322e3ba4cc8407ec2451c80b7f3622305602c8a85518c9d22578f3"
+     "sha256_now": "94297de0252011164e3b88648a2616bbccc905fc17072357f6e0e84458cdc21c"
     },
     {
      "path": "scripts/experiments/phase_c1/scoring.py",
@@ -2837,13 +2964,13 @@
      "path": "scripts/autoinit/score_recovery_search.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
-     "sha256_now": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b"
+     "sha256_now": "2afd5b27a5b33c4479b661356d15be0349373d77bf8af803266318ad6db79339"
     },
     {
      "path": "src/aadistill/initialization/planning/recovery.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "3905b2c3a318b4ef80eddf16923a8653f192bdedb9d54499da9fe96a18072ea8"
+     "sha256_now": "66221b476c6d9ef8fe89bfa3a0ea0f52d7a308d6f80f03d23a3133851dda7bf0"
     },
     {
      "path": "src/aadistill/evaluation/usable_rollout.py",
@@ -2891,7 +3018,7 @@
   },
   {
    "declaration": "GENERATION_SOURCE_FILES_V1",
-   "declared_in": "aadistill.initialization.planning.generation",
+   "declared_in": "experiments.source_sets",
    "n_declared": 3,
    "dispositions": {
     "modified_in_place": 1,
@@ -2900,7 +3027,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 1 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": "a1b51736d6a6b1276322a04d44855d7b574011e165e77d6d23c3e31b3036f743",
-   "identity_now": "02478a3492437c024987a72b06f27ca2caf05c73ec64cc3ab7f44ebebbc55ac6",
+   "identity_now": "add7e304d6014b6698f115af816dc927e6bafc2bab2d31ec38ef85dcd13f72ad",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -2909,7 +3036,7 @@
      "path": "scripts/evaluation/uncapped_eval.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "120e92dc08a49ae4e3ed74fbbc6537054c011382755cdec6418c11b341f780d4",
-     "sha256_now": "d0e49c4ac198212ae68911199ae302d90c6af5c8e343a66348cc2bd67e4ee45e"
+     "sha256_now": "41b0de8ddf59b10a4cb09d9ea4af3f93683ab2c8b860ff519fff243073c16d02"
     },
     {
      "path": "src/aadistill/evaluation/degeneration.py",
@@ -2927,7 +3054,7 @@
   },
   {
    "declaration": "TRAINER_SOURCE_FILES_V1",
-   "declared_in": "aadistill.initialization.planning.recovery",
+   "declared_in": "experiments.source_sets",
    "n_declared": 7,
    "dispositions": {
     "modified_in_place": 1,
@@ -2936,7 +3063,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 1 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": "2e63e2e230c09af7e33e4c2acc02aed59e4ea489c364447b032d30bd678dd1dc",
-   "identity_now": "813194ffdd22426c90993776a771b827c36b455917b97505b5eb80d4ccbf0dbd",
+   "identity_now": "8fa6d4208093831c7b86db3a6cfcb92b4b3669b865b9fc0be70a336880717e5e",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -2945,7 +3072,7 @@
      "path": "scripts/training/train_stage3.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "b23265cdae9196e1b192c531eaef37fc6a4d8605a6120344e6d3498176cdd72b",
-     "sha256_now": "32ca0c9df4719e024dc091407745bab336ea79310c960f16a331ea0ba900b2ec"
+     "sha256_now": "72786942a48014fbea92b197070e7d7c5677154847f1233f99cdffc94e25cfa0"
     },
     {
      "path": "src/aadistill/training/train.py",
@@ -2987,7 +3114,7 @@
   },
   {
    "declaration": "RECOVERY_SCORING_FILES_V2",
-   "declared_in": "aadistill.initialization.planning.recovery",
+   "declared_in": "experiments.source_sets",
    "n_declared": 6,
    "dispositions": {
     "modified_in_place": 1,
@@ -2997,7 +3124,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 1 renamed AND modified, 1 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
-   "identity_now": "b63e1cd9d4ec9e77d27cd4d9366ad7258f33fa71ad2f59dcad2c1c2af82a8883",
+   "identity_now": "18ce628faba704bfa1e8b53f9c912da2962e878742d0115db2f88c0b16269ca3",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -3006,7 +3133,7 @@
      "path": "scripts/autoinit/score_recovery_search.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
-     "sha256_now": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b"
+     "sha256_now": "2afd5b27a5b33c4479b661356d15be0349373d77bf8af803266318ad6db79339"
     },
     {
      "path": "src/aadistill/evaluation/usable_rollout.py",
@@ -3037,13 +3164,13 @@
      "new_path": "src/aadistill/initialization/planning/recovery.py",
      "disposition": "renamed_and_modified",
      "sha256_at_base": "39d6598e210b9619d56463f6ba3000d47e1a97f7121e7db25b97213d4d6c799e",
-     "sha256_now": "3905b2c3a318b4ef80eddf16923a8653f192bdedb9d54499da9fe96a18072ea8"
+     "sha256_now": "66221b476c6d9ef8fe89bfa3a0ea0f52d7a308d6f80f03d23a3133851dda7bf0"
     }
    ]
   },
   {
    "declaration": "RECOVERY_SCORING_FILES_V3",
-   "declared_in": "aadistill.initialization.planning.recovery",
+   "declared_in": "experiments.source_sets",
    "n_declared": 6,
    "dispositions": {
     "modified_in_place": 1,
@@ -3053,7 +3180,7 @@
    "additive_only": false,
    "_accounting": "0 renamed with identical bytes, 0 renamed AND modified, 1 modified in place, 0 removed. Recording this as additive would be false wherever anything was removed.",
    "identity_at_base": null,
-   "identity_now": "b63e1cd9d4ec9e77d27cd4d9366ad7258f33fa71ad2f59dcad2c1c2af82a8883",
+   "identity_now": "18ce628faba704bfa1e8b53f9c912da2962e878742d0115db2f88c0b16269ca3",
    "historical_only": true,
    "launch_compatible_with_frozen_preregistration": false,
    "scientific_fields_changed": 0,
@@ -3062,7 +3189,7 @@
      "path": "scripts/autoinit/score_recovery_search.py",
      "disposition": "modified_in_place",
      "sha256_at_base": "b19eba4c2c5f555aeb141811439ad5e5417a3222c3b57b78bad3f497eb90dba3",
-     "sha256_now": "86530893e19e73bff17cdec2ca8577111803eb571b074e9091e8ea5dbe1d9f7b"
+     "sha256_now": "2afd5b27a5b33c4479b661356d15be0349373d77bf8af803266318ad6db79339"
     },
     {
      "path": "src/aadistill/evaluation/usable_rollout.py",
@@ -3092,7 +3219,7 @@
      "path": "src/aadistill/initialization/planning/recovery.py",
      "disposition": "declared_path_absent_at_base",
      "sha256_at_base": null,
-     "sha256_now": "3905b2c3a318b4ef80eddf16923a8653f192bdedb9d54499da9fe96a18072ea8"
+     "sha256_now": "66221b476c6d9ef8fe89bfa3a0ea0f52d7a308d6f80f03d23a3133851dda7bf0"
     }
    ]
   }
@@ -3102,5 +3229,5 @@
   "rule": "no file under logs/ was moved, renamed or rewritten by this migration; logs/runs/index.json verifies that independently by directory digest"
  },
  "authorizes": "nothing",
- "self_sha256": "29a363657fe8e00e58f36182d2bc732cb9b75b51dbfa95996c7750562daa4513"
+ "self_sha256": "8d44d8c65aefbe5e2bd3ad740ecef3c91dd1782097ce7d3aee940521a132346c"
 }

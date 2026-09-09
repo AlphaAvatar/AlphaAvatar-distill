@@ -50,9 +50,14 @@ SCHEMA = "aadistill.migration_source_relocation/v1"
 
 #: (declaration, module, digest callable or None). The digest is exercised so
 #: "this still computes" / "this refuses" is a measurement, not a claim.
+#: Each declaration and the module that OWNS it. Five of these moved out of the
+#: core in the Milestone-A closure -- a declaration is an experiment's statement
+#: about which files it executes, which is exactly the kind of fact the core
+#: stopped holding. This table follows the owner rather than the historical
+#: location; the historical location is what `account()` measures the move from.
 DECLARATIONS = [
-    ("HARNESS_SOURCE_FILES_V1", "aadistill.governance.authorization",
-     "harness_source_digest"),
+    ("HARNESS_SOURCE_FILES_V1", "experiments.preflight",
+     "preflight_harness_digest"),
     ("PHASE_A_HARNESS_SOURCE_FILES_V1", "experiments.phase_a.plan",
      "phase_a_harness_digest"),
     ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "experiments.phase_b.plan",
@@ -64,14 +69,10 @@ DECLARATIONS = [
     ("C1_HARNESS_SOURCE_FILES_V1", "experiments.phase_c1.authorization",
      "c1_historical_harness_digest"),
     ("C1_SCORING_FILES_V1", "experiments.phase_c1.scoring", None),
-    ("GENERATION_SOURCE_FILES_V1", "aadistill.initialization.planning.generation",
-     None),
-    ("TRAINER_SOURCE_FILES_V1", "aadistill.initialization.planning.recovery",
-     None),
-    ("RECOVERY_SCORING_FILES_V2", "aadistill.initialization.planning.recovery",
-     None),
-    ("RECOVERY_SCORING_FILES_V3", "aadistill.initialization.planning.recovery",
-     None),
+    ("GENERATION_SOURCE_FILES_V1", "experiments.source_sets", None),
+    ("TRAINER_SOURCE_FILES_V1", "experiments.source_sets", None),
+    ("RECOVERY_SCORING_FILES_V2", "experiments.source_sets", None),
+    ("RECOVERY_SCORING_FILES_V3", "experiments.source_sets", None),
 ]
 
 
