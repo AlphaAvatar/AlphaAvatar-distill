@@ -46,16 +46,11 @@ from .provider import RunPodProvider, read_api_key
 from .remote import JobSpec, SSHTarget, probe, start_detached
 from .session import SessionContext, SessionSpec, missing_arguments
 
-#: The pod's workspace and checkout roots. These are DEPLOYMENT facts about
-#: the image a session runs in, and they remain module constants deliberately:
-#: they are consumed inside f-strings that build remote shell commands, so a
-#: session that ran a different image would need its own runner rather than a
-#: different value. `SessionSpec.validate` refuses absolute repository-relative
-#: destinations for exactly this reason -- a declaration must not carry the
-#: pod's layout. If a second image is ever needed, they move to
-#: `ExecutionCommands` beside `remote_python`, which is the same kind of fact.
-WS = "/workspace"
-REPO = f"{WS}/aad"
+#: The pod's workspace and checkout roots are NOT here. They were `WS` and
+#: `REPO` module constants, consumed by nineteen f-strings that build remote
+#: commands, so supporting a second image meant patching this module's globals.
+#: They come from `ExecutionCommands` now and are read through `self.ws` and
+#: `self.repo`, which every one of those f-strings uses.
 
 PROBE_COMMAND = (
     "echo \"SETUP_DONE=$(grep -c 'MARKER:SETUP_DONE' {status} 2>/dev/null | tail -1)\"; "
@@ -126,6 +121,11 @@ class SessionRunner:
         #: This used to call `shutil.which("runpodctl")` and then read a config
         #: file under `configs/` -- so reusable infrastructure knew one
         #: provider's binary name and this repository's directory layout.
+        #: The image layout this SESSION declares. Read once, used by every
+        #: remote command below -- setup, driver launch, working directories,
+        #: PYTHONPATH, relay and artifact paths, collection and cleanup.
+        self.ws = self.spec.commands.workspace_root
+        self.repo = self.spec.commands.checkout_root
         self.cli = _first_existing(self.spec.commands.provider_cli_candidates)
         if not self.cli or not Path(self.cli).is_file():
             raise SystemExit(
@@ -327,7 +327,9 @@ class SessionRunner:
                 [self.cli, "pod", "create", "--image", self.a.image,
                  "--gpu-id", self.a.gpu, "--gpu-count", "1",
                  "--container-disk-in-gb", str(self.a.disk_gb), "--volume-in-gb", "0",
-                 "--min-cuda-version", "13.0", "--ports", "22/tcp",
+                 *(("--min-cuda-version", self.spec.commands.min_cuda_version)
+                   if self.spec.commands.min_cuda_version else ()),
+                 "--ports", "22/tcp",
                  "--name", f"aadistill-{self.spec.session_id}",
                  "--terminate-after", deadline.strftime("%Y-%m-%dT%H:%M:%SZ")],
                 capture_output=True, text=True, timeout=300)
@@ -563,20 +565,20 @@ class SessionRunner:
         token = Path(self.a.token_src)
         if not token.is_file() or token.stat().st_size == 0:
             return "no_hf_token"
-        target.run(f"mkdir -p {WS}/hf {WS}/assets && chmod 700 {WS}/hf", timeout=60)
-        subprocess.run(scp + [str(token), f"root@{host}:{WS}/hf/token"],
+        target.run(f"mkdir -p {self.ws}/hf {self.ws}/assets && chmod 700 {self.ws}/hf", timeout=60)
+        subprocess.run(scp + [str(token), f"root@{host}:{self.ws}/hf/token"],
                        capture_output=True, timeout=180)
-        if target.run(f"test -s {WS}/hf/token", timeout=60).returncode != 0:
+        if target.run(f"test -s {self.ws}/hf/token", timeout=60).returncode != 0:
             return "empty_hf_token"
         # Only what the manifest declares. The uplink is 0.72 MB/s, so the
         # frozen search assets are ~3 s and need no relay round trip — but a
         # session that declares none now sends none, and setup copies none.
         for asset in self.spec.setup.local_assets:
             subprocess.run(scp + ["-r", str(self.repo_root / asset.repo_path),
-                                  f"root@{host}:{WS}/assets/{asset.dest_name}"],
+                                  f"root@{host}:{self.ws}/assets/{asset.dest_name}"],
                            capture_output=True, timeout=600)
         setup_script = self.repo_root / self.spec.commands.setup_script
-        subprocess.run(scp + [str(setup_script), f"root@{host}:{WS}/"],
+        subprocess.run(scp + [str(setup_script), f"root@{host}:{self.ws}/"],
                        capture_output=True, timeout=180)
 
         try:
@@ -598,19 +600,19 @@ class SessionRunner:
         self.ev["setup_environment"] = {k: v for k, v in sorted(env.items())}
         rendered = " ".join(f"{k}={_shell_quote(v)}" for k, v in sorted(env.items()))
         target.run(
-            f"cd {WS} && {rendered} "
-            f"bash {WS}/{setup_name} > {WS}/setup.log 2>&1; "
-            f"echo SETUP_RC=$? >> {WS}/setup.log",
+            f"cd {self.ws} && {rendered} "
+            f"bash {self.ws}/{setup_name} > {self.ws}/setup.log 2>&1; "
+            f"echo SETUP_RC=$? >> {self.ws}/setup.log",
             timeout=self.a.setup_timeout_s)
         result = parse_setup_probe(target.run(
             PROBE_COMMAND.format(status=self.spec.status_path,
-                                 log=f"{WS}/setup.log"),
+                                 log=f"{self.ws}/setup.log"),
             timeout=120).stdout)
         self.ev["stages"].setdefault("setup", []).append({"draw": draw, **result})
         if result["host_cold"] not in ("", "0") or result["setup_rc"] == "90":
             return "cold"
         if result["setup_done"] in ("", "0"):
-            tail = target.run(f"tail -40 {WS}/setup.log", timeout=120).stdout
+            tail = target.run(f"tail -40 {self.ws}/setup.log", timeout=120).stdout
             self.say(f"setup did not reach SETUP_DONE:\n{tail[-2000:]}")
             self._collect_setup_failure_evidence(target, draw)
             return "setup_failed"
@@ -687,9 +689,9 @@ class SessionRunner:
         job = start_detached(target, JobSpec(
             job_id=self.spec.driver_job_id, workdir=REPO,
             command=self.spec.driver_command(self.context(), self.plan),
-            job_dir=f"{WS}/jobs", log_path=self.spec.run_log_path,
+            job_dir=f"{self.ws}/jobs", log_path=self.spec.run_log_path,
             status_path=self.spec.status_path,
-            env={"PYTHONPATH": f"{REPO}/src"}),
+            env={"PYTHONPATH": f"{self.repo}/src"}),
             start_timeout=120, verify_timeout=60)
         self.ev["driver_job"] = job.as_dict()
         self.say(f"driver detached, pid {job.pid}, confirmed by {job.confirmed_by} "
@@ -701,7 +703,7 @@ class SessionRunner:
                       Path(self.spec.run_log_path).name, required=False),
             RelaySpec(self.spec.status_path,
                       Path(self.spec.status_path).name, required=False),
-            RelaySpec(f"{REPO}/artifacts/audit/{self.spec.artifacts.audit_dirname}/"
+            RelaySpec(f"{self.repo}/artifacts/audit/{self.spec.artifacts.audit_dirname}/"
                       f"{self.spec.artifacts.evidence_filename}",
                       self.spec.artifacts.evidence_filename, required=False),
         ]
@@ -753,21 +755,21 @@ class SessionRunner:
     def collect_and_teardown(self, target, host, scp, terminal: str) -> bool:
         art = self.spec.artifacts
         success = self.spec.markers.success
-        cc = (f"cd {REPO} && PYTHONPATH={REPO}/src "
+        cc = (f"cd {self.repo} && PYTHONPATH={self.repo}/src "
               f"{self.spec.commands.remote_python} "
               f"{self.spec.commands.artifact_collector}")
-        audit = f"{REPO}/artifacts/audit/{art.audit_dirname}"
+        audit = f"{self.repo}/artifacts/audit/{art.audit_dirname}"
         target.run(f"mkdir -p {audit}/session && "
                    f"cp {self.spec.run_log_path} {self.spec.status_path} "
-                   f"{WS}/setup.log {audit}/session/ 2>/dev/null "
+                   f"{self.ws}/setup.log {audit}/session/ 2>/dev/null "
                    "|| true", timeout=120)
         # A blocking failure has a smaller required set: the products do not
         # exist, and demanding them would block teardown on artifacts the run
         # correctly refused to produce.
         spec_path = art.spec_failed if terminal != success else art.spec_success
-        man, arc = f"{WS}/manifest.json", f"{WS}/{art.archive_basename}"
+        man, arc = f"{self.ws}/manifest.json", f"{self.ws}/{art.archive_basename}"
         r_man = target.run(
-            f"{cc} manifest --root {REPO}/artifacts --spec {REPO}/{spec_path} "
+            f"{cc} manifest --root {self.repo}/artifacts --spec {self.repo}/{spec_path} "
             f"--out {man} --settle-seconds {self.a.settle_seconds}", timeout=900)
         self.say(f"  manifest rc={r_man.returncode}\n{r_man.stdout.strip()[-900:]}")
         r_arc = target.run(f"{cc} archive --manifest {man} --out {arc}", timeout=1800)

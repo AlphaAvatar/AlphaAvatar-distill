@@ -45,7 +45,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.deployment import provider_cli_candidates  # noqa: E402
+from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE  # noqa: E402
 from experiments.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization, SEARCH_ONLY_HARNESS_FILES, recovery_continuation_harness_digest  # noqa: E402
 from aadistill.infrastructure.session import (
@@ -56,7 +56,12 @@ from aadistill.infrastructure.session import (
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     frozen_science_plan_gate, session_commit_gate,
 )
-from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
+from aadistill.infrastructure.session_runner import run_session  # noqa: E402
+#: The image layout THIS session declares, and the same values it hands
+#: the runner. They were module constants in the runner, so a second
+#: image could only be supported by patching the framework's globals.
+WS = POD_IMAGE["workspace_root"]
+REPO = POD_IMAGE["checkout_root"]
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
@@ -199,7 +204,7 @@ def spec(args) -> SessionSpec:
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
-            provider_cli_candidates=provider_cli_candidates()),
+            **deployment_commands()),
         #: The SAME frozen plan. This session is a different operational
         #: identity, not a different science: nothing here rewrites 9377a2dc to
         #: pretend Phase A always began at stage 2.

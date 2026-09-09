@@ -1,0 +1,12 @@
+{
+ "schema": "aadistill.pod_image/v1",
+ "_contract": "The image layout a pod session runs inside. DEPLOYMENT facts -- where the workspace is, where the repository is checked out, which interpreter the container built, and what the provider requires of the host -- which the reusable core must not name. A session that runs a different image supplies different values; nothing here is a session's scientific choice. AUTHORIZES NOTHING.",
+ "workspace_root": "/workspace",
+ "checkout_root": "/workspace/aad",
+ "_why_checkout_is_not_derived": "It is written as a full path rather than workspace_root + '/aad' because a second image may put the checkout somewhere else entirely, and deriving it would make that layout unexpressible.",
+ "remote_python": "/opt/train/bin/python",
+ "_remote_python": "The interpreter every setup script builds inside the container. A fact about the image, not a repository path.",
+ "min_cuda_version": "13.0",
+ "_min_cuda_version": "Passed to the provider as --min-cuda-version so the host driver can actually run this image. null means the runtime imposes no floor and the flag is omitted entirely -- an absent requirement must not become the string 'null' on a command line.",
+ "authorizes": "nothing"
+}

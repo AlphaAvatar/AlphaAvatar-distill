@@ -22,6 +22,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 PROVIDER_CLI_CONFIG = REPO / "configs/infrastructure/provider_cli.json"
 ARTIFACT_STORE_CONFIG = REPO / "configs/infrastructure/artifact_store.json"
+POD_IMAGE_CONFIG = REPO / "configs/infrastructure/pod_image.json"
 
 #: The provider CLI's name on PATH, then the fallback locations this deployment
 #: declares. An empty fallback list is legitimate: it means the CLI is expected
@@ -42,10 +43,34 @@ def provider_cli_candidates() -> tuple[str, ...]:
     return ((on_path,) if on_path else ()) + fallbacks
 
 
+_IMAGE = json.loads(POD_IMAGE_CONFIG.read_text())
+
+#: The image layout every session in THIS deployment runs inside. The runner
+#: held `WS = "/workspace"`, `REPO = f"{WS}/aad"` and `--min-cuda-version 13.0`
+#: as module constants, so a second image could only be supported by patching
+#: the framework's globals.
+#:
+#: Spread into `ExecutionCommands` by each launcher, so a session that runs a
+#: different image says so in its own declaration.
+POD_IMAGE = {
+    "workspace_root": _IMAGE["workspace_root"],
+    "checkout_root": _IMAGE["checkout_root"],
+    "remote_python": _IMAGE["remote_python"],
+    "min_cuda_version": _IMAGE["min_cuda_version"],
+}
+
+
+def deployment_commands(**overrides) -> dict:
+    """This deployment's image facts, with a caller's explicit values winning."""
+    return {**POD_IMAGE, "provider_cli_candidates": provider_cli_candidates(),
+            **overrides}
+
+
 #: WHICH artifact repository a `RelayInput` means when it does not say.
 #: `RelayInput.repo` had this as a module-level default computed at import from
 #: `configs/`, so importing the core read the repository.
 MAIN_RELAY: str = json.loads(ARTIFACT_STORE_CONFIG.read_text())["main_relay"]
 
-__all__ = ["ARTIFACT_STORE_CONFIG", "MAIN_RELAY", "PROVIDER_CLI_CONFIG",
-           "PROVIDER_CLI_NAME", "provider_cli_candidates"]
+__all__ = ["ARTIFACT_STORE_CONFIG", "MAIN_RELAY", "POD_IMAGE",
+           "POD_IMAGE_CONFIG", "PROVIDER_CLI_CONFIG", "PROVIDER_CLI_NAME",
+           "deployment_commands", "provider_cli_candidates"]

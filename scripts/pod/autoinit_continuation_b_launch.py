@@ -48,7 +48,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from experiments.deployment import provider_cli_candidates  # noqa: E402
+from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
 from aadistill.infrastructure.session import (
@@ -59,7 +59,12 @@ from aadistill.infrastructure.session import (
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     frozen_science_plan_gate, session_commit_gate,
 )
-from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
+from aadistill.infrastructure.session_runner import run_session  # noqa: E402
+#: The image layout THIS session declares, and the same values it hands
+#: the runner. They were module constants in the runner, so a second
+#: image could only be supported by patching the framework's globals.
+WS = POD_IMAGE["workspace_root"]
+REPO = POD_IMAGE["checkout_root"]
 from autoinit_science_inputs import CANONICAL_INIT, RECOVERY_LADDER  # noqa: E402
 from autoinit_phase_a_launch import (  # noqa: E402
     LOCAL_ASSETS as PHASE_A_LOCAL_ASSETS, TEACHER_REVISION, TEST_IGNORES,
@@ -420,7 +425,7 @@ def spec(args) -> SessionSpec:
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
-            provider_cli_candidates=provider_cli_candidates()),
+            **deployment_commands()),
         plan_id=CONTINUATION_PLAN_V1.plan_id,
         plan_hash=CONTINUATION_PLAN_V1.plan_hash,
         budget=continuation_budget(args),

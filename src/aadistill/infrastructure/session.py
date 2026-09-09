@@ -207,6 +207,17 @@ class ExecutionCommands:
     #: see the class docstring for why this one is defaulted and the others are
     #: not.
     remote_python: str = "/opt/train/bin/python"
+    #: WHERE the pod's workspace and repository checkout are. REQUIRED. These
+    #: were `WS = "/workspace"` and `REPO = f"{WS}/aad"` -- module constants in
+    #: the runner, consumed by nineteen f-strings that build remote commands.
+    #: A session running a different image could only be supported by patching
+    #: the framework's globals, which is the thing this whole type removes.
+    workspace_root: str = field(kw_only=True)
+    checkout_root: str = field(kw_only=True)
+    #: What the provider must guarantee of the HOST for this image to run.
+    #: `None` means the runtime imposes no floor and the flag is omitted --
+    #: an absent requirement must not reach a command line as the word "None".
+    min_cuda_version: str | None = None
     #: Ordered places to look for the provider CLI, PATH first, RESOLVED BY THE
     #: CALLER. The runner used to call `shutil.which("runpodctl")` and read
     #: `configs/infrastructure/provider_cli.json` itself, so reusable

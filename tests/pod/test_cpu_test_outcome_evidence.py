@@ -20,6 +20,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 
+from aadistill.infrastructure.session import ExecutionCommands  # noqa: E402
 from aadistill.runtime import pod_environment as pe
 import summarize_pytest_outcomes as S  # noqa: E402
 
@@ -103,13 +104,18 @@ def test_the_collector_never_raises_on_a_billing_pod(monkeypatch):
             raise OSError("ssh died")
 
     fake = types.SimpleNamespace(
-        spec=types.SimpleNamespace(        #: The runner reads its executables from the spec now, so a stub spec
-        #: must declare them; there is no default for it to fall back on.
-        commands=types.SimpleNamespace(
+        spec=types.SimpleNamespace(
+        #: The REAL type, not a SimpleNamespace. A fake that names the fields
+        #: it happens to need goes stale silently the moment the type gains
+        #: one -- which is exactly what happened when `workspace_root`,
+        #: `checkout_root` and `min_cuda_version` were added: twenty tests
+        #: failed with AttributeError on a double, not on the code.
+        commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
-            remote_python="/opt/train/bin/python"),
+            remote_python="/opt/train/bin/python",
+            workspace_root="/workspace", checkout_root="/workspace/aad"),
 setup_failure_files=("/workspace/x.json",)),
         ev={}, say=lambda m: None)
     SessionRunner._collect_setup_failure_evidence(fake, Boom(), 1)

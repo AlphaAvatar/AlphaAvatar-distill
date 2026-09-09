@@ -54,7 +54,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.deployment import provider_cli_candidates  # noqa: E402
+from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
@@ -66,7 +66,12 @@ from aadistill.infrastructure.session import (
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     frozen_science_plan_gate, session_commit_gate,
 )
-from aadistill.infrastructure.session_runner import REPO, WS, run_session  # noqa: E402
+from aadistill.infrastructure.session_runner import run_session  # noqa: E402
+#: The image layout THIS session declares, and the same values it hands
+#: the runner. They were module constants in the runner, so a second
+#: image could only be supported by patching the framework's globals.
+WS = POD_IMAGE["workspace_root"]
+REPO = POD_IMAGE["checkout_root"]
 from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
@@ -573,7 +578,7 @@ def spec(args) -> SessionSpec:
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
-            provider_cli_candidates=provider_cli_candidates()),
+            **deployment_commands()),
         plan_id=PHASE_A_PLAN_V1.plan_id,
         plan_hash=PHASE_A_PLAN_V1.plan_hash,
         budget=budget(args),

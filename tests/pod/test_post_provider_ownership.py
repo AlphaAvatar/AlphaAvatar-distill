@@ -28,6 +28,8 @@ import json
 import subprocess
 import sys
 import types
+
+from aadistill.infrastructure.session import ExecutionCommands  # noqa: E402
 from pathlib import Path
 
 import pytest
@@ -92,11 +94,17 @@ def _runner(tmp_path, monkeypatch, *, returned_price, max_price=1.09,
     r.spec = types.SimpleNamespace(
         #: The runner reads its executables from the spec now, so a stub spec
         #: must declare them; there is no default for it to fall back on.
-        commands=types.SimpleNamespace(
+        #: The REAL type, not a SimpleNamespace. A fake that names the fields
+        #: it happens to need goes stale silently the moment the type gains
+        #: one -- which is exactly what happened when `workspace_root`,
+        #: `checkout_root` and `min_cuda_version` were added: twenty tests
+        #: failed with AttributeError on a double, not on the code.
+        commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
-            remote_python="/opt/train/bin/python"),
+            remote_python="/opt/train/bin/python",
+            workspace_root="/workspace", checkout_root="/workspace/aad"),
         session_id="autoinit-c1",
         teardown=types.SimpleNamespace(require_provider_confirmation=confirm))
     r.a = types.SimpleNamespace(
