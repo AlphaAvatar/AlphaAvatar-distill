@@ -206,8 +206,16 @@ class ExecutionCommands:
     layout inside reusable infrastructure -- a second deployment, or a session
     with its own collector, would have had to edit the runner.
 
-    Every field is required. A default here would be the runner quietly choosing
-    an executable on the session's behalf, which is the property being removed.
+    The three repository scripts are required. A default for any of them would
+    be the runner quietly choosing an executable on the session's behalf, which
+    is the property being removed.
+
+    `remote_python` is the one field that keeps a default, and the distinction
+    is deliberate rather than an oversight: it is not a repository path and not
+    a session's choice. It is the interpreter path every setup script builds
+    inside the container, so it is a fact about the deployment image that all
+    nine launchers share — which is why none of them passes it. A session that
+    runs a different image says so.
     """
 
     #: Run on the DEV BOX, detached, to own the provider resource.
@@ -216,7 +224,9 @@ class ExecutionCommands:
     setup_script: str
     #: Run on the pod to collect declared artifacts.
     artifact_collector: str
-    #: The interpreter the pod uses. A deployment fact.
+    #: The container's interpreter. A deployment fact, not a repository path —
+    #: see the class docstring for why this one is defaulted and the others are
+    #: not.
     remote_python: str = "/opt/train/bin/python"
 
     def as_dict(self) -> dict[str, str]:
