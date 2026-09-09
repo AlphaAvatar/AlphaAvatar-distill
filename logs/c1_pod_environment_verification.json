@@ -1,12 +1,12 @@
 {
   "_what_this_is": "one complete pod-like sweep of the CPU test suite: the condition a fresh C1 pod is actually in, which is what C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run.",
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
-  "c1_harness_digest": "f33ed469228192eb095aeb2af4b563fbebd0c8af171fb2ebfac2435ed0ca4138",
-  "c1_harness_n_files": 89,
+  "c1_harness_digest": "26cbc86ceda7dfdd72df018185ca439b7a8a0c1373d0428691f8dc7d548a1466",
+  "c1_harness_n_files": 94,
   "counts": {
     "error": 0,
-    "failed": 0,
-    "passed": 3223,
+    "failed": 23,
+    "passed": 3293,
     "skipped": 113
   },
   "environment": {
@@ -48,7 +48,31 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
-  "failed_nodeids": [],
+  "failed_nodeids": [
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched",
+    "tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_after_file_hash_is_refused",
+    "tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_numstat_is_refused",
+    "tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_patch_hash_is_refused",
+    "tests/autoinit/test_phase_b_historical_amendments.py::test_a_missing_changed_file_is_refused",
+    "tests/autoinit/test_phase_b_historical_amendments.py::test_an_incorrect_source_commit_is_refused",
+    "tests/autoinit/test_phase_b_historical_amendments.py::test_the_ledger_verifies_against_the_live_tree",
+    "tests/autoinit/test_phase_b_plan.py::test_completed_phase_b_drift_is_historically_accounted_for",
+    "tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one",
+    "tests/pod/test_autoinit_preflight_rehearsal.py::test_the_authorization_bounds_the_session",
+    "tests/pod/test_c1_source_closure.py::test_the_harness_names_the_setup_script_the_runner_executes",
+    "tests/pod/test_continuation_b_executes.py::test_the_frozen_source_set_IS_the_real_import_closure",
+    "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state",
+    "tests/pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest",
+    "tests/pod/test_continuation_rehearsal.py::test_setup_verifies_THIS_sessions_authorization_and_fails_closed",
+    "tests/pod/test_continuation_rehearsal.py::test_stage3_aggregation_consumes_what_the_real_scorer_emits",
+    "tests/pod/test_continuation_rehearsal.py::test_the_session_commit_is_verified_against_the_authorization",
+    "tests/pod/test_phase_a_rehearsal.py::test_a_phase_a_grant_cannot_be_loaded_by_the_narrow_type",
+    "tests/pod/test_phase_a_rehearsal.py::test_the_narrow_type_still_answers_no",
+    "tests/pod/test_phase_b_driver_and_launcher.py::test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe",
+    "tests/pod/test_session_kind_dispatch.py::test_every_launchable_kind_has_a_branch_that_loads_ITS_OWN_type[autoinit_device_canary_launch]",
+    "tests/pod/test_session_kind_dispatch.py::test_every_launchable_kind_has_a_branch_that_loads_ITS_OWN_type[autoinit_measurement_launch]",
+    "tests/pod/test_session_kind_dispatch.py::test_every_launchable_kind_has_a_branch_that_loads_ITS_OWN_type[autoinit_preflight_launch]"
+  ],
   "findings": {
     "all_skipped_nodeids": [
       "tests/autoinit/test_c1_confirmation_scoring.py::test_code_is_excluded_by_set_membership_not_by_the_scorer",
@@ -175,8 +199,8 @@
     "battery_staged_role_outcome": "passed",
     "counts": {
       "error": 0,
-      "failed": 0,
-      "passed": 3223,
+      "failed": 23,
+      "passed": 3293,
       "skipped": 113
     },
     "devbox_only_expected_skips": {
@@ -203,7 +227,31 @@
       "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
       "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
     ],
-    "failed_nodeids": [],
+    "failed_nodeids": [
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched",
+      "tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_after_file_hash_is_refused",
+      "tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_numstat_is_refused",
+      "tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_patch_hash_is_refused",
+      "tests/autoinit/test_phase_b_historical_amendments.py::test_a_missing_changed_file_is_refused",
+      "tests/autoinit/test_phase_b_historical_amendments.py::test_an_incorrect_source_commit_is_refused",
+      "tests/autoinit/test_phase_b_historical_amendments.py::test_the_ledger_verifies_against_the_live_tree",
+      "tests/autoinit/test_phase_b_plan.py::test_completed_phase_b_drift_is_historically_accounted_for",
+      "tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one",
+      "tests/pod/test_autoinit_preflight_rehearsal.py::test_the_authorization_bounds_the_session",
+      "tests/pod/test_c1_source_closure.py::test_the_harness_names_the_setup_script_the_runner_executes",
+      "tests/pod/test_continuation_b_executes.py::test_the_frozen_source_set_IS_the_real_import_closure",
+      "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state",
+      "tests/pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest",
+      "tests/pod/test_continuation_rehearsal.py::test_setup_verifies_THIS_sessions_authorization_and_fails_closed",
+      "tests/pod/test_continuation_rehearsal.py::test_stage3_aggregation_consumes_what_the_real_scorer_emits",
+      "tests/pod/test_continuation_rehearsal.py::test_the_session_commit_is_verified_against_the_authorization",
+      "tests/pod/test_phase_a_rehearsal.py::test_a_phase_a_grant_cannot_be_loaded_by_the_narrow_type",
+      "tests/pod/test_phase_a_rehearsal.py::test_the_narrow_type_still_answers_no",
+      "tests/pod/test_phase_b_driver_and_launcher.py::test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe",
+      "tests/pod/test_session_kind_dispatch.py::test_every_launchable_kind_has_a_branch_that_loads_ITS_OWN_type[autoinit_device_canary_launch]",
+      "tests/pod/test_session_kind_dispatch.py::test_every_launchable_kind_has_a_branch_that_loads_ITS_OWN_type[autoinit_measurement_launch]",
+      "tests/pod/test_session_kind_dispatch.py::test_every_launchable_kind_has_a_branch_that_loads_ITS_OWN_type[autoinit_preflight_launch]"
+    ],
     "host_local_c1_expected_skips": {
       "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": "skipped",
       "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists": "skipped",
@@ -222,7 +270,10 @@
     },
     "leaf_transport_all_passed": true,
     "n_skipped": 113,
-    "problems": [],
+    "problems": [
+      "23 failed/errored: ['tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_after_file_hash_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_numstat_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_patch_hash_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_missing_changed_file_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_an_incorrect_source_commit_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_the_ledger_verifies_against_the_live_tree', 'tests/autoinit/test_phase_b_plan.py::test_completed_phase_b_drift_is_historically_accounted_for', 'tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one', 'tests/pod/test_autoinit_preflight_rehearsal.py::test_the_authorization_bounds_the_session']",
+      "repository_state: did not pass 2/2: {'tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog': 'passed', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state': 'failed'}."
+    ],
     "renderer_parity_expected_skips": {
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]": "skipped",
@@ -235,9 +286,9 @@
     "renderer_parity_skipped_as_expected": true,
     "repository_state": {
       "tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog": "passed",
-      "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "passed"
+      "tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state": "failed"
     },
-    "repository_state_all_passed": true,
+    "repository_state_all_passed": false,
     "skip_reasons": {
       "tests/autoinit/test_c1_confirmation_scoring.py::test_code_is_excluded_by_set_membership_not_by_the_scorer": "no retained historical generations",
       "tests/autoinit/test_c1_confirmation_scoring.py::test_mutation_dropping_the_tool_structural_gate_is_caught": "no retained historical generations",
@@ -354,9 +405,9 @@
       "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init": "the baseline initialization is absent, so the validator exits 1 before it can produce a gated report"
     },
     "skip_set_digest": "d9d3f64467dfe2ff72bcdb36c7e50c364a8ef3a45e7ca077c407f7c4916acffe",
-    "skip_set_is_forensic_not_scientific": "the complete skip list exists so a pod/sweep divergence can be NAMED. The total is not a target and carries no scientific content; only the named groups above express C1 expectations.",
+    "skip_set_is_forensic_not_scientific": "the complete skip list exists so a pod/sweep divergence can be NAMED. The total is not a target and carries no scientific content; only the declared groups above express expectations.",
     "unexpected_environment_skips": [],
-    "verdict": "PASS"
+    "verdict": "FAIL"
   },
   "invocation_realized": {
     "declared_test_ignores": [
@@ -399,15 +450,18 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught",
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory"
   ],
-  "n_tests": 3336,
-  "pod_test_environment_digest": "a187a70f51738c8d8907a8d25a295ebe490d8fee514ccbb804bcc0055814d61d",
-  "pod_test_environment_n_files": 178,
+  "n_tests": 3429,
+  "pod_test_environment_digest": "17e96f9cfc536f852effa8abaaa39d5bb3c9b57543610cd554495c4d6e5553f7",
+  "pod_test_environment_n_files": 182,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
     "scripts/autoinit/publish_selected_leaves.py",
     "scripts/autoinit/record_pod_environment.py"
   ],
-  "problems": [],
+  "problems": [
+    "23 failed/errored: ['tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_after_file_hash_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_numstat_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_patch_hash_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_missing_changed_file_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_an_incorrect_source_commit_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_the_ledger_verifies_against_the_live_tree', 'tests/autoinit/test_phase_b_plan.py::test_completed_phase_b_drift_is_historically_accounted_for', 'tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one', 'tests/pod/test_autoinit_preflight_rehearsal.py::test_the_authorization_bounds_the_session']",
+    "repository_state: did not pass 2/2: {'tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog': 'passed', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state': 'failed'}."
+  ],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/autoinit/test_stage1_import.py",
   "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
   "record_kind": "diagnostic",
@@ -415,13 +469,13 @@
   "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
   "renderer_parity_skipped_as_expected": true,
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 748.1,
-  "self_sha256": "094fa4e24492b98f976e4377d714c5070ffdbc907636552a2c5ee31bfbb14efe",
+  "seconds": 785.4,
+  "self_sha256": "a93a3b69d8d54a5cb6b9703b02640679c837e0574735c3939b2054aef72878cb",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_dae80bc4.bundle",
+    "BUNDLE_NAME": "aad_autoinit_bf0944f3.bundle",
     "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
     "SESSION_AUTH_PATH": "logs/autoinit_c1_authorization.json",
-    "SESSION_COMMIT": "dae80bc4bd1a9acb680ed651b188089144f4ac4d",
+    "SESSION_COMMIT": "bf0944f3ab487b0116494f60a73fa17d21cefac9",
     "SESSION_KIND": "c1",
     "SESSION_PLAN_HASH": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
     "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
@@ -434,7 +488,7 @@
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
   "simulator_command": "<SessionSpec.setup_environment: 12 keys> HIDDEN_PATHS=<1020 derived paths, contract 9ef2356ee807> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
-  "simulator_exit_code": 0,
+  "simulator_exit_code": 1,
   "staging_contract": {
     "digest": "9ef2356ee80752978ca7dba78956383051135ea0a4cf23fa4b32abcb6269a9ab",
     "local_asset_destinations": [
@@ -465,8 +519,8 @@
   },
   "staging_contract_digest": "9ef2356ee80752978ca7dba78956383051135ea0a4cf23fa4b32abcb6269a9ab",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "dae80bc4bd1a9acb680ed651b188089144f4ac4d",
+  "swept_base_commit": "bf0944f3ab487b0116494f60a73fa17d21cefac9",
   "tree_clean": true,
   "unexpected_environment_skips": [],
-  "verdict": "PASS"
+  "verdict": "FAIL"
 }

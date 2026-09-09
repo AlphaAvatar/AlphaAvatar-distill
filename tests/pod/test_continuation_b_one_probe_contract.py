@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -412,14 +413,28 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     # running.pods, budget.planning_floor_usd) already carry "nothing was bought".
     assert "FROZEN" in state["phase_c"]["c0"]["status"]
     assert state["phase_c"]["c0"]["authorizes"] == "nothing"
-    # "NOT SCIENTIFICALLY EXECUTED", not "NOT EXECUTED": attempt 1 DID run and
-    # spend $0.0786, and it produced no measurement, so the plain word became
-    # ambiguous the moment a pod existed. The guarded claim is the one that only
-    # becomes false when a C1 probe actually measures something.
-    # "NOT CURRENTLY AUTHORIZED", not "NOT AUTHORIZED": a grant was issued and
-    # consumed, and saying C1 was never authorized would be false.
-    for word in ("NOT SCIENTIFICALLY EXECUTED", "NOT CURRENTLY AUTHORIZED"):
-        assert word in state["phase_c"]["c1"]["status"], word
+    # THE THIRD wording break. The comment above already records two: "NOT
+    # DESIGNED" then "NOT IMPLEMENTED", each made false by ordinary progress
+    # while the protective content was unchanged. The Milestone-A repair of the
+    # snapshot's self-contradiction made it happen again -- "NOT SCIENTIFICALLY
+    # EXECUTED" became "TREATMENT AND ENDPOINT UNMEASURED", which says the same
+    # thing in fewer words.
+    #
+    # So this stops matching a PHRASE and asserts the content, which is what the
+    # comment above said to do and what the phrase kept standing in for:
+    # attempt 9 measured the replay and nothing else, and nothing is live.
+    measured = state["phase_c"]["c1"]["measured"]
+    assert "UNMEASURED" in measured, measured
+    for axis in ("treatment", "endpoint"):
+        assert axis in measured.lower(), axis
+    assert re.search(r"\bno decision\b", measured, re.I), measured
+    # A grant WAS issued and consumed, so "never authorized" would be false; what
+    # must hold is that none is live.
+    assert state["authorized"]["any"] is False
+    assert state["prepared_launch"]["any"] is False
+    assert re.search(r"not currently authorized|no current grant",
+                     state["phase_c"]["c1"]["status"], re.I), (
+        state["phase_c"]["c1"]["status"])
     assert "NOT STARTED" in state["phase_c"]["c2"]["status"]
     # Nothing that needs a GPU may be claimed as built.
     assert "pre-ATTENTION parent" in state["phase_c"]["c1"]["not_built"]

@@ -125,7 +125,7 @@
    "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL.",
    "needs": "a new maintainer review and a NEW grant for any tenth attempt. Headroom is not permission; see budget.",
-   "not_built": "grant, authorization and bundle all CONSUMED by attempt 9; none is live. A tenth attempt needs a new grant, a new authorization, a fresh bundle and a fresh launch_bound record. The parent rebuild and ~8 GB teacher weights need GPU/network.",
+   "not_built": "grant, authorization and bundle all CONSUMED by attempt 9; none is live. A tenth attempt needs a new grant, a new authorization, a fresh bundle and a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
    "evidence": "logs/autoinit_c1_attempt9/ (attempt 8: logs/autoinit_c1_attempt8/)",
    "readiness": "the launch_bound record and the 12 gates were consumed by attempt 9. Both are owed again for any future launch.",
    "blocker": "CLEARED at $0 on 2026-09-08. The stage-F device boundary in attention.activation_importance_v1 is repaired: apply() now builds a compute-device working copy via device.stats_to, and head_write_energy places its score vector and fails closed on a mismatch. Science unmoved (formula, impl id, spec, seeds, digests). NOT observed on a GPU. The remaining blocker is the absence of a grant, not the code.",

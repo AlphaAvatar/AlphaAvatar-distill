@@ -352,7 +352,14 @@ def test_the_authorization_bounds_the_session(tmp_path):
     with pytest.raises(AuthorizationError, match="separately unauthorized"):
         auth.refuse("phase_a")
     assert not auth.allows("phase_a")
-    assert auth.automatic_phase_a_start is False
+    # `automatic_phase_a_start` was a hard-`False` property on the governance
+    # primitive. It is now an ACTION the preflight policy simply does not grant,
+    # which is a stronger statement: there is no flag left to set true.
+    assert not auth.allows("automatic_phase_a_start")
+    assert "automatic_phase_a_start" not in auth.action_policy.allowed
+    # Both wire claims still reach the artifact, so a reader sees the refusal.
+    assert auth.as_dict()["automatic_phase_a_start"] is False
+    assert auth.as_dict()["phase_a_authorized"] is False
 
 
 def test_the_micro_preflight_authorization_is_retired_by_its_own_gate():

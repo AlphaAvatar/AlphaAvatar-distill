@@ -45,19 +45,36 @@ HISTORICAL = EQ.find_generations()
 def test_the_frozen_assets_are_untouched():
     """Neither historical asset may move because C1 needed a scorer.
 
-    The pinned digest moved once, at the initialization migration, from v2's
-    808080a7c5d8… to v3's — the same six files at current paths. That is a
-    relocation and not a change of scorer: 570 frozen samples re-scored through
-    the pre- and post-migration trees are byte-identical
-    (logs/architecture_scoring_equivalence.json). The battery hashes below did
-    not move at all, which is the other half of what this asserts.
+    The pinned digest has moved twice, both times for ownership rather than for
+    arithmetic: at the initialization migration from v2's 808080a7c5d8… to v3,
+    and again at the Milestone-A closure, when `score_recovery_search.py` was
+    repointed and `planning/recovery.py` gave up this study's constants.
+
+    The four modules that actually COMPUTE a score — `usable_rollout`,
+    `strict_answer`, `behavior`, `capability` — are byte-identical across both
+    moves, and that is checked by execution rather than argued: 570 frozen
+    Phase-A samples across 3 search paths, re-scored through the pre- and
+    post-migration trees, are identical per sample and in aggregate
+    (`logs/architecture_scoring_equivalence.json`, regenerated at this tree).
+
+    The battery hashes below did not move at all, which is the other half of
+    what this asserts. A digest that moved WITH a battery hash would be a
+    different finding entirely.
     """
+    import json
+
     from experiments.source_sets import recovery_scoring_contract
 
     contract = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v3"
     assert contract["digest"] == (
-        "b63e1cd9d4ec9e77d27cd4d9366ad7258f33fa71ad2f59dcad2c1c2af82a8883")
+        "18ce628faba704bfa1e8b53f9c912da2962e878742d0115db2f88c0b16269ca3")
+
+    # The pinned digest is only allowed to move because this holds. Read it,
+    # rather than trusting the docstring above.
+    eq = json.loads((REPO / "logs/architecture_scoring_equivalence.json").read_text())
+    assert eq["all_scores_identical"] is True
+    assert eq["total_samples"] == 570
     manifest, manifest_sha = C1S.battery_manifest(C1_BATTERY)
     assert manifest_sha == C1_BATTERY_MANIFEST_SHA256
     assert manifest["content_sha256"] == C1_BATTERY_CONTENT_SHA256
