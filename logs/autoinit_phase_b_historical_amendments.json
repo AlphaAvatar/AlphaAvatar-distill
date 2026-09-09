@@ -600,6 +600,59 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "8374dd9ec0133099b3c7f5b31c9cfe21884cd840d2ba1c8b1884af6923adbfa3"
+  },
+  {
+   "amendment_id": "PHB-HA-004",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-09T09:42:50+00:00",
+   "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+   "source_repair_commit": "c26a311c8ad778c249d3e5171ae0949188788409",
+   "source_repair_parent": "dae4ad975ac8fc9c34afcd721df290ff05794e4c",
+   "previous_live_digest": "bb3fd1845b210870a66bfb17d95e708141ce95a893b58bb72ddb6092827a37ab",
+   "new_live_digest": "93659b25d49e3605e712cd7e32d6da05b277c39813486ccdee539a0d4c5734ed",
+   "changed_files": [
+    "src/aadistill/infrastructure/session.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/infrastructure/session.py": "a35abc1a78d35132575fedb2cad273df4185c7d70088af91bdeb0cc4ef3226be"
+   },
+   "file_sha256_after": {
+    "src/aadistill/infrastructure/session.py": "07a2fbcb5a3edcdfaf427fcd70bee2f6ebc7e4ddff01992bc9a63c5f86207cb2"
+   },
+   "patch_sha256": "05429f981772aaf9ccaeef04d598150f25fe8cdef4c150caca2c01e1add02625",
+   "numstat": {
+    "src/aadistill/infrastructure/session.py": [
+     13,
+     3
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 3,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "Milestone-A merge-review closure, second accounting round: the readiness contract left aadistill.runtime.pod_environment for scripts/experiments/phase_c1/ (nine node-id groups and their refusal prose, replaced by a caller-declared ReadinessGroups); the generic packers stopped defaulting pad_id to Qwen's 151643; ExecutionCommands' docstring was corrected; and one stale internal caller of dispatch_branch_hashes was repaired. Derived metadata re-emitted.",
+   "why_the_owner_is_shared_session_runner": "The same shared-infrastructure files carry Phase B's frozen executable set as well as Phase A's, the preflight's and C1's. session.py, session_runner.py, post_freeze.py, pod_environment.py and the data packers all belong to that set, so a change made for the Milestone-A separation moves Phase B's live digest even though Phase B is closed. Accounted here, as PHB-HA-001 through 003 accounted theirs.",
+   "why_a_c1_only_override_was_rejected": "Nothing is conferred on C1. C1_HARNESS_SOURCE_FILES_V1 still names pre-migration paths and refuses outright; the repointed declarations fail by digest mismatch. No grant, authorization or bundle is live, and this entry asserts launch_compatible_with_frozen_preregistration: false.",
+   "maintainer_authorization": "MAINTAINER MERGE REVIEW DECISION, 2026-09-09, on branch tip dc566fce7b1b8e2d7fac1ade359af2846108aeb3. Same decision that authorized PHB-HA-003: it directs the \u00a71 ownership changes on the SAME branch, forbids rewriting the existing 43 commits, and directs 'Append only additional relocation/accounting entries.' A second entry is required because the closure continued after PHB-HA-003 was written. No Attempt-10 grant, formal authorization, formal bundle or formal experiment is authorized.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "8374dd9ec0133099b3c7f5b31c9cfe21884cd840d2ba1c8b1884af6923adbfa3",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "6efc682cd0d177af9f5e06dd7ed54c12488e1fa7ca2b30416575c68ecd7a62b8"
   }
  ]
 }
