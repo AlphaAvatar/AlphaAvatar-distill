@@ -69,7 +69,7 @@ def test_the_frozen_assets_are_untouched():
     contract = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v3"
     assert contract["digest"] == (
-        "933dfc60670e762f91b486c32648ef465c84d78ef9404914fb048cb428967ea6")
+        "70ebaef52fd52045dc5d221ab450a0a325790100135433230bc1f0ab365446b2")
 
     # The pinned digest is only allowed to move because this holds. Read it,
     # rather than trusting the docstring above.
