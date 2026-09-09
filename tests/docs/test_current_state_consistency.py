@@ -179,11 +179,24 @@ class TestStateMdAgrees:
     to the person reading the prose."""
 
     def live_region(self) -> str:
-        """STATE.md down to the first superseded section. Everything below is
-        history, kept as written, and is not a claim about now."""
+        """STATE.md down to the first superseded section, with quoted literals
+        removed.
+
+        Two exclusions, and both are load-bearing. Everything below the first
+        `# Superseded` heading is history, kept as written, and is not a claim
+        about now. And an inline-code span is a CITATION: the entry describing
+        this very repair has to be able to write ``"NINE LABELS, EIGHT PAID /
+        NEVER MEASURED"`` to say what the stale key said. A gate that cannot
+        tell a quotation from an assertion forces the documentation to describe
+        its own defects vaguely, which is worse than the defect.
+
+        Prose outside backticks is still an assertion, and
+        `test_an_unquoted_claim_is_still_caught` holds that line.
+        """
         text = STATE.read_text()
         cut = text.find("\n# Superseded")
-        return text[:cut] if cut > 0 else text
+        live = text[:cut] if cut > 0 else text
+        return re.sub(r"`[^`]*`", "`", live)
 
     def test_it_does_not_claim_nine_labels_or_eight_paid(self):
         live = self.live_region()
@@ -208,3 +221,23 @@ class TestStateMdAgrees:
         heads = re.findall(r"^# Current state", text, re.M)
         assert len(heads) == 1, (
             f"{len(heads)} sections claim to be the current state")
+
+    def test_an_unquoted_claim_is_still_caught(self, monkeypatch, tmp_path):
+        """The backtick exclusion must not become a way to smuggle a claim.
+
+        Prose is an assertion; a code span is a quotation. Only the second is
+        exempt, and this pins the difference in both directions.
+        """
+        import test_current_state_consistency as mod
+
+        quoted = tmp_path / "quoted.md"
+        quoted.write_text("The stale key read `NEVER MEASURED` and was wrong.\n")
+        plain = tmp_path / "plain.md"
+        plain.write_text("Phase C1 is NEVER MEASURED.\n")
+
+        monkeypatch.setattr(mod, "STATE", quoted)
+        self.test_it_does_not_say_c1_was_never_measured()   # the citation passes
+
+        monkeypatch.setattr(mod, "STATE", plain)
+        with pytest.raises(AssertionError):
+            self.test_it_does_not_say_c1_was_never_measured()

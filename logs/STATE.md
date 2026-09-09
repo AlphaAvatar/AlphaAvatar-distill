@@ -18,6 +18,56 @@ how the snapshot came to disagree with itself.
 | authorization | **none** — no live grant, no live authorization, no staged bundle |
 | stage-F device repair | **logical / CPU-structural evidence only** until the CUDA validation runs; the defect is a cross-device placement, which a single-device machine cannot observe |
 | architecture migration | a **current engineering activity**, not a C1 result and no evidence about ATTENTION. Record: [`migrations/initialization-core/v1/`](migrations/initialization-core/v1/) |
+| owed | **one GPU micro-validation**, requested and NOT authorized: [`cuda_micro_validation_request.md`](cuda_micro_validation_request.md) |
+
+> **MILESTONE-A MERGE-REVIEW CLOSURE, 2026-09-09 — `$0.0000`, no pod, no GPU, no
+> provider resource, no grant, no authorization, no bundle.** The four merge
+> blockers, closed on the same branch; the existing 43 commits are untouched.
+>
+> **`path_literals` reaches 0** and the ratchet's allow list is now empty, so
+> `core_boundary_baseline.json` is a plain refusal rather than a ratchet. Every
+> other rule was already at zero. What the list held was the core naming which
+> log a phase's accounting lives in and which scripts the session runner
+> executes; both come from the caller now — `ExecutionCommands` has no defaults,
+> so **the runner cannot know a repository script name**.
+>
+> **Semantic policy is detected by shape, not keyword.** A new AST gate for the
+> class the literal detectors cannot see: `SEED_SA` is an int, a capability list
+> is a tuple of ordinary words, `CATASTROPHIC_V1` arrived as a dataclass
+> default. Seven rules, each narrowed against the real false positives the first
+> pass produced — 43 findings, most of them the mechanism's own vocabulary.
+> Three were genuine and are fixed rather than baselined. **Semantic hardcode:
+> 0.** `SuccessiveHalvingPlan` now requires its policy by keyword, proven with
+> **two** callers, because one caller cannot distinguish "used what I passed"
+> from "used the default that happens to match".
+>
+> **The snapshot stopped contradicting itself.** `phase_c.c1` said `TEN LABELS,
+> NINE PAID / REPLAY MEASURED`; `phases.phase_c1`, four keys away, still said
+> `NINE LABELS, EIGHT PAID / NEVER MEASURED`. The repair is mostly deletion —
+> two copies of a fact are two chances to be wrong — and the new gate scans
+> every string rather than pinning a key, since the key I would have trusted was
+> right the whole time.
+>
+> **The CUDA check now runs the stage that failed.** The per-operator matrix
+> could not have caught attempt 9 twice over: the failure was in the
+> composition, and the matrix does not execute the treatment operator at all. It
+> now builds the two-arm world, gates a real parent, runs the tail through
+> `materialize_fixed_path_suffix`, and observes five placements rather than
+> assuming them. Restore the old `stats_to` across a device split and it goes
+> red where the L40S did. **Still NOT RUN on CUDA** — see the request above.
+>
+> **Historical reuse stays REFUSED**, and the four conclusions that look
+> contradictory are now derived in one place rather than reconciled from four
+> documents: valid bytes, reconstruction under the historical contract,
+> byte-identical relocation outputs across 570 samples, and a refused live
+> reuse. Nothing was relaxed and no equivalence bypass exists.
+>
+> **Accounting:** Phase-B ledger amendment **PHB-HA-003** (14 files, +236/−125,
+> every quantity re-derived from git), and the migration record extended to the
+> branch tip over 52 commits. **Scientific fields moved: 0** of 94 examined in
+> the C1 preregistration — seeds, battery, both path hashes, isolation plan,
+> recipe, geometry and pricing all byte-identical.
+>
 
 > **C1 attempt 9, 2026-09-07 — `$1.0440`, pod `8gtnsbigpgaz76`, 57.47 min,
 > provider confirms gone.** Cumulative **`$267.8598`** of `$283.7600`, leaving
