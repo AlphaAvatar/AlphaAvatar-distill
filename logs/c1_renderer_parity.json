@@ -1,13 +1,13 @@
 {
   "_what_this_is": "the $0 pre-provider proof that the shared renderers still reproduce the frozen recovery-search prompts byte for byte, executed on the dev box because it is the only host holding the seven pinned source snapshots. The C1 pod is not given them and does not need them.",
   "also_executed_by": "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
-  "c1_harness_digest": "064ae260424455aadc71a726b60c4e399c5fc4441c85d341440630bdc9ae0d0d",
+  "c1_harness_digest": "16170ed7bf359010aa3111bf65aa35fee7be15cfe66a0504a5b882576c998271",
   "counts": {
     "FAIL": 0,
     "PASS": 7,
     "SOURCE_ABSENT": 0
   },
-  "executable_head": "9ef0009923e1749b45d0da60d9f712d9b817d1b0",
+  "executable_head": "acad8f26910b0a8ebd47092bac9ab3c0865f2826",
   "groups": [
     {
       "file": "full/test-00000-of-00001.parquet",
@@ -147,7 +147,7 @@
   "reason": "7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte",
   "resolved_hub_cache": "/home/ecs-user/.cache/huggingface/hub",
   "schema": "aadistill.autoinit.c1_renderer_parity/v1",
-  "self_sha256": "a4fa573bed75703ed1dec4b8bd5fa03c8d7586366df97fe21d6a25d65bc88f99",
+  "self_sha256": "46cc33277558007d5aa4894c00f6727604d85dd32555c1186ed56c15ba1df43a",
   "shared_implementation": "scripts/data/battery_render.py:check_group_parity",
   "tree_clean": true,
   "verdict": "PASS"
