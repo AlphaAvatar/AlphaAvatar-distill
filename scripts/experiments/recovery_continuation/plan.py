@@ -40,6 +40,7 @@ from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json
 from aadistill.governance.authorization import SpendAuthorization
+from experiments.preflight import PREFLIGHT_POLICY  # noqa: E402
 from aadistill.initialization.planning.recovery import (
     PreflightPlan,
     PreflightStage,
@@ -484,6 +485,12 @@ CONTINUATION_AUTHORIZATION = SpendAuthorization(
         "and torn down and remains a FAILED continuation; it does not authorize "
         "a retry that trains. Phase A remains separately unauthorized."),
     harness_source_files=CONTINUATION_HARNESS_SOURCE_FILES_V1,
+    #: The continuation's artifact is written under the same WIRE contract as
+    #: the preflight's -- same schema, same `preflight_plan_hash` key -- which
+    #: is why `logs/autoinit_continuation_authorization.json` reads with it.
+    #: That contract used to be literals inside the generic `as_dict`, one of
+    #: which named Phase A. The policy still grants nothing.
+    action_policy=PREFLIGHT_POLICY,
 )
 
 

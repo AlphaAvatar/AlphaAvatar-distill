@@ -644,6 +644,18 @@ def spec(args) -> SessionSpec:
             #: search succeeded.
             fetch_products=lambda ctx: [*fetch_selected_leaves(ctx),
                                         *fetch_finalists(ctx)],
+            #: Phase A's fetch returns TWO shapes: transfer dicts from
+            #: `fetch_selected_leaves`, and `canonical_id` STRINGS from
+            #: `fetch_finalists`, which name bytes already off-pod and copy
+            #: nothing. The runner's default is fail-closed and rejects the
+            #: strings, correctly -- a generic runner cannot know that an
+            #: unrecognized object means a completed transfer. So Phase A says
+            #: so itself, which is the declaration that was missing when
+            #: `isinstance(entry, dict) ... else True` lived in the runner and
+            #: silently blessed every non-dict.
+            fetch_result_ok=lambda entry: (
+                entry.get("rc") == 0 if isinstance(entry, dict)
+                else isinstance(entry, str) and bool(entry)),
             products_secured=selected_leaves_secured),
         teardown=TeardownPolicy(
             note="Phase A is a terminus; nothing chains off it"),

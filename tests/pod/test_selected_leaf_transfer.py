@@ -4,7 +4,7 @@ The first version of this closure copied the five selected leaves to
 `artifacts/audit/autoinit_phase_a/selected_leaves` on the pod and verified their
 digests there. Useful staging, and not durability: the artifact specs do not name
 `selected_leaves`, `selected_leaf_durability.json` was not a fetched report, and
-`fetch_finalists` returns immediately when `stage2_passed` is false. A Stage-2
+`fetch_finalists` returns immediately when `products_eligible` is false. A Stage-2
 failure could therefore still delete all five with the pod — the exact class the
 closure exists to prevent, with every other check green.
 
@@ -39,9 +39,9 @@ def load_launcher():
 class Ctx:
     """The slice of `SessionContext` these callables touch."""
 
-    def __init__(self, scr, *, stage2_passed=False, ckpt_store=None):
+    def __init__(self, scr, *, products_eligible=False, ckpt_store=None):
         self.scr = Path(scr)
-        self.stage2_passed = stage2_passed
+        self.products_eligible = products_eligible
         self.host = "pod.invalid"
         self.scp = ("scp", "-o", "StrictHostKeyChecking=no")
         self.evidence: dict = {}
@@ -102,7 +102,7 @@ def test_the_stage1_fetch_is_not_gated_on_stage_2(tmp_path, monkeypatch):
     not pass, and stage 2 failed six seconds after stage 1 succeeded."""
     mod = load_launcher()
     write_report(tmp_path, ["aaa", "bbb"])
-    ctx = Ctx(tmp_path, stage2_passed=False)
+    ctx = Ctx(tmp_path, products_eligible=False)
 
     calls = []
 

@@ -85,9 +85,9 @@ def args(cont):
 class Ctx:
     """The slice of `SessionContext` the product callables and gate touch."""
 
-    def __init__(self, scr, *, ckpt_store=None, stage2_passed=True):
+    def __init__(self, scr, *, ckpt_store=None, products_eligible=True):
         self.scr = Path(scr)
-        self.stage2_passed = stage2_passed
+        self.products_eligible = products_eligible
         self.host = "pod.invalid"
         self.scp = ("scp",)
         self.evidence: dict = {}

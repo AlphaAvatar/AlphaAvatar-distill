@@ -187,7 +187,7 @@ def test_the_canary_still_fetches_nothing_and_cannot_authorize_phase_a():
     specs = {name: spec for name, _m, _a, spec in all_specs()}
     canary = specs[CANARY]
     ctx = SessionContext(scr=Path("/tmp"), args=None, auth=None, evidence={},
-                         say=lambda m: None, stage2_passed=True)
+                         say=lambda m: None, products_eligible=True)
     assert canary.artifacts.fetch_products(ctx) == []
     assert canary.artifacts.event_streams(ctx) == ()
     #: The type is the guarantee. `SpendAuthorization.allows_phase_a` is a hard

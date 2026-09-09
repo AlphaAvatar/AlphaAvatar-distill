@@ -614,7 +614,7 @@ def test_the_controls_are_fetched_whenever_they_exist():
         "the checkpoint fetch is gated on total success; a non-blocking Stage-3 "
         "failure would delete the permanent controls, which is what happened "
         "on 2026-08-13")
-    assert "stage2_passed" in launch
+    assert "products_eligible" in launch
     assert '"PREFLIGHT_INCOMPLETE"' in launch
     # And the fetch is verified by size, not by return code alone.
     assert '"bytes": size' in launch

@@ -137,10 +137,14 @@ def build_plan(battery: dict) -> SuccessiveHalvingPlan:
         # Formula frozen, value pending the control characterization. Deliberately
         # NOT pre-filled from the historical prior: a fallback value would be the
         # second definition this rule exists to eliminate.
+        #: `feasibility_min` is PENDING here -- it is materialized from the
+        #: measured control, so the frozen plan carries a sentinel. It goes
+        #: THROUGH `plan_policy` rather than beside it: the policy now supplies
+        #: that field, and passing both is a duplicate-keyword error.
         **plan_policy(
             equivalence=EquivalenceRule(n_pooled=battery["n_scorable_prompts"] * 2),
+            feasibility_min=-1.0,      # PENDING; see selection_rules below
         ),
-        feasibility_min=-1.0,          # PENDING; see selection_rules below
         feasibility=FeasibilityRule(n_pooled=battery["n_prompts"] * 2),
         survivor_rule=("rung 1: exclude searched leaves below the feasibility floor, "
                        "then take the top 2 by correct_overall; the canonical "

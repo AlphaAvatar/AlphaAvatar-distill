@@ -737,7 +737,7 @@ def test_the_launcher_recognises_the_markers_its_own_driver_emits():
     assert terminal <= recognised, terminal - recognised
     # INCOMPLETE means the blocking stages passed, so products still exist.
     assert spec.markers.incomplete == ("CONTINUATION_INCOMPLETE",)
-    assert spec.markers.stage2_passed("CONTINUATION_INCOMPLETE", {}) is True, (
+    assert spec.markers.products_are_eligible("CONTINUATION_INCOMPLETE", {}) is True, (
         "an incomplete continuation would have its products left on the pod")
 
 
@@ -748,7 +748,7 @@ def test_the_continuation_fetches_no_checkpoints_and_waits_on_no_train_log():
     mod = load_continuation_launcher()
     spec = mod.spec(launch_args(mod))
     ctx = SessionContext(scr=Path("/tmp"), args=None, auth=None, evidence={},
-                         say=lambda m: None, stage2_passed=True)
+                         say=lambda m: None, products_eligible=True)
     assert spec.artifacts.fetch_products(ctx) == []
     assert spec.artifacts.event_streams(ctx) == ()
     assert spec.artifacts.audit_dirname == "autoinit_continuation"

@@ -267,37 +267,83 @@ def test_the_canary_driver_is_runnable():
 # `canonical_id` STRINGS. Only a successful run reaches this line with a
 # non-empty list, which is why six earlier attempts never found it.
 
-def _fetch_result_ok():
+def _default_ok():
     sys.path.insert(0, str(REPO / "src"))
-    from aadistill.infrastructure.session_runner import fetch_result_ok
-    return fetch_result_ok
+    from aadistill.infrastructure.session import default_fetch_result_ok
+    return default_fetch_result_ok
+
+
+def _phase_a_ok():
+    """Phase A's OWN validator, read off its declared ArtifactPolicy.
+
+    Built through the launcher's real parser and `spec()`, so this is the
+    policy a pod would run under -- not a hand-made lookalike.
+    """
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    sys.path.insert(0, str(REPO / "scripts"))
+    import autoinit_phase_a_launch as L
+
+    args = L.build_parser().parse_args(
+        ["--scr", "/tmp/x", "--session-commit", "d" * 40, "--bundle", "b.bundle"])
+    return L.spec(args).artifacts.fetch_result_ok
 
 
 def test_string_finalist_identifiers_do_not_crash_the_status_computation():
-    """Attempt 7's exact terminal shape: two canonical ids, no transfer."""
-    fetch_result_ok = _fetch_result_ok()
+    """Attempt 7's exact terminal shape: two canonical ids, no transfer.
+
+    They are accepted because PHASE A says they are, not because the runner
+    guesses. `finalists_to_fetch` names bytes that are already off-pod, so
+    there is no `rc` to check and inventing a failure would be as wrong as
+    inventing a success.
+    """
+    ok = _phase_a_ok()
     fetched = ["cca699c93f34dad7e94a5d13a25b2bc2",
                "85bde4ded2c31953f802e39cf2252c87"]
-    # The computation the runner performs, verbatim.
-    assert all(fetch_result_ok(f) for f in fetched) is True
+    assert all(ok(f) for f in fetched) is True
+
+
+def test_the_GENERIC_default_refuses_an_unrecognized_object():
+    """The property the old helper traded away.
+
+    `isinstance(entry, dict) ... else True` returned True for a string, for
+    `None`, for an error object, for anything -- so a policy that returned an
+    unfetched product would have been recorded as having secured it. The
+    default fails CLOSED and a session that means otherwise declares it.
+    """
+    ok = _default_ok()
+    assert ok({"rc": 0}) is True
+    assert ok({"rc": 1}) is False
+    assert ok("an-identifier") is False
+    assert ok(None) is False
+    assert ok(object()) is False
 
 
 def test_a_failed_transfer_still_fails_closed():
     """The property the crash must not be traded away for."""
-    fetch_result_ok = _fetch_result_ok()
-    assert fetch_result_ok({"control": "ctl_sa", "rc": 0, "bytes": 5}) is True
-    assert fetch_result_ok({"control": "ctl_sa", "rc": 1, "bytes": 0}) is False
-    assert fetch_result_ok({"leaf": "abc", "rc": 255}) is False
+    ok = _phase_a_ok()
+    assert ok({"control": "ctl_sa", "rc": 0, "bytes": 5}) is True
+    assert ok({"control": "ctl_sa", "rc": 1, "bytes": 0}) is False
+    assert ok({"leaf": "abc", "rc": 255}) is False
     # A dict with no `rc` at all is not a successful transfer either.
-    assert fetch_result_ok({"leaf": "abc"}) is False
-    assert all(fetch_result_ok(f) for f in
-               [{"rc": 0}, "an-identifier", {"rc": 1}]) is False
+    assert ok({"leaf": "abc"}) is False
+    assert all(ok(f) for f in [{"rc": 0}, "an-identifier", {"rc": 1}]) is False
+
+
+def test_a_typed_identifier_is_accepted_without_any_policy_declaring_it():
+    """The other half of the maintainer's option: state the kind."""
+    sys.path.insert(0, str(REPO / "src"))
+    from aadistill.infrastructure.session import ProductFetchResult
+
+    ok = _default_ok()
+    assert ok(ProductFetchResult(kind="identifier", detail="abc")) is True
+    assert ok(ProductFetchResult(kind="transfer", detail={}, rc=0)) is True
+    assert ok(ProductFetchResult(kind="transfer", detail={}, rc=1)) is False
 
 
 def test_the_runner_uses_the_predicate_rather_than_get_rc_directly():
     """Wiring: the crash was at the call site, not in a helper."""
     src = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
-    assert "fetch_result_ok(f) for f in fetched" in src
+    assert "self.spec.artifacts.fetch_result_ok(f) for f in fetched" in src
     assert 'f.get("rc") == 0 for f in fetched' not in src, (
         "the attempt-7 crash is back")
 
