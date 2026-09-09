@@ -142,13 +142,40 @@ class SeedAggregation:
                     "correct_given_usable": "sum(correct_s) / sum(usable_s)",
                 }}
 
-    def pool(self, per_seed: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    #: Both pooled-count aggregations assume `correct <= usable`: they refuse
+    #: `correct > usable` outright and divide ALL correct answers by usable
+    #: ones for the conditional metric. Under a rule where correctness is
+    #: independent of usability both are wrong -- the first rejects valid data,
+    #: the second computes a ratio of two quantities that are not nested.
+    supports_independent_correctness: bool = False
+
+    def require_compatible(self, rule) -> None:
+        """Refuse an incompatible rule BEFORE anything is aggregated.
+
+        Producing pooled numbers first and discovering the mismatch afterwards
+        is how an unsupported combination comes to look like a result.
+        """
+        if rule is None or rule.correct_implies_usable:
+            return
+        if not self.supports_independent_correctness:
+            raise ScoringContractError(
+                f"aggregation {self.aggregation_id}@v{self.version} assumes "
+                f"correct => usable, but rule {rule.rule_id!r} declares "
+                "correct_implies_usable=False. It divides all correct answers "
+                "by usable ones, which is not a conditional probability when "
+                "the two are independent. Use an aggregation that consumes a "
+                "correct_and_usable joint count.")
+
+    def pool(self, per_seed: Sequence[Mapping[str, Any]], *,
+             rule=None) -> dict[str, Any]:
         """Combine one candidate's per-seed counts.
 
         Each entry needs ``n``, ``usable`` and ``correct`` counts, and its
         ``seed``. Rates are *derived* here and never read from the input, so a
         caller cannot pass a pre-averaged rate and have it silently accepted.
         """
+        #: FIRST. Refuse an incompatible rule before any number exists.
+        self.require_compatible(rule)
         if not per_seed:
             raise ValueError("no seed results to pool")
         seeds = [int(r["seed"]) for r in per_seed]
@@ -259,7 +286,32 @@ class ScorableAwareSeedAggregation:
                                "conditional denominator"),
                 }}
 
-    def pool(self, per_seed: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    #: Both pooled-count aggregations assume `correct <= usable`: they refuse
+    #: `correct > usable` outright and divide ALL correct answers by usable
+    #: ones for the conditional metric. Under a rule where correctness is
+    #: independent of usability both are wrong -- the first rejects valid data,
+    #: the second computes a ratio of two quantities that are not nested.
+    supports_independent_correctness: bool = False
+
+    def require_compatible(self, rule) -> None:
+        """Refuse an incompatible rule BEFORE anything is aggregated.
+
+        Producing pooled numbers first and discovering the mismatch afterwards
+        is how an unsupported combination comes to look like a result.
+        """
+        if rule is None or rule.correct_implies_usable:
+            return
+        if not self.supports_independent_correctness:
+            raise ScoringContractError(
+                f"aggregation {self.aggregation_id}@v{self.version} assumes "
+                f"correct => usable, but rule {rule.rule_id!r} declares "
+                "correct_implies_usable=False. It divides all correct answers "
+                "by usable ones, which is not a conditional probability when "
+                "the two are independent. Use an aggregation that consumes a "
+                "correct_and_usable joint count.")
+
+    def pool(self, per_seed: Sequence[Mapping[str, Any]], *,
+             rule=None) -> dict[str, Any]:
         """Combine one candidate's per-seed counts. Rates are derived, never read.
 
         Refuses a caller that omits a denominator: passing only `n`/`usable`/
@@ -267,6 +319,8 @@ class ScorableAwareSeedAggregation:
         missing denominators to `n` and `usable` would silently reintroduce the
         defect.
         """
+        #: FIRST. Refuse an incompatible rule before any number exists.
+        self.require_compatible(rule)
         if not per_seed:
             raise ValueError("no seed results to pool")
         seeds = [int(r["seed"]) for r in per_seed]
@@ -333,6 +387,98 @@ class ScorableAwareSeedAggregation:
         }
 
 
+
+
+@dataclass(frozen=True)
+class JointCountSeedAggregation:
+    """Pooled counts for a policy where correctness does NOT imply usability.
+
+    The other two aggregations divide ALL correct answers by usable ones. That
+    is a conditional probability only because their rule guarantees every
+    correct rollout is usable; drop that guarantee and the same division is a
+    ratio of two quantities that are not nested, and can exceed 1.
+
+    So this one consumes the JOINT count explicitly. `correct_and_usable`
+    cannot be recovered from the marginals -- a caller that has only `correct`
+    and `usable` does not know how they overlap -- so it is required, and a
+    seed that omits it is refused rather than having a plausible number
+    invented for it.
+
+        usable_rollout_rate  = sum(usable_s)            / sum(n_s)
+        correct_overall      = sum(correct_s)           / sum(n_s)
+        correct_given_usable = sum(correct_and_usable_s) / sum(usable_s)
+
+    Mechanism, not policy: WHICH aggregation a study uses is the study's
+    choice, and this module holds no instance of one.
+    """
+
+    aggregation_id: str = "joint_counts"
+    version: int = 1
+    supports_independent_correctness: bool = True
+    #: Every count a caller must supply.
+    required_counts: tuple[str, ...] = ("n", "usable", "correct",
+                                        "correct_and_usable")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"aggregation_id": self.aggregation_id, "version": self.version,
+                "required_counts": list(self.required_counts),
+                "definitions": {
+                    "correct_overall": "sum(correct_s) / sum(n_s)",
+                    "usable_rollout_rate": "sum(usable_s) / sum(n_s)",
+                    "correct_given_usable":
+                        "sum(correct_and_usable_s) / sum(usable_s)",
+                }}
+
+    def require_compatible(self, rule) -> None:
+        """Accepts either kind of rule: the joint count is always correct."""
+        return
+
+    def pool(self, per_seed: Sequence[Mapping[str, Any]], *,
+             rule=None) -> dict[str, Any]:
+        if not per_seed:
+            raise ValueError("no seed results to pool")
+        seeds = [int(r["seed"]) for r in per_seed]
+        if len(set(seeds)) != len(seeds):
+            raise ValueError(f"duplicate seeds in {seeds}; each seed counts once")
+        totals = {}
+        for key in self.required_counts:
+            for row in per_seed:
+                if key not in row:
+                    raise ScoringContractError(
+                        f"seed {row.get('seed')}: {key!r} is required by "
+                        f"{self.aggregation_id}@v{self.version}. The joint "
+                        "count cannot be derived from the marginals, and this "
+                        "aggregation will not invent one.")
+                value = row[key]
+                if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                    raise ValueError(
+                        f"seed {row.get('seed')}: {key}={value!r} is not a "
+                        "non-negative integer count")
+            totals[key] = sum(int(r[key]) for r in per_seed)
+        n, usable = totals["n"], totals["usable"]
+        joint = totals["correct_and_usable"]
+        if n <= 0:
+            raise ValueError("pooled n is zero")
+        if usable > n or totals["correct"] > n:
+            raise ValueError(
+                f"pooled usable={usable} / correct={totals['correct']} exceed "
+                f"n={n}; these are counts, not rates")
+        if joint > usable or joint > totals["correct"]:
+            raise ValueError(
+                f"pooled correct_and_usable={joint} exceeds usable={usable} or "
+                f"correct={totals['correct']}; a joint count cannot exceed "
+                "either marginal")
+        return {
+            "seeds": sorted(seeds),
+            "n": n, "usable": usable, "correct": totals["correct"],
+            "correct_and_usable": joint,
+            "usable_rollout_rate": usable / n,
+            "correct_overall": totals["correct"] / n,
+            #: The JOINT numerator. Undefined rather than 0.0 when nothing was
+            #: usable, for the same reason the other aggregations say so.
+            "correct_given_usable": (joint / usable) if usable else None,
+            "aggregation": f"{self.aggregation_id}@v{self.version}",
+        }
 
 
 @dataclass(frozen=True)
@@ -1649,7 +1795,15 @@ def score_recovery_row(*, usable: bool, scorer_correct: bool,
     """
     correct = bool(rule.decide(bool(scorable), bool(usable),
                                bool(scorer_correct)))
+    extra = {}
+    if not rule.correct_implies_usable:
+        #: Under an independent rule `correct` and `usable` are separate facts,
+        #: so a conditional metric needs the JOINT one and cannot recover it
+        #: from the marginals. Under a strict rule it equals `correct` by
+        #: construction, and emitting it would change every existing record.
+        extra["correct_and_usable"] = bool(correct and usable)
     return {
+        **extra,
         "usable": bool(usable),
         "scorer_correct": bool(scorer_correct),
         "scorable": bool(scorable),
@@ -1668,16 +1822,30 @@ def validate_scored_rows(rows: Sequence[Mapping[str, Any]], *,
     offending row is invisible — the counts are already summed. This runs on rows,
     so a violation names the prompt.
     """
+    implies_usable = rule.correct_implies_usable if rule else True
     violations = []
     counts = {"n": 0, "usable": 0, "correct": 0, "scorable": 0,
               "correct_but_unusable": 0}
+    #: The JOINT count, which is the only honest numerator for a conditional
+    #: metric when correctness is independent of usability. Reported only under
+    #: an independent rule: under a strict one it equals `correct` by
+    #: construction, and adding a redundant key would change every existing
+    #: record's bytes for nothing.
+    joint = 0
     for row in rows:
         counts["n"] += 1
         counts["usable"] += bool(row.get("usable"))
         counts["correct"] += bool(row.get("correct"))
         counts["scorable"] += bool(row.get("scorable", True))
         counts["correct_but_unusable"] += bool(row.get("correct_but_unusable"))
-        if row.get("correct") and not row.get("usable"):
+        joint += bool(row.get("correct")) and bool(row.get("usable"))
+        #: ONLY when the rule says correctness implies usability. It used to be
+        #: unconditional, so a caller whose rule declared
+        #: `correct_implies_usable=False` had its own valid rows rejected --
+        #: with the rule's note quoted as the reason they were illegal, which
+        #: is the opposite of what the note said. Absent a rule the strict
+        #: assumption stands, because that is what every existing caller means.
+        if implies_usable and row.get("correct") and not row.get("usable"):
             violations.append({
                 "id": row.get("id"), "set": row.get("set"),
                 #: The rule's own words. This module does not know why a
@@ -1694,6 +1862,8 @@ def validate_scored_rows(rows: Sequence[Mapping[str, Any]], *,
         raise ScoringContractError(
             f"{len(violations)} scored rows violate correct => usable: "
             f"{violations[:3]}")
+    if not implies_usable:
+        counts["correct_and_usable"] = joint
     return counts
 
 #: The concrete instances moved to `scripts/experiments/recovery_policy.py`,
