@@ -57,8 +57,16 @@ def _seedish(value: object) -> bool:
 
 
 #: Names that decide something about a named phase, attempt or C1 stage.
+#: Both spellings: `phase_a_authorized` and `PhaseAAuthorization`. The class
+#: names in this repository are CamelCase without separators, so a rule that
+#: only understood snake_case would have missed every one of them.
 PHASE_POLICY = re.compile(
     r"(^|_)(phase_[a-z0-9]+|attempt_?\d*|c1|c0|stage_[a-z0-9]+|rung\d*)($|_)", re.I)
+PHASE_CAMEL = re.compile(r"(^|[a-z0-9])(Phase[A-Z0-9]|Attempt\d|C[01][A-Z_]|Rung\d)")
+
+
+def _phasey(name: str) -> bool:
+    return bool(PHASE_POLICY.search(name) or PHASE_CAMEL.search(name))
 
 #: A hardware SKU, a VRAM quantity, or a price. Shapes, not a vendor list.
 SKU = re.compile(r"\b([ARLHVT]\d{2,3}[SXL]?|H\d{3}|MI\d{3})\b")
@@ -163,7 +171,7 @@ class SemanticWalker(ast.NodeVisitor):
             if nm == "dataclass" or (isinstance(dec, ast.Attribute)
                                      and dec.attr == "dataclass"):
                 self._dataclass_defaults(node)
-        if PHASE_POLICY.search(node.name):
+        if _phasey(node.name):
             self._report("phase_policy_class", node, node.name, node.name,
                          "a class named for one phase, attempt or C1 stage")
         self._scoped(node, "class")
