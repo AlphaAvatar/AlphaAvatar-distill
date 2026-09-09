@@ -71,7 +71,7 @@ def example_to_rendered(example: dict) -> RenderedSession:
 
 
 def pack_e5(examples: list[dict], system_ids_by_key: dict[str, list[int]], *,
-            block_len: int = 8192, pad_id: int = 151643,
+            block_len: int = 8192, pad_id: int,
             target_blocks: int | None = None) -> list[PackedBlock]:
     """Pack E5 examples with truncation forbidden.
 

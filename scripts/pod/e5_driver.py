@@ -49,6 +49,10 @@ SEEDS = ("sa", "sb")
 STEP = None        # resolved from the measured step count at train time
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
 N_VAL = 16          # must equal intervals.eval_blocks in the arm configs
+#: Qwen's pad token. E5's fact, not the packer's: `pack_e5` used to default
+#: to it, so these calls packed with the default while `write_pack` RECORDED
+#: 151643 separately. They agreed by coincidence -- one source now.
+PAD_ID = 151643
 MEASURED_SEC_PER_STEP = 1.2955   # attempt 7, final C pack, truncated path
 TARGET_CE_TOKENS = 735_603
 TOLERANCE = 0.05
@@ -356,7 +360,7 @@ def stage_pair(args):
             rows = [json.loads(l) for l in
                     (REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl").open()
                     if l.strip()]
-            minima[(arm, seed)] = len(pack_e5(rows, sysids, block_len=8192))
+            minima[(arm, seed)] = len(pack_e5(rows, sysids, block_len=8192, pad_id=PAD_ID))
     common = max(minima.values())
     # Three passes at two blocks per step needs 3n/2 to be a whole number, so the
     # common count must be EVEN. Attempt 4 landed on 759 and `verify_pack` failed
@@ -378,17 +382,18 @@ def stage_pair(args):
                     (REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl").open()
                     if l.strip()]
             out = REPO / f"artifacts/stage3/e5_pack_{arm.lower()}_{seed}"
-            blocks = pack_e5(rows, sysids, block_len=8192, target_blocks=common)
+            blocks = pack_e5(rows, sysids, block_len=8192, pad_id=PAD_ID,
+                             target_blocks=common)
             held = [json.loads(l) for l in
                     (REPO / f"artifacts/stage3/e5_val_{arm}_{seed}.jsonl").open()
                     if l.strip()]
-            val_blocks = pack_e5(held, sysids, block_len=8192)[:N_VAL]
+            val_blocks = pack_e5(held, sysids, block_len=8192, pad_id=PAD_ID)[:N_VAL]
             if len(val_blocks) < N_VAL:
                 raise AssertionError(
                     f"{seed}/{arm}: only {len(val_blocks)} held-out blocks, "
                     f"need {N_VAL} for validation")
             write_pack(blocks, out, arm=arm.lower(), seed=seed, block_len=8192,
-                       pad_id=151643, target_ce_tokens=TARGET_CE_TOKENS,
+                       pad_id=PAD_ID, target_ce_tokens=TARGET_CE_TOKENS,
                        val_blocks=val_blocks)
             v = verify_pack(out, rows, expected_blocks=common,
                             target_ce_tokens=TARGET_CE_TOKENS, tolerance=TOLERANCE,
@@ -486,8 +491,8 @@ def _pack_c(seed: str) -> Path:
     sysids = json.loads((d / "system_ids.json").read_text())
     ck, rk, _ = intersect(ex, [dict(e) for e in ex])
     c_sel, _, sel = select_paired_to_token_target(ck, rk, TARGET_CE_TOKENS)
-    blocks = pack_e5(c_sel, sysids, block_len=8192)
-    write_pack(blocks, out, arm="c", seed=seed, block_len=8192, pad_id=151643,
+    blocks = pack_e5(c_sel, sysids, block_len=8192, pad_id=PAD_ID)
+    write_pack(blocks, out, arm="c", seed=seed, block_len=8192, pad_id=PAD_ID,
                target_ce_tokens=TARGET_CE_TOKENS, extra={"selection": sel})
     print(f"C pack {seed}: {len(blocks)} blocks, "
           f"{sel['arm_c_supervised']:,} CE tokens", flush=True)

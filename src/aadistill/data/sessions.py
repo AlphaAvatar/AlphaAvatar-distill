@@ -501,7 +501,10 @@ def pack_sessions(
     system_ids_by_key: dict[str, list[int]],
     *,
     block_len: int = 8192,
-    pad_id: int = 151643,
+    #: REQUIRED. It defaulted to 151643 -- Qwen's pad token -- which made a
+    #: generic packer carry one model family's constant, and let a caller
+    #: pack with the default while RECORDING a pad id it never passed.
+    pad_id: int,
     allow_terminal_truncation: bool = True,
 ) -> list[PackedBlock]:
     """Pack an ordered session list, never mixing system-prompt groups (§4).

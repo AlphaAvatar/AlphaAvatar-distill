@@ -512,3 +512,43 @@ def test_deferral_preserves_prefix_nesting():
     for i, block in enumerate(complete):
         assert long[i].input_ids == block.input_ids
         assert long[i].audit["sessions"] == block.audit["sessions"]
+
+
+# --- the packer does not know a model family ---------------------------------
+
+def test_the_packers_require_a_pad_id_rather_than_assuming_qwens():
+    """`pad_id` defaulted to 151643 in both packers.
+
+    Two problems, and the second is the one that bites. A generic packer in
+    `aadistill.data` carried one model family's constant, which the core is not
+    supposed to do. And `scripts/pod/e5_driver.py` packed with that default
+    while separately RECORDING `pad_id=151643` into the pack metadata — two
+    independent statements of the same fact, agreeing by coincidence. Change the
+    default and the recorded metadata would have described bytes that were
+    padded with something else, silently.
+
+    So both packers now require it and the driver states it once.
+    """
+    import pytest
+
+    from aadistill.data.e5_pack import pack_e5
+
+    with pytest.raises(TypeError, match="pad_id"):
+        pack_sessions([], {}, block_len=64)
+    with pytest.raises(TypeError, match="pad_id"):
+        pack_e5([], {}, block_len=64)
+
+
+def test_the_e5_driver_packs_and_records_from_one_source():
+    """Whatever the driver records must be what it packed with."""
+    import re
+    from pathlib import Path
+
+    src = (Path(__file__).resolve().parents[2]
+           / "scripts/pod/e5_driver.py").read_text()
+    assert re.search(r"^PAD_ID = 151643$", src, re.M), (
+        "e5_driver no longer declares its pad id once")
+    # No call may state the literal again -- that is how the two drifted apart.
+    body = re.sub(r"^PAD_ID = 151643$", "", src, flags=re.M)
+    assert "151643" not in re.sub(r"^\s*#.*$", "", body, flags=re.M), (
+        "e5_driver repeats the pad-id literal outside its one declaration")

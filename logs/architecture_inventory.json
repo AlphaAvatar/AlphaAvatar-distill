@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 109,
-  "lines": 29797,
+  "lines": 29800,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -23,7 +23,7 @@
   "family_access_outside_adapters": 0,
   "import_time_registration": 0,
   "import_time_taxonomy": 5,
-  "big_int_literals": 4,
+  "big_int_literals": 2,
   "package_cycles": 0
  },
  "findings": {
@@ -61,18 +61,6 @@
    }
   ],
   "big_int_literals": [
-   {
-    "path": "src/aadistill/data/e5_pack.py",
-    "owner": "pack_e5",
-    "line": 74,
-    "value": 151643
-   },
-   {
-    "path": "src/aadistill/data/sessions.py",
-    "owner": "pack_sessions",
-    "line": 504,
-    "value": 151643
-   },
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
     "owner": "SessionRunner._collect_setup_failure_evidence",
@@ -971,15 +959,6 @@
     "aadistill.data.sessions"
    ],
    "literals": [
-    {
-     "value": 151643,
-     "kinds": [
-      "big_int"
-     ],
-     "owner": "pack_e5",
-     "line": 74,
-     "experiment_tokens": []
-    },
     {
      "value": "rungs",
      "kinds": [
@@ -2254,7 +2233,7 @@
   "src/aadistill/data/sessions.py": {
    "module": "aadistill.data.sessions",
    "path": "src/aadistill/data/sessions.py",
-   "lines": 528,
+   "lines": 530,
    "imports": [
     {
      "target": "__future__",
@@ -2357,15 +2336,6 @@
      "experiment_tokens": [
       "rung"
      ]
-    },
-    {
-     "value": 151643,
-     "kinds": [
-      "big_int"
-     ],
-     "owner": "pack_sessions",
-     "line": 504,
-     "experiment_tokens": []
     }
    ],
    "family_attribute_access": [],
@@ -4051,7 +4021,7 @@
   "src/aadistill/governance/post_freeze.py": {
    "module": "aadistill.governance.post_freeze",
    "path": "src/aadistill/governance/post_freeze.py",
-   "lines": 302,
+   "lines": 303,
    "imports": [
     {
      "target": "__future__",
@@ -4091,7 +4061,7 @@
     },
     {
      "target": "subprocess",
-     "line": 158,
+     "line": 159,
      "relative": 0
     }
    ],
@@ -4103,7 +4073,7 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 140,
+     "line": 141,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4114,7 +4084,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 201,
+     "line": 202,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4125,7 +4095,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 203,
+     "line": 204,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4136,7 +4106,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 209,
+     "line": 210,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4147,7 +4117,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 237,
+     "line": 238,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4171,31 +4141,31 @@
      "name": "_sha_file",
      "kind": "function",
      "qualname": "_sha_file",
-     "line": 146
+     "line": 147
     },
     {
      "name": "entry_self_hash",
      "kind": "function",
      "qualname": "entry_self_hash",
-     "line": 150
+     "line": 151
     },
     {
      "name": "_git",
      "kind": "function",
      "qualname": "_git",
-     "line": 157
+     "line": 158
     },
     {
      "name": "historical_accounted_for",
      "kind": "function",
      "qualname": "historical_accounted_for",
-     "line": 165
+     "line": 166
     },
     {
      "name": "_rederive_last_entry",
      "kind": "function",
      "qualname": "_rederive_last_entry",
-     "line": 256
+     "line": 257
     }
    ],
    "import_time_calls": [],
@@ -6782,13 +6752,13 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "q_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 198
     },
     {
      "chain": "self_attn.k_proj",
-     "probe": "self_attn",
+     "probe": "k_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 199
     },
@@ -6800,19 +6770,19 @@
     },
     {
      "chain": "mlp.gate_proj",
-     "probe": "gate_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 201
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "up_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 202
     },
     {
      "chain": "self_attn.o_proj",
-     "probe": "o_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_out_projections",
      "line": 206
     },
