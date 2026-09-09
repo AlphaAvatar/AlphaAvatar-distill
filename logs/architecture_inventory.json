@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 109,
-  "lines": 29718,
+  "lines": 29824,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -37,22 +37,22 @@
    {
     "path": "src/aadistill/initialization/operators/base.py",
     "call": "register_kind",
-    "line": 470
+    "line": 474
    },
    {
     "path": "src/aadistill/initialization/operators/base.py",
     "call": "register_kind",
-    "line": 475
-   },
-   {
-    "path": "src/aadistill/initialization/operators/base.py",
-    "call": "register_kind",
-    "line": 480
+    "line": 479
    },
    {
     "path": "src/aadistill/initialization/operators/base.py",
     "call": "register_kind",
     "line": 484
+   },
+   {
+    "path": "src/aadistill/initialization/operators/base.py",
+    "call": "register_kind",
+    "line": 488
    },
    {
     "path": "src/aadistill/initialization/operators/composite.py",
@@ -64,7 +64,7 @@
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
     "owner": "SessionRunner._collect_setup_failure_evidence",
-    "line": 679,
+    "line": 642,
     "value": 400000
    },
    {
@@ -3670,7 +3670,7 @@
   "src/aadistill/governance/authorization.py": {
    "module": "aadistill.governance.authorization",
    "path": "src/aadistill/governance/authorization.py",
-   "lines": 318,
+   "lines": 360,
    "imports": [
     {
      "target": "__future__",
@@ -3747,91 +3747,91 @@
      "name": "allows",
      "kind": "function",
      "qualname": "ActionPolicy.allows",
-     "line": 59
+     "line": 76
     },
     {
      "name": "refuse",
      "kind": "function",
      "qualname": "ActionPolicy.refuse",
-     "line": 62
+     "line": 79
     },
     {
      "name": "check_claims",
      "kind": "function",
      "qualname": "ActionPolicy.check_claims",
-     "line": 69
+     "line": 86
     },
     {
      "name": "harness_source_digest",
      "kind": "function",
      "qualname": "harness_source_digest",
-     "line": 84
+     "line": 101
     },
     {
      "name": "SpendAuthorization",
      "kind": "class",
      "qualname": "SpendAuthorization",
-     "line": 116
+     "line": 133
     },
     {
      "name": "allows",
      "kind": "function",
      "qualname": "SpendAuthorization.allows",
-     "line": 153
+     "line": 170
     },
     {
      "name": "refuse",
      "kind": "function",
      "qualname": "SpendAuthorization.refuse",
-     "line": 157
+     "line": 174
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "SpendAuthorization.as_dict",
-     "line": 161
+     "line": 178
     },
     {
      "name": "require_plan",
      "kind": "function",
      "qualname": "SpendAuthorization.require_plan",
-     "line": 191
+     "line": 219
     },
     {
      "name": "require_stage",
      "kind": "function",
      "qualname": "SpendAuthorization.require_stage",
-     "line": 198
+     "line": 226
     },
     {
      "name": "require_within_cap",
      "kind": "function",
      "qualname": "SpendAuthorization.require_within_cap",
-     "line": 204
+     "line": 232
     },
     {
      "name": "require_harness",
      "kind": "function",
      "qualname": "SpendAuthorization.require_harness",
-     "line": 210
+     "line": 238
     },
     {
      "name": "require_within_launch_limit",
      "kind": "function",
      "qualname": "SpendAuthorization.require_within_launch_limit",
-     "line": 233
+     "line": 261
     },
     {
      "name": "load",
      "kind": "function",
      "qualname": "SpendAuthorization.load",
-     "line": 245
+     "line": 273
     },
     {
      "name": "authorization_from_dict",
      "kind": "function",
      "qualname": "authorization_from_dict",
-     "line": 301
+     "line": 337
     }
    ],
    "import_time_calls": [],
@@ -5446,7 +5446,7 @@
   "src/aadistill/infrastructure/session.py": {
    "module": "aadistill.infrastructure.session",
    "path": "src/aadistill/infrastructure/session.py",
-   "lines": 725,
+   "lines": 788,
    "imports": [
     {
      "target": "__future__",
@@ -5499,19 +5499,6 @@
       "StepTime",
       "plan_session"
      ]
-    },
-    {
-     "target": "json",
-     "line": 88,
-     "relative": 0
-    },
-    {
-     "target": "pathlib",
-     "line": 89,
-     "relative": 0,
-     "names": [
-      "Path"
-     ]
     }
    ],
    "internal_imports": [
@@ -5533,7 +5520,7 @@
       "float"
      ],
      "owner": "BudgetSpec",
-     "line": 384,
+     "line": 445,
      "experiment_tokens": []
     },
     {
@@ -5542,7 +5529,7 @@
       "float"
      ],
      "owner": "BudgetSpec",
-     "line": 388,
+     "line": 449,
      "experiment_tokens": []
     },
     {
@@ -5551,7 +5538,7 @@
       "experiment_token"
      ],
      "owner": "SessionSpec.validate",
-     "line": 530,
+     "line": 593,
      "experiment_tokens": [
       "phase_a"
      ]
@@ -5562,7 +5549,7 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 712,
+     "line": 775,
      "experiment_tokens": [
       "attempt"
      ]
@@ -5589,160 +5576,178 @@
      "line": 55
     },
     {
-     "name": "_main_relay",
-     "kind": "function",
-     "qualname": "_main_relay",
-     "line": 87
-    },
-    {
      "name": "RelayInput",
      "kind": "class",
      "qualname": "RelayInput",
-     "line": 104
+     "line": 79
     },
     {
      "name": "staged",
      "kind": "function",
      "qualname": "RelayInput.staged",
-     "line": 161
+     "line": 140
     },
     {
      "name": "as_record",
      "kind": "function",
      "qualname": "RelayInput.as_record",
-     "line": 165
+     "line": 144
     },
     {
      "name": "LocalAsset",
      "kind": "class",
      "qualname": "LocalAsset",
-     "line": 178
+     "line": 157
     },
     {
      "name": "as_env_entry",
      "kind": "function",
      "qualname": "LocalAsset.as_env_entry",
-     "line": 194
+     "line": 173
     },
     {
      "name": "ExecutionCommands",
      "kind": "class",
      "qualname": "ExecutionCommands",
-     "line": 200
+     "line": 179
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "ExecutionCommands.as_dict",
-     "line": 232
+     "line": 218
     },
     {
      "name": "SetupManifest",
      "kind": "class",
      "qualname": "SetupManifest",
-     "line": 239
+     "line": 225
     },
     {
      "name": "assets_env",
      "kind": "function",
      "qualname": "SetupManifest.assets_env",
-     "line": 268
+     "line": 254
     },
     {
      "name": "test_ignores_env",
      "kind": "function",
      "qualname": "SetupManifest.test_ignores_env",
-     "line": 271
+     "line": 257
     },
     {
      "name": "staged_relay_inputs",
      "kind": "function",
      "qualname": "SetupManifest.staged_relay_inputs",
-     "line": 274
+     "line": 260
     },
     {
      "name": "relay_env",
      "kind": "function",
      "qualname": "SetupManifest.relay_env",
-     "line": 278
+     "line": 264
     },
     {
      "name": "MarkerPolicy",
      "kind": "class",
      "qualname": "MarkerPolicy",
-     "line": 295
+     "line": 281
     },
     {
      "name": "is_incomplete",
      "kind": "function",
      "qualname": "MarkerPolicy.is_incomplete",
-     "line": 306
+     "line": 292
     },
     {
-     "name": "stage2_passed",
+     "name": "products_are_eligible",
      "kind": "function",
-     "qualname": "MarkerPolicy.stage2_passed",
-     "line": 309
+     "qualname": "MarkerPolicy.products_are_eligible",
+     "line": 303
+    },
+    {
+     "name": "ProductFetchResult",
+     "kind": "class",
+     "qualname": "ProductFetchResult",
+     "line": 323
+    },
+    {
+     "name": "__post_init__",
+     "kind": "function",
+     "qualname": "ProductFetchResult.__post_init__",
+     "line": 344
+    },
+    {
+     "name": "ok",
+     "kind": "function",
+     "qualname": "ProductFetchResult.ok",
+     "line": 352
+    },
+    {
+     "name": "default_fetch_result_ok",
+     "kind": "function",
+     "qualname": "default_fetch_result_ok",
+     "line": 356
     },
     {
      "name": "ArtifactPolicy",
      "kind": "class",
      "qualname": "ArtifactPolicy",
-     "line": 316
+     "line": 373
     },
     {
      "name": "TeardownPolicy",
      "kind": "class",
      "qualname": "TeardownPolicy",
-     "line": 356
+     "line": 417
     },
     {
      "name": "BudgetSpec",
      "kind": "class",
      "qualname": "BudgetSpec",
-     "line": 368
+     "line": 429
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "BudgetSpec.plan",
-     "line": 391
+     "line": 452
     },
     {
      "name": "SessionContext",
      "kind": "class",
      "qualname": "SessionContext",
-     "line": 413
+     "line": 474
     },
     {
      "name": "SessionSpec",
      "kind": "class",
      "qualname": "SessionSpec",
-     "line": 445
+     "line": 508
     },
     {
      "name": "validate",
      "kind": "function",
      "qualname": "SessionSpec.validate",
-     "line": 513
+     "line": 576
     },
     {
      "name": "setup_environment",
      "kind": "function",
      "qualname": "SessionSpec.setup_environment",
-     "line": 628
+     "line": 691
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "SessionSpec.as_dict",
-     "line": 654
+     "line": 717
     },
     {
      "name": "missing_arguments",
      "kind": "function",
      "qualname": "missing_arguments",
-     "line": 718
+     "line": 781
     }
    ],
    "import_time_calls": [],
@@ -5856,7 +5861,7 @@
   "src/aadistill/infrastructure/session_runner.py": {
    "module": "aadistill.infrastructure.session_runner",
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "lines": 1019,
+   "lines": 983,
    "imports": [
     {
      "target": "__future__",
@@ -5977,13 +5982,8 @@
      ]
     },
     {
-     "target": "json",
-     "line": 118,
-     "relative": 0
-    },
-    {
      "target": "huggingface_hub",
-     "line": 334,
+     "line": 297,
      "relative": 0,
      "names": [
       "HfApi"
@@ -5991,7 +5991,7 @@
     },
     {
      "target": "tarfile",
-     "line": 822,
+     "line": 785,
      "relative": 0
     }
    ],
@@ -6010,7 +6010,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.check_gpu_offered",
-     "line": 275,
+     "line": 238,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6021,7 +6021,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.check_gpu_offered",
-     "line": 277,
+     "line": 240,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6032,7 +6032,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.check_gpu_offered",
-     "line": 285,
+     "line": 248,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6043,7 +6043,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.create",
-     "line": 443,
+     "line": 406,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6054,7 +6054,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.wait_endpoint",
-     "line": 507,
+     "line": 470,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6065,7 +6065,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.read_image_digest",
-     "line": 553,
+     "line": 516,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6076,7 +6076,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.read_image_digest",
-     "line": 562,
+     "line": 525,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6087,7 +6087,7 @@
       "big_int"
      ],
      "owner": "SessionRunner._collect_setup_failure_evidence",
-     "line": 679,
+     "line": 642,
      "experiment_tokens": []
     }
    ],
@@ -6097,163 +6097,151 @@
      "name": "ImageIdentityUnavailable",
      "kind": "class",
      "qualname": "ImageIdentityUnavailable",
-     "line": 60
-    },
-    {
-     "name": "fetch_result_ok",
-     "kind": "function",
-     "qualname": "fetch_result_ok",
-     "line": 71
+     "line": 68
     },
     {
      "name": "parse_setup_probe",
      "kind": "function",
      "qualname": "parse_setup_probe",
-     "line": 101
-    },
-    {
-     "name": "provider_cli_fallbacks",
-     "kind": "function",
-     "qualname": "provider_cli_fallbacks",
-     "line": 111
+     "line": 79
     },
     {
      "name": "_first_existing",
      "kind": "function",
      "qualname": "_first_existing",
-     "line": 128
+     "line": 89
     },
     {
      "name": "SessionRunner",
      "kind": "class",
      "qualname": "SessionRunner",
-     "line": 135
+     "line": 96
     },
     {
      "name": "__init__",
      "kind": "function",
      "qualname": "SessionRunner.__init__",
-     "line": 138
+     "line": 99
     },
     {
      "name": "say",
      "kind": "function",
      "qualname": "SessionRunner.say",
-     "line": 194
+     "line": 157
     },
     {
      "name": "elapsed",
      "kind": "function",
      "qualname": "SessionRunner.elapsed",
-     "line": 203
+     "line": 166
     },
     {
      "name": "usd",
      "kind": "function",
      "qualname": "SessionRunner.usd",
-     "line": 206
+     "line": 169
     },
     {
      "name": "save",
      "kind": "function",
      "qualname": "SessionRunner.save",
-     "line": 209
+     "line": 172
     },
     {
      "name": "context",
      "kind": "function",
      "qualname": "SessionRunner.context",
-     "line": 213
+     "line": 176
     },
     {
      "name": "make_plan",
      "kind": "function",
      "qualname": "SessionRunner.make_plan",
-     "line": 229
+     "line": 192
     },
     {
      "name": "check_gpu_offered",
      "kind": "function",
      "qualname": "SessionRunner.check_gpu_offered",
-     "line": 254
+     "line": 217
     },
     {
      "name": "run_prechecks",
      "kind": "function",
      "qualname": "SessionRunner.run_prechecks",
-     "line": 302
+     "line": 265
     },
     {
      "name": "create",
      "kind": "function",
      "qualname": "SessionRunner.create",
-     "line": 359
+     "line": 322
     },
     {
      "name": "launch_watchdog",
      "kind": "function",
      "qualname": "SessionRunner.launch_watchdog",
-     "line": 450
+     "line": 413
     },
     {
      "name": "wait_endpoint",
      "kind": "function",
      "qualname": "SessionRunner.wait_endpoint",
-     "line": 483
+     "line": 446
     },
     {
      "name": "read_image_digest",
      "kind": "function",
      "qualname": "SessionRunner.read_image_digest",
-     "line": 526
+     "line": 489
     },
     {
      "name": "setup_on_draw",
      "kind": "function",
      "qualname": "SessionRunner.setup_on_draw",
-     "line": 580
+     "line": 543
     },
     {
      "name": "_collect_setup_failure_evidence",
      "kind": "function",
      "qualname": "SessionRunner._collect_setup_failure_evidence",
-     "line": 657
+     "line": 620
     },
     {
      "name": "run",
      "kind": "function",
      "qualname": "SessionRunner.run",
-     "line": 686
+     "line": 649
     },
     {
      "name": "collect_and_teardown",
      "kind": "function",
      "qualname": "SessionRunner.collect_and_teardown",
-     "line": 790
+     "line": 753
     },
     {
      "name": "finish_emergency",
      "kind": "function",
      "qualname": "SessionRunner.finish_emergency",
-     "line": 940
+     "line": 904
     },
     {
      "name": "teardown_now",
      "kind": "function",
      "qualname": "SessionRunner.teardown_now",
-     "line": 961
+     "line": 925
     },
     {
      "name": "_shell_quote",
      "kind": "function",
      "qualname": "_shell_quote",
-     "line": 987
+     "line": 951
     },
     {
      "name": "run_session",
      "kind": "function",
      "qualname": "run_session",
-     "line": 994
+     "line": 958
     }
    ],
    "import_time_calls": [],
@@ -6752,7 +6740,7 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 198
     },
@@ -6782,7 +6770,7 @@
     },
     {
      "chain": "self_attn.o_proj",
-     "probe": "self_attn",
+     "probe": "o_proj",
      "owner": "Qwen3Adapter.stream_out_projections",
      "line": 206
     },
@@ -8094,7 +8082,7 @@
   "src/aadistill/initialization/operators/base.py": {
    "module": "aadistill.initialization.operators.base",
    "path": "src/aadistill/initialization/operators/base.py",
-   "lines": 487,
+   "lines": 491,
    "imports": [
     {
      "target": "__future__",
@@ -8385,37 +8373,37 @@
      "name": "registry_ledger",
      "kind": "function",
      "qualname": "registry_ledger",
-     "line": 414
+     "line": 418
     },
     {
      "name": "verify_ledger",
      "kind": "function",
      "qualname": "verify_ledger",
-     "line": 424
+     "line": 428
     },
     {
      "name": "write_ledger",
      "kind": "function",
      "qualname": "write_ledger",
-     "line": 461
+     "line": 465
     }
    ],
    "import_time_calls": [
     {
      "call": "register_kind",
-     "line": 470
+     "line": 474
     },
     {
      "call": "register_kind",
-     "line": 475
-    },
-    {
-     "call": "register_kind",
-     "line": 480
+     "line": 479
     },
     {
      "call": "register_kind",
      "line": 484
+    },
+    {
+     "call": "register_kind",
+     "line": 488
     }
    ],
    "classification": "generic_operator"
@@ -10109,7 +10097,7 @@
   "src/aadistill/initialization/planning/ranking.py": {
    "module": "aadistill.initialization.planning.ranking",
    "path": "src/aadistill/initialization/planning/ranking.py",
-   "lines": 599,
+   "lines": 598,
    "imports": [
     {
      "target": "__future__",
@@ -10175,7 +10163,7 @@
     },
     {
      "target": "math",
-     "line": 535,
+     "line": 545,
      "relative": 0
     }
    ],
@@ -10183,19 +10171,7 @@
     "aadistill.initialization.specs.metrics",
     "aadistill.initialization.specs.state"
    ],
-   "literals": [
-    {
-     "value": "phase_a_blocked",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "EpsilonResponseRule.evaluate",
-     "line": 557,
-     "experiment_tokens": [
-      "phase_a"
-     ]
-    }
-   ],
+   "literals": [],
    "family_attribute_access": [],
    "definitions": [
     {
@@ -10394,31 +10370,31 @@
      "name": "evaluate",
      "kind": "function",
      "qualname": "EpsilonResponseRule.evaluate",
-     "line": 534
+     "line": 544
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "EpsilonResponseRule.as_dict",
-     "line": 560
+     "line": 563
     },
     {
      "name": "register_policy",
      "kind": "function",
      "qualname": "register_policy",
-     "line": 580
+     "line": 579
     },
     {
      "name": "get_policy",
      "kind": "function",
      "qualname": "get_policy",
-     "line": 592
+     "line": 591
     },
     {
      "name": "registered_policies",
      "kind": "function",
      "qualname": "registered_policies",
-     "line": 598
+     "line": 597
     }
    ],
    "import_time_calls": [],
@@ -10427,7 +10403,7 @@
   "src/aadistill/initialization/planning/recovery.py": {
    "module": "aadistill.initialization.planning.recovery",
    "path": "src/aadistill/initialization/planning/recovery.py",
-   "lines": 2059,
+   "lines": 2090,
    "imports": [
     {
      "target": "__future__",
@@ -10457,6 +10433,7 @@
      "line": 50,
      "relative": 0,
      "names": [
+      "Callable",
       "Mapping",
       "Sequence"
      ]
@@ -10686,7 +10663,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.__post_init__",
-     "line": 1737,
+     "line": 1763,
      "experiment_tokens": [
       "rung"
      ]
@@ -10697,7 +10674,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.as_dict",
-     "line": 1775,
+     "line": 1806,
      "experiment_tokens": [
       "rung"
      ]
@@ -10708,7 +10685,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.as_dict",
-     "line": 1775,
+     "line": 1806,
      "experiment_tokens": [
       "rung"
      ]
@@ -10719,7 +10696,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.select_rung1_survivors",
-     "line": 1882,
+     "line": 1913,
      "experiment_tokens": [
       "rung"
      ]
@@ -10730,7 +10707,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.select_final_winner",
-     "line": 1945,
+     "line": 1976,
      "experiment_tokens": [
       "rung"
      ]
@@ -10741,7 +10718,7 @@
       "experiment_token"
      ],
      "owner": "probe_configs",
-     "line": 2038,
+     "line": 2069,
      "experiment_tokens": [
       "rung"
      ]
@@ -10752,7 +10729,7 @@
       "experiment_token"
      ],
      "owner": "probe_configs",
-     "line": 2044,
+     "line": 2075,
      "experiment_tokens": [
       "rung"
      ]
@@ -10763,7 +10740,7 @@
       "experiment_token"
      ],
      "owner": "probe_configs",
-     "line": 2043,
+     "line": 2074,
      "experiment_tokens": [
       "rung"
      ]
@@ -11195,139 +11172,145 @@
      "name": "plan_hash",
      "kind": "function",
      "qualname": "PreflightPlan.plan_hash",
-     "line": 1572
+     "line": 1575
     },
     {
      "name": "advance_to",
      "kind": "function",
      "qualname": "PreflightPlan.advance_to",
-     "line": 1576
+     "line": 1579
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "PreflightPlan.as_dict",
-     "line": 1594
+     "line": 1597
     },
     {
      "name": "ScoringContractError",
      "kind": "class",
      "qualname": "ScoringContractError",
-     "line": 1606
+     "line": 1609
+    },
+    {
+     "name": "CorrectnessRule",
+     "kind": "class",
+     "qualname": "CorrectnessRule",
+     "line": 1614
     },
     {
      "name": "score_recovery_row",
      "kind": "function",
      "qualname": "score_recovery_row",
-     "line": 1610
+     "line": 1637
     },
     {
      "name": "validate_scored_rows",
      "kind": "function",
      "qualname": "validate_scored_rows",
-     "line": 1645
+     "line": 1663
     },
     {
      "name": "SuccessiveHalvingPlan",
      "kind": "class",
      "qualname": "SuccessiveHalvingPlan",
-     "line": 1683
+     "line": 1706
     },
     {
      "name": "__post_init__",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.__post_init__",
-     "line": 1731
+     "line": 1757
     },
     {
      "name": "rung1_probes",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.rung1_probes",
-     "line": 1755
+     "line": 1786
     },
     {
      "name": "rung2_probes",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.rung2_probes",
-     "line": 1759
+     "line": 1790
     },
     {
      "name": "probe_count",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.probe_count",
-     "line": 1763
+     "line": 1794
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.as_dict",
-     "line": 1767
+     "line": 1798
     },
     {
      "name": "feasibility_floor",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.feasibility_floor",
-     "line": 1813
+     "line": 1844
     },
     {
      "name": "_gate",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan._gate",
-     "line": 1819
+     "line": 1850
     },
     {
      "name": "_rank",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan._rank",
-     "line": 1857
+     "line": 1888
     },
     {
      "name": "_tied_with_leader",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan._tied_with_leader",
-     "line": 1861
+     "line": 1892
     },
     {
      "name": "select_rung1_survivors",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.select_rung1_survivors",
-     "line": 1869
+     "line": 1900
     },
     {
      "name": "select_final_winner",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.select_final_winner",
-     "line": 1897
+     "line": 1928
     },
     {
      "name": "plan_hash",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.plan_hash",
-     "line": 1974
+     "line": 2005
     },
     {
      "name": "freeze",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.freeze",
-     "line": 1977
+     "line": 2008
     },
     {
      "name": "assert_preregistered",
      "kind": "function",
      "qualname": "assert_preregistered",
-     "line": 1988
+     "line": 2019
     },
     {
      "name": "admit_leaves",
      "kind": "function",
      "qualname": "admit_leaves",
-     "line": 2003
+     "line": 2034
     },
     {
      "name": "probe_configs",
      "kind": "function",
      "qualname": "probe_configs",
-     "line": 2030
+     "line": 2061
     }
    ],
    "import_time_calls": [],
@@ -16238,7 +16221,7 @@
   "src/aadistill/runtime/staging_contract.py": {
    "module": "aadistill.runtime.staging_contract",
    "path": "src/aadistill/runtime/staging_contract.py",
-   "lines": 236,
+   "lines": 239,
    "imports": [
     {
      "target": "__future__",
@@ -16289,19 +16272,7 @@
     }
    ],
    "internal_imports": [],
-   "literals": [
-    {
-     "value": "the pod derives NCPU from its cgroup quota (never bare nproc, which reports the host's CPUs inside a container and also honours OMP_NUM_THREADS), pins the suite with `taskset -c 0-(NCPU-1)`, and caps ",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "derive_contract",
-     "line": 114,
-     "experiment_tokens": [
-      "attempt"
-     ]
-    }
-   ],
+   "literals": [],
    "family_attribute_access": [],
    "definitions": [
     {
@@ -16320,43 +16291,43 @@
      "name": "contract_digest",
      "kind": "function",
      "qualname": "contract_digest",
-     "line": 130
+     "line": 133
     },
     {
      "name": "staged_files",
      "kind": "function",
      "qualname": "staged_files",
-     "line": 142
+     "line": 145
     },
     {
      "name": "gitignored_files",
      "kind": "function",
      "qualname": "gitignored_files",
-     "line": 156
+     "line": 159
     },
     {
      "name": "hidden_files",
      "kind": "function",
      "qualname": "hidden_files",
-     "line": 164
+     "line": 167
     },
     {
      "name": "sources_on_disk",
      "kind": "function",
      "qualname": "sources_on_disk",
-     "line": 188
+     "line": 191
     },
     {
      "name": "undeclared_in_destination",
      "kind": "function",
      "qualname": "undeclared_in_destination",
-     "line": 207
+     "line": 210
     },
     {
      "name": "describe",
      "kind": "function",
      "qualname": "describe",
-     "line": 222
+     "line": 225
     }
    ],
    "import_time_calls": [],

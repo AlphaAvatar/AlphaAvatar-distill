@@ -31,6 +31,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.calibration.profiles import NO_CALIBRATION
+from experiments.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
 from experiments.calibration import DOMAIN_BALANCED_V1
 from aadistill.runtime.cost import (  # noqa: E402
     L40S_MEASURED,

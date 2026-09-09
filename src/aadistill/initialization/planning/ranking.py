@@ -530,6 +530,16 @@ class EpsilonResponseRule:
         "on the pilot's GPU backend; the statistic is max(max - min) across the "
         "policy's objective metrics")
     repeats: int = 10
+    #: What the CALLER says happens on each branch, and the key its blocked
+    #: flag appears under. These were literals naming Phase A, so a generic
+    #: ranking rule told every reader which of THIS project's phases would not
+    #: start -- and the sentences are recorded verbatim in frozen
+    #: preregistrations, so they are supplied rather than rewritten.
+    proceed_note: str = ""
+    stop_note: str = ""
+    if_below_note: str = ""
+    if_at_or_above_note: str = ""
+    blocked_key: str = "dependent_work_blocked"
 
     def evaluate(self, measured_range: float) -> dict[str, Any]:
         import math as _math
@@ -545,34 +555,23 @@ class EpsilonResponseRule:
             "measured_range": measured_range,
             "passes": passes,
             "epsilon_final": self.declared_epsilon if passes else None,
-            "action": ("proceed: the measured range is below the declared epsilon, "
-                       "which stands unchanged"
-                       if passes else
-                       "STOP: the measured range reaches or exceeds the declared "
-                       "epsilon. Do NOT materialize a new epsilon automatically. "
-                       "Mark the preflight as requiring review and do not start "
-                       "Phase A; a beam tolerance derived from one profiling run "
-                       "is not a scientific tolerance."),
+            "action": self.proceed_note if passes else self.stop_note,
             "requires_review": not passes,
-            "phase_a_blocked": not passes,
+            self.blocked_key: not passes,
         }
 
     def as_dict(self) -> dict[str, Any]:
         return {"rule_id": self.rule_id, "version": self.version,
                 "declared_epsilon": self.declared_epsilon,
                 "measurement_definition": self.measurement, "repeats": self.repeats,
-                "if_below": "epsilon stands unchanged",
-                "if_at_or_above": ("no automatic re-derivation; preflight requires "
-                                   "review and Phase A is blocked"),
+                "if_below": self.if_below_note,
+                "if_at_or_above": self.if_at_or_above_note,
                 "rejected_alternative": ("epsilon_final = max(1e-4, 2 * measured) "
                                          "- rejected for v1 because it derives a "
                                          "scientific tolerance from a single "
                                          "profiling run")}
 
 
-#: Frozen against the shipped policy's smallest declared epsilon.
-EPSILON_RESPONSE_V1 = EpsilonResponseRule(
-    declared_epsilon=min(PARETO_V1.epsilon.values()))
 
 _POLICIES: dict[str, BeamRankingPolicy] = {PARETO_V1.qualified_id: PARETO_V1}
 

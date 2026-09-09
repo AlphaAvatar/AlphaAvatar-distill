@@ -70,8 +70,11 @@ class TestTheClosureCoversWhatSpendsMoney:
         ("src/aadistill/infrastructure/log_relay.py",
          "class LogRelay", "class LogRelay_MUTATED",
          "log relay"),
+        #: `fetch_result_ok` until the Milestone-A closure, when it moved to
+        #: ArtifactPolicy as a fail-closed validator. Anchored on the runner's
+        #: own class now, which cannot move without the runner moving.
         ("src/aadistill/infrastructure/session_runner.py",
-         "def fetch_result_ok", "def fetch_result_ok_MUTATED",
+         "class SessionRunner", "class SessionRunner_MUTATED",
          "the session runner"),
         ("src/aadistill/infrastructure/watchdog.py",
          "class WatchdogPolicy", "class WatchdogPolicy_MUTATED",

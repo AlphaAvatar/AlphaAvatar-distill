@@ -114,8 +114,11 @@ def derive_contract(setup: Any, *, session_id: str = "") -> dict[str, Any]:
             "the pod derives NCPU from its cgroup quota (never bare nproc, which "
             "reports the host's CPUs inside a container and also honours "
             "OMP_NUM_THREADS), pins the suite with `taskset -c 0-(NCPU-1)`, and "
-            "caps OMP/MKL/OPENBLAS at min(NCPU, 8). Attempt 4 observed 128 vCPUs "
-            "visible, cgroup budget 15, cpu set 0-14."),
+            "caps OMP/MKL/OPENBLAS at min(NCPU, 8)."),
+        #: Observed on a real pod: 128 vCPUs visible, cgroup budget 15, cpu set
+        #: 0-14. That measurement is evidence from one session and stays a
+        #: comment -- a deployment contract states the rule, not which attempt
+        #: happened to demonstrate it.
         "teacher_revision": setup.teacher_revision,
         "tests_max_seconds": setup.tests_max_seconds,
         "granularity": (

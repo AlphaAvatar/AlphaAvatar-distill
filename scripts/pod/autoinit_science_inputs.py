@@ -34,6 +34,9 @@ if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.session import RelayInput  # noqa: E402
+#: WHICH artifact store these inputs come from. `RelayInput.repo` used to
+#: default to a MAIN_RELAY the core computed by reading configs/ at import.
+from experiments.deployment import MAIN_RELAY  # noqa: E402
 
 #: Where the pack is read from. `scripts/pod/p2_driver.py` reads
 #: `ladder_uniform_probe`; the recovery corpus loader reads `ladder_uniform`.

@@ -18,7 +18,7 @@ how the snapshot came to disagree with itself.
 | authorization | **none** — no live grant, no live authorization, no staged bundle |
 | stage-F device repair | **logical / CPU-structural evidence only** until the CUDA validation runs; the defect is a cross-device placement, which a single-device machine cannot observe |
 | architecture migration | a **current engineering activity**, not a C1 result and no evidence about ATTENTION. Record: [`migrations/initialization-core/v1/`](migrations/initialization-core/v1/) |
-| owed | **one GPU micro-validation**, requested and NOT authorized: [`cuda_micro_validation_request.md`](cuda_micro_validation_request.md) |
+| owed | **one GPU micro-validation**, requested and NOT authorized: [`validations/cuda-stage-f/v1/request.md`](validations/cuda-stage-f/v1/request.md) |
 
 > **MILESTONE-A MERGE-REVIEW CLOSURE, 2026-09-09 — `$0.0000`, no pod, no GPU, no
 > provider resource, no grant, no authorization, no bundle.** The four merge

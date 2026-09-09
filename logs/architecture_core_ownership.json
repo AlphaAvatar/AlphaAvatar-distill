@@ -1,0 +1,18 @@
+{
+ "schema": "aadistill.architecture_core_ownership/v1",
+ "_contract": "Ownership violations the literal and semantic gates cannot see. Each rule is pinned by a RESTORED real defect in tests/architecture/test_core_ownership.py.",
+ "root": "src/aadistill",
+ "by_rule": {
+  "phase_in_payload": 0,
+  "concrete_id_default": 0,
+  "experiment_default": 0,
+  "scoring_semantics": 0,
+  "core_reads_repository": 0,
+  "import_time_deployment_load": 0,
+  "numeric_stage_policy": 0,
+  "untyped_result_branch": 0
+ },
+ "total": 0,
+ "findings": [],
+ "authorizes": "nothing"
+}

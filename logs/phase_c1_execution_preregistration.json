@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "59db0f112e85e7a25dcdd82f6d79bea519ec1f2f",
+ "head_commit": "ef2f38aa68d460bb54fdf5e1bf2bfdb7a7b27a03",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -74,8 +74,8 @@
    "scripts/autoinit"
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
-  "n_files": 94,
-  "digest": "16170ed7bf359010aa3111bf65aa35fee7be15cfe66a0504a5b882576c998271",
+  "n_files": 95,
+  "digest": "a5d710058eb59707837ab282599cfa2e56321bb319e345ebcf57561b0c2e0d6f",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -110,13 +110,13 @@
    },
    {
     "path": "scripts/autoinit/score_c1_confirmation.py",
-    "sha256": "94297de0252011164e3b88648a2616bbccc905fc17072357f6e0e84458cdc21c",
-    "bytes": 14620
+    "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+    "bytes": 14964
    },
    {
     "path": "scripts/autoinit/score_recovery_search.py",
-    "sha256": "2afd5b27a5b33c4479b661356d15be0349373d77bf8af803266318ad6db79339",
-    "bytes": 21818
+    "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+    "bytes": 22149
    },
    {
     "path": "scripts/evaluation/uncapped_eval.py",
@@ -127,6 +127,11 @@
     "path": "scripts/experiments/calibration.py",
     "sha256": "371c51813f1d1a6871c7ae9c542fec03818dc016cec3d4417e0983b694684cd9",
     "bytes": 3308
+   },
+   {
+    "path": "scripts/experiments/deployment.py",
+    "sha256": "33c819363d86064623c69f073de4bc072503a4a3e5803c7cb4dd5e0815d70ec7",
+    "bytes": 2164
    },
    {
     "path": "scripts/experiments/phase_a/plan.py",
@@ -185,8 +190,8 @@
    },
    {
     "path": "scripts/experiments/recovery_policy.py",
-    "sha256": "101fd6e36ebbd75cf802dc78ee634ba410676e5f7dfe5b316d00edbd3210da0b",
-    "bytes": 4658
+    "sha256": "0c748be322050ad09eb9bf62b5c02b7c173c815286e33fb068b47658cadac5bc",
+    "bytes": 6306
    },
    {
     "path": "scripts/experiments/source_sets.py",
@@ -200,8 +205,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "cfa38c763496fa534f13310e56130f296f8352f0a1271197c1cf7f14d914925c",
-    "bytes": 51033
+    "sha256": "718e2b5edd07e867dd0578e7bf60476c11e2ac2483ddd4382f591320eac1ae00",
+    "bytes": 51215
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -215,8 +220,8 @@
    },
    {
     "path": "scripts/pod/autoinit_science_inputs.py",
-    "sha256": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e",
-    "bytes": 4020
+    "sha256": "ef4ab147131a950c54bbdf5ca39d0b32054cff3efdcd35dbf7acbe633204e292",
+    "bytes": 4281
    },
    {
     "path": "scripts/pod/collect_artifacts.py",
@@ -290,8 +295,8 @@
    },
    {
     "path": "src/aadistill/governance/authorization.py",
-    "sha256": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b",
-    "bytes": 15598
+    "sha256": "75dfdb26b68051bd06a3f4b8c2130d0cc37637a9bf92228862ba542d73bc8f29",
+    "bytes": 17933
    },
    {
     "path": "src/aadistill/governance/closure.py",
@@ -340,8 +345,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/session.py",
-    "sha256": "07a2fbcb5a3edcdfaf427fcd70bee2f6ebc7e4ddff01992bc9a63c5f86207cb2",
-    "bytes": 34081
+    "sha256": "11986416d8b8f77db63fc7cb2adfa21cf23185dfd85d2256acfdf450cb1abd5f",
+    "bytes": 37409
    },
    {
     "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -350,8 +355,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
-    "sha256": "5d89e329daaa0af03ada76cc9cb93e3e3fb1ef567915fc8359d197e3eef8713a",
-    "bytes": 51676
+    "sha256": "c97b495ad05a16114585ee3b2fd1211a275a679116aace3c4fd626480fee5910",
+    "bytes": 50389
    },
    {
     "path": "src/aadistill/infrastructure/watchdog.py",
@@ -405,8 +410,8 @@
    },
    {
     "path": "src/aadistill/initialization/operators/base.py",
-    "sha256": "c37f4c58e8ae5f149c0b9cefd1b4faae563590fa4017d05c14fcbc650f48d6cd",
-    "bytes": 19455
+    "sha256": "fd9c4cd03a523111af083ab36c2f7d7d211c587824fe29e25f442dfc4cc82689",
+    "bytes": 19717
    },
    {
     "path": "src/aadistill/initialization/operators/composite.py",
@@ -450,8 +455,8 @@
    },
    {
     "path": "src/aadistill/initialization/planning/recovery.py",
-    "sha256": "66221b476c6d9ef8fe89bfa3a0ea0f52d7a308d6f80f03d23a3133851dda7bf0",
-    "bytes": 100249
+    "sha256": "484fc2a1ea294e3538ad26fb9fbcb0f99b19d40e904dcb723fe9b37c76edd188",
+    "bytes": 101674
    },
    {
     "path": "src/aadistill/initialization/specs/arch.py",
@@ -535,8 +540,8 @@
    },
    {
     "path": "src/aadistill/runtime/staging_contract.py",
-    "sha256": "cc5bc68e1919315229033adae6b934fe952aed4325b37d42bad2df9aafdcfad7",
-    "bytes": 11018
+    "sha256": "b643915feee1c9d617a8e8fdab616c8be8f3c73c2d806d93c25d943461d16b55",
+    "bytes": 11206
    },
    {
     "path": "src/aadistill/training/lora.py",
@@ -803,7 +808,7 @@
   "contract": "c1_confirmation_scoring@v1",
   "contract_id": "c1_confirmation_scoring",
   "version": 1,
-  "digest": "834de3ebe95d415d144c065600ee0b919f3d58430fe33299d477db0616d3efdc",
+  "digest": "737020ca4c83cdd0d3ddea8ba6b1b44aba9c637e5ce9d4ff44d76ce24be525a3",
   "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
   "semantic_parent": "recovery_search_scoring@v2",
   "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
@@ -1061,5 +1066,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "c5e9de807f4c8660f333449b39d3f234c8324ec5e1edf4bec139eee04da39c70"
+ "preregistration_sha256": "ab113c60d3d7dcbf92441cffc2970eb2d116425b435a4c708f3879bd444b16a1"
 }
