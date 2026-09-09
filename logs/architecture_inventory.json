@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 109,
-  "lines": 29824,
+  "lines": 30007,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -64,7 +64,7 @@
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
     "owner": "SessionRunner._collect_setup_failure_evidence",
-    "line": 642,
+    "line": 644,
     "value": 400000
    },
    {
@@ -5446,7 +5446,7 @@
   "src/aadistill/infrastructure/session.py": {
    "module": "aadistill.infrastructure.session",
    "path": "src/aadistill/infrastructure/session.py",
-   "lines": 788,
+   "lines": 799,
    "imports": [
     {
      "target": "__future__",
@@ -5520,7 +5520,7 @@
       "float"
      ],
      "owner": "BudgetSpec",
-     "line": 445,
+     "line": 456,
      "experiment_tokens": []
     },
     {
@@ -5529,7 +5529,7 @@
       "float"
      ],
      "owner": "BudgetSpec",
-     "line": 449,
+     "line": 460,
      "experiment_tokens": []
     },
     {
@@ -5538,7 +5538,7 @@
       "experiment_token"
      ],
      "owner": "SessionSpec.validate",
-     "line": 593,
+     "line": 604,
      "experiment_tokens": [
       "phase_a"
      ]
@@ -5549,7 +5549,7 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 775,
+     "line": 786,
      "experiment_tokens": [
       "attempt"
      ]
@@ -5615,139 +5615,139 @@
      "name": "as_dict",
      "kind": "function",
      "qualname": "ExecutionCommands.as_dict",
-     "line": 218
+     "line": 229
     },
     {
      "name": "SetupManifest",
      "kind": "class",
      "qualname": "SetupManifest",
-     "line": 225
+     "line": 236
     },
     {
      "name": "assets_env",
      "kind": "function",
      "qualname": "SetupManifest.assets_env",
-     "line": 254
+     "line": 265
     },
     {
      "name": "test_ignores_env",
      "kind": "function",
      "qualname": "SetupManifest.test_ignores_env",
-     "line": 257
+     "line": 268
     },
     {
      "name": "staged_relay_inputs",
      "kind": "function",
      "qualname": "SetupManifest.staged_relay_inputs",
-     "line": 260
+     "line": 271
     },
     {
      "name": "relay_env",
      "kind": "function",
      "qualname": "SetupManifest.relay_env",
-     "line": 264
+     "line": 275
     },
     {
      "name": "MarkerPolicy",
      "kind": "class",
      "qualname": "MarkerPolicy",
-     "line": 281
+     "line": 292
     },
     {
      "name": "is_incomplete",
      "kind": "function",
      "qualname": "MarkerPolicy.is_incomplete",
-     "line": 292
+     "line": 303
     },
     {
      "name": "products_are_eligible",
      "kind": "function",
      "qualname": "MarkerPolicy.products_are_eligible",
-     "line": 303
+     "line": 314
     },
     {
      "name": "ProductFetchResult",
      "kind": "class",
      "qualname": "ProductFetchResult",
-     "line": 323
+     "line": 334
     },
     {
      "name": "__post_init__",
      "kind": "function",
      "qualname": "ProductFetchResult.__post_init__",
-     "line": 344
+     "line": 355
     },
     {
      "name": "ok",
      "kind": "function",
      "qualname": "ProductFetchResult.ok",
-     "line": 352
+     "line": 363
     },
     {
      "name": "default_fetch_result_ok",
      "kind": "function",
      "qualname": "default_fetch_result_ok",
-     "line": 356
+     "line": 367
     },
     {
      "name": "ArtifactPolicy",
      "kind": "class",
      "qualname": "ArtifactPolicy",
-     "line": 373
+     "line": 384
     },
     {
      "name": "TeardownPolicy",
      "kind": "class",
      "qualname": "TeardownPolicy",
-     "line": 417
+     "line": 428
     },
     {
      "name": "BudgetSpec",
      "kind": "class",
      "qualname": "BudgetSpec",
-     "line": 429
+     "line": 440
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "BudgetSpec.plan",
-     "line": 452
+     "line": 463
     },
     {
      "name": "SessionContext",
      "kind": "class",
      "qualname": "SessionContext",
-     "line": 474
+     "line": 485
     },
     {
      "name": "SessionSpec",
      "kind": "class",
      "qualname": "SessionSpec",
-     "line": 508
+     "line": 519
     },
     {
      "name": "validate",
      "kind": "function",
      "qualname": "SessionSpec.validate",
-     "line": 576
+     "line": 587
     },
     {
      "name": "setup_environment",
      "kind": "function",
      "qualname": "SessionSpec.setup_environment",
-     "line": 691
+     "line": 702
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "SessionSpec.as_dict",
-     "line": 717
+     "line": 728
     },
     {
      "name": "missing_arguments",
      "kind": "function",
      "qualname": "missing_arguments",
-     "line": 781
+     "line": 792
     }
    ],
    "import_time_calls": [],
@@ -5861,7 +5861,7 @@
   "src/aadistill/infrastructure/session_runner.py": {
    "module": "aadistill.infrastructure.session_runner",
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "lines": 983,
+   "lines": 985,
    "imports": [
     {
      "target": "__future__",
@@ -5991,7 +5991,7 @@
     },
     {
      "target": "tarfile",
-     "line": 785,
+     "line": 787,
      "relative": 0
     }
    ],
@@ -6043,7 +6043,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.create",
-     "line": 406,
+     "line": 408,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6054,7 +6054,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.wait_endpoint",
-     "line": 470,
+     "line": 472,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6065,7 +6065,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.read_image_digest",
-     "line": 516,
+     "line": 518,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6076,7 +6076,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.read_image_digest",
-     "line": 525,
+     "line": 527,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6087,7 +6087,7 @@
       "big_int"
      ],
      "owner": "SessionRunner._collect_setup_failure_evidence",
-     "line": 642,
+     "line": 644,
      "experiment_tokens": []
     }
    ],
@@ -6097,31 +6097,31 @@
      "name": "ImageIdentityUnavailable",
      "kind": "class",
      "qualname": "ImageIdentityUnavailable",
-     "line": 68
+     "line": 63
     },
     {
      "name": "parse_setup_probe",
      "kind": "function",
      "qualname": "parse_setup_probe",
-     "line": 79
+     "line": 74
     },
     {
      "name": "_first_existing",
      "kind": "function",
      "qualname": "_first_existing",
-     "line": 89
+     "line": 84
     },
     {
      "name": "SessionRunner",
      "kind": "class",
      "qualname": "SessionRunner",
-     "line": 96
+     "line": 91
     },
     {
      "name": "__init__",
      "kind": "function",
      "qualname": "SessionRunner.__init__",
-     "line": 99
+     "line": 94
     },
     {
      "name": "say",
@@ -6181,67 +6181,67 @@
      "name": "launch_watchdog",
      "kind": "function",
      "qualname": "SessionRunner.launch_watchdog",
-     "line": 413
+     "line": 415
     },
     {
      "name": "wait_endpoint",
      "kind": "function",
      "qualname": "SessionRunner.wait_endpoint",
-     "line": 446
+     "line": 448
     },
     {
      "name": "read_image_digest",
      "kind": "function",
      "qualname": "SessionRunner.read_image_digest",
-     "line": 489
+     "line": 491
     },
     {
      "name": "setup_on_draw",
      "kind": "function",
      "qualname": "SessionRunner.setup_on_draw",
-     "line": 543
+     "line": 545
     },
     {
      "name": "_collect_setup_failure_evidence",
      "kind": "function",
      "qualname": "SessionRunner._collect_setup_failure_evidence",
-     "line": 620
+     "line": 622
     },
     {
      "name": "run",
      "kind": "function",
      "qualname": "SessionRunner.run",
-     "line": 649
+     "line": 651
     },
     {
      "name": "collect_and_teardown",
      "kind": "function",
      "qualname": "SessionRunner.collect_and_teardown",
-     "line": 753
+     "line": 755
     },
     {
      "name": "finish_emergency",
      "kind": "function",
      "qualname": "SessionRunner.finish_emergency",
-     "line": 904
+     "line": 906
     },
     {
      "name": "teardown_now",
      "kind": "function",
      "qualname": "SessionRunner.teardown_now",
-     "line": 925
+     "line": 927
     },
     {
      "name": "_shell_quote",
      "kind": "function",
      "qualname": "_shell_quote",
-     "line": 951
+     "line": 953
     },
     {
      "name": "run_session",
      "kind": "function",
      "qualname": "run_session",
-     "line": 958
+     "line": 960
     }
    ],
    "import_time_calls": [],
@@ -6746,25 +6746,25 @@
     },
     {
      "chain": "self_attn.k_proj",
-     "probe": "k_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 199
     },
     {
      "chain": "self_attn.v_proj",
-     "probe": "v_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 200
     },
     {
      "chain": "mlp.gate_proj",
-     "probe": "gate_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 201
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "up_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 202
     },
@@ -10403,7 +10403,7 @@
   "src/aadistill/initialization/planning/recovery.py": {
    "module": "aadistill.initialization.planning.recovery",
    "path": "src/aadistill/initialization/planning/recovery.py",
-   "lines": 2090,
+   "lines": 2260,
    "imports": [
     {
      "target": "__future__",
@@ -10493,17 +10493,17 @@
     },
     {
      "target": "platform",
-     "line": 808,
+     "line": 954,
      "relative": 0
     },
     {
      "target": "torch",
-     "line": 810,
+     "line": 956,
      "relative": 0
     },
     {
      "target": "transformers",
-     "line": 811,
+     "line": 957,
      "relative": 0
     }
    ],
@@ -10518,7 +10518,7 @@
       "float"
      ],
      "owner": "EquivalenceRule",
-     "line": 370,
+     "line": 516,
      "experiment_tokens": []
     },
     {
@@ -10527,7 +10527,7 @@
       "float"
      ],
      "owner": "EquivalenceRule.components",
-     "line": 387,
+     "line": 533,
      "experiment_tokens": []
     },
     {
@@ -10536,7 +10536,7 @@
       "float"
      ],
      "owner": "EquivalenceRule.components",
-     "line": 390,
+     "line": 536,
      "experiment_tokens": []
     },
     {
@@ -10545,7 +10545,7 @@
       "float"
      ],
      "owner": "FeasibilityRule",
-     "line": 453,
+     "line": 599,
      "experiment_tokens": []
     },
     {
@@ -10554,7 +10554,7 @@
       "float"
      ],
      "owner": "FeasibilityRule",
-     "line": 454,
+     "line": 600,
      "experiment_tokens": []
     },
     {
@@ -10563,7 +10563,7 @@
       "float"
      ],
      "owner": "FeasibilityRule.components",
-     "line": 462,
+     "line": 608,
      "experiment_tokens": []
     },
     {
@@ -10572,7 +10572,7 @@
       "float"
      ],
      "owner": "CatastrophicCapabilityRule",
-     "line": 507,
+     "line": 653,
      "experiment_tokens": []
     },
     {
@@ -10581,7 +10581,7 @@
       "float"
      ],
      "owner": "CatastrophicCapabilityRule",
-     "line": 508,
+     "line": 654,
      "experiment_tokens": []
     },
     {
@@ -10590,7 +10590,7 @@
       "float"
      ],
      "owner": "CatastrophicCapabilityRule.violations",
-     "line": 520,
+     "line": 666,
      "experiment_tokens": []
     },
     {
@@ -10599,7 +10599,7 @@
       "experiment_token"
      ],
      "owner": "CatastrophicCapabilityRule.as_dict",
-     "line": 542,
+     "line": 688,
      "experiment_tokens": [
       "rung"
      ]
@@ -10610,7 +10610,7 @@
       "float"
      ],
      "owner": "CapabilitySchema.validate",
-     "line": 605,
+     "line": 751,
      "experiment_tokens": []
     },
     {
@@ -10619,7 +10619,7 @@
       "experiment_token"
      ],
      "owner": "observe_recovery_protocol",
-     "line": 1190,
+     "line": 1336,
      "experiment_tokens": [
       "rung"
      ]
@@ -10630,7 +10630,7 @@
       "experiment_token"
      ],
      "owner": "observe_recovery_protocol",
-     "line": 1190,
+     "line": 1336,
      "experiment_tokens": [
       "rung"
      ]
@@ -10641,7 +10641,7 @@
       "experiment_token"
      ],
      "owner": "observe_recovery_protocol",
-     "line": 1197,
+     "line": 1343,
      "experiment_tokens": [
       "rung"
      ]
@@ -10652,7 +10652,7 @@
       "experiment_token"
      ],
      "owner": "observe_recovery_protocol",
-     "line": 1197,
+     "line": 1343,
      "experiment_tokens": [
       "rung"
      ]
@@ -10663,7 +10663,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.__post_init__",
-     "line": 1763,
+     "line": 1933,
      "experiment_tokens": [
       "rung"
      ]
@@ -10674,7 +10674,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.as_dict",
-     "line": 1806,
+     "line": 1976,
      "experiment_tokens": [
       "rung"
      ]
@@ -10685,7 +10685,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.as_dict",
-     "line": 1806,
+     "line": 1976,
      "experiment_tokens": [
       "rung"
      ]
@@ -10696,7 +10696,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.select_rung1_survivors",
-     "line": 1913,
+     "line": 2083,
      "experiment_tokens": [
       "rung"
      ]
@@ -10707,7 +10707,7 @@
       "experiment_token"
      ],
      "owner": "SuccessiveHalvingPlan.select_final_winner",
-     "line": 1976,
+     "line": 2146,
      "experiment_tokens": [
       "rung"
      ]
@@ -10718,7 +10718,7 @@
       "experiment_token"
      ],
      "owner": "probe_configs",
-     "line": 2069,
+     "line": 2239,
      "experiment_tokens": [
       "rung"
      ]
@@ -10729,7 +10729,7 @@
       "experiment_token"
      ],
      "owner": "probe_configs",
-     "line": 2075,
+     "line": 2245,
      "experiment_tokens": [
       "rung"
      ]
@@ -10740,7 +10740,7 @@
       "experiment_token"
      ],
      "owner": "probe_configs",
-     "line": 2074,
+     "line": 2244,
      "experiment_tokens": [
       "rung"
      ]
@@ -10791,526 +10791,562 @@
      "line": 136
     },
     {
+     "name": "require_compatible",
+     "kind": "function",
+     "qualname": "SeedAggregation.require_compatible",
+     "line": 152
+    },
+    {
      "name": "pool",
      "kind": "function",
      "qualname": "SeedAggregation.pool",
-     "line": 145
+     "line": 169
     },
     {
      "name": "count",
      "kind": "function",
      "qualname": "SeedAggregation.pool.count",
-     "line": 158
+     "line": 185
     },
     {
      "name": "ScorableAwareSeedAggregation",
      "kind": "class",
      "qualname": "ScorableAwareSeedAggregation",
-     "line": 201
+     "line": 228
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "ScorableAwareSeedAggregation.as_dict",
-     "line": 243
+     "line": 270
+    },
+    {
+     "name": "require_compatible",
+     "kind": "function",
+     "qualname": "ScorableAwareSeedAggregation.require_compatible",
+     "line": 296
     },
     {
      "name": "pool",
      "kind": "function",
      "qualname": "ScorableAwareSeedAggregation.pool",
-     "line": 262
+     "line": 313
     },
     {
      "name": "count",
      "kind": "function",
      "qualname": "ScorableAwareSeedAggregation.pool.count",
-     "line": 276
+     "line": 330
+    },
+    {
+     "name": "JointCountSeedAggregation",
+     "kind": "class",
+     "qualname": "JointCountSeedAggregation",
+     "line": 393
+    },
+    {
+     "name": "as_dict",
+     "kind": "function",
+     "qualname": "JointCountSeedAggregation.as_dict",
+     "line": 422
+    },
+    {
+     "name": "require_compatible",
+     "kind": "function",
+     "qualname": "JointCountSeedAggregation.require_compatible",
+     "line": 432
+    },
+    {
+     "name": "pool",
+     "kind": "function",
+     "qualname": "JointCountSeedAggregation.pool",
+     "line": 436
     },
     {
      "name": "EquivalenceRule",
      "kind": "class",
      "qualname": "EquivalenceRule",
-     "line": 339
+     "line": 485
     },
     {
      "name": "__post_init__",
      "kind": "function",
      "qualname": "EquivalenceRule.__post_init__",
-     "line": 378
+     "line": 524
     },
     {
      "name": "components",
      "kind": "function",
      "qualname": "EquivalenceRule.components",
-     "line": 385
+     "line": 531
     },
     {
      "name": "materialize",
      "kind": "function",
      "qualname": "EquivalenceRule.materialize",
-     "line": 394
+     "line": 540
     },
     {
      "name": "require_value",
      "kind": "function",
      "qualname": "EquivalenceRule.require_value",
-     "line": 407
+     "line": 553
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "EquivalenceRule.as_dict",
-     "line": 416
+     "line": 562
     },
     {
      "name": "FeasibilityRule",
      "kind": "class",
      "qualname": "FeasibilityRule",
-     "line": 437
+     "line": 583
     },
     {
      "name": "components",
      "kind": "function",
      "qualname": "FeasibilityRule.components",
-     "line": 460
+     "line": 606
     },
     {
      "name": "materialize",
      "kind": "function",
      "qualname": "FeasibilityRule.materialize",
-     "line": 468
+     "line": 614
     },
     {
      "name": "require_value",
      "kind": "function",
      "qualname": "FeasibilityRule.require_value",
-     "line": 477
+     "line": 623
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "FeasibilityRule.as_dict",
-     "line": 485
+     "line": 631
     },
     {
      "name": "CatastrophicCapabilityRule",
      "kind": "class",
      "qualname": "CatastrophicCapabilityRule",
-     "line": 497
+     "line": 643
     },
     {
      "name": "violations",
      "kind": "function",
      "qualname": "CatastrophicCapabilityRule.violations",
-     "line": 513
+     "line": 659
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "CatastrophicCapabilityRule.as_dict",
-     "line": 535
+     "line": 681
     },
     {
      "name": "CapabilitySchemaError",
      "kind": "class",
      "qualname": "CapabilitySchemaError",
-     "line": 547
+     "line": 693
     },
     {
      "name": "CapabilitySchema",
      "kind": "class",
      "qualname": "CapabilitySchema",
-     "line": 552
+     "line": 698
     },
     {
      "name": "validate",
      "kind": "function",
      "qualname": "CapabilitySchema.validate",
-     "line": 573
+     "line": 719
     },
     {
      "name": "validate_all",
      "kind": "function",
      "qualname": "CapabilitySchema.validate_all",
-     "line": 624
+     "line": 770
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "CapabilitySchema.as_dict",
-     "line": 628
+     "line": 774
     },
     {
      "name": "recovery_scoring_contract",
      "kind": "function",
      "qualname": "recovery_scoring_contract",
-     "line": 669
+     "line": 815
     },
     {
      "name": "trainer_source_digest",
      "kind": "function",
      "qualname": "trainer_source_digest",
-     "line": 751
+     "line": 897
     },
     {
      "name": "RuntimeEnvironmentFingerprint",
      "kind": "class",
      "qualname": "RuntimeEnvironmentFingerprint",
-     "line": 783
+     "line": 929
     },
     {
      "name": "observe",
      "kind": "function",
      "qualname": "RuntimeEnvironmentFingerprint.observe",
-     "line": 806
+     "line": 952
     },
     {
      "name": "digest",
      "kind": "function",
      "qualname": "RuntimeEnvironmentFingerprint.digest",
-     "line": 823
+     "line": 969
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "RuntimeEnvironmentFingerprint.as_dict",
-     "line": 826
+     "line": 972
     },
     {
      "name": "require_pinned",
      "kind": "function",
      "qualname": "RuntimeEnvironmentFingerprint.require_pinned",
-     "line": 834
+     "line": 980
     },
     {
      "name": "RecoveryProtocolFingerprint",
      "kind": "class",
      "qualname": "RecoveryProtocolFingerprint",
-     "line": 843
+     "line": 989
     },
     {
      "name": "unmaterialized_fields",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.unmaterialized_fields",
-     "line": 919
+     "line": 1065
     },
     {
      "name": "is_materialized",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.is_materialized",
-     "line": 924
+     "line": 1070
     },
     {
      "name": "require_materialized",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.require_materialized",
-     "line": 927
+     "line": 1073
     },
     {
      "name": "materialized",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.materialized",
-     "line": 944
+     "line": 1090
     },
     {
      "name": "from_run_artifacts",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.from_run_artifacts",
-     "line": 968
+     "line": 1114
     },
     {
      "name": "identity",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.identity",
-     "line": 1002
+     "line": 1148
     },
     {
      "name": "fingerprint",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.fingerprint",
-     "line": 1012
+     "line": 1158
     },
     {
      "name": "compare",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.compare",
-     "line": 1015
+     "line": 1161
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "RecoveryProtocolFingerprint.as_dict",
-     "line": 1045
+     "line": 1191
     },
     {
      "name": "ObservedProtocolError",
      "kind": "class",
      "qualname": "ObservedProtocolError",
-     "line": 1057
+     "line": 1203
     },
     {
      "name": "normalize_trainable_patterns",
      "kind": "function",
      "qualname": "normalize_trainable_patterns",
-     "line": 1061
+     "line": 1207
     },
     {
      "name": "_Observation",
      "kind": "class",
      "qualname": "_Observation",
-     "line": 1075
+     "line": 1221
     },
     {
      "name": "__init__",
      "kind": "function",
      "qualname": "_Observation.__init__",
-     "line": 1084
+     "line": 1230
     },
     {
      "name": "need",
      "kind": "function",
      "qualname": "_Observation.need",
-     "line": 1089
+     "line": 1235
     },
     {
      "name": "agree",
      "kind": "function",
      "qualname": "_Observation.agree",
-     "line": 1104
+     "line": 1250
     },
     {
      "name": "ObservedRecoveryProtocol",
      "kind": "class",
      "qualname": "ObservedRecoveryProtocol",
-     "line": 1116
+     "line": 1262
     },
     {
      "name": "is_strict",
      "kind": "function",
      "qualname": "ObservedRecoveryProtocol.is_strict",
-     "line": 1125
+     "line": 1271
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "ObservedRecoveryProtocol.as_dict",
-     "line": 1128
+     "line": 1274
     },
     {
      "name": "observe_recovery_protocol",
      "kind": "function",
      "qualname": "observe_recovery_protocol",
-     "line": 1136
+     "line": 1282
     },
     {
      "name": "RecoveryProbeIdentity",
      "kind": "class",
      "qualname": "RecoveryProbeIdentity",
-     "line": 1406
+     "line": 1552
     },
     {
      "name": "probe_id",
      "kind": "function",
      "qualname": "RecoveryProbeIdentity.probe_id",
-     "line": 1420
+     "line": 1566
     },
     {
      "name": "matched_against",
      "kind": "function",
      "qualname": "RecoveryProbeIdentity.matched_against",
-     "line": 1426
+     "line": 1572
     },
     {
      "name": "require_attested",
      "kind": "function",
      "qualname": "RecoveryProbeIdentity.require_attested",
-     "line": 1464
+     "line": 1610
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "RecoveryProbeIdentity.as_dict",
-     "line": 1481
+     "line": 1627
     },
     {
      "name": "HistoricalRunAudit",
      "kind": "class",
      "qualname": "HistoricalRunAudit",
-     "line": 1489
+     "line": 1635
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "HistoricalRunAudit.as_dict",
-     "line": 1507
+     "line": 1653
     },
     {
      "name": "PreflightStage",
      "kind": "class",
      "qualname": "PreflightStage",
-     "line": 1526
+     "line": 1672
     },
     {
      "name": "__post_init__",
      "kind": "function",
      "qualname": "PreflightStage.__post_init__",
-     "line": 1534
+     "line": 1680
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "PreflightStage.as_dict",
-     "line": 1546
+     "line": 1692
     },
     {
      "name": "PreflightPlan",
      "kind": "class",
      "qualname": "PreflightPlan",
-     "line": 1553
+     "line": 1699
     },
     {
      "name": "plan_hash",
      "kind": "function",
      "qualname": "PreflightPlan.plan_hash",
-     "line": 1575
+     "line": 1721
     },
     {
      "name": "advance_to",
      "kind": "function",
      "qualname": "PreflightPlan.advance_to",
-     "line": 1579
+     "line": 1725
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "PreflightPlan.as_dict",
-     "line": 1597
+     "line": 1743
     },
     {
      "name": "ScoringContractError",
      "kind": "class",
      "qualname": "ScoringContractError",
-     "line": 1609
+     "line": 1755
     },
     {
      "name": "CorrectnessRule",
      "kind": "class",
      "qualname": "CorrectnessRule",
-     "line": 1614
+     "line": 1760
     },
     {
      "name": "score_recovery_row",
      "kind": "function",
      "qualname": "score_recovery_row",
-     "line": 1637
+     "line": 1783
     },
     {
      "name": "validate_scored_rows",
      "kind": "function",
      "qualname": "validate_scored_rows",
-     "line": 1663
+     "line": 1817
     },
     {
      "name": "SuccessiveHalvingPlan",
      "kind": "class",
      "qualname": "SuccessiveHalvingPlan",
-     "line": 1706
+     "line": 1876
     },
     {
      "name": "__post_init__",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.__post_init__",
-     "line": 1757
+     "line": 1927
     },
     {
      "name": "rung1_probes",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.rung1_probes",
-     "line": 1786
+     "line": 1956
     },
     {
      "name": "rung2_probes",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.rung2_probes",
-     "line": 1790
+     "line": 1960
     },
     {
      "name": "probe_count",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.probe_count",
-     "line": 1794
+     "line": 1964
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.as_dict",
-     "line": 1798
+     "line": 1968
     },
     {
      "name": "feasibility_floor",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.feasibility_floor",
-     "line": 1844
+     "line": 2014
     },
     {
      "name": "_gate",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan._gate",
-     "line": 1850
+     "line": 2020
     },
     {
      "name": "_rank",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan._rank",
-     "line": 1888
+     "line": 2058
     },
     {
      "name": "_tied_with_leader",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan._tied_with_leader",
-     "line": 1892
+     "line": 2062
     },
     {
      "name": "select_rung1_survivors",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.select_rung1_survivors",
-     "line": 1900
+     "line": 2070
     },
     {
      "name": "select_final_winner",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.select_final_winner",
-     "line": 1928
+     "line": 2098
     },
     {
      "name": "plan_hash",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.plan_hash",
-     "line": 2005
+     "line": 2175
     },
     {
      "name": "freeze",
      "kind": "function",
      "qualname": "SuccessiveHalvingPlan.freeze",
-     "line": 2008
+     "line": 2178
     },
     {
      "name": "assert_preregistered",
      "kind": "function",
      "qualname": "assert_preregistered",
-     "line": 2019
+     "line": 2189
     },
     {
      "name": "admit_leaves",
      "kind": "function",
      "qualname": "admit_leaves",
-     "line": 2034
+     "line": 2204
     },
     {
      "name": "probe_configs",
      "kind": "function",
      "qualname": "probe_configs",
-     "line": 2061
+     "line": 2231
     }
    ],
    "import_time_calls": [],

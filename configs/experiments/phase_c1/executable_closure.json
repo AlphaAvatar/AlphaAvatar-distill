@@ -23,7 +23,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 95,
- "digest": "a5d710058eb59707837ab282599cfa2e56321bb319e345ebcf57561b0c2e0d6f",
+ "digest": "779fec1e5526e657922b81d66a09e0d94a2ab72efa02f701f425e17fd93c1d9c",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -78,8 +78,8 @@
   },
   {
    "path": "scripts/experiments/deployment.py",
-   "sha256": "33c819363d86064623c69f073de4bc072503a4a3e5803c7cb4dd5e0815d70ec7",
-   "bytes": 2164
+   "sha256": "6c121ddd2745fbc94ccce4ef67d5fb612a9f9c2703a9d5f842847ea5dbed078f",
+   "bytes": 3187
   },
   {
    "path": "scripts/experiments/phase_a/plan.py",
@@ -153,8 +153,8 @@
   },
   {
    "path": "scripts/pod/autoinit_c1_launch.py",
-   "sha256": "718e2b5edd07e867dd0578e7bf60476c11e2ac2483ddd4382f591320eac1ae00",
-   "bytes": 51215
+   "sha256": "2d1c232d574c55d76a54d30958b95db611ca6c55ca56b97a897933c364c4ab39",
+   "bytes": 51464
   },
   {
    "path": "scripts/pod/autoinit_engine_probe.py",
@@ -293,8 +293,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session.py",
-   "sha256": "11986416d8b8f77db63fc7cb2adfa21cf23185dfd85d2256acfdf450cb1abd5f",
-   "bytes": 37409
+   "sha256": "10400defd24f9e8bcbc2879718459a8e5daabda053c065500102419c8e980494",
+   "bytes": 38161
   },
   {
    "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -303,8 +303,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "sha256": "c97b495ad05a16114585ee3b2fd1211a275a679116aace3c4fd626480fee5910",
-   "bytes": 50389
+   "sha256": "6ae249ee9b0f9f338f16ff65a90c04eb1dccdfb4443460776584b61bcd8dc926",
+   "bytes": 50678
   },
   {
    "path": "src/aadistill/infrastructure/watchdog.py",
@@ -403,8 +403,8 @@
   },
   {
    "path": "src/aadistill/initialization/planning/recovery.py",
-   "sha256": "484fc2a1ea294e3538ad26fb9fbcb0f99b19d40e904dcb723fe9b37c76edd188",
-   "bytes": 101674
+   "sha256": "79dc2d53e4d4c831bf767187a8dbe9ec7310fa49df8c19939ea129c596af6cf5",
+   "bytes": 110492
   },
   {
    "path": "src/aadistill/initialization/specs/arch.py",

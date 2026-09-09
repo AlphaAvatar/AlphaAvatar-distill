@@ -873,6 +873,80 @@
     "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2"
    ],
    "entry_sha256": "2d56e5135be51f0fa0c5baf734ca7e55669cce5963ee35cfb69519cbdd662138"
+  },
+  {
+   "amendment_id": "PHB-HA-008",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-09T20:52:44+00:00",
+   "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+   "source_repair_commit": "bf447673e475c262c5e864b8e5daaf19b5bb7b2c",
+   "source_repair_parent": "90a266598a73ecf3f3fbd4073aae1f9c87e77357",
+   "previous_live_digest": "51ac00d011d2e631c8058fdda117e7388118417ddfc5cb43ee72611c1bb72bbf",
+   "new_live_digest": "91bcb48589f4fd8abd17240988c3b0925b4dd9b779be3326f5f44a3bcf28ee6a",
+   "changed_files": [
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "file_sha256_before": {
+    "scripts/pod/autoinit_phase_a_launch.py": "2587a5f61a80f99a7a583982af6b1b9fcfcdda9da0de79c846a9aa25e41235ab",
+    "scripts/pod/autoinit_phase_b_launch.py": "179c0548bde431df8f0b4bdb672e6469801946789b47c0e12379d5ba656a53b0",
+    "src/aadistill/infrastructure/session.py": "11986416d8b8f77db63fc7cb2adfa21cf23185dfd85d2256acfdf450cb1abd5f",
+    "src/aadistill/infrastructure/session_runner.py": "c97b495ad05a16114585ee3b2fd1211a275a679116aace3c4fd626480fee5910"
+   },
+   "file_sha256_after": {
+    "scripts/pod/autoinit_phase_a_launch.py": "3dc0d9d2cb6e0354723e5e83fa94a3ec81b49d42645e2cbd6b460f03d24417be",
+    "scripts/pod/autoinit_phase_b_launch.py": "c362261af4b4f22373dd9db27a6541a0fce788733b450ead52ca0b14bd2897de",
+    "src/aadistill/infrastructure/session.py": "10400defd24f9e8bcbc2879718459a8e5daabda053c065500102419c8e980494",
+    "src/aadistill/infrastructure/session_runner.py": "6ae249ee9b0f9f338f16ff65a90c04eb1dccdfb4443460776584b61bcd8dc926"
+   },
+   "patch_sha256": "64e64c8d857c72640ab899a15a7d61cb799882a404d3582c94e35ac726253848",
+   "numstat": {
+    "scripts/pod/autoinit_phase_a_launch.py": [
+     8,
+     3
+    ],
+    "scripts/pod/autoinit_phase_b_launch.py": [
+     8,
+     3
+    ],
+    "src/aadistill/infrastructure/session.py": [
+     11,
+     0
+    ],
+    "src/aadistill/infrastructure/session_runner.py": [
+     31,
+     29
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 35,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "The two Milestone-A residual fixes. CorrectnessRule is honoured by every component that reads it: validate_scored_rows enforces correct => usable only when the rule declares it, a scored row carries the joint count only under an independent rule, both pooled aggregations declare supports_independent_correctness=False and refuse an incompatible rule before aggregating, and JointCountSeedAggregation consumes correct_and_usable as the conditional numerator. And the pod image layout -- workspace root, checkout root, remote interpreter, minimum CUDA version -- moved from session_runner module constants into ExecutionCommands and configs/infrastructure/pod_image.json.",
+   "why_the_owner_is_shared_session_runner": "planning/recovery.py, infrastructure/session.py, infrastructure/session_runner.py and the nine launchers all belong to Phase B's frozen executable set as well as to every other session's, so a change made for the Milestone-A closure moves Phase B's live digest even though Phase B is closed and consumed.",
+   "why_a_c1_only_override_was_rejected": "Nothing is conferred on C1. C1_HARNESS_SOURCE_FILES_V1 still names pre-migration paths and refuses outright. No formal grant, authorization or bundle is live; this entry asserts launch_compatible_with_frozen_preregistration: false. The engineering CUDA validation authorized separately is not a C1 session and does not use this set.",
+   "maintainer_authorization": "MAINTAINER DECISION, 2026-09-10, on branch tip 1e4999c77aa65e03cec4603a9235a53a20a45f2d: complete the two named Milestone-A fixes -- CorrectnessRule consistency through the declared execution path, and completion of deployment injection -- and then execute ONE authorized real-CUDA engineering validation at at most 1 resource, 1 create attempt, 0 retries, a $0.25 engineering soft cap and a $0.40 total ceiling including a $0.15 teardown reserve. It authorizes no Attempt-10 grant, no reuse of a consumed C1 permission, no formal bundle, no recovery training, no confirmation battery, no formal C1 decision and no merge to main.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "2d56e5135be51f0fa0c5baf734ca7e55669cce5963ee35cfb69519cbdd662138",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "252e6da900a451f4df402f704cadb8312fa6144db51df5999a9d3a19eea7e93d"
   }
  ]
 }
