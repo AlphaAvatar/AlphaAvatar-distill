@@ -213,7 +213,13 @@ def main() -> None:
     for f in result["failures"]:
         print(f"  FAILED {f['probe_id']}: {f['failed']} {f['checkpoint_error'] or ''}")
     print(f"open precondition   {result['open_precondition']['what']}")
-    print(f"wrote {out.relative_to(REPO_ROOT)}")
+    # `relative_to` raises outside the repo, which turned a completed run
+    # into a traceback AFTER the record was already written.
+    try:
+        shown = out.relative_to(REPO_ROOT)
+    except ValueError:
+        shown = out
+    print(f"wrote {shown}")
     sys.exit(0 if result["reuse_verified"] else 1)
 
 

@@ -1,0 +1,45 @@
+{
+ "schema": "aadistill.autoinit.historical_reuse_position/v1",
+ "generated_utc": "2026-09-09T08:01:32.753570+00:00",
+ "_contract": "The four conclusions about historical probe reuse, each DERIVED here rather than cited: valid bytes, reconstruction under the historical contract, byte-identical relocation outputs, and a REFUSED live reuse. Regenerable; relaxes nothing; authorizes nothing.",
+ "conclusions": {
+  "1_historical_probe_bytes_are_valid": {
+   "verdict": "PASS",
+   "how": "every probe's student_artifact_digest re-derives from the retained checkpoint bytes and equals the recorded value",
+   "n_probes": 11
+  },
+  "2_probes_reconstruct_under_their_historical_contract": {
+   "verdict": "PASS",
+   "how": "every check except the live-contract identity passes for every probe",
+   "checks": [
+    "artifact_digest_re_derives_from_bytes",
+    "battery_is_recovery_search_v2",
+    "complete",
+    "protocol_hash_matches_attested",
+    "seed_is_the_frozen_one"
+   ]
+  },
+  "3_behavior_v0_relocation_outputs_are_byte_identical": {
+   "verdict": "PASS",
+   "how": "the 570-sample comparison re-scored frozen Phase-A generations through the pre- and post-migration trees",
+   "record": "logs/architecture_scoring_equivalence.json",
+   "total_samples": 570,
+   "paths_compared": 3,
+   "all_scores_identical": true,
+   "coverage_limitation": "usable_rollout reads two record schemas and this evidence exercises only the one(s) named above. Inverting a component in the OTHER branch does not move these numbers, so this comparison would not detect it. Verified by mutation, not assumed: inverting no_severe_repetition in _from_behavior_v0 turns all three paths to MISMATCH, while the same inversion in _from_three_mode leaves them identical."
+  },
+  "4_live_reuse_under_scoring_contract_v3": {
+   "verdict": "REFUSED",
+   "how": "11 of 11 probes fail scoring_contract_matches_live, and nothing else",
+   "only_the_live_contract_check_fails": true,
+   "why_this_is_not_a_defect": "the identity rule refuses a probe whose recorded scorer digest is not the live one. The scorer relocated and the contract legitimately moved v2 -> v3; conclusion 3 shows the arithmetic did not move with it.",
+   "why_it_is_not_relaxed": "admitting a superseded contract because equivalence was demonstrated would change what counts as a reusable scientific observation. That is a maintainer decision, not a migration one. No old->new equivalence bypass exists, the historical probes are not rewritten to v3, and their historical scoring identity is unchanged."
+  }
+ },
+ "all_four_hold_simultaneously": true,
+ "live_scoring_contract_digest": "18ce628faba704bfa1e8b53f9c912da2962e878742d0115db2f88c0b16269ca3",
+ "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
+ "reuse_verified": false,
+ "_what_would_change_this": "a maintainer decision to admit a superseded scoring contract, or new evidence that the probes stopped reconstructing. Neither is a migration action.",
+ "authorizes": "nothing"
+}

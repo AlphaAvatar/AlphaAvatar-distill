@@ -185,3 +185,114 @@ def test_the_gate_refuses_a_SWAPPED_checkpoint(monkeypatch):
     monkeypatch.setattr(vhr, "CHECKPOINTS", swapped)
     ok, why = pbl.historical_reuse_reconstruction_gate(types.SimpleNamespace())
     assert not ok and "no longer re-derive" in why
+
+
+# --- the four conclusions, held together ------------------------------------
+#
+# Separately they read as though one must be wrong: the probes are valid, they
+# reconstruct, the numbers are byte-identical -- and reuse is refused anyway.
+# `historical_reuse_position.py` derives all four from the same `verify()` call
+# the pre-provider gate uses, so the position is computed rather than narrated.
+#
+# These tests live in THIS module deliberately. It is the one the pod launchers
+# exclude by exact filename, and every test here needs the dev-box artifact
+# store. A new file would be a `$0.15` setup abort on the next pod, which is
+# precisely how these tests came to be split out in the first place.
+
+def _position(**kw):
+    import sys
+
+    sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    from historical_reuse_position import position
+
+    return position(**kw)
+
+
+def test_all_four_conclusions_hold_at_once():
+    doc = _position()
+    v = {k: c["verdict"] for k, c in doc["conclusions"].items()}
+    assert v == {
+        "1_historical_probe_bytes_are_valid": "PASS",
+        "2_probes_reconstruct_under_their_historical_contract": "PASS",
+        "3_behavior_v0_relocation_outputs_are_byte_identical": "PASS",
+        "4_live_reuse_under_scoring_contract_v3": "REFUSED",
+    }, v
+    assert doc["all_four_hold_simultaneously"] is True
+
+
+def test_the_refusal_is_derived_from_the_live_verifier_not_asserted():
+    """If `verify()` ever stopped refusing, this must go red rather than keep
+    printing REFUSED from a constant."""
+    def not_refusing():
+        return {"probes": [], "failures": [], "reuse_verified": True,
+                "n_probes": 0, "live_scoring_contract_digest": "x",
+                "probes_dir_digest": "y"}
+
+    doc = _position(verify_fn=not_refusing)
+    assert doc["conclusions"]["4_live_reuse_under_scoring_contract_v3"][
+        "verdict"] == "NOT REFUSED"
+    assert doc["all_four_hold_simultaneously"] is False
+
+
+def test_a_probe_failing_anything_else_breaks_the_position():
+    """Conclusion 4 is 'ONLY the live contract fails'. A second failing check is
+    a different and much worse finding, and must not be absorbed."""
+    def two_failures():
+        return {
+            "probes": [{"checks": {"complete": True,
+                                   "artifact_digest_re_derives_from_bytes": False,
+                                   "scoring_contract_matches_live": False},
+                        "failed": ["artifact_digest_re_derives_from_bytes",
+                                   "scoring_contract_matches_live"],
+                        "recomputed_artifact_digest": "a",
+                        "recorded_artifact_digest": "b"}],
+            "failures": [{"failed": ["artifact_digest_re_derives_from_bytes",
+                                     "scoring_contract_matches_live"]}],
+            "reuse_verified": False, "n_probes": 1,
+            "live_scoring_contract_digest": "x", "probes_dir_digest": "y"}
+
+    doc = _position(verify_fn=two_failures)
+    c = doc["conclusions"]
+    assert c["1_historical_probe_bytes_are_valid"]["verdict"] == "FAIL"
+    assert c["4_live_reuse_under_scoring_contract_v3"][
+        "only_the_live_contract_check_fails"] is False
+    assert doc["all_four_hold_simultaneously"] is False
+
+
+def test_conclusion_three_is_read_from_the_equivalence_record(tmp_path):
+    """Not from a sentence in a docstring: weaken the evidence and the verdict
+    moves."""
+    import json
+
+    weakened = tmp_path / "eq.json"
+    weakened.write_text(json.dumps({
+        "all_scores_identical": False, "total_samples": 570,
+        "paths_compared": 3, "coverage": {"limitation": "x"}}))
+    doc = _position(equivalence_path=weakened)
+    assert doc["conclusions"][
+        "3_behavior_v0_relocation_outputs_are_byte_identical"]["verdict"] == "FAIL"
+    assert doc["all_four_hold_simultaneously"] is False
+
+
+def test_the_committed_record_agrees_with_a_live_derivation():
+    import json
+
+    path = REPO / "logs/autoinit_historical_reuse_position.json"
+    assert path.is_file(), "run scripts/autoinit/historical_reuse_position.py"
+    recorded = json.loads(path.read_text())
+    live = _position()
+    assert {k: c["verdict"] for k, c in recorded["conclusions"].items()} == \
+        {k: c["verdict"] for k, c in live["conclusions"].items()}
+    assert recorded["live_scoring_contract_digest"] == \
+        live["live_scoring_contract_digest"]
+
+
+def test_no_old_to_new_equivalence_bypass_was_added():
+    """The refusal must still be a plain identity comparison. A branch that
+    admitted a superseded digest 'because equivalence was demonstrated' is the
+    thing the maintainer decision forbids."""
+    src = (REPO / "scripts/autoinit/verify_historical_probe_reuse.py").read_text()
+    assert '"scoring_contract_matches_live":' in src
+    body = src.split('"scoring_contract_matches_live":')[1].split(",\n")[0]
+    assert "==" in body and "or" not in body, (
+        f"the live-contract check gained an alternative branch: {body!r}")
