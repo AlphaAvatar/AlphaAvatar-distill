@@ -436,6 +436,10 @@ CONTINUATION_SOURCE_FILES_V2: tuple[str, ...] = (
     #: loaded file lets that file change under a grant claiming to pin the
     #: executable — which is the defect this whole declaration exists to
     #: prevent. Additive: nothing was removed.
+    #: Added at the residual core-ownership closure: the provider CLI lookup
+    #: and the artifact-store id left `src/aadistill`, so the module that now
+    #: holds them is LOADED by the continuation and must be measured.
+    "scripts/experiments/deployment.py",
     "scripts/experiments/recovery_policy.py",
     "scripts/experiments/source_sets.py",
     "scripts/experiments/recovery_continuation/__init__.py",

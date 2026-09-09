@@ -174,8 +174,10 @@ def test_the_searched_leaves_and_control_pass_the_recovery_gate(searched):
     plan = SuccessiveHalvingPlan(
         plan_id="rehearsal.phase_a", recipe=E1_KD_HEAVY_0860K,
         searched_leaves=len(leaves), survivors=max(1, len(leaves) - 1),
-        **plan_policy(equivalence=EquivalenceRule(n_pooled=340)),
-        feasibility_min=0.0,
+        #: THROUGH the policy: it supplies feasibility_min now, so passing both
+        #: is a duplicate-keyword error rather than a silent override.
+        **plan_policy(equivalence=EquivalenceRule(n_pooled=340),
+                      feasibility_min=0.0),
         feasibility=FeasibilityRule(n_pooled=380),
         survivor_rule="rehearsal", winner_rule="rehearsal",
         battery_asset_id="recovery_search_v2")
