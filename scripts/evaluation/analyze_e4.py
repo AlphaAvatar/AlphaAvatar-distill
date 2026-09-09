@@ -39,6 +39,10 @@ from aadistill.evaluation.paired_stats import (  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from reevaluate_stage23 import three_mode_arm  # noqa: E402
 
+#: The resampling seed this analysis reports under. Stated here
+#: because a statistics mechanism should not carry one study's seed.
+BOOTSTRAP_SEED = 20260806
+
 AUDIT = REPO_ROOT / "artifacts/audit"
 
 # alias -> (three-mode dir, training log or None, movement label or None)
@@ -214,13 +218,13 @@ def main() -> None:
             per_seed[s] = {
                 "correct_overall": {
                     **mcnemar_counts(ca, cb),
-                    **paired_bootstrap_ci(ca, cb, iterations=args.bootstrap)},
+                    **paired_bootstrap_ci(ca, cb, iterations=args.bootstrap, seed=BOOTSTRAP_SEED)},
                 "correct_and_naturally_terminated": {
                     **mcnemar_counts(ja, jb),
-                    **paired_bootstrap_ci(ja, jb, iterations=args.bootstrap)},
+                    **paired_bootstrap_ci(ja, jb, iterations=args.bootstrap, seed=BOOTSTRAP_SEED)},
                 "usable_rollout_rate": {
                     **mcnemar_counts(ua, ub),
-                    **paired_bootstrap_ci(ua, ub, iterations=args.bootstrap)},
+                    **paired_bootstrap_ci(ua, ub, iterations=args.bootstrap, seed=BOOTSTRAP_SEED)},
             }
         deltas = {m: round((families[arm_fam][m]["mean"] or 0)
                            - (families[ref_fam][m]["mean"] or 0), 4)

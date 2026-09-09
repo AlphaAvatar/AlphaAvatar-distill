@@ -46,6 +46,10 @@ from aadistill.evaluation.strict_answer import extract_final_answer  # noqa: E40
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from run_three_mode_diagnostic import NUMERIC, score  # noqa: E402
 
+#: The resampling seed this analysis reports under. Stated here
+#: because a statistics mechanism should not carry one study's seed.
+BOOTSTRAP_SEED = 20260806
+
 AUDIT = REPO_ROOT / "artifacts/audit"
 THREE_MODE = AUDIT / "three_mode"
 SESSIONS_PATH = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
@@ -379,7 +383,7 @@ def compare(a_alias: str, b_alias: str, arms: dict, iterations: int) -> dict | N
     for axis in ("usable", "correct"):
         pa, pb = a["per_sample"][axis], b["per_sample"][axis]
         counts = mcnemar_counts(pa, pb)
-        ci = paired_bootstrap_ci(pa, pb, iterations=iterations)
+        ci = paired_bootstrap_ci(pa, pb, iterations=iterations, seed=BOOTSTRAP_SEED)
         out[axis] = {
             "rate_a": counts["rate_a"], "rate_b": counts["rate_b"],
             "delta": counts["delta"],

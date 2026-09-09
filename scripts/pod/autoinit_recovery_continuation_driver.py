@@ -59,7 +59,8 @@ from aadistill.initialization.planning.stage1_import import (  # noqa: E402
 #: The frozen identities WITHOUT the search module. Importing `phase_a_search`
 #: here would put `run_phase_a_search` one attribute lookup away.
 from phase_a_frozen import (  # noqa: E402
-    CANONICAL_INIT, CANONICAL_INIT_SHA256, TARGET_GEOMETRY, TEACHER_ID,
+    CANONICAL_CONTROL_ID, CANONICAL_INIT, CANONICAL_INIT_SHA256,
+    TARGET_GEOMETRY, TEACHER_ID,
     TEACHER_REVISION,
 )
 from autoinit_phase_a_driver import (  # noqa: E402
@@ -106,7 +107,8 @@ class RecoveryContinuationDriver(PhaseADriver):
                 expected_config_hash=result["config_hash"],
                 target_geometry=TARGET_GEOMETRY,
                 control_dir=REPO / CANONICAL_INIT,
-                control_sha256=CANONICAL_INIT_SHA256)
+                control_sha256=CANONICAL_INIT_SHA256,
+                control_id=CANONICAL_CONTROL_ID)
         except Stage1ImportError as exc:
             return self.record(
                 1, False, f"the persisted Stage-1 result did not verify: {exc}")

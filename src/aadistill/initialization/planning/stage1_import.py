@@ -118,7 +118,7 @@ def import_stage1_result(
     target_geometry: Mapping[str, Any],
     control_dir: str | Path,
     control_sha256: str | None,
-    control_id: str = "qwen3_0p6b_init_v0",
+    control_id: str,
 ) -> ImportedStage1:
     """Rebuild the five selected leaves and the control, or refuse.
 

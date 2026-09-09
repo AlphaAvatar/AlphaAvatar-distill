@@ -1,0 +1,8 @@
+{
+ "schema": "aadistill.nested_rung/v1",
+ "_contract": "The nested-rung increment E5 reproduces: unique supervised tokens added when the 0.86M rung is extended to 1.60M. EXPERIMENT INSTANCE DATA -- it is the SCALE one study is trying to reproduce, and it is NOT interchangeable with a block or step count. AUTHORIZES NOTHING.",
+ "nested_rung_increment": 735603,
+ "extends_rung": "0.86M",
+ "to_rung": "1.60M",
+ "authorizes": "nothing"
+}

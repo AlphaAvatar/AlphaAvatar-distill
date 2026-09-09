@@ -28,10 +28,14 @@ TARGET_GEOMETRY = dict(hidden_size=1024, num_hidden_layers=28, intermediate_size
 #: The retained canonical initialization, injected as the recovery control by
 #: hash. A re-executed composite is not the historical incumbent.
 CANONICAL_INIT = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+#: The control this study imports Stage 1 against. Stated by the
+#: experiment, because a reusable importer should not default to one.
+CANONICAL_CONTROL_ID = "qwen3_0p6b_init_v0"
 CANONICAL_INIT_SHA256 = (
     "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54")
 
 SEARCH_SEED = 20260815
 
 __all__ = ["TEACHER_ID", "TEACHER_REVISION", "TARGET_GEOMETRY",
-           "CANONICAL_INIT", "CANONICAL_INIT_SHA256", "SEARCH_SEED"]
+           "CANONICAL_INIT", "CANONICAL_INIT_SHA256", "CANONICAL_CONTROL_ID",
+           "SEARCH_SEED"]

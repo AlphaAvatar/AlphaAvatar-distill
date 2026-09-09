@@ -59,7 +59,7 @@ def mcnemar_counts(a: dict, b: dict) -> dict:
 
 
 def paired_bootstrap_ci(a: dict, b: dict, *, iterations: int = 10000,
-                        seed: int = 20260806, alpha: float = 0.05) -> dict:
+                        seed: int, alpha: float = 0.05) -> dict:
     """Percentile CI for rate(b) − rate(a), resampling *prompts* with replacement.
 
     Deterministic given (a, b, iterations, seed): the same inputs always produce

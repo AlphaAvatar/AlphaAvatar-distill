@@ -48,6 +48,10 @@ from analyze_e6 import (  # noqa: E402  — one scorer, shared by both experimen
     arm_alias, load_sessions, rescore_arm, token_stream_sha256,
 )
 
+#: The resampling seed this analysis reports under. Stated here
+#: because a statistics mechanism should not carry one study's seed.
+BOOTSTRAP_SEED = 20260806
+
 AUDIT = REPO_ROOT / "artifacts/audit"
 THREE_MODE = AUDIT / "three_mode"
 REGISTRATION = REPO_ROOT / "logs/e6b_registration.json"
@@ -110,7 +114,7 @@ def compare(a_alias: str, b_alias: str, arms: dict, iterations: int) -> dict | N
                "tie": counts["both_true"] + counts["both_false"],
                "n_paired": counts["n_paired"]}
         if axis in ("usable", "correct"):
-            ci = paired_bootstrap_ci(pa, pb, iterations=iterations)
+            ci = paired_bootstrap_ci(pa, pb, iterations=iterations, seed=BOOTSTRAP_SEED)
             row["bootstrap_ci"] = [ci["ci_low"], ci["ci_high"]]
             row["ci_excludes_zero"] = ci["ci_excludes_zero"]
         out[axis] = row

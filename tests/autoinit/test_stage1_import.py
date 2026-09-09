@@ -57,7 +57,10 @@ def run_import(frozen, result, durability, **over):
         adapter=get_adapter("qwen3"),
         expected_config_hash=result["config_hash"],
         target_geometry=frozen["target"], control_dir=frozen["control_dir"],
-        control_sha256=frozen["control_sha"])
+        control_sha256=frozen["control_sha"],
+        #: Stated, not defaulted: the importer no longer names one study's
+        #: control, so a caller says which one it is importing against.
+        control_id="qwen3_0p6b_init_v0")
     kw.update(over)
     return import_stage1_result(**kw)
 

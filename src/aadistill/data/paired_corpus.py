@@ -367,10 +367,9 @@ def comparability_report(c: list[dict], r: list[dict], *,
     }
 
 
-# The registered nested-rung increment: unique supervised tokens added when the
-# 0.86M rung is extended to 1.60M. It is the *scale* E5 is trying to reproduce,
-# and it is NOT interchangeable with a block or step count.
-NESTED_RUNG_INCREMENT = 735_603
+# The nested-rung increment moved to `configs/experiments/e5/nested_rung.json`.
+# It is the SCALE one study reproduces, not a property of paired-corpus
+# construction, and a default here made every caller that omitted it that study.
 
 
 def suffix_overlap(examples: list[dict]) -> dict:
@@ -397,7 +396,7 @@ def suffix_overlap(examples: list[dict]) -> dict:
 
 
 def select_paired_to_token_target(c_kept: list[dict], r_kept: list[dict],
-                                  target: int = NESTED_RUNG_INCREMENT,
+                                  target: int,
                                   *, salt: str = "e5") -> tuple[list, list, dict]:
     """Choose the paired subset whose CE-token totals sit closest to `target`.
 

@@ -37,7 +37,7 @@ def test_identical_arms_have_no_discordant_pairs_and_a_zero_delta():
     a = ids("10110")
     c = mcnemar_counts(a, dict(a))
     assert c["discordant"] == 0 and c["delta"] == 0.0
-    ci = paired_bootstrap_ci(a, dict(a), iterations=500)
+    ci = paired_bootstrap_ci(a, dict(a), iterations=500, seed=20260806)
     # Every resample of an all-zero difference vector is zero.
     assert ci["delta"] == 0.0 and ci["ci_low"] == 0.0 == ci["ci_high"]
     assert ci["ci_excludes_zero"] is False
@@ -56,7 +56,7 @@ def test_bootstrap_is_deterministic_and_seed_sensitive():
 def test_interval_brackets_the_point_estimate_and_covers_a_large_effect():
     a = ids("0" * 100)
     b = ids("1" * 80 + "0" * 20)
-    ci = paired_bootstrap_ci(a, b, iterations=2000)
+    ci = paired_bootstrap_ci(a, b, iterations=2000, seed=20260806)
     assert ci["delta"] == 0.8
     assert ci["ci_low"] <= ci["delta"] <= ci["ci_high"]
     assert ci["ci_excludes_zero"] is True
@@ -67,7 +67,7 @@ def test_a_tiny_effect_on_a_small_battery_does_not_exclude_zero():
     """The honest outcome for one prompt of difference out of 150."""
     a = ids("0" * 150)
     b = ids("1" + "0" * 149)
-    ci = paired_bootstrap_ci(a, b, iterations=2000)
+    ci = paired_bootstrap_ci(a, b, iterations=2000, seed=20260806)
     assert ci["delta"] == pytest.approx(1 / 150, abs=1e-4)
     assert ci["ci_excludes_zero"] is False
 
@@ -76,7 +76,7 @@ def test_unpaired_inputs_fail_loudly():
     with pytest.raises(ValueError, match="not paired"):
         mcnemar_counts({"a": True}, {"b": False})
     with pytest.raises(ValueError, match="not paired"):
-        paired_bootstrap_ci({"a": True}, {"b": False})
+        paired_bootstrap_ci({"a": True}, {"b": False}, seed=20260806)
 
 
 def test_only_shared_ids_are_compared():
@@ -111,4 +111,4 @@ def test_joint_rate_composes_with_the_paired_machinery():
     b = joint_rate(ids("11111100"), ids("11111100"))["per_sample"]
     c = mcnemar_counts(a, b)
     assert c["b_gained"] == 2 and c["b_lost"] == 0
-    assert paired_bootstrap_ci(a, b, iterations=500)["delta"] == 0.25
+    assert paired_bootstrap_ci(a, b, iterations=500, seed=20260806)["delta"] == 0.25
