@@ -338,13 +338,40 @@ class Engineering:
             raise Stop(f"unpack failed: {r.stdout[-400:]}{r.stderr[-400:]}")
         self.check_soft_cap("dependency install")
         deps = " ".join(self.deploy["pip_deps"])
-        r = target.run(f"pip install --no-input -q {deps} 2>&1 | tail -5",
+        #: TWO defects cost the 2026-09-09 run, both here.
+        #:
+        #: `2>&1 | tail -5` made the shell report TAIL's exit status, which is
+        #: always 0. pip refused the install outright and this recorded rc=0.
+        #: The exit code is pip's own now, captured before anything reads it.
+        #:
+        #: And the image's interpreter is PEP 668 "externally managed", so a
+        #: plain `pip install` is refused by design. `--break-system-packages`
+        #: is what that refusal names, and it is right for a disposable pod
+        #: whose whole life is this one run.
+        flags = "--no-input --break-system-packages"
+        r = target.run(f"pip install {flags} -q {deps}; echo PIP_RC=$?",
                        timeout=900)
-        self.ev["pip_rc"] = r.returncode
-        self.ev["pip_tail"] = (r.stdout + r.stderr)[-1500:]
-        if r.returncode != 0:
-            raise Stop(f"dependency install failed: {r.stdout[-400:]}")
-        self.say("dependencies ready")
+        out = r.stdout + r.stderr
+        m = re.search(r"PIP_RC=(\d+)", out)
+        pip_rc = int(m.group(1)) if m else -1
+        self.ev["pip_rc"] = pip_rc
+        self.ev["pip_output_tail"] = out[-2000:]
+        if pip_rc != 0:
+            raise Stop(f"dependency install failed (pip rc={pip_rc}): "
+                       f"{out[-500:]}")
+        #: And PROVE the imports resolve before spending on the validation. A
+        #: missing module found here is a setup failure that costs seconds; the
+        #: same module found inside the check reads as a validation failure.
+        probe = ("import numpy, torch, transformers, safetensors; "
+                 "print('IMPORTS_OK', torch.__version__, torch.cuda.is_available())")
+        py = self.deploy["remote_python"]
+        r = target.run(f"cd {repo} && PYTHONPATH=src:scripts {py} -c \"{probe}\"",
+                       timeout=300)
+        self.ev["import_probe"] = (r.stdout + r.stderr)[-800:]
+        if "IMPORTS_OK" not in r.stdout:
+            raise Stop(f"import probe failed, so the validation would fail for a "
+                       f"setup reason: {(r.stdout + r.stderr)[-400:]}")
+        self.say(f"dependencies ready — {r.stdout.strip()}")
 
     def validate(self, target: SSHTarget) -> dict:
         """The one validation invocation. There is no second."""

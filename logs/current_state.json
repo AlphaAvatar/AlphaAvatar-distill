@@ -22,13 +22,13 @@
   "note": "aad_autoinit_c338a76b.bundle 5c1384bb41c3 was consumed by attempt 9 and authorizes nothing further."
  },
  "budget": {
-  "cumulative_spend_usd": 267.8598,
+  "cumulative_spend_usd": 267.8671,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 15.9002,
+  "remaining_usd": 15.8929,
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "$283.7600 - $267.8598 = $15.9002 remaining; minus the $15.1475 ceiling leaves $0.7527 >= 0, so EXACTLY ONE ceiling-sized attempt fits (worst case $283.0073) and no second one. Derived, not asserted: tests/docs/test_budget_arithmetic.py.",
+  "headroom_note": "$283.7600 - $267.8671 = $15.8929 remaining; minus the $15.1475 ceiling leaves $0.7454 >= 0, so EXACTLY ONE ceiling-sized formal attempt still fits. Includes $0.0073 of ENGINEERING spend (CUDA stage-F, not a C1 attempt). Headroom is not permission.",
   "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. Headroom is not permission."
  },
  "frozen": {
@@ -44,14 +44,14 @@
    "fourth_seed": "never"
   },
   "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds, not these -- fe9683 was selected under sa/sb/sc.",
-  "calibration": "calib.domain_balanced@v1 (spec 11f36a88, content d65c1f40) and calib.reasoning_heavy@v2 (spec 6c67b8df, content cdb28389)",
+  "calibration": "calib.domain_balanced@v1 11f36a88/d65c1f40; calib.reasoning_heavy@v2 6c67b8df/cdb28389",
   "runtime_comparability": "generation_runtime_comparability@v2",
   "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
   "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct candidates",
   "continuation_b": "CLOSED. exec a5ce6311789eb4cd, prereg bd827d12b6607356, authorization CONSUMED.",
-  "phase_c0_protocol": "logs/phase_c0_preregistration.json -- phase_c0_protocol/v1, FROZEN 2026-09-01. Binds the C1 fixed path, geometry, recipe, arms, seeds, battery and decision.",
-  "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850 scorable selected; P(GO | +0.015) = 0.8379 >= 0.80 at rho=0.15."
+  "phase_c0_protocol": "logs/phase_c0_preregistration.json -- phase_c0_protocol/v1, FROZEN 2026-09-01",
+  "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850, P(GO|+0.015)=0.8379"
  },
  "latest_verification": {
   "utc": "2026-09-07T00:00:00Z",
@@ -102,11 +102,9 @@
   "margin": 0.011765,
   "clears_by": 7e-05,
   "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
-  "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510",
   "authorizes": "nothing",
   "record": "logs/autoinit_continuation_b_attempt5.json",
-  "metrics_owned_by": "logs/autoinit_continuation_b_attempt5.json",
-  "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved but not comfortable."
+  "metrics_owned_by": "logs/autoinit_continuation_b_attempt5.json"
  },
  "phase_c": {
   "c0": {
@@ -124,13 +122,11 @@
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL.",
-   "needs": "a new maintainer review and a NEW grant for any tenth attempt. Headroom is not permission; see budget.",
    "not_built": "grant, authorization and bundle all CONSUMED by attempt 9; none is live. A tenth attempt needs a new grant, a new authorization, a fresh bundle and a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
-   "evidence": "logs/autoinit_c1_attempt9/ (attempt 8: logs/autoinit_c1_attempt8/)",
-   "readiness": "the launch_bound record and the 12 gates were consumed by attempt 9. Both are owed again for any future launch.",
-   "blocker": "CLEARED at $0 on 2026-09-08. The stage-F device boundary in attention.activation_importance_v1 is repaired: apply() now builds a compute-device working copy via device.stats_to, and head_write_energy places its score vector and fails closed on a mismatch. Science unmoved (formula, impl id, spec, seeds, digests). NOT observed on a GPU. The remaining blocker is the absence of a grant, not the code.",
+   "blocker": "CLEARED at $0 on 2026-09-08: the stage-F device boundary in attention.activation_importance_v1 is repaired -- apply() builds a compute-device working copy via device.stats_to and head_write_energy fails closed on a mismatch. Science unmoved. STILL NOT OBSERVED ON A GPU: the 2026-09-09 engineering validation failed in setup before any operator ran. The remaining blocker is the absence of a grant, not the code.",
    "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, on an L40S). treatment + endpoint: UNMEASURED -- zero probes trained, zero evaluated, no decision. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort: not an ATTENTION result and not a frozen-rule INCONCLUSIVE.",
-   "repairs": "SIX defects repaired at $0 before attempt 9 (three observed working on hardware); the stage-F device boundary repaired at $0 after it. That repair is LOGICAL / CPU-STRUCTURAL EVIDENCE ONLY and remains so until the CUDA validation runs -- the defect was a cross-device placement, which a single-device machine cannot observe. Detail: logs/STATE.md."
+   "repairs": "SIX defects repaired at $0 before attempt 9 (three observed working on hardware); the stage-F device boundary repaired at $0 after it. That repair is LOGICAL / CPU-STRUCTURAL EVIDENCE ONLY and remains so until the CUDA validation runs -- the defect was a cross-device placement, which a single-device machine cannot observe. Detail: logs/STATE.md.",
+   "owed": "a new maintainer review and a NEW grant for any tenth attempt; the launch_bound record and 12 gates are owed again. Evidence: logs/autoinit_c1_attempt9/."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -171,5 +167,11 @@
  "architecture_migration": {
   "status": "CURRENT ENGINEERING ACTIVITY -- initialization-core consolidation and core/application separation. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
   "record": "logs/migrations/initialization-core/v1/"
+ },
+ "cuda_engineering_validation": {
+  "status": "EXECUTED 2026-09-09, INFRASTRUCTURE FAIL, $0.0073, teardown provider-confirmed. The launcher reported a refused pip install as success; the check exited on ModuleNotFoundError before any operator ran. NO CUDA OBSERVATION. Not a C1 result.",
+  "stage_f_repair": "LOGICAL / CPU-STRUCTURAL EVIDENCE ONLY, unchanged.",
+  "record": "logs/runs/cuda_stage_f/cuda_stage_f_20260910/",
+  "authorizes": "nothing"
  }
 }

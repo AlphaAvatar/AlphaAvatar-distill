@@ -1896,3 +1896,52 @@ authorization. Cumulative stays **`$266.8158`** of `$283.7600`, `$16.9442`
 uncommitted. The repair is **unmeasured on hardware** and C1 remains
 scientifically unmeasured: no completed replay, no training, no evaluation, no
 decision.
+
+---
+
+## 2026-09-09 — CUDA stage-F ENGINEERING validation: infrastructure FAIL, `$0.0073`
+
+**Not a C1 attempt.** This is an engineering validation under the maintainer
+decision of 2026-09-10, recorded at
+`logs/validations/cuda-stage-f/v1/authorization.json`. It carries no C1 grant,
+no bundle and no formal authorization, and it produces no C1 observation. The
+C1 attempt count is **unchanged at ten labels, nine paid**.
+
+| what | cost | evidence |
+| --- | --- | --- |
+| CUDA stage-F engineering validation: one pod `ij54bzvcyldm9j`, RTX 2000 Ada at `$0.24/h`, 1.84 min, **INFRASTRUCTURE FAIL** in the launcher's dependency step. No CUDA observation was made | $0.0073 | `logs/runs/cuda_stage_f/cuda_stage_f_20260910/` |
+
+Cumulative spend before `$267.8598` → after **`$267.8671`** of the unchanged
+`$283.7600` cap. Remaining **`$15.8929`**, which still covers one full
+`$15.1475` formal C1 attempt with **`$0.7454`** after it.
+
+**The contract held; my launcher did not.** One quote pass over nine candidates,
+one create attempt, the watchdog detached in the same second the pod id existed,
+the actual rate confirmed at or below the quote, work stopped at the first
+substantive exception, and teardown was provider-confirmed — the independent
+watchdog journal records `pod_exists: false`, `pod_billing: false`,
+`desired_status: TERMINATED` and `$0.0070` accrued. Final inventory: zero pods.
+
+**What failed, and it is mine.** Two defects in
+`scripts/validation/cuda_engineering_launch.py`, both in the dependency step:
+
+1. `pip install ... 2>&1 | tail -5` makes the shell report **tail's** exit
+   status, which is always 0. The install had been refused and this recorded
+   `pip_rc: 0`.
+2. The image's interpreter is PEP 668 *externally managed*, so a plain
+   `pip install` is refused by design. The refusal names the flag it wants and
+   the launcher did not pass it.
+
+So the validation entry point ran and exited 1 four seconds later on
+`ModuleNotFoundError: No module named 'numpy'`. That reads as a validation
+failure and was a **setup** failure.
+
+**This says nothing about the stage-F repair.** No operator executed, no device
+placement was observed, and `attention.activation_importance_v1` still has never
+run on a GPU. The repair remains **logical / CPU-structural evidence only**.
+
+Both defects are fixed and pinned by regressions, and an import probe now runs
+before the validation so a missing module costs seconds and is reported as
+setup. **The fixed launcher has not been run on a GPU.** One resource was
+authorized and it has been consumed; no replacement was created and none will be
+without a new maintainer decision.

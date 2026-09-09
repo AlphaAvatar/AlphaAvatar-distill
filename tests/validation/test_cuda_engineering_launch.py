@@ -288,3 +288,55 @@ def test_it_names_no_formal_c1_input():
     for forbidden in ("autoinit_c1_authorization", "c1_confirmation_v1",
                       "attempt9", "recovery_search_v2", "C1Authorization"):
         assert forbidden not in src, f"the engineering launcher names {forbidden}"
+
+
+# --- the two defects that cost the 2026-09-09 run --------------------------
+
+class TestTheDependencyStepReportsItsOwnFailure:
+    """Both of these were live when the authorized GPU run executed.
+
+    `pip install ... 2>&1 | tail -5` makes the shell report TAIL's status,
+    which is always 0. pip refused the install under PEP 668, the launcher
+    recorded `pip_rc: 0`, and the validation failed four seconds later on
+    `ModuleNotFoundError: numpy` -- reading as a validation failure when it was
+    a setup one.
+    """
+
+    def test_the_pip_command_does_not_pipe_its_exit_status_away(self):
+        """Code only. The comment above the fix has to be able to quote the
+        construct it forbids in order to explain what went wrong."""
+        ship = (ENTRY.read_text().split("def ship")[1]
+                .split("def validate")[0])
+        code = "\n".join(l for l in ship.splitlines()
+                         if not l.lstrip().startswith(("#", "#:")))
+        assert "| tail" not in code, (
+            "the dependency install pipes through tail again; the shell then "
+            "reports tail's exit status and a refused install looks successful")
+
+    def test_it_captures_pips_own_return_code(self):
+        src = ENTRY.read_text()
+        assert "PIP_RC=$?" in src
+        assert 'm = re.search(r"PIP_RC=(\\d+)", out)' in src
+
+    def test_it_passes_the_flag_pep_668_asks_for(self):
+        """The image's interpreter is externally managed, so a plain install is
+        refused by design."""
+        assert "--break-system-packages" in ENTRY.read_text()
+
+    def test_an_unparseable_pip_status_is_a_failure_not_a_pass(self, eng, mod,
+                                                               monkeypatch):
+        """If the marker never appears, the rc is unknown -- which must stop the
+        run, not proceed as though it were zero."""
+        import re as _re
+        out = "some output with no marker at all"
+        m = _re.search(r"PIP_RC=(\d+)", out)
+        assert (int(m.group(1)) if m else -1) == -1
+
+    def test_the_import_probe_precedes_the_validation(self):
+        """A missing module found in the probe costs seconds and reads as a
+        setup failure; the same module found inside the check reads as a
+        validation failure, which is what happened."""
+        src = ENTRY.read_text()
+        ship = src.split("def ship")[1].split("def validate")[0]
+        assert "IMPORTS_OK" in ship
+        assert "import numpy" in ship

@@ -1,0 +1,216 @@
+{
+ "schema": "aadistill.cuda_engineering_run/v1",
+ "run_id": "cuda_stage_f_20260910",
+ "scientific_use": false,
+ "is_formal_c1": false,
+ "authorizes": "nothing",
+ "authorization": "cuda_stage_f_engineering.2026-09-10",
+ "authorization_sha256": "a23416687d69209b55b059953e79a6e6b1499072d70f4aaa624c46a699d3f7ef",
+ "execution_sha": "355a1f7d7b0f09840dc8f4d84923e97a2039003f",
+ "deployment": {
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "remote_python": "python",
+  "min_cuda_version": "13.0",
+  "container_disk_gb": 20,
+  "pip_deps": [
+   "transformers",
+   "numpy"
+  ],
+  "authorizes": "nothing"
+ },
+ "timeline": [
+  {
+   "utc": "2026-09-09T22:10:14.990709+00:00",
+   "msg": "  NVIDIA RTX 2000 Ada Generation: securePrice $0.24/h, 16GB, stock Low"
+  },
+  {
+   "utc": "2026-09-09T22:10:15.375576+00:00",
+   "msg": "  NVIDIA RTX A4000: securePrice $0.25/h, 16GB, stock Low"
+  },
+  {
+   "utc": "2026-09-09T22:10:15.793743+00:00",
+   "msg": "  NVIDIA RTX A4500: securePrice $0.25/h, 20GB, stock None"
+  },
+  {
+   "utc": "2026-09-09T22:10:16.189476+00:00",
+   "msg": "  NVIDIA RTX A5000: securePrice $0.27/h, 24GB, stock None"
+  },
+  {
+   "utc": "2026-09-09T22:10:16.623053+00:00",
+   "msg": "  NVIDIA L4: securePrice $0.49/h, 24GB, stock Low"
+  },
+  {
+   "utc": "2026-09-09T22:10:17.040596+00:00",
+   "msg": "  NVIDIA GeForce RTX 3090: securePrice $0.5/h, 24GB, stock Low"
+  },
+  {
+   "utc": "2026-09-09T22:10:17.470529+00:00",
+   "msg": "  NVIDIA GeForce RTX 4090: securePrice $0.74/h, 24GB, stock Low"
+  },
+  {
+   "utc": "2026-09-09T22:10:17.880314+00:00",
+   "msg": "  NVIDIA RTX A6000: securePrice $0.53/h, 48GB, stock None"
+  },
+  {
+   "utc": "2026-09-09T22:10:18.270062+00:00",
+   "msg": "  NVIDIA L40S: securePrice $1.09/h, 48GB, stock Medium"
+  },
+  {
+   "utc": "2026-09-09T22:10:18.270098+00:00",
+   "msg": "accepted NVIDIA RTX 2000 Ada Generation at $0.24/h (soft $0.25 = 62.5 min, hard $0.4 = 100.0 min)"
+  },
+  {
+   "utc": "2026-09-09T22:10:18.270131+00:00",
+   "msg": "creating ONE pod (attempt 1 of 1) \u2014 create --image runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 --gpu-id NVIDIA RTX 2000 Ada Generation --gpu-count"
+  },
+  {
+   "utc": "2026-09-09T22:10:19.277193+00:00",
+   "msg": "created ij54bzvcyldm9j \u2014 registering and starting the watchdog NOW"
+  },
+  {
+   "utc": "2026-09-09T22:10:19.277660+00:00",
+   "msg": "watchdog detached (launch #1) \u2014 hard 100.0 min / $0.4"
+  },
+  {
+   "utc": "2026-09-09T22:10:19.683892+00:00",
+   "msg": "actual rate $0.24/h confirmed at or below the quote"
+  },
+  {
+   "utc": "2026-09-09T22:11:38.949240+00:00",
+   "msg": "endpoint 213.173.110.197:10705"
+  },
+  {
+   "utc": "2026-09-09T22:11:39.543401+00:00",
+   "msg": "shipping 1.54 MB of source"
+  },
+  {
+   "utc": "2026-09-09T22:11:51.369576+00:00",
+   "msg": "dependencies ready"
+  },
+  {
+   "utc": "2026-09-09T22:11:51.369604+00:00",
+   "msg": "running: cd /workspace/aad && PYTHONPATH=src:scripts python scripts/validation/cuda_engineering_check.py --config configs/validation/cuda_engineering.json --run-id cuda_stage_f_20260910"
+  },
+  {
+   "utc": "2026-09-09T22:11:55.163533+00:00",
+   "msg": "validation exited 1"
+  },
+  {
+   "utc": "2026-09-09T22:11:57.534041+00:00",
+   "msg": "collected 0 artifact file(s)"
+  },
+  {
+   "utc": "2026-09-09T22:11:57.534069+00:00",
+   "msg": "tearing down ij54bzvcyldm9j"
+  },
+  {
+   "utc": "2026-09-09T22:12:08.508195+00:00",
+   "msg": "provider confirms the pod is gone and not billing"
+  }
+ ],
+ "quotes": [
+  {
+   "gpu": "NVIDIA RTX 2000 Ada Generation",
+   "secure_price_per_hour": 0.24,
+   "stock": "Low",
+   "vram_gb": 16
+  },
+  {
+   "gpu": "NVIDIA RTX A4000",
+   "secure_price_per_hour": 0.25,
+   "stock": "Low",
+   "vram_gb": 16
+  },
+  {
+   "gpu": "NVIDIA L4",
+   "secure_price_per_hour": 0.49,
+   "stock": "Low",
+   "vram_gb": 24
+  },
+  {
+   "gpu": "NVIDIA GeForce RTX 3090",
+   "secure_price_per_hour": 0.5,
+   "stock": "Low",
+   "vram_gb": 24
+  },
+  {
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "secure_price_per_hour": 0.74,
+   "stock": "Low",
+   "vram_gb": 24
+  },
+  {
+   "gpu": "NVIDIA L40S",
+   "secure_price_per_hour": 1.09,
+   "stock": "Medium",
+   "vram_gb": 48
+  }
+ ],
+ "accepted_quote": {
+  "gpu": "NVIDIA RTX 2000 Ada Generation",
+  "secure_price_per_hour": 0.24,
+  "stock": "Low",
+  "vram_gb": 16
+ },
+ "create_command": [
+  "/home/ecs-user/.local/bin/runpodctl",
+  "pod",
+  "create",
+  "--image",
+  "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "--gpu-id",
+  "NVIDIA RTX 2000 Ada Generation",
+  "--gpu-count",
+  "1",
+  "--container-disk-in-gb",
+  "20",
+  "--volume-in-gb",
+  "0",
+  "--min-cuda-version",
+  "13.0",
+  "--ports",
+  "22/tcp",
+  "--name",
+  "aad-cuda-eng-cuda_stage_f_20260910",
+  "--terminate-after",
+  "2026-09-09T23:50:18Z"
+ ],
+ "create_stdout_tail": "{\n  \"containerDiskInGb\": 20,\n  \"costPerHr\": 0.24,\n  \"desiredStatus\": \"RUNNING\",\n  \"env\": [\n    \"PUBLIC_KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHyLTGGhfoY+v3w7CEP8xX0shw4wzWxHnJDqsh60731 alphaavatar-runpod\\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X+f7hsoLZFbJeFXGStjQiea01LsDIFDE5LdnKCrOjGQK10BvmiW593WTL27OChjStN+xb0zMIyTu/rKas9wNL5msNlUbljmwwj4pIPTEMK31FPhUiBpy2vTlHrH1hdNapHX9nh5iOTTvgZV/Vu+a2lxZvdTFkl5GtTLs2TGsHSmKijnrPro2j++BLUd69VTvW8tFsN/w6VALIAnmrt23wUq15Chjhgs3Ar2SI9A/Ww5+T6aRnP6nOKk+DPGAB5RIVL1Rla88sG3lyraNVSFpBfC8tDnyq7PO6uzolWBJ+Dw4I9HP9eia5IJcGRoi+pGCD0Ml0bFmSQiA1coT2zw1 runpodctl-ssh-key\"\n  ],\n  \"gpuCount\": 1,\n  \"id\": \"ij54bzvcyldm9j\",\n  \"imageName\": \"runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404\",\n  \"lastStatusChange\": \"Rented by User: Wed Sep 09 2026 22:10:18 GMT+0000 (Coordinated Universal Time)\",\n  \"machine\": {\n    \"gpuDisplayName\": \"RTX 2000 Ada\",\n    \"location\": \"RO\"\n  },\n  \"memoryInGb\": 31,\n  \"name\": \"aad-cuda-eng-cuda_stage_f_20260910\",\n  \"ports\": \"22/tcp\",\n  \"vcpuCount\": 6,\n  \"volumeInGb\": 0,\n  \"volumeMountPath\": \"/workspace\"\n}\n",
+ "provider_resource_created": true,
+ "pod_id": "ij54bzvcyldm9j",
+ "watchdog_launches": 1,
+ "watchdog_journal": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/bbb3dbf0-ddf4-4817-805a-4c9072e84d75/scratchpad/eng_run/watchdog.jsonl",
+ "actual_price_per_hour": 0.24,
+ "payload_bytes": 1611352,
+ "unpack_rc": 0,
+ "pip_rc": 0,
+ "pip_tail": "    \n    See /usr/share/doc/python3.12/README.venv for more information.\n\nnote: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.\nhint: See PEP 668 for the detailed specification.\nWarning: Permanently added '[213.173.110.197]:10705' (ECDSA) to the list of known hosts.\n",
+ "validation_command": "cd /workspace/aad && PYTHONPATH=src:scripts python scripts/validation/cuda_engineering_check.py --config configs/validation/cuda_engineering.json --run-id cuda_stage_f_20260910",
+ "validation": {
+  "started_utc": "2026-09-09T22:11:51.369606+00:00",
+  "finished_utc": "2026-09-09T22:11:55.163329+00:00",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "Warning: Permanently added '[213.173.110.197]:10705' (ECDSA) to the list of known hosts.\n/usr/local/lib/python3.12/dist-packages/torch/_subclasses/functional_tensor.py:279: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)\n  cpu = _conversion_method_template(device=torch.device(\"cpu\"))\nTraceback (most recent call last):\n  File \"/workspace/aad/scripts/validation/cuda_engineering_check.py\", line 561, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/workspace/aad/scripts/validation/cuda_engineering_check.py\", line 425, in main\n    from aadistill.initialization.operators.base import registered_implementations\n  File \"/workspace/aad/src/aadistill/initialization/operators/__init__.py\", line 14, in <module>\n    from aadistill.initialization.operators.attention import ATTENTION_WEIGHT_PROXY_V0\n  File \"/workspace/aad/src/aadistill/initialization/operators/attention.py\", line 40, in <module>\n    from aadistill.initialization.calibration.profiles import CalibrationNeed\n  File \"/workspace/aad/src/aadistill/initialization/calibration/profiles.py\", line 30, in <module>\n    from aadistill.initialization.calibration.datasets import DatasetRole\n  File \"/workspace/aad/src/aadistill/initialization/calibration/datasets.py\", line 37, in <module>\n    from aadistill.data.extra_stream import content_sha256\n  File \"/workspace/aad/src/aadistill/data/extra_stream.py\", line 39, in <module>\n    import numpy as np\nModuleNotFoundError: No module named 'numpy'\n"
+ },
+ "collected_files": [],
+ "teardown": {
+  "remove_rc": 0,
+  "remove_output": "pod \"ij54bzvcyldm9j\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead\n",
+  "provider_confirms_gone": true,
+  "polls": [
+   {
+    "pods": []
+   }
+  ]
+ },
+ "final_pod_inventory": {
+  "pods": []
+ },
+ "verdict": "FAIL",
+ "verdict_reason": "validation exited 1",
+ "elapsed_minutes": 1.837,
+ "estimated_cost_usd": 0.0073,
+ "_cost_basis": "elapsed wall clock x the provider-confirmed hourly rate. An ESTIMATE: the provider bills per second from provisioning, and this is the evidence available at teardown.",
+ "provider_create_attempts": 1
+}
