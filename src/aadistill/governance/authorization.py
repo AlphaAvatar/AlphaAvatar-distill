@@ -12,15 +12,22 @@ lived in prose: E6b overran by $0.56 with the number in a plan document, and a
 finished corpus build idled ~$8.70 because teardown was tied to a generous
 backstop rather than to completion.
 
-`AUTHORIZED_STAGES` is the whole of it. Phase A is not on the list, and
-`allows_phase_a` is a hard `False` rather than a flag someone could set.
+**This module holds mechanism only.** Which actions an authorization may
+express, which files its harness covers and which on-disk keys would claim a
+permission are all supplied by the application: a governance primitive that
+knows one experiment's stage names is not reusable, and the next experiment
+would have to edit it rather than declare itself.
+
+Absence of permission is denial. `ActionPolicy` must be supplied to load an
+artifact at all, so an authorization cannot be read by a caller that has not
+said what it is allowed to express.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -31,41 +38,64 @@ class AuthorizationError(RuntimeError):
     """An action exceeds or falls outside what was authorized."""
 
 
-#: The executable harness this authorization is granted against. Same rule and
-#: same failure mode as the trainer and scoring source sets: a missing declared
-#: file raises rather than yielding a digest over a smaller harness.
-HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
-    "scripts/pod/autoinit_preflight_launch.py",
-    "scripts/pod/autoinit_preflight_driver.py",
-    "scripts/pod/autoinit_preflight_setup.sh",
-    # What that script STAGES, since 2026-08-18: the relay sources, the
-    # destinations and the four frozen digests it used to carry itself. A
-    # harness digest that covered the shell but not its manifest would
-    # certify the fetching and leave what is fetched unmeasured.
-    "scripts/pod/autoinit_science_inputs.py",
-    "scripts/pod/autoinit_engine_probe.py",
-    "scripts/pod/watchdog.py",
-    "scripts/pod/collect_artifacts.py",
-    # The session machinery. Added 2026-08-18 with the composition refactor: the
-    # flow that used to live in `autoinit_preflight_launch.py` now lives here, so
-    # a harness digest that did not cover it would certify a launcher that is a
-    # hundred lines of declaration while the code that creates pods, relays logs
-    # and tears down went unmeasured.
-    "src/aadistill/infrastructure/session.py",
-    "src/aadistill/infrastructure/session_runner.py",
-    "src/aadistill/infrastructure/session_prechecks.py",
-    "src/aadistill/governance/authorization.py",
-    "src/aadistill/initialization/planning/generation.py",
-)
-#: Bumped with the three session modules. A digest computed over set 1 and one
-#: computed over set 2 are not comparable, and the version is what says so.
-HARNESS_SOURCE_SET_VERSION = 2
+#: An action an authorization may express, and how a claim to it appears on
+#: disk. Supplied by the application: `phase_a`, `beam_search` and the rest are
+#: one project's vocabulary, and a governance primitive that enumerated them
+#: could not serve a second experiment.
+@dataclass(frozen=True)
+class ActionPolicy:
+    """What an authorization is permitted to express. Absence is denial."""
+
+    policy_id: str
+    #: Actions this authorization MAY grant. Everything else is denied.
+    allowed: frozenset[str] = frozenset()
+    #: on-disk key -> action. An artifact whose key is truthy for an action
+    #: outside `allowed` is refused at load: that is a document claiming a
+    #: permission its own policy does not have.
+    wire_claims: dict[str, str] = field(default_factory=dict)
+    #: action -> what to tell someone who asked for it. Optional.
+    refusal_notes: dict[str, str] = field(default_factory=dict)
+
+    def allows(self, action: str) -> bool:
+        return action in self.allowed
+
+    def refuse(self, action: str) -> None:
+        note = self.refusal_notes.get(action)
+        raise AuthorizationError(
+            note or (f"{action!r} is not authorized under policy "
+                     f"{self.policy_id!r}; absence of permission is denial. "
+                     "Stop, report, and obtain a new authorization."))
+
+    def check_claims(self, raw: dict[str, Any], *, where: str = "") -> None:
+        """Refuse an artifact that claims a permission this policy denies."""
+        claimed = [key for key, action in self.wire_claims.items()
+                   if raw.get(key) and not self.allows(action)]
+        if claimed:
+            raise AuthorizationError(
+                f"{where or 'this artifact'} claims {claimed}, which policy "
+                f"{self.policy_id!r} does not grant; refusing to load it")
+
+
+#: A policy that grants nothing and recognises no claim. The safe default for a
+#: caller that has not declared one -- it can express no permission at all.
+DENY_ALL = ActionPolicy(policy_id="deny_all")
 
 
 def harness_source_digest(repo_root: str | Path = ".", *,
-                          files: tuple[str, ...] | None = None) -> dict[str, Any]:
+                          files: tuple[str, ...],
+                          set_version: int | None = None) -> dict[str, Any]:
+    """Digest a caller-declared harness set.
+
+    `files` is required. It used to default to the preflight's list, which meant
+    a caller that forgot to declare its own executable silently got a digest
+    over somebody else's -- and the digest verified perfectly.
+    """
     root = Path(repo_root)
-    declared = tuple(files) if files is not None else HARNESS_SOURCE_FILES_V1
+    if not files:
+        raise AuthorizationError(
+            "no harness source files were declared; a digest over an empty or "
+            "unstated set describes nothing and would authorize anything")
+    declared = tuple(files)
     entries = []
     for rel in sorted(declared):
         path = root / rel
@@ -77,8 +107,9 @@ def harness_source_digest(repo_root: str | Path = ".", *,
                         "bytes": path.stat().st_size})
     digest = hashlib.sha256(
         "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()).hexdigest()
-    return {"digest": digest, "set_version": HARNESS_SOURCE_SET_VERSION,
-            "files": entries}
+    #: The version belongs to whoever declared the set: two digests over
+    #: different sets are not comparable, and the version is what says so.
+    return {"digest": digest, "set_version": set_version, "files": entries}
 
 
 @dataclass(frozen=True)
@@ -102,11 +133,11 @@ class SpendAuthorization:
     authorized_session_commit: str | None = None
     harness_source_digest: str | None = None
     #: WHICH files that digest covers. A session that runs a different
-    #: executable — the continuation runs its own launcher, driver and plan
-    #: module — must declare them here, or `require_harness` would digest the
-    #: preflight's files and happily admit an edited continuation driver. The
-    #: default keeps every existing artifact byte-identical.
-    harness_source_files: tuple[str, ...] = HARNESS_SOURCE_FILES_V1
+    #: executable -- the continuation runs its own launcher, driver and plan
+    #: module -- must declare them here. This used to DEFAULT to the preflight's
+    #: list, so a session that forgot to declare its own executable digested
+    #: somebody else's and was admitted.
+    harness_source_files: tuple[str, ...] = ()
     #: A ceiling on ONE launch, separate from the cumulative cap. The cumulative
     #: cap covers an effort that has already failed several times; without this,
     #: a single run could spend the whole of it. Named by the maintainer.
@@ -115,15 +146,17 @@ class SpendAuthorization:
     provenance_commit: str | None = None
     version: int = 1
 
-    #: Not a field. Phase A is separately unauthorized and this artifact cannot
-    #: express permission for it.
-    @property
-    def allows_phase_a(self) -> bool:
-        return False
+    #: What this authorization may express. `DENY_ALL` grants nothing, so an
+    #: authorization constructed without a policy can permit no action at all.
+    action_policy: ActionPolicy = DENY_ALL
 
-    @property
-    def automatic_phase_a_start(self) -> bool:
-        return False
+    def allows(self, action: str) -> bool:
+        """Does this authorization grant `action`? Absence is denial."""
+        return self.action_policy.allows(action)
+
+    def refuse(self, action: str) -> None:
+        """Refuse `action`, with the policy's own note if it has one."""
+        self.action_policy.refuse(action)
 
     def as_dict(self) -> dict[str, Any]:
         payload = {
@@ -139,8 +172,8 @@ class SpendAuthorization:
             "authorized_stages": list(self.authorized_stages),
             "stage_conditions": dict(self.stage_conditions),
             "scope_note": self.scope_note,
-            "phase_a_authorized": self.allows_phase_a,
-            "automatic_phase_a_start": self.automatic_phase_a_start,
+            **{key: self.allows(action)
+               for key, action in self.action_policy.wire_claims.items()},
             "authorized_session_commit": self.authorized_session_commit,
             "harness_source_digest": self.harness_source_digest,
             "harness_source_files": list(self.harness_source_files),
@@ -208,13 +241,21 @@ class SpendAuthorization:
                 f"cumulative cap ${self.hard_cap_usd:.2f} covers an effort that "
                 "has already failed several times; it is not one run's budget.")
 
-    def refuse_phase_a(self) -> None:
-        raise AuthorizationError(
-            "Phase A is separately unauthorized and is not reachable from the "
-            "preflight. Stop, report, and obtain a new authorization.")
-
     @classmethod
-    def load(cls, path: str | Path) -> "SpendAuthorization":
+    def load(cls, path: str | Path, *,
+             policy: ActionPolicy | None = None) -> "SpendAuthorization":
+        """Read an artifact under a declared policy.
+
+        `policy` is required, by class attribute or argument. A caller that has
+        not said what the artifact may express cannot check whether it claims
+        more, so reading it at all would be reading an unchecked permission.
+        """
+        resolved = policy or getattr(cls, "POLICY", None)
+        if resolved is None:
+            raise AuthorizationError(
+                f"{cls.__name__}.load needs an ActionPolicy: without one there "
+                "is nothing to check an artifact's claims against, and an "
+                "unchecked claim is an unenforced permission")
         raw = json.loads(Path(path).read_text())
         stated = raw.get("authorization_sha256")
         check = dict(raw)
@@ -223,10 +264,7 @@ class SpendAuthorization:
             raise AuthorizationError(
                 f"{path} does not match its own authorization_sha256; it has "
                 "been edited since it was granted")
-        if raw.get("phase_a_authorized") or raw.get("automatic_phase_a_start"):
-            raise AuthorizationError(
-                "this artifact claims Phase A authorization, which it cannot "
-                "grant; refusing to load it")
+        resolved.check_claims(raw, where=str(path))
         return cls(
             authorization_id=raw["authorization_id"],
             granted_utc=raw["granted_utc"], granted_by=raw["granted_by"],
@@ -238,8 +276,11 @@ class SpendAuthorization:
             scope_note=raw["scope_note"],
             authorized_session_commit=raw.get("authorized_session_commit"),
             harness_source_digest=raw.get("harness_source_digest"),
-            harness_source_files=tuple(raw.get("harness_source_files")
-                                       or HARNESS_SOURCE_FILES_V1),
+            #: No fallback. An artifact that names no harness gets none, and
+            #: `require_harness` then refuses -- which is right: inheriting
+            #: another session's file list is how a digest comes to describe an
+            #: executable nobody checked.
+            harness_source_files=tuple(raw.get("harness_source_files") or ()),
             per_launch_hard_usd=raw.get("per_launch_hard_usd"),
             provenance_commit=raw.get("provenance_commit"),
             version=int(raw.get("version", 1)))

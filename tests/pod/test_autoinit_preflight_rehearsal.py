@@ -392,7 +392,7 @@ def test_an_unrehearsed_harness_cannot_consume_the_authorization(tmp_path):
     # Given a file list that EXISTS, so the check under test is the one that
     # fires: the committed authorization names pre-migration paths, and the
     # missing-file refusal would otherwise mask the missing-digest one.
-    from aadistill.governance.authorization import HARNESS_SOURCE_FILES_V1
+    from experiments.preflight import HARNESS_SOURCE_FILES_V1
     present = tuple(f for f in HARNESS_SOURCE_FILES_V1 if (REPO / f).is_file())
     with pytest.raises(AuthorizationError, match="no harness_source_digest"):
         replace(auth, harness_source_digest=None,

@@ -197,6 +197,35 @@ class LocalAsset:
 
 
 @dataclass(frozen=True)
+class ExecutionCommands:
+    """The repository scripts a session's runner executes.
+
+    Declared by the session, not known by the runner. The runner used to name
+    `scripts/pod/watchdog.py`, `scripts/pod/autoinit_preflight_setup.sh` and
+    `scripts/pod/collect_artifacts.py` directly, which put one repository's
+    layout inside reusable infrastructure -- a second deployment, or a session
+    with its own collector, would have had to edit the runner.
+
+    Every field is required. A default here would be the runner quietly choosing
+    an executable on the session's behalf, which is the property being removed.
+    """
+
+    #: Run on the DEV BOX, detached, to own the provider resource.
+    watchdog: str
+    #: Uploaded to the pod and run there.
+    setup_script: str
+    #: Run on the pod to collect declared artifacts.
+    artifact_collector: str
+    #: The interpreter the pod uses. A deployment fact.
+    remote_python: str = "/opt/train/bin/python"
+
+    def as_dict(self) -> dict[str, str]:
+        return {"watchdog": self.watchdog, "setup_script": self.setup_script,
+                "artifact_collector": self.artifact_collector,
+                "remote_python": self.remote_python}
+
+
+@dataclass(frozen=True)
 class SetupManifest:
     """Everything the shared setup script is allowed to know about a session.
 
@@ -418,11 +447,16 @@ class SessionSpec:
 
     #: The artifact this session's spending is granted by, and the TYPE that
     #: loads it. The type is a field rather than a base-class choice, which is
-    #: what makes "this launcher cannot start Phase A" a property instead of a
-    #: promise: `SpendAuthorization.allows_phase_a` is a hard False, so a session
-    #: naming that type cannot start Phase A whatever it is pointed at.
+    #: what makes "this launcher cannot start a stage it was not granted" a
+    #: property instead of a promise: the loader carries an `ActionPolicy`, and
+    #: absence of permission is denial, so a session naming a type whose policy
+    #: grants nothing cannot start anything whatever it is pointed at.
     authorization_path: str
     authorization_loader: Callable[[Any], Any]
+
+    #: The repository scripts this session's runner executes. Declared here
+    #: because the runner must not know them; see `ExecutionCommands`.
+    commands: ExecutionCommands
 
     plan_id: str
     plan_hash: str

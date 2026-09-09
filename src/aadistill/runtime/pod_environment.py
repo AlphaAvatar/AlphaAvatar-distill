@@ -48,33 +48,12 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA = "aadistill.autoinit.c1_pod_environment_verification/v1"
-RECORD_PATH = "logs/c1_pod_environment_verification.json"
 
-#: Files that decide the pod test gate's outcome and are **outside**
-#: `C1_HARNESS_SOURCE_FILES_V1`. A list, not a glob, so each entry is a decision
-#: somebody made.
-#:
-#: Strictly disjoint from the harness set, and `test_c1_readiness_gates` asserts
-#: it. `verify_record` checks BOTH digests, so a file named in both buys nothing:
-#: editing it already invalidates the record through the harness. Redundant
-#: binding only makes the two lists look like independent evidence when they are
-#: not. `autoinit_preflight_setup.sh`, `battery_render.py` and
-#: `renderer_parity_gate.py` were all listed here until 2026-09-04 and are now
-#: covered by the harness itself.
-POD_TEST_ENVIRONMENT_FILES_V1: tuple[str, ...] = (
-    #: The simulator that creates the pod-like conditions. Not executed on a pod,
-    #: so it has no place in the harness, but a change to it changes what the
-    #: recorded sweep MEANT.
-    "scripts/pod/simulate_pod_env.sh",
-    #: A dev-box publishing tool the paid session never runs — and whose tests the
-    #: pod's setup gate does. That asymmetry is exactly why it is measured here
-    #: and not in the harness.
-    "scripts/autoinit/publish_selected_leaves.py",
-    #: The recorder decides what the record CLAIMS the sweep found. A parser that
-    #: mislabelled a skip as a pass would certify a failing gate, and nothing else
-    #: here would notice.
-    "scripts/autoinit/record_pod_environment.py",
-)
+#: The record path and the named non-harness files are CALLER-SUPPLIED. They
+#: used to be written here, which put one experiment's log name and one
+#: experiment's tool list inside a reusable runtime module. They now live in
+#: `scripts/experiments/phase_c1/pod_environment.py`.
+
 
 #: The seven parametrized cases that legitimately skip on a pod: they re-open the
 #: pinned Hugging Face source snapshots, which are a dev-box readiness input and
@@ -204,7 +183,8 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def pod_test_environment_digest(repo_root: str | Path = ".") -> dict[str, Any]:
+def pod_test_environment_digest(repo_root: str | Path = ".", *,
+                                named_files: tuple[str, ...]) -> dict[str, Any]:
     """Digest over everything that decides the pod test gate's outcome.
 
     The whole test tree is in here on purpose. A new test is exactly as capable
@@ -214,7 +194,7 @@ def pod_test_environment_digest(repo_root: str | Path = ".") -> dict[str, Any]:
     root = Path(repo_root)
     rels = sorted(
         {str(p.relative_to(root)) for p in (root / "tests").rglob("*.py")}
-        | set(POD_TEST_ENVIRONMENT_FILES_V1))
+        | set(named_files))
     entries = []
     for rel in rels:
         p = root / rel
@@ -227,7 +207,7 @@ def pod_test_environment_digest(repo_root: str | Path = ".") -> dict[str, Any]:
     digest = hashlib.sha256(
         "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()).hexdigest()
     return {"digest": digest, "n_files": len(entries),
-            "named_files": list(POD_TEST_ENVIRONMENT_FILES_V1),
+            "named_files": list(named_files),
             "rule": ("sha256 over sorted 'path:sha256' lines of tests/**/*.py "
                      "plus the named non-harness files")}
 
@@ -469,10 +449,14 @@ def tree_is_clean(repo_root: str | Path = ".") -> bool:
     return out.returncode == 0 and not out.stdout.strip()
 
 
-#: The only tracked path that may differ between the swept commit and the
-#: session commit before an authorization exists. The record is written after the
-#: sweep by construction, so its own commit can never be part of the swept tree.
-PERMITTED_POST_SWEEP_PATHS: tuple[str, ...] = (RECORD_PATH,)
+def permitted_post_sweep_paths(record_path: str) -> tuple[str, ...]:
+    """The only tracked path that may differ between the swept and session commits.
+
+    The record is written after the sweep by construction, so its own commit can
+    never be part of the swept tree. Which path that is belongs to whoever owns
+    the record.
+    """
+    return (record_path,)
 
 
 def lineage_from_swept_base(repo_root: Path, base: str | None, commit: str,
@@ -538,6 +522,8 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
                   required_kind: str | None = None,
                   staging_contract_digest: str | None = None,
                   harness_digest: "Callable[[Path], str] | None" = None,
+                  named_files: tuple[str, ...] = (),
+                  record_path: str | None = None,
                   ) -> tuple[bool, str]:
     """The cheap pre-provider check: does this record still describe live code?
 
@@ -624,7 +610,8 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
 
     try:
         live_harness = harness_digest(repo_root)
-        live_env = pod_test_environment_digest(repo_root)["digest"]
+        live_env = pod_test_environment_digest(
+            repo_root, named_files=named_files)["digest"]
     except Exception as exc:                                   # noqa: BLE001
         return False, f"cannot digest the live tree: {exc}"
 
@@ -646,7 +633,10 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
         return False, ("the record names no swept_base_commit, so nothing "
                        "constrains what changed after the sweep")
     target = session_commit or head_commit(root)
-    allowed = list(PERMITTED_POST_SWEEP_PATHS)
+    if record_path is None:
+        return False, ("no record_path was supplied; which artifact the sweep\n"
+                       "writes is the caller's fact and this will not guess it")
+    allowed = list(permitted_post_sweep_paths(record_path))
     if authorization_path:
         allowed.append(authorization_path)
     lineage = lineage_from_swept_base(root, base, target, tuple(allowed))
@@ -665,5 +655,5 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
                   f"{lineage['reason']}")
 
 
-def load_record(repo_root: str | Path = ".") -> dict[str, Any]:
-    return json.loads((Path(repo_root) / RECORD_PATH).read_text())
+def load_record(repo_root: str | Path = ".", *, record_path: str) -> dict[str, Any]:
+    return json.loads((Path(repo_root) / record_path).read_text())

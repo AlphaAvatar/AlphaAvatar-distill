@@ -774,10 +774,8 @@ def test_the_continuation_fetches_no_checkpoints_and_waits_on_no_train_log():
 def test_the_authorization_binds_the_code_that_actually_runs():
     """It digested the preflight's files, so an edited continuation driver —
     the executable that spends the money — passed the gate unnoticed."""
-    from aadistill.governance.authorization import (
-        HARNESS_SOURCE_FILES_V1,
-        harness_source_digest,
-    )
+    from aadistill.governance.authorization import harness_source_digest
+    from experiments.preflight import HARNESS_SOURCE_FILES_V1
     from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1
 
     files = set(CONTINUATION_HARNESS_SOURCE_FILES_V1)

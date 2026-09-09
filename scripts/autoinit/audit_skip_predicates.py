@@ -192,7 +192,7 @@ def known_attributes() -> dict[str, str]:
 
     Derived, never transcribed: if `RECORD_PATH` moves, this moves with it.
     """
-    from aadistill.runtime import pod_environment as pe
+    from experiments.phase_c1 import pod_environment as pe
     # Quoted, because the expansion is read back by a literal-path regex: an
     # unquoted value expands and then resolves to nothing.
     return {k: f'"{v}"' for k, v in (
@@ -341,7 +341,7 @@ def predicates_in(path: Path, repo: Path, tracked: set[str] | None = None,
 
 def known_classification(nodeid: str) -> str | None:
     """Groups the readiness contract already names, by nodeid."""
-    from aadistill.runtime import pod_environment as pe
+    from experiments.phase_c1 import pod_environment as pe
     for group, members in (
             ("renderer_parity", pe.RENDERER_PARITY_NODEIDS),
             ("battery_source", pe.BATTERY_SOURCE_NODEIDS),

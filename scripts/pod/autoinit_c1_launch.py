@@ -51,7 +51,7 @@ from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Aut
 from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
 from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
 from aadistill.runtime.staging_contract import derive_contract  # noqa: E402
-from aadistill.runtime.pod_environment import (  # noqa: E402
+from experiments.phase_c1.pod_environment import (  # noqa: E402
     LAUNCH_BOUND,
     RECORD_PATH as POD_ENV_RECORD,
     load_record as load_pod_env_record,
@@ -60,7 +60,8 @@ from aadistill.runtime.pod_environment import (  # noqa: E402
 from aadistill.infrastructure.manifest import (  # noqa: E402
     sha256_file, sha256_json,
 )
-from aadistill.infrastructure.session import (  # noqa: E402
+from aadistill.infrastructure.session import (
+    ExecutionCommands,  # noqa: E402
     ArtifactPolicy, LocalAsset, MarkerPolicy, SessionContext, SessionSpec,
     SetupManifest, TeardownPolicy,
 )
@@ -793,6 +794,10 @@ def spec(args) -> SessionSpec:
         #: schema at load: each measures a different harness and carries a
         #: ceiling derived for different work.
         authorization_loader=C1Authorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py"),
         plan_id="autoinit.v1.phase_c1",
         #: The isolation plan's own hash, not Phase A's. C1 is different science,
         #: not a different operational identity for the same science.

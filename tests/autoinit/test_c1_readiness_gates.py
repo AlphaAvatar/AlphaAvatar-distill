@@ -31,7 +31,7 @@ sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.runtime import cpu_test_env as CTE
-from aadistill.runtime import pod_environment as pe
+from experiments.phase_c1 import pod_environment as pe
 from renderer_parity_gate import (EXPECTED_GROUPS, gate_verdict,  # noqa: E402
                                   run_parity)
 
@@ -653,8 +653,15 @@ def _swept_repo(tmp_path, monkeypatch):
     base = _git(root, "rev-parse", "HEAD")
 
     # Only the lineage is under test; make both digest checks agree by fiat.
-    monkeypatch.setattr(pe, "pod_test_environment_digest",
-                        lambda r=".": {"digest": "e" * 64, "n_files": 1})
+    #
+    # Patched on the RUNTIME module, which is where `verify_record` resolves the
+    # name. `pe` is C1's facade over it, and patching the facade leaves the call
+    # inside the mechanism untouched -- a synthetic repo does not contain the
+    # named non-harness files, so the real digest raises before the lineage
+    # check this test is about is ever reached.
+    from aadistill.runtime import pod_environment as _runtime_pe
+    monkeypatch.setattr(_runtime_pe, "pod_test_environment_digest",
+                        lambda r=".", **kw: {"digest": "e" * 64, "n_files": 1})
     from experiments.phase_c1 import authorization as ca
     monkeypatch.setattr(ca, "c1_harness_digest",
                         lambda r=".", files=None: {"digest": "h" * 64, "n_files": 1})
@@ -747,8 +754,10 @@ def test_changing_a_test_or_source_file_is_refused_by_the_digests(tmp_path,
     """
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     head = _commit(root, "tests/test_x.py", "def test_a(): assert True\n", "edit")
-    monkeypatch.setattr(pe, "pod_test_environment_digest",
-                        lambda r=".": {"digest": "9" * 64, "n_files": 1})
+    # On the runtime module, for the same reason as in `_swept_repo`.
+    from aadistill.runtime import pod_environment as _runtime_pe
+    monkeypatch.setattr(_runtime_pe, "pod_test_environment_digest",
+                        lambda r=".", **kw: {"digest": "9" * 64, "n_files": 1})
     ok, why = pe.verify_record(rec, root, session_commit=head, harness_digest=c1_digest)
     assert not ok
     assert "pod test environment" in why and "owed again" in why

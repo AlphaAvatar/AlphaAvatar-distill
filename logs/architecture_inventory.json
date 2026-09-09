@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 109,
-  "lines": 29792,
+  "lines": 29875,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -18,7 +18,7 @@
   },
   "sha256_literals": 0,
   "repo_id_literals": 0,
-  "path_literals": 23,
+  "path_literals": 9,
   "experiment_named_modules": 0,
   "family_access_outside_adapters": 0,
   "import_time_registration": 0,
@@ -30,90 +30,6 @@
   "sha256_literals": [],
   "repo_id_literals": [],
   "path_literals": [
-   {
-    "path": "src/aadistill/governance/authorization.py",
-    "owner": "<module>",
-    "line": 38,
-    "value": "scripts/pod/autoinit_preflight_launch.py"
-   },
-   {
-    "path": "src/aadistill/governance/authorization.py",
-    "owner": "<module>",
-    "line": 39,
-    "value": "scripts/pod/autoinit_preflight_driver.py"
-   },
-   {
-    "path": "src/aadistill/governance/authorization.py",
-    "owner": "<module>",
-    "line": 40,
-    "value": "scripts/pod/autoinit_preflight_setup.sh"
-   },
-   {
-    "path": "src/aadistill/governance/authorization.py",
-    "owner": "<module>",
-    "line": 45,
-    "value": "scripts/pod/autoinit_science_inputs.py"
-   },
-   {
-    "path": "src/aadistill/governance/authorization.py",
-    "owner": "<module>",
-    "line": 46,
-    "value": "scripts/pod/autoinit_engine_probe.py"
-   },
-   {
-    "path": "src/aadistill/governance/authorization.py",
-    "owner": "<module>",
-    "line": 47,
-    "value": "scripts/pod/watchdog.py"
-   },
-   {
-    "path": "src/aadistill/governance/authorization.py",
-    "owner": "<module>",
-    "line": 48,
-    "value": "scripts/pod/collect_artifacts.py"
-   },
-   {
-    "path": "src/aadistill/governance/post_freeze.py",
-    "owner": "<module>",
-    "line": 32,
-    "value": "logs/autoinit_phase_b_post_freeze_changes.json"
-   },
-   {
-    "path": "src/aadistill/governance/post_freeze.py",
-    "owner": "<module>",
-    "line": 34,
-    "value": "scripts/pod/autoinit_preflight_setup.sh"
-   },
-   {
-    "path": "src/aadistill/governance/post_freeze.py",
-    "owner": "<module>",
-    "line": 138,
-    "value": "logs/autoinit_phase_b_historical_amendments.json"
-   },
-   {
-    "path": "src/aadistill/governance/post_freeze.py",
-    "owner": "historical_accounted_for",
-    "line": 203,
-    "value": "logs/autoinit_phase_b_preregistration.json"
-   },
-   {
-    "path": "src/aadistill/infrastructure/session_runner.py",
-    "owner": "SessionRunner.launch_watchdog",
-    "line": 463,
-    "value": "scripts/pod/watchdog.py"
-   },
-   {
-    "path": "src/aadistill/infrastructure/session_runner.py",
-    "owner": "SessionRunner.setup_on_draw",
-    "line": 615,
-    "value": "scripts/pod/autoinit_preflight_setup.sh"
-   },
-   {
-    "path": "src/aadistill/infrastructure/session_runner.py",
-    "owner": "SessionRunner.collect_and_teardown",
-    "line": 789,
-    "value": "/src /opt/train/bin/python scripts/pod/collect_artifacts.py"
-   },
    {
     "path": "src/aadistill/initialization/planning/generation.py",
     "owner": "<module>",
@@ -227,7 +143,7 @@
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
     "owner": "SessionRunner._collect_setup_failure_evidence",
-    "line": 675,
+    "line": 679,
     "value": 400000
    },
    {
@@ -3887,11 +3803,11 @@
   "src/aadistill/governance/authorization.py": {
    "module": "aadistill.governance.authorization",
    "path": "src/aadistill/governance/authorization.py",
-   "lines": 273,
+   "lines": 314,
    "imports": [
     {
      "target": "__future__",
-     "line": 19,
+     "line": 26,
      "relative": 0,
      "names": [
       "annotations"
@@ -3899,25 +3815,26 @@
     },
     {
      "target": "hashlib",
-     "line": 21,
+     "line": 28,
      "relative": 0
     },
     {
      "target": "json",
-     "line": 22,
+     "line": 29,
      "relative": 0
     },
     {
      "target": "dataclasses",
-     "line": 23,
+     "line": 30,
      "relative": 0,
      "names": [
-      "dataclass"
+      "dataclass",
+      "field"
      ]
     },
     {
      "target": "pathlib",
-     "line": 24,
+     "line": 31,
      "relative": 0,
      "names": [
       "Path"
@@ -3925,7 +3842,7 @@
     },
     {
      "target": "typing",
-     "line": 25,
+     "line": 32,
      "relative": 0,
      "names": [
       "Any"
@@ -3933,7 +3850,7 @@
     },
     {
      "target": "aadistill.infrastructure.manifest",
-     "line": 27,
+     "line": 34,
      "relative": 0,
      "names": [
       "sha256_file",
@@ -3944,200 +3861,110 @@
    "internal_imports": [
     "aadistill.infrastructure.manifest"
    ],
-   "literals": [
-    {
-     "value": "scripts/pod/autoinit_preflight_launch.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 38,
-     "experiment_tokens": []
-    },
-    {
-     "value": "scripts/pod/autoinit_preflight_driver.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 39,
-     "experiment_tokens": []
-    },
-    {
-     "value": "scripts/pod/autoinit_preflight_setup.sh",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 40,
-     "experiment_tokens": []
-    },
-    {
-     "value": "scripts/pod/autoinit_science_inputs.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 45,
-     "experiment_tokens": []
-    },
-    {
-     "value": "scripts/pod/autoinit_engine_probe.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 46,
-     "experiment_tokens": []
-    },
-    {
-     "value": "scripts/pod/watchdog.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 47,
-     "experiment_tokens": []
-    },
-    {
-     "value": "scripts/pod/collect_artifacts.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 48,
-     "experiment_tokens": []
-    },
-    {
-     "value": "phase_a_authorized",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "SpendAuthorization.as_dict",
-     "line": 142,
-     "experiment_tokens": [
-      "phase_a"
-     ]
-    },
-    {
-     "value": "automatic_phase_a_start",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "SpendAuthorization.as_dict",
-     "line": 143,
-     "experiment_tokens": [
-      "phase_a"
-     ]
-    },
-    {
-     "value": "phase_a_authorized",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "SpendAuthorization.load",
-     "line": 226,
-     "experiment_tokens": [
-      "phase_a"
-     ]
-    },
-    {
-     "value": "automatic_phase_a_start",
-     "kinds": [
-      "experiment_token"
-     ],
-     "owner": "SpendAuthorization.load",
-     "line": 226,
-     "experiment_tokens": [
-      "phase_a"
-     ]
-    }
-   ],
+   "literals": [],
    "family_attribute_access": [],
    "definitions": [
     {
      "name": "AuthorizationError",
      "kind": "class",
      "qualname": "AuthorizationError",
-     "line": 30
+     "line": 37
+    },
+    {
+     "name": "ActionPolicy",
+     "kind": "class",
+     "qualname": "ActionPolicy",
+     "line": 46
+    },
+    {
+     "name": "allows",
+     "kind": "function",
+     "qualname": "ActionPolicy.allows",
+     "line": 59
+    },
+    {
+     "name": "refuse",
+     "kind": "function",
+     "qualname": "ActionPolicy.refuse",
+     "line": 62
+    },
+    {
+     "name": "check_claims",
+     "kind": "function",
+     "qualname": "ActionPolicy.check_claims",
+     "line": 69
     },
     {
      "name": "harness_source_digest",
      "kind": "function",
      "qualname": "harness_source_digest",
-     "line": 65
+     "line": 84
     },
     {
      "name": "SpendAuthorization",
      "kind": "class",
      "qualname": "SpendAuthorization",
-     "line": 85
+     "line": 116
     },
     {
-     "name": "allows_phase_a",
+     "name": "allows",
      "kind": "function",
-     "qualname": "SpendAuthorization.allows_phase_a",
-     "line": 121
+     "qualname": "SpendAuthorization.allows",
+     "line": 153
     },
     {
-     "name": "automatic_phase_a_start",
+     "name": "refuse",
      "kind": "function",
-     "qualname": "SpendAuthorization.automatic_phase_a_start",
-     "line": 125
+     "qualname": "SpendAuthorization.refuse",
+     "line": 157
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "SpendAuthorization.as_dict",
-     "line": 128
+     "line": 161
     },
     {
      "name": "require_plan",
      "kind": "function",
      "qualname": "SpendAuthorization.require_plan",
-     "line": 158
+     "line": 191
     },
     {
      "name": "require_stage",
      "kind": "function",
      "qualname": "SpendAuthorization.require_stage",
-     "line": 165
+     "line": 198
     },
     {
      "name": "require_within_cap",
      "kind": "function",
      "qualname": "SpendAuthorization.require_within_cap",
-     "line": 171
+     "line": 204
     },
     {
      "name": "require_harness",
      "kind": "function",
      "qualname": "SpendAuthorization.require_harness",
-     "line": 177
+     "line": 210
     },
     {
      "name": "require_within_launch_limit",
      "kind": "function",
      "qualname": "SpendAuthorization.require_within_launch_limit",
-     "line": 200
-    },
-    {
-     "name": "refuse_phase_a",
-     "kind": "function",
-     "qualname": "SpendAuthorization.refuse_phase_a",
-     "line": 211
+     "line": 233
     },
     {
      "name": "load",
      "kind": "function",
      "qualname": "SpendAuthorization.load",
-     "line": 217
+     "line": 245
     },
     {
      "name": "authorization_from_dict",
      "kind": "function",
      "qualname": "authorization_from_dict",
-     "line": 256
+     "line": 297
     }
    ],
    "import_time_calls": [],
@@ -4327,7 +4154,7 @@
   "src/aadistill/governance/post_freeze.py": {
    "module": "aadistill.governance.post_freeze",
    "path": "src/aadistill/governance/post_freeze.py",
-   "lines": 299,
+   "lines": 302,
    "imports": [
     {
      "target": "__future__",
@@ -4374,45 +4201,12 @@
    "internal_imports": [],
    "literals": [
     {
-     "value": "logs/autoinit_phase_b_post_freeze_changes.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 32,
-     "experiment_tokens": [
-      "phase_b"
-     ]
-    },
-    {
-     "value": "scripts/pod/autoinit_preflight_setup.sh",
-     "kinds": [
-      "path"
-     ],
-     "owner": "<module>",
-     "line": 34,
-     "experiment_tokens": []
-    },
-    {
-     "value": "logs/autoinit_phase_b_historical_amendments.json",
-     "kinds": [
-      "path",
-      "experiment_token"
-     ],
-     "owner": "<module>",
-     "line": 138,
-     "experiment_tokens": [
-      "phase_b"
-     ]
-    },
-    {
      "value": "aadistill.autoinit.phase_b_historical_amendments/v1",
      "kinds": [
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 139,
+     "line": 140,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4423,7 +4217,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 198,
+     "line": 201,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4431,18 +4225,6 @@
     {
      "value": "phase_b_frozen_source_digest",
      "kinds": [
-      "experiment_token"
-     ],
-     "owner": "historical_accounted_for",
-     "line": 200,
-     "experiment_tokens": [
-      "phase_b"
-     ]
-    },
-    {
-     "value": "logs/autoinit_phase_b_preregistration.json",
-     "kinds": [
-      "path",
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
@@ -4457,7 +4239,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 206,
+     "line": 209,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4468,7 +4250,7 @@
       "experiment_token"
      ],
      "owner": "historical_accounted_for",
-     "line": 234,
+     "line": 237,
      "experiment_tokens": [
       "phase_b"
      ]
@@ -4480,7 +4262,7 @@
      "name": "dispatch_branch_hashes",
      "kind": "function",
      "qualname": "dispatch_branch_hashes",
-     "line": 45
+     "line": 44
     },
     {
      "name": "accounted_for",
@@ -4516,7 +4298,7 @@
      "name": "_rederive_last_entry",
      "kind": "function",
      "qualname": "_rederive_last_entry",
-     "line": 253
+     "line": 256
     }
    ],
    "import_time_calls": [],
@@ -5797,7 +5579,7 @@
   "src/aadistill/infrastructure/session.py": {
    "module": "aadistill.infrastructure.session",
    "path": "src/aadistill/infrastructure/session.py",
-   "lines": 681,
+   "lines": 715,
    "imports": [
     {
      "target": "__future__",
@@ -5884,7 +5666,7 @@
       "float"
      ],
      "owner": "BudgetSpec",
-     "line": 345,
+     "line": 374,
      "experiment_tokens": []
     },
     {
@@ -5893,7 +5675,7 @@
       "float"
      ],
      "owner": "BudgetSpec",
-     "line": 349,
+     "line": 378,
      "experiment_tokens": []
     },
     {
@@ -5902,7 +5684,7 @@
       "experiment_token"
      ],
      "owner": "SessionSpec.validate",
-     "line": 486,
+     "line": 520,
      "experiment_tokens": [
       "phase_a"
      ]
@@ -5913,7 +5695,7 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 668,
+     "line": 702,
      "experiment_tokens": [
       "attempt"
      ]
@@ -5976,112 +5758,124 @@
      "line": 194
     },
     {
+     "name": "ExecutionCommands",
+     "kind": "class",
+     "qualname": "ExecutionCommands",
+     "line": 200
+    },
+    {
+     "name": "as_dict",
+     "kind": "function",
+     "qualname": "ExecutionCommands.as_dict",
+     "line": 222
+    },
+    {
      "name": "SetupManifest",
      "kind": "class",
      "qualname": "SetupManifest",
-     "line": 200
+     "line": 229
     },
     {
      "name": "assets_env",
      "kind": "function",
      "qualname": "SetupManifest.assets_env",
-     "line": 229
+     "line": 258
     },
     {
      "name": "test_ignores_env",
      "kind": "function",
      "qualname": "SetupManifest.test_ignores_env",
-     "line": 232
+     "line": 261
     },
     {
      "name": "staged_relay_inputs",
      "kind": "function",
      "qualname": "SetupManifest.staged_relay_inputs",
-     "line": 235
+     "line": 264
     },
     {
      "name": "relay_env",
      "kind": "function",
      "qualname": "SetupManifest.relay_env",
-     "line": 239
+     "line": 268
     },
     {
      "name": "MarkerPolicy",
      "kind": "class",
      "qualname": "MarkerPolicy",
-     "line": 256
+     "line": 285
     },
     {
      "name": "is_incomplete",
      "kind": "function",
      "qualname": "MarkerPolicy.is_incomplete",
-     "line": 267
+     "line": 296
     },
     {
      "name": "stage2_passed",
      "kind": "function",
      "qualname": "MarkerPolicy.stage2_passed",
-     "line": 270
+     "line": 299
     },
     {
      "name": "ArtifactPolicy",
      "kind": "class",
      "qualname": "ArtifactPolicy",
-     "line": 277
+     "line": 306
     },
     {
      "name": "TeardownPolicy",
      "kind": "class",
      "qualname": "TeardownPolicy",
-     "line": 317
+     "line": 346
     },
     {
      "name": "BudgetSpec",
      "kind": "class",
      "qualname": "BudgetSpec",
-     "line": 329
+     "line": 358
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "BudgetSpec.plan",
-     "line": 352
+     "line": 381
     },
     {
      "name": "SessionContext",
      "kind": "class",
      "qualname": "SessionContext",
-     "line": 374
+     "line": 403
     },
     {
      "name": "SessionSpec",
      "kind": "class",
      "qualname": "SessionSpec",
-     "line": 406
+     "line": 435
     },
     {
      "name": "validate",
      "kind": "function",
      "qualname": "SessionSpec.validate",
-     "line": 469
+     "line": 503
     },
     {
      "name": "setup_environment",
      "kind": "function",
      "qualname": "SessionSpec.setup_environment",
-     "line": 584
+     "line": 618
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "SessionSpec.as_dict",
-     "line": 610
+     "line": 644
     },
     {
      "name": "missing_arguments",
      "kind": "function",
      "qualname": "missing_arguments",
-     "line": 674
+     "line": 708
     }
    ],
    "import_time_calls": [],
@@ -6195,7 +5989,7 @@
   "src/aadistill/infrastructure/session_runner.py": {
    "module": "aadistill.infrastructure.session_runner",
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "lines": 1014,
+   "lines": 1019,
    "imports": [
     {
      "target": "__future__",
@@ -6330,7 +6124,7 @@
     },
     {
      "target": "tarfile",
-     "line": 817,
+     "line": 822,
      "relative": 0
     }
    ],
@@ -6388,21 +6182,12 @@
      ]
     },
     {
-     "value": "scripts/pod/watchdog.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "SessionRunner.launch_watchdog",
-     "line": 463,
-     "experiment_tokens": []
-    },
-    {
      "value": "attempt",
      "kinds": [
       "experiment_token"
      ],
      "owner": "SessionRunner.wait_endpoint",
-     "line": 506,
+     "line": 507,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6413,7 +6198,7 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.read_image_digest",
-     "line": 552,
+     "line": 553,
      "experiment_tokens": [
       "attempt"
      ]
@@ -6424,19 +6209,10 @@
       "experiment_token"
      ],
      "owner": "SessionRunner.read_image_digest",
-     "line": 561,
+     "line": 562,
      "experiment_tokens": [
       "attempt"
      ]
-    },
-    {
-     "value": "scripts/pod/autoinit_preflight_setup.sh",
-     "kinds": [
-      "path"
-     ],
-     "owner": "SessionRunner.setup_on_draw",
-     "line": 615,
-     "experiment_tokens": []
     },
     {
      "value": 400000,
@@ -6444,16 +6220,7 @@
       "big_int"
      ],
      "owner": "SessionRunner._collect_setup_failure_evidence",
-     "line": 675,
-     "experiment_tokens": []
-    },
-    {
-     "value": "/src /opt/train/bin/python scripts/pod/collect_artifacts.py",
-     "kinds": [
-      "path"
-     ],
-     "owner": "SessionRunner.collect_and_teardown",
-     "line": 789,
+     "line": 679,
      "experiment_tokens": []
     }
    ],
@@ -6565,61 +6332,61 @@
      "name": "wait_endpoint",
      "kind": "function",
      "qualname": "SessionRunner.wait_endpoint",
-     "line": 482
+     "line": 483
     },
     {
      "name": "read_image_digest",
      "kind": "function",
      "qualname": "SessionRunner.read_image_digest",
-     "line": 525
+     "line": 526
     },
     {
      "name": "setup_on_draw",
      "kind": "function",
      "qualname": "SessionRunner.setup_on_draw",
-     "line": 579
+     "line": 580
     },
     {
      "name": "_collect_setup_failure_evidence",
      "kind": "function",
      "qualname": "SessionRunner._collect_setup_failure_evidence",
-     "line": 653
+     "line": 657
     },
     {
      "name": "run",
      "kind": "function",
      "qualname": "SessionRunner.run",
-     "line": 682
+     "line": 686
     },
     {
      "name": "collect_and_teardown",
      "kind": "function",
      "qualname": "SessionRunner.collect_and_teardown",
-     "line": 786
+     "line": 790
     },
     {
      "name": "finish_emergency",
      "kind": "function",
      "qualname": "SessionRunner.finish_emergency",
-     "line": 935
+     "line": 940
     },
     {
      "name": "teardown_now",
      "kind": "function",
      "qualname": "SessionRunner.teardown_now",
-     "line": 956
+     "line": 961
     },
     {
      "name": "_shell_quote",
      "kind": "function",
      "qualname": "_shell_quote",
-     "line": 982
+     "line": 987
     },
     {
      "name": "run_session",
      "kind": "function",
      "qualname": "run_session",
-     "line": 989
+     "line": 994
     }
    ],
    "import_time_calls": [],
@@ -7118,7 +6885,7 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "self_attn",
+     "probe": "q_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 198
     },
@@ -7130,19 +6897,19 @@
     },
     {
      "chain": "self_attn.v_proj",
-     "probe": "self_attn",
+     "probe": "v_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 200
     },
     {
      "chain": "mlp.gate_proj",
-     "probe": "gate_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 201
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "up_proj",
+     "probe": "mlp",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 202
     },

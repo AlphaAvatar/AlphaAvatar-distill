@@ -45,7 +45,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from aadistill.governance.authorization import SpendAuthorization  # noqa: E402
 from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
-from aadistill.infrastructure.session import (  # noqa: E402
+from aadistill.infrastructure.session import (
+    ExecutionCommands,  # noqa: E402
     ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, RelayInput,
     SessionContext, SessionSpec, SetupManifest, TeardownPolicy,
 )
@@ -210,6 +211,10 @@ def spec(args) -> SessionSpec:
                      "frozen thresholds"),
         authorization_path=AUTH_PATH,
         authorization_loader=SpendAuthorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py"),
         plan_id=CONTINUATION_PLAN_V1.plan_id,
         plan_hash=CONTINUATION_PLAN_V1.plan_hash,
         budget=BudgetSpec(

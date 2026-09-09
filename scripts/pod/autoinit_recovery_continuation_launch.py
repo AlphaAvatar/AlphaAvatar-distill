@@ -47,7 +47,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE  # noqa: E402
 from experiments.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization, SEARCH_ONLY_HARNESS_FILES, recovery_continuation_harness_digest  # noqa: E402
-from aadistill.infrastructure.session import (  # noqa: E402
+from aadistill.infrastructure.session import (
+    ExecutionCommands,  # noqa: E402
     ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,
     SetupManifest, TeardownPolicy,
 )
@@ -193,6 +194,10 @@ def spec(args) -> SessionSpec:
         #: digest that never read its launcher, driver or importer, at a price
         #: derived for work it does not do.
         authorization_loader=RecoveryContinuationAuthorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py"),
         #: The SAME frozen plan. This session is a different operational
         #: identity, not a different science: nothing here rewrites 9377a2dc to
         #: pretend Phase A always began at stage 2.

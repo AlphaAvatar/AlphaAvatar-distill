@@ -53,7 +53,8 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     PreflightStage,
 )
 from aadistill.infrastructure.budget import Phase  # noqa: E402
-from aadistill.infrastructure.session import (  # noqa: E402
+from aadistill.infrastructure.session import (
+    ExecutionCommands,  # noqa: E402
     ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, RelayInput,
     SessionContext, SessionSpec, SetupManifest, TeardownPolicy,
 )
@@ -138,6 +139,10 @@ def spec(args) -> SessionSpec:
         #: so this session cannot start Phase A even if pointed at the wrong
         #: artifact. The canary is infrastructure, not science.
         authorization_loader=SpendAuthorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py"),
         plan_id=CANARY_PLAN_V1.plan_id,
         plan_hash=CANARY_PLAN_V1.plan_hash,
         budget=BudgetSpec(

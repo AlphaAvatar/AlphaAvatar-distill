@@ -57,7 +57,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
-from aadistill.infrastructure.session import (  # noqa: E402
+from aadistill.infrastructure.session import (
+    ExecutionCommands,  # noqa: E402
     ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, RelayInput,
     SessionContext, SessionSpec, SetupManifest, TeardownPolicy,
 )
@@ -567,6 +568,10 @@ def spec(args) -> SessionSpec:
         #: The one artifact type that CAN grant Phase A. Naming it is what makes
         #: the permission a property of the declaration.
         authorization_loader=PhaseAAuthorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py"),
         plan_id=PHASE_A_PLAN_V1.plan_id,
         plan_hash=PHASE_A_PLAN_V1.plan_hash,
         budget=budget(args),

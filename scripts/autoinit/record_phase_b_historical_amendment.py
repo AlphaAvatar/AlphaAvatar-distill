@@ -36,16 +36,18 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from aadistill.governance.authorization import HARNESS_SOURCE_FILES_V1  # noqa: E402
+from experiments.preflight import HARNESS_SOURCE_FILES_V1  # noqa: E402
 from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
 from experiments.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, phase_b_source_digest  # noqa: E402
 from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2  # noqa: E402
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
 from aadistill.governance.post_freeze import (  # noqa: E402
-    HISTORICAL_LEDGER_PATH,
     HISTORICAL_LEDGER_SCHEMA,
-    SEALED_LEGACY_NOTE,
     entry_self_hash,
+)
+from experiments.phase_b.post_freeze import (  # noqa: E402
+    HISTORICAL_LEDGER_PATH,
+    SEALED_LEGACY_NOTE,
 )
 
 PREREG = "logs/autoinit_phase_b_preregistration.json"

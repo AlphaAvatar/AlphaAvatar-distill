@@ -27,11 +27,10 @@ import subprocess
 import re
 from pathlib import Path
 
-#: Where the declaration lives. One file, so a second undeclared change cannot
-#: hide behind a differently-named note.
-NOTE_PATH = "logs/autoinit_phase_b_post_freeze_changes.json"
-
-SETUP_SCRIPT = "scripts/pod/autoinit_preflight_setup.sh"
+#: Every path this module works on is CALLER-SUPPLIED. It used to name one
+#: phase's note, ledger, preregistration and setup script, which made a generic
+#: accounting mechanism unusable by any other phase without editing it. The
+#: Phase-B values now live in `scripts/experiments/phase_b/post_freeze.py`.
 
 #: `[a-z0-9_]`, not `[a-z_]`. The original class could not match a kind with a
 #: digit, so a `c1` branch was invisible here: its body was absorbed into the
@@ -42,17 +41,18 @@ _BRANCH = re.compile(r'^(?:el)?if \[ "\$SESSION_KIND" = "([a-z0-9_]+)" \]; then$
                      re.M)
 
 
-def dispatch_branch_hashes(repo_root: str | Path = ".") -> dict[str, str]:
+def dispatch_branch_hashes(repo_root: str | Path = ".", *,
+                           setup_script: str) -> dict[str, str]:
     """One hash per `SESSION_KIND` branch, sliced at the next branch keyword.
 
     Sliced at the next `elif` **of any kind**, not at a named one: an inserted
     branch would otherwise be absorbed into its predecessor's slice and the
     predecessor would read as changed when it is not.
     """
-    text = (Path(repo_root) / SETUP_SCRIPT).read_text()
+    text = (Path(repo_root) / setup_script).read_text()
     marks = [(m.group(1), m.start(), m.end()) for m in _BRANCH.finditer(text)]
     if not marks:
-        raise ValueError(f"{SETUP_SCRIPT} declares no SESSION_KIND branches")
+        raise ValueError(f"{setup_script} declares no SESSION_KIND branches")
     end_all = text.index("\nelse\n", marks[0][1])
     out: dict[str, str] = {}
     for i, (kind, _, body_start) in enumerate(marks):
@@ -62,7 +62,8 @@ def dispatch_branch_hashes(repo_root: str | Path = ".") -> dict[str, str]:
 
 
 def accounted_for(frozen_digest: str, observed_digest: str,
-                  repo_root: str | Path = ".") -> tuple[bool, str]:
+                  repo_root: str | Path = ".", *,
+                  note_path: str, setup_script: str) -> tuple[bool, str]:
     """Is this drift declared, additive, and harmless to existing sessions?
 
     Returns `(False, reason)` for an undeclared, stale, non-additive, or
@@ -72,28 +73,28 @@ def accounted_for(frozen_digest: str, observed_digest: str,
         return True, "the executable is the one that was frozen"
 
     root = Path(repo_root)
-    note_path = root / NOTE_PATH
-    if not note_path.is_file():
+    note_file = root / note_path
+    if not note_file.is_file():
         return False, (
             f"the executable digests to {observed_digest[:12]}… but the record "
             f"froze {frozen_digest[:12]}…, and nothing declares why")
     try:
-        note = json.loads(note_path.read_text())
+        note = json.loads(note_file.read_text())
     except json.JSONDecodeError as exc:
-        return False, f"{NOTE_PATH} is not readable: {exc}"
+        return False, f"{note_path} is not readable: {exc}"
 
     if note.get("frozen_digest") != frozen_digest:
-        return False, (f"{NOTE_PATH} describes a freeze at "
+        return False, (f"{note_path} describes a freeze at "
                        f"{str(note.get('frozen_digest'))[:12]}…, not "
                        f"{frozen_digest[:12]}…")
     if note.get("post_freeze_digest") != observed_digest:
-        return False, (f"{NOTE_PATH} accounts for "
+        return False, (f"{note_path} accounts for "
                        f"{str(note.get('post_freeze_digest'))[:12]}… but the tree "
                        f"digests to {observed_digest[:12]}…; a further change was "
                        "made and not declared")
     change = note.get("change") or {}
     if change.get("additive_only") is not True or change.get("lines_removed") != 0:
-        return False, (f"{NOTE_PATH} declares a change that is not additive; a "
+        return False, (f"{note_path} declares a change that is not additive; a "
                        "removal or edit must fail closed")
     branches = note.get("dispatch_branches") or {}
     if branches.get("pre_existing_changed"):
@@ -106,13 +107,13 @@ def accounted_for(frozen_digest: str, observed_digest: str,
     for kind, recorded in (branches.get("pre_existing_unchanged") or {}).items():
         if observed_branches.get(kind) != recorded:
             return False, (f"the {kind!r} dispatch branch does not hash to what "
-                           f"{NOTE_PATH} records; it changed after the change was "
+                           f"{note_path} records; it changed after the change was "
                            "reviewed")
     added = sorted(set(observed_branches) - set(branches.get("pre_existing_unchanged") or {}))
     if added != sorted(branches.get("added") or []):
         return False, (f"the script declares branches {added} but the note records "
                        f"{sorted(branches.get('added') or [])}")
-    return True, (f"drift declared in {NOTE_PATH}: additive, "
+    return True, (f"drift declared in {note_path}: additive, "
                   f"{len(observed_branches)} branches, "
                   f"{len(branches.get('pre_existing_unchanged') or {})} pre-existing "
                   "byte-identical")
@@ -135,12 +136,11 @@ def accounted_for(frozen_digest: str, observed_digest: str,
 # is deliberately not readable by `preregistration_gate`, and every entry has to
 # say so in its own fields before it will verify.
 
-HISTORICAL_LEDGER_PATH = "logs/autoinit_phase_b_historical_amendments.json"
+#: Kept as the SCHEMA name only; the path is a parameter.
 HISTORICAL_LEDGER_SCHEMA = "aadistill.autoinit.phase_b_historical_amendments/v1"
 
 #: The sealed v1 declaration. Anchored by hash, never rewritten: an amendment
 #: that could edit the record it amends is not an amendment.
-SEALED_LEGACY_NOTE = NOTE_PATH
 
 
 def _sha_file(path: Path) -> str:
@@ -163,7 +163,10 @@ def _git(repo_root: Path, *args: str) -> str:
 
 
 def historical_accounted_for(frozen_digest: str, observed_digest: str,
-                             repo_root: str | Path = ".") -> tuple[bool, str]:
+                             repo_root: str | Path = ".", *,
+                             ledger_path: str, sealed_note: str,
+                             setup_script: str,
+                             preregistration_path: str) -> tuple[bool, str]:
     """Is the drift from `frozen_digest` to `observed_digest` reviewed HISTORY?
 
     Answers only that. A `True` here is not permission to launch anything, and
@@ -178,18 +181,18 @@ def historical_accounted_for(frozen_digest: str, observed_digest: str,
         return True, "the executable is the one that was frozen"
 
     root = Path(repo_root)
-    path = root / HISTORICAL_LEDGER_PATH
+    path = root / ledger_path
     if not path.is_file():
         return False, (f"the executable digests to {observed_digest[:12]}… but "
                        f"the record froze {frozen_digest[:12]}…, and "
-                       f"{HISTORICAL_LEDGER_PATH} does not exist")
+                       f"{ledger_path} does not exist")
     try:
         led = json.loads(path.read_text())
     except json.JSONDecodeError as exc:
-        return False, f"{HISTORICAL_LEDGER_PATH} is not readable: {exc}"
+        return False, f"{ledger_path} is not readable: {exc}"
 
     if led.get("schema") != HISTORICAL_LEDGER_SCHEMA:
-        return False, f"{HISTORICAL_LEDGER_PATH} declares schema {led.get('schema')!r}"
+        return False, f"{ledger_path} declares schema {led.get('schema')!r}"
     if led.get("consumed_by_a_paid_launch_gate") is not False:
         return False, ("the ledger does not declare itself unusable by a paid "
                        "launch gate")
@@ -200,15 +203,15 @@ def historical_accounted_for(frozen_digest: str, observed_digest: str,
                        f"{str(anchors.get('phase_b_frozen_source_digest'))[:12]}…, "
                        f"not {frozen_digest[:12]}…")
 
-    prereg = root / "logs/autoinit_phase_b_preregistration.json"
+    prereg = root / preregistration_path
     if not prereg.is_file():
         return False, "the immutable Phase-B preregistration is missing"
     if anchors.get("phase_b_preregistration_sha256") != _sha_file(prereg):
         return False, ("the immutable Phase-B preregistration has changed since "
                        "the ledger anchored it")
-    sealed = root / SEALED_LEGACY_NOTE
+    sealed = root / sealed_note
     if not sealed.is_file():
-        return False, f"the sealed legacy note {SEALED_LEGACY_NOTE} is missing"
+        return False, f"the sealed legacy note {sealed_note} is missing"
     if anchors.get("sealed_legacy_note_sha256") != _sha_file(sealed):
         return False, ("the sealed legacy v1 declaration has been modified; it "
                        "is anchored by hash and must stay byte-identical")

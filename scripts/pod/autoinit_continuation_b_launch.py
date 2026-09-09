@@ -50,7 +50,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
-from aadistill.infrastructure.session import (  # noqa: E402
+from aadistill.infrastructure.session import (
+    ExecutionCommands,  # noqa: E402
     ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,
     SetupManifest, TeardownPolicy,
 )
@@ -414,6 +415,10 @@ def spec(args) -> SessionSpec:
         #: Refused by schema if a full Phase-B artifact is passed: that grant
         #: authorizes a search this session must not run.
         authorization_loader=ContinuationAuthorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py"),
         plan_id=CONTINUATION_PLAN_V1.plan_id,
         plan_hash=CONTINUATION_PLAN_V1.plan_hash,
         budget=continuation_budget(args),

@@ -42,7 +42,8 @@ from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
-from aadistill.infrastructure.session import (  # noqa: E402
+from aadistill.infrastructure.session import (
+    ExecutionCommands,  # noqa: E402
     ArtifactPolicy, LocalAsset, MarkerPolicy, RelayInput, SessionContext,
     SessionSpec, SetupManifest, TeardownPolicy,
 )
@@ -493,7 +494,7 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
     # preregistration would destroy the record of what attempt 5 executed, so
     # declared additive drift that leaves every pre-existing branch
     # byte-identical is accepted and everything else still fails closed.
-    from aadistill.governance.post_freeze import accounted_for
+    from experiments.phase_b.post_freeze import accounted_for
 
     ok, why = accounted_for(prereg["executable_source"]["digest"], observed,
                             REPO_ROOT)
@@ -609,6 +610,10 @@ def spec(args) -> SessionSpec:
         #: Refused by schema if a Phase-A artifact is passed. Phase A is
         #: complete; its grant measures a different harness at a different price.
         authorization_loader=PhaseBAuthorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py"),
         plan_id=PHASE_B_PLAN_V1.plan_id,
         plan_hash=PHASE_B_PLAN_V1.plan_hash,
         budget=phase_b_budget(args),

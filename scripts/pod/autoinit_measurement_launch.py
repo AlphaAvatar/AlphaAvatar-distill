@@ -44,7 +44,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from aadistill.governance.authorization import SpendAuthorization  # noqa: E402
 from experiments.measurement.plan import MEASUREMENT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
-from aadistill.infrastructure.session import (  # noqa: E402
+from aadistill.infrastructure.session import (
+    ExecutionCommands,  # noqa: E402
     ArtifactPolicy, BudgetSpec, LocalAsset, MarkerPolicy, SessionContext,
     SessionSpec, SetupManifest, TeardownPolicy,
 )
@@ -113,6 +114,10 @@ def spec(args) -> SessionSpec:
         #: The ordinary type. `allows_phase_a` is a hard False, so a measurement
         #: pointed at a Phase-A artifact refuses it rather than running it.
         authorization_loader=SpendAuthorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py"),
         plan_id=MEASUREMENT_PLAN_V1.plan_id,
         plan_hash=MEASUREMENT_PLAN_V1.plan_hash,
         budget=BudgetSpec(

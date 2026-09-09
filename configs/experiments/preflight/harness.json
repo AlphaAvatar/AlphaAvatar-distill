@@ -1,0 +1,21 @@
+{
+ "schema": "aadistill.harness_source_set/v1",
+ "_contract": "The executable a preflight session runs, and the version of that declaration. EXPERIMENT DATA: which scripts a session executes is the session's fact, not the governance mechanism's. Transcribed without edit, so the digest is unchanged. AUTHORIZES NOTHING.",
+ "harness_set_id": "preflight_harness",
+ "set_version": 2,
+ "files": [
+  "scripts/pod/autoinit_preflight_launch.py",
+  "scripts/pod/autoinit_preflight_driver.py",
+  "scripts/pod/autoinit_preflight_setup.sh",
+  "scripts/pod/autoinit_science_inputs.py",
+  "scripts/pod/autoinit_engine_probe.py",
+  "scripts/pod/watchdog.py",
+  "scripts/pod/collect_artifacts.py",
+  "src/aadistill/infrastructure/session.py",
+  "src/aadistill/infrastructure/session_runner.py",
+  "src/aadistill/infrastructure/session_prechecks.py",
+  "src/aadistill/governance/authorization.py",
+  "src/aadistill/initialization/planning/generation.py"
+ ],
+ "authorizes": "nothing"
+}

@@ -460,7 +460,8 @@ class SessionRunner:
         journal = self.scr / "watchdog.jsonl"
         if self._watchdog_for and self._watchdog_for == self.pod_id:
             return journal
-        cmd = [sys.executable, str(self.repo_root / "scripts/pod/watchdog.py"),
+        cmd = [sys.executable,
+               str(self.repo_root / self.spec.commands.watchdog),
                "--pod-id", self.pod_id,
                "--session-start-epoch", str(self.start_epoch),
                "--price-per-hour", str(self.price),
@@ -611,9 +612,9 @@ class SessionRunner:
             subprocess.run(scp + ["-r", str(self.repo_root / asset.repo_path),
                                   f"root@{host}:{WS}/assets/{asset.dest_name}"],
                            capture_output=True, timeout=600)
-        subprocess.run(scp + [str(self.repo_root
-                                  / "scripts/pod/autoinit_preflight_setup.sh"),
-                              f"root@{host}:{WS}/"], capture_output=True, timeout=180)
+        setup_script = self.repo_root / self.spec.commands.setup_script
+        subprocess.run(scp + [str(setup_script), f"root@{host}:{WS}/"],
+                       capture_output=True, timeout=180)
 
         try:
             self.image_digest = self.read_image_digest(target, startup_deadline)
@@ -628,11 +629,14 @@ class SessionRunner:
         self.say(f"draw {draw}: running setup")
         env = self.spec.setup_environment(session_commit=self.a.session_commit,
                                           bundle=self.a.bundle)
+        #: The uploaded script keeps its basename on the pod, so the name the
+        #: session declared is the name that runs.
+        setup_name = Path(self.spec.commands.setup_script).name
         self.ev["setup_environment"] = {k: v for k, v in sorted(env.items())}
         rendered = " ".join(f"{k}={_shell_quote(v)}" for k, v in sorted(env.items()))
         target.run(
             f"cd {WS} && {rendered} "
-            f"bash {WS}/autoinit_preflight_setup.sh > {WS}/setup.log 2>&1; "
+            f"bash {WS}/{setup_name} > {WS}/setup.log 2>&1; "
             f"echo SETUP_RC=$? >> {WS}/setup.log",
             timeout=self.a.setup_timeout_s)
         result = parse_setup_probe(target.run(
@@ -786,8 +790,9 @@ class SessionRunner:
     def collect_and_teardown(self, target, host, scp, terminal: str) -> bool:
         art = self.spec.artifacts
         success = self.spec.markers.success
-        cc = (f"cd {REPO} && PYTHONPATH={REPO}/src /opt/train/bin/python "
-              "scripts/pod/collect_artifacts.py")
+        cc = (f"cd {REPO} && PYTHONPATH={REPO}/src "
+              f"{self.spec.commands.remote_python} "
+              f"{self.spec.commands.artifact_collector}")
         audit = f"{REPO}/artifacts/audit/{art.audit_dirname}"
         target.run(f"mkdir -p {audit}/session && "
                    f"cp {self.spec.run_log_path} {self.spec.status_path} "
