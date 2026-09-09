@@ -706,6 +706,115 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "7d926ded2413425fac9bcbcdb671464020d317a9b477120028d0d6d3a355f4a0"
+  },
+  {
+   "amendment_id": "PHB-HA-006",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-09T16:10:40+00:00",
+   "reviewed_base_commit": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+   "source_repair_commit": "13587c994c62383cd70038f2494c7b6f004de91b",
+   "source_repair_parent": "9c0ed25502917c02d487a2ed81f4e3f341a9ff12",
+   "previous_live_digest": "f7bc9cea17585602050e8ff5434446f6c4efd9fed859ad22e5e54fe07323dc16",
+   "new_live_digest": "31aac7743b7c21ad217a961fd406ae249b8da432768a84cb6e7ad3df60917977",
+   "changed_files": [
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "scripts/pod/autoinit_science_inputs.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/planning/ranking.py"
+   ],
+   "file_sha256_before": {
+    "scripts/autoinit/write_preregistration.py": "723344a777a2c6ad070c11353c7536e009e827dd52a18a81bec1f26f2c5cfa0d",
+    "scripts/pod/autoinit_phase_a_launch.py": "0d210cf9d3b2e57ab5f3d9b9c38716d9b2adea04956005c5ed4e60c742561d5d",
+    "scripts/pod/autoinit_phase_b_launch.py": "94616029b1fe501fa9f4c244b0fd5baa413e37a6ca85e002edbcc2cd8980403b",
+    "scripts/pod/autoinit_science_inputs.py": "257e4ad3334c39bf105efe899a995fc4e93fe9ce2cf7c1f2f02b5f9f2829477e",
+    "src/aadistill/governance/authorization.py": "37e66d543cc044bab3287a47ff9b40f54aebf962b96594a1c100022dac38328b",
+    "src/aadistill/infrastructure/session.py": "07a2fbcb5a3edcdfaf427fcd70bee2f6ebc7e4ddff01992bc9a63c5f86207cb2",
+    "src/aadistill/infrastructure/session_runner.py": "5d89e329daaa0af03ada76cc9cb93e3e3fb1ef567915fc8359d197e3eef8713a",
+    "src/aadistill/initialization/operators/base.py": "c37f4c58e8ae5f149c0b9cefd1b4faae563590fa4017d05c14fcbc650f48d6cd",
+    "src/aadistill/initialization/planning/ranking.py": "33df4e53f74da0c301aaa8228ab43e3ea2ca4ae57ef59ddcd7e0631bd5c94a20"
+   },
+   "file_sha256_after": {
+    "scripts/autoinit/write_preregistration.py": "67aab06ee93b9377396e1045ce983ce65194246c2803c1af8372eb355f1ea1a2",
+    "scripts/pod/autoinit_phase_a_launch.py": "dce0b8b3924e8a9b13fc5c6d6d3e0790412142cd5dd997872d8aad11b0f37896",
+    "scripts/pod/autoinit_phase_b_launch.py": "179c0548bde431df8f0b4bdb672e6469801946789b47c0e12379d5ba656a53b0",
+    "scripts/pod/autoinit_science_inputs.py": "ef4ab147131a950c54bbdf5ca39d0b32054cff3efdcd35dbf7acbe633204e292",
+    "src/aadistill/governance/authorization.py": "75dfdb26b68051bd06a3f4b8c2130d0cc37637a9bf92228862ba542d73bc8f29",
+    "src/aadistill/infrastructure/session.py": "11986416d8b8f77db63fc7cb2adfa21cf23185dfd85d2256acfdf450cb1abd5f",
+    "src/aadistill/infrastructure/session_runner.py": "c97b495ad05a16114585ee3b2fd1211a275a679116aace3c4fd626480fee5910",
+    "src/aadistill/initialization/operators/base.py": "fd9c4cd03a523111af083ab36c2f7d7d211c587824fe29e25f442dfc4cc82689",
+    "src/aadistill/initialization/planning/ranking.py": "dc2e867769ee3c3add89a3e8082a5ccc93e6b42dfae7c818a96dd49740e121ce"
+   },
+   "patch_sha256": "6d4be6af5c4ccf460251bc2a800f8f69924c04e8b2a8972556abb2a30cafd376",
+   "numstat": {
+    "scripts/autoinit/write_preregistration.py": [
+     1,
+     1
+    ],
+    "scripts/pod/autoinit_phase_a_launch.py": [
+     14,
+     2
+    ],
+    "scripts/pod/autoinit_phase_b_launch.py": [
+     3,
+     1
+    ],
+    "scripts/pod/autoinit_science_inputs.py": [
+     6,
+     3
+    ],
+    "src/aadistill/governance/authorization.py": [
+     51,
+     9
+    ],
+    "src/aadistill/infrastructure/session.py": [
+     94,
+     31
+    ],
+    "src/aadistill/infrastructure/session_runner.py": [
+     21,
+     57
+    ],
+    "src/aadistill/initialization/operators/base.py": [
+     7,
+     3
+    ],
+    "src/aadistill/initialization/planning/ranking.py": [
+     14,
+     15
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 122,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "Milestone-A residual core-ownership closure: the surviving experiment and deployment policy left src/aadistill. governance/authorization.py's serializer takes its schema, plan-hash key and enforcement sentence from ActionPolicy; planning/recovery.py gave up plan_id, both metric names, feasibility_min, include_canonical_control and the empirical seed-spread rationale, and score_recovery_row's correctness rule became a caller-supplied CorrectnessRule; planning/ranking.py's epsilon response notes and its concrete instance moved out; infrastructure/session_runner.py stopped reading configs/ for the provider CLI and stopped treating every non-dict fetch result as a success; infrastructure/session.py lost MAIN_RELAY, its import-time config read, and MarkerPolicy.stage2_passed; operators/base.py stopped naming the ledger path. A third architecture gate (core_ownership.py) now checks the class of defect the literal and semantic gates could not see.",
+   "why_the_owner_is_shared_session_runner": "Phase B's frozen executable set names session.py, session_runner.py, authorization.py, planning/recovery.py, planning/ranking.py and operators/base.py, along with the launchers and the setup script. A change made for the Milestone-A separation therefore moves Phase B's live digest even though Phase B is closed and consumed.",
+   "why_a_c1_only_override_was_rejected": "Nothing is conferred on C1. C1_HARNESS_SOURCE_FILES_V1 still names pre-migration paths and refuses outright. No grant, authorization or bundle is live, and this entry asserts launch_compatible_with_frozen_preregistration: false.",
+   "maintainer_authorization": "MAINTAINER REVIEW DECISION, 2026-09-09, on branch tip 701f9d62dfed430ae74893c83ba91847553b0937: merge remains NO-GO because the zero hardcode reports have confirmed false negatives. The decision directs removal of the surviving experiment/deployment policy from core on the SAME branch, forbids rebase, squash, force-push and merge to main, and permits appending only the source-relocation/history accounting these final moves require. No Attempt-10 grant, formal authorization, formal bundle or formal scientific execution is authorized.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "7d926ded2413425fac9bcbcdb671464020d317a9b477120028d0d6d3a355f4a0",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "4d3b8e43688089a3f4f33b29615671f51bfd3d318c41955d210a43dd49a6f0b4"
   }
  ]
 }

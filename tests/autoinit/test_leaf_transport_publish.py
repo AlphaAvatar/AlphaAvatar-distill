@@ -85,7 +85,7 @@ def test_the_home_token_file_is_still_the_fallback(pub, tmp_path, monkeypatch):
 def test_the_transport_repo_is_not_the_main_relay(pub):
     """A transport path that pointed at the main relay would reintroduce the
     quota problem it exists to avoid."""
-    from aadistill.infrastructure.session import MAIN_RELAY
+    from experiments.deployment import MAIN_RELAY
 
     assert pub.TRANSPORT_REPO != MAIN_RELAY
     assert "transport" in pub.TRANSPORT_REPO
