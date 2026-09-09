@@ -47,22 +47,21 @@ from aadistill.governance.authorization import (  # noqa: E402
     SpendAuthorization,
 )
 from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, ControlImportError, EvaluationReadinessError, check_evaluation_ready, continuation_manifest, import_permanent_control  # noqa: E402
-from aadistill.initialization.planning.generation import (  # noqa: E402
+from aadistill.initialization.planning.generation import (
     GenerationProtocolError,
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
-    generation_source_digest,
     observe_generation_protocol,
 )
-from aadistill.initialization.planning.recovery import (  # noqa: E402
-    CATASTROPHIC_V1,
-    POOLED_COUNTS_V2,
+from experiments.source_sets import generation_source_digest
+from aadistill.initialization.planning.recovery import (
     EquivalenceRule,
     FeasibilityRule,
     RecoveryAdmissionError,
     RuntimeEnvironmentFingerprint,
-    recovery_scoring_contract,
 )
+from experiments.recovery_policy import CATASTROPHIC_V1, POOLED_COUNTS_V2
+from experiments.source_sets import recovery_scoring_contract
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 WS = Path("/workspace")

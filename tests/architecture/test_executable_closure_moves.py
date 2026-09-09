@@ -27,6 +27,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
+
 from aadistill.governance.closure import derive  # noqa: E402
 from experiments.phase_c1.authorization import (  # noqa: E402
     C1_DECLARED_INPUTS, C1_ENTRY_POINTS, C1_SOURCE_ROOTS)

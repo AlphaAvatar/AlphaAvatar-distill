@@ -548,7 +548,7 @@ def frozen_repo(tmp_path: Path) -> Path:
     # V3: the same six files at current paths. V2 is the historical
     # declaration and names the pre-migration ones, so copying it into a
     # scratch tree fails on the first file that no longer exists.
-    from aadistill.initialization.planning.recovery import RECOVERY_SCORING_FILES_V3
+    from experiments.source_sets import RECOVERY_SCORING_FILES_V3
     for rel in RECOVERY_SCORING_FILES_V3:
         dst = repo / rel
         dst.parent.mkdir(parents=True, exist_ok=True)

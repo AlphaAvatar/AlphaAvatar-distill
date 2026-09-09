@@ -52,7 +52,7 @@ def test_the_frozen_assets_are_untouched():
     (logs/architecture_scoring_equivalence.json). The battery hashes below did
     not move at all, which is the other half of what this asserts.
     """
-    from aadistill.initialization.planning.recovery import recovery_scoring_contract
+    from experiments.source_sets import recovery_scoring_contract
 
     contract = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v3"
@@ -72,7 +72,7 @@ def test_the_c1_contract_is_a_new_name_not_a_new_metric():
 
 def test_the_c1_closure_covers_the_three_files_v2_omits():
     """V2 omits three files that decide numbers. Do not repeat the hole."""
-    from aadistill.initialization.planning.recovery import RECOVERY_SCORING_FILES_V2
+    from experiments.source_sets import RECOVERY_SCORING_FILES_V2
 
     holes = {"scripts/autoinit/audit_tool_scoring.py",
              "src/aadistill/data/tools.py",

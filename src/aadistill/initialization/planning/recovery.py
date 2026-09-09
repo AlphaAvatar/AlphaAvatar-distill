@@ -195,7 +195,6 @@ class SeedAggregation:
         }
 
 
-POOLED_COUNTS_V1 = SeedAggregation()
 
 
 @dataclass(frozen=True)
@@ -334,7 +333,6 @@ class ScorableAwareSeedAggregation:
         }
 
 
-POOLED_COUNTS_V2 = ScorableAwareSeedAggregation()
 
 
 @dataclass(frozen=True)
@@ -544,7 +542,6 @@ class CatastrophicCapabilityRule:
                 "enforced_at": ["rung1", "final"]}
 
 
-CATASTROPHIC_V1 = CatastrophicCapabilityRule()
 
 
 class CapabilitySchemaError(RecoveryAdmissionError):
@@ -639,8 +636,6 @@ class CapabilitySchema:
 
 #: The scorable capabilities of recovery_search_v2 (unchanged from v1). `code` is behaviour-only and
 #: therefore not a capability the catastrophic rule can rank on.
-CAPABILITY_SCHEMA_V1 = CapabilitySchema(
-    expected=("gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool"))
 
 
 #: Every implementation that materially defines the frozen recovery-search
@@ -652,16 +647,6 @@ CAPABILITY_SCHEMA_V1 = CapabilitySchema(
 #: invisible to the identity that was supposed to pin the metric. A scoring
 #: contract must cover everything that can move a number, including the rule that
 #: relates two numbers to each other.
-RECOVERY_SCORING_FILES_V2: tuple[str, ...] = (
-    "scripts/autoinit/score_recovery_search.py",  # the recovery-search contract
-    "src/aadistill/evaluation/usable_rollout.py",  # the five behaviour components
-    "src/aadistill/evaluation/strict_answer.py",   # protocol validity, extraction
-    "src/aadistill/evaluation/behavior.py",        # split, tool-call diagnostics
-    "src/aadistill/evaluation/capability.py",      # per-set correctness scorers
-    "src/aadistill/autoinit/recovery.py",          # correct=>usable, capability
-                                                   # schema, pooled aggregation,
-                                                   # thresholds
-)
 
 #: v2 relocated. The initialization cutover moved this module out of
 #: `aadistill.autoinit`, so v2 names a path that no longer exists and can no
@@ -675,22 +660,16 @@ RECOVERY_SCORING_FILES_V2: tuple[str, ...] = (
 #: still required, because the digest is over `path:sha256` lines and both
 #: components changed — a contract that silently kept its old identity across a
 #: real byte change would be worth less than one that moves honestly.
-RECOVERY_SCORING_FILES_V3: tuple[str, ...] = (
-    "scripts/autoinit/score_recovery_search.py",   # the recovery-search contract
-    "src/aadistill/evaluation/usable_rollout.py",  # the five behaviour components
-    "src/aadistill/evaluation/strict_answer.py",   # protocol validity, extraction
-    "src/aadistill/evaluation/behavior.py",        # split, tool-call diagnostics
-    "src/aadistill/evaluation/capability.py",      # per-set correctness scorers
-    "src/aadistill/initialization/planning/recovery.py",  # correct=>usable,
-                                                   # capability schema, pooled
-                                                   # aggregation, thresholds
-)
-RECOVERY_SCORING_CONTRACT_ID = "recovery_search_scoring"
-RECOVERY_SCORING_CONTRACT_VERSION = 3
+#: The contract id and version are the CALLER's: they name one project's
+#: scoring contract, and a reusable mechanism should not claim a version number
+#: on a study's behalf. Passed to `recovery_scoring_contract`.
+DEFAULT_SCORING_CONTRACT_ID = "recovery_search_scoring"
 
 
 def recovery_scoring_contract(repo_root: str | Path = ".", *,
-                              files: Sequence[str] | None = None,
+                              files: Sequence[str],
+                              version: int | None = None,
+                              contract_id: str | None = None,
                               ) -> dict[str, Any]:
     """The aggregate scoring-contract digest a result binds to.
 
@@ -698,7 +677,17 @@ def recovery_scoring_contract(repo_root: str | Path = ".", *,
     declared file raises rather than yielding a digest over a smaller contract.
     """
     root = Path(repo_root)
-    declared = tuple(files) if files is not None else RECOVERY_SCORING_FILES_V3
+    if not files:
+        raise RecoveryAdmissionError(
+            "no recovery-scoring source files were declared; a digest over an "
+            "unstated set describes nothing")
+    declared = tuple(files)
+    cid = contract_id or DEFAULT_SCORING_CONTRACT_ID
+    if version is None:
+        raise RecoveryAdmissionError(
+            "no contract version was declared; two digests over different file "
+            "sets are not comparable and the version is what says so")
+    ver = version
     entries = []
     for rel in sorted(declared):
         path = root / rel
@@ -712,9 +701,9 @@ def recovery_scoring_contract(repo_root: str | Path = ".", *,
     digest = hashlib.sha256(
         "".join(f"{e['path']}:{e['sha256']}\n" for e in entries).encode()).hexdigest()
     return {
-        "contract": f"{RECOVERY_SCORING_CONTRACT_ID}@v{RECOVERY_SCORING_CONTRACT_VERSION}",
-        "contract_id": RECOVERY_SCORING_CONTRACT_ID,
-        "version": RECOVERY_SCORING_CONTRACT_VERSION,
+        "contract": f"{cid}@v{ver}",
+        "contract_id": cid,
+        "version": ver,
         "digest": digest,
         "files": entries,
         "rule": ("sha256 over sorted 'path:sha256' lines of the declared "
@@ -728,7 +717,7 @@ def recovery_scoring_contract(repo_root: str | Path = ".", *,
                    "pooled_counts seed aggregation",
                    "the threshold formulas materialized from control data"],
         "supersedes": {
-            "contract": f"{RECOVERY_SCORING_CONTRACT_ID}@v2",
+            "contract": f"{cid}@v{ver - 1}",
             "identity_was": ("the same six files, with the last at "
                              "src/aadistill/initialization/planning/recovery.py"),
             "why": ("the initialization cutover moved that module, so v2 names "
@@ -756,20 +745,12 @@ def recovery_scoring_contract(repo_root: str | Path = ".", *,
 #: imports — the training loop and its loss/KD, the deterministic block ordering,
 #: the packing helpers, model construction, and the LoRA/freeze policy the
 #: trainable-parameter selection goes through — not from a guess.
-TRAINER_SOURCE_FILES_V1: tuple[str, ...] = (
-    "scripts/training/train_stage3.py",      # entry point, config -> run semantics
-    "src/aadistill/training/train.py",       # loop, loss/KD, optimizer, resume
-    "src/aadistill/training/lora.py",        # trainable-parameter selection policy
-    "src/aadistill/data/ladder.py",          # deterministic block ordering
-    "src/aadistill/data/dataset.py",         # packing, masks, encoding
-    "src/aadistill/models/teacher.py",       # teacher load + dtype/attn selection
-    "src/aadistill/models/student.py",       # student load + RoPE guard
-)
 TRAINER_SOURCE_SET_VERSION = 1
 
 
-def trainer_source_digest(repo_root: str | Path = ".",
-                          files: Sequence[str] = TRAINER_SOURCE_FILES_V1) -> dict[str, Any]:
+def trainer_source_digest(repo_root: str | Path = ".", *,
+                          files: Sequence[str],
+                          set_version: int | None = None) -> dict[str, Any]:
     """A material identity for the trainer, independent of unrelated commits.
 
     Hashes the declared source set and nothing else. A documentation or STATE
@@ -1620,58 +1601,6 @@ class PreflightPlan:
                     "the runtime is attested and the cheap gates pass")}
 
 
-PREFLIGHT_PLAN_V1 = PreflightPlan(stages=(
-    PreflightStage(
-        stage=0, name="runtime attestation", blocking=True,
-        purpose=("pin what everything else will be measured and trained under, "
-                 "before any of it happens"),
-        produces=("image digest", "RuntimeEnvironmentFingerprint",
-                  "trainer_source_digest + declared file set",
-                  "input artifact hashes (canonical init, pack, suite, battery)",
-                  "materialized RecoveryProtocolFingerprint",
-                  "frozen attested protocol artifact: "
-                  "logs/autoinit_phase_a_protocol_attested.json"),
-        stop_conditions=("image digest unavailable",
-                         "any input artifact hash mismatches its pin",
-                         "trainer source file missing from the declared set",
-                         "attested trainer digest or runtime contradicts a "
-                         "preregistered value -> protocol drift, STOP")),
-    PreflightStage(
-        stage=1, name="cheap machine gates", blocking=True,
-        purpose="find out whether this machine and runtime are usable at all",
-        produces=("activation-statistics GPU/CPU split",
-                  "GPU state-evaluator repeatability range",
-                  "peak GPU resident memory on the widest operator",
-                  "checkpoint write/read throughput"),
-        stop_conditions=(
-            "evaluator repeatability range >= declared epsilon -> "
-            "conservative_review_gate fires, Phase A blocked, STOP",
-            "peak resident memory > 40 GiB on an L40S -> hardware plan wrong, STOP",
-            "disk throughput implies the working set is not feasible -> STOP")),
-    PreflightStage(
-        stage=2, name="permanent canonical controls", blocking=True,
-        purpose=("produce the two matched control probes that Phase A will reuse "
-                 "at rung 2"),
-        produces=("canonical init -> 0.86M seed sa",
-                  "canonical init -> 0.86M seed sb",
-                  "per-run RecoveryProtocolFingerprint and RecoveryProbeIdentity",
-                  "checkpoint artifact digests"),
-        stop_conditions=(
-            "a run's protocol fingerprint differs from the Stage-0 ATTESTED "
-            "protocol hash (not the preregistered object, which still carries "
-            "runtime_digest: null)",
-            "a run's protocol is not materialized",
-            "step time diverges from the priced 4.15 s/step by more than 25%")),
-    PreflightStage(
-        stage=3, name="control characterization", blocking=False,
-        purpose="materialize the frozen threshold formulas from control data only",
-        produces=("sa and sb on recovery_search_v2",
-                  "pooled_counts@v2 aggregate + per-seed counts and rates",
-                  "materialized equivalence interval",
-                  "materialized feasibility floor",
-                  "per-capability control baselines"),
-        stop_conditions=("capability schema validation fails -> scoring defect, STOP",)),
-))
 
 
 class ScoringContractError(RuntimeError):
@@ -1744,11 +1673,10 @@ def validate_scored_rows(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             f"{violations[:3]}")
     return counts
 
-SEED_SA = 20260726
-SEED_SB = 20260801
-#: Tie-break seed. Used only for candidates that finish inside the preregistered
-#: equivalence interval after two seeds — never as a third look at everything.
-SEED_SC = 20260813
+#: The concrete instances moved to `scripts/experiments/recovery_policy.py`,
+#: built from `configs/experiments/phase_a/recovery_policy.json`. They used to
+#: be module constants here AND dataclass defaults below, so a plan constructed
+#: without policy arguments silently became the current experiment.
 
 
 @dataclass(frozen=True)
@@ -1761,8 +1689,10 @@ class SuccessiveHalvingPlan:
     searched_leaves: int
     #: Searched leaves advancing to rung 2. The control advances unconditionally.
     survivors: int
-    seeds: tuple[int, ...] = (SEED_SA, SEED_SB)
-    tie_break_seed: int | None = SEED_SC
+    #: REQUIRED. These used to default to the current study's seeds, so a plan
+    #: built without arguments was that study whether or not anyone said so.
+    seeds: tuple[int, ...] = field(kw_only=True)
+    tie_break_seed: int | None = field(kw_only=True)
     include_canonical_control: bool = True
     #: Feasibility constraint. Blind to correctness by construction, so it gates
     #: rather than scores.
@@ -1772,15 +1702,12 @@ class SuccessiveHalvingPlan:
     primary_metric: str = "correct_overall"
     #: Reported to explain a ranking; never changes one.
     secondary_metric: str = "correct_given_usable"
-    reported_components: tuple[str, ...] = (
-        "non_empty", "natural_termination", "no_severe_repetition",
-        "no_context_limit", "protocol_valid")
+    reported_components: tuple[str, ...] = field(kw_only=True)
     #: The behaviour equivalence interval. A rule, not a constant: the formula is
     #: frozen now, the numeric value comes from the control characterization.
-    equivalence: EquivalenceRule = field(
-        default_factory=lambda: EquivalenceRule(n_pooled=300))
+    equivalence: EquivalenceRule = field(kw_only=True)
     #: Per-capability collapse gate, enforced at both rungs.
-    catastrophic: CatastrophicCapabilityRule = CATASTROPHIC_V1
+    catastrophic: CatastrophicCapabilityRule = field(kw_only=True)
     #: What every result must carry for that gate to be able to see anything.
     #:
     #: `None` means no per-capability contract is declared, in which case the
@@ -1788,14 +1715,14 @@ class SuccessiveHalvingPlan:
     #: cannot see a capability must not report a verdict on it. Every selection
     #: result records `capability_schema_enforced` so the difference is visible,
     #: and the Phase-A plan always declares one.
-    capability_schema: CapabilitySchema | None = CAPABILITY_SCHEMA_V1
+    capability_schema: CapabilitySchema | None = field(kw_only=True)
     #: Seed-aware usable-rollout floor. Materialized from the control.
     feasibility: FeasibilityRule | None = None
     #: How per-seed counts become one number. Part of the plan hash. Defaults to
     #: v2: v1 pooled correctness over the wrong denominator, and a default that
     #: still selected it would put the defect back into every plan that does not
     #: name an aggregation explicitly. v1 remains importable for provenance.
-    aggregation: SeedAggregation | ScorableAwareSeedAggregation = POOLED_COUNTS_V2
+    aggregation: SeedAggregation | ScorableAwareSeedAggregation = field(kw_only=True)
     survivor_rule: str = ""
     winner_rule: str = ""
     battery_asset_id: str = ""

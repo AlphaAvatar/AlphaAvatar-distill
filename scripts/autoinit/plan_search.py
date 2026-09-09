@@ -27,6 +27,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402

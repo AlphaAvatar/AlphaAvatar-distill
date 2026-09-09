@@ -103,7 +103,14 @@ def test_the_collector_never_raises_on_a_billing_pod(monkeypatch):
             raise OSError("ssh died")
 
     fake = types.SimpleNamespace(
-        spec=types.SimpleNamespace(setup_failure_files=("/workspace/x.json",)),
+        spec=types.SimpleNamespace(        #: The runner reads its executables from the spec now, so a stub spec
+        #: must declare them; there is no default for it to fall back on.
+        commands=types.SimpleNamespace(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            remote_python="/opt/train/bin/python"),
+setup_failure_files=("/workspace/x.json",)),
         ev={}, say=lambda m: None)
     SessionRunner._collect_setup_failure_evidence(fake, Boom(), 1)
     got = fake.ev["setup_failure_evidence"][0]["files"]["/workspace/x.json"]

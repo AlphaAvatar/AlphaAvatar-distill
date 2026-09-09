@@ -31,8 +31,12 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from aadistill.initialization.planning.generation import (  # noqa: E402
+from aadistill.initialization.planning.generation import (
     CONTEXT_RESOLUTION_RULE,
     GENERATION_DTYPE,
     MAX_TOKENS_RULE,
@@ -40,8 +44,8 @@ from aadistill.initialization.planning.generation import (  # noqa: E402
     SYSTEM_INJECTION_RULE,
     TOKENIZER_SOURCE_CHECKPOINT,
     generation_runtime_fingerprint,
-    generation_source_digest,
 )
+from experiments.source_sets import generation_source_digest
 
 #: The sampling parameters, defined once and used both to build SamplingParams
 #: and to describe the run in its summary. Two copies could disagree, and a

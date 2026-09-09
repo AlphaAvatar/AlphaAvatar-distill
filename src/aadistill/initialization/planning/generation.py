@@ -44,11 +44,9 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json
 
 #: The implementation whose behaviour this fingerprint claims to describe. If the
 #: generator changes, the digest must move, or the identity is a decoration.
-GENERATION_SOURCE_FILES_V1: tuple[str, ...] = (
-    "scripts/evaluation/uncapped_eval.py",       # the rollout driver itself
-    "src/aadistill/evaluation/degeneration.py",  # the semantic stop
-    "src/aadistill/evaluation/behavior.py",      # split/score of the stored text
-)
+#: Moved to `configs/experiments/phase_a/source_sets.json`, loaded by
+#: `scripts/experiments/source_sets.py`. Which scripts implement a project's
+#: generation protocol is that project's fact.
 GENERATION_PROTOCOL_ID = "recovery_generation"
 GENERATION_PROTOCOL_VERSION = 1
 
@@ -88,10 +86,14 @@ class GenerationProtocolError(RuntimeError):
 
 
 def generation_source_digest(repo_root: str | Path = ".", *,
-                             files: tuple[str, ...] | None = None) -> dict[str, Any]:
+                             files: tuple[str, ...]) -> dict[str, Any]:
     """Aggregate digest over the declared generation implementation."""
     root = Path(repo_root)
-    declared = tuple(files) if files is not None else GENERATION_SOURCE_FILES_V1
+    if not files:
+        raise ValueError(
+            "no generation source files were declared; a digest over an "
+            "unstated set describes nothing")
+    declared = tuple(files)
     entries = []
     for rel in sorted(declared):
         path = root / rel

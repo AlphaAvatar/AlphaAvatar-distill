@@ -43,11 +43,7 @@ from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     SCHEDULE_V1,
 )
-from aadistill.initialization.planning.recovery import (  # noqa: E402
-    SEED_SA,
-    SEED_SB,
-    SEED_SC,
-)
+from experiments.recovery_policy import SEED_SA, SEED_SB, SEED_SC
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 FROZEN_SCIENCE_PLAN = REPO_ROOT / "logs/autoinit_phase_a_recovery_plan_frozen.json"

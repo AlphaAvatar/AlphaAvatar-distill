@@ -163,22 +163,20 @@ def test_the_searched_leaves_and_control_pass_the_recovery_gate(searched):
     executed at $0 rather than discovered at hour four of a paid session.
     """
     from aadistill.initialization.planning.recovery import (
-        CAPABILITY_SCHEMA_V1,
-        CATASTROPHIC_V1,
         EquivalenceRule,
         FeasibilityRule,
         SuccessiveHalvingPlan,
     )
+    from experiments.recovery_policy import plan_policy
     from experiments.recipes import E1_KD_HEAVY_0860K
 
     leaves = list(searched.leaves)
     plan = SuccessiveHalvingPlan(
         plan_id="rehearsal.phase_a", recipe=E1_KD_HEAVY_0860K,
         searched_leaves=len(leaves), survivors=max(1, len(leaves) - 1),
+        **plan_policy(equivalence=EquivalenceRule(n_pooled=340)),
         feasibility_min=0.0,
-        equivalence=EquivalenceRule(n_pooled=340),
         feasibility=FeasibilityRule(n_pooled=380),
-        catastrophic=CATASTROPHIC_V1, capability_schema=CAPABILITY_SCHEMA_V1,
         survivor_rule="rehearsal", winner_rule="rehearsal",
         battery_asset_id="recovery_search_v2")
 

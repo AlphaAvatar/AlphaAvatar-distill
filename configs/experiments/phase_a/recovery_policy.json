@@ -1,0 +1,43 @@
+{
+ "schema": "aadistill.recovery_policy/v1",
+ "_contract": "The recovery-search policy THIS project's Phase-A study runs under: which seeds, which capability names, which equivalence and collapse rules, which reported behaviour components. EXPERIMENT INSTANCE DATA. It used to be written out in src/aadistill and reached as dataclass defaults, so a plan constructed without arguments silently became the current experiment. Transcribed without edit. AUTHORIZES NOTHING.",
+ "policy_id": "phase_a_recovery_v1",
+ "seeds": {
+  "sa": 20260726,
+  "sb": 20260801,
+  "tie_break": 20260813,
+  "_why_tie_break": "used only for candidates that finish inside the preregistered equivalence interval after two seeds -- never as a third look at everything"
+ },
+ "capability_schema": {
+  "expected": [
+   "gsm8k",
+   "math_verified",
+   "multihop",
+   "rag",
+   "knowledge",
+   "tool"
+  ]
+ },
+ "catastrophic": {
+  "candidate_max": 0.1,
+  "control_min": 0.4,
+  "metric": "usable_rollout_rate",
+  "rule_id": "per_capability_collapse",
+  "version": 1
+ },
+ "equivalence": {
+  "n_pooled": 300,
+  "_why": "the frozen study's pooled scorable count; a rule, not a constant -- the formula is frozen and the numeric value comes from control characterization"
+ },
+ "reported_components": [
+  "non_empty",
+  "natural_termination",
+  "no_severe_repetition",
+  "no_context_limit",
+  "protocol_valid"
+ ],
+ "feasibility_metric": "usable_rollout_rate",
+ "primary_metric": "correct_overall",
+ "secondary_metric": "correct_given_usable",
+ "authorizes": "nothing"
+}

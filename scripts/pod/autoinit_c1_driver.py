@@ -80,12 +80,12 @@ from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     write_replay_record,
     write_suffix_execution_record,
 )
-from aadistill.initialization.planning.generation import (  # noqa: E402
+from aadistill.initialization.planning.generation import (
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
-    generation_source_digest,
     observe_generation_protocol,
 )
+from experiments.source_sets import generation_source_digest
 from aadistill.initialization.operators import attention_activation  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 

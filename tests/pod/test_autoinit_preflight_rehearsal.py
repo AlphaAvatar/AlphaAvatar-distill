@@ -38,9 +38,14 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.governance.authorization import (  # noqa: E402
     AuthorizationError,
-    SpendAuthorization,
 )
-from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1  # noqa: E402
+#: The preflight's TYPE, which carries the preflight's ActionPolicy. The base
+#: `SpendAuthorization` now refuses to load without one: a caller that has not
+#: said what an artifact may express cannot check whether it claims more.
+from experiments.preflight import (  # noqa: E402
+    PreflightAuthorization as SpendAuthorization,
+)
+from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 
 DRIVER_PATH = REPO / "scripts/pod/autoinit_preflight_driver.py"
 LAUNCH_PATH = REPO / "scripts/pod/autoinit_preflight_launch.py"
@@ -183,12 +188,8 @@ def build(tmp_path, *, stage0=True, gates=None, controls_ok=True,
             return d.record(3, False, "preflight_ctl_r0860k_sa generation rc=1")
         if stage3 == "contract_drift":
             return d.record(3, False, "scored under a different scoring contract")
-        from aadistill.initialization.planning.recovery import (
-            CATASTROPHIC_V1,
-            POOLED_COUNTS_V2,
-            EquivalenceRule,
-            FeasibilityRule,
-        )
+        from aadistill.initialization.planning.recovery import EquivalenceRule, FeasibilityRule
+        from experiments.recovery_policy import CATASTROPHIC_V1, POOLED_COUNTS_V2
         sa, sb = fake_result(0.62, 0.31, mod.SEED_SA), fake_result(0.58, 0.29, mod.SEED_SB)
         pooled = POOLED_COUNTS_V2.pool([
             {"seed": mod.SEED_SA,
@@ -349,7 +350,7 @@ def test_the_authorization_bounds_the_session(tmp_path):
     with pytest.raises(AuthorizationError):
         auth.require_within_cap(8.61, what="session")
     with pytest.raises(AuthorizationError, match="separately unauthorized"):
-        auth.refuse_phase_a()
+        auth.refuse("phase_a")
     assert auth.allows_phase_a is False
     assert auth.automatic_phase_a_start is False
 
@@ -447,7 +448,7 @@ def test_a_tampered_authorization_does_not_load(tmp_path):
     raw.pop("authorization_sha256")
     raw["authorization_sha256"] = sha256_json(raw)
     path.write_text(json.dumps(raw))
-    with pytest.raises(AuthorizationError, match="cannot grant"):
+    with pytest.raises(AuthorizationError, match="does not grant"):
         SpendAuthorization.load(path)
 
 

@@ -278,14 +278,14 @@ def test_the_continuation_does_not_train_and_cannot_reach_phase_a():
     assert manifest["manifest_sha256"]
     assert manifest["import_required_fields"] == list(IMPORT_REQUIRED_FIELDS)
     # It is a different plan from the preflight, not a mutation of it.
-    from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1
+    from experiments.recovery_policy import PREFLIGHT_PLAN_V1
     assert CONTINUATION_PLAN_V1.plan_hash != PREFLIGHT_PLAN_V1.plan_hash
     assert CONTINUATION_PLAN_V1.plan_id != PREFLIGHT_PLAN_V1.plan_id
 
 
 def test_advance_to_was_not_weakened():
     """The preflight gate must still refuse what it refused before."""
-    from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1
+    from experiments.recovery_policy import PREFLIGHT_PLAN_V1
 
     with pytest.raises(RecoveryAdmissionError, match="no recorded result"):
         PREFLIGHT_PLAN_V1.advance_to(3, {0: {"passed": True}, 1: {"passed": True}})
@@ -792,7 +792,8 @@ def test_the_authorization_binds_the_code_that_actually_runs():
     # The digest is over the continuation set, and it differs from the
     # preflight's — the two authorizations cannot be confused for each other.
     observed = harness_source_digest(REPO, files=CONTINUATION_HARNESS_SOURCE_FILES_V1)
-    assert observed["digest"] != harness_source_digest(REPO)["digest"]
+    assert observed["digest"] != harness_source_digest(
+        REPO, files=HARNESS_SOURCE_FILES_V1)["digest"]
 
 
 def test_the_continuation_authorization_is_narrow_and_cannot_train():
@@ -809,13 +810,15 @@ def test_the_continuation_authorization_is_narrow_and_cannot_train():
     assert 3.4244 + 1.3860 <= auth.expected_usd
     assert 3.4244 + 1.6896 <= auth.hard_cap_usd
     assert auth.plan_hash == CONTINUATION_PLAN_V1.plan_hash
-    assert auth.allows_phase_a is False and auth.automatic_phase_a_start is False
+    #: Absence of permission, which under the policy mechanism IS the denial:
+    #: `phase_a` is in neither `allowed` nor any grant this artifact can make.
+    assert not auth.allows("phase_a") and not auth.allows("automatic_phase_a_start")
     with pytest.raises(AuthorizationError):
         auth.require_within_cap(5.13, what="session")
     with pytest.raises(AuthorizationError):
         auth.require_stage(4)
-    with pytest.raises(AuthorizationError, match="separately unauthorized"):
-        auth.refuse_phase_a()
+    with pytest.raises(AuthorizationError, match="not authorized|separately unauthorized"):
+        auth.refuse("phase_a")
     assert "does not permit training" in auth.scope_note
 
 
@@ -950,11 +953,8 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     import importlib.util
     import subprocess
 
-    from aadistill.initialization.planning.recovery import (
-        EquivalenceRule,
-        FeasibilityRule,
-        POOLED_COUNTS_V2,
-    )
+
+    from experiments.recovery_policy import POOLED_COUNTS_V2
 
     spec = importlib.util.spec_from_file_location(
         "rs_tests", REPO / "tests/autoinit/test_recovery_search_scoring.py")

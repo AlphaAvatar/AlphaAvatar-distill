@@ -133,7 +133,14 @@ def _runner(monkeypatch, *, outcome, create_ok=True):
     r.launch_watchdog = lambda: Path("/dev/null")
     r.teardown_now = lambda why: r.ev.setdefault("teardown", []).append(why)
     r.plan = types.SimpleNamespace(hard_terminate_minutes=834.0)
-    r.spec = types.SimpleNamespace(session_id="autoinit-c1")
+    r.spec = types.SimpleNamespace(        #: The runner reads its executables from the spec now, so a stub spec
+        #: must declare them; there is no default for it to fall back on.
+        commands=types.SimpleNamespace(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            remote_python="/opt/train/bin/python"),
+session_id="autoinit-c1")
 
     args = C1.build_parser().parse_args(BASE_ARGV)
     r.a = types.SimpleNamespace(

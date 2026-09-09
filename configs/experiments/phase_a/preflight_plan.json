@@ -1,0 +1,80 @@
+{
+ "schema": "aadistill.preflight_plan/v1",
+ "_contract": "The Phase-A preflight's stage topology: which stages exist, which block, what each produces and why they are ordered so. EXPERIMENT INSTANCE DATA that used to sit in src/aadistill. Transcribed without edit, so plan_hash is unchanged. AUTHORIZES NOTHING.",
+ "plan_id": "autoinit.micro_preflight",
+ "version": 1,
+ "plan_hash_at_extraction": "83218ddd283c961f42f4ec5852542192487d5fc10a3a34e7b7fe6b62e84cc604",
+ "stages": [
+  {
+   "stage": 0,
+   "name": "runtime attestation",
+   "purpose": "pin what everything else will be measured and trained under, before any of it happens",
+   "produces": [
+    "image digest",
+    "RuntimeEnvironmentFingerprint",
+    "trainer_source_digest + declared file set",
+    "input artifact hashes (canonical init, pack, suite, battery)",
+    "materialized RecoveryProtocolFingerprint",
+    "frozen attested protocol artifact: logs/autoinit_phase_a_protocol_attested.json"
+   ],
+   "blocking": true,
+   "stop_conditions": [
+    "image digest unavailable",
+    "any input artifact hash mismatches its pin",
+    "trainer source file missing from the declared set",
+    "attested trainer digest or runtime contradicts a preregistered value -> protocol drift, STOP"
+   ]
+  },
+  {
+   "stage": 1,
+   "name": "cheap machine gates",
+   "purpose": "find out whether this machine and runtime are usable at all",
+   "produces": [
+    "activation-statistics GPU/CPU split",
+    "GPU state-evaluator repeatability range",
+    "peak GPU resident memory on the widest operator",
+    "checkpoint write/read throughput"
+   ],
+   "blocking": true,
+   "stop_conditions": [
+    "evaluator repeatability range >= declared epsilon -> conservative_review_gate fires, Phase A blocked, STOP",
+    "peak resident memory > 40 GiB on an L40S -> hardware plan wrong, STOP",
+    "disk throughput implies the working set is not feasible -> STOP"
+   ]
+  },
+  {
+   "stage": 2,
+   "name": "permanent canonical controls",
+   "purpose": "produce the two matched control probes that Phase A will reuse at rung 2",
+   "produces": [
+    "canonical init -> 0.86M seed sa",
+    "canonical init -> 0.86M seed sb",
+    "per-run RecoveryProtocolFingerprint and RecoveryProbeIdentity",
+    "checkpoint artifact digests"
+   ],
+   "blocking": true,
+   "stop_conditions": [
+    "a run's protocol fingerprint differs from the Stage-0 ATTESTED protocol hash (not the preregistered object, which still carries runtime_digest: null)",
+    "a run's protocol is not materialized",
+    "step time diverges from the priced 4.15 s/step by more than 25%"
+   ]
+  },
+  {
+   "stage": 3,
+   "name": "control characterization",
+   "purpose": "materialize the frozen threshold formulas from control data only",
+   "produces": [
+    "sa and sb on recovery_search_v2",
+    "pooled_counts@v2 aggregate + per-seed counts and rates",
+    "materialized equivalence interval",
+    "materialized feasibility floor",
+    "per-capability control baselines"
+   ],
+   "blocking": false,
+   "stop_conditions": [
+    "capability schema validation fails -> scoring defect, STOP"
+   ]
+  }
+ ],
+ "authorizes": "nothing"
+}

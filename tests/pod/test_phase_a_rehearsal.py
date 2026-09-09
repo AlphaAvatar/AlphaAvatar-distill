@@ -488,7 +488,7 @@ def test_a_pooled_row_satisfies_the_real_capability_schema(tmp_path):
     roughly seven hours of paid compute. Checked here against the REAL frozen
     schema rather than a hand-written shape.
     """
-    from aadistill.initialization.planning.recovery import CAPABILITY_SCHEMA_V1
+    from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
 
     mod = load_driver(tmp_path)
     # The capability names and counts the real scorer emits, per the Stage-3
@@ -523,10 +523,8 @@ def test_a_pooled_row_satisfies_the_real_capability_schema(tmp_path):
 
 def test_a_pooled_row_missing_a_capability_is_refused(tmp_path):
     """Proves the check above is load-bearing rather than decorative."""
-    from aadistill.initialization.planning.recovery import (
-        CAPABILITY_SCHEMA_V1,
-        CapabilitySchemaError,
-    )
+    from aadistill.initialization.planning.recovery import CapabilitySchemaError
+    from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
 
     mod = load_driver(tmp_path)
     short = {cap: {"n": 30, "usable": 10} for cap in

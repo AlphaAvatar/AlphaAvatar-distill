@@ -44,13 +44,8 @@ from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json
 from aadistill.governance.authorization import AuthorizationError
-from aadistill.initialization.planning.recovery import (
-    PreflightPlan,
-    PreflightStage,
-    SEED_SA,
-    SEED_SB,
-    SEED_SC,
-)
+from aadistill.initialization.planning.recovery import PreflightPlan, PreflightStage
+from experiments.recovery_policy import SEED_SA, SEED_SB, SEED_SC
 
 SCHEMA = "aadistill.autoinit.phase_a_authorization/v1"
 

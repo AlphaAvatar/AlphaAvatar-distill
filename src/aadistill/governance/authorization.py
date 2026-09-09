@@ -283,7 +283,11 @@ class SpendAuthorization:
             harness_source_files=tuple(raw.get("harness_source_files") or ()),
             per_launch_hard_usd=raw.get("per_launch_hard_usd"),
             provenance_commit=raw.get("provenance_commit"),
-            version=int(raw.get("version", 1)))
+            version=int(raw.get("version", 1)),
+            #: The loaded object carries the policy its claims were checked
+            #: against, so a later `allows`/`refuse` answers under the same
+            #: rules the load enforced rather than under the deny-all default.
+            action_policy=resolved)
 
 
 #: MICRO_PREFLIGHT_AUTHORIZATION moved to

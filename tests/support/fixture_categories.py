@@ -45,7 +45,7 @@ def current_tree_expectation(tmp_path: Path) -> Path:
     without moving any number it produces.
     """
     import verify_frozen_assets as vfa
-    from aadistill.initialization.planning.recovery import recovery_scoring_contract
+    from experiments.source_sets import recovery_scoring_contract
 
     contract = recovery_scoring_contract(REPO)
     doc = {
@@ -170,10 +170,10 @@ def current_tree_stage3_binding(driver_module, tmp_path: Path,
 
 
 def _live_scoring() -> dict:
-    from aadistill.initialization.planning.recovery import recovery_scoring_contract
+    from experiments.source_sets import recovery_scoring_contract
     return recovery_scoring_contract(REPO)
 
 
 def _live_generation_digest() -> str:
-    from aadistill.initialization.planning.generation import generation_source_digest
+    from experiments.source_sets import generation_source_digest
     return generation_source_digest(REPO)["digest"]

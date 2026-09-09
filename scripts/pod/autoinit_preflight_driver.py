@@ -37,29 +37,30 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.governance.authorization import (  # noqa: E402
     AuthorizationError,
-    SpendAuthorization,
 )
-from aadistill.initialization.planning.generation import (  # noqa: E402
+from experiments.preflight import (  # noqa: E402
+    PreflightAuthorization as SpendAuthorization,
+)
+from aadistill.initialization.planning.generation import (
     GenerationProtocolError,
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
-    generation_source_digest,
     observe_generation_protocol,
 )
+from experiments.source_sets import generation_source_digest
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     EPSILON_RESPONSE_V1,
     PARETO_V1,
 )
-from aadistill.initialization.planning.recovery import (  # noqa: E402
-    CATASTROPHIC_V1,
-    POOLED_COUNTS_V2,
-    PREFLIGHT_PLAN_V1,
-    SEED_SA,
-    SEED_SB,
+from aadistill.initialization.planning.recovery import (
     EquivalenceRule,
     FeasibilityRule,
     ObservedProtocolError,
@@ -67,9 +68,15 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     RecoveryProbeIdentity,
     RuntimeEnvironmentFingerprint,
     observe_recovery_protocol,
-    recovery_scoring_contract,
-    trainer_source_digest,
 )
+from experiments.recovery_policy import (
+    CATASTROPHIC_V1,
+    POOLED_COUNTS_V2,
+    PREFLIGHT_PLAN_V1,
+    SEED_SA,
+    SEED_SB,
+)
+from experiments.source_sets import recovery_scoring_contract, trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 WS = Path("/workspace")

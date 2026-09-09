@@ -26,6 +26,10 @@ import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
@@ -53,6 +57,7 @@ from aadistill.initialization.planning.recovery import (
     probe_configs,
 )
 from experiments.recipes import E1_KD_HEAVY_0860K
+from experiments.recovery_policy import plan_policy  # noqa: E402
 from aadistill.initialization.planning.search import (  # noqa: E402
     BeamSearch,
     SearchConfig,
@@ -200,6 +205,7 @@ def main() -> None:
         plan_id="autoinit.dryrun", recipe=E1_KD_HEAVY_0860K,
         searched_leaves=min(searched, len(leaves)),
         survivors=max(1, min(searched, len(leaves)) - 1),
+        **plan_policy(),
         feasibility_min=0.0,
         survivor_rule="dry run only; the paid plan is preregistered separately",
         winner_rule="dry run only; the paid plan is preregistered separately",

@@ -363,7 +363,7 @@ def test_completed_phase_b_drift_is_historically_accounted_for():
     and `test_nonadditive_historical_amendment_does_not_make_phase_b_launchable`
     asks whether it is LAUNCHABLE. The answers are yes and no.
     """
-    from aadistill.governance.post_freeze import historical_accounted_for
+    from experiments.phase_b.post_freeze import historical_accounted_for
 
     prereg = json.loads(PREREG.read_text())
     ok, why = historical_accounted_for(prereg["executable_source"]["digest"],
@@ -381,7 +381,7 @@ def test_nonadditive_historical_amendment_does_not_make_phase_b_launchable():
     correct answer, because that preregistration describes code this tree no
     longer contains.
     """
-    from aadistill.governance.post_freeze import accounted_for
+    from experiments.phase_b.post_freeze import accounted_for
 
     prereg = json.loads(PREREG.read_text())
     frozen = prereg["executable_source"]["digest"]

@@ -49,11 +49,11 @@ from score_recovery_search import (  # noqa: E402
 )
 
 from experiments.phase_c1.scoring import C1_BATTERY_PATH, C1_METRIC_CONTRACT, SCHEMA, c1_scoring_contract, validate_c1_battery  # noqa: E402
-from aadistill.initialization.planning.recovery import (  # noqa: E402
-    CAPABILITY_SCHEMA_V1,
+from aadistill.initialization.planning.recovery import (
     score_recovery_row,
     validate_scored_rows,
 )
+from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
 from aadistill.evaluation import usable_rollout  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 

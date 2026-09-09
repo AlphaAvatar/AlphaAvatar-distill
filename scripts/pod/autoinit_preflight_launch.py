@@ -31,13 +31,17 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # The sibling science-input declarations. Present when this file is run
 # directly; absent when a test loads it by path, which is how the
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.governance.authorization import SpendAuthorization  # noqa: E402
-from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1  # noqa: E402
+from experiments.preflight import PreflightAuthorization as SpendAuthorization  # noqa: E402
+from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (
     ExecutionCommands,  # noqa: E402

@@ -18,10 +18,14 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.governance.authorization import harness_source_digest
 from experiments.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
-from aadistill.initialization.planning.recovery import PREFLIGHT_PLAN_V1  # noqa: E402
+from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 
 
 def main() -> None:

@@ -1,0 +1,46 @@
+{
+ "schema": "aadistill.executable_source_sets/v1",
+ "_contract": "Which files implement this project's scorer, trainer and generation protocol. EXPERIMENT INSTANCE DATA: a reusable core can say what a source digest IS without naming one project's scripts. Transcribed without edit, so every digest is unchanged. AUTHORIZES NOTHING.",
+ "recovery_scoring": {
+  "contract_id": "recovery_search_scoring",
+  "version": 3,
+  "files_v3": [
+   "scripts/autoinit/score_recovery_search.py",
+   "src/aadistill/evaluation/usable_rollout.py",
+   "src/aadistill/evaluation/strict_answer.py",
+   "src/aadistill/evaluation/behavior.py",
+   "src/aadistill/evaluation/capability.py",
+   "src/aadistill/initialization/planning/recovery.py"
+  ],
+  "files_v2_historical": [
+   "scripts/autoinit/score_recovery_search.py",
+   "src/aadistill/evaluation/usable_rollout.py",
+   "src/aadistill/evaluation/strict_answer.py",
+   "src/aadistill/evaluation/behavior.py",
+   "src/aadistill/evaluation/capability.py",
+   "src/aadistill/autoinit/recovery.py"
+  ],
+  "_v2_is_historical": "v2 names the pre-migration paths and is the record of what completed runs bound; it is not computable here"
+ },
+ "trainer": {
+  "set_version": 1,
+  "files": [
+   "scripts/training/train_stage3.py",
+   "src/aadistill/training/train.py",
+   "src/aadistill/training/lora.py",
+   "src/aadistill/data/ladder.py",
+   "src/aadistill/data/dataset.py",
+   "src/aadistill/models/teacher.py",
+   "src/aadistill/models/student.py"
+  ]
+ },
+ "generation": {
+  "set_version": 1,
+  "files": [
+   "scripts/evaluation/uncapped_eval.py",
+   "src/aadistill/evaluation/degeneration.py",
+   "src/aadistill/evaluation/behavior.py"
+  ]
+ },
+ "authorizes": "nothing"
+}

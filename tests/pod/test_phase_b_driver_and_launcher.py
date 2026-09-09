@@ -353,7 +353,7 @@ def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
     Asserting `ok` again would mean the amendment had quietly become permission.
     """
     from experiments.phase_b.plan import phase_b_source_digest
-    from aadistill.governance.post_freeze import historical_accounted_for
+    from experiments.phase_b.post_freeze import historical_accounted_for
 
     prereg = json.loads(
         (REPO / "logs/autoinit_phase_b_preregistration.json").read_text())

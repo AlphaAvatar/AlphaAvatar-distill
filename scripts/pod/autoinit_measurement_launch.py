@@ -41,7 +41,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from aadistill.governance.authorization import SpendAuthorization  # noqa: E402
+from experiments.preflight import PreflightAuthorization as SpendAuthorization  # noqa: E402
 from experiments.measurement.plan import MEASUREMENT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (

@@ -490,7 +490,7 @@ def test_B_the_historical_thresholds_still_bind_the_historical_protocol():
 
 def test_B_the_historical_protocol_records_v2_and_is_not_rewritten_to_v3():
     """The migration bumped the LIVE contract; the record keeps saying v2."""
-    from aadistill.initialization.planning.recovery import recovery_scoring_contract
+    from experiments.source_sets import recovery_scoring_contract
     att = json.loads(
         (REPO / "logs/autoinit_stage3_complete"
          / "attested_evaluation_protocol.json").read_text())

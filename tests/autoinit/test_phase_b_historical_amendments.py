@@ -30,10 +30,14 @@ sys.path.insert(0, str(REPO / "src"))
 
 from experiments.phase_b.plan import phase_b_source_digest  # noqa: E402
 from aadistill.governance.post_freeze import (  # noqa: E402
-    HISTORICAL_LEDGER_PATH,
     HISTORICAL_LEDGER_SCHEMA,
-    accounted_for,
     entry_self_hash,
+)
+#: Phase B's paths, and the two verifiers bound to them. The generic mechanism
+#: takes every path as an argument now, so the phase supplies its own.
+from experiments.phase_b.post_freeze import (  # noqa: E402
+    HISTORICAL_LEDGER_PATH,
+    accounted_for,
     historical_accounted_for,
 )
 

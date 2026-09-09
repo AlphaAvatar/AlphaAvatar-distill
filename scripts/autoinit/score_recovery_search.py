@@ -47,16 +47,20 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from audit_tool_scoring import as_openai_calls, as_openai_tools  # noqa: E402
 
-from aadistill.initialization.planning.recovery import (  # noqa: E402
-    CAPABILITY_SCHEMA_V1,
-    recovery_scoring_contract,
+from aadistill.initialization.planning.recovery import (
     score_recovery_row,
     validate_scored_rows,
 )
+from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
+from experiments.source_sets import recovery_scoring_contract
 from aadistill.evaluation import usable_rollout  # noqa: E402
 from aadistill.data.tools import normalize_tools  # noqa: E402
 from aadistill.evaluation.behavior import score_tool_call, split_generation  # noqa: E402

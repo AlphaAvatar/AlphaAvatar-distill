@@ -71,27 +71,27 @@ from aadistill.runtime.leaf_durability import (  # noqa: E402
     LeafDurabilityError,
     persist_selected_leaves,
 )
-from aadistill.initialization.planning.generation import (  # noqa: E402
+from aadistill.initialization.planning.generation import (
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
-    generation_source_digest,
     observe_generation_protocol,
 )
+from experiments.source_sets import generation_source_digest
 from aadistill.initialization.planning.generation_compat import (  # noqa: E402
     ComparabilityError,
     comparable_generation_identity,
     require_comparable,
 )
 from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_manifest  # noqa: E402
-from aadistill.initialization.planning.recovery import (  # noqa: E402
-    POOLED_COUNTS_V2,
+from aadistill.initialization.planning.recovery import (
     RecoveryAdmissionError,
     RuntimeEnvironmentFingerprint,
     admit_leaves,
     assert_preregistered,
     probe_configs,
-    recovery_scoring_contract,
 )
+from experiments.recovery_policy import POOLED_COUNTS_V2
+from experiments.source_sets import recovery_scoring_contract
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Explicit: importing an operator module no longer registers it.

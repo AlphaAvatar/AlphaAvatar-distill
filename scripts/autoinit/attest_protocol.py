@@ -38,13 +38,17 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from aadistill.initialization.planning.recovery import (  # noqa: E402
-    PREFLIGHT_PLAN_V1,
+from aadistill.initialization.planning.recovery import (
     RecoveryAdmissionError,
     RuntimeEnvironmentFingerprint,
-    trainer_source_digest,
 )
+from experiments.recovery_policy import PREFLIGHT_PLAN_V1
+from experiments.source_sets import trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))

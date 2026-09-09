@@ -23,6 +23,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the experiment instances live under `experiments.`
+#: since the core/application separation, and this file is also run as
+#: a subprocess with a caller-set PYTHONPATH.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
@@ -45,21 +49,26 @@ from aadistill.initialization.planning.ranking import (  # noqa: E402
     SCHEDULE_V1,
 )
 from aadistill.initialization.planning.recovery import (
+    FeasibilityRule,
+    RecoveryProtocolFingerprint,
+    RuntimeEnvironmentFingerprint,
+    EquivalenceRule,
+    SuccessiveHalvingPlan,
+)
+from experiments.recovery_policy import (
+    plan_policy,
     CAPABILITY_SCHEMA_V1,
     CATASTROPHIC_V1,
     PREFLIGHT_PLAN_V1,
-    TRAINER_SOURCE_FILES_V1,
-    FeasibilityRule,
-    RecoveryProtocolFingerprint,
-    recovery_scoring_contract,
-    RuntimeEnvironmentFingerprint,
-    trainer_source_digest,
     POOLED_COUNTS_V2,
     SEED_SA,
     SEED_SB,
     SEED_SC,
-    EquivalenceRule,
-    SuccessiveHalvingPlan,
+)
+from experiments.source_sets import (
+    TRAINER_SOURCE_FILES_V1,
+    recovery_scoring_contract,
+    trainer_source_digest,
 )
 from experiments.recipes import E1_KD_HEAVY_0860K
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
@@ -124,15 +133,15 @@ def build_plan(battery: dict) -> SuccessiveHalvingPlan:
     return SuccessiveHalvingPlan(
         plan_id="autoinit.v1.phase_a", recipe=E1_KD_HEAVY_0860K,
         searched_leaves=5, survivors=2,
-        feasibility_min=-1.0,          # PENDING; see selection_rules below
+        # The study's policy, with this plan's two pending values overriding it.
         # Formula frozen, value pending the control characterization. Deliberately
         # NOT pre-filled from the historical prior: a fallback value would be the
         # second definition this rule exists to eliminate.
-        equivalence=EquivalenceRule(n_pooled=battery["n_scorable_prompts"] * 2),
+        **plan_policy(
+            equivalence=EquivalenceRule(n_pooled=battery["n_scorable_prompts"] * 2),
+        ),
+        feasibility_min=-1.0,          # PENDING; see selection_rules below
         feasibility=FeasibilityRule(n_pooled=battery["n_prompts"] * 2),
-        catastrophic=CATASTROPHIC_V1,
-        capability_schema=CAPABILITY_SCHEMA_V1,
-        aggregation=POOLED_COUNTS_V2,
         survivor_rule=("rung 1: exclude searched leaves below the feasibility floor, "
                        "then take the top 2 by correct_overall; the canonical "
                        "control advances unconditionally and consumes no slot"),
