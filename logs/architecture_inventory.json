@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 109,
-  "lines": 29708,
+  "lines": 29718,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -5446,7 +5446,7 @@
   "src/aadistill/infrastructure/session.py": {
    "module": "aadistill.infrastructure.session",
    "path": "src/aadistill/infrastructure/session.py",
-   "lines": 715,
+   "lines": 725,
    "imports": [
     {
      "target": "__future__",
@@ -5533,7 +5533,7 @@
       "float"
      ],
      "owner": "BudgetSpec",
-     "line": 374,
+     "line": 384,
      "experiment_tokens": []
     },
     {
@@ -5542,7 +5542,7 @@
       "float"
      ],
      "owner": "BudgetSpec",
-     "line": 378,
+     "line": 388,
      "experiment_tokens": []
     },
     {
@@ -5551,7 +5551,7 @@
       "experiment_token"
      ],
      "owner": "SessionSpec.validate",
-     "line": 520,
+     "line": 530,
      "experiment_tokens": [
       "phase_a"
      ]
@@ -5562,7 +5562,7 @@
       "experiment_token"
      ],
      "owner": "<module>",
-     "line": 702,
+     "line": 712,
      "experiment_tokens": [
       "attempt"
      ]
@@ -5634,115 +5634,115 @@
      "name": "as_dict",
      "kind": "function",
      "qualname": "ExecutionCommands.as_dict",
-     "line": 222
+     "line": 232
     },
     {
      "name": "SetupManifest",
      "kind": "class",
      "qualname": "SetupManifest",
-     "line": 229
+     "line": 239
     },
     {
      "name": "assets_env",
      "kind": "function",
      "qualname": "SetupManifest.assets_env",
-     "line": 258
+     "line": 268
     },
     {
      "name": "test_ignores_env",
      "kind": "function",
      "qualname": "SetupManifest.test_ignores_env",
-     "line": 261
+     "line": 271
     },
     {
      "name": "staged_relay_inputs",
      "kind": "function",
      "qualname": "SetupManifest.staged_relay_inputs",
-     "line": 264
+     "line": 274
     },
     {
      "name": "relay_env",
      "kind": "function",
      "qualname": "SetupManifest.relay_env",
-     "line": 268
+     "line": 278
     },
     {
      "name": "MarkerPolicy",
      "kind": "class",
      "qualname": "MarkerPolicy",
-     "line": 285
+     "line": 295
     },
     {
      "name": "is_incomplete",
      "kind": "function",
      "qualname": "MarkerPolicy.is_incomplete",
-     "line": 296
+     "line": 306
     },
     {
      "name": "stage2_passed",
      "kind": "function",
      "qualname": "MarkerPolicy.stage2_passed",
-     "line": 299
+     "line": 309
     },
     {
      "name": "ArtifactPolicy",
      "kind": "class",
      "qualname": "ArtifactPolicy",
-     "line": 306
+     "line": 316
     },
     {
      "name": "TeardownPolicy",
      "kind": "class",
      "qualname": "TeardownPolicy",
-     "line": 346
+     "line": 356
     },
     {
      "name": "BudgetSpec",
      "kind": "class",
      "qualname": "BudgetSpec",
-     "line": 358
+     "line": 368
     },
     {
      "name": "plan",
      "kind": "function",
      "qualname": "BudgetSpec.plan",
-     "line": 381
+     "line": 391
     },
     {
      "name": "SessionContext",
      "kind": "class",
      "qualname": "SessionContext",
-     "line": 403
+     "line": 413
     },
     {
      "name": "SessionSpec",
      "kind": "class",
      "qualname": "SessionSpec",
-     "line": 435
+     "line": 445
     },
     {
      "name": "validate",
      "kind": "function",
      "qualname": "SessionSpec.validate",
-     "line": 503
+     "line": 513
     },
     {
      "name": "setup_environment",
      "kind": "function",
      "qualname": "SessionSpec.setup_environment",
-     "line": 618
+     "line": 628
     },
     {
      "name": "as_dict",
      "kind": "function",
      "qualname": "SessionSpec.as_dict",
-     "line": 644
+     "line": 654
     },
     {
      "name": "missing_arguments",
      "kind": "function",
      "qualname": "missing_arguments",
-     "line": 708
+     "line": 718
     }
    ],
    "import_time_calls": [],
@@ -6770,13 +6770,13 @@
     },
     {
      "chain": "mlp.gate_proj",
-     "probe": "mlp",
+     "probe": "gate_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 201
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 202
     },
