@@ -4,31 +4,23 @@
  "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "091ee15fbc6ea8de902f0546a6ecb6f5dc9935b55ef1019e31ec5fa1cc462361",
+ "post_freeze_digest": "16feef036ab79bda3342d19f7f5a647bb4b460720dedea3abcab4a26c4fe2df1",
  "changed_files": [
-  "scripts/experiments/recovery_policy.py",
-  "scripts/pod/autoinit_continuation_b_launch.py",
-  "scripts/pod/autoinit_phase_a_launch.py",
-  "scripts/pod/autoinit_recovery_continuation_launch.py",
-  "scripts/pod/autoinit_science_inputs.py",
-  "src/aadistill/governance/authorization.py",
-  "src/aadistill/infrastructure/session.py",
-  "src/aadistill/infrastructure/session_runner.py",
-  "src/aadistill/initialization/operators/base.py",
-  "src/aadistill/initialization/planning/recovery.py"
+  "scripts/experiments/phase_b/continuation.py",
+  "scripts/pod/autoinit_phase_a_launch.py"
  ],
  "change": {
   "what": "the all-stage initialization-core consolidation and the Milestone-A core/application separation. Reusable implementation moved out of aadistill.init and aadistill.autoinit into aadistill.initialization, and the remaining repository paths and semantic experiment policy left the core for scripts/experiments/ and configs/experiments/.",
   "why_it_touches_this_frozen_set": "continuation B's executable set names the shared infrastructure and the initialization core, so a relocation made for another phase moves this digest even though continuation B is closed and consumed.",
-  "n_changed_files": 10,
+  "n_changed_files": 2,
   "also": "the surviving experiment and deployment policy left src/aadistill: the authorization serializer, the recovery plan's study defaults and correctness rule, the epsilon response notes, the provider CLI lookup, MAIN_RELAY, MarkerPolicy.stage2_passed and the operator ledger path."
  },
  "pre_existing_branches_unchanged": false,
  "pre_existing_branches_note": "CHANGED at this declaration, and the previous note is superseded. The branches that moved: ['c1', 'continuation_b', 'phase_a', 'phase_b', 'recovery_continuation']. They moved because scripts/pod/autoinit_preflight_setup.sh carries embedded Python whose imports were rewritten by the relocation -- not because any dispatch DECISION changed. Recorded as moved rather than argued to be equivalent: continuation B is CLOSED and CONSUMED, so nothing relies on these hashes to launch, and claiming they were untouched would be false.",
  "preregistration_rewritten": false,
  "scientific_impact": "NONE. No Phase-A/B/continuation result, metric, hash or artifact changes. Relocation and ownership only; the 570-sample scoring comparison in logs/architecture_scoring_equivalence.json is byte-identical at this tree.",
- "declared_at_commit": "13587c994c62383cd70038f2494c7b6f004de91b",
- "post_freeze_digest_previous": "003a274b7bb01b46afc682a6c39330befbaa7d817ea690d44bc5aeea4714a84f",
+ "declared_at_commit": "e8d118fabbcddd1821a7a928ba7c8cec67f2c7b3",
+ "post_freeze_digest_previous": "091ee15fbc6ea8de902f0546a6ecb6f5dc9935b55ef1019e31ec5fa1cc462361",
  "history": [
   {
    "utc": "2026-09-06T06:00:00Z",
@@ -93,6 +85,12 @@
    "declared_at_commit": "59db0f112e85e7a25dcdd82f6d79bea519ec1f2f",
    "digest_moved": "003a274b7bb01b46 -> 091ee15fbc6ea8de",
    "change": "the residual core-ownership closure"
+  },
+  {
+   "utc": "2026-09-10T00:00:00Z",
+   "declared_at_commit": "13587c994c62383cd70038f2494c7b6f004de91b",
+   "digest_moved": "091ee15fbc6ea8de -> 16feef036ab79bda",
+   "change": "the residual closure's consumer round; deployment.py added to the set"
   }
  ],
  "branch_hashes_at_latest_declaration": {

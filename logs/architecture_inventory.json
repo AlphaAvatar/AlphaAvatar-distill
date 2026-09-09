@@ -6740,37 +6740,37 @@
     },
     {
      "chain": "self_attn.q_proj",
-     "probe": "q_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 198
     },
     {
      "chain": "self_attn.k_proj",
-     "probe": "self_attn",
+     "probe": "k_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 199
     },
     {
      "chain": "self_attn.v_proj",
-     "probe": "self_attn",
+     "probe": "v_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 200
     },
     {
      "chain": "mlp.gate_proj",
-     "probe": "mlp",
+     "probe": "gate_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 201
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 202
     },
     {
      "chain": "self_attn.o_proj",
-     "probe": "o_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_out_projections",
      "line": 206
     },
