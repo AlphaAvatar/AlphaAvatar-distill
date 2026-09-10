@@ -1,0 +1,198 @@
+{
+ "schema": "aadistill.cuda_suffix_evidence/v1",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "cases": [
+  {
+   "geometry_id": "suffix_narrow",
+   "device": "cuda",
+   "device_proofs_are_meaningful": true,
+   "_why": "on a single-device host every co-location claim below is trivially true. A CPU run exercises this harness and proves nothing about placement -- that substitution is what let attempt 9 reach a paid pod.",
+   "treatment_impl_id": "attention.activation_importance_v1",
+   "executed_step_indices": [
+    3
+   ],
+   "steps_written": [
+    "03_attention"
+   ],
+   "path_hash": "4855bcef072afbf876f44184cf7cebc7a6445f3fb6fdb7c4f025633f97597f40",
+   "parent_artifact_digest": "60326277196a43ce9e7758b2dd6a78b1d9cbe047e25100ead51796fbb7ecf772",
+   "output_artifact_digest": "7f2a49f4a9f081ddbc98e048f137df3d36136609bc7535b5faa35fb92cc99ba1",
+   "record": "stage_f/treatment_record.json",
+   "device_proofs": {
+    "collector_state_is_the_host_snapshot": {
+     "claim": "AttentionHeadStatsCollector.state() returns a host-resident snapshot -- the persistent cache form, by design",
+     "observed": true,
+     "holds": true,
+     "detail": [
+      [
+       "cpu",
+       "cpu"
+      ]
+     ]
+    },
+    "one_working_copy_reaches_the_model_device": {
+     "claim": "stats_to builds EXACTLY ONE working copy on the compute device; more than one would mean the transfer moved into a loop and the (layers, heads, d, d) tensor is duplicated",
+     "observed": true,
+     "holds": true,
+     "detail": {
+      "n_calls": 1,
+      "devices": [
+       [
+        "cuda:0",
+        "cuda:0"
+       ]
+      ]
+     }
+    },
+    "statistics_and_o_proj_are_co_located": {
+     "claim": "at every head_write_energy call the attention statistics and o_proj.weight are on the same device -- the exact pair that raised on the L40S",
+     "observed": true,
+     "holds": true,
+     "detail": [
+      {
+       "layer": 0,
+       "stats": "cuda:0",
+       "o_proj": "cuda:0"
+      },
+      {
+       "layer": 1,
+       "stats": "cuda:0",
+       "o_proj": "cuda:0"
+      }
+     ]
+    },
+    "score_vector_is_allocated_on_the_operand_device": {
+     "claim": "the per-head score buffer is created on w.device, not on the host default -- otherwise the first scores[h] assignment is a second, latent cross-device use",
+     "observed": true,
+     "holds": true,
+     "detail": [
+      "cuda:0",
+      "cuda:0"
+     ]
+    },
+    "returned_score_vector_is_host_resident": {
+     "claim": "the small returned vector is moved to the host ONCE, after the whole vector is built; the ranking and tie-break that follow are host-side and unchanged",
+     "observed": true,
+     "holds": true,
+     "detail": [
+      "cpu",
+      "cpu"
+     ]
+    }
+   },
+   "checks": {
+    "the_treatment_operator_executed": true,
+    "the_original_suffix_index_is_retained": true,
+    "the_checkpoint_keeps_its_original_number": true,
+    "the_prefix_did_not_execute_again": true,
+    "the_prefix_indices_are_recorded_as_skipped": true,
+    "the_output_stays_bound_to_the_full_frozen_path": true,
+    "the_record_is_not_a_replay": true,
+    "the_record_names_the_executed_step": true,
+    "the_parent_was_genuinely_gated": true,
+    "the_treatment_did_its_own_work": true
+   },
+   "passed": true
+  },
+  {
+   "geometry_id": "suffix_mid",
+   "device": "cuda",
+   "device_proofs_are_meaningful": true,
+   "_why": "on a single-device host every co-location claim below is trivially true. A CPU run exercises this harness and proves nothing about placement -- that substitution is what let attempt 9 reach a paid pod.",
+   "treatment_impl_id": "attention.activation_importance_v1",
+   "executed_step_indices": [
+    3
+   ],
+   "steps_written": [
+    "03_attention"
+   ],
+   "path_hash": "51f13334862a508f0a9cc7354395bb7ca19e321d316e18329b14b1b15265606f",
+   "parent_artifact_digest": "8c48e4171cde184de251cea205dfb919fcacb90aea92dfeb678531a440b41541",
+   "output_artifact_digest": "a8c858803379fea3c6eecbdf38d3729f707488244f09ba279c0e152562fcb77a",
+   "record": "stage_f/treatment_record.json",
+   "device_proofs": {
+    "collector_state_is_the_host_snapshot": {
+     "claim": "AttentionHeadStatsCollector.state() returns a host-resident snapshot -- the persistent cache form, by design",
+     "observed": true,
+     "holds": true,
+     "detail": [
+      [
+       "cpu",
+       "cpu"
+      ]
+     ]
+    },
+    "one_working_copy_reaches_the_model_device": {
+     "claim": "stats_to builds EXACTLY ONE working copy on the compute device; more than one would mean the transfer moved into a loop and the (layers, heads, d, d) tensor is duplicated",
+     "observed": true,
+     "holds": true,
+     "detail": {
+      "n_calls": 1,
+      "devices": [
+       [
+        "cuda:0",
+        "cuda:0"
+       ]
+      ]
+     }
+    },
+    "statistics_and_o_proj_are_co_located": {
+     "claim": "at every head_write_energy call the attention statistics and o_proj.weight are on the same device -- the exact pair that raised on the L40S",
+     "observed": true,
+     "holds": true,
+     "detail": [
+      {
+       "layer": 0,
+       "stats": "cuda:0",
+       "o_proj": "cuda:0"
+      },
+      {
+       "layer": 1,
+       "stats": "cuda:0",
+       "o_proj": "cuda:0"
+      },
+      {
+       "layer": 2,
+       "stats": "cuda:0",
+       "o_proj": "cuda:0"
+      }
+     ]
+    },
+    "score_vector_is_allocated_on_the_operand_device": {
+     "claim": "the per-head score buffer is created on w.device, not on the host default -- otherwise the first scores[h] assignment is a second, latent cross-device use",
+     "observed": true,
+     "holds": true,
+     "detail": [
+      "cuda:0",
+      "cuda:0",
+      "cuda:0"
+     ]
+    },
+    "returned_score_vector_is_host_resident": {
+     "claim": "the small returned vector is moved to the host ONCE, after the whole vector is built; the ranking and tie-break that follow are host-side and unchanged",
+     "observed": true,
+     "holds": true,
+     "detail": [
+      "cpu",
+      "cpu",
+      "cpu"
+     ]
+    }
+   },
+   "checks": {
+    "the_treatment_operator_executed": true,
+    "the_original_suffix_index_is_retained": true,
+    "the_checkpoint_keeps_its_original_number": true,
+    "the_prefix_did_not_execute_again": true,
+    "the_prefix_indices_are_recorded_as_skipped": true,
+    "the_output_stays_bound_to_the_full_frozen_path": true,
+    "the_record_is_not_a_replay": true,
+    "the_record_names_the_executed_step": true,
+    "the_parent_was_genuinely_gated": true,
+    "the_treatment_did_its_own_work": true
+   },
+   "passed": true
+  }
+ ]
+}

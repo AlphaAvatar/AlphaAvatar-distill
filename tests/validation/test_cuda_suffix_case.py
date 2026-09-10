@@ -278,3 +278,66 @@ class TestAnUnreachedSiteCannotPass:
         out = run_case(check, cfg, adapter, tmp_path)
         for name, proof in out["device_proofs"].items():
             assert proof["observed"] is True, f"{name} was never reached"
+
+
+# --- the matrix criterion, against the contract it must not contradict ------
+
+class TestTheMatrixAsksTheRightQuestion:
+    """The first real GPU run failed all 8 matrix cases while every operator
+    had succeeded.
+
+    The criterion demanded the CHILD be on the requested device.
+    `initialization/device.py` documents the opposite: "an operator's child
+    comes from ChildBuilder -> build_student, which sets the dtype and does NOT
+    place the model, so a parent on CUDA routinely coexists with a freshly
+    built child on the host."
+
+    It was invisible on CPU, where `device` is the host and the check passed
+    trivially. That is the inverse of the usual trap: CPU did not hide a device
+    bug, it hid a wrong ACCEPTANCE CRITERION.
+    """
+
+    def test_the_documented_contract_still_says_the_child_is_not_placed(self):
+        """If this sentence ever leaves device.py, the criterion below must be
+        revisited rather than silently kept."""
+        doc = (REPO / "src/aadistill/initialization/device.py").read_text()
+        assert "does NOT place the model" in doc
+        assert "coexists with a freshly built child on the host" in doc
+
+    def test_a_case_is_judged_on_where_the_OPERATOR_ran(self, check):
+        """A parent on the host means the operator did not run on the device,
+        whatever the config asked for."""
+        rows = [{"applied": True, "ran_on_requested_device": True,
+                 "child_host_resident_per_builder_contract": True},
+                {"applied": True, "ran_on_requested_device": False,
+                 "child_host_resident_per_builder_contract": True}]
+        passed = [r for r in rows
+                  if r.get("applied")
+                  and r.get("ran_on_requested_device") is True
+                  and r.get("child_host_resident_per_builder_contract") is True]
+        assert len(passed) == 1
+
+    def test_the_old_criterion_would_have_failed_a_healthy_cuda_run(self):
+        """The exact 2026-09-10 shape: parent on cuda, child on cpu, no error."""
+        row = {"applied": True, "parent_device": "cuda:0", "child_device": "cpu"}
+        old = (row["child_device"] is not None
+               and row["child_device"].startswith("cuda"))
+        assert old is False, "the old criterion is what failed 8/8"
+        new = (row["applied"] and row["parent_device"].startswith("cuda")
+               and row["child_device"].startswith("cpu"))
+        assert new is True
+
+    def test_it_is_not_weakened_to_accept_a_cpu_run(self, check, cfg, adapter,
+                                                    tmp_path):
+        """The correction must not have turned the matrix into something that
+        passes when nothing ran on a GPU. A host parent still fails."""
+        row = {"applied": True, "ran_on_requested_device": False,
+               "child_host_resident_per_builder_contract": True}
+        assert not (row["ran_on_requested_device"] is True), (
+            "a run whose parent never reached the device must not pass")
+
+    def test_the_source_no_longer_names_the_wrong_key(self):
+        src = (REPO / "scripts/validation/cuda_engineering_check.py").read_text()
+        code = "\n".join(l for l in src.splitlines()
+                         if not l.lstrip().startswith("#"))
+        assert "child_on_requested_device" not in code

@@ -145,6 +145,9 @@ def run_one(impl_id: str, model, parent_spec, target_spec, adapter, items,
 
     impl = get_implementation(impl_id)
     plan = impl.plan(parent_spec, target_spec, adapter)
+    #: WHERE THE OPERATOR ACTUALLY RAN. Read from the parent's weights, not
+    #: from `device`, which is only what the caller intended.
+    parent_device = device_of(model)
     ctx = OperatorContext(
         adapter=adapter, model=model, parent_spec=parent_spec,
         target_spec=target_spec, profile=NO_CALIBRATION, calibration_items=items,
@@ -152,13 +155,29 @@ def run_one(impl_id: str, model, parent_spec, target_spec, adapter, items,
     outcome = impl.apply(ctx)
     child = getattr(outcome, "model", None)
     placement = device_of(child) if child is not None else None
+    kind = device.split(":")[0]
     return {
         "impl_id": impl_id,
         "planned": plan is not None,
         "applied": True,
+        #: The question the matrix actually asks: did this operator execute
+        #: against a parent on the requested device without a placement, dtype
+        #: or shape error?
+        "parent_device": parent_device,
+        "ran_on_requested_device": (
+            parent_device is not None and parent_device.startswith(kind)),
         "child_device": placement,
-        "child_on_requested_device": (
-            placement is not None and placement.startswith(device.split(":")[0])),
+        #: NOT "is the child on the requested device". `initialization/device.py`
+        #: documents the opposite: "an operator's child comes from ChildBuilder
+        #: -> build_student, which sets the dtype and does NOT place the model,
+        #: so a parent on CUDA routinely coexists with a freshly built child on
+        #: the host." Demanding the child be on `device` encoded an assumption
+        #: the framework states is false -- and it was invisible on CPU, where
+        #: `device` IS the host and the check passed trivially. On the first
+        #: real GPU run it failed all 8 cases while every operator had in fact
+        #: succeeded.
+        "child_host_resident_per_builder_contract": (
+            placement is not None and placement.startswith("cpu")),
     }
 
 
@@ -488,8 +507,10 @@ def main() -> int:
                   f"{'ok' if row.get('applied') else 'FAILED'}")
         del model
 
-    passed = [r for r in results if r.get("applied")
-              and r.get("child_on_requested_device") is not False]
+    passed = [r for r in results
+              if r.get("applied")
+              and r.get("ran_on_requested_device") is True
+              and r.get("child_host_resident_per_builder_contract") is True]
 
     # --- the end-to-end case, per declared geometry -------------------------
     suffix_root = layout.path(run_cfg["optional_roles"]["suffix_case"])

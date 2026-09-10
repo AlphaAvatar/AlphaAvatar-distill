@@ -1,0 +1,14 @@
+{
+ "python": "3.12.3",
+ "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
+ "torch": "2.9.1+cu130",
+ "transformers": "5.17.0",
+ "cuda": {
+  "device_name": "NVIDIA RTX 2000 Ada Generation",
+  "capability": "8.9",
+  "device_count": 1,
+  "torch": "2.9.1+cu130",
+  "cuda_runtime": "13.0",
+  "driver": "cuda"
+ }
+}

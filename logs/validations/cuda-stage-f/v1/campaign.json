@@ -17,8 +17,22 @@
    "failure_class": "setup",
    "teardown_confirmed": true,
    "record": "logs/runs/cuda_stage_f/cuda_stage_f_20260910/"
+  },
+  {
+   "subrun_id": "cuda_stage_f_20260910_s2",
+   "pod_id": "zoz95844krv2ze",
+   "gpu": "NVIDIA RTX 2000 Ada Generation",
+   "rate_usd_per_hour": 0.24,
+   "elapsed_minutes": 3.622,
+   "cost_usd": 0.0145,
+   "cost_basis": "elapsed x confirmed rate",
+   "verdict": "FAIL",
+   "failure_class": "operator",
+   "teardown_confirmed": true,
+   "execution_sha": "fd2aa174eb7f1d15236021e2688003349c918199",
+   "record": "logs/runs/cuda_stage_f/cuda_stage_f_20260910_s2/"
   }
  ],
  "authorizes": "nothing",
- "booked_usd": 0.0073
+ "booked_usd": 0.0218
 }
