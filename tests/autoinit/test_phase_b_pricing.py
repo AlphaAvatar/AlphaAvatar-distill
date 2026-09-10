@@ -32,6 +32,43 @@ from price_phase_b import (  # noqa: E402
 )
 from verify_historical_probe_reuse import ADMITTED, CHECKPOINTS  # noqa: E402
 
+sys.path.insert(0, str(REPO / "tests/pod"))
+from historical_contract_reuse import (  # noqa: E402
+    write_historical_contract_record)
+
+
+@pytest.fixture
+def citable_reuse(tmp_path, monkeypatch):
+    """Price against the record the probes satisfy under their OWN contract.
+
+    Phase A's probes were scored under `recovery_search_scoring@v2`. The scorer
+    relocated and the contract moved to v3, so the live record now fails
+    `scoring_contract_matches_live` on all eleven probes and nothing else, and
+    `price()` correctly refuses it -- that refusal is asserted directly by
+    `test_the_pricing_refuses_the_live_record_today`.
+
+    These tests are about the pricing arithmetic, which needs a record it may
+    cite. Autouse would hide the refusal test, so it is requested per test.
+    """
+    monkeypatch.setattr(price_phase_b, "REUSE_RECORD",
+                        write_historical_contract_record(tmp_path))
+
+
+def test_the_pricing_refuses_the_live_record_today():
+    """The current correct answer, stated once and on purpose.
+
+    `logs/autoinit_historical_reuse_position.json` conclusion 4 derives the same
+    refusal independently. If the contract ever matches again this fails, and
+    `citable_reuse` should be dropped rather than kept out of habit.
+    """
+    import json
+
+    live = json.loads(
+        (REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    assert live["reuse_verified"] is False
+    with pytest.raises(SystemExit, match="reuse_verified=false"):
+        price()
+
 
 # --- the historical evidence ------------------------------------------------
 
@@ -85,14 +122,14 @@ def test_pricing_refuses_a_reuse_record_describing_different_probe_bytes(
 # --- the arithmetic ---------------------------------------------------------
 
 
-def test_reuse_removes_the_verified_priors_from_the_sa_bill():
+def test_reuse_removes_the_verified_priors_from_the_sa_bill(citable_reuse):
     p = price()["probes"]
     assert p["sa_missing"] == PHASE_B_SEARCHED_LEAVES
     assert price()["procedure"]["candidates_at_sa"]["total"] == \
         PHASE_B_SEARCHED_LEAVES + len(PHASE_A_FINALISTS) + 1
 
 
-def test_each_scenario_describes_ONE_world():
+def test_each_scenario_describes_ONE_world(citable_reuse):
     """The trap: pricing sb as if the survivors were new while pricing sc as if
     they were the priors. Each end must be internally consistent."""
     p = price()["probes"]
@@ -105,7 +142,7 @@ def test_each_scenario_describes_ONE_world():
     assert (p["total_low"], p["total_high"], p["total_no_reuse"]) == (5, 10, 14)
 
 
-def test_the_no_reuse_path_is_a_REJECTED_counterfactual_not_the_ceiling():
+def test_the_no_reuse_path_is_a_REJECTED_counterfactual_not_the_ceiling(citable_reuse):
     """Comparability failure terminates at stage 0; it does not buy a bigger run.
 
     The frozen feasibility floor and equivalence interval were materialized under
@@ -126,7 +163,7 @@ def test_the_no_reuse_path_is_a_REJECTED_counterfactual_not_the_ceiling():
     assert "NOT an executable path" in r["scenarios"]["rejected_counterfactual_no_reuse"]
 
 
-def test_the_floor_is_not_called_an_expectation():
+def test_the_floor_is_not_called_an_expectation(citable_reuse):
     """No expected-value assumption over survivor identity or tie-break
     probability is defined anywhere, so nothing here may be called 'expected'."""
     r = price()
@@ -138,7 +175,7 @@ def test_the_floor_is_not_called_an_expectation():
     assert "not an expectation" in r["scenarios"]["low"]
 
 
-def test_the_totals_are_ordered_and_composed_of_what_they_claim():
+def test_the_totals_are_ordered_and_composed_of_what_they_claim(citable_reuse):
     r = price()
     lo = r["total"]["low_usd"]
     hi = r["total"]["hard_with_reuse_usd"]
@@ -157,25 +194,27 @@ def test_the_totals_are_ordered_and_composed_of_what_they_claim():
     assert s["usd_hard"] > s["usd_high"] > s["usd_low"]
 
 
-def test_it_prices_a_two_profile_search_not_a_one_profile_one():
+def test_it_prices_a_two_profile_search_not_a_one_profile_one(citable_reuse):
     s = price()["search"]
     assert s["leaves_max"] >= 20
     assert s["peak_storage_gib_working"] > 200
     assert s["provision_container_disk_gib"] >= 300
 
 
-def test_the_record_does_not_claim_to_be_an_authorization():
+def test_the_record_does_not_claim_to_be_an_authorization(citable_reuse):
     r = price()
     assert "NOT an authorization" in r["_contract"]
     assert "grant" in r["_contract"]
     assert r["reuse"]["verified"] is True
-    assert r["reuse"]["source"].endswith("autoinit_historical_probe_reuse.json")
+    # The record it actually read, whichever that is. The point is that the
+    # priced plan names its evidence, not that the filename is one string.
+    assert r["reuse"]["source"] == str(price_phase_b.REUSE_RECORD)
 
 
 # --- the three holes a first mutation pass found ----------------------------
 
 
-def test_a_probe_that_EXISTS_but_is_not_verified_is_still_billed(monkeypatch, tmp_path):
+def test_a_probe_that_EXISTS_but_is_not_verified_is_still_billed(monkeypatch, tmp_path, citable_reuse):
     """M1: reuse must come from the verification verdict, not from the file.
 
     Today every admitted probe both exists and verifies, so the two sources agree
@@ -185,7 +224,9 @@ def test_a_probe_that_EXISTS_but_is_not_verified_is_still_billed(monkeypatch, tm
     from verify_historical_probe_reuse import probes_dir_digest
 
     full = price()["probes"]["total_low"]
-    real = json.loads((REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    # The record the pricing is CURRENTLY reading, not the live one -- otherwise
+    # this withholds from a list the priced run never saw.
+    real = json.loads(price_phase_b.REUSE_RECORD.read_text())
     withheld = [p for p in real["admitted_reusable_probes"]
                 if p != f"{PHASE_A_FINALISTS[0]}/sa"]
     doctored = tmp_path / "reuse.json"

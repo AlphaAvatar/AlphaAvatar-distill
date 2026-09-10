@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 171,
+ "modules_scanned": 173,
  "test_ignores": [
   "tests/data/test_recovery_corpus_pipeline.py",
   "tests/pod/test_phase_a_stages1_5_execute.py",
@@ -172,7 +172,7 @@
  "predicates": [
   {
    "file": "tests/architecture/test_core_ownership.py",
-   "line": 301,
+   "line": 367,
    "kind": "pytest.skip",
    "function": "test_the_recorded_report_agrees_with_a_live_scan",
    "condition": "not path.is_file()",
@@ -204,7 +204,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 120,
+   "line": 139,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -220,7 +220,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 129,
+   "line": 148,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -236,7 +236,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 168,
+   "line": 187,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -252,7 +252,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 180,
+   "line": 199,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -268,7 +268,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_confirmation_scoring.py",
-   "line": 215,
+   "line": 234,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not HISTORICAL",
@@ -1854,5 +1854,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "cafc1fa04513909db165fe331b807d11ea10b9b59d9e63ca666756893f1db3f2"
+ "digest": "b2b03d07c31a29d847ffce950e135f9ef6debacdec8bbbf82d22efd1a2001a46"
 }
