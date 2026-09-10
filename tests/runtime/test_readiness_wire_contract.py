@@ -97,13 +97,31 @@ class TestTheC1ContractIsUnchanged:
     def test_the_harness_field_is_exactly_the_key_records_use(self):
         assert C1.C1_RECORD_CONTRACT.harness_field == "c1_harness_digest"
 
-    def test_the_committed_record_still_declares_that_schema(self):
-        """Read from the artifact on disk, not from the constant."""
-        import json
+    def test_the_writer_sources_both_values_from_the_contract(self):
+        """The producer/consumer property, and the reason neither value moved.
 
-        committed = json.loads((REPO / C1.RECORD_PATH).read_text())
-        assert committed["schema"] == C1.C1_RECORD_CONTRACT.schema
-        assert C1.C1_RECORD_CONTRACT.harness_field in committed
+        This first read `logs/c1_pod_environment_verification.json` off disk —
+        which the pod-simulated sweep caught at `$0`, because that record is one
+        of the 1056 paths a C1 pod does not receive. A test that reads a
+        repository artifact the session does not stage passes on a dev box and
+        fails on a pod, and this suite runs inside the pod's setup gate.
+
+        Reading the WRITER is better than reading one artifact anyway: it checks
+        that the record and the gate take their schema and their harness key
+        from the same place, which is the property that keeps every record
+        verifiable — not just the one currently on disk.
+        """
+        src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+        code = "\n".join(l for l in src.splitlines()
+                         if not l.lstrip().startswith("#"))
+        assert '"schema": C1_RECORD_CONTRACT.schema' in code, (
+            "the recorder writes a schema string it did not read from the "
+            "contract the verifier checks against")
+        assert "C1_RECORD_CONTRACT.harness_field: harness" in code, (
+            "the recorder writes the harness under a literal key rather than "
+            "the contract's field name")
+        assert '"c1_harness_digest":' not in code, (
+            "a literal harness key survives in the recorder")
 
     def test_a_c1_shaped_record_verifies_through_the_real_function(self):
         ok, why = PE.verify_record(record_for(C1.C1_RECORD_CONTRACT), REPO,
