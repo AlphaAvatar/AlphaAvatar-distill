@@ -1,7 +1,8 @@
-**Updated:** 2026-09-10 · branch `prep/c1-run-identity` · `main` = `daf64772` ·
+**Updated:** 2026-09-11 · branch `prep/c1-run-identity` · `main` = `daf64772` ·
 **PHASE B CLOSED · PHASE C0 FROZEN · ATTEMPT 9 RAN — THE FROZEN PATH
-REPRODUCES; STAGE F FAILED · MILESTONE-A MERGED · NO ENGINEERING BLOCKER
-REMAINS FOR A TENTH ATTEMPT — ONLY A MAINTAINER DECISION**
+REPRODUCES; STAGE F FAILED · MILESTONE-A MERGED · TWO ENGINEERING BLOCKERS
+FOUND AND REPAIRED 2026-09-11 — THE 2026-09-10 "NO ENGINEERING BLOCKER"
+READING WAS WRONG**
 
 # Current state
 
@@ -25,8 +26,59 @@ how the snapshot came to disagree with itself.
 | engineering campaign | **CLOSED**. Authorized, executed, reconciled and torn down: [`validations/cuda-stage-f/v1/`](validations/cuda-stage-f/v1/). No GPU work is owed |
 | Milestone A | **MERGED 2026-09-10**, fast-forward, `main` = `daf64772`. The migration branch is preserved |
 | run identity | **IN PRODUCTION.** The launcher requires `--run-id` and writes into `runs/phase_c1/<run_id>/`; there is no `--out` and no flat session record. Attempts 1–9 stay exactly where they are, registered by path |
-| owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains. **No engineering blocker** |
+| owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
+| **corrected** | the 2026-09-10 claim that **no engineering blocker remained was WRONG**. Two were found on review and repaired on 2026-09-11: an undefined `REPO` in the shared runner that would have raised `NameError` *after* a pod was created and setup had completed, and a scratch root with no owner, which let one attempt collect another's evidence. Both came in with `main`; neither was introduced by the run-identity work. See the 2026-09-11 section |
 
+> **TWO ENGINEERING BLOCKERS, FOUND ON REVIEW AND REPAIRED, 2026-09-11 —
+> `$0.0000`, no pod, no GPU, no provider resource, no grant, no authorization.**
+>
+> The previous entry ended by saying no engineering blocker remained. **That was
+> wrong**, and the correction matters more than either repair: a tenth attempt
+> launched on 2026-09-10 would have created a pod, completed setup, materialized
+> its inputs and then died on a `NameError`.
+>
+> **1. `SessionRunner.run()` read an undefined `REPO`.** It built the driver's
+> `JobSpec` with `workdir=REPO` — a module constant deleted when the image layout
+> moved into `ExecutionCommands`, three lines above an `env` that had been
+> converted correctly. It raises only after the provider resource exists, so the
+> cheapest possible defect would have been found at the most expensive possible
+> moment. Now `self.repo`, i.e. `spec.commands.checkout_root`: config-derived, no
+> constant restored, no global injected by a launcher.
+>
+> *Why nothing caught it.* The removal was verified against the nineteen
+> f-strings that build remote commands; this is a keyword argument. And every
+> test that drives the real acquisition loop stubs `setup_on_draw` to a
+> **failure** outcome, so `run()` returned before reaching the line. The success
+> path had no execution coverage at all — it does now, under two deployment
+> layouts that share no path component.
+>
+> The same CLASS is covered statically: `inventory.py` gains one rule using
+> stdlib `symtable` — names read as module globals the module never binds. It
+> reports **0** here and exactly `('run', 'REPO')` on the pre-fix bytes, which is
+> asserted, so the guard is not merely quiet. Not a lint sweep.
+>
+> **2. A run could collect outputs it did not produce.** `open_c1_run` refused a
+> colliding `run_id` under `logs/runs/` and said nothing about `--scr`, where the
+> outputs actually accumulate. A fresh run id aimed at attempt 9's scratch,
+> failing *before its driver started*, came home with attempt 9's driver
+> evidence, status stream and artifact manifest recorded as its own — every role
+> present, every file real, `verify_run_manifest` green.
+>
+> Output ownership is now explicit: claimed at open, required at closeout,
+> decided by the run's **declared outputs** so a shared read-only cache neither
+> claims nor blocks. A foreign claim is refused by name; an unclaimed directory
+> holding this run's outputs is refused as *unknown* ownership. Nothing is
+> deleted, nothing overwritten, and mtime is never consulted. The CUDA
+> engineering launcher uses the same mechanism.
+>
+> **Frozen science is unmoved.** `session_runner.py` belongs to Phase B's frozen
+> executable set, so the change is declared additively as **PHB-HA-010** with a
+> git-derived numstat (`+9 −1`, `lines_removed: 1` — the real number, not a
+> convenient zero). The C1 harness moves `bef1e52b` → `f2789673`: no file added,
+> none removed, exactly the three edited; of **394** non-harness preregistration
+> leaf fields, **two** move — `head_commit` and the document's own self-hash.
+> **Scientific fields moved: 0.**
+>
 > **A RUN NOW HAS AN IDENTITY BEFORE IT RUNS, 2026-09-10 — `$0.0000`, no pod, no
 > GPU, no provider resource, no grant, no authorization, no bundle.**
 >

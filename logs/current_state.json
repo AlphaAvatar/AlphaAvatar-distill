@@ -68,8 +68,8 @@
  ],
  "next_starting_point": {
   "status": "Attempt 9 produced C1's FIRST scientific observation -- both frozen replay gates PASSED -- then aborted in stage F. That defect is repaired and CONFIRMED ON REAL CUDA; see phase_c.c1.blocker. Engineering campaign closed.",
-  "the_ask": "A maintainer decision on whether a tenth attempt is worth the one ceiling-sized slot left. Milestone A is MERGED; no engineering blocker remains.",
-  "budget": "$267.8998 spent of the unchanged $283.7600 cap; $15.8602 uncommitted, which covers exactly one $15.1475 attempt with $0.7127 after it."
+  "the_ask": "A maintainer decision on whether a tenth attempt is worth the one ceiling-sized slot left. CORRECTION: the 2026-09-10 'no engineering blocker' reading was WRONG -- two were found on review and repaired 2026-09-11. See logs/STATE.md.",
+  "budget": "OWNED by the budget block above; not restated here."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",

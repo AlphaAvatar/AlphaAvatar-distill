@@ -1161,6 +1161,59 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "be8d9e2224a35f3e3cdf3e341c006a05e773bb2f3efa6eb81e6b18c037f24576"
+  },
+  {
+   "amendment_id": "PHB-HA-010",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-10T17:49:20+00:00",
+   "reviewed_base_commit": "0103467384ca0013ddc0caa9dc18c92aadfa5c78",
+   "source_repair_commit": "4e24d6fe2b444eeb57dc0f467e8a12db311cd777",
+   "source_repair_parent": "0103467384ca0013ddc0caa9dc18c92aadfa5c78",
+   "previous_live_digest": "7be583c44220b17ede3246c6bf173f0e97d741ee1132ee25540eea1bb757db67",
+   "new_live_digest": "137441442a009c85591ae01c751661bb371924b652d09fb22a2435676f09be75",
+   "changed_files": [
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/infrastructure/session_runner.py": "bcf2b7fd1b75f4f9bf847831ac4ea4e8b78be02873ff9515e8a4c48ad30c7bcf"
+   },
+   "file_sha256_after": {
+    "src/aadistill/infrastructure/session_runner.py": "d6416138055f866242ef2fc25281125f9f19815d9007810888bc0c1fa8026862"
+   },
+   "patch_sha256": "d0579aede5f69f20abb7dc31c2aa210f07dcdc184527a7f3fe19acc2396a90ae",
+   "numstat": {
+    "src/aadistill/infrastructure/session_runner.py": [
+     9,
+     1
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 1,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "Repair of an undefined name in the shared session runner. SessionRunner.run() built the driver JobSpec with workdir=REPO, a module constant deleted when the image layout moved into ExecutionCommands; it now reads self.repo, i.e. spec.commands.checkout_root. One line changed, nine added, all of the addition being the comment recording why the name survived (a keyword argument, not one of the f-strings the removal was verified against). No behaviour is added or removed: the value written is the one the same call already used for PYTHONPATH.",
+   "why_the_owner_is_shared_session_runner": "session_runner.py is a member of CONTINUATION_SOURCE_FILES_V2 because every launchable session runs through it, including Phase B's. Phase B Stage 1 is COMPLETE and its frozen digest is historical evidence of what attempt 5 executed; rewriting the preregistration to match new code would destroy that evidence, and leaving a NameError in the shared runner would leave every future session unable to start its driver. The change is declared here instead.",
+   "why_a_c1_only_override_was_rejected": "This is not a C1-specific behaviour. The defect is in the shared runner and would have raised for any session reaching driver submission; the fix reads the value the caller already declares through ExecutionCommands, so no experiment-specific branch, constant or override is introduced anywhere.",
+   "maintainer_authorization": "maintainer review of 2026-09-11: repair the undefined REPO and bind run identity to output ownership; no merge, no Attempt-10 grant, no paid resource",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "be8d9e2224a35f3e3cdf3e341c006a05e773bb2f3efa6eb81e6b18c037f24576",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "15a89843d2ddc7dea641dd2768b7b34701aab6d73ac528964c91345697f63468"
   }
  ]
 }

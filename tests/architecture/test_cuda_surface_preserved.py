@@ -57,6 +57,18 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "of one experiment's groups. THIS IS A DECLARED SEMANTIC CHANGE to "
             "readiness verification and is deliberately not described as prose.",
      }),
+    ("0103467384ca0013ddc0caa9dc18c92aadfa5c78",
+     "undefined REPO in the shared runner, and run/output ownership",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "run(): the driver JobSpec's `workdir` reads `self.repo` "
+            "(spec.commands.checkout_root) instead of `REPO`, a module constant "
+            "deleted when the image layout moved into ExecutionCommands. THIS IS "
+            "A DECLARED SEMANTIC CHANGE -- the expression evaluated is different "
+            "-- and is deliberately not described as prose, even though the "
+            "previous expression could only ever raise NameError. It is the same "
+            "value the same call already passed as PYTHONPATH.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.
@@ -173,17 +185,30 @@ def test_this_rounds_declaration_is_not_empty():
     assert ROUNDS[-1][2], "the current round declares no semantic change"
 
 
-def test_the_readiness_change_is_declared_as_semantic_not_prose():
-    """Named explicitly, because describing it as a docstring sweep is exactly
-    the misreport this file exists to prevent."""
-    declared = ROUNDS[-1][2]
-    assert "src/aadistill/runtime/pod_environment.py" in declared
-    why = declared["src/aadistill/runtime/pod_environment.py"]
-    assert "SEMANTIC CHANGE" in why
+#: (core path, the round that declared it). Each named semantic change is
+#: checked against ITS OWN round, not against whichever round happens to be
+#: last: this test read `ROUNDS[-1]` and broke the moment a later round was
+#: appended, which would have pushed someone toward deleting it rather than
+#: binding it correctly.
+NAMED_SEMANTIC_CHANGES = (
+    ("src/aadistill/runtime/pod_environment.py",
+     "b2ecdff83ee0a7653eea7872b5af6739a4de4381"),
+    ("src/aadistill/infrastructure/session_runner.py",
+     "0103467384ca0013ddc0caa9dc18c92aadfa5c78"),
+)
+
+
+@pytest.mark.parametrize("path,tip", NAMED_SEMANTIC_CHANGES,
+                         ids=lambda v: v.split("/")[-1])
+def test_a_named_change_is_declared_as_semantic_not_prose(path, tip):
+    """Describing either as a docstring sweep is the misreport this file exists
+    to prevent, so each is named and each is measured."""
+    round_ = next(r for r in ROUNDS if r[0] == tip)
+    declared = round_[2]
+    assert path in declared, f"{tip[:8]} does not declare {path}"
+    assert "SEMANTIC CHANGE" in declared[path]
     # And it really is one, measured rather than asserted.
-    base = ROUNDS[-1][0]
-    path = "src/aadistill/runtime/pod_environment.py"
-    assert shape(git("show", f"{base}:{path}")) != shape((REPO / path).read_text())
+    assert shape(git("show", f"{tip}:{path}")) != shape((REPO / path).read_text())
 
 
 def test_the_prose_sweep_actually_covered_the_core():

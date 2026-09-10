@@ -4,7 +4,7 @@
  "root": "src/aadistill",
  "counts": {
   "modules": 109,
-  "lines": 30183,
+  "lines": 30191,
   "classifications": {
    "generic_architecture_spec": 2,
    "model_family_adapter": 2,
@@ -24,6 +24,8 @@
   "import_time_registration": 0,
   "import_time_taxonomy": 5,
   "big_int_literals": 2,
+  "undefined_global_reads": 0,
+  "star_import_modules": 0,
   "package_cycles": 0
  },
  "findings": {
@@ -73,7 +75,9 @@
     "line": 492,
     "value": 1000003
    }
-  ]
+  ],
+  "undefined_global_reads": [],
+  "star_import_modules": []
  },
  "graph": {
   "module_edges": {
@@ -532,6 +536,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/__init__.py": {
@@ -544,6 +550,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/cleaning.py": {
@@ -658,6 +666,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/dataset.py": {
@@ -785,6 +795,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/diversity.py": {
@@ -893,6 +905,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/e5_pack.py": {
@@ -1021,6 +1035,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/extra_stream.py": {
@@ -1134,6 +1150,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/ladder.py": {
@@ -1348,6 +1366,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/mixture.py": {
@@ -1396,6 +1416,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/paired_corpus.py": {
@@ -1864,6 +1886,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/prefix_split.py": {
@@ -2070,6 +2094,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/recovery.py": {
@@ -2228,6 +2254,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/sessions.py": {
@@ -2444,6 +2472,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/tools.py": {
@@ -2509,6 +2539,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/data/verify.py": {
@@ -2593,6 +2625,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/__init__.py": {
@@ -2605,6 +2639,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/behavior.py": {
@@ -2786,6 +2822,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/capability.py": {
@@ -2984,6 +3022,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/degeneration.py": {
@@ -3076,6 +3116,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/general_text.py": {
@@ -3137,6 +3179,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/init_nll.py": {
@@ -3198,6 +3242,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/oracle_reasoning.py": {
@@ -3291,6 +3337,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/paired_stats.py": {
@@ -3352,6 +3400,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/strict_answer.py": {
@@ -3431,6 +3481,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/evaluation/usable_rollout.py": {
@@ -3508,6 +3560,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/governance/__init__.py": {
@@ -3520,6 +3574,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/governance/artifact_manifest.py": {
@@ -3665,6 +3721,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/governance/authorization.py": {
@@ -3835,6 +3893,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/governance/closure.py": {
@@ -3946,6 +4006,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/governance/grant.py": {
@@ -4016,6 +4078,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/governance/post_freeze.py": {
@@ -4169,6 +4233,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/infrastructure/__init__.py": {
@@ -4181,6 +4247,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/artifact_gate.py": {
@@ -4431,6 +4499,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/budget.py": {
@@ -4655,6 +4725,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/env.py": {
@@ -4747,6 +4819,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/log_relay.py": {
@@ -4909,6 +4983,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/manifest.py": {
@@ -4973,6 +5049,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/infrastructure/provider.py": {
@@ -5205,6 +5283,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/remote.py": {
@@ -5441,6 +5521,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/session.py": {
@@ -5793,6 +5875,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/session_prechecks.py": {
@@ -5898,12 +5982,14 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/session_runner.py": {
    "module": "aadistill.infrastructure.session_runner",
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "lines": 989,
+   "lines": 997,
    "imports": [
     {
      "target": "__future__",
@@ -6033,7 +6119,7 @@
     },
     {
      "target": "tarfile",
-     "line": 791,
+     "line": 799,
      "relative": 0
     }
    ],
@@ -6259,34 +6345,36 @@
      "name": "collect_and_teardown",
      "kind": "function",
      "qualname": "SessionRunner.collect_and_teardown",
-     "line": 759
+     "line": 767
     },
     {
      "name": "finish_emergency",
      "kind": "function",
      "qualname": "SessionRunner.finish_emergency",
-     "line": 910
+     "line": 918
     },
     {
      "name": "teardown_now",
      "kind": "function",
      "qualname": "SessionRunner.teardown_now",
-     "line": 931
+     "line": 939
     },
     {
      "name": "_shell_quote",
      "kind": "function",
      "qualname": "_shell_quote",
-     "line": 957
+     "line": 965
     },
     {
      "name": "run_session",
      "kind": "function",
      "qualname": "run_session",
-     "line": 964
+     "line": 972
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/source_identity.py": {
@@ -6330,6 +6418,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/infrastructure/watchdog.py": {
@@ -6605,6 +6695,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/__init__.py": {
@@ -6617,6 +6709,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/adapters/__init__.py": {
@@ -6664,6 +6758,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "model_family_adapter"
   },
   "src/aadistill/initialization/adapters/qwen3.py": {
@@ -6788,7 +6884,7 @@
     },
     {
      "chain": "self_attn.k_proj",
-     "probe": "k_proj",
+     "probe": "self_attn",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 199
     },
@@ -6806,7 +6902,7 @@
     },
     {
      "chain": "mlp.up_proj",
-     "probe": "mlp",
+     "probe": "up_proj",
      "owner": "Qwen3Adapter.stream_in_projections",
      "line": 202
     },
@@ -6988,6 +7084,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "model_family_adapter"
   },
   "src/aadistill/initialization/calibration/__init__.py": {
@@ -7000,6 +7098,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/calibration/datasets.py": {
@@ -7200,6 +7300,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/calibration/items.py": {
@@ -7268,6 +7370,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/calibration/profiles.py": {
@@ -7506,6 +7610,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/device.py": {
@@ -7591,6 +7697,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/initialization/operators/__init__.py": {
@@ -7692,6 +7800,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/_common.py": {
@@ -7798,6 +7908,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/attention.py": {
@@ -7928,6 +8040,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/attention_activation.py": {
@@ -8119,6 +8233,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/base.py": {
@@ -8448,6 +8564,8 @@
      "line": 488
     }
    ],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/composite.py": {
@@ -8606,6 +8724,8 @@
      "line": 54
     }
    ],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/depth.py": {
@@ -8905,6 +9025,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/ffn.py": {
@@ -9039,6 +9161,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/register.py": {
@@ -9123,6 +9247,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/operators/width.py": {
@@ -9302,6 +9428,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_operator"
   },
   "src/aadistill/initialization/planning/__init__.py": {
@@ -9314,6 +9442,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/fixed_path.py": {
@@ -9642,6 +9772,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/generation.py": {
@@ -9916,6 +10048,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/generation_compat.py": {
@@ -10007,6 +10141,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/metrics.py": {
@@ -10134,6 +10270,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/ranking.py": {
@@ -10440,6 +10578,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/recovery.py": {
@@ -11392,6 +11532,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/search.py": {
@@ -11821,6 +11963,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/stage1_import.py": {
@@ -11970,6 +12114,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/planning/stage1_selection.py": {
@@ -12072,6 +12218,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/specs/__init__.py": {
@@ -12084,6 +12232,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/specs/arch.py": {
@@ -12450,6 +12600,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_architecture_spec"
   },
   "src/aadistill/initialization/specs/artifact.py": {
@@ -12632,6 +12784,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/initialization/specs/identity_collapse.py": {
@@ -12729,6 +12883,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/specs/metrics.py": {
@@ -12944,6 +13100,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/specs/state.py": {
@@ -13246,6 +13404,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/statistics/__init__.py": {
@@ -13258,6 +13418,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/statistics/attention.py": {
@@ -13339,6 +13501,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/statistics/collect.py": {
@@ -13440,6 +13604,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_statistics"
   },
   "src/aadistill/initialization/statistics/contribution.py": {
@@ -13587,6 +13753,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_statistics"
   },
   "src/aadistill/initialization/statistics/reweight.py": {
@@ -13693,6 +13861,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_statistics"
   },
   "src/aadistill/initialization/statistics/spec.py": {
@@ -13803,6 +13973,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_architecture_spec"
   },
   "src/aadistill/initialization/transforms/__init__.py": {
@@ -13815,6 +13987,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/transforms/nll_gate.py": {
@@ -13902,6 +14076,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/initialization/transforms/project.py": {
@@ -13972,6 +14148,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_statistics"
   },
   "src/aadistill/initialization/transforms/sandwich.py": {
@@ -14124,6 +14302,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_statistics"
   },
   "src/aadistill/models/__init__.py": {
@@ -14136,6 +14316,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/models/quant.py": {
@@ -14183,6 +14365,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/models/student.py": {
@@ -14273,6 +14457,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/models/teacher.py": {
@@ -14355,6 +14541,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/models/tokenizer_contract.py": {
@@ -14447,6 +14635,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/rollout/__init__.py": {
@@ -14459,6 +14649,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/rollout/engines.py": {
@@ -14826,6 +15018,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/rollout/generate.py": {
@@ -14890,6 +15084,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/rollout/snapshots.py": {
@@ -15073,6 +15269,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/runtime/__init__.py": {
@@ -15085,6 +15283,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/runtime/cost.py": {
@@ -15556,6 +15756,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/runtime/cpu_test_env.py": {
@@ -15672,6 +15874,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/runtime/device_handoff.py": {
@@ -15771,6 +15975,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/runtime/leaf_durability.py": {
@@ -15876,6 +16082,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/runtime/pod_environment.py": {
@@ -16101,6 +16309,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_governance_runtime"
   },
   "src/aadistill/runtime/run_layout.py": {
@@ -16285,6 +16495,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/runtime/staging_contract.py": {
@@ -16400,6 +16612,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/runtime/telemetry.py": {
@@ -16549,6 +16763,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/training/__init__.py": {
@@ -16561,6 +16777,8 @@
    "family_attribute_access": [],
    "definitions": [],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/training/lora.py": {
@@ -16735,6 +16953,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   },
   "src/aadistill/training/train.py": {
@@ -17186,6 +17406,8 @@
     }
    ],
    "import_time_calls": [],
+   "undefined_global_reads": [],
+   "star_imports": [],
    "classification": "generic_planning_execution"
   }
  },
