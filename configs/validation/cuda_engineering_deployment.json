@@ -3,12 +3,31 @@
  "_contract": "The image this ENGINEERING validation runs in. Deliberately not configs/infrastructure/pod_image.json: that describes the image a formal C1 session uses, which builds /opt/train/bin/python during a long setup this run does not perform. A stock PyTorch image already carries torch and CUDA, so the run installs one package and starts. AUTHORIZES NOTHING.",
  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
  "_image": "torch 2.9.1 built against CUDA 13.0. The validation runs bfloat16, which needs compute capability >= 8.0; the image does not relax that, the device must provide it.",
- "remote_python": "python",
- "_remote_python": "The image's own interpreter, on PATH. /opt/train/bin/python does not exist here -- it is built by the C1 setup script, which this run does not execute.",
+ "remote_python": "/workspace/eng-venv/bin/python",
+ "_remote_python": "The venv's interpreter. Install, import probe and validation all use THIS one -- the 2026-09-09 run installed with a bare `pip` and validated with a different `python`, so nothing tied the two together.",
  "min_cuda_version": "13.0",
  "_min_cuda_version": "Matches the image's CUDA build so the provider only offers hosts whose driver can run it.",
  "container_disk_gb": 20,
- "pip_deps": ["transformers", "numpy"],
- "_pip_deps": "transformers pulls safetensors. numpy is named explicitly because the initialization core imports it and a missing one would fail after the pod is already billing.",
- "authorizes": "nothing"
+ "pip_deps": [
+  "numpy",
+  "transformers"
+ ],
+ "_pip_deps": "transformers pulls safetensors. numpy is named explicitly because the initialization core imports it and its absence is what ended the first run. Versions are resolved by the environment and RECORDED, not pinned here -- a pin would drift from the image.",
+ "authorizes": "nothing",
+ "venv": {
+  "path": "/workspace/eng-venv",
+  "system_site_packages": true,
+  "_why": "--system-site-packages so the image's CUDA-enabled torch is inherited rather than reinstalled. A plain venv would hide it, and `pip install torch` into an empty venv can resolve to a CPU build -- which would silently turn a GPU validation into a CPU one.",
+  "_why_not_break_system_packages": "The image's interpreter is PEP 668 externally managed, and --break-system-packages is the override that refusal names. It is a justified last resort for a disposable pod, not a generic requirement, so the venv is the default and the override is declared per deployment."
+ },
+ "allow_break_system_packages": false,
+ "capability": {
+  "compute_capability_min": [
+   8,
+   0
+  ],
+  "dtype": "bfloat16",
+  "min_free_vram_gib": 2,
+  "_probe": "the readiness probe must import, see CUDA, meet the capability floor, support the dtype AND complete a real allocation and matmul on the device. Printing CUDA=False beside an IMPORTS_OK marker is not GPU readiness."
+ }
 }

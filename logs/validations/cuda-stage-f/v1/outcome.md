@@ -39,8 +39,11 @@ So the validation entry point started and exited `1` four seconds later on
 ## What this does NOT say
 
 **Nothing about the stage-F repair.** No operator executed. No device placement
-was observed. `attention.activation_importance_v1` has still never run on a GPU,
-and the repair remains **logical / CPU-structural evidence only**.
+was observed. The accurate statement is that **the repaired and migrated
+treatment suffix has not yet successfully completed real-CUDA engineering
+validation** — the operator itself did enter GPU execution in formal Attempt 9
+and failed there, which is why the repair exists. The repair remains **logical /
+CPU-structural evidence only**.
 
 It is not a C1 attempt, not a C1 result, and changes no formal C1 status:
 replay MEASURED 2/2 PASS, formal treatment UNMEASURED, endpoint UNMEASURED,
@@ -51,9 +54,10 @@ Attempt 9 NO DECISION.
 Both defects are fixed in `scripts/validation/cuda_engineering_launch.py` and
 pinned by regressions in `tests/validation/test_cuda_engineering_launch.py`,
 including one that reads the dependency step's **code** (not its comments) and
-fails if the pipe returns. An import probe now runs before the validation, so a
-missing module costs seconds and is reported as a setup failure rather than a
-validation failure.
+fails if the pipe returns. An import and device-readiness probe now runs before the
+validation. It is **billed setup on a live pod, not a zero-dollar step** — but
+it costs seconds rather than the whole attempt, and it reports a setup failure
+as a setup failure.
 
 **The fixed launcher has not been run on a GPU.** One resource was authorized
 and it has been consumed. No replacement was created and none will be without a
@@ -64,5 +68,5 @@ new maintainer decision.
 The payload probe extracted the shipped tar into a bare directory and ran the
 check from it alone, which proved the *payload* was import-complete — on a
 machine that already had numpy. What it could not test is the *pod's*
-interpreter and its package policy. That gap is what the new import probe
-closes, on the pod, before the money-spending step.
+interpreter and its package policy. That gap is what the new probe closes — on the
+pod, which means it is billed, and before the money-spending step.

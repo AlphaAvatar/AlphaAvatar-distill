@@ -257,6 +257,53 @@ Agents must request human confirmation before:
 - changing the public project mission;
 - declaring an official optimization record.
 
+### P12.1. Autonomous engineering repair inside an approved envelope
+
+Once a maintainer has approved an **engineering validation** with a stated
+budget and scope, ordinary engineering failures inside that envelope are the
+agent's to diagnose, repair and revalidate **without a further approval**. This
+applies across the whole pipeline, not to one phase.
+
+Ordinary means: setup failed; a dependency is missing; an interpreter or
+environment is wrong; a CUDA/device/dtype/shape integration test failed; an
+engineering launcher or artifact check needs a narrow repair. For each one:
+preserve the exact environment, command, exit status and traceback; classify
+the failure; implement the smallest coherent fix; run the targeted regression;
+record a reproducible implementation identity; and rerun.
+
+The envelope is what makes this safe, and it is **not** elastic:
+
+* **The budget is cumulative across every resource and subrun of the task.** A
+  rerun does not reset it, and a replacement resource does not receive a fresh
+  allocation. Before each paid action, compute settled plus outstanding plus
+  active cost, verify a useful attempt still fits before the soft stop, and
+  preserve the teardown reserve. Deadlines are derived from the accepted
+  billing rate, never fixed independently of price.
+* **At most one active or potentially billing resource at a time**, and one
+  create call per acquisition invocation. A corrected attempt is an explicit
+  new subrun, not an invisible provider retry.
+* Every rerun needs a recorded failure, a corrective action, a new subrun
+  identity and sufficient remaining budget. Repeating an identical failure
+  unchanged is not a repair.
+* If ownership or billing status is ever unknown: create nothing else,
+  prioritise reconciliation and teardown, and escalate if the safety boundary
+  cannot be restored.
+
+This authority ends where engineering ends. It never covers additional budget,
+changes to frozen scientific protocols, retries of formal experiments, formal
+recovery or confirmation evaluation, a release, or a merge. A scope or budget
+expansion needs a new maintainer decision; routine repair inside the envelope
+does not.
+
+Stop and report when the remaining budget cannot fund a corrected test plus
+teardown, when a cumulative boundary is reached, when a resource may still be
+billing and cannot be reconciled, when continuation would require changing
+frozen science or permissions, or when the validation passes. Do not stop
+merely because another ordinary engineering test failed.
+
+**Each task's dollar amounts live in that task's governance artifact, never in
+reusable core.**
+
 ### P13. Actively search for better techniques
 
 AlphaAvatar-distill is a research-driven engineering project. Agents should actively search for relevant new techniques, papers, repositories, kernels, training recipes, and evaluation methods when they may improve the project.

@@ -32,6 +32,7 @@ The spend contract, enforced here rather than hoped for:
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import re
@@ -61,6 +62,9 @@ VALIDATION_DIR = REPO_ROOT / "logs/validations/cuda-stage-f/v1"
 #: describes an image whose `/opt/train/bin/python` is built by a long setup this
 #: run does not perform.
 DEPLOYMENT_CONFIG = REPO_ROOT / "configs/validation/cuda_engineering_deployment.json"
+#: Cumulative cost across every resource and subrun of this task. A rerun does
+#: NOT reset it and a replacement resource does NOT get a fresh allocation.
+CAMPAIGN = REPO_ROOT / "logs/validations/cuda-stage-f/v1/campaign.json"
 
 #: Candidates that can satisfy cc >= 8.0 with native BF16 and >= 2 GiB. The
 #: cheapest AVAILABLE one is chosen from a single bounded quote pass -- not a
@@ -86,9 +90,24 @@ class Engineering:
         self.scr.mkdir(parents=True, exist_ok=True)
         self.auth = json.loads(AUTHORIZATION.read_text())
         rc = self.auth["resource_contract"]
+        #: TASK-CUMULATIVE caps, not per-invocation allocations.
         self.soft_usd = float(rc["engineering_soft_cap_usd"])
         self.hard_usd = float(rc["total_resource_cost_ceiling_usd"])
         self.reserve_usd = float(rc["teardown_reserve_usd"])
+
+        self.campaign = json.loads(CAMPAIGN.read_text())
+        #: What earlier subruns already spent. Booked, never refunded by a
+        #: rerun policy -- the first subrun's $0.0073 reduces what this one may
+        #: use, which is the whole point of a cumulative cap.
+        self.booked_usd = float(self.campaign["booked_usd"])
+        self.remaining_total = round(self.hard_usd - self.booked_usd, 6)
+        self.remaining_soft = round(self.soft_usd - self.booked_usd, 6)
+        if self.remaining_total <= self.reserve_usd:
+            raise Stop(
+                f"${self.booked_usd:.4f} already booked leaves "
+                f"${self.remaining_total:.4f} of the ${self.hard_usd:.2f} "
+                f"ceiling, which does not clear the ${self.reserve_usd:.2f} "
+                "teardown reserve. Stop.")
         if rc["provider_create_attempts_max"] != 1 or rc["retries_or_replacement_pods"] != 0:
             raise Stop("this entry point implements exactly one create and no retry")
         if self.reserve_usd >= self.hard_usd:
@@ -119,6 +138,11 @@ class Engineering:
             "authorizes": "nothing",
             "authorization": self.auth["authorization_id"],
             "authorization_sha256": self.auth["authorization_sha256"],
+            "campaign_id": self.campaign["campaign_id"],
+            "subrun_id": args.run_id,
+            "campaign_booked_before_usd": self.booked_usd,
+            "campaign_remaining_total_usd": self.remaining_total,
+            "campaign_remaining_to_soft_usd": self.remaining_soft,
             "execution_sha": args.execution_sha,
             "deployment": None,
             "timeline": [],
@@ -132,16 +156,23 @@ class Engineering:
         self.ev["timeline"].append({"utc": datetime.now(timezone.utc).isoformat(),
                                     "msg": msg})
 
-    def spent(self) -> float:
+    def subrun_spent(self) -> float:
+        """What THIS subrun has accrued."""
         if self.start_epoch is None or self.rate is None:
             return 0.0
         return (time.time() - self.start_epoch) / 3600.0 * self.rate
 
+    def spent(self) -> float:
+        """CAMPAIGN spend: what earlier subruns booked, plus this one."""
+        return self.booked_usd + self.subrun_spent()
+
     def check_soft_cap(self, what: str) -> None:
         s = self.spent()
         if s >= self.soft_usd:
-            raise Stop(f"soft cap reached before {what}: ${s:.4f} >= "
-                       f"${self.soft_usd:.2f}")
+            raise Stop(f"cumulative soft cap reached before {what}: "
+                       f"${s:.4f} >= ${self.soft_usd:.2f} "
+                       f"(${self.booked_usd:.4f} booked by earlier subruns "
+                       f"+ ${self.subrun_spent():.4f} here)")
 
     # -- 1. one bounded quote pass ----------------------------------------
     def quote(self) -> tuple[str, float]:
@@ -177,23 +208,32 @@ class Engineering:
         rate, gpu, stock, mem = quotes[0]
         #: The ceiling must buy enough time to be worth starting. Below this
         #: the run cannot finish setup, so creating a pod would only spend.
-        if self.hard_usd / rate * 60 < self.a.min_minutes:
+        #: Against what is LEFT, minus the reserve -- not against the original
+        #: ceiling. A useful attempt must fit and the teardown reserve must
+        #: survive it.
+        usable = self.remaining_total - self.reserve_usd
+        if usable / rate * 60 < self.a.min_minutes:
             raise Stop(
-                f"cheapest available is {gpu} at ${rate}/h, which buys only "
-                f"{self.hard_usd / rate * 60:.1f} min inside the ${self.hard_usd} "
-                f"ceiling; {self.a.min_minutes} min is the declared minimum")
+                f"cheapest available is {gpu} at ${rate}/h. ${usable:.4f} is "
+                f"usable (${self.remaining_total:.4f} left of the "
+                f"${self.hard_usd:.2f} ceiling, minus the "
+                f"${self.reserve_usd:.2f} reserve), which buys "
+                f"{usable / rate * 60:.1f} min; {self.a.min_minutes} min is the "
+                "declared minimum for a useful attempt")
         self.ev["accepted_quote"] = {"gpu": gpu, "secure_price_per_hour": rate,
                                      "stock": stock, "vram_gb": mem}
-        self.say(f"accepted {gpu} at ${rate}/h "
-                 f"(soft ${self.soft_usd} = {self.soft_usd / rate * 60:.1f} min, "
-                 f"hard ${self.hard_usd} = {self.hard_usd / rate * 60:.1f} min)")
+        self.say(f"accepted {gpu} at ${rate}/h — ${self.booked_usd:.4f} booked, "
+                 f"${self.remaining_soft:.4f} to the soft stop "
+                 f"({self.remaining_soft / rate * 60:.1f} min), "
+                 f"${self.remaining_total:.4f} to the ceiling "
+                 f"({self.remaining_total / rate * 60:.1f} min)")
         return gpu, rate
 
     # -- 2. exactly one create --------------------------------------------
     def create(self, gpu: str, quoted: float) -> None:
         if self.created:
             raise Stop("a create has already been attempted; there is no second")
-        hard_minutes = self.hard_usd / quoted * 60
+        hard_minutes = self.remaining_total / quoted * 60
         deadline = datetime.now(timezone.utc) + timedelta(minutes=hard_minutes)
         argv = [self.cli, "pod", "create", "--image", self.deploy["image"],
                 "--gpu-id", gpu, "--gpu-count", "1",
@@ -259,13 +299,16 @@ class Engineering:
 
     def launch_watchdog(self) -> None:
         journal = self.scr / "watchdog.jsonl"
-        hard_minutes = self.hard_usd / self.rate * 60
+        #: The watchdog terminates at what is LEFT of the CAMPAIGN ceiling,
+        #: not at a fresh $0.40. It measures this pod's own clock, so the
+        #: budget it is given is the remaining one.
+        hard_minutes = self.remaining_total / self.rate * 60
         cmd = [sys.executable, str(REPO_ROOT / "scripts/pod/watchdog.py"),
                "--pod-id", self.pod_id,
                "--session-start-epoch", str(self.start_epoch),
                "--price-per-hour", str(self.rate),
                "--hard-minutes", f"{hard_minutes:.4f}",
-               "--authorized-usd", str(self.hard_usd),
+               "--authorized-usd", f"{self.remaining_total:.4f}",
                "--journal", str(journal),
                "--poll-seconds", "20", "--verify-delay-seconds", "10",
                "--terminate-rounds", "3", "--verify-polls", "3"]
@@ -278,7 +321,7 @@ class Engineering:
         self.ev["watchdog_launches"] = self.watchdogs
         self.ev["watchdog_journal"] = str(journal)
         self.say(f"watchdog detached (launch #{self.watchdogs}) — hard "
-                 f"{hard_minutes:.1f} min / ${self.hard_usd}")
+                 f"{hard_minutes:.1f} min / ${self.remaining_total:.4f} remaining")
 
     def verify_rate(self) -> None:
         """The rate it ACTUALLY provisioned at, not the quote."""
@@ -337,41 +380,133 @@ class Engineering:
         if r.returncode != 0:
             raise Stop(f"unpack failed: {r.stdout[-400:]}{r.stderr[-400:]}")
         self.check_soft_cap("dependency install")
+        self.prepare_environment(target, repo)
+
+    # -- setup: ONE interpreter, real exit codes, real readiness -----------
+    def prepare_environment(self, target: SSHTarget, repo: str) -> None:
+        """Build the environment the validation will actually run in.
+
+        The 2026-09-09 failure was three separate mistakes stacked:
+        installation used a bare `pip` while validation used a different
+        `python`, so nothing tied them together; the install was piped through
+        `tail`, so the shell reported tail's status and a refusal read as
+        success; and the image's interpreter is PEP 668 externally managed, so
+        the install had in fact been refused.
+
+        Each is closed here. `py` is the ONE interpreter used to install, to
+        probe and to validate. `-m pip` is that interpreter's own pip. The
+        return code is pip's, captured through a marker rather than inferred
+        from a pipeline. And the venv inherits system site-packages so the
+        image's CUDA-enabled torch survives -- a clean venv would hide it, and
+        resolving torch afresh can land a CPU build, which would turn a GPU
+        validation into a CPU one without saying so.
+        """
+        venv = self.deploy["venv"]
+        py = self.deploy["remote_python"]
+        flags = "--system-site-packages" if venv["system_site_packages"] else ""
+        r = target.run(
+            f"python3 -m venv {flags} {venv['path']} && {py} -V; echo RC=$?",
+            timeout=600)
+        out = r.stdout + r.stderr
+        self.ev["venv_setup"] = out[-1500:]
+        if not re.search(r"RC=0\b", out):
+            raise Stop(f"could not build the validation environment: {out[-500:]}")
+        self.say(f"environment {venv['path']} ready ({r.stdout.strip().splitlines()[-2] if len(r.stdout.strip().splitlines())>1 else r.stdout.strip()})")
+
         deps = " ".join(self.deploy["pip_deps"])
-        #: TWO defects cost the 2026-09-09 run, both here.
-        #:
-        #: `2>&1 | tail -5` made the shell report TAIL's exit status, which is
-        #: always 0. pip refused the install outright and this recorded rc=0.
-        #: The exit code is pip's own now, captured before anything reads it.
-        #:
-        #: And the image's interpreter is PEP 668 "externally managed", so a
-        #: plain `pip install` is refused by design. `--break-system-packages`
-        #: is what that refusal names, and it is right for a disposable pod
-        #: whose whole life is this one run.
-        flags = "--no-input --break-system-packages"
-        r = target.run(f"pip install {flags} -q {deps}; echo PIP_RC=$?",
-                       timeout=900)
+        override = ("--break-system-packages "
+                    if self.deploy.get("allow_break_system_packages") else "")
+        #: THE interpreter's own pip, and PIP's OWN return code. `| tail`
+        #: reports tail's status, which is always 0.
+        r = target.run(f"{py} -m pip install --no-input {override}-q {deps}; "
+                       f"echo PIP_RC=$?", timeout=1200)
         out = r.stdout + r.stderr
         m = re.search(r"PIP_RC=(\d+)", out)
         pip_rc = int(m.group(1)) if m else -1
         self.ev["pip_rc"] = pip_rc
-        self.ev["pip_output_tail"] = out[-2000:]
+        self.ev["pip_output_tail"] = out[-3000:]
         if pip_rc != 0:
-            raise Stop(f"dependency install failed (pip rc={pip_rc}): "
-                       f"{out[-500:]}")
-        #: And PROVE the imports resolve before spending on the validation. A
-        #: missing module found here is a setup failure that costs seconds; the
-        #: same module found inside the check reads as a validation failure.
-        probe = ("import numpy, torch, transformers, safetensors; "
-                 "print('IMPORTS_OK', torch.__version__, torch.cuda.is_available())")
-        py = self.deploy["remote_python"]
-        r = target.run(f"cd {repo} && PYTHONPATH=src:scripts {py} -c \"{probe}\"",
+            raise Stop(f"dependency install failed (pip rc={pip_rc}): {out[-800:]}")
+
+        #: What actually got installed, recorded rather than assumed.
+        r = target.run(f"{py} -m pip list --format=freeze 2>/dev/null | "
+                       f"grep -Ei '^(torch|numpy|transformers|safetensors)=='",
                        timeout=300)
-        self.ev["import_probe"] = (r.stdout + r.stderr)[-800:]
-        if "IMPORTS_OK" not in r.stdout:
-            raise Stop(f"import probe failed, so the validation would fail for a "
-                       f"setup reason: {(r.stdout + r.stderr)[-400:]}")
-        self.say(f"dependencies ready — {r.stdout.strip()}")
+        self.ev["installed_versions"] = sorted(
+            l.strip() for l in r.stdout.splitlines() if "==" in l)
+        self.ev["validation_interpreter"] = py
+        self.say(f"installed: {', '.join(self.ev['installed_versions']) or '(none reported)'}")
+        self.readiness_probe(target, repo, py)
+
+    def readiness_probe(self, target: SSHTarget, repo: str, py: str) -> None:
+        """Prove the GPU is usable BEFORE spending on the validation.
+
+        Not a print. The probe exits non-zero on every failure, and it checks
+        the things that decide whether the validation can mean anything:
+        imports resolve, CUDA is present, the capability floor is met, the
+        declared dtype is supported, and a real allocation and matmul complete
+        ON the device. `CUDA=False` beside an `IMPORTS_OK` marker is not
+        readiness.
+        """
+        cap = self.deploy["capability"]
+        major, minor = cap["compute_capability_min"]
+        probe = f"""
+import json, sys
+import numpy, safetensors, transformers, torch
+out = {{"torch": torch.__version__, "numpy": numpy.__version__,
+       "transformers": transformers.__version__,
+       "cuda_available": torch.cuda.is_available(),
+       "cuda_runtime": torch.version.cuda}}
+if not out["cuda_available"]:
+    print(json.dumps(out)); print("PROBE_FAIL cuda_not_available"); sys.exit(2)
+cc = torch.cuda.get_device_capability(0)
+free, total = torch.cuda.mem_get_info(0)
+out.update(device=torch.cuda.get_device_name(0), capability=list(cc),
+           free_gib=round(free/2**30, 3), total_gib=round(total/2**30, 3),
+           bf16_supported=torch.cuda.is_bf16_supported())
+if cc < ({major}, {minor}):
+    print(json.dumps(out)); print("PROBE_FAIL capability"); sys.exit(3)
+if not out["bf16_supported"]:
+    print(json.dumps(out)); print("PROBE_FAIL dtype"); sys.exit(4)
+if out["free_gib"] < {cap["min_free_vram_gib"]}:
+    print(json.dumps(out)); print("PROBE_FAIL vram"); sys.exit(5)
+a = torch.randn(64, 64, device="cuda", dtype=torch.{cap["dtype"]})
+b = (a @ a).float().sum().item()
+out["device_matmul_finite"] = bool(b == b)
+if not out["device_matmul_finite"]:
+    print(json.dumps(out)); print("PROBE_FAIL matmul"); sys.exit(6)
+print(json.dumps(out)); print("PROBE_OK")
+"""
+        (self.scr / "probe.py").write_text(probe)
+        #: base64, not a heredoc. The probe is Python source full of quotes,
+        #: braces and newlines, and it has to survive an ssh command string and
+        #: a remote shell. base64 has no shell metacharacters, so there is
+        #: nothing to quote wrongly -- and a quoting failure here would look
+        #: like a device failure.
+        blob = base64.b64encode(probe.encode()).decode()
+        r = target.run(
+            f"echo {blob} | base64 -d > /tmp/readiness_probe.py && "
+            f"cd {repo} && PYTHONPATH=src:scripts {py} /tmp/readiness_probe.py; "
+            f"echo PROBE_RC=$?", timeout=600)
+        out = r.stdout + r.stderr
+        m = re.search(r"PROBE_RC=(\d+)", out)
+        probe_rc = int(m.group(1)) if m else -1
+        self.ev["readiness_probe"] = {"rc": probe_rc, "output": out[-3000:]}
+        for line in r.stdout.splitlines():
+            line = line.strip()
+            if line.startswith("{"):
+                try:
+                    self.ev["readiness_probe"]["report"] = json.loads(line)
+                except Exception:                                  # noqa: BLE001
+                    pass
+        if probe_rc != 0 or "PROBE_OK" not in r.stdout:
+            raise Stop(
+                f"GPU readiness probe failed (rc={probe_rc}); the validation "
+                f"would fail for an environment reason: {out[-700:]}")
+        rep = self.ev["readiness_probe"].get("report", {})
+        self.say(f"GPU ready — {rep.get('device')} cc{rep.get('capability')} "
+                 f"bf16={rep.get('bf16_supported')} free={rep.get('free_gib')}GiB "
+                 f"torch={rep.get('torch')}")
 
     def validate(self, target: SSHTarget) -> dict:
         """The one validation invocation. There is no second."""
@@ -457,8 +592,39 @@ class Engineering:
             "elapsed wall clock x the provider-confirmed hourly rate. An "
             "ESTIMATE: the provider bills per second from provisioning, and "
             "this is the evidence available at teardown.")
+        self.ev["subrun_cost_usd"] = round(self.subrun_spent(), 4)
+        self.ev["campaign_cost_after_usd"] = round(self.spent(), 4)
         self.ev["provider_create_attempts"] = self.created
         self.ev["watchdog_launches"] = self.watchdogs
+
+    def book_subrun(self, verdict: str, failure_class: str = "") -> None:
+        """Append this subrun's cost to the CAMPAIGN ledger.
+
+        Written whether it passed or failed. A failed subrun that did not book
+        its spend would hand the next one a budget that does not exist.
+        """
+        doc = json.loads(CAMPAIGN.read_text())
+        if any(x["subrun_id"] == self.a.run_id for x in doc["subruns"]):
+            return                       # already booked; never double-count
+        doc["subruns"].append({
+            "subrun_id": self.a.run_id,
+            "pod_id": self.pod_id or None,
+            "gpu": (self.ev.get("accepted_quote") or {}).get("gpu"),
+            "rate_usd_per_hour": self.rate,
+            "elapsed_minutes": self.ev.get("elapsed_minutes"),
+            "cost_usd": round(self.subrun_spent(), 4),
+            "cost_basis": "elapsed x confirmed rate",
+            "verdict": verdict,
+            "failure_class": failure_class or None,
+            "teardown_confirmed": bool(
+                (self.ev.get("teardown") or {}).get("provider_confirms_gone")),
+            "execution_sha": self.a.execution_sha or None,
+            "record": f"logs/runs/cuda_stage_f/{self.a.run_id}/",
+        })
+        doc["booked_usd"] = round(sum(x["cost_usd"] for x in doc["subruns"]), 4)
+        CAMPAIGN.write_text(json.dumps(doc, indent=1) + "\n")
+        self.say(f"campaign ledger: {len(doc['subruns'])} subrun(s), "
+                 f"${doc['booked_usd']:.4f} booked of ${self.hard_usd:.2f}")
 
     def run(self) -> int:
         verdict, reason = "FAIL", ""
@@ -492,8 +658,29 @@ class Engineering:
         finally:
             self.teardown()
             self.finish(verdict, reason)
+            if self.created:
+                self.book_subrun(verdict, self.classify(verdict, reason))
             self.write_evidence()
         return 0 if verdict.endswith("PASS") else 1
+
+    @staticmethod
+    def classify(verdict: str, reason: str) -> str:
+        """Which KIND of failure this was. Recorded, not inferred later."""
+        if verdict.endswith("PASS"):
+            return ""
+        r = reason.lower()
+        for needle, kind in (("readiness probe", "setup"),
+                             ("dependency install", "setup"),
+                             ("environment", "setup"),
+                             ("unpack", "setup"),
+                             ("endpoint", "infrastructure"),
+                             ("create", "infrastructure"),
+                             ("soft cap", "budget"),
+                             ("ceiling", "budget"),
+                             ("validation exited", "operator")):
+            if needle in r:
+                return kind
+        return "unknown"
 
     def write_evidence(self) -> None:
         """Through RunLayout, under one engineering run root."""

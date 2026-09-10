@@ -1,6 +1,14 @@
 # CUDA stage-F engineering validation — request v1
 
-**Status: REQUESTED, NOT AUTHORIZED.** Nothing is created, nothing is running,
+> **SUPERSEDED IN PART.** This document was written before the run. It was
+> authorized by `authorization.json`, executed once as subrun
+> `cuda_stage_f_20260910` (see `outcome.md` — FAIL in setup), and its
+> "retry/replacement: none" row is superseded by
+> `authorization_amendment_1.json`, which permits a bounded repair loop inside
+> the SAME cumulative budget. The budget arithmetic below is the pre-run
+> figure; `campaign.json` holds the live cumulative cost. Kept as written.
+
+**Status when written: REQUESTED, NOT AUTHORIZED.** Nothing is created, nothing is running,
 nothing is billing. This document stops before provider creation. It is not a
 grant, and it does not itself permit a launch.
 
@@ -11,8 +19,10 @@ grant, authorization, bundle or formal endpoint exists.**
 
 ## Why it is owed
 
-`attention.activation_importance_v1` has **never executed on a GPU**. Attempt 9
-died inside it:
+`attention.activation_importance_v1` **did** enter GPU execution — in formal
+Attempt 9, where it failed. What has not happened is a successful run: **the
+repaired and migrated treatment suffix has not yet successfully completed
+real-CUDA engineering validation.** Attempt 9 died inside it:
 
 ```
 RuntimeError: Expected all tensors to be on the same device,

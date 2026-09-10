@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.engineering_validation_authorization_amendment/v1",
+ "_contract": "Amendment 1 to the CUDA stage-F engineering authorization. It supersedes the one-resource/no-retry clause of that authorization FOR THIS TASK ONLY, and adds nothing to the budget. Recorded here, under the engineering governance owner, and deliberately NOT in the canonical formal C1 authorization artifact.",
+ "amendment_id": "cuda_stage_f_engineering.amendment_1",
+ "amends": "cuda_stage_f_engineering.2026-09-10",
+ "granted_utc": "2026-09-10T00:00:00Z",
+ "granted_by": "maintainer decision, on reporting commit 029a250dec6c448846794b96e6c887103fb2c454",
+ "what_changes": [
+  "the earlier 'one resource for the entire task', 'no replacement' and 'no repair-and-rerun' clauses are superseded by a bounded repair loop",
+  "ordinary engineering failures -- setup, dependency, interpreter, device/dtype/shape integration, launcher or artifact-check repairs -- are diagnosed, repaired and revalidated autonomously without a further maintainer decision"
+ ],
+ "what_does_not_change": [
+  "the budget. The soft cap, ceiling and teardown reserve are CUMULATIVE across every resource and subrun of this task, not per invocation",
+  "at most ONE active or potentially billing provider resource at a time",
+  "one create call per acquisition invocation",
+  "the validation scope, the treatment operator and both declared geometries",
+  "the frozen scientific protocols, which this cannot change"
+ ],
+ "cumulative_budget": {
+  "engineering_soft_cap_usd": 0.25,
+  "total_resource_ceiling_usd": 0.4,
+  "teardown_reserve_usd": 0.15,
+  "already_booked_usd": 0.0073,
+  "remaining_total_usd": 0.3927,
+  "remaining_before_soft_cap_usd": 0.2427,
+  "_basis": "subrun cuda_stage_f_20260910 spent $0.0073 on pod ij54bzvcyldm9j. That is booked and is NOT refunded by the rerun policy."
+ },
+ "the_original_run_is_history": "subrun cuda_stage_f_20260910 remains a consumed single-resource execution under the unamended authorization. Its authorization and evidence are not edited to pretend retries were permitted at the time.",
+ "does_not_authorize": [
+  "additional budget",
+  "changes to frozen scientific protocols",
+  "automatic retries of formal experiments",
+  "formal recovery or confirmation evaluation",
+  "an Attempt-10 grant, authorization or formal bundle",
+  "merging into main",
+  "destructive rewriting of historical records"
+ ],
+ "authorizes": "nothing formal",
+ "amendment_sha256": "ebe03c40e2551b9826fc2bbd7c679ed7f12d8c92afda20a1b2b1902b5780f8c3"
+}

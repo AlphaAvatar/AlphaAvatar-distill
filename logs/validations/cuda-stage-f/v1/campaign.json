@@ -1,0 +1,24 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "_contract": "Cumulative cost of the CUDA stage-F engineering campaign, across every resource and subrun. The launcher READS this before each paid action and refuses when the remaining allowance cannot fund a useful attempt plus the teardown reserve. A rerun does NOT reset it.",
+ "campaign_id": "cuda_stage_f",
+ "authorization": "logs/validations/cuda-stage-f/v1/authorization.json",
+ "amendment": "logs/validations/cuda-stage-f/v1/authorization_amendment_1.json",
+ "subruns": [
+  {
+   "subrun_id": "cuda_stage_f_20260910",
+   "pod_id": "ij54bzvcyldm9j",
+   "gpu": "NVIDIA RTX 2000 Ada Generation",
+   "rate_usd_per_hour": 0.24,
+   "elapsed_minutes": 1.837,
+   "cost_usd": 0.0073,
+   "cost_basis": "elapsed x confirmed rate; watchdog journal accrued $0.0070",
+   "verdict": "FAIL (setup)",
+   "failure_class": "setup",
+   "teardown_confirmed": true,
+   "record": "logs/runs/cuda_stage_f/cuda_stage_f_20260910/"
+  }
+ ],
+ "authorizes": "nothing",
+ "booked_usd": 0.0073
+}
