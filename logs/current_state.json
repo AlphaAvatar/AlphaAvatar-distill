@@ -73,10 +73,8 @@
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
-  "logs/phase_c0_preregistration.json -- the FROZEN C1 protocol",
-  "logs/STATE.md -- human view of this file",
-  "logs/CATALOG.md -- which log owns which fact",
-  "AGENTS.md -- the binding working contract"
+  "logs/STATE.md -- human view",
+  "logs/CATALOG.md -- ownership"
  ],
  "phases": {
   "phase_a": "COMPLETE / FROZEN",
@@ -104,7 +102,9 @@
   "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
   "authorizes": "nothing",
   "record": "logs/autoinit_continuation_b_attempt5.json",
-  "metrics_owned_by": "logs/autoinit_continuation_b_attempt5.json"
+  "metrics_owned_by": "logs/autoinit_continuation_b_attempt5.json",
+  "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved but not comfortable.",
+  "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510"
  },
  "phase_c": {
   "c0": {
