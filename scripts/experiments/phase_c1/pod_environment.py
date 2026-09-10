@@ -21,8 +21,8 @@ from aadistill.runtime import pod_environment as _pe  # noqa: E402
 from aadistill.runtime.pod_environment import (  # noqa: E402,F401
     LAUNCH_BOUND,
     RECORD_KINDS,
-    SCHEMA,
     ReadinessGroups,
+    RecordContract,
     compare_skip_sets,
     head_commit,
     lineage_from_swept_base,
@@ -202,6 +202,19 @@ def evaluate_sweep(outcomes, skip_reasons=None, *, groups=None):
                                    groups=groups or C1_READINESS_GROUPS)
 
 
+#: THE WIRE FORMAT OF C1'S READINESS RECORD.
+#:
+#: `SCHEMA` and the `c1_harness_digest` key were defined in
+#: `aadistill.runtime.pod_environment`, and `verify_record` compared against
+#: them by name. A reusable runtime therefore accepted exactly one experiment's
+#: schema and looked for its harness under exactly one experiment's key: a
+#: second caller could not have had a readiness record at all.
+#:
+#: **Neither value moves.** The string is what every committed C1 record already
+#: carries, and the field name is the key their self-hashes were computed over.
+#: What changed is who owns them.
+SCHEMA = "aadistill.autoinit.c1_pod_environment_verification/v1"
+
 #: Where the sweep writes what it found.
 RECORD_PATH = "logs/c1_pod_environment_verification.json"
 
@@ -233,15 +246,44 @@ def load_record(repo_root=".") -> dict:
     return _pe.load_record(repo_root, record_path=RECORD_PATH)
 
 
+def c1_harness_digest_value(repo_root=".") -> str:
+    """C1's harness digest, as the contract's callable wants it.
+
+    Imported inside the function: `experiments.phase_c1.authorization` imports
+    from this module's neighbours, and a module-level import here would make the
+    cycle real.
+    """
+    from experiments.phase_c1.authorization import c1_harness_digest
+
+    return c1_harness_digest(repo_root)["digest"]
+
+
+#: C1's complete wire contract, in one place. The launcher's
+#: `pod_environment_gate` never passed a harness digest -- it called this
+#: module's wrapper, which set only `named_files` and `record_path` -- so the
+#: real launch path would have refused with "no harness_digest provider was
+#: supplied" while every test passed one explicitly and never saw it. Carrying
+#: the callable in the contract is what makes the tested path and the launch
+#: path the same path.
+C1_RECORD_CONTRACT = RecordContract(
+    schema=SCHEMA,
+    harness_field="c1_harness_digest",
+    harness_digest=c1_harness_digest_value,
+    record_path=RECORD_PATH,
+    named_files=POD_TEST_ENVIRONMENT_FILES_V1,
+    harness_label="C1 harness",
+)
+
+
 def verify_record(record: dict, repo_root=".", **kwargs):
-    kwargs.setdefault("named_files", POD_TEST_ENVIRONMENT_FILES_V1)
-    kwargs.setdefault("record_path", RECORD_PATH)
+    kwargs.setdefault("contract", C1_RECORD_CONTRACT)
     return _pe.verify_record(record, repo_root, **kwargs)
 
 
 #: C1's permitted post-sweep path, derived from the record it owns.
 PERMITTED_POST_SWEEP_PATHS = _pe.permitted_post_sweep_paths(RECORD_PATH)
 
-__all__ = ["RECORD_PATH", "POD_TEST_ENVIRONMENT_FILES_V1",
-           "PERMITTED_POST_SWEEP_PATHS", "pod_test_environment_digest",
-           "load_record", "verify_record"]
+__all__ = ["C1_RECORD_CONTRACT", "PERMITTED_POST_SWEEP_PATHS",
+           "POD_TEST_ENVIRONMENT_FILES_V1", "RECORD_PATH", "SCHEMA",
+           "c1_harness_digest_value", "load_record",
+           "pod_test_environment_digest", "verify_record"]

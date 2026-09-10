@@ -393,7 +393,7 @@ def test_a_launch_bound_record_without_a_staging_contract_is_refused():
            "counts": {"passed": 1, "skipped": 0, "failed": 0, "error": 0},
            "verdict": "PASS", "record_kind": pe.LAUNCH_BOUND, "problems": []}
     rec["self_sha256"] = pe.self_hash(rec)
-    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND, harness_digest=c1_digest)
+    ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND)
     assert not ok and "staging_contract_digest" in why
 
 
@@ -410,7 +410,7 @@ def test_a_record_swept_under_a_different_staging_contract_is_refused(contract):
            "staging_contract_digest": "0" * 64}
     rec["self_sha256"] = pe.self_hash(rec)
     ok, why = pe.verify_record(rec, REPO, required_kind=pe.LAUNCH_BOUND,
-                               staging_contract_digest=contract["digest"], harness_digest=c1_digest)
+                               staging_contract_digest=contract["digest"])
     assert not ok and "staging contract" in why and "owed again" in why
 
 

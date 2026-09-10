@@ -449,10 +449,123 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
 
 def test_the_handoff_and_phase_index_exist_and_are_linked():
     """A new reviewer must be able to reconstruct the history without knowing
-    filenames. These two are the entry points the snapshot promises."""
+    filenames. These are the entry points the snapshot promises."""
     for name in ("PHASE_INDEX.md", "phase_a_vs_phase_b_comparison.md",
                  "phase_c_roadmap.md", "HANDOFF_next_session.md"):
         assert (REPO / "logs" / name).is_file(), name
     state = json.loads((REPO / "logs/current_state.json").read_text())
     assert state["read_order"][0].startswith("logs/PHASE_INDEX.md")
-    assert "HANDOFF_next_session.md" in state["handoff"]
+
+
+# --- where the CURRENT handoff route actually lands -------------------------
+#
+# This asked only that `state["handoff"]` contained the string
+# "HANDOFF_next_session.md". It did, and that file had said since 2026-09-02
+# that C1 was implemented-but-not-executed, with `$19.9003` of headroom against
+# a `$13.7578` ceiling -- so the route was green while pointing a new reviewer
+# at a state nine paid attempts out of date.
+#
+# So these resolve the route and read what is on the other end.
+
+def handoff_targets() -> list[Path]:
+    """Every logs/ file the current handoff entry names, resolved to a path."""
+    import re
+
+    state = json.loads((REPO / "logs/current_state.json").read_text())
+    entry = state["handoff"]
+    names = re.findall(r"logs/[A-Za-z0-9_.\-]+\.(?:md|json)", entry)
+    assert names, f"the handoff entry names no file at all: {entry!r}"
+    return [REPO / n for n in names]
+
+
+def test_the_handoff_route_resolves_to_files_that_exist():
+    for target in handoff_targets():
+        assert target.is_file(), f"the handoff routes to a missing file: {target}"
+
+
+def test_the_route_does_not_land_on_the_superseded_handoff():
+    """Not a string check on the snapshot: the resolved TARGET must not be it."""
+    for target in handoff_targets():
+        assert target.name != "HANDOFF_next_session.md", (
+            "current_state.json still routes to the 2026-09-02 handoff, which "
+            "says C1 is unexecuted and quotes a superseded budget")
+
+
+def current_region(text: str) -> str:
+    """A living snapshot's CURRENT claims: everything before its history.
+
+    `STATE.md` is a snapshot followed by dated session blocks (AGENTS.md 3.3),
+    and those blocks legitimately quote figures that were true when written --
+    a `$13.7578` cap that really did apply to attempt 3, for instance. Scanning
+    the whole file would make every honest historical record look like a stale
+    current claim, and the fix for that would be deleting history.
+
+    So the boundary is the first dated block, `^> **`.
+    """
+    import re
+
+    lines = text.splitlines()
+    end = next((i for i, l in enumerate(lines) if re.match(r"^> \*\*", l)),
+               len(lines))
+    return "\n".join(lines[:end])
+
+
+def test_what_the_route_lands_on_is_actually_current():
+    """Read the destination's CONTENT. A route that resolves to a real file
+    saying the wrong thing is the failure this replaces."""
+    state = json.loads((REPO / "logs/current_state.json").read_text())
+    text = "\n".join(t.read_text() for t in handoff_targets())
+    current = "\n".join(current_region(t.read_text()) for t in handoff_targets())
+
+    # The superseded handoff's headline claims, which must not be asserted as
+    # current anywhere the route lands.
+    for stale in ("$19.9003", "$13.7578"):
+        assert stale not in current, (
+            f"the current handoff destination asserts {stale} as current")
+    assert "not executed" not in current.lower(), (
+        "the destination still describes C1 as unexecuted")
+
+    # And the facts a reviewer arriving there must find, taken from the snapshot
+    # rather than transcribed -- a hardcoded figure here would go stale exactly
+    # the way the old handoff did.
+    spend = f"${state['budget']['cumulative_spend_usd']:.4f}"
+    remaining = f"${state['budget']['remaining_usd']:.4f}"
+    for fact in (spend, remaining):
+        assert fact in current, (
+            f"the handoff destination does not state {fact!r} as current")
+    for fact in ("MEASURED", "NO DECISION", "CONFIRMED ON REAL CUDA"):
+        assert fact in text, f"the handoff destination does not state {fact!r}"
+
+
+def test_the_current_region_is_not_the_whole_file():
+    """Guards `current_region`: if the boundary vanished, the check above would
+    silently start scanning the history and could only be made green by
+    deleting it."""
+    for target in handoff_targets():
+        whole = target.read_text()
+        assert len(current_region(whole)) < len(whole), (
+            f"{target.name} has no dated history block; the current-region "
+            "boundary is not doing anything")
+
+
+def test_the_superseded_handoff_is_registered_as_historical():
+    """Kept as evidence, and labelled -- in the file that owns ownership."""
+    assert (REPO / "logs/HANDOFF_next_session.md").is_file(), (
+        "the historical handoff was deleted rather than superseded")
+    state = json.loads((REPO / "logs/current_state.json").read_text())
+    assert "HANDOFF_next_session.md" in state["superseded_handoff"]
+    assert "HISTORICAL" in state["superseded_handoff"]
+
+    catalog = (REPO / "logs/CATALOG.md").read_text()
+    row = next(l for l in catalog.splitlines()
+               if "`HANDOFF_next_session.md`" in l)
+    assert "HISTORICAL" in row and "superseded" in row.lower(), row
+    assert "STATE.md" in row, "the catalog row does not say what replaced it"
+
+
+def test_the_old_handoffs_own_text_is_not_rewritten():
+    """Superseding is a routing change. Editing the historical document to make
+    it look current would destroy the evidence of what was believed then."""
+    for stale in ("$19.9003", "$13.7578"):
+        assert stale in (REPO / "logs/HANDOFF_next_session.md").read_text(), (
+            f"{stale} was edited out of the historical handoff")

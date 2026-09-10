@@ -28,9 +28,39 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 
-#: The reviewed tip this closure started from. Everything below is measured
-#: against it, so the assertions describe THIS session's changes and no others.
-REVIEWED_TIP = "573d6cfc92497c176afe4645335df1a2534f93df"
+#: One entry per independent review round on this branch, oldest first: the tip
+#: that round was reviewed at, and the core files that round deliberately
+#: changed the BEHAVIOUR of. Everything else it touched must be prose-only.
+#:
+#: A list rather than one constant because each round is bound to its own
+#: reviewed tip. Collapsing them would either lose the earlier round's
+#: declaration or measure this round's changes from the wrong base, and both
+#: weaken the check that catches an undeclared edit riding along with a
+#: docstring sweep.
+ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
+    ("573d6cfc92497c176afe4645335df1a2534f93df",
+     "post-CUDA evidence and reproducibility closure",
+     {
+        "src/aadistill/infrastructure/session.py":
+            "ExecutionCommands: interpreter default removed, canonical "
+            "DeploymentBinding added",
+        "src/aadistill/infrastructure/session_runner.py":
+            "records the resolved provider CLI in the session record",
+     }),
+    ("b2ecdff83ee0a7653eea7872b5af6739a4de4381",
+     "readiness wire-contract core/application separation",
+     {
+        "src/aadistill/runtime/pod_environment.py":
+            "RecordContract: the schema string, the harness field name, the "
+            "harness digest callable and the record path are the CALLER's; the "
+            "success summary is derived from the record instead of naming two "
+            "of one experiment's groups. THIS IS A DECLARED SEMANTIC CHANGE to "
+            "readiness verification and is deliberately not described as prose.",
+     }),
+)
+
+#: The tip the CURRENT round was reviewed at.
+REVIEWED_TIP = ROUNDS[-1][0]
 
 #: The GPU-validated execution commit. Named here because it is what the
 #: preserved surface's bytes are claimed to still match.
@@ -46,14 +76,18 @@ CUDA_VALIDATED_SURFACE = (
     "src/aadistill/initialization/adapters/qwen3.py",
 )
 
-#: The two files this closure deliberately changed the behaviour of, and the
-#: reason. Anything else appearing in the semantic list is unexplained.
-EXPECTED_SEMANTIC_CHANGES = {
-    "src/aadistill/infrastructure/session.py":
-        "ExecutionCommands: interpreter default removed, canonical DeploymentBinding added",
-    "src/aadistill/infrastructure/session_runner.py":
-        "records the resolved provider CLI in the session record",
-}
+
+def declared_from(round_index: int) -> dict[str, str]:
+    """Every semantic change declared by this round and every later one.
+
+    Measured from an older base, a later round's declared change is also in the
+    diff -- so the expected set for round i is the union from i onward, and
+    nothing else is admissible.
+    """
+    out: dict[str, str] = {}
+    for _tip, _label, changes in ROUNDS[round_index:]:
+        out.update(changes)
+    return out
 
 
 def git(*args: str) -> str:
@@ -109,30 +143,62 @@ def test_none_of_them_appears_in_this_sessions_diff(changed_core):
     assert overlap == [], f"validated surface touched: {overlap}"
 
 
-# --- 2. everything else that changed changed only in prose ------------------
+# --- 2. every other change is prose-only, or declared ----------------------
 
-def test_every_other_core_change_is_prose_only(changed_core):
-    """The check that reading 44 diffs by eye would not reliably make."""
-    semantic = [f for f in changed_core
-                if shape(git("show", f"{REVIEWED_TIP}:{f}"))
-                != shape((REPO / f).read_text())]
-    assert set(semantic) == set(EXPECTED_SEMANTIC_CHANGES), (
-        "unexplained semantic change in core:\n"
-        + "\n".join(f"  {f}" for f in sorted(set(semantic)
-                                             ^ set(EXPECTED_SEMANTIC_CHANGES))))
+@pytest.mark.parametrize("index", range(len(ROUNDS)),
+                         ids=[r[1] for r in ROUNDS])
+def test_every_other_core_change_is_prose_only_or_declared(index):
+    """The check that reading dozens of diffs by eye would not reliably make.
+
+    Run once per review round, from that round's own reviewed tip. From an older
+    base a later round's declared change is also in the diff, so the admissible
+    set is the union from that round onward -- and nothing else. An edit that
+    rode along with a docstring sweep appears here as an unexplained entry.
+    """
+    base = ROUNDS[index][0]
+    changed = [f for f in git("diff", "--name-only", base).split()
+               if f.startswith("src/aadistill/") and f.endswith(".py")]
+    semantic = {f for f in changed
+                if shape(git("show", f"{base}:{f}")) != shape((REPO / f).read_text())}
+    expected = set(declared_from(index))
+    assert semantic == expected, (
+        f"from {base[:8]} ({ROUNDS[index][1]}), core semantic changes disagree "
+        "with what is declared:\n"
+        + "\n".join(f"  {f}" for f in sorted(semantic ^ expected)))
 
 
-def test_the_prose_sweep_actually_covered_the_core(changed_core):
-    """A guard on the guard above: if the sweep touched almost nothing,
-    `test_every_other_core_change_is_prose_only` would pass vacuously."""
-    prose_only = set(changed_core) - set(EXPECTED_SEMANTIC_CHANGES)
+def test_this_rounds_declaration_is_not_empty():
+    """A round that declares nothing while changing behaviour would pass the
+    check above only by making the expected set match a wrong observation."""
+    assert ROUNDS[-1][2], "the current round declares no semantic change"
+
+
+def test_the_readiness_change_is_declared_as_semantic_not_prose():
+    """Named explicitly, because describing it as a docstring sweep is exactly
+    the misreport this file exists to prevent."""
+    declared = ROUNDS[-1][2]
+    assert "src/aadistill/runtime/pod_environment.py" in declared
+    why = declared["src/aadistill/runtime/pod_environment.py"]
+    assert "SEMANTIC CHANGE" in why
+    # And it really is one, measured rather than asserted.
+    base = ROUNDS[-1][0]
+    path = "src/aadistill/runtime/pod_environment.py"
+    assert shape(git("show", f"{base}:{path}")) != shape((REPO / path).read_text())
+
+
+def test_the_prose_sweep_actually_covered_the_core():
+    """A guard on the guard above: if almost nothing changed in prose,
+    the parametrized check would pass close to vacuously."""
+    changed = [f for f in git("diff", "--name-only", ROUNDS[0][0]).split()
+               if f.startswith("src/aadistill/") and f.endswith(".py")]
+    prose_only = set(changed) - set(declared_from(0))
     assert len(prose_only) >= 20, (
         f"only {len(prose_only)} core files changed in prose; the ownership "
         "sweep was expected to reach far more than that")
 
 
-def test_the_two_semantic_changes_are_outside_the_validated_surface():
-    assert not (set(EXPECTED_SEMANTIC_CHANGES) & set(CUDA_VALIDATED_SURFACE))
+def test_no_declared_change_touches_the_validated_surface():
+    assert not (set(declared_from(0)) & set(CUDA_VALIDATED_SURFACE))
 
 
 # --- the geometries the validation ran are unchanged too --------------------

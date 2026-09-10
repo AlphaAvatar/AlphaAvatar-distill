@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.autoinit.historical_reuse_position/v1",
- "generated_utc": "2026-09-10T09:12:46.238090+00:00",
+ "generated_utc": "2026-09-10T12:42:35.588845+00:00",
  "_contract": "The four conclusions about historical probe reuse, each DERIVED here rather than cited: valid bytes, reconstruction under the historical contract, byte-identical relocation outputs, and a REFUSED live reuse. Regenerable; relaxes nothing; authorizes nothing.",
  "conclusions": {
   "1_historical_probe_bytes_are_valid": {

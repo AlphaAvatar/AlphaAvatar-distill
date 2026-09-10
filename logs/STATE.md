@@ -1451,7 +1451,7 @@ DESIGNED", which C0 has now made false).
 | the power evidence behind N=850 | [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json) |
 | what Phase A and B concluded | [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md) |
 | the Phase-C structure | [`phase_c_roadmap.md`](phase_c_roadmap.md) |
-| the next-session handoffs | [`HANDOFF_next_session.md`](HANDOFF_next_session.md) |
+| the next-session handoff | **this file.** [`HANDOFF_next_session.md`](HANDOFF_next_session.md) is HISTORICAL — written 2026-09-02, unmaintained, and superseded on every point that has moved since. [`CATALOG.md`](CATALOG.md) records what it says and why it is no longer an entry point |
 | storage and what was cleaned | [`storage_closeout_20260831.json`](storage_closeout_20260831.json) |
 
 ## Filesystem policy — three roots, no others

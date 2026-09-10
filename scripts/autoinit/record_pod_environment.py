@@ -43,10 +43,10 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from experiments.phase_c1.authorization import c1_harness_digest  # noqa: E402
 from experiments.phase_c1.pod_environment import (  # noqa: E402
+    C1_RECORD_CONTRACT,
     LEAF_TRANSPORT_NODEIDS,
     RECORD_PATH,
     RENDERER_PARITY_NODEIDS,
-    SCHEMA,
     evaluate_sweep,
     head_commit,
     pod_test_environment_digest,
@@ -251,7 +251,10 @@ def main() -> int:
     findings = evaluate_sweep(junit["outcomes"], junit.get("skip_reasons"))
 
     record = {
-        "schema": SCHEMA,
+        # The wire format is the SESSION's, read off the contract the verifier
+        # will check against. Writing one string here and comparing another
+        # somewhere else is how a record and its gate come to disagree.
+        "schema": C1_RECORD_CONTRACT.schema,
         "_what_this_is": (
             "one complete pod-like sweep of the CPU test suite: the condition a "
             "fresh C1 pod is actually in, which is what C1 attempt 3R's setup "
@@ -279,7 +282,7 @@ def main() -> int:
             "after issuance adds a second path to the lineage diff and "
             "session_commit_gate refuses."),
         "tree_clean": clean_before,
-        "c1_harness_digest": harness["digest"],
+        C1_RECORD_CONTRACT.harness_field: harness["digest"],
         "c1_harness_n_files": harness["n_files"],
         "pod_test_environment_digest": env_digest["digest"],
         "pod_test_environment_n_files": env_digest["n_files"],

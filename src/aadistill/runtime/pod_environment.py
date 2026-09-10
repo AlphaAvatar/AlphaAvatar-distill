@@ -48,12 +48,69 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-SCHEMA = "aadistill.autoinit.c1_pod_environment_verification/v1"
-
-#: The record path and the named non-harness files are CALLER-SUPPLIED. They
-#: used to be written here, which put one experiment's log name and one
-#: experiment's tool list inside a reusable runtime module. They now live in
+#: The record path, the named non-harness files, the SCHEMA STRING and the
+#: HARNESS FIELD NAME are all CALLER-SUPPLIED, through `RecordContract` below.
+#: They used to be written here — one experiment's log name, one experiment's
+#: tool list, one experiment's schema and one experiment's `c1_harness_digest`
+#: key — inside a reusable runtime module. They now live in
 #: `scripts/experiments/phase_c1/pod_environment.py`.
+
+
+@dataclass(frozen=True)
+class RecordContract:
+    """What a caller's readiness record IS, on the wire.
+
+    The runtime used to define `SCHEMA` and to read `record["c1_harness_digest"]`
+    by name, so a second session could not have a readiness record at all: its
+    own schema would be rejected as "unexpected", and its harness would be looked
+    for under another experiment's key. Extracting `ReadinessGroups` moved the
+    *expectations* out and left the *wire format* behind, which is why this is a
+    second, separate type rather than more fields on that one — one describes
+    what a sweep should observe, this describes what its record looks like.
+
+    Every field is required and there is no default anywhere. A default schema
+    would make one experiment's record the silently-accepted shape, and a default
+    harness field would send a second caller's verification at a key its record
+    does not have — both of which are the defect being closed.
+
+    `harness_digest` stays a callable rather than a value: it is re-derived
+    against the LIVE tree at verification time, which is the entire point of the
+    check.
+    """
+
+    #: The exact `schema` string this caller's records carry. Compared for
+    #: equality; the runtime has no opinion about its shape.
+    schema: str
+    #: WHICH record key holds the harness digest. C1's is `c1_harness_digest`,
+    #: and it stays that, because renaming it would invalidate every record
+    #: already written — including their self-hashes.
+    harness_field: str
+    #: `(repo_root) -> digest`. Re-derived live, never read from the record.
+    harness_digest: Callable[[Any], str]
+    #: The artifact the sweep writes, relative to the repository root.
+    record_path: str
+    #: Files that decide the pod test gate's outcome and lie OUTSIDE the harness.
+    named_files: tuple[str, ...] = ()
+    #: What to call the harness in a refusal. "C1 harness" read oddly in a
+    #: message about somebody else's session.
+    harness_label: str = "harness"
+
+    def __post_init__(self) -> None:
+        missing = [f for f in ("schema", "harness_field", "record_path")
+                   if not str(getattr(self, f) or "").strip()]
+        if missing:
+            raise ValueError(
+                f"incomplete readiness record contract: {missing} carry no "
+                "value. The caller owns the wire format; a reusable runtime "
+                "must not choose a schema or a field name on its behalf.")
+        if not callable(self.harness_digest):
+            raise ValueError(
+                "harness_digest must be callable: which harness a record "
+                "describes is re-derived against the live tree, not read from "
+                "the record it is checking")
+
+    def recorded_harness(self, record: Mapping[str, Any]) -> Any:
+        return record.get(self.harness_field)
 
 
 #: The readiness contract a caller declares. The nine node-id groups that used
@@ -423,14 +480,48 @@ RECORD_KINDS: tuple[str, ...] = ("diagnostic", "launch_bound")
 LAUNCH_BOUND: str = "launch_bound"
 
 
+def group_summary(record: Mapping[str, Any]) -> str:
+    """What the record ACTUALLY observed, in the caller's own group names.
+
+    The success message used to read "7 renderer skips, leaf transport 5/5" —
+    two of C1's group names and two of C1's counts, hardcoded into a reusable
+    runtime, and printed verbatim whatever the record said. A second caller's
+    passing sweep would have been reported in C1's vocabulary, and C1's own
+    message would have kept claiming 7 and 5 after either group changed size.
+
+    `evaluate_sweep` already derives its output keys from the caller's group
+    names, so this reads them back: for each `<name>_all_passed` the observed
+    pass count out of the group's size, and for each `<name>_skipped_as_expected`
+    the observed skip count. Nothing is named here, and every number comes from
+    the record.
+    """
+    parts: list[str] = []
+    for key in sorted(record):
+        if key.endswith("_all_passed"):
+            name = key[: -len("_all_passed")]
+            seen = record.get(name)
+        elif key.endswith("_skipped_as_expected"):
+            name = key[: -len("_skipped_as_expected")]
+            seen = record.get(f"{name}_expected_skips")
+        else:
+            continue
+        if not isinstance(seen, Mapping):
+            # The flag is present and the observations are not: report the flag
+            # rather than inventing a ratio.
+            parts.append(f"{name} {'ok' if record.get(key) else 'NOT ok'}")
+            continue
+        want = "passed" if key.endswith("_all_passed") else "skipped"
+        got = sum(1 for v in seen.values() if v == want)
+        parts.append(f"{name} {got}/{len(seen)} {want}")
+    return ", ".join(parts) if parts else "no declared groups"
+
+
 def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
+                  contract: RecordContract,
                   session_commit: str | None = None,
                   authorization_path: str | None = None,
                   required_kind: str | None = None,
                   staging_contract_digest: str | None = None,
-                  harness_digest: "Callable[[Path], str] | None" = None,
-                  named_files: tuple[str, ...] = (),
-                  record_path: str | None = None,
                   ) -> tuple[bool, str]:
     """The cheap pre-provider check: does this record still describe live code?
 
@@ -454,19 +545,14 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
     other change — `logs/**`, docs, README, preregistration, state, tests,
     source — means the sweep is owed again.
     """
-    # `harness_digest` is INJECTED. Which harness a readiness record describes
-    # is an experiment-instance fact, and the core reaching into
-    # `experiments.phase_c1` to find out inverted the dependency -- the reusable
-    # runtime would have named one experiment, and adding a second would have
-    # meant editing this file.
-    if harness_digest is None:
-        return False, (
-            "no harness_digest provider was supplied; which harness this record "
-            "describes is the caller's fact, and this function will not guess "
-            "it. Pass the experiment's digest function.")
-
-    if record.get("schema") != SCHEMA:
-        return False, f"unexpected schema {record.get('schema')!r}"
+    # The whole wire format is INJECTED. Which schema a readiness record
+    # carries, which key holds its harness digest, which harness that is and
+    # where the record lives are all experiment-instance facts; the runtime
+    # reaching into one experiment to find out inverted the dependency, and a
+    # second caller could not have had a record at all.
+    if record.get("schema") != contract.schema:
+        return False, (f"unexpected schema {record.get('schema')!r}: this caller "
+                       f"declares {contract.schema!r}")
     stored = record.get("self_sha256")
     if not stored or stored != self_hash(record):
         return False, "the record's self-hash does not match its contents"
@@ -516,15 +602,16 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
             "that ordering was once reported backwards.")
 
     try:
-        live_harness = harness_digest(repo_root)
+        live_harness = contract.harness_digest(repo_root)
         live_env = pod_test_environment_digest(
-            repo_root, named_files=named_files)["digest"]
+            repo_root, named_files=contract.named_files)["digest"]
     except Exception as exc:                                   # noqa: BLE001
         return False, f"cannot digest the live tree: {exc}"
 
-    if record.get("c1_harness_digest") != live_harness:
-        return False, (f"the record was made against C1 harness "
-                       f"{str(record.get('c1_harness_digest'))[:12]}…, the live tree "
+    recorded_harness = contract.recorded_harness(record)
+    if recorded_harness != live_harness:
+        return False, (f"the record was made against {contract.harness_label} "
+                       f"{str(recorded_harness)[:12]}…, the live tree "
                        f"is {live_harness[:12]}… — the pod sweep is owed again")
     if record.get("pod_test_environment_digest") != live_env:
         return False, (f"the record was made against pod test environment "
@@ -540,10 +627,7 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
         return False, ("the record names no swept_base_commit, so nothing "
                        "constrains what changed after the sweep")
     target = session_commit or head_commit(root)
-    if record_path is None:
-        return False, ("no record_path was supplied; which artifact the sweep\n"
-                       "writes is the caller's fact and this will not guess it")
-    allowed = list(permitted_post_sweep_paths(record_path))
+    allowed = list(permitted_post_sweep_paths(contract.record_path))
     if authorization_path:
         allowed.append(authorization_path)
     lineage = lineage_from_swept_base(root, base, target, tuple(allowed))
@@ -555,11 +639,11 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
 
     c = record.get("counts") or {}
     return True, (f"pod sweep {c.get('passed')} passed / {c.get('skipped')} skipped "
-                  f"/ {c.get('failed', 0) + c.get('error', 0)} failed, 7 renderer "
-                  f"skips, leaf transport 5/5, binds harness {live_harness[:12]}… "
-                  f"and environment {live_env[:12]}…, staging contract "
-                  f"{str(recorded_staging)[:12]}…, swept at {base[:8]} with "
-                  f"{lineage['reason']}")
+                  f"/ {c.get('failed', 0) + c.get('error', 0)} failed, "
+                  f"{group_summary(record)}, binds {contract.harness_label} "
+                  f"{live_harness[:12]}… and environment {live_env[:12]}…, staging "
+                  f"contract {str(recorded_staging)[:12]}…, swept at {base[:8]} "
+                  f"with {lineage['reason']}")
 
 
 def load_record(repo_root: str | Path = ".", *, record_path: str) -> dict[str, Any]:
