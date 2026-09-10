@@ -37,8 +37,29 @@ SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
 #: Enough to construct a `SessionSpec`; no pod, no provider, no network.
 BASE_ARGS = ["--scr", "/tmp/does-not-matter", "--session-commit", "d" * 40,
              "--bundle", "b.bundle"]
-#: Some launchers require an extra required flag to parse at all.
-ARG_VARIANTS = ([], ["--transport", "relay"])
+#: Values for the required options `BASE_ARGS` does not already supply.
+#:
+#: This was a hand-kept list of variants -- `([], ["--transport", "relay"])` --
+#: and a launcher that gained a required flag simply stopped parsing, was
+#: skipped by the `continue` below, and vanished from the enumeration. That is
+#: not hypothetical: `--run-id` took this test down, and the only symptom was an
+#: aggregate assertion reporting `c1` missing, several layers from the cause.
+#:
+#: Asked of the REAL parser instead, so a new required flag is supplied rather
+#: than guessed at. A constrained option takes its first declared choice; an
+#: unconstrained one takes a value that satisfies the identifier rules this
+#: repository's ids use.
+def required_extras(parser, already: set[str]) -> list[str]:
+    out: list[str] = []
+    for action in parser._actions:
+        if not action.required or not action.option_strings:
+            continue
+        if any(flag in already for flag in action.option_strings):
+            continue
+        value = (str(sorted(action.choices)[0]) if action.choices
+                 else "kind_probe")
+        out += [action.option_strings[-1], value]
+    return out
 
 DEFAULT_KIND = "spend"
 #: Kinds that must NOT share the generic loader. Each names a distinct
@@ -91,6 +112,11 @@ def default_kind_from_script() -> str:
     return m.group(1)
 
 
+#: Launcher modules that define `spec`/`build_parser` and could NOT be parsed.
+#: Populated by `launchers()`; asserted empty below.
+UNPARSEABLE: list[str] = []
+
+
 def launchers() -> dict[str, tuple[str, str]]:
     """launcher module -> (SESSION_KIND it exports, authorization class name)."""
     found = {}
@@ -102,15 +128,16 @@ def launchers() -> dict[str, tuple[str, str]]:
             continue
         if not (hasattr(mod, "spec") and hasattr(mod, "build_parser")):
             continue
-        args = None
-        for extra in ARG_VARIANTS:
-            try:
-                with contextlib.redirect_stderr(io.StringIO()):
-                    args = mod.build_parser().parse_args(BASE_ARGS + extra)
-                break
-            except SystemExit:
-                continue
-        if args is None:
+        parser = mod.build_parser()
+        extra = required_extras(parser, set(BASE_ARGS))
+        try:
+            with contextlib.redirect_stderr(io.StringIO()):
+                args = parser.parse_args(BASE_ARGS + extra)
+        except SystemExit:
+            #: Recorded, not skipped. A launcher that stops parsing used to drop
+            #: out of the enumeration silently, and the only symptom was an
+            #: aggregate assertion naming a kind several layers from the cause.
+            UNPARSEABLE.append(mod_name)
             continue
         session = mod.spec(args)
         loader = session.authorization_loader
@@ -130,6 +157,21 @@ def test_the_probe_sees_the_sessions_this_repository_can_actually_launch():
     kinds = {k for k, _ in LAUNCHERS.values()}
     assert kinds >= {*DEDICATED_KINDS, DEFAULT_KIND}
     assert len(LAUNCHERS) >= 7, sorted(LAUNCHERS)
+
+
+def test_no_launcher_was_dropped_because_it_would_not_parse():
+    """Named here, where the cause is, rather than inferred from a missing kind.
+
+    The count and kind-set assertions above cannot see this: dropping a launcher
+    whose kind another launcher also declares leaves both of them satisfied, and
+    the parametrized tests below simply stop existing for it -- fewer tests, all
+    green. Mutating the probe's argument filler proved exactly that, so the
+    failure is reported where it happens.
+    """
+    assert not UNPARSEABLE, (
+        f"{UNPARSEABLE} define spec/build_parser and could not be parsed with "
+        "the required options derived from their own parsers; they were "
+        "excluded from every check in this module")
 
 
 def test_the_scripts_default_is_the_narrow_spend_path():
