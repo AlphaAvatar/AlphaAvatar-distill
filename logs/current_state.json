@@ -22,13 +22,13 @@
   "note": "aad_autoinit_c338a76b.bundle 5c1384bb41c3 was consumed by attempt 9 and authorizes nothing further."
  },
  "budget": {
-  "cumulative_spend_usd": 267.8925,
+  "cumulative_spend_usd": 267.8998,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 15.8675,
+  "remaining_usd": 15.8602,
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "$283.7600 - $267.8925 = $15.8675 remaining; minus the $15.1475 ceiling leaves $0.7200 >= 0, so EXACTLY ONE ceiling-sized formal attempt still fits. Includes $0.0400 of ENGINEERING spend across three CUDA stage-F subruns, none of them a C1 attempt. Headroom is not permission.",
+  "headroom_note": "$283.7600 - $267.8998 = $15.8602; minus the $15.1475 ceiling leaves $0.7127 >= 0, so EXACTLY ONE ceiling-sized formal attempt still fits. Includes $0.0400 ENGINEERING spend, no C1 attempt. Corrected 2026-09-10 from $267.8925 (roll-up dropped $0.0073); see ledger. Not permission.",
   "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. Headroom is not permission."
  },
  "frozen": {

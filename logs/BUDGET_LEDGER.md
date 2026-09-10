@@ -1966,10 +1966,31 @@ nine paid**.
 allocation: each subrun started from what the previous ones had booked, and the
 watchdog was handed the remaining ceiling, not a fresh one.
 
-Project spend `$267.8598` → **`$267.8925`** of the unchanged `$283.7600` cap
+Project spend `$267.8671` → **`$267.8998`** of the unchanged `$283.7600` cap
 (the first subrun's `$0.0073` was already booked on 2026-09-09; this adds
-`$0.0327`). Remaining **`$15.8675`**, which still covers one full `$15.1475`
-formal C1 attempt with **`$0.7200`** after it.
+`$0.0327`). Remaining **`$15.8602`**, which still covers one full `$15.1475`
+formal C1 attempt with **`$0.7127`** after it.
+
+```text
+pre-campaign               267.8598                 (attempt-9 entry above)
++ subrun 1  0.0073   ->    267.8671                 (booked 2026-09-09)
++ subrun 2  0.0145
++ subrun 3  0.0182   ->    267.8998                 = 267.8598 + 0.0400
+remaining              283.7600 - 267.8998 =  15.8602
+after one ceiling       15.8602 -  15.1475 =   0.7127   >= 0  ->  IT FITS
+worst case if launched 267.8998 +  15.1475 = 283.0473   <= 283.7600
+```
+
+> **CORRECTED 2026-09-10, same day, before the closeout report.** As first
+> written this line read "`$267.8598` → `$267.8925` … remaining `$15.8675` …
+> `$0.7200` after it". The prose correctly said subrun 1 was *already booked*,
+> and then the arithmetic added `$0.0327` to the baseline from *before* subrun 1
+> — booking `$0.0327` of a `$0.0400` campaign and losing `$0.0073` from the
+> project cumulative. The three subrun costs in the table above were right; the
+> roll-up was not. The corrected chain is shown explicitly rather than restated,
+> because that is how the error survived being written. The verdict does not
+> change: one ceiling-sized formal attempt still fits, by `$0.7127` instead of
+> `$0.7200`. `campaign.json` was never wrong — it booked `$0.0400` throughout.
 
 **Three resources, never more than one at a time**, each provider-confirmed
 non-billing before the next was created. Three creates, one per subrun, no
