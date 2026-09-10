@@ -32,6 +32,9 @@ from pathlib import Path
 
 import pytest
 
+from historical_contract_reuse import (  # noqa: E402
+    write_historical_contract_record)
+
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
@@ -221,10 +224,20 @@ def test_the_attempt4_sb_probe_is_strictly_reusable():
 
 def test_the_driver_actually_imports_the_attempt4_sb_probe(drv, tmp_path,
                                                            monkeypatch):
-    """Drive the real import and require `fe9683e6a9c7/sb` to arrive."""
+    """Drive the real import and require `fe9683e6a9c7/sb` to arrive.
+
+    Against the record the probes satisfy under their OWN scoring contract. The
+    live record is refused today -- the scorer relocated and the contract moved
+    v2 -> v3 -- and that refusal is asserted directly by
+    `test_the_live_historical_record_is_refused_today` below. Pointed at the
+    live record this test would only re-observe that refusal and would stop
+    checking the import it exists for.
+    """
     audit = tmp_path / "audit"
     (audit / "probes").mkdir(parents=True)
     monkeypatch.setattr(drv, "AUDIT", audit)
+    monkeypatch.setattr(drv, "HISTORICAL_REUSE",
+                        write_historical_contract_record(tmp_path))
 
     d = drv.ContinuationDriver.__new__(drv.ContinuationDriver)
     d.imported_probe_ids = set()
@@ -255,4 +268,50 @@ def test_every_verified_reuse_record_is_wired_into_the_import(drv):
         assert source in src, f"{source} is not among the import sources"
     for record in (drv.HISTORICAL_REUSE, drv.ATTEMPT5_REUSE, drv.ATTEMPT4_REUSE):
         assert record.is_file(), record
+
+    # Two of the three are still verified outright. The historical one is
+    # refused under the live scoring contract, deliberately -- see below -- so
+    # it is checked for a STATED verdict rather than for a true one.
+    for record in (drv.ATTEMPT5_REUSE, drv.ATTEMPT4_REUSE):
         assert json.loads(record.read_text())["reuse_verified"] is True, record
+    historical = json.loads(drv.HISTORICAL_REUSE.read_text())
+    assert isinstance(historical["reuse_verified"], bool)
+
+
+def test_the_live_historical_record_is_refused_today(drv):
+    """Not a gap in coverage: the refusal is the current correct answer.
+
+    Phase A's probes were scored under `recovery_search_scoring@v2`. The scorer
+    has relocated twice since and the contract legitimately moved to v3, so all
+    eleven probes fail `scoring_contract_matches_live` and nothing else.
+    `logs/autoinit_historical_reuse_position.json` derives the same conclusion
+    independently and records it as REFUSED, explicitly unrelaxed: admitting a
+    superseded contract is a maintainer decision, not a migration one.
+
+    If the contract ever matches again this fails, and the derived-record
+    fixtures above should be dropped rather than kept out of habit.
+    """
+    live = json.loads(drv.HISTORICAL_REUSE.read_text())
+    assert live["reuse_verified"] is False
+    for probe in live["probes"]:
+        assert probe["failed"] == ["scoring_contract_matches_live"], probe["probe_id"]
+
+    position = json.loads(
+        (REPO / "logs/autoinit_historical_reuse_position.json").read_text())
+    c4 = position["conclusions"]["4_live_reuse_under_scoring_contract_v3"]
+    assert c4["verdict"] == "REFUSED"
+    assert position["all_four_hold_simultaneously"] is True
+
+
+def test_the_driver_refuses_the_live_record_rather_than_citing_it(drv, tmp_path,
+                                                                 monkeypatch):
+    """The refusal reaches the import path, not just the record."""
+    from aadistill.initialization.planning.recovery import RecoveryAdmissionError
+
+    audit = tmp_path / "audit"
+    (audit / "probes").mkdir(parents=True)
+    monkeypatch.setattr(drv, "AUDIT", audit)
+    d = drv.ContinuationDriver.__new__(drv.ContinuationDriver)
+    d.imported_probe_ids = set()
+    with pytest.raises(RecoveryAdmissionError, match="unverified"):
+        drv.ContinuationDriver.import_completed_probes(d)

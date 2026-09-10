@@ -947,6 +947,220 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "252e6da900a451f4df402f704cadb8312fa6144db51df5999a9d3a19eea7e93d"
+  },
+  {
+   "amendment_id": "PHB-HA-009",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-10T09:58:03+00:00",
+   "reviewed_base_commit": "573d6cfc92497c176afe4645335df1a2534f93df",
+   "source_repair_commit": "cda2f4fc14b6243a5b1e98c34da05e45815b8132",
+   "source_repair_parent": "573d6cfc92497c176afe4645335df1a2534f93df",
+   "previous_live_digest": "91bcb48589f4fd8abd17240988c3b0925b4dd9b779be3326f5f44a3bcf28ee6a",
+   "new_live_digest": "7be583c44220b17ede3246c6bf173f0e97d741ee1132ee25540eea1bb757db67",
+   "changed_files": [
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/depth.py",
+    "src/aadistill/initialization/operators/width.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/leaf_durability.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/data/extra_stream.py": "3f778021d307aa1859008299423c45b04fcf81f29c3462f9eb91dc279a98066c",
+    "src/aadistill/governance/authorization.py": "75dfdb26b68051bd06a3f4b8c2130d0cc37637a9bf92228862ba542d73bc8f29",
+    "src/aadistill/infrastructure/artifact_gate.py": "22332ab2b23c0b47513374075086def3aabc61a038e149d9dda7f768b48f173b",
+    "src/aadistill/infrastructure/budget.py": "5931865c89b213ee3c9eccc6536f51e6d66dd9e445ea8b5c85af67b39530cd1a",
+    "src/aadistill/infrastructure/provider.py": "ab640477b99efd179896d4a0ad934804757867eaac22742c96e8752129a87e3e",
+    "src/aadistill/infrastructure/remote.py": "3db055894e523ef9c13d39329c8cd24b2070d4b8ec43180700c2dea921e21bf9",
+    "src/aadistill/infrastructure/session.py": "10400defd24f9e8bcbc2879718459a8e5daabda053c065500102419c8e980494",
+    "src/aadistill/infrastructure/session_prechecks.py": "1a6efcfd9fdbc122781a6879eb8251431952ddd8f5165a7fc60994b93021c159",
+    "src/aadistill/infrastructure/session_runner.py": "6ae249ee9b0f9f338f16ff65a90c04eb1dccdfb4443460776584b61bcd8dc926",
+    "src/aadistill/initialization/calibration/datasets.py": "d28922994a4e790d5442817a0466ab0ea0e289e6bec20c88d9dd5957ad5ab149",
+    "src/aadistill/initialization/calibration/profiles.py": "7b1a4a6ad536762a9f46b90ea4c6939f2cba8ea02163cc12db0d0855104ebfa7",
+    "src/aadistill/initialization/operators/base.py": "fd9c4cd03a523111af083ab36c2f7d7d211c587824fe29e25f442dfc4cc82689",
+    "src/aadistill/initialization/operators/depth.py": "ecffe2e537b2f998d682edd22459c10309474e8554e8c361e602751c275e70d1",
+    "src/aadistill/initialization/operators/width.py": "9790b60fa9cf12dbd52565b3e6c5380985694aa43277b245db41f9a614744647",
+    "src/aadistill/initialization/planning/generation_compat.py": "2edda42b3df86bebf10aa525f5ff7b0f533529f220d50f221c8f0c09c399deb0",
+    "src/aadistill/initialization/planning/ranking.py": "dc2e867769ee3c3add89a3e8082a5ccc93e6b42dfae7c818a96dd49740e121ce",
+    "src/aadistill/initialization/planning/search.py": "a02fa31f1b2764184c052fad3f00189768b7f041ffb63c92deb7e4d7ed29e498",
+    "src/aadistill/initialization/planning/stage1_selection.py": "178b3c486750faca2cdf387315c9b5bd885b79a404980edd7f93990f4eadbfc8",
+    "src/aadistill/initialization/specs/identity_collapse.py": "823bb9784c77d8364dd1f197cc2b5bf26254773c1d60563f86191b4730978583",
+    "src/aadistill/initialization/specs/state.py": "fa8289755d8ad0fe64628caa5ea3ca315f7b8eb0416860e2f6bd86b7b70df498",
+    "src/aadistill/initialization/transforms/project.py": "11465b962e2d4b093324d6b0ee3c96133ee8f6feaea3d0a7e2b4165036819e36",
+    "src/aadistill/runtime/cost.py": "9cdecf509df78968f043a720e32a033239dd66285124b8ffd335ee045aa617b6",
+    "src/aadistill/runtime/device_handoff.py": "0f7a25ee84456be98d1bfe7f482481bda743a74b914c8e68a3d8f78941f1e8cd",
+    "src/aadistill/runtime/leaf_durability.py": "024967267f9ededb651437d7b660395c642a191c09d8dd1e8a3bf6946214a017"
+   },
+   "file_sha256_after": {
+    "src/aadistill/data/extra_stream.py": "712e828328987806a5b093a1bab77f36ecc4064a7da368e0faf1fa06838ad2ce",
+    "src/aadistill/governance/authorization.py": "27c664a3ad3bdaf195f71602fc3456b492c5b99a7c6ebace06a186b7a55df9e9",
+    "src/aadistill/infrastructure/artifact_gate.py": "a46f743bd9eadfbb22f4e73af698f4ba6d59db930ad914501b9b48720401cd5b",
+    "src/aadistill/infrastructure/budget.py": "f77d6f25899f5ee187929125ab464a38afec4182add9da00ac7bb2c92e20ca4c",
+    "src/aadistill/infrastructure/provider.py": "31245e59bc0160082ce2e0a220a659c96a6aa9fb72ccc628ec9bdef03abd7781",
+    "src/aadistill/infrastructure/remote.py": "8d194cce37c9093a8e63986f856624039a0895fc853e687770639e1b66743184",
+    "src/aadistill/infrastructure/session.py": "f482438fe787b8086b2312485d87f73803541fcb9c19e5ae9968e842be9b29a5",
+    "src/aadistill/infrastructure/session_prechecks.py": "b32f4401fdb21ecf4ba45fcf8d62e046cdb14fa552b924d73def718cc0b5014d",
+    "src/aadistill/infrastructure/session_runner.py": "bcf2b7fd1b75f4f9bf847831ac4ea4e8b78be02873ff9515e8a4c48ad30c7bcf",
+    "src/aadistill/initialization/calibration/datasets.py": "0e1f9759e4acb3a06d9c5f48f42c911f71f7f8cba5a2bec57cd938a5c2eaa2b9",
+    "src/aadistill/initialization/calibration/profiles.py": "7334063b781a213c720f62cffa56e0676a3481f3690a1b62ca2e7dc2936f870e",
+    "src/aadistill/initialization/operators/base.py": "9aabc7b406a62b97ae14d8c08e504030fee345f3bacc1fa987ad2c6a0d69ba3b",
+    "src/aadistill/initialization/operators/depth.py": "b1f5c9914e5bdbccd3ee52a5e56ff4050e533f7f8416360aca79f584341f7846",
+    "src/aadistill/initialization/operators/width.py": "9537f8cadc09dcd04d5a080a0a9132070e27ebe918e9acd4f6aa15bbe07ddda3",
+    "src/aadistill/initialization/planning/generation_compat.py": "5326437e42b16622470cda9a50a3a8bfb06e829f8ba06b430a7e854792b2d218",
+    "src/aadistill/initialization/planning/ranking.py": "49c3b3b9779086abbf86be4f432f33a06bf53e33630f847b2430c4742f1647a8",
+    "src/aadistill/initialization/planning/search.py": "2691a3c1d5d6d5ea6b562c770df0ababa7bbd1036402b64dac6349e603c04713",
+    "src/aadistill/initialization/planning/stage1_selection.py": "f77f6b33fe05cbd3b64bc611941b52a1d5921f9d970c0960be7fb78a8af5d3d5",
+    "src/aadistill/initialization/specs/identity_collapse.py": "17586155f1ce538c64c02d34e1456488b04598d7869744a3b67b8322b97e821e",
+    "src/aadistill/initialization/specs/state.py": "4b7877ad1008e6a8ea01d6f506b0d3db1e16bc030cae1b881caccd38ef15def4",
+    "src/aadistill/initialization/transforms/project.py": "0b783fb59a9377b2496df66d53f6acdbf8c99167576a9c241a6c7d66cd0f632b",
+    "src/aadistill/runtime/cost.py": "e87956c507ab84602914a3121b474f809a33a70aec477721956e514ff9a5591e",
+    "src/aadistill/runtime/device_handoff.py": "39ad7cc03c7f7e02f8ef3b36ed440370e3afd61e0627e32132fe20807fdb0fd0",
+    "src/aadistill/runtime/leaf_durability.py": "b215de1aaa012d6a6fed47f442c62f7d1bd1ff334716cc7c26053590a1e8ec43"
+   },
+   "patch_sha256": "7be95a8a06a70377af77bd62b26c15d9aaf4d1e442c82a097890763be867789f",
+   "numstat": {
+    "src/aadistill/data/extra_stream.py": [
+     1,
+     1
+    ],
+    "src/aadistill/governance/authorization.py": [
+     5,
+     5
+    ],
+    "src/aadistill/infrastructure/artifact_gate.py": [
+     11,
+     11
+    ],
+    "src/aadistill/infrastructure/budget.py": [
+     17,
+     14
+    ],
+    "src/aadistill/infrastructure/provider.py": [
+     2,
+     1
+    ],
+    "src/aadistill/infrastructure/remote.py": [
+     3,
+     2
+    ],
+    "src/aadistill/infrastructure/session.py": [
+     186,
+     115
+    ],
+    "src/aadistill/infrastructure/session_prechecks.py": [
+     4,
+     4
+    ],
+    "src/aadistill/infrastructure/session_runner.py": [
+     14,
+     10
+    ],
+    "src/aadistill/initialization/calibration/datasets.py": [
+     3,
+     3
+    ],
+    "src/aadistill/initialization/calibration/profiles.py": [
+     2,
+     2
+    ],
+    "src/aadistill/initialization/operators/base.py": [
+     1,
+     1
+    ],
+    "src/aadistill/initialization/operators/depth.py": [
+     17,
+     16
+    ],
+    "src/aadistill/initialization/operators/width.py": [
+     2,
+     2
+    ],
+    "src/aadistill/initialization/planning/generation_compat.py": [
+     2,
+     2
+    ],
+    "src/aadistill/initialization/planning/ranking.py": [
+     19,
+     18
+    ],
+    "src/aadistill/initialization/planning/search.py": [
+     4,
+     4
+    ],
+    "src/aadistill/initialization/planning/stage1_selection.py": [
+     3,
+     3
+    ],
+    "src/aadistill/initialization/specs/identity_collapse.py": [
+     3,
+     3
+    ],
+    "src/aadistill/initialization/specs/state.py": [
+     2,
+     2
+    ],
+    "src/aadistill/initialization/transforms/project.py": [
+     1,
+     1
+    ],
+    "src/aadistill/runtime/cost.py": [
+     4,
+     3
+    ],
+    "src/aadistill/runtime/device_handoff.py": [
+     2,
+     2
+    ],
+    "src/aadistill/runtime/leaf_durability.py": [
+     5,
+     4
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 229,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "The post-CUDA evidence and reproducibility closure. Two behavioural changes: ExecutionCommands drops its concrete interpreter default so a caller must supply one, and gains a canonical DeploymentBinding covering all seven behaviour-affecting fields plus the RESOLVED provider CLI, digested into the session record -- which previously carried no deployment at all, so two layouts differing in workspace, checkout root or CUDA floor serialized identically. Everything else in this commit that touches Phase B's set is DOCSTRING AND COMMENT ONLY: 44 core modules gave up this project's run labels, probe sizes, seed names, battery counts, measured spreads and dollar figures, which are relocated verbatim to docs/core-provenance.md. That prose-only property is not asserted, it is proved by AST comparison with docstrings stripped, in tests/architecture/test_cuda_surface_preserved.py.",
+   "why_the_owner_is_shared_session_runner": "planning/recovery.py, infrastructure/session.py, infrastructure/session_runner.py, infrastructure/budget.py, infrastructure/watchdog.py and their neighbours belong to Phase B's frozen executable set as well as to every other session's, so a docstring swept for the Milestone-A core-ownership rule moves Phase B's live digest even though Phase B is closed and consumed. The scoring-contract digest moved for the same reason -- planning/recovery.py is in the declared C1 scoring set -- and 570 frozen samples re-scored through both trees are identical per sample and in aggregate.",
+   "why_a_c1_only_override_was_rejected": "Nothing is conferred on C1. No formal grant, authorization or bundle is live; this entry asserts launch_compatible_with_frozen_preregistration: false. The CUDA engineering validation that ran on 2026-09-10 was authorized separately, is not a C1 session, used none of this set's launch path, and its campaign is closed at $0.0400 with zero pods.",
+   "maintainer_authorization": "MAINTAINER DECISION, 2026-09-10, on reporting tip 573d6cfc92497c176afe4645335df1a2534f93df: final post-CUDA evidence and reproducibility closure -- correct the current-state owners, add one append-only GPU interpretation amendment, finish the deployment binding, and remove remaining experiment-instance prose from core. It authorizes no Attempt-10 grant, no formal bundle, no formal experiment, no new GPU run, and no merge to main.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "252e6da900a451f4df402f704cadb8312fa6144db51df5999a9d3a19eea7e93d",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "be8d9e2224a35f3e3cdf3e341c006a05e773bb2f3efa6eb81e6b18c037f24576"
   }
  ]
 }

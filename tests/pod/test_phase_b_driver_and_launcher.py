@@ -29,6 +29,9 @@ from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from experiments.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
 from experiments.phase_b.plan import PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 from autoinit_phase_a_driver import PhaseADriver  # noqa: E402
+from historical_contract_reuse import (  # noqa: E402
+    NotOnlyTheContractCheck, under_historical_contract,
+    write_historical_contract_record)
 
 HISTORICAL = REPO / "logs/autoinit_recovery_continuation_attempt7/probes"
 
@@ -62,10 +65,69 @@ def _auth_file(tmp_path, **over) -> Path:
 
 @pytest.fixture
 def driver(tmp_path, monkeypatch):
+    """A Phase-B driver pointed at the record its own contract satisfies.
+
+    Phase A's probes were scored under `recovery_search_scoring@v2`; the scorer
+    has since relocated and the contract moved to v3, so the live record now
+    fails `scoring_contract_matches_live` on all eleven probes and NOTHING else.
+    That refusal is correct and deliberate -- see
+    `logs/autoinit_historical_reuse_position.json` conclusion 4 -- and it is
+    asserted directly by `test_the_live_record_is_currently_refused` below.
+
+    It is not what these tests are about. They ask what the driver does with a
+    record it MAY cite: which probes it imports, which admitted-but-excluded
+    leaves it still skips, how it refuses a thin or permissive one. Left
+    pointing at the live record they would all collapse into one refusal and
+    leave the import logic untested, which is how it went stale unnoticed
+    through the migration.
+    """
     monkeypatch.setattr(pbd, "AUDIT", tmp_path / "audit")
+    monkeypatch.setattr(pbd, "REUSE_RECORD",
+                        write_historical_contract_record(tmp_path))
     monkeypatch.setattr(pbd.PhaseBDriver, "AUTHORIZATION_PATH",
                         str(_auth_file(tmp_path)))
     return pbd.PhaseBDriver(_args())
+
+
+# --- what the LIVE record says, which is a different question ---------------
+
+def test_the_live_record_is_currently_refused():
+    """Not incidentally: `import_historical_probes` must refuse it TODAY.
+
+    If the live contract ever matches again, this fails and the `driver`
+    fixture's derivation should be dropped rather than kept out of habit.
+    """
+    live = json.loads((REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    assert live["reuse_verified"] is False
+    assert live["failures"], "refused with no stated failure"
+
+
+def test_the_refusal_is_the_live_contract_identity_and_nothing_else():
+    """The whole reason the derivation is legitimate. A probe failing anything
+    else would be a real defect, and setting it aside would hide one."""
+    live = json.loads((REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    for probe in live["probes"]:
+        assert probe["failed"] == ["scoring_contract_matches_live"], probe["probe_id"]
+
+
+def test_the_two_records_agree_about_the_refusal():
+    """`autoinit_historical_reuse_position.json` derives the same conclusion
+    independently. Two records disagreeing about whether history may be cited
+    is worse than either verdict."""
+    pos = json.loads(
+        (REPO / "logs/autoinit_historical_reuse_position.json").read_text())
+    c4 = pos["conclusions"]["4_live_reuse_under_scoring_contract_v3"]
+    assert c4["verdict"] == "REFUSED"
+    assert c4["only_the_live_contract_check_fails"] is True
+    assert pos["all_four_hold_simultaneously"] is True
+
+
+def test_the_derivation_refuses_to_set_aside_a_real_defect():
+    """Guards the helper: it may drop ONE check, and only that one."""
+    live = json.loads((REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    live["probes"][0]["failed"] = ["artifact_digest_re_derives_from_bytes"]
+    with pytest.raises(NotOnlyTheContractCheck):
+        under_historical_contract(live)
 
 
 # --- the governing artifacts ------------------------------------------------
@@ -375,7 +437,42 @@ def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
     assert accounted, "the drift is refused for launch AND unexplained"
 
 
-def test_the_reuse_gate_proves_the_ten_probe_budget():
+def test_the_reuse_gate_reflects_the_live_scoring_contract():
+    """Inverted for the same reason as the preregistration gate above.
+
+    This gate reads `logs/autoinit_historical_probe_reuse.json`, which is
+    regenerated from the live tree. Phase A's probes were scored under
+    `recovery_search_scoring@v2`; the scorer has since relocated and the
+    contract moved to v3, so every probe now fails
+    `scoring_contract_matches_live` and the gate that guards a paid Phase-B
+    launch says so. That is the designed refusal, recorded and reasoned about in
+    `logs/autoinit_historical_reuse_position.json` conclusion 4.
+
+    Written as a branch, not as a flat inversion: if the contract ever matches
+    again, the ten-probe budget claim must come back rather than silently stay
+    refused.
+    """
+    record = json.loads(
+        (REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    ok, why = pbl.reuse_record_gate(types.SimpleNamespace())
+
+    if record["reuse_verified"]:
+        assert ok, why
+        assert "pricing ten, not twelve" in why
+        return
+
+    assert not ok, ("the paid Phase-B gate accepted a reuse record the live "
+                    f"scoring contract refuses: {why}")
+    assert "reuse_verified=false" in why
+
+
+def test_the_ten_probe_budget_still_holds_under_the_historical_contract(tmp_path,
+                                                                       monkeypatch):
+    """The claim the gate used to make, kept alive against the record the
+    probes actually satisfy. Losing it entirely would mean the budget arithmetic
+    stopped being checked at all."""
+    monkeypatch.setattr(pbl, "REUSE_RECORD",
+                        write_historical_contract_record(tmp_path))
     ok, why = pbl.reuse_record_gate(types.SimpleNamespace())
     assert ok, why
     assert "pricing ten, not twelve" in why
@@ -392,8 +489,7 @@ def test_the_candidate_filter_holds_even_if_the_RECORD_admits_an_excluded_leaf(
     driver's guard still exists. This feeds a record that *does* admit an
     excluded leaf and requires the driver to refuse it anyway.
     """
-    record = json.loads(
-        (REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    record = under_historical_contract()
     permissive = tmp_path / "reuse.json"
     permissive.write_text(json.dumps({
         **record,
@@ -830,7 +926,7 @@ def _live_like(**over):
     invented to match what the consumer wants is how a stub ends up certifying
     the defect it was supposed to catch.
     """
-    base = json.loads((REPO / "logs/autoinit_historical_probe_reuse.json").read_text())
+    base = under_historical_contract()
     return {**base, **over}
 
 
