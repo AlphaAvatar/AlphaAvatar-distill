@@ -32,8 +32,10 @@ from __future__ import annotations
 
 import argparse
 import ast
+import builtins
 import json
 import re
+import symtable
 import sys
 from pathlib import Path
 
@@ -41,6 +43,17 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 CORE = REPO_ROOT / "src" / "aadistill"
 OUT = "logs/architecture_inventory.json"
 SCHEMA = "aadistill.architecture_inventory/v1"
+
+#: Names the interpreter binds in every module, which no module assigns.
+#: `__conditional_annotations__` is the 3.14 lazy-annotation cell; it is
+#: compiler-generated and would otherwise be reported in every module that has
+#: an annotated module-level binding.
+IMPLICIT_MODULE_NAMES = frozenset({
+    "__name__", "__file__", "__doc__", "__package__", "__spec__", "__loader__",
+    "__builtins__", "__path__", "__all__", "__debug__",
+    "__conditional_annotations__",
+})
+RESOLVABLE_NAMES = frozenset(dir(builtins)) | IMPLICIT_MODULE_NAMES
 
 # --- what counts as an instance literal -------------------------------------
 #
@@ -252,6 +265,48 @@ def classify(mod: str, rel: str, facts: dict) -> str:
     return "generic_planning_execution"
 
 
+def _tables(table):
+    yield table
+    for child in table.get_children():
+        yield from _tables(child)
+
+
+def undefined_global_reads(src: str, rel: str) -> list[dict]:
+    """Names read as module globals that this module never binds.
+
+    A `NameError` waiting for the branch that reaches it. `session_runner.py`
+    built the driver's `JobSpec` with `workdir=REPO` for a whole milestone after
+    `REPO` was deleted: the removal was verified against the f-strings that
+    build remote commands, and this was a keyword argument. It raised only after
+    a pod had been created, setup had completed and the inputs had
+    materialized — the most expensive moment in a session to find a typo.
+
+    Scope analysis comes from stdlib `symtable`, which already knows what a
+    comprehension, a closure, a `global` statement and a class body do to a
+    name. A symbol reported here is `is_global()` and `is_referenced()` and is
+    bound nowhere at module level, so a conditional import, a `try/except
+    ImportError` fallback and a `TYPE_CHECKING` block all count as bindings —
+    this reports the names that are not there at all, not the ones that are
+    merely hard to see.
+
+    NOT a general lint: one rule, over the same core this file already scans.
+    """
+    table = symtable.symtable(src, rel, "exec")
+    bound = {s.get_name() for s in table.get_symbols()
+             if s.is_assigned() or s.is_imported() or s.is_namespace()}
+    out = []
+    for scope in _tables(table):
+        for sym in scope.get_symbols():
+            name = sym.get_name()
+            if not (sym.is_global() and sym.is_referenced()):
+                continue
+            if name in bound or name in RESOLVABLE_NAMES:
+                continue
+            out.append({"name": name, "scope": scope.get_name(),
+                        "scope_kind": scope.get_type()})
+    return out
+
+
 def scan() -> dict:
     modules = {}
     for path in sorted(CORE.rglob("*.py")):
@@ -289,6 +344,12 @@ def scan() -> dict:
                                               key=lambda r: r["line"]),
             "definitions": w.defs,
             "import_time_calls": import_time,
+            "undefined_global_reads": undefined_global_reads(src, rel),
+            #: `from x import *` binds names this analysis cannot enumerate, so
+            #: a module using it would make the rule above unsound. Recorded
+            #: rather than assumed absent.
+            "star_imports": [i["target"] for i in w.imports
+                             if "*" in (i.get("names") or ())],
         }
         facts["classification"] = classify(w.mod, rel, facts)
         modules[rel] = facts
@@ -343,7 +404,8 @@ def main() -> int:
         "sha256_literals": [], "repo_id_literals": [], "path_literals": [],
         "experiment_named_modules": [], "family_access_outside_adapters": [],
         "import_time_registration": [], "import_time_taxonomy": [],
-        "big_int_literals": [],
+        "big_int_literals": [], "undefined_global_reads": [],
+        "star_import_modules": [],
     }
     for rel, m in modules.items():
         is_adapter = m["classification"] == "model_family_adapter"
@@ -358,6 +420,13 @@ def main() -> int:
                 findings["path_literals"].append(entry)
             if "big_int" in lit["kinds"]:
                 findings["big_int_literals"].append(entry)
+        for u in m["undefined_global_reads"]:
+            findings["undefined_global_reads"].append({"path": rel, **u})
+        if m["star_imports"]:
+            #: Reported, because a star import makes the rule above unsound for
+            #: that module rather than merely noisy.
+            findings["star_import_modules"].append(
+                {"path": rel, "targets": m["star_imports"]})
         if m["classification"] == "experiment_instance":
             findings["experiment_named_modules"].append(rel)
         if not is_adapter and m["family_attribute_access"]:

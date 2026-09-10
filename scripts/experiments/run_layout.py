@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import json
 import sys
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -58,8 +58,30 @@ AREAS: tuple[str, ...] = (
     "governance", "runtime", "evidence", "artifacts", "closeout")
 
 
+#: Marks a writable output location as belonging to exactly one run.
+#:
+#: A run's *directory* under `logs/runs` is not the only place it writes. The
+#: session's scratch root is where the launcher log, the relayed driver streams
+#: and the collected artifact manifest actually accumulate, and it is passed in
+#: by the operator, created with `exist_ok=True`, and shared with read-only
+#: inputs and caches. Nothing tied it to a run, so a fresh run id aimed at a
+#: previous attempt's scratch collected that attempt's evidence as its own.
+CLAIM_NAME = ".aad_output_claim.json"
+CLAIM_SCHEMA = "aadistill.run_output_claim/v1"
+
+
 class RunConventionError(RuntimeError):
     """A role path, or a run, that does not fit this repository's convention."""
+
+
+class OutputOwnershipError(RunConventionError):
+    """An output location belongs to a different run, or to nobody known.
+
+    A subclass because callers refuse on both for the same reason, and because
+    the two are genuinely different findings: a foreign claim is a collision,
+    an unclaimed directory that already holds outputs is UNKNOWN ownership.
+    Neither is resolved by guessing.
+    """
 
 
 def area_of(relative: str) -> str:
@@ -150,6 +172,102 @@ def open_run(repo_root: Path | str, experiment_id: str, run_id: str, *,
     return layout.create(dict(roles))
 
 
+def read_output_claim(root: Path | str) -> dict[str, Any] | None:
+    """The claim on this output location, or None if it carries none."""
+    path = Path(root) / CLAIM_NAME
+    if not path.is_file():
+        return None
+    try:
+        doc = json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        raise OutputOwnershipError(
+            f"{path} is not readable as a claim ({exc}); ownership of this "
+            "output location is unknown and it is not safe to write into")
+    if doc.get("schema") != CLAIM_SCHEMA:
+        raise OutputOwnershipError(
+            f"{path} carries schema {doc.get('schema')!r}, not {CLAIM_SCHEMA!r}")
+    return doc
+
+
+def claim_output_root(root: Path | str, experiment_id: str, run_id: str, *,
+                      outputs: Iterable[str]) -> dict[str, Any]:
+    """Claim a writable output location for this run, or refuse.
+
+    Three cases, and the middle one is the defect this exists for:
+
+    * claimed by THIS run — idempotent, so a resumed or re-entered launcher
+      does not trip over its own marker;
+    * claimed by another run — refused, naming the owner;
+    * unclaimed but already holding one of this run's declared `outputs` —
+      refused as UNKNOWN ownership. Not "probably stale", not "older than the
+      session": mtime is a guess, and the alternative to guessing is to say so.
+
+    `outputs` is what the run will write and later collect — NOT everything in
+    the directory. A scratch root legitimately holds shared read-only inputs
+    and a model cache, and refusing on those would make the rule unusable, so
+    they neither claim nor block.
+
+    Writes only `CLAIM_NAME`. Nothing here deletes, moves or rewrites a
+    pre-existing file: a refused location is left exactly as it was found.
+    """
+    root = Path(root)
+    declared = sorted(set(outputs))
+    existing = read_output_claim(root) if root.exists() else None
+    if existing is not None:
+        owner = (existing.get("experiment_id"), existing.get("run_id"))
+        if owner != (experiment_id, run_id):
+            raise OutputOwnershipError(
+                f"{root} is the output location of {owner[0]}/{owner[1]}, not "
+                f"{experiment_id}/{run_id}. Two runs must not share a writable "
+                "output root: the second would collect the first's evidence as "
+                "its own. Use a fresh scratch directory")
+        return existing
+
+    present = [rel for rel in declared if (root / rel).exists()]
+    if present:
+        raise OutputOwnershipError(
+            f"{root} already holds {len(present)} of this run's declared "
+            f"outputs ({present[:3]}) and carries no claim, so it belongs to "
+            "an execution this run cannot identify. It is left untouched; use "
+            "a fresh scratch directory rather than writing over evidence whose "
+            "owner is unknown")
+
+    root.mkdir(parents=True, exist_ok=True)
+    doc = {
+        "schema": CLAIM_SCHEMA,
+        "_contract": ("This directory is the writable OUTPUT root of exactly "
+                      "one run. Shared read-only inputs and caches may live "
+                      "here too; only the declared outputs below decide "
+                      "ownership. AUTHORIZES NOTHING."),
+        "experiment_id": experiment_id,
+        "run_id": run_id,
+        "declared_outputs": declared,
+    }
+    (root / CLAIM_NAME).write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
+
+
+def require_output_claim(root: Path | str, experiment_id: str,
+                         run_id: str) -> dict[str, Any]:
+    """Refuse unless this output location is demonstrably this run's.
+
+    Asked again at closeout rather than assumed from the open: the two happen
+    at opposite ends of a session, and what is collected has to be what THIS
+    execution produced.
+    """
+    claim = read_output_claim(root)
+    if claim is None:
+        raise OutputOwnershipError(
+            f"{root} carries no output claim, so nothing in it can be shown to "
+            f"belong to {experiment_id}/{run_id}; refusing to collect it")
+    owner = (claim.get("experiment_id"), claim.get("run_id"))
+    if owner != (experiment_id, run_id):
+        raise OutputOwnershipError(
+            f"{root} is claimed by {owner[0]}/{owner[1]}; refusing to collect "
+            f"its contents as {experiment_id}/{run_id}'s evidence")
+    return claim
+
+
 def record_run(layout: RunLayout, *, spec: ArtifactSpec,
                plan: Mapping[str, Any], implementation: Mapping[str, Any],
                status: Mapping[str, Any], roles: Mapping[str, str],
@@ -210,7 +328,9 @@ def present_roles(layout: RunLayout,
     return out
 
 
-__all__ = ["AREAS", "MANIFEST_NAME", "RUNS_ROOT", "ArtifactSpec",
+__all__ = ["AREAS", "CLAIM_NAME", "CLAIM_SCHEMA", "MANIFEST_NAME",
+           "RUNS_ROOT", "ArtifactSpec", "OutputOwnershipError",
            "RunConventionError", "RunLayout", "area_of", "check_roles",
-           "is_recorded", "layout_for", "manifest_path", "open_run",
-           "present_roles", "read_run", "record_run"]
+           "claim_output_root", "is_recorded", "layout_for", "manifest_path",
+           "open_run", "present_roles", "read_output_claim", "read_run",
+           "record_run", "require_output_claim"]

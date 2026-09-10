@@ -691,7 +691,15 @@ class SessionRunner:
             return False
 
         job = start_detached(target, JobSpec(
-            job_id=self.spec.driver_job_id, workdir=REPO,
+            #: `self.repo`, i.e. `spec.commands.checkout_root`. This read
+            #: `REPO` -- a module constant deleted when the image layout moved
+            #: into `ExecutionCommands` -- three lines above an `env` that was
+            #: converted correctly. The removal was checked against the
+            #: f-strings that build remote commands, and a keyword argument is
+            #: not one, so it survived: a `NameError` raised only after the pod
+            #: was created, setup had completed and the inputs had
+            #: materialized.
+            job_id=self.spec.driver_job_id, workdir=self.repo,
             command=self.spec.driver_command(self.context(), self.plan),
             job_dir=f"{self.ws}/jobs", log_path=self.spec.run_log_path,
             status_path=self.spec.status_path,

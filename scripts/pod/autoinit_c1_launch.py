@@ -50,8 +50,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from experiments.deployment import MAIN_RELAY, POD_IMAGE, deployment_commands  # noqa: E402
 from experiments.run_layout import (  # noqa: E402
-    ArtifactSpec as RunArtifactSpec, RUNS_ROOT, open_run, present_roles,
-    record_run,
+    ArtifactSpec as RunArtifactSpec, RUNS_ROOT, claim_output_root, layout_for,
+    open_run, present_roles, record_run, require_output_claim,
 )
 from experiments.phase_c1 import session as CS
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
@@ -1108,16 +1108,34 @@ def build_parser():
     return ap
 
 
+#: The scratch-relative paths this run WRITES and later collects. Ownership of
+#: the scratch root is decided by these alone: a shared model cache or a staged
+#: input living beside them neither claims the directory nor blocks it.
+RUN_OUTPUTS: tuple[str, ...] = tuple(source for source, _ in _RUN_COLLECT)
+
+
+def layout_for_run(repo_root: Path | str, run_id: str):
+    """This attempt's layout, without touching the filesystem."""
+    return layout_for(repo_root, RUN_EXPERIMENT_ID, run_id)
+
+
 def open_c1_run(args, repo_root: Path | None = None):
-    """Create this attempt's run directory and point the session record at it.
+    """Claim this attempt's outputs, create its run directory, point `out` at it.
 
     Runs BEFORE `SessionSpec` construction and therefore before any provider
-    call, so a run id that collides with a recorded run costs `$0` rather than
-    being discovered after a pod exists. `SessionRunner.save()` writes
-    `args.out` without creating its parent, which is the other reason this
-    happens first.
+    call, so a run id that collides with a recorded run — or a scratch root that
+    belongs to a different attempt — costs `$0` rather than being discovered
+    after a pod exists. `SessionRunner.save()` writes `args.out` without
+    creating its parent, which is the other reason this happens first.
+
+    The scratch claim comes FIRST. `logs/runs/<run_id>/` and `--scr` are two
+    independent output locations, and only the first was ever checked: a fresh
+    run id aimed at attempt 9's scratch passed the run-directory rule and then
+    collected attempt 9's driver evidence as its own.
     """
     repo_root = REPO_ROOT if repo_root is None else Path(repo_root)
+    claim_output_root(args.scr, RUN_EXPERIMENT_ID, args.run_id,
+                      outputs=RUN_OUTPUTS)
     layout = open_run(repo_root, RUN_EXPERIMENT_ID, args.run_id,
                       roles=C1_RUN_ROLES)
     for source, role in _RUN_GOVERNANCE:
@@ -1141,6 +1159,11 @@ def close_c1_run(layout, args, repo_root: Path | None = None) -> dict:
     """
     repo_root = REPO_ROOT if repo_root is None else Path(repo_root)
     scr = Path(args.scr)
+    #: Asked again here, not assumed from the open. The two happen at opposite
+    #: ends of a session, and what is collected has to be what THIS execution
+    #: produced -- otherwise a foreign scratch turns a run that failed before
+    #: its driver started into a manifest full of someone else's evidence.
+    require_output_claim(scr, RUN_EXPERIMENT_ID, args.run_id)
     for source, role in _RUN_COLLECT:
         src = scr / source
         if src.is_file():

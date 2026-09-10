@@ -54,7 +54,8 @@ from aadistill.infrastructure.remote import SSHTarget  # noqa: E402
 from experiments.deployment import (  # noqa: E402
     POD_IMAGE, provider_cli_candidates)
 from experiments.run_layout import (  # noqa: E402
-    ArtifactSpec, RUNS_ROOT, open_run, present_roles, record_run,
+    ArtifactSpec, RUNS_ROOT, claim_output_root, open_run, present_roles,
+    record_run, require_output_claim,
 )
 
 #: This validation's key in `logs/runs/` and in the run index.
@@ -81,6 +82,14 @@ RUN_SPEC = ArtifactSpec(
     spec_id="cuda_engineering_run_v1",
     required=("evidence",),
     optional=("validation_stdout", "watchdog", "artifacts"))
+
+#: The scratch-relative paths this run writes and later collects. Same rule as
+#: the C1 session's, with this validation's own vocabulary: `--scr` is a second
+#: writable output location, independent of `logs/runs/`, and a fresh run id
+#: aimed at a previous subrun's scratch would otherwise collect that subrun's
+#: stdout and artifacts as its own.
+RUN_OUTPUTS: tuple[str, ...] = (
+    "validation_stdout.txt", "watchdog.jsonl", "artifacts")
 
 AUTHORIZATION = REPO_ROOT / "logs/validations/cuda-stage-f/v1/authorization.json"
 VALIDATION_DIR = REPO_ROOT / "logs/validations/cuda-stage-f/v1"
@@ -114,6 +123,11 @@ class Engineering:
         self.a = args
         self.scr = Path(args.scr)
         self.scr.mkdir(parents=True, exist_ok=True)
+        #: Before the budget arithmetic and long before `create()`, so a scratch
+        #: belonging to another subrun refuses at `$0` rather than after a pod
+        #: exists.
+        claim_output_root(self.scr, RUN_EXPERIMENT_ID, args.run_id,
+                          outputs=RUN_OUTPUTS)
         self.auth = json.loads(AUTHORIZATION.read_text())
         rc = self.auth["resource_contract"]
         #: TASK-CUMULATIVE caps, not per-invocation allocations.
@@ -718,6 +732,10 @@ print(json.dumps(out)); print("PROBE_OK")
         by recording the run, which is what makes it discoverable.
         """
         repo_root = REPO_ROOT if repo_root is None else Path(repo_root)
+        #: Asked again at the collecting end, for the same reason the C1
+        #: session asks: the open and the closeout are far apart, and what is
+        #: recorded has to be what THIS subrun produced.
+        require_output_claim(self.scr, RUN_EXPERIMENT_ID, self.a.run_id)
         layout = open_run(repo_root, RUN_EXPERIMENT_ID, self.a.run_id,
                           roles=RUN_ROLES)
         layout.path(RUN_ROLES["evidence"]).write_text(

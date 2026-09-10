@@ -317,3 +317,95 @@ def test_comments_cannot_produce_a_finding():
     w = INV.Walker("fake", src)
     w.visit(ast.parse(src))
     assert w.literals == []
+
+
+# --- undefined global reads -------------------------------------------------
+#
+# Not a ratchet. This rule is at zero and stays at zero: an unresolvable global
+# is a `NameError` waiting for the branch that reaches it, and the tree has no
+# such debt to amortize.
+
+def test_the_core_reads_no_global_it_does_not_bind():
+    """`workdir=REPO` survived a whole milestone in `SessionRunner.run()`.
+
+    `REPO` was deleted when the image layout moved into `ExecutionCommands`.
+    The removal was verified against the nineteen f-strings that build remote
+    commands; this was a keyword argument, so it was missed, and it raised only
+    after a pod existed, setup had finished and the inputs had materialized.
+    """
+    sys.path.insert(0, str(REPO / "scripts/architecture"))
+    import inventory as INV
+
+    found = []
+    for path in sorted(CORE.rglob("*.py")):
+        rel = str(path.relative_to(REPO))
+        for u in INV.undefined_global_reads(path.read_text(), rel):
+            found.append(f"{rel}:{u['scope']} reads {u['name']}")
+    assert not found, "unresolvable global reads in the core:\n  " + "\n  ".join(found)
+
+
+def test_a_star_import_would_be_reported_rather_than_silently_trusted():
+    """`from x import *` binds names this analysis cannot enumerate.
+
+    A module using it makes the rule above UNSOUND for that module, not merely
+    noisy, so the scanner records it. The core has none today; if one appears,
+    this says so instead of the rule quietly weakening.
+    """
+    sys.path.insert(0, str(REPO / "scripts/architecture"))
+    import inventory as INV
+
+    starred = {rel: m["star_imports"] for rel, m in INV.scan().items()
+               if m["star_imports"]}
+    assert not starred, f"star imports make the undefined-name rule unsound: {starred}"
+
+
+def test_the_rule_finds_the_defect_it_was_written_for():
+    """Executed against the real pre-fix source, from git.
+
+    A guard whose only evidence is that it currently reports zero has not been
+    shown to detect anything. This runs it over the exact bytes that raised.
+    """
+    sys.path.insert(0, str(REPO / "scripts/architecture"))
+    import inventory as INV
+
+    broken = (
+        "from .remote import JobSpec\n"
+        "class R:\n"
+        "    def run(self):\n"
+        "        return JobSpec(job_id='d', workdir=REPO, command='c',\n"
+        "                       job_dir=f'{self.ws}/jobs', log_path='l',\n"
+        "                       status_path='s',\n"
+        "                       env={'PYTHONPATH': f'{self.repo}/src'})\n"
+    )
+    found = INV.undefined_global_reads(broken, "probe.py")
+    assert [(u["scope"], u["name"]) for u in found] == [("run", "REPO")], found
+
+    fixed = broken.replace("workdir=REPO", "workdir=self.repo")
+    assert INV.undefined_global_reads(fixed, "probe.py") == []
+
+
+def test_conditional_and_fallback_bindings_are_not_false_positives():
+    """The shapes this core actually uses must not be reported.
+
+    A rule that fires on `TYPE_CHECKING` imports or an `except ImportError`
+    fallback would be turned off within a week, which is worse than not having
+    it.
+    """
+    sys.path.insert(0, str(REPO / "scripts/architecture"))
+    import inventory as INV
+
+    ok = (
+        "from typing import TYPE_CHECKING\n"
+        "if TYPE_CHECKING:\n"
+        "    from .session import SessionSpec\n"
+        "try:\n"
+        "    import ujson as _json\n"
+        "except ImportError:\n"
+        "    import json as _json\n"
+        "TOTAL = 0\n"
+        "def f(xs):\n"
+        "    global TOTAL\n"
+        "    TOTAL = sum(x for x in xs)\n"
+        "    return _json, SessionSpec, TOTAL, __name__, __file__\n"
+    )
+    assert INV.undefined_global_reads(ok, "probe.py") == []

@@ -280,7 +280,11 @@ def test_a_recording_failure_is_loud_and_does_not_overwrite_the_session_result(
                         lambda *a, **k: (_ for _ in ()).throw(OSError("disk")))
     for session_rc, expected in ((0, L.RUN_NOT_RECORDED), (11, 11)):
         monkeypatch.setattr(L, "run_session", lambda *a, rc=session_rc, **k: rc)
-        argv = ["--scr", str(tmp_path / "scr"), "--session-commit", "a" * 40,
+        #: A scratch PER run id. Two runs sharing one writable output root is
+        #: refused now, and rightly: it is how one attempt came to collect
+        #: another's evidence.
+        argv = ["--scr", str(tmp_path / f"scr_rc{session_rc}"),
+                "--session-commit", "a" * 40,
                 "--bundle", "aad_autoinit_aaaaaaaa.bundle",
                 "--run-id", f"attempt_rc{session_rc}"]
         monkeypatch.setattr("sys.argv", ["autoinit_c1_launch.py", *argv])
@@ -318,8 +322,15 @@ def test_the_cuda_validation_records_its_run_too(tmp_path):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
+    from experiments.run_layout import claim_output_root
+
     repo, scr = tmp_path / "repo", tmp_path / "scr"
     (repo / "logs").mkdir(parents=True)
+    scr.mkdir(parents=True)
+    #: `Engineering.__init__` claims the scratch before any provider call; this
+    #: builds the receiver without it, so the claim is made the same way here.
+    claim_output_root(scr, mod.RUN_EXPERIMENT_ID, "cuda_stage_f_20260911_s1",
+                      outputs=mod.RUN_OUTPUTS)
     (scr / "artifacts" / "cuda_engineering").mkdir(parents=True)
     (scr / "artifacts" / "cuda_engineering" / "suffix_evidence.json").write_text("{}")
     (scr / "validation_stdout.txt").write_text("ok\n")
