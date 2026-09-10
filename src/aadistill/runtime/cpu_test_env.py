@@ -1,7 +1,7 @@
 """The one CPU-test environment, declared once and used by both machines.
 
-C1 attempt 5's `--strict` skip-set comparison was correct machinery pointed at
-two DIFFERENT environments. The launch-bound diagnostic runs on a CPU dev box
+A `--strict` skip-set comparison has been correct machinery pointed at two
+DIFFERENT environments. The launch-bound diagnostic runs on a CPU dev box
 with an isolated empty HF cache; the pod runs on an L40S with the pinned teacher
 already downloaded. Compared exactly, a healthy pod would have been refused for
 being a healthy pod:

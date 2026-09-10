@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.autoinit.historical_reuse_position/v1",
- "generated_utc": "2026-09-09T21:46:29.066977+00:00",
+ "generated_utc": "2026-09-10T09:12:46.238090+00:00",
  "_contract": "The four conclusions about historical probe reuse, each DERIVED here rather than cited: valid bytes, reconstruction under the historical contract, byte-identical relocation outputs, and a REFUSED live reuse. Regenerable; relaxes nothing; authorizes nothing.",
  "conclusions": {
   "1_historical_probe_bytes_are_valid": {
@@ -37,7 +37,7 @@
   }
  },
  "all_four_hold_simultaneously": true,
- "live_scoring_contract_digest": "70ebaef52fd52045dc5d221ab450a0a325790100135433230bc1f0ab365446b2",
+ "live_scoring_contract_digest": "4102513cd6f705e2cd3b2da6f818862142019042177837e54b941cde4f52de04",
  "probes_dir_digest": "a5115816861ad239f646facec4d53ba2c7925c9430c530e7c6d0af2560d5b1af",
  "reuse_verified": false,
  "_what_would_change_this": "a maintainer decision to admit a superseded scoring contract, or new evidence that the probes stopped reconstructing. Neither is a migration action.",

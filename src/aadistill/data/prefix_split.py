@@ -1,6 +1,6 @@
 """Prefix/continuation splitting, shared by Experiment 5's C and R arms.
 
-E5 asks whether training on **student-visited** prefix states beats training on
+This asks whether training on **student-visited** prefix states beats training on
 **teacher-native** prefix states at matched budget. For that contrast to be
 about the state distribution and nothing else, both arms must have the same
 *shape*: condition on a prefix, supervise a continuation.

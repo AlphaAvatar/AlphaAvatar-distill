@@ -1,6 +1,6 @@
-"""Pack E5's already-tokenized prefix/continuation examples into the trainer's format.
+"""Pack already-tokenized prefix/continuation examples into the trainer's format.
 
-E5 examples are not sessions to be rendered: they are token streams that already
+These examples are not sessions to be rendered: they are token streams that already
 exist — for arm C a teacher trajectory with the mask moved, for arm R a student
 prefix followed by a teacher recovery. Re-applying the chat template to them
 would delete earlier reasoning traces (the finding behind the corpus builder) and
@@ -10,13 +10,14 @@ So this adds an **already-tokenized path into the production packer** rather tha
 a second packing algorithm. Examples are adapted to `RenderedSession` and handed
 to `pack_sessions`, which keeps every production semantic: the system prompt is a
 hard group boundary and is emitted once per block, and two examples sharing a
-source trajectory are never co-packed — for E5 that matters as much as it did for
+source trajectory are never co-packed — which matters here as much as it does for
 turn expansion, because the two truncations of one trajectory are prefixes of one
 another and co-packing would leak one into the other's context.
 
 The one behavioural difference is registered: `allow_terminal_truncation=False`.
-Production packing may cut the last session at a block boundary; E5 may not,
-because a cut prefix changes the state being trained on and a cut continuation
+Production packing may cut the last session at a block boundary; a
+prefix/continuation pack may not, because a cut prefix changes the state being
+trained on and a cut continuation
 silently shortens supervision.
 """
 
@@ -36,7 +37,7 @@ REQUIRED_FIELDS = ("ids", "mask", "n_system_tokens", "system_key",
 
 
 def example_to_rendered(example: dict) -> RenderedSession:
-    """Adapt one E5 example record to the packer's input type.
+    """Adapt one prefix/continuation example record to the packer's input type.
 
     `body_ids` excludes the system block, which `pack_sessions` emits once per
     block — so the example's leading `n_system_tokens` are stripped here and must
@@ -73,7 +74,7 @@ def example_to_rendered(example: dict) -> RenderedSession:
 def pack_e5(examples: list[dict], system_ids_by_key: dict[str, list[int]], *,
             block_len: int = 8192, pad_id: int,
             target_blocks: int | None = None) -> list[PackedBlock]:
-    """Pack E5 examples with truncation forbidden.
+    """Pack prefix/continuation examples with truncation forbidden.
 
     `target_blocks` raises the block count to a common value shared by both arms.
     C and R pack to different minima — R's prefixes are longer — and the
@@ -140,7 +141,7 @@ def write_pack(blocks: list[PackedBlock], out_dir: Path, *, arm: str, seed: str,
                extra: dict | None = None) -> dict:
     """Emit `blocks.npz`, `ladder.json` and `audit.jsonl` in the loader's contract.
 
-    `ladder.json` declares ONE rung, covering the training blocks only. An E5
+    `ladder.json` declares ONE rung, covering the training blocks only. This
     pack is a fixed budget rather than a nested ladder, but the loader takes its
     validation set from the blocks *past* the largest rung -- so a rung covering
     every block leaves an empty tail and `ladder_blocks` refuses to load it. That

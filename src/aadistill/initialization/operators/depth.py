@@ -1,7 +1,7 @@
 """DEPTH implementations: which blocks survive.
 
-Two algorithms, deliberately kept as separate immutable ids because E8a showed
-they disagree almost completely — for 36 -> 28 they share exactly one removed
+Two algorithms, deliberately kept as separate immutable ids because they have
+been measured to disagree almost completely — for 36 -> 28 they share one removed
 layer out of eight, and the causal search preserved the full-width teacher
 distribution 3.11x better while initializing 2.8 nats worse once composed with
 width/FFN/attention compression. Which is right is the open question the search
@@ -325,17 +325,17 @@ def _forward_logits(model, item, device: str, skip=frozenset()):
     upcasts to float32 in chunks internally, so widening here would only double
     the bytes held per item without changing a single reduced value.
 
-    **This returned ``.cpu()`` until 2026-08-19, and that cost $11.43.** E8a —
-    ``scripts/training/search_depth_map.py``, the implementation this operator
-    ports — keeps prepared inputs, reference logits, ablated logits and the
+    **This returned ``.cpu()`` once, and it cost a full paid search.** The
+    implementation this operator ports keeps prepared inputs, reference logits,
+    ablated logits and the
     ``distortion`` reduction on the selected accelerator. The port introduced the
     transfer, and with it a full 151,936-vocabulary softmax/KL on the host, 260
     evaluations x 67 items per expansion: ~86 TiB of CPU traffic and ~8.6 TiB
-    copied off the device. Attempt 10 ran 10 h 47 m inside one expansion, GPU at
-    0-1 %, and was stopped without finishing it.
+    copied off the device. A paid run spent over ten hours inside a single
+    expansion at 0-1 % GPU utilisation, and was stopped without finishing it.
 
     Nothing about the reduction changed to fix this. The tensors simply stay
-    where E8a left them.
+    where the ported implementation left them.
     """
     ids = item["input_ids"].to(device)
     if not skip:
@@ -355,12 +355,12 @@ class _ReferenceLogits:
     frozen ``calib.domain_balanced@v1`` mixture that is 59,763 prediction
     positions x 151,936 vocabulary x 4 B = **33.8 GiB**, held for the duration of
     the search, on every invocation of this operator. Nothing had ever executed
-    it against the real mixture: Phase-A attempt 5 died earlier, at the
-    calibration file, and every zero-cost run used a toy mixture. Its first real
+    it against the real mixture: the one paid run that would have reached it
+    died earlier, and every zero-cost run used a toy mixture. Its first real
     execution — this rehearsal — was killed by the OOM killer.
 
-    ``scripts/training/search_depth_map.py``, the E8a script whose algorithm this
-    operator re-runs, already had the answer and it was dropped in the port: size
+    The script whose algorithm this operator re-runs already had the answer,
+    and it was dropped in the port: size
     the cache, and if it does not fit, recompute. Recomputing is numerically
     identical — same deterministic no-grad forward, same tensor, and
     ``distortion`` upcasts either way — so the fallback is automatic and loud
@@ -391,8 +391,8 @@ class _ReferenceLogits:
                   else self.BUDGET_FRACTION * self.available_bytes)
         self.enabled = budget is None or self.estimate_bytes <= budget
 
-        # PARTIAL CACHING. Until 2026-08-27 this was all-or-nothing, and Phase-B
-        # attempt 3 landed exactly in the gap: a 16.9 GiB reference against a
+        # PARTIAL CACHING. This was once all-or-nothing, and a paid run landed
+        # exactly in the gap: a 16.9 GiB reference against a
         # 66%-of-20.3 GiB = 13.4 GiB allowance. 79% of it fit and none of it was
         # kept, so every one of 260 candidates recomputed the ENTIRE reference —
         # ~2x the forward passes for the whole expansion, twelve times over.
@@ -488,7 +488,8 @@ def _available_memory_bytes(device: Any) -> tuple[int | None, str]:
     host — correctly for the code as it then stood, because ``_forward_logits``
     returned ``.cpu()``. Its own docstring said so:
 
-        "E8a kept its cache on the accelerator and therefore checked
+        "the ported implementation kept its cache on the accelerator and
+        therefore checked
         ``torch.cuda.mem_get_info``; copying that probe here would measure free
         VRAM against an allocation that never touches it."
 
@@ -497,7 +498,7 @@ def _available_memory_bytes(device: Any) -> tuple[int | None, str]:
 
     The fallback when it does not fit is **recompute**, never a silent move to
     the host: a host-resident reference would drag the whole reduction back with
-    it, which is the $11.43 failure.
+    it, which is the failure that cost a full paid search.
     """
     dev = torch.device(device) if not isinstance(device, torch.device) else device
     if dev.type == "cuda":                       # pragma: no cover - needs a GPU

@@ -1,6 +1,6 @@
 """Calibration profiles — first-class, versioned, and chosen per operator.
 
-E8a measured its depth objective on one frozen 67-item domain-balanced mixture.
+A depth objective has been measured on one frozen domain-balanced mixture.
 That was a fixed choice, and a fixed choice cannot be compared against the
 alternative it excluded. Here the mixture is an argument: a path may run
 ``DEPTH(reasoning_heavy) -> ATTENTION(domain_balanced) -> FFN(reasoning_heavy) ->
@@ -61,7 +61,7 @@ class CalibrationSource:
     """One dataset contributing to a mixture.
 
     ``revision`` is required even when it is the string ``"local"``: a source
-    without a pinned revision cannot support P4 reproduction, and leaving the
+    without a pinned revision cannot support reproduction, and leaving the
     field optional is how that gets forgotten.
     """
 

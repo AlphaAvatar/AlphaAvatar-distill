@@ -65,8 +65,8 @@ def assert_rope_from_config(config, path: str = "") -> float:
     only wants to know "will this config produce the right positional basis?"
     either has to materialize the whole model — 16 GB in fp32 for the teacher — or
     build it on the `meta` device, where `inv_freq` has no values and the check
-    dies inside `Tensor.item()`. That is exactly what happened on E8 pod A: setup
-    failed after TEACHER_READY and the session self-terminated at $0.08.
+    dies inside `Tensor.item()`. That is exactly what has happened on a paid
+    pod: setup failed after the teacher loaded and the session self-terminated.
 
     The rotary module owns 128 buffer elements and no parameters, so this is the
     cheap and correct way to ask the question.

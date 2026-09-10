@@ -2016,6 +2016,16 @@ snapshot, exactly one `stats_to` working copy, statistics co-located with
 `o_proj.weight` at every layer, the score vector allocated on the operand
 device, and the returned vector host-resident.
 
+**Two explanatory claims were corrected afterwards, at `$0.0000`**, by one
+append-only amendment at
+`logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json`: subrun 2's
+failure class is `harness_acceptance_criterion` rather than `operator` — its
+suffix computations completed and the rejected condition was a wrong
+requirement — and the PASS observed *operator computation on `cuda:0` with the
+child host-resident per the builder contract*, not children left on the device.
+No cost, outcome, device field or provider identity moved; the amendment binds
+the corrected artifacts by content hash and rewrites none of them.
+
 **This is engineering evidence only.** It is not a C1 treatment result, not an
 endpoint measurement, and not a decision. Formal C1 is unchanged: replay
 MEASURED 2/2 PASS, formal treatment UNMEASURED, endpoint UNMEASURED, Attempt 9

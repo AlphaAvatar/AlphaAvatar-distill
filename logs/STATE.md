@@ -18,9 +18,11 @@ how the snapshot came to disagree with itself.
 | authorization | **none** — no live grant, no live authorization, no staged bundle |
 | spend | **`$267.8998`** of `$283.7600`, leaving **`$15.8602`** — still one full `$15.1475` formal attempt, with `$0.7127` after it |
 | CUDA stage-F | **PASS 2026-09-10**, subrun 3 of 3, `$0.0400` total. NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130): both geometries executed `attention.activation_importance_v1` through the real verified suffix, and **all five device placements were observed on `cuda:0`**. Two earlier subruns failed in the harness — a pipeline that hid pip's exit status, then a matrix criterion that demanded the child be on the device while `device.py` documents it is not. **Engineering evidence only**, not a C1 result. [`runs/cuda_stage_f/`](runs/cuda_stage_f/) |
-| stage-F device repair | **logical / CPU-structural evidence only** until the CUDA validation runs; the defect is a cross-device placement, which a single-device machine cannot observe |
+| stage-F device repair | **CONFIRMED ON REAL CUDA** at execution SHA `7027a8f4` (2026-09-10). It was logical / CPU-structural evidence until then; the defect is a cross-device placement, which a single-device machine cannot observe, and a real accelerator has now observed it |
+| CUDA interpretation | one append-only amendment corrects **two explanatory claims** and nothing else: subrun 2's failure class is `harness_acceptance_criterion`, not `operator`, and the PASS observed *operator on `cuda:0`, child host-resident per the builder contract* — not children left on CUDA. Outcomes, costs, devices and provider identities are bound by hash and unaltered: [`interpretation_amendment_1.json`](validations/cuda-stage-f/v1/interpretation_amendment_1.json) |
 | architecture migration | a **current engineering activity**, not a C1 result and no evidence about ATTENTION. Record: [`migrations/initialization-core/v1/`](migrations/initialization-core/v1/) |
-| owed | **one GPU micro-validation**, requested and NOT authorized: [`validations/cuda-stage-f/v1/request.md`](validations/cuda-stage-f/v1/request.md) |
+| engineering campaign | **CLOSED**. Authorized, executed, reconciled and torn down: [`validations/cuda-stage-f/v1/`](validations/cuda-stage-f/v1/). No GPU work is owed |
+| owed | **Milestone-A merge review**, and a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
 
 > **MILESTONE-A MERGE-REVIEW CLOSURE, 2026-09-09 — `$0.0000`, no pod, no GPU, no
 > provider resource, no grant, no authorization, no bundle.** The four merge
@@ -57,6 +59,8 @@ how the snapshot came to disagree with itself.
 > `materialize_fixed_path_suffix`, and observes five placements rather than
 > assuming them. Restore the old `stats_to` across a device split and it goes
 > red where the L40S did. **Still NOT RUN on CUDA** — see the request above.
+> *(Superseded 2026-09-10: it has since RUN and PASSED on real CUDA at execution
+> SHA `7027a8f4`. See the status table at the top of this file.)*
 >
 > **Historical reuse stays REFUSED**, and the four conclusions that look
 > contradictory are now derived in one place rather than reconciled from four
@@ -100,6 +104,10 @@ how the snapshot came to disagree with itself.
 > **`$15.9002`**. Against the `$15.1475` per-attempt ceiling that is a reserve of
 > **`$0.7527`**, so **exactly one** ceiling-sized attempt still fits (worst case
 > `$283.0073` of `$283.7600`) — and no second one. Headroom is not permission.
+> *(Those were the figures immediately after attempt 9. `$0.0400` of engineering
+> spend has been booked since; the current cumulative is `$267.8998`, leaving
+> `$15.8602` and a `$0.7127` reserve. The status table at the top of this file
+> and `logs/BUDGET_LEDGER.md` are authoritative.)*
 > *(Corrected 2026-09-08: this line previously said `$15.9002` "no longer covers
 > a full `$15.1475` attempt", which contradicts its own subtraction. See the
 > attempt-9 entry in `logs/BUDGET_LEDGER.md` and
@@ -231,6 +239,7 @@ how the snapshot came to disagree with itself.
 > **no artifact written**. Its whole body is executed at `$0` by
 > `tests/validation/`, which substitutes only the device gate. **No paid
 > resource is requested or authorized.**
+> *(Superseded 2026-09-10: authorized, run and PASSED. See the status table.)*
 
 > **Architecture inventory, all-stage runtime layout, and the first experiment
 > extraction, 2026-09-08 — `$0.0000`, no pod, no GPU, no provider resource, no
@@ -329,6 +338,9 @@ how the snapshot came to disagree with itself.
 > **Not observed on a GPU.** The repair is verified logically, at `$0`. Nothing
 > here is ATTENTION evidence, and attempt 9 remains **NO DECISION after a
 > pre-treatment infrastructure abort**.
+> *(Superseded 2026-09-10 on the first clause only: the repair is now confirmed
+> on real CUDA at execution SHA `7027a8f4`. It is still not ATTENTION evidence,
+> and attempt 9 is still NO DECISION.)*
 >
 > **One item left open, deliberately.**
 > `test_every_gate_but_the_commit_binding_passes_against_the_candidate` FAILS:
@@ -396,6 +408,8 @@ how the snapshot came to disagree with itself.
 > this session was told to stop and propose a contract rather than spend. The
 > Stage-F device repair therefore remains verified logically, at `$0`, and has
 > still never executed on an accelerator.
+> *(Superseded 2026-09-10: the contract was authorized and the validation PASSED
+> on real CUDA at execution SHA `7027a8f4`, for `$0.0400` across three subruns.)*
 
 > **Post-provider ownership repair and the P12 record-rule split, 2026-09-07 —
 > `$0.0000`, no pod, no GPU, no provider resource.** The second authorization

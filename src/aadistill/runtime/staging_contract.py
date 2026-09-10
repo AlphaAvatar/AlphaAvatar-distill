@@ -1,7 +1,7 @@
 """What a pod can actually see, derived from the session manifest that stages it.
 
-C1 attempt 4 died at the pod CPU test gate for `$0.6986` with six failures, and
-the readiness sweep that had certified the same tree passed. The sweep ran with
+A paid session died at the pod CPU test gate with six failures, and the
+readiness sweep that had certified the same tree passed. The sweep ran with
 `simulate_pod_env.sh`'s generic default `HIDDEN_PATHS` — a hand-maintained list of
 paths *believed* absent, whose own comment asserted that every pod session stages
 `artifacts/stage3/corpus_v2`. C1 stages no such thing. The simulation was 55 tests
@@ -177,8 +177,8 @@ def hidden_files(contract: dict[str, Any], repo_root: str | Path = ".") -> list[
 
 # --- premises, asked of the filesystem rather than of the environment --------
 #
-# C1 attempt 5 died at the pod test gate for `$0.3150` because two tests about
-# this contract were guarded by `skipif(AAD_SYNTHETIC_HF_TOKEN)` — a flag the
+# A paid session died at the pod test gate because two tests about this
+# contract were guarded by `skipif(AAD_SYNTHETIC_HF_TOKEN)` — a flag the
 # SIMULATOR sets. That predicate asks "am I inside the simulation?" when the
 # property it needs is "does this machine hold the unstaged artifacts?". The pod
 # is behaviourally identical to the simulation — the files are not there — while

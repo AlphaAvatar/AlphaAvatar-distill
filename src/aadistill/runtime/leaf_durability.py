@@ -1,7 +1,7 @@
 """Make a successful Stage-1 selection survive a failing Stage 2.
 
-Phase-A attempt 11 spent **180.3 minutes** producing five valid, measured,
-selected leaves — and then lost every one of their checkpoints, because
+A paid session spent **180.3 minutes** producing valid, measured, selected
+leaves — and then lost every one of their checkpoints, because
 persistence happens only after Stage-5 selection and Stage 2 failed six seconds
 after Stage 1 passed. The search *record* came home; the weights did not. The
 science that survived is a ranking whose artifacts no longer exist, and
@@ -23,8 +23,9 @@ Three properties, each learned from a specific failure:
 * **Verified after transfer, not before.** The digest is recomputed from the
   destination and required to equal the one the search recorded. A copy that
   silently truncated is a copy that passed every check made only at the source.
-* **Headroom is measured, and refusal is the answer.** Attempt 11's five leaves
-  are 5.55 GiB; the relay had ~1.03 GiB free and the dev box 3.4 GiB. A
+* **Headroom is measured, and refusal is the answer.** In that session the
+  leaves were 5.55 GiB against ~1.03 GiB free on the relay and 3.4 GiB on the
+  dev box. A
   persistence step that discovers this halfway through has already destroyed the
   thing it was protecting, so the space is checked before the first byte moves.
 

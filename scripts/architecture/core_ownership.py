@@ -46,6 +46,76 @@ RULES = (
     "import_time_deployment_load",
     "numeric_stage_policy",
     "untyped_result_branch",
+    "instance_prose",
+)
+
+# ---------------------------------------------------------------------------
+# rule 9: instance prose in DOCSTRINGS AND COMMENTS
+#
+# The other eight rules read code and skip prose, which is correct for them: a
+# phase name in a `raise` explains a refusal to a human. But the same file's
+# docstring can carry this project's entire run history -- which experiment
+# measured what, at which probe size, on which seeds, for how many dollars --
+# and a reusable core that documents itself by one campaign's incidents is
+# owned by that campaign whether or not any of it is executable.
+#
+# Deliberately NARROW. It matches an instance IDENTITY (a run label, a phase,
+# an attempt number), an instance MEASUREMENT this project made, an instance
+# SEED name, and a campaign COST. It does not match generic mathematics, schema
+# versions, algorithm terminology, model-family capabilities, or the AGENTS.md
+# principle numbers (`P3`, `P10`) that state the project's rules rather than
+# its results.
+# ---------------------------------------------------------------------------
+
+#: A run label as this project spells them -- `E7`, `E6b`, `P2` -- when used as
+#: an identity. `P0`-`P4` collide with AGENTS.md principle numbers, so those are
+#: disambiguated by context below rather than by the pattern.
+RUN_LABEL = re.compile(r"(?<![A-Za-z0-9_.])(E[1-9][0-9]?[ab]?|P[0-4])(?=[ :,)./]|$)")
+#: A phase, an attempt, or a numbered session of one.
+PHASE_ATTEMPT = re.compile(
+    r"\bPhase[- ][ABC]\b|\bAttempt[- ]?\d+\b|\bC1 (?:attempt|session|run)\b")
+#: Measurements THIS project made, at the sizes it made them.
+INSTANCE_MEASURE = re.compile(
+    r"\b0\.86\s?M\b|\b0\.1290\b|[−-]5\.22\b|\b190 (?:prompts|items)\b|"
+    r"\b170 are\b|\b= ?340\b|\b170 correctness")
+#: This project's seed names.
+SEED_LABEL = re.compile(r"\bseeds? s[abc]\b|\bs[abc] ?\+ ?s[abc]\b|\bon seed s[abc]\b")
+#: A campaign dollar figure. AGENTS.md P12.1: a task's dollar amounts live in
+#: that task's governance artifact, never in reusable core.
+CAMPAIGN_COST = re.compile(r"\$\s?\d+\.\d{2,4}")
+
+#: `P3`/`P10`-style references to AGENTS.md principles are the project's RULES,
+#: not its results, and a core module may cite the rule it implements.
+PRINCIPLE_CITATION = re.compile(
+    r"AGENTS\.md[^.]*|\bP\d+(?:\.\d+)?/P\d+|\bP\d+(?:\.\d+)?\)|principle")
+
+INSTANCE_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
+    ("run label", RUN_LABEL),
+    ("phase/attempt", PHASE_ATTEMPT),
+    ("measurement", INSTANCE_MEASURE),
+    ("seed", SEED_LABEL),
+    ("cost", CAMPAIGN_COST),
+)
+
+#: Modules whose BYTES are pinned by the accepted real-CUDA engineering
+#: validation of 2026-09-10 (execution SHA 7027a8f4). The review that accepted
+#: that evidence also directed that this exact surface not be modified, so its
+#: prose is reported separately rather than rewritten: editing it would put the
+#: reporting tip's copy of a validated file out of step with the commit the
+#: evidence names, for a comment.
+#:
+#: This is a DEFERRAL, not an exemption. `scan()` counts these findings and
+#: `main()` prints them; they are excluded only from the `total`, which is the
+#: number the merge gate reads. Removing a file from this tuple must make its
+#: findings count, and adding one must be justified by the CUDA acceptance --
+#: `tests/architecture/test_core_ownership.py` pins the membership.
+CUDA_VALIDATED_SURFACE: tuple[str, ...] = (
+    "src/aadistill/initialization/operators/attention_activation.py",
+    "src/aadistill/initialization/statistics/attention.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
 )
 
 #: A phase/attempt/session NAME, as this project spells them.
@@ -254,11 +324,52 @@ class Walker(ast.NodeVisitor):
                          "importing this module reads deployment configuration")
 
 
+def prose_lines(source: str) -> list[tuple[int, str, str]]:
+    """`(lineno, "doc"|"cmt", text)` for every docstring and comment line.
+
+    Line-granular on purpose: a module docstring is one string, and reporting
+    the whole thing would name a file rather than a sentence.
+    """
+    lines = source.splitlines()
+    kind: dict[int, str] = {}
+    for n in ast.walk(ast.parse(source)):
+        if isinstance(n, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef,
+                          ast.ClassDef)) and ast.get_docstring(n, clean=False):
+            body0 = n.body[0]
+            for ln in range(body0.lineno, (body0.end_lineno or body0.lineno) + 1):
+                kind[ln] = "doc"
+    for i, line in enumerate(lines, 1):
+        if line.strip().startswith("#"):
+            kind[i] = "cmt"
+    return [(ln, k, lines[ln - 1]) for ln, k in sorted(kind.items())]
+
+
+def scan_prose(path: str, source: str) -> list[dict]:
+    """Rule 9. One finding per matched instance value, with its line."""
+    out = []
+    for ln, kind, text in prose_lines(source):
+        cited = PRINCIPLE_CITATION.search(text)
+        for label, rx in INSTANCE_PATTERNS:
+            for m in rx.finditer(text):
+                # `P4` inside "AGENTS.md P4, P5" is the rule this module obeys.
+                if label == "run label" and cited:
+                    continue
+                out.append({
+                    "rule": "instance_prose", "path": path, "line": ln,
+                    "name": f"{kind}:{m.group(0)}",
+                    "why": (f"a {label} from this project's run history "
+                            f"({m.group(0)!r}) documents reusable core with one "
+                            "campaign's instance data; relocate it to "
+                            "docs/core-provenance.md and keep the mechanism"),
+                })
+    return out
+
+
 def scan_source(path: str, source: str) -> list[dict]:
     w = Walker(path, source)
     w.visit(w.tree)
     w.check_module()
-    return w.findings
+    return w.findings + scan_prose(path, source)
 
 
 def scan(root: Path = CORE) -> list[dict]:
@@ -268,23 +379,46 @@ def scan(root: Path = CORE) -> list[dict]:
     return out
 
 
+def partition(found: list[dict]) -> tuple[list[dict], list[dict]]:
+    """`(counted, deferred)`. Deferred is the CUDA-validated surface's prose.
+
+    Split rather than filtered: a deferred finding is still a finding, and it
+    is still printed. What it is excluded from is the gate's total.
+    """
+    deferred = [f for f in found if f["path"] in CUDA_VALIDATED_SURFACE
+                and f["rule"] == "instance_prose"]
+    ids = {id(f) for f in deferred}
+    return [f for f in found if id(f) not in ids], deferred
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--write", action="store_true")
     args = ap.parse_args()
-    found = scan()
+    counted, deferred = partition(scan())
     by_rule: dict[str, int] = {r: 0 for r in RULES}
-    for f in found:
+    for f in counted:
         by_rule[f["rule"]] = by_rule.get(f["rule"], 0) + 1
         print(f"  {f['rule']:28} {f['path']}:{f['line']}  {f['name']}")
-    doc = {"schema": "aadistill.architecture_core_ownership/v1",
+    for f in deferred:
+        print(f"  DEFERRED {f['rule']:19} {f['path']}:{f['line']}  {f['name']}")
+    doc = {"schema": "aadistill.architecture_core_ownership/v2",
            "_contract": ("Ownership violations the literal and semantic gates "
                          "cannot see. Each rule is pinned by a RESTORED real "
                          "defect in tests/architecture/test_core_ownership.py."),
            "root": "src/aadistill", "by_rule": by_rule,
-           "total": len(found), "findings": found, "authorizes": "nothing"}
+           "total": len(counted), "findings": counted,
+           "_deferred": ("Instance prose inside the real-CUDA-validated "
+                         "execution surface. Reported, not rewritten: the "
+                         "review that accepted execution SHA 7027a8f4 directed "
+                         "that this surface not be modified. Not an exemption "
+                         "-- removing a path from CUDA_VALIDATED_SURFACE makes "
+                         "its findings count again."),
+           "deferred_surface": list(CUDA_VALIDATED_SURFACE),
+           "deferred_total": len(deferred), "deferred_findings": deferred,
+           "authorizes": "nothing"}
     print(json.dumps(by_rule, indent=1))
-    print(f"total: {len(found)}")
+    print(f"total: {len(counted)}   deferred (CUDA surface): {len(deferred)}")
     if args.write:
         out = REPO / "logs/architecture_core_ownership.json"
         out.write_text(json.dumps(doc, indent=1) + "\n")

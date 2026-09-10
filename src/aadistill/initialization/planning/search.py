@@ -99,7 +99,7 @@ class Deadline:
     afterwards: this module recorded ``elapsed`` and ``wall_seconds`` and never
     compared them to anything, and ``_expand_one`` had no clock at all. So one
     expansion ran 10.78 h against a 3.0 h budget for the whole search and would
-    have continued to the watchdog's $23.05 ceiling.
+    have continued to the watchdog's ceiling.
 
     Deliberately **not** a :class:`SearchConfig` field: that dataclass "fixes a
     search run, and therefore everything that hashes". A wall-clock budget is an
@@ -339,14 +339,14 @@ class BeamSearch:
         # cannot exist. Every loader written so far has been `lambda profile:
         # items`, which ignores its argument and therefore answered anyway; the
         # first loader that actually dispatched on the profile raised KeyError
-        # inside the beam. A correct Phase-B loader delegating to
+        # inside the beam. A correct loader delegating to
         # `profile.resolve()` would have raised CalibrationError there instead —
         # on a paid pod, mid-search.
         #
         # Identity is untouched: `n_calibration_items` is the only thing derived
         # from this list and `_expand_one` explicitly excludes it from
         # `config_hash`, while both `CalibrationNeed.NONE` implementations ignore
-        # `config` entirely. So no state id, and no recorded Phase-A state, moves.
+        # `config` entirely. So no state id, and no recorded state, moves.
         if profile.is_no_calibration:
             return ()
         key = profile.qualified_id
@@ -380,7 +380,7 @@ class BeamSearch:
         # The reload is validated on the PRODUCED model's device, then moved to
         # the search device to be measured.
         #
-        # Phase-A attempt 6 died here. `_validate` forwards both models through
+        # A paid search died here. `_validate` forwards both models through
         # one input, and that input used to be built on `config.device`. The
         # reload is placed there too, but the produced child is whatever the
         # operator built — `ChildBuilder` calls `build_student`, which sets the

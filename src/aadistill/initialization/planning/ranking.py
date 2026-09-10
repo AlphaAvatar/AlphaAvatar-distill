@@ -1,9 +1,10 @@
 """Beam selection: a hashable ranking policy plus a hashable width schedule.
 
 Ranking is **not** minimum NLL, and that is an empirical finding rather than a
-preference. E7 moved held-out FineWeb NLL by −5.22 nats and autonomous behaviour
-by exactly +0.0000, and the checkpoint with the best held-out NLL of its
-trajectory produced *zero* protocol-valid generations. NLL is therefore recorded
+preference. A recovery run in this project moved held-out general-text NLL by
+several nats and autonomous behaviour by exactly zero, and the checkpoint with
+the best held-out NLL of its trajectory produced *no* protocol-valid generation
+at all. NLL is therefore recorded
 as a diagnostic and is **not** a v1 objective: it may not be the reason a path
 dies.
 
@@ -12,8 +13,8 @@ Three mechanisms keep hypotheses alive that a naive beam would kill.
 **Delayed pruning.** ``BeamSchedule`` retains *every* child of the root before any
 quality pruning happens. Level 0 offers one child per applicable operator, and
 those are the distinct structural hypotheses the search exists to compare;
-discarding one on a single step-0 measurement is exactly the mistake E8a
-documented, where a proxy that looked 3.11x better reversed after composition.
+discarding one on a single step-0 measurement is a documented mistake: a proxy
+that looked several times better has reversed after composition.
 
 **ε-dominance.** A state is only eliminated when another is *meaningfully* better:
 no worse than ε on any objective and better by more than ε on at least one.
@@ -163,8 +164,8 @@ class BeamRankingPolicy:
         if not self.objectives:
             raise RankingError(f"{self.policy_id}: declares no objectives")
         if len(self.objectives) == 1:
-            # Not a style rule: a single-objective beam is the failure mode E7
-            # documented. If one is genuinely wanted, it needs its own policy id
+            # Not a style rule: a single-objective beam is the failure mode
+            # measured above. If one is genuinely wanted, it needs its own id
             # and an explicit override in metadata.
             if not self.metadata.get("single_objective_acknowledged"):
                 raise RankingError(
@@ -276,8 +277,8 @@ class BeamRankingPolicy:
         exists to prevent is precisely a lineage whose states all dominate
         another's: front-order selection alone would take the first lineage's
         second-best before the second lineage's best and extinguish a distinct
-        structural hypothesis on a step-0 measurement. E8a is the standing
-        warning that a step-0 ordering can reverse after composition.
+        structural hypothesis on a step-0 measurement, and a step-0 ordering
+        has been measured to reverse after composition.
         """
         if room >= len(ordered):
             return list(ordered)
@@ -433,9 +434,9 @@ VALIDITY_GUARDRAIL = Guardrail(
 #: v1 default. Frozen per run, not per session: a paid search records this hash
 #: in its preregistration and the manifest asserts it did not move.
 #:
-#: **NLL is not an objective.** E7 is the reason, and it is a direct measurement
-#: rather than a worry: a −5.22 nat swing in held-out NLL moved autonomous
-#: behaviour by exactly +0.0000, and the best-NLL checkpoint of its trajectory
+#: **NLL is not an objective.** The reason is a direct measurement rather than a
+#: worry: a multi-nat swing in held-out NLL has moved autonomous behaviour by
+#: exactly zero, and the best-NLL checkpoint of that trajectory
 #: produced zero protocol-valid generations. NLL is recorded per domain and shown
 #: beside every ranking decision as a diagnostic; it may not kill a path.
 #:
@@ -488,8 +489,8 @@ PARETO_V1 = BeamRankingPolicy(
 #: Level 0 offers one child per applicable operator — five for the decomposed
 #: library at one calibration profile, plus the composite. Those are the distinct
 #: structural hypotheses the search exists to compare, and pruning one of them on
-#: a single step-0 measurement is the mistake E8a documented: a proxy that looked
-#: 3.11x better reversed once composition happened. Width 6 afterwards is wider
+#: a single step-0 measurement is the documented mistake: a proxy that looked
+#: several times better reversed once composition happened. Width 6 is wider
 #: than the 5 hypotheses it carries forward, so the first pruning level can keep
 #: every surviving lineage and still admit a second variant of one of them.
 SCHEDULE_V1 = BeamSchedule(
@@ -514,8 +515,8 @@ class EpsilonResponseRule:
     automatically: a single profiling run is a poor basis for a scientific
     tolerance, and a rule like ``max(1e-4, 2 * measured)`` would let one noisy
     session widen the beam's notion of equivalence without anyone deciding that it
-    should. Instead the preflight is marked as requiring review and Phase A does
-    not start.
+    should. Instead the preflight is marked as requiring review and the caller's
+    declared blocked-branch does not start.
 
     The measurement is defined here too, so the number the rule consumes cannot be
     redefined afterwards.
@@ -531,8 +532,8 @@ class EpsilonResponseRule:
         "policy's objective metrics")
     repeats: int = 10
     #: What the CALLER says happens on each branch, and the key its blocked
-    #: flag appears under. These were literals naming Phase A, so a generic
-    #: ranking rule told every reader which of THIS project's phases would not
+    #: flag appears under. These were literals naming one of this project's
+    #: phases, so a generic ranking rule told every reader which phase would not
     #: start -- and the sentences are recorded verbatim in frozen
     #: preregistrations, so they are supplied rather than rewritten.
     proceed_note: str = ""

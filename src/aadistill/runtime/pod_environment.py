@@ -1,14 +1,14 @@
 """Proof that the pod's CPU test gate can pass, bound to the tree that proved it.
 
-C1 attempt 3R reached `VLLM_READY → TEACHER_READY → ROPE_OK` and then died at the
-setup test gate: `14 failed, 2650 passed`, `$0.3482`, no scientific stage. Seven
-were renderer-parity cases reading `$HOME` for a Hugging Face cache no pod has,
+A paid session reached every readiness marker and then died at the setup test
+gate: fourteen failures out of ~2650, no scientific stage. Seven were
+renderer-parity cases reading `$HOME` for a Hugging Face cache no pod has,
 and two were repository state. **The other five remain UNEXPLAINED**: they were
 attributed to leaf transport by a `$0` reproduction that ran with no `HF_TOKEN`,
 which is a state no pod is in, and that attribution does not reproduce.
 
-The seven passed on the dev box and could not pass on a pod, and three launches
-went by without anyone finding out, because no C1 attempt had ever reached
+The seven passed on the dev box and could not pass on a pod, and several
+launches went by without anyone finding out, because no session had reached
 `TESTS_OK` before.
 
 The suite that answers "would this pass on a pod?" takes about thirteen minutes,
@@ -188,9 +188,9 @@ def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
                     reasons[nid] = (child.get("message")
                                     or (child.text or "").strip())[:300]
                 else:
-                    # WHY it failed. Attempt 6 named all 18 failing nodeids and
-                    # not one message, so its mechanism is attributed rather than
-                    # proven — the same shape as attempt 3R's four-line tail and
+                    # WHY it failed. A diagnostic that names every failing
+                    # nodeid and not one message leaves the mechanism attributed
+                    # rather than proven — the same shape as a four-line tail and
                     # attempt 5's missing skip list, one layer further in.
                     details[nid] = {
                         "kind": status,
@@ -216,9 +216,9 @@ def read_junit(path: str | Path, repo_root: str | Path = ".") -> dict[str, Any]:
 def skip_set_digest(nodeids: Sequence[str]) -> str:
     """Deterministic over the COMPLETE skip set, order-independent.
 
-    Two sweeps with the same digest skipped exactly the same tests. Attempt 5
-    could not make that comparison: its diagnostics named every FAILED nodeid and
-    no SKIPPED one, so a divergence that only moved a skip was invisible, and one
+    Two sweeps with the same digest skipped exactly the same tests. A diagnostic
+    that names every FAILED nodeid and no SKIPPED one cannot make that
+    comparison: a divergence that only moved a skip is invisible, and one
     such divergence is still unexplained.
     """
     body = "\n".join(sorted(set(nodeids)))
@@ -253,10 +253,10 @@ def evaluate_sweep(outcomes: dict[str, str],
     """Turn per-nodeid outcomes into the pass/fail findings the record asserts.
 
     `groups` is REQUIRED and comes from the session. This function used to name
-    nine C1 node-id tuples directly, so a reusable runtime carried one
-    experiment's expectations and refused in its vocabulary -- "host-local
-    Phase-A cases did not skip under SESSION_KIND=c1" is not something a generic
-    module can say.
+    one session's node-id tuples directly, so a reusable runtime carried that
+    experiment's expectations and refused in its vocabulary -- naming which of
+    this project's phases failed to skip under which session kind is not
+    something a generic module can say.
 
     The output keys are derived from the caller's own group names, so the record
     schema is the session's too. C1's names reproduce the existing keys exactly.
@@ -378,9 +378,9 @@ def lineage_from_swept_base(repo_root: Path, base: str | None, commit: str,
     hand-written copies of a lineage rule drifted.
 
     It lives HERE rather than in `session_prechecks` on purpose.
-    `session_prechecks.py` is a member of Phase B's and continuation B's frozen
-    executable sets, and generalizing it in place moved both of those digests —
-    for a feature neither closed phase will ever use. This module is in the C1
+    `session_prechecks.py` is a member of two closed phases' frozen executable
+    sets, and generalizing it in place moved both of those digests — for a
+    feature neither closed phase will ever use. This module is in the current
     harness alone, so the cost lands where the benefit does.
     """
     from aadistill.infrastructure.session_prechecks import lineage_from_authorized_base
@@ -483,8 +483,8 @@ def verify_record(record: dict[str, Any], repo_root: str | Path = ".", *,
                        f"one of {list(RECORD_KINDS)}; a record that cannot say "
                        "what it is cannot be relied on for anything")
     # The staged view the sweep ran under must be the one this session stages.
-    # Attempt 4's sweep used simulate_pod_env.sh's GENERIC default HIDDEN_PATHS,
-    # so it modelled a machine 55 tests more generous than the pod and certified
+    # A sweep that used the pod simulator's GENERIC default HIDDEN_PATHS
+    # modelled a machine 55 tests more generous than the real pod and certified
     # a tree that then failed six ways. A launch-bound record must carry a
     # contract derived from the session's own SetupManifest, and it must still
     # describe the live one.

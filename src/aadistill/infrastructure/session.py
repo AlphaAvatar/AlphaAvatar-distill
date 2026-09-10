@@ -1,25 +1,20 @@
 """What a paid pod session IS, as one immutable declaration.
 
-A session used to be a subclass of the micro-preflight launcher, retargeted by
-mutating that module's globals before construction. Its real contract was the
-union of three things, no one of which could be read from the others: its own
-class attributes and overridden hooks, every ``self.a.<name>`` the base read, and
-every line a shared shell script executed unconditionally. Nothing checked that a
-session satisfied all three, and three paid pods were lost proving it:
+A session used to be a subclass of one launcher, retargeted by mutating that
+module's globals before construction. Its real contract was the union of three
+things, no one of which could be read from the others: its own class attributes
+and overridden hooks, every ``self.a.<name>`` the base read, and every line a
+shared shell script executed unconditionally. Nothing checked that a session
+satisfied all three, and three paid pods were lost proving it:
 
-===========================  ========  =================================================
-session                        cost     died on
-===========================  ========  =================================================
-Phase-A attempt 1             $0.1075   ``SESSION_KIND`` leaked between two sessions
-device canary attempt 1       $0.0603   the base read ``self.a.teacher_revision``; the
-                                        subclass had never heard of it
-device canary retry           $0.0637   the shared setup copies two assets out of
-                                        ``$WS/assets``; the subclass had declared
-                                        ``LOCAL_ASSETS = ()`` because it needed neither
-===========================  ========  =================================================
+* a shared setup variable leaked between two sessions using one script;
+* the base read a runner argument the subclass's parser had never defined;
+* the shared setup copied assets out of a staging directory for a session that
+  had honestly declared it wanted none.
 
 Every one is the same failure: **a session inherited a requirement it never
-declared.** This module is the replacement. A session states everything it is,
+declared.** (Which sessions, and what each cost, is in ``docs/core-provenance.md``.)
+This module is the replacement. A session states everything it is,
 once, in a frozen object; :mod:`aadistill.infrastructure.session_runner` consumes
 that object and nothing else. There is no base class to inherit from and no
 module global to mutate, so "inherited a requirement it never declared" stops
@@ -31,10 +26,11 @@ is priced**, which is the only point at which refusing is free.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, ClassVar, Mapping, Sequence
 
 from .budget import BudgetPlan, Phase, StepTime, plan_session
 
@@ -79,47 +75,42 @@ def _bad_repo_dir(dest: str) -> list[str]:
 class RelayInput:
     """One object the pod fetches from the artifact store.
 
-    Declared so the launcher can refuse **at $0** rather than after setup has
-    been paid for. Phase-A attempt 5 died at $0.6426 on a calibration file that
-    was neither staged nor prechecked: stage 1 called ``resolve()`` and there was
-    nothing to read.
+    Declared so the launcher can refuse **before anything is priced** rather
+    than after setup has been paid for. A paid session has been lost to a
+    science input that was neither staged nor prechecked: its first stage called
+    ``resolve()`` and there was nothing to read.
 
-    Until 2026-08-18 this type carried a *path and nothing else*, and ``dest``
-    documented itself as "the setup script already knows where this goes". It
-    did know: ``autoinit_preflight_setup.sh`` named three relay prefixes, ten
-    filenames, four sha256 pins and a probe-to-ladder copy, unconditionally, for
-    every session. So the declaration was an existence assertion and the staging
-    was hidden — the same defect the ``LOCAL_ASSETS`` fix closed on the dev-box
-    side, still open on the relay side. Four of the ten files were declared by no
-    session at all, and the calibration that killed attempt 5 was declared by
-    two sessions out of four while being staged for all four.
+    This type once carried a *path and nothing else*, and ``dest`` documented
+    itself as "the setup script already knows where this goes". It did know: the
+    shared setup script named every relay prefix, filename, digest pin and
+    secondary copy itself, unconditionally, for every session. So the
+    declaration was an existence assertion and the staging was hidden — the same
+    defect the ``LOCAL_ASSETS`` fix closed on the dev-box side, still open on
+    the relay side. Several staged files were declared by no session at all, and
+    the input that killed a paid session was declared by some sessions while
+    being staged for all of them.
 
     Now the declaration IS the staging. ``dest`` means what it says, and the
     setup script names no relay path, no filename and no digest of its own.
     """
 
     path: str
-    #: WHICH artifact repository holds it. Defaults to the main relay, so every
-    #: existing declaration keeps its meaning unchanged.
-    #:
-    #: Added 2026-08-22 because the five Attempt-12 leaves cannot travel by the
-    #: routes that existed. Pushing them by scp needs 1.99 MB/s to fit the
-    #: launcher's 600 s per-asset timeout against a dev box observed at
-    #: 0.44-0.72 MB/s — that is what ended continuation attempt 2 — and the main
-    #: relay had 1.60 GiB of headroom against 5.55 GiB of leaves. A second
-    #: private repo was measured to work (2026-08-13: "a 1 MiB write to a
-    #: different private repo succeeded, so the limit binds per-repo"), which
-    #: inverts the transfer: the pod PULLS at hub speed instead of the dev box
-    #: PUSHING while a GPU bills.
-    #:
-    #: It lives on ``RelayInput`` rather than in a continuation-specific fetch
-    #: block for the same reason ``dest`` does. A hidden second fetch path would
-    #: be exactly the defect this type was created to remove: staging the
-    #: manifest does not declare.
     #: WHICH artifact repository holds it. REQUIRED: it defaulted to a
-    #: module-level `MAIN_RELAY` computed at import from
-    #: `configs/infrastructure/artifact_store.json`, so importing this module
-    #: read the repository and the framework named one organisation's storage.
+    #: module-level constant computed at import from this repository's config
+    #: tree, so importing this module read the repository and the framework
+    #: named one organisation's storage.
+    #:
+    #: It is a per-input field rather than one relay for the whole session
+    #: because a large staged input can exceed both routes that exist: pushing
+    #: multi-GiB objects by scp needs a dev-box uplink faster than the
+    #: launcher's per-asset timeout allows, and a single relay repository can
+    #: run out of headroom. A second repository inverts the transfer -- the pod
+    #: PULLS at hub speed instead of the dev box PUSHING while a GPU bills.
+    #:
+    #: It lives on ``RelayInput`` rather than in a session-specific fetch block
+    #: for the same reason ``dest`` does. A hidden second fetch path would be
+    #: exactly the defect this type was created to remove: staging that the
+    #: manifest does not declare.
     repo: str
     #: Repository-relative DIRECTORY it is staged into on the pod. ``None`` means
     #: setup does not stage it — the continuation's two permanent controls arrive
@@ -130,10 +121,9 @@ class RelayInput:
     #: The frozen content hash, when one is pinned. Verified on the pod, after
     #: staging and before any science runs, at every destination it lands in.
     sha256: str | None = None
-    #: A second directory the staged file is copied to. The recovery pack is read
-    #: as ``ladder_uniform_probe`` by `p2_driver.py` and as ``ladder_uniform`` by
-    #: the recovery corpus loader; the shell used to do this with a directory
-    #: walk nobody had declared.
+    #: A second directory the staged file is copied to. One artifact may be read
+    #: under two names by two consumers; the shell used to do this with a
+    #: directory walk nobody had declared.
     also_stage_to: str | None = None
 
     @property
@@ -157,11 +147,11 @@ class RelayInput:
 class LocalAsset:
     """A dev-box-only artifact the launcher scp's, and setup installs.
 
-    ``install_to`` is the whole point. The shared setup script used to name
-    ``state_eval_v1`` and ``recovery_search_v2`` itself, so a session that needed
-    neither still had them copied out of ``$WS/assets`` — and the device-canary
-    retry, which had honestly declared it wanted none, died at $0.0637 when that
-    unconditional ``cp`` found an empty directory under ``set -e``.
+    ``install_to`` is the whole point. A shared setup script used to name two
+    specific assets itself, so a session that needed neither still had them
+    copied out of the staging directory — and a session that had honestly
+    declared it wanted none died when that unconditional ``cp`` found an empty
+    directory under ``set -e``.
     """
 
     repo_path: str
@@ -177,24 +167,25 @@ class LocalAsset:
 
 @dataclass(frozen=True)
 class ExecutionCommands:
-    """The repository scripts a session's runner executes.
+    """Where a session executes, and what it executes there.
 
     Declared by the session, not known by the runner. The runner used to name
-    `scripts/pod/watchdog.py`, `scripts/pod/autoinit_preflight_setup.sh` and
-    `scripts/pod/collect_artifacts.py` directly, which put one repository's
-    layout inside reusable infrastructure -- a second deployment, or a session
-    with its own collector, would have had to edit the runner.
+    the watchdog, setup and collector scripts directly, and to hold the
+    workspace root, the checkout root and the host CUDA floor as module
+    constants -- which put one repository's layout and one image's layout
+    inside reusable infrastructure. A second deployment could then only be
+    supported by patching the framework's globals.
 
-    The three repository scripts are required. A default for any of them would
-    be the runner quietly choosing an executable on the session's behalf, which
-    is the property being removed.
+    **Every field is required.** A default here is the runner choosing on the
+    session's behalf: an executable it was not given, an interpreter no caller
+    named, or a workspace nobody declared. `min_cuda_version` accepts `None`,
+    but the caller must say so explicitly -- `None` means "this runtime imposes
+    no floor and the flag is omitted", which is a decision, not an absence.
 
-    `remote_python` is the one field that keeps a default, and the distinction
-    is deliberate rather than an oversight: it is not a repository path and not
-    a session's choice. It is the interpreter path every setup script builds
-    inside the container, so it is a fact about the deployment image that all
-    nine launchers share — which is why none of them passes it. A session that
-    runs a different image says so.
+    `binding()` is the canonical identity of all of it. Two deployments that
+    differ in interpreter, workspace, checkout root or CUDA floor must not
+    serialize to the same execution identity, because the session record is
+    what a later reader reproduces a run from.
     """
 
     #: Run on the DEV BOX, detached, to own the provider resource.
@@ -203,33 +194,97 @@ class ExecutionCommands:
     setup_script: str
     #: Run on the pod to collect declared artifacts.
     artifact_collector: str
-    #: The container's interpreter. A deployment fact, not a repository path —
-    #: see the class docstring for why this one is defaulted and the others are
-    #: not.
-    remote_python: str = "/opt/train/bin/python"
+    #: The container's interpreter. A deployment fact, not a repository path,
+    #: and REQUIRED: a framework that defaults it names one image's build.
+    remote_python: str = field(kw_only=True)
     #: WHERE the pod's workspace and repository checkout are. REQUIRED. These
-    #: were `WS = "/workspace"` and `REPO = f"{WS}/aad"` -- module constants in
-    #: the runner, consumed by nineteen f-strings that build remote commands.
-    #: A session running a different image could only be supported by patching
-    #: the framework's globals, which is the thing this whole type removes.
+    #: were module constants in the runner, consumed by nineteen f-strings that
+    #: build remote commands. A session running a different image could only be
+    #: supported by patching the framework's globals, which is the thing this
+    #: whole type removes.
     workspace_root: str = field(kw_only=True)
     checkout_root: str = field(kw_only=True)
     #: What the provider must guarantee of the HOST for this image to run.
-    #: `None` means the runtime imposes no floor and the flag is omitted --
-    #: an absent requirement must not reach a command line as the word "None".
-    min_cuda_version: str | None = None
+    #: REQUIRED, and explicitly nullable: `None` means the runtime imposes no
+    #: floor and the flag is omitted -- an absent requirement must not reach a
+    #: command line as the word "None", and must not be assumed either.
+    min_cuda_version: str | None = field(kw_only=True)
     #: Ordered places to look for the provider CLI, PATH first, RESOLVED BY THE
-    #: CALLER. The runner used to call `shutil.which("runpodctl")` and read
-    #: `configs/infrastructure/provider_cli.json` itself, so reusable
-    #: infrastructure named one provider's binary and reached into this
-    #: repository's config tree. Empty means "no candidate was resolved", and
+    #: CALLER. The runner used to call `shutil.which` on one provider's binary
+    #: name and then read this repository's config tree, so reusable
+    #: infrastructure knew both. Empty means "no candidate was resolved", and
     #: the runner refuses rather than searching anywhere of its own choosing.
     provider_cli_candidates: tuple[str, ...] = ()
 
-    def as_dict(self) -> dict[str, str]:
-        return {"watchdog": self.watchdog, "setup_script": self.setup_script,
-                "artifact_collector": self.artifact_collector,
-                "remote_python": self.remote_python}
+    #: Fields whose value changes what runs, or where. `binding()` covers
+    #: exactly these, so adding one without adding it here is the defect this
+    #: tuple exists to make visible.
+    BEHAVIOUR_FIELDS: ClassVar[tuple[str, ...]] = (
+        "watchdog", "setup_script", "artifact_collector", "remote_python",
+        "workspace_root", "checkout_root", "min_cuda_version")
+
+    def validate(self) -> "ExecutionCommands":
+        """Refuse an incomplete deployment. Fails CLOSED, before pricing.
+
+        A blank interpreter or workspace does not fail where it is missing; it
+        fails inside a remote command on a pod that is already billing.
+        """
+        missing = [f for f in self.BEHAVIOUR_FIELDS
+                   if f != "min_cuda_version" and not str(getattr(self, f) or "").strip()]
+        if missing:
+            raise SessionSpecError(
+                f"incomplete deployment declaration: {missing} "
+                "carry no value. The application supplies these; reusable "
+                "infrastructure must not choose an interpreter, a workspace or "
+                "an executable on a session's behalf.")
+        return self
+
+    def as_dict(self) -> dict[str, Any]:
+        """Every behaviour-affecting field, plus the resolution candidates."""
+        d: dict[str, Any] = {f: getattr(self, f) for f in self.BEHAVIOUR_FIELDS}
+        d["provider_cli_candidates"] = list(self.provider_cli_candidates)
+        return d
+
+    def binding(self, *, selected_provider_cli: str | None = None) -> "DeploymentBinding":
+        """The canonical identity of this deployment.
+
+        `selected_provider_cli` is a RUNNER-time fact -- which candidate
+        actually existed on the machine that launched -- so it is supplied
+        rather than stored, and it participates in the identity: the same
+        session launched through a different CLI binary is a different
+        deployment of it.
+        """
+        return DeploymentBinding(fields=self.as_dict(),
+                                 selected_provider_cli=selected_provider_cli)
+
+
+@dataclass(frozen=True)
+class DeploymentBinding:
+    """A deployment's canonical form and its digest.
+
+    Exists because `ExecutionCommands.as_dict()` once serialized four of its
+    seven behaviour-affecting fields, so two layouts differing in workspace,
+    checkout root or CUDA floor produced byte-identical records. A record that
+    cannot distinguish two deployments cannot reproduce either (AGENTS.md P4).
+    """
+
+    fields: Mapping[str, Any]
+    selected_provider_cli: str | None = None
+
+    def canonical(self) -> dict[str, Any]:
+        """Sorted, with the resolved CLI included. The digest's exact input."""
+        d = {k: self.fields[k] for k in sorted(self.fields)}
+        d["selected_provider_cli"] = self.selected_provider_cli
+        return d
+
+    @property
+    def digest(self) -> str:
+        return hashlib.sha256(
+            json.dumps(self.canonical(), sort_keys=True,
+                       separators=(",", ":")).encode()).hexdigest()
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"deployment": self.canonical(), "deployment_digest": self.digest}
 
 
 @dataclass(frozen=True)
@@ -295,8 +350,9 @@ class MarkerPolicy:
     success: str = "ALL_DONE"
     failure: tuple[str, ...] = ()
     #: Failure markers that still mean the blocking stages passed, so whatever
-    #: they produced EXISTS and must be fetched. ``if terminal == "ALL_DONE"``
-    #: deleted $2.82 of verified checkpoints on 2026-08-13 for want of this.
+    #: they produced EXISTS and must be fetched. Gating retrieval on session
+    #: success instead — ``if terminal == "ALL_DONE"`` — has deleted verified
+    #: checkpoints that every other check had already confirmed.
     incomplete: tuple[str, ...] = ()
     failure_note: str = ""
 
@@ -316,9 +372,9 @@ class MarkerPolicy:
         """Do this session's products EXIST and therefore need fetching?
 
         Distinct from "did the session succeed". Products are fetched whenever
-        they exist, which is whenever the blocking stages passed -- this was
-        `if terminal == "ALL_DONE"` on 2026-08-13 and it destroyed both
-        controls of a $2.82 session.
+        they exist, which is whenever the blocking stages passed. Gating on the
+        session's terminal instead -- `if terminal == "ALL_DONE"` -- has
+        destroyed both controls of a completed paid session.
 
         The generic answer uses only what a `MarkerPolicy` already declares:
         the success terminal and the incomplete terminals. A session that knows
@@ -391,9 +447,9 @@ class ArtifactPolicy:
     spec_failed: str
     report_names: tuple[str, ...] = ()
     #: Append-only streams a torn-down session may have left mid-write. A
-    #: callable rather than a list because Phase A derives its nine probe streams
-    #: from what was actually journalled: naming a fixed set would either miss a
-    #: rung-2 probe or demand a rung-3 one that correctly never ran.
+    #: callable rather than a list because a session may derive its streams from
+    #: what was actually journalled: naming a fixed set would either miss a
+    #: stream that ran or demand one that correctly never did.
     event_streams: Callable[["SessionContext"], tuple[str, ...]] = \
         lambda ctx: ()
     #: Fetch what this session PRODUCED and cannot regenerate for free. Returns
@@ -404,8 +460,9 @@ class ArtifactPolicy:
     #:
     #: Separate from `fetch_products` returning cleanly, because `all([])` is
     #: True: a fetch that returned NOTHING passes `checkpoint_hashes_matched`
-    #: while having secured nothing at all. Phase-A attempt 11 staged five
-    #: selected leaves on the pod and lost every one with every check green.
+    #: while having secured nothing at all. A session has staged every one of
+    #: its selected leaves on the pod and lost all of them with every check
+    #: green.
     #:
     #: The default answers "this session owes no products", which is the honest
     #: answer for a run that produces no weights — not a reason to skip the gate.
@@ -563,9 +620,9 @@ class SessionSpec:
     #:
     #: A setup abort never reaches artifact collection — the pod is deleted from
     #: the setup branch — and the launcher prints only `tail -40` of the setup
-    #: log. C1 attempt 5's complete skip list was therefore ~100 lines that could
-    #: not fit in the surviving window, and one sweep/pod divergence is still
-    #: unexplained because of it. Anything named here is read and embedded in the
+    #: log. A complete skip list can be far longer than the surviving window,
+    #: and one sweep/pod divergence in this project's history is still
+    #: unexplained for that reason. Anything named here is read and embedded in the
     #: session evidence, which is written on the dev box.
     #:
     #: Keep them SMALL: this is a `cat` over ssh on a billing pod.
@@ -593,6 +650,12 @@ class SessionSpec:
         costs nothing.
         """
         problems: list[str] = []
+        # The deployment, first: an incomplete one fails inside a remote command
+        # on a pod that is already billing, which is the latest possible place.
+        try:
+            self.commands.validate()
+        except SessionSpecError as exc:
+            problems.append(str(exc))
         if not self.session_id.strip():
             problems.append("session_id is empty")
         if not self.schema.strip():
@@ -702,11 +765,11 @@ class SessionSpec:
     def setup_environment(self, *, session_commit: str, bundle: str) -> dict[str, str]:
         """Built ENTIRELY from the manifest. Nothing else reaches setup.
 
-        Two failures live in this method's existence. `SESSION_KIND` leaked
-        between two sessions sharing one setup script ($0.1075) because it was a
+        Two paid failures live in this method's existence. `SESSION_KIND`
+        leaked between two sessions sharing one setup script because it was a
         module global; here it can only arrive through `setup.env`. And the
         shared script named two assets itself, so a session that wanted none got
-        them anyway ($0.0637); here it reads `SESSION_ASSETS`.
+        them anyway; here it reads `SESSION_ASSETS`.
         """
         env = {
             "SESSION_COMMIT": session_commit,
@@ -725,12 +788,20 @@ class SessionSpec:
         env.update({k: str(v) for k, v in self.setup.env.items()})
         return env
 
-    def as_dict(self) -> dict[str, Any]:
-        """The declaration, for the session record. Callables are named, not called."""
+    def as_dict(self, *, selected_provider_cli: str | None = None) -> dict[str, Any]:
+        """The declaration, for the session record. Callables are named, not called.
+
+        The deployment travels with it. Until 2026-09-10 it did not: `commands`
+        was absent from this dict entirely, so the artifact a later reader
+        reproduces a run from recorded neither the interpreter, the workspace,
+        the checkout root nor the host CUDA floor the run actually used.
+        """
         return {
             "session_id": self.session_id,
             "schema": self.schema,
             "description": self.description,
+            **self.commands.binding(
+                selected_provider_cli=selected_provider_cli).as_dict(),
             "authorization_path": self.authorization_path,
             "authorization_type": getattr(self.authorization_loader, "__qualname__",
                                           str(self.authorization_loader)),
@@ -792,8 +863,8 @@ RUNNER_ARGUMENT_CONTRACT: tuple[str, ...] = (
 def missing_arguments(args: Any) -> list[str]:
     """Which runner arguments a namespace does not carry.
 
-    Device-canary attempt 1 was lost at $0.0603 because the base read three
-    attributes the subclass's parser never defined, and nothing looked until a
+    A paid session was lost because the machinery read three argument
+    attributes the launcher's parser never defined, and nothing looked until a
     pod existed. This is that look, and it is free.
     """
     return [name for name in RUNNER_ARGUMENT_CONTRACT if not hasattr(args, name)]

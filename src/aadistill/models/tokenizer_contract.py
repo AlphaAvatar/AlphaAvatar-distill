@@ -1,7 +1,7 @@
 """Which tokenizer a training run uses, stated rather than inferred.
 
-Phase-A attempt 11 lost a Stage-2 probe to this, after a 180-minute search had
-already succeeded. The chain was:
+A paid session lost a probe to this after a three-hour search had already
+succeeded. The chain was:
 
 1. a searched leaf is a **model** artifact: `save_pretrained()` writes weights,
    `config.json` and `generation_config.json`, and no tokenizer files. That is

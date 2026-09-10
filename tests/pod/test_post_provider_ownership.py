@@ -104,7 +104,8 @@ def _runner(tmp_path, monkeypatch, *, returned_price, max_price=1.09,
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
             remote_python="/opt/train/bin/python",
-            workspace_root="/workspace", checkout_root="/workspace/aad"),
+            workspace_root="/workspace", checkout_root="/workspace/aad",
+            min_cuda_version="13.0"),
         session_id="autoinit-c1",
         teardown=types.SimpleNamespace(require_provider_confirmation=confirm))
     r.a = types.SimpleNamespace(

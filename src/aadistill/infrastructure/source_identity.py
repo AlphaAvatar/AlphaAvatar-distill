@@ -16,7 +16,7 @@ which re-derives independently, could see it, and it refused every launch.
 
 So this module exists to be the thing a new session imports instead of writing an
 eighth copy. It deliberately does **not** refactor the existing seven: each lives
-inside a frozen source set, and rewriting them would move Phase-A and Phase-B
+inside a frozen source set, and rewriting them would move closed phases'
 digests for a reason unrelated to their own science. They are byte-identical to
 this implementation, and a test asserts that.
 

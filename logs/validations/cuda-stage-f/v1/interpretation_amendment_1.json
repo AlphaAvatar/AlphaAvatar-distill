@@ -1,0 +1,76 @@
+{
+ "schema": "aadistill.engineering_validation_interpretation_amendment/v1",
+ "_contract": "Amendment 1 to the INTERPRETATION of the CUDA stage-F engineering validation. It corrects two explanatory claims and nothing else. It does not alter any observed device field, any subrun cost, any provider identity, any PASS/FAIL outcome, or any scientific interpretation, and it rewrites no raw subrun report, no campaign record, no provider evidence and no historical execution record. It is APPEND-ONLY: the artifacts it corrects are bound below by content hash and left exactly as written. AUTHORIZES NOTHING.",
+ "amendment_id": "cuda_stage_f_engineering.interpretation_amendment_1",
+ "amends": "cuda_stage_f_engineering.2026-09-10",
+ "written_utc": "2026-09-10T00:00:00Z",
+ "written_by": "post-CUDA evidence and reproducibility closure, on reporting commit 573d6cfc92497c176afe4645335df1a2534f93df",
+ "execution_sha_under_review": "7027a8f4c0a7684c892b483a2193025cc26c1b58",
+ "binds": [
+  {
+   "path": "logs/validations/cuda-stage-f/v1/campaign.json",
+   "sha256": "72555b3dc380c4eccf6e391556e014dc9733e6a96f475a12b4852e5fc2bf7b06",
+   "bytes": 1977
+  },
+  {
+   "path": "logs/validations/cuda-stage-f/v1/outcome.md",
+   "sha256": "9bfda89394913ad38ade560da408c5c3b31d329918dfb31ffff2d13d5f206514",
+   "bytes": 4081
+  },
+  {
+   "path": "logs/runs/cuda_stage_f/cuda_stage_f_20260910_s2/evidence.json",
+   "sha256": "cf89ad316d5dfa35bb25ca814d7652ac0eae099368b8abba8fef77cab1cb4af4",
+   "bytes": 29328
+  },
+  {
+   "path": "logs/runs/cuda_stage_f/cuda_stage_f_20260910_s3/evidence.json",
+   "sha256": "2e431331f1444a24c32079ccad6e442b7d73abfcd64bd7dd6a452d5653e535e1",
+   "bytes": 29288
+  }
+ ],
+ "binding_rule": "sha256 over the exact bytes of each corrected artifact at the time this amendment was written. A later edit to any of them breaks the binding, which is the point: an interpretation amendment must not silently attach itself to different evidence.",
+ "corrections": [
+  {
+   "id": "A",
+   "subject": "cuda_stage_f_20260910_s2",
+   "field": "failure_class",
+   "was": "operator",
+   "now": "harness_acceptance_criterion",
+   "why": "The suffix computations COMPLETED. Every one of the eight matrix cases reported applied=true and raised no error. What failed was the acceptance criterion the harness applied to them: it required the operator's CHILD to be on the requested compute device. `initialization/device.py` documents the opposite as the builder's contract -- ChildBuilder does not place the model, so a parent on CUDA routinely coexists with a freshly built child on the host. On CPU the criterion was vacuously true, because device=cpu satisfied it by construction; the first real GPU is where a wrong question first got a wrong answer. This was a defect in the measuring instrument, not in the operator under test.",
+   "does_not_change": [
+    "the subrun's FAIL outcome",
+    "its $0.0145 cost",
+    "its pod identity zoz95844krv2ze",
+    "any observed device field"
+   ]
+  },
+  {
+   "id": "B",
+   "subject": "cuda_stage_f_20260910_s3",
+   "field": "explanatory wording of the PASS",
+   "was": "wording that reads as though every operator left its child on the requested CUDA device",
+   "now": {
+    "parent_or_operator_computation_device": "cuda:0",
+    "final_child_device": "cpu",
+    "child_host_resident_per_builder_contract": true
+   },
+   "why": "That is the contract the run actually observed and the one the corrected criterion checks: the operator COMPUTES on the requested device, and the child it returns is host-resident because the builder does not place it. Saying the children were left on CUDA would describe a different system and would make the corrected criterion look wrong.",
+   "does_not_change": [
+    "the verdict: subrun 3 remains CUDA ENGINEERING VALIDATION PASS",
+    "the five device observations, every one observed=true holds=true on cuda:0",
+    "the two geometries, suffix_narrow and suffix_mid",
+    "the retained suffix index and the 03_attention checkpoint",
+    "that the prefix was not re-executed",
+    "its $0.0182 cost or its pod identity 8tbsixglzz64ox"
+   ]
+  }
+ ],
+ "unchanged": {
+  "verdict": "subrun 3 remains CUDA ENGINEERING VALIDATION PASS",
+  "campaign_total_usd": 0.04,
+  "formal_c1": "UNCHANGED. Replay MEASURED 2/2 PASS; treatment and endpoint UNMEASURED; attempt 9 NO DECISION. This amendment is engineering interpretation and touches no scientific claim.",
+  "scientific_interpretation": "not altered by this amendment"
+ },
+ "authorizes": "nothing",
+ "amendment_sha256": "99f64478a8195fc22182183d194133206b2efd8a80496eb2bc5b8f9bee2e4ebd"
+}

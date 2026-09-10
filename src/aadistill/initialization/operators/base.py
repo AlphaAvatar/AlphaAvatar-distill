@@ -2,7 +2,7 @@
 
 **A kind is not an implementation.** ``DEPTH`` is a structural dimension — which
 blocks survive. ``depth.positional_v0`` and ``depth.causal_kl_greedy_v1`` are two
-different algorithms for deciding it, and E8a showed they disagree: the
+different algorithms for deciding it, and they have been measured to disagree: the
 positional heuristic and the causal search share exactly one removed layer out of
 eight. Collapsing the two concepts would make "we tried DEPTH" mean nothing, and
 would make a later ``depth.xxx_v2`` either overwrite history or need a new kind.

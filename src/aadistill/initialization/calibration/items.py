@@ -9,14 +9,14 @@ they want a ``[1, T]`` LongTensor.
 
 Something has to convert. Until now nothing in the library did: the conversion
 lived in ``scripts/autoinit/phase_a_search.as_operator_items``, so the search had
-it and :mod:`aadistill.autoinit.fixed_path` did not. C1 attempt 8 paid for that
-gap — stage D reached ``depth.apply`` and raised ``KeyError: 'input_ids'`` on the
+it and the fixed-path executor did not. A paid session met that gap — a stage
+reached ``depth.apply`` and raised ``KeyError: 'input_ids'`` on the
 real frozen mixture, after the pod had loaded 398 weight shards.
 
 **Why it kept being invisible.** Every fixed-path test passes
 ``calibration_items=`` and every toy fixture builds items already in the operator
 shape, so no `$0` run ever asked a real profile for its items. The same class of
-defect appeared once before, on Phase-A attempt 5, and for the same reason.
+defect has appeared before, for the same reason.
 
 So this module exists, and there is exactly one of it:
 

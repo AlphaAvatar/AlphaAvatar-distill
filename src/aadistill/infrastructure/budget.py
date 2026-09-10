@@ -1,8 +1,8 @@
 """Four separate cost thresholds for a paid GPU session.
 
-E6b billed $7.68 against a $7.12 authorization. The proximate cause was a step
-time priced from E4's comparable arms (3.625 s/step) against the 4.15 s/step the
-run actually sustained — a 14% miss, ~$0.81 of unbudgeted time. The structural
+A paid session has overrun its authorization because it was priced from an
+earlier run's comparable arms (3.625 s/step) against the 4.15 s/step it actually
+sustained — a 14% miss, and the overrun with it. The structural
 cause was that the session had **one** number: the authorization was also the
 kill point, so by the time the deadline mattered there was no time left in which
 to bundle, transfer and verify artifacts, and no earlier point at which the
@@ -19,8 +19,8 @@ because they answer different questions:
     continues; nothing new begins. This is the threshold a driver consults.
 ``artifact_recovery_reserve``
     Time deliberately held back **after** the soft stop so that bundling,
-    hashing, transfer and verification have somewhere to happen. E6b had no such
-    reserve, which is why a late run and a lost event stream arrived together.
+    hashing, transfer and verification have somewhere to happen. A session
+    without one loses its artifacts exactly when it also runs late.
 ``hard_terminate``
     The absolute provider-side kill point, enforced by
     :mod:`aadistill.infrastructure.watchdog` against the provider API. It is
@@ -39,12 +39,14 @@ class BudgetError(ValueError):
     """A session plan that cannot be executed within its authorization."""
 
 
-# The step time E6b actually sustained: L40S, Stage 3 ladder arms, 2916 steps,
-# bf16, teacher-in-memory KD. Both arms, mean of the per-10-step console
-# timings. Any Stage 3 L40S estimate starts here.
+# The step time a Stage-3 ladder arm actually sustained on an L40S: 2916 steps,
+# bf16, teacher-in-memory KD, both arms, mean of the per-10-step console
+# timings. Any Stage 3 L40S estimate starts from an OBSERVED number, not an
+# extrapolated one; which run observed it is in docs/core-provenance.md.
 #
-# 3.625 s/step — the figure derived from E4's comparable arms and used to price
-# E6b — is superseded. It is recorded in `SUPERSEDED_STEP_SECONDS` so that a
+# 3.625 s/step — the figure derived from an earlier run's comparable arms, and
+# the one that underpriced a session — is superseded. It is recorded in
+# `SUPERSEDED_STEP_SECONDS` so that a
 # plan reaching for it is rejected by name rather than by an anonymous bound.
 MEASURED_STEP_SECONDS = 4.15
 SUPERSEDED_STEP_SECONDS = 3.625
@@ -140,7 +142,8 @@ class BudgetPlan:
     def may_start(self, elapsed_minutes: float, phase_minutes: float) -> bool:
         """May a phase of `phase_minutes` start now and still leave the reserve?
 
-        This is the gate E6b did not have. The driver re-priced before each arm
+        This is the gate an overrunning session did not have. Its driver
+        re-priced before each arm
         against the *authorization*, so an arm that would finish just under the
         cap was allowed to start — leaving nothing for teardown.
         """
@@ -180,7 +183,7 @@ def plan_session(
 ) -> BudgetPlan:
     """Price a session and place its four thresholds.
 
-    `step_time_floor` defaults to the E6b measurement because that is the only
+    `step_time_floor` defaults to the measured value because that is the only
     Stage 3 L40S number this project has *observed*. A different workload may
     legitimately be faster, but it must say so: passing a `step_time` under the
     floor requires `below_floor_reason`, which lands in the plan's notes and
@@ -238,8 +241,8 @@ def plan_session(
     # expected figure and be multiplied by the contingency, and one added after
     # the soft stop would not protect the work at all: the driver's `afford()`
     # refuses to START anything that would cross the soft stop, so a risk that
-    # materializes EARLY in a session — Phase A's reference-cache fallback is
-    # consumed entirely inside stage 1 — would be paid for out of the later
+    # materializes EARLY in a session — a reference-cache fallback consumed
+    # entirely inside the first stage, say — would be paid for out of the later
     # stages' budget and silently truncate them. A reserve that only moves the
     # watchdog's kill time protects the pod, not the experiment.
     reserve_minutes = sum(r.minutes for r in soft_stop_reserves)

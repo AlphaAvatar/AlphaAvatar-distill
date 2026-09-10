@@ -1,6 +1,6 @@
 """A second, KD-only token stream that runs alongside the rollout stream.
 
-E7 asks whether adding general-text teacher KD restores general language
+This asks whether adding general-text teacher KD restores general language
 modelling without disturbing the rollout trajectory that produced the current
 behavioural anchor. "Without disturbing" is the hard part, and it is a data
 question before it is a loss question: if the extra text were merged into the

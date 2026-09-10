@@ -72,7 +72,8 @@ class ImageIdentityUnavailable(RuntimeError):
 
 
 def parse_setup_probe(stdout: str) -> dict:
-    """Read the probe by LABEL, never by line position (see e8b: a $0.19 misread)."""
+    """Read the probe by LABEL, never by line position; a positional read has
+    misreported a setup probe and cost a paid session."""
     out = {"setup_done": "0", "host_cold": "0", "setup_rc": "", "tail": ""}
     for line in stdout.splitlines():
         key, _, value = line.partition("=")
@@ -96,9 +97,9 @@ class SessionRunner:
         self.a = args
         self.repo_root = Path(repo_root)
 
-        # The argument contract, checked at $0. Device-canary attempt 1 died at
-        # $0.0603 because the machinery read three attributes its parser had
-        # never defined, and nothing looked until a pod existed.
+        # The argument contract, checked before anything is priced. A paid
+        # session has died because the machinery read three attributes its
+        # parser had never defined, and nothing looked until a pod existed.
         missing = missing_arguments(args)
         if missing:
             raise AuthorizationError(
@@ -135,7 +136,10 @@ class SessionRunner:
         self.ev: dict = {
             "schema": spec.schema,
             "session_id": spec.session_id,
-            "session_spec": spec.as_dict(),
+            # The RESOLVED CLI, not just the candidates: which binary actually
+            # existed on the launching machine is part of what a reader needs to
+            # reproduce this, and it is knowable only here.
+            "session_spec": spec.as_dict(selected_provider_cli=self.cli),
             "timeline": [], "stages": {},
             "authorization": self.auth.as_dict(),
             "session_plan_hash": spec.plan_hash,
@@ -799,13 +803,13 @@ class SessionRunner:
 
         # Products are fetched whenever they EXIST, which is whenever the
         # blocking stages passed — not only when the whole session succeeded.
-        # This was `if terminal == "ALL_DONE"` on 2026-08-13, and it destroyed
-        # both controls of a $2.82 session.
+        # This was `if terminal == "ALL_DONE"` once, and it destroyed both
+        # controls of a completed paid session.
         eligible = self.spec.markers.products_are_eligible(
             terminal, self.ev.get("driver_stages") or {})
-        # The reports are fetched BEFORE the products: Phase A's
-        # `fetch_products` reads `leaf_retention.json` to decide which
-        # initializations come home.
+        # The reports are fetched BEFORE the products: a session's
+        # `fetch_products` may read a report to decide which artifacts come
+        # home.
         for name in art.report_names:
             subprocess.run(scp + [f"root@{host}:{audit}/{name}", str(store / name)],
                            capture_output=True, timeout=600)

@@ -480,8 +480,9 @@ def packing_report(examples: list[dict], n_blocks: int, block_len: int) -> dict:
 
 
 # --- independent per-arm selection to one common token budget -----------------
-# Attempt 4 measured what makes this necessary: R's supervised continuation runs
-# 1.66x (sa) to 1.76x (sb) longer than C's on the same bundle at the same cut
+# A measured run shows what makes this necessary: one arm's supervised
+# continuation runs 1.66x to 1.76x longer than the other's on the same bundle at
+# the same cut
 # depth, because C's span is the teacher's own remaining trajectory while R's is
 # a fresh teacher generation from a student prefix. One common bundle count
 # therefore cannot put both arms on one token target -- at 778 bundles C was

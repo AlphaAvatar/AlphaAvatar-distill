@@ -353,7 +353,8 @@ def pack_group(
 
             # The session does not fit whole: it can only be the terminal one.
             if not allow_terminal_truncation:
-                # E5 forbids cutting any sample: a cut prefix changes the state
+                # A prefix/continuation pack forbids cutting any sample: a cut
+                # prefix changes the state
                 # being trained on and a cut continuation silently shortens the
                 # supervision. Close the block instead and let this session open
                 # the next one whole. A session that cannot fit an EMPTY block

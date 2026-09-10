@@ -1,6 +1,6 @@
 """Make a completed Stage-1 search durable before anything else can fail.
 
-Phase-B attempt 4 paid for and **completed** an eight-hour joint P=2 search. It
+A paid session completed an eight-hour joint search. It
 measured the canonical control, measured both imported finalists, and computed
 its Top-N ranking. Then a local-name collision in the summary dict raised, the
 stage failed, and the session ended with no authoritative record of which five
@@ -81,8 +81,8 @@ def build(*, search_config, ranking, suite, policy, profiles,
             "calibration_profiles": sorted({step.profile_id for step in state.steps}),
             # REQUIRED BY `verify_transferred_leaf`, which rebuilds the identity
             # from the bytes that arrived and takes these two from the record
-            # because no file carries them. Attempt 5 omitted `arch_signature`,
-            # so every one of five transfers reported NOT MATCHED on a KeyError
+            # because no file carries them. Omitting `arch_signature` once made
+            # every transfer report NOT MATCHED on a KeyError
             # while the bytes were in fact correct — a secured gate that cried
             # wolf at exactly the moment it must be believed.
             "arch_signature": state.artifact.arch_signature if state.artifact else None,

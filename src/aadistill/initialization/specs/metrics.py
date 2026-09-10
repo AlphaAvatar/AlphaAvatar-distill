@@ -109,7 +109,7 @@ class StateEvalSuite:
 
     Domains are declared rather than inferred so the equal-domain aggregate is a
     design decision, not a property of whichever domain happened to tokenize
-    longest — the same rule E8a used (``domain_balanced_score``).
+    longest — the same rule ``domain_balanced_score`` applies.
     """
 
     suite_id: str

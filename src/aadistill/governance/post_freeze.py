@@ -1,8 +1,8 @@
 """When a frozen executable digest moves for a reason worth recording.
 
 `scripts/pod/autoinit_preflight_setup.sh` is simultaneously a member of three
-frozen source sets — Phase A's harness, Phase B's executable, the recovery
-continuation's — **and** the single `SESSION_KIND` dispatcher every launchable
+frozen source sets — several closed phases' harnesses and executables — **and**
+the single `SESSION_KIND` dispatcher every launchable
 session passes through. Adding a session therefore moves digests that were frozen
 before that session existed, and there is no version of "add a session" that
 avoids it: the runner hardcodes one setup script.
@@ -30,7 +30,7 @@ from pathlib import Path
 #: Every path this module works on is CALLER-SUPPLIED. It used to name one
 #: phase's note, ledger, preregistration and setup script, which made a generic
 #: accounting mechanism unusable by any other phase without editing it. The
-#: Phase-B values now live in `scripts/experiments/phase_b/post_freeze.py`.
+#: Each phase's own values now live with that phase, in the application layer.
 
 #: `[a-z0-9_]`, not `[a-z_]`. The original class could not match a kind with a
 #: digit, so a `c1` branch was invisible here: its body was absorbed into the
@@ -122,13 +122,13 @@ def accounted_for(frozen_digest: str, observed_digest: str,
 
 # --- historical accounting, which is NOT launch compatibility ---------------
 #
-# `accounted_for` above answers one question: may a Phase-B launch run against
-# this tree? It requires the drift to be additive and branch-identical, and it
+# `accounted_for` above answers one question: may a launch of the frozen phase
+# run against this tree? It requires the drift to be additive and branch-identical, and it
 # must keep saying NO to anything else — that is what protects a completed
 # result from being reinterpreted.
 #
-# But "Phase B may not launch against this tree" and "nobody ever explained why
-# the digest moved" are different facts, and the repository had only one
+# But "this phase may not launch against this tree" and "nobody ever explained
+# why the digest moved" are different facts, and the repository had only one
 # mechanism for both. A reviewed, non-additive operational repair to a SHARED
 # runtime file therefore had nowhere to be recorded: declaring it additive would
 # be false, and not declaring it left an unexplained digest.

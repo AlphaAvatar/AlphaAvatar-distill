@@ -58,7 +58,7 @@ def stream_projection(
     # `residual_sqsum`, so the summands land wherever the caller placed the
     # state — `composite.apply` does `stats_to(state, model_device(parent))`
     # before calling in, so on a pod that is cuda:0. A host accumulator here is
-    # what killed Phase-A attempt 9 at $0.34, on the `+=` below, and no CPU
+    # what killed a paid session, on the `+=` below, and no CPU
     # rehearsal can see it: on the dev box both operands are already host and
     # the arithmetic is correct. The dtype is unchanged; only the placement is.
     avg = torch.zeros(d_teacher, d_teacher, dtype=torch.float64,

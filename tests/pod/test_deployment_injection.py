@@ -30,6 +30,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
 
+from aadistill.infrastructure import session as SESSION  # noqa: E402
 from aadistill.infrastructure import session_runner as SR  # noqa: E402
 
 from session_specs import all_specs  # noqa: E402
@@ -137,6 +138,134 @@ def test_the_cuda_floor_reaches_the_provider_create_argv():
     for value, expected in ((("12.4"), ["--min-cuda-version", "12.4"]), (None, [])):
         argv = list(("--min-cuda-version", value) if value else ())
         assert argv == expected
+
+
+# --- the canonical binding, and what makes two deployments different -------
+
+class TestTheCanonicalDeploymentBinding:
+    """The session record must be able to tell two deployments apart.
+
+    `ExecutionCommands.as_dict()` serialized four of its seven
+    behaviour-affecting fields, and `SessionSpec.as_dict()` did not call it at
+    all -- so the artifact a later reader reproduces a run from recorded
+    neither the workspace, the checkout root nor the host CUDA floor. Two
+    layouts that share three script paths were byte-identical in the record.
+    """
+
+    def test_every_behaviour_affecting_field_is_in_the_binding(self):
+        r, spec = runner_for(LAYOUT_A)
+        got = spec.commands.as_dict()
+        for f in ("workspace_root", "checkout_root", "remote_python",
+                  "min_cuda_version", "watchdog", "setup_script",
+                  "artifact_collector"):
+            assert f in got, f
+        assert "provider_cli_candidates" in got
+
+    def test_the_declared_field_list_matches_what_is_serialized(self):
+        """A field added to the type but not to `BEHAVIOUR_FIELDS` would drop
+        out of the identity silently, which is the defect being fixed."""
+        from dataclasses import fields as dc_fields
+        _, spec = runner_for(LAYOUT_A)
+        declared = {f.name for f in dc_fields(spec.commands)}
+        covered = set(spec.commands.BEHAVIOUR_FIELDS) | {"provider_cli_candidates"}
+        assert declared == covered, declared ^ covered
+
+    def test_two_deployments_receive_different_identities(self):
+        a = runner_for(LAYOUT_A)[1].commands.binding().digest
+        b = runner_for(LAYOUT_B)[1].commands.binding().digest
+        assert a != b
+
+    @pytest.mark.parametrize(
+        "field_name,other",
+        [("workspace_root", "/srv/run"),
+         ("checkout_root", "/srv/run/checkout"),
+         ("remote_python", "/usr/local/venv/bin/python3"),
+         ("min_cuda_version", "12.4")])
+    def test_each_field_alone_changes_the_identity(self, field_name, other):
+        """One at a time. Four fields differing together could hide three that
+        do not participate."""
+        base = runner_for(LAYOUT_A)[1].commands
+        assert base.binding().digest != replace(
+            base, **{field_name: other}).binding().digest
+
+    def test_a_null_cuda_floor_is_distinguishable_from_a_declared_one(self):
+        """`None` is a decision -- this runtime imposes no floor -- and must not
+        collide with any version string."""
+        base = runner_for(LAYOUT_A)[1].commands
+        assert (replace(base, min_cuda_version=None).binding().digest
+                != base.binding().digest)
+
+    def test_the_resolved_provider_cli_participates(self):
+        """Which binary actually existed on the launching machine is knowable
+        only at runtime, so it is supplied rather than stored."""
+        c = runner_for(LAYOUT_A)[1].commands
+        assert (c.binding(selected_provider_cli="/usr/bin/runpodctl").digest
+                != c.binding(selected_provider_cli="/home/u/bin/runpodctl").digest)
+
+    def test_the_binding_reaches_the_session_record(self):
+        rec = runner_for(LAYOUT_B)[1].as_dict(selected_provider_cli="/usr/bin/x")
+        assert rec["deployment"]["workspace_root"] == "/srv/run"
+        assert rec["deployment"]["remote_python"] == "/usr/local/venv/bin/python3"
+        assert rec["deployment"]["min_cuda_version"] == "12.4"
+        assert rec["deployment"]["selected_provider_cli"] == "/usr/bin/x"
+        assert len(rec["deployment_digest"]) == 64
+
+    def test_the_runner_records_the_cli_it_actually_resolved(self):
+        src = (REPO_ROOT / "src/aadistill/infrastructure/session_runner.py").read_text()
+        assert "spec.as_dict(selected_provider_cli=self.cli)" in src
+
+
+class TestMissingDeploymentDataFailsClosed:
+    """Not silently defaulted. A blank interpreter does not fail where it is
+    missing; it fails inside a remote command on a pod that is already billing.
+    """
+
+    @pytest.mark.parametrize("field_name", ["remote_python", "workspace_root",
+                                            "checkout_root", "watchdog",
+                                            "setup_script", "artifact_collector"])
+    def test_a_blank_required_field_is_refused(self, field_name):
+        base = runner_for(LAYOUT_A)[1].commands
+        with pytest.raises(SESSION.SessionSpecError, match=field_name):
+            replace(base, **{field_name: ""}).validate()
+
+    def test_the_refusal_happens_during_spec_validation(self):
+        """Before pricing, before the provider is contacted, before a pod."""
+        _, spec = runner_for(LAYOUT_A)
+        broken = replace(spec, commands=replace(spec.commands, remote_python=""))
+        with pytest.raises(SESSION.SessionSpecError, match="remote_python"):
+            broken.validate()
+
+    def test_the_interpreter_has_no_default_at_all(self):
+        """It defaulted to one image's build path, so every session that never
+        mentioned an interpreter silently claimed that one."""
+        with pytest.raises(TypeError, match="remote_python"):
+            SESSION.ExecutionCommands(watchdog="w", setup_script="s",
+                                 artifact_collector="c",
+                                 workspace_root="/ws", checkout_root="/ws/r",
+                                 min_cuda_version=None)
+
+    def test_a_null_cuda_floor_is_still_accepted_when_stated(self):
+        SESSION.ExecutionCommands(watchdog="w", setup_script="s",
+                             artifact_collector="c", remote_python="/p",
+                             workspace_root="/ws", checkout_root="/ws/r",
+                             min_cuda_version=None).validate()
+
+
+def test_no_concrete_image_interpreter_remains_in_core():
+    """Anywhere in `src/aadistill`, not just in the runner."""
+    core = REPO_ROOT / "src/aadistill"
+    for p in sorted(core.rglob("*.py")):
+        assert "/opt/train/bin/python" not in p.read_text(), p
+
+
+def test_neither_layout_relies_on_a_module_global():
+    """Both are driven through the real construction path, and the module holds
+    no workspace, checkout or interpreter constant for either to fall back on."""
+    for mod in (SR, SESSION):
+        for name, value in vars(mod).items():
+            if name.isupper() and isinstance(value, str):
+                assert "/workspace" not in value, f"{mod.__name__}.{name}"
+                assert "/opt/train" not in value, f"{mod.__name__}.{name}"
 
 
 # --- what must NOT have changed -------------------------------------------

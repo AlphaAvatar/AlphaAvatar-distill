@@ -147,7 +147,8 @@ def _runner(monkeypatch, *, outcome, create_ok=True):
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
             remote_python="/opt/train/bin/python",
-            workspace_root="/workspace", checkout_root="/workspace/aad"),
+            workspace_root="/workspace", checkout_root="/workspace/aad",
+            min_cuda_version="13.0"),
 session_id="autoinit-c1")
 
     args = C1.build_parser().parse_args(BASE_ARGV)

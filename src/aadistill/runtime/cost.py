@@ -179,8 +179,9 @@ def materialization_overhead_seconds(child_bytes: float) -> float:
     bookkeeping and a round-trip validation would be reading a number off an
     instrument that was never pointed at them.
 
-    Attempt 3 makes the size of the gap concrete: 544.7 min of Stage 1, 388.2 min
-    of measured causal DEPTH, and 156.5 min of everything else that the FLOP model
+    A measured search makes the size of the gap concrete: 544.7 min of stage
+    time, 388.2 min of measured causal DEPTH, and 156.5 min of everything else
+    that the FLOP model
     accounted for only as a few seconds of state evaluation per child.
 
     Conservative by construction, and cheap: it is one multiply and an add per
@@ -247,7 +248,7 @@ def greedy_depth_flops(spec: ArchSpec, n_remove: int, tokens: int, seq_len: int,
         unconditionally until 2026-08-27, and the reason the P=2 range was wrong.
     ``recomputed``
         one intact pass *per candidate*: `evaluations` of them. This is what
-        Phase-B attempt 3 actually ran — 16.9 GiB of reference against a 13.4 GiB
+        a paid search actually ran — 16.9 GiB of reference against a 13.4 GiB
         allowance, all-or-nothing, so none of it was kept.
     ``partial``
         ``cached_fraction`` of the mixture is resident and paid for once; the

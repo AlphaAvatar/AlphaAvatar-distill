@@ -8,19 +8,20 @@ only way to make that checkable is to have an artifact that exists first.
 
 The schedule:
 
-    N searched leaves + the retained canonical control
-      ->  rung 1: identical 0.86M recovery on seed sa, all of them
-      ->  search-battery evaluation
-      ->  rung 2: the control (unconditionally) + the best S searched leaves, seed sb
+    N searched candidates + the retained canonical control
+      ->  rung 1: one identical recovery recipe, first seed, all of them
+      ->  battery evaluation
+      ->  rung 2: the control (unconditionally) + the best S candidates, second seed
       ->  Top-1 from the two-seed result
-      ->  optional seed sc, for tied candidates only
+      ->  an optional third seed, for tied candidates only
       ->  full recovery (separately authorized)
 
-Rules the rest of the project already paid to learn:
+The invariants it enforces:
 
-* **Selection is on autonomous behaviour, not state NLL** (E7: a −5.22 nat NLL
-  swing moved behaviour by +0.0000; the best-NLL checkpoint of its trajectory
-  produced zero protocol-valid generations).
+* **Selection is on autonomous behaviour, not on state NLL.** A large held-out
+  NLL swing can leave autonomous behaviour unchanged, and the best-NLL
+  checkpoint of a trajectory can produce no protocol-valid generation at all,
+  so NLL is a diagnostic here and never an objective.
 * **Selection is a constraint followed by an objective, never a weighted sum.**
   ``usable_rollout`` is a *feasibility* gate — it is blind to correctness by
   construction, so a terse contentless reply scores perfectly on it and a
@@ -28,18 +29,20 @@ Rules the rest of the project already paid to learn:
   capability failure. Feasible candidates are then ranked on ``correct_overall``,
   with ``correct_given_usable`` reported as a diagnostic that explains *why* a
   candidate ranks where it does without moving it.
-* **Two seeds minimum, because one is unreadable.** The behaviour metric moves
-  0.1290 on seed alone.
+* **At least two seeds, because one is unreadable.** A behaviour metric whose
+  seed-to-seed spread is comparable to the differences being ranked cannot rank
+  them from a single draw; the caller supplies the measured spread.
 * **The control advances to rung 2 regardless of its rung-1 result.** A baseline
   eliminated at rung 1 gives a two-seed comparison with nothing to compare
-  against, and its variance is exactly what makes the searched candidates'
-  differences readable.
+  against, and its variance is exactly what makes the candidates' differences
+  readable.
 * **Thresholds are preregistered, never chosen after seeing the table**
   (AGENTS.md 4.5). ``SuccessiveHalvingPlan.freeze`` writes the record and
   ``assert_preregistered`` refuses a selection whose plan hash does not match.
 
-``N`` is deliberately unset here. The cost model informs it; the decision is the
-maintainer's.
+``N``, the recipe, the probe size, the seeds and the battery are all supplied by
+the caller. Which experiments established these invariants, and what they cost,
+is recorded in ``docs/core-provenance.md``.
 """
 
 from __future__ import annotations
@@ -88,11 +91,10 @@ class RecoveryRecipe:
         }
 
 
-#: E1/P1 at the 0.86M probe rung. Frozen: AutoInitializer v1 changes the
-#: initialization, not the recovery objective (handoff 5.1 item 18).
-#: The concrete recipes moved to `configs/recipes/recovery.json`: specific loss
-#: weights, token counts and a pack hash are experiment data, not framework.
-#: `scripts/experiments/recipes.py` loads them.
+#: A recovery objective is held FIXED across a search so that initialization
+#: stays the only variable. The concrete recipes are experiment data -- specific
+#: loss weights, token counts and a pack hash -- and the application loads them.
+#: This module defines their shape and never names one.
 
 
 def recipe_from_dict(doc) -> "RecoveryRecipe":
@@ -228,13 +230,13 @@ class SeedAggregation:
 class ScorableAwareSeedAggregation:
     """Pooled counts that obey the scorer's own denominators. **Use this one.**
 
-    `pooled_counts@v1` pools `correct` over `n` and over `usable`. The scorer has
-    never computed correctness that way, and cannot: of the battery's 190 prompts
-    only **170 are correctness-scorable**, because the 20 `code` items have no
-    correctness oracle and counting them wrong would depress every candidate
-    identically. Per seed the scorer therefore reports
+    `pooled_counts@v1` pools `correct` over `n` and over `usable`. A scorer
+    cannot compute correctness that way whenever a battery contains items with
+    no correctness oracle: those items are answerable but unscorable, and
+    counting them wrong would depress every candidate identically. The two
+    denominators are therefore different, and per seed the scorer reports
 
-        usable_rollout_rate  = usable / n                 (behaviour: all 190)
+        usable_rollout_rate  = usable / n                 (behaviour: every item)
         correct_overall      = correct / n_scorable       (correctness: 170)
         correct_given_usable = correct / usable_scorable  (usable AND scorable)
 
@@ -485,11 +487,12 @@ class JointCountSeedAggregation:
 class EquivalenceRule:
     """The behaviour equivalence interval. **One definition, and it is seed-aware.**
 
-    Prompt-level binomial uncertainty alone understates what this project has
-    measured. The behaviour metric moves **0.1290 on training seed alone**, and
-    340 prompts drawn from a *single* recovered checkpoint say nothing about that:
-    they estimate one checkpoint's rate precisely and the *recipe's* rate not at
-    all. An interval built only from the binomial term would call two
+    Prompt-level binomial uncertainty alone understates a recipe's true spread.
+    A behaviour metric can move as much on training seed as on the difference
+    being ranked, and prompts drawn from a *single* recovered checkpoint say
+    nothing about that: they estimate one checkpoint's rate precisely and the
+    *recipe's* rate not at all. An interval built only from the binomial term
+    would call two
     initializations different when a reseed of either would have crossed the gap.
 
     So the frozen rule takes the larger of the two uncertainties:
@@ -1909,8 +1912,8 @@ class SuccessiveHalvingPlan:
     #: `None` means no per-capability contract is declared, in which case the
     #: catastrophic rule is **disabled** rather than silently passing: a rule that
     #: cannot see a capability must not report a verdict on it. Every selection
-    #: result records `capability_schema_enforced` so the difference is visible,
-    #: and the Phase-A plan always declares one.
+    #: result records `capability_schema_enforced` so the difference is visible.
+    #: A plan that intends the gate to run declares one.
     capability_schema: CapabilitySchema | None = field(kw_only=True)
     #: Seed-aware usable-rollout floor. Materialized from the control.
     feasibility: FeasibilityRule | None = None
@@ -1936,8 +1939,8 @@ class SuccessiveHalvingPlan:
             #: The MATHEMATICAL requirement: one seed cannot separate two
             #: candidates whose difference is smaller than seed noise. How
             #: large that noise is, is an empirical fact about one metric on
-            #: one study -- 0.1290 for behavior_v0 -- and it belongs to that
-            #: study's policy, not to this constructor.
+            #: one study, and it belongs to that study's policy rather than to
+            #: this constructor.
             raise ValueError(
                 "successive halving needs at least 2 seeds: one seed cannot "
                 "rank candidates separated by less than seed-only variance")
@@ -2068,7 +2071,7 @@ class SuccessiveHalvingPlan:
                 if abs(float(r[self.primary_metric]) - best) <= interval]
 
     def select_rung1_survivors(self, results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-        """Which **searched** leaves advance to seed sb.
+        """Which **searched** leaves advance to the second seed.
 
         The control is not eligible for these slots and does not consume one; it
         advances unconditionally, which is what makes rung 2 a two-seed baseline
@@ -2108,8 +2111,8 @@ class SuccessiveHalvingPlan:
         checkpoint:
 
         ``resolved``               one finalist leads by more than the interval.
-        ``tie_pending``            finalists are equivalent after sa+sb; seed sc is
-                                   owed, and ``winner`` is ``None``.
+        ``tie_pending``            finalists are equivalent after both seeds; a
+                                   further seed is owed, and ``winner`` is ``None``.
         ``unresolved_equivalence`` finalists are *still* equivalent after sc.
                                    ``winner`` is ``None``, and that is the result:
                                    **AutoInitializer v1 did not resolve a unique
@@ -2207,9 +2210,10 @@ def admit_leaves(candidates: Sequence[InitializationState],
 
     Refusing intermediates is not a formality. A depth-only intermediate is
     *larger* than the target and will usually look better on teacher KL than any
-    fully compressed leaf — E8b measured exactly that reversal, DC beating DP by
-    0.89–1.18 nats at full width while FC lost to FP by 0.90–2.82 nats once
-    compressed. An unguarded Top-N would fill up with states that cannot be
+    fully compressed leaf — a reversal this project has measured directly, where
+    the ordering of two operator families at full width was the opposite of
+    their ordering once compressed. An unguarded Top-N would fill up with states
+    that cannot be
     deployed and whose ranking does not transfer.
     """
     searched = [s for s in candidates if s.provenance != "retained_canonical"]

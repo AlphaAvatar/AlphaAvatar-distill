@@ -175,7 +175,7 @@ def validate_extra_stream_config(extra: dict) -> None:
     """The second stream's contract, checked before anything loads.
 
     Every field here is part of the treatment's identity and therefore of the
-    config hash. `kind` in particular is not decoration: the E7 comparison is
+    config hash. `kind` in particular is not decoration: a comparison may be
     "general-text KD" against "the same number of KD positions from in-domain
     text", and a config that cannot say which one it is cannot be the arm it
     claims to be.
@@ -515,7 +515,8 @@ def stream_block_indices(n_blocks: int, seed: int, start: int, count: int) -> li
 def gradient_share(trainer, n_steps: int = 4) -> dict:
     """Measure the extra stream's share of the gradient, without training.
 
-    E7 preregisters one `lambda_extra` and runs no sweep. That is only safe if
+    A preregistered experiment fixes one `lambda_extra` and runs no sweep.
+    That is only safe if
     an obviously mis-scaled weight is caught *before* the run rather than
     inferred from its results — the two are not the same thing, and the second
     is a sweep wearing a disguise.
@@ -674,7 +675,7 @@ class Trainer:
         # not bitwise: a shorter sequence reorders float32 reductions, and Adam
         # amplifies the resulting ~1e-8 gradient differences on near-zero-gradient
         # components. Defaulting on would silently change what a previously
-        # logged config computes, which is exactly what P4 forbids. Opting in per
+        # logged config computes, which reproducibility forbids. Opting in per
         # config also changes that config's hash, so the manifest records which
         # path a run took instead of leaving it to the code version.
         self.truncate_padding = bool(cfg["batch"].get("truncate_padding", False))

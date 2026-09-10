@@ -1,6 +1,6 @@
 """Hand the accelerator from one stage to the next, and prove it happened.
 
-Phase-A attempt 12 died six seconds after Stage 1 succeeded:
+A paid session died six seconds after its search stage succeeded:
 
     Tried to allocate 3.58 GiB. GPU 0 has 44.39 GiB of which 2.36 GiB is free.
     Process 6820 has 24.05 GiB in use … this process has 17.97 GiB in use.
@@ -173,7 +173,7 @@ def require_released(record: dict, *, what: str) -> None:
     """Refuse to start `what` while the driver still holds live device tensors.
 
     The verdict has diagnosed this correctly since the module was written and
-    nothing ever acted on it. Attempt 4's handoff said, in as many words,
+    nothing ever acted on it. One such handoff said, in as many words,
     *"7.55 GiB is still ALLOCATED after the release … a genuine retention, not
     allocator caching"* — and the run continued, because only `free_bytes`
     gated. A diagnosis that is recorded but not enforced is not a gate.

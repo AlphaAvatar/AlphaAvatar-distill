@@ -3,7 +3,8 @@
 E6b's launcher started its driver with the intended incantation —
 ``setsid nohup … > log 2>&1 < /dev/null & disown`` — and the ssh call blocked for
 the whole 434-minute run anyway. The invocation was byte-identical to E6's, which
-had returned in 74 seconds. So the lesson is not "use setsid": E6b already did.
+had returned in 74 seconds. So the lesson is not "use setsid": the blocked run
+already did.
 The lesson is that **whether the channel closes is not under the launcher's
 control**, and a launcher whose orchestration depends on ssh returning has a
 single point of failure it cannot inspect.
@@ -193,7 +194,7 @@ def bootstrap_script(spec: JobSpec) -> str:
         # after the shell has already expanded `$VAR` on that same line, so
         # `TEACHER_REVISION=abc python -c "...$TEACHER_REVISION..."` forwards an
         # empty string — the same class of silent-empty-variable failure that
-        # killed the E6b setup at INIT_READY.
+        # has killed a setup at its first readiness marker.
         env_prefix = "".join(
             f"export {k}={shlex.quote(v)}; " for k, v in sorted(spec.env.items()))
     inner = (

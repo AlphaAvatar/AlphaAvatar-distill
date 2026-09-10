@@ -268,11 +268,76 @@ class TestUntypedResultShapeBranch:
         assert "untyped_result_branch" not in rules(src)
 
 
+# --- rule 9: instance prose in docstrings and comments -----------------------
+
+class TestInstanceProseInCoreDocumentation:
+    """The ninth false negative: the other rules read code and skip prose.
+
+    That is right for them -- a phase name in a `raise` explains a refusal to a
+    human. But the same file's docstring carried this project's whole run
+    history: which experiment measured what, at which probe size, on which
+    seeds, for how many dollars. A reusable core documented by one campaign's
+    incidents is owned by that campaign whether or not any of it executes.
+    """
+
+    #: Verbatim, from `initialization/planning/recovery.py`'s module docstring.
+    RESTORED = ('"""Recovery Top-N orchestration.\n'
+                '\n'
+                '      ->  rung 1: identical 0.86M recovery on seed sa, all of them\n'
+                '\n'
+                '* Selection is on behaviour, not NLL (E7: a -5.22 nat NLL swing\n'
+                '  moved behaviour by +0.0000).\n'
+                '* The behaviour metric moves 0.1290 on seed alone.\n'
+                '"""\n')
+
+    def test_the_restored_docstring_is_flagged(self):
+        assert "instance_prose" in rules(self.RESTORED)
+
+    @pytest.mark.parametrize("text,why", [
+        ("E7 moved held-out NLL", "a run label"),
+        ("Phase-A attempt 5 died", "a phase and an attempt"),
+        ("C1 attempt 8 paid for that gap", "a session of a phase"),
+        ("the 0.86M probe rung", "this project's probe size"),
+        ("moves 0.1290 on seed alone", "this project's measured spread"),
+        ("of the battery's 190 prompts", "this project's battery"),
+        ("recovery on seed sa, all of them", "this project's seed names"),
+        ("died at $0.6426 on a calibration", "a campaign cost"),
+    ])
+    def test_each_named_class_fires(self, text, why):
+        assert "instance_prose" in rules(f'"""{text}"""\n'), why
+
+    def test_it_fires_in_a_comment_too(self):
+        """Comments carried as much of it as docstrings did."""
+        assert "instance_prose" in rules("# Attempt 4 measured what makes this\nx = 1\n")
+
+    @pytest.mark.parametrize("text", [
+        "the softmax over 151,936 vocabulary entries",
+        "schema aadistill.recovery_plan/v1",
+        "grouped-query attention with 8 KV heads",
+        "AGENTS.md P3/P10 forbid a generic word-count cut",
+        "cannot support reproduction (P4)",
+        "activation-aware SVD of the projection",
+        "a 14% miss against the sustained step time",
+    ])
+    def test_generic_content_is_not_flagged(self, text):
+        """The false positives a broad keyword sweep would produce. Mathematics,
+        schema versions, algorithm terminology, model-family capabilities, and
+        the AGENTS.md principle numbers that state the project's RULES rather
+        than its results."""
+        assert "instance_prose" not in rules(f'"""{text}"""\n'), text
+
+    def test_executable_code_is_not_scanned_by_this_rule(self):
+        """It is the prose rule. A phase name in a payload is rule 1's job, and
+        double-reporting would make the two indistinguishable."""
+        found = findings('D = {"note": "no code path to Phase A"}\n', "instance_prose")
+        assert found == []
+
+
 # --- the live tree ----------------------------------------------------------
 
 class TestTheCoreIsClean:
     def test_no_ownership_violations_remain(self):
-        found = OWN.scan(CORE)
+        found, _deferred = OWN.partition(OWN.scan(CORE))
         assert found == [], (
             "core-ownership violations in src/aadistill:\n"
             + "\n".join(f"  {f['rule']}: {f['path']}:{f['line']} "
@@ -281,15 +346,16 @@ class TestTheCoreIsClean:
     def test_every_rule_is_exercised_by_a_restored_defect(self):
         """Guards the guard: a rule with no red case proves nothing.
 
-        The eight classes the maintainer named must each have a test above that
-        makes the checker fire. If a rule is added without one, this fails.
+        Each class the maintainer named must have a test above that makes the
+        checker fire. If a rule is added without one, this fails.
         """
         exercised = set()
         for cls in (TestPhaseNameInAPayload, TestConcretePlanIdDefault,
                     TestExperimentDefaultsInADataclass,
                     TestScoringSemanticsInPlanning, TestCoreReadsRepositoryPaths,
                     TestImportTimeDeploymentLoad, TestNumericStageInInfrastructure,
-                    TestUntypedResultShapeBranch):
+                    TestUntypedResultShapeBranch,
+                    TestInstanceProseInCoreDocumentation):
             exercised |= rules(cls.RESTORED, path=INFRA)
         assert set(OWN.RULES) <= exercised, (
             f"rules with no restored-defect case: {sorted(set(OWN.RULES) - exercised)}")
@@ -299,4 +365,61 @@ class TestTheCoreIsClean:
         path = REPO / "logs/architecture_core_ownership.json"
         if not path.is_file():
             pytest.skip("no recorded report yet")
-        assert json.loads(path.read_text())["total"] == len(OWN.scan(CORE))
+        doc = json.loads(path.read_text())
+        counted, deferred = OWN.partition(OWN.scan(CORE))
+        assert doc["total"] == len(counted)
+        assert doc["deferred_total"] == len(deferred)
+
+
+class TestTheDeferralIsBoundedAndVisible:
+    """The CUDA-validated surface is DEFERRED, not exempt.
+
+    The review that accepted execution SHA 7027a8f4 directed that this exact
+    surface not be modified, so its prose is reported rather than rewritten:
+    editing it for a comment would put the reporting tip's copy of a validated
+    file out of step with the commit the evidence names. That is a real reason,
+    and it is also exactly the shape of a guard being narrowed to fit -- so the
+    membership is pinned here rather than left to the scanner.
+    """
+
+    def test_it_is_exactly_the_surface_the_review_named(self):
+        assert set(OWN.CUDA_VALIDATED_SURFACE) == {
+            "src/aadistill/initialization/operators/attention_activation.py",
+            "src/aadistill/initialization/statistics/attention.py",
+            "src/aadistill/initialization/device.py",
+            "src/aadistill/initialization/planning/fixed_path.py",
+            "src/aadistill/initialization/adapters/__init__.py",
+            "src/aadistill/initialization/adapters/qwen3.py",
+        }
+
+    def test_every_deferred_path_exists(self):
+        """A deferral naming a file that is gone silently shrinks the gate."""
+        for p in OWN.CUDA_VALIDATED_SURFACE:
+            assert (REPO / p).is_file(), p
+
+    def test_it_defers_only_the_prose_rule(self):
+        """The other eight rules read executable code. A real ownership defect
+        inside a validated file is still a defect, and must still count."""
+        _, deferred = OWN.partition(OWN.scan(CORE))
+        assert {f["rule"] for f in deferred} <= {"instance_prose"}
+
+    def test_a_deferred_file_still_produces_findings(self):
+        """Not silence. If this returns nothing, the deferral has become
+        indistinguishable from the surface being clean."""
+        _, deferred = OWN.partition(OWN.scan(CORE))
+        assert len(deferred) > 0
+        assert {f["path"] for f in deferred} <= set(OWN.CUDA_VALIDATED_SURFACE)
+
+    def test_removing_a_path_makes_its_findings_count_again(self):
+        """The property that makes this a deferral rather than an exemption."""
+        found = OWN.scan(CORE)
+        before, _ = OWN.partition(found)
+        original = OWN.CUDA_VALIDATED_SURFACE
+        try:
+            OWN.CUDA_VALIDATED_SURFACE = tuple(
+                p for p in original
+                if p != "src/aadistill/initialization/device.py")
+            after, _ = OWN.partition(found)
+        finally:
+            OWN.CUDA_VALIDATED_SURFACE = original
+        assert len(after) > len(before)

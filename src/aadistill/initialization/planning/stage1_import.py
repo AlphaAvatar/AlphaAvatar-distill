@@ -1,4 +1,4 @@
-"""Import a *completed, verified* Phase-A Stage-1 result. Nothing weaker.
+"""Import a *completed, verified* Stage-1 search result. Nothing weaker.
 
 Attempts 11 and 12 independently produced the same Stage-1 search — identical
 config hash, identical 43 states and 7 complete leaves, identical five selected

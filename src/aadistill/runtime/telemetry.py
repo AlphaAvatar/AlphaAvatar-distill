@@ -1,6 +1,6 @@
 """Where the wall clock went. Operational only — never scientific identity.
 
-Phase-B attempt 3 spent 544.7 min in Stage 1 and stopped on its deadline. What
+A paid search spent 544.7 min in one stage and stopped on its deadline. What
 was known afterwards: `depth.causal_kl_greedy_v1` ran 12 expansions totalling
 388.2 min. What was *not* known, and could not be recovered because the run log
 is the only surviving record: how much of that was reference forwards versus

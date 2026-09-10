@@ -49,7 +49,7 @@ class ActivationStatsCollector:
         d, i = self.hidden_size, self.intermediate_size
         # ACCUMULATE ON THE MODEL'S DEVICE. The hooks receive activations from
         # the model, so an accumulator anywhere else is a cross-device add: that
-        # is what killed Phase-A attempt 7 in `ffn_abs_sum[idx] += ...`, and it
+        # is what killed a paid session in `ffn_abs_sum[idx] += ...`, and it
         # had never fired because this collector's only previous execution was
         # the Stage-0 regeneration on the CPU-only dev box, where the model and
         # the accumulators coincide.

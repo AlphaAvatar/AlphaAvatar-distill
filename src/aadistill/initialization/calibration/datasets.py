@@ -15,14 +15,14 @@ data:
 The failure this module exists to prevent is quiet: nothing crashes when a
 calibration mixture happens to contain three promotion prompts. The search simply
 selects, a little, for the thing it will later be graded on, and the final number
-is no longer an out-of-sample number. E8a already hit a near-miss here — its
-leakage proof "caught two real collisions" (STATE.md 7).
+is no longer an out-of-sample number. This project has already had a near-miss
+here: its leakage proof caught two real collisions.
 
 So the check is content-based and fail-closed. Prompt *content* hashes are
 compared, not ids: the same question arriving through two dataset paths under two
 ids is exactly the leak, and an id comparison cannot see it. The convention
 matches ``scripts/data/check_e8_calibration_leakage.py`` so a role check and the
-existing E8 proof mean the same thing by the same rule.
+existing leakage proof mean the same thing by the same rule.
 """
 
 from __future__ import annotations

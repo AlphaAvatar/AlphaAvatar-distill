@@ -21,7 +21,7 @@ mechanical here:
   obscures it, and a report missing the general-language series cannot say that.
 
 The gate deliberately does **not** look at the NLL *values*. A worse or better
-initialization NLL must not cancel or promote E8 — the endpoint is autonomous
+initialization NLL must not cancel or promote a candidate — the endpoint is autonomous
 behaviour after matched recovery. The only value-level check is validity:
 finite, positive, and not silently zero.
 """
@@ -33,7 +33,7 @@ import json
 import math
 from pathlib import Path
 
-# The three general-language / teacher-native series E8 requires per checkpoint.
+# The three general-language / teacher-native series required per checkpoint.
 # `holdout_v1` is the historical 40-document series, preserved for continuity;
 # `fineweb_val_e7` is E7's 20x larger disjoint stream; `teacher_native_val` is
 # the pack's own held-out validation slice, the teacher-native counterpart. They

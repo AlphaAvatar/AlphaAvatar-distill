@@ -12,8 +12,8 @@ the checkpoint being transformed, not from the original teacher.
 
 That is the whole point of making width an operator. Run last, it sees a stream
 that depth, attention and FFN compression have already reshaped; run first, it
-sees the teacher's. Those are different projections, and E8a is the evidence that
-the difference is not negligible.
+sees the teacher's. Those are different projections, and this project has
+measured that the difference is not negligible.
 """
 
 from __future__ import annotations

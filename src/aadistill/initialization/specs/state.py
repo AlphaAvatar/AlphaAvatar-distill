@@ -15,8 +15,8 @@ checkpoints**. A state is created with no evaluation at all; ``attach_evaluation
 refuses any evaluation whose ``artifact_digest`` is not this state's own, and
 ``ready_for_ranking`` requires a present, matching, complete evaluation. A child
 cannot inherit its parent's NLL because there is no code path that would let it —
-the same guarantee ``init/nll_gate.py`` established for initialization NLL after
-E8, generalized to every node of the search. The binding is to the *artifact*
+the same guarantee the NLL gate established for initialization NLL, generalized
+to every node of the search. The binding is to the *artifact*
 (every shard, the index, the config, the architecture signature, the tokenizer)
 rather than to one filename, so it survives a checkpoint being sharded.
 

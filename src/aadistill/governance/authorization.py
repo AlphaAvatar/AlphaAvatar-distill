@@ -8,9 +8,9 @@ records who permitted how much of it, when.
 
 The launcher loads it and cannot proceed past what it grants. That matters
 because every budget overrun in this project's history came from a limit that
-lived in prose: E6b overran by $0.56 with the number in a plan document, and a
-finished corpus build idled ~$8.70 because teardown was tied to a generous
-backstop rather than to completion.
+lived in prose: one session overran with its limit stated only in a plan
+document, and a finished corpus build idled for hours because teardown was tied
+to a generous backstop rather than to completion.
 
 **This module holds mechanism only.** Which actions an authorization may
 express, which files its harness covers and which on-disk keys would claim a
@@ -180,8 +180,8 @@ class SpendAuthorization:
 
         The schema string, the plan-hash key and the enforcement sentence used
         to be literals here, so this generic serializer named one project's
-        schema and stated "no code path to Phase A" for every artifact any
-        experiment would ever write.
+        schema and named one of its phases in the refusal sentence of every
+        artifact any experiment would ever write.
         """
         policy = self.action_policy
         if not policy.wire_schema:

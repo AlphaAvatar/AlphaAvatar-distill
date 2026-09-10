@@ -3,8 +3,8 @@
 Every phase of this project has re-implemented the same contract: a grant is a
 human decision about *money and permission*, an authorization is a machine
 derivation about *identity*, and the failure mode is a grant that asserts an
-identity nobody computed. Phase A, Phase B, the continuation and C1 each carry
-their own copy of the check.
+identity nobody computed. Every launchable phase in this repository carries its
+own copy of the check.
 
 The mechanism is experiment-agnostic and lives here:
 

@@ -1,7 +1,7 @@
 """Generation-runtime comparability, v2. Additive; nothing historical is rewritten.
 
-Phase-A attempt 4 was refused at $0.2052 by a binding that was working exactly as
-specified, on a difference that carries no generation semantics. Every observed
+A paid session was refused by a binding that was working exactly as specified,
+on a difference that carries no generation semantics. Every observed
 field that governs decoding matched the Stage-3 controls — vLLM, transformers,
 torch, dtype, engine settings, tokenizer, chat template, context, stop ids — and
 the protocol hashes still differed, because inside the protocol the runtime is a

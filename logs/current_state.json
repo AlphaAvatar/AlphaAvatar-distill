@@ -8,11 +8,11 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods: 8gtnsbigpgaz76 deleted at 57.47 min, provider_confirms_gone true, and an independent read-only poller recorded an empty inventory at 15:20:22Z."
+  "note": "zero pods. The three CUDA stage-F subruns were each provider-confirmed gone, and a read-only inventory poll on 2026-09-10 returned an empty list."
  },
  "authorized": {
   "any": false,
-  "note": "NO LIVE GRANT AND NO LIVE AUTHORIZATION. The Attempt-9 grant and its authorization are CONSUMED -- provider resource 8gtnsbigpgaz76 was created. Neither permits a retry or a replacement pod. A tenth attempt needs a new maintainer review and a new grant.",
+  "note": "NO LIVE GRANT, AUTHORIZATION, FORMAL BUNDLE OR PROVIDER RESOURCE. Attempt 9 consumed the first three; the CUDA engineering authorization is spent and its campaign closed. See `blocker`.",
   "c1_attempt9": "CONSUMED. $1.0440, 57.47 min. BOTH REPLAY GATES PASSED; stage F aborted on a device defect, since repaired at $0. logs/autoinit_c1_attempt9/outcome.json.",
   "c1_attempts": "ten labels, NINE paid, $4.0001, zero ATTENTION science. Per-attempt cost and cause: logs/BUDGET_LEDGER.md."
  },
@@ -67,9 +67,9 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt 9 produced C1's FIRST scientific observation -- both frozen replay gates PASSED -- then aborted in stage F before any treatment output. The device defect that caused it is REPAIRED at $0 (2026-09-08) and verified logically, never on a GPU.",
-  "the_ask": "independent review of the Stage-F repair, and a maintainer decision on whether a tenth attempt is worth the one ceiling-sized slot that remains.",
-  "budget": "$267.8598 spent of the unchanged $283.7600 cap; $15.9002 uncommitted, which covers exactly one $15.1475 attempt."
+  "status": "Attempt 9 produced C1's FIRST scientific observation -- both frozen replay gates PASSED -- then aborted in stage F before any treatment output. That device defect is REPAIRED and CONFIRMED ON REAL CUDA at execution SHA 7027a8f4. Engineering campaign closed.",
+  "the_ask": "Milestone-A merge review, and a maintainer decision on whether a tenth attempt is worth the one ceiling-sized slot that remains.",
+  "budget": "$267.8998 spent of the unchanged $283.7600 cap; $15.8602 uncommitted, which covers exactly one $15.1475 attempt with $0.7127 after it."
  },
  "read_order": [
   "logs/PHASE_INDEX.md -- history by phase, START HERE",
@@ -111,8 +111,8 @@
    "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
    "protocol": "logs/phase_c0_preregistration.json fb2eeea531f9f0d1",
    "sizing_evidence": "logs/phase_c0_sizing_evidence.json 4786242d349e9b21",
-   "summary": "850 scorable / 950 total; 3 fresh paired seeds as fixed blocks; primary correct_overall; SESOI +0.010, design alternative +0.015.",
-   "authorizes": "nothing"
+   "authorizes": "nothing",
+   "design": "850 scorable / 950 total; 3 fresh paired seeds; primary correct_overall; SESOI +0.010."
   },
   "c1": {
    "status": "IMPLEMENTED / TEN LABELS, NINE PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / NO CURRENT GRANT OR AUTHORIZATION",
@@ -122,10 +122,10 @@
    "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
    "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL.",
-   "not_built": "grant, authorization and bundle all CONSUMED by attempt 9; none is live. A tenth attempt needs a new grant, a new authorization, a fresh bundle and a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
-   "blocker": "CLEARED. The stage-F device boundary in attention.activation_importance_v1 was repaired at $0 on 2026-09-08 and is now CONFIRMED ON REAL CUDA by the 2026-09-10 engineering validation: both geometries, all five placements observed on cuda:0. Science unmoved. The remaining blocker is the absence of a grant, not the code.",
-   "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, on an L40S). treatment + endpoint: UNMEASURED -- zero probes trained, zero evaluated, no decision. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort: not an ATTENTION result and not a frozen-rule INCONCLUSIVE.",
-   "repairs": "SIX defects repaired at $0 before attempt 9 (three observed working on hardware); the stage-F device boundary repaired at $0 after it. That repair is LOGICAL / CPU-STRUCTURAL EVIDENCE ONLY and remains so until the CUDA validation runs -- the defect was a cross-device placement, which a single-device machine cannot observe. Detail: logs/STATE.md.",
+   "not_built": "grant, authorization and bundle all CONSUMED by attempt 9. A tenth attempt needs all three again plus a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
+   "blocker": "CLEARED. The stage-F device boundary in attention.activation_importance_v1 was repaired at $0 on 2026-09-08 and CONFIRMED ON REAL CUDA at execution SHA 7027a8f4 by the 2026-09-10 engineering validation: both geometries, all five placements observed on cuda:0. Science unmoved. The remaining blocker is the absence of a grant, not the code.",
+   "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, L40S). treatment + endpoint: UNMEASURED. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort -- not an ATTENTION result and not a frozen-rule INCONCLUSIVE.",
+   "repairs": "SIX defects repaired at $0 before attempt 9 (three observed working on hardware); the stage-F device boundary repaired at $0 after it and CONFIRMED ON REAL CUDA at execution SHA 7027a8f4 (2026-09-10). Detail: logs/STATE.md.",
    "owed": "a new maintainer review and a NEW grant for any tenth attempt; the launch_bound record and 12 gates are owed again. Evidence: logs/autoinit_c1_attempt9/."
   },
   "c2": {
@@ -137,16 +137,14 @@
   "measured_utc": "2026-09-01T04:00:00Z",
   "roots": {
    "git": "/home/ecs-user/AlphaAvatar-distill",
-   "canonical artifacts": "/home/ecs-user/aad-artifacts",
-   "scratch": "/home/ecs-user/aad-scratch/sessions/<session-id>"
+   "artifacts": "/home/ecs-user/aad-artifacts"
   },
   "checkpoints_deleted": 0,
   "scientific_artifacts_deleted": 0,
   "open_maintainer_decision": "KEEP / unresolved ownership: 2 duplicate checkpoint pairs, 2.92 GiB. NOT deletion candidates.",
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
-  "free_space_note": "12.01 GiB free after the limited P12 cleanup of rebuildable caches. Detail: c1_storage_recovery.json.",
   "free_bytes": 12897964032,
-  "preserved_scratch_20260901": "/home/ecs-user/aad-artifacts/autoinit/preserved_scratch_20260901/MANIFEST.json owns it"
+  "free_note": "detail: c1_storage_recovery.json"
  },
  "blocker": "NOT AUTHORIZED. No live grant, no live authorization, no staged bundle -- attempt 9 consumed all three. C1's replay is MEASURED (2/2 PASS); its treatment and endpoint are UNMEASURED. A tenth attempt needs a new maintainer review, a new grant, a new authorization, a fresh bundle and a fresh launch_bound readiness record.",
  "deferred_not_blocking": {
@@ -169,9 +167,11 @@
   "record": "logs/migrations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {
-  "status": "PASS 2026-09-10 at subrun 3 on an NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130). Both geometries executed attention.activation_importance_v1 through the real verified suffix; all five device placements OBSERVED on cuda:0.",
+  "status": "PASS 2026-09-10, subrun 3, execution SHA 7027a8f4, NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130). Both geometries ran attention.activation_importance_v1 through the real verified suffix; index and 03_attention preserved; prefix not re-executed; all five device observations passed on cuda:0; treatment records written and read back.",
+  "campaign": "CLOSED. Three subruns, $0.0400 cumulative, one active resource at a time, each provider-confirmed non-billing before the next. Zero pods. Per-subrun detail is OWNED by campaign.json; read it there.",
   "campaign_cost_usd": 0.04,
-  "means": "the repaired and migrated treatment suffix now successfully completes real-CUDA engineering validation. ENGINEERING EVIDENCE ONLY.",
+  "means": "the repaired and migrated treatment suffix HAS successfully completed real-CUDA engineering validation. ENGINEERING EVIDENCE ONLY -- not a C1 treatment result, not an endpoint, not a decision.",
+  "amendment": "logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json corrects subrun 2's failure class and subrun 3's PASS wording. Outcomes, costs, devices and provider identities are unaltered.",
   "record": "logs/runs/cuda_stage_f/ and logs/validations/cuda-stage-f/v1/",
   "authorizes": "nothing"
  }

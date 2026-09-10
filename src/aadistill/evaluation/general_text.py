@@ -4,9 +4,9 @@ E7's first question is whether general language modelling can be restored. These
 are the numbers that answer it — and every one of them is a **diagnostic**. They
 may describe what the treatment did to the student's distribution over ordinary
 prose; they may not promote a checkpoint. That rule is not a style preference:
-E6b showed two objectives improving validation CE by the same amount while only
-one moved autonomous behaviour, and the FineWeb NLL of the E1 lineage actually
-*reverses* against behaviour past the 2.96M rung.
+this project has measured two objectives improving validation CE by the same
+amount while only one moved autonomous behaviour, and a lineage whose held-out
+NLL *reverses* against behaviour past a certain scale.
 
 Four quantities, deliberately separate:
 

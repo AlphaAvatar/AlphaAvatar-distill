@@ -138,14 +138,45 @@ class TestTheSnapshotStatesTheRequiredFacts:
     @pytest.mark.parametrize("pattern,fact", [
         (r"\bNO DECISION\b", "attempt 9 is NO DECISION"),
         (r"pre-treatment infrastructure abort", "why it is NO DECISION"),
-        (r"LOGICAL\s*/\s*CPU-STRUCTURAL EVIDENCE ONLY",
-         "the stage-F repair's evidentiary standing"),
+        # Until 2026-09-10 this required "LOGICAL / CPU-STRUCTURAL EVIDENCE
+        # ONLY", which was the repair's standing while no accelerator had ever
+        # executed it. A real CUDA device has now observed it, so the required
+        # fact is the confirmation and the SHA it is bound to -- an
+        # unattributed "confirmed" would be the weaker claim.
+        (r"CONFIRMED ON REAL CUDA", "the stage-F repair's evidentiary standing"),
+        (r"7027a8f4", "the execution SHA that confirmation is bound to"),
+        (r"ENGINEERING EVIDENCE ONLY",
+         "that the CUDA validation is not a C1 result"),
         (r"CURRENT ENGINEERING ACTIVITY",
          "the migration is engineering, not a C1 result"),
     ])
     def test_the_fact_appears(self, pattern, fact):
         blob = "\n".join(v for _, v in strings(snapshot()))
         assert re.search(pattern, blob, re.I), f"the snapshot does not state {fact}"
+
+    @pytest.mark.parametrize("pattern,why", [
+        (r"CPU-STRUCTURAL EVIDENCE ONLY",
+         "the repair is no longer CPU-only evidence"),
+        (r"NOT AUTHORIZED[^.]{0,40}(GPU|CUDA)|GPU[^.]{0,30}NOT authorized",
+         "the GPU validation was authorized, run and closed"),
+        (r"\$?267\.8598\b", "that cumulative is superseded by $267.8998"),
+        (r"\$?15\.9002\b", "that remaining figure is superseded by $15.8602"),
+    ])
+    def test_the_stale_claim_is_gone(self, pattern, why):
+        """The other half. A snapshot that states the new fact while still
+        carrying the old one contradicts itself, and a reader has no way to
+        tell which line is current."""
+        bad = {p: v for p, v in strings(snapshot()) if re.search(pattern, v, re.I)}
+        assert not bad, f"{why}; still present in:\n" + "\n".join(
+            f"  {p}: {v}" for p, v in bad.items())
+
+    def test_the_engineering_campaign_is_closed(self):
+        cv = snapshot()["cuda_engineering_validation"]
+        assert cv["campaign_cost_usd"] == 0.04
+        assert "CLOSED" in cv["campaign"]
+        assert cv["authorizes"] == "nothing"
+        assert (REPO / cv["amendment"].split()[0]).is_file(), (
+            "the snapshot names an interpretation amendment that does not exist")
 
     def test_nothing_is_authorized(self):
         s = snapshot()

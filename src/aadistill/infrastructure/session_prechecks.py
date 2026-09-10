@@ -2,7 +2,7 @@
 
 These were overridden methods on three launcher subclasses — which is why the
 micro-preflight quietly had no commit gate at all while the continuation and
-Phase A each had their own copy of one, and nobody could see the asymmetry
+two other launchers each had their own copy of one, and nobody could see the asymmetry
 without reading three files. A precheck is now a value in
 `SessionSpec.precheck`, so a reader can count them.
 
@@ -89,15 +89,15 @@ def session_commit_gate(repo_root: Path, auth_path: str, *,
     """The harness at `--session-commit` must be the authorized one.
 
     The pod does not run the dev box's working tree: it clones a bundle and
-    checks out this commit. Continuation attempt 5 died at $0.1369 on a stale
-    binding, and this is the gate that followed.
+    checks out this commit. A paid session has died on a stale binding, and
+    this is the gate that followed.
 
     Rather than compare two commit hashes — which cannot be equal, since the
     authorization artifact is written before it is committed — it asks the
     question that matters: do the harness files AT THAT COMMIT digest to the
     authorized value, and does that commit carry this exact authorization?
 
-    `check_lineage` adds Phase A's stronger third question: is everything else in
+    `check_lineage` adds a stronger third question: is everything else in
     the tree unchanged from the authorized base? It is a parameter rather than a
     separate function because the difference between the two sessions was one
     call, and duplicating ninety lines to express it is how the two copies

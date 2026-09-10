@@ -8,7 +8,8 @@ to nothing else.
 
 Two transports, chosen for what this project has actually verified (P14):
 
-* **Polling** goes over the RunPod GraphQL API. Every launcher since E2 reads
+* **Polling** goes over the RunPod GraphQL API. Every launcher in this
+  repository reads
   `pod(input:{podId:…}) { runtime { ports … } }` this way, so the query shape,
   the auth-in-query-string form and the `runtime: null`-means-starting semantics
   are all confirmed by use.

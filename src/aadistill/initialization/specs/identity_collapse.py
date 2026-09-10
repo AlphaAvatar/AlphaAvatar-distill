@@ -1,12 +1,12 @@
 """When a searched initialization turns out to BE an imported one.
 
-Phase-B attempt 5 completed its joint P=2 search and then died in Stage 2 on
+A paid session completed its joint search and then died in a later stage on
 ``duplicate seeds in [20260726, 20260726]``. The pooling guard was right. What
 was wrong was the candidate universe it was asked to pool.
 
 The preregistration froze "5 searched + 2 imported + 1 control = **8 distinct**".
-Two of the five searched leaves turned out to be **byte-identical** to two
-retained Phase-A finalists: same content-derived state id, same re-derived
+Two of its searched leaves turned out to be **byte-identical** to two finalists
+retained from an earlier phase: same content-derived state id, same re-derived
 artifact digest, same bytes. State ids are content-derived, so a larger search
 that rediscovers the same composition from the same root produces the same
 initialization — which is the determinism the project wants, and which the

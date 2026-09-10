@@ -46,17 +46,22 @@ HISTORICAL = EQ.find_generations()
 def test_the_frozen_assets_are_untouched():
     """Neither historical asset may move because C1 needed a scorer.
 
-    The pinned digest has moved twice, both times for ownership rather than for
-    arithmetic: at the initialization migration from v2's 808080a7c5d8… to v3,
-    and again at the Milestone-A closure, when `score_recovery_search.py` was
-    repointed and `planning/recovery.py` gave up this study's constants.
+    The pinned digest has moved three times, every one for ownership rather
+    than for arithmetic: at the initialization migration from v2's 808080a7c5d8…
+    to v3; at the Milestone-A closure, when `score_recovery_search.py` was
+    repointed and `planning/recovery.py` gave up this study's constants; and at
+    the post-CUDA closure, when `planning/recovery.py` gave up the last of this
+    study's *prose* — the probe size, the seed names, the battery counts and the
+    measured seed spread that had been documenting reusable core.
 
-    The four modules that actually COMPUTE a score — `usable_rollout`,
-    `strict_answer`, `behavior`, `capability` — are byte-identical across both
-    moves, and that is checked by execution rather than argued: 570 frozen
-    Phase-A samples across 3 search paths, re-scored through the pre- and
-    post-migration trees, are identical per sample and in aggregate
-    (`logs/architecture_scoring_equivalence.json`, regenerated at this tree).
+    The third move is docstring-only, and that is not asserted from the diff:
+    of the six declared files exactly one changed, and the four modules that
+    actually COMPUTE a score — `usable_rollout`, `strict_answer`, `behavior`,
+    `capability` — are byte-identical across all three moves. That is checked by
+    execution rather than argued: 570 frozen search-path samples, re-scored
+    through the pre- and post-migration trees, are identical per sample and in
+    aggregate (`logs/architecture_scoring_equivalence.json`, regenerated at this
+    tree).
 
     The battery hashes below did not move at all, which is the other half of
     what this asserts. A digest that moved WITH a battery hash would be a
@@ -69,7 +74,21 @@ def test_the_frozen_assets_are_untouched():
     contract = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v3"
     assert contract["digest"] == (
-        "70ebaef52fd52045dc5d221ab450a0a325790100135433230bc1f0ab365446b2")
+        "4102513cd6f705e2cd3b2da6f818862142019042177837e54b941cde4f52de04")
+
+    # The four scoring modules are byte-identical to the base commit this
+    # branch left. Read from git, not asserted: the whole point of the pin
+    # moving is that "only prose changed" must be demonstrable.
+    import subprocess
+    changed = subprocess.run(
+        ["git", "diff", "--name-only",
+         "4f7b38be36be3f0ae206fa55a849b8e420c60fc9", "--",
+         "src/aadistill/evaluation/usable_rollout.py",
+         "src/aadistill/evaluation/strict_answer.py",
+         "src/aadistill/evaluation/behavior.py",
+         "src/aadistill/evaluation/capability.py"],
+        cwd=REPO, capture_output=True, text=True).stdout.split()
+    assert changed == [], f"a scoring module moved: {changed}"
 
     # The pinned digest is only allowed to move because this holds. Read it,
     # rather than trusting the docstring above.

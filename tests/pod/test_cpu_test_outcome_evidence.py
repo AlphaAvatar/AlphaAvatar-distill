@@ -115,7 +115,8 @@ def test_the_collector_never_raises_on_a_billing_pod(monkeypatch):
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
             remote_python="/opt/train/bin/python",
-            workspace_root="/workspace", checkout_root="/workspace/aad"),
+            workspace_root="/workspace", checkout_root="/workspace/aad",
+            min_cuda_version="13.0"),
 setup_failure_files=("/workspace/x.json",)),
         ev={}, say=lambda m: None)
     SessionRunner._collect_setup_failure_evidence(fake, Boom(), 1)

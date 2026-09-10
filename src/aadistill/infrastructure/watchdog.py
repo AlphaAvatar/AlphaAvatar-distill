@@ -1,11 +1,11 @@
 """An independent budget watchdog, and a watcher that cannot mistake silence.
 
-Two E6b failures live here.
+Two failures from one paid session live here.
 
 **The backstop that was never observed to fire.** RunPod's `--terminate-after`
-has been the documented last-resort cost layer since E4 and has never once been
-seen to act. On 2026-08-08 the deadline was 00:28:47 and the pod was still
-`RUNNING` at 00:34. It is now demoted to a redundant third layer; the layer that
+has been the documented last-resort cost layer for this project's whole history
+and has never once been seen to act: a pod has been observed still `RUNNING`
+minutes past its deadline. It is now demoted to a redundant third layer; the layer that
 is *supposed* to work is `Watchdog`, which polls the provider itself, decides
 against its own clock, terminates, and — the part `--terminate-after` skipped —
 **verifies the pod actually disappeared**, retrying until it has.
@@ -41,8 +41,8 @@ class WatchdogPolicy:
 
     `session_start_epoch` is the epoch of the session's **first** pod create,
     not the current pod's. Billing is per session: a cold-host redraw replaces
-    the pod and must not hand the replacement a fresh meter (E6b launcher,
-    `pod_start_epoch` written once).
+    the pod and must not hand the replacement a fresh meter --
+    `pod_start_epoch` is written once.
     """
 
     pod_id: str
@@ -292,7 +292,7 @@ class SessionWatcher:
 
     `assess` takes the provider observation as a required positional argument.
     That is the design: a caller cannot reach a verdict with markers alone, so
-    the E6b inference — quiet log, therefore quiet session — is not expressible.
+    the inference "quiet log, therefore quiet session" is not expressible.
     """
 
     def __init__(self, *, stall_seconds: float = 1800.0) -> None:
