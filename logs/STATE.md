@@ -16,8 +16,8 @@ how the snapshot came to disagree with itself.
 | endpoint | **UNMEASURED** — zero evaluated, no decision |
 | attempt 9 | **NO DECISION** — a pre-treatment infrastructure abort, not an ATTENTION result and not a frozen-rule `INCONCLUSIVE` |
 | authorization | **none** — no live grant, no live authorization, no staged bundle |
-| spend | **`$267.8671`** of `$283.7600`, leaving **`$15.8929`** — still one full `$15.1475` formal attempt, with `$0.7454` after it |
-| CUDA stage-F | **EXECUTED 2026-09-09, INFRASTRUCTURE FAIL**, `$0.0073`, teardown provider-confirmed. **No CUDA observation**: the launcher read a refused `pip install` as success and the check exited on `ModuleNotFoundError` before any operator ran. Not a C1 result. [`runs/cuda_stage_f/cuda_stage_f_20260910/`](runs/cuda_stage_f/cuda_stage_f_20260910/) |
+| spend | **`$267.8925`** of `$283.7600`, leaving **`$15.8675`** — still one full `$15.1475` formal attempt, with `$0.7200` after it |
+| CUDA stage-F | **PASS 2026-09-10**, subrun 3 of 3, `$0.0400` total. NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130): both geometries executed `attention.activation_importance_v1` through the real verified suffix, and **all five device placements were observed on `cuda:0`**. Two earlier subruns failed in the harness — a pipeline that hid pip's exit status, then a matrix criterion that demanded the child be on the device while `device.py` documents it is not. **Engineering evidence only**, not a C1 result. [`runs/cuda_stage_f/`](runs/cuda_stage_f/) |
 | stage-F device repair | **logical / CPU-structural evidence only** until the CUDA validation runs; the defect is a cross-device placement, which a single-device machine cannot observe |
 | architecture migration | a **current engineering activity**, not a C1 result and no evidence about ATTENTION. Record: [`migrations/initialization-core/v1/`](migrations/initialization-core/v1/) |
 | owed | **one GPU micro-validation**, requested and NOT authorized: [`validations/cuda-stage-f/v1/request.md`](validations/cuda-stage-f/v1/request.md) |

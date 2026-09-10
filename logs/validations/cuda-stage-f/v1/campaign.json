@@ -31,8 +31,22 @@
    "teardown_confirmed": true,
    "execution_sha": "fd2aa174eb7f1d15236021e2688003349c918199",
    "record": "logs/runs/cuda_stage_f/cuda_stage_f_20260910_s2/"
+  },
+  {
+   "subrun_id": "cuda_stage_f_20260910_s3",
+   "pod_id": "8tbsixglzz64ox",
+   "gpu": "NVIDIA RTX 2000 Ada Generation",
+   "rate_usd_per_hour": 0.24,
+   "elapsed_minutes": 4.561,
+   "cost_usd": 0.0182,
+   "cost_basis": "elapsed x confirmed rate",
+   "verdict": "CUDA ENGINEERING VALIDATION PASS",
+   "failure_class": null,
+   "teardown_confirmed": true,
+   "execution_sha": "7027a8f4c0a7684c892b483a2193025cc26c1b58",
+   "record": "logs/runs/cuda_stage_f/cuda_stage_f_20260910_s3/"
   }
  ],
  "authorizes": "nothing",
- "booked_usd": 0.0218
+ "booked_usd": 0.04
 }

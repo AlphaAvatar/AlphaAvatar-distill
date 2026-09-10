@@ -1945,3 +1945,57 @@ before the validation so a missing module costs seconds and is reported as
 setup. **The fixed launcher has not been run on a GPU.** One resource was
 authorized and it has been consumed; no replacement was created and none will be
 without a new maintainer decision.
+
+---
+
+## 2026-09-10 — CUDA stage-F engineering campaign: PASS at subrun 3, `$0.0400` total
+
+**Not a C1 attempt.** Engineering validation under the maintainer decision of
+2026-09-10 and its amendment 1, which permits a bounded repair loop inside the
+SAME cumulative budget. The C1 attempt count is **unchanged at ten labels,
+nine paid**.
+
+| subrun | pod | GPU | cost | verdict |
+| --- | --- | --- | --- | --- |
+| `cuda_stage_f_20260910` | `ij54bzvcyldm9j` | RTX 2000 Ada `$0.24/h` | $0.0073 | FAIL — setup |
+| `cuda_stage_f_20260910_s2` | `zoz95844krv2ze` | RTX 2000 Ada `$0.24/h` | $0.0145 | FAIL — acceptance criterion |
+| `cuda_stage_f_20260910_s3` | `8tbsixglzz64ox` | RTX 2000 Ada `$0.24/h` | $0.0182 | **CUDA ENGINEERING VALIDATION PASS** |
+
+**Cumulative engineering spend `$0.0400`** of the `$0.4000` ceiling — 10% — and
+`$0.0400` of the `$0.2500` soft cap. The cap was never a per-invocation
+allocation: each subrun started from what the previous ones had booked, and the
+watchdog was handed the remaining ceiling, not a fresh one.
+
+Project spend `$267.8598` → **`$267.8925`** of the unchanged `$283.7600` cap
+(the first subrun's `$0.0073` was already booked on 2026-09-09; this adds
+`$0.0327`). Remaining **`$15.8675`**, which still covers one full `$15.1475`
+formal C1 attempt with **`$0.7200`** after it.
+
+**Three resources, never more than one at a time**, each provider-confirmed
+non-billing before the next was created. Three creates, one per subrun, no
+provider-level retries. Final inventory: zero pods.
+
+**What the two failures were, and why neither is a defect in the code under
+test.** The first was mine: a shell pipeline that reported `tail`'s exit status,
+hiding a PEP 668 refusal. The second was also mine, and more interesting — the
+per-operator matrix demanded the operator's CHILD be on the requested device,
+while `initialization/device.py` documents that `ChildBuilder` deliberately does
+not place it. On CPU that check passed trivially; on the first real GPU it
+failed all eight cases while every operator had in fact succeeded. CPU did not
+hide a device bug there, it hid a wrong acceptance criterion.
+
+**What subrun 3 established, on an NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch
+2.9.1+cu130).** The repaired and migrated treatment suffix now **successfully
+completes real-CUDA engineering validation**: both declared geometries executed
+`attention.activation_importance_v1` through the real
+`materialize_fixed_path_suffix` from a genuinely gated parent, kept index 3 and
+`03_attention`, wrote no prefix checkpoint, and produced a treatment record that
+validates. All five device placements were **observed** on `cuda:0` — the host
+snapshot, exactly one `stats_to` working copy, statistics co-located with
+`o_proj.weight` at every layer, the score vector allocated on the operand
+device, and the returned vector host-resident.
+
+**This is engineering evidence only.** It is not a C1 treatment result, not an
+endpoint measurement, and not a decision. Formal C1 is unchanged: replay
+MEASURED 2/2 PASS, formal treatment UNMEASURED, endpoint UNMEASURED, Attempt 9
+NO DECISION.

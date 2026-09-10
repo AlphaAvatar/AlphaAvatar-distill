@@ -1,0 +1,352 @@
+{
+ "schema": "aadistill.cuda_engineering_run/v1",
+ "run_id": "cuda_stage_f_20260910_s3",
+ "scientific_use": false,
+ "is_formal_c1": false,
+ "authorizes": "nothing",
+ "authorization": "cuda_stage_f_engineering.2026-09-10",
+ "authorization_sha256": "a23416687d69209b55b059953e79a6e6b1499072d70f4aaa624c46a699d3f7ef",
+ "campaign_id": "cuda_stage_f",
+ "subrun_id": "cuda_stage_f_20260910_s3",
+ "campaign_booked_before_usd": 0.0218,
+ "campaign_remaining_total_usd": 0.3782,
+ "campaign_remaining_to_soft_usd": 0.2282,
+ "execution_sha": "7027a8f4c0a7684c892b483a2193025cc26c1b58",
+ "deployment": {
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "remote_python": "/workspace/eng-venv/bin/python",
+  "min_cuda_version": "13.0",
+  "container_disk_gb": 20,
+  "pip_deps": [
+   "numpy",
+   "transformers"
+  ],
+  "authorizes": "nothing",
+  "venv": {
+   "path": "/workspace/eng-venv",
+   "system_site_packages": true,
+   "_why": "--system-site-packages so the image's CUDA-enabled torch is inherited rather than reinstalled. A plain venv would hide it, and `pip install torch` into an empty venv can resolve to a CPU build -- which would silently turn a GPU validation into a CPU one.",
+   "_why_not_break_system_packages": "The image's interpreter is PEP 668 externally managed, and --break-system-packages is the override that refusal names. It is a justified last resort for a disposable pod, not a generic requirement, so the venv is the default and the override is declared per deployment."
+  },
+  "allow_break_system_packages": false,
+  "capability": {
+   "compute_capability_min": [
+    8,
+    0
+   ],
+   "dtype": "bfloat16",
+   "min_free_vram_gib": 2,
+   "_probe": "the readiness probe must import, see CUDA, meet the capability floor, support the dtype AND complete a real allocation and matmul on the device. Printing CUDA=False beside an IMPORTS_OK marker is not GPU readiness."
+  }
+ },
+ "timeline": [
+  {
+   "utc": "2026-09-10T06:07:09.183685+00:00",
+   "msg": "  NVIDIA RTX 2000 Ada Generation: securePrice $0.24/h, 16GB, stock Low"
+  },
+  {
+   "utc": "2026-09-10T06:07:09.848496+00:00",
+   "msg": "  NVIDIA RTX A4000: securePrice $0.25/h, 16GB, stock Low"
+  },
+  {
+   "utc": "2026-09-10T06:07:10.250128+00:00",
+   "msg": "  NVIDIA RTX A4500: securePrice $0.25/h, 20GB, stock Low"
+  },
+  {
+   "utc": "2026-09-10T06:07:10.999539+00:00",
+   "msg": "  NVIDIA RTX A5000: securePrice $0.27/h, 24GB, stock None"
+  },
+  {
+   "utc": "2026-09-10T06:07:11.467773+00:00",
+   "msg": "  NVIDIA L4: securePrice $0.49/h, 24GB, stock Low"
+  },
+  {
+   "utc": "2026-09-10T06:07:11.902456+00:00",
+   "msg": "  NVIDIA GeForce RTX 3090: securePrice $0.5/h, 24GB, stock Low"
+  },
+  {
+   "utc": "2026-09-10T06:07:12.366897+00:00",
+   "msg": "  NVIDIA GeForce RTX 4090: securePrice $0.74/h, 24GB, stock Medium"
+  },
+  {
+   "utc": "2026-09-10T06:07:12.822561+00:00",
+   "msg": "  NVIDIA RTX A6000: securePrice $0.53/h, 48GB, stock Low"
+  },
+  {
+   "utc": "2026-09-10T06:07:13.605380+00:00",
+   "msg": "  NVIDIA L40S: securePrice $1.09/h, 48GB, stock High"
+  },
+  {
+   "utc": "2026-09-10T06:07:13.605416+00:00",
+   "msg": "accepted NVIDIA RTX 2000 Ada Generation at $0.24/h \u2014 $0.0218 booked, $0.2282 to the soft stop (57.0 min), $0.3782 to the ceiling (94.6 min)"
+  },
+  {
+   "utc": "2026-09-10T06:07:13.605449+00:00",
+   "msg": "creating ONE pod (attempt 1 of 1) \u2014 create --image runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 --gpu-id NVIDIA RTX 2000 Ada Generation --gpu-count"
+  },
+  {
+   "utc": "2026-09-10T06:07:14.632518+00:00",
+   "msg": "created 8tbsixglzz64ox \u2014 registering and starting the watchdog NOW"
+  },
+  {
+   "utc": "2026-09-10T06:07:14.632973+00:00",
+   "msg": "watchdog detached (launch #1) \u2014 hard 94.6 min / $0.3782 remaining"
+  },
+  {
+   "utc": "2026-09-10T06:07:15.095237+00:00",
+   "msg": "actual rate $0.24/h confirmed at or below the quote"
+  },
+  {
+   "utc": "2026-09-10T06:09:53.343429+00:00",
+   "msg": "endpoint 213.173.108.40:20377"
+  },
+  {
+   "utc": "2026-09-10T06:09:53.941511+00:00",
+   "msg": "shipping 1.55 MB of source"
+  },
+  {
+   "utc": "2026-09-10T06:10:09.047019+00:00",
+   "msg": "environment /workspace/eng-venv ready (Python 3.12.3)"
+  },
+  {
+   "utc": "2026-09-10T06:10:32.440018+00:00",
+   "msg": "installed: numpy==2.5.3, safetensors==0.8.0, torch==2.9.1+cu130, transformers==5.17.0"
+  },
+  {
+   "utc": "2026-09-10T06:10:38.766376+00:00",
+   "msg": "GPU ready \u2014 NVIDIA RTX 2000 Ada Generation cc[8, 9] bf16=True free=15.481GiB torch=2.9.1+cu130"
+  },
+  {
+   "utc": "2026-09-10T06:10:38.766406+00:00",
+   "msg": "running: cd /workspace/aad && PYTHONPATH=src:scripts /workspace/eng-venv/bin/python scripts/validation/cuda_engineering_check.py --config configs/validation/cuda_engineering.json --run-id cuda_stage_f_20260910_s3"
+  },
+  {
+   "utc": "2026-09-10T06:10:51.547997+00:00",
+   "msg": "validation exited 0"
+  },
+  {
+   "utc": "2026-09-10T06:11:35.465288+00:00",
+   "msg": "collected 61 artifact file(s)"
+  },
+  {
+   "utc": "2026-09-10T06:11:35.465308+00:00",
+   "msg": "tearing down 8tbsixglzz64ox"
+  },
+  {
+   "utc": "2026-09-10T06:11:47.270418+00:00",
+   "msg": "provider confirms the pod is gone and not billing"
+  },
+  {
+   "utc": "2026-09-10T06:11:47.270664+00:00",
+   "msg": "campaign ledger: 3 subrun(s), $0.0400 booked of $0.40"
+  }
+ ],
+ "quotes": [
+  {
+   "gpu": "NVIDIA RTX 2000 Ada Generation",
+   "secure_price_per_hour": 0.24,
+   "stock": "Low",
+   "vram_gb": 16
+  },
+  {
+   "gpu": "NVIDIA RTX A4000",
+   "secure_price_per_hour": 0.25,
+   "stock": "Low",
+   "vram_gb": 16
+  },
+  {
+   "gpu": "NVIDIA RTX A4500",
+   "secure_price_per_hour": 0.25,
+   "stock": "Low",
+   "vram_gb": 20
+  },
+  {
+   "gpu": "NVIDIA L4",
+   "secure_price_per_hour": 0.49,
+   "stock": "Low",
+   "vram_gb": 24
+  },
+  {
+   "gpu": "NVIDIA GeForce RTX 3090",
+   "secure_price_per_hour": 0.5,
+   "stock": "Low",
+   "vram_gb": 24
+  },
+  {
+   "gpu": "NVIDIA RTX A6000",
+   "secure_price_per_hour": 0.53,
+   "stock": "Low",
+   "vram_gb": 48
+  },
+  {
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "secure_price_per_hour": 0.74,
+   "stock": "Medium",
+   "vram_gb": 24
+  },
+  {
+   "gpu": "NVIDIA L40S",
+   "secure_price_per_hour": 1.09,
+   "stock": "High",
+   "vram_gb": 48
+  }
+ ],
+ "accepted_quote": {
+  "gpu": "NVIDIA RTX 2000 Ada Generation",
+  "secure_price_per_hour": 0.24,
+  "stock": "Low",
+  "vram_gb": 16
+ },
+ "create_command": [
+  "/home/ecs-user/.local/bin/runpodctl",
+  "pod",
+  "create",
+  "--image",
+  "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "--gpu-id",
+  "NVIDIA RTX 2000 Ada Generation",
+  "--gpu-count",
+  "1",
+  "--container-disk-in-gb",
+  "20",
+  "--volume-in-gb",
+  "0",
+  "--min-cuda-version",
+  "13.0",
+  "--ports",
+  "22/tcp",
+  "--name",
+  "aad-cuda-eng-cuda_stage_f_20260910_s3",
+  "--terminate-after",
+  "2026-09-10T07:41:46Z"
+ ],
+ "create_stdout_tail": "{\n  \"containerDiskInGb\": 20,\n  \"costPerHr\": 0.24,\n  \"desiredStatus\": \"RUNNING\",\n  \"env\": [\n    \"PUBLIC_KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHyLTGGhfoY+v3w7CEP8xX0shw4wzWxHnJDqsh60731 alphaavatar-runpod\\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X+f7hsoLZFbJeFXGStjQiea01LsDIFDE5LdnKCrOjGQK10BvmiW593WTL27OChjStN+xb0zMIyTu/rKas9wNL5msNlUbljmwwj4pIPTEMK31FPhUiBpy2vTlHrH1hdNapHX9nh5iOTTvgZV/Vu+a2lxZvdTFkl5GtTLs2TGsHSmKijnrPro2j++BLUd69VTvW8tFsN/w6VALIAnmrt23wUq15Chjhgs3Ar2SI9A/Ww5+T6aRnP6nOKk+DPGAB5RIVL1Rla88sG3lyraNVSFpBfC8tDnyq7PO6uzolWBJ+Dw4I9HP9eia5IJcGRoi+pGCD0Ml0bFmSQiA1coT2zw1 runpodctl-ssh-key\"\n  ],\n  \"gpuCount\": 1,\n  \"id\": \"8tbsixglzz64ox\",\n  \"imageName\": \"runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404\",\n  \"lastStatusChange\": \"Rented by User: Thu Sep 10 2026 06:07:14 GMT+0000 (Coordinated Universal Time)\",\n  \"machine\": {\n    \"gpuDisplayName\": \"RTX 2000 Ada\",\n    \"location\": \"RO\"\n  },\n  \"memoryInGb\": 31,\n  \"name\": \"aad-cuda-eng-cuda_stage_f_20260910_s3\",\n  \"ports\": \"22/tcp\",\n  \"vcpuCount\": 6,\n  \"volumeInGb\": 0,\n  \"volumeMountPath\": \"/workspace\"\n}\n",
+ "provider_resource_created": true,
+ "pod_id": "8tbsixglzz64ox",
+ "watchdog_launches": 1,
+ "watchdog_journal": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/bbb3dbf0-ddf4-4817-805a-4c9072e84d75/scratchpad/eng_s3/watchdog.jsonl",
+ "actual_price_per_hour": 0.24,
+ "payload_bytes": 1623490,
+ "unpack_rc": 0,
+ "venv_setup": "Python 3.12.3\nRC=0\nWarning: Permanently added '[213.173.108.40]:20377' (ECDSA) to the list of known hosts.\n",
+ "pip_rc": 0,
+ "pip_output_tail": "PIP_RC=0\nWarning: Permanently added '[213.173.108.40]:20377' (ECDSA) to the list of known hosts.\n",
+ "installed_versions": [
+  "numpy==2.5.3",
+  "safetensors==0.8.0",
+  "torch==2.9.1+cu130",
+  "transformers==5.17.0"
+ ],
+ "validation_interpreter": "/workspace/eng-venv/bin/python",
+ "readiness_probe": {
+  "rc": 0,
+  "output": "{\"torch\": \"2.9.1+cu130\", \"numpy\": \"2.5.3\", \"transformers\": \"5.17.0\", \"cuda_available\": true, \"cuda_runtime\": \"13.0\", \"device\": \"NVIDIA RTX 2000 Ada Generation\", \"capability\": [8, 9], \"free_gib\": 15.481, \"total_gib\": 15.574, \"bf16_supported\": true, \"device_matmul_finite\": true}\nPROBE_OK\nPROBE_RC=0\nWarning: Permanently added '[213.173.108.40]:20377' (ECDSA) to the list of known hosts.\n",
+  "report": {
+   "torch": "2.9.1+cu130",
+   "numpy": "2.5.3",
+   "transformers": "5.17.0",
+   "cuda_available": true,
+   "cuda_runtime": "13.0",
+   "device": "NVIDIA RTX 2000 Ada Generation",
+   "capability": [
+    8,
+    9
+   ],
+   "free_gib": 15.481,
+   "total_gib": 15.574,
+   "bf16_supported": true,
+   "device_matmul_finite": true
+  }
+ },
+ "validation_command": "cd /workspace/aad && PYTHONPATH=src:scripts /workspace/eng-venv/bin/python scripts/validation/cuda_engineering_check.py --config configs/validation/cuda_engineering.json --run-id cuda_stage_f_20260910_s3",
+ "validation": {
+  "started_utc": "2026-09-10T06:10:38.766409+00:00",
+  "finished_utc": "2026-09-10T06:10:51.547715+00:00",
+  "returncode": 0,
+  "stdout": "  narrow         depth.positional_v0              ok\n  narrow         width.global_pca_v0              ok\n  narrow         ffn.activation_importance_v0     ok\n  narrow         attention.weight_proxy_v0        ok\n  shallow_wide   depth.positional_v0              ok\n  shallow_wide   width.global_pca_v0              ok\n  shallow_wide   ffn.activation_importance_v0     ok\n  shallow_wide   attention.weight_proxy_v0        ok\ndepth.causal_kl_greedy_v1: round 0 candidate 1/4 (layer 0) score 0.036748 \u00b7 1 evals \u00b7 0.0 min \u00b7 395.94 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/4 (layer 1) score 0.022539 \u00b7 2 evals \u00b7 0.0 min \u00b7 628.66 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/4 (layer 2) score 0.016554 \u00b7 3 evals \u00b7 0.0 min \u00b7 780.26 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/4 (layer 3) score 0.010491 \u00b7 4 evals \u00b7 0.0 min \u00b7 884.16 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 3 score 0.010491; runner-up 2 margin 6.063e-03\ndepth.causal_kl_greedy_v1: round 1 candidate 1/3 (layer 0) score 0.037006 \u00b7 5 evals \u00b7 0.0 min \u00b7 991.28 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/3 (layer 1) score 0.027489 \u00b7 6 evals \u00b7 0.0 min \u00b7 1076.89 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/3 (layer 2) score 0.022688 \u00b7 7 evals \u00b7 0.0 min \u00b7 1147.35 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 2 score 0.022688; runner-up 1 margin 4.801e-03\ndepth.causal_kl_greedy_v1: round 0 candidate 1/4 (layer 0) score 0.036748 \u00b7 1 evals \u00b7 0.0 min \u00b7 769.43 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/4 (layer 1) score 0.022539 \u00b7 2 evals \u00b7 0.0 min \u00b7 1040.99 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/4 (layer 2) score 0.016554 \u00b7 3 evals \u00b7 0.0 min \u00b7 1179.29 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/4 (layer 3) score 0.010491 \u00b7 4 evals \u00b7 0.0 min \u00b7 1263.76 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 3 score 0.010491; runner-up 2 margin 6.063e-03\ndepth.causal_kl_greedy_v1: round 1 candidate 1/3 (layer 0) score 0.037006 \u00b7 5 evals \u00b7 0.0 min \u00b7 1374.54 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/3 (layer 1) score 0.027489 \u00b7 6 evals \u00b7 0.0 min \u00b7 1456.85 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/3 (layer 2) score 0.022688 \u00b7 7 evals \u00b7 0.0 min \u00b7 1523.12 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 2 score 0.022688; runner-up 1 margin 4.801e-03\n  suffix suffix_narrow          ok\ndepth.causal_kl_greedy_v1: round 0 candidate 1/4 (layer 0) score 0.036748 \u00b7 1 evals \u00b7 0.0 min \u00b7 773.23 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/4 (layer 1) score 0.022539 \u00b7 2 evals \u00b7 0.0 min \u00b7 1055.21 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/4 (layer 2) score 0.016554 \u00b7 3 evals \u00b7 0.0 min \u00b7 1202.52 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/4 (layer 3) score 0.010491 \u00b7 4 evals \u00b7 0.0 min \u00b7 1287.66 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 3 score 0.010491; runner-up 2 margin 6.063e-03\ndepth.causal_kl_greedy_v1: round 0 candidate 1/4 (layer 0) score 0.036748 \u00b7 1 evals \u00b7 0.0 min \u00b7 764.41 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/4 (layer 1) score 0.022539 \u00b7 2 evals \u00b7 0.0 min \u00b7 1048.04 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/4 (layer 2) score 0.016554 \u00b7 3 evals \u00b7 0.0 min \u00b7 1195.79 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/4 (layer 3) score 0.010491 \u00b7 4 evals \u00b7 0.0 min \u00b7 1287.20 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 3 score 0.010491; runner-up 2 margin 6.063e-03\n  suffix suffix_mid             ok\n\n8/8 case(s) passed; artifacts complete\nreport: /workspace/aad/artifacts/validation/cuda_engineering/cuda_stage_f_20260910_s3/report.json\n",
+  "stderr": "Warning: Permanently added '[213.173.108.40]:20377' (ECDSA) to the list of known hosts.\n[transformers] `torch_dtype` is deprecated! Use `dtype` instead!\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 382.38it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 5968.06it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 962.66it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 6221.85it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 984.12it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 5283.61it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1155.14it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 8770.87it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 791.98it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 6222.62it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1046.74it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 5959.23it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1132.37it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 7921.25it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1037.94it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 6071.74it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 6497.34it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1120.87it/s]\n\nLoading weights:   0%|          | 0/24 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 24/24 [00:00<00:00, 7358.43it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 570.34it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 4804.79it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 685.34it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 5245.88it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 655.46it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 6380.42it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 726.92it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 5828.89it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 740.91it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 5400.06it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 713.56it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 5676.09it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 679.68it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 7964.88it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 797.70it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 7858.29it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 5947.68it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 754.91it/s]\n\nLoading weights:   0%|          | 0/35 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 6902.09it/s]\n"
+ },
+ "collected_files": [
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/environment.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/report.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/artifacts/cuda_validation_calibration/items.jsonl",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/00_depth/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/00_depth/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/00_depth/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/01_ffn/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/01_ffn/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/01_ffn/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/02_residual_width/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/02_residual_width/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/02_residual_width/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/03_attention/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/03_attention/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/incumbent/steps/03_attention/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/00_depth/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/00_depth/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/00_depth/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/01_ffn/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/01_ffn/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/01_ffn/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/02_residual_width/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/02_residual_width/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/02_residual_width/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/03_attention/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/03_attention/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/probe/steps/03_attention/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/stage_f/steps/03_attention/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/stage_f/steps/03_attention/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/stage_f/steps/03_attention/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_mid/stage_f/treatment_record.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/artifacts/cuda_validation_calibration/items.jsonl",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/00_depth/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/00_depth/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/00_depth/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/01_ffn/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/01_ffn/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/01_ffn/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/02_residual_width/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/02_residual_width/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/02_residual_width/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/03_attention/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/03_attention/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/03_attention/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/00_depth/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/00_depth/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/00_depth/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/01_ffn/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/01_ffn/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/01_ffn/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/02_residual_width/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/02_residual_width/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/02_residual_width/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/03_attention/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/03_attention/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/probe/steps/03_attention/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/stage_f/steps/03_attention/config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/stage_f/steps/03_attention/generation_config.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/stage_f/steps/03_attention/model.safetensors",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/stage_f/treatment_record.json",
+  "artifacts/cuda_engineering/cuda_stage_f_20260910_s3/suffix_evidence.json"
+ ],
+ "teardown": {
+  "remove_rc": 0,
+  "remove_output": "pod \"8tbsixglzz64ox\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead\n",
+  "provider_confirms_gone": true,
+  "polls": [
+   {
+    "pods": []
+   }
+  ]
+ },
+ "final_pod_inventory": {
+  "pods": []
+ },
+ "verdict": "CUDA ENGINEERING VALIDATION PASS",
+ "elapsed_minutes": 4.561,
+ "estimated_cost_usd": 0.04,
+ "_cost_basis": "elapsed wall clock x the provider-confirmed hourly rate. An ESTIMATE: the provider bills per second from provisioning, and this is the evidence available at teardown.",
+ "subrun_cost_usd": 0.0182,
+ "campaign_cost_after_usd": 0.04,
+ "provider_create_attempts": 1
+}

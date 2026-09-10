@@ -22,13 +22,13 @@
   "note": "aad_autoinit_c338a76b.bundle 5c1384bb41c3 was consumed by attempt 9 and authorizes nothing further."
  },
  "budget": {
-  "cumulative_spend_usd": 267.8671,
+  "cumulative_spend_usd": 267.8925,
   "authorized_cap_usd": 283.76,
-  "remaining_usd": 15.8929,
+  "remaining_usd": 15.8675,
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "$283.7600 - $267.8671 = $15.8929 remaining; minus the $15.1475 ceiling leaves $0.7454 >= 0, so EXACTLY ONE ceiling-sized formal attempt still fits. Includes $0.0073 of ENGINEERING spend (CUDA stage-F, not a C1 attempt). Headroom is not permission.",
+  "headroom_note": "$283.7600 - $267.8925 = $15.8675 remaining; minus the $15.1475 ceiling leaves $0.7200 >= 0, so EXACTLY ONE ceiling-sized formal attempt still fits. Includes $0.0400 of ENGINEERING spend across three CUDA stage-F subruns, none of them a C1 attempt. Headroom is not permission.",
   "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. Headroom is not permission."
  },
  "frozen": {
@@ -123,7 +123,7 @@
    "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL.",
    "not_built": "grant, authorization and bundle all CONSUMED by attempt 9; none is live. A tenth attempt needs a new grant, a new authorization, a fresh bundle and a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
-   "blocker": "CLEARED at $0 on 2026-09-08: the stage-F device boundary in attention.activation_importance_v1 is repaired -- apply() builds a compute-device working copy via device.stats_to and head_write_energy fails closed on a mismatch. Science unmoved. STILL NOT OBSERVED ON A GPU: the 2026-09-09 engineering validation failed in setup before any operator ran. The remaining blocker is the absence of a grant, not the code.",
+   "blocker": "CLEARED. The stage-F device boundary in attention.activation_importance_v1 was repaired at $0 on 2026-09-08 and is now CONFIRMED ON REAL CUDA by the 2026-09-10 engineering validation: both geometries, all five placements observed on cuda:0. Science unmoved. The remaining blocker is the absence of a grant, not the code.",
    "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, on an L40S). treatment + endpoint: UNMEASURED -- zero probes trained, zero evaluated, no decision. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort: not an ATTENTION result and not a frozen-rule INCONCLUSIVE.",
    "repairs": "SIX defects repaired at $0 before attempt 9 (three observed working on hardware); the stage-F device boundary repaired at $0 after it. That repair is LOGICAL / CPU-STRUCTURAL EVIDENCE ONLY and remains so until the CUDA validation runs -- the defect was a cross-device placement, which a single-device machine cannot observe. Detail: logs/STATE.md.",
    "owed": "a new maintainer review and a NEW grant for any tenth attempt; the launch_bound record and 12 gates are owed again. Evidence: logs/autoinit_c1_attempt9/."
@@ -169,9 +169,10 @@
   "record": "logs/migrations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {
-  "status": "EXECUTED 2026-09-09, INFRASTRUCTURE FAIL, $0.0073, teardown provider-confirmed. The launcher reported a refused pip install as success; the check exited on ModuleNotFoundError before any operator ran. NO CUDA OBSERVATION. Not a C1 result.",
-  "stage_f_repair": "LOGICAL / CPU-STRUCTURAL EVIDENCE ONLY, unchanged.",
-  "record": "logs/runs/cuda_stage_f/cuda_stage_f_20260910/",
+  "status": "PASS 2026-09-10 at subrun 3 on an NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130). Both geometries executed attention.activation_importance_v1 through the real verified suffix; all five device placements OBSERVED on cuda:0.",
+  "campaign_cost_usd": 0.04,
+  "means": "the repaired and migrated treatment suffix now successfully completes real-CUDA engineering validation. ENGINEERING EVIDENCE ONLY.",
+  "record": "logs/runs/cuda_stage_f/ and logs/validations/cuda-stage-f/v1/",
   "authorizes": "nothing"
  }
 }

@@ -1,72 +1,81 @@
 # CUDA stage-F engineering validation — outcome
 
-**EXECUTED 2026-09-09. INFRASTRUCTURE FAIL. No CUDA observation was made.**
+**CUDA ENGINEERING VALIDATION PASS**, 2026-09-10, at subrun 3 of 3.
 
 | | |
 | --- | --- |
-| execution SHA | `355a1f7d7b0f09840dc8f4d84923e97a2039003f` |
-| authorization | `authorization.json`, `a23416687d69209b…` |
-| provider resource | `ij54bzvcyldm9j` — NVIDIA RTX 2000 Ada Generation, 16 GB |
-| accepted / actual rate | `$0.24/h` quoted, `$0.24/h` confirmed |
-| create attempts | **1** |
-| watchdog launches | **1** |
-| elapsed | 1.84 min |
-| cost | **`$0.0073`** (estimate: elapsed × confirmed rate; the watchdog journal independently accrued `$0.0070`) |
-| teardown | **provider-confirmed** — pod absent from inventory, journal records `pod_billing: false`, `TERMINATED` |
-| verdict | **FAIL (setup)** |
+| execution SHA (the PASS) | `7027a8f4c0a7684c892b483a2193025cc26c1b58` |
+| authorization | `authorization.json` + `authorization_amendment_1.json` |
+| device | NVIDIA RTX 2000 Ada Generation — cc **8.9**, bf16 supported, 15.48 GiB free |
+| runtime | torch `2.9.1+cu130`, CUDA runtime 13.0, numpy 2.5.3, transformers 5.17.0, safetensors 0.8.0 |
+| resources | **3 total, never more than 1 at a time**; 3 creates, one per subrun, no provider retries |
+| campaign cost | **`$0.0400`** of the `$0.4000` ceiling and the `$0.2500` soft cap |
+| teardown | **all three provider-confirmed non-billing**; final inventory zero pods |
 
-## What happened
+## The subruns
 
-The spend contract held end to end. One bounded quote pass over nine candidates
-chose the cheapest available; one create attempt was issued; the watchdog was
-detached in the same second the pod id existed; the provisioned rate was
-confirmed at the quote; work stopped at the first substantive exception; and
-teardown was verified rather than assumed.
+| subrun | pod | cost | class | outcome |
+| --- | --- | --- | --- | --- |
+| `cuda_stage_f_20260910` | `ij54bzvcyldm9j` | $0.0073 | setup | FAIL |
+| `cuda_stage_f_20260910_s2` | `zoz95844krv2ze` | $0.0145 | harness criterion | FAIL |
+| `cuda_stage_f_20260910_s3` | `8tbsixglzz64ox` | $0.0182 | — | **PASS** |
 
-The **launcher's dependency step** failed, and both defects were mine:
+**Subrun 1 — setup.** A shell pipeline reported `tail`'s exit status, hiding a
+PEP 668 refusal; the check exited on `ModuleNotFoundError: numpy`. Repaired by
+one interpreter for install, probe and validation (`--system-site-packages`
+venv, so the image's cu130 torch is inherited rather than resolved afresh),
+pip's own return code through a marker, and a readiness probe that requires
+CUDA, the capability floor, the dtype and a real device matmul.
 
-1. `pip install ... 2>&1 | tail -5` makes the shell report **tail's** exit
-   status, which is always `0`. The install had already been refused and the
-   run recorded `pip_rc: 0`.
-2. The image's interpreter is PEP 668 *externally managed*, so a plain
-   `pip install` is refused by design. The refusal message names the flag it
-   wants; the launcher did not pass it.
+**Subrun 2 — a wrong acceptance criterion.** Setup passed and both suffix
+geometries executed the treatment operator successfully, but the per-operator
+matrix failed 8 of 8 with every case recording `applied: True` and no error. The
+criterion demanded the operator's CHILD be on the requested device;
+`initialization/device.py` documents that `ChildBuilder` deliberately does not
+place it. On CPU the check passed trivially, so it had never fired. Corrected to
+ask what the matrix is for: did the operator run against a parent **on** the
+device, read from the parent's weights, and is the child host-resident as the
+builder contract states. A host parent still fails.
 
-So the validation entry point started and exited `1` four seconds later on
-`ModuleNotFoundError: No module named 'numpy'` — inside
-`aadistill.data.extra_stream`, reached while registering operators.
+Neither failure was a defect in the code under test.
 
-## What this does NOT say
+## What subrun 3 observed
 
-**Nothing about the stage-F repair.** No operator executed. No device placement
-was observed. The accurate statement is that **the repaired and migrated
-treatment suffix has not yet successfully completed real-CUDA engineering
-validation** — the operator itself did enter GPU execution in formal Attempt 9
-and failed there, which is why the repair exists. The repair remains **logical /
-CPU-structural evidence only**.
+Matrix **8/8**. Suffix case **both geometries**, `device_proofs_are_meaningful:
+true`.
 
-It is not a C1 attempt, not a C1 result, and changes no formal C1 status:
-replay MEASURED 2/2 PASS, formal treatment UNMEASURED, endpoint UNMEASURED,
-Attempt 9 NO DECISION.
+Per geometry (`suffix_narrow`, `suffix_mid`): `attention.activation_importance_v1`
+executed through the real `materialize_fixed_path_suffix` from a genuinely gated
+parent; suffix index **3** retained and `03_attention` kept its number; **no
+prefix checkpoint written**; the output stayed bound to the full frozen path;
+the treatment record wrote and read back, is not a replay, and carries
+`n_pinned: 0`.
 
-## What was done about it
+Five placements **observed**, not assumed:
 
-Both defects are fixed in `scripts/validation/cuda_engineering_launch.py` and
-pinned by regressions in `tests/validation/test_cuda_engineering_launch.py`,
-including one that reads the dependency step's **code** (not its comments) and
-fails if the pipe returns. An import and device-readiness probe now runs before the
-validation. It is **billed setup on a live pod, not a zero-dollar step** — but
-it costs seconds rather than the whole attempt, and it reports a setup failure
-as a setup failure.
+| proof | evidence |
+| --- | --- |
+| collector state is the host snapshot | `['cpu', 'cpu']` |
+| exactly one `stats_to` working copy on the device | `n_calls: 1`, `cuda:0` |
+| statistics and `o_proj.weight` co-located | `cuda:0` / `cuda:0` at every layer |
+| score vector allocated on the operand device | `cuda:0` |
+| returned score vector host-resident | `cpu` |
 
-**The fixed launcher has not been run on a GPU.** One resource was authorized
-and it has been consumed. No replacement was created and none will be without a
-new maintainer decision.
+That is the Attempt-9 failure class — statistics on the host meeting weights on
+`cuda:0` — exercised on real hardware and passing.
 
-## Why a $0 rehearsal did not catch it
+## What this does and does not mean
 
-The payload probe extracted the shipped tar into a bare directory and ran the
-check from it alone, which proved the *payload* was import-complete — on a
-machine that already had numpy. What it could not test is the *pod's*
-interpreter and its package policy. That gap is what the new probe closes — on the
-pod, which means it is billed, and before the money-spending step.
+**The repaired and migrated treatment suffix has now successfully completed
+real-CUDA engineering validation.** The operator itself had entered GPU
+execution before, in formal Attempt 9, and failed there; that is why the repair
+exists.
+
+It is **engineering evidence only**: not a C1 treatment result, not an endpoint
+measurement, not a decision. No formal seeds, no confirmation battery, no
+Attempt-9 checkpoint, no recovery training. Formal C1 is unchanged — replay
+MEASURED 2/2 PASS, formal treatment UNMEASURED, endpoint UNMEASURED, Attempt 9
+NO DECISION.
+
+A pod-side readiness probe is **billed setup after provider creation**, not a
+zero-dollar step. It costs seconds rather than the whole attempt.

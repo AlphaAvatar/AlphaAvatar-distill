@@ -1,0 +1,241 @@
+{
+ "schema": "aadistill.autoinit.fixed_path_suffix_execution/v1",
+ "_what_this_is": "one arm's tail, executed from a parent that ANOTHER run produced and gated. It is not a replay: the executed step's output digest was never pinned, so this record reports an identity, not a match.",
+ "path": {
+  "schema": "aadistill.autoinit.fixed_path/v1",
+  "path_id": "validation.cuda_suffix.treatment",
+  "family": "qwen3",
+  "target_spec": {
+   "head_dim": 32,
+   "hidden_size": 64,
+   "intermediate_size": 128,
+   "max_position_embeddings": 512,
+   "num_attention_heads": 2,
+   "num_hidden_layers": 2,
+   "num_key_value_heads": 1,
+   "rope_theta": 1000000.0,
+   "tie_word_embeddings": true,
+   "vocab_size": 512
+  },
+  "target_spec_hash": "b881cf4de8f136ce920ebc9c7369db74fe3b7ffd1b746fb68ef1e1f836f080e0",
+  "steps": [
+   {
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "profile_id": "validation.cuda_synthetic@v1",
+    "expected_artifact_digest": null,
+    "label": ""
+   },
+   {
+    "impl_id": "ffn.activation_importance_v0",
+    "profile_id": "validation.cuda_synthetic@v1",
+    "expected_artifact_digest": null,
+    "label": ""
+   },
+   {
+    "impl_id": "width.global_pca_v0",
+    "profile_id": "validation.cuda_synthetic@v1",
+    "expected_artifact_digest": "60326277196a43ce9e7758b2dd6a78b1d9cbe047e25100ead51796fbb7ecf772",
+    "label": "pre-ATTENTION parent"
+   },
+   {
+    "impl_id": "attention.activation_importance_v1",
+    "profile_id": "validation.cuda_synthetic@v1",
+    "expected_artifact_digest": null,
+    "label": "treatment ATTENTION"
+   }
+  ],
+  "kinds": [
+   "DEPTH",
+   "FFN",
+   "RESIDUAL_WIDTH",
+   "ATTENTION"
+  ],
+  "path_label": "DEPTH(validation.cuda_synthetic@v1)->FFN(validation.cuda_synthetic@v1)->RESIDUAL_WIDTH(validation.cuda_synthetic@v1)->ATTENTION(validation.cuda_synthetic@v1)",
+  "root_repo_id": "validation/fixture",
+  "root_revision": "synthetic",
+  "stats_spec": {
+   "spec_id": "residual_moments_and_ffn_magnitude",
+   "version": 1,
+   "accumulation_dtype": "float64",
+   "quantities": [
+    "residual_sum",
+    "residual_sqsum",
+    "residual_count",
+    "ffn_abs_sum",
+    "ffn_sq_sum",
+    "token_counts"
+   ],
+   "spec_hash": "08b0dffbe900683e0bb81e8ec8d969f6783d07aa04427c0dcceba164e32c2e5b"
+  },
+  "device": "cuda",
+  "seed": 0,
+  "max_shard_size": null
+ },
+ "path_hash": "4855bcef072afbf876f44184cf7cebc7a6445f3fb6fdb7c4f025633f97597f40",
+ "is_replay": false,
+ "output_digest_was_pre_pinned": false,
+ "output_digest_claim": "NONE. No expected digest exists for this output and none is asserted. Do not read this record as a replay match.",
+ "verified_prefix": {
+  "path_id": "validation.cuda_suffix.treatment",
+  "start_index": 3,
+  "parent_step_index": 2,
+  "parent_checkpoint": "/workspace/aad/artifacts/validation/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/02_residual_width",
+  "parent_artifact_digest": "60326277196a43ce9e7758b2dd6a78b1d9cbe047e25100ead51796fbb7ecf772",
+  "parent_result_spec_hash": "03ef5d8fde18ae8f33b3a0205d80566b3cd7eaade2faaf60db7d6faf99455b69",
+  "expected_parent_artifact_digest": "60326277196a43ce9e7758b2dd6a78b1d9cbe047e25100ead51796fbb7ecf772",
+  "expected_path_hash": "4855bcef072afbf876f44184cf7cebc7a6445f3fb6fdb7c4f025633f97597f40",
+  "prefix_reference_steps": [
+   {
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "profile_id": "validation.cuda_synthetic@v1",
+    "expected_artifact_digest": null,
+    "label": ""
+   },
+   {
+    "impl_id": "ffn.activation_importance_v0",
+    "profile_id": "validation.cuda_synthetic@v1",
+    "expected_artifact_digest": null,
+    "label": ""
+   },
+   {
+    "impl_id": "width.global_pca_v0",
+    "profile_id": "validation.cuda_synthetic@v1",
+    "expected_artifact_digest": "60326277196a43ce9e7758b2dd6a78b1d9cbe047e25100ead51796fbb7ecf772",
+    "label": "pre-ATTENTION parent"
+   }
+  ],
+  "expected_suffix_steps": [
+   [
+    "attention.activation_importance_v1",
+    "validation.cuda_synthetic@v1"
+   ]
+  ],
+  "premise": "verified",
+  "actual_path_hash": "4855bcef072afbf876f44184cf7cebc7a6445f3fb6fdb7c4f025633f97597f40",
+  "executed_step_indices": [
+   3
+  ],
+  "prefix_step_indices_not_executed": [
+   0,
+   1,
+   2
+  ],
+  "root_placement": {
+   "declared": "cuda",
+   "n_parameters": 24,
+   "n_buffers": 2,
+   "devices": [
+    "cuda:0"
+   ],
+   "n_tensors_checked": 26,
+   "resolved": "cuda:0"
+  },
+  "parent_reidentified_artifact_digest": "60326277196a43ce9e7758b2dd6a78b1d9cbe047e25100ead51796fbb7ecf772",
+  "parent_reidentified_from": "/workspace/aad/artifacts/validation/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/incumbent/steps/02_residual_width",
+  "loaded_parent_spec_hash": "03ef5d8fde18ae8f33b3a0205d80566b3cd7eaade2faaf60db7d6faf99455b69"
+ },
+ "calibration": {
+  "profile_id": "validation.cuda_synthetic@v1"
+ },
+ "runtime": {
+  "torch": "2.9.1+cu130",
+  "device": "cuda",
+  "dtype": "bfloat16"
+ },
+ "steps": [
+  {
+   "index": 3,
+   "impl_id": "attention.activation_importance_v1",
+   "profile_id": "validation.cuda_synthetic@v1",
+   "kind": "ATTENTION",
+   "result_spec_hash": "d485857927a8fac3f8f937d26c95a6383aa2e4db4e73e55d4f2fbcfa1fa8ce16",
+   "artifact_digest": "7f2a49f4a9f081ddbc98e048f137df3d36136609bc7535b5faa35fb92cc99ba1",
+   "weights_digest": "1b244df97cefc1c51bcfdd1e765358e78e3ee199a98b456b4ce2c925725cac3b",
+   "config_sha256": "bd3393e47a87ed7dee68775de522546ab391cc9cef6082359a8b1e4465262c6a",
+   "arch_signature": "d485857927a8fac3f8f937d26c95a6383aa2e4db4e73e55d4f2fbcfa1fa8ce16",
+   "tokenizer_sha256": null,
+   "single_shard_sha256": "fa190f04b1cd7dc44d65237ab2f6854df163ee1b009723f6ef77d186283d241c",
+   "num_parameters": 115136,
+   "checkpoint_path": "/workspace/aad/artifacts/validation/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/stage_f/steps/03_attention",
+   "seconds": 0.0373,
+   "local_metrics": {
+    "op.attention.retained_write_energy_mean": 0.5175517666519467,
+    "op.attention.retained_write_energy_min": 0.5144178708546143
+   },
+   "trace": {
+    "source": "activation_write_energy_per_group_topk",
+    "score": "mean_t ||W_o,h a_h(t)||^2",
+    "stats_spec": "4dd0e23a6b8b9e92dce711c597a9ebd7d7a3b477ffa59eb296a08850472ed134",
+    "calibration_tokens": 512,
+    "q_heads": [
+     4,
+     2
+    ],
+    "kv_heads": 2
+   },
+   "selection": {
+    "kept_heads": [
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      2
+     ]
+    ]
+   },
+   "digest_expected": null,
+   "digest_matches": null
+  }
+ ],
+ "executed_step_indices": [
+  3
+ ],
+ "output": {
+  "index": 3,
+  "impl_id": "attention.activation_importance_v1",
+  "profile_id": "validation.cuda_synthetic@v1",
+  "kind": "ATTENTION",
+  "result_spec_hash": "d485857927a8fac3f8f937d26c95a6383aa2e4db4e73e55d4f2fbcfa1fa8ce16",
+  "artifact_digest": "7f2a49f4a9f081ddbc98e048f137df3d36136609bc7535b5faa35fb92cc99ba1",
+  "weights_digest": "1b244df97cefc1c51bcfdd1e765358e78e3ee199a98b456b4ce2c925725cac3b",
+  "config_sha256": "bd3393e47a87ed7dee68775de522546ab391cc9cef6082359a8b1e4465262c6a",
+  "arch_signature": "d485857927a8fac3f8f937d26c95a6383aa2e4db4e73e55d4f2fbcfa1fa8ce16",
+  "tokenizer_sha256": null,
+  "single_shard_sha256": "fa190f04b1cd7dc44d65237ab2f6854df163ee1b009723f6ef77d186283d241c",
+  "num_parameters": 115136,
+  "checkpoint_path": "/workspace/aad/artifacts/validation/cuda_engineering/cuda_stage_f_20260910_s3/suffix/suffix_suffix_narrow/stage_f/steps/03_attention",
+  "seconds": 0.0373,
+  "local_metrics": {
+   "op.attention.retained_write_energy_mean": 0.5175517666519467,
+   "op.attention.retained_write_energy_min": 0.5144178708546143
+  },
+  "trace": {
+   "source": "activation_write_energy_per_group_topk",
+   "score": "mean_t ||W_o,h a_h(t)||^2",
+   "stats_spec": "4dd0e23a6b8b9e92dce711c597a9ebd7d7a3b477ffa59eb296a08850472ed134",
+   "calibration_tokens": 512,
+   "q_heads": [
+    4,
+    2
+   ],
+   "kv_heads": 2
+  },
+  "selection": {
+   "kept_heads": [
+    [
+     1,
+     3
+    ],
+    [
+     1,
+     2
+    ]
+   ]
+  },
+  "digest_expected": null,
+  "digest_matches": null
+ },
+ "n_pinned": 0
+}
