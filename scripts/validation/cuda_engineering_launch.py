@@ -51,10 +51,36 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.infrastructure.provider import (  # noqa: E402
     RunPodProvider, read_api_key)
 from aadistill.infrastructure.remote import SSHTarget  # noqa: E402
-from aadistill.runtime.run_layout import ArtifactSpec, RunLayout  # noqa: E402
-
 from experiments.deployment import (  # noqa: E402
     POD_IMAGE, provider_cli_candidates)
+from experiments.run_layout import (  # noqa: E402
+    ArtifactSpec, RUNS_ROOT, open_run, present_roles, record_run,
+)
+
+#: This validation's key in `logs/runs/` and in the run index.
+#:
+#: `cuda_stage_f`, not `cuda-stage-f`: a run id validates as a single path
+#: segment, and refusing a hyphen is how a separator or `..` cannot resolve
+#: outside the run root. The dry run found this at `$0`, in a line only a
+#: completed run reaches.
+RUN_EXPERIMENT_ID = "cuda_stage_f"
+
+#: role -> path inside this run. NOT C1's vocabulary: this validation has no
+#: authorization snapshot to keep, no bundle, no driver evidence and no probe
+#: results — it has a stdout transcript and whatever the suffix wrote. The areas
+#: are shared; what lives in them is per-experiment, which is the property that
+#: makes the same mechanism carry both.
+RUN_ROLES: dict[str, str] = {
+    "evidence": "evidence/evidence.json",
+    "validation_stdout": "runtime/validation_stdout.txt",
+    "watchdog": "runtime/watchdog.jsonl",
+    "artifacts": "artifacts/",
+}
+
+RUN_SPEC = ArtifactSpec(
+    spec_id="cuda_engineering_run_v1",
+    required=("evidence",),
+    optional=("validation_stdout", "watchdog", "artifacts"))
 
 AUTHORIZATION = REPO_ROOT / "logs/validations/cuda-stage-f/v1/authorization.json"
 VALIDATION_DIR = REPO_ROOT / "logs/validations/cuda-stage-f/v1"
@@ -682,34 +708,47 @@ print(json.dumps(out)); print("PROBE_OK")
                 return kind
         return "unknown"
 
-    def write_evidence(self) -> None:
-        """Through RunLayout, under one engineering run root."""
-        #: `cuda_stage_f`, not `cuda-stage-f`: RunLayout refuses a hyphen in an
-        #: id, and refusing is right -- it validates ids so a path separator or
-        #: `..` cannot resolve outside the run root. The dry run found this at
-        #: $0, in a line only a completed run reaches.
-        layout = RunLayout(run_root=REPO_ROOT / "logs/runs",
-                           experiment_id="cuda_stage_f",
-                           run_id=self.a.run_id).create({
-            "evidence": "evidence.json", "validation_stdout": "validation_stdout.txt",
-            "watchdog": "watchdog.jsonl", "artifacts": "artifacts/"})
-        spec = ArtifactSpec(spec_id="cuda_engineering_run_v1",
-                            required=("evidence",),
-                            optional=("validation_stdout", "watchdog", "artifacts"))
-        layout.path("evidence.json").write_text(
+    def write_evidence(self, repo_root: Path | None = None) -> None:
+        """Into this run's own directory, then record its manifest.
+
+        The three 2026-09-10 subruns wrote `evidence.json` and friends straight
+        into the run root and recorded no manifest, so `record_run_index.py`
+        could not see them: real runs existed on disk that the index reported as
+        zero. This writes the same evidence into the shared areas and finishes
+        by recording the run, which is what makes it discoverable.
+        """
+        repo_root = REPO_ROOT if repo_root is None else Path(repo_root)
+        layout = open_run(repo_root, RUN_EXPERIMENT_ID, self.a.run_id,
+                          roles=RUN_ROLES)
+        layout.path(RUN_ROLES["evidence"]).write_text(
             json.dumps(self.ev, indent=1) + "\n")
-        for src_name, role in (("validation_stdout.txt", "validation_stdout.txt"),
-                               ("watchdog.jsonl", "watchdog.jsonl")):
+        for src_name, role in (("validation_stdout.txt", "validation_stdout"),
+                               ("watchdog.jsonl", "watchdog")):
             src = self.scr / src_name
             if src.is_file():
-                shutil.copy2(src, layout.path(role))
+                shutil.copy2(src, layout.path(RUN_ROLES[role]))
         arts = self.scr / "artifacts"
         if arts.is_dir():
-            shutil.copytree(arts, layout.path("artifacts/"), dirs_exist_ok=True)
-        ok, why = spec.check(r for r, rel in {"evidence": "evidence.json"}.items()
-                             if layout.path(rel).exists())
+            shutil.copytree(arts, layout.path(RUN_ROLES["artifacts"]),
+                            dirs_exist_ok=True)
+        doc = record_run(
+            layout, spec=RUN_SPEC,
+            plan={"validation": "cuda-stage-f", "execution_sha":
+                  self.a.execution_sha, "image": self.a.image},
+            implementation={"launcher":
+                            "scripts/validation/cuda_engineering_launch.py"},
+            status={"verdict": self.ev.get("verdict"),
+                    "pod_id": self.ev.get("pod_id"),
+                    #: The keys `finish` actually writes, not the session
+                    #: runner's `cost` block — this launcher has none of that.
+                    "subrun_cost_usd": self.ev.get("subrun_cost_usd"),
+                    "campaign_cost_after_usd": self.ev.get(
+                        "campaign_cost_after_usd"),
+                    "authorizes": "nothing"},
+            roles=present_roles(layout, RUN_ROLES))
         print(f"\nverdict: {self.ev.get('verdict')}")
-        print(f"evidence: {layout.rel_root}  (artifacts {'complete' if ok else why})")
+        print(f"evidence: {RUNS_ROOT}/{doc['root']}  "
+              f"({len(doc['roles'])} role(s) recorded)")
 
 
 def main() -> int:

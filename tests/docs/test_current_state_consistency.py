@@ -147,12 +147,26 @@ class TestTheSnapshotStatesTheRequiredFacts:
         (r"7027a8f4", "the execution SHA that confirmation is bound to"),
         (r"ENGINEERING EVIDENCE ONLY",
          "that the CUDA validation is not a C1 result"),
-        (r"CURRENT ENGINEERING ACTIVITY",
-         "the migration is engineering, not a C1 result"),
     ])
     def test_the_fact_appears(self, pattern, fact):
         blob = "\n".join(v for _, v in strings(snapshot()))
         assert re.search(pattern, blob, re.I), f"the snapshot does not state {fact}"
+
+    def test_the_migration_is_stated_as_engineering_not_as_a_c1_result(self):
+        """Asked of the migration's OWN field, not of the whole snapshot.
+
+        This used to require the literal `CURRENT ENGINEERING ACTIVITY` anywhere
+        in the document. That phrase stopped being true when Milestone A merged,
+        and a blob-wide search would in any case have been satisfied by the CUDA
+        validation's own "not a C1 result" — a different subject making the same
+        disclaimer. The enduring fact is about the migration, so it is checked
+        where the migration is described, and it holds whether the migration is
+        running, merged or abandoned.
+        """
+        status = snapshot()["architecture_migration"]["status"]
+        assert re.search(r"NOT a C1 result", status, re.I), status
+        assert re.search(r"no ATTENTION evidence", status, re.I), status
+        assert re.search(r"authorizes nothing", status, re.I), status
 
     @pytest.mark.parametrize("pattern,why", [
         (r"CPU-STRUCTURAL EVIDENCE ONLY",

@@ -1097,22 +1097,18 @@ def test_the_non_environment_exemption_is_named_and_narrow():
 def test_the_prereg_gate_count_and_order_equal_the_live_session():
     """It said 10 while `spec.precheck` had held 12 since the two readiness gates
     were added — a false execution fact in the document an authorization binds."""
-    import importlib.util
+    from session_specs import load_session_launcher, session_args
 
     doc = json.loads(
         (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
     transport = doc["transport"]
 
-    sys.path.insert(0, str(REPO / "scripts/pod"))
-    loader = importlib.util.spec_from_file_location(
-        "_c1_launch_for_test", REPO / "scripts/pod/autoinit_c1_launch.py")
-    mod = importlib.util.module_from_spec(loader)
-    sys.modules["_c1_launch_for_test"] = mod
-    loader.loader.exec_module(mod)
-    args = mod.build_parser().parse_args(
-        ["--scr", "/tmp/x", "--session-commit", "0" * 40,
-         "--bundle", "aad_autoinit_00000000.bundle"])
-    live = mod.spec(args).precheck
+    #: Through the shared helper, which asks the REAL parser what it requires.
+    #: This built the argv by hand and went red the day the launcher started
+    #: requiring `--run-id` — a second place that has to remember the command
+    #: line is the thing `session_args` exists to remove.
+    mod = load_session_launcher("autoinit_c1_launch")
+    live = mod.spec(session_args(mod)).precheck
     names = [getattr(g, "__name__", "session_commit_and_lineage") for g in live]
 
     assert transport["n_pre_provider_gates"] == len(live) == 12

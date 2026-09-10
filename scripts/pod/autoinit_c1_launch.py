@@ -2,7 +2,8 @@
 """Phase C1 — fixed-path ATTENTION isolation, as a session specification.
 
     PYTHONPATH=src setsid nohup python -u scripts/pod/autoinit_c1_launch.py \
-        --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
+        --scr <scratch> --run-id <attemptN> \
+        --session-commit <sha> --bundle <name> < /dev/null &
 
 **This session does not search.** It replays one frozen operator sequence, gates
 it against two recorded artifact digests, then runs six fixed probes. There is no
@@ -35,6 +36,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -47,6 +49,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from experiments.deployment import MAIN_RELAY, POD_IMAGE, deployment_commands  # noqa: E402
+from experiments.run_layout import (  # noqa: E402
+    ArtifactSpec as RunArtifactSpec, RUNS_ROOT, open_run, present_roles,
+    record_run,
+)
 from experiments.phase_c1 import session as CS
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
 from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
@@ -183,6 +189,124 @@ TEACHER_BINDING = "logs/phase_c1_teacher_binding.json"
 #: Written by scripts/autoinit/stage_c1_bundle.py; the local half of the
 #: transport check. The gate verifies the REMOTE object against it.
 BUNDLE_RECORD = "logs/autoinit_c1_bundle.json"
+
+# ---------------------------------------------------------------------------
+# where this run's files go
+#
+# Every C1 attempt so far wrote its session record to ONE flat path,
+# `logs/autoinit_c1_session.json`, which the next attempt overwrote; the evidence
+# directory `logs/autoinit_c1_attempt9/` was then assembled by hand afterwards,
+# and the run index found it by matching the directory's NAME. Three
+# consequences, all of them real: the live record and the preserved copy are
+# byte-identical duplicates of one fact, `logs/CATALOG.md` described the live
+# file as attempt 5's when it held attempt 9's, and a launcher that died before
+# the manual step left evidence with no owner at all.
+#
+# So the run declares its identity BEFORE it runs, and the launcher writes into
+# it. `experiments.run_layout` owns the five-area convention; the roles below are
+# C1's own vocabulary, which is why a Stage-0 collection run or a rollout
+# benchmark can use the same mechanism without inheriting `replay_record`.
+# ---------------------------------------------------------------------------
+
+#: This experiment's key in `logs/runs/` and in the run index. `phase_c1` is
+#: already the index's experiment id for attempts 1-9, so a tenth attempt joins
+#: the same series instead of starting a parallel one.
+RUN_EXPERIMENT_ID = "phase_c1"
+
+#: role -> path inside this run. Small, reviewable text only: the artifact
+#: TARBALL and the extracted tree stay in the scratch directory, and
+#: `artifacts/manifest.json` carries their hashes. A run manifest holds a
+#: verifiable reference to a large artifact; it never holds the artifact.
+C1_RUN_ROLES: dict[str, str] = {
+    #: Written by `SessionRunner.save()` on every path, including a launcher
+    #: error, so it is the one role that is always present.
+    "session_record": "runtime/session.json",
+    "launcher_log": "runtime/launcher.log",
+    "watchdog_journal": "runtime/watchdog.jsonl",
+    #: Snapshots of the ONE-USE artifacts this attempt consumed. Their live
+    #: paths are rewritten by the next issuance, so the snapshot is a fact about
+    #: this run that has no other owner -- not a second copy of a current one.
+    "authorization": "governance/authorization.json",
+    "bundle_record": "governance/bundle.json",
+    "readiness_record": "governance/readiness.json",
+    "driver_evidence": "evidence/c1_evidence.json",
+    "driver_log": "evidence/driver_run.log",
+    #: The COMPLETE marker sequence. The session record echoes only the last
+    #: status it saw into its timeline, so the stream is the one place the whole
+    #: ordering survives -- and stage ordering is what `assert_stage_order`
+    #: exists to police.
+    "driver_status": "evidence/driver_status.txt",
+    "artifact_manifest": "artifacts/manifest.json",
+    #: NOT written by the launcher. A maintainer's post-review classification
+    #: outlives the process that ran the session; declaring the role says where
+    #: it goes and lets a later `record_run` name it without widening the spec.
+    "outcome": "closeout/outcome.json",
+}
+
+C1_RUN_SPEC = RunArtifactSpec(
+    spec_id="phase_c1_session_v1",
+    required=("session_record",),
+    optional=tuple(r for r in C1_RUN_ROLES if r != "session_record"))
+
+#: Scratch-relative source -> role, for the small text files the runner leaves
+#: beside the pod. Copied into the run after the session, because the scratch
+#: directory is outside the repository by design and does not survive as
+#: evidence.
+#:
+#: The three relay names are DERIVED from the same constants the relay is built
+#: from — `LogRelay` names each local copy `Path(remote).name` — so renaming the
+#: status file cannot leave this list quietly pointing at a path that stopped
+#: existing. That is a transcription this file would otherwise have to keep in
+#: step by hand, and the collection runs once, after teardown, where a wrong
+#: name loses the evidence instead of failing.
+_RUN_COLLECT: tuple[tuple[str, str], ...] = (
+    ("launch.log", "launcher_log"),
+    ("watchdog.jsonl", "watchdog_journal"),
+    (f"relay/{Path(RUN_LOG).name}", "driver_log"),
+    (f"relay/{Path(STATUS).name}", "driver_status"),
+    ("relay/c1_evidence.json", "driver_evidence"),
+    ("store/manifest.json", "artifact_manifest"),
+)
+
+#: Repository-relative source -> role, snapshotted when the run opens, while the
+#: artifacts still describe THIS attempt.
+_RUN_GOVERNANCE: tuple[tuple[str, str], ...] = (
+    (AUTH_PATH, "authorization"),
+    (BUNDLE_RECORD, "bundle_record"),
+    (POD_ENV_RECORD, "readiness_record"),
+)
+
+
+def session_record_path(run_id: str) -> str:
+    """Where THIS run's session record goes, repository-relative.
+
+    ONE rule, called by the parser and by `open_c1_run`, so the path the runner
+    writes to and the directory the run was created in cannot disagree. Two
+    derivations of one path is how they drift.
+    """
+    return str(Path(RUNS_ROOT) / RUN_EXPERIMENT_ID / run_id
+               / C1_RUN_ROLES["session_record"])
+
+
+class _RunIdSetsOut(argparse.Action):
+    """`--run-id` also produces `out`, because the RUNNER reads `out`.
+
+    `SessionRunner.save()` writes `args.out`, and
+    `test_every_session_namespace_carries_what_the_runner_reads` requires every
+    such attribute to come from the REAL parser: device-canary attempt 1 died at
+    `$0.0603` on an attribute a hand-written namespace had and the parser did
+    not, *after* the pod was created and billing. Filling `out` in later would
+    have left the parser's namespace incomplete and that gate red, and narrowing
+    the gate to suit this session is the move that cost attempt 2 `$0.1013`.
+
+    Deriving it here keeps both properties: the namespace is complete, and there
+    is still no `--out` flag that could point the session record somewhere other
+    than its own run.
+    """
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        setattr(namespace, self.dest, value)
+        namespace.out = session_record_path(value)
 
 #: EXACTLY ONE provider resource, for the whole session.
 #:
@@ -923,6 +1047,16 @@ def build_parser():
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scr", required=True)
+    #: REQUIRED, and there is no `--out` to point somewhere else. A default
+    #: would only help if every future launch command remembered to override it,
+    #: which is how nine attempts came to share one session-record path; naming
+    #: the run is now the same act as launching it.
+    ap.add_argument("--run-id", required=True, action=_RunIdSetsOut,
+                    help="this attempt's id under logs/runs/"
+                         f"{RUN_EXPERIMENT_ID}/, e.g. attempt10. Lowercase "
+                         "letters, digits and underscores. Refused if that run "
+                         "already has a manifest. Also derives the session "
+                         "record's path; there is no --out")
     ap.add_argument("--session-commit", required=True)
     ap.add_argument("--bundle", required=True,
                     help="must be the canonical name derived from\n"
@@ -968,15 +1102,104 @@ def build_parser():
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/autoinit_c1_session.json")
+    #: No `--out`. It is `run_id` and the layout, or it is nothing: see
+    #: `C1_RUN_ROLES`. `SessionRunner` reads `args.out`, so `open_c1_run` sets it
+    #: to the run's own session-record path before the runner is constructed.
     return ap
+
+
+def open_c1_run(args, repo_root: Path | None = None):
+    """Create this attempt's run directory and point the session record at it.
+
+    Runs BEFORE `SessionSpec` construction and therefore before any provider
+    call, so a run id that collides with a recorded run costs `$0` rather than
+    being discovered after a pod exists. `SessionRunner.save()` writes
+    `args.out` without creating its parent, which is the other reason this
+    happens first.
+    """
+    repo_root = REPO_ROOT if repo_root is None else Path(repo_root)
+    layout = open_run(repo_root, RUN_EXPERIMENT_ID, args.run_id,
+                      roles=C1_RUN_ROLES)
+    for source, role in _RUN_GOVERNANCE:
+        src = repo_root / source
+        if src.is_file():
+            shutil.copy2(src, layout.path(C1_RUN_ROLES[role]))
+    #: Idempotent for a parser-built namespace, and the whole answer for a
+    #: hand-built one. Same rule either way -- see `session_record_path`.
+    args.out = session_record_path(args.run_id)
+    return layout
+
+
+def close_c1_run(layout, args, repo_root: Path | None = None) -> dict:
+    """Collect the small evidence beside the pod, then write the run manifest.
+
+    Runs after the session on every path, including a launcher error, because
+    the runner already caught that and saved. What it cannot cover is the
+    launcher process itself dying: then the run directory exists with no
+    manifest, which `record_run_index.py` reports as an unrecorded run rather
+    than silently omitting.
+    """
+    repo_root = REPO_ROOT if repo_root is None else Path(repo_root)
+    scr = Path(args.scr)
+    for source, role in _RUN_COLLECT:
+        src = scr / source
+        if src.is_file():
+            shutil.copy2(src, layout.path(C1_RUN_ROLES[role]))
+    session = json.loads((repo_root / args.out).read_text())
+    return record_run(
+        layout, spec=C1_RUN_SPEC,
+        plan={"session_id": session.get("session_id"),
+              "plan_hash": session.get("session_plan_hash"),
+              "session_commit": args.session_commit,
+              "bundle": args.bundle,
+              "preregistration": PREREG,
+              "scratch_root": str(scr),
+              "scratch_note": ("the artifact archive and the extracted tree stay "
+                               "here; artifacts/manifest.json carries their "
+                               "hashes. Large artifacts are not moved into git")},
+        implementation={"launcher": "scripts/pod/autoinit_c1_launch.py",
+                        "harness_source_digest": session.get(
+                            "harness_source_digest"),
+                        "authorization": AUTH_PATH},
+        status={"passed": session.get("passed"),
+                #: `terminal`, spelled the way the runner writes it. A key the
+                #: record does not have would read as `None` and look like a
+                #: session that produced no marker.
+                "terminal": session.get("terminal"),
+                "pod_id": session.get("pod_id") or None,
+                "cost": session.get("cost"),
+                "provider_confirms_gone": session.get("provider_confirms_gone"),
+                "authorizes": "nothing"},
+        roles=present_roles(layout, C1_RUN_ROLES))
+
+
+#: Exit code for "the session finished, the run did not get recorded".
+#:
+#: Distinct from the session's own codes, and it never overwrites one: a session
+#: that already failed keeps its result, because the pod outcome is what an
+#: operator acts on. But an unrecorded run is not a silent condition either --
+#: it is exactly the state `open_run` refuses to reopen, so a successful session
+#: that could not record itself must not exit 0.
+RUN_NOT_RECORDED = 12
 
 
 def main() -> int:
     args = build_parser().parse_args()
-    return run_session(spec(args), args, REPO_ROOT,
-                       summary=("STOP for review. C1 replayed one frozen path "
-                                "under two digest gates and ran no search."))
+    layout = open_c1_run(args)
+    rc = run_session(spec(args), args, REPO_ROOT,
+                     summary=("STOP for review. C1 replayed one frozen path "
+                              "under two digest gates and ran no search."))
+    try:
+        doc = close_c1_run(layout, args)
+    except Exception as exc:                                      # noqa: BLE001
+        print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
+              f"  the run directory is {RUNS_ROOT}/{layout.rel_root}; it holds "
+              "whatever the session produced and has no manifest. Do not reuse "
+              "this run id.")
+        return rc or RUN_NOT_RECORDED
+    print(f"run {doc['experiment_id']}/{doc['run_id']} recorded — "
+          f"{len(doc['roles'])} role(s) under {RUNS_ROOT}/{doc['root']}")
+    return rc
 
 
 if __name__ == "__main__":

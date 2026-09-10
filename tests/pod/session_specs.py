@@ -15,7 +15,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 
 #: (name, extra argv). The continuation requires `--transport`; everything else
-#: runs on defaults. Keep this list complete: a session missing from it is a
+#: runs on defaults, and `session_args` supplies `--run-id` to any launcher whose
+#: parser declares one. Keep this list complete: a session missing from it is a
 #: session no structural check covers.
 SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("autoinit_preflight_launch", ()),
@@ -43,11 +44,21 @@ def session_args(mod, extra: tuple[str, ...] = (), **overrides):
     Device-canary attempt 1 died at $0.0603 on an attribute a hand-written
     namespace would have had and the real parser did not. Tests build their
     namespace here for that reason.
+
+    A launcher that requires `--run-id` gets one, unless the caller supplied its
+    own. Asked of the REAL parser rather than of a list kept here, so a second
+    session adopting the run layout needs no edit — and so this helper cannot
+    quietly satisfy a required argument that the parser dropped.
     """
-    args = mod.build_parser().parse_args(
-        ["--scr", "/tmp/session-spec-test",
-         "--session-commit", "0" * 40,
-         "--bundle", "aad_test.bundle", *extra])
+    argv = ["--scr", "/tmp/session-spec-test",
+            "--session-commit", "0" * 40,
+            "--bundle", "aad_test.bundle", *extra]
+    parser = mod.build_parser()
+    accepts_run_id = any("--run-id" in (a.option_strings or ())
+                         for a in parser._actions)
+    if accepts_run_id and "--run-id" not in argv:
+        argv += ["--run-id", "spec_check"]
+    args = parser.parse_args(argv)
     for k, v in overrides.items():
         setattr(args, k, v)
     return args

@@ -20,6 +20,7 @@ no longer exists.
 | `tests/` | mirrors `src/` and `scripts/` |
 | `configs/` | frozen run configurations and artifact specifications |
 | `logs/` | project memory. See [`logs/CATALOG.md`](../logs/CATALOG.md) |
+| `logs/runs/` | **where a run's own files go.** One directory per experiment and run — `logs/runs/{experiment_id}/{run_id}/` — holding `manifest.json` and five areas: **governance** (what permitted the run), **runtime** (how it executed), **evidence** (what it observed), **artifacts** (what it produced), **closeout** (how it ended). The convention is `scripts/experiments/run_layout.py`; the mechanism is `src/aadistill/runtime/run_layout.py`, which names no directory. `logs/runs/index.json` registers every run, and reports under `unrecorded` any run directory that exists without a manifest. Reviewable text only — an artifact archive stays in the session's scratch directory and the manifest carries its hash |
 | `docs/` | durable reference (this file, and its siblings) |
 | `data/` | corpora; the large files are gitignored |
 | `artifacts/` | generated locally, gitignored, never committed |
@@ -72,6 +73,7 @@ and their contents inventoried in
 | path | responsibility |
 | --- | --- |
 | `scripts/autoinit/` | AutoInitializer tooling: preregistration, search, scoring, issuers, audits |
+| `scripts/experiments/` | experiment instances — plans, seeds, digests, budgets — plus the deployment and run-layout conventions this repository's sessions share. Nothing here is a mechanism |
 | `scripts/pod/` | paid-session executables. Catalogued in [`docs/POD_SCRIPTS.md`](POD_SCRIPTS.md) |
 | `scripts/training/`, `scripts/evaluation/`, `scripts/data/`, `scripts/rollout/` | stage tooling |
 | `scripts/consolidate/` | result consolidation |

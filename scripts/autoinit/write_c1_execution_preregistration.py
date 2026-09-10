@@ -108,9 +108,12 @@ def live_prechecks() -> tuple[int, list[str]]:
     mod = importlib.util.module_from_spec(loader)
     sys.modules["_c1_launch_for_prereg"] = mod
     loader.loader.exec_module(mod)
+    #: `--run-id` is required by the launcher and names nothing here: this probe
+    #: builds a `SessionSpec` to read its gate list and never opens a run, so no
+    #: directory under `logs/runs/` is created by writing a preregistration.
     args = mod.build_parser().parse_args(
         ["--scr", "/tmp/prereg-probe", "--session-commit", "0" * 40,
-         "--bundle", "aad_autoinit_00000000.bundle"])
+         "--bundle", "aad_autoinit_00000000.bundle", "--run-id", "prereg_probe"])
     precheck = mod.spec(args).precheck
     return len(precheck), [getattr(g, "__name__", "session_commit_and_lineage")
                            for g in precheck]

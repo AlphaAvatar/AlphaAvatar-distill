@@ -311,7 +311,7 @@ def test_the_gate_is_wired_and_the_count_is_ten():
 
     args = L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", HEAD,
-         "--bundle", canonical_bundle_name(HEAD)])
+         "--bundle", canonical_bundle_name(HEAD), "--run-id", "gate_count"])
     spec = L.spec(args)
     names = [getattr(g, "__name__", "session_commit_and_lineage")
              for g in spec.precheck]

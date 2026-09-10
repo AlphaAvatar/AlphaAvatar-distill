@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "b2ecdff83ee0a7653eea7872b5af6739a4de4381",
+ "head_commit": "daf64772495eedfe4dffbe8d201a1c084b772116",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -74,8 +74,8 @@
    "scripts/autoinit"
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
-  "n_files": 95,
-  "digest": "64664a5feeaadeb731e4700241c47adeae1d404f142c8efb362e90035519062b",
+  "n_files": 97,
+  "digest": "bef1e52b40cb884cd5ae0faecb9ee794dc20c313a7f4d47d26e83fc75c809483",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -194,6 +194,11 @@
     "bytes": 6306
    },
    {
+    "path": "scripts/experiments/run_layout.py",
+    "sha256": "927ef5a164e2ed5ac39a8bbb09370a57cd7cda47f4752fa2c0fecf8111a20eb2",
+    "bytes": 9768
+   },
+   {
     "path": "scripts/experiments/source_sets.py",
     "sha256": "751822836672fdaa6c670d546b023dd5c66c9d5cb4c8a47ffb297bca12c96ea1",
     "bytes": 3127
@@ -205,8 +210,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "2d1c232d574c55d76a54d30958b95db611ca6c55ca56b97a897933c364c4ab39",
-    "bytes": 51464
+    "sha256": "0b7d0098039f9b7b2d609ee491e3e1f289eb4d9e38664e48a209e8f0b2fd4766",
+    "bytes": 62820
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -537,6 +542,11 @@
     "path": "src/aadistill/runtime/pod_environment.py",
     "sha256": "538d23a0a061f4513650860e58c725efccd5c6a911e26802342dfee11936543d",
     "bytes": 32404
+   },
+   {
+    "path": "src/aadistill/runtime/run_layout.py",
+    "sha256": "8b361400dcbe2c5db898fd2e567794dae0e0fdd007d67ce0bdc0d4239e853c42",
+    "bytes": 11241
    },
    {
     "path": "src/aadistill/runtime/staging_contract.py",
@@ -1066,5 +1076,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "e13e5f6d0fd7771be0a3a246490d8df0e8679a17398df25b827a463220d9a9b8"
+ "preregistration_sha256": "3ccabd1990c5cc90dde1a6a6bb3b1111cd5834bfbc160cdd91edcfd309f5bffe"
 }

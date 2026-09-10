@@ -120,28 +120,77 @@ def discover_v3(repo_root: Path) -> list[dict]:
     return out
 
 
+def discover_unrecorded(repo_root: Path) -> list[dict]:
+    """Run directories under `logs/runs` that hold files and no valid manifest.
+
+    The index used to skip these silently, and it was not a hypothetical gap:
+    the three 2026-09-10 CUDA stage-F subruns each wrote a real directory here
+    and none of them wrote a manifest, so an index whose contract reads "every
+    run this repository has recorded" reported `runs_current: 0` while three
+    runs sat on disk. Silence is the wrong answer twice over — it also hides the
+    case that matters operationally, a launcher that died before it could record
+    itself.
+
+    They are reported, with their digest, and NOT promoted into `runs`: a run
+    that never declared its own roles has not been recorded, and back-filling a
+    manifest from the outside would be this index inventing evidence about an
+    execution it did not watch.
+    """
+    from aadistill.runtime.run_layout import MANIFEST_SCHEMA
+
+    runs_root = repo_root / "logs/runs"
+    out: list[dict] = []
+    if not runs_root.is_dir():
+        return out
+    for run_dir in sorted(p for p in runs_root.glob("*/*") if p.is_dir()):
+        manifest = run_dir / "manifest.json"
+        if manifest.is_file():
+            try:
+                if json.loads(manifest.read_text()).get("schema") == MANIFEST_SCHEMA:
+                    continue
+            except json.JSONDecodeError:
+                pass
+        files = [p for p in run_dir.rglob("*") if p.is_file()]
+        if not files:
+            continue
+        rel = run_dir.relative_to(repo_root).as_posix()
+        out.append({
+            "experiment_id": run_dir.parent.name, "run_id": run_dir.name,
+            "root": rel, "n_files": len(files),
+            "digest": digest_of(run_dir)["digest"],
+            "why": ("no valid run manifest; predates the run-manifest convention "
+                    "or the launcher did not reach its closeout"),
+        })
+    return out
+
+
 def build_index(repo_root: Path) -> dict:
     legacy = sorted(discover_legacy(repo_root).values(),
                     key=lambda r: (r["experiment_id"], r["run_id"]))
     modern = discover_v3(repo_root)
+    unrecorded = discover_unrecorded(repo_root)
     return {
         "schema": SCHEMA,
         "_contract": (
             "Every run this repository has recorded, ONE ENTRY PER LOGICAL RUN. "
             "A legacy run references its surviving components in place: nothing "
             "was moved, renamed or copied, and each component carries a digest "
-            "so that is checkable. Registering a run confers nothing."),
+            "so that is checkable. Registering a run confers nothing. A run "
+            "directory that exists but recorded no manifest is reported under "
+            "`unrecorded`, never silently dropped."),
         "granularity": ("one entry per (experiment_id, run_id). The v1 index "
                         "counted artifact roots, so an attempt with an evidence "
                         "directory and a grant file appeared twice."),
         "counts": {
             "runs_legacy_v1": len(legacy),
             "runs_current": len(modern),
+            "runs_unrecorded": len(unrecorded),
             "legacy_components": sum(r["n_components"] for r in legacy),
             "by_experiment": {e: sum(1 for r in legacy if r["experiment_id"] == e)
                               for e in sorted({r["experiment_id"] for r in legacy})},
         },
         "runs": legacy + modern,
+        "unrecorded": unrecorded,
         "authorizes": "nothing",
     }
 
@@ -154,6 +203,9 @@ def main() -> int:
     for r in index["runs"]:
         print(f"  v{r['layout_version']}  {r['experiment_id']:22} {r['run_id']:16} "
               f"{r['n_components']} component(s): {','.join(r['components'])}")
+    for u in index["unrecorded"]:
+        print(f"  --  {u['experiment_id']:22} {u['run_id']:16} "
+              f"{u['n_files']} file(s), NO MANIFEST: {u['root']}")
     print(f"\n{json.dumps(index['counts'], indent=1)}")
     if args.write:
         out = REPO_ROOT / OUT

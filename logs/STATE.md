@@ -1,6 +1,7 @@
-**Updated:** 2026-09-09 · branch `migration/initialization-milestone-a` (`main` unchanged) ·
+**Updated:** 2026-09-10 · branch `prep/c1-run-identity` · `main` = `daf64772` ·
 **PHASE B CLOSED · PHASE C0 FROZEN · ATTEMPT 9 RAN — THE FROZEN PATH
-REPRODUCES; STAGE F FAILED · MILESTONE-A MIGRATION GREEN, AWAITING MERGE REVIEW**
+REPRODUCES; STAGE F FAILED · MILESTONE-A MERGED · NO ENGINEERING BLOCKER
+REMAINS FOR A TENTH ATTEMPT — ONLY A MAINTAINER DECISION**
 
 # Current state
 
@@ -22,8 +23,56 @@ how the snapshot came to disagree with itself.
 | CUDA interpretation | one append-only amendment corrects **two explanatory claims** and nothing else: subrun 2's failure class is `harness_acceptance_criterion`, not `operator`, and the PASS observed *operator on `cuda:0`, child host-resident per the builder contract* — not children left on CUDA. Outcomes, costs, devices and provider identities are bound by hash and unaltered: [`interpretation_amendment_1.json`](validations/cuda-stage-f/v1/interpretation_amendment_1.json) |
 | architecture migration | a **current engineering activity**, not a C1 result and no evidence about ATTENTION. Record: [`migrations/initialization-core/v1/`](migrations/initialization-core/v1/) |
 | engineering campaign | **CLOSED**. Authorized, executed, reconciled and torn down: [`validations/cuda-stage-f/v1/`](validations/cuda-stage-f/v1/). No GPU work is owed |
-| owed | **Milestone-A merge review**, and a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
+| Milestone A | **MERGED 2026-09-10**, fast-forward, `main` = `daf64772`. The migration branch is preserved |
+| run identity | **IN PRODUCTION.** The launcher requires `--run-id` and writes into `runs/phase_c1/<run_id>/`; there is no `--out` and no flat session record. Attempts 1–9 stay exactly where they are, registered by path |
+| owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains. **No engineering blocker** |
 
+> **A RUN NOW HAS AN IDENTITY BEFORE IT RUNS, 2026-09-10 — `$0.0000`, no pod, no
+> GPU, no provider resource, no grant, no authorization, no bundle.**
+>
+> `RunLayout`, `ArtifactSpec` and `build_run_manifest` had been in the tree since
+> the Milestone-A migration with **no production caller at all**: every reference
+> was a test. Meanwhile every C1 attempt wrote its session record to the flat
+> `logs/autoinit_c1_session.json`, which the next attempt overwrote, and
+> `logs/autoinit_c1_attempt9/` was assembled by hand afterwards. Three
+> consequences, each of them observed rather than imagined:
+>
+> * the live record and the preserved copy are byte-identical duplicates of one
+>   fact, and only the copy survives the next launch;
+> * `CATALOG.md` described the live file as **attempt 5's** while it held attempt
+>   9's — stale for four attempts, because a fact written twice goes stale on one
+>   side;
+> * `logs/runs/index.json` reported `runs_current: 0` while **three** real CUDA
+>   stage-F subruns sat under `logs/runs/`, invisible to both discovery rules.
+>
+> **What changed.** `scripts/experiments/run_layout.py` is the application-layer
+> convention — the only place `logs/runs` and the five areas `governance/`,
+> `runtime/`, `evidence/`, `artifacts/`, `closeout/` are written down. The core
+> still names no directory and no role. The C1 launcher now **requires**
+> `--run-id`, has no `--out` to point elsewhere, snapshots the one-use governance
+> artifacts at open, collects the small evidence at close and records
+> `manifest.json`; the CUDA engineering launcher does the same through the same
+> functions with a **disjoint** role vocabulary, which is what distinguishes a
+> mechanism from C1's habits.
+>
+> **What did not change.** Attempts 1–9, the frozen Phase-A/B evidence and the
+> three CUDA subrun directories are untouched — no file moved, renamed or
+> deleted, and no manifest was back-filled for a run that never declared its own
+> roles. Those three are now listed under `unrecorded` with their digests
+> instead of being dropped. `logs/autoinit_c1_session.json` stays where it is,
+> holding attempt 9, marked HISTORICAL.
+>
+> **Cost of the change.** The launcher is inside the C1 harness closure, so
+> `c1_harness_digest` moves `64664a5f…` → `bef1e52b…` and the execution
+> preregistration is re-emitted. Diffed rather than asserted: the harness gains
+> exactly the **two** `run_layout` modules and edits **one** file, the launcher;
+> nothing is removed. Of the **394** non-harness leaf fields, **two** move —
+> `head_commit` and the document's own `preregistration_sha256`. **Scientific
+> fields moved: 0.** The
+> 2026-09-10 pod-environment record is a **diagnostic** bound to
+> `d8e6896a`; it is not promoted, not rewritten, and a fresh launch-bound record
+> is owed before any tenth attempt regardless.
+>
 > **MILESTONE-A MERGE-REVIEW CLOSURE, 2026-09-09 — `$0.0000`, no pod, no GPU, no
 > provider resource, no grant, no authorization, no bundle.** The four merge
 > blockers, closed on the same branch; the existing 43 commits are untouched.
@@ -1383,6 +1432,7 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
 | standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |
+| run identity | `--run-id` is **required** and there is no `--out`. The run is opened before the `SessionSpec` is built, so a colliding id refuses at `$0`; the session record, the one-use governance snapshots, the collected small evidence and `manifest.json` all live under `runs/phase_c1/<run_id>/`. Convention: `scripts/experiments/run_layout.py`; mechanism: `runtime/run_layout.py` |
 | Stage-H admission | no probe is scored unless the protocol observed from **its own** raw summaries is comparable to the attested one; on drift the session stops `C1_INCOMPLETE` before scoring, and no later probe is evaluated |
 | C1 scoring binding | `c1_confirmation_scoring@v1` · `77507935f21f83eb…` over 11 files · parent `recovery_search_scoring@v2` `808080a7…`, unchanged · equivalence **IDENTICAL / 15 cases / 0 differences** |
 

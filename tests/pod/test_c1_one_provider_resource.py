@@ -52,8 +52,12 @@ def _launcher():
 
 
 C1 = _launcher()
+#: `--run-id` is required by the launcher: a run is named before it is launched,
+#: and no test builds an argv the operator could not type. Nothing here opens a
+#: run — these tests read `create_attempts`/`host_draws` off the parsed namespace
+#: and drive `SessionRunner` directly — so the id names no directory.
 BASE_ARGV = ["--scr", "/tmp/c1-one-resource", "--session-commit", "0" * 40,
-             "--bundle", "aad_test.bundle"]
+             "--bundle", "aad_test.bundle", "--run-id", "one_resource"]
 
 
 # --- A. the defaults realize one resource -----------------------------------

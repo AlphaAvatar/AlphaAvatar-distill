@@ -68,7 +68,7 @@
  ],
  "next_starting_point": {
   "status": "Attempt 9 produced C1's FIRST scientific observation -- both frozen replay gates PASSED -- then aborted in stage F. That defect is repaired and CONFIRMED ON REAL CUDA; see phase_c.c1.blocker. Engineering campaign closed.",
-  "the_ask": "Milestone-A merge review, and a maintainer decision on whether a tenth attempt is worth the one ceiling-sized slot that remains.",
+  "the_ask": "A maintainer decision on whether a tenth attempt is worth the one ceiling-sized slot left. Milestone A is MERGED; no engineering blocker remains.",
   "budget": "$267.8998 spent of the unchanged $283.7600 cap; $15.8602 uncommitted, which covers exactly one $15.1475 attempt with $0.7127 after it."
  },
  "read_order": [
@@ -158,11 +158,11 @@
   "layout_version": 1,
   "root": "logs/autoinit_c1_attempt9",
   "index": "logs/runs/index.json",
-  "note": "legacy-v1 by path, ONE entry in logs/runs/index.json with its grant as a second component. run-layout-v3 is FUTURE-only.",
+  "note": "legacy-v1 by path, ONE index entry with its grant as a second component. From attempt 10 the launcher REQUIRES --run-id and writes logs/runs/phase_c1/<run_id>/.",
   "run_id": "attempt9"
  },
  "architecture_migration": {
-  "status": "CURRENT ENGINEERING ACTIVITY -- initialization-core consolidation and core/application separation. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
+  "status": "MERGED to main 2026-09-10 as daf64772: initialization-core consolidation and core/application separation. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
   "record": "logs/migrations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {

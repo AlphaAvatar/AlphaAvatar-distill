@@ -72,6 +72,18 @@ logs/runs/**/evidence/evaluation/
 !logs/runs/**/*.json
 !logs/runs/**/*.jsonl
 
+# Archives anywhere in the tree. A session's collected-artifact tarball is the
+# one heavy thing a run legitimately produces beside its manifest, and it is
+# exactly the shape the exclusions below do not catch: `logs/runs/**/*.gz` was
+# TRACKED, because the `runs/` rule matches directories and nothing here matched
+# the file. The tarball belongs in the scratch directory with the extracted tree;
+# the run manifest carries its hash. No archive is currently tracked, so this
+# removes nothing.
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
 # Model weights anywhere in the tree (small metadata/manifests stay tracked)
 *.safetensors
 *.bin

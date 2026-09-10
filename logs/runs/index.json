@@ -1,10 +1,11 @@
 {
  "schema": "aadistill.runtime.run_index/v2",
- "_contract": "Every run this repository has recorded, ONE ENTRY PER LOGICAL RUN. A legacy run references its surviving components in place: nothing was moved, renamed or copied, and each component carries a digest so that is checkable. Registering a run confers nothing.",
+ "_contract": "Every run this repository has recorded, ONE ENTRY PER LOGICAL RUN. A legacy run references its surviving components in place: nothing was moved, renamed or copied, and each component carries a digest so that is checkable. Registering a run confers nothing. A run directory that exists but recorded no manifest is reported under `unrecorded`, never silently dropped.",
  "granularity": "one entry per (experiment_id, run_id). The v1 index counted artifact roots, so an attempt with an evidence directory and a grant file appeared twice.",
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 0,
+  "runs_unrecorded": 3,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": 5,
@@ -621,6 +622,32 @@
    },
    "aggregate_digest": "d91d560c844582c0af01e8f56e67e0ddbb1ee4423d53c32e3d60a1424a462b95",
    "n_components": 1
+  }
+ ],
+ "unrecorded": [
+  {
+   "experiment_id": "cuda_stage_f",
+   "run_id": "cuda_stage_f_20260910",
+   "root": "logs/runs/cuda_stage_f/cuda_stage_f_20260910",
+   "n_files": 3,
+   "digest": "8bbfe7261c036dec1eca4051de7747c4b041d80f47fefc515815f5993ca6336b",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "cuda_stage_f",
+   "run_id": "cuda_stage_f_20260910_s2",
+   "root": "logs/runs/cuda_stage_f/cuda_stage_f_20260910_s2",
+   "n_files": 64,
+   "digest": "b3964af2a98085d57ff48855bde54624ed1af8934be26fd0da636ea50dc93e5e",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "cuda_stage_f",
+   "run_id": "cuda_stage_f_20260910_s3",
+   "root": "logs/runs/cuda_stage_f/cuda_stage_f_20260910_s3",
+   "n_files": 64,
+   "digest": "1be716ca99d150e40b76258c272d3aab71fd16212e6dc4d4dbfa77c7a047501c",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],
  "authorizes": "nothing"
