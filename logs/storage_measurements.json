@@ -1,289 +1,340 @@
 {
-  "schema": "aadistill.storage_measurements/v1",
-  "rule": "before and after are measured with the same definitions, in the same four areas, or the difference means nothing",
-  "readings": [
-    {
-      "label": "before-cleanup",
-      "measured_utc": "2026-08-17T19:24:30+00:00",
-      "commit": "8c4b1f31faa09079150f59e75d27cc8b0b28e2a5",
-      "note": "baseline for the log and checkpoint-storage cleanup; nothing deleted yet. Local artifact storage counts both artifacts/ and the out-of-tree store.",
-      "areas": {
-        "repository_working_tree": {
-          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
-          "bytes": 151039643,
-          "files": 782,
-          "of_which_logs_bytes": 5433165,
-          "of_which_logs_files": 212,
-          "of_which_data_bytes": 139121268,
-          "of_which_data_files": 70,
-          "git_tracked_bytes": 11840219,
-          "git_tracked_files": 712,
-          "git_dir_bytes": 33223721
-        },
-        "local_artifact_storage": {
-          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
-          "bytes": 100145014120,
-          "files": 1697,
-          "in_tree": {
-            "path": "artifacts",
-            "bytes": 7433055748,
-            "files": 1059
-          },
-          "out_of_tree": {
-            "path": "/home/ecs-user/aad-artifacts",
-            "bytes": 92711958372,
-            "files": 638
-          }
-        },
-        "relay_lfs_storage": {
-          "repo": "AlphaAvatar/aadistill-artifacts",
-          "bytes": 98913220067,
-          "files": 1152,
-          "source": "logs/checkpoint_registry.json (cached listing)",
-          "queried_utc": "2026-08-17T19:05:45+00:00"
-        },
-        "scratch_session_directories": {
-          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
-          "path": "/home/ecs-user/aad-scratch",
-          "bytes": 61192882,
-          "files": 662
-        }
-      }
+ "schema": "aadistill.storage_measurements/v1",
+ "rule": "before and after are measured with the same definitions, in the same four areas, or the difference means nothing",
+ "readings": [
+  {
+   "label": "before-cleanup",
+   "measured_utc": "2026-08-17T19:24:30+00:00",
+   "commit": "8c4b1f31faa09079150f59e75d27cc8b0b28e2a5",
+   "note": "baseline for the log and checkpoint-storage cleanup; nothing deleted yet. Local artifact storage counts both artifacts/ and the out-of-tree store.",
+   "areas": {
+    "repository_working_tree": {
+     "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+     "bytes": 151039643,
+     "files": 782,
+     "of_which_logs_bytes": 5433165,
+     "of_which_logs_files": 212,
+     "of_which_data_bytes": 139121268,
+     "of_which_data_files": 70,
+     "git_tracked_bytes": 11840219,
+     "git_tracked_files": 712,
+     "git_dir_bytes": 33223721
     },
-    {
-      "label": "after-cleanup",
-      "measured_utc": "2026-08-17T19:51:58+00:00",
-      "commit": "fe3c2b3169964ae4884c3946124ba914ae64a556",
-      "note": "after the log normalization and the seven tombstoned retirements",
-      "areas": {
-        "repository_working_tree": {
-          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
-          "bytes": 150992246,
-          "files": 781,
-          "of_which_logs_bytes": 5380823,
-          "of_which_logs_files": 211,
-          "of_which_data_bytes": 139121268,
-          "of_which_data_files": 70,
-          "git_tracked_bytes": 12062160,
-          "git_tracked_files": 717,
-          "git_dir_bytes": 33521594
-        },
-        "local_artifact_storage": {
-          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
-          "bytes": 96215580358,
-          "files": 1418,
-          "in_tree": {
-            "path": "artifacts",
-            "bytes": 7390054345,
-            "files": 976
-          },
-          "out_of_tree": {
-            "path": "/home/ecs-user/aad-artifacts",
-            "bytes": 88825526013,
-            "files": 442
-          }
-        },
-        "relay_lfs_storage": {
-          "repo": "AlphaAvatar/aadistill-artifacts",
-          "bytes": 98913220067,
-          "files": 1152,
-          "source": "logs/checkpoint_registry.json (cached listing)",
-          "queried_utc": "2026-08-17T19:05:45+00:00"
-        },
-        "scratch_session_directories": {
-          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
-          "path": "/home/ecs-user/aad-scratch",
-          "bytes": 61175074,
-          "files": 656
-        }
-      }
+    "local_artifact_storage": {
+     "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+     "bytes": 100145014120,
+     "files": 1697,
+     "in_tree": {
+      "path": "artifacts",
+      "bytes": 7433055748,
+      "files": 1059
+     },
+     "out_of_tree": {
+      "path": "/home/ecs-user/aad-artifacts",
+      "bytes": 92711958372,
+      "files": 638
+     }
     },
-    {
-      "label": "after-verification",
-      "measured_utc": "2026-08-17T20:28:49+00:00",
-      "commit": "b4f28a0789bd0f15a56097e4d9d854b8c5a116ba",
-      "note": "after the full suite, the pod simulator and the frozen-asset verifier; these runs regenerate artifacts/audit and the simulator's quarantine, so this is what the tree costs to verify",
-      "areas": {
-        "repository_working_tree": {
-          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
-          "bytes": 150996896,
-          "files": 781,
-          "of_which_logs_bytes": 5385196,
-          "of_which_logs_files": 211,
-          "of_which_data_bytes": 139121268,
-          "of_which_data_files": 70,
-          "git_tracked_bytes": 12077384,
-          "git_tracked_files": 718,
-          "git_dir_bytes": 33850076
-        },
-        "local_artifact_storage": {
-          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
-          "bytes": 96215580358,
-          "files": 1418,
-          "in_tree": {
-            "path": "artifacts",
-            "bytes": 7390054345,
-            "files": 976
-          },
-          "out_of_tree": {
-            "path": "/home/ecs-user/aad-artifacts",
-            "bytes": 88825526013,
-            "files": 442
-          }
-        },
-        "relay_lfs_storage": {
-          "repo": "AlphaAvatar/aadistill-artifacts",
-          "bytes": 98913220067,
-          "files": 1152,
-          "source": "logs/checkpoint_registry.json (cached listing)",
-          "queried_utc": "2026-08-17T19:05:45+00:00"
-        },
-        "scratch_session_directories": {
-          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
-          "path": "/home/ecs-user/aad-scratch",
-          "bytes": 61178042,
-          "files": 657
-        }
-      }
+    "relay_lfs_storage": {
+     "repo": "AlphaAvatar/aadistill-artifacts",
+     "bytes": 98913220067,
+     "files": 1152,
+     "source": "logs/checkpoint_registry.json (cached listing)",
+     "queried_utc": "2026-08-17T19:05:45+00:00"
     },
-    {
-      "label": "final",
-      "measured_utc": "2026-08-18T06:42:13+00:00",
-      "commit": "33b396c79cd920a0b77b0a157abc4fd25f6881c5",
-      "note": "end of the cleanup + architecture session",
-      "areas": {
-        "repository_working_tree": {
-          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
-          "bytes": 151061277,
-          "files": 786,
-          "of_which_logs_bytes": 5393326,
-          "of_which_logs_files": 211,
-          "of_which_data_bytes": 139121268,
-          "of_which_data_files": 70,
-          "git_tracked_bytes": 12141765,
-          "git_tracked_files": 723,
-          "git_dir_bytes": 34352170
-        },
-        "local_artifact_storage": {
-          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
-          "bytes": 96215580358,
-          "files": 1418,
-          "in_tree": {
-            "path": "artifacts",
-            "bytes": 7390054345,
-            "files": 976
-          },
-          "out_of_tree": {
-            "path": "/home/ecs-user/aad-artifacts",
-            "bytes": 88825526013,
-            "files": 442
-          }
-        },
-        "relay_lfs_storage": {
-          "repo": "AlphaAvatar/aadistill-artifacts",
-          "bytes": 98913220067,
-          "files": 1152,
-          "source": "logs/checkpoint_registry.json (cached listing)",
-          "queried_utc": "2026-08-17T19:05:45+00:00"
-        },
-        "scratch_session_directories": {
-          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
-          "path": "/home/ecs-user/aad-scratch",
-          "bytes": 61183978,
-          "files": 659
-        }
-      }
-    },
-    {
-      "label": "after-derived-cache-cleanup",
-      "measured_utc": "2026-08-20T17:17:12+00:00",
-      "commit": "5c9fdd40ddd1fa1e2fd64cc46731491442c800c4",
-      "note": "uv build cache 7.4181 GiB and the three Qwen3-4B-Thinking-2507 weight blobs 7.4924 GiB evicted; no checkpoint deleted; see logs/derived_cache_cleanup.json",
-      "areas": {
-        "repository_working_tree": {
-          "definition": "the tree excluding .git, .venv, artifacts/ and caches",
-          "bytes": 153293505,
-          "files": 879,
-          "of_which_logs_bytes": 7345033,
-          "of_which_logs_files": 286,
-          "of_which_data_bytes": 139121268,
-          "of_which_data_files": 70,
-          "git_tracked_bytes": 14358405,
-          "git_tracked_files": 814,
-          "git_dir_bytes": 39310103
-        },
-        "local_artifact_storage": {
-          "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
-          "bytes": 96241784146,
-          "files": 1419,
-          "in_tree": {
-            "path": "artifacts",
-            "bytes": 7390054345,
-            "files": 976
-          },
-          "out_of_tree": {
-            "path": "/home/ecs-user/aad-artifacts",
-            "bytes": 88851729801,
-            "files": 443
-          }
-        },
-        "relay_lfs_storage": {
-          "repo": "AlphaAvatar/aadistill-artifacts",
-          "bytes": 98913220067,
-          "files": 1152,
-          "source": "logs/checkpoint_registry.json (cached listing)",
-          "queried_utc": "2026-08-17T19:05:45+00:00"
-        },
-        "scratch_session_directories": {
-          "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
-          "path": "/home/ecs-user/aad-scratch",
-          "bytes": 131247299,
-          "files": 851
-        }
-      },
-      "filesystem": {
-        "path": "/home/ecs-user",
-        "total_bytes": 210978394112,
-        "used_bytes": 178278256640,
-        "free_bytes": 23892717568,
-        "free_human": "22.25 GiB",
-        "percent_used": 84.5
-      }
-    },
-    {
-      "label": "after-derived-cache-cleanup-20260827",
-      "measured_utc": "2026-08-25T19:46:01.567957+00:00",
-      "commit": "94cb073baf9725815985d71d3fcfe1fc73eb5549",
-      "note": "Reclaimed 1,610,587,371 bytes (1.5000 GiB) of REBUILDABLE derived caches only, to clear ckpt_store_capacity_gate for the approved Phase-B session. No checkpoint, scientific artifact, relay_retired object or sibling-project asset was touched, and the measured 6 GiB ckpt-store working margin was not shrunk.",
-      "areas": {
-        "filesystem_root": {
-          "definition": "df on /",
-          "free_bytes_before": 11276140544,
-          "free_bytes_after": 12902334464
-        },
-        "ckpt_store": {
-          "definition": "free space at /home/ecs-user/aad-artifacts",
-          "free_gib_before": 10.5024,
-          "free_gib_after": 12.0162,
-          "gate_required_gib": 11.55,
-          "gate_result": "PASS"
-        },
-        "out_of_tree_artifact_store": {
-          "definition": "/home/ecs-user/aad-artifacts",
-          "bytes": 97979120699,
-          "note": "UNCHANGED: nothing was deleted here"
-        },
-        "caches": {
-          "definition": "~/.cache after the cleanup",
-          "bytes": 8093702254,
-          "removed": [
-            "huggingface/datasets",
-            "huggingface/xet",
-            "pre-commit",
-            "pip"
-          ]
-        }
-      }
+    "scratch_session_directories": {
+     "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+     "path": "/home/ecs-user/aad-scratch",
+     "bytes": 61192882,
+     "files": 662
     }
-  ]
+   }
+  },
+  {
+   "label": "after-cleanup",
+   "measured_utc": "2026-08-17T19:51:58+00:00",
+   "commit": "fe3c2b3169964ae4884c3946124ba914ae64a556",
+   "note": "after the log normalization and the seven tombstoned retirements",
+   "areas": {
+    "repository_working_tree": {
+     "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+     "bytes": 150992246,
+     "files": 781,
+     "of_which_logs_bytes": 5380823,
+     "of_which_logs_files": 211,
+     "of_which_data_bytes": 139121268,
+     "of_which_data_files": 70,
+     "git_tracked_bytes": 12062160,
+     "git_tracked_files": 717,
+     "git_dir_bytes": 33521594
+    },
+    "local_artifact_storage": {
+     "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+     "bytes": 96215580358,
+     "files": 1418,
+     "in_tree": {
+      "path": "artifacts",
+      "bytes": 7390054345,
+      "files": 976
+     },
+     "out_of_tree": {
+      "path": "/home/ecs-user/aad-artifacts",
+      "bytes": 88825526013,
+      "files": 442
+     }
+    },
+    "relay_lfs_storage": {
+     "repo": "AlphaAvatar/aadistill-artifacts",
+     "bytes": 98913220067,
+     "files": 1152,
+     "source": "logs/checkpoint_registry.json (cached listing)",
+     "queried_utc": "2026-08-17T19:05:45+00:00"
+    },
+    "scratch_session_directories": {
+     "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+     "path": "/home/ecs-user/aad-scratch",
+     "bytes": 61175074,
+     "files": 656
+    }
+   }
+  },
+  {
+   "label": "after-verification",
+   "measured_utc": "2026-08-17T20:28:49+00:00",
+   "commit": "b4f28a0789bd0f15a56097e4d9d854b8c5a116ba",
+   "note": "after the full suite, the pod simulator and the frozen-asset verifier; these runs regenerate artifacts/audit and the simulator's quarantine, so this is what the tree costs to verify",
+   "areas": {
+    "repository_working_tree": {
+     "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+     "bytes": 150996896,
+     "files": 781,
+     "of_which_logs_bytes": 5385196,
+     "of_which_logs_files": 211,
+     "of_which_data_bytes": 139121268,
+     "of_which_data_files": 70,
+     "git_tracked_bytes": 12077384,
+     "git_tracked_files": 718,
+     "git_dir_bytes": 33850076
+    },
+    "local_artifact_storage": {
+     "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+     "bytes": 96215580358,
+     "files": 1418,
+     "in_tree": {
+      "path": "artifacts",
+      "bytes": 7390054345,
+      "files": 976
+     },
+     "out_of_tree": {
+      "path": "/home/ecs-user/aad-artifacts",
+      "bytes": 88825526013,
+      "files": 442
+     }
+    },
+    "relay_lfs_storage": {
+     "repo": "AlphaAvatar/aadistill-artifacts",
+     "bytes": 98913220067,
+     "files": 1152,
+     "source": "logs/checkpoint_registry.json (cached listing)",
+     "queried_utc": "2026-08-17T19:05:45+00:00"
+    },
+    "scratch_session_directories": {
+     "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+     "path": "/home/ecs-user/aad-scratch",
+     "bytes": 61178042,
+     "files": 657
+    }
+   }
+  },
+  {
+   "label": "final",
+   "measured_utc": "2026-08-18T06:42:13+00:00",
+   "commit": "33b396c79cd920a0b77b0a157abc4fd25f6881c5",
+   "note": "end of the cleanup + architecture session",
+   "areas": {
+    "repository_working_tree": {
+     "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+     "bytes": 151061277,
+     "files": 786,
+     "of_which_logs_bytes": 5393326,
+     "of_which_logs_files": 211,
+     "of_which_data_bytes": 139121268,
+     "of_which_data_files": 70,
+     "git_tracked_bytes": 12141765,
+     "git_tracked_files": 723,
+     "git_dir_bytes": 34352170
+    },
+    "local_artifact_storage": {
+     "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+     "bytes": 96215580358,
+     "files": 1418,
+     "in_tree": {
+      "path": "artifacts",
+      "bytes": 7390054345,
+      "files": 976
+     },
+     "out_of_tree": {
+      "path": "/home/ecs-user/aad-artifacts",
+      "bytes": 88825526013,
+      "files": 442
+     }
+    },
+    "relay_lfs_storage": {
+     "repo": "AlphaAvatar/aadistill-artifacts",
+     "bytes": 98913220067,
+     "files": 1152,
+     "source": "logs/checkpoint_registry.json (cached listing)",
+     "queried_utc": "2026-08-17T19:05:45+00:00"
+    },
+    "scratch_session_directories": {
+     "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+     "path": "/home/ecs-user/aad-scratch",
+     "bytes": 61183978,
+     "files": 659
+    }
+   }
+  },
+  {
+   "label": "after-derived-cache-cleanup",
+   "measured_utc": "2026-08-20T17:17:12+00:00",
+   "commit": "5c9fdd40ddd1fa1e2fd64cc46731491442c800c4",
+   "note": "uv build cache 7.4181 GiB and the three Qwen3-4B-Thinking-2507 weight blobs 7.4924 GiB evicted; no checkpoint deleted; see logs/derived_cache_cleanup.json",
+   "areas": {
+    "repository_working_tree": {
+     "definition": "the tree excluding .git, .venv, artifacts/ and caches",
+     "bytes": 153293505,
+     "files": 879,
+     "of_which_logs_bytes": 7345033,
+     "of_which_logs_files": 286,
+     "of_which_data_bytes": 139121268,
+     "of_which_data_files": 70,
+     "git_tracked_bytes": 14358405,
+     "git_tracked_files": 814,
+     "git_dir_bytes": 39310103
+    },
+    "local_artifact_storage": {
+     "definition": "artifacts/ in the tree PLUS the out-of-tree store, both generated and gitignored",
+     "bytes": 96241784146,
+     "files": 1419,
+     "in_tree": {
+      "path": "artifacts",
+      "bytes": 7390054345,
+      "files": 976
+     },
+     "out_of_tree": {
+      "path": "/home/ecs-user/aad-artifacts",
+      "bytes": 88851729801,
+      "files": 443
+     }
+    },
+    "relay_lfs_storage": {
+     "repo": "AlphaAvatar/aadistill-artifacts",
+     "bytes": 98913220067,
+     "files": 1152,
+     "source": "logs/checkpoint_registry.json (cached listing)",
+     "queried_utc": "2026-08-17T19:05:45+00:00"
+    },
+    "scratch_session_directories": {
+     "definition": "per-session working directories, bundles, poller output and pod-simulator quarantine",
+     "path": "/home/ecs-user/aad-scratch",
+     "bytes": 131247299,
+     "files": 851
+    }
+   },
+   "filesystem": {
+    "path": "/home/ecs-user",
+    "total_bytes": 210978394112,
+    "used_bytes": 178278256640,
+    "free_bytes": 23892717568,
+    "free_human": "22.25 GiB",
+    "percent_used": 84.5
+   }
+  },
+  {
+   "label": "after-derived-cache-cleanup-20260827",
+   "measured_utc": "2026-08-25T19:46:01.567957+00:00",
+   "commit": "94cb073baf9725815985d71d3fcfe1fc73eb5549",
+   "note": "Reclaimed 1,610,587,371 bytes (1.5000 GiB) of REBUILDABLE derived caches only, to clear ckpt_store_capacity_gate for the approved Phase-B session. No checkpoint, scientific artifact, relay_retired object or sibling-project asset was touched, and the measured 6 GiB ckpt-store working margin was not shrunk.",
+   "areas": {
+    "filesystem_root": {
+     "definition": "df on /",
+     "free_bytes_before": 11276140544,
+     "free_bytes_after": 12902334464
+    },
+    "ckpt_store": {
+     "definition": "free space at /home/ecs-user/aad-artifacts",
+     "free_gib_before": 10.5024,
+     "free_gib_after": 12.0162,
+     "gate_required_gib": 11.55,
+     "gate_result": "PASS"
+    },
+    "out_of_tree_artifact_store": {
+     "definition": "/home/ecs-user/aad-artifacts",
+     "bytes": 97979120699,
+     "note": "UNCHANGED: nothing was deleted here"
+    },
+    "caches": {
+     "definition": "~/.cache after the cleanup",
+     "bytes": 8093702254,
+     "removed": [
+      "huggingface/datasets",
+      "huggingface/xet",
+      "pre-commit",
+      "pip"
+     ]
+    }
+   }
+  },
+  {
+   "label": "after-checkpoint-cleanup-20260911",
+   "measured_utc": "2026-09-11T00:00:00Z",
+   "commit": "56d0b8f88657de789e05b2685f6736f8885006a6",
+   "note": "Authorized local cleanup after the root filesystem reached 100% and killed a pod-like sweep mid-run, leaving 869 gitignored artifacts (5.9 GiB) displaced in the simulator's hide directory and truncating two tracked files to zero bytes. All 869 were restored (0 quarantined) and both tracked files recovered from git; the C1 battery, the staged Stage-1 checkpoint config and the frozen-asset verifier were re-checked by hash and by the real gate. Deleted: 17 registered units, 48.44 GiB -- ten trainer_state.pt files (optimizer/scheduler/RNG state) from COMPLETED experiments E2p1/E4/E6b/E7, and seven intermediate step checkpoints of E2 phase 1, a closed diagnostic recorded as 'in current lineage: no'. NO model weights of any protected class were deleted: every canonical, control and reproducibility_required MODEL is retained at its canonical path, as is the 13 GiB of pytest tmp_path scratch's replacement policy. Five tombstones record the criterion, the surviving evidence and reconstruction cost; the registry marks each unit present_local=false rather than forgetting it.",
+   "areas": {
+    "filesystem_root": {
+     "definition": "df on /",
+     "free_bytes_before": 16384,
+     "free_bytes_after": 65191387136,
+     "free_gib_before": 0.0,
+     "free_gib_after": 60.71,
+     "note": "before is the 100%-full state that killed the sweep; the intermediate step after removing 13 GiB of pytest tmp_path scratch was 12.28 GiB free"
+    },
+    "ckpt_store": {
+     "definition": "free space at /home/ecs-user/aad-artifacts",
+     "free_gib_before": 12.28,
+     "free_gib_after": 60.71,
+     "gate_required_gib": 40.0,
+     "gate_result": "PASS",
+     "note": "same filesystem as the repository, /tmp and aad-scratch: one device, /dev/nvme0n1p3"
+    },
+    "out_of_tree_artifact_store": {
+     "definition": "/home/ecs-user/aad-artifacts",
+     "bytes": 49693538655,
+     "note": "48.44 GiB deleted here under the 2026-09-11 cleanup authorization; tombstoned"
+    },
+    "caches": {
+     "definition": "/tmp/pytest-of-ecs-user, pytest tmp_path roots",
+     "bytes": 4096,
+     "removed": [
+      "pytest-of-ecs-user (13 GiB of tmp_path trees from this session's suite runs)"
+     ],
+     "policy": "pyproject now sets tmp_path_retention_policy=failed and retention_count=1, so failure evidence is kept and passing runs leave nothing"
+    }
+   },
+   "retained_and_why": {
+    "model weights, all protected classes": "canonical, control and reproducibility_required MODELs carry frozen comparison and reproduction duty",
+    "permanent control trainer_state (6.56 GiB)": "control is a protected class and Stage-3 recovery may still resume from them",
+    "activation_stats.safetensors (1.81 GiB)": "reproducibility_required: the Stage-0 teacher statistics cache",
+    "qwen3_0p6b_init_v0 (1.12 GiB)": "the Stage-1 init C1 stages and every recipe starts from",
+    "e5 (0.90 GiB)": "classified 'unreviewed' in the registry; an unclear role is not a licence to delete",
+    "/tmp/alphaavatar-semantic-addressing-* (3.7 GiB)": "ownership not established in this project; out of scope"
+   },
+   "inputs_still_complete": {
+    "c1_confirmation_v1": "content_sha256 matches logs/phase_c1_battery.json; 950/850",
+    "stage1 checkpoint config.json": "sha256 a7131bb092b38a07, the pinned ROPE staging input",
+    "frozen_assets verifier": "PASS against configs/experiments/phase_c1/frozen_assets.json",
+    "registry": "every unit marked present_local is on disk; none absent-and-unretired"
+   }
+  }
+ ]
 }

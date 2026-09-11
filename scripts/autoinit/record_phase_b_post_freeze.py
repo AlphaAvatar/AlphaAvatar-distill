@@ -47,7 +47,7 @@ from experiments.phase_b.post_freeze import (  # noqa: E402
     SETUP_SCRIPT,
     dispatch_branch_hashes,
 )
-from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
+from aadistill.infrastructure.manifest import sha256_json, write_text_atomic  # noqa: E402
 
 PREREG = REPO_ROOT / "logs/autoinit_phase_b_preregistration.json"
 #: The commit whose tree the Phase-B preregistration describes — pinned, NOT
@@ -180,7 +180,9 @@ def main() -> None:
     body["note_sha256"] = sha256_json(body)
     out = Path(args.out)
     out = out if out.is_absolute() else REPO_ROOT / args.out
-    out.write_text(json.dumps(body, indent=2) + "\n")
+    #: Atomic: this file was truncated to zero bytes by a full disk on
+    #: 2026-09-11, and it is a governance record.
+    write_text_atomic(out, json.dumps(body, indent=2) + "\n")
     print(f"frozen      {frozen[:16]}…")
     print(f"post-freeze {live[:16]}…")
     print(f"changed set members {in_set}")

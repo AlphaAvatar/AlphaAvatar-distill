@@ -521,3 +521,71 @@ def test_a_nested_simulation_does_not_inherit_the_interpreter_control(tmp_path):
     assert "INNER=<unset>" in r.stdout, r.stdout
     src = SCRIPT.read_text()
     assert "PODSIM_LOCK HIDDEN_PATHS PODSIM_PYTHON" in src
+
+
+# --- free space is checked BEFORE anything is moved --------------------------
+#
+# On 2026-09-11 the filesystem filled while a sweep was running. The EXIT trap
+# never completed, 869 gitignored artifacts (5.9 GiB) were left in the hide
+# directory, and `git status` read clean the whole time -- gitignored files are
+# precisely what it does not see. Two tracked files were truncated to zero bytes
+# in the same window.
+#
+# A sweep that runs out of disk is not a failed sweep. It is a displaced
+# repository that reports nothing.
+
+def _run_simulator(tmp_path, *, min_free_gib, cmd="true"):
+    import subprocess
+
+    env = {**os.environ,
+           "HIDE_DIR": str(tmp_path / "hide"),
+           "PODSIM_LOCK": str(tmp_path / "lock"),
+           "PODSIM_MIN_FREE_GIB": str(min_free_gib),
+           "PODSIM_CMD": cmd}
+    return subprocess.run(["bash", str(REPO / "scripts/pod/simulate_pod_env.sh")],
+                          capture_output=True, text=True, cwd=REPO, env=env,
+                          timeout=300)
+
+
+def test_the_sweep_refuses_when_free_space_is_below_the_requirement(tmp_path):
+    """And refuses BEFORE hiding, which is the whole point.
+
+    Refusing after the first `mv` would leave the caller to restore by hand,
+    which is exactly the state this rule was learned from.
+    """
+    out = _run_simulator(tmp_path, min_free_gib=10**9)
+    assert out.returncode == 5, out.stdout + out.stderr
+    assert "REFUSING" in out.stderr
+    assert "free" in out.stderr.lower()
+    assert not (tmp_path / "hide").exists(), (
+        "the hide directory was created before the space check")
+    assert not (tmp_path / "lock").exists(), (
+        "the lock survived a refusal, so the next sweep would refuse too")
+
+
+def test_the_sweep_proceeds_when_the_requirement_is_met(tmp_path):
+    """Both directions: a check that always refuses protects nothing."""
+    out = _run_simulator(tmp_path, min_free_gib=1)
+    assert "free space ok" in out.stdout, out.stdout + out.stderr
+    assert "REFUSING" not in out.stderr
+
+
+def test_the_threshold_is_an_input_not_a_constant_in_the_core():
+    """The number lives with the caller that knows the footprint.
+
+    `src/aadistill` must not learn this machine's capacity, and the simulator
+    must not hard-code a figure derived from one workload.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "rpe", REPO / "scripts/autoinit/record_pod_environment.py")
+    rpe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rpe)
+    assert rpe.min_free_gib() >= 20, "the derived requirement lost its headroom"
+
+    sim = (REPO / "scripts/pod/simulate_pod_env.sh").read_text()
+    assert "PODSIM_MIN_FREE_GIB" in sim, "the simulator no longer takes the input"
+    core = (REPO / "src/aadistill").rglob("*.py")
+    offenders = [p.name for p in core if "MIN_FREE_GIB" in p.read_text()]
+    assert not offenders, f"a disk threshold reached the core: {offenders}"

@@ -101,6 +101,27 @@ DEFAULT_JUNIT = "/home/ecs-user/aad-scratch/podsim_junit.xml"
 DEFAULT_LOG = "/home/ecs-user/aad-scratch/podsim_pytest.log"
 
 
+def min_free_gib() -> int:
+    """How much room this sweep needs before it moves anything.
+
+    Derived, not guessed, and derived HERE because this is the caller that knows
+    the footprint. Three things consume space during a sweep: the hidden
+    artifacts, which are moved WITHIN the filesystem and so cost nothing extra;
+    pytest's `tmp_path` tree, which is what actually grows; and the junit/log
+    output, which is small.
+
+    The dominant term was measured on 2026-09-11: a full suite left about
+    3.5 GiB under `/tmp/pytest-of-*` per run. Doubling it covers a run that
+    keeps more, and the headroom covers this estimate simply being wrong --
+    which is the case that matters, because being wrong here does not fail the
+    sweep, it displaces the repository's gitignored artifacts and reports
+    nothing.
+    """
+    measured_tmp_gib = 4      # observed peak of one full-suite tmp_path tree
+    headroom_gib = 16         # what a wrong estimate must not be able to eat
+    return measured_tmp_gib * 2 + headroom_gib
+
+
 def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
     """Refuse a PASS when the declaration and the invocation disagree.
 
@@ -194,7 +215,10 @@ def main() -> int:
            # The interpreter the simulator uses to emit the CPU-test contract.
            # Explicit, because on a pod there is no repo venv and the ambient
            # fallback that used to cover that gap cost attempt 6 its CPU gate.
-           "PODSIM_PYTHON": sys.executable}
+           "PODSIM_PYTHON": sys.executable,
+           # Derived from THIS sweep's own footprint rather than guessed, and
+           # passed from here because this is where the footprint is known.
+           "PODSIM_MIN_FREE_GIB": str(min_free_gib())}
     command = (f"<SessionSpec.setup_environment: {len(setup_env)} keys> "
                f"HIDDEN_PATHS=<{len(hidden)} derived paths, contract "
                f"{contract['digest'][:12]}> PODSIM_CMD=<derived> "

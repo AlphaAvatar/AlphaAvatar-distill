@@ -72,6 +72,42 @@ if [ -d "$HIDE" ] && [ -n "$(ls -A "$HIDE" 2>/dev/null)" ]; then
   rmdir "$LOCK" 2>/dev/null
   exit 4
 fi
+
+# A sweep that runs out of disk is not a failed sweep, it is a DISPLACED
+# REPOSITORY. On 2026-09-11 the filesystem filled mid-run, the EXIT trap never
+# completed, and 869 gitignored artifacts -- 5.9 GiB -- were left sitting in
+# $HIDE while `git status` read clean, because gitignored files are exactly what
+# `git status` does not see. Two tracked files were truncated to zero bytes in
+# the same window.
+#
+# So the check happens HERE: after the lock, before anything is moved. Refusing
+# now costs nothing; refusing after the first `mv` means the caller has to
+# restore by hand, which is how this rule was learned. The threshold is an
+# input, not a constant compiled in: `PODSIM_MIN_FREE_GIB` is set by whatever
+# invokes the simulator, and it is measured on the filesystem that actually
+# holds $HIDE and the repository, not on whichever mount happens to be busiest.
+MIN_FREE_GIB=${PODSIM_MIN_FREE_GIB:-20}
+free_gib_of() { df -PBG "$1" 2>/dev/null | awk 'NR==2 {gsub("G","",$4); print $4}'; }
+HIDE_PARENT=$(dirname "$HIDE")
+mkdir -p "$HIDE_PARENT"
+for where in "$HIDE_PARENT" "$PODSIM_ROOT"; do
+  have=$(free_gib_of "$where")
+  if [ -z "$have" ]; then
+    echo "REFUSING: cannot read free space for $where" >&2
+    rmdir "$LOCK" 2>/dev/null
+    exit 5
+  fi
+  if [ "$have" -lt "$MIN_FREE_GIB" ]; then
+    echo "REFUSING: ${have}GiB free on the filesystem holding $where, below the" >&2
+    echo "  ${MIN_FREE_GIB}GiB this sweep requires. A sweep that fills the disk" >&2
+    echo "  leaves the repository's gitignored artifacts displaced in $HIDE and" >&2
+    echo "  git status will not show it. Free space first." >&2
+    rmdir "$LOCK" 2>/dev/null
+    exit 5
+  fi
+done
+echo "free space ok: $(free_gib_of "$PODSIM_ROOT")GiB >= ${MIN_FREE_GIB}GiB required"
+
 mkdir -p "$HIDE"
 
 # --- the second dimension: HOME and Hugging Face -----------------------------

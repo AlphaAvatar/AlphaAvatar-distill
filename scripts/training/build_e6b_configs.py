@@ -34,7 +34,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
+from aadistill.infrastructure.manifest import sha256_json, write_text_atomic  # noqa: E402
 
 SEEDS = ("sa", "sb")
 OBJECTIVE_PARENT = "configs/stage3/e4/e4_p2_r1600k_{seed}.json"
@@ -110,14 +110,16 @@ def main() -> None:
     for seed in SEEDS:
         cfg, prov = build(seed)
         path = args.out_dir / f"{cfg['run_name']}.json"
-        path.write_text(json.dumps(cfg, indent=2) + "\n")
+        #: Atomic: e6b_p2_r2960k_sa.json was truncated to zero bytes by a
+        #: full disk on 2026-09-11.
+        write_text_atomic(path, json.dumps(cfg, indent=2) + "\n")
         manifest[cfg["run_name"]] = prov
         print(f"wrote {path.relative_to(REPO_ROOT)}")
         print(f"  seed {cfg['seed']}  rung {cfg['rung']:,}  "
               f"steps {cfg['schedule']['total_steps']}  "
               f"loss {cfg['loss']['ce_weight']}/{cfg['loss']['kd_weight']}  "
               f"sha256 {prov['config_sha256'][:16]}…")
-    args.manifest.write_text(json.dumps(manifest, indent=2) + "\n")
+    write_text_atomic(args.manifest, json.dumps(manifest, indent=2) + "\n")
     print(f"wrote {args.manifest.relative_to(REPO_ROOT)}")
 
 

@@ -563,3 +563,47 @@ def test_the_normal_path_still_blocks_on_a_live_stream():
     assert not d.allowed and not d.emergency
     assert d.failed_check == "final_streams_quiescent"
     assert "must not be accepted as the final one" in d.reason
+
+
+# --- a whole-file write either lands or leaves the old file alone ------------
+
+def test_write_text_atomic_leaves_the_original_when_the_disk_is_full(tmp_path):
+    """`Path.write_text` truncates first and writes second.
+
+    On 2026-09-11 the filesystem filled between those two steps and two tracked
+    files became zero bytes. They were recoverable from git, which is luck: the
+    same sequence on a gitignored artifact loses it outright.
+    """
+    from unittest import mock
+
+    from aadistill.infrastructure.manifest import write_text_atomic
+
+    target = tmp_path / "record.json"
+    target.write_text("ORIGINAL")
+    with mock.patch("os.fsync", side_effect=OSError(28, "No space left on device")):
+        with pytest.raises(OSError):
+            write_text_atomic(target, "REPLACEMENT")
+    assert target.read_text() == "ORIGINAL", "a failed write destroyed the original"
+    assert [p.name for p in tmp_path.iterdir()] == ["record.json"], (
+        "a failed write left a temp file beside the thing it was protecting")
+
+
+def test_write_text_atomic_replaces_on_success(tmp_path):
+    """Both directions: a writer that never writes protects nothing."""
+    from aadistill.infrastructure.manifest import write_text_atomic
+
+    target = tmp_path / "record.json"
+    target.write_text("ORIGINAL")
+    write_text_atomic(target, "REPLACEMENT")
+    assert target.read_text() == "REPLACEMENT"
+
+
+def test_the_writers_that_were_truncated_use_it():
+    """Only the paths that actually failed -- this is not a repo-wide refactor."""
+    from pathlib import Path as _P
+
+    repo = _P(__file__).resolve().parents[2]
+    for f in ("scripts/autoinit/record_phase_b_post_freeze.py",
+              "scripts/training/build_e6b_configs.py"):
+        src = (repo / f).read_text()
+        assert "write_text_atomic" in src, f"{f} still truncates before writing"

@@ -36,3 +36,21 @@ explicit = true
 
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
+
+# Keep failure evidence, drop the rest.
+#
+# On 2026-09-11 the root filesystem filled at 100% and a pod-like sweep died
+# mid-run, leaving 869 gitignored artifacts displaced and two tracked files
+# truncated to zero bytes. 13 GiB of that disk was `/tmp/pytest-of-*`: pytest
+# keeps the last three `tmp_path` roots by default, and a full suite of this
+# repository leaves about 3.5 GiB in each, so a handful of runs is a problem
+# nobody sees until something else needs the space.
+#
+# `failed` keeps the tmp_path of any test that failed -- which is the evidence
+# worth having -- and discards the rest as each run ends. `count = 1` bounds
+# what survives across runs. This is pytest's own mechanism, not a cleanup
+# framework: nothing here deletes by pattern, so no other user's or other
+# project's directory is reachable from it.
+[tool.pytest.ini_options]
+tmp_path_retention_count = 1
+tmp_path_retention_policy = "failed"
