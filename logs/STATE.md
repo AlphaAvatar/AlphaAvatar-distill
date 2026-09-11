@@ -33,10 +33,22 @@ how the snapshot came to disagree with itself.
 | owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
 | **corrected** | the 2026-09-10 claim that **no engineering blocker remained was WRONG**. Two were found on review and repaired on 2026-09-11: an undefined `REPO` in the shared runner that would have raised `NameError` *after* a pod was created and setup had completed, and a scratch root with no owner, which let one attempt collect another's evidence. Both came in with `main`; neither was introduced by the run-identity work. See the 2026-09-11 section |
 
-**Right now: nothing is running. Nothing is billing. No pod exists. Nothing is
-prepared for launch.** Attempt 10's pod was deleted at 6.48 min and confirmed
-gone three ways, including an out-of-band read-only poll. **1 of the package's 3
-formal attempts is used**, `$0.1177` booked.
+> ## ⚠ A PAID SESSION IS LIVE — C1 attempt 11, pod `udkapuemrwqcmt`
+>
+> Created **2026-09-11T11:53:46Z** at `$1.09/h` on a secure L40S, hard terminate
+> 834 min = `$15.1475`. **Attempt 2 of the package's 3**; one remains after it.
+> All **fourteen** pre-provider gates passed at `$0` in a read-only pre-flight
+> and were re-run by the launcher before anything was created — including the
+> new `frozen_assets_gate`, which is the check attempt 10 paid to discover.
+> `AUTHORIZATION_OK`, a setup-side check, was also executed verbatim at `$0`.
+>
+> Launcher and an independent read-only provider poll run under tmux
+> (`c1launch11`, `c1poll11`). Evidence accrues in
+> [`runs/phase_c1/attempt11/`](runs/phase_c1/attempt11/). **Nothing is
+> concluded: treatment and endpoint remain UNMEASURED.**
+
+Attempt 10's pod was deleted at 6.48 min and confirmed gone three ways,
+including an out-of-band read-only poll. `$0.1177` booked.
 
 > ### C1 ATTEMPT 10 — SETUP ABORT at the frozen-asset gate, `$0.1177`, 6.48 min
 >
