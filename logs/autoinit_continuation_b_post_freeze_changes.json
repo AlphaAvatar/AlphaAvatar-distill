@@ -1,31 +1,31 @@
 {
  "schema": "aadistill.autoinit.continuation_b_post_freeze_changes/v1",
- "generated_utc": "2026-09-11T00:00:00Z",
+ "generated_utc": "2026-09-12T00:00:00Z",
  "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "23878ff4f21d408b19b7a992e843523cbd517d61501213656d11b8e08b476648",
+ "post_freeze_digest": "b82f0633bca2b1eaac965dae31e254e2b49c2f747ae56fd6151199b2567ff2dc",
  "changed_files": [
-  "src/aadistill/infrastructure/manifest.py"
+  "src/aadistill/infrastructure/session_runner.py"
  ],
  "change": {
-  "what": "write_text_atomic in the shared manifest helper: a whole-file write goes to a sibling temp, is fsynced, then os.replace'd, so a full disk fails on the temp and the previous file survives. write_manifest routes through it.",
-  "why_it_touches_this_frozen_set": "continuation B's executable set names the shared manifest helper, so a durability repair to a writer every session uses moves this digest even though continuation B is closed and consumed.",
-  "n_changed_files": 1,
-  "numstat": {
-   "src/aadistill/infrastructure/manifest.py": {
-    "lines_added": 30,
-    "lines_removed": 2
-   }
-  },
-  "behaviour_for_this_frozen_set": "identical on every path that succeeds. The only behavioural difference is on a write that fails: the previous file is left intact instead of truncated."
+  "what": "per-resource acquisition evidence in the shared session runner, and the draw counter as a class attribute. The watchdog journal is derived from the pod id at LAUNCH and the rename is gone; create() names its raw provider response by DRAW and attempt; run() records a create_failed draw for a create that returned no id; the journal name became a module-level function so a launcher detaching its own backstop cannot spell the convention differently from the collector that globs for it.",
+  "why_it_touches_this_frozen_set": "continuation B's executable set names src/aadistill/infrastructure/session_runner.py, the shared provider-acquisition runner. Any repair to how a session acquires, watches and records a provider resource moves this digest even though continuation B is closed and consumed.",
+  "additive_only": false,
+  "lines_added": 73,
+  "lines_removed": 36,
+  "why_not_additive": "the removed lines ARE the repair. The previous scheme renamed a shared journal aside when a draw started, which isolates nothing, because Journal.write reopens by path on every event: a watchdog that had not yet exited recreated the shared path and wrote its final poll and watchdog_end into the NEXT resource's journal while its own archive was left unterminated. Keeping the rename beside a per-pod name would leave the defect reachable. Reproduced with two real processes; three mutation-checked tests hold the line.",
+  "numstat_this_change": "73\t36\tsrc/aadistill/infrastructure/session_runner.py",
+  "numstat_rule": "git diff --numstat <previous declared_at_commit> HEAD -- <changed_files>",
+  "spans_commits": "7d516b8 and 19cf224; the numstat is measured across both, not one of them.",
+  "scope": "this entry describes the CHANGE BEING DECLARED NOW. Earlier declared changes are in `history`."
  },
- "pre_existing_branches_unchanged": false,
- "pre_existing_branches_note": "CHANGED at this declaration, and the previous note is superseded. The branches that moved: ['c1', 'continuation_b', 'phase_a', 'phase_b', 'recovery_continuation']. They moved because scripts/pod/autoinit_preflight_setup.sh carries embedded Python whose imports were rewritten by the relocation -- not because any dispatch DECISION changed. Recorded as moved rather than argued to be equivalent: continuation B is CLOSED and CONSUMED, so nothing relies on these hashes to launch, and claiming they were untouched would be false.",
+ "pre_existing_branches_unchanged": true,
+ "pre_existing_branches_note": "UNCHANGED at this declaration, and MEASURED rather than asserted: scripts/pod/autoinit_preflight_setup.sh is not among the changed files, and every SESSION_KIND branch re-hashes identical to the previous declaration's recorded set.",
  "preregistration_rewritten": false,
- "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched; the change is confined to how a file is written, not to what is written.",
- "declared_at_commit": "761ce60590178a436eb339ecc983afc6f72f2c95",
- "post_freeze_digest_previous": "058eb1c618173d90774ab7eb130951602e447138cb5868b85905da0489e3364e",
+ "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The change is confined to how a session names and records the provider resources it acquires.",
+ "declared_at_commit": "19cf2240100464832179746287a213c42c165366",
+ "post_freeze_digest_previous": "23878ff4f21d408b19b7a992e843523cbd517d61501213656d11b8e08b476648",
  "history": [
   {
    "utc": "2026-09-06T06:00:00Z",
@@ -360,6 +360,35 @@
     "src/aadistill/infrastructure/session_runner.py"
    ],
    "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The change is confined to provider acquisition and to the evidence recorded about it."
+  },
+  {
+   "utc": "2026-09-11T00:00:00Z",
+   "declared_at_commit": "761ce60590178a436eb339ecc983afc6f72f2c95",
+   "digest_moved": "058eb1c618173d90 -> 23878ff4f21d408b",
+   "change": {
+    "what": "write_text_atomic in the shared manifest helper: a whole-file write goes to a sibling temp, is fsynced, then os.replace'd, so a full disk fails on the temp and the previous file survives. write_manifest routes through it.",
+    "why_it_touches_this_frozen_set": "continuation B's executable set names the shared manifest helper, so a durability repair to a writer every session uses moves this digest even though continuation B is closed and consumed.",
+    "n_changed_files": 1,
+    "numstat": {
+     "src/aadistill/infrastructure/manifest.py": {
+      "lines_added": 30,
+      "lines_removed": 2
+     }
+    },
+    "behaviour_for_this_frozen_set": "identical on every path that succeeds. The only behavioural difference is on a write that fails: the previous file is left intact instead of truncated."
+   },
+   "changed_files": [
+    "src/aadistill/infrastructure/manifest.py"
+   ],
+   "pre_existing_branches_unchanged": false,
+   "pre_existing_branches_note": "CHANGED at this declaration, and the previous note is superseded. The branches that moved: ['c1', 'continuation_b', 'phase_a', 'phase_b', 'recovery_continuation']. They moved because scripts/pod/autoinit_preflight_setup.sh carries embedded Python whose imports were rewritten by the relocation -- not because any dispatch DECISION changed. Recorded as moved rather than argued to be equivalent: continuation B is CLOSED and CONSUMED, so nothing relies on these hashes to launch, and claiming they were untouched would be false.",
+   "branch_hashes": {
+    "phase_a": "991233b9b55b9e2a7d3757b3568b56a1106fb8a4ef5c6bf552ea44fbca6fa058",
+    "phase_b": "0827dfaea8fa6e19418eaa5204dfc4181f9d481821afe604dfe246413e4609ec",
+    "continuation_b": "535ffcd23462e5f37331125c320c272f2822ec2a64a228cc6494109b4c37d79f",
+    "c1": "01ff547319ca2f0d53b89763c376bcb5cfb4809142da1a99cb4e5064b0524916",
+    "recovery_continuation": "ea1d64fa2dd5067cf558c25b172fbcf50c7b101c95c3b872e10709d3c997e7ae"
+   }
   }
  ],
  "branch_hashes_at_latest_declaration": {
@@ -370,5 +399,6 @@
   "recovery_continuation": "ea1d64fa2dd5067cf558c25b172fbcf50c7b101c95c3b872e10709d3c997e7ae"
  },
  "launch_compatible": false,
- "launch_compatible_note": "the continuation is CLOSED and CONSUMED; its authorization binds a non-HEAD commit, so no continuation-B session can launch again. This records history and confers nothing."
+ "launch_compatible_note": "the continuation is CLOSED and CONSUMED; its authorization binds a non-HEAD commit, so no continuation-B session can launch again. This records history and confers nothing.",
+ "also_declared_as": "PHB-HA-014 and PHB-HA-015 in logs/autoinit_phase_b_historical_amendments.json, and a review round in tests/architecture/test_cuda_surface_preserved.py. ONE change, three frozen sets that pin a digest naming this file; each owes its own declaration, and declaring one does not declare the others."
 }
