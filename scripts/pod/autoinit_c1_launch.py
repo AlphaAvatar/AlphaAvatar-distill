@@ -51,7 +51,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from experiments.deployment import MAIN_RELAY, POD_IMAGE, deployment_commands  # noqa: E402
 from experiments.run_layout import (  # noqa: E402
-    ArtifactSpec as RunArtifactSpec, RUNS_ROOT, claim_output_root, layout_for,
+    ArtifactSpec as RunArtifactSpec, claim_output_root, layout_for,
+    rel_run_dir,
     open_run, present_roles, record_run, require_output_claim, write_run_readmes,
 )
 from experiments.phase_c1 import session as CS
@@ -518,7 +519,11 @@ def grant_provenance_gate(ctx: SessionContext) -> tuple[bool, str]:
     run_id = getattr(ctx.args, "run_id", None)
     if not run_id:
         return False, "this session has no run_id, so no grant can belong to it"
-    rel = f"{RUNS_ROOT}/{RUN_EXPERIMENT_ID}/{run_id}/{C1_RUN_ROLES['grant']}"
+    #: Through the helper, so this gate and `open_run` cannot disagree about
+    #: where the run is. They did: this line named the pre-stage location while
+    #: the run moved under its declared stage.
+    rel = (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
+           f"/{C1_RUN_ROLES['grant']}")
     want = (REPO_ROOT / rel).resolve()
     try:
         raw = json.loads((REPO_ROOT / AUTH_PATH).read_text())
@@ -1435,12 +1440,15 @@ def main() -> int:
         doc = close_c1_run(layout, args)
     except Exception as exc:                                      # noqa: BLE001
         print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
-              f"  the run directory is {RUNS_ROOT}/{layout.rel_root}; it holds "
+              f"  the run directory is "
+              f"{rel_run_dir(RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)}; "
+              "it holds "
               "whatever the session produced and has no manifest. Do not reuse "
               "this run id.")
         return rc or RUN_NOT_RECORDED
     print(f"run {doc['experiment_id']}/{doc['run_id']} recorded — "
-          f"{len(doc['roles'])} role(s) under {RUNS_ROOT}/{doc['root']}")
+          f"{len(doc['roles'])} role(s) under "
+          f"{rel_run_dir(doc['experiment_id'], doc['run_id'], RUN_STAGE_ID)}")
     return rc
 
 

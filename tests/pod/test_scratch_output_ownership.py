@@ -34,7 +34,11 @@ REPO = Path(__file__).resolve().parents[2]
 #: What a previous attempt leaves behind, with content that names it.
 STALE = {
     "launch.log": "attempt9 launcher\n",
-    "watchdog.jsonl": '{"attempt": 9}\n',
+    #: Named after the pod it watched, which is how a watchdog writes from its
+    #: first tick. The launcher declares these by PATTERN, so a fixture using
+    #: the pre-isolation fixed name would leave the scratch looking one output
+    #: emptier than it is.
+    "watchdog_pod9.jsonl": '{"attempt": 9}\n',
     "relay/autoinit_c1_run.log": "attempt9 driver ran\n",
     "relay/autoinit_c1.status": "MARKER:ALL_DONE attempt9\n",
     "relay/c1_evidence.json": '{"attempt": 9, "stages": ["B", "C", "D"]}',
@@ -155,7 +159,7 @@ def test_an_unclaimed_scratch_holding_outputs_is_refused_as_ambiguous(tmp_path,
     with pytest.raises(RunConventionError) as exc:
         L.open_c1_run(_args(scr, "attempt10"), repo)
     msg = str(exc.value)
-    assert "relay/c1_evidence.json" in msg or "6" in msg
+    assert "relay/c1_evidence.json" in msg or str(len(STALE)) in msg, msg
     _unchanged(scr, digests)
 
 
@@ -201,7 +205,8 @@ def test_a_run_with_its_own_scratch_collects_normally(tmp_path, L):
     assert {"driver_evidence", "driver_log", "driver_status",
             "artifact_manifest"} <= set(doc["roles"])
     assert "attempt10" in layout.path("evidence/driver_status.txt").read_text()
-    assert read_run(repo, "phase_c1", "attempt10")["self_sha256"] == doc["self_sha256"]
+    assert read_run(repo, "phase_c1", "attempt10",
+                    L.RUN_STAGE_ID)["self_sha256"] == doc["self_sha256"]
 
 
 def test_reopening_the_same_run_id_on_its_own_scratch_is_the_run_id_rule(
@@ -270,16 +275,17 @@ def test_the_cuda_validation_claims_and_requires_the_same_way(tmp_path):
     from experiments.run_layout import claim_output_root
 
     mod = _cuda()
-    assert set(mod.RUN_OUTPUTS) == {"validation_stdout.txt", "watchdog.jsonl",
+    assert set(mod.RUN_OUTPUTS) == {"validation_stdout.txt", "watchdog_*.jsonl",
                                     "artifacts"}
     L = load_session_launcher("autoinit_c1_launch")
     #: The RUN-ROLE vocabularies are disjoint — that is the mechanism-vs-instance
     #: property. The scratch OUTPUTS are not, and must not be assumed to be:
-    #: both sessions detach the same `watchdog.py` and both call its journal
-    #: `watchdog.jsonl`. Which is the point — a filename cannot say which run
-    #: produced it, so ownership is decided by the claim on the directory.
+    #: both sessions detach the same `watchdog.py` and both name its journal
+    #: after the pod it watches, so both declare the same PATTERN. Which is the
+    #: point — neither a filename nor a pod id says which run produced it, so
+    #: ownership is decided by the claim on the directory.
     assert not set(mod.RUN_ROLES) & set(L.C1_RUN_ROLES)
-    assert set(mod.RUN_OUTPUTS) & set(L.RUN_OUTPUTS) == {"watchdog.jsonl"}
+    assert set(mod.RUN_OUTPUTS) & set(L.RUN_OUTPUTS) == {"watchdog_*.jsonl"}
 
     repo, scr = tmp_path / "repo", tmp_path / "scr"
     (repo / "logs").mkdir(parents=True)
@@ -289,7 +295,7 @@ def test_the_cuda_validation_claims_and_requires_the_same_way(tmp_path):
 
     _, eng = _cuda_engineering(scr, "subrun_a")
     eng.write_evidence(repo)
-    doc = read_run(repo, "cuda_stage_f", "subrun_a")
+    doc = read_run(repo, "cuda_stage_f", "subrun_a", mod.RUN_STAGE_ID)
     assert "validation_stdout" in doc["roles"]
 
 

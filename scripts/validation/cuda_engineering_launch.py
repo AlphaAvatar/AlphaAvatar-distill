@@ -56,7 +56,8 @@ from aadistill.infrastructure.session_runner import (  # noqa: E402
 from experiments.deployment import (  # noqa: E402
     POD_IMAGE, provider_cli_candidates)
 from experiments.run_layout import (  # noqa: E402
-    ArtifactSpec, RUNS_ROOT, claim_output_root, open_run, present_roles,
+    ArtifactSpec, claim_output_root, open_run, present_roles,
+    rel_run_dir,
     record_run, require_output_claim, write_run_readmes,
 )
 
@@ -788,7 +789,8 @@ print(json.dumps(out)); print("PROBE_OK")
                     "authorizes": "nothing"},
             roles=present_roles(layout, RUN_ROLES))
         print(f"\nverdict: {self.ev.get('verdict')}")
-        print(f"evidence: {RUNS_ROOT}/{doc['root']}  "
+        print("evidence: "
+              f"{rel_run_dir(doc['experiment_id'], doc['run_id'], RUN_STAGE_ID)}  "
               f"({len(doc['roles'])} role(s) recorded)")
 
 

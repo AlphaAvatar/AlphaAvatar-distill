@@ -336,7 +336,11 @@ def test_the_watchdog_starts_at_registration_before_the_price_is_judged(
     cmd = calls["watchdogs"][0]
     assert "--pod-id" in cmd and cmd[cmd.index("--pod-id") + 1] == "pod1"
     assert r.ev["watchdog_owns_pod"] == "pod1"
-    assert r.ev["watchdog_journals"] == [str(r.scr / "watchdog.jsonl")]
+    #: Named after the resource, from the first tick. The fixed name was
+    #: renamed aside on a redraw, which does not isolate a writer that
+    #: still holds the path.
+    assert r.ev["watchdog_journals"] == [
+        str(r.scr / SR.watchdog_journal_name(r.pod_id))]
     # started BEFORE the rejection was recorded
     first = r.ev["saves"][0]
     assert first["watchdog_owns_pod"] == "pod1"
@@ -375,7 +379,11 @@ def test_launch_watchdog_is_idempotent_for_one_resource(tmp_path, monkeypatch):
     r.launch_watchdog()
     r.launch_watchdog()
     assert len(calls["watchdogs"]) == 1
-    assert r.ev["watchdog_journals"] == [str(r.scr / "watchdog.jsonl")]
+    #: Named after the resource, from the first tick. The fixed name was
+    #: renamed aside on a redraw, which does not isolate a writer that
+    #: still holds the path.
+    assert r.ev["watchdog_journals"] == [
+        str(r.scr / SR.watchdog_journal_name(r.pod_id))]
 
 
 def test_a_new_provider_resource_gets_its_own_watchdog(tmp_path, monkeypatch):

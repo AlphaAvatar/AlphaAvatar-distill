@@ -111,6 +111,14 @@ def watchdog_journal_name(pod_id: str | None, suffix: str = "jsonl") -> str:
 class SessionRunner:
     """Runs one `SessionSpec`. Not a base class; there is nothing to override."""
 
+    #: Which acquisition draw is in flight. A CLASS attribute, so `create()`
+    #: can name it however the instance was built: `run()` assigns the real
+    #: draw, and a caller that drives `create()` directly -- the ownership
+    #: tests do, and so does any future entry point that acquires one resource
+    #: without the draw loop -- gets draw 1 rather than an AttributeError
+    #: raised while a provider call is in flight.
+    draw = 1
+
     def __init__(self, spec: SessionSpec, args, repo_root: Path):
         self.spec = spec.validate()
         self.a = args
@@ -167,8 +175,6 @@ class SessionRunner:
         }
         self.ev.update(dict(spec.evidence_fields))
         self.pod_id = ""
-        #: Which acquisition draw is in flight. Names the raw provider response
-        #: so a later draw cannot overwrite an earlier one's.
         self.draw = 1
         self.start_epoch = 0.0
         #: The provider resource the detached watchdog already owns, so a second

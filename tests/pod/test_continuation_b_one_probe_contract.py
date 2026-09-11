@@ -471,7 +471,14 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
                      r"treatment and endpoint unmeasured", c1["status"], re.I), (
         c1["status"])
     if state["authorized"]["any"]:
-        used = state["authorized"].get("formal_attempts_used")
+        #: `formal_sessions_used` since 2026-09-11, when the attempt CAP was
+        #: withdrawn and the counted thing was renamed to what it always was --
+        #: a launcher session. The older key is still accepted so this reads a
+        #: snapshot from either side of that change; what it will not accept is
+        #: NEITHER, which is a package whose usage is untracked.
+        used = (state["authorized"].get("formal_sessions_used")
+                if "formal_sessions_used" in state["authorized"]
+                else state["authorized"].get("formal_attempts_used"))
         assert isinstance(used, int), (
             "an authorization exists and the snapshot does not count what it "
             "has been used for")

@@ -209,6 +209,24 @@ def runs_root_for(repo_root: Path | str, stage_id: str | None) -> Path:
     return base if stage_id is None else base / stage_segment(stage_id)
 
 
+def rel_run_dir(experiment_id: str, run_id: str,
+                stage_id: str | None = None) -> str:
+    """A run's directory as a REPO-RELATIVE path, stage segment included.
+
+    The one string an operator is told and a gate computes. It existed as
+    `f"{RUNS_ROOT}/{experiment_id}/{run_id}"` at four call sites, and when runs
+    were grouped by stage all four silently kept naming the pre-stage location.
+    Three were messages. The fourth was `grant_provenance_gate`, which computes
+    where THIS session's grant must be: it would have looked under the legacy
+    root while `open_run` put the run under the stage, so a correctly placed
+    grant is refused and a grant placed where the gate looks is outside the run
+    it belongs to. That is a `$0` refusal at gate time -- but only if it is
+    noticed before a launch, and it consumes a one-use chain either way.
+    """
+    stage = "" if stage_id is None else f"{stage_segment(stage_id)}/"
+    return f"{RUNS_ROOT}/{stage}{experiment_id}/{run_id}"
+
+
 def layout_for(repo_root: Path | str, experiment_id: str, run_id: str,
                stage_id: str | None = None) -> RunLayout:
     """This run's layout. Creates nothing and checks nothing on disk.
@@ -557,4 +575,5 @@ __all__ = ["AREAS", "CLAIM_NAME", "CLAIM_SCHEMA", "MANIFEST_NAME",
            "RunConventionError", "RunLayout", "area_of", "check_roles",
            "claim_output_root", "is_recorded", "layout_for", "manifest_path",
            "open_run", "present_roles", "read_output_claim", "read_run",
+           "rel_run_dir",
            "record_run", "require_output_claim"]

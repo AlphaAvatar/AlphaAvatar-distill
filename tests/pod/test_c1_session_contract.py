@@ -711,8 +711,20 @@ def _grant_root(tmp_path, *, run_id="attempt10", grant_run_id=None,
     root = tmp_path / "root"
     body = {"granted_by": "maintainer, review 2026-09-11",
             "covers": "one launch"} if grant_body is None else grant_body
-    rel = (f"{L.RUNS_ROOT}/{L.RUN_EXPERIMENT_ID}/{grant_run_id or run_id}/"
-           f"{L.C1_RUN_ROLES['grant']}")
+    #: Through the SAME helper the gate uses, and then checked against where
+    #: `open_run` really puts the run. This built the path itself, the identical
+    #: wrong way the gate did -- both omitted the stage segment after runs were
+    #: grouped by stage -- so the two agreed and the test could not see it. A
+    #: fixture that recomputes its subject's logic proves only that the logic is
+    #: self-consistent.
+    from experiments.run_layout import layout_for, rel_run_dir
+    rel = (f"{rel_run_dir(L.RUN_EXPERIMENT_ID, grant_run_id or run_id, L.RUN_STAGE_ID)}"
+           f"/{L.C1_RUN_ROLES['grant']}")
+    expect = layout_for(root, L.RUN_EXPERIMENT_ID, grant_run_id or run_id,
+                        L.RUN_STAGE_ID).path(L.C1_RUN_ROLES["grant"])
+    assert (root / rel).resolve() == expect.resolve(), (
+        f"the gate would look at {rel}, but the run's grant role resolves to "
+        f"{expect.relative_to(root)}")
     if write_grant:
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
         (root / rel).write_text(json.dumps(body, indent=1) + "\n")
