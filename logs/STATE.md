@@ -163,6 +163,58 @@ teardown was confirmed are three facts recorded independently of whether a valid
 scientific conclusion exists. An engineering failure is never written up as a
 statistical `INCONCLUSIVE`.
 
+> **THE ISSUER DECLARED PATHS THE MIGRATION HAD DELETED, 2026-09-11 —
+> `$0.0000`, caught by a read-only pre-flight BEFORE the launcher was invoked,
+> so no formal attempt was consumed.**
+>
+> `session_commit_gate` re-digests the authorization's `harness_source_files` at
+> the session commit — literally `git show <commit>:<path>` for each one — and
+> compares the result to `harness_source_digest`. Those two fields have to
+> describe the same files.
+>
+> They stopped doing so at the initialization cutover. `harness_source_digest`
+> became the **derived post-migration closure** (97 current paths) while
+> `harness_source_files` stayed frozen at `C1_HARNESS_SOURCE_FILES_V1` — the
+> pre-migration declaration, deliberately still pointing at
+> `src/aadistill/autoinit/…`, which no longer exists. So the first authorization
+> issued under the approved package declared 73 paths that are not in the tree,
+> and **two gates refused**: `session_commit_and_lineage` with *"does not
+> contain \['src/aadistill/autoinit/\_\_init\_\_.py', …]"*, and
+> `bundle_staged_gate` with the same list after a real round-trip of the
+> uploaded bundle.
+>
+> **Why no `$0` test caught it.** `session_commit_gate` is the one gate that
+> reads this field, and it is in `ALWAYS_STRUCTURALLY_UNAVAILABLE` for the
+> candidate sweep — it binds a *real issued* commit, which a scratch candidate
+> does not have. So it had never run against a real issuance on the migrated
+> tree. This is exactly the risk the exclusion list's own docstring names: an
+> exclusion list is where a real gate goes to die quietly.
+>
+> **What found it instead.** A read-only pre-flight that calls the same thirteen
+> gate functions with the same real authorization and the same real argument
+> namespace, without invoking the launcher and without calling `open_c1_run`.
+> Under this package an attempt is consumed at *invocation*, so the cheap check
+> has to happen outside it. It cost nothing and saved one of three attempts.
+>
+> **The repair.** The issuer now declares the set its digest was computed over —
+> `tuple(f["path"] for f in harness["files"])` — and `c1_harness_gate` compares
+> the declaration against the live derived set rather than against the frozen
+> constant, naming the pre-migration case explicitly so the message does not
+> send a reader looking for another phase's grant. `C1_HARNESS_SOURCE_FILES_V1`
+> and `c1_historical_harness_digest` are untouched: they are the record of what
+> the completed attempts ran, and the guard that stops an old authorization
+> being revalidated on this tree.
+>
+> **Five `$0` regressions close the gap**, and the pre-fix code fails all five:
+> the declared set must equal the digested set; every declared path must exist
+> at `HEAD` (which is what the gate actually does); the historical declaration
+> must be refused *by name*; and the set the issuer really writes must be
+> accepted, so the refusal is not refusing everything.
+>
+> **The first authorization is VOID and was never used.** It is preserved in git
+> at `52d6b68`, was never passed to the launcher, created no resource and cost
+> `$0.0000`. `0` of 3 formal attempts are used.
+
 > **THE GOVERNANCE INPUT HAD NOWHERE LEGAL TO GO, 2026-09-11 — `$0.0000`, no
 > pod, no GPU, no provider resource, no grant, no authorization.**
 >

@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "199711af75a5d56ca4ca9376f559a527f4eed82a",
+ "head_commit": "52d6b68dec78b786b4c074b8213e04eccccc250c",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -75,7 +75,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 97,
-  "digest": "33c031985720f749055a01ca08049e15f31b783e10f5270c23223e488f649618",
+  "digest": "464dacb3d8db9ced4ae4a3070e0bb10339ac05243438365f3eb9d6bfe8ea8776",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -150,8 +150,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/authorization_payload.py",
-    "sha256": "973c08f9a59cfc4c25f21c15a6703df3c1ef9448906939ead2e0ee058abf79d3",
-    "bytes": 11771
+    "sha256": "6ce5f287d33b8dfc8a6abbdd8996997d5a0e6c36f7eab6c4a7be08a007338544",
+    "bytes": 12893
    },
    {
     "path": "scripts/experiments/phase_c1/bundle.py",
@@ -210,8 +210,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "059ac7216871f8b589ada53fd6a60d69018a93c8be25625e7271d95380026bc0",
-    "bytes": 69033
+    "sha256": "8e918675d3698c093c8af4cba35fb1f3d572da3621082c56677448a2b4005c20",
+    "bytes": 69869
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -1077,5 +1077,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "ed79d659bed64088a1e7248a7090edbe509f6a4273a72c1a3a9b9aa4560d7ae7"
+ "preregistration_sha256": "8654b2456f8692b92b25171d1af012c2ba394258fc9306573cab86981148b8f3"
 }

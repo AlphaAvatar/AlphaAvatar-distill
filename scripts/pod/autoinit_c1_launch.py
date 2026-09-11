@@ -421,18 +421,31 @@ def c1_harness_gate(ctx: SessionContext) -> tuple[bool, str]:
     operator went unmeasured.
     """
     try:
-        live = c1_harness_digest(REPO_ROOT)["digest"]
+        current = c1_harness_digest(REPO_ROOT)
     except Exception as exc:                       # noqa: BLE001
         return False, f"cannot compute the C1 harness digest: {exc}"
+    live = current["digest"]
+    expected = tuple(f["path"] for f in current["files"])
     declared = tuple(getattr(ctx.auth, "harness_source_files", ()) or ())
-    if declared != C1_HARNESS_SOURCE_FILES_V1:
+    if declared != expected:
+        #: Named separately, because it is the failure an authorization issued
+        #: after the initialization cutover actually lands on, and "a different
+        #: file set" would send the reader looking for another phase's grant.
+        if declared == C1_HARNESS_SOURCE_FILES_V1:
+            return False, (
+                "the authorization declares the PRE-MIGRATION harness set: "
+                f"{len(declared)} paths under src/aadistill/autoinit/, which the "
+                "initialization cutover moved. Its digest was computed over the "
+                f"{len(expected)} current paths, so the two describe different "
+                "sets and session_commit_gate can never pass. Re-issue.")
         return False, ("the authorization declares a different harness file set "
-                       "than this session executes")
+                       f"({len(declared)} paths) than this session executes "
+                       f"({len(expected)})")
     stored = getattr(ctx.auth, "harness_source_digest", None)
     if stored and stored != live:
         return False, (f"harness digest {stored[:12]}… in the authorization does "
                        f"not match the live tree {live[:12]}…")
-    return True, f"C1 harness {live[:12]}… over {len(C1_HARNESS_SOURCE_FILES_V1)} files"
+    return True, f"C1 harness {live[:12]}… over {len(expected)} declared files"
 
 
 def grant_provenance_gate(ctx: SessionContext) -> tuple[bool, str]:

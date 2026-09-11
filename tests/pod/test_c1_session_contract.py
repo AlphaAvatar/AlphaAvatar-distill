@@ -7,6 +7,7 @@ that exists in exactly one place, and the three driver methods that raise.
 
 from __future__ import annotations
 
+import dataclasses
 import importlib.util
 import json
 import os
@@ -583,8 +584,18 @@ def test_the_candidate_describes_this_tree_not_a_remembered_one(tmp_path):
     like a broken gate. A candidate derived from the live tree cannot go stale.
     """
     auth = C1Authorization.load(write_candidate(tmp_path))
-    assert auth.harness_source_digest == c1_harness_digest(REPO)["digest"]
-    assert tuple(auth.harness_source_files) == C1_HARNESS_SOURCE_FILES_V1
+    live = c1_harness_digest(REPO)
+    assert auth.harness_source_digest == live["digest"]
+    #: The DECLARED set is the derived one too, since 2026-09-11. It asserted
+    #: `== C1_HARNESS_SOURCE_FILES_V1` here, which is how "describes this tree"
+    #: came to be checked for the digest and contradicted for the file list:
+    #: the constant is frozen at the pre-migration paths, so the candidate
+    #: declared 73 files that no longer exist while binding a digest over the 97
+    #: that do. This test's own name is the property it stopped checking.
+    assert tuple(auth.harness_source_files) == tuple(
+        f["path"] for f in live["files"])
+    assert tuple(auth.harness_source_files) != C1_HARNESS_SOURCE_FILES_V1, (
+        "the historical declaration is back in an issued authorization")
 
 
 def test_mutation_a_stale_candidate_is_refused_by_the_harness_gate(launcher, spec,
@@ -782,3 +793,87 @@ def test_the_grant_role_is_declared_and_is_not_snapshotted(L_unused=None):
     assert "grant" not in [role for _src, role in L._RUN_GOVERNANCE]
     assert "grant" not in [role for _src, role in L._RUN_COLLECT]
     assert L._RUN_PREPARED == ("grant",)
+
+
+# --- the authorization must declare the set its digest covers ----------------
+#
+# `session_commit_gate` re-digests `harness_source_files` at the session commit,
+# by running `git show <commit>:<path>` for each one, and compares the result to
+# `harness_source_digest`. So those two fields have to describe the SAME files.
+#
+# They stopped doing so at the initialization cutover: the digest became the
+# derived post-migration closure while the declaration stayed frozen at the
+# pre-migration paths. Every authorization issued afterwards was structurally
+# unusable, and the first one was caught by a read-only pre-flight rather than
+# by a test, because the only gate that reads the field is excluded from the
+# candidate sweep. These are the $0 checks that close that gap.
+
+def _issued_payload(tmp_path):
+    sys.path.insert(0, str(REPO / "scripts/experiments/phase_c1"))
+    from authorization_payload import build_c1_authorization_payload
+
+    return build_c1_authorization_payload(
+        grant=TEST_GRANT, session_commit=TEST_SESSION_COMMIT,
+        granted_utc=TEST_GRANTED_UTC, repo_root=REPO,
+        grant_path="<test fixture>")
+
+
+def test_the_declared_harness_set_is_the_one_the_digest_covers(tmp_path):
+    """The invariant that was violated, stated directly."""
+    payload = _issued_payload(tmp_path)
+    declared = tuple(payload["harness_source_files"])
+    live = c1_harness_digest(REPO)
+    assert declared == tuple(f["path"] for f in live["files"]), (
+        "the authorization declares one file set and binds a digest over "
+        "another; session_commit_gate re-digests the declared set and could "
+        "never match")
+    assert payload["harness_source_digest"] == live["digest"]
+
+
+def test_every_declared_harness_path_exists_in_this_repository(tmp_path):
+    """Exactly what the gate does, and exactly where it failed.
+
+    `git show <commit>:<path>` on a path the cutover moved returns non-zero, and
+    the gate refuses with `does not contain [...]` after listing every missing
+    one. Asked here against HEAD, for free.
+    """
+    import subprocess
+
+    declared = _issued_payload(tmp_path)["harness_source_files"]
+    missing = [p for p in declared
+               if subprocess.run(["git", "show", f"HEAD:{p}"],
+                                 capture_output=True, cwd=REPO).returncode != 0]
+    assert not missing, (
+        f"{len(missing)} declared harness path(s) are not in HEAD, so a pod "
+        f"checking out this commit cannot digest them: {missing[:5]}")
+
+
+def test_the_superseded_historical_declaration_is_refused_by_name(tmp_path):
+    """The mutation, and its message must be the useful one.
+
+    Re-introducing `C1_HARNESS_SOURCE_FILES_V1` must not read as "some other
+    phase's grant" — that sends the reader looking for the wrong thing.
+    """
+    import types
+
+    auth = C1Authorization.load(write_candidate(tmp_path))
+    stale = dataclasses.replace(auth,
+                                harness_source_files=C1_HARNESS_SOURCE_FILES_V1)
+    launcher = load_session_launcher("autoinit_c1_launch")
+    ctx = types.SimpleNamespace(args=session_args(launcher), auth=stale,
+                                evidence={})
+    ok, why = launcher.c1_harness_gate(ctx)
+    assert not ok
+    assert "PRE-MIGRATION" in why and "Re-issue" in why, why
+
+
+def test_the_gate_accepts_the_set_the_issuer_actually_writes(tmp_path):
+    """Both directions: the refusal above must not be refusing everything."""
+    import types
+
+    auth = C1Authorization.load(write_candidate(tmp_path))
+    launcher = load_session_launcher("autoinit_c1_launch")
+    ctx = types.SimpleNamespace(args=session_args(launcher), auth=auth,
+                                evidence={})
+    ok, why = launcher.c1_harness_gate(ctx)
+    assert ok, why

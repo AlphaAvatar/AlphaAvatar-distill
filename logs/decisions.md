@@ -7476,3 +7476,43 @@ on a paid pod.
   `logs/STATE.md`. Nothing in `src/aadistill`.
 - **Revisit when:** the package's count or money is exhausted, a verdict is
   reached, or a failure class outside the pre-authorized set occurs.
+
+## 2026-09-11 — The issuer declared paths the migration had deleted
+
+- **Context:** the first authorization issued under the approved package was
+  structurally unusable. `session_commit_gate` re-digests
+  `harness_source_files` at the session commit by running
+  `git show <commit>:<path>` for each entry and comparing to
+  `harness_source_digest`; the initialization cutover moved the digest to the
+  derived post-migration closure (97 current paths) while the declaration stayed
+  frozen at `C1_HARNESS_SOURCE_FILES_V1` (73 paths under
+  `src/aadistill/autoinit/`, which no longer exists). Two gates refused.
+- **How it was found:** a read-only pre-flight that calls the thirteen gate
+  functions directly with the real authorization and the real argument
+  namespace, without invoking the launcher. Under the 2026-09-11 package an
+  attempt is consumed at *invocation*, so a `$0` refusal still costs one of
+  three; the check had to happen outside the launcher, and it did. **No attempt
+  was consumed and no resource was created.**
+- **Why no existing `$0` test caught it:** `session_commit_gate` is the only
+  consumer of the field, and it is structurally excluded from the candidate
+  sweep because it binds a real issued commit. It had therefore never run
+  against a real issuance on the migrated tree — the precise failure mode the
+  exclusion list's docstring warns about.
+- **Decision:** the issuer declares the set its digest covers, and
+  `c1_harness_gate` compares the declaration to the live derived set instead of
+  to the frozen constant. `C1_HARNESS_SOURCE_FILES_V1` and
+  `c1_historical_harness_digest` are left exactly as they are: they record what
+  the completed attempts executed and stop an old authorization being
+  revalidated on a tree it never ran on.
+- **Alternatives considered:** computing the digest over the historical list —
+  impossible, the files are gone and `c1_historical_harness_digest` refuses by
+  design; relaxing `session_commit_gate` to skip missing paths — rejected, a
+  digest over a smaller set silently describes less code than will run, which is
+  the failure the gate exists to prevent.
+- **Risks:** the declared set is now derived, so an unintended closure change
+  moves what an authorization binds. That is the intended behaviour — it is
+  already how `harness_source_digest` works — and the closure snapshot plus
+  `c1_closure_drift` report file-level additions and removals separately from
+  edits.
+- **Revisit when:** the executable closure gains or loses an entry point, or a
+  future migration moves source paths again.

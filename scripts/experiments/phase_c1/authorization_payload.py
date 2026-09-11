@@ -203,7 +203,22 @@ def build_c1_authorization_payload(
         scope_note=grant["covers"],
         authorized_session_commit=session_commit,
         harness_source_digest=harness["digest"],
-        harness_source_files=C1_HARNESS_SOURCE_FILES_V1,
+        #: The set the digest above was computed over -- NOT the historical
+        #: declaration. `session_commit_gate` re-digests `harness_source_files`
+        #: at the session commit and compares it to `harness_source_digest`, so
+        #: the two must describe the same files or the gate can never pass.
+        #:
+        #: This said `C1_HARNESS_SOURCE_FILES_V1` until 2026-09-11. That constant
+        #: is the pre-migration declaration and is deliberately frozen pointing
+        #: at `src/aadistill/autoinit/...`, which the initialization cutover
+        #: moved; the digest beside it had already become the derived
+        #: post-migration closure. So every authorization issued after the
+        #: cutover declared 73 paths that no longer exist while binding a digest
+        #: over 97 that do, and `git show <commit>:<path>` failed on the first
+        #: one. Nothing caught it because the only gate that reads this field is
+        #: excluded from the candidate sweep -- it binds a real issued commit --
+        #: so it had never run against a real issuance on the migrated tree.
+        harness_source_files=tuple(f["path"] for f in harness["files"]),
         provenance_commit=session_commit)
 
     payload = auth.as_dict()
