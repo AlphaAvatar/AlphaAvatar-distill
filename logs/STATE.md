@@ -21,7 +21,7 @@ how the snapshot came to disagree with itself.
 | endpoint | **UNMEASURED** — zero evaluated, no decision |
 | attempt 9 | **NO DECISION** — a pre-treatment infrastructure abort, not an ATTENTION result and not a frozen-rule `INCONCLUSIVE` |
 | authorization | **package APPROVED 2026-09-11, nothing issued yet** — up to 3 formal attempts, `0` used. No live grant, no live authorization, no staged bundle. An approval is not a launch |
-| spend | **`$268.0175`** of the raised `$320.00` cap, leaving **`$51.9825`**. Booked against the package: `$0.1177` of `$51.4425`, **1 of 3** attempts used. The `$0.6577` margin is for accounting corrections, not an allowance |
+| spend | **`$268.2958`** of the raised `$320.00` cap, leaving **`$51.7042`**. Booked against the package: `$0.3960` of `$51.4425`, **2 of 3** attempts used. The `$0.6577` margin is for accounting corrections, not an allowance |
 | CUDA stage-F | **PASS 2026-09-10**, subrun 3 of 3, `$0.0400` total. NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130): both geometries executed `attention.activation_importance_v1` through the real verified suffix, and **all five device placements were observed on `cuda:0`**. Two earlier subruns failed in the harness — a pipeline that hid pip's exit status, then a matrix criterion that demanded the child be on the device while `device.py` documents it is not. **Engineering evidence only**, not a C1 result. [`runs/cuda_stage_f/`](runs/cuda_stage_f/) |
 | stage-F device repair | **CONFIRMED ON REAL CUDA** at execution SHA `7027a8f4` (2026-09-10). It was logical / CPU-structural evidence until then; the defect is a cross-device placement, which a single-device machine cannot observe, and a real accelerator has now observed it |
 | CUDA interpretation | one append-only amendment corrects **two explanatory claims** and nothing else: subrun 2's failure class is `harness_acceptance_criterion`, not `operator`, and the PASS observed *operator on `cuda:0`, child host-resident per the builder contract* — not children left on CUDA. Outcomes, costs, devices and provider identities are bound by hash and unaltered: [`interpretation_amendment_1.json`](validations/cuda-stage-f/v1/interpretation_amendment_1.json) |
@@ -33,66 +33,53 @@ how the snapshot came to disagree with itself.
 | owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
 | **corrected** | the 2026-09-10 claim that **no engineering blocker remained was WRONG**. Two were found on review and repaired on 2026-09-11: an undefined `REPO` in the shared runner that would have raised `NameError` *after* a pod was created and setup had completed, and a scratch root with no owner, which let one attempt collect another's evidence. Both came in with `main`; neither was introduced by the run-identity work. See the 2026-09-11 section |
 
-> ## ⚠ A PAID SESSION IS LIVE — C1 attempt 11, pod `udkapuemrwqcmt`
->
-> Created **2026-09-11T11:53:46Z** at `$1.09/h` on a secure L40S, hard terminate
-> 834 min = `$15.1475`. **Attempt 2 of the package's 3**; one remains after it.
-> All **fourteen** pre-provider gates passed at `$0` in a read-only pre-flight
-> and were re-run by the launcher before anything was created — including the
-> new `frozen_assets_gate`, which is the check attempt 10 paid to discover.
-> `AUTHORIZATION_OK`, a setup-side check, was also executed verbatim at `$0`.
->
-> Launcher and an independent read-only provider poll run under tmux
-> (`c1launch11`, `c1poll11`). Evidence accrues in
-> [`runs/phase_c1/attempt11/`](runs/phase_c1/attempt11/). **Nothing is
-> concluded: treatment and endpoint remain UNMEASURED.**
+**Right now: nothing is running. Nothing is billing. No pod exists. Nothing is
+prepared for launch.** `$268.2958` of `$320.0000`; package booked `$0.3960` of
+`$51.4425`; **2 of 3 formal attempts used, 1 remains and is NOT being spent.**
 
-Attempt 10's pod was deleted at 6.48 min and confirmed gone three ways,
-including an out-of-band read-only poll. `$0.1177` booked.
-
-> ### C1 ATTEMPT 10 — SETUP ABORT at the frozen-asset gate, `$0.1177`, 6.48 min
+> ## ⛔ A MAINTAINER DECISION IS OWED BEFORE THE LAST ATTEMPT
 >
-> Pod `kabazpl889i5u5`, `$1.09/h` secure L40S, `SETUP_RC=91`. Setup reached
-> `ENV_READY → REPO_READY → ASSETS_STAGED → TRAIN_ENV` and stopped at marker 4
-> of 11. **The driver never started: no replay, no training, no evaluation, no
-> decision.** All 13 pre-provider gates had passed twice — once in a read-only
-> pre-flight that did not invoke the launcher, and again by the launcher itself.
-> One create call, one resource, zero redraws, watchdog detached before the
-> create. Full record: [`runs/phase_c1/attempt10/`](runs/phase_c1/attempt10/).
+> Two attempts are gone to infrastructure with **zero scientific stages** —
+> attempt 10 at the frozen-asset gate (`$0.1177`, repaired and now gated at
+> `$0`), attempt 11 to a provider cold host (`$0.2783`). One attempt remains.
 >
-> **The cause.** The initialization cutover relocated two of the scoring
-> contract's six declared files — `src/aadistill/autoinit/recovery.py` is now
-> `src/aadistill/initialization/planning/recovery.py` — and the contract is a
-> digest over sorted `path:sha256` lines, so it *must* move.
-> `recovery_search_scoring@v3` is the correct post-migration identity. The
-> verifier's compiled-in constants still asked the pre-migration question, and
-> the `--expect` flag that exists for exactly that distinction was never passed
-> by any session. Attempt 9 ran on 2026-09-07, three days before the migration
-> merged, so this gate had never been exercised post-migration.
+> **Attempt 11's cause is identified, ordinary, and not addressable from this
+> repository.** Pod `udkapuemrwqcmt` was created and billed but never became
+> reachable: `starting` for 840 s, no TCP 22 mapping, abandoned at the
+> 15-minute bound. The independent out-of-band poll recorded `runtime: null` at
+> three consecutive ticks, corroborating that the host never started
+> independently of anything the launcher said. Nothing here caused it and no
+> repair here prevents it.
 >
-> **Why it was not free.** The frozen-asset verification existed *only* as a
-> setup step. It had no dev-box counterpart, so a condition fully decidable on
-> this machine was decided on a billing pod. It reproduces at `$0` after
-> teardown, identically.
+> **What it exposes is structural, and it is the decision.** C1 launches with
+> `--host-draws 1` because the grant permits exactly **one provider resource**.
+> Every earlier session in this project drew up to three — deleting a cold host
+> and drawing again — because this provider yields unreachable hosts often
+> enough to plan for: continuation attempt 2 burned all three draws on
+> `HOST_COLD`, continuation attempt 1 spent 29 of its 38 minutes on one, and
+> micro-preflight attempt 4 lost `~$0.41` the same way. Under the one-resource
+> rule, a condition every other session treated as a **retryable draw** consumes
+> an entire formal attempt.
 >
-> **The repair.** `frozen_assets_gate` is the fourteenth pre-provider gate. It
-> runs the *same script* against the *same committed expectation document* the
-> pod uses — not a reimplementation, which would be a second thing to keep in
-> step and would agree right up until it mattered. The expectation document
-> lives at [`configs/experiments/phase_c1/frozen_assets.json`](../configs/experiments/phase_c1/frozen_assets.json),
-> its asset block is **copied** from the verifier's own constants rather than
-> re-typed, and both it and the verifier are now inside the measured harness, so
-> what the gate trusts cannot change without moving the digest a grant binds.
+> **Recommended:** allow up to **3 host draws inside one formal attempt**, with
+> **at most one billing resource at any moment**, each unreachable draw deleted
+> and provider-confirmed gone before the next is created, all inside the
+> unchanged `$15.1475` per-attempt ceiling and counting as **one** attempt. That
+> is what `--host-draws 3` already implements and what every prior session used;
+> it changes no science, no ceiling and no attempt count.
 >
-> **No frozen science moved.** The relocation's numerical equivalence is
-> measured, not asserted: `architecture_scoring_equivalence.json` re-scored
-> frozen Phase-A generations through both trees and every score, count, rate and
-> per-sample record is identical.
+> **Alternative:** keep one resource and spend the last attempt on the same
+> lottery. Attempt 11's evidence says that is a real risk, not a hypothetical.
 >
-> **Retry is pre-authorized** — all six conditions hold, the decisive one being
-> that no formal probe training started, which is confirmed rather than assumed:
-> the driver never ran. Attempt 11 uses a new run identity and a fresh one-use
-> chain.
+> **A weaker, free precaution either way:** refuse to launch while L40S stock
+> reads `Low`. Attempt 10 launched at `Medium` and had TCP 22 in 1.6 min;
+> attempt 11 launched at `Low` and never got an endpoint. That is `n=1` — worth
+> doing because it costs nothing, not worth trusting on its own.
+>
+> **Why I stopped instead of retrying.** The package pre-authorizes a retry
+> whose cause has been *addressed*. This one is identified but unaddressed, the
+> only effective mitigation needs a rule the grant fixes, and relaunching
+> unchanged would repeat an identical failure with the last of three attempts.
 
 ## APPROVED execution package — maintainer decision, 2026-09-11
 
@@ -115,7 +102,7 @@ against. **Booked against the package so far: `$0.0000`.**
 | GPU **engineering** allowance, cumulative across every subrun | **`$6.0000`** |
 | package total | **`$51.4425`** |
 | spend at approval | `$267.8998` |
-| booked since | `$0.1177` (attempt 10), cumulative `$268.0175` |
+| booked since | `$0.3960` (attempts 10 and 11), cumulative `$268.2958` |
 | new cumulative cap | **`$320.0000`** (`267.8998 + 51.4425 = 319.3423`, plus `$0.6577` of reconciliation margin — the ledger has already needed a `$0.0073` correction once, and a cap with no margin turns an arithmetic fix into a breach) |
 | cap **increase** | **`+$36.2400`**, not `+$51.4425`: the old cap already covered `$15.2025` of the package |
 

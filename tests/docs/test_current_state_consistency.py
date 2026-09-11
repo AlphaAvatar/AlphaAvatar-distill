@@ -67,29 +67,38 @@ def count_before(text: str, noun: str) -> list[int]:
 # --- the counts agree with each other ---------------------------------------
 
 class TestTheAttemptCountIsOneNumber:
-    def test_every_label_claim_says_ten(self):
+    #: Twelve labels (1, 2, 3, 3R, 4-11) and eleven paid since 2026-09-11, when
+    #: attempts 10 and 11 were CLOSED OUT and booked. The counts move with the
+    #: LEDGER, not with the appearance of a pod: while attempt 10 was running I
+    #: briefly wrote "eleven labels, ten paid" here and reverted it, because a
+    #: running attempt is not a booked one and the count is one number.
+    LABELS, PAID = 12, 11
+
+    def test_every_label_claim_agrees(self):
         """The exact drift: one key said ten labels and another said nine."""
         bad = {p: v for p, v in strings(snapshot())
                for n in count_before(v, r"labels?")
-               if n != 10}
+               if n != self.LABELS}
         assert not bad, (
-            "C1 has TEN attempt labels (1, 2, 3, 3R, 4-9). Disagreeing:\n"
-            + "\n".join(f"  {p}: {v}" for p, v in bad.items()))
+            f"C1 has {self.LABELS} attempt labels (1, 2, 3, 3R, 4-11). "
+            "Disagreeing:\n" + "\n".join(f"  {p}: {v}" for p, v in bad.items()))
 
-    def test_every_paid_claim_says_nine(self):
+    def test_every_paid_claim_agrees(self):
         bad = {p: v for p, v in strings(snapshot())
                for n in count_before(v, r"paid")
-               if n != 9}
+               if n != self.PAID}
         assert not bad, (
-            "NINE attempts were paid; attempt 3 created no resource. "
+            f"{self.PAID} attempts were paid; attempt 3 created no resource. "
             "Disagreeing:\n" + "\n".join(f"  {p}: {v}" for p, v in bad.items()))
 
     def test_the_labels_and_the_paid_count_differ_by_exactly_the_free_one(self):
-        """Ten labels and nine paid is only coherent because one label spent
-        nothing. If that stops being true the two numbers stop being both
-        right, and this catches it in the ledger rather than in the snapshot."""
+        """The labels and the paid count are only coherent because exactly one
+        label spent nothing. If that stops being true the two numbers stop being
+        both right, and this catches it in the ledger rather than the snapshot."""
         ledger = (REPO / "logs/BUDGET_LEDGER.md").read_text()
         free = re.findall(r"C1 attempt 3[^|]*\|\s*\$0\.0000", ledger)
+        assert self.LABELS - self.PAID == 1, (
+            'more than one free label would need more than one explanation')
         assert free, ("nothing in BUDGET_LEDGER.md still records a C1 label "
                       "that cost $0.0000, so 'ten labels, nine paid' has lost "
                       "its explanation")

@@ -1,0 +1,36 @@
+[11:53:33] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[11:53:34] NVIDIA L40S $1.09/h, stock Low
+[11:53:34] session commit 04e24183a924 verified: harness digests to c3c4e0ecfc78…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[11:53:34] grant bb8b9a427f47… at logs/runs/phase_c1/attempt11/governance/grant.json, as recorded by the authorization
+[11:53:34] C1 harness c3c4e0ecfc78… over 99 declared files
+[11:53:34] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[11:53:35] preregistration 063e26dc134e… (self-hash verified), harness c3c4e0ecfc78…
+[11:53:35] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[11:53:36] frozen assets verified against configs/experiments/phase_c1/frozen_assets.json
+[11:53:36] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[11:53:36] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[11:53:36] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[11:53:38] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[11:53:40] aad_autoinit_04e24183.bundle (9468826 bytes, a367a9bc4630…) round-trips to 04e24183a924… carrying this authorization and harness c3c4e0ecfc78…
+[11:53:44] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[11:53:44] pod sweep 3671 passed / 113 skipped / 0 failed, leaf_transport ok, renderer_parity ok, binds C1 harness c3c4e0ecfc78… and environment 2a71b4d2dfa3…, staging contract 74192f5b7198…, swept at e924387f with only ['logs/autoinit_c1_authorization.json', 'logs/c1_pod_environment_verification.json'] differs from the swept base
+[11:53:45] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[11:53:46] watchdog detached — hard 834 min = $15.15
+[11:53:46] created udkapuemrwqcmt at $1.09/h
+[11:54:40]   starting (60s) — $0.02
+[11:55:45]   starting (120s) — $0.04
+[11:56:49]   starting (180s) — $0.06
+[11:57:53]   starting (240s) — $0.07
+[11:58:57]   starting (300s) — $0.09
+[12:00:00]   starting (360s) — $0.11
+[12:01:04]   starting (420s) — $0.13
+[12:02:08]   starting (480s) — $0.15
+[12:03:13]   starting (540s) — $0.17
+[12:04:18]   starting (600s) — $0.19
+[12:05:22]   starting (660s) — $0.21
+[12:06:25]   starting (720s) — $0.23
+[12:07:29]   starting (780s) — $0.25
+[12:08:33]   starting (840s) — $0.27
+[12:08:54] ABORT after draw 1: no_endpoint
+[12:08:54] deleting pod (setup no_endpoint)
+[12:09:05] pod deleted — 15.3 min, $0.28; provider confirms gone: True

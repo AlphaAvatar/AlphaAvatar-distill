@@ -2142,3 +2142,45 @@ started (the driver never ran), the cause is identified and repaired, frozen
 science and the decision rule are untouched, the resource is confirmed gone, and
 the count and balance fund a complete attempt. Attempt 11 uses a new run
 identity and a fresh one-use chain.
+
+---
+
+## 2026-09-11 — C1 attempt 11: the host never came up, `$0.2783`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 11: 14/14 pre-provider gates passed twice, pod `udkapuemrwqcmt` created at `$1.09/h`, **PROVIDER ACQUISITION FAILURE — `no_endpoint`**. `starting` for 840 s, no TCP 22 mapping ever appeared, abandoned at the 15-minute bound. Setup never started, so no marker was reached at all | `$0.2783` | [`runs/phase_c1/attempt11/`](runs/phase_c1/attempt11/) |
+
+**Cumulative: `$268.0175` + `$0.2783` = `$268.2958` of the `$320.0000` cap.**
+Package booked **`$0.3960`** of `$51.4425`; **2 of 3** formal attempts used.
+
+```text
+project   268.0175 + 0.2783 = 268.2958   of 320.0000, leaving 51.7042
+package     0.1177 + 0.2783 =   0.3960   of  51.4425, leaving 51.0465
+attempts                          2      of 3, leaving 1
+last attempt worst case  268.2958 + 15.1475 = 283.4433  <= 320.0000
+```
+
+**One create call, one resource, zero redraws**, watchdog detached before the
+create, teardown confirmed three ways. The independent out-of-band poll recorded
+`runtime: null` at three consecutive five-minute ticks — corroboration that the
+host never started, independent of anything the launcher reported.
+
+**This is not a defect in this repository and no repair here prevents it.** The
+15-minute abandonment is the documented rule working: `runtime: null` at 15
+minutes means the host is not starting, and continuing to wait is continuing to
+pay.
+
+**What it exposes is structural.** C1 launches with `--host-draws 1` because the
+grant permits exactly one provider resource. Every earlier session in this
+project drew up to three, deleting a cold host and drawing again, because this
+provider produces unreachable hosts often enough to plan for — continuation
+attempt 2 burned all three draws on `HOST_COLD`, continuation attempt 1 spent 29
+of 38 minutes on one, and micro-preflight attempt 4 lost `~$0.41` the same way.
+Under the one-resource rule, a condition every other session treated as a
+retryable draw consumes an entire formal attempt.
+
+**Stopped rather than retried.** The package pre-authorizes a retry whose cause
+has been *addressed*; this cause is identified but not addressable from here,
+and relaunching unchanged would bet the last of three attempts on the same
+lottery. That decision is the maintainer's.

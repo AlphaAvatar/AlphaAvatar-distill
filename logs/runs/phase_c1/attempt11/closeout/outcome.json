@@ -1,0 +1,97 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the measured closeout of C1 attempt 11, built from the provider and launcher evidence collected beside it.",
+
+ "attempt": 11,
+ "package": "phase_c1.execution_package.2026-09-11",
+ "formal_attempt_index": 2,
+ "formal_attempts_in_package": 3,
+ "terminal_marker": null,
+ "abort_reason": "no_endpoint",
+ "classification": "PROVIDER ACQUISITION FAILURE. The pod was created and billed but never became reachable: no SSH endpoint ever appeared. Setup never started, so this is upstream of every failure mode either earlier attempt had.",
+
+ "what_ran": {
+  "pre_provider_gates": "14 of 14 passed, twice -- once in a read-only pre-flight that did not invoke the launcher, and again by the launcher itself",
+  "setup_markers_reached": [],
+  "setup_started": false,
+  "driver_started": false,
+  "probes_trained": 0,
+  "probes_evaluated": 0,
+  "decision_ran": false
+ },
+
+ "the_failure": {
+  "what_happened": "pod udkapuemrwqcmt was created at 11:53:46Z and polled every ~64 s. It reported `starting` for 840 s and no TCP 22 mapping ever appeared. The launcher abandoned the draw at 15.3 min and deleted the pod.",
+  "independently_corroborated": "the out-of-band read-only poll, running in its own tmux session and touching only the provider control plane, recorded desiredStatus RUNNING with `runtime: null` at 11:58:33Z, 12:03:33Z and 12:08:34Z -- three consecutive ticks in which the host had not started -- and an empty inventory at 12:10:31Z. That is independent of anything the launcher claimed.",
+  "not_a_launcher_defect": "the 15-minute bound is the documented rule: `runtime: null` at 15 minutes means the host is not starting, and the correct action is to stop rather than keep paying. It did exactly that.",
+  "not_addressable_by_repair": "nothing in this repository caused it and no change here prevents it. It is a provider-side cold host.",
+  "what_it_is_not": [
+   "not a gate failure: all fourteen passed, at $0 and again at launch",
+   "not a setup failure: setup never ran, because there was no host to run it on",
+   "not a replay mismatch, not an efficacy observation, not a frozen-rule INCONCLUSIVE"
+  ]
+ },
+
+ "the_structural_exposure_it_reveals": {
+  "what": "C1 launches with --host-draws 1 and --create-attempts 1, because the grant permits exactly ONE provider resource. Every earlier session in this project drew up to three hosts, deleting a cold one and drawing again, precisely because this provider yields unreachable hosts often enough to plan for.",
+  "consequence": "a condition every other session treated as a retryable draw consumes an entire formal C1 attempt.",
+  "evidence_that_it_is_common_here": [
+   "AutoInit characterization continuation attempt 2: all THREE host draws tripped HOST_COLD in the uv-sync window, $0.6367, produced nothing",
+   "AutoInit characterization continuation attempt 1: 29 of 38 minutes were a cold host, abandoned and deleted by the launcher",
+   "micro-preflight attempt 4: ~$0.41 of it was a cold first draw, abandoned and deleted"
+  ],
+  "stock_status_at_each_c1_launch": {
+   "attempt_10": "Medium -- TCP 22 appeared at 1.6 min",
+   "attempt_11": "Low -- no endpoint in 15.3 min"
+  },
+  "stock_evidence_is_weak": "n=1 at Low. Suggestive, not established, and not on its own a basis for spending the last attempt."
+ },
+
+ "provider": {
+  "pod_id": "udkapuemrwqcmt",
+  "gpu": "NVIDIA L40S (secure)",
+  "quoted_price_per_hour": 1.09,
+  "stock_status_at_quote": "Low",
+  "created_utc": "2026-09-11T11:53:46Z",
+  "elapsed_minutes": 15.32,
+  "actual_usd": 0.2783,
+  "authorized_usd": 15.1475,
+  "within_authorization": true,
+  "provider_create_calls": 1,
+  "second_resource_created": false,
+  "redraws": 0,
+  "redraws_permitted": 0,
+  "provider_confirms_gone": true,
+  "teardown_confirmed_three_ways": [
+   "the launcher deleted the pod at 15.3 min and reported provider_confirms_gone true",
+   "the independent out-of-band poll recorded an empty inventory at 2026-09-11T12:10:31Z",
+   "the run manifest records provider_confirms_gone true"
+  ]
+ },
+
+ "retry_assessment": {
+  "eligible_under_the_package": "NOT ESTABLISHED -- one condition is not satisfiable by me",
+  "conditions": {
+   "no_formal_probe_training_started": "CONFIRMED -- setup never started; there was no host",
+   "ordinary_infrastructure_failure_with_cause_addressed": "the cause is identified and is ordinary, but it is NOT addressed and cannot be addressed from this repository. The only effective mitigation -- redrawing a host that never became reachable -- requires more than one provider resource per attempt, which this grant forbids. Relaxing that is a scope decision, not a repair.",
+   "frozen_science_input_contracts_and_decision_rule_unchanged": "yes, nothing was touched",
+   "previous_resource_confirmed_not_billing": "yes, three independent confirmations",
+   "count_and_balance_sufficient": "1 attempt and $51.0465 of package remain, which funds one complete attempt",
+   "new_run_identity_and_fresh_one_use_chain": "available"
+  },
+  "why_this_stops": "the package pre-authorizes retries whose cause has been addressed. Relaunching unchanged would be repeating an identical failure and betting the last of three attempts on a provider lottery. That is a maintainer decision."
+ },
+
+ "budget": {
+  "cumulative_before": 268.0175,
+  "this_attempt": 0.2783,
+  "cumulative_after": 268.2958,
+  "cap": 320.0,
+  "package_booked_after": 0.396,
+  "package_total": 51.4425,
+  "attempts_used": 2,
+  "attempts_remaining": 1
+ },
+
+ "authorizes": "nothing"
+}

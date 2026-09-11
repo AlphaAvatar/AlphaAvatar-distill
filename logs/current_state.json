@@ -5,33 +5,32 @@
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "OWNED by the readiness record's swept_base_commit and deliberately not duplicated: this snapshot is written BEFORE the commit it would name, and gate 12 forbids editing state after the sweep, so a copy here could only go stale. It did (4f85ecda vs 0457bab).",
  "running": {
-  "paid_compute": true,
-  "pods": 1,
-  "pod_id": "udkapuemrwqcmt",
-  "launchers": 1,
-  "note": "C1 attempt 11 LIVE, created 2026-09-11T11:53:46Z, secure L40S $1.09/h, hard terminate 834 min = $15.1475. Launcher and an independent read-only poll run under tmux (c1launch11, c1poll11). Detail: logs/STATE.md."
+  "paid_compute": false,
+  "pods": 0,
+  "launchers": 0,
+  "note": "zero pods. Attempt 11's pod udkapuemrwqcmt never started -- runtime null at three consecutive out-of-band poll ticks -- and was deleted at 15.3 min, confirmed gone three ways at 2026-09-11T12:10:31Z."
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11: up to 3 formal C1 attempts. An approval is NOT a launch. Attempt 11 is attempt 2 of 3 and is RUNNING; its one-use chain is consumed. 1 remains after it.",
+  "note": "PACKAGE APPROVED 2026-09-11: up to 3 formal C1 attempts. An approval is NOT a launch. Attempts 10 and 11 are consumed, both to infrastructure with zero scientific stages. ONE attempt remains and is NOT being spent: a maintainer decision is owed on the one-provider-resource rule. See blocker.",
   "package_id": "phase_c1.execution_package.2026-09-11",
   "formal_attempts_used": 2,
   "formal_attempts_max": 3,
-  "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440, 57.47 min. BOTH REPLAY GATES PASSED; stage F aborted on a device defect, since repaired. logs/autoinit_c1_attempt9/outcome.json.",
-  "c1_attempts": "ten labels, NINE paid, $4.0001, zero ATTENTION science. Attempt 10 is RUNNING and is not booked until closeout. Per-attempt cost and cause: logs/BUDGET_LEDGER.md."
+  "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/autoinit_c1_attempt9/outcome.json.",
+  "c1_attempts": "twelve labels, ELEVEN paid, $4.3961 total, zero ATTENTION science. Per-attempt cost and cause: logs/BUDGET_LEDGER.md."
  },
  "prepared_launch": {
-  "any": true,
-  "bundles": 1,
-  "note": "aad_autoinit_04e24183.bundle, round-trip verified for session commit 04e24183 and consumed by attempt 11."
+  "any": false,
+  "bundles": 0,
+  "note": "aad_autoinit_04e24183.bundle was consumed by attempt 11 and authorizes nothing further."
  },
  "budget": {
-  "cumulative_spend_usd": 268.0175,
+  "cumulative_spend_usd": 268.2958,
   "authorized_cap_usd": 320.0,
-  "remaining_usd": 51.9825,
+  "remaining_usd": 51.7042,
   "cap_raised_utc": "2026-09-11",
   "cap_raised_from_usd": 283.76,
-  "package": "phase_c1.execution_package.2026-09-11 -- 3 formal attempts max at $15.1475 each ($45.4425) + $6.0000 engineering = $51.4425. Booked: $0.1177 (attempt 10). Limits bind SEPARATELY and do not transfer.",
+  "package": "phase_c1.execution_package.2026-09-11 -- 3 formal attempts max at $15.1475 each ($45.4425) + $6.0000 engineering = $51.4425. Booked: $0.3960 (attempts 10, 11). Limits bind SEPARATELY and do not transfer.",
   "planning_floor_usd": 13.4401,
   "reconciliation_margin_usd": 0.6577,
   "remaining_is_not_permission": true,
@@ -55,7 +54,6 @@
   "runtime_comparability": "generation_runtime_comparability@v2",
   "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
   "phase_b_stage1_selection_sha256": "84fd6496851995ae",
-  "phase_b_identity": "amendment df413bd99119dab7, universe e94f15d2e648d86a, 6 distinct candidates",
   "continuation_b": "CLOSED. exec a5ce6311789eb4cd, prereg bd827d12b6607356, authorization CONSUMED.",
   "phase_c0_protocol": "logs/phase_c0_preregistration.json -- phase_c0_protocol/v1, FROZEN 2026-09-01",
   "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850, P(GO|+0.015)=0.8379"
@@ -70,12 +68,11 @@
  "abandoned": [
   "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
   "the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th A/B seed",
-  "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept",
-  "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
+  "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "Attempt 11 RUNNING since 2026-09-11T11:53:46Z on pod udkapuemrwqcmt. Closeout owes evidence, cost, provider teardown confirmation and the ledger entry.",
-  "the_ask": "nothing outstanding from the maintainer. The next maintainer decision is owed only on a stop condition: training started, an unconfirmable state, a replay mismatch, a protocol change, a verdict, or a boundary.",
+  "status": "Attempts 10 and 11 consumed, $0.3960, zero scientific stages: a repaired frozen-asset gate, then a provider cold host. 1 attempt remains, unspent.",
+  "the_ask": "whether a host that NEVER becomes reachable may be deleted and redrawn inside one formal attempt -- one billing resource at a time, inside the unchanged $15.1475 ceiling -- or whether the last attempt is spent under the current one-resource rule.",
   "budget": "OWNED by the budget block above; not restated here."
  },
  "read_order": [
@@ -122,7 +119,7 @@
    "design": "850 scorable / 950 total; 3 fresh paired seeds; primary correct_overall; SESOI +0.010."
   },
   "c1": {
-   "status": "IMPLEMENTED / TEN LABELS, NINE PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / NO CURRENT GRANT OR AUTHORIZATION",
+   "status": "IMPLEMENTED / TWELVE LABELS, ELEVEN PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / NO CURRENT GRANT OR AUTHORIZATION",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "execution_prereg": "logs/phase_c1_execution_preregistration.json OWNS the live preregistration, harness and head identities; read them THERE rather than copying them here.",
@@ -133,8 +130,8 @@
    "grant_location": "runs/phase_c1/<run_id>/governance/grant.json, committed BEFORE the launch_bound sweep. NOT the flat autoinit_c1_attempt<N>_grant.json of attempts 1-9. Rules: logs/STATE.md.",
    "blocker": "CLEARED. The stage-F device boundary was repaired at $0 and CONFIRMED ON REAL CUDA -- see cuda_engineering_validation. The remaining blocker is the absence of a grant, not the code.",
    "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, L40S). treatment + endpoint: UNMEASURED. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort -- not an ATTENTION result, not a frozen-rule INCONCLUSIVE.",
-   "repairs": "SIX at $0 before attempt 9, the stage-F device boundary after it, two blockers and the governance-input seam on 2026-09-11. Detail: logs/STATE.md.",
-   "owed": "a new maintainer decision and a NEW grant for any tenth attempt; a fresh launch_bound record and every pre-provider gate are owed again (the gate count is derived from the live session, never restated here). Evidence: logs/autoinit_c1_attempt9/."
+   "repairs": "SIX at $0 before attempt 9, the stage-F device boundary after it, two blockers and the governance-input seam on 2026-09-11, then the frozen-asset gate after attempt 10. Detail: logs/STATE.md.",
+   "owed": "a maintainer decision on host redraws before the LAST attempt is spent; see the top-level blocker. Evidence: logs/runs/phase_c1/attempt11/closeout/outcome.json."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -150,7 +147,7 @@
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
   "free_note": "detail: c1_storage_recovery.json"
  },
- "blocker": "NOT AUTHORIZED. No live grant, no live authorization, no staged bundle -- attempt 9 consumed all three. C1's replay is MEASURED (2/2 PASS); its treatment and endpoint are UNMEASURED. A tenth attempt needs a new maintainer review, a new grant, a new authorization, a fresh bundle and a fresh launch_bound readiness record.",
+ "blocker": "MAINTAINER DECISION OWED. Attempt 11 died on a provider cold host -- no SSH endpoint in 15.3 min. The cause is ordinary and identified but is NOT addressable from this repository: the only effective mitigation is redrawing a host that never became reachable, which needs more than one provider resource per attempt and the grant forbids it. One attempt remains; relaunching unchanged would repeat the same lottery with the last of three. Recommendation and options: logs/STATE.md.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/STATE.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision"
