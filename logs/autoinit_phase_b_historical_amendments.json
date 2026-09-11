@@ -1359,6 +1359,59 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "a4a12f512fe8cd93d3033f2c20ecaa7faf6818a7bc36f41fbd0fc79ff34998fe"
+  },
+  {
+   "amendment_id": "PHB-HA-014",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-11T18:34:18+00:00",
+   "reviewed_base_commit": "0aab945dd276f8231cdb070246c5c9bec8940759",
+   "source_repair_commit": "7d516b8e57bc7dead670d37db15aab3f6a8662c5",
+   "source_repair_parent": "0aab945dd276f8231cdb070246c5c9bec8940759",
+   "previous_live_digest": "6651b60585d9d937eee0e7b4414114208de523ad82f4ae22bb60b44738a096cb",
+   "new_live_digest": "71327162a66f1393899570d7743ff5bb1d78ed5fc5f4e43bfe81459b31bc085e",
+   "changed_files": [
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/infrastructure/session_runner.py": "493e61482bca37a3d93cb119a141efb1d4751cb43eb571bdbe503c15b10e5496"
+   },
+   "file_sha256_after": {
+    "src/aadistill/infrastructure/session_runner.py": "9f3f99f8597b1b5a90d1f0993fdf74d4abc9a2a9e35e4cb58c408faa95f16ba7"
+   },
+   "patch_sha256": "165eb856dc824cc999a37b83d3599d9db9d9b493d28bddfdecfa30a537b99f44",
+   "numstat": {
+    "src/aadistill/infrastructure/session_runner.py": [
+     67,
+     36
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 36,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "Per-resource acquisition evidence in the shared session runner. The watchdog journal is derived from the pod id at LAUNCH and the rename is gone: the previous scheme moved a fixed path aside when a draw started, which isolates nothing, because Journal.write reopens by path on every event -- a watchdog that had not yet exited recreated the shared path and wrote its final poll and watchdog_end into the NEXT resource's journal while its own archive was left unterminated, reproduced with two real processes. create() names its raw provider response by DRAW and attempt, because attempt restarts at 1 in each draw and a second draw's first create overwrote the first draw's, the only record of what the provider said including a refusal carrying no pod id. run() records a create_failed draw, with no pod id and the raw responses it actually wrote, so a draw that created nothing is still in ev['draws']. The journal name is now a module-level function so a launcher that detaches its own backstop cannot spell the convention differently from the collector that globs for it.",
+   "why_the_owner_is_shared_session_runner": "Phase B's executable set names src/aadistill/infrastructure/session_runner.py, the shared provider-acquisition runner. Any repair to how a session acquires, watches and records a provider resource moves this digest even though Phase B is closed and resolved.",
+   "why_a_c1_only_override_was_rejected": "Acquisition, the watchdog backstop and draw accounting are used by every paid session in this project, not by C1 alone. A C1-only journal-naming path would leave every other session with the defect this repair exists to remove, and would put two spellings of one convention in the tree -- which is how a collector comes to glob for a file nothing writes.",
+   "maintainer_authorization": "P12.1 autonomous engineering repair inside the approved phase_c1.execution_package.2026-09-11 envelope; no new budget, no scientific change",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "a4a12f512fe8cd93d3033f2c20ecaa7faf6818a7bc36f41fbd0fc79ff34998fe",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "19510b2d8be643c7f75bacfef24b44703f7faf9dc357f3ae1cd65f5f5d011936"
   }
  ]
 }
