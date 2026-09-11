@@ -89,6 +89,25 @@ def _first_existing(paths) -> str | None:
     return None
 
 
+def watchdog_journal_name(pod_id: str | None, suffix: str = "jsonl") -> str:
+    """The watchdog journal for ONE provider resource, named by its pod id.
+
+    Every resource writes its own path from the backstop's first tick. There is
+    no shared `watchdog.jsonl` and nothing is renamed: the previous scheme wrote
+    a fixed path and moved it aside when a new draw started, which isolates
+    nothing, because `Journal.write` reopens by path on every event. A watchdog
+    that had not yet exited recreated the shared path and wrote its final poll
+    and `watchdog_end` into the NEXT resource's journal, while its own archive
+    was left without an ending.
+
+    Named by pod id rather than by draw number so a cost on an invoice can be
+    traced to the backstop that watched it, and so `record_draw` and the
+    watchdog itself derive the same name at different moments without having to
+    agree on when `self.pod_id` changed.
+    """
+    return f"watchdog_{pod_id}.{suffix}"
+
+
 class SessionRunner:
     """Runs one `SessionSpec`. Not a base class; there is nothing to override."""
 
@@ -148,6 +167,9 @@ class SessionRunner:
         }
         self.ev.update(dict(spec.evidence_fields))
         self.pod_id = ""
+        #: Which acquisition draw is in flight. Names the raw provider response
+        #: so a later draw cannot overwrite an earlier one's.
+        self.draw = 1
         self.start_epoch = 0.0
         #: The provider resource the detached watchdog already owns, so a second
         #: call cannot start a second backstop against the same pod.
@@ -337,7 +359,13 @@ class SessionRunner:
                  "--name", f"aadistill-{self.spec.session_id}",
                  "--terminate-after", deadline.strftime("%Y-%m-%dT%H:%M:%SZ")],
                 capture_output=True, text=True, timeout=300)
-            (self.scr / f"create_raw_{attempt}.txt").write_text(raw.stdout + raw.stderr)
+            #: Named by DRAW and attempt. `attempt` restarts at 1 inside every
+            #: draw, so a second draw's first create overwrote the first
+            #: draw's raw provider response -- the only record of what the
+            #: provider actually said, including the refusal text when no pod
+            #: id came back at all.
+            (self.scr / f"create_raw_d{self.draw}_a{attempt}.txt").write_text(
+                raw.stdout + raw.stderr)
             try:
                 pid = json.loads(raw.stdout).get("id", "")
             except Exception:
@@ -425,24 +453,20 @@ class SessionRunner:
         two detached processes racing to terminate the same pod, so the second
         call returns the journal it already owns. A genuine redraw gets a new
         pod id and therefore a new watchdog.
+
+        **Each resource writes its own path from the first tick.** Both names
+        were fixed and the previous one was RENAMED aside when a new draw
+        started, which does not isolate anything: `Journal.write` reopens by
+        path on every event, so an old watchdog that had not yet exited
+        recreated the shared path and wrote its final poll and `watchdog_end`
+        into the NEW resource's journal -- while its own archive was left
+        without an ending. Reproduced with two real processes on a real
+        filesystem. Renaming a path a writer still holds is not isolation; a
+        distinct path per pod is.
         """
-        journal = self.scr / "watchdog.jsonl"
+        journal = self.scr / self._watchdog_journal_name(self.pod_id)
         if self._watchdog_for and self._watchdog_for == self.pod_id:
             return journal
-        #: A NEW resource gets a new watchdog, and the previous one's evidence
-        #: is moved aside first. Both names were fixed, and `watchdog.out` is
-        #: opened `"w"`, so a redraw appended one pod's ticks to another's
-        #: journal and truncated its console outright — the backstop's own
-        #: record of the resource it was watching. `watchdog.jsonl` still names
-        #: the CURRENT resource, which is what the artifact spec collects; the
-        #: abandoned ones keep their pod id in the filename and are named per
-        #: draw in `ev["draws"]`.
-        if self._watchdog_for and self._watchdog_for != self.pod_id:
-            for suffix in ("jsonl", "out"):
-                live = self.scr / f"watchdog.{suffix}"
-                if live.exists():
-                    live.rename(self.scr / self._watchdog_journal_name(
-                        self._watchdog_for, suffix))
         cmd = [sys.executable,
                str(self.repo_root / self.spec.commands.watchdog),
                "--pod-id", self.pod_id,
@@ -451,7 +475,7 @@ class SessionRunner:
                "--hard-minutes", str(self.plan.hard_terminate_minutes),
                "--authorized-usd", str(self.auth.hard_cap_usd),
                "--journal", str(journal), "--poll-seconds", "60"]
-        out = open(self.scr / "watchdog.out", "w")
+        out = open(self.scr / self._watchdog_journal_name(self.pod_id, "out"), "w")
         subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT,
                          stdin=subprocess.DEVNULL, cwd=self.repo_root,
                          env={**os.environ, "PYTHONPATH": str(self.repo_root / "src")},
@@ -670,7 +694,26 @@ class SessionRunner:
         if not self.make_plan() or not self.run_prechecks():
             return False
         for draw in range(1, self.a.host_draws + 1):
+            self.draw = draw
             if not self.create():
+                #: A create that returned no id created nothing and billed
+                #: nothing -- but it is still a draw that happened, and the
+                #: provider's refusal is the only evidence of why. Recorded with
+                #: no pod id rather than left out of `draws` entirely.
+                self.record_draw(draw, "create_failed", {
+                    "pod_id": None, "why": "create_failed",
+                    "confirmed_not_billing": True,
+                    "provider_resource_created": False,
+                    #: Every attempt this draw made, not a guessed name:
+                    #: `create_attempts` may be more than one, and the refusal
+                    #: worth reading is usually the LAST one.
+                    "raw_responses": sorted(
+                        q.name for q in self.scr.glob(f"create_raw_d{draw}_a*.txt")),
+                    "rule": ("no id was returned, so no resource exists and "
+                             "nothing is billing; the raw provider response is "
+                             "kept beside this record"),
+                })
+                self.save()
                 return False
             #: The watchdog is NOT started here any more. `create()` starts it
             #: at the moment the provider returns an id, so a resource rejected
@@ -971,24 +1014,11 @@ class SessionRunner:
         self.say(f"EMERGENCY: only relayed snapshots survive — {events}")
         self.save()
 
-    @staticmethod
-    def _watchdog_journal_name(pod_id: str | None,
-                               suffix: str = "jsonl") -> str:
-        """Where an ABANDONED resource's watchdog evidence is kept, by pod id.
-
-        The live resource always writes the plain `watchdog.jsonl` the artifact
-        spec collects; this is the name it is rotated to when a new draw takes
-        over, so a cost on an invoice can be traced to the backstop that watched
-        it.
-
-        Deliberately not conditional on `self.pod_id`. It was, and the condition
-        was read at two different moments: `record_draw` runs while the pod
-        being abandoned is still `self.pod_id`, so it recorded `watchdog.jsonl`,
-        while rotation — running later, after the new id was assigned — moved
-        the file to `watchdog_<pod>.jsonl`. The record pointed at a file that no
-        longer existed under that name.
-        """
-        return f"watchdog_{pod_id}.{suffix}"
+    #: Module-level, so a launcher that detaches its own backstop rather than
+    #: going through `SessionRunner` names the journal the same way. Two
+    #: spellings of one convention is how a collector comes to glob for a file
+    #: nothing writes.
+    _watchdog_journal_name = staticmethod(watchdog_journal_name)
 
     def release_and_confirm(self, pod_id: str, why: str) -> dict:
         """Delete a resource and WAIT for the provider to say it stopped billing.
@@ -1042,7 +1072,8 @@ class SessionRunner:
             "price_per_hour": self.price,
             "elapsed_minutes_at_release": round(self.elapsed(), 2),
             "cumulative_usd_at_release": round(self.usd(), 4),
-            "watchdog_journal": self._watchdog_journal_name(released.get("pod_id")),
+            "watchdog_journal": (self._watchdog_journal_name(released["pod_id"])
+                                 if released.get("pod_id") else None),
             "release": released,
         })
 

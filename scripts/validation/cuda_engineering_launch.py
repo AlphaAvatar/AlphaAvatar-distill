@@ -51,6 +51,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.infrastructure.provider import (  # noqa: E402
     RunPodProvider, read_api_key)
 from aadistill.infrastructure.remote import SSHTarget  # noqa: E402
+from aadistill.infrastructure.session_runner import (  # noqa: E402
+    watchdog_journal_name)
 from experiments.deployment import (  # noqa: E402
     POD_IMAGE, provider_cli_candidates)
 from experiments.run_layout import (  # noqa: E402
@@ -80,7 +82,8 @@ RUN_STAGE_ID = "shared"
 RUN_ROLES: dict[str, str] = {
     "evidence": "evidence/evidence.json",
     "validation_stdout": "runtime/validation_stdout.txt",
-    "watchdog": "runtime/watchdog.jsonl",
+    #: A directory: one journal per resource, named by pod id.
+    "watchdog": "runtime/watchdog/",
     "artifacts": "artifacts/",
 }
 
@@ -95,7 +98,7 @@ RUN_SPEC = ArtifactSpec(
 #: aimed at a previous subrun's scratch would otherwise collect that subrun's
 #: stdout and artifacts as its own.
 RUN_OUTPUTS: tuple[str, ...] = (
-    "validation_stdout.txt", "watchdog.jsonl", "artifacts")
+    "validation_stdout.txt", "artifacts", "watchdog_*.jsonl")
 
 AUTHORIZATION = REPO_ROOT / "logs/validations/cuda-stage-f/v1/authorization.json"
 VALIDATION_DIR = REPO_ROOT / "logs/validations/cuda-stage-f/v1"
@@ -344,7 +347,12 @@ class Engineering:
         self.launch_watchdog()
 
     def launch_watchdog(self) -> None:
-        journal = self.scr / "watchdog.jsonl"
+        #: Named after the resource it watches, the same convention the shared
+        #: runner uses. This launcher creates exactly one pod, so the fixed name
+        #: was not yet a collision -- but the collector globs for the shared
+        #: convention, and a second spelling here would mean a journal nothing
+        #: collects.
+        journal = self.scr / watchdog_journal_name(self.pod_id)
         #: The watchdog terminates at what is LEFT of the CAMPAIGN ceiling,
         #: not at a fresh $0.40. It measures this pod's own clock, so the
         #: budget it is given is the remaining one.
@@ -359,7 +367,8 @@ class Engineering:
                "--poll-seconds", "20", "--verify-delay-seconds", "10",
                "--terminate-rounds", "3", "--verify-polls", "3"]
         env = {**os.environ, "PYTHONPATH": str(REPO_ROOT / "src")}
-        out = open(self.scr / "watchdog.out", "w")
+        out = open(self.scr / watchdog_journal_name(self.pod_id, "out"),
+                   "w")
         subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT,
                          stdin=subprocess.DEVNULL, cwd=REPO_ROOT, env=env,
                          start_new_session=True)
@@ -750,11 +759,15 @@ print(json.dumps(out)); print("PROBE_OK")
                           stage_id=RUN_STAGE_ID, roles=RUN_ROLES)
         layout.path(RUN_ROLES["evidence"]).write_text(
             json.dumps(self.ev, indent=1) + "\n")
-        for src_name, role in (("validation_stdout.txt", "validation_stdout"),
-                               ("watchdog.jsonl", "watchdog")):
-            src = self.scr / src_name
-            if src.is_file():
-                shutil.copy2(src, layout.path(RUN_ROLES[role]))
+        src = self.scr / "validation_stdout.txt"
+        if src.is_file():
+            shutil.copy2(src, layout.path(RUN_ROLES["validation_stdout"]))
+        #: Every journal and console this subrun's backstops left, by pod id.
+        wd = layout.path(RUN_ROLES["watchdog"])
+        wd.mkdir(parents=True, exist_ok=True)
+        for j in sorted(self.scr.glob("watchdog_*.jsonl")) + sorted(
+                self.scr.glob("watchdog_*.out")):
+            shutil.copy2(j, wd / j.name)
         arts = self.scr / "artifacts"
         if arts.is_dir():
             shutil.copytree(arts, layout.path(RUN_ROLES["artifacts"]),

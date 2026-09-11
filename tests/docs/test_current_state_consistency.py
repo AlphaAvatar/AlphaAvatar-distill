@@ -67,12 +67,14 @@ def count_before(text: str, noun: str) -> list[int]:
 # --- the counts agree with each other ---------------------------------------
 
 class TestTheAttemptCountIsOneNumber:
-    #: Twelve labels (1, 2, 3, 3R, 4-11) and eleven paid since 2026-09-11, when
-    #: attempts 10 and 11 were CLOSED OUT and booked. The counts move with the
-    #: LEDGER, not with the appearance of a pod: while attempt 10 was running I
-    #: briefly wrote "eleven labels, ten paid" here and reverted it, because a
-    #: running attempt is not a booked one and the count is one number.
-    LABELS, PAID = 12, 11
+    #: Thirteen labels (1, 2, 3, 3R, 4-12) and eleven paid since 2026-09-11,
+    #: when attempts 10, 11 and 12 were CLOSED OUT and booked. The counts move
+    #: with the LEDGER, not with the appearance of a pod: while attempt 10 was
+    #: running I briefly wrote "eleven labels, ten paid" here and reverted it,
+    #: because a running attempt is not a booked one and the count is one
+    #: number. Attempt 12 is a label that cost nothing -- the provider refused
+    #: the create -- so it moves LABELS and not PAID.
+    LABELS, PAID = 13, 11
 
     def test_every_label_claim_agrees(self):
         """The exact drift: one key said ten labels and another said nine."""
@@ -91,17 +93,32 @@ class TestTheAttemptCountIsOneNumber:
             f"{self.PAID} attempts were paid; attempt 3 created no resource. "
             "Disagreeing:\n" + "\n".join(f"  {p}: {v}" for p, v in bad.items()))
 
-    def test_the_labels_and_the_paid_count_differ_by_exactly_the_free_one(self):
-        """The labels and the paid count are only coherent because exactly one
-        label spent nothing. If that stops being true the two numbers stop being
-        both right, and this catches it in the ledger rather than the snapshot."""
+    #: Every label that created no provider resource and therefore cost
+    #: nothing. The gap between LABELS and PAID is exactly these, and each one
+    #: has to be findable in the ledger at $0.0000 -- the point is that the gap
+    #: is EXPLAINED, not that it happens to be some size.
+    FREE_LABELS = ("3", "12")
+
+    def test_the_labels_and_the_paid_count_differ_by_exactly_the_free_ones(self):
+        """The labels and the paid count are only coherent because some labels
+        spent nothing. This checks the arithmetic against the LEDGER rather than
+        against the snapshot that makes the claim.
+
+        It asserted a difference of exactly ONE, which was the same sentence as
+        "the gap is explained" only while there was one free label. Attempt 12
+        was refused at $0 and made a second. Requiring one would have forced the
+        true count out of the documentation to keep a test green.
+        """
         ledger = (REPO / "logs/BUDGET_LEDGER.md").read_text()
-        free = re.findall(r"C1 attempt 3[^|]*\|\s*\$0\.0000", ledger)
-        assert self.LABELS - self.PAID == 1, (
-            'more than one free label would need more than one explanation')
-        assert free, ("nothing in BUDGET_LEDGER.md still records a C1 label "
-                      "that cost $0.0000, so 'ten labels, nine paid' has lost "
-                      "its explanation")
+        missing = [n for n in self.FREE_LABELS
+                   if not re.search(rf"C1 attempt {n}[^|]*\|\s*`?\$0\.0000",
+                                    ledger)]
+        assert not missing, (
+            f"BUDGET_LEDGER.md records no $0.0000 C1 label for {missing}, so "
+            f"'{self.LABELS} labels, {self.PAID} paid' has lost its explanation")
+        assert self.LABELS - self.PAID == len(self.FREE_LABELS), (
+            f"{self.LABELS} - {self.PAID} = {self.LABELS - self.PAID} free "
+            f"labels, but {len(self.FREE_LABELS)} are named and explained")
 
 
 # --- the measurement state agrees -------------------------------------------
@@ -212,9 +229,17 @@ class TestTheSnapshotStatesTheRequiredFacts:
         needs a grant, a launch-bound sweep, an issued authorization and a
         staged bundle before anything can be created.
 
-        So the shape is pinned in whichever direction is true, and the attempt
-        counter is required to exist and stay inside the approved bound — a
-        package whose usage is untracked is a package without a limit.
+        So the shape is pinned in whichever direction is true, and the usage is
+        required to be counted and to stay inside a STATED bound — a package
+        whose usage is untracked is a package without a limit.
+
+        The bound was an attempt CAP, and this required one as an integer. The
+        maintainer withdrew that cap on 2026-09-11: sessions are still counted,
+        but what limits them is money. Requiring an integer cap would have
+        forced the snapshot to state a limit that no longer exists, so the
+        requirement is now that a bound is stated and checkable in whichever
+        form is live — and when it is the money, the balance is required to be
+        arithmetically consistent, which the count never was.
         """
         s = snapshot()
         a = s["authorized"]
@@ -225,11 +250,29 @@ class TestTheSnapshotStatesTheRequiredFacts:
 
         assert a.get("package_id"), (
             "the snapshot claims an authorization exists but names no package")
-        used, cap = a.get("formal_attempts_used"), a.get("formal_attempts_max")
-        assert isinstance(used, int) and isinstance(cap, int), (
-            "an approved package must count its attempts; an uncounted package "
-            "has no limit")
-        assert 0 <= used <= cap, f"{used} of {cap} attempts used"
+        used, cap = a.get("formal_sessions_used"), a.get("formal_sessions_max")
+        assert isinstance(used, int), (
+            "an approved package must count its sessions; uncounted usage "
+            "cannot be checked against any limit")
+        if isinstance(cap, int):
+            assert 0 <= used <= cap, f"{used} of {cap} sessions used"
+        else:
+            assert cap is None, (
+                f"formal_sessions_max is {cap!r}: an integer cap or an "
+                "explicit null, never a missing key -- a cap that is absent "
+                "because nobody wrote it reads exactly like one that was "
+                "withdrawn")
+            assert a.get("_sessions_max_meaning"), (
+                "no cap and no explanation: a null limit must say that it is "
+                "the amendment and name what binds instead")
+            #: What binds instead, checked rather than described.
+            b = s["budget"]
+            spend, capped = b["cumulative_spend_usd"], b["authorized_cap_usd"]
+            assert 0 < spend <= capped, f"{spend} of {capped}"
+            assert b["remaining_usd"] == round(capped - spend, 4), (
+                "the stated remainder is not the stated cap minus the stated "
+                "spend")
+            assert b.get("remaining_is_not_permission") is True
         #: A package approval must never be written as though it were the
         #: issuance. If a bundle is staged or a pod is billing, that is a
         #: separate claim the snapshot has to make explicitly elsewhere.
@@ -282,12 +325,17 @@ class TestStateMdAgrees:
         live = text[:cut] if cut > 0 else text
         return re.sub(r"`[^`]*`", "`", live)
 
-    def test_it_does_not_claim_nine_labels_or_eight_paid(self):
+    def test_its_counts_are_the_same_numbers_the_snapshot_claims(self):
+        """It hardcoded `10` and `9`, which had to be re-edited on every attempt
+        and had already gone stale against the snapshot's own constants. The
+        numbers now come from ONE place, so a count can drift in one document
+        and be caught rather than duplicated correctly by hand."""
         live = self.live_region()
-        assert not count_before(live, r"attempt labels") or \
-            set(count_before(live, r"attempt labels")) == {10}, live[:400]
-        bad = [n for n in count_before(live, r"paid") if n != 9]
-        assert not bad, f"STATE.md claims {bad} paid attempts"
+        C = TestTheAttemptCountIsOneNumber
+        bad = [n for n in count_before(live, r"labels?") if n != C.LABELS]
+        assert not bad, f"STATE.md claims {bad} labels, the count is {C.LABELS}"
+        bad = [n for n in count_before(live, r"paid") if n != C.PAID]
+        assert not bad, f"STATE.md claims {bad} paid, the count is {C.PAID}"
 
     def test_it_does_not_say_c1_was_never_measured(self):
         assert not re.search(r"NEVER MEASURED", self.live_region()), (

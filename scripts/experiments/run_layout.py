@@ -40,6 +40,7 @@ replace — and a run that has already been recorded is never silently reopened.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from collections.abc import Iterable, Mapping
 from pathlib import Path
@@ -70,7 +71,19 @@ RUNS_ROOT = "logs/runs"
 #: get an explicit bucket rather than being filed under whichever stage they
 #: touched last.
 STAGE_PREFIX = "stage-"
-PIPELINE_STAGES = tuple(str(i) for i in range(7))
+
+#: A pipeline stage id is a decimal number. NOT a fixed list: `range(7)` encoded
+#: "this project has stages 0-6", which is a fact about today's AGENTS.md rather
+#: than about the mechanism, and it would have refused a Stage 7 that a future
+#: config declared -- forcing a public-code edit to add a stage, which is the
+#: opposite of declaring one. A wider fixed range would have the same shape.
+#:
+#: What the pattern still buys is path safety: one path segment, digits only, so
+#: a stage id can never introduce a separator, a traversal or a hidden file.
+PIPELINE_STAGE = re.compile(r"^(0|[1-9][0-9]*)$")
+
+#: Buckets for work that is not a pipeline stage at all. Named, because these
+#: are not numbers and must not be invented ad hoc.
 NON_PIPELINE_STAGES = ("shared",)
 
 #: The run's own index, inside the run.
@@ -168,15 +181,18 @@ def stage_segment(stage_id: str) -> str:
     a new directory: the failure mode this prevents is a typo silently creating
     `logs/runs/stage-c1/` and a second place for one experiment's runs to live.
     """
-    known = PIPELINE_STAGES + NON_PIPELINE_STAGES
-    if stage_id not in known:
+    if not isinstance(stage_id, str) or not (
+            PIPELINE_STAGE.match(stage_id) or stage_id in NON_PIPELINE_STAGES):
         raise RunConventionError(
-            f"stage_id {stage_id!r} is not one of {list(known)}. The pipeline "
-            "stages are 0-6; work that is not a pipeline stage -- storage "
-            "maintenance, engineering validation, cross-stage infrastructure -- "
-            "is declared 'shared' rather than filed under a stage it merely "
-            "touched. Phase (A/B/C) and attempt are different dimensions and "
-            "are not stage ids.")
+            f"stage_id {stage_id!r} is not a pipeline stage number or one of "
+            f"{list(NON_PIPELINE_STAGES)}. A pipeline stage is a decimal number "
+            "declared by the experiment -- this mechanism does not cap which "
+            "ones exist, so a stage the pipeline grows later needs a config "
+            "entry and no change here. Work that is not a pipeline stage at all "
+            "-- storage maintenance, engineering validation, cross-stage "
+            "infrastructure -- is declared 'shared' rather than filed under a "
+            "stage it merely touched. Phase (A/B/C) and attempt are different "
+            "dimensions and are not stage ids.")
     return f"{STAGE_PREFIX}{stage_id}"
 
 
@@ -345,7 +361,13 @@ def claim_output_root(root: Path | str, experiment_id: str, run_id: str, *,
                 "its own. Use a fresh scratch directory")
         return existing
 
-    present = [rel for rel in declared if (root / rel).exists()]
+    #: An entry containing `*` is a pattern, because some outputs are named
+    #: after a resource that does not exist when the claim is made -- a
+    #: watchdog journal carries its pod id, and a session may hold several
+    #: resources in turn. Without this the journals stopped counting as
+    #: evidence that a scratch root belongs to a run.
+    present = [rel for rel in declared
+               if (any(root.glob(rel)) if "*" in rel else (root / rel).exists())]
     if present:
         raise OutputOwnershipError(
             f"{root} already holds {len(present)} of this run's declared "

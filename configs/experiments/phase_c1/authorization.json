@@ -124,8 +124,9 @@
   "training": "all six trainings must complete before any evaluation; a training failure is C1_INCOMPLETE, not a partial confirmation experiment",
   "generation_admission": "no probe is scored unless the generation protocol observed from its own raw summaries is comparable to the attested C1 protocol",
   "decision": "stage I requires six complete admitted and scored probes",
-  "retry": "THIS authorization permits exactly one launch attempt and no automatic retry, no replacement pod and no ceiling increase. Whether a FURTHER attempt may be authorized is the execution package's question, not this artifact's: see execution_package.autonomous_formal_retry_requires_all_of."
+  "retry": "THIS authorization funds exactly ONE launcher session. Inside that session the launcher may take up to the approved number of acquisition draws, replacing a host that was created and never became usable; at most ONE resource may be billing at any instant, enforced by SessionRunner.release_and_confirm, and every draw shares this session's single ceiling. A FURTHER session needs a new grant, a new launch-bound readiness record, a new authorization and a new bundle -- see execution_package for when that is permitted without a further maintainer decision."
  },
- "one_use": "ONE grant, ONE issuance, ONE launch attempt, ONE provider resource. A failure is this attempt's result. Unchanged by the 2026-09-11 package: the package does not make an authorization reusable, it states how many separate one-use chains may be issued and under exactly what conditions.",
- "authorizes": "nothing"
+ "one_use": "ONE grant, ONE issuance, ONE launcher session. Within the session, acquisition draws are bounded by execution_package.acquisition and never exceed one BILLING resource at a time. A failure is this session's result; a new session always uses a complete new one-use chain and never reuses a consumed one.",
+ "authorizes": "nothing",
+ "_superseded_wording_note": "Until 2026-09-11 these two fields read 'no replacement pod' and 'ONE provider resource'. That was the rule attempts 1-12 ran under and it is preserved in their issued authorizations, which are not rewritten. It stopped describing the generation source when the package permitted bounded acquisition draws, and an authorization that contradicts the package it is issued under is a governance defect even when nothing reads the prose."
 }

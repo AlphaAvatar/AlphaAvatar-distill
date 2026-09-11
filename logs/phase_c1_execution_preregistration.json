@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "53bc27d0713ef47860e3b5296f9b28049ebe0436",
+ "head_commit": "0aab945dd276f8231cdb070246c5c9bec8940759",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "6ed749093c8fc38e0b1f8e51550ccb6419ed2ee9e9dad15c64b4a45210c2f2ed",
+  "digest": "5bf1aacab1e74377404d51205669fd8cf42f1581364a377ef4e0c98152abdbe5",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -91,8 +91,8 @@
    },
    {
     "path": "configs/experiments/phase_c1/authorization.json",
-    "sha256": "ed1f5755a5ae268501c711592bf42b9d40b553275105b8002f581f95c721f9c6",
-    "bytes": 11434
+    "sha256": "2a0e65f91441a31fc7216cdfd8263927282468ab078a04c02ee292c9bb806d76",
+    "bytes": 12187
    },
    {
     "path": "configs/experiments/phase_c1/frozen_assets.json",
@@ -206,8 +206,8 @@
    },
    {
     "path": "scripts/experiments/run_layout.py",
-    "sha256": "52bae0e283ca93d6b9fb9a79447838bff96303b890062202dadc5d89d14ad4e3",
-    "bytes": 26006
+    "sha256": "fb7fc6f96b60e174b9184482c43f87fc498ea43b7c7d4aead182cacda429a3ee",
+    "bytes": 27411
    },
    {
     "path": "scripts/experiments/source_sets.py",
@@ -221,8 +221,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "ab94b148a9fcae6b4f93dd590b34a40e265a4e3dba30dbaf57bfabc52e08188c",
-    "bytes": 76038
+    "sha256": "4bb9918fecf177ce42a5a1e62eda9969fb4f7fb7ffaf591e3f30c5cb24878de0",
+    "bytes": 76996
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -371,8 +371,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
-    "sha256": "493e61482bca37a3d93cb119a141efb1d4751cb43eb571bdbe503c15b10e5496",
-    "bytes": 57143
+    "sha256": "9f3f99f8597b1b5a90d1f0993fdf74d4abc9a2a9e35e4cb58c408faa95f16ba7",
+    "bytes": 59039
    },
    {
     "path": "src/aadistill/infrastructure/watchdog.py",
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "a6a98767956cf5af09d44e146780000813f2dab4ef549e8464bd9d8b2e9defac"
+ "preregistration_sha256": "4e53578c7283e964afbd7722ea097eb4b166a48fed4ef59933ac3292723dec6b"
 }

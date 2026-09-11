@@ -39,6 +39,7 @@ one-resource grant.
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 import time
@@ -410,3 +411,102 @@ def test_M_the_live_grant_and_the_launcher_agree_on_acquisition():
     assert one_use["provider_resources_permitted"] <= C1.C1_MAX_HOST_DRAWS
     assert one_use.get("one_billing_resource_at_a_time") is True, (
         "the live grant does not state the invariant the launcher enforces")
+
+
+# --- one resource, one journal, from the first tick --------------------------
+#
+# `Journal.write` reopens by PATH on every event. Renaming a live path aside
+# therefore isolates nothing: an old watchdog that has not yet exited recreates
+# the shared path and writes its final poll and `watchdog_end` into the NEXT
+# resource's journal, while its own archive is left without an ending.
+#
+# Reproduced below with two real processes on a real filesystem, in the order a
+# redraw actually produces: old writer still alive, new writer starts, old
+# writer finishes.
+
+def _journal_proc(path, pod, events, delay=0.0):
+    """A real detached writer using the REAL Journal, like the watchdog does."""
+    import subprocess as sp
+    import sys as _s
+
+    code = (
+        "import sys, time;"
+        "sys.path.insert(0, %r);"
+        "from aadistill.infrastructure.watchdog import Journal;"
+        "j = Journal(%r);"
+        "time.sleep(%r);"
+        "[j.write(e, pod_id=%r) for e in %r]" % (
+            str(REPO / "src"), str(path), delay, pod, events))
+    return sp.Popen([_s.executable, "-c", code])
+
+
+def test_a_slow_previous_watchdog_cannot_write_into_the_next_journal(tmp_path):
+    """The defect, at the file level, with the paths the runner now derives."""
+    from aadistill.infrastructure.session_runner import SessionRunner
+
+    old_pod, new_pod = "podOLD", "podNEW"
+    old_path = tmp_path / SessionRunner._watchdog_journal_name(old_pod)
+    new_path = tmp_path / SessionRunner._watchdog_journal_name(new_pod)
+    assert old_path != new_path, "two resources share one journal path"
+
+    # The old writer is still alive and finishes AFTER the new one starts.
+    old = _journal_proc(old_path, old_pod, ["poll", "watchdog_end"], delay=1.0)
+    new = _journal_proc(new_path, new_pod, ["watchdog_start", "poll"], delay=0.0)
+    new.wait(timeout=60)
+    old.wait(timeout=60)
+
+    old_lines = [json.loads(x) for x in old_path.read_text().splitlines() if x]
+    new_lines = [json.loads(x) for x in new_path.read_text().splitlines() if x]
+
+    assert {e["event"] for e in old_lines} == {"poll", "watchdog_end"}, (
+        "the abandoned resource's archive is missing its ending")
+    assert all(e["pod_id"] == old_pod for e in old_lines)
+    assert all(e["pod_id"] == new_pod for e in new_lines), (
+        "the previous resource's events landed in the next resource's journal")
+    assert "watchdog_end" not in {e["event"] for e in new_lines}
+
+
+def test_the_runner_derives_a_distinct_journal_per_pod():
+    """And not by renaming: the name is the pod's from the first tick."""
+    from aadistill.infrastructure.session_runner import SessionRunner
+
+    names = {SessionRunner._watchdog_journal_name(p) for p in ("a", "b", "c")}
+    assert len(names) == 3
+    src = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
+    body = src[src.index("def launch_watchdog"):src.index("def wait_endpoint")]
+    assert ".rename(" not in body, (
+        "launch_watchdog still renames a path a live writer may hold")
+    assert '"watchdog.jsonl"' not in body, "a shared journal path is back"
+
+
+def test_each_draw_keeps_its_own_raw_provider_response(monkeypatch):
+    """`attempt` restarts at 1 inside every draw, so draw 2's first create
+    overwrote draw 1's raw response -- the only record of what the provider
+    said, including a refusal that returned no pod id at all."""
+    r, created = _runner(monkeypatch, outcome="no_endpoint")
+    for f in r.scr.glob("create_raw_*"):
+        f.unlink()
+    r.run()
+
+    raw = sorted(p.name for p in r.scr.glob("create_raw_*"))
+    assert len(raw) == len(created), f"{len(created)} creates left {raw}"
+    assert len(set(raw)) == len(raw), f"raw responses overwrote each other: {raw}"
+
+
+def test_a_create_that_returned_no_id_is_still_recorded(monkeypatch):
+    """It created nothing and billed nothing, but it happened, and the
+    provider's refusal is the only evidence of why."""
+    r, created = _runner(monkeypatch, outcome="ok", create_ok=False)
+
+    assert r.run() is False
+    assert len(created) == 1
+    draws = r.ev.get("draws") or []
+    assert len(draws) == 1, "a failed create left no draw record"
+    assert draws[0]["outcome"] == "create_failed"
+    assert draws[0]["pod_id"] is None
+    assert draws[0]["release"]["provider_resource_created"] is False
+    #: And it names the files that are really there, so the refusal can be
+    #: read from the record without guessing how many attempts were made.
+    named = draws[0]["release"]["raw_responses"]
+    assert named == ["create_raw_d1_a1.txt"]
+    assert all((r.scr / n).is_file() for n in named), named

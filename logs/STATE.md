@@ -1,11 +1,14 @@
-**Updated:** 2026-09-11 · **review baseline** `55bb324a` — the tree this
+**Updated:** 2026-09-12 · **review baseline** `0aab945d` — the tree this
 revision was written against, not a claim about the current tip; run
 `git log --oneline -1` for that. Branch names and tip SHAs go stale on the next
 commit, so they are not restated here. ·
 **PHASE B CLOSED · PHASE C0 FROZEN · ATTEMPT 9 RAN — THE FROZEN PATH
 REPRODUCES; STAGE F FAILED · MILESTONE-A MERGED · TWO ENGINEERING BLOCKERS
 FOUND AND REPAIRED 2026-09-11 — THE 2026-09-10 "NO ENGINEERING BLOCKER"
-READING WAS WRONG · THE GOVERNANCE-INPUT SEAM IS CLOSED 2026-09-11**
+READING WAS WRONG · THE GOVERNANCE-INPUT SEAM IS CLOSED 2026-09-11 · THE
+ATTEMPT CAP AND THE ONE-RESOURCE RULE ARE WITHDRAWN 2026-09-11 · ATTEMPT 12
+REFUSED AT `$0` FOR LACK OF PROVIDER CAPACITY · NO MAINTAINER DECISION IS
+OWED — THE BLOCKER IS CAPACITY**
 
 # Current state
 
@@ -15,13 +18,13 @@ how the snapshot came to disagree with itself.
 
 | | |
 | --- | --- |
-| C1 attempts | **ten labels** (1, 2, 3, 3R, 4–9), **nine paid**, `$4.0001` — attempt 3 created no resource. [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) |
+| C1 attempts | **thirteen labels** (1, 2, 3, 3R, 4–12), **eleven paid**, `$4.3961` — attempts 3 and 12 created no resource. [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) |
 | replay | **MEASURED — 2/2 PASS** on an L40S (parent `eea90c91`, incumbent `c313d1b4`) |
 | treatment | **UNMEASURED** — zero probes trained |
 | endpoint | **UNMEASURED** — zero evaluated, no decision |
 | attempt 9 | **NO DECISION** — a pre-treatment infrastructure abort, not an ATTENTION result and not a frozen-rule `INCONCLUSIVE` |
-| authorization | **package APPROVED 2026-09-11, nothing issued yet** — up to 3 formal attempts, `0` used. No live grant, no live authorization, no staged bundle. An approval is not a launch |
-| spend | **`$268.2958`** of the raised `$320.00` cap, leaving **`$51.7042`**. Booked against the package: `$0.3960` of `$51.4425`, **2 of 3** attempts used. The `$0.6577` margin is for accounting corrections, not an allowance |
+| authorization | **package APPROVED 2026-09-11 and AMENDED the same day — no attempt cap.** Nothing is issued: attempt 12's chain was consumed at invocation. No live grant, no live authorization, no staged bundle. An approval is not a launch |
+| spend | **`$268.2958`** of the raised `$320.00` cap, leaving **`$51.7042`**. Booked against the package: `$0.3960` of `$51.4425`; attempt 12 cost `$0`. **No attempt cap — money bounds the sessions:** `$51.0465` funds three full-ceiling sessions and no more. The `$0.6577` margin is for accounting corrections, not an allowance |
 | CUDA stage-F | **PASS 2026-09-10**, subrun 3 of 3, `$0.0400` total. NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130): both geometries executed `attention.activation_importance_v1` through the real verified suffix, and **all five device placements were observed on `cuda:0`**. Two earlier subruns failed in the harness — a pipeline that hid pip's exit status, then a matrix criterion that demanded the child be on the device while `device.py` documents it is not. **Engineering evidence only**, not a C1 result. [`runs/cuda_stage_f/`](runs/cuda_stage_f/) |
 | stage-F device repair | **CONFIRMED ON REAL CUDA** at execution SHA `7027a8f4` (2026-09-10). It was logical / CPU-structural evidence until then; the defect is a cross-device placement, which a single-device machine cannot observe, and a real accelerator has now observed it |
 | CUDA interpretation | one append-only amendment corrects **two explanatory claims** and nothing else: subrun 2's failure class is `harness_acceptance_criterion`, not `operator`, and the PASS observed *operator on `cuda:0`, child host-resident per the builder contract* — not children left on CUDA. Outcomes, costs, devices and provider identities are bound by hash and unaltered: [`interpretation_amendment_1.json`](validations/cuda-stage-f/v1/interpretation_amendment_1.json) |
@@ -30,56 +33,59 @@ how the snapshot came to disagree with itself.
 | Milestone A | **MERGED 2026-09-10**, fast-forward to `daf64772`. The migration branch is preserved |
 | governance input | **CLOSED 2026-09-11.** A grant may now live at this run's `governance/grant.json` — where it has to be, because it is committed *before* the launch-bound sweep — without `open_run` refusing the run as a dead launcher's residue. `grant_provenance_gate` is the thirteenth pre-provider gate |
 | run identity | **IN PRODUCTION.** The launcher requires `--run-id` and writes into `runs/phase_c1/<run_id>/`; there is no `--out` and no flat session record. Attempts 1–9 stay exactly where they are, registered by path |
-| owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
+| owed | **nothing that blocks a launch.** The host-redraw question was decided on 2026-09-11 (up to three draws per session, one billing resource at a time, unchanged ceiling). What blocks the next session is **provider capacity** — attempt 12's create was refused. Two non-blocking decisions stay open: historical-probe reuse under `scoring_contract_matches_live`, and 2.92 GiB of duplicate checkpoints with unresolved ownership |
 | **corrected** | the 2026-09-10 claim that **no engineering blocker remained was WRONG**. Two were found on review and repaired on 2026-09-11: an undefined `REPO` in the shared runner that would have raised `NameError` *after* a pod was created and setup had completed, and a scratch root with no owner, which let one attempt collect another's evidence. Both came in with `main`; neither was introduced by the run-identity work. See the 2026-09-11 section |
 
 **Right now: nothing is running. Nothing is billing. No pod exists. Nothing is
 prepared for launch.** `$268.2958` of `$320.0000`; package booked `$0.3960` of
-`$51.4425`; **2 of 3 formal attempts used, 1 remains and is NOT being spent.**
+`$51.4425`. **No cap on the number of sessions remains; the `$51.0465` balance
+funds three full-ceiling sessions and no more.** The only thing running is a
+`$0` read-only capacity watch.
 
-> ## ⛔ A MAINTAINER DECISION IS OWED BEFORE THE LAST ATTEMPT
+> ## ⏸ DECIDED, THEN REFUSED FOR CAPACITY — THE BLOCKER IS THE MARKET
 >
-> Two attempts are gone to infrastructure with **zero scientific stages** —
-> attempt 10 at the frozen-asset gate (`$0.1177`, repaired and now gated at
-> `$0`), attempt 11 to a provider cold host (`$0.2783`). One attempt remains.
+> **The decision that was owed here has been taken.** On 2026-09-11, after
+> attempt 11, the maintainer **withdrew the three-attempt cap and the
+> one-provider-resource rule**. A session may now take up to **three
+> acquisition draws** — replacing a host that was created and never became
+> usable — with **at most one billing resource at any instant**, every draw
+> carrying its own pod id, cost, raw provider response and watchdog journal, all
+> inside the unchanged `$15.1475` ceiling. There is no cap on how many sessions
+> may be run; the budget bounds them. The withdrawal is **prospective**:
+> attempts 10 and 11 keep their costs, numbering and the one-resource
+> authorizations they actually ran under.
 >
-> **Attempt 11's cause is identified, ordinary, and not addressable from this
-> repository.** Pod `udkapuemrwqcmt` was created and billed but never became
-> reachable: `starting` for 840 s, no TCP 22 mapping, abandoned at the
-> 15-minute bound. The independent out-of-band poll recorded `runtime: null` at
-> three consecutive ticks, corroborating that the host never started
-> independently of anything the launcher said. Nothing here caused it and no
-> repair here prevents it.
+> **A defect was named with it and is closed.** The redraw path deleted a pod,
+> ignored the result and created the next one — treating a returned subprocess
+> as evidence that a resource had stopped billing.
+> `SessionRunner.release_and_confirm` now deletes and then *waits for the
+> provider* to report the resource not billing, and **aborts the session** rather
+> than create a second resource when that cannot be confirmed.
 >
-> **What it exposes is structural, and it is the decision.** C1 launches with
-> `--host-draws 1` because the grant permits exactly **one provider resource**.
-> Every earlier session in this project drew up to three — deleting a cold host
-> and drawing again — because this provider yields unreachable hosts often
-> enough to plan for: continuation attempt 2 burned all three draws on
-> `HOST_COLD`, continuation attempt 1 spent 29 of its 38 minutes on one, and
-> micro-preflight attempt 4 lost `~$0.41` the same way. Under the one-resource
-> rule, a condition every other session treated as a **retryable draw** consumes
-> an entire formal attempt.
+> **Attempt 12 then cost `$0.0000` and produced no resource.** All 14
+> pre-provider gates passed twice — once in a read-only pre-flight that did not
+> invoke the launcher, and again by the launcher — and the single create call
+> was refused: *"There are no longer any instances available with the requested
+> specifications."*
 >
-> **Recommended:** allow up to **3 host draws inside one formal attempt**, with
-> **at most one billing resource at any moment**, each unreachable draw deleted
-> and provider-confirmed gone before the next is created, all inside the
-> unchanged `$15.1475` per-attempt ceiling and counting as **one** attempt. That
-> is what `--host-draws 3` already implements and what every prior session used;
-> it changes no science, no ceiling and no attempt count.
+> **This is capacity, not configuration, and host draws do not address it.** A
+> draw replaces a host that was *created* and never became usable; creation
+> itself was refused, so there was nothing to replace. A create-attempt loop
+> would sleep and ask the same market again, which is stock chasing and is not
+> authorized. Backing off at `$0` and choosing a better moment is the handling
+> the package permits.
 >
-> **Alternative:** keep one resource and spend the last attempt on the same
-> lottery. Attempt 11's evidence says that is a real risk, not a hypothetical.
+> **What is running:** a read-only capacity watch at `$0`. Nothing else. The
+> next one-use chain — grant, `launch_bound` sweep, authorization, bundle — is
+> built **only when capacity exists**, because the chain is consumed at
+> invocation and must not be spent on a market that cannot serve it. Attempt
+> 12's chain is consumed and authorizes nothing.
 >
-> **A weaker, free precaution either way:** refuse to launch while L40S stock
-> reads `Low`. Attempt 10 launched at `Medium` and had TCP 22 in 1.6 min;
-> attempt 11 launched at `Low` and never got an endpoint. That is `n=1` — worth
-> doing because it costs nothing, not worth trusting on its own.
->
-> **Why I stopped instead of retrying.** The package pre-authorizes a retry
-> whose cause has been *addressed*. This one is identified but unaddressed, the
-> only effective mitigation needs a rule the grant fixes, and relaunching
-> unchanged would repeat an identical failure with the last of three attempts.
+> **A weaker, free precaution, unchanged:** stock reading `Low` is a warning and
+> not a gate. Attempt 10 launched at `Medium` and had TCP 22 in 1.6 min; attempt
+> 11 launched at `Low` and never got an endpoint; attempt 12 was quoted at `Low`
+> and refused outright. `Low` does not mean *no* capacity — it is worth reading,
+> not worth treating as a hard gate.
 
 ## APPROVED execution package — maintainer decision, 2026-09-11
 
@@ -92,13 +98,19 @@ below the accepted rate, and every pre-provider gate. Full terms:
 `execution_package` in
 [`configs/experiments/phase_c1/authorization.json`](../configs/experiments/phase_c1/authorization.json),
 which is also where the issuer reads the cap it refuses a mis-stated grant
-against. **Booked against the package so far: `$0.0000`.**
+against. **Booked against the package so far: `$0.3960`** (attempts 10 and 11;
+attempt 12 cost `$0`).
+
+> **AMENDED the same day.** After attempt 11 the maintainer **withdrew the
+> three-attempt cap and the one-provider-resource-per-invocation rule.** The
+> table and terms below are reproduced with that amendment applied; the money is
+> untouched. Source: `execution_package._attempts_amendment_2026_09_11b`.
 
 | | approved |
 | --- | --- |
-| formal C1 attempts, **including the first** | **3** |
+| formal C1 sessions, **including the first** | **no cap** — withdrawn 2026-09-11. Money bounds them: at `$15.1475` worst case, the `$51.0465` balance funds three full-ceiling sessions and no more |
 | per-attempt hard ceiling | **`$15.1475`** — unchanged, derived from [`phase_c1_pricing.json`](phase_c1_pricing.json) at secure L40S `$1.09/h`. It already contains a 10% contingency and a 20-minute artifact-recovery reserve; nothing re-buys them |
-| formal sub-total | `3 × 15.1475` = **`$45.4425`** |
+| formal sub-total | **`$45.4425`** — approved as `3 × 15.1475` and unchanged by the amendment. It is now a *pool*, not three slots |
 | GPU **engineering** allowance, cumulative across every subrun | **`$6.0000`** |
 | package total | **`$51.4425`** |
 | spend at approval | `$267.8998` |
@@ -106,19 +118,29 @@ against. **Booked against the package so far: `$0.0000`.**
 | new cumulative cap | **`$320.0000`** (`267.8998 + 51.4425 = 319.3423`, plus `$0.6577` of reconciliation margin — the ledger has already needed a `$0.0073` correction once, and a cap with no margin turns an arithmetic fix into a breach) |
 | cap **increase** | **`+$36.2400`**, not `+$51.4425`: the old cap already covered `$15.2025` of the package |
 
-**Three is a ceiling, not a target**, and the engineering allowance is used only
-when a question genuinely needs an accelerator — it is not a requirement to add
-a GPU test before a formal attempt. **The five limits bind separately and do not
-transfer**: a cheap failure does not buy a fourth attempt, an unspent
-engineering allowance does not raise the per-attempt ceiling, and the margin is
-for real accounting corrections, not spending.
+**The money is the ceiling, not a target**, and the engineering allowance is
+used only when a question genuinely needs an accelerator — it is not a
+requirement to add a GPU test before a formal session. **The four remaining
+limits bind separately and do not transfer**: an unspent engineering allowance
+does not raise the per-session ceiling, the package total does not draw on the
+project cap, and the margin is for real accounting corrections, not spending.
+What a cheap failure *does* now buy is another session — that is exactly what
+the amendment changed — but only while the balance still funds a **complete**
+one.
 
-**Counting a formal attempt.** Invoking the formal launcher under a **new
-one-use authorization consumes one attempt, even if it then refuses at `$0`**
-before any provider resource exists. Read-only checks, code repair and
-engineering validation before issuance do not count. One provider-create call
-and one resource per formal invocation; a replacement pod, an internal redraw, a
-fresh `run_id` or a re-issuance does not evade the count.
+**Counting a formal session.** Invoking the formal launcher under a **new
+one-use authorization is one formal session, even if it then refuses at `$0`**
+before any provider resource exists — attempts 10, 11 and 12 are each one.
+Read-only checks, code repair and engineering validation before issuance do not
+count. **The counting survived the amendment; only the cap on the count was
+withdrawn**, so sessions are still numbered, recorded and ledgered one by one.
+
+**Inside a session:** one provider-create call per **draw**, **at most three
+draws**, **at most one billing resource at any instant**, every draw recorded
+with its own pod id, cost, raw provider response and watchdog journal, and all
+of them sharing the session's single `$15.1475` ceiling. A redraw is not a
+hidden retry; an *unrecorded* one would be. A fresh `run_id` or a re-issuance is
+a new session and is counted as one.
 
 > **This is prospective and rewrites nothing.** The 2026-09-04 ruling — that
 > attempt 3 was *not* consumed because no provider resource was created — stands
@@ -126,14 +148,14 @@ fresh `run_id` or a re-issuance does not evade the count.
 > its scope written down, because a superseded rule that reads as current is how
 > a spent attempt gets recovered by citation.
 
-**The formal budget funds three COMPLETE attempts, not three cheap failures.**
-All nine paid C1 attempts so far aborted early and cost `$0.0786`, `$0.1013`,
-`$0.3482`, `$0.6986`, `$0.3150`, `$0.3665`, `$0.4231`, `$0.6248` and `$1.0440` —
-`$4.0001` for nine. Budgeting the next three at that rate would be budgeting for
-the failure mode we have already fixed. Each of the three is funded at the full
-ceiling, so a run that reaches the 6 × 61.55-minute training block and fails
-there — the expensive failure E8b actually hit twice, at step 110 and near step
-900 — does not consume the package.
+**The formal budget funds COMPLETE sessions, not cheap failures.** All eleven
+paid C1 attempts so far aborted early and cost `$0.0786`, `$0.1013`, `$0.3482`,
+`$0.6986`, `$0.3150`, `$0.3665`, `$0.4231`, `$0.6248`, `$1.0440`, `$0.1177` and
+`$0.2783` — `$4.3961` for eleven. Budgeting the remaining balance at that rate
+would be budgeting for failure modes we have already fixed. Every session is
+funded at the full ceiling, so a run that reaches the 6 × 61.55-minute training
+block and fails there — the expensive failure E8b actually hit twice, at step
+110 and near step 900 — is affordable rather than a surprise.
 
 **Why `$6.0000` of engineering.** The closed CUDA campaign cost `$0.0400` for
 three subruns on an RTX 2000 Ada at `$0.24/h`. That is the cheap case and not
@@ -145,7 +167,9 @@ formal attempt.
 
 **Resource bounds.** At most **one active or potentially billing resource at a
 time**, across engineering and formal work alike, and one create call per
-acquisition invocation. Formal attempts: secure L40S priced at `$1.09/h`, with
+**draw**. A draw that replaces an unusable host is permitted only after the
+previous resource is **provider-confirmed not billing**; when that cannot be
+confirmed the session **aborts** rather than create a second one. Formal attempts: secure L40S priced at `$1.09/h`, with
 `--max-price` derived from the pricing record — a live quote above it refuses at
 `$0` before any resource exists, and a different GPU class is a **repricing**
 that this package does not authorize. Engineering: the cheapest card that can
@@ -162,9 +186,9 @@ them:
    and has been addressed;
 3. frozen science, the input contracts and the decision rule are unchanged;
 4. the previous resource is **confirmed** no longer billing;
-5. the remaining attempt count and package balance still fund a **complete**
-   attempt plus its teardown;
-6. the new attempt uses a new run identity and a complete, valid one-use
+5. the package balance still funds a **complete** session plus its teardown —
+   this is now the binding limit, since the attempt count was withdrawn;
+6. the new session uses a new run identity and a complete, valid one-use
    authorization chain — never a consumed one.
 
 In practice that covers a pre-provider gate refusal, provider acquisition
@@ -189,12 +213,13 @@ cumulative total, and a replacement resource does not get a fresh allocation.
 * **an input-identity conflict that cannot be restored to its frozen binding**,
   or anything that would require changing the scientific protocol;
 * **a completed run with a verdict — GO, NO-GO or INCONCLUSIVE.** All three end
-  the package's formal attempts. `INCONCLUSIVE` is a result, not an engineering
+  the package's formal sessions — the amendment removed a cap, not this line. `INCONCLUSIVE` is a result, not an engineering
   failure, and must never be re-run in pursuit of a GO: at Δ = 0 the design
   returns it 26% of the time and at Δ = SESOI 45% of the time, which is a
   property of the experiment accepted in advance;
-* the package total, the per-attempt ceiling, the three-attempt count or the
-  project cap is reached; or a resource's billing state is unknown.
+* the package total, the per-session ceiling or the project cap is reached —
+  the attempt count is no longer one of these; or a resource's billing state is
+  unknown.
 
 **Never**, under any budget: splicing probes across attempts, substituting a
 seed, selectively retaining outputs, or changing arms, seeds, recipe, battery,
@@ -256,7 +281,9 @@ statistical `INCONCLUSIVE`.
 >
 > **The first authorization is VOID and was never used.** It is preserved in git
 > at `52d6b68`, was never passed to the launcher, created no resource and cost
-> `$0.0000`. `0` of 3 formal attempts are used.
+> `$0.0000`. `0` of 3 formal attempts were used *as of that day* — a figure
+> from before attempts 10–12 and from before the cap was withdrawn. The current
+> count and the amendment are at the top of this file.
 
 > **THE GOVERNANCE INPUT HAD NOWHERE LEGAL TO GO, 2026-09-11 — `$0.0000`, no
 > pod, no GPU, no provider resource, no grant, no authorization.**
@@ -506,11 +533,12 @@ statistical `INCONCLUSIVE`.
 > attempt-9 entry in `logs/BUDGET_LEDGER.md` and
 > `tests/docs/test_budget_arithmetic.py`.)*
 >
-> **THE FIRST C1 SCIENTIFIC OBSERVATION, after ten attempt labels and nine paid
-> pods.** (Ten labels — 1, 2, 3, 3R, 4–9 — but **nine paid**: at attempt 3 the
-> launcher declined to create a pod on price, so that label spent `$0.0000` and
-> no provider resource existed. The nine paid attempts sum to `$4.0001`;
-> `logs/BUDGET_LEDGER.md` owns the per-attempt accounting.) Setup completed, the
+> **THE FIRST C1 SCIENTIFIC OBSERVATION, after every prior C1 label had failed
+> before any scientific stage.** (The attempt counts and per-attempt accounting
+> as of this entry are owned by `logs/BUDGET_LEDGER.md` and summarised once, at
+> the top of this file — restating them in a dated entry is how a historical
+> paragraph came to read as a current claim, and how two documents came to
+> disagree about the same number.) Setup completed, the
 > driver ran, and **stages B, C, D
 > and E all PASSED**. Both fail-stop replay gates matched exactly:
 >

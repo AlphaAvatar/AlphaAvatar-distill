@@ -244,7 +244,10 @@ def test_a_completed_session_records_every_role_it_produced(tmp_path, L):
     _write_session(repo, args, passed=True, terminal="ALL_DONE")
     scr = Path(args.scr)
     (scr / "launch.log").write_text("line\n")
-    (scr / "watchdog.jsonl").write_text("{}\n")
+    #: Named after the pod that produced it, which is how a watchdog
+    #: writes from its first tick now.
+    (scr / "watchdog_podabc.jsonl").write_text("{}\n")
+    (scr / "watchdog_podabc.out").write_text("started\n")
     (scr / "relay").mkdir()
     #: Named the way the relay names them, from the spec, so this fixture
     #: cannot drift away from what a real session leaves.
@@ -403,6 +406,77 @@ def test_the_cuda_validation_records_its_run_too(tmp_path):
     assert doc["artifact_spec"] == "cuda_engineering_run_v1"
     #: A different vocabulary from C1's, through the same functions.
     assert "session_record" not in doc["roles"]
+
+
+def test_the_engineering_run_collects_its_watchdog_journals_by_pod(tmp_path):
+    """The backstop's own record of the resource it watched.
+
+    It is collected by PATTERN, not by a fixed filename: journals are named
+    after the pod, so a collector looking for `watchdog.jsonl` finds nothing
+    the launcher writes and reports a run that had a backstop as one that did
+    not. The role is a DIRECTORY for the same reason.
+    """
+    import importlib.util
+
+    path = REPO / "scripts/validation/cuda_engineering_launch.py"
+    spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    from aadistill.infrastructure.session_runner import watchdog_journal_name
+    from experiments.run_layout import claim_output_root
+
+    repo, scr = tmp_path / "repo", tmp_path / "scr"
+    (repo / "logs").mkdir(parents=True)
+    scr.mkdir(parents=True)
+    claim_output_root(scr, mod.RUN_EXPERIMENT_ID, "r1", outputs=mod.RUN_OUTPUTS)
+    #: Exactly the names the launcher's own `launch_watchdog` derives.
+    (scr / watchdog_journal_name("p1")).write_text('{"event":"tick"}\n')
+    (scr / watchdog_journal_name("p1", "out")).write_text("detached\n")
+
+    eng = object.__new__(mod.Engineering)
+    eng.a = types.SimpleNamespace(run_id="r1", execution_sha="a" * 40,
+                                  image="img:tag")
+    eng.scr = scr
+    eng.ev = {"verdict": "PASS", "pod_id": "p1"}
+    eng.write_evidence(repo)
+
+    doc = read_run(repo, "cuda_stage_f", "r1", "shared")
+    assert "watchdog" in doc["roles"], (
+        "the journal was written and not collected")
+    wd = repo / "logs/runs/stage-shared/cuda_stage_f/r1/runtime/watchdog"
+    assert sorted(q.name for q in wd.iterdir()) == [
+        "watchdog_p1.jsonl", "watchdog_p1.out"]
+
+
+def test_an_unclaimed_scratch_holding_only_a_journal_is_still_refused(tmp_path):
+    """Declaring the journals by PATTERN is what keeps this working.
+
+    They are named after a pod that does not exist when the claim is made, so
+    they cannot be declared statically -- and dropping them from the declared
+    outputs would mean a scratch root holding a previous run's backstop
+    evidence, and nothing else, reads as empty and gets written over.
+    """
+    import importlib.util
+
+    from experiments.run_layout import OutputOwnershipError, claim_output_root
+
+    path = REPO / "scripts/validation/cuda_engineering_launch.py"
+    spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert any("*" in o for o in mod.RUN_OUTPUTS), (
+        "no pattern output: a pod-named journal cannot be declared statically")
+
+    scr = tmp_path / "scr"
+    scr.mkdir()
+    (scr / "watchdog_p1.jsonl").write_text("{}\n")
+    with pytest.raises(OutputOwnershipError) as exc:
+        claim_output_root(scr, mod.RUN_EXPERIMENT_ID, "r1",
+                          outputs=mod.RUN_OUTPUTS)
+    assert "watchdog_*.jsonl" in str(exc.value)
+    #: And it really was left alone.
+    assert (scr / "watchdog_p1.jsonl").read_text() == "{}\n"
 
 
 def test_the_two_consumers_share_no_role_name():

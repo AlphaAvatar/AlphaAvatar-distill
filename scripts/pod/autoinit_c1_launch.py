@@ -233,7 +233,12 @@ C1_RUN_ROLES: dict[str, str] = {
     #: error, so it is the one role that is always present.
     "session_record": "runtime/session.json",
     "launcher_log": "runtime/launcher.log",
-    "watchdog_journal": "runtime/watchdog.jsonl",
+    #: A DIRECTORY, because a session may hold more than one resource in turn
+    #: and each watchdog writes its own journal from its first tick. One file
+    #: here would mean one resource's evidence collected and the rest left in
+    #: scratch -- or, before the isolation repair, two resources' events in one
+    #: file.
+    "watchdog_journal": "runtime/watchdog/",
     #: The maintainer decision this attempt runs under. UNLIKE every other role
     #: here it is an INPUT: it is authored and committed before the launch-bound
     #: sweep, because the authorization is issued from it and the sweep must see
@@ -283,7 +288,6 @@ C1_RUN_SPEC = RunArtifactSpec(
 #: name loses the evidence instead of failing.
 _RUN_COLLECT: tuple[tuple[str, str], ...] = (
     ("launch.log", "launcher_log"),
-    ("watchdog.jsonl", "watchdog_journal"),
     (f"relay/{Path(RUN_LOG).name}", "driver_log"),
     (f"relay/{Path(STATUS).name}", "driver_status"),
     ("relay/c1_evidence.json", "driver_evidence"),
@@ -1308,7 +1312,11 @@ def build_parser():
 #: The scratch-relative paths this run WRITES and later collects. Ownership of
 #: the scratch root is decided by these alone: a shared model cache or a staged
 #: input living beside them neither claims the directory nor blocks it.
-RUN_OUTPUTS: tuple[str, ...] = tuple(source for source, _ in _RUN_COLLECT)
+#: Plus the per-resource watchdog journals, by pattern: they are named after a
+#: pod that does not exist when the claim is made, and they are exactly the
+#: evidence that a scratch root belonged to a run.
+RUN_OUTPUTS: tuple[str, ...] = (*(source for source, _ in _RUN_COLLECT),
+                                "watchdog_*.jsonl")
 
 
 def layout_for_run(repo_root: Path | str, run_id: str):
@@ -1372,6 +1380,13 @@ def close_c1_run(layout, args, repo_root: Path | None = None) -> dict:
         src = scr / source
         if src.is_file():
             shutil.copy2(src, layout.path(C1_RUN_ROLES[role]))
+    #: Every resource's watchdog evidence, by the pod id in its name. Resolved
+    #: by glob rather than listed, because how many resources a session held is
+    #: only known once it has ended.
+    wd = layout.path(C1_RUN_ROLES["watchdog_journal"])
+    wd.mkdir(parents=True, exist_ok=True)
+    for src in sorted(scr.glob("watchdog_*.jsonl")) + sorted(scr.glob("watchdog_*.out")):
+        shutil.copy2(src, wd / src.name)
     session = json.loads((repo_root / args.out).read_text())
     return record_run(
         layout, spec=C1_RUN_SPEC,

@@ -22,6 +22,7 @@ fails.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -427,9 +428,40 @@ def test_the_stage_segment_is_declared_not_guessed():
 
     assert stage_segment("3") == "stage-3"
     assert stage_segment("shared") == "stage-shared"
-    for bad in ("c1", "phase_c1", "C", "attempt10", "7", ""):
+    for bad in ("c1", "phase_c1", "C", "attempt10", "", "-1", "1.5", "../x",
+                "shared2", "01x"):
         with pytest.raises(RunConventionError):
             stage_segment(bad)
+
+
+def test_a_stage_the_pipeline_grows_later_needs_no_change_here(tmp_path):
+    """`range(7)` encoded today's AGENTS.md in the mechanism.
+
+    A stage is DECLARED by an experiment's config. Capping which ones may exist
+    means adding a stage requires editing public code, which is the opposite of
+    declaring it -- and a wider fixed range has the same shape. The whole path
+    must derive, and the run must reach the index, with nothing here edited.
+    """
+    import importlib.util
+
+    roles = {"session_record": "runtime/session.json"}
+    art = ArtifactSpec(spec_id="stage7_v1", required=("session_record",))
+    layout = open_run(tmp_path, "some_future_experiment", "r1", roles=roles,
+                      stage_id="7")
+    assert layout.root == (tmp_path / RUNS_ROOT / "stage-7"
+                           / "some_future_experiment" / "r1")
+    _fill(layout, roles)
+    record_run(layout, spec=art, plan={}, implementation={}, status={},
+               roles=present_roles(layout, roles))
+
+    spec = importlib.util.spec_from_file_location(
+        "rri_stage7",
+        Path(__file__).resolve().parents[2] / "scripts/architecture/record_run_index.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    found = {(r["experiment_id"], r.get("stage")) for r in mod.discover_v3(tmp_path)}
+    assert ("some_future_experiment", "7") in found, (
+        "a declared stage beyond today's range did not reach the index")
 
 
 def test_a_stage_grouped_run_lands_under_its_stage(tmp_path):

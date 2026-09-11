@@ -96,6 +96,28 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "identical on every path that succeeds, different on one that fails, "
             "where the previous file now survives.",
      }),
+    ("0aab945dd276f8231cdb070246c5c9bec8940759",
+     "per-resource watchdog isolation and failed-draw evidence",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "the watchdog journal is derived from the pod id at LAUNCH and the "
+            "rename is gone. The previous round moved the shared path aside "
+            "when a draw started, which isolates nothing: `Journal.write` "
+            "reopens by path per event, so a watchdog that had not yet exited "
+            "recreated the shared path and wrote its final poll and "
+            "`watchdog_end` into the NEXT resource's journal while its own "
+            "archive was left unterminated. Reproduced with two real "
+            "processes. `create()` names its raw provider response by DRAW and "
+            "attempt, because `attempt` restarts at 1 in each draw and a "
+            "second draw's first create overwrote the first draw's -- the only "
+            "record of what the provider said, including a refusal carrying no "
+            "pod id. `run()` records a `create_failed` draw, with no pod id and "
+            "the raw responses it actually wrote, so a draw that created "
+            "nothing is still in `ev['draws']`. THIS IS A DECLARED SEMANTIC "
+            "CHANGE to acquisition evidence, reachable by any session that "
+            "draws more than once or is refused, and deliberately not "
+            "described as prose.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.

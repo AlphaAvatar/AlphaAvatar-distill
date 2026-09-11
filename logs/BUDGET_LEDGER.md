@@ -2184,3 +2184,71 @@ retryable draw consumes an entire formal attempt.
 has been *addressed*; this cause is identified but not addressable from here,
 and relaunching unchanged would bet the last of three attempts on the same
 lottery. That decision is the maintainer's.
+
+---
+
+## 2026-09-11 — AMENDED: the attempt cap and the one-resource rule are withdrawn
+
+The entry above ends with a decision the maintainer then took. Two constraints
+were **withdrawn prospectively**:
+
+* the **cap of three formal attempts**. There is no package-level limit on how
+  many times the formal launcher may be invoked. Sessions are still numbered,
+  recorded and ledgered one by one; what is gone is the ceiling on the count.
+* the **one-provider-resource-per-invocation rule**. A session may take up to
+  **three acquisition draws**, replacing a host that was created and never
+  became usable — with **at most one billing resource at any instant**, every
+  draw carrying its own pod id, cost, raw provider response and watchdog
+  journal, and all of them sharing the session's single `$15.1475` ceiling.
+
+**The money did not move.** `$51.4425` package, `$15.1475` per session,
+`$6.0000` engineering, `$320.0000` cap, `$0.6577` reconciliation margin — all
+unchanged. What changed is that **money, not a count, now bounds how many
+sessions are possible.** At `$15.1475` worst case per session, the `$51.0465`
+remaining funds three full-ceiling sessions and no more; a session that cannot
+be funded end to end, including evidence recovery and teardown, does not start.
+
+**Attempts 10 and 11 keep everything they ran under** — their costs, their
+numbering, their one-resource authorizations and the counting in force at the
+time. A withdrawal is prospective. It does not rewrite a record.
+
+The amendment is `execution_package._attempts_amendment_2026_09_11b` in
+`configs/experiments/phase_c1/authorization.json`, which is the source the
+generator reads.
+
+**One defect was named with it and is now closed.** The redraw path deleted a
+pod, ignored the result and created the next one, treating a returned
+subprocess as evidence that a resource had stopped billing.
+`SessionRunner.release_and_confirm` now deletes and then *waits for the
+provider* to report the resource not billing, and **aborts the session** rather
+than create a second resource when that cannot be confirmed.
+
+---
+
+## 2026-09-11 — C1 attempt 12: `$0.0000`, provider refused to create
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 12: 14/14 pre-provider gates passed twice — once in a read-only pre-flight that did not invoke the launcher, and again by the launcher. One create call, **refused**: *"There are no longer any instances available with the requested specifications."* No resource existed, nothing billed, nothing needed tearing down | `$0.0000` | [`runs/phase_c1/attempt12/`](runs/phase_c1/attempt12/) |
+
+**Cumulative unchanged: `$268.2958` of the `$320.0000` cap.** Package booked
+unchanged at **`$0.3960`** of `$51.4425`.
+
+```text
+project   268.2958 + 0.0000 = 268.2958   of 320.0000, leaving 51.7042
+package     0.3960 + 0.0000 =   0.3960   of  51.4425, leaving 51.0465
+sessions worst case  268.2958 + 15.1475 = 283.4433  <= 320.0000
+```
+
+**Capacity, not configuration.** The quote was the accepted `$1.09/h` rate, the
+gates all passed, and the request was simply not satisfiable at that moment.
+Host draws do not help here: a draw replaces a host that was *created* and never
+became usable, and creation itself was refused, so there was nothing to replace.
+A create-attempt loop would sleep and ask the same market again, which is stock
+chasing and is not authorized.
+
+**Backing off at `$0` and choosing a better moment is the handling the package
+permits.** A read-only capacity watch runs at `$0`; the next session is built
+only when capacity exists, because the one-use chain is consumed at invocation
+and should not be spent on a market that cannot serve it. Attempt 12's grant,
+authorization and bundle are **consumed** and authorize nothing further.
