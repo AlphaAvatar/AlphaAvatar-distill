@@ -2,8 +2,8 @@
  "schema": "aadistill.autoinit.c1_authorization/v1",
  "authorization_id": "autoinit.v1.phase_c1",
  "version": 1,
- "granted_utc": "2026-09-11T10:02:05+00:00",
- "granted_by": "maintainer decision, 2026-09-11, recorded after an independent engineering review of the increment 55bb324a..199711af found the prepared-grant / run-opening seam and the grant-provenance repair sound and reported no new material blocker. The same decision raised the project cumulative cap from $283.7600 to $320.0000 (+$36.2400) and approved a finite execution package: at most THREE formal C1 attempts including this one, each at the unchanged $15.1475 hard ceiling, plus a $6.0000 cumulative GPU engineering allowance. The maintainer explicitly set the autonomous-retry boundary at TRAINING STARTED rather than at a completed probe, and explicitly declined to make this package retroactive to any earlier attempt or authorization. Package terms: configs/experiments/phase_c1/authorization.json:execution_package; ledger entry and arithmetic: logs/BUDGET_LEDGER.md, 2026-09-11; rationale and rejected alternatives: logs/decisions.md, 2026-09-11.",
+ "granted_utc": "2026-09-11T11:51:45+00:00",
+ "granted_by": "the SAME maintainer decision of 2026-09-11 that approved the execution package; this is that package's pre-authorized retry, not a new approval. Attempt 10 aborted during SETUP at the frozen-asset gate (SETUP_RC=91, $0.1177, 6.48 min, pod kabazpl889i5u5 confirmed gone three ways). All six retry conditions are satisfied and each was checked rather than assumed: no formal probe training started -- the driver never ran, setup stopped at marker 4 of 11; the failure is an ordinary infrastructure failure whose cause was reproduced at $0, repaired, and given a pre-provider counterpart gate plus regressions; frozen science, the input contracts and the decision rule are unchanged, and the relocated scorer's numerical equivalence is measured in logs/architecture_scoring_equivalence.json; the previous resource is confirmed no longer billing; 2 of 3 attempts and $51.3248 of the package remain, which funds a complete attempt plus teardown; and this attempt uses a new run identity and a fresh one-use chain. Package terms: configs/experiments/phase_c1/authorization.json:execution_package. Attempt 10's closeout: logs/runs/phase_c1/attempt10/closeout/outcome.json.",
  "plan_id": "autoinit.v1.phase_c1",
  "phase_a_session_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
  "phase_a_science_plan_hash": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
@@ -28,17 +28,19 @@
  "scope_note": "exactly one C1 launch under the UNCHANGED frozen C1 protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh paired seeds = exactly six E1_KD_HEAVY_0860K recovery trainings; ALL SIX trainings complete before any confirmation evaluation begins; exactly one frozen confirmation evaluation per completed probe, each admitted against its own observed generation protocol before scoring; followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision rule. Nothing in the protocol, the arms, the seeds, the battery, the recovery recipe, the generation protocol, the scoring contract, the statistic or the behavioural vetoes may move.",
  "phase_a_authorized": false,
  "automatic_followon_start": false,
- "authorized_session_commit": "871235c72470d0a030c40c15291b292de55a0e01",
- "harness_source_digest": "464dacb3d8db9ced4ae4a3070e0bb10339ac05243438365f3eb9d6bfe8ea8776",
+ "authorized_session_commit": "50fda0985beec2e29375bb33e498b16cf3d16cd6",
+ "harness_source_digest": "c3c4e0ecfc78fbda64afb7ccbc6e69d0e46b12635b654b5d8a06f116ad3c5de7",
  "harness_source_files": [
   "configs/autoinit/c1_artifacts.json",
   "configs/autoinit/c1_artifacts_failed.json",
   "configs/experiments/phase_c1/authorization.json",
+  "configs/experiments/phase_c1/frozen_assets.json",
   "scripts/autoinit/audit_tool_scoring.py",
   "scripts/autoinit/issue_c1_authorization.py",
   "scripts/autoinit/renderer_parity_gate.py",
   "scripts/autoinit/score_c1_confirmation.py",
   "scripts/autoinit/score_recovery_search.py",
+  "scripts/autoinit/verify_frozen_assets.py",
   "scripts/evaluation/uncapped_eval.py",
   "scripts/experiments/calibration.py",
   "scripts/experiments/deployment.py",
@@ -130,18 +132,18 @@
   "src/aadistill/training/train.py"
  ],
  "per_launch_hard_usd": 15.1475,
- "provenance_commit": "871235c72470d0a030c40c15291b292de55a0e01",
+ "provenance_commit": "50fda0985beec2e29375bb33e498b16cf3d16cd6",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
  "allows_phase_a": false,
  "allows_beam_search": false,
  "authorizes_c1_isolation": true,
  "scope": "2 arms x 3 fresh seeds = 6 fixed 0.86M recovery probes on one frozen path, evaluated once each on c1_confirmation_v1. No search, no ranking, no successive halving, no tie-breaking, no arm elimination, and no formal Stage-2/3 recovery.",
  "grant": {
-  "path": "logs/runs/phase_c1/attempt10/governance/grant.json",
-  "sha256": "e5db2cbbbf1cc9b00d13efb17db617e4c467d2a248824f1b73b3bf06e1f25adf",
-  "granted_by": "maintainer decision, 2026-09-11, recorded after an independent engineering review of the increment 55bb324a..199711af found the prepared-grant / run-opening seam and the grant-provenance repair sound and reported no new material blocker. The same decision raised the project cumulative cap from $283.7600 to $320.0000 (+$36.2400) and approved a finite execution package: at most THREE formal C1 attempts including this one, each at the unchanged $15.1475 hard ceiling, plus a $6.0000 cumulative GPU engineering allowance. The maintainer explicitly set the autonomous-retry boundary at TRAINING STARTED rather than at a completed probe, and explicitly declined to make this package retroactive to any earlier attempt or authorization. Package terms: configs/experiments/phase_c1/authorization.json:execution_package; ledger entry and arithmetic: logs/BUDGET_LEDGER.md, 2026-09-11; rationale and rejected alternatives: logs/decisions.md, 2026-09-11.",
+  "path": "logs/runs/phase_c1/attempt11/governance/grant.json",
+  "sha256": "bb8b9a427f47aa5ba82d35fa703f30590d85acc4e93c1f047acbc6d5a8380f36",
+  "granted_by": "the SAME maintainer decision of 2026-09-11 that approved the execution package; this is that package's pre-authorized retry, not a new approval. Attempt 10 aborted during SETUP at the frozen-asset gate (SETUP_RC=91, $0.1177, 6.48 min, pod kabazpl889i5u5 confirmed gone three ways). All six retry conditions are satisfied and each was checked rather than assumed: no formal probe training started -- the driver never ran, setup stopped at marker 4 of 11; the failure is an ordinary infrastructure failure whose cause was reproduced at $0, repaired, and given a pre-provider counterpart gate plus regressions; frozen science, the input contracts and the decision rule are unchanged, and the relocated scorer's numerical equivalence is measured in logs/architecture_scoring_equivalence.json; the previous resource is confirmed no longer billing; 2 of 3 attempts and $51.3248 of the package remain, which funds a complete attempt plus teardown; and this attempt uses a new run identity and a fresh one-use chain. Package terms: configs/experiments/phase_c1/authorization.json:execution_package. Attempt 10's closeout: logs/runs/phase_c1/attempt10/closeout/outcome.json.",
   "covers": "exactly one C1 launch under the UNCHANGED frozen C1 protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh paired seeds = exactly six E1_KD_HEAVY_0860K recovery trainings; ALL SIX trainings complete before any confirmation evaluation begins; exactly one frozen confirmation evaluation per completed probe, each admitted against its own observed generation protocol before scoring; followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision rule. Nothing in the protocol, the arms, the seeds, the battery, the recovery recipe, the generation protocol, the scoring contract, the statistic or the behavioural vetoes may move.",
-  "cumulative_spend_at_approval_usd": 267.8998,
+  "cumulative_spend_at_approval_usd": 268.0175,
   "cumulative_cap_usd": 320.0,
   "does_not_authorize": [
    "a second launch under THIS grant",
@@ -179,10 +181,10 @@
   ]
  },
  "bound": {
-  "execution_preregistration": "8654b2456f8692b92b25171d1af012c2ba394258fc9306573cab86981148b8f3",
-  "execution_preregistration_head_commit": "52d6b68dec78b786b4c074b8213e04eccccc250c",
-  "c1_harness_digest": "464dacb3d8db9ced4ae4a3070e0bb10339ac05243438365f3eb9d6bfe8ea8776",
-  "c1_harness_n_files": 97,
+  "execution_preregistration": "063e26dc134e7d6699073dc0e36a1a255e67a9c74994e16c6881953a89edaa05",
+  "execution_preregistration_head_commit": "0e6e3adefc8d638667f3e881c9ec5b4090689318",
+  "c1_harness_digest": "c3c4e0ecfc78fbda64afb7ccbc6e69d0e46b12635b654b5d8a06f116ad3c5de7",
+  "c1_harness_n_files": 99,
   "isolation_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
   "c0_preregistration": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
   "battery": {
@@ -215,7 +217,7 @@
    "soft_stop_usd": 14.7841,
    "hard_ceiling_usd": 15.1475,
    "cumulative_cap_usd": 320.0,
-   "cumulative_spend_at_approval_usd": 267.8998
+   "cumulative_spend_at_approval_usd": 268.0175
   }
  },
  "one_use": "ONE grant, ONE issuance, ONE launch attempt, ONE provider resource. A failure is this attempt's result. Unchanged by the 2026-09-11 package: the package does not make an authorization reusable, it states how many separate one-use chains may be issued and under exactly what conditions.",
@@ -253,5 +255,5 @@
   "spending the $0.6577 reconciliation margin",
   "using the GPU engineering allowance for complete formal probes or for an endpoint measurement on the frozen confirmation battery"
  ],
- "authorization_sha256": "570d59e4e398a302219e3826775d3007d99a3e2290133189d732cd3d9e377ac4"
+ "authorization_sha256": "5f988f9a5a3923fb0cad11d123db55f2b8de3493c6bfefd951d6eefa8f032208"
 }
