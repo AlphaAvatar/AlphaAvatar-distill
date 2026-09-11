@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "0e6e3adefc8d638667f3e881c9ec5b4090689318",
+ "head_commit": "fe27dfdc488ae0ee3bd50f04ceb14f901bf8b1f6",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "c3c4e0ecfc78fbda64afb7ccbc6e69d0e46b12635b654b5d8a06f116ad3c5de7",
+  "digest": "ecd4b518b883f1f0eefbde591ec5ade3434f3294dc5ed21bc478d59708f06b48",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -91,8 +91,8 @@
    },
    {
     "path": "configs/experiments/phase_c1/authorization.json",
-    "sha256": "14c0bae2de84561288e2ca02f7c3ebd7b723bb6c98afd5e7608a1508daf39290",
-    "bytes": 7372
+    "sha256": "1e3fc023f76852fc5852efedef22efeaf892bfea4b6c1e247328de1c22ada279",
+    "bytes": 10485
    },
    {
     "path": "configs/experiments/phase_c1/frozen_assets.json",
@@ -221,8 +221,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "1dc2217963f951e87b7bd9e269c54c557e5ddce1a8e603798917507f63b257f9",
-    "bytes": 72928
+    "sha256": "f8126bce86568dfeabc28e453d8a646efe0921f202974b946c1f6eaa9a5caf3e",
+    "bytes": 75042
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -371,8 +371,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
-    "sha256": "d6416138055f866242ef2fc25281125f9f19815d9007810888bc0c1fa8026862",
-    "bytes": 51532
+    "sha256": "493e61482bca37a3d93cb119a141efb1d4751cb43eb571bdbe503c15b10e5496",
+    "bytes": 57143
    },
    {
     "path": "src/aadistill/infrastructure/watchdog.py",
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "063e26dc134e7d6699073dc0e36a1a255e67a9c74994e16c6881953a89edaa05"
+ "preregistration_sha256": "ceeec7e8d6a492397849bbf69e742187a401c619d9e2a21c290cb33a8ccb720c"
 }

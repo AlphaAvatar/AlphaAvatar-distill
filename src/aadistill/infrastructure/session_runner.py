@@ -429,6 +429,20 @@ class SessionRunner:
         journal = self.scr / "watchdog.jsonl"
         if self._watchdog_for and self._watchdog_for == self.pod_id:
             return journal
+        #: A NEW resource gets a new watchdog, and the previous one's evidence
+        #: is moved aside first. Both names were fixed, and `watchdog.out` is
+        #: opened `"w"`, so a redraw appended one pod's ticks to another's
+        #: journal and truncated its console outright — the backstop's own
+        #: record of the resource it was watching. `watchdog.jsonl` still names
+        #: the CURRENT resource, which is what the artifact spec collects; the
+        #: abandoned ones keep their pod id in the filename and are named per
+        #: draw in `ev["draws"]`.
+        if self._watchdog_for and self._watchdog_for != self.pod_id:
+            for suffix in ("jsonl", "out"):
+                live = self.scr / f"watchdog.{suffix}"
+                if live.exists():
+                    live.rename(self.scr / self._watchdog_journal_name(
+                        self._watchdog_for, suffix))
         cmd = [sys.executable,
                str(self.repo_root / self.spec.commands.watchdog),
                "--pod-id", self.pod_id,
@@ -668,9 +682,30 @@ class SessionRunner:
             if outcome in ("cold", "no_endpoint") and draw < self.a.host_draws:
                 self.say(f"{outcome.upper()} on draw {draw} — abandoning "
                          f"{self.pod_id} and redrawing")
-                subprocess.run([self.cli, "remove", "pod", self.pod_id],
-                               capture_output=True, timeout=180)
+                #: RELEASE IS CONFIRMED BEFORE THE NEXT RESOURCE EXISTS.
+                #:
+                #: This used to fire `remove pod` without reading its result,
+                #: set `self.pod_id = ""` and continue straight into `create()`.
+                #: Three different things were being treated as proof that a
+                #: resource had stopped billing: a subprocess returning, a local
+                #: variable being cleared, and the loop moving on. None of them
+                #: is. A `remove` that silently failed would have left the first
+                #: pod billing while the second was created — two billing
+                #: resources at once, which no session here is permitted to
+                #: have, and the second watchdog would not have been watching
+                #: the first pod.
+                released = self.release_and_confirm(self.pod_id, outcome)
+                self.record_draw(draw, outcome, released)
+                if not released["confirmed_not_billing"]:
+                    self.say(
+                        f"ABORT: cannot confirm {self.pod_id} stopped billing "
+                        "— refusing to create a second resource while the "
+                        "first may still be running. Reconcile it by hand.")
+                    self.ev["abort_reason"] = "unconfirmed_release"
+                    self.save()
+                    return False
                 self.pod_id = ""
+                self.save()
                 continue
             self.say(f"ABORT after draw {draw}: {outcome}")
             if self.pod_id:
@@ -936,22 +971,89 @@ class SessionRunner:
         self.say(f"EMERGENCY: only relayed snapshots survive — {events}")
         self.save()
 
-    def teardown_now(self, why: str) -> None:
-        self.say(f"deleting pod ({why})")
-        subprocess.run([self.cli, "remove", "pod", self.pod_id],
-                       capture_output=True, timeout=180)
+    @staticmethod
+    def _watchdog_journal_name(pod_id: str | None,
+                               suffix: str = "jsonl") -> str:
+        """Where an ABANDONED resource's watchdog evidence is kept, by pod id.
+
+        The live resource always writes the plain `watchdog.jsonl` the artifact
+        spec collects; this is the name it is rotated to when a new draw takes
+        over, so a cost on an invoice can be traced to the backstop that watched
+        it.
+
+        Deliberately not conditional on `self.pod_id`. It was, and the condition
+        was read at two different moments: `record_draw` runs while the pod
+        being abandoned is still `self.pod_id`, so it recorded `watchdog.jsonl`,
+        while rotation — running later, after the new id was assigned — moved
+        the file to `watchdog_<pod>.jsonl`. The record pointed at a file that no
+        longer existed under that name.
+        """
+        return f"watchdog_{pod_id}.{suffix}"
+
+    def release_and_confirm(self, pod_id: str, why: str) -> dict:
+        """Delete a resource and WAIT for the provider to say it stopped billing.
+
+        The only evidence of release this project accepts. A `remove` returning
+        zero, a `runtime` of `null`, a query that failed, and a locally cleared
+        `pod_id` are each a statement about *this process*, not about whether a
+        resource is still costing money. Only the provider reporting the pod not
+        billing is.
+
+        Returns the record rather than storing it, because two callers need it
+        for different reasons: an abandoned draw must prove release before the
+        next resource may exist, and a final teardown must ledger it.
+        """
+        rm = subprocess.run([self.cli, "remove", "pod", pod_id],
+                            capture_output=True, text=True, timeout=180)
         st = None
         if self.spec.teardown.require_provider_confirmation:
             for _ in range(18):
                 time.sleep(10)
-                st = self.provider.get(self.pod_id)
+                st = self.provider.get(pod_id)
                 if not st.billing:
                     break
-        self.ev["final_pod_state"] = {
+        return {
+            "pod_id": pod_id,
+            "why": why,
+            "remove_returncode": rm.returncode,
             "exists": st.exists if st else None,
             "desired_status": st.desired_status if st else None,
-            "billing": st.billing if st else None}
-        self.ev["provider_confirms_gone"] = bool(st and not st.billing)
+            "billing": st.billing if st else None,
+            "confirmed_not_billing": bool(st and not st.billing),
+            "confirmation_required": self.spec.teardown.require_provider_confirmation,
+            "rule": ("a zero returncode, a null runtime, a failed query or a "
+                     "cleared local pod_id are NOT evidence of release; only "
+                     "the provider reporting this resource not billing is"),
+        }
+
+    def record_draw(self, draw: int, outcome: str, released: dict) -> None:
+        """One entry per provider resource, appended and never overwritten.
+
+        `ev["pod_id"]`, `actual_price_per_hour` and `final_pod_state` describe
+        the CURRENT resource and are rewritten by the next `create()`. With one
+        resource per session that was the whole story; with redraws it stops
+        being one, and an abandoned pod that left no record is a cost nobody can
+        reconcile.
+        """
+        self.ev.setdefault("draws", []).append({
+            "draw": draw,
+            "pod_id": released.get("pod_id"),
+            "outcome": outcome,
+            "price_per_hour": self.price,
+            "elapsed_minutes_at_release": round(self.elapsed(), 2),
+            "cumulative_usd_at_release": round(self.usd(), 4),
+            "watchdog_journal": self._watchdog_journal_name(released.get("pod_id")),
+            "release": released,
+        })
+
+    def teardown_now(self, why: str) -> None:
+        self.say(f"deleting pod ({why})")
+        released = self.release_and_confirm(self.pod_id, why)
+        self.ev["final_pod_state"] = {
+            "exists": released["exists"],
+            "desired_status": released["desired_status"],
+            "billing": released["billing"]}
+        self.ev["provider_confirms_gone"] = released["confirmed_not_billing"]
         self.ev["cost"] = {"price_per_hour": self.price,
                            "elapsed_minutes": round(self.elapsed(), 2),
                            "actual_usd": round(self.usd(), 4),

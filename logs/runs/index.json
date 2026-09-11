@@ -5,7 +5,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 2,
-  "runs_unrecorded": 3,
+  "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": 5,
@@ -670,6 +670,14 @@
    "n_files": 64,
    "digest": "1be716ca99d150e40b76258c272d3aab71fd16212e6dc4d4dbfa77c7a047501c",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt12",
+   "root": "logs/runs/phase_c1/attempt12",
+   "n_files": 1,
+   "digest": "e68675b58601293ca6564f4cad96a8d321aaa04c367df3dae903c28608d7bca4",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

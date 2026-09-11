@@ -350,29 +350,54 @@ class _RunIdSetsOut(argparse.Action):
 #: returns for review — the simpler of the two options the review allowed, and
 #: it cannot create a resource or wait for stock.
 #:
-#: Enforced by TYPE, not by default: a default only helps if every future launch
-#: command remembers to pass two flags. `SessionRunner` is untouched, so Phase A,
-#: Phase B, the continuations and the preflight keep multi-draw acquisition.
-C1_PROVIDER_RESOURCES = 1
+#: SUPERSEDED 2026-09-11 by a maintainer decision, prospectively. The paragraph
+#: above is why the limits existed and what they protected against; it is kept
+#: because attempts 1-11 ran under it. What changed is only the FIRST of the two
+#: rules it enforced.
+#:
+#: Attempt 11 showed what coupling them costs. Its pod was created, billed and
+#: never became reachable -- a provider cold host, which every earlier session in
+#: this project handled by deleting the draw and taking another, and which this
+#: launcher could only handle by consuming an entire formal attempt. Under
+#: `host_draws = 1` a condition every other session treats as a retryable DRAW
+#: ends the ATTEMPT.
+#:
+#: So draws are permitted again, up to a batch of three. What is NOT relaxed is
+#: the property the old rule was really protecting: **at most one billing
+#: resource at any instant**. That is no longer enforced by making the redraw
+#: branch unreachable -- it is enforced inside that branch, by
+#: `SessionRunner.release_and_confirm`, which refuses to create the next
+#: resource until the provider itself reports the abandoned one not billing. A
+#: rule that holds by construction is better than a rule that holds because a
+#: code path is dead, and the dead path was hiding a real defect: it cleared
+#: `pod_id` locally and continued without ever asking the provider.
+#:
+#: `create_attempts` stays at 1. Draws replace an unusable HOST; create-attempts
+#: sleep 300 s and ask the same market again, which is stock chasing, and that
+#: is still not authorized. The per-session ceiling is unchanged and covers ALL
+#: draws together: `start_epoch` is set once, so `elapsed()` and `usd()` span the
+#: session and three draws do not buy three ceilings.
+C1_CREATE_ATTEMPTS = 1
+C1_MAX_HOST_DRAWS = 3
 
 
-def _exactly_one(flag: str):
-    """An argparse type that accepts only 1, and says why."""
+def _bounded(flag: str, lo: int, hi: int):
+    """An argparse type that accepts a range, and says why the range is that."""
     def parse(raw: str) -> int:
         try:
             value = int(raw)
         except ValueError:
             raise argparse.ArgumentTypeError(f"{flag} must be an integer") from None
-        if value != C1_PROVIDER_RESOURCES:
+        if not lo <= value <= hi:
             raise argparse.ArgumentTypeError(
-                f"{flag}={value} would permit more than one provider resource. "
-                "The C1 grant permits exactly one, with no replacement pod and "
-                f"no stock chasing, so {flag} is fixed at {C1_PROVIDER_RESOURCES}.")
+                f"{flag}={value} is outside {lo}..{hi}. Draws replace an "
+                "unreachable host inside ONE session and share its ceiling; "
+                "they are not extra attempts and not a way to chase stock.")
         return value
     return parse
 
 
-def require_one_provider_resource(args) -> None:
+def require_bounded_acquisition(args) -> None:
     """The same rule where a hand-built namespace cannot slip past the parser.
 
     Device-canary attempt 1 died at `$0.0603` on an attribute a real parser
@@ -380,14 +405,18 @@ def require_one_provider_resource(args) -> None:
     not the whole guard. This runs during spec construction, before
     `run_session` and therefore before anything can be created.
     """
-    for name, flag in (("create_attempts", "--create-attempts"),
-                       ("host_draws", "--host-draws")):
-        value = getattr(args, name, None)
-        if value != C1_PROVIDER_RESOURCES:
-            raise SystemExit(
-                f"refusing to build the C1 session: {name}={value!r}. The grant "
-                "permits exactly one provider resource and no replacement pod; "
-                f"{flag} is fixed at {C1_PROVIDER_RESOURCES}.")
+    attempts = getattr(args, "create_attempts", None)
+    if attempts != C1_CREATE_ATTEMPTS:
+        raise SystemExit(
+            f"refusing to build the C1 session: create_attempts={attempts!r}. "
+            "A create-attempt sleeps and asks the same market again, which is "
+            f"stock chasing; --create-attempts is fixed at {C1_CREATE_ATTEMPTS}.")
+    draws = getattr(args, "host_draws", None)
+    if not isinstance(draws, int) or not 1 <= draws <= C1_MAX_HOST_DRAWS:
+        raise SystemExit(
+            f"refusing to build the C1 session: host_draws={draws!r}. A draw "
+            "replaces a host that never became usable, inside one session and "
+            f"inside its one ceiling; the batch is capped at {C1_MAX_HOST_DRAWS}.")
 
 #: Dev-box-only assets the launcher scp's. The battery is 3.26 MiB and the
 #: reasoning-heavy mixture 0.76 MiB, so both fit the observed 0.44-0.72 MB/s
@@ -1055,7 +1084,7 @@ def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
 def spec(args) -> SessionSpec:
     #: Before anything can be created. A namespace that would permit a second
     #: provider resource never becomes a SessionSpec.
-    require_one_provider_resource(args)
+    require_bounded_acquisition(args)
     return SessionSpec(
         session_id="autoinit-c1",
         schema="aadistill.autoinit.c1_session/v1",
@@ -1240,11 +1269,16 @@ def build_parser():
     ap.add_argument("--tests-max-s", type=int, default=2700)
     ap.add_argument("--startup-limit-min", type=float, default=15.0)
     #: ONE. Not a default a launch command has to remember to pass — the type
-    #: itself refuses anything else. See `C1_PROVIDER_RESOURCES`.
-    ap.add_argument("--create-attempts", type=_exactly_one("--create-attempts"),
-                    default=C1_PROVIDER_RESOURCES)
-    ap.add_argument("--host-draws", type=_exactly_one("--host-draws"),
-                    default=C1_PROVIDER_RESOURCES)
+    #: itself refuses anything else. See `C1_CREATE_ATTEMPTS` / `C1_MAX_HOST_DRAWS`.
+    ap.add_argument("--create-attempts",
+                    type=_bounded("--create-attempts", 1, C1_CREATE_ATTEMPTS),
+                    default=C1_CREATE_ATTEMPTS)
+    #: Defaults to the batch cap. A cold host is common enough on this provider
+    #: that defaulting to 1 is what made attempt 11 cost an attempt rather than
+    #: a draw; all draws share this session's single ceiling.
+    ap.add_argument("--host-draws",
+                    type=_bounded("--host-draws", 1, C1_MAX_HOST_DRAWS),
+                    default=C1_MAX_HOST_DRAWS)
     #: Unreachable with one attempt (`if attempt < create_attempts` is never
     #: true), and kept only because the runner argument contract requires the
     #: field. C1 never sleeps against changing stock.
