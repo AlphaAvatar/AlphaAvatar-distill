@@ -1,8 +1,11 @@
-**Updated:** 2026-09-11 · branch `prep/c1-run-identity` · `main` = `daf64772` ·
+**Updated:** 2026-09-11 · **review baseline** `55bb324a` — the tree this
+revision was written against, not a claim about the current tip; run
+`git log --oneline -1` for that. Branch names and tip SHAs go stale on the next
+commit, so they are not restated here. ·
 **PHASE B CLOSED · PHASE C0 FROZEN · ATTEMPT 9 RAN — THE FROZEN PATH
 REPRODUCES; STAGE F FAILED · MILESTONE-A MERGED · TWO ENGINEERING BLOCKERS
 FOUND AND REPAIRED 2026-09-11 — THE 2026-09-10 "NO ENGINEERING BLOCKER"
-READING WAS WRONG**
+READING WAS WRONG · THE GOVERNANCE-INPUT SEAM IS CLOSED 2026-09-11**
 
 # Current state
 
@@ -24,10 +27,161 @@ how the snapshot came to disagree with itself.
 | CUDA interpretation | one append-only amendment corrects **two explanatory claims** and nothing else: subrun 2's failure class is `harness_acceptance_criterion`, not `operator`, and the PASS observed *operator on `cuda:0`, child host-resident per the builder contract* — not children left on CUDA. Outcomes, costs, devices and provider identities are bound by hash and unaltered: [`interpretation_amendment_1.json`](validations/cuda-stage-f/v1/interpretation_amendment_1.json) |
 | architecture migration | a **current engineering activity**, not a C1 result and no evidence about ATTENTION. Record: [`migrations/initialization-core/v1/`](migrations/initialization-core/v1/) |
 | engineering campaign | **CLOSED**. Authorized, executed, reconciled and torn down: [`validations/cuda-stage-f/v1/`](validations/cuda-stage-f/v1/). No GPU work is owed |
-| Milestone A | **MERGED 2026-09-10**, fast-forward, `main` = `daf64772`. The migration branch is preserved |
+| Milestone A | **MERGED 2026-09-10**, fast-forward to `daf64772`. The migration branch is preserved |
+| governance input | **CLOSED 2026-09-11.** A grant may now live at this run's `governance/grant.json` — where it has to be, because it is committed *before* the launch-bound sweep — without `open_run` refusing the run as a dead launcher's residue. `grant_provenance_gate` is the thirteenth pre-provider gate |
 | run identity | **IN PRODUCTION.** The launcher requires `--run-id` and writes into `runs/phase_c1/<run_id>/`; there is no `--out` and no flat session record. Attempts 1–9 stay exactly where they are, registered by path |
 | owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
 | **corrected** | the 2026-09-10 claim that **no engineering blocker remained was WRONG**. Two were found on review and repaired on 2026-09-11: an undefined `REPO` in the shared runner that would have raised `NameError` *after* a pod was created and setup had completed, and a scratch root with no owner, which let one attempt collect another's evidence. Both came in with `main`; neither was introduced by the run-identity work. See the 2026-09-11 section |
+
+## PROPOSED execution package — NOT APPROVED, AUTHORIZES NOTHING
+
+The maintainer has stated that the budget will rise to support a *bounded*
+number of retries, and asked for the amounts. **This is the proposal. It is not
+a grant, not an authorization, and not permission to create anything.** Nothing
+may be spent against it until a maintainer records the decision; the live cap
+remains `$283.7600` and the live spend `$267.8998` until then.
+
+| | proposed |
+| --- | --- |
+| formal C1 attempts, **including the first** | **3** |
+| per-attempt hard ceiling | **`$15.1475`** — unchanged, derived from [`phase_c1_pricing.json`](phase_c1_pricing.json) at secure L40S `$1.09/h`. It already contains a 10% contingency and a 20-minute artifact-recovery reserve; nothing re-buys them |
+| formal sub-total | `3 × 15.1475` = **`$45.4425`** |
+| GPU **engineering** allowance, cumulative across every subrun | **`$6.0000`** |
+| package total | **`$51.4425`** |
+| spend to date | `$267.8998` |
+| new cumulative cap | **`$320.0000`** (`267.8998 + 51.4425 = 319.3423`, plus `$0.6577` of reconciliation margin — the ledger has already needed a `$0.0073` correction once, and a cap with no margin turns an arithmetic fix into a breach) |
+
+**The formal budget funds three COMPLETE attempts, not three cheap failures.**
+All nine paid C1 attempts so far aborted early and cost `$0.0786`, `$0.1013`,
+`$0.3482`, `$0.6986`, `$0.3150`, `$0.3665`, `$0.4231`, `$0.6248` and `$1.0440` —
+`$4.0001` for nine. Budgeting the next three at that rate would be budgeting for
+the failure mode we have already fixed. Each of the three is funded at the full
+ceiling, so a run that reaches the 6 × 61.55-minute training block and fails
+there — the expensive failure E8b actually hit twice, at step 110 and near step
+900 — does not consume the package.
+
+**Why `$6.0000` of engineering.** The closed CUDA campaign cost `$0.0400` for
+three subruns on an RTX 2000 Ada at `$0.24/h`. That is the cheap case and not
+the planning case: setup time on this project has varied 30× for the same script
+and image, and a single cold L40S setup at 150 minutes is `$2.72` before any
+work happens. `$6.0000` funds roughly two worst-case L40S engineering sessions
+plus many minutes-long cheap-card device tests, and is bounded well below one
+formal attempt.
+
+**Resource bounds.** At most **one active or potentially billing resource at a
+time**, across engineering and formal work alike, and one create call per
+acquisition invocation. Formal attempts: secure L40S priced at `$1.09/h`, with
+`--max-price` derived from the pricing record — a live quote above it refuses at
+`$0` before any resource exists, and a different GPU class is a **repricing**
+that this package does not authorize. Engineering: the cheapest card that can
+actually observe the property, rate `≤ $1.10/h`, hard-terminate 120 min per
+subrun, campaign record updated before the next paid action. Before every paid
+action: settled + outstanding + active must leave a complete attempt plus its
+teardown reserve inside the package ceiling.
+
+**Retryable inside the package, without returning to the maintainer** — every
+one of these is an engineering failure with **no scientific output**:
+
+* a pre-provider gate refusal (`$0`; not an attempt at all);
+* provider acquisition failure — no capacity, no endpoint, quote above
+  `--max-price`, pod deleted before setup completes;
+* any setup failure before `SETUP_DONE`, including the CPU test gate;
+* a driver failure in stages **B–F** — teacher fetch, operator registration,
+  replay execution, arm materialization — i.e. **before the first recovery
+  training step**. Attempt 9 is exactly this class;
+* launcher, watchdog, relay or collection failure with **zero probes trained**.
+
+Each retry is a new subrun with its own `run_id`, its own grant, its own
+authorization and its own bundle. A rerun never resets the cumulative total, and
+a replacement resource does not get a fresh allocation.
+
+**Must stop and return to the maintainer:**
+
+* **a replay mismatch at stage D or E.** The frozen rule is: preserve the
+  evidence and stop. It is a *result*. A larger budget does not license a
+  re-roll, and this package does not grant one;
+* **any failure at or after stage G with one or more probes trained.** Partial
+  endpoint exposure has occurred, the seeds are paired, and re-running with
+  knowledge of a partial result is choosing the continuation from the outcome.
+  Whether such a run can be discarded and restarted is a maintainer decision;
+* **a completed run with a verdict — GO, NO-GO or INCONCLUSIVE.** All three are
+  legitimate frozen outcomes. `INCONCLUSIVE` is not an engineering failure and
+  must never be re-run for a better answer; at Δ = 0 the design returns it 26%
+  of the time and at Δ = SESOI 45% of the time, which is a property of the
+  experiment, not a fault to spend past;
+* the package ceiling or the three-attempt count is reached; the remaining
+  balance cannot fund a complete attempt plus teardown; a resource's billing
+  state is unknown; or any change to frozen science, the arms, the seeds, the
+  battery, the recipe, the SESOI, the statistic or the behavioural vetoes.
+
+**`NO DECISION` is recorded separately from `INCONCLUSIVE`, and is not bounded
+by stage G.** How far a run got, whether its evidence was collected, and whether
+teardown was confirmed are three facts recorded independently of whether a valid
+scientific conclusion exists. An engineering failure is never written up as a
+statistical `INCONCLUSIVE`.
+
+> **THE GOVERNANCE INPUT HAD NOWHERE LEGAL TO GO, 2026-09-11 — `$0.0000`, no
+> pod, no GPU, no provider resource, no grant, no authorization.**
+>
+> A grant is an **input**, and it is the one governance artifact that must exist
+> *before* the launch: the launch-bound sweep is taken on the final clean
+> pre-authorization tree, and the authorization is issued from the grant. So it
+> is committed first, and the run directory is where it belongs.
+>
+> `open_run` refused exactly that. Its occupancy rule — right for what it was
+> written for — treats any file in an unrecorded run as the residue of a
+> launcher that died before writing its manifest, which is precisely when those
+> files are the only evidence left. It could not tell that case from a declared,
+> expected input. Nine attempts had avoided the question by putting the grant in
+> `logs/autoinit_c1_attempt<N>_grant.json`: nine flat files in the log root, each
+> a per-attempt fact with no run to belong to.
+>
+> **What changed, and how little.** `open_run` takes `prepared`: role names
+> written before the run opens. They are exempt from the occupancy rule **and
+> from nothing else** — a recorded run is still refused, an undeclared file is
+> still refused, a half-written evidence tree beside the grant is still refused
+> and still named in the refusal. A prepared name that is not a declared role is
+> itself an error, because an exemption for a path the run records no owner for
+> is the ownership problem again under another name. No prepared/running state
+> machine, no second run manager, no new directory: `grant` is one more role, in
+> the area it was always going to be in, and `record_run` gives it an owner.
+>
+> **And the grant now has to be the right one.** The authorization has always
+> recorded the grant it was issued from — path and content hash — and nothing
+> ever looked at that reference again. `grant_provenance_gate` is the thirteenth
+> pre-provider gate: the reference must resolve to **this run's**
+> `governance/grant.json`, the file must exist, and it must still hash to the
+> recorded value. An edited grant, a deleted one and *another attempt's* grant
+> were previously indistinguishable from the right one, and there are nine
+> structurally valid grants sitting in the log root to pick up by mistake.
+> Because there is nowhere else a grant can now be and still pass, the flat file
+> is unnecessary rather than merely discouraged.
+>
+> **Verified at `$0`, on CPU, which is the right environment for it.** This is
+> file layout and lifecycle: no CUDA, no device, no model. Eight mutations were
+> applied to the real implementation and each was caught by the case written for
+> it — ignore `prepared`; exempt everything; drop the unknown-name check; stop
+> declaring the grant prepared; and four separate defeats of the gate. The
+> convention layer is covered against three disjoint stage vocabularies
+> (Stage-0 collection, Stage-3 recovery, Stage-4 rollout) plus a
+> whole-directory role, so the mechanism is not C1-shaped.
+>
+> **Frozen science is unmoved, and the diff says so rather than asserting it.**
+> The C1 harness moves `f2789673` → `1d9c71ab`: 97 files before and after, none
+> added, none removed, exactly two edited — `scripts/experiments/run_layout.py`
+> and `scripts/pod/autoinit_c1_launch.py`. `executable_source` is **unchanged**
+> at `ca1f1df5`. Of **395** non-harness preregistration leaf fields, 15 move:
+> the document's own self-hash, `head_commit`, the gate count `12 → 13`, and the
+> twelve entries of the derived gate-order list shifting by one position.
+> **Scientific fields moved: 0** — seeds, both replay digests, the plan hash,
+> both path hashes, the battery, the teacher, the scoring contract and the
+> decision rule are identical. `src/aadistill` was not touched at all: the
+> exemption belongs to the convention layer that names `logs/runs`, and the core
+> still names no directory, no role and no experiment.
+>
+> **The readiness record is superseded by this change, as designed.** It binds
+> the executable, the harness digest moved, so `pod_environment_gate` refuses
+> until a new sweep is recorded. That is the gate working.
 
 > **TWO ENGINEERING BLOCKERS, FOUND ON REVIEW AND REPAIRED, 2026-09-11 —
 > `$0.0000`, no pod, no GPU, no provider resource, no grant, no authorization.**
@@ -910,9 +1064,16 @@ how the snapshot came to disagree with itself.
 > required to raise `SystemExit(2)`. Restoring the flag in production makes
 > three of the five cases fail, so this would have caught attempt 7 at `$0`.
 >
-> **No thirteenth gate.** The count stays at 12: gate 12 binds the complete
+> **No gate for the CLI seam.** `pod_environment_gate` binds the complete
 > launch-bound sweep to the final executable tree, so a passing sweep that
 > contains this module IS the `$0` pre-provider evidence for the seam.
+>
+> *(Written 2026-09-06 as "no thirteenth gate — the count stays at 12". The
+> claim about the seam is unchanged and still true; the count is not. A
+> thirteenth gate was added on 2026-09-11 for an unrelated reason —
+> `grant_provenance_gate` — and the test enforcing this paragraph asserted the
+> total rather than its actual subject, so it went red while nothing it was
+> about had changed. It now asserts that no gate claims the driver CLI seam.)*
 >
 > **Attempt 7 itself is unchanged:** CONFIRMED launcher→driver CLI mismatch,
 > replay NOT REACHED, training 0, evaluation 0, score 0, decision 0.
@@ -1483,8 +1644,9 @@ Design and implementation proceeded at `$0`; **execution did not**. What exists:
 | execution preregistration | [`phase_c1_execution_preregistration.json`](phase_c1_execution_preregistration.json) · rebound after the acquisition repair; the live values are in the file and in [`current_state.json`](current_state.json) · harness over 73 files · executable source `ead856cf8ef9…` · every revision so far moved only executable identity; **no scientific field has ever moved**, and each 2026-09-07 rewrite was diffed field by field to show it |
 | price bound | [`phase_c1_pricing.json`](phase_c1_pricing.json) · REPRICED to secure L40S **$1.09/h** · floor **$13.4401** · soft stop **$14.7841** · **ceiling $15.1475** |
 | evidence declaration | [`configs/autoinit/c1_artifacts.json`](../configs/autoinit/c1_artifacts.json) + [`_failed`](../configs/autoinit/c1_artifacts_failed.json) — inside the measured harness, so editing what survives teardown moves the digest a grant binds |
-| standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **12** pre-provider gates · no Phase-A driver or launcher in the closure |
-| run identity | `--run-id` is **required** and there is no `--out`. The run is opened before the `SessionSpec` is built, so a colliding id refuses at `$0`; the session record, the one-use governance snapshots, the collected small evidence and `manifest.json` all live under `runs/phase_c1/<run_id>/`. Convention: `scripts/experiments/run_layout.py`; mechanism: `runtime/run_layout.py` |
+| standalone session | `scripts/pod/autoinit_c1_launch.py` + `autoinit_c1_driver.py` · `SESSION_KIND=c1` · `C1Authorization` · **13** pre-provider gates since 2026-09-11 · no Phase-A driver or launcher in the closure |
+| run identity | `--run-id` is **required** and there is no `--out`. The run is opened before the `SessionSpec` is built, so a colliding id refuses at `$0`; the prepared grant, the session record, the one-use governance snapshots, the collected small evidence and `manifest.json` all live under `runs/phase_c1/<run_id>/`. Convention: `scripts/experiments/run_layout.py`; mechanism: `runtime/run_layout.py` |
+| grant location | `runs/phase_c1/<run_id>/governance/grant.json`, committed **before** the launch-bound sweep. Not `logs/autoinit_c1_attempt<N>_grant.json`: that shape is what attempts 1–9 used and it is not used again |
 | Stage-H admission | no probe is scored unless the protocol observed from **its own** raw summaries is comparable to the attested one; on drift the session stops `C1_INCOMPLETE` before scoring, and no later probe is evaluated |
 | C1 scoring binding | `c1_confirmation_scoring@v1` · `77507935f21f83eb…` over 11 files · parent `recovery_search_scoring@v2` `808080a7…`, unchanged · equivalence **IDENTICAL / 15 cases / 0 differences** |
 

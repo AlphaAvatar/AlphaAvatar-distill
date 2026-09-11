@@ -154,11 +154,22 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
         if not files:
             continue
         rel = run_dir.relative_to(repo_root).as_posix()
+        #: A run whose only files are governance inputs has not executed — it is
+        #: PREPARED. A maintainer grant is committed into the run before the
+        #: launch-bound sweep, so this state is now reachable on purpose, and
+        #: reporting it as "the launcher did not reach its closeout" would be a
+        #: false statement about a session that never started. Derived from the
+        #: convention's own area vocabulary, so no role name is interpreted here.
+        areas = {Path(p).relative_to(run_dir).parts[0] for p in files
+                 if len(Path(p).relative_to(run_dir).parts) > 1}
+        prepared_only = areas == {"governance"}
         out.append({
             "experiment_id": run_dir.parent.name, "run_id": run_dir.name,
             "root": rel, "n_files": len(files),
             "digest": digest_of(run_dir)["digest"],
-            "why": ("no valid run manifest; predates the run-manifest convention "
+            "why": ("no run manifest, and only governance inputs are present: "
+                    "PREPARED but not executed" if prepared_only else
+                    "no valid run manifest; predates the run-manifest convention "
                     "or the launcher did not reach its closeout"),
         })
     return out

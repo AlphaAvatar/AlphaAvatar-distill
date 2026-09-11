@@ -321,9 +321,20 @@ def test_the_session_declares_that_it_neither_searches_nor_eliminates(spec):
 #: `session_commit_and_lineage` binds a real issued commit; `bundle_staged_gate`
 #: needs a bundle for that commit uploaded to the relay; `pod_environment_gate`
 #: consumes the sweep's own output and so cannot be a precondition of the suite
-#: that produces it.
+#: that produces it; `grant_provenance_gate` requires an issued grant to exist
+#: at `logs/runs/phase_c1/<run_id>/governance/grant.json` in the REAL repository,
+#: and a scratch candidate has no such run — writing one into the repository to
+#: satisfy a unit test would be a test creating a run directory.
+#:
+#: Every entry here owes direct coverage elsewhere, and each has it:
+#: `session_commit_and_lineage` in `test_run_identity_is_wired`,
+#: `bundle_staged_gate` in `test_c1_bundle_transport`, `pod_environment_gate` in
+#: `test_c1_readiness_gates`, and `grant_provenance_gate` below, driven against
+#: a temporary root with the same `monkeypatch` pattern the preregistration gate
+#: uses — pass, foreign run, absent file, edited grant and missing reference.
 ALWAYS_STRUCTURALLY_UNAVAILABLE = (
-    "session_commit_and_lineage", "bundle_staged_gate", "pod_environment_gate")
+    "session_commit_and_lineage", "bundle_staged_gate", "pod_environment_gate",
+    "grant_provenance_gate")
 
 #: Excluded only when their inputs are genuinely absent. NEVER unconditional:
 #: attempt 2 died at ROPE_OK and `rope_input_gate` is what closed that gap.
@@ -408,7 +419,15 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(
     # a pod, and died on a CPU test suite nobody had run under a pod's HOME.
     assert "renderer_parity_gate" in names, names
     assert "pod_environment_gate" in names, names
-    assert len(spec.precheck) == 12, names
+    # Added 2026-09-11: the grant an authorization was issued from must still
+    # exist, be unedited, and belong to THIS run. Nine structurally valid grants
+    # from earlier attempts are sitting in the log root.
+    assert "grant_provenance_gate" in names, names
+    # Compared, not restated. The single pinned literal is in
+    # test_c1_readiness_gates.test_the_prereg_gate_count_and_order_equal_the_live_session.
+    prereg = json.loads(
+        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+    assert len(spec.precheck) == prereg["transport"]["n_pre_provider_gates"], names
 
 
 # --- the preregistration must verify its own declared hash ------------------
@@ -627,3 +646,117 @@ def test_the_hf_predicate_does_not_excuse_the_gates_on_a_real_dev_box(monkeypatc
     monkeypatch.delenv("HF_HOME", raising=False)
     monkeypatch.setenv("AAD_SYNTHETIC_HF_TOKEN", "1")
     assert hf_inputs_are_absent()
+
+
+# --- the grant provenance gate ----------------------------------------------
+#
+# The decision a session runs under is an INPUT: authored and committed while
+# the tree is still clean, because the launch-bound sweep and the authorization
+# issued from it both need it to already be there. Until 2026-09-11 the
+# authorization recorded which grant it came from and nothing ever looked at
+# that reference again — so an edited grant, a deleted one, and *another
+# attempt's* grant were all indistinguishable from the right one.
+#
+# Driven against a temporary root, the same way the preregistration gate is.
+
+def _grant_root(tmp_path, *, run_id="attempt10", grant_run_id=None,
+                grant_body=None, write_grant=True, reference=True):
+    """A repo-shaped root holding an authorization and (usually) its grant."""
+    import autoinit_c1_launch as L
+    from aadistill.infrastructure.manifest import sha256_json
+
+    root = tmp_path / "root"
+    body = {"granted_by": "maintainer, review 2026-09-11",
+            "covers": "one launch"} if grant_body is None else grant_body
+    rel = (f"{L.RUNS_ROOT}/{L.RUN_EXPERIMENT_ID}/{grant_run_id or run_id}/"
+           f"{L.C1_RUN_ROLES['grant']}")
+    if write_grant:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).write_text(json.dumps(body, indent=1) + "\n")
+    auth = {"authorization_id": "autoinit.v1.phase_c1"}
+    if reference:
+        auth["grant"] = {"path": rel, "sha256": sha256_json(body)}
+    (root / L.AUTH_PATH).parent.mkdir(parents=True, exist_ok=True)
+    (root / L.AUTH_PATH).write_text(json.dumps(auth, indent=1) + "\n")
+    return root, rel
+
+
+def _grant_gate(tmp_path, monkeypatch, *, run_id="attempt10", **over):
+    import types
+    import autoinit_c1_launch as L
+
+    root, rel = _grant_root(tmp_path, run_id=run_id, **over)
+    monkeypatch.setattr(L, "REPO_ROOT", root)
+    ctx = types.SimpleNamespace(args=types.SimpleNamespace(run_id=run_id),
+                                evidence={})
+    return L.grant_provenance_gate(ctx), ctx, rel
+
+
+def test_a_grant_prepared_in_this_run_passes_the_gate(tmp_path, monkeypatch):
+    (ok, why), ctx, rel = _grant_gate(tmp_path, monkeypatch)
+    assert ok, why
+    assert ctx.evidence["grant_provenance"]["path"] == rel
+    assert ctx.evidence["grant_provenance"]["run_id"] == "attempt10"
+
+
+def test_another_attempts_grant_is_refused(tmp_path, monkeypatch):
+    """The failure mode with nine real instances sitting in the log root."""
+    (ok, why), _, _ = _grant_gate(tmp_path, monkeypatch, grant_run_id="attempt6")
+    assert not ok
+    assert "attempt6" in why and "different session" in why
+
+
+def test_a_grant_the_authorization_names_but_does_not_exist_is_refused(
+        tmp_path, monkeypatch):
+    (ok, why), _, _ = _grant_gate(tmp_path, monkeypatch, write_grant=False)
+    assert not ok and "does not exist" in why
+
+
+def test_a_grant_edited_after_issuance_is_refused(tmp_path, monkeypatch):
+    """The authorization's self-hash covers the REFERENCE, not the file."""
+    import autoinit_c1_launch as L
+
+    root, rel = _grant_root(tmp_path)
+    doc = json.loads((root / rel).read_text())
+    doc["covers"] = "two launches"
+    (root / rel).write_text(json.dumps(doc, indent=1) + "\n")
+    monkeypatch.setattr(L, "REPO_ROOT", root)
+    import types
+    ok, why = L.grant_provenance_gate(
+        types.SimpleNamespace(args=types.SimpleNamespace(run_id="attempt10"),
+                              evidence={}))
+    assert not ok and "edited after it was used" in why
+
+
+def test_an_authorization_that_names_no_grant_is_refused(tmp_path, monkeypatch):
+    (ok, why), _, _ = _grant_gate(tmp_path, monkeypatch, reference=False)
+    assert not ok and "records no grant" in why
+
+
+def test_a_spelled_differently_but_identical_path_still_passes(tmp_path,
+                                                               monkeypatch):
+    """`./logs/...` is the same file as `logs/...`; the operator types one."""
+    import types
+    import autoinit_c1_launch as L
+
+    root, rel = _grant_root(tmp_path)
+    auth = json.loads((root / L.AUTH_PATH).read_text())
+    auth["grant"]["path"] = f"./{rel}"
+    (root / L.AUTH_PATH).write_text(json.dumps(auth, indent=1) + "\n")
+    monkeypatch.setattr(L, "REPO_ROOT", root)
+    ok, why = L.grant_provenance_gate(
+        types.SimpleNamespace(args=types.SimpleNamespace(run_id="attempt10"),
+                              evidence={}))
+    assert ok, why
+
+
+def test_the_grant_role_is_declared_and_is_not_snapshotted(L_unused=None):
+    """It is an input, so nothing copies it in — unlike the three one-use
+    artifacts, whose live paths the next issuance overwrites."""
+    import autoinit_c1_launch as L
+
+    assert L.C1_RUN_ROLES["grant"] == "governance/grant.json"
+    assert "grant" in L.C1_RUN_SPEC.optional
+    assert "grant" not in [role for _src, role in L._RUN_GOVERNANCE]
+    assert "grant" not in [role for _src, role in L._RUN_COLLECT]
+    assert L._RUN_PREPARED == ("grant",)

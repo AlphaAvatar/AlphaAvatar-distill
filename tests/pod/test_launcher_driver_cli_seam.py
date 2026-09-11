@@ -152,11 +152,28 @@ def test_the_authority_is_the_drivers_parser_not_a_copy_of_its_options():
         "The parser is the authority; hand it the tokens instead.")
 
 
-def test_the_seam_is_covered_without_a_thirteenth_gate():
-    """Gate 12 binds the launch-bound sweep to the final tree, so a sweep that
-    contains this module IS the $0 pre-provider evidence for the seam."""
+def test_the_seam_is_covered_by_this_module_and_not_by_a_gate():
+    """`pod_environment_gate` binds the launch-bound sweep to the final tree, so
+    a sweep that contains this module IS the `$0` pre-provider evidence for the
+    launcher→driver CLI seam. No gate of its own was added, and the claim worth
+    protecting is *that* — not a particular total.
+
+    This asserted `== 12` until 2026-09-11, when a gate was added for an
+    unrelated reason (grant provenance) and this test went red while nothing it
+    is about had changed. A count is not a proxy for "no gate does X"; the two
+    checks below say what is actually meant, and the one pinned total lives in
+    `test_c1_readiness_gates.test_the_prereg_gate_count_and_order_equal_the_live_session`.
+    """
+    import json
+
     mod = load_session_launcher("autoinit_c1_launch")
     spec = mod.spec(session_args(mod))
-    assert len(spec.precheck) == 12, (
-        f"the preregistered pre-provider gate count moved to {len(spec.precheck)}")
+    names = [getattr(g, "__name__", "session_commit_and_lineage")
+             for g in spec.precheck]
+    assert not [n for n in names if "driver" in n or "cli" in n or "argv" in n], (
+        f"a gate now claims to cover the driver CLI seam: {names}. If that is "
+        "deliberate, this module's premise has changed and it should say so")
+    prereg = json.loads(
+        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+    assert len(spec.precheck) == prereg["transport"]["n_pre_provider_gates"], names
     assert str(Path(__file__).relative_to(REPO)) not in spec.setup.test_ignores

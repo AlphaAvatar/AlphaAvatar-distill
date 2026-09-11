@@ -510,32 +510,56 @@ def test_an_issued_session_tree_is_accepted_with_record_and_authorization(
     assert not ok2 and "post-sweep drift" in why2
 
 
-def test_gate_twelve_is_excluded_from_the_candidate_sweep_for_a_stated_reason():
-    """The exclusion must stay narrow and stay justified.
+#: Every gate the candidate sweep cannot exercise, and the module that DOES
+#: exercise it directly. An exclusion list is exactly where a real gate goes to
+#: die quietly, so membership is pinned — and so is the existence of a named
+#: replacement, which is the part that makes an exclusion survivable.
+STRUCTURAL_EXCLUSIONS = {
+    # binds a real issued commit; a scratch candidate has none. Driven in the
+    # identical `check_lineage=True` form the C1 launcher constructs.
+    "session_commit_and_lineage": "tests/pod/test_phase_a_rehearsal.py",
+    # needs a bundle for that commit really uploaded to the relay
+    "bundle_staged_gate": "tests/pod/test_c1_bundle_transport.py",
+    # consumes the sweep's own output, so it cannot precede the suite
+    "pod_environment_gate": "tests/autoinit/test_c1_readiness_gates.py",
+    # binds an issued grant inside a real run directory; a test must not
+    # create one in the repository to satisfy itself
+    "grant_provenance_gate": "tests/pod/test_c1_session_contract.py",
+}
 
-    `pod_environment_gate` consumes the pod sweep's own output, so it cannot also
-    be a precondition of the suite that sweep runs. That is a circularity, not a
-    convenience — but an exclusion list is exactly where a real gate goes to die
-    quietly, so both the membership and the reason are pinned here.
+
+def test_the_candidate_sweeps_exclusions_are_narrow_justified_and_covered():
+    """The exclusion must stay narrow, stay justified, and stay covered.
+
+    Each member is here because a scratch candidate structurally cannot supply
+    what the gate binds — an issued commit, an uploaded bundle, the sweep's own
+    output, an issued grant. That is a circularity or a missing artifact, not a
+    convenience, and the price of excluding a gate is naming where it IS driven.
     """
     #: Membership read as DATA. The literal `'"pod_environment_gate"]'` was
     #: matched in source text until 2026-09-08, which broke the moment the list
     #: became a named constant — and would equally have broken on a reformat.
-    #: What is being protected is that the exclusion set is exactly these three
-    #: and that each one's reason is still written down.
     import sys
 
     sys.path.insert(0, str(REPO / "tests/pod"))
     from test_c1_session_contract import ALWAYS_STRUCTURALLY_UNAVAILABLE
 
-    assert set(ALWAYS_STRUCTURALLY_UNAVAILABLE) == {
-        "session_commit_and_lineage", "bundle_staged_gate", "pod_environment_gate"}, (
-        "the exclusion set changed shape; re-read why each member is in it")
+    assert set(ALWAYS_STRUCTURALLY_UNAVAILABLE) == set(STRUCTURAL_EXCLUSIONS), (
+        "the exclusion set changed shape; re-read why each member is in it, and "
+        "give any new member a direct-coverage module above")
+
+    for gate, module in STRUCTURAL_EXCLUSIONS.items():
+        path = REPO / module
+        assert path.is_file(), f"{gate}'s stated coverage {module} does not exist"
+        assert gate in path.read_text(), (
+            f"{module} is named as {gate}'s direct coverage but never mentions "
+            "it; an excluded gate with no replacement is an unexercised gate")
 
     src = (REPO / "tests/pod/test_c1_session_contract.py").read_text()
-    assert "genuine\n    circularity" in src, "the reason for excluding gate 12 is gone"
+    assert "genuine\n    circularity" in src, (
+        "the reason for excluding pod_environment_gate is gone")
     assert "It is not left unexercised" in src, (
-        "the pointer to gate 12's real coverage is gone")
+        "the pointer to pod_environment_gate's real coverage is gone")
 
 
 def test_the_only_conditional_exclusion_is_the_synthetic_credential():
@@ -1111,9 +1135,16 @@ def test_the_prereg_gate_count_and_order_equal_the_live_session():
     live = mod.spec(session_args(mod)).precheck
     names = [getattr(g, "__name__", "session_commit_and_lineage") for g in live]
 
-    assert transport["n_pre_provider_gates"] == len(live) == 12
+    #: 13 since 2026-09-11, when `grant_provenance_gate` was inserted. The count
+    #: is pinned as well as compared so that losing a gate AND its record in the
+    #: same edit still fails here.
+    assert transport["n_pre_provider_gates"] == len(live) == 13
     assert transport["pre_provider_gate_order"] == names
     assert names[-2:] == ["renderer_parity_gate", "pod_environment_gate"]
+    #: Provenance is checked before anything reads the pricing, the harness or
+    #: the preregistration: running under another attempt's decision is not a
+    #: condition the later gates can detect.
+    assert names[:2] == ["session_commit_and_lineage", "grant_provenance_gate"]
 
 
 def test_the_prereg_states_the_canonical_issuance_ordering():

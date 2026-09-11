@@ -138,7 +138,8 @@ def is_recorded(layout: RunLayout) -> bool:
 
 
 def open_run(repo_root: Path | str, experiment_id: str, run_id: str, *,
-             roles: Mapping[str, str]) -> RunLayout:
+             roles: Mapping[str, str],
+             prepared: Iterable[str] = ()) -> RunLayout:
     """Create this run's directories, refusing to write into an occupied one.
 
     A recorded run is finished: its manifest names paths and a status that a
@@ -152,23 +153,59 @@ def open_run(repo_root: Path | str, experiment_id: str, run_id: str, *,
     is no resume path to protect because none of these sessions has one. If one
     is ever added it reopens the run explicitly, rather than by this function
     forgetting to look.
+
+    **`prepared` names roles written before the run opens, by someone else.**
+    Not every file in a run is produced by the run: a maintainer's grant is
+    authored and committed *while the tree is still clean*, because the
+    launch-bound readiness sweep and the authorization that follows it both
+    require it to be there already. Without this parameter the only two places
+    such an input could go were a flat `logs/<experiment>_attemptN_grant.json` —
+    the habit this convention exists to end — or nowhere, because the occupancy
+    rule could not tell a declared, expected input from the residue of a dead
+    launcher.
+
+    It is an exemption from **that one rule** and nothing else. A prepared role
+    must be declared in `roles`, so it lands in the manifest and has an owner; a
+    name that is not a declared role is a typo, and silently widening the
+    exemption to cover it is how it would stop meaning anything. Everything else
+    in the run root still refuses: a recorded run, an undeclared file, a
+    half-written evidence tree. Nothing here reads, validates or trusts the
+    prepared file — whether it is the *right* grant is the caller's gate to
+    apply, and C1 applies it against the authorization that names its hash.
     """
     check_roles(roles)
+    prepared = tuple(prepared)
+    unknown = sorted(set(prepared) - set(roles))
+    if unknown:
+        raise RunConventionError(
+            f"prepared role(s) {unknown} are not declared in `roles`. A "
+            "prepared input is exempted from the occupancy rule, so it has to "
+            "be a role this run will record an owner for; an undeclared name "
+            "would exempt a path nothing is accountable for")
     layout = layout_for(repo_root, experiment_id, run_id)
     if is_recorded(layout):
         raise RunConventionError(
             f"{layout.rel_root} is already recorded ({MANIFEST_NAME} exists). "
             "Use a new run_id; a recorded run is not reopened, because its "
             "manifest describes an execution that this one would overwrite")
-    occupied = sorted(p.relative_to(layout.root).as_posix()
-                      for p in layout.root.rglob("*") if p.is_file()
-                      ) if layout.root.exists() else []
+    #: A whole-directory role (`artifacts/`) exempts what is under it; a file
+    #: role exempts exactly itself.
+    exempt_files = {roles[r] for r in prepared if not roles[r].endswith("/")}
+    exempt_trees = tuple(roles[r] for r in prepared if roles[r].endswith("/"))
+    occupied = sorted(
+        rel for rel in (p.relative_to(layout.root).as_posix()
+                        for p in layout.root.rglob("*") if p.is_file())
+        if rel not in exempt_files
+        and not any(rel.startswith(t) for t in exempt_trees)
+    ) if layout.root.exists() else []
     if occupied:
         raise RunConventionError(
-            f"{layout.rel_root} already holds {len(occupied)} file(s) "
-            f"({occupied[:3]}) and has no {MANIFEST_NAME}: a run whose launcher "
-            "died before recording itself. Use a new run_id rather than writing "
-            "over the only evidence of what happened")
+            f"{layout.rel_root} already holds {len(occupied)} undeclared "
+            f"file(s) ({occupied[:3]}) and has no {MANIFEST_NAME}: a run whose "
+            "launcher died before recording itself. Use a new run_id rather "
+            "than writing over the only evidence of what happened"
+            + (f" ({len(prepared)} prepared role(s) were exempt and are not "
+               "counted here)" if prepared else ""))
     return layout.create(dict(roles))
 
 

@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "4e24d6fe2b444eeb57dc0f467e8a12db311cd777",
+ "head_commit": "55bb324a4a0ba522a69bd67eb07b338c71fd6f64",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -75,7 +75,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 97,
-  "digest": "f278967302367aa72cde008ebbe50bb731ffcb3dc8e373886e895f1c74027c80",
+  "digest": "1d9c71ab678323a1b905ba5b8605e335634b0779234323239f4f18a6bdbb7793",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -195,8 +195,8 @@
    },
    {
     "path": "scripts/experiments/run_layout.py",
-    "sha256": "bf56fbbf3f27726a36e0ced7ff22d2a3dfc6591152287f094f371efc36bebc05",
-    "bytes": 15349
+    "sha256": "bdbfeed80bf7c6f3ba236d6299f26cc2bcaaabac787b665a593ab4d0f7f9f46a",
+    "bytes": 17594
    },
    {
     "path": "scripts/experiments/source_sets.py",
@@ -210,8 +210,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "11395ecdf4f5526d2b6bfd359cbf0a598fee0ee4b85a33868bff0528f4285171",
-    "bytes": 64199
+    "sha256": "059ac7216871f8b589ada53fd6a60d69018a93c8be25625e7271d95380026bc0",
+    "bytes": 69033
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -1039,9 +1039,10 @@
   ],
   "why_the_sweep_precedes_issuance": "session_commit_gate requires the session commit to differ from authorized_session_commit by exactly the authorization path. A launch-bound sweep run AFTER issuance adds the readiness record as a second path and the gate refuses. Run before, the record is the permitted readiness delta and the authorization is the permitted issuance delta, so both lineage relations hold at once. This ordering was once reported backwards; it is derived from the gate, not from memory.",
   "bundle_ordering": "the bundle must contain the commit that CARRIES the authorization, so it is staged at step 7, after step 6. A bundle built for the pre-authorization base checks out a tree with no authorization in it",
-  "n_pre_provider_gates": 12,
+  "n_pre_provider_gates": 13,
   "pre_provider_gate_order": [
    "session_commit_and_lineage",
+   "grant_provenance_gate",
    "c1_harness_gate",
    "pricing_identity_gate",
    "preregistration_gate",
@@ -1076,5 +1077,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "c7d9469db345b9dbeeeb7345e827882fb05150a79c08422150fc0ba96acebf83"
+ "preregistration_sha256": "bbf983fabfd12d2e802cad428312a93f3fb99fa04afcdcc375c10b6980ab433d"
 }

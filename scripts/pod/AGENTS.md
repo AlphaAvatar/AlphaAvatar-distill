@@ -197,6 +197,15 @@ with the bundle, or unpack into a real checkout.
 
 ## Before each session
 
+- **Put the grant where the run can consume it.** A maintainer grant belongs at
+  `logs/runs/<experiment_id>/<run_id>/governance/grant.json`, committed *before*
+  the launch-bound readiness sweep — the sweep is taken on the final clean
+  pre-authorization tree, and the authorization is issued from the grant. Not a
+  flat `logs/<experiment>_attemptN_grant.json`: that shape is what attempts 1–9
+  used and it is not used again. The launcher declares the role as `prepared`,
+  so `open_run` accepts it and still refuses anything else in the directory, and
+  `grant_provenance_gate` refuses a grant belonging to another run, an absent
+  one, or one edited after issuance.
 - **Regenerate the git bundle** at the current commit and re-upload it, then
   update `hashes_transfer.txt` — `setup.sh` verifies hashes and fails loudly on
   a stale bundle. The tracked `data/eval_behavior_v0/prompts.jsonl` travels with

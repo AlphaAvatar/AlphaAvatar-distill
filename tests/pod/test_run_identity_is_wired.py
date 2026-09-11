@@ -146,6 +146,56 @@ def test_an_absent_governance_artifact_does_not_stop_the_run(tmp_path, L):
     assert not layout.path("governance/authorization.json").exists()
 
 
+def _place_grant(repo, L, run_id="attempt10", body='{"granted_by": "m"}\n'):
+    """What a maintainer commits before the readiness sweep."""
+    p = (repo / L.RUNS_ROOT / L.RUN_EXPERIMENT_ID / run_id
+         / L.C1_RUN_ROLES["grant"])
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(body)
+    return p
+
+
+def test_a_grant_placed_before_the_run_opens_does_not_block_it(tmp_path, L):
+    """The seam this closes.
+
+    The grant must be committed while the tree is still clean, because the
+    launch-bound sweep is taken on the final pre-authorization tree and the
+    authorization is issued FROM the grant. `open_run` then found a file in the
+    run directory and refused it as a dead launcher's residue — so the only
+    remaining places for a grant were a flat `logs/..._attemptN_grant.json` or
+    nowhere.
+    """
+    repo = _fake_repo(tmp_path, L)
+    grant = _place_grant(repo, L)
+    layout = L.open_c1_run(_args(tmp_path), repo)
+    assert layout.path(L.C1_RUN_ROLES["grant"]).read_text() == grant.read_text()
+
+
+def test_the_grant_is_recorded_as_one_of_the_runs_roles(tmp_path, L):
+    """Traceable ownership: the run's own manifest names it."""
+    repo = _fake_repo(tmp_path, L)
+    _place_grant(repo, L)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args)
+    L.close_c1_run(layout, args, repo)
+    roles = read_run(repo, L.RUN_EXPERIMENT_ID, "attempt10")["roles"]
+    assert roles["grant"] == L.C1_RUN_ROLES["grant"]
+
+
+def test_a_dead_launchers_evidence_still_refuses_even_beside_a_grant(tmp_path, L):
+    """The exemption is for the grant, not for the run directory."""
+    repo = _fake_repo(tmp_path, L)
+    _place_grant(repo, L)
+    stale = (repo / L.RUNS_ROOT / L.RUN_EXPERIMENT_ID / "attempt10"
+             / L.C1_RUN_ROLES["driver_evidence"])
+    stale.parent.mkdir(parents=True, exist_ok=True)
+    stale.write_text("{}\n")
+    with pytest.raises(RunConventionError) as exc:
+        L.open_c1_run(_args(tmp_path), repo)
+    assert L.C1_RUN_ROLES["driver_evidence"] in str(exc.value)
+
+
 def test_a_run_id_that_collides_is_refused(tmp_path, L):
     repo = _fake_repo(tmp_path, L)
     args = _args(tmp_path)
@@ -431,3 +481,32 @@ def test_this_repositorys_index_still_accounts_for_every_run_on_disk():
     assert on_disk <= accounted, f"unaccounted run directories: {on_disk - accounted}"
     committed = json.loads((REPO / "logs/runs/index.json").read_text())
     assert committed["counts"].get("runs_unrecorded") == len(index["unrecorded"])
+
+
+def test_a_prepared_run_is_reported_as_prepared_not_as_a_dead_launcher(tmp_path):
+    """The index is a consumer of the run-directory SHAPE, and the grant made a
+    new one reachable: a run that holds a governance input and nothing else.
+
+    Reporting that as "the launcher did not reach its closeout" would be a false
+    statement about a session that never started, and it is the kind of false
+    statement a committed index carries forward unchallenged.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "record_run_index", REPO / "scripts/architecture/record_run_index.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    runs = tmp_path / "logs/runs/phase_c1"
+    prepared = runs / "attempt_prepared/governance"
+    prepared.mkdir(parents=True)
+    (prepared / "grant.json").write_text('{"granted_by": "m"}\n')
+    died = runs / "attempt_died/evidence"
+    died.mkdir(parents=True)
+    (died / "c1_evidence.json").write_text("{}\n")
+
+    found = {r["run_id"]: r["why"] for r in mod.discover_unrecorded(tmp_path)}
+    assert "PREPARED but not executed" in found["attempt_prepared"]
+    assert "did not reach its closeout" in found["attempt_died"]
+    assert "PREPARED" not in found["attempt_died"]

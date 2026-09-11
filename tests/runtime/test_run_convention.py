@@ -263,6 +263,124 @@ def test_an_empty_run_directory_may_be_opened(tmp_path):
     assert open_run(tmp_path, "stage4_rollout", "r1", roles=roles)
 
 
+# --- inputs prepared before the run opens -----------------------------------
+#
+# Not every file in a run is written by the run. A maintainer's grant is
+# authored and committed while the tree is still clean, because the launch-bound
+# readiness sweep and the authorization issued from it both require it to be
+# there already. The occupancy rule could not tell that declared, expected input
+# from the residue of a launcher that died, so the only two places such a file
+# could go were a flat `logs/<experiment>_attemptN_grant.json` — nine of those
+# exist — or nowhere.
+#
+# `prepared` is an exemption from THAT rule and nothing else, which is what the
+# next four cases pin.
+
+def _prepared_run(tmp_path, body='{"granted_by": "maintainer"}\n'):
+    """A run directory holding only its prepared grant, not yet opened."""
+    _, _, roles = STAGE3
+    grant = tmp_path / RUNS_ROOT / "stage3_recovery" / "r1" / roles["grant"]
+    grant.parent.mkdir(parents=True)
+    grant.write_text(body)
+    return roles, grant
+
+
+def test_a_prepared_role_may_already_exist_when_the_run_opens(tmp_path):
+    roles, grant = _prepared_run(tmp_path)
+    layout = open_run(tmp_path, "stage3_recovery", "r1", roles=roles,
+                      prepared=("grant",))
+    assert layout.path(roles["grant"]).read_text() == grant.read_text(), (
+        "opening the run must not rewrite or truncate a prepared input")
+
+
+def test_the_same_file_undeclared_still_blocks_the_run(tmp_path):
+    """The mutation. Drop the declaration and the refusal comes straight back.
+
+    Without this the first case proves nothing: an `open_run` that had simply
+    stopped checking occupancy would pass it just as well.
+    """
+    roles, _ = _prepared_run(tmp_path)
+    with pytest.raises(RunConventionError) as exc:
+        open_run(tmp_path, "stage3_recovery", "r1", roles=roles)
+    assert "died before recording" in str(exc.value)
+
+
+def test_a_prepared_role_exempts_itself_and_nothing_else(tmp_path):
+    """A half-written evidence tree beside the grant is still the dead-launcher
+    case, and naming the grant must not smuggle it through."""
+    roles, _ = _prepared_run(tmp_path)
+    stray = tmp_path / RUNS_ROOT / "stage3_recovery" / "r1" / roles["eval_rows"]
+    stray.parent.mkdir(parents=True, exist_ok=True)
+    stray.write_text("{}\n")
+    with pytest.raises(RunConventionError) as exc:
+        open_run(tmp_path, "stage3_recovery", "r1", roles=roles,
+                 prepared=("grant",))
+    assert roles["eval_rows"] in str(exc.value)
+    assert roles["grant"] not in str(exc.value), (
+        "the exempt input must not be counted among the files that refuse")
+
+
+def test_a_prepared_name_that_is_not_a_declared_role_is_refused(tmp_path):
+    """A typo would exempt a path the run records no owner for."""
+    _, _, roles = STAGE3
+    with pytest.raises(RunConventionError) as exc:
+        open_run(tmp_path, "stage3_recovery", "r1", roles=roles,
+                 prepared=("grnat",))
+    assert "grnat" in str(exc.value)
+
+
+def test_a_recorded_run_is_refused_even_with_a_prepared_input(tmp_path):
+    """`prepared` relaxes occupancy. It never reopens a finished run."""
+    _, spec, roles = STAGE3
+    layout = open_run(tmp_path, "stage3_recovery", "r1", roles=roles)
+    _fill(layout, roles)
+    record_run(layout, spec=spec, plan={}, implementation={}, status={},
+               roles=present_roles(layout, roles))
+    with pytest.raises(RunConventionError) as exc:
+        open_run(tmp_path, "stage3_recovery", "r1", roles=roles,
+                 prepared=("grant",))
+    assert MANIFEST_NAME in str(exc.value)
+
+
+def test_a_prepared_input_is_recorded_as_one_of_the_runs_roles(tmp_path):
+    """Which is the point of declaring it rather than exempting a path.
+
+    An input the run consumes but never records has the same ownership problem
+    as the flat file it replaces: it exists, and nothing says which run it
+    belongs to.
+    """
+    _, spec, roles = STAGE3
+    _prepared_run(tmp_path)
+    layout = open_run(tmp_path, "stage3_recovery", "r1", roles=roles,
+                      prepared=("grant",))
+    _fill(layout, roles, present=["train_log", "checkpoint_manifest"])
+    record_run(layout, spec=spec, plan={}, implementation={}, status={},
+               roles=present_roles(layout, roles))
+    assert read_run(tmp_path, "stage3_recovery", "r1")["roles"]["grant"] == (
+        roles["grant"])
+
+
+def test_a_whole_directory_prepared_role_exempts_what_is_inside_it(tmp_path):
+    """`artifacts/` is a legal role, so it has to be a legal prepared one.
+
+    The second half is the boundary: exempting the tree must not exempt a file
+    that merely sits beside it.
+    """
+    roles = {"staged": "artifacts/", "log": "runtime/a.log"}
+    for run_id in ("r1", "r2"):
+        staged = tmp_path / RUNS_ROOT / "e" / run_id / "artifacts"
+        staged.mkdir(parents=True)
+        (staged / "input.jsonl").write_text("{}\n")
+    assert open_run(tmp_path, "e", "r1", roles=roles, prepared=("staged",))
+
+    beside = tmp_path / RUNS_ROOT / "e" / "r2" / roles["log"]
+    beside.parent.mkdir(parents=True, exist_ok=True)
+    beside.write_text("stale\n")
+    with pytest.raises(RunConventionError) as exc:
+        open_run(tmp_path, "e", "r2", roles=roles, prepared=("staged",))
+    assert roles["log"] in str(exc.value)
+
+
 # --- reading back is verification, not deserialization ----------------------
 
 def test_a_tampered_manifest_is_refused_on_read(tmp_path):

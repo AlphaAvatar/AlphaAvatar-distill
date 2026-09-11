@@ -223,6 +223,17 @@ C1_RUN_ROLES: dict[str, str] = {
     "session_record": "runtime/session.json",
     "launcher_log": "runtime/launcher.log",
     "watchdog_journal": "runtime/watchdog.jsonl",
+    #: The maintainer decision this attempt runs under. UNLIKE every other role
+    #: here it is an INPUT: it is authored and committed before the launch-bound
+    #: sweep, because the authorization is issued from it and the sweep must see
+    #: the final clean tree. The launcher neither writes nor copies it -- it is
+    #: already in place, exempted from `open_run`'s occupancy rule by name, and
+    #: verified against the authorization that records its hash.
+    #:
+    #: Its predecessors were `logs/autoinit_c1_attempt<N>_grant.json`: nine flat
+    #: files in the log root, each one a per-attempt fact with no run to belong
+    #: to. This is the same fact with an owner.
+    "grant": "governance/grant.json",
     #: Snapshots of the ONE-USE artifacts this attempt consumed. Their live
     #: paths are rewritten by the next issuance, so the snapshot is a fact about
     #: this run that has no other owner -- not a second copy of a current one.
@@ -270,11 +281,19 @@ _RUN_COLLECT: tuple[tuple[str, str], ...] = (
 
 #: Repository-relative source -> role, snapshotted when the run opens, while the
 #: artifacts still describe THIS attempt.
+#:
+#: `grant` is deliberately absent: it is not copied from a live repository path,
+#: because it has no live repository path. It is authored directly at its role
+#: location and is already there when the run opens.
 _RUN_GOVERNANCE: tuple[tuple[str, str], ...] = (
     (AUTH_PATH, "authorization"),
     (BUNDLE_RECORD, "bundle_record"),
     (POD_ENV_RECORD, "readiness_record"),
 )
+
+#: Roles written before the run opens, by someone other than the launcher.
+#: Exempt from `open_run`'s occupancy rule and from nothing else.
+_RUN_PREPARED: tuple[str, ...] = ("grant",)
 
 
 def session_record_path(run_id: str) -> str:
@@ -414,6 +433,71 @@ def c1_harness_gate(ctx: SessionContext) -> tuple[bool, str]:
         return False, (f"harness digest {stored[:12]}… in the authorization does "
                        f"not match the live tree {live[:12]}…")
     return True, f"C1 harness {live[:12]}… over {len(C1_HARNESS_SOURCE_FILES_V1)} files"
+
+
+def grant_provenance_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The maintainer decision this session runs under must belong to THIS run.
+
+    The authorization records the grant it was issued from — its path and the
+    hash of its contents — and until now nothing checked that reference again.
+    Three things could go wrong silently, and each of them is a different way of
+    running under a decision that was made about something else:
+
+    * the grant could have been edited after issuance, since the authorization's
+      own self-hash covers the reference, not the file it points at;
+    * it could have been deleted, leaving an authorization whose stated
+      provenance cannot be produced on request;
+    * it could belong to a *different attempt*. This is the live one. Nine
+      grants exist as `logs/autoinit_c1_attempt<N>_grant.json`, all structurally
+      valid, and a launch that read one of those would be running attempt 10
+      under attempt 6's permission.
+
+    So the grant is required at this run's own `governance/grant.json` — the
+    location `open_run` exempts by name and `record_run` gives an owner. That is
+    also what makes the flat per-attempt file unnecessary rather than merely
+    discouraged: there is nowhere else a grant can be and still pass here.
+    """
+    run_id = getattr(ctx.args, "run_id", None)
+    if not run_id:
+        return False, "this session has no run_id, so no grant can belong to it"
+    rel = f"{RUNS_ROOT}/{RUN_EXPERIMENT_ID}/{run_id}/{C1_RUN_ROLES['grant']}"
+    want = (REPO_ROOT / rel).resolve()
+    try:
+        raw = json.loads((REPO_ROOT / AUTH_PATH).read_text())
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"cannot read {AUTH_PATH}: {exc}"
+    ref = raw.get("grant") or {}
+    stated_path, stated_sha = ref.get("path"), ref.get("sha256")
+    if not stated_path or not stated_sha:
+        return False, (f"{AUTH_PATH} records no grant path and hash, so the "
+                       "decision it was issued from cannot be identified")
+    #: Resolved, not string-compared: the issuer stores whatever `--grant` was
+    #: typed, and `./logs/...` is the same file as `logs/...`.
+    got = Path(stated_path)
+    got = (got if got.is_absolute() else REPO_ROOT / got).resolve()
+    if got != want:
+        return False, (f"the authorization was issued from {stated_path}, which "
+                       f"is not this run's grant at {rel}. A grant belongs to "
+                       "one attempt; using another attempt's is running under a "
+                       "decision made about a different session")
+    if not want.is_file():
+        return False, (f"{rel} does not exist, so the authorization's stated "
+                       "provenance cannot be produced")
+    try:
+        live = sha256_json(json.loads(want.read_text()))
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"cannot read {rel} as a grant: {exc}"
+    if live != stated_sha:
+        return False, (f"{rel} hashes to {live[:12]}… but the authorization was "
+                       f"issued from {str(stated_sha)[:12]}…; the grant was "
+                       "edited after it was used")
+    ctx.evidence["grant_provenance"] = {
+        "role": "grant", "path": rel, "sha256": live,
+        "recorded_by": AUTH_PATH, "run_id": run_id,
+        "rule": ("the authorization's grant reference must resolve to THIS "
+                 "run's governance/grant.json and hash to the recorded value"),
+    }
+    return True, f"grant {live[:12]}… at {rel}, as recorded by the authorization"
 
 
 def pricing_identity_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -999,6 +1083,7 @@ def spec(args) -> SessionSpec:
                              "/workspace/pytest.log"),
         precheck=(
             session_commit_gate(REPO_ROOT, AUTH_PATH, check_lineage=True),
+            grant_provenance_gate,
             c1_harness_gate,
             pricing_identity_gate,
             preregistration_gate,
@@ -1137,7 +1222,7 @@ def open_c1_run(args, repo_root: Path | None = None):
     claim_output_root(args.scr, RUN_EXPERIMENT_ID, args.run_id,
                       outputs=RUN_OUTPUTS)
     layout = open_run(repo_root, RUN_EXPERIMENT_ID, args.run_id,
-                      roles=C1_RUN_ROLES)
+                      roles=C1_RUN_ROLES, prepared=_RUN_PREPARED)
     for source, role in _RUN_GOVERNANCE:
         src = repo_root / source
         if src.is_file():

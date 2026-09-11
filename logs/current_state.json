@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-08T00:00:00Z",
+ "generated_utc": "2026-09-11T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/decisions.md. Human view: logs/STATE.md. Ownership: logs/CATALOG.md.",
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "OWNED by the readiness record's swept_base_commit and deliberately not duplicated: this snapshot is written BEFORE the commit it would name, and gate 12 forbids editing state after the sweep, so a copy here could only go stale. It did (4f85ecda vs 0457bab).",
@@ -54,7 +54,7 @@
   "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850, P(GO|+0.015)=0.8379"
  },
  "latest_verification": {
-  "utc": "2026-09-07T00:00:00Z",
+  "utc": "2026-09-11T00:00:00Z",
   "owned_by": "logs/c1_pod_environment_verification.json",
   "owns": "record_kind, swept_base_commit, staging-contract digest, setup environment, counts, both digests and verdict. Read them THERE.",
   "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
@@ -68,7 +68,7 @@
  ],
  "next_starting_point": {
   "status": "Attempt 9 produced C1's FIRST scientific observation -- both frozen replay gates PASSED -- then aborted in stage F. That defect is repaired and CONFIRMED ON REAL CUDA; see phase_c.c1.blocker. Engineering campaign closed.",
-  "the_ask": "A maintainer decision on whether a tenth attempt is worth the one ceiling-sized slot left. CORRECTION: the 2026-09-10 'no engineering blocker' reading was WRONG -- two were found on review and repaired 2026-09-11. See logs/STATE.md.",
+  "the_ask": "A maintainer decision confirming a FINITE execution package: a GPU engineering allowance, a bounded number of formal C1 attempts, a per-attempt ceiling and a new cumulative cap. The direction is settled; the amounts are not. Proposal and the 2026-09-11 repairs: logs/STATE.md.",
   "budget": "OWNED by the budget block above; not restated here."
  },
  "read_order": [
@@ -123,10 +123,11 @@
    "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
    "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL.",
    "not_built": "grant, authorization and bundle all CONSUMED by attempt 9. A tenth attempt needs all three again plus a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
-   "blocker": "CLEARED. The stage-F device boundary in attention.activation_importance_v1 was repaired at $0 on 2026-09-08 and CONFIRMED ON REAL CUDA at execution SHA 7027a8f4 (2026-09-10): both geometries, all five placements observed on cuda:0. Science unmoved. The remaining blocker is the absence of a grant, not the code.",
-   "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, L40S). treatment + endpoint: UNMEASURED. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort -- not an ATTENTION result and not a frozen-rule INCONCLUSIVE.",
-   "repairs": "SIX defects repaired at $0 before attempt 9 (three observed working on hardware); the stage-F device boundary repaired at $0 after it -- see `blocker`. Detail: logs/STATE.md.",
-   "owed": "a new maintainer review and a NEW grant for any tenth attempt; the launch_bound record and 12 gates are owed again. Evidence: logs/autoinit_c1_attempt9/."
+   "grant_location": "runs/phase_c1/<run_id>/governance/grant.json, committed BEFORE the launch_bound sweep. NOT the flat autoinit_c1_attempt<N>_grant.json of attempts 1-9. Rules: logs/STATE.md.",
+   "blocker": "CLEARED. The stage-F device boundary was repaired at $0 and CONFIRMED ON REAL CUDA -- see cuda_engineering_validation. The remaining blocker is the absence of a grant, not the code.",
+   "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, L40S). treatment + endpoint: UNMEASURED. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort -- not an ATTENTION result, not a frozen-rule INCONCLUSIVE.",
+   "repairs": "SIX at $0 before attempt 9, the stage-F device boundary after it, two blockers and the governance-input seam on 2026-09-11. Detail: logs/STATE.md.",
+   "owed": "a new maintainer decision and a NEW grant for any tenth attempt; a fresh launch_bound record and every pre-provider gate are owed again (the gate count is derived from the live session, never restated here). Evidence: logs/autoinit_c1_attempt9/."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -158,7 +159,7 @@
   "layout_version": 1,
   "root": "logs/autoinit_c1_attempt9",
   "index": "logs/runs/index.json",
-  "note": "legacy-v1 by path, ONE index entry with its grant as a second component. From attempt 10 the launcher REQUIRES --run-id and writes logs/runs/phase_c1/<run_id>/.",
+  "note": "legacy-v1 by path, ONE index entry. From attempt 10 the launcher REQUIRES --run-id and writes logs/runs/phase_c1/<run_id>/.",
   "run_id": "attempt9"
  },
  "architecture_migration": {
@@ -170,9 +171,9 @@
   "campaign": "CLOSED. Three subruns, $0.0400 cumulative, one active resource at a time, each provider-confirmed non-billing before the next. Zero pods. Per-subrun detail: campaign.json.",
   "campaign_cost_usd": 0.04,
   "means": "the repaired and migrated treatment suffix HAS successfully completed real-CUDA engineering validation. ENGINEERING EVIDENCE ONLY -- not a C1 treatment result, not an endpoint, not a decision.",
-  "amendment": "logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json corrects subrun 2's failure class and subrun 3's PASS wording. Outcomes, costs, devices and provider identities are unaltered.",
+  "amendment": "logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured. Read it THERE.",
   "record": "logs/runs/cuda_stage_f/ and logs/validations/cuda-stage-f/v1/",
   "authorizes": "nothing"
  },
- "superseded_handoff": "logs/HANDOFF_next_session.md is HISTORICAL (2026-09-02, unmaintained): it says C1 is unexecuted and quotes $19.9003 headroom and a $13.7578 ceiling. True then, not now. Evidence, not an entry point."
+ "superseded_handoff": "logs/HANDOFF_next_session.md is HISTORICAL (2026-09-02, unmaintained) and is NOT an entry point. What it says and why it is stale: logs/CATALOG.md."
 }

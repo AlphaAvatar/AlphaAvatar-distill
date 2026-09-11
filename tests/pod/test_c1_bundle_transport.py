@@ -303,10 +303,18 @@ def test_mutation_dropping_the_remote_roundtrip_is_caught():
     assert "upload_file" not in code
 
 
-def test_the_gate_is_wired_and_the_count_is_ten():
-    """Ten now. Eight passed while attempt 1 died on transport; nine passed while
-    attempt 2 died on the ROPE_OK staging input. Each abort added the gate that
-    would have refused it at $0."""
+def test_the_transport_and_rope_gates_are_wired():
+    """Attempt 1 died on transport; attempt 2 died on the ROPE_OK staging input.
+    Each abort added the gate that would have refused it at `$0`, and this is
+    the module that keeps both of them wired.
+
+    The TOTAL is deliberately not restated here. It was, and it became one of
+    four places holding the same literal — so adding a gate turned into an
+    errand across four files, which is how a count and the thing it counts drift
+    apart. The count is compared against the preregistration, which is the
+    document an authorization binds; the single pinned literal lives in
+    `test_c1_readiness_gates.test_the_prereg_gate_count_and_order_equal_the_live_session`.
+    """
     import autoinit_c1_launch as L
 
     args = L.build_parser().parse_args(
@@ -317,9 +325,9 @@ def test_the_gate_is_wired_and_the_count_is_ten():
              for g in spec.precheck]
     assert "bundle_staged_gate" in names, names
     assert "rope_input_gate" in names, names
-    # 10 → 12 on 2026-09-04: `renderer_parity_gate` and `pod_environment_gate`
-    # were added after attempt 3R aborted at the pod's CPU test gate.
-    assert len(spec.precheck) == 12, names
+    prereg = json.loads(
+        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+    assert len(spec.precheck) == prereg["transport"]["n_pre_provider_gates"], names
 
 
 def test_preparation_is_a_separate_command_that_may_mutate_the_relay():
