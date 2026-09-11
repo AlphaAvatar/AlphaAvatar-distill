@@ -414,3 +414,87 @@ def test_read_refuses_a_run_that_never_recorded_itself(tmp_path):
     with pytest.raises(RunConventionError) as exc:
         read_run(tmp_path, "stage4_rollout", "never")
     assert MANIFEST_NAME in str(exc.value)
+
+
+# --- runs are grouped by the stage their work belongs to ---------------------
+#
+# `logs/runs/stage-<stage_id>/<experiment_id>/<run_id>/`. The stage is DECLARED
+# by the experiment's config. Phase (A/B/C), pipeline stage (0-6) and attempt
+# are three dimensions; `phase_c1` is an experiment id, not a stage.
+
+def test_the_stage_segment_is_declared_not_guessed():
+    from experiments.run_layout import stage_segment
+
+    assert stage_segment("3") == "stage-3"
+    assert stage_segment("shared") == "stage-shared"
+    for bad in ("c1", "phase_c1", "C", "attempt10", "7", ""):
+        with pytest.raises(RunConventionError):
+            stage_segment(bad)
+
+
+def test_a_stage_grouped_run_lands_under_its_stage(tmp_path):
+    _, spec, roles = STAGE3
+    layout = open_run(tmp_path, "stage3_recovery", "r1", roles=roles, stage_id="3")
+    assert layout.root == tmp_path / RUNS_ROOT / "stage-3" / "stage3_recovery" / "r1"
+    _fill(layout, roles)
+    record_run(layout, spec=spec, plan={}, implementation={}, status={},
+               roles=present_roles(layout, roles))
+    assert (layout.root / MANIFEST_NAME).is_file()
+
+
+def test_non_pipeline_work_gets_an_explicit_bucket(tmp_path):
+    """Storage maintenance and engineering validation are not Stage 3."""
+    roles = {"evidence": "evidence/probe.json"}
+    layout = open_run(tmp_path, "cuda_stage_f", "s1", roles=roles,
+                      stage_id="shared")
+    assert "stage-shared" in str(layout.root)
+
+
+def test_the_legacy_root_is_still_addressable(tmp_path):
+    """Runs whose grant and closeout name a two-level path are read there.
+
+    Moving a run whose identity was issued against its location breaks the
+    lineage that makes it evidence, so old runs are found, not relocated.
+    """
+    _, _, roles = STAGE4
+    layout = open_run(tmp_path, "stage4_rollout", "r1", roles=roles)
+    assert layout.root == tmp_path / RUNS_ROOT / "stage4_rollout" / "r1"
+
+
+# --- a README describes a directory; it is never evidence --------------------
+
+def test_a_readme_is_the_one_other_file_a_run_root_may_hold():
+    from experiments.run_layout import README_NAME, area_of
+
+    assert area_of(README_NAME) == "root"
+    #: By NAME, not by extension: "ignore Markdown" would let any .md file
+    #: accumulate in a run root unowned.
+    for other in ("NOTES.md", "readme.md", "README.txt", "docs.md"):
+        with pytest.raises(RunConventionError):
+            area_of(other)
+
+
+def test_a_run_root_holding_only_a_readme_can_still_be_opened(tmp_path):
+    from experiments.run_layout import README_NAME
+
+    _, _, roles = STAGE4
+    root = tmp_path / RUNS_ROOT / "stage-4" / "stage4_rollout" / "r1"
+    root.mkdir(parents=True)
+    (root / README_NAME).write_text("# what this directory is\n")
+    layout = open_run(tmp_path, "stage4_rollout", "r1", roles=roles, stage_id="4")
+    assert (layout.root / README_NAME).read_text().startswith("# what")
+
+
+def test_a_readme_does_not_excuse_anything_else_in_the_root(tmp_path):
+    """The dead-launcher rule survives README support."""
+    from experiments.run_layout import README_NAME
+
+    _, _, roles = STAGE4
+    root = tmp_path / RUNS_ROOT / "stage-4" / "stage4_rollout" / "r1"
+    (root / "artifacts").mkdir(parents=True)
+    (root / README_NAME).write_text("# desc\n")
+    (root / "artifacts" / "rollouts.jsonl").write_text("{}\n")
+    with pytest.raises(RunConventionError) as exc:
+        open_run(tmp_path, "stage4_rollout", "r1", roles=roles, stage_id="4")
+    assert "died before recording" in str(exc.value)
+    assert README_NAME not in str(exc.value)

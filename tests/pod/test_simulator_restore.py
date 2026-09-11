@@ -589,3 +589,33 @@ def test_the_threshold_is_an_input_not_a_constant_in_the_core():
     core = (REPO / "src/aadistill").rglob("*.py")
     offenders = [p.name for p in core if "MIN_FREE_GIB" in p.read_text()]
     assert not offenders, f"a disk threshold reached the core: {offenders}"
+
+
+def test_the_threshold_is_overridable_and_says_what_it_describes():
+    """A number derived from one workload must not silently govern another.
+
+    A larger student, a longer battery or a sweep that retains more per test has
+    a different footprint; the supported way to say so is the override, not an
+    edit to the function.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "rpe_ovr", REPO / "scripts/autoinit/record_pod_environment.py")
+    rpe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rpe)
+
+    default = rpe.min_free_gib()
+    os.environ["AAD_PODSIM_MIN_FREE_GIB"] = "77"
+    try:
+        assert rpe.min_free_gib() == 77, "the override is not honoured"
+    finally:
+        os.environ.pop("AAD_PODSIM_MIN_FREE_GIB", None)
+    assert rpe.min_free_gib() == default
+
+    #: Whitespace-normalised: the docstring wraps at the margin, so the phrase
+    #: is split across a newline and a raw `in` check fails on formatting
+    #: rather than on meaning.
+    doc = " ".join((rpe.min_free_gib.__doc__ or "").split())
+    assert "not a standing disk policy" in doc, (
+        "the threshold no longer says that it describes one workload")

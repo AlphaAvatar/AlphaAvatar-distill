@@ -2106,7 +2106,16 @@
    "reason_physical_weights_deleted": "NO WEIGHTS WERE DELETED by this criterion. The model of every affected run is retained at its canonical path with its retention class unchanged; only the resume state was removed.",
    "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "not reconstructible, and not required to be: optimizer state is a property of a training trajectory that has ended. Re-running the recipe would produce a new trajectory, not this one.",
-   "expected_reconstruction_cost": "n/a -- nothing downstream consumes it"
+   "expected_reconstruction_cost": "n/a -- nothing downstream consumes it",
+   "capability_lost": "EXACT-RESUME CAPABILITY FOR THESE RUNS IS GONE. Optimizer moments, scheduler position and RNG state cannot be reconstructed, so none of these runs can be continued from its recorded step. What survives is the MODEL, which serves comparison and evaluation. Keeping weights for comparison and keeping the ability to resume training are different capabilities, and only the first was retained here.",
+   "what_can_still_be_done": [
+    "score, evaluate and compare the retained model weights",
+    "re-derive any number a frozen record reports from those weights"
+   ],
+   "what_can_no_longer_be_done": [
+    "resume training from the recorded step",
+    "reproduce the exact continuation of the original trajectory"
+   ]
   },
   {
    "canonical_id": "optimizer_state_of_a_completed_experiment.E6b",
@@ -2141,7 +2150,16 @@
    "reason_physical_weights_deleted": "NO WEIGHTS WERE DELETED by this criterion. The model of every affected run is retained at its canonical path with its retention class unchanged; only the resume state was removed.",
    "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "not reconstructible, and not required to be: optimizer state is a property of a training trajectory that has ended. Re-running the recipe would produce a new trajectory, not this one.",
-   "expected_reconstruction_cost": "n/a -- nothing downstream consumes it"
+   "expected_reconstruction_cost": "n/a -- nothing downstream consumes it",
+   "capability_lost": "EXACT-RESUME CAPABILITY FOR THESE RUNS IS GONE. Optimizer moments, scheduler position and RNG state cannot be reconstructed, so none of these runs can be continued from its recorded step. What survives is the MODEL, which serves comparison and evaluation. Keeping weights for comparison and keeping the ability to resume training are different capabilities, and only the first was retained here.",
+   "what_can_still_be_done": [
+    "score, evaluate and compare the retained model weights",
+    "re-derive any number a frozen record reports from those weights"
+   ],
+   "what_can_no_longer_be_done": [
+    "resume training from the recorded step",
+    "reproduce the exact continuation of the original trajectory"
+   ]
   },
   {
    "canonical_id": "optimizer_state_of_a_completed_experiment.E7",
@@ -2178,7 +2196,16 @@
    "reason_physical_weights_deleted": "NO WEIGHTS WERE DELETED by this criterion. The model of every affected run is retained at its canonical path with its retention class unchanged; only the resume state was removed.",
    "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "not reconstructible, and not required to be: optimizer state is a property of a training trajectory that has ended. Re-running the recipe would produce a new trajectory, not this one.",
-   "expected_reconstruction_cost": "n/a -- nothing downstream consumes it"
+   "expected_reconstruction_cost": "n/a -- nothing downstream consumes it",
+   "capability_lost": "EXACT-RESUME CAPABILITY FOR THESE RUNS IS GONE. Optimizer moments, scheduler position and RNG state cannot be reconstructed, so none of these runs can be continued from its recorded step. What survives is the MODEL, which serves comparison and evaluation. Keeping weights for comparison and keeping the ability to resume training are different capabilities, and only the first was retained here.",
+   "what_can_still_be_done": [
+    "score, evaluate and compare the retained model weights",
+    "re-derive any number a frozen record reports from those weights"
+   ],
+   "what_can_no_longer_be_done": [
+    "resume training from the recorded step",
+    "reproduce the exact continuation of the original trajectory"
+   ]
   },
   {
    "canonical_id": "optimizer_state_of_a_completed_experiment.E2_phase_1",
@@ -2213,7 +2240,16 @@
    "reason_physical_weights_deleted": "NO WEIGHTS WERE DELETED by this criterion. The model of every affected run is retained at its canonical path with its retention class unchanged; only the resume state was removed.",
    "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "not reconstructible, and not required to be: optimizer state is a property of a training trajectory that has ended. Re-running the recipe would produce a new trajectory, not this one.",
-   "expected_reconstruction_cost": "n/a -- nothing downstream consumes it"
+   "expected_reconstruction_cost": "n/a -- nothing downstream consumes it",
+   "capability_lost": "EXACT-RESUME CAPABILITY FOR THESE RUNS IS GONE. Optimizer moments, scheduler position and RNG state cannot be reconstructed, so none of these runs can be continued from its recorded step. What survives is the MODEL, which serves comparison and evaluation. Keeping weights for comparison and keeping the ability to resume training are different capabilities, and only the first was retained here.",
+   "what_can_still_be_done": [
+    "score, evaluate and compare the retained model weights",
+    "re-derive any number a frozen record reports from those weights"
+   ],
+   "what_can_no_longer_be_done": [
+    "resume training from the recorded step",
+    "reproduce the exact continuation of the original trajectory"
+   ]
   },
   {
    "canonical_id": "intermediate_step_checkpoint_of_a_closed_diagnostic.E2_phase_1",
@@ -2253,7 +2289,8 @@
    "reason_physical_weights_deleted": "a closed diagnostic outside the current lineage, whose conclusion is recorded in EXPERIMENTS.md and EXPERIMENT_INDEX.md. No scientific claim depends on these tensors still existing, and nothing executable reads them: the E2 config names the Stage-1 init as its student_path and PRODUCED these rather than consuming them.",
    "deterministic_reconstruction_possible": true,
    "reconstruction_recipe": "configs/stage3/e2/e2_d1_s{a,b}_pca.json from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint, the recorded seed and the frozen ladder corpus.",
-   "expected_reconstruction_cost": "a paid GPU session per arm; not planned and not needed"
+   "expected_reconstruction_cost": "a paid GPU session per arm; not planned and not needed",
+   "capability_lost": "BOTH the weights and the resume state of these intermediate steps are gone. E2 phase 1 is a closed diagnostic outside the current lineage; its accepted result is the recorded finding, not these tensors. Re-running the config from the Stage-1 init would produce a NEW trajectory, not this one."
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant. A withdrawn entry is kept, never removed: the reason a tombstone was wrong is worth as much as the tombstone."

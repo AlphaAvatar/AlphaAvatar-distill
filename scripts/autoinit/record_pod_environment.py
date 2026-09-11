@@ -102,21 +102,25 @@ DEFAULT_LOG = "/home/ecs-user/aad-scratch/podsim_pytest.log"
 
 
 def min_free_gib() -> int:
-    """How much room this sweep needs before it moves anything.
+    """How much room THIS sweep needs before it moves anything.
 
-    Derived, not guessed, and derived HERE because this is the caller that knows
-    the footprint. Three things consume space during a sweep: the hidden
-    artifacts, which are moved WITHIN the filesystem and so cost nothing extra;
-    pytest's `tmp_path` tree, which is what actually grows; and the junit/log
-    output, which is small.
+    Derived here because this is the caller that knows the footprint, and
+    derived from a measurement rather than chosen: on 2026-09-11 one full suite
+    left about 3.5 GiB under `/tmp/pytest-of-*`. Doubling that covers a run that
+    keeps more; the headroom covers the estimate simply being wrong, which is
+    the case that matters, because being wrong here does not fail the sweep --
+    it displaces the repository's gitignored artifacts and reports nothing.
 
-    The dominant term was measured on 2026-09-11: a full suite left about
-    3.5 GiB under `/tmp/pytest-of-*` per run. Doubling it covers a run that
-    keeps more, and the headroom covers this estimate simply being wrong --
-    which is the case that matters, because being wrong here does not fail the
-    sweep, it displaces the repository's gitignored artifacts and reports
-    nothing.
+    **This figure describes the current suite on the current tree.** It is not a
+    standing disk policy and must not be inherited by an operation with a
+    different footprint: a larger student, a longer battery or a sweep that
+    retains more per test needs its own number, measured the same way. Override
+    with `AAD_PODSIM_MIN_FREE_GIB` when the workload is known to differ, which
+    is the supported way to say so rather than editing this function.
     """
+    override = os.environ.get("AAD_PODSIM_MIN_FREE_GIB")
+    if override:
+        return int(override)
     measured_tmp_gib = 4      # observed peak of one full-suite tmp_path tree
     headroom_gib = 16         # what a wrong estimate must not be able to eat
     return measured_tmp_gib * 2 + headroom_gib

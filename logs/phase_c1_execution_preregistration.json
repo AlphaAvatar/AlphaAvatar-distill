@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "761ce60590178a436eb339ecc983afc6f72f2c95",
+ "head_commit": "53bc27d0713ef47860e3b5296f9b28049ebe0436",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "fa545bfdf3740873e27ce4267157bdde9663218adcc528c1ff16b803f7338735",
+  "digest": "6ed749093c8fc38e0b1f8e51550ccb6419ed2ee9e9dad15c64b4a45210c2f2ed",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -91,8 +91,8 @@
    },
    {
     "path": "configs/experiments/phase_c1/authorization.json",
-    "sha256": "1e3fc023f76852fc5852efedef22efeaf892bfea4b6c1e247328de1c22ada279",
-    "bytes": 10485
+    "sha256": "ed1f5755a5ae268501c711592bf42b9d40b553275105b8002f581f95c721f9c6",
+    "bytes": 11434
    },
    {
     "path": "configs/experiments/phase_c1/frozen_assets.json",
@@ -206,8 +206,8 @@
    },
    {
     "path": "scripts/experiments/run_layout.py",
-    "sha256": "bdbfeed80bf7c6f3ba236d6299f26cc2bcaaabac787b665a593ab4d0f7f9f46a",
-    "bytes": 17594
+    "sha256": "52bae0e283ca93d6b9fb9a79447838bff96303b890062202dadc5d89d14ad4e3",
+    "bytes": 26006
    },
    {
     "path": "scripts/experiments/source_sets.py",
@@ -221,8 +221,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "f8126bce86568dfeabc28e453d8a646efe0921f202974b946c1f6eaa9a5caf3e",
-    "bytes": 75042
+    "sha256": "ab94b148a9fcae6b4f93dd590b34a40e265a4e3dba30dbaf57bfabc52e08188c",
+    "bytes": 76038
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "a4ea473bd8f844fb190f7f254e5ba0fb18bafbb106476c8791c94e3f5eec5c60"
+ "preregistration_sha256": "a6a98767956cf5af09d44e146780000813f2dab4ef549e8464bd9d8b2e9defac"
 }

@@ -2,6 +2,8 @@
  "schema": "aadistill.experiment_authorization_config/v1",
  "_contract": "The Phase-C1 INSTANCE data the authorization assembler needs: which committed objects to read, which money figures to refuse a mis-priced session against, and what the session's stage conditions say. Every value here was a literal inside src/aadistill until 2026-09-08. Moving it out is what lets the core be reused by another experiment. AUTHORIZES NOTHING: this is configuration, not a grant.",
  "experiment_id": "phase_c1",
+ "stage_id": "1",
+ "_stage_id_meaning": "Which PIPELINE STAGE this experiment belongs to, DECLARED by the maintainer rather than inferred from a name or from which code the pod happens to execute. C1 is Stage 1 -- projection and structural initialization. Its two arms are two Stage-1 initializations that differ in exactly one operator of DEPTH->FFN->RESIDUAL_WIDTH->ATTENTION, and the question it answers is which ATTENTION initialization to keep. The six 0.86M recovery probes it trains are the measuring INSTRUMENT for that question, not the subject: grouping the runs by the instrument would file an initialization experiment next to Stage-3 recovery work and lose what it is for. The PHASE is C, carried by experiment_id 'phase_c1'; the ATTEMPT is the run_id. Stage, phase and attempt are three dimensions and this field is only the first. Consumed by scripts/experiments/run_layout.py to place runs at logs/runs/stage-1/phase_c1/<run_id>/.",
  "authorization_id": "autoinit.v1.phase_c1",
  "plan_id": "autoinit.v1.phase_c1",
  "inputs": {

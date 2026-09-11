@@ -52,12 +52,13 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 from experiments.deployment import MAIN_RELAY, POD_IMAGE, deployment_commands  # noqa: E402
 from experiments.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, RUNS_ROOT, claim_output_root, layout_for,
-    open_run, present_roles, record_run, require_output_claim,
+    open_run, present_roles, record_run, require_output_claim, write_run_readmes,
 )
 from experiments.phase_c1 import session as CS
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
 from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
 from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
 from aadistill.runtime.staging_contract import derive_contract  # noqa: E402
 from experiments.phase_c1.pod_environment import (  # noqa: E402
     LAUNCH_BOUND,
@@ -217,6 +218,12 @@ BUNDLE_RECORD = "logs/autoinit_c1_bundle.json"
 #: the same series instead of starting a parallel one.
 RUN_EXPERIMENT_ID = "phase_c1"
 
+#: The pipeline stage this experiment's runs EXECUTE, read from the experiment's
+#: own configuration rather than decided here. C1 trains and evaluates Stage-3
+#: recovery probes to answer a Stage-1 question, under Phase C; the config
+#: carries that distinction and this module does not restate it.
+RUN_STAGE_ID = load_config(REPO_ROOT)["stage_id"]
+
 #: role -> path inside this run. Small, reviewable text only: the artifact
 #: TARBALL and the extracted tree stay in the scratch directory, and
 #: `artifacts/manifest.json` carries their hashes. A run manifest holds a
@@ -307,7 +314,8 @@ def session_record_path(run_id: str) -> str:
     writes to and the directory the run was created in cannot disagree. Two
     derivations of one path is how they drift.
     """
-    return str(Path(RUNS_ROOT) / RUN_EXPERIMENT_ID / run_id
+    return str(layout_for(REPO_ROOT, RUN_EXPERIMENT_ID, run_id,
+                          stage_id=RUN_STAGE_ID).root.relative_to(REPO_ROOT)
                / C1_RUN_ROLES["session_record"])
 
 
@@ -1305,7 +1313,8 @@ RUN_OUTPUTS: tuple[str, ...] = tuple(source for source, _ in _RUN_COLLECT)
 
 def layout_for_run(repo_root: Path | str, run_id: str):
     """This attempt's layout, without touching the filesystem."""
-    return layout_for(repo_root, RUN_EXPERIMENT_ID, run_id)
+    return layout_for(repo_root, RUN_EXPERIMENT_ID, run_id,
+                      stage_id=RUN_STAGE_ID)
 
 
 def open_c1_run(args, repo_root: Path | None = None):
@@ -1326,11 +1335,17 @@ def open_c1_run(args, repo_root: Path | None = None):
     claim_output_root(args.scr, RUN_EXPERIMENT_ID, args.run_id,
                       outputs=RUN_OUTPUTS)
     layout = open_run(repo_root, RUN_EXPERIMENT_ID, args.run_id,
-                      roles=C1_RUN_ROLES, prepared=_RUN_PREPARED)
+                      roles=C1_RUN_ROLES, prepared=_RUN_PREPARED,
+                      stage_id=RUN_STAGE_ID)
     for source, role in _RUN_GOVERNANCE:
         src = repo_root / source
         if src.is_file():
             shutil.copy2(src, layout.path(C1_RUN_ROLES[role]))
+    #: Describe the directories as they are created. Documentation only: the
+    #: manifest stays the canonical index, and a README neither counts as a
+    #: produced role nor makes an unexecuted run look like a failed one.
+    write_run_readmes(layout, experiment_id=RUN_EXPERIMENT_ID, run_id=args.run_id,
+                      stage_id=RUN_STAGE_ID, roles=C1_RUN_ROLES)
     #: Idempotent for a parser-built namespace, and the whole answer for a
     #: hand-built one. Same rule either way -- see `session_record_path`.
     args.out = session_record_path(args.run_id)

@@ -1,0 +1,24 @@
+[16:49:05] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[16:49:06] NVIDIA L40S $1.09/h, stock Low
+[16:49:06] session commit 53bc27d0713e verified: harness digests to fa545bfdf374…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[16:49:06] grant 41d6b4ce921e… at logs/runs/phase_c1/attempt12/governance/grant.json, as recorded by the authorization
+[16:49:06] C1 harness fa545bfdf374… over 99 declared files
+[16:49:06] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[16:49:07] preregistration a4ea473bd8f8… (self-hash verified), harness fa545bfdf374…
+[16:49:07] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[16:49:08] frozen assets verified against configs/experiments/phase_c1/frozen_assets.json
+[16:49:08] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[16:49:08] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[16:49:08] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[16:49:10] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[16:49:12] aad_autoinit_53bc27d0.bundle (9543307 bytes, 9573d4fc285e…) round-trips to 53bc27d0713e… carrying this authorization and harness fa545bfdf374…
+[16:49:15] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[16:49:16] pod sweep 3684 passed / 113 skipped / 0 failed, leaf_transport ok, renderer_parity ok, binds C1 harness fa545bfdf374… and environment ece4c070a28f…, staging contract 74192f5b7198…, swept at 5f3161c2 with only ['logs/autoinit_c1_authorization.json', 'logs/c1_pod_environment_verification.json'] differs from the swept base
+[16:49:17] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[16:49:18] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[16:49:18] ABORT: could not create a pod

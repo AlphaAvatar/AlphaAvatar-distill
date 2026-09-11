@@ -55,7 +55,7 @@ from experiments.deployment import (  # noqa: E402
     POD_IMAGE, provider_cli_candidates)
 from experiments.run_layout import (  # noqa: E402
     ArtifactSpec, RUNS_ROOT, claim_output_root, open_run, present_roles,
-    record_run, require_output_claim,
+    record_run, require_output_claim, write_run_readmes,
 )
 
 #: This validation's key in `logs/runs/` and in the run index.
@@ -65,6 +65,12 @@ from experiments.run_layout import (  # noqa: E402
 #: outside the run root. The dry run found this at `$0`, in a line only a
 #: completed run reaches.
 RUN_EXPERIMENT_ID = "cuda_stage_f"
+
+#: NOT a pipeline stage. This validates that a CUDA device executes an operator
+#: correctly; it trains nothing, evaluates nothing and produces no stage
+#: artifact. Filing it under whichever stage the operator happens to belong to
+#: would make "show me Stage 3 runs" return an engineering probe.
+RUN_STAGE_ID = "shared"
 
 #: role -> path inside this run. NOT C1's vocabulary: this validation has no
 #: authorization snapshot to keep, no bundle, no driver evidence and no probe
@@ -737,7 +743,11 @@ print(json.dumps(out)); print("PROBE_OK")
         #: recorded has to be what THIS subrun produced.
         require_output_claim(self.scr, RUN_EXPERIMENT_ID, self.a.run_id)
         layout = open_run(repo_root, RUN_EXPERIMENT_ID, self.a.run_id,
+                          stage_id=RUN_STAGE_ID,
                           roles=RUN_ROLES)
+        write_run_readmes(layout, experiment_id=RUN_EXPERIMENT_ID,
+                          run_id=self.a.run_id,
+                          stage_id=RUN_STAGE_ID, roles=RUN_ROLES)
         layout.path(RUN_ROLES["evidence"]).write_text(
             json.dumps(self.ev, indent=1) + "\n")
         for src_name, role in (("validation_stdout.txt", "validation_stdout"),

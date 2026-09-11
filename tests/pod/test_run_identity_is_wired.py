@@ -96,7 +96,7 @@ def test_the_parser_still_produces_every_attribute_the_runner_reads(L):
 
     args = session_args(L)
     assert not missing_arguments(args)
-    assert args.out == f"{RUNS_ROOT}/phase_c1/{args.run_id}/runtime/session.json"
+    assert args.out == L.session_record_path(args.run_id)
 
 
 def test_the_parser_and_the_open_derive_the_same_path(tmp_path, L):
@@ -117,7 +117,7 @@ def test_the_session_record_is_written_inside_the_run(tmp_path, L):
     repo = _fake_repo(tmp_path, L)
     args = _args(tmp_path)
     layout = L.open_c1_run(args, repo)
-    assert args.out == f"{RUNS_ROOT}/phase_c1/attempt10/runtime/session.json"
+    assert args.out == L.session_record_path("attempt10")
     assert layout.rel_root == "phase_c1/attempt10"
     #: The parent exists, which `SessionRunner.save()` does not create.
     assert (repo / args.out).parent.is_dir()
@@ -148,8 +148,9 @@ def test_an_absent_governance_artifact_does_not_stop_the_run(tmp_path, L):
 
 def _place_grant(repo, L, run_id="attempt10", body='{"granted_by": "m"}\n'):
     """What a maintainer commits before the readiness sweep."""
-    p = (repo / L.RUNS_ROOT / L.RUN_EXPERIMENT_ID / run_id
-         / L.C1_RUN_ROLES["grant"])
+    #: Derived from the launcher, not rebuilt here: a second derivation of one
+    #: path is how the two drift when a stage level is inserted between them.
+    p = L.layout_for_run(repo, run_id).root / L.C1_RUN_ROLES["grant"]
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(body)
     return p
@@ -179,7 +180,8 @@ def test_the_grant_is_recorded_as_one_of_the_runs_roles(tmp_path, L):
     layout = L.open_c1_run(args, repo)
     _write_session(repo, args)
     L.close_c1_run(layout, args, repo)
-    roles = read_run(repo, L.RUN_EXPERIMENT_ID, "attempt10")["roles"]
+    roles = read_run(repo, L.RUN_EXPERIMENT_ID, "attempt10",
+                 L.RUN_STAGE_ID)["roles"]
     assert roles["grant"] == L.C1_RUN_ROLES["grant"]
 
 
@@ -187,7 +189,7 @@ def test_a_dead_launchers_evidence_still_refuses_even_beside_a_grant(tmp_path, L
     """The exemption is for the grant, not for the run directory."""
     repo = _fake_repo(tmp_path, L)
     _place_grant(repo, L)
-    stale = (repo / L.RUNS_ROOT / L.RUN_EXPERIMENT_ID / "attempt10"
+    stale = (L.layout_for_run(repo, "attempt10").root
              / L.C1_RUN_ROLES["driver_evidence"])
     stale.parent.mkdir(parents=True, exist_ok=True)
     stale.write_text("{}\n")
@@ -262,7 +264,8 @@ def test_a_completed_session_records_every_role_it_produced(tmp_path, L):
     assert doc["status"]["passed"] is True
     assert doc["status"]["cost"]["actual_usd"] == 1.044
     assert doc["authorizes"] == "nothing"
-    assert read_run(repo, "phase_c1", "attempt10")["self_sha256"] == doc["self_sha256"]
+    assert read_run(repo, "phase_c1", "attempt10",
+                L.RUN_STAGE_ID)["self_sha256"] == doc["self_sha256"]
 
 
 def test_a_setup_abort_records_the_session_record_alone(tmp_path, L):
@@ -393,7 +396,7 @@ def test_the_cuda_validation_records_its_run_too(tmp_path):
               "subrun_cost_usd": 0.0182, "campaign_cost_after_usd": 0.04}
     eng.write_evidence(repo)
 
-    doc = read_run(repo, "cuda_stage_f", "cuda_stage_f_20260911_s1")
+    doc = read_run(repo, "cuda_stage_f", "cuda_stage_f_20260911_s1", "shared")
     assert set(doc["roles"]) == {"evidence", "validation_stdout", "artifacts"}
     assert doc["status"]["verdict"] == "CUDA ENGINEERING VALIDATION PASS"
     assert doc["status"]["subrun_cost_usd"] == 0.0182
@@ -471,9 +474,21 @@ def test_this_repositorys_index_still_accounts_for_every_run_on_disk():
     ri = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ri)
 
-    on_disk = {(p.parent.name, p.name)
-               for p in (REPO / "logs/runs").glob("*/*") if p.is_dir()
-               and any(q.is_file() for q in p.rglob("*"))}
+    #: Both layouts, scanned independently of the module under test. This had
+    #: the same fixed `*/*` assumption the index had, so the moment a stage
+    #: level appeared it started reporting `stage-1/phase_c1` -- a grouping
+    #: directory holding a README -- as an unaccounted run.
+    runs_root = REPO / "logs/runs"
+
+    def _is_run(d):
+        return d.is_dir() and any(
+            q.is_file() and q.name != "README.md" for q in d.rglob("*"))
+
+    on_disk = {(d.parent.name, d.name)
+               for d in runs_root.glob("*/*")
+               if not d.parent.name.startswith("stage-") and _is_run(d)}
+    on_disk |= {(d.parent.name, d.name)
+                for d in runs_root.glob("stage-*/*/*") if _is_run(d)}
     index = ri.build_index(REPO)
     accounted = {(r["experiment_id"], r["run_id"])
                  for r in index["runs"] if r["layout_version"] != 1}
@@ -510,3 +525,74 @@ def test_a_prepared_run_is_reported_as_prepared_not_as_a_dead_launcher(tmp_path)
     assert "PREPARED but not executed" in found["attempt_prepared"]
     assert "did not reach its closeout" in found["attempt_died"]
     assert "PREPARED" not in found["attempt_died"]
+
+
+# --- the stage grouping reaches the index and the launcher, not just the docs -
+
+def test_the_launcher_writes_under_its_declared_stage(L):
+    """The failure this guards: a directory diagram showing the new structure
+    while the launcher still writes the old one."""
+    import json as _json
+
+    cfg = _json.loads(
+        (REPO / "configs/experiments/phase_c1/authorization.json").read_text())
+    assert L.RUN_STAGE_ID == cfg["stage_id"], (
+        "the launcher's stage is not the one the experiment config declares")
+    assert L.session_record_path("attempt_x") == (
+        f"logs/runs/stage-{cfg['stage_id']}/phase_c1/attempt_x/runtime/session.json")
+    assert L.layout_for_run(REPO, "attempt_x").root.as_posix().endswith(
+        f"logs/runs/stage-{cfg['stage_id']}/phase_c1/attempt_x")
+
+
+def test_the_stage_is_declared_by_config_not_inferred_from_the_name():
+    """`phase_c1` is an experiment id. Reading a stage out of it would make
+    phase and stage the same dimension, which they are not."""
+    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    assert 'load_config(REPO_ROOT)["stage_id"]' in src
+    assert 'RUN_STAGE_ID = "3"' not in src, "the stage was hard-coded in the launcher"
+
+
+def test_the_index_discovers_both_layouts(tmp_path):
+    """A fixed two-level glob would make every stage-grouped run invisible
+    while the index went on reporting a confident total."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "rri", REPO / "scripts/architecture/record_run_index.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    from experiments.run_layout import open_run, record_run, present_roles, ArtifactSpec
+    roles = {"session_record": "runtime/session.json"}
+    art = ArtifactSpec(spec_id="t", required=("session_record",))
+    for stage, exp, run in [(None, "legacy_exp", "r1"), ("3", "staged_exp", "r1")]:
+        lay = open_run(tmp_path, exp, run, roles=roles, stage_id=stage)
+        (lay.path("runtime/session.json")).write_text("{}\n")
+        record_run(lay, spec=art, plan={}, implementation={}, status={},
+                   roles=present_roles(lay, roles))
+
+    found = {(r["experiment_id"], r.get("stage")) for r in mod.discover_v3(tmp_path)}
+    assert ("legacy_exp", None) in found, "the legacy two-level run was lost"
+    assert ("staged_exp", "3") in found, "the stage-grouped run was not discovered"
+
+
+def test_a_directory_holding_only_a_readme_is_not_a_dead_run(tmp_path):
+    """It has not executed and it has not failed. Reporting it as unrecorded
+    would describe a launcher that died where nothing ever started."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "rri2", REPO / "scripts/architecture/record_run_index.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    described = tmp_path / "logs/runs/stage-3/some_exp/prepared_only"
+    described.mkdir(parents=True)
+    (described / "README.md").write_text("# what goes here\n")
+    died = tmp_path / "logs/runs/stage-3/some_exp/died"
+    (died / "evidence").mkdir(parents=True)
+    (died / "evidence" / "partial.json").write_text("{}\n")
+
+    ids = {u["run_id"] for u in mod.discover_unrecorded(tmp_path)}
+    assert "died" in ids, "a launcher that died was not reported"
+    assert "prepared_only" not in ids, "a described-but-unstarted run was reported"

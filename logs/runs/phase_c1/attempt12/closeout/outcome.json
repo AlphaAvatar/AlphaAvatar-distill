@@ -1,0 +1,53 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the closeout of C1 attempt 12, which cost nothing because no provider resource was ever created.",
+
+ "attempt": 12,
+ "package": "phase_c1.execution_package.2026-09-11",
+ "terminal_marker": null,
+ "abort_reason": "create_failed_no_capacity",
+ "classification": "ZERO-DOLLAR PRE-PROVIDER REFUSAL. The provider declined to create an instance, so nothing was created, nothing billed and nothing needed tearing down.",
+
+ "what_ran": {
+  "pre_provider_gates": "14 of 14 passed, twice -- once in a read-only pre-flight that did not invoke the launcher, and again by the launcher itself",
+  "provider_create_calls": 1,
+  "provider_resource_created": false,
+  "setup_started": false,
+  "driver_started": false,
+  "probes_trained": 0,
+  "probes_evaluated": 0,
+  "decision_ran": false
+ },
+
+ "the_failure": {
+  "provider_message": "There are no longer any instances available with the requested specifications. Please refresh and try again.",
+  "raw_evidence": "/home/ecs-user/aad-scratch/sessions/c1-attempt12/create_raw_1.txt",
+  "stock_status_at_quote": "Low",
+  "quoted_price_per_hour": 1.09,
+  "what_it_is": "capacity, not configuration. The quote was the accepted rate, the gates all passed, and the request was simply not satisfiable at that moment.",
+  "why_host_draws_did_not_help": "draws replace a host that was CREATED and then never became usable -- cold, or no endpoint. Here creation itself was refused, so there was no resource to replace. The batch of three covers attempt 11's failure mode, not this one.",
+  "why_create_attempts_stays_one": "a create-attempt sleeps and asks the same market again, which is stock chasing and is not authorized. Backing off at $0 and choosing a better moment is the handling this package permits."
+ },
+
+ "cost": {
+  "actual_usd": 0.0,
+  "provider_resource_created": false,
+  "cumulative_unchanged_usd": 268.2958,
+  "package_booked_unchanged_usd": 0.396
+ },
+
+ "retry_assessment": {
+  "eligible_under_the_package": true,
+  "conditions": {
+   "no_formal_probe_training_started": "CONFIRMED -- no pod existed",
+   "ordinary_infrastructure_failure_with_cause_handled": "yes: a supplier transient. The package states that backing off and requesting a host at a better moment IS the handling, and that no repository change is required for one.",
+   "frozen_science_input_contracts_and_decision_rule_unchanged": "yes",
+   "previous_resource_confirmed_not_billing": "vacuous -- none was created; the inventory was polled and was empty",
+   "balance_sufficient": "yes, $51.0465 of package remains",
+   "new_run_identity_and_fresh_one_use_chain": "required for the next session: this authorization was consumed at invocation"
+  },
+  "handling": "a $0 read-only capacity watch was started rather than repeating the create; the next session is built only once capacity exists, because the one-use chain is consumed at invocation and should not be spent on a market that cannot serve it."
+ },
+
+ "authorizes": "nothing"
+}

@@ -305,7 +305,9 @@
      "free_gib_after": 60.71,
      "gate_required_gib": 40.0,
      "gate_result": "PASS",
-     "note": "same filesystem as the repository, /tmp and aad-scratch: one device, /dev/nvme0n1p3"
+     "note": "same filesystem as the repository, /tmp and aad-scratch: one device, /dev/nvme0n1p3",
+     "_measurement_vs_threshold": "60.71 GiB is a MEASUREMENT of free space after this cleanup. 40 GiB was the target this cleanup was asked to reach. 24 GiB is a separate ADMISSION THRESHOLD that one operation -- the pod-like sweep -- checks before it moves anything, derived from that sweep's own footprint. Three different numbers with three different owners: none of them licenses the others, and a future operation with a larger footprint needs its own threshold rather than inheriting this one.",
+     "gate_required_gib_meaning": "the 40 GiB floor this cleanup was asked to clear, not a standing admission gate"
     },
     "out_of_tree_artifact_store": {
      "definition": "/home/ecs-user/aad-artifacts",

@@ -4,8 +4,8 @@
  "granularity": "one entry per (experiment_id, run_id). The v1 index counted artifact roots, so an attempt with an evidence directory and a grant file appeared twice.",
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 2,
-  "runs_unrecorded": 4,
+  "runs_current": 3,
+  "runs_unrecorded": 3,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": 5,
@@ -626,6 +626,8 @@
   {
    "experiment_id": "phase_c1",
    "run_id": "attempt10",
+   "stage": null,
+   "layout": "legacy_two_level",
    "layout_version": 3,
    "components": {
     "root": "logs/runs/phase_c1/attempt10",
@@ -637,6 +639,8 @@
   {
    "experiment_id": "phase_c1",
    "run_id": "attempt11",
+   "stage": null,
+   "layout": "legacy_two_level",
    "layout_version": 3,
    "components": {
     "root": "logs/runs/phase_c1/attempt11",
@@ -644,6 +648,19 @@
    },
    "manifest_sha256": "bba1347fdad9dd7c25f997ab9f0e5c6a72cc52d8493e1da1dffe69460a273850",
    "n_components": 7
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt12",
+   "stage": null,
+   "layout": "legacy_two_level",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/runs/phase_c1/attempt12",
+    "manifest": "logs/runs/phase_c1/attempt12/manifest.json"
+   },
+   "manifest_sha256": "2e594a7d48ef6823ecf12168e6a10c951921673e85b78a068f61a84696ca43a2",
+   "n_components": 6
   }
  ],
  "unrecorded": [
@@ -670,14 +687,6 @@
    "n_files": 64,
    "digest": "1be716ca99d150e40b76258c272d3aab71fd16212e6dc4d4dbfa77c7a047501c",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
-  },
-  {
-   "experiment_id": "phase_c1",
-   "run_id": "attempt12",
-   "root": "logs/runs/phase_c1/attempt12",
-   "n_files": 1,
-   "digest": "e68675b58601293ca6564f4cad96a8d321aaa04c367df3dae903c28608d7bca4",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

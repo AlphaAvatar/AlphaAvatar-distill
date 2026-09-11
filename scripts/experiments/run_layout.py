@@ -9,13 +9,21 @@ benchmark and a Phase-C isolation session without a source change.
 This module is that caller — the one place in AlphaAvatar-distill that says the
 root is `logs/runs` and that a run's files are grouped into five areas:
 
-    logs/runs/<experiment_id>/<run_id>/
+    logs/runs/stage-<stage_id>/<experiment_id>/<run_id>/
         manifest.json     the run's index; written by the run itself
+        README.md         what this directory is; documentation, never evidence
         governance/       what permitted the run: grant, authorization, bundle
         runtime/          how it executed: session record, launcher log, watchdog
         evidence/         what it observed: driver evidence, replay records
         artifacts/        what it produced or brought home
         closeout/         how it ended: outcome, cost, teardown confirmation
+
+The stage is DECLARED by the experiment's config and passed in; it is not
+inferred from a name. Runs that predate the stage grouping stay at
+`logs/runs/<experiment_id>/<run_id>/` and are found there — their grants,
+readiness records and closeouts name those paths, and moving a run whose
+identity was issued against its location breaks the lineage that makes it
+evidence. One index reads both.
 
 The areas are a repository convention and nothing more. **Which roles exist
 inside them is the experiment's vocabulary**, declared by the experiment through
@@ -48,8 +56,33 @@ from aadistill.runtime.run_layout import (  # noqa: E402
 #: it is written down.
 RUNS_ROOT = "logs/runs"
 
+#: New runs are grouped by the pipeline stage their work belongs to:
+#:
+#:     logs/runs/stage-<stage_id>/<experiment_id>/<run_id>/
+#:
+#: The stage is DECLARED by the experiment's configuration and passed in. It is
+#: never inferred from an experiment name, a directory name or the string "c1":
+#: phase (A/B/C), pipeline stage (0-6) and attempt are three different
+#: dimensions, and collapsing them is how `phase_c1` came to look like a stage.
+#:
+#: `shared` exists because not all managed work is a pipeline stage. Storage
+#: maintenance, CUDA engineering validation and cross-stage infrastructure runs
+#: get an explicit bucket rather than being filed under whichever stage they
+#: touched last.
+STAGE_PREFIX = "stage-"
+PIPELINE_STAGES = tuple(str(i) for i in range(7))
+NON_PIPELINE_STAGES = ("shared",)
+
 #: The run's own index, inside the run.
 MANIFEST_NAME = "manifest.json"
+
+#: The one file permitted in a run's own root beside its manifest.
+#:
+#: Named explicitly, not matched by extension. "Ignore Markdown" would let any
+#: .md file accumulate unowned in a run root, which is the habit the five areas
+#: exist to prevent; this is one filename, and `open_run` still refuses every
+#: other pre-existing file.
+README_NAME = "README.md"
 
 #: The five areas, and what each one answers. A role path must begin with one of
 #: them. Ordered as a run moves through them, which is also the order a reader
@@ -102,12 +135,19 @@ def area_of(relative: str) -> str:
         raise RunConventionError(
             f"{relative!r} contains a traversal segment; a role names a path "
             "inside its area, not a route out of it")
+    #: The run's own README is the ONE root file besides the manifest. It is
+    #: matched by exact name: a rule that ignored `*.md` would let any Markdown
+    #: accumulate in a run root unowned, which is what the five areas exist to
+    #: prevent. A README describes the directory; it is never evidence, never a
+    #: product, and never proof that the run executed.
+    if relative == README_NAME:
+        return "root"
     head, sep, _ = relative.partition("/")
     if head not in AREAS:
         raise RunConventionError(
             f"{relative!r} is not inside one of {list(AREAS)}. A run's own root "
-            f"holds {MANIFEST_NAME} and nothing else, so that every file in a "
-            "run has a declared owner")
+            f"holds {MANIFEST_NAME}, {README_NAME} and nothing else, so that "
+            "every file in a run has a declared owner")
     if not sep:
         raise RunConventionError(
             f"{relative!r} names the area itself; write {relative}/ for the whole "
@@ -121,10 +161,48 @@ def check_roles(roles: Mapping[str, str]) -> None:
         area_of(rel)
 
 
-def layout_for(repo_root: Path | str, experiment_id: str,
-               run_id: str) -> RunLayout:
-    """This run's layout. Creates nothing and checks nothing on disk."""
-    return RunLayout(run_root=Path(repo_root) / RUNS_ROOT,
+def stage_segment(stage_id: str) -> str:
+    """`stage-3`, `stage-shared`. Refuses anything undeclared.
+
+    A stage id is a DECLARATION, so an unrecognised one is an error rather than
+    a new directory: the failure mode this prevents is a typo silently creating
+    `logs/runs/stage-c1/` and a second place for one experiment's runs to live.
+    """
+    known = PIPELINE_STAGES + NON_PIPELINE_STAGES
+    if stage_id not in known:
+        raise RunConventionError(
+            f"stage_id {stage_id!r} is not one of {list(known)}. The pipeline "
+            "stages are 0-6; work that is not a pipeline stage -- storage "
+            "maintenance, engineering validation, cross-stage infrastructure -- "
+            "is declared 'shared' rather than filed under a stage it merely "
+            "touched. Phase (A/B/C) and attempt are different dimensions and "
+            "are not stage ids.")
+    return f"{STAGE_PREFIX}{stage_id}"
+
+
+def runs_root_for(repo_root: Path | str, stage_id: str | None) -> Path:
+    """Where runs of a given stage live.
+
+    `stage_id=None` is the LEGACY root, `logs/runs/<experiment_id>/<run_id>/`.
+    It exists to read attempts 1-12 and the CUDA subruns where they are: those
+    have issued or frozen identities, and moving a run whose grant, readiness
+    record and closeout all name its path would break the lineage that makes it
+    evidence. New runs declare a stage; old runs are found, not relocated.
+    """
+    base = Path(repo_root) / RUNS_ROOT
+    return base if stage_id is None else base / stage_segment(stage_id)
+
+
+def layout_for(repo_root: Path | str, experiment_id: str, run_id: str,
+               stage_id: str | None = None) -> RunLayout:
+    """This run's layout. Creates nothing and checks nothing on disk.
+
+    `stage_id` is the experiment's declaration. It defaults to None so the
+    legacy root stays readable by every existing caller, and so that a caller
+    which has not yet declared a stage fails by writing where it always did
+    rather than by writing somewhere new and unindexed.
+    """
+    return RunLayout(run_root=runs_root_for(repo_root, stage_id),
                      experiment_id=experiment_id, run_id=run_id)
 
 
@@ -139,7 +217,8 @@ def is_recorded(layout: RunLayout) -> bool:
 
 def open_run(repo_root: Path | str, experiment_id: str, run_id: str, *,
              roles: Mapping[str, str],
-             prepared: Iterable[str] = ()) -> RunLayout:
+             prepared: Iterable[str] = (),
+             stage_id: str | None = None) -> RunLayout:
     """Create this run's directories, refusing to write into an occupied one.
 
     A recorded run is finished: its manifest names paths and a status that a
@@ -182,7 +261,7 @@ def open_run(repo_root: Path | str, experiment_id: str, run_id: str, *,
             "prepared input is exempted from the occupancy rule, so it has to "
             "be a role this run will record an owner for; an undeclared name "
             "would exempt a path nothing is accountable for")
-    layout = layout_for(repo_root, experiment_id, run_id)
+    layout = layout_for(repo_root, experiment_id, run_id, stage_id)
     if is_recorded(layout):
         raise RunConventionError(
             f"{layout.rel_root} is already recorded ({MANIFEST_NAME} exists). "
@@ -192,6 +271,12 @@ def open_run(repo_root: Path | str, experiment_id: str, run_id: str, *,
     #: role exempts exactly itself.
     exempt_files = {roles[r] for r in prepared if not roles[r].endswith("/")}
     exempt_trees = tuple(roles[r] for r in prepared if roles[r].endswith("/"))
+    #: And the README, by name. A directory that already carries its own
+    #: description is not a dead launcher's residue -- but this exempts exactly
+    #: one filename, so a run root holding anything else is still refused, and a
+    #: run holding ONLY a README is still an unexecuted run rather than a
+    #: failed one.
+    exempt_files.add(README_NAME)
     occupied = sorted(
         rel for rel in (p.relative_to(layout.root).as_posix()
                         for p in layout.root.rglob("*") if p.is_file())
@@ -327,10 +412,10 @@ def record_run(layout: RunLayout, *, spec: ArtifactSpec,
     return doc
 
 
-def read_run(repo_root: Path | str, experiment_id: str,
-             run_id: str) -> dict[str, Any]:
+def read_run(repo_root: Path | str, experiment_id: str, run_id: str,
+             stage_id: str | None = None) -> dict[str, Any]:
     """One recorded run's manifest, verified before it is returned."""
-    layout = layout_for(repo_root, experiment_id, run_id)
+    layout = layout_for(repo_root, experiment_id, run_id, stage_id)
     path = manifest_path(layout)
     if not path.is_file():
         raise RunConventionError(f"{layout.rel_root} has no {MANIFEST_NAME}")
@@ -358,11 +443,91 @@ def present_roles(layout: RunLayout,
     for role, rel in roles.items():
         target = layout.path(rel)
         if target.is_dir():
-            if any(target.rglob("*")):
+            #: A README does not count as content. It describes the area; it is
+            #: not something the run produced, and a whole-directory role whose
+            #: only file is its own description would otherwise be reported as
+            #: an artifact the run made.
+            if any(q.name != README_NAME for q in target.rglob("*") if q.is_file()):
                 out[role] = rel
         elif target.exists():
             out[role] = rel
     return out
+
+
+#: What each area is for, in one line. The run-level README links the manifest;
+#: these say what belongs in the directory they sit in, so a reader who opens
+#: `evidence/` knows why it is not `artifacts/`.
+AREA_PURPOSE: dict[str, str] = {
+    "governance": ("what permitted this run: the maintainer grant, the one-use "
+                   "authorization, the readiness record and the bundle record. "
+                   "INPUTS and one-use snapshots, not products."),
+    "runtime": ("how it executed: the session record the runner writes on every "
+                "path, the launcher console, the watchdog journal."),
+    "evidence": ("what it observed: driver evidence, replay records, the marker "
+                 "stream. Observations, not conclusions."),
+    "artifacts": ("what it produced or brought home. Large objects stay in the "
+                  "session scratch and are referenced by hash from "
+                  "`artifacts/manifest.json`; this directory holds reviewable "
+                  "text."),
+    "closeout": ("how it ended: the outcome classification, the measured cost "
+                 "and the provider teardown confirmation."),
+}
+
+
+def write_run_readmes(layout: RunLayout, *, experiment_id: str, run_id: str,
+                      stage_id: str | None, roles: Mapping[str, str]) -> list[str]:
+    """Describe this run's directories. Documentation only.
+
+    A README here is never evidence, never a product and never proof that the
+    run executed: `present_roles` ignores it, `record_run_index` does not count
+    a README-only directory as a run, and nothing derived from a run reads one.
+
+    It also does not restate facts that have an owner. No cumulative cost, no
+    current `main` SHA, no authorization status, no result -- those live in the
+    ledger, in git and in the manifest, and a second hand-maintained copy is how
+    they go stale. What it carries is what this directory is for, and where the
+    canonical index is.
+    """
+    written: list[str] = []
+    where = f"stage-{stage_id}/" if stage_id else ""
+    rows = "".join(f"| `{a}/` | {AREA_PURPOSE[a]} |\n" for a in AREAS)
+    (layout.root / README_NAME).write_text(
+        f"# {experiment_id} / {run_id}\n"
+        f"\n"
+        f"One run of `{experiment_id}`, at "
+        f"`logs/runs/{where}{experiment_id}/{run_id}/`.\n"
+        f"\n"
+        f"**Canonical index: `{MANIFEST_NAME}` in this directory.** It names "
+        f"every role this run recorded, its status and its cost. Read it rather "
+        f"than this file for anything factual: this README describes the layout "
+        f"and is not evidence that the run executed, succeeded or was "
+        f"authorized.\n"
+        f"\n"
+        f"| area | what is in it |\n"
+        f"| --- | --- |\n"
+        f"{rows}"
+        f"\n"
+        f"The repository-wide index of every run is `logs/runs/index.json`.\n")
+    written.append(README_NAME)
+    for area in AREAS:
+        d = layout.root / area
+        if not d.is_dir():
+            continue
+        mine = sorted(r for r, rel in roles.items() if rel.split("/")[0] == area)
+        declares = ("Roles this run declares here: "
+                    + ", ".join(f"`{m}`" for m in mine) + ".\n"
+                    if mine else
+                    "This run declares no role in this area.\n")
+        (d / README_NAME).write_text(
+            f"# {area}/\n"
+            f"\n"
+            f"{AREA_PURPOSE[area]}\n"
+            f"\n"
+            f"{declares}"
+            f"\n"
+            f"Described by `../{MANIFEST_NAME}`, which is authoritative.\n")
+        written.append(f"{area}/{README_NAME}")
+    return written
 
 
 __all__ = ["AREAS", "CLAIM_NAME", "CLAIM_SCHEMA", "MANIFEST_NAME",

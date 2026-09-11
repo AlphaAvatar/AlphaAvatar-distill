@@ -105,15 +105,25 @@ def discover_v3(repo_root: Path) -> list[dict]:
     out: list[dict] = []
     if not runs_root.is_dir():
         return out
-    for manifest in sorted(runs_root.glob("*/*/manifest.json")):
+    #: BOTH layouts. New runs are grouped by declared stage --
+    #: `stage-<id>/<experiment>/<run>` -- and the runs that already exist are
+    #: two levels deep. A fixed `*/*` glob found only the second, so adding the
+    #: stage level would have made every new run invisible to the index while
+    #: the index went on reporting a confident total.
+    for manifest in sorted({*runs_root.glob("*/*/manifest.json"),
+                            *runs_root.glob("*/*/*/manifest.json")}):
         doc = json.loads(manifest.read_text())
         if doc.get("schema") != MANIFEST_SCHEMA:
             continue
+        rel = manifest.parent.relative_to(repo_root).as_posix()
+        stage = (manifest.parent.parent.parent.name
+                 if manifest.parent.parent.parent != runs_root else None)
         out.append({
             "experiment_id": doc["experiment_id"], "run_id": doc["run_id"],
+            "stage": stage.removeprefix("stage-") if stage else None,
+            "layout": "stage_grouped" if stage else "legacy_two_level",
             "layout_version": doc["layout_version"],
-            "components": {"root": f"logs/runs/{doc['root']}",
-                           "manifest": f"logs/runs/{doc['root']}/manifest.json"},
+            "components": {"root": rel, "manifest": f"{rel}/manifest.json"},
             "manifest_sha256": doc["self_sha256"],
             "n_components": len(doc.get("roles") or {}),
         })
@@ -142,7 +152,12 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
     out: list[dict] = []
     if not runs_root.is_dir():
         return out
-    for run_dir in sorted(p for p in runs_root.glob("*/*") if p.is_dir()):
+    #: Both layouts, and a stage directory is not itself a run: `stage-3` holds
+    #: experiments, so only its grandchildren are candidates.
+    candidates = {p for p in runs_root.glob("*/*") if p.is_dir()
+                  and not p.parent.name.startswith("stage-")}
+    candidates |= {p for p in runs_root.glob("stage-*/*/*") if p.is_dir()}
+    for run_dir in sorted(candidates):
         manifest = run_dir / "manifest.json"
         if manifest.is_file():
             try:
@@ -151,7 +166,11 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
             except json.JSONDecodeError:
                 pass
         files = [p for p in run_dir.rglob("*") if p.is_file()]
-        if not files:
+        #: A directory holding only its own README has not executed and has not
+        #: failed. Counting it as an unrecorded run would report a launcher that
+        #: died where nothing ever started.
+        described_only = {p.name for p in files} == {"README.md"}
+        if not files or described_only:
             continue
         rel = run_dir.relative_to(repo_root).as_posix()
         #: A run whose only files are governance inputs has not executed — it is
