@@ -59,12 +59,10 @@ def _accepted_cap_usd() -> float:
     a number the subject owns is a second source for it, which is the failure
     this whole file exists to police elsewhere.
 
-    Imported through the PACKAGE. `write_candidate` reaches the same module by
-    putting `scripts/experiments/phase_c1` on `sys.path`, which is survivable
-    inside a function and is not survivable at module scope: that directory
-    holds `session.py`, `authorization.py`, `bundle.py` and `scoring.py`, and
-    making them importable as top-level names during collection shadows
-    whatever else in the suite imports those names.
+    Imported through the PACKAGE, like everything else that reaches this
+    module. Putting `scripts/experiments/phase_c1` on `sys.path` is never safe:
+    it holds `packaging.py`, which shadows the third-party `packaging`
+    distribution for the whole process.
     """
     from experiments.phase_c1.authorization_payload import load_config
 
@@ -84,9 +82,21 @@ TEST_GRANT = {
 
 
 def write_candidate(tmp_path, **over):
-    """A deterministic candidate authorization in `tmp_path`. Returns its path."""
-    sys.path.insert(0, str(REPO / "scripts/experiments/phase_c1"))
-    from authorization_payload import build_c1_authorization_payload
+    """A deterministic candidate authorization in `tmp_path`. Returns its path.
+
+    Imported through the PACKAGE, never by putting
+    `scripts/experiments/phase_c1` on `sys.path`. That directory contains
+    `packaging.py`, which SHADOWS the third-party `packaging` distribution, so
+    the first later module to import transformers dies with
+    `cannot import name 'version' from 'packaging'`. `sys.path` is
+    process-global: a function-scope insert is not scoped to the function, it
+    just takes a particular module ordering to expose. An earlier comment in
+    this file claimed such an insert was "survivable inside a function"; it is
+    not, and 17 collection errors in an unrelated module are what that claim
+    was worth.
+    """
+    from experiments.phase_c1.authorization_payload import (
+        build_c1_authorization_payload)
 
     payload = build_c1_authorization_payload(
         grant=TEST_GRANT, session_commit=TEST_SESSION_COMMIT,
@@ -809,8 +819,8 @@ def test_the_grant_role_is_declared_and_is_not_snapshotted(L_unused=None):
 # candidate sweep. These are the $0 checks that close that gap.
 
 def _issued_payload(tmp_path):
-    sys.path.insert(0, str(REPO / "scripts/experiments/phase_c1"))
-    from authorization_payload import build_c1_authorization_payload
+    from experiments.phase_c1.authorization_payload import (
+        build_c1_authorization_payload)
 
     return build_c1_authorization_payload(
         grant=TEST_GRANT, session_commit=TEST_SESSION_COMMIT,

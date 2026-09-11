@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 99,
- "digest": "4606781b2a2f46c3b2a570395100fafca5a7351986902f23f4f332c96293dc3b",
+ "digest": "c3c4e0ecfc78fbda64afb7ccbc6e69d0e46b12635b654b5d8a06f116ad3c5de7",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -54,8 +54,8 @@
   },
   {
    "path": "scripts/autoinit/issue_c1_authorization.py",
-   "sha256": "b0123a320429a82a1d3d65afd550deeafe00b731b495956cc0b1c1247b68ab81",
-   "bytes": 6524
+   "sha256": "f995fbfd3926ce8c7722d2d27390ac933ce088a3abf1ad01aaa67e92f1453f11",
+   "bytes": 6766
   },
   {
    "path": "scripts/autoinit/renderer_parity_gate.py",

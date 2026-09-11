@@ -48,10 +48,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
-sys.path.insert(0, str(REPO_ROOT / "scripts/experiments/phase_c1"))
+#: NOT `scripts/experiments/phase_c1` on sys.path: that directory holds
+#: `packaging.py`, which shadows the third-party `packaging` distribution
+#: and breaks the next transformers import in the process. Reached through
+#: the package instead, which `scripts` on the path already allows.
 
 from experiments.phase_c1.authorization import C1Authorization  # noqa: E402
-from authorization_payload import (  # noqa: E402
+from experiments.phase_c1.authorization_payload import (  # noqa: E402
     C1AuthorizationRefused, build_c1_authorization_payload, load_config,
 )
 
