@@ -394,8 +394,18 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
         assert "phase_b" not in who, (
             "Phase B is CLOSED and its result authorizes nothing; an "
             "authorization naming it would be reopening a resolved phase")
-    assert state["running"]["pods"] == 0 and state["running"]["launchers"] == 0
-    assert state["prepared_launch"]["any"] is False
+    #: Not "nothing is running anywhere" — that was the same sentence as "Phase
+    #: B is closed" only while no other phase could run, and it stopped being so
+    #: the moment a Phase-C1 attempt went live. Whether anything is running at
+    #: all is compared against the prose view in
+    #: `test_the_two_state_views_agree_on_what_is_running_and_authorized`, in
+    #: whichever direction is true. Here: whatever runs must not be Phase B.
+    for block in ("running", "prepared_launch"):
+        assert "phase_b" not in json.dumps(state[block]).lower(), (
+            f"{block} names Phase B, which is CLOSED and authorizes nothing")
+    if state["running"]["pods"]:
+        assert state["running"].get("pod_id"), (
+            "a pod is recorded as running and the snapshot does not name it")
     # This used to require `planning_floor_usd is None` on the reasoning that a
     # floor implies a priced next session and none was planned. C1 is now priced,
     # so the assertion moved to what still protects the boundary: a floor may

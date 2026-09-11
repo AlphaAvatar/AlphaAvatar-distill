@@ -33,11 +33,23 @@ how the snapshot came to disagree with itself.
 | owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
 | **corrected** | the 2026-09-10 claim that **no engineering blocker remained was WRONG**. Two were found on review and repaired on 2026-09-11: an undefined `REPO` in the shared runner that would have raised `NameError` *after* a pod was created and setup had completed, and a scratch root with no owner, which let one attempt collect another's evidence. Both came in with `main`; neither was introduced by the run-identity work. See the 2026-09-11 section |
 
-**Right now: nothing is running. Nothing is billing. No pod exists. Nothing is
-prepared for launch** — no grant is issued, no authorization exists and no
-bundle is staged. The package below is approved; none of it has been spent, and
-`0` of its 3 formal attempts have been used. Provider inventory was polled
-read-only and returned zero pods.
+> ## ⚠ A PAID SESSION IS LIVE — C1 attempt 10, pod `kabazpl889i5u5`
+>
+> Created **2026-09-11T10:04:25Z** at `$1.09/h` on a secure L40S, hard terminate
+> 834 min = `$15.1475`. This is **attempt 1 of the 3** the package allows; its
+> one-use authorization is consumed. All thirteen pre-provider gates passed at
+> `$0` in a read-only pre-flight and were then re-run by the launcher itself
+> before anything was created.
+>
+> The launcher and an **independent read-only provider poll** both run under
+> tmux on the dev box — sessions `c1launch` and `c1poll` — so a blocked
+> launcher, a hung driver or a crashed trainer are all invisible to the poll and
+> all irrelevant: a dead orchestrator still bills. The watchdog was detached
+> *before* the create, not after it returned.
+>
+> Evidence accrues in [`runs/phase_c1/attempt10/`](runs/phase_c1/attempt10/) and
+> in `/home/ecs-user/aad-scratch/sessions/c1-attempt10`. **Nothing is concluded:
+> treatment and endpoint remain UNMEASURED until this run produces them.**
 
 ## APPROVED execution package — maintainer decision, 2026-09-11
 
@@ -504,10 +516,13 @@ statistical `INCONCLUSIVE`.
 > `one_use_grant_consumed` are both recorded — the grant is honestly marked
 > consumed. Exactly one provider-create call, one watchdog, zero redraws.
 >
-> **Nothing is running.** Pod deleted, `provider_confirms_gone: true`, final
+> **Attempt 9's pod is gone.** Deleted, `provider_confirms_gone: true`, final
 > state `TERMINATED`/not billing, watchdog ended `pod_gone` never over the hard
 > limit, and an independent read-only poller recorded an empty inventory at
-> `15:20:22Z`. The grant and authorization are **CONSUMED** and permit no retry
+> `15:20:22Z`. *(This paragraph is about attempt 9. It read "Nothing is
+> running" until 2026-09-11, when attempt 10 went live and that sentence --
+> true of its own attempt, sitting in the current section -- became a
+> present-tense claim that a pod was not billing while one was.)* The grant and authorization are **CONSUMED** and permit no retry
 > and no replacement pod.
 
 > **MILESTONE A — THE INITIALIZATION MIGRATION IS GREEN AND AWAITING MERGE

@@ -5,24 +5,25 @@
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "OWNED by the readiness record's swept_base_commit and deliberately not duplicated: this snapshot is written BEFORE the commit it would name, and gate 12 forbids editing state after the sweep, so a copy here could only go stale. It did (4f85ecda vs 0457bab).",
  "running": {
-  "paid_compute": false,
-  "pods": 0,
-  "launchers": 0,
-  "note": "zero pods. The three CUDA stage-F subruns were each provider-confirmed gone, and a read-only inventory poll on 2026-09-10 returned an empty list."
+  "paid_compute": true,
+  "pods": 1,
+  "pod_id": "kabazpl889i5u5",
+  "launchers": 1,
+  "note": "C1 attempt 10 LIVE, created 2026-09-11T10:04:25Z, secure L40S $1.09/h, hard terminate 834 min = $15.1475. Launcher and an independent read-only poll run under tmux (c1launch, c1poll). Detail: logs/STATE.md."
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11: up to 3 formal C1 attempts under the frozen protocol. An approval is NOT a launch -- a grant, a launch_bound sweep, a one-use authorization and a bundle are each still required and are tracked below.",
+  "note": "PACKAGE APPROVED 2026-09-11: up to 3 formal C1 attempts under the frozen protocol. An approval is NOT a launch. Attempt 10 is attempt 1 of 3 and is RUNNING; its one-use authorization is consumed.",
   "package_id": "phase_c1.execution_package.2026-09-11",
-  "formal_attempts_used": 0,
+  "formal_attempts_used": 1,
   "formal_attempts_max": 3,
-  "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440, 57.47 min. BOTH REPLAY GATES PASSED; stage F aborted on a device defect, since repaired at $0. logs/autoinit_c1_attempt9/outcome.json.",
-  "c1_attempts": "ten labels, NINE paid, $4.0001, zero ATTENTION science. Per-attempt cost and cause: logs/BUDGET_LEDGER.md."
+  "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440, 57.47 min. BOTH REPLAY GATES PASSED; stage F aborted on a device defect, since repaired. logs/autoinit_c1_attempt9/outcome.json.",
+  "c1_attempts": "ten labels, NINE paid, $4.0001, zero ATTENTION science. Attempt 10 is RUNNING and is not booked until closeout. Per-attempt cost and cause: logs/BUDGET_LEDGER.md."
  },
  "prepared_launch": {
-  "any": false,
+  "any": true,
   "bundles": 1,
-  "note": "aad_autoinit_c338a76b.bundle 5c1384bb41c3 was consumed by attempt 9 and authorizes nothing further."
+  "note": "aad_autoinit_eec1bb2a.bundle, round-trip verified for session commit eec1bb2a and consumed by attempt 10."
  },
  "budget": {
   "cumulative_spend_usd": 267.8998,
@@ -73,7 +74,7 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Package APPROVED 2026-09-11 and main fast-forwarded to 199711af. Attempt 10 is being prepared: grant -> launch_bound sweep -> authorization -> bundle -> gates -> launch.",
+  "status": "Attempt 10 RUNNING since 2026-09-11T10:04:25Z on pod kabazpl889i5u5. Closeout owes evidence, cost, provider teardown confirmation and the ledger entry.",
   "the_ask": "nothing outstanding from the maintainer. The next maintainer decision is owed only on a stop condition: training started, an unconfirmable state, a replay mismatch, a protocol change, a verdict, or a boundary.",
   "budget": "OWNED by the budget block above; not restated here."
  },
@@ -146,10 +147,7 @@
    "git": "/home/ecs-user/AlphaAvatar-distill",
    "artifacts": "/home/ecs-user/aad-artifacts"
   },
-  "checkpoints_deleted": 0,
-  "scientific_artifacts_deleted": 0,
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
-  "free_bytes": 12897964032,
   "free_note": "detail: c1_storage_recovery.json"
  },
  "blocker": "NOT AUTHORIZED. No live grant, no live authorization, no staged bundle -- attempt 9 consumed all three. C1's replay is MEASURED (2/2 PASS); its treatment and endpoint are UNMEASURED. A tenth attempt needs a new maintainer review, a new grant, a new authorization, a fresh bundle and a fresh launch_bound readiness record.",
