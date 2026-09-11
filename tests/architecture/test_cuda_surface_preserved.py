@@ -69,6 +69,33 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "previous expression could only ever raise NameError. It is the same "
             "value the same call already passed as PYTHONPATH.",
      }),
+    ("fe27dfdc488ae0ee3bd50f04ceb14f901bf8b1f6",
+     "confirmed release on redraw, and a whole-file write that cannot truncate",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "the acquisition loop's redraw branch. It fired `remove pod`, ignored "
+            "the result, cleared `self.pod_id` and created the next resource, so "
+            "a subprocess returning and a local assignment were being treated as "
+            "evidence that a pod had stopped billing. It now calls "
+            "`release_and_confirm`, which deletes and then WAITS for the provider "
+            "to report the resource not billing, and ABORTS the session rather "
+            "than create a second one when that cannot be confirmed. "
+            "`record_draw` appends one entry per resource -- pod id, outcome, "
+            "cumulative cost, its own watchdog journal -- because `ev['pod_id']` "
+            "describes only the current pod, and watchdog journals rotate to "
+            "`watchdog_<pod_id>` so a redraw cannot truncate the previous "
+            "backstop's evidence. THIS IS A DECLARED SEMANTIC CHANGE to provider "
+            "acquisition, reachable by every session that draws more than once, "
+            "and deliberately not described as prose.",
+        "src/aadistill/infrastructure/manifest.py":
+            "`write_text_atomic`: a whole-file write goes to a sibling temp, is "
+            "fsynced, then `os.replace`d, and `write_manifest` routes through it. "
+            "`Path.write_text` truncates first and writes second; when the "
+            "filesystem filled on 2026-09-11 two tracked files became zero bytes "
+            "in that gap. THIS IS A DECLARED SEMANTIC CHANGE to durability -- "
+            "identical on every path that succeeds, different on one that fails, "
+            "where the previous file now survives.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.
