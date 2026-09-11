@@ -2,8 +2,8 @@
  "schema": "aadistill.autoinit.c1_authorization/v1",
  "authorization_id": "autoinit.v1.phase_c1",
  "version": 1,
- "granted_utc": "2026-09-11T11:51:45+00:00",
- "granted_by": "the SAME maintainer decision of 2026-09-11 that approved the execution package; this is that package's pre-authorized retry, not a new approval. Attempt 10 aborted during SETUP at the frozen-asset gate (SETUP_RC=91, $0.1177, 6.48 min, pod kabazpl889i5u5 confirmed gone three ways). All six retry conditions are satisfied and each was checked rather than assumed: no formal probe training started -- the driver never ran, setup stopped at marker 4 of 11; the failure is an ordinary infrastructure failure whose cause was reproduced at $0, repaired, and given a pre-provider counterpart gate plus regressions; frozen science, the input contracts and the decision rule are unchanged, and the relocated scorer's numerical equivalence is measured in logs/architecture_scoring_equivalence.json; the previous resource is confirmed no longer billing; 2 of 3 attempts and $51.3248 of the package remain, which funds a complete attempt plus teardown; and this attempt uses a new run identity and a fresh one-use chain. Package terms: configs/experiments/phase_c1/authorization.json:execution_package. Attempt 10's closeout: logs/runs/phase_c1/attempt10/closeout/outcome.json.",
+ "granted_utc": "2026-09-11T16:43:52+00:00",
+ "granted_by": "the maintainer decision of 2026-09-11 approving the execution package, AS AMENDED the same day after attempt 11. The amendment withdraws, prospectively, both the three-session cap and the one-provider-resource-per-invocation rule: ordinary infrastructure failures, setup failures and $0 pre-provider refusals, where it is CONFIRMED that no formal probe training has started, are now handled and retried autonomously inside the remaining budget. Attempt 11 was a provider cold host -- created, billed, never reachable -- which under the withdrawn rule consumed a whole session because the launcher could not take another draw. Money, science, price and the one-billing-resource invariant are unchanged. Terms: configs/experiments/phase_c1/authorization.json:execution_package. Attempt 11's closeout: logs/runs/phase_c1/attempt11/closeout/outcome.json.",
  "plan_id": "autoinit.v1.phase_c1",
  "phase_a_session_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
  "phase_a_science_plan_hash": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
@@ -28,8 +28,8 @@
  "scope_note": "exactly one C1 launch under the UNCHANGED frozen C1 protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh paired seeds = exactly six E1_KD_HEAVY_0860K recovery trainings; ALL SIX trainings complete before any confirmation evaluation begins; exactly one frozen confirmation evaluation per completed probe, each admitted against its own observed generation protocol before scoring; followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision rule. Nothing in the protocol, the arms, the seeds, the battery, the recovery recipe, the generation protocol, the scoring contract, the statistic or the behavioural vetoes may move.",
  "phase_a_authorized": false,
  "automatic_followon_start": false,
- "authorized_session_commit": "50fda0985beec2e29375bb33e498b16cf3d16cd6",
- "harness_source_digest": "c3c4e0ecfc78fbda64afb7ccbc6e69d0e46b12635b654b5d8a06f116ad3c5de7",
+ "authorized_session_commit": "34ab8c1cbaf9fc8bdad86e953cd2d3182c8d1842",
+ "harness_source_digest": "fa545bfdf3740873e27ce4267157bdde9663218adcc528c1ff16b803f7338735",
  "harness_source_files": [
   "configs/autoinit/c1_artifacts.json",
   "configs/autoinit/c1_artifacts_failed.json",
@@ -132,24 +132,26 @@
   "src/aadistill/training/train.py"
  ],
  "per_launch_hard_usd": 15.1475,
- "provenance_commit": "50fda0985beec2e29375bb33e498b16cf3d16cd6",
+ "provenance_commit": "34ab8c1cbaf9fc8bdad86e953cd2d3182c8d1842",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
  "allows_phase_a": false,
  "allows_beam_search": false,
  "authorizes_c1_isolation": true,
  "scope": "2 arms x 3 fresh seeds = 6 fixed 0.86M recovery probes on one frozen path, evaluated once each on c1_confirmation_v1. No search, no ranking, no successive halving, no tie-breaking, no arm elimination, and no formal Stage-2/3 recovery.",
  "grant": {
-  "path": "logs/runs/phase_c1/attempt11/governance/grant.json",
-  "sha256": "bb8b9a427f47aa5ba82d35fa703f30590d85acc4e93c1f047acbc6d5a8380f36",
-  "granted_by": "the SAME maintainer decision of 2026-09-11 that approved the execution package; this is that package's pre-authorized retry, not a new approval. Attempt 10 aborted during SETUP at the frozen-asset gate (SETUP_RC=91, $0.1177, 6.48 min, pod kabazpl889i5u5 confirmed gone three ways). All six retry conditions are satisfied and each was checked rather than assumed: no formal probe training started -- the driver never ran, setup stopped at marker 4 of 11; the failure is an ordinary infrastructure failure whose cause was reproduced at $0, repaired, and given a pre-provider counterpart gate plus regressions; frozen science, the input contracts and the decision rule are unchanged, and the relocated scorer's numerical equivalence is measured in logs/architecture_scoring_equivalence.json; the previous resource is confirmed no longer billing; 2 of 3 attempts and $51.3248 of the package remain, which funds a complete attempt plus teardown; and this attempt uses a new run identity and a fresh one-use chain. Package terms: configs/experiments/phase_c1/authorization.json:execution_package. Attempt 10's closeout: logs/runs/phase_c1/attempt10/closeout/outcome.json.",
+  "path": "logs/runs/phase_c1/attempt12/governance/grant.json",
+  "sha256": "41d6b4ce921e0d64822d3d1827a2f66c50de44a6b153ad771e5768525f3e271b",
+  "granted_by": "the maintainer decision of 2026-09-11 approving the execution package, AS AMENDED the same day after attempt 11. The amendment withdraws, prospectively, both the three-session cap and the one-provider-resource-per-invocation rule: ordinary infrastructure failures, setup failures and $0 pre-provider refusals, where it is CONFIRMED that no formal probe training has started, are now handled and retried autonomously inside the remaining budget. Attempt 11 was a provider cold host -- created, billed, never reachable -- which under the withdrawn rule consumed a whole session because the launcher could not take another draw. Money, science, price and the one-billing-resource invariant are unchanged. Terms: configs/experiments/phase_c1/authorization.json:execution_package. Attempt 11's closeout: logs/runs/phase_c1/attempt11/closeout/outcome.json.",
   "covers": "exactly one C1 launch under the UNCHANGED frozen C1 protocol at a hard ceiling of $15.1475: the frozen fixed-path ATTENTION isolation, 2 frozen arms x 3 frozen fresh paired seeds = exactly six E1_KD_HEAVY_0860K recovery trainings; ALL SIX trainings complete before any confirmation evaluation begins; exactly one frozen confirmation evaluation per completed probe, each admitted against its own observed generation protocol before scoring; followed by the existing frozen GO / NO-GO / INCONCLUSIVE decision rule. Nothing in the protocol, the arms, the seeds, the battery, the recovery recipe, the generation protocol, the scoring contract, the statistic or the behavioural vetoes may move.",
-  "cumulative_spend_at_approval_usd": 268.0175,
+  "cumulative_spend_at_approval_usd": 268.2958,
   "cumulative_cap_usd": 320.0,
   "does_not_authorize": [
+   "a second launcher session under THIS grant",
+   "more than three host draws in this session",
+   "two billing resources at any instant",
+   "a draw taken without the provider confirming the previous one stopped billing",
+   "chasing stock with repeated create-attempts",
    "a second launch under THIS grant",
-   "a replacement pod for this attempt",
-   "more than one provider resource for this attempt",
-   "a fourth formal attempt, or any attempt beyond the package's three",
    "any retry after formal probe training has started",
    "a retry when it cannot be confirmed whether training started",
    "re-running a valid INCONCLUSIVE in pursuit of a GO",
@@ -181,9 +183,9 @@
   ]
  },
  "bound": {
-  "execution_preregistration": "063e26dc134e7d6699073dc0e36a1a255e67a9c74994e16c6881953a89edaa05",
-  "execution_preregistration_head_commit": "0e6e3adefc8d638667f3e881c9ec5b4090689318",
-  "c1_harness_digest": "c3c4e0ecfc78fbda64afb7ccbc6e69d0e46b12635b654b5d8a06f116ad3c5de7",
+  "execution_preregistration": "a4ea473bd8f844fb190f7f254e5ba0fb18bafbb106476c8791c94e3f5eec5c60",
+  "execution_preregistration_head_commit": "761ce60590178a436eb339ecc983afc6f72f2c95",
+  "c1_harness_digest": "fa545bfdf3740873e27ce4267157bdde9663218adcc528c1ff16b803f7338735",
   "c1_harness_n_files": 99,
   "isolation_plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
   "c0_preregistration": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
@@ -217,15 +219,17 @@
    "soft_stop_usd": 14.7841,
    "hard_ceiling_usd": 15.1475,
    "cumulative_cap_usd": 320.0,
-   "cumulative_spend_at_approval_usd": 268.0175
+   "cumulative_spend_at_approval_usd": 268.2958
   }
  },
  "one_use": "ONE grant, ONE issuance, ONE launch attempt, ONE provider resource. A failure is this attempt's result. Unchanged by the 2026-09-11 package: the package does not make an authorization reusable, it states how many separate one-use chains may be issued and under exactly what conditions.",
  "does_not_authorize": [
+  "a second launcher session under THIS grant",
+  "more than three host draws in this session",
+  "two billing resources at any instant",
+  "a draw taken without the provider confirming the previous one stopped billing",
+  "chasing stock with repeated create-attempts",
   "a second launch under THIS grant",
-  "a replacement pod for this attempt",
-  "more than one provider resource for this attempt",
-  "a fourth formal attempt, or any attempt beyond the package's three",
   "any retry after formal probe training has started",
   "a retry when it cannot be confirmed whether training started",
   "re-running a valid INCONCLUSIVE in pursuit of a GO",
@@ -255,5 +259,5 @@
   "spending the $0.6577 reconciliation margin",
   "using the GPU engineering allowance for complete formal probes or for an endpoint measurement on the frozen confirmation battery"
  ],
- "authorization_sha256": "5f988f9a5a3923fb0cad11d123db55f2b8de3493c6bfefd951d6eefa8f032208"
+ "authorization_sha256": "1acde4f3d77ccb4ad6b7310391d778be3e5cd3147b566e6f3b9786a69c920a76"
 }
