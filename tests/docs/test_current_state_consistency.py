@@ -192,11 +192,41 @@ class TestTheSnapshotStatesTheRequiredFacts:
         assert (REPO / cv["amendment"].split()[0]).is_file(), (
             "the snapshot names an interpretation amendment that does not exist")
 
-    def test_nothing_is_authorized(self):
+    def test_an_approved_package_is_not_an_issued_authorization(self):
+        """The distinction the whole launch contract rests on.
+
+        This asserted `authorized.any is False` outright, which was the same
+        sentence as "no package has been approved" only while none had. On
+        2026-09-11 one was, and the invariant worth protecting is not that
+        nothing is approved — it is that **an approval is not a launch**: a
+        package permits a bounded number of one-use chains, and each chain still
+        needs a grant, a launch-bound sweep, an issued authorization and a
+        staged bundle before anything can be created.
+
+        So the shape is pinned in whichever direction is true, and the attempt
+        counter is required to exist and stay inside the approved bound — a
+        package whose usage is untracked is a package without a limit.
+        """
         s = snapshot()
-        assert s["authorized"]["any"] is False
-        assert s["prepared_launch"]["any"] is False
-        assert s["running"]["paid_compute"] is False
+        a = s["authorized"]
+        if not a["any"]:
+            assert s["prepared_launch"]["any"] is False
+            assert s["running"]["paid_compute"] is False
+            return
+
+        assert a.get("package_id"), (
+            "the snapshot claims an authorization exists but names no package")
+        used, cap = a.get("formal_attempts_used"), a.get("formal_attempts_max")
+        assert isinstance(used, int) and isinstance(cap, int), (
+            "an approved package must count its attempts; an uncounted package "
+            "has no limit")
+        assert 0 <= used <= cap, f"{used} of {cap} attempts used"
+        #: A package approval must never be written as though it were the
+        #: issuance. If a bundle is staged or a pod is billing, that is a
+        #: separate claim the snapshot has to make explicitly elsewhere.
+        assert "approval is not a launch" in a["note"].lower() or \
+            "not a launch" in a["note"].lower(), (
+                "the note does not distinguish approval from issuance")
 
     def test_the_migration_authorizes_nothing_and_is_not_a_result(self):
         status = snapshot()["architecture_migration"]["status"].lower()

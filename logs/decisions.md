@@ -7425,3 +7425,54 @@ on a paid pod.
   efficacy evidence of any kind**.
 - **Revisit when:** a maintainer decides whether the one remaining ceiling-sized
   slot is worth spending. Nothing in this session authorizes that.
+
+## 2026-09-11 — The C1 execution package: three attempts, a $320.00 cap, and where the retry line is
+
+- **Context:** nine paid C1 attempts had produced one scientific observation
+  (replay 2/2 PASS) and no ATTENTION evidence. Under the old `$283.7600` cap
+  exactly one ceiling-sized attempt still fitted, so any post-training
+  infrastructure failure would have ended C1 permanently. Separately, the
+  governance-input seam was closed at `$0` and independently reviewed as the
+  increment `55bb324a..199711af`.
+- **Decision:** approve a finite execution package. Project cap `$283.7600` →
+  **`$320.0000`** (`+$36.2400`). Up to **3** formal attempts *including the
+  first*, each at the unchanged `$15.1475` ceiling (`$45.4425`), plus a
+  **`$6.0000`** cumulative GPU engineering allowance — `$51.4425` in total, with
+  `$0.6577` of reconciliation margin that is not an allowance. The five limits
+  bind separately and do not transfer.
+- **Alternatives considered:** *one last attempt* under the existing cap — the
+  status quo, rejected because a single expensive failure ends the experiment
+  with no verdict. *Two attempts* — rejected because one expensive failure
+  consumes the package and returns the project to the same position. *Budgeting
+  retries at the historical abort cost* (`$0.0786`–`$1.0440`, nine of them
+  totalling `$4.0001`) — rejected explicitly: that prices the failure mode
+  already fixed, and the package must fund three **complete** attempts.
+- **The retry line is "training started", not "a probe completed".** A first
+  draft of this package drew it at *one or more probes trained*, which would
+  have permitted a retry after probe 1 began and died mid-training. The
+  maintainer corrected it: autonomous retry covers only failures where it can be
+  **confirmed that no formal probe training has started**, and an unconfirmable
+  state is not retryable. Once training starts, evidence is preserved and the
+  run stops for a separate decision. This is a boundary on *pre-authorized
+  retry*, not a claim that training start equals endpoint exposure.
+- **Attempt counting changed, prospectively only.** Invoking the formal launcher
+  under a new one-use authorization now consumes an attempt even if it refuses
+  at `$0`. The 2026-09-04 ruling — consumption at provider-resource creation —
+  is **not rewritten**; it stands as the rule attempt 3 ran under. Both rules
+  are recorded with their scope, because a superseded rule that looks current is
+  how a spent attempt gets recovered by citation.
+- **Expected upside:** C1 can absorb two expensive infrastructure failures and
+  still return a verdict, and ordinary engineering failures stop costing a
+  round-trip through maintainer review.
+- **Risks:** three attempts at full ceiling is `$45.4425` against a project that
+  has spent `$267.8998` for no ATTENTION evidence. The design returns
+  `INCONCLUSIVE` 26% of the time at Δ=0 and 45% at Δ=SESOI, and the package
+  explicitly forbids re-running a valid `INCONCLUSIVE` in pursuit of a GO — so
+  it may end with a legitimate non-answer. That is the experiment's property,
+  accepted in advance rather than discovered afterwards.
+- **Where it lives:** `configs/experiments/phase_c1/authorization.json`
+  (`execution_package`, and the cap the issuer refuses a mis-stated grant
+  against), `logs/BUDGET_LEDGER.md`, `logs/current_state.json` and
+  `logs/STATE.md`. Nothing in `src/aadistill`.
+- **Revisit when:** the package's count or money is exhausted, a verdict is
+  reached, or a failure class outside the pre-authorized set occurs.

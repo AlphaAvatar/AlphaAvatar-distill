@@ -23,7 +23,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 97,
- "digest": "1d9c71ab678323a1b905ba5b8605e335634b0779234323239f4f18a6bdbb7793",
+ "digest": "33c031985720f749055a01ca08049e15f31b783e10f5270c23223e488f649618",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -38,8 +38,8 @@
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "63753b3cede0336b6d247b2b9f7635208d80d09ca6d8bdbba0304fa921d888d5",
-   "bytes": 3006
+   "sha256": "14c0bae2de84561288e2ca02f7c3ebd7b723bb6c98afd5e7608a1508daf39290",
+   "bytes": 7372
   },
   {
    "path": "scripts/autoinit/audit_tool_scoring.py",

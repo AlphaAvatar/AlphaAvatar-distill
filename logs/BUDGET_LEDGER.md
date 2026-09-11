@@ -2030,3 +2030,75 @@ the corrected artifacts by content hash and rewrites none of them.
 endpoint measurement, and not a decision. Formal C1 is unchanged: replay
 MEASURED 2/2 PASS, formal treatment UNMEASURED, endpoint UNMEASURED, Attempt 9
 NO DECISION.
+
+---
+
+## 2026-09-11 — APPROVED: the C1 execution package, and the cap raised to `$320.0000`
+
+**Maintainer decision, 2026-09-11**, after independent engineering review of the
+increment `55bb324a..199711af`. This is a prospective decision about a new
+execution package; it does not modify any historical authorization, attempt or
+record.
+
+**The project cumulative cap rises from `$283.7600` to `$320.0000` — an increase
+of `$36.2400`.** Not `$51.4425`: the old cap already covered `$15.2025` of the
+package, and quoting the package total as the increase would overstate it.
+
+| | approved |
+| --- | --- |
+| formal C1 attempts, **including the first** | **3**, a ceiling and not a target |
+| per formal attempt | **`$15.1475`** hard ceiling — unchanged, and no minute assumption in [`phase_c1_pricing.json`](phase_c1_pricing.json) moved |
+| formal allowance | **`$45.4425`** |
+| GPU engineering allowance, cumulative across every subrun | **`$6.0000`** |
+| package total | **`$51.4425`** |
+| reconciliation margin | **`$0.6577`** — for real accounting corrections only, not a spending allowance |
+
+```text
+3 x 15.1475          =  45.4425   formal
+45.4425 +  6.0000    =  51.4425   package
+267.8998 + 51.4425   = 319.3423   worst case if the package is spent in full
+320.0000 - 319.3423  =   0.6577   margin
+320.0000 - 283.7600  =  36.2400   cap increase
+```
+
+**The five limits bind separately and may not be traded against each other.** A
+cheap failure does not buy a fourth attempt. An unspent engineering allowance
+does not raise the per-attempt ceiling. The margin is not an allowance. Every
+real cost enters the accounting, including unsettled cost and any resource that
+may still be billing; a discrepancy is reconciled before the next paid action,
+never absorbed to keep an action looking affordable.
+
+**Attempt counting, prospective for this package only.** Invoking the formal
+launcher under a **new one-use authorization consumes one formal attempt**, even
+if it then refuses at `$0` before a provider resource exists. Read-only checks,
+code repair and engineering validation before issuance do not count. One
+provider-create call and one resource per formal invocation; a replacement pod,
+an internal redraw, a fresh `run_id` or a re-issuance does not evade the count.
+
+> This **supersedes nothing historical.** The 2026-09-04 ruling — that attempt 3
+> was not consumed because no provider resource was created — stands verbatim as
+> the rule attempt 3 actually ran under, and is not rewritten. The new rule
+> governs this package's attempts and no others.
+
+**Autonomous formal retry inside the package requires ALL of:** it can be
+*confirmed* that no formal probe training has started; the failure is an ordinary
+infrastructure failure whose cause is identified and addressed; frozen science,
+input contracts and the decision rule are unchanged; the previous resource is
+confirmed no longer billing; the remaining count and balance still fund a
+complete attempt plus teardown; and the new attempt uses a new run identity and a
+complete, valid one-use authorization chain.
+
+**Stop and report** once the first probe has *started* training — finished or
+not — or when it cannot be confirmed whether training started; on a real replay
+mismatch; on an input-identity conflict that cannot be restored to the frozen
+binding; on anything needing a protocol change; and on any complete, valid
+GO / NO-GO / INCONCLUSIVE. **An `INCONCLUSIVE` is a result, not an engineering
+failure**, and re-running one in pursuit of a GO is forbidden, as is splicing
+probes across attempts, substituting a seed, or selectively retaining outputs.
+
+**Instance policy lives in [`configs/experiments/phase_c1/authorization.json`](../configs/experiments/phase_c1/authorization.json)**
+under `execution_package`, where the issuer reads the cap it refuses a
+mis-stated grant against. None of it is in `src/aadistill`.
+
+**Booked against this package so far: `$0.0000`.** Cumulative project spend is
+unchanged at **`$267.8998`** — an approval is not a cost.

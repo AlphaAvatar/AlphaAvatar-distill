@@ -11,9 +11,12 @@
   "note": "zero pods. The three CUDA stage-F subruns were each provider-confirmed gone, and a read-only inventory poll on 2026-09-10 returned an empty list."
  },
  "authorized": {
-  "any": false,
-  "note": "NO LIVE GRANT, AUTHORIZATION, FORMAL BUNDLE OR PROVIDER RESOURCE. Attempt 9 consumed the first three; the CUDA engineering authorization is spent and its campaign closed. See `blocker`.",
-  "c1_attempt9": "CONSUMED. $1.0440, 57.47 min. BOTH REPLAY GATES PASSED; stage F aborted on a device defect, since repaired at $0. logs/autoinit_c1_attempt9/outcome.json.",
+  "any": true,
+  "note": "PACKAGE APPROVED 2026-09-11: up to 3 formal C1 attempts under the frozen protocol. An approval is NOT a launch -- a grant, a launch_bound sweep, a one-use authorization and a bundle are each still required and are tracked below.",
+  "package_id": "phase_c1.execution_package.2026-09-11",
+  "formal_attempts_used": 0,
+  "formal_attempts_max": 3,
+  "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440, 57.47 min. BOTH REPLAY GATES PASSED; stage F aborted on a device defect, since repaired at $0. logs/autoinit_c1_attempt9/outcome.json.",
   "c1_attempts": "ten labels, NINE paid, $4.0001, zero ATTENTION science. Per-attempt cost and cause: logs/BUDGET_LEDGER.md."
  },
  "prepared_launch": {
@@ -23,13 +26,16 @@
  },
  "budget": {
   "cumulative_spend_usd": 267.8998,
-  "authorized_cap_usd": 283.76,
-  "remaining_usd": 15.8602,
+  "authorized_cap_usd": 320.0,
+  "remaining_usd": 52.1002,
+  "cap_raised_utc": "2026-09-11",
+  "cap_raised_from_usd": 283.76,
+  "package": "phase_c1.execution_package.2026-09-11 -- 3 formal attempts max at $15.1475 each ($45.4425) + $6.0000 engineering = $51.4425. Booked so far: $0.0000. Limits bind SEPARATELY and do not transfer.",
   "planning_floor_usd": 13.4401,
+  "reconciliation_margin_usd": 0.6577,
   "remaining_is_not_permission": true,
   "ledger": "logs/BUDGET_LEDGER.md",
-  "headroom_note": "283.7600 - 267.8998 = 15.8602; minus the 15.1475 ceiling leaves 0.7127 >= 0, so EXACTLY ONE ceiling-sized formal attempt still fits. Includes $0.0400 ENGINEERING spend. Corrected 2026-09-10 from $267.8925; see ledger. Not permission.",
-  "planning_floor_note": "C1 at secure L40S $1.09/h: floor $13.4401, soft $14.7841, ceiling $15.1475. Headroom is not permission."
+  "terms": "configs/experiments/phase_c1/authorization.json:execution_package -- attempt counting, the six retry conditions and the stop list. Read them THERE."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -67,8 +73,8 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt 9 produced C1's FIRST scientific observation -- both frozen replay gates PASSED -- then aborted in stage F. That defect is repaired and CONFIRMED ON REAL CUDA; see phase_c.c1.blocker. Engineering campaign closed.",
-  "the_ask": "A maintainer decision confirming a FINITE execution package: a GPU engineering allowance, a bounded number of formal C1 attempts, a per-attempt ceiling and a new cumulative cap. The direction is settled; the amounts are not. Proposal and the 2026-09-11 repairs: logs/STATE.md.",
+  "status": "Package APPROVED 2026-09-11 and main fast-forwarded to 199711af. Attempt 10 is being prepared: grant -> launch_bound sweep -> authorization -> bundle -> gates -> launch.",
+  "the_ask": "nothing outstanding from the maintainer. The next maintainer decision is owed only on a stop condition: training started, an unconfirmable state, a replay mismatch, a protocol change, a verdict, or a boundary.",
   "budget": "OWNED by the budget block above; not restated here."
  },
  "read_order": [
@@ -163,14 +169,14 @@
   "run_id": "attempt9"
  },
  "architecture_migration": {
-  "status": "MERGED to main 2026-09-10 as daf64772: initialization-core consolidation and core/application separation. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
+  "status": "MERGED to main 2026-09-10 as daf64772, and again 2026-09-11 as 199711af. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
   "record": "logs/migrations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {
-  "status": "PASS 2026-09-10, subrun 3, execution SHA 7027a8f4, NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130). Both geometries ran attention.activation_importance_v1 through the real verified suffix; index and 03_attention preserved; prefix not re-executed; all five device observations passed on cuda:0.",
+  "status": "PASS 2026-09-10, subrun 3, execution SHA 7027a8f4, NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130). Both geometries ran the real verified suffix; all five device observations passed on cuda:0. Detail: the record below.",
   "campaign": "CLOSED. Three subruns, $0.0400 cumulative, one active resource at a time, each provider-confirmed non-billing before the next. Zero pods. Per-subrun detail: campaign.json.",
   "campaign_cost_usd": 0.04,
-  "means": "the repaired and migrated treatment suffix HAS successfully completed real-CUDA engineering validation. ENGINEERING EVIDENCE ONLY -- not a C1 treatment result, not an endpoint, not a decision.",
+  "means": "ENGINEERING EVIDENCE ONLY -- not a C1 treatment result, not an endpoint, not a decision.",
   "amendment": "logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured. Read it THERE.",
   "record": "logs/runs/cuda_stage_f/ and logs/validations/cuda-stage-f/v1/",
   "authorizes": "nothing"

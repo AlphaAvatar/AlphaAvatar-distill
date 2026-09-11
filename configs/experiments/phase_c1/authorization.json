@@ -26,7 +26,58 @@
   "hard_ceiling_usd": 15.1475,
   "planning_floor_usd": 13.4401,
   "soft_stop_usd": 14.7841,
-  "cumulative_cap_usd": 283.76
+  "cumulative_cap_usd": 320.0,
+  "_cap_amendment": "2026-09-11: the PROJECT cumulative cap rose from 283.76 to 320.00 (+36.24) with the approved execution package below. The per-attempt ceiling did NOT move and no minute assumption changed. The issuer refuses a grant naming any other cap, which is why this value lives here rather than being inferred from the ledger."
+ },
+ "execution_package": {
+  "_contract": "The maintainer decision this experiment's attempts run under. INSTANCE POLICY, which is why it is configuration and not core: the core knows nothing about attempts, packages, dollars or retries. AUTHORIZES NOTHING BY ITSELF -- a launch still needs a grant, an authorization, a launch-bound readiness record and a bundle.",
+  "package_id": "phase_c1.execution_package.2026-09-11",
+  "approved_utc": "2026-09-11",
+  "approved_by": "maintainer decision, 2026-09-11, after independent engineering review of 55bb324a..199711af",
+  "formal_attempts_max": 3,
+  "formal_attempts_include_the_first": true,
+  "per_attempt_hard_ceiling_usd": 15.1475,
+  "formal_allowance_usd": 45.4425,
+  "gpu_engineering_allowance_usd": 6.0,
+  "package_total_usd": 51.4425,
+  "cumulative_spend_at_approval_usd": 267.8998,
+  "reconciliation_margin_usd": 0.6577,
+  "limits_do_not_transfer": "the engineering allowance, the per-attempt ceiling, the attempt count, the package total and the project cap bind SEPARATELY. A cheap failure does not buy a fourth attempt; an unspent engineering allowance does not raise the per-attempt ceiling; the margin is for real accounting corrections and is not spendable.",
+  "attempt_counting": {
+   "rule": "invoking the formal launcher under a NEW one-use authorization consumes one formal attempt, even if it then refuses at $0 before any provider resource exists.",
+   "not_counted": "read-only checks, code repair and GPU engineering validation before an authorization is issued.",
+   "prospective_only": "this rule governs THIS package. It does not rewrite the 2026-09-04 ruling, under which attempt 3 was not consumed because no provider resource was created; that record stands verbatim as the rule its own attempt ran under.",
+   "no_hidden_retries": "one provider-create call and one resource per formal invocation. A replacement pod, an internal redraw, a fresh run_id or a re-issuance does not evade the count."
+  },
+  "autonomous_formal_retry_requires_all_of": [
+   "it can be CONFIRMED that no formal probe training has started",
+   "the failure is an ordinary infrastructure failure whose cause is identified and addressed",
+   "frozen science, the input contracts and the decision rule are unchanged",
+   "the previous resource is confirmed no longer billing",
+   "the remaining attempt count and package balance still fund a complete attempt plus teardown",
+   "the new attempt uses a new run identity and a complete, valid one-use authorization chain"
+  ],
+  "stop_and_report": [
+   "the first probe has STARTED training, whether or not it finished -- preserve all evidence and stop",
+   "it cannot be confirmed whether training started; absence of confirmation is not confirmation of absence",
+   "a real replay mismatch at stage D or E",
+   "an input-identity conflict that cannot be restored to the frozen binding",
+   "anything requiring a change to the scientific protocol",
+   "any complete, valid GO / NO-GO / INCONCLUSIVE -- all three end the package's formal attempts, and an INCONCLUSIVE is a result, never an engineering failure to spend past",
+   "a package, count, ceiling or cap boundary is reached, or a resource's billing state is unknown"
+  ],
+  "never": [
+   "re-running a valid INCONCLUSIVE in pursuit of a GO",
+   "splicing probes across attempts",
+   "substituting a seed",
+   "selectively retaining outputs",
+   "changing arms, seeds, recipe, battery, statistics or the behavioural vetoes"
+  ],
+  "engineering_allowance_does_not_authorize": [
+   "complete formal probes",
+   "consuming the frozen confirmation battery for an endpoint",
+   "a formal retry -- those come from this package's attempt count, not from the engineering allowance"
+  ]
  },
  "authorized_stages": [0, 1, 2, 3, 4, 5],
  "stage_conditions": {
@@ -35,8 +86,8 @@
   "training": "all six trainings must complete before any evaluation; a training failure is C1_INCOMPLETE, not a partial confirmation experiment",
   "generation_admission": "no probe is scored unless the generation protocol observed from its own raw summaries is comparable to the attested C1 protocol",
   "decision": "stage I requires six complete admitted and scored probes",
-  "retry": "none. One launch attempt; no automatic retry, no second attempt, no automatic ceiling increase."
+  "retry": "THIS authorization permits exactly one launch attempt and no automatic retry, no replacement pod and no ceiling increase. Whether a FURTHER attempt may be authorized is the execution package's question, not this artifact's: see execution_package.autonomous_formal_retry_requires_all_of."
  },
- "one_use": "ONE grant, ONE issuance, ONE launch attempt. No automatic retry, no second attempt, no automatic ceiling increase. A failure is the attempt's result and needs a new maintainer review.",
+ "one_use": "ONE grant, ONE issuance, ONE launch attempt, ONE provider resource. A failure is this attempt's result. Unchanged by the 2026-09-11 package: the package does not make an authorization reusable, it states how many separate one-use chains may be issued and under exactly what conditions.",
  "authorizes": "nothing"
 }

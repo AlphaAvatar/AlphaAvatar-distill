@@ -48,6 +48,28 @@ C1_EXECUTABLE = tuple(r["path"] for r in c1_current_executable(REPO)["files"])
 TEST_GRANTED_UTC = "2026-01-01T00:00:00+00:00"
 TEST_SESSION_COMMIT = "0" * 40
 
+def _accepted_cap_usd() -> float:
+    """The cap the ISSUER refuses a mis-stated grant against, read from config.
+
+    Written out as `283.76` until 2026-09-11, when the approved package raised
+    it to `320.00` and this fixture became the only thing in the tree still
+    naming the old one — so every candidate-driven gate test failed on a cap
+    that had moved for a reason none of them are about. A fixture that restates
+    a number the subject owns is a second source for it, which is the failure
+    this whole file exists to police elsewhere.
+
+    Imported through the PACKAGE. `write_candidate` reaches the same module by
+    putting `scripts/experiments/phase_c1` on `sys.path`, which is survivable
+    inside a function and is not survivable at module scope: that directory
+    holds `session.py`, `authorization.py`, `bundle.py` and `scoring.py`, and
+    making them importable as top-level names during collection shadows
+    whatever else in the suite imports those names.
+    """
+    from experiments.phase_c1.authorization_payload import load_config
+
+    return float(load_config(REPO)["accepted_pricing"]["cumulative_cap_usd"])
+
+
 #: The maintainer-stated half. Deliberately not copied from any real grant: this
 #: names a fictional approver and says, in the artifact itself, what it is.
 TEST_GRANT = {
@@ -55,7 +77,7 @@ TEST_GRANT = {
     "covers": ("an ephemeral candidate used to drive the real pre-provider gates "
                "at $0. It permits nothing and is never written to logs/."),
     "cumulative_spend_at_approval_usd": 0.0,
-    "cumulative_cap_usd": 283.76,
+    "cumulative_cap_usd": _accepted_cap_usd(),
     "does_not_authorize": ["anything at all"],
 }
 

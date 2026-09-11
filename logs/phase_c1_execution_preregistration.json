@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "55bb324a4a0ba522a69bd67eb07b338c71fd6f64",
+ "head_commit": "199711af75a5d56ca4ca9376f559a527f4eed82a",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -75,7 +75,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 97,
-  "digest": "1d9c71ab678323a1b905ba5b8605e335634b0779234323239f4f18a6bdbb7793",
+  "digest": "33c031985720f749055a01ca08049e15f31b783e10f5270c23223e488f649618",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -90,8 +90,8 @@
    },
    {
     "path": "configs/experiments/phase_c1/authorization.json",
-    "sha256": "63753b3cede0336b6d247b2b9f7635208d80d09ca6d8bdbba0304fa921d888d5",
-    "bytes": 3006
+    "sha256": "14c0bae2de84561288e2ca02f7c3ebd7b723bb6c98afd5e7608a1508daf39290",
+    "bytes": 7372
    },
    {
     "path": "scripts/autoinit/audit_tool_scoring.py",
@@ -1077,5 +1077,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "bbf983fabfd12d2e802cad428312a93f3fb99fa04afcdcc375c10b6980ab433d"
+ "preregistration_sha256": "ed79d659bed64088a1e7248a7090edbe509f6a4273a72c1a3a9b9aa4560d7ae7"
 }

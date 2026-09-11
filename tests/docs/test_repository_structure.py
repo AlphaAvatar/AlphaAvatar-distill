@@ -195,7 +195,20 @@ def test_the_two_state_views_agree_on_what_is_running_and_authorized():
     # happens to reach the margin. Matching raw text meant every reflow was a
     # test failure, and the two accepted newline positions were whichever two
     # had been written so far.
-    text = " ".join(STATE.read_text().lower().split())
+    #
+    # And scoped to the CURRENT view. STATE.md keeps its superseded sections in
+    # place, under headings that say so, and this test read the whole file — so
+    # on 2026-09-11 "nothing is billing" and "nothing is prepared for launch"
+    # were found only in the attempt-8 section frozen on 2026-09-06, and the
+    # guard had been satisfied by history rather than by a claim about now. A
+    # test that cannot tell a current statement from a recorded one is not
+    # checking agreement between the two views; it is checking that the file
+    # once contained a sentence.
+    current = STATE.read_text().split("\n# Superseded")[0]
+    assert len(current) < len(STATE.read_text()), (
+        "STATE.md no longer marks where the current view ends; this test would "
+        "silently go back to reading history as a current claim")
+    text = " ".join(current.lower().split())
 
     if not snap["running"]["paid_compute"]:
         assert snap["running"]["pods"] == 0

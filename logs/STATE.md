@@ -20,8 +20,8 @@ how the snapshot came to disagree with itself.
 | treatment | **UNMEASURED** — zero probes trained |
 | endpoint | **UNMEASURED** — zero evaluated, no decision |
 | attempt 9 | **NO DECISION** — a pre-treatment infrastructure abort, not an ATTENTION result and not a frozen-rule `INCONCLUSIVE` |
-| authorization | **none** — no live grant, no live authorization, no staged bundle |
-| spend | **`$267.8998`** of `$283.7600`, leaving **`$15.8602`** — still one full `$15.1475` formal attempt, with `$0.7127` after it |
+| authorization | **package APPROVED 2026-09-11, nothing issued yet** — up to 3 formal attempts, `0` used. No live grant, no live authorization, no staged bundle. An approval is not a launch |
+| spend | **`$267.8998`** of the raised `$320.00` cap, leaving **`$52.1002`** — of which `$51.4425` is this package and `$0.6577` is reconciliation margin, not an allowance |
 | CUDA stage-F | **PASS 2026-09-10**, subrun 3 of 3, `$0.0400` total. NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130): both geometries executed `attention.activation_importance_v1` through the real verified suffix, and **all five device placements were observed on `cuda:0`**. Two earlier subruns failed in the harness — a pipeline that hid pip's exit status, then a matrix criterion that demanded the child be on the device while `device.py` documents it is not. **Engineering evidence only**, not a C1 result. [`runs/cuda_stage_f/`](runs/cuda_stage_f/) |
 | stage-F device repair | **CONFIRMED ON REAL CUDA** at execution SHA `7027a8f4` (2026-09-10). It was logical / CPU-structural evidence until then; the defect is a cross-device placement, which a single-device machine cannot observe, and a real accelerator has now observed it |
 | CUDA interpretation | one append-only amendment corrects **two explanatory claims** and nothing else: subrun 2's failure class is `harness_acceptance_criterion`, not `operator`, and the PASS observed *operator on `cuda:0`, child host-resident per the builder contract* — not children left on CUDA. Outcomes, costs, devices and provider identities are bound by hash and unaltered: [`interpretation_amendment_1.json`](validations/cuda-stage-f/v1/interpretation_amendment_1.json) |
@@ -33,15 +33,26 @@ how the snapshot came to disagree with itself.
 | owed | a maintainer decision on whether a tenth C1 attempt is worth the one ceiling-sized slot that remains |
 | **corrected** | the 2026-09-10 claim that **no engineering blocker remained was WRONG**. Two were found on review and repaired on 2026-09-11: an undefined `REPO` in the shared runner that would have raised `NameError` *after* a pod was created and setup had completed, and a scratch root with no owner, which let one attempt collect another's evidence. Both came in with `main`; neither was introduced by the run-identity work. See the 2026-09-11 section |
 
-## PROPOSED execution package — NOT APPROVED, AUTHORIZES NOTHING
+**Right now: nothing is running. Nothing is billing. No pod exists. Nothing is
+prepared for launch** — no grant is issued, no authorization exists and no
+bundle is staged. The package below is approved; none of it has been spent, and
+`0` of its 3 formal attempts have been used. Provider inventory was polled
+read-only and returned zero pods.
 
-The maintainer has stated that the budget will rise to support a *bounded*
-number of retries, and asked for the amounts. **This is the proposal. It is not
-a grant, not an authorization, and not permission to create anything.** Nothing
-may be spent against it until a maintainer records the decision; the live cap
-remains `$283.7600` and the live spend `$267.8998` until then.
+## APPROVED execution package — maintainer decision, 2026-09-11
 
-| | proposed |
+Approved after independent engineering review of `55bb324a..199711af`. **An
+approval is not a launch.** A formal attempt still needs, in this order: this
+run's grant, a `launch_bound` readiness sweep on the clean pre-authorization
+tree, a new one-use authorization, an exact-session bundle, a live quote at or
+below the accepted rate, and every pre-provider gate. Full terms:
+[`BUDGET_LEDGER.md`](BUDGET_LEDGER.md), [`decisions.md`](decisions.md) and
+`execution_package` in
+[`configs/experiments/phase_c1/authorization.json`](../configs/experiments/phase_c1/authorization.json),
+which is also where the issuer reads the cap it refuses a mis-stated grant
+against. **Booked against the package so far: `$0.0000`.**
+
+| | approved |
 | --- | --- |
 | formal C1 attempts, **including the first** | **3** |
 | per-attempt hard ceiling | **`$15.1475`** — unchanged, derived from [`phase_c1_pricing.json`](phase_c1_pricing.json) at secure L40S `$1.09/h`. It already contains a 10% contingency and a 20-minute artifact-recovery reserve; nothing re-buys them |
@@ -50,6 +61,27 @@ remains `$283.7600` and the live spend `$267.8998` until then.
 | package total | **`$51.4425`** |
 | spend to date | `$267.8998` |
 | new cumulative cap | **`$320.0000`** (`267.8998 + 51.4425 = 319.3423`, plus `$0.6577` of reconciliation margin — the ledger has already needed a `$0.0073` correction once, and a cap with no margin turns an arithmetic fix into a breach) |
+| cap **increase** | **`+$36.2400`**, not `+$51.4425`: the old cap already covered `$15.2025` of the package |
+
+**Three is a ceiling, not a target**, and the engineering allowance is used only
+when a question genuinely needs an accelerator — it is not a requirement to add
+a GPU test before a formal attempt. **The five limits bind separately and do not
+transfer**: a cheap failure does not buy a fourth attempt, an unspent
+engineering allowance does not raise the per-attempt ceiling, and the margin is
+for real accounting corrections, not spending.
+
+**Counting a formal attempt.** Invoking the formal launcher under a **new
+one-use authorization consumes one attempt, even if it then refuses at `$0`**
+before any provider resource exists. Read-only checks, code repair and
+engineering validation before issuance do not count. One provider-create call
+and one resource per formal invocation; a replacement pod, an internal redraw, a
+fresh `run_id` or a re-issuance does not evade the count.
+
+> **This is prospective and rewrites nothing.** The 2026-09-04 ruling — that
+> attempt 3 was *not* consumed because no provider resource was created — stands
+> verbatim below as the rule attempt 3 actually ran under. Two rules, each with
+> its scope written down, because a superseded rule that reads as current is how
+> a spent attempt gets recovered by citation.
 
 **The formal budget funds three COMPLETE attempts, not three cheap failures.**
 All nine paid C1 attempts so far aborted early and cost `$0.0786`, `$0.1013`,
@@ -79,40 +111,51 @@ subrun, campaign record updated before the next paid action. Before every paid
 action: settled + outstanding + active must leave a complete attempt plus its
 teardown reserve inside the package ceiling.
 
-**Retryable inside the package, without returning to the maintainer** — every
-one of these is an engineering failure with **no scientific output**:
+**Autonomous formal retry inside the package requires ALL SIX** — not any one of
+them:
 
-* a pre-provider gate refusal (`$0`; not an attempt at all);
-* provider acquisition failure — no capacity, no endpoint, quote above
-  `--max-price`, pod deleted before setup completes;
-* any setup failure before `SETUP_DONE`, including the CPU test gate;
-* a driver failure in stages **B–F** — teacher fetch, operator registration,
-  replay execution, arm materialization — i.e. **before the first recovery
-  training step**. Attempt 9 is exactly this class;
-* launcher, watchdog, relay or collection failure with **zero probes trained**.
+1. it can be **confirmed** that no formal probe training has started;
+2. the failure is an ordinary infrastructure failure whose cause is identified
+   and has been addressed;
+3. frozen science, the input contracts and the decision rule are unchanged;
+4. the previous resource is **confirmed** no longer billing;
+5. the remaining attempt count and package balance still fund a **complete**
+   attempt plus its teardown;
+6. the new attempt uses a new run identity and a complete, valid one-use
+   authorization chain — never a consumed one.
 
-Each retry is a new subrun with its own `run_id`, its own grant, its own
-authorization and its own bundle. A rerun never resets the cumulative total, and
-a replacement resource does not get a fresh allocation.
+In practice that covers a pre-provider gate refusal, provider acquisition
+failure, any setup failure before `SETUP_DONE` including the CPU test gate, a
+driver failure in stages **B–F** (attempt 9's class), and a launcher, watchdog,
+relay or collection failure before training begins. A rerun never resets the
+cumulative total, and a replacement resource does not get a fresh allocation.
 
-**Must stop and return to the maintainer:**
+**Stop, preserve everything, and report:**
 
-* **a replay mismatch at stage D or E.** The frozen rule is: preserve the
-  evidence and stop. It is a *result*. A larger budget does not license a
-  re-roll, and this package does not grant one;
-* **any failure at or after stage G with one or more probes trained.** Partial
-  endpoint exposure has occurred, the seeds are paired, and re-running with
-  knowledge of a partial result is choosing the continuation from the outcome.
-  Whether such a run can be discarded and restarted is a maintainer decision;
-* **a completed run with a verdict — GO, NO-GO or INCONCLUSIVE.** All three are
-  legitimate frozen outcomes. `INCONCLUSIVE` is not an engineering failure and
-  must never be re-run for a better answer; at Δ = 0 the design returns it 26%
-  of the time and at Δ = SESOI 45% of the time, which is a property of the
-  experiment, not a fault to spend past;
-* the package ceiling or the three-attempt count is reached; the remaining
-  balance cannot fund a complete attempt plus teardown; a resource's billing
-  state is unknown; or any change to frozen science, the arms, the seeds, the
-  battery, the recipe, the SESOI, the statistic or the behavioural vetoes.
+* **the first probe has STARTED training — finished or not.** This is the line,
+  and it is *not* "one or more probes trained": a probe that began and died
+  mid-training is outside pre-authorized retry just as much as one that
+  completed. This is a boundary on pre-approved retry, not a claim that starting
+  training exposes an endpoint;
+* **it cannot be confirmed whether training started.** Absence of confirmation
+  is not confirmation of absence, and the unconfirmable case is never inferred
+  to be retryable;
+* **a real replay mismatch at stage D or E.** The frozen rule is: preserve the
+  evidence and stop. It is a *result*; a larger budget does not license a
+  re-roll;
+* **an input-identity conflict that cannot be restored to its frozen binding**,
+  or anything that would require changing the scientific protocol;
+* **a completed run with a verdict — GO, NO-GO or INCONCLUSIVE.** All three end
+  the package's formal attempts. `INCONCLUSIVE` is a result, not an engineering
+  failure, and must never be re-run in pursuit of a GO: at Δ = 0 the design
+  returns it 26% of the time and at Δ = SESOI 45% of the time, which is a
+  property of the experiment accepted in advance;
+* the package total, the per-attempt ceiling, the three-attempt count or the
+  project cap is reached; or a resource's billing state is unknown.
+
+**Never**, under any budget: splicing probes across attempts, substituting a
+seed, selectively retaining outputs, or changing arms, seeds, recipe, battery,
+statistics or the behavioural vetoes.
 
 **`NO DECISION` is recorded separately from `INCONCLUSIVE`, and is not bounded
 by stage G.** How far a run got, whether its evidence was collected, and whether

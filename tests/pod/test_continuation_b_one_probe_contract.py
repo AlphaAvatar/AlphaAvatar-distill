@@ -379,8 +379,21 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     assert "SELECTION evidence" in state["phase_b_result"]["not_capability"]
     assert state["phase_b_result"]["authorizes"].startswith("nothing")
 
-    # Nothing is live.
-    assert state["authorized"]["any"] is False
+    # Nothing PHASE-B is live, which is what this module is about.
+    #
+    # This asserted `authorized.any is False` outright until 2026-09-11, when a
+    # Phase-C1 execution package was approved and the assertion started failing
+    # in a module that has nothing to do with Phase C. "Nothing anywhere is
+    # authorized" was never the claim worth protecting here — "Phase B is closed
+    # and authorizes nothing further" is — so whatever IS authorized must be
+    # named, and must not be Phase B.
+    if state["authorized"]["any"]:
+        who = json.dumps(state["authorized"]).lower()
+        assert "phase_c1" in who, (
+            "something is authorized and the snapshot does not say what")
+        assert "phase_b" not in who, (
+            "Phase B is CLOSED and its result authorizes nothing; an "
+            "authorization naming it would be reopening a resolved phase")
     assert state["running"]["pods"] == 0 and state["running"]["launchers"] == 0
     assert state["prepared_launch"]["any"] is False
     # This used to require `planning_floor_usd is None` on the reasoning that a
@@ -395,7 +408,13 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
             f"the snapshot's planning floor {floor} is not the accepted pricing "
             f"record's {pricing['totals']['floor_usd']}")
         assert pricing["authorizes"] == "nothing"
-        assert state["authorized"]["any"] is False, "priced is not authorized"
+        #: Priced is not funded. The pricing record cannot authorize, and any
+        #: funding that does exist has to come from a named maintainer package
+        #: rather than from the existence of a price.
+        if state["authorized"]["any"]:
+            assert state["authorized"].get("package_id"), (
+                "funding is claimed with no package named; a price is not a "
+                "permission and neither is an unattributed 'yes'")
 
     # Phase C *execution* has not started.
     #
@@ -428,13 +447,27 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     for axis in ("treatment", "endpoint"):
         assert axis in measured.lower(), axis
     assert re.search(r"\bno decision\b", measured, re.I), measured
-    # A grant WAS issued and consumed, so "never authorized" would be false; what
-    # must hold is that none is live.
-    assert state["authorized"]["any"] is False
-    assert state["prepared_launch"]["any"] is False
-    assert re.search(r"not currently authorized|no current grant",
-                     state["phase_c"]["c1"]["status"], re.I), (
-        state["phase_c"]["c1"]["status"])
+    # A grant WAS issued and consumed, so "never authorized" would be false.
+    #
+    # Nor is "nothing is authorized" the invariant: on 2026-09-11 a Phase-C1
+    # execution package was approved, and later a bundle will be staged for it —
+    # both legitimate, and both of which used to fail here. Whether anything is
+    # LIVE is checked against the prose view in
+    # `test_the_two_state_views_agree_on_what_is_running_and_authorized`, in
+    # whichever direction is true. What this module owns is narrower and does not
+    # move: **C1 execution has produced no science**, whatever is authorized.
+    c1 = state["phase_c"]["c1"]
+    assert re.search(r"not currently authorized|no current grant|"
+                     r"treatment and endpoint unmeasured", c1["status"], re.I), (
+        c1["status"])
+    if state["authorized"]["any"]:
+        used = state["authorized"].get("formal_attempts_used")
+        assert isinstance(used, int), (
+            "an authorization exists and the snapshot does not count what it "
+            "has been used for")
+        assert "UNMEASURED" in c1["measured"], (
+            "an authorization exists AND C1 claims a measured endpoint; one of "
+            "the two is wrong and neither may be assumed")
     assert "NOT STARTED" in state["phase_c"]["c2"]["status"]
     # Nothing that needs a GPU may be claimed as built.
     assert "pre-ATTENTION parent" in state["phase_c"]["c1"]["not_built"]
