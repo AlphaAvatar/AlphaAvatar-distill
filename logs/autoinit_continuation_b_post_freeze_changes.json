@@ -4,28 +4,28 @@
  "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "058eb1c618173d90774ab7eb130951602e447138cb5868b85905da0489e3364e",
+ "post_freeze_digest": "23878ff4f21d408b19b7a992e843523cbd517d61501213656d11b8e08b476648",
  "changed_files": [
-  "src/aadistill/infrastructure/session_runner.py"
+  "src/aadistill/infrastructure/manifest.py"
  ],
  "change": {
-  "what": "the shared acquisition loop confirms release before the next resource exists. An abandoned draw is deleted and then WAITED on until the provider reports it not billing; if that cannot be confirmed the session aborts rather than creating a second resource. Each resource records its own pod id, outcome, cumulative cost and watchdog journal, and journals rotate per pod so a redraw cannot truncate the previous backstop's evidence.",
-  "why_it_touches_this_frozen_set": "continuation B's executable set names the shared session runner, so a repair to the loop every session shares moves this digest even though continuation B is closed and consumed. The defect was REACHABLE for continuation B, which runs with multiple draws: it had been redrawing on an unconfirmed release.",
+  "what": "write_text_atomic in the shared manifest helper: a whole-file write goes to a sibling temp, is fsynced, then os.replace'd, so a full disk fails on the temp and the previous file survives. write_manifest routes through it.",
+  "why_it_touches_this_frozen_set": "continuation B's executable set names the shared manifest helper, so a durability repair to a writer every session uses moves this digest even though continuation B is closed and consumed.",
   "n_changed_files": 1,
   "numstat": {
-   "src/aadistill/infrastructure/session_runner.py": {
-    "lines_added": 112,
-    "lines_removed": 10
+   "src/aadistill/infrastructure/manifest.py": {
+    "lines_added": 30,
+    "lines_removed": 2
    }
   },
-  "behaviour_for_this_frozen_set": "strictly safer and otherwise unchanged. A draw that releases normally proceeds exactly as before; one that cannot be confirmed released now stops the session instead of creating a second billing resource."
+  "behaviour_for_this_frozen_set": "identical on every path that succeeds. The only behavioural difference is on a write that fails: the previous file is left intact instead of truncated."
  },
  "pre_existing_branches_unchanged": false,
  "pre_existing_branches_note": "CHANGED at this declaration, and the previous note is superseded. The branches that moved: ['c1', 'continuation_b', 'phase_a', 'phase_b', 'recovery_continuation']. They moved because scripts/pod/autoinit_preflight_setup.sh carries embedded Python whose imports were rewritten by the relocation -- not because any dispatch DECISION changed. Recorded as moved rather than argued to be equivalent: continuation B is CLOSED and CONSUMED, so nothing relies on these hashes to launch, and claiming they were untouched would be false.",
  "preregistration_rewritten": false,
- "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The change is confined to provider acquisition and to the evidence recorded about it.",
- "declared_at_commit": "4d0f578ed1dfbd8e4fc9cb9732db02ea876d4ed7",
- "post_freeze_digest_previous": "55ce619574ced2e741874db43d86d18350f354eaf1d650225e55950ea5dde55b",
+ "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched; the change is confined to how a file is written, not to what is written.",
+ "declared_at_commit": "761ce60590178a436eb339ecc983afc6f72f2c95",
+ "post_freeze_digest_previous": "058eb1c618173d90774ab7eb130951602e447138cb5868b85905da0489e3364e",
  "history": [
   {
    "utc": "2026-09-06T06:00:00Z",
@@ -339,6 +339,27 @@
     "scripts/pod/autoinit_preflight_setup.sh"
    ],
    "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The added branch is inert unless a session declares the variable, and continuation B does not. The scoring NUMBERS behind the changed expectation are measured identical across the relocation in logs/architecture_scoring_equivalence.json."
+  },
+  {
+   "post_freeze_digest": "058eb1c618173d90774ab7eb130951602e447138cb5868b85905da0489e3364e",
+   "declared_at_commit": "4d0f578ed1dfbd8e4fc9cb9732db02ea876d4ed7",
+   "generated_utc": "2026-09-11T00:00:00Z",
+   "change": {
+    "what": "the shared acquisition loop confirms release before the next resource exists. An abandoned draw is deleted and then WAITED on until the provider reports it not billing; if that cannot be confirmed the session aborts rather than creating a second resource. Each resource records its own pod id, outcome, cumulative cost and watchdog journal, and journals rotate per pod so a redraw cannot truncate the previous backstop's evidence.",
+    "why_it_touches_this_frozen_set": "continuation B's executable set names the shared session runner, so a repair to the loop every session shares moves this digest even though continuation B is closed and consumed. The defect was REACHABLE for continuation B, which runs with multiple draws: it had been redrawing on an unconfirmed release.",
+    "n_changed_files": 1,
+    "numstat": {
+     "src/aadistill/infrastructure/session_runner.py": {
+      "lines_added": 112,
+      "lines_removed": 10
+     }
+    },
+    "behaviour_for_this_frozen_set": "strictly safer and otherwise unchanged. A draw that releases normally proceeds exactly as before; one that cannot be confirmed released now stops the session instead of creating a second billing resource."
+   },
+   "changed_files": [
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The change is confined to provider acquisition and to the evidence recorded about it."
   }
  ],
  "branch_hashes_at_latest_declaration": {

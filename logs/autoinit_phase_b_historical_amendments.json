@@ -1308,6 +1308,57 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "91b8f70da138ff8140dee580f37518b296401fa659a25aba69fabbb3e9fac0db"
+  },
+  {
+   "amendment_id": "PHB-HA-013",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-11T15:54:14+00:00",
+   "reviewed_base_commit": "56d0b8f88657de789e05b2685f6736f8885006a6",
+   "source_repair_commit": "761ce60590178a436eb339ecc983afc6f72f2c95",
+   "source_repair_parent": "56d0b8f88657de789e05b2685f6736f8885006a6",
+   "previous_live_digest": "46172197d2d6aef787f331deb2072dcc5396814b1607da07a9b8b4ffc4cd7c17",
+   "new_live_digest": "6651b60585d9d937eee0e7b4414114208de523ad82f4ae22bb60b44738a096cb",
+   "changed_files": [
+    "src/aadistill/infrastructure/manifest.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/infrastructure/manifest.py": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2"
+   },
+   "file_sha256_after": {
+    "src/aadistill/infrastructure/manifest.py": "8b2ed17b278b6fa34d963d277fba612ae4ce9a27b948179f57a290a192c1d467"
+   },
+   "patch_sha256": "3c20a908bf2ecd3edaa11a7faeb28a36fa7312669c265fc20c6faa0ca22ffe88",
+   "numstat": {
+    "src/aadistill/infrastructure/manifest.py": [
+     30,
+     2
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 2,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "write_text_atomic in the shared manifest helper: a whole-file write now goes to a sibling temp file, is fsynced, and is moved into place with os.replace, so a full disk fails on the temp and the previous file survives. Path.write_text truncates first and writes second, and on 2026-09-11 the filesystem filled between those two steps and left two tracked files at zero bytes.",
+   "why_the_owner_is_shared_session_runner": "Phase B's executable set names src/aadistill/infrastructure/manifest.py, the shared hashing and manifest helper. A durability repair to a writer every session uses moves this digest even though Phase B is closed and resolved.",
+   "why_a_c1_only_override_was_rejected": "write_manifest is called by many sessions, not by C1 alone. Making the atomic write a C1-only path would leave every other session able to destroy a manifest it was in the middle of writing.",
+   "maintainer_authorization": "maintainer decision of 2026-09-11 authorizing local disk cleanup and closing the direct causes of the exhaustion, which names fixing the ordinary file-write path that truncates on ENOSPC. No Phase-B science, result or launch permission changes; launch_compatible_with_frozen_preregistration stays false.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "91b8f70da138ff8140dee580f37518b296401fa659a25aba69fabbb3e9fac0db",
+   "also_affected_hash_bound_sets": [
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "a4a12f512fe8cd93d3033f2c20ecaa7faf6818a7bc36f41fbd0fc79ff34998fe"
   }
  ]
 }

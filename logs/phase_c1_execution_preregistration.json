@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "fe27dfdc488ae0ee3bd50f04ceb14f901bf8b1f6",
+ "head_commit": "761ce60590178a436eb339ecc983afc6f72f2c95",
  "executable_source": {
   "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "ecd4b518b883f1f0eefbde591ec5ade3434f3294dc5ed21bc478d59708f06b48",
+  "digest": "fa545bfdf3740873e27ce4267157bdde9663218adcc528c1ff16b803f7338735",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -346,8 +346,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/manifest.py",
-    "sha256": "e51f34fa6ad8cb86286815da2b473b56ad6320a3c13e4881465f15146945c6d2",
-    "bytes": 897
+    "sha256": "8b2ed17b278b6fa34d963d277fba612ae4ce9a27b948179f57a290a192c1d467",
+    "bytes": 2060
    },
    {
     "path": "src/aadistill/infrastructure/provider.py",
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "ceeec7e8d6a492397849bbf69e742187a401c619d9e2a21c290cb33a8ccb720c"
+ "preregistration_sha256": "a4ea473bd8f844fb190f7f254e5ba0fb18bafbb106476c8791c94e3f5eec5c60"
 }
