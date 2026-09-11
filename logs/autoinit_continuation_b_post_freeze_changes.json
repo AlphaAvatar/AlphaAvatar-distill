@@ -1,33 +1,31 @@
 {
  "schema": "aadistill.autoinit.continuation_b_post_freeze_changes/v1",
- "generated_utc": "2026-09-11T02:20:00Z",
+ "generated_utc": "2026-09-11T00:00:00Z",
  "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "8b463f8061fb3088fbad75a8bc3abaad2f67824601177b1c1e575a9dfbbb4c31",
+ "post_freeze_digest": "55ce619574ced2e741874db43d86d18350f354eaf1d650225e55950ea5dde55b",
  "changed_files": [
-  "src/aadistill/infrastructure/session_runner.py"
+  "scripts/pod/autoinit_preflight_setup.sh"
  ],
  "change": {
-  "what": "repair of an undefined name in the shared session runner. SessionRunner.run() built the driver JobSpec with workdir=REPO, a module constant deleted when the image layout moved into ExecutionCommands; it now reads self.repo, i.e. spec.commands.checkout_root -- the value the same call already passed as PYTHONPATH.",
-  "why_it_touches_this_frozen_set": "continuation B's executable set names the shared infrastructure, so a repair made for every launchable session moves this digest even though continuation B is closed and consumed. The alternative to declaring it is to leave a NameError in the runner every future session executes.",
+  "what": "the shared pod setup reads an OPTIONAL SESSION_FROZEN_EXPECT and, when a session sets it, passes --expect to verify_frozen_assets.py instead of using that script's compiled-in historical constants. Empty for every session that does not set it, so every other session asks exactly the question it asked before.",
+  "why_it_touches_this_frozen_set": "continuation B's executable set names the shared setup script, so a repair made for a session running on the migrated tree moves this digest even though continuation B is closed and consumed. The alternative is to leave every post-migration session failing at SETUP_RC=91, which is what C1 attempt 10 paid $0.1177 and one of three attempts to discover.",
   "n_changed_files": 1,
   "numstat": {
-   "src/aadistill/infrastructure/session_runner.py": [
-    9,
-    1
-   ]
+   "scripts/pod/autoinit_preflight_setup.sh": {
+    "lines_added": 21,
+    "lines_removed": 2
+   }
   },
-  "lines_removed": 1,
-  "measured_from": "2e0fe849a5dceb80b63fe49f2de956febd75c743",
-  "note": "DERIVED from git against the previous declaration's commit, not transcribed. The same repair is declared to Phase B's ledger as PHB-HA-010; both frozen sets name this file, and declaring one does not declare the other -- which is how this was missed until the pod-like sweep refused it."
+  "behaviour_for_this_frozen_set": "UNCHANGED. Continuation B never set SESSION_FROZEN_EXPECT and the variable defaults to empty, so the branch this set would execute is the same one it executed: the historical constants, no --expect argument."
  },
  "pre_existing_branches_unchanged": false,
  "pre_existing_branches_note": "CHANGED at this declaration, and the previous note is superseded. The branches that moved: ['c1', 'continuation_b', 'phase_a', 'phase_b', 'recovery_continuation']. They moved because scripts/pod/autoinit_preflight_setup.sh carries embedded Python whose imports were rewritten by the relocation -- not because any dispatch DECISION changed. Recorded as moved rather than argued to be equivalent: continuation B is CLOSED and CONSUMED, so nothing relies on these hashes to launch, and claiming they were untouched would be false.",
  "preregistration_rewritten": false,
- "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The repaired expression could only ever raise NameError, so no completed continuation-B result can have depended on it.",
- "declared_at_commit": "e2a68d849bdd7c94edf3783fdfc49cc516436e12",
- "post_freeze_digest_previous": "e5d8db43bc952d40dba8c4ef07b62edd7a8c653dacae2d2db01e5975053d197f",
+ "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The added branch is inert unless a session declares the variable, and continuation B does not. The scoring NUMBERS behind the changed expectation are measured identical across the relocation in logs/architecture_scoring_equivalence.json.",
+ "declared_at_commit": "pending \u2014 this working tree; the commit that carries this declaration",
+ "post_freeze_digest_previous": "8b463f8061fb3088fbad75a8bc3abaad2f67824601177b1c1e575a9dfbbb4c31",
  "history": [
   {
    "utc": "2026-09-06T06:00:00Z",
@@ -297,6 +295,29 @@
     "src/aadistill/runtime/device_handoff.py",
     "src/aadistill/runtime/leaf_durability.py"
    ]
+  },
+  {
+   "post_freeze_digest": "8b463f8061fb3088fbad75a8bc3abaad2f67824601177b1c1e575a9dfbbb4c31",
+   "declared_at_commit": "e2a68d849bdd7c94edf3783fdfc49cc516436e12",
+   "generated_utc": "2026-09-11T02:20:00Z",
+   "change": {
+    "what": "repair of an undefined name in the shared session runner. SessionRunner.run() built the driver JobSpec with workdir=REPO, a module constant deleted when the image layout moved into ExecutionCommands; it now reads self.repo, i.e. spec.commands.checkout_root -- the value the same call already passed as PYTHONPATH.",
+    "why_it_touches_this_frozen_set": "continuation B's executable set names the shared infrastructure, so a repair made for every launchable session moves this digest even though continuation B is closed and consumed. The alternative to declaring it is to leave a NameError in the runner every future session executes.",
+    "n_changed_files": 1,
+    "numstat": {
+     "src/aadistill/infrastructure/session_runner.py": [
+      9,
+      1
+     ]
+    },
+    "lines_removed": 1,
+    "measured_from": "2e0fe849a5dceb80b63fe49f2de956febd75c743",
+    "note": "DERIVED from git against the previous declaration's commit, not transcribed. The same repair is declared to Phase B's ledger as PHB-HA-010; both frozen sets name this file, and declaring one does not declare the other -- which is how this was missed until the pod-like sweep refused it."
+   },
+   "changed_files": [
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The repaired expression could only ever raise NameError, so no completed continuation-B result can have depended on it."
   }
  ],
  "branch_hashes_at_latest_declaration": {

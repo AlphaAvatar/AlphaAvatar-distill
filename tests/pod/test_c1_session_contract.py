@@ -877,3 +877,111 @@ def test_the_gate_accepts_the_set_the_issuer_actually_writes(tmp_path):
                                 evidence={})
     ok, why = launcher.c1_harness_gate(ctx)
     assert ok, why
+
+
+# --- the frozen-asset gate ---------------------------------------------------
+#
+# Attempt 10 died at the pod's frozen-asset check for $0.1177 and one of three
+# attempts, on a condition this machine could have decided for free: the
+# initialization cutover relocated two of the scoring contract's six declared
+# files, so the contract legitimately became `@v3` while the verifier's
+# compiled-in constants still said `@v2`, and nothing passed the `--expect` flag
+# that exists for exactly that distinction. These cover the counterpart gate.
+
+def test_the_expectation_document_restates_the_asset_block_exactly():
+    """The assets are COPIED from the verifier's constants, never re-typed.
+
+    The first draft of the expectation document was hand-written and named an
+    asset that does not exist with hashes that were invented. A transcribed hash
+    is a second source for a value that already has one.
+    """
+    sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    import verify_frozen_assets as V
+
+    doc = json.loads((REPO / "configs/experiments/phase_c1/frozen_assets.json"
+                      ).read_text())
+    assert doc["assets"] == V.FROZEN, (
+        "the expectation document's asset block has drifted from the verifier's "
+        "own constants; one of the two was edited alone")
+    assert doc["scoring_contract"]["supersedes"] == {
+        "contract": V.FROZEN_SCORING_CONTRACT,
+        "digest": V.FROZEN_SCORING_DIGEST}, (
+        "the document must name the pin it supersedes, so the change is a "
+        "documented succession rather than an unexplained different number")
+    assert doc["authorizes"] == "nothing"
+
+
+def test_the_expectation_names_the_live_scoring_contract():
+    """And it must be the contract this tree really computes, not a guess."""
+    from experiments.source_sets import recovery_scoring_contract
+
+    doc = json.loads((REPO / "configs/experiments/phase_c1/frozen_assets.json"
+                      ).read_text())
+    live = recovery_scoring_contract(REPO)
+    assert doc["scoring_contract"]["contract"] == live["contract"]
+    assert doc["scoring_contract"]["digest"] == live["digest"]
+
+
+def test_the_frozen_asset_gate_passes_on_this_tree(launcher):
+    import types
+
+    ctx = types.SimpleNamespace(args=session_args(launcher), evidence={})
+    ok, why = launcher.frozen_assets_gate(ctx)
+    assert ok, why
+    assert ctx.evidence["frozen_assets"]["returncode"] == 0
+
+
+def test_the_frozen_asset_gate_reproduces_attempt_tens_refusal(tmp_path,
+                                                               monkeypatch):
+    """The mutation, and it is the exact condition that was paid for.
+
+    Point the gate at an expectation carrying the superseded `@v2` pin and it
+    must refuse — at `$0`, here, instead of at `SETUP_RC=91` on a billing pod.
+    """
+    import types
+
+    doc = json.loads((REPO / "configs/experiments/phase_c1/frozen_assets.json"
+                      ).read_text())
+    doc["scoring_contract"] = {**doc["scoring_contract"],
+                               **doc["scoring_contract"]["supersedes"]}
+    stale = REPO / "configs/experiments/phase_c1/_stale_expect_for_test.json"
+    stale.write_text(json.dumps(doc, indent=1) + "\n")
+    try:
+        mod = load_session_launcher("autoinit_c1_launch")
+        monkeypatch.setattr(mod, "FROZEN_EXPECT", str(
+            stale.relative_to(REPO)))
+        ctx = types.SimpleNamespace(args=session_args(mod), evidence={})
+        ok, why = mod.frozen_assets_gate(ctx)
+    finally:
+        stale.unlink()
+    assert not ok
+    assert "recovery_search_scoring@v2" in why or "scoring contract" in why, why
+
+
+def test_the_setup_reads_the_variable_the_launcher_declares(launcher, spec):
+    """A forwarded variable nothing reads, or a read variable nothing forwards,
+    are the same defect seen from two ends."""
+    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    assert "SESSION_FROZEN_EXPECT" in setup
+    assert spec.setup.env["SESSION_FROZEN_EXPECT"] == launcher.FROZEN_EXPECT
+    assert (REPO / launcher.FROZEN_EXPECT).is_file()
+    #: Optional by construction: every other session keeps the historical
+    #: question, so this must not become a required variable for all of them.
+    assert "${SESSION_FROZEN_EXPECT:-}" in setup
+
+
+def test_what_the_frozen_asset_gate_trusts_is_inside_the_measured_harness():
+    """Otherwise the gate's answer could be changed without moving any digest.
+
+    The launcher names the expectation document as a string and hands it to a
+    subprocess, so the import walk cannot see it. Declared explicitly, for the
+    same reason `c1_artifacts.json` is: a file that decides whether a session may
+    run has to be inside the set a grant binds.
+    """
+    closure = {f["path"] for f in c1_harness_digest(REPO)["files"]}
+    launcher = load_session_launcher("autoinit_c1_launch")
+    assert launcher.FROZEN_EXPECT in closure, (
+        f"{launcher.FROZEN_EXPECT} decides the frozen-asset gate and is not in "
+        "the harness the authorization measures")
+    assert "scripts/autoinit/verify_frozen_assets.py" in closure, (
+        "the verifier the gate executes is not measured either")

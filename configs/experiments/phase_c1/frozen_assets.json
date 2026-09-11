@@ -1,0 +1,33 @@
+{
+ "schema": "aadistill.autoinit.frozen_asset_expectation/v1",
+ "_contract": "What `verify_frozen_assets.py --expect` checks a Phase-C1 tree against. The asset block is COPIED from that script's own FROZEN constants, not re-typed: a hand-transcribed hash is a second source for a value that already has one, and I got it wrong on the first draft. `test_the_c1_expectation_restates_the_asset_block_exactly` pins the two together. AUTHORIZES NOTHING.",
+ "_why_this_file_exists": "The verifier's built-in constants answer 'does this tree match the COMPLETED runs' preregistration'. After the initialization cutover the answer is legitimately no for one field, and the script already carries `--expect` for exactly that distinction -- but nothing ever passed it, so C1's pod setup kept asking the historical question and refused. Attempt 10 died there: SETUP_RC=91, $0.1177, 6.48 min, no driver stage, no probe trained. Attempt 9 ran on 2026-09-07, three days before the migration merged, so this gate had never been exercised post-migration.",
+ "assets": {
+  "state_eval_v1": {
+   "root": "artifacts/stage1/state_eval_v1",
+   "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+   "manifest_sha256": "95204907efa7efc681ef334f223073da6ca35dbf889b029a7672f5817ab72b05",
+   "items_sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d"
+  },
+  "recovery_search_v2": {
+   "root": "artifacts/stage3/recovery_search_v2",
+   "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
+   "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
+   "tools_materialization_sha256": "3016f1c421a705cf72ce852a76f26ad6ef6dcaf84021a80de9c130bf224befdf",
+   "items_sha256": null
+  }
+ },
+ "assets_note": "UNCHANGED from the historical block, and attempt 10's own report confirms it: the only problem it raised was the scoring contract. The migration moved source files, not data assets.",
+ "scoring_contract": {
+  "contract": "recovery_search_scoring@v3",
+  "digest": "4102513cd6f705e2cd3b2da6f818862142019042177837e54b941cde4f52de04",
+  "supersedes": {
+   "contract": "recovery_search_scoring@v2",
+   "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be"
+  },
+  "why_it_moved": "the contract is a digest over sorted 'path:sha256' lines and the initialization cutover relocated two of its six declared files -- src/aadistill/autoinit/recovery.py is now src/aadistill/initialization/planning/recovery.py. A relocation MUST move this digest; it is the intended post-migration identity, not a drift.",
+  "why_that_is_safe": "measured, not assumed. logs/architecture_scoring_equivalence.json re-scored frozen Phase-A generations through the pre- and post-migration trees and reports every score, count, rate and per-sample record identical, with only contract and provenance fields differing. logs/phase_c1_scoring_equivalence.json separately shows c1_confirmation_scoring@v1 reproducing the frozen scorer on 15 retained probes: IDENTICAL, 0 differences, no tolerance.",
+  "what_this_is_not": "a change to frozen science. No metric, threshold, rule or number moved. The v2 identity remains the record of what the completed attempts executed."
+ },
+ "authorizes": "nothing"
+}

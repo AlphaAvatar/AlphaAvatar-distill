@@ -204,6 +204,14 @@ C1_DECLARED_INPUTS: tuple[str, ...] = (
     "configs/experiments/phase_c1/authorization.json",
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",
+    #: What the frozen-asset gate checks this tree against, on the pod and at
+    #: $0 before one exists. Declared because the AST walk cannot see it: the
+    #: launcher names it as a string and hands it to a subprocess, so without
+    #: this line the document deciding whether a session may run would sit
+    #: OUTSIDE the set a grant binds, and could be edited without moving the
+    #: digest — the same property that makes `c1_artifacts.json` a declared
+    #: input rather than an incidental file.
+    "configs/experiments/phase_c1/frozen_assets.json",
 )
 
 #: A recorded snapshot of the derived closure, for reporting drift. Never the

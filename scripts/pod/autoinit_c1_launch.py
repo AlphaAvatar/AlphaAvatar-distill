@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -178,6 +179,9 @@ AUTH_PATH = "logs/autoinit_c1_authorization.json"
 
 PRICING = "logs/phase_c1_pricing.json"
 PREREG = "logs/phase_c1_execution_preregistration.json"
+#: The expectation the frozen-asset gate checks this tree against, on the pod
+#: and — since 2026-09-11 — at $0 before a pod exists.
+FROZEN_EXPECT = "configs/experiments/phase_c1/frozen_assets.json"
 #: Declared once. `artifact_spec_gate` reads these and `ArtifactPolicy` books
 #: them, so the gate cannot end up validating a different file than the one the
 #: pod is handed.
@@ -511,6 +515,48 @@ def grant_provenance_gate(ctx: SessionContext) -> tuple[bool, str]:
                  "run's governance/grant.json and hash to the recorded value"),
     }
     return True, f"grant {live[:12]}… at {rel}, as recorded by the authorization"
+
+
+def frozen_assets_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Run the pod's frozen-asset check HERE, before a pod exists.
+
+    Attempt 10 is the reason, and it cost `$0.1177` plus one of three attempts.
+    The setup script has verified the frozen assets since long before C1, and
+    there was no dev-box counterpart — so a condition fully decidable on this
+    machine was decided on a billing pod instead. The initialization cutover
+    relocated two of the scoring contract's six declared files, the contract
+    legitimately became `@v3`, the verifier's compiled-in constants still said
+    `@v2`, and nothing passed the `--expect` flag that exists for exactly that.
+    `SETUP_RC=91`, no driver stage, no probe trained.
+
+    This is the same script, the same expectation document and the same exit
+    convention as the pod runs — not a reimplementation of it, which would be a
+    second thing to keep in step and would agree with the pod right up until it
+    mattered.
+    """
+    import subprocess
+
+    expect = REPO_ROOT / FROZEN_EXPECT
+    if not expect.is_file():
+        return False, (f"{FROZEN_EXPECT} is missing; the setup would refuse at "
+                       "the frozen-asset gate after a pod exists")
+    proc = subprocess.run(
+        [sys.executable, "scripts/autoinit/verify_frozen_assets.py",
+         "--expect", str(expect)],
+        capture_output=True, text=True, cwd=REPO_ROOT,
+        env={**os.environ, "PYTHONPATH": "src:scripts"})
+    tail = (proc.stdout + proc.stderr).strip().splitlines()
+    ctx.evidence["frozen_assets"] = {
+        "expect": FROZEN_EXPECT, "returncode": proc.returncode,
+        "tail": tail[-12:],
+    }
+    if proc.returncode != 0:
+        #: Verbatim, and for the same reason the setup script says so: "the
+        #: verifier could not run" and "these are not the expected assets" are
+        #: different findings and must not be reported as one.
+        return False, ("the frozen-asset check refuses this tree: "
+                       + " ".join(tail[-6:])[:400])
+    return True, f"frozen assets verified against {FROZEN_EXPECT}"
 
 
 def pricing_identity_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -1039,7 +1085,17 @@ def spec(args) -> SessionSpec:
             #: Declared. Without it setup falls to SESSION_KIND=spend and loads a
             #: SpendAuthorization, which refuses this artifact — the session
             #: would die at setup, exit 98, before any work.
-            env={"SESSION_KIND": "c1"},
+            #:
+            #: `SESSION_FROZEN_EXPECT` names the document the frozen-asset gate
+            #: checks against. Empty for every other session, which keeps asking
+            #: the historical question with the verifier's compiled-in
+            #: constants; C1 runs on the migrated tree, where the scoring
+            #: contract legitimately reads `@v3` because the cutover relocated
+            #: two of its six declared files. Attempt 10 died on exactly that
+            #: for `$0.1177` — `SETUP_RC=91`, no driver stage, no probe trained
+            #: — because the `--expect` mechanism existed and nothing passed it.
+            env={"SESSION_KIND": "c1",
+                 "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
                           "SESSION_ASSETS", "SESSION_RELAY_INPUTS",
@@ -1101,6 +1157,7 @@ def spec(args) -> SessionSpec:
             pricing_identity_gate,
             preregistration_gate,
             frozen_c1_science_gate,
+            frozen_assets_gate,
             teacher_binding_gate,
             battery_staged_gate,
             artifact_spec_gate,

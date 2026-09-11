@@ -2102,3 +2102,43 @@ mis-stated grant against. None of it is in `src/aadistill`.
 
 **Booked against this package so far: `$0.0000`.** Cumulative project spend is
 unchanged at **`$267.8998`** — an approval is not a cost.
+
+---
+
+## 2026-09-11 — C1 attempt 10: the frozen-asset gate, `$0.1177`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 10: 13/13 pre-provider gates passed twice — once in a read-only pre-flight that did not invoke the launcher, again by the launcher itself — pod `kabazpl889i5u5` created at `$1.09/h`, 6.48 min, **INFRASTRUCTURE ABORT during SETUP at the frozen-asset gate**, `SETUP_RC=91`. No driver stage, no replay, no training, no evaluation, no decision | `$0.1177` | [`runs/phase_c1/attempt10/`](runs/phase_c1/attempt10/) |
+
+**Cumulative: `$267.8998` + `$0.1177` = `$268.0175` of the `$320.0000` cap.**
+Package booked **`$0.1177`** of `$51.4425`; **1 of 3** formal attempts used.
+
+```text
+project   267.8998 + 0.1177 = 268.0175   of 320.0000, leaving 51.9825
+package     0.0000 + 0.1177 =   0.1177   of  51.4425, leaving 51.3248
+attempts                          1      of 3, leaving 2
+next attempt worst case  268.0175 + 15.1475 = 283.1650  <= 320.0000
+```
+
+**One provider resource, one create call, zero redraws**, watchdog detached
+before the create. Teardown confirmed **three** ways: the launcher's own report,
+an independent read-only poll running out of band that recorded an empty
+inventory at `10:14:08Z`, and the run manifest.
+
+**The cause, and why it was not free.** The initialization cutover relocated two
+of the scoring contract's six declared files, so the contract legitimately reads
+`recovery_search_scoring@v3`; the verifier's compiled-in constants still asked
+the pre-migration question, and the `--expect` flag that exists for exactly that
+distinction was never passed. Attempt 9 ran three days before the migration
+merged, so this setup gate had never been exercised post-migration. **The check
+was fully decidable on the dev box and had no dev-box counterpart** — that is
+why it was discovered on a billing pod, and it is now `frozen_assets_gate`, the
+fourteenth pre-provider gate, running the same script against the same committed
+expectation document.
+
+**Retry is pre-authorized.** All six conditions hold: no formal probe training
+started (the driver never ran), the cause is identified and repaired, frozen
+science and the decision rule are untouched, the resource is confirmed gone, and
+the count and balance fund a complete attempt. Attempt 11 uses a new run
+identity and a fresh one-use chain.

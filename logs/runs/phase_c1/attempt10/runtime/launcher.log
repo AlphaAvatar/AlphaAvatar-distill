@@ -1,0 +1,69 @@
+[10:04:14] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[10:04:14] NVIDIA L40S $1.09/h, stock Medium
+[10:04:14] session commit eec1bb2aa42c verified: harness digests to 464dacb3d8db…, carries the authorization and only logs/autoinit_c1_authorization.json differs from the authorized base
+[10:04:14] grant e5db2cbbbf1c… at logs/runs/phase_c1/attempt10/governance/grant.json, as recorded by the authorization
+[10:04:15] C1 harness 464dacb3d8db… over 97 declared files
+[10:04:15] ceiling $15.1475, derived from logs/phase_c1_pricing.json
+[10:04:15] preregistration 8654b2456f86… (self-hash verified), harness 464dacb3d8db…
+[10:04:15] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[10:04:15] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[10:04:15] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[10:04:15] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[10:04:17] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[10:04:20] aad_autoinit_eec1bb2a.bundle (9425438 bytes, 91d5e6b03d55…) round-trips to eec1bb2aa42c… carrying this authorization and harness 464dacb3d8db…
+[10:04:23] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[10:04:23] pod sweep 3665 passed / 113 skipped / 0 failed, leaf_transport ok, renderer_parity ok, binds C1 harness 464dacb3d8db… and environment 3ca6a87edb16…, staging contract bb34ac5a298f…, swept at 11527e17 with only ['logs/autoinit_c1_authorization.json', 'logs/c1_pod_environment_verification.json'] differs from the swept base
+[10:04:24] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[10:04:25] watchdog detached — hard 834 min = $15.15
+[10:04:25] created kabazpl889i5u5 at $1.09/h
+[10:05:20]   starting (60s) — $0.02
+[10:06:04] TCP 22 at 160.250.71.214:10249 after 1.6 min
+[10:06:06] draw 1: ssh reachable — $0.03
+[10:06:45] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[10:06:45] draw 1: running setup
+[10:10:36] setup did not reach SETUP_DONE:
+ + requests==2.34.2
+ + rich==15.0.0
+ + safetensors==0.8.0
+ + setuptools==81.0.0
+ + shellingham==1.5.4
+ + six==1.17.0
+ + sympy==1.14.0
+ + tokenizers==0.22.2
+ + torch==2.11.0+cu128
+ + tqdm==4.68.4
+ + transformers==5.13.1
+ + triton==3.6.0
+ + typer==0.26.8
+ + typing-extensions==4.16.0
+ + urllib3==2.7.0
+ + xxhash==3.8.1
+ + yarl==1.24.2
+Using Python 3.12.3 environment at: /opt/train
+Resolved 1 package in 1ms
+   Building aadistill @ file:///workspace/aad
+      Built aadistill @ file:///workspace/aad
+Prepared 1 package in 282ms
+Installed 1 package in 1ms
+ + aadistill==0.0.1 (from file:///workspace/aad)
+[10:10:23] offline install completed in 7s
+train torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1
+MARKER:TRAIN_ENV
+[10:10:30] verifying the frozen assets against the preregistered constants
+[10:10:31] FROZEN ASSET GATE FAILED -- output follows verbatim, because 'the 
+[10:10:31] verifier could not run' and 'these are not the preregistered assets' are 
+[10:10:31] different findings and must not be reported as the same one:
+BLOCKER: the pod is not running the preregistered assets. Do not enter Stage 1; record evidence and tear down.
+{
+  "passed": false,
+  "problems": [
+    "scoring contract is recovery_search_scoring@v3 4102513cd6f705e2cd3b2da6f818862142019042177837e54b941cde4f52de04, expected recovery_search_scoring@v2 808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be"
+  ]
+}
+MARKER:FROZEN_ASSETS_FAILED
+SETUP_RC=91
+
+[10:10:43]   preserved setup-failure evidence off-pod: /workspace/pytest.log, /workspace/pytest_junit.xml, /workspace/pytest_outcomes.json
+[10:10:43] ABORT after draw 1: setup_failed
+[10:10:43] deleting pod (setup setup_failed)
+[10:10:54] pod deleted — 6.5 min, $0.12; provider confirms gone: True

@@ -1,0 +1,48 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c1",
+ "run_id": "attempt10",
+ "root": "phase_c1/attempt10",
+ "artifact_spec": "phase_c1_session_v1",
+ "plan": {
+  "session_id": "autoinit-c1",
+  "plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
+  "session_commit": "eec1bb2aa42ca79ff6aeada03d76dae008738b16",
+  "bundle": "aad_autoinit_eec1bb2a.bundle",
+  "preregistration": "logs/phase_c1_execution_preregistration.json",
+  "scratch_root": "/home/ecs-user/aad-scratch/sessions/c1-attempt10",
+  "scratch_note": "the artifact archive and the extracted tree stay here; artifacts/manifest.json carries their hashes. Large artifacts are not moved into git"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_c1_launch.py",
+  "harness_source_digest": "464dacb3d8db9ced4ae4a3070e0bb10339ac05243438365f3eb9d6bfe8ea8776",
+  "authorization": "logs/autoinit_c1_authorization.json"
+ },
+ "status": {
+  "passed": false,
+  "terminal": null,
+  "pod_id": "kabazpl889i5u5",
+  "cost": {
+   "price_per_hour": 1.09,
+   "elapsed_minutes": 6.48,
+   "actual_usd": 0.1177,
+   "authorized_usd": 15.1475,
+   "within_authorization": true
+  },
+  "provider_confirms_gone": true,
+  "authorizes": "nothing"
+ },
+ "roles": {
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "grant": "governance/grant.json",
+  "launcher_log": "runtime/launcher.log",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json",
+  "watchdog_journal": "runtime/watchdog.jsonl"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "7b7edcfafcbf34d4dfedca1378486caab88eee093da3b32d7950da31da60148e"
+}

@@ -4,7 +4,7 @@
  "granularity": "one entry per (experiment_id, run_id). The v1 index counted artifact roots, so an attempt with an evidence directory and a grant file appeared twice.",
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 0,
+  "runs_current": 1,
   "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
@@ -622,6 +622,17 @@
    },
    "aggregate_digest": "d91d560c844582c0af01e8f56e67e0ddbb1ee4423d53c32e3d60a1424a462b95",
    "n_components": 1
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt10",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/runs/phase_c1/attempt10",
+    "manifest": "logs/runs/phase_c1/attempt10/manifest.json"
+   },
+   "manifest_sha256": "7b7edcfafcbf34d4dfedca1378486caab88eee093da3b32d7950da31da60148e",
+   "n_components": 7
   }
  ],
  "unrecorded": [
@@ -651,10 +662,10 @@
   },
   {
    "experiment_id": "phase_c1",
-   "run_id": "attempt10",
-   "root": "logs/runs/phase_c1/attempt10",
+   "run_id": "attempt11",
+   "root": "logs/runs/phase_c1/attempt11",
    "n_files": 1,
-   "digest": "10b04e0f2896dbbc44938dc134bdc4ea644bf5f55318d50cafabd53d590c2597",
+   "digest": "d49654ffecb04fcf62801a5e742a8e6d809ef568d9afc9a7e3b918ab570e76a8",
    "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],

@@ -1,0 +1,88 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the measured closeout of C1 attempt 10, built from the provider and setup evidence collected beside it. Nothing here is inferred from a log line that was not preserved.",
+
+ "attempt": 10,
+ "package": "phase_c1.execution_package.2026-09-11",
+ "formal_attempt_index": 1,
+ "formal_attempts_in_package": 3,
+ "terminal_marker": "FROZEN_ASSETS_FAILED",
+ "setup_rc": 91,
+ "classification": "INFRASTRUCTURE FAILURE during SETUP, before any driver stage. Not an efficacy result, not a replay mismatch, and not a frozen-rule INCONCLUSIVE.",
+
+ "what_ran": {
+  "setup_markers_reached": ["ENV_READY", "REPO_READY", "ASSETS_STAGED", "TRAIN_ENV"],
+  "setup_markers_not_reached": ["ASSETS_READY", "VLLM_READY", "TEACHER_READY", "ROPE_OK", "TESTS_OK", "AUTHORIZATION_OK", "SETUP_DONE"],
+  "driver_started": false,
+  "stages_run": [],
+  "probes_trained": 0,
+  "probes_evaluated": 0,
+  "decision_ran": false,
+  "teacher_fetched": false
+ },
+
+ "the_failure": {
+  "reported_by": "scripts/autoinit/verify_frozen_assets.py, invoked by the shared setup after the train venv exists",
+  "problem": "scoring contract is recovery_search_scoring@v3 4102513cd6f705e2cd3b2da6f818862142019042177837e54b941cde4f52de04, expected recovery_search_scoring@v2 808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+  "root_cause": "the initialization cutover relocated two of the scoring contract's six declared files -- src/aadistill/autoinit/recovery.py is now src/aadistill/initialization/planning/recovery.py -- and the contract is a digest over sorted 'path:sha256' lines, so it MUST move. recovery_search_scoring@v3 is the correct post-migration identity. The verifier's compiled-in constants still asked the pre-migration question, and the `--expect` flag that exists for exactly this distinction was never passed by any session.",
+  "why_no_earlier_run_caught_it": "attempt 9 ran on 2026-09-07, three days before the migration merged on 2026-09-10. No C1 attempt has launched since, so this setup gate had never been exercised post-migration.",
+  "why_no_zero_dollar_check_caught_it": "the frozen-asset verification existed only as a SETUP step. It had no dev-box counterpart, so a condition fully decidable on this machine was decided on a billing pod instead. That is the gap the repair closes.",
+  "reproduced_at_zero_dollars": "yes -- the same verifier, run on the dev box after teardown, reproduces the identical single problem.",
+  "what_it_is_not": [
+   "not a replay mismatch: stage D and E were never reached and no digest comparison ran",
+   "not an efficacy observation: no arm was materialized, no probe trained, nothing evaluated",
+   "not a change in frozen science: no metric, threshold, rule or number moved, and the relocation's numerical equivalence is measured in logs/architecture_scoring_equivalence.json"
+  ]
+ },
+
+ "provider": {
+  "pod_id": "kabazpl889i5u5",
+  "gpu": "NVIDIA L40S (secure)",
+  "quoted_price_per_hour": 1.09,
+  "stock_status_at_quote": "Medium",
+  "created_utc": "2026-09-11T10:04:25Z",
+  "elapsed_minutes": 6.48,
+  "actual_usd": 0.1177,
+  "authorized_usd": 15.1475,
+  "within_authorization": true,
+  "provider_create_calls": 1,
+  "second_resource_created": false,
+  "redraws": 0,
+  "watchdogs_started": 1,
+  "watchdog_detached_before_create": true,
+  "provider_confirms_gone": true,
+  "teardown_confirmed_three_ways": [
+   "the launcher reported the pod deleted at 6.5 min with provider_confirms_gone true",
+   "an independent read-only poll, running out of band in its own tmux session, recorded an empty inventory at 2026-09-11T10:14:08Z",
+   "the run manifest records provider_confirms_gone: true"
+  ]
+ },
+
+ "gates": {
+  "pre_provider": "13 of 13 passed, twice: once in a read-only pre-flight that did NOT invoke the launcher, and again by the launcher itself before anything was created.",
+  "what_the_pre_flight_could_not_cover": "the frozen-asset check, because it was a setup step with no pre-provider counterpart. It is now gate 14."
+ },
+
+ "retry_assessment": {
+  "eligible_under_the_package": true,
+  "conditions": {
+   "no_formal_probe_training_started": "CONFIRMED -- the driver never started; setup exited at marker 4 of 11",
+   "ordinary_infrastructure_failure_with_cause_addressed": "yes -- diagnosed at $0, repaired, and given a pre-provider gate plus five regressions",
+   "frozen_science_input_contracts_and_decision_rule_unchanged": "yes -- seeds, arms, recipe, battery, statistic and vetoes untouched; the scoring NUMBERS are measured identical across the relocation",
+   "previous_resource_confirmed_not_billing": "yes -- three independent confirmations above",
+   "count_and_balance_sufficient": "yes -- 1 of 3 attempts used, $0.1177 of $51.4425 booked",
+   "new_run_identity_and_fresh_one_use_chain": "required and will be used: attempt 11, with its own grant, authorization and bundle"
+  }
+ },
+
+ "budget": {
+  "cumulative_before": 267.8998,
+  "this_attempt": 0.1177,
+  "cumulative_after": 268.0175,
+  "cap": 320.0,
+  "package_booked_after": 0.1177,
+  "package_total": 51.4425
+ },
+
+ "authorizes": "nothing"
+}

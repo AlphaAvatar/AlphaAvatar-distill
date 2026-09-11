@@ -5,15 +5,14 @@
  "baseline_commit": "logs/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "OWNED by the readiness record's swept_base_commit and deliberately not duplicated: this snapshot is written BEFORE the commit it would name, and gate 12 forbids editing state after the sweep, so a copy here could only go stale. It did (4f85ecda vs 0457bab).",
  "running": {
-  "paid_compute": true,
-  "pods": 1,
-  "pod_id": "kabazpl889i5u5",
-  "launchers": 1,
-  "note": "C1 attempt 10 LIVE, created 2026-09-11T10:04:25Z, secure L40S $1.09/h, hard terminate 834 min = $15.1475. Launcher and an independent read-only poll run under tmux (c1launch, c1poll). Detail: logs/STATE.md."
+  "paid_compute": false,
+  "pods": 0,
+  "launchers": 0,
+  "note": "zero pods. Attempt 10's pod kabazpl889i5u5 was deleted at 6.48 min and confirmed gone three ways, including an out-of-band read-only poll at 2026-09-11T10:14:08Z."
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11: up to 3 formal C1 attempts under the frozen protocol. An approval is NOT a launch. Attempt 10 is attempt 1 of 3 and is RUNNING; its one-use authorization is consumed.",
+  "note": "PACKAGE APPROVED 2026-09-11: up to 3 formal C1 attempts. An approval is NOT a launch. Attempt 10 used attempt 1 of 3 and its one-use chain is CONSUMED; 2 remain. No live grant, authorization or bundle for attempt 11 yet.",
   "package_id": "phase_c1.execution_package.2026-09-11",
   "formal_attempts_used": 1,
   "formal_attempts_max": 3,
@@ -21,17 +20,17 @@
   "c1_attempts": "ten labels, NINE paid, $4.0001, zero ATTENTION science. Attempt 10 is RUNNING and is not booked until closeout. Per-attempt cost and cause: logs/BUDGET_LEDGER.md."
  },
  "prepared_launch": {
-  "any": true,
-  "bundles": 1,
-  "note": "aad_autoinit_eec1bb2a.bundle, round-trip verified for session commit eec1bb2a and consumed by attempt 10."
+  "any": false,
+  "bundles": 0,
+  "note": "aad_autoinit_eec1bb2a.bundle was consumed by attempt 10 and authorizes nothing further."
  },
  "budget": {
-  "cumulative_spend_usd": 267.8998,
+  "cumulative_spend_usd": 268.0175,
   "authorized_cap_usd": 320.0,
-  "remaining_usd": 52.1002,
+  "remaining_usd": 51.9825,
   "cap_raised_utc": "2026-09-11",
   "cap_raised_from_usd": 283.76,
-  "package": "phase_c1.execution_package.2026-09-11 -- 3 formal attempts max at $15.1475 each ($45.4425) + $6.0000 engineering = $51.4425. Booked so far: $0.0000. Limits bind SEPARATELY and do not transfer.",
+  "package": "phase_c1.execution_package.2026-09-11 -- 3 formal attempts max at $15.1475 each ($45.4425) + $6.0000 engineering = $51.4425. Booked: $0.1177 (attempt 10). Limits bind SEPARATELY and do not transfer.",
   "planning_floor_usd": 13.4401,
   "reconciliation_margin_usd": 0.6577,
   "remaining_is_not_permission": true,
@@ -74,7 +73,7 @@
   "the ATTENTION 'search declined to calibrate' reading: WITHDRAWN 2026-09-01"
  ],
  "next_starting_point": {
-  "status": "Attempt 10 RUNNING since 2026-09-11T10:04:25Z on pod kabazpl889i5u5. Closeout owes evidence, cost, provider teardown confirmation and the ledger entry.",
+  "status": "Attempt 10 aborted in SETUP at the frozen-asset gate, $0.1177, no driver stage, no probe trained. Cause repaired at $0 and given a pre-provider gate. Attempt 11 is the pre-authorized retry.",
   "the_ask": "nothing outstanding from the maintainer. The next maintainer decision is owed only on a stop condition: training started, an unconfirmable state, a replay mismatch, a protocol change, a verdict, or a boundary.",
   "budget": "OWNED by the budget block above; not restated here."
  },

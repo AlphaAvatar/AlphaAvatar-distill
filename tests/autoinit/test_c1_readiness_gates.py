@@ -1135,10 +1135,11 @@ def test_the_prereg_gate_count_and_order_equal_the_live_session():
     live = mod.spec(session_args(mod)).precheck
     names = [getattr(g, "__name__", "session_commit_and_lineage") for g in live]
 
-    #: 13 since 2026-09-11, when `grant_provenance_gate` was inserted. The count
-    #: is pinned as well as compared so that losing a gate AND its record in the
-    #: same edit still fails here.
-    assert transport["n_pre_provider_gates"] == len(live) == 13
+    #: 14 since 2026-09-11: `grant_provenance_gate`, then `frozen_assets_gate`
+    #: after attempt 10 died on a frozen-asset condition that was fully decidable
+    #: on the dev box. The count is pinned as well as compared so that losing a
+    #: gate AND its record in the same edit still fails here.
+    assert transport["n_pre_provider_gates"] == len(live) == 14
     assert transport["pre_provider_gate_order"] == names
     assert names[-2:] == ["renderer_parity_gate", "pod_environment_gate"]
     #: Provenance is checked before anything reads the pricing, the harness or

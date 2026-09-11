@@ -13,7 +13,8 @@
   "scripts/pod/autoinit_preflight_setup.sh",
   "configs/experiments/phase_c1/authorization.json",
   "configs/autoinit/c1_artifacts.json",
-  "configs/autoinit/c1_artifacts_failed.json"
+  "configs/autoinit/c1_artifacts_failed.json",
+  "configs/experiments/phase_c1/frozen_assets.json"
  ],
  "source_roots": [
   "src",
@@ -22,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 97,
- "digest": "464dacb3d8db9ced4ae4a3070e0bb10339ac05243438365f3eb9d6bfe8ea8776",
+ "n_files": 99,
+ "digest": "4606781b2a2f46c3b2a570395100fafca5a7351986902f23f4f332c96293dc3b",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -40,6 +41,11 @@
    "path": "configs/experiments/phase_c1/authorization.json",
    "sha256": "14c0bae2de84561288e2ca02f7c3ebd7b723bb6c98afd5e7608a1508daf39290",
    "bytes": 7372
+  },
+  {
+   "path": "configs/experiments/phase_c1/frozen_assets.json",
+   "sha256": "103ddd78e2740ac1ed82034f53037f33e4f78687088c95557d24de26587167e5",
+   "bytes": 3285
   },
   {
    "path": "scripts/autoinit/audit_tool_scoring.py",
@@ -65,6 +71,11 @@
    "path": "scripts/autoinit/score_recovery_search.py",
    "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
    "bytes": 22149
+  },
+  {
+   "path": "scripts/autoinit/verify_frozen_assets.py",
+   "sha256": "1552298b95e16a3562e6f13005a764616d9d08f237b24033cdff78874fd30a20",
+   "bytes": 11246
   },
   {
    "path": "scripts/evaluation/uncapped_eval.py",
@@ -93,8 +104,8 @@
   },
   {
    "path": "scripts/experiments/phase_c1/authorization.py",
-   "sha256": "5ae7812c439fe53e7dea30dce7b3c4717606ef02e485631143204054cec8e6fb",
-   "bytes": 24419
+   "sha256": "d841b8891563f76cda31213c6ed2fba9c6d25014c9562737b1300a13d1ec7b8e",
+   "bytes": 24983
   },
   {
    "path": "scripts/experiments/phase_c1/authorization_payload.py",
@@ -158,8 +169,8 @@
   },
   {
    "path": "scripts/pod/autoinit_c1_launch.py",
-   "sha256": "8e918675d3698c093c8af4cba35fb1f3d572da3621082c56677448a2b4005c20",
-   "bytes": 69869
+   "sha256": "1dc2217963f951e87b7bd9e269c54c557e5ddce1a8e603798917507f63b257f9",
+   "bytes": 72928
   },
   {
    "path": "scripts/pod/autoinit_engine_probe.py",
@@ -168,8 +179,8 @@
   },
   {
    "path": "scripts/pod/autoinit_preflight_setup.sh",
-   "sha256": "25cb1f298564d1b606666d4c6e2016cfda9764af9f3723156d3948cafebe7308",
-   "bytes": 38635
+   "sha256": "39d3b80855da0f537bbb2ca45e438715a813697a6bcd84b795b7b580e3a28f27",
+   "bytes": 39668
   },
   {
    "path": "scripts/pod/autoinit_science_inputs.py",

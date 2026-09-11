@@ -300,10 +300,29 @@ mark TRAIN_ENV
 # reported the missing interpreter as an identity mismatch -- which cost a $0.03
 # pod on 2026-08-13 and, worse, would have read as a corrupted asset. The gate is
 # still well before Stage 0: the driver has not started.
-say "verifying the frozen assets against the preregistered constants"
+# `SESSION_FROZEN_EXPECT` is optional and empty for every session that does not
+# set it, which keeps those sessions asking the historical question against the
+# verifier's compiled-in constants. A session running on the migrated tree must
+# name the document it expects instead: the initialization cutover relocated two
+# of the scoring contract's six declared files, so the contract legitimately
+# reads `@v3` there, and `--expect` is the distinction the verifier already
+# carried for exactly this. C1 attempt 10 died here for $0.1177 because nothing
+# passed it -- SETUP_RC=91, no driver stage, no probe trained.
+FROZEN_EXPECT_ARGS=""
+if [ -n "${SESSION_FROZEN_EXPECT:-}" ]; then
+  if [ ! -f "$REPO/$SESSION_FROZEN_EXPECT" ]; then
+    say "SESSION_FROZEN_EXPECT names $SESSION_FROZEN_EXPECT, which is not in the checkout"
+    mark "FROZEN_ASSETS_FAILED"
+    exit 91
+  fi
+  FROZEN_EXPECT_ARGS="--expect $REPO/$SESSION_FROZEN_EXPECT"
+  say "verifying the frozen assets against $SESSION_FROZEN_EXPECT"
+else
+  say "verifying the frozen assets against the preregistered constants"
+fi
 FROZEN_RC=0
 FROZEN_OUT=$(cd "$REPO" && PYTHONPATH=src:scripts /opt/train/bin/python \
-    scripts/autoinit/verify_frozen_assets.py 2>&1) || FROZEN_RC=$?
+    scripts/autoinit/verify_frozen_assets.py $FROZEN_EXPECT_ARGS 2>&1) || FROZEN_RC=$?
 if [ "$FROZEN_RC" -ne 0 ]; then
   say "FROZEN ASSET GATE FAILED -- output follows verbatim, because 'the "
   say "verifier could not run' and 'these are not the preregistered assets' are "
