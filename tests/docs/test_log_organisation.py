@@ -128,8 +128,11 @@ class TestTheIndexAccountsForBothLayouts:
                  for r in [*index["runs"], *index["unrecorded"]]]
         assert any("/logs/stages/stage-" in r or r.startswith("logs/stages/stage-")
                    for r in roots), "no stage-grouped run found"
-        assert any(r.startswith("logs/cross-stage/") for r in roots), (
-            "no cross-stage run found")
+        #: `cross-stage/` is EMPTY today: every historical experiment resolved
+        #: to exactly one stage. It is not asserted to exist -- a category kept
+        #: alive with nothing in it is the bucket this replaced.
+        assert not (REPO / "logs/cross-stage").exists() or any(
+            r.startswith("logs/cross-stage/") for r in roots)
 
 
     def test_the_kinds_are_declared_so_an_entry_need_not_be_inferred(self, index):
@@ -270,7 +273,7 @@ class TestTheRelocationIsTraceable:
     def record(self):
         #: The latest migration: earlier ones describe moves that later ones
         #: superseded, so `new_path` there is where the object went NEXT.
-        return load("logs/migrations/log-layout-v2/manifest.json")
+        return load("logs/migrations/log-layout-v3/manifest.json")
 
     def test_every_move_landed_and_its_origin_is_gone(self, record):
         for m in record["entries"]:
@@ -291,9 +294,14 @@ class TestTheRelocationIsTraceable:
             #: Either spelling: v1 says why the move preserves evidence, v2
             #: states the historical binding and the migration reason. Both
             #: answer the same question and both must answer it.
-            assert (e.get("evidence_preserving_because")
-                    or e.get("historical_binding")), e["new_path"]
-            assert e.get("migration_reason") or e.get("binding"), e["new_path"]
+            #: Every migration states why: v1 `evidence_preserving_because`,
+            #: v2 `historical_binding` + `migration_reason`, v3 the attribution
+            #: `reason` with its `attribution_source`. All answer "why is this
+            #: the right home, and how do I check it".
+            assert any(e.get(k) for k in ("evidence_preserving_because",
+                                          "historical_binding", "reason")), e
+            assert any(e.get(k) for k in ("migration_reason", "binding",
+                                          "attribution_source")), e
             assert e.get("source_commit")
 
     def _unused_test_every_exception_states_what_holds_it(self, record):
@@ -347,9 +355,11 @@ class TestTheNavigationIsDerivedFromTheTree:
             "scripts/consolidate/render_log_navigation.py --write")
 
         runs = runs_by_experiment(REPO)
-        for d in sorted((REPO / "logs/cross-stage").iterdir()):
-            if not d.is_dir():
-                continue
+        #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
+        #: their areas. `rglob("*/*")` also matched `phase_c1/analyses`, which
+        #: has no README and is not meant to.
+        for d in sorted(q for st in (REPO / "logs/stages").glob("stage-*")
+                        for q in st.iterdir() if q.is_dir()):
             assert (d / "README.md").read_text() == render_experiment_readme(
                 d, REPO, runs), f"{d.name}/README.md is stale"
 
@@ -365,9 +375,11 @@ class TestTheNavigationIsDerivedFromTheTree:
         """A generated document restating an owned fact is the duplication the
         cleanup removes; it would also go stale silently."""
         import re
-        for d in sorted((REPO / "logs/cross-stage").iterdir()):
-            if not d.is_dir():
-                continue
+        #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
+        #: their areas. `rglob("*/*")` also matched `phase_c1/analyses`, which
+        #: has no README and is not meant to.
+        for d in sorted(q for st in (REPO / "logs/stages").glob("stage-*")
+                        for q in st.iterdir() if q.is_dir()):
             body = (d / "README.md").read_text()
             assert not re.search(r"\$\d", body), f"{d.name}: states a cost"
             assert not re.search(r"\b[0-9a-f]{8,}\b", body), f"{d.name}: states a SHA"
