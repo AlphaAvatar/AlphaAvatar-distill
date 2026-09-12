@@ -54,7 +54,9 @@ def L():
 def _repo(tmp_path, L):
     repo = tmp_path / "repo"
     (repo / "logs").mkdir(parents=True, exist_ok=True)
+    (repo / L.PRICING).parent.mkdir(parents=True, exist_ok=True)
     (repo / L.PRICING).write_bytes((REPO / L.PRICING).read_bytes())
+    (repo / L.AUTH_PATH).parent.mkdir(parents=True, exist_ok=True)
     (repo / L.AUTH_PATH).write_text('{"authorization_id": "test"}')
     return repo
 
@@ -237,8 +239,10 @@ def test_a_shared_read_only_input_does_not_make_a_scratch_ambiguous(tmp_path, L)
     repo = _repo(tmp_path, L)
     scr = tmp_path / "with_cache"
     (scr / "hf_cache" / "models").mkdir(parents=True)
+    (scr / "hf_cache" / "models" / "blob.bin").parent.mkdir(parents=True, exist_ok=True)
     (scr / "hf_cache" / "models" / "blob.bin").write_bytes(b"\x00" * 32)
     (scr / "assets").mkdir()
+    (scr / "assets" / "battery.tar").parent.mkdir(parents=True, exist_ok=True)
     (scr / "assets" / "battery.tar").write_bytes(b"\x00" * 16)
 
     layout = L.open_c1_run(_args(scr, "attempt10"), repo)
@@ -291,6 +295,7 @@ def test_the_cuda_validation_claims_and_requires_the_same_way(tmp_path):
     (repo / "logs").mkdir(parents=True)
     scr.mkdir()
     claim_output_root(scr, "cuda_stage_f", "subrun_a", outputs=mod.RUN_OUTPUTS)
+    (scr / "validation_stdout.txt").parent.mkdir(parents=True, exist_ok=True)
     (scr / "validation_stdout.txt").write_text("subrun_a stdout\n")
 
     _, eng = _cuda_engineering(scr, "subrun_a")
@@ -312,6 +317,7 @@ def test_a_cuda_subrun_may_not_collect_another_subruns_scratch(tmp_path):
     (repo / "logs").mkdir(parents=True)
     scr.mkdir()
     claim_output_root(scr, "cuda_stage_f", "subrun_a", outputs=mod.RUN_OUTPUTS)
+    (scr / "validation_stdout.txt").parent.mkdir(parents=True, exist_ok=True)
     (scr / "validation_stdout.txt").write_text("subrun_a stdout\n")
     before = hashlib.sha256((scr / "validation_stdout.txt").read_bytes()).hexdigest()
 

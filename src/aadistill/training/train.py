@@ -117,7 +117,7 @@ def validate_train_config(cfg: dict) -> None:
     # written before this key existed keeps its exact behaviour. It is a
     # memory/time knob: the objective is identical for any chunk, but the float32
     # accumulation order is not, so it must be set per *regime* and never for one
-    # arm of a compared pair (see logs/experiments/early/analyses/e8b_backend_audit.md).
+    # arm of a compared pair (see logs/e8b_backend_audit.md).
     if "kd_chunk" in loss:
         if not isinstance(loss["kd_chunk"], int) or loss["kd_chunk"] < 1:
             raise ValueError("loss.kd_chunk must be a positive int")
@@ -309,7 +309,7 @@ def prediction_mask(
     protocol it would never produce, and at `</think>` it puts p≈0 on the very
     token CE demands — so KD there transmits a contradiction rather than
     knowledge, at 2× CE's per-position weight
-    (`logs/archive/indexes/EXPERIMENTS.md`). This scope
+    (`logs/EXPERIMENTS.md`). This scope
     removes the contested positions and leaves the rest of KD untouched.
     """
     if scope == "assistant":

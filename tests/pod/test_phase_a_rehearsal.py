@@ -672,6 +672,7 @@ def test_the_launcher_fetches_finalists_not_only_a_winner(tmp_path):
         auth=None, evidence={}, say=lambda m: None)
     store = tmp_path / "store"
     store.mkdir()
+    (store / "leaf_retention.json").parent.mkdir(parents=True, exist_ok=True)
     (store / "leaf_retention.json").write_text(json.dumps({"entries": [
         {"canonical_id": "leaf0", "is_control": False,
          "permanent_checkpoint_retained": True},
@@ -821,12 +822,15 @@ def test_a_non_auth_path_changed_after_the_authorized_base_is_refused(tmp_path):
 
     git("init", "-q")
     git("config", "user.email", "t@t"); git("config", "user.name", "t")
+    (repo / "scripts" / "harness.py").parent.mkdir(parents=True, exist_ok=True)
     (repo / "scripts" / "harness.py").write_text("harness v1\n")
+    (repo / "unrelated.txt").parent.mkdir(parents=True, exist_ok=True)
     (repo / "unrelated.txt").write_text("before\n")
     git("add", "-A"); git("commit", "-q", "-m", "base")
     base = git("rev-parse", "HEAD").stdout.strip()
 
     # (a) the legitimate shape: only the authorization artifact is added.
+    (repo / AUTH).parent.mkdir(parents=True, exist_ok=True)
     (repo / AUTH).write_text('{"grant": 1}\n')
     git("add", "-A"); git("commit", "-q", "-m", "authorization")
     good = git("rev-parse", "HEAD").stdout.strip()
@@ -835,6 +839,7 @@ def test_a_non_auth_path_changed_after_the_authorized_base_is_refused(tmp_path):
     assert ok["changed_paths"] == [AUTH]
 
     # (b) the gap: same harness, exact auth blob, but something else moved too.
+    (repo / "unrelated.txt").parent.mkdir(parents=True, exist_ok=True)
     (repo / "unrelated.txt").write_text("after\n")
     git("add", "-A"); git("commit", "-q", "-m", "a path that was never authorized")
     bad = git("rev-parse", "HEAD").stdout.strip()
@@ -849,7 +854,9 @@ def test_a_non_auth_path_changed_after_the_authorized_base_is_refused(tmp_path):
 
     # (c) an unrelated line of history is refused as not descending.
     git("checkout", "-q", "--orphan", "other")
+    (repo / "scripts" / "harness.py").parent.mkdir(parents=True, exist_ok=True)
     (repo / "scripts" / "harness.py").write_text("harness v1\n")
+    (repo / AUTH).parent.mkdir(parents=True, exist_ok=True)
     (repo / AUTH).write_text('{"grant": 1}\n')
     git("add", "-A"); git("commit", "-q", "-m", "orphan")
     orphan = git("rev-parse", "HEAD").stdout.strip()
@@ -1088,17 +1095,24 @@ def test_the_success_spec_requires_what_the_driver_actually_writes(tmp_path):
                  "search_result.json", "phase_a_result.json",
                  "rung1_selection.json", "rung2_selection.json",
                  "leaf_retention.json", "engine_probe.json"):
+        (audit / name).parent.mkdir(parents=True, exist_ok=True)
         (audit / name).write_text("{}")
     for i in range(9):
+        (audit / "probes" / f"p{i}.json").parent.mkdir(parents=True, exist_ok=True)
         (audit / "probes" / f"p{i}.json").write_text("{}")
+        (audit / "configs" / f"p{i}.json").parent.mkdir(parents=True, exist_ok=True)
         (audit / "configs" / f"p{i}.json").write_text("{}")
+        (audit / f"p{i}_recovery_search.json").parent.mkdir(parents=True, exist_ok=True)
         (audit / f"p{i}_recovery_search.json").write_text("{}")
+        (audit / f"p{i}_per_sample.jsonl").parent.mkdir(parents=True, exist_ok=True)
         (audit / f"p{i}_per_sample.jsonl").write_text("{}\n")
         gen = root / "eval/phase_a" / f"p{i}"
         gen.mkdir(parents=True)
+        (gen / f"p{i}.generations.jsonl").parent.mkdir(parents=True, exist_ok=True)
         (gen / f"p{i}.generations.jsonl").write_text("{}\n")
     search = root / "autoinit/phase_a_search"
     search.mkdir(parents=True)
+    (search / "states.jsonl").parent.mkdir(parents=True, exist_ok=True)
     (search / "states.jsonl").write_text("{}\n")
 
     manifest = build_manifest(str(root), _load_specs(
@@ -1115,6 +1129,7 @@ def test_the_failed_spec_requires_only_the_evidence(tmp_path):
     root = tmp_path / "artifacts"
     audit = root / "audit/autoinit_phase_a"
     audit.mkdir(parents=True)
+    (audit / "phase_a_evidence.json").parent.mkdir(parents=True, exist_ok=True)
     (audit / "phase_a_evidence.json").write_text("{}")
     manifest = build_manifest(str(root), _load_specs(
         REPO / "configs/autoinit/phase_a_artifacts_failed.json"),

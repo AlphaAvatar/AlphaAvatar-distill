@@ -73,7 +73,9 @@ def ledger_at(tmp_path):
         (work / "logs").mkdir(exist_ok=True)
         for rel in ("logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json",
                     "logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"):
+            (work / rel).parent.mkdir(parents=True, exist_ok=True)
             (work / rel).write_bytes((REPO / rel).read_bytes())
+        (work / HISTORICAL_LEDGER_PATH).parent.mkdir(parents=True, exist_ok=True)
         (work / HISTORICAL_LEDGER_PATH).write_text(json.dumps(doc, indent=1))
         for name in (".git", "src", "scripts", "tests"):
             link = work / name

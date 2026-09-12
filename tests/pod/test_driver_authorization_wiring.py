@@ -98,6 +98,7 @@ def constructed(tmp_path, monkeypatch):
     mod = load("autoinit_continuation_b_driver")
     repo = tmp_path / "repo"
     (repo / "logs").mkdir(parents=True)
+    (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).parent.mkdir(parents=True, exist_ok=True)
     (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).write_text(
         json.dumps(fixture_auth_payload()))
     monkeypatch.setattr(mod, "REPO", repo)
@@ -204,6 +205,7 @@ def test_the_mutation_that_caused_attempt_2_is_caught(tmp_path, monkeypatch):
 
     repo = tmp_path / "repo"
     (repo / "logs").mkdir(parents=True)
+    (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).parent.mkdir(parents=True, exist_ok=True)
     (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).write_text(
         json.dumps(fixture_auth_payload()))
     shutil.copy(REPO / "logs/budget/approvals/autoinit_phase_a_authorization.json",

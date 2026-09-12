@@ -474,6 +474,7 @@ def _prereg_gate(tmp_path, monkeypatch, doc) -> tuple[bool, str]:
     #: The preregistration moved into `logs/experiments/phase_c1/` on
     #: 2026-09-12, so its parent no longer exists in a bare fixture root.
     (root / L.PREREG).parent.mkdir(parents=True, exist_ok=True)
+    (root / L.PREREG).parent.mkdir(parents=True, exist_ok=True)
     (root / L.PREREG).write_text(json.dumps(doc, indent=1) + "\n")
     monkeypatch.setattr(L, "REPO_ROOT", root)
     monkeypatch.setattr(L, "c1_harness_digest",
@@ -730,6 +731,7 @@ def _grant_root(tmp_path, *, run_id="attempt10", grant_run_id=None,
         f"{expect.relative_to(root)}")
     if write_grant:
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
         (root / rel).write_text(json.dumps(body, indent=1) + "\n")
     auth = {"authorization_id": "autoinit.v1.phase_c1"}
     if reference:
@@ -739,6 +741,7 @@ def _grant_root(tmp_path, *, run_id="attempt10", grant_run_id=None,
     #: fixture that keeps writing it to the repository root tests a layout
     #: nothing produces any more.
     auth_rel = L.auth_path_for(grant_run_id or run_id)
+    (root / auth_rel).parent.mkdir(parents=True, exist_ok=True)
     (root / auth_rel).parent.mkdir(parents=True, exist_ok=True)
     (root / auth_rel).write_text(json.dumps(auth, indent=1) + "\n")
     return root, rel
@@ -786,6 +789,7 @@ def test_a_grant_edited_after_issuance_is_refused(tmp_path, monkeypatch):
     root, rel = _grant_root(tmp_path)
     doc = json.loads((root / rel).read_text())
     doc["covers"] = "two launches"
+    (root / rel).parent.mkdir(parents=True, exist_ok=True)
     (root / rel).write_text(json.dumps(doc, indent=1) + "\n")
     monkeypatch.setattr(L, "REPO_ROOT", root)
     import types
@@ -810,6 +814,7 @@ def test_a_spelled_differently_but_identical_path_still_passes(tmp_path,
     auth_rel = L.auth_path_for("attempt10")
     auth = json.loads((root / auth_rel).read_text())
     auth["grant"]["path"] = f"./{rel}"
+    (root / auth_rel).parent.mkdir(parents=True, exist_ok=True)
     (root / auth_rel).write_text(json.dumps(auth, indent=1) + "\n")
     monkeypatch.setattr(L, "REPO_ROOT", root)
     ok, why = L.grant_provenance_gate(

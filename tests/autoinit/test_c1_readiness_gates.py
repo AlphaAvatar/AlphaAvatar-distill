@@ -229,8 +229,10 @@ def test_the_environment_digest_moves_when_a_measured_file_moves(tmp_path):
         dest = root / named
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(REPO / named, dest)
+    (root / "tests/test_x.py").parent.mkdir(parents=True, exist_ok=True)
     (root / "tests/test_x.py").write_text("def test_a(): pass\n")
     before = pe.pod_test_environment_digest(root)["digest"]
+    (root / "tests/test_x.py").parent.mkdir(parents=True, exist_ok=True)
     (root / "tests/test_x.py").write_text("def test_a(): assert True\n")
     assert pe.pod_test_environment_digest(root)["digest"] != before
 
@@ -685,9 +687,13 @@ def _swept_repo(tmp_path, monkeypatch):
     root = tmp_path / "repo"
     (root / "logs").mkdir(parents=True)
     (root / "tests").mkdir()
+    (root / "logs/state/current.md").parent.mkdir(parents=True, exist_ok=True)
     (root / "logs/state/current.md").write_text("state\n")
+    (root / "logs/state/current.json").parent.mkdir(parents=True, exist_ok=True)
     (root / "logs/state/current.json").write_text('{"a": 1}\n')
+    (root / "logs/state/ownership.md").parent.mkdir(parents=True, exist_ok=True)
     (root / "logs/state/ownership.md").write_text("catalog\n")
+    (root / "tests/test_x.py").parent.mkdir(parents=True, exist_ok=True)
     (root / "tests/test_x.py").write_text("def test_a(): pass\n")
     _git(root.parent, "init", "-q", str(root)) if False else subprocess.run(
         ["git", "init", "-q", str(root)], check=True, capture_output=True)

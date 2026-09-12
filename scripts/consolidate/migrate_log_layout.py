@@ -154,6 +154,41 @@ FILE_RULES: tuple[tuple[str, str], ...] = (
 )
 
 
+def frozen_set_members(root: Path) -> frozenset[str]:
+    """Every source file a frozen digest hashes. Byte-for-byte untouchable.
+
+    A relocation rewrites path strings, and a path string inside one of these is
+    usually a COMMENT citing an analysis document. Rewriting two such comments
+    in `score_recovery_search.py` moved `recovery_search_scoring@v3` and the
+    frozen-asset gate refused the tree -- correctly. The citation was never
+    wrong: it named where that analysis was, and the migration manifest carries
+    it forward.
+
+    So the sets are read from their own declarations and excluded from every
+    text rewrite. A digest that moves because of housekeeping is a digest that
+    stops meaning anything.
+    """
+    import sys as _sys
+
+    _sys.path.insert(0, str(root / "scripts"))
+    _sys.path.insert(0, str(root / "src"))
+    out: set[str] = set()
+    try:
+        from experiments import source_sets as ss
+        for name in dir(ss):
+            if name.endswith(("_FILES_V1", "_FILES_V3", "_FILES_V2")):
+                out.update(getattr(ss, name))
+    except Exception:                                          # noqa: BLE001
+        pass
+    try:
+        from experiments.phase_c1.authorization import (
+            C1_HARNESS_SOURCE_FILES_V1 as h)
+        out.update(h)
+    except Exception:                                          # noqa: BLE001
+        pass
+    return frozenset(out)
+
+
 def git(*args: str, root: Path = REPO_ROOT) -> str:
     return subprocess.run(["git", *args], cwd=root, capture_output=True,
                           text=True, check=True).stdout

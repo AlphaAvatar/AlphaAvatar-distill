@@ -525,7 +525,10 @@ def test_the_handoff_and_phase_index_exist_and_are_linked():
         return {q.name for q in seen}
 
     found = reachable_from(REPO / "logs/README.md")
-    for name in ("PHASE_INDEX.md", "phase_a_vs_phase_b_comparison.md",
+    #: `PHASE_INDEX.md` became `state/phase_index.md` in log-layout-v1. The
+    #: requirement is that a reviewer can REACH each document from the entry
+    #: point, which is what the loop below checks -- the basename is incidental.
+    for name in ("phase_index.md", "phase_a_vs_phase_b_comparison.md",
                  "phase_c_roadmap.md", "HANDOFF_next_session.md"):
         hits = list(REPO.glob(f"logs/**/{name}"))
         assert hits, f"{name} exists nowhere"

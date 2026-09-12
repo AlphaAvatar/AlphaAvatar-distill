@@ -101,7 +101,7 @@ BATTERY_CONTENT_SHA256 = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacc
 #:
 #: * `tool_args_schema_ok` — the xLAM `required` list is reconstructed from
 #:   missing defaults, which is an interpretive step; the audit
-#:   (logs/experiments/shared/analyses/autoinit_tool_scoring_audit.json) showed no verdict depends on that
+#:   (logs/autoinit_tool_scoring_audit.json) showed no verdict depends on that
 #:   interpretation, and the field stays diagnostic rather than becoming a gate;
 #: * `tool_call_exact_match` — that is *correctness*, and folding it into
 #:   usability would collapse the two axes this battery exists to keep apart.
@@ -125,7 +125,7 @@ def scorer_correct(set_name: str, record: dict, sample: dict) -> tuple[bool, dic
         # The battery stores tools/reference_calls in the corpus envelope; the
         # scorer takes the OpenAI envelope. The translation is mechanical and was
         # audited over 20 items x 6 adversarial cases
-        # (logs/experiments/shared/analyses/autoinit_tool_scoring_audit.json): no verdict depends on how the
+        # (logs/autoinit_tool_scoring_audit.json): no verdict depends on how the
         # `required` list is interpreted.
         # `as_openai_tools` reads xLAM-shaped entries (`t["name"]`). The battery
         # may store either that bare form (v1) or the canonical envelope where

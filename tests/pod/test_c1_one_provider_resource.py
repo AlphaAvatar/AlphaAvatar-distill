@@ -399,7 +399,8 @@ def test_M_the_live_grant_and_the_launcher_agree_on_acquisition():
     """
     import json
 
-    live = sorted((REPO / "logs/runs/phase_c1").glob("*/governance/grant.json"))
+    #: Across the canonical layout: stage-scoped and unscoped alike.
+    live = sorted((REPO / "logs/runs").glob("*/*/*/governance/grant.json"))
     assert live, "no grant exists in any run directory"
     grant = json.loads(live[-1].read_text())
     one_use = grant["one_use"]

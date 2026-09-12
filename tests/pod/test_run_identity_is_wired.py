@@ -46,9 +46,12 @@ def _fake_repo(tmp_path, L, *, governance=True):
     (repo / "logs").mkdir(parents=True, exist_ok=True)
     #: The real pricing record, because `build_parser` derives `--max-price`
     #: from it rather than carrying a second copy of the rate.
+    (repo / L.PRICING).parent.mkdir(parents=True, exist_ok=True)
     (repo / L.PRICING).write_bytes((REPO / L.PRICING).read_bytes())
     if governance:
+        (repo / L.AUTH_PATH).parent.mkdir(parents=True, exist_ok=True)
         (repo / L.AUTH_PATH).write_text('{"authorization_id": "test"}')
+        (repo / L.BUNDLE_RECORD).parent.mkdir(parents=True, exist_ok=True)
         (repo / L.BUNDLE_RECORD).write_text('{"bundle": "aad_test"}')
     return repo
 
@@ -152,6 +155,7 @@ def test_the_one_use_governance_artifacts_are_produced_into_the_run(tmp_path, L)
                                                        exist_ok=True)
     (repo / L.auth_path_for("attempt99")).write_text(
         '{"authorization_id": "the NEXT attempt"}')
+    (repo / L.AUTH_POINTER).parent.mkdir(parents=True, exist_ok=True)
     (repo / L.AUTH_POINTER).write_text('{"authorization_id": "a pointer"}')
     assert json.loads(auth.read_text())["authorization_id"] == "test"
 
@@ -263,18 +267,23 @@ def test_a_completed_session_records_every_role_it_produced(tmp_path, L):
     layout = L.open_c1_run(args, repo)
     _write_session(repo, args, passed=True, terminal="ALL_DONE")
     scr = Path(args.scr)
+    (scr / "launch.log").parent.mkdir(parents=True, exist_ok=True)
     (scr / "launch.log").write_text("line\n")
     #: Named after the pod that produced it, which is how a watchdog
     #: writes from its first tick now.
+    (scr / "watchdog_podabc.jsonl").parent.mkdir(parents=True, exist_ok=True)
     (scr / "watchdog_podabc.jsonl").write_text("{}\n")
+    (scr / "watchdog_podabc.out").parent.mkdir(parents=True, exist_ok=True)
     (scr / "watchdog_podabc.out").write_text("started\n")
     (scr / "relay").mkdir()
     #: Named the way the relay names them, from the spec, so this fixture
     #: cannot drift away from what a real session leaves.
     for src, _role in L._RUN_COLLECT:
         if src.startswith("relay/"):
+            (scr / src).parent.mkdir(parents=True, exist_ok=True)
             (scr / src).write_text("{}\n")
     (scr / "store").mkdir()
+    (scr / "store" / "manifest.json").parent.mkdir(parents=True, exist_ok=True)
     (scr / "store" / "manifest.json").write_text("{}")
 
     #: The governance artifacts a real session has by then are produced into
@@ -324,7 +333,9 @@ def test_the_manifest_references_the_scratch_root_rather_than_copying_it(
     _write_session(repo, args)
     scr = Path(args.scr)
     (scr / "store").mkdir()
+    (scr / "store" / "manifest.json").parent.mkdir(parents=True, exist_ok=True)
     (scr / "store" / "manifest.json").write_text("{}")
+    (scr / "store" / "c1_artifacts.tar.gz").parent.mkdir(parents=True, exist_ok=True)
     (scr / "store" / "c1_artifacts.tar.gz").write_bytes(b"\x00" * 4096)
 
     doc = L.close_c1_run(layout, args, repo)
@@ -420,7 +431,9 @@ def test_the_cuda_validation_records_its_run_too(tmp_path):
     claim_output_root(scr, mod.RUN_EXPERIMENT_ID, "cuda_stage_f_20260911_s1",
                       outputs=mod.RUN_OUTPUTS)
     (scr / "artifacts" / "cuda_engineering").mkdir(parents=True)
+    (scr / "artifacts" / "cuda_engineering" / "suffix_evidence.json").parent.mkdir(parents=True, exist_ok=True)
     (scr / "artifacts" / "cuda_engineering" / "suffix_evidence.json").write_text("{}")
+    (scr / "validation_stdout.txt").parent.mkdir(parents=True, exist_ok=True)
     (scr / "validation_stdout.txt").write_text("ok\n")
 
     eng = object.__new__(mod.Engineering)
@@ -502,6 +515,7 @@ def test_an_unclaimed_scratch_holding_only_a_journal_is_still_refused(tmp_path):
 
     scr = tmp_path / "scr"
     scr.mkdir()
+    (scr / "watchdog_p1.jsonl").parent.mkdir(parents=True, exist_ok=True)
     (scr / "watchdog_p1.jsonl").write_text("{}\n")
     with pytest.raises(OutputOwnershipError) as exc:
         claim_output_root(scr, mod.RUN_EXPERIMENT_ID, "r1",
@@ -543,6 +557,7 @@ def test_the_index_finds_a_recorded_run_and_reports_an_unrecorded_one(tmp_path,
 
     orphan = repo / RUNS_ROOT / "phase_c1" / "attempt11"
     (orphan / "runtime").mkdir(parents=True)
+    (orphan / "runtime" / "session.json").parent.mkdir(parents=True, exist_ok=True)
     (orphan / "runtime" / "session.json").write_text("{}")
 
     found = ri.discover_v3(repo)
@@ -590,14 +605,21 @@ def test_this_repositorys_index_still_accounts_for_every_run_on_disk():
         return d.is_dir() and any(
             q.is_file() and q.name != "README.md" for q in d.rglob("*"))
 
+    #: The canonical shapes, both of them: `stage-<id>/<experiment>/<run>` and
+    #: `unscoped/<experiment>/<run>`. A `*/*` scan treated `unscoped/phase_a`
+    #: -- a grouping directory -- as a run, which is the same mistake the index
+    #: itself once made in the other direction.
     on_disk = {(d.parent.name, d.name)
-               for d in runs_root.glob("*/*")
-               if not d.parent.name.startswith("stage-") and _is_run(d)}
+               for d in runs_root.glob("stage-*/*/*") if _is_run(d)}
     on_disk |= {(d.parent.name, d.name)
-                for d in runs_root.glob("stage-*/*/*") if _is_run(d)}
+                for d in runs_root.glob("unscoped/*/*") if _is_run(d)}
+
     index = ri.build_index(REPO)
-    accounted = {(r["experiment_id"], r["run_id"])
-                 for r in index["runs"] if r["layout_version"] != 1}
+    #: EVERY index entry accounts for a run, including the legacy-registered
+    #: ones. They used to live outside `logs/runs/` so they could not appear in
+    #: this scan; log-layout-v1 brought them in, and excluding them here would
+    #: report a run that IS registered, with its component digests, as missing.
+    accounted = {(r["experiment_id"], r["run_id"]) for r in index["runs"]}
     accounted |= {(u["experiment_id"], u["run_id"]) for u in index["unrecorded"]}
     assert on_disk <= accounted, f"unaccounted run directories: {on_disk - accounted}"
     committed = json.loads((REPO / "logs/runs/index.json").read_text())
@@ -622,9 +644,11 @@ def test_a_prepared_run_is_reported_as_prepared_not_as_a_dead_launcher(tmp_path)
     runs = tmp_path / "logs/runs/phase_c1"
     prepared = runs / "attempt_prepared/governance"
     prepared.mkdir(parents=True)
+    (prepared / "grant.json").parent.mkdir(parents=True, exist_ok=True)
     (prepared / "grant.json").write_text('{"granted_by": "m"}\n')
     died = runs / "attempt_died/evidence"
     died.mkdir(parents=True)
+    (died / "c1_evidence.json").parent.mkdir(parents=True, exist_ok=True)
     (died / "c1_evidence.json").write_text("{}\n")
 
     found = {r["run_id"]: r["why"] for r in mod.discover_unrecorded(tmp_path)}
@@ -694,9 +718,11 @@ def test_a_directory_holding_only_a_readme_is_not_a_dead_run(tmp_path):
 
     described = tmp_path / "logs/runs/stage-3/some_exp/prepared_only"
     described.mkdir(parents=True)
+    (described / "README.md").parent.mkdir(parents=True, exist_ok=True)
     (described / "README.md").write_text("# what goes here\n")
     died = tmp_path / "logs/runs/stage-3/some_exp/died"
     (died / "evidence").mkdir(parents=True)
+    (died / "evidence" / "partial.json").parent.mkdir(parents=True, exist_ok=True)
     (died / "evidence" / "partial.json").write_text("{}\n")
 
     ids = {u["run_id"] for u in mod.discover_unrecorded(tmp_path)}

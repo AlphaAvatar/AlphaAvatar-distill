@@ -3,9 +3,9 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "47c6a22169d7891cb6381c2b4b25e9e667aaabce",
+ "head_commit": "03de0a9721350992769fcd3f9c055fb6e35c6d88",
  "executable_source": {
-  "digest": "7d8b78bbbdac89cd411ffdaef0c1e9949375f814e12aeecdef44a8e8a5b37823",
+  "digest": "1ec7ed9fe9665fdc0e6adea9aacbfb255b81c0956e22d91552357275f25d626a",
   "files": [
    {
     "path": "scripts/autoinit/verify_c1_battery_isolation.py",
@@ -19,18 +19,18 @@
    },
    {
     "path": "scripts/data/build_c1_confirmation_battery.py",
-    "sha256": "26af35f56b6a30ba5786a147f9f1ff998de5a2a15c95d145356e6081e0c026b7",
-    "bytes": 13309
+    "sha256": "a74a11846d3ef13111b9ecde8c862c3398a4fbb6f2a07085e173ce7452fffea6",
+    "bytes": 13336
    },
    {
     "path": "scripts/experiments/phase_c1/isolation.py",
-    "sha256": "cae93301babb0a725917e20f629ebe315e90e5df86decacb3b0c27f3c544fb04",
-    "bytes": 19602
+    "sha256": "933818e6ca8e7eea2390896407475357ec844b1d317fd34cd8e8b55bb5067300",
+    "bytes": 19629
    },
    {
     "path": "scripts/experiments/phase_c1/session.py",
-    "sha256": "38e95baa723841c17f064302fa758ec1b976af088f052804e87da6619b33e611",
-    "bytes": 14158
+    "sha256": "c0afdb99b94dd508f928c79c6aa243aa717511e1952f3a261bb85f28938aefa4",
+    "bytes": 14164
    },
    {
     "path": "src/aadistill/initialization/operators/attention_activation.py",
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "75e10e512dab8de3a7b698ef6e29cb2f1e5fb3e890b37a3c6e71494ef01541f5",
+  "digest": "411808c164ba6f9dd03db22565e6bb6a12ca9173949d9efe7f88f9de5e4a0597",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -91,28 +91,28 @@
    },
    {
     "path": "configs/experiments/phase_c1/authorization.json",
-    "sha256": "ea326b1c17287b0f4da76889b764997b07fc53df41abee3748ebc4506aaa453e",
-    "bytes": 12235
+    "sha256": "4db4d3f15c89d8d23c37f51618c44e98bc435a437c240e2c1a1a92499c7428ef",
+    "bytes": 12305
    },
    {
     "path": "configs/experiments/phase_c1/frozen_assets.json",
-    "sha256": "21253ec98cafc49b37f1d8e98d450d86874c647aafd1bfed64921885b0900eb2",
-    "bytes": 3297
+    "sha256": "05801418a882e4362b4cf2448322eb17d92fa591f2215bf0443a6a230bffbf11",
+    "bytes": 3329
    },
    {
     "path": "scripts/autoinit/audit_tool_scoring.py",
-    "sha256": "5cf55651d826509648f9d040405017bb8958fb31b6e352a19b60ab22c0fd6f41",
-    "bytes": 10252
+    "sha256": "0be949e34a1ab73114da0af975ed809ec787574dd4f10ec70824a6c974c4109e",
+    "bytes": 10280
    },
    {
     "path": "scripts/autoinit/issue_c1_authorization.py",
-    "sha256": "93214cb5ff0cf636eb2bf0a9ba335f2b44200ee542f839be6187c92e4d7ea7c5",
-    "bytes": 8988
+    "sha256": "33923bff97e0dd7a8af672527610d59e83bdb032c595647bf31b97e011c22cc7",
+    "bytes": 9049
    },
    {
     "path": "scripts/autoinit/renderer_parity_gate.py",
-    "sha256": "02994ed1fcbacb0f7f213ca99b9b3fc74c95c4fceac1035481f9f7d920abbaf8",
-    "bytes": 6582
+    "sha256": "ec936ecbbcedfe477db8a36591b71955ea3a2eb255a0acfae2a75fe16db77c19",
+    "bytes": 6592
    },
    {
     "path": "scripts/autoinit/score_c1_confirmation.py",
@@ -126,8 +126,8 @@
    },
    {
     "path": "scripts/autoinit/verify_frozen_assets.py",
-    "sha256": "1552298b95e16a3562e6f13005a764616d9d08f237b24033cdff78874fd30a20",
-    "bytes": 11246
+    "sha256": "aea8ca6bef6ed7713afb72d279aa03ea78d09235d3b897d47e2f062953cfe819",
+    "bytes": 11289
    },
    {
     "path": "scripts/evaluation/uncapped_eval.py",
@@ -146,8 +146,8 @@
    },
    {
     "path": "scripts/experiments/phase_a/plan.py",
-    "sha256": "7b98df036b349c690585b5d82460d669d8439822bed14e4297464a5f010fedd5",
-    "bytes": 27750
+    "sha256": "78f050eeaa4a9146d2d31ada8386b20409756aad20ee32ad5d0f6f97c5c6ac74",
+    "bytes": 27779
    },
    {
     "path": "scripts/experiments/phase_c1/__init__.py",
@@ -156,8 +156,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/authorization.py",
-    "sha256": "d841b8891563f76cda31213c6ed2fba9c6d25014c9562737b1300a13d1ec7b8e",
-    "bytes": 24983
+    "sha256": "c07d908f142f7bd68e88e65aa224be951ad0cd73d00dedfabff609540330aaf6",
+    "bytes": 25037
    },
    {
     "path": "scripts/experiments/phase_c1/authorization_payload.py",
@@ -171,8 +171,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/isolation.py",
-    "sha256": "cae93301babb0a725917e20f629ebe315e90e5df86decacb3b0c27f3c544fb04",
-    "bytes": 19602
+    "sha256": "933818e6ca8e7eea2390896407475357ec844b1d317fd34cd8e8b55bb5067300",
+    "bytes": 19629
    },
    {
     "path": "scripts/experiments/phase_c1/packaging.py",
@@ -181,8 +181,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/pod_environment.py",
-    "sha256": "1b543d9c2fbea32b443379a2a68990eff3e4c5b991b9ca5cd07ae724149dd520",
-    "bytes": 16952
+    "sha256": "e649dde106bbbaed2aa38ffcc61b8fcd129583cd1d0e0f9da2edf75726d970a3",
+    "bytes": 16982
    },
    {
     "path": "scripts/experiments/phase_c1/probe_results.py",
@@ -196,8 +196,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/session.py",
-    "sha256": "38e95baa723841c17f064302fa758ec1b976af088f052804e87da6619b33e611",
-    "bytes": 14158
+    "sha256": "c0afdb99b94dd508f928c79c6aa243aa717511e1952f3a261bb85f28938aefa4",
+    "bytes": 14164
    },
    {
     "path": "scripts/experiments/recovery_policy.py",
@@ -206,8 +206,8 @@
    },
    {
     "path": "scripts/experiments/run_layout.py",
-    "sha256": "140741d4c11c43ad29d7092132768df081760a3e24a693c2105a7bf5b0883798",
-    "bytes": 28450
+    "sha256": "a081983800ca79585d8f6f7cc38daa4cf6de5763f9890741512aab7436fd1ede",
+    "bytes": 28907
    },
    {
     "path": "scripts/experiments/source_sets.py",
@@ -216,13 +216,13 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_driver.py",
-    "sha256": "06b1e35d1db4fca18f9465b14976a4eb37d373ef135dd53c0ac751d96c430260",
-    "bytes": 61867
+    "sha256": "63a2515e9ddea18c3d406c95f348f55a54e5bcce9871ebf1b6928364e99b3b77",
+    "bytes": 61939
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "247def7d246c38e86970d50ba78f16fe3046fec888c7914353ffcbccd63ee4f1",
-    "bytes": 81617
+    "sha256": "09805c7611e6e2a55a206db7e42f2b7a42ee5ddc924290e69c4dc36a737a7c96",
+    "bytes": 81811
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -231,13 +231,13 @@
    },
    {
     "path": "scripts/pod/autoinit_preflight_setup.sh",
-    "sha256": "39d3b80855da0f537bbb2ca45e438715a813697a6bcd84b795b7b580e3a28f27",
-    "bytes": 39668
+    "sha256": "1f8ed14a3cb3d59951164fc08d3a7bcf210933ef1abc6f98c59c69d583674b3a",
+    "bytes": 39725
    },
    {
     "path": "scripts/pod/autoinit_science_inputs.py",
-    "sha256": "ef4ab147131a950c54bbdf5ca39d0b32054cff3efdcd35dbf7acbe633204e292",
-    "bytes": 4281
+    "sha256": "2daf840b647f8408929ddc3c9a3d6cc0af868848078a402ee30e86d2e88c36f2",
+    "bytes": 4309
    },
    {
     "path": "scripts/pod/collect_artifacts.py",
@@ -276,8 +276,8 @@
    },
    {
     "path": "src/aadistill/data/verify.py",
-    "sha256": "1860b77f93ac78ad8d50c014f596cb23696a98cc666d7aa6fe359ed0dc718af1",
-    "bytes": 7567
+    "sha256": "f5f39175443a9e0ed5a43e3b066e4deb7f228e30ec2a16179d96ec8d2180333b",
+    "bytes": 7583
    },
    {
     "path": "src/aadistill/evaluation/__init__.py",
@@ -589,7 +589,7 @@
  },
  "launcher": "scripts/pod/autoinit_c1_launch.py",
  "pricing": {
-  "path": "logs/phase_c1_pricing.json",
+  "path": "logs/experiments/phase_c1/plans/phase_c1_pricing.json",
   "pricing_sha256": "909ed65f0d0d559b6b509fd1701f2fb30c3885717b1041c726c33dec48ee5be3",
   "floor_usd": 13.4401,
   "expected_usd": 14.7841,
@@ -597,12 +597,12 @@
   "enforcement": "BudgetSpec is derived from this record; the ceiling exists in exactly one place"
  },
  "c0_protocol": {
-  "path": "logs/phase_c0_preregistration.json",
+  "path": "logs/experiments/phase_c1/plans/phase_c0_preregistration.json",
   "sha256": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
   "protocol_id": "autoinit.v1.phase_c0"
  },
  "c1_session_contract": {
-  "hash": "b89d40b64588a4e73dd8f80c5159c0577d846f2a8b3b74e728ef0fde5eae625c",
+  "hash": "b23f41883b15ca951e4469bb2648b875bb70db3ca2f73ee87b8b598499a9df95",
   "stages": [
    "A: session_setup",
    "B: teacher_fetch_verify",
@@ -699,7 +699,7 @@
    "git_blob_sha1": "For a non-LFS file the blob is named by the git blob SHA-1. VERIFIED empirically: config.json's blob name equals `git hash-object config.json`."
   },
   "verification_rule": "On fetch, every file in `files` must hash to its recorded blob_name under the matching convention. Reconstruction MUST NOT begin on any mismatch.",
-  "binding_record": "logs/experiments/phase_c1/teacher_binding.json",
+  "binding_record": "logs/experiments/phase_c1/plans/teacher_binding.json",
   "weights_present_locally": false
  },
  "tokenizer_contract": {
@@ -790,7 +790,7 @@
   "count": 3,
   "derivation": "seed_i = uint32_be(SHA256(C0_digest + ':phase-c1:recovery-seed:' + decimal(i))[0:4]) mod 2**31, i from 0, advancing past collisions with the historical seeds or an earlier draw",
   "base_digest": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
-  "base_digest_source": "logs/phase_c0_preregistration.json (commit be2ab08)",
+  "base_digest_source": "logs/experiments/phase_c1/plans/phase_c0_preregistration.json (commit be2ab08)",
   "historical_seeds_excluded": [
    20260726,
    20260801,
@@ -829,7 +829,7 @@
   "contract": "c1_confirmation_scoring@v1",
   "contract_id": "c1_confirmation_scoring",
   "version": 1,
-  "digest": "b510bf643fb17532e387f379ca4f6ee170cd31f594774e40dc466fd02524afd3",
+  "digest": "839033aa0b671419ce56997054f13b7793a909957c9fd08e6c94062a8af620ef",
   "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
   "semantic_parent": "recovery_search_scoring@v2",
   "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
@@ -884,7 +884,7 @@
    "no_weighted_scalar": "usable_rollout_rate and correct_overall are reported separately and are never combined; usable_rollout is blind to correctness by construction"
   },
   "historical_numerical_equivalence": {
-   "record": "logs/experiments/phase_c1/scoring_equivalence.json",
+   "record": "logs/experiments/phase_c1/results/scoring_equivalence.json",
    "sha256": "0ee5ce346ee0a33a4376fa939022f880c4225b083821a8b0d0d09d7836c02959",
    "verdict": "IDENTICAL",
    "n_cases": 15,
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "0dc472bbe7373a35e9091a62524dc508d5524d4c46772ab19fbe6ff1d5345e15"
+ "preregistration_sha256": "59cb843ad8e290a04570c6e07e8683ffa70a615c4392a8fc8f8279471be4d838"
 }

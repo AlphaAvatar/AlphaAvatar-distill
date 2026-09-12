@@ -669,6 +669,7 @@ def test_fetch_and_secure_speak_the_SAME_contract(monkeypatch, tmp_path):
     store = tmp_path / "store"
     store.mkdir()
     leaves = [{"state_id": f"leaf{i}", "artifact_digest": f"d{i}"} for i in range(5)]
+    (store / pal.SELECTED_LEAF_REPORT).parent.mkdir(parents=True, exist_ok=True)
     (store / pal.SELECTED_LEAF_REPORT).write_text(json.dumps({"leaves": leaves}))
     ctx = types.SimpleNamespace(scr=tmp_path, args=types.SimpleNamespace(
         fetch_finalists=True, ckpt_store=str(tmp_path / "ck")))
@@ -766,6 +767,7 @@ def test_the_secured_gate_refuses_a_FAILED_or_UNMATCHED_transfer(tmp_path):
     store = tmp_path / "store"
     store.mkdir()
     leaves = [{"state_id": f"leaf{i}"} for i in range(3)]
+    (store / pal.SELECTED_LEAF_REPORT).parent.mkdir(parents=True, exist_ok=True)
     (store / pal.SELECTED_LEAF_REPORT).write_text(json.dumps({"leaves": leaves}))
     ctx = types.SimpleNamespace(scr=tmp_path, args=types.SimpleNamespace(
         fetch_finalists=True, ckpt_store=str(tmp_path / "ck")))
