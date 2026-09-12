@@ -35,7 +35,7 @@ from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, C
 from aadistill.initialization.planning.recovery import EquivalenceRule, FeasibilityRule  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
-RECORDS = REPO / "logs/autoinit_permanent_controls"
+RECORDS = REPO / "logs/experiments/phase_a/results/autoinit_permanent_controls"
 # Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
 # under a fresh empty HOME so host-local state is invisible on BOTH machines.
 # An absolute literal is immune to that, which is what let host-local cases run
@@ -833,7 +833,7 @@ def test_the_session_commit_is_verified_against_the_authorization():
     import subprocess
 
     mod = load_continuation_launcher()
-    auth_path = REPO / "logs/autoinit_continuation_authorization.json"
+    auth_path = REPO / "logs/budget/approvals/autoinit_continuation_authorization.json"
     if not auth_path.is_file():
         pytest.skip("no continuation authorization has been issued yet")
 
@@ -1239,14 +1239,14 @@ def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
             return r, markers.read_text()
 
         # This session's own authorization and plan: must reach the driver.
-        ok, marks = run("logs/autoinit_continuation_authorization.json",
+        ok, marks = run("logs/budget/approvals/autoinit_continuation_authorization.json",
                         CONTINUATION_PLAN_V1.plan_hash)
         assert ok.returncode == 0, ok.stdout + ok.stderr
         assert "REACHED_THE_DRIVER" in ok.stdout
         assert marks.strip() == "AUTHORIZATION_OK"
 
         # A plan that is not this session's: fail closed, classified, no driver.
-        bad, marks = run("logs/autoinit_continuation_authorization.json", "0" * 64)
+        bad, marks = run("logs/budget/approvals/autoinit_continuation_authorization.json", "0" * 64)
         assert bad.returncode == 98, f"rc={bad.returncode}: {bad.stdout}{bad.stderr}"
         assert "REACHED_THE_DRIVER" not in bad.stdout
         assert marks.strip() == "AUTHORIZATION_MISMATCH"
@@ -1254,7 +1254,7 @@ def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
         # The exact attempt-5 failure: an unrelated session's artifact. It must
         # still be refused -- the fix is that we no longer ASK it, not that it
         # would now pass.
-        stale, marks = run("logs/autoinit_micro_preflight_authorization.json",
+        stale, marks = run("logs/budget/approvals/autoinit_micro_preflight_authorization.json",
                            CONTINUATION_PLAN_V1.plan_hash)
         assert stale.returncode == 98
         assert marks.strip() == "AUTHORIZATION_MISMATCH"
@@ -1262,7 +1262,7 @@ def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
         # And the launcher must name them: an unset variable cannot silently
         # skip the gate.
         for auth, plan in ((None, CONTINUATION_PLAN_V1.plan_hash),
-                           ("logs/autoinit_continuation_authorization.json", None)):
+                           ("logs/budget/approvals/autoinit_continuation_authorization.json", None)):
             missing, marks = run(auth, plan)
             assert missing.returncode != 0
             assert "REACHED_THE_DRIVER" not in missing.stdout
@@ -1415,11 +1415,11 @@ def test_each_launcher_names_its_own_authorization_to_setup():
              "--bundle", "b.bundle", *extra]))
 
     c = spec_for("autoinit_continuation_launch", ("--transport", "relay"))
-    assert c.authorization_path == "logs/autoinit_continuation_authorization.json"
+    assert c.authorization_path == "logs/budget/approvals/autoinit_continuation_authorization.json"
     assert c.plan_hash == CONTINUATION_PLAN_V1.plan_hash
 
     p = spec_for("autoinit_preflight_launch")
-    assert p.authorization_path == "logs/autoinit_micro_preflight_authorization.json"
+    assert p.authorization_path == "logs/budget/approvals/autoinit_micro_preflight_authorization.json"
     assert p.plan_hash != CONTINUATION_PLAN_V1.plan_hash
 
     # Every session names a DIFFERENT authorization and a different plan. Sharing

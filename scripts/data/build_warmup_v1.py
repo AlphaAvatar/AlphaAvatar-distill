@@ -3,7 +3,7 @@
 Usage:
     uv run python scripts/data/build_warmup_v1.py
 
-Mixture (user-approved 2026-07-13, see logs/decisions.md): permissively
+Mixture (user-approved 2026-07-13, see logs/budget/decisions.md): permissively
 licensed public sources plus the 47 handcrafted v0 samples. Char budgets
 approximate a ~1M-token total at ~4 chars/token; exact token counts are
 logged later by the Stage 0 collection manifest.

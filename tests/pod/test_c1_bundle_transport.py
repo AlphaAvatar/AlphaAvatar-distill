@@ -32,7 +32,7 @@ sys.path.insert(0, str(REPO / "scripts" / "pod"))
 
 from experiments.phase_c1.bundle import BUNDLE_PREFIX, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, require_canonical_bundle_arg, roundtrip, sha256_bytes  # noqa: E402
 
-AUTH_PATH = "logs/autoinit_c1_authorization.json"
+AUTH_PATH = "logs/budget/approvals/autoinit_c1_authorization.json"
 
 
 def _git(*a, cwd=None):
@@ -326,7 +326,7 @@ def test_the_transport_and_rope_gates_are_wired():
     assert "bundle_staged_gate" in names, names
     assert "rope_input_gate" in names, names
     prereg = json.loads(
-        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
     assert len(spec.precheck) == prereg["transport"]["n_pre_provider_gates"], names
 
 

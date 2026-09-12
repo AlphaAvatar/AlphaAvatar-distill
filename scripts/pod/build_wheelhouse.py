@@ -42,7 +42,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 #: The pod's interpreter, read from a real run's recorded runtime fingerprint
-#: rather than assumed: `logs/autoinit_preflight_run4` records 3.12.3.
+#: rather than assumed: `logs/validations/micro-preflight/runs/autoinit_preflight_run4` records 3.12.3.
 POD_PYTHON = (3, 12)
 RELAY_REPO = "AlphaAvatar/aadistill-artifacts"
 RELAY_PATH = "transfer/wheelhouse_cu128_cp312"

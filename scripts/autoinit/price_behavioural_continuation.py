@@ -2,7 +2,7 @@
 """What the Phase-B behavioural continuation still owes. Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/price_behavioural_continuation.py \
-        --out logs/autoinit_behavioural_continuation_pricing.json
+        --out logs/experiments/shared/analyses/autoinit_behavioural_continuation_pricing.json
 
 **Stage 1 is complete and must not be repurchased.** Attempt 5 emitted an
 authoritative Top-5, a durable Stage-1 selection artifact and a retained journal,
@@ -52,13 +52,13 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 from price_phase_b import probe_cost  # noqa: E402
 from aadistill.runtime.cost import L40S_MEASURED  # noqa: E402
 
-HISTORICAL = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
-ATTEMPT5 = REPO_ROOT / "logs/autoinit_attempt5_probe_reuse.json"
-ATTEMPT4 = REPO_ROOT / "logs/autoinit_attempt4_probe_reuse.json"
+HISTORICAL = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
+ATTEMPT5 = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_attempt5_probe_reuse.json"
+ATTEMPT4 = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json"
 #: The recomputed rung-2 decision. When it exists it names exactly which sc
 #: probes are owed; without it the pricing books the worst case.
-CORRECTED_RUNG2 = REPO_ROOT / "logs/autoinit_continuation_b_corrected_rung2.json"
-AMENDMENT = REPO_ROOT / "logs/autoinit_phase_b_identity_collapse_amendment.json"
+CORRECTED_RUNG2 = REPO_ROOT / "logs/experiments/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json"
+AMENDMENT = REPO_ROOT / "logs/experiments/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
 
 #: Measured, not chosen: the slowest setup across attempts 3, 4 and 5 was
 #: attempt 5's 21.9 min (attempt 4 took 7.3). A bound takes the slowest observed.
@@ -130,7 +130,7 @@ def price(hardware=L40S_MEASURED) -> dict:
         corrected = json.loads(CORRECTED_RUNG2.read_text())
         missing_sc = [s[:12] for s in corrected["sc_still_owed"]]
         sc_basis = {
-            "source": "logs/autoinit_continuation_b_corrected_rung2.json",
+            "source": "logs/experiments/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json",
             "decision_status": corrected["decision_status"],
             "tie_break_candidates": [s[:12] for s in
                                      corrected["tie_break_candidates"]],
@@ -181,13 +181,13 @@ def price(hardware=L40S_MEASURED) -> dict:
                 "that citation this session would owe a replacement sb as well, "
                 "and the ceiling would price two probes rather than one"),
             "records": [
-                {"record": "logs/autoinit_historical_probe_reuse.json",
+                {"record": "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json",
                  "probes_dir_digest": json.loads(HISTORICAL.read_text())["probes_dir_digest"],
                  "admits": sorted(ev["historical"])},
-                {"record": "logs/autoinit_attempt5_probe_reuse.json",
+                {"record": "logs/experiments/shared/analyses/autoinit_attempt5_probe_reuse.json",
                  "probes_dir_digest": json.loads(ATTEMPT5.read_text())["probes_dir_digest"],
                  "admits": sorted(ev["attempt5"])},
-                {"record": "logs/autoinit_attempt4_probe_reuse.json",
+                {"record": "logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json",
                  "probes_dir_digest": (json.loads(ATTEMPT4.read_text())["probes_dir_digest"]
                                        if ATTEMPT4.is_file() else None),
                  "admits": sorted(ev.get("attempt4", []))},
@@ -243,7 +243,7 @@ def price(hardware=L40S_MEASURED) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_behavioural_continuation_pricing.json")
+    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_behavioural_continuation_pricing.json")
     args = ap.parse_args()
     r = price()
     out = Path(args.out)

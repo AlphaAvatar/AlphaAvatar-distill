@@ -2,7 +2,7 @@
 
 Validated against known-answer cases before anything is spent on them — a
 project habit that has caught three real scorer defects
-(`logs/EXPERIMENTS.md`). A diagnostic that is wrong in the same direction as the
+(`logs/archive/indexes/EXPERIMENTS.md`). A diagnostic that is wrong in the same direction as the
 hypothesis is worse than no diagnostic.
 """
 

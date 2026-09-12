@@ -73,7 +73,7 @@ register_builtin_operators()
 #: Where the launcher stages attempt 12's five preserved leaves.
 STAGED_LEAVES = REPO / "artifacts/autoinit/phase_a_selected"
 #: The committed evidence the import is bound to.
-EVIDENCE = REPO / "logs/autoinit_phase_a_attempt12"
+EVIDENCE = REPO / "logs/runs/unscoped/phase_a/attempt12"
 
 
 class RecoveryContinuationDriver(PhaseADriver):
@@ -83,7 +83,7 @@ class RecoveryContinuationDriver(PhaseADriver):
     #: attempt 12's consumed Phase-A authorization — which is committed at that
     #: path — and enforced a $23.0484 ceiling on a session priced at $16.7456.
     AUTHORIZATION_TYPE = RecoveryContinuationAuthorization
-    AUTHORIZATION_PATH = "logs/autoinit_recovery_continuation_authorization.json"
+    AUTHORIZATION_PATH = "logs/budget/approvals/autoinit_recovery_continuation_authorization.json"
 
     def stage1(self) -> bool:
         """Import the verified Stage-1 result. No search is reachable from here."""

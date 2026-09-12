@@ -17,7 +17,7 @@ them and require the claims to agree.
 
 Historical records are deliberately out of scope. The attempt-8 and attempt-9
 grants say "Eight attempt labels" and "Nine attempt labels" and were correct
-when written; `logs/autoinit_c1_attempt9/outcome.json` likewise. Those are
+when written; `logs/runs/stage-1/phase_c1/attempt9/outcome.json` likewise. Those are
 sealed evidence, not live state.
 """
 from __future__ import annotations
@@ -29,8 +29,8 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-SNAPSHOT = REPO / "logs/current_state.json"
-STATE = REPO / "logs/STATE.md"
+SNAPSHOT = REPO / "logs/state/current.json"
+STATE = REPO / "logs/state/current.md"
 
 WORD = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
         "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11}
@@ -109,7 +109,7 @@ class TestTheAttemptCountIsOneNumber:
         was refused at $0 and made a second. Requiring one would have forced the
         true count out of the documentation to keep a test green.
         """
-        ledger = (REPO / "logs/BUDGET_LEDGER.md").read_text()
+        ledger = (REPO / "logs/budget/ledger.md").read_text()
         missing = [n for n in self.FREE_LABELS
                    if not re.search(rf"C1 attempt {n}[^|]*\|\s*`?\$0\.0000",
                                     ledger)]

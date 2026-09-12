@@ -4,7 +4,7 @@
 
 This drives the real `scripts/pod/simulate_pod_env.sh` — empty HOME, isolated
 `HF_HOME`, synthetic `HF_TOKEN`, gitignored artifacts hidden, the pod's own pytest
-selection — and writes `logs/c1_pod_environment_verification.json`.
+selection — and writes `logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json`.
 
 It runs the simulator itself rather than accepting somebody's transcript of one,
 so the command in the record is literally the command that produced the counts.
@@ -511,7 +511,7 @@ def main() -> int:
                      "junit_sha256": _sha256_of(args.junit),
                      "pytest_log_sha256": _sha256_of(args.log),
                      "executions_of_this_tree": existing_executions(head)},
-        "renderer_parity_is_proved_by": "logs/experiments/phase_c1/renderer_parity.json",
+        "renderer_parity_is_proved_by": "logs/validations/renderer-parity/c1_renderer_parity.json",
     }
     if realization["problems"]:
         record["problems"] = list(record["problems"]) + realization["problems"]
@@ -543,7 +543,7 @@ def main() -> int:
             "record_kind": record["record_kind"],
             "verdict": record["verdict"],
             "swept_base_commit": record.get("swept_base_commit"),
-            "history": "logs/experiments/phase_c1/readiness_history.json",
+            "history": "logs/experiments/phase_c1/history/readiness_history.json",
             "authorizes": "nothing",
         }
         (REPO_ROOT / RECORD_POINTER).write_text(

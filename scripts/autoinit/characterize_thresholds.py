@@ -153,7 +153,7 @@ def measure_repeatability(args, tmp: Path) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_threshold_characterization.json")
+    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_threshold_characterization.json")
     ap.add_argument("--repeats", type=int, default=12)
     ap.add_argument("--items", type=int, default=4)
     ap.add_argument("--seq-len", type=int, default=64)

@@ -166,7 +166,7 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--level", choices=("step0", "behaviour", "both"),
                     default="step0")
-    ap.add_argument("--records", default="logs/e8b_step0_records")
+    ap.add_argument("--records", default="logs/experiments/early/history/e8b_step0_records")
     ap.add_argument("--results", default="logs/e8b_results.json",
                     help="per-seed recovered behaviour, written by the sessions")
     ap.add_argument("--out", default="")

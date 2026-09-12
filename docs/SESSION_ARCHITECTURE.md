@@ -4,7 +4,7 @@
 runner executes them; the shared setup script is manifest-driven. The design was
 specified on 2026-08-18 after being built and deliberately reverted once; this
 page now describes what the repository does. The reverted attempt and why it was
-reverted are in [`../logs/decisions.md`](../logs/decisions.md).
+reverted are in [`../logs/budget/decisions.md`](../logs/budget/decisions.md).
 
 ## The problem, stated in money
 
@@ -153,7 +153,7 @@ companions `config.json`, `generation_config.json`, `tokenizer.json`,
 `tokenizer_config.json` and `chat_template.jinja`, plus the recovery pack's
 `ladder.json` and `audit.jsonl`. The companions went undeclared on the reasoning
 that the weights were the artifact. A control that shipped without its tokenizer
-is already written up in `logs/autoinit_control_sb_packaging_repair.json`.
+is already written up in `logs/experiments/shared/analyses/autoinit_control_sb_packaging_repair.json`.
 
 Now the declaration **is** the staging. `RelayInput` carries source, destination,
 digest and the second destination the recovery pack is mirrored to;

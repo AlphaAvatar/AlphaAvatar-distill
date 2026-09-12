@@ -260,7 +260,7 @@ def _run_setup(box: dict, **env_extra) -> subprocess.CompletedProcess:
         "PATH": f"{bin_}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
         "HOME": str(home),
         "SESSION_STATUS": "/workspace/autoinit_continuation.status",
-        "SESSION_AUTH_PATH": "logs/autoinit_continuation_authorization.json",
+        "SESSION_AUTH_PATH": "logs/budget/approvals/autoinit_continuation_authorization.json",
         "SESSION_PLAN_HASH": CONTINUATION_PLAN_V1.plan_hash,
         "BUNDLE_NAME": "aad_rehearsal.bundle",
         "SESSION_COMMIT": commit, "REHEARSAL_COMMIT": commit,

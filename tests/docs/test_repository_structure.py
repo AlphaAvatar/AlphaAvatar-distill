@@ -20,9 +20,9 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 README = REPO / "README.md"
-STATE = REPO / "logs/STATE.md"
-SNAPSHOT = REPO / "logs/current_state.json"
-CATALOG = REPO / "logs/CATALOG.md"
+STATE = REPO / "logs/state/current.md"
+SNAPSHOT = REPO / "logs/state/current.json"
+CATALOG = REPO / "logs/state/ownership.md"
 LAYOUT = REPO / "docs/REPO_LAYOUT.md"
 POD_SCRIPTS = REPO / "docs/POD_SCRIPTS.md"
 
@@ -46,7 +46,7 @@ def test_the_readme_carries_no_live_spend_or_authorization_state():
     money = [m for m in re.findall(r"\$[0-9]+\.[0-9]{2,4}", text)]
     assert not money, (
         f"the README states dollar amounts {money}; spend and caps are owned by "
-        "logs/BUDGET_LEDGER.md")
+        "logs/budget/ledger.md")
 
     forbidden = [
         # Naming the concept and linking to its owner is the desired shape;
@@ -60,7 +60,7 @@ def test_the_readme_carries_no_live_spend_or_authorization_state():
         hit = re.search(pattern, text, re.M)
         assert not hit, (
             f"the README claims live state ({hit.group(0)!r}); that fact is "
-            "owned by logs/current_state.json")
+            "owned by logs/state/current.json")
 
 
 def test_the_readme_keeps_the_required_public_structure():
@@ -75,8 +75,8 @@ def test_the_readme_keeps_the_required_public_structure():
 
 def test_the_readme_points_at_the_owners_of_the_facts_it_dropped():
     text = README.read_text()
-    for owner in ("logs/current_state.json", "logs/STATE.md",
-                  "logs/BUDGET_LEDGER.md", "logs/CATALOG.md",
+    for owner in ("logs/state/current.json", "logs/state/current.md",
+                  "logs/budget/ledger.md", "logs/state/ownership.md",
                   "docs/REPO_LAYOUT.md"):
         assert owner in text, f"the README does not point at {owner}"
 
@@ -303,8 +303,8 @@ def test_the_device_canary_is_recorded_as_terminated_and_not_prepared():
                for a in snap["abandoned"]), (
         "current_state.json does not record the canary path as terminated")
     # And the evidence it was terminated *with* is still here.
-    for d in ("logs/autoinit_device_canary_attempt1",
-              "logs/autoinit_device_canary_attempt2"):
+    for d in ("logs/validations/device-canary/runs/autoinit_device_canary_attempt1",
+              "logs/validations/device-canary/runs/autoinit_device_canary_attempt2"):
         assert (REPO / d).is_dir(), f"{d} was removed; that is paid evidence"
 
 

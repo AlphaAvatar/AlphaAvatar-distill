@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from aadistill.evaluation.usable_rollout import detect_schema  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
-OUT = "logs/architecture_scoring_equivalence.json"
+OUT = "logs/maintenance/inventories/architecture_scoring_equivalence.json"
 
 #: Frozen Phase-A rung-1 generations, by search path. Real evidence from a
 #: completed run, not a fixture: a synthetic case cannot show that 190 real

@@ -311,7 +311,7 @@ def test_the_launcher_loads_the_continuation_type(launcher):
     assert spec.authorization_loader == RecoveryContinuationAuthorization.load, (
         "the production launcher still loads the Phase-A type")
     assert spec.authorization_path == (
-        "logs/autoinit_recovery_continuation_authorization.json")
+        "logs/budget/approvals/autoinit_recovery_continuation_authorization.json")
 
 
 def test_the_precheck_recomputes_the_continuation_harness(launcher):
@@ -349,7 +349,7 @@ def test_the_gate_refuses_an_artifact_declaring_the_phase_a_file_list(launcher):
 def test_the_pod_driver_loads_the_continuation_artifact_not_the_phase_a_one():
     """The consumer that actually governs spend, and the one this work nearly
     missed. `PhaseADriver.__init__` loaded a hard-coded
-    `logs/autoinit_phase_a_authorization.json` — a file that IS committed,
+    `logs/budget/approvals/autoinit_phase_a_authorization.json` — a file that IS committed,
     holding attempt 12's consumed $23.0484 authorization. The continuation
     subclasses that driver, so on the pod it would have enforced
     `require_within_cap` against the search's ceiling, not its own, and recorded
@@ -362,18 +362,18 @@ def test_the_pod_driver_loads_the_continuation_artifact_not_the_phase_a_one():
     assert drv.RecoveryContinuationDriver.AUTHORIZATION_TYPE is (
         RecoveryContinuationAuthorization)
     assert drv.RecoveryContinuationDriver.AUTHORIZATION_PATH == (
-        "logs/autoinit_recovery_continuation_authorization.json")
+        "logs/budget/approvals/autoinit_recovery_continuation_authorization.json")
     # And the parent is unchanged, so full Phase A still loads its own.
     assert drv.PhaseADriver.AUTHORIZATION_TYPE is PA
     assert drv.PhaseADriver.AUTHORIZATION_PATH == (
-        "logs/autoinit_phase_a_authorization.json")
+        "logs/budget/approvals/autoinit_phase_a_authorization.json")
     assert (drv.RecoveryContinuationDriver.AUTHORIZATION_PATH
             != drv.PhaseADriver.AUTHORIZATION_PATH)
 
 
 def test_the_committed_phase_a_artifact_cannot_be_read_as_a_continuation_one():
     """Concrete, against the real file the driver used to load."""
-    stale = REPO / "logs/autoinit_phase_a_authorization.json"
+    stale = REPO / "logs/budget/approvals/autoinit_phase_a_authorization.json"
     if not stale.is_file():
         pytest.skip("no committed Phase-A authorization to check against")
     assert PhaseAAuthorization.load(stale).hard_cap_usd == 23.0484
@@ -560,7 +560,7 @@ def test_the_issuer_writes_no_dollar_figure_of_its_own():
 
 def test_the_issuer_defaults_to_the_continuation_artifact_path():
     src = ISSUER.read_text()
-    assert 'logs/autoinit_recovery_continuation_authorization.json' in src
+    assert 'logs/budget/approvals/autoinit_recovery_continuation_authorization.json' in src
 
 
 def test_the_module_carries_no_grant_prose():
@@ -582,7 +582,7 @@ def test_any_continuation_authorization_present_is_a_spent_one():
     that was granted and is now spent — bound to a base commit that is no longer
     HEAD, so its lineage gate refuses the current tree by construction.
     """
-    path = REPO / "logs/autoinit_recovery_continuation_authorization.json"
+    path = REPO / "logs/budget/approvals/autoinit_recovery_continuation_authorization.json"
     if not path.exists():
         return
     auth = RecoveryContinuationAuthorization.load(path)

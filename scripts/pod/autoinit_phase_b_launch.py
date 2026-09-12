@@ -20,7 +20,7 @@ for work Phase B does not do.
 It will not proceed past a comparability failure. That is decided by the driver's
 stage 0, which is blocking, so the session tears down with evidence rather than
 falling back to a larger run. The 14-probe no-reuse path is a **rejected
-counterfactual**, priced in `logs/autoinit_phase_b_pricing.json` only so the
+counterfactual**, priced in `logs/experiments/phase_b/analyses/autoinit_phase_b_pricing.json` only so the
 rejection is on the record; nothing here can select it.
 """
 
@@ -85,9 +85,9 @@ from verify_historical_probe_reuse import (  # noqa: E402
 STATUS = f"{WS}/autoinit_phase_b.status"
 RUN_LOG = f"{WS}/autoinit_phase_b_run.log"
 AUTH_PATH = "logs/autoinit_phase_b_authorization.json"
-FROZEN_SCIENCE_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
-PREREGISTRATION = REPO_ROOT / "logs/autoinit_phase_b_preregistration.json"
-REUSE_RECORD = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
+FROZEN_SCIENCE_PLAN = "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+PREREGISTRATION = REPO_ROOT / "logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json"
+REUSE_RECORD = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
 
 #: Phase-B-specific, and deliberately built by extension rather than by editing
 #: Phase A's tuple: `TEST_IGNORES` is the historical contract several completed
@@ -718,7 +718,7 @@ def build_parser() -> argparse.ArgumentParser:
     from autoinit_phase_a_launch import build_parser as phase_a_parser
 
     ap = phase_a_parser()
-    ap.set_defaults(out="logs/autoinit_phase_b_session.json",
+    ap.set_defaults(out="logs/experiments/phase_b/analyses/autoinit_phase_b_session.json",
                     disk_gb=PHASE_B_PROVISION_GIB,
                     search_minutes=SEARCH_MINUTES_P2,
                     rung1_probes=RUNG1_PROBES_P2,

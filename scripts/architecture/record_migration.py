@@ -109,7 +109,7 @@ def classify(old: str, base: str) -> dict:
                 #: A declaration REPOINTED at a path that did not exist at the
                 #: base. Calling that "modified in place" would describe a
                 #: relocation as an edit; where the file came FROM is recorded
-                #: in logs/architecture_declaration_history.json, which holds
+                #: in logs/maintenance/inventories/architecture_declaration_history.json, which holds
                 #: each declaration's pre-migration path list.
                 disposition = "declared_path_absent_at_base"
             elif now == old_sha:

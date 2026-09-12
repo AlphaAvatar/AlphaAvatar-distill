@@ -1,0 +1,2254 @@
+# Budget ledger — actual spend, reconciled 2026-08-12
+
+**Do not infer available authorization from an old cap.** Caps were raised several times
+and one was exceeded. What follows separates what was *spent* from what was *authorized*.
+
+## Reconciliation method, and its limit
+
+Per-session evidence files (`logs/*_evidence.json`) are written **per session name and
+overwritten on reuse** — `e8b_s2_session_evidence.json` holds only the sixth S2 attempt,
+and no evidence file survives for E1–E6. They are therefore *not* a complete provider
+record and cannot reconstruct history on their own.
+
+The authoritative figure is the cumulative total carried forward in the budget planners
+and cross-checked against each experiment's recorded cost in
+[`EXPERIMENTS.md`](../archive/indexes/EXPERIMENTS.md). Surviving evidence files agree with those
+per-session figures where both exist (E7 $10.49, E8a $0.53 for pod A, E8b-S1 $4.07 at
+polling end, E8b-S2 $7.21).
+
+Where a launcher figure is a lower bound because a pod was terminated manually
+afterwards, the higher manual figure is the one carried.
+
+## Actual cumulative spend
+
+```
+E1  data-scaling matrix, 24 arms                            $ 47.6000
+E2  0.86M diagnostics, phase 1                               (see §12)
+E3  attention-restriction at 0.86M                           (see §20)
+E4  P2 CE-heavy 0.86M -> 1.60M                               (see §21)
+E5  teacher- vs student-prefix, 5 attempts                   $  9.7800
+E6  E1 scale curve on the frozen battery                     $  2.3600
+E6b P2 CE-heavy at 2.96M                                     $  7.6800
+    diagnostics/hardening/canaries (§14-19, §30, §32-33)      $  9.0000 approx
+E7  FineWeb-Edu KD                                           $ 10.4900
+E8a contribution-guided depth search                         $  3.7253
+--- carried-forward pre-E8b baseline ------------------------ $163.8833
+E8b step-0 (S1)                                              $  5.2100
+E8b S2 attempts 1-3, setup failures, nothing trained         $  3.1000
+E8b S2 attempt 4, 20-step gate then OOM                      $  0.5500
+E8b S2 attempt 5, OOM at step 110                            $  0.7500
+E8b S2 attempt 6, DP-sa trained, DC-sa OOM at ~step 900      $  7.2100
+--- E8b total ---------------------------------------------- $ 16.8200
+AutoInit micro-preflight attempt 1 (L40S, 1.5 min)           $  0.0300
+    setup aborted at the frozen-asset gate: it invoked
+    /opt/train/bin/python before `uv sync` created it. Pod
+    deleted by the launcher, provider confirmed gone. No
+    stage ran; nothing was trained or measured.
+AutoInit micro-preflight attempt 2 (L40S, 17.4 min)          $  0.2869
+    setup passed; Stage 0 attested both protocol identities;
+    Stage 1's evaluator-repeatability gate raised and the
+    session stopped there. The permanent controls were NOT
+    trained, which is the staging working as designed. Pod
+    deleted, provider confirmed gone.
+
+AutoInit micro-preflight attempt 3 (L40S, 170.9 min)         $  2.8200
+    Stages 0-2 passed; both permanent controls trained and
+    strictly verified, then DELETED unfetched by a launcher
+    condition gated on total success. Stage 3 generation
+    failed and its cause was lost with the pod, because no
+    preflight artifact spec had ever been loadable.
+
+AutoInit micro-preflight attempt 4 (L40S, 217.9 min)         $  3.6000
+    Stages 0-2 passed; BOTH permanent controls trained,
+    strictly verified and RETRIEVED (5.51 + 5.50 GiB, hashes
+    re-verified locally). Stage 3 blocked on tool rendering
+    under transformers 5.15. ~$0.41 of it was a cold first
+    draw, abandoned and deleted by the launcher.
+
+AutoInit characterization continuation, attempt 1 (L40S,      $  0.6312
+    38.25 min). PRODUCED NOTHING. 29 min of it was a cold
+    host, abandoned and deleted by the launcher; the redraw
+    then failed the pod's blocking test gate on seven tests
+    that read `recovery_search_v1`, which the v2 migration
+    stopped staging. Pod deleted, provider-confirmed gone.
+    Both causes fixed and locked by tests before relaunch.
+
+AutoInit characterization continuation, attempt 2 (L40S,      $  0.6367
+    38.59 min). PRODUCED NOTHING. All THREE host draws tripped
+    HOST_COLD in the uv-sync window; the launcher abandoned and
+    deleted each, then aborted. Pod deleted, provider-confirmed
+    gone. The test-gate defect that killed attempt 1 was fixed
+    and verified under the pod simulator before this launch, so
+    this failure is a different, infrastructure one.
+
+AutoInit characterization continuation, attempt 3 (L40S,      $  0.0700
+    4.3 min). PRODUCED NOTHING, but failed FAST and loudly:
+    `uv sync --frozen` installs from the source recorded in the
+    lock, and torch's is the pytorch registry, which
+    `--find-links` does not override. The offline gate caught it
+    in 4 minutes instead of a 28-minute burn.
+
+AutoInit Stage-3 continuation, attempt 8 COMPLETE (L40S, 41.3 min) $  0.6816
+Phase A attempt 1 (L40S, 6.5 min) SETUP GATE FAILED, NOTHING RAN $  0.1075
+Phase A attempt 2 (L40S, 28.3 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.4665
+Phase A attempt 3 (L40S, 12.8 min) STAGE-0 GATE FAILED, NOTHING RAN $  0.2103
+Phase A attempt 4 (L40S, 12.4 min) STAGE-3 BINDING REFUSED       $  0.2052
+Phase A attempt 5 (L40S, 38.9 min) STAGE 0 PASSED, STAGE 1 FAILED $  0.6426
+    FIRST TIME STAGE 0 PASSED. The v2 comparability migration held on
+    hardware: attestation written, protocol 250f72ef, comparable
+    identity 70a26e0b. Caveat: this pod drew driver 580.159.03, the
+    SAME as Stage 3, so v1 would also have passed here -- v2 was not
+    the deciding factor on this particular host.
+    Stage 1 then failed on its first real execution:
+      CalibrationError: calib.domain_balanced@v1:
+      artifacts/stage1/e8_calibration_v1/items.jsonl is missing
+    phase_a_search.py:124 calls DOMAIN_BALANCED_V1.resolve(), which
+    reads that file. It is NOT in the launcher's LOCAL_ASSETS, NOT in
+    the relay precheck's `need` list, and is INCOMPLETE on the dev box
+    (only docs.jsonl + general_disjointness.json). It IS on the relay
+    at e8_inputs_20260810/calibration_v1/. A required Phase-A input
+    that nothing stages and no $0 gate checks for.
+    38.9 min includes a redrawn host (vvsohv60cuuokx -> s797g6xphdibms).
+    Pod deleted, provider confirms gone; nothing trained.
+    NOT a code defect. Stage 0's real body ran end to end -- the fix
+    verified at $0 held -- and the NEW Stage-3 protocol binding then
+    refused, as designed: the pod's evaluation protocol hashed to
+    17218f7c, not the pinned 250f72ef under which the equivalence
+    interval and feasibility floor were materialized.
+    The cause is ONE field. Every observation governing generation
+    semantics matched exactly (vLLM 0.27.1, transformers 5.15.0, torch
+    2.13.0+cu130, bfloat16, gpu_mem 0.9, max_num_seqs 256,
+    max_num_batched_tokens 8192, enforce_eager False, tokenizer sha,
+    chat-template sha, resolved_context 8192, context_source,
+    stop_token_ids). Only runtime_digest differed, and within the
+    runtime only image_digest, whose suffix is the HOST NVIDIA DRIVER
+    version appended by read_image_digest:
+        stage 3   ...ubuntu2404@580.159.03
+        attempt 4 ...ubuntu2404@580.126.09
+    Pod deleted, provider confirms gone, no stage passed, nothing
+    trained.
+    Setup passed in 5.2 min (warm image). The driver detached and died
+    ~2 min into stage 0, AFTER the engine probe ran: the driver called
+    declared_generation_protocol(engine_probe_json) but that function
+    takes no positional arguments. The continuation's working form is
+    declared_generation_protocol().materialized(...). A second defect
+    in the same never-executed stage 0, of a class the attempt-2
+    regression did not cover: that one checked argv for external
+    SCRIPTS, this is an in-process CALL. Failed closed, pod deleted,
+    provider confirms gone, no stage passed, nothing trained.
+    Setup PASSED this time: the SESSION_KIND test fix held, so the
+    pod's blocking CPU suite cleared and the driver detached. It then
+    died ONE SECOND later in stage 0. The driver's engine-probe call
+    omitted `--model`, which autoinit_engine_probe.py marks
+    required=True, so argparse exited rc=2 before vLLM ever loaded.
+    A defect in the Phase-A driver, not in any gate: the stage-0 gate
+    refused correctly and the session failed closed. The rehearsal
+    SCRIPTED stage 0 rather than building its argv, so that line had
+    never executed anywhere. Pod deleted, provider confirms gone;
+    no stage passed, nothing was trained, no permanent artifact touched.
+    The pod's blocking CPU test suite failed one test:
+    test_setup_verifies_THIS_sessions_authorization_and_fails_closed.
+    The setup gate itself behaved CORRECTLY. The launcher exports
+    SESSION_KIND=phase_a into setup.sh, which exports it to the test
+    gate; that test extracts setup's authorization block and ran its
+    phase_a branch against the CONTINUATION's artifact, which is
+    correctly refused with exit 98. The test controlled two session
+    variables and not the third. It passed on the dev box and under the
+    pod simulator, and could only fail on a real Phase-A pod.
+    Failed CLOSED: aborted after draw 1, pod deleted, provider confirms
+    gone, driver never started, no stage ran, nothing trained.
+AutoInit characterization continuation, attempt 7 (L40S, 27.0 min) $  0.4500
+AutoInit characterization continuation, attempt 6 (L40S, 8.0 min)  $  0.1324
+AutoInit characterization continuation, attempt 5 (L40S, 8.3 min)  $  0.1369
+AutoInit characterization continuation, attempt 4 (L40S,      $  1.3672
+    82.9 min). The train env installed OFFLINE IN 11 SECONDS —
+    the fix works on hardware. Then `pip install vllm`, still
+    unpinned and still going to PyPI, hung 76 min on the same
+    host that had failed three cold draws. Torn down manually
+    once the outcome was determined; provider-confirmed gone.
+
+ACTUAL CUMULATIVE SPEND                                      $193.1783
+```
+
+The pre-E8b baseline `$163.8833` is the figure every E8/E8b planner was built on
+(`scripts/training/plan_e8b_budget.py`, `ACTUAL_BASELINE_USD`). E8b's $16.82 is itemised
+above from §38–§42.
+
+## Authorized caps, in order
+
+```
+$149.03   EXCEEDED by $0.56 during E6b, and CLOSED. The overrun is recorded,
+          not rewritten.
+$150.41   temporary canary cap, spent and closed
+$162.49   E8 baseline cap
+$172.57   +$10.08 for E8 (2026-08-11)
+$173.40   +$0.83 increment
+$211.07   +$47.18 E8b hard backstop (2026-08-11), rounded up from $211.0633
+$213.00   +$1.93 for Phase A (2026-08-15). The maintainer approved raising the
+          cap "e.g. $213-214" after being shown that Phase A did not fit;
+          $213.00 was selected from that range as the conservative end and is
+          the figure recorded here. Nothing was spent against it.
+$234.00   +$3.00 (2026-08-21). APPROVED, in the maintainer's own words: "I
+          approve the cumulative project cap increase from $231.00 to $234.00,
+          but this is only the project ceiling. The Phase-A per-launch ceiling
+          remains $23.0484, and no Attempt 12 launch is authorized yet."
+          Arithmetic: $209.6842 spent, so one full hard-ceiling attempt reaches
+          $232.7326, leaving $1.2674. It does NOT authorize an Attempt 13.
+$231.00   +$12.00 (2026-08-20). APPROVED, in the maintainer's own words: "I
+          approve raising the cumulative AlphaAvatar-distill project cap from
+          $219.00 to $231.00." Explicitly scoped: "This is a cumulative project
+          ceiling only. It does not change the existing Phase-A per-launch hard
+          ceiling of $23.0484, does not authorize any subsequent attempt, and
+          does not authorize spending outside the next explicitly approved
+          session."
+          The arithmetic it was granted against: $206.4741 spent, so one full
+          hard-ceiling Phase-A attempt reaches $206.4741 + $23.0484 =
+          $229.5225, leaving $1.4775 of margin under the new cap. It funds
+          ONE Phase-A Attempt 11 and nothing else. Attempt 12 is NOT funded,
+          authorized, prepared or implied by it.
+$219.00   +$2.00 (2026-08-17). APPROVED. Funds AT MOST two things: one
+          infrastructure-only Stage-1 GPU device canary with hard cap
+          $1.0197, and -- ONLY if that canary passes and tears down
+          cleanly -- one complete Phase-A Attempt 8 under the existing
+          $23.0484 per-launch hard bound. It does NOT authorize a canary
+          retry, Attempt 9, or any change to the frozen science.
+$217.00   +$4.00 for Phase A attempt 6 (2026-08-17). APPROVED. The maintainer's
+          words: "My recommended new cumulative project cap is $217.00",
+          followed by "Record this approval in the ledger and machine-readable
+          state ... and issue one fresh PhaseAAuthorization." The raise covers
+          the repriced hard bound after the reference-cache fallback audit and
+          the beam-6 pricing correction: $23.048325 against $19.8217 remaining
+          under $213.00. Against $193.1783 spent it leaves $23.8217, a margin of
+          $0.7734 over one complete attempt. FUNDS ONE ATTEMPT: "This funds one
+          attempt only and does not imply Attempt 7."
+```
+
+### Why the cap moved, and by how much
+
+Phase A did not fit under `$211.07`. Repriced from the measured Stage-3 battery
+it was `$12.36 expected / $20.13 hard` against `$19.5238` remaining — short by
+`$0.61`. The alternatives were dropping the conditional third seed (a design
+change, and Stage 3 showed real seed disagreement) or cutting the `$3.00`
+infrastructure reserve (four of eight continuation attempts hit an
+infrastructure event). Raising the cap preserves the frozen design.
+
+**The launcher's own model prices it higher than the repricing document did**,
+and the launcher's figure is the one that binds, because it is what
+`plan_session` computes before a pod can exist:
+
+```
+                                    repricing doc     launcher make_plan
+search                                    $1.76        180 min allowance
+9 probes (rung 1 + rung 2)               $10.60        priced per step
+conditional seed-sc rung (3 probes)       $3.53        priced as headroom
+setup, attestation, selection,
+  manifest, sync, transfer                  --         48 min
+contingency 10% + 20 min reserve            --         included
+-------------------------------------------------------------------------
+expected                                 $12.36        $17.8933
+  of which conditional tie-break              --        $3.5328
+  expected without the tie-break              --       $14.3604
+soft                                        --         $19.6826
+hard                                     $20.13        $20.0126
+```
+
+The document priced search and probes; it did not price the session around
+them. The `$14.3604` figure is the honest expected cost of a Phase A that
+resolves after two seeds.
+
+The conditional rung is **priced as headroom, not as an expectation**: if it were
+left out, a legitimately triggered seed-sc rung would be killed by the watchdog
+mid-probe. An unused leash costs nothing, because the pod is torn down on
+completion rather than at the threshold.
+
+Within that project cap, the characterization continuation carries its own bound:
+
+```
+$1.75   continuation cap as handed off (expected $0.90)
+$2.30   RAISED 2026-08-14 with maintainer approval, after attempt 1 spent
+        $0.6312 and produced nothing. Covers that sunk cost plus one full
+        attempt at its $1.6352 hard threshold. Expected $1.97.
+        Raising the cap does NOT loosen a session: `make_plan` still prices
+        one run at soft $1.4702 / hard $1.6352.
+```
+
+## Protocol deviations and overruns
+
+| what | figure | recorded |
+| --- | --- | --- |
+| E6b exceeded the $149.03 cap | +$0.56 | `EXPERIMENTS.md` §29 |
+| E8b-S1 exceeded its $3.25 session plan | $5.21 actual | §38 — the DP step-0 probe ran 200 min against a 20 min estimate |
+| E8b-S2 spent $11.06 on six attempts, five of them infrastructure | — | §39–§41 |
+| DC's step-0 probe deferred, never run | — | §38, declared |
+| the 20-step memory gate was falsified by the real run | — | §41–§42 |
+| continuation attempt 1 bought nothing: cold host + a test gate reading an unstaged battery | $0.6312 | `decisions.md` 2026-08-14, `STATE.md` |
+| continuation attempt 2 bought nothing: three consecutive cold hosts, all in the uv-sync window | $0.6367 | `decisions.md` 2026-08-14 |
+| continuation attempt 3 bought nothing, but failed in 4 min | $0.0700 | `uv sync` cannot install a registry-pinned wheel offline |
+| continuation attempt 4: train env offline in 11 s, then `pip install vllm` hung 76 min | $1.3672 | the exposure named in the offline commit |
+| continuation attempt 5: every offline fix worked on hardware; died on the LAST line of setup, a stale binding to the micro-preflight authorization | $0.1369 | `autoinit_continuation_attempts/attempt5/` |
+| continuation attempt 6: the session-scoped authorization gate PASSED on the pod; setup finished with SETUP_RC=0 and the launcher misread it as setup_failed, because the shared setup wrote markers to the preflight's status filename | $0.1324 | `autoinit_continuation_attempts/attempt6/` |
+| continuation attempt 7: **the driver ran.** Stages 0/1/2 passed; Stage 3 characterized sa and failed on sb, whose checkpoint has no tokenizer files | $0.4500 | `autoinit_continuation_attempts/attempt7/` |
+| continuation attempt 8: **COMPLETE.** ALL_DONE, both controls characterized, thresholds materialized | $0.6816 | `autoinit_stage3_complete/` |
+| **continuation total: $4.1060 spent across eight attempts; Stage 3 COMPLETE** | $4.1060 | arithmetic corrected: the earlier $1.2712 line double-counted a rounded print; the per-attempt entries were always right |
+
+## Current position
+
+```
+authorized cumulative cap                                    $234.00
+    RAISED AND APPROVED 2026-08-21, from $231.00 (itself raised from
+    $219.00 on 2026-08-20). A CUMULATIVE PROJECT
+    CEILING ONLY: it does not change the $23.0484 Phase-A per-launch
+    hard ceiling, does not authorize any subsequent attempt, and does
+    not authorize spend outside the next explicitly approved session.
+    See the caps list above.
+actual cumulative spend                                      $230.0350
+    The header below drifted from its own itemization between attempts
+    4 and 7 -- the per-attempt terms were always added, the total was
+    not re-summed. Re-derived 2026-08-24; the terms sum to $230.0350
+    exactly, and $234.00 - $230.0350 = $3.9650.
+    = $194.0530 + $0.1900 attempt 8 + $0.3400 attempt 9
+      + $11.4300 attempt 10 + $0.0700 measurement attempt 1
+      + $0.1834 measurement attempt 2 + $0.2077 measurement attempt 3
+      + $3.2101 Phase-A attempt 11 + $3.7872 Phase-A attempt 12
+      + $0.0100 recovery continuation attempt 1
+      + $0.2389 recovery continuation attempt 2
+      + $0.2011 recovery continuation attempt 3
+      + $0.4112 recovery continuation attempt 4
+      + $1.3511 recovery continuation attempt 5
+      + $1.4926 recovery continuation attempt 6
+      + $12.8587 recovery continuation attempt 7.
+remaining under the $234.00 cap                              $  3.9650
+    FUNDS NO FURTHER PAID SESSION OF ANY KIND: a continuation ceiling
+    is $16.7456 and a Phase-A attempt $23.0484.
+    REMAINING BALANCE IS NOT AUTHORIZATION. Every grant issued, through
+    attempt 7's, is spent.
+recovery continuation attempt 7 (L40S, 779.3 min) PHASE A COMPLETE $ 12.8587
+    AUTHORIZED 2026-08-23 as autoinit.recovery_continuation.2026-08-23T1314Z
+    (sha256 d354557e) against
+    logs/autoinit_recovery_continuation_attempt7_grant.json.
+    Base 7e1d429, session commit d968b20, harness b824441c over 22 files.
+    Ceiling $16.7456, of which $12.8587 was spent -- UNDER the $14.9233
+    expected. Pod 3c1g6e01kdu1ya; provider confirms gone; watchdog ended
+    pod_gone.
+    ALL_DONE. Six stages, ELEVEN probes trained and scored: 6 in rung 1
+    on seed sa, 3 in rung 2 on sb, 2 in the conditional rung 3 on sc.
+    RESULT: unresolved_equivalence, winner None, tie_break_ran true.
+    Pooled correct_overall: cca699c93f34 0.029412, 85bde4ded2c3 0.019608,
+    control-qwen 0.008824, against a 0.011695 interval. The two searched
+    leaves are tied with each other; cca699c9 IS separated from the
+    canonical control and 85bde4de is not. No fourth seed follows.
+    Comparability held: comparable_identity 70a26e0b, live == historical.
+    Probe training was 61.0-61.1 min against 61.55 priced, so attempt 6's
+    71.9 min was host variance.
+    THE LAUNCHER THEN CRASHED AFTER COLLECTION on a fetch_products
+    contract mismatch (AttributeError: 'str' object has no attribute
+    'get'), mislabelling the session INCOMPLETE despite DRIVER_EXITED:0.
+    Nothing was lost: 9 reports fetched, local_hash_problems [], archive
+    extracted with all 11 probe trees, and the two retained finalists are
+    initializations already preserved at 1.2 GiB each.
+recovery continuation attempt 6 (L40S, 90.5 min) BATTERY REACHED $  1.4926
+    AUTHORIZED 2026-08-23 as autoinit.recovery_continuation.2026-08-23T0944Z
+    (sha256 b15aab3c) against
+    logs/autoinit_recovery_continuation_attempt6_grant.json.
+    Base 948b1e8, session commit 08670e5, harness 0dbf1272 over 22 files.
+    Ceiling $16.7456, of which $1.4926 was spent. Pod ifp8feyil1gp7v;
+    provider confirms gone; watchdog ended pod_gone after 91 ticks.
+    THE ATTEMPT-5 REPAIR IS CONFIRMED: trained_model_dir() resolved the
+    probe checkpoint with no FileNotFoundError and execution entered
+    battery(), past the line that ended attempt 5. Setup $0.13 and TCP 22
+    in 0.2 min, both the best recorded.
+    FAILED in generation, 50 s after PROBE_TRAINED: uncapped_eval raised
+    ValueError, tokenizer.chat_template is not set. Trainer.save_checkpoint
+    writes weights and config only; battery() passes --model <that dir>
+    with no --tokenizer, and that flag defaults to the checkpoint's own
+    tokenizer. Every proven caller had pointed --model at CANONICAL_INIT,
+    a full checkpoint.
+    PROTOCOL WARNING: passing --tokenizer would fix the crash and break
+    comparability. tokenizer_source is material under
+    generation_runtime_comparability@v2 and Stage 0 attested it as "the
+    evaluated checkpoint" with tokenizer_sha256 c1db93c8.
+    The probe trained in 71.9 min against 61.55 priced (+16.6%) and was
+    again lost with the pod -- the second time paid training was discarded.
+recovery continuation attempt 5 (L40S, 81.9 min) PROBE TRAINED $  1.3511
+    AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1925Z
+    (sha256 7f575d5f) against
+    logs/autoinit_recovery_continuation_attempt5_grant.json.
+    Base 4794193, session commit 63625e1, harness 95cf336d over 22 files.
+    Ceiling $16.7456, of which $1.3511 was spent. Pod 9jxov5bjtiy2xu;
+    provider confirms gone; watchdog ended pod_gone after 82 ticks.
+    BOTH MEMORY REPAIRS VERIFIED ON HARDWARE. Against attempt 4's
+    identical `before`: freed_allocated_bytes 8,101,709,824 vs 0,
+    allocated after 0.008 GiB vs 7.55, free 43.87 GiB vs 36.32,
+    live_retention false vs true. require_headroom passed on 43.87 against
+    the 43.65 requirement -- the figure the repair predicted, to two
+    decimals -- so the 41.65 GiB basis is very nearly exact rather than
+    merely conservative.
+    AND THE FIRST RECOVERY PROBE TRAINED: MARKER:PROBE_TRAINED for
+    rung1.cca699c93f34.sa after 61.7 min against the 61.55 min the budget
+    is priced from, confirming the pricing basis on hardware.
+    FAILED at stage 2 AFTER that training, reading the probe's checkpoint:
+    the driver reads out_dir/latest.txt and out_dir/<tag>/model, while the
+    trainer writes out_dir/checkpoints/latest.txt and
+    checkpoints/<tag>/model. train_stage3.py's resume path reads it
+    correctly -- one writer, two consumers, one wrong, on a line only a
+    completed 62-minute probe can reach. The probe's own artifacts were
+    lost with the pod: the fetch spec collects finalists, and a
+    trained-but-unscored probe is not one.
+recovery continuation attempt 4 (L40S, 24.9 min) STAGES 0-1   $  0.4112
+    AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1454Z
+    (sha256 874d54f6) against
+    logs/autoinit_recovery_continuation_attempt4_grant.json.
+    Base 38db4f2, session commit ef4353c, harness 162c09ed over 22 files --
+    unchanged from attempt 3, since the portability repair touched files
+    outside the set. Ceiling $16.7456, of which $0.4112 was spent. Pod
+    k1mgu38q0y6sei; provider confirms gone; watchdog ended pod_gone after
+    26 ticks.
+    THE PORTABILITY REPAIR WORKED: setup passed for the first time in any
+    continuation, and the driver started confirmed by descriptor probe.
+    STAGE 0 AND STAGE 1 PASSED ON HARDWARE. Stage 0 attested interval
+    0.011695, floor 0.3000, plan 02be33b9. Stage 1 imported the five
+    Attempt-12 leaves in frozen selected order, RE-IDENTIFIED FROM THE POD
+    BYTES against the Stage-1 artifact and shard digests (config
+    567d32789ba6), and measured the canonical control once on state_eval@v1
+    over 74022 positions (artifact_digest dc9500d3). No search ran.
+    FAILED at stage 2, first rung-1 probe, on CUDA OOM in kd_forward_kl.
+    Two compounding defects: release_to_subprocess reported
+    freed_allocated_bytes=0 with live_retention=true (7.55 GiB still held
+    after drop+del), and require_headroom demands RECOVERY_TRAINER_BYTES
+    22 GiB + 2 margin = 24.00 against 36.32 free, so it passed -- while the
+    probe actually used 36.30 GiB and OOM'd asking for 298 MiB more.
+    Attempt 12's class: the gate written to stop it, whose message names
+    attempt 12, was calibrated ~14 GiB below the trainer that ran.
+recovery continuation attempt 3 (L40S, 12.2 min) NO STAGE RAN $  0.2011
+    AUTHORIZED 2026-08-22 as autoinit.recovery_continuation.2026-08-22T1311Z
+    (sha256 021d8830) against
+    logs/autoinit_recovery_continuation_attempt3_grant.json.
+    Base 7368568, session commit ad73e05, harness 162c09ed over 22 files.
+    Ceiling $16.7456, of which $0.2011 was spent. Pod ku8vcn5mu8hp9i;
+    provider confirms gone; watchdog ended pod_gone after 13 ticks.
+    THE TRANSPORT CLOSURE WORKED: the pre-provider gate read 25 relay
+    inputs (10 main + 15 transport) and 2 local assets, and the pod
+    reached ASSETS_STAGED, ASSETS_READY and VLLM_READY -- so 5.5513 GiB
+    of Stage-1 leaves were pulled from the transport repo and every
+    declared digest verified. Attempt 2's failure class is closed.
+    FAILED at the setup CPU test gate: publish_selected_leaves.verify()
+    calls tempfile.mkdtemp(dir="/home/ecs-user/aad-scratch"), a dev-box
+    path absent on a pod, so 5 tests raise FileNotFoundError. Reproduced
+    at $0 in a mount namespace -- 5 failed, matching the pod exactly.
+    Attempt 8's class one step out: a $0 test EXECUTING dev-box-only code
+    rather than merely asserting dev-box state.
+recovery continuation attempt 2 (L40S, 14.5 min) NO STAGE RAN $  0.2389
+    AUTHORIZED 2026-08-21 as autoinit.recovery_continuation.2026-08-21T2004Z
+    against logs/autoinit_recovery_continuation_attempt2_grant.json
+    (sha256 a29dac6fd120). Ceiling $16.7456, of which $0.2389 was spent.
+    Pod 7hthdteyc25xgx; provider confirms gone; watchdog ended pod_gone.
+    THE RESILIENCE CLOSURE WORKED: the readiness poll that killed attempt 1
+    succeeded, reaching TCP 22 at 3.7 min, and the image identity was
+    confirmed. Every $0 gate passed and the bundle round-tripped.
+    FAILED at LOCAL_ASSET staging: SessionRunner scps each declared local
+    asset with subprocess.run(..., timeout=600), which RAISES. One stage-1
+    leaf is 1.110 GiB = 1192 MB, so fitting the 600 s timeout needs
+    1.99 MB/s sustained. This session's own bundle upload minutes earlier
+    ran at 0.44 MB/s; the recorded dev-box uplink is 0.72 MB/s. One leaf
+    therefore needs 28-45 min against a 10-minute timeout -- 3-4.5x over.
+    It could not have succeeded, and would have repeated four more times.
+    NO $0 GATE COULD SEE IT: selected_leaves_present_gate asks whether the
+    leaves exist and verify LOCALLY, the structural staging test covers
+    SESSION_RELAY_INPUTS (pulled) not LOCAL_ASSETS (pushed), and the pod
+    simulator never scps. Declared, verified, and undeliverable.
+    BOTH TRANSPORTS ARE CLOSED: scp needs 1.99 MB/s against <=0.72 MB/s;
+    the relay has 1.60 GiB headroom against 5.55 GiB of leaves, which is
+    why --stage-leaves-to-relay is off. The five leaves currently have no
+    route to a pod. Not relaunched: the grant is spent and the arithmetic
+    says a rerun fails identically.
+recovery continuation attempt 1 (L40S, 0.7 min) NO STAGE RAN  $  0.0100
+    AUTHORIZED 2026-08-21 as autoinit.recovery_continuation.2026-08-21T1642Z
+    against logs/experiments/recovery_continuation/autoinit_recovery_continuation_grant.json. Ceiling
+    $16.7456, of which $0.0100 was spent. EVERY pre-provider gate
+    passed; pod dckc72mtoe9ijw was created and then deleted 27 s later
+    when the launcher's readiness poll raised URLError (SSL
+    UNEXPECTED_EOF). Provider confirms gone: True. Nothing billing.
+    NOT a gate failure and NOT a scientific result: no stage ran, no
+    leaf was touched, no science changed. The five preserved stage-1
+    leaves are untouched inputs on the dev box.
+    ROOT CAUSE, measured afterwards at $0: the RunPod GraphQL endpoint
+    was returning transport errors at 5/20 = 25% (SSL EOF, ECONNRESET,
+    RemoteDisconnected). `session_runner.wait_endpoint` calls
+    `provider._gql` DIRECTLY, bypassing `provider.get`, which is the
+    one documented as "Never raises. A watchdog that dies on a
+    transient 502 is not a backstop." That poll makes up to 90 calls;
+    at 25% loss it cannot survive. The 15-hour main poll DOES use
+    `get()` and is not exposed. Relaunching unchanged would repeat.
+    The single-issuance grant is spent, so the fix needs a new grant.
+Phase A attempt 12 (L40S, 229.5 min) STAGE 1 PASSED, KEPT     $  3.7872
+    AUTHORIZED 2026-08-20 as autoinit.phase_a.2026-08-20T1856Z
+    against logs/autoinit_phase_a_attempt12_grant.json (sha256
+    69e8150ea9d4). Ceiling $23.0484, of which $3.7872 was spent.
+      stage 0   PASSED, attested, 1.9 min.
+      stage 1   PASSED, 203.8 min, SEARCH_DONE:5.
+      stage 2   FAILED on CUDA OOM -- NOT the tokenizer, which is
+                closed: training reached a loss computation.
+      stages 3-5  not reached.
+    THE DURABILITY CLOSURE WORKED. All five stage-1 selected leaves
+    transferred to /home/ecs-user/aad-artifacts/autoinit/phase_a/ with
+    digest=MATCHED, AFTER the stage-2 failure -- the exact case that
+    returned early before -- and required_products_secured recorded
+    {ok: true, "all 5 stage-1 selected leaves verified off-pod"}. Each
+    was re-verified independently afterwards from local bytes: 5/5
+    artifact_digest and single_shard_sha256 match the stage-1 record,
+    1.110 GiB each, tokenizer_sha256 None (still weight-only).
+    Attempt 11 produced the SAME five leaves and destroyed all of them.
+    THE SEARCH IS DETERMINISTIC, and this is the second independent
+    paid confirmation: identical config_hash 567d32789ba6dcef,
+    identical 43 states / 7 complete leaves, identical selected state
+    ids in order, and the first depth invocation chose layer 21 with
+    score 0.625600, runner-up 17, margin 1.529e-03 -- byte-identical to
+    attempt 11 on a different host three days earlier. Only wall time
+    differs (203.8 vs 180.3 min), which is host speed.
+    THE OOM, in its own numbers: the driver runs the beam search
+    IN-PROCESS and still holds ~24.05 GiB at the end of stage 1; stage
+    2 spawns train_stage3.py as a SUBPROCESS needing ~17.97 GiB; the
+    L40S has 44.39 GiB and 2.36 GiB was free when cross_entropy asked
+    for 3.58. Structural, not a race: it will recur at the same point
+    on every attempt on this hardware. Same shape as the
+    reference-cache finding -- the search's residency is larger than a
+    standalone measurement of a stage suggests.
+    Pod deleted, provider confirms gone at 229.5 min against a 1397-min
+    bound. manifest rc=0, 14 files, 7 classes. No launcher error.
+    AUTHORIZATION AND GRANT CONSUMED. NO ATTEMPT 13 IS PREPARED,
+    GRANTED, FUNDED OR IMPLIED.
+    Evidence: logs/autoinit_phase_a_attempt12/
+Phase A attempt 11 (L40S, 194.6 min) STAGE 1 PASSED             $  3.2101
+    AUTHORIZED 2026-08-20 as autoinit.phase_a.2026-08-20T0940Z
+    against logs/autoinit_phase_a_attempt11_grant.json (sha256
+    6a6251f7a534). Ceiling $23.0484, of which $3.2101 was spent.
+    THE BEAM SEARCH RAN TO COMPLETION FOR THE FIRST TIME.
+      stage 0   PASSED, attested, 2.0 min.
+      stage 1   PASSED, 180.3 min. 43 states, 4 levels, 7 complete
+                leaves, 18 pruned. Five leaves selected, each
+                596,049,920 parameters, each a distinct four-operator
+                composition. Control injected and frozen-hash verified.
+                THE EXISTING COMPOSITE_STAGE1 RECIPE LANDS ON FRONT 4
+                AND IS NOT SELECTED -- four search-discovered orderings
+                dominate it. First evidence that operator ORDERING
+                carries signal, which is the question Phase A exists
+                to ask.
+      stage 2   FAILED CLOSED on the first rung-1 probe:
+                "teacher and student tokenizers differ; refusing to
+                train". Diagnosed and REPRODUCED at $0:
+                Qwen3Adapter.save() calls save_pretrained(), which
+                writes weights and config and NO tokenizer files;
+                AutoTokenizer.from_pretrained() on such a directory
+                does NOT raise -- it returns a ONE-TOKEN vocabulary.
+                The guard caught it. Without the guard the probe would
+                have trained against a 1-token tokenizer and produced
+                numbers. The canonical init's own tokenizer is fine and
+                hashes identically to the teacher's; what is missing is
+                any step carrying those files into a SEARCHED leaf.
+                The control_sb class again (2026-08-16): identity gates
+                pass while the checkpoint cannot be used, because the
+                gates check what the PRODUCER needs.
+      stages 3-5  not reached.
+    THE REFERENCE CACHE FELL BACK ALL FOUR TIMES. 16.9 GiB does not fit
+    in 66% of the 20.3 GiB free INSIDE the search; the measurement saw
+    36.42 GiB free standalone. Four causal-depth invocations, each a
+    full 260 evals: 37.3 / 27.0 / 33.7 / 24.1 min = 122.1 min, 68% of
+    the search, at 6.96-10.79 eval/min against the standalone 12.07.
+    The measurement was not wrong; it measured a different memory
+    regime, and the cached path may never be reachable inside the
+    search at this teacher size.
+    THE DEADLINE FIX WAS LOAD-BEARING BY 17 SECONDS. Stage 1 took
+    180.283 min against the old 180.0000 base bound it would have been
+    killed at, and 363.9841 as derived in 16e382f. That commit is the
+    only reason this search produced a result.
+    Pod deleted by the launcher, provider confirms gone at 194.5 min
+    against a 1397-min bound. manifest rc=0, 13 files, 7 classes.
+    LEAF WEIGHTS ARE GONE: finalists are fetched after stage-5
+    selection, which never ran, so the five checkpoints died with the
+    pod. The RECORD survives; regenerating the weights costs another
+    ~180 min of search.
+    AUTHORIZATION AND GRANT CONSUMED: one launch, spent, not reusable.
+    NO ATTEMPT 12 IS PREPARED, GRANTED, FUNDED OR IMPLIED.
+    Evidence: logs/autoinit_phase_a_attempt11/
+Bounded measurement attempt 3 (L40S, 12.6 min) **COMPLETE**    $  0.2077
+    AUTHORIZED 2026-08-20 as autoinit.measurement.2026-08-20T0512Z
+    against logs/experiments/measurement/autoinit_measurement_grant3.json (sha256 2124eaef0fc5).
+    A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
+    Phase-A attempt; hard ceiling $1.6294, plan's own hard stop
+    $0.8910, of which $0.2077 was spent. ALL_DONE, passed=true,
+    manifest rc=0, teardown on the NORMAL gate, pod fsk7tz1rnx43xr
+    deleted with provider confirmation. No launcher error.
+    THE MEASUREMENT RAN AND ANSWERED EVERY QUESTION IT WAS SET.
+      rate            12.07 weighted evaluations/min against E8a's
+                      frozen 12.0/min anchor -- +0.6%. The 260-eval
+                      schedule prices at 21.53 min vs E8a's 21.7.
+                      Attempt 10's host path needed >= 647 min for ONE
+                      expansion and never finished: >= 30x slower.
+      backend         max AND mean per-item KL delta EXACTLY 0.0 at
+                      both |skip|=1 and |skip|=8. Not below a
+                      threshold -- identically zero.
+      aggregation     0.0228 and 0.0340 apart, which is the DECLARED
+                      position-weighted vs unweighted-mean difference
+                      (predicted ~0.027), not drift. It is ~300x the
+                      8.195e-05 decision margin, which is exactly why
+                      the contract compares per item.
+      VRAM            production peak 26.82 GiB (the Phase-A number),
+                      comparison peak 10.45 GiB, on a 44.39 GiB L40S:
+                      17.57 GiB headroom. The dual-cache repair holds.
+      cache           CACHED at the frozen mixture. 16.913 GiB estimate
+                      against 36.42 GiB available at fraction 0.66,
+                      headroom read from cuda.mem_get_info. No
+                      fallback; the priced basis stands.
+      GPU             mean 98.3%, median 98%, min 94, max 100 over 221
+                      nvidia-smi samples. ZERO samples below 10%.
+                      Attempt 10 sat at 0-1% for 11 hours. The .cpu()
+                      diagnosis is confirmed on hardware.
+      cgroup          visible_cpus 128, torch threads 128 -> 13 from
+                      cgroup.v2. The container reported CPUs it did
+                      not have and the driver corrected for it.
+    THESE VALUES AUTHORIZE NOTHING. They are inputs to a repricing and
+    a SEPARATE cumulative-budget decision. No Phase-A attempt 11 is
+    prepared, granted, funded or implied.
+    AUTHORIZATION AND GRANT CONSUMED: one launch, spent, not reusable.
+    Evidence: logs/autoinit_measurement_attempt3/
+Bounded measurement attempt 2 (L40S, 11.1 min) ENTRYPOINT      $  0.1834
+    AUTHORIZED 2026-08-19 as autoinit.measurement.2026-08-19T1738Z
+    against logs/experiments/measurement/autoinit_measurement_grant2.json (sha256 82f5104d49e4).
+    A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
+    Phase-A attempt; hard ceiling $1.6294, of which $0.1834 was spent.
+    NO MEASUREMENT RAN. SETUP PASSED END TO END -- SETUP_RC=0, all
+    eleven markers, both frozen assets staged and verified, in 6.5 min.
+    The attempt-1 setup-contract repair HELD on hardware.
+    The driver then exited 1 in the first statement of main() that
+    touches the repository:
+      ImportError: cannot import name 'as_operator_items' from
+                   'aadistill.autoinit.datasets'
+    It lives in scripts/autoinit/phase_a_search.py and always has.
+    WHY $0 COULD NOT SEE IT: 22 tests covered this job and every one
+    called run_measurement / skip_set / GpuSampler / the stop conditions
+    DIRECTLY. None called main(), so the entire production entrypoint --
+    argument defaults, pinned revision, model loading, calibration
+    resolution, identity assembly, report, stop conditions, artifact
+    write -- was reachable only from a paid pod. The tested surface and
+    the executed surface were different surfaces.
+    REPAIRED at $0: run_entrypoint(args, *, hardware, teacher_loader,
+    calibration, ...) holds all of it and main() is three lines, so the
+    CPU test drives the production path with a toy loader rather than a
+    parallel imitation of it. No second main(). Mutation-verified:
+    restoring the bad import fails 1; bypassing the seam fails 1;
+    moving the unpinned-revision guard after loading fails 2.
+    A FIFTH MUTATION PASSED and exposed a real hole: load_teacher is the
+    one function the seam injects past, so dropping revision= from
+    from_pretrained -- measuring against whatever the Hub published that
+    morning -- was invisible. Now covered by a stubbed from_pretrained.
+    SECOND DEFECT, $0.0034 of the above: the launcher then raised
+    ArtifactError because the emergency teardown demanded this session
+    name the event streams it was truncating. It declares NONE by
+    design; quiescence failed because a final_required artifact was
+    MISSING, not because a producer was mid-write.
+    evaluate_teardown now takes streams_at_risk (the manifest's own
+    completion_marker_failures + still_being_written) and requires
+    naming only when there is something to name. streams_at_risk=None
+    keeps the strict rule, so FAIL-CLOSED BEHAVIOUR FOR TRAINING
+    SESSIONS WITH INCOMPLETE EVENT STREAMS IS UNCHANGED.
+    Pod deleted by the launcher, provider confirms gone at 11.1 min
+    against a 54-min hard bound.
+    AUTHORIZATION AND GRANT CONSUMED: one launch, spent, not reusable.
+    NO ATTEMPT 3 IS PREPARED OR AUTHORIZED.
+    Evidence: logs/autoinit_measurement_attempt2/
+Bounded measurement attempt 1 (L40S, 4.0 min) SETUP CONTRACT   $  0.0700
+    AUTHORIZED 2026-08-19 as autoinit.measurement.2026-08-19T1142Z
+    against logs/experiments/measurement/autoinit_measurement_grant.json (sha256 ec73be8c1962).
+    A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
+    Phase-A attempt; hard ceiling $1.6294, of which $0.07 was spent.
+    NO MEASUREMENT RAN. Setup refused at the frozen-asset gate
+    (SETUP_RC=91, MARKER:FROZEN_ASSETS_FAILED) before the teacher
+    download and before any evaluation:
+      "state_eval_v1: artifacts/stage1/state_eval_v1 is absent"
+    The session declared LOCAL_ASSETS = () because it reads only the
+    calibration and the teacher, both from the relay. True, and beside
+    the point: autoinit_preflight_setup.sh runs verify_frozen_assets.py
+    UNCONDITIONALLY, and that verifier checks both frozen roots whatever
+    the session is doing. What binds is what the SETUP REQUIRES, not
+    what the session reads.
+    THE DEVICE-CANARY RETRY AGAIN, sixteen days later: that session also
+    declared LOCAL_ASSETS = (), also for a true reason, and also died in
+    setup ($0.0637). The 2026-08-18 fix stopped the setup COPYING
+    undeclared assets -- correct, and it held here -- but nothing told a
+    session which assets it MUST declare.
+    REPAIRED at $0: tests/pod/test_session_setup_contract.py asserts
+    verifier_required_local_roots is a subset of every session's
+    installed local roots, comparing DECLARATIONS not filesystem
+    presence, with the requirement DERIVED from verify_frozen_assets
+    .FROZEN rather than transcribed -- so a third frozen root added to
+    the verifier and to no session fails at $0. Mutation-verified.
+    The device canary's declaration was ALSO still wrong and is
+    corrected; that is not reviving it.
+    Pod deleted by the launcher, provider confirms gone. Failed closed.
+    AUTHORIZATION AND GRANT CONSUMED: one launch, spent, not reusable.
+    Evidence: logs/autoinit_measurement_attempt1/
+Phase A attempt 10 (L40S, 692.5 min) INCOMPLETE, RUNTIME COST  $ 11.4300
+    AUTHORIZED 2026-08-18 as autoinit.phase_a.2026-08-18T1746Z against
+    logs/autoinit_phase_a_attempt10_grant.json (sha256 3ef080d91d58).
+    NOT A SCIENTIFIC RESULT AND NOT A STAGE-1 SELECTION RESULT.
+    Setup and Stage 0 passed; Stage 0 attested interval 0.011695,
+    floor 0.3000, plan 02be33b9. THE THREE STAGE-1 DEVICE FIXES HELD --
+    stream_projection ran on CUDA and the composite expansion below it
+    completed, so the attempt-9 defect did not recur.
+    Stage 1 then entered its THIRD operator expansion,
+    depth.causal_kl_greedy_v1 (third in deterministic registry order;
+    the two written states are exactly the first two), and was still
+    inside it 10 h 47 m later with the L40S at 0-1% utilisation and 192
+    driver threads saturating a 13-vCPU cgroup.
+    THE COST, IN THE OPERATOR'S OWN NUMBERS: greedy_removal(36, 8) is
+    260 evaluations x 67 calibration items = 17,420 forward+distortion
+    pairs. Each copies the logits device->host (_forward_logits returns
+    .cpu(), targets are .cpu()) and runs a full 151,936-vocabulary
+    softmax/KL on the CPU: ~0.33 TiB of CPU traffic per evaluation,
+    ~86 TiB over the expansion, ~8.6 TiB copied off the device. The
+    transfer is deliberate and documented; the CPU cost of the reduction
+    was never priced.
+    MEASURED VS PRICED: --search-minutes 180.0 priced the WHOLE beam
+    search at 3.0 h. This ONE expansion ran 10.78 h without finishing --
+    at least 3.6x the entire search budget, and a lower bound.
+    NOTHING ENFORCED IT: --search-minutes feeds only an affordability
+    check before the search starts (driver:433); search.py records
+    elapsed but never checks a deadline, and _expand_one has no clock.
+    The only backstop was the watchdog at the full $23.05 ceiling.
+    Stopped on maintainer instruction at 05:18 UTC via the supported
+    path -- the driver was stopped, the launcher's poll broke on
+    DRIVER_EXITED:143 and ran its normal collect_and_teardown. Manifest
+    rc=0, 9 files, gate allowed, pod deleted, provider confirms gone.
+    The pod was NOT repaired.
+    How far through the 260 evaluations it got is UNKNOWN: greedy_removal
+    journals only on completion, so the run emitted no external progress
+    signal. The two states' weights were not in the failed-artifact spec
+    and are gone; their specs and hashes survive.
+    Evidence: logs/autoinit_phase_a_attempt10/
+Phase A attempt 9 (L40S, 20.4 min) STAGE 0 PASSED, STAGE 1 FAILED $  0.3400
+    AUTHORIZED 2026-08-18 by an explicit maintainer GO, issued against
+    logs/autoinit_phase_a_attempt9_grant.json (sha256 7b62b5c516be) as
+    autoinit.phase_a.2026-08-18T1512Z.
+    THE ATTEMPT-8 FIX HELD: setup reached SETUP_DONE in 7.4 min and the
+    blocking test gate PASSED -- the same tests/docs suite that failed
+    attempt 8. That question is closed.
+    STAGE 0 PASSED and attested, the second time on hardware:
+      evaluation_protocol 250f72ef  comparable_identity 70a26e0b
+      science_plan 02be33b9         source_digest a1b51736
+    all three frozen identities matched under comparability v2. This host
+    drew driver 580.159.03 -- the same as Stage 3 and attempt 5 -- so as
+    on attempt 5 it does not by itself discriminate v2 from v1.
+    STAGE 1 FAILED, and the traceback CAME HOME:
+      RuntimeError: Expected all tensors to be on the same device, but
+      found at least two devices, cuda:0 and cpu!
+      src/aadistill/init/project.py:60  avg += w * (m / m.trace())
+    project.py:57 allocates `avg` with a dtype and NO device, so it lands
+    on CPU, while uncentered_moment() follows `state` -- CPU on the dev
+    box, cuda:0 on a pod. A CPU rehearsal cannot see it: both operands
+    agree there and the arithmetic is correct.
+    THIRD Stage-1 device-placement defect: attempt 6 ($0.3552) the
+    _validate probe, attempt 7 ($0.3955) the ActivationStatsCollector
+    accumulators, now this. autoinit.stage1_device_contract@v1 closed the
+    first two and did not reach a freshly-allocated accumulator two call
+    levels below the operator. Three for three, every one is a tensor
+    allocated without a device in a path only a GPU executes.
+    Nothing trained; no checkpoint, probe or search leaf produced. The
+    permanent controls are inputs here and were untouched. Manifest rc=0,
+    10 files, teardown gate allowed; pod deleted, provider confirms gone.
+    Watchdog's last tick read $0.3498 at 21.2 min, which counts until it
+    noticed the pod was already gone; the pod's own 20.4 min lifetime at
+    $0.99/h is $0.3366 -> $0.34 carried.
+    Failed closed; STOPPED FOR REVIEW. Grant spent; no attempt 10.
+    Evidence: logs/autoinit_phase_a_attempt9/
+Phase A attempt 8 (L40S, 11.28 min) SETUP TEST GATE FAILED   $  0.1900
+    AUTHORIZED 2026-08-18 by an explicit maintainer GO, issued
+    against the one-use grant logs/autoinit_phase_a_attempt8_grant.json
+    (sha256 09541ef547c6) as authorization
+    autoinit.phase_a.2026-08-18T1244Z. The device-canary condition
+    that had gated attempt 8 was superseded by that decision: the
+    canary path is TERMINATED and was not revived.
+    NO STAGE RAN. Nothing trained, measured, or written to the relay.
+    Setup reached ROPE_OK -- eight markers in -- so the new
+    manifest-driven relay staging, the pod-side frozen-asset gate and
+    the staged checkpoint all worked on hardware for the first time.
+    It then failed the blocking CPU test gate: 2 failed, 1789 passed,
+    63 skipped. Both failures are dev-box-environment tests that
+    cannot pass in a container, and both were added by the 2026-08-18
+    inventory/cleanup work, not by the relay-staging fix:
+      test_every_path_named_in_the_repo_layout_exists -- REPO_LAYOUT.md
+        names /home/ecs-user/aad-artifacts/ and /home/ecs-user/aad-scratch/,
+        and `REPO / ref` discards the base for an absolute operand, so
+        the test reads the host filesystem. A pod has neither (69b2e74).
+      test_no_tombstoned_path_is_still_on_disk -- the tombstone
+        stage3_ladder_uniform_local_cache names artifacts/stage3/
+        ladder_uniform, which the pod's setup STAGES as the recovery
+        pack's mirror. Same shape as the podsim tombstone dded03e
+        itself withdrew (dded03e).
+    The pod simulator could not catch either: it cannot unmake an
+    out-of-tree path, and for the tombstone it produces the OPPOSITE
+    of the pod's state -- it HIDES that gitignored directory, so the
+    assertion passes for the wrong reason.
+    Pod 2maapdxqg566r5 deleted by the launcher, provider confirms gone.
+    Watchdog accrued $0.1833 at its last tick; the launcher's rounded
+    $0.19 is carried, per the higher-figure rule above.
+    Failed closed as instructed; STOPPED FOR REVIEW. The grant covered
+    one launch and is SPENT. No retry was attempted and no attempt 9
+    is authorized, funded, prepared or implied.
+    Evidence: logs/autoinit_phase_a_attempt8/
+unused authorization remaining                               $ 20.5286
+    = $234.00 - $213.4714. NOT enough for another full Phase-A attempt
+    at the $23.0484 per-launch ceiling -- it is $2.5198 short. The cap
+    funded one attempt, that attempt has run, and the approval says it
+    does not authorize Attempt 13.
+    (superseded: $24.3158 before attempt 12) RAISED AND APPROVED 2026-08-21 from
+    $231.00. Enough for one full-ceiling Phase-A attempt ($23.0484)
+    with $1.2674 of margin -- and for nothing after it. The approval
+    says in terms that it is "only the project ceiling", that the
+    per-launch ceiling is unchanged, and that no Attempt 12 launch is
+    authorized yet. Attempt 12 still requires its own one-use grant and
+    authorization; a $234.00 cap does not authorize an Attempt 13.
+    (superseded arithmetic, kept for the audit trail: This is NOT enough for another full Phase-A
+    attempt at the $23.0484 per-launch ceiling -- it is $1.7326 short.
+    RECOMMENDED AND NOT APPROVED (2026-08-20): raise the cumulative
+    project cap to $234.00. One further full-ceiling launch would reach
+    $209.6842 + $23.0484 = $232.7326, so $234.00 leaves $1.2674 of
+    margin. That is a PROJECT-LEVEL CEILING recommendation only: the
+    Phase-A per-launch hard ceiling stays $23.0484, a future Attempt 12
+    still requires a new explicit one-use grant and authorization, and
+    a $234.00 cap does NOT authorize an Attempt 13. Until it is
+    approved in the imperative, no Phase-A attempt may be prepared.
+    The 2026-08-20 raise funded ONE attempt, that attempt has run, and
+    the maintainer's approval says in terms that it "does not authorize
+    any subsequent attempt".
+    UNUSED BALANCE IS STILL NOT AUTHORIZATION. The cap makes Attempt 11
+    affordable; the GRANT and the AUTHORIZATION are what make it
+    permitted, and both are one-use. After Attempt 11 the remaining
+    figure MUST NOT be read as funding an Attempt 12: the maintainer's
+    approval says the raise "does not authorize any subsequent attempt".
+    Nothing below is a standing permission to spend; each line is a
+    consumed or lapsed commitment kept for arithmetic.
+    Previously committed against it:
+      device canary hard                                       $  1.0197
+        SPENT $0.1240 across two sessions, NEITHER of which ran
+        the canary script: attempt 1 died on the launcher's
+        argument contract, the retry on the shared setup's asset
+        contract. Both grants are consumed and the retry was
+        explicitly the only one authorized. NOT canary results.
+      Attempt 8 hard, CONDITIONAL on the canary passing        $ 23.0484
+        The canary has not run, so Attempt 8 is not authorized.
+      remaining after a canary retry and Attempt 8             $  0.9426
+    Attempt 7's authorization
+    `autoinit.phase_a.2026-08-17T0850Z` covered exactly ONE
+    launcher invocation, is SPENT, and its lineage gate refuses
+    every later commit by construction. No attempt 8 is
+    authorized, funded, prepared or implied.
+--- the attempt-7 grant, now spent -------------------------------------------
+Phase A attempt-7 per-launch hard authorization              $ 23.0484
+cumulative-cap margin at the full hard bound                 $  0.4181
+    ATTEMPT 7 WAS AUTHORIZED (2026-08-17), under the EXISTING
+    $217.00 cap. The cap is NOT raised. The authorization covers
+    exactly one Phase-A launcher invocation and does not authorize
+    attempt 8, any increase above $217.00, or any change to the
+    frozen search, recovery, seeds, thresholds,
+    runtime-comparability rules, or the science/session plans.
+    The attempt-6 authorization `autoinit.phase_a.2026-08-16T1912Z`
+    is SPENT; its lineage gate refuses every later commit by
+    construction, so attempt 7 runs under a freshly issued one.
+paid compute currently running                                NONE
+    attempt 6 pod wgm2tamw8nu9f5 and attempt 7 pod n2kfqhyoya4zzj
+    both deleted; provider confirms gone for both
+
+    SUPERSEDED Phase-A pricing, kept because a threshold that
+    moved silently is how E6b overran:
+      $20.0126 hard  no fallback reserve, no beam-6 correction
+      $22.4508 hard  fallback reserve placed AFTER the soft stop.
+                     Wrong: the fallback is consumed inside
+                     stage 1, and `afford()` gates on the SOFT
+                     stop, so it would have truncated the
+                     conditional seed-sc rung to pay for an
+                     infrastructure risk.
+      $23.0483 hard  CURRENT. Both reserves before the soft stop:
+                     +147.7683 min reference-cache fallback and
+                     +36.2158 min beam-6 search correction, on a
+                     $17.8933 expected and a $22.7183 soft stop,
+                     plus the 20-minute artifact-recovery reserve.
+                     Authorization cap is the 4-dp ceiling,
+                     $23.0484. Derivation in
+                     `autoinit_phase_a_fallback_audit.json`.
+GRANTED Phase-A authorization, 2026-08-15T12:32:08Z          $ 20.0126
+    `autoinit.phase_a.2026-08-15T1232Z`, sha256 14360ef4…
+    expected $17.8933 ($14.3604 if it resolves after two
+    seeds); per-launch hard equals the cap because this is
+    ONE session. Bound to session plan 9377a2dc…, science
+    plan 02be33b9…, harness digest ea2f360b… and commit
+    9b05a058…. Stages 0-5. Nothing spent against it.
+
+    **ISSUED IS NOT LAUNCHED.** The artifact authorizes the
+    spend and the stages; the maintainer's instruction that
+    requested it also says "Do not launch Phase A yet", so
+    the run waits for a separate explicit go.
+continuation spent across eight attempts                     $  4.1060
+    0.6312 + 0.6367 + 0.0700 + 1.3672 + 0.1369 + 0.1324 + 0.4500
+    + 0.6816.  STAGE 3 IS COMPLETE: attempt 8 returned ALL_DONE,
+    characterized both controls and materialized the thresholds.
+GRANTED cumulative continuation authorization                $  4.54
+    expected $4.23. BOTH issued artifacts are now CONSUMED, each
+    having been granted for ONE launcher invocation:
+      e4854818…  attempt 5, INCOMPLETE, $0.1369
+      f21b4038…  attempt 6, INCOMPLETE, $0.1324
+
+    expected $4.10, granted by the maintainer 2026-08-15.
+    = $2.7051 spent + one newly-priced hard attempt ($1.6896).
+    PER-LAUNCH HARD LIMIT                                    $  1.6896
+    Named by the maintainer and now ENFORCED in code
+    (`SpendAuthorization.per_launch_hard_usd`, checked in
+    `make_plan` before a pod can be created). Previously only
+    the plan's own arithmetic self-limited, so the cumulative
+    figure was reachable by a single run.
+    The re-priced plan is expected 84.0 min / $1.3860, soft
+    $1.5246, hard $1.6896 — the limit binds exactly.
+    The earlier artifact `759eaf8c…` asserted these amounts
+    BEFORE the approval existed. It is void and must not be
+    reused; no pod was created under it.
+micro-preflight spent of its $8.60 authorization             $  6.7369
+micro-preflight remaining under that authorization           $  1.8631
+    LESS THAN A SESSION COSTS (~$3.2). Nothing further is
+    launched without a new increment.
+of which was earmarked for E8b completion                    $ 30.36
+paid compute currently running                                NONE
+```
+
+**E8b is strategically terminated, so its earmark is released.** The $30.37 of unused
+authorization is not committed to anything. No completion budget for E8b was requested
+and none should be.
+
+**No paid compute is running.** Verified by provider query: zero live pods.
+
+## 2026-08-27 — cumulative cap raised to $256.84 for ONE Phase-B execution
+
+```
+previous cumulative actual spend                             $230.0350
+previous authorized cumulative cap                           $234.00
+NEW authorized cumulative cap                                $256.8400
+newly approved headroom                                      $ 26.8050
+Phase-B SINGLE-SESSION hard ceiling                          $ 26.8049
+Phase-B planning floor (NOT an expected spend)               $ 13.0800
+```
+
+**APPROVED by the maintainer**, in their own words: "Increase the
+AlphaAvatar-distill cumulative budget cap from **$234.00 to $256.84**." The
+reviewer's verdict on the same message: Phase-B science GO, Phase-B
+implementation/readiness GO, cumulative increase APPROVED, and one Phase-B paid
+execution authorized to prepare and launch subject to the frozen fail-closed
+gates.
+
+**The $0.0001 difference is deliberate.** `$256.8400 - $230.0350 = $26.8050`,
+while the frozen single-session ceiling is `$26.8049`. The rounding margin
+belongs to the **cumulative** cap; it does not enlarge the session ceiling, and
+`PhaseBAuthorization.require_within_cap` is issued against `$26.8049`.
+
+**`$13.0800` is a planning floor, not an expected spend.** No expected-value
+assumption over survivor identity or tie-break probability is defined anywhere.
+
+**Unused headroom is not authorization.** Whatever Phase B does not spend funds
+nothing else; a later experiment needs its own maintainer decision.
+
+## 2026-08-26 — Phase-B attempt 1: $0.1500, aborted at setup
+
+```
+cumulative spend before                                      $230.0350
+Phase-B attempt 1 (pod 4dbqycjrivhq17, 8.8 min, L40S)        $  0.1500
+cumulative spend after                                       $230.1850
+authorized cumulative cap                                    $256.8400
+remaining headroom                                           $ 26.6550
+```
+
+Aborted at the pod-side setup test gate; **no scientific stage ran**. The pod was
+deleted and the provider confirms it is gone. The one-use authorization
+`autoinit.phase_b.20260826T053826Z` is **consumed**; a retry needs a new grant.
+
+## 2026-08-27 — cumulative cap raised to $256.99 to RESTORE the retry envelope
+
+```
+cumulative spend                                             $230.1850
+previous authorized cumulative cap                           $256.8400
+NEW authorized cumulative cap                                $256.9900
+remaining headroom                                           $ 26.8050
+Phase-B retry single-session hard ceiling  (UNCHANGED)       $ 26.8049
+planning floor, not an expectation         (UNCHANGED)       $ 13.0800
+```
+
+Maintainer approval, 2026-08-27: "raise the cumulative budget cap from **$256.84
+to $256.99**. Keep the frozen Phase-B retry single-session hard ceiling unchanged
+at **$26.8049**. The extra `$0.15` only restores the original full retry envelope
+after Attempt 1 spent `$0.15`; do not use it to enlarge the session ceiling or
+fund later work."
+
+**This is a restoration, not an increase in scope.** Attempt 1 spent `$0.1500`
+without entering a scientific stage, which left `$26.6550` of headroom against a
+`$26.8049` session ceiling — arithmetically short of the run it authorized. The
+`$0.15` puts the retry back where it started; the ceiling and the floor did not
+move, and the `$0.0001` difference remains cumulative rounding margin.
+
+Grant document: `autoinit_phase_b_grant_retry.json`. **Unused headroom is not
+authorization** — whatever the retry does not spend funds nothing else.
+
+## 2026-08-27 — Phase-B attempt 2: $0.2300, aborted at the authorization gate
+
+```
+cumulative spend before                                      $230.1850
+Phase-B attempt 2 (pod xgca8kkv4pm68n, 13.9 min, L40S)       $  0.2300
+cumulative spend after                                       $230.4150
+authorized cumulative cap                                    $256.9900
+remaining headroom                                           $ 26.5750
+Phase-B single-session hard ceiling                          $ 26.8049
+```
+
+The pod's **test gate passed** — the attempt-1 defect is fixed — and setup then
+failed one step later at `AUTHORIZATION_MISMATCH` (`SETUP_RC=98`): the shared
+setup script has no `SESSION_KIND=phase_b` branch, so it loaded a
+`PhaseBAuthorization` with `SpendAuthorization.load`. **No scientific stage ran.**
+The pod was deleted and the provider confirms it is gone. The one-use
+authorization `autoinit.phase_b.20260826T101431Z` is **consumed**.
+
+**Headroom `$26.5750` is now BELOW the `$26.8049` session ceiling**, so a third
+attempt is arithmetically blocked without a new maintainer cap decision. Phase-B
+setup attempts have cost **$0.3800** in total and produced no scientific evidence.
+
+## 2026-08-27 — cumulative cap raised to $257.22, replacing attempt 2's setup cost
+
+```
+cumulative spend                                             $230.4150
+previous authorized cumulative cap                           $256.9900
+NEW authorized cumulative cap                                $257.2200
+remaining headroom                                           $ 26.8050
+Phase-B retry single-session hard ceiling  (UNCHANGED)       $ 26.8049
+planning floor, not an expectation         (UNCHANGED)       $ 13.0800
+```
+
+Reviewer/maintainer approval, 2026-08-27: "cumulative cap: raise from **$256.99 to
+$257.22**; Phase-B retry single-session ceiling: **unchanged at $26.8049**. The
+extra `$0.23` only replaces the setup cost already lost in Attempt 2. It does not
+increase the retry's per-session scientific budget or authorize later work."
+
+**Second replacement of the same kind.** The cap has moved twice — `$256.84` →
+`$256.99` after attempt 1's `$0.1500`, then → `$257.22` after attempt 2's
+`$0.2300` — each time restoring headroom to `$26.8050` against an unmoved
+`$26.8049` ceiling. Phase-B setup attempts have now cost **$0.3800** and produced
+**no scientific evidence**; attempts 1 and 2 must not enter the Phase-B scientific
+evidence set.
+
+Grant document: `autoinit_phase_b_grant_attempt3.json`. **Unused headroom is not
+authorization.**
+
+## 2026-08-27 — Phase-B attempt 3: $9.5000, Stage 0 passed, Stage 1 ran out of time
+
+```
+cumulative spend before                                      $230.4150
+Phase-B attempt 3 (pod wkausr939ts7vv, 575.9 min, L40S)      $  9.5000
+cumulative spend after                                       $239.9150
+authorized cumulative cap                                    $257.2200
+remaining headroom                                           $ 17.3050
+Phase-B single-session hard ceiling                          $ 26.8049
+```
+
+The first attempt to enter the science. **Stage 0 passed** — comparability held,
+so all historical reuse was preserved — and **Stage 1 hit its 544 min search
+deadline** and stopped fail-closed rather than running to the `$23.72` cost
+backstop. No Top-5, no rungs, no selection: **EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT**. The pod was deleted
+and the provider confirms it is gone. The one-use authorization
+`autoinit.phase_b.20260826T164611Z` is **consumed**.
+
+**The cost model was wrong at the top of its own range.** The P=2 search was
+priced at 1.91–7.51 h; it ran 9.08 h without finishing. `depth.causal_kl_greedy_v1`
+alone took **388.2 min, 71.3% of the search**, across 12 expansions averaging
+**32.3 min** each. Repricing needs the measured figure, and that is a reviewer
+decision.
+
+Phase-B attempts have now cost **$9.8800** in total, of which `$0.3800` was setup
+failure. Headroom `$17.3050` is below the `$26.8049` ceiling, so a fourth attempt
+is arithmetically blocked without a new maintainer decision.
+
+## 2026-08-27 — pricing closure: composite, shared statistics, materialization
+
+**No spend.** The ceiling below supersedes the `$35.7775` figure recorded earlier
+the same day, which was arithmetically close but not faithful.
+
+```
+search planning range (P=2)                       $ 5.2705 - $ 9.5066
+search HARD bound  (16.461 h, 987.635 min)                  $16.2960
+ten priced probes @ $1.637                                  $16.3700
+setup reserve                                               $ 3.0000
+------------------------------------------------------------------
+DERIVED session hard ceiling                                $35.6660
+session floor (was $13.0800), NOT an expectation            $16.4555
+plan hard terminate / soft stop                   $31.7769 / $31.4469
+------------------------------------------------------------------
+implied cumulative cap at $239.9150 spent                  $275.5810
+```
+
+**Three accounting corrections, and two of them were cancelling.**
+`composite.stage1_sandwich_v0` reached the branching counts and was priced at
+zero, while FFN/WIDTH statistics were charged per operator instead of once per
+`(parent, profile)`. Fixing only one would have moved the total the wrong way.
+Third, the non-FLOP path — save, hash, canonical reload, validate — is now
+charged explicitly, because the `88.83 TFLOP/s` anchor was measured on forward
+compute and never covered checkpoint I/O.
+
+**The root cannot share statistics** and is now priced accordingly: `_stats_key`
+returns `None` for a parent with no artifact digest, so level 0 pays **six**
+collections where a level-1 parent pays two.
+
+The net effect on the bound is small — 994.4 -> 987.6 min — and that is the point:
+the composition is now faithful rather than coincidentally close.
+
+## 2026-08-27 — (superseded) first re-derivation: $35.7775
+
+**No spend. This is a pricing correction, not a transaction.** Cumulative spend
+is unchanged at **$239.9150** against the approved **$257.22** cap.
+
+```
+search planning range (P=2)                       $ 1.8950 - $ 8.0213
+search HARD bound  (16.573 h, 994.395 min)                  $16.4075
+ten priced probes @ $1.637                                  $16.3700
+setup reserve                                               $ 3.0000
+------------------------------------------------------------------
+DERIVED session hard ceiling                                $35.7775
+session floor, unchanged, NOT an expectation                $13.0800
+plan hard terminate / soft stop                   $31.8995 / $31.5695
+------------------------------------------------------------------
+implied cumulative cap at $239.9150 spent                  $275.6925
+```
+
+**Why the old number was wrong.** `$26.8049` rested on a P=2 search priced at
+1.91-7.51 h. That range assumed the intact causal-depth reference was computed
+**once** and cached; attempt 3 recomputed it **per candidate**, ran 9.08 h — above
+the whole old range — and did not finish. The corrected model prices all three
+reference modes and bounds the beam by its most expensive admissible parents
+instead of by `children_max x mean`, which is an average and not a bound.
+
+**The frozen `$26.8049` was deliberately NOT changed**, so this is fail-closed
+rather than applied: `plan_session` refuses the session under it by **$5.09**,
+with the figure in the error. **Attempt 4 cannot launch** until the maintainer
+rules on the ceiling and the cap.
+
+## 2026-08-27 — APPROVED: session ceiling $35.6660, cumulative cap $275.59
+
+**No spend.** Maintainer decision, 2026-08-27, on the corrected pricing model.
+
+```
+cumulative spend                                            $239.9150
+NEW authorized cumulative cap                               $275.5900
+Phase-B attempt-4 session hard ceiling                      $ 35.6660
+planning floor, NOT an expectation                          $ 16.4555
+search hard bound (16.461 h, 987.635 min)                   $ 16.2960
+plan hard terminate / soft stop                   $31.7769 / $31.4469
+```
+
+`$239.9150 + $35.6660 = $275.5810`; the cap is `$275.59`, so the margin is
+`$0.0090` of ordinary rounding. **Unused cumulative headroom does not authorize
+any later experiment.**
+
+Attempts 1-3 remain historical: `$0.1500` and `$0.2300` of setup failure and
+`$9.5000` of `EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`. None of them enters
+the Phase-B scientific result.
+
+Grant document: `autoinit_phase_b_grant_attempt4.json`. Attempt 4 is authorized
+only after the poll-lifetime repair and every existing gate passes.
+
+## 2026-08-28 — Phase-B attempt 4: $8.1700, search completed, summary raised
+
+```
+cumulative spend before                                      $239.9150
+Phase-B attempt 4 (pod zjwpsurs2dyvw8, 495.2 min, L40S)      $  8.1700
+cumulative spend after                                       $248.0850
+authorized cumulative cap                                    $275.5900
+remaining headroom                                           $ 27.5050
+Phase-B session hard ceiling                                 $ 35.6660
+```
+
+Stage 0 passed; **Stage 1 completed its search**, measured the control and both
+imported finalists and computed its ranking, then raised
+`AttributeError: 'Qwen3Config' object has no attribute 'run_id'` while building
+the summary — a local-name collision on a path only Phase B reaches. Stages 2-5
+never ran: `EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`. Pod deleted and
+provider-confirmed. The authorization `autoinit.phase_b.20260827T102821Z` is
+**consumed**.
+
+**Two repairs confirmed on hardware.** The search journal came home this time
+(53 MB, retained out-of-tree), and P1 ran in `partial` mode throughout: the same
+12 causal-depth expansions cost **287.3 min against attempt 3's 388.2**, a 26%
+reduction.
+
+**Headroom `$27.5050` is below the `$35.6660` session ceiling**, so a fifth
+attempt is arithmetically blocked without a new maintainer cap decision.
+Phase-B attempts have now cost **$18.0500** with no scientific result.
+
+## 2026-08-28 — APPROVED: cumulative cap $283.76 for Phase-B attempt 5
+
+**No spend.** Maintainer decision, 2026-08-28.
+
+```
+cumulative spend                                            $248.0850
+NEW authorized cumulative cap                               $283.7600
+Phase-B attempt-5 session hard ceiling  (UNCHANGED)         $ 35.6660
+planning floor, NOT an expectation      (UNCHANGED)         $ 16.4555
+```
+
+`$248.0850 + $35.6660 = $283.7510`; the cap is `$283.76`, so `$0.0090` is
+ordinary rounding. **The ceiling and floor have not moved** — only the spend
+beneath them has. **Unused cumulative headroom authorizes nothing.**
+
+Phase-B attempts 1-4 cost **$18.0500** and produced no scientific result:
+`$0.1500` and `$0.2300` of setup failure, `$9.5000` on a search deadline, and
+`$8.1700` on a search that completed and then raised in its summary. All four
+remain historical evidence and none enters the Phase-B scientific result.
+
+Grant document: `autoinit_phase_b_grant_attempt5.json`.
+
+## 2026-08-29 — Phase-B attempt 5: $11.9700, Stage 1 completed, Stage 2 failed
+
+```
+cumulative spend before                                      $248.0850
+Phase-B attempt 5 (pod 37aah10zvqk4lo, 725.7 min, L40S)      $ 11.9700
+cumulative spend after                                       $260.0550
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 23.7050
+Phase-B session hard ceiling                                 $ 35.6660
+```
+
+**The furthest any attempt has reached.** Stage 0 passed; **Stage 1 completed the
+P=2 search in 464 min of its 987.6 min allowance and emitted an authoritative
+Top-5**; Stage 2 ran three new `sa` probes and then failed on
+`duplicate seeds in [20260726, 20260726]`. No `sb`/`sc`, no cross-phase
+selection: **`EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`** for the calibration
+question. Pod deleted and provider-confirmed; the authorization
+`autoinit.phase_b.20260828T070326Z` is **consumed**.
+
+**Headroom `$23.7050` is below the `$35.6660` ceiling**, so a sixth attempt needs
+a new cap decision. Phase-B attempts now total **$30.0200**.
+
+## 2026-08-29 — Behavioural continuation attempt 1: $0.2513, aborted at the pod test gate
+
+```
+cumulative spend before                                      $260.0550
+continuation attempt 1 (pod nuitz0ketxukpm, 15.2 min, L40S)  $  0.2513
+cumulative spend after                                       $260.3063
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 23.4537
+continuation session hard ceiling                            $  8.0691
+```
+
+**No scientific stage ran.** Setup reached `VLLM_READY`, `TEACHER_READY` and
+`ROPE_OK`, then the CPU test gate returned **4 failed / 2300 passed / 95
+skipped** and the session aborted before any probe was bought. Pod deleted at
+16:20:25Z; provider confirms gone, `billing: false`. The authorization
+`autoinit.continuation_b.20260829T153538Z` is **consumed**.
+
+**The gate caught a real missing input, not a flaky test.** The continuation
+launcher declares
+`relay_inputs=(*CANONICAL_INIT, *RECOVERY_LADDER, *continuation_inputs())` and
+`local_assets=PHASE_A_LOCAL_ASSETS`, so it stages **neither calibration
+mixture**: `CALIBRATION_V1` (relay → `artifacts/stage1/e8_calibration_v1/`) and
+`CALIBRATION_V2_LOCAL` (dev-box → `artifacts/stage1/reasoning_heavy_v2/`) are
+both Phase B's and both were dropped. The session binds both calibration
+identities in its authorization and preregistration while never staging the
+bytes — and `calib.domain_balanced@v1` is the fixed distribution every probe is
+measured under, so this would have failed later at far greater cost.
+
+Reproduced at **$0** afterwards by hiding both directories and re-running the
+pod's exact ignore set: the same four tests fail, and only those four. Record:
+[`autoinit_continuation_b_attempt1.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt1.json).
+
+Headroom `$23.4537` still covers one `$8.0691` continuation, but the grant
+explicitly excludes a second attempt, so one needs a maintainer decision.
+
+## 2026-08-29 — Behavioural continuation attempt 2: $0.3146, aborted at driver stage 0
+
+```
+cumulative spend before                                      $260.3063
+continuation attempt 2 (pod ew2ykjczuex87i, 19.1 min, L40S)  $  0.3146
+cumulative spend after                                       $260.6209
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 23.1391
+continuation session hard ceiling                            $  8.0691
+```
+
+**Further than attempt 1, and still no scientific stage.** The attempt-1 repair
+worked: the CPU test gate **passed**, `SETUP_RC=0`, `AUTHORIZATION_OK` and
+`SETUP_DONE` were reached, and the driver detached and was confirmed by
+descriptor probe. Three minutes later `stage_bind` raised
+
+```
+AttributeError: 'PhaseAAuthorization' object has no attribute 'require_evidence'
+```
+
+`ContinuationDriver` never overrides `PhaseADriver`'s `AUTHORIZATION_TYPE` /
+`AUTHORIZATION_PATH`, so on the pod it loaded the committed **Phase-A**
+authorization instead of its own. It is the only `PhaseADriver` subclass that
+sets neither; Phase B and the recovery continuation both do. The seam's own
+comment names this subclass as the reason it exists.
+
+The artifact archive was collected (9 files, 4 classes), the teardown gate
+allowed, the pod deleted at 20:53:51Z and the provider confirms gone and not
+billing. The authorization `autoinit.continuation_b.20260829T194657Z` is
+**consumed**.
+
+Behavioural-continuation attempts now total **$0.5659** and have bought no
+science. Record:
+[`autoinit_continuation_b_attempt2.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt2.json).
+
+## 2026-08-30 — Behavioural continuation attempt 3: $0.2275, stage 0 PASSED, stage 1 failed
+
+```
+cumulative spend before                                      $260.6209
+continuation attempt 3 (pod qbfqbp3y6hq8iu, 13.8 min, L40S)  $  0.2275
+cumulative spend after                                       $260.8484
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 22.9116
+continuation session hard ceiling                            $  8.0691
+```
+
+**The furthest any continuation attempt has reached, and the first to pass a
+scientific stage.** All 7 pre-provider gates passed including
+`session_commit_and_lineage`; setup completed; the driver loaded its own
+`ContinuationAuthorization`; and **stage 0 PASSED** — every cited identity bound,
+the collapsed universe `e94f15d2e648` and Stage-1 selection `84fd64968519`
+verified, the evaluation protocol attested (interval `0.011695`, floor `0.3000`),
+and all **eleven** probe journals imported. The attempt-2 constructor defect is
+hardware-closed.
+
+Stage 1 then refused, in the same second:
+
+```
+85bde4ded2c31953f802e39cf2252c87 is an ADVANCING finalist but is not staged at
+/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87
+```
+
+**A dev-box path used on the pod.** `build_finalist_states` resolves each
+finalist as `Path(c.checkpoint_path)`, and `checkpoint_path` comes from the
+frozen identity-collapse amendment, which records dev-box absolute paths. The
+launcher stages the finalists at `artifacts/autoinit/phase_a_selected/<state_id>`
+— which is exactly what `autoinit_phase_b_driver.py` already resolves against
+(`STAGED_FINALISTS / canonical_id`, lines 110 and 362). The amendment must
+**not** move: its hash `df413bd99119dab7` is bound by the authorization and the
+preregistration, and its dev-box paths are correct for the machine holding those
+bytes. The repair belongs in the driver.
+
+Twenty artifacts across six classes were collected, the teardown gate allowed,
+the pod deleted at 09:30:28Z and the provider confirms gone and not billing. The
+authorization `autoinit.continuation_b.20260830T091529Z` is **consumed**.
+
+Behavioural-continuation attempts now total **$0.7934** and have bought no
+probe. Record:
+[`autoinit_continuation_b_attempt3.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt3.json).
+
+## 2026-08-30 — Behavioural continuation attempt 4: $1.4680, COMPLETE and RESOLVED
+
+```
+cumulative spend before                                      $260.8484
+continuation attempt 4 (pod hyvp7dw3zkb1zk, 89.0 min, L40S)  $  1.4680
+cumulative spend after                                       $262.3164
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 21.4436
+continuation session hard ceiling                            $  8.0691
+```
+
+**`ALL_DONE`.** The first behavioural-continuation session to buy a probe and
+reach a terminal scientific result. All 7 pre-provider gates passed, setup and
+the CPU test gate passed, stage 0 bound every cited identity, stage 3 trained and
+evaluated **one** probe — `autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb`, the single
+mandatory missing observation — and the frozen selector resolved at the pooled
+`sa+sb` stage, so **no `sc` was bought**.
+
+Came in at **$1.4680 against the $8.0691 ceiling** and well under the $4.32
+expectation, because only one of the three priced probes was needed. 44 artifacts
+across 16 classes collected, teardown gate `allowed=True failed=None`, pod deleted
+13:16:42Z, provider confirms gone and not billing.
+
+Behavioural-continuation attempts total **$2.2614** across four launches; the
+three that bought nothing cost `$0.7934` between them and each closed a distinct
+defect. Record:
+[`autoinit_continuation_b_attempt4.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt4.json).
+
+## 2026-08-30 — Behavioural continuation attempt 5: $1.5433, PHASE B RESOLVED
+
+```
+cumulative spend before                                      $262.3164
+continuation attempt 5 (pod skoh6l6wmmwxce, 93.5 min, L40S)  $  1.5433
+cumulative spend after                                       $263.8597
+authorized cumulative cap                                    $283.7600
+remaining headroom                                           $ 19.9003
+continuation session hard ceiling                            $  5.4784
+```
+
+**Phase B is closed.** All 8 pre-provider gates passed; the pod independently
+recomputed the corrected rung-2 decision and reproduced it exactly
+(`11/340`, `9/340`, `3/340` → `tie_pending`, candidates
+`{fe9683e6a9c7, 85bde4ded2c3}`); stage 4 then bought **exactly one** probe,
+`autoinit.v1.phase_a.rung3.fe9683e6a9c7.sc`, and stage 5 resolved.
+
+**Winner `fe9683e6a9c7`**, not the control, `tie_break_ran: true`, report
+`8c8842b84fe85cec`. Final pooled `sa+sb+sc`: `16/510 = 0.031373` against
+`10/510 = 0.019608`; the control stays at `3/340 = 0.008824` because it is
+outside the interval and correctly never advanced.
+
+**The margin clears by `0.000070`** — `0.011765` against an interval of
+`0.011695`. One correct answer is `1/510 = 0.001961`, so the separation is about
+**3.6% of a single correct sample**. The frozen rule was applied exactly as
+preregistered; the result is what it returns, and it is not a comfortable
+separation.
+
+Came in at `$1.5433` against the `$5.4784` ceiling. Behavioural-continuation
+attempts total **$3.8047** across five launches; the three that bought nothing
+cost `$0.7934` and each closed a distinct defect. Record:
+[`autoinit_continuation_b_attempt5.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt5.json).
+
+## Standing rules
+
+* Plan from **actual spend**, never from unused room under a previous authorization.
+* Never silently shrink an experiment to fit a shortfall — report the exact figure and
+  ask. `budget.plan_session` enforces this by raising with the number rather than
+  trimming the run.
+* `--authorized-usd` needs **4 decimal places**: `plan_session` compares unrounded, so
+  `18.76` fails against a plan of `$18.760145`.
+* Budget every session for **1–2 abandoned host draws**; the observed rate across E8 was
+  nine abandoned draws in six launches.
+
+## Provenance note on the $213.00 cap (recorded post-run, 2026-08-15)
+
+The Phase-A authorization's `granted_by` field says the cap was raised on "the
+maintainer's own words 'Raise it further, e.g. $213-214'". **That attribution is
+imprecise and is corrected here rather than in the artifact.**
+
+What actually happened: the assistant presented four budget options; that
+sentence was the *option label the assistant authored*, and the maintainer
+**selected** it. The approval is explicit and substantively valid — the
+maintainer chose to raise the cap into $213–214 over three alternatives, and
+$213.00 is the conservative end of that range. What the maintainer did not do is
+type that sentence.
+
+The artifact is **not** edited: `granted_by` is inside `authorization_sha256`,
+and `phase_a.py` is inside the harness digest, so correcting the wording would
+move both and force a rebuild and reissue for an attribution nuance that is not
+an authorization defect. Recorded in prose, at the maintainer's direction.
+
+## Phase C1 — attempt 1, 2026-09-02
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 1: ABORT at setup, draw 1. The pod could not fetch the repo bundle — `transfer/c1` does not exist on the relay, because **no bundle was created or uploaded for this session's commit**. `SETUP_RC=1`, no scientific stage ran, pod deleted 4.8 min after creation and provider-confirmed gone | $0.0786 | `logs/experiments/phase_c1/autoinit_c1_session.json`, `/home/ecs-user/c1_scr/{launch.log,watchdog.jsonl}` |
+
+**Cumulative: $263.8597 + $0.0786 = $263.9383 of the $283.7600 cap.** $19.8217
+uncommitted. The cap was not raised.
+
+**The authorization is consumed.** `logs/autoinit_c1_authorization.json` permitted
+ONE launch attempt; that attempt was made and its outcome is recorded above. No
+retry is authorized without a new maintainer review, and none was attempted.
+
+**Why no `$0` gate caught it.** All eight pre-provider gates verify the *contents*
+of the session commit — harness digest, lineage, authorization, preregistration,
+frozen science, teacher binding, battery, artifact specs. None verifies that the
+pod can *obtain* that commit. "Regenerate the git bundle at the current commit and
+re-upload it" is a documented pre-session step in `scripts/pod/AGENTS.md`, not a
+precheck, so it depends on an operator remembering it. The relay convention is
+`transfer/aad_autoinit_<8hex>.bundle`; `--bundle c1` named a file that never
+existed. A `bundle_staged_gate` would have refused this at `$0`.
+
+## Phase C1 — attempt 2, 2026-09-03
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 2: ABORT at setup, draw 1, at the **ROPE_OK** gate. Transport worked — the canonical bundle round-tripped and the pod checked out the exact session commit — and setup reached **TEACHER_READY** (7 of 11 markers): repo cloned, assets staged, both venvs built, vLLM ready, teacher fetched and byte-verified. Then `checking the RoPE base resolves in every venv` exited `no staged checkpoint to check`. The shared setup globs `artifacts/stage1/*/checkpoint/config.json`; C1 stages only the three tokenizer sidecars, so the glob was empty. `SETUP_RC=1`, no scientific stage ran, pod deleted at 6.1 min, provider-confirmed gone | $0.1013 | `logs/autoinit_c1_attempt2/` |
+
+**Cumulative: $263.9383 + $0.1013 = $264.0396 of the $283.7600 cap.** $19.7204
+uncommitted. The cap was not raised.
+
+**The Attempt-2 authorization is consumed.** One launch attempt, made. No third
+attempt without a new maintainer/scientific review.
+
+**Why no `$0` gate caught it, and why that is worse than attempt 1.** The shared
+setup's `ROPE_OK` step requires a *loadable* checkpoint under
+`artifacts/stage1/*/checkpoint/`. C1 stages only `tokenizer.json`,
+`tokenizer_config.json` and `chat_template.jinja` there — no `config.json` — so
+the glob found nothing.
+
+`tests/pod/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without`
+**was exactly that guard**, and on 2026-09-02 I narrowed its trigger from "any
+file under the canonical-init prefix" to "`model.safetensors`", reasoning that C1
+loads no model from there. That reasoning was about what C1 reads. The guard was
+about what the SHARED SETUP requires — the same distinction that cost the
+device-canary retry `$0.0637` and the measurement session `$0.0700`, and which
+this session had already applied correctly when staging `state_eval_v1` and
+`recovery_search_v2` for `verify_frozen_assets`. Weakening the test removed the
+only `$0` signal that would have refused this launch.
+
+## Phase C1 — attempt 3, 2026-09-04
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 3: the launcher **declined to create a pod**. All ten pre-provider gates passed when run standalone, but the launcher checks the market rate first: `NVIDIA L40S $1.09/h, stock Low` against the priced `$0.99/h`, and aborted. **No pod was created, no provider resource existed, `$0.00` spent** — `logs/experiments/phase_c1/autoinit_c1_session.json` has no `pod_id` and no `cost` block, and `stages` is empty | $0.0000 | `logs/autoinit_c1_attempt3/` |
+
+**Cumulative unchanged: $264.0396 of the $283.7600 cap.** $19.7204 uncommitted.
+
+**The refusal is arithmetically correct.** The whole pricing record is derived at
+`$0.99/h`; at `$1.09/h` the same 834-minute hard-terminate window would cost
+`$15.15`, above the `$13.7578` ceiling. Raising `--max-price` would be a
+repricing decision, which this grant explicitly does not authorize.
+
+**Not one of the enumerated failure modes.** Attempts 1 and 2 were infrastructure
+aborts of a *running pod*. This is a market-price refusal before any resource
+existed. Whether it consumes the grant's one launch attempt is a maintainer
+question, not the launcher's and not mine. **No retry was attempted**, and
+`--max-price` was not raised.
+
+### Attempt 3, relaunch — 2026-09-04
+
+Maintainer review defined the one launch attempt as consumed when a **provider
+resource is created**, not when a launcher command is invoked, so the Attempt-3
+authorization `955c9288…` stayed live and the relaunch used the same session
+commit `ca519e67`, the same bundle and the same authorization bytes. The launcher
+re-quoted **`$1.09/h`** and refused.
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 3, second launcher invocation: launcher refused at `$1.09/h` against the priced `$0.99/h`. **No pod, no provider resource, `$0.00`** | $0.0000 | `logs/autoinit_c1_attempt3/launch_relaunch.log` |
+
+**Correction, 2026-09-04 — "all ten gates passed again" was false.** Both rows
+above originally claimed the ten pre-provider gates passed during attempt 3.
+`SessionRunner.run` is `if not self.make_plan() or not self.run_prechecks()`:
+it **prices before it gates**. Both attempt-3 invocations aborted inside
+`make_plan` at `0.0` elapsed, and the session record proves it — the timeline
+holds three entries (budget, price, ABORT), `stages` is `{}`, and there is no
+`prechecks` key at all. Attempt 3 never executed a single gate. I wrote the
+claim from the expectation that gates run first; the evidence I cited says the
+opposite, and it is a claim about what evidence exists, which makes it the worst
+kind to get wrong.
+
+The ten gates have now actually been executed, at `$0.0000`, by driving the real
+`SessionRunner.make_plan()` and `run_prechecks()` against the live tree and
+stopping before `create()` — the launcher's own `spec()`, the runner's own
+`context()`, no stubs. 10/10 PASS. Evidence:
+`logs/autoinit_c1_attempt3r/gate_rehearsal.txt`.
+
+**Cumulative unchanged: $264.0396 of $283.7600.**
+
+**A correction to the previous report.** I reported that the L40S rate had
+"fallen to `$0.79/h`, below the priced `$0.99/h`". That figure was
+`lowestPrice.uninterruptablePrice`, which equals `communityPrice`. The launcher
+prices on **`securePrice`**, and every prior session ran on secure cloud —
+attempt 2 created its pod at `$0.99/h` secure. Measured together now:
+
+```
+securePrice      1.09      <- what the launcher uses
+communityPrice   0.79      <- what I reported
+```
+
+The secure price did not fall; it has been `$1.09` throughout, and my reading
+described a product this launcher does not provision. The relaunch cost nothing,
+but the premise for requesting it was mine and it was wrong.
+
+## 2026-09-04 — C1 Attempt-3R: repriced, launched, aborted at the pod test gate
+
+Repriced to secure L40S `$1.09/h` (`pricing_sha256 909ed65f…`, ceiling
+`$15.1475`, every minute assumption unchanged), issued authorization
+`9b562e0a…` at session commit `26fd4cc9`, staged bundle
+`aad_autoinit_26fd4cc9.bundle`, 10/10 pre-provider gates PASS, pod
+`pj3c870n6yx70z` created at `$1.09/h`.
+
+Setup reached **VLLM_READY → TEACHER_READY → ROPE_OK** — both previously fatal
+gaps are closed and stayed closed — and then **failed the CPU test suite**:
+`14 failed, 2650 passed, 103 skipped in 787.78s`. Pod deleted, provider confirms
+gone.
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 3R: repriced launch, 18.85 min, **INFRASTRUCTURE ABORT at the pod test gate**. No replay, no training, no evaluation, no decision | $0.3482 | `logs/autoinit_c1_attempt3r/` |
+
+| C1 attempt 4: launch-bound readiness, 12/12 gates, 38.46 min, **INFRASTRUCTURE ABORT at the pod test gate**. No replay, no training, no evaluation, no decision | $0.6986 | `logs/autoinit_c1_attempt4/` |
+
+**Cumulative: $265.0864 of $283.7600.** `$18.6736` uncommitted. The attempt-4 grant is CONSUMED — a provider resource was created — and it permits no retry.
+Worst case never approached: the watchdog's last poll read `$0.6986` at 38.46 min against a `$15.1475` ceiling.
+
+Cost is the watchdog's last poll (38.46 min → `$0.6986`) rather than the launcher's own 38.3 min → `$0.70` display, on the standing rule that the
+provider-polled reading wins.
+
+**Superseded line:** **Cumulative: $264.3878 of $283.7600.** `$19.3722` uncommitted — still less than
+one full C1 session at the repriced ceiling of `$15.1475`… which it now exceeds
+only by about `$3.53`. A further C1 attempt is arithmetically possible exactly once
+more and needs a maintainer grant.
+
+Cost is recorded at the watchdog's last poll (19.17 min → `$0.3483`, written as
+`$0.3482`) rather than the launcher's `18.85 min → $0.3424`, because the
+watchdog polls the provider and the launcher measures its own wall clock; when
+they disagree the more expensive reading is the honest one.
+
+**All fourteen are now enumerated, at `$0.0000`** — by running the same suite
+with `HOME` pointed at an empty directory, which is the condition a fresh pod is
+actually in. `logs/autoinit_c1_attempt3r/test_gate_enumeration.json`.
+
+| count | tests | cause |
+| --- | --- | --- |
+| 7 | `test_c1_battery.py` renderer parity, every group | `battery_render.py:33` reads `~/.cache/huggingface/hub` **directly**, ignoring `HF_HOME` |
+| 5 | `test_leaf_transport_publish.py`, all of them | **WITHDRAWN 2026-09-04.** They fail only with `HF_TOKEN` unset, and pod setup exports it at line 36 before the gate at line 475. All five PASS under the real pod condition; `publish_selected_leaves.py` already preferred `HF_TOKEN` and was not changed. **Five of the fourteen are unexplained** |
+| 1 | `test_every_log_is_classified_in_the_catalog` | my two unclassified attempt-3R log entries — FIXED |
+| 1 | `test_the_live_snapshot_records_the_terminal_phase_b_state` | the snapshot said an authorization was live — FIXED |
+
+7 + 5 + 1 + 1 = 14, and the sweep's own 13 reconciles as that set minus the two
+already fixed, plus one gate test needing network the empty `$HOME` denies.
+
+**The class was half right.** The dataset cache genuinely did hard-code
+`Path.home()` and is repaired. The credential did not: `token()` had already
+preferred `HF_TOKEN`, and the pod exports one. The `$0` enumeration missed
+that because it reproduced with no `HF_TOKEN` at all — a condition no pod is
+in. Reproducing the exact five nodeids **before** editing production code is
+what caught it; the repair changed no token code and froze the behaviour in
+tests instead. Five of the fourteen pod failures remain unaccounted for.
+
+Three diagnostic notes this abort earned. `autoinit_preflight_setup.sh` runs
+`tail -4 /workspace/pytest.log` then `exit 1`, so 14 failures arrived as 3 names
+and the file died with the pod; one `grep '^FAILED'` would have been free.
+`simulate_pod_env.sh` exists to ask "would this suite pass on a pod?" but models
+only the gitignored-repo half, not `$HOME`, so it would have caught none of the
+twelve environment failures. And no C1 attempt had ever reached `TESTS_OK`
+before, which is why a gate that cannot pass on a pod survived three launches.
+
+---
+
+## 2026-09-05 — C1 attempt 5: the third abort at the same gate, `$0.3150`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 5: launch-bound readiness, 12/12 gates re-run by the launcher, 17.34 min, **INFRASTRUCTURE ABORT at the pod CPU test gate**. No replay, no training, no evaluation, no decision | $0.3150 | `logs/autoinit_c1_attempt5/` |
+
+**Cumulative: $265.4014 of $283.7600.** `$18.3586` uncommitted. The attempt-5
+grant is CONSUMED — pod `e2ghwfuerdrvni` was created — and it permits no retry.
+
+Cost is the provider-polled reading at deletion (17.3 min → `$0.31`, recorded by
+the session as `$0.315`), on the standing rule that the provider's figure wins.
+
+**Two failures, and the sweep had certified this exact tree seventeen minutes
+earlier.** Pod: `2769 passed, 99 skipped, 2 failed` in 781.84 s. Sweep:
+`2770 passed, 100 skipped, 0 failed` in 673.2 s. Same 2870 tests.
+
+| count | tests | cause |
+| --- | --- | --- |
+| 2 | `test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible`, `::test_an_undeclared_file_inside_a_staged_destination_stays_hidden` | both assert facts about files that exist only on the **dev box** — that `corpus_v2`/`battery_v2` appear in the hidden set, and that the checkpoint dir holds an undeclared file. A pod has neither, because they were never transferred |
+
+**The root cause is the guard, not the contract.** Both tests are correctly
+classified as dev-box-only — `pod_environment.DEVBOX_ONLY_NODEIDS` names these
+two exact nodeids and the sweep recorded `devbox_only_skipped_as_expected: true`.
+But the skip is produced by `pytest.mark.skipif(os.environ.get("AAD_SYNTHETIC_HF_TOKEN"))`,
+a flag **the simulator sets and the pod does not**. The predicate encodes "am I
+inside the simulator?" when the property it needed was "does this machine hold
+the unstaged artifacts?". The pod is the one environment behaviourally identical
+to the simulation — no unstaged artifacts — while carrying none of its markers,
+so the guard is exactly inverted there: it skips where the assertion would hold
+and runs where it cannot.
+
+Attempt 4's root cause did **not** recur. The manifest-derived positive staged
+view held; the 49 extra skips and 6 failures the generic `HIDDEN_PATHS`
+complement produced are gone, and the pod's own staging matched contract
+`9ef2356ee807`.
+
+**One divergence remains unexplained.** If exactly those two moved skip→fail the
+pod's skip count would be 98; it is 99, and the pod passed one fewer test than
+the sweep. So one test that PASSED in the sweep SKIPPED on the pod. The pod
+diagnostics grep `^FAILED|^ERROR` only, so a skip divergence is invisible unless
+it also fails — the pod's skip list was never captured and died with the pod. It
+did not cause this abort and must not be assumed benign.
+
+The diagnostic that *did* pay off: the `grep '^FAILED'` added after attempt 3R
+delivered both nodeids exactly, where attempt 3R lost fourteen failures to a
+four-line tail.
+
+---
+
+## 2026-09-06 — C1 attempt 6: the strict comparison earns its keep, `$0.3665`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 6: launch-bound readiness, 12/12 gates re-run by the launcher, 20.17 min, **INFRASTRUCTURE ABORT at the pod CPU test gate**. No replay, no training, no evaluation, no decision | $0.3665 | `logs/autoinit_c1_attempt6/` |
+
+**Cumulative: $265.7679 of $283.7600.** `$17.9921` uncommitted. The attempt-6
+grant is CONSUMED — pod `n71opk7lv4fhzf` was created — and it permits no retry
+and no replacement pod.
+
+Cost is the provider-polled watchdog tick (20.17 min → `$0.3665`) rather than the
+launcher's 19.4 min → `$0.35`, on the standing rule that the provider's figure
+wins and the larger reading is the honest one.
+
+**Pod `2791 passed / 113 skipped / 18 failed`; the sweep, on the same 2922
+selected tests, `2808 / 114 / 0`.** The strict skip-set comparison fired and
+named all three divergences exactly:
+
+| shape | nodeid | cause |
+| --- | --- | --- |
+| expected-skip-but-RAN | `test_the_committed_record_still_binds_the_live_executable` | the recorder MOVES THE RECORD ASIDE during a sweep so it cannot certify itself, so the record is absent here and present on a pod |
+| expected-skip-but-RAN | `test_the_recorded_swept_commit_is_a_real_commit_in_this_repository` | same mechanism |
+| unexpected POD-ONLY skip | `test_every_path_named_in_the_repo_layout_exists` | `REPO_LAYOUT.md` names `/home/ecs-user/aad-artifacts/` as an absolute literal, which a fresh `HOME` cannot neutralize |
+
+**Two of these are mine and one is structural.** The `REPO_LAYOUT` case is a
+registry error: I gave the class `devbox_only_artifact` ONE parity claim and
+asserted it for every member, and it is false for a test that reads absolute
+paths out of a Markdown file. That is precisely the excuse list the registry
+exists to prevent. The record-stashing pair is worse than a bug — it is a
+permanent consequence of how the sweep avoids self-reference, and no
+classification can make the two machines agree.
+
+The 18 failures are all in `test_simulator_restore.py`, the one module the
+parity repair made shell out to `cpu_test_env_args.py` via a `.venv` path a pod
+does not have. **Attributed, not proven:** the outcomes file records skip reasons
+but only failure NODEIDS, so nothing says why. At `$0` the fallback was shown
+unsafe — this box's `/usr/bin/python3` is 3.6.8 and cannot parse the emitter —
+which proves the fallback is untested, not that it is what failed there.
+
+**What the money bought.** The evidence survived: `setup_failure_files` pulled
+`pytest_outcomes.json` off the pod before teardown, 36,728 characters naming all
+113 skips with reasons and all 18 failures — where attempt 5's list died with the
+pod. The CPU-test isolation did not leak: after the gate, on the real L40S, CUDA
+was available again and the teacher cache was intact. And the GPU predicate
+appears in neither divergence list, so `CUDA_VISIBLE_DEVICES=""` did hide an
+L40S — the one claim that could not be tested on a CPU box.
+
+---
+
+## 2026-09-06 — C1 attempt 7: past the CPU gate at last, then argparse, `$0.4231`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 7: launch-bound readiness, 12/12 gates, 23.29 min, **INFRASTRUCTURE ABORT — the driver exited 2 on an unrecognized argument**. No replay, no training, no evaluation, no decision | $0.4231 | `logs/autoinit_c1_attempt7/` |
+
+**Cumulative: $266.1910 of $283.7600.** `$17.5690` uncommitted. The attempt-7
+grant is CONSUMED — pod `gfd8buh5tr51qb` was created — and it permits no retry
+and no replacement pod.
+
+**The first C1 attempt ever to clear the pod CPU test gate.**
+`MARKER:TESTS_OK:861s`, then `AUTHORIZATION_OK`, then `SETUP_DONE`. Attempts 3R,
+4, 5 and 6 all died at that gate. The complete marker sequence survived for the
+first time too, relayed off the pod while it ran rather than glimpsed through a
+`tail -40` window: `ENV_READY → REPO_READY → ASSETS_STAGED → TRAIN_ENV →
+ASSETS_READY → VLLM_READY → TEACHER_READY → ROPE_OK → TESTS_OK → AUTHORIZATION_OK
+→ SETUP_DONE`.
+
+All four attempt-6 repairs are now validated on real hardware. The strict
+skip-set comparison is fail-closed on any difference and **did not fire**, so the
+pod's complete skip set equalled the launch-bound sweep's 114 nodeids at
+`ee74f9e3dd305c5d` — the first exact sweep/pod agreement in this project. The
+`AAD_C1_CPU_TEST_SCOPE` skip behaved identically on a pod, the explicit
+`PODSIM_PYTHON` held where there is no repo venv, and CUDA and the teacher cache
+were restored after the isolated scope.
+
+**Then the driver never ran.** Root cause **CONFIRMED**, quoted from its own
+relayed stderr rather than attributed:
+
+```
+autoinit_c1_driver.py: error: unrecognized arguments: --stage all
+```
+
+`autoinit_c1_launch.py:701` builds the command with `--stage all`; the C1
+driver's parser defines seven options and no `--stage`. argparse exits 2 before
+a line of the driver runs.
+
+**No `$0` gate could have caught it, and that is the finding.** Every
+pre-provider gate checks the LAUNCHER's inputs — its own argument namespace, the
+harness digest, the authorization, the bundle, the staged view, the readiness
+record. Nothing parses the string the launcher hands the DRIVER with the driver's
+own parser. This is the device-canary failure one level out: that one produced
+`missing_arguments(args)` for the runner's namespace, and the launcher→driver
+seam was left without the equivalent.
+
+The failure-detail capture added after attempt 6 is what made this diagnosable in
+minutes: the driver's stderr came home in `relay/autoinit_c1_run.log`. Nothing is
+repaired here.
+
+---
+
+## 2026-09-07 — C1 attempt 9: BOTH REPLAY GATES PASSED, then stage F, `$1.0440`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 9: 12/12 gates, one L40S at $1.09/h, 57.47 min, **both frozen replay gates PASSED**, then an infrastructure failure in stage F. No training, no evaluation, no decision | $1.0440 | `logs/autoinit_c1_attempt9/` |
+
+**Cumulative: $267.8598 of $283.7600.** `$15.9002` uncommitted. The attempt-9
+grant and its authorization are CONSUMED; neither permits a retry or a
+replacement pod.
+
+```
+remaining              = 283.7600 - 267.8598 = 15.9002
+per-attempt ceiling    =                       15.1475
+reserve after one      =  15.9002 - 15.1475 =   0.7527   >= 0  ->  IT FITS
+worst case if launched = 267.8598 + 15.1475 = 283.0073   <= 283.7600
+```
+
+**Exactly one ceiling-sized attempt still fits under the cap.** It would leave
+`$0.7527` and permit no second one. Headroom is not permission: whether a tenth
+attempt happens is a maintainer decision against this ledger.
+
+> **CORRECTED 2026-09-08.** As first written this entry read "`$15.9002`
+> uncommitted — which is **below the `$15.1475` per-attempt ceiling by only
+> `$0.7527`**, so a further full attempt no longer fits under the cap." That is
+> the negation of its own arithmetic: `15.9002 - 15.1475 = +0.7527` is the
+> amount by which the remaining budget CLEARS the ceiling, not a shortfall. The
+> same sentence had been copied into `logs/STATE.md` and
+> `logs/current_state.json`; all three are corrected, and
+> `tests/docs/test_budget_arithmetic.py` now derives `full_attempt_fits` and
+> `reserve_after_ceiling` from the recorded inputs rather than trusting prose.
+> No money moved — only the conclusion drawn from it, which would have told a
+> maintainer that Phase C1 was over for budget reasons when it is not.
+
+**THE FIRST C1 SCIENTIFIC OBSERVATION, after ten attempt labels and nine paid
+provider resources.** (Attempt 3 spent `$0.0000` — the launcher declined on
+price and created no resource — so the ten labels 1, 2, 3, 3R, 4–9 bought nine
+pods, totalling `$4.0001`.) Setup completed, the driver ran, and stages B, C, D and E
+all PASSED. Both fail-stop replay gates matched their frozen values exactly:
+
+```
+step 2  width.global_pca_v0        eea90c91346a0745…  expected eea90c91346a0745…  MATCHED
+step 3  attention.weight_proxy_v0  c313d1b4081b9a3b…  expected c313d1b4081b9a3b…  MATCHED
+all_pinned_digests_matched: true   n_pinned: 2
+```
+
+The frozen `fe9683` path **reproduces its recorded identity** on an NVIDIA L40S
+under torch 2.11.0+cu128, transformers 5.13.1 and CUDA 12.8. That is precisely
+the property C1's two fail-stop gates exist to test, and it is now **measured
+rather than assumed**. It says **nothing** about ATTENTION efficacy: no probe was
+trained, none evaluated, and no endpoint computed.
+
+**Stage F then failed** — `RuntimeError: Expected all tensors to be on the same
+device, but found at least two devices, cuda:0 and cpu!` at
+`src/aadistill/init/attention_stats.py:146`, inside the treatment operator
+`attention.activation_importance_v1`. The persistent `StatsCache` lives on the
+host **by design**; the model weights are on `cuda:0`; `head_write_energy`
+multiplies the two without co-locating them. That operator had never executed on
+a GPU — every `$0` regression runs it on CPU, where host stats and host weights
+are trivially co-located, and no earlier attempt reached stage F at all.
+
+**The launcher did not call this a replay mismatch**, and that is the repair
+working: it printed *"a blocking C1 stage failed … this line asserts nothing
+about which stage failed or why."* The post-provider ownership repair also held
+on real hardware — `watchdog detached` was logged **before**
+`created 8gtnsbigpgaz76`, `provider_resource_created` and
+`one_use_grant_consumed` are both recorded, and exactly one watchdog owned the
+pod for its whole life.
+
+Pod `8gtnsbigpgaz76` deleted at 57.47 min; `provider_confirms_gone: true`, final
+state `TERMINATED`/not billing, and an **independent read-only poller**
+separately recorded an empty inventory at `15:20:22Z`. The watchdog ended
+`pod_gone` after 58 ticks, never over the hard limit.
+
+## 2026-09-06 — C1 attempt 8: the driver ran, and stage D crashed, `$0.6248`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 8: launch-bound readiness, 12/12 gates, 34.39 min, **INFRASTRUCTURE ABORT inside stage D**. No completed replay, no training, no evaluation, no decision | $0.6248 | `logs/autoinit_c1_attempt8/` |
+
+**Cumulative: $266.8158 of $283.7600.** `$16.9442` uncommitted. The attempt-8
+grant is CONSUMED — pod `fbuggw0x9efqsz` was created — and it permits no retry
+and no replacement pod.
+
+**The first C1 attempt whose DRIVER executed a stage.** Attempt 7 reached
+`SETUP_DONE` and died at the driver's argument parse; the CLI-seam repair held,
+`MARKER:DRIVER_START` fired, and stages B and C passed: the teacher verified at
+`768f209d9ea8` with 3 shards, and `attention.activation_importance_v1`
+(`1171f3b791e2`) registered against scorer `77507935f21f83eb` and battery
+`a285d61f88de`. The CPU gate passed again at 1352 s with the strict skip-set
+comparison silent — a second consecutive exact sweep/pod agreement.
+
+**Then stage D crashed.** Root cause CONFIRMED with a full traceback:
+
+```
+src/aadistill/autoinit/operators/depth.py:176
+    targets = [item["input_ids"][0, 1:].to(compute) for item in items]
+KeyError: 'input_ids'
+```
+
+reached through `stage_de` → `materialize_fixed_path` → `impl.execute` →
+`depth.apply`, after 398 weight shards had loaded.
+
+**The launcher's own summary line is wrong, and this matters.** It printed
+*"C1_REPLAY_MISMATCH is the scientific stop: the frozen path did not reproduce
+its recorded digest"* — a canned sentence it emits for any blocking-stage
+failure. **No digest was compared.** The stage raised before any replay digest
+could be computed, so the frozen parent path has neither reproduced nor failed
+to reproduce its recorded value. Recording a replay mismatch here would put a
+false claim about the frozen path's reproducibility into the record, for exactly
+the property C1 exists to test. The driver's own `c1_evidence.json` carries the
+truth, which is why it is the artifact and the launcher line is not.
+
+**That open question is now ANSWERED, at `$0` and with no pod (2026-09-07).**
+Neither side "reads a key its supplier never promised": the supplier and the
+consumer were correct and the **boundary between them was missing from this
+path**. A materialized mixture stores tokens under `ids` — the form the pinned
+`d65c1f40…` content identity is defined over — and every calibrated operator
+reads `input_ids`. The conversion existed only in
+`scripts/autoinit/phase_a_search.as_operator_items`, a *script*, so the search
+had it and `fixed_path` did not. `src/aadistill/autoinit/calibration_items.py`
+is now the single boundary.
+
+A **second** defect was found beside it and would have cost the rest of the
+ceiling rather than aborting: stage D declared `cuda` and loaded its root with a
+bare `AutoModelForCausalLM.from_pretrained(...).eval()`, no transfer, so the
+whole parent replay would have run on the host CPU inside a paid GPU hour.
+
+**No money was spent answering this.** `$0.0000`, no pod, no grant, no
+authorization. Cumulative stays **`$266.8158`** of `$283.7600`, `$16.9442`
+uncommitted. The repair is **unmeasured on hardware** and C1 remains
+scientifically unmeasured: no completed replay, no training, no evaluation, no
+decision.
+
+---
+
+## 2026-09-09 — CUDA stage-F ENGINEERING validation: infrastructure FAIL, `$0.0073`
+
+**Not a C1 attempt.** This is an engineering validation under the maintainer
+decision of 2026-09-10, recorded at
+`logs/validations/cuda-stage-f/v1/authorization.json`. It carries no C1 grant,
+no bundle and no formal authorization, and it produces no C1 observation. The
+C1 attempt count is **unchanged at ten labels, nine paid**.
+
+| what | cost | evidence |
+| --- | --- | --- |
+| CUDA stage-F engineering validation: one pod `ij54bzvcyldm9j`, RTX 2000 Ada at `$0.24/h`, 1.84 min, **INFRASTRUCTURE FAIL** in the launcher's dependency step. No CUDA observation was made | $0.0073 | `logs/runs/cuda_stage_f/cuda_stage_f_20260910/` |
+
+Cumulative spend before `$267.8598` → after **`$267.8671`** of the unchanged
+`$283.7600` cap. Remaining **`$15.8929`**, which still covers one full
+`$15.1475` formal C1 attempt with **`$0.7454`** after it.
+
+**The contract held; my launcher did not.** One quote pass over nine candidates,
+one create attempt, the watchdog detached in the same second the pod id existed,
+the actual rate confirmed at or below the quote, work stopped at the first
+substantive exception, and teardown was provider-confirmed — the independent
+watchdog journal records `pod_exists: false`, `pod_billing: false`,
+`desired_status: TERMINATED` and `$0.0070` accrued. Final inventory: zero pods.
+
+**What failed, and it is mine.** Two defects in
+`scripts/validation/cuda_engineering_launch.py`, both in the dependency step:
+
+1. `pip install ... 2>&1 | tail -5` makes the shell report **tail's** exit
+   status, which is always 0. The install had been refused and this recorded
+   `pip_rc: 0`.
+2. The image's interpreter is PEP 668 *externally managed*, so a plain
+   `pip install` is refused by design. The refusal names the flag it wants and
+   the launcher did not pass it.
+
+So the validation entry point ran and exited 1 four seconds later on
+`ModuleNotFoundError: No module named 'numpy'`. That reads as a validation
+failure and was a **setup** failure.
+
+**This says nothing about the stage-F repair.** No operator executed, no device
+placement was observed, and `attention.activation_importance_v1` still has never
+run on a GPU. The repair remains **logical / CPU-structural evidence only**.
+
+Both defects are fixed and pinned by regressions, and an import probe now runs
+before the validation so a missing module costs seconds and is reported as
+setup. **The fixed launcher has not been run on a GPU.** One resource was
+authorized and it has been consumed; no replacement was created and none will be
+without a new maintainer decision.
+
+---
+
+## 2026-09-10 — CUDA stage-F engineering campaign: PASS at subrun 3, `$0.0400` total
+
+**Not a C1 attempt.** Engineering validation under the maintainer decision of
+2026-09-10 and its amendment 1, which permits a bounded repair loop inside the
+SAME cumulative budget. The C1 attempt count is **unchanged at ten labels,
+nine paid**.
+
+| subrun | pod | GPU | cost | verdict |
+| --- | --- | --- | --- | --- |
+| `cuda_stage_f_20260910` | `ij54bzvcyldm9j` | RTX 2000 Ada `$0.24/h` | $0.0073 | FAIL — setup |
+| `cuda_stage_f_20260910_s2` | `zoz95844krv2ze` | RTX 2000 Ada `$0.24/h` | $0.0145 | FAIL — acceptance criterion |
+| `cuda_stage_f_20260910_s3` | `8tbsixglzz64ox` | RTX 2000 Ada `$0.24/h` | $0.0182 | **CUDA ENGINEERING VALIDATION PASS** |
+
+**Cumulative engineering spend `$0.0400`** of the `$0.4000` ceiling — 10% — and
+`$0.0400` of the `$0.2500` soft cap. The cap was never a per-invocation
+allocation: each subrun started from what the previous ones had booked, and the
+watchdog was handed the remaining ceiling, not a fresh one.
+
+Project spend `$267.8671` → **`$267.8998`** of the unchanged `$283.7600` cap
+(the first subrun's `$0.0073` was already booked on 2026-09-09; this adds
+`$0.0327`). Remaining **`$15.8602`**, which still covers one full `$15.1475`
+formal C1 attempt with **`$0.7127`** after it.
+
+```text
+pre-campaign               267.8598                 (attempt-9 entry above)
++ subrun 1  0.0073   ->    267.8671                 (booked 2026-09-09)
++ subrun 2  0.0145
++ subrun 3  0.0182   ->    267.8998                 = 267.8598 + 0.0400
+remaining              283.7600 - 267.8998 =  15.8602
+after one ceiling       15.8602 -  15.1475 =   0.7127   >= 0  ->  IT FITS
+worst case if launched 267.8998 +  15.1475 = 283.0473   <= 283.7600
+```
+
+> **CORRECTED 2026-09-10, same day, before the closeout report.** As first
+> written this line read "`$267.8598` → `$267.8925` … remaining `$15.8675` …
+> `$0.7200` after it". The prose correctly said subrun 1 was *already booked*,
+> and then the arithmetic added `$0.0327` to the baseline from *before* subrun 1
+> — booking `$0.0327` of a `$0.0400` campaign and losing `$0.0073` from the
+> project cumulative. The three subrun costs in the table above were right; the
+> roll-up was not. The corrected chain is shown explicitly rather than restated,
+> because that is how the error survived being written. The verdict does not
+> change: one ceiling-sized formal attempt still fits, by `$0.7127` instead of
+> `$0.7200`. `campaign.json` was never wrong — it booked `$0.0400` throughout.
+
+**Three resources, never more than one at a time**, each provider-confirmed
+non-billing before the next was created. Three creates, one per subrun, no
+provider-level retries. Final inventory: zero pods.
+
+**What the two failures were, and why neither is a defect in the code under
+test.** The first was mine: a shell pipeline that reported `tail`'s exit status,
+hiding a PEP 668 refusal. The second was also mine, and more interesting — the
+per-operator matrix demanded the operator's CHILD be on the requested device,
+while `initialization/device.py` documents that `ChildBuilder` deliberately does
+not place it. On CPU that check passed trivially; on the first real GPU it
+failed all eight cases while every operator had in fact succeeded. CPU did not
+hide a device bug there, it hid a wrong acceptance criterion.
+
+**What subrun 3 established, on an NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch
+2.9.1+cu130).** The repaired and migrated treatment suffix now **successfully
+completes real-CUDA engineering validation**: both declared geometries executed
+`attention.activation_importance_v1` through the real
+`materialize_fixed_path_suffix` from a genuinely gated parent, kept index 3 and
+`03_attention`, wrote no prefix checkpoint, and produced a treatment record that
+validates. All five device placements were **observed** on `cuda:0` — the host
+snapshot, exactly one `stats_to` working copy, statistics co-located with
+`o_proj.weight` at every layer, the score vector allocated on the operand
+device, and the returned vector host-resident.
+
+**Two explanatory claims were corrected afterwards, at `$0.0000`**, by one
+append-only amendment at
+`logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json`: subrun 2's
+failure class is `harness_acceptance_criterion` rather than `operator` — its
+suffix computations completed and the rejected condition was a wrong
+requirement — and the PASS observed *operator computation on `cuda:0` with the
+child host-resident per the builder contract*, not children left on the device.
+No cost, outcome, device field or provider identity moved; the amendment binds
+the corrected artifacts by content hash and rewrites none of them.
+
+**This is engineering evidence only.** It is not a C1 treatment result, not an
+endpoint measurement, and not a decision. Formal C1 is unchanged: replay
+MEASURED 2/2 PASS, formal treatment UNMEASURED, endpoint UNMEASURED, Attempt 9
+NO DECISION.
+
+---
+
+## 2026-09-11 — APPROVED: the C1 execution package, and the cap raised to `$320.0000`
+
+**Maintainer decision, 2026-09-11**, after independent engineering review of the
+increment `55bb324a..199711af`. This is a prospective decision about a new
+execution package; it does not modify any historical authorization, attempt or
+record.
+
+**The project cumulative cap rises from `$283.7600` to `$320.0000` — an increase
+of `$36.2400`.** Not `$51.4425`: the old cap already covered `$15.2025` of the
+package, and quoting the package total as the increase would overstate it.
+
+| | approved |
+| --- | --- |
+| formal C1 attempts, **including the first** | **3**, a ceiling and not a target |
+| per formal attempt | **`$15.1475`** hard ceiling — unchanged, and no minute assumption in [`phase_c1_pricing.json`](../experiments/phase_c1/plans/phase_c1_pricing.json) moved |
+| formal allowance | **`$45.4425`** |
+| GPU engineering allowance, cumulative across every subrun | **`$6.0000`** |
+| package total | **`$51.4425`** |
+| reconciliation margin | **`$0.6577`** — for real accounting corrections only, not a spending allowance |
+
+```text
+3 x 15.1475          =  45.4425   formal
+45.4425 +  6.0000    =  51.4425   package
+267.8998 + 51.4425   = 319.3423   worst case if the package is spent in full
+320.0000 - 319.3423  =   0.6577   margin
+320.0000 - 283.7600  =  36.2400   cap increase
+```
+
+**The five limits bind separately and may not be traded against each other.** A
+cheap failure does not buy a fourth attempt. An unspent engineering allowance
+does not raise the per-attempt ceiling. The margin is not an allowance. Every
+real cost enters the accounting, including unsettled cost and any resource that
+may still be billing; a discrepancy is reconciled before the next paid action,
+never absorbed to keep an action looking affordable.
+
+**Attempt counting, prospective for this package only.** Invoking the formal
+launcher under a **new one-use authorization consumes one formal attempt**, even
+if it then refuses at `$0` before a provider resource exists. Read-only checks,
+code repair and engineering validation before issuance do not count. One
+provider-create call and one resource per formal invocation; a replacement pod,
+an internal redraw, a fresh `run_id` or a re-issuance does not evade the count.
+
+> This **supersedes nothing historical.** The 2026-09-04 ruling — that attempt 3
+> was not consumed because no provider resource was created — stands verbatim as
+> the rule attempt 3 actually ran under, and is not rewritten. The new rule
+> governs this package's attempts and no others.
+
+**Autonomous formal retry inside the package requires ALL of:** it can be
+*confirmed* that no formal probe training has started; the failure is an ordinary
+infrastructure failure whose cause is identified and addressed; frozen science,
+input contracts and the decision rule are unchanged; the previous resource is
+confirmed no longer billing; the remaining count and balance still fund a
+complete attempt plus teardown; and the new attempt uses a new run identity and a
+complete, valid one-use authorization chain.
+
+**Stop and report** once the first probe has *started* training — finished or
+not — or when it cannot be confirmed whether training started; on a real replay
+mismatch; on an input-identity conflict that cannot be restored to the frozen
+binding; on anything needing a protocol change; and on any complete, valid
+GO / NO-GO / INCONCLUSIVE. **An `INCONCLUSIVE` is a result, not an engineering
+failure**, and re-running one in pursuit of a GO is forbidden, as is splicing
+probes across attempts, substituting a seed, or selectively retaining outputs.
+
+**Instance policy lives in [`configs/experiments/phase_c1/authorization.json`](../../configs/experiments/phase_c1/authorization.json)**
+under `execution_package`, where the issuer reads the cap it refuses a
+mis-stated grant against. None of it is in `src/aadistill`.
+
+**Booked against this package so far: `$0.0000`.** Cumulative project spend is
+unchanged at **`$267.8998`** — an approval is not a cost.
+
+---
+
+## 2026-09-11 — C1 attempt 10: the frozen-asset gate, `$0.1177`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 10: 13/13 pre-provider gates passed twice — once in a read-only pre-flight that did not invoke the launcher, again by the launcher itself — pod `kabazpl889i5u5` created at `$1.09/h`, 6.48 min, **INFRASTRUCTURE ABORT during SETUP at the frozen-asset gate**, `SETUP_RC=91`. No driver stage, no replay, no training, no evaluation, no decision | `$0.1177` | [`runs/phase_c1/attempt10/`](../runs/stage-1/phase_c1/attempt10/) |
+
+**Cumulative: `$267.8998` + `$0.1177` = `$268.0175` of the `$320.0000` cap.**
+Package booked **`$0.1177`** of `$51.4425`; **1 of 3** formal attempts used.
+
+```text
+project   267.8998 + 0.1177 = 268.0175   of 320.0000, leaving 51.9825
+package     0.0000 + 0.1177 =   0.1177   of  51.4425, leaving 51.3248
+attempts                          1      of 3, leaving 2
+next attempt worst case  268.0175 + 15.1475 = 283.1650  <= 320.0000
+```
+
+**One provider resource, one create call, zero redraws**, watchdog detached
+before the create. Teardown confirmed **three** ways: the launcher's own report,
+an independent read-only poll running out of band that recorded an empty
+inventory at `10:14:08Z`, and the run manifest.
+
+**The cause, and why it was not free.** The initialization cutover relocated two
+of the scoring contract's six declared files, so the contract legitimately reads
+`recovery_search_scoring@v3`; the verifier's compiled-in constants still asked
+the pre-migration question, and the `--expect` flag that exists for exactly that
+distinction was never passed. Attempt 9 ran three days before the migration
+merged, so this setup gate had never been exercised post-migration. **The check
+was fully decidable on the dev box and had no dev-box counterpart** — that is
+why it was discovered on a billing pod, and it is now `frozen_assets_gate`, the
+fourteenth pre-provider gate, running the same script against the same committed
+expectation document.
+
+**Retry is pre-authorized.** All six conditions hold: no formal probe training
+started (the driver never ran), the cause is identified and repaired, frozen
+science and the decision rule are untouched, the resource is confirmed gone, and
+the count and balance fund a complete attempt. Attempt 11 uses a new run
+identity and a fresh one-use chain.
+
+---
+
+## 2026-09-11 — C1 attempt 11: the host never came up, `$0.2783`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 11: 14/14 pre-provider gates passed twice, pod `udkapuemrwqcmt` created at `$1.09/h`, **PROVIDER ACQUISITION FAILURE — `no_endpoint`**. `starting` for 840 s, no TCP 22 mapping ever appeared, abandoned at the 15-minute bound. Setup never started, so no marker was reached at all | `$0.2783` | [`runs/phase_c1/attempt11/`](../runs/stage-1/phase_c1/attempt11/) |
+
+**Cumulative: `$268.0175` + `$0.2783` = `$268.2958` of the `$320.0000` cap.**
+Package booked **`$0.3960`** of `$51.4425`; **2 of 3** formal attempts used.
+
+```text
+project   268.0175 + 0.2783 = 268.2958   of 320.0000, leaving 51.7042
+package     0.1177 + 0.2783 =   0.3960   of  51.4425, leaving 51.0465
+attempts                          2      of 3, leaving 1
+last attempt worst case  268.2958 + 15.1475 = 283.4433  <= 320.0000
+```
+
+**One create call, one resource, zero redraws**, watchdog detached before the
+create, teardown confirmed three ways. The independent out-of-band poll recorded
+`runtime: null` at three consecutive five-minute ticks — corroboration that the
+host never started, independent of anything the launcher reported.
+
+**This is not a defect in this repository and no repair here prevents it.** The
+15-minute abandonment is the documented rule working: `runtime: null` at 15
+minutes means the host is not starting, and continuing to wait is continuing to
+pay.
+
+**What it exposes is structural.** C1 launches with `--host-draws 1` because the
+grant permits exactly one provider resource. Every earlier session in this
+project drew up to three, deleting a cold host and drawing again, because this
+provider produces unreachable hosts often enough to plan for — continuation
+attempt 2 burned all three draws on `HOST_COLD`, continuation attempt 1 spent 29
+of 38 minutes on one, and micro-preflight attempt 4 lost `~$0.41` the same way.
+Under the one-resource rule, a condition every other session treated as a
+retryable draw consumes an entire formal attempt.
+
+**Stopped rather than retried.** The package pre-authorizes a retry whose cause
+has been *addressed*; this cause is identified but not addressable from here,
+and relaunching unchanged would bet the last of three attempts on the same
+lottery. That decision is the maintainer's.
+
+---
+
+## 2026-09-11 — AMENDED: the attempt cap and the one-resource rule are withdrawn
+
+The entry above ends with a decision the maintainer then took. Two constraints
+were **withdrawn prospectively**:
+
+* the **cap of three formal attempts**. There is no package-level limit on how
+  many times the formal launcher may be invoked. Sessions are still numbered,
+  recorded and ledgered one by one; what is gone is the ceiling on the count.
+* the **one-provider-resource-per-invocation rule**. A session may take up to
+  **three acquisition draws**, replacing a host that was created and never
+  became usable — with **at most one billing resource at any instant**, every
+  draw carrying its own pod id, cost, raw provider response and watchdog
+  journal, and all of them sharing the session's single `$15.1475` ceiling.
+
+**The money did not move.** `$51.4425` package, `$15.1475` per session,
+`$6.0000` engineering, `$320.0000` cap, `$0.6577` reconciliation margin — all
+unchanged. What changed is that **money, not a count, now bounds how many
+sessions are possible.** At `$15.1475` worst case per session, the `$51.0465`
+remaining funds three full-ceiling sessions and no more; a session that cannot
+be funded end to end, including evidence recovery and teardown, does not start.
+
+**Attempts 10 and 11 keep everything they ran under** — their costs, their
+numbering, their one-resource authorizations and the counting in force at the
+time. A withdrawal is prospective. It does not rewrite a record.
+
+The amendment is `execution_package._attempts_amendment_2026_09_11b` in
+`configs/experiments/phase_c1/authorization.json`, which is the source the
+generator reads.
+
+**One defect was named with it and is now closed.** The redraw path deleted a
+pod, ignored the result and created the next one, treating a returned
+subprocess as evidence that a resource had stopped billing.
+`SessionRunner.release_and_confirm` now deletes and then *waits for the
+provider* to report the resource not billing, and **aborts the session** rather
+than create a second resource when that cannot be confirmed.
+
+---
+
+## 2026-09-11 — C1 attempt 12: `$0.0000`, provider refused to create
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 12: 14/14 pre-provider gates passed twice — once in a read-only pre-flight that did not invoke the launcher, and again by the launcher. One create call, **refused**: *"There are no longer any instances available with the requested specifications."* No resource existed, nothing billed, nothing needed tearing down | `$0.0000` | [`runs/phase_c1/attempt12/`](../runs/stage-1/phase_c1/attempt12/) |
+
+**Cumulative unchanged: `$268.2958` of the `$320.0000` cap.** Package booked
+unchanged at **`$0.3960`** of `$51.4425`.
+
+```text
+project   268.2958 + 0.0000 = 268.2958   of 320.0000, leaving 51.7042
+package     0.3960 + 0.0000 =   0.3960   of  51.4425, leaving 51.0465
+sessions worst case  268.2958 + 15.1475 = 283.4433  <= 320.0000
+```
+
+**Capacity, not configuration.** The quote was the accepted `$1.09/h` rate, the
+gates all passed, and the request was simply not satisfiable at that moment.
+Host draws do not help here: a draw replaces a host that was *created* and never
+became usable, and creation itself was refused, so there was nothing to replace.
+A create-attempt loop would sleep and ask the same market again, which is stock
+chasing and is not authorized.
+
+**Backing off at `$0` and choosing a better moment is the handling the package
+permits.** A read-only capacity watch runs at `$0`; the next session is built
+only when capacity exists, because the one-use chain is consumed at invocation
+and should not be spent on a market that cannot serve it. Attempt 12's grant,
+authorization and bundle are **consumed** and authorize nothing further.

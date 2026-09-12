@@ -74,7 +74,7 @@ CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 CONTROL_ROOT = REPO / "artifacts/controls"
 CONTROLS = (("preflight_ctl_r0860k_sa", 20260726),
             ("preflight_ctl_r0860k_sb", 20260801))
-RECORDS = REPO / "logs/autoinit_permanent_controls"
+RECORDS = REPO / "logs/experiments/phase_a/results/autoinit_permanent_controls"
 BATTERY_CONTENT = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
 SMOKE_SETS = ("tool", "rag")
 
@@ -108,7 +108,7 @@ class ContinuationDriver:
             "stages": {}}
         AUDIT.mkdir(parents=True, exist_ok=True)
         self.auth = SpendAuthorization.load(
-            REPO / "logs/autoinit_continuation_authorization.json")
+            REPO / "logs/budget/approvals/autoinit_continuation_authorization.json")
         self.auth.require_plan(CONTINUATION_PLAN_V1.plan_hash)
         self.ev["authorization"] = self.auth.as_dict()
 

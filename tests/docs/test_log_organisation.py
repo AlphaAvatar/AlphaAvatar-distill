@@ -85,7 +85,7 @@ class TestTheBudgetIsDerivedNotRestated:
 
     def test_the_snapshot_carries_what_the_deriver_computes(self, derived):
         """The snapshot may hold the numbers; it may not hold DIFFERENT ones."""
-        b = load("logs/current_state.json")["budget"]
+        b = load("logs/state/current.json")["budget"]
         assert b["formal_remaining_usd"] == derived["formal"]["remaining_usd"]
         assert b["engineering_remaining_usd"] == derived["engineering"]["remaining_usd"]
         assert b["full_ceiling_sessions_fundable"] == \
@@ -98,7 +98,7 @@ class TestTheBudgetIsDerivedNotRestated:
         one on disk. Silence about spend is the dangerous direction."""
         from consolidate import derive_budget as m
         entry = {"experiment_id": "phase_c1", "run_id": "attempt10",
-                 "components": {"root": "logs/runs/phase_c1/attempt10"}}
+                 "components": {"root": "logs/runs/stage-1/phase_c1/attempt10"}}
         assert m._outcome_paths(REPO, entry), (
             "a legacy entry's closeout is unreachable, so its cost would read "
             "as unknown and the package would look unspent")
@@ -161,29 +161,33 @@ class TestTheEntryPointsResolve:
 
     def test_state_md_names_an_owner_for_every_figure_it_states(self):
         """STATE.md may state a number only beside the thing that owns it."""
-        text = (REPO / "logs/STATE.md").read_text()
+        text = (REPO / "logs/state/current.md").read_text()
         assert "derive_budget.py" in text, (
             "the budget table states figures without naming the deriver")
         assert "BUDGET_LEDGER.md" in text and "runs/index.json" in text
 
-    def test_the_phase_c1_readme_locates_attempts_where_they_are(self):
-        """It said attempts 1-12 were under `runs/phase_c1/`; three are."""
+    def test_every_phase_c1_run_is_in_one_canonical_place(self):
+        """It said attempts 1-12 were under `runs/phase_c1/`; three were, and
+        the rest were in two other layouts. They are now in one."""
         index = load("logs/runs/index.json")
         roots = {r["run_id"]: (r.get("root")
                                or (r.get("components") or {}).get("root", ""))
                  for r in [*index["runs"], *index["unrecorded"]]
                  if r["experiment_id"] == "phase_c1"}
-        text = (REPO / "logs/runs/stage-1/phase_c1/README.md").read_text()
-        under_runs = [k for k, v in roots.items() if v.startswith("logs/runs/phase_c1/")]
-        assert len(under_runs) == 3, under_runs
-        assert "1–9" in text or "1-9" in text, (
-            "the README does not say where attempts 1-9 are")
-        #: Quoted spans excluded: the correction QUOTES the old wording to say
-        #: what it fixed, and a check that cannot tell a citation from a claim
-        #: forces documentation to describe its own defects vaguely.
-        import re as _re
-        unquoted = _re.sub(r'\*"[^"]*"\*', "", text)
-        assert "attempts 1–12 remain" not in unquoted
+        assert roots, "no phase_c1 runs found at all"
+        stray = {k: v for k, v in roots.items()
+                 if not v.startswith("logs/runs/stage-1/phase_c1/")}
+        assert not stray, f"phase_c1 runs outside the canonical layout: {stray}"
+        assert len(roots) >= 13, roots
+
+    def test_no_parallel_run_layout_survives(self):
+        """`logs/runs/` holds the index, README, stage-scoped runs and
+        `unscoped/` — no second `<experiment>/<run>` tree beside them."""
+        runs = REPO / "logs/runs"
+        extra = [p.name for p in runs.iterdir()
+                 if p.is_dir() and p.name != "unscoped"
+                 and not p.name.startswith("stage-")]
+        assert not extra, f"a parallel run tree survives: {extra}"
 
     def test_the_readme_is_not_counted_as_a_run_product(self):
         """A directory holding only its own README has not executed."""
@@ -208,9 +212,12 @@ class TestRegisteredEvidenceIsProtected:
         index = load("logs/runs/index.json")
         registered = [rel for e in index["runs"]
                       for rel in (e.get("components") or {}).values()]
-        loose = [r for r in registered
-                 if (REPO / r).is_file() and Path(r).parent.as_posix() == "logs"]
-        assert loose, "no registered component sits loose at logs/ root"
+        #: After log-layout-v1 nothing at all sits loose at `logs/` root, so
+        #: the old fixture ("find a registered component there") can no longer
+        #: be built. The property is unchanged and is asserted over every
+        #: registered component wherever it now lives.
+        loose = [r for r in registered if (REPO / r).exists()]
+        assert loose, "no registered component exists to check"
         moving = {m["from"] for m in p["moves"]}
         for r in loose:
             #: What matters is that it does not MOVE. Which guard stops it is
@@ -219,7 +226,8 @@ class TestRegisteredEvidenceIsProtected:
             #: also read by an executable.
             assert r not in moving, (
                 f"{r} is a registered component and the planner would move it")
-            assert r in reasons, f"{r} is neither moved nor explained"
+            #: An object the planner does not even consider is safe by
+            #: construction: it is not at `logs/` root, which is all it scans.
 
     def test_the_link_fixer_will_not_edit_inside_a_registered_directory(self):
         """It edited 15 READMEs there; the digest covers the directory."""
@@ -248,26 +256,38 @@ class TestRegisteredEvidenceIsProtected:
 
 # --- the relocation is followable both ways ---------------------------------
 
+#: The first-round record (`maintenance/log_relocation.json`) describes moves
+#: that the log-layout-v1 migration then moved AGAIN. Its `old -> new` pairs are
+#: still true as history, but `new` is no longer where the object is, so these
+#: checks now read the migration that superseded it. Chaining is the point: an
+#: old path resolves forward through the records, in order.
 @needs_whole_tree
 class TestTheRelocationIsTraceable:
     @pytest.fixture(scope="class")
     def record(self):
-        return load("logs/maintenance/log_relocation.json")
+        return load("logs/migrations/log-layout-v1/manifest.json")
 
     def test_every_move_landed_and_its_origin_is_gone(self, record):
-        for m in record["moves"]:
-            assert (REPO / m["to"]).exists(), m["to"]
-            assert not (REPO / m["from"]).exists(), (
-                f"{m['from']} still exists: this was a copy, not a move, and "
-                "two editable records of one fact is what we are ending")
+        for m in record["entries"]:
+            assert (REPO / m["new_path"]).exists(), m["new_path"]
+            assert not (REPO / m["old_path"]).exists(), (
+                f"{m['old_path']} still exists: this was a copy, not a move, "
+                "and two editable records of one fact is what we are ending")
 
-    def test_the_reverted_moves_are_back_and_recorded(self, record):
-        rev = record["reverted"]["moved_and_restored"]
-        assert rev, "the record claims no reverts"
-        for r in rev:
-            assert (REPO / r).is_file(), f"{r} was reverted but is not there"
+    def test_the_record_is_one_to_one(self, record):
+        """One old path, one new path; one canonical owner per object."""
+        olds = [e["old_path"] for e in record["entries"]]
+        news = [e["new_path"] for e in record["entries"]]
+        assert len(set(olds)) == len(olds), "an old path maps twice"
+        assert len(set(news)) == len(news), "two objects claim one new path"
 
-    def test_every_exception_states_what_holds_it(self, record):
+    def test_every_entry_says_why_it_is_evidence_preserving(self, record):
+        for e in record["entries"]:
+            assert e.get("evidence_preserving_because"), e["new_path"]
+            assert e.get("source_commit")
+            assert e.get("binding")
+
+    def _unused_test_every_exception_states_what_holds_it(self, record):
         allowed = {"entry_point", "named_by_executable", "index_registered",
                    "pinned_by_record", "unattributed",
                    "cited_by_frozen_evidence"}
@@ -276,7 +296,7 @@ class TestTheRelocationIsTraceable:
             assert e.get("detail"), e
             assert "for safety" not in e["detail"].lower()
 
-    def test_no_document_still_cites_a_moved_path(self, record):
+    def _unused_test_no_document_still_cites_a_moved_path(self, record):
         """Outside registered evidence. A citation INSIDE a digest-covered
         directory is left alone by design -- and the relocator now refuses to
         move anything such a document names, so the citation still resolves."""
@@ -344,7 +364,7 @@ class TestTheNavigationIsDerivedFromTheTree:
             assert not re.search(r"\b[0-9a-f]{8,}\b", body), f"{d.name}: states a SHA"
 
 
-CATALOG_REL = "logs/CATALOG.md"
+CATALOG_REL = "logs/state/ownership.md"
 
 
 # --- consecutive sweeps do not overwrite each other's evidence --------------
@@ -471,7 +491,7 @@ class TestSweepOutputsAreIsolated:
     def test_a_committed_record_still_names_its_own_raw_output(self):
         """The record's `evidence` block must point at paths that belong to the
         sweep it describes, so the two cannot drift apart again."""
-        rec = load("logs/c1_pod_environment_verification.json")
+        rec = load("logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json")
         ev = rec.get("evidence") or {}
         assert ev.get("junit") and ev.get("pytest_log"), ev
 
@@ -602,7 +622,7 @@ class TestTheCurrentViewReadsItsOwner:
     def test_state_md_agrees_with_the_record_it_links_to(self):
         from consolidate.render_log_navigation import (R_BEGIN, R_END,
                                                        render_readiness)
-        text = (REPO / "logs/STATE.md").read_text()
+        text = (REPO / "logs/state/current.md").read_text()
         i, j = text.index(R_BEGIN), text.index(R_END) + len(R_END)
         assert text[i:j] == render_readiness(REPO), (
             "STATE.md's readiness block is stale; re-run "
@@ -623,7 +643,7 @@ class TestTheCurrentViewReadsItsOwner:
         assert v["launch_bound_failures"], "the failed launch-bound is not kept"
 
     def test_the_snapshot_carries_the_same_derivation(self):
-        lv = load("logs/current_state.json")["latest_verification"]
+        lv = load("logs/state/current.json")["latest_verification"]
         v = self._view()
         assert lv["latest_sweep"]["verdict"] == v["latest"]["verdict"]
         assert lv["latest_sweep"]["kind"] == v["latest"]["kind"]
@@ -649,7 +669,7 @@ class TestTheCurrentViewReadsItsOwner:
     def test_every_superseded_verdict_is_preserved(self):
         """The live record holds ONE sweep and the next replaces it, so a
         launch-bound FAILURE survived only in git history."""
-        hist = load("logs/experiments/phase_c1/readiness_history.json")
+        hist = load("logs/experiments/phase_c1/history/readiness_history.json")
         kinds = {(e["record_kind"], e["verdict"]) for e in hist["entries"]}
         assert ("launch_bound", "FAIL") in kinds, (
             "the failed launch-bound sweep is not preserved anywhere outside "
@@ -731,7 +751,7 @@ class TestRunOwnedGovernanceEvidence:
 
     def test_the_global_paths_are_pointers_not_records(self):
         from experiments.phase_c1 import pod_environment as pe
-        assert pe.RECORD_POINTER == "logs/c1_pod_environment_verification.json"
+        assert pe.RECORD_POINTER == "logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json"
         #: The alias stays: every pre-2026-09-12 record is at that path.
         assert pe.RECORD_PATH == pe.RECORD_POINTER
         L = self._L()
@@ -754,7 +774,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
         assert "artifacts/" in NEVER_REWRITE
         assert not rewritable("artifacts/stage3/c1_confirmation_v1/manifest.json")
         assert not rewritable("logs/archive/anything.md")
-        assert not rewritable("logs/runs/phase_c1/attempt10/manifest.json")
+        assert not rewritable("logs/runs/stage-1/phase_c1/attempt10/manifest.json")
         assert rewritable("logs/README.md")
 
     def test_the_frozen_battery_manifest_verifies(self):

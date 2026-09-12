@@ -2,7 +2,7 @@
 """Stage E6's six evaluation checkpoints and verify every one against its hash.
 
     /opt/train/bin/python scripts/pod/e6_stage_checkpoints.py \
-        --registration logs/e6_registration.json --relay-dest /workspace/ckpt \
+        --registration logs/experiments/early/analyses/e6_registration.json --relay-dest /workspace/ckpt \
         --devbox-src /workspace/ckpt_local --init <stage1 checkpoint> \
         --out artifacts/audit/e6_checkpoint_manifest.json
 

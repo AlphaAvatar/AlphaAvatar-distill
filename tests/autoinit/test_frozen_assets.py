@@ -28,7 +28,7 @@ STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
 #: where v1 remains on disk, and died on the pod's test gate, which is a blocking
 #: setup step. That cost $0.63 and a full setup cycle on 2026-08-14.
 RECOVERY_SEARCH = REPO / "artifacts/stage3/recovery_search_v2"
-ISOLATION = REPO / "logs/autoinit_role_isolation.json"
+ISOLATION = REPO / "logs/experiments/shared/analyses/autoinit_role_isolation.json"
 
 #: Both assets are gitignored, so a checkout that staged neither must SKIP rather
 #: than error. Guarding only on STATE_EVAL let a missing battery raise instead.
@@ -184,7 +184,7 @@ def test_tool_items_carry_what_the_frozen_scorer_consumes():
 
 
 def test_the_tool_scoring_audit_backs_the_scorable_decision():
-    audit = load(REPO / "logs/autoinit_tool_scoring_audit.json")
+    audit = load(REPO / "logs/experiments/shared/analyses/autoinit_tool_scoring_audit.json")
     assert audit["all_cases_behave_as_required"]
     assert audit["connection_is_mechanical"]
     assert audit["correctness_field_if_scorable"] == "tool_call_exact_match"
@@ -209,7 +209,7 @@ def test_both_historical_checkpoints_are_available_and_lineage_valid():
     gone is the failure this guards against, so a deleted entry must carry its
     deletion provenance and keep the hashes that remain its identity.
     """
-    report = load(REPO / "logs/autoinit_control_availability.json")
+    report = load(REPO / "logs/experiments/shared/analyses/autoinit_control_availability.json")
     assert report["relay_reachable"]
     assert report["both_pass_legacy_lineage_subset"], report["consequence"]
     for name, entry in report["controls"].items():
@@ -232,7 +232,7 @@ def test_both_historical_checkpoints_are_available_and_lineage_valid():
 
 
 def test_the_control_record_does_not_claim_they_are_phase_a_controls():
-    report = load(REPO / "logs/autoinit_control_availability.json")
+    report = load(REPO / "logs/experiments/shared/analyses/autoinit_control_availability.json")
     assert report["any_recipe_matched_control"] is False
     consequence = report["consequence"]
     assert "NOT Phase-A matched controls" in consequence
@@ -276,7 +276,7 @@ def test_battery_ids_are_reproducible_not_process_dependent():
 def test_the_equivalence_denominator_matches_the_battery():
     """The interval's n_pooled must track the scorable count, not a stale constant."""
     manifest = load(RECOVERY_SEARCH / "manifest.json")
-    prereg = load(REPO / "logs/autoinit_phase_a_preregistration.json")
+    prereg = load(REPO / "logs/experiments/phase_a/plans/autoinit_phase_a_preregistration.json")
     rule = prereg["recovery"]["selection_rules"]["equivalence_rule"]
     assert rule["n_pooled"] == manifest["n_scorable_prompts"] * 2
     assert rule["status"] == "PENDING_CONTROL_CHARACTERIZATION"

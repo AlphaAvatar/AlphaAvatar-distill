@@ -2,8 +2,8 @@
 
 A convention that only tests obey is not a convention. `RunLayout` and
 `build_run_manifest` existed for a while with **no production caller at all**:
-every C1 attempt wrote its session record to the flat `logs/autoinit_c1_session.json`,
-which the next attempt overwrote, and `logs/autoinit_c1_attempt9/` was assembled
+every C1 attempt wrote its session record to the flat `logs/experiments/phase_c1/analyses/autoinit_c1_session.json`,
+which the next attempt overwrote, and `logs/runs/stage-1/phase_c1/attempt9/` was assembled
 by hand afterwards. Meanwhile the three CUDA stage-F subruns wrote real
 directories under `logs/runs/` and recorded no manifest, so `logs/runs/index.json`
 reported `runs_current: 0` with three runs sitting on disk.

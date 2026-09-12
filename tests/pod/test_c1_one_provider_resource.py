@@ -393,7 +393,7 @@ def test_L_the_redraw_branch_is_reachable_and_capped():
 def test_M_the_live_grant_and_the_launcher_agree_on_acquisition():
     """Against the LIVE grant, not attempt 9's.
 
-    This read `logs/autoinit_c1_attempt9_grant.json`, a frozen artifact of a
+    This read `logs/budget/approvals/autoinit_c1_attempt9_grant.json`, a frozen artifact of a
     session that ran under the superseded rule. A contract test pointed at
     sealed evidence can only ever re-assert history.
     """

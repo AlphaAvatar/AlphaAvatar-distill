@@ -2,7 +2,7 @@
 """Can Phase B reuse Phase A's probes as evidence? Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/verify_historical_probe_reuse.py \
-        --out logs/autoinit_historical_probe_reuse.json
+        --out logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json
 
 Phase B's terminal procedure reuses historical sa/sb/sc results "only after
 strict reconstruction proves the same materialized recovery protocol and seed".
@@ -58,7 +58,7 @@ from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 #: Explicit: importing an adapter module no longer registers it.
 register_builtin_adapters()
 
-ATTEMPT = REPO_ROOT / "logs/autoinit_recovery_continuation_attempt7"
+ATTEMPT = REPO_ROOT / "logs/runs/unscoped/recovery_continuation/attempt7"
 PROBES = ATTEMPT / "probes"
 ATTESTED = ATTEMPT / "attested_evaluation_protocol.json"
 
@@ -199,7 +199,7 @@ def verify(root: Path = PROBES) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_historical_probe_reuse.json")
+    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json")
     args = ap.parse_args()
     result = verify()
     out = Path(args.out)

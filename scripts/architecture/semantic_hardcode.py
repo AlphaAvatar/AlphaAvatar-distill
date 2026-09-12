@@ -336,9 +336,9 @@ def main() -> int:
     for f in findings[:20]:
         print(f"  {f['rule']:38} {f['path'][14:]:34} {f['name']}")
     if args.write:
-        (REPO_ROOT / "logs/architecture_semantic_hardcode.json").write_text(
+        (REPO_ROOT / "logs/maintenance/inventories/architecture_semantic_hardcode.json").write_text(
             json.dumps(doc, indent=1) + "\n")
-        print("wrote logs/architecture_semantic_hardcode.json")
+        print("wrote logs/maintenance/inventories/architecture_semantic_hardcode.json")
     return 0
 
 

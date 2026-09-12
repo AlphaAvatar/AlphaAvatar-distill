@@ -12,7 +12,7 @@ builds ten genuinely different runs — including two stages that do not exist y
 — through the same functions.
 
 **The index counts runs, not artifact roots.** It reported 77. Attempt 9 is one
-run with two surviving components (`logs/autoinit_c1_attempt9` and
+run with two surviving components (`logs/runs/stage-1/phase_c1/attempt9` and
 `…_grant.json`); the old schema recorded them as two peers, so "how many C1
 attempts?" answered 19 for a phase that has had 9. There are **41 logical runs
 over 77 components**, and nothing moved to achieve that.
@@ -272,9 +272,20 @@ def test_no_run_dual_writes_a_legacy_path(index):
             continue
         for p in r["components"].values():
             assert p not in legacy, f"{p} is written by both a legacy and a current run"
-    for p in legacy:
-        assert not p.startswith("logs/runs/"), (
-            f"{p} is legacy but sits inside the hierarchical tree; one fact, one home")
+    #: "legacy must sit OUTSIDE logs/runs/" encoded the two-tree world, and
+    #: log-layout-v1 removed it: every run, legacy-registered or not, is now
+    #: under one hierarchy. The property that matters survives above -- no path
+    #: is claimed by two runs -- and is strengthened here across ALL entries,
+    #: which is what "one fact, one home" actually means.
+    seen: dict[str, str] = {}
+    for r in [*index["runs"], *index["unrecorded"]]:
+        paths = set((r.get("components") or {}).values())
+        if r.get("root"):
+            paths.add(r["root"])
+        for path in paths:
+            owner = f"{r['experiment_id']}/{r['run_id']}"
+            assert seen.setdefault(path, owner) == owner, (
+                f"{path} is claimed by {seen[path]} and by {owner}")
 
 
 def test_no_unregistered_attempt_entry_sits_directly_under_logs(index):
@@ -290,7 +301,7 @@ def test_no_unregistered_attempt_entry_sits_directly_under_logs(index):
 
 
 def test_latest_run_resolves_to_exactly_one_entry(index):
-    state = json.loads((REPO / "logs/current_state.json").read_text())
+    state = json.loads((REPO / "logs/state/current.json").read_text())
     latest = state.get("latest_run")
     assert latest is not None, "current_state.json declares no latest_run"
     #: Across BOTH `runs` and `unrecorded`: the latest run may legitimately be

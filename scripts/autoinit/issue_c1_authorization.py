@@ -2,7 +2,7 @@
 """Issue the ONE-USE Phase-C1 authorization. Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/issue_c1_authorization.py \
-        --grant logs/autoinit_c1_grant.json --require-clean
+        --grant logs/budget/approvals/autoinit_c1_grant.json --require-clean
 
 Same contract as the Phase-A, Phase-B and continuation issuers, and the same
 reason for it: the grant is an **input**, not a constant. `c1_authorization.py`
@@ -26,7 +26,7 @@ What this binds, and what invalidates it if edited:
   first -- importing its module does not register it;
 * the **C0 preregistration digest** as the science plan;
 * the **execution preregistration**, by its own self-verified hash;
-* the **hard ceiling**, cross-checked against `logs/phase_c1_pricing.json`;
+* the **hard ceiling**, cross-checked against `logs/experiments/phase_c1/plans/phase_c1_pricing.json`;
 * the **battery**, **teacher binding** and **scoring contract** identities the
   session will measure under.
 
@@ -62,7 +62,7 @@ from experiments.phase_c1.authorization_payload import (  # noqa: E402
 #: Every authorization issued before 2026-09-12 is at this path, and it was the
 #: canonical artifact: each issuance overwrote one file, so the authorization a
 #: session ran under lived where the next issuance would replace it.
-OUT = "logs/autoinit_c1_authorization.json"
+OUT = "logs/budget/approvals/autoinit_c1_authorization.json"
 
 
 def _out_for(run_id: str | None, stage_id: str | None) -> str:

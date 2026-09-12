@@ -27,7 +27,7 @@ BOTH, and they must not be conflated:
   not captured.
 
     python scripts/pod/summarize_pytest_outcomes.py --junit X --out Y \
-        [--expected logs/c1_pod_environment_verification.json] [--strict]
+        [--expected logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json] [--strict]
 
 `--strict` exits non-zero on any difference. Entirely local: it reads two files
 and writes one.

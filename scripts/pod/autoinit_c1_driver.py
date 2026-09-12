@@ -105,9 +105,9 @@ EVAL = REPO / "artifacts/eval/c1"
 WORK = REPO / "artifacts/autoinit/c1_arms"
 
 BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
-BATTERY_IDENTITY = REPO / "logs/experiments/phase_c1/battery.json"
-TEACHER_BINDING = REPO / "logs/experiments/phase_c1/teacher_binding.json"
-MEMORY_BASIS = REPO / "logs/autoinit_recovery_trainer_memory_basis.json"
+BATTERY_IDENTITY = REPO / "logs/experiments/phase_c1/plans/battery.json"
+TEACHER_BINDING = REPO / "logs/experiments/phase_c1/plans/teacher_binding.json"
+MEMORY_BASIS = REPO / "logs/experiments/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json"
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
 PACK_DIR = "artifacts/stage3/ladder_uniform_probe"
 C1_SCORER = REPO / "scripts/autoinit/score_c1_confirmation.py"
@@ -265,7 +265,7 @@ class C1Driver:
     """Stages B-I. No search, no rungs, no ranking, no elimination."""
 
     AUTHORIZATION_TYPE = C1Authorization
-    AUTHORIZATION_PATH = "logs/autoinit_c1_authorization.json"
+    AUTHORIZATION_PATH = "logs/budget/approvals/autoinit_c1_authorization.json"
 
     def __init__(self, a):
         self.a = a

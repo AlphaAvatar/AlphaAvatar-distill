@@ -100,7 +100,7 @@ class TestTheC1ContractIsUnchanged:
     def test_the_writer_sources_both_values_from_the_contract(self):
         """The producer/consumer property, and the reason neither value moved.
 
-        This first read `logs/c1_pod_environment_verification.json` off disk —
+        This first read `logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json` off disk —
         which the pod-simulated sweep caught at `$0`, because that record is one
         of the 1056 paths a C1 pod does not receive. A test that reads a
         repository artifact the session does not stage passes on a dev box and

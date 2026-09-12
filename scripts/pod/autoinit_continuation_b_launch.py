@@ -77,10 +77,10 @@ from autoinit_recovery_continuation_launch import (  # noqa: E402
 STATUS = f"{WS}/autoinit_continuation_b.status"
 RUN_LOG = f"{WS}/autoinit_continuation_b_run.log"
 AUTH_PATH = "logs/autoinit_continuation_b_authorization.json"
-FROZEN_SCIENCE_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
-PREREGISTRATION = REPO_ROOT / "logs/autoinit_continuation_b_preregistration.json"
-PRICING = REPO_ROOT / "logs/autoinit_behavioural_continuation_pricing.json"
-AMENDMENT = REPO_ROOT / "logs/autoinit_phase_b_identity_collapse_amendment.json"
+FROZEN_SCIENCE_PLAN = "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+PREREGISTRATION = REPO_ROOT / "logs/experiments/continuation_b/plans/autoinit_continuation_b_preregistration.json"
+PRICING = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_behavioural_continuation_pricing.json"
+AMENDMENT = REPO_ROOT / "logs/experiments/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
 
 #: Same exclusions as Phase B, plus this session's own whole-function test, which
 #: runs the continuation end to end on CPU and belongs on the dev box, plus the
@@ -130,7 +130,7 @@ CONTINUATION_LEAF_PREFIX = "phase_b_attempt5/selected_leaves"
 ADVANCING_NEW_LEAF = "fe9683e6a9c783bbc6fe276a78c851c6"
 ADVANCING_RETAINED = "85bde4ded2c31953f802e39cf2252c87"
 
-CONTINUATION_ASSET_MANIFEST = REPO_ROOT / "logs/autoinit_continuation_b_assets.json"
+CONTINUATION_ASSET_MANIFEST = REPO_ROOT / "logs/experiments/continuation_b/analyses/autoinit_continuation_b_assets.json"
 
 #: New scratch goes under the project's scratch root, one directory per session
 #: — NOT another `phase_b_*_scr` beside it in `$HOME`. Five of those already
@@ -159,7 +159,7 @@ DEFAULT_SCRATCH_ROOT = Path("/home/ecs-user/aad-scratch/sessions")
 # session that ran the Phase-A or P=2 search and is dominated by a `states.jsonl`
 # search journal of 26-55 MB, which this session is mechanically unable to write.
 # Derivation and the full measurement table:
-# `logs/autoinit_continuation_b_capacity.json`.
+# `logs/experiments/continuation_b/analyses/autoinit_continuation_b_capacity.json`.
 CONTINUATION_STORE_MEASURED_BYTES = 13_641_956
 #: Applied to the largest measured comparable rather than to the closest one. A
 #: continuation that runs its conditional `sc` writes two probes' worth of
@@ -518,7 +518,7 @@ def build_parser() -> argparse.ArgumentParser:
     from autoinit_phase_a_launch import build_parser as phase_a_parser
 
     ap = phase_a_parser()
-    ap.set_defaults(out="logs/autoinit_continuation_b_session.json",
+    ap.set_defaults(out="logs/experiments/continuation_b/analyses/autoinit_continuation_b_session.json",
                     disk_gb=120,
                     #: The corrected scientific inventory, not the old worst
                     #: case. No `sb` is missing — Attempt 4 bought the last one —

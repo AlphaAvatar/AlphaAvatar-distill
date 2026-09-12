@@ -50,7 +50,7 @@ def test_every_historical_probe_reconstructs_but_reuse_is_now_REFUSED():
 
     The numbers those probes carry are NOT in question: 570 frozen samples
     re-scored through the pre- and post-migration trees are byte-identical
-    (logs/architecture_scoring_equivalence.json). What has changed is the
+    (logs/maintenance/inventories/architecture_scoring_equivalence.json). What has changed is the
     IDENTITY rule, which is deliberately conservative and refuses a probe whose
     recorded scorer digest is not the live one.
 
@@ -277,7 +277,7 @@ def test_conclusion_three_is_read_from_the_equivalence_record(tmp_path):
 def test_the_committed_record_agrees_with_a_live_derivation():
     import json
 
-    path = REPO / "logs/autoinit_historical_reuse_position.json"
+    path = REPO / "logs/experiments/shared/analyses/autoinit_historical_reuse_position.json"
     assert path.is_file(), "run scripts/autoinit/historical_reuse_position.py"
     recorded = json.loads(path.read_text())
     live = _position()

@@ -24,7 +24,7 @@ never printed at all.
         --status  /home/ecs-user/aad-artifacts/e6b/e6b.status \\
         --config configs/stage3/e6b/e6b_p2_r2960k_sa.json \\
         --config configs/stage3/e6b/e6b_p2_r2960k_sb.json \\
-        --out logs/e6b_reconstructed_training_events.json
+        --out logs/experiments/early/analyses/e6b_reconstructed_training_events.json
 """
 
 from __future__ import annotations

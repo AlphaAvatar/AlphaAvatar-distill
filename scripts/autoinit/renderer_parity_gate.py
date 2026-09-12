@@ -44,7 +44,7 @@ from battery_render import (FROZEN_SOURCES, check_group_parity,  # noqa: E402
                             hub_cache)
 
 SCHEMA = "aadistill.autoinit.c1_renderer_parity/v1"
-RECORD = REPO_ROOT / "logs/experiments/phase_c1/renderer_parity.json"
+RECORD = REPO_ROOT / "logs/validations/renderer-parity/c1_renderer_parity.json"
 
 #: Every group must be accounted for. A gate that silently checked six of seven
 #: would be indistinguishable from one that checked all seven and passed.

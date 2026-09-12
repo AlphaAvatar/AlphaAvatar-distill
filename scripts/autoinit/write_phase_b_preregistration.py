@@ -2,7 +2,7 @@
 """Emit the machine-readable Phase-B preregistration. Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/write_phase_b_preregistration.py \
-        --out logs/autoinit_phase_b_preregistration.json
+        --out logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json
 
 Everything Phase B is committed to, **before any Phase-B result exists**,
 assembled from the live objects rather than transcribed so a field cannot drift
@@ -46,8 +46,8 @@ from aadistill.initialization.planning.ranking import (  # noqa: E402
 from experiments.recovery_policy import SEED_SA, SEED_SB, SEED_SC
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-FROZEN_SCIENCE_PLAN = REPO_ROOT / "logs/autoinit_phase_a_recovery_plan_frozen.json"
-REUSE_RECORD = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
+FROZEN_SCIENCE_PLAN = REPO_ROOT / "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+REUSE_RECORD = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
 STATE_EVAL_MANIFEST = REPO_ROOT / "artifacts/stage1/state_eval_v1/manifest.json"
 
 #: Transcribed, then verified against the file. A constant that reads its expected
@@ -180,7 +180,7 @@ def build() -> dict:
         # --- the science Phase B does NOT redefine -----------------------
         "science_plan": {
             "plan_hash": FROZEN_SCIENCE_PLAN_HASH,
-            "source": "logs/autoinit_phase_a_recovery_plan_frozen.json",
+            "source": "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json",
             "reused_unchanged": True,
             "equivalence_interval": science["equivalence_rule"]["value"],
             "feasibility_floor": science["feasibility_rule"]["value"],
@@ -232,7 +232,7 @@ def build() -> dict:
             "requirement": ("an imported result is citable ONLY where strict "
                             "reconstruction proves the same materialized recovery "
                             "protocol and seed"),
-            "record": "logs/autoinit_historical_probe_reuse.json",
+            "record": "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json",
             "probes_dir_digest": reuse.get("probes_dir_digest"),
             "verified_at_preregistration": sorted(
                 reuse.get("admitted_reusable_probes", [])),
@@ -307,7 +307,7 @@ def preregistration_identity(prereg: dict) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_phase_b_preregistration.json")
+    ap.add_argument("--out", default="logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json")
     args = ap.parse_args()
     prereg = build()
     out = Path(args.out)

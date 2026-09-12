@@ -61,7 +61,7 @@ from autoinit_science_inputs import (  # noqa: E402
 
 STATUS = f"{WS}/autoinit_preflight.status"
 RUN_LOG = f"{WS}/autoinit_preflight_run.log"
-AUTH_PATH = "logs/autoinit_micro_preflight_authorization.json"
+AUTH_PATH = "logs/budget/approvals/autoinit_micro_preflight_authorization.json"
 CONTROLS = ("preflight_ctl_r0860k_sa", "preflight_ctl_r0860k_sb")
 
 #: Dev-box-only artifacts the pod cannot fetch from the relay (~1.6 MB). Each one
@@ -248,7 +248,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/autoinit_preflight_session.json")
+    ap.add_argument("--out", default="logs/validations/micro-preflight/autoinit_preflight_session.json")
     return ap
 
 

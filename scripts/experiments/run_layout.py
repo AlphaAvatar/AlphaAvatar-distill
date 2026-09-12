@@ -84,7 +84,13 @@ PIPELINE_STAGE = re.compile(r"^(0|[1-9][0-9]*)$")
 
 #: Buckets for work that is not a pipeline stage at all. Named, because these
 #: are not numbers and must not be invented ad hoc.
-NON_PIPELINE_STAGES = ("shared",)
+#: `shared` is work that is not a pipeline stage at all -- engineering
+#: validation, storage maintenance. `unscoped` is a run whose pipeline stage no
+#: frozen record DETERMINES: the log-layout-v1 migration put every legacy run
+#: there rather than guess, because only `phase_c1` declares a stage and the
+#: other experiments' frozen records describe DRIVER stages, a different
+#: dimension. A stage that is merely unknown must not be invented.
+NON_PIPELINE_STAGES = ("shared", "unscoped")
 
 #: The run's own index, inside the run.
 MANIFEST_NAME = "manifest.json"

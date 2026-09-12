@@ -651,7 +651,7 @@ def main() -> int:
                     default="/nonexistent/runpodctl-canary-forced-failure")
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/e7_canary_rerun_evidence.json")
+    ap.add_argument("--out", default="logs/experiments/early/analyses/e7_canary_rerun_evidence.json")
     args = ap.parse_args()
 
     c = Canary(args)

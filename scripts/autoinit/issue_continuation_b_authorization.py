@@ -2,7 +2,7 @@
 """Issue the ONE-USE behavioural-continuation authorization. Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/issue_continuation_b_authorization.py \
-        --grant logs/autoinit_continuation_b_grant.json --require-clean
+        --grant logs/budget/approvals/autoinit_continuation_b_grant.json --require-clean
 
 Same contract as the Phase-A and Phase-B issuers, and the same reason for it: the
 grant is an **input**, not a constant. `phase_b_continuation.py` carries the
@@ -53,15 +53,15 @@ from experiments.phase_b.continuation import BOUND_EVIDENCE, CONTINUATION_PLAN_V
 from experiments.source_sets import recovery_scoring_contract, trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-FROZEN_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
-PREREGISTRATION = "logs/autoinit_continuation_b_preregistration.json"
-AMENDMENT = "logs/autoinit_phase_b_identity_collapse_amendment.json"
-STAGE1_SELECTION = "logs/autoinit_phase_b_attempt5/stage1_selection.json"
-HISTORICAL_REUSE = "logs/autoinit_historical_probe_reuse.json"
-ATTEMPT5_REUSE = "logs/autoinit_attempt5_probe_reuse.json"
-ATTEMPT4_REUSE = "logs/autoinit_attempt4_probe_reuse.json"
-ASSETS = "logs/autoinit_continuation_b_assets.json"
-PRICING = "logs/autoinit_behavioural_continuation_pricing.json"
+FROZEN_PLAN = "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+PREREGISTRATION = "logs/experiments/continuation_b/plans/autoinit_continuation_b_preregistration.json"
+AMENDMENT = "logs/experiments/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
+STAGE1_SELECTION = "logs/runs/unscoped/phase_b/attempt5/stage1_selection.json"
+HISTORICAL_REUSE = "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
+ATTEMPT5_REUSE = "logs/experiments/shared/analyses/autoinit_attempt5_probe_reuse.json"
+ATTEMPT4_REUSE = "logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json"
+ASSETS = "logs/experiments/continuation_b/analyses/autoinit_continuation_b_assets.json"
+PRICING = "logs/experiments/shared/analyses/autoinit_behavioural_continuation_pricing.json"
 
 #: Derived by `price_behavioural_continuation.py` and approved unchanged. The
 #: floor is ONE probe (the mandatory missing `sb`); the ceiling is THREE (that

@@ -1,7 +1,7 @@
 """Prove the causal-depth runtime repair changed no decision.
 
     PYTHONPATH=src python scripts/autoinit/verify_depth_backend_equivalence.py \
-        --out logs/autoinit_depth_backend_equivalence.json
+        --out logs/validations/depth-backend/autoinit_depth_backend_equivalence.json
 
 `depth.causal_kl_greedy_v1` scored on the host until 2026-08-19 because the port
 of `scripts/training/search_depth_map.py` inserted `.cpu()` on the logits and the
@@ -175,7 +175,7 @@ def frozen_rule_known_answer() -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_depth_backend_equivalence.json")
+    ap.add_argument("--out", default="logs/validations/depth-backend/autoinit_depth_backend_equivalence.json")
     ap.add_argument("--layers", type=int, default=8)
     ap.add_argument("--remove", type=int, default=3)
     ap.add_argument("--items", type=int, default=6)

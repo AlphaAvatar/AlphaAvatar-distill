@@ -60,7 +60,7 @@ def test_the_frozen_assets_are_untouched():
     `capability` — are byte-identical across all three moves. That is checked by
     execution rather than argued: 570 frozen search-path samples, re-scored
     through the pre- and post-migration trees, are identical per sample and in
-    aggregate (`logs/architecture_scoring_equivalence.json`, regenerated at this
+    aggregate (`logs/maintenance/inventories/architecture_scoring_equivalence.json`, regenerated at this
     tree).
 
     The battery hashes below did not move at all, which is the other half of
@@ -92,7 +92,7 @@ def test_the_frozen_assets_are_untouched():
 
     # The pinned digest is only allowed to move because this holds. Read it,
     # rather than trusting the docstring above.
-    eq = json.loads((REPO / "logs/architecture_scoring_equivalence.json").read_text())
+    eq = json.loads((REPO / "logs/maintenance/inventories/architecture_scoring_equivalence.json").read_text())
     assert eq["all_scores_identical"] is True
     assert eq["total_samples"] == 570
     manifest, manifest_sha = C1S.battery_manifest(C1_BATTERY)
@@ -138,7 +138,7 @@ def test_the_metric_contract_pins_the_frozen_denominators():
 
 @pytest.mark.skipif(not HISTORICAL, reason="no retained historical generations")
 def test_the_committed_equivalence_record_says_identical():
-    rec = json.loads((REPO / "logs/experiments/phase_c1/scoring_equivalence.json").read_text())
+    rec = json.loads((REPO / "logs/experiments/phase_c1/results/scoring_equivalence.json").read_text())
     assert rec["verdict"] == "IDENTICAL"
     assert rec["total_differences"] == 0
     assert rec["n_cases"] >= 3
@@ -206,7 +206,7 @@ def test_the_equivalence_gate_cannot_cover_correct_implies_usable(monkeypatch,
     never fires and the equivalence gate cannot discriminate it. Breaking the
     rule therefore produces no difference — which is a fact about the evidence,
     not a licence. The rule is covered directly below instead, and the hole is
-    recorded in `logs/experiments/phase_c1/scoring_equivalence.json`.
+    recorded in `logs/experiments/phase_c1/results/scoring_equivalence.json`.
     """
     def mutate(mp):
         def naive(*, usable, scorer_correct, scorable=True, rule=None):

@@ -140,7 +140,7 @@ def test_the_observed_device_fields_are_untouched():
     """The five placements the PASS rests on, read from the subrun's own
     report."""
     rep = json.loads(
-        (REPO / "logs/runs/cuda_stage_f/cuda_stage_f_20260910_s3/artifacts"
+        (REPO / "logs/validations/cuda-stage-f/runs/cuda_stage_f_20260910_s3/artifacts"
                 "/cuda_engineering/cuda_stage_f_20260910_s3/suffix_evidence.json"
          ).read_text())
     proofs = [(case["geometry_id"], name, p)

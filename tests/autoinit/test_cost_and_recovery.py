@@ -857,7 +857,7 @@ def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
     # paths. Not a change of scorer -- four are byte-identical, the other two
     # differ only in import lines, and 570 frozen samples re-scored through
     # both trees are byte-identical
-    # (logs/architecture_scoring_equivalence.json).
+    # (logs/maintenance/inventories/architecture_scoring_equivalence.json).
     assert contract["contract"] == "recovery_search_scoring@v3"
     assert len(contract["digest"]) == 64
     covered = {e["path"] for e in contract["files"]}
@@ -888,7 +888,7 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
 
     This used to require the recorded digest to equal the live one. That is the
     right check while the code and the record describe the same tree, and the
-    wrong one afterwards: `logs/autoinit_phase_a_preregistration.json` is the
+    wrong one afterwards: `logs/experiments/phase_a/plans/autoinit_phase_a_preregistration.json` is the
     record of a COMPLETED run, so re-emitting it to match today's code would
     claim that run executed the relocated implementation.
 
@@ -897,7 +897,7 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
     old launch fail closed rather than proceed against thresholds measured
     under different code.
     """
-    path = REPO / "logs/autoinit_phase_a_preregistration.json"
+    path = REPO / "logs/experiments/phase_a/plans/autoinit_phase_a_preregistration.json"
     if not path.is_file():
         pytest.skip("preregistration not present")
     from experiments.source_sets import recovery_scoring_contract
@@ -990,7 +990,7 @@ def test_the_preflight_plan_is_hashable_and_orders_money_last():
 
 
 def test_the_historical_controls_are_not_labelled_as_valid_controls():
-    audit_path = REPO / "logs/autoinit_recovery_fingerprint_audit.json"
+    audit_path = REPO / "logs/experiments/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json"
     if not audit_path.is_file():
         pytest.skip("fingerprint audit not present")
     audit = json.loads(audit_path.read_text())
@@ -1016,7 +1016,7 @@ def test_the_historical_controls_are_not_labelled_as_valid_controls():
 
 def test_the_availability_report_does_not_claim_a_matched_control():
     """Lineage verification is a strict subset of protocol matching."""
-    path = REPO / "logs/autoinit_control_availability.json"
+    path = REPO / "logs/experiments/shared/analyses/autoinit_control_availability.json"
     if not path.is_file():
         pytest.skip("availability report not present")
     report = json.loads(path.read_text())

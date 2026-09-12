@@ -1,7 +1,7 @@
 """Fail-closed isolation check across every AutoInitializer data role.
 
     PYTHONPATH=src .venv/bin/python scripts/data/check_autoinit_role_isolation.py \
-        --out logs/autoinit_role_isolation.json
+        --out logs/experiments/shared/analyses/autoinit_role_isolation.json
 
 Five roles, and no prompt may appear under two of them:
 
@@ -187,7 +187,7 @@ def load_roles(args) -> dict[str, RoleAssets]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_role_isolation.json")
+    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_role_isolation.json")
     ap.add_argument("--calibration", default="artifacts/stage1/e8_calibration_v1")
     ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
     ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v2")

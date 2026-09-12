@@ -23,7 +23,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-REGISTRATION = REPO / "logs/e6_registration.json"
+REGISTRATION = REPO / "logs/experiments/early/analyses/e6_registration.json"
 DRIVER = REPO / "scripts/pod/e6_driver.py"
 
 pytestmark = pytest.mark.skipif(

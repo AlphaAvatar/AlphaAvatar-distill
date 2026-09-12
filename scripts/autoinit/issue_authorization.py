@@ -30,7 +30,7 @@ from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_micro_preflight_authorization.json")
+    ap.add_argument("--out", default="logs/budget/approvals/autoinit_micro_preflight_authorization.json")
     args = ap.parse_args()
 
     commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,

@@ -48,7 +48,7 @@ from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 HISTORICAL_BATTERY = REPO_ROOT / "artifacts/stage3/recovery_search_v2"
 FROZEN_SCORER = REPO_ROOT / "scripts/autoinit/score_recovery_search.py"
-OUT = REPO_ROOT / "logs/experiments/phase_c1/scoring_equivalence.json"
+OUT = REPO_ROOT / "logs/experiments/phase_c1/results/scoring_equivalence.json"
 
 #: Where retained historical evidence lives on a dev box. Searched, not required:
 #: the generations are large and out of tree by policy (AGENTS.md 2.5), so this

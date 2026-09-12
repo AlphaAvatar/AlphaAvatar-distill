@@ -17,7 +17,7 @@ Three comparisons, and the third is the one the control exists for:
     C vs A    matched extra KD alone: how much is just more KD signal
     B vs C    what FineWeb's CONTENT adds beyond that
 
-The interpretation is fixed in advance (`logs/e7_preregistration.md` 7.4) and
+The interpretation is fixed in advance (`logs/experiments/early/analyses/e7_preregistration.md` 7.4) and
 separates three things that are easy to blur: general-language restoration,
 autonomous stability, and autonomous reasoning correctness. **If B improves the
 general-text diagnostics but does not beat C on autonomous correctness, FineWeb
@@ -55,7 +55,7 @@ from analyze_e6 import (  # noqa: E402  — one scorer, shared by both experimen
 
 AUDIT = REPO_ROOT / "artifacts/audit"
 THREE_MODE = AUDIT / "three_mode"
-REGISTRATION = REPO_ROOT / "logs/e7_preregistration.md"
+REGISTRATION = REPO_ROOT / "logs/experiments/early/analyses/e7_preregistration.md"
 
 FLOORS = {"usable_rollout_rate": 0.0800, "correct_overall": 0.0600}
 SEEDS = ("sa", "sb")
@@ -220,8 +220,8 @@ def qualitative(arms: dict, sessions: dict, a_alias: str, b_alias: str,
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/e7_results.json")
-    ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/e7_report.md")
+    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/experiments/early/analyses/e7_results.json")
+    ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/experiments/early/analyses/e7_report.md")
     ap.add_argument("--per-prompt", type=Path,
                     default=AUDIT / "e7_per_prompt.jsonl")
     ap.add_argument("--bootstrap", type=int, default=10000)

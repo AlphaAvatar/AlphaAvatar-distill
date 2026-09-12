@@ -50,7 +50,7 @@ from experiments.phase_b.post_freeze import (  # noqa: E402
     SEALED_LEGACY_NOTE,
 )
 
-PREREG = "logs/autoinit_phase_b_preregistration.json"
+PREREG = "logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json"
 
 
 def git(*args: str) -> str:

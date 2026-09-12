@@ -63,7 +63,7 @@ from autoinit_science_inputs import (  # noqa: E402
 
 STATUS = f"{WS}/autoinit_measurement.status"
 RUN_LOG = f"{WS}/autoinit_measurement_run.log"
-AUTH_PATH = "logs/autoinit_measurement_authorization.json"
+AUTH_PATH = "logs/budget/approvals/autoinit_measurement_authorization.json"
 #: The two frozen assets the SHARED SETUP verifies, not the ones this session
 #: reads. It reads neither: the measurement needs only the calibration and the
 #: teacher, both from the relay. But `autoinit_preflight_setup.sh` runs
@@ -85,7 +85,7 @@ TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
                 "tests/pod/test_phase_a_stages1_5_execute.py")
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
-#: From `logs/autoinit_causal_depth_pricing_bound.json`. The measurement itself is
+#: From `logs/experiments/shared/analyses/autoinit_causal_depth_pricing_bound.json`. The measurement itself is
 #: ~2.4 min of evaluations at E8a's rate; everything else is session overhead,
 #: which is why the ceiling is dominated by setup and load rather than by work.
 SETUP_MINUTES = 12.0
@@ -232,7 +232,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=str(Path.home() / ".runpod/config.toml"))
-    ap.add_argument("--out", default="logs/autoinit_measurement_session.json")
+    ap.add_argument("--out", default="logs/experiments/measurement/analyses/autoinit_measurement_session.json")
     return ap
 
 

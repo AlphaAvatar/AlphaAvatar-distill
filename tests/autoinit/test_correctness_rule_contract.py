@@ -215,6 +215,6 @@ def test_the_covered_behavior_v0_equivalence_still_holds():
     re-scored through the pre- and post-migration trees."""
     import json
 
-    eq = json.loads((REPO / "logs/architecture_scoring_equivalence.json").read_text())
+    eq = json.loads((REPO / "logs/maintenance/inventories/architecture_scoring_equivalence.json").read_text())
     assert eq["all_scores_identical"] is True
     assert eq["total_samples"] == 570

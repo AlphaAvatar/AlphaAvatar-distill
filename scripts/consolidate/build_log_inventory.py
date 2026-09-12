@@ -2,7 +2,7 @@
 """Complete inventory of the project's documentary storage, before anything is deleted.
 
     PYTHONPATH=src python scripts/consolidate/build_log_inventory.py \
-        --out logs/log_inventory.json
+        --out logs/maintenance/inventories/log_inventory.json
 
 Nothing is deleted here. This answers the questions a cleanup has to answer first:
 
@@ -66,12 +66,12 @@ DOCUMENTARY = ("logs", "docs", "configs", "README.md", "AGENTS.md")
 #: reference rule cannot pick. Each entry is (sha256 prefix -> canonical path, why).
 CANONICAL_OVERRIDES = {
     "db5bb0cb33ed": (
-        "logs/autoinit_stage3_complete/imported_controls.json",
+        "logs/experiments/phase_a/results/autoinit_stage3_complete/imported_controls.json",
         "the same control import served attempt 7 and the completed attempt 8. "
         "The completed run owns it: its products are the frozen Stage-3 artifacts, "
         "so a reader following the accepted result finds the file in place."),
     "b39bc39e5908": (
-        "logs/autoinit_preflight_run4/preflight_evidence.json",
+        "logs/validations/micro-preflight/runs/autoinit_preflight_run4/preflight_evidence.json",
         "one session wrote one evidence file. `write_preregistration.py` and the "
         "materialized preregistration both cite this path; the copy under "
         "autoinit_permanent_controls/ is that file under a second name."),
@@ -82,7 +82,7 @@ CANONICAL_OVERRIDES = {
 #: already in history" cannot quietly stop being true.
 STALE_SNAPSHOTS = {
     "logs/archive/current_state_20260817_full.json":
-        ("3261f6b67e513a9c7c4260e3a7ccc91c847dc127", "logs/current_state.json"),
+        ("3261f6b67e513a9c7c4260e3a7ccc91c847dc127", "logs/state/current.json"),
 }
 
 #: Files whose shape says "scratch" but which carry evidence held nowhere else.
@@ -224,7 +224,7 @@ def verbatim_narrative_overlap(paths: list[Path]) -> list[dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--out", default="logs/log_inventory.json")
+    ap.add_argument("--out", default="logs/maintenance/inventories/log_inventory.json")
     args = ap.parse_args()
 
     files = iter_files()

@@ -247,7 +247,7 @@ def markdown_table(data: dict) -> str:
                f"headline at the time and resolves at only 3.3x its seed spread; held-out "
                f"NLL ({data['guard']['band']} band) was its guard rail and was later retired "
                f"as a selection identity outright. Reference values — {guard}. The current "
-               f"Stage 2/3 primary metric is `usable_rollout`; see logs/EXPERIMENTS.md.")
+               f"Stage 2/3 primary metric is `usable_rollout`; see logs/archive/indexes/EXPERIMENTS.md.")
     # Only mention unscored references when there are some. The teacher was the
     # last one outstanding and was scored on 2026-07-28, which left this trailing
     # an empty list.

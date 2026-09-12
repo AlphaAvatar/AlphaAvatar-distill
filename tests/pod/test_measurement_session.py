@@ -61,7 +61,7 @@ def test_it_uses_its_own_authorization_and_plan_not_phase_as(spec):
 
     assert spec.plan_hash == MEASUREMENT_PLAN_V1.plan_hash
     assert spec.plan_hash != PHASE_A_PLAN_V1.plan_hash
-    assert spec.authorization_path == "logs/autoinit_measurement_authorization.json"
+    assert spec.authorization_path == "logs/budget/approvals/autoinit_measurement_authorization.json"
     assert "phase_a" not in spec.authorization_path
 
 

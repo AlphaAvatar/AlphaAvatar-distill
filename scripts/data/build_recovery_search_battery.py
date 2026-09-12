@@ -62,7 +62,7 @@ SETS = {
     # Scorable as of the tool-scoring audit: `behavior.score_tool_call` consumes
     # the battery after a mechanical envelope translation, distinguishes all six
     # adversarial cases, and its exact-match verdict never depends on the one
-    # interpretive field. See logs/autoinit_tool_scoring_audit.json.
+    # interpretive field. See logs/experiments/shared/analyses/autoinit_tool_scoring_audit.json.
     "tool":           ("tool", 20, True),
 }
 
@@ -430,7 +430,7 @@ def main() -> None:
             "tool": ("behavior.score_tool_call, correctness = tool_call_exact_match "
                      "against gold_tool_calls; tool_args_schema_ok is a diagnostic "
                      "because its `required` list interprets xLAM's convention"),
-            "tool_audit": "logs/autoinit_tool_scoring_audit.json",
+            "tool_audit": "logs/experiments/shared/analyses/autoinit_tool_scoring_audit.json",
             "tool_strictness": (
                 "exact match compares the emitted call list to the gold list in "
                 "order; 9 of 20 items are multi-call. This is the existing frozen "

@@ -2,7 +2,7 @@
 """Canonical inventory of every checkpoint and weight artifact, wherever it lives.
 
     PYTHONPATH=src python scripts/consolidate/build_checkpoint_registry.py \
-        --hash --relay --out logs/checkpoint_registry.json
+        --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json
 
 Nothing is deleted here. This produces the registry a deletion pass may act on,
 and the rule is that no file is removed before it appears in this file with a
@@ -117,7 +117,7 @@ CLASSIFY: dict[str, dict] = {
         retention="duplicate", status="superseded",
         why="a 32-wide 6-layer toy model built by a $0 CPU dry run; its identity "
             "is recorded in artifacts/autoinit/dryrun/search/states.jsonl and in "
-            "logs/autoinit_dryrun_fresh.json",
+            "logs/validations/dryrun/autoinit_dryrun_fresh.json",
         never_delete=None,
         reconstruction="PYTHONPATH=src python scripts/autoinit/dry_run_search.py "
                        "--out artifacts/autoinit/dryrun",
@@ -128,7 +128,7 @@ CLASSIFY: dict[str, dict] = {
         why="a materialized beam leaf of the $0 toy search. Its complete lineage — "
             "arch spec hash, artifact digest, config hash, parameter count, score "
             "and prune decision — is in search/states.jsonl and in "
-            "logs/autoinit_dryrun_fresh.json / _resume.json",
+            "logs/validations/dryrun/autoinit_dryrun_fresh.json / _resume.json",
         never_delete=None,
         reconstruction="PYTHONPATH=src python scripts/autoinit/dry_run_search.py "
                        "--out artifacts/autoinit/dryrun",
@@ -219,7 +219,7 @@ BULK_DUPLICATE_NOTES = {
         "the rebuilt ladder from scripts/data/audit_e1_mixture_rebuild.py. Its "
         "blocks.npz and audit.jsonl are byte-identical to the historical pack it "
         "was compared against; the audit's value is the recorded match "
-        "(artifacts/audit/e1_mixture_rebuild.json, logs/EXPERIMENTS.md), not the "
+        "(artifacts/audit/e1_mixture_rebuild.json, logs/archive/indexes/EXPERIMENTS.md), not the "
         "second copy of the bytes"),
     "artifacts/stage3/ladder_uniform": (
         "the trainer-side name of the frozen training pack. Byte-identical to "
@@ -372,7 +372,7 @@ def mirror_verifications() -> dict[str, dict]:
     """What scripts/consolidate/verify_relay_mirror.py has actually proved, keyed
     by local tree. A `verified_stale_cache` deletion cites this, so the registry
     reads the evidence rather than repeating a claim about it."""
-    p = REPO_ROOT / "logs/relay_mirror_verification.json"
+    p = REPO_ROOT / "logs/validations/relay-mirror/relay_mirror_verification.json"
     if not p.is_file():
         return {}
     out = {}
@@ -384,7 +384,7 @@ def mirror_verifications() -> dict[str, dict]:
             "by_lfs_oid": v["verified_by_lfs_oid"],
             "by_download": v["verified_by_download"],
             "generated_utc": v["generated_utc"],
-            "evidence": "logs/relay_mirror_verification.json",
+            "evidence": "logs/validations/relay-mirror/relay_mirror_verification.json",
         }
     return out
 
@@ -430,7 +430,7 @@ def bulk_duplicates() -> list[dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--out", default="logs/checkpoint_registry.json")
+    ap.add_argument("--out", default="logs/maintenance/inventories/checkpoint_registry.json")
     ap.add_argument("--hash", action="store_true",
                     help="compute weight sha256 (slow; the registry is not "
                          "authoritative for deletion without it)")
@@ -526,7 +526,7 @@ def main() -> int:
         "deletion_rule": ("a checkpoint may be deleted only if it is not protected, "
                           "no never_delete clause applies, its scientific status is "
                           "recorded elsewhere, its hash is in this registry, and a "
-                          "tombstone is written to logs/checkpoint_tombstones.json"),
+                          "tombstone is written to logs/maintenance/inventories/checkpoint_tombstones.json"),
         "retention_classes": sorted({e["retention"] for e in entries}),
         "protected_classes": sorted(PROTECTED),
         "local": {

@@ -536,7 +536,7 @@ def run_entrypoint(args, *, hardware=None, teacher_loader=load_teacher,
         "compare_against": {
             "e8a_frozen_cost_model": "260 evaluations in 1,300 s = 21.7 min, 12.0/min",
             "attempt_10_host_path": ">= 647 min for one expansion, unfinished",
-            "cpu_equivalence_artifact": "logs/autoinit_depth_backend_equivalence.json",
+            "cpu_equivalence_artifact": "logs/validations/depth-backend/autoinit_depth_backend_equivalence.json",
         },
     }
     out = Path(repo_root) / args.out

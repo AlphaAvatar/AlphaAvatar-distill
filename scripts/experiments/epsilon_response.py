@@ -6,7 +6,7 @@ the instance too, and the instance's prose named Phase A -- so a generic ranking
 module told every reader which of THIS project's phases would not start.
 
 **The four sentences are transcribed verbatim.** They are recorded in
-`logs/autoinit_phase_a_preregistration.json`, which is frozen, so the rule must
+`logs/experiments/phase_a/plans/autoinit_phase_a_preregistration.json`, which is frozen, so the rule must
 keep producing exactly these bytes.
 """
 from __future__ import annotations

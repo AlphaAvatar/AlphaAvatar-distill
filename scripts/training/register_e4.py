@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Write the immutable Experiment 4 registration, BEFORE anything trains.
 
-    PYTHONPATH=src python scripts/training/register_e3.py --out logs/e4_registration.json
+    PYTHONPATH=src python scripts/training/register_e3.py --out logs/experiments/early/analyses/e4_registration.json
 
 Pins, by hash, everything the experiment's conclusions will depend on: the six
 arm configs, the Stage 1 fork point, the packed rung that trains, the corpus the
@@ -95,7 +95,7 @@ NOISE_FLOORS = {
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/e4_registration.json")
+    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/experiments/early/analyses/e4_registration.json")
     args = ap.parse_args()
 
     meta = load_ladder_meta(PACK)

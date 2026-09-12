@@ -85,7 +85,7 @@ class EvaluationReadinessError(ControlImportError):
 #: passed every identity check and then could not render one prompt, because its
 #: package was missing all three of these files. `sa` had them and was
 #: characterized. Restored by a packaging repair on 2026-08-15 —
-#: `logs/autoinit_control_sb_packaging_repair.json` — with no retraining and no
+#: `logs/experiments/shared/analyses/autoinit_control_sb_packaging_repair.json` — with no retraining and no
 #: weight change.
 EVALUATION_READY_ASSETS_V1: dict[str, str] = {
     "chat_template.jinja":
@@ -487,7 +487,7 @@ CONTINUATION_AUTHORIZATION = SpendAuthorization(
     harness_source_files=CONTINUATION_HARNESS_SOURCE_FILES_V1,
     #: The continuation's artifact is written under the same WIRE contract as
     #: the preflight's -- same schema, same `preflight_plan_hash` key -- which
-    #: is why `logs/autoinit_continuation_authorization.json` reads with it.
+    #: is why `logs/budget/approvals/autoinit_continuation_authorization.json` reads with it.
     #: That contract used to be literals inside the generic `as_dict`, one of
     #: which named Phase A. The policy still grants nothing.
     action_policy=PREFLIGHT_POLICY,

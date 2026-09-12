@@ -16,7 +16,7 @@ Writes two files:
   * a JSONL file with the same cases, for programmatic analysis
 
     uv run python scripts/evaluation/build_test_cases.py \
-        --eval-dir artifacts/eval/e1 --out logs/e1_test_cases.md
+        --eval-dir artifacts/eval/e1 --out logs/experiments/early/analyses/e1_test_cases.md
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def pick(rows: list[dict], per_bucket: int) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--eval-dir", default="artifacts/eval/e1")
-    ap.add_argument("--out", default="logs/e1_test_cases.md")
+    ap.add_argument("--out", default="logs/experiments/early/analyses/e1_test_cases.md")
     ap.add_argument("--per-bucket", type=int, default=6)
     ap.add_argument("--prompts", nargs="*",
                     default=["data/eval_behavior_v0/prompts.jsonl",

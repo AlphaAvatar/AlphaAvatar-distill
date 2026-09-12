@@ -186,7 +186,7 @@ def select(candidates: list[dict]) -> dict | None:
     decodes a greedy candidate at all, and the determinism claim did not survive
     measurement: bf16 greedy decoding is not batch-invariant, so candidate 0 was
     never reproducible across batch compositions the way the rule assumed
-    ([log](../../logs/EXPERIMENTS.md)).
+    ([log](../../logs/archive/indexes/EXPERIMENTS.md)).
     With every candidate an equal draw, privileging index 0 would just be
     selecting on batch position.
     """

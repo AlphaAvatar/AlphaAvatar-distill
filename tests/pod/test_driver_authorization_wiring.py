@@ -206,8 +206,8 @@ def test_the_mutation_that_caused_attempt_2_is_caught(tmp_path, monkeypatch):
     (repo / "logs").mkdir(parents=True)
     (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).write_text(
         json.dumps(fixture_auth_payload()))
-    shutil.copy(REPO / "logs/autoinit_phase_a_authorization.json",
-                repo / "logs/autoinit_phase_a_authorization.json")
+    shutil.copy(REPO / "logs/budget/approvals/autoinit_phase_a_authorization.json",
+                repo / "logs/budget/approvals/autoinit_phase_a_authorization.json")
     monkeypatch.setattr(mod, "REPO", repo)
     monkeypatch.setattr(mod, "AUDIT", tmp_path / "audit")
 
@@ -232,12 +232,12 @@ def test_the_mutation_that_caused_attempt_2_is_caught(tmp_path, monkeypatch):
 #: that bug is a wrong ceiling rather than a crash.
 DRIVER_WIRING = (
     ("autoinit_phase_a_driver", "PhaseADriver",
-     "PhaseAAuthorization", "logs/autoinit_phase_a_authorization.json"),
+     "PhaseAAuthorization", "logs/budget/approvals/autoinit_phase_a_authorization.json"),
     ("autoinit_phase_b_driver", "PhaseBDriver",
      "PhaseBAuthorization", "logs/autoinit_phase_b_authorization.json"),
     ("autoinit_recovery_continuation_driver", "RecoveryContinuationDriver",
      "RecoveryContinuationAuthorization",
-     "logs/autoinit_recovery_continuation_authorization.json"),
+     "logs/budget/approvals/autoinit_recovery_continuation_authorization.json"),
     ("autoinit_continuation_b_driver", "ContinuationDriver",
      "ContinuationAuthorization",
      "logs/autoinit_continuation_b_authorization.json"),

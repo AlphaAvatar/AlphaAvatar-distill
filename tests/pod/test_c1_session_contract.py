@@ -173,7 +173,7 @@ def test_the_setup_dispatcher_has_a_c1_branch():
 # --- the ceiling exists in exactly one place -------------------------------
 
 def test_the_ceiling_is_derived_from_the_accepted_pricing_record():
-    pricing = json.loads((REPO / "logs/phase_c1_pricing.json").read_text())
+    pricing = json.loads((REPO / "logs/experiments/phase_c1/plans/phase_c1_pricing.json").read_text())
     assert c1_hard_ceiling_usd(REPO) == pricing["totals"]["hard_ceiling_usd"]
 
 
@@ -194,7 +194,7 @@ def test_the_plan_is_priced_at_the_rate_the_launcher_actually_pays():
     must NOT satisfy the current ceiling."""
     from aadistill.infrastructure.budget import BudgetError
 
-    pricing = json.loads((REPO / "logs/phase_c1_pricing.json").read_text())
+    pricing = json.loads((REPO / "logs/experiments/phase_c1/plans/phase_c1_pricing.json").read_text())
     assert pricing["hardware"]["price_per_hour_usd"] == 1.09
 
     stale = c1_budget_spec(REPO).plan(price_per_hour=0.99,
@@ -214,7 +214,7 @@ def test_a_ceiling_that_rounds_down_would_fail_closed():
 
 
 def test_the_pricing_record_authorizes_nothing():
-    pricing = json.loads((REPO / "logs/phase_c1_pricing.json").read_text())
+    pricing = json.loads((REPO / "logs/experiments/phase_c1/plans/phase_c1_pricing.json").read_text())
     assert pricing["authorizes"] == "nothing"
 
 
@@ -233,7 +233,7 @@ def test_a_superseded_committed_authorization_cannot_authorize():
     """
     from experiments.phase_c1.authorization import C1Authorization, c1_hard_ceiling_usd, c1_harness_digest
 
-    p = REPO / "logs/autoinit_c1_authorization.json"
+    p = REPO / "logs/budget/approvals/autoinit_c1_authorization.json"
     assert p.is_file(), "the authorization record must be retained"
     auth = C1Authorization.load(p)
     assert auth.allows_phase_a is False and auth.allows_beam_search is False
@@ -274,7 +274,7 @@ def test_a_missing_harness_file_raises_rather_than_shrinking_the_digest():
 
 def test_the_preregistration_records_the_live_harness_digest():
     doc = json.loads(
-        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
     assert doc["c1_harness"]["digest"] == c1_harness_digest(REPO)["digest"]
     assert doc["authorizes"] == "nothing"
     assert doc["authorization"]["schema"] == C1_SCHEMA
@@ -459,7 +459,7 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(
     # Compared, not restated. The single pinned literal is in
     # test_c1_readiness_gates.test_the_prereg_gate_count_and_order_equal_the_live_session.
     prereg = json.loads(
-        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
     assert len(spec.precheck) == prereg["transport"]["n_pre_provider_gates"], names
 
 
@@ -484,7 +484,7 @@ def _prereg_gate(tmp_path, monkeypatch, doc) -> tuple[bool, str]:
 
 def _prereg_doc() -> dict:
     return json.loads(
-        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
 
 
 def test_the_preregistration_gate_verifies_the_self_hash(tmp_path, monkeypatch):

@@ -9,7 +9,7 @@ a different harness; accepting one here would certify code this session does not
 run and price it for work it does not do. That refusal is by schema, at load.
 
 **Its ceiling is derived from the accepted pricing record, not typed in.**
-`c1_budget_spec()` reads `logs/phase_c1_pricing.json` and builds the `BudgetSpec`
+`c1_budget_spec()` reads `logs/experiments/phase_c1/plans/phase_c1_pricing.json` and builds the `BudgetSpec`
 from it, so there is exactly one place the enforceable ceiling comes from. A second
 hand-maintained copy is how a session comes to be authorized for one figure and
 priced at another.
@@ -411,7 +411,7 @@ class C1Authorization(PhaseAAuthorization):
 # the budget, derived from the accepted pricing record
 # ---------------------------------------------------------------------------
 
-PRICING_PATH = "logs/phase_c1_pricing.json"
+PRICING_PATH = "logs/experiments/phase_c1/plans/phase_c1_pricing.json"
 
 #: 1023 steps at the rate every retained probe of this recipe actually ran.
 PROBE_STEPS = 1023

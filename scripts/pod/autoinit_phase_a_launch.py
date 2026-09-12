@@ -28,7 +28,7 @@ GiB of headroom — and five bf16 leaves are 5.61 GiB, so relay staging of the
 searched leaves is **off**. Only the finalists are pulled to the dev box.
 Rejected leaves are neither fetched nor deleted: `leaf_retention.json` carries
 their digest, lineage, sa evidence and rejection reason. Full accounting in
-`logs/autoinit_phase_a_storage.md`.
+`logs/experiments/phase_a/analyses/autoinit_phase_a_storage.md`.
 
 Phase A is a terminus. It starts one driver, that driver has no stage 6, and the
 authorization has no code path to a follow-on experiment.
@@ -81,8 +81,8 @@ register_builtin_adapters()
 
 STATUS = f"{WS}/autoinit_phase_a.status"
 RUN_LOG = f"{WS}/autoinit_phase_a_run.log"
-AUTH_PATH = "logs/autoinit_phase_a_authorization.json"
-FROZEN_SCIENCE_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
+AUTH_PATH = "logs/budget/approvals/autoinit_phase_a_authorization.json"
+FROZEN_SCIENCE_PLAN = "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 #: Dev-box-only inputs the pod cannot fetch from git: the two frozen assets.
 LOCAL_ASSETS = (
     LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
@@ -115,7 +115,7 @@ SEARCH_MINUTES = 180.0
 #: 16.91 GiB in bf16. When the cgroup cannot take it the operator recomputes the
 #: reference per candidate — numerically identical, ~2.10x the forward work.
 #: Worst case the frozen schedule reaches 16 invocations (1+3+6+6) and the extra
-#: is 8,866.1 s. Derived in `logs/autoinit_phase_a_fallback_audit.json`.
+#: is 8,866.1 s. Derived in `logs/experiments/phase_a/analyses/autoinit_phase_a_fallback_audit.json`.
 #:
 #: It is a SOFT-STOP reserve, not a hard-only one. The fallback is consumed
 #: entirely inside stage 1, so a reserve placed after the soft stop would leave
@@ -683,7 +683,7 @@ def spec(args) -> SessionSpec:
                          "because it is expected to. It runs only for finalists "
                          "inside the preregistered equivalence interval."),
                 "why_this_exceeds_the_repricing_doc": (
-                    "logs/autoinit_phase_a_repricing.md priced search + probes "
+                    "logs/experiments/phase_a/analyses/autoinit_phase_a_repricing.md priced search + probes "
                     "only. This plan additionally carries setup, Stage-0 "
                     "attestation, selection, artifact manifest/verify, "
                     "synchronization, transfer, a 10% contingency and a "
@@ -726,7 +726,7 @@ def build_parser() -> argparse.ArgumentParser:
     #: 91.54 GiB against an inferred 100 GB (93.13 GiB) limit — 1.60 GiB of
     #: headroom — and five bf16 leaves are 5.61 GiB. Staging them would fail on
     #: quota partway through, and deletion on this relay is a maintainer
-    #: decision, not a launcher's. See logs/autoinit_phase_a_storage.md.
+    #: decision, not a launcher's. See logs/experiments/phase_a/analyses/autoinit_phase_a_storage.md.
     ap.add_argument("--stage-leaves-to-relay", action="store_true", default=False)
     ap.add_argument("--no-stage-leaves-to-relay", dest="stage_leaves_to_relay",
                     action="store_false")
@@ -752,7 +752,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/autoinit_phase_a_session.json")
+    ap.add_argument("--out", default="logs/experiments/phase_a/analyses/autoinit_phase_a_session.json")
     return ap
 
 

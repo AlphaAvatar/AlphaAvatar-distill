@@ -52,8 +52,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "pod"))
 from experiments.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
 from experiments.recovery_continuation.session import CONTINUATION_GRANT_PROSE_REQUIRED, RECOVERY_CONTINUATION_AUTHORIZATION, RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization, recovery_continuation_harness_digest  # noqa: E402
 
-FROZEN_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
-OUT = "logs/autoinit_recovery_continuation_authorization.json"
+FROZEN_PLAN = "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+OUT = "logs/budget/approvals/autoinit_recovery_continuation_authorization.json"
 
 #: What a continuation grant document must say. Nothing here is derived: a
 #: maintainer writes it, and everything the ISSUER can establish for itself — the

@@ -7,8 +7,8 @@
 > it is the brief the implementation was written against, and reading a result
 > without its brief is how a decision becomes unexplainable.
 >
-> Current state: [`logs/STATE.md`](../../logs/STATE.md) (human) and
-> [`logs/current_state.json`](../../logs/current_state.json) (machine).
+> Current state: [`logs/state/current.md`](../../logs/state/current.md) (human) and
+> [`logs/state/current.json`](../../logs/state/current.json) (machine).
 >
 > **One mechanical edit since archiving, 2026-08-18:** this file was written at
 > `docs/` and moved to `docs/archive/`, which left every `../logs/…` link one
@@ -76,14 +76,14 @@ none moved reasoning.
 | E8a calibration mixture | 67 items, content sha256 `d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f`, leakage-checked |
 | **permanent controls** | `preflight_ctl_r0860k_{sa,sb}` — weights `573847a730c1a499…` / `4c6adcf861871690…`, shared observed protocol `aad75fee8a897d9c…`, probe ids `799bd5ac…` / `793f786a…`. On the relay at `permanent_controls/`, and in `~/aad-artifacts/autoinit/`. **Never retrain these.** |
 | **recovery-search battery** | `artifacts/stage3/recovery_search_v2` — 190 prompts, 170 scorable, content `a1b22778…`, scoring contract `recovery_search_scoring@v2` digest `808080a7…`. v1 is INVALID (rendered 0/20 tool prompts) and is kept only with a `SUPERSEDED.md`. |
-| **materialized thresholds** | `logs/autoinit_stage3_complete/materialized_thresholds.json` — equivalence interval **0.011695**, feasibility floor **0.3000**, from pooled control rates. Phase A cannot start without these. |
+| **materialized thresholds** | `logs/experiments/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json` — equivalence interval **0.011695**, feasibility floor **0.3000**, from pooled control rates. Phase A cannot start without these. |
 | control reference on `recovery_search_v2` | pooled `usable_rollout_rate` **0.3711** · `correct_overall` **0.0118** · `correct_given_usable` **0.0286** (380 prompts, seeds sa+sb) |
 
 Every deleted checkpoint has a tombstone in
-[`../logs/checkpoint_tombstones.json`](../../logs/checkpoint_tombstones.json) with hash,
+[`../logs/maintenance/inventories/checkpoint_tombstones.json`](../../logs/maintenance/inventories/checkpoint_tombstones.json) with hash,
 reason, reconstruction recipe and cost. **A scientific conclusion never depends on a
 file still existing at a path** — resolve through
-[`../logs/checkpoint_registry.json`](../../logs/checkpoint_registry.json).
+[`../logs/maintenance/inventories/checkpoint_registry.json`](../../logs/maintenance/inventories/checkpoint_registry.json).
 
 ## 4. Closed paths — do not reopen without a new hypothesis
 
@@ -180,13 +180,13 @@ domain alone and demoted out of the beam objectives, delayed pruning with
 epsilon-dominance and lineage diversity, a constraint-then-objective recovery
 selector, an activation-statistics cache keyed on the parent artifact, and
 recompute-per-candidate reference logits. Nine items, each pinned by a test in
-`tests/autoinit/test_corrections.py`; see [`../logs/decisions.md`](../../logs/decisions.md)
+`tests/autoinit/test_corrections.py`; see [`../logs/budget/decisions.md`](../../logs/budget/decisions.md)
 2026-08-12.
 
 **What is still missing, and blocks a paid run:** the initializer-state evaluation
 suite, the recovery search battery, the `calib.reasoning_heavy@v1` mixture, a
 frozen halving preregistration, and one measurement of the statistics-pass GPU/CPU
-split. All zero cost. See [`../logs/autoinit_pilot_proposal.md`](../../logs/autoinit_pilot_proposal.md) §3.
+split. All zero cost. See [`../logs/experiments/shared/analyses/autoinit_pilot_proposal.md`](../../logs/experiments/shared/analyses/autoinit_pilot_proposal.md) §3.
 
 ## 6. Budget
 
@@ -201,28 +201,28 @@ paid compute running           NONE
 **$12.36 expected / $20.13 hard**; the hard bound exceeds the $19.5238 remaining
 by $0.61. That is a maintainer decision, not an accounting one — the options and
 what each costs are in
-[`../logs/autoinit_phase_a_repricing.md`](../../logs/autoinit_phase_a_repricing.md).
+[`../logs/experiments/phase_a/analyses/autoinit_phase_a_repricing.md`](../../logs/experiments/phase_a/analyses/autoinit_phase_a_repricing.md).
 
 E8b's termination released its earmark. Full reconciliation, including the
 E6b $0.56 overrun and the limit of the evidence-file record, is in
-[`../logs/BUDGET_LEDGER.md`](../../logs/BUDGET_LEDGER.md). **Plan from actual spend, never
+[`../logs/budget/ledger.md`](../../logs/budget/ledger.md). **Plan from actual spend, never
 from unused room under a previous authorization.**
 
 ## 7. Read these, in order
 
-1. [`../logs/STATE.md`](../../logs/STATE.md) — current state, a few minutes
+1. [`../logs/state/current.md`](../../logs/state/current.md) — current state, a few minutes
 2. **this file**
-3. [`../logs/EXPERIMENT_INDEX.md`](../../logs/EXPERIMENT_INDEX.md) — what each of E1–E8
+3. [`../logs/archive/indexes/EXPERIMENT_INDEX.md`](../../logs/archive/indexes/EXPERIMENT_INDEX.md) — what each of E1–E8
    proved and what it does *not* support
-4. [`../logs/decisions.md`](../../logs/decisions.md) — decision records, including the
+4. [`../logs/budget/decisions.md`](../../logs/budget/decisions.md) — decision records, including the
    AutoInitializer constraints and the backend freeze
-5. [`../logs/checkpoint_registry.json`](../../logs/checkpoint_registry.json) +
-   [`../logs/checkpoint_tombstones.json`](../../logs/checkpoint_tombstones.json)
-6. [`../logs/e8b_backend_audit.md`](../../logs/e8b_backend_audit.md) — the runtime findings
+5. [`../logs/maintenance/inventories/checkpoint_registry.json`](../../logs/maintenance/inventories/checkpoint_registry.json) +
+   [`../logs/maintenance/inventories/checkpoint_tombstones.json`](../../logs/maintenance/inventories/checkpoint_tombstones.json)
+6. [`../logs/experiments/early/analyses/e8b_backend_audit.md`](../../logs/experiments/early/analyses/e8b_backend_audit.md) — the runtime findings
    that constrain any 3B+ recovery
 7. [`../AGENTS.md`](../../AGENTS.md) — the working contract; P17/P18 and the promotion rules
    are binding
-8. [`../logs/current_state.json`](../../logs/current_state.json) — machine-readable version
+8. [`../logs/state/current.json`](../../logs/state/current.json) — machine-readable version
    of the above
 
 ## 8. Runtime facts that will bite you
@@ -271,10 +271,10 @@ teardown without an infrastructure defect.
 > compute**, the one term in the search still covered by an allowance rather than
 > a measurement.
 
-What is worth reading first, in this order: [`../logs/STATE.md`](../../logs/STATE.md)
-for the position, [`../logs/autoinit_stage3_complete/`](../../logs/autoinit_stage3_complete/)
+What is worth reading first, in this order: [`../logs/state/current.md`](../../logs/state/current.md)
+for the position, [`../logs/experiments/phase_a/results/autoinit_stage3_complete/`](../../logs/experiments/phase_a/results/autoinit_stage3_complete/)
 for what Stage 3 produced, and
-[`../logs/autoinit_continuation_attempts/`](../../logs/autoinit_continuation_attempts/)
+[`../logs/experiments/recovery_continuation/history/autoinit_continuation_attempts/`](../../logs/experiments/recovery_continuation/history/autoinit_continuation_attempts/)
 for what eight attempts cost and why.
 
 ### 9.0 The infrastructure lesson, because it cost $2.3 of the $4.1

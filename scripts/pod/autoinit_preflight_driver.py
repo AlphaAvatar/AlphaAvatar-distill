@@ -120,7 +120,7 @@ class Driver:
                          "stages": {}, "markers": []}
         AUDIT.mkdir(parents=True, exist_ok=True)
         self.auth = SpendAuthorization.load(
-            REPO / "logs/autoinit_micro_preflight_authorization.json")
+            REPO / "logs/budget/approvals/autoinit_micro_preflight_authorization.json")
         self.auth.require_plan(PREFLIGHT_PLAN_V1.plan_hash)
         self.ev["authorization"] = self.auth.as_dict()
         self.attested = None

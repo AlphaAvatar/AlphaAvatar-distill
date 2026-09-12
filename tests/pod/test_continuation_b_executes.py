@@ -62,12 +62,12 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-STAGE3_PROBE = REPO / "logs/autoinit_stage3_complete/engine_probe.json"
-FROZEN_PLAN = REPO / "logs/autoinit_phase_a_recovery_plan_frozen.json"
-REAL_SCORED = (REPO / "logs/autoinit_stage3_complete"
+STAGE3_PROBE = REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete/engine_probe.json"
+FROZEN_PLAN = REPO / "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+REAL_SCORED = (REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete"
                / "preflight_ctl_r0860k_sa_recovery_search.json")
-REAL_AMENDMENT = REPO / "logs/autoinit_phase_b_identity_collapse_amendment.json"
-PRICING = REPO / "logs/autoinit_behavioural_continuation_pricing.json"
+REAL_AMENDMENT = REPO / "logs/experiments/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
+PRICING = REPO / "logs/experiments/shared/analyses/autoinit_behavioural_continuation_pricing.json"
 
 pytestmark = pytest.mark.skipif(
     not (STAGE3_PROBE.is_file() and FROZEN_PLAN.is_file() and REAL_SCORED.is_file()

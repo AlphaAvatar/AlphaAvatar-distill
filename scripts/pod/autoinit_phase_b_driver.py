@@ -99,12 +99,12 @@ _phase_a.STATUS = STATUS
 
 #: The verified reuse record, produced at `$0` by
 #: `scripts/autoinit/verify_historical_probe_reuse.py` and re-checked here.
-REUSE_RECORD = REPO / "logs/autoinit_historical_probe_reuse.json"
+REUSE_RECORD = REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
 #: Where the historical probe records themselves live, in the committed tree.
-HISTORICAL_PROBES = REPO / "logs/autoinit_recovery_continuation_attempt7/probes"
+HISTORICAL_PROBES = REPO / "logs/runs/unscoped/recovery_continuation/attempt7/probes"
 #: The Phase-A durability record: the canonical ids and the digests their bytes
 #: must reproduce.
-LEAF_RETENTION = REPO / "logs/autoinit_recovery_continuation_attempt7/leaf_retention.json"
+LEAF_RETENTION = REPO / "logs/runs/unscoped/recovery_continuation/attempt7/leaf_retention.json"
 #: Where the launcher stages the two retained finalists on the pod. Read-only
 #: inputs: they are measured on the state-evaluation suite and never trained.
 STAGED_FINALISTS = REPO / "artifacts/autoinit/phase_a_selected"

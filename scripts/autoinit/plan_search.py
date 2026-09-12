@@ -1,7 +1,7 @@
 """Price the v1 AutoInitializer search space. Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/plan_search.py \
-        --out logs/autoinit_v1_search_space.json
+        --out logs/experiments/shared/analyses/autoinit_v1_search_space.json
 
 Emits the v1 search-space manifest: what the space contains, how many states a
 beam of each width materializes, what that costs in GPU-hours and dollars on each
@@ -124,7 +124,7 @@ def halving_cost(searched: int, survivors: int, price_per_hour: float) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--out", default="logs/autoinit_v1_search_space.json")
+    parser.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_v1_search_space.json")
     parser.add_argument("--beam-widths", type=int, nargs="+", default=[4, 6, 8])
     parser.add_argument("--warmup-levels", type=int, default=SCHEDULE_V1.warmup_levels)
     parser.add_argument("--profile-counts", type=int, nargs="+", default=[1, 2, 3])

@@ -79,11 +79,11 @@ register_builtin_adapters()
 
 STATUS = f"{WS}/autoinit_recovery_continuation.status"
 RUN_LOG = f"{WS}/autoinit_recovery_continuation_run.log"
-AUTH_PATH = "logs/autoinit_recovery_continuation_authorization.json"
-FROZEN_SCIENCE_PLAN = "logs/autoinit_phase_a_recovery_plan_frozen.json"
+AUTH_PATH = "logs/budget/approvals/autoinit_recovery_continuation_authorization.json"
+FROZEN_SCIENCE_PLAN = "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 #: Attempt 12's committed durability record — the five ids, in order, with the
 #: digests the bytes must reproduce.
-STAGE1_EVIDENCE = REPO_ROOT / "logs/autoinit_phase_a_attempt12"
+STAGE1_EVIDENCE = REPO_ROOT / "logs/runs/unscoped/phase_a/attempt12"
 #: The canonical local checkpoint store. Still the scientific owner: the
 #: transport repo is a delivery path and nothing more.
 # Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
@@ -93,9 +93,9 @@ STAGE1_EVIDENCE = REPO_ROOT / "logs/autoinit_phase_a_attempt12"
 # resolves identically. Precedent: verify_c1_scoring_equivalence.EVIDENCE_ROOTS.
 CKPT_STORE = Path.home() / "aad-artifacts/autoinit/phase_a"
 #: Transport only, private, and verified at $0 before any paid session may use
-#: it -- see logs/autoinit_selected_leaf_transport_manifest.json.
+#: it -- see logs/experiments/shared/analyses/autoinit_selected_leaf_transport_manifest.json.
 TRANSPORT_REPO = "AlphaAvatar/aadistill-transport"
-TRANSPORT_MANIFEST = REPO_ROOT / "logs/autoinit_selected_leaf_transport_manifest.json"
+TRANSPORT_MANIFEST = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_selected_leaf_transport_manifest.json"
 #: Where they land in the pod's repository, and where the driver reads them.
 STAGED_INTO = "artifacts/autoinit/phase_a_selected"
 
@@ -406,7 +406,7 @@ def build_parser() -> argparse.ArgumentParser:
     from autoinit_phase_a_launch import build_parser as phase_a_parser
 
     ap = phase_a_parser()
-    ap.set_defaults(out="logs/autoinit_recovery_continuation_session.json")
+    ap.set_defaults(out="logs/experiments/recovery_continuation/analyses/autoinit_recovery_continuation_session.json")
     return ap
 
 

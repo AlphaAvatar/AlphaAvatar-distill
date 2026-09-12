@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import json
 import re
 import sys
 from pathlib import Path
@@ -83,6 +84,58 @@ def index_basenames(root: Path) -> dict[str, list[Path]]:
     return out
 
 
+def relocation_map(root: Path) -> dict[str, str]:
+    """old path -> new path, from every migration manifest present.
+
+    Consulted BEFORE any basename search, because the manifest KNOWS where an
+    object went. Searching by name cannot tell `attempt10` of one experiment
+    from `attempt10` of another, and reported those as ambiguous while the
+    answer was recorded.
+    """
+    out: dict[str, str] = {}
+    for m in sorted(root.glob("logs/migrations/*/manifest.json")):
+        try:
+            doc = json.loads(m.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        for e in doc.get("entries", []):
+            if e.get("old_path") and e.get("new_path"):
+                out[e["old_path"]] = e["new_path"]
+    return out
+
+
+def via_manifest(doc: Path, target: str, root: Path,
+                 moved: dict[str, str]) -> str | None:
+    """Resolve a link through the migration record, as a repo-relative path."""
+    raw = target.split("#", 1)[0].rstrip("/")
+    candidates = []
+    resolved = (doc.parent / raw).resolve()
+    try:
+        candidates.append(resolved.relative_to(root).as_posix())
+    except ValueError:
+        pass
+    candidates.append(raw.lstrip("./"))
+    if not raw.startswith(("/", ".")):
+        candidates.append(f"logs/{raw}")
+    for c in candidates:
+        if c in moved:
+            return moved[c]
+    #: A file INSIDE a directory that moved: the directory is in the record,
+    #: the file never moved on its own. Longest prefix first so a nested move
+    #: wins over its parent.
+    for c in candidates:
+        for old in sorted(moved, key=len, reverse=True):
+            if c.startswith(old + "/"):
+                return moved[old] + c[len(old):]
+    #: Last resort: the link names a file by a name that no longer exists
+    #: because the object was RENAMED by the migration -- `STATE.md` is now
+    #: `state/current.md`. Unique basenames only; an ambiguous one is left for
+    #: a human, because guessing here points a citation at the wrong evidence.
+    base = Path(raw).name
+    hits = {new for old, new in moved.items() if Path(old).name == base}
+    return hits.pop() if len(hits) == 1 else None
+
+
 def narrow(target: str, cands: list[Path], root: Path) -> list[Path]:
     """Prefer candidates whose path ENDS with the link's own path suffix.
 
@@ -108,6 +161,7 @@ def resolve(doc: Path, target: str, root: Path) -> Path:
 
 def repair(root: Path = REPO_ROOT, write: bool = False) -> dict:
     names = index_basenames(root)
+    moved = relocation_map(root)
     frozen = protected_dirs(root)
     fixed, unresolved, ambiguous, skipped = [], [], [], []
     for doc in sorted(root.rglob("*.md")):
@@ -130,6 +184,17 @@ def repair(root: Path = REPO_ROOT, write: bool = False) -> dict:
                 continue
             #: A directory link written with a trailing slash resolves to a
             #: directory that may legitimately have moved too.
+            #: The record first: it knows, where a name search only guesses.
+            known = via_manifest(doc, target, root, moved)
+            if known and (root / known).exists():
+                new = Path(__import__("os").path.relpath(
+                    root / known, doc.parent)).as_posix()
+                if target.endswith("/"):
+                    new += "/"
+                text = text.replace(f"]({target})", f"]({new})")
+                fixed.append({"doc": doc.relative_to(root).as_posix(),
+                              "from": target, "to": new, "via": "manifest"})
+                continue
             base = Path(target.split("#", 1)[0].rstrip("/")).name
             cands = narrow(target, names.get(base, []), root)
             if len(cands) == 1:

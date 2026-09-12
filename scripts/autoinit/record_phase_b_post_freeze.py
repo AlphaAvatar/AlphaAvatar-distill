@@ -3,7 +3,7 @@
 
     PYTHONPATH=src python scripts/autoinit/record_phase_b_post_freeze.py
 
-Regenerates `logs/autoinit_phase_b_post_freeze_changes.json` from the tree as it
+Regenerates `logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json` from the tree as it
 actually is. A generator rather than a hand-edited file because the declaration
 must track the code — a stale note is refused by
 `aadistill.governance.post_freeze.accounted_for`, which is the point.
@@ -49,7 +49,7 @@ from experiments.phase_b.post_freeze import (  # noqa: E402
 )
 from aadistill.infrastructure.manifest import sha256_json, write_text_atomic  # noqa: E402
 
-PREREG = REPO_ROOT / "logs/autoinit_phase_b_preregistration.json"
+PREREG = REPO_ROOT / "logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json"
 #: The commit whose tree the Phase-B preregistration describes — pinned, NOT
 #: `HEAD`. With `HEAD` the comparison becomes self-referential the moment this
 #: change is committed: the dispatcher would equal itself, `added` would come
@@ -75,17 +75,17 @@ def branch_bodies(text: str) -> dict[str, str]:
 def main() -> None:
     #: Sealed. A generator that cannot express the accumulated history must not
     #: be able to overwrite it — this is the check, not a comment asking for one.
-    note = REPO_ROOT / "logs/autoinit_phase_b_post_freeze_changes.json"
+    note = REPO_ROOT / "logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"
     if note.is_file():
         raise SystemExit(
-            "refusing: logs/autoinit_phase_b_post_freeze_changes.json is the "
+            "refusing: logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json is the "
             "SEALED v1 declaration and this generator rebuilds a single v1 body "
             "rather than preserving its accumulated history. Running it here "
             "would drop entries and break the hash the amendment ledger anchors "
             "it by. Append post-completion drift with "
             "scripts/autoinit/record_phase_b_historical_amendment.py instead.")
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_phase_b_post_freeze_changes.json")
+    ap.add_argument("--out", default="logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json")
     args = ap.parse_args()
 
     prereg = json.loads(PREREG.read_text())

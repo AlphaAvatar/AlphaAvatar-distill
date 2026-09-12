@@ -4,7 +4,7 @@
     PYTHONPATH=src python scripts/architecture/record_run_index.py --write
 
 The first version of this index counted 77 "runs". It was counting artifact
-roots: `logs/autoinit_c1_attempt9` and `logs/autoinit_c1_attempt9_grant.json`
+roots: `logs/runs/stage-1/phase_c1/attempt9` and `logs/budget/approvals/autoinit_c1_attempt9_grant.json`
 are one attempt with two surviving components, and the index recorded them as
 two peers. A reader asking "how many C1 attempts have run?" got 19 for a phase
 that has had 9.
@@ -63,11 +63,34 @@ CONVENTIONS: list[tuple[re.Pattern, str, str, str]] = [
 ]
 
 
+def _relocated(repo_root: Path) -> dict[str, str]:
+    """old path -> current path, from the log-layout-v1 migration manifest.
+
+    The conventions below name objects by the FILENAME each had at
+    `logs/` root. Those objects moved into the canonical layout on
+    2026-09-12, so matching on the current tree finds nothing and every
+    legacy run silently becomes `unrecorded` -- losing the per-component
+    digests that make "the historical evidence is unchanged" checkable.
+    The manifest is how a name from then resolves to a path now.
+    """
+    p = repo_root / "logs/migrations/log-layout-v1/manifest.json"
+    if not p.is_file():
+        return {}
+    doc = json.loads(p.read_text())
+    return {e["old_path"]: e["new_path"] for e in doc.get("entries", [])}
+
+
 def discover_legacy(repo_root: Path) -> dict[tuple[str, str], dict]:
     runs: dict[tuple[str, str], dict] = {}
-    for entry in sorted((repo_root / "logs").iterdir()):
+    moved = _relocated(repo_root)
+    #: The names as they were, resolved to where they are.
+    candidates = [(Path(old).name, new) for old, new in moved.items()
+                  if Path(old).parent.as_posix() == "logs"]
+    candidates += [(q.name, q.relative_to(repo_root).as_posix())
+                   for q in sorted((repo_root / "logs").iterdir())]
+    for name, current in candidates:
         for pattern, experiment, tpl, role in CONVENTIONS:
-            m = pattern.match(entry.name)
+            m = pattern.match(name)
             if not m:
                 continue
             run_id = tpl.format(**m.groupdict())
@@ -76,7 +99,7 @@ def discover_legacy(repo_root: Path) -> dict[tuple[str, str], dict]:
                 "experiment_id": experiment, "run_id": run_id,
                 "layout_version": 1, "components": {}, "component_digests": {},
             })
-            rel = f"logs/{entry.name}"
+            rel = current
             if role in rec["components"]:
                 raise SystemExit(
                     f"two paths claim role {role!r} of {experiment}/{run_id}: "
@@ -154,9 +177,15 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
         return out
     #: Both layouts, and a stage directory is not itself a run: `stage-3` holds
     #: experiments, so only its grandchildren are candidates.
+    #: Both grouped forms -- `stage-<id>/<experiment>/<run>` and
+    #: `unscoped/<experiment>/<run>` -- plus anything still two levels deep. A
+    #: glob written for one shape silently omits the others, which is how the
+    #: per-experiment counts came to read only the legacy tree.
     candidates = {p for p in runs_root.glob("*/*") if p.is_dir()
-                  and not p.parent.name.startswith("stage-")}
+                  and not p.parent.name.startswith("stage-")
+                  and p.parent.name != "unscoped"}
     candidates |= {p for p in runs_root.glob("stage-*/*/*") if p.is_dir()}
+    candidates |= {p for p in runs_root.glob("unscoped/*/*") if p.is_dir()}
     for run_dir in sorted(candidates):
         manifest = run_dir / "manifest.json"
         if manifest.is_file():
@@ -198,7 +227,15 @@ def build_index(repo_root: Path) -> dict:
     legacy = sorted(discover_legacy(repo_root).values(),
                     key=lambda r: (r["experiment_id"], r["run_id"]))
     modern = discover_v3(repo_root)
-    unrecorded = discover_unrecorded(repo_root)
+    #: A legacy run REGISTERED with its component digests is not also an
+    #: unrecorded directory. Before the layout migration the two could not
+    #: overlap -- legacy runs lived at `logs/` root and this scan looked only
+    #: under `logs/runs/`. They live under `logs/runs/` now, so every legacy
+    #: run was being counted twice, once with its digests and once as evidence
+    #: nobody had registered.
+    registered = {rel for r in legacy for rel in r["components"].values()}
+    unrecorded = [u for u in discover_unrecorded(repo_root)
+                  if u["root"] not in registered]
     return {
         "schema": SCHEMA,
         "_contract": (

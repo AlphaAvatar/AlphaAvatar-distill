@@ -40,7 +40,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 CORE = REPO / "src" / "aadistill"
-INVENTORY = REPO / "logs/architecture_inventory.json"
+INVENTORY = REPO / "logs/maintenance/inventories/architecture_inventory.json"
 BASELINE = REPO / "configs/architecture/core_boundary_baseline.json"
 
 

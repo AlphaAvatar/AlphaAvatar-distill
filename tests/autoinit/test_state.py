@@ -223,7 +223,7 @@ def test_pruned_states_stay_auditable(tmp_path, teacher_spec, target_spec):
 
 # --- the live snapshot must not deny a grant it also declares ---------------
 #
-# On 2026-09-07 `logs/current_state.json` said BOTH that the Attempt-9 grant was
+# On 2026-09-07 `logs/state/current.json` said BOTH that the Attempt-9 grant was
 # present and one-use, and — in `blocker` and `phase_c.c1.not_built` — that "No
 # C1 grant exists" / "no grant". Three fields had simply not been updated when
 # the grant landed. A handoff document that contradicts itself about whether a
@@ -232,7 +232,7 @@ def test_pruned_states_stay_auditable(tmp_path, teacher_spec, target_spec):
 # Deliberately NOT a natural-language framework. It covers the owned live fields
 # that produced this contradiction and nothing else.
 
-SNAPSHOT = Path(__file__).resolve().parents[2] / "logs/current_state.json"
+SNAPSHOT = Path(__file__).resolve().parents[2] / "logs/state/current.json"
 
 #: Phrases that DENY a grant. "the grant exists" must not match, so each is a
 #: negation, not a keyword.

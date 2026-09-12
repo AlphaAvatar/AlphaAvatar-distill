@@ -17,7 +17,7 @@ the only correct sequence is:
     session commit -> bundle it -> upload -> gate -> provider
 
 A bundle built for the pre-authorization base and reused afterwards checks out a
-tree with no `logs/autoinit_c1_authorization.json` in it. The gate catches that,
+tree with no `logs/budget/approvals/autoinit_c1_authorization.json` in it. The gate catches that,
 but it should never be reached.
 
 This step MUTATES the relay. The pre-provider gate is read-only by design, so
@@ -39,13 +39,13 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from experiments.phase_c1.bundle import RELAY_REPO, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, stage_bundle  # noqa: E402
 
-AUTH_PATH = "logs/autoinit_c1_authorization.json"
+AUTH_PATH = "logs/budget/approvals/autoinit_c1_authorization.json"
 
 
 def _out_for(run_id: str | None, stage_id: str | None) -> str:
     """Where this staging goes. Same convention as every other run role."""
     if not run_id:
-        return "logs/autoinit_c1_bundle.json"
+        return "logs/experiments/phase_c1/analyses/autoinit_c1_bundle.json"
     if not stage_id:
         raise SystemExit("--run-id needs --stage-id: the run's location is "
                          "derived from the stage its experiment declares")

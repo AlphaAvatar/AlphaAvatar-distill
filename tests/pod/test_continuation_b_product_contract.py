@@ -54,7 +54,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-CAPACITY_RECORD = REPO / "logs/autoinit_continuation_b_capacity.json"
+CAPACITY_RECORD = REPO / "logs/experiments/continuation_b/analyses/autoinit_continuation_b_capacity.json"
 
 
 def load(name: str, filename: str):
@@ -369,7 +369,7 @@ def test_the_six_to_three_boundary_is_intact():
     # The frozen amendment identity, re-derived, still matches the grant's.
     observed = drv.ContinuationDriver.observed_evidence()
     prereg = json.loads(
-        (REPO / "logs/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/experiments/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     assert (observed["collapsed_universe_identity"]
             == prereg["evidence_universe"]["universe_identity"])
     assert prereg["evidence_universe"]["distinct_candidates"] == 6

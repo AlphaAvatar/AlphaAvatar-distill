@@ -126,7 +126,7 @@ def main() -> int:
             need = m["peak_with_15pct_margin_gb"]
             row.append(f"{name.split()[0]}: {'YES' if need <= vram else 'NO'}")
         print(f"  {card:12s} {vram:4d} GB  ->  " + " | ".join(row))
-    dest = REPO_ROOT / "logs/e8b_memory_sizing.json"
+    dest = REPO_ROOT / "logs/experiments/early/analyses/e8b_memory_sizing.json"
     dest.write_text(json.dumps(out, indent=2) + "\n")
     print(f"\nwrote {dest.relative_to(REPO_ROOT)}")
     return 0

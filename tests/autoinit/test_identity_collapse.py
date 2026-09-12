@@ -115,7 +115,7 @@ def test_the_real_attempt_5_amendment_matches_this_implementation():
 
     amendment = json.loads(
         (Path(__file__).resolve().parents[2]
-         / "logs/autoinit_phase_b_identity_collapse_amendment.json").read_text())
+         / "logs/experiments/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json").read_text())
     entries = [entry(c["state_id"], c["artifact_digest"], role)
                for c in amendment["collapsed_universe"]["candidates"]
                for role in c["roles"]]

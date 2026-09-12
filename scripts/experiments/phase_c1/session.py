@@ -129,7 +129,7 @@ C1_STAGES: tuple[C1Stage, ...] = (
             ("session_record", "watchdog_journal")),
     C1Stage("B", "teacher_fetch_verify",
             f"fetch {TEACHER_REPO}@{TEACHER_REVISION[:12]} and verify every file "
-            "against logs/experiments/phase_c1/teacher_binding.json",
+            "against logs/experiments/phase_c1/plans/teacher_binding.json",
             "ANY shard or config file whose hash differs from the binding",
             ("teacher_verification",), blocks_training=True),
     C1Stage("C", "register_operator",

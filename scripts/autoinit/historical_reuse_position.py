@@ -2,7 +2,7 @@
 """The four conclusions about historical probe reuse, stated together.
 
     PYTHONPATH=src:scripts python scripts/autoinit/historical_reuse_position.py \
-        --out logs/autoinit_historical_reuse_position.json
+        --out logs/experiments/shared/analyses/autoinit_historical_reuse_position.json
 
 Each of these is already established somewhere, and separately they read as
 though one of them must be wrong:
@@ -42,7 +42,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-EQUIVALENCE = REPO / "logs/architecture_scoring_equivalence.json"
+EQUIVALENCE = REPO / "logs/maintenance/inventories/architecture_scoring_equivalence.json"
 
 #: The one check that may fail. Anything else means the probes themselves
 #: stopped reconstructing, which is a different and much worse finding.
@@ -158,7 +158,7 @@ def position(verify_fn=None, equivalence_path: Path = EQUIVALENCE) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_historical_reuse_position.json")
+    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_historical_reuse_position.json")
     args = ap.parse_args()
 
     doc = position()

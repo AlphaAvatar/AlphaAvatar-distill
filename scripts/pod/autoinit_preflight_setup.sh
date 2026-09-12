@@ -539,7 +539,7 @@ set +e
 /opt/train/bin/python "$REPO/scripts/pod/summarize_pytest_outcomes.py" \
   --junit /workspace/pytest_junit.xml \
   --out /workspace/pytest_outcomes.json \
-  --expected "$REPO/logs/c1_pod_environment_verification.json" \
+  --expected "$REPO/logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json" \
   --repo "$REPO" --strict
 SUMMARY_RC=$?
 set -e
@@ -666,7 +666,7 @@ elif [ "$SESSION_KIND" = "c1" ]; then
   # A SIXTH type. Phase-C1's grant measures a harness containing the C1 launcher,
   # driver, fixed-path replayer and the new ATTENTION operator, none of which
   # appear in any earlier file set, and it carries a ceiling derived from
-  # logs/phase_c1_pricing.json for six 0.86M probes rather than for a search or a
+  # logs/experiments/phase_c1/plans/phase_c1_pricing.json for six 0.86M probes rather than for a search or a
   # continuation. Every other branch would either refuse the artifact on schema or
   # — worse — accept it while binding C1 to another phase's file list and price.
   #

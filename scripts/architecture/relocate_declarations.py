@@ -45,7 +45,7 @@ sys.path.insert(0, str(REPO / "scripts/architecture"))
 
 from migration_map import MAP  # noqa: E402
 
-OUT = "logs/architecture_declaration_history.json"
+OUT = "logs/maintenance/inventories/architecture_declaration_history.json"
 
 #: (declaration, file it lives in, module, the version constant to bump)
 DECLARATIONS = [

@@ -107,7 +107,7 @@ EXPECTED = {
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--battery", default="artifacts/stage3/recovery_search_v1")
-    ap.add_argument("--out", default="logs/autoinit_tool_scoring_audit.json")
+    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_tool_scoring_audit.json")
     args = ap.parse_args()
 
     path = REPO_ROOT / args.battery / "tool.jsonl"

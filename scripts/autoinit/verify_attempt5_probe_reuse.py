@@ -2,7 +2,7 @@
 """Can the behavioural continuation cite Attempt 5's three fresh `sa` probes?
 
     PYTHONPATH=src python scripts/autoinit/verify_attempt5_probe_reuse.py \
-        --out logs/autoinit_attempt5_probe_reuse.json
+        --out logs/experiments/shared/analyses/autoinit_attempt5_probe_reuse.json
 
 Attempt 5 completed Stage 1, then paid for three genuinely new rung-1 `sa`
 probes — `fe9683e6a9c7`, `bf5ae3b6ae00`, `ab7632b00788` — before Stage 2 failed
@@ -62,7 +62,7 @@ from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 #: Explicit: importing an adapter module no longer registers it.
 register_builtin_adapters()
 
-ATTEMPT = REPO_ROOT / "logs/autoinit_phase_b_attempt5"
+ATTEMPT = REPO_ROOT / "logs/runs/unscoped/phase_b/attempt5"
 PROBES = ATTEMPT / "probes"
 ATTESTED = ATTEMPT / "attested_evaluation_protocol.json"
 SELECTION = ATTEMPT / "stage1_selection.json"
@@ -187,7 +187,7 @@ def verify(root: Path = PROBES) -> dict:
             "for, to the same standard as the historical Phase-A citations. "
             "Consumed by the behavioural-continuation pricing, which fails closed "
             "without it. Not an authorization."),
-        "source": "logs/autoinit_phase_b_attempt5/probes",
+        "source": "logs/runs/unscoped/phase_b/attempt5/probes",
         "probes_dir_digest": probes_dir_digest(root),
         "attested_protocol_hash": attested_protocol,
         "live_scoring_contract_digest": live_contract["digest"],
@@ -213,7 +213,7 @@ def verify(root: Path = PROBES) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_attempt5_probe_reuse.json")
+    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_attempt5_probe_reuse.json")
     args = ap.parse_args()
     result = verify()
     out = Path(args.out)

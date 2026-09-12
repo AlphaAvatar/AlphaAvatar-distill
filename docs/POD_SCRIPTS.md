@@ -25,7 +25,7 @@ to appear below.
 | `autoinit_continuation_launch.py` | the Stage-3 continuation's **session specification** |
 | `autoinit_measurement_launch.py` | the bounded causal-depth runtime/backend measurement's **session specification**. Names `SpendAuthorization`, so it cannot start Phase A; runs no search, selects no depth map, writes no checkpoint |
 | `autoinit_recovery_continuation_launch.py` | the recovery continuation's **session specification**. Priced by `continuation_budget` ($16.7456 hard, no search), declares attempt 12's five preserved leaves as staged session inputs, and names a driver that cannot search |
-| `autoinit_c1_launch.py` | **Phase C1** session specification: fixed-path ATTENTION isolation. `SESSION_KIND=c1`, `C1Authorization`, a `BudgetSpec` derived from `logs/phase_c1_pricing.json`, and **twelve** pre-provider gates — the ninth proves a pod can obtain the exact authorized commit from the relay, the tenth that the shared setup's `ROPE_OK` step has the 1,418-byte config it globs for, and the last two are renderer parity and the pod-environment readiness record. It also **requires `--run-id`** and has no `--out`: the session record, the governance snapshots, the collected evidence and the run manifest all live under `logs/runs/phase_c1/<run_id>/`. Runs no search |
+| `autoinit_c1_launch.py` | **Phase C1** session specification: fixed-path ATTENTION isolation. `SESSION_KIND=c1`, `C1Authorization`, a `BudgetSpec` derived from `logs/experiments/phase_c1/plans/phase_c1_pricing.json`, and **twelve** pre-provider gates — the ninth proves a pod can obtain the exact authorized commit from the relay, the tenth that the shared setup's `ROPE_OK` step has the 1,418-byte config it globs for, and the last two are renderer parity and the pod-environment readiness record. It also **requires `--run-id`** and has no `--out`: the session record, the governance snapshots, the collected evidence and the run manifest all live under `logs/runs/phase_c1/<run_id>/`. Runs no search |
 | `autoinit_c1_driver.py` | the C1 driver: replays the frozen path under the `eea90c91`/`c313d1b4` digest gates, then runs 2 arms x 3 fresh seeds. `stage1`, `run_rung` and `selection_row` all raise — no search, no rungs, no ranking |
 | `autoinit_recovery_continuation_driver.py` | its pod-side driver. Stage 1 IMPORTS the verified attempt-12 result — it never imports `phase_a_search`, never delegates to the searching `stage1`, and has no `--stage` value that searches |
 | `autoinit_preflight_driver.py` | the micro-preflight's pod-side driver |
@@ -80,7 +80,7 @@ part your session happens to need — is now enforced structurally by
 `SessionSpec`, which is where the value ended up.
 
 **No further canary is prepared or authorized.** If one is ever wanted, the
-starting point is `logs/STATE.md`, not this directory.
+starting point is `logs/state/current.md`, not this directory.
 
 ## HISTORICAL — produced recorded results, frozen
 
@@ -115,7 +115,7 @@ Transfer manifests recorded by those sessions: `hashes_ckpt.txt`,
 | `setup.sh` | the per-experiment setup scripts, then `autoinit_preflight_setup.sh` |
 | `orchestrate.sh` | the Python launchers |
 | `train.sh` | `scripts/training/train_stage3.py` |
-| `checkpoint_inventory.py` | `scripts/consolidate/build_checkpoint_registry.py`. Both inventory both stores; this one's `REQUIRED` set is written around Experiment 2 and has not moved since, and two inventories with different stale opinions is worse than one. Its LFS insight — that removing a file from a Hugging Face repo's current revision reclaims no quota — is preserved in the replacement's docstring and in `logs/relay_mirror_verification.json` |
+| `checkpoint_inventory.py` | `scripts/consolidate/build_checkpoint_registry.py`. Both inventory both stores; this one's `REQUIRED` set is written around Experiment 2 and has not moved since, and two inventories with different stale opinions is worse than one. Its LFS insight — that removing a file from a Hugging Face repo's current revision reclaims no quota — is preserved in the replacement's docstring and in `logs/validations/relay-mirror/relay_mirror_verification.json` |
 
 ## Local notes
 

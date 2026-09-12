@@ -43,7 +43,7 @@
 # frozen-asset verifier rewrites `frozen_asset_verification.json` on every run
 # -- so the directory is safe to remove by hand at any time. It is recurring
 # scratch, not a retained artifact: see the WITHDRAWN `podsim_quarantine_residue`
-# entry in `logs/checkpoint_tombstones.json` for why it must not be tombstoned.
+# entry in `logs/maintenance/inventories/checkpoint_tombstones.json` for why it must not be tombstoned.
 set -u
 PODSIM_ROOT=${PODSIM_ROOT:-"$(cd "$(dirname "$0")/../.." && pwd)"}
 cd "$PODSIM_ROOT" || exit 1

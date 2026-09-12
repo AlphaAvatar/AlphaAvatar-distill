@@ -24,7 +24,7 @@ So every judgement here comes from the syntax tree:
   `configs/`, `artifacts/`, `~`, or an absolute prefix) and reported with the
   binding they belong to.
 
-The output is `logs/architecture_inventory.json` and is consumed by
+The output is `logs/maintenance/inventories/architecture_inventory.json` and is consumed by
 `tests/architecture/`, which turns the findings into binding gates. Nothing here
 decides policy; it reports ownership, and the tests decide.
 """
@@ -41,7 +41,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CORE = REPO_ROOT / "src" / "aadistill"
-OUT = "logs/architecture_inventory.json"
+OUT = "logs/maintenance/inventories/architecture_inventory.json"
 SCHEMA = "aadistill.architecture_inventory/v1"
 
 #: Names the interpreter binds in every module, which no module assigns.

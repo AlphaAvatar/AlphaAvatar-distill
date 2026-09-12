@@ -32,7 +32,7 @@ Run it in each environment and compare the two reports:
     .venv/bin/python scripts/autoinit/audit_tool_rendering.py --compare A.json B.json
 
 Only the tokenizer and its chat template are loaded — never a model config — so
-the transformers-4.x RoPE misreading (logs/STATE.md §0.5) cannot apply here.
+the transformers-4.x RoPE misreading (logs/state/current.md §0.5) cannot apply here.
 """
 
 from __future__ import annotations

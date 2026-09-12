@@ -36,7 +36,7 @@ control `qwen3_0p6b_init_v0`.
 
 **Evidence used.** Eleven probes across three rungs; the tie-break rung ran.
 
-**Final metrics** ([`autoinit_recovery_continuation_attempt7/phase_a_result.json`](../../autoinit_recovery_continuation_attempt7/phase_a_result.json)):
+**Final metrics** ([`autoinit_recovery_continuation_attempt7/phase_a_result.json`](../../runs/unscoped/recovery_continuation/attempt7/phase_a_result.json)):
 
 | candidate | seeds | correct | `correct_overall` | `usable_rollout` | `correct_given_usable` |
 | --- | --- | --- | --- | --- | --- |
@@ -84,7 +84,7 @@ same interval, same ranking metric as Phase A.
 ### Stage 1 — authoritative Top-5
 
 Selection `84fd6496851995ae…`
-([`autoinit_phase_b_attempt5/stage1_selection.json`](../../autoinit_phase_b_attempt5/stage1_selection.json)):
+([`autoinit_phase_b_attempt5/stage1_selection.json`](../../runs/unscoped/phase_b/attempt5/stage1_selection.json)):
 
 | state | Pareto front | path |
 | --- | --- | --- |
@@ -138,7 +138,7 @@ Attempt 4 reported `resolved / winner=fe9683e6a9c7` and that decision was
 **withdrawn**: the inherited pooling admitted the *imported* `85bde4ded2c3/sc`
 into a rung-2 comparison, making it `sa+sb+sc` (n=570) against `sa+sb` (n=380)
 for the others. Recomputed over `sa+sb` alone
-([`autoinit_continuation_b_corrected_rung2.json`](../../autoinit_continuation_b_corrected_rung2.json)),
+([`autoinit_continuation_b_corrected_rung2.json`](../continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json)),
 and independently reproduced on the pod in the final session:
 
 | candidate | `sa+sb` | `correct_overall` |
@@ -303,9 +303,9 @@ and the least supported today.*
 
 > **INTERPRETATION WITHDRAWN AND CORRECTED, 2026-09-01.** The reading below is
 > **wrong** and must not be cited. No number in it changes; the inference from
-> those numbers does. Decision record: [`decisions.md`](../../decisions.md) 2026-09-01.
+> those numbers does. Decision record: [`decisions.md`](../../budget/decisions.md) 2026-09-01.
 > Corrected motivation of record:
-> [`phase_c0_preregistration.json`](../../phase_c0_preregistration.json).
+> [`phase_c0_preregistration.json`](../phase_c1/plans/phase_c0_preregistration.json).
 >
 > **The correction.** `attention.weight_proxy_v0` declares
 > `CalibrationNeed.NONE`. `BeamSearch._candidate_expansions` offers such an
@@ -384,7 +384,7 @@ The incumbent is a *starting point*, not a result to defend.
 **Phase C — ATTENTION operator R&D.** Not launched, not designed, not priced,
 not authorized. The agreed structure — C0 power design, C1 fixed-path isolation,
 C2 ATTENTION-aware re-search — is recorded in
-[`phase_c_roadmap.md`](../phase_c1/phase_c_roadmap.md).
+[`phase_c_roadmap.md`](../phase_c1/plans/phase_c_roadmap.md).
 
 Proposed direction:
 
@@ -429,10 +429,10 @@ Proposed direction:
 
 | fact | artifact |
 | --- | --- |
-| Phase-A final | [`autoinit_recovery_continuation_attempt7/phase_a_result.json`](../../autoinit_recovery_continuation_attempt7/phase_a_result.json) |
-| Phase-B Stage-1 Top-5, paths, Pareto fronts | [`autoinit_phase_b_attempt5/stage1_selection.json`](../../autoinit_phase_b_attempt5/stage1_selection.json) |
-| identity collapse, rung-1 ranking | [`autoinit_phase_b_identity_collapse_amendment.json`](../../autoinit_phase_b_identity_collapse_amendment.json) |
-| corrected rung 2 | [`autoinit_continuation_b_corrected_rung2.json`](../../autoinit_continuation_b_corrected_rung2.json) |
-| Phase-B final | [`autoinit_continuation_b_attempt5.json`](../../autoinit_continuation_b_attempt5.json) |
-| reuse records | [`autoinit_historical_probe_reuse.json`](../../autoinit_historical_probe_reuse.json), [`autoinit_attempt5_probe_reuse.json`](../../autoinit_attempt5_probe_reuse.json), [`autoinit_attempt4_probe_reuse.json`](../../autoinit_attempt4_probe_reuse.json) |
-| spend | [`BUDGET_LEDGER.md`](../../BUDGET_LEDGER.md) |
+| Phase-A final | [`autoinit_recovery_continuation_attempt7/phase_a_result.json`](../../runs/unscoped/recovery_continuation/attempt7/phase_a_result.json) |
+| Phase-B Stage-1 Top-5, paths, Pareto fronts | [`autoinit_phase_b_attempt5/stage1_selection.json`](../../runs/unscoped/phase_b/attempt5/stage1_selection.json) |
+| identity collapse, rung-1 ranking | [`autoinit_phase_b_identity_collapse_amendment.json`](../phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json) |
+| corrected rung 2 | [`autoinit_continuation_b_corrected_rung2.json`](../continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json) |
+| Phase-B final | [`autoinit_continuation_b_attempt5.json`](../continuation_b/analyses/autoinit_continuation_b_attempt5.json) |
+| reuse records | [`autoinit_historical_probe_reuse.json`](../shared/analyses/autoinit_historical_probe_reuse.json), [`autoinit_attempt5_probe_reuse.json`](../shared/analyses/autoinit_attempt5_probe_reuse.json), [`autoinit_attempt4_probe_reuse.json`](../shared/analyses/autoinit_attempt4_probe_reuse.json) |
+| spend | [`BUDGET_LEDGER.md`](../../budget/ledger.md) |

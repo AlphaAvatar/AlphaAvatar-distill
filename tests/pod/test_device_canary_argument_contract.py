@@ -198,7 +198,7 @@ def test_the_canary_still_fetches_nothing_and_cannot_authorize_phase_a():
     assert canary.authorization_loader.__self__ is SpendAuthorization
 
     auth = SpendAuthorization.load(
-        REPO / "logs/autoinit_device_canary_authorization.json")
+        REPO / "logs/budget/approvals/autoinit_device_canary_authorization.json")
     assert not auth.allows("phase_a"), (
         "a canary grant must never permit Phase A")
 

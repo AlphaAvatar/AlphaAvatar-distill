@@ -16,7 +16,7 @@ merely rejected. There is no `survivors` field to set to zero, no `rungs` list
 to leave empty and no `tie_break_seed` to set to `None` — those concepts do not
 exist here, so no future edit can quietly reintroduce elimination.
 
-Everything numeric is frozen by `logs/phase_c0_preregistration.json`; this module
+Everything numeric is frozen by `logs/experiments/phase_c1/plans/phase_c0_preregistration.json`; this module
 is the executable form of that document, and `assert_preregistered` refuses a
 plan whose hash does not match the frozen record.
 """

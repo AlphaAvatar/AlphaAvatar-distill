@@ -30,7 +30,7 @@ from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, C
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_continuation_authorization.json")
+    ap.add_argument("--out", default="logs/budget/approvals/autoinit_continuation_authorization.json")
     ap.add_argument("--require-clean", action="store_true",
                     help="refuse to issue against a dirty working tree, because "
                          "the pod checks out a commit and would not run the "

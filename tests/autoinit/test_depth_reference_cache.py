@@ -6,7 +6,7 @@ candidate evaluations costs one ablated forward instead of two. It used to do so
 `calib.domain_balanced@v1` mixture that is 59,763 prediction positions x 151,936
 vocabulary x 4 B = **33.8 GiB** per invocation, and the OOM killer took the first
 run that ever fed it the real mixture
-(`logs/autoinit_phase_a_full_mixture_depth.json`).
+(`logs/experiments/phase_a/analyses/autoinit_phase_a_full_mixture_depth.json`).
 
 `scripts/training/search_depth_map.py` — the E8a script whose algorithm this
 operator declares it re-runs — already sized the cache and fell back to

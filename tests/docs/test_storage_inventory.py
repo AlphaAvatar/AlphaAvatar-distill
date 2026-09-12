@@ -1,7 +1,7 @@
 """The inventories have to stay true, or a deletion pass acts on a fiction.
 
-These are cheap structural checks over `logs/checkpoint_registry.json`,
-`logs/log_inventory.json` and `logs/checkpoint_tombstones.json`. They exist
+These are cheap structural checks over `logs/maintenance/inventories/checkpoint_registry.json`,
+`logs/maintenance/inventories/log_inventory.json` and `logs/maintenance/inventories/checkpoint_tombstones.json`. They exist
 because the failure mode of a cleanup is not "the script crashed" — it is a
 registry that still describes the tree of three days ago, a tombstone pointing at
 a survivor that did not survive, or a `delete` proposal against something the
@@ -16,9 +16,9 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-REGISTRY = REPO / "logs/checkpoint_registry.json"
-LOG_INVENTORY = REPO / "logs/log_inventory.json"
-TOMBSTONES = REPO / "logs/checkpoint_tombstones.json"
+REGISTRY = REPO / "logs/maintenance/inventories/checkpoint_registry.json"
+LOG_INVENTORY = REPO / "logs/maintenance/inventories/log_inventory.json"
+TOMBSTONES = REPO / "logs/maintenance/inventories/checkpoint_tombstones.json"
 
 
 def load(p: Path) -> dict:
@@ -91,14 +91,41 @@ def test_every_duplicate_names_a_survivor_that_exists():
                 f"{r['path']} defers to {r['duplicate_of']}, which is not there")
 
 
+def _relocated(old: str) -> str:
+    """Where an object recorded at `old` lives now, per the migrations."""
+    import json as _json
+
+    for m in sorted((REPO / "logs/migrations").glob("*/manifest.json")):
+        try:
+            doc = _json.loads(m.read_text())
+        except (OSError, _json.JSONDecodeError):
+            continue
+        table = {e["old_path"]: e["new_path"] for e in doc.get("entries", [])}
+        if old in table:
+            return table[old]
+        for o, n in sorted(table.items(), key=lambda kv: -len(kv[0])):
+            if old.startswith(o + "/"):
+                return n + old[len(o):]
+    return old
+
+
 def test_removed_copies_still_name_a_survivor_and_keep_their_hash():
     inv = load(LOG_INVENTORY)
     for r in inv.get("removed", []):
         assert len(r["sha256"]) == 64, f"{r['path']} lost its hash"
         survivor = r.get("canonical_survivor")
         if survivor:
-            assert (REPO / survivor).is_file(), (
-                f"{r['path']} was removed in favour of {survivor}, which is gone")
+            #: Resolved through the migration record. The inventory names the
+            #: survivor's path AS IT WAS; log-layout-v1 moved it, and the
+            #: inventory is historical evidence that is not rewritten to match.
+            #: What must still hold is that the survivor EXISTS -- which is a
+            #: question about the object, not about its address.
+            here = REPO / survivor
+            if not here.is_file():
+                here = REPO / _relocated(survivor)
+            assert here.is_file(), (
+                f"{r['path']} was removed in favour of {survivor}, which is "
+                "gone and is not in the relocation record either")
 
 
 def test_each_duplicate_group_decided_its_canonical_copy():

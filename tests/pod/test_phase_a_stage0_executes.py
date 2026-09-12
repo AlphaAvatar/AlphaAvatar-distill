@@ -39,12 +39,12 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 #: The protocol the Stage-3 controls materialized this run's thresholds under.
 STAGE3_HASH = "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
-STAGE3_PROBE = REPO / "logs/autoinit_stage3_complete/engine_probe.json"
-AUTH = REPO / "logs/autoinit_phase_a_authorization.json"
+STAGE3_PROBE = REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete/engine_probe.json"
+AUTH = REPO / "logs/budget/approvals/autoinit_phase_a_authorization.json"
 
 pytestmark = pytest.mark.skipif(
     not (AUTH.is_file() and STAGE3_PROBE.is_file()
-         and (REPO / "logs/autoinit_phase_a_recovery_plan_frozen.json").is_file()
+         and (REPO / "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json").is_file()
          and (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file()),
     reason="needs the issued authorization, the frozen plan, the Stage-3 engine "
            "probe and the staged battery")
@@ -240,7 +240,7 @@ def test_a_swapped_stage3_thresholds_artifact_is_refused(tmp_path, monkeypatch):
 def test_the_pinned_hash_is_the_one_the_thresholds_were_materialized_under():
     """Guards the constant against drifting away from the artifact."""
     recorded = json.loads(
-        (REPO / "logs/autoinit_stage3_complete/materialized_thresholds.json")
+        (REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json")
         .read_text())["evaluation_protocol_hash"]
     mod_src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
     assert recorded == STAGE3_HASH
@@ -371,13 +371,13 @@ def test_the_compat_artifact_must_bind_to_the_stage3_protocol(tmp_path, monkeypa
 def test_the_historical_attestation_is_read_not_rewritten():
     """250f72ef is historical fact. The migration must not have touched it."""
     import subprocess
-    for rel in ("logs/autoinit_stage3_complete/attested_evaluation_protocol.json",
-                "logs/autoinit_stage3_complete/materialized_thresholds.json",
-                "logs/autoinit_stage3_complete/engine_probe.json"):
+    for rel in ("logs/experiments/phase_a/results/autoinit_stage3_complete/attested_evaluation_protocol.json",
+                "logs/experiments/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json",
+                "logs/experiments/phase_a/results/autoinit_stage3_complete/engine_probe.json"):
         diff = subprocess.run(["git", "diff", "--", rel], cwd=REPO,
                               capture_output=True, text=True).stdout
         assert diff == "", f"{rel} was modified; it is historical evidence"
-    att = json.loads((REPO / "logs/autoinit_stage3_complete"
+    att = json.loads((REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete"
                       / "attested_evaluation_protocol.json").read_text())
     assert att["evaluation_protocol_hash"] == STAGE3_HASH
 
@@ -404,7 +404,7 @@ def test_a_real_content_digest_is_material_in_full(tmp_path):
     assert a["form"] == "content_digest"
 
     protocol = json.loads(
-        (REPO / "logs/autoinit_stage3_complete/attested_evaluation_protocol.json")
+        (REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete/attested_evaluation_protocol.json")
         .read_text())["evaluation_protocol"]
     base_runtime = json.loads(STAGE3_PROBE.read_text())["runtime"]
 
@@ -474,7 +474,7 @@ def test_an_unexpected_in_process_failure_keeps_its_traceback(tmp_path):
 def test_B_the_historical_stage3_attestation_is_intact():
     """The bytes the migration must not have touched."""
     att = json.loads(
-        (REPO / "logs/autoinit_stage3_complete"
+        (REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete"
          / "attested_evaluation_protocol.json").read_text())
     assert att["evaluation_protocol_hash"] == STAGE3_HASH
     assert att["evaluation_protocol"]["scoring_contract"] == "recovery_search_scoring@v2"
@@ -483,7 +483,7 @@ def test_B_the_historical_stage3_attestation_is_intact():
 
 def test_B_the_historical_thresholds_still_bind_the_historical_protocol():
     thresholds = json.loads(
-        (REPO / "logs/autoinit_stage3_complete"
+        (REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete"
          / "materialized_thresholds.json").read_text())
     assert thresholds["evaluation_protocol_hash"] == STAGE3_HASH
 
@@ -492,7 +492,7 @@ def test_B_the_historical_protocol_records_v2_and_is_not_rewritten_to_v3():
     """The migration bumped the LIVE contract; the record keeps saying v2."""
     from experiments.source_sets import recovery_scoring_contract
     att = json.loads(
-        (REPO / "logs/autoinit_stage3_complete"
+        (REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete"
          / "attested_evaluation_protocol.json").read_text())
     live = recovery_scoring_contract(REPO)
     assert att["evaluation_protocol"]["scoring_contract"] == "recovery_search_scoring@v2"

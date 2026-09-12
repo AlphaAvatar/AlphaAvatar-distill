@@ -80,7 +80,7 @@ def load_grant(path: Path) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_measurement_authorization.json")
+    ap.add_argument("--out", default="logs/budget/approvals/autoinit_measurement_authorization.json")
     ap.add_argument("--grant", required=True,
                     help="a one-use grant document: who permitted what, at what "
                          "cumulative spend, and what it does not authorize")

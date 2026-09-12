@@ -164,7 +164,7 @@ class TestTheCoreIsClean:
                         for f in findings))
 
     def test_the_recorded_report_agrees_with_a_live_scan(self):
-        path = REPO / "logs/architecture_semantic_hardcode.json"
+        path = REPO / "logs/maintenance/inventories/architecture_semantic_hardcode.json"
         if not path.is_file():
             pytest.skip("no recorded report yet")
         recorded = json.loads(path.read_text())

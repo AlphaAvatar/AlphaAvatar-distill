@@ -2,7 +2,7 @@
 """Price the paid work Phase B actually still owes. Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/price_phase_b.py \
-        --out logs/autoinit_phase_b_pricing.json
+        --out logs/experiments/phase_b/analyses/autoinit_phase_b_pricing.json
 
 Phase B is not a fresh Phase A. Its terminal procedure is a **cross-phase**
 behavioural selection: the P=2 search's Top-5 leaves compete against the two
@@ -13,7 +13,7 @@ candidate set MINUS what has already been observed, and pricing it any other way
 would bill for evidence this project already owns.
 
 Reuse is **not** assumed from the existence of a file. It is taken from
-`logs/autoinit_historical_probe_reuse.json`, the strict reconstruction record
+`logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json`, the strict reconstruction record
 produced by `verify_historical_probe_reuse.py`, and this script **fails closed**
 if that record is missing, unverified, or describes a different set of probe
 bytes than the ones on disk now.
@@ -56,7 +56,7 @@ from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 
 #: Attempt 7's probe records — the only Phase-A behavioural evidence that exists.
-PROBES = REPO_ROOT / "logs/autoinit_recovery_continuation_attempt7/probes"
+PROBES = REPO_ROOT / "logs/runs/unscoped/recovery_continuation/attempt7/probes"
 
 #: The reviewer's terminal procedure, 2026-08-25.
 PHASE_B_SEARCHED_LEAVES = 5        # Top-5 admitted from the P=2 search
@@ -78,7 +78,7 @@ DEPTH_CACHED_FRACTION = 13.4 / 16.9
 PROBE_RE = re.compile(r"^autoinit\.v1\.phase_a\.rung(\d)\.([^.]+)\.(s[abc])\.json$")
 
 #: The strict reconstruction record this pricing is conditional on.
-REUSE_RECORD = REPO_ROOT / "logs/autoinit_historical_probe_reuse.json"
+REUSE_RECORD = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
 
 
 def observed_probes(root: Path = PROBES) -> dict[str, set[str]]:
@@ -298,7 +298,7 @@ def price(hardware=L40S_MEASURED) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_phase_b_pricing.json")
+    ap.add_argument("--out", default="logs/experiments/phase_b/analyses/autoinit_phase_b_pricing.json")
     args = ap.parse_args()
     result = price()
     out = Path(args.out)

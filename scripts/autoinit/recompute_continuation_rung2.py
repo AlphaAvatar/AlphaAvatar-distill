@@ -35,9 +35,9 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-PROBES = REPO_ROOT / "logs/autoinit_continuation_b_attempt4/probes"
-WITHDRAWN = REPO_ROOT / "logs/autoinit_continuation_b_attempt4/phase_a_result.json"
-AMENDMENT = REPO_ROOT / "logs/autoinit_phase_b_identity_collapse_amendment.json"
+PROBES = REPO_ROOT / "logs/runs/unscoped/continuation_b/attempt4/probes"
+WITHDRAWN = REPO_ROOT / "logs/runs/unscoped/continuation_b/attempt4/phase_a_result.json"
+AMENDMENT = REPO_ROOT / "logs/experiments/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
 
 
 def load_driver():
@@ -82,7 +82,7 @@ def recompute() -> dict:
             "select_final_winner. Supersedes the decision in the Attempt-4 "
             "result, which pooled an imported sc into a rung-2 comparison. Buys "
             "nothing; moves no frozen identity. NOT an authorization."),
-        "source_probes": "logs/autoinit_continuation_b_attempt4/probes",
+        "source_probes": "logs/runs/unscoped/continuation_b/attempt4/probes",
         "admitted_rungs": list(drv.ContinuationDriver.RUNG2_ADMITTED),
         "science_plan_hash": plan.plan_hash,
         "equivalence_interval": withdrawn["equivalence_interval"],
@@ -102,7 +102,7 @@ def recompute() -> dict:
         "sc_already_held": sorted(have_sc),
         "sc_still_owed": owed,
         "withdrawn_decision": {
-            "source": "logs/autoinit_continuation_b_attempt4/phase_a_result.json",
+            "source": "logs/runs/unscoped/continuation_b/attempt4/phase_a_result.json",
             "decision_status": withdrawn["decision_status"],
             "winner": withdrawn["winner"],
             "why_withdrawn": (
@@ -120,7 +120,7 @@ def recompute() -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out",
-                    default="logs/autoinit_continuation_b_corrected_rung2.json")
+                    default="logs/experiments/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json")
     args = ap.parse_args()
     out = Path(args.out)
     out = out if out.is_absolute() else REPO_ROOT / args.out

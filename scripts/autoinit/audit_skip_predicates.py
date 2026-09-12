@@ -15,7 +15,7 @@ unclassified is reported and fails the audit.
 
     PYTHONPATH=src python scripts/autoinit/audit_skip_predicates.py [--write]
 
-`--write` refreshes `logs/experiments/phase_c1/skip_predicate_audit.json`. Entirely at `$0`: it
+`--write` refreshes `logs/experiments/phase_c1/analyses/skip_predicate_audit.json`. Entirely at `$0`: it
 reads source and never imports the modules under audit.
 """
 from __future__ import annotations
@@ -38,7 +38,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "tests/pod"))
 
-RECORD = "logs/experiments/phase_c1/skip_predicate_audit.json"
+RECORD = "logs/experiments/phase_c1/analyses/skip_predicate_audit.json"
 REGISTRY = "configs/autoinit/c1_skip_predicate_classification.json"
 SCHEMA = "aadistill.autoinit.c1_skip_predicate_audit/v1"
 

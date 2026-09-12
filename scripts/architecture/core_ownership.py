@@ -420,7 +420,7 @@ def main() -> int:
     print(json.dumps(by_rule, indent=1))
     print(f"total: {len(counted)}   deferred (CUDA surface): {len(deferred)}")
     if args.write:
-        out = REPO / "logs/architecture_core_ownership.json"
+        out = REPO / "logs/maintenance/inventories/architecture_core_ownership.json"
         out.write_text(json.dumps(doc, indent=1) + "\n")
         print(f"wrote {out}")
     return 0

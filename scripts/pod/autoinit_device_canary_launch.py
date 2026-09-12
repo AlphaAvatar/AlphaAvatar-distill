@@ -76,7 +76,7 @@ from autoinit_science_inputs import (  # noqa: E402
 
 STATUS = f"{WS}/autoinit_device_canary.status"
 RUN_LOG = f"{WS}/autoinit_device_canary_run.log"
-AUTH_PATH = "logs/autoinit_device_canary_authorization.json"
+AUTH_PATH = "logs/budget/approvals/autoinit_device_canary_authorization.json"
 #: The canary reads the frozen calibration mixture and the canonical student.
 #: Both come from the relay; neither is a dev-box-only asset, so nothing is
 #: scp'd and no asset is installed. Under the old shared setup that declaration
@@ -123,7 +123,7 @@ CANARY_PLAN_V1 = PreflightPlan(
 )
 
 #: Priced from the project's own cost model: the compute is ~1 s, so this is
-#: session overhead and nothing else. See `logs/autoinit_stage1_device_audit.json`.
+#: session overhead and nothing else. See `logs/experiments/phase_a/analyses/autoinit_stage1_device_audit.json`.
 SETUP_MINUTES = 11.0
 PARENT_LOAD_MINUTES = 3.0
 CANARY_MINUTES = 8.0
@@ -263,7 +263,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=str(Path.home() / ".runpod/config.toml"))
-    ap.add_argument("--out", default="logs/autoinit_device_canary_session.json")
+    ap.add_argument("--out", default="logs/validations/device-canary/autoinit_device_canary_session.json")
     return ap
 
 

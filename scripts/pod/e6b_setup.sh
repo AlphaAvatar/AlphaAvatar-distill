@@ -258,7 +258,7 @@ mark MASK_OK
 # confounded comparison after paying for it.
 say "validating the E6b arms against their registration"
 cd "$REPO" && PYTHONPATH=src /opt/train/bin/python scripts/training/validate_e6b_arms.py \
-    --registration logs/e6b_registration.json \
+    --registration logs/experiments/early/analyses/e6b_registration.json \
     --out artifacts/audit/e6b_preflight_pod.json
 mark ARMS_VALIDATED
 

@@ -212,7 +212,7 @@ def main() -> int:
                         "prediction_positions": CALIBRATION_POSITIONS},
         "subset_evaluations": SUBSET_EVALUATIONS,
     }
-    dest = REPO_ROOT / "logs/e8_budget_plans.json"
+    dest = REPO_ROOT / "logs/experiments/early/analyses/e8_budget_plans.json"
     dest.write_text(json.dumps(out, indent=2) + "\n")
     print(f"\nwrote {dest.relative_to(REPO_ROOT)}")
     return 0

@@ -53,7 +53,7 @@ LAUNCH_PATH = REPO / "scripts/pod/autoinit_preflight_launch.py"
 #: composition refactor moved the flow here and left the launcher a
 #: declaration, so the tests that assert on the FLOW follow it.
 RUNNER_PATH = REPO / "src/aadistill/infrastructure/session_runner.py"
-AUTH_PATH = REPO / "logs/autoinit_micro_preflight_authorization.json"
+AUTH_PATH = REPO / "logs/budget/approvals/autoinit_micro_preflight_authorization.json"
 
 pytestmark = pytest.mark.skipif(
     not (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file(),

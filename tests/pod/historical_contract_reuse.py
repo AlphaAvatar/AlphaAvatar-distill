@@ -3,7 +3,7 @@
 Phase A's probes were scored under `recovery_search_scoring@v2`. The scorer has
 since relocated twice and the contract legitimately moved to v3, so every one of
 the eleven probes now fails `scoring_contract_matches_live` — and only that
-check. `logs/autoinit_historical_reuse_position.json` derives the same thing and
+check. `logs/experiments/shared/analyses/autoinit_historical_reuse_position.json` derives the same thing and
 records it as conclusion 4: **live reuse under v3 is REFUSED**, deliberately and
 without relaxation, because admitting a superseded contract is a maintainer
 decision rather than a migration one.
@@ -31,7 +31,7 @@ import json
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-LIVE_RECORD = REPO / "logs/autoinit_historical_probe_reuse.json"
+LIVE_RECORD = REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
 
 #: The one check the historical contract cannot satisfy, by construction.
 LIVE_CONTRACT_CHECK = "scoring_contract_matches_live"

@@ -50,7 +50,7 @@ sys.path.insert(0, str(REPO / "scripts/architecture"))
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from migration_map import MAP  # noqa: E402
 
-OUT = "logs/architecture_source_relocation.json"
+OUT = "logs/maintenance/inventories/architecture_source_relocation.json"
 SCHEMA = "aadistill.architecture_source_relocation/v1"
 
 #: Every frozen declaration, with the callable that computes its digest so the
@@ -131,10 +131,10 @@ def account_set(name: str, module: str, digest_fn: str | None,
             if (moved or edited or deleted) else
             #: A repointed declaration names current paths, so nothing here is
             #: outstanding. Its move history is not lost — it is recorded in
-            #: logs/architecture_declaration_history.json, which holds the old
+            #: logs/maintenance/inventories/architecture_declaration_history.json, which holds the old
             #: path list and the digest the completed runs bound.
             "this declaration names paths that all exist; its relocation is "
-            "accounted for in logs/architecture_declaration_history.json"),
+            "accounted for in logs/maintenance/inventories/architecture_declaration_history.json"),
         "moves": moved, "moves_with_edits": edited, "deletions": deleted,
     }
     if digest_fn:

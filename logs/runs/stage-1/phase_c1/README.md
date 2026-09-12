@@ -28,23 +28,18 @@ capability.
 This file deliberately restates none of them. A second hand-maintained copy of a
 cost, a commit or an authorization status is how the two disagree.
 
-## Earlier attempts — three locations, not one
+## Every attempt is here
 
-This said *"attempts 1–12 remain at `logs/runs/phase_c1/<run_id>/`"*, and only
-three of them are there. The real layout, derived from
-[`../../index.json`](../../index.json) rather than restated:
+All 14 Phase-C1 runs live under this one directory. They were in three
+layouts — `logs/autoinit_c1_attempt<N>/` for 1–9, `logs/runs/phase_c1/<run>/`
+for 10–12, and this one for 13 — and the log-layout-v1 migration brought them
+together without changing a byte.
 
-| attempts | where |
-| --- | --- |
-| 1–9 | `logs/autoinit_c1_attempt<N>/`, with several also holding a flat `logs/autoinit_c1_attempt<N>_grant.json` |
-| 10–12 | `logs/runs/phase_c1/<run_id>/` |
-| 13– | here |
+Old paths still appear inside consumed authorizations and closed manifests.
+That is not staleness: each states where the object was when that payload was
+written, and
+[`../../../migrations/log-layout-v1/manifest.json`](../../../migrations/log-layout-v1/manifest.json)
+maps every one forward.
 
-They are **found, not relocated.** Attempts 1–9 predate the run directory
-entirely; 10–12 predate the stage grouping. Their grants, consumed
-authorizations and closeouts name the paths they are at, so moving one breaks
-the lineage that makes it evidence — and for the flat grants that binding is
-explicit: a consumed authorization records the grant's path *and* its hash.
-
-The index covers all three locations. Query it rather than guessing from a
-path.
+Stage 1 because `configs/experiments/phase_c1/authorization.json` DECLARES
+`stage_id: "1"` — the only experiment in this repository that declares one.

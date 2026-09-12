@@ -29,7 +29,7 @@ out here rather than left to judgement at the keyboard:
 
 Refusals, which are the point of the tool:
 
-  * the path is `protected` in logs/checkpoint_registry.json, or carries a
+  * the path is `protected` in logs/maintenance/inventories/checkpoint_registry.json, or carries a
     `never_delete_clause`;
   * `--canonical` names something that does not exist;
   * a criterion of `byte_identical_duplicate` when the survivor's bytes differ;
@@ -49,8 +49,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-TOMBSTONES = REPO_ROOT / "logs/checkpoint_tombstones.json"
-REGISTRY = REPO_ROOT / "logs/checkpoint_registry.json"
+TOMBSTONES = REPO_ROOT / "logs/maintenance/inventories/checkpoint_tombstones.json"
+REGISTRY = REPO_ROOT / "logs/maintenance/inventories/checkpoint_registry.json"
 
 CRITERIA = {
     "unreferenced_failed_partial": "an interrupted or failed attempt that nothing "

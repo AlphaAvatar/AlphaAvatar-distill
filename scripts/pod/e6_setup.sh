@@ -204,7 +204,7 @@ mark INIT_READY
 # `--stores relay` is what makes that split explicit rather than accidental.
 say "staging and hash-verifying the four relay checkpoints"
 /opt/train/bin/python "$REPO/scripts/pod/e6_stage_checkpoints.py" \
-    --registration "$REPO/logs/e6_registration.json" \
+    --registration "$REPO/logs/experiments/early/analyses/e6_registration.json" \
     --relay-dest /workspace/ckpt \
     --devbox-src /workspace/ckpt_local \
     --stores relay \

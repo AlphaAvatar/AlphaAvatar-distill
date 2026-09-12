@@ -362,7 +362,7 @@ class TestTheCoreIsClean:
 
     def test_the_recorded_report_agrees_with_a_live_scan(self):
         import json
-        path = REPO / "logs/architecture_core_ownership.json"
+        path = REPO / "logs/maintenance/inventories/architecture_core_ownership.json"
         if not path.is_file():
             pytest.skip("no recorded report yet")
         doc = json.loads(path.read_text())

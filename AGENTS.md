@@ -692,7 +692,7 @@ Create only the logs needed by the current milestone.
 Once the first meaningful implementation or experiment session begins, maintain a single current-state file at:
 
 ```text
-logs/STATE.md
+logs/state/current.md
 ```
 
 `STATE.md` is the canonical handoff document for the repository. It should allow a new human or coding agent to continue the project without relying on chat history.
@@ -724,7 +724,7 @@ The file should clearly distinguish between:
 * decisions or approvals currently required from the user;
 * links to relevant experiment logs, decision records, manifests, or training logs.
 
-Update `logs/STATE.md`:
+Update `logs/state/current.md`:
 
 * after meaningful implementation, experiment, environment, dependency, model, or repository-structure changes;
 * after a stage passes, fails, pauses, or changes status;

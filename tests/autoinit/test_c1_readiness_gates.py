@@ -420,7 +420,7 @@ def test_the_pod_gate_names_every_failing_nodeid_before_it_exits():
 
 # --- the record on disk, once it exists -------------------------------------
 
-C1_AUTH_PATH = "logs/autoinit_c1_authorization.json"
+C1_AUTH_PATH = "logs/budget/approvals/autoinit_c1_authorization.json"
 
 
 #: These two CONSUME the readiness record. `record_pod_environment.py` moves the
@@ -455,7 +455,7 @@ def test_the_committed_record_still_binds_the_live_executable():
     `authorization_path`, so only the readiness record counted as a permitted
     post-sweep path. That is not the shape a pod is ever in: a pod checks out the
     SESSION commit, which by construction also carries
-    `logs/autoinit_c1_authorization.json`, so the authorization read as post-sweep
+    `logs/budget/approvals/autoinit_c1_authorization.json`, so the authorization read as post-sweep
     drift and the record was refused. It cost one of attempt 4's six failures.
 
     The production gate was already correct and passed — `pod_environment_gate`
@@ -685,9 +685,9 @@ def _swept_repo(tmp_path, monkeypatch):
     root = tmp_path / "repo"
     (root / "logs").mkdir(parents=True)
     (root / "tests").mkdir()
-    (root / "logs/STATE.md").write_text("state\n")
-    (root / "logs/current_state.json").write_text('{"a": 1}\n')
-    (root / "logs/CATALOG.md").write_text("catalog\n")
+    (root / "logs/state/current.md").write_text("state\n")
+    (root / "logs/state/current.json").write_text('{"a": 1}\n')
+    (root / "logs/state/ownership.md").write_text("catalog\n")
     (root / "tests/test_x.py").write_text("def test_a(): pass\n")
     _git(root.parent, "init", "-q", str(root)) if False else subprocess.run(
         ["git", "init", "-q", str(root)], check=True, capture_output=True)
@@ -747,7 +747,7 @@ def test_the_canonical_authorization_is_accepted_only_in_the_issued_shape(
         tmp_path, monkeypatch):
     """An issued session commits its authorization after the sweep. That is the
     ONE extra path, and only when a session actually carries an authorization."""
-    auth = "logs/autoinit_c1_authorization.json"
+    auth = "logs/budget/approvals/autoinit_c1_authorization.json"
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     _commit(root, pe.RECORD_PATH, '{"record": true}\n', "record the sweep")
     head = _commit(root, auth, '{"authorization": true}\n', "issue")
@@ -764,18 +764,18 @@ def test_the_canonical_authorization_is_accepted_only_in_the_issued_shape(
 def test_changing_current_state_after_the_sweep_is_refused(tmp_path, monkeypatch):
     """The exact 2026-09-04 hole: the pod suite reads this file."""
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
-    head = _commit(root, "logs/current_state.json", '{"a": 2}\n', "normalize state")
+    head = _commit(root, "logs/state/current.json", '{"a": 2}\n', "normalize state")
     ok, why = pe.verify_record(rec, root, session_commit=head)
     assert not ok
-    assert "post-sweep drift" in why and "logs/current_state.json" in why
+    assert "post-sweep drift" in why and "logs/state/current.json" in why
 
 
 def test_changing_state_md_after_the_sweep_is_refused(tmp_path, monkeypatch):
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
-    head = _commit(root, "logs/STATE.md", "rewritten\n", "update the handoff")
+    head = _commit(root, "logs/state/current.md", "rewritten\n", "update the handoff")
     ok, why = pe.verify_record(rec, root, session_commit=head)
     assert not ok
-    assert "post-sweep drift" in why and "logs/STATE.md" in why
+    assert "post-sweep drift" in why and "logs/state/current.md" in why
 
 
 def test_an_arbitrary_second_log_or_doc_file_is_refused(tmp_path, monkeypatch):
@@ -784,7 +784,7 @@ def test_an_arbitrary_second_log_or_doc_file_is_refused(tmp_path, monkeypatch):
     _commit(root, pe.RECORD_PATH, '{"record": true}\n', "record the sweep")
     head = _commit(root, "logs/some_other_note.json", "{}\n", "add a note")
     ok, why = pe.verify_record(rec, root, session_commit=head,
-                               authorization_path="logs/autoinit_c1_authorization.json")
+                               authorization_path="logs/budget/approvals/autoinit_c1_authorization.json")
     assert not ok
     assert "post-sweep drift" in why and "logs/some_other_note.json" in why
 
@@ -822,7 +822,7 @@ def test_a_session_commit_off_the_swept_line_of_history_is_refused(tmp_path,
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     _git(root, "checkout", "-q", "-b", "other", f"{base}~0")
     _git(root, "checkout", "-q", "--orphan", "elsewhere")
-    _commit(root, "logs/STATE.md", "different history\n", "orphan")
+    _commit(root, "logs/state/current.md", "different history\n", "orphan")
     head = _git(root, "rev-parse", "HEAD")
     ok, why = pe.verify_record(rec, root, session_commit=head)
     assert not ok and "post-sweep drift" in why
@@ -849,7 +849,7 @@ def test_the_snapshot_does_not_duplicate_the_swept_commit():
     gate 12 now forbids editing state after the sweep, so it could not even be
     corrected in place. The record owns it.
     """
-    snap = json.loads((REPO / "logs/current_state.json").read_text())
+    snap = json.loads((REPO / "logs/state/current.json").read_text())
     baseline = snap["baseline_commit"]
     assert not re.fullmatch(r"[0-9a-f]{7,40}", baseline), (
         f"baseline_commit is a bare hash ({baseline}); it must point at the "
@@ -911,7 +911,7 @@ def test_the_delegate_agrees_with_the_frozen_rule_on_one_path(tmp_path,
 
     root, rec, base = _swept_repo(tmp_path, monkeypatch)
     head = _commit(root, pe.RECORD_PATH, '{"r": 1}\n', "record")
-    for allowed in (pe.RECORD_PATH, "logs/STATE.md"):
+    for allowed in (pe.RECORD_PATH, "logs/state/current.md"):
         a = lineage_from_authorized_base(root, base, head, allowed)
         b = pe.lineage_from_swept_base(root, base, head, (allowed,))
         assert a["ok"] == b["ok"], allowed
@@ -934,7 +934,7 @@ def test_the_snapshot_does_not_duplicate_the_sweep_result():
     verdict; a second copy in a file that is edited on a different cadence can
     only go stale.
     """
-    lv = json.loads((REPO / "logs/current_state.json").read_text())[
+    lv = json.loads((REPO / "logs/state/current.json").read_text())[
         "latest_verification"]
     assert lv["owned_by"] == pe.RECORD_PATH
     blob = json.dumps(lv)
@@ -1067,7 +1067,7 @@ def test_the_pricing_record_is_hash_verified_before_the_rate_is_used():
     assert "pricing_sha256" in src
     doc = load_pricing(REPO)
     assert doc["hardware"]["price_per_hour_usd"] == 1.09
-    assert PRICING_PATH == "logs/phase_c1_pricing.json"
+    assert PRICING_PATH == "logs/experiments/phase_c1/plans/phase_c1_pricing.json"
 
 
 def test_a_battery_source_case_that_passed_means_the_role_leaked(tmp_path):
@@ -1145,7 +1145,7 @@ def test_the_prereg_gate_count_and_order_equal_the_live_session():
     from session_specs import load_session_launcher, session_args
 
     doc = json.loads(
-        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
     transport = doc["transport"]
 
     #: Through the shared helper, which asks the REAL parser what it requires.
@@ -1172,7 +1172,7 @@ def test_the_prereg_gate_count_and_order_equal_the_live_session():
 def test_the_prereg_states_the_canonical_issuance_ordering():
     """Sweep BEFORE issuance. Stated backwards once, and it would refuse at $0."""
     doc = json.loads(
-        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
     steps = doc["transport"]["ordering"]
     assert len(steps) == 9, steps
     joined = " ".join(steps).lower()

@@ -18,7 +18,7 @@ Four areas, because a single total hides what actually changed:
     scratch / session dirs    /home/ecs-user/aad-scratch — per-session working
                               directories, bundles, poller output, quarantine
 
-Readings append to logs/storage_measurements.json. A before/after pair with the
+Readings append to logs/maintenance/storage/storage_measurements.json. A before/after pair with the
 same definitions is the only honest way to say what a cleanup reclaimed.
 """
 
@@ -68,14 +68,14 @@ def git_tracked_bytes() -> tuple[int, int]:
 
 
 def relay_bytes(requery: bool) -> dict:
-    registry = REPO_ROOT / "logs/checkpoint_registry.json"
+    registry = REPO_ROOT / "logs/maintenance/inventories/checkpoint_registry.json"
     if not requery and registry.is_file():
         relay = json.loads(registry.read_text()).get("relay", {})
         if relay.get("files"):
             return {"repo": RELAY_REPO,
                     "bytes": sum(f["size_bytes"] for f in relay["files"]),
                     "files": len(relay["files"]),
-                    "source": "logs/checkpoint_registry.json (cached listing)",
+                    "source": "logs/maintenance/inventories/checkpoint_registry.json (cached listing)",
                     "queried_utc": relay.get("queried_utc")}
     from huggingface_hub import HfApi                      # noqa: PLC0415
     info = HfApi().repo_info(RELAY_REPO, repo_type="model", files_metadata=True)
@@ -146,7 +146,7 @@ def main() -> int:
     ap.add_argument("--label", required=True,
                     help="e.g. before-cleanup / after-cleanup")
     ap.add_argument("--note", default="")
-    ap.add_argument("--out", default="logs/storage_measurements.json")
+    ap.add_argument("--out", default="logs/maintenance/storage/storage_measurements.json")
     ap.add_argument("--relay", action="store_true",
                     help="re-query the artifact store instead of reading the "
                          "registry's cached listing")
