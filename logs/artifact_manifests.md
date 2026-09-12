@@ -1008,7 +1008,7 @@ retrain.
   every set sha256 equal to the frozen manifest value, `content_sha256`
   re-derived to `a285d61f…`, membership 950/850. The repo-local copy is
   retained. The scientific identity and the selection rule are untouched.
-- **Committed identity:** [`phase_c1_battery.json`](phase_c1_battery.json) —
+- **Committed identity:** [`phase_c1_battery.json`](experiments/phase_c1/battery.json) —
   asset id, per-set sha256, pinned source revisions, sampling rule, isolation
   result.
 - **Content hash:**

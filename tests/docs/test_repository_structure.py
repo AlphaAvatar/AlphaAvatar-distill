@@ -335,6 +335,26 @@ def _logs_tree_is_partial() -> bool:
 @pytest.mark.skipif(_logs_tree_is_partial(),
                     reason="logs/ is partially staged; an absent target is the "
                            "staging, not a broken link")
+def _preserved(rel: str) -> bool:
+    """Documents kept verbatim: a link in one records where a file WAS.
+
+    `logs/archive/` says in its own header that it is unedited, and the runs the
+    index registers carry directory digests. Repointing a link inside either
+    would change preserved text to suit a relocation; the forward mapping lives
+    in `logs/maintenance/log_relocation.json` instead.
+    """
+    return rel.startswith("logs/archive/") or any(
+        rel.startswith(d + "/") for d in _registered_run_dirs())
+
+
+def _registered_run_dirs() -> tuple[str, ...]:
+    import json as _json
+    idx = _json.loads((REPO / "logs/runs/index.json").read_text())
+    return tuple(rel for e in idx.get("runs", [])
+                 for rel in (e.get("components") or {}).values()
+                 if (REPO / rel).is_dir())
+
+
 def test_no_markdown_link_points_at_a_file_that_is_not_there():
     """Cross-references are what replaces a duplicated copy, so a broken one is
     a lost fact rather than a cosmetic defect. Two whole classes of these existed
@@ -344,6 +364,8 @@ def test_no_markdown_link_points_at_a_file_that_is_not_there():
     broken = []
     for md in sorted(REPO.rglob("*.md")):
         if any(part in (".git", ".venv", "__pycache__") for part in md.parts):
+            continue
+        if _preserved(md.relative_to(REPO).as_posix()):
             continue
         for m in re.finditer(r"\[[^\]]*\]\(([^)]+)\)", md.read_text(errors="ignore")):
             target = m.group(1).split("#")[0].strip()

@@ -28,12 +28,14 @@ import argparse
 import collections
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 CATALOG = "logs/CATALOG.md"
+READREC = "logs/c1_pod_environment_verification.json"
 INDEX = "logs/runs/index.json"
 MARK_START = "## Classification"
 MARK_END = "## One copy of every raw artifact"
@@ -149,6 +151,89 @@ def render_experiment_readme(d: Path, root: Path,
     return "\n".join(lines)
 
 
+READINESS_RECORD = "logs/c1_pod_environment_verification.json"
+READINESS_HISTORY = "logs/experiments/phase_c1/readiness_history.json"
+STATE_MD = "logs/STATE.md"
+R_BEGIN = "<!-- readiness:begin -->"
+R_END = "<!-- readiness:end -->"
+
+
+def readiness_view(root: Path) -> dict:
+    """Three separate statements, read from the record rather than restated.
+
+    `STATE.md` said the readiness record was a launch-bound FAILURE while the
+    file it linked to was a diagnostic PASS. The three facts had been collapsed
+    into one line, so the line was wrong about all of them at once:
+
+    * what the LATEST sweep observed -- its kind, verdict and the tree it swept;
+    * whether a launch-bound record exists for the CURRENT tree, which is what a
+      launch would rest on and is a different question entirely;
+    * that an earlier launch-bound sweep FAILED, which stays true afterwards.
+
+    Derived, so saving a new verification record does not also require editing
+    the current view by hand -- which is how it went stale within hours.
+    """
+    live = json.loads((root / READREC).read_text()) if (
+        root / READREC).is_file() else {}
+    hist = (json.loads((root / READINESS_HISTORY).read_text())
+            if (root / READINESS_HISTORY).is_file() else {"entries": []})
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root,
+                          capture_output=True, text=True,
+                          check=True).stdout.strip()
+    swept = str(live.get("swept_base_commit") or "")
+    lb = [e for e in hist.get("entries", [])
+          if e.get("record_kind") == "launch_bound"]
+    return {
+        "latest": {"kind": live.get("record_kind"), "verdict": live.get("verdict"),
+                   "swept_base_commit": swept, "counts": live.get("counts"),
+                   "describes_head": bool(swept) and swept == head},
+        "launch_bound_ready": (live.get("record_kind") == "launch_bound"
+                               and live.get("verdict") == "PASS"
+                               and swept == head),
+        "launch_bound_failures": [
+            {"swept_base_commit": e["swept_base_commit"],
+             "committed_utc": e.get("committed_utc"),
+             "problems": e.get("problems")}
+            for e in lb if e.get("verdict") != "PASS"],
+        "history": READINESS_HISTORY,
+        "record": READREC,
+    }
+
+
+def render_readiness(root: Path) -> str:
+    v = readiness_view(root)
+    lt = v["latest"]
+    c = lt.get("counts") or {}
+    lines = [R_BEGIN, "",
+             "| readiness | | owner |", "| --- | --- | --- |"]
+    lines.append(
+        f"| latest sweep | **{lt['kind']} — {lt['verdict']}**"
+        + (f" ({c.get('passed')} passed, {c.get('failed', 0)} failed)" if c else "")
+        + f", swept at `{lt['swept_base_commit'][:8]}`"
+        + ("; describes the current tree" if lt["describes_head"]
+           else "; **does not describe the current tree**")
+        + f" | [`{Path(READREC).name}`]({Path(READREC).name}) |")
+    lines.append(
+        "| launch-bound for the next session | "
+        + ("**PREPARED**" if v["launch_bound_ready"]
+           else "**not prepared** — a launch-bound sweep on the final clean "
+                "pre-authorization tree is owed")
+        + " | this file's launch-chain section |")
+    if v["launch_bound_failures"]:
+        f = v["launch_bound_failures"][-1]
+        lines.append(
+            f"| last launch-bound failure | swept at `{str(f['swept_base_commit'])[:8]}`"
+            f" on {str(f['committed_utc'])[:10]} — kept as history, not a current"
+            " state | [`experiments/phase_c1/readiness_history.json`]"
+            "(experiments/phase_c1/readiness_history.json) |")
+    lines += ["",
+              "*Generated from the record by "
+              "`scripts/consolidate/render_log_navigation.py`; do not edit by "
+              "hand — it went stale within hours when it was prose.*",
+              "", R_END]
+    return "\n".join(lines)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--write", action="store_true")
@@ -167,13 +252,21 @@ def main() -> int:
             if d.is_dir():
                 readmes[d / "README.md"] = render_experiment_readme(d, root, runs)
 
+    state_p = root / STATE_MD
+    state_text = state_p.read_text()
+    i2, j2 = state_text.index(R_BEGIN), state_text.index(R_END) + len(R_END)
+    new_state = state_text[:i2] + render_readiness(root) + state_text[j2:]
+
     changed = [CATALOG] if new_catalog != text else []
+    if new_state != state_text:
+        changed.append(STATE_MD)
     for p, body in readmes.items():
         if not p.exists() or p.read_text() != body:
             changed.append(p.relative_to(root).as_posix())
 
     if a.write:
         (root / CATALOG).write_text(new_catalog)
+        state_p.write_text(new_state)
         for p, body in readmes.items():
             p.write_text(body)
         print(f"rewrote {len(changed)} document(s)")

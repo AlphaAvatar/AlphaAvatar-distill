@@ -336,7 +336,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 843,
+   "line": 864,
    "kind": "pytest.skip",
    "function": "test_the_recorded_swept_commit_is_a_real_commit_in_this_repository",
    "condition": "not path.is_file()",
@@ -740,7 +740,7 @@
    "kind": "pytest.skip",
    "function": "test_the_committed_audit_record_matches_the_live_one",
    "condition": "not path.is_file()",
-   "expanded": "not path.is_file() | path=REPO / A.RECORD | A.RECORD=\"logs/c1_skip_predicate_audit.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "not path.is_file() | path=REPO / A.RECORD | A.RECORD=\"logs/experiments/phase_c1/skip_predicate_audit.json\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -1890,5 +1890,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "ffb6dd4a97da2340fad4f5e7efad3bfdab259217621a270ff02467eb63f9721c"
+ "digest": "8436b493721b7928f3c9012c0a38ed46f91b2b221cbaa50b71eecaf23f8dedb3"
 }

@@ -51,7 +51,7 @@
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
   "equivalence_interval": 0.011695296982299022,
   "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds from the C0 digest.",
-  "owner": "logs/phase_c0_preregistration.json and logs/phase_c1_execution_preregistration.json own every frozen identity; the hashes above are the ones a reader needs to recognise, not the set.",
+  "owner": "logs/phase_c0_preregistration.json and logs/experiments/phase_c1/execution_preregistration.json own every frozen identity; the hashes above are the ones a reader needs to recognise, not the set.",
   "feasibility_floor": 0.3,
   "seeds": {
    "sa": 20260726,
@@ -61,11 +61,19 @@
   }
  },
  "latest_verification": {
-  "utc": "2026-09-12T00:00:00Z",
-  "pod_sweep": "FAIL -- the launch_bound sweep refused on a stale run index; owed again",
+  "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
+  "latest_sweep": {
+   "kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "78635c5e34c27c1f06d00753626f0466936eeb62",
+   "describes_head": false
+  },
+  "launch_bound_ready": false,
+  "launch_bound_failures": 1,
   "owned_by": "logs/c1_pod_environment_verification.json",
+  "history": "logs/experiments/phase_c1/readiness_history.json",
   "last_paid_attempt_owned_by": "logs/runs/phase_c1/attempt11/closeout/outcome.json",
-  "_last_paid_note": "attempt 11 is the last session that BILLED; attempt 12 was a $0 capacity refusal. This field named attempt 9 through three later sessions."
+  "_three_separate_facts": "what the latest sweep OBSERVED, whether a launch-bound record describes the CURRENT tree, and that an earlier launch-bound sweep failed. STATE.md collapsed them into one line and was wrong about all three at once."
  },
  "abandoned": [
   "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
@@ -126,7 +134,7 @@
    "not_built": "grant, authorization and bundle all CONSUMED by attempt 12; the next session needs all three plus a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
    "owners": {
     "protocol": "logs/phase_c0_preregistration.json",
-    "execution_prereg": "logs/phase_c1_execution_preregistration.json",
+    "execution_prereg": "logs/experiments/phase_c1/execution_preregistration.json",
     "pricing": "logs/phase_c1_pricing.json",
     "history": "logs/experiments/phase_c1/operational_history.md",
     "runs": "logs/runs/index.json"

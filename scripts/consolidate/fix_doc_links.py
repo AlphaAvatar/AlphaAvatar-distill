@@ -52,9 +52,15 @@ def protected_dirs(root: Path) -> tuple[str, ...]:
     if not p.is_file():
         return ()
     idx = json.loads(p.read_text())
-    return tuple(sorted({rel for e in idx.get("runs", [])
-                         for rel in (e.get("components") or {}).values()
-                         if (root / rel).is_dir()}))
+    registered = {rel for e in idx.get("runs", [])
+                  for rel in (e.get("components") or {}).values()
+                  if (root / rel).is_dir()}
+    #: And the archive. Those documents are kept VERBATIM and say so in their
+    #: own header; repointing a link inside one would make that false. A
+    #: citation there records where a file was when the document was written,
+    #: and the forward mapping is in the relocation record.
+    registered.add("logs/archive")
+    return tuple(sorted(registered))
 
 
 def index_basenames(root: Path) -> dict[str, list[Path]]:

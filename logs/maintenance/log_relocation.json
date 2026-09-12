@@ -3,13 +3,13 @@
  "_what_this_is": "the 2026-09-12 relocation of loose `logs/` material into the experiment that owns it. Every move is old path -> new path, so a citation in an older document can be followed forward. Nothing was copied and nothing was deleted.",
  "counts": {
   "loose_before": 198,
-  "moved": 14,
+  "moved": 20,
   "reverted": 30,
-  "loose_after": 185,
-  "staying": 185,
+  "loose_after": 179,
+  "staying": 179,
   "by_reason": {
    "entry_point": 11,
-   "named_by_executable": 97,
+   "named_by_executable": 91,
    "index_registered": 34,
    "cited_by_frozen_evidence": 8,
    "unattributed": 3,
@@ -86,6 +86,42 @@
    "from": "logs/storage_closeout_20260831.json",
    "to": "logs/maintenance/storage_closeout_20260831.json",
    "experiment": "maintenance"
+  },
+  {
+   "from": "logs/phase_c1_execution_preregistration.json",
+   "to": "logs/experiments/phase_c1/execution_preregistration.json",
+   "experiment": "phase_c1",
+   "round": "2026-09-12b: active C1 experiment records, with their producers and consumers"
+  },
+  {
+   "from": "logs/phase_c1_battery.json",
+   "to": "logs/experiments/phase_c1/battery.json",
+   "experiment": "phase_c1",
+   "round": "2026-09-12b: active C1 experiment records, with their producers and consumers"
+  },
+  {
+   "from": "logs/phase_c1_teacher_binding.json",
+   "to": "logs/experiments/phase_c1/teacher_binding.json",
+   "experiment": "phase_c1",
+   "round": "2026-09-12b: active C1 experiment records, with their producers and consumers"
+  },
+  {
+   "from": "logs/phase_c1_scoring_equivalence.json",
+   "to": "logs/experiments/phase_c1/scoring_equivalence.json",
+   "experiment": "phase_c1",
+   "round": "2026-09-12b: active C1 experiment records, with their producers and consumers"
+  },
+  {
+   "from": "logs/c1_renderer_parity.json",
+   "to": "logs/experiments/phase_c1/renderer_parity.json",
+   "experiment": "phase_c1",
+   "round": "2026-09-12b: active C1 experiment records, with their producers and consumers"
+  },
+  {
+   "from": "logs/c1_skip_predicate_audit.json",
+   "to": "logs/experiments/phase_c1/skip_predicate_audit.json",
+   "experiment": "phase_c1",
+   "round": "2026-09-12b: active C1 experiment records, with their producers and consumers"
   }
  ],
  "reverted": {
@@ -1129,7 +1165,7 @@
    ]
   },
   {
-   "path": "logs/c1_renderer_parity.json",
+   "path": "logs/experiments/phase_c1/renderer_parity.json",
    "reason": "named_by_executable",
    "detail": "resolved by 2 site(s): scripts/autoinit/record_pod_environment.py, scripts/autoinit/renderer_parity_gate.py",
    "sites": [
@@ -1138,7 +1174,7 @@
    ]
   },
   {
-   "path": "logs/c1_skip_predicate_audit.json",
+   "path": "logs/experiments/phase_c1/skip_predicate_audit.json",
    "reason": "named_by_executable",
    "detail": "resolved by 1 site(s): scripts/autoinit/audit_skip_predicates.py",
    "sites": [
@@ -1551,7 +1587,7 @@
    ]
   },
   {
-   "path": "logs/phase_c1_battery.json",
+   "path": "logs/experiments/phase_c1/battery.json",
    "reason": "named_by_executable",
    "detail": "resolved by 4 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/write_c1_execution_preregistration.py, scripts/pod/autoinit_c1_driver.py",
    "sites": [
@@ -1562,7 +1598,7 @@
    ]
   },
   {
-   "path": "logs/phase_c1_execution_preregistration.json",
+   "path": "logs/experiments/phase_c1/execution_preregistration.json",
    "reason": "named_by_executable",
    "detail": "resolved by 9 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/write_c1_execution_preregistration.py, scripts/pod/autoinit_c1_launch.py",
    "sites": [
@@ -1594,7 +1630,7 @@
    ]
   },
   {
-   "path": "logs/phase_c1_scoring_equivalence.json",
+   "path": "logs/experiments/phase_c1/scoring_equivalence.json",
    "reason": "named_by_executable",
    "detail": "resolved by 4 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/verify_c1_scoring_equivalence.py, scripts/autoinit/write_c1_execution_preregistration.py",
    "sites": [
@@ -1605,7 +1641,7 @@
    ]
   },
   {
-   "path": "logs/phase_c1_teacher_binding.json",
+   "path": "logs/experiments/phase_c1/teacher_binding.json",
    "reason": "named_by_executable",
    "detail": "resolved by 4 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/write_c1_execution_preregistration.py, scripts/pod/autoinit_c1_driver.py",
    "sites": [
@@ -1639,5 +1675,26 @@
   }
  ],
  "_exceptions_rule": "each exception states what holds it: an entry point, a live executable reference with the naming sites listed, a component the run index registers with a digest, a path recorded beside a digest, or no convention claiming it. `for safety` is not a reason and does not appear.",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "governance_artifacts_now_run_owned": {
+  "_what_changed": "grant, readiness record, authorization and bundle record are produced into the run that owns them. Each was a repository-root file every session overwrote, with the closeout copying it into the run afterwards -- so the evidence a session ran under lived where the next session would replace it.",
+  "grant": "<run>/governance/grant.json",
+  "readiness_record": "<run>/governance/readiness.json",
+  "authorization": "<run>/governance/authorization.json",
+  "bundle_record": "<run>/governance/bundle.json",
+  "global_entry_points_are_pointers": [
+   "logs/c1_pod_environment_verification.json",
+   "logs/autoinit_c1_authorization.json",
+   "logs/autoinit_c1_bundle.json"
+  ],
+  "lineage": "permitted_post_sweep_paths names exactly ONE file, this run's readiness record, plus the issued authorization the caller adds. The governance/ directory is NOT exempt: a grant committed after the sweep still invalidates it, which is what forces grant-then-sweep."
+ },
+ "c1_attempts_10_to_12": {
+  "verdict": "CANNOT MOVE. Read-only, at logs/runs/phase_c1/<run_id>/.",
+  "_checked_not_assumed": "derived by reading the artifacts, not by policy.",
+  "binding_1_consumed_authorization": "each run's issued authorization records grant.path as logs/runs/phase_c1/<run_id>/governance/grant.json together with its sha256, and the authorization carries its own authorization_sha256 over that. Moving the run makes a consumed authorization's stated provenance resolve to nothing, and correcting it would rewrite a consumed authorization.",
+  "binding_2_hashed_manifest": "each run's manifest.json carries root: 'phase_c1/<run_id>' and a self_sha256 computed over it, and logs/runs/index.json records that hash as manifest_sha256. Moving the run either leaves the manifest stating a location it is not at, or changes root and therefore the hash the index recorded.",
+  "binding_3_forward_citation": "each attempt is cited BY NAME in the next attempt's consumed grant and authorization -- attempt 11's cites attempt 10's closeout, attempt 13's cites attempt 12's.",
+  "consequence": "C1 spans three layouts and two of them are permanent: attempts 1-9 predate run directories entirely, attempts 10-12 are hash-bound to the two-level layout, and attempt 13 onward is stage-grouped. The index covers all three; the directories cannot be made uniform without rewriting consumed authorizations."
+ }
 }

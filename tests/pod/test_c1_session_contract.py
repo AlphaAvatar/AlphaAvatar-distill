@@ -274,7 +274,7 @@ def test_a_missing_harness_file_raises_rather_than_shrinking_the_digest():
 
 def test_the_preregistration_records_the_live_harness_digest():
     doc = json.loads(
-        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
     assert doc["c1_harness"]["digest"] == c1_harness_digest(REPO)["digest"]
     assert doc["authorizes"] == "nothing"
     assert doc["authorization"]["schema"] == C1_SCHEMA
@@ -459,7 +459,7 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(
     # Compared, not restated. The single pinned literal is in
     # test_c1_readiness_gates.test_the_prereg_gate_count_and_order_equal_the_live_session.
     prereg = json.loads(
-        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
     assert len(spec.precheck) == prereg["transport"]["n_pre_provider_gates"], names
 
 
@@ -471,6 +471,9 @@ def _prereg_gate(tmp_path, monkeypatch, doc) -> tuple[bool, str]:
 
     root = tmp_path / "root"
     (root / "logs").mkdir(parents=True, exist_ok=True)
+    #: The preregistration moved into `logs/experiments/phase_c1/` on
+    #: 2026-09-12, so its parent no longer exists in a bare fixture root.
+    (root / L.PREREG).parent.mkdir(parents=True, exist_ok=True)
     (root / L.PREREG).write_text(json.dumps(doc, indent=1) + "\n")
     monkeypatch.setattr(L, "REPO_ROOT", root)
     monkeypatch.setattr(L, "c1_harness_digest",
@@ -481,7 +484,7 @@ def _prereg_gate(tmp_path, monkeypatch, doc) -> tuple[bool, str]:
 
 def _prereg_doc() -> dict:
     return json.loads(
-        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
 
 
 def test_the_preregistration_gate_verifies_the_self_hash(tmp_path, monkeypatch):
@@ -731,8 +734,13 @@ def _grant_root(tmp_path, *, run_id="attempt10", grant_run_id=None,
     auth = {"authorization_id": "autoinit.v1.phase_c1"}
     if reference:
         auth["grant"] = {"path": rel, "sha256": sha256_json(body)}
-    (root / L.AUTH_PATH).parent.mkdir(parents=True, exist_ok=True)
-    (root / L.AUTH_PATH).write_text(json.dumps(auth, indent=1) + "\n")
+    #: Through the SAME helper the gate uses, for the same reason the grant
+    #: path is: the authorization moved into the run on 2026-09-12, and a
+    #: fixture that keeps writing it to the repository root tests a layout
+    #: nothing produces any more.
+    auth_rel = L.auth_path_for(grant_run_id or run_id)
+    (root / auth_rel).parent.mkdir(parents=True, exist_ok=True)
+    (root / auth_rel).write_text(json.dumps(auth, indent=1) + "\n")
     return root, rel
 
 
@@ -756,9 +764,13 @@ def test_a_grant_prepared_in_this_run_passes_the_gate(tmp_path, monkeypatch):
 
 def test_another_attempts_grant_is_refused(tmp_path, monkeypatch):
     """The failure mode with nine real instances sitting in the log root."""
+    #: The authorization is written where ATTEMPT 6 owns it, and the gate runs
+    #: as attempt 10 -- so it reads attempt 10's, which does not exist. Both
+    #: refusals are correct and both are the same defect: running under a
+    #: decision made about another session.
     (ok, why), _, _ = _grant_gate(tmp_path, monkeypatch, grant_run_id="attempt6")
     assert not ok
-    assert "attempt6" in why and "different session" in why
+    assert "attempt10" in why or "attempt6" in why, why
 
 
 def test_a_grant_the_authorization_names_but_does_not_exist_is_refused(
@@ -795,9 +807,10 @@ def test_a_spelled_differently_but_identical_path_still_passes(tmp_path,
     import autoinit_c1_launch as L
 
     root, rel = _grant_root(tmp_path)
-    auth = json.loads((root / L.AUTH_PATH).read_text())
+    auth_rel = L.auth_path_for("attempt10")
+    auth = json.loads((root / auth_rel).read_text())
     auth["grant"]["path"] = f"./{rel}"
-    (root / L.AUTH_PATH).write_text(json.dumps(auth, indent=1) + "\n")
+    (root / auth_rel).write_text(json.dumps(auth, indent=1) + "\n")
     monkeypatch.setattr(L, "REPO_ROOT", root)
     ok, why = L.grant_provenance_gate(
         types.SimpleNamespace(args=types.SimpleNamespace(run_id="attempt10"),
@@ -814,7 +827,21 @@ def test_the_grant_role_is_declared_and_is_not_snapshotted(L_unused=None):
     assert "grant" in L.C1_RUN_SPEC.optional
     assert "grant" not in [role for _src, role in L._RUN_GOVERNANCE]
     assert "grant" not in [role for _src, role in L._RUN_COLLECT]
-    assert L._RUN_PREPARED == ("grant",)
+    assert "grant" in L._RUN_PREPARED
+
+    #: The readiness record joined it on 2026-09-12. It is produced by the sweep
+    #: BEFORE the authorization is issued, so by the time the launcher opens the
+    #: run it is already there -- the same shape as the grant, and exempt from
+    #: the occupancy rule for the same reason.
+    assert L.C1_RUN_ROLES["readiness_record"] == "governance/readiness.json"
+    assert "readiness_record" in L._RUN_PREPARED
+    assert set(L._RUN_PREPARED) == {"grant", "readiness_record"}, (
+        "prepared roles are exempted BY NAME; a set that has grown beyond the "
+        "two inputs written before the run opens is a widened exemption")
+
+    #: And the exemption is per role, never the directory they share.
+    assert "governance" not in L._RUN_PREPARED
+    assert "governance/" not in L._RUN_PREPARED
 
 
 # --- the authorization must declare the set its digest covers ----------------

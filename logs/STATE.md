@@ -18,9 +18,22 @@ for launch.** The only process is a `$0` read-only capacity watch.
 | replay | **MEASURED — 2/2 PASS** (attempt 9) | [`runs/index.json`](runs/index.json) |
 | treatment, endpoint | **UNMEASURED** — zero probes trained. Attempt 9 is **NO DECISION**: a pre-treatment infrastructure abort, not a frozen-rule result | [`experiments/phase_c1/operational_history.md`](experiments/phase_c1/operational_history.md) |
 | launch chain | attempt 13's grant is committed; **nothing else is prepared**, and the chain is **paused** pending this cleanup | [`runs/stage-1/phase_c1/attempt13/`](runs/stage-1/phase_c1/attempt13/) |
-| readiness record | **FAIL** — the `launch_bound` sweep of 2026-09-12 refused on a stale run index. Superseded by this cleanup and owed again | [`c1_pod_environment_verification.json`](c1_pod_environment_verification.json) |
 | blocker | provider capacity for secure L40S at `$1.09/h` | below |
 | spend | `$268.2958` of `$320.0000` | [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) |
+
+## Readiness
+
+<!-- readiness:begin -->
+
+| readiness | | owner |
+| --- | --- | --- |
+| latest sweep | **diagnostic — PASS** (3725 passed, 0 failed), swept at `78635c5e`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](c1_pod_environment_verification.json) |
+| launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
+| last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`experiments/phase_c1/readiness_history.json`](experiments/phase_c1/readiness_history.json) |
+
+*Generated from the record by `scripts/consolidate/render_log_navigation.py`; do not edit by hand — it went stale within hours when it was prose.*
+
+<!-- readiness:end -->
 
 ## Budget — four limits that do not transfer
 

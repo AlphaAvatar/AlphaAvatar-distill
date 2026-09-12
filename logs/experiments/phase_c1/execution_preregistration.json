@@ -3,9 +3,9 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "6edaf7670374a5077ec4e55178ddb3fa688eb290",
+ "head_commit": "47c6a22169d7891cb6381c2b4b25e9e667aaabce",
  "executable_source": {
-  "digest": "ca1f1df5b371d8027a0f236240b3f62d5d75c228a29a2972b628c86d8f0c2ed4",
+  "digest": "7d8b78bbbdac89cd411ffdaef0c1e9949375f814e12aeecdef44a8e8a5b37823",
   "files": [
    {
     "path": "scripts/autoinit/verify_c1_battery_isolation.py",
@@ -29,8 +29,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/session.py",
-    "sha256": "8136fe6df4582ff9bf80a014e256b71fddab665ca9ada00fc0856551d7aef8d1",
-    "bytes": 14146
+    "sha256": "38e95baa723841c17f064302fa758ec1b976af088f052804e87da6619b33e611",
+    "bytes": 14158
    },
    {
     "path": "src/aadistill/initialization/operators/attention_activation.py",
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "80bf9c8f52f1bf433aef18cd640b3072fe0a1fefbb454b0b36d01e44de6f3c30",
+  "digest": "75e10e512dab8de3a7b698ef6e29cb2f1e5fb3e890b37a3c6e71494ef01541f5",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -91,13 +91,13 @@
    },
    {
     "path": "configs/experiments/phase_c1/authorization.json",
-    "sha256": "2a0e65f91441a31fc7216cdfd8263927282468ab078a04c02ee292c9bb806d76",
-    "bytes": 12187
+    "sha256": "ea326b1c17287b0f4da76889b764997b07fc53df41abee3748ebc4506aaa453e",
+    "bytes": 12235
    },
    {
     "path": "configs/experiments/phase_c1/frozen_assets.json",
-    "sha256": "103ddd78e2740ac1ed82034f53037f33e4f78687088c95557d24de26587167e5",
-    "bytes": 3285
+    "sha256": "21253ec98cafc49b37f1d8e98d450d86874c647aafd1bfed64921885b0900eb2",
+    "bytes": 3297
    },
    {
     "path": "scripts/autoinit/audit_tool_scoring.py",
@@ -106,13 +106,13 @@
    },
    {
     "path": "scripts/autoinit/issue_c1_authorization.py",
-    "sha256": "f995fbfd3926ce8c7722d2d27390ac933ce088a3abf1ad01aaa67e92f1453f11",
-    "bytes": 6766
+    "sha256": "93214cb5ff0cf636eb2bf0a9ba335f2b44200ee542f839be6187c92e4d7ea7c5",
+    "bytes": 8988
    },
    {
     "path": "scripts/autoinit/renderer_parity_gate.py",
-    "sha256": "7d87ec76432694a8523678abc326e00ac7c2abf42bb0e01a40e4dd96e88671b8",
-    "bytes": 6564
+    "sha256": "02994ed1fcbacb0f7f213ca99b9b3fc74c95c4fceac1035481f9f7d920abbaf8",
+    "bytes": 6582
    },
    {
     "path": "scripts/autoinit/score_c1_confirmation.py",
@@ -181,8 +181,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/pod_environment.py",
-    "sha256": "daccc39a9b98a6a7740bb59f546ed30c5f812748ea0681801409c4d2d3f86876",
-    "bytes": 14101
+    "sha256": "1b543d9c2fbea32b443379a2a68990eff3e4c5b991b9ca5cd07ae724149dd520",
+    "bytes": 16952
    },
    {
     "path": "scripts/experiments/phase_c1/probe_results.py",
@@ -196,8 +196,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/session.py",
-    "sha256": "8136fe6df4582ff9bf80a014e256b71fddab665ca9ada00fc0856551d7aef8d1",
-    "bytes": 14146
+    "sha256": "38e95baa723841c17f064302fa758ec1b976af088f052804e87da6619b33e611",
+    "bytes": 14158
    },
    {
     "path": "scripts/experiments/recovery_policy.py",
@@ -216,13 +216,13 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_driver.py",
-    "sha256": "a52b55c00f67597d43a8a6c93961aba51cc41b8f3f50866603f38fd857b98e19",
-    "bytes": 61843
+    "sha256": "06b1e35d1db4fca18f9465b14976a4eb37d373ef135dd53c0ac751d96c430260",
+    "bytes": 61867
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "407ab2e05009c25ffc723ebd6339f78f307e02fd5c4a0b7b39efaaed9f007571",
-    "bytes": 77355
+    "sha256": "247def7d246c38e86970d50ba78f16fe3046fec888c7914353ffcbccd63ee4f1",
+    "bytes": 81617
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -602,7 +602,7 @@
   "protocol_id": "autoinit.v1.phase_c0"
  },
  "c1_session_contract": {
-  "hash": "96871c2e38784ee6517bc3aa48fe6e8de749958e1a7cb967e2d6ccdcb90cec7d",
+  "hash": "b89d40b64588a4e73dd8f80c5159c0577d846f2a8b3b74e728ef0fde5eae625c",
   "stages": [
    "A: session_setup",
    "B: teacher_fetch_verify",
@@ -699,7 +699,7 @@
    "git_blob_sha1": "For a non-LFS file the blob is named by the git blob SHA-1. VERIFIED empirically: config.json's blob name equals `git hash-object config.json`."
   },
   "verification_rule": "On fetch, every file in `files` must hash to its recorded blob_name under the matching convention. Reconstruction MUST NOT begin on any mismatch.",
-  "binding_record": "logs/phase_c1_teacher_binding.json",
+  "binding_record": "logs/experiments/phase_c1/teacher_binding.json",
   "weights_present_locally": false
  },
  "tokenizer_contract": {
@@ -884,7 +884,7 @@
    "no_weighted_scalar": "usable_rollout_rate and correct_overall are reported separately and are never combined; usable_rollout is blind to correctness by construction"
   },
   "historical_numerical_equivalence": {
-   "record": "logs/phase_c1_scoring_equivalence.json",
+   "record": "logs/experiments/phase_c1/scoring_equivalence.json",
    "sha256": "0ee5ce346ee0a33a4376fa939022f880c4225b083821a8b0d0d09d7836c02959",
    "verdict": "IDENTICAL",
    "n_cases": 15,
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "e6ade272f102249d5e7b84606e0b50acc5f61c81141927ca280cad050ad54827"
+ "preregistration_sha256": "0dc472bbe7373a35e9091a62524dc508d5524d4c46772ab19fbe6ff1d5345e15"
 }

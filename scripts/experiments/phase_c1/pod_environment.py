@@ -215,8 +215,37 @@ def evaluate_sweep(outcomes, skip_reasons=None, *, groups=None):
 #: What changed is who owns them.
 SCHEMA = "aadistill.autoinit.c1_pod_environment_verification/v1"
 
-#: Where the sweep writes what it found.
-RECORD_PATH = "logs/c1_pod_environment_verification.json"
+#: The GLOBAL entry point. A POINTER, not a second editable record: it names
+#: the run whose governance area owns the live readiness evidence, together with
+#: that record's hash. Kept because a reader needs one stable place to start.
+#:
+#: It was the canonical record, which meant every run in turn overwrote one file
+#: and each closeout copied it away afterwards -- so the evidence a run was
+#: launched under lived at a path the next run would replace.
+RECORD_POINTER = "logs/c1_pod_environment_verification.json"
+
+#: Back-compatible alias. Sweeps that name no run still write here, and every
+#: record committed before 2026-09-12 is here.
+RECORD_PATH = RECORD_POINTER
+
+#: The run-owned location. Matches `C1_RUN_ROLES["readiness_record"]` in the
+#: launcher, which is the run's own declared role for it.
+RUN_READINESS_ROLE = "governance/readiness.json"
+
+
+def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
+    """Where THIS run's readiness record lives, repository-relative.
+
+    `None` is the global pointer path, which is what a sweep with no run writes
+    and what every pre-2026-09-12 record is at. A run id resolves through the
+    same convention the launcher uses, so the sweep, the gate and the run's own
+    manifest cannot disagree about where the record is.
+    """
+    if not run_id:
+        return RECORD_POINTER
+    from experiments.run_layout import rel_run_dir
+
+    return f"{rel_run_dir('phase_c1', run_id, stage_id)}/{RUN_READINESS_ROLE}"
 
 #: Files that decide the pod test gate's outcome and are OUTSIDE the C1 harness.
 #: A list, not a glob, so each entry is a decision somebody made. Strictly
@@ -242,8 +271,11 @@ def pod_test_environment_digest(repo_root=".") -> dict:
         repo_root, named_files=POD_TEST_ENVIRONMENT_FILES_V1)
 
 
-def load_record(repo_root=".") -> dict:
-    return _pe.load_record(repo_root, record_path=RECORD_PATH)
+def load_record(repo_root=".", *, run_id: str | None = None,
+                stage_id: str | None = None) -> dict:
+    """This run's readiness record, or the global one when no run is named."""
+    return _pe.load_record(repo_root,
+                           record_path=record_path_for(run_id, stage_id))
 
 
 def c1_harness_digest_value(repo_root=".") -> str:
@@ -265,14 +297,27 @@ def c1_harness_digest_value(repo_root=".") -> str:
 #: supplied" while every test passed one explicitly and never saw it. Carrying
 #: the callable in the contract is what makes the tested path and the launch
 #: path the same path.
-C1_RECORD_CONTRACT = RecordContract(
-    schema=SCHEMA,
-    harness_field="c1_harness_digest",
-    harness_digest=c1_harness_digest_value,
-    record_path=RECORD_PATH,
-    named_files=POD_TEST_ENVIRONMENT_FILES_V1,
-    harness_label="C1 harness",
-)
+def c1_record_contract(run_id: str | None = None,
+                       stage_id: str | None = None) -> RecordContract:
+    """C1's wire contract for a given run.
+
+    The record path is the ONLY thing that varies, and everything derived from
+    it follows -- including `permitted_post_sweep_paths`, which is why the
+    lineage rule stays exactly as narrow as before: it names one file, this
+    run's readiness record, and not the `governance/` directory it sits in.
+    """
+    return RecordContract(
+        schema=SCHEMA,
+        harness_field="c1_harness_digest",
+        harness_digest=c1_harness_digest_value,
+        record_path=record_path_for(run_id, stage_id),
+        named_files=POD_TEST_ENVIRONMENT_FILES_V1,
+        harness_label="C1 harness",
+    )
+
+
+#: The no-run contract, for callers that have no session in hand.
+C1_RECORD_CONTRACT = c1_record_contract()
 
 
 def verify_record(record: dict, repo_root=".", **kwargs):
@@ -280,8 +325,21 @@ def verify_record(record: dict, repo_root=".", **kwargs):
     return _pe.verify_record(record, repo_root, **kwargs)
 
 
-#: C1's permitted post-sweep path, derived from the record it owns.
-PERMITTED_POST_SWEEP_PATHS = _pe.permitted_post_sweep_paths(RECORD_PATH)
+def permitted_post_sweep_paths(run_id: str | None = None,
+                               stage_id: str | None = None) -> tuple[str, ...]:
+    """The tracked paths that may differ after THIS run's sweep.
+
+    Exactly two things, as before: the readiness record itself, and -- added by
+    the caller -- the issued authorization. The record is now run-owned, so the
+    permitted path is this run's readiness file. The `governance/` directory is
+    NOT exempt: a grant committed after the sweep still invalidates it, which is
+    the rule that forces grant-then-sweep.
+    """
+    return _pe.permitted_post_sweep_paths(record_path_for(run_id, stage_id))
+
+
+#: C1's permitted post-sweep path when no run is named.
+PERMITTED_POST_SWEEP_PATHS = permitted_post_sweep_paths()
 
 __all__ = ["C1_RECORD_CONTRACT", "PERMITTED_POST_SWEEP_PATHS",
            "POD_TEST_ENVIRONMENT_FILES_V1", "RECORD_PATH", "SCHEMA",

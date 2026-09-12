@@ -39,7 +39,7 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 #: Explicit: importing the core no longer registers a mixture.
 register_builtin_profiles()
 
-OUT = REPO / "logs/phase_c1_execution_preregistration.json"
+OUT = REPO / "logs/experiments/phase_c1/execution_preregistration.json"
 
 #: The two evidence declarations. Restated here rather than imported, because
 #: importing the launcher would pull the whole Phase-A launcher in; the copy is
@@ -79,10 +79,10 @@ def source_digest(files: tuple[str, ...] = C1_SOURCE_FILES) -> dict:
 
 def _equivalence() -> dict:
     """The admission-gate record. Absent means C1 cannot be authorized."""
-    p = REPO / "logs/phase_c1_scoring_equivalence.json"
+    p = REPO / "logs/experiments/phase_c1/scoring_equivalence.json"
     if not p.is_file():
         raise SystemExit(
-            "logs/phase_c1_scoring_equivalence.json is missing; the C1 scoring "
+            "logs/experiments/phase_c1/scoring_equivalence.json is missing; the C1 scoring "
             "binding has not been admitted and must not be preregistered")
     return json.loads(p.read_text())
 
@@ -130,11 +130,11 @@ def main() -> None:
     assert len(set(seeds)) == 3 and not set(seeds) & set(HISTORICAL_SEEDS)
 
     arms = CS.build_arm_specs()
-    battery = json.loads((REPO / "logs/phase_c1_battery.json").read_text())
+    battery = json.loads((REPO / "logs/experiments/phase_c1/battery.json").read_text())
     #: Derived, so the artifact-spec block cannot drift from the design.
     n_probes = CS.C1_SESSION_CONTRACT.n_probes
     n_sets = len(battery["set_sha256"])
-    teacher = json.loads((REPO / "logs/phase_c1_teacher_binding.json").read_text())
+    teacher = json.loads((REPO / "logs/experiments/phase_c1/teacher_binding.json").read_text())
     c0 = json.loads((REPO / "logs/phase_c0_preregistration.json").read_text())
 
     plan = C1IsolationPlan(
@@ -267,7 +267,7 @@ def main() -> None:
             "index_total_size_bytes": teacher["index_total_size_bytes"],
             "hash_semantics": teacher["hash_semantics"],
             "verification_rule": teacher["verification_rule"],
-            "binding_record": "logs/phase_c1_teacher_binding.json",
+            "binding_record": "logs/experiments/phase_c1/teacher_binding.json",
             "weights_present_locally": teacher["weights_present_locally"],
         },
         "tokenizer_contract": {
@@ -356,8 +356,8 @@ def main() -> None:
             "files": [e["path"] for e in c1_scoring_contract(REPO)["files"]],
             "metric_contract": C1_METRIC_CONTRACT,
             "historical_numerical_equivalence": {
-                "record": "logs/phase_c1_scoring_equivalence.json",
-                "sha256": sha256_file(REPO / "logs/phase_c1_scoring_equivalence.json"),
+                "record": "logs/experiments/phase_c1/scoring_equivalence.json",
+                "sha256": sha256_file(REPO / "logs/experiments/phase_c1/scoring_equivalence.json"),
                 "verdict": _equivalence()["verdict"],
                 "n_cases": _equivalence()["n_cases"],
                 "total_differences": _equivalence()["total_differences"],

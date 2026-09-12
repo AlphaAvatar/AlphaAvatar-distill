@@ -138,7 +138,7 @@ def test_the_metric_contract_pins_the_frozen_denominators():
 
 @pytest.mark.skipif(not HISTORICAL, reason="no retained historical generations")
 def test_the_committed_equivalence_record_says_identical():
-    rec = json.loads((REPO / "logs/phase_c1_scoring_equivalence.json").read_text())
+    rec = json.loads((REPO / "logs/experiments/phase_c1/scoring_equivalence.json").read_text())
     assert rec["verdict"] == "IDENTICAL"
     assert rec["total_differences"] == 0
     assert rec["n_cases"] >= 3
@@ -206,7 +206,7 @@ def test_the_equivalence_gate_cannot_cover_correct_implies_usable(monkeypatch,
     never fires and the equivalence gate cannot discriminate it. Breaking the
     rule therefore produces no difference — which is a fact about the evidence,
     not a licence. The rule is covered directly below instead, and the hole is
-    recorded in `logs/phase_c1_scoring_equivalence.json`.
+    recorded in `logs/experiments/phase_c1/scoring_equivalence.json`.
     """
     def mutate(mp):
         def naive(*, usable, scorer_correct, scorable=True, rule=None):

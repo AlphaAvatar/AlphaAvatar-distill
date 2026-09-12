@@ -26,7 +26,7 @@
    "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be"
   },
   "why_it_moved": "the contract is a digest over sorted 'path:sha256' lines and the initialization cutover relocated two of its six declared files -- src/aadistill/autoinit/recovery.py is now src/aadistill/initialization/planning/recovery.py. A relocation MUST move this digest; it is the intended post-migration identity, not a drift.",
-  "why_that_is_safe": "measured, not assumed. logs/architecture_scoring_equivalence.json re-scored frozen Phase-A generations through the pre- and post-migration trees and reports every score, count, rate and per-sample record identical, with only contract and provenance fields differing. logs/phase_c1_scoring_equivalence.json separately shows c1_confirmation_scoring@v1 reproducing the frozen scorer on 15 retained probes: IDENTICAL, 0 differences, no tolerance.",
+  "why_that_is_safe": "measured, not assumed. logs/architecture_scoring_equivalence.json re-scored frozen Phase-A generations through the pre- and post-migration trees and reports every score, count, rate and per-sample record identical, with only contract and provenance fields differing. logs/experiments/phase_c1/scoring_equivalence.json separately shows c1_confirmation_scoring@v1 reproducing the frozen scorer on 15 retained probes: IDENTICAL, 0 differences, no tolerance.",
   "what_this_is_not": "a change to frozen science. No metric, threshold, rule or number moved. The v2 identity remains the record of what the completed attempts executed."
  },
  "authorizes": "nothing"

@@ -475,13 +475,34 @@ def test_the_committed_record_still_binds_the_live_executable():
 
 
 def test_the_test_matches_the_paid_gate_argument_for_argument():
-    """The launcher's permitted-path set and this module's must be the same one."""
+    """The launcher's permitted-path set and this module's must be the same one.
+
+    It compared SOURCE TEXT -- a literal `AUTH_PATH = "logs/..."` and the string
+    `authorization_path=AUTH_PATH`. On 2026-09-12 the authorization moved into
+    the run that owns it and both literals changed, so the test broke while the
+    property it protects was intact. It now asks the launcher for the path it
+    would actually pass, which is the thing that has to agree.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "L", REPO / "scripts/pod/autoinit_c1_launch.py")
+    L = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(L)
+
+    #: No run named: the global entry point, which is what this module's
+    #: fixtures use.
+    assert L.auth_path_for(None) == C1_AUTH_PATH
+    #: With a run: the run's own governance artifact, and the two differ --
+    #: otherwise the move did not happen and this assertion is vacuous.
+    run_scoped = L.auth_path_for("attempt13")
+    assert run_scoped != C1_AUTH_PATH
+    assert run_scoped.endswith("governance/authorization.json")
+
     src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
-    assert 'AUTH_PATH = "logs/autoinit_c1_authorization.json"' in src
-    assert C1_AUTH_PATH == "logs/autoinit_c1_authorization.json"
-    assert "authorization_path=AUTH_PATH" in src, (
-        "the paid gate no longer permits the authorization path; this test would "
-        "then be stricter than the gate rather than equal to it")
+    assert "authorization_path=auth_path_for(" in src, (
+        "the paid gate no longer permits this run's authorization path; this "
+        "test would then be stricter than the gate rather than equal to it")
 
 
 def test_a_pre_authorization_tree_is_accepted_with_the_record_alone(tmp_path,
@@ -1124,7 +1145,7 @@ def test_the_prereg_gate_count_and_order_equal_the_live_session():
     from session_specs import load_session_launcher, session_args
 
     doc = json.loads(
-        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
     transport = doc["transport"]
 
     #: Through the shared helper, which asks the REAL parser what it requires.
@@ -1151,7 +1172,7 @@ def test_the_prereg_gate_count_and_order_equal_the_live_session():
 def test_the_prereg_states_the_canonical_issuance_ordering():
     """Sweep BEFORE issuance. Stated backwards once, and it would refuse at $0."""
     doc = json.loads(
-        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
     steps = doc["transport"]["ordering"]
     assert len(steps) == 9, steps
     joined = " ".join(steps).lower()

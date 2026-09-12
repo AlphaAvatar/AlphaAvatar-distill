@@ -185,7 +185,7 @@
   "any restatement of attempt 9 as an ATTENTION result"
  ],
  "preregistration_rebinding": {
-  "_what_this_is": "the old-vs-new field diff of logs/phase_c1_execution_preregistration.json across the repair, computed leaf by leaf over the flattened document rather than eyeballed.",
+  "_what_this_is": "the old-vs-new field diff of logs/experiments/phase_c1/execution_preregistration.json across the repair, computed leaf by leaf over the flattened document rather than eyeballed.",
   "total_leaf_fields": 274,
   "fields_moved": 6,
   "scientific_fields_moved": 0,

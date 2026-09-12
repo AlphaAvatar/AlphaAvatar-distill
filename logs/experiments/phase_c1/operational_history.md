@@ -1312,7 +1312,7 @@ statistical `INCONCLUSIVE`.
 >    regressions execute the actual test functions against pod-shaped and
 >    simulation-shaped roots; four mutations were confirmed caught.
 > 2. **The CLASS is closed, not just the incident.**
->    [`c1_skip_predicate_audit.json`](../../c1_skip_predicate_audit.json) walks all
+>    [`c1_skip_predicate_audit.json`](skip_predicate_audit.json) walks all
 >    **95** skip predicates in the C1-selected suite and resolves each path
 >    premise against the git index and the SetupManifest — the two mechanisms
 >    that actually put a file on a pod — rather than guessing from keywords. **45**

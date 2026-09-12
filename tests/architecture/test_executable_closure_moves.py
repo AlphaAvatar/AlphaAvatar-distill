@@ -198,7 +198,7 @@ class TestTheRealClosure:
 
         live = derive(REPO, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
                       roots=C1_SOURCE_ROOTS)
-        rel = "logs/phase_c1_execution_preregistration.json"
+        rel = "logs/experiments/phase_c1/execution_preregistration.json"
         assert rel not in {r["path"] for r in live["files"]}, (
             "including it would make the digest unreachable")
 

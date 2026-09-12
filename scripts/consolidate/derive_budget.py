@@ -149,7 +149,14 @@ def derive(root: Path = REPO_ROOT) -> dict:
     #: The package's own book is authoritative for what it has spent; the
     #: per-session costs are what that book is checked against.
     formal_spent = _package_booked(root, sessions)
-    eng_spent = _engineering_spent(root)
+    approved = str(pkg.get("approved_utc") or "")
+    campaigns = [_attribute(c, pkg.get("package_id"), approved)
+                 for c in engineering_campaigns(root)]
+    eng_spent = round(sum(c["cost_usd"] for c in campaigns
+                          if c["attribution"] == "this_package"), 4)
+    #: Unknowns are NAMED, never folded into a total as zero. A balance computed
+    #: over unestablished attribution is not a balance a launch may rest on.
+    unattributed = [c for c in campaigns if c["attribution"] == "unknown"]
 
     #: A zero here is a claim, and it was wrong once: the package's own book is
     #: cross-checked against the sessions, and a disagreement is raised rather
@@ -183,7 +190,19 @@ def derive(root: Path = REPO_ROOT) -> dict:
                     "spent_usd": round(formal_spent + eng_spent, 4),
                     "remaining_usd": round(total - formal_spent - eng_spent, 4)},
         "project": {"cap_usd": cap} if cap else {},
-        "full_ceiling_sessions_fundable": int(formal_left // ceiling),
+        "engineering_campaigns": campaigns,
+        "pending_reconciliation": [c["campaign"] for c in unattributed],
+        #: `None` when anything is unreconciled: an arithmetic summary computed
+        #: over an unknown is not a number a launch may be planned against. It
+        #: is also NOT a permission when it is a number -- see below.
+        "full_ceiling_sessions_fundable": (
+            None if unattributed else int(formal_left // ceiling)),
+        "_fundable_is_arithmetic_not_permission": (
+            "how many complete sessions the remaining FORMAL allowance would "
+            "cover. It restores no cap and grants nothing: a session still needs "
+            "a grant, a launch-bound readiness record, an authorization and a "
+            "bundle. `null` means an engineering cost is unattributed and the "
+            "balance is provisional until reconciled."),
         "_fundable_rule": (
             "floor(FORMAL remaining / per-session ceiling). The formal allowance "
             "is the divisor's numerator because the engineering allowance cannot "
@@ -215,21 +234,84 @@ def _package_booked(root: Path, sessions: list[dict]) -> float:
     return round(best, 4)
 
 
-def _engineering_spent(root: Path) -> float:
-    """Cumulative engineering spend CHARGED TO THIS PACKAGE.
+def engineering_campaigns(root: Path) -> list[dict]:
+    """Every engineering campaign, with what it cost and which package it is on.
 
-    The CUDA campaign closed on 2026-09-10 and the package was approved on
-    2026-09-11 against a cumulative that already contained it, so its `$0.0400`
-    is in the project total and not in this package's engineering allowance.
-    Counting it twice would understate the allowance by its own amount.
+    DISCOVERED, not named. This read one hardcoded path and returned `0.0` for
+    anything whose status began with `CLOSED`, so a second campaign was invisible
+    and a campaign that spent inside this package stopped counting the moment it
+    was closed. Closure is a statement about whether more may be spent, not about
+    whether anything was.
+
+    Attribution is explicit where a record states it and DERIVED from dates where
+    it does not: a campaign authorized before the package was approved was paid
+    for by an earlier decision and is already inside
+    `cumulative_spend_at_approval_usd`. Counting it again would charge one
+    resource twice.
+
+    A campaign whose cost or package cannot be established is returned with
+    `attribution: "unknown"`. It is never silently read as zero.
     """
-    p = root / CAMPAIGN
-    if not p.is_file():
-        return 0.0
-    doc = json.loads(p.read_text())
-    if str(doc.get("status", "")).upper().startswith("CLOSED"):
-        return 0.0
-    return round(float(doc.get("campaign_cost_usd") or 0.0), 4)
+    out: list[dict] = []
+    for p in sorted(root.glob("logs/validations/*/*/campaign.json")):
+        try:
+            doc = json.loads(p.read_text())
+        except (json.JSONDecodeError, OSError):
+            out.append({"campaign": p.relative_to(root).as_posix(),
+                        "cost_usd": None, "attribution": "unknown",
+                        "why": "the campaign record cannot be read"})
+            continue
+        cost = doc.get("booked_usd")
+        if cost is None:
+            cost = doc.get("campaign_cost_usd")
+        if cost is None and isinstance(doc.get("subruns"), list):
+            parts = [s.get("cost_usd", s.get("subrun_cost_usd"))
+                     for s in doc["subruns"]]
+            cost = sum(x for x in parts if x is not None) if all(
+                x is not None for x in parts) else None
+        rec = {"campaign": p.relative_to(root).as_posix(),
+               "campaign_id": doc.get("campaign_id"),
+               "cost_usd": None if cost is None else round(float(cost), 4),
+               "package_id": doc.get("package_id"),
+               "granted_utc": None, "attribution": None}
+        auth_rel = doc.get("authorization")
+        if isinstance(auth_rel, str):
+            try:
+                rec["granted_utc"] = json.loads(
+                    (root / auth_rel).read_text()).get("granted_utc")
+            except (json.JSONDecodeError, OSError):
+                pass
+        out.append(rec)
+    return out
+
+
+def _attribute(camp: dict, package_id: str, approved_utc: str) -> dict:
+    """Decide whether a campaign's cost is charged to THIS package."""
+    if camp["cost_usd"] is None:
+        camp["attribution"] = "unknown"
+        camp["why"] = "no cost could be read from the campaign record"
+        return camp
+    if camp.get("package_id"):
+        camp["attribution"] = ("this_package" if camp["package_id"] == package_id
+                               else "other_package")
+        camp["why"] = f"the record states package_id {camp['package_id']!r}"
+        return camp
+    if not camp.get("granted_utc"):
+        camp["attribution"] = "unknown"
+        camp["why"] = ("the record states no package_id and its authorization "
+                       "no date, so which decision paid for it is unestablished")
+        return camp
+    #: Date comparison on the ISO prefix: both are UTC and only the day matters.
+    if camp["granted_utc"][:10] < approved_utc[:10]:
+        camp["attribution"] = "before_this_package"
+        camp["why"] = (f"authorized {camp['granted_utc'][:10]}, before this "
+                       f"package was approved {approved_utc[:10]}; already "
+                       "inside cumulative_spend_at_approval_usd")
+    else:
+        camp["attribution"] = "this_package"
+        camp["why"] = (f"authorized {camp['granted_utc'][:10]}, on or after "
+                       f"{approved_utc[:10]}")
+    return camp
 
 
 def main() -> int:

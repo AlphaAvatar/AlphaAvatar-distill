@@ -114,8 +114,6 @@ run's own closeout; those are the owners.
 * `autoinit_phase_b_pricing.json`
 * `autoinit_phase_b_session.json`
 * `c1_pod_environment_verification.json`
-* `c1_renderer_parity.json`
-* `c1_skip_predicate_audit.json`
 * `checkpoint_registry.json`
 * `checkpoint_tombstones.json`
 * `current_state.json`
@@ -125,11 +123,7 @@ run's own closeout; those are the owners.
 * `maintenance/` — storage, scratch, cache and inventory records
 * `migrations/`
 * `phase_c0_preregistration.json`
-* `phase_c1_battery.json`
-* `phase_c1_execution_preregistration.json`
 * `phase_c1_pricing.json`
-* `phase_c1_scoring_equivalence.json`
-* `phase_c1_teacher_binding.json`
 * `relay_mirror_verification.json`
 * `runs/`
 * `storage_measurements.json`

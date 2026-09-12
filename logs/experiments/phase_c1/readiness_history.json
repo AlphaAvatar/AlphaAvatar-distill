@@ -1,0 +1,1095 @@
+{
+ "schema": "aadistill.c1_readiness_history/v1",
+ "_what_this_is": "every readiness sweep this experiment has recorded, oldest first. The live record at logs/c1_pod_environment_verification.json holds ONE sweep and is replaced by the next, so a superseded verdict -- including a launch-bound FAILURE -- survived only in git history. This is that history, extracted from it rather than retyped.",
+ "_the_live_record_is_the_owner": "for what is true NOW read logs/c1_pod_environment_verification.json. This file is history and authorizes nothing.",
+ "entries": [
+  {
+   "record_kind": null,
+   "verdict": "PASS",
+   "swept_base_commit": null,
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2768,
+    "skipped": 61
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "474d184af7ff09272a956293df29c4013262eb58",
+   "committed_utc": "2026-09-04T15:28:58+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "9d88a3c36ae080ded1b55de4faf76d031627fac8",
+   "counts": {
+    "error": 0,
+    "failed": 5,
+    "passed": 2780,
+    "skipped": 62
+   },
+   "problems": [
+    "5 failed/errored: ['tests/autoinit/test_phase_b_plan.py::test_any_post_freeze_change_to_the_phase_b_executable_is_recorded_and_additive', 'tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest', 'tests/pod/test_phase_b_driver_and_launcher.py::test_the_preregistration_gate_binds_the_executable_and_both_mixtures']",
+    "repository-state tests did not pass: {'tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog': 'passed', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state': 'failed'}"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "4231b42bebe7b31c168c69d11834e6ccefd94870",
+   "committed_utc": "2026-09-04T17:54:56+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "4231b42bebe7b31c168c69d11834e6ccefd94870",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2787,
+    "skipped": 62
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "c8a2961c0ea93a7ece095256efdb143d550e5348",
+   "committed_utc": "2026-09-04T18:08:53+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "86260d243e6e83622e1ff919b696d03efd33aaf6",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2798,
+    "skipped": 62
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "77e0eb4709b50ab82ed154a8e78ead62368ffbfb",
+   "committed_utc": "2026-09-05T02:45:45+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "47578f26c1a480afdffd8ef5ad8a5fb976461f98",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2798,
+    "skipped": 62
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "815feb70e5efff007520e27c3f0d929d730ce7bb",
+   "committed_utc": "2026-09-05T03:41:48+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "c6c6869c4bf2f0d3b9537a7dffaebf1ad18379c0",
+   "counts": {
+    "error": 0,
+    "failed": 28,
+    "passed": 2770,
+    "skipped": 75
+   },
+   "problems": [
+    "28 failed/errored: ['tests/autoinit/test_stage1_import.py::test_the_control_arrives_unmeasured_and_the_gate_says_so', 'tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint', 'tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate', 'tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports', 'tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible', 'tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden', 'tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]', 'tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set', 'tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set', 'tests/evaluation/test_capability.py::test_every_frozen_answerability_pair_is_complete']",
+    "battery construction-source skip set is not the expected 3: {'tests/data/test_c1_battery.py::test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content[artifacts/eval/battery_v2]': 'failed', 'tests/data/test_c1_battery.py::test_it_is_disjoint_from_the_recovery_training_corpus': 'skipped', 'tests/data/test_c1_battery.py::test_final_promotion_is_still_intact_and_was_only_read': 'skipped'}"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "04c4934006370e4c6ed649d82ac58cdb022aa823",
+   "committed_utc": "2026-09-05T15:57:04+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "793da8ceb24b9d7d80c6e513a0f0df3b0a92ecc5",
+   "counts": {
+    "error": 0,
+    "failed": 8,
+    "passed": 2767,
+    "skipped": 98
+   },
+   "problems": [
+    "8 failed/errored: ['tests/autoinit/test_stage1_import.py::test_the_control_arrives_unmeasured_and_the_gate_says_so', 'tests/autoinit/test_stage1_import.py::test_the_control_is_rebuilt_from_its_frozen_checkpoint', 'tests/autoinit/test_stage1_import.py::test_the_imported_leaves_pass_the_live_admission_gate', 'tests/autoinit/test_stage1_import.py::test_the_real_attempt12_result_imports', 'tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate', 'tests/pod/test_c1_session_contract.py::test_the_preregistration_records_the_live_harness_digest', 'tests/pod/test_c1_source_closure.py::test_the_preregistration_records_the_live_harness', 'tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off']"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "e9775ac6a53d500aee2d99a628102debafbb5475",
+   "committed_utc": "2026-09-05T16:13:42+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "14c81a001d5479cfd2ce556eb3018a57c6ec0fcf",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2765,
+    "skipped": 100
+   },
+   "problems": [
+    "unexpected environment skips: ['tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs']"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "5b5a8899d9b8cfb6901d43b75ed6455842f16e60",
+   "committed_utc": "2026-09-05T21:25:22+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "5b5a8899d9b8cfb6901d43b75ed6455842f16e60",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2766,
+    "skipped": 100
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "fba81f953ae9821e0a61eacba239bfceb75fd3e2",
+   "committed_utc": "2026-09-05T21:38:27+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "fba81f953ae9821e0a61eacba239bfceb75fd3e2",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2767,
+    "skipped": 100
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "9bb2650d16fc9e70dcfeada8f748a3dfb2ef89c7",
+   "committed_utc": "2026-09-05T21:50:47+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "aa6e298d74938a58afe29819e215bec401910ca2",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2770,
+    "skipped": 100
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "ce2cb8943894ec977a3d889538eee2c59ea5e3c3",
+   "committed_utc": "2026-09-05T22:23:39+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "be8266175b448fc2c86c511706fb518fe288d2d3",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2770,
+    "skipped": 100
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "4297278dbb54c0e4611f76fb4276559625de7923",
+   "committed_utc": "2026-09-05T22:54:33+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "132e7f6af172be712f5c155d8134b6736d684131",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2802,
+    "skipped": 101
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "216c87331aef67488042861fc7b59fb283990be8",
+   "committed_utc": "2026-09-06T05:40:13+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "577c5cdcec5d59ac2249b86410de572ae7e3d597",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2808,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "f7f3ba21da07bebd348b1ecf731854810924c0e7",
+   "committed_utc": "2026-09-06T17:39:35+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "f7f3ba21da07bebd348b1ecf731854810924c0e7",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2808,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "6a736f1f2d8c0c87355733476333b77f48eea9ff",
+   "committed_utc": "2026-09-06T18:26:22+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "b82a2b136281688e0230d9b833d8f8363d92ec42",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2808,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "ee77903137c027441410056559c33a87c7ffb97c",
+   "committed_utc": "2026-09-06T19:06:14+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "fddcb017af9db1d571cffdb2370a57d6a3c48f1d",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2820,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "549e7eddd5b6bf157ac0e0652e7b05c8caa59a16",
+   "committed_utc": "2026-09-06T21:03:59+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "0ea49d6cb031baf9da1ea43ac9440ceefbacec19",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2820,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "49df524362c28f2ef084bd3940a2f6d2015af62d",
+   "committed_utc": "2026-09-06T21:37:22+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "0e4dc8a3ef4ba51d9ba0650bc68ca4b117d828ba",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2825,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "5b00a8ebaaa4d913348e364917a1ad46ea87837a",
+   "committed_utc": "2026-09-06T23:33:43+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "79d4b925648e7880250cbbc726a35eadb9375ae2",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2825,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "b5733168a7c713894d92cc6b9d55e46fa182d9f5",
+   "committed_utc": "2026-09-07T00:32:22+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "385f0016e75fdc4e47007692d00d6665d99529ee",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2868,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "eedd8eeedfd55b6274c91114654402c4d40103bd",
+   "committed_utc": "2026-09-07T03:26:59+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "a54447889cd370d089517acaee01f37a1a3906bf",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2912,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "5410ac935fcbf6872d4fb871b66b68841c0e7413",
+   "committed_utc": "2026-09-07T05:02:36+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "c8d199e65a2bc528d63d13e91f21615a56bcc196",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2919,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "5956a5fd03a371b2005915b3e0efefd64ca87787",
+   "committed_utc": "2026-09-07T15:26:06+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "cc897d65c46893338a364f47a8c9d9dc1215019b",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2919,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "414a3faee61e51ece3e2692a36abbdaaf5cc7fe8",
+   "committed_utc": "2026-09-07T16:41:18+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "42bf8aef227cba846b26125211e1ec85fc61062a",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2942,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "bd4e5880e458cdf57d5cffb2fdf89014e82ba50c",
+   "committed_utc": "2026-09-07T18:42:13+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "2911bf1e00ebc1dfecbfe5a405c4cb085a01b5c0",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 2987,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "224fa817c40353f26d93967604249ed8999cf7a1",
+   "committed_utc": "2026-09-07T21:11:16+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "3a061f0c221faa6cce0599116f783545a2507975",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3027,
+    "skipped": 114
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "17d0e614d8780c234fe83c3002bf51a9b9721469",
+   "committed_utc": "2026-09-08T01:25:00+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "c74d029e612c517f1b89da45673949e6a1723cb3",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3093,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "a66a883efece1c7c9481387566b6e15ac0836a7b",
+   "committed_utc": "2026-09-08T04:13:34+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "25eea6ea7d299111076ebd2454fb7d25c999b259",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3093,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "0771c05fcd47bd711bd54a549f3d96f946e60eca",
+   "committed_utc": "2026-09-08T04:27:58+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "01a2a21aaf157d1d704024299de874044ce17683",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3116,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "4f7b38be36be3f0ae206fa55a849b8e420c60fc9",
+   "committed_utc": "2026-09-08T11:39:23+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "9fba4535d91e32a6db2b9fb5a1d2004d62bea0ad",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3223,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "b781fe260b53a89efa17af297b10a50b3a4f7c1d",
+   "committed_utc": "2026-09-08T22:23:26+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "055d1fb904ac814b40314da077c944be17391026",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3223,
+    "skipped": 113
+   },
+   "problems": [
+    "the simulator exited 4 with no failing nodeid"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "d1fcc3036e4b77938db557e0a74ec566691fa2a7",
+   "committed_utc": "2026-09-09T00:44:40+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "d1fcc3036e4b77938db557e0a74ec566691fa2a7",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3223,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "408561b0fcd81c223be292d5c7360f498409eb06",
+   "committed_utc": "2026-09-09T00:58:01+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "257a074ba23db252e630da158bdde0f893dc9e21",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3223,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "5d77cf9f0f0b0f9c8d654d9d4832b6010477e050",
+   "committed_utc": "2026-09-09T02:24:32+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "ec5c0c461af8bd0e47e93ffe3a83205809f97c80",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3223,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "a13b27efa754c829acb69e6d5601b8fbf4988079",
+   "committed_utc": "2026-09-09T03:16:37+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "dae80bc4bd1a9acb680ed651b188089144f4ac4d",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3223,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "dc566fce7b1b8e2d7fac1ade359af2846108aeb3",
+   "committed_utc": "2026-09-09T04:10:09+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "bf0944f3ab487b0116494f60a73fa17d21cefac9",
+   "counts": {
+    "error": 0,
+    "failed": 23,
+    "passed": 3293,
+    "skipped": 113
+   },
+   "problems": [
+    "23 failed/errored: ['tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_after_file_hash_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_numstat_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_false_patch_hash_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_a_missing_changed_file_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_an_incorrect_source_commit_is_refused', 'tests/autoinit/test_phase_b_historical_amendments.py::test_the_ledger_verifies_against_the_live_tree', 'tests/autoinit/test_phase_b_plan.py::test_completed_phase_b_drift_is_historically_accounted_for', 'tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one', 'tests/pod/test_autoinit_preflight_rehearsal.py::test_the_authorization_bounds_the_session']",
+    "repository_state: did not pass 2/2: {'tests/docs/test_repository_structure.py::test_every_log_is_classified_in_the_catalog': 'passed', 'tests/pod/test_continuation_b_one_probe_contract.py::test_the_live_snapshot_records_the_terminal_phase_b_state': 'failed'}."
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "c26a311c8ad778c249d3e5171ae0949188788409",
+   "committed_utc": "2026-09-09T17:42:33+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "e0964eba71bec5c8305054416dc73800baf2c609",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3317,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "acad8f26910b0a8ebd47092bac9ab3c0865f2826",
+   "committed_utc": "2026-09-09T20:12:20+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "98430df568b92646df02fb0faa5bbdf8b250e3c7",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3317,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "701f9d62dfed430ae74893c83ba91847553b0937",
+   "committed_utc": "2026-09-09T21:14:14+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "90a266598a73ecf3f3fbd4073aae1f9c87e77357",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3354,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "70f7ac64e9bd8220797ff4393798eff880b544c9",
+   "committed_utc": "2026-09-10T02:20:52+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "82931551fdfb5c802f5d09dbebcfa214bc174362",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3354,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "3020fc4d44bdb9f1b53c3d6fb82fd42901544f4e",
+   "committed_utc": "2026-09-10T02:41:58+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "137df6039a46677e4d0069adcfa00a9d26cf26d3",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3405,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "355a1f7d7b0f09840dc8f4d84923e97a2039003f",
+   "committed_utc": "2026-09-10T06:09:25+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "db8e47e7fd7bba9daaee74af88cb928d5fbfe251",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3436,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "668609e435db31e285e3b57f17e33ddde7ae17a6",
+   "committed_utc": "2026-09-10T15:16:18+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "c35ccdbe65ff1c5656977011a0524e8213739ad7",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3525,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "b2ecdff83ee0a7653eea7872b5af6739a4de4381",
+   "committed_utc": "2026-09-10T19:44:32+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "d8e6896a72afbd316fc88985b104d73ec232fccd",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3573,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "daf64772495eedfe4dffbe8d201a1c084b772116",
+   "committed_utc": "2026-09-10T22:20:32+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "7bfaed0795120e079d4c6834e12eda79e2fa001d",
+   "counts": {
+    "error": 0,
+    "failed": 1,
+    "passed": 3622,
+    "skipped": 113
+   },
+   "problems": [
+    "1 failed/errored: ['tests/pod/test_session_kind_dispatch.py::test_the_probe_sees_the_sessions_this_repository_can_actually_launch']"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "5e8d51ca20e270053458ee44eaa20a8a35d5ce54",
+   "committed_utc": "2026-09-11T00:38:44+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "5e8d51ca20e270053458ee44eaa20a8a35d5ce54",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3625,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "0103467384ca0013ddc0caa9dc18c92aadfa5c78",
+   "committed_utc": "2026-09-11T00:52:53+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "e2a68d849bdd7c94edf3783fdfc49cc516436e12",
+   "counts": {
+    "error": 0,
+    "failed": 1,
+    "passed": 3642,
+    "skipped": 113
+   },
+   "problems": [
+    "1 failed/errored: ['tests/pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest']"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "9e9d6f56b45a0cc2a6c40aa3d6b1ad7698df3c65",
+   "committed_utc": "2026-09-11T02:13:21+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "9e9d6f56b45a0cc2a6c40aa3d6b1ad7698df3c65",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3643,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "55bb324a4a0ba522a69bd67eb07b338c71fd6f64",
+   "committed_utc": "2026-09-11T02:26:55+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "436e81d6da3ac655eef955042c4e29d745ed1056",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3661,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "199711af75a5d56ca4ca9376f559a527f4eed82a",
+   "committed_utc": "2026-09-11T15:03:45+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "05ba78d50f70afe71c506f4c8cce2c4df0507500",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3661,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "e7b41d728643d2b53f62b843216fc061475ed89e",
+   "committed_utc": "2026-09-11T17:06:39+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "11527e17343a6e3053bec4b79afba1e25c27a967",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3665,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "871235c72470d0a030c40c15291b292de55a0e01",
+   "committed_utc": "2026-09-11T18:02:05+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "e924387f083683a2102f679824ff21b1be0763f8",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3671,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "50fda0985beec2e29375bb33e498b16cf3d16cd6",
+   "committed_utc": "2026-09-11T19:51:45+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "PASS",
+   "swept_base_commit": "5f3161c2e6ae89593c1d2deedb51b2769d00b9fc",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3684,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "34ab8c1cbaf9fc8bdad86e953cd2d3182c8d1842",
+   "committed_utc": "2026-09-12T00:43:51+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "7a9c40bc9fe843d23b034db4a663f92882714858",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3704,
+    "skipped": 113
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "5418db0ff4945ad27509605ea079a9da26b24001",
+   "committed_utc": "2026-09-12T05:14:10+08:00"
+  },
+  {
+   "record_kind": "launch_bound",
+   "verdict": "FAIL",
+   "swept_base_commit": "8274598159e01cce95679bdef209aeca2bd479dd",
+   "counts": {
+    "error": 0,
+    "failed": 1,
+    "passed": 3703,
+    "skipped": 113
+   },
+   "problems": [
+    "1 failed/errored: ['tests/pod/test_run_identity_is_wired.py::test_this_repositorys_index_still_accounts_for_every_run_on_disk']"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+   },
+   "committed_at": "185eb053ed8ec5c90173de333803adf99df414d1",
+   "committed_utc": "2026-09-12T15:17:23+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "185eb053ed8ec5c90173de333803adf99df414d1",
+   "counts": {
+    "error": 0,
+    "failed": 3,
+    "passed": 3730,
+    "skipped": 113
+   },
+   "problems": [
+    "3 failed/errored: ['tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output', 'tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing', 'tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there']"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-185eb053ed8e/junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-185eb053ed8e/pytest.log"
+   },
+   "committed_at": "50eb6068193612bfbd715e5c9a98441188db5a4b",
+   "committed_utc": "2026-09-12T16:24:42+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "FAIL",
+   "swept_base_commit": "50eb6068193612bfbd715e5c9a98441188db5a4b",
+   "counts": {
+    "error": 0,
+    "failed": 4,
+    "passed": 3721,
+    "skipped": 121
+   },
+   "problems": [
+    "4 failed/errored: ['tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution', 'tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for', 'tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready', 'tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one']"
+   ],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-50eb60681936/junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-50eb60681936/pytest.log"
+   },
+   "committed_at": "78635c5e34c27c1f06d00753626f0466936eeb62",
+   "committed_utc": "2026-09-12T16:37:51+08:00"
+  },
+  {
+   "record_kind": "diagnostic",
+   "verdict": "PASS",
+   "swept_base_commit": "78635c5e34c27c1f06d00753626f0466936eeb62",
+   "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 3725,
+    "skipped": 121
+   },
+   "problems": [],
+   "evidence": {
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-78635c5e34c2/junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-78635c5e34c2/pytest.log"
+   },
+   "committed_at": "47c6a22169d7891cb6381c2b4b25e9e667aaabce",
+   "committed_utc": "2026-09-12T16:49:16+08:00"
+  }
+ ],
+ "authorizes": "nothing"
+}

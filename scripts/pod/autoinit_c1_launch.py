@@ -63,7 +63,9 @@ from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
 from aadistill.runtime.staging_contract import derive_contract  # noqa: E402
 from experiments.phase_c1.pod_environment import (  # noqa: E402
     LAUNCH_BOUND,
-    RECORD_PATH as POD_ENV_RECORD,
+    RECORD_POINTER as POD_ENV_RECORD,
+    c1_record_contract,
+    record_path_for as pod_env_record_for,
     load_record as load_pod_env_record,
     verify_record as verify_pod_env_record,
 )
@@ -177,10 +179,32 @@ TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
 
 STATUS = f"{WS}/autoinit_c1.status"
 RUN_LOG = f"{WS}/autoinit_c1_run.log"
-AUTH_PATH = "logs/autoinit_c1_authorization.json"
+#: The GLOBAL entry point for the issued authorization. Like the readiness
+#: record, this was the canonical artifact: every issuance overwrote one
+#: repository-root file, and each closeout copied it into the run afterwards to
+#: keep a copy. The authorization a session ran under therefore lived at a path
+#: the next issuance would replace.
+AUTH_POINTER = "logs/autoinit_c1_authorization.json"
+
+#: Back-compatible name. Every authorization issued before 2026-09-12 is here,
+#: and a session with no run id still reads it.
+AUTH_PATH = AUTH_POINTER
+
+
+def auth_path_for(run_id: str | None) -> str:
+    """Where THIS run's issued authorization lives, repository-relative.
+
+    Resolved through the same convention as every other role, so the issuer, the
+    gates, the lineage rule and the run's own manifest cannot disagree about
+    where it is.
+    """
+    if not run_id:
+        return AUTH_POINTER
+    return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
+            f"/{C1_RUN_ROLES['authorization']}")
 
 PRICING = "logs/phase_c1_pricing.json"
-PREREG = "logs/phase_c1_execution_preregistration.json"
+PREREG = "logs/experiments/phase_c1/execution_preregistration.json"
 #: The expectation the frozen-asset gate checks this tree against, on the pod
 #: and — since 2026-09-11 — at $0 before a pod exists.
 FROZEN_EXPECT = "configs/experiments/phase_c1/frozen_assets.json"
@@ -190,11 +214,25 @@ FROZEN_EXPECT = "configs/experiments/phase_c1/frozen_assets.json"
 SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
 SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 BATTERY_MANIFEST = "artifacts/stage3/c1_confirmation_v1/manifest.json"
-BATTERY_IDENTITY = "logs/phase_c1_battery.json"
-TEACHER_BINDING = "logs/phase_c1_teacher_binding.json"
+BATTERY_IDENTITY = "logs/experiments/phase_c1/battery.json"
+TEACHER_BINDING = "logs/experiments/phase_c1/teacher_binding.json"
 #: Written by scripts/autoinit/stage_c1_bundle.py; the local half of the
 #: transport check. The gate verifies the REMOTE object against it.
-BUNDLE_RECORD = "logs/autoinit_c1_bundle.json"
+#: The GLOBAL entry point for the staged-bundle record. Like the readiness
+#: record and the authorization, this was one repository-root file that every
+#: session staged over -- and it is the one artifact that MUST stay uncommitted
+#: inside a launch window, because committing it adds a third path to the
+#: session lineage diff and `session_commit_gate` refuses.
+BUNDLE_POINTER = "logs/autoinit_c1_bundle.json"
+BUNDLE_RECORD = BUNDLE_POINTER
+
+
+def bundle_record_for(run_id: str | None) -> str:
+    """Where THIS run's bundle record lives, repository-relative."""
+    if not run_id:
+        return BUNDLE_POINTER
+    return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
+            f"/{C1_RUN_ROLES['bundle_record']}")
 
 # ---------------------------------------------------------------------------
 # where this run's files go
@@ -301,15 +339,32 @@ _RUN_COLLECT: tuple[tuple[str, str], ...] = (
 #: `grant` is deliberately absent: it is not copied from a live repository path,
 #: because it has no live repository path. It is authored directly at its role
 #: location and is already there when the run opens.
-_RUN_GOVERNANCE: tuple[tuple[str, str], ...] = (
-    (AUTH_PATH, "authorization"),
-    (BUNDLE_RECORD, "bundle_record"),
-    (POD_ENV_RECORD, "readiness_record"),
-)
+#:
+#: `readiness_record` left for the same reason on 2026-09-12. The sweep writes
+#: it into this run's governance area directly, so there is nothing to copy --
+#: and copying it was the workaround for its living at a repository-root path
+#: that the next run would overwrite. The root file is now a pointer and is
+#: never snapshotted: a pointer is not evidence.
+#: `authorization` left on 2026-09-12 for the same reason as the readiness
+#: record: the issuer writes it into this run's governance area, so there is
+#: nothing to copy. The repository-root file is a pointer and is never
+#: snapshotted -- a pointer is not evidence.
+#: EMPTY since 2026-09-12. Every governance artifact -- grant, readiness
+#: record, authorization, bundle record -- is now produced into the run that
+#: owns it, so there is nothing to copy in at closeout. Copying was the
+#: workaround for artifacts living at repository-root paths the next session
+#: would overwrite. Kept as an empty declaration rather than deleted: a future
+#: artifact that genuinely arrives from outside the run belongs here.
+_RUN_GOVERNANCE: tuple[tuple[str, str], ...] = ()
 
 #: Roles written before the run opens, by someone other than the launcher.
 #: Exempt from `open_run`'s occupancy rule and from nothing else.
-_RUN_PREPARED: tuple[str, ...] = ("grant",)
+#: Written before the run opens, by someone else. The grant is a maintainer
+#: input; the readiness record is produced by the sweep, which by contract runs
+#: BEFORE the authorization is issued and therefore before the launcher starts.
+#: Both are exempt from the occupancy rule BY NAME -- the exemption is per role,
+#: never the whole `governance/` directory.
+_RUN_PREPARED: tuple[str, ...] = ("grant", "readiness_record")
 
 
 def session_record_path(run_id: str) -> str:
@@ -525,14 +580,15 @@ def grant_provenance_gate(ctx: SessionContext) -> tuple[bool, str]:
     rel = (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
            f"/{C1_RUN_ROLES['grant']}")
     want = (REPO_ROOT / rel).resolve()
+    auth_rel = auth_path_for(run_id)
     try:
-        raw = json.loads((REPO_ROOT / AUTH_PATH).read_text())
+        raw = json.loads((REPO_ROOT / auth_rel).read_text())
     except Exception as exc:                                   # noqa: BLE001
-        return False, f"cannot read {AUTH_PATH}: {exc}"
+        return False, f"cannot read {auth_rel}: {exc}"
     ref = raw.get("grant") or {}
     stated_path, stated_sha = ref.get("path"), ref.get("sha256")
     if not stated_path or not stated_sha:
-        return False, (f"{AUTH_PATH} records no grant path and hash, so the "
+        return False, (f"{auth_rel} records no grant path and hash, so the "
                        "decision it was issued from cannot be identified")
     #: Resolved, not string-compared: the issuer stores whatever `--grant` was
     #: typed, and `./logs/...` is the same file as `logs/...`.
@@ -556,7 +612,7 @@ def grant_provenance_gate(ctx: SessionContext) -> tuple[bool, str]:
                        "edited after it was used")
     ctx.evidence["grant_provenance"] = {
         "role": "grant", "path": rel, "sha256": live,
-        "recorded_by": AUTH_PATH, "run_id": run_id,
+        "recorded_by": auth_rel, "run_id": run_id,
         "rule": ("the authorization's grant reference must resolve to THIS "
                  "run's governance/grant.json and hash to the recorded value"),
     }
@@ -872,16 +928,27 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
     whether the tree is sound, and refuses only the thing that creates a provider
     resource.
     """
+    #: THIS run's readiness record. It was a single repository-root file that
+    #: each run in turn overwrote, so the evidence a session launched under sat
+    #: at a path the next session would replace, and each closeout copied it
+    #: away afterwards to keep a copy. It is now produced into the run that owns
+    #: it, and the root file is a pointer.
+    run_id = getattr(ctx.args, "run_id", None)
+    record_rel = pod_env_record_for(run_id, RUN_STAGE_ID)
     try:
-        record = load_pod_env_record(REPO_ROOT)
+        record = load_pod_env_record(REPO_ROOT, run_id=run_id,
+                                     stage_id=RUN_STAGE_ID)
     except FileNotFoundError:
-        return False, (f"{POD_ENV_RECORD} does not exist: no pod-like sweep has "
-                       "been recorded for this executable")
+        return False, (f"{record_rel} does not exist: no pod-like sweep has "
+                       "been recorded for this run. A sweep is taken on the "
+                       "clean pre-authorization tree and written into the run "
+                       "it is for.")
     except Exception as exc:                                   # noqa: BLE001
-        return False, f"cannot read {POD_ENV_RECORD}: {exc}"
+        return False, f"cannot read {record_rel}: {exc}"
 
     # The session commit is what the pod checks out, so it — not this working
-    # tree — is what must descend from the swept base. `AUTH_PATH` is permitted
+    # tree — is what must descend from the swept base. This run's authorization
+    # is permitted
     # because an issued session commits its authorization after the sweep by
     # construction; it is the same single path the session-lineage gate allows.
     # The staged view the sweep ran under must be the one THIS session stages.
@@ -895,19 +962,21 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
 
     ok, reason = verify_pod_env_record(
         record, REPO_ROOT,
+        contract=c1_record_contract(run_id, RUN_STAGE_ID),
         session_commit=getattr(ctx.args, "session_commit", None),
-        authorization_path=AUTH_PATH,
+        authorization_path=auth_path_for(run_id),
         required_kind=LAUNCH_BOUND,
         staging_contract_digest=live_staging)
     ctx.evidence["pod_environment_verification"] = {
         "verdict": "PASS" if ok else "FAIL",
-        "record": POD_ENV_RECORD,
+        "record": record_rel,
         "record_self_sha256": record.get("self_sha256"),
         "record_kind": record.get("record_kind"),
         "required_record_kind": LAUNCH_BOUND,
         "swept_base_commit": record.get("swept_base_commit"),
         "session_commit": getattr(ctx.args, "session_commit", None),
-        "permitted_post_sweep_paths": [POD_ENV_RECORD, AUTH_PATH],
+        "permitted_post_sweep_paths": [record_rel,
+                                       auth_path_for(run_id)],
         "live_staging_contract_digest": live_staging,
         "recorded_staging_contract_digest": record.get("staging_contract_digest"),
         "counts": record.get("counts"),
@@ -945,25 +1014,27 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     except C1BundleError as exc:
         return False, str(exc)
 
-    staged = REPO_ROOT / BUNDLE_RECORD
+    bundle_rel = bundle_record_for(getattr(ctx.args, "run_id", None))
+    staged = REPO_ROOT / bundle_rel
     if not staged.is_file():
-        return False, (f"{BUNDLE_RECORD} is missing; run "
+        return False, (f"{bundle_rel} is missing; run "
                        f"scripts/autoinit/stage_c1_bundle.py --session-commit "
                        f"{commit} first")
     record = json.loads(staged.read_text())
     if record.get("session_commit") != commit:
-        return False, (f"{BUNDLE_RECORD} describes a bundle for "
+        return False, (f"{bundle_rel} describes a bundle for "
                        f"{str(record.get('session_commit'))[:12]}…, not the session "
                        f"commit {commit[:12]}…")
 
-    auth_bytes = (REPO_ROOT / AUTH_PATH).read_bytes()
+    auth_rel = auth_path_for(getattr(ctx.args, "run_id", None))
+    auth_bytes = (REPO_ROOT / auth_rel).read_bytes()
     try:
         with tempfile.TemporaryDirectory() as tmp:
             evidence = roundtrip(
                 session_commit=commit,
                 local_bundle_sha256=record["sha256"],
                 authorization_bytes=auth_bytes,
-                authorization_path=AUTH_PATH,
+                authorization_path=auth_rel,
                 expected_harness_digest=ctx.auth.harness_source_digest,
                 harness_files=tuple(ctx.auth.harness_source_files),
                 download=hf_download, workdir=Path(tmp))
@@ -1108,7 +1179,7 @@ def spec(args) -> SessionSpec:
         description=("Phase C1: fixed-path ATTENTION isolation. Replays the frozen "
                      "fe9683 path under two digest gates, then runs 2 arms x 3 "
                      "fresh seeds. Runs no search"),
-        authorization_path=AUTH_PATH,
+        authorization_path=auth_path_for(getattr(args, "run_id", None)),
         #: The C1 type. A Phase-A, Phase-B or continuation artifact is refused by
         #: schema at load: each measures a different harness and carries a
         #: ceiling derived for different work.
@@ -1197,7 +1268,9 @@ def spec(args) -> SessionSpec:
                              "/workspace/pytest_junit.xml",
                              "/workspace/pytest.log"),
         precheck=(
-            session_commit_gate(REPO_ROOT, AUTH_PATH, check_lineage=True),
+            session_commit_gate(REPO_ROOT,
+                                auth_path_for(getattr(args, "run_id", None)),
+                                check_lineage=True),
             grant_provenance_gate,
             c1_harness_gate,
             pricing_identity_gate,
@@ -1407,7 +1480,8 @@ def close_c1_run(layout, args, repo_root: Path | None = None) -> dict:
         implementation={"launcher": "scripts/pod/autoinit_c1_launch.py",
                         "harness_source_digest": session.get(
                             "harness_source_digest"),
-                        "authorization": AUTH_PATH},
+                        "authorization": auth_path_for(
+                            getattr(args, "run_id", None))},
         status={"passed": session.get("passed"),
                 #: `terminal`, spelled the way the runner writes it. A key the
                 #: record does not have would read as `None` and look like a

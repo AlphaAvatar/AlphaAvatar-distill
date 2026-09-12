@@ -46,6 +46,8 @@ from experiments.phase_c1.pod_environment import (  # noqa: E402
     C1_RECORD_CONTRACT,
     LEAF_TRANSPORT_NODEIDS,
     RECORD_PATH,
+    RECORD_POINTER,
+    record_path_for,
     RENDERER_PARITY_NODEIDS,
     evaluate_sweep,
     head_commit,
@@ -112,10 +114,48 @@ def derive_c1_session():
 SWEEP_ROOT = "/home/ecs-user/aad-scratch/podsim"
 
 
-def sweep_outputs(head: str, *, root: str = SWEEP_ROOT) -> tuple[str, str]:
-    """`(junit, log)` for a sweep of this tree. Never a shared path."""
-    d = Path(root) / f"sweep-{head[:12]}"
-    return str(d / "junit.xml"), str(d / "pytest.log")
+def sweep_dir(head: str, *, root: str = SWEEP_ROOT) -> Path:
+    """Where executions of THIS tree live. Source identity, not execution."""
+    return Path(root) / f"sweep-{head[:12]}"
+
+
+def allocate_execution(head: str, *, root: str = SWEEP_ROOT
+                       ) -> tuple[str, str, str]:
+    """Claim a fresh execution directory. `(execution_id, junit, log)`.
+
+    **Source identity and execution identity are different things.** Keying the
+    path on the commit alone said "the same tree is the same claim", and that is
+    wrong: a sweep that failed and a sweep that then passed are two observations
+    of one tree, and the second overwrote the first. The simulator redirects with
+    `>`, so the earlier `junit.xml` and `pytest.log` were truncated, including
+    ones a committed record cites as its evidence.
+
+    `mkdir(exist_ok=False)` IS the allocation, so two executions cannot claim the
+    same directory even concurrently, and an existing directory is never entered.
+    The id is recorded in the record together with the paths; nothing has to
+    re-derive a filename from a commit.
+    """
+    base = sweep_dir(head, root=root)
+    n = 1
+    while True:
+        d = base / f"exec-{n:03d}"
+        try:
+            d.mkdir(parents=True, exist_ok=False)
+        except FileExistsError:
+            n += 1
+            if n > 9999:
+                raise SystemExit(f"{base} holds 9999 executions; refusing")
+            continue
+        return (f"sweep-{head[:12]}/exec-{n:03d}",
+                str(d / "junit.xml"), str(d / "pytest.log"))
+
+
+def existing_executions(head: str, *, root: str = SWEEP_ROOT) -> list[str]:
+    """Execution directories already recorded for this tree. READ ONLY."""
+    base = sweep_dir(head, root=root)
+    if not base.is_dir():
+        return []
+    return sorted(p.name for p in base.iterdir() if p.is_dir())
 
 
 def min_free_gib() -> int:
@@ -194,16 +234,44 @@ def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
     }
 
 
+def _sha256_of(path: str | None) -> str | None:
+    """Hash a raw-output file, or `None` when it is not there.
+
+    Recorded so "this record's evidence" is checkable rather than asserted: a
+    path can be right and its contents replaced, which is exactly what the
+    shared-path scheme did.
+    """
+    import hashlib
+
+    if not path or not Path(path).is_file():
+        return None
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     #: Defaults are DERIVED per sweep, below, once the head commit is known.
     ap.add_argument("--junit", default=None,
-                    help="raw JUnit path; defaults to a per-sweep directory "
-                         "keyed on the head commit, so a new sweep cannot "
-                         "overwrite raw output an existing record cites")
+                    help="raw JUnit path. Defaults to a freshly ALLOCATED "
+                         "execution directory under this tree's sweep "
+                         "directory; an explicit path that already holds "
+                         "output is refused rather than overwritten")
     ap.add_argument("--log", default=None)
     ap.add_argument("--from-existing", action="store_true",
-                    help="parse a sweep that already ran instead of running one")
+                    help="READ ONLY: parse a sweep that already ran. Requires "
+                         "--junit, allocates nothing and executes nothing")
+    ap.add_argument("--run-id", default=None,
+                    help="the run this readiness evidence belongs to. With it "
+                         "the record is written into that run's governance "
+                         "area and the repository-root file becomes a pointer; "
+                         "without it the root file is the record, which is "
+                         "where every pre-2026-09-12 sweep is.")
+    ap.add_argument("--stage-id", default=None,
+                    help="the run's declared stage; required with --run-id")
     ap.add_argument("--kind", default="diagnostic",
                     choices=("diagnostic", "launch_bound"),
                     help=("`diagnostic` proves the machinery on the current tree; "
@@ -214,15 +282,46 @@ def main() -> int:
 
     # Captured BEFORE the record is written: writing it into logs/ is itself a
     # tree modification, and the verdict must describe the tree that was swept.
+    if args.run_id and not args.stage_id:
+        raise SystemExit("--run-id needs --stage-id: the run's location is "
+                         "derived from the stage its experiment declares, and "
+                         "guessing it would put the evidence in a second place")
+    record_rel = record_path_for(args.run_id, args.stage_id)
+
     clean_before = tree_is_clean(REPO_ROOT)
     head = head_commit(REPO_ROOT)
     #: Resolved now that the tree's identity is known. A caller may still name
     #: its own paths; what it may not get is a shared default that silently
     #: replaces another sweep's raw output.
-    if args.junit is None or args.log is None:
-        j, l = sweep_outputs(head)
-        args.junit = args.junit or j
-        args.log = args.log or l
+    #: Reading an existing result and producing a new one are separate paths.
+    #: They shared one branch, so `--from-existing` still resolved a DEFAULT
+    #: output path -- which for a fresh default would have been an empty
+    #: directory it had just created.
+    if args.from_existing:
+        if not args.junit:
+            raise SystemExit(
+                "--from-existing parses a sweep that already ran and cannot "
+                "guess which one. Name it with --junit. Executions of this "
+                f"tree: {existing_executions(head) or 'none'}")
+        if not Path(args.junit).is_file():
+            raise SystemExit(f"--from-existing: {args.junit} does not exist")
+        args.log = args.log or str(Path(args.junit).with_name("pytest.log"))
+        execution_id = f"imported:{Path(args.junit).parent.name}"
+    elif args.junit is None and args.log is None:
+        execution_id, args.junit, args.log = allocate_execution(head)
+        print(f"execution {execution_id}")
+    else:
+        #: A caller may name its own paths; what it may not do is write over
+        #: output that already exists, which is how a cited record lost the
+        #: evidence it pointed at.
+        for named in (args.junit, args.log):
+            if named and Path(named).exists():
+                raise SystemExit(
+                    f"{named} already exists. A new execution never overwrites "
+                    "an existing one; use --from-existing to read it, or name "
+                    "an unused path.")
+        args.log = args.log or str(Path(args.junit).with_name("pytest.log"))
+        execution_id = f"explicit:{Path(args.junit).parent.name}"
     Path(args.junit).parent.mkdir(parents=True, exist_ok=True)
     Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     harness = c1_harness_digest(REPO_ROOT)
@@ -280,7 +379,7 @@ def main() -> int:
         # not this one. Move it aside for the duration; the tests skip when it is
         # absent, which is the honest reading of "not yet recorded".
         stash = None
-        live = REPO_ROOT / RECORD_PATH
+        live = REPO_ROOT / record_rel
         try:
             if live.is_file():
                 stash = Path(tempfile.mkdtemp(prefix="podsim-record-")) / live.name
@@ -402,8 +501,17 @@ def main() -> int:
         "expected_environment_skips": findings["expected_environment_skips"],
         "problems": findings["problems"],
         "verdict": findings["verdict"] if rc == 0 else "FAIL",
-        "evidence": {"junit": args.junit, "pytest_log": args.log},
-        "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
+        #: The execution's OWN identity and its own raw output, with hashes so
+        #: a later reader can verify that what it finds is what was recorded.
+        #: Two executions of one commit are two observations, and each keeps
+        #: its own; the paths are recorded rather than re-derived from the
+        #: commit, because a commit does not identify an execution.
+        "execution_id": execution_id,
+        "evidence": {"junit": args.junit, "pytest_log": args.log,
+                     "junit_sha256": _sha256_of(args.junit),
+                     "pytest_log_sha256": _sha256_of(args.log),
+                     "executions_of_this_tree": existing_executions(head)},
+        "renderer_parity_is_proved_by": "logs/experiments/phase_c1/renderer_parity.json",
     }
     if realization["problems"]:
         record["problems"] = list(record["problems"]) + realization["problems"]
@@ -412,15 +520,42 @@ def main() -> int:
         record["problems"] = [f"the simulator exited {rc} with no failing nodeid"]
     record["self_sha256"] = self_hash(record)
 
-    out = REPO_ROOT / RECORD_PATH
+    #: Into the run that owns it. A run's readiness evidence is part of that
+    #: run, not a repository-level file the next run replaces.
+    out = REPO_ROOT / record_rel
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+
+    if args.run_id:
+        #: A POINTER, not a second record: it says where the live evidence is
+        #: and what it hashes to, so one stable path still answers "which sweep
+        #: is current" without becoming a copy that can drift.
+        pointer = {
+            "schema": "aadistill.autoinit.c1_readiness_pointer/v1",
+            "_what_this_is": (
+                "a pointer to the run that owns the live readiness record. NOT "
+                "the record: this file used to be the record, which meant each "
+                "run overwrote the evidence the previous one launched under."),
+            "run_id": args.run_id,
+            "stage_id": args.stage_id,
+            "record": record_rel,
+            "record_self_sha256": record["self_sha256"],
+            "record_kind": record["record_kind"],
+            "verdict": record["verdict"],
+            "swept_base_commit": record.get("swept_base_commit"),
+            "history": "logs/experiments/phase_c1/readiness_history.json",
+            "authorizes": "nothing",
+        }
+        (REPO_ROOT / RECORD_POINTER).write_text(
+            json.dumps(pointer, indent=1) + "\n")
+        print(f"pointer: {RECORD_POINTER} -> {record_rel}")
 
     c = record["counts"]
     print(f"\n{record['verdict']}: {c['passed']} passed, {c['skipped']} skipped, "
           f"{c['failed']} failed, {c['error']} error  (rc={rc}, {seconds}s)")
     for p in record["problems"]:
         print(f"  problem: {p}")
-    print(f"record: {RECORD_PATH} ({record['self_sha256'][:12]}…)")
+    print(f"record: {record_rel} ({record['self_sha256'][:12]}…)")
     return 0 if record["verdict"] == "PASS" else 1
 
 

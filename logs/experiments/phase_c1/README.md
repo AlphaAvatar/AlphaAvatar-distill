@@ -27,10 +27,17 @@ and their grants and closeouts name the paths they are at.
 ## Files here
 
 * [`autoinit_c1_stage_f_device_repair.json`](autoinit_c1_stage_f_device_repair.json)
+* [`battery.json`](battery.json)
 * [`c1_storage_recovery.json`](c1_storage_recovery.json)
+* [`execution_preregistration.json`](execution_preregistration.json)
 * [`operational_history.md`](operational_history.md)
 * [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json)
 * [`phase_c_roadmap.md`](phase_c_roadmap.md)
+* [`readiness_history.json`](readiness_history.json)
+* [`renderer_parity.json`](renderer_parity.json)
+* [`scoring_equivalence.json`](scoring_equivalence.json)
+* [`skip_predicate_audit.json`](skip_predicate_audit.json)
+* [`teacher_binding.json`](teacher_binding.json)
 
 Moved from `logs/` root on 2026-09-12 — see
 [`../../maintenance/log_relocation.json`](../../maintenance/log_relocation.json),

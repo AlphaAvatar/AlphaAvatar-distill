@@ -6843,7 +6843,7 @@ recovery continuation under the derived **$16.7456** ceiling.
   register-before-use a property of the code rather than a runbook step. It
   contains no search, ranking, halving or tie-breaking, and a test checks its
   import graph.
-- **Execution preregistration** at `logs/phase_c1_execution_preregistration.json`,
+- **Execution preregistration** at `logs/experiments/phase_c1/execution_preregistration.json`,
   `48beff49a1d087dc…`. Every field derived from live objects; it authorizes
   nothing.
 - **Pricing** at `logs/phase_c1_pricing.json`, `70d2fec6a41c43b1…`: floor

@@ -332,7 +332,7 @@
     "/tmp/alphaavatar-semantic-addressing-* (3.7 GiB)": "ownership not established in this project; out of scope"
    },
    "inputs_still_complete": {
-    "c1_confirmation_v1": "content_sha256 matches logs/phase_c1_battery.json; 950/850",
+    "c1_confirmation_v1": "content_sha256 matches logs/experiments/phase_c1/battery.json; 950/850",
     "stage1 checkpoint config.json": "sha256 a7131bb092b38a07, the pinned ROPE staging input",
     "frozen_assets verifier": "PASS against configs/experiments/phase_c1/frozen_assets.json",
     "registry": "every unit marked present_local is on disk; none absent-and-unretired"

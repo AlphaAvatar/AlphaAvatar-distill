@@ -58,7 +58,24 @@ from experiments.phase_c1.authorization_payload import (  # noqa: E402
     C1AuthorizationRefused, build_c1_authorization_payload, load_config,
 )
 
+#: The GLOBAL entry point. A POINTER once a run is named -- see `--run-id`.
+#: Every authorization issued before 2026-09-12 is at this path, and it was the
+#: canonical artifact: each issuance overwrote one file, so the authorization a
+#: session ran under lived where the next issuance would replace it.
 OUT = "logs/autoinit_c1_authorization.json"
+
+
+def _out_for(run_id: str | None, stage_id: str | None) -> str:
+    """Where this issuance goes. Through the same convention as every role."""
+    if not run_id:
+        return OUT
+    if not stage_id:
+        raise SystemExit("--run-id needs --stage-id: the run's location is "
+                         "derived from the stage its experiment declares")
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    from experiments.run_layout import rel_run_dir
+
+    return f"{rel_run_dir('phase_c1', run_id, stage_id)}/governance/authorization.json"
 
 
 def git(*args: str) -> str:
@@ -73,7 +90,17 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--grant", required=True, type=Path)
-    ap.add_argument("--out", default=OUT)
+    ap.add_argument("--run-id", default=None,
+                    help="the run this authorization is issued for. With it the "
+                         "artifact is written into that run's governance area "
+                         "and the repository-root file becomes a pointer, so "
+                         "the next issuance cannot overwrite it.")
+    ap.add_argument("--stage-id", default=None,
+                    help="the run's declared stage; required with --run-id")
+    ap.add_argument("--out", default=None,
+                    help="explicit output path. Defaults to this run's "
+                         "governance/authorization.json, or to the global "
+                         "entry point when no run is named.")
     ap.add_argument("--require-clean", action="store_true",
                     help="refuse to issue against a dirty tree; the authorized "
                          "commit must describe what the pod will check out")
@@ -104,7 +131,18 @@ def main() -> int:
     except C1AuthorizationRefused as exc:
         raise SystemExit(f"refusing to issue: {exc}") from None
 
+    #: Into the run that owns it.
+    if args.out is None:
+        args.out = _out_for(args.run_id, args.stage_id)
     out = REPO_ROOT / args.out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    #: An issuance never writes over an existing authorization. One-use means
+    #: one artifact; replacing one in place is how a consumed authorization
+    #: became indistinguishable from a fresh one.
+    if out.exists():
+        raise SystemExit(
+            f"{args.out} already exists. An authorization is one-use: issue "
+            "into a new run, or move the existing artifact aside deliberately.")
     out.write_text(json.dumps(payload, indent=1) + "\n")
 
     # Round-trip through the real loader: an artifact this issuer wrote but the
@@ -123,6 +161,8 @@ def main() -> int:
     else:
         bound = payload["bound"]
         print(f"wrote {args.out}")
+        if args.run_id:
+            print(f"  owned by run       {args.run_id} (stage {args.stage_id})")
         print(f"  authorization_id   {payload['authorization_id']}")
         print(f"  authorization_sha  {payload['authorization_sha256']}")
         print(f"  session commit     {commit}")

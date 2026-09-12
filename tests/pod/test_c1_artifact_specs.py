@@ -111,7 +111,7 @@ def test_patterns_match_the_producing_source_literals():
 def test_success_spec_covers_the_frozen_evidence_contract():
     """Minimums are derived from the contract, not transcribed into the test."""
     prereg = json.loads(
-        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
     n_probes = prereg["c1_session_contract"]["stages"] and 6
     required = {s.artifact_class: s.min_matches
                 for s in load_specs(str(REPO / SUCCESS)) if s.required}
@@ -434,7 +434,7 @@ def test_preregistration_binds_both_spec_hashes():
     from aadistill.infrastructure.manifest import sha256_file
 
     doc = json.loads(
-        (REPO / "logs/phase_c1_execution_preregistration.json").read_text())
+        (REPO / "logs/experiments/phase_c1/execution_preregistration.json").read_text())
     block = doc["artifact_specs"]
     assert block["success"]["path"] == SUCCESS
     assert block["failed"]["path"] == FAILED
