@@ -993,7 +993,7 @@ retrain.
   aggregate counts.
 - **Related:** `logs/decisions.md` 2026-09-01; `logs/current_state.json`
   (`storage.preserved_scratch_20260901`); `logs/STATE.md`;
-  `logs/phase_c0_sizing_evidence.json`.
+  `logs/experiments/phase_c1/phase_c0_sizing_evidence.json`.
 
 ## Phase-C1 confirmation battery — built and frozen 2026-09-01
 

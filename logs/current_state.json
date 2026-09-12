@@ -12,59 +12,60 @@
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-attempt cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions. Attempts 10-12 consumed, $0.3960, zero scientific stages. Terms: budget.terms.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-12 consumed, $0.3960, zero scientific stages.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/autoinit_c1_attempt9/outcome.json.",
   "c1_attempts": "thirteen labels, ELEVEN paid, $4.3961 total, zero ATTENTION science. Attempt 12 cost $0 -- the provider refused the create. Per-attempt cost and cause: logs/BUDGET_LEDGER.md.",
   "formal_sessions_used": 3,
   "formal_sessions_max": null,
-  "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is the $15.1475 per-session ceiling, the $51.4425 package and the $320.0000 project cap."
+  "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
   "any": false,
-  "bundles": 0,
-  "note": "attempt 12's grant, authorization and bundle were consumed at invocation. A new session needs a complete new one-use chain."
+  "grant_committed": "logs/runs/stage-1/phase_c1/attempt13/governance/grant.json",
+  "readiness_record": "FAIL -- the 2026-09-12 launch_bound sweep refused on a stale run index; owed again after this cleanup",
+  "authorization": null,
+  "bundle": null,
+  "note": "attempt 13's grant is committed and NOTHING else is prepared. The chain is PAUSED for the log cleanup. Attempt 12's chain was consumed at invocation and is never reused."
  },
  "budget": {
   "cumulative_spend_usd": 268.2958,
   "authorized_cap_usd": 320.0,
   "remaining_usd": 51.7042,
-  "cap_raised_utc": "2026-09-11",
-  "cap_raised_from_usd": 283.76,
-  "package": "phase_c1.execution_package.2026-09-11, amended 2026-09-11b -- NO attempt cap; $15.1475 per session, package $51.4425, booked $0.3960.",
-  "planning_floor_usd": 13.4401,
-  "reconciliation_margin_usd": 0.6577,
   "remaining_is_not_permission": true,
+  "formal_remaining_usd": 45.0465,
+  "engineering_remaining_usd": 6.0,
+  "package_remaining_usd": 51.0465,
+  "per_session_ceiling_usd": 15.1475,
+  "full_ceiling_sessions_fundable": 2,
+  "_derived_by": "scripts/consolidate/derive_budget.py",
+  "_limits_do_not_transfer": "formal, engineering, package and project bind SEPARATELY. full_ceiling_sessions_fundable divides the FORMAL remainder by the ceiling; dividing the PACKAGE remainder instead gives 3 and is wrong, because the engineering allowance cannot pay for a formal probe. This block said 3 until 2026-09-12.",
   "ledger": "logs/BUDGET_LEDGER.md",
-  "terms": "configs/experiments/phase_c1/authorization.json:execution_package -- attempt counting, the six retry conditions and the stop list. Read them THERE."
+  "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
+  "planning_floor_usd": 13.4401,
+  "_planning_floor_note": "from logs/phase_c1_pricing.json:totals.floor_usd. Priced is not funded."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
   "equivalence_interval": 0.011695296982299022,
+  "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds from the C0 digest.",
+  "owner": "logs/phase_c0_preregistration.json and logs/phase_c1_execution_preregistration.json own every frozen identity; the hashes above are the ones a reader needs to recognise, not the set.",
   "feasibility_floor": 0.3,
   "seeds": {
    "sa": 20260726,
    "sb": 20260801,
    "sc_conditional": 20260813,
    "fourth_seed": "never"
-  },
-  "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds -- fe9683 was selected under sa/sb/sc.",
-  "calibration": "calib.domain_balanced@v1 11f36a88/d65c1f40; calib.reasoning_heavy@v2 6c67b8df/cdb28389",
-  "runtime_comparability": "generation_runtime_comparability@v2",
-  "phase_b_session_plan_hash": "23f23649b4be92bd8852bf9d89f8dcb372bc5a00a175ae631d32b9d71de8032d",
-  "phase_b_stage1_selection_sha256": "84fd6496851995ae",
-  "continuation_b": "CLOSED. exec a5ce6311789eb4cd, prereg bd827d12b6607356, authorization CONSUMED.",
-  "phase_c0_protocol": "logs/phase_c0_preregistration.json -- phase_c0_protocol/v1, FROZEN 2026-09-01",
-  "phase_c0_sizing": "logs/phase_c0_sizing_evidence.json -- N=850, P(GO|+0.015)=0.8379"
+  }
  },
  "latest_verification": {
-  "utc": "2026-09-11T00:00:00Z",
+  "utc": "2026-09-12T00:00:00Z",
+  "pod_sweep": "FAIL -- the launch_bound sweep refused on a stale run index; owed again",
   "owned_by": "logs/c1_pod_environment_verification.json",
-  "owns": "record_kind, swept_base_commit, staging-contract digest, setup environment, counts, both digests and verdict. Read them THERE.",
-  "renderer_parity_owned_by": "logs/c1_renderer_parity.json",
-  "last_paid_attempt_owned_by": "logs/autoinit_c1_attempt9/outcome.json"
+  "last_paid_attempt_owned_by": "logs/runs/phase_c1/attempt11/closeout/outcome.json",
+  "_last_paid_note": "attempt 11 is the last session that BILLED; attempt 12 was a $0 capacity refusal. This field named attempt 9 through three later sessions."
  },
  "abandoned": [
   "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
@@ -72,13 +73,15 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "Attempts 10-12 consumed, $0.3960, zero scientific stages: a repaired frozen-asset gate, a cold host, a refused create. No session cap; $51.0465 funds three full-ceiling sessions.",
-  "the_ask": "nothing that blocks the launch. Next, autonomously: wait for secure-L40S capacity at $1.09/h, then build a COMPLETE NEW one-use chain and launch. Attempt 12's chain is consumed and must not be reused.",
-  "budget": "OWNED by the budget block above; not restated here."
+  "status": "log cleanup in progress; the launch chain is PAUSED after attempt 13's grant.",
+  "then": "re-run the launch_bound sweep on the cleaned tree, issue the authorization from attempt 13's grant, stage the bundle, launch when capacity allows.",
+  "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
-  "logs/PHASE_INDEX.md -- history by phase, START HERE",
+  "logs/README.md -- START HERE, the index",
+  "logs/PHASE_INDEX.md -- history by phase",
   "logs/STATE.md -- human view",
+  "logs/runs/index.json -- every run",
   "logs/CATALOG.md -- ownership"
  ],
  "phases": {
@@ -93,7 +96,7 @@
   "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
   "decision_status": "unresolved_equivalence",
   "winner": null,
-  "record": "logs/autoinit_recovery_continuation_attempt7/"
+  "owner": "logs/autoinit_recovery_continuation_attempt7/"
  },
  "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
  "phase_b_result": {
@@ -101,15 +104,11 @@
   "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
   "winner_is_control": false,
   "tie_break_ran": true,
-  "report_sha256": "8c8842b84fe85cece28beaa859c70b16a2724104b2a2b31975cd90b485611bee",
-  "margin": 0.011765,
   "clears_by": 7e-05,
-  "ranking_metric": "correct_overall; usable_rollout does NOT rank, though it agrees here",
-  "authorizes": "nothing",
-  "record": "logs/autoinit_continuation_b_attempt5.json",
-  "metrics_owned_by": "logs/autoinit_continuation_b_attempt5.json",
   "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
-  "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510"
+  "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510.",
+  "authorizes": "nothing",
+  "owner": "logs/autoinit_continuation_b_attempt5.json -- metrics and margin live THERE"
  },
  "phase_c": {
   "c0": {
@@ -123,16 +122,16 @@
    "status": "IMPLEMENTED / THIRTEEN LABELS, ELEVEN PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / NO CURRENT GRANT OR AUTHORIZATION",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes. NOT recovery evidence.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
-   "execution_prereg": "logs/phase_c1_execution_preregistration.json OWNS the live preregistration, harness and head identities.",
-   "pricing": "logs/phase_c1_pricing.json 909ed65f -- secure L40S $1.09/h, CEILING $15.1475.",
-   "seeds": "1635674081, 1656475568, 696460635 (from the C0 digest)",
-   "scoring": "c1_confirmation_scoring@v1 77507935; equivalence IDENTICAL.",
-   "not_built": "grant, authorization and bundle all CONSUMED by attempt 12; the next session needs all three plus a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
-   "grant_location": "<run>/governance/grant.json, committed BEFORE the launch_bound sweep. Rules: logs/STATE.md.",
-   "blocker": "CLEARED. The stage-F device boundary was repaired at $0 and CONFIRMED ON REAL CUDA -- see cuda_engineering_validation. The remaining blocker is the absence of a grant, not the code.",
    "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, L40S). treatment + endpoint: UNMEASURED. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort -- not an ATTENTION result.",
-   "repairs": "TEN at $0, the latest four after attempt 12: confirmed release before a redraw, per-resource watchdog journals, per-draw raw provider responses, recorded failed creates. Detail: logs/STATE.md.",
-   "owed": "nothing that BLOCKS a launch -- host redraws were decided 2026-09-11. What blocks it is provider capacity; see the top-level blocker. Two non-blocking decisions: deferred_not_blocking."
+   "not_built": "grant, authorization and bundle all CONSUMED by attempt 12; the next session needs all three plus a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
+   "owners": {
+    "protocol": "logs/phase_c0_preregistration.json",
+    "execution_prereg": "logs/phase_c1_execution_preregistration.json",
+    "pricing": "logs/phase_c1_pricing.json",
+    "history": "logs/experiments/phase_c1/operational_history.md",
+    "runs": "logs/runs/index.json"
+   },
+   "blocker": "provider capacity; see the top-level blocker."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -154,29 +153,29 @@
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live: the live contract moved v2 -> v3 with the scorer's path. The probes reconstruct and the numbers are unchanged; relaxing the rule would change what counts as a reusable observation. Maintainer decision, not blocking."
  },
- "handoff": "logs/STATE.md -- canonical; see read_order for the rest",
+ "handoff": "logs/STATE.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and cost history: logs/decisions.md, logs/BUDGET_LEDGER.md and the per-run dirs.",
  "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed.",
  "latest_run": {
   "experiment_id": "phase_c1",
-  "layout_version": 1,
-  "root": "logs/runs/phase_c1/attempt12",
-  "run_id": "attempt12",
+  "run_id": "attempt13",
+  "root": "logs/runs/stage-1/phase_c1/attempt13",
+  "state": "PREPARED, not executed -- governance inputs only",
   "index": "logs/runs/index.json",
-  "note": "pre-stage layout. From the NEXT session runs are grouped by the stage the experiment config DECLARES: logs/runs/stage-<stage_id>/<experiment_id>/<run_id>/. Phase C1 declares stage 1."
+  "last_executed": "logs/runs/phase_c1/attempt12"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10 as daf64772, and again 2026-09-11 as 199711af. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
   "record": "logs/migrations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {
-  "status": "PASS 2026-09-10, subrun 3, execution SHA 7027a8f4, NVIDIA RTX 2000 Ada (cc 8.9, bf16, torch 2.9.1+cu130). Both geometries ran the real verified suffix; all five device observations passed on cuda:0. Detail: the record.",
-  "campaign": "CLOSED. Three subruns, $0.0400 cumulative, one active resource at a time, each provider-confirmed non-billing before the next. Zero pods. Per-subrun detail: campaign.json.",
+  "status": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada. The stage-F device repair is CONFIRMED ON REAL CUDA.",
+  "campaign": "CLOSED. Three subruns, one active resource at a time, all provider-confirmed non-billing.",
   "campaign_cost_usd": 0.04,
   "means": "ENGINEERING EVIDENCE ONLY -- not a C1 treatment result, not an endpoint, not a decision.",
-  "amendment": "logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured. Read it THERE.",
-  "record": "logs/runs/cuda_stage_f/ and logs/validations/cuda-stage-f/v1/",
-  "authorizes": "nothing"
+  "authorizes": "nothing",
+  "owner": "logs/validations/cuda-stage-f/v1/ and logs/runs/cuda_stage_f/",
+  "amendment": "logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured."
  },
  "superseded_handoff": "logs/HANDOFF_next_session.md is HISTORICAL (2026-09-02, unmaintained) and is NOT an entry point. What it says and why it is stale: logs/CATALOG.md."
 }

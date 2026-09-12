@@ -5,17 +5,59 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 3,
-  "runs_unrecorded": 3,
+  "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
-   "continuation_b": 5,
-   "device_canary": 2,
-   "measurement": 3,
-   "phase_a": 8,
-   "phase_b": 5,
-   "phase_c1": 10,
-   "recovery_continuation": 8
-  }
+   "continuation_b": {
+    "recorded": 5,
+    "unrecorded": 0,
+    "total": 5
+   },
+   "cuda_stage_f": {
+    "recorded": 0,
+    "unrecorded": 3,
+    "total": 3
+   },
+   "device_canary": {
+    "recorded": 2,
+    "unrecorded": 0,
+    "total": 2
+   },
+   "measurement": {
+    "recorded": 3,
+    "unrecorded": 0,
+    "total": 3
+   },
+   "phase_a": {
+    "recorded": 8,
+    "unrecorded": 0,
+    "total": 8
+   },
+   "phase_b": {
+    "recorded": 5,
+    "unrecorded": 0,
+    "total": 5
+   },
+   "phase_c1": {
+    "recorded": 13,
+    "unrecorded": 1,
+    "total": 14
+   },
+   "recovery_continuation": {
+    "recorded": 8,
+    "unrecorded": 0,
+    "total": 8
+   }
+  },
+  "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
+ },
+ "kinds": {
+  "_what_this_is": "what each entry IS, so a reader is not left inferring it from the shape of a path. A run that executed, a run that is prepared and has not, historical evidence with no manifest, a legacy aggregate that spans several runs, and a directory that only describes itself are five different things.",
+  "recorded_run": "wrote a valid manifest naming the roles it produced. In `runs`.",
+  "prepared_not_executed": "holds governance inputs only -- a grant committed before the launch-bound sweep -- and no runtime, evidence or closeout. In `unrecorded`, flagged by its `why`. It is not a launcher that died; nothing started.",
+  "historical_evidence_no_manifest": "predates the manifest convention or the launcher never reached its closeout. In `unrecorded` with a digest.",
+  "legacy_aggregate": "one entry whose components span several directories, recorded before per-run directories existed. In `runs`, with `components` naming each part in place.",
+  "description_only": "a directory holding nothing but its own README. Counted nowhere: it is navigation, not a run, and reporting it as an unrecorded run would describe a launcher that never ran."
  },
  "runs": [
   {
@@ -687,6 +729,14 @@
    "n_files": 64,
    "digest": "1be716ca99d150e40b76258c272d3aab71fd16212e6dc4d4dbfa77c7a047501c",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt13",
+   "root": "logs/runs/stage-1/phase_c1/attempt13",
+   "n_files": 1,
+   "digest": "40efc1141c49afd72bd4d9f2ca8629710c0cc74c9016b7aec1805ddaad89fddd",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

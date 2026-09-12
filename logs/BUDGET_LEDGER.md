@@ -463,7 +463,7 @@ recovery continuation attempt 2 (L40S, 14.5 min) NO STAGE RAN $  0.2389
     says a rerun fails identically.
 recovery continuation attempt 1 (L40S, 0.7 min) NO STAGE RAN  $  0.0100
     AUTHORIZED 2026-08-21 as autoinit.recovery_continuation.2026-08-21T1642Z
-    against logs/autoinit_recovery_continuation_grant.json. Ceiling
+    against logs/experiments/recovery_continuation/autoinit_recovery_continuation_grant.json. Ceiling
     $16.7456, of which $0.0100 was spent. EVERY pre-provider gate
     passed; pod dckc72mtoe9ijw was created and then deleted 27 s later
     when the launcher's readiness poll raised URLError (SSL
@@ -572,7 +572,7 @@ Phase A attempt 11 (L40S, 194.6 min) STAGE 1 PASSED             $  3.2101
     Evidence: logs/autoinit_phase_a_attempt11/
 Bounded measurement attempt 3 (L40S, 12.6 min) **COMPLETE**    $  0.2077
     AUTHORIZED 2026-08-20 as autoinit.measurement.2026-08-20T0512Z
-    against logs/autoinit_measurement_grant3.json (sha256 2124eaef0fc5).
+    against logs/experiments/measurement/autoinit_measurement_grant3.json (sha256 2124eaef0fc5).
     A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
     Phase-A attempt; hard ceiling $1.6294, plan's own hard stop
     $0.8910, of which $0.2077 was spent. ALL_DONE, passed=true,
@@ -613,7 +613,7 @@ Bounded measurement attempt 3 (L40S, 12.6 min) **COMPLETE**    $  0.2077
     Evidence: logs/autoinit_measurement_attempt3/
 Bounded measurement attempt 2 (L40S, 11.1 min) ENTRYPOINT      $  0.1834
     AUTHORIZED 2026-08-19 as autoinit.measurement.2026-08-19T1738Z
-    against logs/autoinit_measurement_grant2.json (sha256 82f5104d49e4).
+    against logs/experiments/measurement/autoinit_measurement_grant2.json (sha256 82f5104d49e4).
     A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
     Phase-A attempt; hard ceiling $1.6294, of which $0.1834 was spent.
     NO MEASUREMENT RAN. SETUP PASSED END TO END -- SETUP_RC=0, all
@@ -658,7 +658,7 @@ Bounded measurement attempt 2 (L40S, 11.1 min) ENTRYPOINT      $  0.1834
     Evidence: logs/autoinit_measurement_attempt2/
 Bounded measurement attempt 1 (L40S, 4.0 min) SETUP CONTRACT   $  0.0700
     AUTHORIZED 2026-08-19 as autoinit.measurement.2026-08-19T1142Z
-    against logs/autoinit_measurement_grant.json (sha256 ec73be8c1962).
+    against logs/experiments/measurement/autoinit_measurement_grant.json (sha256 ec73be8c1962).
     A SpendAuthorization: phase_a_authorized FALSE by type. NOT a
     Phase-A attempt; hard ceiling $1.6294, of which $0.07 was spent.
     NO MEASUREMENT RAN. Setup refused at the frozen-asset gate
@@ -1437,7 +1437,7 @@ an authorization defect. Recorded in prose, at the maintainer's direction.
 
 | what | cost | evidence |
 | --- | --- | --- |
-| C1 attempt 1: ABORT at setup, draw 1. The pod could not fetch the repo bundle — `transfer/c1` does not exist on the relay, because **no bundle was created or uploaded for this session's commit**. `SETUP_RC=1`, no scientific stage ran, pod deleted 4.8 min after creation and provider-confirmed gone | $0.0786 | `logs/autoinit_c1_session.json`, `/home/ecs-user/c1_scr/{launch.log,watchdog.jsonl}` |
+| C1 attempt 1: ABORT at setup, draw 1. The pod could not fetch the repo bundle — `transfer/c1` does not exist on the relay, because **no bundle was created or uploaded for this session's commit**. `SETUP_RC=1`, no scientific stage ran, pod deleted 4.8 min after creation and provider-confirmed gone | $0.0786 | `logs/experiments/phase_c1/autoinit_c1_session.json`, `/home/ecs-user/c1_scr/{launch.log,watchdog.jsonl}` |
 
 **Cumulative: $263.8597 + $0.0786 = $263.9383 of the $283.7600 cap.** $19.8217
 uncommitted. The cap was not raised.
@@ -1487,7 +1487,7 @@ only `$0` signal that would have refused this launch.
 
 | what | cost | evidence |
 | --- | --- | --- |
-| C1 attempt 3: the launcher **declined to create a pod**. All ten pre-provider gates passed when run standalone, but the launcher checks the market rate first: `NVIDIA L40S $1.09/h, stock Low` against the priced `$0.99/h`, and aborted. **No pod was created, no provider resource existed, `$0.00` spent** — `logs/autoinit_c1_session.json` has no `pod_id` and no `cost` block, and `stages` is empty | $0.0000 | `logs/autoinit_c1_attempt3/` |
+| C1 attempt 3: the launcher **declined to create a pod**. All ten pre-provider gates passed when run standalone, but the launcher checks the market rate first: `NVIDIA L40S $1.09/h, stock Low` against the priced `$0.99/h`, and aborted. **No pod was created, no provider resource existed, `$0.00` spent** — `logs/experiments/phase_c1/autoinit_c1_session.json` has no `pod_id` and no `cost` block, and `stages` is empty | $0.0000 | `logs/autoinit_c1_attempt3/` |
 
 **Cumulative unchanged: $264.0396 of the $283.7600 cap.** $19.7204 uncommitted.
 

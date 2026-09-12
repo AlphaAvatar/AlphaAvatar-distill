@@ -3,7 +3,7 @@
 > **Phase A and Phase B are both COMPLETE.** Their full history, every attempt and
 > every artifact are indexed in [`PHASE_INDEX.md`](PHASE_INDEX.md); the scientific
 > conclusions are in
-> [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md). The rows
+> [`phase_a_vs_phase_b_comparison.md`](experiments/phase_a/phase_a_vs_phase_b_comparison.md). The rows
 > below cover the E-series and the two AutoInit phase results.
 
 One place to answer: **what has been run, what did each one prove, and which

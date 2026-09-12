@@ -8,10 +8,10 @@ Phase B to be?* — and records what blocks it. It does **not** design Phase B, 
 it does not resolve any of the open scientific choices in §6; those are the
 reviewer's.
 
-Sources: [`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md) §4, §5, §6, §9;
-[`../docs/AUTOINIT_REFERENCE.md`](../docs/AUTOINIT_REFERENCE.md) §9.4;
-[`decisions.md`](decisions.md) 2026-08-12 Decision (1), (7), (8);
-[`autoinit_v1_search_space.json`](autoinit_v1_search_space.json);
+Sources: [`autoinit_pilot_proposal.md`](../../autoinit_pilot_proposal.md) §4, §5, §6, §9;
+[`../docs/AUTOINIT_REFERENCE.md`](../../../docs/AUTOINIT_REFERENCE.md) §9.4;
+[`decisions.md`](../../decisions.md) 2026-08-12 Decision (1), (7), (8);
+[`autoinit_v1_search_space.json`](../../autoinit_v1_search_space.json);
 `src/aadistill/autoinit/calibration.py`.
 
 ---
@@ -447,7 +447,7 @@ chosen.
 ## 7. Cost and storage — repriced 2026-08-25 against VERIFIED reuse
 
 Regenerable: `PYTHONPATH=src python scripts/autoinit/price_phase_b.py`
-→ [`autoinit_phase_b_pricing.json`](autoinit_phase_b_pricing.json). It **fails
+→ [`autoinit_phase_b_pricing.json`](../../autoinit_phase_b_pricing.json). It **fails
 closed** if the reuse record is missing, unverified, or describes different probe
 bytes than the ones on disk. **These are inputs to an authorization, not one.**
 

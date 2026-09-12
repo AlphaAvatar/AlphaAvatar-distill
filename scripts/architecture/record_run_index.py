@@ -216,13 +216,64 @@ def build_index(repo_root: Path) -> dict:
             "runs_current": len(modern),
             "runs_unrecorded": len(unrecorded),
             "legacy_components": sum(r["n_components"] for r in legacy),
-            "by_experiment": {e: sum(1 for r in legacy if r["experiment_id"] == e)
-                              for e in sorted({r["experiment_id"] for r in legacy})},
+            #: Over `runs`, which is legacy + modern. It counted `legacy` alone
+            #: while `runs` held both, so every experiment that had moved to the
+            #: current layout under-reported itself -- and the more a phase
+            #: migrated, the more wrong its own count became.
+            "by_experiment": _by_experiment(legacy + modern, unrecorded),
+            "_by_experiment_scope": (
+                "counts BOTH layouts, split by what each entry is. `recorded` "
+                "is a run that wrote its own manifest; `unrecorded` is a "
+                "directory holding evidence without one. They are reported "
+                "separately because a missing manifest is a real difference in "
+                "what the entry can be trusted to say about itself, not a "
+                "presentation detail."),
+        },
+        "kinds": {
+            "_what_this_is": (
+                "what each entry IS, so a reader is not left inferring it from "
+                "the shape of a path. A run that executed, a run that is "
+                "prepared and has not, historical evidence with no manifest, a "
+                "legacy aggregate that spans several runs, and a directory that "
+                "only describes itself are five different things."),
+            "recorded_run": (
+                "wrote a valid manifest naming the roles it produced. In "
+                "`runs`."),
+            "prepared_not_executed": (
+                "holds governance inputs only -- a grant committed before the "
+                "launch-bound sweep -- and no runtime, evidence or closeout. "
+                "In `unrecorded`, flagged by its `why`. It is not a launcher "
+                "that died; nothing started."),
+            "historical_evidence_no_manifest": (
+                "predates the manifest convention or the launcher never reached "
+                "its closeout. In `unrecorded` with a digest."),
+            "legacy_aggregate": (
+                "one entry whose components span several directories, recorded "
+                "before per-run directories existed. In `runs`, with "
+                "`components` naming each part in place."),
+            "description_only": (
+                "a directory holding nothing but its own README. Counted "
+                "nowhere: it is navigation, not a run, and reporting it as an "
+                "unrecorded run would describe a launcher that never ran."),
         },
         "runs": legacy + modern,
         "unrecorded": unrecorded,
         "authorizes": "nothing",
     }
+
+
+def _by_experiment(recorded: list[dict], unrecorded: list[dict]) -> dict:
+    """Per experiment, counted over every entry rather than one layout."""
+    out: dict[str, dict] = {}
+    for r in recorded:
+        e = out.setdefault(r["experiment_id"], {"recorded": 0, "unrecorded": 0})
+        e["recorded"] += 1
+    for r in unrecorded:
+        e = out.setdefault(r["experiment_id"], {"recorded": 0, "unrecorded": 0})
+        e["unrecorded"] += 1
+    for e in out.values():
+        e["total"] = e["recorded"] + e["unrecorded"]
+    return dict(sorted(out.items()))
 
 
 def main() -> int:

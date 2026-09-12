@@ -1,10 +1,19 @@
 # Phase C — ATTENTION operator R&D · roadmap
 
+
+> **Status correction, 2026-09-12.** This document is the agreed STRUCTURE for
+> Phase C and is kept as written. Its status line — *"C1/C2 NOT STARTED / NOT
+> PRICED / NOT AUTHORIZED"* — was true when written and is now false for C1: C1
+> is priced at `$15.1475` per session, has been authorized under an approved
+> execution package, and has run thirteen labelled sessions of which eleven
+> billed. C2 is still not started. For the current status read
+> [`../../STATE.md`](../../STATE.md); this file owns the plan, not the state.
+
 **Status: C0 COMPLETE / APPROVED / FROZEN · C1 NOT STARTED · C2 NOT STARTED.
 NOT PRICED · NOT AUTHORIZED · NO COMPUTE.**
 
 The Phase-C0 protocol is frozen in
-[`phase_c0_preregistration.json`](phase_c0_preregistration.json), with its sizing
+[`phase_c0_preregistration.json`](../../phase_c0_preregistration.json), with its sizing
 evidence in [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json).
 Those two files, not this page, are the record of what C1 must do. This page is
 the surrounding structure and rationale.
@@ -28,7 +37,7 @@ authorization for it.
 > once, against the `NO_CALIBRATION` sentinel**, however many profiles are active
 > (`src/aadistill/autoinit/search.py`, `src/aadistill/autoinit/calibration.py`).
 > The search never had a second option to reject. See
-> [`decisions.md`](decisions.md) 2026-09-01.
+> [`decisions.md`](../../decisions.md) 2026-09-01.
 
 The correct motivation:
 
@@ -55,7 +64,7 @@ one operator with the rest held fixed. That is the gap C1 closes.
 
 ## Phase C0 — protocol and power design · **COMPLETE / FROZEN 2026-09-01**
 
-**Output:** [`phase_c0_preregistration.json`](phase_c0_preregistration.json)
+**Output:** [`phase_c0_preregistration.json`](../../phase_c0_preregistration.json)
 (protocol, `aadistill.autoinit.phase_c0_protocol/v1`) and
 [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json) (the power
 evidence behind the battery size). Both are binding on C1.
@@ -95,7 +104,7 @@ and promoting it would still require its own decision record.
 ## Phase C1 — fixed-path ATTENTION isolation · **NOT STARTED**
 
 **The causal-ish test neither Phase A nor Phase B contains.** Protocol frozen in
-[`phase_c0_preregistration.json`](phase_c0_preregistration.json); nothing is
+[`phase_c0_preregistration.json`](../../phase_c0_preregistration.json); nothing is
 implemented, priced or authorized.
 
 **What C1 is, stated precisely.** C1 *does* execute compute: **2 arms × 3 fresh

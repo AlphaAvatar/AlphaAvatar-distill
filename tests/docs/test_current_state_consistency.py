@@ -345,14 +345,41 @@ class TestStateMdAgrees:
     def test_it_points_at_the_migration_record_rather_than_restating_it(self):
         assert "migrations/initialization-core/v1" in self.live_region()
 
-    def test_the_stale_section_is_marked_rather_than_deleted(self):
-        """The attempt-8-era section is history and stays; what it must not do
-        is present itself as current."""
+    def test_the_stale_narrative_is_moved_rather_than_deleted(self):
+        """History is kept and is not allowed to read as current.
+
+        It used to require a `# Superseded` heading INSIDE `STATE.md`, which was
+        the only way to hold the line while current state and history shared one
+        file. On 2026-09-12 they were separated, and the guarantee is now
+        structural rather than typographic: the current view contains no history
+        at all, and the history is a document of its own that says what it is.
+
+        Both halves are still required. Deleting the narrative would satisfy
+        "no history in STATE.md" while destroying the record, so the archived
+        document must exist and must carry the superseded content.
+        """
         text = STATE.read_text()
-        assert "# Superseded: the current state as of attempt 8" in text
         heads = re.findall(r"^# Current state", text, re.M)
         assert len(heads) == 1, (
             f"{len(heads)} sections claim to be the current state")
+        assert "# Superseded" not in text, (
+            "STATE.md carries a superseded section again; history belongs in "
+            "the archive or in the experiment that owns it")
+
+        archived = REPO / "logs/archive/STATE_superseded_through_2026-09-11.md"
+        assert archived.is_file(), (
+            "the superseded state is not in the archive: it was deleted rather "
+            "than moved, and it is the only record of what was believed then")
+        body = archived.read_text()
+        assert "Superseded" in body.splitlines()[0]
+        #: The content really came across, not just a heading.
+        assert "# Superseded: the current state as of attempt 8" in body
+        assert len(body) > 10 * len(text), (
+            "the archive is not much larger than the current view, so the "
+            "narrative probably did not move")
+
+        #: And STATE.md still leads a reader to it.
+        assert "archive/STATE_superseded_through_2026-09-11.md" in text
 
     def test_an_unquoted_claim_is_still_caught(self, monkeypatch, tmp_path):
         """The backtick exclusion must not become a way to smuggle a claim.

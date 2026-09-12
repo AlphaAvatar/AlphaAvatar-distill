@@ -28,8 +28,23 @@ capability.
 This file deliberately restates none of them. A second hand-maintained copy of a
 cost, a commit or an authorization status is how the two disagree.
 
-## Earlier attempts
+## Earlier attempts — three locations, not one
 
-Attempts 1–12 ran before this grouping existed and remain at
-`logs/runs/phase_c1/<run_id>/`. They are indexed from the same `index.json`;
-they are not moved, because their grants and closeouts name those paths.
+This said *"attempts 1–12 remain at `logs/runs/phase_c1/<run_id>/`"*, and only
+three of them are there. The real layout, derived from
+[`../../index.json`](../../index.json) rather than restated:
+
+| attempts | where |
+| --- | --- |
+| 1–9 | `logs/autoinit_c1_attempt<N>/`, with several also holding a flat `logs/autoinit_c1_attempt<N>_grant.json` |
+| 10–12 | `logs/runs/phase_c1/<run_id>/` |
+| 13– | here |
+
+They are **found, not relocated.** Attempts 1–9 predate the run directory
+entirely; 10–12 predate the stage grouping. Their grants, consumed
+authorizations and closeouts name the paths they are at, so moving one breaks
+the lineage that makes it evidence — and for the flat grants that binding is
+explicit: a consumed authorization records the grant's path *and* its hash.
+
+The index covers all three locations. Query it rather than guessing from a
+path.

@@ -13,13 +13,13 @@ duplicates no facts: every row is a status label and a link.
 | --- | --- | --- |
 | **Phase A** | COMPLETE | **`unresolved_equivalence`** — no winner. Numerical leader `cca699c93f34` |
 | **Phase B** | COMPLETE | **`resolved`** — winner `fe9683e6a9c7`, but the separation is razor-thin |
-| **Phase C0** | **COMPLETE / APPROVED / FROZEN** 2026-09-01 | protocol [`phase_c0_preregistration.json`](phase_c0_preregistration.json), sizing [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json). N=850 scorable / 950 total, 3 fresh paired seeds |
-| **Phase C1** | **REPLAY MEASURED / TREATMENT AND ENDPOINT UNMEASURED / NOT AUTHORIZED** | fixed-path ATTENTION isolation using short 0.86M recovery probes. Ten attempt labels, nine paid. Attempt 9 reached and **PASSED both frozen replay gates**, then aborted in stage F before any training: no probe trained, no arm evaluated, **NO DECISION**. Status and money are owned by [`current_state.json`](current_state.json) and [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) and are deliberately not restated here — an earlier revision of this row carried a copied ceiling and went stale. Structure in [`phase_c_roadmap.md`](phase_c_roadmap.md) |
+| **Phase C0** | **COMPLETE / APPROVED / FROZEN** 2026-09-01 | protocol [`phase_c0_preregistration.json`](phase_c0_preregistration.json), sizing [`phase_c0_sizing_evidence.json`](experiments/phase_c1/phase_c0_sizing_evidence.json). N=850 scorable / 950 total, 3 fresh paired seeds |
+| **Phase C1** | **REPLAY MEASURED / TREATMENT AND ENDPOINT UNMEASURED / NOT AUTHORIZED** | fixed-path ATTENTION isolation using short 0.86M recovery probes. Ten attempt labels, nine paid. Attempt 9 reached and **PASSED both frozen replay gates**, then aborted in stage F before any training: no probe trained, no arm evaluated, **NO DECISION**. Status and money are owned by [`current_state.json`](current_state.json) and [`BUDGET_LEDGER.md`](BUDGET_LEDGER.md) and are deliberately not restated here — an earlier revision of this row carried a copied ceiling and went stale. Structure in [`phase_c_roadmap.md`](experiments/phase_c1/phase_c_roadmap.md) |
 | **Phase C2** | **NOT STARTED** | runs only if C1 finds a worthwhile ATTENTION formulation |
 
 > The two phases' best candidates are **not distinguishable**: `16/510` vs
 > `15/510`, one correct answer apart. See
-> [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md).
+> [`phase_a_vs_phase_b_comparison.md`](experiments/phase_a/phase_a_vs_phase_b_comparison.md).
 
 ---
 
@@ -147,7 +147,7 @@ universe collapses to **six distinct candidates**; rung 1 advanced
 
 ## Phase A vs Phase B
 
-**→ [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md)** — the
+**→ [`phase_a_vs_phase_b_comparison.md`](experiments/phase_a/phase_a_vs_phase_b_comparison.md)** — the
 scientific handoff into Phase C. Both phases end to end, the operator-level
 evidence classification, the recommended incumbent and its caveats, and the
 Phase-C starting point.
@@ -164,7 +164,7 @@ Phase-C starting point.
 | micro-preflight | [`autoinit_preflight_run4/`](autoinit_preflight_run4/) |
 | causal-depth backend equivalence | [`autoinit_depth_backend_equivalence.json`](autoinit_depth_backend_equivalence.json) |
 | capacity / transport findings | [`autoinit_continuation_b_capacity.json`](autoinit_continuation_b_capacity.json), [`autoinit_leaf_transport_quota_finding.json`](autoinit_leaf_transport_quota_finding.json) |
-| scratch inventory | [`scratch_inventory_20260829.json`](scratch_inventory_20260829.json) |
+| scratch inventory | [`scratch_inventory_20260829.json`](maintenance/scratch_inventory_20260829.json) |
 
 ## Operational lessons
 

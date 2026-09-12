@@ -202,9 +202,19 @@ def test_the_index_counts_runs_not_artifact_roots(index):
     assert components > len(runs), (
         "every run has exactly one component, so this schema change bought "
         "nothing — check the discovery patterns")
-    assert index["counts"]["by_experiment"]["phase_c1"] == 10, (
-        "C1 has had attempts 1-9 plus 3r; any other number is counting "
-        "artifacts again")
+    #: `by_experiment` counts BOTH layouts since 2026-09-12 -- it counted only
+    #: `legacy` while `runs` held legacy + modern, so every experiment that had
+    #: migrated under-reported itself. The original protection is kept by
+    #: checking the legacy portion directly, which is what "not counting
+    #: artifacts again" was ever about.
+    legacy_c1 = [r for r in runs if r["experiment_id"] == "phase_c1"]
+    assert len(legacy_c1) == 10, (
+        "C1 has had attempts 1-9 plus 3r in the legacy layout; any other "
+        "number is counting artifacts again")
+    c1 = index["counts"]["by_experiment"]["phase_c1"]
+    assert c1["recorded"] + c1["unrecorded"] == c1["total"]
+    assert c1["total"] > len(legacy_c1), (
+        "the per-experiment count ignores the current layout again")
 
 
 def test_every_component_path_has_exactly_one_owner(index):
@@ -283,12 +293,27 @@ def test_latest_run_resolves_to_exactly_one_entry(index):
     state = json.loads((REPO / "logs/current_state.json").read_text())
     latest = state.get("latest_run")
     assert latest is not None, "current_state.json declares no latest_run"
-    matches = [r for r in index["runs"]
+    #: Across BOTH `runs` and `unrecorded`: the latest run may legitimately be
+    #: PREPARED and not executed -- a grant is committed into the run before the
+    #: launch-bound sweep, so that state is reachable on purpose. Searching only
+    #: `runs` would force the snapshot to name an older run as the latest one.
+    everything = [*index["runs"], *index["unrecorded"]]
+    matches = [r for r in everything
                if r["experiment_id"] == latest["experiment_id"]
                and r["run_id"] == latest["run_id"]]
     assert len(matches) == 1, f"latest_run {latest} matched {len(matches)} entries"
-    assert latest["root"] in matches[0]["components"].values(), (
-        f"latest_run root {latest['root']} is not a component of its own entry")
+    entry = matches[0]
+    roots = set((entry.get("components") or {}).values())
+    if entry.get("root"):
+        roots.add(entry["root"])
+    assert latest["root"] in roots, (
+        f"latest_run root {latest['root']} is not a path of its own entry")
+    #: And a prepared run must say so, rather than reading as an executed one.
+    if entry in index["unrecorded"]:
+        assert "PREPARED" in entry.get("why", "") , entry
+        assert "PREPARED" in latest.get("state", ""), (
+            "the snapshot names a prepared run as latest without saying it is "
+            "prepared, which reads as an execution that happened")
 
 
 def test_the_index_authorizes_nothing(index):

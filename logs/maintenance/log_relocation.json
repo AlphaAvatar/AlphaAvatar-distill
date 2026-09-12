@@ -1,0 +1,1643 @@
+{
+ "schema": "aadistill.log_relocation/v1",
+ "_what_this_is": "the 2026-09-12 relocation of loose `logs/` material into the experiment that owns it. Every move is old path -> new path, so a citation in an older document can be followed forward. Nothing was copied and nothing was deleted.",
+ "counts": {
+  "loose_before": 198,
+  "moved": 14,
+  "reverted": 30,
+  "loose_after": 185,
+  "staying": 185,
+  "by_reason": {
+   "entry_point": 11,
+   "named_by_executable": 97,
+   "index_registered": 34,
+   "cited_by_frozen_evidence": 8,
+   "unattributed": 3,
+   "pinned_by_record": 32
+  }
+ },
+ "moves": [
+  {
+   "from": "logs/architecture_sandwich_equivalence.json",
+   "to": "logs/experiments/architecture/architecture_sandwich_equivalence.json",
+   "experiment": "architecture"
+  },
+  {
+   "from": "logs/autoinit_c1_stage_f_device_repair.json",
+   "to": "logs/experiments/phase_c1/autoinit_c1_stage_f_device_repair.json",
+   "experiment": "phase_c1"
+  },
+  {
+   "from": "logs/autoinit_phase_b_grant.json",
+   "to": "logs/experiments/phase_b/autoinit_phase_b_grant.json",
+   "experiment": "phase_b"
+  },
+  {
+   "from": "logs/autoinit_phase_b_grant_retry.json",
+   "to": "logs/experiments/phase_b/autoinit_phase_b_grant_retry.json",
+   "experiment": "phase_b"
+  },
+  {
+   "from": "logs/autoinit_phase_b_reconstruction.md",
+   "to": "logs/experiments/phase_b/autoinit_phase_b_reconstruction.md",
+   "experiment": "phase_b"
+  },
+  {
+   "from": "logs/c1_storage_recovery.json",
+   "to": "logs/experiments/phase_c1/c1_storage_recovery.json",
+   "experiment": "phase_c1"
+  },
+  {
+   "from": "logs/derived_cache_cleanup.json",
+   "to": "logs/maintenance/derived_cache_cleanup.json",
+   "experiment": "maintenance"
+  },
+  {
+   "from": "logs/derived_cache_cleanup_20260827.json",
+   "to": "logs/maintenance/derived_cache_cleanup_20260827.json",
+   "experiment": "maintenance"
+  },
+  {
+   "from": "logs/phase_a_vs_phase_b_comparison.md",
+   "to": "logs/experiments/phase_a/phase_a_vs_phase_b_comparison.md",
+   "experiment": "phase_a"
+  },
+  {
+   "from": "logs/phase_c0_sizing_evidence.json",
+   "to": "logs/experiments/phase_c1/phase_c0_sizing_evidence.json",
+   "experiment": "phase_c1"
+  },
+  {
+   "from": "logs/phase_c_roadmap.md",
+   "to": "logs/experiments/phase_c1/phase_c_roadmap.md",
+   "experiment": "phase_c1"
+  },
+  {
+   "from": "logs/scratch_closeout_20260831.json",
+   "to": "logs/maintenance/scratch_closeout_20260831.json",
+   "experiment": "maintenance"
+  },
+  {
+   "from": "logs/scratch_inventory_20260829.json",
+   "to": "logs/maintenance/scratch_inventory_20260829.json",
+   "experiment": "maintenance"
+  },
+  {
+   "from": "logs/storage_closeout_20260831.json",
+   "to": "logs/maintenance/storage_closeout_20260831.json",
+   "experiment": "maintenance"
+  }
+ ],
+ "reverted": {
+  "_why": "these 24 were moved and MOVED BACK the same day. They are components the run index registers WITH A DIGEST, and a registered component is evidence at a path: moving it makes the recorded digest describe nothing. The first pass missed them because the index stores `components` (role -> path) and `component_digests` (role -> digest) as two separate maps, so a check looking for one object carrying both a path and a hash found neither.",
+  "_also_reverted": "15 README files INSIDE registered directories, whose links the link-fixer had repointed. The digest covers the directory, so editing a file in it changes registered evidence. Their bytes were restored from git. A stale link inside frozen evidence is correct -- it records where things were when the evidence was written.",
+  "_found_by": "tests/runtime/test_run_layout_all_stages.py::test_every_historical_component_is_byte_identical",
+  "moved_and_restored": [
+   "logs/autoinit_c1_session.json",
+   "logs/autoinit_continuation_b_attempt1.json",
+   "logs/autoinit_continuation_b_attempt2.json",
+   "logs/autoinit_continuation_b_attempt3.json",
+   "logs/autoinit_continuation_b_attempt4.json",
+   "logs/autoinit_continuation_b_attempt5.json",
+   "logs/autoinit_continuation_b_grant.json",
+   "logs/autoinit_measurement_grant.json",
+   "logs/autoinit_measurement_grant2.json",
+   "logs/autoinit_measurement_grant3.json",
+   "logs/autoinit_phase_a_attempt10_grant.json",
+   "logs/autoinit_phase_a_attempt11_grant.json",
+   "logs/autoinit_phase_a_attempt12_grant.json",
+   "logs/autoinit_phase_a_attempt8_grant.json",
+   "logs/autoinit_phase_a_attempt9_grant.json",
+   "logs/autoinit_phase_b_attempt1.json",
+   "logs/autoinit_phase_b_attempt2.json",
+   "logs/autoinit_phase_b_attempt3.json",
+   "logs/autoinit_phase_b_attempt4.json",
+   "logs/autoinit_phase_b_attempt5.json",
+   "logs/autoinit_phase_b_grant_attempt3.json",
+   "logs/autoinit_phase_b_grant_attempt4.json",
+   "logs/autoinit_phase_b_grant_attempt5.json",
+   "logs/autoinit_recovery_continuation_attempt2_grant.json",
+   "logs/autoinit_recovery_continuation_attempt3_grant.json",
+   "logs/autoinit_recovery_continuation_attempt4_grant.json",
+   "logs/autoinit_recovery_continuation_attempt5_grant.json",
+   "logs/autoinit_recovery_continuation_attempt6_grant.json",
+   "logs/autoinit_recovery_continuation_attempt7_grant.json",
+   "logs/autoinit_recovery_continuation_grant.json"
+  ],
+  "edited_and_restored": [
+   "logs/autoinit_measurement_attempt1/README.md",
+   "logs/autoinit_measurement_attempt2/README.md",
+   "logs/autoinit_measurement_attempt3/README.md",
+   "logs/autoinit_phase_a_attempt10/README.md",
+   "logs/autoinit_phase_a_attempt11/README.md",
+   "logs/autoinit_phase_a_attempt12/README.md",
+   "logs/autoinit_phase_a_attempt8/README.md",
+   "logs/autoinit_phase_a_attempt9/README.md",
+   "logs/autoinit_recovery_continuation_attempt1/README.md",
+   "logs/autoinit_recovery_continuation_attempt2/README.md",
+   "logs/autoinit_recovery_continuation_attempt3/README.md",
+   "logs/autoinit_recovery_continuation_attempt4/README.md",
+   "logs/autoinit_recovery_continuation_attempt5/README.md",
+   "logs/autoinit_recovery_continuation_attempt6/README.md",
+   "logs/autoinit_recovery_continuation_attempt7/README.md"
+  ],
+  "_second_class": "six of these were reverted for a different reason again: a registered directory's own text CITES them in prose -- a session record or a run README naming the grant it ran under. The citation carries no hash and no executable reads it, so neither the digest check nor the reference check saw it; what makes it binding is that the citing document cannot be corrected, because correcting it changes the digest that makes it evidence. The target holds still instead."
+ },
+ "prose_repointed": [
+  "README.md",
+  "logs/BUDGET_LEDGER.md",
+  "logs/STATE.md",
+  "logs/artifact_manifests.md",
+  "logs/autoinit_recovery_continuation_attempt1/README.md",
+  "logs/autoinit_recovery_continuation_attempt2/README.md",
+  "logs/autoinit_recovery_continuation_attempt3/README.md",
+  "logs/autoinit_recovery_continuation_attempt4/README.md",
+  "logs/autoinit_recovery_continuation_attempt5/README.md",
+  "logs/autoinit_recovery_continuation_attempt6/README.md",
+  "logs/autoinit_recovery_continuation_attempt7/README.md",
+  "logs/decisions.md"
+ ],
+ "exceptions": [
+  {
+   "path": "logs/BUDGET_LEDGER.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/CATALOG.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/EXPERIMENTS.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/EXPERIMENT_INDEX.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/HANDOFF_next_session.md",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): tests/pod/test_continuation_b_one_probe_contract.py",
+   "sites": [
+    "tests/pod/test_continuation_b_one_probe_contract.py"
+   ]
+  },
+  {
+   "path": "logs/PHASE_INDEX.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/README.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/STATE.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/architecture_core_ownership.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/architecture/core_ownership.py, tests/architecture/test_core_ownership.py",
+   "sites": [
+    "scripts/architecture/core_ownership.py",
+    "tests/architecture/test_core_ownership.py"
+   ]
+  },
+  {
+   "path": "logs/architecture_declaration_history.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/architecture/relocate_declarations.py",
+   "sites": [
+    "scripts/architecture/relocate_declarations.py"
+   ]
+  },
+  {
+   "path": "logs/architecture_inventory.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/architecture/inventory.py, tests/architecture/test_core_boundaries.py",
+   "sites": [
+    "scripts/architecture/inventory.py",
+    "tests/architecture/test_core_boundaries.py"
+   ]
+  },
+  {
+   "path": "logs/architecture_scoring_equivalence.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): scripts/architecture/compare_scoring_across_migration.py, scripts/autoinit/historical_reuse_position.py, tests/autoinit/test_c1_confirmation_scoring.py",
+   "sites": [
+    "scripts/architecture/compare_scoring_across_migration.py",
+    "scripts/autoinit/historical_reuse_position.py",
+    "tests/autoinit/test_c1_confirmation_scoring.py",
+    "tests/autoinit/test_correctness_rule_contract.py"
+   ]
+  },
+  {
+   "path": "logs/architecture_semantic_hardcode.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/architecture/semantic_hardcode.py, tests/architecture/test_semantic_hardcode.py",
+   "sites": [
+    "scripts/architecture/semantic_hardcode.py",
+    "tests/architecture/test_semantic_hardcode.py"
+   ]
+  },
+  {
+   "path": "logs/architecture_source_relocation.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/architecture/record_source_relocation.py",
+   "sites": [
+    "scripts/architecture/record_source_relocation.py"
+   ]
+  },
+  {
+   "path": "logs/artifact_manifests.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/autoinit_attempt4_probe_reuse.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 7 site(s): scripts/autoinit/issue_continuation_b_authorization.py, scripts/autoinit/price_behavioural_continuation.py, scripts/autoinit/verify_attempt4_probe_reuse.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_b_authorization.py",
+    "scripts/autoinit/price_behavioural_continuation.py",
+    "scripts/autoinit/verify_attempt4_probe_reuse.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py",
+    "scripts/pod/autoinit_continuation_b_driver.py",
+    "tests/pod/test_continuation_b_one_probe_contract.py",
+    "tests/pod/test_continuation_b_stage_aware_pooling.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_attempt5_probe_reuse.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 5 site(s): scripts/autoinit/issue_continuation_b_authorization.py, scripts/autoinit/price_behavioural_continuation.py, scripts/autoinit/verify_attempt5_probe_reuse.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_b_authorization.py",
+    "scripts/autoinit/price_behavioural_continuation.py",
+    "scripts/autoinit/verify_attempt5_probe_reuse.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py",
+    "scripts/pod/autoinit_continuation_b_driver.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_attempt5_retention_verification.json",
+   "reason": "index_registered",
+   "detail": "recovery_continuation/attempt5::retention in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_behavioural_continuation_pricing.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 6 site(s): scripts/autoinit/issue_continuation_b_authorization.py, scripts/autoinit/price_behavioural_continuation.py, scripts/autoinit/write_continuation_b_preregistration.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_b_authorization.py",
+    "scripts/autoinit/price_behavioural_continuation.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py",
+    "scripts/pod/autoinit_continuation_b_launch.py",
+    "tests/pod/test_continuation_b_executes.py",
+    "tests/pod/test_continuation_b_one_probe_contract.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_c1_attempt2_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt2::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_attempt3_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt3::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_attempt3r_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt3r::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_attempt4_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt4::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_attempt5_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt5::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_attempt6_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt6::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_attempt7_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt7::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_attempt8_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt8::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_attempt9_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_c1/attempt9::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_c1_authorization.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 8 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/issue_c1_authorization.py, scripts/autoinit/stage_c1_bundle.py",
+   "sites": [
+    "configs/experiments/phase_c1/authorization.json",
+    "scripts/autoinit/issue_c1_authorization.py",
+    "scripts/autoinit/stage_c1_bundle.py",
+    "scripts/pod/autoinit_c1_driver.py",
+    "scripts/pod/autoinit_c1_launch.py",
+    "tests/autoinit/test_c1_readiness_gates.py",
+    "tests/pod/test_c1_bundle_transport.py",
+    "tests/pod/test_c1_session_contract.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_c1_bundle.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/autoinit/stage_c1_bundle.py, scripts/pod/autoinit_c1_launch.py",
+   "sites": [
+    "scripts/autoinit/stage_c1_bundle.py",
+    "scripts/pod/autoinit_c1_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_c1_grant.json",
+   "reason": "cited_by_frozen_evidence",
+   "detail": "cited in logs/autoinit_c1_attempt1/autoinit_c1_authorization.json, which a recorded digest covers"
+  },
+  {
+   "path": "logs/autoinit_c1_session.json",
+   "reason": "cited_by_frozen_evidence",
+   "detail": "cited in logs/autoinit_c1_attempt1/launch.log, which a recorded digest covers"
+  },
+  {
+   "path": "logs/autoinit_causal_depth_pricing_bound.json",
+   "reason": "unattributed",
+   "detail": "no naming convention claims it; left in place rather than filed by guess"
+  },
+  {
+   "path": "logs/autoinit_continuation_authorization.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 5 site(s): scripts/autoinit/issue_continuation_authorization.py, scripts/pod/autoinit_continuation_driver.py, scripts/pod/autoinit_continuation_launch.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_authorization.py",
+    "scripts/pod/autoinit_continuation_driver.py",
+    "scripts/pod/autoinit_continuation_launch.py",
+    "tests/pod/test_continuation_rehearsal.py",
+    "tests/pod/test_setup_end_to_end.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_continuation_b_assets.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 3 site(s): scripts/autoinit/issue_continuation_b_authorization.py, scripts/autoinit/write_continuation_b_preregistration.py, scripts/pod/autoinit_continuation_b_launch.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_b_authorization.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py",
+    "scripts/pod/autoinit_continuation_b_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_continuation_b_attempt1.json",
+   "reason": "index_registered",
+   "detail": "continuation_b/attempt1::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_continuation_b_attempt2.json",
+   "reason": "index_registered",
+   "detail": "continuation_b/attempt2::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_continuation_b_attempt3.json",
+   "reason": "index_registered",
+   "detail": "continuation_b/attempt3::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_continuation_b_attempt4.json",
+   "reason": "index_registered",
+   "detail": "continuation_b/attempt4::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_continuation_b_attempt5.json",
+   "reason": "index_registered",
+   "detail": "continuation_b/attempt5::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_continuation_b_capacity.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): tests/pod/test_continuation_b_product_contract.py",
+   "sites": [
+    "tests/pod/test_continuation_b_product_contract.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_continuation_b_corrected_rung2.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 3 site(s): scripts/autoinit/price_behavioural_continuation.py, scripts/autoinit/recompute_continuation_rung2.py, scripts/autoinit/write_continuation_b_preregistration.py",
+   "sites": [
+    "scripts/autoinit/price_behavioural_continuation.py",
+    "scripts/autoinit/recompute_continuation_rung2.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_continuation_b_grant.json",
+   "reason": "cited_by_frozen_evidence",
+   "detail": "cited in logs/autoinit_continuation_b_attempt3/continuation_evidence.json, which a recorded digest covers"
+  },
+  {
+   "path": "logs/autoinit_continuation_b_post_freeze_changes.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): tests/pod/test_continuation_b_one_probe_contract.py",
+   "sites": [
+    "tests/pod/test_continuation_b_one_probe_contract.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_continuation_b_preregistration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 5 site(s): scripts/autoinit/issue_continuation_b_authorization.py, scripts/autoinit/write_continuation_b_preregistration.py, scripts/pod/autoinit_continuation_b_launch.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_b_authorization.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py",
+    "scripts/pod/autoinit_continuation_b_launch.py",
+    "tests/pod/test_continuation_b_one_probe_contract.py",
+    "tests/pod/test_continuation_b_product_contract.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_continuation_b_session.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/autoinit_continuation_b_launch.py",
+   "sites": [
+    "scripts/pod/autoinit_continuation_b_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_continuation_session.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/autoinit_continuation_launch.py",
+   "sites": [
+    "scripts/pod/autoinit_continuation_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_control_availability.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): scripts/autoinit/verify_control_checkpoints.py, scripts/autoinit/write_preregistration.py, tests/autoinit/test_cost_and_recovery.py",
+   "sites": [
+    "scripts/autoinit/verify_control_checkpoints.py",
+    "scripts/autoinit/write_preregistration.py",
+    "tests/autoinit/test_cost_and_recovery.py",
+    "tests/autoinit/test_frozen_assets.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_control_sb_packaging_repair.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_depth_backend_equivalence.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/autoinit/measure_causal_depth_runtime.py, scripts/autoinit/verify_depth_backend_equivalence.py",
+   "sites": [
+    "scripts/autoinit/measure_causal_depth_runtime.py",
+    "scripts/autoinit/verify_depth_backend_equivalence.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_device_canary_authorization.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/pod/autoinit_device_canary_launch.py, tests/pod/test_device_canary_argument_contract.py",
+   "sites": [
+    "scripts/pod/autoinit_device_canary_launch.py",
+    "tests/pod/test_device_canary_argument_contract.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_device_canary_session.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/autoinit_device_canary_launch.py",
+   "sites": [
+    "scripts/pod/autoinit_device_canary_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_dryrun_fresh.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/consolidate/build_checkpoint_registry.py",
+   "sites": [
+    "scripts/consolidate/build_checkpoint_registry.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_dryrun_resume.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_historical_probe_reuse.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 13 site(s): scripts/autoinit/issue_continuation_b_authorization.py, scripts/autoinit/issue_phase_b_authorization.py, scripts/autoinit/price_behavioural_continuation.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_b_authorization.py",
+    "scripts/autoinit/issue_phase_b_authorization.py",
+    "scripts/autoinit/price_behavioural_continuation.py",
+    "scripts/autoinit/price_phase_b.py",
+    "scripts/autoinit/verify_historical_probe_reuse.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py",
+    "scripts/autoinit/write_phase_b_preregistration.py",
+    "scripts/pod/autoinit_continuation_b_driver.py",
+    "scripts/pod/autoinit_phase_b_driver.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "tests/autoinit/test_phase_b_pricing.py",
+    "tests/pod/historical_contract_reuse.py",
+    "tests/pod/test_phase_b_driver_and_launcher.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_historical_reuse_position.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): scripts/autoinit/historical_reuse_position.py, tests/autoinit/test_phase_b_reuse_hostlocal.py, tests/pod/test_continuation_b_stage_aware_pooling.py",
+   "sites": [
+    "scripts/autoinit/historical_reuse_position.py",
+    "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+    "tests/pod/test_continuation_b_stage_aware_pooling.py",
+    "tests/pod/test_phase_b_driver_and_launcher.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_leaf_transport_quota_finding.json",
+   "reason": "unattributed",
+   "detail": "no naming convention claims it; left in place rather than filed by guess"
+  },
+  {
+   "path": "logs/autoinit_measurement_authorization.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 3 site(s): scripts/autoinit/issue_measurement_authorization.py, scripts/pod/autoinit_measurement_launch.py, tests/pod/test_measurement_session.py",
+   "sites": [
+    "scripts/autoinit/issue_measurement_authorization.py",
+    "scripts/pod/autoinit_measurement_launch.py",
+    "tests/pod/test_measurement_session.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_measurement_grant.json",
+   "reason": "cited_by_frozen_evidence",
+   "detail": "cited in logs/autoinit_measurement_attempt1/session.json, which a recorded digest covers"
+  },
+  {
+   "path": "logs/autoinit_measurement_grant2.json",
+   "reason": "cited_by_frozen_evidence",
+   "detail": "cited in logs/autoinit_measurement_attempt2/session.json, which a recorded digest covers"
+  },
+  {
+   "path": "logs/autoinit_measurement_grant3.json",
+   "reason": "cited_by_frozen_evidence",
+   "detail": "cited in logs/autoinit_measurement_attempt3/session.json, which a recorded digest covers"
+  },
+  {
+   "path": "logs/autoinit_measurement_session.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/autoinit_measurement_launch.py",
+   "sites": [
+    "scripts/pod/autoinit_measurement_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_micro_preflight_authorization.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 5 site(s): scripts/autoinit/issue_authorization.py, scripts/pod/autoinit_preflight_driver.py, scripts/pod/autoinit_preflight_launch.py",
+   "sites": [
+    "scripts/autoinit/issue_authorization.py",
+    "scripts/pod/autoinit_preflight_driver.py",
+    "scripts/pod/autoinit_preflight_launch.py",
+    "tests/pod/test_autoinit_preflight_rehearsal.py",
+    "tests/pod/test_continuation_rehearsal.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_micro_preflight_plan.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_attempt10_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_a/attempt10::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_a_attempt11_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_a/attempt11::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_a_attempt12_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_a/attempt12::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_a_attempt8_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_a/attempt8::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_a_attempt9_grant.json",
+   "reason": "index_registered",
+   "detail": "phase_a/attempt9::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_a_authorization.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 9 site(s): scripts/autoinit/issue_phase_a_authorization.py, scripts/autoinit/write_preregistration.py, scripts/pod/autoinit_phase_a_driver.py",
+   "sites": [
+    "scripts/autoinit/issue_phase_a_authorization.py",
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/pod/autoinit_phase_a_driver.py",
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "tests/autoinit/test_recovery_continuation_authorization.py",
+    "tests/pod/test_driver_authorization_wiring.py",
+    "tests/pod/test_phase_a_rehearsal.py",
+    "tests/pod/test_phase_a_stage0_executes.py",
+    "tests/pod/test_phase_a_stages1_5_execute.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_fallback_audit.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): tests/pod/test_phase_a_rehearsal.py",
+   "sites": [
+    "tests/pod/test_phase_a_rehearsal.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_full_mixture_depth.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_preregistration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 3 site(s): scripts/autoinit/write_preregistration.py, tests/autoinit/test_cost_and_recovery.py, tests/autoinit/test_frozen_assets.py",
+   "sites": [
+    "scripts/autoinit/write_preregistration.py",
+    "tests/autoinit/test_cost_and_recovery.py",
+    "tests/autoinit/test_frozen_assets.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_preregistration.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_preregistration_materialized.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/autoinit/write_preregistration.py",
+   "sites": [
+    "scripts/autoinit/write_preregistration.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_protocol_compat_v2.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/autoinit/emit_protocol_compat_v2.py, scripts/pod/autoinit_phase_a_driver.py",
+   "sites": [
+    "scripts/autoinit/emit_protocol_compat_v2.py",
+    "scripts/pod/autoinit_phase_a_driver.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_recovery_plan_frozen.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 17 site(s): scripts/autoinit/issue_continuation_b_authorization.py, scripts/autoinit/issue_phase_a_authorization.py, scripts/autoinit/issue_phase_b_authorization.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_b_authorization.py",
+    "scripts/autoinit/issue_phase_a_authorization.py",
+    "scripts/autoinit/issue_phase_b_authorization.py",
+    "scripts/autoinit/issue_recovery_continuation_authorization.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py",
+    "scripts/autoinit/write_phase_b_preregistration.py",
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/pod/autoinit_continuation_b_launch.py",
+    "scripts/pod/autoinit_phase_a_driver.py",
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "scripts/pod/autoinit_recovery_continuation_launch.py",
+    "tests/pod/test_continuation_b_executes.py",
+    "tests/pod/test_continuation_b_stage_aware_pooling.py",
+    "tests/pod/test_phase_a_rehearsal.py",
+    "tests/pod/test_phase_a_stage0_executes.py",
+    "tests/pod/test_phase_a_stages1_5_execute.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_repricing.md",
+   "reason": "cited_by_frozen_evidence",
+   "detail": "cited in logs/autoinit_phase_a_attempt10/session.json, which a recorded digest covers"
+  },
+  {
+   "path": "logs/autoinit_phase_a_session.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/autoinit_phase_a_launch.py",
+   "sites": [
+    "scripts/pod/autoinit_phase_a_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_a_storage.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_b_attempt1.json",
+   "reason": "index_registered",
+   "detail": "phase_b/attempt1::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_b_attempt2.json",
+   "reason": "index_registered",
+   "detail": "phase_b/attempt2::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_b_attempt3.json",
+   "reason": "index_registered",
+   "detail": "phase_b/attempt3::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_b_attempt4.json",
+   "reason": "index_registered",
+   "detail": "phase_b/attempt4::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_b_attempt5.json",
+   "reason": "index_registered",
+   "detail": "phase_b/attempt5::outcome in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_b_grant_attempt3.json",
+   "reason": "index_registered",
+   "detail": "phase_b/attempt3::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_b_grant_attempt4.json",
+   "reason": "index_registered",
+   "detail": "phase_b/attempt4::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_b_grant_attempt5.json",
+   "reason": "index_registered",
+   "detail": "phase_b/attempt5::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_phase_b_historical_amendments.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/experiments/phase_b/post_freeze.py",
+   "sites": [
+    "scripts/experiments/phase_b/post_freeze.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_b_identity_collapse_amendment.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 8 site(s): scripts/autoinit/issue_continuation_b_authorization.py, scripts/autoinit/price_behavioural_continuation.py, scripts/autoinit/recompute_continuation_rung2.py",
+   "sites": [
+    "scripts/autoinit/issue_continuation_b_authorization.py",
+    "scripts/autoinit/price_behavioural_continuation.py",
+    "scripts/autoinit/recompute_continuation_rung2.py",
+    "scripts/autoinit/write_continuation_b_preregistration.py",
+    "scripts/pod/autoinit_continuation_b_driver.py",
+    "scripts/pod/autoinit_continuation_b_launch.py",
+    "tests/autoinit/test_identity_collapse.py",
+    "tests/pod/test_continuation_b_executes.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_b_post_freeze_changes.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): scripts/autoinit/record_phase_b_post_freeze.py, scripts/experiments/phase_b/post_freeze.py, tests/autoinit/test_phase_b_historical_amendments.py",
+   "sites": [
+    "scripts/autoinit/record_phase_b_post_freeze.py",
+    "scripts/experiments/phase_b/post_freeze.py",
+    "tests/autoinit/test_phase_b_historical_amendments.py",
+    "tests/autoinit/test_phase_b_plan.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_b_preregistration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 9 site(s): scripts/autoinit/issue_phase_b_authorization.py, scripts/autoinit/record_phase_b_historical_amendment.py, scripts/autoinit/record_phase_b_post_freeze.py",
+   "sites": [
+    "scripts/autoinit/issue_phase_b_authorization.py",
+    "scripts/autoinit/record_phase_b_historical_amendment.py",
+    "scripts/autoinit/record_phase_b_post_freeze.py",
+    "scripts/autoinit/write_phase_b_preregistration.py",
+    "scripts/experiments/phase_b/post_freeze.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "tests/autoinit/test_phase_b_historical_amendments.py",
+    "tests/autoinit/test_phase_b_plan.py",
+    "tests/pod/test_phase_b_driver_and_launcher.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_b_pricing.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/autoinit/price_phase_b.py",
+   "sites": [
+    "scripts/autoinit/price_phase_b.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_phase_b_session.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/autoinit_phase_b_launch.py",
+   "sites": [
+    "scripts/pod/autoinit_phase_b_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_pilot_proposal.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_preflight_remaining_gates.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_preflight_session.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/autoinit_preflight_launch.py",
+   "sites": [
+    "scripts/pod/autoinit_preflight_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_attempt2_grant.json",
+   "reason": "index_registered",
+   "detail": "recovery_continuation/attempt2::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_attempt3_grant.json",
+   "reason": "index_registered",
+   "detail": "recovery_continuation/attempt3::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_attempt4_grant.json",
+   "reason": "index_registered",
+   "detail": "recovery_continuation/attempt4::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_attempt5_grant.json",
+   "reason": "index_registered",
+   "detail": "recovery_continuation/attempt5::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_attempt6_grant.json",
+   "reason": "index_registered",
+   "detail": "recovery_continuation/attempt6::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_attempt7_grant.json",
+   "reason": "index_registered",
+   "detail": "recovery_continuation/attempt7::grant in logs/runs/index.json, with a recorded digest"
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_authorization.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 5 site(s): scripts/autoinit/issue_recovery_continuation_authorization.py, scripts/pod/autoinit_recovery_continuation_driver.py, scripts/pod/autoinit_recovery_continuation_launch.py",
+   "sites": [
+    "scripts/autoinit/issue_recovery_continuation_authorization.py",
+    "scripts/pod/autoinit_recovery_continuation_driver.py",
+    "scripts/pod/autoinit_recovery_continuation_launch.py",
+    "tests/autoinit/test_recovery_continuation_authorization.py",
+    "tests/pod/test_driver_authorization_wiring.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_grant.json",
+   "reason": "cited_by_frozen_evidence",
+   "detail": "cited in logs/autoinit_recovery_continuation_attempt1/README.md, which a recorded digest covers"
+  },
+  {
+   "path": "logs/autoinit_recovery_continuation_session.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/autoinit_recovery_continuation_launch.py",
+   "sites": [
+    "scripts/pod/autoinit_recovery_continuation_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_recovery_fingerprint_audit.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): scripts/autoinit/compare_recovery_fingerprints.py, scripts/autoinit/verify_control_checkpoints.py, scripts/autoinit/write_preregistration.py",
+   "sites": [
+    "scripts/autoinit/compare_recovery_fingerprints.py",
+    "scripts/autoinit/verify_control_checkpoints.py",
+    "scripts/autoinit/write_preregistration.py",
+    "tests/autoinit/test_cost_and_recovery.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_recovery_scoring_validation.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/autoinit/validate_recovery_scoring.py, scripts/autoinit/write_preregistration.py",
+   "sites": [
+    "scripts/autoinit/validate_recovery_scoring.py",
+    "scripts/autoinit/write_preregistration.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_recovery_search_v1_manifest.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_recovery_search_v2_audit.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/autoinit/audit_recovery_search_v2.py",
+   "sites": [
+    "scripts/autoinit/audit_recovery_search_v2.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_recovery_search_v2_build.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/data/build_recovery_search_v2.py",
+   "sites": [
+    "scripts/data/build_recovery_search_v2.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_recovery_trainer_memory_basis.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/pod/autoinit_c1_driver.py, tests/autoinit/test_device_handoff.py",
+   "sites": [
+    "scripts/pod/autoinit_c1_driver.py",
+    "tests/autoinit/test_device_handoff.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_relay_capacity.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_relay_retention_20260822.json",
+   "reason": "unattributed",
+   "detail": "no naming convention claims it; left in place rather than filed by guess"
+  },
+  {
+   "path": "logs/autoinit_repeatability_cpu_smoke.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_role_isolation.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 3 site(s): scripts/autoinit/write_preregistration.py, scripts/data/check_autoinit_role_isolation.py, tests/autoinit/test_frozen_assets.py",
+   "sites": [
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/data/check_autoinit_role_isolation.py",
+    "tests/autoinit/test_frozen_assets.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_selected_leaf_transport_manifest.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/autoinit/publish_selected_leaves.py, scripts/pod/autoinit_recovery_continuation_launch.py",
+   "sites": [
+    "scripts/autoinit/publish_selected_leaves.py",
+    "scripts/pod/autoinit_recovery_continuation_launch.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_stage1_device_audit.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_state_eval_v1_manifest.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_threshold_characterization.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/autoinit/characterize_thresholds.py, scripts/autoinit/write_preregistration.py",
+   "sites": [
+    "scripts/autoinit/characterize_thresholds.py",
+    "scripts/autoinit/write_preregistration.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_tool_rendering_audit_tf5.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_tool_rendering_migration.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/autoinit_tool_scoring_audit.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): scripts/autoinit/audit_tool_scoring.py, scripts/autoinit/write_preregistration.py, scripts/data/build_recovery_search_battery.py",
+   "sites": [
+    "scripts/autoinit/audit_tool_scoring.py",
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/data/build_recovery_search_battery.py",
+    "tests/autoinit/test_frozen_assets.py"
+   ]
+  },
+  {
+   "path": "logs/autoinit_v1_search_space.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/autoinit/plan_search.py, tests/pod/test_phase_a_rehearsal.py",
+   "sites": [
+    "scripts/autoinit/plan_search.py",
+    "tests/pod/test_phase_a_rehearsal.py"
+   ]
+  },
+  {
+   "path": "logs/c1_pod_environment_verification.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/experiments/phase_c1/pod_environment.py",
+   "sites": [
+    "scripts/experiments/phase_c1/pod_environment.py"
+   ]
+  },
+  {
+   "path": "logs/c1_renderer_parity.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/autoinit/record_pod_environment.py, scripts/autoinit/renderer_parity_gate.py",
+   "sites": [
+    "scripts/autoinit/record_pod_environment.py",
+    "scripts/autoinit/renderer_parity_gate.py"
+   ]
+  },
+  {
+   "path": "logs/c1_skip_predicate_audit.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/autoinit/audit_skip_predicates.py",
+   "sites": [
+    "scripts/autoinit/audit_skip_predicates.py"
+   ]
+  },
+  {
+   "path": "logs/checkpoint_registry.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): scripts/consolidate/build_checkpoint_registry.py, scripts/consolidate/measure_storage.py, scripts/consolidate/retire_artifact.py",
+   "sites": [
+    "scripts/consolidate/build_checkpoint_registry.py",
+    "scripts/consolidate/measure_storage.py",
+    "scripts/consolidate/retire_artifact.py",
+    "tests/docs/test_storage_inventory.py"
+   ]
+  },
+  {
+   "path": "logs/checkpoint_tombstones.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 3 site(s): scripts/autoinit/verify_control_checkpoints.py, scripts/consolidate/retire_artifact.py, tests/docs/test_storage_inventory.py",
+   "sites": [
+    "scripts/autoinit/verify_control_checkpoints.py",
+    "scripts/consolidate/retire_artifact.py",
+    "tests/docs/test_storage_inventory.py"
+   ]
+  },
+  {
+   "path": "logs/current_state.json",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/decisions.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  },
+  {
+   "path": "logs/e1_test_cases.jsonl",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e1_test_cases.md",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/evaluation/build_test_cases.py",
+   "sites": [
+    "scripts/evaluation/build_test_cases.py"
+   ]
+  },
+  {
+   "path": "logs/e3_registration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/register_e3.py",
+   "sites": [
+    "scripts/training/register_e3.py"
+   ]
+  },
+  {
+   "path": "logs/e4_registration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/register_e4.py",
+   "sites": [
+    "scripts/training/register_e4.py"
+   ]
+  },
+  {
+   "path": "logs/e5_heldout_eval_ids.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/data/build_e5_arm_r.py",
+   "sites": [
+    "scripts/data/build_e5_arm_r.py"
+   ]
+  },
+  {
+   "path": "logs/e5_proposal.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e5_registration.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e6_registration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 3 site(s): scripts/evaluation/analyze_e6.py, scripts/evaluation/register_e6.py, tests/evaluation/test_e6_registration.py",
+   "sites": [
+    "scripts/evaluation/analyze_e6.py",
+    "scripts/evaluation/register_e6.py",
+    "tests/evaluation/test_e6_registration.py"
+   ]
+  },
+  {
+   "path": "logs/e6_report.md",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/evaluation/analyze_e6.py",
+   "sites": [
+    "scripts/evaluation/analyze_e6.py"
+   ]
+  },
+  {
+   "path": "logs/e6_results.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/evaluation/analyze_e6.py",
+   "sites": [
+    "scripts/evaluation/analyze_e6.py"
+   ]
+  },
+  {
+   "path": "logs/e6b_protocol_deviations.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e6b_reconstructed_training_events.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): tests/pod/test_reconstruct_training_events.py",
+   "sites": [
+    "tests/pod/test_reconstruct_training_events.py"
+   ]
+  },
+  {
+   "path": "logs/e6b_registration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 3 site(s): scripts/evaluation/analyze_e6b.py, scripts/pod/e6b_driver.py, scripts/training/register_e6b.py",
+   "sites": [
+    "scripts/evaluation/analyze_e6b.py",
+    "scripts/pod/e6b_driver.py",
+    "scripts/training/register_e6b.py"
+   ]
+  },
+  {
+   "path": "logs/e6b_report.md",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/evaluation/analyze_e6b.py",
+   "sites": [
+    "scripts/evaluation/analyze_e6b.py"
+   ]
+  },
+  {
+   "path": "logs/e6b_results.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/evaluation/analyze_e6b.py",
+   "sites": [
+    "scripts/evaluation/analyze_e6b.py"
+   ]
+  },
+  {
+   "path": "logs/e7_budget_plans.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/plan_e7_budget.py",
+   "sites": [
+    "scripts/training/plan_e7_budget.py"
+   ]
+  },
+  {
+   "path": "logs/e7_canary_evidence.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e7_canary_proposal.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e7_canary_report.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e7_canary_rerun_evidence.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/canary.py",
+   "sites": [
+    "scripts/pod/canary.py"
+   ]
+  },
+  {
+   "path": "logs/e7_canary_rerun_report.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e7_preregistration.md",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/evaluation/analyze_e7.py",
+   "sites": [
+    "scripts/evaluation/analyze_e7.py"
+   ]
+  },
+  {
+   "path": "logs/e7_relay_manifest.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/data/stage_e7_streams.py, scripts/pod/e7_setup.sh",
+   "sites": [
+    "scripts/data/stage_e7_streams.py",
+    "scripts/pod/e7_setup.sh"
+   ]
+  },
+  {
+   "path": "logs/e7_report.md",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/evaluation/analyze_e7.py",
+   "sites": [
+    "scripts/evaluation/analyze_e7.py"
+   ]
+  },
+  {
+   "path": "logs/e7_results.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/evaluation/analyze_e7.py",
+   "sites": [
+    "scripts/evaluation/analyze_e7.py"
+   ]
+  },
+  {
+   "path": "logs/e7_session_evidence.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/e7_launch.py",
+   "sites": [
+    "scripts/pod/e7_launch.py"
+   ]
+  },
+  {
+   "path": "logs/e8_budget_plans.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/plan_e8_budget.py",
+   "sites": [
+    "scripts/training/plan_e8_budget.py"
+   ]
+  },
+  {
+   "path": "logs/e8_init_stage_manifest.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/build_and_stage_e8_init.py",
+   "sites": [
+    "scripts/training/build_and_stage_e8_init.py"
+   ]
+  },
+  {
+   "path": "logs/e8_relay_manifest.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/data/stage_e8_inputs.py",
+   "sites": [
+    "scripts/data/stage_e8_inputs.py"
+   ]
+  },
+  {
+   "path": "logs/e8_step0_report.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8a_session_evidence.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/e8a_launch.py",
+   "sites": [
+    "scripts/pod/e8a_launch.py"
+   ]
+  },
+  {
+   "path": "logs/e8b_analysis.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8b_backend_audit.md",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8b_budget_plans.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/plan_e8b_budget.py",
+   "sites": [
+    "scripts/training/plan_e8b_budget.py"
+   ]
+  },
+  {
+   "path": "logs/e8b_dp_memory_profile.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8b_dp_sa_train_log_oom.jsonl",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8b_memory_sizing.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/size_e8b_memory.py",
+   "sites": [
+    "scripts/training/size_e8b_memory.py"
+   ]
+  },
+  {
+   "path": "logs/e8b_reprice_after_gate.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/reprice_e8b_after_gate.py",
+   "sites": [
+    "scripts/training/reprice_e8b_after_gate.py"
+   ]
+  },
+  {
+   "path": "logs/e8b_s1_session_evidence.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8b_s2_gate200.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8b_s2_session_evidence.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8b_s2_throughput_gate.json",
+   "reason": "pinned_by_record",
+   "detail": "recorded with a digest by logs/log_inventory.json.files",
+   "records": [
+    "logs/log_inventory.json.files"
+   ]
+  },
+  {
+   "path": "logs/e8b_session_evidence.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/pod/e8b_launch.py",
+   "sites": [
+    "scripts/pod/e8b_launch.py"
+   ]
+  },
+  {
+   "path": "logs/e8b_stream_shape_audit.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/training/audit_stream_shapes.py",
+   "sites": [
+    "scripts/training/audit_stream_shapes.py"
+   ]
+  },
+  {
+   "path": "logs/log_inventory.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/consolidate/build_log_inventory.py, tests/docs/test_storage_inventory.py",
+   "sites": [
+    "scripts/consolidate/build_log_inventory.py",
+    "tests/docs/test_storage_inventory.py"
+   ]
+  },
+  {
+   "path": "logs/phase_c0_preregistration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/autoinit/write_c1_execution_preregistration.py",
+   "sites": [
+    "scripts/autoinit/write_c1_execution_preregistration.py"
+   ]
+  },
+  {
+   "path": "logs/phase_c1_battery.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/write_c1_execution_preregistration.py, scripts/pod/autoinit_c1_driver.py",
+   "sites": [
+    "configs/experiments/phase_c1/authorization.json",
+    "scripts/autoinit/write_c1_execution_preregistration.py",
+    "scripts/pod/autoinit_c1_driver.py",
+    "scripts/pod/autoinit_c1_launch.py"
+   ]
+  },
+  {
+   "path": "logs/phase_c1_execution_preregistration.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 9 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/write_c1_execution_preregistration.py, scripts/pod/autoinit_c1_launch.py",
+   "sites": [
+    "configs/experiments/phase_c1/authorization.json",
+    "scripts/autoinit/write_c1_execution_preregistration.py",
+    "scripts/pod/autoinit_c1_launch.py",
+    "tests/architecture/test_executable_closure_moves.py",
+    "tests/autoinit/test_c1_readiness_gates.py",
+    "tests/pod/test_c1_artifact_specs.py",
+    "tests/pod/test_c1_bundle_transport.py",
+    "tests/pod/test_c1_session_contract.py",
+    "tests/pod/test_launcher_driver_cli_seam.py"
+   ]
+  },
+  {
+   "path": "logs/phase_c1_pricing.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 9 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/price_c1.py, scripts/autoinit/write_c1_execution_preregistration.py",
+   "sites": [
+    "configs/experiments/phase_c1/authorization.json",
+    "scripts/autoinit/price_c1.py",
+    "scripts/autoinit/write_c1_execution_preregistration.py",
+    "scripts/experiments/phase_c1/authorization.py",
+    "scripts/pod/autoinit_c1_launch.py",
+    "tests/autoinit/test_c1_readiness_gates.py",
+    "tests/docs/test_budget_arithmetic.py",
+    "tests/pod/test_c1_session_contract.py",
+    "tests/pod/test_continuation_b_one_probe_contract.py"
+   ]
+  },
+  {
+   "path": "logs/phase_c1_scoring_equivalence.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/verify_c1_scoring_equivalence.py, scripts/autoinit/write_c1_execution_preregistration.py",
+   "sites": [
+    "configs/experiments/phase_c1/authorization.json",
+    "scripts/autoinit/verify_c1_scoring_equivalence.py",
+    "scripts/autoinit/write_c1_execution_preregistration.py",
+    "tests/autoinit/test_c1_confirmation_scoring.py"
+   ]
+  },
+  {
+   "path": "logs/phase_c1_teacher_binding.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 4 site(s): configs/experiments/phase_c1/authorization.json, scripts/autoinit/write_c1_execution_preregistration.py, scripts/pod/autoinit_c1_driver.py",
+   "sites": [
+    "configs/experiments/phase_c1/authorization.json",
+    "scripts/autoinit/write_c1_execution_preregistration.py",
+    "scripts/pod/autoinit_c1_driver.py",
+    "scripts/pod/autoinit_c1_launch.py"
+   ]
+  },
+  {
+   "path": "logs/relay_mirror_verification.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 2 site(s): scripts/consolidate/build_checkpoint_registry.py, scripts/consolidate/verify_relay_mirror.py",
+   "sites": [
+    "scripts/consolidate/build_checkpoint_registry.py",
+    "scripts/consolidate/verify_relay_mirror.py"
+   ]
+  },
+  {
+   "path": "logs/storage_measurements.json",
+   "reason": "named_by_executable",
+   "detail": "resolved by 1 site(s): scripts/consolidate/measure_storage.py",
+   "sites": [
+    "scripts/consolidate/measure_storage.py"
+   ]
+  },
+  {
+   "path": "logs/supported_models.md",
+   "reason": "entry_point",
+   "detail": "a top-level entry point; it stays findable at the root"
+  }
+ ],
+ "_exceptions_rule": "each exception states what holds it: an entry point, a live executable reference with the naming sites listed, a component the run index registers with a digest, a path recorded beside a digest, or no convention claiming it. `for safety` is not a reason and does not appear.",
+ "authorizes": "nothing"
+}

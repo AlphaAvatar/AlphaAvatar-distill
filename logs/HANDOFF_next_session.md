@@ -62,7 +62,7 @@ retained. The accepted terminal result is Attempt 5's.
 
 ## The comparison — read this before deciding anything
 
-**[`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md)**
+**[`phase_a_vs_phase_b_comparison.md`](experiments/phase_a/phase_a_vs_phase_b_comparison.md)**
 
 Three conclusions that should govern Phase C:
 
@@ -96,7 +96,7 @@ distinguishable from Phase A's leader; it is not a strong benchmark (16/510, nea
 the floor); **it is not recovered** — no Stage-2/3 training has ever been run;
 and none of its component operators is individually validated.
 
-## Roadmap — [`phase_c_roadmap.md`](phase_c_roadmap.md)
+## Roadmap — [`phase_c_roadmap.md`](experiments/phase_c1/phase_c_roadmap.md)
 
 * **C0 — protocol/power design, before any probe.** The effects that decided both
   phases are 1–6 correct answers out of 510 and the interval is 6 samples. A
@@ -117,7 +117,7 @@ recovery remains deferred.**
 ## Storage
 
 Repo 8.27 GiB · canonical `aad-artifacts` 94.69 GiB · scratch 0.24 GiB · free
-10.14 GiB. See [`storage_closeout_20260831.json`](storage_closeout_20260831.json).
+10.14 GiB. See [`storage_closeout_20260831.json`](maintenance/storage_closeout_20260831.json).
 One open maintainer decision: two duplicate checkpoint pairs totalling 2.92 GiB,
 deliberately not deleted — reasoning in that file.
 
@@ -148,8 +148,8 @@ they must not return.
 | you want | read |
 | --- | --- |
 | the scientific history, by phase | [`PHASE_INDEX.md`](PHASE_INDEX.md) — **start here** |
-| what Phase A and B concluded | [`phase_a_vs_phase_b_comparison.md`](phase_a_vs_phase_b_comparison.md) |
-| the Phase-C structure | [`phase_c_roadmap.md`](phase_c_roadmap.md) |
+| what Phase A and B concluded | [`phase_a_vs_phase_b_comparison.md`](experiments/phase_a/phase_a_vs_phase_b_comparison.md) |
+| the Phase-C structure | [`phase_c_roadmap.md`](experiments/phase_c1/phase_c_roadmap.md) |
 | live facts, machine-readable | [`current_state.json`](current_state.json) |
 | live facts, prose | [`STATE.md`](STATE.md) |
 | which log owns which fact | [`CATALOG.md`](CATALOG.md) |
@@ -199,7 +199,7 @@ without checking what that machinery required. Read
 ## Known open items, none blocking
 
 * two duplicate checkpoint pairs, 2.92 GiB — maintainer decision, see
-  [`storage_closeout_20260831.json`](storage_closeout_20260831.json);
+  [`storage_closeout_20260831.json`](maintenance/storage_closeout_20260831.json);
 * `tests/pod/session_specs.py::SESSION_LAUNCHERS` omits the Phase-B and
   continuation launchers, so neither is covered by the simulator/pod ignore-list
   pin. Recorded as infrastructure debt; the pin also assumes every session shares

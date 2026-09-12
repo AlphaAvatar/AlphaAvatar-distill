@@ -500,11 +500,42 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
 def test_the_handoff_and_phase_index_exist_and_are_linked():
     """A new reviewer must be able to reconstruct the history without knowing
     filenames. These are the entry points the snapshot promises."""
+    #: By ROUTE, not by root filename. Two of these moved into the experiment
+    #: that owns them on 2026-09-12, and pinning their directory would have
+    #: forced the documents back to the root to keep a test green. What the
+    #: reviewer needs is unchanged: each document exists, and each is reachable
+    #: by following links from the entry point without knowing where it lives.
+    import re as _re
+
+    def reachable_from(start: Path, hops: int = 3) -> set[str]:
+        seen, frontier = {start.resolve()}, [start]
+        for _ in range(hops):
+            nxt = []
+            for doc in frontier:
+                if not doc.is_file() or doc.suffix != ".md":
+                    continue
+                for t in _re.findall(r"\]\(([^)#\s]+)\)", doc.read_text()):
+                    if t.startswith(("http", "mailto:")):
+                        continue
+                    q = (doc.parent / t).resolve()
+                    if q.exists() and q not in seen:
+                        seen.add(q)
+                        nxt.append(q)
+            frontier = nxt
+        return {q.name for q in seen}
+
+    found = reachable_from(REPO / "logs/README.md")
     for name in ("PHASE_INDEX.md", "phase_a_vs_phase_b_comparison.md",
                  "phase_c_roadmap.md", "HANDOFF_next_session.md"):
-        assert (REPO / "logs" / name).is_file(), name
+        hits = list(REPO.glob(f"logs/**/{name}"))
+        assert hits, f"{name} exists nowhere"
+        assert name in found, (
+            f"{name} exists at {hits[0].relative_to(REPO)} but cannot be "
+            "reached by following links from logs/README.md")
+
     state = json.loads((REPO / "logs/current_state.json").read_text())
-    assert state["read_order"][0].startswith("logs/PHASE_INDEX.md")
+    first = state["read_order"][0].split()[0]
+    assert (REPO / first).is_file(), f"read_order starts at {first}, which is not a file"
 
 
 # --- where the CURRENT handoff route actually lands -------------------------

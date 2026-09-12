@@ -204,10 +204,15 @@ def test_the_two_state_views_agree_on_what_is_running_and_authorized():
     # test that cannot tell a current statement from a recorded one is not
     # checking agreement between the two views; it is checking that the file
     # once contained a sentence.
+    #: The whole file IS the current view since 2026-09-12: history moved to
+    #: `logs/archive/` and to the experiment that owns it. The split is checked
+    #: by `test_the_stale_narrative_is_moved_rather_than_deleted`; what this
+    #: needs is a current view that contains no history, so a claim found here
+    #: cannot have been satisfied by a frozen section.
     current = STATE.read_text().split("\n# Superseded")[0]
-    assert len(current) < len(STATE.read_text()), (
-        "STATE.md no longer marks where the current view ends; this test would "
-        "silently go back to reading history as a current claim")
+    assert "# Superseded" not in STATE.read_text(), (
+        "STATE.md carries history again; a claim about now could be satisfied "
+        "by a frozen section instead of by a statement about now")
     text = " ".join(current.lower().split())
 
     if not snap["running"]["paid_compute"]:

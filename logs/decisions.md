@@ -674,7 +674,7 @@
 
 ## 2026-08-24 — Phase B reconstructed at `$0`: it is blocked on science, not on implementation
 
-- **Context:** a fresh session opened Phase B. Before writing any Phase-B code, the committed design was reconstructed from the proposal, the reference, the decision records, the search-space manifest and `calibration.py`. No pod was created, no grant or authorization was issued, and no paid work was performed. Full reconstruction: [`autoinit_phase_b_reconstruction.md`](autoinit_phase_b_reconstruction.md).
+- **Context:** a fresh session opened Phase B. Before writing any Phase-B code, the committed design was reconstructed from the proposal, the reference, the decision records, the search-space manifest and `calibration.py`. No pod was created, no grant or authorization was issued, and no paid work was performed. Full reconstruction: [`autoinit_phase_b_reconstruction.md`](experiments/phase_b/autoinit_phase_b_reconstruction.md).
 - **Finding (1) — `calib.reasoning_heavy@v1` cannot be built as specified, and this is arithmetic rather than judgement.** It declares itself a reweighted draw from the `calib.domain_balanced@v1` item pool at `token_budget = 59_763`. Re-derived from the pinned pool: its weights require **11,952.6 `code`** and **20,917.0 `math`** prediction positions from a pool holding **8,622** and **16,781**. The largest budget at which every weight is achievable is **43,110** — `code` binds. Worse, 59,763 **is** the pool's total, so a draw without replacement is the identity and would reproduce `domain_balanced`'s tokens exactly: two profiles differing only by `profile_hash`, which is the byte-identical-state failure Decision (1) of 2026-08-12 removed for `CalibrationNeed.NONE` operators, reintroduced through the mixture instead. **Pinned by a test** (3 mutations, each turning the passing state into a failing one: the budget lowered to the feasible figure, the binding weight moved off `code`, and the transcribed pool constant corrupted).
 - **Finding (2) — the repository prices Phase B as a SEARCH ONLY and records no rule for combining it with Phase A.** The proposal quotes a beam-6 two-profile search at $1.90–7.43 and 245 GiB and specifies no recovery rungs, seeds or selection rule. But Phase A selected **behaviourally** — `usable_rollout_rate` gates, `correct_overall` ranks — precisely because E8a and E7 are this project's own evidence that step-0 metrics must not select. And Phase A ended `unresolved_equivalence` with `winner: None`, so there is no Phase-A winner for a Phase-B result to be combined *with*. **No Phase-B preregistration exists:** `autoinit_phase_a_preregistration.json` carries `active_calibration_profile` in the singular and zero occurrences of `reasoning_heavy` or `phase_b`.
 - **Decision — surface, do not resolve.** Three choices are genuinely open (how the reweighted mixture is drawn; whether Phase B includes recovery and how the final initialization is selected; whether Phase A's five retained leaves are reused or the search is re-run jointly). Four of the remaining `$0` items cannot be written without them, and writing them anyway would be inventing Phase-B science inside an implementation pass. **No Phase-B code was written.**
@@ -6329,7 +6329,7 @@ tokens, hashing to `7781771acc3798ee…`, the frozen recovery-protocol identity.
 permanently retired; both caches are recreated by routine commands, so filing
 them as active tombstones would reproduce the tombstone-semantics defect this
 project has already fixed twice — an active tombstone naming a path a living
-session legitimately writes. `logs/derived_cache_cleanup.json` carries the paths,
+session legitimately writes. `logs/maintenance/derived_cache_cleanup.json` carries the paths,
 bytes, verified blob hashes, reconstruction source and revision, and the
 resulting free space. The tombstone file is untouched: still 16 active, 3.6406
 GiB, and no cache path appears in it.
@@ -6658,7 +6658,7 @@ recovery continuation under the derived **$16.7456** ceiling.
   isolation experiment.
 - **Decision:** freeze `logs/phase_c0_preregistration.json`
   (`aadistill.autoinit.phase_c0_protocol/v1`) with sizing evidence in
-  `logs/phase_c0_sizing_evidence.json`. Key terms:
+  `logs/experiments/phase_c1/phase_c0_sizing_evidence.json`. Key terms:
   * two arms, no successive halving, no elimination rung, both arms complete
     every confirmation seed;
   * exactly **3 fresh** paired recovery seeds as **fixed experimental blocks**;

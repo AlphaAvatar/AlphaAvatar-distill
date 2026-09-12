@@ -97,8 +97,25 @@ def derive_c1_session():
                                        bundle=canonical_bundle_name(head))
     contract = derive_contract(spec.setup, session_id="autoinit-c1")
     return spec, contract, describe(contract, REPO_ROOT), setup_env
-DEFAULT_JUNIT = "/home/ecs-user/aad-scratch/podsim_junit.xml"
-DEFAULT_LOG = "/home/ecs-user/aad-scratch/podsim_pytest.log"
+#: One directory per sweep, named by the tree the sweep is ABOUT.
+#:
+#: Both of these were fixed paths, so every sweep overwrote the previous one's
+#: raw output -- including a sweep whose record is cited as evidence, whose
+#: `evidence.junit` and `evidence.pytest_log` then pointed at a different
+#: sweep's results. The record survived; what it referenced did not.
+#:
+#: Keyed on the head commit rather than a timestamp: two sweeps of the SAME tree
+#: are the same claim and may share a directory, while a sweep of a different
+#: tree is a different claim and gets its own. A timestamp would also make the
+#: path unreproducible, and a record that names an unreproducible path cannot be
+#: checked later.
+SWEEP_ROOT = "/home/ecs-user/aad-scratch/podsim"
+
+
+def sweep_outputs(head: str, *, root: str = SWEEP_ROOT) -> tuple[str, str]:
+    """`(junit, log)` for a sweep of this tree. Never a shared path."""
+    d = Path(root) / f"sweep-{head[:12]}"
+    return str(d / "junit.xml"), str(d / "pytest.log")
 
 
 def min_free_gib() -> int:
@@ -179,8 +196,12 @@ def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--junit", default=DEFAULT_JUNIT)
-    ap.add_argument("--log", default=DEFAULT_LOG)
+    #: Defaults are DERIVED per sweep, below, once the head commit is known.
+    ap.add_argument("--junit", default=None,
+                    help="raw JUnit path; defaults to a per-sweep directory "
+                         "keyed on the head commit, so a new sweep cannot "
+                         "overwrite raw output an existing record cites")
+    ap.add_argument("--log", default=None)
     ap.add_argument("--from-existing", action="store_true",
                     help="parse a sweep that already ran instead of running one")
     ap.add_argument("--kind", default="diagnostic",
@@ -195,6 +216,15 @@ def main() -> int:
     # tree modification, and the verdict must describe the tree that was swept.
     clean_before = tree_is_clean(REPO_ROOT)
     head = head_commit(REPO_ROOT)
+    #: Resolved now that the tree's identity is known. A caller may still name
+    #: its own paths; what it may not get is a shared default that silently
+    #: replaces another sweep's raw output.
+    if args.junit is None or args.log is None:
+        j, l = sweep_outputs(head)
+        args.junit = args.junit or j
+        args.log = args.log or l
+    Path(args.junit).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.log).parent.mkdir(parents=True, exist_ok=True)
     harness = c1_harness_digest(REPO_ROOT)
     env_digest = pod_test_environment_digest(REPO_ROOT)
 
