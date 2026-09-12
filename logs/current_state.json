@@ -66,7 +66,7 @@
    "kind": "diagnostic",
    "verdict": "FAIL",
    "swept_base_commit": "30f6ceeda452c52a8173164e1a419058d3e64d7e",
-   "describes_head": true
+   "describes_head": false
   },
   "launch_bound_ready": false,
   "launch_bound_failures": 1,
