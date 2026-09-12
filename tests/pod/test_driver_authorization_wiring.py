@@ -208,8 +208,12 @@ def test_the_mutation_that_caused_attempt_2_is_caught(tmp_path, monkeypatch):
     (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).parent.mkdir(parents=True, exist_ok=True)
     (repo / mod.ContinuationDriver.AUTHORIZATION_PATH).write_text(
         json.dumps(fixture_auth_payload()))
+    #: Nested destination: the canonical layout puts approvals under
+    #: `logs/budget/approvals/`, so a bare `logs/` has nowhere to copy into.
+    dest = repo / "logs/budget/approvals/autoinit_phase_a_authorization.json"
+    dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy(REPO / "logs/budget/approvals/autoinit_phase_a_authorization.json",
-                repo / "logs/budget/approvals/autoinit_phase_a_authorization.json")
+                dest)
     monkeypatch.setattr(mod, "REPO", repo)
     monkeypatch.setattr(mod, "AUDIT", tmp_path / "audit")
 
