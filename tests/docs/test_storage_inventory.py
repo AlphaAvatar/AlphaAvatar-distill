@@ -95,18 +95,23 @@ def _relocated(old: str) -> str:
     """Where an object recorded at `old` lives now, per the migrations."""
     import json as _json
 
+    #: CHAINED, in migration order: an object moved by v1 and again by v2
+    #: needs both hops, and following one leaves a path that no longer exists.
+    path = old
     for m in sorted((REPO / "logs/migrations").glob("*/manifest.json")):
         try:
             doc = _json.loads(m.read_text())
         except (OSError, _json.JSONDecodeError):
             continue
         table = {e["old_path"]: e["new_path"] for e in doc.get("entries", [])}
-        if old in table:
-            return table[old]
+        if path in table:
+            path = table[path]
+            continue
         for o, n in sorted(table.items(), key=lambda kv: -len(kv[0])):
-            if old.startswith(o + "/"):
-                return n + old[len(o):]
-    return old
+            if path.startswith(o + "/"):
+                path = n + path[len(o):]
+                break
+    return path
 
 
 def test_removed_copies_still_name_a_survivor_and_keep_their_hash():

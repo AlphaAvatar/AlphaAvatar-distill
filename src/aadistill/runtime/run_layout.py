@@ -264,11 +264,21 @@ def verify_run_manifest(doc: Mapping[str, Any], run_root: str | Path, *,
     stated = doc.get("self_sha256")
     if stated != sha256_json({k: v for k, v in doc.items() if k != "self_sha256"}):
         return False, "the manifest does not match its own self_sha256"
+    #: The manifest states its own `root` relative to the run root, and that
+    #: string carries whatever `runs_subdir` the caller's convention uses. The
+    #: check reconstructs the layout from what the manifest says rather than
+    #: assuming a composition: a verifier that rebuilt `experiment/run` rejected
+    #: every manifest written under a convention that puts runs in a child
+    #: directory, which is a statement about the verifier, not the manifest.
+    stated_root = doc.get("root") or ""
+    parts = stated_root.split("/")
+    subdir = "/".join(parts[1:-1]) if len(parts) > 2 else ""
     try:
-        layout = RunLayout(Path(run_root), doc["experiment_id"], doc["run_id"])
+        layout = RunLayout(Path(run_root), doc["experiment_id"], doc["run_id"],
+                           runs_subdir=subdir)
     except (RunLayoutError, KeyError) as exc:
         return False, f"unusable identifiers: {exc}"
-    if doc.get("root") != layout.rel_root:
+    if stated_root != layout.rel_root:
         return False, f"root {doc.get('root')!r} is not {layout.rel_root!r}"
 
     roles = doc.get("roles") or {}

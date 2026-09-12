@@ -6,7 +6,7 @@ Everything this experiment produced, in one place.
 | --- | --- |
 | [`analyses/`](analyses/) | working analyses and audits |
 | [`history/`](history/) | narrative: what happened, session by session |
-| [`runs/`](runs/) | one directory per execution attempt |
+| runs | registered from components; see the index |
 
 ## Runs
 

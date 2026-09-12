@@ -90,6 +90,8 @@ def test_the_root_is_named_here_and_only_here():
     import ast
     import aadistill.runtime.run_layout as core
 
+    #: Retained for reading historical provenance; nothing writes there since
+    #: log-layout-v2 made the hierarchy stage-first.
     assert RUNS_ROOT == "logs/runs"
     tree = ast.parse(open(core.__file__).read())
     for node in ast.walk(tree):
@@ -170,7 +172,7 @@ def test_the_core_really_would_have_allowed_the_crafted_path(tmp_path):
 def test_each_experiment_opens_records_and_reads_back(tmp_path, experiment_id,
                                                       spec, roles):
     layout = open_run(tmp_path, experiment_id, "r1", roles=roles)
-    assert layout.root == tmp_path / RUNS_ROOT / experiment_id / "r1"
+    assert layout.root == _here(tmp_path, experiment_id)
     _fill(layout, roles)
     doc = record_run(layout, spec=spec, plan={"n": 1}, implementation={},
                      status={"passed": True}, roles=present_roles(layout, roles))
@@ -260,7 +262,7 @@ def test_an_occupied_run_with_no_manifest_is_not_reopened(tmp_path):
 def test_an_empty_run_directory_may_be_opened(tmp_path):
     """Only files block. A bare directory is what `create` itself leaves."""
     _, _, roles = STAGE4
-    (tmp_path / RUNS_ROOT / "stage4_rollout" / "r1").mkdir(parents=True)
+    (_here(tmp_path, "stage4_rollout")).mkdir(parents=True)
     assert open_run(tmp_path, "stage4_rollout", "r1", roles=roles)
 
 
@@ -280,7 +282,7 @@ def test_an_empty_run_directory_may_be_opened(tmp_path):
 def _prepared_run(tmp_path, body='{"granted_by": "maintainer"}\n'):
     """A run directory holding only its prepared grant, not yet opened."""
     _, _, roles = STAGE3
-    grant = tmp_path / RUNS_ROOT / "stage3_recovery" / "r1" / roles["grant"]
+    grant = _here(tmp_path, "stage3_recovery") / roles["grant"]
     grant.parent.mkdir(parents=True)
     grant.write_text(body)
     return roles, grant
@@ -310,7 +312,7 @@ def test_a_prepared_role_exempts_itself_and_nothing_else(tmp_path):
     """A half-written evidence tree beside the grant is still the dead-launcher
     case, and naming the grant must not smuggle it through."""
     roles, _ = _prepared_run(tmp_path)
-    stray = tmp_path / RUNS_ROOT / "stage3_recovery" / "r1" / roles["eval_rows"]
+    stray = _here(tmp_path, "stage3_recovery") / roles["eval_rows"]
     stray.parent.mkdir(parents=True, exist_ok=True)
     stray.write_text("{}\n")
     with pytest.raises(RunConventionError) as exc:
@@ -369,12 +371,12 @@ def test_a_whole_directory_prepared_role_exempts_what_is_inside_it(tmp_path):
     """
     roles = {"staged": "artifacts/", "log": "runtime/a.log"}
     for run_id in ("r1", "r2"):
-        staged = tmp_path / RUNS_ROOT / "e" / run_id / "artifacts"
+        staged = _here(tmp_path, "e", run_id) / "artifacts"
         staged.mkdir(parents=True)
         (staged / "input.jsonl").write_text("{}\n")
     assert open_run(tmp_path, "e", "r1", roles=roles, prepared=("staged",))
 
-    beside = tmp_path / RUNS_ROOT / "e" / "r2" / roles["log"]
+    beside = _here(tmp_path, "e", "r2") / roles["log"]
     beside.parent.mkdir(parents=True, exist_ok=True)
     beside.write_text("stale\n")
     with pytest.raises(RunConventionError) as exc:
@@ -423,6 +425,19 @@ def test_read_refuses_a_run_that_never_recorded_itself(tmp_path):
 # by the experiment's config. Phase (A/B/C), pipeline stage (0-6) and attempt
 # are three dimensions; `phase_c1` is an experiment id, not a stage.
 
+def _here(root, experiment_id, run_id="r1", stage_id=None):
+    """The canonical location of a run, composed the way the convention does.
+
+    The tests spelled `logs/runs/<experiment>/<run>` inline. That was the
+    layout; log-layout-v2 made it `stages/stage-<id>/<experiment>/runs/<run>`,
+    or `cross-stage/<experiment>/runs/<run>` when no stage is declared. One
+    helper, so a layout change is one edit rather than twenty.
+    """
+    from experiments.run_layout import layout_for
+
+    return layout_for(root, experiment_id, run_id, stage_id).root
+
+
 def test_the_stage_segment_is_declared_not_guessed():
     from experiments.run_layout import stage_segment
 
@@ -448,8 +463,8 @@ def test_a_stage_the_pipeline_grows_later_needs_no_change_here(tmp_path):
     art = ArtifactSpec(spec_id="stage7_v1", required=("session_record",))
     layout = open_run(tmp_path, "some_future_experiment", "r1", roles=roles,
                       stage_id="7")
-    assert layout.root == (tmp_path / RUNS_ROOT / "stage-7"
-                           / "some_future_experiment" / "r1")
+    assert layout.root == _here(tmp_path, "some_future_experiment",
+                                stage_id="7")
     _fill(layout, roles)
     record_run(layout, spec=art, plan={}, implementation={}, status={},
                roles=present_roles(layout, roles))
@@ -467,7 +482,7 @@ def test_a_stage_the_pipeline_grows_later_needs_no_change_here(tmp_path):
 def test_a_stage_grouped_run_lands_under_its_stage(tmp_path):
     _, spec, roles = STAGE3
     layout = open_run(tmp_path, "stage3_recovery", "r1", roles=roles, stage_id="3")
-    assert layout.root == tmp_path / RUNS_ROOT / "stage-3" / "stage3_recovery" / "r1"
+    assert layout.root == _here(tmp_path, "stage3_recovery", stage_id="3")
     _fill(layout, roles)
     record_run(layout, spec=spec, plan={}, implementation={}, status={},
                roles=present_roles(layout, roles))
@@ -490,7 +505,7 @@ def test_the_legacy_root_is_still_addressable(tmp_path):
     """
     _, _, roles = STAGE4
     layout = open_run(tmp_path, "stage4_rollout", "r1", roles=roles)
-    assert layout.root == tmp_path / RUNS_ROOT / "stage4_rollout" / "r1"
+    assert layout.root == _here(tmp_path, "stage4_rollout")
 
 
 # --- a README describes a directory; it is never evidence --------------------
@@ -510,7 +525,7 @@ def test_a_run_root_holding_only_a_readme_can_still_be_opened(tmp_path):
     from experiments.run_layout import README_NAME
 
     _, _, roles = STAGE4
-    root = tmp_path / RUNS_ROOT / "stage-4" / "stage4_rollout" / "r1"
+    root = _here(tmp_path, "stage4_rollout", stage_id="4")
     root.mkdir(parents=True)
     (root / README_NAME).write_text("# what this directory is\n")
     layout = open_run(tmp_path, "stage4_rollout", "r1", roles=roles, stage_id="4")
@@ -522,7 +537,7 @@ def test_a_readme_does_not_excuse_anything_else_in_the_root(tmp_path):
     from experiments.run_layout import README_NAME
 
     _, _, roles = STAGE4
-    root = tmp_path / RUNS_ROOT / "stage-4" / "stage4_rollout" / "r1"
+    root = _here(tmp_path, "stage4_rollout", stage_id="4")
     (root / "artifacts").mkdir(parents=True)
     (root / README_NAME).write_text("# desc\n")
     (root / "artifacts" / "rollouts.jsonl").write_text("{}\n")

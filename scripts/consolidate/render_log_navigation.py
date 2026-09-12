@@ -131,7 +131,7 @@ def render_catalog(root: Path) -> str:
             "The per-entry detail — what each attempt cost, what failed, what each",
             "record binds — is in",
             "[`archive/CATALOG_detail_through_2026-09-11.md`]"
-            "(../archive/CATALOG_detail_through_2026-09-11.md).",
+            "(../archive/repository/CATALOG_detail_through_2026-09-11.md).",
             "It was maintained here *and* in the ledger, the run index and each",
             "run's own closeout; those are the owners.", ""]
     for c in ("CURRENT", "REFERENCE", "HISTORICAL", "SUPERSEDED", "TERMINATED"):
@@ -191,8 +191,14 @@ def render_experiment_readme(d: Path, root: Path,
                "validations": "engineering evidence supporting this experiment"}
     for a in areas:
         lines.append(f"| [`{a}/`]({a}/) | {purpose.get(a, 'material')} |")
-    lines += ["| [`runs/`](runs/) | one directory per execution attempt |", "",
-              "## Runs", ""]
+    if (d / "runs").is_dir():
+        lines.append("| [`runs/`](runs/) | one directory per execution attempt |")
+    else:
+        #: An experiment whose runs were registered from components spread
+        #: across several directories has no `runs/` of its own. Linking one
+        #: would point at nothing.
+        lines.append("| runs | registered from components; see the index |")
+    lines += ["", "## Runs", ""]
     #: Linked only when the directory exists. `legacy_aggregate` is a
     #: registered entry whose components span several directories, not a run
     #: directory, so a link to it would point nowhere.

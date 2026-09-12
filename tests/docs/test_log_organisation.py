@@ -126,11 +126,11 @@ class TestTheIndexAccountsForBothLayouts:
     def test_a_run_in_each_layout_is_found(self, index):
         roots = [r.get("root") or (r.get("components") or {}).get("root") or ""
                  for r in [*index["runs"], *index["unrecorded"]]]
-        assert any("/runs/stage-" in r for r in roots), "no stage-grouped run found"
-        assert any(r.startswith("logs/runs/") and "/stage-" not in r
-                   for r in roots), "no two-level run found"
-        assert any(not r.startswith("logs/runs/") for r in roots), \
-            "no pre-run-directory evidence found"
+        assert any("/logs/stages/stage-" in r or r.startswith("logs/stages/stage-")
+                   for r in roots), "no stage-grouped run found"
+        assert any(r.startswith("logs/cross-stage/") for r in roots), (
+            "no cross-stage run found")
+
 
     def test_the_kinds_are_declared_so_an_entry_need_not_be_inferred(self, index):
         for k in ("recorded_run", "prepared_not_executed",
@@ -176,18 +176,21 @@ class TestTheEntryPointsResolve:
                  if r["experiment_id"] == "phase_c1"}
         assert roots, "no phase_c1 runs found at all"
         stray = {k: v for k, v in roots.items()
-                 if not v.startswith("logs/runs/stage-1/phase_c1/")}
+                 if not v.startswith("logs/stages/stage-1/phase_c1/runs/")}
         assert not stray, f"phase_c1 runs outside the canonical layout: {stray}"
         assert len(roots) >= 13, roots
 
     def test_no_parallel_run_layout_survives(self):
         """`logs/runs/` holds the index, README, stage-scoped runs and
         `unscoped/` — no second `<experiment>/<run>` tree beside them."""
-        runs = REPO / "logs/runs"
-        extra = [p.name for p in runs.iterdir()
-                 if p.is_dir() and p.name != "unscoped"
-                 and not p.name.startswith("stage-")]
-        assert not extra, f"a parallel run tree survives: {extra}"
+        #: The parallel axes are gone entirely: runs live inside the
+        #: experiment that owns them, which lives inside its stage.
+        for gone in ("logs/runs", "logs/experiments", "logs/validations"):
+            assert not (REPO / gone).exists(), (
+                f"{gone} still exists; it was a parallel top-level axis")
+        for p in (REPO / "logs/stages").iterdir():
+            assert p.name == "README.md" or (
+                p.is_dir() and p.name.startswith("stage-")), p
 
     def test_the_readme_is_not_counted_as_a_run_product(self):
         """A directory holding only its own README has not executed."""
@@ -265,7 +268,9 @@ class TestRegisteredEvidenceIsProtected:
 class TestTheRelocationIsTraceable:
     @pytest.fixture(scope="class")
     def record(self):
-        return load("logs/migrations/log-layout-v1/manifest.json")
+        #: The latest migration: earlier ones describe moves that later ones
+        #: superseded, so `new_path` there is where the object went NEXT.
+        return load("logs/migrations/log-layout-v2/manifest.json")
 
     def test_every_move_landed_and_its_origin_is_gone(self, record):
         for m in record["entries"]:
@@ -283,9 +288,13 @@ class TestTheRelocationIsTraceable:
 
     def test_every_entry_says_why_it_is_evidence_preserving(self, record):
         for e in record["entries"]:
-            assert e.get("evidence_preserving_because"), e["new_path"]
+            #: Either spelling: v1 says why the move preserves evidence, v2
+            #: states the historical binding and the migration reason. Both
+            #: answer the same question and both must answer it.
+            assert (e.get("evidence_preserving_because")
+                    or e.get("historical_binding")), e["new_path"]
+            assert e.get("migration_reason") or e.get("binding"), e["new_path"]
             assert e.get("source_commit")
-            assert e.get("binding")
 
     def _unused_test_every_exception_states_what_holds_it(self, record):
         allowed = {"entry_point", "named_by_executable", "index_registered",
@@ -338,7 +347,7 @@ class TestTheNavigationIsDerivedFromTheTree:
             "scripts/consolidate/render_log_navigation.py --write")
 
         runs = runs_by_experiment(REPO)
-        for d in sorted((REPO / "logs/experiments").iterdir()):
+        for d in sorted((REPO / "logs/cross-stage").iterdir()):
             if not d.is_dir():
                 continue
             assert (d / "README.md").read_text() == render_experiment_readme(
@@ -356,7 +365,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         """A generated document restating an owned fact is the duplication the
         cleanup removes; it would also go stale silently."""
         import re
-        for d in sorted((REPO / "logs/experiments").iterdir()):
+        for d in sorted((REPO / "logs/cross-stage").iterdir()):
             if not d.is_dir():
                 continue
             body = (d / "README.md").read_text()
