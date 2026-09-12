@@ -33,7 +33,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-PROBES = REPO / "logs/cross-stage/continuation_b/runs/attempt4/probes"
+PROBES = REPO / "logs/stages/stage-1/continuation_b/runs/attempt4/probes"
 PRICING = REPO / "logs/shared/analyses/autoinit_behavioural_continuation_pricing.json"
 ATTEMPT4_REUSE = REPO / "logs/shared/analyses/autoinit_attempt4_probe_reuse.json"
 
@@ -107,7 +107,7 @@ def test_a_moved_attempt4_digest_fails_before_any_probe(drv, monkeypatch, tmp_pa
 
 def test_the_issuer_and_preregistration_both_carry_it():
     prereg = json.loads(
-        (REPO / "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     record = prereg["reuse_rule"]["attempt4_record"]
     assert record["probes_dir_digest"] == json.loads(
         ATTEMPT4_REUSE.read_text())["probes_dir_digest"]
@@ -262,7 +262,7 @@ def test_the_preregistration_binds_the_live_executable_digest():
     from experiments.phase_b.continuation import continuation_source_digest
 
     prereg = json.loads(
-        (REPO / "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     recorded = prereg["executable_source"]["digest"]
     live = continuation_source_digest(REPO)["digest"]
 
@@ -276,12 +276,12 @@ def test_the_preregistration_binds_the_live_executable_digest():
         # would destroy its meaning. Declaring the change is the remedy this
         # project already chose once, for the same file, when the continuation
         # itself needed its branch.
-        record = REPO / "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_post_freeze_changes.json"
+        record = REPO / "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_post_freeze_changes.json"
         assert record.is_file(), (
             f"the preregistration binds {recorded[:12]}… but the source tree "
             f"digests to {live[:12]}… and nothing declares the change. Either "
             "revert the edit or record it, as "
-            "logs/cross-stage/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json does.")
+            "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json does.")
         declared = json.loads(record.read_text())
         assert declared["frozen_digest"] == recorded
         assert declared["post_freeze_digest"] == live, (
@@ -299,7 +299,7 @@ def test_the_preregistration_binds_the_live_session_plan_and_pricing():
     from experiments.phase_b.continuation import CONTINUATION_PLAN_V1
 
     prereg = json.loads(
-        (REPO / "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     priced = json.loads(PRICING.read_text())
 
     assert prereg["session_plan"]["plan_hash"] == CONTINUATION_PLAN_V1.plan_hash
@@ -314,7 +314,7 @@ def test_the_preregistration_binds_the_live_session_plan_and_pricing():
 def test_the_preregistration_states_the_current_scientific_state():
     """No stale V2 narrative alongside V3 fields."""
     prereg = json.loads(
-        (REPO / "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     blob = json.dumps(prereg)
 
     assert "at most two conditional sc" not in blob, (

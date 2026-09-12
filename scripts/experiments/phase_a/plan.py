@@ -386,7 +386,7 @@ class PhaseAAuthorization:
 
 #: The grant this session issues. Figures come from the launcher's own
 #: `make_plan`, which is what `plan_session` computes before a pod can exist —
-#: NOT from `logs/cross-stage/phase_a/analyses/autoinit_phase_a_repricing.md`, which priced search and probes
+#: NOT from `logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_repricing.md`, which priced search and probes
 #: and never priced the session around them.
 #:
 #: `authorized_session_commit` and `harness_source_digest` are filled at issue

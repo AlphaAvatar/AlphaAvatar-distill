@@ -27,7 +27,7 @@ from aadistill.initialization.planning.stage1_import import (  # noqa: E402
     import_stage1_result,
 )
 
-D = REPO / "logs/cross-stage/phase_a/runs/attempt12"
+D = REPO / "logs/stages/stage-1/phase_a/runs/attempt12"
 STORE = Path("/home/ecs-user/aad-artifacts/autoinit/phase_a")
 
 pytestmark = pytest.mark.skipif(

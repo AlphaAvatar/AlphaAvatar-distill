@@ -327,6 +327,9 @@ def main() -> int:
             for d in sorted(p for p in st.iterdir() if p.is_dir()):
                 readmes[d / "README.md"] = render_experiment_readme(d, root, runs)
     cross = root / CROSS
+    #: Only when something genuinely spans stages. It is empty today -- every
+    #: historical experiment resolved to exactly one stage -- and an empty
+    #: `cross-stage/` is not created just to have the category.
     if cross.is_dir():
         readmes[cross / "README.md"] = render_group_readme(
             cross, "logs/cross-stage",

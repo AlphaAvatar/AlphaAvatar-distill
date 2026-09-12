@@ -7,7 +7,7 @@ The project's records. **Stage → Experiment → Run.**
 | what is true right now | [`state/current.md`](state/current.md) · [`state/current.json`](state/current.json) |
 | what has been spent | [`budget/ledger.md`](budget/ledger.md), and run [`derive_budget.py`](../scripts/consolidate/derive_budget.py) for live balances |
 | what a stage contains | [`stages/`](stages/) |
-| work with no established stage | [`cross-stage/`](cross-stage/) |
+| work with no established stage | [`cross-stage/`](archive/cross-stage/) |
 | shared infrastructure | [`shared/`](shared/) |
 | every run, anywhere | [`index.json`](index.json) |
 | where an old path went | [`migrations/`](migrations/) |
@@ -50,7 +50,7 @@ stages are **driver** stages, a different dimension, and an operator called
 
 Today only `phase_c1` declares one, so it is the only occupant of
 [`stages/stage-1/`](stages/stage-1/). Everything else is in
-[`cross-stage/`](cross-stage/) — a statement that no frozen record establishes
+[`cross-stage/`](archive/cross-stage/) — a statement that no frozen record establishes
 its stage, not a holding pen. Stages are never pre-created: a stage exists when
 an experiment declares it.
 

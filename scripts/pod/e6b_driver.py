@@ -73,7 +73,7 @@ def model_dir(name: str) -> Path:
 
 def stage_validate(args) -> None:
     run(["scripts/training/validate_e6b_arms.py",
-         "--registration", "logs/cross-stage/early/analyses/e6b_registration.json",
+         "--registration", "logs/stages/stage-3/e6b/analyses/e6b_registration.json",
          "--out", OUT / "e6b_preflight_driver.json"])
     mark("ARMS_VALIDATED")
 

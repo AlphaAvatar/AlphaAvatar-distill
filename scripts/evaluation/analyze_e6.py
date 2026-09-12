@@ -2,7 +2,7 @@
 """Experiment 6 analysis: the E1 PCA scale curve on the frozen 150-prompt battery.
 
     PYTHONPATH=src python scripts/evaluation/analyze_e6.py \
-        --out artifacts/audit/e6_results.json --report logs/cross-stage/early/analyses/e6_report.md
+        --out artifacts/audit/e6_results.json --report logs/stages/stage-3/e6/analyses/e6_report.md
 
 Nothing is generated here. Every arm is re-scored from its retained raw
 generations with the current scorer, and no stored `correct`, `usable` or
@@ -53,7 +53,7 @@ BOOTSTRAP_SEED = 20260806
 AUDIT = REPO_ROOT / "artifacts/audit"
 THREE_MODE = AUDIT / "three_mode"
 SESSIONS_PATH = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
-REGISTRATION = REPO_ROOT / "logs/cross-stage/early/analyses/e6_registration.json"
+REGISTRATION = REPO_ROOT / "logs/stages/stage-3/e6/analyses/e6_registration.json"
 
 # Carried unchanged from the E3/E4/E5 registry; see the registration.
 FLOORS = {"usable_rollout_rate": 0.0800, "correct_overall": 0.0600}
@@ -481,8 +481,8 @@ def main() -> None:
     # Small enough to track (~140 KB): the per-sample maps are stripped before
     # writing, so this is the summary, not the generations. The generations stay
     # under the gitignored `artifacts/` tree and on the dev-box store.
-    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/cross-stage/early/analyses/e6_results.json")
-    ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/cross-stage/early/analyses/e6_report.md")
+    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/stages/stage-3/e6/analyses/e6_results.json")
+    ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/stages/stage-3/e6/analyses/e6_report.md")
     # 1,500 rows of raw evidence: too big for logs/, and it lives beside the
     # generations it summarises under the gitignored artifacts tree.
     ap.add_argument("--per-prompt", type=Path,

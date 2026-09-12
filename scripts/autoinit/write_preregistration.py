@@ -4,7 +4,7 @@
 
 Everything the run is committed to, assembled from the live objects rather than
 transcribed, so a field cannot drift from what the code will actually do. The
-companion prose document is `logs/cross-stage/phase_a/analyses/autoinit_phase_a_preregistration.md`.
+companion prose document is `logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_preregistration.md`.
 
 Two inputs are deliberately absent and marked `PENDING_MICRO_PREFLIGHT`: the
 canonical control's usable-rollout rate and correctness on the recovery-search
@@ -97,15 +97,15 @@ CANONICAL_CONTROL = {
 }
 PENDING = "PENDING_MICRO_PREFLIGHT"
 #: The pre-measurement draft. Preserved, never rewritten.
-DRAFT_PREREGISTRATION = "logs/cross-stage/phase_a/plans/autoinit_phase_a_preregistration.json"
+DRAFT_PREREGISTRATION = "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration.json"
 MATERIALIZED_PREREGISTRATION = (
-    "logs/cross-stage/phase_a/plans/autoinit_phase_a_preregistration_materialized.json")
+    "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration_materialized.json")
 #: The frozen *science* plan, in the shape `assert_preregistered` reads. The
 #: preregistration document above is prose-and-evidence around it; this is the
 #: file the driver binds the executing SuccessiveHalvingPlan against, and until
 #: now it had never been written — `plan.freeze` was only ever called into a
 #: dry-run scratch directory and in tests.
-FROZEN_RECOVERY_PLAN = "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+FROZEN_RECOVERY_PLAN = "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 #: The frozen recovery-search battery's content hash. Pinned here so the
 #: supersession statement can assert, mechanically, that the *prompts* did not
 #: change when the *scoring* did.
@@ -158,7 +158,7 @@ def build_plan(battery: dict) -> SuccessiveHalvingPlan:
 
 def build_frozen_plan(repo_root: str | Path = REPO_ROOT, *,
                       recovery_search: str = "artifacts/stage3/recovery_search_v2",
-                      stage3: str = "logs/cross-stage/phase_a/results/autoinit_stage3_complete",
+                      stage3: str = "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete",
                       ) -> SuccessiveHalvingPlan:
     """The executing plan: built, then materialized from the control's own rates.
 
@@ -221,7 +221,7 @@ def main() -> None:
     ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
     ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v2")
     ap.add_argument(
-        "--stage3", default="logs/cross-stage/phase_a/results/autoinit_stage3_complete",
+        "--stage3", default="logs/stages/stage-1/phase_a/results/autoinit_stage3_complete",
         help="Completed control-characterization products. When this directory "
              "carries materialized thresholds, the two PENDING rules are frozen "
              "from the control's own rates and the preregistration is re-emitted "
@@ -535,9 +535,9 @@ def main() -> None:
         "recovery_scoring_contract": {
             **recovery_scoring_contract(REPO_ROOT),
             "validation": json.loads(
-                (REPO_ROOT / "logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_scoring_validation.json"
+                (REPO_ROOT / "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_scoring_validation.json"
                  ).read_text())
-            if (REPO_ROOT / "logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_scoring_validation.json"
+            if (REPO_ROOT / "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_scoring_validation.json"
                 ).is_file() else "NOT VALIDATED",
             "tool_usable_gate": {
                 "definition": ("generic usable_rollout AND tool_call_emitted AND "
@@ -607,9 +607,9 @@ def main() -> None:
                        "intended_phase_a_comparison":
                            r.get("intended_phase_a_comparison"),
                        "report_sha256": r["report_sha256"]}
-        )(json.loads((REPO_ROOT / "logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json"
+        )(json.loads((REPO_ROOT / "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json"
                       ).read_text()))
-        if (REPO_ROOT / "logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json").is_file()
+        if (REPO_ROOT / "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json").is_file()
         else "NOT AUDITED",
         "tool_scoring_audit": json.loads(
             (REPO_ROOT / "logs/shared/analyses/autoinit_tool_scoring_audit.json").read_text())
@@ -700,7 +700,7 @@ def main() -> None:
             "(logs/shared/validations/micro-preflight/runs/autoinit_preflight_run4/preflight_evidence.json)",
             "activation-statistics GPU/CPU split measured on two hosts: "
             "gpu_fraction 0.5177-0.5609, total 8.02-8.30 s per pass "
-            "(logs/cross-stage/phase_a/analyses/autoinit_phase_a_repricing.md)",
+            "(logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_repricing.md)",
         ],
     }
     prereg["preregistration_sha256"] = sha256_json(prereg)

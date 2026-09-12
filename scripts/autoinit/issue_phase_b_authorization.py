@@ -48,8 +48,8 @@ from experiments.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B
 from experiments.source_sets import recovery_scoring_contract, trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-FROZEN_PLAN = "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
-PREREGISTRATION = "logs/cross-stage/phase_b/plans/autoinit_phase_b_preregistration.json"
+FROZEN_PLAN = "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+PREREGISTRATION = "logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json"
 REUSE_RECORD = "logs/shared/analyses/autoinit_historical_probe_reuse.json"
 
 #: The ceilings, RE-DERIVED and approved 2026-08-27. `$26.8049` rested on a P=2

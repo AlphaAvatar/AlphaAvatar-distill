@@ -241,18 +241,18 @@ STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
 #: target-architecture checkpoint that exists before the search runs, and it is
 #: what the continuation probed, so the generation identity stays comparable.
 CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
-FROZEN_PLAN = REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+FROZEN_PLAN = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 #: The Stage-3 controls materialized this run's equivalence interval and
 #: feasibility floor under ONE evaluation protocol. Phase A must measure
 #: under the same one or the thresholds do not describe its candidates.
-STAGE3_THRESHOLDS = REPO / "logs/cross-stage/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json"
+STAGE3_THRESHOLDS = REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json"
 STAGE3_EVALUATION_PROTOCOL_HASH = (
     "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4")
-STAGE3_ATTESTATION = REPO / "logs/cross-stage/phase_a/results/autoinit_stage3_complete/attested_evaluation_protocol.json"
-STAGE3_PROBE = REPO / "logs/cross-stage/phase_a/results/autoinit_stage3_complete/engine_probe.json"
+STAGE3_ATTESTATION = REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/attested_evaluation_protocol.json"
+STAGE3_PROBE = REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/engine_probe.json"
 #: What the stage-2 recovery trainer needs on the device. DERIVED FROM A
 #: MEASUREMENT, not chosen: the full basis is recorded in
-#: `logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json` and a test pins these terms
+#: `logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json` and a test pins these terms
 #: against it.
 #:
 #: The old value was `22 * 2**30`, attributed to attempt 12's OOM — a subprocess
@@ -279,7 +279,7 @@ RECOVERY_TRAINER_BYTES = int(
      + RECOVERY_TRAINER_RESERVED_SLACK_GIB
      + RECOVERY_TRAINER_NON_TORCH_GIB) * 2**30)
 #: The versioned comparability relation the live protocol is judged under.
-COMPAT_V2 = REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_protocol_compat_v2.json"
+COMPAT_V2 = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_protocol_compat_v2.json"
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
 #: The preregistered `state_eval@v1` identity, as two hashes that bind two
 #: different things. The manifest carries only the first.

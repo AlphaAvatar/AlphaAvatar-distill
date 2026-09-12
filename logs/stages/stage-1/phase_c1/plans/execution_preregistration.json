@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "8a6bbcaafa761ffca0b2697c5f68182798a2709d",
+ "head_commit": "e89952b0be8d5e31397976571005c7326c022630",
  "executable_source": {
   "digest": "2c43e4e6cf85582e3fa809512a1b2c611ba880e0229884fb566f3e7dae7845fd",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "d5cb4232cac5f4e0d4e29f63c14891920eb5f656e9cb83065777c19b4c2fc54a",
+  "digest": "dac103d1d4e014ea02f77941a1cdf099a456aca220c400ffbfcb063f7c76c535",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -126,8 +126,8 @@
    },
    {
     "path": "scripts/autoinit/verify_frozen_assets.py",
-    "sha256": "5433423c08b0be3c20b9ba3a2ffa34c40c2b8346c1b565f2883de19269889340",
-    "bytes": 11289
+    "sha256": "de7e160e5e87d16bdf8658e64ff25c53d36266a6ae3cd8de4cb4648d12abb68d",
+    "bytes": 11292
    },
    {
     "path": "scripts/evaluation/uncapped_eval.py",
@@ -146,8 +146,8 @@
    },
    {
     "path": "scripts/experiments/phase_a/plan.py",
-    "sha256": "2b51f07e6fb25d773a325ad360408b9e3964ec1f4c240a0063ab4ab471a93e0a",
-    "bytes": 27779
+    "sha256": "2f032e240405bb345e8ae1e4a9ba89959a5e13049afe109b1d2cb67d591bddfc",
+    "bytes": 27782
    },
    {
     "path": "scripts/experiments/phase_c1/__init__.py",
@@ -216,8 +216,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_driver.py",
-    "sha256": "3fb0442573c3f69f0c9408206ca450a18dc218f81a26217fd4d14ec2083031ec",
-    "bytes": 61945
+    "sha256": "fc247046f0f3968dd2a2036019a33b63b59062df384b2e35eae4c7c522b6a93b",
+    "bytes": 61948
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
@@ -556,8 +556,8 @@
    },
    {
     "path": "src/aadistill/runtime/run_layout.py",
-    "sha256": "cd28b70a1eea540667869acf59df9dfa02c8147930fca6e5c83db883271bc084",
-    "bytes": 11889
+    "sha256": "2317d16715ac0ae5117009e118d086f9191b9fdf054a5be2f12a0f0be6c6a9e5",
+    "bytes": 12534
    },
    {
     "path": "src/aadistill/runtime/staging_contract.py",
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "9d05a0c1df1d189f7f03c7dcd6456e99ce906f8ccdcf057d491b883775d41acd"
+ "preregistration_sha256": "cc635d115ca543a8e5aa65900802a653b9135989e709ae8285c800c5c5083021"
 }

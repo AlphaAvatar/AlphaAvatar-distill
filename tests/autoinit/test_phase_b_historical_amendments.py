@@ -41,7 +41,7 @@ from experiments.phase_b.post_freeze import (  # noqa: E402
     historical_accounted_for,
 )
 
-PREREG = REPO / "logs/cross-stage/phase_b/plans/autoinit_phase_b_preregistration.json"
+PREREG = REPO / "logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json"
 LEDGER = REPO / HISTORICAL_LEDGER_PATH
 
 
@@ -71,8 +71,8 @@ def ledger_at(tmp_path):
         work = tmp_path / "work"
         work.mkdir(exist_ok=True)
         (work / "logs").mkdir(exist_ok=True)
-        for rel in ("logs/cross-stage/phase_b/plans/autoinit_phase_b_preregistration.json",
-                    "logs/cross-stage/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"):
+        for rel in ("logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json",
+                    "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"):
             (work / rel).parent.mkdir(parents=True, exist_ok=True)
             (work / rel).write_bytes((REPO / rel).read_bytes())
         (work / HISTORICAL_LEDGER_PATH).parent.mkdir(parents=True, exist_ok=True)

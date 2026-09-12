@@ -57,8 +57,8 @@ ATTEMPT5 = REPO_ROOT / "logs/shared/analyses/autoinit_attempt5_probe_reuse.json"
 ATTEMPT4 = REPO_ROOT / "logs/shared/analyses/autoinit_attempt4_probe_reuse.json"
 #: The recomputed rung-2 decision. When it exists it names exactly which sc
 #: probes are owed; without it the pricing books the worst case.
-CORRECTED_RUNG2 = REPO_ROOT / "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json"
-AMENDMENT = REPO_ROOT / "logs/cross-stage/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
+CORRECTED_RUNG2 = REPO_ROOT / "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json"
+AMENDMENT = REPO_ROOT / "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
 
 #: Measured, not chosen: the slowest setup across attempts 3, 4 and 5 was
 #: attempt 5's 21.9 min (attempt 4 took 7.3). A bound takes the slowest observed.
@@ -130,7 +130,7 @@ def price(hardware=L40S_MEASURED) -> dict:
         corrected = json.loads(CORRECTED_RUNG2.read_text())
         missing_sc = [s[:12] for s in corrected["sc_still_owed"]]
         sc_basis = {
-            "source": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json",
+            "source": "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json",
             "decision_status": corrected["decision_status"],
             "tie_break_candidates": [s[:12] for s in
                                      corrected["tie_break_candidates"]],

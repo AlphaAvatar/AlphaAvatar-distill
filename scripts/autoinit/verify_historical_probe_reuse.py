@@ -58,7 +58,7 @@ from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 #: Explicit: importing an adapter module no longer registers it.
 register_builtin_adapters()
 
-ATTEMPT = REPO_ROOT / "logs/cross-stage/recovery_continuation/runs/attempt7"
+ATTEMPT = REPO_ROOT / "logs/stages/stage-1/recovery_continuation/runs/attempt7"
 PROBES = ATTEMPT / "probes"
 ATTESTED = ATTEMPT / "attested_evaluation_protocol.json"
 

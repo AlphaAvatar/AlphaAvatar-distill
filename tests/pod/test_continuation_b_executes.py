@@ -62,11 +62,11 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-STAGE3_PROBE = REPO / "logs/cross-stage/phase_a/results/autoinit_stage3_complete/engine_probe.json"
-FROZEN_PLAN = REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
-REAL_SCORED = (REPO / "logs/cross-stage/phase_a/results/autoinit_stage3_complete"
+STAGE3_PROBE = REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/engine_probe.json"
+FROZEN_PLAN = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+REAL_SCORED = (REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete"
                / "preflight_ctl_r0860k_sa_recovery_search.json")
-REAL_AMENDMENT = REPO / "logs/cross-stage/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
+REAL_AMENDMENT = REPO / "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
 PRICING = REPO / "logs/shared/analyses/autoinit_behavioural_continuation_pricing.json"
 
 pytestmark = pytest.mark.skipif(

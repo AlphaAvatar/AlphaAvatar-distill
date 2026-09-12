@@ -5,7 +5,7 @@ longer a matter of taste which reference mode the model prices. The run is a
 **replay constraint**: a model that cannot reproduce work already observed cannot
 be used to authorize more of it.
 
-Observed, from `logs/cross-stage/phase_b/analyses/autoinit_phase_b_attempt3.json` and the driver log:
+Observed, from `logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt3.json` and the driver log:
 
 * 12 `depth.causal_kl_greedy_v1` invocations completed;
 * 388.2 min total, mean 32.3, range 28.5-38.4;

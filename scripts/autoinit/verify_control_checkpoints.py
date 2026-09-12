@@ -168,7 +168,7 @@ def main() -> None:
         # script checks lineage and bytes, which is a strict subset.
         entry["recipe_matched_control"] = False
         entry["recipe_matched_control_decided_by"] = (
-            "logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json")
+            "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json")
         all_ok = all_ok and entry["passes_legacy_lineage_subset"]
         report["controls"][name] = entry
 

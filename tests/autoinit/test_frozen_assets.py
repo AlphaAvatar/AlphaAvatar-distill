@@ -276,7 +276,7 @@ def test_battery_ids_are_reproducible_not_process_dependent():
 def test_the_equivalence_denominator_matches_the_battery():
     """The interval's n_pooled must track the scorable count, not a stale constant."""
     manifest = load(RECOVERY_SEARCH / "manifest.json")
-    prereg = load(REPO / "logs/cross-stage/phase_a/plans/autoinit_phase_a_preregistration.json")
+    prereg = load(REPO / "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration.json")
     rule = prereg["recovery"]["selection_rules"]["equivalence_rule"]
     assert rule["n_pooled"] == manifest["n_scorable_prompts"] * 2
     assert rule["status"] == "PENDING_CONTROL_CHARACTERIZATION"

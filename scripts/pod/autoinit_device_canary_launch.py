@@ -123,7 +123,7 @@ CANARY_PLAN_V1 = PreflightPlan(
 )
 
 #: Priced from the project's own cost model: the compute is ~1 s, so this is
-#: session overhead and nothing else. See `logs/cross-stage/phase_a/analyses/autoinit_stage1_device_audit.json`.
+#: session overhead and nothing else. See `logs/stages/stage-1/phase_a/analyses/autoinit_stage1_device_audit.json`.
 SETUP_MINUTES = 11.0
 PARENT_LOAD_MINUTES = 3.0
 CANARY_MINUTES = 8.0

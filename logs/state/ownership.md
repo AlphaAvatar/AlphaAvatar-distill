@@ -55,7 +55,6 @@ run's own closeout; those are the owners.
 
 ### HISTORICAL
 
-* `cross-stage/`
 * `index.json`
 * `shared/`
 * `stages/`

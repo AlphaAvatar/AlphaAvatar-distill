@@ -12,7 +12,7 @@ else reads it. The previous single-run versions (`orchestrate_s2v1.sh`,
 E6b overran its authorization by $0.56 and lost both arms' machine-readable
 training event streams. Four rules follow, and a new launcher that does not
 implement them is not compliant. Full account:
-[`logs/cross-stage/early/analyses/e6b_protocol_deviations.md`](../../logs/cross-stage/early/analyses/e6b_protocol_deviations.md);
+[`logs/stages/stage-3/e6b/analyses/e6b_protocol_deviations.md`](../../logs/stages/stage-3/e6b/analyses/e6b_protocol_deviations.md);
 decision record 2026-08-09.
 
 **1. Never depend on the driver-start ssh returning.** E6b's launcher used the

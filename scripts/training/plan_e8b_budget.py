@@ -240,7 +240,7 @@ def main() -> int:
            "e8b_hard_backstop_usd": round(hard, 2),
            "authorized_cumulative_cap_usd": 211.07,  # rounded UP to the cent, per maintainer
            "expected_wall_hours": round(wall / 60, 1)}
-    dest = REPO_ROOT / "logs/cross-stage/early/analyses/e8b_budget_plans.json"
+    dest = REPO_ROOT / "logs/stages/stage-3/e8b/analyses/e8b_budget_plans.json"
     dest.write_text(json.dumps(out, indent=2) + "\n")
     print(f"\nwrote {dest.relative_to(REPO_ROOT)}")
     return 0

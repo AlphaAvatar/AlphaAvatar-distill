@@ -1258,7 +1258,7 @@ measured under, so this would have failed later at far greater cost.
 
 Reproduced at **$0** afterwards by hiding both directories and re-running the
 pod's exact ignore set: the same four tests fail, and only those four. Record:
-[`autoinit_continuation_b_attempt1.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt1.json).
+[`autoinit_continuation_b_attempt1.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt1.json).
 
 Headroom `$23.4537` still covers one `$8.0691` continuation, but the grant
 explicitly excludes a second attempt, so one needs a maintainer decision.
@@ -1296,7 +1296,7 @@ billing. The authorization `autoinit.continuation_b.20260829T194657Z` is
 
 Behavioural-continuation attempts now total **$0.5659** and have bought no
 science. Record:
-[`autoinit_continuation_b_attempt2.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt2.json).
+[`autoinit_continuation_b_attempt2.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt2.json).
 
 ## 2026-08-30 — Behavioural continuation attempt 3: $0.2275, stage 0 PASSED, stage 1 failed
 
@@ -1341,7 +1341,7 @@ authorization `autoinit.continuation_b.20260830T091529Z` is **consumed**.
 
 Behavioural-continuation attempts now total **$0.7934** and have bought no
 probe. Record:
-[`autoinit_continuation_b_attempt3.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt3.json).
+[`autoinit_continuation_b_attempt3.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt3.json).
 
 ## 2026-08-30 — Behavioural continuation attempt 4: $1.4680, COMPLETE and RESOLVED
 
@@ -1369,7 +1369,7 @@ across 16 classes collected, teardown gate `allowed=True failed=None`, pod delet
 Behavioural-continuation attempts total **$2.2614** across four launches; the
 three that bought nothing cost `$0.7934` between them and each closed a distinct
 defect. Record:
-[`autoinit_continuation_b_attempt4.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt4.json).
+[`autoinit_continuation_b_attempt4.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt4.json).
 
 ## 2026-08-30 — Behavioural continuation attempt 5: $1.5433, PHASE B RESOLVED
 
@@ -1402,7 +1402,7 @@ separation.
 Came in at `$1.5433` against the `$5.4784` ceiling. Behavioural-continuation
 attempts total **$3.8047** across five launches; the three that bought nothing
 cost `$0.7934` and each closed a distinct defect. Record:
-[`autoinit_continuation_b_attempt5.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt5.json).
+[`autoinit_continuation_b_attempt5.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt5.json).
 
 ## Standing rules
 

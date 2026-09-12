@@ -232,7 +232,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=str(Path.home() / ".runpod/config.toml"))
-    ap.add_argument("--out", default="logs/cross-stage/measurement/analyses/autoinit_measurement_session.json")
+    ap.add_argument("--out", default="logs/stages/stage-1/measurement/analyses/autoinit_measurement_session.json")
     return ap
 
 

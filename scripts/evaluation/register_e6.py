@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Write the immutable Experiment 6 registration, BEFORE any GPU is created.
 
-    PYTHONPATH=src python scripts/evaluation/register_e6.py --out logs/cross-stage/early/analyses/e6_registration.json
+    PYTHONPATH=src python scripts/evaluation/register_e6.py --out logs/stages/stage-3/e6/analyses/e6_registration.json
 
 E6 is **evaluation-only**. Nothing trains, nothing is merged, quantized or
 overwritten. It places the existing high-rung Experiment 1 PCA checkpoints onto
@@ -352,7 +352,7 @@ def cost_model(gpu: str, rate: float) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/cross-stage/early/analyses/e6_registration.json")
+    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/stages/stage-3/e6/analyses/e6_registration.json")
     ap.add_argument("--gpu", default="L40S")
     ap.add_argument("--rate", type=float, default=0.99)
     ap.add_argument("--authorized-usd", type=float, required=True,

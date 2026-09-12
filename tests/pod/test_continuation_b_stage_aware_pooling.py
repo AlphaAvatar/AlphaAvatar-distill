@@ -41,8 +41,8 @@ sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 #: The attempt-4 evidence, exactly as retained.
-PROBES = REPO / "logs/cross-stage/continuation_b/runs/attempt4/probes"
-RESULT = REPO / "logs/cross-stage/continuation_b/runs/attempt4/phase_a_result.json"
+PROBES = REPO / "logs/stages/stage-1/continuation_b/runs/attempt4/probes"
+RESULT = REPO / "logs/stages/stage-1/continuation_b/runs/attempt4/phase_a_result.json"
 
 FE = "fe9683e6a9c783bbc6fe276a78c851c6"
 BD = "85bde4ded2c31953f802e39cf2252c87"
@@ -53,7 +53,7 @@ CTL = "control-qwen3_0p6b_init_v0"
 #: `seed_aware_max_binomial_seedrange` rule, whose dominant term is the binomial
 #: one; the value is pinned below against the committed result so a typo here
 #: cannot quietly widen or narrow the decision.
-FROZEN_PLAN = REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+FROZEN_PLAN = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 
 
 def load_driver():

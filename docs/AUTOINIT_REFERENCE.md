@@ -146,7 +146,7 @@ must **name** the streams it truncates; an unnamed truncation raises.
 `LogRelay` mirroring event streams continuously; `collect_artifacts.py` gating
 teardown. **`--terminate-after` is a redundant third layer and is not a stop
 mechanism** — it has never been observed to fire. Verified live end-to-end by the
-control-plane canary ([`e7_canary_rerun_report.md`](../logs/cross-stage/early/analyses/e7_canary_rerun_report.md),
+control-plane canary ([`e7_canary_rerun_report.md`](../logs/stages/stage-3/e7/analyses/e7_canary_rerun_report.md),
 12/12) and exercised for 635 minutes by E7 without incident.
 
 ### 0.5 Two prerequisite facts found on 2026-08-10, both binding
@@ -277,8 +277,8 @@ what restores general text is *extra KD signal on unseen text*, largely
 regardless of which text.
 
 Record [`EXPERIMENTS.md`](../logs/archive/repository/indexes/EXPERIMENTS.md) §34 · report
-[`e7_report.md`](../logs/cross-stage/early/analyses/e7_report.md) · preregistration
-[`e7_preregistration.md`](../logs/cross-stage/early/analyses/e7_preregistration.md) · decision
+[`e7_report.md`](../logs/stages/stage-3/e7/analyses/e7_report.md) · preregistration
+[`e7_preregistration.md`](../logs/stages/stage-3/e7/analyses/e7_preregistration.md) · decision
 [`decisions.md`](../logs/budget/decisions.md) 2026-08-09.
 
 ## 4. Protocol requirements (binding)
@@ -488,10 +488,10 @@ all zero cost:
 8. **Do not launch** the old 2.96M recovery, the E8b hardware bridge, P2-5.50M, a
    FineWeb sweep, on-policy, full recovery of any Top-1 winner, or any E9.
 
-**Durability is done** (`logs/cross-stage/early/analyses/e8_relay_manifest.json`): 13/13 staged and
+**Durability is done** (`logs/stages/stage-3/e8/analyses/e8_relay_manifest.json`): 13/13 staged and
 roundtrip-verified, including the 1.95 GB Stage 0 cache and `warmup_v1`, its input.
 The treatment init and the full search trace are staged too
-(`logs/cross-stage/early/analyses/e8_init_stage_manifest.json`, 11/11 verified).
+(`logs/stages/stage-3/e8/analyses/e8_init_stage_manifest.json`, 11/11 verified).
 
 **No other follow-up is running or planned.** A 2.96M + FineWeb confirmation, a
 FineWeb-ratio sweep, P2-5.50M, on-policy/GKD, a second contribution map and any E9
@@ -538,6 +538,6 @@ around the retired metric.
 | **§36** | **E8a — map preserves the teacher 3.1× better, initializes 2.8 nats worse** | **complete; 2.96M recovery cancelled** |
 | §37 | E8b — depth-map × compression interaction, pair-matched hardware | preflight done, awaiting $47.18 |
 
-Protocol deviations on record: [`e6b_protocol_deviations.md`](../logs/cross-stage/early/analyses/e6b_protocol_deviations.md)
+Protocol deviations on record: [`e6b_protocol_deviations.md`](../logs/stages/stage-3/e6b/analyses/e6b_protocol_deviations.md)
 (cost overrun $0.56, lost event streams; scientific endpoint valid, operational
 protocol noncompliant).

@@ -141,7 +141,7 @@ def main() -> None:
         # Session-level and example-level censuses are reported separately: one
         # rejected session removes `truncations` candidate examples, and mixing
         # the units made an earlier build look like it had lost a sample it had
-        # not (see logs/cross-stage/early/analyses/e5_registration.json census_reconciliation).
+        # not (see logs/stages/stage-3/e5/analyses/e5_registration.json census_reconciliation).
         "sessions": {
             "candidates": len(incremental),
             "accepted": len(incremental) - len(rejected_sessions),

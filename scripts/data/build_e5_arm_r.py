@@ -143,7 +143,7 @@ def main() -> None:
     # the dev box and FileNotFound-ed on the pod after 53 minutes of setup. The
     # pin carries the registered mask hash and is verified here, so a silently
     # different exclusion set cannot slip through.
-    pin = json.loads((REPO_ROOT / "logs/cross-stage/early/analyses/e5_heldout_eval_ids.json").read_text())
+    pin = json.loads((REPO_ROOT / "logs/stages/stage-3/e5/analyses/e5_heldout_eval_ids.json").read_text())
     held_out = set(pin["ids"])
     got = hashlib.sha256(json.dumps(sorted(held_out)).encode()).hexdigest()
     if got != pin["mask_sha256"] or not got.startswith("d6e24e0b09da1bcc"):

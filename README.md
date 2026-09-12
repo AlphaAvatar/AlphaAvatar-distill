@@ -25,7 +25,7 @@ has exactly one owner:
 | **current state, machine-readable** | [`logs/state/current.json`](./logs/state/current.json) |
 | **current state, in prose** | [`logs/state/current.md`](./logs/state/current.md) |
 | **the scientific history, by phase** | [`logs/state/phase_index.md`](./logs/state/phase_index.md) — start here if you do not know the filenames |
-| **what Phase A and Phase B concluded** | [`logs/cross-stage/phase_a/phase_a_vs_phase_b_comparison.md`](./logs/cross-stage/phase_a/phase_a_vs_phase_b_comparison.md) |
+| **what Phase A and Phase B concluded** | [`logs/cross-stage/phase_a/phase_a_vs_phase_b_comparison.md`](logs/stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md) |
 | spend, caps, authorizations | [`logs/budget/ledger.md`](./logs/budget/ledger.md) |
 | which log owns which fact | [`logs/state/ownership.md`](./logs/state/ownership.md) |
 | where code lives | [`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) |
@@ -243,7 +243,7 @@ step-matched compute control.
 - **No reasoning emerged anywhere.** GSM8K exact match across all 25 checkpoints:
   min 0.000, max 0.050, mean 0.006.
 
-Reviewable samples: [`logs/cross-stage/early/analyses/e1_test_cases.md`](./logs/cross-stage/early/analyses/e1_test_cases.md).
+Reviewable samples: [`logs/cross-stage/early/analyses/e1_test_cases.md`](logs/stages/stage-3/e1/analyses/e1_test_cases.md).
 
 </details>
 

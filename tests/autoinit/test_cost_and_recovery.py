@@ -888,7 +888,7 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
 
     This used to require the recorded digest to equal the live one. That is the
     right check while the code and the record describe the same tree, and the
-    wrong one afterwards: `logs/cross-stage/phase_a/plans/autoinit_phase_a_preregistration.json` is the
+    wrong one afterwards: `logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration.json` is the
     record of a COMPLETED run, so re-emitting it to match today's code would
     claim that run executed the relocated implementation.
 
@@ -897,7 +897,7 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
     old launch fail closed rather than proceed against thresholds measured
     under different code.
     """
-    path = REPO / "logs/cross-stage/phase_a/plans/autoinit_phase_a_preregistration.json"
+    path = REPO / "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration.json"
     if not path.is_file():
         pytest.skip("preregistration not present")
     from experiments.source_sets import recovery_scoring_contract
@@ -990,7 +990,7 @@ def test_the_preflight_plan_is_hashable_and_orders_money_last():
 
 
 def test_the_historical_controls_are_not_labelled_as_valid_controls():
-    audit_path = REPO / "logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json"
+    audit_path = REPO / "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json"
     if not audit_path.is_file():
         pytest.skip("fingerprint audit not present")
     audit = json.loads(audit_path.read_text())

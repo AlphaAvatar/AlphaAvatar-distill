@@ -74,7 +74,7 @@ CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 CONTROL_ROOT = REPO / "artifacts/controls"
 CONTROLS = (("preflight_ctl_r0860k_sa", 20260726),
             ("preflight_ctl_r0860k_sb", 20260801))
-RECORDS = REPO / "logs/cross-stage/phase_a/results/autoinit_permanent_controls"
+RECORDS = REPO / "logs/stages/stage-1/phase_a/results/autoinit_permanent_controls"
 BATTERY_CONTENT = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
 SMOKE_SETS = ("tool", "rag")
 

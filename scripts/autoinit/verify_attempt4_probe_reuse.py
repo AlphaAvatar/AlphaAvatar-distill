@@ -61,7 +61,7 @@ from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 #: Explicit: importing an adapter module no longer registers it.
 register_builtin_adapters()
 
-ATTEMPT = REPO_ROOT / "logs/cross-stage/continuation_b/runs/attempt4"
+ATTEMPT = REPO_ROOT / "logs/stages/stage-1/continuation_b/runs/attempt4"
 PROBES = ATTEMPT / "probes"
 ATTESTED = ATTEMPT / "attested_evaluation_protocol.json"
 
@@ -189,7 +189,7 @@ def verify(root: Path = PROBES) -> dict:
             "the probe against the checkpoint bytes, the frozen battery, the live "
             "scoring contract and the attested protocol — none of which the "
             "pooling defect touches."),
-        "source": "logs/cross-stage/continuation_b/runs/attempt4/probes",
+        "source": "logs/stages/stage-1/continuation_b/runs/attempt4/probes",
         "probes_dir_digest": probes_dir_digest(root),
         "attested_protocol_hash": attested_protocol,
         "live_scoring_contract_digest": live_contract["digest"],

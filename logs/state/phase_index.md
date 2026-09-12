@@ -19,7 +19,7 @@ duplicates no facts: every row is a status label and a link.
 
 > The two phases' best candidates are **not distinguishable**: `16/510` vs
 > `15/510`, one correct answer apart. See
-> [`phase_a_vs_phase_b_comparison.md`](../cross-stage/phase_a/phase_a_vs_phase_b_comparison.md).
+> [`phase_a_vs_phase_b_comparison.md`](../stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md).
 
 ---
 
@@ -33,22 +33,22 @@ operator order gives the best behavioural starting point?
 | attempt | status | record |
 | --- | --- | --- |
 | 1–5 | failed before the current session architecture | [`decisions.md`](../budget/decisions.md) |
-| 6 | failed | [`autoinit_phase_a_attempt6/`](../cross-stage/phase_a/runs/attempt6/) |
-| 7 | failed | [`autoinit_phase_a_attempt7/`](../cross-stage/phase_a/runs/attempt7/) |
-| 8 | failed, `$0.1900` | [`autoinit_phase_a_attempt8/`](../cross-stage/phase_a/runs/attempt8/) |
-| 9 | failed, `$0.3400` | [`autoinit_phase_a_attempt9/`](../cross-stage/phase_a/runs/attempt9/) |
-| 10 | failed, `$11.4300` | [`autoinit_phase_a_attempt10/`](../cross-stage/phase_a/runs/attempt10/) |
-| 11 | search completed; five selected leaves lost at teardown | [`autoinit_phase_a_attempt11/`](../cross-stage/phase_a/runs/attempt11/) |
-| 12 | OOM | [`autoinit_phase_a_attempt12/`](../cross-stage/phase_a/runs/attempt12/) |
-| summary | — | [`autoinit_phase_a_attempts/`](../cross-stage/phase_a/history/autoinit_phase_a_attempts/) |
+| 6 | failed | [`autoinit_phase_a_attempt6/`](../stages/stage-1/phase_a/runs/attempt6/) |
+| 7 | failed | [`autoinit_phase_a_attempt7/`](../stages/stage-1/phase_a/runs/attempt7/) |
+| 8 | failed, `$0.1900` | [`autoinit_phase_a_attempt8/`](../stages/stage-1/phase_a/runs/attempt8/) |
+| 9 | failed, `$0.3400` | [`autoinit_phase_a_attempt9/`](../stages/stage-1/phase_a/runs/attempt9/) |
+| 10 | failed, `$11.4300` | [`autoinit_phase_a_attempt10/`](../stages/stage-1/phase_a/runs/attempt10/) |
+| 11 | search completed; five selected leaves lost at teardown | [`autoinit_phase_a_attempt11/`](../stages/stage-1/phase_a/runs/attempt11/) |
+| 12 | OOM | [`autoinit_phase_a_attempt12/`](../stages/stage-1/phase_a/runs/attempt12/) |
+| summary | — | [`autoinit_phase_a_attempts/`](../stages/stage-1/phase_a/history/autoinit_phase_a_attempts/) |
 
 ### Behavioural selection — recovery continuation
 
 | attempt | status | record |
 | --- | --- | --- |
-| 1 | `$0.01`, launcher died 27 s in | [`autoinit_recovery_continuation_attempt1/`](../cross-stage/recovery_continuation/runs/attempt1/) |
-| 2–6 | failed | [`autoinit_recovery_continuation_attempt2/`](../cross-stage/recovery_continuation/runs/attempt2/) … [`…attempt6/`](../cross-stage/recovery_continuation/runs/attempt6/) |
-| **7** | **`ALL_DONE` — the Phase-A terminal result**, `$12.8587` | [`autoinit_recovery_continuation_attempt7/`](../cross-stage/recovery_continuation/runs/attempt7/) |
+| 1 | `$0.01`, launcher died 27 s in | [`autoinit_recovery_continuation_attempt1/`](../stages/stage-1/recovery_continuation/runs/attempt1/) |
+| 2–6 | failed | [`autoinit_recovery_continuation_attempt2/`](../stages/stage-1/recovery_continuation/runs/attempt2/) … [`…attempt6/`](../stages/stage-1/recovery_continuation/runs/attempt6/) |
+| **7** | **`ALL_DONE` — the Phase-A terminal result**, `$12.8587` | [`autoinit_recovery_continuation_attempt7/`](../stages/stage-1/recovery_continuation/runs/attempt7/) |
 
 ### Phase-A terminal result
 
@@ -56,10 +56,10 @@ operator order gives the best behavioural starting point?
 (usable `0.6561`) against `85bde4ded2c3` `10/510 = 0.019608` — margin `0.009804`,
 **inside** the `0.011695` interval. Both beat the canonical control (`0.008824`).
 
-* result → [`autoinit_recovery_continuation_attempt7/phase_a_result.json`](../cross-stage/recovery_continuation/runs/attempt7/phase_a_result.json)
-* preregistration → [`autoinit_phase_a_preregistration.json`](../cross-stage/phase_a/plans/autoinit_phase_a_preregistration.json)
-* frozen science plan → [`autoinit_phase_a_recovery_plan_frozen.json`](../cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json)
-* permanent Stage-3 controls → [`autoinit_permanent_controls/`](../cross-stage/phase_a/results/autoinit_permanent_controls/), [`autoinit_stage3_complete/`](../cross-stage/phase_a/results/autoinit_stage3_complete/)
+* result → [`autoinit_recovery_continuation_attempt7/phase_a_result.json`](../stages/stage-1/recovery_continuation/runs/attempt7/phase_a_result.json)
+* preregistration → [`autoinit_phase_a_preregistration.json`](../stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration.json)
+* frozen science plan → [`autoinit_phase_a_recovery_plan_frozen.json`](../stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json)
+* permanent Stage-3 controls → [`autoinit_permanent_controls/`](../stages/stage-1/phase_a/results/autoinit_permanent_controls/), [`autoinit_stage3_complete/`](../stages/stage-1/phase_a/results/autoinit_stage3_complete/)
 
 ---
 
@@ -72,19 +72,19 @@ distribution is allowed to vary?
 
 | attempt | status | record |
 | --- | --- | --- |
-| 1 | aborted at the pod test gate, `$0.15` | [`autoinit_phase_b_attempt1.json`](../cross-stage/phase_b/analyses/autoinit_phase_b_attempt1.json) |
-| 2 | aborted at authorization binding, `$0.23` | [`autoinit_phase_b_attempt2.json`](../cross-stage/phase_b/analyses/autoinit_phase_b_attempt2.json) |
-| 3 | search deadline exhausted, `$9.50` | [`autoinit_phase_b_attempt3.json`](../cross-stage/phase_b/analyses/autoinit_phase_b_attempt3.json) · [`autoinit_phase_b_attempt3/`](../cross-stage/phase_b/runs/attempt3/) |
-| 4 | search completed, raised writing its summary, `$8.17` | [`autoinit_phase_b_attempt4.json`](../cross-stage/phase_b/analyses/autoinit_phase_b_attempt4.json) · [`autoinit_phase_b_attempt4/`](../cross-stage/phase_b/runs/attempt4/) |
-| **5** | **Stage 1 COMPLETE — authoritative Top-5**, then Stage 2 failed. `$11.97` | [`autoinit_phase_b_attempt5.json`](../cross-stage/phase_b/analyses/autoinit_phase_b_attempt5.json) · [`autoinit_phase_b_attempt5/`](../cross-stage/phase_b/runs/attempt5/) |
+| 1 | aborted at the pod test gate, `$0.15` | [`autoinit_phase_b_attempt1.json`](../stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt1.json) |
+| 2 | aborted at authorization binding, `$0.23` | [`autoinit_phase_b_attempt2.json`](../stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt2.json) |
+| 3 | search deadline exhausted, `$9.50` | [`autoinit_phase_b_attempt3.json`](../stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt3.json) · [`autoinit_phase_b_attempt3/`](../stages/stage-1/phase_b/runs/attempt3/) |
+| 4 | search completed, raised writing its summary, `$8.17` | [`autoinit_phase_b_attempt4.json`](../stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt4.json) · [`autoinit_phase_b_attempt4/`](../stages/stage-1/phase_b/runs/attempt4/) |
+| **5** | **Stage 1 COMPLETE — authoritative Top-5**, then Stage 2 failed. `$11.97` | [`autoinit_phase_b_attempt5.json`](../stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt5.json) · [`autoinit_phase_b_attempt5/`](../stages/stage-1/phase_b/runs/attempt5/) |
 
 ### Stage-1 Top-5 → six-candidate universe → rung 1
 
 | step | artifact |
 | --- | --- |
-| authoritative Top-5 and operator paths | [`autoinit_phase_b_attempt5/stage1_selection.json`](../cross-stage/phase_b/runs/attempt5/stage1_selection.json) |
-| identity collapse, six-candidate universe, rung-1 selection | [`autoinit_phase_b_identity_collapse_amendment.json`](../cross-stage/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json) |
-| post-freeze executable drift, declared | [`autoinit_phase_b_post_freeze_changes.json`](../cross-stage/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json) |
+| authoritative Top-5 and operator paths | [`autoinit_phase_b_attempt5/stage1_selection.json`](../stages/stage-1/phase_b/runs/attempt5/stage1_selection.json) |
+| identity collapse, six-candidate universe, rung-1 selection | [`autoinit_phase_b_identity_collapse_amendment.json`](../stages/stage-1/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json) |
+| post-freeze executable drift, declared | [`autoinit_phase_b_post_freeze_changes.json`](../stages/stage-1/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json) |
 
 Two Top-5 leaves reproduced retained Phase-A finalists byte-for-byte, so the
 universe collapses to **six distinct candidates**; rung 1 advanced
@@ -94,11 +94,11 @@ universe collapses to **six distinct candidates**; rung 1 advanced
 
 | attempt | status | reached | record |
 | --- | --- | --- | --- |
-| 1 | failed, `$0.2513` | pod test gate | [`autoinit_continuation_b_attempt1.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt1.json) · [`…attempt1/`](../cross-stage/continuation_b/runs/attempt1/) |
-| 2 | failed, `$0.3146` | driver stage 0 | [`autoinit_continuation_b_attempt2.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt2.json) · [`…attempt2/`](../cross-stage/continuation_b/runs/attempt2/) |
-| 3 | failed, `$0.2275` | stage 1 | [`autoinit_continuation_b_attempt3.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt3.json) · [`…attempt3/`](../cross-stage/continuation_b/runs/attempt3/) |
-| 4 | `ALL_DONE`, `$1.4680` — **decision WITHDRAWN**, probe retained | [`autoinit_continuation_b_attempt4.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt4.json) · [`…attempt4/`](../cross-stage/continuation_b/runs/attempt4/) |
-| **5** | **`ALL_DONE` — the Phase-B terminal result**, `$1.5433` | [`autoinit_continuation_b_attempt5.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt5.json) · [`…attempt5/`](../cross-stage/continuation_b/runs/attempt5/) |
+| 1 | failed, `$0.2513` | pod test gate | [`autoinit_continuation_b_attempt1.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt1.json) · [`…attempt1/`](../stages/stage-1/continuation_b/runs/attempt1/) |
+| 2 | failed, `$0.3146` | driver stage 0 | [`autoinit_continuation_b_attempt2.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt2.json) · [`…attempt2/`](../stages/stage-1/continuation_b/runs/attempt2/) |
+| 3 | failed, `$0.2275` | stage 1 | [`autoinit_continuation_b_attempt3.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt3.json) · [`…attempt3/`](../stages/stage-1/continuation_b/runs/attempt3/) |
+| 4 | `ALL_DONE`, `$1.4680` — **decision WITHDRAWN**, probe retained | [`autoinit_continuation_b_attempt4.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt4.json) · [`…attempt4/`](../stages/stage-1/continuation_b/runs/attempt4/) |
+| **5** | **`ALL_DONE` — the Phase-B terminal result**, `$1.5433` | [`autoinit_continuation_b_attempt5.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt5.json) · [`…attempt5/`](../stages/stage-1/continuation_b/runs/attempt5/) |
 
 > ### ⚠ Attempt 4's result is WITHDRAWN
 >
@@ -111,7 +111,7 @@ universe collapses to **six distinct candidates**; rung 1 advanced
 > The probe it bought, `fe9683e6a9c7/sb`, **is** valid and is retained.
 >
 > The accepted rung-2 decision is
-> [`autoinit_continuation_b_corrected_rung2.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json):
+> [`autoinit_continuation_b_corrected_rung2.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json):
 > `sa+sb` only → **`tie_pending`**, candidates `{fe9683e6a9c7, 85bde4ded2c3}`.
 
 ### Reuse records — all three, all authorization-bound
@@ -137,8 +137,8 @@ universe collapses to **six distinct candidates**; rung 1 advanced
 > `unresolved_equivalence`. Protocol-resolved; **not** strong evidence of
 > intrinsic superiority.
 
-* result → [`autoinit_continuation_b_attempt5/phase_a_result.json`](../cross-stage/continuation_b/runs/attempt5/phase_a_result.json)
-* preregistration → [`autoinit_continuation_b_preregistration.json`](../cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json)
+* result → [`autoinit_continuation_b_attempt5/phase_a_result.json`](../stages/stage-1/continuation_b/runs/attempt5/phase_a_result.json)
+* preregistration → [`autoinit_continuation_b_preregistration.json`](../stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json)
 * pricing → [`autoinit_behavioural_continuation_pricing.json`](../shared/analyses/autoinit_behavioural_continuation_pricing.json)
 * grant → [`autoinit_continuation_b_grant.json`](../budget/approvals/autoinit_continuation_b_grant.json)
 * consumed authorizations → [`superseded/`](../archive/cross-stage/superseded/superseded/)
@@ -147,7 +147,7 @@ universe collapses to **six distinct candidates**; rung 1 advanced
 
 ## Phase A vs Phase B
 
-**→ [`phase_a_vs_phase_b_comparison.md`](../cross-stage/phase_a/phase_a_vs_phase_b_comparison.md)** — the
+**→ [`phase_a_vs_phase_b_comparison.md`](../stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md)** — the
 scientific handoff into Phase C. Both phases end to end, the operator-level
 evidence classification, the recommended incumbent and its caveats, and the
 Phase-C starting point.
@@ -159,11 +159,11 @@ Phase-C starting point.
 | what | record |
 | --- | --- |
 | E1–E8 experiment series | [`EXPERIMENT_INDEX.md`](../archive/repository/indexes/EXPERIMENT_INDEX.md), [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) |
-| bounded measurement sessions | [`autoinit_measurement_attempt1/`](../cross-stage/measurement/runs/attempt1/) … [`…attempt3/`](../cross-stage/measurement/runs/attempt3/) |
+| bounded measurement sessions | [`autoinit_measurement_attempt1/`](../stages/stage-1/measurement/runs/attempt1/) … [`…attempt3/`](../stages/stage-1/measurement/runs/attempt3/) |
 | device canary — TERMINATED | [`autoinit_device_canary_attempt1/`](../shared/validations/device-canary/runs/autoinit_device_canary_attempt1/), [`…attempt2/`](../shared/validations/device-canary/runs/autoinit_device_canary_attempt2/) |
 | micro-preflight | [`autoinit_preflight_run4/`](../shared/validations/micro-preflight/runs/autoinit_preflight_run4/) |
 | causal-depth backend equivalence | [`autoinit_depth_backend_equivalence.json`](../shared/validations/depth-backend/autoinit_depth_backend_equivalence.json) |
-| capacity / transport findings | [`autoinit_continuation_b_capacity.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_capacity.json), [`autoinit_leaf_transport_quota_finding.json`](../shared/analyses/autoinit_leaf_transport_quota_finding.json) |
+| capacity / transport findings | [`autoinit_continuation_b_capacity.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_capacity.json), [`autoinit_leaf_transport_quota_finding.json`](../shared/analyses/autoinit_leaf_transport_quota_finding.json) |
 | scratch inventory | [`scratch_inventory_20260829.json`](../maintenance/scratch_inventory_20260829.json) |
 
 ## Operational lessons

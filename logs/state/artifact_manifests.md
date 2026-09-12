@@ -800,7 +800,7 @@ behaviour-wave numbers taken with the degeneration stop active.
   sets (`artifacts/audit/three_mode/A{1,2}-*`, 150 generations each with token
   ids and decoded text), `artifacts/audit/e3_comparison.json`,
   `artifacts/audit/e3_movement/`, the preregistration
-  [`logs/cross-stage/early/analyses/e3_registration.json`](../cross-stage/early/analyses/e3_registration.json), and the full record at
+  [`logs/cross-stage/early/analyses/e3_registration.json`](../stages/stage-3/e3/analyses/e3_registration.json), and the full record at
   [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §20. **The experiment remains fully
   re-analysable; it is not re-runnable without retraining** (~$5.76).
 - **Distinguish this from a loss.** P0-assistant's and E5's checkpoints were
@@ -853,7 +853,7 @@ list was inherited verbatim from E6, a session that did not train, so the event
 streams were **never listed**; `tar tzf` on the retrieved bundle confirms it
 holds `artifacts/audit/three_mode/**` and nothing else. Every downstream check
 then passed on the incomplete bundle. Full record:
-[`e6b_protocol_deviations.md`](../cross-stage/early/analyses/e6b_protocol_deviations.md).
+[`e6b_protocol_deviations.md`](../stages/stage-3/e6b/analyses/e6b_protocol_deviations.md).
 
 The training curve, per-step timings and final validation CE survive in the
 driver console log, so the substance is recoverable; the machine-readable event
@@ -894,7 +894,7 @@ Disjointness: `artifacts/stage3/e7_disjointness.json` — index ranges **and**
 content hashes, against `holdout_v1`, `warmup_v1`, `eval_behavior_v0/prompts.jsonl`
 and all seven `capability-v2` files. Zero overlaps involving any E7 stream.
 
-Rebuild commands: [`e7_preregistration.md`](../cross-stage/early/analyses/e7_preregistration.md) §11.
+Rebuild commands: [`e7_preregistration.md`](../stages/stage-3/e7/analyses/e7_preregistration.md) §11.
 
 
 

@@ -807,7 +807,7 @@ statistical `INCONCLUSIVE`.
 > | may Phase B launch against this tree? | `post_freeze.accounted_for`, unchanged | **FALSE** |
 >
 > That pair is the required invariant, and it is asserted as a test.
-> [`autoinit_phase_b_historical_amendments.json`](../../../../cross-stage/phase_b/analyses/autoinit_phase_b_historical_amendments.json)
+> [`autoinit_phase_b_historical_amendments.json`](../../phase_b/analyses/autoinit_phase_b_historical_amendments.json)
 > is append-only, anchored by hash to the immutable preregistration and to the
 > sealed v1 note, chained by entry hash, and it **confers nothing** — every entry
 > asserts `launch_compatible_with_frozen_preregistration: false`, and the paid

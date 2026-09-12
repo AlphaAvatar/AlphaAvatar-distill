@@ -2,7 +2,7 @@
 """Price the paid work Phase B actually still owes. Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/price_phase_b.py \
-        --out logs/cross-stage/phase_b/analyses/autoinit_phase_b_pricing.json
+        --out logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_pricing.json
 
 Phase B is not a fresh Phase A. Its terminal procedure is a **cross-phase**
 behavioural selection: the P=2 search's Top-5 leaves compete against the two
@@ -56,7 +56,7 @@ from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 
 #: Attempt 7's probe records — the only Phase-A behavioural evidence that exists.
-PROBES = REPO_ROOT / "logs/cross-stage/recovery_continuation/runs/attempt7/probes"
+PROBES = REPO_ROOT / "logs/stages/stage-1/recovery_continuation/runs/attempt7/probes"
 
 #: The reviewer's terminal procedure, 2026-08-25.
 PHASE_B_SEARCHED_LEAVES = 5        # Top-5 admitted from the P=2 search
@@ -298,7 +298,7 @@ def price(hardware=L40S_MEASURED) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/cross-stage/phase_b/analyses/autoinit_phase_b_pricing.json")
+    ap.add_argument("--out", default="logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_pricing.json")
     args = ap.parse_args()
     result = price()
     out = Path(args.out)

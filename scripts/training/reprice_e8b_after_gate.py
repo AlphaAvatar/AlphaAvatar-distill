@@ -165,7 +165,7 @@ def main() -> int:
           "KD chunk 128 across the whole depth-only regime. The 20-step gate is "
           "falsified and replaced by a 200-step steady-state gate.")
 
-    out = REPO_ROOT / "logs/cross-stage/early/analyses/e8b_reprice_after_gate.json"
+    out = REPO_ROOT / "logs/stages/stage-3/e8b/analyses/e8b_reprice_after_gate.json"
     out.write_text(json.dumps({
         "created_from": "S2 attempt 4 gate measurement, commit ccba0fbf",
         "measured_steady_s_per_step": MEASURED_STEADY_S,

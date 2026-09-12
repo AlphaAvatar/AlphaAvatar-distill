@@ -35,7 +35,7 @@ from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, C
 from aadistill.initialization.planning.recovery import EquivalenceRule, FeasibilityRule  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
-RECORDS = REPO / "logs/cross-stage/phase_a/results/autoinit_permanent_controls"
+RECORDS = REPO / "logs/stages/stage-1/phase_a/results/autoinit_permanent_controls"
 # Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
 # under a fresh empty HOME so host-local state is invisible on BOTH machines.
 # An absolute literal is immune to that, which is what let host-local cases run

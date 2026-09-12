@@ -62,7 +62,7 @@ from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 #: Explicit: importing an adapter module no longer registers it.
 register_builtin_adapters()
 
-ATTEMPT = REPO_ROOT / "logs/cross-stage/phase_b/runs/attempt5"
+ATTEMPT = REPO_ROOT / "logs/stages/stage-1/phase_b/runs/attempt5"
 PROBES = ATTEMPT / "probes"
 ATTESTED = ATTEMPT / "attested_evaluation_protocol.json"
 SELECTION = ATTEMPT / "stage1_selection.json"
@@ -187,7 +187,7 @@ def verify(root: Path = PROBES) -> dict:
             "for, to the same standard as the historical Phase-A citations. "
             "Consumed by the behavioural-continuation pricing, which fails closed "
             "without it. Not an authorization."),
-        "source": "logs/cross-stage/phase_b/runs/attempt5/probes",
+        "source": "logs/stages/stage-1/phase_b/runs/attempt5/probes",
         "probes_dir_digest": probes_dir_digest(root),
         "attested_protocol_hash": attested_protocol,
         "live_scoring_contract_digest": live_contract["digest"],

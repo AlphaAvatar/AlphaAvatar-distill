@@ -55,7 +55,7 @@ TOOL_SET = "tool"
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(V2))
-    ap.add_argument("--report", default="logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_search_v2_build.json")
+    ap.add_argument("--report", default="logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_search_v2_build.json")
     args = ap.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)

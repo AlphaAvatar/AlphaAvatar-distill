@@ -218,7 +218,7 @@ def test_the_executing_plan_reproduces_the_frozen_one():
     from aadistill.initialization.planning.recovery import assert_preregistered
     from write_preregistration import build_frozen_plan
 
-    frozen = REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+    frozen = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
     assert frozen.is_file(), "no frozen science plan; Stage 0 has nothing to bind"
     plan = build_frozen_plan(REPO)
     assert assert_preregistered(plan, frozen)["plan_hash"] == plan.plan_hash
@@ -1166,7 +1166,7 @@ def test_the_two_soft_stop_reserves_are_named_and_carry_their_derived_minutes():
                              "beam6_search_pricing_correction"}
 
     # Each one against the artifact it was derived from, not against itself.
-    audit = json.loads((REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_fallback_audit.json").read_text())
+    audit = json.loads((REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_fallback_audit.json").read_text())
     extra_s = sum(r["extra_seconds_if_recomputing"]
                   for r in audit["part_2_cost"]["per_invocation"])
     assert reserves["stage1_reference_cache_fallback"] == pytest.approx(extra_s / 60)
@@ -1427,7 +1427,7 @@ def test_the_deadline_derivation_moves_no_frozen_identity():
     SCIENCE = "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"
 
     assert PHASE_A_PLAN_V1.plan_hash == SESSION
-    assert json.loads((REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json")
+    assert json.loads((REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json")
                       .read_text())["plan_hash"] == SCIENCE
 
     # And the identity is invariant under the very inputs the deadline is

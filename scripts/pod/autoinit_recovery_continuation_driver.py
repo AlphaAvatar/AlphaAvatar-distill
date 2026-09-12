@@ -73,7 +73,7 @@ register_builtin_operators()
 #: Where the launcher stages attempt 12's five preserved leaves.
 STAGED_LEAVES = REPO / "artifacts/autoinit/phase_a_selected"
 #: The committed evidence the import is bound to.
-EVIDENCE = REPO / "logs/cross-stage/phase_a/runs/attempt12"
+EVIDENCE = REPO / "logs/stages/stage-1/phase_a/runs/attempt12"
 
 
 class RecoveryContinuationDriver(PhaseADriver):

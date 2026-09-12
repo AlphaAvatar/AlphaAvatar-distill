@@ -76,7 +76,7 @@ none moved reasoning.
 | E8a calibration mixture | 67 items, content sha256 `d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f`, leakage-checked |
 | **permanent controls** | `preflight_ctl_r0860k_{sa,sb}` — weights `573847a730c1a499…` / `4c6adcf861871690…`, shared observed protocol `aad75fee8a897d9c…`, probe ids `799bd5ac…` / `793f786a…`. On the relay at `permanent_controls/`, and in `~/aad-artifacts/autoinit/`. **Never retrain these.** |
 | **recovery-search battery** | `artifacts/stage3/recovery_search_v2` — 190 prompts, 170 scorable, content `a1b22778…`, scoring contract `recovery_search_scoring@v2` digest `808080a7…`. v1 is INVALID (rendered 0/20 tool prompts) and is kept only with a `SUPERSEDED.md`. |
-| **materialized thresholds** | `logs/cross-stage/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json` — equivalence interval **0.011695**, feasibility floor **0.3000**, from pooled control rates. Phase A cannot start without these. |
+| **materialized thresholds** | `logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json` — equivalence interval **0.011695**, feasibility floor **0.3000**, from pooled control rates. Phase A cannot start without these. |
 | control reference on `recovery_search_v2` | pooled `usable_rollout_rate` **0.3711** · `correct_overall` **0.0118** · `correct_given_usable` **0.0286** (380 prompts, seeds sa+sb) |
 
 Every deleted checkpoint has a tombstone in
@@ -201,7 +201,7 @@ paid compute running           NONE
 **$12.36 expected / $20.13 hard**; the hard bound exceeds the $19.5238 remaining
 by $0.61. That is a maintainer decision, not an accounting one — the options and
 what each costs are in
-[`../logs/cross-stage/phase_a/analyses/autoinit_phase_a_repricing.md`](../../logs/cross-stage/phase_a/analyses/autoinit_phase_a_repricing.md).
+[`../logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_repricing.md`](../../logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_repricing.md).
 
 E8b's termination released its earmark. Full reconciliation, including the
 E6b $0.56 overrun and the limit of the evidence-file record, is in
@@ -218,7 +218,7 @@ from unused room under a previous authorization.**
    AutoInitializer constraints and the backend freeze
 5. [`../logs/maintenance/inventories/checkpoint_registry.json`](../../logs/maintenance/inventories/checkpoint_registry.json) +
    [`../logs/maintenance/inventories/checkpoint_tombstones.json`](../../logs/maintenance/inventories/checkpoint_tombstones.json)
-6. [`../logs/cross-stage/early/analyses/e8b_backend_audit.md`](../../logs/cross-stage/early/analyses/e8b_backend_audit.md) — the runtime findings
+6. [`../logs/stages/stage-3/e8b/analyses/e8b_backend_audit.md`](../../logs/stages/stage-3/e8b/analyses/e8b_backend_audit.md) — the runtime findings
    that constrain any 3B+ recovery
 7. [`../AGENTS.md`](../../AGENTS.md) — the working contract; P17/P18 and the promotion rules
    are binding
@@ -272,9 +272,9 @@ teardown without an infrastructure defect.
 > a measurement.
 
 What is worth reading first, in this order: [`../logs/state/current.md`](../../logs/state/current.md)
-for the position, [`../logs/cross-stage/phase_a/results/autoinit_stage3_complete/`](../../logs/cross-stage/phase_a/results/autoinit_stage3_complete/)
+for the position, [`../logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/`](../../logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/)
 for what Stage 3 produced, and
-[`../logs/cross-stage/recovery_continuation/history/autoinit_continuation_attempts/`](../../logs/cross-stage/recovery_continuation/history/autoinit_continuation_attempts/)
+[`../logs/stages/stage-1/recovery_continuation/history/autoinit_continuation_attempts/`](../../logs/stages/stage-1/recovery_continuation/history/autoinit_continuation_attempts/)
 for what eight attempts cost and why.
 
 ### 9.0 The infrastructure lesson, because it cost $2.3 of the $4.1

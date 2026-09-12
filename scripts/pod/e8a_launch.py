@@ -642,7 +642,7 @@ def main() -> int:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/cross-stage/early/analyses/e8a_session_evidence.json")
+    ap.add_argument("--out", default="logs/stages/stage-3/e8/analyses/e8a_session_evidence.json")
     args = ap.parse_args()
 
     session = E8A(args)

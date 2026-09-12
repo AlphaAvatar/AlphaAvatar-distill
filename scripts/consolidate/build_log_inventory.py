@@ -66,7 +66,7 @@ DOCUMENTARY = ("logs", "docs", "configs", "README.md", "AGENTS.md")
 #: reference rule cannot pick. Each entry is (sha256 prefix -> canonical path, why).
 CANONICAL_OVERRIDES = {
     "db5bb0cb33ed": (
-        "logs/cross-stage/phase_a/results/autoinit_stage3_complete/imported_controls.json",
+        "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/imported_controls.json",
         "the same control import served attempt 7 and the completed attempt 8. "
         "The completed run owns it: its products are the frozen Stage-3 artifacts, "
         "so a reader following the accepted result finds the file in place."),

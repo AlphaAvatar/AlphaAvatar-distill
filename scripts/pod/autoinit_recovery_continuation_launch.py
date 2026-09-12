@@ -80,10 +80,10 @@ register_builtin_adapters()
 STATUS = f"{WS}/autoinit_recovery_continuation.status"
 RUN_LOG = f"{WS}/autoinit_recovery_continuation_run.log"
 AUTH_PATH = "logs/budget/approvals/autoinit_recovery_continuation_authorization.json"
-FROZEN_SCIENCE_PLAN = "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+FROZEN_SCIENCE_PLAN = "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 #: Attempt 12's committed durability record — the five ids, in order, with the
 #: digests the bytes must reproduce.
-STAGE1_EVIDENCE = REPO_ROOT / "logs/cross-stage/phase_a/runs/attempt12"
+STAGE1_EVIDENCE = REPO_ROOT / "logs/stages/stage-1/phase_a/runs/attempt12"
 #: The canonical local checkpoint store. Still the scientific owner: the
 #: transport repo is a delivery path and nothing more.
 # Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
@@ -406,7 +406,7 @@ def build_parser() -> argparse.ArgumentParser:
     from autoinit_phase_a_launch import build_parser as phase_a_parser
 
     ap = phase_a_parser()
-    ap.set_defaults(out="logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_continuation_session.json")
+    ap.set_defaults(out="logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_continuation_session.json")
     return ap
 
 

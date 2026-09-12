@@ -53,14 +53,14 @@ from experiments.phase_b.continuation import BOUND_EVIDENCE, CONTINUATION_PLAN_V
 from experiments.source_sets import recovery_scoring_contract, trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-FROZEN_PLAN = "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
-PREREGISTRATION = "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json"
-AMENDMENT = "logs/cross-stage/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
-STAGE1_SELECTION = "logs/cross-stage/phase_b/runs/attempt5/stage1_selection.json"
+FROZEN_PLAN = "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+PREREGISTRATION = "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json"
+AMENDMENT = "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
+STAGE1_SELECTION = "logs/stages/stage-1/phase_b/runs/attempt5/stage1_selection.json"
 HISTORICAL_REUSE = "logs/shared/analyses/autoinit_historical_probe_reuse.json"
 ATTEMPT5_REUSE = "logs/shared/analyses/autoinit_attempt5_probe_reuse.json"
 ATTEMPT4_REUSE = "logs/shared/analyses/autoinit_attempt4_probe_reuse.json"
-ASSETS = "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_assets.json"
+ASSETS = "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_assets.json"
 PRICING = "logs/shared/analyses/autoinit_behavioural_continuation_pricing.json"
 
 #: Derived by `price_behavioural_continuation.py` and approved unchanged. The

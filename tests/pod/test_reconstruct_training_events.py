@@ -21,7 +21,7 @@ SCRIPT = REPO / "scripts/pod/reconstruct_training_events.py"
 # in the launch-bound diagnostic and skip on the pod. On the real dev box this
 # resolves identically. Precedent: verify_c1_scoring_equivalence.EVIDENCE_ROOTS.
 E6B = Path.home() / "aad-artifacts/e6b"
-COMMITTED = REPO / "logs/cross-stage/early/analyses/e6b_reconstructed_training_events.json"
+COMMITTED = REPO / "logs/stages/stage-3/e6b/analyses/e6b_reconstructed_training_events.json"
 
 RUN_LOG = """[17:25:51] $ /opt/train/bin/python scripts/training/train_stage3.py --config /workspace/aad/configs/stage3/e6b/{name}.json
 device cuda; loading packed token ladder ...

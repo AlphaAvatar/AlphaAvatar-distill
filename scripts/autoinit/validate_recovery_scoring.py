@@ -59,7 +59,7 @@ EXPECTATIONS = {
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_scoring_validation.json")
+    ap.add_argument("--out", default="logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_scoring_validation.json")
     args = ap.parse_args()
 
     spec = importlib.util.spec_from_file_location("rs_tests", TESTS)

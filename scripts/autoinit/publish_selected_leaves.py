@@ -60,7 +60,7 @@ TRANSPORT_REPO = "AlphaAvatar/aadistill-transport"
 PREFIX = "phase_a_attempt12/selected_leaves"
 
 CANONICAL_STORE = Path("/home/ecs-user/aad-artifacts/autoinit/phase_a")
-EVIDENCE = REPO_ROOT / "logs/cross-stage/phase_a/runs/attempt12/selected_leaf_durability.json"
+EVIDENCE = REPO_ROOT / "logs/stages/stage-1/phase_a/runs/attempt12/selected_leaf_durability.json"
 MANIFEST = REPO_ROOT / "logs/shared/analyses/autoinit_selected_leaf_transport_manifest.json"
 
 #: The configured scratch root, when the operator names one. The dev box keeps
