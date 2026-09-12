@@ -50,6 +50,23 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 #: input to this plan.
 REFERENCE_ROOTS = ("scripts", "tests", "configs")
 
+#: Trees a relocation NEVER rewrites, whatever they contain.
+#:
+#: `artifacts/` is the working copy of out-of-tree canonical assets, and a
+#: frozen battery manifest lists its own build-time untracked files. A bulk
+#: path rewrite edited that list, which changed the manifest and broke the
+#: `manifest_sha256` the scorer verifies -- 34 tests and the pod CPU gate
+#: refused. It was restored byte-identical from the canonical store.
+#:
+#: The lesson is the general one: a path string inside an artifact may be part
+#: of what a hash covers. Rewrite only what a relocation OWNS.
+NEVER_REWRITE = ("artifacts/", "logs/archive/", "logs/runs/", "logs/validations/")
+
+
+def rewritable(rel: str) -> bool:
+    """Whether a relocation may edit this file's text."""
+    return not any(rel.startswith(t) for t in NEVER_REWRITE)
+
 PATH_LITERAL = re.compile(r'["\']((?:logs|\./logs)/[A-Za-z0-9_./*<>{}-]+)["\']')
 
 #: Filename prefix -> the experiment that owns the file. Read in order. These
@@ -284,6 +301,8 @@ def rewrite_prose(root: Path, moves: list[dict]) -> list[str]:
     touched = []
     for f in sorted(root.rglob("*.md")):
         if ".git" in f.parts or "aad-artifacts" in f.parts:
+            continue
+        if not rewritable(f.relative_to(root).as_posix()):
             continue
         try:
             text = old = f.read_text()

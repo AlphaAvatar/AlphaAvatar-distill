@@ -1,13 +1,13 @@
 {
   "_what_this_is": "one complete pod-like sweep of the CPU test suite: the condition a fresh C1 pod is actually in, which is what C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run.",
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
-  "c1_harness_digest": "80bf9c8f52f1bf433aef18cd640b3072fe0a1fefbb454b0b36d01e44de6f3c30",
+  "c1_harness_digest": "75e10e512dab8de3a7b698ef6e29cb2f1e5fb3e890b37a3c6e71494ef01541f5",
   "c1_harness_n_files": 99,
   "counts": {
     "error": 0,
-    "failed": 0,
-    "passed": 3725,
-    "skipped": 121
+    "failed": 42,
+    "passed": 3717,
+    "skipped": 112
   },
   "environment": {
     "artifact_hiding": "manifest-derived positive staged view: 28 files visible from the C1 SetupManifest, 1056 hidden as the computed complement. NOT the simulator's generic default.",
@@ -18,9 +18,15 @@
     "token_mode": "synthetic, non-empty; never printed, never a real credential"
   },
   "evidence": {
-    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-78635c5e34c2/junit.xml",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-78635c5e34c2/pytest.log"
+    "executions_of_this_tree": [
+      "exec-001"
+    ],
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-b55a4f001b66/exec-001/junit.xml",
+    "junit_sha256": "1cf8b4c2a40015913f3f818a9c594ad983143fc2fac3c66e98b9d9f78c16f118",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-b55a4f001b66/exec-001/pytest.log",
+    "pytest_log_sha256": "6bef278ab7a24474930fd559d30688de65dc23c827842dd094e74017de09423b"
   },
+  "execution_id": "sweep-b55a4f001b66/exec-001",
   "expected_environment_skips": [
     "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
     "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
@@ -48,7 +54,50 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
-  "failed_nodeids": [],
+  "failed_nodeids": [
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_a_changed_scorable_membership_refuses",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_a_changed_set_count_refuses",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_a_missing_set_refuses",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_a_moved_content_hash_refuses",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_a_moved_manifest_hash_refuses",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_code_must_be_the_only_behaviour_only_set",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_code_never_enters_the_correctness_denominator",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_the_missing_metrics_key_is_expected_and_does_not_fail",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_the_production_scorer_accepts_the_frozen_c1_battery",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_the_scorer_refuses_an_incomplete_or_foreign_generation_set[kwargs0-no generations for]",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_the_scorer_refuses_an_incomplete_or_foreign_generation_set[kwargs1-have no generation]",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_the_scorer_refuses_an_incomplete_or_foreign_generation_set[kwargs2-duplicate generation]",
+    "tests/autoinit/test_c1_confirmation_scoring.py::test_the_scorer_refuses_an_incomplete_or_foreign_generation_set[kwargs3-is not in the frozen set]",
+    "tests/autoinit/test_staging_contract.py::test_the_recorder_derives_and_never_falls_back",
+    "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
+    "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to",
+    "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation",
+    "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately",
+    "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there",
+    "tests/pod/test_c1_driver_execution.py::test_A_an_ordinary_failure_before_the_parent_match_is_stage_D",
+    "tests/pod/test_c1_driver_execution.py::test_B_an_ordinary_failure_after_the_parent_match_is_stage_E",
+    "tests/pod/test_c1_driver_execution.py::test_C2_a_replay_record_that_reads_back_wrong_fails_stage_E_only",
+    "tests/pod/test_c1_driver_execution.py::test_C_a_replay_record_that_cannot_be_written_fails_stage_E_only",
+    "tests/pod/test_c1_driver_execution.py::test_D_a_complete_replay_marks_E_only_after_the_record_is_readable",
+    "tests/pod/test_c1_driver_execution.py::test_E2_a_step3_mismatch_is_stage_E_and_a_replay_mismatch",
+    "tests/pod/test_c1_driver_execution.py::test_E_a_step2_mismatch_is_still_stage_D_and_a_replay_mismatch",
+    "tests/pod/test_c1_driver_execution.py::test_a_drifted_generation_protocol_is_refused_before_scoring",
+    "tests/pod/test_c1_driver_execution.py::test_a_failed_fourth_training_produces_no_evaluation_and_no_decision",
+    "tests/pod/test_c1_driver_execution.py::test_a_replay_mismatch_trains_nothing_and_writes_its_evidence_first",
+    "tests/pod/test_c1_driver_execution.py::test_a_stage_f_device_failure_is_C1_FAILED_and_never_a_replay_mismatch",
+    "tests/pod/test_c1_driver_execution.py::test_a_stage_f_device_failure_leaves_the_passing_replay_record_intact",
+    "tests/pod/test_c1_driver_execution.py::test_a_stage_f_device_failure_writes_no_treatment_artifacts",
+    "tests/pod/test_c1_driver_execution.py::test_all_six_trainings_precede_the_first_evaluation",
+    "tests/pod/test_c1_driver_execution.py::test_an_expired_deadline_is_C1_FAILED_and_never_a_replay_mismatch",
+    "tests/pod/test_c1_driver_execution.py::test_every_admitted_probe_carries_its_observed_protocol",
+    "tests/pod/test_c1_driver_execution.py::test_the_cuda_handoff_gate_precedes_every_training",
+    "tests/pod/test_c1_driver_execution.py::test_the_decision_consumes_all_six_probes_and_the_real_rule",
+    "tests/pod/test_c1_driver_execution.py::test_the_full_session_runs_b_through_i_in_order",
+    "tests/pod/test_c1_driver_execution.py::test_the_session_writes_every_report_the_launcher_fetches",
+    "tests/pod/test_run_identity_is_wired.py::test_a_completed_session_records_every_role_it_produced",
+    "tests/pod/test_run_identity_is_wired.py::test_the_one_use_governance_artifacts_are_snapshotted_at_open"
+  ],
   "findings": {
     "all_skipped_nodeids": [
       "tests/autoinit/test_c1_confirmation_scoring.py::test_code_is_excluded_by_set_membership_not_by_the_scorer",
@@ -94,14 +143,13 @@
       "tests/data/test_sessions.py::test_render_session_rejects_a_session_over_the_limit",
       "tests/data/test_sessions.py::test_render_session_round_trips_through_the_official_template",
       "tests/data/test_sessions.py::test_source_system_prompt_is_preserved_in_the_render",
-      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_every_superseded_verdict_is_preserved",
       "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing",
       "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_the_catalog_classifies_every_entry",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_every_exception_states_what_holds_it",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_every_move_landed_and_its_origin_is_gone",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_no_document_still_cites_a_moved_path",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_the_reverted_moves_are_back_and_recorded",
-      "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there",
       "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store",
       "tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set",
       "tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set",
@@ -135,14 +183,6 @@
       "tests/evaluation/test_e6_registration.py::test_reused_arms_have_complete_retained_generations",
       "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards",
       "tests/evaluation/test_strict_answer.py::test_gold_target_is_the_rendered_span_not_the_content_field",
-      "tests/pod/test_c1_driver_execution.py::test_a_drifted_generation_protocol_is_refused_before_scoring",
-      "tests/pod/test_c1_driver_execution.py::test_all_six_trainings_precede_the_first_evaluation",
-      "tests/pod/test_c1_driver_execution.py::test_every_admitted_probe_carries_its_observed_protocol",
-      "tests/pod/test_c1_driver_execution.py::test_only_the_c1_battery_is_opened_in_stage_h",
-      "tests/pod/test_c1_driver_execution.py::test_the_cuda_handoff_gate_precedes_every_training",
-      "tests/pod/test_c1_driver_execution.py::test_the_decision_consumes_all_six_probes_and_the_real_rule",
-      "tests/pod/test_c1_driver_execution.py::test_the_full_session_runs_b_through_i_in_order",
-      "tests/pod/test_c1_driver_execution.py::test_the_session_writes_every_report_the_launcher_fetches",
       "tests/pod/test_continuation_rehearsal.py::test_a_checkpoint_that_is_not_there_is_refused",
       "tests/pod/test_continuation_rehearsal.py::test_a_control_binding_that_disagrees_is_refused",
       "tests/pod/test_continuation_rehearsal.py::test_a_control_that_never_verified_cannot_be_imported",
@@ -183,9 +223,9 @@
     "battery_staged_role_outcome": "passed",
     "counts": {
       "error": 0,
-      "failed": 0,
-      "passed": 3725,
-      "skipped": 121
+      "failed": 42,
+      "passed": 3717,
+      "skipped": 112
     },
     "devbox_only_expected_skips": {
       "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible": "skipped",
@@ -211,7 +251,50 @@
       "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
       "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
     ],
-    "failed_nodeids": [],
+    "failed_nodeids": [
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_a_changed_scorable_membership_refuses",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_a_changed_set_count_refuses",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_a_missing_set_refuses",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_a_moved_content_hash_refuses",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_a_moved_manifest_hash_refuses",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_code_must_be_the_only_behaviour_only_set",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_code_never_enters_the_correctness_denominator",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_the_missing_metrics_key_is_expected_and_does_not_fail",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_the_production_scorer_accepts_the_frozen_c1_battery",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_the_scorer_refuses_an_incomplete_or_foreign_generation_set[kwargs0-no generations for]",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_the_scorer_refuses_an_incomplete_or_foreign_generation_set[kwargs1-have no generation]",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_the_scorer_refuses_an_incomplete_or_foreign_generation_set[kwargs2-duplicate generation]",
+      "tests/autoinit/test_c1_confirmation_scoring.py::test_the_scorer_refuses_an_incomplete_or_foreign_generation_set[kwargs3-is not in the frozen set]",
+      "tests/autoinit/test_staging_contract.py::test_the_recorder_derives_and_never_falls_back",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately",
+      "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there",
+      "tests/pod/test_c1_driver_execution.py::test_A_an_ordinary_failure_before_the_parent_match_is_stage_D",
+      "tests/pod/test_c1_driver_execution.py::test_B_an_ordinary_failure_after_the_parent_match_is_stage_E",
+      "tests/pod/test_c1_driver_execution.py::test_C2_a_replay_record_that_reads_back_wrong_fails_stage_E_only",
+      "tests/pod/test_c1_driver_execution.py::test_C_a_replay_record_that_cannot_be_written_fails_stage_E_only",
+      "tests/pod/test_c1_driver_execution.py::test_D_a_complete_replay_marks_E_only_after_the_record_is_readable",
+      "tests/pod/test_c1_driver_execution.py::test_E2_a_step3_mismatch_is_stage_E_and_a_replay_mismatch",
+      "tests/pod/test_c1_driver_execution.py::test_E_a_step2_mismatch_is_still_stage_D_and_a_replay_mismatch",
+      "tests/pod/test_c1_driver_execution.py::test_a_drifted_generation_protocol_is_refused_before_scoring",
+      "tests/pod/test_c1_driver_execution.py::test_a_failed_fourth_training_produces_no_evaluation_and_no_decision",
+      "tests/pod/test_c1_driver_execution.py::test_a_replay_mismatch_trains_nothing_and_writes_its_evidence_first",
+      "tests/pod/test_c1_driver_execution.py::test_a_stage_f_device_failure_is_C1_FAILED_and_never_a_replay_mismatch",
+      "tests/pod/test_c1_driver_execution.py::test_a_stage_f_device_failure_leaves_the_passing_replay_record_intact",
+      "tests/pod/test_c1_driver_execution.py::test_a_stage_f_device_failure_writes_no_treatment_artifacts",
+      "tests/pod/test_c1_driver_execution.py::test_all_six_trainings_precede_the_first_evaluation",
+      "tests/pod/test_c1_driver_execution.py::test_an_expired_deadline_is_C1_FAILED_and_never_a_replay_mismatch",
+      "tests/pod/test_c1_driver_execution.py::test_every_admitted_probe_carries_its_observed_protocol",
+      "tests/pod/test_c1_driver_execution.py::test_the_cuda_handoff_gate_precedes_every_training",
+      "tests/pod/test_c1_driver_execution.py::test_the_decision_consumes_all_six_probes_and_the_real_rule",
+      "tests/pod/test_c1_driver_execution.py::test_the_full_session_runs_b_through_i_in_order",
+      "tests/pod/test_c1_driver_execution.py::test_the_session_writes_every_report_the_launcher_fetches",
+      "tests/pod/test_run_identity_is_wired.py::test_a_completed_session_records_every_role_it_produced",
+      "tests/pod/test_run_identity_is_wired.py::test_the_one_use_governance_artifacts_are_snapshotted_at_open"
+    ],
     "host_local_c1_expected_skips": {
       "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": "skipped",
       "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists": "skipped",
@@ -229,8 +312,10 @@
       "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
     },
     "leaf_transport_all_passed": true,
-    "n_skipped": 121,
-    "problems": [],
+    "n_skipped": 112,
+    "problems": [
+      "42 failed/errored: ['tests/autoinit/test_c1_confirmation_scoring.py::test_a_changed_scorable_membership_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_a_changed_set_count_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_a_missing_set_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_a_moved_content_hash_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_a_moved_manifest_hash_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_code_must_be_the_only_behaviour_only_set', 'tests/autoinit/test_c1_confirmation_scoring.py::test_code_never_enters_the_correctness_denominator', 'tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched', 'tests/autoinit/test_c1_confirmation_scoring.py::test_the_missing_metrics_key_is_expected_and_does_not_fail', 'tests/autoinit/test_c1_confirmation_scoring.py::test_the_production_scorer_accepts_the_frozen_c1_battery']"
+    ],
     "renderer_parity_expected_skips": {
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]": "skipped",
@@ -290,14 +375,13 @@
       "tests/data/test_sessions.py::test_render_session_rejects_a_session_over_the_limit": "teacher tokenizer not in local HF cache",
       "tests/data/test_sessions.py::test_render_session_round_trips_through_the_official_template": "teacher tokenizer not in local HF cache",
       "tests/data/test_sessions.py::test_source_system_prompt_is_preserved_in_the_render": "teacher tokenizer not in local HF cache",
-      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_every_superseded_verdict_is_preserved": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_the_catalog_classifies_every_entry": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_every_exception_states_what_holds_it": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_every_move_landed_and_its_origin_is_gone": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_no_document_still_cites_a_moved_path": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_the_reverted_moves_are_back_and_recorded": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
-      "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there": "logs/ is partially staged; an absent target is the staging, not a broken link",
       "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store": "no out-of-tree store on this machine",
       "tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set": "frozen battery is a gitignored artifact; rebuild with scripts/data/build_capability_battery.py",
       "tests/evaluation/test_capability.py::test_correct_selective_refusal_wins_every_safety_pair_on_the_frozen_set": "frozen battery is a gitignored artifact; rebuild with scripts/data/build_capability_battery.py",
@@ -331,14 +415,6 @@
       "tests/evaluation/test_e6_registration.py::test_reused_arms_have_complete_retained_generations": "retained generations are gitignored and dev-box-only",
       "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards": "no behavior scorecards on this machine (gitignored artifacts)",
       "tests/evaluation/test_strict_answer.py::test_gold_target_is_the_rendered_span_not_the_content_field": "corpus not present locally",
-      "tests/pod/test_c1_driver_execution.py::test_a_drifted_generation_protocol_is_refused_before_scoring": "no retained generation summary to model the fake on",
-      "tests/pod/test_c1_driver_execution.py::test_all_six_trainings_precede_the_first_evaluation": "no retained generation summary to model the fake on",
-      "tests/pod/test_c1_driver_execution.py::test_every_admitted_probe_carries_its_observed_protocol": "no retained generation summary to model the fake on",
-      "tests/pod/test_c1_driver_execution.py::test_only_the_c1_battery_is_opened_in_stage_h": "no retained generation summary to model the fake on",
-      "tests/pod/test_c1_driver_execution.py::test_the_cuda_handoff_gate_precedes_every_training": "no retained generation summary to model the fake on",
-      "tests/pod/test_c1_driver_execution.py::test_the_decision_consumes_all_six_probes_and_the_real_rule": "no retained generation summary to model the fake on",
-      "tests/pod/test_c1_driver_execution.py::test_the_full_session_runs_b_through_i_in_order": "no retained generation summary to model the fake on",
-      "tests/pod/test_c1_driver_execution.py::test_the_session_writes_every_report_the_launcher_fetches": "no retained generation summary to model the fake on",
       "tests/pod/test_continuation_rehearsal.py::test_a_checkpoint_that_is_not_there_is_refused": "the permanent controls are local artifacts, not tracked in git",
       "tests/pod/test_continuation_rehearsal.py::test_a_control_binding_that_disagrees_is_refused": "the permanent controls are local artifacts, not tracked in git",
       "tests/pod/test_continuation_rehearsal.py::test_a_control_that_never_verified_cannot_be_imported": "the permanent controls are local artifacts, not tracked in git",
@@ -369,10 +445,10 @@
       "tests/pod/test_setup_end_to_end.py::test_the_real_setup_runs_to_SETUP_DONE_and_the_launcher_reads_it": "the canonical checkpoint is not staged locally",
       "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init": "the baseline initialization is absent, so the validator exits 1 before it can produce a gated report"
     },
-    "skip_set_digest": "8477b2c21f13fa5fbf00425c7651ee3cd7bfacf09f7e7b8be34820a56ece3a8c",
+    "skip_set_digest": "a84f970e4348a1467ba5553019cb7b6b9d0137c8d2b454b9f127ff4f904ecb93",
     "skip_set_is_forensic_not_scientific": "the complete skip list exists so a pod/sweep divergence can be NAMED. The total is not a target and carries no scientific content; only the declared groups above express expectations.",
     "unexpected_environment_skips": [],
-    "verdict": "PASS"
+    "verdict": "FAIL"
   },
   "invocation_realized": {
     "declared_test_ignores": [
@@ -416,15 +492,17 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught",
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory"
   ],
-  "n_tests": 3846,
-  "pod_test_environment_digest": "2388ba0fe6ae57f11065db836b6c869dfbe2acdad77adcb2c9307a472d06342d",
+  "n_tests": 3871,
+  "pod_test_environment_digest": "bdca28a3aed581afd09afb7bd5d605f9f78dd4c9517695c44ee07aac4985acee",
   "pod_test_environment_n_files": 195,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
     "scripts/autoinit/publish_selected_leaves.py",
     "scripts/autoinit/record_pod_environment.py"
   ],
-  "problems": [],
+  "problems": [
+    "42 failed/errored: ['tests/autoinit/test_c1_confirmation_scoring.py::test_a_changed_scorable_membership_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_a_changed_set_count_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_a_missing_set_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_a_moved_content_hash_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_a_moved_manifest_hash_refuses', 'tests/autoinit/test_c1_confirmation_scoring.py::test_code_must_be_the_only_behaviour_only_set', 'tests/autoinit/test_c1_confirmation_scoring.py::test_code_never_enters_the_correctness_denominator', 'tests/autoinit/test_c1_confirmation_scoring.py::test_the_frozen_assets_are_untouched', 'tests/autoinit/test_c1_confirmation_scoring.py::test_the_missing_metrics_key_is_expected_and_does_not_fail', 'tests/autoinit/test_c1_confirmation_scoring.py::test_the_production_scorer_accepts_the_frozen_c1_battery']"
+  ],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/autoinit/test_stage1_import.py",
   "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
   "record_kind": "diagnostic",
@@ -432,13 +510,13 @@
   "renderer_parity_is_proved_by": "logs/experiments/phase_c1/renderer_parity.json",
   "renderer_parity_skipped_as_expected": true,
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 654.2,
-  "self_sha256": "ec4da5e1f8090d7ace1b05931944e417f817958b4f7796088e99e8bebfb9460d",
+  "seconds": 848.4,
+  "self_sha256": "9b31a6ff31dedfacc1d94d32218857379d145da0fcd34d60ed9ba9104db632a4",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_78635c5e.bundle",
+    "BUNDLE_NAME": "aad_autoinit_b55a4f00.bundle",
     "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
-    "SESSION_AUTH_PATH": "logs/autoinit_c1_authorization.json",
-    "SESSION_COMMIT": "78635c5e34c27c1f06d00753626f0466936eeb62",
+    "SESSION_AUTH_PATH": "logs/runs/stage-1/phase_c1/spec_check/governance/authorization.json",
+    "SESSION_COMMIT": "b55a4f001b6675c91fd09cbe47f565be1d91e64c",
     "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c1/frozen_assets.json",
     "SESSION_KIND": "c1",
     "SESSION_PLAN_HASH": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
@@ -451,8 +529,8 @@
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1056 derived paths, contract 74192f5b7198> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-78635c5e34c2/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-78635c5e34c2/pytest.log bash scripts/pod/simulate_pod_env.sh",
-  "simulator_exit_code": 0,
+  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1056 derived paths, contract 74192f5b7198> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-b55a4f001b66/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-b55a4f001b66/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_exit_code": 1,
   "staging_contract": {
     "digest": "74192f5b71986a43d03ab4794b148b6c236d68885a344ad58e549e07de8c4e45",
     "local_asset_destinations": [
@@ -483,8 +561,8 @@
   },
   "staging_contract_digest": "74192f5b71986a43d03ab4794b148b6c236d68885a344ad58e549e07de8c4e45",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "78635c5e34c27c1f06d00753626f0466936eeb62",
+  "swept_base_commit": "b55a4f001b6675c91fd09cbe47f565be1d91e64c",
   "tree_clean": true,
   "unexpected_environment_skips": [],
-  "verdict": "PASS"
+  "verdict": "FAIL"
 }

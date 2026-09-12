@@ -27,7 +27,7 @@ for launch.** The only process is a `$0` read-only capacity watch.
 
 | readiness | | owner |
 | --- | --- | --- |
-| latest sweep | **diagnostic — PASS** (3725 passed, 0 failed), swept at `78635c5e`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](c1_pod_environment_verification.json) |
+| latest sweep | **diagnostic — FAIL** (3717 passed, 42 failed), swept at `b55a4f00`; describes the current tree | [`c1_pod_environment_verification.json`](c1_pod_environment_verification.json) |
 | launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
 | last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`experiments/phase_c1/readiness_history.json`](experiments/phase_c1/readiness_history.json) |
 

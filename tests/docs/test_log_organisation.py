@@ -610,10 +610,14 @@ class TestTheCurrentViewReadsItsOwner:
         v = self._view()
         assert set(v) >= {"latest", "launch_bound_ready",
                           "launch_bound_failures"}
-        #: They really are independent right now: the latest sweep PASSED and a
-        #: launch-bound is NOT prepared, which one combined line cannot say.
-        assert v["latest"]["verdict"] == "PASS"
-        assert v["launch_bound_ready"] is False
+        #: Independent by CONSTRUCTION, not by today's values: this asserted
+        #: `verdict == "PASS"`, which pinned a moment and went red the next time
+        #: a sweep failed -- the very coupling the split exists to remove.
+        assert v["latest"]["verdict"] in ("PASS", "FAIL")
+        #: A diagnostic record can never make a launch-bound ready, whatever it
+        #: found. That is the conjunction one combined line could not express.
+        if v["latest"]["kind"] == "diagnostic":
+            assert v["launch_bound_ready"] is False
         assert v["launch_bound_failures"], "the failed launch-bound is not kept"
 
     def test_the_snapshot_carries_the_same_derivation(self):
@@ -628,8 +632,13 @@ class TestTheCurrentViewReadsItsOwner:
         """A PASS swept at another commit is not a prepared launch-bound."""
         from consolidate import render_log_navigation as m
         v = self._view()
-        assert v["latest"]["describes_head"] is False or v["launch_bound_ready"]
-        # readiness_ready is a conjunction: kind, verdict AND tree
+        #: The conjunction, asserted directly rather than through whichever
+        #: combination happens to be live: readiness requires kind AND verdict
+        #: AND the tree, so failing any one of them denies it.
+        ready = (v["latest"]["kind"] == "launch_bound"
+                 and v["latest"]["verdict"] == "PASS"
+                 and v["latest"]["describes_head"])
+        assert v["launch_bound_ready"] == ready
         assert not (v["latest"]["kind"] == "diagnostic"
                     and v["launch_bound_ready"]), (
             "a diagnostic record is being read as launch-bound readiness")
@@ -725,3 +734,44 @@ class TestRunOwnedGovernanceEvidence:
         assert pe.RECORD_PATH == pe.RECORD_POINTER
         L = self._L()
         assert L.auth_path_for(None) == L.AUTH_POINTER
+
+
+# --- a relocation never edits what it does not own --------------------------
+
+class TestARelocationRewritesOnlyWhatItOwns:
+    """A bulk path rewrite edited `code_state.untracked_files` inside the frozen
+    battery manifest under `artifacts/`. That list is covered by the manifest's
+    own `manifest_sha256`, so the scorer refused it and 34 tests plus the pod
+    CPU gate failed. Restored byte-identical from the canonical store.
+
+    A path string inside an artifact may be part of what a hash covers."""
+
+    def test_the_protected_trees_are_declared(self):
+        from consolidate.relocate_logs import NEVER_REWRITE, rewritable
+        assert "artifacts/" in NEVER_REWRITE
+        assert not rewritable("artifacts/stage3/c1_confirmation_v1/manifest.json")
+        assert not rewritable("logs/archive/anything.md")
+        assert not rewritable("logs/runs/phase_c1/attempt10/manifest.json")
+        assert rewritable("logs/README.md")
+
+    def test_the_frozen_battery_manifest_verifies(self):
+        """The check the scorer makes, made here at $0."""
+        from aadistill.infrastructure.manifest import sha256_json
+        p = REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json"
+        if not p.is_file():
+            pytest.skip("the battery working copy is not present")
+        m = json.loads(p.read_text())
+        calc = sha256_json({k: v for k, v in m.items() if k != "manifest_sha256"})
+        assert calc == m.get("manifest_sha256"), (
+            "the battery manifest does not match its own manifest_sha256; "
+            "something edited a frozen artifact")
+
+    def test_it_matches_the_canonical_store(self):
+        from aadistill.infrastructure.manifest import sha256_file
+        a = REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json"
+        b = Path("/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1/"
+                 "manifest.json")
+        if not (a.is_file() and b.is_file()):
+            pytest.skip("one of the copies is not present on this machine")
+        assert sha256_file(a) == sha256_file(b), (
+            "the working copy has drifted from the canonical artifact")

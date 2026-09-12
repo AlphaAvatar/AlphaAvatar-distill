@@ -19,7 +19,7 @@ capability.
 | what | owner |
 | --- | --- |
 | the frozen protocol | `logs/phase_c0_preregistration.json` |
-| what a session executes, and its bound identities | `logs/phase_c1_execution_preregistration.json` |
+| what a session executes, and its bound identities | `logs/experiments/phase_c1/execution_preregistration.json` |
 | the approved budget, attempt and retry policy | `configs/experiments/phase_c1/authorization.json` → `execution_package` |
 | spend, per attempt and cumulative | `logs/BUDGET_LEDGER.md` |
 | current status | `logs/current_state.json`, `logs/STATE.md` |
