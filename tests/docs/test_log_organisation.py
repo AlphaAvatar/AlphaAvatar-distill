@@ -349,6 +349,7 @@ CATALOG_REL = "logs/CATALOG.md"
 
 # --- consecutive sweeps do not overwrite each other's evidence --------------
 
+@needs_whole_tree
 class TestSweepOutputsAreIsolated:
     """Two executions of ONE commit must not overwrite each other.
 
@@ -588,6 +589,7 @@ class TestEngineeringSpendIsAttributedByPackage:
 
 # --- the current view cannot go stale against its own owner -----------------
 
+@needs_whole_tree
 class TestTheCurrentViewReadsItsOwner:
     """STATE.md said the readiness record was a launch-bound FAILURE while the
     file it linked to was a diagnostic PASS. Three facts had been collapsed into
@@ -738,6 +740,7 @@ class TestRunOwnedGovernanceEvidence:
 
 # --- a relocation never edits what it does not own --------------------------
 
+@needs_whole_tree
 class TestARelocationRewritesOnlyWhatItOwns:
     """A bulk path rewrite edited `code_state.untracked_files` inside the frozen
     battery manifest under `artifacts/`. That list is covered by the manifest's

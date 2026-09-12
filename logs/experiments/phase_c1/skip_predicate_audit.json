@@ -8,28 +8,29 @@
   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
   "tests/autoinit/test_stage1_import.py"
  ],
- "n_predicates": 104,
+ "n_predicates": 106,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 42,
+  "filesystem_premise_onpod": 43,
   "filesystem_premise_unresolved": 4,
   "gpu": 1,
   "optional_dependency": 9,
   "repository_content": 3,
   "staged_artifact": 3,
   "unrecognised": 27,
-  "unstaged_artifact": 8
+  "unstaged_artifact": 9
  },
- "n_differs_on_pod": 24,
+ "n_differs_on_pod": 25,
  "n_unrecognised": 31,
- "n_registered": 36,
+ "n_registered": 37,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
    "tests/autoinit/test_c1_confirmation_scoring.py",
    "tests/autoinit/test_frozen_records.py",
    "tests/data/test_e7_streams.py",
+   "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store",
    "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store",
    "tests/evaluation/test_capability.py",
    "tests/evaluation/test_e6_analysis.py",
@@ -105,8 +106,8 @@
  "parity_by_resolution": {
   "absent_on_both": 9,
   "guaranteed_dependency": 9,
-  "normalized_by_contract": 30,
-  "same_on_pod": 56
+  "normalized_by_contract": 31,
+  "same_on_pod": 57
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -925,6 +926,38 @@
    "registered_as": "staging_premise_property",
    "parity": "normalized_by_contract",
    "parity_why": "these ask the filesystem for unstaged artifacts. The simulator has moved them aside and the pod never received them, so both skip for the same stated reason."
+  },
+  {
+   "file": "tests/docs/test_log_organisation.py",
+   "line": 765,
+   "kind": "pytest.skip",
+   "function": "test_the_frozen_battery_manifest_verifies",
+   "condition": "not p.is_file()",
+   "expanded": "not p.is_file() | p=REPO / \"artifacts/stage3/c1_confirmation_v1/manifest.json\" | REPO=Path(__file__).resolve().parents[2] | m=json.loads(p.read_text())",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/docs/test_log_organisation.py::test_the_frozen_battery_manifest_verifies",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/docs/test_log_organisation.py",
+   "line": 778,
+   "kind": "pytest.skip",
+   "function": "test_it_matches_the_canonical_store",
+   "condition": "not (a.is_file() and b.is_file())",
+   "expanded": "not (a.is_file() and b.is_file()) | a=REPO / \"artifacts/stage3/c1_confirmation_v1/manifest.json\" | b=Path(\"/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1/\"\n                 \"manifest.json\") | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "unstaged_artifact",
+   "verdict": "differs_on_pod",
+   "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
+   "nodeid": "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store",
+   "readiness_group": null,
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/docs/test_repository_structure.py",
@@ -1890,5 +1923,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "8436b493721b7928f3c9012c0a38ed46f91b2b221cbaa50b71eecaf23f8dedb3"
+ "digest": "1e4d688663a1bd0b9694f2943f251c6dfbf227ddefb2d2a576b8833f644edf6c"
 }

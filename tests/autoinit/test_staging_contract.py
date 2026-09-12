@@ -375,9 +375,17 @@ def test_the_recorder_derives_and_never_falls_back(contract):
     assert '"HIDDEN_PATHS"' in src and '"PODSIM_CMD"' in src
     assert "hidden_files(contract, REPO_ROOT)" in src
     # No except-and-continue around the derivation.
-    head = src[src.index("def derive_c1_session"):
-               src.index("def check_invocation_matches")]
-    assert "except" not in head, (
+    #
+    # Read from the SYNTAX TREE, not by slicing between two function names.
+    # The slice covered everything written between them, so an unrelated helper
+    # added later -- one whose `except FileExistsError` is how it allocates a
+    # fresh sweep directory -- failed this. The subject is one function.
+    import ast
+
+    fn = next(n for n in ast.parse(src).body
+              if isinstance(n, ast.FunctionDef) and n.name == "derive_c1_session")
+    handlers = [n for n in ast.walk(fn) if isinstance(n, ast.ExceptHandler)]
+    assert not handlers, (
         "derive_c1_session swallows an error and would let the sweep fall back "
         "to the generic simulator default")
 

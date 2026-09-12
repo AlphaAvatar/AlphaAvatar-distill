@@ -150,6 +150,10 @@
   "tests/docs/test_repository_structure.py": {
    "class": "staging_premise_property",
    "why": "the markdown link resolver, for the same reason: a link from a staged document to an unstaged one is a fact about the staging, not a broken reference. Keyed on the same observed git-vs-filesystem comparison."
+  },
+  "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store": {
+   "class": "devbox_only_artifact",
+   "why": "compares the repo-local battery working copy against the canonical artifact store under $HOME. Neither is staged to a pod, and the contract points HOME at a fresh empty directory for the pytest command on BOTH machines, so both decide absent and skip for the same stated reason. It asks the FILESYSTEM, not a simulator marker."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",

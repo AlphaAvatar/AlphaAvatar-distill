@@ -65,7 +65,7 @@
   "latest_sweep": {
    "kind": "diagnostic",
    "verdict": "FAIL",
-   "swept_base_commit": "b55a4f001b6675c91fd09cbe47f565be1d91e64c",
+   "swept_base_commit": "9f0149c3d67c1b1fb33204a9dea4e95f7d536ec8",
    "describes_head": true
   },
   "launch_bound_ready": false,
