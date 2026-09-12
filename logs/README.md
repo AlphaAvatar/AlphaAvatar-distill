@@ -1,89 +1,80 @@
 # logs
 
-The project's records, in one canonical layout. **Start here.**
+The project's records. **Stage → Experiment → Run.**
 
 | I want to know… | read |
 | --- | --- |
-| what is true right now | [`state/current.md`](state/current.md) — human view · [`state/current.json`](state/current.json) — machine view |
+| what is true right now | [`state/current.md`](state/current.md) · [`state/current.json`](state/current.json) |
 | what has been spent | [`budget/ledger.md`](budget/ledger.md), and run [`derive_budget.py`](../scripts/consolidate/derive_budget.py) for live balances |
-| every run | [`runs/index.json`](runs/index.json) |
-| why something was decided | [`budget/decisions.md`](budget/decisions.md) |
-| which file owns which fact | [`state/ownership.md`](state/ownership.md) |
-| what happened in a phase | [`state/phase_index.md`](state/phase_index.md) |
-| where an old path went | [`migrations/log-layout-v1/manifest.json`](migrations/log-layout-v1/manifest.json) |
+| what a stage contains | [`stages/`](stages/) |
+| work with no established stage | [`cross-stage/`](cross-stage/) |
+| shared infrastructure | [`shared/`](shared/) |
+| every run, anywhere | [`index.json`](index.json) |
+| where an old path went | [`migrations/`](migrations/) |
 | a superseded document | [`archive/`](archive/) |
 
-Nothing here authorizes anything. A launch needs a grant, a launch-bound
-readiness record, a one-use authorization and a bundle — see
-[`state/current.md`](state/current.md).
+Nothing here authorizes anything.
 
-## The layout
+## The hierarchy
 
 ```
 logs/
-├── README.md            this file, the only thing at the root
-├── state/               what is true now: current.json, current.md, ownership
-├── budget/              ledger.md, decisions.md, approvals/ (grants, authorizations)
-├── experiments/         <experiment_id>/{plans,analyses,results,history}/
-├── runs/                index.json, stage-<stage_id>/<experiment>/<run>/, unscoped/
-├── validations/         <validation_id>/ — engineering evidence, not science
-├── maintenance/         storage/, inventories/, cleanup/
-├── migrations/          log-layout-v1/ — how the old paths map forward
-└── archive/             superseded documents, kept verbatim
+├── README.md
+├── index.json          every run, across every stage
+├── state/              what is true now
+├── budget/             ledger, decisions, approvals/
+├── stages/
+│   └── stage-<id>/
+│       └── <experiment>/
+│           ├── plans/  analyses/  results/  history/  validations/
+│           └── runs/<run_id>/{governance,runtime,evidence,artifacts,closeout}/
+├── cross-stage/<experiment>/    same shape; stage not established
+├── shared/             infrastructure analyses and validations
+├── maintenance/        storage/, inventories/, cleanup/
+├── migrations/         how old paths map forward
+└── archive/            stages/, cross-stage/, repository/
 ```
 
-### Runs
+**One experiment, one directory.** Why the work was done, its protocol, its
+analyses, its aggregate results, the engineering validation that supports it,
+its history and every run — all in one place. You do not have to decide whether
+something is "an experiment thing" or "a run thing" before you can find it.
 
-```
-logs/runs/stage-<stage_id>/<experiment_id>/<run_id>/
-logs/runs/unscoped/<experiment_id>/<run_id>/
-```
+### Stage is read, never guessed
 
-Each run holds `README.md`, `manifest.json` and the five areas `governance/
-runtime/ evidence/ artifacts/ closeout/`.
+An experiment's stage comes from `configs/experiments/<id>/authorization.json`
+→ `stage_id`. An identifier like `phase_a` or `phase_c1` names the *experiment*;
+it says nothing about the pipeline stage. A preregistration's `session_plan`
+stages are **driver** stages, a different dimension, and an operator called
+`composite.stage1_sandwich_v0` names an operator.
 
-**Stage is declared, never inferred.** It comes from the experiment's
-configuration — `configs/experiments/<id>/authorization.json:stage_id` — and
-never from a directory name or from the string `c1`. Stages are not enumerated
-in advance: a stage the pipeline grows later needs a config entry and no code
-change.
+Today only `phase_c1` declares one, so it is the only occupant of
+[`stages/stage-1/`](stages/stage-1/). Everything else is in
+[`cross-stage/`](cross-stage/) — a statement that no frozen record establishes
+its stage, not a holding pen. Stages are never pre-created: a stage exists when
+an experiment declares it.
 
-**`unscoped/` is for a run whose stage no frozen record determines.** Today that
-is every experiment except `phase_c1`: their frozen records describe *driver*
-stages (`stage 0` attestation, `stage 1` build), which is a different dimension,
-and an operator named `composite.stage1_sandwich_v0` names an operator. Filing
-those under a guessed stage would be inventing provenance. When a frozen record
-does determine one, the run belongs under that stage.
+### Validations belong to what they serve
 
-**Three dimensions, kept apart:** the pipeline *stage*, the *experiment* (which
-carries the phase), and the *run* (one execution attempt). A provider *draw* is a
-fourth thing and lives inside a run's evidence, not in its path.
+The CUDA stage-F validation exists to prove C1's execution path, so it is at
+`stages/stage-1/phase_c1/validations/cuda-stage-f/`. Infrastructure validation
+that serves no single experiment is in [`shared/validations/`](shared/validations/).
+`validation` is not a top-level category.
 
-### Validations
+### Old paths
 
-Engineering validation — CUDA integration, device placement, dtype, a canary —
-lives in `validations/<id>/`, never in `runs/`. It answers a hardware question
-and produces no scientific measurement.
+Every relocation is recorded in [`migrations/`](migrations/) as old → new, with
+the identity each object had before it moved. An old path inside a consumed
+authorization or a closed manifest is **not stale**: it states where that object
+was when the payload was written, which is still true, and git history holds the
+tree. Those payloads are never rewritten.
 
-### Finding an old path
+## The rule
 
-Every object that moved is in
-[`migrations/log-layout-v1/manifest.json`](migrations/log-layout-v1/manifest.json)
-as old path → new path, with the identity it had before the move.
+**One fact, one owner — physically.** A run's result is in its own
+`evidence/`, `artifacts/`, `closeout/`; a cross-run aggregate in the
+experiment's `results/`; engineering evidence in its `validations/`; money in
+`budget/`; current state in `state/`. Never three editable copies.
 
-An old path written inside a frozen payload — a consumed authorization, a closed
-run's manifest, an archived document — is **not stale**. It states where the
-object was when that payload was written, which is still true, and git history
-holds the tree that proves it. Those strings are not rewritten; the manifest is
-how you follow one forward.
-
-## The rule this directory is maintained by
-
-**One fact, one owner — as a physical file, not only as a principle.** A result
-belongs to its run (`evidence/`, `artifacts/`, `closeout/`); a cross-run summary
-to `experiments/<id>/results/`; engineering evidence to `validations/`. The same
-result does not exist as three editable copies. A number that can be derived
-from a manifest, a closeout, an approval or the ledger is derived, not copied.
-
-Configuration is **not** here: `configs/` is the source of truth, and a run's
+Configuration is **not** here — `configs/` is the source of truth, and a run's
 manifest records the config path and hash it ran under.

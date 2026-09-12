@@ -12,7 +12,7 @@ reason would make the next agent remove the guard. So the reasons live **here**,
 outside the core, keyed by the module and the mechanism they justify.
 
 **This file authorizes nothing.** It is a register of why code exists. The
-authoritative accounts stay where they already are: `logs/archive/indexes/EXPERIMENTS.md` for
+authoritative accounts stay where they already are: `logs/archive/repository/indexes/EXPERIMENTS.md` for
 runs, `logs/budget/ledger.md` for money, `logs/state/phase_index.md` for phase
 history, and the per-validation directories under `logs/validations/`.
 

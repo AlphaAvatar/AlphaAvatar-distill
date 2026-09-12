@@ -32,7 +32,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 ENTRY = REPO / "scripts/validation/cuda_engineering_launch.py"
-AUTH = REPO / "logs/validations/cuda-stage-f/v1/authorization.json"
+AUTH = REPO / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json"
 
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
@@ -363,7 +363,7 @@ class TestPriorSpendReducesTheNextResourcesLimits:
 
     def test_the_launcher_starts_from_what_earlier_subruns_booked(self, eng):
         booked = json.loads(
-            (REPO / "logs/validations/cuda-stage-f/v1/campaign.json").read_text()
+            (REPO / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/campaign.json").read_text()
         )["booked_usd"]
         assert eng.booked_usd == booked > 0, "no prior spend was carried in"
         assert eng.remaining_total == pytest.approx(eng.hard_usd - booked)

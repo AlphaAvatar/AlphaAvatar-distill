@@ -48,7 +48,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from experiments.phase_a.plan import GRANT_PROSE_REQUIRED, PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, phase_a_harness_digest  # noqa: E402
 
-FROZEN_PLAN = "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+FROZEN_PLAN = "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 
 #: What a grant document must say. Nothing here is derived: a maintainer writes
 #: it, and everything the ISSUER can establish for itself — the timestamp, the

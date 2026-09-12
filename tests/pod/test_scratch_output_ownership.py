@@ -175,7 +175,7 @@ def test_the_stale_evidence_never_reaches_a_manifest(tmp_path, L):
     scr, digests = _owned_stale_scratch(tmp_path, L, repo)
 
     hijack = _args(scr, "attempt10")
-    hijack.out = "logs/runs/stage-1/phase_c1/attempt10/runtime/session.json"
+    hijack.out = "logs/stages/stage-1/phase_c1/runs/attempt10/runtime/session.json"
     layout = L.layout_for_run(repo, "attempt10")
     layout.create(dict(L.C1_RUN_ROLES))
     _write_session(repo, hijack)

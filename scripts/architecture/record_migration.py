@@ -236,7 +236,7 @@ def main() -> int:
         "historical_evidence": {
             "files_moved_or_rewritten": 0,
             "rule": ("no file under logs/ was moved, renamed or rewritten by "
-                     "this migration; logs/runs/index.json verifies that "
+                     "this migration; logs/index.json verifies that "
                      "independently by directory digest"),
         },
         "authorizes": "nothing",

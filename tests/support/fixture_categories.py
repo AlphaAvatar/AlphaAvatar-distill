@@ -114,9 +114,9 @@ def current_tree_stage3_binding(driver_module, tmp_path: Path,
     from aadistill.infrastructure.manifest import sha256_json
 
     att = historical_document(
-        "logs/experiments/phase_a/results/autoinit_stage3_complete/attested_evaluation_protocol.json")
+        "logs/cross-stage/phase_a/results/autoinit_stage3_complete/attested_evaluation_protocol.json")
     thresholds = historical_document(
-        "logs/experiments/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json")
+        "logs/cross-stage/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json")
     compat = json.loads(driver_module.COMPAT_V2.read_text())
 
     protocol = json.loads(json.dumps(att["evaluation_protocol"]))  # deep copy

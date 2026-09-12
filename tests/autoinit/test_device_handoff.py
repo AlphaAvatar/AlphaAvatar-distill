@@ -357,7 +357,7 @@ def test_the_trainer_requirement_matches_its_recorded_basis():
     import autoinit_phase_a_driver as drv
 
     basis = json.loads(
-        (REPO / "logs/experiments/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json").read_text())
+        (REPO / "logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json").read_text())
     terms = basis["conversion_to_device_bytes"]["terms_gib"]
     assert drv.RECOVERY_TRAINER_PEAK_ALLOCATED_GIB == terms["peak_allocated"]
     assert drv.RECOVERY_TRAINER_RESERVED_SLACK_GIB == terms["allocator_reserved_slack"]

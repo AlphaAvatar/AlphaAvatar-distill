@@ -277,7 +277,7 @@ def test_conclusion_three_is_read_from_the_equivalence_record(tmp_path):
 def test_the_committed_record_agrees_with_a_live_derivation():
     import json
 
-    path = REPO / "logs/experiments/shared/analyses/autoinit_historical_reuse_position.json"
+    path = REPO / "logs/shared/analyses/autoinit_historical_reuse_position.json"
     assert path.is_file(), "run scripts/autoinit/historical_reuse_position.py"
     recorded = json.loads(path.read_text())
     live = _position()

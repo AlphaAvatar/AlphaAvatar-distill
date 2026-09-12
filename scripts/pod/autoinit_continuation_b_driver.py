@@ -92,20 +92,20 @@ def bind_status_file() -> None:
 
 #: The completed evidence this session stands on. Every one is re-checked at
 #: stage 0 against the authorization's bound hashes.
-STAGE1_SELECTION = REPO / "logs/runs/unscoped/phase_b/attempt5/stage1_selection.json"
-AMENDMENT = REPO / "logs/experiments/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
-HISTORICAL_REUSE = REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
-ATTEMPT5_REUSE = REPO / "logs/experiments/shared/analyses/autoinit_attempt5_probe_reuse.json"
-HISTORICAL_PROBES = REPO / "logs/runs/unscoped/recovery_continuation/attempt7/probes"
-ATTEMPT5_PROBES = REPO / "logs/runs/unscoped/phase_b/attempt5/probes"
+STAGE1_SELECTION = REPO / "logs/cross-stage/phase_b/runs/attempt5/stage1_selection.json"
+AMENDMENT = REPO / "logs/cross-stage/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
+HISTORICAL_REUSE = REPO / "logs/shared/analyses/autoinit_historical_probe_reuse.json"
+ATTEMPT5_REUSE = REPO / "logs/shared/analyses/autoinit_attempt5_probe_reuse.json"
+HISTORICAL_PROBES = REPO / "logs/cross-stage/recovery_continuation/runs/attempt7/probes"
+ATTEMPT5_PROBES = REPO / "logs/cross-stage/phase_b/runs/attempt5/probes"
 #: Attempt 4's ONE purchased probe, `fe9683e6a9c7/sb`. Its session's decision was
 #: withdrawn — the inherited pooling let a historical `sc` leak into the rung-2
 #: comparison — but the probe is a valid finished measurement of the right
 #: checkpoint on the right seed, strictly reconstructed by
 #: `scripts/autoinit/verify_attempt4_probe_reuse.py`. Citing it is what stops the
 #: next session paying ~72 min of L40S for evidence that already exists.
-ATTEMPT4_REUSE = REPO / "logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json"
-ATTEMPT4_PROBES = REPO / "logs/runs/unscoped/continuation_b/attempt4/probes"
+ATTEMPT4_REUSE = REPO / "logs/shared/analyses/autoinit_attempt4_probe_reuse.json"
+ATTEMPT4_PROBES = REPO / "logs/cross-stage/continuation_b/runs/attempt4/probes"
 
 CANONICAL_CONTROL = "control-qwen"
 

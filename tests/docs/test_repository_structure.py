@@ -303,8 +303,8 @@ def test_the_device_canary_is_recorded_as_terminated_and_not_prepared():
                for a in snap["abandoned"]), (
         "current_state.json does not record the canary path as terminated")
     # And the evidence it was terminated *with* is still here.
-    for d in ("logs/validations/device-canary/runs/autoinit_device_canary_attempt1",
-              "logs/validations/device-canary/runs/autoinit_device_canary_attempt2"):
+    for d in ("logs/shared/validations/device-canary/runs/autoinit_device_canary_attempt1",
+              "logs/shared/validations/device-canary/runs/autoinit_device_canary_attempt2"):
         assert (REPO / d).is_dir(), f"{d} was removed; that is paid evidence"
 
 
@@ -349,7 +349,7 @@ def _preserved(rel: str) -> bool:
 
 def _registered_run_dirs() -> tuple[str, ...]:
     import json as _json
-    idx = _json.loads((REPO / "logs/runs/index.json").read_text())
+    idx = _json.loads((REPO / "logs/index.json").read_text())
     return tuple(rel for e in idx.get("runs", [])
                  for rel in (e.get("components") or {}).values()
                  if (REPO / rel).is_dir())

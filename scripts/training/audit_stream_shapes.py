@@ -2,7 +2,7 @@
 """Are the per-step memory-driving shapes constant across the 1,761-step stream?
 
     PYTHONPATH=src python scripts/training/audit_stream_shapes.py \
-        --out logs/experiments/early/analyses/e8b_stream_shape_audit.json
+        --out logs/cross-stage/early/analyses/e8b_stream_shape_audit.json
 
 Zero GPU cost. The block order is `stream_block_indices(n_blocks, seed, step*bps, bps)`
 — a pure function of the seed and the step — so the exact stream every arm will see is
@@ -165,7 +165,7 @@ def summarize(a: dict) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out", default="logs/experiments/early/analyses/e8b_stream_shape_audit.json")
+    ap.add_argument("--out", default="logs/cross-stage/early/analyses/e8b_stream_shape_audit.json")
     ap.add_argument("--arms", default="DP-sa,DC-sa,DP-sb,DC-sb")
     args = ap.parse_args()
 

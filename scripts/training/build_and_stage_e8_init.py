@@ -65,7 +65,7 @@ def main() -> int:
     ap.add_argument("--depth-map", default="",
                     help="depth_map.json from pod A (default: beside --frozen-map)")
     ap.add_argument("--skip-upload", action="store_true")
-    ap.add_argument("--out", default="logs/experiments/early/analyses/e8_init_stage_manifest.json")
+    ap.add_argument("--out", default="logs/cross-stage/early/analyses/e8_init_stage_manifest.json")
     args = ap.parse_args()
 
     frozen_path = Path(args.frozen_map)

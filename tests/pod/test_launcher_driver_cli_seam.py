@@ -174,6 +174,6 @@ def test_the_seam_is_covered_by_this_module_and_not_by_a_gate():
         f"a gate now claims to cover the driver CLI seam: {names}. If that is "
         "deliberate, this module's premise has changed and it should say so")
     prereg = json.loads(
-        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
+        (REPO / "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json").read_text())
     assert len(spec.precheck) == prereg["transport"]["n_pre_provider_gates"], names
     assert str(Path(__file__).relative_to(REPO)) not in spec.setup.test_ignores

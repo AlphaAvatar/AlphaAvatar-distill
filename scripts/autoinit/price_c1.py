@@ -38,7 +38,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-OUT = REPO / "logs/experiments/phase_c1/plans/phase_c1_pricing.json"
+OUT = REPO / "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json"
 
 #: Secure-cloud L40S, the field `session_runner` prices on
 #: (`gpuTypes[0].securePrice`). Was 0.99 when Phase A/B ran and when C1 was first

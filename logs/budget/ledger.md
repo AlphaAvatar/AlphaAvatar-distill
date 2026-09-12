@@ -12,7 +12,7 @@ record and cannot reconstruct history on their own.
 
 The authoritative figure is the cumulative total carried forward in the budget planners
 and cross-checked against each experiment's recorded cost in
-[`EXPERIMENTS.md`](../archive/indexes/EXPERIMENTS.md). Surviving evidence files agree with those
+[`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md). Surviving evidence files agree with those
 per-session figures where both exist (E7 $10.49, E8a $0.53 for pod A, E8b-S1 $4.07 at
 polling end, E8b-S2 $7.21).
 
@@ -1258,7 +1258,7 @@ measured under, so this would have failed later at far greater cost.
 
 Reproduced at **$0** afterwards by hiding both directories and re-running the
 pod's exact ignore set: the same four tests fail, and only those four. Record:
-[`autoinit_continuation_b_attempt1.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt1.json).
+[`autoinit_continuation_b_attempt1.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt1.json).
 
 Headroom `$23.4537` still covers one `$8.0691` continuation, but the grant
 explicitly excludes a second attempt, so one needs a maintainer decision.
@@ -1296,7 +1296,7 @@ billing. The authorization `autoinit.continuation_b.20260829T194657Z` is
 
 Behavioural-continuation attempts now total **$0.5659** and have bought no
 science. Record:
-[`autoinit_continuation_b_attempt2.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt2.json).
+[`autoinit_continuation_b_attempt2.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt2.json).
 
 ## 2026-08-30 — Behavioural continuation attempt 3: $0.2275, stage 0 PASSED, stage 1 failed
 
@@ -1341,7 +1341,7 @@ authorization `autoinit.continuation_b.20260830T091529Z` is **consumed**.
 
 Behavioural-continuation attempts now total **$0.7934** and have bought no
 probe. Record:
-[`autoinit_continuation_b_attempt3.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt3.json).
+[`autoinit_continuation_b_attempt3.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt3.json).
 
 ## 2026-08-30 — Behavioural continuation attempt 4: $1.4680, COMPLETE and RESOLVED
 
@@ -1369,7 +1369,7 @@ across 16 classes collected, teardown gate `allowed=True failed=None`, pod delet
 Behavioural-continuation attempts total **$2.2614** across four launches; the
 three that bought nothing cost `$0.7934` between them and each closed a distinct
 defect. Record:
-[`autoinit_continuation_b_attempt4.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt4.json).
+[`autoinit_continuation_b_attempt4.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt4.json).
 
 ## 2026-08-30 — Behavioural continuation attempt 5: $1.5433, PHASE B RESOLVED
 
@@ -1402,7 +1402,7 @@ separation.
 Came in at `$1.5433` against the `$5.4784` ceiling. Behavioural-continuation
 attempts total **$3.8047** across five launches; the three that bought nothing
 cost `$0.7934` and each closed a distinct defect. Record:
-[`autoinit_continuation_b_attempt5.json`](../experiments/continuation_b/analyses/autoinit_continuation_b_attempt5.json).
+[`autoinit_continuation_b_attempt5.json`](../cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt5.json).
 
 ## Standing rules
 
@@ -2047,7 +2047,7 @@ package, and quoting the package total as the increase would overstate it.
 | | approved |
 | --- | --- |
 | formal C1 attempts, **including the first** | **3**, a ceiling and not a target |
-| per formal attempt | **`$15.1475`** hard ceiling — unchanged, and no minute assumption in [`phase_c1_pricing.json`](../experiments/phase_c1/plans/phase_c1_pricing.json) moved |
+| per formal attempt | **`$15.1475`** hard ceiling — unchanged, and no minute assumption in [`phase_c1_pricing.json`](../stages/stage-1/phase_c1/plans/phase_c1_pricing.json) moved |
 | formal allowance | **`$45.4425`** |
 | GPU engineering allowance, cumulative across every subrun | **`$6.0000`** |
 | package total | **`$51.4425`** |
@@ -2109,7 +2109,7 @@ unchanged at **`$267.8998`** — an approval is not a cost.
 
 | what | cost | evidence |
 | --- | --- | --- |
-| C1 attempt 10: 13/13 pre-provider gates passed twice — once in a read-only pre-flight that did not invoke the launcher, again by the launcher itself — pod `kabazpl889i5u5` created at `$1.09/h`, 6.48 min, **INFRASTRUCTURE ABORT during SETUP at the frozen-asset gate**, `SETUP_RC=91`. No driver stage, no replay, no training, no evaluation, no decision | `$0.1177` | [`runs/phase_c1/attempt10/`](../runs/stage-1/phase_c1/attempt10/) |
+| C1 attempt 10: 13/13 pre-provider gates passed twice — once in a read-only pre-flight that did not invoke the launcher, again by the launcher itself — pod `kabazpl889i5u5` created at `$1.09/h`, 6.48 min, **INFRASTRUCTURE ABORT during SETUP at the frozen-asset gate**, `SETUP_RC=91`. No driver stage, no replay, no training, no evaluation, no decision | `$0.1177` | [`runs/phase_c1/attempt10/`](../stages/stage-1/phase_c1/runs/attempt10/) |
 
 **Cumulative: `$267.8998` + `$0.1177` = `$268.0175` of the `$320.0000` cap.**
 Package booked **`$0.1177`** of `$51.4425`; **1 of 3** formal attempts used.
@@ -2149,7 +2149,7 @@ identity and a fresh one-use chain.
 
 | what | cost | evidence |
 | --- | --- | --- |
-| C1 attempt 11: 14/14 pre-provider gates passed twice, pod `udkapuemrwqcmt` created at `$1.09/h`, **PROVIDER ACQUISITION FAILURE — `no_endpoint`**. `starting` for 840 s, no TCP 22 mapping ever appeared, abandoned at the 15-minute bound. Setup never started, so no marker was reached at all | `$0.2783` | [`runs/phase_c1/attempt11/`](../runs/stage-1/phase_c1/attempt11/) |
+| C1 attempt 11: 14/14 pre-provider gates passed twice, pod `udkapuemrwqcmt` created at `$1.09/h`, **PROVIDER ACQUISITION FAILURE — `no_endpoint`**. `starting` for 840 s, no TCP 22 mapping ever appeared, abandoned at the 15-minute bound. Setup never started, so no marker was reached at all | `$0.2783` | [`runs/phase_c1/attempt11/`](../stages/stage-1/phase_c1/runs/attempt11/) |
 
 **Cumulative: `$268.0175` + `$0.2783` = `$268.2958` of the `$320.0000` cap.**
 Package booked **`$0.3960`** of `$51.4425`; **2 of 3** formal attempts used.
@@ -2229,7 +2229,7 @@ than create a second resource when that cannot be confirmed.
 
 | what | cost | evidence |
 | --- | --- | --- |
-| C1 attempt 12: 14/14 pre-provider gates passed twice — once in a read-only pre-flight that did not invoke the launcher, and again by the launcher. One create call, **refused**: *"There are no longer any instances available with the requested specifications."* No resource existed, nothing billed, nothing needed tearing down | `$0.0000` | [`runs/phase_c1/attempt12/`](../runs/stage-1/phase_c1/attempt12/) |
+| C1 attempt 12: 14/14 pre-provider gates passed twice — once in a read-only pre-flight that did not invoke the launcher, and again by the launcher. One create call, **refused**: *"There are no longer any instances available with the requested specifications."* No resource existed, nothing billed, nothing needed tearing down | `$0.0000` | [`runs/phase_c1/attempt12/`](../stages/stage-1/phase_c1/runs/attempt12/) |
 
 **Cumulative unchanged: `$268.2958` of the `$320.0000` cap.** Package booked
 unchanged at **`$0.3960`** of `$51.4425`.

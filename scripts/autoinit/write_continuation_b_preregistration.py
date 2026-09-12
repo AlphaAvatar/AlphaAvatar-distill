@@ -33,15 +33,15 @@ from aadistill.initialization.operators.register import register_builtin_operato
 #: Explicit: importing an operator module no longer registers it.
 register_builtin_operators()
 
-AMENDMENT = REPO_ROOT / "logs/experiments/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
-PRICING = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_behavioural_continuation_pricing.json"
-ASSETS = REPO_ROOT / "logs/experiments/continuation_b/analyses/autoinit_continuation_b_assets.json"
-SELECTION = REPO_ROOT / "logs/runs/unscoped/phase_b/attempt5/stage1_selection.json"
-HISTORICAL = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json"
-ATTEMPT5 = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_attempt5_probe_reuse.json"
-ATTEMPT4 = REPO_ROOT / "logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json"
-CORRECTED_RUNG2 = REPO_ROOT / "logs/experiments/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json"
-FROZEN = REPO_ROOT / "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+AMENDMENT = REPO_ROOT / "logs/cross-stage/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json"
+PRICING = REPO_ROOT / "logs/shared/analyses/autoinit_behavioural_continuation_pricing.json"
+ASSETS = REPO_ROOT / "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_assets.json"
+SELECTION = REPO_ROOT / "logs/cross-stage/phase_b/runs/attempt5/stage1_selection.json"
+HISTORICAL = REPO_ROOT / "logs/shared/analyses/autoinit_historical_probe_reuse.json"
+ATTEMPT5 = REPO_ROOT / "logs/shared/analyses/autoinit_attempt5_probe_reuse.json"
+ATTEMPT4 = REPO_ROOT / "logs/shared/analyses/autoinit_attempt4_probe_reuse.json"
+CORRECTED_RUNG2 = REPO_ROOT / "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json"
+FROZEN = REPO_ROOT / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 
 FULL_PHASE_B_CEILING_USD = 35.6660
 
@@ -225,7 +225,7 @@ def build() -> dict:
             "sc_already_held": corrected["sc_already_held"],
             "sc_still_owed": corrected["sc_still_owed"],
             "withdrawn": corrected["withdrawn_decision"]["decision_status"],
-            "source": "logs/experiments/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json",
+            "source": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json",
         },
         "reuse_rule": {
             "binds_on": ["student_artifact_digest", "seed"],
@@ -284,7 +284,7 @@ def build() -> dict:
             "observed_call_site_owners": list(search_call_site_owners(REPO_ROOT)),
         },
         "science_plan": {"plan_hash": science,
-                         "source": "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json",
+                         "source": "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json",
                          "unchanged": True},
         "session_plan": {
             "plan_id": CONTINUATION_PLAN_V1.plan_id,
@@ -326,7 +326,7 @@ def build() -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/experiments/continuation_b/plans/autoinit_continuation_b_preregistration.json")
+    ap.add_argument("--out", default="logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json")
     args = ap.parse_args()
     body = build()
     out = Path(args.out)

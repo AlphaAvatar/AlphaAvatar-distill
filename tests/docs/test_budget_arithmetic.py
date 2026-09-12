@@ -21,7 +21,7 @@ requires every prose claim to agree with the derivation. It deliberately does
 not re-state the answer: a test that hard-codes `full_attempt_fits = True` would
 have to be edited on the next spend, which is exactly when it stops being
 checked. The inputs are the snapshot's cumulative spend and cap, and the
-ceiling from `logs/experiments/phase_c1/plans/phase_c1_pricing.json`.
+ceiling from `logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json`.
 
 Scope: money arithmetic and claims about it. Whether an attempt is AUTHORIZED is
 a maintainer decision and is not derivable from any number here — headroom has
@@ -36,7 +36,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 SNAPSHOT = REPO / "logs/state/current.json"
-PRICING = REPO / "logs/experiments/phase_c1/plans/phase_c1_pricing.json"
+PRICING = REPO / "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json"
 LEDGER = REPO / "logs/budget/ledger.md"
 STATE = REPO / "logs/state/current.md"
 

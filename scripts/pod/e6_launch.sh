@@ -292,7 +292,7 @@ else
   say "dev-box checkpoints uploaded and decompressed — $(cost)"
   if $SSH "root@$HOST" "cd /workspace/aad && /opt/train/bin/python \
       scripts/pod/e6_stage_checkpoints.py \
-        --registration logs/experiments/early/analyses/e6_registration.json --relay-dest /workspace/ckpt \
+        --registration logs/cross-stage/early/analyses/e6_registration.json --relay-dest /workspace/ckpt \
         --devbox-src /workspace/ckpt_local \
         --init artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
         --out artifacts/audit/e6_checkpoint_manifest.json" >>"$LOG" 2>&1; then

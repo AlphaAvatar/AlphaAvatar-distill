@@ -12,7 +12,7 @@ no bundle, no teacher weights, no venv build and no formal authorization, and
 that must fit inside `$0.40`.
 
 **It is not a C1 session.** It reads
-`logs/validations/cuda-stage-f/v1/authorization.json`, an engineering
+`logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json`, an engineering
 authorization recorded under this validation's own governance evidence. It
 cannot read, and does not accept, a formal C1 grant.
 
@@ -101,15 +101,15 @@ RUN_SPEC = ArtifactSpec(
 RUN_OUTPUTS: tuple[str, ...] = (
     "validation_stdout.txt", "artifacts", "watchdog_*.jsonl")
 
-AUTHORIZATION = REPO_ROOT / "logs/validations/cuda-stage-f/v1/authorization.json"
-VALIDATION_DIR = REPO_ROOT / "logs/validations/cuda-stage-f/v1"
+AUTHORIZATION = REPO_ROOT / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json"
+VALIDATION_DIR = REPO_ROOT / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1"
 #: THIS run's image, not the formal C1 one. `configs/infrastructure/pod_image.json`
 #: describes an image whose `/opt/train/bin/python` is built by a long setup this
 #: run does not perform.
 DEPLOYMENT_CONFIG = REPO_ROOT / "configs/validation/cuda_engineering_deployment.json"
 #: Cumulative cost across every resource and subrun of this task. A rerun does
 #: NOT reset it and a replacement resource does NOT get a fresh allocation.
-CAMPAIGN = REPO_ROOT / "logs/validations/cuda-stage-f/v1/campaign.json"
+CAMPAIGN = REPO_ROOT / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/campaign.json"
 
 #: Candidates that can satisfy cc >= 8.0 with native BF16 and >= 2 GiB. The
 #: cheapest AVAILABLE one is chosen from a single bounded quote pass -- not a

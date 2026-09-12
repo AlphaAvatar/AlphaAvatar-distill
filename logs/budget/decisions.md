@@ -674,7 +674,7 @@
 
 ## 2026-08-24 — Phase B reconstructed at `$0`: it is blocked on science, not on implementation
 
-- **Context:** a fresh session opened Phase B. Before writing any Phase-B code, the committed design was reconstructed from the proposal, the reference, the decision records, the search-space manifest and `calibration.py`. No pod was created, no grant or authorization was issued, and no paid work was performed. Full reconstruction: [`autoinit_phase_b_reconstruction.md`](../experiments/phase_b/autoinit_phase_b_reconstruction.md).
+- **Context:** a fresh session opened Phase B. Before writing any Phase-B code, the committed design was reconstructed from the proposal, the reference, the decision records, the search-space manifest and `calibration.py`. No pod was created, no grant or authorization was issued, and no paid work was performed. Full reconstruction: [`autoinit_phase_b_reconstruction.md`](../cross-stage/phase_b/autoinit_phase_b_reconstruction.md).
 - **Finding (1) — `calib.reasoning_heavy@v1` cannot be built as specified, and this is arithmetic rather than judgement.** It declares itself a reweighted draw from the `calib.domain_balanced@v1` item pool at `token_budget = 59_763`. Re-derived from the pinned pool: its weights require **11,952.6 `code`** and **20,917.0 `math`** prediction positions from a pool holding **8,622** and **16,781**. The largest budget at which every weight is achievable is **43,110** — `code` binds. Worse, 59,763 **is** the pool's total, so a draw without replacement is the identity and would reproduce `domain_balanced`'s tokens exactly: two profiles differing only by `profile_hash`, which is the byte-identical-state failure Decision (1) of 2026-08-12 removed for `CalibrationNeed.NONE` operators, reintroduced through the mixture instead. **Pinned by a test** (3 mutations, each turning the passing state into a failing one: the budget lowered to the feasible figure, the binding weight moved off `code`, and the transcribed pool constant corrupted).
 - **Finding (2) — the repository prices Phase B as a SEARCH ONLY and records no rule for combining it with Phase A.** The proposal quotes a beam-6 two-profile search at $1.90–7.43 and 245 GiB and specifies no recovery rungs, seeds or selection rule. But Phase A selected **behaviourally** — `usable_rollout_rate` gates, `correct_overall` ranks — precisely because E8a and E7 are this project's own evidence that step-0 metrics must not select. And Phase A ended `unresolved_equivalence` with `winner: None`, so there is no Phase-A winner for a Phase-B result to be combined *with*. **No Phase-B preregistration exists:** `autoinit_phase_a_preregistration.json` carries `active_calibration_profile` in the singular and zero occurrences of `reasoning_heavy` or `phase_b`.
 - **Decision — surface, do not resolve.** Three choices are genuinely open (how the reweighted mixture is drawn; whether Phase B includes recovery and how the final initialization is selected; whether Phase A's five retained leaves are reused or the search is re-run jointly). Four of the remaining `$0` items cannot be written without them, and writing them anyway would be inventing Phase-B science inside an implementation pass. **No Phase-B code was written.**
@@ -706,7 +706,7 @@
 - **Nothing was lost.** The crash fired after all 9 reports and the artifact archive were fetched (`local_hash_problems: []`, all 11 probe trees extracted), and nothing was owed off-pod: the two retained finalists are *initializations* already preserved canonically at 1.2 GiB each and mirrored in the transport repo, both verified present.
 - **A ledger correction, found while recording this.** `actual cumulative spend` had drifted from its own itemization between attempts 4 and 7 — the per-attempt terms were always appended, the header total was not re-summed. Re-derived: the terms sum to **$230.0350** exactly, and $234.00 − $230.0350 = **$3.9650**.
 - **Budget is now exhausted for practical purposes.** `$3.9650` funds no paid session of any kind: a continuation ceiling is $16.7456 and a Phase-A attempt $23.0484.
-- **Revisit when:** the maintainer decides what `unresolved_equivalence` means for the recipe, and whether to fix the launcher defect. Full record: [`autoinit_recovery_continuation_attempt7/`](../runs/unscoped/recovery_continuation/attempt7/).
+- **Revisit when:** the maintainer decides what `unresolved_equivalence` means for the recipe, and whether to fix the launcher defect. Full record: [`autoinit_recovery_continuation_attempt7/`](../cross-stage/recovery_continuation/runs/attempt7/).
 
 ## 2026-08-23 — The evaluation tokenizer is materialized, not redirected
 
@@ -767,7 +767,7 @@
 
 **(b) The trainer requirement, measured rather than chosen.** `RECOVERY_TRAINER_BYTES` was `22 * 2**30`, attributed to attempt 12's mid-failure footprint rounded up. The maintainer's caution was correct and load-bearing: **attempt 4's 36.30 GiB is only a lower bound**, since it OOM'd inside the first `kd_forward_kl`, before `loss.backward()` and before the first `AdamW.step()`, so gradients and both moment tensors had not materialized. Setting the requirement from it would have rebuilt the same defect at a higher number.
 
-  **Exact-recipe historical evidence exists and was used.** `preflight_ctl_r0860k_{sa,sb}` — the two permanent controls — report `torch.cuda.max_memory_allocated()` of **39.79 GiB**, identically, each over a COMPLETED 1023-step run on an **L40S**, with every memory-relevant field of `configs/stage3/e1/e1_r0860k_sa_pca.json` reproduced exactly; the only difference is `data_dir`, the staged pack path, which is an allowed probe override and cannot change the memory profile. Converting that PyTorch figure into the device figure `require_headroom` compares against uses two overheads read off attempt 4's own OOM decomposition — 1.35 GiB reserved-but-unallocated and 0.51 GiB non-PyTorch — giving **41.65 GiB**. Derivation recorded mechanically in [`autoinit_recovery_trainer_memory_basis.json`](../experiments/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json) and pinned by a test. **No calibration launch was bought.**
+  **Exact-recipe historical evidence exists and was used.** `preflight_ctl_r0860k_{sa,sb}` — the two permanent controls — report `torch.cuda.max_memory_allocated()` of **39.79 GiB**, identically, each over a COMPLETED 1023-step run on an **L40S**, with every memory-relevant field of `configs/stage3/e1/e1_r0860k_sa_pca.json` reproduced exactly; the only difference is `data_dir`, the staged pack path, which is an allowed probe override and cannot change the memory profile. Converting that PyTorch figure into the device figure `require_headroom` compares against uses two overheads read off attempt 4's own OOM decomposition — 1.35 GiB reserved-but-unallocated and 0.51 GiB non-PyTorch — giving **41.65 GiB**. Derivation recorded mechanically in [`autoinit_recovery_trainer_memory_basis.json`](../cross-stage/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json) and pinned by a test. **No calibration launch was bought.**
 
   The old constant was **17.79 GiB below the trainer's measured peak** — worse than the ~14 GiB the attempt-4 write-up estimated against the pre-backward footprint.
 
@@ -857,7 +857,7 @@
 - **A measurement caution, recorded because it nearly became a claim.** While diagnosing, uplink samples of 23 KB/s and 5 KB/s were taken — but the run had already torn down at 20:20:49, so those samples measured a dying pod and are **not** evidence of the transfer rate. The finding above rests on the leaf size, the 600 s constant, and two independently observed upload rates, none of which depend on those samples.
 - **Not attempted:** no relaunch and no live-pod repair. The grant makes a failed staging gate a fail-closed stop, the authorization is spent, and the arithmetic says a rerun fails identically.
 - **The decision this needs, and it is the maintainer's:** how the five leaves reach a pod at all. The obvious candidates each have a cost — reclaiming relay quota so they can be pulled rather than pushed; raising or removing the per-asset scp timeout, which is a change to shared session machinery and would still take 138–226 min of billing to transfer; compressing or sharding them; regenerating them on the pod, which means rerunning the search this work exists to avoid; or a different host with a faster uplink. None is a code change to make unprompted.
-- **Revisit when:** the maintainer chooses a transport. Evidence: [`autoinit_recovery_continuation_attempt2/`](../runs/unscoped/recovery_continuation/attempt2/).
+- **Revisit when:** the maintainer chooses a transport. Evidence: [`autoinit_recovery_continuation_attempt2/`](../cross-stage/recovery_continuation/runs/attempt2/).
 
 ## 2026-08-22 — Operational identity and scientific identity are different invariants
 
@@ -895,7 +895,7 @@
 - **Why this stopped rather than retried.** At 25% per-request loss, surviving five polls is `0.75^5 ≈ 24%`: a relaunch would repeat, not gamble. And the grant states *"Consumed by exactly one issuance"* — fixing the launcher moves the continuation harness digest, which invalidates the authorization **by design** and would require a second issuance from a spent one-use grant. That is a maintainer decision, so the chain stopped here with evidence rather than self-authorizing.
 - **Proposed fix, NOT applied:** catch `URLError`/`OSError` inside `wait_endpoint`'s existing deadline loop and keep polling until the current `startup_limit_min` bound. No new constant, no new deadline, still fails closed at 15 minutes. Extending the same tolerance to `read_image_digest` costs nothing. Validating it costs one paid launch and needs a new grant, a new base, re-issuance and a new bundle.
 - **What the run did prove.** The continuation authorization chain works end to end on real infrastructure: the continuation-specific schema and issuer, the 22-file harness digest recomputed from the relay checkout, the one-path authorization-only commit, and all four pre-provider gates including the five preserved leaves verifying locally. The failure is downstream of every identity check.
-- **Revisit when:** the maintainer decides on the `wait_endpoint` tolerance fix and a new one-use grant. Evidence: [`autoinit_recovery_continuation_attempt1/`](../runs/unscoped/recovery_continuation/attempt1/).
+- **Revisit when:** the maintainer decides on the `wait_endpoint` tolerance fix and a new one-use grant. Evidence: [`autoinit_recovery_continuation_attempt1/`](../cross-stage/recovery_continuation/runs/attempt1/).
 
 ## 2026-08-14 — recovery_search_v1 is INVALID; v2 is its semantic successor
 
@@ -919,13 +919,13 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **This battery's tool prompts have never been rendered.** `recovery_search_v1` was built 2026-08-12 and its first evaluation attempt crashed on the first tool prompt. There are no historical tool scores from it to preserve comparability with.
 - **Measured, all 20 items, transformers 5.13.1:** the stored value renders **0/20** (`ValueError: Tools should either be a JSON schema…`, the same failure as the pod's 5.15.0); `json.loads` → xLAM list renders 20/20; converted to the project's OpenAI-style form renders 20/20; **the two renderable forms share 0/20 token-id hashes** (272 vs 296 tokens on the first item).
 - **Root cause is the asset, not the library.** `recovery_search_v1` is the only tool asset in this repository storing `tools` as a JSON string of xLAM objects; every `data/stage2*/…/tool_calling.jsonl` stores a list of OpenAI-style entries. The builder copied the upstream column verbatim.
-- **Decision: none taken.** The equivalence test that would have authorised a silent compatibility adapter cannot be satisfied by any option, because there is nothing to be equivalent *to*. What remains is a choice about what the model is shown in every tool prompt, which moves the `tool` capability that `recovery_search_scoring@v2` exists to measure. Options A (parse only — literal to the asset, diverges from the training distribution), B (parse and convert — matches training and every other asset, adds a documented transformation and a `required` judgement), C (rebuild the asset — changes `content_sha256 a1b22778…`, needs the preregistration, setup gate and scoring contract re-emitted). Recorded in [`autoinit_tool_rendering_migration.md`](../experiments/shared/analyses/autoinit_tool_rendering_migration.md) and left to the maintainer.
+- **Decision: none taken.** The equivalence test that would have authorised a silent compatibility adapter cannot be satisfied by any option, because there is nothing to be equivalent *to*. What remains is a choice about what the model is shown in every tool prompt, which moves the `tool` capability that `recovery_search_scoring@v2` exists to measure. Options A (parse only — literal to the asset, diverges from the training distribution), B (parse and convert — matches training and every other asset, adds a documented transformation and a `required` judgement), C (rebuild the asset — changes `content_sha256 a1b22778…`, needs the preregistration, setup gate and scoring contract re-emitted). Recorded in [`autoinit_tool_rendering_migration.md`](../shared/analyses/autoinit_tool_rendering_migration.md) and left to the maintainer.
 - **Ruled out:** pinning the evaluator to 4.x (cannot load the tokenizer, misreads RoPE 500×, and `transformers_version` is material generation identity) and editing the frozen asset in place to satisfy an API.
 - **The Stage-2 controls are untouched by any of this** and must not be retrained. Whichever option is chosen changes `uncapped_eval.py` and therefore `generation_source_digest`, so the generation protocol is re-attested at Stage 0 before Stage 3 — a Stage-0/3 re-attestation, not a Stage-2 invalidation.
 
 ## 2026-08-14 — Both `gpu_fraction` measurements are kept; Phase A repriced
 
-- **`0.5609` (attempt 3) and `0.5177` (attempt 4) are both valid.** Same script, same frozen mixture and parameters, same image tag and driver, identical peak memory — two different physical hosts. The *split* moves 4.3 points while the *total pass* moves 3.5% (8.303 s vs 8.021 s), and the faster-GPU host spent proportionally more time on the CPU term. Neither replaces the other; the pair is recorded as a **range** with its pooled value (0.5397), and repricing uses the **total**, not the fraction. [`autoinit_phase_a_repricing.md`](../experiments/phase_a/analyses/autoinit_phase_a_repricing.md).
+- **`0.5609` (attempt 3) and `0.5177` (attempt 4) are both valid.** Same script, same frozen mixture and parameters, same image tag and driver, identical peak memory — two different physical hosts. The *split* moves 4.3 points while the *total pass* moves 3.5% (8.303 s vs 8.021 s), and the faster-GPU host spent proportionally more time on the CPU term. Neither replaces the other; the pair is recorded as a **range** with its pooled value (0.5397), and repricing uses the **total**, not the fraction. [`autoinit_phase_a_repricing.md`](../cross-stage/phase_a/analyses/autoinit_phase_a_repricing.md).
 - **Phase A repriced from measured values: $13.02 expected / $21.01 hard**, against the superseded $17.00 / $26.21. The reduction is almost entirely the probe: 61.55 min measured end-to-end (twice) against a priced 84.9 min, because the arm runs at 3.15 s/step rather than 4.15. The 1.20 overhead factor is retired — the measurement subsumes it.
 - **Still unmeasured and labelled as such:** the battery evaluation cost for *this* battery (Stage 3 has never completed; the $0.236 carried from E6 is a different battery) and operator build compute. Both are covered by the gap to the hard column, not hidden in the expected one.
 - **Against $23.6298 of unused authorization the repriced hard backstop leaves $2.62.** Thin. Phase A remains unauthorized and should be decided against this table.
@@ -1094,7 +1094,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **Alternatives considered:** deduplicating profile-branched states after generation (rejected — they would still be generated and measured); keeping a single `model.safetensors` assumption and sharding only when forced (rejected — the failure is silent, and a hash of a missing file is the worst outcome); regenerating the control inside the search for uniformity (rejected — it would silently redefine what every historical behaviour number refers to); keeping NLL as a third objective with a large ε (rejected — E7 is evidence that it should not select at all, not that it should select weakly); five per-domain KLs as separate objectives (rejected for v1 — with six objectives over ~40 states almost nothing is dominated, so the tie-break rather than the dominance rule would be doing the selecting, which should be a decision rather than a side effect).
 - **Expected upside:** the first paid search is interpretable — the state count means something, the leaves are comparable to a real baseline, and no path dies for a reason E7 already invalidated. And it cannot fail on checkpoint semantics the dry run does not reach: sharding is now exercised by a CPU test with `max_shard_size="8KB"`.
 - **Risks:** delayed pruning widens the search — 39–56 states instead of 30–42, and the working-storage peak rises to **106 GiB** for Phase A. The budget margin against E8b's released $30.3667 is **$4.16** at the hard backstop, which is thin if the conditional third seed fires and setup goes badly. One further defect was found while fixing these: resume matched states from a journal written under a *different evaluation suite*, because state identity is the path and does not include the suite; restore now rejects a record whose `suite_hash` differs.
-- **Revisit when:** the five zero-cost prerequisites in [`autoinit_pilot_proposal.md`](../experiments/shared/analyses/autoinit_pilot_proposal.md) §3 are met. The statistics-pass GPU/CPU split remains the only reason every cost is a range.
+- **Revisit when:** the five zero-cost prerequisites in [`autoinit_pilot_proposal.md`](../shared/analyses/autoinit_pilot_proposal.md) §3 are met. The statistics-pass GPU/CPU split remains the only reason every cost is a range.
 
 ## 2026-08-12 — AutoInitializer v1: what is mechanical, and what the composite operator is for
 
@@ -1106,7 +1106,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **Alternatives considered:** decomposing the incumbent into four operators so the search space is uniform (rejected — it would silently redefine what `86fbba78…` means); checking operator contracts in tests only (rejected — the contract has to hold on a paid pod, where no test runs); a single scalar beam metric for simplicity (rejected on E7's evidence); hashing the calibration mixture by its file bytes (rejected — reformatting the JSON moves the file hash without changing a token, so the profile now re-derives E8a's `d65c1f40…` token-level identity from the loaded items).
 - **Expected upside:** the invariants that matter — intermediates never reaching recovery, leaves matching the target exactly, metrics binding to weights, order being preserved — are properties of the API rather than of reviewer attention. 112 tests, and the search core is proven family-agnostic against a non-transformers MoE fixture with structural fields and an operator kind the core has never seen.
 - **Risks:** the beam ranks on step-0 state metrics, and **nothing yet demonstrates that composed step-0 fidelity predicts post-recovery behaviour.** E7 showed one step-0-style metric does not. The Pareto policy and a generous Top-N mitigate but do not resolve this; the pilot's six probes are the first direct measurement of the correlation and must be reported either way. Two defects were found by the dry run that would otherwise have reached a pod: transformers derives `layer_types` from the layer count, so an inherited config is self-inconsistent after a depth change, and applying a spec by `setattr` after `from_dict` leaves derived fields describing the old geometry.
-- **Revisit when:** the prerequisites in [`autoinit_pilot_proposal.md`](../experiments/shared/analyses/autoinit_pilot_proposal.md) §3 are met — the state-evaluation suite and recovery search battery are built and leakage-checked, the halving plan is frozen, and the statistics-pass GPU/CPU split is measured. That last one is the only reason every cost in the proposal is a range.
+- **Revisit when:** the prerequisites in [`autoinit_pilot_proposal.md`](../shared/analyses/autoinit_pilot_proposal.md) §3 are met — the state-evaluation suite and recovery search battery are built and leakage-checked, the halving plan is frozen, and the statistics-pass GPU/CPU split is measured. That last one is the only reason every cost in the proposal is a range.
 
 ## 2026-08-05 — Experiment 3: baseline is P2-ceheavy, and LoRA gets no optimizer of its own
 
@@ -1861,7 +1861,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **Alternatives considered:** (a) Qwen3-Thinking-2507's published serving preset (0.6 / 0.95 / top_k 20) — rejected as optimizing *one good answer*, whereas this job wants `n` diverse candidates whose distribution is the teacher's own, with the verifier rather than the sampler doing the filtering. (b) Keeping a greedy candidate 0 alongside sampled ones — rejected: it is mode-collapsed by construction, and the determinism that justified privileging it does not exist (see below). (c) Mid-range truncation (top_p 0.95, temperature 1.0) — rejected for the pilot as an unprincipled midpoint; the pilot measures accept@1/accept@n, which is the empirical evidence for revisiting it.
 - **Expected upside:** Candidate diversity is what makes accept@n exceed accept@1, so untruncated sampling should raise the yield per prompt at fixed `n` — the quantity that prices the bulk build. It also makes the corpus reflect the teacher's actual distribution rather than a truncated one, which matters because DAPO/GRPO-style work reports that truncating the tail suppresses low-probability tokens at exactly the high-entropy positions where branching happens.
 - **Risks:** Temperature 1.0 with no truncation can derail a thinking model into degenerate traces, and traces run to a 4096-token cap, so tail risk compounds into wasted GPU budget. Mitigated by measurement, not assumption: the pilot reports accept@1/accept@n and `truncated_at_cap` per slice. Also, `accept_at_1` changes meaning — it now reads "one sample was accepted" rather than "greedy was accepted", so it is not comparable to any pre-2026-07-29 figure.
-- **Supporting measurement:** the determinism half of the old greedy justification did not survive testing. bf16 greedy decoding is **not batch-invariant** on this project's own hardware — 1/6 prompts identical between batch-1 and batch-6 with padding eliminated, versus 6/6 in fp32 ([record](../archive/indexes/EXPERIMENTS.md) §4). Candidate 0 was never reproducible across batch compositions the way `select` assumed.
+- **Supporting measurement:** the determinism half of the old greedy justification did not survive testing. bf16 greedy decoding is **not batch-invariant** on this project's own hardware — 1/6 prompts identical between batch-1 and batch-6 with padding eliminated, versus 6/6 in fp32 ([record](../archive/repository/indexes/EXPERIMENTS.md) §4). Candidate 0 was never reproducible across batch compositions the way `select` assumed.
 - **Revisit when:** the pilot's accept@n comes in low, or per-slice `truncated_at_cap` rises sharply against the earlier preset — either would argue for reintroducing mild truncation. Also revisit if this corpus is ever used for importance-weighted on-policy objectives, where the sampling distribution must be recorded exactly.
 
 ## 2026-07-29 — `refusal_uncertainty` is dropped from teacher-target generation
@@ -1880,7 +1880,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **Alternatives considered:** (a) Raise the threshold to 100 — rejected: the public targets it would displace are 13–16 words (median 15) while the teacher's refusals are 66–160 (median 87), so the change would make refusals ~6× longer on 9 of 10 prompts, a direct regression against P10 (short realtime responses) bought by relaxing a rule until a metric moved. (b) Keep generating and accept the ~0 yield — rejected as pure waste: it is the second most expensive slice per candidate (median 1,628 think tokens). (c) Rewrite the refusal rule to score terseness relative to the gold rather than an absolute word count — deferred; it is a better rule but nothing currently needs it, since the slice is no longer a target source.
 - **Expected upside:** Removes the slice with the worst cost-per-accepted-sample from every future generation run at zero data loss, and prevents a regression that would have looked like an improvement in the accept-rate table.
 - **Risks:** If the public refusal targets are themselves weak, this decision preserves that weakness rather than fixing it — but that is a Stage 2 data-quality question, not something teacher generation was going to solve. Revisit if refusal behavior is still the student's weakest axis after the CE/KD conflict is addressed.
-- **Supporting measurement:** independently, **10 of 40 candidates (25%) answered a question squad_v2 marks unanswerable** (`"Hyrule"`, `"GameCube and Wii."`, `"the answer is December 2006"`), rejected as `not_a_refusal`. This is consistent with the teacher's measured grounding ceiling of 0.562, its lowest behavior axis, and is a second independent reason not to source refusal targets from this teacher. Full analysis: [record](../archive/indexes/EXPERIMENTS.md) §5.
+- **Supporting measurement:** independently, **10 of 40 candidates (25%) answered a question squad_v2 marks unanswerable** (`"Hyrule"`, `"GameCube and Wii."`, `"the answer is December 2006"`), rejected as `not_a_refusal`. This is consistent with the teacher's measured grounding ceiling of 0.562, its lowest behavior axis, and is a second independent reason not to source refusal targets from this teacher. Full analysis: [record](../archive/repository/indexes/EXPERIMENTS.md) §5.
 - **Revisit when:** a different teacher is used for this slice, or the refusal rule is rewritten to be gold-relative.
 
 ## 2026-07-29 — `openmath` is cap-bound; the fix is a measurement, not a setting
@@ -2640,7 +2640,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 ## 2026-08-09 — E6b's canonical scientific conclusion, and the limits on it
 
 - **Context:** E6b completed with operational deviations
-  ([`e6b_protocol_deviations.md`](../experiments/early/analyses/e6b_protocol_deviations.md)). The maintainer
+  ([`e6b_protocol_deviations.md`](../cross-stage/early/analyses/e6b_protocol_deviations.md)). The maintainer
   accepted the result on 2026-08-09 — both arms completed the frozen schedule,
   the final checkpoints were retrieved and hash-verified, and the frozen
   evaluation artifacts are complete — and directed that neither arm be rerun.
@@ -3131,7 +3131,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
   Qwen3 norms/RoPE/MLP + foreach AdamW + KD chunk 512 + one change:
   `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`.** DP and DC, both seeds, use
   exactly this. The registered KD chunk-128 fallback was **not** needed.
-  Full audit: [`e8b_backend_audit.md`](../experiments/early/analyses/e8b_backend_audit.md).
+  Full audit: [`e8b_backend_audit.md`](../cross-stage/early/analyses/e8b_backend_audit.md).
 - **Alternatives considered:**
   * *optimized attention* — rejected as already present. Both models resolve to `sdpa`
     and the failed run's own backward emitted the flash-kernel warning from
@@ -4121,7 +4121,7 @@ CalibrationError: calib.domain_balanced@v1:
   separate.
 - **Measured:** one depth invocation over the **complete** 59,763-position
   mixture now peaks at **4.36 GiB** instead of 33.8, in 349 s
-  ([`autoinit_phase_a_full_mixture_depth.json`](../experiments/phase_a/analyses/autoinit_phase_a_full_mixture_depth.json)).
+  ([`autoinit_phase_a_full_mixture_depth.json`](../cross-stage/phase_a/analyses/autoinit_phase_a_full_mixture_depth.json)).
 - **Risk that remains, unmeasured:** on the pod the model is bf16, so the cache
   is **16.91 GiB** and needs ≳25.6 GiB of host headroom to be taken. RunPod
   advertises 94 GB at the 1×L40S price point, so the cached path — the one the
@@ -4387,7 +4387,7 @@ cuda:0, different from other tensors on cpu
   later, in a different operator.
 - **The traceback preservation paid for itself on its first run.** The whole
   frame is in
-  [`autoinit_phase_a_attempt7/stage1_traceback.log`](../runs/unscoped/phase_a/attempt7/stage1_traceback.log),
+  [`autoinit_phase_a_attempt7/stage1_traceback.log`](../cross-stage/phase_a/runs/attempt7/stage1_traceback.log),
   collected as a fifth artifact class. No guessing was required this time.
 
 ```
@@ -5782,7 +5782,7 @@ default for any driver a pod invokes, not a repair applied after each bill.
 failure. Grant and authorization spent, not reusable. Cumulative **$206.2664** of
 $219.00, remaining **$12.7336**. **No measurement attempt 3 and no Phase-A attempt
 11 is prepared, granted or implied.** Evidence:
-[`autoinit_measurement_attempt2/`](../runs/unscoped/measurement/attempt2/).
+[`autoinit_measurement_attempt2/`](../cross-stage/measurement/runs/attempt2/).
 
 ## 2026-08-20 — The causal-depth port reaches E8a's throughput: 12.07/min measured
 
@@ -5870,7 +5870,7 @@ corroborated rather than replaced.
 **Disposition.** Attempt 3 recorded consumed and COMPLETE. Grant and
 authorization spent, not reusable. Cumulative **$206.4741** of $219.00, remaining
 **$12.5259**. Evidence:
-[`autoinit_measurement_attempt3/`](../runs/unscoped/measurement/attempt3/).
+[`autoinit_measurement_attempt3/`](../cross-stage/measurement/runs/attempt3/).
 
 ## 2026-08-20 — The Stage-1 runtime deadline is derived from the price, not restated
 
@@ -6046,7 +6046,7 @@ review, per the grant. Two questions are owed to the maintainer:
 
 **Disposition.** Consumed; Stage 1 passed, Stage 2 fail-closed stop. Cumulative
 **$209.6842** of $231.00. No Attempt 12 is prepared, granted, funded or implied.
-Evidence: [`autoinit_phase_a_attempt11/`](../runs/unscoped/phase_a/attempt11/).
+Evidence: [`autoinit_phase_a_attempt11/`](../cross-stage/phase_a/runs/attempt11/).
 
 ## 2026-08-20 — The tokenizer contract belongs to the consumer, and Stage 1 now outlives Stage 2
 
@@ -6438,7 +6438,7 @@ trainer against the now-preserved leaves in a session that never held the search
 fail-closed stop. Cumulative **$213.4714** of $234.00, leaving **$20.5286** —
 $2.5198 short of another full attempt. **No Attempt 13 is prepared, granted,
 funded or implied.** Evidence:
-[`autoinit_phase_a_attempt12/`](../runs/unscoped/phase_a/attempt12/).
+[`autoinit_phase_a_attempt12/`](../cross-stage/phase_a/runs/attempt12/).
 
 ## 2026-08-21 — Stage 1 is a result to import, not work to repeat
 

@@ -110,6 +110,14 @@ class RunLayout:
     experiment_id: str
     run_id: str
     layout_version: int = RUN_LAYOUT_VERSION
+    #: A path segment between the experiment and the run, supplied by the
+    #: caller's convention. Empty by default, so every existing layout composes
+    #: exactly as before. It exists because a convention may keep an
+    #: experiment's runs in a child directory beside its plans and results
+    #: rather than directly under the experiment -- which is a statement about
+    #: that convention, not about any experiment, and so belongs in the
+    #: caller's hands.
+    runs_subdir: str = ""
 
     def __post_init__(self) -> None:
         _check("experiment_id", self.experiment_id, _ID)
@@ -118,11 +126,15 @@ class RunLayout:
     @property
     def rel_root(self) -> str:
         """Relative to `run_root`. The core states no repository location."""
-        return f"{self.experiment_id}/{self.run_id}"
+        mid = f"{self.runs_subdir}/" if self.runs_subdir else ""
+        return f"{self.experiment_id}/{mid}{self.run_id}"
 
     @property
     def root(self) -> Path:
-        return Path(self.run_root) / self.experiment_id / self.run_id
+        p = Path(self.run_root) / self.experiment_id
+        if self.runs_subdir:
+            p = p / self.runs_subdir
+        return p / self.run_id
 
     def path(self, relative: str) -> Path:
         """Resolve a caller-declared relative path inside this run."""

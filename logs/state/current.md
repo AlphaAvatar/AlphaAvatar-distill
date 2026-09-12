@@ -14,10 +14,10 @@ for launch.** The only process is a `$0` read-only capacity watch.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation | [`experiments/phase_c1/`](../experiments/phase_c1/) |
-| replay | **MEASURED — 2/2 PASS** (attempt 9) | [`runs/index.json`](../runs/index.json) |
-| treatment, endpoint | **UNMEASURED** — zero probes trained. Attempt 9 is **NO DECISION**: a pre-treatment infrastructure abort, not a frozen-rule result | [`experiments/phase_c1/operational_history.md`](../experiments/phase_c1/history/operational_history.md) |
-| launch chain | attempt 13's grant is committed; **nothing else is prepared**, and the chain is **paused** pending this cleanup | [`runs/stage-1/phase_c1/attempt13/`](../runs/stage-1/phase_c1/attempt13/) |
+| phase | C1 — fixed-path ATTENTION isolation | [`experiments/phase_c1/`](../stages/stage-1/phase_c1/) |
+| replay | **MEASURED — 2/2 PASS** (attempt 9) | [`runs/index.json`](../index.json) |
+| treatment, endpoint | **UNMEASURED** — zero probes trained. Attempt 9 is **NO DECISION**: a pre-treatment infrastructure abort, not a frozen-rule result | [`experiments/phase_c1/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md) |
+| launch chain | attempt 13's grant is committed; **nothing else is prepared**, and the chain is **paused** pending this cleanup | [`runs/stage-1/phase_c1/attempt13/`](../stages/stage-1/phase_c1/runs/attempt13/) |
 | blocker | provider capacity for secure L40S at `$1.09/h` | below |
 | spend | `$268.2958` of `$320.0000` | [`BUDGET_LEDGER.md`](../budget/ledger.md) |
 
@@ -27,9 +27,9 @@ for launch.** The only process is a `$0` read-only capacity watch.
 
 | readiness | | owner |
 | --- | --- | --- |
-| latest sweep | **diagnostic — FAIL** (3736 passed, 3 failed), swept at `30f6ceed`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../experiments/phase_c1/analyses/c1_pod_environment_verification.json) |
+| latest sweep | **diagnostic — FAIL** (3736 passed, 3 failed), swept at `30f6ceed`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
 | launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
-| last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../experiments/phase_c1/history/readiness_history.json) |
+| last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../stages/stage-1/phase_c1/history/readiness_history.json) |
 
 *Generated from the record by `scripts/consolidate/render_log_navigation.py`; do not edit by hand — it went stale within hours when it was prose.*
 
@@ -110,16 +110,16 @@ The initialization migration and the CUDA stage-F validation are engineering
 records. The stage-F device repair is **CONFIRMED ON REAL CUDA** at execution
 SHA `7027a8f4`. Neither is a C1 result and neither authorizes anything:
 [`migrations/initialization-core/v1/`](../migrations/initialization-core/v1/) ·
-[`validations/cuda-stage-f/v1/`](../validations/cuda-stage-f/v1/)
+[`validations/cuda-stage-f/v1/`](../stages/stage-1/phase_c1/validations/cuda-stage-f/v1/)
 
 ## History
 
 This file holds the current state only. The narrative moved out on 2026-09-12
 and is unedited:
 
-* [`experiments/phase_c1/operational_history.md`](../experiments/phase_c1/history/operational_history.md)
+* [`experiments/phase_c1/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md)
   — every C1 session, its cost, failure and repair
-* [`archive/STATE_superseded_through_2026-09-11.md`](../archive/STATE_superseded_through_2026-09-11.md)
+* [`archive/STATE_superseded_through_2026-09-11.md`](../archive/repository/STATE_superseded_through_2026-09-11.md)
   — the superseded repository state, spanning Phase A, Phase B and the
   continuations
 * [`decisions.md`](../budget/decisions.md) — decision records

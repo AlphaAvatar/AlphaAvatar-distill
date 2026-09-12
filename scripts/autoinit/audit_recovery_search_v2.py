@@ -49,7 +49,7 @@ def rows(root: Path, name: str) -> list[dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/experiments/recovery_continuation/analyses/autoinit_recovery_search_v2_audit.json")
+    ap.add_argument("--out", default="logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_search_v2_audit.json")
     args = ap.parse_args()
 
     import transformers

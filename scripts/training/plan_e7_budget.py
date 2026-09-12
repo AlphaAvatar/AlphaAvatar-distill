@@ -153,7 +153,7 @@ def main() -> int:
     print("\n  the historical $149.03 authorization is NOT counted as remaining "
           "balance; it is exceeded and closed.")
 
-    dest = REPO_ROOT / "logs/experiments/early/analyses/e7_budget_plans.json"
+    dest = REPO_ROOT / "logs/cross-stage/early/analyses/e7_budget_plans.json"
     dest.write_text(json.dumps(out, indent=2) + "\n")
     print(f"\nwrote {dest}")
     return 0

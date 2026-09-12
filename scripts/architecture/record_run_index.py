@@ -4,7 +4,7 @@
     PYTHONPATH=src python scripts/architecture/record_run_index.py --write
 
 The first version of this index counted 77 "runs". It was counting artifact
-roots: `logs/runs/stage-1/phase_c1/attempt9` and `logs/budget/approvals/autoinit_c1_attempt9_grant.json`
+roots: `logs/stages/stage-1/phase_c1/runs/attempt9` and `logs/budget/approvals/autoinit_c1_attempt9_grant.json`
 are one attempt with two surviving components, and the index recorded them as
 two peers. A reader asking "how many C1 attempts have run?" got 19 for a phase
 that has had 9.
@@ -32,7 +32,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.runtime.run_layout import digest_of  # noqa: E402
 
-OUT = "logs/runs/index.json"
+#: At the root of `logs/`: the index spans every stage.
+OUT = "logs/index.json"
 SCHEMA = "aadistill.runtime.run_index/v2"
 
 #: (pattern, experiment_id, run_id template, role). A run is the (experiment,
@@ -73,11 +74,32 @@ def _relocated(repo_root: Path) -> dict[str, str]:
     digests that make "the historical evidence is unchanged" checkable.
     The manifest is how a name from then resolves to a path now.
     """
-    p = repo_root / "logs/migrations/log-layout-v1/manifest.json"
-    if not p.is_file():
+    #: CHAINED across every migration, in order. log-layout-v1 moved an object
+    #: and log-layout-v2 moved it again, so a single manifest's `new_path` is
+    #: only where it went NEXT -- not where it is. Following one hop left the
+    #: index pointing at directories that no longer exist.
+    hops: list[dict[str, str]] = []
+    for m in sorted((repo_root / "logs/migrations").glob("*/manifest.json")):
+        try:
+            doc = json.loads(m.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        hops.append({e["old_path"]: e["new_path"] for e in doc.get("entries", [])})
+    if not hops:
         return {}
-    doc = json.loads(p.read_text())
-    return {e["old_path"]: e["new_path"] for e in doc.get("entries", [])}
+
+    def follow(path: str) -> str:
+        for table in hops:
+            if path in table:
+                path = table[path]
+                continue
+            for o, n in sorted(table.items(), key=lambda kv: -len(kv[0])):
+                if path.startswith(o + "/"):
+                    path = n + path[len(o):]
+                    break
+        return path
+
+    return {old: follow(old) for table in hops for old in table}
 
 
 def discover_legacy(repo_root: Path) -> dict[tuple[str, str], dict]:
@@ -124,23 +146,27 @@ def discover_v3(repo_root: Path) -> list[dict]:
     """Hierarchical runs, found by the presence of a manifest."""
     from aadistill.runtime.run_layout import MANIFEST_SCHEMA
 
-    runs_root = repo_root / "logs/runs"
+    #: STAGE-FIRST, since log-layout-v2:
+    #:     logs/stages/stage-<id>/<experiment>/runs/<run>/
+    #:     logs/cross-stage/<experiment>/runs/<run>/
+    #: There is no `logs/runs/`. An experiment's runs sit beside its plans and
+    #: results rather than in a parallel tree.
+    stages_root = repo_root / "logs/stages"
+    cross_root = repo_root / "logs/cross-stage"
     out: list[dict] = []
-    if not runs_root.is_dir():
-        return out
-    #: BOTH layouts. New runs are grouped by declared stage --
-    #: `stage-<id>/<experiment>/<run>` -- and the runs that already exist are
-    #: two levels deep. A fixed `*/*` glob found only the second, so adding the
-    #: stage level would have made every new run invisible to the index while
-    #: the index went on reporting a confident total.
-    for manifest in sorted({*runs_root.glob("*/*/manifest.json"),
-                            *runs_root.glob("*/*/*/manifest.json")}):
+    found: set = set()
+    if stages_root.is_dir():
+        found |= set(stages_root.glob("*/*/runs/*/manifest.json"))
+    if cross_root.is_dir():
+        found |= set(cross_root.glob("*/runs/*/manifest.json"))
+    for manifest in sorted(found):
         doc = json.loads(manifest.read_text())
         if doc.get("schema") != MANIFEST_SCHEMA:
             continue
         rel = manifest.parent.relative_to(repo_root).as_posix()
-        stage = (manifest.parent.parent.parent.name
-                 if manifest.parent.parent.parent != runs_root else None)
+        #: `.../stage-<id>/<experiment>/runs/<run>/manifest.json`
+        parts = manifest.parent.relative_to(repo_root).parts
+        stage = parts[2] if parts[1] == "stages" else None
         out.append({
             "experiment_id": doc["experiment_id"], "run_id": doc["run_id"],
             "stage": stage.removeprefix("stage-") if stage else None,
@@ -171,9 +197,10 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
     """
     from aadistill.runtime.run_layout import MANIFEST_SCHEMA
 
-    runs_root = repo_root / "logs/runs"
+    #: Same stage-first roots as `discover_v3`.
+    roots = [repo_root / "logs/stages", repo_root / "logs/cross-stage"]
     out: list[dict] = []
-    if not runs_root.is_dir():
+    if not any(r.is_dir() for r in roots):
         return out
     #: Both layouts, and a stage directory is not itself a run: `stage-3` holds
     #: experiments, so only its grandchildren are candidates.
@@ -181,11 +208,12 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
     #: `unscoped/<experiment>/<run>` -- plus anything still two levels deep. A
     #: glob written for one shape silently omits the others, which is how the
     #: per-experiment counts came to read only the legacy tree.
-    candidates = {p for p in runs_root.glob("*/*") if p.is_dir()
-                  and not p.parent.name.startswith("stage-")
-                  and p.parent.name != "unscoped"}
-    candidates |= {p for p in runs_root.glob("stage-*/*/*") if p.is_dir()}
-    candidates |= {p for p in runs_root.glob("unscoped/*/*") if p.is_dir()}
+    candidates: set = set()
+    st, cs = roots
+    if st.is_dir():
+        candidates |= {p for p in st.glob("*/*/runs/*") if p.is_dir()}
+    if cs.is_dir():
+        candidates |= {p for p in cs.glob("*/runs/*") if p.is_dir()}
     for run_dir in sorted(candidates):
         manifest = run_dir / "manifest.json"
         if manifest.is_file():
@@ -212,7 +240,10 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
                  if len(Path(p).relative_to(run_dir).parts) > 1}
         prepared_only = areas == {"governance"}
         out.append({
-            "experiment_id": run_dir.parent.name, "run_id": run_dir.name,
+            #: `.../<experiment>/runs/<run>`: the experiment is the
+            #: grandparent. Reading the parent gave the literal "runs", which
+            #: then appeared in the index as an experiment of that name.
+            "experiment_id": run_dir.parent.parent.name, "run_id": run_dir.name,
             "root": rel, "n_files": len(files),
             "digest": digest_of(run_dir)["digest"],
             "why": ("no run manifest, and only governance inputs are present: "

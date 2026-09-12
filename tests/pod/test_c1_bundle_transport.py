@@ -326,7 +326,7 @@ def test_the_transport_and_rope_gates_are_wired():
     assert "bundle_staged_gate" in names, names
     assert "rope_input_gate" in names, names
     prereg = json.loads(
-        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
+        (REPO / "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json").read_text())
     assert len(spec.precheck) == prereg["transport"]["n_pre_provider_gates"], names
 
 

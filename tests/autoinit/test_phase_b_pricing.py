@@ -57,14 +57,14 @@ def citable_reuse(tmp_path, monkeypatch):
 def test_the_pricing_refuses_the_live_record_today():
     """The current correct answer, stated once and on purpose.
 
-    `logs/experiments/shared/analyses/autoinit_historical_reuse_position.json` conclusion 4 derives the same
+    `logs/shared/analyses/autoinit_historical_reuse_position.json` conclusion 4 derives the same
     refusal independently. If the contract ever matches again this fails, and
     `citable_reuse` should be dropped rather than kept out of habit.
     """
     import json
 
     live = json.loads(
-        (REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
+        (REPO / "logs/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
     assert live["reuse_verified"] is False
     with pytest.raises(SystemExit, match="reuse_verified=false"):
         price()

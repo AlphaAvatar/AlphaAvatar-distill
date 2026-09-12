@@ -3,7 +3,7 @@
 Why this exists
 ---------------
 Teacher generation is the next spend, and its cost is dominated by decode
-throughput (`logs/archive/indexes/EXPERIMENTS.md`). The survey
+throughput (`logs/archive/repository/indexes/EXPERIMENTS.md`). The survey
 reached one conclusion: **benchmark, do not pick from a table** — the published
 engine ordering is driven by prefix-cache reuse under concurrent load, and a
 corpus build of unique prompts is the workload where that ordering reverses.

@@ -1,0 +1,1093 @@
+{
+ "schema": "aadistill.autoinit.c1_execution_preregistration/v1",
+ "preregistration_id": "autoinit.v1.phase_c1.execution",
+ "written_utc": "2026-09-02T00:00:00Z",
+ "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
+ "head_commit": "8a6bbcaafa761ffca0b2697c5f68182798a2709d",
+ "executable_source": {
+  "digest": "2c43e4e6cf85582e3fa809512a1b2c611ba880e0229884fb566f3e7dae7845fd",
+  "files": [
+   {
+    "path": "scripts/autoinit/verify_c1_battery_isolation.py",
+    "sha256": "9c03ce35d237c3409f4eb970afd9175798faa8044b55ae83d32a1882304cdd74",
+    "bytes": 9939
+   },
+   {
+    "path": "scripts/data/battery_render.py",
+    "sha256": "20eea99fc20dbd8608b86f301960cfeef09388234634aa90a34cccdc1866e725",
+    "bytes": 15885
+   },
+   {
+    "path": "scripts/data/build_c1_confirmation_battery.py",
+    "sha256": "141f397999ff9e01b8728eaba863d157f810de20aa84ad9621c7840ee416f05d",
+    "bytes": 13339
+   },
+   {
+    "path": "scripts/experiments/phase_c1/isolation.py",
+    "sha256": "9fdcf6a6aace4dfeeff4c7aba52309a81c00705833cfcd818ef6f9864ef0abee",
+    "bytes": 19632
+   },
+   {
+    "path": "scripts/experiments/phase_c1/session.py",
+    "sha256": "5d6be1d4a1738ccadee28d481b83792812fd4b25a5d572f1e51738783f268c91",
+    "bytes": 14167
+   },
+   {
+    "path": "src/aadistill/initialization/operators/attention_activation.py",
+    "sha256": "b2ea83eefbc23b0472d7299669b019b0a34344c40b6a6c7e9694a5cd27b82d3a",
+    "bytes": 15490
+   },
+   {
+    "path": "src/aadistill/initialization/planning/fixed_path.py",
+    "sha256": "94698e18efcf7f17eebac3ea849a796615a3ac6fd4b12a1a4560c47dc3060d57",
+    "bytes": 35231
+   },
+   {
+    "path": "src/aadistill/initialization/statistics/attention.py",
+    "sha256": "017ca640688a050e0266425b36e703efb2035121c02989a9708136c582b69da9",
+    "bytes": 9933
+   }
+  ],
+  "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+ },
+ "c1_harness": {
+  "schema": "aadistill.executable_closure/v1",
+  "_contract": "What a CURRENT session would execute, derived by walking import edges from the declared entry points, plus the non-python inputs that decide execution or authorization. Derived live from the tree at the moment it was computed. This is NOT a historical record and describes no completed run. AUTHORIZES NOTHING.",
+  "experiment_id": "phase_c1",
+  "entry_points": [
+   "scripts/pod/autoinit_c1_launch.py",
+   "scripts/pod/autoinit_c1_driver.py",
+   "scripts/experiments/phase_c1/authorization_payload.py",
+   "scripts/autoinit/issue_c1_authorization.py",
+   "scripts/pod/collect_artifacts.py"
+  ],
+  "declared_non_python_inputs": [
+   "scripts/pod/autoinit_preflight_setup.sh",
+   "configs/experiments/phase_c1/authorization.json",
+   "configs/autoinit/c1_artifacts.json",
+   "configs/autoinit/c1_artifacts_failed.json",
+   "configs/experiments/phase_c1/frozen_assets.json"
+  ],
+  "source_roots": [
+   "src",
+   "scripts",
+   "scripts/pod",
+   "scripts/autoinit"
+  ],
+  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
+  "n_files": 99,
+  "digest": "d5cb4232cac5f4e0d4e29f63c14891920eb5f656e9cb83065777c19b4c2fc54a",
+  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
+  "files": [
+   {
+    "path": "configs/autoinit/c1_artifacts.json",
+    "sha256": "39576ead0ef2e510386b9baf7d8640241607df667189f54c71f388c359ea271c",
+    "bytes": 5824
+   },
+   {
+    "path": "configs/autoinit/c1_artifacts_failed.json",
+    "sha256": "c21bb89dd7fc12ed3d0105d344696010df5c07e1487fcfe369bfa2822c539e97",
+    "bytes": 6412
+   },
+   {
+    "path": "configs/experiments/phase_c1/authorization.json",
+    "sha256": "fd234c005e08776730306f6c11e5c827bd0d58a2dfc0a1959a30a6946a0d122d",
+    "bytes": 12320
+   },
+   {
+    "path": "configs/experiments/phase_c1/frozen_assets.json",
+    "sha256": "7cb691d804ebc382317af2b5d7b169245a935ce681991025e3514effa4b05a1e",
+    "bytes": 3332
+   },
+   {
+    "path": "scripts/autoinit/audit_tool_scoring.py",
+    "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+    "bytes": 10268
+   },
+   {
+    "path": "scripts/autoinit/issue_c1_authorization.py",
+    "sha256": "fd89885138b6b3b9c6bf66cce6d19a13dce3d5df662e63220c3d566dc3c8469b",
+    "bytes": 9052
+   },
+   {
+    "path": "scripts/autoinit/renderer_parity_gate.py",
+    "sha256": "d0eddf97d1f9ddc4b1292f7fb9767991686ba344e9ffa7de065560900c2c4ad1",
+    "bytes": 6616
+   },
+   {
+    "path": "scripts/autoinit/score_c1_confirmation.py",
+    "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+    "bytes": 14964
+   },
+   {
+    "path": "scripts/autoinit/score_recovery_search.py",
+    "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+    "bytes": 22149
+   },
+   {
+    "path": "scripts/autoinit/verify_frozen_assets.py",
+    "sha256": "5433423c08b0be3c20b9ba3a2ffa34c40c2b8346c1b565f2883de19269889340",
+    "bytes": 11289
+   },
+   {
+    "path": "scripts/evaluation/uncapped_eval.py",
+    "sha256": "41b0de8ddf59b10a4cb09d9ea4af3f93683ab2c8b860ff519fff243073c16d02",
+    "bytes": 28932
+   },
+   {
+    "path": "scripts/experiments/calibration.py",
+    "sha256": "371c51813f1d1a6871c7ae9c542fec03818dc016cec3d4417e0983b694684cd9",
+    "bytes": 3308
+   },
+   {
+    "path": "scripts/experiments/deployment.py",
+    "sha256": "6c121ddd2745fbc94ccce4ef67d5fb612a9f9c2703a9d5f842847ea5dbed078f",
+    "bytes": 3187
+   },
+   {
+    "path": "scripts/experiments/phase_a/plan.py",
+    "sha256": "2b51f07e6fb25d773a325ad360408b9e3964ec1f4c240a0063ab4ab471a93e0a",
+    "bytes": 27779
+   },
+   {
+    "path": "scripts/experiments/phase_c1/__init__.py",
+    "sha256": "c1b21f798da24f20b2a09afdd95ab09bad53b6e350572482074741560e603da7",
+    "bytes": 80
+   },
+   {
+    "path": "scripts/experiments/phase_c1/authorization.py",
+    "sha256": "bee9a52e257123813356b76b3924dc19fa00cb342f8fec9a07dc27cfba232762",
+    "bytes": 25043
+   },
+   {
+    "path": "scripts/experiments/phase_c1/authorization_payload.py",
+    "sha256": "6ce5f287d33b8dfc8a6abbdd8996997d5a0e6c36f7eab6c4a7be08a007338544",
+    "bytes": 12893
+   },
+   {
+    "path": "scripts/experiments/phase_c1/bundle.py",
+    "sha256": "7b159d818206cf5c12c8e6bde721f9532494218585cc5af5000585d1cf0794a0",
+    "bytes": 12983
+   },
+   {
+    "path": "scripts/experiments/phase_c1/isolation.py",
+    "sha256": "9fdcf6a6aace4dfeeff4c7aba52309a81c00705833cfcd818ef6f9864ef0abee",
+    "bytes": 19632
+   },
+   {
+    "path": "scripts/experiments/phase_c1/packaging.py",
+    "sha256": "eee453c2a57ede97bc6ab496059f6da5a031865f99299d3e45e73f71252e5847",
+    "bytes": 6154
+   },
+   {
+    "path": "scripts/experiments/phase_c1/pod_environment.py",
+    "sha256": "b64cccac7b1c050203047e81cfaf763994f2eb641c30bc9bbe0a4e6cb5de6cf5",
+    "bytes": 16985
+   },
+   {
+    "path": "scripts/experiments/phase_c1/probe_results.py",
+    "sha256": "4e0cba89c8ab092cae57c736ddb81146fef99dfa75fac88c217f65efdc092378",
+    "bytes": 14338
+   },
+   {
+    "path": "scripts/experiments/phase_c1/scoring.py",
+    "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+    "bytes": 12056
+   },
+   {
+    "path": "scripts/experiments/phase_c1/session.py",
+    "sha256": "5d6be1d4a1738ccadee28d481b83792812fd4b25a5d572f1e51738783f268c91",
+    "bytes": 14167
+   },
+   {
+    "path": "scripts/experiments/recovery_policy.py",
+    "sha256": "0c748be322050ad09eb9bf62b5c02b7c173c815286e33fb068b47658cadac5bc",
+    "bytes": 6306
+   },
+   {
+    "path": "scripts/experiments/run_layout.py",
+    "sha256": "77e42f67fb44aec7e8ba2fd49e475dd6d5f789bfdf1ed86d918c014fc0cd5d7d",
+    "bytes": 30490
+   },
+   {
+    "path": "scripts/experiments/source_sets.py",
+    "sha256": "751822836672fdaa6c670d546b023dd5c66c9d5cb4c8a47ffb297bca12c96ea1",
+    "bytes": 3127
+   },
+   {
+    "path": "scripts/pod/autoinit_c1_driver.py",
+    "sha256": "3fb0442573c3f69f0c9408206ca450a18dc218f81a26217fd4d14ec2083031ec",
+    "bytes": 61945
+   },
+   {
+    "path": "scripts/pod/autoinit_c1_launch.py",
+    "sha256": "4f19c14a45e06c70f84d81629e13c3695b642756161e777fc8960035106b387d",
+    "bytes": 81842
+   },
+   {
+    "path": "scripts/pod/autoinit_engine_probe.py",
+    "sha256": "8637e3f30d09e2a6afcce61385a3e7eddb2d65968caa39a6504eee213d21ab38",
+    "bytes": 3935
+   },
+   {
+    "path": "scripts/pod/autoinit_preflight_setup.sh",
+    "sha256": "286191a1b63de04f0c2a268a5f9fbd51d19c4398a3201967e3e5c4f63948287a",
+    "bytes": 39731
+   },
+   {
+    "path": "scripts/pod/autoinit_science_inputs.py",
+    "sha256": "142875b3014464104d5d690b3f074565be319b570ab90681ee6429d800455159",
+    "bytes": 4297
+   },
+   {
+    "path": "scripts/pod/collect_artifacts.py",
+    "sha256": "47929122055ac52933bc51c75c2f8b86700a60521cb0dad77f912b6964d0063c",
+    "bytes": 8994
+   },
+   {
+    "path": "scripts/pod/watchdog.py",
+    "sha256": "c0c498d6f4027bc8f5638db521640cbcb52d544ed9748fd8c99c60012cf1e05f",
+    "bytes": 4544
+   },
+   {
+    "path": "scripts/training/train_stage3.py",
+    "sha256": "72786942a48014fbea92b197070e7d7c5677154847f1233f99cdffc94e25cfa0",
+    "bytes": 15380
+   },
+   {
+    "path": "src/aadistill/data/dataset.py",
+    "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+    "bytes": 18533
+   },
+   {
+    "path": "src/aadistill/data/extra_stream.py",
+    "sha256": "712e828328987806a5b093a1bab77f36ecc4064a7da368e0faf1fa06838ad2ce",
+    "bytes": 8112
+   },
+   {
+    "path": "src/aadistill/data/ladder.py",
+    "sha256": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca",
+    "bytes": 7055
+   },
+   {
+    "path": "src/aadistill/data/tools.py",
+    "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+    "bytes": 6043
+   },
+   {
+    "path": "src/aadistill/data/verify.py",
+    "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+    "bytes": 7594
+   },
+   {
+    "path": "src/aadistill/evaluation/__init__.py",
+    "sha256": "ef0d31ab3f8eb1e7c98749f9015b6ed4c7d0aa8164bf9885a64e9ee9aad6ff9e",
+    "bytes": 27
+   },
+   {
+    "path": "src/aadistill/evaluation/behavior.py",
+    "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+    "bytes": 19983
+   },
+   {
+    "path": "src/aadistill/evaluation/capability.py",
+    "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+    "bytes": 19568
+   },
+   {
+    "path": "src/aadistill/evaluation/degeneration.py",
+    "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+    "bytes": 5245
+   },
+   {
+    "path": "src/aadistill/evaluation/strict_answer.py",
+    "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+    "bytes": 7628
+   },
+   {
+    "path": "src/aadistill/evaluation/usable_rollout.py",
+    "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+    "bytes": 6155
+   },
+   {
+    "path": "src/aadistill/governance/authorization.py",
+    "sha256": "27c664a3ad3bdaf195f71602fc3456b492c5b99a7c6ebace06a186b7a55df9e9",
+    "bytes": 17960
+   },
+   {
+    "path": "src/aadistill/governance/closure.py",
+    "sha256": "2f352c785b4f5076f6290d8ff04c75b87016eef8dfdd4b2ce9ec7d607532bc8c",
+    "bytes": 12492
+   },
+   {
+    "path": "src/aadistill/governance/grant.py",
+    "sha256": "cb7aa9458cc51aa5683c610a244f7329559d6aaa1d395f6702ae44f4073a6a94",
+    "bytes": 4782
+   },
+   {
+    "path": "src/aadistill/infrastructure/artifact_gate.py",
+    "sha256": "a46f743bd9eadfbb22f4e73af698f4ba6d59db930ad914501b9b48720401cd5b",
+    "bytes": 25391
+   },
+   {
+    "path": "src/aadistill/infrastructure/budget.py",
+    "sha256": "f77d6f25899f5ee187929125ab464a38afec4182add9da00ac7bb2c92e20ca4c",
+    "bytes": 12161
+   },
+   {
+    "path": "src/aadistill/infrastructure/env.py",
+    "sha256": "28af5663171568aa8e74d02556084e2932a6b8cc6e7f94f5e3cd0f58b3142be8",
+    "bytes": 4368
+   },
+   {
+    "path": "src/aadistill/infrastructure/log_relay.py",
+    "sha256": "a418c92223b83ea067343c34c84a7f7b3b65856cdff92616db3eb820a62d449f",
+    "bytes": 7320
+   },
+   {
+    "path": "src/aadistill/infrastructure/manifest.py",
+    "sha256": "8b2ed17b278b6fa34d963d277fba612ae4ce9a27b948179f57a290a192c1d467",
+    "bytes": 2060
+   },
+   {
+    "path": "src/aadistill/infrastructure/provider.py",
+    "sha256": "31245e59bc0160082ce2e0a220a659c96a6aa9fb72ccc628ec9bdef03abd7781",
+    "bytes": 15745
+   },
+   {
+    "path": "src/aadistill/infrastructure/remote.py",
+    "sha256": "8d194cce37c9093a8e63986f856624039a0895fc853e687770639e1b66743184",
+    "bytes": 13454
+   },
+   {
+    "path": "src/aadistill/infrastructure/session.py",
+    "sha256": "f482438fe787b8086b2312485d87f73803541fcb9c19e5ae9968e842be9b29a5",
+    "bytes": 40993
+   },
+   {
+    "path": "src/aadistill/infrastructure/session_prechecks.py",
+    "sha256": "b32f4401fdb21ecf4ba45fcf8d62e046cdb14fa552b924d73def718cc0b5014d",
+    "bytes": 11022
+   },
+   {
+    "path": "src/aadistill/infrastructure/session_runner.py",
+    "sha256": "c436220787b44f9875eae123974cf9c05c5f9b64c7c6890e9eb254228d047e3c",
+    "bytes": 59342
+   },
+   {
+    "path": "src/aadistill/infrastructure/watchdog.py",
+    "sha256": "222c46c9931656973b031e411ac5d137adf95164a6bb5fe91b09747672277184",
+    "bytes": 14152
+   },
+   {
+    "path": "src/aadistill/initialization/adapters/qwen3.py",
+    "sha256": "2e247cd8f59f2003aa4fec5fda5a90ae825373d6f2a845b8c711a11dd2e8fd4c",
+    "bytes": 10527
+   },
+   {
+    "path": "src/aadistill/initialization/calibration/datasets.py",
+    "sha256": "0e1f9759e4acb3a06d9c5f48f42c911f71f7f8cba5a2bec57cd938a5c2eaa2b9",
+    "bytes": 13529
+   },
+   {
+    "path": "src/aadistill/initialization/calibration/items.py",
+    "sha256": "6cd2f2c2dad30db733704523a0a3c81dd9f20f5a598b6a1658aafb74a3b616be",
+    "bytes": 7533
+   },
+   {
+    "path": "src/aadistill/initialization/calibration/profiles.py",
+    "sha256": "7334063b781a213c720f62cffa56e0676a3481f3690a1b62ca2e7dc2936f870e",
+    "bytes": 15604
+   },
+   {
+    "path": "src/aadistill/initialization/device.py",
+    "sha256": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
+    "bytes": 12044
+   },
+   {
+    "path": "src/aadistill/initialization/operators/__init__.py",
+    "sha256": "489552813827388c121c3c7c0d3b032cd7a2abe172af8aaa8096c82b7b11c819",
+    "bytes": 3058
+   },
+   {
+    "path": "src/aadistill/initialization/operators/_common.py",
+    "sha256": "d065241b735b0193817caadf97f94ab16bbfa3f624ecf123915041fc9a15615b",
+    "bytes": 6309
+   },
+   {
+    "path": "src/aadistill/initialization/operators/attention.py",
+    "sha256": "5e3d3e17b3e001f027271ffd06392bf044411a4d2387b1f209a79018d0704a84",
+    "bytes": 6921
+   },
+   {
+    "path": "src/aadistill/initialization/operators/attention_activation.py",
+    "sha256": "b2ea83eefbc23b0472d7299669b019b0a34344c40b6a6c7e9694a5cd27b82d3a",
+    "bytes": 15490
+   },
+   {
+    "path": "src/aadistill/initialization/operators/base.py",
+    "sha256": "9aabc7b406a62b97ae14d8c08e504030fee345f3bacc1fa987ad2c6a0d69ba3b",
+    "bytes": 19728
+   },
+   {
+    "path": "src/aadistill/initialization/operators/composite.py",
+    "sha256": "4bc00f6739ca644a3db7cccfb5dae7a1790d1d2b6df95a64f98a32eca20e6e68",
+    "bytes": 8857
+   },
+   {
+    "path": "src/aadistill/initialization/operators/depth.py",
+    "sha256": "b1f5c9914e5bdbccd3ee52a5e56ff4050e533f7f8416360aca79f584341f7846",
+    "bytes": 27371
+   },
+   {
+    "path": "src/aadistill/initialization/operators/ffn.py",
+    "sha256": "89d2e5ecb5c5331cac17002d0f13f966629466a3a38d662680fb34faa83798ba",
+    "bytes": 6439
+   },
+   {
+    "path": "src/aadistill/initialization/operators/register.py",
+    "sha256": "f05ba4fc2dffb8b00ea7f6b10167ac6bea192de5cd1e23aadc063de3334bef85",
+    "bytes": 2480
+   },
+   {
+    "path": "src/aadistill/initialization/operators/width.py",
+    "sha256": "9537f8cadc09dcd04d5a080a0a9132070e27ebe918e9acd4f6aa15bbe07ddda3",
+    "bytes": 8468
+   },
+   {
+    "path": "src/aadistill/initialization/planning/__init__.py",
+    "sha256": "5ed897c6addfb4605d736ab3da9e62d958cf1b7815f4294ffe84c8a8a7554ba4",
+    "bytes": 50
+   },
+   {
+    "path": "src/aadistill/initialization/planning/fixed_path.py",
+    "sha256": "94698e18efcf7f17eebac3ea849a796615a3ac6fd4b12a1a4560c47dc3060d57",
+    "bytes": 35231
+   },
+   {
+    "path": "src/aadistill/initialization/planning/generation.py",
+    "sha256": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f",
+    "bytes": 27768
+   },
+   {
+    "path": "src/aadistill/initialization/planning/recovery.py",
+    "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+    "bytes": 110776
+   },
+   {
+    "path": "src/aadistill/initialization/specs/arch.py",
+    "sha256": "52d8224d96740b599006a7995cd629eb8d531dac1db81a37a6a2cdfba7851f5f",
+    "bytes": 16248
+   },
+   {
+    "path": "src/aadistill/initialization/specs/artifact.py",
+    "sha256": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9",
+    "bytes": 8819
+   },
+   {
+    "path": "src/aadistill/initialization/specs/metrics.py",
+    "sha256": "e00f6b1902647a2d2a78eebcd8485d9625e63a26a02c2f144a23875566dac4ab",
+    "bytes": 10857
+   },
+   {
+    "path": "src/aadistill/initialization/specs/state.py",
+    "sha256": "4b7877ad1008e6a8ea01d6f506b0d3db1e16bc030cae1b881caccd38ef15def4",
+    "bytes": 22024
+   },
+   {
+    "path": "src/aadistill/initialization/statistics/attention.py",
+    "sha256": "017ca640688a050e0266425b36e703efb2035121c02989a9708136c582b69da9",
+    "bytes": 9933
+   },
+   {
+    "path": "src/aadistill/initialization/statistics/collect.py",
+    "sha256": "22780d46ede55de0252951d9f9d240e2250f7dc049e0bacc77f4bb46560679b4",
+    "bytes": 7669
+   },
+   {
+    "path": "src/aadistill/initialization/statistics/contribution.py",
+    "sha256": "984a4ed3a277e26c5c50d8f75ca5319049d7b8b219726bc705f1bc176b3f29c3",
+    "bytes": 15551
+   },
+   {
+    "path": "src/aadistill/initialization/statistics/spec.py",
+    "sha256": "951c4da15063de8d9193896a8b045efee9e175a1cab349dc4cc833c6d268bdda",
+    "bytes": 4835
+   },
+   {
+    "path": "src/aadistill/initialization/transforms/project.py",
+    "sha256": "0b783fb59a9377b2496df66d53f6acdbf8c99167576a9c241a6c7d66cd0f632b",
+    "bytes": 6265
+   },
+   {
+    "path": "src/aadistill/initialization/transforms/sandwich.py",
+    "sha256": "ac7af66a466d5b0ca059b0a290e290756b30b2de64ad4202530a8566ce84074f",
+    "bytes": 15276
+   },
+   {
+    "path": "src/aadistill/models/student.py",
+    "sha256": "2ad3655c5726567944ff078fa56e26f9052d51d7e8bcd9d879b7cf9976b9c79c",
+    "bytes": 6653
+   },
+   {
+    "path": "src/aadistill/models/teacher.py",
+    "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+    "bytes": 3567
+   },
+   {
+    "path": "src/aadistill/models/tokenizer_contract.py",
+    "sha256": "47a2f49f05f1199fa398f835969e1f71600d47cd77aa7a4506015221a753d439",
+    "bytes": 6920
+   },
+   {
+    "path": "src/aadistill/runtime/__init__.py",
+    "sha256": "9ab9b982b521e72ec4f56e3ed744acb897cf1ae9270a035a8c8bd614226239a8",
+    "bytes": 287
+   },
+   {
+    "path": "src/aadistill/runtime/device_handoff.py",
+    "sha256": "39ad7cc03c7f7e02f8ef3b36ed440370e3afd61e0627e32132fe20807fdb0fd0",
+    "bytes": 9995
+   },
+   {
+    "path": "src/aadistill/runtime/pod_environment.py",
+    "sha256": "538d23a0a061f4513650860e58c725efccd5c6a911e26802342dfee11936543d",
+    "bytes": 32404
+   },
+   {
+    "path": "src/aadistill/runtime/run_layout.py",
+    "sha256": "cd28b70a1eea540667869acf59df9dfa02c8147930fca6e5c83db883271bc084",
+    "bytes": 11889
+   },
+   {
+    "path": "src/aadistill/runtime/staging_contract.py",
+    "sha256": "d4419f654c10ad31124a3899f16bf5d231aa691d101c18b1a0bc28b7a520f191",
+    "bytes": 11182
+   },
+   {
+    "path": "src/aadistill/training/lora.py",
+    "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+    "bytes": 10657
+   },
+   {
+    "path": "src/aadistill/training/train.py",
+    "sha256": "d473ccc9a210916252d661de8e1185cd190b324939eb63f826776246893c6539",
+    "bytes": 63007
+   }
+  ],
+  "authorizes": "nothing",
+  "note": "the set an authorization measures. It includes the launcher, the driver, the setup script, the operators the fixed path applies, the recovery and scoring paths the six probes invoke, and the session infrastructure they run through."
+ },
+ "authorization": {
+  "schema": "aadistill.autoinit.c1_authorization/v1",
+  "type": "experiments.phase_c1.authorization.C1Authorization",
+  "session_kind": "c1",
+  "allows_phase_a": false,
+  "allows_beam_search": false,
+  "n_harness_files": 73,
+  "status": "NO GRANT EXISTS. No authorization has been issued."
+ },
+ "launcher": "scripts/pod/autoinit_c1_launch.py",
+ "pricing": {
+  "path": "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json",
+  "pricing_sha256": "909ed65f0d0d559b6b509fd1701f2fb30c3885717b1041c726c33dec48ee5be3",
+  "floor_usd": 13.4401,
+  "expected_usd": 14.7841,
+  "hard_ceiling_usd": 15.1475,
+  "enforcement": "BudgetSpec is derived from this record; the ceiling exists in exactly one place"
+ },
+ "c0_protocol": {
+  "path": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
+  "sha256": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+  "protocol_id": "autoinit.v1.phase_c0"
+ },
+ "c1_session_contract": {
+  "hash": "6a5b019b970f5b5c4376d035138ed852528dfad6b7b362335f9e168c5f7bd7af",
+  "stages": [
+   "A: session_setup",
+   "B: teacher_fetch_verify",
+   "C: register_operator",
+   "D: replay_parent",
+   "E: replay_incumbent",
+   "F: materialize_arms",
+   "G: recovery_probes",
+   "H: evaluate",
+   "I: decide",
+   "J: collect_teardown"
+  ],
+  "gate_stages": [
+   "teacher_fetch_verify",
+   "register_operator",
+   "replay_parent",
+   "replay_incumbent",
+   "materialize_arms"
+  ]
+ },
+ "treatment_operator": {
+  "impl_id": "attention.activation_importance_v1",
+  "signature_hash": "1171f3b791e2394d4b730b887f936763edd5bb4d31b52090cdccacef809e0e90",
+  "version": 1,
+  "calibration_need": "activation_stats",
+  "calibration_profile": "calib.domain_balanced@v1",
+  "score_definition": "score_h = mean_t || W_o,h @ a_h(t) ||^2",
+  "score_definition_long": "a_h(t) is query head h's slice of the concatenated attention output, i.e. the tensor o_proj consumes; W_o,h is o_proj's column block for that head. The score is the mean over calibration tokens of the squared L2 norm of that head's contribution to the residual stream. Computed EXACTLY from the streamed per-head second moment as <W_o,h^T W_o,h, mean_t a_h a_h^T>_F, not approximated.",
+  "selection": "per-GQA-group top-k, 4 query heads per KV group -> keep 2; descending score; ties by ASCENDING head index",
+  "preserved": "GQA grouping, head_dim, KV heads, RoPE basis; modifies = {num_attention_heads} only",
+  "registration": "EXPLICIT. Importing the module does not register the operator, because BeamSearch._allowed_impl_ids falls back to the entire registry when allowed_impls is None. Stage C registers it before any FixedPathSpec names it, and build_arm_specs refuses otherwise.",
+  "not_in_frozen_library": true,
+  "stats_spec": {
+   "spec_id": "attention_head_output_second_moment",
+   "version": 1,
+   "accumulation_dtype": "float64",
+   "quantities": [
+    "attn_head_sqsum",
+    "attn_token_count"
+   ],
+   "spec_hash": "4dd0e23a6b8b9e92dce711c597a9ebd7d7a3b477ffa59eb296a08850472ed134"
+  }
+ },
+ "incumbent_operator": {
+  "impl_id": "attention.weight_proxy_v0",
+  "calibration_profile": "calib.none@v1"
+ },
+ "fixed_path": {
+  "incumbent_spec_hash": "8b0bb455bfba069f2dcc1b4555cf40ecb7efe4cf53121a14937e7028131ae08d",
+  "treatment_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+  "incumbent_path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.none@v1)",
+  "treatment_path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+  "shared_prefix": true,
+  "target_geometry": {
+   "head_dim": 128,
+   "hidden_size": 1024,
+   "intermediate_size": 3072,
+   "num_attention_heads": 16,
+   "num_hidden_layers": 28,
+   "num_key_value_heads": 8,
+   "tie_word_embeddings": true,
+   "vocab_size": 151936
+  },
+  "search_seed_carried": 20260815
+ },
+ "replay_gates": {
+  "expected_parent_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "expected_parent_state_id": "b8820f41d062bffffca4b99148602136",
+  "expected_incumbent_digest": "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6",
+  "expected_incumbent_state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "fail_stop": "A mismatch at EITHER gate ENDS THE SESSION BEFORE ANY 0.86M RECOVERY TRAINING. No automatic waiver, no retry, no substitution of a rebuilt parent for the historical one. The mismatch evidence is preserved and referred to review; a functional-equivalence amendment is a decision to be made from that evidence, not pre-authorized here.",
+  "evidence_on_mismatch": [
+   "every intermediate artifact_digest, in order",
+   "DEPTH selected and removed blocks",
+   "FFN selected neurons per layer",
+   "WIDTH projection diagnostics",
+   "ATTENTION kept heads per layer",
+   "runtime: image digest, torch, transformers, CUDA runtime, driver, GPU",
+   "the expected and realized digests, side by side"
+  ]
+ },
+ "teacher": {
+  "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "expected_shard_sha256": {
+   "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+   "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+   "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+  },
+  "n_shards": 3,
+  "index_total_size_bytes": 8045591552,
+  "hash_semantics": {
+   "lfs_sha256": "For an LFS-backed file the hub blob is named by the sha256 of its content. VERIFIED empirically on this box: tokenizer.json's blob name equals sha256(content).",
+   "git_blob_sha1": "For a non-LFS file the blob is named by the git blob SHA-1. VERIFIED empirically: config.json's blob name equals `git hash-object config.json`."
+  },
+  "verification_rule": "On fetch, every file in `files` must hash to its recorded blob_name under the matching convention. Reconstruction MUST NOT begin on any mismatch.",
+  "binding_record": "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+  "weights_present_locally": false
+ },
+ "tokenizer_contract": {
+  "module": "aadistill.models.tokenizer_contract",
+  "rule": "leaves are weight-only by design \u2014 leaf_durability REFUSES a persisted leaf carrying tokenizer files, because that would change tokenizer_sha256 and therefore the artifact digest the metrics hang on. Both arms are packaged for evaluation through the tokenizer contract, not by copying files into the checkpoint.",
+  "teacher_tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+ },
+ "calibration": {
+  "calib.domain_balanced@v1": {
+   "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+   "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+   "n_items": 67
+  },
+  "calib.reasoning_heavy@v2": {
+   "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+   "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+   "items_path": "artifacts/stage1/reasoning_heavy_v2/items.jsonl",
+   "n_items": 62
+  },
+  "resolution": "fail-closed: resolve() re-derives and checks the content hash"
+ },
+ "isolation_plan": {
+  "plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
+  "plan": {
+   "schema": "aadistill.autoinit.c1_isolation_plan/v1",
+   "plan_id": "autoinit.v1.phase_c1",
+   "arms": [
+    {
+     "arm_id": "c1.incumbent",
+     "role": "incumbent",
+     "attention_impl_id": "attention.weight_proxy_v0",
+     "attention_profile_id": "calib.none@v1"
+    },
+    {
+     "arm_id": "c1.treatment",
+     "role": "treatment",
+     "attention_impl_id": "attention.activation_importance_v1",
+     "attention_profile_id": "calib.domain_balanced@v1"
+    }
+   ],
+   "seeds": [
+    1635674081,
+    1656475568,
+    696460635
+   ],
+   "probe_count": 6,
+   "battery_asset_id": "c1_confirmation_v1",
+   "battery_content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+   "sesoi": 0.01,
+   "design_alternative": 0.015,
+   "alpha": 0.05,
+   "primary_metric": "correct_overall",
+   "secondary_metric": "usable_rollout_rate",
+   "seed_robustness_min_positive": 2,
+   "usable_pooled_min_delta": -0.05,
+   "usable_per_seed_min_delta": -0.1,
+   "catastrophic": {
+    "rule_id": "per_capability_collapse",
+    "candidate_max": 0.1,
+    "control_min": 0.4,
+    "control_operand": "incumbent",
+    "candidate_operand": "treatment",
+    "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, replacement vetoed",
+    "asymmetry": "deliberate: this can veto the treatment, never the incumbent. It is never positive ranking evidence."
+   },
+   "structure": {
+    "successive_halving": false,
+    "elimination_rung": false,
+    "tie_break_rung": false,
+    "search_ranking": false,
+    "both_arms_run_every_seed": true
+   },
+   "historical_seeds_rejected": [
+    20260726,
+    20260801,
+    20260813
+   ],
+   "notes": {}
+  }
+ },
+ "seeds": {
+  "values": [
+   1635674081,
+   1656475568,
+   696460635
+  ],
+  "count": 3,
+  "derivation": "seed_i = uint32_be(SHA256(C0_digest + ':phase-c1:recovery-seed:' + decimal(i))[0:4]) mod 2**31, i from 0, advancing past collisions with the historical seeds or an earlier draw",
+  "base_digest": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+  "base_digest_source": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json (commit be2ab08)",
+  "historical_seeds_excluded": [
+   20260726,
+   20260801,
+   20260813
+  ],
+  "no_human_choice": "the rule leaves no discretion; the values are determined by a document frozen before the replacement operator existed",
+  "independently_confirmed": "recomputed by the committed implementation, by a hand computation, and by the reviewer, all three agreeing"
+ },
+ "battery": {
+  "asset_id": "c1_confirmation_v1",
+  "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+  "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+  "canonical_path": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
+  "repo_local_copy": "artifacts/stage3/c1_confirmation_v1  (repo-local working copy, gitignored)",
+  "n_prompts": 950,
+  "n_scorable_prompts": 850,
+  "set_sha256": {
+   "gsm8k": "f95017ca71ae77a0c98afee1d431c94c45fa328de602d51a07c1dfc87a086ee8",
+   "math_verified": "de302bda2d3949897ea5ba775f3ff2f1c48454c359b879555f918ffc745fba7d",
+   "multihop": "1c2652a9203fb9b3a766605a02fedf85f45f41bbc06919612add78e070d3ec34",
+   "rag": "1a3b0e876849916369421ba3629fa39e049c9d891ce753f2e9709042e5dcdb54",
+   "knowledge": "f52cc45f21a11100ba989001bca827f9c3cc953ad14e3e8f403381a4fe4afd35",
+   "tool": "bbd863d4431369d25e7d9675e8feb95395e46b271199146b5e2a01ea7ebc84a3",
+   "code": "f9da1df0d93d07910094985afea397580149ab0398af41230e0dfd3780479b89"
+  },
+  "evaluated_once_per_probe": true,
+  "no_model_has_been_evaluated_on_it": true
+ },
+ "generation_protocol": {
+  "fingerprint": "1e5031c2b7debcccb6ab8f92d9863fb2a8381aefd534d5267cb0b519e6192206",
+  "protocol_id": "recovery_generation",
+  "version": 1,
+  "note": "the frozen Phase-A/B generation identity: greedy, temperature 0, P18-unrestricted max_tokens, degeneration stop, resolved context 8192"
+ },
+ "scoring_contract": {
+  "contract": "c1_confirmation_scoring@v1",
+  "contract_id": "c1_confirmation_scoring",
+  "version": 1,
+  "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+  "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+  "semantic_parent": "recovery_search_scoring@v2",
+  "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+  "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+  "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated.",
+  "n_files": 11,
+  "files": [
+   "scripts/autoinit/audit_tool_scoring.py",
+   "scripts/autoinit/score_c1_confirmation.py",
+   "scripts/autoinit/score_recovery_search.py",
+   "scripts/experiments/phase_c1/scoring.py",
+   "src/aadistill/data/tools.py",
+   "src/aadistill/data/verify.py",
+   "src/aadistill/evaluation/behavior.py",
+   "src/aadistill/evaluation/capability.py",
+   "src/aadistill/evaluation/strict_answer.py",
+   "src/aadistill/evaluation/usable_rollout.py",
+   "src/aadistill/initialization/planning/recovery.py"
+  ],
+  "metric_contract": {
+   "contract": "c1_confirmation_scoring@v1",
+   "defined_by": "source, not the battery manifest",
+   "correct_overall": {
+    "numerator": "correct on scorable prompts",
+    "denominator": "n_scorable",
+    "denominator_value": 850
+   },
+   "usable_rollout_rate": {
+    "numerator": "usable on ALL prompts",
+    "denominator": "n",
+    "denominator_value": 950
+   },
+   "correct_given_usable": {
+    "numerator": "correct on scorable prompts",
+    "denominator": "usable_scorable",
+    "role": "diagnostic; never reorders"
+   },
+   "scorable_sets": [
+    "gsm8k",
+    "knowledge",
+    "math_verified",
+    "multihop",
+    "rag",
+    "tool"
+   ],
+   "behaviour_only_sets": [
+    "code"
+   ],
+   "correct_implies_usable": "by construction, via the frozen score_recovery_row contract",
+   "tool_usability": "generic usable_rollout AND tool_call_emitted AND tool_call_parsed AND tool_name_valid",
+   "capability_schema": "CAPABILITY_SCHEMA_V1 (six scorable capabilities)",
+   "no_weighted_scalar": "usable_rollout_rate and correct_overall are reported separately and are never combined; usable_rollout is blind to correctness by construction"
+  },
+  "historical_numerical_equivalence": {
+   "record": "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json",
+   "sha256": "0ee5ce346ee0a33a4376fa939022f880c4225b083821a8b0d0d09d7836c02959",
+   "verdict": "IDENTICAL",
+   "n_cases": 15,
+   "total_differences": 0,
+   "basis": "real retained recovery_search_v2 generations scored through both paths; every material numerical field equal, per sample and in aggregate, no tolerance",
+   "coverage_limits": {
+    "correct_implies_usable": "NOT covered by this gate: correct_but_unusable is 0 on every retained probe (0 of 15 have any), so the implication never fires in historical evidence. Covered directly in tests/autoinit/test_c1_confirmation_scoring.py against the frozen score_recovery_row, which C1 imports unmodified.",
+    "c1_battery_rows": "this gate runs on recovery_search_v2 by construction \u2014 it is the only battery both scorers can read. The C1 battery is exercised separately by the production-path tests."
+   }
+  }
+ },
+ "recovery_recipe": {
+  "recipe_id": "e1_p1_kd_heavy@0.86M",
+  "ce_weight": 0.25,
+  "kd_weight": 1.0,
+  "temperature": 1.0,
+  "kd_scope": "all",
+  "tokens": 860000,
+  "pack": "artifacts/stage3/ladder_uniform_probe",
+  "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+  "block_len": 8192,
+  "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations."
+ },
+ "decision": {
+  "primary_endpoint": "correct_overall over the 850 scorable prompts",
+  "estimand": "Delta = mean over prompts ( mean over the 3 fixed seeds ( correct_treatment - correct_incumbent ) )",
+  "inference": "stratified prompt-cluster bootstrap; seeds are FIXED BLOCKS",
+  "ci_claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+  "bootstrap": {
+   "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+   "seed": 816109261,
+   "seed_derivation": "SHA256(C0_digest + ':phase-c1:bootstrap')[0:4] mod 2**31",
+   "iterations": 20000,
+   "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+   "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+   "bound_before_any_c1_datum_exists": true
+  },
+  "rule": {
+   "GO": [
+    "one-sided 95% LCB > 0",
+    "AND point estimate >= +0.010",
+    "AND at least 2 of 3 seed-specific deltas > 0",
+    "AND all behavioural guardrails pass"
+   ],
+   "NO_GO": [
+    "one-sided 95% UCB < +0.010",
+    "OR a preregistered behavioural veto fires"
+   ],
+   "INCONCLUSIVE": "otherwise; no forced winner"
+  },
+  "also_reported": [
+   "two-sided 95% CI",
+   "each seed-specific delta",
+   "McNemar counts per seed",
+   "per-set and per-domain diagnostics"
+  ]
+ },
+ "guardrails": {
+  "usable_rollout": {
+   "pooled_min_delta": -0.05,
+   "per_seed_min_delta": -0.1,
+   "role": "veto only; never positive ranking credit"
+  },
+  "catastrophic_capability": {
+   "rule_id": "per_capability_collapse",
+   "candidate_max": 0.1,
+   "control_min": 0.4,
+   "control_operand": "the INCUMBENT arm (fe9683 / current ATTENTION)",
+   "candidate_operand": "the TREATMENT arm (activation_importance_v1)",
+   "asymmetry": "deliberate: it can veto the treatment, never flag the incumbent. Never positive ranking evidence."
+  }
+ },
+ "runtime_requirements": {
+  "must_be_recorded_at_execution": [
+   "image digest",
+   "torch version",
+   "transformers version",
+   "CUDA runtime",
+   "host driver",
+   "GPU model",
+   "attention backend",
+   "dtype"
+  ],
+  "why": "the replay gates compare artifact digests, and config_sha256 folds in transformers_version while the WIDTH projection is a float64 eigendecomposition whose low bits depend on the BLAS kernel. A mismatch is only interpretable against the runtime that produced it.",
+  "phase_b_search_runtime_for_reference": {
+   "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04",
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "cuda_runtime": "12.8",
+   "measurement_device": "cuda"
+  }
+ },
+ "evidence_manifest_contract": {
+  "required_before_teardown": [
+   "per-probe train_log.jsonl (6)",
+   "per-probe per-sample rows (6)",
+   "per-probe raw generations, every evaluated sample (P18)",
+   "per-probe scored aggregates (6)",
+   "both arm artifact identities and the verified parent identity",
+   "the fixed-path replay record for both arms",
+   "the decision record with all seed-specific deltas and McNemar counts",
+   "the runtime identity block"
+  ],
+  "gate": "collect_artifacts.py manifest -> archive -> verify-archive -> transfer -> verify-local -> gate; a missing required artifact blocks teardown"
+ },
+ "artifact_specs": {
+  "success": {
+   "path": "configs/autoinit/c1_artifacts.json",
+   "sha256": "39576ead0ef2e510386b9baf7d8640241607df667189f54c71f388c359ea271c",
+   "requires": "6 train_log.jsonl, 6 run_manifest, 6 run_completion, 6 probe journals, 6 probe configs, 6 per-sample files, 6 scored aggregates, 42 raw generation files and 42 generation summaries (every set of every probe), plus the replay record, both arm identities, the decision, the attested protocol, the session evidence and the engine probe"
+  },
+  "failed": {
+   "path": "configs/autoinit/c1_artifacts_failed.json",
+   "sha256": "c21bb89dd7fc12ed3d0105d344696010df5c07e1487fcfe369bfa2822c539e97",
+   "requires": "the session evidence record only. Everything else is collected when present. `ArtifactSpec` has no conditional and the runner selects between exactly two spec files on one bit, so the required set is the intersection over every terminal failure state; requiring the replay record would block teardown on a run that failed before stage D. The residual hole is recorded in the file's `limitation` field and is a live review item, not a closed design."
+  },
+  "gate": "artifact_spec_gate in scripts/pod/autoinit_c1_launch.py, at $0 before provider creation: both files exist, parse, load through collect_artifacts.load_specs, stay inside the artifact roots, are inside the measured harness set, cover the contract above at derived minimums, and \u2014 for the failure spec \u2014 demand nothing that presupposes training",
+  "paths_are_the_driver_s": "the manifest root is artifacts/ and the paths under it are the STANDALONE C1 driver's own: audit/autoinit_c1, stage3/c1/<probe_id>, eval/c1/<probe_id>. An earlier revision of this document said they were PhaseADriver's, which C1Driver then inherited; that inheritance is gone and no C1 evidence is written under another phase's tree"
+ },
+ "driver": {
+  "path": "scripts/pod/autoinit_c1_driver.py",
+  "standalone": true,
+  "subclasses_phase_a_driver": false,
+  "imports_phase_a_driver_or_launcher": false,
+  "owns_paths": [
+   "artifacts/audit/autoinit_c1",
+   "artifacts/stage3/c1",
+   "artifacts/eval/c1"
+  ],
+  "stages": "B-I; A and J belong to the session runner",
+  "stage_g_h_separation": "stage G runs all six recovery trainings and opens no battery, starts no evaluator and no scorer; stage H calls require_all_trained() before the first evaluation. Evaluating inside the training loop would let the first arm meet the confirmation battery before the last arm was trained",
+  "generation_admission": "NO PROBE RESULT IS ADMITTED unless the generation protocol observed from THAT probe's raw per-set summaries is comparable to the preregistered C1 evaluation protocol. The comparison runs after generation and BEFORE the scorer; on failure the session stops as C1_INCOMPLETE, that probe is not scored, no later probe is evaluated and stage I does not run. The scorer is passed the OBSERVED fingerprint, not the attested one \u2014 they are equal once the check passes, and the direction of provenance is the point",
+  "attested_evaluation_protocol": "written to artifacts/audit/autoinit_c1/c1_attested_evaluation_protocol.json at the start of stage H, before the first evaluation; the six admitted per-probe protocol hashes must all equal it, and c1_probe_results.json carries the observed generation fingerprint and observed evaluation_protocol_hash for every probe",
+  "scoring": "score_c1_confirmation.py only, on c1_confirmation_v1 only. The frozen score_recovery_search.py is never invoked on this battery",
+  "device_handoff": "complete_release -> require_released -> require_headroom before probe 1, at the measured recovery-trainer requirement",
+  "evidence": [
+   "c1_evidence.json",
+   "c1_replay_record.json",
+   "c1_arm_identities.json",
+   "c1_probe_results.json",
+   "c1_decision.json",
+   "c1_attested_evaluation_protocol.json",
+   "c1_device_handoff.json",
+   "<probe_id>_generation_admission.json"
+  ]
+ },
+ "transport": {
+  "canonical_bundle_name": "aad_autoinit_<first 8 hex of session commit>.bundle",
+  "relay": "AlphaAvatar/aadistill-artifacts:transfer/<canonical name>",
+  "derived_from": "--session-commit; an alias fails at $0",
+  "preparation": "scripts/autoinit/stage_c1_bundle.py -- MAY mutate the relay; refuses a commit that does not carry the authorization, and refuses to overwrite a different existing remote object",
+  "gate": "bundle_staged_gate, READ-ONLY: download the canonical relay object, sha256 it against the staged bundle, git bundle verify the round-tripped bytes, clone and check out the session commit exactly as the pod's setup does, then require the authorization inside the checkout to be the artifact the launcher is loading and the harness recomputed from that checkout to equal the authorized digest",
+  "ordering": [
+   "1. the maintainer grant and ALL final metadata are committed",
+   "2. that clean pre-authorization tree is frozen: no source, test, preregistration, state, catalog or doc path may move after it",
+   "3. the real `--kind launch_bound` pod-like sweep runs on THAT tree",
+   "4. commit ONLY the readiness record",
+   "5. issue the authorization against that clean readiness commit, --require-clean",
+   "6. commit ONLY the authorization artifact",
+   "7. stage the canonical bundle for that commit and round-trip it",
+   "8. run all 12 $0 pre-provider gates",
+   "9. create a provider resource ONLY after all 12 pass"
+  ],
+  "why_the_sweep_precedes_issuance": "session_commit_gate requires the session commit to differ from authorized_session_commit by exactly the authorization path. A launch-bound sweep run AFTER issuance adds the readiness record as a second path and the gate refuses. Run before, the record is the permitted readiness delta and the authorization is the permitted issuance delta, so both lineage relations hold at once. This ordering was once reported backwards; it is derived from the gate, not from memory.",
+  "bundle_ordering": "the bundle must contain the commit that CARRIES the authorization, so it is staged at step 7, after step 6. A bundle built for the pre-authorization base checks out a tree with no authorization in it",
+  "n_pre_provider_gates": 14,
+  "pre_provider_gate_order": [
+   "session_commit_and_lineage",
+   "grant_provenance_gate",
+   "c1_harness_gate",
+   "pricing_identity_gate",
+   "preregistration_gate",
+   "frozen_c1_science_gate",
+   "frozen_assets_gate",
+   "teacher_binding_gate",
+   "battery_staged_gate",
+   "artifact_spec_gate",
+   "rope_input_gate",
+   "bundle_staged_gate",
+   "renderer_parity_gate",
+   "pod_environment_gate"
+  ],
+  "gate_count_source": "len(spec(args).precheck) on the live C1 SessionSpec, not a literal. The literal said 10 while the session had 12."
+ },
+ "setup_readiness": {
+  "rope_ok_input": {
+   "relay_path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+   "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+   "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+   "bytes": 1418,
+   "stored_rope_base": 5000000,
+   "verified": "the relay object was downloaded read-only and hashed against the identity the repository already records; rope_input_gate re-derives it before every launch"
+  },
+  "is_not_a_measurement_input": "this config is consumed ONLY by the shared setup's ROPE_OK step. It is not read by any C1 stage: the arms are materialized from the verified teacher, the probes train from the arm checkpoints, and stage H evaluates a package built from the trained bytes plus the three frozen tokenizer sidecars. No C1 number depends on it.",
+  "weights_not_staged": "model.safetensors and generation_config.json are deliberately NOT pulled: 1.19 GiB for a check that reads neither",
+  "gate": "rope_input_gate, at $0 and read-only -- declared, correct destination, pinned, present on the relay, hashes to the pin, parses, and stored_rope_base == 5,000,000. It does not replace the pod-side ROPE_OK check under both runtimes"
+ },
+ "out_of_scope": [
+  "formal Stage-2/Stage-3 recovery training \u2014 explicitly NOT in scope; C1 is a fixed-path ATTENTION isolation using short 0.86M recovery probes and establishes no recovered-model capability",
+  "canonical Stage-1 NLL",
+  "Phase C2 joint re-search",
+  "any search, ranking, successive halving, tie-breaking or arm elimination"
+ ],
+ "authorizes": "nothing",
+ "preregistration_sha256": "9d05a0c1df1d189f7f03c7dcd6456e99ce906f8ccdcf057d491b883775d41acd"
+}

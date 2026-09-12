@@ -1,0 +1,714 @@
+{
+ "schema": "aadistill.runtime.run_index/v2",
+ "_contract": "Every run this repository has recorded, ONE ENTRY PER LOGICAL RUN. A legacy run references its surviving components in place: nothing was moved, renamed or copied, and each component carries a digest so that is checkable. Registering a run confers nothing. A run directory that exists but recorded no manifest is reported under `unrecorded`, never silently dropped.",
+ "granularity": "one entry per (experiment_id, run_id). The v1 index counted artifact roots, so an attempt with an evidence directory and a grant file appeared twice.",
+ "counts": {
+  "runs_legacy_v1": 41,
+  "runs_current": 3,
+  "runs_unrecorded": 1,
+  "legacy_components": 77,
+  "by_experiment": {
+   "continuation_b": {
+    "recorded": 5,
+    "unrecorded": 0,
+    "total": 5
+   },
+   "device_canary": {
+    "recorded": 2,
+    "unrecorded": 0,
+    "total": 2
+   },
+   "measurement": {
+    "recorded": 3,
+    "unrecorded": 0,
+    "total": 3
+   },
+   "phase_a": {
+    "recorded": 8,
+    "unrecorded": 0,
+    "total": 8
+   },
+   "phase_b": {
+    "recorded": 5,
+    "unrecorded": 0,
+    "total": 5
+   },
+   "phase_c1": {
+    "recorded": 13,
+    "unrecorded": 1,
+    "total": 14
+   },
+   "recovery_continuation": {
+    "recorded": 8,
+    "unrecorded": 0,
+    "total": 8
+   }
+  },
+  "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
+ },
+ "kinds": {
+  "_what_this_is": "what each entry IS, so a reader is not left inferring it from the shape of a path. A run that executed, a run that is prepared and has not, historical evidence with no manifest, a legacy aggregate that spans several runs, and a directory that only describes itself are five different things.",
+  "recorded_run": "wrote a valid manifest naming the roles it produced. In `runs`.",
+  "prepared_not_executed": "holds governance inputs only -- a grant committed before the launch-bound sweep -- and no runtime, evidence or closeout. In `unrecorded`, flagged by its `why`. It is not a launcher that died; nothing started.",
+  "historical_evidence_no_manifest": "predates the manifest convention or the launcher never reached its closeout. In `unrecorded` with a digest.",
+  "legacy_aggregate": "one entry whose components span several directories, recorded before per-run directories existed. In `runs`, with `components` naming each part in place.",
+  "description_only": "a directory holding nothing but its own README. Counted nowhere: it is navigation, not a run, and reporting it as an unrecorded run would describe a launcher that never ran."
+ },
+ "runs": [
+  {
+   "experiment_id": "continuation_b",
+   "run_id": "attempt1",
+   "layout_version": 1,
+   "components": {
+    "outcome": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt1.json",
+    "root": "logs/cross-stage/continuation_b/runs/attempt1"
+   },
+   "component_digests": {
+    "outcome": "988e92960f031f9420e18e1c10de1d153ca63158000bc0978eeeab8f1a24665d",
+    "root": "ce2b07fffc9b446128bc6de0fccc11712fa195a46b3b13a0603d8ac8b8f11847"
+   },
+   "aggregate_digest": "6ff3ad5b079a6ec9d45467e21b0061bb988464c89c98be1c4836e9edaced2620",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "continuation_b",
+   "run_id": "attempt2",
+   "layout_version": 1,
+   "components": {
+    "outcome": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt2.json",
+    "root": "logs/cross-stage/continuation_b/runs/attempt2"
+   },
+   "component_digests": {
+    "outcome": "32f7b71504280ba8f07584f5e5cbec35ddf528661995661130fb1f577ae3a9a0",
+    "root": "0eb5770b4a9a5db640e587cbeaf1ebf00f172e779585797240b4a96c6f4b7f69"
+   },
+   "aggregate_digest": "8d8f52fa96db143e90d3f0a984214dae98aafc358dc591e6ef9f09d967731649",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "continuation_b",
+   "run_id": "attempt3",
+   "layout_version": 1,
+   "components": {
+    "outcome": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt3.json",
+    "root": "logs/cross-stage/continuation_b/runs/attempt3"
+   },
+   "component_digests": {
+    "outcome": "f867b92ec9659daefd1ee9ed4faa6f0a0d95bddbd2cb7aba13575d96d9db0d07",
+    "root": "37e16019fa59ad79af0fb06b81ce95124032abdd0ce65623155a47a80c0101b6"
+   },
+   "aggregate_digest": "e2f6ae2f8b0ad7809e9e01a966b8477cc241d1a658cb2ee8de24e7369adff1a8",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "continuation_b",
+   "run_id": "attempt4",
+   "layout_version": 1,
+   "components": {
+    "outcome": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt4.json",
+    "root": "logs/cross-stage/continuation_b/runs/attempt4"
+   },
+   "component_digests": {
+    "outcome": "6f7bd62429ed3c97ef35d45a3890b50a74ec270dc21a83c8228db635a924a451",
+    "root": "853907f5767160311e315837af03d852c99b211739ad08bcf00ef32b3918a15b"
+   },
+   "aggregate_digest": "ac42dcd62b5431df674b5afb3f6ed89b75811bd39ae5bc7844d60edba36bb0b6",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "continuation_b",
+   "run_id": "attempt5",
+   "layout_version": 1,
+   "components": {
+    "outcome": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt5.json",
+    "root": "logs/cross-stage/continuation_b/runs/attempt5"
+   },
+   "component_digests": {
+    "outcome": "7f673dae1a884d2f97d4cf271d4e2bf7d2cc35cfc75fa78689d9cf2d2d5d9078",
+    "root": "b28b3648db9eea3f62addb7482893149f13907f49075703e6719190caf28140a"
+   },
+   "aggregate_digest": "02872e50597866915799ae6ed47530da66a7d367dd8b34caa8a87b6fe6d8b49f",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "device_canary",
+   "run_id": "attempt1",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/shared/validations/device-canary/runs/autoinit_device_canary_attempt1"
+   },
+   "component_digests": {
+    "root": "c32796c97b799611ce28764d8381bf4c3f73547093b37da005d59f5736596c92"
+   },
+   "aggregate_digest": "0a5b2e0f828bfff080291121399978b9e310335518f533683dc961d673641929",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "device_canary",
+   "run_id": "attempt2",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/shared/validations/device-canary/runs/autoinit_device_canary_attempt2"
+   },
+   "component_digests": {
+    "root": "559f1e5917f3b9867583227bc404b0ab3b14c59bd8a4532cdb0913cc777e8373"
+   },
+   "aggregate_digest": "6bef6b8b5f4a3943788c85c09bbee0e6ae2ddcdbebc609f4e93d7798fcb27740",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "measurement",
+   "run_id": "attempt1",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/cross-stage/measurement/runs/attempt1"
+   },
+   "component_digests": {
+    "root": "a31a02123fa4b8900dd6a00e10cd0a25c9c76fe344797987b86bab21356b7bf0"
+   },
+   "aggregate_digest": "cdffe7b75ee6ace1c6d861e86a2280476f6bb47bf9f4d232dc870c4d85bb1243",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "measurement",
+   "run_id": "attempt2",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/cross-stage/measurement/runs/attempt2"
+   },
+   "component_digests": {
+    "root": "39467cd275d00dbe39c2eadb2f1a228708ab462bd9431b71239d4ab54ae3590d"
+   },
+   "aggregate_digest": "cb3fe66764d8060747adb69b13f2b64a42f38596ef529dd5e28186f2e7b3c020",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "measurement",
+   "run_id": "attempt3",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/cross-stage/measurement/runs/attempt3"
+   },
+   "component_digests": {
+    "root": "d795222d1b0856256082d79c799dc3e20387e10bb4a62f68fbfe642bd56ca9cd"
+   },
+   "aggregate_digest": "ed9978a0307874ff0b04dfcc1efd4ac84e38890edf26be99af927f0ce32294ca",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "phase_a",
+   "run_id": "attempt10",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_phase_a_attempt10_grant.json",
+    "root": "logs/cross-stage/phase_a/runs/attempt10"
+   },
+   "component_digests": {
+    "grant": "a87a4863acffbcd9ce26e84b18ebca797577d0d4be8e08c969c7a6a36e59006f",
+    "root": "cff24a5f8f6bce94442ac7ec65bf85a8852cd5d2544c4d96724e09f7f22f01f7"
+   },
+   "aggregate_digest": "ceba2a2402305b713e7f91d79ce393da391115bdc36c3710e79dba6d5d8bb9f3",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_a",
+   "run_id": "attempt11",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_phase_a_attempt11_grant.json",
+    "root": "logs/cross-stage/phase_a/runs/attempt11"
+   },
+   "component_digests": {
+    "grant": "d77d7466fa23f1d5904da1608b1fc5c6f7fe1d17b2b6b2009a28e2a02f022a8c",
+    "root": "d62be19586a7e47a89b1ed3bf8883c09afbb7b1ac48d15466a9f914bb4a9983a"
+   },
+   "aggregate_digest": "bcf69036eae919b31c54676501a0ebb84626dc3d15e9411881ccfa25558e4cf3",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_a",
+   "run_id": "attempt12",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_phase_a_attempt12_grant.json",
+    "root": "logs/cross-stage/phase_a/runs/attempt12"
+   },
+   "component_digests": {
+    "grant": "8bc6f0333581138b56453755d3a376ee63687495b9812c257a31bdf7c30cb82a",
+    "root": "3fd1fb8593385b2bbfbd0027351a5ea44af823541ac02cb8a844cf3b27bf1e9e"
+   },
+   "aggregate_digest": "effb76bd35a0ea9cb384c739ebf7056228db6cb531ec2955e357c7834b5342d8",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_a",
+   "run_id": "attempt6",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/cross-stage/phase_a/runs/attempt6"
+   },
+   "component_digests": {
+    "root": "218fda3eea5b5400c613a910d511f120261bb64859d716efedefe640013679d4"
+   },
+   "aggregate_digest": "aac275a2c2f5a949071f52ed4085f27f522b4a55eeb63672e3ae5cf53e13b754",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "phase_a",
+   "run_id": "attempt7",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/cross-stage/phase_a/runs/attempt7"
+   },
+   "component_digests": {
+    "root": "9ec9e00830d6dceaa933dad9f621adfea8b00e4649f8ff6ae6279f329701a13b"
+   },
+   "aggregate_digest": "2f142189753c956faa242cc15cc434ee7adc61059412b24361c562017060d2d4",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "phase_a",
+   "run_id": "attempt8",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_phase_a_attempt8_grant.json",
+    "root": "logs/cross-stage/phase_a/runs/attempt8"
+   },
+   "component_digests": {
+    "grant": "0f6d5b80958cc18c236636c2993002c9150fd4a07ed616bd44f35ad82cee072d",
+    "root": "88193e5e8a15e9c3a8c3e031298bc1fa1560108a915d24bed6dbb71e485f281f"
+   },
+   "aggregate_digest": "5732664db3f5fd6a13a77572bb5fc56b57938d703de6d687562649ea36d78779",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_a",
+   "run_id": "attempt9",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_phase_a_attempt9_grant.json",
+    "root": "logs/cross-stage/phase_a/runs/attempt9"
+   },
+   "component_digests": {
+    "grant": "877700864cc7763a745deedbaf77f8f0c677b46e20d2bb75c4a656f30d20b1fc",
+    "root": "400792e43d840cb5bc083e06964f47a60615e2251050d041dee7b7c4456fbf96"
+   },
+   "aggregate_digest": "748ddb257c1ca8b3f1942be99e70c060fff62f1ffaff44f742af5e39d9073370",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_a",
+   "run_id": "legacy_aggregate",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/cross-stage/phase_a/history/autoinit_phase_a_attempts"
+   },
+   "component_digests": {
+    "root": "643d3b9b69b939e6684113687484d8abc3c3d52e481118e64295ee834a699407"
+   },
+   "aggregate_digest": "e4e93aed2d5523ccfc5c94ba57b44beca82e74f39f75049f12d6020164b2eac0",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "phase_b",
+   "run_id": "attempt1",
+   "layout_version": 1,
+   "components": {
+    "outcome": "logs/cross-stage/phase_b/analyses/autoinit_phase_b_attempt1.json",
+    "root": "logs/cross-stage/phase_b/runs/attempt1"
+   },
+   "component_digests": {
+    "outcome": "29c96c22645d5215918d67cce23d5bcf2dfb524b1603aabb3816914d0649ef49",
+    "root": "77071f7094d3b8964ff772756e7ecea5c23e012cf95d587964a93ab29f81a913"
+   },
+   "aggregate_digest": "96c790b2a0dd71312fb997f5ad6a9bb90db4f669dfe64ffbf7441b4051e91c1e",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_b",
+   "run_id": "attempt2",
+   "layout_version": 1,
+   "components": {
+    "outcome": "logs/cross-stage/phase_b/analyses/autoinit_phase_b_attempt2.json",
+    "root": "logs/cross-stage/phase_b/runs/attempt2"
+   },
+   "component_digests": {
+    "outcome": "802e043aae44157ed44d78d013c87eb57c0bbfe4663124a6f2dd72618809bd8a",
+    "root": "413b086dbe1810feb6acb32a503af54c6fcb36b71f09de4479b38a8a04c0ed70"
+   },
+   "aggregate_digest": "0cb5fb6c07d83e00b73be5d8339e91eeab1ece982fbf633577f7660796e98451",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_b",
+   "run_id": "attempt3",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/cross-stage/phase_b/analyses/autoinit_phase_b_grant_attempt3.json",
+    "outcome": "logs/cross-stage/phase_b/analyses/autoinit_phase_b_attempt3.json",
+    "root": "logs/cross-stage/phase_b/runs/attempt3"
+   },
+   "component_digests": {
+    "grant": "91067139db7a1b726bc1a217701f252e73e88d8f07615804c55b178d045b9280",
+    "outcome": "eb3adad33087dae2339d40b1082a4c8ca5b22fcfd68949dab41418a9edce81a5",
+    "root": "7599d1bf4df95819317be9e2871ce4b52ea416267ebf469e64e70d3800c6437a"
+   },
+   "aggregate_digest": "ab366202769a4cf0f763ac2969409d78bc6b4ccbcfdec70a0a466c98b44b95e5",
+   "n_components": 3
+  },
+  {
+   "experiment_id": "phase_b",
+   "run_id": "attempt4",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/cross-stage/phase_b/analyses/autoinit_phase_b_grant_attempt4.json",
+    "outcome": "logs/cross-stage/phase_b/analyses/autoinit_phase_b_attempt4.json",
+    "root": "logs/cross-stage/phase_b/runs/attempt4"
+   },
+   "component_digests": {
+    "grant": "71801a5b3d977f4de43ac14e91a401fcab26361e755bd064d6b53235a9ecba2e",
+    "outcome": "477277ca6b78a4378f5e21eaa6182dd1347b243fdb96e3358585a47188d907e0",
+    "root": "4690beb6d14617e145c22ee27f46c315ba3e595cbfcaf32f4e8d9cbebe32db00"
+   },
+   "aggregate_digest": "322cbc55e98b2dc40305c10da8d6f1f236cbc02143174794f106d0d4c4e03a0b",
+   "n_components": 3
+  },
+  {
+   "experiment_id": "phase_b",
+   "run_id": "attempt5",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/cross-stage/phase_b/analyses/autoinit_phase_b_grant_attempt5.json",
+    "outcome": "logs/cross-stage/phase_b/analyses/autoinit_phase_b_attempt5.json",
+    "root": "logs/cross-stage/phase_b/runs/attempt5"
+   },
+   "component_digests": {
+    "grant": "c93f255182853d9d6de6a1082cf1e6e8dddf1cf542564524111fae0a58b3b930",
+    "outcome": "ed365e9fb4b7103445fa749f5798b6c8310dff08382549da8be56d14d34b019f",
+    "root": "61d3782b9c06add6a8a9c3bae9062cb68a65abb940dfd062e8c5b504bec90948"
+   },
+   "aggregate_digest": "a3f3d56d40218b49547c79e18da12c4adf399fa49946fa838a0ab0ba12d93fb3",
+   "n_components": 3
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt1",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt1"
+   },
+   "component_digests": {
+    "root": "87258355640dba9f7bbbfbe65b7a237d87ea7718f5a88d94556983a63ddbbcfe"
+   },
+   "aggregate_digest": "766ad5a2c73b05253e1c8be887d95df4669c7c014a987d76cbcdbe72b2ea5e99",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt2",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt2_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt2"
+   },
+   "component_digests": {
+    "grant": "43b252d5301fed7a8919bd1d5b4e7ccd21b854d6bb972d137a7fb93ee93b435e",
+    "root": "885ffb44fdb1a92b310f7ca0ad2423c958f3d401317d6b741d093c99625a6619"
+   },
+   "aggregate_digest": "4b45f5c79552a178e160d14151953c1c8e89718c9c074c67b60762d77661414b",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt3",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt3_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt3"
+   },
+   "component_digests": {
+    "grant": "74cf9f258b0b725c6e84f4fc1cac116b14fbe00d9ed9ffa8455892218dde3a2c",
+    "root": "a2ef41cddf72ef00322577de5fc81b721ca294523de1e95e8b8e2620c646084a"
+   },
+   "aggregate_digest": "f363ec910f886c6f5962087c23f2c008c1640c94acd244c6bd83a48e70ead92a",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt3r",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt3r_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt3r"
+   },
+   "component_digests": {
+    "grant": "551e27eb246d1ee1832f10d701676de77b63f650b9a5b4908ecf05a8d6a5339b",
+    "root": "104dd51f52a6e72744ce74a76766636d8df6bd396f25b5e2e4f531403ef7bd10"
+   },
+   "aggregate_digest": "cc372618f29977283df62769843719278cdc0a672cd9a603626b9ba1000040f2",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt4",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt4_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt4"
+   },
+   "component_digests": {
+    "grant": "b6824bee08658fb6488e2ed7ed3383e47817663dac3fbbdc61ecaadf5566c12c",
+    "root": "c275ed0e17e2896093041f8f5be4e88c36080cebd44aba168be56a870ba1aa4b"
+   },
+   "aggregate_digest": "70b222231e8560b24d1873276dceeeac9b9f79706a5f2bb53212504547354198",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt5",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt5_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt5"
+   },
+   "component_digests": {
+    "grant": "099894f16d255530511d4a08aac55d717bf16bc8297a0ed33d5b62ce916efeaf",
+    "root": "06d9c7ef33781924538bcc676c522d617899c404b6a4ea4a88a90413de728f82"
+   },
+   "aggregate_digest": "b4c81a451b4fa3a4f55814a305d3c77493f71b58e8b85f3d96b9cda1d9c54cdc",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt6",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt6_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt6"
+   },
+   "component_digests": {
+    "grant": "80c420379cf3ca14e7631acc47c2d7ecd94f8eec1b5f6995aabb8266027af2ee",
+    "root": "6f0e53fed09fe8f817475c2759247f44c11eaeb68a311d264d613cc939e3e539"
+   },
+   "aggregate_digest": "e1a189c93afeedefb1b7f10acb88cc338139e4fbe8a3afd910e714cb34f6f71f",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt7",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt7_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt7"
+   },
+   "component_digests": {
+    "grant": "86ab754ef448cf028bbd34ea002f68694a1f898354da12e84ae2dd1a6e99eaf3",
+    "root": "18e01c2d2e9ba26374e1e9a0531eff40f07943fb2b92ca5e7f503ee99af18659"
+   },
+   "aggregate_digest": "64f0a5407bdb286078de87d32114131b9e8e05a21c55ee3b566fba5d06cc9a48",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt8",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt8_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt8"
+   },
+   "component_digests": {
+    "grant": "00b1ac471273b19a6a08c4d253300f7f0c382400f3d595c223b8652dacd3834b",
+    "root": "8eaa2502857d3c7104e4fa768f8418ff015c0639054f99a0e406d93fd4f1a62f"
+   },
+   "aggregate_digest": "834261dfacd9d36246e4cc380ec81c7289812bae58b3aa8cdf2bf538863105c6",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt9",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_c1_attempt9_grant.json",
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt9"
+   },
+   "component_digests": {
+    "grant": "97c22c7cc2d622445132cd7d22e2c4e5888d255f530c82f3eddca4b59e975dee",
+    "root": "417684047d8e56322751954e9ff2a13fb49c5cdbb35682fe694ad4648f0bc2d5"
+   },
+   "aggregate_digest": "d8f0406fa4908aed4ba579cbbce9b88734d52b42145330f1be2a5b9c36137533",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt1",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/cross-stage/recovery_continuation/runs/attempt1"
+   },
+   "component_digests": {
+    "root": "fa3358d4ecae98221f8d3cab4c4444abddb588bf1ebb2d06331373422f81f772"
+   },
+   "aggregate_digest": "65e1008e12d3bf0379bc25b071298790d9dbeaa626793a6f7f2c359554d86d51",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt2",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_recovery_continuation_attempt2_grant.json",
+    "root": "logs/cross-stage/recovery_continuation/runs/attempt2"
+   },
+   "component_digests": {
+    "grant": "5fd3e39e509a2ba0d5257d7ac2f8695fdd82345e8c7e45b19fea47a15173c41e",
+    "root": "5bb8a3bbfcf89e9d541127d4cdd13c1f8ede74750dd0f1d9a891c209df35f1e5"
+   },
+   "aggregate_digest": "17c0779ab2b35690d629b72fe792888a986f521494c0374d3b0a60a796c43363",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt3",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_recovery_continuation_attempt3_grant.json",
+    "root": "logs/cross-stage/recovery_continuation/runs/attempt3"
+   },
+   "component_digests": {
+    "grant": "9766453e1a1dcf3615f96798819f4ac8de59b57ba15ce9b885f88694de3ed580",
+    "root": "e60de9b9123ca930565e200a9f7dbdba773996130d4dedaf85c51e1af42afed7"
+   },
+   "aggregate_digest": "436e2d50b99775508a05cb6face02f53feecd359e0f0d58b596add1503a93180",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt4",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_recovery_continuation_attempt4_grant.json",
+    "probe_reuse": "logs/shared/analyses/autoinit_attempt4_probe_reuse.json",
+    "root": "logs/cross-stage/recovery_continuation/runs/attempt4"
+   },
+   "component_digests": {
+    "grant": "ce6744cedeff254409921ea4f5e2051f3cd815590239465712c36a9973f29ee6",
+    "probe_reuse": "7738f5e123881028d5dc85ca1f4d91ed0f6cce878b95ed20ffb5708adc76338a",
+    "root": "1891a3987c0c786ebd1fb9a7e798f7fd6e272b480422ee7f58c919197a296c91"
+   },
+   "aggregate_digest": "daa34b4eba84c91816a30cfe542701ecc1b2e49d501252277127c6ded8c32756",
+   "n_components": 3
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt5",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_recovery_continuation_attempt5_grant.json",
+    "probe_reuse": "logs/shared/analyses/autoinit_attempt5_probe_reuse.json",
+    "retention": "logs/shared/analyses/autoinit_attempt5_retention_verification.json",
+    "root": "logs/cross-stage/recovery_continuation/runs/attempt5"
+   },
+   "component_digests": {
+    "grant": "c04d21d09c7717978fe6d209388b5637e503821c868a461aa885d96cd214a560",
+    "probe_reuse": "7b1331fcf8360769b598006090e0695ea37f9eb2916d022ee77d801b0d9f0ea0",
+    "retention": "17008a1d20dfed15c443ce36a8cec90795057754eb41b6dd386ec236795e818c",
+    "root": "fea2460ceb2d340404bcf79b74851aecb38bf94a1a3505a3c14c74ac4e8847a3"
+   },
+   "aggregate_digest": "1749e1984b97defb4b869654cbcfb077e59f4c034ed5c0281bbf4bba3a1b1191",
+   "n_components": 4
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt6",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_recovery_continuation_attempt6_grant.json",
+    "root": "logs/cross-stage/recovery_continuation/runs/attempt6"
+   },
+   "component_digests": {
+    "grant": "c5674c0e93fd6728b2efa60b6063def922cbd760f7ba2022632bb4536198fc2f",
+    "root": "3c26b3fca3066a41d11bd4893b3805b02959706b45923584ae15e6244f9ea215"
+   },
+   "aggregate_digest": "6cb7e8731265619d56a673a295565e372125e31c4b567b4bb2642f857a3462de",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "attempt7",
+   "layout_version": 1,
+   "components": {
+    "grant": "logs/budget/approvals/autoinit_recovery_continuation_attempt7_grant.json",
+    "root": "logs/cross-stage/recovery_continuation/runs/attempt7"
+   },
+   "component_digests": {
+    "grant": "20ac203d6fcda3747f01dae917eb57e357f69ca8b9c62b95bf271a1d728f4b2e",
+    "root": "13bb4fcdfbac5fe1833790b752293f3c20d2891718d89b4425f08004eb90444b"
+   },
+   "aggregate_digest": "f2a4206feb4b410c8616c3cb102c163081024fa44f97b9398c2d1a1c8e1e9922",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "recovery_continuation",
+   "run_id": "legacy_aggregate",
+   "layout_version": 1,
+   "components": {
+    "root": "logs/cross-stage/recovery_continuation/history/autoinit_continuation_attempts"
+   },
+   "component_digests": {
+    "root": "7bb9028b3ac56b03216aafc3635626b8cf516d2f684536110a840c7120f26735"
+   },
+   "aggregate_digest": "5ebbbf90079d8f770f3038e696720e9d949f086dd1255b8935fcaf38ddcd901f",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt10",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt10",
+    "manifest": "logs/stages/stage-1/phase_c1/runs/attempt10/manifest.json"
+   },
+   "manifest_sha256": "7b7edcfafcbf34d4dfedca1378486caab88eee093da3b32d7950da31da60148e",
+   "n_components": 7
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt11",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt11",
+    "manifest": "logs/stages/stage-1/phase_c1/runs/attempt11/manifest.json"
+   },
+   "manifest_sha256": "bba1347fdad9dd7c25f997ab9f0e5c6a72cc52d8493e1da1dffe69460a273850",
+   "n_components": 7
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt12",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt12",
+    "manifest": "logs/stages/stage-1/phase_c1/runs/attempt12/manifest.json"
+   },
+   "manifest_sha256": "2e594a7d48ef6823ecf12168e6a10c951921673e85b78a068f61a84696ca43a2",
+   "n_components": 6
+  }
+ ],
+ "unrecorded": [
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt13",
+   "root": "logs/stages/stage-1/phase_c1/runs/attempt13",
+   "n_files": 1,
+   "digest": "40efc1141c49afd72bd4d9f2ca8629710c0cc74c9016b7aec1805ddaad89fddd",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  }
+ ],
+ "authorizes": "nothing"
+}

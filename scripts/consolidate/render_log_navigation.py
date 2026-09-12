@@ -35,8 +35,13 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 CATALOG = "logs/state/ownership.md"
-READREC = "logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json"
-INDEX = "logs/runs/index.json"
+READREC = "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
+READINESS_RECORD = READREC
+READINESS_HISTORY = "logs/stages/stage-1/phase_c1/history/readiness_history.json"
+STATE_MD = "logs/state/current.md"
+R_BEGIN = "<!-- readiness:begin -->"
+R_END = "<!-- readiness:end -->"
+INDEX = "logs/index.json"
 MARK_START = "## Classification"
 MARK_END = "## One copy of every raw artifact"
 
@@ -138,34 +143,66 @@ def render_catalog(root: Path) -> str:
     return "\n".join(body)
 
 
-def render_experiment_readme(d: Path, root: Path,
-                             runs: dict[str, list[tuple[str, str]]]) -> str:
-    rs = runs.get(d.name, [])
-    files = [f for f in sorted(d.iterdir()) if f.name != "README.md"]
-    lines = [f"# {d.name}", "",
-             f"Experiment-level material for `{d.name}`. Its **runs** are elsewhere —",
-             "this directory holds what belongs to the experiment as a whole.", "",
-             "## Its runs, from the index", ""]
-    lines += ([f"* `{r}` — `{p}`" for r, p in rs] or ["* none recorded"])
+STAGES = "logs/stages"
+CROSS = "logs/cross-stage"
+
+
+def render_stage_readme(stage_dir: Path, root: Path) -> str:
+    """What a stage holds: its experiments, and what each is."""
+    stage = stage_dir.name.removeprefix("stage-")
+    exps = sorted(p.name for p in stage_dir.iterdir() if p.is_dir())
+    lines = [f"# {stage_dir.name}", "",
+             f"Pipeline stage **{stage}**. Every experiment here DECLARES this",
+             "stage in `configs/experiments/<id>/authorization.json`; the stage is",
+             "never inferred from an experiment's name.", "",
+             "| experiment | material |", "| --- | --- |"]
+    for e in exps:
+        sub = sorted(q.name for q in (stage_dir / e).iterdir() if q.is_dir())
+        lines.append(f"| [`{e}/`]({e}/) | {', '.join(sub) or '—'} |")
     lines += ["",
-              "Canonical list, always: [`../../runs/index.json`](../../runs/index.json).",
-              "These are **found, not relocated** — several predate the current layout",
-              "and their grants and closeouts name the paths they are at.", "",
-              "## Files here", ""]
-    lines += ([f"* [`{f.name}`]({f.name})" for f in files] or ["* none"])
-    lines += ["",
-              "Moved from `logs/` root on 2026-09-12 — see",
-              "[`../../maintenance/log_relocation.json`](../../maintenance/log_relocation.json),",
-              "which also records what could **not** move and why.",
-              "Nothing here authorizes anything.", ""]
+              "An experiment's plans, analyses, results, history, validations and",
+              "runs are all inside its own directory. Canonical run list, across",
+              "every stage: [`../../index.json`](../../index.json).", ""]
     return "\n".join(lines)
 
 
-READINESS_RECORD = "logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json"
-READINESS_HISTORY = "logs/experiments/phase_c1/history/readiness_history.json"
-STATE_MD = "logs/state/current.md"
-R_BEGIN = "<!-- readiness:begin -->"
-R_END = "<!-- readiness:end -->"
+def render_group_readme(group: Path, title: str, why: str) -> str:
+    exps = sorted(p.name for p in group.iterdir() if p.is_dir())
+    lines = [f"# {title}", "", why, "",
+             "| directory | material |", "| --- | --- |"]
+    for e in exps:
+        sub = sorted(q.name for q in (group / e).iterdir() if q.is_dir())
+        lines.append(f"| [`{e}/`]({e}/) | {', '.join(sub) or '—'} |")
+    lines += ["", "Canonical run list: [`../index.json`](../index.json).", ""]
+    return "\n".join(lines)
+
+
+def render_experiment_readme(d: Path, root: Path,
+                             runs: dict[str, list[tuple[str, str]]]) -> str:
+    rs = runs.get(d.name, [])
+    areas = [q.name for q in sorted(d.iterdir()) if q.is_dir() and q.name != "runs"]
+    lines = [f"# {d.name}", "",
+             "Everything this experiment produced, in one place.", "",
+             "| area | what it holds |", "| --- | --- |"]
+    purpose = {"plans": "protocol, preregistration, pricing — what was registered before running",
+               "analyses": "working analyses and audits",
+               "results": "aggregate results across runs",
+               "history": "narrative: what happened, session by session",
+               "validations": "engineering evidence supporting this experiment"}
+    for a in areas:
+        lines.append(f"| [`{a}/`]({a}/) | {purpose.get(a, 'material')} |")
+    lines += ["| [`runs/`](runs/) | one directory per execution attempt |", "",
+              "## Runs", ""]
+    #: Linked only when the directory exists. `legacy_aggregate` is a
+    #: registered entry whose components span several directories, not a run
+    #: directory, so a link to it would point nowhere.
+    lines += ([f"* [`{r}`](runs/{r}/)" if (d / "runs" / r).is_dir()
+               else f"* `{r}` — registered from components; see the index"
+               for r, _ in rs] or ["* none recorded"])
+    lines += ["",
+              "Canonical list, always the index rather than this file.",
+              "Nothing here authorizes anything.", ""]
+    return "\n".join(lines)
 
 
 def _rel_to_state(target: str) -> str:
@@ -269,11 +306,31 @@ def main() -> int:
 
     runs = runs_by_experiment(root)
     readmes = {}
-    exp_root = root / "logs/experiments"
-    if exp_root.is_dir():
-        for d in sorted(exp_root.iterdir()):
-            if d.is_dir():
+    #: Stage-first: every stage, every experiment inside it, and the two
+    #: non-stage groups. Generated from the tree, so a new experiment or a new
+    #: stage appears by re-running this rather than by remembering to write one.
+    stages_root = root / STAGES
+    if stages_root.is_dir():
+        readmes[stages_root / "README.md"] = render_group_readme(
+            stages_root, "logs/stages",
+            "Pipeline stages. A stage exists here when an experiment DECLARES "
+            "it in `configs/experiments/<id>/authorization.json`; stages are "
+            "never pre-created and never inferred from a name.")
+        for st in sorted(p for p in stages_root.iterdir() if p.is_dir()):
+            readmes[st / "README.md"] = render_stage_readme(st, root)
+            for d in sorted(p for p in st.iterdir() if p.is_dir()):
                 readmes[d / "README.md"] = render_experiment_readme(d, root, runs)
+    cross = root / CROSS
+    if cross.is_dir():
+        readmes[cross / "README.md"] = render_group_readme(
+            cross, "logs/cross-stage",
+            "Experiments whose pipeline stage no frozen record establishes. "
+            "That is a finding, not a holding pen: an identifier names the "
+            "experiment, and a driver stage or an operator id is a different "
+            "dimension. When a record does establish a stage, the experiment "
+            "moves under it.")
+        for d in sorted(p for p in cross.iterdir() if p.is_dir()):
+            readmes[d / "README.md"] = render_experiment_readme(d, root, runs)
 
     state_p = root / STATE_MD
     state_text = state_p.read_text()

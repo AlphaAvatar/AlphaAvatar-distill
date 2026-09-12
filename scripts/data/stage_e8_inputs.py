@@ -91,7 +91,7 @@ def main() -> int:
     ap.add_argument("--relay", default=RELAY)
     ap.add_argument("--prefix", default=PREFIX)
     ap.add_argument("--verify-roundtrip", action="store_true")
-    ap.add_argument("--out", default="logs/experiments/early/analyses/e8_relay_manifest.json")
+    ap.add_argument("--out", default="logs/cross-stage/early/analyses/e8_relay_manifest.json")
     args = ap.parse_args()
 
     from huggingface_hub import HfApi, hf_hub_download

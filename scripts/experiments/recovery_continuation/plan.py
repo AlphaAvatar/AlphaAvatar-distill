@@ -85,7 +85,7 @@ class EvaluationReadinessError(ControlImportError):
 #: passed every identity check and then could not render one prompt, because its
 #: package was missing all three of these files. `sa` had them and was
 #: characterized. Restored by a packaging repair on 2026-08-15 —
-#: `logs/experiments/shared/analyses/autoinit_control_sb_packaging_repair.json` — with no retraining and no
+#: `logs/shared/analyses/autoinit_control_sb_packaging_repair.json` — with no retraining and no
 #: weight change.
 EVALUATION_READY_ASSETS_V1: dict[str, str] = {
     "chat_template.jinja":

@@ -197,7 +197,7 @@ def main() -> int:
             "moved_or_rewritten": 0,
             "note": ("No file under logs/ was moved, renamed or rewritten by "
                      "this migration. Run evidence and preregistrations are "
-                     "untouched; logs/runs/index.json verifies that "
+                     "untouched; logs/index.json verifies that "
                      "independently by digest."),
         },
         "authorizes": "nothing",

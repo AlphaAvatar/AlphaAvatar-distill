@@ -153,7 +153,7 @@ companions `config.json`, `generation_config.json`, `tokenizer.json`,
 `tokenizer_config.json` and `chat_template.jinja`, plus the recovery pack's
 `ladder.json` and `audit.jsonl`. The companions went undeclared on the reasoning
 that the weights were the artifact. A control that shipped without its tokenizer
-is already written up in `logs/experiments/shared/analyses/autoinit_control_sb_packaging_repair.json`.
+is already written up in `logs/shared/analyses/autoinit_control_sb_packaging_repair.json`.
 
 Now the declaration **is** the staging. `RelayInput` carries source, destination,
 digest and the second destination the recovery pack is mirrored to;

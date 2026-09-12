@@ -7,7 +7,7 @@
 # measured on the same validation stream as B and C, on one device.
 #
 # Everything E7 needs is on the relay, so nothing crosses the dev-box uplink.
-# The extra-KD streams are hash-verified against `logs/experiments/early/analyses/e7_relay_manifest.json`,
+# The extra-KD streams are hash-verified against `logs/cross-stage/early/analyses/e7_relay_manifest.json`,
 # which is committed — a stream that does not match is not the treatment.
 #
 # Markers: ENV_READY -> REPO_READY -> DATA_READY -> TRAIN_ENV -> VLLM_READY
@@ -215,7 +215,7 @@ fetch('e7_streams_20260809', ['holdout_v1.jsonl'], '/workspace/aad/data/warmup')
 cd "$REPO" && python3 - <<'PYEOF'
 import hashlib, json, sys
 from pathlib import Path
-relay = json.loads(Path('logs/experiments/early/analyses/e7_relay_manifest.json').read_text())
+relay = json.loads(Path('logs/cross-stage/early/analyses/e7_relay_manifest.json').read_text())
 for name, entry in relay['streams'].items():
     for fname, want in entry['sha256'].items():
         p = Path('artifacts/stage3') / name / fname

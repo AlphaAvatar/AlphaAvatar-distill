@@ -248,7 +248,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/validations/micro-preflight/autoinit_preflight_session.json")
+    ap.add_argument("--out", default="logs/shared/validations/micro-preflight/autoinit_preflight_session.json")
     return ap
 
 

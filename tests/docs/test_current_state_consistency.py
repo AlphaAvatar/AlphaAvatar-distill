@@ -17,7 +17,7 @@ them and require the claims to agree.
 
 Historical records are deliberately out of scope. The attempt-8 and attempt-9
 grants say "Eight attempt labels" and "Nine attempt labels" and were correct
-when written; `logs/runs/stage-1/phase_c1/attempt9/outcome.json` likewise. Those are
+when written; `logs/stages/stage-1/phase_c1/runs/attempt9/outcome.json` likewise. Those are
 sealed evidence, not live state.
 """
 from __future__ import annotations
@@ -366,7 +366,7 @@ class TestStateMdAgrees:
             "STATE.md carries a superseded section again; history belongs in "
             "the archive or in the experiment that owns it")
 
-        archived = REPO / "logs/archive/STATE_superseded_through_2026-09-11.md"
+        archived = REPO / "logs/archive/repository/STATE_superseded_through_2026-09-11.md"
         assert archived.is_file(), (
             "the superseded state is not in the archive: it was deleted rather "
             "than moved, and it is the only record of what was believed then")

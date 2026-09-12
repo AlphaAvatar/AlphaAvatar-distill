@@ -117,7 +117,7 @@ CLASSIFY: dict[str, dict] = {
         retention="duplicate", status="superseded",
         why="a 32-wide 6-layer toy model built by a $0 CPU dry run; its identity "
             "is recorded in artifacts/autoinit/dryrun/search/states.jsonl and in "
-            "logs/validations/dryrun/autoinit_dryrun_fresh.json",
+            "logs/shared/validations/dryrun/autoinit_dryrun_fresh.json",
         never_delete=None,
         reconstruction="PYTHONPATH=src python scripts/autoinit/dry_run_search.py "
                        "--out artifacts/autoinit/dryrun",
@@ -128,7 +128,7 @@ CLASSIFY: dict[str, dict] = {
         why="a materialized beam leaf of the $0 toy search. Its complete lineage — "
             "arch spec hash, artifact digest, config hash, parameter count, score "
             "and prune decision — is in search/states.jsonl and in "
-            "logs/validations/dryrun/autoinit_dryrun_fresh.json / _resume.json",
+            "logs/shared/validations/dryrun/autoinit_dryrun_fresh.json / _resume.json",
         never_delete=None,
         reconstruction="PYTHONPATH=src python scripts/autoinit/dry_run_search.py "
                        "--out artifacts/autoinit/dryrun",
@@ -219,7 +219,7 @@ BULK_DUPLICATE_NOTES = {
         "the rebuilt ladder from scripts/data/audit_e1_mixture_rebuild.py. Its "
         "blocks.npz and audit.jsonl are byte-identical to the historical pack it "
         "was compared against; the audit's value is the recorded match "
-        "(artifacts/audit/e1_mixture_rebuild.json, logs/archive/indexes/EXPERIMENTS.md), not the "
+        "(artifacts/audit/e1_mixture_rebuild.json, logs/archive/repository/indexes/EXPERIMENTS.md), not the "
         "second copy of the bytes"),
     "artifacts/stage3/ladder_uniform": (
         "the trainer-side name of the frozen training pack. Byte-identical to "
@@ -372,7 +372,7 @@ def mirror_verifications() -> dict[str, dict]:
     """What scripts/consolidate/verify_relay_mirror.py has actually proved, keyed
     by local tree. A `verified_stale_cache` deletion cites this, so the registry
     reads the evidence rather than repeating a claim about it."""
-    p = REPO_ROOT / "logs/validations/relay-mirror/relay_mirror_verification.json"
+    p = REPO_ROOT / "logs/shared/validations/relay-mirror/relay_mirror_verification.json"
     if not p.is_file():
         return {}
     out = {}
@@ -384,7 +384,7 @@ def mirror_verifications() -> dict[str, dict]:
             "by_lfs_oid": v["verified_by_lfs_oid"],
             "by_download": v["verified_by_download"],
             "generated_utc": v["generated_utc"],
-            "evidence": "logs/validations/relay-mirror/relay_mirror_verification.json",
+            "evidence": "logs/shared/validations/relay-mirror/relay_mirror_verification.json",
         }
     return out
 

@@ -7,11 +7,11 @@
  "authorization_id": "autoinit.v1.phase_c1",
  "plan_id": "autoinit.v1.phase_c1",
  "inputs": {
-  "preregistration": "logs/experiments/phase_c1/plans/execution_preregistration.json",
-  "pricing": "logs/experiments/phase_c1/plans/phase_c1_pricing.json",
-  "battery_identity": "logs/experiments/phase_c1/plans/battery.json",
-  "teacher_binding": "logs/experiments/phase_c1/plans/teacher_binding.json",
-  "scoring_equivalence": "logs/experiments/phase_c1/results/scoring_equivalence.json"
+  "preregistration": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+  "pricing": "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json",
+  "battery_identity": "logs/stages/stage-1/phase_c1/plans/battery.json",
+  "teacher_binding": "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+  "scoring_equivalence": "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json"
  },
  "output": "logs/budget/approvals/autoinit_c1_authorization.json",
  "grant_contract": {

@@ -20,7 +20,7 @@ decision rule are `aadistill.autoinit.c1_session` and `c1_isolation`; duplicatin
 any of them here would create a second copy to keep in step.
 
 *The ceiling is derived, once.* `c1_budget_spec()` reads
-`logs/experiments/phase_c1/plans/phase_c1_pricing.json` and back-derives the step time from its measured
+`logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json` and back-derives the step time from its measured
 per-probe minutes, so the enforceable ceiling exists in exactly one place. A
 second hand-maintained figure is how a session comes to be authorized for one
 number and priced at another.
@@ -203,8 +203,8 @@ def auth_path_for(run_id: str | None) -> str:
     return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
             f"/{C1_RUN_ROLES['authorization']}")
 
-PRICING = "logs/experiments/phase_c1/plans/phase_c1_pricing.json"
-PREREG = "logs/experiments/phase_c1/plans/execution_preregistration.json"
+PRICING = "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json"
+PREREG = "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
 #: The expectation the frozen-asset gate checks this tree against, on the pod
 #: and — since 2026-09-11 — at $0 before a pod exists.
 FROZEN_EXPECT = "configs/experiments/phase_c1/frozen_assets.json"
@@ -214,8 +214,8 @@ FROZEN_EXPECT = "configs/experiments/phase_c1/frozen_assets.json"
 SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
 SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 BATTERY_MANIFEST = "artifacts/stage3/c1_confirmation_v1/manifest.json"
-BATTERY_IDENTITY = "logs/experiments/phase_c1/plans/battery.json"
-TEACHER_BINDING = "logs/experiments/phase_c1/plans/teacher_binding.json"
+BATTERY_IDENTITY = "logs/stages/stage-1/phase_c1/plans/battery.json"
+TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
 #: Written by scripts/autoinit/stage_c1_bundle.py; the local half of the
 #: transport check. The gate verifies the REMOTE object against it.
 #: The GLOBAL entry point for the staged-bundle record. Like the readiness
@@ -223,7 +223,7 @@ TEACHER_BINDING = "logs/experiments/phase_c1/plans/teacher_binding.json"
 #: session staged over -- and it is the one artifact that MUST stay uncommitted
 #: inside a launch window, because committing it adds a third path to the
 #: session lineage diff and `session_commit_gate` refuses.
-BUNDLE_POINTER = "logs/experiments/phase_c1/analyses/autoinit_c1_bundle.json"
+BUNDLE_POINTER = "logs/stages/stage-1/phase_c1/analyses/autoinit_c1_bundle.json"
 BUNDLE_RECORD = BUNDLE_POINTER
 
 
@@ -238,8 +238,8 @@ def bundle_record_for(run_id: str | None) -> str:
 # where this run's files go
 #
 # Every C1 attempt so far wrote its session record to ONE flat path,
-# `logs/experiments/phase_c1/analyses/autoinit_c1_session.json`, which the next attempt overwrote; the evidence
-# directory `logs/runs/stage-1/phase_c1/attempt9/` was then assembled by hand afterwards,
+# `logs/stages/stage-1/phase_c1/analyses/autoinit_c1_session.json`, which the next attempt overwrote; the evidence
+# directory `logs/stages/stage-1/phase_c1/runs/attempt9/` was then assembled by hand afterwards,
 # and the run index found it by matching the directory's NAME. Three
 # consequences, all of them real: the live record and the preserved copy are
 # byte-identical duplicates of one fact, `logs/state/ownership.md` described the live
@@ -1193,7 +1193,7 @@ def spec(args) -> SessionSpec:
         #: The isolation plan's own hash, not Phase A's. C1 is different science,
         #: not a different operational identity for the same science.
         plan_hash=_plan_hash(),
-        #: DERIVED from logs/experiments/phase_c1/plans/phase_c1_pricing.json. Never written here.
+        #: DERIVED from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json. Never written here.
         budget=c1_budget_spec(REPO_ROOT),
         setup=SetupManifest(
             relay_inputs=(*RECOVERY_LADDER, *CALIBRATION_V1,

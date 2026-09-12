@@ -33,9 +33,9 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-PROBES = REPO / "logs/runs/unscoped/continuation_b/attempt4/probes"
-PRICING = REPO / "logs/experiments/shared/analyses/autoinit_behavioural_continuation_pricing.json"
-ATTEMPT4_REUSE = REPO / "logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json"
+PROBES = REPO / "logs/cross-stage/continuation_b/runs/attempt4/probes"
+PRICING = REPO / "logs/shared/analyses/autoinit_behavioural_continuation_pricing.json"
+ATTEMPT4_REUSE = REPO / "logs/shared/analyses/autoinit_attempt4_probe_reuse.json"
 
 FE, BD = "fe9683e6a9c7", "85bde4ded2c3"
 SEED_SC = 20260813
@@ -107,7 +107,7 @@ def test_a_moved_attempt4_digest_fails_before_any_probe(drv, monkeypatch, tmp_pa
 
 def test_the_issuer_and_preregistration_both_carry_it():
     prereg = json.loads(
-        (REPO / "logs/experiments/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     record = prereg["reuse_rule"]["attempt4_record"]
     assert record["probes_dir_digest"] == json.loads(
         ATTEMPT4_REUSE.read_text())["probes_dir_digest"]
@@ -262,7 +262,7 @@ def test_the_preregistration_binds_the_live_executable_digest():
     from experiments.phase_b.continuation import continuation_source_digest
 
     prereg = json.loads(
-        (REPO / "logs/experiments/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     recorded = prereg["executable_source"]["digest"]
     live = continuation_source_digest(REPO)["digest"]
 
@@ -276,12 +276,12 @@ def test_the_preregistration_binds_the_live_executable_digest():
         # would destroy its meaning. Declaring the change is the remedy this
         # project already chose once, for the same file, when the continuation
         # itself needed its branch.
-        record = REPO / "logs/experiments/continuation_b/analyses/autoinit_continuation_b_post_freeze_changes.json"
+        record = REPO / "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_post_freeze_changes.json"
         assert record.is_file(), (
             f"the preregistration binds {recorded[:12]}… but the source tree "
             f"digests to {live[:12]}… and nothing declares the change. Either "
             "revert the edit or record it, as "
-            "logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json does.")
+            "logs/cross-stage/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json does.")
         declared = json.loads(record.read_text())
         assert declared["frozen_digest"] == recorded
         assert declared["post_freeze_digest"] == live, (
@@ -299,7 +299,7 @@ def test_the_preregistration_binds_the_live_session_plan_and_pricing():
     from experiments.phase_b.continuation import CONTINUATION_PLAN_V1
 
     prereg = json.loads(
-        (REPO / "logs/experiments/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     priced = json.loads(PRICING.read_text())
 
     assert prereg["session_plan"]["plan_hash"] == CONTINUATION_PLAN_V1.plan_hash
@@ -314,7 +314,7 @@ def test_the_preregistration_binds_the_live_session_plan_and_pricing():
 def test_the_preregistration_states_the_current_scientific_state():
     """No stale V2 narrative alongside V3 fields."""
     prereg = json.loads(
-        (REPO / "logs/experiments/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
+        (REPO / "logs/cross-stage/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
     blob = json.dumps(prereg)
 
     assert "at most two conditional sc" not in blob, (
@@ -363,7 +363,7 @@ def test_the_pricing_cites_the_attempt4_reuse_that_makes_missing_sb_empty():
         records[r["record"]] = r
         if r["record"] in forward:
             records[forward[r["record"]]] = r
-    a4 = records["logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json"]
+    a4 = records["logs/shared/analyses/autoinit_attempt4_probe_reuse.json"]
     assert a4["admits"] == ["fe9683e6a9c7/sb"]
     assert a4["probes_dir_digest"] == json.loads(
         ATTEMPT4_REUSE.read_text())["probes_dir_digest"]
@@ -431,7 +431,7 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     # mistaken for funded.
     floor = state["budget"]["planning_floor_usd"]
     if floor is not None:
-        pricing = json.loads((REPO / "logs/experiments/phase_c1/plans/phase_c1_pricing.json").read_text())
+        pricing = json.loads((REPO / "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json").read_text())
         assert floor == pricing["totals"]["floor_usd"], (
             f"the snapshot's planning floor {floor} is not the accepted pricing "
             f"record's {pricing['totals']['floor_usd']}")
@@ -660,7 +660,7 @@ def test_the_current_region_is_not_the_whole_file():
 
 def test_the_superseded_handoff_is_registered_as_historical():
     """Kept as evidence, and labelled -- in the file that owns ownership."""
-    assert (REPO / "logs/archive/handoffs/HANDOFF_next_session.md").is_file(), (
+    assert (REPO / "logs/archive/repository/handoffs/HANDOFF_next_session.md").is_file(), (
         "the historical handoff was deleted rather than superseded")
     state = json.loads((REPO / "logs/state/current.json").read_text())
     assert "HANDOFF_next_session.md" in state["superseded_handoff"]
@@ -685,5 +685,5 @@ def test_the_old_handoffs_own_text_is_not_rewritten():
     """Superseding is a routing change. Editing the historical document to make
     it look current would destroy the evidence of what was believed then."""
     for stale in ("$19.9003", "$13.7578"):
-        assert stale in (REPO / "logs/archive/handoffs/HANDOFF_next_session.md").read_text(), (
+        assert stale in (REPO / "logs/archive/repository/handoffs/HANDOFF_next_session.md").read_text(), (
             f"{stale} was edited out of the historical handoff")

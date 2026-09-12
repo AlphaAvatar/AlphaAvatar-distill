@@ -52,7 +52,7 @@ register_builtin_adapters()
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
-# Frozen by E8a; see logs/experiments/early/analyses/e8_step0_report.md and artifacts/audit/e8_frozen_depth_map.json.
+# Frozen by E8a; see logs/cross-stage/early/analyses/e8_step0_report.md and artifacts/audit/e8_frozen_depth_map.json.
 CONTRIBUTION_REMOVED = [2, 3, 15, 16, 20, 21, 26, 32]
 STUDENT_LAYERS = 28
 

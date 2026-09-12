@@ -50,7 +50,7 @@ def main() -> int:
     ap.add_argument("--verify-roundtrip", action="store_true",
                     help="re-download and re-hash; an upload that returns 200 "
                          "is not evidence")
-    ap.add_argument("--out", default="logs/experiments/early/analyses/e7_relay_manifest.json")
+    ap.add_argument("--out", default="logs/cross-stage/early/analyses/e7_relay_manifest.json")
     args = ap.parse_args()
 
     from huggingface_hub import HfApi, hf_hub_download

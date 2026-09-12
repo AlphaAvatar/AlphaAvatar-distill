@@ -222,7 +222,7 @@ SCHEMA = "aadistill.autoinit.c1_pod_environment_verification/v1"
 #: It was the canonical record, which meant every run in turn overwrote one file
 #: and each closeout copied it away afterwards -- so the evidence a run was
 #: launched under lived at a path the next run would replace.
-RECORD_POINTER = "logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json"
+RECORD_POINTER = "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
 
 #: Back-compatible alias. Sweeps that name no run still write here, and every
 #: record committed before 2026-09-12 is here.

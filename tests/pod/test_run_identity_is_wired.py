@@ -2,10 +2,10 @@
 
 A convention that only tests obey is not a convention. `RunLayout` and
 `build_run_manifest` existed for a while with **no production caller at all**:
-every C1 attempt wrote its session record to the flat `logs/experiments/phase_c1/analyses/autoinit_c1_session.json`,
-which the next attempt overwrote, and `logs/runs/stage-1/phase_c1/attempt9/` was assembled
+every C1 attempt wrote its session record to the flat `logs/stages/stage-1/phase_c1/analyses/autoinit_c1_session.json`,
+which the next attempt overwrote, and `logs/stages/stage-1/phase_c1/runs/attempt9/` was assembled
 by hand afterwards. Meanwhile the three CUDA stage-F subruns wrote real
-directories under `logs/runs/` and recorded no manifest, so `logs/runs/index.json`
+directories under `logs/runs/` and recorded no manifest, so `logs/index.json`
 reported `runs_current: 0` with three runs sitting on disk.
 
 So these tests execute the real functions — `open_c1_run`, `close_c1_run`,
@@ -583,7 +583,7 @@ def test_an_empty_run_directory_is_not_reported_as_an_orphan(tmp_path):
 def test_this_repositorys_index_still_accounts_for_every_run_on_disk():
     """Against the real tree. The committed index must not silently drop a run.
 
-    `logs/runs/index.json` read `runs_current: 0` while three CUDA stage-F
+    `logs/index.json` read `runs_current: 0` while three CUDA stage-F
     subruns existed under `logs/runs/`, because a directory without a manifest
     matched neither discovery rule. Whatever is on disk is either recorded or
     reported.
@@ -622,7 +622,7 @@ def test_this_repositorys_index_still_accounts_for_every_run_on_disk():
     accounted = {(r["experiment_id"], r["run_id"]) for r in index["runs"]}
     accounted |= {(u["experiment_id"], u["run_id"]) for u in index["unrecorded"]}
     assert on_disk <= accounted, f"unaccounted run directories: {on_disk - accounted}"
-    committed = json.loads((REPO / "logs/runs/index.json").read_text())
+    committed = json.loads((REPO / "logs/index.json").read_text())
     assert committed["counts"].get("runs_unrecorded") == len(index["unrecorded"])
 
 

@@ -33,7 +33,7 @@ from historical_contract_reuse import (  # noqa: E402
     NotOnlyTheContractCheck, under_historical_contract,
     write_historical_contract_record)
 
-HISTORICAL = REPO / "logs/runs/unscoped/recovery_continuation/attempt7/probes"
+HISTORICAL = REPO / "logs/cross-stage/recovery_continuation/runs/attempt7/probes"
 
 
 def _args(**over):
@@ -71,7 +71,7 @@ def driver(tmp_path, monkeypatch):
     has since relocated and the contract moved to v3, so the live record now
     fails `scoring_contract_matches_live` on all eleven probes and NOTHING else.
     That refusal is correct and deliberate -- see
-    `logs/experiments/shared/analyses/autoinit_historical_reuse_position.json` conclusion 4 -- and it is
+    `logs/shared/analyses/autoinit_historical_reuse_position.json` conclusion 4 -- and it is
     asserted directly by `test_the_live_record_is_currently_refused` below.
 
     It is not what these tests are about. They ask what the driver does with a
@@ -97,7 +97,7 @@ def test_the_live_record_is_currently_refused():
     If the live contract ever matches again, this fails and the `driver`
     fixture's derivation should be dropped rather than kept out of habit.
     """
-    live = json.loads((REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
+    live = json.loads((REPO / "logs/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
     assert live["reuse_verified"] is False
     assert live["failures"], "refused with no stated failure"
 
@@ -105,7 +105,7 @@ def test_the_live_record_is_currently_refused():
 def test_the_refusal_is_the_live_contract_identity_and_nothing_else():
     """The whole reason the derivation is legitimate. A probe failing anything
     else would be a real defect, and setting it aside would hide one."""
-    live = json.loads((REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
+    live = json.loads((REPO / "logs/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
     for probe in live["probes"]:
         assert probe["failed"] == ["scoring_contract_matches_live"], probe["probe_id"]
 
@@ -115,7 +115,7 @@ def test_the_two_records_agree_about_the_refusal():
     independently. Two records disagreeing about whether history may be cited
     is worse than either verdict."""
     pos = json.loads(
-        (REPO / "logs/experiments/shared/analyses/autoinit_historical_reuse_position.json").read_text())
+        (REPO / "logs/shared/analyses/autoinit_historical_reuse_position.json").read_text())
     c4 = pos["conclusions"]["4_live_reuse_under_scoring_contract_v3"]
     assert c4["verdict"] == "REFUSED"
     assert c4["only_the_live_contract_check_fails"] is True
@@ -124,7 +124,7 @@ def test_the_two_records_agree_about_the_refusal():
 
 def test_the_derivation_refuses_to_set_aside_a_real_defect():
     """Guards the helper: it may drop ONE check, and only that one."""
-    live = json.loads((REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
+    live = json.loads((REPO / "logs/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
     live["probes"][0]["failed"] = ["artifact_digest_re_derives_from_bytes"]
     with pytest.raises(NotOnlyTheContractCheck):
         under_historical_contract(live)
@@ -409,7 +409,7 @@ def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
     runtime file inside the Phase-B set — removed lines Phase B ran. The frozen
     preregistration therefore no longer describes this tree, and the gate that
     guards a paid Phase-B launch must say so. Historical accounting moved to
-    `logs/experiments/phase_b/analyses/autoinit_phase_b_historical_amendments.json`; launch compatibility
+    `logs/cross-stage/phase_b/analyses/autoinit_phase_b_historical_amendments.json`; launch compatibility
     stayed here and stayed strict.
 
     Asserting `ok` again would mean the amendment had quietly become permission.
@@ -418,7 +418,7 @@ def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
     from experiments.phase_b.post_freeze import historical_accounted_for
 
     prereg = json.loads(
-        (REPO / "logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json").read_text())
+        (REPO / "logs/cross-stage/phase_b/plans/autoinit_phase_b_preregistration.json").read_text())
     frozen = prereg["executable_source"]["digest"]
     live = phase_b_source_digest(REPO)["digest"]
 
@@ -440,20 +440,20 @@ def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
 def test_the_reuse_gate_reflects_the_live_scoring_contract():
     """Inverted for the same reason as the preregistration gate above.
 
-    This gate reads `logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json`, which is
+    This gate reads `logs/shared/analyses/autoinit_historical_probe_reuse.json`, which is
     regenerated from the live tree. Phase A's probes were scored under
     `recovery_search_scoring@v2`; the scorer has since relocated and the
     contract moved to v3, so every probe now fails
     `scoring_contract_matches_live` and the gate that guards a paid Phase-B
     launch says so. That is the designed refusal, recorded and reasoned about in
-    `logs/experiments/shared/analyses/autoinit_historical_reuse_position.json` conclusion 4.
+    `logs/shared/analyses/autoinit_historical_reuse_position.json` conclusion 4.
 
     Written as a branch, not as a flat inversion: if the contract ever matches
     again, the ten-probe budget claim must come back rather than silently stay
     refused.
     """
     record = json.loads(
-        (REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
+        (REPO / "logs/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
     ok, why = pbl.reuse_record_gate(types.SimpleNamespace())
 
     if record["reuse_verified"]:
@@ -591,7 +591,7 @@ def test_it_fails_closed_when_an_imported_finalist_lacks_its_evidence(
         driver, tmp_path, monkeypatch):
     """Do not fall through into training a checkpoint staged read-only."""
     record = json.loads(
-        (REPO / "logs/experiments/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
+        (REPO / "logs/shared/analyses/autoinit_historical_probe_reuse.json").read_text())
     thin = tmp_path / "reuse.json"
     thin.write_text(json.dumps({
         **record,

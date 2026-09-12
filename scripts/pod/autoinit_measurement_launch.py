@@ -85,7 +85,7 @@ TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
                 "tests/pod/test_phase_a_stages1_5_execute.py")
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
-#: From `logs/experiments/shared/analyses/autoinit_causal_depth_pricing_bound.json`. The measurement itself is
+#: From `logs/shared/analyses/autoinit_causal_depth_pricing_bound.json`. The measurement itself is
 #: ~2.4 min of evaluations at E8a's rate; everything else is session overhead,
 #: which is why the ceiling is dominated by setup and load rather than by work.
 SETUP_MINUTES = 12.0
@@ -232,7 +232,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=str(Path.home() / ".runpod/config.toml"))
-    ap.add_argument("--out", default="logs/experiments/measurement/analyses/autoinit_measurement_session.json")
+    ap.add_argument("--out", default="logs/cross-stage/measurement/analyses/autoinit_measurement_session.json")
     return ap
 
 

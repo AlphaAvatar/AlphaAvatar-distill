@@ -39,7 +39,7 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 #: Explicit: importing the core no longer registers a mixture.
 register_builtin_profiles()
 
-OUT = REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json"
+OUT = REPO / "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
 
 #: The two evidence declarations. Restated here rather than imported, because
 #: importing the launcher would pull the whole Phase-A launcher in; the copy is
@@ -79,10 +79,10 @@ def source_digest(files: tuple[str, ...] = C1_SOURCE_FILES) -> dict:
 
 def _equivalence() -> dict:
     """The admission-gate record. Absent means C1 cannot be authorized."""
-    p = REPO / "logs/experiments/phase_c1/results/scoring_equivalence.json"
+    p = REPO / "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json"
     if not p.is_file():
         raise SystemExit(
-            "logs/experiments/phase_c1/results/scoring_equivalence.json is missing; the C1 scoring "
+            "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json is missing; the C1 scoring "
             "binding has not been admitted and must not be preregistered")
     return json.loads(p.read_text())
 
@@ -130,12 +130,12 @@ def main() -> None:
     assert len(set(seeds)) == 3 and not set(seeds) & set(HISTORICAL_SEEDS)
 
     arms = CS.build_arm_specs()
-    battery = json.loads((REPO / "logs/experiments/phase_c1/plans/battery.json").read_text())
+    battery = json.loads((REPO / "logs/stages/stage-1/phase_c1/plans/battery.json").read_text())
     #: Derived, so the artifact-spec block cannot drift from the design.
     n_probes = CS.C1_SESSION_CONTRACT.n_probes
     n_sets = len(battery["set_sha256"])
-    teacher = json.loads((REPO / "logs/experiments/phase_c1/plans/teacher_binding.json").read_text())
-    c0 = json.loads((REPO / "logs/experiments/phase_c1/plans/phase_c0_preregistration.json").read_text())
+    teacher = json.loads((REPO / "logs/stages/stage-1/phase_c1/plans/teacher_binding.json").read_text())
+    c0 = json.loads((REPO / "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json").read_text())
 
     plan = C1IsolationPlan(
         plan_id="autoinit.v1.phase_c1",
@@ -184,7 +184,7 @@ def main() -> None:
         },
         "launcher": "scripts/pod/autoinit_c1_launch.py",
         "pricing": {
-            "path": "logs/experiments/phase_c1/plans/phase_c1_pricing.json",
+            "path": "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json",
             "pricing_sha256": load_pricing(REPO)["pricing_sha256"],
             "floor_usd": load_pricing(REPO)["totals"]["floor_usd"],
             "expected_usd": load_pricing(REPO)["totals"]["expected_usd"],
@@ -193,8 +193,8 @@ def main() -> None:
                             "exists in exactly one place"),
         },
         "c0_protocol": {
-            "path": "logs/experiments/phase_c1/plans/phase_c0_preregistration.json",
-            "sha256": sha256_file(REPO / "logs/experiments/phase_c1/plans/phase_c0_preregistration.json"),
+            "path": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
+            "sha256": sha256_file(REPO / "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json"),
             "protocol_id": c0["protocol_id"],
         },
         "c1_session_contract": {
@@ -267,7 +267,7 @@ def main() -> None:
             "index_total_size_bytes": teacher["index_total_size_bytes"],
             "hash_semantics": teacher["hash_semantics"],
             "verification_rule": teacher["verification_rule"],
-            "binding_record": "logs/experiments/phase_c1/plans/teacher_binding.json",
+            "binding_record": "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
             "weights_present_locally": teacher["weights_present_locally"],
         },
         "tokenizer_contract": {
@@ -307,7 +307,7 @@ def main() -> None:
                            "i from 0, advancing past collisions with the historical "
                            "seeds or an earlier draw"),
             "base_digest": C0_PREREGISTRATION_SHA256,
-            "base_digest_source": "logs/experiments/phase_c1/plans/phase_c0_preregistration.json (commit be2ab08)",
+            "base_digest_source": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json (commit be2ab08)",
             "historical_seeds_excluded": list(HISTORICAL_SEEDS),
             "no_human_choice": ("the rule leaves no discretion; the values are "
                                 "determined by a document frozen before the "
@@ -356,8 +356,8 @@ def main() -> None:
             "files": [e["path"] for e in c1_scoring_contract(REPO)["files"]],
             "metric_contract": C1_METRIC_CONTRACT,
             "historical_numerical_equivalence": {
-                "record": "logs/experiments/phase_c1/results/scoring_equivalence.json",
-                "sha256": sha256_file(REPO / "logs/experiments/phase_c1/results/scoring_equivalence.json"),
+                "record": "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json",
+                "sha256": sha256_file(REPO / "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json"),
                 "verdict": _equivalence()["verdict"],
                 "n_cases": _equivalence()["n_cases"],
                 "total_differences": _equivalence()["total_differences"],

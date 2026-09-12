@@ -13,7 +13,7 @@ What is true **now**. Nothing here is history; nothing here authorizes anything.
 
 `current.json` and `current.md` are **replaced, not appended**. A narrative of
 what happened belongs to the experiment that owns it, under
-[`../experiments/`](../experiments/); the money belongs to
+[`../experiments/`](../stages/); the money belongs to
 [`../budget/`](../budget/).
 
 The readiness block in `current.md` and `latest_verification` in `current.json`

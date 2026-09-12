@@ -1073,7 +1073,7 @@ def test_the_pricing_record_is_hash_verified_before_the_rate_is_used():
     assert "pricing_sha256" in src
     doc = load_pricing(REPO)
     assert doc["hardware"]["price_per_hour_usd"] == 1.09
-    assert PRICING_PATH == "logs/experiments/phase_c1/plans/phase_c1_pricing.json"
+    assert PRICING_PATH == "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json"
 
 
 def test_a_battery_source_case_that_passed_means_the_role_leaked(tmp_path):
@@ -1151,7 +1151,7 @@ def test_the_prereg_gate_count_and_order_equal_the_live_session():
     from session_specs import load_session_launcher, session_args
 
     doc = json.loads(
-        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
+        (REPO / "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json").read_text())
     transport = doc["transport"]
 
     #: Through the shared helper, which asks the REAL parser what it requires.
@@ -1178,7 +1178,7 @@ def test_the_prereg_gate_count_and_order_equal_the_live_session():
 def test_the_prereg_states_the_canonical_issuance_ordering():
     """Sweep BEFORE issuance. Stated backwards once, and it would refuse at $0."""
     doc = json.loads(
-        (REPO / "logs/experiments/phase_c1/plans/execution_preregistration.json").read_text())
+        (REPO / "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json").read_text())
     steps = doc["transport"]["ordering"]
     assert len(steps) == 9, steps
     joined = " ".join(steps).lower()

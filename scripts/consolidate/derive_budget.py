@@ -48,8 +48,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 PACKAGE = "configs/experiments/phase_c1/authorization.json"
-RUN_INDEX = "logs/runs/index.json"
-CAMPAIGN = "logs/validations/cuda-stage-f/v1/campaign.json"
+RUN_INDEX = "logs/index.json"
+CAMPAIGN = "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/campaign.json"
 
 #: The experiment whose sessions spend the formal allowance. An instance fact,
 #: which is why it is here in the application layer and not in the core.

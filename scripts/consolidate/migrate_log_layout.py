@@ -267,7 +267,7 @@ def plan(root: Path = REPO_ROOT) -> dict:
             if exp_dir.name == "cuda_stage_f":
                 moves.append({
                     "old_path": rel,
-                    "new_path": f"logs/validations/cuda-stage-f/runs/{run_dir.name}",
+                    "new_path": f"logs/stages/stage-1/phase_c1/validations/cuda-stage-f/runs/{run_dir.name}",
                     "binding": "validation_run", "kind": "directory"})
                 continue
             stage = declared_stage(exp_dir.name, root)

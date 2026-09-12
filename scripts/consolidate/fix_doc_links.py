@@ -49,7 +49,7 @@ def protected_dirs(root: Path) -> tuple[str, ...]:
     correct: the evidence records where things were when it was written.
     """
     import json
-    p = root / "logs/runs/index.json"
+    p = root / "logs/index.json"
     if not p.is_file():
         return ()
     idx = json.loads(p.read_text())

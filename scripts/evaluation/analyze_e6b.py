@@ -54,7 +54,7 @@ BOOTSTRAP_SEED = 20260806
 
 AUDIT = REPO_ROOT / "artifacts/audit"
 THREE_MODE = AUDIT / "three_mode"
-REGISTRATION = REPO_ROOT / "logs/experiments/early/analyses/e6b_registration.json"
+REGISTRATION = REPO_ROOT / "logs/cross-stage/early/analyses/e6b_registration.json"
 
 FLOORS = {"usable_rollout_rate": 0.0800, "correct_overall": 0.0600}
 SEEDS = ("sa", "sb")
@@ -242,8 +242,8 @@ def qualitative(arms: dict, sessions: dict, a_alias: str, b_alias: str,
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/experiments/early/analyses/e6b_results.json")
-    ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/experiments/early/analyses/e6b_report.md")
+    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/cross-stage/early/analyses/e6b_results.json")
+    ap.add_argument("--report", type=Path, default=REPO_ROOT / "logs/cross-stage/early/analyses/e6b_report.md")
     ap.add_argument("--per-prompt", type=Path,
                     default=AUDIT / "e6b_per_prompt.jsonl")
     ap.add_argument("--bootstrap", type=int, default=10000)

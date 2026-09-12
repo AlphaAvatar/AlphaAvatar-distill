@@ -12,7 +12,7 @@ builds ten genuinely different runs — including two stages that do not exist y
 — through the same functions.
 
 **The index counts runs, not artifact roots.** It reported 77. Attempt 9 is one
-run with two surviving components (`logs/runs/stage-1/phase_c1/attempt9` and
+run with two surviving components (`logs/stages/stage-1/phase_c1/runs/attempt9` and
 `…_grant.json`); the old schema recorded them as two peers, so "how many C1
 attempts?" answered 19 for a phase that has had 9. There are **41 logical runs
 over 77 components**, and nothing moved to achieve that.
@@ -35,7 +35,7 @@ from aadistill.runtime.run_layout import (  # noqa: E402
     RunLayoutError, build_run_manifest, digest_of, verify_run_manifest,
 )
 
-INDEX = REPO / "logs/runs/index.json"
+INDEX = REPO / "logs/index.json"
 
 
 def _make(tmp_path, experiment, run, roles, spec=None, **over):

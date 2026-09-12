@@ -245,7 +245,7 @@ def main() -> None:
             "rank": ("SHA256(C0_preregistration_digest + ':phase-c1-battery:' + "
                      "stratum + ':' + stable_source_id)"),
             "base_digest": C0_DIGEST,
-            "base_digest_source": "logs/experiments/phase_c1/plans/phase_c0_preregistration.json, commit be2ab08",
+            "base_digest_source": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json, commit be2ab08",
             "outcome_dependence": "NONE — no model output of any kind is consulted",
             "difficulty_reweighting": ("none. Source-native metadata (MATH level, "
                                        "SQuAD answerability) is retained on the items "

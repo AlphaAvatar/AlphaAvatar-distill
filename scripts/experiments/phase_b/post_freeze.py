@@ -18,13 +18,13 @@ from aadistill.governance import post_freeze as _pf  # noqa: E402
 
 #: Where the declaration lives. One file, so a second undeclared change cannot
 #: hide behind a differently-named note.
-NOTE_PATH = "logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"
+NOTE_PATH = "logs/cross-stage/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"
 #: The append-only ledger of reviewed, post-completion drift.
-HISTORICAL_LEDGER_PATH = "logs/experiments/phase_b/analyses/autoinit_phase_b_historical_amendments.json"
+HISTORICAL_LEDGER_PATH = "logs/cross-stage/phase_b/analyses/autoinit_phase_b_historical_amendments.json"
 #: The ledger begins where the sealed v1 note stopped.
 SEALED_LEGACY_NOTE = NOTE_PATH
 #: What Phase B preregistered.
-PREREGISTRATION_PATH = "logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json"
+PREREGISTRATION_PATH = "logs/cross-stage/phase_b/plans/autoinit_phase_b_preregistration.json"
 #: The single dispatcher every launchable session shares.
 SETUP_SCRIPT = "scripts/pod/autoinit_preflight_setup.sh"
 

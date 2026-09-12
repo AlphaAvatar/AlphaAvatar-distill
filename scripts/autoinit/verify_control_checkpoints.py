@@ -68,7 +68,7 @@ EXPECTED_INIT = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_control_availability.json")
+    ap.add_argument("--out", default="logs/shared/analyses/autoinit_control_availability.json")
     args = ap.parse_args()
 
     from huggingface_hub import HfApi, hf_hub_download
@@ -168,7 +168,7 @@ def main() -> None:
         # script checks lineage and bytes, which is a strict subset.
         entry["recipe_matched_control"] = False
         entry["recipe_matched_control_decided_by"] = (
-            "logs/experiments/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json")
+            "logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json")
         all_ok = all_ok and entry["passes_legacy_lineage_subset"]
         report["controls"][name] = entry
 

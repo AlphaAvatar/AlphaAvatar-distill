@@ -27,7 +27,7 @@ What is substituted, and nothing else:
   is the real one, so the structural hash stage 1 pins is the real one, and the
   calibration items are the real ones — `DOMAIN_BALANCED_V1.resolve()` runs, with
   both of its hash checks, and its output is what the operators consume.
-  `logs/experiments/phase_a/analyses/autoinit_phase_a_full_mixture_depth.json` records the same operator run
+  `logs/cross-stage/phase_a/analyses/autoinit_phase_a_full_mixture_depth.json` records the same operator run
   against the **complete** 59,763-position mixture, which is the case that OOMed.
 * the **vLLM engine probe** at stage 0 — no GPU here.
 * the **probe training subprocess and the generation battery** — the
@@ -54,17 +54,17 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 AUTH = REPO / "logs/budget/approvals/autoinit_phase_a_authorization.json"
-STAGE3_PROBE = REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete/engine_probe.json"
+STAGE3_PROBE = REPO / "logs/cross-stage/phase_a/results/autoinit_stage3_complete/engine_probe.json"
 STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
 CALIBRATION = REPO / "artifacts/stage1/e8_calibration_v1/items.jsonl"
 #: A real scored battery result. The stub copies its shape instead of guessing.
-REAL_SCORED = (REPO / "logs/experiments/phase_a/results/autoinit_stage3_complete"
+REAL_SCORED = (REPO / "logs/cross-stage/phase_a/results/autoinit_stage3_complete"
                / "preflight_ctl_r0860k_sa_recovery_search.json")
 
 pytestmark = pytest.mark.skipif(
     not (AUTH.is_file() and STAGE3_PROBE.is_file() and CALIBRATION.is_file()
          and (STATE_EVAL / "manifest.json").is_file() and REAL_SCORED.is_file()
-         and (REPO / "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json").is_file()
+         and (REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json").is_file()
          and (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file()),
     reason="needs the issued authorization, the frozen plan, the staged "
            "state_eval + calibration + battery, and a real scored result")

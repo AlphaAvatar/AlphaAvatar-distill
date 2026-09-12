@@ -2,7 +2,7 @@
 """Can a later session cite Attempt 4's one purchased `sb` probe?
 
     PYTHONPATH=src python scripts/autoinit/verify_attempt4_probe_reuse.py \
-        --out logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json
+        --out logs/shared/analyses/autoinit_attempt4_probe_reuse.json
 
 Attempt 4 ran to `ALL_DONE` and paid for exactly one genuinely new observation:
 `autoinit.v1.phase_a.rung2.fe9683e6a9c7.sb`, the single missing rung-2 probe.
@@ -61,7 +61,7 @@ from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 #: Explicit: importing an adapter module no longer registers it.
 register_builtin_adapters()
 
-ATTEMPT = REPO_ROOT / "logs/runs/unscoped/continuation_b/attempt4"
+ATTEMPT = REPO_ROOT / "logs/cross-stage/continuation_b/runs/attempt4"
 PROBES = ATTEMPT / "probes"
 ATTESTED = ATTEMPT / "attested_evaluation_protocol.json"
 
@@ -189,7 +189,7 @@ def verify(root: Path = PROBES) -> dict:
             "the probe against the checkpoint bytes, the frozen battery, the live "
             "scoring contract and the attested protocol — none of which the "
             "pooling defect touches."),
-        "source": "logs/runs/unscoped/continuation_b/attempt4/probes",
+        "source": "logs/cross-stage/continuation_b/runs/attempt4/probes",
         "probes_dir_digest": probes_dir_digest(root),
         "attested_protocol_hash": attested_protocol,
         "live_scoring_contract_digest": live_contract["digest"],
@@ -215,7 +215,7 @@ def verify(root: Path = PROBES) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json")
+    ap.add_argument("--out", default="logs/shared/analyses/autoinit_attempt4_probe_reuse.json")
     args = ap.parse_args()
     result = verify()
     out = Path(args.out)

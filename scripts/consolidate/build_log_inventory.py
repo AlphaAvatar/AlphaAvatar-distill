@@ -66,12 +66,12 @@ DOCUMENTARY = ("logs", "docs", "configs", "README.md", "AGENTS.md")
 #: reference rule cannot pick. Each entry is (sha256 prefix -> canonical path, why).
 CANONICAL_OVERRIDES = {
     "db5bb0cb33ed": (
-        "logs/experiments/phase_a/results/autoinit_stage3_complete/imported_controls.json",
+        "logs/cross-stage/phase_a/results/autoinit_stage3_complete/imported_controls.json",
         "the same control import served attempt 7 and the completed attempt 8. "
         "The completed run owns it: its products are the frozen Stage-3 artifacts, "
         "so a reader following the accepted result finds the file in place."),
     "b39bc39e5908": (
-        "logs/validations/micro-preflight/runs/autoinit_preflight_run4/preflight_evidence.json",
+        "logs/shared/validations/micro-preflight/runs/autoinit_preflight_run4/preflight_evidence.json",
         "one session wrote one evidence file. `write_preregistration.py` and the "
         "materialized preregistration both cite this path; the copy under "
         "autoinit_permanent_controls/ is that file under a second name."),

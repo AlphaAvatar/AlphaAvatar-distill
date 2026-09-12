@@ -41,8 +41,8 @@ sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 #: The attempt-4 evidence, exactly as retained.
-PROBES = REPO / "logs/runs/unscoped/continuation_b/attempt4/probes"
-RESULT = REPO / "logs/runs/unscoped/continuation_b/attempt4/phase_a_result.json"
+PROBES = REPO / "logs/cross-stage/continuation_b/runs/attempt4/probes"
+RESULT = REPO / "logs/cross-stage/continuation_b/runs/attempt4/phase_a_result.json"
 
 FE = "fe9683e6a9c783bbc6fe276a78c851c6"
 BD = "85bde4ded2c31953f802e39cf2252c87"
@@ -53,7 +53,7 @@ CTL = "control-qwen3_0p6b_init_v0"
 #: `seed_aware_max_binomial_seedrange` rule, whose dominant term is the binomial
 #: one; the value is pinned below against the committed result so a typo here
 #: cannot quietly widen or narrow the decision.
-FROZEN_PLAN = REPO / "logs/experiments/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
+FROZEN_PLAN = REPO / "logs/cross-stage/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 
 
 def load_driver():
@@ -206,7 +206,7 @@ def test_exactly_one_sc_is_missing_and_it_is_fe9683(drv, store):
 def test_the_attempt4_sb_probe_is_strictly_reusable():
     """It must never be repurchased: its session's decision was withdrawn, the
     measurement was not."""
-    rec = json.loads((REPO / "logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json").read_text())
+    rec = json.loads((REPO / "logs/shared/analyses/autoinit_attempt4_probe_reuse.json").read_text())
     assert rec["reuse_verified"] is True
     assert rec["reusable_probes"] == ["fe9683e6a9c7/sb"]
     probe = rec["probes"][0]
@@ -284,7 +284,7 @@ def test_the_live_historical_record_is_refused_today(drv):
     Phase A's probes were scored under `recovery_search_scoring@v2`. The scorer
     has relocated twice since and the contract legitimately moved to v3, so all
     eleven probes fail `scoring_contract_matches_live` and nothing else.
-    `logs/experiments/shared/analyses/autoinit_historical_reuse_position.json` derives the same conclusion
+    `logs/shared/analyses/autoinit_historical_reuse_position.json` derives the same conclusion
     independently and records it as REFUSED, explicitly unrelaxed: admitting a
     superseded contract is a maintainer decision, not a migration one.
 
@@ -297,7 +297,7 @@ def test_the_live_historical_record_is_refused_today(drv):
         assert probe["failed"] == ["scoring_contract_matches_live"], probe["probe_id"]
 
     position = json.loads(
-        (REPO / "logs/experiments/shared/analyses/autoinit_historical_reuse_position.json").read_text())
+        (REPO / "logs/shared/analyses/autoinit_historical_reuse_position.json").read_text())
     c4 = position["conclusions"]["4_live_reuse_under_scoring_contract_v3"]
     assert c4["verdict"] == "REFUSED"
     assert position["all_four_hold_simultaneously"] is True

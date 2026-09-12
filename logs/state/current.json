@@ -2,7 +2,7 @@
  "schema": "aadistill.current_state/v2",
  "generated_utc": "2026-09-12T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
- "baseline_commit": "logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
+ "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "OWNED by the readiness record's swept_base_commit and NOT duplicated: this snapshot is written BEFORE the commit it would name, and gate 12 forbids editing state after the sweep.",
  "running": {
   "paid_compute": false,
@@ -14,7 +14,7 @@
   "any": true,
   "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-12 consumed, $0.3960, zero scientific stages.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
-  "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/runs/stage-1/phase_c1/attempt9/outcome.json.",
+  "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/stages/stage-1/phase_c1/runs/attempt9/outcome.json.",
   "c1_attempts": "thirteen labels, ELEVEN paid, $4.3961 total, zero ATTENTION science. Attempt 12 cost $0 -- the provider refused the create. Per-attempt cost and cause: logs/budget/ledger.md.",
   "formal_sessions_used": 3,
   "formal_sessions_max": null,
@@ -22,7 +22,7 @@
  },
  "prepared_launch": {
   "any": false,
-  "grant_committed": "logs/runs/stage-1/phase_c1/attempt13/governance/grant.json",
+  "grant_committed": "logs/stages/stage-1/phase_c1/runs/attempt13/governance/grant.json",
   "readiness_record": "FAIL -- the 2026-09-12 launch_bound sweep refused on a stale run index; owed again after this cleanup",
   "authorization": null,
   "bundle": null,
@@ -43,7 +43,7 @@
   "ledger": "logs/budget/ledger.md",
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
   "planning_floor_usd": 13.4401,
-  "_planning_floor_note": "from logs/experiments/phase_c1/plans/phase_c1_pricing.json:totals.floor_usd. Priced is not funded."
+  "_planning_floor_note": "from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json:totals.floor_usd. Priced is not funded."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -51,7 +51,7 @@
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
   "equivalence_interval": 0.011695296982299022,
   "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds from the C0 digest.",
-  "owner": "logs/experiments/phase_c1/plans/phase_c0_preregistration.json and logs/experiments/phase_c1/plans/execution_preregistration.json own every frozen identity; the hashes above are the ones a reader needs to recognise, not the set.",
+  "owner": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json and logs/stages/stage-1/phase_c1/plans/execution_preregistration.json own every frozen identity; the hashes above are the ones a reader needs to recognise, not the set.",
   "feasibility_floor": 0.3,
   "seeds": {
    "sa": 20260726,
@@ -70,9 +70,9 @@
   },
   "launch_bound_ready": false,
   "launch_bound_failures": 1,
-  "owned_by": "logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json",
-  "history": "logs/experiments/phase_c1/history/readiness_history.json",
-  "last_paid_attempt_owned_by": "logs/runs/stage-1/phase_c1/attempt11/closeout/outcome.json",
+  "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json",
+  "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
+  "last_paid_attempt_owned_by": "logs/stages/stage-1/phase_c1/runs/attempt11/closeout/outcome.json",
   "_three_separate_facts": "what the latest sweep OBSERVED, whether a launch-bound record describes the CURRENT tree, and that an earlier launch-bound sweep failed. STATE.md collapsed them into one line and was wrong about all three at once."
  },
  "abandoned": [
@@ -89,7 +89,7 @@
   "logs/README.md -- START HERE, the index",
   "logs/state/phase_index.md -- history by phase",
   "logs/state/current.md -- human view",
-  "logs/runs/index.json -- every run",
+  "logs/index.json -- every run",
   "logs/state/ownership.md -- ownership"
  ],
  "phases": {
@@ -104,7 +104,7 @@
   "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
   "decision_status": "unresolved_equivalence",
   "winner": null,
-  "owner": "logs/runs/unscoped/recovery_continuation/attempt7/"
+  "owner": "logs/cross-stage/recovery_continuation/runs/attempt7/"
  },
  "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
  "phase_b_result": {
@@ -116,12 +116,12 @@
   "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
   "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510.",
   "authorizes": "nothing",
-  "owner": "logs/experiments/continuation_b/analyses/autoinit_continuation_b_attempt5.json -- metrics and margin live THERE"
+  "owner": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt5.json -- metrics and margin live THERE"
  },
  "phase_c": {
   "c0": {
    "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
-   "protocol": "logs/experiments/phase_c1/plans/phase_c0_preregistration.json fb2eeea531f9f0d1",
+   "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json fb2eeea531f9f0d1",
    "sizing_evidence": "logs/phase_c0_sizing_evidence.json 4786242d349e9b21",
    "authorizes": "nothing",
    "design": "850 scorable / 950 total; 3 fresh paired seeds; primary correct_overall; SESOI +0.010."
@@ -133,11 +133,11 @@
    "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, L40S). treatment + endpoint: UNMEASURED. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort -- not an ATTENTION result.",
    "not_built": "grant, authorization and bundle all CONSUMED by attempt 12; the next session needs all three plus a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
    "owners": {
-    "protocol": "logs/experiments/phase_c1/plans/phase_c0_preregistration.json",
-    "execution_prereg": "logs/experiments/phase_c1/plans/execution_preregistration.json",
-    "pricing": "logs/experiments/phase_c1/plans/phase_c1_pricing.json",
-    "history": "logs/experiments/phase_c1/history/operational_history.md",
-    "runs": "logs/runs/index.json"
+    "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
+    "execution_prereg": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+    "pricing": "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json",
+    "history": "logs/stages/stage-1/phase_c1/history/operational_history.md",
+    "runs": "logs/index.json"
    },
    "blocker": "provider capacity; see the top-level blocker."
   },
@@ -155,7 +155,7 @@
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
   "free_note": "detail: c1_storage_recovery.json"
  },
- "blocker": "PROVIDER CAPACITY. Attempt 12's create was refused -- no secure L40S at the accepted $1.09/h. Not a repository defect and not a draw's job: a draw replaces a host that was CREATED and never became usable. A $0 capacity watch is running. Evidence: logs/runs/stage-1/phase_c1/attempt12/closeout/outcome.json.",
+ "blocker": "PROVIDER CAPACITY. Attempt 12's create was refused -- no secure L40S at the accepted $1.09/h. Not a repository defect and not a draw's job: a draw replaces a host that was CREATED and never became usable. A $0 capacity watch is running. Evidence: logs/stages/stage-1/phase_c1/runs/attempt12/closeout/outcome.json.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/state/current.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
@@ -167,10 +167,10 @@
  "latest_run": {
   "experiment_id": "phase_c1",
   "run_id": "attempt13",
-  "root": "logs/runs/stage-1/phase_c1/attempt13",
+  "root": "logs/stages/stage-1/phase_c1/runs/attempt13",
   "state": "PREPARED, not executed -- governance inputs only",
-  "index": "logs/runs/index.json",
-  "last_executed": "logs/runs/stage-1/phase_c1/attempt12"
+  "index": "logs/index.json",
+  "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt12"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10 as daf64772, and again 2026-09-11 as 199711af. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
@@ -182,8 +182,8 @@
   "campaign_cost_usd": 0.04,
   "means": "ENGINEERING EVIDENCE ONLY -- not a C1 treatment result, not an endpoint, not a decision.",
   "authorizes": "nothing",
-  "owner": "logs/validations/cuda-stage-f/v1/ and logs/runs/cuda_stage_f/",
-  "amendment": "logs/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured."
+  "owner": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/ and logs/runs/cuda_stage_f/",
+  "amendment": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured."
  },
- "superseded_handoff": "logs/archive/handoffs/HANDOFF_next_session.md is HISTORICAL (2026-09-02, unmaintained) and is NOT an entry point. What it says and why it is stale: logs/state/ownership.md."
+ "superseded_handoff": "logs/archive/repository/handoffs/HANDOFF_next_session.md is HISTORICAL (2026-09-02, unmaintained) and is NOT an entry point. What it says and why it is stale: logs/state/ownership.md."
 }

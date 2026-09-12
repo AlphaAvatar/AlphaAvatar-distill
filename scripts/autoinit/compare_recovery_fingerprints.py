@@ -191,7 +191,7 @@ def phase_a_protocol(config_path: Path) -> RecoveryProtocolFingerprint:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/experiments/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json")
+    ap.add_argument("--out", default="logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json")
     args = ap.parse_args()
 
     from huggingface_hub import hf_hub_download

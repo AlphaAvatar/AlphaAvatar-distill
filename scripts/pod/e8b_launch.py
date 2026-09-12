@@ -716,7 +716,7 @@ def main() -> int:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/experiments/early/analyses/e8b_session_evidence.json")
+    ap.add_argument("--out", default="logs/cross-stage/early/analyses/e8b_session_evidence.json")
     ap.add_argument("--authorized-usd", type=float, required=True)
     args = ap.parse_args()
     global STATUS, RUN_LOG, ARMS

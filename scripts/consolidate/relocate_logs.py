@@ -60,7 +60,10 @@ REFERENCE_ROOTS = ("scripts", "tests", "configs")
 #:
 #: The lesson is the general one: a path string inside an artifact may be part
 #: of what a hash covers. Rewrite only what a relocation OWNS.
-NEVER_REWRITE = ("artifacts/", "logs/archive/", "logs/runs/", "logs/validations/")
+NEVER_REWRITE = ("artifacts/", "logs/archive/",
+                 #: Stage-first since log-layout-v2: a run's own evidence and
+                 #: an experiment's frozen plans are under these.
+                 "logs/stages/", "logs/cross-stage/")
 
 
 def rewritable(rel: str) -> bool:
@@ -140,14 +143,14 @@ def index_registered(root: Path) -> dict[str, str]:
     directory.
     """
     out: dict[str, str] = {}
-    p = root / "logs/runs/index.json"
+    p = root / "logs/index.json"
     if not p.is_file():
         return out
     idx = json.loads(p.read_text())
     for e in idx.get("runs", []):
         for role, rel in (e.get("components") or {}).items():
             out[rel] = (f"{e['experiment_id']}/{e['run_id']}::{role} in "
-                        "logs/runs/index.json, with a recorded digest")
+                        "logs/index.json, with a recorded digest")
     return out
 
 
@@ -165,7 +168,7 @@ def cited_by_frozen_evidence(root: Path) -> dict[str, str]:
     citation carries no hash of its own.
     """
     out: dict[str, str] = {}
-    p = root / "logs/runs/index.json"
+    p = root / "logs/index.json"
     if not p.is_file():
         return out
     idx = json.loads(p.read_text())

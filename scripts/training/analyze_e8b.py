@@ -23,7 +23,7 @@ depth-map effect is within-hardware while the interaction is not.
 
 The `DC-DP` and `FC-FP` contrasts are each computed inside one regime and one
 hardware class. The interaction is reported in the **registered** direction,
-`(FC-FP) - (DC-DP)` (`logs/archive/e8b_preregistration.md` §8) — negative means the map does
+`(FC-FP) - (DC-DP)` (`logs/archive/cross-stage/e8b_preregistration.md` §8) — negative means the map does
 worse once compression is applied than at full width. It carries the nesting and
 cannot on its own exclude a hardware x depth-map interaction.
 """
@@ -166,7 +166,7 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--level", choices=("step0", "behaviour", "both"),
                     default="step0")
-    ap.add_argument("--records", default="logs/experiments/early/history/e8b_step0_records")
+    ap.add_argument("--records", default="logs/cross-stage/early/history/e8b_step0_records")
     ap.add_argument("--results", default="logs/e8b_results.json",
                     help="per-seed recovered behaviour, written by the sessions")
     ap.add_argument("--out", default="")

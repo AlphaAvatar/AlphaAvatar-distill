@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Price E8 through the four-threshold planner, phase by phase.
 
-Every figure in `logs/archive/e8_preregistration.md` comes from here, so the proposal and
+Every figure in `logs/archive/cross-stage/e8_preregistration.md` comes from here, so the proposal and
 the arithmetic that would enforce it are the same code. Touches no GPU, creates
 no pod.
 
@@ -212,7 +212,7 @@ def main() -> int:
                         "prediction_positions": CALIBRATION_POSITIONS},
         "subset_evaluations": SUBSET_EVALUATIONS,
     }
-    dest = REPO_ROOT / "logs/experiments/early/analyses/e8_budget_plans.json"
+    dest = REPO_ROOT / "logs/cross-stage/early/analyses/e8_budget_plans.json"
     dest.write_text(json.dumps(out, indent=2) + "\n")
     print(f"\nwrote {dest.relative_to(REPO_ROOT)}")
     return 0

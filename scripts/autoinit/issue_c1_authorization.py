@@ -26,7 +26,7 @@ What this binds, and what invalidates it if edited:
   first -- importing its module does not register it;
 * the **C0 preregistration digest** as the science plan;
 * the **execution preregistration**, by its own self-verified hash;
-* the **hard ceiling**, cross-checked against `logs/experiments/phase_c1/plans/phase_c1_pricing.json`;
+* the **hard ceiling**, cross-checked against `logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json`;
 * the **battery**, **teacher binding** and **scoring contract** identities the
   session will measure under.
 

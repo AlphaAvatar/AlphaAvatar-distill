@@ -63,7 +63,7 @@ def test_changing_the_chunk_count_does_perturb_the_last_bits():
     """The claim is mathematical identity, NOT bit-identity — pin the difference.
 
     If this ever starts passing as an exact equality, the summation has changed and
-    the re-pricing note in logs/experiments/early/analyses/e8b_reprice_after_gate.json needs rewording.
+    the re-pricing note in logs/cross-stage/early/analyses/e8b_reprice_after_gate.json needs rewording.
     """
     s, t, mask = _inputs(0, vocab=1024)
     one_chunk, _ = kd_forward_kl(s, t, mask, chunk=10_000)
@@ -102,7 +102,7 @@ def test_an_empty_mask_returns_zero_without_touching_the_loop():
 
 def test_the_default_chunk_is_the_value_the_gate_ran_with():
     # If the default moves, the OOM arithmetic recorded in
-    # logs/experiments/early/analyses/e8b_reprice_after_gate.json no longer describes what runs.
+    # logs/cross-stage/early/analyses/e8b_reprice_after_gate.json no longer describes what runs.
     import inspect
     sig = inspect.signature(kd_forward_kl)
     assert sig.parameters["chunk"].default == 512

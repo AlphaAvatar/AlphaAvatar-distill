@@ -48,7 +48,7 @@ _LADDER_MIRROR = "artifacts/stage3/ladder_uniform"
 #: other five are the companion files a checkpoint is unloadable without — and
 #: which no session declared, on the reasoning that the weights were the
 #: artifact. A control that shipped without its tokenizer has already been
-#: written up once (`logs/experiments/shared/analyses/autoinit_control_sb_packaging_repair.json`).
+#: written up once (`logs/shared/analyses/autoinit_control_sb_packaging_repair.json`).
 CANONICAL_INIT: tuple[RelayInput, ...] = tuple(
     RelayInput(f"stage1/qwen3_0p6b_init_v0/checkpoint/{name}",
                dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",

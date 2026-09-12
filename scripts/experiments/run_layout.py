@@ -55,6 +55,16 @@ from aadistill.runtime.run_layout import (  # noqa: E402
 
 #: This repository's run root, relative to the repository root. The only place
 #: it is written down.
+#: Stage-first, since log-layout-v2. `logs/runs/` no longer exists: a run is
+#: reached through the experiment that owns it, which is reached through the
+#: stage that owns the experiment.
+LOGS_ROOT = "logs"
+STAGES_ROOT = "stages"
+CROSS_STAGE = "cross-stage"
+RUNS_DIR = "runs"
+
+#: Retained for reading historical provenance ONLY -- the migration manifests
+#: name it. Nothing writes here.
 RUNS_ROOT = "logs/runs"
 
 #: New runs are grouped by the pipeline stage their work belongs to:
@@ -202,6 +212,22 @@ def stage_segment(stage_id: str) -> str:
     return f"{STAGE_PREFIX}{stage_id}"
 
 
+def experiment_root(repo_root: Path | str, experiment_id: str,
+                    stage_id: str | None) -> Path:
+    """`logs/stages/stage-<id>/<experiment>/`, or the cross-stage home.
+
+    STAGE IS THE FIRST DIMENSION. An experiment's plans, analyses, results,
+    history, validations and runs live under one directory; `runs/` is a child
+    of the experiment, not a parallel top-level tree. An experiment with no
+    declared stage is under `cross-stage/`, which states that its stage is not
+    established rather than inventing one.
+    """
+    base = Path(repo_root) / LOGS_ROOT
+    if stage_id is None:
+        return base / CROSS_STAGE / experiment_id
+    return base / STAGES_ROOT / stage_segment(stage_id) / experiment_id
+
+
 def runs_root_for(repo_root: Path | str, stage_id: str | None) -> Path:
     """Where runs of a given stage live.
 
@@ -229,8 +255,10 @@ def rel_run_dir(experiment_id: str, run_id: str,
     it belongs to. That is a `$0` refusal at gate time -- but only if it is
     noticed before a launch, and it consumes a one-use chain either way.
     """
-    stage = "" if stage_id is None else f"{stage_segment(stage_id)}/"
-    return f"{RUNS_ROOT}/{stage}{experiment_id}/{run_id}"
+    if stage_id is None:
+        return f"{LOGS_ROOT}/{CROSS_STAGE}/{experiment_id}/{RUNS_DIR}/{run_id}"
+    return (f"{LOGS_ROOT}/{STAGES_ROOT}/{stage_segment(stage_id)}/"
+            f"{experiment_id}/{RUNS_DIR}/{run_id}")
 
 
 def layout_for(repo_root: Path | str, experiment_id: str, run_id: str,
@@ -242,8 +270,14 @@ def layout_for(repo_root: Path | str, experiment_id: str, run_id: str,
     which has not yet declared a stage fails by writing where it always did
     rather than by writing somewhere new and unindexed.
     """
-    return RunLayout(run_root=runs_root_for(repo_root, stage_id),
-                     experiment_id=experiment_id, run_id=run_id)
+    #: Stage-first: the run root is the stage (or the cross-stage home), and
+    #: `runs/` sits between the experiment and the run so an experiment's runs
+    #: live beside its plans, analyses, results and validations.
+    base = Path(repo_root) / LOGS_ROOT
+    root = (base / CROSS_STAGE if stage_id is None
+            else base / STAGES_ROOT / stage_segment(stage_id))
+    return RunLayout(run_root=root, experiment_id=experiment_id, run_id=run_id,
+                     runs_subdir=RUNS_DIR)
 
 
 def manifest_path(layout: RunLayout) -> Path:
@@ -553,7 +587,7 @@ def write_run_readmes(layout: RunLayout, *, experiment_id: str, run_id: str,
         f"| --- | --- |\n"
         f"{rows}"
         f"\n"
-        f"The repository-wide index of every run is `logs/runs/index.json`.\n")
+        f"The repository-wide index of every run is `logs/index.json`.\n")
     written.append(README_NAME)
     for area in AREAS:
         d = layout.root / area

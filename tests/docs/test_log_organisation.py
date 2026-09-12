@@ -98,7 +98,7 @@ class TestTheBudgetIsDerivedNotRestated:
         one on disk. Silence about spend is the dangerous direction."""
         from consolidate import derive_budget as m
         entry = {"experiment_id": "phase_c1", "run_id": "attempt10",
-                 "components": {"root": "logs/runs/stage-1/phase_c1/attempt10"}}
+                 "components": {"root": "logs/stages/stage-1/phase_c1/runs/attempt10"}}
         assert m._outcome_paths(REPO, entry), (
             "a legacy entry's closeout is unreachable, so its cost would read "
             "as unknown and the package would look unspent")
@@ -109,7 +109,7 @@ class TestTheBudgetIsDerivedNotRestated:
 class TestTheIndexAccountsForBothLayouts:
     @pytest.fixture(scope="class")
     def index(self):
-        return load("logs/runs/index.json")
+        return load("logs/index.json")
 
     def test_by_experiment_totals_reconcile_with_the_entries(self, index):
         """It counted `legacy` while `runs` held legacy + modern, so every
@@ -169,7 +169,7 @@ class TestTheEntryPointsResolve:
     def test_every_phase_c1_run_is_in_one_canonical_place(self):
         """It said attempts 1-12 were under `runs/phase_c1/`; three were, and
         the rest were in two other layouts. They are now in one."""
-        index = load("logs/runs/index.json")
+        index = load("logs/index.json")
         roots = {r["run_id"]: (r.get("root")
                                or (r.get("components") or {}).get("root", ""))
                  for r in [*index["runs"], *index["unrecorded"]]
@@ -209,7 +209,7 @@ class TestRegisteredEvidenceIsProtected:
         from consolidate.relocate_logs import plan
         p = plan(REPO)
         reasons = {e["path"]: e["reason"] for e in p["exceptions"]}
-        index = load("logs/runs/index.json")
+        index = load("logs/index.json")
         registered = [rel for e in index["runs"]
                       for rel in (e.get("components") or {}).values()]
         #: After log-layout-v1 nothing at all sits loose at `logs/` root, so
@@ -242,7 +242,7 @@ class TestRegisteredEvidenceIsProtected:
 
     def test_every_registered_component_still_hashes_to_its_record(self):
         from architecture.record_run_index import digest_of
-        index = load("logs/runs/index.json")
+        index = load("logs/index.json")
         drift = []
         for e in index["runs"]:
             for role, rel in (e.get("components") or {}).items():
@@ -491,7 +491,7 @@ class TestSweepOutputsAreIsolated:
     def test_a_committed_record_still_names_its_own_raw_output(self):
         """The record's `evidence` block must point at paths that belong to the
         sweep it describes, so the two cannot drift apart again."""
-        rec = load("logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json")
+        rec = load("logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json")
         ev = rec.get("evidence") or {}
         assert ev.get("junit") and ev.get("pytest_log"), ev
 
@@ -669,7 +669,7 @@ class TestTheCurrentViewReadsItsOwner:
     def test_every_superseded_verdict_is_preserved(self):
         """The live record holds ONE sweep and the next replaces it, so a
         launch-bound FAILURE survived only in git history."""
-        hist = load("logs/experiments/phase_c1/history/readiness_history.json")
+        hist = load("logs/stages/stage-1/phase_c1/history/readiness_history.json")
         kinds = {(e["record_kind"], e["verdict"]) for e in hist["entries"]}
         assert ("launch_bound", "FAIL") in kinds, (
             "the failed launch-bound sweep is not preserved anywhere outside "
@@ -698,7 +698,7 @@ class TestRunOwnedGovernanceEvidence:
         a = record_path_for("attempt13", "1")
         b = record_path_for("attempt14", "1")
         assert a != b
-        assert a.startswith("logs/runs/stage-1/phase_c1/attempt13/")
+        assert a.startswith("logs/stages/stage-1/phase_c1/runs/attempt13/")
         assert a.endswith("governance/readiness.json")
 
     def test_each_run_gets_its_own_authorization_path(self):
@@ -724,7 +724,7 @@ class TestRunOwnedGovernanceEvidence:
         from experiments.phase_c1.pod_environment import (
             permitted_post_sweep_paths)
         L = self._L()
-        grant = (f"logs/runs/stage-1/phase_c1/attempt13/"
+        grant = (f"logs/stages/stage-1/phase_c1/runs/attempt13/"
                  f"{L.C1_RUN_ROLES['grant']}")
         assert grant not in permitted_post_sweep_paths("attempt13", "1")
 
@@ -751,7 +751,7 @@ class TestRunOwnedGovernanceEvidence:
 
     def test_the_global_paths_are_pointers_not_records(self):
         from experiments.phase_c1 import pod_environment as pe
-        assert pe.RECORD_POINTER == "logs/experiments/phase_c1/analyses/c1_pod_environment_verification.json"
+        assert pe.RECORD_POINTER == "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
         #: The alias stays: every pre-2026-09-12 record is at that path.
         assert pe.RECORD_PATH == pe.RECORD_POINTER
         L = self._L()
@@ -774,7 +774,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
         assert "artifacts/" in NEVER_REWRITE
         assert not rewritable("artifacts/stage3/c1_confirmation_v1/manifest.json")
         assert not rewritable("logs/archive/anything.md")
-        assert not rewritable("logs/runs/stage-1/phase_c1/attempt10/manifest.json")
+        assert not rewritable("logs/stages/stage-1/phase_c1/runs/attempt10/manifest.json")
         assert rewritable("logs/README.md")
 
     def test_the_frozen_battery_manifest_verifies(self):

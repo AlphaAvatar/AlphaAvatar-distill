@@ -81,7 +81,7 @@ FROZEN_SCORING_CONTRACT = "recovery_search_scoring@v2"
 #: changed, and that is not asserted but measured: re-running
 #: `validate_recovery_scoring.py` over nine policies x 190 frozen prompts
 #: reproduces every number of the `f76008d5…` record exactly
-#: (`logs/experiments/recovery_continuation/analyses/autoinit_recovery_scoring_validation.json`). The version stays at 2
+#: (`logs/cross-stage/recovery_continuation/analyses/autoinit_recovery_scoring_validation.json`). The version stays at 2
 #: because the metric did not move; bumping it would falsely signal that it had.
 #: Re-pinned 2026-08-14 for `pooled_counts@v2`: the scorer now emits
 #: `usable_scorable`, and `recovery.py` — which is in the scoring source set —

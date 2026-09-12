@@ -22,7 +22,7 @@ from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from experiments.phase_a.plan import PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
 from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS, PHASE_B_DELEGATED_IDENTITIES, PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 
-PREREG = REPO / "logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json"
+PREREG = REPO / "logs/cross-stage/phase_b/plans/autoinit_phase_b_preregistration.json"
 
 
 def _authorization(**overrides) -> PhaseBAuthorization:
@@ -433,8 +433,8 @@ def test_the_immutable_phase_b_records_are_byte_identical_to_the_reviewed_base()
             continue
         back.update({e["new_path"]: e["old_path"] for e in doc.get("entries", [])})
 
-    for rel in ("logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json",
-                "logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"):
+    for rel in ("logs/cross-stage/phase_b/plans/autoinit_phase_b_preregistration.json",
+                "logs/cross-stage/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"):
         historical = back.get(rel, rel)
         at_base = subprocess.run(
             ["git", "-C", str(REPO), "show", f"bd4e5880:{historical}"],

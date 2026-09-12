@@ -76,7 +76,7 @@ LOCAL_ASSETS = (
                "artifacts/stage1"),
     LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
                "artifacts/stage3"),
-    LocalAsset("logs/experiments/phase_a/results/autoinit_permanent_controls", "autoinit_permanent_controls",
+    LocalAsset("logs/cross-stage/phase_a/results/autoinit_permanent_controls", "autoinit_permanent_controls",
                "logs"),
 )
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
@@ -84,7 +84,7 @@ TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 #: The three record files each control travels with.
 CONTROL_RECORDS = tuple(
-    f"logs/experiments/phase_a/results/autoinit_permanent_controls/{c}_{suffix}.json"
+    f"logs/cross-stage/phase_a/results/autoinit_permanent_controls/{c}_{suffix}.json"
     for c in CONTROLS
     for suffix in ("probe_identity", "run_manifest", "run_completion"))
 
@@ -145,7 +145,7 @@ def materialize_controls(ctx: SessionContext) -> bool:
         # The records travel with the assets either way; they are tiny.
         for suffix in ("run_manifest", "run_completion"):
             subprocess.run(
-                scp + [str(REPO_ROOT / "logs/experiments/phase_a/results/autoinit_permanent_controls"
+                scp + [str(REPO_ROOT / "logs/cross-stage/phase_a/results/autoinit_permanent_controls"
                            / f"{name}_{suffix}.json"),
                        f"root@{ctx.host}:{dest}/{suffix}.json"],
                 capture_output=True, timeout=600)
@@ -337,7 +337,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out", default="logs/experiments/recovery_continuation/analyses/autoinit_continuation_session.json")
+    ap.add_argument("--out", default="logs/cross-stage/recovery_continuation/analyses/autoinit_continuation_session.json")
     return ap
 
 

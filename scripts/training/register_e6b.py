@@ -239,7 +239,7 @@ def cost_model(rate: float, per_step_s: float, p90_step_s: float) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/experiments/early/analyses/e6b_registration.json")
+    ap.add_argument("--out", type=Path, default=REPO_ROOT / "logs/cross-stage/early/analyses/e6b_registration.json")
     ap.add_argument("--authorized-usd", type=float, required=True)
     ap.add_argument("--rate", type=float, default=0.99)
     ap.add_argument("--per-step-seconds", type=float, default=3.625)

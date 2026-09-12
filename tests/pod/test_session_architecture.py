@@ -431,7 +431,7 @@ def test_every_staged_input_declares_a_destination_and_the_env_carries_it(name, 
 @pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
                          ids=lambda v: v if isinstance(v, str) else "")
 def test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without(name, extra):
-    """Weights are not a checkpoint. `logs/experiments/shared/analyses/autoinit_control_sb_packaging_repair.json`
+    """Weights are not a checkpoint. `logs/shared/analyses/autoinit_control_sb_packaging_repair.json`
     is the write-up of a control whose identity gates all passed and which could
     not be evaluated, because it shipped without its tokenizer.
 

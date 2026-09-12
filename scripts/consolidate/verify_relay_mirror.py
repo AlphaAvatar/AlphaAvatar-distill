@@ -4,7 +4,7 @@
     PYTHONPATH=src python scripts/consolidate/verify_relay_mirror.py \
         --local /home/ecs-user/aad-artifacts/wheelhouse_vllm_cp312 \
         --relay-prefix transfer/wheelhouse_vllm_cp312 \
-        --out logs/validations/relay-mirror/relay_mirror_verification.json
+        --out logs/shared/validations/relay-mirror/relay_mirror_verification.json
 
 "The remote copy has been hash-verified" is the only clause that lets a local
 cache be deleted, so it needs evidence rather than an assertion. This produces
@@ -49,7 +49,7 @@ def main() -> int:
     ap.add_argument("--local", required=True)
     ap.add_argument("--relay-prefix", required=True)
     ap.add_argument("--repo", default=RELAY_REPO)
-    ap.add_argument("--out", default="logs/validations/relay-mirror/relay_mirror_verification.json")
+    ap.add_argument("--out", default="logs/shared/validations/relay-mirror/relay_mirror_verification.json")
     ap.add_argument("--max-download-bytes", type=int, default=256 << 20,
                     help="refuse to download more than this to verify; a mirror "
                          "that needs a large download is not cheap evidence")

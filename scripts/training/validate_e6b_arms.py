@@ -2,7 +2,7 @@
 """Prove the E6b arms are what the registration says, before a step is taken.
 
     PYTHONPATH=src python scripts/training/validate_e6b_arms.py \
-        --registration logs/experiments/early/analyses/e6b_registration.json --out artifacts/audit/e6b_preflight.json
+        --registration logs/cross-stage/early/analyses/e6b_registration.json --out artifacts/audit/e6b_preflight.json
 
 E6b's entire claim rests on one sentence: *the only intended difference from
 `e1_r2960k_{seed}_pca` is the CE/KD weighting*. That sentence is checked here

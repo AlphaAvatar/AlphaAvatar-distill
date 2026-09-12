@@ -9,7 +9,7 @@ identity independently from two saved engine-probe evidence files — Stage 3's
 that they resolve to the same v2 identity while the exact driver patch is the
 only formerly-material runtime difference.
 
-`logs/experiments/phase_a/results/autoinit_stage3_complete/{attested_evaluation_protocol,materialized_thresholds}.json`
+`logs/cross-stage/phase_a/results/autoinit_stage3_complete/{attested_evaluation_protocol,materialized_thresholds}.json`
 are read and hashed, never written. `250f72ef…` remains the protocol those
 controls actually attested; this artifact supersedes the *comparability rule*
 applied to it, not the fact.
@@ -43,7 +43,7 @@ from aadistill.initialization.planning.generation_compat import (  # noqa: E402
 from experiments.source_sets import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-STAGE3_DIR = "logs/experiments/phase_a/results/autoinit_stage3_complete"
+STAGE3_DIR = "logs/cross-stage/phase_a/results/autoinit_stage3_complete"
 STAGE3_PROTOCOL_HASH = (
     "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4")
 OBSERVED_FIELDS = ("vllm_version", "transformers_version", "torch_version",
@@ -77,7 +77,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--attempt4-probe", required=True,
                     help="the engine_probe.json collected from Phase-A attempt 4")
-    ap.add_argument("--out", default="logs/experiments/phase_a/analyses/autoinit_phase_a_protocol_compat_v2.json")
+    ap.add_argument("--out", default="logs/cross-stage/phase_a/analyses/autoinit_phase_a_protocol_compat_v2.json")
     args = ap.parse_args()
 
     s3_att_path = REPO_ROOT / STAGE3_DIR / "attested_evaluation_protocol.json"

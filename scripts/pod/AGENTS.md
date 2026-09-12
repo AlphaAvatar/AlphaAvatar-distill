@@ -12,7 +12,7 @@ else reads it. The previous single-run versions (`orchestrate_s2v1.sh`,
 E6b overran its authorization by $0.56 and lost both arms' machine-readable
 training event streams. Four rules follow, and a new launcher that does not
 implement them is not compliant. Full account:
-[`logs/experiments/early/analyses/e6b_protocol_deviations.md`](../../logs/experiments/early/analyses/e6b_protocol_deviations.md);
+[`logs/cross-stage/early/analyses/e6b_protocol_deviations.md`](../../logs/cross-stage/early/analyses/e6b_protocol_deviations.md);
 decision record 2026-08-09.
 
 **1. Never depend on the driver-start ssh returning.** E6b's launcher used the
@@ -135,7 +135,7 @@ as they are.
    failed** — it means no public TCP 22 mapping exists, which never appears if
    the pod was created without `--ports "22/tcp"`. Both were verified against the
    API on 2026-07-26; together they cost ~$0.95 in healthy pods deleted as
-   "stuck" (`logs/archive/indexes/EXPERIMENTS.md`).
+   "stuck" (`logs/archive/repository/indexes/EXPERIMENTS.md`).
 
    Use GraphQL, and treat an actual SSH connection as the only ground truth:
 
@@ -165,7 +165,7 @@ as they are.
 
 The scripts above are the **training** path. The 2026-07-30 gate and the
 2026-08-01 corpus build ran a generation job instead, under its own venv, and
-paid for four infrastructure lessons (`logs/archive/indexes/EXPERIMENTS.md` §9):
+paid for four infrastructure lessons (`logs/archive/repository/indexes/EXPERIMENTS.md` §9):
 
 - **Create the pod with `--min-cuda-version 13.0`.** vLLM 0.26.0's wheel links
   `libcudart.so.13`; a 570.x-driver host cannot run it, and
@@ -192,7 +192,7 @@ $25.56 run was idle time**. Tie teardown to the completion marker; the
 
 **Fix the bundle so `code_state` carries a git commit.** The corpus v2 manifest
 records `code_state_error` instead of a commit, because the bundle was unpacked
-outside a git checkout (P4 gap, `logs/archive/indexes/EXPERIMENTS.md` §10). Ship the commit hash
+outside a git checkout (P4 gap, `logs/archive/repository/indexes/EXPERIMENTS.md` §10). Ship the commit hash
 with the bundle, or unpack into a real checkout.
 
 ## Before each session
