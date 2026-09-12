@@ -25,3 +25,20 @@ checked on every run of `scripts/consolidate/build_log_inventory.py` and asserte
 by `tests/docs/test_storage_inventory.py`. A file in the working tree can drift
 from what it claims to be a copy of; a git object cannot, so the reference is the
 stabler citation and the second copy is gone.
+
+## What is in here
+
+| group | what it holds |
+| --- | --- |
+| [`handoffs/`](handoffs/) | superseded handoff documents, kept verbatim: [`HANDOFF_next_session.md`](handoffs/HANDOFF_next_session.md) — the current one is [`../state/current.md`](../state/current.md) |
+| [`indexes/`](indexes/) | superseded experiment indexes; the live index is [`../runs/index.json`](../runs/index.json) |
+| [`superseded/`](superseded/) | documents retired by a later decision, each with the record that replaced it |
+| [`STATE_superseded_through_2026-09-11.md`](STATE_superseded_through_2026-09-11.md) | the repository state as it stood, spanning Phase A, Phase B and the continuations |
+| [`CATALOG_detail_through_2026-09-11.md`](CATALOG_detail_through_2026-09-11.md) | the per-entry log detail that `state/ownership.md` used to carry |
+
+Every group has a stated origin. `archive/` is **not** where unclassified files
+go: an object with no owner gets one, not a shelf here.
+
+Links inside these documents are **not** repointed when the repository moves.
+They record where a file was when the document was written; follow them through
+[`../migrations/log-layout-v1/manifest.json`](../migrations/log-layout-v1/manifest.json).

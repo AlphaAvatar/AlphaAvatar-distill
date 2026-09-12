@@ -103,9 +103,38 @@ def test_the_binding_still_matches(doc):
     """The whole mechanism. If a raw subrun report, the campaign record or the
     outcome has been rewritten, this fails rather than the amendment quietly
     describing bytes that no longer exist."""
+    #: The amendment binds paths as they were when it was written. The
+    #: log-layout-v1 migration moved the CUDA subruns into `validations/`, and
+    #: the amendment is hash-anchored evidence that is not rewritten to match.
+    #: The binding is about the object -- its bytes and size -- so the lookup
+    #: goes through the migration and the hash still has to agree.
+    import json as _json
+
+    forward = {}
+    for m in sorted((REPO / "logs/migrations").glob("*/manifest.json")):
+        try:
+            mdoc = _json.loads(m.read_text())
+        except (OSError, _json.JSONDecodeError):
+            continue
+        forward.update({e["old_path"]: e["new_path"]
+                        for e in mdoc.get("entries", [])})
+
+    def _resolve(rel: str) -> Path:
+        here = REPO / rel
+        if here.is_file():
+            return here
+        if rel in forward:
+            return REPO / forward[rel]
+        for o, n in sorted(forward.items(), key=lambda kv: -len(kv[0])):
+            if rel.startswith(o + "/"):
+                return REPO / (n + rel[len(o):])
+        return here
+
     for entry in doc["binds"]:
-        p = REPO / entry["path"]
-        assert p.is_file(), entry["path"]
+        p = _resolve(entry["path"])
+        assert p.is_file(), (
+            f"{entry['path']} is bound by the amendment and is not at that "
+            "path nor at any path the migration records for it")
         assert hashlib.sha256(p.read_bytes()).hexdigest() == entry["sha256"], (
             f"{entry['path']} has changed since the amendment bound it; "
             "re-derive the amendment rather than applying it to new bytes")

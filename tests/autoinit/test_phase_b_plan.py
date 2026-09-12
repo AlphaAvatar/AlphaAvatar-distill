@@ -417,12 +417,30 @@ def test_the_immutable_phase_b_records_are_byte_identical_to_the_reviewed_base()
     """The preregistration and the sealed v1 note are evidence, not state."""
     import subprocess
 
+    #: The base commit knows these files by the path they had THEN. log-layout-v1
+    #: moved them, so `git show <base>:<current path>` finds nothing -- not
+    #: because the evidence changed, but because the question used today's
+    #: address for a historical tree. The migration manifest answers it: the
+    #: historical fact is `<base commit> + <old path>`, and the bytes must still
+    #: match what sits at the current path.
+    import json as _json
+
+    back = {}
+    for m in sorted((REPO / "logs/migrations").glob("*/manifest.json")):
+        try:
+            doc = _json.loads(m.read_text())
+        except (OSError, _json.JSONDecodeError):
+            continue
+        back.update({e["new_path"]: e["old_path"] for e in doc.get("entries", [])})
+
     for rel in ("logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json",
                 "logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"):
+        historical = back.get(rel, rel)
         at_base = subprocess.run(
-            ["git", "-C", str(REPO), "show", f"bd4e5880:{rel}"],
+            ["git", "-C", str(REPO), "show", f"bd4e5880:{historical}"],
             capture_output=True).stdout
-        assert at_base, f"{rel} is missing at the reviewed base"
+        assert at_base, (
+            f"{rel} is missing at the reviewed base, even as {historical}")
         assert (REPO / rel).read_bytes() == at_base, (
             f"{rel} changed; it is anchored by hash and must stay identical")
 

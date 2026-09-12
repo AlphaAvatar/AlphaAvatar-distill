@@ -344,7 +344,25 @@ def test_the_preregistration_states_the_current_scientific_state():
 def test_the_pricing_cites_the_attempt4_reuse_that_makes_missing_sb_empty():
     priced = json.loads(PRICING.read_text())
     prov = priced["reuse_provenance"]
-    records = {r["record"]: r for r in prov["records"]}
+    #: The pricing record is EVIDENCE and names the path this file had when it
+    #: was priced. log-layout-v1 moved the file and did not rewrite the record,
+    #: so the lookup goes through the migration rather than assuming either
+    #: address.
+    import json as _json
+
+    forward = {}
+    for m in sorted((REPO / "logs/migrations").glob("*/manifest.json")):
+        try:
+            doc = _json.loads(m.read_text())
+        except (OSError, _json.JSONDecodeError):
+            continue
+        forward.update({e["old_path"]: e["new_path"]
+                        for e in doc.get("entries", [])})
+    records = {}
+    for r in prov["records"]:
+        records[r["record"]] = r
+        if r["record"] in forward:
+            records[forward[r["record"]]] = r
     a4 = records["logs/experiments/shared/analyses/autoinit_attempt4_probe_reuse.json"]
     assert a4["admits"] == ["fe9683e6a9c7/sb"]
     assert a4["probes_dir_digest"] == json.loads(
@@ -518,6 +536,11 @@ def test_the_handoff_and_phase_index_exist_and_are_linked():
                     if t.startswith(("http", "mailto:")):
                         continue
                     q = (doc.parent / t).resolve()
+                    #: A directory link is followed to its README: that is how
+                    #: the canonical layout indexes a group, and a walker that
+                    #: only followed files stopped at every directory.
+                    if q.is_dir() and (q / "README.md").is_file():
+                        q = q / "README.md"
                     if q.exists() and q not in seen:
                         seen.add(q)
                         nxt.append(q)
@@ -557,7 +580,10 @@ def handoff_targets() -> list[Path]:
 
     state = json.loads((REPO / "logs/state/current.json").read_text())
     entry = state["handoff"]
-    names = re.findall(r"logs/[A-Za-z0-9_.\-]+\.(?:md|json)", entry)
+    #: `/` included: the canonical layout is nested, so a pattern that stopped
+    #: at the first slash matched only `logs/README.md` and the route was read
+    #: as landing on the index -- which states no figures by design.
+    names = re.findall(r"logs/[A-Za-z0-9_./\-]+\.(?:md|json)", entry)
     assert names, f"the handoff entry names no file at all: {entry!r}"
     return [REPO / n for n in names]
 
@@ -640,11 +666,19 @@ def test_the_superseded_handoff_is_registered_as_historical():
     assert "HANDOFF_next_session.md" in state["superseded_handoff"]
     assert "HISTORICAL" in state["superseded_handoff"]
 
-    catalog = (REPO / "logs/state/ownership.md").read_text()
-    row = next(l for l in catalog.splitlines()
-               if "`HANDOFF_next_session.md`" in l)
-    assert "HISTORICAL" in row and "superseded" in row.lower(), row
-    assert "STATE.md" in row, "the catalog row does not say what replaced it"
+    #: The superseding statement moved to the document that OWNS the archive.
+    #: `ownership.md` classifies `logs/` top-level entries, and after
+    #: log-layout-v1 the handoff is not one -- it is inside `archive/handoffs/`,
+    #: whose README says what it holds and what replaced it. Asking the catalog
+    #: for a row about a file two levels down would be asking the wrong owner.
+    archive = (REPO / "logs/archive/README.md").read_text()
+    assert "handoffs/" in archive, "the archive does not index its groups"
+    row = next(l for l in archive.splitlines() if "handoffs/" in l)
+    assert "superseded" in row.lower(), row
+    assert "state/current.md" in row, (
+        "the archive index does not say what replaced the handoff")
+    #: and the snapshot still routes a reader away from it
+    assert "HISTORICAL" in state["superseded_handoff"]
 
 
 def test_the_old_handoffs_own_text_is_not_rewritten():

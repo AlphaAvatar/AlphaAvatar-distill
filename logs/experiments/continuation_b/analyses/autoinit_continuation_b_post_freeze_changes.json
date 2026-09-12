@@ -4,28 +4,23 @@
  "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "b82f0633bca2b1eaac965dae31e254e2b49c2f747ae56fd6151199b2567ff2dc",
+ "post_freeze_digest": "6da9507057662c6ccc790342007ece7a02e67e7e193ccf303aa6fdfc0c737d95",
  "changed_files": [
-  "src/aadistill/infrastructure/session_runner.py"
+  "scripts/pod/autoinit_preflight_setup.sh"
  ],
  "change": {
-  "what": "per-resource acquisition evidence in the shared session runner, and the draw counter as a class attribute. The watchdog journal is derived from the pod id at LAUNCH and the rename is gone; create() names its raw provider response by DRAW and attempt; run() records a create_failed draw for a create that returned no id; the journal name became a module-level function so a launcher detaching its own backstop cannot spell the convention differently from the collector that globs for it.",
-  "why_it_touches_this_frozen_set": "continuation B's executable set names src/aadistill/infrastructure/session_runner.py, the shared provider-acquisition runner. Any repair to how a session acquires, watches and records a provider resource moves this digest even though continuation B is closed and consumed.",
+  "what": "log-layout-v1 path synchronisation: `logs/` was given one canonical layout and these members read or write repository-relative log paths that moved with it. Every edit is a path string or a prose citation of one.",
+  "why_it_touches_this_frozen_set": "continuation B's executable set names the shared setup script and the session runner. A path synchronisation moves their bytes and therefore this digest, even though continuation B is closed and consumed.",
   "additive_only": false,
-  "lines_added": 73,
-  "lines_removed": 36,
-  "why_not_additive": "the removed lines ARE the repair. The previous scheme renamed a shared journal aside when a draw started, which isolates nothing, because Journal.write reopens by path on every event: a watchdog that had not yet exited recreated the shared path and wrote its final poll and watchdog_end into the NEXT resource's journal while its own archive was left unterminated. Keeping the rename beside a per-pod name would leave the defect reachable. Reproduced with two real processes; three mutation-checked tests hold the line.",
-  "numstat_this_change": "73\t36\tsrc/aadistill/infrastructure/session_runner.py",
-  "numstat_rule": "git diff --numstat <previous declared_at_commit> HEAD -- <changed_files>",
-  "spans_commits": "7d516b8 and 19cf224; the numstat is measured across both, not one of them.",
-  "scope": "this entry describes the CHANGE BEING DECLARED NOW. Earlier declared changes are in `history`."
+  "scientific_impact_none_because": "no logic, threshold, protocol, seed, score or decision changed; only the addresses these scripts resolve. The 245 relocated objects are byte-identical and the migration manifest records each one's identity before the move.",
+  "scope": "this entry describes the CHANGE BEING DECLARED NOW."
  },
- "pre_existing_branches_unchanged": true,
- "pre_existing_branches_note": "UNCHANGED at this declaration, and MEASURED rather than asserted: scripts/pod/autoinit_preflight_setup.sh is not among the changed files, and every SESSION_KIND branch re-hashes identical to the previous declaration's recorded set.",
+ "pre_existing_branches_unchanged": false,
+ "pre_existing_branches_note": "MEASURED against the previous declaration's recorded set. The setup script changed, so a branch hash may move; what must not change is a branch's MEANING, and the edits are path strings only.",
  "preregistration_rewritten": false,
- "scientific_impact": "NONE. No probe, seed, score, decision rule, price or reuse record is touched. The change is confined to how a session names and records the provider resources it acquires.",
- "declared_at_commit": "19cf2240100464832179746287a213c42c165366",
- "post_freeze_digest_previous": "23878ff4f21d408b19b7a992e843523cbd517d61501213656d11b8e08b476648",
+ "scientific_impact": "NONE. A filesystem relocation; no scientific field moved.",
+ "declared_at_commit": "02723333e6c506e92bc98ba681a1ee386aae9f8a",
+ "post_freeze_digest_previous": "b82f0633bca2b1eaac965dae31e254e2b49c2f747ae56fd6151199b2567ff2dc",
  "history": [
   {
    "utc": "2026-09-06T06:00:00Z",
@@ -389,13 +384,40 @@
     "c1": "01ff547319ca2f0d53b89763c376bcb5cfb4809142da1a99cb4e5064b0524916",
     "recovery_continuation": "ea1d64fa2dd5067cf558c25b172fbcf50c7b101c95c3b872e10709d3c997e7ae"
    }
+  },
+  {
+   "utc": "2026-09-12T00:00:00Z",
+   "declared_at_commit": "19cf2240100464832179746287a213c42c165366",
+   "digest_moved": "23878ff4f21d408b -> b82f0633bca2b1ea",
+   "change": {
+    "what": "per-resource acquisition evidence in the shared session runner, and the draw counter as a class attribute. The watchdog journal is derived from the pod id at LAUNCH and the rename is gone; create() names its raw provider response by DRAW and attempt; run() records a create_failed draw for a create that returned no id; the journal name became a module-level function so a launcher detaching its own backstop cannot spell the convention differently from the collector that globs for it.",
+    "why_it_touches_this_frozen_set": "continuation B's executable set names src/aadistill/infrastructure/session_runner.py, the shared provider-acquisition runner. Any repair to how a session acquires, watches and records a provider resource moves this digest even though continuation B is closed and consumed.",
+    "additive_only": false,
+    "lines_added": 73,
+    "lines_removed": 36,
+    "why_not_additive": "the removed lines ARE the repair. The previous scheme renamed a shared journal aside when a draw started, which isolates nothing, because Journal.write reopens by path on every event: a watchdog that had not yet exited recreated the shared path and wrote its final poll and watchdog_end into the NEXT resource's journal while its own archive was left unterminated. Keeping the rename beside a per-pod name would leave the defect reachable. Reproduced with two real processes; three mutation-checked tests hold the line.",
+    "numstat_this_change": "73\t36\tsrc/aadistill/infrastructure/session_runner.py",
+    "numstat_rule": "git diff --numstat <previous declared_at_commit> HEAD -- <changed_files>",
+    "spans_commits": "7d516b8 and 19cf224; the numstat is measured across both, not one of them.",
+    "scope": "this entry describes the CHANGE BEING DECLARED NOW. Earlier declared changes are in `history`."
+   },
+   "changed_files": [
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "branch_hashes": {
+    "phase_a": "991233b9b55b9e2a7d3757b3568b56a1106fb8a4ef5c6bf552ea44fbca6fa058",
+    "phase_b": "0827dfaea8fa6e19418eaa5204dfc4181f9d481821afe604dfe246413e4609ec",
+    "continuation_b": "535ffcd23462e5f37331125c320c272f2822ec2a64a228cc6494109b4c37d79f",
+    "c1": "01ff547319ca2f0d53b89763c376bcb5cfb4809142da1a99cb4e5064b0524916",
+    "recovery_continuation": "ea1d64fa2dd5067cf558c25b172fbcf50c7b101c95c3b872e10709d3c997e7ae"
+   }
   }
  ],
  "branch_hashes_at_latest_declaration": {
   "phase_a": "991233b9b55b9e2a7d3757b3568b56a1106fb8a4ef5c6bf552ea44fbca6fa058",
   "phase_b": "0827dfaea8fa6e19418eaa5204dfc4181f9d481821afe604dfe246413e4609ec",
   "continuation_b": "535ffcd23462e5f37331125c320c272f2822ec2a64a228cc6494109b4c37d79f",
-  "c1": "01ff547319ca2f0d53b89763c376bcb5cfb4809142da1a99cb4e5064b0524916",
+  "c1": "711850e5b44085aebcb10395263feef4387b32739fb5392953648bab6ccf10b2",
   "recovery_continuation": "ea1d64fa2dd5067cf558c25b172fbcf50c7b101c95c3b872e10709d3c997e7ae"
  },
  "launch_compatible": false,

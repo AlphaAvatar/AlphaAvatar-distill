@@ -815,6 +815,9 @@ def test_a_non_auth_path_changed_after_the_authorized_base_is_refused(tmp_path):
     AUTH = "logs/budget/approvals/autoinit_phase_a_authorization.json"
     repo = tmp_path / "repo"
     (repo / "logs").mkdir(parents=True)
+    #: The canonical layout is nested: an authorization lives under
+    #: `logs/budget/approvals/`, so a bare `logs/` is no longer enough.
+    (repo / AUTH).parent.mkdir(parents=True, exist_ok=True)
     (repo / "scripts").mkdir()
 
     def git(*a):

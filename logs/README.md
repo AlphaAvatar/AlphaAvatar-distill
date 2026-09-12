@@ -9,7 +9,9 @@ The project's records, in one canonical layout. **Start here.**
 | every run | [`runs/index.json`](runs/index.json) |
 | why something was decided | [`budget/decisions.md`](budget/decisions.md) |
 | which file owns which fact | [`state/ownership.md`](state/ownership.md) |
+| what happened in a phase | [`state/phase_index.md`](state/phase_index.md) |
 | where an old path went | [`migrations/log-layout-v1/manifest.json`](migrations/log-layout-v1/manifest.json) |
+| a superseded document | [`archive/`](archive/) |
 
 Nothing here authorizes anything. A launch needs a grant, a launch-bound
 readiness record, a one-use authorization and a bundle — see

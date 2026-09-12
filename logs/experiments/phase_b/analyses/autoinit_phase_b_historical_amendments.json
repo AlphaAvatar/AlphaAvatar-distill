@@ -3,7 +3,7 @@
  "_what_this_is": "an APPEND-ONLY ledger of reviewed, post-completion drift in the Phase-B executable source set. It exists because 'this tree may not launch Phase B' and 'nobody explained why the digest moved' are different facts and the repository had one mechanism for both. It records history and confers nothing.",
  "consumed_by_a_paid_launch_gate": false,
  "launch_compatibility_owner": "scripts/pod/autoinit_phase_b_launch.py::preregistration_gate, via aadistill.governance.post_freeze.accounted_for \u2014 which is unchanged and still refuses non-additive drift",
- "immutability": "logs/autoinit_phase_b_preregistration.json and logs/autoinit_phase_b_post_freeze_changes.json are anchored by hash above and are never rewritten by this command.",
+ "immutability": "logs/experiments/phase_b/plans/autoinit_phase_b_preregistration.json and logs/experiments/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json are anchored by hash above and are never rewritten by this command.",
  "anchors": {
   "phase_b_preregistration": "logs/autoinit_phase_b_preregistration.json",
   "phase_b_preregistration_sha256": "65162317a298f6108b9902e7dce4b45a66b4d8e770406a2400e80d6e0dc2edc2",
@@ -1465,6 +1465,129 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "5c6b622bca2f1b180abf26b95296fe676faf50b6bc9e1b3c72cd4f97753ac7ba"
+  },
+  {
+   "amendment_id": "PHB-HA-016",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-12T15:04:28+00:00",
+   "reviewed_base_commit": "19cf224",
+   "source_repair_commit": "02723333e6c506e92bc98ba681a1ee386aae9f8a",
+   "source_repair_parent": "19cf2240100464832179746287a213c42c165366",
+   "previous_live_digest": "4d2fffb01e8da074147421e0493724e8464966152bff49ca214bc59e50616e9e",
+   "new_live_digest": "4c78dee48a6a1b7a42edcbeeeacf4c4f17d5261c4c25e927cd4f11a3669b9035",
+   "changed_files": [
+    "scripts/autoinit/price_phase_b.py",
+    "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/autoinit/verify_historical_probe_reuse.py",
+    "scripts/autoinit/write_preregistration.py",
+    "scripts/experiments/phase_a/plan.py",
+    "scripts/pod/autoinit_phase_a_driver.py",
+    "scripts/pod/autoinit_phase_a_launch.py",
+    "scripts/pod/autoinit_phase_b_driver.py",
+    "scripts/pod/autoinit_phase_b_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py"
+   ],
+   "file_sha256_before": {
+    "scripts/autoinit/price_phase_b.py": "7e013552818bc2c9979d74a559b3ac1e36391025780d92d1aa614b54a88bc310",
+    "scripts/autoinit/verify_frozen_assets.py": "1552298b95e16a3562e6f13005a764616d9d08f237b24033cdff78874fd30a20",
+    "scripts/autoinit/verify_historical_probe_reuse.py": "bdcc6dabe8e4e2eadce97abe9e9ab134491498e61484fdfe69c08db469695e84",
+    "scripts/autoinit/write_preregistration.py": "53a31753bb8097f2a4fe09ab32394a5833a754ca427eb057c2e753b90577b6f1",
+    "scripts/experiments/phase_a/plan.py": "7b98df036b349c690585b5d82460d669d8439822bed14e4297464a5f010fedd5",
+    "scripts/pod/autoinit_phase_a_driver.py": "8f5a57e908fa5f36408bcf9cf9a8aa13e57ca723faad9fae85940d9bda5afa75",
+    "scripts/pod/autoinit_phase_a_launch.py": "3dc0d9d2cb6e0354723e5e83fa94a3ec81b49d42645e2cbd6b460f03d24417be",
+    "scripts/pod/autoinit_phase_b_driver.py": "f253d261e9e388c5b7c0bd18115598e7a3d811e19dc3206a5cf4b819b4cbae9a",
+    "scripts/pod/autoinit_phase_b_launch.py": "c362261af4b4f22373dd9db27a6541a0fce788733b450ead52ca0b14bd2897de",
+    "scripts/pod/autoinit_preflight_setup.sh": "39d3b80855da0f537bbb2ca45e438715a813697a6bcd84b795b7b580e3a28f27",
+    "scripts/pod/autoinit_science_inputs.py": "ef4ab147131a950c54bbdf5ca39d0b32054cff3efdcd35dbf7acbe633204e292"
+   },
+   "file_sha256_after": {
+    "scripts/autoinit/price_phase_b.py": "fc3e2b9dd847e8bc6a511234bf85794ac58548b8f7ba0e66f30cb92efb60deda",
+    "scripts/autoinit/verify_frozen_assets.py": "aea8ca6bef6ed7713afb72d279aa03ea78d09235d3b897d47e2f062953cfe819",
+    "scripts/autoinit/verify_historical_probe_reuse.py": "2daf415bfc3f8dfb2d1fe3e4565d0e05310476929bbd1b4beecae935a89ecdb3",
+    "scripts/autoinit/write_preregistration.py": "26cac83ca7e5dd5cdf10fb22f0c09f5008068708d88fc853ba4b381de53b0ad4",
+    "scripts/experiments/phase_a/plan.py": "78f050eeaa4a9146d2d31ada8386b20409756aad20ee32ad5d0f6f97c5c6ac74",
+    "scripts/pod/autoinit_phase_a_driver.py": "c16ccae6e22d678324785e93f3901818014b3e949fe346a5c82effe3700bae7a",
+    "scripts/pod/autoinit_phase_a_launch.py": "86cc4396cc6a7262ce8e07654edac2813ae2b492a1e1c9000978d72c846cf877",
+    "scripts/pod/autoinit_phase_b_driver.py": "a4ec467f96011c0409cd93e5177d96be3ee915216ee22156212595abc361281c",
+    "scripts/pod/autoinit_phase_b_launch.py": "f24204d369ab5220543125e287a3d3b44022bc161cc44e2a41e8459acc95927e",
+    "scripts/pod/autoinit_preflight_setup.sh": "1f8ed14a3cb3d59951164fc08d3a7bcf210933ef1abc6f98c59c69d583674b3a",
+    "scripts/pod/autoinit_science_inputs.py": "2daf840b647f8408929ddc3c9a3d6cc0af868848078a402ee30e86d2e88c36f2"
+   },
+   "patch_sha256": "dedd5d8f7c8ca60c3a71507de2336b1b8b33660519cb89fb142f9e8f8ec33c27",
+   "numstat": {
+    "scripts/autoinit/price_phase_b.py": [
+     5,
+     5
+    ],
+    "scripts/autoinit/verify_frozen_assets.py": [
+     1,
+     1
+    ],
+    "scripts/autoinit/verify_historical_probe_reuse.py": [
+     3,
+     3
+    ],
+    "scripts/autoinit/write_preregistration.py": [
+     21,
+     21
+    ],
+    "scripts/experiments/phase_a/plan.py": [
+     1,
+     1
+    ],
+    "scripts/pod/autoinit_phase_a_driver.py": [
+     8,
+     8
+    ],
+    "scripts/pod/autoinit_phase_a_launch.py": [
+     7,
+     7
+    ],
+    "scripts/pod/autoinit_phase_b_driver.py": [
+     3,
+     3
+    ],
+    "scripts/pod/autoinit_phase_b_launch.py": [
+     5,
+     5
+    ],
+    "scripts/pod/autoinit_preflight_setup.sh": [
+     2,
+     2
+    ],
+    "scripts/pod/autoinit_science_inputs.py": [
+     1,
+     1
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 57,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "log-layout-v1 path synchronisation. logs/ was given one canonical layout -- 245 objects relocated byte-identically, verified by per-file sha256 and per-directory tree hash -- and these launchers, drivers and setup scripts read and write repository-relative log paths that moved with it. Every edit is a path string or a prose citation of one; no logic, no threshold, no protocol and no decision changed. Files covered by a FROZEN digest (recovery_search_scoring@v3, the trainer and generation source sets) were deliberately left untouched and keep their original bytes: two comment citations there had been rewritten, which moved the scoring contract and the frozen-asset gate refused the tree, correctly.",
+   "why_the_owner_is_shared_session_runner": "Phase B's executable set names these launchers, drivers and the shared setup script. A path synchronisation moves their bytes and therefore this digest, even though Phase B is closed and its authorization consumed.",
+   "why_a_c1_only_override_was_rejected": "The paths are read by every session's launcher, driver and setup -- Phase A, Phase B, both continuations and C1. Synchronising only C1's would leave every other session resolving a layout that no longer exists.",
+   "maintainer_authorization": "P12.1 autonomous engineering repair inside the approved phase_c1.execution_package.2026-09-11 envelope; a filesystem/provenance migration, no new budget and no scientific change",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "5c6b622bca2f1b180abf26b95296fe676faf50b6bc9e1b3c72cd4f97753ac7ba",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "b649298963fb2e8133f60c6333369aadf45f808415de91f844e9835c412c3ce3"
   }
  ]
 }
