@@ -8,7 +8,7 @@
   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
   "tests/autoinit/test_stage1_import.py"
  ],
- "n_predicates": 102,
+ "n_predicates": 104,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
@@ -18,12 +18,12 @@
   "optional_dependency": 9,
   "repository_content": 3,
   "staged_artifact": 3,
-  "unrecognised": 25,
+  "unrecognised": 27,
   "unstaged_artifact": 8
  },
  "n_differs_on_pod": 24,
- "n_unrecognised": 29,
- "n_registered": 34,
+ "n_unrecognised": 31,
+ "n_registered": 36,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
@@ -72,7 +72,9 @@
    "tests/pod/test_recovery_continuation_session.py::skip_if_c1_session"
   ],
   "staging_premise_property": [
-   "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible"
+   "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
+   "tests/docs/test_log_organisation.py",
+   "tests/docs/test_repository_structure.py"
   ]
  },
  "stale_registry_entries": [],
@@ -103,7 +105,7 @@
  "parity_by_resolution": {
   "absent_on_both": 9,
   "guaranteed_dependency": 9,
-  "normalized_by_contract": 28,
+  "normalized_by_contract": 30,
   "same_on_pod": 56
  },
  "parity_unresolved": [],
@@ -152,6 +154,8 @@
   "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
   "tests/data/test_dataset.py::tokenizer",
   "tests/data/test_sessions.py::tokenizer",
+  "tests/docs/test_log_organisation.py",
+  "tests/docs/test_repository_structure.py",
   "tests/evaluation/test_oracle_reasoning.py::tok",
   "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards",
   "tests/pod/test_c1_driver_execution.py::_summary_template",
@@ -905,6 +909,38 @@
    "registered_as": "local_hf_cache",
    "parity": "normalized_by_contract",
    "parity_why": "the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
+  },
+  {
+   "file": "tests/docs/test_log_organisation.py",
+   "line": 48,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "bool(_missing_tracked_logs())",
+   "expanded": "bool(_missing_tracked_logs())",
+   "signal": "unrecognised",
+   "verdict": "unknown",
+   "why": "no known signal matched; a human must say whether a pod sees the same premise",
+   "nodeid": "tests/docs/test_log_organisation.py",
+   "readiness_group": null,
+   "registered_as": "staging_premise_property",
+   "parity": "normalized_by_contract",
+   "parity_why": "these ask the filesystem for unstaged artifacts. The simulator has moved them aside and the pod never received them, so both skip for the same stated reason."
+  },
+  {
+   "file": "tests/docs/test_repository_structure.py",
+   "line": 335,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "_logs_tree_is_partial()",
+   "expanded": "_logs_tree_is_partial()",
+   "signal": "unrecognised",
+   "verdict": "unknown",
+   "why": "no known signal matched; a human must say whether a pod sees the same premise",
+   "nodeid": "tests/docs/test_repository_structure.py",
+   "readiness_group": null,
+   "registered_as": "staging_premise_property",
+   "parity": "normalized_by_contract",
+   "parity_why": "these ask the filesystem for unstaged artifacts. The simulator has moved them aside and the pod never received them, so both skip for the same stated reason."
   },
   {
    "file": "tests/docs/test_storage_inventory.py",
@@ -1854,5 +1890,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "9ea1a677668a9b6333f4fcbf8a3e9553a5f415bc04dba4348a518d1efd969c96"
+ "digest": "ffb6dd4a97da2340fad4f5e7efad3bfdab259217621a270ff02467eb63f9721c"
 }

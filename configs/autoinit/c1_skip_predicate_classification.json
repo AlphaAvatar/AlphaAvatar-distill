@@ -142,6 +142,14 @@
   },
   "tests/training/test_train.py::teacher_tokenizer": {
    "class": "local_hf_cache"
+  },
+  "tests/docs/test_log_organisation.py": {
+   "class": "staging_premise_property",
+   "why": "the whole-tree log checks: the catalog renderer, the relocation record and the navigation regeneration read the logs/ tree as a set. A pod receives a staged subset, so the set is different there. The predicate compares `git ls-files logs` against the filesystem -- it asks for the property it needs and both machines answer correctly."
+  },
+  "tests/docs/test_repository_structure.py": {
+   "class": "staging_premise_property",
+   "why": "the markdown link resolver, for the same reason: a link from a staged document to an unstaged one is a fact about the staging, not a broken reference. Keyed on the same observed git-vs-filesystem comparison."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",
