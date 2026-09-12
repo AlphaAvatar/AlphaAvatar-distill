@@ -5,9 +5,9 @@
   "c1_harness_n_files": 99,
   "counts": {
     "error": 0,
-    "failed": 12,
-    "passed": 3742,
-    "skipped": 120
+    "failed": 3,
+    "passed": 3736,
+    "skipped": 135
   },
   "environment": {
     "artifact_hiding": "manifest-derived positive staged view: 28 files visible from the C1 SetupManifest, 1056 hidden as the computed complement. NOT the simulator's generic default.",
@@ -21,12 +21,12 @@
     "executions_of_this_tree": [
       "exec-001"
     ],
-    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-9f0149c3d67c/exec-001/junit.xml",
-    "junit_sha256": "2e5046bd516d79a89fcf747464ec2dd40907422cf7663fd1e7e9737824c38a11",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-9f0149c3d67c/exec-001/pytest.log",
-    "pytest_log_sha256": "534b6379fc3f65bac5b092137ee8760cb6f056351941004a50a991cd1c5aa111"
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-30f6ceeda452/exec-001/junit.xml",
+    "junit_sha256": "78f55e61906e0cffa5df4265c77df2c2150578b10a4dbf1c87f7e59e357eed39",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-30f6ceeda452/exec-001/pytest.log",
+    "pytest_log_sha256": "9b7d03bcc692cc0d2776a14c63b22f6f07efcef326bafed76d61f022be3ff436"
   },
-  "execution_id": "sweep-9f0149c3d67c/exec-001",
+  "execution_id": "sweep-30f6ceeda452/exec-001",
   "expected_environment_skips": [
     "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
     "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
@@ -55,15 +55,6 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
   "failed_nodeids": [
-    "tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution",
-    "tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for",
-    "tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready",
-    "tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one",
-    "tests/autoinit/test_staging_contract.py::test_the_recorder_derives_and_never_falls_back",
-    "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
-    "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to",
-    "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation",
-    "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately",
     "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there",
     "tests/pod/test_run_identity_is_wired.py::test_a_completed_session_records_every_role_it_produced",
     "tests/pod/test_run_identity_is_wired.py::test_the_one_use_governance_artifacts_are_snapshotted_at_open"
@@ -113,7 +104,22 @@
       "tests/data/test_sessions.py::test_render_session_rejects_a_session_over_the_limit",
       "tests/data/test_sessions.py::test_render_session_round_trips_through_the_official_template",
       "tests/data/test_sessions.py::test_source_system_prompt_is_preserved_in_the_render",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_it_matches_the_canonical_store",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_the_frozen_battery_manifest_verifies",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_the_protected_trees_are_declared",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_retry_after_failure_does_not_truncate_the_failed_evidence",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_an_explicit_path_that_already_exists_is_refused",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_an_interrupted_second_execution_leaves_the_first_intact",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_no_shared_default_remains",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_reading_an_existing_sweep_is_a_separate_path",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_two_executions_of_one_commit_get_two_locations",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_two_trees_get_two_locations",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_a_launch_bound_claim_requires_the_current_tree",
       "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_every_superseded_verdict_is_preserved",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately",
       "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing",
       "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_the_catalog_classifies_every_entry",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_every_exception_states_what_holds_it",
@@ -201,9 +207,9 @@
     "battery_staged_role_outcome": "passed",
     "counts": {
       "error": 0,
-      "failed": 12,
-      "passed": 3742,
-      "skipped": 120
+      "failed": 3,
+      "passed": 3736,
+      "skipped": 135
     },
     "devbox_only_expected_skips": {
       "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible": "skipped",
@@ -230,15 +236,6 @@
       "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
     ],
     "failed_nodeids": [
-      "tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution",
-      "tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for",
-      "tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready",
-      "tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one",
-      "tests/autoinit/test_staging_contract.py::test_the_recorder_derives_and_never_falls_back",
-      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
-      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to",
-      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation",
-      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately",
       "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there",
       "tests/pod/test_run_identity_is_wired.py::test_a_completed_session_records_every_role_it_produced",
       "tests/pod/test_run_identity_is_wired.py::test_the_one_use_governance_artifacts_are_snapshotted_at_open"
@@ -260,9 +257,9 @@
       "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
     },
     "leaf_transport_all_passed": true,
-    "n_skipped": 120,
+    "n_skipped": 135,
     "problems": [
-      "12 failed/errored: ['tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution', 'tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for', 'tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready', 'tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one', 'tests/autoinit/test_staging_contract.py::test_the_recorder_derives_and_never_falls_back', 'tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output', 'tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to', 'tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation', 'tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately', 'tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there']"
+      "3 failed/errored: ['tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there', 'tests/pod/test_run_identity_is_wired.py::test_a_completed_session_records_every_role_it_produced', 'tests/pod/test_run_identity_is_wired.py::test_the_one_use_governance_artifacts_are_snapshotted_at_open']"
     ],
     "renderer_parity_expected_skips": {
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
@@ -323,7 +320,22 @@
       "tests/data/test_sessions.py::test_render_session_rejects_a_session_over_the_limit": "teacher tokenizer not in local HF cache",
       "tests/data/test_sessions.py::test_render_session_round_trips_through_the_official_template": "teacher tokenizer not in local HF cache",
       "tests/data/test_sessions.py::test_source_system_prompt_is_preserved_in_the_render": "teacher tokenizer not in local HF cache",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_it_matches_the_canonical_store": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_the_frozen_battery_manifest_verifies": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_the_protected_trees_are_declared": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_retry_after_failure_does_not_truncate_the_failed_evidence": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_an_explicit_path_that_already_exists_is_refused": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_an_interrupted_second_execution_leaves_the_first_intact": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_no_shared_default_remains": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_reading_an_existing_sweep_is_a_separate_path": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_two_executions_of_one_commit_get_two_locations": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_two_trees_get_two_locations": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_a_launch_bound_claim_requires_the_current_tree": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_every_superseded_verdict_is_preserved": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_the_catalog_classifies_every_entry": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheRelocationIsTraceable::test_every_exception_states_what_holds_it": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
@@ -401,7 +413,7 @@
       "tests/pod/test_setup_end_to_end.py::test_the_real_setup_runs_to_SETUP_DONE_and_the_launcher_reads_it": "the canonical checkpoint is not staged locally",
       "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init": "the baseline initialization is absent, so the validator exits 1 before it can produce a gated report"
     },
-    "skip_set_digest": "a5df1d25b959a331d4ff029b07ed262ee2b6c6db75160d4821ece0b517fef850",
+    "skip_set_digest": "d26d8237f807aa344073f569a9c4954f74a1a71b7f1aaac2f7346bbf21867b0d",
     "skip_set_is_forensic_not_scientific": "the complete skip list exists so a pod/sweep divergence can be NAMED. The total is not a target and carries no scientific content; only the declared groups above express expectations.",
     "unexpected_environment_skips": [],
     "verdict": "FAIL"
@@ -449,7 +461,7 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory"
   ],
   "n_tests": 3874,
-  "pod_test_environment_digest": "e0e7069a1192a0c395a33538314bf2d8ea0a81e0bce1b56444273b8863b1e2ca",
+  "pod_test_environment_digest": "39412bd7fa6f706d2c99deb1364a46214cc5ebd9180ad7baf6b99ee083f25a76",
   "pod_test_environment_n_files": 195,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
@@ -457,7 +469,7 @@
     "scripts/autoinit/record_pod_environment.py"
   ],
   "problems": [
-    "12 failed/errored: ['tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution', 'tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for', 'tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready', 'tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one', 'tests/autoinit/test_staging_contract.py::test_the_recorder_derives_and_never_falls_back', 'tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output', 'tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to', 'tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation', 'tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately', 'tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there']"
+    "3 failed/errored: ['tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there', 'tests/pod/test_run_identity_is_wired.py::test_a_completed_session_records_every_role_it_produced', 'tests/pod/test_run_identity_is_wired.py::test_the_one_use_governance_artifacts_are_snapshotted_at_open']"
   ],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/autoinit/test_stage1_import.py",
   "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
@@ -466,13 +478,13 @@
   "renderer_parity_is_proved_by": "logs/experiments/phase_c1/renderer_parity.json",
   "renderer_parity_skipped_as_expected": true,
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 840.7,
-  "self_sha256": "89d7e9f5b45f83a86e0700fcdef281a8e9bf35fbb64343fa2b358a53b73fc12e",
+  "seconds": 854.0,
+  "self_sha256": "70c863245cdad0d71613c1f940c05740f2d1422a294295c5b30db4b508162c6e",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_9f0149c3.bundle",
+    "BUNDLE_NAME": "aad_autoinit_30f6ceed.bundle",
     "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
     "SESSION_AUTH_PATH": "logs/runs/stage-1/phase_c1/spec_check/governance/authorization.json",
-    "SESSION_COMMIT": "9f0149c3d67c1b1fb33204a9dea4e95f7d536ec8",
+    "SESSION_COMMIT": "30f6ceeda452c52a8173164e1a419058d3e64d7e",
     "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c1/frozen_assets.json",
     "SESSION_KIND": "c1",
     "SESSION_PLAN_HASH": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
@@ -485,7 +497,7 @@
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1056 derived paths, contract 74192f5b7198> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-9f0149c3d67c/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-9f0149c3d67c/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1056 derived paths, contract 74192f5b7198> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-30f6ceeda452/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-30f6ceeda452/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
   "simulator_exit_code": 1,
   "staging_contract": {
     "digest": "74192f5b71986a43d03ab4794b148b6c236d68885a344ad58e549e07de8c4e45",
@@ -517,7 +529,7 @@
   },
   "staging_contract_digest": "74192f5b71986a43d03ab4794b148b6c236d68885a344ad58e549e07de8c4e45",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "9f0149c3d67c1b1fb33204a9dea4e95f7d536ec8",
+  "swept_base_commit": "30f6ceeda452c52a8173164e1a419058d3e64d7e",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "FAIL"

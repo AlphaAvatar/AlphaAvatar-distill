@@ -123,20 +123,40 @@ def test_the_session_record_is_written_inside_the_run(tmp_path, L):
     assert (repo / args.out).parent.is_dir()
 
 
-def test_the_one_use_governance_artifacts_are_snapshotted_at_open(tmp_path, L):
-    """Snapshotted BEFORE the session, while they still describe this attempt.
+def test_the_one_use_governance_artifacts_are_produced_into_the_run(tmp_path, L):
+    """Produced into the run, not copied from a shared repository-root file.
 
-    The live authorization and bundle record are rewritten by the next issuance,
-    so a copy taken afterwards can describe a different attempt entirely.
+    This used to check that the launcher SNAPSHOTTED the live authorization and
+    bundle record at open, because both lived at repository-root paths the next
+    issuance overwrote — the copy was the defence. On 2026-09-12 the issuer and
+    the bundle stager began writing into the run that owns them, so there is
+    nothing to copy and the defence is structural.
+
+    The property is the same one and is asserted directly: what a later
+    issuance writes cannot reach a run that has already been opened.
     """
     repo = _fake_repo(tmp_path, L)
     args = _args(tmp_path)
     layout = L.open_c1_run(args, repo)
-    assert json.loads(layout.path("governance/authorization.json").read_text()
-                      )["authorization_id"] == "test"
-    (repo / L.AUTH_PATH).write_text('{"authorization_id": "the NEXT attempt"}')
-    assert json.loads(layout.path("governance/authorization.json").read_text()
-                      )["authorization_id"] == "test"
+
+    #: Where this run's artifacts live, through the launcher's own helper.
+    auth = repo / L.auth_path_for(args.run_id)
+    auth.parent.mkdir(parents=True, exist_ok=True)
+    auth.write_text('{"authorization_id": "test"}')
+    assert auth.resolve() == layout.path("governance/authorization.json").resolve(), (
+        "the issuer and the run disagree about where the authorization lives")
+
+    #: A later issuance writes to ITS run, and to the global pointer. Neither
+    #: can reach this one.
+    (repo / L.auth_path_for("attempt99")).parent.mkdir(parents=True,
+                                                       exist_ok=True)
+    (repo / L.auth_path_for("attempt99")).write_text(
+        '{"authorization_id": "the NEXT attempt"}')
+    (repo / L.AUTH_POINTER).write_text('{"authorization_id": "a pointer"}')
+    assert json.loads(auth.read_text())["authorization_id"] == "test"
+
+    #: And nothing copies it in, which is what made the old defence necessary.
+    assert "authorization" not in [role for _src, role in L._RUN_GOVERNANCE]
 
 
 def test_an_absent_governance_artifact_does_not_stop_the_run(tmp_path, L):
@@ -257,11 +277,23 @@ def test_a_completed_session_records_every_role_it_produced(tmp_path, L):
     (scr / "store").mkdir()
     (scr / "store" / "manifest.json").write_text("{}")
 
+    #: The governance artifacts a real session has by then are produced into
+    #: the run before it closes -- the grant by the maintainer, the readiness
+    #: record by the sweep, the authorization by the issuer, the bundle record
+    #: by the stager. This fixture drives `close_c1_run` alone, so it puts them
+    #: where their producers would.
+    for role in ("authorization", "bundle_record"):
+        q = layout.path(L.C1_RUN_ROLES[role])
+        q.parent.mkdir(parents=True, exist_ok=True)
+        q.write_text("{}\n")
+
     doc = L.close_c1_run(layout, args, repo)
     assert set(doc["roles"]) == {
         "session_record", "launcher_log", "watchdog_journal", "authorization",
         "bundle_record", "driver_evidence", "driver_log", "driver_status",
         "artifact_manifest"}
+    #: They are the run's own, not copies: nothing collects them any more.
+    assert not L._RUN_GOVERNANCE
     assert layout.path("evidence/driver_status.txt").is_file()
     assert doc["status"]["terminal"] == "ALL_DONE"
     assert doc["status"]["passed"] is True
