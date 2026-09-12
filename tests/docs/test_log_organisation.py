@@ -25,6 +25,32 @@ def load(rel: str) -> dict:
     return json.loads((REPO / rel).read_text())
 
 
+def _missing_tracked_logs() -> list[str]:
+    """Tracked `logs/` files that are not on disk right now.
+
+    A pod receives a STAGED subset of the repository, and the pod-environment
+    simulator models that by moving the rest aside. Anything here that reads the
+    `logs/` tree as a whole -- the catalog renderer, the relocation record --
+    describes a different tree there, and three of these tests failed inside the
+    sweep for exactly that reason. On a paid pod that is a CPU-gate failure.
+
+    The condition is OBSERVED, not flagged: git says what should be present and
+    the filesystem says what is. A `skipif` keyed on a simulator variable would
+    be inverted on the pod, which does not set it -- this repository has already
+    lost a session to that.
+    """
+    out = subprocess.run(["git", "ls-files", "logs"], cwd=REPO,
+                         capture_output=True, text=True, check=True).stdout.split()
+    return [f for f in out if not (REPO / f).exists()]
+
+
+#: Applied to the tests that read the tree as a whole. The rest run everywhere.
+needs_whole_tree = pytest.mark.skipif(
+    bool(_missing_tracked_logs()),
+    reason=("the logs/ tree is partially staged, so a check that reads it as a "
+            "whole would describe a different tree"))
+
+
 # --- the four balances -----------------------------------------------------
 
 class TestTheBudgetIsDerivedNotRestated:
@@ -222,6 +248,7 @@ class TestRegisteredEvidenceIsProtected:
 
 # --- the relocation is followable both ways ---------------------------------
 
+@needs_whole_tree
 class TestTheRelocationIsTraceable:
     @pytest.fixture(scope="class")
     def record(self):
@@ -276,6 +303,7 @@ class TestTheRelocationIsTraceable:
 class TestTheNavigationIsDerivedFromTheTree:
     """It went stale thirty times in one afternoon while being hand-edited."""
 
+    @needs_whole_tree
     def test_rendering_again_changes_nothing(self):
         """Run the renderer against the live tree; its output must already be
         what is committed. A drift means a file moved and the navigation was
@@ -296,6 +324,7 @@ class TestTheNavigationIsDerivedFromTheTree:
             assert (d / "README.md").read_text() == render_experiment_readme(
                 d, REPO, runs), f"{d.name}/README.md is stale"
 
+    @needs_whole_tree
     def test_the_catalog_classifies_every_entry(self):
         import re
         named = set(re.findall(r"`([^`]+)`", (REPO / CATALOG_REL).read_text()))
@@ -355,6 +384,7 @@ class TestSweepOutputsAreIsolated:
         assert "podsim_junit.xml" not in src, "the shared JUnit default is back"
         assert "podsim_pytest.log" not in src, "the shared log default is back"
 
+    @needs_whole_tree
     def test_a_committed_record_still_names_its_own_raw_output(self):
         """The record's `evidence` block must point at paths that belong to the
         sweep it describes, so the two cannot drift apart again."""

@@ -5,8 +5,8 @@
   "c1_harness_n_files": 99,
   "counts": {
     "error": 0,
-    "failed": 1,
-    "passed": 3703,
+    "failed": 3,
+    "passed": 3730,
     "skipped": 113
   },
   "environment": {
@@ -18,8 +18,8 @@
     "token_mode": "synthetic, non-empty; never printed, never a real credential"
   },
   "evidence": {
-    "junit": "/home/ecs-user/aad-scratch/podsim_junit.xml",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim_pytest.log"
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-185eb053ed8e/junit.xml",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-185eb053ed8e/pytest.log"
   },
   "expected_environment_skips": [
     "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
@@ -49,7 +49,9 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
   "failed_nodeids": [
-    "tests/pod/test_run_identity_is_wired.py::test_this_repositorys_index_still_accounts_for_every_run_on_disk"
+    "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
+    "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing",
+    "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there"
   ],
   "findings": {
     "all_skipped_nodeids": [
@@ -177,8 +179,8 @@
     "battery_staged_role_outcome": "passed",
     "counts": {
       "error": 0,
-      "failed": 1,
-      "passed": 3703,
+      "failed": 3,
+      "passed": 3730,
       "skipped": 113
     },
     "devbox_only_expected_skips": {
@@ -206,7 +208,9 @@
       "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
     ],
     "failed_nodeids": [
-      "tests/pod/test_run_identity_is_wired.py::test_this_repositorys_index_still_accounts_for_every_run_on_disk"
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
+      "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing",
+      "tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there"
     ],
     "host_local_c1_expected_skips": {
       "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": "skipped",
@@ -227,7 +231,7 @@
     "leaf_transport_all_passed": true,
     "n_skipped": 113,
     "problems": [
-      "1 failed/errored: ['tests/pod/test_run_identity_is_wired.py::test_this_repositorys_index_still_accounts_for_every_run_on_disk']"
+      "3 failed/errored: ['tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output', 'tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing', 'tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there']"
     ],
     "renderer_parity_expected_skips": {
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
@@ -406,31 +410,31 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_a_file_absent_from_the_far_end_is_caught",
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory"
   ],
-  "n_tests": 3817,
-  "pod_test_environment_digest": "b390055cc5349b90e7061170b390b14a451d4051c17327359aa89c455390019b",
-  "pod_test_environment_n_files": 194,
+  "n_tests": 3846,
+  "pod_test_environment_digest": "09ade89532d5beb14fd62200227518f8d34bc1309c15c36116ef2198f161f8c7",
+  "pod_test_environment_n_files": 195,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
     "scripts/autoinit/publish_selected_leaves.py",
     "scripts/autoinit/record_pod_environment.py"
   ],
   "problems": [
-    "1 failed/errored: ['tests/pod/test_run_identity_is_wired.py::test_this_repositorys_index_still_accounts_for_every_run_on_disk']"
+    "3 failed/errored: ['tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output', 'tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing', 'tests/docs/test_repository_structure.py::test_no_markdown_link_points_at_a_file_that_is_not_there']"
   ],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/autoinit/test_stage1_import.py",
   "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
-  "record_kind": "launch_bound",
+  "record_kind": "diagnostic",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved C1 launch rests on. It is produced on the final CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are committed, BEFORE the authorization is issued -- because a sweep run after issuance adds a second path to the lineage diff and session_commit_gate refuses.",
   "renderer_parity_is_proved_by": "logs/c1_renderer_parity.json",
   "renderer_parity_skipped_as_expected": true,
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 635.2,
-  "self_sha256": "7cb71b15f8fd78958384103ee98cfa68ec0f1ec2dcbf071af5790d0c36a87d18",
+  "seconds": 654.5,
+  "self_sha256": "9a37d0d32fbaf8c81b52163b0e00c4764cd127463876c73133a946cb0f1721ea",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_82745981.bundle",
+    "BUNDLE_NAME": "aad_autoinit_185eb053.bundle",
     "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
     "SESSION_AUTH_PATH": "logs/autoinit_c1_authorization.json",
-    "SESSION_COMMIT": "8274598159e01cce95679bdef209aeca2bd479dd",
+    "SESSION_COMMIT": "185eb053ed8ec5c90173de333803adf99df414d1",
     "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c1/frozen_assets.json",
     "SESSION_KIND": "c1",
     "SESSION_PLAN_HASH": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
@@ -443,7 +447,7 @@
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1056 derived paths, contract 74192f5b7198> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim_junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim_pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1056 derived paths, contract 74192f5b7198> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-185eb053ed8e/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-185eb053ed8e/pytest.log bash scripts/pod/simulate_pod_env.sh",
   "simulator_exit_code": 1,
   "staging_contract": {
     "digest": "74192f5b71986a43d03ab4794b148b6c236d68885a344ad58e549e07de8c4e45",
@@ -475,7 +479,7 @@
   },
   "staging_contract_digest": "74192f5b71986a43d03ab4794b148b6c236d68885a344ad58e549e07de8c4e45",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "8274598159e01cce95679bdef209aeca2bd479dd",
+  "swept_base_commit": "185eb053ed8ec5c90173de333803adf99df414d1",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "FAIL"
