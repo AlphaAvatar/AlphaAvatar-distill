@@ -8,12 +8,12 @@
   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
   "tests/autoinit/test_stage1_import.py"
  ],
- "n_predicates": 109,
+ "n_predicates": 110,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
   "filesystem_premise_onpod": 45,
-  "filesystem_premise_unresolved": 4,
+  "filesystem_premise_unresolved": 5,
   "gpu": 1,
   "optional_dependency": 9,
   "repository_content": 3,
@@ -22,12 +22,13 @@
   "unstaged_artifact": 10
  },
  "n_differs_on_pod": 26,
- "n_unrecognised": 31,
- "n_registered": 38,
+ "n_unrecognised": 32,
+ "n_registered": 39,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
    "tests/autoinit/test_c1_confirmation_scoring.py",
+   "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
    "tests/autoinit/test_frozen_records.py",
    "tests/data/test_e7_streams.py",
    "tests/docs/test_log_organisation.py::test_every_cited_path_including_untracked_really_exists",
@@ -107,7 +108,7 @@
  "parity_by_resolution": {
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
-  "normalized_by_contract": 31,
+  "normalized_by_contract": 32,
   "same_on_pod": 59
  },
  "parity_unresolved": [],
@@ -150,6 +151,7 @@
  "unaccounted": [],
  "unrecognised": [
   "tests/autoinit/test_c1_confirmation_scoring.py",
+  "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
   "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
   "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
   "tests/data/test_c1_battery.py::require_role",
@@ -332,13 +334,29 @@
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
    "readiness_group": null,
-   "registered_as": null,
+   "registered_as": "devbox_only_artifact",
    "parity": "same_on_pod",
    "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 870,
+   "line": 485,
+   "kind": "pytest.skip",
+   "function": "test_the_committed_record_still_binds_the_live_executable",
+   "condition": "not (REPO / named).is_file()",
+   "expanded": "not (REPO / named).is_file() | REPO=Path(__file__).resolve().parents[2] | named=doc.get(\"record\") | doc=json.loads((REPO / named).read_text())",
+   "signal": "filesystem_premise_unresolved",
+   "verdict": "unknown",
+   "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
+   "nodeid": "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
+   "readiness_group": null,
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
+  },
+  {
+   "file": "tests/autoinit/test_c1_readiness_gates.py",
+   "line": 883,
    "kind": "pytest.skip",
    "function": "test_the_recorded_swept_commit_is_a_real_commit_in_this_repository",
    "condition": "not path.is_file()",
@@ -1972,5 +1990,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "87c6d3bbc824dc13c5d4f829c89e941be7c9158a26f3278c3f64ad1bbfe3fe1e"
+ "digest": "05337da28b33ed2f0a6da528a9f18a459f1bbddeed64741f480ff53503114a2f"
 }

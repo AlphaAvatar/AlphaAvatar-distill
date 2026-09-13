@@ -43,6 +43,10 @@
   "tests/autoinit/test_c1_confirmation_scoring.py": {
    "class": "devbox_only_artifact"
   },
+  "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable": {
+   "class": "devbox_only_artifact",
+   "note": "gate 12's second guard, added when the readiness record moved into the run that owns it. The condition reads a path taken from the pointer, so the audit cannot resolve a literal out of the source and a human has to say what it inspects: runs/<run>/governance/readiness.json, which `runs/` gitignores. A git bundle therefore never carries it and a pod never receives it, and the simulator moves it aside here \u2014 absent on both, SKIP on both. On a pod the FIRST guard in this test fires anyway, because a pod running the CPU suite is inside the measured suite whose outcome the record is built from. The gate this test mirrors resolves the record directly and is unaffected."
+  },
   "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host": {
    "class": "pinned_snapshot_source"
   },
