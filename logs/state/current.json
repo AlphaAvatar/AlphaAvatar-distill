@@ -166,9 +166,9 @@
  "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed.",
  "latest_run": {
   "experiment_id": "phase_c1",
-  "run_id": "attempt13",
-  "root": "logs/stages/stage-1/phase_c1/runs/attempt13",
-  "state": "PREPARED, not executed -- governance inputs only",
+  "run_id": "attempt14",
+  "root": "logs/stages/stage-1/phase_c1/runs/attempt14",
+  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
   "index": "logs/index.json",
   "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt12"
  },

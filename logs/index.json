@@ -990,8 +990,8 @@
    "experiment_id": "phase_c1",
    "run_id": "attempt14",
    "root": "logs/stages/stage-1/phase_c1/runs/attempt14",
-   "n_files": 1,
-   "digest": "c4ba3962665ef7736f64171d4880fbd70fc11cb92a3635d9b38328e4ed632e20",
+   "n_files": 2,
+   "digest": "4d00ef5ab7982c5384501dc73c07b590d9e7513c09a68da0cf5deaedccd16e47",
    "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],

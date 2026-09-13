@@ -707,6 +707,37 @@ def main() -> int:
     lv["launch_bound_failures"] = len(v["launch_bound_failures"])
     new_snapshot = dict(snap)
     new_snapshot["latest_verification"] = lv
+
+    #: `latest_run` was hand-maintained too, and went stale the same way: it
+    #: still named attempt 13 "PREPARED, not executed" after that attempt was
+    #: consumed and closed and attempt 14 existed. Derived from the run index,
+    #: which is itself derived from the tree.
+    #:
+    #: "Latest" is the highest attempt number of the experiment the snapshot
+    #: already names -- ordering by run id rather than by mtime, because a file
+    #: touched by a regeneration is not a newer run. `state` comes from the
+    #: index entry, so a prepared run cannot read as an executed one.
+    idx = load(INDEX, root)
+    prior = dict(snap.get("latest_run") or {})
+    exp = prior.get("experiment_id")
+    if exp:
+        entries = [e for e in [*idx["runs"], *idx["unrecorded"]]
+                   if e["experiment_id"] == exp]
+
+        def _n(e):
+            digits = "".join(c for c in e["run_id"] if c.isdigit())
+            return (int(digits) if digits else -1, e["run_id"])
+
+        if entries:
+            newest = max(entries, key=_n)
+            root_rel = (newest.get("root")
+                        or (newest.get("components") or {}).get("root"))
+            prior["run_id"] = newest["run_id"]
+            prior["root"] = root_rel
+            prior["state"] = (
+                newest["why"] if newest in idx["unrecorded"]
+                else "recorded: the run wrote its own manifest")
+            new_snapshot["latest_run"] = prior
     snap_body = json.dumps(new_snapshot, indent=1) + "\n"
 
     state_p = root / STATE_MD
