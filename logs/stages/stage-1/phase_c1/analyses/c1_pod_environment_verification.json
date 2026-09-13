@@ -1,13 +1,14 @@
 {
  "schema": "aadistill.autoinit.c1_readiness_pointer/v1",
  "_what_this_is": "a pointer to the run that owns the live readiness record. NOT the record: this file used to be the record, which meant each run overwrote the evidence the previous one launched under.",
- "run_id": "attempt14",
+ "run_id": "attempt15",
  "stage_id": "1",
- "record": "logs/stages/stage-1/phase_c1/runs/attempt14/governance/readiness.json",
- "record_self_sha256": "825e9a48793114c5f7d5a45a76a5d156727642be16d90906e14d4844e6e948d3",
+ "record": "logs/stages/stage-1/phase_c1/runs/attempt15/governance/readiness.json",
+ "record_self_sha256": "db41f54834a6f877bf83a111d3a201fbeb8b5a1b05522fbcc6e3b45857f3231f",
  "record_kind": "launch_bound",
- "verdict": "PASS",
- "swept_base_commit": "e941d1eb417b08433ff932c52393dcd3aab86be5",
+ "verdict": "FAIL",
+ "swept_base_commit": "697dc6aac94768d2d37c05713603b00300aa9c39",
  "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
+ "_it_lags_by_design": "a launch_bound sweep writes ONLY the run-owned record: rewriting this tracked file would put an unpermitted change into the tree it just certified, and the session-lineage rule would refuse the launch. So between a launch-bound sweep and the launch it feeds, the summary here describes the PREVIOUS state of that run. The record named above is the authority; `--repoint` refreshes this at the next convergence.",
  "authorizes": "nothing"
 }

@@ -16,7 +16,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/stages/stage-1/phase_c1/runs/attempt9/outcome.json.",
   "c1_attempts": "fourteen labels, TWELVE paid, $4.7960 total, zero ATTENTION science. Attempts 12 and 13 cost $0 -- the provider refused one create, and the other never reached a provider. Per-attempt cost and cause: logs/budget/ledger.md.",
-  "pre_science_retry_is_autonomous": "MAINTAINER DIRECTION 2026-09-13: a launcher invocation that aborts before formal training begins is an engineering subrun. Close it, repair, build a FRESH one-use chain, retry -- no further approval, inside the same cumulative budget. See AGENTS.md P12.1.",
+  "pre_science_retry_is_autonomous": "MAINTAINER DIRECTION 2026-09-13, now AGENTS.md P12.1: an invocation that aborts before formal training is an engineering subrun. Close it, repair, build a FRESH chain, retry -- no further approval, same cumulative budget.",
   "formal_sessions_used": 5,
   "formal_sessions_max": null,
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
@@ -27,7 +27,7 @@
   "readiness_record": null,
   "authorization": null,
   "bundle": null,
-  "note": "attempt 15's grant is committed and NOTHING else is prepared: the launch_bound sweep, the authorization and the bundle are all owed, in that order. Attempt 14's chain was consumed at invocation -- a provider resource was created under it -- and is never reused."
+  "note": "attempt 15's grant is committed; the launch_bound sweep, the authorization and the bundle are owed, in that order. Attempt 14's chain was consumed at invocation and is never reused."
  },
  "budget": {
   "cumulative_spend_usd": 268.6957,
@@ -39,10 +39,10 @@
   "package_remaining_usd": 50.6466,
   "per_session_ceiling_usd": 15.1475,
   "full_ceiling_sessions_fundable": 2,
-  "_derived_by": "scripts/consolidate/render_log_navigation.py, from scripts/consolidate/derive_budget.py",
+  "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
   "_project_spend_before_this_package_usd": 267.8998,
-  "_anchor_note": "the project cap and the package are separate books. This is the project total on the day the package opened; cumulative_spend_usd is this plus what the package has booked. Stated rather than back-computed: back-computing it from the current total would make whatever this file says self-consistent, including a wrong figure. It said $268.2958 while the package had booked $0.7959 -- $0.40 too generous -- because nothing derived it despite the _derived_by above.",
-  "_limits_do_not_transfer": "formal, engineering, package and project bind SEPARATELY. full_ceiling_sessions_fundable divides the FORMAL remainder by the ceiling; dividing the PACKAGE remainder instead gives 3 and is wrong, because the engineering allowance cannot pay for a formal probe. This block said 3 until 2026-09-12.",
+  "_anchor_note": "the project cap and the package are separate books: this is the project total when the package opened. Stated, never back-computed -- decisions.md 2026-09-13.",
+  "_limits_do_not_transfer": "formal, engineering, package and project bind SEPARATELY; the fundable count divides the FORMAL remainder. Shown with its arithmetic in logs/state/current.md.",
   "ledger": "logs/budget/ledger.md",
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
   "planning_floor_usd": 13.4401,
@@ -68,9 +68,9 @@
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
    "kind": "launch_bound",
-   "verdict": "PASS",
-   "swept_base_commit": "e941d1eb417b08433ff932c52393dcd3aab86be5",
-   "describes_head": false
+   "verdict": "FAIL",
+   "swept_base_commit": "697dc6aac94768d2d37c05713603b00300aa9c39",
+   "describes_head": true
   },
   "launch_bound_ready": false,
   "launch_bound_failures": 1,
@@ -80,9 +80,9 @@
   "_three_separate_facts": "what the latest sweep OBSERVED, whether a launch-bound record describes the CURRENT tree, and that an earlier launch-bound sweep failed. STATE.md collapsed them into one line and was wrong about all three at once."
  },
  "abandoned": [
-  "recovery_search_v1; calib.reasoning_heavy@v1 (both INVALID/UNBUILDABLE before use)",
-  "the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th A/B seed",
-  "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept"
+  "recovery_search_v1; calib.reasoning_heavy@v1 (INVALID before use)",
+  "the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed",
+  "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
   "status": "attempt 14 closed: PRE-SCIENCE SETUP ABORT, $0.3999, zero pods, no science. Its three sweep/pod divergences are repaired.",
@@ -126,24 +126,22 @@
   "c0": {
    "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
    "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json fb2eeea531f9f0d1",
-   "sizing_evidence": "logs/phase_c0_sizing_evidence.json 4786242d349e9b21",
+   "sizing_evidence": "logs/stages/stage-1/phase_c1/plans/phase_c0_sizing_evidence.json 4786242d349e9b21",
    "authorizes": "nothing",
    "design": "850 scorable / 950 total; 3 fresh paired seeds; primary correct_overall; SESOI +0.010."
   },
   "c1": {
-   "status": "IMPLEMENTED / THIRTEEN LABELS, ELEVEN PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / NO CURRENT GRANT OR AUTHORIZATION",
-   "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes. NOT recovery evidence.",
+   "status": "IMPLEMENTED / FOURTEEN ATTEMPTS RUN, TWELVE PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / attempt 15's GRANT COMMITTED, nothing else prepared",
+   "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, L40S). treatment + endpoint: UNMEASURED. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort -- not an ATTENTION result.",
-   "not_built": "grant, authorization and bundle all CONSUMED by attempt 12; the next session needs all three plus a fresh launch_bound record. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
+   "not_built": "attempts 13 and 14 consumed their chains; attempt 15 has a committed grant and still needs a launch_bound record, an authorization and a bundle. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
    "owners": {
     "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
     "execution_prereg": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
-    "pricing": "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json",
-    "history": "logs/stages/stage-1/phase_c1/history/operational_history.md",
     "runs": "logs/index.json"
    },
-   "blocker": "provider capacity; see the top-level blocker."
+   "blocker": "none outstanding; see the top-level blocker."
   },
   "c2": {
    "status": "NOT STARTED",
@@ -159,11 +157,11 @@
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
   "free_note": "detail: c1_storage_recovery.json"
  },
- "blocker": "PROVIDER CAPACITY. Attempt 12's create was refused -- no secure L40S at the accepted $1.09/h. Not a repository defect and not a draw's job: a draw replaces a host that was CREATED and never became usable. A $0 capacity watch is running. Evidence: logs/stages/stage-1/phase_c1/runs/attempt12/closeout/outcome.json.",
+ "blocker": "NONE OUTSTANDING. Attempt 14 acquired a secure L40S at $1.09/h on its first draw and aborted at the pod CPU test gate on three dev-box-only premises, all repaired at 2df2df1. Evidence: runs/attempt14/closeout/outcome.json.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/state/current.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
-  "historical_probe_reuse": "REFUSED by scoring_contract_matches_live: the live contract moved v2 -> v3 with the scorer's path. The probes reconstruct and the numbers are unchanged; relaxing the rule would change what counts as a reusable observation. Maintainer decision, not blocking."
+  "historical_probe_reuse": "REFUSED by scoring_contract_matches_live: the live contract moved v2 -> v3 with the scorer's path. Probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
  },
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",

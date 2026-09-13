@@ -30,7 +30,7 @@ setup-abort branch, the provider confirms it is gone, and a live query returns
 
 | readiness | | owner |
 | --- | --- | --- |
-| latest sweep | **launch_bound — PASS**, swept at `e941d1eb`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
+| latest sweep | **launch_bound — FAIL**, swept at `697dc6aa`; describes the current tree | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
 | launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
 | last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../stages/stage-1/phase_c1/history/readiness_history.json) |
 
@@ -51,7 +51,7 @@ these by hand; run the deriver.**
 | formal sessions | `$44.6466` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$50.6466` of `$51.4425` |
-| project cap | `$51.3043` of `$320.0000` |
+| project cap | `$268.6957` spent of `$320.0000`, leaving `$51.3043` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$45.4425` and the formal allowance has `$44.6466`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

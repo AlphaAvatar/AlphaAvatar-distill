@@ -353,6 +353,14 @@ def pointer_for(run_id: str, stage_id: str, record: dict, record_rel: str) -> di
         "verdict": record.get("verdict"),
         "swept_base_commit": record.get("swept_base_commit"),
         "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
+        "_it_lags_by_design": (
+            "a launch_bound sweep writes ONLY the run-owned record: rewriting "
+            "this tracked file would put an unpermitted change into the tree it "
+            "just certified, and the session-lineage rule would refuse the "
+            "launch. So between a launch-bound sweep and the launch it feeds, "
+            "the summary here describes the PREVIOUS state of that run. The "
+            "record named above is the authority; `--repoint` refreshes this at "
+            "the next convergence."),
         "authorizes": "nothing",
     }
 

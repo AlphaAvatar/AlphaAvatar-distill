@@ -665,9 +665,14 @@ def render_budget(root: Path) -> str:
     for label, b in rows:
         lines.append(f"| {label} | `${b['remaining_usd']:.4f}` of "
                      f"`${b['allowance_usd']:.4f}` |")
+    #: All three project figures, because `test_the_two_state_views_agree_on_money`
+    #: requires the prose to show the spend, the cap and the remainder -- the
+    #: three the two views drifted on. A row that showed only the remainder read
+    #: as agreement while the spend was stated nowhere.
     if snap.get("remaining_usd") is not None:
-        lines.append(f"| project cap | `${snap['remaining_usd']:.4f}` of "
-                     f"`${snap['authorized_cap_usd']:.4f}` |")
+        lines.append(f"| project cap | `${snap['cumulative_spend_usd']:.4f}` "
+                     f"spent of `${snap['authorized_cap_usd']:.4f}`, leaving "
+                     f"`${snap['remaining_usd']:.4f}` |")
     n = d["full_ceiling_sessions_fundable"]
     ceiling = d["per_session_ceiling_usd"]
     lines += ["",
