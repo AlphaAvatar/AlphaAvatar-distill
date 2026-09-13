@@ -471,8 +471,21 @@ def test_the_committed_record_still_binds_the_live_executable():
     path = REPO / pe.RECORD_PATH
     if not path.is_file():
         pytest.skip(f"{pe.RECORD_PATH} has not been produced yet")
-    ok, why = pe.verify_record(json.loads(path.read_text()), REPO,
-                               authorization_path=C1_AUTH_PATH)
+    doc = json.loads(path.read_text())
+    #: FOLLOW THE POINTER. `RECORD_PATH` stopped being the record when a run
+    #: began owning its readiness evidence, so that path now holds a pointer
+    #: carrying the verdict and the record's location — and `verify_record`
+    #: given a pointer refuses it for having none of the fields it checks. The
+    #: paid gate resolves the same way; this asks the question it asks. The
+    #: record is under `runs/`, which git ignores, so a checkout that does not
+    #: carry it has nothing for this to verify.
+    named = doc.get("record")
+    if named:
+        if not (REPO / named).is_file():
+            pytest.skip(f"{named} is run-owned and gitignored; it is not in "
+                        "this checkout")
+        doc = json.loads((REPO / named).read_text())
+    ok, why = pe.verify_record(doc, REPO, authorization_path=C1_AUTH_PATH)
     assert ok, why
 
 
