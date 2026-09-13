@@ -932,11 +932,11 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 48,
+   "line": 69,
    "kind": "skipif",
    "function": "<module>",
-   "condition": "bool(_missing_tracked_logs())",
-   "expanded": "bool(_missing_tracked_logs())",
+   "condition": "bool(_MISSING_NOW)",
+   "expanded": "bool(_MISSING_NOW) | _MISSING_NOW=_missing_tracked_logs()",
    "signal": "unrecognised",
    "verdict": "unknown",
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
@@ -948,7 +948,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 469,
+   "line": 504,
    "kind": "pytest.skip",
    "function": "test_every_cited_path_including_untracked_really_exists",
    "condition": "not (REPO / \"artifacts/stage0/qwen3_4b_thinking_v1\").is_dir()",
@@ -964,7 +964,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 744,
+   "line": 779,
    "kind": "pytest.skip",
    "function": "test_a_committed_record_still_names_its_own_raw_output",
    "condition": "not (REPO / named).is_file()",
@@ -980,7 +980,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 883,
+   "line": 976,
    "kind": "pytest.skip",
    "function": "test_state_md_agrees_with_the_record_it_links_to",
    "condition": "named and not (REPO / named).is_file()",
@@ -996,7 +996,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1055,
+   "line": 1148,
    "kind": "pytest.skip",
    "function": "test_the_frozen_battery_manifest_verifies",
    "condition": "not p.is_file()",
@@ -1012,7 +1012,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1068,
+   "line": 1161,
    "kind": "pytest.skip",
    "function": "test_it_matches_the_canonical_store",
    "condition": "not (a.is_file() and b.is_file())",
@@ -1990,5 +1990,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "5f858ff8570f48f4e41fb762a49fa213213d8774ba56de1b238a475424aa3e39"
+ "digest": "cb0630c7df799e830e7b76fd643532234e0412313c0957bbc193ee7611a26b48"
 }

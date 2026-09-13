@@ -74,7 +74,8 @@
   },
   "tests/docs/test_log_organisation.py": {
    "class": "staging_premise_property",
-   "why": "the whole-tree log checks: the catalog renderer, the relocation record and the navigation regeneration read the logs/ tree as a set. A pod receives a staged subset, so the set is different there. The predicate compares `git ls-files logs` against the filesystem -- it asks for the property it needs and both machines answer correctly."
+   "why": "the whole-tree log checks: the catalog renderer, the relocation record and the navigation regeneration read the logs/ tree as a set. The predicate compares `git ls-files logs` against the filesystem -- it asks for the property it needs rather than for a marker.",
+   "corrected_2026_09_13": "the original justification said a pod receives a staged subset of logs/, so the set differs there. It does NOT: a bundle checkout carries every TRACKED file, and the simulator hides only gitignored ones, so the honest answer on both machines is 'nothing is missing'. What actually fired the predicate was the sweep driver itself -- record_pod_environment.py stashes the readiness record while it runs -- and 23 tests therefore SKIPPED in the launch-bound sweep and RAN on attempt 14's pod. That one deliberate absence is now exempt, so both machines agree and this predicate should not fire at all in a healthy tree. It remains registered because a genuinely partial logs/ tree is still a thing these tests must not describe."
   },
   "tests/docs/test_log_organisation.py::test_every_cited_path_including_untracked_really_exists": {
    "class": "devbox_only_artifact",

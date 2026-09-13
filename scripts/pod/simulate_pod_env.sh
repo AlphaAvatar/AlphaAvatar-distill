@@ -252,9 +252,17 @@ echo "hid $n path(s) a pod session does not receive"
 # `rmdir` only removes empty directories, and restore recreates the tree with
 # `mkdir -p "$(dirname "$n")"` before moving each path back, so this is exactly
 # reversible. Deepest-first, so parents empty out as children go.
+# ABSOLUTE entries are exempt from pruning. A host-local store outside the
+# checkout (`HIDDEN_PATHS` may name one, because a pod receives an asset's bytes
+# and never the store it was frozen in) has parents that belong to the machine,
+# not to this simulation: walking up from one could rmdir an emptied directory
+# under $HOME. Hiding and restoring it is exactly reversible; pruning around it
+# is not this script's business. Hiding a whole store also leaves no empty
+# directory behind, which is the only thing pruning exists to fix.
 pruned=0
 while IFS= read -r p; do
   [ -n "$p" ] || continue
+  case "$p" in /*) continue ;; esac
   d=$(dirname "$p")
   while [ "$d" != "." ] && [ "$d" != "/" ]; do
     rmdir "$d" 2>/dev/null || break

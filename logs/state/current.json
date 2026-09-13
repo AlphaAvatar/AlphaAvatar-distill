@@ -8,42 +8,46 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods. Attempt 12 never created one -- the create was refused for lack of capacity -- so nothing billed. A $0 capacity watch is the only thing running."
+  "note": "zero pods. Attempt 14's pod h9hs9l127w4x99 was deleted by the launcher's setup-abort branch, the provider confirms it is gone, and a live query returns ZERO_PODS. Nothing is running and nothing is billing."
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-12 consumed, $0.3960, zero scientific stages.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-14 consumed, $0.7959, zero scientific stages.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/stages/stage-1/phase_c1/runs/attempt9/outcome.json.",
-  "c1_attempts": "thirteen labels, ELEVEN paid, $4.3961 total, zero ATTENTION science. Attempt 12 cost $0 -- the provider refused the create. Per-attempt cost and cause: logs/budget/ledger.md.",
-  "formal_sessions_used": 3,
+  "c1_attempts": "fourteen labels, TWELVE paid, $4.7960 total, zero ATTENTION science. Attempts 12 and 13 cost $0 -- the provider refused one create, and the other never reached a provider. Per-attempt cost and cause: logs/budget/ledger.md.",
+  "pre_science_retry_is_autonomous": "MAINTAINER DIRECTION 2026-09-13: a launcher invocation that aborts before formal training begins is an engineering subrun. Close it, repair, build a FRESH one-use chain, retry -- no further approval, inside the same cumulative budget. See AGENTS.md P12.1.",
+  "formal_sessions_used": 5,
   "formal_sessions_max": null,
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
   "any": false,
-  "grant_committed": "logs/stages/stage-1/phase_c1/runs/attempt13/governance/grant.json",
-  "readiness_record": "FAIL -- the 2026-09-12 launch_bound sweep refused on a stale run index; owed again after this cleanup",
+  "grant_committed": null,
+  "readiness_record": null,
   "authorization": null,
   "bundle": null,
-  "note": "attempt 13's grant is committed and NOTHING else is prepared. The chain is PAUSED for the log cleanup. Attempt 12's chain was consumed at invocation and is never reused."
+  "note": "NOTHING is prepared. Attempt 14's chain was consumed at invocation -- a provider resource was created under it -- and is never reused. Attempt 15 needs a fresh grant, a fresh launch_bound sweep, a fresh authorization and a fresh bundle."
  },
  "budget": {
-  "cumulative_spend_usd": 268.2958,
+  "cumulative_spend_usd": 268.6957,
   "authorized_cap_usd": 320.0,
-  "remaining_usd": 51.7042,
+  "remaining_usd": 51.3043,
   "remaining_is_not_permission": true,
-  "formal_remaining_usd": 45.0465,
+  "formal_remaining_usd": 44.6466,
   "engineering_remaining_usd": 6.0,
-  "package_remaining_usd": 51.0465,
+  "package_remaining_usd": 50.6466,
   "per_session_ceiling_usd": 15.1475,
   "full_ceiling_sessions_fundable": 2,
-  "_derived_by": "scripts/consolidate/derive_budget.py",
+  "_derived_by": "scripts/consolidate/render_log_navigation.py, from scripts/consolidate/derive_budget.py",
+  "_project_spend_before_this_package_usd": 267.8998,
+  "_anchor_note": "the project cap and the package are separate books. This is the project total on the day the package opened; cumulative_spend_usd is this plus what the package has booked. Stated rather than back-computed: back-computing it from the current total would make whatever this file says self-consistent, including a wrong figure. It said $268.2958 while the package had booked $0.7959 -- $0.40 too generous -- because nothing derived it despite the _derived_by above.",
   "_limits_do_not_transfer": "formal, engineering, package and project bind SEPARATELY. full_ceiling_sessions_fundable divides the FORMAL remainder by the ceiling; dividing the PACKAGE remainder instead gives 3 and is wrong, because the engineering allowance cannot pay for a formal probe. This block said 3 until 2026-09-12.",
   "ledger": "logs/budget/ledger.md",
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
   "planning_floor_usd": 13.4401,
-  "_planning_floor_note": "from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json:totals.floor_usd. Priced is not funded."
+  "_planning_floor_note": "from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json:totals.floor_usd. Priced is not funded.",
+  "_package_spent_usd": 0.7959
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -64,8 +68,8 @@
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
    "kind": "launch_bound",
-   "verdict": "FAIL",
-   "swept_base_commit": "c5dfd9ea5139f47463ad577fbe944ce05fc07fb3",
+   "verdict": "PASS",
+   "swept_base_commit": "e941d1eb417b08433ff932c52393dcd3aab86be5",
    "describes_head": false
   },
   "launch_bound_ready": false,
@@ -81,8 +85,8 @@
   "the paid device-canary session path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "log cleanup in progress; the launch chain is PAUSED after attempt 13's grant.",
-  "then": "re-run the launch_bound sweep on the cleaned tree, issue the authorization from attempt 13's grant, stage the bundle, launch when capacity allows.",
+  "status": "attempt 14 closed: PRE-SCIENCE SETUP ABORT, $0.3999, zero pods, no science. Its three sweep/pod divergences are repaired.",
+  "then": "build the attempt-15 chain: grant, converge, ONE launch_bound sweep, authorization, commit, bundle with --run-id, launcher.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -168,7 +172,7 @@
   "experiment_id": "phase_c1",
   "run_id": "attempt14",
   "root": "logs/stages/stage-1/phase_c1/runs/attempt14",
-  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
+  "state": "recorded: the run wrote its own manifest",
   "index": "logs/index.json",
   "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt12"
  },

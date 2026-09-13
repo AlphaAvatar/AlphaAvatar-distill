@@ -373,6 +373,41 @@ ALWAYS_STRUCTURALLY_UNAVAILABLE = (
 #: attempt 2 died at ROPE_OK and `rope_input_gate` is what closed that gap.
 HF_DEPENDENT_GATES = ("rope_input_gate", "renderer_parity_gate")
 
+#: Excluded only when the canonical OUT-OF-TREE store is genuinely absent, which
+#: is every pod's condition and no dev box's. `battery_staged_gate` compares the
+#: staged battery against the canonical frozen copy, and that copy is host-local
+#: to the machine that froze it: the session stages the battery's BYTES to the
+#: pod, never the store. The gate is right to be strict where it runs for real —
+#: pre-provider, on the dev box, before anything is created — and this test was
+#: wrong to assert a premise the pod does not own. C1 attempt 14 died on that
+#: distinction at the pod CPU gate for $0.40.
+HOST_LOCAL_STORE_GATES = ("battery_staged_gate",)
+
+
+def canonical_battery_store() -> Path:
+    """Where the gate will look, read from the document the gate reads.
+
+    Derived rather than restated: a predicate that hard-coded the path would
+    excuse the gate on the day the store moved and the gate started failing for
+    real. Not a module-level constant, because it resolves outside the
+    repository — see `test_mutation_a_host_local_candidate_dependency_is_visible_here`.
+    """
+    import autoinit_c1_launch as L
+
+    return Path(json.loads(
+        (REPO / L.BATTERY_IDENTITY).read_text())["canonical_path"])
+
+
+def host_local_store_is_absent() -> bool:
+    """Does this machine lack the canonical out-of-tree battery store?
+
+    Keyed on the CONDITION, exactly as `hf_inputs_are_absent` is, and for the
+    same reason: a pod is behaviourally identical to a machine that never had
+    the store while carrying none of the simulator's markers, so a predicate
+    that asked "am I in the simulation?" would be inverted there.
+    """
+    return not canonical_battery_store().is_dir()
+
 
 def hf_inputs_are_absent() -> bool:
     """Is a real Hugging Face credential AND a populated hub cache missing?
@@ -439,6 +474,10 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(
     #: FALSE on a real dev box, where both gates still run for real.
     if hf_inputs_are_absent():
         structurally_unavailable += list(HF_DEPENDENT_GATES)
+    #: And one gate needs a host-local store that no pod possesses. Same shape,
+    #: same reason, and the same both-directions pin below.
+    if host_local_store_is_absent():
+        structurally_unavailable += list(HOST_LOCAL_STORE_GATES)
     failures = []
     for gate in spec.precheck:
         name = getattr(gate, "__name__", "session_commit_and_lineage")
@@ -693,6 +732,61 @@ def test_the_hf_predicate_does_not_excuse_the_gates_on_a_real_dev_box(monkeypatc
     monkeypatch.delenv("HF_HOME", raising=False)
     monkeypatch.setenv("AAD_SYNTHETIC_HF_TOKEN", "1")
     assert hf_inputs_are_absent()
+
+
+def test_the_host_local_predicate_does_not_excuse_the_gate_where_the_store_is(
+        monkeypatch, tmp_path):
+    """Both directions, because an exemption that is always true protects nothing.
+
+    On the machine that holds the canonical battery store — the dev box, where
+    every real launch happens — `battery_staged_gate` must still be exercised by
+    the test above. Where the store is genuinely absent, as on every pod, the
+    predicate must say so.
+    """
+    real = canonical_battery_store()
+    if real.is_dir():
+        assert not host_local_store_is_absent(), (
+            f"this machine HOLDS {real}, yet the predicate excuses "
+            f"{list(HOST_LOCAL_STORE_GATES)} from the gate test")
+
+    # And TRUE when the store is really gone, asked of a tree whose committed
+    # identity names a path that does not exist.
+    import autoinit_c1_launch as L
+
+    root = tmp_path / "root"
+    (root / L.BATTERY_IDENTITY).parent.mkdir(parents=True)
+    (root / L.BATTERY_IDENTITY).write_text(json.dumps(
+        {"canonical_path": str(tmp_path / "no-such-store")}))
+    monkeypatch.setattr(L, "REPO_ROOT", root)
+    monkeypatch.setattr(sys.modules[__name__], "REPO", root)
+    assert host_local_store_is_absent()
+
+
+def test_the_production_gate_still_refuses_when_the_canonical_store_is_missing(
+        monkeypatch, tmp_path):
+    """The exemption is in the TEST. The gate itself must not have learned it.
+
+    `battery_staged_gate` exists to prove, before a provider is created, that
+    the bytes about to be staged are the canonical frozen battery. "Canonical
+    absent, therefore pass" would delete the gate while leaving its name in the
+    list, and the launcher would create a pod on an unverified battery.
+    """
+    import types
+
+    import autoinit_c1_launch as L
+
+    root = tmp_path / "root"
+    (root / L.BATTERY_IDENTITY).parent.mkdir(parents=True)
+    (root / L.BATTERY_IDENTITY).write_text(json.dumps(
+        {"canonical_path": str(tmp_path / "gone")}))
+    local = root / "artifacts/stage3/c1_confirmation_v1"
+    local.mkdir(parents=True)
+    (local / "gsm8k.jsonl").write_text('{"id": 1}\n')
+    monkeypatch.setattr(L, "REPO_ROOT", root)
+
+    ok, why = L.battery_staged_gate(types.SimpleNamespace())
+    assert not ok, "the gate passed with no canonical copy to compare against"
+    assert "canonical" in why and "missing" in why, why
 
 
 # --- the grant provenance gate ----------------------------------------------

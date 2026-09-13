@@ -281,8 +281,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 3,
-  "runs_unrecorded": 2,
+  "runs_current": 4,
+  "runs_unrecorded": 1,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": {
@@ -311,8 +311,8 @@
     "total": 5
    },
    "phase_c1": {
-    "recorded": 13,
-    "unrecorded": 2,
+    "recorded": 14,
+    "unrecorded": 1,
     "total": 15
    },
    "recovery_continuation": {
@@ -975,6 +975,19 @@
    },
    "manifest_sha256": "2e594a7d48ef6823ecf12168e6a10c951921673e85b78a068f61a84696ca43a2",
    "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt14",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt14",
+    "manifest": "logs/stages/stage-1/phase_c1/runs/attempt14/manifest.json"
+   },
+   "manifest_sha256": "632bccf9cc64639133412734e92ca0c80486bbfa358951090fbc8dbfb1ffc57b",
+   "n_components": 7
   }
  ],
  "unrecorded": [
@@ -983,16 +996,8 @@
    "run_id": "attempt13",
    "root": "logs/stages/stage-1/phase_c1/runs/attempt13",
    "n_files": 4,
-   "digest": "c279b9c6f68f032acdff14c932f9e067305fd5237b0290504ca99cb2bcc71c91",
+   "digest": "4ddbccb2a573c6c10b81a06237e79a74f67027e48c047faf497a9a480ac9d38f",
    "why": "no run manifest; its closeout states: PRE-PROVIDER INFRASTRUCTURE ABORT. Not an efficacy result, not a replay mismatch, and not a frozen-rule INCONCLUSIVE."
-  },
-  {
-   "experiment_id": "phase_c1",
-   "run_id": "attempt14",
-   "root": "logs/stages/stage-1/phase_c1/runs/attempt14",
-   "n_files": 2,
-   "digest": "4d00ef5ab7982c5384501dc73c07b590d9e7513c09a68da0cf5deaedccd16e47",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

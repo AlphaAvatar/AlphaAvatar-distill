@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.autoinit.c1_readiness_pointer/v1",
  "_what_this_is": "a pointer to the run that owns the live readiness record. NOT the record: this file used to be the record, which meant each run overwrote the evidence the previous one launched under.",
- "run_id": "attempt13",
+ "run_id": "attempt14",
  "stage_id": "1",
- "record": "logs/stages/stage-1/phase_c1/runs/attempt13/governance/readiness.json",
- "record_self_sha256": "61c6a3e6c1ac116a8a3e40a09cb82762072b71543df8d0bd48d14eae11543497",
+ "record": "logs/stages/stage-1/phase_c1/runs/attempt14/governance/readiness.json",
+ "record_self_sha256": "825e9a48793114c5f7d5a45a76a5d156727642be16d90906e14d4844e6e948d3",
  "record_kind": "launch_bound",
- "verdict": "FAIL",
- "swept_base_commit": "c5dfd9ea5139f47463ad577fbe944ce05fc07fb3",
+ "verdict": "PASS",
+ "swept_base_commit": "e941d1eb417b08433ff932c52393dcd3aab86be5",
  "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
  "authorizes": "nothing"
 }

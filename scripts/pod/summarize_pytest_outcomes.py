@@ -29,13 +29,21 @@ BOTH, and they must not be conflated:
     python scripts/pod/summarize_pytest_outcomes.py --junit X --out Y \
         [--expected logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json] [--strict]
 
-`--strict` exits non-zero on any difference. Entirely local: it reads two files
+The record compared against is the one that AUTHORIZED this session: the
+`readiness.json` beside `$SESSION_AUTH_PATH`, which the launcher already exports
+to setup. `--expected` is the pre-2026-09-12 entry point and is now a pointer to
+whichever run swept last; it is used only when this session owns no record.
+
+`--strict` exits non-zero on any difference, and on an unavailable comparison
+when the session owns a record — attempt 14 had one, compared against nothing,
+and paid for the divergence at the pod gate. Entirely local: it reads two files
 and writes one.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -48,8 +56,50 @@ from aadistill.runtime import pod_environment as pe
 #: JSON and only what a human must see immediately is printed.
 PRINT_LIMIT = 12
 
+#: The pointer that used to be the record. Before 2026-09-12 the repository-root
+#: file WAS the launch-bound readiness record; now it names the run that owns
+#: the live one. Reading it as a record is how C1 attempt 14 compared against
+#: nothing at all.
+POINTER_SCHEMA = "aadistill.autoinit.c1_readiness_pointer/v1"
 
-def summarize(junit: Path, expected_record: Path | None, repo: Path) -> dict:
+
+def resolve_expected(expected: Path | None, session_auth: str | None,
+                     repo: Path) -> tuple[Path | None, bool, str | None]:
+    """Which record THIS pod must match, and whether matching is mandatory.
+
+    The record that authorized this session is the one beside the authorization
+    the launcher named, because the issuer, the sweep and the launcher all
+    address a run by the same governance directory. The repository-root path is
+    a POINTER and names whichever run swept last: on attempt 14 it named attempt
+    13, carried no skip set at all, and the comparison silently reported
+    UNAVAILABLE on the one pod that needed it.
+
+    Returns `(path, mandatory, why_not)`. `mandatory` is true exactly when a
+    run-owned record was found: having one and not comparing against it is the
+    blind spot, while a session that predates the layout keeps the old
+    behaviour rather than being failed for its filing.
+    """
+    if session_auth:
+        auth = Path(session_auth)
+        auth = auth if auth.is_absolute() else repo / auth
+        owned = auth.parent / "readiness.json"
+        if owned.is_file():
+            return owned, True, None
+    if expected and expected.is_file():
+        try:
+            doc = json.loads(expected.read_text())
+        except json.JSONDecodeError:
+            doc = {}
+        if doc.get("schema") == POINTER_SCHEMA:
+            return expected, False, (
+                f"{expected} is a pointer to run {doc.get('run_id')!r}, not a "
+                "record. This session's own record was not found, so there is "
+                "nothing it is entitled to be compared against.")
+    return expected, False, None
+
+
+def summarize(junit: Path, expected_record: Path | None, repo: Path,
+              *, why_not: str | None = None) -> dict:
     parsed = pe.read_junit(junit, repo)
     outcomes = parsed["outcomes"]
     reasons = parsed.get("skip_reasons", {})
@@ -74,12 +124,15 @@ def summarize(junit: Path, expected_record: Path | None, repo: Path) -> dict:
         "comparison": None,
     }
 
-    if expected_record and expected_record.is_file():
+    if why_not:
+        out["comparison"] = {"available": False, "why": why_not}
+    elif expected_record and expected_record.is_file():
         rec = json.loads(expected_record.read_text())
         exp = (rec.get("findings") or {}).get("all_skipped_nodeids")
         if exp is None:
             out["comparison"] = {
                 "available": False,
+                "record": str(expected_record),
                 "why": ("the committed readiness record predates the complete "
                         "skip set and carries only the named groups, so no exact "
                         "comparison is possible"),
@@ -137,6 +190,12 @@ def main() -> int:
     ap.add_argument("--junit", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--expected", default="")
+    ap.add_argument("--session-authorization",
+                    default=os.environ.get("SESSION_AUTH_PATH", ""),
+                    help="the authorization this session runs under. Its "
+                         "sibling readiness.json is the record this pod must "
+                         "match. Defaults to $SESSION_AUTH_PATH, which the "
+                         "launcher already exports to setup.")
     ap.add_argument("--repo", default=str(HERE.parents[2]))
     ap.add_argument("--strict", action="store_true")
     a = ap.parse_args()
@@ -149,7 +208,12 @@ def main() -> int:
              "error": f"no JUnit report at {junit}"}, indent=1) + "\n")
         return 0                      # never mask the suite's own exit code
 
-    out = summarize(junit, Path(a.expected) if a.expected else None, Path(a.repo))
+    record, mandatory, why_not = resolve_expected(
+        Path(a.expected) if a.expected else None,
+        a.session_authorization or None, Path(a.repo))
+    out = summarize(junit, record, Path(a.repo), why_not=why_not)
+    out["expected_record"] = str(record) if record else None
+    out["comparison_is_mandatory"] = mandatory
     Path(a.out).write_text(json.dumps(out, indent=1) + "\n")
     report(out)
 
@@ -158,6 +222,16 @@ def main() -> int:
         print("REFUSING: the pod's skip set is not the launch-bound sweep's. "
               "The sweep therefore did not certify this machine, which is the "
               "condition that cost attempt 5 a grant.")
+        return 1
+    #: A session that OWNS a launch-bound record and cannot be compared against
+    #: it is the attempt-14 condition: the divergence that failed the gate would
+    #: have been named here for nothing, and was not. An unavailable comparison
+    #: is a failed comparison whenever the record exists.
+    if a.strict and mandatory and not cmp.get("available"):
+        print(f"REFUSING: this session's launch-bound record is {record} and "
+              "the pod's skip set could not be compared against it: "
+              f"{cmp.get('why')}. A record that cannot be checked certifies "
+              "nothing.")
         return 1
     return 0
 

@@ -57,6 +57,12 @@ GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
      ("scripts/architecture/record_run_index.py", "--write")),
     ("stage index",
      ("scripts/consolidate/stage_attribution.py", "--write")),
+    #: Before the navigation, which reads the pointer. A launch_bound sweep
+    #: leaves the pointer alone on purpose, so it lags by one run until this
+    #: runs -- and it had drifted far enough to name a FAIL at a commit the run
+    #: it pointed at had never swept.
+    ("readiness pointer",
+     ("scripts/autoinit/record_pod_environment.py", "--repoint")),
     ("navigation + snapshot",
      ("scripts/consolidate/render_log_navigation.py", "--write")),
     ("log inventory",
@@ -175,6 +181,28 @@ def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
     if 'args.kind != "launch_bound"' not in src:
         problems.append("the recorder does not guard the global pointer "
                         "against a launch_bound sweep")
+
+    #: A tracked `logs/` file that is not on disk makes `needs_whole_tree` fire,
+    #: which makes 23 tests SKIP in the sweep and RUN on the pod. Attempt 14's
+    #: sweep certified exactly that skip set and the pod did not reproduce it.
+    #: Cheap here, thirteen minutes and a paid gate anywhere else.
+    sys.path.insert(0, str(REPO / "tests/docs"))
+    from test_log_organisation import _missing_tracked_logs
+    missing = _missing_tracked_logs()
+    if missing:
+        problems.append(f"{len(missing)} tracked logs/ file(s) are not on disk, "
+                        f"so the sweep would skip the whole-tree checks the pod "
+                        f"runs: {missing[:3]}")
+
+    #: The store the gate compares the battery against. Its ABSENCE is the pod's
+    #: condition and the sweep now models it; its absence HERE would mean the
+    #: launcher's own pre-provider gate cannot pass.
+    sys.path.insert(0, str(REPO / "tests/pod"))
+    from test_c1_session_contract import canonical_battery_store
+    if not canonical_battery_store().is_dir():
+        problems.append(f"the canonical battery store {canonical_battery_store()} "
+                        "is missing on this machine, so battery_staged_gate "
+                        "cannot pass and no launch can be issued from here")
     return problems
 
 

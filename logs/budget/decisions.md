@@ -1,5 +1,54 @@
 # Decision records
 
+## 2026-09-13 — the sweep must model host-local absence, and the pod must be told which record it is being judged against
+
+- **Context:** attempt 14 passed all fourteen pre-provider gates, created an
+  L40S, and aborted at the pod CPU test gate 22 minutes and `$0.40` later with
+  two failures out of 3892. The launch-bound sweep had passed 3754/0 on the same
+  executable. No probe was trained and no science was reached.
+- **Three divergences, one class.** Each is a premise the dev box owns and a pod
+  does not, evaluated by a pod-facing test:
+  1. `battery_staged_gate` compares the staged battery against the canonical
+     out-of-tree store named by `battery.json`'s absolute `canonical_path`. The
+     simulator hides gitignored paths *inside* the repository and had no notion
+     of a store outside it, so the sweep could see it and the pod could not.
+  2. `test_simulator_restore._run_simulator` did not pass `PODSIM_PYTHON`. The
+     dev box fell through to `.venv/bin/python`; a pod checkout has no repo venv.
+     Its sibling passed only because the negative case refuses on free space
+     before reaching the interpreter check.
+  3. **Named for the first time here:** the sweep skipped 23 tests the pod ran.
+     `record_pod_environment.py` moves the readiness record aside for the
+     duration of the sweep — deliberately, because the suite it runs contains
+     the two tests that verify that record — and `needs_whole_tree` read that one
+     intentional absence as a partially staged `logs/` tree. The pod could not
+     report it: it was comparing its skip set against the repository-root
+     pointer, which stopped being a record on 2026-09-12 and named attempt 13.
+- **Decisions.**
+  - The production `battery_staged_gate` stays strict. "Canonical absent
+    therefore pass" would delete the gate and leave its name in the list. The
+    exemption is a condition-keyed predicate in the TEST, the same shape as
+    `hf_inputs_are_absent`, pinned in both directions.
+  - The sweep hides host-local stores as well as in-tree artifacts, **derived**
+    from the documents the launcher's own gates read rather than listed, so a
+    plan that names a new store is modelled the day it is committed.
+  - The whole-tree predicate exempts exactly the file the sweep driver stashes,
+    and its skip reason now names the missing files.
+  - The pod compares against the record that AUTHORIZED it — the `readiness.json`
+    beside `$SESSION_AUTH_PATH` — and `--strict` now refuses when a session owns
+    a record and the comparison cannot be made. An unavailable comparison was
+    passing silently; a check that cannot fail is not a check.
+- **Not done, and deliberately:** no frozen C1 harness file was touched, so the
+  harness digest and the execution preregistration are unchanged. A related gap
+  is recorded rather than fixed: `summarize_pytest_outcomes.py` is named by the
+  historical `C1_HARNESS_SOURCE_FILES_V1` but is **not** in the live 99-file
+  digest. It is governed by `swept_base_commit` lineage instead, which is
+  sufficient but is not what the test asserting its membership implies.
+- **Risk:** the mandatory comparison makes a skip divergence fail the pod gate
+  where it used to pass silently. That is intended, and it is why divergence 3
+  was fixed at its source in the same change.
+- **Revisit when:** a fourth divergence of this class appears, or when the live
+  harness set is next revised.
+
 ## 2026-09-13 — `open_run` must admit the four artifacts written before it
 
 - **Context:** attempt 13's launcher refused at `open_run`, before pricing and

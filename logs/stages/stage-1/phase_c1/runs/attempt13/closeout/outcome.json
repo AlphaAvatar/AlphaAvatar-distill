@@ -29,8 +29,10 @@
   "cost_usd": 0.0
  },
  "budget": {
-  "cost_usd": 0.0,
-  "why_zero": "open_run precedes run_session, which prices before it gates and gates before it creates. Nothing was quoted and nothing was created."
+  "this_attempt": 0.0,
+  "package_booked_after": 0.396,
+  "why_zero": "open_run precedes run_session, which prices before it gates and gates before it creates. Nothing was quoted and nothing was created.",
+  "_why_stated_at_all": "a closeout that records no cost is reported as UNKNOWN by the derived ledger, and an unknown must not be read as zero. A $0 attempt still owes an explicit zero."
  },
  "science": {
   "formal_probes": 0,

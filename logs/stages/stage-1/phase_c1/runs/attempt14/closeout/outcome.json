@@ -1,0 +1,98 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the closeout of C1 attempt 14, which reached a provider and aborted during setup at the pod CPU test gate. A session record, runtime area and setup-failure evidence exist and are described here; no evidence, artifact or closeout science exists, because none was produced.",
+ "attempt": 14,
+ "package": "phase_c1.execution_package.2026-09-11",
+ "terminal_marker": null,
+ "setup_rc": 1,
+ "launcher_exit": 11,
+ "classification": "PRE-SCIENCE / SETUP INFRASTRUCTURE ABORT. Not an efficacy result, not a replay mismatch, and not a frozen-rule INCONCLUSIVE. Stage G was never reached and no probe was trained.",
+ "the_failure": {
+  "where": "scripts/pod/autoinit_preflight_setup.sh, the pod CPU test gate",
+  "outcome": "3775 passed, 115 skipped, 2 failed, 3892 selected in 982.18s",
+  "why_it_is_infrastructure": "both failures are dev-box-only premises evaluated on a pod. Neither touches the C1 science: not the harness, the arms, the seeds, the battery contents, the replay digests or the scoring. The battery itself staged correctly and its on-pod bytes were the canonical ones.",
+  "divergences": [
+   {
+    "nodeid": "tests/pod/test_c1_session_contract.py::test_every_gate_but_the_commit_binding_passes_against_the_candidate",
+    "message": "AssertionError: ['battery_staged_gate: the canonical copy /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1 is missing']",
+    "root_cause": "`battery_staged_gate` compares the staged battery against the CANONICAL out-of-tree store, whose absolute path it reads from the committed `logs/stages/stage-1/phase_c1/plans/battery.json`. That store is host-local to the dev box: the session stages the battery's BYTES, never the store. The gate is correct where it runs for real (pre-provider, on the dev box); the defect is that a pod-facing test asserted a premise the pod does not own. simulate_pod_env.sh hides gitignored paths INSIDE the repository and had no notion of a host-local store outside it, so the launch-bound sweep passed while the pod could not.",
+    "repaired_by": "a condition-keyed exemption in the test, in the same shape as `hf_inputs_are_absent()`, plus derivation of host-local unstaged paths into the sweep's hidden set so the sweep now reproduces the absence. The production gate is unchanged and still strict."
+   },
+   {
+    "nodeid": "tests/pod/test_simulator_restore.py::test_the_sweep_proceeds_when_the_requirement_is_met",
+    "message": "AssertionError: assert 'REFUSING' not in 'REFUSING: no interpreter. Pass PODSIM_PYTHON=$sys.executable, or run from a checkout whose .venv/bin/python exists...'",
+    "root_cause": "the free-space pair's helper `_run_simulator` did not pass `PODSIM_PYTHON`, unlike the module's older `run_sim` helper which has passed it since the attempt-6 repair. On the dev box the simulator fell back to `.venv/bin/python`, which exists; a pod checkout has no repo venv, so the script refused. Only the POSITIVE direction reaches the interpreter check — the negative one refuses on free space first, which is why its sibling passed on the pod.",
+    "root_cause_is_independent": "yes. Same class as the first (a dev-box-only premise), different premise and different mechanism; one repair does not close the other.",
+    "repaired_by": "the helper supplies the interpreter, which is already a declared INPUT to the simulator, plus a guard test that every simulator-driving helper in the module does so."
+   }
+  ],
+  "third_finding": {
+   "what": "skip-set comparison UNAVAILABLE",
+   "detail": "the pod compared its skip set against `logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json`, which became a POINTER on 2026-09-12 and still named attempt 13. It carries no `findings.all_skipped_nodeids`, so no comparison was possible — and had it carried one, it would have been the wrong run's. This is the mechanism that would have named divergence 1 before the spend, and it was blind.",
+   "repaired_by": "the summarizer now resolves the record that belongs to THIS session, from the authorization the launcher named, and refuses when a run-owned record is present but the comparison cannot be made."
+  }
+ },
+ "what_ran": {
+  "launch_bound_sweep": "PASS at e941d1eb417b08433ff932c52393dcd3aab86be5, sweep-e941d1eb417b/exec-001, 3754 passed / 138 skipped / 0 failed",
+  "authorization_issued": true,
+  "bundle_staged": true,
+  "launcher_invoked": true,
+  "run_opened": true,
+  "gates_run": 14,
+  "gates_passed": 14,
+  "gpu_priced": true,
+  "provider_resource_created": true,
+  "setup_reached": true,
+  "setup_completed": false,
+  "driver_started": false,
+  "probes_trained": 0
+ },
+ "provider": {
+  "pod_id": "h9hs9l127w4x99",
+  "gpu": "NVIDIA L40S",
+  "price_per_hour": 1.09,
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+  "elapsed_minutes": 22.01,
+  "deleted_by": "the launcher's setup-abort branch",
+  "final_pod_state": {"exists": false, "desired_status": "TERMINATED", "billing": false},
+  "provider_confirms_gone": true,
+  "observed_after_teardown": "ZERO_PODS",
+  "cost_usd": 0.3999
+ },
+ "budget": {
+  "this_attempt": 0.3999,
+  "package_booked_after": 0.7959,
+  "_booked_rule": "recomputed from the components, not carried forward: attempt10 0.1177 + attempt11 0.2783 + attempt12 0.0000 + attempt14 0.3999. Attempt 13 cost nothing and is stated as 0.0 rather than omitted.",
+  "authorized_usd": 15.1475,
+  "within_authorization": true,
+  "what_it_bought": "22 minutes of L40S, of which 16.4 were the CPU test gate. No science."
+ },
+ "science": {
+  "formal_probes": 0,
+  "arms_evaluated": 0,
+  "decision": "NONE",
+  "reached_stage_g": false,
+  "protocol_changed": false,
+  "frozen_assets_touched": false
+ },
+ "chain": {
+  "state": "CONSUMED",
+  "why": "the authorization funds exactly one launcher session and the launcher created a provider resource under it. Attempt 15 needs a new grant, readiness record, authorization and bundle.",
+  "preserved_unedited": {
+   "grant": "9b6e3b409a6b6eb95358f26ef8ba986e3af6e8bdba908c2f228a274138f875c8",
+   "readiness": "c2895edb1d536162d8da9879323044555edb6697335d11ac2665f9796b7ab99b",
+   "authorization": "724c8e49dccf3014b5754d65c1d14c40fb1f7abc54757dd53f7a617cf9702608",
+   "bundle_record": "11597635a7fbd321271b563f588e5c47ac5445a147b4eaf27ab27d3606ed5a28"
+  },
+  "raw_evidence": {
+   "launcher_log": "runtime/launcher.log",
+   "session_record": "runtime/session.json",
+   "watchdog": "runtime/watchdog/watchdog_h9hs9l127w4x99.jsonl",
+   "pod_pytest_log": "runtime/session.json :: setup_failure_evidence[0].files['/workspace/pytest.log']",
+   "pod_junit_xml": "runtime/session.json :: setup_failure_evidence[0].files['/workspace/pytest_junit.xml']",
+   "pod_outcomes_json": "runtime/session.json :: setup_failure_evidence[0].files['/workspace/pytest_outcomes.json']",
+   "note": "the three pod files were pulled off the pod before teardown by `SessionSpec.setup_failure_files` and are embedded verbatim in the session record. The JUnit XML is truncated at the 400 000-character collection limit; the outcomes JSON and the pytest log are complete and carry every failing nodeid, every skip and every skip reason."
+  }
+ },
+ "authorizes": "nothing"
+}

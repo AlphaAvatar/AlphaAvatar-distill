@@ -27,6 +27,7 @@ the record is still written so the failure is inspectable.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import os
 import re
@@ -89,16 +90,95 @@ def derive_c1_session():
     import sys as _sys
     _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
     _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
-    from session_specs import load_session_launcher, session_args
+    from session_specs import session_args
     from experiments.phase_c1.bundle import canonical_bundle_name
 
-    launcher = load_session_launcher("autoinit_c1_launch")
+    launcher = c1_launcher()
     spec = launcher.spec(session_args(launcher))
     head = head_commit(REPO_ROOT)
     setup_env = spec.setup_environment(session_commit=head,
                                        bundle=canonical_bundle_name(head))
     contract = derive_contract(spec.setup, session_id="autoinit-c1")
     return spec, contract, describe(contract, REPO_ROOT), setup_env
+
+
+@functools.lru_cache(maxsize=1)
+def c1_launcher():
+    """The launcher module, loaded once.
+
+    Shared by the session derivation and the host-local scan so both describe
+    the same launcher, and memoized because `load_session_launcher` builds a
+    fresh module object each call.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
+    _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
+    from session_specs import load_session_launcher
+    return load_session_launcher("autoinit_c1_launch")
+
+
+def gate_documents(launcher, repo_root: Path) -> list[str]:
+    """Every committed JSON document the launcher's own gates read.
+
+    Taken from the launcher module's path constants rather than from a list kept
+    here, so a gate added tomorrow with a new document is covered the day it
+    lands instead of the day a pod fails on it.
+    """
+    out = set()
+    for name, value in vars(launcher).items():
+        if (name.isupper() and isinstance(value, str) and value.endswith(".json")
+                and not value.startswith("/") and (repo_root / value).is_file()):
+            out.add(value)
+    return sorted(out)
+
+
+def host_local_stores(launcher, repo_root: Path) -> list[str]:
+    """Absolute paths OUTSIDE the repository that those documents name.
+
+    A path like this is a host-local store: something the machine that froze an
+    asset holds, and that no pod receives, because a session stages an asset's
+    BYTES and never the store they were frozen in. `hidden_files` cannot see
+    one — it is the complement of the manifest within the repository's own
+    gitignored set, and a store outside the tree is in neither term.
+
+    That blind spot cost C1 attempt 14 $0.40 and 22 minutes: `battery_staged_gate`
+    compares the staged battery against `battery.json`'s `canonical_path`, the
+    dev box had it, the launch-bound sweep passed, and the pod — which by design
+    has the bytes and not the store — failed the gate test at its CPU gate.
+
+    Derived from the documents, not listed here, and restricted to paths that
+    actually exist: hiding is a rename, and a rename of something absent is a
+    no-op the simulator already skips.
+    """
+    def strings(node):
+        if isinstance(node, dict):
+            for v in node.values():
+                yield from strings(v)
+        elif isinstance(node, list):
+            for v in node:
+                yield from strings(v)
+        elif isinstance(node, str):
+            yield node
+
+    root = repo_root.resolve()
+    found = set()
+    for rel in gate_documents(launcher, repo_root):
+        try:
+            doc = json.loads((repo_root / rel).read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        for s in strings(doc):
+            #: A command line is not a path. Anything with whitespace is prose or
+            #: an invocation, and several plan documents record both.
+            if not s.startswith("/") or any(c.isspace() for c in s):
+                continue
+            p = Path(s)
+            try:
+                p.resolve().relative_to(root)
+            except ValueError:
+                if p.exists():
+                    found.add(s)
+    return sorted(found)
 #: One directory per sweep, named by the tree the sweep is ABOUT.
 #:
 #: Both of these were fixed paths, so every sweep overwrote the previous one's
@@ -252,6 +332,65 @@ def _sha256_of(path: str | None) -> str | None:
     return h.hexdigest()
 
 
+def pointer_for(run_id: str, stage_id: str, record: dict, record_rel: str) -> dict:
+    """The navigation document, shared by the sweep and by `--repoint`.
+
+    One shape written from two places was how the pointer came to disagree with
+    the run it names: it said `FAIL` at `c5dfd9ea` while `attempt13`'s own record
+    said `PASS` at `5aafc549`.
+    """
+    return {
+        "schema": "aadistill.autoinit.c1_readiness_pointer/v1",
+        "_what_this_is": (
+            "a pointer to the run that owns the live readiness record. NOT "
+            "the record: this file used to be the record, which meant each "
+            "run overwrote the evidence the previous one launched under."),
+        "run_id": run_id,
+        "stage_id": stage_id,
+        "record": record_rel,
+        "record_self_sha256": record.get("self_sha256"),
+        "record_kind": record.get("record_kind"),
+        "verdict": record.get("verdict"),
+        "swept_base_commit": record.get("swept_base_commit"),
+        "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
+        "authorizes": "nothing",
+    }
+
+
+def repoint(root: Path) -> int:
+    """Point the root file at the newest run-owned record. Runs nothing.
+
+    A `launch_bound` sweep leaves the pointer alone on purpose: it is tracked,
+    and rewriting it would put an unpermitted change into the very tree the
+    sweep is certifying. The cost is that navigation lags by one run, and
+    nothing was closing that gap — the pointer still named attempt 13 after
+    attempts 13 and 14 had both been swept, closed and consumed.
+    """
+    records = sorted(
+        root.glob("logs/stages/*/*/runs/*/governance/readiness.json"),
+        key=lambda p: (int("".join(c for c in p.parents[1].name if c.isdigit())
+                           or -1), p.parents[1].name))
+    if not records:
+        print("no run-owned readiness record exists; pointer left alone")
+        return 0
+    newest = records[-1]
+    doc = json.loads(newest.read_text())
+    rel = newest.relative_to(root).as_posix()
+    #: logs/stages/stage-<id>/<experiment>/runs/<run>/governance/readiness.json
+    #: The run is `parents[1]`, the same handle the sort above uses. Reading it
+    #: positionally out of `parts` put "runs" in the `run_id` field.
+    stage_id = newest.relative_to(root).parts[2].split("-", 1)[1]
+    pointer = pointer_for(newest.parents[1].name, stage_id, doc, rel)
+    p = root / RECORD_POINTER
+    body = json.dumps(pointer, indent=1) + "\n"
+    if p.is_file() and p.read_text() == body:
+        print(f"pointer already names {rel}")
+        return 0
+    p.write_text(body)
+    print(f"pointer -> {rel} ({doc.get('record_kind')} {doc.get('verdict')})")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     #: Defaults are DERIVED per sweep, below, once the head commit is known.
@@ -272,6 +411,14 @@ def main() -> int:
                          "where every pre-2026-09-12 sweep is.")
     ap.add_argument("--stage-id", default=None,
                     help="the run's declared stage; required with --run-id")
+    ap.add_argument("--repoint", action="store_true",
+                    help="MAINTENANCE, runs nothing: rewrite the repository-root "
+                         "pointer from the newest run-owned record that already "
+                         "exists. A launch_bound sweep deliberately leaves the "
+                         "pointer alone -- rewriting a tracked file mid-sweep "
+                         "puts an unpermitted change into the tree it swept -- "
+                         "so navigation lags by one run until this is run. Do it "
+                         "BEFORE a sweep, never after.")
     ap.add_argument("--kind", default="diagnostic",
                     choices=("diagnostic", "launch_bound"),
                     help=("`diagnostic` proves the machinery on the current tree; "
@@ -279,6 +426,9 @@ def main() -> int:
                           "launch rests on. Default is deliberately the weaker "
                           "claim."))
     args = ap.parse_args()
+
+    if args.repoint:
+        return repoint(REPO_ROOT)
 
     # Captured BEFORE the record is written: writing it into logs/ is itself a
     # tree modification, and the verdict must describe the tree that was swept.
@@ -337,7 +487,13 @@ def main() -> int:
     # same SetupManifest the SessionRunner launches, and the hidden set is
     # computed as its complement rather than declared.
     spec, contract, staged_view, setup_env = derive_c1_session()
-    hidden = hidden_files(contract, REPO_ROOT)
+    #: The complement inside the repository, plus the host-local stores outside
+    #: it that the session's own documents name. Both are things this machine
+    #: holds and the pod does not; only the first was modelled until attempt 14
+    #: paid to find the second.
+    in_tree = hidden_files(contract, REPO_ROOT)
+    host_local = host_local_stores(c1_launcher(), REPO_ROOT)
+    hidden = [*in_tree, *host_local]
     pytest_cmd = (".venv/bin/python -m pytest tests/ -q "
                   + " ".join(f"--ignore={i}" for i in contract["test_ignores"]))
     # The production setup environment is MERGED IN, so the child pytest runs
@@ -462,8 +618,16 @@ def main() -> int:
             "dev_hf_cache_visible": False,
             "artifact_hiding": (
                 f"manifest-derived positive staged view: {staged_view['n_staged_files']} "
-                f"files visible from the C1 SetupManifest, {len(hidden)} hidden as "
-                f"the computed complement. NOT the simulator's generic default."),
+                f"files visible from the C1 SetupManifest, {len(in_tree)} hidden as "
+                f"the computed complement and {len(host_local)} host-local store(s) "
+                f"hidden as well. NOT the simulator's generic default."),
+            "host_local_stores_hidden": host_local,
+            "host_local_rule": (
+                "an absolute path outside the repository named by a document the "
+                "launcher's gates read. The session stages an asset's bytes, never "
+                "the store it was frozen in, so a pod has none of these. Derived "
+                "from those documents rather than listed, and hidden by rename for "
+                "the duration of the sweep."),
         },
         # THE command handed to PODSIM_CMD, not a transcription of one. A record
         # that restates the command cannot be checked against the JUnit it claims
@@ -546,22 +710,7 @@ def main() -> int:
         #: A POINTER, not a second record: it says where the live evidence is
         #: and what it hashes to, so one stable path still answers "which sweep
         #: is current" without becoming a copy that can drift.
-        pointer = {
-            "schema": "aadistill.autoinit.c1_readiness_pointer/v1",
-            "_what_this_is": (
-                "a pointer to the run that owns the live readiness record. NOT "
-                "the record: this file used to be the record, which meant each "
-                "run overwrote the evidence the previous one launched under."),
-            "run_id": args.run_id,
-            "stage_id": args.stage_id,
-            "record": record_rel,
-            "record_self_sha256": record["self_sha256"],
-            "record_kind": record["record_kind"],
-            "verdict": record["verdict"],
-            "swept_base_commit": record.get("swept_base_commit"),
-            "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
-            "authorizes": "nothing",
-        }
+        pointer = pointer_for(args.run_id, args.stage_id, record, record_rel)
         (REPO_ROOT / RECORD_POINTER).write_text(
             json.dumps(pointer, indent=1) + "\n")
         print(f"pointer: {RECORD_POINTER} -> {record_rel}")

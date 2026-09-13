@@ -2252,3 +2252,30 @@ permits.** A read-only capacity watch runs at `$0`; the next session is built
 only when capacity exists, because the one-use chain is consumed at invocation
 and should not be spent on a market that cannot serve it. Attempt 12's grant,
 authorization and bundle are **consumed** and authorize nothing further.
+
+## 2026-09-13 — C1 attempts 13 and 14: `$0.0000` and `$0.3999`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 13: the launcher refused inside `open_run`, before pricing and before any provider call. `_RUN_PREPARED` named two of the four artifacts the documented pre-launch sequence writes into a run, so the authorization the issuer had just placed there read as a dead launcher's residue. No quote, no resource, nothing billed | `$0.0000` | [`runs/phase_c1/attempt13/`](../stages/stage-1/phase_c1/runs/attempt13/) |
+| C1 attempt 14: 14/14 pre-provider gates passed, pod `h9hs9l127w4x99` created at `$1.09/h`, 22.01 min, **INFRASTRUCTURE ABORT during SETUP at the pod CPU test gate**, `SETUP_RC=1`, 2 failed of 3892. Pod deleted, provider confirms gone, live check `ZERO_PODS`. No driver stage, no replay, no training, no evaluation, no decision | `$0.3999` | [`runs/phase_c1/attempt14/`](../stages/stage-1/phase_c1/runs/attempt14/) |
+
+**Cumulative: `$268.6957` of the `$320.0000` cap.** Package booked
+**`$0.7959`** of `$51.4425`.
+
+```text
+project   267.8998 + 0.7959 = 268.6957   of 320.0000, leaving 51.3043
+package     0.3960 + 0.3999 =   0.7959   of  51.4425, leaving 50.6466
+sessions worst case  268.6957 + 15.1475 = 283.8432  <= 320.0000
+```
+
+Recomputed from the components rather than carried forward: attempt10 `$0.1177`
++ attempt11 `$0.2783` + attempt12 `$0.0000` + attempt13 `$0.0000` + attempt14
+`$0.3999`. Two full-ceiling sessions remain fundable from the formal allowance.
+
+**Both attempts are pre-science.** Neither reached Stage G, neither trained a
+probe, and neither produced or invalidated any scientific result. Attempt 13's
+was an occupancy contract with no satisfiable ordering; attempt 14's was three
+divergences between the dev box and a pod, all of them premises the dev box owns
+— see the decision record of the same date. Both chains are **consumed** and
+authorize nothing further.

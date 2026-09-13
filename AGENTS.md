@@ -426,6 +426,22 @@ recovery or confirmation evaluation, a release, or a merge. A scope or budget
 expansion needs a new maintainer decision; routine repair inside the envelope
 does not.
 
+**A formal launcher invocation that aborts before measurement begins is an
+engineering subrun, not a retried experiment.** When a task-specific governance
+artifact explicitly authorizes autonomous pre-science retries inside a
+cumulative budget, an invocation that ends before formal training or
+measurement starts produced no measurement to retry. Preserve and close that
+attempt — it consumed its one-use chain even at $0 — then diagnose, repair,
+build a **fresh** chain under a new attempt identity, and retry, without asking
+for another approval. Do not reuse the consumed chain, and do not treat the
+incrementing attempt number as a scope expansion.
+
+This exception is about retry governance only. It never permits retrying,
+resuming, pooling, or re-running a scientific measurement once formal training
+or measurement HAS begun, and it never widens the budget: the cumulative
+envelope above still governs every subrun. If it is uncertain whether formal
+measurement started, that uncertainty is itself a stop condition.
+
 Stop and report when the remaining budget cannot fund a corrected test plus
 teardown, when a cumulative boundary is reached, when a resource may still be
 billing and cannot be reconciled, when continuation would require changing

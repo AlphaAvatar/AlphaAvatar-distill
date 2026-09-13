@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-13T08:55:15+00:00",
+  "created_utc": "2026-09-13T11:02:20+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,20 +10,20 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 965,
-    "bytes": 41178150,
+    "files": 979,
+    "bytes": 41753538,
     "by_disposition": {
       "keep_canonical": 79,
-      "keep_immutable": 720,
+      "keep_immutable": 734,
       "keep_referenced": 151,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 457,
+      "immutable_record": 460,
       "index": 8,
-      "narrative": 178,
-      "raw_execution_artifact": 301,
+      "narrative": 184,
+      "raw_execution_artifact": 306,
       "scratch_debug": 15
     },
     "duplicate_groups": 49,
@@ -2831,23 +2831,24 @@
       "decided_by": "rule: per-run evidence"
     },
     {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "members": [
+        "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/watchdog/watchdog_h9hs9l127w4x99.out",
+        "logs/stages/stage-1/phase_c1/runs/attempt6/watchdog.out",
+        "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/runs/cuda_stage_f_20260910/validation_stdout.txt"
+      ],
+      "canonical": null,
+      "canonical_reason": "3 of 3 sit inside a run directory the run index registers with a digest, so each is that run's own evidence and removing it would change what the index records about that run. Identical bytes across attempts are a reused or re-derived observation, not one object under several names",
+      "reclaimable_bytes": 0,
+      "decided_by": "rule: per-run evidence"
+    },
+    {
       "sha256": "2c9f61f64b08c2342788ad4a8a231abf9c073ddb4ef1f35549a997cea341bd11",
       "size_bytes": 8645,
       "members": [
         "logs/stages/stage-1/phase_c1/runs/attempt3/autoinit_c1_authorization.json",
         "logs/stages/stage-1/phase_c1/runs/attempt3/autoinit_c1_authorization_955c9288_superseded.json"
-      ],
-      "canonical": null,
-      "canonical_reason": "2 of 2 sit inside a run directory the run index registers with a digest, so each is that run's own evidence and removing it would change what the index records about that run. Identical bytes across attempts are a reused or re-derived observation, not one object under several names",
-      "reclaimable_bytes": 0,
-      "decided_by": "rule: per-run evidence"
-    },
-    {
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size_bytes": 0,
-      "members": [
-        "logs/stages/stage-1/phase_c1/runs/attempt6/watchdog.out",
-        "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/runs/cuda_stage_f_20260910/validation_stdout.txt"
       ],
       "canonical": null,
       "canonical_reason": "2 of 2 sit inside a run directory the run index registers with a digest, so each is that run's own evidence and removing it would change what the index records about that run. Identical bytes across attempts are a reused or re-derived observation, not one object under several names",
@@ -3459,6 +3460,13 @@
       ]
     },
     {
+      "sentence": "Large objects stay in the session scratch and are referenced by hash from `artifacts/manifest.json`;",
+      "files": [
+        "logs/stages/stage-1/phase_c1/runs/attempt14/README.md",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/artifacts/README.md"
+      ]
+    },
+    {
       "sentence": "MEASURED 2/2 PASS, formal treatment UNMEASURED, endpoint UNMEASURED, Attempt 9",
       "files": [
         "logs/budget/ledger.md",
@@ -3547,6 +3555,13 @@
       "files": [
         "logs/budget/decisions.md",
         "logs/stages/stage-1/phase_a/runs/attempt9/README.md"
+      ]
+    },
+    {
+      "sentence": "`battery_staged_gate` compares the staged battery against the canonical",
+      "files": [
+        "logs/budget/decisions.md",
+        "logs/state/current.md"
       ]
     },
     {
@@ -3655,6 +3670,27 @@
       ]
     },
     {
+      "sentence": "the maintainer grant, the one-use authorization, the readiness record and the bundle record.",
+      "files": [
+        "logs/stages/stage-1/phase_c1/runs/attempt14/README.md",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/governance/README.md"
+      ]
+    },
+    {
+      "sentence": "the outcome classification, the measured cost and the provider teardown confirmation.",
+      "files": [
+        "logs/stages/stage-1/phase_c1/runs/attempt14/README.md",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/closeout/README.md"
+      ]
+    },
+    {
+      "sentence": "the session record the runner writes on every path, the launcher console, the watchdog journal.",
+      "files": [
+        "logs/stages/stage-1/phase_c1/runs/attempt14/README.md",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/README.md"
+      ]
+    },
+    {
       "sentence": "true` \u2014 it now fails closed when two roles share no comparable",
       "files": [
         "docs/AUTOINIT_REFERENCE.md",
@@ -3714,8 +3750,8 @@
   "files": [
     {
       "path": "AGENTS.md",
-      "size_bytes": 75633,
-      "sha256": "697114ef1a40f26d0b5813e4ed646c23719fe2d5feca355f3c8733f80eb32438",
+      "size_bytes": 76662,
+      "sha256": "a21382e56361371b57e4e3cacc60c746a9ee2d45ab62feff9c11673e4af63945",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -3741,6 +3777,7 @@
         "logs/stages/stage-1/README.md",
         "logs/stages/stage-1/phase_a/runs/attempt11/search_states_FULL_RECORD.md",
         "logs/stages/stage-1/phase_c1/plans/battery.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/session.json",
         "logs/stages/stage-1/recovery_continuation/history/autoinit_continuation_attempts/README.md",
         "logs/stages/stage-2/README.md",
         "logs/stages/stage-3/README.md",
@@ -3748,6 +3785,8 @@
         "logs/stages/stage-3/e8/plans/e8_preregistration.md",
         "logs/stages/stage-3/history/EXPERIMENTS.md",
         "logs/state/artifact_manifests.md",
+        "logs/state/current.json",
+        "logs/state/current.md",
         "logs/state/supported_models.md",
         "scripts/architecture/core_ownership.py",
         "scripts/autoinit/audit_skip_predicates.py",
@@ -4262,6 +4301,7 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c1/analyses/autoinit_c1_bundle.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/governance/bundle.json",
         "scripts/autoinit/issue_c1_authorization.py",
         "scripts/autoinit/stage_c1_bundle.py",
         "scripts/pod/autoinit_c1_driver.py",
@@ -4706,8 +4746,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 835483,
-      "sha256": "744fbc8528b782d7586eae6a27424209b7d9c1f3957f56dccf5dea82a8d1f108",
+      "size_bytes": 838925,
+      "sha256": "027f92a0daa96b1866c099b00e883729e35cd9442186c637c92dea7ba43c8926",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -4739,8 +4779,8 @@
     },
     {
       "path": "logs/budget/ledger.md",
-      "size_bytes": 133189,
-      "sha256": "ac343d69e4d91145b13cbb861e9b093b129dc97e77dff6bd63c55bab844ed7c1",
+      "size_bytes": 135118,
+      "sha256": "0f2a3999c1ab11ab176a77c031f95d7b972370d004c94701f704a3bf5ecb7e4c",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -4766,13 +4806,14 @@
     },
     {
       "path": "logs/index.json",
-      "size_bytes": 57669,
-      "sha256": "7e7d0d427694e1f6e4b94a6eb6bff1fe5d78dd977e2c88fdb6e5e28c09986b75",
+      "size_bytes": 57760,
+      "sha256": "8f2c8c45c1c2a6e24b5f47889c93713bdd4c61ff14a84557a1248e1a1db49fe0",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "docs/REPO_LAYOUT.md",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/README.md",
         "logs/state/current.json",
         "scripts/architecture/record_migration.py",
         "scripts/architecture/record_run_index.py",
@@ -11322,13 +11363,14 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json",
       "size_bytes": 701,
-      "sha256": "c42051c9a30d4ef70a6fa5d45ca6a62f355cdf7aa22f987bc47b8b7ddb5b2b57",
+      "sha256": "fb7c60f440698f748fd3a77ef7102a7f2e8e52d8b7281df35368c30993a68a86",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/closeout/outcome.json",
         "logs/state/current.json",
         "scripts/autoinit/record_pod_environment.py",
         "scripts/consolidate/render_log_navigation.py",
@@ -11353,8 +11395,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
-      "size_bytes": 107835,
-      "sha256": "6626da431d46d4369bcf1dca8d48bc0a46f4e1d7d057db9cac6165adf5f131ac",
+      "size_bytes": 107852,
+      "sha256": "540c85ae902260e07e130a2ece216e555693e8798001dd38e737fea26e514f72",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -11432,6 +11474,7 @@
         "configs/experiments/phase_c1/authorization.json",
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/closeout/outcome.json",
         "scripts/autoinit/write_c1_execution_preregistration.py",
         "scripts/pod/autoinit_c1_driver.py",
         "scripts/pod/autoinit_c1_launch.py"
@@ -11455,6 +11498,7 @@
         "configs/experiments/phase_c1/authorization.json",
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/manifest.json",
         "logs/state/current.json",
         "scripts/autoinit/write_c1_execution_preregistration.py",
         "scripts/pod/autoinit_c1_launch.py",
@@ -11532,6 +11576,7 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/session.json",
         "logs/state/current.json",
         "scripts/autoinit/issue_c1_authorization.py",
         "scripts/autoinit/price_c1.py",
@@ -12073,8 +12118,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/runs/attempt13/closeout/outcome.json",
-      "size_bytes": 3478,
-      "sha256": "e43dfd2b744ae6992b59a7c4d047f100ac2917cd3df396d9dede8593415d79a7",
+      "size_bytes": 3703,
+      "sha256": "ebfa24a0259982c2513377233a2978f43984e5264f736622cc74c0389cfb39ae",
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
@@ -12107,8 +12152,7 @@
       "in_paid_attempt_chain": true,
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
-        "logs/stages/stage-1/phase_c1/runs/attempt13/governance/authorization.json",
-        "logs/state/current.json"
+        "logs/stages/stage-1/phase_c1/runs/attempt13/governance/authorization.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -12122,8 +12166,121 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/README.md",
+      "size_bytes": 1212,
+      "sha256": "dc918dfef0a4e83f540df7652a8c282771aa1a4e2e7358b55185a3032d9f744d",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/artifacts/README.md",
+      "size_bytes": 297,
+      "sha256": "6813488dd60bba4d82642545501d90a03c5fb3f33f74d741321ee34760959dd4",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/closeout/README.md",
+      "size_bytes": 213,
+      "sha256": "61a9631de0bfd7e35ffe34d168436ea62cbe6e13bbcfbe4c53ed42390bfe8b76",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/closeout/outcome.json",
+      "size_bytes": 7231,
+      "sha256": "0104b9027d50551720f9c2cf94815e91b91a4cbae04eb209953175b86d6e2254",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/evidence/README.md",
+      "size_bytes": 253,
+      "sha256": "4c1c4fc9bc358c48f8ad07155d2516c8c8afefc89dd57d15f67131044b14a9a5",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/governance/README.md",
+      "size_bytes": 329,
+      "sha256": "6cb2dab39a13b9dcc41d0b1e526336f8d00471a7752f784e2e906e8ab14e2ab4",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/governance/authorization.json",
+      "size_bytes": 16211,
+      "sha256": "724c8e49dccf3014b5754d65c1d14c40fb1f7abc54757dd53f7a617cf9702608",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
-        "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
+        "logs/stages/stage-1/phase_c1/runs/attempt14/manifest.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/governance/bundle.json",
+      "size_bytes": 997,
+      "sha256": "11597635a7fbd321271b563f588e5c47ac5445a147b4eaf27ab27d3606ed5a28",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -12137,7 +12294,9 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json"
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/governance/authorization.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/session.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -12146,9 +12305,96 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/runs/attempt14/governance/readiness.json",
-      "size_bytes": 56068,
-      "sha256": "bce90b491e8e98cbc1e1c4e78bc71cc4ea2b5aa6bcb80554312f3bf70d8d3e4f",
+      "size_bytes": 64146,
+      "sha256": "c2895edb1d536162d8da9879323044555edb6697335d11ac2665f9796b7ab99b",
       "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json",
+        "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/manifest.json",
+      "size_bytes": 1964,
+      "sha256": "d1b04fce336b8e1cc935bd344e2fc8eae3acd7533afbec5130040d421b7c6f84",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/README.md",
+      "size_bytes": 268,
+      "sha256": "b3323b9d2fbdffdf857f9c21a1699ef488461ea8a45f1db05e3a680ed7fe1aa1",
+      "category": "narrative",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/launcher.log",
+      "size_bytes": 4826,
+      "sha256": "8e690a767695f24a4b7b97b3cd2affe24fa3a1b986736fc0732baf9ad15e4c20",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/session.json",
+      "size_bytes": 518260,
+      "sha256": "c98e3c2d84c322437659a1b52befc9bd4e14336f1b031eac9c36d6533c6a3e27",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/watchdog/watchdog_h9hs9l127w4x99.jsonl",
+      "size_bytes": 5948,
+      "sha256": "218e3831232d946912c9a9dc8dba2bf83b155f36aa13cd4b41bb12a0054b9fb9",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/watchdog/watchdog_h9hs9l127w4x99.out",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "category": "raw_execution_artifact",
       "in_paid_attempt_chain": true,
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json"
@@ -18713,8 +18959,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11778,
-      "sha256": "3994af7ab89a4555056cf8988a8ba44bf261961408df0e06d81ff7e1354a48a5",
+      "size_bytes": 12677,
+      "sha256": "899ac4cd1c1c034222d172cf9802d099b17f155664e9b5d7c9e76ec3bb8520bb",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -18754,8 +19000,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 8959,
-      "sha256": "69705c09b3850676e69f78aa5ef949a11ab4d63988ddc73f4061e6f851a57b80",
+      "size_bytes": 10628,
+      "sha256": "0fecb6e03f8578384714bf51ed13b723ee76278b2b989c6332636faccea0008f",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

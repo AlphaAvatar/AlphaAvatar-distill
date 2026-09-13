@@ -25,8 +25,22 @@ def load(rel: str) -> dict:
     return json.loads((REPO / rel).read_text())
 
 
+#: The one tracked `logs/` file the SWEEP ITSELF removes while it runs.
+#:
+#: `record_pod_environment.py` stashes the readiness record it is about to
+#: replace, because the suite it runs contains the two tests that verify that
+#: record and they would otherwise assert a stale artifact against the tree being
+#: swept. That is deliberate, documented, and exactly one file.
+#:
+#: Counting it as a partial tree is what made 23 tests below SKIP in the
+#: launch-bound sweep and RUN on the pod. They passed there, so it cost nothing
+#: this time — but a sweep that certifies a skip set the pod does not reproduce
+#: has not certified the pod, and attempt 5 lost a grant to that exact shape.
+STASHED_BY_THE_SWEEP = "/governance/readiness.json"
+
+
 def _missing_tracked_logs() -> list[str]:
-    """Tracked `logs/` files that are not on disk right now.
+    """Tracked `logs/` files that are not on disk right now, EXCLUDING that one.
 
     A pod receives a STAGED subset of the repository, and the pod-environment
     simulator models that by moving the rest aside. Anything here that reads the
@@ -41,14 +55,22 @@ def _missing_tracked_logs() -> list[str]:
     """
     out = subprocess.run(["git", "ls-files", "logs"], cwd=REPO,
                          capture_output=True, text=True, check=True).stdout.split()
-    return [f for f in out if not (REPO / f).exists()]
+    return [f for f in out
+            if not (REPO / f).exists() and not f.endswith(STASHED_BY_THE_SWEEP)]
 
 
 #: Applied to the tests that read the tree as a whole. The rest run everywhere.
+#:
+#: The reason NAMES the files. A fixed string told the attempt-14 sweep record
+#: that 23 tests skipped because the tree was partial, and nothing anywhere said
+#: which file was missing — the diagnosis took a JUnit from a deleted pod and a
+#: read of the sweep driver.
+_MISSING_NOW = _missing_tracked_logs()
 needs_whole_tree = pytest.mark.skipif(
-    bool(_missing_tracked_logs()),
+    bool(_MISSING_NOW),
     reason=("the logs/ tree is partially staged, so a check that reads it as a "
-            "whole would describe a different tree"))
+            f"whole would describe a different tree: {len(_MISSING_NOW)} tracked "
+            f"file(s) absent, e.g. {_MISSING_NOW[:3]}"))
 
 
 # --- the four balances -----------------------------------------------------
@@ -90,7 +112,20 @@ class TestTheBudgetIsDerivedNotRestated:
         assert b["engineering_remaining_usd"] == derived["engineering"]["remaining_usd"]
         assert b["full_ceiling_sessions_fundable"] == \
             derived["full_ceiling_sessions_fundable"]
-        assert b["_derived_by"] == "scripts/consolidate/derive_budget.py"
+        assert b["package_remaining_usd"] == derived["package"]["remaining_usd"]
+
+        #: `_derived_by` must name a writer that ACTUALLY writes it. It named
+        #: `derive_budget.py` while nothing regenerated the block at all, so the
+        #: snapshot went on stating a formal remainder `$0.40` too generous
+        #: after attempt 14 booked its cost. Pinning the string alone is what
+        #: let a claim of derivation stand in for the derivation.
+        assert "derive_budget.py" in b["_derived_by"]
+        writer = b["_derived_by"].split(",")[0].strip()
+        assert (REPO / writer).is_file(), writer
+        src = (REPO / writer).read_text()
+        assert "full_ceiling_sessions_fundable" in src and "derive_budget" in src, (
+            f"{writer} is named as the writer of this block and does not "
+            "compute it")
 
     def test_an_unreadable_session_is_not_read_as_free(self):
         """The deriver reported `$0.0000 spent` against a package that had
@@ -863,6 +898,64 @@ class TestEngineeringSpendIsAttributedByPackage:
 # --- the current view cannot go stale against its own owner -----------------
 
 @needs_whole_tree
+class TestTheWholeTreePredicateModelsThePod:
+    """The sweep and the pod must agree about which tests skip.
+
+    They did not. The launch-bound sweeps for attempts 13 and 14 each recorded
+    25 skips in this module; the pod ran 23 of them. The cause was not the
+    simulator and not the pod: `record_pod_environment.py` moves the readiness
+    record aside for the duration of the sweep, that made one tracked `logs/`
+    file absent, and the predicate above read one deliberate absence as a
+    partially staged tree.
+    """
+
+    def test_the_file_the_sweep_stashes_is_not_read_as_a_partial_tree(self,
+                                                                      monkeypatch):
+        """The excluded path must be the one the driver actually stashes."""
+        src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+        assert "shutil.move(str(live), str(stash))" in src, (
+            "the sweep no longer stashes the previous record; if it stopped, "
+            "this exclusion is now hiding a real partial tree")
+        assert "record_rel = record_path_for(" in src
+
+        from experiments.phase_c1.pod_environment import record_path_for
+        stashed = record_path_for("attempt99", "1")
+        assert stashed.endswith(STASHED_BY_THE_SWEEP), (
+            f"the driver stashes {stashed}, which the predicate does not exempt")
+
+    def test_a_real_partial_tree_is_still_detected(self, monkeypatch, tmp_path):
+        """Both directions. An exemption that swallows everything protects nothing.
+
+        Driven against a synthetic checkout rather than by deleting from this
+        one: the whole point of the predicate is what it says about a tree, and
+        making the real tree partial to test it is how a sweep loses artifacts.
+        """
+        import subprocess as sp
+
+        root = tmp_path / "repo"
+        (root / "logs/stages/stage-1/e/runs/r/governance").mkdir(parents=True)
+        (root / "logs/keep.md").write_text("kept")
+        (root / "logs/gone.md").write_text("about to vanish")
+        (root / "logs/stages/stage-1/e/runs/r/governance/readiness.json").write_text("{}")
+        sp.run(["git", "init", "-q"], cwd=root, check=True)
+        sp.run(["git", "add", "-A"], cwd=root, check=True)
+        sp.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                "commit", "-qm", "x"], cwd=root, check=True)
+
+        import tests.docs.test_log_organisation as mod  # noqa: PLC0415
+        monkeypatch.setattr(mod, "REPO", root)
+
+        assert mod._missing_tracked_logs() == []
+
+        # The record alone: deliberate, and not a partial tree.
+        (root / "logs/stages/stage-1/e/runs/r/governance/readiness.json").unlink()
+        assert mod._missing_tracked_logs() == []
+
+        # Any other tracked file: a partial tree, and it must say which.
+        (root / "logs/gone.md").unlink()
+        assert mod._missing_tracked_logs() == ["logs/gone.md"]
+
+
 class TestTheCurrentViewReadsItsOwner:
     """STATE.md said the readiness record was a launch-bound FAILURE while the
     file it linked to was a diagnostic PASS. Three facts had been collapsed into

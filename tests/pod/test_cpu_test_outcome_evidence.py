@@ -172,7 +172,13 @@ def test_a_divergent_skip_set_is_refused_and_the_difference_printed(tmp_path):
     proc = subprocess.run(
         [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
          "--junit", str(junit), "--out", str(tmp_path / "o.json"),
-         "--expected", str(record), "--repo", str(tmp_path), "--strict"],
+         "--expected", str(record), "--repo", str(tmp_path), "--strict",
+         #: Explicitly none: `--session-authorization` defaults to
+         #: `$SESSION_AUTH_PATH`, which is SET on a pod, and this case is about
+         #: the fixture record rather than the session's own. Leaving it to the
+         #: environment would make this test read a different file there than
+         #: here — the exact divergence shape it is part of repairing.
+         "--session-authorization", ""],
         capture_output=True, text=True)
     assert proc.returncode == 1, proc.stdout
     assert "expected-skip-but-RAN" in proc.stdout
@@ -200,6 +206,136 @@ def test_a_record_without_the_skip_set_says_so_rather_than_passing(tmp_path):
     out = S.summarize(junit, record, tmp_path)
     assert out["comparison"]["available"] is False
     assert "only the named groups" in out["comparison"]["why"]
+
+
+# --- WHICH record the pod is entitled to be compared against -----------------
+#
+# C1 attempt 14 compared against `logs/.../analyses/c1_pod_environment_verification.json`,
+# which stopped being the record on 2026-09-12 and became a pointer naming
+# whichever run swept last. It named attempt 13, carried no skip set, and the
+# comparison reported UNAVAILABLE — on the one pod whose skip divergence was
+# about to fail the gate for $0.40.
+
+def _owned(tmp_path: Path, run: str, skipped: list[str]) -> Path:
+    """A run governance directory holding an authorization and its record."""
+    gov = tmp_path / f"logs/stages/stage-1/phase_c1/runs/{run}/governance"
+    gov.mkdir(parents=True)
+    (gov / "authorization.json").write_text(json.dumps({"authorization_id": run}))
+    (gov / "readiness.json").write_text(json.dumps(
+        {"findings": {"all_skipped_nodeids": skipped}}))
+    return gov / "authorization.json"
+
+
+def test_the_record_compared_against_is_the_one_that_authorized_this_session(
+        tmp_path):
+    auth = _owned(tmp_path, "attempt99", ["tests/a.py::test_s"])
+    pointer = tmp_path / "pointer.json"
+    pointer.write_text(json.dumps({"schema": S.POINTER_SCHEMA,
+                                   "run_id": "attempt13"}))
+
+    record, mandatory, why = S.resolve_expected(
+        pointer, auth.relative_to(tmp_path).as_posix(), tmp_path)
+    assert record == auth.parent / "readiness.json"
+    assert mandatory and why is None
+
+
+def test_a_pointer_is_never_read_as_a_record(tmp_path):
+    """It would compare this pod against a different run's sweep."""
+    pointer = tmp_path / "pointer.json"
+    pointer.write_text(json.dumps({"schema": S.POINTER_SCHEMA,
+                                   "run_id": "attempt13"}))
+    record, mandatory, why = S.resolve_expected(pointer, None, tmp_path)
+    assert not mandatory
+    assert "pointer" in why and "attempt13" in why
+
+    junit = _junit(tmp_path, {("tests.a", "test_s"): ("skipped", "r")})
+    out = S.summarize(junit, record, tmp_path, why_not=why)
+    assert out["comparison"]["available"] is False
+    assert "attempt13" in out["comparison"]["why"]
+
+
+def test_a_session_that_owns_a_record_is_refused_when_it_cannot_be_compared(
+        tmp_path):
+    """Attempt 14's condition exactly, and it must now fail the gate.
+
+    The record existed, the pod ran, and nothing compared them. `--strict`
+    refused only a DIFFERING skip set, so an absent comparison passed silently —
+    a check that cannot fail is not a check.
+    """
+    gov = _owned(tmp_path, "attempt99", []).parent
+    #: Owned, but written before the complete skip set existed.
+    (gov / "readiness.json").write_text(json.dumps(
+        {"findings": {"counts": {"skipped": 3}}}))
+    junit = _junit(tmp_path, {("tests.a", "test_s"): ("skipped", "r")})
+    proc = subprocess.run(
+        [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
+         "--junit", str(junit), "--out", str(tmp_path / "o.json"),
+         "--repo", str(tmp_path), "--strict",
+         "--session-authorization",
+         (gov / "authorization.json").relative_to(tmp_path).as_posix()],
+        capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stdout + proc.stderr
+    assert "REFUSING" in proc.stdout
+    assert "certifies nothing" in proc.stdout
+
+
+def test_an_owned_record_that_matches_passes_and_says_which_file(tmp_path):
+    """The other direction: a mandatory comparison that succeeds must succeed."""
+    auth = _owned(tmp_path, "attempt99", ["tests/a.py::test_s"])
+    junit = _junit(tmp_path, {("tests.a", "test_s"): ("skipped", "r"),
+                              ("tests.a", "test_p"): ("passed", "")})
+    proc = subprocess.run(
+        [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
+         "--junit", str(junit), "--out", str(tmp_path / "o.json"),
+         "--repo", str(tmp_path), "--strict",
+         "--session-authorization", auth.relative_to(tmp_path).as_posix()],
+        capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "IDENTICAL" in proc.stdout
+    written = json.loads((tmp_path / "o.json").read_text())
+    assert written["comparison_is_mandatory"] is True
+    assert written["expected_record"].endswith("attempt99/governance/readiness.json")
+
+
+def test_the_pod_invocation_resolves_this_session_without_being_told():
+    """The wiring, end to end, on the shipped setup script and the real spec.
+
+    Three things have to line up and none of them is asserted by the pieces
+    above: the setup gate passes `--repo` so a repo-relative authorization path
+    resolves; it does NOT override `--session-authorization`, so the environment
+    default applies; and the launcher puts `SESSION_AUTH_PATH` into that
+    environment pointing inside the run's own governance directory.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(REPO / "scripts/pod"))
+    from session_specs import load_session_launcher, session_args
+
+    text = SETUP.read_text()
+    call = text[text.index("summarize_pytest_outcomes.py"):][:600]
+    assert '--repo "$REPO"' in call, call
+    assert "--session-authorization" not in call, (
+        "the gate overrides the session default; if that is deliberate it must "
+        "name the run's own record, not the repository-root pointer")
+
+    launcher = load_session_launcher("autoinit_c1_launch")
+    spec = launcher.spec(session_args(launcher))
+    auth = spec.authorization_path
+    assert auth.endswith("/governance/authorization.json"), auth
+    assert not Path(auth).is_absolute(), (
+        f"{auth} is absolute; --repo would not compose with it")
+
+
+def test_the_launch_bound_record_this_run_will_own_carries_the_skip_set():
+    """The producer's side of the same contract, checked on the live recorder.
+
+    A resolution that finds the right file proves nothing if the file the sweep
+    writes has no skip set in it. Asserted against the record `record_pod_environment`
+    actually writes, not against a fixture of it.
+    """
+    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    assert '"findings": findings,' in src
+    assert "all_skipped_nodeids" in json.dumps(
+        pe.evaluate_sweep({"tests/a.py::test_s": "skipped"}, groups=GROUPS))
 
 
 def test_a_missing_junit_report_does_not_mask_the_suite_exit_code(tmp_path):

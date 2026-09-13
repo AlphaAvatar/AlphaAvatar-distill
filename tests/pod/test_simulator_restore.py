@@ -507,6 +507,139 @@ def test_a_non_executable_interpreter_refuses_rather_than_falling_back(tmp_path)
     assert "is not executable" in r.stderr
 
 
+# --- host-local stores, which live OUTSIDE the checkout ----------------------
+#
+# A pod receives an asset's BYTES and never the store it was frozen in, so a
+# store outside the repository is something the dev box has and the pod does
+# not — the same class as a gitignored artifact, and invisible to the manifest
+# complement that models that class. C1 attempt 14 paid $0.40 to discover the
+# gap: `battery_staged_gate` reads an absolute `canonical_path` out of a
+# committed document, the sweep could see it and the pod could not.
+#
+# The sweep now hides those too, so the two machines agree. Which puts a rename
+# of something outside the tree on the restore path, and that has to be exact.
+
+def test_a_store_outside_the_checkout_is_hidden_and_restored_exactly(tmp_path):
+    """Absolute entries round-trip byte for byte, parents included."""
+    root = build_tree(tmp_path)
+    store = tmp_path / "host_local/frozen_v1"
+    (store / "inner").mkdir(parents=True)
+    (store / "inner/battery.jsonl").write_text('{"id": "a"}\n')
+    (store / "manifest.json").write_text('{"n": 1}\n')
+    sibling = tmp_path / "host_local/keep_me"
+    sibling.mkdir()
+    (sibling / "other.txt").write_text("untouched")
+    before = snapshot(tmp_path / "host_local")
+
+    #: `echo "STORE=$?"` and not `&& echo VISIBLE || echo GONE`: the simulator
+    #: prints `running: <command>` before running it, so a literal marker inside
+    #: the command satisfies an `in r.stdout` assertion whatever happens. Only
+    #: the SUBSTITUTED value can distinguish the outcomes — the idiom the rest of
+    #: this module already uses.
+    r = run_sim(root, tmp_path / "hidden",
+                f"artifacts/audit\n{store}",
+                f'test -e "{store}"; echo "STORE=$?"')
+    assert r.returncode == 0, r.stdout + r.stderr
+    # It really was absent while the suite ran — which is the whole point.
+    assert "STORE=1" in r.stdout, r.stdout
+    assert snapshot(tmp_path / "host_local") == before, (
+        "the host-local store did not come back exactly as it was")
+    assert sibling.is_dir(), "a sibling of the hidden store was disturbed"
+
+
+def test_pruning_never_walks_above_the_checkout(tmp_path):
+    """An emptied parent of a host-local store belongs to the machine.
+
+    Pruning exists to stop an EMPTY `artifacts/eval/battery_v2` from defeating a
+    `skipif(not BATTERY.is_dir())`. That reasoning is about the checkout. Walking
+    up from an absolute path would `rmdir` directories under `$HOME` that this
+    simulation does not own, and restore would recreate them with different
+    ownership and mtime.
+    """
+    root = build_tree(tmp_path)
+    only_child = tmp_path / "host_local/solo/asset"
+    only_child.mkdir(parents=True)
+    (only_child / "x.txt").write_text("x")
+
+    #: Observed DURING the run, not after: restore recreates a pruned parent with
+    #: `mkdir -p`, so an after-the-fact existence check passes either way and
+    #: would certify the very behaviour this refuses.
+    r = run_sim(root, tmp_path / "hidden", f"artifacts/audit\n{only_child}",
+                f'test -d "{only_child.parent}"; echo "PARENT=$?"')
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "PARENT=0" in r.stdout, r.stdout
+    assert (tmp_path / "host_local/solo").is_dir()
+    assert (only_child / "x.txt").read_text() == "x"
+
+
+def _venvless_copy(tmp_path: Path) -> Path:
+    """The shipped script in a checkout that has no `.venv`.
+
+    Which is a pod's condition exactly: a pod runs the suite with
+    `/opt/train/bin/python` against a bundle checkout that carries no venv. Every
+    helper in this module must survive that, and until 2026-09-13 one did not.
+    """
+    fake = tmp_path / "checkout/scripts/pod"
+    fake.mkdir(parents=True)
+    (fake / SCRIPT.name).write_text(SCRIPT.read_text())
+    (fake / "cpu_test_env_args.py").write_text(
+        (SCRIPT.parent / "cpu_test_env_args.py").read_text())
+    assert not (tmp_path / "checkout/.venv").exists()
+    return fake / SCRIPT.name
+
+
+def _helpers_that_drive_the_script() -> set[str]:
+    """Non-test module functions that hand the simulator a command, by AST.
+
+    By AST rather than by regex because this module's comments discuss the very
+    strings a regex would look for, and a text scan cannot tell a comment from a
+    call — the mistake `test_mutation_a_host_local_candidate_dependency_is_visible_here`
+    documents for the sibling module.
+    """
+    import ast
+
+    tree = ast.parse(Path(__file__).read_text())
+    found = set()
+    for node in tree.body:
+        if not isinstance(node, ast.FunctionDef) or node.name.startswith("test_"):
+            continue
+        names = {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
+        if {"SCRIPT", "subprocess"} <= names:
+            found.add(node.name)
+    return found
+
+
+def test_every_helper_that_drives_the_simulator_supplies_the_interpreter(tmp_path,
+                                                                        monkeypatch):
+    """Driven against a venv-less copy, which is the pod's condition.
+
+    `run_sim` has passed `PODSIM_PYTHON` since the attempt-6 repair. The
+    free-space pair's helper, added later, did not — and nothing here noticed,
+    because on this box the `.venv/bin/python` fallback exists. C1 attempt 14
+    found it instead, at the pod CPU gate, 22 minutes and $0.40 into a paid
+    session that had passed all fourteen pre-provider gates.
+
+    So both halves are pinned: the SET of helpers is derived, so a third one
+    cannot appear untested, and each is actually executed where no repo venv
+    exists.
+    """
+    assert _helpers_that_drive_the_script() == {"run_sim", "_run_simulator"}, (
+        "a helper drives the simulator without being exercised below; add it, "
+        f"found {sorted(_helpers_that_drive_the_script())}")
+
+    monkeypatch.setattr(sys.modules[__name__], "SCRIPT", _venvless_copy(tmp_path))
+
+    r = run_sim(build_tree(tmp_path), tmp_path / "hidden", "artifacts/audit", "true")
+    assert "REFUSING: no interpreter" not in r.stderr, r.stderr
+    assert r.returncode == 0, r.stdout + r.stderr
+
+    #: Created first: the lock is `mkdir` without `-p`, so its parent must exist.
+    (tmp_path / "space").mkdir()
+    out = _run_simulator(tmp_path / "space", min_free_gib=1)
+    assert "REFUSING: no interpreter" not in out.stderr, out.stderr
+    assert "free space ok" in out.stdout, out.stdout + out.stderr
+
+
 def test_a_nested_simulation_does_not_inherit_the_interpreter_control(tmp_path):
     """`PODSIM_PYTHON` is invocation-local, like every other PODSIM_* control.
 
@@ -541,10 +674,19 @@ def _run_simulator(tmp_path, *, min_free_gib, cmd="true"):
            "HIDE_DIR": str(tmp_path / "hide"),
            "PODSIM_LOCK": str(tmp_path / "lock"),
            "PODSIM_MIN_FREE_GIB": str(min_free_gib),
+           # The interpreter is an INPUT, exactly as in `run_sim` above, and for
+           # exactly the same reason. This helper omitted it, so the positive
+           # case fell through to the `.venv/bin/python` branch -- which exists
+           # on the dev box and never on a pod, whose checkout has no repo venv.
+           # C1 attempt 14 died at the pod CPU gate on that one line, $0.40 and
+           # 22 minutes in, while the launch-bound sweep had passed here.
+           #
+           # Only the POSITIVE direction reaches this code at all: its sibling
+           # refuses on free space first, which is why the pair failed by half.
+           "PODSIM_PYTHON": sys.executable,
            "PODSIM_CMD": cmd}
-    return subprocess.run(["bash", str(REPO / "scripts/pod/simulate_pod_env.sh")],
-                          capture_output=True, text=True, cwd=REPO, env=env,
-                          timeout=300)
+    return subprocess.run(["bash", str(SCRIPT)], capture_output=True, text=True,
+                          cwd=REPO, env=env, timeout=300)
 
 
 def test_the_sweep_refuses_when_free_space_is_below_the_requirement(tmp_path):
