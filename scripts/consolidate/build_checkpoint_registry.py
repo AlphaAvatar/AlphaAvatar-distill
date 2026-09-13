@@ -219,7 +219,7 @@ BULK_DUPLICATE_NOTES = {
         "the rebuilt ladder from scripts/data/audit_e1_mixture_rebuild.py. Its "
         "blocks.npz and audit.jsonl are byte-identical to the historical pack it "
         "was compared against; the audit's value is the recorded match "
-        "(artifacts/audit/e1_mixture_rebuild.json, logs/archive/repository/indexes/EXPERIMENTS.md), not the "
+        "(artifacts/audit/e1_mixture_rebuild.json, logs/stages/stage-3/history/EXPERIMENTS.md), not the "
         "second copy of the bytes"),
     "artifacts/stage3/ladder_uniform": (
         "the trainer-side name of the frozen training pack. Byte-identical to "

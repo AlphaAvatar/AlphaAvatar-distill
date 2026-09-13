@@ -175,6 +175,131 @@ Hardware selection must be based on the actual operation, model size, sequence l
 
 If the repository is moved from a CPU environment to a GPU environment, the same logged experiment config and command should remain usable whenever practical. Hardware-specific changes must be expressed through explicit configuration rather than unlogged code edits.
 
+### P8.3. Validation cadence and test economy
+
+Verification is required (sections 2.8 and 2.9). *Continuous* verification is
+not. This section says **when** to run what, because a suite that runs after
+every edit costs hours, buries the signal it exists to produce, and turns a
+coherent piece of work into a stop-start crawl.
+
+#### Development default: finish the work, do not test after every edit
+
+While implementing, the default is to **keep implementing**. Do not fall into:
+
+```text
+edit → targeted tests → edit → targeted tests → commit → targeted tests
+```
+
+**A commit is not a validation boundary.** Committing records work; it does not
+assert that the work is verified. A coherent task may be several commits and
+still owe exactly one convergence validation at the end.
+
+#### Running tests mid-implementation requires a specific uncertainty
+
+Run a check during development only when this holds:
+
+> the result will actually decide how the next step is implemented.
+
+Legitimate cases: locating a traceback; not knowing a resolver contract; not
+knowing an API signature; not knowing a shape/device/dtype behaviour;
+reproducing a specific observed failure.
+
+Then run the **smallest check that answers the question** — typically 1–10
+named tests, one small unit-test file, a syntax/import/schema check, or a short
+smoke test. Not hundreds of tests.
+
+#### Renaming a broad suite does not make it a development-time check
+
+**Renaming a broad suite "targeted", "target scope", "affected scope",
+"convergence scope" or similar does not make it a development-time check.**
+
+If a so-called targeted validation runs tens, hundreds or thousands of tests,
+spans several subsystems, takes minutes, or exercises large areas unrelated to
+the current uncertainty, then it *is* convergence validation and belongs after
+the round's implementation is complete. Do not relabel your way around this.
+
+#### When the full suite runs
+
+Implement the whole coherent task first — implementation, producer and
+consumer, metadata, docs, navigation, tests — and only then validate:
+
+```text
+complete implementation
+  → one small convergence validation
+  → fix concrete failures using only the failed tests and the minimal related ones
+  → one full suite
+```
+
+If the full suite fails, **do not rerun the full suite after every fix.** Rerun
+only the failures and their minimal neighbourhood. When all of them are closed:
+
+```text
+  → at most one final full suite
+```
+
+So a normal development round contains **at most one post-convergence full
+suite, plus at most one final full suite after fixes** — not one per commit.
+
+Once a round's structure is still changing, an early full suite is *premature
+development evidence*, not final validation, and must not be presented as
+though the work had been validated.
+
+#### Sweeps
+
+* **pod-like / diagnostic sweep** — run only when diagnosing a specific
+  staging or pod-environment problem, or when the formal launch chain requires
+  it. It is never a routine way to finish a piece of ordinary work.
+* **`launch_bound` sweep** — run **once**, when implementation, metadata and
+  grant are final, the tree is clean, and an experiment is about to be
+  launched. Its whole meaning is that it describes the tree a launch will use.
+
+#### GPU
+
+GPU validation is for work that actually needs a GPU: CUDA, device placement,
+dtype, kernels, activation collection, real model materialization, or
+training/inference integration. Do not spend GPU time on ordinary filesystem,
+documentation or log-organisation work.
+
+Equally, do not manufacture a meaningless CPU substitute first. The escalation
+ladder in P8.2 is about finding the cheapest step that can *answer the
+question*; a CPU rehearsal that cannot reach the behaviour under test is not a
+cheaper validation, it is a more expensive way of learning nothing (and has
+already hidden a device-placement bug that then failed on a paid pod).
+
+#### Relationship to P12.1's targeted regression
+
+P12.1 says an autonomous engineering repair ends with "run the targeted
+regression". That applies to an **observed, specific engineering failure**:
+
+```text
+observed failure → minimal repair → targeted regression
+```
+
+It does **not** mean every ordinary code change owes a regression run.
+
+```text
+ordinary edit → targeted regression just in case
+```
+
+is not the default flow and is exactly what this section forbids.
+
+#### How to report
+
+Report progress as **work**, not as test counts. `243 passed`, `2798 passed`,
+`3917 passed` are not milestones and must not be the body of a status report.
+Lead with:
+
+* implementation complete or incomplete;
+* the canonical tree;
+* remaining blockers;
+* scientific execution state.
+
+Then state the evidence, in the final report only, under whichever of these
+actually happened: development checks (if any), convergence validation, full
+suite, launch-bound sweep (if applicable), GPU validation (if applicable).
+
+Tests are evidence for the work. They are not the work.
+
 ### P9. Match training and deployment numerics when possible
 
 If the target deployment is INT8, INT4, FP8, MXFP4, or another low-precision mode, prefer training, recovery, and evaluation paths that simulate or match deployment numerics as closely as practical.
@@ -270,6 +395,12 @@ engineering launcher or artifact check needs a narrow repair. For each one:
 preserve the exact environment, command, exit status and traceback; classify
 the failure; implement the smallest coherent fix; run the targeted regression;
 record a reproducible implementation identity; and rerun.
+
+"Run the targeted regression" is scoped to the **observed** failure being
+repaired — the smallest set of tests that shows this failure is gone and
+nothing next to it broke. It is not a licence to run a broad suite under that
+name, and it does not extend to ordinary edits that no failure prompted. See
+P8.3.
 
 The envelope is what makes this safe, and it is **not** elastic:
 
@@ -637,6 +768,10 @@ After code exists, agents should add and run appropriate checks, such as:
 - checkpoint resume tests.
 
 If a check cannot run because the code, dependency, data, or hardware does not exist yet, document that explicitly.
+
+**P8.3 governs when each of these runs.** This section says what verification a
+mature component owes; P8.3 says that the debt is settled once per coherent
+round of work, not after every edit or every commit.
 
 ### 2.9 Definition of done
 

@@ -128,11 +128,14 @@ class TestTheIndexAccountsForBothLayouts:
                  for r in [*index["runs"], *index["unrecorded"]]]
         assert any("/logs/stages/stage-" in r or r.startswith("logs/stages/stage-")
                    for r in roots), "no stage-grouped run found"
-        #: `cross-stage/` is EMPTY today: every historical experiment resolved
-        #: to exactly one stage. It is not asserted to exist -- a category kept
-        #: alive with nothing in it is the bucket this replaced.
-        assert not (REPO / "logs/cross-stage").exists() or any(
-            r.startswith("logs/cross-stage/") for r in roots)
+        #: There is no `cross-stage/` DIRECTORY: every historical experiment
+        #: resolved to exactly one stage. The layout module can still compose
+        #: that path (it is a frozen C1 harness member and is not edited to
+        #: tidy a directory), so what is asserted is the tree, which is what a
+        #: reader navigates -- and that nothing has quietly started writing
+        #: there.
+        assert not (REPO / "logs/cross-stage").exists()
+        assert not any(r.startswith("logs/cross-stage/") for r in roots)
 
 
     def test_the_kinds_are_declared_so_an_entry_need_not_be_inferred(self, index):
@@ -163,11 +166,27 @@ class TestTheEntryPointsResolve:
             assert (REPO / "logs" / target).exists(), f"logs/README.md -> {target}"
 
     def test_state_md_names_an_owner_for_every_figure_it_states(self):
-        """STATE.md may state a number only beside the thing that owns it."""
-        text = (REPO / "logs/state/current.md").read_text()
+        """STATE.md may state a number only beside the thing that owns it.
+
+        The owners are checked as PATHS THAT RESOLVE, not as remembered
+        filenames. Pinning the strings `BUDGET_LEDGER.md` and `runs/index.json`
+        kept two labels alive for files that had been renamed and moved: the
+        test passed while the document named owners that did not exist.
+        """
+        import re
+        p = REPO / "logs/state/current.md"
+        text = p.read_text()
         assert "derive_budget.py" in text, (
             "the budget table states figures without naming the deriver")
-        assert "BUDGET_LEDGER.md" in text and "runs/index.json" in text
+        for owner in ("../budget/ledger.md", "../index.json"):
+            assert f"]({owner})" in text, f"no owner links to {owner}"
+        #: Every label that looks like a path must BE the path it links to.
+        for label, target in re.findall(r"\[`([^`]+)`\]\(([^)#\s]+)\)", text):
+            if "/" not in label and "." not in label:
+                continue
+            assert (p.parent / target).resolve().exists(), f"dead link: {target}"
+            assert target.endswith(label.rstrip("/")) or label in target, (
+                f"label `{label}` does not name its target {target}")
 
     def test_every_phase_c1_run_is_in_one_canonical_place(self):
         """It said attempts 1-12 were under `runs/phase_c1/`; three were, and
@@ -192,7 +211,10 @@ class TestTheEntryPointsResolve:
             assert not (REPO / gone).exists(), (
                 f"{gone} still exists; it was a parallel top-level axis")
         for p in (REPO / "logs/stages").iterdir():
-            assert p.name == "README.md" or (
+            #: `index.json` is the stage index: which stage each experiment
+            #: belongs to, and what each stage is. It sits beside the stages it
+            #: describes, the way `logs/index.json` sits beside every run.
+            assert p.name in ("README.md", "index.json") or (
                 p.is_dir() and p.name.startswith("stage-")), p
 
     def test_the_readme_is_not_counted_as_a_run_product(self):
@@ -260,79 +282,77 @@ class TestRegisteredEvidenceIsProtected:
         assert not drift, "registered evidence changed:\n  " + "\n  ".join(drift)
 
 
-# --- the relocation is followable both ways ---------------------------------
+# --- an old path still resolves, and nothing else is kept to make it --------
 
-#: The first-round record (`maintenance/log_relocation.json`) describes moves
-#: that the log-layout-v1 migration then moved AGAIN. Its `old -> new` pairs are
-#: still true as history, but `new` is no longer where the object is, so these
-#: checks now read the migration that superseded it. Chaining is the point: an
-#: old path resolves forward through the records, in order.
+#: This replaces four migration manifests. They held the same old -> new pairs
+#: plus a per-file digest, a source commit and a paragraph of justification for
+#: every move -- a second, editable copy of trees git already has, and a
+#: permanent top-level `logs/migrations/` category for what was a one-off. What
+#: a consumer needs is the pairing, so the pairing is what survives: a flat
+#: table in `logs/index.json`. These tests hold it to being complete and
+#: correct, because a wrong forward pointer is worse than none.
 @needs_whole_tree
-class TestTheRelocationIsTraceable:
+class TestAnOldPathStillResolves:
     @pytest.fixture(scope="class")
-    def record(self):
-        #: The latest migration: earlier ones describe moves that later ones
-        #: superseded, so `new_path` there is where the object went NEXT.
-        return load("logs/migrations/log-layout-v3/manifest.json")
+    def table(self):
+        return load("logs/index.json")["historical_paths"]["map"]
 
-    def test_every_move_landed_and_its_origin_is_gone(self, record):
-        for m in record["entries"]:
-            assert (REPO / m["new_path"]).exists(), m["new_path"]
-            assert not (REPO / m["old_path"]).exists(), (
-                f"{m['old_path']} still exists: this was a copy, not a move, "
-                "and two editable records of one fact is what we are ending")
+    @pytest.fixture(scope="class")
+    def resolve(self):
+        from architecture.record_run_index import resolve_historical
+        return lambda rel: resolve_historical(rel, REPO)
 
-    def test_the_record_is_one_to_one(self, record):
-        """One old path, one new path; one canonical owner per object."""
-        olds = [e["old_path"] for e in record["entries"]]
-        news = [e["new_path"] for e in record["entries"]]
-        assert len(set(olds)) == len(olds), "an old path maps twice"
-        assert len(set(news)) == len(news), "two objects claim one new path"
+    def test_every_old_path_points_at_something_that_is_there(self, table):
+        """A forward pointer at nothing is worse than no pointer: it reads as
+        an answer. Anything whose object was deleted is absent from the table
+        instead."""
+        dangling = [f"{o} -> {n}" for o, n in table.items()
+                    if not (REPO / n).exists()]
+        assert not dangling, "historical paths resolving to nothing:\n  " + \
+            "\n  ".join(dangling[:10])
 
-    def test_every_entry_says_why_it_is_evidence_preserving(self, record):
-        for e in record["entries"]:
-            #: Either spelling: v1 says why the move preserves evidence, v2
-            #: states the historical binding and the migration reason. Both
-            #: answer the same question and both must answer it.
-            #: Every migration states why: v1 `evidence_preserving_because`,
-            #: v2 `historical_binding` + `migration_reason`, v3 the attribution
-            #: `reason` with its `attribution_source`. All answer "why is this
-            #: the right home, and how do I check it".
-            assert any(e.get(k) for k in ("evidence_preserving_because",
-                                          "historical_binding", "reason")), e
-            assert any(e.get(k) for k in ("migration_reason", "binding",
-                                          "attribution_source")), e
-            assert e.get("source_commit")
+    def test_no_old_path_is_also_a_live_path(self, table):
+        """The origin is gone. If both exist, the object was COPIED, and two
+        editable records of one fact is what this layout ends."""
+        both = [o for o in table if (REPO / o).exists()]
+        assert not both, f"old paths that still exist: {both[:5]}"
 
-    def _unused_test_every_exception_states_what_holds_it(self, record):
-        allowed = {"entry_point", "named_by_executable", "index_registered",
-                   "pinned_by_record", "unattributed",
-                   "cited_by_frozen_evidence"}
-        for e in record["exceptions"]:
-            assert e["reason"] in allowed, e
-            assert e.get("detail"), e
-            assert "for safety" not in e["detail"].lower()
-
-    def _unused_test_no_document_still_cites_a_moved_path(self, record):
-        """Outside registered evidence. A citation INSIDE a digest-covered
-        directory is left alone by design -- and the relocator now refuses to
-        move anything such a document names, so the citation still resolves."""
-        from consolidate.fix_doc_links import protected_dirs
-        frozen = protected_dirs(REPO)
-        stale = []
-        for m in record["moves"]:
-            for f in REPO.rglob("*.md"):
-                if ".git" in f.parts:
+    def test_a_descendant_of_a_moved_directory_resolves(self, table, resolve):
+        """The table is collapsed to directory pairs where a whole directory
+        landed in one place, so resolution has to be longest-prefix rather than
+        exact-match. An exact-only lookup would silently return the query."""
+        moved_dirs = [o for o, n in table.items() if (REPO / n).is_dir()]
+        assert moved_dirs, "no directory pair to exercise the prefix rule"
+        checked = 0
+        for old in moved_dirs:
+            for child in sorted((REPO / table[old]).rglob("*")):
+                if not child.is_file():
                     continue
-                rel = f.relative_to(REPO).as_posix()
-                if any(rel.startswith(d + "/") for d in frozen):
-                    continue
-                try:
-                    if m["from"] in f.read_text():
-                        stale.append((f.relative_to(REPO).as_posix(), m["from"]))
-                except (OSError, UnicodeDecodeError):
-                    continue
-        assert not stale, f"documents still cite moved paths: {stale[:5]}"
+                rel = child.relative_to(REPO / table[old]).as_posix()
+                assert resolve(f"{old}/{rel}") == f"{table[old]}/{rel}"
+                checked += 1
+                break
+        assert checked, "no file under any moved directory"
+
+    def test_an_unmapped_path_comes_back_unchanged(self, resolve):
+        """No match means "this is current, or names something gone" -- never
+        a guess. Returning a near-miss is how a resolver invents evidence."""
+        assert resolve("logs/README.md") == "logs/README.md"
+        assert resolve("logs/nothing/here.json") == "logs/nothing/here.json"
+
+    def test_the_paths_frozen_payloads_actually_name_resolve(self, resolve):
+        """The reason the table exists. Each of these is named by a record that
+        is not rewritten -- a checkpoint tombstone naming where a deleted
+        checkpoint's result is frozen, a pricing record naming the reuse
+        evidence it was priced against, a builder naming its preregistration."""
+        for old in ("logs/EXPERIMENTS.md",
+                    "logs/EXPERIMENT_INDEX.md",
+                    "logs/PROPOSAL.md",
+                    "logs/autoinit_attempt4_probe_reuse.json",
+                    "logs/autoinit_phase_a_attempt7"):
+            now = resolve(old)
+            assert now != old, f"{old} did not resolve"
+            assert (REPO / now).exists(), f"{old} -> {now}, which is not there"
 
 
 # --- the generated navigation is regenerable --------------------------------
@@ -358,8 +378,9 @@ class TestTheNavigationIsDerivedFromTheTree:
         #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
         #: their areas. `rglob("*/*")` also matched `phase_c1/analyses`, which
         #: has no README and is not meant to.
+        from consolidate.render_log_navigation import experiment_dirs
         for d in sorted(q for st in (REPO / "logs/stages").glob("stage-*")
-                        for q in st.iterdir() if q.is_dir()):
+                        for q in experiment_dirs(st)):
             assert (d / "README.md").read_text() == render_experiment_readme(
                 d, REPO, runs), f"{d.name}/README.md is stale"
 
@@ -371,21 +392,181 @@ class TestTheNavigationIsDerivedFromTheTree:
                    if p.name not in named and f"{p.name}/" not in named]
         assert not missing, f"unclassified: {missing}"
 
+    @needs_whole_tree
+    def test_the_stage_navigation_is_regenerable_too(self):
+        """The stage READMEs, the stages index, `shared/` and the block inside
+        `logs/README.md` are all derived from the attribution mapping.
+
+        Without this they are generated once and hand-edited afterwards, which
+        is exactly how `logs/README.md` came to say "only phase_c1 declares a
+        stage, everything else is cross-stage" long after neither was true.
+        """
+        from consolidate.render_log_navigation import (
+            LOGS_README, S_BEGIN, S_END, render_shared_readme,
+            render_stage_readme, render_stages_index)
+        for st in sorted((REPO / "logs/stages").glob("stage-*")):
+            assert (st / "README.md").read_text() == render_stage_readme(st, REPO), (
+                f"{st.name}/README.md is stale; re-run "
+                "scripts/consolidate/render_log_navigation.py --write")
+        assert render_stages_index(REPO) in (REPO / "logs/stages/README.md").read_text()
+        assert (REPO / "logs/shared/README.md").read_text() == render_shared_readme(REPO)
+        text = (REPO / LOGS_README).read_text()
+        i, j = text.index(S_BEGIN) + len(S_BEGIN), text.index(S_END)
+        assert text[i:j].strip() == render_stages_index(
+            REPO, base="stages/").strip(), "logs/README.md's stage table is stale"
+
     def test_a_generated_readme_states_no_cost_or_status(self):
         """A generated document restating an owned fact is the duplication the
         cleanup removes; it would also go stale silently."""
         import re
         #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
-        #: their areas. `rglob("*/*")` also matched `phase_c1/analyses`, which
-        #: has no README and is not meant to.
+        #: their areas, and not the STAGE's own areas either: `history/` is
+        #: stage-level material, has no experiment README and is not meant to.
+        from consolidate.render_log_navigation import experiment_dirs
         for d in sorted(q for st in (REPO / "logs/stages").glob("stage-*")
-                        for q in st.iterdir() if q.is_dir()):
+                        for q in experiment_dirs(st)):
             body = (d / "README.md").read_text()
             assert not re.search(r"\$\d", body), f"{d.name}: states a cost"
             assert not re.search(r"\b[0-9a-f]{8,}\b", body), f"{d.name}: states a SHA"
 
 
 CATALOG_REL = "logs/state/ownership.md"
+
+
+# --- every experiment has a stage, and every stage directory an experiment ---
+
+class TestTheStageMappingIsComplete:
+    """v2 filed six experiments under `cross-stage/` because no `stage_id`
+    field was found. That is not what cross-stage means, and a mapping that
+    can express "I did not look hard enough" as a category will."""
+
+    @pytest.fixture(scope="class")
+    def attribution(self):
+        from consolidate import stage_attribution
+        return stage_attribution
+
+    def test_the_stage_descriptions_cite_only_real_paths(self, attribution):
+        """Each stage says what it is for, what it consumes and produces, and
+        where its canonical configs and manifests live. That is navigation, and
+        navigation that has quietly stopped describing the tree is worse than
+        none, because it is still read."""
+        assert attribution.STAGES, "no stage is described at all"
+        described = {s["stage_id"] for s in attribution.STAGES}
+        filed = {r["stage_id"] for r in attribution.INVENTORY if r["stage_id"]}
+        assert filed <= described, f"stages with rows and no description: {filed - described}"
+        for s in attribution.STAGES:
+            assert s["purpose"] and s["status"], s["stage_id"]
+            for key in ("data", "outputs", "configs", "code"):
+                for item in s.get(key) or []:
+                    if isinstance(item, dict):
+                        assert (REPO / item["path"]).exists(), (
+                            f"stage-{s['stage_id']}.{key}: {item['path']}")
+
+    def test_a_stage_with_no_experiments_still_reports_its_work(self, attribution):
+        """"experiments: 0" reads as an empty stage. Stage 0 produced the
+        statistics cache Stage 1 initializes from and Stage 2 produced the
+        mixtures Stage 3 trains on, so a stage's own work is counted and shown
+        beside the count of studies about it."""
+        rows = {s["stage_id"]: s for s in attribution.stage_rows(REPO)}
+        for sid in ("0", "2"):
+            a = rows[sid]["activity"]
+            assert a["experiments"] == 0
+            assert a["pipeline_activity"] >= 1, (
+                f"stage-{sid} reports no work of its own")
+            assert a["canonical_configs"] or a["canonical_data_manifests"], (
+                f"stage-{sid} names no canonical material")
+            body = (REPO / f"logs/stages/stage-{sid}/README.md").read_text()
+            for section in ("## Purpose", "## Inputs", "## Data", "## Outputs",
+                            "## Canonical configs", "## Current status"):
+                assert section in body, f"stage-{sid} README lacks {section}"
+
+    def test_every_experiment_says_what_it_asked(self, attribution):
+        """A stage README that lists identifiers and statuses says how much was
+        done and nothing about what was being found out."""
+        missing = [r["experiment_id"] for r in attribution.INVENTORY
+                   if r["classification"] == "experiment" and not r["question"]]
+        assert not missing, f"experiments with no stated question: {missing}"
+
+    def test_every_cited_piece_of_evidence_still_exists(self, attribution):
+        """The inventory is a set of claims about the repository, and a claim
+        that has quietly stopped being true is worse than none. This already
+        caught a row citing `src/aadistill/autoinit/operators/depth.py` after
+        the initialization-core migration moved that module."""
+        assert attribution.verify(REPO) == []
+
+    def test_the_totals_are_derived_from_the_rows(self, attribution):
+        """Stated totals may not disagree with the rows they summarize —
+        the previous report said 14 experiments over a table listing 15."""
+        t = attribution.totals()
+        rows = attribution.INVENTORY
+        exps = [r for r in rows if r["classification"] == "experiment"]
+        assert t["experiment_total"] == len(exps)
+        assert t["experiment_total"] == t["single_stage"] + t["true_cross_stage"]
+        assert t["unresolved"] == 0 and t["unresolved_ids"] == []
+        assert t["holds"]
+        #: Every row is counted exactly once, as an experiment or otherwise.
+        assert sum(t["non_experiment_rows"].values()) + len(exps) == len(rows)
+
+    def test_nothing_is_filed_cross_stage_for_want_of_a_stage(self, attribution):
+        """An experiment whose stage is unknown is UNRESOLVED, which is a
+        finding. `cross-stage` requires several stages as the subject."""
+        for r in attribution.INVENTORY:
+            if r["stage_id"] is None:
+                assert r["classification"] == "stage-neutral", (
+                    f"{r['experiment_id']} has no stage and is not stage-neutral; it is "
+                    "unresolved, and must not be filed as cross-stage")
+
+    def test_every_stage_directory_is_named_by_the_index(self, attribution):
+        """A directory under a stage with no row is exactly the drift the
+        index exists to prevent.
+
+        The stage's OWN areas are the one exception, and they are exempt by
+        being declared -- `STAGE_AREAS` in the renderer -- not by being skipped
+        here. A new area therefore has to be written down before it can appear,
+        which is the same bargain every experiment row makes.
+        """
+        from consolidate.render_log_navigation import STAGE_AREAS
+        known = {r["experiment_id"] for r in attribution.INVENTORY}
+        for st in sorted((REPO / "logs/stages").glob("stage-*")):
+            for d in st.iterdir():
+                if not d.is_dir():
+                    continue
+                assert d.name in known or d.name in STAGE_AREAS, (
+                    f"{st.name}/{d.name} is neither an experiment named by "
+                    "the stage index nor a declared stage area")
+
+    def test_every_stage_present_has_repository_evidence(self, attribution):
+        """A stage exists because something happened, not because AGENTS.md
+        numbers stages 0-6. Pre-building stage-4 through stage-6 is the thing
+        this forbids."""
+        on_disk = {p.name for p in (REPO / "logs/stages").glob("stage-*")}
+        assert on_disk == set(attribution.stages_present())
+
+    def test_the_committed_mapping_is_what_the_generator_produces(self,
+                                                                  attribution):
+        committed = load(attribution.STAGE_INDEX)
+        assert committed == attribution.document(REPO), (
+            "logs/stages/index.json is stale; re-run "
+            "scripts/consolidate/stage_attribution.py --write")
+
+    def test_an_experiment_without_runs_is_still_reported(self, attribution):
+        """Absent material is not absent work.
+
+        E2 ran, wrote no run logs, and was missing from the stage map
+        entirely. It now has a directory holding the one document it did leave
+        -- its phases 2-3 proposal -- and still has no runs, because it
+        recorded none. The two facts are separate and both have to hold: the
+        experiment is reported, and nothing is invented to fill it out.
+        """
+        e2 = next(r for r in attribution.INVENTORY
+                  if r["experiment_id"] == "e2")
+        assert e2["classification"] == "experiment" and e2["stage_id"] == "3"
+        assert "`e2`" in (REPO / "logs/stages/stage-3/README.md").read_text()
+        d = REPO / "logs/stages/stage-3/e2"
+        assert (d / "plans/PROPOSAL.md").is_file(), (
+            "E2's proposal is not under the experiment that owns it")
+        assert not (d / "runs").exists(), (
+            "E2 recorded no runs; a runs/ directory would assert otherwise")
 
 
 # --- consecutive sweeps do not overwrite each other's evidence --------------
@@ -794,7 +975,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
         from consolidate.relocate_logs import NEVER_REWRITE, rewritable
         assert "artifacts/" in NEVER_REWRITE
         assert not rewritable("artifacts/stage3/c1_confirmation_v1/manifest.json")
-        assert not rewritable("logs/archive/anything.md")
+        assert "logs/stages/" in NEVER_REWRITE
         assert not rewritable("logs/stages/stage-1/phase_c1/runs/attempt10/manifest.json")
         assert rewritable("logs/README.md")
 

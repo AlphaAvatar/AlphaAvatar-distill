@@ -1,7 +1,7 @@
 # E8b execution-backend audit — DP/DC, 2026-08-11
 
 Commissioned after S2's registered throughput gate OOM'd on an 80 GB A100
-([`EXPERIMENTS.md` §40](../../../../archive/repository/indexes/EXPERIMENTS.md)). Purpose: select and freeze an efficient,
+([`EXPERIMENTS.md` §40](../../history/EXPERIMENTS.md)). Purpose: select and freeze an efficient,
 numerically acceptable execution backend for the DP/DC pair before committing to the
 long 1.60M runs. **The scientific experiment is unchanged** — no change to
 architecture, loss definition, data, optimizer hyperparameters, trainable parameters,

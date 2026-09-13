@@ -204,11 +204,11 @@ def test_the_two_state_views_agree_on_what_is_running_and_authorized():
     # test that cannot tell a current statement from a recorded one is not
     # checking agreement between the two views; it is checking that the file
     # once contained a sentence.
-    #: The whole file IS the current view since 2026-09-12: history moved to
-    #: `logs/archive/` and to the experiment that owns it. The split is checked
-    #: by `test_the_stale_narrative_is_moved_rather_than_deleted`; what this
-    #: needs is a current view that contains no history, so a claim found here
-    #: cannot have been satisfied by a frozen section.
+    #: The whole file IS the current view: history lives with the experiment or
+    #: stage that owns it, or in git. The split is checked by
+    #: `test_the_current_view_carries_no_history_and_no_shelf`; what this needs
+    #: is a current view that contains no history, so a claim found here cannot
+    #: have been satisfied by a frozen section.
     current = STATE.read_text().split("\n# Superseded")[0]
     assert "# Superseded" not in STATE.read_text(), (
         "STATE.md carries history again; a claim about now could be satisfied "
@@ -338,13 +338,11 @@ def _logs_tree_is_partial() -> bool:
 def _preserved(rel: str) -> bool:
     """Documents kept verbatim: a link in one records where a file WAS.
 
-    `logs/archive/` says in its own header that it is unedited, and the runs the
-    index registers carry directory digests. Repointing a link inside either
-    would change preserved text to suit a relocation; the forward mapping lives
-    in `logs/maintenance/log_relocation.json` instead.
+    The runs the index registers carry directory digests, so repointing a link
+    inside one would change registered evidence to suit a relocation. The
+    forward mapping lives in `logs/index.json`.`historical_paths` instead.
     """
-    return rel.startswith("logs/archive/") or any(
-        rel.startswith(d + "/") for d in _registered_run_dirs())
+    return any(rel.startswith(d + "/") for d in _registered_run_dirs())
 
 
 def _registered_run_dirs() -> tuple[str, ...]:

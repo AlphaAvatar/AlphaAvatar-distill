@@ -5,7 +5,7 @@
 > ([`e7_canary_report.md`](e7_canary_report.md), $0.045); run 2 **PASSED 12/12**
 > unaided ([`e7_canary_rerun_report.md`](e7_canary_rerun_report.md), $0.033).
 > Four defects were found across the two runs, all fixed with regression tests.
-> Records: [`EXPERIMENTS.md`](../../../../archive/repository/indexes/EXPERIMENTS.md) §32–33.
+> Records: [`EXPERIMENTS.md`](../../history/EXPERIMENTS.md) §32–33.
 
 **Status when written: nothing has been launched. This requires separate
 explicit authorization.**

@@ -7,7 +7,7 @@
 > when written (test counts, open blockers, the authorization state) are left as
 > they stood.
 >
-> The result is in [`EXPERIMENTS.md`](../../../../archive/repository/indexes/EXPERIMENTS.md) §34 and
+> The result is in [`EXPERIMENTS.md`](../../history/EXPERIMENTS.md) §34 and
 > [`e7_report.md`](e7_report.md): **preregistered outcome 2** — general language
 > modelling restored (−5.22 nats), autonomous behaviour unmoved (usable rollout
 > +0.0000, every comparison inside its floor). The maintainer authorized the

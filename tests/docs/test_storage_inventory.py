@@ -92,26 +92,19 @@ def test_every_duplicate_names_a_survivor_that_exists():
 
 
 def _relocated(old: str) -> str:
-    """Where an object recorded at `old` lives now, per the migrations."""
-    import json as _json
+    """Where an object recorded at `old` lives now.
 
-    #: CHAINED, in migration order: an object moved by v1 and again by v2
-    #: needs both hops, and following one leaves a path that no longer exists.
-    path = old
-    for m in sorted((REPO / "logs/migrations").glob("*/manifest.json")):
-        try:
-            doc = _json.loads(m.read_text())
-        except (OSError, _json.JSONDecodeError):
-            continue
-        table = {e["old_path"]: e["new_path"] for e in doc.get("entries", [])}
-        if path in table:
-            path = table[path]
-            continue
-        for o, n in sorted(table.items(), key=lambda kv: -len(kv[0])):
-            if path.startswith(o + "/"):
-                path = n + path[len(o):]
-                break
-    return path
+    The inventory names a survivor by the path it had when the record was
+    written, and that statement is not rewritten. `logs/index.json` carries the
+    old -> current table; it is already flattened, so one lookup answers what
+    used to need chaining across four migration manifests.
+    """
+    import sys
+
+    sys.path.insert(0, str(REPO / "scripts"))
+    from architecture.record_run_index import resolve_historical
+
+    return resolve_historical(old, REPO)
 
 
 def test_removed_copies_still_name_a_survivor_and_keep_their_hash():

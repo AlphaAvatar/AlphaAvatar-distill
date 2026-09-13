@@ -18,5 +18,4 @@ per-session ceiling once produced a fundable-session count that was too high.
 `approvals/` holds **consumed** artifacts. They are evidence: never edited,
 never re-issued, never made valid again by changing their contents. A path
 written inside one states where a file was when it was issued — see
-[`../migrations/log-layout-v1/manifest.json`](../migrations/log-layout-v1/manifest.json)
-to follow it forward.
+[`../index.json`](../index.json)`.historical_paths` to follow it forward.

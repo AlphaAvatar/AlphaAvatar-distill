@@ -6,6 +6,7 @@ Everything this experiment produced, in one place.
 | --- | --- |
 | [`analyses/`](analyses/) | working analyses and audits |
 | [`history/`](history/) | narrative: what happened, session by session |
+| [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
 | runs | registered from components; see the index |
 
 ## Runs

@@ -2,10 +2,12 @@
 
 **Start here** if you want the scientific history and do not know the filenames.
 
-[`CATALOG.md`](ownership.md) organizes logs by *class* — who owns which fact, what
-is current, what is superseded. This file organizes the same evidence by
-**phase → experiment → attempt**, which is how the science actually happened. It
-duplicates no facts: every row is a status label and a link.
+[`ownership.md`](ownership.md) organizes logs by *class* — who owns which fact,
+what is current, what is historical. This file organizes the same evidence by
+**phase → experiment → attempt**, which is how the science actually happened,
+and [`experiment_index.md`](experiment_index.md) organizes it by what each
+experiment concluded. All three duplicate no facts: every row is a status label
+and a link.
 
 **Terminal states at a glance**
 
@@ -141,7 +143,7 @@ universe collapses to **six distinct candidates**; rung 1 advanced
 * preregistration → [`autoinit_continuation_b_preregistration.json`](../stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json)
 * pricing → [`autoinit_behavioural_continuation_pricing.json`](../shared/analyses/autoinit_behavioural_continuation_pricing.json)
 * grant → [`autoinit_continuation_b_grant.json`](../budget/approvals/autoinit_continuation_b_grant.json)
-* consumed authorizations → [`superseded/`](../archive/cross-stage/superseded/superseded/)
+* consumed authorizations → [`history/superseded_authorizations/`](../stages/stage-1/continuation_b/history/superseded_authorizations/)
 
 ---
 
@@ -158,13 +160,13 @@ Phase-C starting point.
 
 | what | record |
 | --- | --- |
-| E1–E8 experiment series | [`EXPERIMENT_INDEX.md`](../archive/repository/indexes/EXPERIMENT_INDEX.md), [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) |
+| E1–E8 experiment series | [`EXPERIMENT_INDEX.md`](experiment_index.md), [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) |
 | bounded measurement sessions | [`autoinit_measurement_attempt1/`](../stages/stage-1/measurement/runs/attempt1/) … [`…attempt3/`](../stages/stage-1/measurement/runs/attempt3/) |
 | device canary — TERMINATED | [`autoinit_device_canary_attempt1/`](../shared/validations/device-canary/runs/autoinit_device_canary_attempt1/), [`…attempt2/`](../shared/validations/device-canary/runs/autoinit_device_canary_attempt2/) |
 | micro-preflight | [`autoinit_preflight_run4/`](../shared/validations/micro-preflight/runs/autoinit_preflight_run4/) |
 | causal-depth backend equivalence | [`autoinit_depth_backend_equivalence.json`](../shared/validations/depth-backend/autoinit_depth_backend_equivalence.json) |
 | capacity / transport findings | [`autoinit_continuation_b_capacity.json`](../stages/stage-1/continuation_b/analyses/autoinit_continuation_b_capacity.json), [`autoinit_leaf_transport_quota_finding.json`](../shared/analyses/autoinit_leaf_transport_quota_finding.json) |
-| scratch inventory | [`scratch_inventory_20260829.json`](../maintenance/scratch_inventory_20260829.json) |
+| scratch inventory | [`scratch_inventory_20260829.json`](../maintenance/inventories/scratch_inventory_20260829.json) |
 
 ## Operational lessons
 

@@ -56,11 +56,6 @@ def protected_dirs(root: Path) -> tuple[str, ...]:
     registered = {rel for e in idx.get("runs", [])
                   for rel in (e.get("components") or {}).values()
                   if (root / rel).is_dir()}
-    #: And the archive. Those documents are kept VERBATIM and say so in their
-    #: own header; repointing a link inside one would make that false. A
-    #: citation there records where a file was when the document was written,
-    #: and the forward mapping is in the relocation record.
-    registered.add("logs/archive")
     return tuple(sorted(registered))
 
 
@@ -85,23 +80,21 @@ def index_basenames(root: Path) -> dict[str, list[Path]]:
 
 
 def relocation_map(root: Path) -> dict[str, str]:
-    """old path -> new path, from every migration manifest present.
+    """old path -> current path, from the run index's historical-path table.
 
-    Consulted BEFORE any basename search, because the manifest KNOWS where an
+    Consulted BEFORE any basename search, because the table KNOWS where an
     object went. Searching by name cannot tell `attempt10` of one experiment
     from `attempt10` of another, and reported those as ambiguous while the
     answer was recorded.
     """
-    out: dict[str, str] = {}
-    for m in sorted(root.glob("logs/migrations/*/manifest.json")):
-        try:
-            doc = json.loads(m.read_text())
-        except (json.JSONDecodeError, OSError):
-            continue
-        for e in doc.get("entries", []):
-            if e.get("old_path") and e.get("new_path"):
-                out[e["old_path"]] = e["new_path"]
-    return out
+    p = root / "logs/index.json"
+    if not p.is_file():
+        return {}
+    try:
+        block = json.loads(p.read_text()).get("historical_paths") or {}
+    except (json.JSONDecodeError, OSError):
+        return {}
+    return dict(block.get("map") or {})
 
 
 def via_manifest(doc: Path, target: str, root: Path,

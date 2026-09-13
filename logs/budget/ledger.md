@@ -12,7 +12,7 @@ record and cannot reconstruct history on their own.
 
 The authoritative figure is the cumulative total carried forward in the budget planners
 and cross-checked against each experiment's recorded cost in
-[`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md). Surviving evidence files agree with those
+[`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md). Surviving evidence files agree with those
 per-session figures where both exist (E7 $10.49, E8a $0.53 for pod A, E8b-S1 $4.07 at
 polling end, E8b-S2 $7.21).
 

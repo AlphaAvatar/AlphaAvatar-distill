@@ -104,7 +104,7 @@
   "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
   "decision_status": "unresolved_equivalence",
   "winner": null,
-  "owner": "logs/cross-stage/recovery_continuation/runs/attempt7/"
+  "owner": "logs/stages/stage-1/recovery_continuation/runs/attempt7/"
  },
  "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
  "phase_b_result": {
@@ -116,7 +116,7 @@
   "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
   "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510.",
   "authorizes": "nothing",
-  "owner": "logs/cross-stage/continuation_b/analyses/autoinit_continuation_b_attempt5.json -- metrics and margin live THERE"
+  "owner": "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt5.json -- metrics and margin live THERE"
  },
  "phase_c": {
   "c0": {
@@ -174,7 +174,7 @@
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10 as daf64772, and again 2026-09-11 as 199711af. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
-  "record": "logs/migrations/initialization-core/v1/"
+  "record": "logs/maintenance/source-relocations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {
   "status": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada. The stage-F device repair is CONFIRMED ON REAL CUDA.",
@@ -185,5 +185,5 @@
   "owner": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/ and logs/runs/cuda_stage_f/",
   "amendment": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured."
  },
- "superseded_handoff": "logs/archive/repository/handoffs/HANDOFF_next_session.md is HISTORICAL (2026-09-02, unmaintained) and is NOT an entry point. What it says and why it is stale: logs/state/ownership.md."
+ "superseded_handoff": "none. A superseded document is deleted rather than shelved: git history holds it, and a second copy in the working tree is one more thing to keep consistent. The handoff is logs/state/current.md, which is the only one."
 }

@@ -60,10 +60,12 @@ REFERENCE_ROOTS = ("scripts", "tests", "configs")
 #:
 #: The lesson is the general one: a path string inside an artifact may be part
 #: of what a hash covers. Rewrite only what a relocation OWNS.
-NEVER_REWRITE = ("artifacts/", "logs/archive/",
-                 #: Stage-first since log-layout-v2: a run's own evidence and
-                 #: an experiment's frozen plans are under these.
-                 "logs/stages/", "logs/cross-stage/")
+#: Stage-first: a run's own evidence, an experiment's frozen plans and a
+#: stage's retained history all sit under `logs/stages/`. `logs/cross-stage/`
+#: does not exist; it stays listed because the layout mechanism can still
+#: compose that path, and a guard that lapses the moment the directory appears
+#: is not a guard.
+NEVER_REWRITE = ("artifacts/", "logs/stages/", "logs/cross-stage/")
 
 
 def rewritable(rel: str) -> bool:
@@ -323,7 +325,12 @@ def rewrite_prose(root: Path, moves: list[dict]) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--write", action="store_true")
-    ap.add_argument("--record", default="logs/maintenance/log_relocation.json")
+    ap.add_argument("--record",
+                    default="logs/maintenance/cleanup/log_relocation.json",
+                    help="where to write this relocation's old -> new record. "
+                         "Not committed by default: a relocation is a one-off, "
+                         "and the pairs a consumer still needs afterwards "
+                         "belong in logs/index.json's historical_paths table")
     a = ap.parse_args()
 
     p = plan()

@@ -810,7 +810,7 @@ selection moves to **median-length survivor**, and Experiment 2 gets a **$30.00*
 incremental budget (new cumulative cap **$126.02**).
 
 Full pre-registration, arm table, gates, costing and storage plan:
-[`PROPOSAL.md`](archive/PROPOSAL.md).
+[`PROPOSAL.md`](../e2/plans/PROPOSAL.md).
 
 ### 12.1 Why 0.86M
 
@@ -1019,7 +1019,7 @@ absorbed. Two things moved it from $22.92/$36.01: the battery grew 746 → 846 w
 the safety set was added, and the checkpoint counts were corrected from an
 assumed collapse to the measured fact.
 
-**Phase 1 itemized** (full table in [`PROPOSAL.md`](archive/PROPOSAL.md) §8.2). Training
+**Phase 1 itemized** (full table in [`PROPOSAL.md`](../e2/plans/PROPOSAL.md) §8.2). Training
 alone is $2.03; **$9.26 of the remaining $10.27 is capability-battery generation
 on 10 checkpoints**, and everything else — in-run evals, checkpoint writes,
 transfer, hashing and pod idle — is $1.01 combined.
@@ -2451,7 +2451,7 @@ of this re-analysis.
 ## 20. Experiment 3 — restricting attention updates at the 0.86M rung
 
 > **STATUS: COMPLETE 2026-08-05, $5.76.** Registered before training in
-> [`logs/e3_registration.json`](e3_registration.json); nothing in §20.1–§20.7 was
+> [`logs/e3_registration.json`](../e3/analyses/e3_registration.json); nothing in §20.1–§20.7 was
 > written with knowledge of an outcome. Results are §20.8 onward.
 > **Verdict: restricting attention updates does not improve autonomous
 > generation stability at this rung — it degrades it. Neither arm is adopted.**
@@ -2840,7 +2840,7 @@ follow-up arm forks from a trained checkpoint.
 ## 21. Experiment 4 — P2-CE-heavy scaled from the 0.86M to the 1.60M rung
 
 > **STATUS: COMPLETE 2026-08-06, $4.83.** Registered before training in
-> [`logs/e4_registration.json`](e4_registration.json).
+> [`logs/e4_registration.json`](../e4/analyses/e4_registration.json).
 >
 > **Verdict.** Scaling 0.86M → 1.60M **substantially improves autonomous rollout
 > stability** (+0.2000 usable rollout, both seeds, repetition and context-limit
@@ -3704,7 +3704,7 @@ good on behaviour and possibly better on correctness.
 > **STATUS: COMPLETE.** Evaluation only — nothing trained, no checkpoint written,
 > merged, quantized or overwritten, proven by AST over every executed script
 > (`artifacts/audit/e6_notrain_proof.json`). Registered before any GPU existed in
-> [`logs/e6_registration.json`](e6_registration.json).
+> [`logs/e6_registration.json`](../e6/analyses/e6_registration.json).
 >
 > **Verdict. The original PCA lineage improves from 1.60M to 2.96M and then
 > plateaus.** Usable rollout +0.1100 at 2.96M and +0.1200 at 5.50M against
@@ -3995,7 +3995,7 @@ PYTHONPATH=src python scripts/evaluation/analyze_e6.py --bootstrap 10000
 
 > **STATUS: COMPLETE.** Both arms trained to completion from the Stage 1 PCA init
 > and evaluated on the frozen battery. Registered before training in
-> [`logs/e6b_registration.json`](e6b_registration.json).
+> [`logs/e6b_registration.json`](../e6b/analyses/e6b_registration.json).
 >
 > **Verdict, three separate findings.**
 >
@@ -4200,9 +4200,9 @@ val CE survive in `e6b_run.log`; the machine-readable event stream (AGENTS.md
 > that had to survive was present. The `$(ls -d …)` construct is a real and
 > separate fragility, still present in `e3/e4/e5_launch.sh`, and is now banned
 > for new launchers by lint. Full record:
-> [`e6b_protocol_deviations.md`](e6b_protocol_deviations.md); remediation §30.
+> [`e6b_protocol_deviations.md`](../e6b/analyses/e6b_protocol_deviations.md); remediation §30.
 
-**Derived replacement.** [`e6b_reconstructed_training_events.json`](e6b_reconstructed_training_events.json),
+**Derived replacement.** [`e6b_reconstructed_training_events.json`](../e6b/analyses/e6b_reconstructed_training_events.json),
 parsed from the surviving console log by
 `scripts/pod/reconstruct_training_events.py`, carries
 `"provenance": "reconstructed_from_driver_console"` and
@@ -4266,7 +4266,7 @@ control flow, and control flow does not need to be paid for.
 
 **Scope.** E6b's scientific endpoints are unchanged and neither arm was rerun.
 The deviations themselves are recorded permanently in
-[`e6b_protocol_deviations.md`](e6b_protocol_deviations.md).
+[`e6b_protocol_deviations.md`](../e6b/analyses/e6b_protocol_deviations.md).
 
 ### 30.1 What failed, and what now catches it
 
@@ -4382,8 +4382,8 @@ rollout rung* — to the point where launching it is a budget decision and nothi
 else. No GPU was used. **Nothing has been trained or evaluated, and E7 is not
 authorized.**
 
-Full design: [`e7_preregistration.md`](e7_preregistration.md). Decision records:
-[`decisions.md`](decisions.md), 2026-08-09.
+Full design: [`e7_preregistration.md`](../e7/analyses/e7_preregistration.md). Decision records:
+[`decisions.md`](../../../budget/decisions.md), 2026-08-09.
 
 ### 31.1 The question, and the fact behind it
 
@@ -4485,7 +4485,7 @@ budgeted at 45 min rather than the warm-image 5–8.5:
 
 **Open:** authorization and a cumulative-cap increment above the **$149.59**
 actual baseline (**$163.23** full, $157.59 reduced); the live provider control
-plane, still unverified ([`e7_canary_proposal.md`](e7_canary_proposal.md)); the λ
+plane, still unverified ([`e7_canary_proposal.md`](../e7/analyses/e7_canary_proposal.md)); the λ
 preflight, implemented but needing a real teacher/student; arm A's general-text
 baseline on the new validation stream, priced into the session.
 
@@ -4503,7 +4503,7 @@ $150.41.
 
 **Verdict: FAILED.** Nine criteria passed; artifact manifest + local hash
 verification failed on a real defect. Per the authorization, **E7 was not
-launched.** Full report: [`e7_canary_report.md`](e7_canary_report.md).
+launched.** Full report: [`e7_canary_report.md`](../e7/analyses/e7_canary_report.md).
 
 ### 32.1 Provider-level record
 
@@ -4580,7 +4580,7 @@ after run 1 (§32) failed 9/10 and needed a hand-launched watchdog to recover
 criteria 5–8. Authorized at a **$0.12** hard backstop; no cap increase.
 
 **Verdict: PASSED, all twelve criteria, from one launch command.** Report:
-[`e7_canary_rerun_report.md`](e7_canary_rerun_report.md).
+[`e7_canary_rerun_report.md`](../e7/analyses/e7_canary_rerun_report.md).
 
 ### 33.1 Provider record
 
@@ -4667,9 +4667,9 @@ restoration transfer to autonomous rollout correctness?
 
 **Answer: yes to the first, no to the second.** This is preregistered outcome 2
 (`e7_preregistration.md` §7.4): *FineWeb preserves language modelling but does
-not solve reasoning.* Report [`e7_report.md`](e7_report.md), machine-readable
-[`e7_results.json`](e7_results.json), session evidence
-[`e7_session_evidence.json`](e7_session_evidence.json).
+not solve reasoning.* Report [`e7_report.md`](../e7/analyses/e7_report.md), machine-readable
+[`e7_results.json`](../e7/analyses/e7_results.json), session evidence
+[`e7_session_evidence.json`](../e7/analyses/e7_session_evidence.json).
 
 ### 34.1 The session
 
@@ -4790,7 +4790,7 @@ teardown (quiescent, marker-backed, six completion markers matched). Setup ran
 ## 35. Experiment 8 — contribution-guided depth initialization: design and preregistration
 
 **Status: prepared, preregistered, NOT authorized.** No GPU has been used. The
-prospective record is [`e8_preregistration.md`](archive/e8_preregistration.md) and is not
+prospective record is [`e8_preregistration.md`](../e8/plans/e8_preregistration.md) and is not
 to be edited to match any outcome.
 
 **Question.** Does position-based depth compression discard teacher blocks that
@@ -4847,7 +4847,7 @@ streams.
   tokens (the historical count), hashing to `aaeb2e4c…`; rebuilding the positional
   init from it gives `86fbba78…`, byte-identical to the pinned control, with every
   projection diagnostic equal to the last digit. **E8 is a single-variable
-  experiment.** See [decisions](decisions.md), 2026-08-10.
+  experiment.** See [decisions](../../../budget/decisions.md), 2026-08-10.
 * **A silent 500× RoPE misread on the measurement path.** The Stage 1 checkpoint's
   config stores `rope_theta` in the transformers-5 `rope_parameters` dict; a 4.x
   reader falls back to 10,000 and reports holdout NLL 11.3953 instead of 11.7482
@@ -4892,8 +4892,8 @@ wider than any effect E8 could claim.
 ## 36. Experiment 8 — the contribution-guided map preserves the teacher 3.1× better and initializes 2.8 nats worse
 
 **Status: the search half is COMPLETE and the training half has NOT run**, blocked
-on $0.20. Full record: [`e8_step0_report.md`](e8_step0_report.md). Prospective
-record: [`e8_preregistration.md`](archive/e8_preregistration.md), frozen before any GPU.
+on $0.20. Full record: [`e8_step0_report.md`](../e8/analyses/e8_step0_report.md). Prospective
+record: [`e8_preregistration.md`](../e8/plans/e8_preregistration.md), frozen before any GPU.
 
 ### 36.1 The map
 
@@ -4982,7 +4982,7 @@ because of E8a's dissociation: the contribution map preserves the full-width tea
 whether the map is good on its own and only breaks when composed with the existing
 width/FFN/attention compression.
 
-Full preflight: [`e8b_preregistration.md`](archive/e8b_preregistration.md). **No GPU used.**
+Full preflight: [`e8b_preregistration.md`](../e8b/plans/e8b_preregistration.md). **No GPU used.**
 
 2×2 at the **1.60M** rung: depth-only (DP/DC, teacher width, 3,215,021,568 params)
 × fully compressed (FP/FC, 596,049,920), positional × contribution, two seeds per

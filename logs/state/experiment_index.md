@@ -1,13 +1,13 @@
 # Canonical experiment index — E1 to E8, and the AutoInit phases
 
 > **Phase A and Phase B are both COMPLETE.** Their full history, every attempt and
-> every artifact are indexed in [`PHASE_INDEX.md`](PHASE_INDEX.md); the scientific
+> every artifact are indexed in [`PHASE_INDEX.md`](phase_index.md); the scientific
 > conclusions are in
-> [`phase_a_vs_phase_b_comparison.md`](experiments/phase_a/phase_a_vs_phase_b_comparison.md). The rows
+> [`phase_a_vs_phase_b_comparison.md`](../stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md). The rows
 > below cover the E-series and the two AutoInit phase results.
 
 One place to answer: **what has been run, what did each one prove, and which
-checkpoints still matter?** Detail lives in [`EXPERIMENTS.md`](EXPERIMENTS.md) (numbered
+checkpoints still matter?** Detail lives in [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) (numbered
 sections, cited per row); this file is the index, not the chronology.
 
 **Kinds.** `experiment` — a complete scientific comparison with an accepted conclusion.
@@ -218,7 +218,7 @@ does not estimate what a fully recovered model can do.
 | **not** supported | any operator-level causal claim. `fe9683e6a9c7` is a joint path; no phase varied one operator with the rest fixed |
 | withdrawn | continuation attempt 4's `resolved` decision — pooled an imported `sc` into a rung-2 comparison. Its purchased probe is retained and valid |
 | checkpoints | `fe9683e6a9c7…` (Phase-C incumbent), `85bde4ded2c3…`, `cca699c93f34…`, canonical control |
-| artifacts | [`PHASE_INDEX.md`](PHASE_INDEX.md) → Phase B; terminal result in [`autoinit_continuation_b_attempt5/`](autoinit_continuation_b_attempt5/) |
+| artifacts | [`PHASE_INDEX.md`](phase_index.md) → Phase B; terminal result in [`autoinit_continuation_b_attempt5/`](../stages/stage-1/continuation_b/runs/attempt5/) |
 | cost | search $30.0200 across five attempts; behavioural continuation $3.8047 across five |
 | in current lineage | **yes** — `fe9683e6a9c7` is the proposed frozen incumbent for Phase C |
 

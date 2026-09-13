@@ -12,9 +12,9 @@ reason would make the next agent remove the guard. So the reasons live **here**,
 outside the core, keyed by the module and the mechanism they justify.
 
 **This file authorizes nothing.** It is a register of why code exists. The
-authoritative accounts stay where they already are: `logs/archive/repository/indexes/EXPERIMENTS.md` for
+authoritative accounts stay where they already are: `logs/stages/stage-3/history/EXPERIMENTS.md` for
 runs, `logs/budget/ledger.md` for money, `logs/state/phase_index.md` for phase
-history, and the per-validation directories under `logs/validations/`.
+history, and the per-validation directories under the experiment that each validation serves, `logs/stages/stage-<id>/<experiment>/validations/`.
 
 `scripts/architecture/core_ownership.py` rule `instance_prose` is what keeps
 core clean; this file is where what it removes is supposed to land.

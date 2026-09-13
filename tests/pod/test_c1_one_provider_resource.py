@@ -399,8 +399,11 @@ def test_M_the_live_grant_and_the_launcher_agree_on_acquisition():
     """
     import json
 
-    #: Across the canonical layout: stage-scoped and unscoped alike.
-    live = sorted((REPO / "logs/runs").glob("*/*/*/governance/grant.json"))
+    #: Across the canonical layout, which is stage-first: a run lives at
+    #: `logs/stages/stage-<id>/<experiment>/runs/<run>/`. This globbed
+    #: `logs/runs/`, which no longer exists, so it matched nothing and failed
+    #: on its own emptiness guard rather than on anything about the grant.
+    live = sorted((REPO / "logs/stages").glob("*/*/runs/*/governance/grant.json"))
     assert live, "no grant exists in any run directory"
     grant = json.loads(live[-1].read_text())
     one_use = grant["one_use"]

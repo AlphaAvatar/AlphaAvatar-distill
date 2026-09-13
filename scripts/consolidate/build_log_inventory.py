@@ -13,11 +13,20 @@ Nothing is deleted here. This answers the questions a cleanup has to answer firs
     evidence that exists nowhere else;
   * which are **historical records that must stay immutable**.
 
-The disposition of a duplicate is *derived*, not asserted: the copy that
-executable code, tests or a consumed record points at is the canonical one, and
-the others are the copies. Where references cannot decide it, the choice is made
-in `CANONICAL_OVERRIDES` below with a written reason, so the decision is
-reviewable rather than implicit.
+The disposition of a duplicate is *derived*, not asserted. First: are these one
+object under several names, or several objects that serialize identically?
+`structurally_distinct` answers that from the tree -- a file inside a run's own
+directory is that run's evidence, and a file inside a materialized checkpoint is
+part of an artifact that has to stay loadable -- and such a group is recorded
+with `canonical: null` and nothing reclaimable. Only for the rest does the
+reference rule apply: the copy that executable code, tests or a consumed record
+points at is canonical, and the others are copies. Where references cannot
+decide, `CANONICAL_OVERRIDES` below decides with a written reason.
+
+An UNDECIDED group proposes nothing. It used to name the alphabetically first
+member canonical, which listed the others as reclaimable under the reason
+"review before deleting" -- an inventory that says it could not decide while
+proposing deletions is one that will eventually be acted on.
 
 Categories
 ----------
@@ -37,6 +46,16 @@ Dispositions
     keep_referenced         load-bearing for code or tests
     keep_unique_evidence    scratch-shaped, but carries a fact held nowhere else
     delete_duplicate        byte-identical to a canonical copy that survives
+
+Duplicate-group decisions
+-------------------------
+    executable reference    exactly one copy is named by code or a test
+    documentary reference   exactly one copy is named by another document
+    override                CANONICAL_OVERRIDES, with a written reason
+    rule: per-run evidence  at least one member is a run's own evidence
+    rule: materialized checkpoint   each is part of its own reloadable artifact
+    rule: empty output      different streams that both produced nothing
+    none                    undecided; nothing is proposed
 """
 
 from __future__ import annotations
@@ -80,9 +99,14 @@ CANONICAL_OVERRIDES = {
 #: Snapshots of a living-state file. Each names the git object that holds the
 #: same bytes; the claim is *verified* at build time, not asserted, so "this is
 #: already in history" cannot quietly stop being true.
+#: `path_in_rev` is the path the object had AT THAT REVISION, not today's. It
+#: read `logs/state/current.json`, which is where the live snapshot sits now and
+#: did not exist at 3261f6b6 -- so `git show` resolved nothing and the claim
+#: "these bytes are already in history" could not be checked at all. The
+#: verification is the point of the entry.
 STALE_SNAPSHOTS = {
     "logs/archive/current_state_20260817_full.json":
-        ("3261f6b67e513a9c7c4260e3a7ccc91c847dc127", "logs/state/current.json"),
+        ("3261f6b67e513a9c7c4260e3a7ccc91c847dc127", "logs/current_state.json"),
 }
 
 #: Files whose shape says "scratch" but which carry evidence held nowhere else.
@@ -98,7 +122,8 @@ CATEGORY_RULES = (
     # (predicate on repo-relative posix path, category)
     (lambda p: p.name in ("poll.log", "monitor.log"), "scratch_debug"),
     (lambda p: p.name in ("current_state.json", "STATE.md"), "living_state"),
-    (lambda p: p.name in ("CATALOG.md", "EXPERIMENT_INDEX.md", "supported_models.md",
+    (lambda p: p.name in ("ownership.md", "experiment_index.md",
+                          "phase_index.md", "supported_models.md",
                           "artifact_manifests.md", "checkpoint_registry.json",
                           "checkpoint_tombstones.json", "log_inventory.json",
                           "storage_measurements.json"), "index"),
@@ -119,6 +144,94 @@ CATEGORY_RULES = (
 #: one of these is immutable unless it is a byte-identical duplicate.
 ATTEMPT_DIR_MARKERS = ("attempt", "_run4", "_canary", "permanent_controls",
                        "stage3_complete", "e8b_s2_dp_sa", "e8b_step0_records")
+
+
+def registered_run_dirs(root: Path) -> tuple[str, ...]:
+    """Every run directory `logs/index.json` registers, in either layout.
+
+    A file inside one is that run's own evidence. A legacy entry carries a
+    `component_digest` per component and a current one a `manifest_sha256`;
+    both mean "this directory's contents are what the index recorded", so
+    filtering on the digest FORM excluded every current-layout run -- which is
+    how attempt 12's own governance copies came to be proposed for deletion in
+    favour of the shared ones, undoing the run-owned governance convention.
+    `unrecorded` counts too: a run that wrote no manifest still owns what it
+    left behind.
+    """
+    p = root / "logs/index.json"
+    if not p.is_file():
+        return ()
+    idx = json.loads(p.read_text())
+    out = set()
+    for e in [*idx.get("runs", []), *idx.get("unrecorded", [])]:
+        for rel in [*(e.get("components") or {}).values(), e.get("root") or ""]:
+            if rel and (root / rel).is_dir():
+                out.add(rel)
+    #: And every directory the CONVENTION makes a run root -- `.../runs/<id>/`
+    #: -- whether or not the index reaches it. The CUDA stage-F subruns sit at
+    #: `phase_c1/validations/cuda-stage-f/runs/<subrun>/`, four levels deeper
+    #: than the index globs, so the index does not list them; they are still
+    #: each one paid subrun's evidence tree.
+    out |= {q.relative_to(root).as_posix()
+            for q in (root / "logs").glob("**/runs/*") if q.is_dir()}
+    return tuple(sorted(out))
+
+
+def checkpoint_dirs(root: Path) -> set[str]:
+    """Directories that ARE a materialized checkpoint, by holding its weights.
+
+    `config.json` and `generation_config.json` beside a `model.safetensors` are
+    not duplicated records; they are the two files without which the weights
+    cannot be reloaded. The CUDA stage-F validation writes one such directory
+    per operator step per arm, and its whole claim is materialize → reload →
+    validate → measure, so deleting a sidecar because another step serialized
+    the same defaults would break the artifact the validation is about.
+    """
+    #: REPO-RELATIVE, because that is how every member path is spelled. An
+    #: absolute path here matched nothing and the rule never fired.
+    return {q.parent.relative_to(root).as_posix()
+            for q in (root / "logs").rglob("model.safetensors")}
+
+
+def structurally_distinct(members: list[str], registered: tuple[str, ...],
+                          ckpt: set[str]) -> tuple[str, str] | None:
+    """Why these byte-identical files are nonetheless different objects.
+
+    Returns `(rule, reason)`, or None when they really are copies of one thing.
+    """
+    if all(Path(m).parent.as_posix() in ckpt for m in members):
+        return ("materialized checkpoint",
+                "each is part of its own materialized checkpoint — the weights "
+                "of one operator step of one arm, or a sidecar without which "
+                "those weights cannot be reloaded. Identical because two steps "
+                "produced the same tensor, or because the same defaults were "
+                "serialized; not because one is a copy of another. The "
+                "validation these belong to claims materialize -> reload -> "
+                "validate -> measure, so removing any of them would break the "
+                "artifact the claim is about")
+    inside = [m for m in members
+              if any(m.startswith(d + "/") for d in registered)]
+    if inside:
+        #: A VETO, not an all-members test. Requiring every member to be
+        #: registered let a group through whenever one copy sat outside a run
+        #: -- and the reference heuristic then named the OUTSIDE copy canonical
+        #: and proposed deleting the run's own. All ten deletions this
+        #: inventory proposed were of that shape: attempt 9's session record,
+        #: four runs' engine probes, attempt 12's authorization. A run owns its
+        #: evidence; a phase-level copy of it is the derived one.
+        return ("per-run evidence",
+                f"{len(inside)} of {len(members)} sit inside a run directory "
+                "the run index registers with a digest, so each is that run's "
+                "own evidence and removing it would change what the index "
+                "records about that run. Identical bytes across attempts are a "
+                "reused or re-derived observation, not one object under "
+                "several names")
+    if all(m.endswith(".out") or m.endswith(".txt") for m in members) and \
+            len({Path(m).name for m in members}) > 1:
+        return ("empty output",
+                "different streams of different runs that both produced "
+                "nothing; an absent output is each run's own fact")
+    return None
 
 
 def sha256_file(p: Path, chunk: int = 1 << 22) -> str:
@@ -254,6 +367,10 @@ def main() -> int:
         })
 
     # ---- duplicate groups, and which copy is canonical --------------------
+    #: Read once. Both answer "are these the same object, or two objects that
+    #: happen to serialize identically", which the byte hash cannot.
+    registered = registered_run_dirs(REPO_ROOT)
+    ckpt = checkpoint_dirs(REPO_ROOT)
     groups = []
     canonical_of: dict[str, tuple[str, str]] = {}
     for digest, members in by_hash.items():
@@ -263,6 +380,24 @@ def main() -> int:
         exec_refd = [m for m in members if by_path[m]["referenced_by_executable"]]
         any_refd = [m for m in members if by_path[m]["referenced_by"]]
         override = CANONICAL_OVERRIDES.get(digest[:12])
+        rule = structurally_distinct(members, registered, ckpt)
+        if rule and not override:
+            #: NOT a duplicate: same bytes, different objects. Recorded with
+            #: `canonical: null` and nothing reclaimable, and deliberately
+            #: BEFORE the reference heuristics -- "exactly one copy is
+            #: referenced" would otherwise mark a registered run's own evidence
+            #: deletable because some other run's identical copy happens to be
+            #: cited.
+            groups.append({
+                "sha256": digest,
+                "size_bytes": by_path[members[0]]["size_bytes"],
+                "members": sorted(members),
+                "canonical": None,
+                "canonical_reason": rule[1],
+                "reclaimable_bytes": 0,
+                "decided_by": f"rule: {rule[0]}",
+            })
+            continue
         if override:
             canonical, why = override
         elif len(exec_refd) == 1:
@@ -273,18 +408,28 @@ def main() -> int:
             canonical = any_refd[0]
             why = "the only copy any other file points at"
         else:
-            canonical, why = sorted(members)[0], "UNDECIDED — review before deleting"
+            #: UNDECIDED proposes NOTHING. It used to name `sorted(members)[0]`
+            #: canonical, which marked every other member `delete_duplicate`
+            #: with the reason "review before deleting" -- an inventory that
+            #: says "I could not decide" while listing three files as
+            #: reclaimable is an inventory that will eventually be acted on.
+            canonical, why = None, ("UNDECIDED — no rule, reference or override "
+                                    "decides which of these is canonical, so "
+                                    "none is proposed for deletion")
         groups.append({
             "sha256": digest,
             "size_bytes": by_path[members[0]]["size_bytes"],
             "members": sorted(members),
             "canonical": canonical,
             "canonical_reason": why,
-            "reclaimable_bytes": by_path[members[0]]["size_bytes"] * (len(members) - 1),
+            "reclaimable_bytes": (0 if canonical is None else
+                                  by_path[members[0]]["size_bytes"] * (len(members) - 1)),
             "decided_by": ("override" if override else
                            "executable reference" if len(exec_refd) == 1 else
                            "documentary reference" if len(any_refd) == 1 else "none"),
         })
+        if canonical is None:
+            continue
         for m in members:
             canonical_of[m] = (canonical, why)
 

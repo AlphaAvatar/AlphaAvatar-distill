@@ -244,7 +244,7 @@ every arm ever evaluated, and GSM8K correctness is 0.00–0.08 everywhere.
 
 **Closed by E7:** lost general language modelling is **not** the cause. It can be
 restored almost completely (−5.22 nats, top-1 up 9×) with no behavioural effect
-whatsoever. See [`EXPERIMENTS.md`](../logs/archive/repository/indexes/EXPERIMENTS.md) §34.
+whatsoever. See [`EXPERIMENTS.md`](../logs/stages/stage-3/history/EXPERIMENTS.md) §34.
 
 **Closed earlier:** reweighting the two existing loss terms (both directions
 tried, §17/§18); selecting on held-out NLL (retired, §12.15); the capacity
@@ -276,7 +276,7 @@ Every paired comparison inside its registered floor (usable 0.0800, correct
 what restores general text is *extra KD signal on unseen text*, largely
 regardless of which text.
 
-Record [`EXPERIMENTS.md`](../logs/archive/repository/indexes/EXPERIMENTS.md) §34 · report
+Record [`EXPERIMENTS.md`](../logs/stages/stage-3/history/EXPERIMENTS.md) §34 · report
 [`e7_report.md`](../logs/stages/stage-3/e7/analyses/e7_report.md) · preregistration
 [`e7_preregistration.md`](../logs/stages/stage-3/e7/analyses/e7_preregistration.md) · decision
 [`decisions.md`](../logs/budget/decisions.md) 2026-08-09.

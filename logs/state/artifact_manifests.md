@@ -12,7 +12,7 @@ Two reading notes:
   `configs/stage3/*.json`, and so on. See
   [`docs/REPO_LAYOUT.md`](../../docs/REPO_LAYOUT.md) for the current map.
 * **Per-run experiment logs were consolidated** into
-  [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) on 2026-07-31 (`1fbcb99`); the originals are
+  [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) on 2026-07-31 (`1fbcb99`); the originals are
   in git history at `866dac2`. "Related logs" below point at the consolidated
   record.
 
@@ -93,7 +93,7 @@ Two reading notes:
   with the same thresholds to every checkpoint.
 - **License/provenance:** internal artifacts derived from the Apache-2.0 teacher
   and the permissive-source corpus v2. Not for redistribution as-is.
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §11,
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §11,
   [`STATE.md`](current.md) §12–13, `artifacts/stage3/e1_consolidated.json`.
 
 ## recovery corpus v2 + token ladders
@@ -146,7 +146,7 @@ Two reading notes:
   the Apache-2.0 teacher. No user data, no secrets. Not reproducible
   token-for-token (sampled decoding; bf16 decoding is not batch-invariant) — the
   hashes pin the experiment (P5), not a re-derivable procedure.
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §10, [`STATE.md`](current.md)
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §10, [`STATE.md`](current.md)
   §6–§8, and the three 2026-08-01 [decision records](../budget/decisions.md).
 
 ## stage3_teacher_corpus_20260730 — teacher corpus v1 (superseded)
@@ -160,10 +160,10 @@ Two reading notes:
   top_k off (not the official preset) and **effectively n=1** — 92.7% of
   candidate pairs are byte-identical because the serving engine seeded per
   request, not per candidate. Retained as labelled auxiliary data only
-  ([`PROPOSAL.md`](../archive/repository/PROPOSAL.md) §2); the 4,096-token cap censored 19.9% of
+  ([`PROPOSAL.md`](../stages/stage-3/e2/plans/PROPOSAL.md) §2); the 4,096-token cap censored 19.9% of
   rollouts (69.7% of `openmath`).
 - **License/provenance:** as the corpus v2 entry above.
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §5, §6.
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §5, §6.
 
 ## tt2x2/ and ttb/ — the two 2026-07-30 four-arm runs (diagnostics)
 
@@ -179,7 +179,7 @@ Two reading notes:
   measurement-limited (99.3% of treatment generations censored at 512 tokens).
   Neither supports a claim about teacher-native supervision.
 - **Hashes:** per-arm sha256 lists are committed alongside each arm on the relay.
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §5.
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §5.
 
 ## stage3/s2v1_from_init and stage3/s2v1_from_s1 — start-point ablation finals
 
@@ -206,7 +206,7 @@ Two reading notes:
   configs/stage3_s2v1_from_init.json` (config sha256 `b2520a2e0ad8…`) and
   `--config configs/stage3_s2v1_from_s1.json` (`7e0612ccf3aa…`), code state git
   `f3d7547`, pod `ruib84xvfyieqm`, 1× L40S, 2026-07-27.
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §3 (start-point ablation).
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §3 (start-point ablation).
   `s2v1_from_init` holdout_v1 NLL **3.8285** — **the recommended branch point**
   for further recovery work (best behavior scorecard, 2700 total steps);
   `s2v1_from_s1` **3.8067**.
@@ -229,9 +229,9 @@ Two reading notes:
   2026-07-27 with `hf upload AlphaAvatar/aadistill-artifacts
   artifacts/stage1/qwen3_0p6b_init_v0/checkpoint
   stage1/qwen3_0p6b_init_v0/checkpoint`.
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §2 (Stage 1);
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §2 (Stage 1);
   purpose: transfer vehicle for the `from_init` arm of the start-point ablation
-  (consolidated into [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §3). It was the only
+  (consolidated into [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §3). It was the only
   start point not previously on the relay.
 
 ## stage3/s2_blocks_v1 — mixture-v1 recovery final checkpoint (current best)
@@ -262,7 +262,7 @@ Two reading notes:
   `5a61689cb9a8…`, code state git `f73be5516a85` + logged uncommitted diff
   `2e04f6834922…`, pod `ippwmpc8wzed24`, 1× L40S, 2026-07-26); uploaded by
   `scripts/pod/post_run.sh` in the same session.
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §3 (mixture v1).
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §3 (mixture v1).
   Holdout_v1 NLL 3.8003 (bf16) — **current best student checkpoint**; it is also
   the reference arm (`A0 chain`) of the proposed start-point ablation.
 - **Not retained:** optimizer state and rolling checkpoints (deleted with the pod).
@@ -285,7 +285,7 @@ Two reading notes:
   uploaded 2026-07-25 with `hf upload AlphaAvatar/aadistill-artifacts
   artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model
   stage3/s1_ffn_norm_v0/step_000660/model` (user-approved 2026-07-25).
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §3 (s1 FFN+norm);
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §3 (s1 FFN+norm);
   purpose: durable external storage + transfer vehicle for the sub-stage 2
   A/B session (decision record 2026-07-25).
 
@@ -304,7 +304,7 @@ Two reading notes:
 - **Creation command:** `uv run python scripts/train_stage3.py --config
   configs/stage3_s1_ext.json` / `--config configs/stage3_s2_blocks.json`
   (commit `6230a14`, pod `simbeepnf8syuu`, 2026-07-25).
-- **Related logs:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §3 (sub-stage 2 A/B).
+- **Related logs:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §3 (sub-stage 2 A/B).
 
 ## engine_bench_20260729 — engine benchmark + teacher-corpus pilot
 
@@ -314,7 +314,7 @@ Two reading notes:
   - `python scripts/bench_engines.py --engines hf --n-prompts 10 --max-new-tokens 4096 --hourly-usd 0.99 --out artifacts/bench/engines_v0`
   - `python scripts/generate_teacher_answers.py --engine hf --limit-per-slice 10 --n 4 --batch-size 4 --max-new-tokens 4096 --max-hours 2.2 --out artifacts/stage2_v2/pilot`
 - **Teacher:** `Qwen/Qwen3-4B-Thinking-2507@768f209d`, bf16
-- **Experiment log:** [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §4 (engine benchmark)
+- **Experiment log:** [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §4 (engine benchmark)
 
 | file | size | sha256 |
 | --- | --- | --- |
@@ -376,11 +376,11 @@ the experiment (P5), not a re-derivable procedure.
   sha256 `3ec3c124…`, chat template `3802169b…` — both reproduced exactly on the
   dev box under transformers 5.13.1 against the corpus's 5.14.1.
 - **Status: prepared, NOT trained on.** Awaiting launch approval
-  ([`PROPOSAL.md`](../archive/repository/PROPOSAL.md)).
+  ([`PROPOSAL.md`](../stages/stage-3/e2/plans/PROPOSAL.md)).
 - **License/provenance:** derived from corpus v2; same constraints. No new
   generation, no new sources.
-- **Related logs:** [`PROPOSAL.md`](../archive/repository/PROPOSAL.md) §3–§4,
-  [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §12.
+- **Related logs:** [`PROPOSAL.md`](../stages/stage-3/e2/plans/PROPOSAL.md) §3–§4,
+  [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §12.
 
 ## e1_r0860k_s{a,b}_pca run records — recovered from the relay
 
@@ -395,8 +395,8 @@ the experiment (P5), not a re-derivable procedure.
   (`config_sha256` `08264ef1…` and `9048173d…`, both reproduced).
 - **Also on the relay, unchanged:** `step_001023/model/` for both arms — the D0
   weights Experiment 2 will re-evaluate on any new capability set.
-- **Related logs:** [`PROPOSAL.md`](../archive/repository/PROPOSAL.md) §2,
-  [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §12.2.
+- **Related logs:** [`PROPOSAL.md`](../stages/stage-3/e2/plans/PROPOSAL.md) §2,
+  [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §12.2.
 
 ## battery_v2 — the frozen Experiment 2 capability battery
 
@@ -438,8 +438,8 @@ the experiment (P5), not a re-derivable procedure.
 - **Status: frozen.** Changing any rule requires bumping `BATTERY_VERSION`.
 - **License/provenance:** derived from the public sources above; no teacher
   generations, no user data.
-- **Related logs:** [`PROPOSAL.md`](../archive/repository/PROPOSAL.md) §6–§7,
-  [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §12.7–§12.8.
+- **Related logs:** [`PROPOSAL.md`](../stages/stage-3/e2/plans/PROPOSAL.md) §6–§7,
+  [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §12.7–§12.8.
 
 ## checkpoint_inventory — both stores, 2026-08-03
 
@@ -457,7 +457,7 @@ the experiment (P5), not a re-derivable procedure.
 - **Relay: 0 bytes reclaimed and no file touched.** Ordinary deletion does not
   free LFS quota there; the operations that would all invalidate existing
   revisions and are reported for separate approval.
-- **Related logs:** [`PROPOSAL.md`](../archive/repository/PROPOSAL.md) §9.
+- **Related logs:** [`PROPOSAL.md`](../stages/stage-3/e2/plans/PROPOSAL.md) §9.
 
 ## Experiment 2 phase 1 outputs (2026-08-04)
 
@@ -641,7 +641,7 @@ Inclusion mask (shared with P0-real and P0-assistant):
 
 ## Experiment 1 checkpoint recoverability — verified 2026-08-05
 
-Full detail in [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §19.14. Digests:
+Full detail in [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §19.14. Digests:
 `artifacts/audit/relay_e1_digests.json` (git-ignored; regenerate from the relay).
 
 * **Local** `artifacts/stage3/rescued/`: 30/30 files verified against the
@@ -743,7 +743,7 @@ Alongside: `e3_run.log` (232 KB), `e3.status`, `e3_pod_hashes.txt`.
 
 Configs: `e3_a1_frozen_attn_sa` (`cc6ba2972a28c7c2…`), `_sb` (`477cbf347ba39df4…`),
 `e3_a2_lora_attn_sa` (`f9c5cdd26af067ae…`), `_sb` (`74e8846e25b12d1f…`) —
-`sha256_json` of the parsed config, matching `logs/cross-stage/early/analyses/e3_registration.json`.
+`sha256_json` of the parsed config, matching `logs/stages/stage-3/e3/analyses/e3_registration.json`.
 
 
 ## Experiment 4 outputs and checkpoints (2026-08-06)
@@ -758,7 +758,7 @@ Pod `qzevis6g43en33` (L40S secure, $0.99/h) deleted after transfer. Store:
 | `e4_p2_r1600k_sb` | same | 5.6 GB |
 
 Config hashes `8256bfba8b3241a8…` (sa) / `7c3817a729133dc9…` (sb), matching
-`logs/cross-stage/early/analyses/e4_registration.json`. Both fork from the Stage 1 init `86fbba78…`; neither
+`logs/stages/stage-3/e4/analyses/e4_registration.json`. Both fork from the Stage 1 init `86fbba78…`; neither
 continues from P2-0.86M.
 
 `e4_side.tar.gz` (1.1 MB): 150 free + 150 oracle generations for all four
@@ -800,8 +800,8 @@ behaviour-wave numbers taken with the degeneration stop active.
   sets (`artifacts/audit/three_mode/A{1,2}-*`, 150 generations each with token
   ids and decoded text), `artifacts/audit/e3_comparison.json`,
   `artifacts/audit/e3_movement/`, the preregistration
-  [`logs/cross-stage/early/analyses/e3_registration.json`](../stages/stage-3/e3/analyses/e3_registration.json), and the full record at
-  [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §20. **The experiment remains fully
+  [`logs/stages/stage-3/e3/analyses/e3_registration.json`](../stages/stage-3/e3/analyses/e3_registration.json), and the full record at
+  [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §20. **The experiment remains fully
   re-analysable; it is not re-runnable without retraining** (~$5.76).
 - **Distinguish this from a loss.** P0-assistant's and E5's checkpoints were
   *lost* to defects. These were *deleted deliberately*, with hashes recorded and
@@ -840,7 +840,7 @@ P0-assistant's weights permanently and all four E5 checkpoints.
 | raw generations, both arms | `artifacts/audit/three_mode/P2-2.96M-{sa,sb}/` | gitignored; free + oracle + forced, 150 prompts each, mask `d6e24e0b…` |
 | retrieved bundle | `/home/ecs-user/aad-artifacts/e6b/e6b_artifacts.tar.gz` | sha256 `d96d63a97082af70…`, digest-verified before teardown |
 | driver console log | `/home/ecs-user/aad-artifacts/e6b/e6b_run.log` | 132 KB; carries the training curve, per-step times and final val CE |
-| summary + report | `logs/cross-stage/early/analyses/e6b_results.json`, `logs/cross-stage/early/analyses/e6b_report.md` | tracked; reproduce byte-identically from the generations |
+| summary + report | `logs/stages/stage-3/e6b/analyses/e6b_results.json`, `logs/stages/stage-3/e6b/analyses/e6b_report.md` | tracked; reproduce byte-identically from the generations |
 | per-prompt records | `artifacts/audit/e6b_per_prompt.jsonl` | 1,200 scored rows |
 
 ### NOT retained — a P4 gap
@@ -859,7 +859,7 @@ The training curve, per-step timings and final validation CE survive in the
 driver console log, so the substance is recoverable; the machine-readable event
 stream required by AGENTS.md 3.7 is not.
 
-**Derived artifact:** `logs/cross-stage/early/analyses/e6b_reconstructed_training_events.json`
+**Derived artifact:** `logs/stages/stage-3/e6b/analyses/e6b_reconstructed_training_events.json`
 (`provenance: reconstructed_from_driver_console`,
 `original_event_stream_available: false`) — 291 `train_step` + 10 `eval_result`
 events per arm, with a per-field provenance block. **Not** the original stream.

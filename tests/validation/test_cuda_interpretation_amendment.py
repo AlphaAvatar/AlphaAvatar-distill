@@ -103,32 +103,19 @@ def test_the_binding_still_matches(doc):
     """The whole mechanism. If a raw subrun report, the campaign record or the
     outcome has been rewritten, this fails rather than the amendment quietly
     describing bytes that no longer exist."""
-    #: The amendment binds paths as they were when it was written. The
-    #: log-layout-v1 migration moved the CUDA subruns into `validations/`, and
-    #: the amendment is hash-anchored evidence that is not rewritten to match.
-    #: The binding is about the object -- its bytes and size -- so the lookup
-    #: goes through the migration and the hash still has to agree.
-    import json as _json
+    #: The amendment binds paths as they were when it was written. The CUDA
+    #: subruns moved into `validations/` afterwards, and the amendment is
+    #: hash-anchored evidence that is not rewritten to match. The binding is
+    #: about the object -- its bytes and size -- so the lookup goes through the
+    #: historical-path table and the hash still has to agree.
+    import sys as _sys
 
-    forward = {}
-    for m in sorted((REPO / "logs/migrations").glob("*/manifest.json")):
-        try:
-            mdoc = _json.loads(m.read_text())
-        except (OSError, _json.JSONDecodeError):
-            continue
-        forward.update({e["old_path"]: e["new_path"]
-                        for e in mdoc.get("entries", [])})
+    _sys.path.insert(0, str(REPO / "scripts"))
+    from architecture.record_run_index import resolve_historical
 
     def _resolve(rel: str) -> Path:
         here = REPO / rel
-        if here.is_file():
-            return here
-        if rel in forward:
-            return REPO / forward[rel]
-        for o, n in sorted(forward.items(), key=lambda kv: -len(kv[0])):
-            if rel.startswith(o + "/"):
-                return REPO / (n + rel[len(o):])
-        return here
+        return here if here.is_file() else REPO / resolve_historical(rel, REPO)
 
     for entry in doc["binds"]:
         p = _resolve(entry["path"])

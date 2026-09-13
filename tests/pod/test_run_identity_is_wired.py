@@ -33,6 +33,17 @@ def L():
     return load_session_launcher("autoinit_c1_launch")
 
 
+def _runs_dir(stage_id: str, experiment_id: str) -> str:
+    """Where a run of `experiment_id` lives, stage-first.
+
+    These tests built their fake trees under `logs/runs/<experiment>/<run>`,
+    which is the layout from before runs moved inside the experiment that owns
+    them. The discoverers look under `logs/stages/`, so every one of these
+    fixtures was describing a tree the code no longer writes.
+    """
+    return f"logs/stages/stage-{stage_id}/{experiment_id}/runs"
+
+
 def _args(tmp_path, run_id="attempt10", **over):
     scr = tmp_path / "scr"
     scr.mkdir(exist_ok=True)
@@ -121,7 +132,7 @@ def test_the_session_record_is_written_inside_the_run(tmp_path, L):
     args = _args(tmp_path)
     layout = L.open_c1_run(args, repo)
     assert args.out == L.session_record_path("attempt10")
-    assert layout.rel_root == "phase_c1/attempt10"
+    assert layout.rel_root == "phase_c1/runs/attempt10"
     #: The parent exists, which `SessionRunner.save()` does not create.
     assert (repo / args.out).parent.is_dir()
 
@@ -489,7 +500,7 @@ def test_the_engineering_run_collects_its_watchdog_journals_by_pod(tmp_path):
     doc = read_run(repo, "cuda_stage_f", "r1", "shared")
     assert "watchdog" in doc["roles"], (
         "the journal was written and not collected")
-    wd = repo / "logs/runs/stage-shared/cuda_stage_f/r1/runtime/watchdog"
+    wd = repo / "logs/stages/stage-shared/cuda_stage_f/runs/r1/runtime/watchdog"
     assert sorted(q.name for q in wd.iterdir()) == [
         "watchdog_p1.jsonl", "watchdog_p1.out"]
 
@@ -555,7 +566,7 @@ def test_the_index_finds_a_recorded_run_and_reports_an_unrecorded_one(tmp_path,
     _write_session(repo, args)
     L.close_c1_run(layout, args, repo)
 
-    orphan = repo / RUNS_ROOT / "phase_c1" / "attempt11"
+    orphan = repo / _runs_dir("1", "phase_c1") / "attempt11"
     (orphan / "runtime").mkdir(parents=True)
     (orphan / "runtime" / "session.json").parent.mkdir(parents=True, exist_ok=True)
     (orphan / "runtime" / "session.json").write_text("{}")
@@ -576,7 +587,7 @@ def test_an_empty_run_directory_is_not_reported_as_an_orphan(tmp_path):
     spec = importlib.util.spec_from_file_location("record_run_index", path)
     ri = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ri)
-    (tmp_path / RUNS_ROOT / "phase_c1" / "attempt12").mkdir(parents=True)
+    (tmp_path / _runs_dir("1", "phase_c1") / "attempt12").mkdir(parents=True)
     assert ri.discover_unrecorded(tmp_path) == []
 
 
@@ -595,24 +606,24 @@ def test_this_repositorys_index_still_accounts_for_every_run_on_disk():
     ri = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ri)
 
-    #: Both layouts, scanned independently of the module under test. This had
-    #: the same fixed `*/*` assumption the index had, so the moment a stage
-    #: level appeared it started reporting `stage-1/phase_c1` -- a grouping
-    #: directory holding a README -- as an unaccounted run.
-    runs_root = REPO / "logs/runs"
+    #: Scanned independently of the module under test, and pointed at the tree
+    #: that exists. This read `logs/runs/`, which is gone, so the glob matched
+    #: nothing and the comparison below was vacuous -- it could not have
+    #: reported an unaccounted run because it never saw one. It then had the
+    #: same fixed `*/*` assumption the index once had, which reads
+    #: `stage-1/phase_c1/plans` as a run.
+    runs_root = REPO / "logs/stages"
 
     def _is_run(d):
         return d.is_dir() and any(
             q.is_file() and q.name != "README.md" for q in d.rglob("*"))
 
-    #: The canonical shapes, both of them: `stage-<id>/<experiment>/<run>` and
-    #: `unscoped/<experiment>/<run>`. A `*/*` scan treated `unscoped/phase_a`
-    #: -- a grouping directory -- as a run, which is the same mistake the index
-    #: itself once made in the other direction.
-    on_disk = {(d.parent.name, d.name)
-               for d in runs_root.glob("stage-*/*/*") if _is_run(d)}
-    on_disk |= {(d.parent.name, d.name)
-                for d in runs_root.glob("unscoped/*/*") if _is_run(d)}
+    #: The canonical shape, and only it:
+    #: `stage-<id>/<experiment>/runs/<run>`. The experiment is the
+    #: GRANDPARENT; reading the parent gives the literal "runs".
+    on_disk = {(d.parent.parent.name, d.name)
+               for d in runs_root.glob("stage-*/*/runs/*") if _is_run(d)}
+    assert on_disk, "the scan found no run at all; it would pass vacuously"
 
     index = ri.build_index(REPO)
     #: EVERY index entry accounts for a run, including the legacy-registered
@@ -641,7 +652,7 @@ def test_a_prepared_run_is_reported_as_prepared_not_as_a_dead_launcher(tmp_path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
-    runs = tmp_path / "logs/runs/phase_c1"
+    runs = tmp_path / _runs_dir("1", "phase_c1")
     prepared = runs / "attempt_prepared/governance"
     prepared.mkdir(parents=True)
     (prepared / "grant.json").parent.mkdir(parents=True, exist_ok=True)
@@ -669,9 +680,9 @@ def test_the_launcher_writes_under_its_declared_stage(L):
     assert L.RUN_STAGE_ID == cfg["stage_id"], (
         "the launcher's stage is not the one the experiment config declares")
     assert L.session_record_path("attempt_x") == (
-        f"logs/runs/stage-{cfg['stage_id']}/phase_c1/attempt_x/runtime/session.json")
+        f"logs/stages/stage-{cfg['stage_id']}/phase_c1/runs/attempt_x/runtime/session.json")
     assert L.layout_for_run(REPO, "attempt_x").root.as_posix().endswith(
-        f"logs/runs/stage-{cfg['stage_id']}/phase_c1/attempt_x")
+        f"logs/stages/stage-{cfg['stage_id']}/phase_c1/runs/attempt_x")
 
 
 def test_the_stage_is_declared_by_config_not_inferred_from_the_name():
@@ -716,11 +727,11 @@ def test_a_directory_holding_only_a_readme_is_not_a_dead_run(tmp_path):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
-    described = tmp_path / "logs/runs/stage-3/some_exp/prepared_only"
+    described = tmp_path / _runs_dir("3", "some_exp") / "prepared_only"
     described.mkdir(parents=True)
     (described / "README.md").parent.mkdir(parents=True, exist_ok=True)
     (described / "README.md").write_text("# what goes here\n")
-    died = tmp_path / "logs/runs/stage-3/some_exp/died"
+    died = tmp_path / _runs_dir("3", "some_exp") / "died"
     (died / "evidence").mkdir(parents=True)
     (died / "evidence" / "partial.json").parent.mkdir(parents=True, exist_ok=True)
     (died / "evidence" / "partial.json").write_text("{}\n")

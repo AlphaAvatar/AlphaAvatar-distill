@@ -563,7 +563,7 @@ statistical `INCONCLUSIVE`.
 > under `logs/` was moved, renamed or rewritten. `C1_HARNESS_SOURCE_FILES_V1`
 > still names pre-migration paths and refuses outright; the repointed
 > declarations fail by digest mismatch. Both are exercised, not asserted.
-> Accounting: `logs/migrations/initialization-core/v1/source-relocation.json`
+> Accounting: `logs/maintenance/source-relocations/initialization-core/v1/source-relocation.json`
 > (eleven declarations) and Phase-B ledger amendment **PHB-HA-002** under the
 > maintainer's P12 decision of 2026-09-08. **Scientific fields moved: 0** — the
 > C1 preregistration's path hashes, seeds, battery and pricing are byte-identical.

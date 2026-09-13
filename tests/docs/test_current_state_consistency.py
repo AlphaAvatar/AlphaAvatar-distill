@@ -343,43 +343,45 @@ class TestStateMdAgrees:
             "9 passed both replay gates")
 
     def test_it_points_at_the_migration_record_rather_than_restating_it(self):
-        assert "migrations/initialization-core/v1" in self.live_region()
+        assert "source-relocations/initialization-core/v1" in self.live_region()
 
-    def test_the_stale_narrative_is_moved_rather_than_deleted(self):
-        """History is kept and is not allowed to read as current.
+    def test_the_current_view_carries_no_history_and_no_shelf(self):
+        """One "current state" section, no superseded narrative, no archive.
 
-        It used to require a `# Superseded` heading INSIDE `STATE.md`, which was
-        the only way to hold the line while current state and history shared one
-        file. On 2026-09-12 they were separated, and the guarantee is now
-        structural rather than typographic: the current view contains no history
-        at all, and the history is a document of its own that says what it is.
+        This test has had its second half REPLACED, and the reason matters. It
+        used to also require that the superseded narrative still existed at
+        `logs/archive/`, on the ground that deleting it would destroy the only
+        record of what was believed then. The maintainer has since ruled that
+        git history IS that record and that a superseded document kept in the
+        working tree is one more thing that has to be stopped from reading as
+        current -- so the archive is gone by decision, not by drift.
 
-        Both halves are still required. Deleting the narrative would satisfy
-        "no history in STATE.md" while destroying the record, so the archived
-        document must exist and must carry the superseded content.
+        What survives unchanged is the half that guards the live document: one
+        section claims to be current, and no history is smuggled back into it.
+        What replaces the other half is the rule that produced the change --
+        nothing in `logs/` may become a shelf again.
         """
         text = STATE.read_text()
         heads = re.findall(r"^# Current state", text, re.M)
         assert len(heads) == 1, (
             f"{len(heads)} sections claim to be the current state")
         assert "# Superseded" not in text, (
-            "STATE.md carries a superseded section again; history belongs in "
-            "the archive or in the experiment that owns it")
+            "STATE.md carries a superseded section again; history belongs to "
+            "the experiment or stage that owns it, or to git")
+        assert not (REPO / "logs/archive").exists(), (
+            "logs/archive/ is back: a document that is merely out of date is "
+            "deleted, and one that is still part of the record goes under its "
+            "owner")
 
-        archived = REPO / "logs/archive/repository/STATE_superseded_through_2026-09-11.md"
-        assert archived.is_file(), (
-            "the superseded state is not in the archive: it was deleted rather "
-            "than moved, and it is the only record of what was believed then")
-        body = archived.read_text()
-        assert "Superseded" in body.splitlines()[0]
-        #: The content really came across, not just a heading.
-        assert "# Superseded: the current state as of attempt 8" in body
-        assert len(body) > 10 * len(text), (
-            "the archive is not much larger than the current view, so the "
-            "narrative probably did not move")
-
-        #: And STATE.md still leads a reader to it.
-        assert "archive/STATE_superseded_through_2026-09-11.md" in text
+        #: The history that IS still part of the record is reachable, under the
+        #: stage that owns it. Deleting that would be a real loss and this is
+        #: what would notice.
+        chronology = REPO / "logs/stages/stage-3/history/EXPERIMENTS.md"
+        assert chronology.is_file(), (
+            "the pre-layout experiment chronology is gone; it is the only "
+            "record several Stage-3 experiments have")
+        assert "stages/stage-3/history/EXPERIMENTS.md" in text, (
+            "STATE.md does not lead a reader to the chronology")
 
     def test_an_unquoted_claim_is_still_caught(self, monkeypatch, tmp_path):
         """The backtick exclusion must not become a way to smuggle a claim.

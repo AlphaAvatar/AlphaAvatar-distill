@@ -841,7 +841,7 @@ def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     assert observed["digest"] == phase_b_source_digest(REPO)["digest"]
     # 59 since the initialization migration: src/aadistill/autoinit/__init__.py
     # was a package shell the consolidation deleted, and it is recorded as a
-    # removal in logs/migrations/initialization-core/v1/source-relocation.json.
+    # removal in logs/maintenance/source-relocations/initialization-core/v1/source-relocation.json.
     assert len(observed["files"]) == 59
     assert observed["not_yet_covered"] == []
     # It is the Phase-B set, not Phase A's.

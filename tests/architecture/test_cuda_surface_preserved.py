@@ -118,6 +118,30 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "draws more than once or is refused, and deliberately not "
             "described as prose.",
      }),
+    ("8a6bbcaafa761ffca0b2697c5f68182798a2709d",
+     "a caller-supplied segment between the experiment and the run",
+     {
+        "src/aadistill/runtime/run_layout.py":
+            "`RunLayout` gained `runs_subdir`, a path segment between the "
+            "experiment and the run supplied by the CALLER's convention, and "
+            "`rel_root`/`root` compose it. It defaults to the empty string, so "
+            "every layout that existed before composes to the same path, byte "
+            "for byte. `verify_run_manifest` then stopped reconstructing "
+            "`experiment/run` and reads the manifest's own stated `root` "
+            "instead, deriving the subdir from it: the verifier that assumed a "
+            "composition rejected every manifest written under a convention "
+            "that keeps runs in a child directory, which is a statement about "
+            "the verifier and not about the manifest. THIS IS A DECLARED "
+            "SEMANTIC CHANGE to layout composition and to manifest "
+            "verification, and is deliberately not described as prose. It is "
+            "the same generalization `7cb25bc` began -- caller-supplied root, "
+            "caller-supplied role vocabulary, no repository, stage or model "
+            "name in the core -- carried one step further, and "
+            "`test_the_root_is_named_here_and_only_here` still holds: the core "
+            "names no `logs/` path. Introduced by `fa9fa9a` (the field and the "
+            "composition) and `e89952b` (the verifier), both in the "
+            "stage-first logs migration, and undeclared until now.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.
@@ -244,6 +268,11 @@ NAMED_SEMANTIC_CHANGES = (
      "b2ecdff83ee0a7653eea7872b5af6739a4de4381"),
     ("src/aadistill/infrastructure/session_runner.py",
      "0103467384ca0013ddc0caa9dc18c92aadfa5c78"),
+    #: The one a logs reorganisation could most easily have been called a
+    #: docstring sweep: its diff is a default-empty field and two path
+    #: compositions, and it went undeclared for exactly that reason.
+    ("src/aadistill/runtime/run_layout.py",
+     "8a6bbcaafa761ffca0b2697c5f68182798a2709d"),
 )
 
 

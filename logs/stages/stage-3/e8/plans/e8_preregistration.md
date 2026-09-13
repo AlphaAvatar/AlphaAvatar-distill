@@ -1,7 +1,7 @@
 > **ARCHIVED / HISTORICAL — 2026-08-12.** This document is no longer an active
 > plan. It is retained for provenance only. The current state is
-> [`STATE.md`](../STATE.md); the current plan is
-> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md).
+> [`STATE.md`](../../../../state/current.md); the current plan is
+> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../../../../docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md).
 > Any 'next experiment' instruction below is superseded.
 
 # Experiment 8 — preregistration
@@ -630,7 +630,7 @@ PYTHONPATH=src python scripts/training/validate_e8_arms.py --require-init \
 
 ## 15. Operational contract
 
-[`scripts/pod/AGENTS.md`](../../scripts/pod/AGENTS.md) is binding for both pods:
+[`scripts/pod/AGENTS.md`](../../../../../scripts/pod/AGENTS.md) is binding for both pods:
 detached start via `start_job.py`; `watchdog.py` beside the launcher from pod
 creation; `LogRelay` mirroring event streams continuously;
 `collect_artifacts.py` gating teardown with `final_required` semantics; hash

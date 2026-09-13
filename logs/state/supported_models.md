@@ -18,7 +18,7 @@ during baseline construction (same date).
 ## qwen3-4b-thinking-distill — current position
 
 Everything below is recorded in the consolidated
-[experiment record](../archive/repository/indexes/EXPERIMENTS.md); per-run logs were merged into it on
+[experiment record](../stages/stage-3/history/EXPERIMENTS.md); per-run logs were merged into it on
 2026-07-31 and remain in git history at commit `866dac2`.
 
 **What passed.** Stage 0 collected 949,859 tokens of teacher sufficient
@@ -80,7 +80,7 @@ holding the best held-out NLL of its trajectory (`sb`@127) produces **zero
 protocol-valid generations across all 726 battery prompts** — general-text
 perplexity peaks *before* the student specialises onto the teacher protocol, so
 the metric and the objective diverge by construction
-([decision](../budget/decisions.md), [record](../archive/repository/indexes/EXPERIMENTS.md) §12.15).
+([decision](../budget/decisions.md), [record](../stages/stage-3/history/EXPERIMENTS.md) §12.15).
 
 **What exists for the next step.** Corpus v2 (11,174 accepted sessions, 66.08M
 generated tokens, gate-passed) cut into the six-rung nested token ladder, plus a
@@ -88,7 +88,7 @@ frozen 846-prompt capability battery (`capability-v2`) with deterministic
 scorers and no LLM judge, validated at 112 evaluator tests. Experiment 2 phases
 2 (loss) and 3 (learning rate) are **specified but unauthorized**, and phase 3
 should not run as written — it was built around the metric phase 1 retired
-([`PROPOSAL.md`](../archive/repository/PROPOSAL.md) §12).
+([`PROPOSAL.md`](../stages/stage-3/e2/plans/PROPOSAL.md) §12).
 
 **Deployment target:** INT8. Every recovery gate already re-evaluates under INT8
 weight fake-quantization at two scopes.
@@ -97,7 +97,7 @@ weight fake-quantization at two scopes.
 
 **No arm has completed the Stage 2/3 objective.** Primary metric is
 `usable_rollout`; correctness is secondary; teacher-forced top-1 is a diagnostic
-only ([`decisions.md`](../budget/decisions.md) 2026-08-05, [`EXPERIMENTS.md`](../archive/repository/indexes/EXPERIMENTS.md) §19).
+only ([`decisions.md`](../budget/decisions.md) 2026-08-05, [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) §19).
 
 150 fixed examples, mask `d6e24e0b…`, unrestricted generation.
 
@@ -139,7 +139,7 @@ below is directly comparable to the table above.
 **P2-1.60M is the current best checkpoint on both axes** and the reference any
 Stage 4/5 work should start from. E5's two arms cost $11.64 across ten paid
 events and neither beat it; the C and R weights were lost to a stale checkpoint
-tag in the transfer path ([EXPERIMENTS.md](../archive/repository/indexes/EXPERIMENTS.md) §27), so re-evaluating
+tag in the transfer path ([EXPERIMENTS.md](../stages/stage-3/history/EXPERIMENTS.md) §27), so re-evaluating
 either would require retraining.
 
 All six trained at the 0.86M rung, 1,023 steps, η 5e-5, warmup 51, same Stage 1

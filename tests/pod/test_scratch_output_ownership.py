@@ -246,7 +246,7 @@ def test_a_shared_read_only_input_does_not_make_a_scratch_ambiguous(tmp_path, L)
     (scr / "assets" / "battery.tar").write_bytes(b"\x00" * 16)
 
     layout = L.open_c1_run(_args(scr, "attempt10"), repo)
-    assert layout.rel_root == "phase_c1/attempt10"
+    assert layout.rel_root == "phase_c1/runs/attempt10"
     assert (scr / "hf_cache" / "models" / "blob.bin").exists()
 
 

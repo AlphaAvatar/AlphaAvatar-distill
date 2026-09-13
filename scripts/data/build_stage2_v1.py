@@ -4,7 +4,7 @@
 Usage:
     uv run python scripts/data/build_stage2_v1.py
 
-Design (see logs/archive/repository/indexes/EXPERIMENTS.md):
+Design (see logs/stages/stage-3/history/EXPERIMENTS.md):
 
 * v0 train is carried into v1 train verbatim, except gsm8k samples, which are
   format-normalized (strip `<<...>>` calculator annotations, rewrite the

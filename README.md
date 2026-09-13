@@ -25,14 +25,14 @@ has exactly one owner:
 | **current state, machine-readable** | [`logs/state/current.json`](./logs/state/current.json) |
 | **current state, in prose** | [`logs/state/current.md`](./logs/state/current.md) |
 | **the scientific history, by phase** | [`logs/state/phase_index.md`](./logs/state/phase_index.md) — start here if you do not know the filenames |
-| **what Phase A and Phase B concluded** | [`logs/cross-stage/phase_a/phase_a_vs_phase_b_comparison.md`](logs/stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md) |
+| **what Phase A and Phase B concluded** | [`logs/stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md`](logs/stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md) |
 | spend, caps, authorizations | [`logs/budget/ledger.md`](./logs/budget/ledger.md) |
 | which log owns which fact | [`logs/state/ownership.md`](./logs/state/ownership.md) |
 | where code lives | [`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) |
 | how a paid session is specified and run | [`docs/SESSION_ARCHITECTURE.md`](./docs/SESSION_ARCHITECTURE.md) |
 | which pod script is live, historical or terminated | [`docs/POD_SCRIPTS.md`](./docs/POD_SCRIPTS.md) |
 | AutoInitializer binding rules and pinned assets | [`docs/AUTOINIT_REFERENCE.md`](./docs/AUTOINIT_REFERENCE.md) |
-| what each experiment proved | [`logs/archive/repository/indexes/EXPERIMENT_INDEX.md`](./logs/archive/repository/indexes/EXPERIMENT_INDEX.md) |
+| what each experiment proved | [`logs/state/experiment_index.md`](./logs/state/experiment_index.md) |
 | decisions and their reasons | [`logs/budget/decisions.md`](./logs/budget/decisions.md) |
 | which checkpoints exist, and why | [`logs/maintenance/inventories/checkpoint_registry.json`](./logs/maintenance/inventories/checkpoint_registry.json) |
 | what was deleted, and how to rebuild it | [`logs/maintenance/inventories/checkpoint_tombstones.json`](./logs/maintenance/inventories/checkpoint_tombstones.json) |
@@ -54,7 +54,7 @@ validated.
 
 ### What E1–E8 established
 
-The public summary. [`logs/archive/repository/indexes/EXPERIMENT_INDEX.md`](./logs/archive/repository/indexes/EXPERIMENT_INDEX.md)
+The public summary. [`logs/state/experiment_index.md`](./logs/state/experiment_index.md)
 owns the per-experiment detail — question, arms, what each result does **not**
 support, and which checkpoints still matter — and is the file to correct if one
 of these lines and the record ever disagree.
@@ -164,7 +164,7 @@ evidence separates them.
 
 **Current experiment:** [Qwen/Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507) → a 0.6B-class student (Qwen3-0.6B geometry, ~6.7× compression, INT8 deployment target).
 
-Full record: [`logs/archive/repository/indexes/EXPERIMENTS.md`](./logs/archive/repository/indexes/EXPERIMENTS.md). Current state and
+Full record: [`logs/stages/stage-3/history/EXPERIMENTS.md`](./logs/stages/stage-3/history/EXPERIMENTS.md). Current state and
 next actions: [`logs/state/current.md`](./logs/state/current.md); cumulative spend against the
 authorized cap: [`logs/budget/ledger.md`](./logs/budget/ledger.md).
 
@@ -243,7 +243,7 @@ step-matched compute control.
 - **No reasoning emerged anywhere.** GSM8K exact match across all 25 checkpoints:
   min 0.000, max 0.050, mean 0.006.
 
-Reviewable samples: [`logs/cross-stage/early/analyses/e1_test_cases.md`](logs/stages/stage-3/e1/analyses/e1_test_cases.md).
+Reviewable samples: [`logs/stages/stage-3/e1/analyses/e1_test_cases.md`](logs/stages/stage-3/e1/analyses/e1_test_cases.md).
 
 </details>
 
@@ -257,16 +257,16 @@ recovery recipe was built; **not comparable point-for-point** with anything abov
 
 | # | date | run | starts from | what changed | total steps | behavior | held-out NLL |
 | ---: | --- | --- | :---: | --- | ---: | ---: | ---: |
-| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/archive/repository/indexes/EXPERIMENTS.md) | — | early-band depth merge, unweighted projection | 0 | – | 17.7977 |
-| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/archive/repository/indexes/EXPERIMENTS.md) | — | middle-band merge, end-weighted projection | 0 | – | 11.7482 |
-| 3 | 2026-07-22 | [s1 recovery](./logs/archive/repository/indexes/EXPERIMENTS.md) | #2 | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 660 | 12.9% | 4.2107 |
-| 4 | 2026-07-25 | [s2 A/B arm A](./logs/archive/repository/indexes/EXPERIMENTS.md) | #3 | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 1320 | – | 4.2747 |
-| 5 | 2026-07-25 | [s2 A/B arm B](./logs/archive/repository/indexes/EXPERIMENTS.md) | #3 | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 1320 | – | 4.2118 |
-| 6 | 2026-07-26 | [s2 on mixture v1](./logs/archive/repository/indexes/EXPERIMENTS.md) | #5 | same recipe, 4.11× data, 2700 steps; plateau broken | 4020 | 8.9% | **3.8003** |
-| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/archive/repository/indexes/EXPERIMENTS.md) | #3 | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3360 | 9.5% | 3.8067 |
-| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/archive/repository/indexes/EXPERIMENTS.md) | #2 | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 2700 | **20.2%** | 3.8285 |
+| 1 | 2026-07-14 | [init v0, recipe attempt 1](./logs/stages/stage-3/history/EXPERIMENTS.md) | — | early-band depth merge, unweighted projection | 0 | – | 17.7977 |
+| 2 | 2026-07-14 | [init v0, fixed recipe](./logs/stages/stage-3/history/EXPERIMENTS.md) | — | middle-band merge, end-weighted projection | 0 | – | 11.7482 |
+| 3 | 2026-07-22 | [s1 recovery](./logs/stages/stage-3/history/EXPERIMENTS.md) | #2 | FFN+norm, CE 0.25 + KD 1.0, 660 steps on mixture v0 | 660 | 12.9% | 4.2107 |
+| 4 | 2026-07-25 | [s2 A/B arm A](./logs/stages/stage-3/history/EXPERIMENTS.md) | #3 | control: +660 FFN-only steps; regressed on mixture-v0 epochs 3–4 | 1320 | – | 4.2747 |
+| 5 | 2026-07-25 | [s2 A/B arm B](./logs/stages/stage-3/history/EXPERIMENTS.md) | #3 | attention unfrozen; freeze set adopted, holdout flat (data-limited) | 1320 | – | 4.2118 |
+| 6 | 2026-07-26 | [s2 on mixture v1](./logs/stages/stage-3/history/EXPERIMENTS.md) | #5 | same recipe, 4.11× data, 2700 steps; plateau broken | 4020 | 8.9% | **3.8003** |
+| 7 | 2026-07-27 | [start-point ablation: from_s1](./logs/stages/stage-3/history/EXPERIMENTS.md) | #3 | same 2700-step leg from s1@660; the A/B arm-B leg was neutral (+0.17%) | 3360 | 9.5% | 3.8067 |
+| 8 | 2026-07-27 | [start-point ablation: from_init](./logs/stages/stage-3/history/EXPERIMENTS.md) | #2 | single-stage from Stage 1 init, 2700 steps total; warm-up ladder unnecessary (+0.74%) | 2700 | **20.2%** | 3.8285 |
 
-**Both metrics in this table are retired.** `behavior_score_v0` was the headline at the time and resolves at only 3.3x its seed spread; held-out NLL (±1% band) was its guard rail and was later retired as a selection identity outright. Reference values — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286. The current Stage 2/3 primary metric is `usable_rollout`; see logs/archive/repository/indexes/EXPERIMENTS.md.
+**Both metrics in this table are retired.** `behavior_score_v0` was the headline at the time and resolves at only 3.3x its seed spread; held-out NLL (±1% band) was its guard rail and was later retired as a selection identity outright. Reference values — teacher Qwen3-4B-Thinking-2507 2.6264 · random-init 0.6B baseline 12.1286. The current Stage 2/3 primary metric is `usable_rollout`; see logs/stages/stage-3/history/EXPERIMENTS.md.
 
 Attempts 7–8 are a fixed-budget ablation of the *start point*: all three branches
 ran the identical 2,700-step leg at the same seed from lineages costing 4,020,
@@ -288,10 +288,10 @@ regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with
 
 | Stage | What it produces | Status |
 | --- | --- | --- |
-| **0** — activation statistics | streaming float64 sufficient statistics from the teacher: per residual point count / sum / `XᵀX`, per-FFN-neuron `Σ\|a\|` and `Σa²`, token frequencies. Fixed 1.95 GB cache regardless of token count. | passed ([log](./logs/archive/repository/indexes/EXPERIMENTS.md)) |
-| **1** — projection + sandwich init | a complete, runnable Qwen3-format 0.6B student (596M params) plus a same-geometry random baseline, both with reproducibility manifests. | passed ([log](./logs/archive/repository/indexes/EXPERIMENTS.md)) |
-| **2** — offline warm-up mixture | eight training-use groups from permissive revision-pinned sources (instruction, RAG/evidence, multi-hop QA, tool calling, refusal/uncertainty, code/math, short realtime, long context) with global dedup, holdout exclusion, and train/val/calib splits. | v0 5.39M tokens ([log](./logs/archive/repository/indexes/EXPERIMENTS.md)), v1 22.13M ([log](./logs/archive/repository/indexes/EXPERIMENTS.md)) |
-| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. Plus the recovery corpus builder (teacher generation at the model's official preset, session rendering, system-grouped packing, nested token ladder) and an uncapped vLLM evaluation harness with a semantic degeneration detector. | **open.** Experiment 1 (24-arm scaling + compute control) and three loss/scope experiments are complete and recorded; **no model has demonstrated passage of a prospectively defined behaviour-recovery gate** ([results](./logs/archive/repository/indexes/EXPERIMENTS.md)). Best `usable_rollout` ~0.61; 31% of rollouts never terminate |
+| **0** — activation statistics | streaming float64 sufficient statistics from the teacher: per residual point count / sum / `XᵀX`, per-FFN-neuron `Σ\|a\|` and `Σa²`, token frequencies. Fixed 1.95 GB cache regardless of token count. | passed ([log](./logs/stages/stage-3/history/EXPERIMENTS.md)) |
+| **1** — projection + sandwich init | a complete, runnable Qwen3-format 0.6B student (596M params) plus a same-geometry random baseline, both with reproducibility manifests. | passed ([log](./logs/stages/stage-3/history/EXPERIMENTS.md)) |
+| **2** — offline warm-up mixture | eight training-use groups from permissive revision-pinned sources (instruction, RAG/evidence, multi-hop QA, tool calling, refusal/uncertainty, code/math, short realtime, long context) with global dedup, holdout exclusion, and train/val/calib splits. | v0 5.39M tokens ([log](./logs/stages/stage-3/history/EXPERIMENTS.md)), v1 22.13M ([log](./logs/stages/stage-3/history/EXPERIMENTS.md)) |
+| **3** — student recovery | one config-driven trainer for all recovery sub-stages: regex freeze policy, masked CE + on-the-fly full-vocab teacher KD, exact resume, per-run manifests, gate evals. Plus the recovery corpus builder (teacher generation at the model's official preset, session rendering, system-grouped packing, nested token ladder) and an uncapped vLLM evaluation harness with a semantic degeneration detector. | **open.** Experiment 1 (24-arm scaling + compute control) and three loss/scope experiments are complete and recorded; **no model has demonstrated passage of a prospectively defined behaviour-recovery gate** ([results](./logs/stages/stage-3/history/EXPERIMENTS.md)). Best `usable_rollout` ~0.61; 31% of rollouts never terminate |
 | **4–6** — online data, on-policy distillation, deployment validation | specified in [`AGENTS.md`](./AGENTS.md) | not started |
 
 Design choices worth knowing:
@@ -386,7 +386,7 @@ The first dense-model compression experiment was kicked off with this instructio
 
 > Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
 
-Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. The active proposal lives in [`logs/archive/repository/PROPOSAL.md`](./logs/archive/repository/PROPOSAL.md); current state and next actions in [`logs/state/current.md`](./logs/state/current.md).
+Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. The active proposal lives in [`logs/stages/stage-3/e2/plans/PROPOSAL.md`](./logs/stages/stage-3/e2/plans/PROPOSAL.md); current state and next actions in [`logs/state/current.md`](./logs/state/current.md).
 
 ---
 
@@ -451,7 +451,7 @@ AlphaAvatar-distill/
 
 The tree is abridged to the parts worth knowing about. New directories appear only when an implemented, verified milestone needs them — no empty placeholders. Model weights, activation caches and experiment artifacts are kept out of git (`.gitignore`); large checkpoints live in a private Hugging Face repo with hashes recorded in `logs/state/artifact_manifests.md`.
 
-On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals were consolidated into [`logs/archive/repository/indexes/EXPERIMENTS.md`](./logs/archive/repository/indexes/EXPERIMENTS.md) and [`logs/archive/repository/PROPOSAL.md`](./logs/archive/repository/PROPOSAL.md), and ~26 GB of superseded artifacts were removed. The originals remain in git history at commit `866dac2`.
+On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals were consolidated into [`logs/stages/stage-3/history/EXPERIMENTS.md`](./logs/stages/stage-3/history/EXPERIMENTS.md) and [`logs/stages/stage-3/e2/plans/PROPOSAL.md`](./logs/stages/stage-3/e2/plans/PROPOSAL.md), and ~26 GB of superseded artifacts were removed. The originals remain in git history at commit `866dac2`.
 
 **Checkpoint retention is uneven and tracked.** Weights live outside git, on the
 private relay or the dev box, with hashes in
@@ -465,7 +465,7 @@ quietly dropped, because the loss bounds what can be re-measured.
 
 Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact commit, command, hardware, data and tokenizer hashes, budget, metric log, and maintainer approval.
 
-**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including every Stage 3 run in `logs/archive/repository/indexes/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and every number on this page is an attempt, not a record.
+**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including every Stage 3 run in `logs/stages/stage-3/history/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and every number on this page is an attempt, not a record.
 
 This applies to the Stage 0/1 initialization result above as well: it is a strong,
 reproducible finding, but it has not been through the record procedure and is not
@@ -505,15 +505,15 @@ _No records yet._
 
 | Reference | Topic | Status | Why it matters here |
 | --- | --- | --- | --- |
-| Muralidharan et al., *Compact Language Models via Pruning and Knowledge Distillation* (Minitron), NVIDIA, 2024. [arXiv:2407.14679](https://arxiv.org/abs/2407.14679) | ffn-pruning, distillation | used | Activation-magnitude neuron/head importance for structured width pruning; establishes that pruned-before-recovery students score near-noise zero-shot and rely on distillation recovery. Informed Stage 1 FFN top-k selection and the interpretation of the init-checkpoint eval ([log](./logs/archive/repository/indexes/EXPERIMENTS.md)). |
+| Muralidharan et al., *Compact Language Models via Pruning and Knowledge Distillation* (Minitron), NVIDIA, 2024. [arXiv:2407.14679](https://arxiv.org/abs/2407.14679) | ffn-pruning, distillation | used | Activation-magnitude neuron/head importance for structured width pruning; establishes that pruned-before-recovery students score near-noise zero-shot and rely on distillation recovery. Informed Stage 1 FFN top-k selection and the interpretation of the init-checkpoint eval ([log](./logs/stages/stage-3/history/EXPERIMENTS.md)). |
 | Gromov et al., *The Unreasonable Ineffectiveness of the Deeper Layers*, 2024. [arXiv:2403.17887](https://arxiv.org/abs/2403.17887) | depth-compression | used | Layer-drop studies show early layers are critical and middle/late-middle layers are most redundant. Motivated moving Stage 1 depth merging from the early band to the middle band after the early-merge ablation collapsed. |
 | Xia et al., *Sheared LLaMA: Accelerating Language Model Pre-training via Structured Pruning*, 2023. [arXiv:2310.06694](https://arxiv.org/abs/2310.06694) | svd-compression, distillation | queued | Structured pruning with mask learning + continued pre-training; candidate comparison recipe for Stage 3 recovery design. |
-| Kim & Rush, *Sequence-Level Knowledge Distillation*, EMNLP 2016. [arXiv:1606.07947](https://arxiv.org/abs/1606.07947) | distillation, offline-data | queued | Training the student on the teacher's *generated* targets rather than on gold targets reweighted by the teacher. Basis of the pending teacher-generated-answer proposal, which targets the answer-style defects that survived the mixture-v1 recovery run ([proposal](./logs/archive/repository/indexes/EXPERIMENTS.md)). |
+| Kim & Rush, *Sequence-Level Knowledge Distillation*, EMNLP 2016. [arXiv:1606.07947](https://arxiv.org/abs/1606.07947) | distillation, offline-data | queued | Training the student on the teacher's *generated* targets rather than on gold targets reweighted by the teacher. Basis of the pending teacher-generated-answer proposal, which targets the answer-style defects that survived the mixture-v1 recovery run ([proposal](./logs/stages/stage-3/history/EXPERIMENTS.md)). |
 | Zelikman et al., *STaR: Bootstrapping Reasoning With Reasoning*, NeurIPS 2022. [arXiv:2203.14465](https://arxiv.org/abs/2203.14465) | offline-data, distillation | queued | Keep only generations whose final answer matches the reference. The correctness gate the same proposal now requires (2026-07-28 directive) is this filter applied to the *teacher*: a generated target is trained on only when it verifies against the public gold key it replaces. |
 | Karpathy, *nanochat* — minimal full-stack LLM training/inference repo, 2025. [github.com/karpathy/nanochat](https://github.com/karpathy/nanochat) | kernel, distributed-training | queued | A dependency-minimal reference for how an efficient training loop is actually assembled (~8k LOC covering tokenizer → pretrain → midtrain → SFT → RL → serve). To be read **before** adding any kernel dependency here: the question it answers is which kernels earn their place in a small codebase and how they are called, which is the cheaper first move than importing a framework ([kernel plan](./logs/budget/decisions.md)). |
-| Ding et al., *Fewer Truncations Improve Language Modeling*, ICML 2024. [arXiv:2404.10830](https://arxiv.org/abs/2404.10830) | offline-data, distillation | used | Concatenate-then-cut packing silently truncates documents at every block boundary and measurably hurts grounded generation; best-fit-decreasing bin packing removes the truncations at the same token efficiency. Adopted as `best_fit_blocks`, and now **measured**: teacher-native targets exceed the current 1024-token block 48.5% of the time, and the naive fix (`best_fit` at 1024) silently discards 56% of the supervised tokens — only `best_fit` at 8192 is lossless ([preflight](./logs/archive/repository/indexes/EXPERIMENTS.md)). |
+| Ding et al., *Fewer Truncations Improve Language Modeling*, ICML 2024. [arXiv:2404.10830](https://arxiv.org/abs/2404.10830) | offline-data, distillation | used | Concatenate-then-cut packing silently truncates documents at every block boundary and measurably hurts grounded generation; best-fit-decreasing bin packing removes the truncations at the same token efficiency. Adopted as `best_fit_blocks`, and now **measured**: teacher-native targets exceed the current 1024-token block 48.5% of the time, and the naive fix (`best_fit` at 1024) silently discards 56% of the supervised tokens — only `best_fit` at 8192 is lossless ([preflight](./logs/stages/stage-3/history/EXPERIMENTS.md)). |
 | Krell et al., *Efficient Sequence Packing without Cross-contamination*, Graphcore, 2021. [arXiv:2107.02027](https://arxiv.org/abs/2107.02027) | offline-data, kernel | partially-used | Formalizes packing as bin packing and pairs it with block-diagonal attention so packed samples cannot attend across each other. The packing half is adopted; the **masking half is deliberately rejected** — a deployed assistant reads a window holding several unrelated things and must attend across it, so training it to ignore irrelevant neighbours is the job rather than an artifact to mask ([decision](./logs/budget/decisions.md)). |
-| LMSYS, *Towards Deterministic Inference in SGLang and Reproducible RL Training*, 2025. [lmsys.org](https://www.lmsys.org/blog/2025-09-22-sglang-deterministic/) | on-policy, rollout, kernel | partially-used | Batch-invariant kernels give **batch-invariant output** — same prompt, same tokens, regardless of how it was batched — at ~34% average slowdown (CUDA graphs recover ~2.8×), and report identical rollout responses *and* loss values across repeated RL runs. Dense models only, with **Qwen3 named**, which is this project's teacher family. Changes the 2026-07-28 in-stack argument: determinism is now a purchasable tax rather than a reason to avoid a serving engine ([survey](./logs/archive/repository/indexes/EXPERIMENTS.md)). **Measured here on SGLang 0.5.12: 241.0 → 108.6 tok/s, a 55% throughput loss — well above the ~34% cited**, which is why deterministic mode is treated as a per-run option rather than a default ([benchmark](./logs/archive/repository/indexes/EXPERIMENTS.md)). |
+| LMSYS, *Towards Deterministic Inference in SGLang and Reproducible RL Training*, 2025. [lmsys.org](https://www.lmsys.org/blog/2025-09-22-sglang-deterministic/) | on-policy, rollout, kernel | partially-used | Batch-invariant kernels give **batch-invariant output** — same prompt, same tokens, regardless of how it was batched — at ~34% average slowdown (CUDA graphs recover ~2.8×), and report identical rollout responses *and* loss values across repeated RL runs. Dense models only, with **Qwen3 named**, which is this project's teacher family. Changes the 2026-07-28 in-stack argument: determinism is now a purchasable tax rather than a reason to avoid a serving engine ([survey](./logs/stages/stage-3/history/EXPERIMENTS.md)). **Measured here on SGLang 0.5.12: 241.0 → 108.6 tok/s, a 55% throughput loss — well above the ~34% cited**, which is why deterministic mode is treated as a per-run option rather than a default ([benchmark](./logs/stages/stage-3/history/EXPERIMENTS.md)). |
 | DeepSeek, *nano-vLLM*, 2025. [HF blog](https://huggingface.co/blog/zamal/introduction-to-nano-vllm) | runtime-deployment | queued | ~1.2k lines, pure Python + Triton, no C++/CUDA extension, offline-inference focus with prefix caching and CUDA graphs; reported near-parity with vLLM on offline workloads. The profile that would give throughput without the dependency weight — determinism properties unknown and unverified by us. |
 | Liu et al., *Defeating the Training-Inference Mismatch via FP16*, 2025. [arXiv:2510.26788](https://arxiv.org/abs/2510.26788) | on-policy, rollout, quantization | queued | Argues the RL training/inference gap is mostly a *numerics* problem, and that BF16's 7-bit mantissa is the culprit: reverting the rollout+training path to FP16 removes the mismatch and stabilizes optimization. Directly in tension with this project's BF16 training policy ([decision 2026-07-13](./logs/budget/decisions.md)) — recorded as a **revisit trigger for Stage 4/5**, not acted on, since changing precision now would break comparability with every logged run. |
 | vLLM team, *No More Train-Inference Mismatch: Bitwise Consistent On-Policy RL with vLLM and TorchTitan*, 2025. [blog.vllm.ai](https://blog.vllm.ai/2025/11/10/bitwise-consistent-train-inference.html) | on-policy, rollout, kernel | queued | Achieves bitwise-identical sampler and trainer numerics by matching kernels, reporting faster convergence and higher reward. The strongest form of the guarantee this project wants, at the cost of the heaviest stack; the reference point for what "consistent" can mean. |

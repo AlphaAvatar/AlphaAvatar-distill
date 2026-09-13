@@ -11,9 +11,11 @@ every declaration at once, and it is deliberately NOT that schema: forcing a
 package relocation into a provider-ownership record would describe it as a
 repair to one session's machinery.
 
-Written hierarchically, under `logs/migrations/<migration>/<version>/`, because
-a migration is a subject with its own history rather than another attempt-shaped
-file in a flat directory.
+Written hierarchically, under
+`logs/maintenance/source-relocations/<migration>/<version>/`, because a
+relocation is a subject with its own versions rather than another
+attempt-shaped file in a flat directory. It is maintenance of the repository's
+own source, not an experiment record and not a log-layout history.
 
 Every quantity is DERIVED from git and from the tree:
 
@@ -244,8 +246,8 @@ def main() -> int:
     doc["self_sha256"] = hashlib.sha256(
         json.dumps(doc, sort_keys=True).encode()).hexdigest()
 
-    out = (REPO / "logs/migrations" / args.migration / args.version
-           / "source-relocation.json")
+    out = (REPO / "logs/maintenance/source-relocations" / args.migration
+           / args.version / "source-relocation.json")
     print(f"{args.migration}/{args.version}: {len(declarations)} declaration(s), "
           f"{doc['totals']['lines_added']} added / "
           f"{doc['totals']['lines_removed']} removed over "

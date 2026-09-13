@@ -212,7 +212,7 @@ from unused room under a previous authorization.**
 
 1. [`../logs/state/current.md`](../../logs/state/current.md) — current state, a few minutes
 2. **this file**
-3. [`../logs/archive/repository/indexes/EXPERIMENT_INDEX.md`](../../logs/archive/repository/indexes/EXPERIMENT_INDEX.md) — what each of E1–E8
+3. [`../logs/state/experiment_index.md`](../../logs/state/experiment_index.md) — what each of E1–E8
    proved and what it does *not* support
 4. [`../logs/budget/decisions.md`](../../logs/budget/decisions.md) — decision records, including the
    AutoInitializer constraints and the backend freeze

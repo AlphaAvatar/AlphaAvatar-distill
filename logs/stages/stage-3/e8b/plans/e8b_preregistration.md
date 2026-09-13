@@ -1,7 +1,7 @@
 > **ARCHIVED / HISTORICAL — 2026-08-12.** This document is no longer an active
 > plan. It is retained for provenance only. The current state is
-> [`STATE.md`](../STATE.md); the current plan is
-> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md).
+> [`STATE.md`](../../../../state/current.md); the current plan is
+> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../../../../docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md).
 > Any 'next experiment' instruction below is superseded.
 
 # E8b — depth-map × compression interaction: pair-matched preflight and proposal
@@ -12,8 +12,8 @@ and identity-checked, hardware is selected on cost per completed step, and the
 sessions are priced. Nothing paid launches without separate authorization.
 
 **E8a is closed and not reopened** — its frozen map, its 3.11× result and its step-0
-dissociation stand as recorded in [`e8_step0_report.md`](../e8_step0_report.md) and
-[`EXPERIMENTS.md`](../EXPERIMENTS.md) §36. **The old E8 2.96M recovery is cancelled and
+dissociation stand as recorded in [`e8_step0_report.md`](../../e8/analyses/e8_step0_report.md) and
+[`EXPERIMENTS.md`](../../history/EXPERIMENTS.md) §36. **The old E8 2.96M recovery is cancelled and
 must not be launched.**
 
 **Question.** Is the contribution-guided depth map better when depth is the only

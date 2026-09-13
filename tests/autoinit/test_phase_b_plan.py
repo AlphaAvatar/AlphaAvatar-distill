@@ -72,7 +72,7 @@ def test_the_source_set_covers_what_a_paid_P2_SEARCH_actually_executes():
     # longer REGISTERS the adapter -- registration is an explicit call now -- and
     # `src/aadistill/autoinit/__init__.py`, which used to be here for the same
     # reason, was deleted by the consolidation and is recorded as a removal in
-    # logs/migrations/initialization-core/v1/source-relocation.json.
+    # logs/maintenance/source-relocations/initialization-core/v1/source-relocation.json.
     assert "src/aadistill/initialization/adapters/__init__.py" in covered
     assert "src/aadistill/autoinit/__init__.py" not in covered
 
@@ -417,21 +417,19 @@ def test_the_immutable_phase_b_records_are_byte_identical_to_the_reviewed_base()
     """The preregistration and the sealed v1 note are evidence, not state."""
     import subprocess
 
-    #: The base commit knows these files by the path they had THEN. log-layout-v1
-    #: moved them, so `git show <base>:<current path>` finds nothing -- not
+    #: The base commit knows these files by the path they had THEN. They have
+    #: moved since, so `git show <base>:<current path>` finds nothing -- not
     #: because the evidence changed, but because the question used today's
-    #: address for a historical tree. The migration manifest answers it: the
-    #: historical fact is `<base commit> + <old path>`, and the bytes must still
-    #: match what sits at the current path.
-    import json as _json
+    #: address for a historical tree. The historical-path table in
+    #: `logs/index.json` answers it, read backwards: the historical fact is
+    #: `<base commit> + <old path>`, and the bytes must still match what sits at
+    #: the current path.
+    import sys as _sys
 
-    back = {}
-    for m in sorted((REPO / "logs/migrations").glob("*/manifest.json")):
-        try:
-            doc = _json.loads(m.read_text())
-        except (OSError, _json.JSONDecodeError):
-            continue
-        back.update({e["new_path"]: e["old_path"] for e in doc.get("entries", [])})
+    _sys.path.insert(0, str(REPO / "scripts"))
+    from architecture.record_run_index import historical_paths
+
+    back = {new: old for old, new in historical_paths(REPO).items()}
 
     for rel in ("logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json",
                 "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json"):

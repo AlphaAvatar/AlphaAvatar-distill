@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-12. The human view. Every number here has an owner named
+**Updated:** 2026-09-13. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -14,12 +14,12 @@ for launch.** The only process is a `$0` read-only capacity watch.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation | [`experiments/phase_c1/`](../stages/stage-1/phase_c1/) |
-| replay | **MEASURED — 2/2 PASS** (attempt 9) | [`runs/index.json`](../index.json) |
-| treatment, endpoint | **UNMEASURED** — zero probes trained. Attempt 9 is **NO DECISION**: a pre-treatment infrastructure abort, not a frozen-rule result | [`experiments/phase_c1/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md) |
-| launch chain | attempt 13's grant is committed; **nothing else is prepared**, and the chain is **paused** pending this cleanup | [`runs/stage-1/phase_c1/attempt13/`](../stages/stage-1/phase_c1/runs/attempt13/) |
+| phase | C1 — fixed-path ATTENTION isolation | [`stages/stage-1/phase_c1/`](../stages/stage-1/phase_c1/) |
+| replay | **MEASURED — 2/2 PASS** (attempt 9) | [`index.json`](../index.json) |
+| treatment, endpoint | **UNMEASURED** — zero probes trained. Attempt 9 is **NO DECISION**: a pre-treatment infrastructure abort, not a frozen-rule result | [`phase_c1/history/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md) |
+| launch chain | attempt 13's grant is committed; **nothing else is prepared**, and the chain is **paused** pending this cleanup | [`phase_c1/runs/attempt13/`](../stages/stage-1/phase_c1/runs/attempt13/) |
 | blocker | provider capacity for secure L40S at `$1.09/h` | below |
-| spend | `$268.2958` of `$320.0000` | [`BUDGET_LEDGER.md`](../budget/ledger.md) |
+| spend | `$268.2958` of `$320.0000` | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness
 
@@ -104,23 +104,64 @@ Stop and report if: the first probe has started training, or whether it started
 cannot be confirmed; a real replay mismatch at stage D or E; an input-identity
 conflict; a limit reached; or a resource whose billing state is unknown.
 
+## The log tree: stage-first, and every experiment attributed
+
+`logs/` is **Stage → Experiment → Run**. Four stages have repository evidence
+and therefore exist — stage-0 and stage-2 as pipeline activity with no
+experiment-run logs, stage-1 and stage-3 with both.
+
+Every historical experiment has a stage, rebuilt from repository facts and
+checked rather than asserted: [`stages/index.json`](../stages/index.json) is the
+stage index. It carries the evidence for each assignment and the rules that
+decided it, and it also says what each stage is *for*, what it consumes and
+produces, and where its canonical configs, data manifests and artifacts live —
+so `logs/stages/` is the pipeline's stage-level entry point rather than a run
+container. **20 experiments, 20 in one stage, 0 genuinely cross-stage, 0
+unresolved.** There is no `cross-stage/` directory, because no experiment takes
+several pipeline stages as its subject; a run whose stage nobody declared is
+refused rather than shelved.
+
+Five Stage-3 experiments ran and produced no log files of their own — `ttb`,
+`p0_real`, `d0`, `p0`, `p2`. They are listed in
+[`stages/stage-3/`](../stages/stage-3/) with their configs, artifacts and index
+sections, and given no directory: an empty one would assert material that does
+not exist. `e2` now has one, holding the single document it left behind.
+
+`migrations/` and `archive/` are gone. A superseded document is deleted, since
+git history holds it; a historical document that is still part of the record —
+a preregistration, a consumed authorization, the pre-layout experiment
+chronology — sits under the experiment or stage that owns it. The few old paths
+current tooling must still resolve are a flat table in
+[`index.json`](../index.json)`.historical_paths`.
+
+One declared exception: `shared/analyses/autoinit_*` and four
+`shared/validations/` directories are **Stage-1 material, not stage-neutral**.
+They stay where they are because frozen pod drivers read those exact paths —
+recorded in the stage index with its blocker rather than left looking ownerless.
+
+This changed no experiment result, no authorization and no frozen evidence. The
+launch chain is unaffected and still paused.
+
 ## Engineering, not results
 
 The initialization migration and the CUDA stage-F validation are engineering
 records. The stage-F device repair is **CONFIRMED ON REAL CUDA** at execution
 SHA `7027a8f4`. Neither is a C1 result and neither authorizes anything:
-[`migrations/initialization-core/v1/`](../migrations/initialization-core/v1/) ·
-[`validations/cuda-stage-f/v1/`](../stages/stage-1/phase_c1/validations/cuda-stage-f/v1/)
+[`maintenance/source-relocations/initialization-core/v1/`](../maintenance/source-relocations/initialization-core/v1/) ·
+[`phase_c1/validations/cuda-stage-f/v1/`](../stages/stage-1/phase_c1/validations/cuda-stage-f/v1/)
 
 ## History
 
-This file holds the current state only. The narrative moved out on 2026-09-12
-and is unedited:
+This file holds the current state only. The narrative lives with what it is
+about, and is unedited:
 
-* [`experiments/phase_c1/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md)
+* [`phase_c1/history/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md)
   — every C1 session, its cost, failure and repair
-* [`archive/STATE_superseded_through_2026-09-11.md`](../archive/repository/STATE_superseded_through_2026-09-11.md)
-  — the superseded repository state, spanning Phase A, Phase B and the
-  continuations
+* [`stages/stage-3/history/EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md)
+  — the pre-layout experiment chronology, and the only record several Stage-3
+  experiments have
+* [`experiment_index.md`](experiment_index.md) — what each experiment proved,
+  what it does **not** support, and which conclusions still bind
+* [`phase_index.md`](phase_index.md) — the same history organized by phase
 * [`decisions.md`](../budget/decisions.md) — decision records
-* [`BUDGET_LEDGER.md`](../budget/ledger.md) — every cost, per session
+* [`budget/ledger.md`](../budget/ledger.md) — every cost, per session

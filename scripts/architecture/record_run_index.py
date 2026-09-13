@@ -64,47 +64,65 @@ CONVENTIONS: list[tuple[re.Pattern, str, str, str]] = [
 ]
 
 
-def _relocated(repo_root: Path) -> dict[str, str]:
-    """old path -> current path, from the log-layout-v1 migration manifest.
+#: Text the published table carries, so a reader meeting it in the index knows
+#: what it is for and what it deliberately is not.
+HISTORICAL_PATHS_NOTE = (
+    "old path -> where that object is now. A frozen payload -- a consumed "
+    "authorization, a closed run's manifest, a hash-anchored amendment -- names "
+    "the path an object had when it was written. That statement stays true and "
+    "is never rewritten, so a consumer reading one needs a way from that name "
+    "to the current address. This is that way, and only that: paths, no "
+    "payload, no hashes, no per-move prose. Git history holds the trees.")
 
-    The conventions below name objects by the FILENAME each had at
-    `logs/` root. Those objects moved into the canonical layout on
-    2026-09-12, so matching on the current tree finds nothing and every
-    legacy run silently becomes `unrecorded` -- losing the per-component
-    digests that make "the historical evidence is unchanged" checkable.
-    The manifest is how a name from then resolves to a path now.
+HISTORICAL_PATHS_RESOLVE = (
+    "exact key first; otherwise the longest key that is a parent directory of "
+    "the query, with the remainder appended. No match means the path is "
+    "current, or names an object that no longer exists.")
+
+HISTORICAL_PATHS_MAINTENANCE = (
+    "carried forward by this builder and extended by hand when an object "
+    "moves. Nothing derives it: once a move is made, only the person making it "
+    "knows the pairing, which is why it is recorded at the time rather than "
+    "reconstructed later.")
+
+
+def historical_paths(repo_root: Path = REPO_ROOT) -> dict[str, str]:
+    """The old-path table the index carries.
+
+    It lives in the index rather than in this file because 300 string pairs are
+    data, and because the index is what a consumer already reads. Four
+    migration manifests used to hold the same pairs alongside per-file digests
+    and prose -- a second, editable copy of trees git already has.
     """
-    #: CHAINED across every migration, in order. log-layout-v1 moved an object
-    #: and log-layout-v2 moved it again, so a single manifest's `new_path` is
-    #: only where it went NEXT -- not where it is. Following one hop left the
-    #: index pointing at directories that no longer exist.
-    hops: list[dict[str, str]] = []
-    for m in sorted((repo_root / "logs/migrations").glob("*/manifest.json")):
-        try:
-            doc = json.loads(m.read_text())
-        except (OSError, json.JSONDecodeError):
-            continue
-        hops.append({e["old_path"]: e["new_path"] for e in doc.get("entries", [])})
-    if not hops:
+    p = repo_root / OUT
+    if not p.is_file():
         return {}
+    block = json.loads(p.read_text()).get("historical_paths") or {}
+    return dict(block.get("map") or {})
 
-    def follow(path: str) -> str:
-        for table in hops:
-            if path in table:
-                path = table[path]
-                continue
-            for o, n in sorted(table.items(), key=lambda kv: -len(kv[0])):
-                if path.startswith(o + "/"):
-                    path = n + path[len(o):]
-                    break
-        return path
 
-    return {old: follow(old) for table in hops for old in table}
+def resolve_historical(rel: str, repo_root: Path = REPO_ROOT) -> str:
+    """`rel` as it is addressed today; `rel` itself when nothing moved it."""
+    table = historical_paths(repo_root)
+    if rel in table:
+        return table[rel]
+    for old in sorted(table, key=len, reverse=True):
+        if rel.startswith(old + "/"):
+            return table[old] + rel[len(old):]
+    return rel
 
 
 def discover_legacy(repo_root: Path) -> dict[tuple[str, str], dict]:
+    """Runs named by the FILENAME each had at `logs/` root.
+
+    Those objects sit in the canonical layout now, so matching on the current
+    tree finds nothing and every legacy run silently becomes `unrecorded` --
+    losing the per-component digests that make "the historical evidence is
+    unchanged" checkable. The historical-path table is how a name from then
+    resolves to a path now.
+    """
     runs: dict[tuple[str, str], dict] = {}
-    moved = _relocated(repo_root)
+    moved = historical_paths(repo_root)
     #: The names as they were, resolved to where they are.
     candidates = [(Path(old).name, new) for old, new in moved.items()
                   if Path(old).parent.as_posix() == "logs"]
@@ -146,11 +164,18 @@ def discover_v3(repo_root: Path) -> list[dict]:
     """Hierarchical runs, found by the presence of a manifest."""
     from aadistill.runtime.run_layout import MANIFEST_SCHEMA
 
-    #: STAGE-FIRST, since log-layout-v2:
+    #: STAGE-FIRST:
     #:     logs/stages/stage-<id>/<experiment>/runs/<run>/
-    #:     logs/cross-stage/<experiment>/runs/<run>/
     #: There is no `logs/runs/`. An experiment's runs sit beside its plans and
     #: results rather than in a parallel tree.
+    #:
+    #: `logs/cross-stage/` DOES NOT EXIST and is not created: every experiment
+    #: resolved to exactly one stage. It is still scanned because
+    #: `experiments.run_layout` still composes that path for `stage_id=None`,
+    #: and that module is covered by the frozen C1 harness digest -- removing
+    #: the fallback would move the digest and invalidate an authorized
+    #: preregistration to tidy a directory that is already gone. A scan of a
+    #: directory that does not exist costs nothing; an unindexed run would not.
     stages_root = repo_root / "logs/stages"
     cross_root = repo_root / "logs/cross-stage"
     out: list[dict] = []
@@ -197,23 +222,18 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
     """
     from aadistill.runtime.run_layout import MANIFEST_SCHEMA
 
-    #: Same stage-first roots as `discover_v3`.
-    roots = [repo_root / "logs/stages", repo_root / "logs/cross-stage"]
+    #: Same roots as `discover_v3`, and for the same reason: `cross-stage/`
+    #: does not exist, and is scanned so that a run written there by the
+    #: retained `stage_id=None` path could not go unreported.
+    stages_root = repo_root / "logs/stages"
+    cross_root = repo_root / "logs/cross-stage"
     out: list[dict] = []
-    if not any(r.is_dir() for r in roots):
+    if not stages_root.is_dir() and not cross_root.is_dir():
         return out
-    #: Both layouts, and a stage directory is not itself a run: `stage-3` holds
-    #: experiments, so only its grandchildren are candidates.
-    #: Both grouped forms -- `stage-<id>/<experiment>/<run>` and
-    #: `unscoped/<experiment>/<run>` -- plus anything still two levels deep. A
-    #: glob written for one shape silently omits the others, which is how the
-    #: per-experiment counts came to read only the legacy tree.
-    candidates: set = set()
-    st, cs = roots
-    if st.is_dir():
-        candidates |= {p for p in st.glob("*/*/runs/*") if p.is_dir()}
-    if cs.is_dir():
-        candidates |= {p for p in cs.glob("*/runs/*") if p.is_dir()}
+    #: A stage directory is not itself a run: `stage-3` holds experiments, so
+    #: only `stage-<id>/<experiment>/runs/<run>` is a candidate.
+    candidates = {p for p in stages_root.glob("*/*/runs/*") if p.is_dir()}
+    candidates |= {p for p in cross_root.glob("*/runs/*") if p.is_dir()}
     for run_dir in sorted(candidates):
         manifest = run_dir / "manifest.json"
         if manifest.is_file():
@@ -279,6 +299,12 @@ def build_index(repo_root: Path) -> dict:
         "granularity": ("one entry per (experiment_id, run_id). The v1 index "
                         "counted artifact roots, so an attempt with an evidence "
                         "directory and a grant file appeared twice."),
+        "historical_paths": {
+            "_what_this_is": HISTORICAL_PATHS_NOTE,
+            "_resolve": HISTORICAL_PATHS_RESOLVE,
+            "_maintenance": HISTORICAL_PATHS_MAINTENANCE,
+            "map": dict(sorted(historical_paths(repo_root).items())),
+        },
         "counts": {
             "runs_legacy_v1": len(legacy),
             "runs_current": len(modern),
