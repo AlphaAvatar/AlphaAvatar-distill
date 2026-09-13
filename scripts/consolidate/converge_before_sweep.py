@@ -72,8 +72,33 @@ def run(argv: tuple[str, ...]) -> int:
                           capture_output=True, text=True).returncode
 
 
+#: Fields a generator stamps with the moment it ran. A document whose ONLY
+#: change is one of these has not drifted -- it has been regenerated -- and
+#: counting it as drift makes the fixed-point check unsatisfiable and leaves the
+#: tree dirty for the very sweep that requires it clean.
+STAMP_FIELDS = ('"created_utc"', '"generated_utc"', '"recorded_utc"')
+
+
 def dirty() -> list[str]:
     return [l[3:] for l in git("status", "--porcelain").splitlines() if l.strip()]
+
+
+def stamp_only(rel: str) -> bool:
+    """Is this file's whole diff a regenerated timestamp?"""
+    diff = git("diff", "-U0", "--", rel).splitlines()
+    body = [l for l in diff
+            if (l.startswith(("+", "-"))
+                and not l.startswith(("+++", "---")))]
+    return bool(body) and all(any(f in l for f in STAMP_FIELDS) for l in body)
+
+
+def revert_stamp_only(paths) -> list[str]:
+    """Put back the files whose only change is when they were generated."""
+    reverted = [rel for rel in paths if stamp_only(rel)]
+    if reverted:
+        subprocess.run(["git", "-C", str(REPO), "checkout", "--", *reverted],
+                       check=True)
+    return reverted
 
 
 def generators(write: bool) -> list[str]:
@@ -86,13 +111,22 @@ def generators(write: bool) -> list[str]:
     first = set(dirty()) - before
     for label, argv in GENERATORS:
         run(argv)
-    second = set(dirty()) - before - first
-    if second:
+    #: EVERY dirty file, not only the newly dirty ones. Scoped to the new set,
+    #: a document already carrying nothing but a fresh timestamp when this
+    #: started stayed dirty and blocked the clean-tree check it exists to serve.
+    second = set(dirty())
+    stamped = set(revert_stamp_only(sorted(second)))
+    moved = second - stamped - first - before
+    if moved:
         problems.append("not at a fixed point after a second pass: "
-                        + ", ".join(sorted(second)))
-    if first and not write:
-        problems.append("regeneration changed: " + ", ".join(sorted(first))
+                        + ", ".join(sorted(moved)))
+    real = first - stamped
+    if real and not write:
+        problems.append("regeneration changed: " + ", ".join(sorted(real))
                         + " (re-run with --write intended, then commit)")
+    if stamped:
+        print("  regenerated, timestamp only, reverted: "
+              + ", ".join(sorted(stamped)))
     return problems
 
 
