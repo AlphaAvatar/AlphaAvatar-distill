@@ -282,7 +282,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 4,
-  "runs_unrecorded": 1,
+  "runs_unrecorded": 2,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": {
@@ -312,8 +312,8 @@
    },
    "phase_c1": {
     "recorded": 14,
-    "unrecorded": 1,
-    "total": 15
+    "unrecorded": 2,
+    "total": 16
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -998,6 +998,14 @@
    "n_files": 4,
    "digest": "4ddbccb2a573c6c10b81a06237e79a74f67027e48c047faf497a9a480ac9d38f",
    "why": "no run manifest; its closeout states: PRE-PROVIDER INFRASTRUCTURE ABORT. Not an efficacy result, not a replay mismatch, and not a frozen-rule INCONCLUSIVE."
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt15",
+   "root": "logs/stages/stage-1/phase_c1/runs/attempt15",
+   "n_files": 1,
+   "digest": "ea32b5a582478416d084fb18d8df2f1248aeb7090785e0826909f74bda7b7256",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

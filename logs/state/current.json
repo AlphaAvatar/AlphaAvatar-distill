@@ -23,11 +23,11 @@
  },
  "prepared_launch": {
   "any": false,
-  "grant_committed": null,
+  "grant_committed": "logs/stages/stage-1/phase_c1/runs/attempt15/governance/grant.json",
   "readiness_record": null,
   "authorization": null,
   "bundle": null,
-  "note": "NOTHING is prepared. Attempt 14's chain was consumed at invocation -- a provider resource was created under it -- and is never reused. Attempt 15 needs a fresh grant, a fresh launch_bound sweep, a fresh authorization and a fresh bundle."
+  "note": "attempt 15's grant is committed and NOTHING else is prepared: the launch_bound sweep, the authorization and the bundle are all owed, in that order. Attempt 14's chain was consumed at invocation -- a provider resource was created under it -- and is never reused."
  },
  "budget": {
   "cumulative_spend_usd": 268.6957,
@@ -170,11 +170,11 @@
  "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed.",
  "latest_run": {
   "experiment_id": "phase_c1",
-  "run_id": "attempt14",
-  "root": "logs/stages/stage-1/phase_c1/runs/attempt14",
-  "state": "recorded: the run wrote its own manifest",
+  "run_id": "attempt15",
+  "root": "logs/stages/stage-1/phase_c1/runs/attempt15",
+  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
   "index": "logs/index.json",
-  "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt12"
+  "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt14"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10 as daf64772, and again 2026-09-11 as 199711af. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",

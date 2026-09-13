@@ -19,7 +19,7 @@ setup-abort branch, the provider confirms it is gone, and a live query returns
 | phase | C1 — fixed-path ATTENTION isolation | [`stages/stage-1/phase_c1/`](../stages/stage-1/phase_c1/) |
 | replay | **MEASURED — 2/2 PASS** (attempt 9) | [`index.json`](../index.json) |
 | treatment, endpoint | **UNMEASURED** — zero probes trained. Attempt 9 is **NO DECISION**: a pre-treatment infrastructure abort, not a frozen-rule result | [`phase_c1/history/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md) |
-| launch chain | **nothing is prepared.** Attempts 13 and 14 are closed and their chains consumed; attempt 15 needs a fresh grant, sweep, authorization and bundle | [`phase_c1/runs/attempt14/`](../stages/stage-1/phase_c1/runs/attempt14/) |
+| launch chain | attempt 15's **grant is committed**; the sweep, authorization and bundle are owed. Attempts 13 and 14 are closed and their chains consumed | [`phase_c1/runs/attempt15/`](../stages/stage-1/phase_c1/runs/attempt15/) |
 | last attempt | **14 — PRE-SCIENCE SETUP ABORT**, `$0.3999`, 14/14 gates passed, pod created, CPU test gate failed 2 of 3892. No science | [`attempt14/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt14/closeout/outcome.json) |
 | blocker | none outstanding: attempt 14's three sweep/pod divergences are repaired | [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
@@ -98,7 +98,7 @@ at or below the accepted rate plus every pre-provider gate.
 One authorization funds one launcher session: up to three acquisition draws
 inside it, never two billing resources, all sharing one `$15.1475` ceiling.
 
-1. this run's **grant**, committed on a clean tree — owed, attempt 15
+1. this run's **grant**, committed on a clean tree — **done**, attempt 15
 2. a **`launch_bound` sweep** on that clean pre-authorization tree — owed
 3. the one-use **authorization**, issued from the grant — owed
 4. the exact-session **bundle**, staged with `--run-id` — owed

@@ -777,6 +777,16 @@ def main() -> int:
             prior["state"] = (
                 newest["why"] if newest in idx["unrecorded"]
                 else "recorded: the run wrote its own manifest")
+            #: `last_executed` was hand-maintained beside two derived fields and
+            #: went stale the same way: it still named attempt 12 after attempt
+            #: 14 had created a pod, billed and been torn down. A run that wrote
+            #: a manifest is one that executed.
+            ran = [e for e in idx["runs"] if e["experiment_id"] == exp]
+            if ran:
+                last = max(ran, key=_n)
+                prior["last_executed"] = (
+                    last.get("root")
+                    or (last.get("components") or {}).get("root"))
             new_snapshot["latest_run"] = prior
 
     #: And the budget block, for the third time in the same file: it declares
