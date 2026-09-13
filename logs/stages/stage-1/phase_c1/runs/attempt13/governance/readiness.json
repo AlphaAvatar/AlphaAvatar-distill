@@ -5,12 +5,12 @@
   "c1_harness_n_files": 99,
   "counts": {
     "error": 0,
-    "failed": 5,
-    "passed": 3768,
-    "skipped": 116
+    "failed": 0,
+    "passed": 3751,
+    "skipped": 138
   },
   "environment": {
-    "artifact_hiding": "manifest-derived positive staged view: 28 files visible from the C1 SetupManifest, 1057 hidden as the computed complement. NOT the simulator's generic default.",
+    "artifact_hiding": "manifest-derived positive staged view: 28 files visible from the C1 SetupManifest, 1056 hidden as the computed complement. NOT the simulator's generic default.",
     "dev_hf_cache_visible": false,
     "hf_home_mode": "isolated \u2014 $PODSIM_ENV_ROOT/hf, outside the dev cache",
     "hf_hub_cache_resolution": "$HF_HOME/hub, set explicitly as HF_HUB_CACHE",
@@ -21,12 +21,12 @@
     "executions_of_this_tree": [
       "exec-001"
     ],
-    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-c5dfd9ea5139/exec-001/junit.xml",
-    "junit_sha256": "bbc4d62a82f8ed348de80428ee7dd9e3db383802bf2ae884413641f656480c7c",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-c5dfd9ea5139/exec-001/pytest.log",
-    "pytest_log_sha256": "6c0e5b0f87d0e5477ac4ffba584b8efb598eecdab5ce3059067267b6aa609a13"
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-5aafc549ac25/exec-001/junit.xml",
+    "junit_sha256": "c28b6389a224297ebceadb45f93a6597c4a6a8ff55381432019fb1454fd975bc",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-5aafc549ac25/exec-001/pytest.log",
+    "pytest_log_sha256": "d3c8a816a9a078859b4ffd4705a8a0d0a96527f469f4defba987d8871cbce41a"
   },
-  "execution_id": "sweep-c5dfd9ea5139/exec-001",
+  "execution_id": "sweep-5aafc549ac25/exec-001",
   "expected_environment_skips": [
     "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
     "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
@@ -54,13 +54,7 @@
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[rag]",
     "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[tool]"
   ],
-  "failed_nodeids": [
-    "tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution",
-    "tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for",
-    "tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready",
-    "tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one",
-    "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation"
-  ],
+  "failed_nodeids": [],
   "findings": {
     "all_skipped_nodeids": [
       "tests/autoinit/test_c1_confirmation_scoring.py::test_code_is_excluded_by_set_membership_not_by_the_scorer",
@@ -106,8 +100,30 @@
       "tests/data/test_sessions.py::test_render_session_rejects_a_session_over_the_limit",
       "tests/data/test_sessions.py::test_render_session_round_trips_through_the_official_template",
       "tests/data/test_sessions.py::test_source_system_prompt_is_preserved_in_the_render",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_it_matches_the_canonical_store",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_the_frozen_battery_manifest_verifies",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_the_protected_trees_are_declared",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_a_descendant_of_a_moved_directory_resolves",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_an_unmapped_path_comes_back_unchanged",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_every_old_path_points_at_something_that_is_there",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_no_old_path_is_also_a_live_path",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_the_paths_frozen_payloads_actually_name_resolve",
       "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_retry_after_failure_does_not_truncate_the_failed_evidence",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_an_explicit_path_that_already_exists_is_refused",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_an_interrupted_second_execution_leaves_the_first_intact",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_no_shared_default_remains",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_reading_an_existing_sweep_is_a_separate_path",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_two_executions_of_one_commit_get_two_locations",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_two_trees_get_two_locations",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_a_launch_bound_claim_requires_the_current_tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_every_superseded_verdict_is_preserved",
       "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately",
+      "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing",
+      "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_the_catalog_classifies_every_entry",
+      "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_the_stage_navigation_is_regenerable_too",
       "tests/docs/test_log_organisation.py::TestTheStageMappingIsComplete::test_every_cited_path_including_untracked_really_exists",
       "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store",
       "tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set",
@@ -190,9 +206,9 @@
     "battery_staged_role_outcome": "passed",
     "counts": {
       "error": 0,
-      "failed": 5,
-      "passed": 3768,
-      "skipped": 116
+      "failed": 0,
+      "passed": 3751,
+      "skipped": 138
     },
     "devbox_only_expected_skips": {
       "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible": "skipped",
@@ -218,13 +234,7 @@
       "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
       "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off"
     ],
-    "failed_nodeids": [
-      "tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution",
-      "tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for",
-      "tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready",
-      "tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one",
-      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation"
-    ],
+    "failed_nodeids": [],
     "host_local_c1_expected_skips": {
       "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": "skipped",
       "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists": "skipped",
@@ -242,10 +252,8 @@
       "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory": "passed"
     },
     "leaf_transport_all_passed": true,
-    "n_skipped": 116,
-    "problems": [
-      "5 failed/errored: ['tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution', 'tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for', 'tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready', 'tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one', 'tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation']"
-    ],
+    "n_skipped": 138,
+    "problems": [],
     "renderer_parity_expected_skips": {
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[code]": "skipped",
       "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte[gsm8k]": "skipped",
@@ -305,8 +313,30 @@
       "tests/data/test_sessions.py::test_render_session_rejects_a_session_over_the_limit": "teacher tokenizer not in local HF cache",
       "tests/data/test_sessions.py::test_render_session_round_trips_through_the_official_template": "teacher tokenizer not in local HF cache",
       "tests/data/test_sessions.py::test_source_system_prompt_is_preserved_in_the_render": "teacher tokenizer not in local HF cache",
-      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output": "logs/stages/stage-1/phase_c1/runs/attempt13/governance/readiness.json is not in this checkout; it is run-owned and gitignored",
-      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to": "logs/stages/stage-1/phase_c1/runs/attempt13/governance/readiness.json is not in this checkout; it is run-owned and gitignored",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_it_matches_the_canonical_store": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_the_frozen_battery_manifest_verifies": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestARelocationRewritesOnlyWhatItOwns::test_the_protected_trees_are_declared": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_a_descendant_of_a_moved_directory_resolves": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_an_unmapped_path_comes_back_unchanged": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_every_old_path_points_at_something_that_is_there": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_no_old_path_is_also_a_live_path": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestAnOldPathStillResolves::test_the_paths_frozen_payloads_actually_name_resolve": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_committed_record_still_names_its_own_raw_output": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_a_retry_after_failure_does_not_truncate_the_failed_evidence": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_an_explicit_path_that_already_exists_is_refused": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_an_interrupted_second_execution_leaves_the_first_intact": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_no_shared_default_remains": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_reading_an_existing_sweep_is_a_separate_path": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_two_executions_of_one_commit_get_two_locations": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestSweepOutputsAreIsolated::test_two_trees_get_two_locations": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_a_launch_bound_claim_requires_the_current_tree": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_every_superseded_verdict_is_preserved": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_state_md_agrees_with_the_record_it_links_to": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_three_facts_are_stated_separately": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_rendering_again_changes_nothing": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_the_catalog_classifies_every_entry": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
+      "tests/docs/test_log_organisation.py::TestTheNavigationIsDerivedFromTheTree::test_the_stage_navigation_is_regenerable_too": "the logs/ tree is partially staged, so a check that reads it as a whole would describe a different tree",
       "tests/docs/test_log_organisation.py::TestTheStageMappingIsComplete::test_every_cited_path_including_untracked_really_exists": "this checkout has no artifacts/stage0/; the out-of-tree material these citations name is not here to check",
       "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store": "no out-of-tree store on this machine",
       "tests/evaluation/test_capability.py::test_always_abstaining_wins_no_answerability_pair_on_the_frozen_set": "frozen battery is a gitignored artifact; rebuild with scripts/data/build_capability_battery.py",
@@ -379,10 +409,10 @@
       "tests/pod/test_setup_end_to_end.py::test_the_real_setup_runs_to_SETUP_DONE_and_the_launcher_reads_it": "the canonical checkpoint is not staged locally",
       "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init": "the baseline initialization is absent, so the validator exits 1 before it can produce a gated report"
     },
-    "skip_set_digest": "cba93bc0336db695f6c74560357dbc6a3340584e6695bbad7bcae704a59f2b8d",
+    "skip_set_digest": "0e3f5f9aa7ab98e13670d2ab0facd9d394b91ef4c7a4104e1b4415a10ad45ae2",
     "skip_set_is_forensic_not_scientific": "the complete skip list exists so a pod/sweep divergence can be NAMED. The total is not a target and carries no scientific content; only the declared groups above express expectations.",
     "unexpected_environment_skips": [],
-    "verdict": "FAIL"
+    "verdict": "PASS"
   },
   "invocation_realized": {
     "declared_test_ignores": [
@@ -427,16 +457,14 @@
     "tests/autoinit/test_leaf_transport_publish.py::test_the_round_trip_needs_no_dev_box_directory"
   ],
   "n_tests": 3889,
-  "pod_test_environment_digest": "6340c76c5b7b5d37ffa52119100b7da9379bdd70dda45d1adfcf97a1a483f810",
+  "pod_test_environment_digest": "4ee5a338482dcc95417d8827b28c32887ddf995ef022b70244a1eca8422072c2",
   "pod_test_environment_n_files": 195,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
     "scripts/autoinit/publish_selected_leaves.py",
     "scripts/autoinit/record_pod_environment.py"
   ],
-  "problems": [
-    "5 failed/errored: ['tests/autoinit/test_skip_predicate_audit.py::test_every_predicate_has_a_parity_resolution', 'tests/autoinit/test_skip_predicate_audit.py::test_no_predicate_is_unaccounted_for', 'tests/autoinit/test_skip_predicate_audit.py::test_strict_parity_is_ready', 'tests/autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one', 'tests/docs/test_log_organisation.py::TestTheCurrentViewReadsItsOwner::test_the_snapshot_carries_the_same_derivation']"
-  ],
+  "problems": [],
   "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py --ignore=tests/autoinit/test_phase_b_reuse_hostlocal.py --ignore=tests/autoinit/test_stage1_import.py",
   "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
   "record_kind": "launch_bound",
@@ -444,13 +472,13 @@
   "renderer_parity_is_proved_by": "logs/stages/stage-1/phase_c1/validations/renderer-parity/c1_renderer_parity.json",
   "renderer_parity_skipped_as_expected": true,
   "schema": "aadistill.autoinit.c1_pod_environment_verification/v1",
-  "seconds": 804.9,
-  "self_sha256": "61c6a3e6c1ac116a8a3e40a09cb82762072b71543df8d0bd48d14eae11543497",
+  "seconds": 800.9,
+  "self_sha256": "b8f5a2e2e3d11b251aa8932fd7071b38819e6670fdf805c97ccd4424ac2eb7a2",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_c5dfd9ea.bundle",
+    "BUNDLE_NAME": "aad_autoinit_5aafc549.bundle",
     "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
     "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_c1/runs/spec_check/governance/authorization.json",
-    "SESSION_COMMIT": "c5dfd9ea5139f47463ad577fbe944ce05fc07fb3",
+    "SESSION_COMMIT": "5aafc549ac25dff64c77f72931ccbbfe2bee6b72",
     "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c1/frozen_assets.json",
     "SESSION_KIND": "c1",
     "SESSION_PLAN_HASH": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
@@ -463,8 +491,8 @@
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1057 derived paths, contract 74192f5b7198> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-c5dfd9ea5139/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-c5dfd9ea5139/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
-  "simulator_exit_code": 1,
+  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1056 derived paths, contract 74192f5b7198> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-5aafc549ac25/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-5aafc549ac25/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_exit_code": 0,
   "staging_contract": {
     "digest": "74192f5b71986a43d03ab4794b148b6c236d68885a344ad58e549e07de8c4e45",
     "local_asset_destinations": [
@@ -473,7 +501,7 @@
       "artifacts/stage3/c1_confirmation_v1",
       "artifacts/stage3/recovery_search_v2"
     ],
-    "n_hidden_files": 1057,
+    "n_hidden_files": 1056,
     "n_staged_files": 28,
     "relay_file_destinations": [
       "artifacts/stage1/e8_calibration_v1/items.jsonl",
@@ -495,8 +523,8 @@
   },
   "staging_contract_digest": "74192f5b71986a43d03ab4794b148b6c236d68885a344ad58e549e07de8c4e45",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "c5dfd9ea5139f47463ad577fbe944ce05fc07fb3",
+  "swept_base_commit": "5aafc549ac25dff64c77f72931ccbbfe2bee6b72",
   "tree_clean": true,
   "unexpected_environment_skips": [],
-  "verdict": "FAIL"
+  "verdict": "PASS"
 }
