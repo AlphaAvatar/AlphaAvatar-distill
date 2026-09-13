@@ -445,6 +445,12 @@ class TestTheStageMappingIsComplete:
         from consolidate import stage_attribution
         return stage_attribution
 
+    #: Reads the tree AS A WHOLE — configs/, data/ and artifacts/ as well as
+    #: logs/ — so a staged pod view, where `artifacts/**` and `data/**` are
+    #: hidden, reports every out-of-tree citation as a drift it is not. The
+    #: marker observes git against the filesystem rather than keying on a
+    #: simulator variable, so it is correct on a real partial checkout too.
+    @needs_whole_tree
     def test_the_stage_descriptions_cite_only_real_paths(self, attribution):
         """Each stage says what it is for, what it consumes and produces, and
         where its canonical configs and manifests live. That is navigation, and
@@ -487,6 +493,7 @@ class TestTheStageMappingIsComplete:
                    if r["classification"] == "experiment" and not r["question"]]
         assert not missing, f"experiments with no stated question: {missing}"
 
+    @needs_whole_tree
     def test_every_cited_piece_of_evidence_still_exists(self, attribution):
         """The inventory is a set of claims about the repository, and a claim
         that has quietly stopped being true is worse than none. This already
@@ -542,6 +549,11 @@ class TestTheStageMappingIsComplete:
         on_disk = {p.name for p in (REPO / "logs/stages").glob("stage-*")}
         assert on_disk == set(attribution.stages_present())
 
+    #: `document()` embeds `verify()`, so it is view-dependent for the same
+    #: reason: a view without `artifacts/` regenerates an index whose
+    #: `problems` list is not empty, and the committed one — written against
+    #: the whole tree — correctly disagrees with it.
+    @needs_whole_tree
     def test_the_committed_mapping_is_what_the_generator_produces(self,
                                                                   attribution):
         committed = load(attribution.STAGE_INDEX)
