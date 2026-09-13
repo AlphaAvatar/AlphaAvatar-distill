@@ -526,7 +526,23 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
 
-    if args.run_id:
+    #: A launch-bound sweep writes the RUN-OWNED RECORD AND NOTHING ELSE.
+    #:
+    #: The pointer is tracked; the record is the run's. Rewriting the pointer
+    #: during a launch-bound sweep put a tracked change into the tree that the
+    #: session-lineage rule does not permit after a sweep -- and the rule is
+    #: deliberately narrow, because a grant committed after a sweep must still
+    #: invalidate it. That made the chain unsatisfiable in both directions:
+    #: leaving the pointer dirty fails the issuer's clean-tree requirement, and
+    #: committing it fails lineage, with no sweep able to converge because each
+    #: one writes its own swept_base_commit into the pointer.
+    #:
+    #: So the pointer is navigation, not the authority for one formal session.
+    #: The launch gate does not read it -- `pod_environment_gate` resolves the
+    #: run-owned record from run_id and stage_id -- and ordinary state
+    #: maintenance may refresh it once launch lineage no longer depends on the
+    #: pre-authorization tree.
+    if args.run_id and args.kind != "launch_bound":
         #: A POINTER, not a second record: it says where the live evidence is
         #: and what it hashes to, so one stable path still answers "which sweep
         #: is current" without becoming a copy that can drift.
@@ -549,6 +565,10 @@ def main() -> int:
         (REPO_ROOT / RECORD_POINTER).write_text(
             json.dumps(pointer, indent=1) + "\n")
         print(f"pointer: {RECORD_POINTER} -> {record_rel}")
+    elif args.run_id:
+        print(f"pointer: {RECORD_POINTER} left UNCHANGED — a launch_bound "
+              "sweep writes only the run-owned record, so the tree it swept "
+              "stays the tree it describes")
 
     c = record["counts"]
     print(f"\n{record['verdict']}: {c['passed']} passed, {c['skipped']} skipped, "

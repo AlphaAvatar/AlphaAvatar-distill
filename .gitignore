@@ -72,6 +72,25 @@ logs/runs/**/evidence/evaluation/
 !logs/runs/**/*.json
 !logs/runs/**/*.jsonl
 
+# ...and the SAME policy for the canonical stage-first evidence root. A run
+# lives at `logs/stages/<stage>/<experiment>/runs/<run>/` now, and only the old
+# `logs/runs/` root was exempted above -- so every run directory created after
+# that migration was silently ignored. `runs/attempt13/governance/readiness.json`
+# was written by a launch-bound sweep and never tracked, while attempt 12's
+# equivalent IS tracked because it predates the move. That made the launch chain
+# unsatisfiable: the one path the session-lineage rule permits to differ after a
+# sweep was a path git could not see, so the sweep's own tracked output looked
+# like undeclared drift.
+#
+# Written generically. No stage number, experiment id or attempt id appears
+# here: a Stage-4 rollout run gets this the day it is created.
+!logs/stages/**/runs/
+!logs/stages/**/runs/**/
+logs/stages/**/runs/**/evidence/training/
+logs/stages/**/runs/**/evidence/evaluation/
+!logs/stages/**/runs/**/*.json
+!logs/stages/**/runs/**/*.jsonl
+
 # Archives anywhere in the tree. A session's collected-artifact tarball is the
 # one heavy thing a run legitimately produces beside its manifest, and it is
 # exactly the shape the exclusions below do not catch: `logs/runs/**/*.gz` was

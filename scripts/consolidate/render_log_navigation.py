@@ -574,15 +574,17 @@ def readiness_view(root: Path) -> dict:
     """
     #: READREC is a POINTER now, not the record: a run owns its readiness
     #: evidence so that the next sweep cannot overwrite what the previous one
-    #: launched under. Follow it. The record is under `runs/`, which git
-    #: ignores, so a tracked-only checkout has the pointer and not the record —
-    #: fall back to the summary the pointer itself carries rather than
-    #: rendering nulls.
+    #: launched under.
+    #:
+    #: Read the POINTER ONLY, and deliberately do not follow it. Merging the
+    #: record made this view a function of a file every sweep rewrites, so
+    #: `current.md` and `current.json` went stale the instant a launch-bound
+    #: sweep finished — and regenerating them puts tracked changes into a tree
+    #: whose lineage permits exactly one. The pointer is navigation and moves
+    #: only when navigation is maintained; the record is the authority, and the
+    #: launch gate resolves it directly from run_id and stage_id.
     live = json.loads((root / READREC).read_text()) if (
         root / READREC).is_file() else {}
-    named = live.get("record")
-    if named and (root / named).is_file():
-        live = {**live, **json.loads((root / named).read_text())}
     hist = (json.loads((root / READINESS_HISTORY).read_text())
             if (root / READINESS_HISTORY).is_file() else {"entries": []})
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root,
