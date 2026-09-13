@@ -1,0 +1,99 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the closeout of C1 attempt 17. It replayed both frozen digest gates, materialized both arms, trained all six formal probes, and then failed in the confirmation evaluation before scoring a single sample. The furthest C1 has ever reached, and it produced NO measurement.",
+ "attempt": 17,
+ "package": "phase_c1.execution_package.2026-09-11",
+ "terminal_marker": "C1_INCOMPLETE",
+ "launcher_exit": 11,
+ "classification": "EVALUATION-HARNESS ABORT AFTER FORMAL TRAINING. Not a replay mismatch, not an efficacy result, and NOT the frozen-rule INCONCLUSIVE: stage I never ran, and no sample was generated or scored. `C1_INCOMPLETE` is a declared failure marker, distinct from the scientific verdict.",
+ "the_failure": {
+  "where": "scripts/evaluation/uncapped_eval.py:325, called from driver STAGE H (evaluate)",
+  "message": "ValueError: Tools should either be a JSON schema, or a callable function with type hints and a docstring suitable for auto-conversion to a schema.",
+  "call": "tok.apply_chat_template(turns, tools=s.get('tools'), ...)",
+  "root_cause": "the battery's tool subset carries `tools` as a JSON STRING. All 100 samples in artifacts/stage3/c1_confirmation_v1/tool.jsonl do. `apply_chat_template` requires a list of JSON schemas, so the generation path raised before producing a single token.",
+  "why_the_parity_gate_did_not_catch_it": "there are TWO renderers over one battery. scripts/data/battery_render.py -- the scoring and parity path -- parses it explicitly at line 191: `parsed_tools = json.loads(tools) if isinstance(tools, str) else tools`. scripts/evaluation/uncapped_eval.py -- the GENERATION path -- passes the raw string through. The pre-provider renderer-parity gate reported 7/7 groups PASS and 190 frozen prompts re-rendered byte for byte, and it was telling the truth about the renderer it exercises. It certified the wrong one for this purpose.",
+  "reproducible_at_zero_cost": "yes, entirely on the dev box: the battery is local, the defect is a data shape, and no GPU or model is involved.",
+  "the_fix": "one line in uncapped_eval.py: parse `tools` when it is a string, exactly as battery_render.py already does. NOT APPLIED -- see `decision_required`."
+ },
+ "what_ran": {
+  "launch_bound_sweep": "PASS at c91b2335, 12 passed / 0 skipped / 0 failed in 9.7 s",
+  "gates_run": 14,
+  "gates_passed": 14,
+  "setup": "complete in 2.5 min at $0.08; CPU gate TESTS_OK:4s",
+  "stages_passed": [
+   "B teacher_fetch_verify",
+   "C register_operator",
+   "D replay_parent",
+   "E replay_incumbent",
+   "F materialize_arms",
+   "G recovery_probes"
+  ],
+  "stage_failed": "H evaluate",
+  "stage_i_decide_reached": false
+ },
+ "science": {
+  "replay": {
+   "verdict": "BOTH GATES PASSED",
+   "parent": "STAGE_PASSED:D at 2026-09-13T14:10:13Z, 36.2 min",
+   "incumbent": "STAGE_PASSED:E at 2026-09-13T14:10:35Z, 22 s",
+   "meaning": "the frozen fixed path reproduces the pinned parent and incumbent digests on this executable. That is a real, reportable result and it is the second time it has been observed (attempt 9 was the first)."
+  },
+  "probes_trained": 6,
+  "probe_log": {
+   "incumbent.1635674081": "2026-09-13T15:41:50Z, 90.8 min",
+   "incumbent.1656475568": "2026-09-13T17:13:13Z, 91.4 min",
+   "incumbent.696460635": "2026-09-13T18:42:11Z, 89.0 min",
+   "treatment.1635674081": "2026-09-13T20:14:55Z, 92.7 min",
+   "treatment.1656475568": "2026-09-13T21:44:22Z, 89.5 min",
+   "treatment.696460635": "2026-09-13T23:11:49Z, 87.5 min"
+  },
+  "samples_generated": 0,
+  "samples_scored": 0,
+  "arms_evaluated": 0,
+  "decision": "NONE",
+  "nothing_was_observed": "no generation completed, so nothing about the outcome was seen. There was no opportunity to peek and no result to be biased by.",
+  "protocol_changed": false,
+  "frozen_assets_touched": false
+ },
+ "the_probes_are_gone": {
+  "what_was_collected": "59 files under the FAILED artifact spec: the six probe training records, the engine probe, the driver logs and the audit trail. Manifest ok=True, missing=[].",
+  "what_was_not": "the trained probe WEIGHTS. The failure spec presupposes no training and collects evidence rather than checkpoints, and the pod is deleted.",
+  "consequence": "the measurement cannot be resumed, spliced or pooled even in principle -- there is nothing left to resume from. Any future attempt retrains all six probes from the same frozen inputs, which is a fresh complete execution of the frozen protocol rather than a continuation of this one."
+ },
+ "provider": {
+  "pod_id": "3fjnnnftllfzya",
+  "gpu": "NVIDIA L40S",
+  "price_per_hour": 1.09,
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+  "elapsed_minutes": 615.77,
+  "teardown": "artifact collection completed (59 files, streams quiescent), then the pod was deleted.",
+  "provider_confirms_gone": true,
+  "observed_after_teardown": "ZERO_PODS",
+  "cost_usd": 11.1866
+ },
+ "budget": {
+  "this_attempt": 11.1866,
+  "package_booked_after": 12.4158,
+  "_booked_rule": "recomputed from the components: attempt10 0.1177 + attempt11 0.2783 + attempt12 0.0000 + attempt13 0.0000 + attempt14 0.3999 + attempt15 0.0000 + attempt16 0.4333 + attempt17 11.1866.",
+  "authorized_usd": 15.1475,
+  "within_authorization": true,
+  "what_it_bought": "a second confirmation that the frozen path replays, six trained probes whose weights are gone, and the diagnosis of a renderer split that a parity gate could not see."
+ },
+ "chain": {
+  "state": "CONSUMED",
+  "why": "a provider resource was created and billed under this authorization.",
+  "preserved_unedited": {
+   "grant": "db8a588f865ece3b9f88c07952540dc4cd42ae4d617a47c85f2d42fb2feba10d",
+   "readiness": "d4b13ed9903ace73604ea9eb91538af67415f9b18b7d0e7d36afe0743b312644",
+   "authorization": "0500a5a47b41622d42e833167edb9ee0a4b41eda2694bcf7e8c775b142c37b75",
+   "bundle_record": "6761906ad1422ac7699c03cb4f655b3034e58be1c0b8b16ea6da73e3c6bb3e21"
+  }
+ },
+ "decision_required": {
+  "why_this_stops_here": "formal measurement had begun. AGENTS.md P8.2.1 and P12.1 both stop autonomous continuation at 'retrying or pooling science after formal measurement has begun without an explicitly supported resume/retry contract'. There is no such contract, and the grant forbids splicing probes across attempts.",
+  "what_is_NOT_in_doubt": "the fix is one line and free to validate; the protocol, arms, seeds, battery and decision rule are untouched; nothing was measured, so nothing can be biased by a re-run.",
+  "what_the_maintainer_must_decide": "whether a fresh attempt 18 may execute the same frozen protocol from the start, at roughly $13.4 for a full run, against a remaining formal allowance of $33.02.",
+  "not_done_pending_that_decision": "the uncapped_eval.py repair is NOT applied. It is inside the frozen C1 harness, and changing the measurement apparatus while a re-run decision is open is the maintainer's call, not an engineering repair inside an envelope."
+ },
+ "authorizes": "nothing"
+}

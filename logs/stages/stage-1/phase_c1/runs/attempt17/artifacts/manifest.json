@@ -1,0 +1,604 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-09-13T23:38:30+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_c1/c1_evidence.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "replay_record",
+      "pattern": "audit/autoinit_c1/c1_replay_record.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "treatment_record",
+      "pattern": "audit/autoinit_c1/c1_treatment_record.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "arm_identities",
+      "pattern": "audit/autoinit_c1/c1_arm_identities.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_results",
+      "pattern": "audit/autoinit_c1/c1_probe_results.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "decision",
+      "pattern": "audit/autoinit_c1/c1_decision.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "attested_protocol",
+      "pattern": "audit/autoinit_c1/c1_attested_evaluation_protocol.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "engine_probe",
+      "pattern": "audit/autoinit_c1/engine_probe.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "device_handoff",
+      "pattern": "audit/autoinit_c1/c1_device_handoff.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_event_stream",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/train_log.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_run_manifest",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_manifest*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_run_completion",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_completion*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "training_completion",
+      "pattern": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.*.training.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_config",
+      "pattern": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_per_sample.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "scored_probe_aggregate",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_c1_confirmation.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.generations.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_train_tail",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_train_tail.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_c1/*.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "audit_json",
+      "pattern": "audit/autoinit_c1/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_logs",
+      "pattern": "audit/autoinit_c1/session/*",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_c1/c1_evidence.json",
+      "artifact_class": "session_evidence",
+      "size_bytes": 26213,
+      "sha256": "62e99d959a05dcc959aae96867adcdf135f37706b778d52c2cae5a9ad5f3bcaa",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_replay_record.json",
+      "artifact_class": "replay_record",
+      "size_bytes": 1023547,
+      "sha256": "2dce5b65ad3289709e181d97e465ce4c7b384bca3dca534a0eae7e4aebc77285",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_treatment_record.json",
+      "artifact_class": "treatment_record",
+      "size_bytes": 16796,
+      "sha256": "d4ea545ba1a3b4ee0937b1cea6648c32445d63ae83cd43a0d1a163e4339f2dc7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_arm_identities.json",
+      "artifact_class": "arm_identities",
+      "size_bytes": 13549,
+      "sha256": "35ca39fedb97278ed54460b8d770b7f5dbfaae352b27ab7d62680e37d0c1e292",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_attested_evaluation_protocol.json",
+      "artifact_class": "attested_protocol",
+      "size_bytes": 10164,
+      "sha256": "b85ef329854e653d682f839bfdc8134aa5dec99372987ce3ebc1a6eac04fd1a7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/engine_probe.json",
+      "artifact_class": "engine_probe",
+      "size_bytes": 1779,
+      "sha256": "49593edb8bdf3047ee4feccd4bb59d0f954124b9ca3c894460b6be0dece8d431",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_device_handoff.json",
+      "artifact_class": "device_handoff",
+      "size_bytes": 688,
+      "sha256": "21ab3f8f8fe22e9b7ce65740847287d33a7bb3b7e162c7b6891abec96ee87483",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1635674081/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48647,
+      "sha256": "37feb23b4c2c7d75de6c10e29ba256b624a05c2395c1a2a21db58841cbee9656",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1656475568/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48627,
+      "sha256": "041877510065f2759d3da4c2a2dfa6a4b27a14e9241f24f47c016ba9b6f0097c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.696460635/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48677,
+      "sha256": "23e3c09dfd9c028d4ca509c44e5790e5df8a1e15f7eb40f1536eb9996533796f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1635674081/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48648,
+      "sha256": "3e4a5cbf012010dfceced1a9a800d765e0d2f9b86da4a4bf6ccfa2d4b17e2772",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1656475568/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48627,
+      "sha256": "dcc006205fc64820b3543d37892396013c41f3f2bfe3296757d6920e545fb1c6",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.696460635/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48682,
+      "sha256": "84d7e644a0acf5df024a064f5ab2d8efd1fa7624d104527792e1da9066bdbac8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1635674081/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8563,
+      "sha256": "9654c948efe639612c74772cea488bc4ff50c6526d31baa904358bae9091ee7d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1656475568/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8563,
+      "sha256": "025153a658059ff46e318becd9e37da4e28f4b2b309ae88fa42047b766417a42",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.696460635/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8557,
+      "sha256": "c7b3266fbc6bf16f9d987b7b5e22341af64ba8ba8cbb41a6e9a3adebdc029777",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1635674081/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8563,
+      "sha256": "a6db5fdfb63bc45732cf5c9c21d6b96e05f77839c6f034e219a33055954ff65e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1656475568/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8563,
+      "sha256": "806dfb4a87a941588f41f44d9bf4a743715038ecbcfdb045f7ecd9edaa9d43bc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.696460635/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8557,
+      "sha256": "855eb969382f3db81efbf76958cdd5e6f568384587e1b7cf4cf366ba995a7135",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1635674081/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1835,
+      "sha256": "45a975c66f84d9d48dfc12ac40d8d3c2976fa0763a62ab90a58ab9f0a39ed870",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1656475568/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1835,
+      "sha256": "9279c853ef543903feb5fa30c7f6b7a1122f0a162509ad21b88856c3d6569a0b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.696460635/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1833,
+      "sha256": "67f7e954fe4d3a5a97b87f6083affcd112fbf42c01429fc1a74ff33fd391f938",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1635674081/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1835,
+      "sha256": "91655aea373bcf566e53ee9c0397afe54ab9323186b8d05dd08292ac127d46bd",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1656475568/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1835,
+      "sha256": "d55debed86ed42bdc6884f5538cc35e3570ff8c3c8d86ad1e8641fd582ca195b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.696460635/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1833,
+      "sha256": "9d027d5d3b4b380dddda79ab1775b7140b0208831b4ac1e060a4f7c539c600b9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.incumbent.1635674081.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 816,
+      "sha256": "a4c71e001d601e43193c816c19650eba4eed95fd86a0ebcc4c7a47a87fc0ef54",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.incumbent.1656475568.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 815,
+      "sha256": "884fa30ca1509c43170195685e85805c1272e3fa444cd883119a10a770e420a5",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.incumbent.696460635.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 810,
+      "sha256": "6b8e02807a37363488ee9630ba4abb81aa7439d96c044de2cb147800fd44ee4d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.treatment.1635674081.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 816,
+      "sha256": "1cd9fa5f70528d3ea32014d862933ac74322fcef6b67ab61ae2c1ec3d34d9aa8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.treatment.1656475568.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 816,
+      "sha256": "472475c9ef7696460b0eb1a2ef7d8789f89e929bdf9728eec1f9aef0621c9c33",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.treatment.696460635.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 810,
+      "sha256": "1df6ab260575bb4037542ac0bc69f43b9de3bee4929f6cc02fb3faa70dda5428",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.incumbent.1635674081.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1921,
+      "sha256": "422ded2d0a6736b9423b2dffba22af46b0077166abc696e5936653ac8a4e8dfb",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.incumbent.1656475568.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1921,
+      "sha256": "56ddc3d6175f61a8555da73d67918856c8ec9b9bd2d721ea1a70a766c4146769",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.incumbent.696460635.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1917,
+      "sha256": "78b38191c80bfe97f692db285a48be61eea3a40c4349edd67ee73f0b09a820da",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.treatment.1635674081.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1921,
+      "sha256": "669cebe5a1aa076a8e619811a0fa1d120ca10e78844573a7336ec404a3071f11",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.treatment.1656475568.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1921,
+      "sha256": "c22c45a568c6ebc9887ff34e21956595f99565df8dc9ff07c40b762f81c4c07c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.treatment.696460635.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1917,
+      "sha256": "820629259d4da027cdc486bcc6d24fb4b37dee39849d8d5c5472d9443fe8e76f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 468884,
+      "sha256": "1d590ec23aa8ba6c5d2a46abeebee1b6ae0003125846d34993ff943f33dbf77a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 413233,
+      "sha256": "29556b2e1e0e1c8660c3c480d6cf2bb4e0f426eb2e21ffb5568ddb51c6aad3b2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 461409,
+      "sha256": "89151793eb8f45f4a204d93fb81a40c3cc3cb1afdd2014f058e60441593a4d1f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 797852,
+      "sha256": "51cb612dd4d6a14b60dc038b07fc0b458cd95a6739266dc78a85975814132aa0",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 451609,
+      "sha256": "a751e645513ad94e51ef3ca917af80f3812780892384fdf42239c8ccbc9400ef",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13509,
+      "sha256": "4b7181accd897a3fe0a7fb5b990cb53ee941fcd8919b23ec09c791e6d1797fad",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13431,
+      "sha256": "c57b67accc3aff663b0d318e9c62394e9dbe9e4b6647557c9edbdb562b8ede61",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 16034,
+      "sha256": "8ae6bd549d191d1a98ae22d24c03e0bdc22a98445b44d655e38259b684d3a8a2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12629,
+      "sha256": "03397a5085e17d440494afd1e1c218752c927d818da8c63719f0dc2a6c528ec8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13434,
+      "sha256": "ab1466eaf494f063f0f8919dd2718025ec4566662373ac78afae9ad1de8356b9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1635674081_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1696,
+      "sha256": "b33bb654b281cec2f5e3b659d4a9aeb273d26f69422f41ebdcc170085d524b5e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1656475568_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1694,
+      "sha256": "93d4f319543ed029b1865921c74e0952ac1888883eabe6467e07c2dc1fe5f293",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.696460635_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1702,
+      "sha256": "f918caf7db7308f826800a638c5341f1ccf938f3133b764e3e7ed6e3ee3abdad",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1635674081_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1700,
+      "sha256": "ce26fc072c57f68f0f0ce4418e7402cbbf0d4414d2eda95df4d5ca476684f16b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1656475568_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1720,
+      "sha256": "3d76c09e9017f35bf736ffa1b7f04abf734f95b6a50801f59153b12956365713",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.696460635_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1690,
+      "sha256": "10aff80d87f8a19d80a1923f77335ee91af4ca139cbf8f681e1fdb595361bece",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.696460635_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 15494,
+      "sha256": "deb0e660a738627d29c57e2911b1ba56f2b91d820545ba36477932d5ba6c97d0",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/engine_probe.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 12314,
+      "sha256": "b65270c27336ad3b1897c599725d555682f564653556e73d06ce9feaac2427e1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/scorer_preflight.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 439,
+      "sha256": "818501ec3a0dbd7321e3bbff5cd5193bc03e07ab83d38559e10442ba3e4902d8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/autoinit_c1.status",
+      "artifact_class": "session_logs",
+      "size_bytes": 1619,
+      "sha256": "7ae6eaecf682e1b33ec0ff8c81103444e878d50f8b8af1841ff74214a75aecbc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/autoinit_c1_run.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 37961,
+      "sha256": "0d46b7673eddd937b478bf911a5c4ed761da459de142110668c96f2391191e93",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/setup.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 23792,
+      "sha256": "b1d3c85e755f6726173a73c7f3a4e3e3cf65731c7f534ef4b754833e9c3dcd8f",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

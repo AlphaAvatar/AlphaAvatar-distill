@@ -2331,3 +2331,31 @@ a subprocess and resolves the adapter; mutating the fix away reproduces attempt
 16's exact error.
 
 Attempt 16's chain is **consumed** and authorizes nothing further.
+
+## 2026-09-13 — C1 attempt 17: six probes trained, zero measured, `$11.1866`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 17: 14/14 gates, pod `3fjnnnftllfzya` at `$1.09/h` for 615.8 min. **Both replay gates PASSED** (parent 36.2 min, incumbent 22 s), both arms materialized, **all six formal probes trained** (~90 min each), then **STAGE H FAILED** in the confirmation evaluation before generating a single sample: `apply_chat_template` was handed the battery's `tools` field as a JSON string. No sample generated, none scored, no decision | `$11.1866` | [`runs/phase_c1/attempt17/`](../stages/stage-1/phase_c1/runs/attempt17/) |
+
+**Cumulative: `$280.3156` of the `$320.0000` cap.** Package booked **`$12.4158`**
+of `$51.4425`.
+
+```text
+project   267.8998 + 12.4158 = 280.3156   of 320.0000, leaving 39.6844
+package     1.2292 + 11.1866 =  12.4158   of  51.4425, leaving 39.0267
+```
+
+**Two full-ceiling sessions still fit the formal allowance** (`$33.0267`
+remaining), and one full re-run is priced at about `$13.4`.
+
+**What the money bought.** A second independent confirmation that the frozen
+fixed path replays both pinned digests. Six trained probes — whose weights are
+**gone**: the FAILED artifact spec collects evidence rather than checkpoints, and
+the pod is deleted. And the diagnosis of a renderer split that no gate could see:
+`battery_render.py` parses the `tools` string (line 191) and `uncapped_eval.py`
+does not, so the renderer-parity gate reported 7/7 PASS about the scoring path
+while the generation path could not render a single tool prompt.
+
+**Nothing was measured, so nothing can be biased by a re-run** — but the decision
+to re-run is the maintainer's. Attempt 17's chain is **consumed**.

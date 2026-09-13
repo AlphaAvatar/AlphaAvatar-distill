@@ -281,8 +281,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 6,
-  "runs_unrecorded": 2,
+  "runs_current": 7,
+  "runs_unrecorded": 1,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": {
@@ -311,8 +311,8 @@
     "total": 5
    },
    "phase_c1": {
-    "recorded": 16,
-    "unrecorded": 2,
+    "recorded": 17,
+    "unrecorded": 1,
     "total": 18
    },
    "recovery_continuation": {
@@ -1014,6 +1014,19 @@
    },
    "manifest_sha256": "493b722764220f4f4aef837b83b3fb1a8ed5431b358021cb79fb33cd099c297a",
    "n_components": 11
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt17",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt17",
+    "manifest": "logs/stages/stage-1/phase_c1/runs/attempt17/manifest.json"
+   },
+   "manifest_sha256": "9e44de2c34e3384acf04ac12f8c5d1b7454d0246b9a6343106857152e5b31356",
+   "n_components": 11
   }
  ],
  "unrecorded": [
@@ -1024,14 +1037,6 @@
    "n_files": 4,
    "digest": "4ddbccb2a573c6c10b81a06237e79a74f67027e48c047faf497a9a480ac9d38f",
    "why": "no run manifest; its closeout states: PRE-PROVIDER INFRASTRUCTURE ABORT. Not an efficacy result, not a replay mismatch, and not a frozen-rule INCONCLUSIVE."
-  },
-  {
-   "experiment_id": "phase_c1",
-   "run_id": "attempt17",
-   "root": "logs/stages/stage-1/phase_c1/runs/attempt17",
-   "n_files": 11,
-   "digest": "c42207027f21a655a1bde2f714d1c087f9f972282dba2999a20dcddce3205458",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],
  "authorizes": "nothing"
