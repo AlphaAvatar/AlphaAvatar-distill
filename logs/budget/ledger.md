@@ -2279,3 +2279,26 @@ was an occupancy contract with no satisfiable ordering; attempt 14's was three
 divergences between the dev box and a pod, all of them premises the dev box owns
 — see the decision record of the same date. Both chains are **consumed** and
 authorize nothing further.
+
+## 2026-09-13 — C1 attempt 15: `$0.0000`, refused by its own lineage gate
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 15: launch-bound sweep PASS in 8.7 s (11 passed / 0 skipped / 0 failed), authorization issued, bundle staged and uploaded, launcher invoked, **REFUSED at the first pre-provider gate**. The readiness record and the authorization were committed together, so two tracked paths differed from the authorized base where `session_commit_and_lineage` permits one. A live quote was read; nothing was created | `$0.0000` | [`runs/phase_c1/attempt15/`](../stages/stage-1/phase_c1/runs/attempt15/) |
+
+**Cumulative unchanged: `$268.6957` of the `$320.0000` cap.** Package booked
+unchanged at **`$0.7959`** of `$51.4425`.
+
+```text
+project   268.6957 + 0.0000 = 268.6957   of 320.0000, leaving 51.3043
+package     0.7959 + 0.0000 =   0.7959   of  51.4425, leaving 50.6466
+sessions worst case  268.6957 + 15.1475 = 283.8432  <= 320.0000
+```
+
+**The gate was right and the ordering was mine.** The execution preregistration
+has specified the sequence since it was written — commit only the record, issue,
+commit only the authorization — and the issuer's clean-tree check was opt-in.
+It is the default now: `--require-clean` became `--allow-dirty`. A safety
+property that must be remembered is in the wrong position.
+
+Attempt 15's chain is **consumed** and authorizes nothing further.

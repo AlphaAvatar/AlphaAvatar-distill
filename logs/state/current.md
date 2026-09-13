@@ -19,8 +19,8 @@ setup-abort branch, the provider confirms it is gone, and a live query returns
 | phase | C1 — fixed-path ATTENTION isolation | [`stages/stage-1/phase_c1/`](../stages/stage-1/phase_c1/) |
 | replay | **MEASURED — 2/2 PASS** (attempt 9) | [`index.json`](../index.json) |
 | treatment, endpoint | **UNMEASURED** — zero probes trained. Attempt 9 is **NO DECISION**: a pre-treatment infrastructure abort, not a frozen-rule result | [`phase_c1/history/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md) |
-| launch chain | attempt 15's **grant is committed**; the sweep, authorization and bundle are owed. Attempts 13 and 14 are closed and their chains consumed | [`phase_c1/runs/attempt15/`](../stages/stage-1/phase_c1/runs/attempt15/) |
-| last attempt | **14 — PRE-SCIENCE SETUP ABORT**, `$0.3999`, 14/14 gates passed, pod created, CPU test gate failed 2 of 3892. No science | [`attempt14/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt14/closeout/outcome.json) |
+| launch chain | attempt 16's **grant is committed**; the sweep, authorization and bundle are owed, **each in its own commit**. Attempts 13, 14 and 15 are closed and their chains consumed | [`phase_c1/runs/attempt16/`](../stages/stage-1/phase_c1/runs/attempt16/) |
+| last attempt | **15 — PRE-PROVIDER LINEAGE ABORT**, `$0.0000`, zero pods. The record and the authorization were committed together, so two tracked paths differed where one is permitted. No science | [`attempt15/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt15/closeout/outcome.json) |
 | blocker | none outstanding: attempt 14's three sweep/pod divergences are repaired | [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
@@ -30,7 +30,7 @@ setup-abort branch, the provider confirms it is gone, and a live query returns
 
 | readiness | | owner |
 | --- | --- | --- |
-| latest sweep | **launch_bound — FAIL**, swept at `e7180a32`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
+| latest sweep | **launch_bound — PASS**, swept at `623f7957`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
 | launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
 | last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../stages/stage-1/phase_c1/history/readiness_history.json) |
 
@@ -98,11 +98,19 @@ at or below the accepted rate plus every pre-provider gate.
 One authorization funds one launcher session: up to three acquisition draws
 inside it, never two billing resources, all sharing one `$15.1475` ceiling.
 
-1. this run's **grant**, committed on a clean tree — **done**, attempt 15
-2. a **`launch_bound` sweep** on that clean pre-authorization tree — owed
-3. the one-use **authorization**, issued from the grant — owed
-4. the exact-session **bundle**, staged with `--run-id` — owed
-5. a live quote, every pre-provider gate, the single launch
+1. this run's **grant**, committed on a clean tree — **done**, attempt 16
+2. a **`launch_bound` sweep** on that clean pre-authorization tree — owed.
+   It takes 8.7 seconds now: the pod's selection is `tests/c1_preflight/`
+3. commit **ONLY the readiness record** — owed
+4. the one-use **authorization**, issued against that clean commit — owed.
+   The issuer refuses a dirty tree by default since attempt 15 skipped step 3
+5. commit **ONLY the authorization artifact** — owed
+6. the exact-session **bundle**, staged with `--run-id` — owed
+7. a live quote, every pre-provider gate, the single launch
+
+Steps 3 and 5 are separate commits because `session_commit_and_lineage` permits
+exactly one tracked path to differ between the authorized base and the session
+commit. Attempt 15 combined them and was refused at `$0`.
 
 Step 2 must follow step 1: `verify_record` permits exactly two tracked paths to
 differ after a sweep — the readiness record and the issued authorization — so a

@@ -1,0 +1,41 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c1",
+ "run_id": "attempt15",
+ "root": "phase_c1/runs/attempt15",
+ "artifact_spec": "phase_c1_session_v1",
+ "plan": {
+  "session_id": "autoinit-c1",
+  "plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
+  "session_commit": "3a8710de0cbbd5491f499333de315f58d5a1f539",
+  "bundle": "aad_autoinit_3a8710de.bundle",
+  "preregistration": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+  "scratch_root": "/home/ecs-user/aad-scratch/c1_attempt15",
+  "scratch_note": "the artifact archive and the extracted tree stay here; artifacts/manifest.json carries their hashes. Large artifacts are not moved into git"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_c1_launch.py",
+  "harness_source_digest": "c3f73421f92410d360fec54489ded35b887e17ceb1b1bc184fc6af8977a24363",
+  "authorization": "logs/stages/stage-1/phase_c1/runs/attempt15/governance/authorization.json"
+ },
+ "status": {
+  "passed": false,
+  "terminal": null,
+  "pod_id": null,
+  "cost": null,
+  "provider_confirms_gone": null,
+  "authorizes": "nothing"
+ },
+ "roles": {
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "grant": "governance/grant.json",
+  "launcher_log": "runtime/launcher.log",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "41fd801ac1f3398ff5ba048ca35d1fea9f7266d79c4a85f8a216586c1fdd80dc"
+}

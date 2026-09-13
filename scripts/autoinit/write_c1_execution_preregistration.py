@@ -566,8 +566,12 @@ def main() -> None:
                 "preregistration, state, catalog or doc path may move after it",
                 "3. the real `--kind launch_bound` pod-like sweep runs on THAT tree",
                 "4. commit ONLY the readiness record",
-                "5. issue the authorization against that clean readiness commit, "
-                "--require-clean",
+                "5. issue the authorization against that clean readiness "
+                "commit. The issuer refuses a dirty tree BY DEFAULT since "
+                "2026-09-13: attempt 15 skipped step 4, issued with the record "
+                "still uncommitted, and aborted at $0 on a two-path lineage "
+                "diff. The ordering was written here and followed by nobody, "
+                "which is what a default is for",
                 "6. commit ONLY the authorization artifact",
                 "7. stage the canonical bundle for that commit and round-trip it",
                 "8. run all 12 $0 pre-provider gates",

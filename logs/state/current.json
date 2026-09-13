@@ -15,19 +15,19 @@
   "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-14 consumed, $0.7959, zero scientific stages.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/stages/stage-1/phase_c1/runs/attempt9/outcome.json.",
-  "c1_attempts": "fourteen labels, TWELVE paid, $4.7960 total, zero ATTENTION science. Attempts 12 and 13 cost $0 -- the provider refused one create, and the other never reached a provider. Per-attempt cost and cause: logs/budget/ledger.md.",
+  "c1_attempts": "fifteen labels, TWELVE paid, $4.7960 total, zero ATTENTION science. Attempts 12, 13 and 15 cost $0. Per-attempt cost and cause: logs/budget/ledger.md.",
   "pre_science_retry_is_autonomous": "MAINTAINER DIRECTION 2026-09-13, now AGENTS.md P12.1: an invocation that aborts before formal training is an engineering subrun. Close it, repair, build a FRESH chain, retry -- no further approval, same cumulative budget.",
-  "formal_sessions_used": 5,
+  "formal_sessions_used": 6,
   "formal_sessions_max": null,
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
   "any": false,
-  "grant_committed": "logs/stages/stage-1/phase_c1/runs/attempt15/governance/grant.json",
+  "grant_committed": "logs/stages/stage-1/phase_c1/runs/attempt16/governance/grant.json",
   "readiness_record": null,
   "authorization": null,
   "bundle": null,
-  "note": "attempt 15's grant is committed; the launch_bound sweep, the authorization and the bundle are owed, in that order. Attempt 14's chain was consumed at invocation and is never reused."
+  "note": "attempt 16's grant is committed; the launch_bound sweep, the authorization and the bundle are owed, in that order, each in its OWN commit. Attempt 15's chain was consumed at invocation and is never reused."
  },
  "budget": {
   "cumulative_spend_usd": 268.6957,
@@ -68,8 +68,8 @@
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
    "kind": "launch_bound",
-   "verdict": "FAIL",
-   "swept_base_commit": "e7180a3239fe8b58132115d3676225d80ba7db44",
+   "verdict": "PASS",
+   "swept_base_commit": "623f79570d42a406d61af7af82bf4dfafe7c2a1b",
    "describes_head": false
   },
   "launch_bound_ready": false,
@@ -85,8 +85,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "attempt 14 closed: PRE-SCIENCE SETUP ABORT, $0.3999, zero pods, no science. Its three sweep/pod divergences are repaired.",
-  "then": "build the attempt-15 chain: grant, converge, ONE launch_bound sweep, authorization, commit, bundle with --run-id, launcher.",
+  "status": "attempt 15 closed: PRE-PROVIDER LINEAGE ABORT, $0.0000, zero pods, no science. The pod's test selection is now tests/c1_preflight/ and the launch-bound sweep takes 8.7 seconds.",
+  "then": "attempt 16: converge, ONE launch_bound sweep, commit ONLY the record, issue, commit ONLY the authorization, bundle with --run-id, launcher.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -131,11 +131,11 @@
    "design": "850 scorable / 950 total; 3 fresh paired seeds; primary correct_overall; SESOI +0.010."
   },
   "c1": {
-   "status": "IMPLEMENTED / FOURTEEN ATTEMPTS RUN, TWELVE PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / attempt 15's GRANT COMMITTED, nothing else prepared",
+   "status": "IMPLEMENTED / FIFTEEN ATTEMPTS RUN, TWELVE PAID / REPLAY MEASURED 2-of-2 PASS / TREATMENT AND ENDPOINT UNMEASURED / attempt 16's GRANT COMMITTED, nothing else prepared",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS (parent eea90c91, incumbent c313d1b4, L40S). treatment + endpoint: UNMEASURED. Attempt 9 is NO DECISION after a pre-treatment infrastructure abort -- not an ATTENTION result.",
-   "not_built": "attempts 13 and 14 consumed their chains; attempt 15 has a committed grant and still needs a launch_bound record, an authorization and a bundle. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
+   "not_built": "attempts 13, 14 and 15 consumed their chains; attempt 16 has a committed grant and still needs a launch_bound record, an authorization and a bundle. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
    "owners": {
     "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
     "execution_prereg": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
@@ -168,11 +168,11 @@
  "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed.",
  "latest_run": {
   "experiment_id": "phase_c1",
-  "run_id": "attempt15",
-  "root": "logs/stages/stage-1/phase_c1/runs/attempt15",
+  "run_id": "attempt16",
+  "root": "logs/stages/stage-1/phase_c1/runs/attempt16",
   "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
   "index": "logs/index.json",
-  "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt14"
+  "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt15"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10 as daf64772, and again 2026-09-11 as 199711af. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",

@@ -2,7 +2,7 @@
 """Issue the ONE-USE Phase-C1 authorization. Zero cost; launches nothing.
 
     PYTHONPATH=src python scripts/autoinit/issue_c1_authorization.py \
-        --grant logs/budget/approvals/autoinit_c1_grant.json --require-clean
+        --grant logs/budget/approvals/autoinit_c1_grant.json
 
 Same contract as the Phase-A, Phase-B and continuation issuers, and the same
 reason for it: the grant is an **input**, not a constant. `c1_authorization.py`
@@ -101,9 +101,17 @@ def main() -> int:
                     help="explicit output path. Defaults to this run's "
                          "governance/authorization.json, or to the global "
                          "entry point when no run is named.")
-    ap.add_argument("--require-clean", action="store_true",
-                    help="refuse to issue against a dirty tree; the authorized "
-                         "commit must describe what the pod will check out")
+    #: DEFAULT ON since 2026-09-13. It was opt-in, and attempt 15 aborted at $0
+    #: because it was not passed: the launch-bound record was still uncommitted
+    #: when the authorization was issued, so the authorized base predated BOTH
+    #: it and the authorization, and `session_commit_gate` correctly refused a
+    #: two-path lineage diff. An option that must be remembered to be safe is a
+    #: default in the wrong position.
+    ap.add_argument("--allow-dirty", action="store_true",
+                    help="issue against a dirty tree. Almost never right: the "
+                         "authorized session commit must describe exactly what "
+                         "the pod checks out, and anything uncommitted now "
+                         "becomes a second path in the lineage diff later.")
     ap.add_argument("--porcelain", action="store_true")
     args = ap.parse_args()
 
@@ -114,7 +122,7 @@ def main() -> int:
     #: The two effects that make this an ISSUANCE rather than a computation, and
     #: which is why they stay in the CLI: refusing a dirty tree, and reading the
     #: clock. `build_c1_authorization_payload` does neither.
-    if args.require_clean:
+    if not args.allow_dirty:
         dirty = git("status", "--porcelain")
         if dirty:
             raise SystemExit(

@@ -1,0 +1,59 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the closeout of C1 attempt 15, which aborted at $0 in a pre-provider gate. No quote was accepted, no resource created, nothing billed.",
+ "attempt": 15,
+ "package": "phase_c1.execution_package.2026-09-11",
+ "terminal_marker": null,
+ "setup_rc": null,
+ "launcher_exit": 11,
+ "classification": "PRE-PROVIDER LINEAGE ABORT at $0. Not an efficacy result, not a replay mismatch, not a frozen-rule INCONCLUSIVE. Stage G was never reached and no probe was trained.",
+ "the_failure": {
+  "where": "scripts/pod/autoinit_c1_launch.py::session_commit_and_lineage",
+  "message": "1 path(s) other than logs/stages/stage-1/phase_c1/runs/attempt15/governance/authorization.json changed between the authorized base and the session commit: ['logs/stages/stage-1/phase_c1/runs/attempt15/governance/readiness.json']",
+  "root_cause": "operator ordering, not a defect in the gate. The launch-bound sweep writes the readiness record; the issuer records the CURRENT HEAD as the authorized base; the gate then permits exactly one path to differ. Committing the record and the authorization together makes two. The execution preregistration has specified the correct order since it was written -- step 4 'commit ONLY the readiness record', step 5 'issue against that clean readiness commit', step 6 'commit ONLY the authorization artifact' -- and it was not followed.",
+  "the_gate_was_right": "it refused a session whose checkout differs from what was authorized in a way the authorization did not describe. That is the protection working, at $0.",
+  "repaired_by": "the issuer refuses a dirty tree BY DEFAULT now. It was opt-in via --require-clean, which is a safety property in the wrong position: it had to be remembered. The flag is inverted to --allow-dirty and the preregistration's step 5 records why."
+ },
+ "what_ran": {
+  "launch_bound_sweep": "PASS at 623f79570d42a406d61af7af82bf4dfafe7c2a1b, 11 passed / 0 skipped / 0 failed in 8.7 s",
+  "authorization_issued": true,
+  "bundle_staged": true,
+  "launcher_invoked": true,
+  "run_opened": true,
+  "gates_run": 1,
+  "gates_passed": 0,
+  "gpu_priced": true,
+  "provider_resource_created": false,
+  "probes_trained": 0
+ },
+ "provider": {
+  "pods": 0,
+  "observed": "ZERO_PODS",
+  "cost_usd": 0.0,
+  "note": "a live securePrice quote is a read-only query. L40S was quoted at $1.09/h, stock High, and nothing was created."
+ },
+ "budget": {
+  "this_attempt": 0.0,
+  "package_booked_after": 0.7959,
+  "why_zero": "the abort is a pre-provider gate refusal. Nothing was created and nothing billed."
+ },
+ "science": {
+  "formal_probes": 0,
+  "arms_evaluated": 0,
+  "decision": "NONE",
+  "reached_stage_g": false,
+  "protocol_changed": false,
+  "frozen_assets_touched": false
+ },
+ "chain": {
+  "state": "CONSUMED",
+  "why": "the launcher was invoked under the one-use authorization. A $0 pre-provider refusal does not return the chain -- the same rule that closed attempts 12 and 13.",
+  "preserved_unedited": {
+   "grant": "df511baf1178d4002218f10a0f0e5e98a373d520dcc37d3a60264e59ca124c51",
+   "readiness": "4a859905dff8226428f194394109ec89d756514173fc06986e20797c29311575",
+   "authorization": "f37edf0cffe142071df5acbacf5a73733a12cebe93019995e77c7c96f8d1813c",
+   "bundle_record": "b20aac736711f16c8c26970731629d570e1239df70c7d8ab48780de2e387b6e4"
+  }
+ },
+ "authorizes": "nothing"
+}

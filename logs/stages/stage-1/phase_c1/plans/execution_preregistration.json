@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "e7180a3239fe8b58132115d3676225d80ba7db44",
+ "head_commit": "3a8710de0cbbd5491f499333de315f58d5a1f539",
  "executable_source": {
   "digest": "2c43e4e6cf85582e3fa809512a1b2c611ba880e0229884fb566f3e7dae7845fd",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "c3f73421f92410d360fec54489ded35b887e17ceb1b1bc184fc6af8977a24363",
+  "digest": "48b127ca6a479713b23acca8cd9cb19f95dd8052878ada7bdd966f1925afeed2",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -106,8 +106,8 @@
    },
    {
     "path": "scripts/autoinit/issue_c1_authorization.py",
-    "sha256": "fd89885138b6b3b9c6bf66cce6d19a13dce3d5df662e63220c3d566dc3c8469b",
-    "bytes": 9052
+    "sha256": "7390b86b659041859e0b08772ce67079be975af5c5792e4d26220876fefdaa9d",
+    "bytes": 9629
    },
    {
     "path": "scripts/autoinit/renderer_parity_gate.py",
@@ -1042,7 +1042,7 @@
    "2. that clean pre-authorization tree is frozen: no source, test, preregistration, state, catalog or doc path may move after it",
    "3. the real `--kind launch_bound` pod-like sweep runs on THAT tree",
    "4. commit ONLY the readiness record",
-   "5. issue the authorization against that clean readiness commit, --require-clean",
+   "5. issue the authorization against that clean readiness commit. The issuer refuses a dirty tree BY DEFAULT since 2026-09-13: attempt 15 skipped step 4, issued with the record still uncommitted, and aborted at $0 on a two-path lineage diff. The ordering was written here and followed by nobody, which is what a default is for",
    "6. commit ONLY the authorization artifact",
    "7. stage the canonical bundle for that commit and round-trip it",
    "8. run all 12 $0 pre-provider gates",
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "72f352a03c874bd79914d9b09844c0f5b4d153356d7234bbe56b1f4cf7f0d8d2"
+ "preregistration_sha256": "0b2bf04b6e6b3f9c1d0e7c2c89a27c7ed24381d9256c8b6ffa685ad07afd95c1"
 }
