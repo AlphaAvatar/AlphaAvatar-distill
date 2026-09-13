@@ -70,7 +70,7 @@
    "kind": "launch_bound",
    "verdict": "FAIL",
    "swept_base_commit": "e7180a3239fe8b58132115d3676225d80ba7db44",
-   "describes_head": true
+   "describes_head": false
   },
   "launch_bound_ready": false,
   "launch_bound_failures": 1,

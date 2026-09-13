@@ -30,7 +30,7 @@ setup-abort branch, the provider confirms it is gone, and a live query returns
 
 | readiness | | owner |
 | --- | --- | --- |
-| latest sweep | **launch_bound — FAIL**, swept at `e7180a32`; describes the current tree | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
+| latest sweep | **launch_bound — FAIL**, swept at `e7180a32`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
 | launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
 | last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../stages/stage-1/phase_c1/history/readiness_history.json) |
 
