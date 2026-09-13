@@ -135,8 +135,11 @@ class ReadinessGroups:
     expected_skips: Mapping[str, Sequence[str]]
     #: Must PASS: named groups whose absence or skip is a finding.
     must_pass: Mapping[str, Sequence[str]]
-    #: A single node id that must pass because the session DOES stage its source.
-    staged_role_nodeid: str
+    #: A single node id that must pass because the session DOES stage its
+    #: source, or None when the session declares no such case. `None` is
+    #: "not applicable", never "any outcome will do": an absent nodeid is
+    #: refused, and only an explicit None is skipped.
+    staged_role_nodeid: str | None
     #: Legitimate skips inside a watched module that are not environment-driven.
     known_non_environment_skips: Sequence[str]
     #: Extra context appended to a group's refusal, by group name. The
@@ -352,11 +355,13 @@ def evaluate_sweep(outcomes: dict[str, str],
             problems.append(
                 f"{name}: expected {len(ids)} skip(s), got {seen}." + note(name))
 
-    staged_role = outcomes.get(groups.staged_role_nodeid, "ABSENT")
-    if staged_role != "passed":
-        problems.append(
-            f"the staged-role case did not pass: {staged_role!r} for "
-            f"{groups.staged_role_nodeid!r}." + note("staged_role"))
+    staged_role = None
+    if groups.staged_role_nodeid is not None:
+        staged_role = outcomes.get(groups.staged_role_nodeid, "ABSENT")
+        if staged_role != "passed":
+            problems.append(
+                f"the staged-role case did not pass: {staged_role!r} for "
+                f"{groups.staged_role_nodeid!r}." + note("staged_role"))
 
     # Any OTHER skip in a watched module is an unexpected environment skip: a
     # test that quietly stopped running under an empty HOME is

@@ -68,9 +68,9 @@
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
    "kind": "launch_bound",
-   "verdict": "PASS",
-   "swept_base_commit": "183667e37ff950c7640cbf51fb98dcc0835d04b4",
-   "describes_head": false
+   "verdict": "FAIL",
+   "swept_base_commit": "e7180a3239fe8b58132115d3676225d80ba7db44",
+   "describes_head": true
   },
   "launch_bound_ready": false,
   "launch_bound_failures": 1,

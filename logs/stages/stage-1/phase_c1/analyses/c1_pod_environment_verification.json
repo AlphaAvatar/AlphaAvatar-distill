@@ -4,10 +4,10 @@
  "run_id": "attempt15",
  "stage_id": "1",
  "record": "logs/stages/stage-1/phase_c1/runs/attempt15/governance/readiness.json",
- "record_self_sha256": "d01528564f4909fd80d524d88357bf6bde22f6190a8f66fdb69e2917a42f1438",
+ "record_self_sha256": "d0501eb1240ed5735d35ba6a3d23fbb2c5af6f2128c516e4ff3ae08c0aa70b67",
  "record_kind": "launch_bound",
- "verdict": "PASS",
- "swept_base_commit": "183667e37ff950c7640cbf51fb98dcc0835d04b4",
+ "verdict": "FAIL",
+ "swept_base_commit": "e7180a3239fe8b58132115d3676225d80ba7db44",
  "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
  "_it_lags_by_design": "a launch_bound sweep writes ONLY the run-owned record: rewriting this tracked file would put an unpermitted change into the tree it just certified, and the session-lineage rule would refuse the launch. So between a launch-bound sweep and the launch it feeds, the summary here describes the PREVIOUS state of that run. The record named above is the authority; `--repoint` refreshes this at the next convergence.",
  "authorizes": "nothing"

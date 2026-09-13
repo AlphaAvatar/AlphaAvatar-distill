@@ -11,10 +11,13 @@ so the command in the record is literally the command that produced the counts.
 A readiness record whose command field was typed by hand is a claim, not
 evidence.
 
-The sweep takes about thirteen minutes. That is why the record exists:
-`aadistill.runtime.pod_environment.verify_record` re-checks in milliseconds that
-the recorded proof still describes the live executable, so a pre-provider gate
-never has to re-run this while a pod waits.
+The sweep takes about ten seconds — it runs the session's own pod selection,
+which for C1 is `tests/c1_preflight/`. It took thirteen minutes until
+2026-09-13, when that selection was the whole repository minus four modules.
+The record still exists because `verify_record` re-checks in milliseconds that
+the recorded proof describes the LIVE executable, which is a different question
+from re-running the sweep: a pre-provider gate must not have to run anything
+while a pod waits.
 
 `--kind` defaults to `diagnostic`, the weaker claim: it says the pod-like suite
 passes on this tree and that the machinery works. A `launch_bound` record is the
@@ -533,7 +536,7 @@ def main() -> int:
         rc, seconds = 0, 0.0
         print(f"parsing the existing sweep at {args.junit}")
     else:
-        print(f"running: {command}\n(this takes roughly 13 minutes)")
+        print(f"running: {command}")
         # A sweep supersedes the record it is about to replace, and the suite it
         # runs CONTAINS the two tests that verify that record. Leaving the old one
         # in place makes them assert a stale artifact against the tree being
