@@ -70,9 +70,9 @@
    "kind": "launch_bound",
    "verdict": "PASS",
    "swept_base_commit": "183667e37ff950c7640cbf51fb98dcc0835d04b4",
-   "describes_head": true
+   "describes_head": false
   },
-  "launch_bound_ready": true,
+  "launch_bound_ready": false,
   "launch_bound_failures": 1,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json",
   "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
