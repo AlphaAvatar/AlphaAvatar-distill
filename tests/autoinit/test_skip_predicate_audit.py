@@ -40,19 +40,27 @@ def test_the_registry_holds_no_stale_entry(rec):
         "these registry lines no longer hold a predicate that needs one")
 
 
-def test_the_audit_covers_the_session_s_own_selection(rec):
-    """Not `tests/` — the modules C1 actually runs, from its own manifest."""
-    from aadistill.runtime import staging_contract as sc
+def test_the_audit_covers_the_whole_suite_and_gates_nothing(rec):
+    """It scans `tests/`, and it is a DEVELOPMENT audit.
+
+    It used to scan "the modules C1 actually runs", which was the whole
+    repository minus four. C1's pod selection became `tests/c1_preflight/` on
+    2026-09-13 — thirteen tests with no skip predicate in them — so scoping to
+    the selection would have left this auditing nothing and reporting PASS.
+
+    The coupling is gone in the other direction instead: it audits everything,
+    for developers, and blocks no launch. The pod-parity property it used to
+    assert for a paid run is asserted by
+    `tests/c1_preflight/test_c1_runtime_contract.py::test_no_check_here_can_skip`,
+    where it is one AST walk over thirteen tests.
+    """
     assert rec["modules_scanned"] > 100
-    assert rec["test_ignores"] == [
-        "tests/data/test_recovery_corpus_pipeline.py",
-        "tests/pod/test_phase_a_stages1_5_execute.py",
-        "tests/autoinit/test_phase_b_reuse_hostlocal.py",
-        "tests/autoinit/test_stage1_import.py",
-    ]
-    for ignored in rec["test_ignores"]:
-        assert not any(p["file"] == ignored for p in rec["predicates"]), (
-            f"{ignored} is ignored by the session but audited anyway")
+    assert rec["test_ignores"] == [], (
+        "the audit is coupled to a session's selection again; a selection that "
+        "excludes the predicates makes its PASS meaningless")
+    files = {p["file"] for p in rec["predicates"]}
+    assert any(f.startswith("tests/pod/") for f in files)
+    assert any(f.startswith("tests/autoinit/") for f in files)
 
 
 def test_the_simulator_marker_is_not_a_premise_anywhere(rec):

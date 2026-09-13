@@ -1,36 +1,33 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 179,
- "test_ignores": [
-  "tests/data/test_recovery_corpus_pipeline.py",
-  "tests/pod/test_phase_a_stages1_5_execute.py",
-  "tests/autoinit/test_phase_b_reuse_hostlocal.py",
-  "tests/autoinit/test_stage1_import.py"
- ],
- "n_predicates": 110,
+ "modules_scanned": 184,
+ "test_ignores": [],
+ "n_predicates": 113,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 45,
+  "filesystem_premise_onpod": 46,
   "filesystem_premise_unresolved": 5,
   "gpu": 1,
   "optional_dependency": 9,
   "repository_content": 3,
   "staged_artifact": 3,
-  "unrecognised": 27,
-  "unstaged_artifact": 10
+  "unrecognised": 28,
+  "unstaged_artifact": 11
  },
- "n_differs_on_pod": 26,
- "n_unrecognised": 32,
- "n_registered": 39,
+ "n_differs_on_pod": 27,
+ "n_unrecognised": 33,
+ "n_registered": 41,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
    "tests/autoinit/test_c1_confirmation_scoring.py",
    "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
    "tests/autoinit/test_frozen_records.py",
+   "tests/autoinit/test_stage1_import.py",
    "tests/data/test_e7_streams.py",
+   "tests/data/test_recovery_corpus_pipeline.py::tokenizer",
    "tests/docs/test_log_organisation.py::test_every_cited_path_including_untracked_really_exists",
    "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store",
    "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store",
@@ -108,8 +105,8 @@
  "parity_by_resolution": {
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
-  "normalized_by_contract": 32,
-  "same_on_pod": 59
+  "normalized_by_contract": 34,
+  "same_on_pod": 60
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -157,6 +154,7 @@
   "tests/data/test_c1_battery.py::require_role",
   "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
   "tests/data/test_dataset.py::tokenizer",
+  "tests/data/test_recovery_corpus_pipeline.py::tokenizer",
   "tests/data/test_sessions.py::tokenizer",
   "tests/docs/test_log_organisation.py",
   "tests/docs/test_repository_structure.py",
@@ -308,7 +306,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 445,
+   "line": 417,
    "kind": "pytest.skip",
    "function": "_skip_if_inside_the_measured_suite",
    "condition": "CTE.in_cpu_test_scope()",
@@ -324,7 +322,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 473,
+   "line": 445,
    "kind": "pytest.skip",
    "function": "test_the_committed_record_still_binds_the_live_executable",
    "condition": "not path.is_file()",
@@ -340,7 +338,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 485,
+   "line": 457,
    "kind": "pytest.skip",
    "function": "test_the_committed_record_still_binds_the_live_executable",
    "condition": "not (REPO / named).is_file()",
@@ -356,7 +354,7 @@
   },
   {
    "file": "tests/autoinit/test_c1_readiness_gates.py",
-   "line": 883,
+   "line": 855,
    "kind": "pytest.skip",
    "function": "test_the_recorded_swept_commit_is_a_real_commit_in_this_repository",
    "condition": "not path.is_file()",
@@ -756,7 +754,7 @@
   },
   {
    "file": "tests/autoinit/test_skip_predicate_audit.py",
-   "line": 123,
+   "line": 131,
    "kind": "pytest.skip",
    "function": "test_the_committed_audit_record_matches_the_live_one",
    "condition": "not path.is_file()",
@@ -771,6 +769,22 @@
    "parity_why": "every path it inspects is tracked or staged"
   },
   {
+   "file": "tests/autoinit/test_stage1_import.py",
+   "line": 33,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "not (D / \"search_result.json\").is_file() or not STORE.is_dir()",
+   "expanded": "not (D / \"search_result.json\").is_file() or not STORE.is_dir() | D=REPO / \"logs/stages/stage-1/phase_a/runs/attempt12\" | STORE=Path(\"/home/ecs-user/aad-artifacts/autoinit/phase_a\") | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "unstaged_artifact",
+   "verdict": "differs_on_pod",
+   "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
+   "nodeid": "tests/autoinit/test_stage1_import.py",
+   "readiness_group": null,
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
+  },
+  {
    "file": "tests/autoinit/test_staging_contract.py",
    "line": 86,
    "kind": "pytest.skip",
@@ -781,7 +795,7 @@
    "verdict": "unknown",
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
-   "readiness_group": "devbox_only",
+   "readiness_group": null,
    "registered_as": "staging_premise_property",
    "parity": "normalized_by_contract",
    "parity_why": "these ask the filesystem for unstaged artifacts. The simulator has moved them aside and the pod never received them, so both skip for the same stated reason."
@@ -797,7 +811,7 @@
    "verdict": "same_on_pod",
    "why": "C1's manifest stages exactly this, so the premise travels",
    "nodeid": "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
-   "readiness_group": "devbox_only",
+   "readiness_group": null,
    "registered_as": null,
    "parity": "same_on_pod",
    "parity_why": "C1's manifest stages it"
@@ -813,7 +827,7 @@
    "verdict": "same_on_pod",
    "why": "C1's manifest stages exactly this, so the premise travels",
    "nodeid": "tests/autoinit/test_staging_contract.py::test_an_undeclared_file_inside_a_staged_destination_stays_hidden",
-   "readiness_group": "devbox_only",
+   "readiness_group": null,
    "registered_as": null,
    "parity": "same_on_pod",
    "parity_why": "C1's manifest stages it"
@@ -829,7 +843,7 @@
    "verdict": "same_on_pod",
    "why": "C1's manifest stages exactly this, so the premise travels",
    "nodeid": "tests/autoinit/test_staging_contract.py::test_the_dev_box_satisfies_both_premises_and_so_both_tests_run",
-   "readiness_group": "devbox_only",
+   "readiness_group": null,
    "registered_as": null,
    "parity": "same_on_pod",
    "parity_why": "C1's manifest stages it"
@@ -877,7 +891,7 @@
    "verdict": "unknown",
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
-   "readiness_group": "renderer_parity",
+   "readiness_group": null,
    "registered_as": "pinned_snapshot_source",
    "parity": "normalized_by_contract",
    "parity_why": "the seven pinned snapshots live in the Hugging Face hub cache. The contract sets HF_HOME/HF_HUB_CACHE to an empty isolated root and clears HUGGINGFACE_HUB_CACHE, HF_DATASETS_CACHE, TRANSFORMERS_CACHE and XDG_CACHE_HOME, so the cache is empty on the pod too and the same cases skip."
@@ -913,6 +927,22 @@
    "registered_as": "devbox_only_artifact",
    "parity": "absent_on_both",
    "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage3/e7_fineweb_kd']"
+  },
+  {
+   "file": "tests/data/test_recovery_corpus_pipeline.py",
+   "line": 52,
+   "kind": "pytest.skip",
+   "function": "tokenizer",
+   "condition": "pytest.skip(\"teacher tokenizer not in local HF cache\")",
+   "expanded": "pytest.skip(\"teacher tokenizer not in local HF cache\")",
+   "signal": "unrecognised",
+   "verdict": "unknown",
+   "why": "no known signal matched; a human must say whether a pod sees the same premise",
+   "nodeid": "tests/data/test_recovery_corpus_pipeline.py::tokenizer",
+   "readiness_group": null,
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/data/test_sessions.py",
@@ -1411,6 +1441,22 @@
    "parity_why": "every path it inspects is tracked or staged"
   },
   {
+   "file": "tests/pod/test_phase_a_stages1_5_execute.py",
+   "line": 64,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "not (AUTH.is_file() and STAGE3_PROBE.is_file() and CALIBRATION.is_file()\n         and (STATE_EVAL / \"manifest.json\").is_file() and REAL_SCORED.is_file()\n         and (REPO / \"logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json\").is_file()\n         and (REPO / \"artifacts/stage3/recovery_search_v2/manifest.json\").is_file())",
+   "expanded": "not (AUTH.is_file() and STAGE3_PROBE.is_file() and CALIBRATION.is_file()\n         and (STATE_EVAL / \"manifest.json\").is_file() and REAL_SCORED.is_file()\n         and (REPO / \"logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json\").is_file()\n         and (REPO / \"artifacts/stage3/recovery_search_v2/manifest.json\").is_file()) | AUTH=REPO / \"logs/budget/approvals/autoinit_phase_a_authorization.json\" | CALIBRATION=REPO / \"artifacts/stage1/e8_calibration_v1/items.jsonl\" | REAL_SCORED=REPO / \"logs/stages/stage-1/phase_a/results/autoinit_stage3_complete\"\n               / \"preflight_ctl_r0860k_sa_recovery_search.json\" | REPO=Path(__file__).resolve().parents[2] | STAGE3_PROBE=REPO / \"logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/engine_probe.json\" | STATE_EVAL=REPO / \"artifacts/stage1/state_eval_v1\"",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/pod/test_phase_a_stages1_5_execute.py",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
    "file": "tests/pod/test_pod_script_paths.py",
    "line": 147,
    "kind": "pytest.skip",
@@ -1501,7 +1547,7 @@
    "verdict": "unknown",
    "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
-   "readiness_group": "host_local_c1",
+   "readiness_group": null,
    "registered_as": "devbox_only_artifact",
    "parity": "normalized_by_contract",
    "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
@@ -1517,7 +1563,7 @@
    "verdict": "unknown",
    "why": "no known signal matched; a human must say whether a pod sees the same premise",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
-   "readiness_group": "known_non_environment",
+   "readiness_group": null,
    "registered_as": "manifest_derived",
    "parity": "same_on_pod",
    "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
@@ -1549,7 +1595,7 @@
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
-   "readiness_group": "host_local_c1",
+   "readiness_group": null,
    "registered_as": "devbox_only_artifact",
    "parity": "normalized_by_contract",
    "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
@@ -1565,7 +1611,7 @@
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
    "nodeid": "tests/pod/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
-   "readiness_group": "host_local_c1",
+   "readiness_group": null,
    "registered_as": "devbox_only_artifact",
    "parity": "normalized_by_contract",
    "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
@@ -1990,5 +2036,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "cb0630c7df799e830e7b76fd643532234e0412313c0957bbc193ee7611a26b48"
+ "digest": "96d68aeb9fe7efa3c3d0b3bfe063f7e1b9d1321fda42e5f495b165eb2a1d261e"
 }

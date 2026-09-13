@@ -182,17 +182,11 @@ def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
         problems.append("the recorder does not guard the global pointer "
                         "against a launch_bound sweep")
 
-    #: A tracked `logs/` file that is not on disk makes `needs_whole_tree` fire,
-    #: which makes 23 tests SKIP in the sweep and RUN on the pod. Attempt 14's
-    #: sweep certified exactly that skip set and the pod did not reproduce it.
-    #: Cheap here, thirteen minutes and a paid gate anywhere else.
-    sys.path.insert(0, str(REPO / "tests/docs"))
-    from test_log_organisation import _missing_tracked_logs
-    missing = _missing_tracked_logs()
-    if missing:
-        problems.append(f"{len(missing)} tracked logs/ file(s) are not on disk, "
-                        f"so the sweep would skip the whole-tree checks the pod "
-                        f"runs: {missing[:3]}")
+    #: REMOVED 2026-09-13: a check that the whole `logs/` tree is present, so
+    #: that `needs_whole_tree` would not skip 23 tests in the sweep that the pod
+    #: then ran. The pod runs `tests/c1_preflight/` now and collects none of
+    #: them, so the divergence it guarded cannot happen and the guard protected
+    #: nothing. Deleted rather than kept for reassurance.
 
     #: The store the gate compares the battery against. Its ABSENCE is the pod's
     #: condition and the sweep now models it; its absence HERE would mean the

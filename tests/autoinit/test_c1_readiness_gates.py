@@ -245,93 +245,65 @@ def test_a_missing_measured_file_refuses_rather_than_digesting_less(tmp_path):
 
 
 # --- what the record must assert about the sweep ----------------------------
+#
+# Nine groups of repository node ids lived here, and thirteen tests policed
+# them. They described which of 3892 repository tests a C1 pod was expected to
+# skip — an expectation that existed only because the pod ran the whole
+# repository. It runs `tests/c1_preflight/` now, so the groups were deleted and
+# these went with them: a test whose subject no longer exists is not coverage.
+#
+# The generic `evaluate_sweep` mechanism is unchanged and is exercised against
+# SYNTHETIC groups in `tests/pod/test_cpu_test_outcome_evidence.py`, which is
+# the stronger place for it — a mechanism proved against one session's contract
+# has not been shown to be a mechanism. What is pinned here is C1's contract as
+# it now stands.
 
-def test_the_expected_skip_set_is_exactly_the_seven_renderer_cases():
-    assert len(pe.RENDERER_PARITY_NODEIDS) == 7
-    groups = {n.split("[")[1].rstrip("]") for n in pe.RENDERER_PARITY_NODEIDS}
-    assert groups == set(EXPECTED_GROUPS)
-    assert all(n.startswith("tests/data/test_c1_battery.py::")
-               for n in pe.RENDERER_PARITY_NODEIDS)
+def test_the_c1_contract_expects_no_skips_at_all():
+    """The simplest contract there is, and it is deliberate.
 
-
-def test_the_five_leaf_transport_nodeids_are_the_historical_ones():
-    """The five names are pinned so the regression set cannot quietly shrink.
-
-    They are NOT "the five that failed on the pod": that attribution was
-    withdrawn when it failed to reproduce under the pod's real HF_TOKEN
-    contract. The five actual attempt-3R identities are still unknown.
+    Every preflight test answers the same way on the dev box, in the sweep and
+    on the pod, so any skip anywhere is a divergence rather than an expectation.
     """
-    assert len(pe.LEAF_TRANSPORT_NODEIDS) == 5
-    historical = {
-        "test_a_corrupted_remote_file_is_caught_by_the_round_trip",
-        "test_a_size_mismatch_at_the_far_end_is_caught",
-        "test_an_lfs_oid_that_disagrees_is_caught_without_downloading",
-        "test_a_file_absent_from_the_far_end_is_caught",
-        "test_the_round_trip_needs_no_dev_box_directory"}
-    assert {n.split("::")[1] for n in pe.LEAF_TRANSPORT_NODEIDS} == historical
+    g = pe.C1_READINESS_GROUPS
+    assert g.expected_skips == {}, g.expected_skips
+    assert g.known_non_environment_skips == ()
+    assert g.staged_role_nodeid is None
+    assert g.watched == (pe.RUNTIME_CONTRACT_MODULE,)
 
 
-def _outcomes(**over) -> dict[str, str]:
-    o = {n: "skipped" for n in pe.RENDERER_PARITY_NODEIDS}
-    # The C1 construction-source cases skip because their historical roles are
-    # not staged; the one role C1 DOES stage must pass.
-    o.update({n: "skipped" for n in pe.BATTERY_SOURCE_NODEIDS})
-    o[pe.BATTERY_STAGED_ROLE_NODEID] = "passed"
-    o.update({n: "skipped" for n in pe.DEVBOX_ONLY_NODEIDS})
-    o.update({n: "skipped" for n in pe.HOST_LOCAL_C1_NODEIDS})
-    o.update({n: "passed" for n in pe.LEAF_TRANSPORT_NODEIDS})
-    o.update({n: "passed" for n in pe.REPOSITORY_STATE_NODEIDS})
-    o["tests/other/test_thing.py::test_ok"] = "passed"
-    o.update(over)
-    return o
+def test_there_is_no_gpu_only_preflight_module():
+    """A GPU module in the pytest gate would test nothing and look like it had.
+
+    The shared CPU-test contract sets `CUDA_VISIBLE_DEVICES=""` for the pytest
+    command on BOTH machines, so `torch.cuda.is_available()` is False on the pod
+    too. The card is asserted after the gate, outside the scope.
+    """
+    from aadistill.runtime.cpu_test_env import overlay
+
+    assert overlay("/tmp/scope")["CUDA_VISIBLE_DEVICES"] == ""
+    assert not (REPO / "tests/c1_preflight/test_c1_gpu_runtime.py").exists()
 
 
-def test_the_expected_sweep_shape_passes():
-    findings = pe.evaluate_sweep(_outcomes())
-    assert findings["verdict"] == "PASS", findings["problems"]
-    assert findings["leaf_transport_all_passed"]
-    assert findings["renderer_parity_skipped_as_expected"]
+def test_the_pod_selection_is_exactly_the_preflight_directory():
+    """Derived from the tree, so a NEW top-level test directory is caught.
 
+    The selection is expressed as ignores, because the shared setup script's
+    invocation is `pytest tests/ $SESSION_TEST_IGNORES` and a session may only
+    add flags. That makes it a complement, and a complement rots silently: a
+    directory added tomorrow would be collected on a billing GPU.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(REPO / "scripts/pod"))
+    import autoinit_c1_launch as launcher
 
-def test_a_leaf_transport_skip_is_a_problem_not_a_pass():
-    """The exact regression: a skipped transport check on a pod is
-    indistinguishable from one that never existed."""
-    findings = pe.evaluate_sweep(
-        _outcomes(**{pe.LEAF_TRANSPORT_NODEIDS[0]: "skipped"}))
-    assert findings["verdict"] == "FAIL"
-    assert any("leaf_transport" in p for p in findings["problems"])
-
-
-def test_an_unexpected_environment_skip_is_detected():
-    """Not global zero-skips — the suite has legitimate unrelated skips — but a
-    NEW skip in the two modules the repair touched."""
-    findings = pe.evaluate_sweep(_outcomes(**{
-        "tests/data/test_c1_battery.py::test_the_counts_are_exactly_the_frozen_mixture":
-            "skipped"}))
-    assert findings["verdict"] == "FAIL"
-    assert any("unexpected environment skips" in p for p in findings["problems"])
-
-
-def test_an_unrelated_skip_elsewhere_is_not_a_problem():
-    findings = pe.evaluate_sweep(
-        _outcomes(**{"tests/models/test_big.py::test_needs_gpu": "skipped"}))
-    assert findings["verdict"] == "PASS", findings["problems"]
-
-
-def test_a_renderer_case_that_passed_is_also_wrong():
-    """If it PASSED under the simulator, the dev box's dataset cache leaked into
-    the isolated environment and the sweep did not simulate a pod at all."""
-    findings = pe.evaluate_sweep(
-        _outcomes(**{pe.RENDERER_PARITY_NODEIDS[0]: "passed"}))
-    assert findings["verdict"] == "FAIL"
-    assert any("renderer_parity" in p for p in findings["problems"])
-
-
-def test_any_failure_is_a_problem():
-    findings = pe.evaluate_sweep(
-        _outcomes(**{"tests/other/test_thing.py::test_ok": "failed"}))
-    assert findings["verdict"] == "FAIL"
-    assert findings["failed_nodeids"] == ["tests/other/test_thing.py::test_ok"]
+    siblings = {f"tests/{p.name}" for p in (REPO / "tests").iterdir()
+                if p.name not in ("__pycache__", "support", "conftest.py")
+                and (p.is_dir() or p.name.startswith("test_"))}
+    siblings.discard(launcher.POD_TEST_SELECTION)
+    missing = siblings - set(launcher.TEST_IGNORES)
+    assert not missing, (
+        f"{sorted(missing)} would be collected on a paid pod; add them to "
+        "TEST_IGNORES or move the check into tests/c1_preflight/")
 
 
 def test_junit_nodeids_round_trip_without_a_file_attribute(tmp_path):
@@ -1087,73 +1059,6 @@ def test_the_pricing_record_is_hash_verified_before_the_rate_is_used():
     doc = load_pricing(REPO)
     assert doc["hardware"]["price_per_hour_usd"] == 1.09
     assert PRICING_PATH == "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json"
-
-
-def test_a_battery_source_case_that_passed_means_the_role_leaked(tmp_path):
-    """If a construction-source case PASSES on a pod, the staged view was too
-    generous — or, worse, it passed vacuously against a role it never read."""
-    findings = pe.evaluate_sweep(
-        _outcomes(**{pe.BATTERY_SOURCE_NODEIDS[0]: "passed"}))
-    assert findings["verdict"] == "FAIL"
-    assert any("battery_source" in p
-               for p in findings["problems"])
-
-
-def test_the_staged_battery_role_must_not_skip(tmp_path):
-    """C1 stages recovery_search_v2, so its disjointness parameter has to RUN.
-    A skip there would mean the local asset stopped being staged."""
-    findings = pe.evaluate_sweep(
-        _outcomes(**{pe.BATTERY_STAGED_ROLE_NODEID: "skipped"}))
-    assert findings["verdict"] == "FAIL"
-    # The refusal names the node id, and C1's own `refusal_notes` supply the
-    # reason -- the mechanism cannot know that recovery_search_v2 is staged.
-    assert any("staged-role case did not pass" in p
-               and "recovery_search_v2" in p for p in findings["problems"]), (
-        findings["problems"])
-
-
-def test_the_c1_readiness_owned_skip_set_is_exact():
-    """FOURTEEN, in four separately-named groups — and this is the set C1
-    READINESS owns, not a claim about the whole repository, which has other
-    legitimate historical and environment skips of its own.
-
-    Named separately because they skip for different reasons: a pinned dataset
-    absent, a historical source role absent, a dev-box-only self-test, a
-    host-local store this session does not own.
-    """
-    expected = (set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
-                | set(pe.DEVBOX_ONLY_NODEIDS) | set(pe.HOST_LOCAL_C1_NODEIDS))
-    assert len(pe.RENDERER_PARITY_NODEIDS) == 7
-    assert len(pe.BATTERY_SOURCE_NODEIDS) == 3
-    assert len(pe.DEVBOX_ONLY_NODEIDS) == 3
-    assert len(pe.HOST_LOCAL_C1_NODEIDS) == 3
-    assert len(expected) == 16
-    assert pe.BATTERY_STAGED_ROLE_NODEID not in expected
-    findings = pe.evaluate_sweep(_outcomes())
-    assert findings["expected_environment_skips"] == sorted(expected)
-
-
-def test_the_non_environment_exemption_is_named_and_narrow():
-    """One nodeid, with a reason, and it is NOT in the readiness-owned set.
-
-    Widening the watch to test_recovery_continuation_session.py surfaced a
-    pre-existing skip that has nothing to do with HOME, HF or staging: the branch
-    it covers is only live when no verified transport exists, and one does. The
-    answer is a named exemption, not a narrower watch that would also stop
-    noticing real staging skips in that module.
-    """
-    assert len(pe.KNOWN_NON_ENVIRONMENT_SKIPS) == 1
-    expected = (set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
-                | set(pe.DEVBOX_ONLY_NODEIDS) | set(pe.HOST_LOCAL_C1_NODEIDS))
-    assert not set(pe.KNOWN_NON_ENVIRONMENT_SKIPS) & expected
-    findings = pe.evaluate_sweep(
-        _outcomes(**{pe.KNOWN_NON_ENVIRONMENT_SKIPS[0]: "skipped"}))
-    assert findings["verdict"] == "PASS", findings["problems"]
-    # A different unexpected skip in that same module is still caught.
-    findings = pe.evaluate_sweep(_outcomes(**{
-        "tests/pod/test_recovery_continuation_session.py::test_something_new":
-            "skipped"}))
-    assert findings["verdict"] == "FAIL"
 
 
 # --- the preregistration's operational contract ------------------------------

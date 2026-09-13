@@ -30,8 +30,8 @@ setup-abort branch, the provider confirms it is gone, and a live query returns
 
 | readiness | | owner |
 | --- | --- | --- |
-| latest sweep | **launch_bound — FAIL**, swept at `697dc6aa`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
-| launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
+| latest sweep | **launch_bound — PASS**, swept at `183667e3`; describes the current tree | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
+| launch-bound for the next session | **PREPARED** | this file's launch-chain section |
 | last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../stages/stage-1/phase_c1/history/readiness_history.json) |
 
 *Generated from the record by `scripts/consolidate/render_log_navigation.py`; do not edit by hand — it went stale within hours when it was prose.*

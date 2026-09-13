@@ -45,11 +45,9 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from experiments.phase_c1.authorization import c1_harness_digest  # noqa: E402
 from experiments.phase_c1.pod_environment import (  # noqa: E402
     C1_RECORD_CONTRACT,
-    LEAF_TRANSPORT_NODEIDS,
     RECORD_PATH,
     RECORD_POINTER,
     record_path_for,
-    RENDERER_PARITY_NODEIDS,
     evaluate_sweep,
     head_commit,
     pod_test_environment_digest,
@@ -664,11 +662,6 @@ def main() -> int:
         # remembered in two places, and the second was forgotten. Same failure
         # shape as the transcribed pytest command.
         "findings": findings,
-        "expected_renderer_parity_skips": list(RENDERER_PARITY_NODEIDS),
-        "leaf_transport_nodeids": list(LEAF_TRANSPORT_NODEIDS),
-        "renderer_parity_skipped_as_expected":
-            findings["renderer_parity_skipped_as_expected"],
-        "leaf_transport_all_passed": findings["leaf_transport_all_passed"],
         "unexpected_environment_skips": findings["unexpected_environment_skips"],
         "expected_environment_skips": findings["expected_environment_skips"],
         "problems": findings["problems"],

@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "ab676e97503080c4d131a130277607132af0866b",
+ "head_commit": "183667e37ff950c7640cbf51fb98dcc0835d04b4",
  "executable_source": {
   "digest": "2c43e4e6cf85582e3fa809512a1b2c611ba880e0229884fb566f3e7dae7845fd",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "b729998b51b339e051c0e812c04f821ae97948a42fccfda289340e6bdc0a4e61",
+  "digest": "7d68120d54632aac763a632749a9b88b1aeea7246b37b627757726f2da3b2eab",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -181,8 +181,8 @@
    },
    {
     "path": "scripts/experiments/phase_c1/pod_environment.py",
-    "sha256": "b64cccac7b1c050203047e81cfaf763994f2eb641c30bc9bbe0a4e6cb5de6cf5",
-    "bytes": 16985
+    "sha256": "7b08011426704176378d0b3f92e1fa71bc8f7318f7d3d566c3c73cf3448dd440",
+    "bytes": 10153
    },
    {
     "path": "scripts/experiments/phase_c1/probe_results.py",
@@ -221,8 +221,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "5ca8be9f6a9f6153fcc96a28a978ac5f57e710464e9c3ac85ad2b36b066eeb23",
-    "bytes": 82952
+    "sha256": "a34956350f976a16db09373394481ef0930740844555b526d36e55b15eccac54",
+    "bytes": 83759
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "53cc4cd582b7b6e13579715fed80e74591c86c2e561f7528ae596501da88098c"
+ "preregistration_sha256": "bb573fc3d554664846c48247c737769695b630fbbb58a67ed8c5a29f1e2d6374"
 }

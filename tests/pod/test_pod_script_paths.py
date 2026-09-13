@@ -649,21 +649,39 @@ def test_the_simulator_runs_each_session_s_own_ignore_list():
         "would fall back to the generic default -- the attempt-4 defect")
     assert "derive_c1_session()" in recorder
 
+    #: Every session must keep the ~20-minute pre-flight rehearsal out of its
+    #: pod gate, whose timeout exits 90 and kills a paid session. C1 states this
+    #: differently now — it names a positive selection and excludes all of
+    #: `tests/pod` — so the property is checked as "not collected", not as "this
+    #: literal is in the list".
     for name, extra in SESSION_LAUNCHERS:
         mod = load_session_launcher(name)
         spec = mod.spec(session_args(mod, extra))
         pod = sorted(spec.setup.test_ignores)
-        assert "tests/pod/test_phase_a_stages1_5_execute.py" in pod, (
+        rehearsal = "tests/pod/test_phase_a_stages1_5_execute.py"
+        assert any(rehearsal == i or rehearsal.startswith(i.rstrip("/") + "/")
+                   for i in pod), (
             f"{name} puts the ~20-minute pre-flight rehearsal back in the pod's "
-            "2700 s gate, whose timeout exits 90 and kills a paid session")
+            "gate, whose timeout exits 90 and kills a paid session")
 
 
-def test_c1_ignores_the_phase_b_host_local_module():
+def test_c1_runs_no_host_local_module_on_a_paid_pod():
     """Its premise is a retained byte store that is deliberately host-local, and
-    running it on a pod cost three of attempt 4's six failures. The WHOLE module
-    is ignored: the cases that did not fail rest on the same absent store."""
+    running it on a pod cost three of attempt 4's six failures.
+
+    It was named in a four-module exclusion list. C1's pod selection is positive
+    now — `tests/c1_preflight/` and nothing else — so the property is that the
+    module is not collected, which is a stronger statement than the old one and
+    covers every other host-local module at the same time.
+    """
     mod = load_session_launcher("autoinit_c1_launch")
-    ignores = mod.spec(session_args(mod)).setup.test_ignores
-    assert "tests/autoinit/test_phase_b_reuse_hostlocal.py" in ignores
+    spec = mod.spec(session_args(mod))
+    ignores = list(spec.setup.test_ignores)
+    for host_local in ("tests/autoinit/test_phase_b_reuse_hostlocal.py",
+                       "tests/autoinit/test_stage1_import.py",
+                       "tests/pod/test_recovery_continuation_session.py"):
+        assert any(host_local.startswith(i.rstrip("/") + "/") or host_local == i
+                   for i in ignores), host_local
+    assert mod.POD_TEST_SELECTION == "tests/c1_preflight"
 
 

@@ -152,30 +152,40 @@ C1_ROPE_CHECKPOINT_DIR = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 #: this session a command line for a search it structurally cannot run, which is
 #: the same class of defect as inheriting its driver. So C1 declares its own.
 TEACHER_REVISION = CS.TEACHER_REVISION
-#: Two Phase-A rehearsals C1 does not exercise. C1's own execution regression is
-#: deliberately NOT ignored: it is ~60 seconds against a 2700 s gate, and running
-#: it on the pod proves the driver's control flow in the real environment before
-#: any stage spends money.
-#: `test_phase_b_reuse_hostlocal.py` joined them after attempt 4, which it cost
-#: three of its six failures. The module's premise is a retained probe byte store
-#: that is deliberately HOST-LOCAL — the file says so in its name — and Phase B's
-#: own session already excludes it from its pod test gate for exactly that reason.
-#: C1 re-ran it on a host where its premises are absent. The WHOLE module is
-#: ignored, not the three nodeids that happened to fail: the other cases in it
-#: rest on the same absent store and would fail the moment they were reached.
-#: Staging the store instead was rejected — it is Phase-B reuse evidence, not a C1
-#: runtime input, and no frozen Phase-B science is touched here.
-#: `test_stage1_import.py` joined on 2026-09-05. The WHOLE module runs against
-#: the real Attempt-12 retained checkpoints at
-#: `/home/ecs-user/aad-artifacts/autoinit/phase_a`, and module-skips on any
-#: machine without that store — which is every pod. It is host-local Phase-A
-#: evidence, not a declared C1 staged input, and copying it onto a billing GPU to
-#: satisfy pytest was rejected. This changes C1 TEST SELECTION only; the module's
-#: Phase-A and continuation semantics are untouched.
-TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
-                "tests/pod/test_phase_a_stages1_5_execute.py",
-                "tests/autoinit/test_phase_b_reuse_hostlocal.py",
-                "tests/autoinit/test_stage1_import.py")
+
+#: WHAT THE PAID POD RUNS: `tests/c1_preflight/` and nothing else.
+#:
+#: Until 2026-09-13 this was a four-entry exclusion list against the whole
+#: repository, so a C1 pod ran 3892 tests for 16 minutes of billed L40S to prove
+#: that AlphaAvatar-distill passes on that machine. It does not need to know
+#: that. Attempt 14 died in it on two tests with no C1 content at all — one
+#: asserting a dev-box artifact store, one a `.venv` a pod checkout never has —
+#: and the exclusion list had grown by one module per such discovery.
+#:
+#: The selection is positive now. `tests/c1_preflight/` holds the checks a C1 pod
+#: can fail in a way that costs money or invalidates the result: the
+#: launcher/driver CLI seam that cost attempt 7 $0.4231, the frozen scientific
+#: identities, the staged battery bytes, the artifact spec that can block
+#: teardown, the imports the driver needs after 70 minutes of training, and a
+#: GPU smoke. Thirteen tests, under a second.
+#:
+#: Expressed as ignores because the shared setup script's pytest invocation is
+#: `pytest tests/ $SESSION_TEST_IGNORES`, and the session may only add flags. One
+#: entry per sibling of the preflight directory; a NEW top-level test directory
+#: must be added here, which is why `test_the_pod_selection_is_exactly_the_preflight`
+#: derives the expected list from the tree rather than restating it.
+#:
+#: The full suite is unchanged and still runs in development, in convergence and
+#: in CI. What changed is that a billing GPU is no longer responsible for it.
+TEST_IGNORES = ("tests/architecture", "tests/autoinit", "tests/data",
+                "tests/docs", "tests/evaluation", "tests/infrastructure",
+                "tests/init", "tests/models", "tests/pod", "tests/rollout",
+                "tests/runtime", "tests/support", "tests/training",
+                "tests/validation", "tests/test_usable_rollout.py")
+
+#: The directory that survives those ignores. Named so the contract is greppable
+#: from the launcher rather than only inferable from what is missing.
+POD_TEST_SELECTION = "tests/c1_preflight"
 
 STATUS = f"{WS}/autoinit_c1.status"
 RUN_LOG = f"{WS}/autoinit_c1_run.log"
@@ -1375,7 +1385,13 @@ def build_parser():
     ap.add_argument("--token-src",
                     default=os.path.expanduser("~/.cache/huggingface/token"))
     ap.add_argument("--uv-max-s", type=int, default=1500)
-    ap.add_argument("--tests-max-s", type=int, default=2700)
+    #: The preflight is fourteen tests and under a second on this box. It was
+    #: 2700, sized for the whole repository. 600 rather than 300 because the box
+    #: is asymmetric: too large costs nothing when the suite exits in seconds,
+    #: while too small exits 124, which the gate turns into `exit 90` and the
+    #: launcher reads as a COLD HOST — that has killed a paid session before, and
+    #: a cold pod's first `import torch` is the slow part here.
+    ap.add_argument("--tests-max-s", type=int, default=600)
     ap.add_argument("--startup-limit-min", type=float, default=15.0)
     #: ONE. Not a default a launch command has to remember to pass — the type
     #: itself refuses anything else. See `C1_CREATE_ATTEMPTS` / `C1_MAX_HOST_DRAWS`.

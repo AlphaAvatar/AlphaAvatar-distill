@@ -577,23 +577,46 @@ def test_a_mismatched_invocation_refuses_before_a_pass_record_exists():
     assert 'record["verdict"] = "FAIL"' in src
 
 
-def test_the_host_local_cases_are_named_separately_from_the_source_skips():
-    """They skip for a different reason and must not be folded into that count."""
+def test_no_host_local_premise_is_asked_of_a_pod_any_more():
+    """The four skip groups this used to keep disjoint no longer exist.
+
+    They named repository tests whose premise is a host-local store, and they
+    were needed because a C1 pod ran the whole repository and would otherwise
+    have been asked about premises it does not own. The pod runs
+    `tests/c1_preflight/` now, and the rule is simpler than a disjointness
+    proof: nothing in the preflight may read a path outside the checkout.
+    """
     from experiments.phase_c1 import pod_environment as pe
-    assert len(pe.HOST_LOCAL_C1_NODEIDS) == 3
-    assert not (set(pe.HOST_LOCAL_C1_NODEIDS)
-                & (set(pe.RENDERER_PARITY_NODEIDS) | set(pe.BATTERY_SOURCE_NODEIDS)
-                   | set(pe.DEVBOX_ONLY_NODEIDS)))
+
+    for gone in ("HOST_LOCAL_C1_NODEIDS", "RENDERER_PARITY_NODEIDS",
+                 "BATTERY_SOURCE_NODEIDS", "DEVBOX_ONLY_NODEIDS"):
+        assert not hasattr(pe, gone), (
+            f"{gone} is back; a pod does not run the tests it names")
+
+    preflight = REPO / "tests/c1_preflight"
+    for f in sorted(preflight.glob("test_*.py")):
+        text = f.read_text()
+        assert "aad-artifacts" not in text and "aad-scratch" not in text, f
+        assert 'Path.home()' not in text, f
 
 
-def test_c1_ignores_exactly_the_four_whole_modules():
+def test_c1_runs_only_its_own_preflight_on_a_paid_pod():
+    """A positive selection, expressed as the complement the shell can take.
+
+    This asserted a four-module exclusion list against the whole repository,
+    which is what made a C1 pod spend 16 minutes of billed L40S proving that
+    AlphaAvatar-distill passes on that machine.
+    """
     spec, contract, view, env = _c1_session()
-    assert list(contract["test_ignores"]) == [
-        "tests/data/test_recovery_corpus_pipeline.py",
-        "tests/pod/test_phase_a_stages1_5_execute.py",
-        "tests/autoinit/test_phase_b_reuse_hostlocal.py",
-        "tests/autoinit/test_stage1_import.py",
-    ]
+    ignores = set(contract["test_ignores"])
+    assert "tests/c1_preflight" not in ignores
+    for sibling in (REPO / "tests").iterdir():
+        rel = f"tests/{sibling.name}"
+        if sibling.name in ("__pycache__", "support", "conftest.py",
+                            "c1_preflight"):
+            continue
+        if sibling.is_dir() or sibling.name.startswith("test_"):
+            assert rel in ignores, f"{rel} would run on a paid pod"
 
 
 def test_the_record_embeds_the_whole_findings_block():
@@ -604,9 +627,9 @@ def test_the_record_embeds_the_whole_findings_block():
     assert '"findings": findings,' in src
     from experiments.phase_c1 import pod_environment as pe
     keys = set(pe.evaluate_sweep({}))
-    for group in ("battery_source_skipped_as_expected",
-                  "host_local_c1_skipped_as_expected",
-                  "devbox_only_skipped_as_expected",
-                  "expected_environment_skips",
-                  "repository_state_all_passed"):
-        assert group in keys, group
+    #: The nine C1 groups are gone with the design that needed them; what the
+    #: record must still carry whole is whatever `evaluate_sweep` computes,
+    #: never a hand-picked subset of it.
+    for key in ("all_skipped_nodeids", "skip_set_digest", "n_skipped",
+                "expected_environment_skips", "problems", "verdict"):
+        assert key in keys, key

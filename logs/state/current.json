@@ -68,11 +68,11 @@
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
    "kind": "launch_bound",
-   "verdict": "FAIL",
-   "swept_base_commit": "697dc6aac94768d2d37c05713603b00300aa9c39",
-   "describes_head": false
+   "verdict": "PASS",
+   "swept_base_commit": "183667e37ff950c7640cbf51fb98dcc0835d04b4",
+   "describes_head": true
   },
-  "launch_bound_ready": false,
+  "launch_bound_ready": true,
   "launch_bound_failures": 1,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json",
   "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",

@@ -175,6 +175,145 @@ Hardware selection must be based on the actual operation, model size, sequence l
 
 If the repository is moved from a CPU environment to a GPU environment, the same logged experiment config and command should remain usable whenever practical. Hardware-specific changes must be expressed through explicit configuration rather than unlogged code edits.
 
+### P8.2.1. Research-first experimental workflow
+
+AlphaAvatar-distill is primarily a research repository, not a production
+workflow/governance platform.
+
+The default experiment workflow MUST remain as small as possible:
+
+```text
+hypothesis
+→ implementation
+→ minimal relevant validation
+→ experiment
+→ measurement
+→ analysis
+→ next optimization
+```
+
+Operational machinery exists only to protect:
+
+1. scientific validity;
+2. reproducibility;
+3. budget/resource safety;
+4. irreplaceable experimental evidence.
+
+A gate, audit, manifest, pointer, derived record, approval step, rehearsal,
+simulation, duplicate validation layer, or other process that clearly protects
+none of these MUST NOT block an experiment.
+
+**The burden of proof is on ADDING process, not removing it.**
+
+Before adding any permanent gate, audit, governance layer, artifact, simulation,
+rehearsal or validation stage, the agent must be able to state:
+
+* the concrete failure it prevents;
+* why an existing mechanism does not already prevent that failure;
+* why the benefit is worth the research-time and execution cost.
+
+"Extra assurance", "defence in depth", "for completeness", or "because a
+previous failure occurred" is not sufficient by itself.
+
+A historical engineering failure should normally cause a root-cause fix and a
+small regression test, NOT a permanent new subsystem.
+
+#### Experiment execution
+
+Paid or formal experiment environments should run only checks that are directly
+required for that experiment to execute safely and produce scientifically valid
+evidence.
+
+Do not run the repository-wide test suite on a paid experiment machine unless
+the experiment genuinely depends on repository-wide behavior.
+
+Prefer experiment-specific preflight checks that complete in seconds or a few
+minutes.
+
+Repository-wide regression suites belong to development/convergence/CI, not to
+the normal scientific execution path.
+
+Do not duplicate the same validation locally, in a simulator, in readiness
+machinery and again on the paid machine unless each layer protects a distinct,
+demonstrable failure mode.
+
+#### Keep experiment records minimal
+
+For a normal experiment, the preferred minimum record is:
+
+* run identity;
+* config/protocol identity;
+* executable/git identity;
+* budget/authorization when spending is involved;
+* raw runtime evidence;
+* raw scientific outputs;
+* cost/provider teardown evidence when applicable;
+* final result/closeout.
+
+Do not create additional records merely because previous experiments had them.
+
+Navigation indexes, documentation, inventories, catalogues, historical-path maps
+and other repository-maintenance metadata must not become launch blockers unless
+the experiment actually consumes them.
+
+One fact should have one canonical owner.
+
+#### Autonomous repair
+
+For an experiment operating inside an already-approved scope and cumulative
+budget, ordinary failures before formal scientific training or measurement
+begins are engineering failures.
+
+The default behavior is:
+
+```text
+failure
+→ preserve evidence
+→ teardown/reconcile resources
+→ diagnose root cause
+→ minimal repair
+→ minimal relevant regression
+→ fresh run identity where required
+→ continue automatically
+```
+
+Do not stop for maintainer approval after each ordinary pre-science failure.
+
+Only stop when continuing would require:
+
+* changing frozen scientific protocol;
+* changing arms, seeds, datasets, scoring or decision rules;
+* increasing the approved budget;
+* changing an approved hardware/rate boundary;
+* proceeding while resource/billing ownership is uncertain;
+* retrying or pooling science after formal measurement has begun without an
+  explicitly supported resume/retry contract;
+* or continuing after a complete valid scientific verdict.
+
+#### Complexity ratchet is forbidden
+
+Do not let experimental infrastructure monotonically accumulate complexity.
+
+When a new mechanism makes an older gate, pointer, audit, compatibility layer,
+rehearsal or record redundant, remove the redundant mechanism.
+
+Periodically prefer deletion and consolidation over another abstraction.
+
+A future agent must not assume that a process is necessary merely because it
+exists in the repository.
+
+Every current and future experiment starts from the minimal workflow and adds
+only the protections that experiment demonstrably needs.
+
+#### Priority
+
+When repository procedures conflict, preserve scientific validity,
+reproducibility and budget/resource safety first, but otherwise prefer the
+simpler research workflow.
+
+Do not optimize AlphaAvatar-distill for procedural completeness at the expense
+of experiment throughput.
+
 ### P8.3. Validation cadence and test economy
 
 Verification is required (sections 2.8 and 2.9). *Continuous* verification is

@@ -124,13 +124,24 @@ PRECEDENCE = ("cpu_test_scope", "simulator_marker", "unstaged_artifact", "absolu
 
 
 def c1_selected_modules(repo: Path) -> tuple[list[Path], list[str]]:
-    """The modules the C1 session actually runs, from its own manifest."""
-    from session_specs import load_session_launcher, session_args
-    mod = load_session_launcher("autoinit_c1_launch")
-    ignores = list(mod.spec(session_args(mod)).setup.test_ignores)
-    files = sorted(p for p in (repo / "tests").rglob("test_*.py")
-                   if str(p.relative_to(repo)) not in ignores)
-    return files, ignores
+    """Every test module in the repository. A DEVELOPMENT audit.
+
+    This used to scan "the modules the C1 session actually runs", which was the
+    same thing while a C1 pod ran the whole repository minus four modules. It
+    stopped being the same thing on 2026-09-13, when the pod's selection became
+    `tests/c1_preflight/` — thirteen tests with no skip predicate in them at all.
+
+    Scoping the audit to that selection would have left it auditing nothing and
+    claiming PASS, which is worse than useless. So the coupling is removed
+    instead: this is a development-side audit of skip predicates across the
+    suite, and it is NOT a launch blocker.
+
+    The pod-parity property it used to assert for a paid run is now asserted
+    where it is cheap and true — `tests/c1_preflight/` contains no skip
+    predicate, checked by the preflight itself.
+    """
+    files = sorted((repo / "tests").rglob("test_*.py"))
+    return files, []
 
 
 def _seg(src: str, node: ast.AST) -> str:
@@ -344,19 +355,23 @@ def predicates_in(path: Path, repo: Path, tracked: set[str] | None = None,
 
 
 def known_classification(nodeid: str) -> str | None:
-    """Groups the readiness contract already names, by nodeid."""
-    from experiments.phase_c1 import pod_environment as pe
-    for group, members in (
-            ("renderer_parity", pe.RENDERER_PARITY_NODEIDS),
-            ("battery_source", pe.BATTERY_SOURCE_NODEIDS),
-            ("host_local_c1", pe.HOST_LOCAL_C1_NODEIDS),
-            ("devbox_only", pe.DEVBOX_ONLY_NODEIDS),
-            ("known_non_environment", pe.KNOWN_NON_ENVIRONMENT_SKIPS)):
-        if any(nodeid == m or m.startswith(nodeid + "[") or nodeid.startswith(m)
-               for m in members):
-            return group
-    return None
+    """Groups the readiness contract already names, by nodeid.
 
+    C1's contract named nine groups of repository test node ids while a pod ran
+    the whole repository. It runs `tests/c1_preflight/` now — thirteen tests,
+    none of which skips anywhere — so all nine described tests no pod collects,
+    and they were deleted rather than left to report a missing expectation
+    forever.
+
+    Nothing is resolved here any more. Everything those groups used to account
+    for is accounted for by
+    `configs/autoinit/c1_skip_predicate_classification.json`, where a human says
+    why — the mechanism that was already doing this work for the rest of the
+    repository. Kept as a seam rather than removed outright: the caller asks one
+    question and gets one answer, and a future session with a genuine pod-side
+    group has somewhere to put it.
+    """
+    return None
 
 
 # --- strict CPU-test parity ---------------------------------------------------
@@ -529,6 +544,11 @@ def audit(repo: Path = REPO) -> dict:
     unaccounted = [p for p in needs_a_word
                    if not p["readiness_group"] and not p["registered_as"]]
     live_keys = {p["nodeid"] for p in needs_a_word}
+    #: STALE means "registered, in scope, and no longer holding a predicate".
+    #: An entry for a module this session does not select is OUT OF SCOPE, not
+    #: rotten: C1's pod selection narrowed to `tests/c1_preflight/` on
+    #: 2026-09-13 and 40-odd honest entries describing development-side
+    #: predicates would otherwise all have read as excuses that had decayed.
     stale = sorted(k for k in registered if k not in live_keys)
 
     from aadistill.runtime import cpu_test_env as cte
