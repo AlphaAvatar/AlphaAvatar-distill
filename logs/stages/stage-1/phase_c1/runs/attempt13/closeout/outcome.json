@@ -1,0 +1,56 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the closeout of C1 attempt 13, which never opened its run. There is no session manifest and none is fabricated: the launcher refused inside `open_run`, before `run_session` was entered, so no session record, runtime, evidence or artifact area exists to describe.",
+ "attempt": 13,
+ "package": "phase_c1.execution_package.2026-09-11",
+ "terminal_marker": null,
+ "setup_rc": null,
+ "classification": "PRE-PROVIDER INFRASTRUCTURE ABORT. Not an efficacy result, not a replay mismatch, and not a frozen-rule INCONCLUSIVE.",
+ "the_failure": {
+  "where": "scripts/pod/autoinit_c1_launch.py::open_c1_run -> open_run",
+  "reason": "open_run rejected the externally-prepared authorization/bundle ownership contract. `_RUN_PREPARED` exempted only `grant` and `readiness_record` from the occupied-unrecorded-run rule, while `issue_c1_authorization.py --run-id` writes governance/authorization.json and `stage_c1_bundle.py --run-id` writes governance/bundle.json before the launcher runs, and `session_commit_gate` reads the authorization back from that exact path. `_RUN_GOVERNANCE` is empty, so nothing copies either in afterwards: the chain had no satisfiable ordering. Attempt 13 hit only the authorization half: its bundle record was staged without --run-id and sits at the global path, so open_run never saw a second undeclared governance file. Admitting the authorization alone would therefore have moved the same refusal to attempt 14.",
+  "message": "phase_c1/runs/attempt13 already holds 1 undeclared file(s) (['governance/authorization.json']) and has no manifest.json",
+  "repaired_by": "_RUN_PREPARED now names all four artifacts written before the run opens; see logs/budget/decisions.md 2026-09-13"
+ },
+ "what_ran": {
+  "launch_bound_sweep": "PASS at 5aafc549, sweep-5aafc549ac25/exec-001",
+  "authorization_issued": true,
+  "bundle_staged": true,
+  "launcher_invoked": true,
+  "run_opened": false,
+  "gates_run": 0,
+  "gpu_priced": false,
+  "provider_resource_created": false,
+  "probes_trained": 0
+ },
+ "provider": {
+  "pods": 0,
+  "observed": "ZERO_PODS",
+  "cost_usd": 0.0
+ },
+ "budget": {
+  "cost_usd": 0.0,
+  "why_zero": "open_run precedes run_session, which prices before it gates and gates before it creates. Nothing was quoted and nothing was created."
+ },
+ "science": {
+  "formal_probes": 0,
+  "arms_evaluated": 0,
+  "decision": "NONE",
+  "reached_stage_g": false
+ },
+ "chain": {
+  "state": "CONSUMED",
+  "why": "the authorization funds exactly one launcher session and the launcher was invoked under it. A $0 pre-provider abort does not return a one-use chain. Attempt 14 needs a new grant, readiness record, authorization and bundle.",
+  "preserved_unedited": {
+   "grant": "82f8f81a9f1934c186718f0eb68ebe113963533837a2c83f98621ffd40009fa3",
+   "readiness": "6d6cd18d9b47ebac5f221b7705c9edc24904e00d099dcec655a6812c31a6a98f",
+   "authorization": "efa766e6ecd5ff9481c377c329ce554b0ae4d195c2ce2bbd415033c8da509774",
+   "bundle_record": {
+    "path": "logs/stages/stage-1/phase_c1/analyses/autoinit_c1_bundle.json",
+    "sha256": "6bdbfeb15ba0375fb5beb094427d364d9ad070f4c4e5070003f99cf7f1d1ebe9",
+    "note": "staged WITHOUT --run-id, so it landed at the global entry point rather than governance/bundle.json. That is why attempt 13 never reached the bundle half of the occupancy problem \u2014 the authorization alone was enough to refuse the run."
+   }
+  }
+ },
+ "authorizes": "nothing"
+}

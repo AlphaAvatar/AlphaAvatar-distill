@@ -982,9 +982,9 @@
    "experiment_id": "phase_c1",
    "run_id": "attempt13",
    "root": "logs/stages/stage-1/phase_c1/runs/attempt13",
-   "n_files": 2,
-   "digest": "4cc91704f5a0b47425ad1bedcc6f256ca54bca6d8ed186e91641f588054ca116",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 4,
+   "digest": "c279b9c6f68f032acdff14c932f9e067305fd5237b0290504ca99cb2bcc71c91",
+   "why": "no run manifest; its closeout states: PRE-PROVIDER INFRASTRUCTURE ABORT. Not an efficacy result, not a replay mismatch, and not a frozen-rule INCONCLUSIVE."
   }
  ],
  "authorizes": "nothing"

@@ -834,19 +834,98 @@ def test_the_grant_role_is_declared_and_is_not_snapshotted(L_unused=None):
     assert "grant" not in [role for _src, role in L._RUN_COLLECT]
     assert "grant" in L._RUN_PREPARED
 
-    #: The readiness record joined it on 2026-09-12. It is produced by the sweep
-    #: BEFORE the authorization is issued, so by the time the launcher opens the
-    #: run it is already there -- the same shape as the grant, and exempt from
-    #: the occupancy rule for the same reason.
+    #: The readiness record joined it on 2026-09-12, the authorization and the
+    #: bundle record on 2026-09-13. All four are produced before the launcher
+    #: opens the run, by someone other than the launcher, and are exempt from
+    #: the occupancy rule for the same single reason.
+    #:
+    #: This asserted `== {"grant", "readiness_record"}` with the reason that
+    #: anything more "is a widened exemption". That encoded a count, not an
+    #: invariant, and the count was already wrong: `issue_c1_authorization.py
+    #: --run-id` and `stage_c1_bundle.py --run-id` both write into
+    #: `governance/`, and the launcher reads both back from there. The
+    #: invariant is which EXACT roles may pre-exist -- so that is what is
+    #: pinned, and `test_a_declared_role_outside_the_prepared_set_is_refused`
+    #: below keeps the set from becoming "any declared role".
     assert L.C1_RUN_ROLES["readiness_record"] == "governance/readiness.json"
-    assert "readiness_record" in L._RUN_PREPARED
-    assert set(L._RUN_PREPARED) == {"grant", "readiness_record"}, (
-        "prepared roles are exempted BY NAME; a set that has grown beyond the "
-        "two inputs written before the run opens is a widened exemption")
+    assert L.C1_RUN_ROLES["authorization"] == "governance/authorization.json"
+    assert L.C1_RUN_ROLES["bundle_record"] == "governance/bundle.json"
+    assert set(L._RUN_PREPARED) == {
+        "grant", "readiness_record", "authorization", "bundle_record"}, (
+        "prepared roles are exempted BY NAME, and these four are exactly the "
+        "artifacts the documented pre-launch sequence writes before the "
+        "launcher opens the run")
 
-    #: And the exemption is per role, never the directory they share.
+    #: And the exemption is per role, never the directory they share, and never
+    #: a pattern.
     assert "governance" not in L._RUN_PREPARED
     assert "governance/" not in L._RUN_PREPARED
+    assert not [r for r in L._RUN_PREPARED if any(c in r for c in "*?[/")]
+
+
+def test_a_declared_role_outside_the_prepared_set_is_refused(tmp_path):
+    """The guard against `prepared` quietly becoming "any declared role".
+
+    `driver_evidence` is a declared role of the same run. It is written BY the
+    launcher, so a copy already sitting there is a dead launcher's residue and
+    must still refuse -- which is the whole occupancy rule.
+    """
+    import autoinit_c1_launch as L
+    from experiments.run_layout import RunConventionError, layout_for, open_run
+
+    root = layout_for(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
+                      stage_id=L.RUN_STAGE_ID).root
+    stray = root / L.C1_RUN_ROLES["driver_evidence"]
+    stray.parent.mkdir(parents=True, exist_ok=True)
+    stray.write_text("{}\n")
+    assert "driver_evidence" not in L._RUN_PREPARED
+    with pytest.raises(RunConventionError) as exc:
+        open_run(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
+                 roles=L.C1_RUN_ROLES, prepared=L._RUN_PREPARED,
+                 stage_id=L.RUN_STAGE_ID)
+    assert "died before recording" in str(exc.value)
+
+
+def test_all_four_prepared_artifacts_may_pre_exist(tmp_path):
+    """The condition attempt 13 died on, exercised end to end.
+
+    The issuer and the bundle stager both write into `governance/` before the
+    launcher runs, and the launcher reads both back from those exact paths. If
+    `open_run` refuses them the chain has no satisfiable ordering at all.
+    """
+    import autoinit_c1_launch as L
+    from experiments.run_layout import layout_for, open_run
+
+    root = layout_for(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
+                      stage_id=L.RUN_STAGE_ID).root
+    for role in L._RUN_PREPARED:
+        p = root / L.C1_RUN_ROLES[role]
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("{}\n")
+    layout = open_run(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
+                      roles=L.C1_RUN_ROLES, prepared=L._RUN_PREPARED,
+                      stage_id=L.RUN_STAGE_ID)
+    assert layout.root == root
+    #: And they are still there: `open_run` claimed the run without
+    #: overwriting a single one of the four.
+    for role in L._RUN_PREPARED:
+        assert (root / L.C1_RUN_ROLES[role]).is_file()
+
+
+def test_an_undeclared_governance_file_is_still_refused(tmp_path):
+    """`prepared` is a list of roles, not an amnesty on the directory."""
+    import autoinit_c1_launch as L
+    from experiments.run_layout import RunConventionError, layout_for, open_run
+
+    root = layout_for(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
+                      stage_id=L.RUN_STAGE_ID).root
+    stray = root / "governance/notes.json"
+    stray.parent.mkdir(parents=True, exist_ok=True)
+    stray.write_text("{}\n")
+    with pytest.raises(RunConventionError):
+        open_run(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
+                 roles=L.C1_RUN_ROLES, prepared=L._RUN_PREPARED,
+                 stage_id=L.RUN_STAGE_ID)
 
 
 # --- the authorization must declare the set its digest covers ----------------

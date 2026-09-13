@@ -1000,9 +1000,17 @@ class TestRunOwnedGovernanceEvidence:
         assert "authorization" in L.C1_RUN_ROLES
         assert "readiness_record" in L.C1_RUN_ROLES
 
-    def test_both_are_exempt_from_occupancy_by_name(self):
+    def test_the_prepared_roles_are_exempt_from_occupancy_by_name(self):
+        """The four artifacts the pre-launch sequence writes into the run, and
+        no fifth. Was pinned at two, which encoded the architecture of
+        2026-09-12 rather than the invariant: the authorization and the bundle
+        record are written into `governance/` by their own commands and read
+        back from those paths by the launcher's gates."""
         L = self._L()
-        assert set(L._RUN_PREPARED) == {"grant", "readiness_record"}
+        assert set(L._RUN_PREPARED) == {
+            "grant", "readiness_record", "authorization", "bundle_record"}
+        assert all(r in L.C1_RUN_ROLES for r in L._RUN_PREPARED)
+        assert "governance" not in L._RUN_PREPARED
 
     def test_the_issuer_refuses_to_overwrite_an_authorization(self, tmp_path):
         """One-use means one artifact. Replacing one in place is how a consumed

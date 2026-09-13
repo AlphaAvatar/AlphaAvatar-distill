@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "e89952b0be8d5e31397976571005c7326c022630",
+ "head_commit": "ab676e97503080c4d131a130277607132af0866b",
  "executable_source": {
   "digest": "2c43e4e6cf85582e3fa809512a1b2c611ba880e0229884fb566f3e7dae7845fd",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 99,
-  "digest": "dac103d1d4e014ea02f77941a1cdf099a456aca220c400ffbfcb063f7c76c535",
+  "digest": "b729998b51b339e051c0e812c04f821ae97948a42fccfda289340e6bdc0a4e61",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -221,8 +221,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
-    "sha256": "4f19c14a45e06c70f84d81629e13c3695b642756161e777fc8960035106b387d",
-    "bytes": 81842
+    "sha256": "5ca8be9f6a9f6153fcc96a28a978ac5f57e710464e9c3ac85ad2b36b066eeb23",
+    "bytes": 82952
    },
    {
     "path": "scripts/pod/autoinit_engine_probe.py",
@@ -1089,5 +1089,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "cc635d115ca543a8e5aa65900802a653b9135989e709ae8285c800c5c5083021"
+ "preregistration_sha256": "53cc4cd582b7b6e13579715fed80e74591c86c2e561f7528ae596501da88098c"
 }

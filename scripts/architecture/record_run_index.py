@@ -259,6 +259,19 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
         areas = {Path(p).relative_to(run_dir).parts[0] for p in files
                  if len(Path(p).relative_to(run_dir).parts) > 1}
         prepared_only = areas == {"governance"}
+        #: A run that never opened still owes an account of itself, and the
+        #: closeout is where it gives one. Read it rather than guessing: with a
+        #: closeout present, "the launcher did not reach its closeout" is the
+        #: one thing that is certainly false. Attempt 13 aborted inside
+        #: `open_run`, so no manifest exists and none is invented -- but its
+        #: closeout says why, and this reports what the closeout says.
+        closeout = run_dir / "closeout/outcome.json"
+        stated = None
+        if closeout.is_file():
+            try:
+                stated = json.loads(closeout.read_text()).get("classification")
+            except (json.JSONDecodeError, OSError):
+                stated = None
         out.append({
             #: `.../<experiment>/runs/<run>`: the experiment is the
             #: grandparent. Reading the parent gave the literal "runs", which
@@ -268,6 +281,8 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
             "digest": digest_of(run_dir)["digest"],
             "why": ("no run manifest, and only governance inputs are present: "
                     "PREPARED but not executed" if prepared_only else
+                    f"no run manifest; its closeout states: {stated}" if stated
+                    else
                     "no valid run manifest; predates the run-manifest convention "
                     "or the launcher did not reach its closeout"),
         })

@@ -996,7 +996,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1047,
+   "line": 1055,
    "kind": "pytest.skip",
    "function": "test_the_frozen_battery_manifest_verifies",
    "condition": "not p.is_file()",
@@ -1012,7 +1012,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1060,
+   "line": 1068,
    "kind": "pytest.skip",
    "function": "test_it_matches_the_canonical_store",
    "condition": "not (a.is_file() and b.is_file())",
@@ -1990,5 +1990,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "05337da28b33ed2f0a6da528a9f18a459f1bbddeed64741f480ff53503114a2f"
+ "digest": "5f858ff8570f48f4e41fb762a49fa213213d8774ba56de1b238a475424aa3e39"
 }

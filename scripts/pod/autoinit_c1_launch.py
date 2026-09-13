@@ -358,13 +358,32 @@ _RUN_COLLECT: tuple[tuple[str, str], ...] = (
 _RUN_GOVERNANCE: tuple[tuple[str, str], ...] = ()
 
 #: Roles written before the run opens, by someone other than the launcher.
-#: Exempt from `open_run`'s occupancy rule and from nothing else.
-#: Written before the run opens, by someone else. The grant is a maintainer
-#: input; the readiness record is produced by the sweep, which by contract runs
-#: BEFORE the authorization is issued and therefore before the launcher starts.
-#: Both are exempt from the occupancy rule BY NAME -- the exemption is per role,
-#: never the whole `governance/` directory.
-_RUN_PREPARED: tuple[str, ...] = ("grant", "readiness_record")
+#: Exempt from `open_run`'s occupancy rule and from NOTHING else: prepared
+#: grants no trust, bypasses no provenance gate, and each of these four is still
+#: validated independently by the gate that owns it.
+#:
+#: All four are produced by the documented pre-launch sequence, in this order:
+#:
+#:     grant            a maintainer input, authored before anything else
+#:     readiness_record written by the launch-bound sweep, which by contract
+#:                      runs before the authorization is issued
+#:     authorization    written by `issue_c1_authorization.py --run-id`, and
+#:                      read back from this exact path by `session_commit_gate`
+#:     bundle_record    written by `stage_c1_bundle.py --run-id`, and read back
+#:                      from the working tree by `bundle_staged_gate`
+#:
+#: The last two were missing, and the omission made the chain unsatisfiable
+#: rather than merely strict: the issuer writes the authorization into the run,
+#: the launcher reads it from there, `_RUN_GOVERNANCE` is empty so nothing
+#: copies it in after `open_run` -- and `open_run` then refused the run as
+#: occupied by an undeclared file. There was no ordering that satisfied all
+#: three. Attempt 13 died on it at $0, before pricing.
+#:
+#: The exemption is per role, BY NAME. Not `governance/`, not a glob, not "any
+#: declared role": a declared role absent from this tuple is still refused, and
+#: an undeclared governance file is still refused.
+_RUN_PREPARED: tuple[str, ...] = ("grant", "readiness_record",
+                                  "authorization", "bundle_record")
 
 
 def session_record_path(run_id: str) -> str:

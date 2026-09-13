@@ -1,5 +1,52 @@
 # Decision records
 
+## 2026-09-13 — `open_run` must admit the four artifacts written before it
+
+- **Context:** attempt 13's launcher refused at `open_run`, before pricing and
+  before any provider resource existed: `phase_c1/runs/attempt13 already holds 1
+  undeclared file(s) (['governance/authorization.json'])`. Cost `$0`, zero pods,
+  zero probes.
+- **The chain had no satisfiable ordering.**
+  `issue_c1_authorization.py --run-id` writes the authorization to
+  `governance/authorization.json`; `session_commit_gate` reads it back from that
+  exact path via `auth_path_for(run_id)`; `_RUN_GOVERNANCE` is `()` so nothing
+  copies it in after the run opens; and `_RUN_PREPARED` named only `grant` and
+  `readiness_record`, so `open_run` treated it as a dead launcher's residue.
+  `stage_c1_bundle.py --run-id` writes `governance/bundle.json` the same way, so
+  admitting the authorization alone would have failed on the next artifact.
+- **Decision:** `_RUN_PREPARED` becomes exactly
+  `("grant", "readiness_record", "authorization", "bundle_record")` — the four
+  artifacts the documented pre-launch sequence writes into the run before the
+  launcher opens it. Approved as an occupancy/lifecycle repair.
+- **What `prepared` still is:** an exemption from the occupied-unrecorded-run
+  rule and nothing else. It grants no trust and bypasses no provenance gate;
+  each of the four is still validated by the gate that owns it. It is per role,
+  BY NAME — not `governance/`, not a glob, not "any declared role". A declared
+  role outside the set is still refused, and an undeclared governance file is
+  still refused; both are now exercised rather than asserted.
+- **The pins were counting, not invariant-checking.** Two tests asserted
+  `== {"grant", "readiness_record"}` on the ground that anything more "is a
+  widened exemption". That encoded the architecture of 2026-09-12. They now pin
+  the exact four roles, and the two refusal cases keep the set from drifting
+  into "any declared role".
+- **Science unchanged.** No arm, seed, stage order, battery, scoring rule,
+  decision rule, training or evaluation protocol, provider or budget field
+  moved. The change is *which exact externally-produced run-owned files may
+  already exist when `open_run` claims the run*.
+- **Harness accounting.** `scripts/pod/autoinit_c1_launch.py` is a C1 harness
+  member, so the digest moved `dac103d1d4e0…` -> `b729998b51b3…` over the same
+  99 files. The execution preregistration was re-derived, not edited: exactly
+  five values changed — `head_commit`, the harness digest, that one file's
+  sha256 and size, and the document's own self-hash. Seeds
+  `[1635674081, 1656475568, 696460635]`, isolation plan `42a496f0923b…`,
+  battery `a285d61f88de…` and the session contract are byte-identical. The
+  preregistration gate was NOT weakened.
+- **Attempt 13 is consumed.** Its authorization funds exactly one launcher
+  session and the launcher was invoked under it. A `$0` pre-provider abort does
+  not return a one-use chain. Its grant, PASS readiness record, authorization
+  and bundle record are preserved unedited and are not recycled.
+- **Revisit when:** attempt 14 closes.
+
 ## 2026-09-05 — Attempt-5 one-use grant approved
 
 - **Context:** the reviewer accepted the manifest-derived staged view, the
