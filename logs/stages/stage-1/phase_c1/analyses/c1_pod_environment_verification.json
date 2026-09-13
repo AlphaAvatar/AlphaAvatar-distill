@@ -4,10 +4,10 @@
  "run_id": "attempt13",
  "stage_id": "1",
  "record": "logs/stages/stage-1/phase_c1/runs/attempt13/governance/readiness.json",
- "record_self_sha256": "de17f30f46129c0cd02872090298e2a9fc208ffc8aaae5e1949c2478148493b1",
+ "record_self_sha256": "0493b62dc0acb94436b1759abac191ee69d5881d5e190527d836ae2ebb7d4e7f",
  "record_kind": "launch_bound",
  "verdict": "FAIL",
- "swept_base_commit": "45a8abda2419b058121b4edde0be31e860ed8fcc",
+ "swept_base_commit": "b6354353a50b1555c5ec51ad813b8dcfa0be070a",
  "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
  "authorizes": "nothing"
 }

@@ -445,12 +445,35 @@ class TestTheStageMappingIsComplete:
         from consolidate import stage_attribution
         return stage_attribution
 
-    #: Reads the tree AS A WHOLE — configs/, data/ and artifacts/ as well as
-    #: logs/ — so a staged pod view, where `artifacts/**` and `data/**` are
-    #: hidden, reports every out-of-tree citation as a drift it is not. The
-    #: marker observes git against the filesystem rather than keying on a
-    #: simulator variable, so it is correct on a real partial checkout too.
-    @needs_whole_tree
+    def test_every_cited_path_including_untracked_really_exists(self, attribution):
+        """`verify()` is strict about TRACKED paths only, so that its answer is
+        the same in a staged pod view as on the dev box. This is the other
+        half: on a checkout that actually holds the out-of-tree material, a
+        cited artifact or dataset that has gone missing is drift and must say
+        so. Skipped where that material is absent — which is a fact about the
+        checkout, observed, not a flag a simulator sets.
+        """
+        cited = {e["path"] for r in attribution.INVENTORY for e in r["evidence"]}
+        cited |= {i["path"] for s in attribution.STAGES
+                  for k in ("data", "outputs", "configs", "code")
+                  for i in (s.get(k) or []) if isinstance(i, dict)}
+        external = sorted(p for p in cited if not p.startswith("logs/"))
+        assert external, "no external material is cited, so this proves nothing"
+        #: A concrete cited path the skip-predicate audit can read out of this
+        #: source, and one C1's manifest does NOT stage — the Stage-0
+        #: statistics cache. `artifacts/stage1/qwen3_0p6b_init_v0` would have
+        #: been the wrong choice twice over: no separator-free name resolves,
+        #: and that one IS staged, so the guard would not fire on a pod and the
+        #: test would run against material that is not there.
+        if not (REPO / "artifacts/stage0/qwen3_4b_thinking_v1").is_dir():
+            pytest.skip("this checkout has no artifacts/stage0/; the "
+                        "out-of-tree material these citations name is not "
+                        "here to check")
+        missing = [p for p in external if not (REPO / p).exists()]
+        assert not missing, (
+            "the stage index cites material this checkout should have and does "
+            "not:\n  " + "\n  ".join(missing))
+
     def test_the_stage_descriptions_cite_only_real_paths(self, attribution):
         """Each stage says what it is for, what it consumes and produces, and
         where its canonical configs and manifests live. That is navigation, and
@@ -460,11 +483,18 @@ class TestTheStageMappingIsComplete:
         described = {s["stage_id"] for s in attribution.STAGES}
         filed = {r["stage_id"] for r in attribution.INVENTORY if r["stage_id"]}
         assert filed <= described, f"stages with rows and no description: {filed - described}"
+        #: Existence is asserted of TRACKED citations only, for the same
+        #: reason `verify()` is: `artifacts/` and the large datasets are
+        #: deliberately outside git, so whether they are on disk is a fact
+        #: about the checkout. The untracked half is
+        #: `test_every_cited_path_including_untracked_really_exists`.
+        tracked = attribution._tracked(str(REPO))
+        assert tracked, "git listed nothing; this check would be vacuous"
         for s in attribution.STAGES:
             assert s["purpose"] and s["status"], s["stage_id"]
             for key in ("data", "outputs", "configs", "code"):
                 for item in s.get(key) or []:
-                    if isinstance(item, dict):
+                    if isinstance(item, dict) and item["path"] in tracked:
                         assert (REPO / item["path"]).exists(), (
                             f"stage-{s['stage_id']}.{key}: {item['path']}")
 
@@ -493,7 +523,6 @@ class TestTheStageMappingIsComplete:
                    if r["classification"] == "experiment" and not r["question"]]
         assert not missing, f"experiments with no stated question: {missing}"
 
-    @needs_whole_tree
     def test_every_cited_piece_of_evidence_still_exists(self, attribution):
         """The inventory is a set of claims about the repository, and a claim
         that has quietly stopped being true is worse than none. This already
@@ -549,11 +578,6 @@ class TestTheStageMappingIsComplete:
         on_disk = {p.name for p in (REPO / "logs/stages").glob("stage-*")}
         assert on_disk == set(attribution.stages_present())
 
-    #: `document()` embeds `verify()`, so it is view-dependent for the same
-    #: reason: a view without `artifacts/` regenerates an index whose
-    #: `problems` list is not empty, and the committed one — written against
-    #: the whole tree — correctly disagrees with it.
-    @needs_whole_tree
     def test_the_committed_mapping_is_what_the_generator_produces(self,
                                                                   attribution):
         committed = load(attribution.STAGE_INDEX)
@@ -704,8 +728,23 @@ class TestSweepOutputsAreIsolated:
 
     def test_a_committed_record_still_names_its_own_raw_output(self):
         """The record's `evidence` block must point at paths that belong to the
-        sweep it describes, so the two cannot drift apart again."""
-        rec = load("logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json")
+        sweep it describes, so the two cannot drift apart again.
+
+        Read THROUGH the pointer: that path stopped being the record when a run
+        began owning its own readiness evidence, and the pointer carries the
+        verdict but not the raw-output paths. The record lives under `runs/`,
+        which git ignores, so a tracked-only checkout does not have it — and a
+        check about a document that is not in this view is not a failure of it.
+        """
+        ptr = load("logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json")
+        named = ptr.get("record")
+        if not named:
+            rec = ptr                      # pre-pointer record, still inline
+        elif not (REPO / named).is_file():
+            pytest.skip(f"{named} is not in this checkout; it is run-owned "
+                        "and gitignored")
+        else:
+            rec = load(named)
         ev = rec.get("evidence") or {}
         assert ev.get("junit") and ev.get("pytest_log"), ev
 
@@ -834,6 +873,15 @@ class TestTheCurrentViewReadsItsOwner:
         return readiness_view(REPO)
 
     def test_state_md_agrees_with_the_record_it_links_to(self):
+        #: The rendered block follows the pointer to the run-owned record, so
+        #: in a checkout without that record it renders the pointer's summary
+        #: instead and cannot equal a block written where the record was there.
+        #: Agreement is only checkable where both documents are.
+        ptr = load("logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json")
+        named = ptr.get("record")
+        if named and not (REPO / named).is_file():
+            pytest.skip(f"{named} is not in this checkout; it is run-owned "
+                        "and gitignored")
         from consolidate.render_log_navigation import (R_BEGIN, R_END,
                                                        render_readiness)
         text = (REPO / "logs/state/current.md").read_text()

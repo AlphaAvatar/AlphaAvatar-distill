@@ -83,7 +83,9 @@ inputs to experiments, not experiments, and are not enumerated here.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -1098,13 +1100,37 @@ def _dig(doc, dotted: str):
     return doc
 
 
+@functools.lru_cache(maxsize=4)
+def _tracked(root: str) -> frozenset[str]:
+    """Everything git tracks. Empty if git cannot answer, which fails STRICT."""
+    out = subprocess.run(["git", "-C", root, "ls-files"],
+                         capture_output=True, text=True)
+    return frozenset(out.stdout.split()) if out.returncode == 0 else frozenset()
+
+
 def _check(root: Path, where: str, evidence) -> list[str]:
-    """Every cited path exists; every quoted field reads what is claimed."""
+    """Every cited path exists; every quoted field reads what is claimed.
+
+    Existence is required of TRACKED paths only. A stage index names the
+    canonical owner of each stage's material, and for `artifacts/` and the
+    large datasets that owner is deliberately outside git — so whether it is on
+    disk is a fact about the checkout, not about the index. Twenty-six of the
+    ninety-five cited paths are untracked, and a view that stages only what a
+    pod needs has none of them: reporting that as drift made `verified` false,
+    made the regenerated index disagree with the committed one, and failed a
+    launch-bound sweep twice on a repository that was correct.
+
+    Untracked material is still verified when it IS present, and
+    `tests/docs/test_log_organisation.py` asserts on a complete checkout that
+    every cited path — tracked or not — is really there.
+    """
     problems: list[str] = []
+    tracked = _tracked(str(root))
     for ev in evidence:
         p = root / ev["path"]
         if not p.exists():
-            problems.append(f"{where}: cited path missing: {ev['path']}")
+            if ev["path"] in tracked:
+                problems.append(f"{where}: cited path missing: {ev['path']}")
             continue
         if "field" not in ev:
             continue

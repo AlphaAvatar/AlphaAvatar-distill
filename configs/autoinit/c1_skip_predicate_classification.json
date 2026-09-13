@@ -68,6 +68,22 @@
   "tests/data/test_sessions.py::tokenizer": {
    "class": "local_hf_cache"
   },
+  "tests/docs/test_log_organisation.py": {
+   "class": "staging_premise_property",
+   "why": "the whole-tree log checks: the catalog renderer, the relocation record and the navigation regeneration read the logs/ tree as a set. A pod receives a staged subset, so the set is different there. The predicate compares `git ls-files logs` against the filesystem -- it asks for the property it needs and both machines answer correctly."
+  },
+  "tests/docs/test_log_organisation.py::test_every_cited_path_including_untracked_really_exists": {
+   "class": "devbox_only_artifact",
+   "note": "the strict half of the stage index's evidence check. `verify()` requires existence of TRACKED citations only, so its answer is the same on a pod as here; this asserts the other 26 \u2014 `artifacts/**` and the untracked datasets \u2014 really exist where they are supposed to. C1's manifest does not stage them, so a pod decides SKIP by design. Two launch-bound sweeps failed before this split existed, on a repository that was correct."
+  },
+  "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store": {
+   "class": "devbox_only_artifact",
+   "why": "compares the repo-local battery working copy against the canonical artifact store under $HOME. Neither is staged to a pod, and the contract points HOME at a fresh empty directory for the pytest command on BOTH machines, so both decide absent and skip for the same stated reason. It asks the FILESYSTEM, not a simulator marker."
+  },
+  "tests/docs/test_repository_structure.py": {
+   "class": "staging_premise_property",
+   "why": "the markdown link resolver, for the same reason: a link from a staged document to an unstaged one is a fact about the staging, not a broken reference. Keyed on the same observed git-vs-filesystem comparison."
+  },
   "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store": {
    "class": "devbox_only_artifact"
   },
@@ -142,18 +158,6 @@
   },
   "tests/training/test_train.py::teacher_tokenizer": {
    "class": "local_hf_cache"
-  },
-  "tests/docs/test_log_organisation.py": {
-   "class": "staging_premise_property",
-   "why": "the whole-tree log checks: the catalog renderer, the relocation record and the navigation regeneration read the logs/ tree as a set. A pod receives a staged subset, so the set is different there. The predicate compares `git ls-files logs` against the filesystem -- it asks for the property it needs and both machines answer correctly."
-  },
-  "tests/docs/test_repository_structure.py": {
-   "class": "staging_premise_property",
-   "why": "the markdown link resolver, for the same reason: a link from a staged document to an unstaged one is a fact about the staging, not a broken reference. Keyed on the same observed git-vs-filesystem comparison."
-  },
-  "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store": {
-   "class": "devbox_only_artifact",
-   "why": "compares the repo-local battery working copy against the canonical artifact store under $HOME. Neither is staged to a pod, and the contract points HOME at a fresh empty directory for the pytest command on BOTH machines, so both decide absent and skip for the same stated reason. It asks the FILESYSTEM, not a simulator marker."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",

@@ -39,6 +39,7 @@ READREC = "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification
 READINESS_RECORD = READREC
 READINESS_HISTORY = "logs/stages/stage-1/phase_c1/history/readiness_history.json"
 STATE_MD = "logs/state/current.md"
+SNAPSHOT = "logs/state/current.json"
 LOGS_README = "logs/README.md"
 R_BEGIN = "<!-- readiness:begin -->"
 R_END = "<!-- readiness:end -->"
@@ -571,8 +572,17 @@ def readiness_view(root: Path) -> dict:
     Derived, so saving a new verification record does not also require editing
     the current view by hand -- which is how it went stale within hours.
     """
+    #: READREC is a POINTER now, not the record: a run owns its readiness
+    #: evidence so that the next sweep cannot overwrite what the previous one
+    #: launched under. Follow it. The record is under `runs/`, which git
+    #: ignores, so a tracked-only checkout has the pointer and not the record —
+    #: fall back to the summary the pointer itself carries rather than
+    #: rendering nulls.
     live = json.loads((root / READREC).read_text()) if (
         root / READREC).is_file() else {}
+    named = live.get("record")
+    if named and (root / named).is_file():
+        live = {**live, **json.loads((root / named).read_text())}
     hist = (json.loads((root / READINESS_HISTORY).read_text())
             if (root / READINESS_HISTORY).is_file() else {"entries": []})
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root,
@@ -675,6 +685,28 @@ def main() -> int:
     if shared.is_dir():
         readmes[shared / "README.md"] = render_shared_readme(root)
 
+    #: `current.json.latest_verification` says `_derived_by: readiness_view`
+    #: and nothing derived it. It was hand-maintained, so it still read
+    #: `diagnostic` at `30f6ceed` while the live record was a launch-bound
+    #: sweep at `b6354353` -- the exact drift `_three_separate_facts` was
+    #: written about. It points rather than copies: the record owns counts and
+    #: digests, and the test that forbids duplicating them still holds.
+    snap_p = root / SNAPSHOT
+    snap = json.loads(snap_p.read_text())
+    v = readiness_view(root)
+    lv = dict(snap.get("latest_verification") or {})
+    lv["latest_sweep"] = {
+        "kind": v["latest"]["kind"],
+        "verdict": v["latest"]["verdict"],
+        "swept_base_commit": v["latest"]["swept_base_commit"],
+        "describes_head": v["latest"]["describes_head"],
+    }
+    lv["launch_bound_ready"] = v["launch_bound_ready"]
+    lv["launch_bound_failures"] = len(v["launch_bound_failures"])
+    new_snapshot = dict(snap)
+    new_snapshot["latest_verification"] = lv
+    snap_body = json.dumps(new_snapshot, indent=1) + "\n"
+
     state_p = root / STATE_MD
     state_text = state_p.read_text()
     i2, j2 = state_text.index(R_BEGIN), state_text.index(R_END) + len(R_END)
@@ -690,6 +722,8 @@ def main() -> int:
                        + "\n" + lr_text[j3:])
 
     changed = [CATALOG] if new_catalog != text else []
+    if snap_body != snap_p.read_text():
+        changed.append(SNAPSHOT)
     if new_state != state_text:
         changed.append(STATE_MD)
     if new_logs_readme != lr_text:
@@ -700,6 +734,7 @@ def main() -> int:
 
     if a.write:
         (root / CATALOG).write_text(new_catalog)
+        snap_p.write_text(snap_body)
         state_p.write_text(new_state)
         logs_readme.write_text(new_logs_readme)
         for p, body in readmes.items():
