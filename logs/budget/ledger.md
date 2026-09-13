@@ -2302,3 +2302,32 @@ It is the default now: `--require-clean` became `--allow-dirty`. A safety
 property that must be remembered is in the wrong position.
 
 Attempt 15's chain is **consumed** and authorizes nothing further.
+
+## 2026-09-13 — C1 attempt 16: the driver ran, and stage D found an empty registry, `$0.4333`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 16: 14/14 pre-provider gates, pod `9jhjbu4i67wb9k` at `$1.09/h`, setup complete with a **4-second** CPU gate (982 s on attempt 14), driver detached, stages B and C passed, **STAGE D FAILED** — `no architecture adapter registered for family 'qwen3'; registered: []`. Artifacts collected, pod deleted, provider confirms gone. No replay comparison, no training, no evaluation, no decision | `$0.4333` | [`runs/phase_c1/attempt16/`](../stages/stage-1/phase_c1/runs/attempt16/) |
+
+**Cumulative: `$269.1290` of the `$320.0000` cap.** Package booked **`$1.2292`**
+of `$51.4425`.
+
+```text
+project   267.8998 + 1.2292 = 269.1290   of 320.0000, leaving 50.8710
+package     0.7959 + 0.4333 =   1.2292   of  51.4425, leaving 50.2133
+sessions worst case  269.1290 + 15.1475 = 284.2765  <= 320.0000
+```
+
+**The furthest a C1 driver has reached since attempt 9**, and the first pod ever
+to run the `tests/c1_preflight/` selection: the CPU gate that cost attempt 14 its
+session took four seconds here.
+
+Registration stopped being an import side effect when the adapter registry became
+something a caller builds. Every other driver picked up the explicit call and
+this one did not — invisible to the suite by construction, because a
+process-default registry is empty in a fresh process and full in any pytest
+session where another test registered it. The preflight now imports the driver in
+a subprocess and resolves the adapter; mutating the fix away reproduces attempt
+16's exact error.
+
+Attempt 16's chain is **consumed** and authorizes nothing further.

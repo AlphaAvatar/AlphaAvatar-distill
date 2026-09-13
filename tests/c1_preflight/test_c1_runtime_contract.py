@@ -180,6 +180,42 @@ def test_the_scoring_and_behaviour_contracts_import():
         assert axis in C1_METRIC_CONTRACT, axis
 
 
+def test_importing_the_driver_registers_what_stage_d_resolves():
+    """Attempt 16, nineteen seconds in, for $0.43.
+
+    The driver reached `replay_parent`, loaded 398 weight tensors and asked the
+    process-default registry for the `qwen3` adapter:
+
+        KeyError: no architecture adapter registered for family 'qwen3';
+        registered: []
+
+    Registration stopped being an import side effect when the registry became
+    something a caller builds. Every other driver picked up the explicit call;
+    this one did not, and nothing could see that — a registry is empty in a
+    fresh process and full in a pytest session where any other test registered
+    it, so the defect was invisible to the suite by construction.
+
+    So this asserts the property in the only way that means anything: import the
+    driver in a SUBPROCESS, exactly as the pod does, and resolve the adapter for
+    the family the pinned checkpoint declares.
+    """
+    import subprocess
+
+    family = json.loads(
+        (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+         ).read_text())["model_type"]
+
+    probe = (
+        "import sys; sys.path[:0] = ['src', 'scripts', 'scripts/pod']\n"
+        "import autoinit_c1_driver\n"
+        "from aadistill.initialization.specs.arch import get_adapter\n"
+        f"print(get_adapter({family!r}).family)\n")
+    out = subprocess.run([sys.executable, "-c", probe], cwd=REPO,
+                         capture_output=True, text=True, timeout=300)
+    assert out.returncode == 0, out.stdout + out.stderr
+    assert out.stdout.strip() == family, out.stdout + out.stderr
+
+
 def test_the_artifact_spec_never_requires_what_a_failed_run_cannot_produce():
     """A FAILED spec demanding post-training classes blocks teardown.
 

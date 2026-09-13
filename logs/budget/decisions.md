@@ -1,5 +1,29 @@
 # Decision records
 
+## 2026-09-13 — a process-default registry cannot be checked in-process
+
+- **Context:** attempt 16's driver reached stage D nineteen seconds in and asked
+  for the `qwen3` architecture adapter. `registered: []`. The C1 driver never
+  called `register_builtin_adapters()`; every other driver did, from the day
+  registration stopped being an import side effect.
+- **Why the suite could not have caught it, at any size:** the registry is
+  process-global. It is empty in a fresh process and full in any pytest session
+  where another test registered it. In-process coverage of the driver asserts
+  the state some earlier test left behind, not the state the pod gets. The old
+  3892-test pod gate would have passed too.
+- **Decision:** the check runs the driver's import in a SUBPROCESS and resolves
+  the adapter for the family the pinned checkpoint config declares. It lives in
+  `tests/c1_preflight/`, so it runs on the dev box, in the launch-bound sweep
+  and on the pod. Mutating the fix away reproduces attempt 16's exact error.
+- **Not done:** no registry-audit subsystem, no import-time enforcement layer, no
+  new artifact. A root-cause fix and one regression test, per P8.2.1.
+- **Generalizes to:** any process-global state a driver depends on — registries,
+  process defaults, environment-derived singletons. If a test would pass because
+  a sibling test initialized it, the check has to leave the process.
+- **Revisit when:** a second family or a second driver ships, at which point the
+  subprocess probe should parameterize over the declared families rather than
+  the one the checkpoint names.
+
 ## 2026-09-13 — the sweep must model host-local absence, and the pod must be told which record it is being judged against
 
 - **Context:** attempt 14 passed all fourteen pre-provider gates, created an

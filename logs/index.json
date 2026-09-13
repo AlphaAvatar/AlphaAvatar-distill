@@ -281,7 +281,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 5,
+  "runs_current": 6,
   "runs_unrecorded": 2,
   "legacy_components": 77,
   "by_experiment": {
@@ -311,9 +311,9 @@
     "total": 5
    },
    "phase_c1": {
-    "recorded": 15,
+    "recorded": 16,
     "unrecorded": 2,
-    "total": 17
+    "total": 18
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -1001,6 +1001,19 @@
    },
    "manifest_sha256": "41fd801ac1f3398ff5ba048ca35d1fea9f7266d79c4a85f8a216586c1fdd80dc",
    "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c1",
+   "run_id": "attempt16",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c1/runs/attempt16",
+    "manifest": "logs/stages/stage-1/phase_c1/runs/attempt16/manifest.json"
+   },
+   "manifest_sha256": "493b722764220f4f4aef837b83b3fb1a8ed5431b358021cb79fb33cd099c297a",
+   "n_components": 11
   }
  ],
  "unrecorded": [
@@ -1014,10 +1027,10 @@
   },
   {
    "experiment_id": "phase_c1",
-   "run_id": "attempt16",
-   "root": "logs/stages/stage-1/phase_c1/runs/attempt16",
+   "run_id": "attempt17",
+   "root": "logs/stages/stage-1/phase_c1/runs/attempt17",
    "n_files": 1,
-   "digest": "fca3008fc64605289b2efde3d09168d783a95e2abab168748c790b33e7d18140",
+   "digest": "f9146b41a8e72eea4b9ac4cae360a42134ad73bb49c00d0f557cccdcf682d829",
    "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],

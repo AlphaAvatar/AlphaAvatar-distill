@@ -1,0 +1,34 @@
+[12:50:51] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[12:50:52] NVIDIA L40S $1.09/h, stock High
+[12:50:52] session commit 000d8ebc95b3 verified: harness digests to 48b127ca6a47…, carries the authorization and only logs/stages/stage-1/phase_c1/runs/attempt16/governance/authorization.json differs from the authorized base
+[12:50:52] grant 547113a0558e… at logs/stages/stage-1/phase_c1/runs/attempt16/governance/grant.json, as recorded by the authorization
+[12:50:53] C1 harness 48b127ca6a47… over 99 declared files
+[12:50:53] ceiling $15.1475, derived from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json
+[12:50:53] preregistration 0b2bf04b6e6b… (self-hash verified), harness 48b127ca6a47…
+[12:50:53] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[12:50:54] frozen assets verified against configs/experiments/phase_c1/frozen_assets.json
+[12:50:54] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[12:50:54] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[12:50:54] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[12:50:56] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[12:51:00] aad_autoinit_000d8ebc.bundle (12485286 bytes, 43fe4d1ff092…) round-trips to 000d8ebc95b3… carrying this authorization and harness 48b127ca6a47…
+[12:51:04] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[12:51:04] pod sweep 11 passed / 0 skipped / 0 failed, no declared groups, binds C1 harness 48b127ca6a47… and environment de8c0cff68a9…, staging contract 5956d6e82a1d…, swept at 0138d5f4 with only ['logs/stages/stage-1/phase_c1/runs/attempt16/governance/authorization.json', 'logs/stages/stage-1/phase_c1/runs/attempt16/governance/readiness.json'] differs from the swept base
+[12:51:05] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[12:51:06] watchdog detached — hard 834 min = $15.15
+[12:51:06] created 9jhjbu4i67wb9k at $1.09/h
+[12:51:40] TCP 22 at 82.221.170.242:37281 after 0.6 min
+[12:51:43] draw 1: ssh reachable — $0.01
+[12:58:06] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[12:58:06] draw 1: running setup
+[13:10:18] draw 1: setup complete — $0.35
+[13:10:25] driver detached, pid 3448, confirmed by descriptor_probe — $0.35
+[13:12:36]   2026-09-13T13:10:42Z MARKER:C1_FAILED — $0.39
+[13:12:36] a blocking C1 stage failed — collecting evidence, then tearing down. Classify from the explicit terminal marker and the collected driver evidence; this line asserts nothing about which stage failed or why.
+[13:12:36] polling ended: C1_FAILED — $0.39
+[13:14:10]   manifest rc=0
+5 file(s) across 3 class(es) -> /workspace/manifest.json
+  final_required: 5 · mutable_snapshot: 0 · final_streams_quiescent: True
+[13:14:47] teardown gate: allowed=True failed=training_complete
+[13:14:47] deleting pod (gate passed after C1_FAILED)
+[13:14:57] pod deleted — 23.9 min, $0.43; provider confirms gone: True

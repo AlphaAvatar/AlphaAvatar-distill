@@ -72,6 +72,7 @@ from aadistill.runtime.device_handoff import (  # noqa: E402
 )
 from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
 from experiments.calibration import register_builtin_profiles  # noqa: E402
+from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathDigestMismatch,
     VerifiedSuffix,
@@ -91,6 +92,15 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 
 #: Explicit: importing the core no longer registers a mixture.
 register_builtin_profiles()
+
+#: Explicit for the same reason, and MISSING until 2026-09-13. Importing an
+#: adapter module stopped registering it when the registry became something a
+#: caller builds; every other driver picked up the call and this one did not.
+#: Attempt 16 reached stage D — replay_parent — 19 seconds after the driver
+#: started, loaded 398 weight tensors, asked for the `qwen3` adapter and got
+#: `registered: []`. $0.43, and the first C1 attempt since #9 to get a driver
+#: past stage C.
+register_builtin_adapters()
 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_c1.status"

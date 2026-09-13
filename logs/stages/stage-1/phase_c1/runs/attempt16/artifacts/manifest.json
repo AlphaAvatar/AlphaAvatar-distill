@@ -1,0 +1,226 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-09-13T13:12:50+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_c1/c1_evidence.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "replay_record",
+      "pattern": "audit/autoinit_c1/c1_replay_record.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "treatment_record",
+      "pattern": "audit/autoinit_c1/c1_treatment_record.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "arm_identities",
+      "pattern": "audit/autoinit_c1/c1_arm_identities.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_results",
+      "pattern": "audit/autoinit_c1/c1_probe_results.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "decision",
+      "pattern": "audit/autoinit_c1/c1_decision.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "attested_protocol",
+      "pattern": "audit/autoinit_c1/c1_attested_evaluation_protocol.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "engine_probe",
+      "pattern": "audit/autoinit_c1/engine_probe.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "device_handoff",
+      "pattern": "audit/autoinit_c1/c1_device_handoff.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_event_stream",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/train_log.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_run_manifest",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_manifest*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_run_completion",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_completion*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "training_completion",
+      "pattern": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.*.training.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_config",
+      "pattern": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_per_sample.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "scored_probe_aggregate",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_c1_confirmation.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.generations.jsonl",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_train_tail",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_train_tail.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_c1/*.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "audit_json",
+      "pattern": "audit/autoinit_c1/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_logs",
+      "pattern": "audit/autoinit_c1/session/*",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_c1/c1_evidence.json",
+      "artifact_class": "session_evidence",
+      "size_bytes": 15345,
+      "sha256": "4d53cdef8281b7566e41a73015138442f7261df1305b6a63da78d004e973d388",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/scorer_preflight.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 439,
+      "sha256": "818501ec3a0dbd7321e3bbff5cd5193bc03e07ab83d38559e10442ba3e4902d8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/autoinit_c1.status",
+      "artifact_class": "session_logs",
+      "size_bytes": 773,
+      "sha256": "91d16a26f7986770dc0665cca8764007e33059c013aae9e56a194cf9ef17448b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/autoinit_c1_run.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 1931,
+      "sha256": "941f883599ecdffe261fc303869f523dc286aa95d99f980f8effbba71a007ed1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/setup.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 32181,
+      "sha256": "6a1968b74c982fa8083f6af6c610ac097ef1b4bcfc7813415737285c5f9f3af6",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

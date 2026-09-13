@@ -1,0 +1,52 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c1",
+ "run_id": "attempt16",
+ "root": "phase_c1/runs/attempt16",
+ "artifact_spec": "phase_c1_session_v1",
+ "plan": {
+  "session_id": "autoinit-c1",
+  "plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
+  "session_commit": "000d8ebc95b3c980abb4176858b71d0303368ea0",
+  "bundle": "aad_autoinit_000d8ebc.bundle",
+  "preregistration": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+  "scratch_root": "/home/ecs-user/aad-scratch/c1_attempt16",
+  "scratch_note": "the artifact archive and the extracted tree stay here; artifacts/manifest.json carries their hashes. Large artifacts are not moved into git"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_c1_launch.py",
+  "harness_source_digest": "48b127ca6a479713b23acca8cd9cb19f95dd8052878ada7bdd966f1925afeed2",
+  "authorization": "logs/stages/stage-1/phase_c1/runs/attempt16/governance/authorization.json"
+ },
+ "status": {
+  "passed": false,
+  "terminal": "C1_FAILED",
+  "pod_id": "9jhjbu4i67wb9k",
+  "cost": {
+   "price_per_hour": 1.09,
+   "elapsed_minutes": 23.85,
+   "actual_usd": 0.4333,
+   "authorized_usd": 15.1475,
+   "within_authorization": true
+  },
+  "provider_confirms_gone": true,
+  "authorizes": "nothing"
+ },
+ "roles": {
+  "artifact_manifest": "artifacts/manifest.json",
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "driver_evidence": "evidence/c1_evidence.json",
+  "driver_log": "evidence/driver_run.log",
+  "driver_status": "evidence/driver_status.txt",
+  "grant": "governance/grant.json",
+  "launcher_log": "runtime/launcher.log",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json",
+  "watchdog_journal": "runtime/watchdog/"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "493b722764220f4f4aef837b83b3fb1a8ed5431b358021cb79fb33cd099c297a"
+}

@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "3a8710de0cbbd5491f499333de315f58d5a1f539",
+ "head_commit": "000d8ebc95b3c980abb4176858b71d0303368ea0",
  "executable_source": {
   "digest": "2c43e4e6cf85582e3fa809512a1b2c611ba880e0229884fb566f3e7dae7845fd",
   "files": [
@@ -75,8 +75,8 @@
    "scripts/autoinit"
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
-  "n_files": 99,
-  "digest": "48b127ca6a479713b23acca8cd9cb19f95dd8052878ada7bdd966f1925afeed2",
+  "n_files": 100,
+  "digest": "90acae886d2e73fc2f6c87799f39b764d01b6efd0b64429f35e323d18ed8a6d8",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -216,8 +216,8 @@
    },
    {
     "path": "scripts/pod/autoinit_c1_driver.py",
-    "sha256": "fc247046f0f3968dd2a2036019a33b63b59062df384b2e35eae4c7c522b6a93b",
-    "bytes": 61948
+    "sha256": "2ccd1aa4ad8f375285dbee6208cae9da7dc41bc3b88afb4677d787add78856a8",
+    "bytes": 62547
    },
    {
     "path": "scripts/pod/autoinit_c1_launch.py",
@@ -378,6 +378,11 @@
     "path": "src/aadistill/infrastructure/watchdog.py",
     "sha256": "222c46c9931656973b031e411ac5d137adf95164a6bb5fe91b09747672277184",
     "bytes": 14152
+   },
+   {
+    "path": "src/aadistill/initialization/adapters/__init__.py",
+    "sha256": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5",
+    "bytes": 2643
    },
    {
     "path": "src/aadistill/initialization/adapters/qwen3.py",
@@ -1089,5 +1094,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "0b2bf04b6e6b3f9c1d0e7c2c89a27c7ed24381d9256c8b6ffa685ad07afd95c1"
+ "preregistration_sha256": "84ee21c02fa2db9313596e8f17fb9a3cff33a7cd59b27b32e974c3e39fd6100b"
 }
