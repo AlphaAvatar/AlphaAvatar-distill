@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.autoinit.c1_bundle/v1",
- "session_commit": "53bc27d0713ef47860e3b5296f9b28049ebe0436",
- "canonical_bundle_name": "aad_autoinit_53bc27d0.bundle",
+ "session_commit": "e0b5b30c759ac1ce5673d2b0be8cf512fab553e3",
+ "canonical_bundle_name": "aad_autoinit_e0b5b30c.bundle",
  "relay_repo": "AlphaAvatar/aadistill-artifacts",
- "relay_path": "transfer/aad_autoinit_53bc27d0.bundle",
- "sha256": "9573d4fc285e9bb920cc280a817bcc25a127295f42e339bc1d9bca45ecc2cc97",
- "bytes": 9543307,
- "carries_authorization": "logs/autoinit_c1_authorization.json",
- "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_53bc27d0.bundle",
- "verify": "The bundle contains this ref:\n53bc27d0713ef47860e3b5296f9b28049ebe0436 refs/heads/_c1_bundle_53bc27d0713e\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1",
+ "relay_path": "transfer/aad_autoinit_e0b5b30c.bundle",
+ "sha256": "6352697d366ba7a6242f282b5aaaad66ac17be37c1a8497e43cb9f921cfa1266",
+ "bytes": 12870524,
+ "carries_authorization": "logs/budget/approvals/autoinit_c1_authorization.json",
+ "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_e0b5b30c.bundle",
+ "verify": "The bundle contains this ref:\ne0b5b30c759ac1ce5673d2b0be8cf512fab553e3 refs/heads/_c1_bundle_e0b5b30c759a\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1",
  "note": "the pre-provider bundle_staged_gate downloads this exact object, verifies it, checks it out and requires the resulting HEAD, authorization and harness digest to match. This record is the local half; the gate is the remote half."
 }
