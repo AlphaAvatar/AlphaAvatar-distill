@@ -9,10 +9,19 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing. No pod exists. Nothing is prepared
-for launch** beyond attempt 17's committed grant. Attempt 16's pod
-`9jhjbu4i67wb9k` was deleted after artifact collection, the provider confirms it
-is gone, and a live query returns `ZERO_PODS`.
+## A PAID SESSION IS LIVE
+
+C1 attempt 17 is running on pod `3fjnnnftllfzya`, NVIDIA L40S at `$1.09/h`,
+ceiling `$15.1475`, watchdog hard stop 834 minutes. **Formal measurement has
+begun** — stage G started 14:11:02Z and probe 1 of 6 trained at 15:41:50Z. It
+must not be retried, resumed or pooled.
+
+**Nothing is prepared for launch** beyond this: attempt 17's chain is consumed,
+and nothing may be prepared while a measurement is in flight.
+
+Launcher and watchdog are detached on the dev box; the poller writes
+`/home/ecs-user/aad-scratch/c1_attempt17.poll.log` every five minutes. Picking
+this up cold: read that log and `c1_attempt17.launcher.log` before anything else.
 
 | | | owner |
 | --- | --- | --- |
@@ -30,7 +39,7 @@ is gone, and a live query returns `ZERO_PODS`.
 
 | readiness | | owner |
 | --- | --- | --- |
-| latest sweep | **launch_bound — PASS**, swept at `0138d5f4`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
+| latest sweep | **launch_bound — PASS**, swept at `c91b2335`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
 | launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
 | last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../stages/stage-1/phase_c1/history/readiness_history.json) |
 
