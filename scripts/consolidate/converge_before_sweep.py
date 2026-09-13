@@ -43,15 +43,20 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-#: (label, argv). Order matters: the stage index and the run index feed the
-#: navigation, and the inventory reads the tree they leave behind.
+#: (label, argv), in CONSUMER ORDER. The run index counts runs; the stage index
+#: reads those counts into `activity.runs`; the navigation renders both; the
+#: inventory reads the tree they leave behind. Running the stage index first
+#: made every pass lag one behind -- a new run appeared in the run index, the
+#: stage index picked it up only on the NEXT pass, and the fixed-point check
+#: reported drift that a third pass would have settled. Which is the check
+#: working: the same lag would have reached a sweep as a stale committed index.
 GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("skip-predicate audit",
      ("scripts/autoinit/audit_skip_predicates.py", "--write")),
-    ("stage index",
-     ("scripts/consolidate/stage_attribution.py", "--write")),
     ("run index",
      ("scripts/architecture/record_run_index.py", "--write")),
+    ("stage index",
+     ("scripts/consolidate/stage_attribution.py", "--write")),
     ("navigation + snapshot",
      ("scripts/consolidate/render_log_navigation.py", "--write")),
     ("log inventory",

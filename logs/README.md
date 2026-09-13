@@ -43,7 +43,7 @@ something is "an experiment thing" or "a run thing" before you can find it.
 | stage | what it is | its own work | experiments | runs |
 | --- | --- | --- | --- | --- |
 | [`stage-0/`](stages/stage-0/) | Initialization warm-up data collection | 1 pipeline activity · 2 configs · 1 data manifest | **none** — its output is data and artifacts | 0 |
-| [`stage-1/`](stages/stage-1/) | Projection and structural initialization | 3 pipeline activities · 4 configs · 1 data manifest | 5, all with logs | 43 |
+| [`stage-1/`](stages/stage-1/) | Projection and structural initialization | 3 pipeline activities · 4 configs · 1 data manifest | 5, all with logs | 44 |
 | [`stage-2/`](stages/stage-2/) | Offline warm-up data collection | 1 pipeline activity · 1 config · 3 data manifests | **none** — its output is data and artifacts | 0 |
 | [`stage-3/`](stages/stage-3/) | Student recovery | 3 pipeline activities · 13 configs · 1 data manifest | 15, of which 5 produced no logs of their own | 0 |
 
