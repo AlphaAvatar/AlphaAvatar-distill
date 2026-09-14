@@ -3,7 +3,7 @@
  "preregistration_id": "autoinit.v1.phase_c1.execution",
  "written_utc": "2026-09-02T00:00:00Z",
  "_contract": "Everything the Phase-C1 session will run, bound before any C1 result exists. AUTHORIZES NOTHING: no pricing decision, no spend grant, no permission to launch. An authorization, if ever issued, binds THIS document.",
- "head_commit": "feb848ab13d9ab69cf311f277ee0d223102365e0",
+ "head_commit": "6f9e73928bcc919651889b458bb2884b6f9234e5",
  "executable_source": {
   "digest": "2c43e4e6cf85582e3fa809512a1b2c611ba880e0229884fb566f3e7dae7845fd",
   "files": [
@@ -76,7 +76,7 @@
   ],
   "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
   "n_files": 100,
-  "digest": "b79d27b259196e2a4824a427dd690baee28767e2385423810139d225b1ce1e6e",
+  "digest": "7607942e933f8824ecbbb658a651d0f0e3e046a9471c68ad44bf97a4ca1035ad",
   "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
   "files": [
    {
@@ -341,8 +341,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/log_relay.py",
-    "sha256": "a418c92223b83ea067343c34c84a7f7b3b65856cdff92616db3eb820a62d449f",
-    "bytes": 7320
+    "sha256": "4b6632ddd514d720a13c3b94ad77cc87772181a121ba7b63eb3f925f2c300281",
+    "bytes": 9833
    },
    {
     "path": "src/aadistill/infrastructure/manifest.py",
@@ -371,8 +371,8 @@
    },
    {
     "path": "src/aadistill/infrastructure/session_runner.py",
-    "sha256": "c436220787b44f9875eae123974cf9c05c5f9b64c7c6890e9eb254228d047e3c",
-    "bytes": 59342
+    "sha256": "31d824e62ebc04e7bcf6d837a9dff31729e8986cf91e8f6d4b6c71f7c9552537",
+    "bytes": 59774
    },
    {
     "path": "src/aadistill/infrastructure/watchdog.py",
@@ -1094,5 +1094,5 @@
   "any search, ranking, successive halving, tie-breaking or arm elimination"
  ],
  "authorizes": "nothing",
- "preregistration_sha256": "92f8455b2309045cd63aff0d3ccd87cb2a813bbf5fdcc47e501294b8715dce6b"
+ "preregistration_sha256": "4a6f1bc7b126d8202cbbdbbd420a21d2e514960ba7fa83760a9976e855c244b2"
 }

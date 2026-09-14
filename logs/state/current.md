@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-13. The human view. Every number here has an owner named
+**Updated:** 2026-09-15. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -21,12 +21,12 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation | [`stages/stage-1/phase_c1/`](../stages/stage-1/phase_c1/) |
-| replay | **MEASURED — 2/2 PASS** (attempt 9) | [`index.json`](../index.json) |
-| treatment, endpoint | **UNMEASURED** — zero probes trained. Attempt 9 is **NO DECISION**: a pre-treatment infrastructure abort, not a frozen-rule result | [`phase_c1/history/operational_history.md`](../stages/stage-1/phase_c1/history/operational_history.md) |
-| launch chain | attempt 17's **grant is committed**; the sweep, authorization and bundle are owed, **each in its own commit**. Attempts 13 through 16 are closed and their chains consumed | [`phase_c1/runs/attempt17/`](../stages/stage-1/phase_c1/runs/attempt17/) |
-| last attempt | **16 — PRE-SCIENCE DRIVER ABORT at stage D**, `$0.4333`. 14/14 gates, setup complete, CPU gate **4 s**, driver reached `replay_parent` and found an empty adapter registry. No comparison, no training, no science | [`attempt16/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt16/closeout/outcome.json) |
-| blocker | none outstanding: attempt 14's three sweep/pod divergences are repaired | [`budget/decisions.md`](../budget/decisions.md) |
+| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**. C2 is the next question and is **not started, not priced, not authorized** | [`stages/stage-1/phase_c1/`](../stages/stage-1/phase_c1/) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18) | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
+| treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
+| launch chain | attempt 18's chain is **consumed**, like every chain before it. **No further C1 attempt is authorized, and none is prepared** — a complete verdict ends the round | [`phase_c1/runs/attempt18/governance/`](../stages/stage-1/phase_c1/runs/attempt18/governance/) |
+| last attempt | **18 — COMPLETE SCIENTIFIC EXECUTION**, `$10.2018`, `ALL_DONE`, launcher exit 0. 14/14 gates, 8 stages, 6/6 probes trained (61.8 min mean) and scored (26.4 min mean), 164 artifacts collected, pod deleted and provider-confirmed gone | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
+| blocker | none blocking C1, which is finished. One **resource** decision is outstanding and belongs to the maintainer: durable large-artifact capacity, see the defects block below | [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness
@@ -98,46 +98,71 @@ It is not a capability claim and not a statement about a trained model, and
 **nothing has been added to the README Optim record**: an official record needs
 the full §3.8 package and maintainer approval.
 
-## Two open items attempt 18 exposed
+## Two engineering defects attempt 18 exposed
 
-Neither affects the result. Neither is repaired.
+Neither affects the C1 result, and both are held separately from it.
 
-1. **The probe-durability mechanism preserved nothing.** Added before this run
-   specifically so completed probes survive a later failure, it ran on all six
-   and every upload was refused: *"Private repository storage limit reached"*,
-   2.22 GiB per probe. It failed the way it was designed to — never raised,
-   disturbed no stage, recorded each probe's identity, seed, config hash,
-   content hash and the exact reason — but the bytes are gone with the pod. It
-   cost this run nothing, because the run succeeded. Had stage H failed again,
-   six probes would have been lost a second time. Fixing it needs relay
-   capacity, which is a resource decision: the private quota is account-wide and
-   freeing it requires permanent LFS deletion or a plan change.
-2. **The relay stream copy of `c1_evidence.json` arrived corrupted** — a stale
-   198-line prefix over the head of the final document, a write that did not
-   truncate. The artifact-store copy is intact. The run's evidence now holds the
-   store copy and keeps the corrupted one beside it as
-   `c1_evidence.relay_stream_corrupt.json`, because it is the evidence of the
-   defect. The collector still prefers the stream copy.
+**1. The relay stream copy of `c1_evidence.json` arrived corrupted — REPAIRED.**
+The driver rewrites that document on every state change; the relay mirrors files
+by byte offset because its other streams are append-only. It had synced 11,343
+bytes of an early version, the driver replaced the file with a 23,425-byte one,
+and `tail -c +11344` appended the new document's tail to the old document's
+head. Exactly the right size, and not JSON.
 
-**A stock label is not the gate.** Attempt 10 acquired at `Medium`, attempt 11
-failed at `Low`, attempt 12 was refused at `Low`; the label predicted none of
-them. `Low` is not `none`, and a `null` reading is *unknown* — neither available
-nor permanently unavailable. What gates a launch is the live `securePrice` quote
-at or below the accepted rate plus every pre-provider gate.
+`RelaySpec` now carries `whole_file`, and such a spec is written by temp file
+plus atomic `os.replace` — the local copy becomes exactly the new bytes or is
+left alone — and refuses rather than writing a document truncated at the chunk
+cap. The evidence document is the one spec that declares it; the event streams
+are still appended, because re-reading a growing train log every poll is what
+the offset scheme exists to avoid.
 
-## The launch chain, and where it stopped
+Two regressions cover it, and both were confirmed by mutation: a long document
+replaced by a shorter one leaves exactly the shorter one and parses; and a
+`whole_file` spec ignores a *stored* offset rather than merely never writing
+one — the first version of the fix passed every other test with that guard
+removed, and an offsets file written by the attempt-18 relay carries `11343`
+for exactly this path.
+
+The closeout also noted that **the collector still prefers the stream copy**.
+That is no longer a defect and needs no change: the preference was only
+dangerous because the preferred copy could be corrupt. The runner performs a
+final `sync_once` after the terminal marker, which for a whole-file spec is a
+complete re-read, so the stream copy is now the finished document.
+
+**2. The probe-durability mechanism preserved nothing — NOT repaired, and not
+mine to repair.** Added before this run so completed probes survive a later
+failure, it ran on all six and every upload was refused: *"Private repository
+storage limit reached"*, 2.22 GiB per probe. The mechanism behaved correctly —
+never raised, disturbed no stage, recorded each probe's identity, seed, config
+hash, content hash and the exact reason — but the bytes are gone with the pod.
+It cost this run nothing because the run succeeded; had stage H failed again,
+six probes would have been lost a second time.
+
+What it needs is a durable large-artifact backend with capacity. The private
+quota is account-wide, and freeing it means permanently deleting historical LFS
+objects or changing a paid plan — a maintainer decision either way. The
+requirement is recorded for future long experiments in AGENTS.md P8.2.1.
+
+## The launch chain — nothing owed, because no session is pending
+
+**C1 owes no step.** Attempt 18's chain is consumed and the round is ended by a
+verdict. This section is kept because the chain is the mechanism any *future*
+authorized paid session uses, not because a session is pending. The readiness
+block above says the latest sweep does not describe the current tree; that is
+correct and is not a debt — a `launch_bound` sweep describes the tree a launch
+will use, so it is run once, when a launch is actually imminent (AGENTS.md P8.3).
 
 One authorization funds one launcher session: up to three acquisition draws
-inside it, never two billing resources, all sharing one `$15.1475` ceiling.
+inside it, never two billing resources, all sharing that session's single
+ceiling. The ordering constraints, which cost real money to learn:
 
-1. this run's **grant**, committed on a clean tree — **done**, attempt 17
-2. a **`launch_bound` sweep** on that clean pre-authorization tree — owed.
-   It takes 8.7 seconds now: the pod's selection is `tests/c1_preflight/`
-3. commit **ONLY the readiness record** — owed
-4. the one-use **authorization**, issued against that clean commit — owed.
-   The issuer refuses a dirty tree by default since attempt 15 skipped step 3
-5. commit **ONLY the authorization artifact** — owed
-6. the exact-session **bundle**, staged with `--run-id` — owed
+1. the run's **grant**, committed on a clean tree
+2. a **`launch_bound` sweep** on that clean pre-authorization tree
+3. commit **ONLY the readiness record**
+4. the one-use **authorization**, issued against that clean commit. The issuer
+   refuses a dirty tree by default since attempt 15 skipped step 3
+5. commit **ONLY the authorization artifact**
+6. the exact-session **bundle**, staged with `--run-id`
 7. a live quote, every pre-provider gate, the single launch
 
 Steps 3 and 5 are separate commits because `session_commit_and_lineage` permits
@@ -148,15 +173,18 @@ Step 2 must follow step 1: `verify_record` permits exactly two tracked paths to
 differ after a sweep — the readiness record and the issued authorization — so a
 grant committed after a sweep invalidates it.
 
-Attempts 13 and 14 are **consumed** and authorize nothing. A chain is consumed
-by the launcher's invocation, whether or not a provider resource followed, and
-is never reused. A launcher invocation that aborts before formal training is an
-engineering subrun: it is closed, repaired and retried under a fresh chain
-without a further approval (AGENTS.md P12.1).
+A chain is consumed by the launcher's invocation, whether or not a provider
+resource followed, and is never reused. A launcher invocation that aborts before
+formal training is an engineering subrun: it is closed, repaired and retried
+under a fresh chain without a further approval (AGENTS.md P12.1). That exception
+governs retries **before** measurement and never after a complete verdict.
 
 Full terms — attempt counting, the six retry conditions, the stop list:
 `execution_package` in
 [`../configs/experiments/phase_c1/authorization.json`](../../configs/experiments/phase_c1/authorization.json).
+Those terms are C1's. A C2 session would need its own grant and its own ceiling;
+neither the project headroom above nor C1's unused formal allowance is
+authorization for one.
 
 ## What ends a round
 

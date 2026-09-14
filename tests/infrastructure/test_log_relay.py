@@ -142,3 +142,104 @@ def test_an_optional_missing_file_is_not_an_error(tmp_path):
     pod, relay, _ = make_relay(tmp_path, required=False)
     result = relay.sync_once()
     assert result.ok
+
+
+# --- a rewritten document is replaced, never appended to ---------------------
+#
+# C1 attempt 18's `c1_evidence.json` came home unparseable. The driver rewrites
+# that file on every state change; the relay had synced 11,343 bytes of an early
+# version, and after the rewrite `tail -c +11344` appended the NEW document's
+# tail to the OLD document's head. The local copy was exactly the right size and
+# was not JSON. The artifact-store copy was intact, so the verdict was never in
+# doubt — but the primary evidence file was lost, and one copy is not two.
+
+def test_a_rewritten_file_ends_up_as_exactly_the_new_bytes(tmp_path):
+    """Old file LONGER than new: the result is the new document, and it parses."""
+    pod = tmp_path / "pod"
+    pod.mkdir()
+    remote = pod / "run" / "evidence.json"
+    remote.parent.mkdir(parents=True)
+
+    spec = RelaySpec(remote_path=str(remote), local_name="evidence.json",
+                     required=False, whole_file=True)
+    relay = LogRelay(LocalShellTarget(pod), (spec,), tmp_path / "durable")
+    local = relay.local_path(spec)
+
+    long_first = json.dumps({"stage": "G", "probes": list(range(400))}, indent=1)
+    remote.write_text(long_first)
+    assert relay.sync_once().ok
+    assert local.read_text() == long_first
+
+    #: The rewrite the driver performs: a SHORTER document replacing a longer.
+    short_after = json.dumps({"stage": "I", "verdict": "GO"}, indent=1)
+    assert len(short_after) < len(long_first)
+    remote.write_text(short_after)
+
+    assert relay.sync_once().ok
+    assert local.read_text() == short_after, "the old tail survived the rewrite"
+    assert json.loads(local.read_text())["verdict"] == "GO"
+    assert not list(local.parent.glob("*.partial")), "a temp file was left behind"
+
+
+def test_a_stored_offset_cannot_make_a_whole_file_spec_read_from_the_middle(tmp_path):
+    """The persisted offset is IGNORED for a whole-file spec, not just unset.
+
+    Found by mutation: reverting `start` to `offsets.get(key, 0)` left all the
+    other tests green, because a whole-file spec stores 0 and so reads 0 anyway.
+    That makes the guard look redundant, and it is not — the offsets file
+    outlives the code that wrote it. An offsets file written by the relay AS IT
+    RAN IN ATTEMPT 18 carries `11343` for exactly this path, which is the number
+    that produced the corrupt document; a spec that only becomes `whole_file`
+    later reads that number back. `tail -c +11344` on the new document is then
+    the original defect with a repaired writer behind it, and the result still
+    does not parse.
+    """
+    pod = tmp_path / "pod"
+    pod.mkdir()
+    remote = pod / "run" / "evidence.json"
+    remote.parent.mkdir(parents=True)
+    document = json.dumps({"stage": "I", "verdict": "GO", "pad": "x" * 400})
+    remote.write_text(document)
+
+    spec = RelaySpec(remote_path=str(remote), local_name="evidence.json",
+                     required=False, whole_file=True)
+    relay = LogRelay(LocalShellTarget(pod), (spec,), tmp_path / "durable")
+    #: Exactly what the attempt-18 relay left behind: a byte offset into a
+    #: document that no longer has that history.
+    relay._save_offsets({spec.remote_path: 137})
+
+    assert relay.sync_once().ok
+    assert relay.local_path(spec).read_text() == document, (
+        "a stored offset truncated the head off a whole document")
+    assert json.loads(relay.local_path(spec).read_text())["verdict"] == "GO"
+
+
+def test_an_append_only_spec_is_still_appended(tmp_path):
+    """The flag must not turn the event streams into whole-file copies.
+
+    `train_log.jsonl` is the file this relay exists for: appended to for hours,
+    and re-reading it whole every cycle would move megabytes per poll.
+    """
+    pod, relay, spec = make_relay(tmp_path)
+    assert spec.whole_file is False
+    emit(pod / "run" / "train_log.jsonl", 5)
+    relay.sync_once()
+    emit(pod / "run" / "train_log.jsonl", 5, start=5)
+    second = relay.sync_once()
+    #: Only the new bytes moved; the whole file would be roughly twice this.
+    assert 0 < second.synced_bytes[spec.remote_path] < 400
+    assert [e["step"] for e in relay.recovered_events(spec)] == list(range(10))
+
+
+def test_the_evidence_document_is_declared_rewritten_by_the_runner():
+    """The flag is a repair only where it is actually applied."""
+    from pathlib import Path
+
+    src = (Path(__file__).resolve().parents[2]
+           / "src/aadistill/infrastructure/session_runner.py").read_text()
+    block = src[src.index("specs = ["):src.index("relay = LogRelay(")]
+    assert "whole_file=True" in block, (
+        "the evidence document is relayed through the append path again")
+    assert block.count("whole_file=True") == 1, (
+        "an append-only stream was marked rewritten; re-reading a growing "
+        "train log every cycle is what the offset scheme exists to avoid")

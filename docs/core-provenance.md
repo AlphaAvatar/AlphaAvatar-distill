@@ -118,6 +118,33 @@ incident justifies.
     # materializes EARLY in a session — Phase A's reference-cache fallback is
 ```
 
+### `src/aadistill/infrastructure/log_relay.py`
+
+Added 2026-09-15, with `session_runner.py` below, when `RelaySpec.whole_file`
+landed. The mechanism the incident justifies: a spec may declare that its writer
+rewrites the file, and such a spec is read from offset zero and replaced
+atomically rather than appended to, refusing rather than writing a document
+truncated at the chunk cap.
+
+```text
+    #: C1 attempt 18 mirrored `c1_evidence.json`, which the driver rewrites on
+    #: every state change, through the append path. The relay had synced 11,343
+    #: bytes of an early version; the driver replaced the file with a
+    #: 23,425-byte one; `tail -c +11344` then appended the NEW document's tail
+    #: to the OLD document's head. The local copy came out exactly the right
+    #: size and did not parse. The artifact-store copy was intact, so the run's
+    #: verdict was never in doubt — but the primary evidence file came home
+    #: unreadable, and had the store copy also failed there would have been
+    #: nothing.
+```
+
+The regression that pins the guard against a *stored* offset — not merely
+against never writing one — is `tests/infrastructure/test_log_relay.py::
+test_a_stored_offset_cannot_make_a_whole_file_spec_read_from_the_middle`. The
+number it uses, `11343`, is the offset the attempt-18 relay actually left
+behind; the guard survived every other test with itself removed, because a
+whole-file spec stores `0` and so reads `0` anyway.
+
 ### `src/aadistill/infrastructure/provider.py`
 
 ```text
@@ -165,6 +192,16 @@ incident justifies.
     # $0.0603 because the machinery read three attributes its parser had
     # both controls of a $2.82 session.
     # The reports are fetched BEFORE the products: Phase A's
+```
+
+Added 2026-09-15, alongside `log_relay.py` above: the evidence document is the
+one relay spec that declares `whole_file`, and the removed prose named the run
+that proved it had to.
+
+```text
+            #: change, not appended to. Relayed through the offset scheme, C1
+            #: attempt 18's copy came home as the head of an early version
+            #: followed by the tail of the final one — right size, unparseable.
 ```
 
 ### `src/aadistill/infrastructure/source_identity.py`

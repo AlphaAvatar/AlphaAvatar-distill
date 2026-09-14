@@ -799,9 +799,15 @@ class SessionRunner:
                       Path(self.spec.run_log_path).name, required=False),
             RelaySpec(self.spec.status_path,
                       Path(self.spec.status_path).name, required=False),
+            #: `whole_file`: the evidence document is REWRITTEN on every state
+            #: change, not appended to, so relaying it by byte offset splices a
+            #: new document's tail onto an old document's head — right size,
+            #: unparseable, no error anywhere. The run log and the status file
+            #: above really are append-only. See `docs/core-provenance.md`.
             RelaySpec(f"{self.repo}/artifacts/audit/{self.spec.artifacts.audit_dirname}/"
                       f"{self.spec.artifacts.evidence_filename}",
-                      self.spec.artifacts.evidence_filename, required=False),
+                      self.spec.artifacts.evidence_filename, required=False,
+                      whole_file=True),
         ]
         specs += [RelaySpec(remote, local, required=False) for remote, local
                   in self.spec.artifacts.extra_relay_streams(self.context())]

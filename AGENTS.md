@@ -267,6 +267,17 @@ experiment's retry policy and not by the existence of the file.
 Keep the implementation small — express this through the existing collector or
 relay rather than building an artifact framework for it.
 
+**A durability mechanism needs a backend with the capacity to hold what it is
+protecting.** C1 attempt 18 exercised the mechanism above on six 2.22 GiB probes
+and preserved none of them: every upload was refused for private storage quota.
+The mechanism behaved correctly — it never raised, it disturbed no stage, and it
+recorded each unit's identity, inputs and content hash together with the exact
+reason — but nothing was preserved. Before a long experiment that will produce
+large completed artifacts, confirm that a durable large-artifact backend exists
+with room for them. Git and hub metadata may hold identities and hashes; they
+are not where the bytes go. Deleting historical objects or buying storage is a
+maintainer decision, never an autonomous repair.
+
 #### Keep experiment records minimal
 
 For a normal experiment, the preferred minimum record is:

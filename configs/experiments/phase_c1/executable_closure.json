@@ -23,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 99,
- "digest": "6ed749093c8fc38e0b1f8e51550ccb6419ed2ee9e9dad15c64b4a45210c2f2ed",
+ "n_files": 100,
+ "digest": "7607942e933f8824ecbbb658a651d0f0e3e046a9471c68ad44bf97a4ca1035ad",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -34,33 +34,33 @@
   },
   {
    "path": "configs/autoinit/c1_artifacts_failed.json",
-   "sha256": "c21bb89dd7fc12ed3d0105d344696010df5c07e1487fcfe369bfa2822c539e97",
-   "bytes": 6412
+   "sha256": "6b82cd5ee0d9deb35330bcb4b219ad36743ff17284ff8ce54b98c941a2f3f21f",
+   "bytes": 6820
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "ed1f5755a5ae268501c711592bf42b9d40b553275105b8002f581f95c721f9c6",
-   "bytes": 11434
+   "sha256": "fd234c005e08776730306f6c11e5c827bd0d58a2dfc0a1959a30a6946a0d122d",
+   "bytes": 12320
   },
   {
    "path": "configs/experiments/phase_c1/frozen_assets.json",
-   "sha256": "103ddd78e2740ac1ed82034f53037f33e4f78687088c95557d24de26587167e5",
-   "bytes": 3285
+   "sha256": "7cb691d804ebc382317af2b5d7b169245a935ce681991025e3514effa4b05a1e",
+   "bytes": 3332
   },
   {
    "path": "scripts/autoinit/audit_tool_scoring.py",
-   "sha256": "5cf55651d826509648f9d040405017bb8958fb31b6e352a19b60ab22c0fd6f41",
-   "bytes": 10252
+   "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+   "bytes": 10268
   },
   {
    "path": "scripts/autoinit/issue_c1_authorization.py",
-   "sha256": "f995fbfd3926ce8c7722d2d27390ac933ce088a3abf1ad01aaa67e92f1453f11",
-   "bytes": 6766
+   "sha256": "7390b86b659041859e0b08772ce67079be975af5c5792e4d26220876fefdaa9d",
+   "bytes": 9629
   },
   {
    "path": "scripts/autoinit/renderer_parity_gate.py",
-   "sha256": "7d87ec76432694a8523678abc326e00ac7c2abf42bb0e01a40e4dd96e88671b8",
-   "bytes": 6564
+   "sha256": "d0eddf97d1f9ddc4b1292f7fb9767991686ba344e9ffa7de065560900c2c4ad1",
+   "bytes": 6616
   },
   {
    "path": "scripts/autoinit/score_c1_confirmation.py",
@@ -74,13 +74,13 @@
   },
   {
    "path": "scripts/autoinit/verify_frozen_assets.py",
-   "sha256": "1552298b95e16a3562e6f13005a764616d9d08f237b24033cdff78874fd30a20",
-   "bytes": 11246
+   "sha256": "de7e160e5e87d16bdf8658e64ff25c53d36266a6ae3cd8de4cb4648d12abb68d",
+   "bytes": 11292
   },
   {
    "path": "scripts/evaluation/uncapped_eval.py",
-   "sha256": "41b0de8ddf59b10a4cb09d9ea4af3f93683ab2c8b860ff519fff243073c16d02",
-   "bytes": 28932
+   "sha256": "277e373c781811ab3cc712bb67c4693cd3ff3217cbd65f32bc80913513181063",
+   "bytes": 30226
   },
   {
    "path": "scripts/experiments/calibration.py",
@@ -94,8 +94,8 @@
   },
   {
    "path": "scripts/experiments/phase_a/plan.py",
-   "sha256": "7b98df036b349c690585b5d82460d669d8439822bed14e4297464a5f010fedd5",
-   "bytes": 27750
+   "sha256": "2f032e240405bb345e8ae1e4a9ba89959a5e13049afe109b1d2cb67d591bddfc",
+   "bytes": 27782
   },
   {
    "path": "scripts/experiments/phase_c1/__init__.py",
@@ -104,8 +104,8 @@
   },
   {
    "path": "scripts/experiments/phase_c1/authorization.py",
-   "sha256": "d841b8891563f76cda31213c6ed2fba9c6d25014c9562737b1300a13d1ec7b8e",
-   "bytes": 24983
+   "sha256": "bee9a52e257123813356b76b3924dc19fa00cb342f8fec9a07dc27cfba232762",
+   "bytes": 25043
   },
   {
    "path": "scripts/experiments/phase_c1/authorization_payload.py",
@@ -119,8 +119,8 @@
   },
   {
    "path": "scripts/experiments/phase_c1/isolation.py",
-   "sha256": "cae93301babb0a725917e20f629ebe315e90e5df86decacb3b0c27f3c544fb04",
-   "bytes": 19602
+   "sha256": "9fdcf6a6aace4dfeeff4c7aba52309a81c00705833cfcd818ef6f9864ef0abee",
+   "bytes": 19632
   },
   {
    "path": "scripts/experiments/phase_c1/packaging.py",
@@ -129,8 +129,8 @@
   },
   {
    "path": "scripts/experiments/phase_c1/pod_environment.py",
-   "sha256": "daccc39a9b98a6a7740bb59f546ed30c5f812748ea0681801409c4d2d3f86876",
-   "bytes": 14101
+   "sha256": "7b08011426704176378d0b3f92e1fa71bc8f7318f7d3d566c3c73cf3448dd440",
+   "bytes": 10153
   },
   {
    "path": "scripts/experiments/phase_c1/probe_results.py",
@@ -144,8 +144,8 @@
   },
   {
    "path": "scripts/experiments/phase_c1/session.py",
-   "sha256": "8136fe6df4582ff9bf80a014e256b71fddab665ca9ada00fc0856551d7aef8d1",
-   "bytes": 14146
+   "sha256": "5d6be1d4a1738ccadee28d481b83792812fd4b25a5d572f1e51738783f268c91",
+   "bytes": 14167
   },
   {
    "path": "scripts/experiments/recovery_policy.py",
@@ -154,8 +154,8 @@
   },
   {
    "path": "scripts/experiments/run_layout.py",
-   "sha256": "52bae0e283ca93d6b9fb9a79447838bff96303b890062202dadc5d89d14ad4e3",
-   "bytes": 26006
+   "sha256": "77e42f67fb44aec7e8ba2fd49e475dd6d5f789bfdf1ed86d918c014fc0cd5d7d",
+   "bytes": 30490
   },
   {
    "path": "scripts/experiments/source_sets.py",
@@ -164,13 +164,13 @@
   },
   {
    "path": "scripts/pod/autoinit_c1_driver.py",
-   "sha256": "a52b55c00f67597d43a8a6c93961aba51cc41b8f3f50866603f38fd857b98e19",
-   "bytes": 61843
+   "sha256": "72b449ccd847ce33b77d62ff5714ac2feffccfa0a54ca41ef442de4b5823bcd4",
+   "bytes": 67508
   },
   {
    "path": "scripts/pod/autoinit_c1_launch.py",
-   "sha256": "ab94b148a9fcae6b4f93dd590b34a40e265a4e3dba30dbaf57bfabc52e08188c",
-   "bytes": 76038
+   "sha256": "e7e2a440cdb057d364d02e49aa25f13dbe8c55c79b6e6f226a1240201f8d33a3",
+   "bytes": 83838
   },
   {
    "path": "scripts/pod/autoinit_engine_probe.py",
@@ -179,13 +179,13 @@
   },
   {
    "path": "scripts/pod/autoinit_preflight_setup.sh",
-   "sha256": "39d3b80855da0f537bbb2ca45e438715a813697a6bcd84b795b7b580e3a28f27",
-   "bytes": 39668
+   "sha256": "286191a1b63de04f0c2a268a5f9fbd51d19c4398a3201967e3e5c4f63948287a",
+   "bytes": 39731
   },
   {
    "path": "scripts/pod/autoinit_science_inputs.py",
-   "sha256": "ef4ab147131a950c54bbdf5ca39d0b32054cff3efdcd35dbf7acbe633204e292",
-   "bytes": 4281
+   "sha256": "142875b3014464104d5d690b3f074565be319b570ab90681ee6429d800455159",
+   "bytes": 4297
   },
   {
    "path": "scripts/pod/collect_artifacts.py",
@@ -224,8 +224,8 @@
   },
   {
    "path": "src/aadistill/data/verify.py",
-   "sha256": "1860b77f93ac78ad8d50c014f596cb23696a98cc666d7aa6fe359ed0dc718af1",
-   "bytes": 7567
+   "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+   "bytes": 7594
   },
   {
    "path": "src/aadistill/evaluation/__init__.py",
@@ -289,8 +289,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/log_relay.py",
-   "sha256": "a418c92223b83ea067343c34c84a7f7b3b65856cdff92616db3eb820a62d449f",
-   "bytes": 7320
+   "sha256": "4b6632ddd514d720a13c3b94ad77cc87772181a121ba7b63eb3f925f2c300281",
+   "bytes": 9833
   },
   {
    "path": "src/aadistill/infrastructure/manifest.py",
@@ -319,13 +319,18 @@
   },
   {
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "sha256": "493e61482bca37a3d93cb119a141efb1d4751cb43eb571bdbe503c15b10e5496",
-   "bytes": 57143
+   "sha256": "31d824e62ebc04e7bcf6d837a9dff31729e8986cf91e8f6d4b6c71f7c9552537",
+   "bytes": 59774
   },
   {
    "path": "src/aadistill/infrastructure/watchdog.py",
    "sha256": "222c46c9931656973b031e411ac5d137adf95164a6bb5fe91b09747672277184",
    "bytes": 14152
+  },
+  {
+   "path": "src/aadistill/initialization/adapters/__init__.py",
+   "sha256": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5",
+   "bytes": 2643
   },
   {
    "path": "src/aadistill/initialization/adapters/qwen3.py",
@@ -499,13 +504,13 @@
   },
   {
    "path": "src/aadistill/runtime/pod_environment.py",
-   "sha256": "538d23a0a061f4513650860e58c725efccd5c6a911e26802342dfee11936543d",
-   "bytes": 32404
+   "sha256": "fa0a8e543d292b6e4ed74771229ed6c064d503d776872a69c3f1d8a719355abb",
+   "bytes": 32693
   },
   {
    "path": "src/aadistill/runtime/run_layout.py",
-   "sha256": "8b361400dcbe2c5db898fd2e567794dae0e0fdd007d67ce0bdc0d4239e853c42",
-   "bytes": 11241
+   "sha256": "2317d16715ac0ae5117009e118d086f9191b9fdf054a5be2f12a0f0be6c6a9e5",
+   "bytes": 12534
   },
   {
    "path": "src/aadistill/runtime/staging_contract.py",

@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-12T00:00:00Z",
+ "generated_utc": "2026-09-15T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "baseline_commit_meaning": "OWNED by the readiness record's swept_base_commit and NOT duplicated: this snapshot is written BEFORE the commit it would name, and gate 12 forbids editing state after the sweep.",
@@ -8,15 +8,13 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods. Attempt 17's pod 3fjnnnftllfzya was deleted after artifact collection, the provider confirms it is gone, and a live query returns ZERO_PODS."
+  "note": "zero pods. Attempt 18's pod ygtjrobs456cb5 was deleted after collecting 164 artifacts, the provider confirms it is gone, and a live query returns ZERO_PODS."
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-17 consumed, $12.4158. Attempt 17 replayed both frozen gates and trained all six probes; nothing was measured.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-18 consumed, $22.6176. Attempt 18 replayed both frozen gates, trained and scored all six probes, and returned the frozen Stage-I verdict GO. A complete verdict ends the round: no further C1 attempt is authorized, and the package balance is not authorization for another question.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
-  "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/stages/stage-1/phase_c1/runs/attempt9/outcome.json.",
   "c1_attempts": "eighteen labels, FIFTEEN paid, $26.6177. Attempt 18 is COMPLETE with a frozen-rule verdict. Per-attempt cost: logs/budget/ledger.md.",
-  "pre_science_retry_is_autonomous": "MAINTAINER DIRECTION 2026-09-13, now AGENTS.md P12.1: an invocation that aborts before formal training is an engineering subrun. Close it, repair, build a FRESH chain, retry -- no further approval, same cumulative budget.",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
@@ -76,7 +74,7 @@
   "launch_bound_failures": 1,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json",
   "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
-  "last_paid_attempt_owned_by": "logs/stages/stage-1/phase_c1/runs/attempt11/closeout/outcome.json",
+  "last_paid_attempt_owned_by": "logs/stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json",
   "_three_separate_facts": "what the latest sweep OBSERVED, whether a launch-bound record describes the CURRENT tree, and that an earlier launch-bound sweep failed. STATE.md collapsed them into one line and was wrong about all three at once."
  },
  "abandoned": [
@@ -145,7 +143,8 @@
   },
   "c2": {
    "status": "NOT STARTED",
-   "gate": "runs only if C1 finds a worthwhile ATTENTION formulation"
+   "gate": "SATISFIED by C1 (verdict GO). Satisfying it is not starting, pricing or authorizing C2.",
+   "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing composition/order beat the frozen C1 treatment? Owner: logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md."
   }
  },
  "storage": {

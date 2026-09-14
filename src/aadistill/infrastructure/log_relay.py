@@ -14,9 +14,12 @@ disappearance**, whatever happens next.
 
 Design notes:
 
-* Byte offsets, persisted. The remote files are append-only (`JsonlLogger` never
-  overwrites), so `tail -c +N` is exact and resumable, and a sync that runs
-  twice appends nothing the second time.
+* Byte offsets, persisted — for the append-only streams, which is most of them
+  (`JsonlLogger` never overwrites), so `tail -c +N` is exact and resumable, and
+  a sync that runs twice appends nothing the second time. A spec declaring
+  `whole_file` opts out: its writer rewrites the file, the offset describes a
+  history the file no longer has, and it is read whole and replaced atomically.
+  See `RelaySpec.whole_file`.
 * base64 on the wire. A jsonl line contains quotes, braces and non-ASCII; moving
   it through a nested shell as text invites the quoting failure this whole
   session is about.
@@ -46,11 +49,25 @@ MAX_CHUNK_BYTES = 8 << 20
 
 @dataclass(frozen=True)
 class RelaySpec:
-    """One remote append-only file and where it lands locally."""
+    """One remote file and where it lands locally.
+
+    APPEND-ONLY BY DEFAULT, because that is what the offset scheme requires.
+    Set `whole_file` for a path whose writer REWRITES it in place: there the
+    offset scheme is not merely inefficient, it corrupts.
+    """
 
     remote_path: str
     local_name: str
     required: bool = True
+    #: The writer rewrites this file rather than appending to it.
+    #:
+    #: Relaying such a path through the offset scheme does not merely waste
+    #: bytes, it CORRUPTS. A persisted offset names a prefix the file no longer
+    #: has, so `tail -c +N` splices the NEW document's tail onto the OLD
+    #: document's head. The result has a plausible size, is not a document, and
+    #: nothing in the transfer reports an error — the failure mode this flag
+    #: exists to end. See `docs/core-provenance.md` for the incident.
+    whole_file: bool = False
 
 
 @dataclass
@@ -70,7 +87,8 @@ class RelayResult:
 
 
 class LogRelay:
-    """Incrementally copy remote append-only files into a durable local dir."""
+    """Copy remote files into a durable local dir: incrementally by default,
+    whole for a spec whose writer rewrites it in place."""
 
     def __init__(self, target: ShellTarget, specs: tuple[RelaySpec, ...],
                  local_root: str | Path, *, timeout: float = 120.0) -> None:
@@ -108,7 +126,10 @@ class LogRelay:
         offsets = self._offsets()
         for spec in self.specs:
             key = spec.remote_path
-            start = int(offsets.get(key, 0))
+            #: A whole-file spec always re-reads from zero. An offset into a
+            #: file that gets rewritten is a claim about a history it no longer
+            #: has.
+            start = 0 if spec.whole_file else int(offsets.get(key, 0))
             try:
                 chunk, err = self._read_remote(spec.remote_path, start)
             except Exception as exc:  # noqa: BLE001 - see module docstring
@@ -121,12 +142,23 @@ class LogRelay:
             if not chunk:
                 result.synced_bytes[key] = 0
                 continue
+            #: A rewritten file is replaced whole or not at all. A document
+            #: truncated at the chunk cap is corruption in the shape of
+            #: success, which is the failure this flag exists to end.
+            if spec.whole_file and len(chunk) >= MAX_CHUNK_BYTES:
+                result.errors[key] = (
+                    f"{key} reached the {MAX_CHUNK_BYTES}-byte chunk cap; "
+                    "refusing to write a truncated document")
+                continue
             try:
-                self._append(self.local_path(spec), chunk)
+                if spec.whole_file:
+                    self._replace(self.local_path(spec), chunk)
+                else:
+                    self._append(self.local_path(spec), chunk)
             except OSError as exc:
                 result.errors[key] = f"local write failed: {exc}"
                 continue
-            offsets[key] = start + len(chunk)
+            offsets[key] = 0 if spec.whole_file else start + len(chunk)
             result.synced_bytes[key] = len(chunk)
         try:
             self._save_offsets(offsets)
@@ -154,6 +186,22 @@ class LogRelay:
             return base64.b64decode(out, validate=True), ""
         except (binascii.Error, ValueError) as exc:
             return b"", f"undecodable chunk from {path}: {exc}"
+
+    @staticmethod
+    def _replace(path: Path, chunk: bytes) -> None:
+        """The local copy becomes EXACTLY these bytes, or is left as it was.
+
+        Temp file plus `os.replace`, atomic on one filesystem, so a reader never
+        sees a half-written document and a shorter new version can never leave
+        the tail of a longer old one behind it.
+        """
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(path.name + ".partial")
+        with open(tmp, "wb") as f:
+            f.write(chunk)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
 
     @staticmethod
     def _append(path: Path, chunk: bytes) -> None:

@@ -142,6 +142,46 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "composition) and `e89952b` (the verifier), both in the "
             "stage-first logs migration, and undeclared until now.",
      }),
+    ("e7180a3239fe8b58132115d3676225d80ba7db44",
+     "a session may declare no staged-role case",
+     {
+        "src/aadistill/runtime/pod_environment.py":
+            "`ReadinessGroups.staged_role_nodeid` became `str | None`, and "
+            "`evaluate_sweep` skips the check when it is None. Previously the "
+            "field was mandatory, `outcomes.get(None, 'ABSENT')` could not "
+            "match, and a session that stages no source-dependent case failed "
+            "its own sweep with 11 passed / 0 failed. THIS IS A DECLARED "
+            "SEMANTIC CHANGE to readiness evaluation and is deliberately not "
+            "described as prose. It is not a relaxation: an ABSENT nodeid is "
+            "still a finding, and only an explicit None is skipped, so a "
+            "session that declares one must still satisfy it. Introduced by "
+            "`a1daf34` and undeclared until now — which is why rounds 2 "
+            "through 5 were failing this check at `6f9e739`, before the relay "
+            "round below touched anything.",
+     }),
+    ("6f9e73928bcc919651889b458bb2884b6f9234e5",
+     "a relayed document its writer rewrites in place",
+     {
+        "src/aadistill/infrastructure/log_relay.py":
+            "`RelaySpec.whole_file`. A spec declaring it is read from offset "
+            "ZERO every cycle — the persisted offset is ignored, not merely "
+            "left unwritten — is written by temp file plus fsync plus "
+            "`os.replace`, and is REFUSED rather than written when the chunk "
+            "reaches `MAX_CHUNK_BYTES`, because a document truncated at the cap "
+            "is corruption in the shape of success. THIS IS A DECLARED "
+            "SEMANTIC CHANGE to relay transport, reachable only by a spec that "
+            "opts in: every append-only stream takes the same path it always "
+            "did, byte for byte, and `_append` is untouched. The failure it "
+            "ends is a rewritten file relayed by byte offset, where `tail -c "
+            "+N` splices the new document's tail onto the old document's head "
+            "and nothing raises.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "the evidence document's `RelaySpec` declares `whole_file=True`. "
+            "One argument, and it is the whole point: the mechanism above is "
+            "inert without a production caller. The run log and the status "
+            "stream keep offset semantics. THIS IS A DECLARED SEMANTIC CHANGE "
+            "to what the runner relays and how.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.
