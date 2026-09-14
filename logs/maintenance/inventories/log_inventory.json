@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-14T17:58:28+00:00",
+  "created_utc": "2026-09-14T18:01:41+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1060,
-    "bytes": 42859633,
+    "bytes": 42867770,
     "by_disposition": {
       "keep_canonical": 80,
       "keep_immutable": 810,
@@ -3919,6 +3919,7 @@
         "logs/stages/stage-0/README.md",
         "logs/stages/stage-1/README.md",
         "logs/stages/stage-1/phase_a/runs/attempt11/search_states_FULL_RECORD.md",
+        "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json",
         "logs/stages/stage-1/phase_c1/plans/battery.json",
         "logs/stages/stage-1/phase_c1/runs/attempt14/runtime/session.json",
         "logs/stages/stage-1/phase_c1/runs/attempt15/governance/authorization.json",
@@ -6438,8 +6439,8 @@
     },
     {
       "path": "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_post_freeze_changes.json",
-      "size_bytes": 29573,
-      "sha256": "fdc19a9086c5951e61e30bbda84aa4064dd6b76dc7e374bf6f854270f791b9a9",
+      "size_bytes": 31672,
+      "sha256": "68cf7762bdb5747ee9407a8c854d60ec6ef86b60592078f917f56960f8c8a240",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9707,8 +9708,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json",
-      "size_bytes": 110055,
-      "sha256": "852002ca2ff7133d25477a713e1ef9173cfc771031c8d10e31447862f91a5b65",
+      "size_bytes": 115929,
+      "sha256": "5c7c77507d99224767b154652b4c1061d73a8e810980dea12b08bdcdd612d3eb",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9768,6 +9769,7 @@
       "referenced_by": [
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json",
         "scripts/autoinit/record_phase_b_post_freeze.py",
         "scripts/experiments/phase_b/post_freeze.py",
         "tests/autoinit/test_phase_b_historical_amendments.py",
@@ -9971,6 +9973,7 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/index.json",
+        "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json",
         "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
         "scripts/autoinit/issue_phase_b_authorization.py",
         "scripts/autoinit/record_phase_b_historical_amendment.py",
@@ -20360,8 +20363,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 15081,
-      "sha256": "4f3be3b676760eb602c243a8d40c0b145af06277a0aa90f92c9ddfb32ad56d60",
+      "size_bytes": 15245,
+      "sha256": "b03db9cb57deffde655048a73cc30b56fdec84c2af96400c3ce2450286a51073",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

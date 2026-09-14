@@ -1,70 +1,43 @@
 {
  "schema": "aadistill.autoinit.continuation_b_post_freeze_changes/v1",
- "generated_utc": "2026-09-13T01:01:28+08:00",
- "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration \u2014 which would destroy the evidence of what attempt 5 actually executed \u2014 and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
+ "generated_utc": "2026-09-14T18:00:27.596440+00:00",
+ "_contract": "The CLOSED continuation-B preregistration binds an executable-source digest. One of its members had to change so Phase C1 could exist at all: the SINGLE SESSION_KIND dispatcher shared by every launchable session, which needed a 'c1' branch. Recording that is the alternative to rewriting the preregistration — which would destroy the evidence of what attempt 5 actually executed — and to deleting the gate, which would destroy its meaning. This is the same situation, and the same remedy, as logs/autoinit_phase_b_post_freeze_changes.json.",
  "continuation_b_status": "CLOSED and CONSUMED. Its authorization binds a NON-HEAD commit, so session_commit_gate rejects it and no continuation-B session can launch again. The frozen digest is historical evidence, not a live gate.",
  "frozen_digest": "a5ce6311789eb4cd28902dfa8e2a65f1fea26123ab67a7fda025c8e8960d7141",
- "post_freeze_digest": "d9909c12560a202e260b934aff09fb9be26136191b36b15fa1f7217ef28a2ce3",
+ "post_freeze_digest": "0088e77f2f6f71f1f6eabae7622fe494a6ccc6a8de3f5509a7d2ddffbf86ebfc",
  "changed_files": [
-  "scripts/experiments/phase_a/plan.py",
-  "scripts/pod/autoinit_continuation_b_driver.py",
-  "scripts/pod/autoinit_continuation_b_launch.py",
-  "scripts/pod/autoinit_phase_a_driver.py",
-  "scripts/pod/autoinit_phase_a_launch.py",
-  "scripts/pod/autoinit_preflight_setup.sh",
-  "scripts/pod/autoinit_recovery_continuation_launch.py",
-  "scripts/pod/autoinit_science_inputs.py"
+  "src/aadistill/infrastructure/log_relay.py",
+  "src/aadistill/infrastructure/session_runner.py",
+  "src/aadistill/initialization/operators/register.py"
  ],
  "change": {
-  "what": "stage-first log-layout path synchronisation, and the direct successor to the log-layout-v1 entry now in `history`. Commits fa9fa9a and e8991e1 moved every experiment's plans, analyses, results, history, validations and runs inside the stage that owns it; logs/experiments/, logs/runs/ and logs/runs/unscoped/ ceased to exist. These members read or write repository-relative log paths that moved with them.",
-  "why_it_touches_this_frozen_set": "continuation B's executable set names the shared setup script, the Phase-A driver and launcher it inherits from, and its own driver and launcher. A path synchronisation moves their bytes and therefore this digest, even though continuation B is closed and consumed.",
+  "what": "The relay whole-file repair, and one docstring correction. `RelaySpec` gained `whole_file`: a spec whose writer REWRITES the file is read from offset zero and replaced by temp file plus fsync plus `os.replace`, and is refused rather than written when the chunk reaches the cap. C1 attempt 18's primary evidence file came home as the head of an early version with the tail of the final one appended to it -- exactly the right size, and not JSON -- because the relay mirrors by byte offset and that document is rewritten on every state change. `session_runner.py` declares the evidence document as the one such spec. `operators/register.py` is prose only: its docstring named `attention_activation.enable()`/`disable()`, functions that have never existed under those names.",
+  "why_it_touches_this_frozen_set": "continuation B's executable set names the shared session runner, the relay it constructs, and the operator registry the search resolves through. There is no continuation-B-free way to repair an evidence-transport corruption in the relay: it is how every session's evidence comes home. The digest moves even though continuation B is closed and consumed.",
   "additive_only": false,
-  "lines_added": 36,
-  "lines_removed": 36,
+  "lines_added": 68,
+  "lines_removed": 12,
   "numstat": {
-   "scripts/experiments/phase_a/plan.py": [
-    1,
-    1
-   ],
-   "scripts/pod/autoinit_continuation_b_driver.py": [
-    8,
+   "src/aadistill/infrastructure/log_relay.py": [
+    56,
     8
    ],
-   "scripts/pod/autoinit_continuation_b_launch.py": [
+   "src/aadistill/infrastructure/session_runner.py": [
     7,
-    7
-   ],
-   "scripts/pod/autoinit_phase_a_driver.py": [
-    6,
-    6
-   ],
-   "scripts/pod/autoinit_phase_a_launch.py": [
-    6,
-    6
-   ],
-   "scripts/pod/autoinit_preflight_setup.sh": [
-    2,
-    2
-   ],
-   "scripts/pod/autoinit_recovery_continuation_launch.py": [
-    5,
-    5
-   ],
-   "scripts/pod/autoinit_science_inputs.py": [
-    1,
     1
+   ],
+   "src/aadistill/initialization/operators/register.py": [
+    5,
+    3
    ]
   },
-  "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
-  "source_repair_parent": "02723333e6c506e92bc98ba681a1ee386aae9f8a",
-  "scientific_impact_none_because": "every changed line is a logs/<old> -> logs/<new> substitution and nothing else. The diff is 1:1 in every member, and masking the logs/ path out of each hunk leaves the two sides identical. No logic, threshold, protocol, seed, score or decision changed, and the destinations were checked to exist on disk."
+  "scientific_impact_none_because": "no logic, threshold, protocol, seed, score or decision changed for continuation B. The relay change is inert on every append-only spec, which is every spec any continuation-B session ever declared: those take the byte-identical `_append` path, and `whole_file` is opt-in per spec. Continuation B's result, its probe, its digests and its reuse record are untouched."
  },
- "pre_existing_branches_unchanged": false,
- "pre_existing_branches_note": "phase_a, phase_b and continuation_b hash unchanged. The c1 branch moved 711850e5b440 -> 4418d4548f54 because the readiness --expected path it names moved with the logs tree. No continuation-B branch changed.",
+ "pre_existing_branches_unchanged": true,
+ "pre_existing_branches_note": "All five SESSION_KIND dispatch branches hash exactly as they did at the previous declaration -- phase_a, phase_b, continuation_b, c1 and recovery_continuation. This change edits no dispatch branch; it repairs the transport underneath them.",
  "preregistration_rewritten": false,
  "scientific_impact": "NONE. A filesystem relocation; no scientific field moved.",
- "declared_at_commit": "f42d46b9729722ab1b37761713a69a5d59a9b031",
- "post_freeze_digest_previous": "6da9507057662c6ccc790342007ece7a02e67e7e193ccf303aa6fdfc0c737d95",
+ "declared_at_commit": "2077022e92af5cddcefe8cc93d9ba49bdd58d928",
+ "post_freeze_digest_previous": "d9909c12560a202e260b934aff09fb9be26136191b36b15fa1f7217ef28a2ce3",
  "history": [
   {
    "utc": "2026-09-06T06:00:00Z",
@@ -360,7 +333,7 @@
   },
   {
    "post_freeze_digest": "55ce619574ced2e741874db43d86d18350f354eaf1d650225e55950ea5dde55b",
-   "declared_at_commit": "pending \u2014 this working tree; the commit that carries this declaration",
+   "declared_at_commit": "pending — this working tree; the commit that carries this declaration",
    "generated_utc": "2026-09-11T00:00:00Z",
    "change": {
     "what": "the shared pod setup reads an OPTIONAL SESSION_FROZEN_EXPECT and, when a session sets it, passes --expect to verify_frozen_assets.py instead of using that script's compiled-in historical constants. Empty for every session that does not set it, so every other session asks exactly the question it asked before.",
@@ -477,6 +450,55 @@
     "c1": "711850e5b44085aebcb10395263feef4387b32739fb5392953648bab6ccf10b2",
     "recovery_continuation": "ea1d64fa2dd5067cf558c25b172fbcf50c7b101c95c3b872e10709d3c997e7ae"
    }
+  },
+  {
+   "utc": "2026-09-13T01:01:28+08:00",
+   "declared_at_commit": "f42d46b9729722ab1b37761713a69a5d59a9b031",
+   "digest_moved": "6da9507057662c6c -> d9909c12560a202e",
+   "change": {
+    "what": "stage-first log-layout path synchronisation, and the direct successor to the log-layout-v1 entry now in `history`. Commits fa9fa9a and e8991e1 moved every experiment's plans, analyses, results, history, validations and runs inside the stage that owns it; logs/experiments/, logs/runs/ and logs/runs/unscoped/ ceased to exist. These members read or write repository-relative log paths that moved with them.",
+    "why_it_touches_this_frozen_set": "continuation B's executable set names the shared setup script, the Phase-A driver and launcher it inherits from, and its own driver and launcher. A path synchronisation moves their bytes and therefore this digest, even though continuation B is closed and consumed.",
+    "additive_only": false,
+    "lines_added": 36,
+    "lines_removed": 36,
+    "numstat": {
+     "scripts/experiments/phase_a/plan.py": [
+      1,
+      1
+     ],
+     "scripts/pod/autoinit_continuation_b_driver.py": [
+      8,
+      8
+     ],
+     "scripts/pod/autoinit_continuation_b_launch.py": [
+      7,
+      7
+     ],
+     "scripts/pod/autoinit_phase_a_driver.py": [
+      6,
+      6
+     ],
+     "scripts/pod/autoinit_phase_a_launch.py": [
+      6,
+      6
+     ],
+     "scripts/pod/autoinit_preflight_setup.sh": [
+      2,
+      2
+     ],
+     "scripts/pod/autoinit_recovery_continuation_launch.py": [
+      5,
+      5
+     ],
+     "scripts/pod/autoinit_science_inputs.py": [
+      1,
+      1
+     ]
+    },
+    "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+    "source_repair_parent": "02723333e6c506e92bc98ba681a1ee386aae9f8a",
+    "scientific_impact_none_because": "every changed line is a logs/<old> -> logs/<new> substitution and nothing else. The diff is 1:1 in every member, and masking the logs/ path out of each hunk leaves the two sides identical. No logic, threshold, protocol, seed, score or decision changed, and the destinations were checked to exist on disk."
+   }
   }
  ],
  "branch_hashes_at_latest_declaration": {
@@ -488,5 +510,5 @@
  },
  "launch_compatible": false,
  "launch_compatible_note": "the continuation is CLOSED and CONSUMED; its authorization binds a non-HEAD commit, so no continuation-B session can launch again. This records history and confers nothing.",
- "also_declared_as": "PHB-HA-017 in logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json. ONE change, several frozen sets that pin a digest naming these files; each owes its own declaration, and declaring one does not declare the others."
+ "also_declared_as": "PHB-HA-018 in logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json. ONE change, several frozen sets that pin a digest naming these files; each owes its own declaration, and neither confers anything. The Phase-B amendment additionally covers `planning/search.py` and `phase_a_search.py`, which the Phase-B set names and this one does not."
 }
