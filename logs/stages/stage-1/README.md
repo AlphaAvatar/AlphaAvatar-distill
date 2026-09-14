@@ -65,6 +65,7 @@ What each one asked of this stage.
 | `continuation_b` — Continuation B — resolving the Phase-B behavioural selection at rung 2 | Which Phase-B candidate wins once the behavioural comparison is carried to rung 2? | [`continuation_b/`](continuation_b/) | complete |
 | `recovery_continuation` — Recovery continuation — finishing Phase A's search under the repaired harness | Finished under the repaired harness, which of Phase A's searched states survive? | [`recovery_continuation/`](recovery_continuation/) | complete |
 | `phase_c1` — Phase C1 — fixed-path ATTENTION isolation | Does a replacement ATTENTION operator beat the frozen incumbent with every other operator held on a fixed path? | [`phase_c1/`](phase_c1/) | authorized — not launched |
+| `phase_c2` — Phase C2 — ATTENTION-aware composition/order re-search | With that ATTENTION operator now fixed, does re-optimizing the operator order and ATTENTION's calibration profile beat the frozen C1 treatment? | [`phase_c2/`](phase_c2/) | planned — space implemented and priced, NOT authorized |
 
 ## Runs
 

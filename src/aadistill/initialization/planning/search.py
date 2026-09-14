@@ -149,6 +149,40 @@ CalibrationLoader = Callable[[CalibrationProfile], Sequence[Mapping[str, Any]]]
 Measurer = Callable[[Any, str], StateEvaluation]
 
 
+def expansion_profiles(
+    implementation,
+    profiles: Sequence[CalibrationProfile],
+    impl_profiles: Mapping[str, Sequence[str]] | None = None,
+) -> list[CalibrationProfile]:
+    """Every profile one implementation is offered for ONE parent, in order.
+
+    Module-level, and the ONE definition of the branching factor. `BeamSearch`
+    calls it to expand; a cost model calls it to count. Two implementations of
+    this rule disagree immediately — the second one branched a
+    `CalibrationNeed.NONE` operator over every active profile and over-counted
+    the root's children — and a price for a space the search does not run is
+    worse than no price. See `docs/core-provenance.md`.
+
+    Both rules live here:
+
+    * an implementation declaring ``CalibrationNeed.NONE`` is offered **once**,
+      against the canonical sentinel, however many profiles are active;
+    * anything else is offered every active profile, unless ``impl_profiles``
+      restricts it. An implementation absent from that mapping branches over
+      everything, which is what every search before the field existed did.
+    """
+    active = sorted(profiles, key=lambda p: p.qualified_id)
+    if not consumes_calibration(implementation):
+        #: `profile_for` returns the sentinel and ignores the argument; passing
+        #: the first active profile only keeps the call total.
+        return [profile_for(implementation, active[0])]
+    allowed = (impl_profiles or {}).get(implementation.impl_id)
+    if allowed is None:
+        return active
+    keep = set(allowed)
+    return [p for p in active if p.qualified_id in keep]
+
+
 @dataclass
 class SearchConfig:
     """Everything that fixes a search run, and therefore everything that hashes."""
@@ -164,6 +198,19 @@ class SearchConfig:
     stats_spec: StatsSpec = DEFAULT_STATS_SPEC
     max_shard_size: str | int | None = None
     allowed_impls: tuple[str, ...] | None = None
+    #: Which of `profiles` a given implementation may branch over, by impl_id.
+    #: An implementation with no entry branches over all of them, which is what
+    #: every search before this one did and remains the default.
+    #:
+    #: This exists because `profiles` is a property of the RUN and the question
+    #: is sometimes a property of ONE operator. A search that has already fixed
+    #: three operators' mixtures and wants to vary the fourth's had no way to
+    #: say so: adding the second profile to `profiles` branched all four, which
+    #: is a full factorial and a different, much more expensive experiment.
+    #: Restricting the space is not the same as restricting the run's identity —
+    #: this is part of `as_dict`, so two searches that reach different leaves
+    #: cannot share a `config_hash`.
+    impl_profiles: Mapping[str, tuple[str, ...]] | None = None
     max_depth: int | None = None
     allow_kind_repeat: bool = False
     device: str = "cpu"
@@ -189,6 +236,12 @@ class SearchConfig:
             "suite": self.suite.qualified_id,
             "suite_hash": self.suite.suite_hash,
             "allowed_impls": list(self.allowed_impls) if self.allowed_impls else None,
+            #: Normalised when present, because the reachable leaf set is what
+            #: this describes and dict order is not part of it. ABSENT when
+            #: unset — see `config_hash`.
+            **({"impl_profiles": {k: sorted(v) for k, v
+                                  in sorted(self.impl_profiles.items())}}
+               if self.impl_profiles else {}),
             "max_depth": self.max_depth,
             "allow_kind_repeat": self.allow_kind_repeat,
             "device": self.device,
@@ -201,6 +254,12 @@ class SearchConfig:
 
     @property
     def config_hash(self) -> str:
+        #: `as_dict` OMITS `impl_profiles` when it is unset rather than emitting
+        #: a null, so a search recorded before the field existed still hashes to
+        #: the value its own record carries and stays verifiable against this
+        #: code. A search that DOES restrict gets a different hash, which is the
+        #: point: two searches reaching different leaves must not share an
+        #: identity. See `docs/core-provenance.md`.
         return sha256_json(self.as_dict())
 
 
@@ -283,8 +342,51 @@ class BeamSearch:
         self.telemetry = TelemetrySink(self.workdir / "telemetry.jsonl")
 
         adapter.validate_target(config.target_spec)
+        self._validate_impl_profiles()
 
     # --- setup -------------------------------------------------------------
+
+    def _validate_impl_profiles(self) -> None:
+        """Refuse a restriction that does not describe this search.
+
+        Checked here, before the teacher is loaded, because every way of getting
+        this wrong is silent at runtime: a typo'd impl_id restricts nothing and
+        the search quietly runs the factorial it was configured to avoid; a
+        profile id that is not active names a mixture no expansion could pick;
+        an empty list removes a kind from the space without removing it from
+        `allowed_impls`, so the target becomes unreachable several expensive
+        levels later instead of now.
+        """
+        if not self.config.impl_profiles:
+            return
+        active = {p.qualified_id for p in self.config.profiles}
+        allowed = set(self._allowed_impl_ids())
+        for impl_id, ids in sorted(self.config.impl_profiles.items()):
+            if impl_id not in allowed:
+                raise SearchError(
+                    f"impl_profiles restricts {impl_id!r}, which this search "
+                    f"cannot run; allowed implementations are {sorted(allowed)}")
+            impl = get_implementation(impl_id)
+            if not consumes_calibration(impl):
+                raise SearchError(
+                    f"impl_profiles restricts {impl_id!r}, which declares "
+                    f"{impl.calibration.value!r} and is offered exactly once "
+                    "against the no-calibration sentinel however many profiles "
+                    "are active. A restriction on it would be ignored, and a "
+                    "configuration whose stated space is not its real space is "
+                    "the thing this check exists to refuse.")
+            if not ids:
+                raise SearchError(
+                    f"impl_profiles gives {impl_id!r} no profile at all. That "
+                    "silently removes a kind from the space while it stays in "
+                    "allowed_impls; drop it from allowed_impls instead, so the "
+                    "target-reachability check can see it.")
+            unknown = sorted(set(ids) - active)
+            if unknown:
+                raise SearchError(
+                    f"impl_profiles gives {impl_id!r} profiles {unknown} that "
+                    f"this search does not branch over; active are "
+                    f"{sorted(active)}")
 
     def root_model(self) -> Any:
         if self._root_model is None:
@@ -460,17 +562,22 @@ class BeamSearch:
         would manufacture byte-identical states, occupy beam slots that distinct
         hypotheses should hold, and inflate the search-space count by a factor
         that means nothing.
+
+        An implementation that DOES consume calibration is offered every active
+        profile, unless ``config.impl_profiles`` restricts it — see that field.
         """
         exclude = () if self.config.allow_kind_repeat else tuple(sorted(set(parent.applied_kinds)))
         options = applicable_implementations(
             self.adapter, parent.spec, self.config.target_spec,
             exclude_kinds=exclude, allow_impls=self._allowed_impl_ids())
         for impl, _ in sorted(options, key=lambda pair: pair[0].impl_id):
-            if not consumes_calibration(impl):
-                yield impl, profile_for(impl, self.config.profiles[0])
-                continue
-            for profile in sorted(self.config.profiles, key=lambda p: p.qualified_id):
+            for profile in self.profiles_for(impl):
                 yield impl, profile
+
+    def profiles_for(self, impl: OperatorImplementation) -> list[CalibrationProfile]:
+        """This search's branching for one implementation."""
+        return expansion_profiles(
+            impl, self.config.profiles, self.config.impl_profiles)
 
     def _expand_one(self, parent: InitializationState, impl: OperatorImplementation,
                     profile: CalibrationProfile) -> InitializationState:

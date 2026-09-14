@@ -12,9 +12,11 @@ An operator defined elsewhere registers itself by calling
 edits this file.
 
 `attention.activation_importance_v1` is deliberately absent. It is registered by
-`attention_activation.enable()` and unregistered by `disable()`, because it is a
-treatment under test rather than a shipped default, and a search that enumerates
-the registry must not pick it up by accident.
+`attention_activation.register()` and removed again by `unregister()`, because it
+is a treatment under test rather than a shipped default, and a search that
+enumerates the registry must not pick it up by accident. (This paragraph said
+`enable()`/`disable()` until 2026-09-15; neither name has ever existed, and a
+caller wrote to the docstring rather than to the module.)
 """
 from __future__ import annotations
 

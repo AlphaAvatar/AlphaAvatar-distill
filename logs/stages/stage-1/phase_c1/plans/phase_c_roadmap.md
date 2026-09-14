@@ -149,6 +149,16 @@ sizes, or to a population of recovery seeds. Say so in the record.
 
 ## Phase C2 — ATTENTION-aware joint re-search
 
+> **Status, 2026-09-15.** The gate below is **satisfied**: C1 returned `GO`, so
+> `attention.activation_importance_v1` is the operator C2 holds fixed. Search-1
+> is now **implemented and priced, and is NOT authorized** — the space, its
+> predicted size and its ceiling live in
+> [`../../phase_c2/plans/phase_c2_search1_plan.md`](../../phase_c2/plans/phase_c2_search1_plan.md),
+> which supersedes this section on every operational detail. Two things below
+> were narrowed there and the narrower form governs: the anchors are compared as
+> a **chain** (A → B frozen, B → C new) rather than as a simultaneous three-arm
+> estimate, and A is **not** re-measured.
+
 **Only if C1 identifies a worthwhile new ATTENTION formulation.** If C1 finds
 nothing, C2 does not run.
 

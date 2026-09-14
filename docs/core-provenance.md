@@ -341,6 +341,35 @@ that proved it had to.
     # Phase-A attempt 6 died here. `_validate` forwards both models through
 ```
 
+Added 2026-09-15 with `SearchConfig.impl_profiles` and the module-level
+`expansion_profiles`. Two mechanisms, and the incidents that justify them:
+
+`expansion_profiles` is the single definition of the branching factor because a
+second implementation of the same rule went wrong the first time it was written.
+The Phase-C2 cost model counted profiles without the `CalibrationNeed.NONE`
+case and predicted **12** children of the root where Phase-B attempt 5 had
+generated **10** — a 20% over-count at level 0, on the model whose whole job is
+to price a search. Collapsing both callers onto one function is why the model
+now reproduces that run's level shape exactly (10 / 46 / 19 / 7).
+
+```text
+    pieces of code they disagreed immediately — the second one branched a
+    `CalibrationNeed.NONE` operator over both mixtures and predicted 12 children
+    of the root where Phase B generated 10.
+```
+
+`config_hash` omits `impl_profiles` when unset rather than emitting a null,
+because Phase A's and Phase B's `config_hash` values are recorded in their
+committed `search_result.json` and a key added for a later experiment would have
+moved both, making those records unverifiable against the current code (P4).
+
+```text
+    #: carries. Adding the key unconditionally would have moved Phase A's
+    #: and Phase B's `config_hash` — recorded in their committed
+    #: `search_result.json` — and made those records unverifiable against
+    #: the current code, which is the reproducibility P4 asks for.
+```
+
 ### `src/aadistill/initialization/planning/stage1_import.py`
 
 ```text

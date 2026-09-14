@@ -21,7 +21,7 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**. C2 is the next question and is **not started, not priced, not authorized** | [`stages/stage-1/phase_c1/`](../stages/stage-1/phase_c1/) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**. C2 Search-1 is **implemented and priced, and NOT authorized**: a space, a ceiling, no driver, no launcher, no chain | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18) | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | attempt 18's chain is **consumed**, like every chain before it. **No further C1 attempt is authorized, and none is prepared** — a complete verdict ends the round | [`phase_c1/runs/attempt18/governance/`](../stages/stage-1/phase_c1/runs/attempt18/governance/) |

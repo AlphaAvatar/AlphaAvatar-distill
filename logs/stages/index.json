@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 20,
-  "single_stage": 20,
+  "experiment_total": 21,
+  "single_stage": 21,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -148,8 +148,8 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 3,
-    "experiments": 5,
-    "experiments_with_logs": 5,
+    "experiments": 6,
+    "experiments_with_logs": 6,
     "runs": 48,
     "canonical_configs": 4,
     "canonical_data_manifests": 1,
@@ -542,6 +542,29 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "The only experiment in the repository that declares its own stage. It also measures with stage-3 confirmation probes, which is what calibrates the subject-vs-instrument rule for the others."
+  },
+  {
+   "experiment_id": "phase_c2",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "planned \u2014 space implemented and priced, NOT authorized",
+   "title": "Phase C2 \u2014 ATTENTION-aware composition/order re-search",
+   "question": "With that ATTENTION operator now fixed, does re-optimizing the operator order and ATTENTION's calibration profile beat the frozen C1 treatment?",
+   "canonical_path": "logs/stages/stage-1/phase_c2",
+   "canonical_config": null,
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
+     "says": "the Search-1 plan, its predicted size and its price. Authorizes nothing"
+    },
+    {
+     "path": "scripts/experiments/phase_c2/search_space.py",
+     "says": "the configured space and the structural cost bound, both derived from committed evidence"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "It re-optimizes the Stage-1 initialization composition around the operator C1 selected, and its product is a Stage-1 path selection. Like `phase_c1` it would measure with stage-3 confirmation probes if a confirmation were ever authorized; those are the instrument, not the subject."
   },
   {
    "experiment_id": "measurement",

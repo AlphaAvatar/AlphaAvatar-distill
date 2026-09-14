@@ -568,6 +568,34 @@ STAGE_1 = [
             "calibrates the subject-vs-instrument rule for the others."),
     ),
     dict(
+        id="phase_c2",
+        kind="experiment",
+        stage_id="1",
+        status="planned — space implemented and priced, NOT authorized",
+        title="Phase C2 — ATTENTION-aware composition/order re-search",
+        #: No config, because there is no authorization to configure. C2 owns a
+        #: space and a price; the launch chain that would need a config does not
+        #: exist and cannot be run by accident.
+        canonical_config=None,
+        evidence=[
+            E("logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
+              "the Search-1 plan, its predicted size and its price. Authorizes "
+              "nothing"),
+            E("scripts/experiments/phase_c2/search_space.py",
+              "the configured space and the structural cost bound, both "
+              "derived from committed evidence"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_c2",
+        classification_reason=(
+            "It re-optimizes the Stage-1 initialization composition around the "
+            "operator C1 selected, and its product is a Stage-1 path "
+            "selection. Like `phase_c1` it would measure with stage-3 "
+            "confirmation probes if a confirmation were ever authorized; those "
+            "are the instrument, not the subject."),
+    ),
+    dict(
         id="measurement",
         kind="engineering-measurement",
         stage_id="1",
@@ -1037,6 +1065,9 @@ QUESTIONS = {
                              "Phase A's searched states survive?",
     "phase_c1": "Does a replacement ATTENTION operator beat the frozen "
                 "incumbent with every other operator held on a fixed path?",
+    "phase_c2": "With that ATTENTION operator now fixed, does re-optimizing "
+                "the operator order and ATTENTION's calibration profile beat "
+                "the frozen C1 treatment?",
     "ttb": "Teacher-native targets or public targets — which recovers better "
            "from the Stage-1 init?",
     "p0_real": "What does full-scope KD recovery reach from the pinned init?",

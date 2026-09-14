@@ -12,7 +12,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-18 consumed, $22.6176. Attempt 18 replayed both frozen gates, trained and scored all six probes, and returned the frozen Stage-I verdict GO. A complete verdict ends the round: no further C1 attempt is authorized, and the package balance is not authorization for another question.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-18 consumed, $22.6176. Attempt 18 returned the frozen Stage-I verdict GO, and a complete verdict ends the round: no further C1 attempt is authorized. This package is C1's.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "c1_attempts": "eighteen labels, FIFTEEN paid, $26.6177. Attempt 18 is COMPLETE with a frozen-rule verdict. Per-attempt cost: logs/budget/ledger.md.",
   "formal_sessions_used": 9,
@@ -99,7 +99,7 @@
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
   "phase_c1": "IMPLEMENTED / NOT AUTHORIZED -- status owned by phase_c.c1",
-  "phase_c2": "NOT STARTED",
+  "phase_c2": "NOT STARTED -- space implemented and priced -- owned by phase_c.c2",
   "formal_recovery_evidence": "NONE"
  },
  "phase_a_result": {
@@ -142,9 +142,11 @@
    "blocker": "none outstanding; see the top-level blocker."
   },
   "c2": {
-   "status": "NOT STARTED",
-   "gate": "SATISFIED by C1 (verdict GO). Satisfying it is not starting, pricing or authorizing C2.",
-   "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing composition/order beat the frozen C1 treatment? Owner: logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md."
+   "status": "NOT STARTED. Search-1 SPACE is implemented and priced; NOT AUTHORIZED, no driver, no launcher, no chain",
+   "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
+   "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment?",
+   "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
+   "priced": "41-53 expansions; expected $7.1787, ceiling $14.5420 at L40S securePrice $1.09/h. Priced is NOT funded: C2 needs its own grant."
   }
  },
  "storage": {

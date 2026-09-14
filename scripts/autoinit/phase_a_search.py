@@ -204,6 +204,11 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                        profile=None, profiles=None,
                        retained_candidates=(),
                        search_minutes: float | None = None,
+                       allowed_impls: tuple[str, ...] | None = None,
+                       impl_profiles=None,
+                       run_id: str = "autoinit.v1.phase_a",
+                       purpose: str = ("AutoInitializer Phase A, the "
+                                       "preregistered search"),
                        ) -> PhaseASearch:
     """Search, then inject and measure the canonical control on the same suite.
 
@@ -212,11 +217,28 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
     hash-bound step-0 metrics could not be compared with the leaves it is
     supposed to be the baseline for.
 
-    The last four arguments exist so this exact function can be executed at toy
-    scale. They are NOT a configuration surface for a paid run: every one of them
-    defaults to the frozen real value, and a rehearsal that stubbed the function
-    out instead would prove nothing about the lines a pod executes. Four paid
-    pods in this project have died in never-executed code.
+    The teacher/geometry/suite/hash arguments exist so this exact function can
+    be executed at toy scale. They are NOT a configuration surface for a paid
+    run: every one of them defaults to the frozen real value, and a rehearsal
+    that stubbed the function out instead would prove nothing about the lines a
+    pod executes. Four paid pods in this project have died in never-executed
+    code.
+
+    ``allowed_impls``, ``impl_profiles``, ``run_id`` and ``purpose`` are a
+    different kind of argument: they are the SPACE a caller searches, and their
+    defaults are what Phase A and Phase B searched. Phase B reached this
+    function with two profiles and the whole registry, and could express nothing
+    else; a caller that has to fix three operators and vary the fourth had to
+    choose between a full factorial and a new copy of this function.
+
+    Every default leaves an existing caller unchanged in behaviour AND in
+    identity: `allowed_impls=None` already means "the whole registry" inside
+    `BeamSearch`, `impl_profiles=None` already means "every active profile", and
+    `SearchConfig.as_dict` OMITS the restriction key when it is unset rather
+    than emitting a null — so Phase A's and Phase B's recorded `config_hash`
+    values are still what this code computes, and their `search_result.json`
+    stays verifiable. `run_id` keeps Phase A's value because Phase B's records
+    carry it and resume is keyed on the journal, not on the name.
     """
     import torch
     from transformers import AutoConfig, AutoModelForCausalLM
@@ -258,13 +280,23 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
     # where the retained-candidate loop rebound it with a `Qwen3Config` and the
     # summary then read `run_id` off a model config, eight hours into a paid run.
     search_config = SearchConfig(
-        run_id="autoinit.v1.phase_a", target_spec=target_spec,
+        run_id=run_id, target_spec=target_spec,
         schedule=SCHEDULE_V1, seed=seed, workdir=Path(workdir),
         profiles=active_profiles, policy=PARETO_V1, suite=suite,
         device=device,
-        notes={"purpose": "AutoInitializer Phase A, the preregistered search",
-               "profiles": (f"P={n}; " + ("the 48 decomposed paths" if n == 1
-                                          else f"{24 * (1 + n) * n * n} decomposed paths")),
+        allowed_impls=tuple(allowed_impls) if allowed_impls else None,
+        impl_profiles=({k: tuple(v) for k, v in impl_profiles.items()}
+                       if impl_profiles else None),
+        notes={"purpose": purpose,
+               # The closed-form leaf count describes the UNRESTRICTED space and
+               # is wrong the moment a caller restricts one. Say so rather than
+               # printing a number for a different search; the restricted count
+               # is derived by the caller that knows the restriction.
+               "profiles": (f"P={n}; " + (
+                   "restricted per implementation — see impl_profiles"
+                   if impl_profiles else
+                   ("the 48 decomposed paths" if n == 1
+                    else f"{24 * (1 + n) * n * n} decomposed paths"))),
                "profile_ids": ",".join(p.qualified_id for p in active_profiles)})
 
     # Runtime only, never hashed: `SearchConfig` fixes the search's identity and

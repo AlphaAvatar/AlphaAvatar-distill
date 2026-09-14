@@ -181,6 +181,24 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "inert without a production caller. The run log and the status "
             "stream keep offset semantics. THIS IS A DECLARED SEMANTIC CHANGE "
             "to what the runner relays and how.",
+        "src/aadistill/initialization/planning/search.py":
+            "`SearchConfig.impl_profiles`, and `expansion_profiles` extracted "
+            "to module level. A search may now restrict WHICH of its active "
+            "calibration profiles a given implementation branches over, instead "
+            "of every calibration-consuming operator branching over all of "
+            "them; `_validate_impl_profiles` refuses a restriction naming an "
+            "implementation the search cannot run, one declaring "
+            "CalibrationNeed.NONE, an empty profile list, or a profile the "
+            "search does not branch over. THIS IS A DECLARED SEMANTIC CHANGE to "
+            "the reachable search space and is deliberately not described as "
+            "prose. It is inert by default: `impl_profiles=None` yields the "
+            "previous branching exactly, and `as_dict` OMITS the key when unset "
+            "rather than emitting a null, so every recorded `config_hash` is "
+            "still what this code computes. `expansion_profiles` also absorbed "
+            "the `CalibrationNeed.NONE` single-offer rule that "
+            "`_candidate_expansions` used to apply inline — same behaviour, one "
+            "definition, so a cost model counting the space cannot disagree "
+            "with the beam expanding it.",
      }),
 )
 
