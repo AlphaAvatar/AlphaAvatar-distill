@@ -2376,3 +2376,31 @@ sessions worst case  280.3156 + 15.1475 = 295.4631  <= 320.0000
 Two full-ceiling sessions still fit the formal allowance. Attempt 18 is a fresh
 complete execution of the unchanged frozen protocol; attempt 17's probes are
 gone and are not reused.
+
+## 2026-09-14 — C1 attempt 18: COMPLETE, verdict GO, `$10.2018`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| C1 attempt 18: 14/14 gates, pod `ygtjrobs456cb5` at `$1.09/h` for 561.6 min. **Both replay gates PASSED**, both arms materialized, **all six probes trained** (61.8 min mean), **all six evaluated** on the frozen battery (26.4 min mean), frozen Stage-I decision returned. `ALL_DONE`, `LAUNCHER_EXIT=0`, 164 artifacts collected, pod deleted, provider confirms gone | `$10.2018` | [`runs/phase_c1/attempt18/`](../stages/stage-1/phase_c1/runs/attempt18/) |
+
+**Cumulative: `$290.5174` of the `$320.0000` cap.** Package booked **`$22.6176`**
+of `$51.4425`.
+
+```text
+project   267.8998 + 22.6176 = 290.5174   of 320.0000, leaving 29.4826
+package     12.4158 + 10.2018 =  22.6176   of  51.4425, leaving 28.8249
+formal                                       of  45.4425, leaving 22.8249
+```
+
+**ONE full-ceiling session now fits the formal allowance**, down from two. The
+run came in `$3.24` under its own planning floor of `$13.4401`.
+
+**The round is ended by a verdict**, not by a budget. Nothing further is
+prepared and no further attempt is authorized.
+
+Two defects this run exposed, neither affecting the result and neither repaired:
+the probe-durability mechanism preserved **none** of the six probes — every
+upload refused for *"Private repository storage limit reached"*, 2.22 GiB each —
+and the relay stream copy of `c1_evidence.json` arrived corrupted while the
+store copy was intact. The first needs relay capacity, which is a resource
+decision. Both are written up in the closeout.

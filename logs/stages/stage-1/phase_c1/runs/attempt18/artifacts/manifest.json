@@ -1,0 +1,1339 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-09-14T14:47:34+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "probe_event_stream",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/train_log.jsonl",
+      "required": true,
+      "min_matches": 6,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_run_manifest",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_manifest*.json",
+      "required": true,
+      "min_matches": 6,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_run_completion",
+      "pattern": "stage3/c1/autoinit.v1.phase_c1.*/run_completion*.json",
+      "required": true,
+      "min_matches": 6,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "training_completion",
+      "pattern": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.*.training.json",
+      "required": true,
+      "min_matches": 6,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_config",
+      "pattern": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.*.json",
+      "required": true,
+      "min_matches": 6,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "per_sample",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_per_sample.jsonl",
+      "required": true,
+      "min_matches": 6,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "scored_probe_aggregate",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_c1_confirmation.json",
+      "required": true,
+      "min_matches": 6,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generations",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.generations.jsonl",
+      "required": true,
+      "min_matches": 42,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "generation_summary",
+      "pattern": "eval/c1/autoinit.v1.phase_c1.*/*.json",
+      "required": true,
+      "min_matches": 42,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "replay_record",
+      "pattern": "audit/autoinit_c1/c1_replay_record.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "treatment_record",
+      "pattern": "audit/autoinit_c1/c1_treatment_record.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "arm_identities",
+      "pattern": "audit/autoinit_c1/c1_arm_identities.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_results",
+      "pattern": "audit/autoinit_c1/c1_probe_results.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "decision",
+      "pattern": "audit/autoinit_c1/c1_decision.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "attested_protocol",
+      "pattern": "audit/autoinit_c1/c1_attested_evaluation_protocol.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_c1/c1_evidence.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "engine_probe",
+      "pattern": "audit/autoinit_c1/engine_probe.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "device_handoff",
+      "pattern": "audit/autoinit_c1/c1_device_handoff.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "probe_train_tail",
+      "pattern": "audit/autoinit_c1/autoinit.v1.phase_c1.*_train_tail.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "gate_log",
+      "pattern": "audit/autoinit_c1/*.log",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "audit_json",
+      "pattern": "audit/autoinit_c1/*.json",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_logs",
+      "pattern": "audit/autoinit_c1/session/*",
+      "required": false,
+      "min_matches": 0,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1635674081/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48656,
+      "sha256": "89c933dc4c5a2f7aae3e19fb1def13ca1de03862c593a33bbe34f7b697ec7b68",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1656475568/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48645,
+      "sha256": "a5ac34cd0b743e4f76267b2cd5c3c6f13c27c4f15d7db3536df2d4e2317acf0c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.696460635/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48671,
+      "sha256": "819d51987a511f65b55325e8e994870c1067b57765ce36a4b776380418fd5128",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1635674081/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48655,
+      "sha256": "a40319bfd5d379095477fdf03bd410937771a480cfe6a3d694b63b79d8cc460a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1656475568/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48645,
+      "sha256": "dd31194ab373e7ea0417437d062c8350f8f6ff6e95e8063a743f5b55977df05e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.696460635/train_log.jsonl",
+      "artifact_class": "probe_event_stream",
+      "size_bytes": 48664,
+      "sha256": "5bc4e244bbf6d565c8e59d775c01fcfe7b7c5ca23f5ba98c24bd9490ec2a21a6",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1635674081/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8561,
+      "sha256": "103d8ed2cadf82fdec6a1f4fc45bc2faaeebdee5526e90ebdc9602d9e97107f3",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1656475568/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8561,
+      "sha256": "671e032891c94ad5cae7d41b749c8a11dd4f49571a50732abb5fbd7ab23d26ae",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.696460635/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8555,
+      "sha256": "4135268dfce232d9b204423c3c2823e7882ba77fb24502aef0aaffa7d746076d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1635674081/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8561,
+      "sha256": "9d2c724cbc15c274f176035505283326d3be0fa119bf7b78028c72c9642ce105",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1656475568/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8561,
+      "sha256": "fcb5fde9e0b656d134b691cd1d3e16d9df284730dde5f3c7ef7857e0a3d073c3",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.696460635/run_manifest.json",
+      "artifact_class": "probe_run_manifest",
+      "size_bytes": 8555,
+      "sha256": "e067b837574742fe194a686c7cb776a595f61f70efbc94dab128fede67e913e7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1635674081/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1835,
+      "sha256": "fb2f69621106e060371d8a9215e81668c5d720c182eb69b29a074e6aee7f8be2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.1656475568/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1833,
+      "sha256": "83eff5143a672a813ac475f7d7115dcd1e01973e31e49490e2cf0317c69242bc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.incumbent.696460635/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1833,
+      "sha256": "a90f85e06abe8eb6c2a5a20788ffeb607d2b42771cf3754ea145bf46f6e01392",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1635674081/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1835,
+      "sha256": "7fc3e5c7c7d4d443675d0b75449d7a1008559b711c680b447aa7ed01c7c3b985",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.1656475568/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1835,
+      "sha256": "0c0686a8f4e0de9ae7e8f9f04322f5525a886be0a47e281c8d7a19609def951f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "stage3/c1/autoinit.v1.phase_c1.treatment.696460635/run_completion.json",
+      "artifact_class": "probe_run_completion",
+      "size_bytes": 1831,
+      "sha256": "2d2327455c5c61e6fd40e1ed20b8dc3e144fe2adf16e14ddf1e15037786593f7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.incumbent.1635674081.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 2009,
+      "sha256": "3b63a6a46642aea156b32da158dc1066f31251e214f3ad889a44813dd338378b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.incumbent.1656475568.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 2009,
+      "sha256": "bb0b52d1140b59c70b1842f5dfb61ea85f07446b571a105862636d964051cf02",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.incumbent.696460635.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 2001,
+      "sha256": "58d0c961d5047e68550c28469c75622647b9a53a6173cafa1d208c958590c6fe",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.treatment.1635674081.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 2009,
+      "sha256": "be07cd4abddc598dc9e64721d39bec4d4630e3205aba9a3283872e94fa593d02",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.treatment.1656475568.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 2009,
+      "sha256": "9e85b067d3fb43c7826bf7c98f5de3fee4819010015294c41f058c8757d3a824",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/probes/autoinit.v1.phase_c1.treatment.696460635.training.json",
+      "artifact_class": "training_completion",
+      "size_bytes": 2001,
+      "sha256": "040fefb1a989a37020689f7e77fa54579e47ae0c802624425ebc2166caca8442",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.incumbent.1635674081.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1921,
+      "sha256": "422ded2d0a6736b9423b2dffba22af46b0077166abc696e5936653ac8a4e8dfb",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.incumbent.1656475568.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1921,
+      "sha256": "56ddc3d6175f61a8555da73d67918856c8ec9b9bd2d721ea1a70a766c4146769",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.incumbent.696460635.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1917,
+      "sha256": "78b38191c80bfe97f692db285a48be61eea3a40c4349edd67ee73f0b09a820da",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.treatment.1635674081.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1921,
+      "sha256": "669cebe5a1aa076a8e619811a0fa1d120ca10e78844573a7336ec404a3071f11",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.treatment.1656475568.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1921,
+      "sha256": "c22c45a568c6ebc9887ff34e21956595f99565df8dc9ff07c40b762f81c4c07c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/configs/autoinit.v1.phase_c1.treatment.696460635.json",
+      "artifact_class": "probe_config",
+      "size_bytes": 1917,
+      "sha256": "820629259d4da027cdc486bcc6d24fb4b37dee39849d8d5c5472d9443fe8e76f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1635674081_per_sample.jsonl",
+      "artifact_class": "per_sample",
+      "size_bytes": 795834,
+      "sha256": "61fe87ce1d493bc9e59d044f4d6a030dccd4fa384727f40d867e4225504321b9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1656475568_per_sample.jsonl",
+      "artifact_class": "per_sample",
+      "size_bytes": 784354,
+      "sha256": "d47a3f377e00a5c4329587389386a176d8da4ef00eccbfefb3d212b987f36f0a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.696460635_per_sample.jsonl",
+      "artifact_class": "per_sample",
+      "size_bytes": 781583,
+      "sha256": "a9f430e2f2e1e82a81960bdaa63f361ed8a6aa2e13cf21875e2ea0dc9badaaa1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1635674081_per_sample.jsonl",
+      "artifact_class": "per_sample",
+      "size_bytes": 787739,
+      "sha256": "d23d671e425b5fc16118856ada81d486d66661e1a2beed394b64a0fdb02a08e6",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1656475568_per_sample.jsonl",
+      "artifact_class": "per_sample",
+      "size_bytes": 796368,
+      "sha256": "c4fc6be7469bedd40bdee46b6d0125f4ed94e33de23786c5de2f27cc35a9a1fa",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.696460635_per_sample.jsonl",
+      "artifact_class": "per_sample",
+      "size_bytes": 791616,
+      "sha256": "a2f631729be206a0edd3032acff930cd4aacbda0ca23aa59887bba4560ebc3bc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1635674081_c1_confirmation.json",
+      "artifact_class": "scored_probe_aggregate",
+      "size_bytes": 20600,
+      "sha256": "d1e4ba225e864bfa414f85741674e669c655a792809cdccde7e1336a6ddffae9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1656475568_c1_confirmation.json",
+      "artifact_class": "scored_probe_aggregate",
+      "size_bytes": 20646,
+      "sha256": "b0b3fb3fdb975ad2bacf7640da03992698ed2ab1256b3d322a35b1ad0116bf1f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.696460635_c1_confirmation.json",
+      "artifact_class": "scored_probe_aggregate",
+      "size_bytes": 20241,
+      "sha256": "edd5c7a2bfa91437205dab54d2db9fdd972808f919e3c0abbe0c68e293b102e1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1635674081_c1_confirmation.json",
+      "artifact_class": "scored_probe_aggregate",
+      "size_bytes": 20500,
+      "sha256": "682a748485e192ba2e79103385bb9449a1baa8947146a1d46371b2e7914474d8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1656475568_c1_confirmation.json",
+      "artifact_class": "scored_probe_aggregate",
+      "size_bytes": 20209,
+      "sha256": "d9af3d90d7fbdcbb9d66418e75b2a019958d2c8167e3e676b53a63318f7e61ff",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.696460635_c1_confirmation.json",
+      "artifact_class": "scored_probe_aggregate",
+      "size_bytes": 20401,
+      "sha256": "8e0fe76a130a32c146389d5356d889355320447093b644b7133f17b9e796d492",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 468735,
+      "sha256": "001aa30e712153afe7eadf34645d691dcadd5d21ba3e8c900b01c3307ac71779",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 531285,
+      "sha256": "0c29f0e7a3f997a635d5a0813bfd50017ed7b3f1b8a99f03b4d7c3f7ec5ee874",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 491691,
+      "sha256": "c759f59c5b33bd639b387337fa7a297bfff39e2a140c4a0c092015338b08c9e1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 527760,
+      "sha256": "bf023e480dc297a2599e082e101ce418b20444b918a73ac9d5d3ca06fb6febb0",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 630104,
+      "sha256": "fc8ae08b26203584121e5807538f28c274fc6ac73af0553dbe3738127f8fe5e2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 526445,
+      "sha256": "854f4633fb9fb60c15156a14edd4b7439e1ca6e3660deb63bed9a8ab8d8bdc69",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/tool.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 233314,
+      "sha256": "4c31b079506d6ffdb2c73aad7cd1ba1ce2698745fca6257df28534c4730491b8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 507632,
+      "sha256": "b34f8a061c762cd13fd8cb2f5eb526eb032775332d8ceab151dca81c024ae6ba",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 520202,
+      "sha256": "95c50b3d4bf623e8ef6b3d6675c8fad65e16d1321840bc2acce85806fa339521",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 499281,
+      "sha256": "5508f64c607cc6493c0eb0e42b454935c3881be5ef03679df6df76f665076929",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 551244,
+      "sha256": "a3a75639fa855aca202f4a7047d94ab112949911b95babf4bead5c9d48c1cf47",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 570212,
+      "sha256": "359cbdc4889f17569ea4b7a09d64bb4abe03a9951cbf6a60e9dc68f32e8929e1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 480235,
+      "sha256": "fb8928359bed7f3badb34ccfce05461214c9024976c2e4483c01148569ef9770",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/tool.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 244588,
+      "sha256": "7692cc7da930a8dcb5b54fd1e7d8083753f8747355308ec77bf73b56225e88ad",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 325640,
+      "sha256": "314dad52b5624e2d77033757b1bd5a683c8c9d1de46cfe74cbea0bce767fb94e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 503018,
+      "sha256": "07762c7912d9715d489f3ca508ace4d7864a20e328314edb9e3e27167d7df777",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 444742,
+      "sha256": "8708a230dbb5b0fd1f5ba0bbcb6f95e8030d4e6d6d2aff7e362af44046b8b73d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 485748,
+      "sha256": "86aa9e0dac4aa52d4fc566485a83ac3fc753b0e359d6d2d8bf64d9b705df0fd7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 756956,
+      "sha256": "5f291bfe0c344dfb684b3a54bb2d1ab446fb5bd578aec968df292938eaf970db",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 450808,
+      "sha256": "cb3663f4751a98dab1ef1a49b56756f2c62a159432456fe83c1acbdea63c3eb6",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/tool.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 239650,
+      "sha256": "1939716143116b5094673aa061725e78769e4f01a3b2c8d9c85b5e871f237269",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 568401,
+      "sha256": "e30e0a7034b195abbf9f4d44db401361f9c20a83d022e1bc3697a0e8fdc940c0",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 467695,
+      "sha256": "512b01de22e8dcd4a4cadc2339a77ed01c92542ff5774c50ed6e0ac82a51e9a7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 337627,
+      "sha256": "754c189a6cf8c65ca3a53e3e2cd5cf3de9176b4e4ffaa42e76c78330a57b3998",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 441110,
+      "sha256": "6fe6354fe3ff8a231aa2c102888dd34e18a848b979edad80272e0284b8a01157",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 709534,
+      "sha256": "25e17fd3ee68fb0b0a57992aac9369da3506d6f192faf87c9331c9181cc502f0",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 447171,
+      "sha256": "c5056fa2c136850a0ce7775272299da980331e7f45a7c3494b1d14420bcb2368",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/tool.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 210597,
+      "sha256": "3364632ac7d38264eb9a07eab1aad4b40c390e5f80b2aa3218a1e439e77bef3a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 570008,
+      "sha256": "58cd677236c71ef3dd8de94d567b9681f91dadddd33f905673a4ce6dfb480fa7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 475087,
+      "sha256": "48b0a2855721bf785a25110a273f5ce3d7da0770fb0671f723e70e8d0d56d09e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 337397,
+      "sha256": "d9a4f2cc7a43bb661f955c8f243a88f48fa345d04d5476c1684fb19e9e7648d1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 502280,
+      "sha256": "b4f46296e3b0cb9289b76709436bc80e8fe14ccca57f25dc549ae2bfc8330dbf",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 572264,
+      "sha256": "92622873dc67ef6dbbfcdc2d9f458e1cdefdd3d7aa2b35b1950af53f42bc3581",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 460448,
+      "sha256": "be101b0bb2cabd219880f3b4580a752c4c4706823d5e8d2d57cdce1c00a4ccc7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/tool.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 222625,
+      "sha256": "4a88c9fb87267ddb8481cac28fc3bc5e88f4bff412e59a11f25ba5f2c6fc0eba",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/code.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 648421,
+      "sha256": "30c72e0efddbc2ef9e36cfa35dfbcb5ce097d493b279bad4954f4d647ea3ee34",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/gsm8k.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 421294,
+      "sha256": "f42807b9a811faab743f5f09324ce2204fe0b7e159beed94a04c61902bceb3bd",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/knowledge.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 357464,
+      "sha256": "e66aff735caeccb53461fadfe9744f29e995a780efc915af2902d8c205b06c64",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/math_verified.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 473079,
+      "sha256": "fd65c982a12fe77a6cd97734a016acdb444ea13ebcec9b4378fb715727d62f85",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/multihop.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 814311,
+      "sha256": "4289ecd84944b1c45c57551050c9091aa7f9e4b03f497eeea629b1788ed159c8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/rag.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 405289,
+      "sha256": "d8eed0e71ac0696e456c7c5dba4cfa55499e121c28aa20f2d3c8137fb8972fb7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/tool.generations.jsonl",
+      "artifact_class": "generations",
+      "size_bytes": 208609,
+      "sha256": "40fe886ce10513c93fa86de6a889f8a3871621f95c5a32e46f6b41ee1bfeff14",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13465,
+      "sha256": "9f82fc426c222bd767493321d8ea5c7907f4409b4d5e21502f613b24cbfb0e1f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13534,
+      "sha256": "1d8796d90b6587bb418907d771f801b1b1f933ee2d91c0fcef21450ef49ea0c2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13482,
+      "sha256": "b5777e9a84a144c56f8e830eb1a54685d6e8bf5dd154648e3da8b9ee52ab54f7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 16530,
+      "sha256": "1cd0493fbce5c44bb2d932040bceb55fb451181f8f1dbcfb9cd0e9e10f6b47c4",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12485,
+      "sha256": "b4225859ec6d4cc171245aa4bf8396cbf2167d39e34b35b9e561768cc3e7d89f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13471,
+      "sha256": "4ea2d02e525c085d0a54c394356291146a398cfbfc12467aa10716ae4bda7ffa",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1635674081/tool.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13046,
+      "sha256": "8a23b47530dc65023eacfc30cf41be1d2f78916406f77936e415660f86931b1d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 14667,
+      "sha256": "52f1627e2f44316902ce3c0963c91e11354c4125be8d136628ea856d422bd3df",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 14943,
+      "sha256": "0cf62ffc7520334cf4d4e6793fb6698b25d3851454c7d9946b28c8e470788209",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13518,
+      "sha256": "277a955d503c74cc46853ee40cd262dc42fd3bb9318231cdb8da7963e055282a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 16733,
+      "sha256": "5d7a8a58bfed131bcb250303399a9596094a12c653166ad663be0312e0cfdeda",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12482,
+      "sha256": "be043566cea58c9995db3f42a62b93cb9dfb2a4a93966e96065d6f1ca18f9c79",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13457,
+      "sha256": "a0169c76a3e680cc579a13f0e1c9d4f769693bd8b80340edb472a18a6b52d69e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.1656475568/tool.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13254,
+      "sha256": "101cd917eb031808520fc516671f5a0dc95cdd3fad09ed81022f05bdc63e7768",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13455,
+      "sha256": "ab4b7427327f478a90eace18a517c372cc40ee95944572b6c908e4131d213edd",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13540,
+      "sha256": "7d62244e641d71e07723b4ad8d223be1369269769e30cff577f82a6618eda526",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13489,
+      "sha256": "4bb4e624cfa86eb0e4935c266e62ee14a1271f4211e8d6bfb38a62c278b040f9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 16110,
+      "sha256": "a1dc3613fff63c021dea05e8de8a0053af0c8867dae8368d16288dac2d9df0e9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13496,
+      "sha256": "d424e2bffda4e1b5ea0a6d65af42f63c0d4f547f9a216fa0daa3d98af808fe3c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13450,
+      "sha256": "ef6df04d3b632c7dd99a3e2ba8f1b12c460bd5dc2e44dd636dc43dfd05443429",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.incumbent.696460635/tool.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13260,
+      "sha256": "8b6bd08f42279dd7ccdaf6efbc76c6a01c5b19354863ae8123db17349368b2df",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 15069,
+      "sha256": "6953dd69ff48257de3eac84d8d25d0dad889eee87c0e17a988c934ac348d6d7b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13548,
+      "sha256": "9ae8b61d06e6c2a04889b76cefb9de72621f80b5de321295825e4fc40d12dd2f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13468,
+      "sha256": "592589a384f8092407c069e89910bac085bd60bc7bb339e18b14139199001803",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 14711,
+      "sha256": "e16ada82f8bd7288438dc02fdea7cb6272b1aa5a4cb12a8b73a303b25c814ab3",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12688,
+      "sha256": "b608ea8356653ddfa3bcc8a2732ade87633013a19a6321754fa16cc99b27c607",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13472,
+      "sha256": "a594796de321c2f00b1a07f35c10c12cea8f51f47e51993e2085ae0d540c3dda",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1635674081/tool.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13036,
+      "sha256": "9b224b99932e127aee847d67aaca699ca6f6c8261f1c0947bd745e6a6397e3dc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 16079,
+      "sha256": "3a059a1493b3fca6faa12206ea5d27421e878265bfa1f500050e9c793ba1864b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13543,
+      "sha256": "964cb77d5babe50cefa7ac4207acc0ced22b1e84ff842d737bda45d68db2af1a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13488,
+      "sha256": "436943ca7497c5d006bfe1dc1aa53ad1c5589d1a9b542fc50067887d940a1535",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 15105,
+      "sha256": "02fc4292bd65a97f68e8b269db9a6cf5bd5517318d740ea358bb5bdd65d83616",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12497,
+      "sha256": "a18eb1b97738e44f6b042229adf8fc2c8543619cb448b9dbaca3ba40ddac9028",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13467,
+      "sha256": "c9ff9243703c06bfe428f9af1b1fbd0b3dc849da10fe195c0a24b0166567f309",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.1656475568/tool.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13239,
+      "sha256": "ca6503974652a5d96465c1a2cb60701ec193f54a93dd699ad880974976c26f7d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/code.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 17695,
+      "sha256": "51c474880e7dd48dc8a8781a9b68a4cb0f6fbbe6eab5e52c36b0bf0878d200ac",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/gsm8k.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13542,
+      "sha256": "302a1c36640858d0bea08931bda24c573db63b8351988e5ca2f2a78fb9969f51",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/knowledge.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13490,
+      "sha256": "e067781a959daa47e696c1340e015f1c8947cf20353fa3e5825f05ad3e73befe",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/math_verified.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13500,
+      "sha256": "a057e385a9f6d4c6a9d2ec13e5ca5c42103e7720461923b3a98f60a107ab7cfe",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/multihop.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 12681,
+      "sha256": "b094e3ba6696ea0c94e17b7ea96ff6be039f4735dfca21ecd1691864adbd4a7e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/rag.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13234,
+      "sha256": "5b557452a87e17b55e85e687727323dffbee497bc47701e8b8b7d9f14c692bea",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "eval/c1/autoinit.v1.phase_c1.treatment.696460635/tool.json",
+      "artifact_class": "generation_summary",
+      "size_bytes": 13228,
+      "sha256": "30d09857a63f0f7e0efc9906a4b71240370cc4ca36d149ac57efdb70c4147946",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_replay_record.json",
+      "artifact_class": "replay_record",
+      "size_bytes": 1023547,
+      "sha256": "3e8c364c4cdc41aa4fcc52fe6a7a10ae37fc5bb68253967ccba1a0cb2eff6f1a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_treatment_record.json",
+      "artifact_class": "treatment_record",
+      "size_bytes": 16795,
+      "sha256": "028eb9a5e24a67108b2fa7db8db072331b658f77564cb8ee70aac3daabb4803c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_arm_identities.json",
+      "artifact_class": "arm_identities",
+      "size_bytes": 13548,
+      "sha256": "758dc197a1d34817bac7f8353a52c89c9eb50685a0f90edddc4e2a6328d447e5",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_probe_results.json",
+      "artifact_class": "probe_results",
+      "size_bytes": 74617,
+      "sha256": "ca2cf035eb261190647e1d88988ac5e1aae1987e5d665dadc826bfd641b61f5f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_decision.json",
+      "artifact_class": "decision",
+      "size_bytes": 2270,
+      "sha256": "763c4205efc6b6b8dc768ca8a25f740ef59a1c0238bc6ed50b8983943164514b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_attested_evaluation_protocol.json",
+      "artifact_class": "attested_protocol",
+      "size_bytes": 10163,
+      "sha256": "821e4646f2a4ee10f348c43d68102bd46c5ba6b68b40452786934b9c2509c199",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_evidence.json",
+      "artifact_class": "session_evidence",
+      "size_bytes": 23425,
+      "sha256": "e902dafb60e6a46ab8500f546c48c21c798f22df0f2d2dc2766bab799d8ce7b9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/engine_probe.json",
+      "artifact_class": "engine_probe",
+      "size_bytes": 1778,
+      "sha256": "e634e4869d1497542eaadb6dbc7a56e62fa9d9f370a94d2766e115f64265ae10",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/c1_device_handoff.json",
+      "artifact_class": "device_handoff",
+      "size_bytes": 688,
+      "sha256": "81fb8595d7ae8c0c4403d1c8035589ba763f51d114de8288361d34acaa976c2c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1635674081_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1694,
+      "sha256": "49f973926fa646e23877d3b323ad3613c2ba40d893a8cc6d3cdd847d158717c7",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1656475568_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1706,
+      "sha256": "4a9aec28e299db3e0204422193063c803d5f6b40ec6a123b91b8c56c4b2f790e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.696460635_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1704,
+      "sha256": "355695a150b5dcf0f49154e8d71db387232a1ba63fd238179ddb23559dc86b22",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1635674081_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1698,
+      "sha256": "5f58e08ef3124ccc2a9fe2aa44253baec38c49c57706b831cb215d1cddcf9e58",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1656475568_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1696,
+      "sha256": "90aa71408683da5025516a13e8f75304d5e4a57911c5b535d3e0eb4d075168cc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.696460635_train_tail.log",
+      "artifact_class": "probe_train_tail",
+      "size_bytes": 1692,
+      "sha256": "43e0f38f3a0e3627f7719dfe045d0d09df1180e742dcdf2bf49080e963bea1e6",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1635674081_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 14790,
+      "sha256": "b6ca76a3611fcb1641fb2a7536f550637e8efa752e67036fe02cd07ac28b5797",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1635674081_scoring.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1038,
+      "sha256": "9aced7fcc7f3767fd3b660fc34e73e4521106bc0098745a9407a814913d21070",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1656475568_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 14792,
+      "sha256": "be8b97552411eed159237fc991b857359cc9500e5a8a0fc4939398169f53f17c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1656475568_scoring.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1038,
+      "sha256": "c54468469ea89c5840f27bcba44e2217bb88b0f027f5f31f27850442c1a2fcfe",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.696460635_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 14760,
+      "sha256": "cd5ddec46fbc560d1b74fd4993763a8dad0fa2775eb094e3ae4195923c9ce51f",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.696460635_scoring.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1030,
+      "sha256": "5d84a4838cc0b236e7945d1f3677cdf62a9391c221ee932a07a5c8ae21985725",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1635674081_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 14794,
+      "sha256": "3899ca59573d0c02736d74949990a799567dc62f5de4f81b4c3d7afb7d6876d2",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1635674081_scoring.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1038,
+      "sha256": "2a22531e6bd7cdf97e999571f65689ed43c7456b8151d173c562597d13eafefc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1656475568_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 14795,
+      "sha256": "1a03a7c575bbfd5da17f2a340eb3eef8894dd5e0f6d007f9a926eed524893e26",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1656475568_scoring.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1036,
+      "sha256": "b3df01ddbf51485a32ca9e3dad0a45ece2226b3c6506fbdbfc580d8e0b5d9598",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.696460635_generation.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 14778,
+      "sha256": "96c2cf39b7fbf6d0cc4c2db2c78c40ab9bf878eadac56d32d7067a56fa3b85ac",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.696460635_scoring.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 1030,
+      "sha256": "62f4f848243545dd72b613a1209ebdad40edb641bf93bf706222b77f2913c91a",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/engine_probe.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 12866,
+      "sha256": "9b7db8f00a400e474f0289ad86163f78b0cadbe52dbab5c077b39abb904b15a5",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/scorer_preflight.log",
+      "artifact_class": "gate_log",
+      "size_bytes": 439,
+      "sha256": "818501ec3a0dbd7321e3bbff5cd5193bc03e07ab83d38559e10442ba3e4902d8",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1635674081_generation_admission.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 405,
+      "sha256": "8627e61ff0c3fc69fbbde9a7e16189c9ccd8356d7085d6af66d503c1d544f661",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.1656475568_generation_admission.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 405,
+      "sha256": "54257813da2cff97570574ddd9756e8d1bf136089c09b550b31e5e337fbe6ae1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.incumbent.696460635_generation_admission.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 404,
+      "sha256": "5f52fbc8ff86b49a62d4a8bb616eb73a9e1d73c234961758cba1fc84e7c9215e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1635674081_generation_admission.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 405,
+      "sha256": "308e6921b83a66eb4ff30891e28049959db6a3eb9ddf3a94560ed2700d2d5d3c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.1656475568_generation_admission.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 405,
+      "sha256": "414799f936bd8841161889ee2f7b165d343ea6101370e40652ca2974d0df5eb1",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/autoinit.v1.phase_c1.treatment.696460635_generation_admission.json",
+      "artifact_class": "audit_json",
+      "size_bytes": 404,
+      "sha256": "53f687e46e1764a934e5d78f31be3cba236cf1754569ba9dfd7ed01f449d0b88",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/autoinit_c1.status",
+      "artifact_class": "session_logs",
+      "size_bytes": 2196,
+      "sha256": "05ff4833669540bf11dbc2752bbd5d4885325bb727c63aa42807a795819d9240",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/autoinit_c1_run.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 40559,
+      "sha256": "96dfa5398d302429a804658199484891409aebd9f4ca74b999a0d7aa09ca9889",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_c1/session/setup.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 21069,
+      "sha256": "47f856c322fff2dc89347d71b22d2c537d33669e282e25374bc4df6c465cd146",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

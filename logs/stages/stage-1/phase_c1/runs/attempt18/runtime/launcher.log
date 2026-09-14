@@ -1,0 +1,48 @@
+[05:33:57] budget: expected 740 min $13.44 · soft $14.78 · hard $15.15 (authorized $15.15)
+[05:33:57] NVIDIA L40S $1.09/h, stock High
+[05:33:57] session commit b20a0d36f68a verified: harness digests to b79d27b25919…, carries the authorization and only logs/stages/stage-1/phase_c1/runs/attempt18/governance/authorization.json differs from the authorized base
+[05:33:57] grant 3dc1ec55a140… at logs/stages/stage-1/phase_c1/runs/attempt18/governance/grant.json, as recorded by the authorization
+[05:33:58] C1 harness b79d27b25919… over 100 declared files
+[05:33:58] ceiling $15.1475, derived from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json
+[05:33:58] preregistration 92f8455b2309… (self-hash verified), harness b79d27b25919…
+[05:33:58] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[05:33:59] frozen assets verified against configs/experiments/phase_c1/frozen_assets.json
+[05:33:59] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[05:33:59] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[05:33:59] success spec covers the contract (6 probes x 7 sets = 42 generation files); failure spec presupposes no training
+[05:34:01] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[05:34:06] aad_autoinit_b20a0d36.bundle (12628287 bytes, 1eeb0a5105eb…) round-trips to b20a0d36f68a… carrying this authorization and harness b79d27b25919…
+[05:34:10] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[05:34:10] pod sweep 17 passed / 0 skipped / 0 failed, no declared groups, binds C1 harness b79d27b25919… and environment 35cab67b6cea…, staging contract 5956d6e82a1d…, swept at e80eb60b with only ['logs/stages/stage-1/phase_c1/runs/attempt18/governance/authorization.json', 'logs/stages/stage-1/phase_c1/runs/attempt18/governance/readiness.json'] differs from the swept base
+[05:34:11] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[05:34:12] watchdog detached — hard 834 min = $15.15
+[05:34:12] created ygtjrobs456cb5 at $1.09/h
+[05:35:05]   starting (60s) — $0.02
+[05:36:08]   starting (120s) — $0.03
+[05:36:49] TCP 22 at 103.196.86.50:46924 after 2.6 min
+[05:36:52] draw 1: ssh reachable — $0.05
+[05:37:40] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[05:37:40] draw 1: running setup
+[05:40:10] draw 1: setup complete — $0.11
+[05:40:16] driver detached, pid 2838, confirmed by descriptor_probe — $0.11
+[05:42:29]   2026-09-14T05:40:28Z MARKER:STAGE_START:D — $0.15
+[06:05:10]   2026-09-14T06:05:03Z MARKER:STAGE_START:G — $0.56
+[07:08:40]   2026-09-14T07:06:49Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c1.incumbent.1635674081 — $1.72
+[08:10:01]   2026-09-14T08:08:31Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c1.incumbent.1656475568 — $2.83
+[09:11:19]   2026-09-14T09:10:24Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c1.incumbent.696460635 — $3.94
+[10:12:36]   2026-09-14T10:12:09Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c1.treatment.1635674081 — $5.06
+[11:16:09]   2026-09-14T11:13:56Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c1.treatment.1656475568 — $6.21
+[12:17:27]   2026-09-14T12:15:44Z MARKER:STAGE_START:H — $7.33
+[12:44:42]   2026-09-14T12:43:07Z MARKER:PROBE_SCORED:autoinit.v1.phase_c1.incumbent.696460635 — $7.82
+[13:09:40]   2026-09-14T13:09:31Z MARKER:PROBE_SCORED:autoinit.v1.phase_c1.incumbent.1635674081 — $8.27
+[13:39:11]   2026-09-14T13:37:09Z MARKER:PROBE_SCORED:autoinit.v1.phase_c1.incumbent.1656475568 — $8.81
+[14:04:09]   2026-09-14T14:02:19Z MARKER:PROBE_SCORED:autoinit.v1.phase_c1.treatment.696460635 — $9.26
+[14:26:51]   2026-09-14T14:24:49Z MARKER:PROBE_SCORED:autoinit.v1.phase_c1.treatment.1635674081 — $9.68
+[14:47:18]   2026-09-14T14:47:10Z MARKER:ALL_DONE — $10.05
+[14:47:18] polling ended: ALL_DONE — $10.05
+[14:54:54]   manifest rc=0
+164 file(s) across 22 class(es) -> /workspace/manifest.json
+  final_required: 164 · mutable_snapshot: 0 · final_streams_quiescent: True
+[14:55:35] teardown gate: allowed=True failed=None
+[14:55:35] deleting pod (gate passed)
+[14:55:46] pod deleted — 561.6 min, $10.20; provider confirms gone: True

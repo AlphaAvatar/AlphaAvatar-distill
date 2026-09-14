@@ -1,0 +1,94 @@
+{
+  "verdict": "GO",
+  "delta": 0.013725490196078431,
+  "lcb_one_sided": 0.005490196078431373,
+  "ucb_one_sided": 0.021568627450980392,
+  "ci_two_sided": [
+    0.004313725490196077,
+    0.023137254901960787
+  ],
+  "sesoi": 0.01,
+  "criteria": {
+    "lcb_above_zero": true,
+    "point_at_or_above_sesoi": true,
+    "seed_robustness": {
+      "n_positive": 3,
+      "required": 2,
+      "passed": true
+    },
+    "guardrails_passed": true,
+    "ucb_below_sesoi": false
+  },
+  "per_seed_delta": [
+    0.015294117647058824,
+    0.009411764705882352,
+    0.01647058823529412
+  ],
+  "usable": {
+    "pooled_delta": 0.025964912280701753,
+    "per_seed_delta": [
+      0.024210526315789474,
+      0.008421052631578947,
+      0.045263157894736845
+    ]
+  },
+  "vetoes": [],
+  "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+  "no_forced_winner": true,
+  "plan_hash": "42a496f0923b1c321426721fb51487df15b5368703fe19a898354973324e27a2",
+  "probe_results_sha256": "4baa79ca2e5e30446fa96974eed05060052e0c48c72cf0f685923a8c93d3a2d2",
+  "mcnemar": {
+    "note": "per-seed discordant pairs over the 850 scorable prompts; counts, not rates",
+    "per_seed": [
+      {
+        "seed": 1635674081,
+        "treatment_only": 25,
+        "incumbent_only": 12
+      },
+      {
+        "seed": 1656475568,
+        "treatment_only": 27,
+        "incumbent_only": 19
+      },
+      {
+        "seed": 696460635,
+        "treatment_only": 31,
+        "incumbent_only": 17
+      }
+    ]
+  },
+  "diagnostics": {
+    "per_seed_correct": {
+      "incumbent": {
+        "1635674081": 18,
+        "1656475568": 26,
+        "696460635": 26
+      },
+      "treatment": {
+        "1635674081": 31,
+        "1656475568": 34,
+        "696460635": 40
+      }
+    },
+    "usable_counts": {
+      "incumbent": {
+        "1635674081": 582,
+        "1656475568": 574,
+        "696460635": 555
+      },
+      "treatment": {
+        "1635674081": 605,
+        "1656475568": 582,
+        "696460635": 598
+      }
+    },
+    "strata_sizes": {
+      "gsm8k": 150,
+      "math_verified": 150,
+      "multihop": 150,
+      "rag": 150,
+      "knowledge": 150,
+      "tool": 100
+    }
+  }
+}

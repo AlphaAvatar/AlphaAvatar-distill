@@ -466,11 +466,17 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     # So this stops matching a PHRASE and asserts the content, which is what the
     # comment above said to do and what the phrase kept standing in for:
     # attempt 9 measured the replay and nothing else, and nothing is live.
+    #: THE FOURTH wording break, and this one is not a wording change: attempt
+    #: 18 MEASURED the endpoint on 2026-09-14, so "UNMEASURED" became false by
+    #: an experiment rather than by an edit. What this module owns is unchanged
+    #: and is asserted directly — a pre-treatment abort is never reported as a
+    #: result, whatever a later attempt achieved.
     measured = state["phase_c"]["c1"]["measured"]
-    assert "UNMEASURED" in measured, measured
     for axis in ("treatment", "endpoint"):
         assert axis in measured.lower(), axis
     assert re.search(r"\bno decision\b", measured, re.I), measured
+    assert re.search(r"attempt 9 is still NO DECISION", measured, re.I), (
+        f"attempt 9's pre-treatment abort has stopped being stated: {measured}")
     # A grant WAS issued and consumed, so "never authorized" would be false.
     #
     # Nor is "nothing is authorized" the invariant: on 2026-09-11 a Phase-C1
@@ -482,7 +488,8 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     # move: **C1 execution has produced no science**, whatever is authorized.
     c1 = state["phase_c"]["c1"]
     assert re.search(r"not currently authorized|no current grant|"
-                     r"treatment and endpoint unmeasured", c1["status"], re.I), (
+                     r"treatment and endpoint unmeasured|"
+                     r"frozen stage-i verdict", c1["status"], re.I), (
         c1["status"])
     if state["authorized"]["any"]:
         #: `formal_sessions_used` since 2026-09-11, when the attempt CAP was
@@ -496,9 +503,20 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
         assert isinstance(used, int), (
             "an authorization exists and the snapshot does not count what it "
             "has been used for")
-        assert "UNMEASURED" in c1["measured"], (
-            "an authorization exists AND C1 claims a measured endpoint; one of "
-            "the two is wrong and neither may be assumed")
+        #: This required UNMEASURED while an authorization implied an
+        #: unexecuted experiment. Attempt 18 executed one, so the pairing to
+        #: check is different: a measured endpoint must cite the record that
+        #: measured it, and that record must carry a frozen-rule verdict.
+        if "UNMEASURED" not in c1["measured"]:
+            assert "c1_decision.json" in c1["measured"], (
+                "C1 claims a measured endpoint and cites no record: "
+                f"{c1['measured']}")
+            cited = next(w for w in c1["measured"].replace(",", " ").split()
+                         if w.endswith("c1_decision.json"))
+            record = REPO / cited.strip()
+            assert record.is_file(), record
+            assert json.loads(record.read_text())["verdict"] in (
+                "GO", "NO-GO", "INCONCLUSIVE")
     assert "NOT STARTED" in state["phase_c"]["c2"]["status"]
     # Nothing that needs a GPU may be claimed as built.
     assert "pre-ATTENTION parent" in state["phase_c"]["c1"]["not_built"]

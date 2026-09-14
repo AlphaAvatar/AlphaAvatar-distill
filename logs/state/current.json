@@ -15,7 +15,7 @@
   "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-17 consumed, $12.4158. Attempt 17 replayed both frozen gates and trained all six probes; nothing was measured.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/stages/stage-1/phase_c1/runs/attempt9/outcome.json.",
-  "c1_attempts": "seventeen labels, FOURTEEN paid, $16.4159. Attempt 17 is the first to train formal probes. Per-attempt cost and cause: logs/budget/ledger.md.",
+  "c1_attempts": "eighteen labels, FIFTEEN paid, $26.6177. Attempt 18 is COMPLETE with a frozen-rule verdict. Per-attempt cost: logs/budget/ledger.md.",
   "pre_science_retry_is_autonomous": "MAINTAINER DIRECTION 2026-09-13, now AGENTS.md P12.1: an invocation that aborts before formal training is an engineering subrun. Close it, repair, build a FRESH chain, retry -- no further approval, same cumulative budget.",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -23,22 +23,22 @@
  },
  "prepared_launch": {
   "any": false,
-  "grant_committed": "logs/stages/stage-1/phase_c1/runs/attempt18/governance/grant.json",
+  "grant_committed": null,
   "readiness_record": null,
   "authorization": null,
   "bundle": null,
-  "note": "attempt 18's grant is committed; the sweep, authorization and bundle are owed, each in its OWN commit. APPROVED 2026-09-14 as a fresh complete execution -- attempt 17's probes are gone and are not reused."
+  "note": "nothing is prepared and no further C1 attempt is authorized: a complete valid verdict ends the round."
  },
  "budget": {
-  "cumulative_spend_usd": 280.3156,
+  "cumulative_spend_usd": 290.5174,
   "authorized_cap_usd": 320.0,
-  "remaining_usd": 39.6844,
+  "remaining_usd": 29.4826,
   "remaining_is_not_permission": true,
-  "formal_remaining_usd": 33.0267,
+  "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
-  "package_remaining_usd": 39.0267,
+  "package_remaining_usd": 28.8249,
   "per_session_ceiling_usd": 15.1475,
-  "full_ceiling_sessions_fundable": 2,
+  "full_ceiling_sessions_fundable": 1,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
   "_project_spend_before_this_package_usd": 267.8998,
   "_anchor_note": "the project cap and the package are separate books: this is the project total when the package opened. Stated, never back-computed -- decisions.md 2026-09-13.",
@@ -47,7 +47,7 @@
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
   "planning_floor_usd": 13.4401,
   "_planning_floor_note": "from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json:totals.floor_usd. Priced is not funded.",
-  "_package_spent_usd": 12.4158
+  "_package_spent_usd": 22.6176
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -69,7 +69,7 @@
   "latest_sweep": {
    "kind": "launch_bound",
    "verdict": "PASS",
-   "swept_base_commit": "c91b233599aee1a2fe736aa2f1468f58ead8aee7",
+   "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
    "describes_head": false
   },
   "launch_bound_ready": false,
@@ -85,8 +85,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "attempt 18 APPROVED and its grant committed: a fresh complete execution of the unchanged frozen protocol.",
-  "then": "converge, ONE launch_bound sweep, commit ONLY the record, issue, commit ONLY the authorization, bundle with --run-id, launcher, full C1 from stage B.",
+  "status": "C1 COMPLETE. Attempt 18 returned the frozen Stage-I verdict GO at $10.2018, under its own planning floor.",
+  "then": "maintainer review of the verdict and of the two open items. No further C1 attempt is authorized.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -131,11 +131,11 @@
    "design": "850 scorable / 950 total; 3 fresh paired seeds; primary correct_overall; SESOI +0.010."
   },
   "c1": {
-   "status": "IMPLEMENTED / SEVENTEEN ATTEMPTS RUN, FOURTEEN PAID / REPLAY MEASURED 2-of-2 PASS TWICE / TREATMENT AND ENDPOINT UNMEASURED / attempt 18 APPROVED, grant committed",
+   "status": "COMPLETE / EIGHTEEN ATTEMPTS RUN, FIFTEEN PAID / REPLAY MEASURED 2-of-2 PASS THREE TIMES / TREATMENT AND ENDPOINT MEASURED ONCE / frozen Stage-I verdict GO -- read the decision record, not this line",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
-   "measured": "replay: MEASURED, 2/2 PASS, twice (attempts 9 and 17). treatment + endpoint: UNMEASURED. Attempt 17 trained all six probes and is NO DECISION after a pre-treatment infrastructure abort in the evaluation harness -- not an ATTENTION result.",
-   "not_built": "attempt 17's six trained probes are GONE: the FAILED spec collects evidence, not checkpoints, and the pod is deleted. A further attempt retrains all six. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
+   "measured": "replay: MEASURED, 2/2 PASS (attempts 9, 17, 18). treatment + endpoint: MEASURED ONCE, by attempt 18, verdict GO -- read logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json, which owns every figure and states its own claim boundary. Attempt 9 is still NO DECISION after a pre-treatment infrastructure abort, and so is attempt 17.",
+   "not_built": "attempt 18's six probes were NOT preserved: every relay upload was refused for private storage quota, 2.22 GiB each, and the pod is deleted. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
    "owners": {
     "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
     "execution_prereg": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
@@ -157,7 +157,7 @@
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
   "free_note": "detail: c1_storage_recovery.json"
  },
- "blocker": "NONE. The tools-shape defect that ended attempt 17 is repaired and validated at $0; completed probes are now preserved when they finish. See logs/state/current.md.",
+ "blocker": "NONE for C1: the round is ended by a verdict. Two open items recorded in runs/attempt18/closeout/outcome.json -- relay storage quota blocks probe durability, and the relay stream copy of the evidence arrives corrupted.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/state/current.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
@@ -170,9 +170,9 @@
   "experiment_id": "phase_c1",
   "run_id": "attempt18",
   "root": "logs/stages/stage-1/phase_c1/runs/attempt18",
-  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
+  "state": "recorded: the run wrote its own manifest",
   "index": "logs/index.json",
-  "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt17"
+  "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt18"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10 as daf64772, and again 2026-09-11 as 199711af. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",

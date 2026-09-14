@@ -1,0 +1,115 @@
+{
+ "schema": "aadistill.autoinit.c1_attempt_outcome/v1",
+ "_what_this_is": "the closeout of C1 attempt 18: the first COMPLETE Phase-C1 execution. Both replay gates passed, both arms materialized, all six probes trained, all six evaluated on the frozen battery, and the frozen Stage-I rule returned a verdict.",
+ "attempt": 18,
+ "package": "phase_c1.execution_package.2026-09-11",
+ "terminal_marker": "ALL_DONE",
+ "launcher_exit": 0,
+ "classification": "COMPLETE SCIENTIFIC EXECUTION. A frozen-rule verdict exists; this round is ended by it.",
+ "what_ran": {
+  "launch_bound_sweep": "PASS at e80eb60b, 17 passed / 0 skipped / 0 failed in 12.2 s",
+  "gates_run": 14,
+  "gates_passed": 14,
+  "setup": "complete in 6 min at $0.11",
+  "stages_passed": [
+   "B",
+   "C",
+   "D replay_parent",
+   "E replay_incumbent",
+   "F materialize_arms",
+   "G recovery_probes",
+   "H evaluate",
+   "I decide"
+  ],
+  "probes_trained": 6,
+  "probes_scored": 6,
+  "probe_minutes": "61.8 mean over six",
+  "eval_minutes": "26.4 mean over six"
+ },
+ "science": {
+  "verdict": "GO",
+  "_the_verdict_is_the_records": "read logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json. The figures below are cited from it, not recomputed here.",
+  "delta_correct_overall": 0.013725490196078431,
+  "lcb_one_sided": 0.005490196078431373,
+  "ci_two_sided": [
+   0.004313725490196077,
+   0.023137254901960787
+  ],
+  "sesoi": 0.01,
+  "criteria": {
+   "lcb_above_zero": true,
+   "point_at_or_above_sesoi": true,
+   "seed_robustness": {
+    "n_positive": 3,
+    "required": 2,
+    "passed": true
+   },
+   "guardrails_passed": true,
+   "ucb_below_sesoi": false
+  },
+  "per_seed_delta": [
+   0.015294117647058824,
+   0.009411764705882352,
+   0.01647058823529412
+  ],
+  "vetoes": [],
+  "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+  "replay": "BOTH GATES PASSED for the third time (attempts 9, 17, 18). STAGE_PASSED:D 06:04:39Z, STAGE_PASSED:E immediately after.",
+  "read_with_care": "absolute correctness is LOW on both arms. Per seed, of 850 scorable prompts: incumbent 18 / 26 / 26 correct, treatment 31 / 34 / 40. The 1.37-point delta sits on a ~2.7% base, so it is a large relative change over a small absolute one. This is SELECTION evidence about one operator under a fixed 0.86M-token recovery budget -- not a capability claim, and not a statement about a trained model.",
+  "usable_rollout": {
+   "pooled_delta": 0.025964912280701753,
+   "per_seed_delta": [
+    0.024210526315789474,
+    0.008421052631578947,
+    0.045263157894736845
+   ]
+  },
+  "usable_counts_note": "usable_rollout ranges 555-605 of 850 for the incumbent and 582-605 for the treatment; roughly a third of prompts produce no usable rollout on either arm.",
+  "protocol_changed": false,
+  "frozen_assets_touched": false
+ },
+ "two_defects_found_by_this_run": {
+  "the_probes_were_lost_again": {
+   "what": "the durability mechanism added before this attempt ran on all six probes and preserved NONE of them. Every upload was refused: 'Private repository storage limit reached'. 2.22 GiB per probe, 13.3 GiB attempted.",
+   "it_failed_the_way_it_was_designed_to": "it never raised, it did not disturb a successful stage, and it recorded the identity, arm, seed, config hash and a content hash for each probe along with the exact reason. The probes are identified; the bytes are gone with the pod.",
+   "it_did_not_cost_this_run_anything": "attempt 18 completed, so nothing depended on preservation. Had stage H failed again, six probes would have been lost a second time.",
+   "what_it_needs": "relay storage capacity. That is a resource decision, not an engineering repair: the private quota is account-wide, and freeing it requires permanent LFS deletion or a plan change. NOT actioned here."
+  },
+  "the_relay_stream_copy_of_the_evidence_was_corrupt": {
+   "what": "`c1_evidence.json` collected through the relay stream arrived with a stale 198-line prefix overlaying the head of the final document -- a write that did not truncate. It does not parse.",
+   "the_store_copy_is_intact": "the same file collected into the artifact store parses and carries outcome ALL_DONE and spend 10.044.",
+   "what_was_done": "the run's evidence now holds the STORE copy; the corrupted stream copy is kept beside it as `c1_evidence.relay_stream_corrupt.json` rather than deleted, because it is the evidence of the defect.",
+   "not_repaired": "the collector still prefers the stream copy. Left for a decision rather than changed while a verdict is being reported."
+  }
+ },
+ "provider": {
+  "pod_id": "ygtjrobs456cb5",
+  "gpu": "NVIDIA L40S",
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 561.57,
+  "artifacts_collected": "164 files across 22 classes; teardown gate allowed=True failed=None",
+  "provider_confirms_gone": true,
+  "observed_after_teardown": "ZERO_PODS",
+  "cost_usd": 10.2018
+ },
+ "budget": {
+  "this_attempt": 10.2018,
+  "package_booked_after": 22.6176,
+  "_booked_rule": "recomputed from the components: 0.1177 + 0.2783 + 0.0000 + 0.0000 + 0.3999 + 0.0000 + 0.4333 + 11.1866 + 10.2018.",
+  "authorized_usd": 15.1475,
+  "within_authorization": true,
+  "under_the_planning_floor": "the floor was $13.4401; this cost $10.2018."
+ },
+ "chain": {
+  "state": "CONSUMED",
+  "preserved_unedited": {
+   "grant": "0e30e54647c27a6774a76cafa8ffe02db94c6148c87a0fcba01f54ee342fec51",
+   "readiness": "6b2e8360104f1ce19d1290b2067128b4972a098a48329c42f507b1dddffd6198",
+   "authorization": "8bc2cc661620aed3215cde3ff004972d2e5a5d9b7c98bc5db0e941ca5fea65c5",
+   "bundle_record": "ece8f50839741d41d27f4e7b45d6e753bca0526f97caee9a9f5904c44b188cd9"
+  }
+ },
+ "this_ends_the_round": "a complete valid verdict exists. AGENTS.md P8.2.1 stops autonomous continuation on 'a complete valid GO / NO-GO / INCONCLUSIVE result', and the package's own stop list says all three end the round. Nothing further is prepared and no further attempt is authorized.",
+ "not_done_deliberately": "no README Optim record entry. An official optimization record needs the full \u00a73.8 package and maintainer approval; a verdict in a run's evidence is not yet that.",
+ "authorizes": "nothing"
+}
