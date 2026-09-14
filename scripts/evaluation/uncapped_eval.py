@@ -183,6 +183,33 @@ def engine_config(llm, ctx: int, gpu_mem_util: float) -> dict:
     return out
 
 
+def tool_schemas(sample: dict):
+    """The sample's `tools`, in the shape `apply_chat_template` requires.
+
+    The battery stores this field as a JSON STRING — all 100 samples of the
+    tool group do — and `apply_chat_template` accepts a list of JSON schemas or
+    callables, never a string. C1 attempt 17 trained all six formal probes over
+    ten hours and then raised here on the first tool prompt, before generating a
+    single token, for $11.19 and no measurement.
+
+    `scripts/data/battery_render.py` has always done this conversion:
+
+        parsed_tools = json.loads(tools) if isinstance(tools, str) else tools
+
+    Two renderers over one battery, and only the scoring one parsed. The
+    pre-provider renderer-parity gate reported 7/7 groups PASS and 190 prompts
+    re-rendered byte for byte, truthfully, about the renderer that does not
+    generate.
+
+    This is an INPUT REPRESENTATION repair and nothing else: a JSON-encoded
+    schema becomes the equivalent parsed structure. Tool contents, messages,
+    system injection, chat template, sampling, context resolution, tokenizer and
+    scoring are untouched, and the battery is not edited to suit the evaluator.
+    """
+    tools = sample.get("tools")
+    return json.loads(tools) if isinstance(tools, str) else tools
+
+
 def gpu_sample() -> dict:
     """One nvidia-smi sample. Cheap, and it is the only utilization evidence."""
     import subprocess
@@ -322,7 +349,7 @@ def main() -> int:
             inject = args.system and not has_system and args.protocol == "project"
             if inject:
                 turns = [{"role": "system", "content": args.system}] + turns
-            prompt = tok.apply_chat_template(turns, tools=s.get("tools"),
+            prompt = tok.apply_chat_template(turns, tools=tool_schemas(s),
                                              tokenize=False,
                                              add_generation_prompt=True,
                                              **template_kwargs)

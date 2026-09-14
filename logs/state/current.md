@@ -9,20 +9,16 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-## STOPPED for a maintainer decision
+## Right now
 
 **Nothing is running. Nothing is billing. No pod exists. Nothing is prepared for
-launch.** Attempt 17's pod `3fjnnnftllfzya` was deleted after artifact
-collection, the provider confirms it is gone, and a live query returns
-`ZERO_PODS`.
+launch** beyond attempt 18's committed grant. Attempt 17's pod `3fjnnnftllfzya`
+was deleted after artifact collection, the provider confirms it is gone, and a
+live query returns `ZERO_PODS`.
 
-C1 attempt 17 replayed both frozen digest gates, materialized both arms and
-**trained all six formal probes** — then failed in the confirmation evaluation
-before generating a single sample. `$11.1866`. No sample generated, none scored,
-**no decision**.
-
-Formal measurement had begun, so continuing is **not** an engineering retry and
-is not mine to authorize. See [what has to be decided](#what-has-to-be-decided).
+**Attempt 18 is approved** (2026-09-14) as a *fresh complete execution* of the
+unchanged frozen protocol — not a continuation of attempt 17. The
+`uncapped_eval.py` tools-shape defect is repaired and validated at `$0`.
 
 | | | owner |
 | --- | --- | --- |
@@ -71,54 +67,44 @@ these by hand; run the deriver.**
 
 Remaining balance is not permission.
 
-## What has to be decided
+## Where attempt 17 stopped, and what changed
 
-Attempt 17 got further than C1 ever has:
-
-```text
-14:10:13  STAGE_PASSED:D   replay_parent      36.2 min
-14:10:35  STAGE_PASSED:E   replay_incumbent   22 s
-14:11:02  STAGE_PASSED:F   materialize_arms
-15:41:50  PROBE_TRAINED    incumbent.1635674081
-17:13:13  PROBE_TRAINED    incumbent.1656475568
-18:42:11  PROBE_TRAINED    incumbent.696460635
-20:14:55  PROBE_TRAINED    treatment.1635674081
-21:44:22  PROBE_TRAINED    treatment.1656475568
-23:11:49  PROBE_TRAINED    treatment.696460635   → STAGE_PASSED:G
-23:37:14  STAGE_FAILED:H   evaluate
-```
-
-Stage H died in `scripts/evaluation/uncapped_eval.py:325`:
+Attempt 17 replayed both frozen digest gates, materialized both arms and trained
+all six formal probes — then failed in stage H before generating a single token:
 
 ```text
 ValueError: Tools should either be a JSON schema, or a callable function
 with type hints and a docstring suitable for auto-conversion to a schema.
 ```
 
-The battery's tool subset carries `tools` as a JSON **string** — all 100 samples
-do — and `apply_chat_template` needs a list.
+The battery stores `tools` as a JSON string, all 100 tool samples do, and
+`apply_chat_template` needs a list. Two renderers over one battery hid it:
+`battery_render.py` parses the string, `uncapped_eval.py` did not, and the
+renderer-parity gate exercises the scoring path rather than the generating one.
 
-**Why the parity gate could not see it.** Two renderers, one battery.
-`scripts/data/battery_render.py` parses the string at line 191; the generation
-path in `uncapped_eval.py` passes it through. The pre-provider gate reported
-`7/7 groups PASS, 190 frozen prompts re-rendered byte for byte` and was telling
-the truth — about the scoring renderer, which is not the one that generates.
+`$11.1866`. **No sample generated, none scored, no decision.**
 
-**What survives:** the six probe training records, the audit trail, and a second
-independent confirmation that the frozen path replays. **What does not:** the
-six trained probes' weights. The FAILED artifact spec collects evidence rather
-than checkpoints and the pod is deleted, so the measurement cannot be resumed,
-spliced or pooled — there is nothing to resume from.
+**Repaired**, with the same conversion the battery renderer has always used —
+an input-representation change and nothing else. Tool contents, messages, system
+injection, chat template, sampling, context resolution, tokenizer, scoring and
+the battery itself are untouched. Validated at `$0` over all 100 tool samples
+with the real frozen tokenizer, plus a byte-identity check on the six non-tool
+groups.
 
-**Nothing was measured**, so no result exists that a re-run could be biased by.
-The fix is one line and free to validate. But formal training had completed and
-evaluation had started, and both AGENTS.md P8.2.1 and P12.1 stop autonomous
-continuation there. **The decision is whether attempt 18 may execute the same
-frozen protocol from the start** — about `$13.4` against `$33.03` of remaining
-formal allowance. The repair is deliberately **not applied** in the meantime:
-`uncapped_eval.py` is inside the frozen C1 harness, and editing the measurement
-apparatus while that decision is open is not an engineering repair inside an
-envelope.
+**And the artifact policy that lost the probes is fixed.** Attempt 17's six
+trained checkpoints were discarded because a later stage failed. A finished
+probe is now pushed to durable relay storage the moment it completes, with its
+identity, arm, seed, config hash and a content hash over the file set; the
+`.training.json` the failure spec already collects carries the location. Heavy
+bytes stay out of git, the artifact stays optional on a failure path, and
+preservation authorizes no reuse — that is a separate scientific decision.
+The principle is repository-wide now: see AGENTS.md P8.2.1, *Expensive completed
+work must survive a later failure*.
+
+**Attempt 18 retrains all six probes from the same frozen inputs and seeds.**
+No reuse or pooling from attempt 17, no stopping after one arm, no adaptive
+rerun. Arms, seeds, recovery recipe, battery, generation semantics, scoring
+contract and decision rule are unchanged; only the executable identity moved.
 
 **A stock label is not the gate.** Attempt 10 acquired at `Medium`, attempt 11
 failed at `Low`, attempt 12 was refused at `Low`; the label predicted none of

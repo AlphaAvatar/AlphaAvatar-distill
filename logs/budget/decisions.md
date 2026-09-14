@@ -1,5 +1,56 @@
 # Decision records
 
+## 2026-09-14 — attempt 18 approved, and a narrow retry rule for zero-measurement harness failures
+
+- **Maintainer decision.** Attempt 18 may execute the complete frozen C1
+  protocol from the beginning, after the `uncapped_eval.py` tools-shape defect
+  is repaired and validated at `$0`. Attempt 17 is closed and immutable:
+  EVALUATION-HARNESS ABORT AFTER FORMAL TRAINING, 6/6 probes trained, 0 samples
+  generated, 0 scored, decision NONE, `$11.1866`, provider gone confirmed.
+- **Why a fresh retry is scientifically acceptable, narrowly:** attempt 17
+  observed no confirmation output — no sample generated a token, nothing was
+  scored, neither arm's endpoint was observed — so there is no result to select
+  on and no significance to chase. Its checkpoints are gone and MUST NOT be
+  reconstructed, pooled, spliced or selectively reused. Attempt 18 retrains all
+  six probes from the same frozen inputs and seeds. Arms, seeds, recovery
+  recipe, battery, generation-protocol semantics, scoring contract and decision
+  rule are unchanged. **This is a fresh complete execution, not a continuation.**
+- **The repair, exactly:** `uncapped_eval.py` passed the battery's `tools` field
+  to `apply_chat_template` unparsed. It now uses the same conversion
+  `battery_render.py` has always used — a JSON-encoded schema string becomes the
+  equivalent parsed structure. An input-representation repair and nothing else.
+  Tool contents, messages, system injection, chat template, sampling, context
+  resolution, tokenizer, scoring and battery contents are untouched, and the
+  frozen battery was NOT edited to fit the evaluator.
+- **Executable identity moved, science did not.** `uncapped_eval.py` and
+  `autoinit_c1_driver.py` are inside the C1 harness, so the harness digest and
+  the preregistration were re-derived. Recorded explicitly: scientific protocol
+  changed **no**; arms **no**; seeds **no**; battery **no**; scoring **no**;
+  decision rule **no**; generation semantics intended by the frozen protocol
+  **no**.
+- **NARROW RETRY AUTHORITY, for the remaining C1 package.** If a future complete
+  attempt reaches formal training and then aborts on a deterministic
+  implementation or infrastructure defect **before any confirmation sample is
+  successfully generated or scored**, the agent may autonomously preserve and
+  close the consumed attempt, repair the defect, validate at `$0`, build a fresh
+  one-use chain and rerun the complete frozen protocol from the beginning —
+  while ALL of these hold: samples generated = 0; samples scored = 0; no arm
+  endpoint observed; no scientific decision exists; no probe or checkpoint is
+  reused across attempts; all six probes are retrained; frozen science
+  unchanged; remaining formal and project budget fund the fresh run; GPU class
+  and accepted price unchanged; provider ownership fully reconciled.
+  **This authority ends the instant any confirmation output has been observed.**
+  If even one formal sample has been generated or scored, or an arm-level
+  endpoint becomes observable, stop for maintainer review. It does not authorize
+  significance chasing.
+- **Validation was deliberately small.** Five properties over the real frozen
+  battery and tokenizer on CPU, around the renderer that actually failed. No new
+  renderer framework, pointer, audit subsystem, full-repository pod suite or
+  rehearsal stage — the root cause is known and the protection needed is a
+  regression, not a mechanism.
+- **Revisit when:** a confirmation sample has been observed, or the package's
+  remaining allowance can no longer fund a corrected run plus teardown.
+
 ## 2026-09-13 — a process-default registry cannot be checked in-process
 
 - **Context:** attempt 16's driver reached stage D nineteen seconds in and asked

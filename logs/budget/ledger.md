@@ -2359,3 +2359,20 @@ while the generation path could not render a single tool prompt.
 
 **Nothing was measured, so nothing can be biased by a re-run** — but the decision
 to re-run is the maintainer's. Attempt 17's chain is **consumed**.
+
+## 2026-09-14 — attempt 18 approved; no spend yet
+
+No cost. Recorded here because the package's session count moves: attempt 18 is
+the ninth formal session and the first authorized by an explicit maintainer
+decision to re-execute after a zero-measurement failure.
+
+```text
+project   267.8998 + 12.4158 = 280.3156   of 320.0000, leaving 39.6844
+package     12.4158                        of  51.4425, leaving 39.0267
+formal                                     of  45.4425, leaving 33.0267
+sessions worst case  280.3156 + 15.1475 = 295.4631  <= 320.0000
+```
+
+Two full-ceiling sessions still fit the formal allowance. Attempt 18 is a fresh
+complete execution of the unchanged frozen protocol; attempt 17's probes are
+gone and are not reused.

@@ -17,17 +17,17 @@
   "c1_attempt9": "CONSUMED under the PREVIOUS grant. $1.0440. BOTH REPLAY GATES PASSED; stage F aborted. logs/stages/stage-1/phase_c1/runs/attempt9/outcome.json.",
   "c1_attempts": "seventeen labels, FOURTEEN paid, $16.4159. Attempt 17 is the first to train formal probes. Per-attempt cost and cause: logs/budget/ledger.md.",
   "pre_science_retry_is_autonomous": "MAINTAINER DIRECTION 2026-09-13, now AGENTS.md P12.1: an invocation that aborts before formal training is an engineering subrun. Close it, repair, build a FRESH chain, retry -- no further approval, same cumulative budget.",
-  "formal_sessions_used": 8,
+  "formal_sessions_used": 9,
   "formal_sessions_max": null,
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
   "any": false,
-  "grant_committed": null,
+  "grant_committed": "logs/stages/stage-1/phase_c1/runs/attempt18/governance/grant.json",
   "readiness_record": null,
   "authorization": null,
   "bundle": null,
-  "note": "nothing is prepared. Attempt 17's chain is consumed. A further attempt needs a MAINTAINER DECISION first: formal measurement had begun, so this is not an engineering retry."
+  "note": "attempt 18's grant is committed; the sweep, authorization and bundle are owed, each in its OWN commit. APPROVED 2026-09-14 as a fresh complete execution -- attempt 17's probes are gone and are not reused."
  },
  "budget": {
   "cumulative_spend_usd": 280.3156,
@@ -85,8 +85,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "attempt 17 closed: both replay gates PASSED, six probes trained, EVALUATION-HARNESS ABORT, $11.1866, zero pods, no measurement.",
-  "then": "STOPPED for a maintainer decision on whether attempt 18 may execute the same frozen protocol from the start, ~$13.4 against $33.03 remaining.",
+  "status": "attempt 18 APPROVED and its grant committed: a fresh complete execution of the unchanged frozen protocol.",
+  "then": "converge, ONE launch_bound sweep, commit ONLY the record, issue, commit ONLY the authorization, bundle with --run-id, launcher, full C1 from stage B.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -131,7 +131,7 @@
    "design": "850 scorable / 950 total; 3 fresh paired seeds; primary correct_overall; SESOI +0.010."
   },
   "c1": {
-   "status": "IMPLEMENTED / SEVENTEEN ATTEMPTS RUN, FOURTEEN PAID / REPLAY MEASURED 2-of-2 PASS TWICE / SIX PROBES TRAINED, ZERO MEASURED / TREATMENT AND ENDPOINT UNMEASURED / awaiting a maintainer decision on a re-run",
+   "status": "IMPLEMENTED / SEVENTEEN ATTEMPTS RUN, FOURTEEN PAID / REPLAY MEASURED 2-of-2 PASS TWICE / TREATMENT AND ENDPOINT UNMEASURED / attempt 18 APPROVED, grant committed",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS, twice (attempts 9 and 17). treatment + endpoint: UNMEASURED. Attempt 17 trained all six probes and is NO DECISION after a pre-treatment infrastructure abort in the evaluation harness -- not an ATTENTION result.",
@@ -157,7 +157,7 @@
   "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
   "free_note": "detail: c1_storage_recovery.json"
  },
- "blocker": "MAINTAINER DECISION. Attempt 17 trained all six probes and stage H failed before generating a sample. One line in uncapped_eval.py, inside the frozen harness. Formal measurement had begun, so a re-run is not an engineering retry. See logs/state/current.md and runs/attempt17/closeout/outcome.json.",
+ "blocker": "NONE. The tools-shape defect that ended attempt 17 is repaired and validated at $0; completed probes are now preserved when they finish. See logs/state/current.md.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/state/current.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
@@ -168,9 +168,9 @@
  "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed.",
  "latest_run": {
   "experiment_id": "phase_c1",
-  "run_id": "attempt17",
-  "root": "logs/stages/stage-1/phase_c1/runs/attempt17",
-  "state": "recorded: the run wrote its own manifest",
+  "run_id": "attempt18",
+  "root": "logs/stages/stage-1/phase_c1/runs/attempt18",
+  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
   "index": "logs/index.json",
   "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt17"
  },

@@ -22,6 +22,7 @@ Everything this experiment produced, in one place.
 * [`attempt15`](runs/attempt15/)
 * [`attempt16`](runs/attempt16/)
 * [`attempt17`](runs/attempt17/)
+* [`attempt18`](runs/attempt18/)
 * [`attempt2`](runs/attempt2/)
 * [`attempt3`](runs/attempt3/)
 * [`attempt3r`](runs/attempt3r/)

@@ -1185,6 +1185,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
     """
     return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_c1_driver.py "
             f"--image-digest '{ctx.image_digest}' "
+            f"--run-id '{getattr(ctx.args, 'run_id', None) or 'unrecorded'}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--spent-usd {ctx.spent_usd:.4f} "
             f"--soft-stop-usd {plan.soft_stop_usd:.4f} "

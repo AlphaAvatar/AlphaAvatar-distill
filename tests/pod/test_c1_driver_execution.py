@@ -1411,3 +1411,117 @@ def test_the_real_stage_f_writes_no_record_when_the_operator_raises(
     assert not (D.AUDIT / "c1_arm_identities.json").exists()
     assert not driver.arm_init, (
         f"stage F registered arms after the operator raised: {driver.arm_init}")
+
+
+# --- completed probes must survive a later stage's failure -------------------
+#
+# C1 attempt 17 trained all six probes over ten hours and lost every one. Stage
+# H failed, the failure artifact spec collects evidence rather than checkpoints,
+# and the pod was deleted. $10.6 of finished experimental work discarded because
+# a LATER stage of the same experiment failed.
+
+def _probe_record() -> dict:
+    return {"probe_id": "autoinit.v1.phase_c1.treatment.696460635",
+            "arm": "treatment", "seed": 696460635,
+            "config_sha256": "c" * 64,
+            "initialization_artifact_digest": "d" * 64}
+
+
+def _driver_shell(run_id: str = "attempt99"):
+    """Enough of a driver to call `preserve_probe` unbound. It touches only
+    `self.a.run_id`, so a namespace is the honest fixture."""
+    return types.SimpleNamespace(a=types.SimpleNamespace(run_id=run_id))
+
+
+def test_a_finished_probe_is_preserved_the_moment_it_exists(tmp_path,
+                                                            monkeypatch):
+    """Not at closeout — the failure that lost six probes happened afterwards."""
+    model = tmp_path / "model"
+    model.mkdir()
+    (model / "model.safetensors").write_bytes(b"weights")
+    (model / "config.json").write_text("{}")
+
+    sent = {}
+
+    class FakeApi:
+        def upload_folder(self, *, folder_path, repo_id, repo_type,
+                          path_in_repo, token):
+            sent.update(folder=folder_path, repo=repo_id, prefix=path_in_repo,
+                        token=bool(token))
+
+    monkeypatch.setitem(sys.modules, "huggingface_hub",
+                        types.SimpleNamespace(HfApi=FakeApi))
+    monkeypatch.setattr(D, "relay_token", lambda: "t")
+
+    out = D.C1Driver.preserve_probe(_driver_shell(), "probe-x", model,
+                                    _probe_record())
+
+    assert out["preserved"] is True
+    assert sent["repo"] == D.RELAY
+    #: Per ATTEMPT and per probe, so two attempts cannot overwrite each other.
+    assert sent["prefix"] == f"{D.PRESERVED_PREFIX}/attempt99/probe-x"
+    assert sent["token"], "uploaded without a credential"
+    assert set(out["files"]) == {"model.safetensors", "config.json"}
+    assert len(out["content_sha256"]) == 64
+    assert out["bytes"] == len(b"weights") + 2
+
+
+def test_preservation_authorizes_nothing():
+    """Saving a checkpoint is not permission to reuse it.
+
+    Preservation and scientific retry policy are separate decisions, and a
+    later reader must not be able to mistake one for the other.
+    """
+    out = D.C1Driver.preserve_probe(_driver_shell(), "p", Path("/nonexistent"),
+                                    _probe_record())
+    assert out["authorizes"].startswith("nothing")
+    for word in ("pooled", "resumed", "reused"):
+        assert word in out["authorizes"]
+
+
+def test_a_preservation_failure_never_destroys_the_training_it_protects(
+        tmp_path, monkeypatch):
+    """It runs after ten hours of successful work. It must not raise."""
+    model = tmp_path / "model"
+    model.mkdir()
+    (model / "w.bin").write_bytes(b"x")
+
+    class Exploding:
+        def upload_folder(self, **_kw):
+            raise RuntimeError("relay is down")
+
+    monkeypatch.setitem(sys.modules, "huggingface_hub",
+                        types.SimpleNamespace(HfApi=Exploding))
+    monkeypatch.setattr(D, "relay_token", lambda: "t")
+
+    out = D.C1Driver.preserve_probe(_driver_shell(), "p", model,
+                                    _probe_record())
+    assert out["preserved"] is False
+    assert "relay is down" in out["why_not"]
+    #: The identity is still recorded, so the loss is diagnosable.
+    assert out["content_sha256"] and out["arm"] == "treatment"
+
+
+def test_the_record_that_survives_a_failure_carries_the_durable_location():
+    """The `.training.json` the FAILED spec collects is where it has to be.
+
+    Preservation is written into the record BEFORE the journal is written, so a
+    stage-H failure — which is what happened — still brings the pointer home.
+    """
+    src = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
+    assert 'record["preserved"] = self.preserve_probe(' in src
+    assert src.index('record["preserved"] = self.preserve_probe(') < \
+        src.index("journal.write_text(json.dumps(record"), (
+            "the journal is written before preservation, so a failure between "
+            "them would lose the pointer to weights that exist")
+
+    spec = json.loads(
+        (REPO / "configs/autoinit/c1_artifacts_failed.json").read_text())
+    patterns = [e.get("pattern") or e.get("glob") for e in spec["entries"]]
+    assert "audit/autoinit_c1/probes/autoinit.v1.phase_c1.*.training.json" in patterns
+    #: And it stays OPTIONAL: an early failure has no probes and must still
+    #: collect what it does have.
+    entry = next(e for e in spec["entries"]
+                 if (e.get("pattern") or e.get("glob", "")).endswith(
+                     "*.training.json"))
+    assert not entry.get("required")

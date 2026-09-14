@@ -237,6 +237,36 @@ Do not duplicate the same validation locally, in a simulator, in readiness
 machinery and again on the paid machine unless each layer protects a distinct,
 demonstrable failure mode.
 
+#### Expensive completed work must survive a later failure
+
+Do not confuse "not required to exist on every failure path" with "should not be
+preserved when it exists".
+
+When an experiment completes an expensive unit of work — a trained checkpoint, a
+collected activation cache, a finished rollout set — that artifact MUST survive
+the failure of a LATER stage of the same experiment. C1 attempt 17 trained all
+six formal probes over ten hours and lost every one because stage H failed, the
+failed-run artifact policy collected evidence rather than weights, and the pod
+was deleted.
+
+Prefer durability at the moment of completion over collection at closeout: once
+a unit of work is finished, persist it — with its identity, its inputs' hashes
+and a content hash — to durable storage immediately, rather than waiting for a
+session that may not end well. Heavy bytes stay outside git; the run's records
+carry the durable location and the hashes.
+
+Such artifacts are OPTIONAL on a failure path, never required: an early failure
+may legitimately have produced none, and demanding them would block the
+collection of what a failed run does have.
+
+**Preservation is not permission.** Saving an artifact authorizes nothing about
+reusing it. Whether a preserved checkpoint may be pooled, resumed or reused
+across formal attempts is a separate scientific decision, governed by the
+experiment's retry policy and not by the existence of the file.
+
+Keep the implementation small — express this through the existing collector or
+relay rather than building an artifact framework for it.
+
 #### Keep experiment records minimal
 
 For a normal experiment, the preferred minimum record is:

@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import argparse
 import gc
+import hashlib
 import json
 import os
 import subprocess
@@ -101,6 +102,31 @@ register_builtin_profiles()
 #: `registered: []`. $0.43, and the first C1 attempt since #9 to get a driver
 #: past stage C.
 register_builtin_adapters()
+
+#: DURABLE STORAGE for completed probes. Attempt 17 trained all six and lost
+#: every one when a later stage failed, so a finished probe is pushed here the
+#: moment it exists rather than at closeout. Heavy bytes live in the relay and
+#: never in git; the run's evidence carries the location and the hashes.
+RELAY = "AlphaAvatar/aadistill-artifacts"
+PRESERVED_PREFIX = "c1_preserved_probes"
+#: The driver runs detached with an explicit minimal environment, so `HF_TOKEN`
+#: is NOT inherited. Setup stages the credential on disk; E8b S1 lost its
+#: publish step to exactly this and the error read as a missing repo rather
+#: than a missing credential.
+TOKEN_FILE = Path("/workspace/hf/token")
+
+
+def relay_token() -> str:
+    env = os.environ.get("HF_TOKEN")
+    if env:
+        return env
+    if TOKEN_FILE.is_file():
+        tok = TOKEN_FILE.read_text().strip()
+        if tok:
+            return tok
+    raise RuntimeError(f"no relay token: HF_TOKEN unset and {TOKEN_FILE} "
+                       "absent or empty")
+
 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_c1.status"
@@ -828,6 +854,75 @@ class C1Driver:
                 f"{len(self.training)}; the confirmation battery is evaluated "
                 "once per fully trained probe and never before")
 
+    def preserve_probe(self, name: str, model_dir: Path, record: dict) -> dict:
+        """Push a finished probe's weights to durable storage, immediately.
+
+        C1 attempt 17 trained all six probes over ten hours and lost every one of
+        them: stage H failed, the failure artifact spec collects evidence rather
+        than checkpoints, and the pod was deleted. `$10.6` of completed
+        experimental work discarded because a LATER stage failed.
+
+        So preservation happens the moment a probe exists, not at closeout, and
+        it does not depend on the session ending well. An early failure preserves
+        nothing because nothing was trained; a stage-G failure preserves every
+        probe that finished before it; a stage-H or -I failure preserves all six.
+
+        Heavy bytes go to the relay and never to git. What travels in the run's
+        evidence — this dict, inside the `.training.json` the failure spec
+        already collects — is the durable location and the hashes needed to
+        identify what is there.
+
+        PRESERVATION IS NOT PERMISSION. Saving a checkpoint authorizes nothing:
+        it does not permit pooling, resuming or reusing a probe across formal
+        attempts, and the frozen protocol still requires every attempt to
+        retrain all six from the same inputs. That is a scientific decision and
+        it is recorded in the payload so a later reader cannot mistake the one
+        for the other.
+
+        NEVER RAISES. A preservation failure must not destroy the training it
+        exists to protect, nor fail a stage that has already succeeded. It
+        records why it could not preserve and lets the run continue.
+        """
+        payload: dict = {
+            "probe_id": name,
+            "arm": record["arm"],
+            "seed": record["seed"],
+            "config_sha256": record["config_sha256"],
+            "initialization_artifact_digest":
+                record["initialization_artifact_digest"],
+            "authorizes": ("nothing. Preservation and reuse are separate "
+                           "decisions: this checkpoint may not be pooled, "
+                           "resumed or reused across formal attempts."),
+        }
+        try:
+            files = sorted(p for p in model_dir.rglob("*") if p.is_file())
+            digests = {str(p.relative_to(model_dir)): sha256_file(p)
+                       for p in files}
+            payload["files"] = digests
+            payload["bytes"] = sum(p.stat().st_size for p in files)
+            #: One hash over the SET, so a reader can compare two preserved
+            #: probes without walking either.
+            payload["content_sha256"] = hashlib.sha256(
+                "\n".join(f"{k}:{v}" for k, v in sorted(digests.items()))
+                .encode()).hexdigest()
+
+            from huggingface_hub import HfApi
+
+            prefix = f"{PRESERVED_PREFIX}/{self.a.run_id}/{name}"
+            HfApi().upload_folder(folder_path=str(model_dir), repo_id=RELAY,
+                                  repo_type="model", path_in_repo=prefix,
+                                  token=relay_token())
+            payload["preserved"] = True
+            payload["relay_repo"] = RELAY
+            payload["relay_prefix"] = prefix
+            say(f"  {name}: preserved {payload['bytes'] / 2**30:.2f} GiB to "
+                f"{RELAY}:{prefix}")
+        except Exception as exc:                              # noqa: BLE001
+            payload["preserved"] = False
+            payload["why_not"] = f"{type(exc).__name__}: {exc}"
+            say(f"  {name}: NOT preserved — {payload['why_not']}")
+        return payload
+
     def stage_g(self) -> None:
         mark("STAGE_START:G")
         self.release_device()
@@ -863,6 +958,7 @@ class C1Driver:
                 "evaluated": False,
                 "complete": True,
             }
+            record["preserved"] = self.preserve_probe(name, model_dir, record)
             journal.write_text(json.dumps(record, indent=2) + "\n")
             self.training[(d["arm"], d["seed"])] = record
             self.ev["probes_trained"] = len(self.training)
@@ -1219,6 +1315,9 @@ class C1Driver:
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Phase C1 fixed-path ATTENTION isolation")
     ap.add_argument("--image-digest", default="")
+    #: Which attempt this is, so a preserved probe lands under its own prefix
+    #: and two attempts can never overwrite each other's weights.
+    ap.add_argument("--run-id", default="unrecorded")
     ap.add_argument("--rate", type=float, default=0.99)
     ap.add_argument("--spent-usd", type=float, default=0.0)
     ap.add_argument("--soft-stop-usd", type=float, required=True)
