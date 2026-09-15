@@ -281,8 +281,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 9,
-  "runs_unrecorded": 3,
+  "runs_current": 10,
+  "runs_unrecorded": 2,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": {
@@ -316,8 +316,8 @@
     "total": 19
    },
    "phase_c2": {
-    "recorded": 1,
-    "unrecorded": 2,
+    "recorded": 2,
+    "unrecorded": 1,
     "total": 3
    },
    "recovery_continuation": {
@@ -1058,6 +1058,19 @@
    },
    "manifest_sha256": "a035512777a324d5adabee0cda6f8bf0b71d5c0558559ca416ae46d922412825",
    "n_components": 7
+  },
+  {
+   "experiment_id": "phase_c2",
+   "run_id": "attempt3",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2/runs/attempt3",
+    "manifest": "logs/stages/stage-1/phase_c2/runs/attempt3/manifest.json"
+   },
+   "manifest_sha256": "08a781d324cf3e0a2ed355e30d096af46afae7de1d8207077ba8e19dbf22e6ab",
+   "n_components": 10
   }
  ],
  "unrecorded": [
@@ -1076,14 +1089,6 @@
    "n_files": 2,
    "digest": "617d05ef2fd1e9648a5393388604450dcd1842e49969c74cd9202ecb9a1c008c",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
-  },
-  {
-   "experiment_id": "phase_c2",
-   "run_id": "attempt3",
-   "root": "logs/stages/stage-1/phase_c2/runs/attempt3",
-   "n_files": 1,
-   "digest": "6032aff53444bea8950c09bc7c27fb91564f5e04679e45d0da12f82b6ee46737",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

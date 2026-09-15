@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 192,
+ "modules_scanned": 195,
  "test_ignores": [],
  "n_predicates": 113,
  "by_signal": {
@@ -1666,7 +1666,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 815,
+   "line": 818,
    "kind": "pytest.skip",
    "function": "test_the_c1_checkpoint_inputs_land_where_the_rope_gate_globs",
    "condition": "not src.is_file()",
@@ -1682,7 +1682,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 847,
+   "line": 850,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_accepts_the_canonical_config",
    "condition": "not src.is_file()",
@@ -1698,7 +1698,7 @@
   },
   {
    "file": "tests/pod/test_session_architecture.py",
-   "line": 870,
+   "line": 873,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_refuses_a_wrong_stored_base",
    "condition": "not src.is_file()",
@@ -2036,5 +2036,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "fcbe99cb9fb4431dcae074460336304727fb56e0780f55c99c077dc72d244a50"
+ "digest": "76484b1d30d72e147848f980f1ede03a69846dc8afb6b2ebfa9e4fb75ea2f118"
 }

@@ -1,0 +1,30 @@
+[18:18:25] budget: expected 395 min $7.18 · soft $14.50 · hard $15.04 (authorized $15.04)
+[18:18:25] NVIDIA L40S $1.09/h, stock Low
+[18:18:25] session commit 5b0396c7f8d4 verified: harness digests to aba90833620f…, carries the authorization and only logs/stages/stage-1/phase_c2/runs/attempt3/governance/authorization.json differs from the authorized base
+[18:18:26] C2 executable closure aba90833620f… over 85 derived files
+[18:18:26] authorized for run 'attempt3'; 3 draw(s) within the 3 permitted
+[18:18:27] frozen-asset expectation configs/experiments/phase_c2/frozen_assets.json verifies: ['state_eval_v1'], no scoring contract requested
+[18:18:27] volume 200 GiB >= 200 for a 87.4 GiB peak working set
+[18:18:27] grant cap $15.0446 matches the pricing record, whose own sha256 verified
+[18:18:27] grant binds the live plan 1dc14abf45ec…
+[18:18:27] pod sweep 23 passed / 0 skipped / 0 failed, no declared groups, binds C2 harness aba90833620f… and environment e54bd445a5dc…, staging contract 5243524fe13f…, swept at 4b293f98 with only ['logs/stages/stage-1/phase_c2/runs/attempt3/governance/authorization.json', 'logs/stages/stage-1/phase_c2/runs/attempt3/governance/readiness.json'] differs from the swept base
+[18:18:31] aad_autoinit_5b0396c7.bundle (12705285 bytes, 7ba0cfee94db…) round-trips to 5b0396c7f8d4… carrying this authorization and executable set aba90833620f…
+[18:18:31] precheck OK: 7 relay inputs (7 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[18:18:33] watchdog detached — hard 828 min = $15.04
+[18:18:33] created o9m4onsnaxrjp4 at $1.09/h
+[18:19:25]   starting (60s) — $0.02
+[18:20:29]   starting (120s) — $0.04
+[18:21:32] TCP 22 at 103.196.86.50:22889 after 3.0 min
+[18:21:35] draw 1: ssh reachable — $0.06
+[18:22:07] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[18:22:07] draw 1: running setup
+[18:24:40] draw 1: setup complete — $0.11
+[18:24:47] driver detached, pid 1762, confirmed by descriptor_probe_exited — $0.11
+[18:26:59]   2026-09-15T18:24:46Z MARKER:PHASE_C2_FAILED — $0.15
+[18:26:59] a blocking stage failed — collecting evidence, then tearing down. Nothing was trained and no permanent artifact was replaced.
+[18:26:59] polling ended: PHASE_C2_FAILED — $0.15
+[18:27:15]   manifest rc=1
+
+[18:27:35] LAUNCHER ERROR: ArtifactError: an emergency teardown over a non-quiescent event stream must name the streams it is truncating; 'the final event stream is incomplete' has to be in the record, not inferred from it later
+[18:27:35] deleting pod (launcher error)
+[18:27:46] pod deleted — 9.2 min, $0.17; provider confirms gone: True

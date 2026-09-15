@@ -253,9 +253,11 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
      {
         "src/aadistill/runtime/setup_steps.py":
             "NEW FILE. The rule deciding which optional setup steps run: parse "
-            "the declaration, answer one question about it, and exit 0 / 1 / 2 "
-            "so a shell `if` cannot read an unusable declaration as permission "
-            "to skip everything. THIS IS A DECLARED SEMANTIC CHANGE by virtue "
+            "the declaration, answer one question about it, and exit 0 / 3 / 4 "
+            "-- never 1 or 2, which an interpreter that cannot parse the file "
+            "at all already uses -- so a shell `if` cannot read a crash as "
+            "permission to skip everything. THIS IS A DECLARED SEMANTIC "
+            "CHANGE by virtue "
             "of being new executable core, and it is what makes "
             "`SetupManifest.setup_markers` mean something: the field was "
             "declared by every session and read by NOTHING, so the shared setup "
@@ -276,6 +278,31 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "`tests/pod/test_phase_c2_setup_contract.py` -- and it REFUSES a "
             "declaration that omits the substrate rather than silently "
             "accepting a setup nobody runs.",
+     }),
+    ("5b0396c7f8d4613a92d6b5d0d6fdb0d7a64cf878",
+     "a stream-less session's teardown route, after attempt 3",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "`streams_at_risk(manifest, declared_streams)`, extracted from the "
+            "inline expression `collect_and_teardown` passed to "
+            "`evaluate_teardown` and given one new answer. THIS IS A DECLARED "
+            "SEMANTIC CHANGE to which teardown route a failed session takes. "
+            "Previously: manifest present -> its marker failures plus its "
+            "still-being-written entries; manifest absent -> `None`, the "
+            "strict rule, which DEMANDS that the caller name the streams it is "
+            "truncating. A session that declares no event streams can never "
+            "satisfy that demand, so C2 attempt 3 -- whose failure spec was "
+            "unloadable, leaving no manifest -- raised `ArtifactError` in the "
+            "middle of teardown and reported it in place of the real failure "
+            "one layer down. Now the absent-manifest case asks the SPEC: no "
+            "declared streams means none to truncate, which is evidence rather "
+            "than an assumption, and the gate's recorded-loss route applies. "
+            "`None` is kept for the only genuinely uninformed case -- streams "
+            "declared AND no manifest -- and "
+            "`tests/pod/test_phase_c2_collection_and_profiles.py` holds that "
+            "mutation. Extracted rather than left inline because a branch "
+            "reachable only from a pod whose collector failed is a branch no "
+            "`$0` check can execute; as a function it is four unit tests.",
      }),
 )
 

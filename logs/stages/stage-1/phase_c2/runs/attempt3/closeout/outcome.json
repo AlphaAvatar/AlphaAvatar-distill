@@ -1,0 +1,100 @@
+{
+ "schema": "aadistill.autoinit.c2_outcome/v1",
+ "_what_this_is": "what Phase-C2 Search-1 attempt 3 actually did, and what it means. Written after provider-confirmed teardown. AUTHORIZES NOTHING.",
+ "attempt": "attempt3",
+ "classification": "ABORTED IN STAGE A — PRE-SCIENCE, NO MEASUREMENT",
+ "terminal_marker": "PHASE_C2_FAILED",
+ "failed_stage": "bind_identities",
+ "what_ran": {
+  "zero_dollar_gates": "9 of 9 PASSED: session commit/lineage, C2 executable closure re-derived independently, resource scope, frozen-asset expectation, storage, pricing identity, plan identity, run-owned launch_bound readiness, bundle round-trip",
+  "provider": "one resource created, draw 1 of the 3 permitted",
+  "setup": "PASSED in 2 min 33 s, SETUP_RC=0. The attempt-2 repair confirmed on real hardware: the frozen-asset step verified C2's own expectation document and the vLLM environment was never built.",
+  "driver": "STARTED. DRIVER_START at 18:24:45Z, MARKER:STAGE_FAILED:bind_identities at 18:24:46Z — one second. Stage B never ran."
+ },
+ "science": {
+  "beam_search_began": false,
+  "levels_expanded": 0,
+  "candidates_evaluated": 0,
+  "baseline_resolved": null,
+  "state_eval_measurements": 0,
+  "c2_baseline_comparison": null,
+  "search2_condition": "not evaluable; the search did not run",
+  "_meaning": "nothing scientific happened. Stage A is identity binding only — it resolves mixtures, registers operators and checks the frozen baseline construction, and it measures nothing. This attempt is neither a null result nor a partial one."
+ },
+ "root_cause": {
+  "failure": "KeyError: no calibration profile 'calib.domain_balanced@v1'; registered: []",
+  "why": "the four calibration mixtures are DATA. They live in configs/calibration/profiles.json, nothing in src/aadistill names them, and scripts/experiments/calibration.py is the application bootstrap that loads and registers them. The C2 driver imported that bootstrap inside stage B, while stage A already called get_profile. Every other driver — C1, Phase B, the device canary, phase_a_search — imports it at module scope.",
+  "why_no_zero_cost_test_saw_it": "tests/conftest.py imports the bootstrap and the registry is process-global, so it is FULL in every pytest process. The empty registry exists only in a fresh interpreter, which is what a pod runs. An in-process test of stage A passes whether or not the driver imports the bootstrap.",
+  "class": "import-order defect behind process-global state. The fix is at module scope rather than a call added to stage A: an import cannot be ordered after a stage, so the defect becomes unexpressible rather than merely fixed.",
+  "not_a_science_failure": "the space, the plan, the pricing, the B identity contract, the staged assets and the readiness evidence were all verified and all correct. Nine gates passed and setup passed."
+ },
+ "two_further_defects_the_failure_path_exposed": {
+  "unloadable_artifact_specs": {
+   "what": "both configs/autoinit/c2_artifacts.json and c2_artifacts_failed.json declared \"lifecycle\": \"best_effort\", which is not a lifecycle: ArtifactSpec.__post_init__ accepts only final_required and mutable_snapshot.",
+   "effect_here": "the failure spec was unloadable, so the collector exited 1 before looking at a single file and no manifest existed — the `manifest rc=1` in the launcher log.",
+   "effect_it_would_have_had": "the same word sat in the SUCCESS spec. A completed ten-hour Search-1 would have produced no manifest, failed the teardown gate at artifact_manifest_created, and held a $1.09/h pod until the 828-minute watchdog. This $0.1674 abort is what found it.",
+   "repair": "required: false is what makes an artifact best-effort; lifecycle says what a matching file MEANS. Both specs corrected and both now record the rule."
+  },
+  "strict_rule_for_a_stream_less_session": {
+   "what": "with no manifest the runner passed streams_at_risk=None, and a session that declares no event streams can never satisfy the emergency gate's \"name the streams you are truncating\" rule.",
+   "effect": "ArtifactError raised mid-teardown; the launcher reported that instead of the real failure one layer down.",
+   "repair": "src/aadistill/infrastructure/session_runner.py:streams_at_risk() — when the manifest is gone but the session declares no streams, there is nothing to truncate and that is evidence, not an assumption. The strict rule is kept for the genuinely uninformed case: streams declared AND no manifest."
+  }
+ },
+ "provider": {
+  "pod_id": "o9m4onsnaxrjp4",
+  "gpu": "NVIDIA L40S",
+  "quoted_price_per_hour": 1.09,
+  "price_basis_authorized": 1.09,
+  "stock_status": "Low",
+  "draws_used": 1,
+  "draws_permitted": 3,
+  "provider_resources_created": 1,
+  "elapsed_minutes": 9.21,
+  "deleted": true,
+  "provider_confirms_gone": true,
+  "independently_reconfirmed": "a separate read-only query returned ZERO_PODS and pod(o9m4onsnaxrjp4) = null after teardown",
+  "teardown_was_correct_despite_the_launcher_error": "the ArtifactError aborted the launcher's collection path, not its teardown: the pod was deleted 11 s later and the provider confirmed it gone. The driver's evidence had already been relayed and was fetched."
+ },
+ "budget": {
+  "this_attempt": 0.1674,
+  "authorized_usd": 15.0446,
+  "within_authorization": true,
+  "project_cumulative_before": 290.5726,
+  "project_cumulative_after": 290.74,
+  "project_cap": 320.0,
+  "project_remaining_after": 29.26,
+  "campaign_spent_after": 0.2226,
+  "campaign_envelope": 16.2,
+  "campaign_absolute_ceiling": 306.7174,
+  "next_formal_attempt_fits": "0.2226 + 15.0446 = 15.2672 <= 16.2000",
+  "engineering_gpu_validation_spent": 0.0,
+  "engineering_gpu_validation_allowance": 0.25,
+  "_why_no_gpu_validation": "the maintainer's item 4 is explicit that a zero-cost route which answers the setup question completely should be taken instead of a ceremonial GPU run. The real stage A now executes in a fresh interpreter off-pod: it resolves both mixtures against their recorded content hashes, registers the C2 operators and verifies the frozen baseline construction 3a233a9017b3…. There is nothing a paid pod would add."
+ },
+ "chain": {
+  "grant_commit_G": "4b293f9810528f8661814283486f655568ecaa98",
+  "readiness_commit_R": "0a618ea956d7e37f6a28a3e74562c9fa620a7eff",
+  "authorization_session_commit_A": "5b0396c7f8d4613a92d6b5d0d6fdb0d7a64cf878",
+  "grant_sha256": "d637e206e473cf5b",
+  "authorization_sha256": "942cfd611b57a0d2",
+  "bundle": "aad_autoinit_5b0396c7.bundle sha256 7ba0cfee94db3ba4439745dc834bdf9e5ef7bd38bb04175b2d286c9644e19636",
+  "c2_harness_digest": "aba90833620fd2cc1d6c57209ae1936ad014d00409d6a0e0faf97b4a8bb5acd3",
+  "consumed": "YES. one_use.consumed_when counts the launcher invocation, spend or no spend. No part of this chain is reused."
+ },
+ "why_this_continued_rather_than_stopped": "the maintainer campaign decision of 2026-09-16 supersedes the earlier instruction to stop merely because an ordinary pre-science engineering repair changes source, config or test files. This attempt ended in stage A, before the beam search and before any measurement, so there is no measurement to retry: it is an engineering subrun. Its chain is consumed and closed, its spend reconciled, the root cause repaired, one regression added, and a fresh attempt identity with a fresh complete governance chain follows automatically. No stop condition was reached: the science is unchanged, the budget is not expanded, the rate boundary is unchanged, billing ownership is certain, and a complete next attempt still fits inside the campaign envelope.",
+ "repairs_made": [
+  "scripts/pod/autoinit_phase_c2_driver.py registers the calibration mixtures at MODULE scope, and the now-redundant in-stage registration is removed",
+  "configs/autoinit/c2_artifacts.json and c2_artifacts_failed.json use the real lifecycle vocabulary and record why best_effort was wrong",
+  "src/aadistill/infrastructure/session_runner.py:streams_at_risk() — a stream-less session takes the recorded-loss route when its manifest is gone",
+  "tests/pod/test_phase_c2_collection_and_profiles.py — one regression module: the real stage A in a FRESH INTERPRETER, the non-vacuity proof that the core registry is empty without the bootstrap, every artifact spec document loads, the lifecycle vocabulary, the failure spec over attempt 3's exact artifact shape, and both teardown routes including the mutation that must keep failing"
+ ],
+ "not_done_deliberately": [
+  "no GPU validation run",
+  "no second launcher invocation on this chain",
+  "no reuse of any attempt-3 governance artifact",
+  "no change to the search space, the plan hash, the pricing identity, the B contract or the Search-1 semantics",
+  "no Search-2, no behavioural confirmation, no C1 rerun"
+ ],
+ "authorizes": "nothing"
+}

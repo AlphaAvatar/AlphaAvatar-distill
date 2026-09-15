@@ -1,7 +1,7 @@
 {
  "spec": "aadistill.artifact_spec/v1",
  "session": "autoinit_phase_c2",
- "note": "FAILED spec: what a Phase-C2 Search-1 run that did not reach ALL_DONE must still bring home. It collects EVIDENCE, and it demands nothing a failed run may legitimately not have produced. An early failure has no search journal and no selection, and requiring either would block teardown on an artifact the run correctly never wrote \u2014 which is how a session ends up unable to tear down the pod that is still billing. The session record is the one required entry, because a failure with no record is a failure nobody can diagnose. Everything else is best-effort and is collected WHENEVER IT EXISTS: a search that ran for hours and then hit its deadline has a journal full of per-state timings, and `if terminal == ALL_DONE` is the predicate that deleted $2.82 of verified artifacts on 2026-08-13. c2_baseline_comparison.json is best-effort here and required in the success spec: a run that failed before the search finished never resolved a baseline, and demanding a comparison it correctly did not write would block teardown of a pod that is still billing.",
+ "note": "FAILED spec: what a Phase-C2 Search-1 run that did not reach ALL_DONE must still bring home. It collects EVIDENCE, and it demands nothing a failed run may legitimately not have produced. An early failure has no search journal and no selection, and requiring either would block teardown on an artifact the run correctly never wrote \u2014 which is how a session ends up unable to tear down the pod that is still billing. The session record is the one required entry, because a failure with no record is a failure nobody can diagnose. Everything else is best-effort and is collected WHENEVER IT EXISTS: a search that ran for hours and then hit its deadline has a journal full of per-state timings, and `if terminal == ALL_DONE` is the predicate that deleted $2.82 of verified artifacts on 2026-08-13. c2_baseline_comparison.json is best-effort here and required in the success spec: a run that failed before the search finished never resolved a baseline, and demanding a comparison it correctly did not write would block teardown of a pod that is still billing. On lifecycle: the vocabulary is `final_required` and `mutable_snapshot` and nothing else -- `ArtifactSpec.__post_init__` refuses any other value, so an invented word makes this whole document UNLOADABLE and the collector exits 1 before it looks at a single file. Both C2 specs said `best_effort` until 2026-09-16, which is not a lifecycle but a `required: false` entry: `required` is what decides whether an absent artifact blocks anything, and `lifecycle` is what a matching file MEANS. A failed attempt 3 hit it on the failure spec ($0.1674, and the launcher raised instead of recording the loss); the same word sat in this success spec, where a completed ten-hour Search-1 would have produced no manifest, failed the teardown gate and held a $1.09/h pod until the 828-minute watchdog.",
  "entries": [
   {
    "artifact_class": "session_evidence",
@@ -13,37 +13,37 @@
    "artifact_class": "search_journal",
    "pattern": "autoinit/phase_c2_search/states.jsonl",
    "required": false,
-   "lifecycle": "best_effort"
+   "lifecycle": "final_required"
   },
   {
    "artifact_class": "search_telemetry",
    "pattern": "autoinit/phase_c2_search/telemetry.jsonl",
    "required": false,
-   "lifecycle": "best_effort"
+   "lifecycle": "final_required"
   },
   {
    "artifact_class": "stage1_selection",
    "pattern": "autoinit/phase_c2_search/stage1_selection.json",
    "required": false,
-   "lifecycle": "best_effort"
+   "lifecycle": "final_required"
   },
   {
    "artifact_class": "search_summary",
    "pattern": "audit/autoinit_phase_c2/c2_search_summary.json",
    "required": false,
-   "lifecycle": "best_effort"
+   "lifecycle": "final_required"
   },
   {
    "artifact_class": "baseline_comparison",
    "pattern": "audit/autoinit_phase_c2/c2_baseline_comparison.json",
    "required": false,
-   "lifecycle": "best_effort"
+   "lifecycle": "final_required"
   },
   {
    "artifact_class": "session_logs",
    "pattern": "audit/autoinit_phase_c2/session/*",
    "required": false,
-   "lifecycle": "best_effort"
+   "lifecycle": "final_required"
   }
  ]
 }

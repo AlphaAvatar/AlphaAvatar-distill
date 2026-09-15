@@ -2433,3 +2433,50 @@ a source and config change inside the C2 executable closure, which moves
 invalidates the approved identity, the launch-bound readiness record and the
 authorization. That is a new maintainer decision, so the attempt is torn down,
 reconciled and STOPPED for review rather than repaired and relaunched.
+
+## 2026-09-16 — C2 attempt 3: ABORTED IN STAGE A, no science, `$0.1674`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| Phase-C2 Search-1 attempt 3: **9/9 `$0` pre-provider gates passed** (the new `frozen_assets_gate` among them), pod `o9m4onsnaxrjp4` at `$1.09/h` for 9.21 min. Setup **passed in 2m33s** — the attempt-2 repair confirmed on real hardware: the frozen-asset step verified C2's own expectation and the vLLM environment was never built. The driver detached and **died one second after `DRIVER_START`, in stage `bind_identities`**: `no calibration profile 'calib.domain_balanced@v1'; registered: []`. **No beam level, nothing trained, nothing measured.** Pod deleted, provider confirms gone | `$0.1674` | [`runs/phase_c2/attempt3/`](../stages/stage-1/phase_c2/runs/attempt3/) |
+
+**Cumulative: `$290.7400` of the `$320.0000` cap.**
+
+```text
+project   290.5726 + 0.1674 = 290.7400   of 320.0000, leaving 29.2600
+campaign    0.0552 + 0.1674 =   0.2226   of 16.2000 (absolute ceiling 306.7174)
+next formal 0.2226 + 15.0446 =  15.2672  <= 16.2000, so a complete attempt still fits
+```
+
+The four calibration mixtures are **data**: they live in
+`configs/calibration/profiles.json`, nothing in `src/aadistill` names them, and
+`scripts/experiments/calibration.py` is the application bootstrap that loads
+them. The C2 driver imported that bootstrap inside **stage B** while **stage A**
+already called `get_profile`, so stage A met an empty registry. Every other
+driver imports it at module scope.
+
+No `$0` test could see it: `tests/conftest.py` imports the bootstrap, the
+registry is process-global, and so it is full in every pytest process. The empty
+registry exists only in a fresh interpreter — which is what a pod runs.
+
+The abort also exposed two defects in the failure path itself, both of which
+would have outlived this attempt. Both C2 artifact specs declared
+`"lifecycle": "best_effort"`, which is not a lifecycle; the document was
+unloadable, so the collector exited 1 and no manifest existed. **The same word
+sat in the success spec**, where a completed ten-hour Search-1 would have
+produced no manifest, failed the teardown gate and held a `$1.09/h` pod until
+the 828-minute watchdog. And with no manifest, a session that declares no event
+streams cannot satisfy the emergency gate's naming rule, so the launcher raised
+`ArtifactError` mid-teardown and reported that instead of the real failure.
+
+Teardown was nevertheless correct and confirmed: pod deleted at 9.2 min,
+`provider_confirms_gone: true`, and an independent read-only query returned
+`ZERO_PODS` with `pod(o9m4onsnaxrjp4) = null`.
+
+Under the maintainer campaign decision of 2026-09-16 this is an **ordinary
+pre-science engineering failure**: it ended before the beam search, so there is
+no measurement to retry. Repaired, regressed and continued automatically under a
+fresh attempt identity and a fresh complete governance chain. Engineering GPU
+validation remains `$0.0000` of its `$0.25` allowance — the `$0` route answers
+the question completely, because the real stage A now executes in a fresh
+interpreter off-pod and verifies the frozen B spec `3a233a90…`.

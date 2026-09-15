@@ -57,6 +57,29 @@ from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
 from aadistill.initialization.planning.search import SearchDeadlineExceeded  # noqa: E402
 from experiments.phase_c2 import comparison as C  # noqa: E402
+#: HERE, at module scope, and not inside the stage that happens to need it.
+#:
+#: The four calibration mixtures are DATA: they live in
+#: `configs/calibration/profiles.json` and nothing in `src/aadistill` names
+#: them, so the core's profile registry starts EMPTY and the application
+#: bootstrap below is what fills it. Every other driver imports it at module
+#: scope for exactly this reason.
+#:
+#: This driver imported it inside stage B while stage A already called
+#: `get_profile`, so attempt 3 died one second after DRIVER_START on
+#: `no calibration profile <the first the space declares>; registered: []` for
+#: $0.1674. No `$0` test could see it: `tests/conftest.py` imports this
+#: bootstrap, so the registry is full in every pytest process and the empty
+#: registry exists only in a fresh interpreter — which is what a pod runs.
+#: `tests/pod/test_phase_c2_collection_and_profiles.py` therefore asks in a
+#: SUBPROCESS.
+#:
+#: Module scope rather than a call added to stage A: an import cannot be
+#: ordered after a stage, so the defect becomes unexpressible rather than
+#: merely fixed.
+from experiments.calibration import register_builtin_profiles  # noqa: E402
+
+register_builtin_profiles()
 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_phase_c2.status"
@@ -234,7 +257,6 @@ class PhaseC2Driver:
     def search_and_baseline(self) -> bool:
         """The search, the durability boundary, and the baseline resolved once."""
         from aadistill.initialization.specs.arch import get_adapter
-        from experiments.calibration import register_builtin_profiles
         from experiments.phase_c2 import baseline as B
         from experiments.phase_c2.search_space import (
             C2_ALLOWED_IMPLS, C2_IMPL_PROFILES, C2_PROFILE_IDS,
@@ -243,7 +265,9 @@ class PhaseC2Driver:
         from aadistill.initialization.planning.search import Deadline
         from phase_a_search import as_operator_items, run_phase_a_search
 
-        register_builtin_profiles()
+        #: The profiles were registered at module import, not here: registering
+        #: in the stage that needs them is what let stage A run first and find
+        #: an empty registry.
         #: The FULL beam envelope, not the expected trajectory. Approving the
         #: beam against 300.16 min would approve work its own deadline permits
         #: — the base plus `beam_composition_risk` — and the soft stop may not

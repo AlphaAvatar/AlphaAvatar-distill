@@ -10,28 +10,41 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **Nothing is running. Nothing is billing. No pod exists**, no further C1
-attempt is authorized, and **nothing is prepared for launch** — attempt2's
-one-use chain is consumed. Attempt 18's pod `ygtjrobs456cb5` was deleted after
-collecting 164 artifacts, the provider confirms it is gone, and a live query
-returns `ZERO_PODS`.
+attempt is authorized, and **nothing is prepared for launch** — attempt3's
+one-use chain is consumed. Attempt 3's pod `o9m4onsnaxrjp4` was deleted 9.2 min
+after creation, the provider confirms it is gone, and an independent query
+returns `ZERO_PODS` with `pod(o9m4onsnaxrjp4) = null`.
 
-**Phase-C2 Search-1 `attempt3` is prepared.** Attempt 2 launched and aborted
-at setup for `$0.0552` — a **pre-science infrastructure abort**, with all 8 `$0`
-gates passed, no driver stage and nothing measured. Its root cause is repaired:
-`SetupManifest.setup_markers` is now an execution contract the shared setup
-script reads, so a session runs only the sections it declares, and C2 names its
-own frozen-asset expectation instead of inheriting Phase-A/C1 constants.
+**Phase-C2 Search-1 `attempt4` is the next formal attempt, and its chain is not
+yet built.** Attempts 2 and 3 both launched and both aborted before the beam
+search — `$0.0552` and `$0.1674`, `$0.2226` together, **no measurement of any
+kind**. Neither is a Search-1 null, partial or scientific result.
+
+Attempt 2's root cause is repaired *and confirmed on real hardware*: attempt 3's
+setup passed in 2 min 33 s, the frozen-asset step verified C2's own expectation
+document, and the vLLM environment was never built. Attempt 3 then died one
+second into stage `bind_identities` on an **empty calibration registry** — the
+driver imported the application bootstrap inside stage B while stage A already
+called `get_profile`. Repaired at module scope, where an import cannot be
+ordered after a stage. The same abort exposed two defects in the failure path,
+both repaired: both C2 artifact specs declared a lifecycle that does not exist,
+which made them unloadable — **including the success spec, where a completed
+ten-hour run would have held a `$1.09/h` pod until the 828-minute watchdog** —
+and a session that declares no event streams could not satisfy the emergency
+teardown gate's naming rule once its manifest was gone.
 
 The **2026-09-16 maintainer campaign decision** authorizes fresh formal chains
 after an ordinary pre-science repair without a further approval, inside a
 `$16.20` envelope measured from `$290.5174` and *including* attempt 2's
 `$0.0552`. Every formal launcher keeps the unchanged `$15.0446` ceiling and the
 `<= $1.09/h` L40S basis, and a launch requires that a full ceiling still fit:
-`0.0552 + 15.0446 = 15.0998 <= 16.20`.
+`0.2226 + 15.0446 = 15.2672 <= 16.20`. Engineering GPU validation has spent
+`$0.0000` of its `$0.25`, and none is planned: the real stage A now executes in
+a fresh interpreter off-pod and verifies the frozen B spec `3a233a90…`.
 
-Attempt 3's grant is committed; the `launch_bound` sweep, the authorization and
-the bundle are owed **in that order**. Attempts 1 and 2 are historical and
-immutable, and none of their governance artifacts is reused.
+Attempt 4 owes a grant, then a `launch_bound` sweep, then the authorization,
+then the bundle, **in that order**. Attempts 1–3 are historical and immutable,
+and none of their governance artifacts is reused.
 
 **C1 is COMPLETE.** Attempt 18 executed the whole frozen protocol — both replay
 gates, both arms, six probes trained, six evaluated on the frozen battery — and
@@ -43,9 +56,9 @@ floor. A complete valid verdict ends the round.
 | phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**, and its execution preregistration is now **frozen to the binding attempt 18 ran under**. C2 Search-1 is **EXECUTABLE and priced, and NOT AUTHORIZED**: space, baseline rule, B→C comparison record, driver, launcher, evidence contract, a `$15.0446` ceiling, a CPU preflight of its own, a derived executable closure, a readiness contract, an authorization issuer, a bundle transport, run ownership of the whole execution and an enforceable provider-resource scope all exist, with the beam and the baseline rebuild on separate clocks; no grant, readiness record, authorization or bundle does | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
-| launch chain | attempt 18's chain is **consumed**, like every chain before it. **No further C1 attempt is authorized, and none is prepared** — a complete verdict ends the round | [`phase_c1/runs/attempt18/governance/`](../stages/stage-1/phase_c1/runs/attempt18/governance/) |
-| last attempt | **18 — COMPLETE SCIENTIFIC EXECUTION**, `$10.2018`, `ALL_DONE`, launcher exit 0. 14/14 gates, 8 stages, 6/6 probes trained (61.8 min mean) and scored (26.4 min mean), 164 artifacts collected, pod deleted and provider-confirmed gone | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
-| blocker | none blocking C1, which is finished. One **resource** decision is outstanding and belongs to the maintainer: durable large-artifact capacity, see the defects block below | [`budget/decisions.md`](../budget/decisions.md) |
+| launch chain | every C2 chain so far is **consumed** — attempts 1, 2 and 3 — and **nothing is prepared**. No further C1 attempt is authorized or prepared either; a complete verdict ended that round | [`phase_c2/runs/attempt3/governance/`](../stages/stage-1/phase_c2/runs/attempt3/governance/) |
+| last attempt | **C2 Search-1 attempt 3 — ABORTED IN STAGE A, `$0.1674`, pre-science, nothing measured.** 9/9 `$0` gates and setup passed; the driver died one second in on an empty calibration registry. Pod deleted and provider-confirmed gone. The last complete scientific execution remains **C1 attempt 18** (`$10.2018`, `ALL_DONE`, verdict `GO`) | [`c2 attempt3`](../stages/stage-1/phase_c2/runs/attempt3/closeout/outcome.json) · [`c1 attempt18`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
+| blocker | **none blocking attempt 4**: the campaign decision authorizes a fresh chain after an ordinary pre-science repair, the repair is done and a full `$15.0446` ceiling still fits. C1 is finished. One **resource** decision remains the maintainer's: durable large-artifact capacity, see the defects block below | [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness
@@ -75,7 +88,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$290.5726` spent of `$320.0000`, leaving `$29.4274` |
+| project cap | `$290.7400` spent of `$320.0000`, leaving `$29.2600` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

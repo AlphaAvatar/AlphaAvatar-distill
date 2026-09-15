@@ -108,6 +108,38 @@ def watchdog_journal_name(pod_id: str | None, suffix: str = "jsonl") -> str:
     return f"watchdog_{pod_id}.{suffix}"
 
 
+def streams_at_risk(manifest: ArtifactManifest | None,
+                    declared_streams) -> tuple[str, ...] | None:
+    """What may be mid-truncation at teardown, from the two sources that know.
+
+    `evaluate_teardown`'s emergency path must be able to tell a TRUNCATED
+    append-only stream from an artifact that was simply never written, and it
+    refuses to guess: give it no evidence (`None`) and it demands that the
+    caller name the streams it is truncating.
+
+    The manifest is that evidence when it exists. When it does not -- the
+    collector failed, or the transfer did -- the SPEC still settles the question
+    for one case: a session that declares no append-only streams has none to
+    truncate, whatever became of the manifest. That is evidence, not an
+    assumption, and it decides between the gate's clean recorded-loss route and
+    an `ArtifactError` raised in the middle of teardown.
+
+    C2 attempt 3 took the second route. Its failure spec was unloadable, so
+    `manifest` was `None`; it declares no event streams, so it could never
+    satisfy "name the streams you are truncating"; and the launcher aborted
+    after the pod was already gone. Reported as a launcher error, the actual
+    failure -- an empty calibration registry in stage A -- was one layer down.
+
+    `None`, the strict rule, is kept for the only genuinely uninformed case:
+    streams ARE declared and the manifest that would say whether they settled
+    is gone.
+    """
+    if manifest is not None:
+        return (tuple(manifest.completion_marker_failures)
+                + tuple(manifest.still_being_written))
+    return () if not tuple(declared_streams) else None
+
+
 class SessionRunner:
     """Runs one `SessionSpec`. Not a base class; there is nothing to override."""
 
@@ -964,6 +996,8 @@ class SessionRunner:
             "report_inputs_verified": local_ok,
             "required_products_secured": bool(secured_ok),
         }
+        declared_streams = art.event_streams(self.context())
+        at_risk = streams_at_risk(manifest, declared_streams)
         decision = evaluate_teardown(
             state,
             emergency_budget=not done,
@@ -973,16 +1007,12 @@ class SessionRunner:
                 "stages that did not run do not exist and must not be demanded. "
                 "Evidence is collected under the reduced spec and the pod is "
                 "torn down."),
-            incomplete_event_streams=() if done
-            else art.event_streams(self.context()),
-            # The manifest's evidence about WHY quiescence failed, so the gate
-            # can tell a truncated stream from an artifact that was never
-            # written. A session declaring no streams and missing its one report
-            # is the second, and must not be asked to name streams it has none
-            # of. `None` when there is no manifest: no evidence, strict rule.
-            streams_at_risk=(
-                tuple(manifest.completion_marker_failures)
-                + tuple(manifest.still_being_written)) if manifest else None)
+            incomplete_event_streams=() if done else declared_streams,
+            # The evidence about WHY quiescence failed, so the gate can tell a
+            # truncated stream from an artifact that was never written. A
+            # session declaring no streams and missing its one report is the
+            # second, and must not be asked to name streams it has none of.
+            streams_at_risk=at_risk)
         self.ev["teardown_gate"] = decision.as_dict()
         self.ev["manifest_summary"] = (
             {"ok": manifest.ok, "entries": len(manifest.entries),
