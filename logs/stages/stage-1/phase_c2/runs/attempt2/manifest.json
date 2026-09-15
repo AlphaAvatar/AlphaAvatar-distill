@@ -1,0 +1,49 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c2",
+ "run_id": "attempt2",
+ "root": "phase_c2/runs/attempt2",
+ "artifact_spec": "phase_c2_session_v1",
+ "plan": {
+  "session_id": "autoinit-phase-c2-search1",
+  "plan_hash": "1dc14abf45ecb57c77934a19870eef9b0638a291be9e1501240f263c9a377241",
+  "session_commit": "3a0a3321385f26b62a4651f3d8844ffd28660514",
+  "bundle": "aad_autoinit_3a0a3321.bundle",
+  "scratch_root": "/home/ecs-user/aad-scratch/c2_attempt2",
+  "scratch_note": "the artifact archive, the extracted tree and every intermediate search state stay here; artifacts/manifest.json carries their hashes. Large artifacts are not moved into git"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_phase_c2_launch.py",
+  "driver": "scripts/pod/autoinit_phase_c2_driver.py",
+  "harness_source_digest": "5a466062aa27d863294e84e3d88954a73d83621dca9356a550f71d3025041d5a",
+  "authorization": "logs/stages/stage-1/phase_c2/runs/attempt2/governance/authorization.json"
+ },
+ "status": {
+  "passed": false,
+  "terminal": null,
+  "pod_id": "o1omuvih3yb13k",
+  "cost": {
+   "price_per_hour": 1.09,
+   "elapsed_minutes": 3.04,
+   "actual_usd": 0.0552,
+   "authorized_usd": 15.0446,
+   "within_authorization": true
+  },
+  "provider_confirms_gone": true,
+  "trains_anything": false,
+  "authorizes": "nothing"
+ },
+ "roles": {
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "grant": "governance/grant.json",
+  "launcher_log": "runtime/launcher.log",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json",
+  "watchdog_journal": "runtime/watchdog/"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "a035512777a324d5adabee0cda6f8bf0b71d5c0558559ca416ae46d922412825"
+}

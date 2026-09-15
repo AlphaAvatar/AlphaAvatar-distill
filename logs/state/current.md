@@ -9,25 +9,34 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing. No pod exists**, and no further C1
-attempt is authorized. Attempt 18's pod `ygtjrobs456cb5` was deleted after
+**Nothing is running. Nothing is billing. No pod exists**, no further C1
+attempt is authorized, and **nothing is prepared for launch** — attempt2's
+one-use chain is consumed. Attempt 18's pod `ygtjrobs456cb5` was deleted after
 collecting 164 artifacts, the provider confirms it is gone, and a live query
 returns `ZERO_PODS`.
 
-**One Phase-C2 Search-1 execution IS approved and being prepared as
-`attempt2`.** The maintainer approved it on 2026-09-16 after independent review
-of commit `2f14ad4`, at a `$15.0446` ceiling — never C1's `$15.1475` — on a
-price basis of L40S `securePrice <= $1.09/h`, with up to three host draws
-sharing that one ceiling. The grant is committed; the `launch_bound` sweep, the
-one-use authorization and the bundle are owed **in that order**. A grant is not
-an authorization, and neither is a launch.
+**Phase-C2 Search-1 `attempt2` LAUNCHED and ABORTED AT SETUP for `$0.0552`.**
+The maintainer approved it on 2026-09-16 after independent review of commit
+`2f14ad4`; the full chain was built and every link verified — grant `7e02b22`,
+launch-bound readiness `7df5d38` (23 passed, 0 skipped), authorization `3a0a332`
+at the `$15.0446` ceiling, bundle `aad_autoinit_3a0a3321` round-tripped from the
+relay. **All 8 `$0` pre-provider gates passed.** Pod `o1omuvih3yb13k` ran 3.04
+min at `$1.09/h` and setup then refused at the frozen-asset gate
+(`SETUP_RC=91`): C2 names no `SESSION_FROZEN_EXPECT`, and the shared setup
+script reads an unset variable as *"ask the verifier's compiled-in constants"*
+rather than as *"skip"* — so C2 inherited the pre-cutover C1 expectation and was
+asked for `artifacts/stage3/recovery_search_v2`, which it neither stages nor
+needs.
 
-The reviewed commit is recorded in the grant as human **provenance**, not as a
-machine-verified identity: the issuance HEAD is the clean tree after the
-readiness record is committed, so no grant field may be required to predict it.
-The seven verified identities are properties of the tree — executable closure
-and file count, plan hash, session-contract hash, pricing hash, B's spec hash
-and B's artifact digest.
+**No driver stage, no beam level, nothing measured.** The pod was deleted, the
+provider confirms it is gone, and an independent query re-confirmed
+`ZERO_PODS`. The one-use chain is **consumed**.
+
+**It STOPPED rather than being repaired and relaunched.** The fix needs a source
+and config change inside the C2 executable closure, which moves
+`c2_harness_digest` off the approved `5a466062…` and invalidates the approved
+identity, the readiness record and the authorization together. That is a new
+maintainer decision.
 
 **Attempt 1 is PRE-AUTHORIZATION SUPERSEDED**: `$0` spend, nothing launched, and
 its grant and pod-test-gate probe are preserved unrewritten as evidence. It is

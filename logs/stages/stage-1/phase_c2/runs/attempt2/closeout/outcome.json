@@ -1,0 +1,87 @@
+{
+ "schema": "aadistill.autoinit.c2_outcome/v1",
+ "_what_this_is": "what Phase-C2 Search-1 attempt 2 actually did, and what it means. Written after provider-confirmed teardown. AUTHORIZES NOTHING.",
+ "attempt": "attempt2",
+ "classification": "ABORTED AT SETUP \u2014 PRE-SCIENCE, NO MEASUREMENT",
+ "terminal_marker": null,
+ "setup_marker": "FROZEN_ASSETS_FAILED",
+ "setup_rc": 91,
+ "what_ran": {
+  "zero_dollar_gates": "8 of 8 PASSED: session commit/lineage, C2 executable closure re-derived independently, resource scope, storage, pricing identity, plan identity, run-owned launch_bound readiness, bundle round-trip",
+  "provider": "one resource created, draw 1 of the 3 permitted",
+  "setup_markers_reached": [
+   "ENV_READY",
+   "REPO_READY",
+   "ASSETS_STAGED",
+   "TRAIN_ENV"
+  ],
+  "setup_marker_refused": "ASSETS_READY (the frozen-asset gate)",
+  "driver": "NEVER STARTED. No stage, no bind_identities, no search."
+ },
+ "science": {
+  "beam_search_began": false,
+  "levels_expanded": 0,
+  "candidates_evaluated": 0,
+  "baseline_resolved": null,
+  "state_eval_measurements": 0,
+  "c2_baseline_comparison": null,
+  "search2_condition": "not evaluable; the search did not run",
+  "_meaning": "nothing scientific happened. This attempt produced no evidence about the Search-1 question, and it is neither a null result nor a partial one: the driver never started."
+ },
+ "root_cause": {
+  "failure": "the shared setup script's frozen-asset gate refused: artifacts/stage3/recovery_search_v2 absent, and the scoring contract read recovery_search_scoring@v3 where the verifier's compiled-in constants expect @v2.",
+  "why_it_ran_at_all": "the C2 session declares no SESSION_FROZEN_EXPECT. The setup script treats an unset variable as 'ask the historical question against the verifier's compiled-in constants', NOT as 'skip'. Those constants are the pre-cutover C1 set, so C2 inherited an expectation about assets it neither stages nor needs.",
+  "it_was_documented": "the script's own comment records that C1 attempt 10 died here for $0.1177 for exactly this reason, and that a session on the migrated tree must name its own expectation document. C1 does, at configs/experiments/phase_c1/frozen_assets.json. C2 never did.",
+  "class": "inherited contract, not inherited need: sharing proven machinery means satisfying what it REQUIRES, and the question that was never asked is what the shared script does when the variable is ABSENT.",
+  "not_a_science_failure": "the space, the plan, the pricing, the B identity contract and the readiness evidence were all verified and all correct. Eight gates passed. The refusal is about a staged-asset expectation."
+ },
+ "provider": {
+  "pod_id": "o1omuvih3yb13k",
+  "gpu": "NVIDIA L40S",
+  "quoted_price_per_hour": 1.09,
+  "price_basis_authorized": 1.09,
+  "stock_status": "Low",
+  "draws_used": 1,
+  "draws_permitted": 3,
+  "provider_resources_created": 1,
+  "elapsed_minutes": 3.04,
+  "deleted": true,
+  "provider_confirms_gone": true,
+  "independently_reconfirmed": "a separate read-only query returned ZERO_PODS and pod(o1omuvih3yb13k) = null after teardown"
+ },
+ "budget": {
+  "this_attempt": 0.0552,
+  "authorized_usd": 15.0446,
+  "within_authorization": true,
+  "project_cumulative_before": 290.5174,
+  "project_cumulative_after": 290.5726,
+  "project_cap": 320.0,
+  "project_remaining_after": 29.4274,
+  "_scope_note": "scripts/consolidate/derive_budget.py is scoped to FORMAL_EXPERIMENT = phase_c1 and therefore cannot see a C2 cost. The ledger is the authoritative figure; the state snapshot's budget.cumulative_spend_usd is C1-package-scoped and excludes this $0.0552 until that deriver is widened."
+ },
+ "chain": {
+  "grant_commit_G": "7e02b22a912e4619c1e6764a6b1dd7412656b348",
+  "readiness_commit_R": "7df5d384c9873418dd28fb0660625bc9f2b09a4f",
+  "authorization_session_commit_A": "3a0a3321385f26b62a4651f3d8844ffd28660514",
+  "grant_sha256": "ac17a0a4c56580f07894b852fe1591bbb16a3b4a4242ce5b5aed631880865d37",
+  "authorization_sha256": "2a50b11c51b057ded46b708fe9078791dbeba882ee734a2c2e4dfdb989047257",
+  "readiness_self_sha256_prefix": "a7e14aa1374d",
+  "bundle": "aad_autoinit_3a0a3321.bundle sha256 200bdf7f29c3eb045ba2e6ed973f9f7127546469ca0c2bb9e15faaee91ab2f66",
+  "c2_harness_digest": "5a466062aa27d863294e84e3d88954a73d83621dca9356a550f71d3025041d5a",
+  "consumed": "YES. one_use.consumed_when counts the launcher invocation, spend or no spend. No part of this chain is reused."
+ },
+ "why_this_stopped_rather_than_retried": "the repair needs a source and config change inside the C2 executable closure -- the launcher must name a C2 frozen-asset expectation document, and that document must exist. Either edit moves c2_harness_digest away from the maintainer-approved 5a466062..., which invalidates the approved identity, the launch_bound readiness record swept at G and the authorization issued at R. The maintainer's step 10 is explicit: a continuation requiring a source/config change, a new authorization or another formal launcher session means tear down, reconcile and STOP for review. Both conditions hold, so this attempt is closed.",
+ "what_a_repair_would_need": [
+  "a C2 frozen-asset expectation document naming what C2 actually stages, or an explicit declaration that C2 verifies no frozen assets",
+  "the C2 launcher to pass it as SESSION_FROZEN_EXPECT",
+  "a $0 regression proving the gate is satisfiable for a session that stages no recovery corpus -- the check that did not exist",
+  "a fresh maintainer grant against the new executable identity, a fresh launch_bound sweep, a fresh authorization and a fresh bundle"
+ ],
+ "not_done_deliberately": [
+  "no source, config or test was changed after the abort",
+  "no second launcher session",
+  "no reuse of the consumed chain",
+  "no Search-2, no behavioural confirmation, no C1 rerun"
+ ],
+ "authorizes": "nothing"
+}

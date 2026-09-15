@@ -2404,3 +2404,32 @@ upload refused for *"Private repository storage limit reached"*, 2.22 GiB each �
 and the relay stream copy of `c1_evidence.json` arrived corrupted while the
 store copy was intact. The first needs relay capacity, which is a resource
 decision. Both are written up in the closeout.
+
+## 2026-09-16 — C2 attempt 2: ABORTED AT SETUP, no science, `$0.0552`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| Phase-C2 Search-1 attempt 2: **8/8 `$0` pre-provider gates passed**, pod `o1omuvih3yb13k` at `$1.09/h` for 3.04 min. Setup reached `TRAIN_ENV` and then **refused at the frozen-asset gate**: `SETUP_RC=91`, `MARKER:FROZEN_ASSETS_FAILED`. **No driver stage, no beam level, nothing trained, nothing measured.** Pod deleted, provider confirms gone | `$0.0552` | [`runs/phase_c2/attempt2/`](../stages/stage-1/phase_c2/runs/attempt2/) |
+
+**Cumulative: `$290.5726` of the `$320.0000` cap.**
+
+```text
+project   290.5174 + 0.0552 = 290.5726   of 320.0000, leaving 29.4274
+```
+
+The C2 session declared no `SESSION_FROZEN_EXPECT`, and the shared setup script
+treats that as *"ask the historical question against the verifier's compiled-in
+constants"* rather than as *"skip"*. Those constants are the pre-cutover C1 set,
+so the gate demanded `artifacts/stage3/recovery_search_v2` — an asset C2 neither
+stages nor needs — and `recovery_search_scoring@v2`, while the migrated tree
+legitimately reads `@v3`. The script's own comment records that C1 attempt 10
+died here for `$0.1177` for exactly this reason and that C1 fixed it by naming
+its own expectation document.
+
+**The one-use chain is consumed** — `consumed_when` counts the launcher
+invocation, spend or no spend — so no part of it is reused. Repairing this needs
+a source and config change inside the C2 executable closure, which moves
+`c2_harness_digest` away from the approved `5a466062…` and therefore
+invalidates the approved identity, the launch-bound readiness record and the
+authorization. That is a new maintainer decision, so the attempt is torn down,
+reconciled and STOPPED for review rather than repaired and relaunched.
