@@ -95,6 +95,20 @@ from autoinit_science_inputs import CALIBRATION_V1, CANONICAL_INIT  # noqa: E402
 STATUS = f"{WS}/autoinit_phase_c2.status"
 RUN_LOG = f"{WS}/autoinit_phase_c2_run.log"
 
+#: What the pod's frozen-asset gate checks this tree against. C2 consumes
+#: exactly ONE frozen asset — `state_eval_v1`, the suite every candidate and the
+#: baseline are ranked on — and no scoring contract, so the document declares
+#: that subset and omits `scoring_contract` entirely.
+#:
+#: Attempt 2 declared nothing here. The shared setup script then asked the
+#: verifier its HISTORICAL question against compiled-in Phase-A/C1 constants,
+#: which demanded `artifacts/stage3/recovery_search_v2` — an asset C2 neither
+#: stages nor needs — and a scoring digest from a source set C2 does not
+#: execute. `SETUP_RC=91`, no driver stage, nothing measured, `$0.0552`. The
+#: script now refuses a session that declares `ASSETS_READY` without naming its
+#: own expectation, so the fallback that produced that abort is unreachable.
+FROZEN_EXPECT = "configs/experiments/phase_c2/frozen_assets.json"
+
 #: The audit root the driver writes into and the collector walks, named ONCE.
 #: `ArtifactPolicy` books it and `close_c2_run` looks inside the extracted
 #: archive under it; two spellings of this string is how Phase-B attempt 3 came
@@ -511,6 +525,71 @@ def c2_executable_gate(ctx: SessionContext) -> tuple[bool, str]:
                   f"{live['n_files']} derived files")
 
 
+def frozen_assets_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The expectation the pod's setup will check, verified here first, at $0.
+
+    Not defence in depth: it is the check whose absence cost attempt 2. The
+    shared setup script runs the verifier on the pod, after the checkout, the
+    staging and the training environment have all been paid for — so a document
+    that is missing, malformed, or simply wrong about a staged asset is
+    discovered at roughly `$0.05` and one consumed one-use chain. Run here, the
+    same verifier answers the same question for nothing.
+
+    It is honest about what it can and cannot see: `state_eval_v1` is staged as
+    a WHOLE TREE, so the bytes this checks are the bytes the pod gets. An
+    expectation naming something C2 stages at file granularity would need the
+    staging contract to say so, and this gate would then be checking a more
+    generous tree than the pod's.
+    """
+    import subprocess
+
+    rel = FROZEN_EXPECT
+    expect = REPO_ROOT / rel
+    if not expect.is_file():
+        return False, (f"{rel} is missing, and the setup script refuses a "
+                       "session that declares ASSETS_READY without one rather "
+                       "than falling back to another experiment's constants")
+    try:
+        doc = json.loads(expect.read_text())
+    except json.JSONDecodeError as exc:
+        return False, f"{rel} is not readable as JSON: {exc}"
+    assets = doc.get("assets")
+    if not isinstance(assets, dict) or not assets:
+        return False, (f"{rel} declares no assets; an empty expectation passes "
+                       "vacuously and would verify nothing")
+    for forbidden in ("recovery_search_v2", "recovery_search_v1"):
+        if forbidden in assets:
+            return False, (f"{rel} requires {forbidden}, which this session "
+                           "does not stage. That is the attempt-2 abort.")
+    if "scoring_contract" in doc:
+        return False, (f"{rel} declares a scoring_contract. C2 trains nothing "
+                       "and scores no battery; it consumes none.")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        done = subprocess.run(
+            #: The DEV-BOX interpreter: this is the $0 pre-provider check. The
+            #: pod runs the same script under /opt/train, which is where the
+            #: setup script invokes it.
+            [sys.executable, "scripts/autoinit/verify_frozen_assets.py",
+             "--expect", rel, "--out", f"{tmp}/frozen_check.json"],
+            cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
+            env={**os.environ, "PYTHONPATH": "src:scripts"})
+    if done.returncode != 0:
+        return False, (f"the frozen-asset expectation {rel} does not verify "
+                       f"against this tree: {(done.stdout + done.stderr)[-500:]}")
+    ctx.evidence["frozen_assets_expectation"] = {
+        "document": rel,
+        "assets": sorted(assets),
+        "scoring_contract_requested": False,
+        "verified_at_zero_cost": True,
+        "rule": ("the pod runs the same verifier with --expect on this "
+                 "document; a session declaring ASSETS_READY and naming no "
+                 "expectation is refused by the setup script"),
+    }
+    return True, (f"frozen-asset expectation {rel} verifies: "
+                  f"{sorted(assets)}, no scoring contract requested")
+
+
 def resource_scope_gate(ctx: SessionContext) -> tuple[bool, str]:
     """This run, and no more provider resources than the grant permitted.
 
@@ -796,7 +875,8 @@ def spec(args) -> SessionSpec:
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
                           "SESSION_ASSETS", "SESSION_RELAY_INPUTS",
-                          "SESSION_KIND", "TEACHER_REVISION"),
+                          "SESSION_KIND", "SESSION_FROZEN_EXPECT",
+                          "SESSION_SETUP_MARKERS", "TEACHER_REVISION"),
             setup_markers=("ENV_READY", "REPO_READY", "ASSETS_STAGED",
                            "TRAIN_ENV", "ASSETS_READY", "TEACHER_READY",
                            "ROPE_OK", "TESTS_OK", "AUTHORIZATION_OK",
@@ -808,7 +888,9 @@ def spec(args) -> SessionSpec:
             #: can SUCCEED while binding this session to another phase's file
             #: list and price. Phase-B attempt 2 proved that at $0.2300, a
             #: KeyError one step after the pod's test gate passed.
-            env={"SESSION_KIND": "c2"},
+            env={"SESSION_KIND": "c2",
+                 #: NAMED, not inherited. See FROZEN_EXPECT above.
+                 "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
             teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
         driver_command=driver_command,
@@ -859,6 +941,7 @@ def spec(args) -> SessionSpec:
                                 check_lineage=True),
             c2_executable_gate,
             resource_scope_gate,
+            frozen_assets_gate,
             storage_gate,
             pricing_identity_gate,
             plan_identity_gate,

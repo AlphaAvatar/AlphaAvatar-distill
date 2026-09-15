@@ -320,6 +320,36 @@ class SetupManifest:
     def assets_env(self) -> str:
         return ",".join(a.as_env_entry() for a in self.local_assets)
 
+    #: The setup steps every session's script produces whatever it declares:
+    #: the pod's environment, its checkout and the training interpreter. They
+    #: are the substrate the optional steps run ON, so they are not gated — but
+    #: a declaration that omits one would describe a setup nobody runs, and a
+    #: declaration that disagrees with reality is worse than none.
+    SUBSTRATE_MARKERS: ClassVar[tuple[str, ...]] = (
+        "ENV_READY", "REPO_READY", "TRAIN_ENV")
+
+    def setup_markers_env(self) -> str:
+        """`SESSION_SETUP_MARKERS`: the steps this session actually declared.
+
+        Read by the shared setup script through
+        `aadistill.runtime.setup_steps`, which is the one rule both sides use.
+
+        This declaration was read by NOTHING until 2026-09-16: the script ran
+        every section unconditionally and emitted the markers as it went, so a
+        session that omitted one got the step anyway — an environment it never
+        calls, and a frozen-asset question about assets it does not stage. A
+        paid session was lost to it; `docs/core-provenance.md` records which.
+        """
+        missing = [m for m in self.SUBSTRATE_MARKERS
+                   if m not in self.setup_markers]
+        if self.setup_markers and missing:
+            raise SessionSpecError(
+                f"the setup declaration omits {missing}, which the shared setup "
+                "script produces for every session. A declaration that does not "
+                "name the substrate describes a setup nobody runs; declare them "
+                "or do not declare markers at all.")
+        return " ".join(self.setup_markers)
+
     def test_ignores_env(self) -> str:
         return " ".join(f"--ignore={p}" for p in self.test_ignores)
 
@@ -780,6 +810,10 @@ class SessionSpec:
             "SESSION_ASSETS": self.setup.assets_env(),
             "SESSION_RELAY_INPUTS": self.setup.relay_env(),
             "SESSION_TEST_IGNORES": self.setup.test_ignores_env(),
+            #: The step-selection contract. The shell runs an optional section
+            #: only when this names its marker, so a session's declaration
+            #: DECIDES its setup rather than describing it afterwards.
+            "SESSION_SETUP_MARKERS": self.setup.setup_markers_env(),
             "UV_MAX_S": str(self.setup.uv_max_seconds),
             "TESTS_MAX_S": str(self.setup.tests_max_seconds),
         }
@@ -834,6 +868,10 @@ class SessionSpec:
                 "tests_max_seconds": self.setup.tests_max_seconds,
                 "teacher_revision": self.setup.teacher_revision,
                 "test_ignores": list(self.setup.test_ignores),
+                #: Serialized because it is now an execution contract: the
+                #: record of a run has to say which setup steps that run
+                #: declared, not only which markers it happened to emit.
+                "setup_markers": list(self.setup.setup_markers),
             },
             "n_prechecks": len(self.precheck),
             "teardown": {"always": self.teardown.always,

@@ -58,6 +58,49 @@ rm -rf "$REPO"; git clone -q "$WS/$BUNDLE_NAME" "$REPO"
 cd "$REPO"; git checkout -q "$SESSION_COMMIT"; git rev-parse HEAD
 mark REPO_READY
 
+# THE SESSION SAYS WHICH SETUP STEPS RUN.
+#
+# `SetupManifest.setup_markers` has been declared by every session since this
+# script existed and was read by NOTHING: the sections below ran
+# unconditionally and emitted the markers as they went, so the declaration
+# described what would happen instead of deciding it. A session that omitted a
+# marker got the step anyway.
+#
+# That cost a paid pod. Phase-C2 Search-1 declares no VLLM_READY -- it never
+# calls vLLM -- and the script installed the whole vLLM environment; it declared
+# no frozen-asset expectation, and the verifier was asked its HISTORICAL
+# question, which demands another experiment's recovery corpus. SETUP_RC=91, no
+# driver stage, nothing measured, $0.0552.
+#
+# The rule lives in `aadistill.runtime.setup_steps` -- one implementation, so
+# the thing that decides what a paid pod does is the thing a test can call. A
+# `case` statement here would be a second rule the moment either was edited.
+#
+# FAIL CLOSED, and the exit codes are how. `if cmd; then` reads every non-zero
+# status as false, so an unusable declaration read through `if` would silently
+# skip every optional step -- the defect, inverted and worse.
+#
+# 0 is declared, 3 is not declared, ANYTHING ELSE ABORTS. The codes skip 1 and 2
+# deliberately: a python that cannot run the module exits 1 with a traceback,
+# and runpy/argparse exit 2. With 1 meaning "not declared", a syntax error under
+# an old interpreter read as *skip this step* -- and it was measured doing
+# exactly that at $0 on an interpreter one minor version too old, which would
+# have silently skipped the frozen-asset gate, the test gate AND the
+# authorization check on a billing pod.
+step_declared() {
+  local rc=0
+  PYTHONPATH="$REPO/src" python3 -m aadistill.runtime.setup_steps "$1" || rc=$?
+  case "$rc" in
+    0) return 0 ;;
+    3) say "step $1 not declared by this session — skipping"; return 1 ;;
+    *) say "SETUP STEP DECLARATION UNUSABLE (rc=$rc) asking about $1 — this is"
+       say "NOT the same as 'not declared' and must never be read as a skip"
+       mark "SETUP_MARKERS_UNUSABLE"; exit 98 ;;
+  esac
+}
+: "${SESSION_SETUP_MARKERS:?the launcher must declare this session setup steps}"
+say "declared setup steps: $SESSION_SETUP_MARKERS"
+
 # THE SESSION SAYS WHICH SCIENCE INPUTS, and this script no longer knows their
 # names, their destinations or their hashes. Until 2026-08-18 the block below
 # was three literal `fetch(prefix, [names], dest)` calls, a directory walk that
@@ -308,6 +351,15 @@ mark TRAIN_ENV
 # reads `@v3` there, and `--expect` is the distinction the verifier already
 # carried for exactly this. C1 attempt 10 died here for $0.1177 because nothing
 # passed it -- SETUP_RC=91, no driver stage, no probe trained.
+# DECLARED, or not run at all. A session that does not declare ASSETS_READY
+# has no frozen assets to verify and must not be asked another experiment's
+# historical question -- which is the $0.0552 Phase-C2 abort, exactly.
+if step_declared ASSETS_READY; then
+# And a session that DOES declare it must name its own expectation. The
+# verifier's compiled-in constants are the pre-cutover Phase-A/C1 set, so
+# falling back to them is how a session inherits a requirement for assets it
+# neither stages nor needs. Explicit or refused; never inherited.
+: "${SESSION_FROZEN_EXPECT:?a session declaring ASSETS_READY must name its frozen-asset expectation document}"
 FROZEN_EXPECT_ARGS=""
 if [ -n "${SESSION_FROZEN_EXPECT:-}" ]; then
   if [ ! -f "$REPO/$SESSION_FROZEN_EXPECT" ]; then
@@ -333,8 +385,13 @@ if [ "$FROZEN_RC" -ne 0 ]; then
 fi
 echo "$FROZEN_OUT" | tail -5
 mark ASSETS_READY
+fi
 
 # --- the vLLM environment, offline and pinned ------------------------------
+# DECLARED, or not built. Phase-C2 Search-1 never calls vLLM: it measures
+# candidates with the training stack and generates nothing. It paid for this
+# whole environment anyway, because the section was unconditional.
+if step_declared VLLM_READY; then
 # This step hung for 76 minutes on 2026-08-14 and cost $1.37: `pip install vllm`
 # was UNPINNED and went to PyPI, on a host whose network had already failed
 # three cold draws. The train venv beside it installed offline in 11 seconds.
@@ -424,7 +481,9 @@ say "vllm offline install completed in $(( $(date -u +%s) - tv0 ))s"
 /opt/vllm/bin/python -c "import vllm, torch; \
   print('vllm', vllm.__version__, '| torch', torch.__version__, torch.cuda.is_available())"
 mark VLLM_READY
+fi
 
+if step_declared TEACHER_READY; then
 say "downloading the teacher at the pinned revision"
 python3 -c "
 import os
@@ -434,9 +493,21 @@ snapshot_download('Qwen/Qwen3-4B-Thinking-2507', revision=os.environ['TEACHER_RE
                   allow_patterns=['*.json','*.safetensors','*.jinja','*.txt'])
 "
 mark TEACHER_READY
+fi
 
-say "checking the RoPE base resolves in every venv"
-for PY in /opt/train/bin/python /opt/vllm/bin/python; do
+if step_declared ROPE_OK; then
+# EVERY VENV THIS SESSION BUILT, discovered rather than listed. This loop named
+# /opt/vllm unconditionally, so a session that legitimately declares no
+# VLLM_READY would have failed here on a missing interpreter -- the skipped step
+# breaking the next one. The check itself is unchanged and still runs in every
+# environment that exists.
+say "checking the RoPE base resolves in every venv this session built"
+VENVS=""
+for CAND in /opt/train/bin/python /opt/vllm/bin/python; do
+  [ -x "$CAND" ] && VENVS="$VENVS $CAND"
+done
+[ -n "$VENVS" ] || { say "NO INTERPRETER TO CHECK ROPE IN"; mark "ROPE_NO_VENV"; exit 94; }
+for PY in $VENVS; do
   $PY -c "
 import glob, sys, transformers
 sys.path.insert(0, '/workspace/aad/src')
@@ -455,7 +526,9 @@ for p in paths:
 "
 done
 mark ROPE_OK
+fi
 
+if step_declared TESTS_OK; then
 cpu_budget() {
   local q p n=""
   if [ -r /sys/fs/cgroup/cpu.max ]; then                    # cgroup v2
@@ -564,6 +637,7 @@ fi
 [ "$SUMMARY_RC" -eq 0 ] || { say "skip set differs from the launch-bound sweep"; exit 1; }
 say "test suite passed in ${tt}s on cpu set ${CPUS}"
 mark "TESTS_OK:${tt}s"
+fi
 
 # The authorization must be loadable and bound to the live plan BEFORE the
 # driver starts, so a tampered or stale artifact fails at $0.30 rather than
@@ -575,6 +649,7 @@ mark "TESTS_OK:${tt}s"
 # the preflight plan hash had moved under `pooled_counts@v2` and a historical
 # artifact no longer matched it. Re-issuing that artifact would only postpone
 # the same failure to the next time either plan moves.
+if step_declared AUTHORIZATION_OK; then
 : "${SESSION_AUTH_PATH:?the launcher must name the session authorization}"
 : "${SESSION_PLAN_HASH:?the launcher must name the session plan hash}"
 # Which artifact TYPE this session's authorization is. The default is the narrow
@@ -744,6 +819,7 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 fi
 mark AUTHORIZATION_OK
+fi
 
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
 mark SETUP_DONE

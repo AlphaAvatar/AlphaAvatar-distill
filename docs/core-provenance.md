@@ -499,6 +499,25 @@ experiment's copy into reusable infrastructure. The prose the core may not carry
     # Attempt 4's sweep used simulate_pod_env.sh's GENERIC default HIDDEN_PATHS,
 ```
 
+### `src/aadistill/runtime/setup_steps.py`
+
+Added 2026-09-16, with `SetupManifest.setup_markers_env` beside it, when the
+setup-step declaration became an execution contract. The prose the core may not
+carry:
+
+```text
+    Phase-C2 Search-1 attempt 2 declared no VLLM_READY -- it never calls vLLM --
+    and no frozen-asset expectation. The shared setup script installed the whole
+    vLLM environment anyway and asked the frozen-asset verifier its HISTORICAL
+    question, which demands artifacts/stage3/recovery_search_v2 and
+    recovery_search_scoring@v2. SETUP_RC=91, MARKER:FROZEN_ASSETS_FAILED, no
+    driver stage, nothing measured, $0.0552.
+
+    The script's own comment already recorded that C1 attempt 10 had died there
+    for $0.1177 for the same reason, and that a session on the migrated tree
+    must name its own expectation document. C1 did; C2 did not.
+```
+
 ### `src/aadistill/runtime/staging_contract.py`
 
 ```text

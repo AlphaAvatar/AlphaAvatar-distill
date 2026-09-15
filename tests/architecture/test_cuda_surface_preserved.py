@@ -248,6 +248,35 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "`aadistill.governance.closure` rather than restated, so the "
             "round-trip and the closure cannot drift apart.",
      }),
+    ("4de162ae11d9e4a3ed5f84a47c3d7215466c35e1",
+     "the setup declaration becomes an execution contract",
+     {
+        "src/aadistill/runtime/setup_steps.py":
+            "NEW FILE. The rule deciding which optional setup steps run: parse "
+            "the declaration, answer one question about it, and exit 0 / 1 / 2 "
+            "so a shell `if` cannot read an unusable declaration as permission "
+            "to skip everything. THIS IS A DECLARED SEMANTIC CHANGE by virtue "
+            "of being new executable core, and it is what makes "
+            "`SetupManifest.setup_markers` mean something: the field was "
+            "declared by every session and read by NOTHING, so the shared setup "
+            "script ran every section unconditionally and a session that "
+            "omitted a marker got the step anyway. It knows no experiment, "
+            "phase, model or step meaning -- the marker names are the session's "
+            "vocabulary, so a future stage declaring its own needs no edit "
+            "here.",
+        "src/aadistill/infrastructure/session.py":
+            "`SetupManifest.setup_markers_env()` and `SUBSTRATE_MARKERS`, plus "
+            "`SESSION_SETUP_MARKERS` in `setup_environment` and "
+            "`setup_markers` in the session record. THIS IS A DECLARED "
+            "SEMANTIC CHANGE to what reaches setup: the shell now runs an "
+            "optional section only when the declaration names its marker, so a "
+            "field that described what would happen now decides it. It is "
+            "inert for every session that declares the full set -- which every "
+            "session but the closed Phase-A launcher does, audited in "
+            "`tests/pod/test_phase_c2_setup_contract.py` -- and it REFUSES a "
+            "declaration that omits the substrate rather than silently "
+            "accepting a setup nobody runs.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.

@@ -455,7 +455,31 @@ still do with only its session record. Large search states stay in scratch —
 `artifacts/manifest.json` carries their hashes, and nothing copies a model
 directory into git to satisfy the layout.
 
-**Attempt 2 is APPROVED and being prepared.** The maintainer decision of
+**Attempt 2 ran and aborted at setup for `$0.0552` — a PRE-SCIENCE
+INFRASTRUCTURE ABORT with no measurement.** Eight `$0` gates passed and the pod
+reached `TRAIN_ENV`; then the shared setup script's frozen-asset gate refused,
+because C2 named no expectation and the script asks the verifier's compiled-in
+Phase-A/C1 constants when none is named. It demanded
+`artifacts/stage3/recovery_search_v2`, which C2 neither stages nor needs.
+
+**Repaired at the architecture, not the symptom.**
+`SetupManifest.setup_markers` had been declared by every session and read by
+nothing; it is now an execution contract. The runner exports it as
+`SESSION_SETUP_MARKERS`, the shell asks one shared rule
+(`aadistill.runtime.setup_steps`) per section, and an optional section runs only
+when the session declared its marker. So C2 no longer builds the vLLM
+environment it never calls, and a session declaring `ASSETS_READY` must name its
+own expectation — the fallback that produced the abort is unreachable. C2's
+expectation is `configs/experiments/phase_c2/frozen_assets.json`: exactly
+`state_eval_v1`, the suite every candidate and the baseline are ranked on, and
+no scoring contract, because C2 consumes none.
+
+**Attempt 3 is authorized** by the maintainer's campaign decision of
+2026-09-16: a `$16.20` repair/retry envelope measured from `$290.5174`,
+inclusive of attempt 2's `$0.0552`, with every formal launcher keeping the
+unchanged `$15.0446` ceiling and `<= $1.09/h` L40S basis.
+
+**Attempt 2 was APPROVED and prepared as follows.** The maintainer decision of
 2026-09-16, taken after independent review of commit `2f14ad4`, permits ONE
 Search-1 launcher session as `attempt2` at the `$15.0446` ceiling with up to
 three host draws sharing it. Its grant is committed at

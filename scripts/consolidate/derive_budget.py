@@ -130,8 +130,110 @@ def _outcome_paths(root: Path, entry: dict) -> list[Path]:
     return out
 
 
+def project_sessions(root: Path) -> list[dict]:
+    """EVERY recorded run with a stated cost, whatever experiment it belongs to.
+
+    `formal_sessions` above is scoped to the experiment whose package is being
+    booked, and that scope is correct for a package balance: an allowance is
+    spent only by the sessions it funds. It is wrong for the PROJECT balance,
+    and the omission was not theoretical — Phase-C2 attempt 2 spent `$0.0552`
+    and the project cumulative could not see it, because this module's only
+    session discovery filtered on `FORMAL_EXPERIMENT`.
+
+    Generic, and deliberately not a second experiment list: a new experiment
+    contributes to the project total the day it records a closeout cost, with no
+    edit here. That is the property the fix has to have — a phase name in a
+    conditional would have to be added again for Stage 2, Stage 3 and every
+    model family after them.
+    """
+    index = load(RUN_INDEX, root)
+    out: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    for entry in [*index.get("runs", []), *index.get("unrecorded", [])]:
+        key = (entry.get("experiment_id"), entry.get("run_id"))
+        if None in key or key in seen:
+            continue
+        seen.add(key)
+        rec = {"experiment_id": key[0], "run_id": key[1],
+               "cost_usd": None, "source": None}
+        for cand in _outcome_paths(root, entry):
+            if not cand.is_file():
+                continue
+            doc = json.loads(cand.read_text())
+            cost = (doc.get("budget") or {}).get("this_attempt")
+            if cost is None:
+                cost = (doc.get("cost") or {}).get("actual_usd")
+            if cost is not None:
+                rec["cost_usd"] = float(cost)
+                rec["source"] = str(cand.relative_to(root))
+                break
+        out.append(rec)
+    return out
+
+
+def project_balance(root: Path, pkg: dict, cap: float | None) -> dict:
+    """The PROJECT cumulative, across every experiment, from one stated anchor.
+
+    `anchor + every recorded closeout cost`. The anchor is the maintainer's
+    stated project total at the moment the current package opened, and every
+    run that predates it records no cost — so the sum is exactly the spend
+    since, with nothing double counted. That is an invariant rather than a
+    coincidence, so it is stated here and the runs that carry no cost are NAMED:
+    adding a cost to a pre-anchor closeout would break it, and this is where a
+    reader would look.
+
+    It is kept apart from the formal/engineering/package balances above on
+    purpose. Those are one experiment's execution package; this is the whole
+    project's cap. An unused package allowance does not become another
+    experiment's headroom, and nothing here transfers it.
+    """
+    #: From the MAINTAINER's own package decision, which states the project
+    #: total at the moment it opened. The renderer used to read this anchor off
+    #: the state snapshot, which is derived navigation: a figure computed from a
+    #: document that is itself rendered from the figure is self-consistent
+    #: whatever it says.
+    anchor = pkg.get("cumulative_spend_at_approval_usd")
+    if anchor is None or cap is None:
+        return {"unavailable": ("the package states no project anchor or cap, "
+                                "so a project cumulative cannot be derived")}
+    sessions = project_sessions(root)
+    priced = [s for s in sessions if s["cost_usd"] is not None]
+    unpriced = [f"{s['experiment_id']}/{s['run_id']}" for s in sessions
+                if s["cost_usd"] is None]
+    since = round(sum(s["cost_usd"] for s in priced), 4)
+    by_experiment: dict[str, float] = {}
+    for s in priced:
+        by_experiment[s["experiment_id"]] = round(
+            by_experiment.get(s["experiment_id"], 0.0) + s["cost_usd"], 4)
+    cumulative = round(float(anchor) + since, 4)
+    return {
+        "cap_usd": float(cap),
+        "anchor_usd": float(anchor),
+        "_anchor_is": ("the project total when the current package opened, "
+                       "stated by the maintainer and never back-computed"),
+        "spent_since_anchor_usd": since,
+        "cumulative_spend_usd": cumulative,
+        "remaining_usd": round(float(cap) - cumulative, 4),
+        "contributions_by_experiment": dict(sorted(by_experiment.items())),
+        "priced_sessions": len(priced),
+        "sessions_without_recorded_cost": unpriced,
+        "_invariant": ("every run predating the anchor records no closeout "
+                       "cost, so `anchor + all recorded costs` double counts "
+                       "nothing. Adding a cost to a pre-anchor closeout would "
+                       "break that, which is why the costless runs are named."),
+        "_not_a_permission": ("remaining project headroom is not authorization "
+                              "to spend it, and an unused package allowance "
+                              "does not transfer between experiments"),
+    }
+
+
 def derive(root: Path = REPO_ROOT) -> dict:
-    pkg = load(PACKAGE, root)["execution_package"]
+    config = load(PACKAGE, root)
+    pkg = config["execution_package"]
+    #: The PROJECT cap lives with the accepted pricing, not in the package: the
+    #: package is one experiment's allowance and the cap bounds everything ever
+    #: spent. Reading it from the wrong block is what returned "no project cap".
+    project_cap = (config.get("accepted_pricing") or {}).get("cumulative_cap_usd")
     formal_allow = float(pkg["formal_allowance_usd"])
     eng_allow = float(pkg["gpu_engineering_allowance_usd"])
     total = float(pkg["package_total_usd"])
@@ -189,7 +291,11 @@ def derive(root: Path = REPO_ROOT) -> dict:
         "package": {"allowance_usd": total,
                     "spent_usd": round(formal_spent + eng_spent, 4),
                     "remaining_usd": round(total - formal_spent - eng_spent, 4)},
-        "project": {"cap_usd": cap} if cap else {},
+        #: The PROJECT balance, generic across experiments. It was `{cap_usd}`
+        #: and nothing else, so the one number every document quotes as
+        #: "cumulative project spend" was maintained by hand in several places
+        #: and could not include a non-C1 session at all.
+        "project": project_balance(root, pkg, project_cap),
         "engineering_campaigns": campaigns,
         "pending_reconciliation": [c["campaign"] for c in unattributed],
         #: `None` when anything is unreconciled: an arithmetic summary computed

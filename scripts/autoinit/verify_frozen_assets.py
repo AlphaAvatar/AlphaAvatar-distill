@@ -117,16 +117,36 @@ def main() -> int:
     # preregistration" and "does this tree match its own current identity" are
     # different questions, and the initialization migration made their answers
     # differ. A caller that wants the second must say so; nothing infers it.
+    #: `scoring_contract` is OPTIONAL in an expectation document, and its
+    #: absence means "this session consumes no scoring contract" rather than
+    #: "check the historical one". Phase-C2 Search-1 trains nothing and scores
+    #: no battery: asking it about `recovery_search_scoring` demanded a digest
+    #: from a source set it does not execute, and the migrated tree legitimately
+    #: reads one version later than the compiled-in constant. That was half of a
+    #: paid abort. A document that omits the key is answered with "not
+    #: requested"; only a document that asks gets the check.
     if args.expect:
         supplied = json.loads(Path(args.expect).read_text())
         expected_assets = supplied["assets"]
-        expected_contract = supplied["scoring_contract"]["contract"]
-        expected_digest = supplied["scoring_contract"]["digest"]
+        contract_block = supplied.get("scoring_contract")
+        expected_contract = (contract_block or {}).get("contract")
+        expected_digest = (contract_block or {}).get("digest")
+        check_contract = contract_block is not None
+        if check_contract and not (expected_contract and expected_digest):
+            print(json.dumps({"passed": False, "problems": [
+                f"{args.expect} declares a scoring_contract block without both "
+                "`contract` and `digest`; a half-stated expectation cannot be "
+                "checked and is not a reason to skip the check"]}, indent=2))
+            return 1
         expected_from = f"the expectation document {args.expect}"
     else:
         expected_assets = FROZEN
         expected_contract = FROZEN_SCORING_CONTRACT
         expected_digest = FROZEN_SCORING_DIGEST
+        #: The historical default still checks it: every caller that relies on
+        #: the compiled-in constants relies on the contract too, and silently
+        #: dropping it would weaken a check no session asked to change.
+        check_contract = True
         expected_from = ("preregistered constants in this file, NOT from "
                          "the manifests on disk")
 
@@ -186,18 +206,32 @@ def main() -> int:
         }
         report["assets"][name] = entry
 
-    contract = recovery_scoring_contract(repo)
-    report["scoring_contract"] = {
-        "expected": expected_contract,
-        "expected_digest": expected_digest,
-        "observed": contract["contract"], "observed_digest": contract["digest"],
-        "match": (contract["contract"] == expected_contract
-                  and contract["digest"] == expected_digest),
-    }
-    if not report["scoring_contract"]["match"]:
-        report["problems"].append(
-            f"scoring contract is {contract['contract']} {contract['digest']}, "
-            f"expected {expected_contract} {expected_digest}")
+    if check_contract:
+        #: Computed only when asked. `recovery_scoring_contract` digests a
+        #: source set a session may not execute at all, so a session that
+        #: consumes no contract should not be made to import one to be told it
+        #: does not match.
+        contract = recovery_scoring_contract(repo)
+        report["scoring_contract"] = {
+            "expected": expected_contract,
+            "expected_digest": expected_digest,
+            "observed": contract["contract"],
+            "observed_digest": contract["digest"],
+            "match": (contract["contract"] == expected_contract
+                      and contract["digest"] == expected_digest),
+        }
+        if not report["scoring_contract"]["match"]:
+            report["problems"].append(
+                f"scoring contract is {contract['contract']} "
+                f"{contract['digest']}, expected {expected_contract} "
+                f"{expected_digest}")
+    else:
+        report["scoring_contract"] = {
+            "checked": False,
+            "why": ("the expectation document declares no scoring_contract, so "
+                    "this session consumes none. Absence is a declaration, not "
+                    "a fallback to the historical contract."),
+        }
 
     report["passed"] = not report["problems"]
     report["report_sha256"] = sha256_json(report)

@@ -817,11 +817,21 @@ def main() -> int:
         #: The anchor is stated in the snapshot rather than back-computed --
         #: back-computing it from the current total would make whatever the file
         #: happens to say self-consistent, including a wrong figure.
-        anchor = b.get("_project_spend_before_this_package_usd")
-        if anchor is not None:
-            b["cumulative_spend_usd"] = round(float(anchor) + spent, 4)
-            b["remaining_usd"] = round(b["authorized_cap_usd"]
-                                       - b["cumulative_spend_usd"], 4)
+        #: From the deriver's PROJECT block, which sums every recorded run's
+        #: closeout cost across every experiment. This used to be
+        #: `anchor + package_spent` -- the C1 package's tail -- so a Phase-C2
+        #: session that spent $0.0552 could not appear in the project total at
+        #: all, and the one number every document quotes was wrong by exactly
+        #: that. The anchor now comes from the maintainer's package decision
+        #: rather than from this snapshot, because a figure derived from the
+        #: document it renders is self-consistent whatever it says.
+        project = d.get("project") or {}
+        if "cumulative_spend_usd" in project:
+            b["cumulative_spend_usd"] = project["cumulative_spend_usd"]
+            b["remaining_usd"] = project["remaining_usd"]
+            #: The per-experiment breakdown stays in the DERIVER. The snapshot
+            #: is the minimal view and has a size guard; it carries the number,
+            #: and `derive_budget.py --json` carries how it was reached.
         b["_package_spent_usd"] = spent
         new_snapshot["budget"] = b
     snap_body = json.dumps(new_snapshot, indent=1) + "\n"

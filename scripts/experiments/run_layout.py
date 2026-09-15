@@ -569,13 +569,22 @@ def write_run_readmes(layout: RunLayout, *, experiment_id: str, run_id: str,
     canonical index is.
     """
     written: list[str] = []
-    where = f"stage-{stage_id}/" if stage_id else ""
+    #: THE ACTUAL LOCATION, through `rel_run_dir` — which exists to be the one
+    #: repo-relative formula for a run's directory, and whose own docstring
+    #: records the four call sites that each carried a copy of it.
+    #:
+    #: This was `f"logs/runs/{where}{experiment_id}/{run_id}/"`: a fifth copy,
+    #: and a stale one. The tree moved to
+    #: `logs/stages/stage-<id>/<experiment>/runs/<run>/` and every run README
+    #: kept pointing readers at `logs/runs/`, which does not exist. Phase-C2
+    #: attempt 2 shipped with that line. `layout.rel_root` is not it either —
+    #: that is stage-relative, so it would have named `phase_c2/runs/attempt2`.
+    where = rel_run_dir(experiment_id, run_id, stage_id)
     rows = "".join(f"| `{a}/` | {AREA_PURPOSE[a]} |\n" for a in AREAS)
     (layout.root / README_NAME).write_text(
         f"# {experiment_id} / {run_id}\n"
         f"\n"
-        f"One run of `{experiment_id}`, at "
-        f"`logs/runs/{where}{experiment_id}/{run_id}/`.\n"
+        f"One run of `{experiment_id}`, at `{where}/`.\n"
         f"\n"
         f"**Canonical index: `{MANIFEST_NAME}` in this directory.** It names "
         f"every role this run recorded, its status and its cost. Read it rather "

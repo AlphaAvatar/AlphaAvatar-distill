@@ -1,6 +1,6 @@
 # phase_c2 / attempt2
 
-One run of `phase_c2`, at `logs/runs/stage-1/phase_c2/attempt2/`.
+One run of `phase_c2`, at `logs/stages/stage-1/phase_c2/runs/attempt2/`.
 
 **Canonical index: `manifest.json` in this directory.** It names every role this run recorded, its status and its cost. Read it rather than this file for anything factual: this README describes the layout and is not evidence that the run executed, succeeded or was authorized.
 

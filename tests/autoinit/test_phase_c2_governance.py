@@ -894,6 +894,9 @@ def test_every_gate_runs_before_a_provider_resource_exists(launcher):
         "c2_executable_gate",
         #: The run identity and the provider-resource COUNT the grant stated.
         "resource_scope_gate",
+        #: The frozen-asset expectation the pod's setup will check, verified
+        #: here first: attempt 2 discovered it at SETUP_RC=91 for $0.0552.
+        "frozen_assets_gate",
         "storage_gate",
         "pricing_identity_gate",
         "plan_identity_gate",

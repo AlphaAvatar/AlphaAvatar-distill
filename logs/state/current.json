@@ -23,9 +23,9 @@
   "note": "attempt2 was APPROVED, fully chained and LAUNCHED on 2026-09-16, and ABORTED AT SETUP for $0.0552: 8/8 $0 gates passed, pod o1omuvih3yb13k ran 3.04 min, the frozen-asset gate refused (SETUP_RC=91) because C2 names no SESSION_FROZEN_EXPECT and the shared setup script then asks the verifier's compiled-in C1-era constants. NO driver stage, NO beam level, NOTHING measured. Pod deleted, provider confirms gone, re-confirmed ZERO_PODS. The one-use chain is CONSUMED. The repair needs a source+config change inside the C2 closure, which moves the approved identity -- so this STOPPED for maintainer review rather than being repaired and relaunched."
  },
  "budget": {
-  "cumulative_spend_usd": 290.5174,
+  "cumulative_spend_usd": 290.5726,
   "authorized_cap_usd": 320.0,
-  "remaining_usd": 29.4826,
+  "remaining_usd": 29.4274,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -34,8 +34,8 @@
   "full_ceiling_sessions_fundable": 1,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
   "_project_spend_before_this_package_usd": 267.8998,
-  "_anchor_note": "the project cap and the package are separate books: this is the project total when the package opened. Stated, never back-computed -- decisions.md 2026-09-13.",
-  "_limits_do_not_transfer": "formal, engineering, package and project bind SEPARATELY; the fundable count divides the FORMAL remainder. Shown with its arithmetic in logs/state/current.md.",
+  "_anchor_note": "the project total when the package opened. The project cumulative is derived from it plus every recorded closeout cost across all experiments; see derive_budget.py.",
+  "_limits_do_not_transfer": "formal, engineering, package and project bind SEPARATELY; see derive_budget.py.",
   "ledger": "logs/budget/ledger.md",
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
   "planning_floor_usd": 13.4401,
@@ -145,7 +145,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NONE. C1 is CLOSED by attempt 18's GO verdict and no further C1 execution is authorized. The relay c1_evidence.json corruption is REPAIRED (RelaySpec whole_file, commit 38d1354). Durable large-checkpoint capacity is an open MAINTAINER RESOURCE DECISION and does not block C2 Search-1, which trains no probes. C2 Search-1 is implemented and priced and NOT AUTHORIZED: it needs a grant, which is a maintainer decision.",
+ "blocker": "NONE BLOCKING. C1 is CLOSED by attempt 18's GO verdict. The attempt-2 setup defect is REPAIRED -- setup now follows the session's declared markers and C2 names its own frozen-asset expectation. Durable large-checkpoint capacity remains an open MAINTAINER RESOURCE DECISION and does not block Search-1, which trains nothing. attempt3 is authorized by the 2026-09-16 campaign decision and needs its own fresh chain.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
@@ -153,12 +153,13 @@
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
  "latest_run": {
-  "experiment_id": "phase_c1",
-  "run_id": "attempt18",
-  "root": "logs/stages/stage-1/phase_c1/runs/attempt18",
-  "state": "recorded: the run wrote its own manifest",
+  "experiment_id": "phase_c2",
+  "run_id": "attempt2",
+  "root": "logs/stages/stage-1/phase_c2/runs/attempt2",
+  "outcome": "recorded; PRE-SCIENCE INFRASTRUCTURE ABORT at setup, $0.0552, nothing measured",
   "index": "logs/index.json",
-  "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt18"
+  "last_executed": "logs/stages/stage-1/phase_c2/runs/attempt2",
+  "state": "recorded: the run wrote its own manifest"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",

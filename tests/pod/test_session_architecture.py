@@ -775,7 +775,10 @@ def test_each_real_session_manifest_stages_through_the_real_block(
 def extract_rope_block() -> str:
     """The `ROPE_OK` check body, verbatim from the shell script."""
     text = SETUP.read_text()
-    start = text.index('say "checking the RoPE base resolves in every venv"')
+    #: The anchor, not the body. The say line gained "this session built" when
+    #: the venv list stopped being hardcoded — a session that declares no
+    #: VLLM_READY has no /opt/vllm, and the loop used to name it unconditionally.
+    start = text.index('say "checking the RoPE base resolves in every venv')
     body = text[text.index('$PY -c "', start) + len('$PY -c "'):]
     body = body[:body.index('\n"\ndone')]
     assert "no staged checkpoint to check" in body and "stored_rope_base" in body

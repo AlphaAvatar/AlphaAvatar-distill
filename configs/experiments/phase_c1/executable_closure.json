@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 100,
- "digest": "fdb30e8860c04935a5d3a13a576605f950fa2cfbdca60606e2610c8ff7b153ea",
+ "digest": "f30fda3fa6543b3a7dc7431027ffe4d41bc7be140e6294a33431a36ce58b2aa6",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -74,8 +74,8 @@
   },
   {
    "path": "scripts/autoinit/verify_frozen_assets.py",
-   "sha256": "de7e160e5e87d16bdf8658e64ff25c53d36266a6ae3cd8de4cb4648d12abb68d",
-   "bytes": 11292
+   "sha256": "9223ffbc6abd4bcb6bc581a578dd40f4549aa1e0d49a925c4e26163db7b8cff6",
+   "bytes": 13328
   },
   {
    "path": "scripts/evaluation/uncapped_eval.py",
@@ -154,8 +154,8 @@
   },
   {
    "path": "scripts/experiments/run_layout.py",
-   "sha256": "77e42f67fb44aec7e8ba2fd49e475dd6d5f789bfdf1ed86d918c014fc0cd5d7d",
-   "bytes": 30490
+   "sha256": "1ddaed33f372c2a4c5026b9a0675c7dd38dec19fd48bc636f923dcfbaea4cf98",
+   "bytes": 31115
   },
   {
    "path": "scripts/experiments/source_sets.py",
@@ -179,8 +179,8 @@
   },
   {
    "path": "scripts/pod/autoinit_preflight_setup.sh",
-   "sha256": "240dafd33a7889b7d1f731e4c2cf06a5393df77fc5d784299cbe93d12daebf69",
-   "bytes": 41403
+   "sha256": "5b2732efb665ecc8f911e5df19c9a0c42d7bcab1a2b4dfd2c1803833e691b512",
+   "bytes": 45260
   },
   {
    "path": "scripts/pod/autoinit_science_inputs.py",
@@ -309,8 +309,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session.py",
-   "sha256": "f482438fe787b8086b2312485d87f73803541fcb9c19e5ae9968e842be9b29a5",
-   "bytes": 40993
+   "sha256": "2a8e23744bedd044b87c8533d11e9411f0d8d2b28b87c86f79d4ac8cb4680be3",
+   "bytes": 43236
   },
   {
    "path": "src/aadistill/infrastructure/session_prechecks.py",
