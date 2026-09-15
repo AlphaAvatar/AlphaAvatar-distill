@@ -1,0 +1,93 @@
+{
+ "schema": "aadistill.autoinit.c2_grant/v1",
+ "_what_this_is": "the maintainer decision permitting ONE Phase-C2 Search-1 launcher session -- attempt 3, the first formal retry after the attempt-2 pre-science infrastructure abort. An INPUT to the issuer, which independently re-derives every identity below and REFUSES on any disagreement. It authorizes nothing by itself: no pod, no authorization, no spend.",
+ "_where_this_lives": "logs/stages/stage-1/phase_c2/runs/attempt3/governance/grant.json. Attempt 1 (PRE-AUTHORIZATION SUPERSEDED) and attempt 2 (PRE-SCIENCE INFRASTRUCTURE ABORT, $0.0552) are historical and immutable; none of their governance artifacts is reused.",
+ "granted_for": "Phase C2 Search-1 -- ATTENTION-aware composition/order re-search, attempt 3",
+ "granted_by": "the MAINTAINER CAMPAIGN DECISION of 2026-09-16, which supersedes the earlier instruction to stop after an ordinary pre-science engineering failure and authorizes a fresh formal chain after the engineering repair without a further approval. Attempt 2's root cause -- the shared setup script executing requirements the session never declared -- is repaired at commit 3f5d537bc968cd2d511378581841617eec8e265e: SetupManifest.setup_markers is now an execution contract, and C2 names its own frozen-asset expectation. The reviewed basis for the campaign was commit 2f14ad44f48d1df7ce9bb4547343d95da806010a; commits are recorded here as HUMAN PROVENANCE and are deliberately not machine-verified identities, because the issuance HEAD is necessarily later than this document.",
+ "covers": "exactly ONE Phase-C2 Search-1 launcher session at a hard ceiling of $15.0446: one beam search over the frozen four-operator Search-1 space under SCHEDULE_V1 (beam width 6, one warmup level), ATTENTION fixed to attention.activation_importance_v1 and branched only across its two declared calibration profiles, DEPTH/FFN/RESIDUAL_WIDTH held at their accepted profiles, operator order free; plus, CONDITIONALLY, exactly one rebuild of the frozen C1 baseline B when the deterministic rule finds the beam did not re-derive it; plus the required c2_baseline_comparison.json B->C search-stage evidence. Nothing in the space, the schedule, the profiles, the B identity contract or the pricing semantics may move.",
+ "explicitly_not_authorized": [
+  "recovery training of any kind",
+  "recovery probes",
+  "any behavioural confirmation of B vs C",
+  "Search-2, conditional or otherwise",
+  "any C1 rerun, reseeding or battery change",
+  "attention.causal_kl_v1",
+  "an adaptive extra seed",
+  "a second formal Search-1 execution after the beam search has begun",
+  "any increase to the $15.0446 ceiling or the $16.20 campaign envelope"
+ ],
+ "one_use": {
+  "issuances_permitted": 1,
+  "launch_attempts_permitted": 1,
+  "provider_resources_permitted": 3,
+  "one_billing_resource_at_a_time": true,
+  "what_that_means": "this authorization funds ONE launcher session. Inside it the launcher may replace a host that never became usable, up to three provider resources in total, ALL sharing this session's single $15.0446 ceiling. The three are host draws inside one launcher session, NOT three scientific attempts. A create request that returns no provider resource id created nothing and is not a provider resource. The next resource is not created until the provider confirms the previous one is no longer billing.",
+  "machine_readable": "the four values above are copied into the authorization as C2ResourceScope and checked by resource_scope_gate before provider creation.",
+  "consumed_when": "the formal launcher is invoked under this authorization, whether or not a provider resource follows and whether or not any money is spent.",
+  "retry_rule": "under the 2026-09-16 campaign decision, an ordinary failure BEFORE the beam search or any scientific measurement begins is an engineering failure: preserve evidence, provider-confirmed teardown, reconcile spend, diagnose, minimal repair, fresh executable identity, fresh run identity and a complete fresh chain, and continue automatically -- but only while the next full $15.0446 ceiling still fits inside the $16.20 campaign envelope. Once the beam search has begun, NO automatic formal retry is authorized: preserve, tear down, reconcile and return."
+ },
+ "bound_identities_the_issuer_must_reproduce": {
+  "_rule": "stated as the maintainer's approval basis and RE-DERIVED by the issuer from the committed objects; it refuses on any disagreement. Exactly these seven and NO COMMIT IDENTITY: each is a property of the TREE rather than a point in its history. The harness digest DIFFERS from attempt 2's 5a466062... because the engineering repair changed the executable, which the campaign decision anticipates and permits.",
+  "_harness_changed_from": "5a466062aa27d863294e84e3d88954a73d83621dca9356a550f71d3025041d5a",
+  "c2_harness_digest": "aba90833620fd2cc1d6c57209ae1936ad014d00409d6a0e0faf97b4a8bb5acd3",
+  "c2_harness_n_files": 85,
+  "c2_plan_hash": "1dc14abf45ecb57c77934a19870eef9b0638a291be9e1501240f263c9a377241",
+  "c2_session_contract_hash": "8fa41faf620e23ecb274734e81e5efb1b20a5c20661b56e6dee758f2b13d6865",
+  "pricing_sha256": "8ae5072445254e226bb6c9e1ca2af70e46103da5d744d9828f47138fa5b079e3",
+  "baseline_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+  "baseline_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342"
+ },
+ "approved_money": {
+  "expected_usd": 7.1787,
+  "soft_stop_usd": 14.4996,
+  "hard_cap_usd": 15.0446,
+  "_ceiling_rule": "$15.0446 is the MAXIMUM authorization for this session and every provider resource inside it shares it. C1's $15.1475 is never substituted.",
+  "price_basis_usd_per_hour": 1.09,
+  "price_rule": "the live NVIDIA L40S securePrice must be re-queried immediately before provider creation. ABOVE $1.09/h the session STOPS at $0."
+ },
+ "approved_runtime_envelopes": {
+  "beam_search_minutes": 635.96,
+  "_beam_rule": "the DEPTH-early base plus beam_composition_risk and nothing else; it excludes the baseline rebuild reserve.",
+  "baseline_rebuild_reserve_minutes": 27.665,
+  "_baseline_rule": "conditional, on its own clock, started only if the deterministic rule establishes B is absent.",
+  "artifact_recovery_reserve_minutes": 30.0,
+  "_recovery_rule": "reachable by neither scientific path."
+ },
+ "campaign": {
+  "decision_utc": "2026-09-16",
+  "envelope_usd": 16.2,
+  "measured_from_project_spend_usd": 290.5174,
+  "absolute_project_ceiling_usd": 306.7174,
+  "spent_so_far_usd": 0.0552,
+  "_spent_so_far_is": "Phase-C2 attempt 2, the pre-science infrastructure abort. Included in the envelope, not additional.",
+  "remaining_envelope_usd": 16.1448,
+  "this_session_worst_case_usd": 15.0446,
+  "fits_before_launch": "0.0552 + 15.0446 = 15.0998 <= 16.2",
+  "engineering_allowance_usd": 0.25,
+  "engineering_spent_usd": 0.0,
+  "_engineering_note": "cumulative and INSIDE the $16.20, not additional to it. None was spent: the $0 validation answered the setup question completely and found two defects a GPU run would have found later and dearer, so a ceremonial setup-only validation was skipped."
+ },
+ "budget_context_at_approval": {
+  "cumulative_spend_usd": 290.5726,
+  "authorized_cap_usd": 320.0,
+  "remaining_usd": 29.4274,
+  "project_after_full_ceiling_usd": 305.6172,
+  "remaining_after_full_ceiling_usd": 14.3828,
+  "_source": "logs/budget/ledger.md and scripts/consolidate/derive_budget.py, whose project view is now generic across experiments",
+  "remaining_is_not_permission": true
+ },
+ "interpretation_discipline": "the Search-1 state_eval result is HYPOTHESIS-GENERATION evidence only. It is not behavioural recovery evidence and must not be described as a demonstrated student capability improvement. If B remains preferred the result is a constrained search-stage null under this space and this cheap metric; if a structurally different C is promising, its exact path, spec and artifact identity are frozen and it remains search-stage evidence. C1 remains closed and frozen.",
+ "stop_conditions": [
+  "live securePrice above $1.09/h -- stop at $0",
+  "any $0 pre-provider gate refuses -- stop at $0, diagnose, repair, fresh chain, continue automatically if the envelope still funds a full session",
+  "the remaining campaign envelope cannot fund another complete $15.0446 session -- STOP and report",
+  "the beam search has begun and anything fails -- preserve, provider-confirmed teardown, reconcile, report; NO automatic retry",
+  "a science, protocol, rate-boundary or budget change would be required -- STOP",
+  "Search-1 completes validly -- collect evidence, confirm zero billing resources, reconcile spend and return for scientific review"
+ ],
+ "authorizes": "nothing by itself; it is the input the issuer requires",
+ "run_id": "attempt3",
+ "stage_id": "1",
+ "recorded_utc": "2026-09-15T18:13:32+00:00",
+ "grant_sha256": "d637e206e473cf5b4554f2c8108353a1f1358ce2d81876483a58cc68e4b74e9b"
+}

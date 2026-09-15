@@ -15,32 +15,23 @@ one-use chain is consumed. Attempt 18's pod `ygtjrobs456cb5` was deleted after
 collecting 164 artifacts, the provider confirms it is gone, and a live query
 returns `ZERO_PODS`.
 
-**Phase-C2 Search-1 `attempt2` LAUNCHED and ABORTED AT SETUP for `$0.0552`.**
-The maintainer approved it on 2026-09-16 after independent review of commit
-`2f14ad4`; the full chain was built and every link verified — grant `7e02b22`,
-launch-bound readiness `7df5d38` (23 passed, 0 skipped), authorization `3a0a332`
-at the `$15.0446` ceiling, bundle `aad_autoinit_3a0a3321` round-tripped from the
-relay. **All 8 `$0` pre-provider gates passed.** Pod `o1omuvih3yb13k` ran 3.04
-min at `$1.09/h` and setup then refused at the frozen-asset gate
-(`SETUP_RC=91`): C2 names no `SESSION_FROZEN_EXPECT`, and the shared setup
-script reads an unset variable as *"ask the verifier's compiled-in constants"*
-rather than as *"skip"* — so C2 inherited the pre-cutover C1 expectation and was
-asked for `artifacts/stage3/recovery_search_v2`, which it neither stages nor
-needs.
+**Phase-C2 Search-1 `attempt3` is prepared.** Attempt 2 launched and aborted
+at setup for `$0.0552` — a **pre-science infrastructure abort**, with all 8 `$0`
+gates passed, no driver stage and nothing measured. Its root cause is repaired:
+`SetupManifest.setup_markers` is now an execution contract the shared setup
+script reads, so a session runs only the sections it declares, and C2 names its
+own frozen-asset expectation instead of inheriting Phase-A/C1 constants.
 
-**No driver stage, no beam level, nothing measured.** The pod was deleted, the
-provider confirms it is gone, and an independent query re-confirmed
-`ZERO_PODS`. The one-use chain is **consumed**.
+The **2026-09-16 maintainer campaign decision** authorizes fresh formal chains
+after an ordinary pre-science repair without a further approval, inside a
+`$16.20` envelope measured from `$290.5174` and *including* attempt 2's
+`$0.0552`. Every formal launcher keeps the unchanged `$15.0446` ceiling and the
+`<= $1.09/h` L40S basis, and a launch requires that a full ceiling still fit:
+`0.0552 + 15.0446 = 15.0998 <= 16.20`.
 
-**It STOPPED rather than being repaired and relaunched.** The fix needs a source
-and config change inside the C2 executable closure, which moves
-`c2_harness_digest` off the approved `5a466062…` and invalidates the approved
-identity, the readiness record and the authorization together. That is a new
-maintainer decision.
-
-**Attempt 1 is PRE-AUTHORIZATION SUPERSEDED**: `$0` spend, nothing launched, and
-its grant and pod-test-gate probe are preserved unrewritten as evidence. It is
-not reused.
+Attempt 3's grant is committed; the `launch_bound` sweep, the authorization and
+the bundle are owed **in that order**. Attempts 1 and 2 are historical and
+immutable, and none of their governance artifacts is reused.
 
 **C1 is COMPLETE.** Attempt 18 executed the whole frozen protocol — both replay
 gates, both arms, six probes trained, six evaluated on the frozen battery — and

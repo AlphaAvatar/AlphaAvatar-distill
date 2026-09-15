@@ -18,9 +18,14 @@
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
-  "any": false,
-  "last_attempt": "logs/stages/stage-1/phase_c2/runs/attempt2",
-  "note": "attempt2 was APPROVED, fully chained and LAUNCHED on 2026-09-16, and ABORTED AT SETUP for $0.0552: 8/8 $0 gates passed, pod o1omuvih3yb13k ran 3.04 min, the frozen-asset gate refused (SETUP_RC=91) because C2 names no SESSION_FROZEN_EXPECT and the shared setup script then asks the verifier's compiled-in C1-era constants. NO driver stage, NO beam level, NOTHING measured. Pod deleted, provider confirms gone, re-confirmed ZERO_PODS. The one-use chain is CONSUMED. The repair needs a source+config change inside the C2 closure, which moves the approved identity -- so this STOPPED for maintainer review rather than being repaired and relaunched."
+  "any": true,
+  "experiment": "phase_c2 Search-1, run attempt3",
+  "run": "logs/stages/stage-1/phase_c2/runs/attempt3",
+  "grant_committed": "governance/grant.json",
+  "readiness_record": null,
+  "authorization": null,
+  "bundle": null,
+  "note": "the 2026-09-16 MAINTAINER CAMPAIGN DECISION authorizes fresh formal chains after an engineering repair without a further approval, inside a $16.20 envelope measured from $290.5174 and INCLUDING attempt 2's $0.0552. Every launcher keeps the $15.0446 ceiling and the <= $1.09/h L40S basis; 0.0552 + 15.0446 = 15.0998 <= 16.20, so a full session still fits. The grant is committed; launch_bound sweep, authorization and bundle are owed IN THAT ORDER. attempts 1 and 2 are historical and not reused."
  },
  "budget": {
   "cumulative_spend_usd": 290.5726,
@@ -127,7 +132,7 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "NOT STARTED scientifically. attempt2 launched 2026-09-16 and ABORTED AT SETUP for $0.0552 with no measurement; its chain is consumed. attempt1 is PRE-AUTHORIZATION SUPERSEDED at $0. A repair needs a new maintainer decision against a new executable identity.",
+   "status": "NOT STARTED scientifically. attempt2 ABORTED AT SETUP for $0.0552 with no measurement and its root cause is REPAIRED; attempt3 is prepared under the 2026-09-16 campaign decision. attempt1 is PRE-AUTHORIZATION SUPERSEDED.",
    "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
    "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
@@ -154,12 +159,12 @@
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
  "latest_run": {
   "experiment_id": "phase_c2",
-  "run_id": "attempt2",
-  "root": "logs/stages/stage-1/phase_c2/runs/attempt2",
+  "run_id": "attempt3",
+  "root": "logs/stages/stage-1/phase_c2/runs/attempt3",
   "outcome": "recorded; PRE-SCIENCE INFRASTRUCTURE ABORT at setup, $0.0552, nothing measured",
   "index": "logs/index.json",
   "last_executed": "logs/stages/stage-1/phase_c2/runs/attempt2",
-  "state": "recorded: the run wrote its own manifest"
+  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
