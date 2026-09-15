@@ -1,10 +1,12 @@
 # Phase C2 — Search-1: ATTENTION-aware composition/order re-search
 
-**Status: IMPLEMENTED AND PRICED · NOT AUTHORIZED · NO COMPUTE · NOTHING IS
-PREPARED FOR LAUNCH.**
+**Status: IMPLEMENTED AND PRICED · `attempt2` APPROVED AND BEING PREPARED · NOT
+YET AUTHORIZED · NO COMPUTE YET.**
 
-This page is a plan and a price. It authorizes nothing, and a review verdict is
-not a spend authorization. The surrounding Phase-C structure is
+This page is a plan and a price. It authorizes nothing by itself, and a review
+verdict is not a spend authorization: the maintainer decision of 2026-09-16
+permits one Search-1 session as `attempt2`, and the grant, readiness record,
+authorization and bundle are the chain that follows it. The surrounding Phase-C structure is
 [`../../phase_c1/plans/phase_c_roadmap.md`](../../phase_c1/plans/phase_c_roadmap.md),
 which owns the C0/C1/C2 shape; this page owns C2 Search-1 only.
 
@@ -453,7 +455,15 @@ still do with only its session record. Large search states stay in scratch —
 `artifacts/manifest.json` carries their hashes, and nothing copies a model
 directory into git to satisfy the layout.
 
-**The mechanisms exist; the artifacts do not.** Since 2026-09-15 the repository
+**Attempt 2 is APPROVED and being prepared.** The maintainer decision of
+2026-09-16, taken after independent review of commit `2f14ad4`, permits ONE
+Search-1 launcher session as `attempt2` at the `$15.0446` ceiling with up to
+three host draws sharing it. Its grant is committed at
+`runs/attempt2/governance/grant.json` and states the seven verified identities;
+the `launch_bound` readiness record, the authorization and the bundle follow in
+that order. Attempt 1 remains superseded and is not reused.
+
+**The mechanisms exist; the instances follow the chain.** Since 2026-09-15 the repository
 carries the C2 CPU preflight (`tests/c2_preflight/`, 23 tests, the whole of what
 the paid pod runs), the derived executable closure a grant binds, the readiness
 contract, the authorization issuer and the bundle transport. What is

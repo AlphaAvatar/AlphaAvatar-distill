@@ -10,17 +10,28 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **Nothing is running. Nothing is billing. No pod exists**, and no further C1
-attempt is authorized. **Nothing is prepared for launch.** Attempt 18's pod
-`ygtjrobs456cb5` was deleted after collecting 164 artifacts, the provider
-confirms it is gone, and a live query returns `ZERO_PODS`.
+attempt is authorized. Attempt 18's pod `ygtjrobs456cb5` was deleted after
+collecting 164 artifacts, the provider confirms it is gone, and a live query
+returns `ZERO_PODS`.
 
-**Phase-C2 Search-1 attempt1 is PRE-AUTHORIZATION SUPERSEDED**: `$0` spend, no
-authorization, no provider resource, no scientific execution. The 2026-09-15
-approval bound commit `7d0a35a` and the 18-file harness *declaration* that was
-current then; the C2 executable identity is now a **derived closure**, so the
-issuer re-derives that grant's identities and refuses it. Its grant and its
-pod-test-gate probe are preserved unrewritten as evidence. A fresh maintainer
-grant is required, and a grant is not an authorization.
+**One Phase-C2 Search-1 execution IS approved and being prepared as
+`attempt2`.** The maintainer approved it on 2026-09-16 after independent review
+of commit `2f14ad4`, at a `$15.0446` ceiling — never C1's `$15.1475` — on a
+price basis of L40S `securePrice <= $1.09/h`, with up to three host draws
+sharing that one ceiling. The grant is committed; the `launch_bound` sweep, the
+one-use authorization and the bundle are owed **in that order**. A grant is not
+an authorization, and neither is a launch.
+
+The reviewed commit is recorded in the grant as human **provenance**, not as a
+machine-verified identity: the issuance HEAD is the clean tree after the
+readiness record is committed, so no grant field may be required to predict it.
+The seven verified identities are properties of the tree — executable closure
+and file count, plan hash, session-contract hash, pricing hash, B's spec hash
+and B's artifact digest.
+
+**Attempt 1 is PRE-AUTHORIZATION SUPERSEDED**: `$0` spend, nothing launched, and
+its grant and pod-test-gate probe are preserved unrewritten as evidence. It is
+not reused.
 
 **C1 is COMPLETE.** Attempt 18 executed the whole frozen protocol — both replay
 gates, both arms, six probes trained, six evaluated on the frozen battery — and
