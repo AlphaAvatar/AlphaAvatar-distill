@@ -177,18 +177,26 @@ def test_the_launcher_and_the_driver_agree_on_every_flag(session, driver):
 
     assert parsed.stage == "all" and parsed.device == "cuda"
     assert parsed.authorization_path == spec.authorization_path
-    #: The two minute figures are DIFFERENT numbers with different jobs: the
-    #: base allowance funds the affordability check, and the deadline that
-    #: actually bounds the search is the base plus the soft-stop reserves. One
-    #: number for both would let the affordability check approve work the
-    #: deadline then kills.
+    #: The BEAM's envelope, twice, and the baseline's separately.
+    #:
+    #: This asserted `search_minutes == base` and `deadline == base + EVERY
+    #: reserve` until 2026-09-15. Both were wrong, in opposite directions: the
+    #: affordability check approved the beam against its expected 300.16-minute
+    #: trajectory while its own deadline permitted 663.6, and that deadline
+    #: included the 27.665 minutes the accounting holds for a missing-B rebuild.
+    #: The partition is now enforced, so the two beam figures coincide by
+    #: construction and the rebuild has its own flag.
     base = next(p.minutes for p in plan.breakdown
                 if p.name == "beam_search_depth_early")
-    reserves = sum(r.minutes for r in plan.soft_stop_reserves)
-    assert parsed.search_minutes == pytest.approx(base, abs=0.05)
-    assert parsed.search_deadline_minutes == pytest.approx(base + reserves,
-                                                           abs=0.05)
-    assert parsed.search_deadline_minutes > parsed.search_minutes
+    risk = next(r.minutes for r in plan.soft_stop_reserves
+                if r.name == "beam_composition_risk")
+    rebuild = next(r.minutes for r in plan.soft_stop_reserves
+                   if r.name == "baseline_rebuild_reserve")
+    assert parsed.search_deadline_minutes == pytest.approx(base + risk, abs=0.05)
+    assert parsed.search_minutes == pytest.approx(
+        parsed.search_deadline_minutes, abs=0.05)
+    assert parsed.search_deadline_minutes < base + risk + rebuild
+    assert parsed.baseline_rebuild_minutes == pytest.approx(rebuild, abs=1e-6)
     #: And the driver is never told it may spend more than the plan allows.
     assert parsed.authorized_usd <= plan.hard_terminate_usd + 1e-9
     assert parsed.soft_stop_usd <= plan.soft_stop_usd + 1e-9
@@ -331,6 +339,54 @@ def test_the_driver_searches_exactly_the_accepted_space(driver):
         assert literal not in body, (
             f"the driver hardcodes {literal!r}; the space belongs to "
             "experiments.phase_c2.search_space")
+
+
+def test_the_harness_set_names_every_file_the_session_executes(registered):
+    """A new executable in the session's path that the set does not name means a
+    grant would certify different code.
+
+    `comparison.py` decides what the run's baseline evidence IS and is the only
+    place a rebuilt B's metric becomes durable, so its bytes are executable by
+    consequence — the same reason the artifact specs are in the set.
+    """
+    from pathlib import Path as _P
+
+    from experiments.phase_c2.session import (
+        C2_HARNESS_SOURCE_FILES_V1, c2_harness_digest,
+    )
+
+    for declared in C2_HARNESS_SOURCE_FILES_V1:
+        assert (REPO / declared).is_file(), declared
+    digested = {e["path"] for e in c2_harness_digest(REPO)["files"]}
+    assert digested == set(C2_HARNESS_SOURCE_FILES_V1), (
+        "the declared constant and the digested set disagree")
+
+    #: Every module the driver and launcher import from the experiment layer.
+    for required in ("scripts/experiments/phase_c2/comparison.py",
+                     "scripts/experiments/phase_c2/baseline.py",
+                     "scripts/experiments/phase_c2/search_space.py",
+                     "configs/autoinit/c2_artifacts.json",
+                     "configs/autoinit/c2_artifacts_failed.json"):
+        assert required in digested, f"{required} is not measured by the grant"
+
+
+def test_the_comparison_is_written_after_the_search_and_never_over_it(driver):
+    """Order, from the source: the comparison cannot precede what it compares.
+
+    And it must land in the audit root the collector walks, not in the search
+    workdir beside the beam's own ranking.
+    """
+    body = DRIVER.read_text()
+    search = body.index("found = run_phase_a_search(")
+    resolve = body.index("C.resolve_baseline_state(")
+    commit = body.index("C.commit(comparison")
+    record = body.index('self.record("search_and_baseline"')
+    assert search < resolve < commit < record, (
+        "the comparison is built or committed out of order")
+    #: Committed to AUDIT, which the artifact spec collects.
+    assert "C.commit(comparison, AUDIT)" in body
+    assert "stage1_selection" not in body[commit:record].replace(
+        "selection_record", "")
 
 
 def test_the_plan_hash_binds_the_space_and_moves_with_it(registered):

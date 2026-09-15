@@ -223,7 +223,14 @@ def make_fallback(tmp_path, monkeypatch, *, steps=None, calls=None):
         return steps if steps is not None else [real_shaped_step()]
 
     monkeypatch.setattr(B, "materialize_fixed_path", fake_materialize)
+    #: `rebuild_minutes` and `afford` are required: the rebuild runs on its OWN
+    #: allowance, checked against the soft stop immediately before
+    #: materialization, and on a clock it builds itself. Accepting a
+    #: pre-constructed `Deadline` would leak the beam's, which after a
+    #: full-envelope search has nothing left. See
+    #: `tests/pod/test_phase_c2_reserve_partition.py`.
     return B.BaselineFallback(adapter=object(), workdir=tmp_path,
+                              rebuild_minutes=27.665, afford=lambda *_: None,
                               repo_root=REPO, device="cuda",
                               say=lambda *_: None)
 

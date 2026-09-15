@@ -288,14 +288,34 @@ class BaselineFallback:
 
     adapter: Any
     workdir: Path
+    #: The rebuild's OWN allowance, in minutes, and the only clock it runs on.
+    #:
+    #: It is a NUMBER and not a `Deadline`, deliberately. A `Deadline` starts
+    #: counting the moment it is constructed, so accepting one here would make
+    #: the rebuild inherit a clock that started before the beam did — and by the
+    #: time the rebuild is reached the beam may have spent all of it. The
+    #: pricing record separates `beam_composition_risk` from
+    #: `baseline_rebuild_reserve` for exactly that reason; a shared clock would
+    #: let the beam consume a reserve the accounting says is not its to spend.
+    #:
+    #: The `Deadline` is built inside `rebuild()`, which is the first moment the
+    #: deterministic rule has established that a rebuild is needed at all.
+    rebuild_minutes: float
+    #: `(minutes, what) -> None`, raising if starting that work would cross the
+    #: soft stop. Checked INDEPENDENTLY of the beam's own check, immediately
+    #: before materialization: the beam's affordability was decided against a
+    #: different envelope and hours earlier.
+    afford: Any
     repo_root: Path = REPO_ROOT
     calibration_items: Any = None
     device: str = "cuda"
-    deadline: Any = None
     say: Any = print
     #: Set once the hook has run. A second invocation is a caller defect, not a
     #: reason to rebuild again.
     outcome: dict[str, Any] | None = field(default=None, init=False)
+    #: The clock the rebuild actually ran on, kept for the evidence. `None`
+    #: until `rebuild()` creates it, which is what a test asserts.
+    rebuild_deadline: Any = field(default=None, init=False)
 
     def __call__(self, result: Any, root_loader: Any) -> list[dict[str, Any]]:
         """`conditional_candidates`: `(SearchResult, root_loader) -> entries`.
@@ -336,10 +356,25 @@ class BaselineFallback:
 
     # -- the rebuild ------------------------------------------------------
     def rebuild(self, root_loader: Any) -> dict[str, Any]:
+        from aadistill.initialization.planning.search import Deadline
+
         spec = frozen_baseline_spec(device=self.device)
         construction = assert_frozen_construction(spec)
         self.say(f"  frozen construction verified: {spec.spec_hash[:12]}… "
                  f"== {B_SPEC_HASH[:12]}…")
+
+        #: Its own affordability check, against the CURRENT spend rather than
+        #: the projection the beam was approved on hours ago. The beam may have
+        #: run to its full envelope; whether the rebuild still fits is a
+        #: different question with a different answer.
+        self.afford(self.rebuild_minutes, "the baseline rebuild")
+
+        #: And its own clock, STARTED HERE. This is the first moment the
+        #: deterministic rule has established that B is absent, which is the
+        #: earliest point at which the reserve is the rebuild's to spend.
+        self.rebuild_deadline = Deadline.from_minutes(self.rebuild_minutes)
+        self.say(f"  baseline rebuild allowance: {self.rebuild_minutes:.2f} min, "
+                 "clock starts now")
 
         #: The output digest is PINNED for the rebuild, which C1 could not do:
         #: attempt 18 was this operator's first run and had no prior digest. Now
@@ -358,7 +393,8 @@ class BaselineFallback:
         steps = materialize_fixed_path(
             pinned, adapter=self.adapter, root_loader=root_loader,
             workdir=out, repo_root=self.repo_root,
-            calibration_items=self.calibration_items, deadline=self.deadline,
+            calibration_items=self.calibration_items,
+            deadline=self.rebuild_deadline,
             on_step=lambda r: self.say(
                 f"    step {r.index} {r.impl_id}: {r.seconds:.1f}s "
                 f"{r.identity.artifact_digest[:12]}…"))
@@ -404,6 +440,15 @@ class BaselineFallback:
             },
             "steps": [s.as_dict() for s in steps],
             "checkpoint_dir": str(directory),
+            "allowance": {
+                "reserve": "baseline_rebuild_reserve",
+                "minutes": self.rebuild_minutes,
+                "clock": self.rebuild_deadline.as_dict(),
+                "_independent_of_the_beam": (
+                    "started when the rebuild began, not when the session did. "
+                    "The beam ran on base + beam_composition_risk and could "
+                    "not spend any of this."),
+            },
         }
         self.say(f"  baseline B: REBUILT and proven — artifact "
                  f"{artifact.artifact_digest[:12]}…, weights "

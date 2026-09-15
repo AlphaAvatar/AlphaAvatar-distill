@@ -132,6 +132,23 @@ set. `BaselineFallback` is single-shot and refuses a second invocation.
 | the shared prefix | `eea90c91…`, the pin the frozen prefix already carries and C1 replayed three times | inside `materialize_fixed_path` |
 | the output | `artifact_digest == 53e30566…` — weights **and** config **and** arch signature **and** tokenizer **and** index | the final step's pin, then again at injection |
 
+**And B's metric survives teardown in either branch.** The beam ranking is
+committed before the baseline resolves — correctly, it must not wait on anything
+— but the generic search summary serializes an imported candidate as identity
+and provenance only. So a run could rebuild B, measure it on the frozen suite,
+and lose the one number the question is asked against. The comparison is
+therefore its own required artifact,
+`audit/autoinit_phase_c2/c2_baseline_comparison.json`, written after both and
+**normalized to one schema**: a searched B's evaluation comes from the matching
+complete beam leaf, a rebuilt B's from the evaluated retained state the fallback
+produced. It carries both sides' complete `state_eval` output, the suite hash,
+the policy identity and epsilon, and a verdict *computed* from the fronts the
+run's own `PARETO_V1` assigns to `{B} ∪ selected C`. A B the beam also selected
+is excluded rather than compared with itself. It cites
+`stage1_selection.json` and never rewrites it: inserting a state the beam did
+not generate would make the search's own record describe a candidate set it
+never produced.
+
 All three fail closed. On a mismatch the digest is **decomposed**, because "the
 digest differs" is not a diagnosis: different `weights_digest` is a scientific
 finding about determinism or an operator, a different `config_sha256` with
@@ -213,6 +230,19 @@ into the hash-verified
 | + `baseline_rebuild_reserve` — one B rebuild | 27.7 | `$0.5026` | **YES** |
 | + `artifact_recovery_reserve` — teardown and collection | 30.0 | `$0.5450` | no |
 | **hard planning ceiling** | **828.1** | **`$15.0446`** | |
+
+**The partition is enforced at runtime, not only in the accounting.** The beam's
+deadline is the DEPTH-early base plus `beam_composition_risk` and nothing else —
+**635.96 min**, which is exactly the space model's structural bound — and the
+affordability check taken before the beam starts protects that whole envelope
+rather than the 300.16-minute expectation. `baseline_rebuild_reserve` is a
+separate **27.665-minute** allowance on its own clock, started only when the
+deterministic rule finds B absent, with its own soft-stop check immediately
+before materialization. Until this repair the beam was handed `base + every
+reserve`, so it could consume the minutes held for a missing-B rebuild. The
+30-minute artifact-recovery reserve is reachable by neither: `afford()` refuses
+work that would cross the soft stop. None of this moves the ceiling — it is a
+partition repair, and it adds no work.
 
 The two reserves land **after** the contingency multiplier and **before** the
 soft stop, which is what makes them protect the work: a reserve added as a phase
@@ -379,6 +409,7 @@ evidence contract, an authorization *type* and a derived budget:
 | the space | [`scripts/experiments/phase_c2/search_space.py`](../../../../../scripts/experiments/phase_c2/search_space.py) |
 | the baseline rule | [`scripts/experiments/phase_c2/baseline.py`](../../../../../scripts/experiments/phase_c2/baseline.py) |
 | plan, authorization type, budget | [`scripts/experiments/phase_c2/session.py`](../../../../../scripts/experiments/phase_c2/session.py) |
+| the B→C comparison | [`scripts/experiments/phase_c2/comparison.py`](../../../../../scripts/experiments/phase_c2/comparison.py) |
 | the evidence contract | `configs/autoinit/c2_artifacts.json` and `…_failed.json` |
 | the price | [`phase_c2_pricing.json`](phase_c2_pricing.json), from `scripts/autoinit/price_c2.py` |
 

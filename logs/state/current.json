@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-16T00:00:00Z",
+ "generated_utc": "2026-09-15T08:56:04Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -72,8 +72,6 @@
   "launch_bound_ready": false,
   "launch_bound_failures": 1,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json",
-  "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
-  "last_paid_attempt_owned_by": "logs/stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json",
   "_three_separate_facts": "what the latest sweep OBSERVED, whether a launch-bound record describes the CURRENT tree, and that an earlier launch-bound sweep failed. STATE.md collapsed them into one line and was wrong about all three at once."
  },
  "abandoned": [
@@ -94,7 +92,7 @@
   "phase_a": "COMPLETE / FROZEN",
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
-  "phase_c1": "IMPLEMENTED / NOT AUTHORIZED -- status owned by phase_c.c1",
+  "phase_c1": "COMPLETE / CLOSED by the attempt-18 GO verdict -- status owned by phase_c.c1",
   "phase_c2": "SEARCH-1 IMPLEMENTED AND PRICED -- NOT AUTHORIZED -- owned by phase_c.c2",
   "formal_recovery_evidence": "NONE"
  },
@@ -113,8 +111,7 @@
   "clears_by": 7e-05,
   "read_with_care": "clears by 0.000070 -- ~3.6% of ONE correct sample, ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
   "not_capability": "SELECTION evidence under a fixed 0.86M probe. 16 correct of 510.",
-  "authorizes": "nothing",
-  "owner": "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt5.json -- metrics and margin live THERE"
+  "authorizes": "nothing"
  },
  "phase_c": {
   "c0": {
@@ -125,7 +122,6 @@
   },
   "c1": {
    "status": "COMPLETE. Eighteen attempts, fifteen paid. Replay MEASURED 2-of-2 three times; treatment and endpoint measured ONCE and the frozen Stage-I verdict is GO -- read the decision record, not this line.",
-   "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS (attempts 9, 17, 18). treatment + endpoint: MEASURED ONCE, by attempt 18, verdict GO -- read logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json, which owns every figure and states its own claim boundary. Attempt 9 is still NO DECISION after a pre-treatment infrastructure abort, and so is attempt 17.",
    "not_built": "attempt 18's six probes were NOT preserved (private storage quota, 2.22 GiB each). Rebuilding the pre-ATTENTION parent needs GPU/network.",
@@ -143,7 +139,9 @@
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
    "executes": "scripts/pod/autoinit_phase_c2_launch.py -> autoinit_phase_c2_driver.py; two stages, trains nothing",
    "priced": "41-53 expansions; expected $7.1787, ceiling $15.0446 at L40S securePrice $1.09/h, INCLUDING a named conditional baseline_rebuild_reserve of 27.665 min ($0.5026). Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json. Priced is NOT funded: C2 needs its own grant, and neither project headroom nor C1's unused allowance is permission.",
-   "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both -- the identities collide by construction."
+   "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both -- the identities collide by construction.",
+   "baseline_evidence": "audit/autoinit_phase_c2/c2_baseline_comparison.json, REQUIRED by the success artifact spec. Both branches write one schema, so a REBUILT B's state_eval result cannot be lost at teardown. It cites the beam's stage1_selection.json and never rewrites it.",
+   "runtime_partition": "beam deadline = DEPTH-early base + beam_composition_risk = 635.96 min; baseline_rebuild_reserve = 27.665 min on its own clock, started only when the rule finds B absent; 30 min artifact recovery reachable by neither."
   }
  },
  "storage": {
@@ -151,12 +149,10 @@
   "roots": {
    "git": "/home/ecs-user/AlphaAvatar-distill",
    "artifacts": "/home/ecs-user/aad-artifacts"
-  },
-  "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1"
+  }
  },
  "blocker": "NONE. C1 is CLOSED by attempt 18's GO verdict and no further C1 execution is authorized. The relay c1_evidence.json corruption is REPAIRED (RelaySpec whole_file, commit 38d1354). Durable large-checkpoint capacity is an open MAINTAINER RESOURCE DECISION and does not block C2 Search-1, which trains no probes. C2 Search-1 is implemented and priced and NOT AUTHORIZED: it needs a grant, which is a maintainer decision.",
  "deferred_not_blocking": {
-  "_note": "open, none blocking. Detail: logs/state/current.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
  },

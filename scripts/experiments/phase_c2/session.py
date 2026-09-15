@@ -72,6 +72,12 @@ C2_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     "scripts/experiments/phase_c2/__init__.py",
     "scripts/experiments/phase_c2/search_space.py",
     "scripts/experiments/phase_c2/baseline.py",
+    #: The B->C comparison. It decides what the run's baseline evidence IS, and
+    #: it is the only place a REBUILT baseline's state_eval result becomes
+    #: durable — so its bytes decide whether the session can answer its own
+    #: question after teardown. Configuration by file type, executable by
+    #: consequence, exactly like the artifact specs below.
+    "scripts/experiments/phase_c2/comparison.py",
     "scripts/experiments/phase_c2/session.py",
     # the search seam the driver calls, and the frozen identities it resolves
     "scripts/autoinit/phase_a_search.py",

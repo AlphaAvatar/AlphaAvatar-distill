@@ -57,7 +57,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, ExecutionCommands, LocalAsset, MarkerPolicy,
-    SessionContext, SessionSpec, SetupManifest, TeardownPolicy,
+    SessionContext, SessionSpec, SessionSpecError, SetupManifest,
+    TeardownPolicy,
 )
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
@@ -167,19 +168,49 @@ def plan_identity_gate(ctx: SessionContext) -> tuple[bool, str]:
     return True, f"grant binds the live plan {live[:12]}…"
 
 
-def driver_command(ctx: SessionContext, plan) -> str:
-    """The pod's command. Both minute figures come from the plan, once.
+def reserve_minutes(plan, name: str) -> float:
+    """One named reserve from the plan. By NAME, because the names are the
+    partition: summing them would hand the beam a clock the accounting says
+    belongs to the baseline rebuild."""
+    for reserve in plan.soft_stop_reserves:
+        if reserve.name == name:
+            return float(reserve.minutes)
+    raise SessionSpecError(
+        f"the plan declares no {name!r} reserve; the runtime partition cannot "
+        f"be derived from it. Declared: "
+        f"{[r.name for r in plan.soft_stop_reserves]}")
 
-    `--search-deadline-minutes` is the base allowance PLUS the soft-stop
-    reserves, because that is what actually bounds the search at runtime, and
-    `--search-minutes` is the base allowance the affordability check spends
-    against. Two names for two different numbers: a `--search-minutes` that
-    also carried the reserves would let the affordability check approve work the
-    deadline would then kill.
+
+def beam_envelope_minutes(plan) -> float:
+    """What the beam may spend: the DEPTH-early base plus its own risk reserve.
+
+    **Not** the sum of all reserves. `baseline_rebuild_reserve` is excluded on
+    purpose: the pricing record separates the two because they buy different
+    things, and a deadline of `base + every reserve` let the beam run into the
+    27.665 minutes held for a missing-B rebuild. Enforcement now matches the
+    accounting, which is a partition repair and adds nothing to the ceiling.
     """
     base = next(p.minutes for p in plan.breakdown
                 if p.name == "beam_search_depth_early")
-    reserves = sum(r.minutes for r in plan.soft_stop_reserves)
+    return base + reserve_minutes(plan, "beam_composition_risk")
+
+
+def driver_command(ctx: SessionContext, plan) -> str:
+    """The pod's command. Every figure comes from the plan, once, by name.
+
+    Three minute numbers with three meanings:
+
+    * `--search-deadline-minutes` bounds the beam at runtime, and is the beam's
+      whole envelope — base plus `beam_composition_risk` and nothing else.
+    * `--search-minutes` funds the affordability check taken before the beam
+      starts. It is the SAME envelope, because approving the beam against its
+      expected 300.16-minute trajectory would approve work its own deadline
+      permits and the soft stop may not fund.
+    * `--baseline-rebuild-minutes` is the conditional reserve, spent only if the
+      deterministic rule finds B absent, on a clock that starts then.
+    """
+    beam = beam_envelope_minutes(plan)
+    rebuild = reserve_minutes(plan, "baseline_rebuild_reserve")
     #: The interpreter is a DEPLOYMENT fact, from the same declaration the
     #: runner reads for the collector. Not `ctx.args`, which has no such field:
     #: the first version of this line said `ctx.args.remote_python` and would
@@ -199,8 +230,9 @@ def driver_command(ctx: SessionContext, plan) -> str:
             f"--rate {ctx.price} --spent-usd {ctx.spent_usd:.3f} "
             f"--soft-stop-usd {floor2(plan.soft_stop_usd)} "
             f"--authorized-usd {floor2(plan.hard_terminate_usd)} "
-            f"--search-minutes {base:.1f} "
-            f"--search-deadline-minutes {base + reserves:.1f} "
+            f"--search-minutes {beam:.2f} "
+            f"--search-deadline-minutes {beam:.2f} "
+            f"--baseline-rebuild-minutes {rebuild:.3f} "
             f"--authorization-path {AUTH_PATH} "
             f"--device cuda")
 

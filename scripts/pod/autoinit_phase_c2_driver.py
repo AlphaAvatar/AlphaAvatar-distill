@@ -54,7 +54,9 @@ for _extra in ("src", "scripts", "scripts/autoinit"):
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
 from aadistill.initialization.planning.search import SearchDeadlineExceeded  # noqa: E402
+from experiments.phase_c2 import comparison as C  # noqa: E402
 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_phase_c2.status"
@@ -242,7 +244,12 @@ class PhaseC2Driver:
         from phase_a_search import as_operator_items, run_phase_a_search
 
         register_builtin_profiles()
-        self.afford(self.a.search_minutes, "the beam search")
+        #: The FULL beam envelope, not the expected trajectory. Approving the
+        #: beam against 300.16 min would approve work its own deadline permits
+        #: — the base plus `beam_composition_risk` — and the soft stop may not
+        #: fund. The launcher sends the same figure as the deadline for exactly
+        #: that reason.
+        self.afford(self.a.search_minutes, "the beam search (full envelope)")
 
         profiles = tuple(get_profile(q) for q in C2_PROFILE_IDS)
         #: Keyed by qualified id, because a loader that ignores its argument was
@@ -251,6 +258,11 @@ class PhaseC2Driver:
         items = {p.qualified_id: as_operator_items(p.resolve(REPO))
                  for p in profiles}
 
+        #: The beam's clock, and ONLY the beam's: the launcher derives this as
+        #: the DEPTH-early base plus `beam_composition_risk` and deliberately
+        #: excludes `baseline_rebuild_reserve`. Before this partition the
+        #: deadline was base + every reserve, which let the beam run into the
+        #: 27.665 minutes the accounting holds for a missing-B rebuild.
         deadline = Deadline.from_minutes(self.a.search_deadline_minutes)
         #: `root_loader` is supplied by the hook's caller, not here:
         #: `run_phase_a_search` owns the teacher's lifetime and passes the same
@@ -264,7 +276,15 @@ class PhaseC2Driver:
             repo_root=REPO,
             calibration_items=items,
             device=self.a.device,
-            deadline=deadline,
+            #: A NUMBER, not a `Deadline`. A `Deadline` starts counting when it
+            #: is constructed, so handing the beam's clock to the rebuild would
+            #: give it whatever the beam left — which after a full-envelope
+            #: search is nothing. The fallback builds its own inside
+            #: `rebuild()`, the first moment B is known to be absent.
+            rebuild_minutes=self.a.baseline_rebuild_minutes,
+            #: The same soft-stop check the beam used, re-taken against the
+            #: CURRENT spend rather than against a projection made hours ago.
+            afford=self.afford,
             say=say)
 
         found = run_phase_a_search(
@@ -284,6 +304,37 @@ class PhaseC2Driver:
             search_minutes=self.a.search_deadline_minutes)
 
         self.baseline = fallback.outcome
+
+        #: THE EVIDENCE BOUNDARY FOR B->C.
+        #:
+        #: `run_phase_a_search` commits the beam ranking before the baseline
+        #: resolves, which is correct — the ranking must not wait on anything.
+        #: But its summary serializes an imported candidate as identity and
+        #: provenance only, so a REBUILT B's evaluation existed nowhere durable:
+        #: the run could rebuild B, measure it correctly, and lose the one
+        #: number the whole question is asked against at teardown.
+        #:
+        #: Written here, after both, and identically in both branches. It cites
+        #: `stage1_selection.json` and never rewrites it.
+        baseline_state = C.resolve_baseline_state(found=found,
+                                                  outcome=self.baseline)
+        comparison = C.build(
+            baseline=baseline_state,
+            baseline_outcome=self.baseline,
+            candidates=found.top_n.selected,
+            suite=found.result.config.suite,
+            policy=PARETO_V1,
+            run_id=found.summary["run_id"],
+            config_hash=found.summary["config_hash"],
+            selection_record=str(
+                (SEARCH_WORKDIR / "stage1_selection.json").relative_to(REPO)),
+            search_summary=str((AUDIT / "c2_search_summary.json").relative_to(REPO)))
+        comparison_path = C.commit(comparison, AUDIT)
+        say(f"  B->C comparison: {comparison['comparison']['verdict']} "
+            f"({comparison['baseline']['resolution']} B, "
+            f"{len(comparison['candidates'])} candidates) -> "
+            f"{comparison_path.name}")
+
         summary = found.summary
         detail = {
             "run_id": summary["run_id"],
@@ -301,6 +352,16 @@ class PhaseC2Driver:
             "control": summary["control"],
             "retained_candidates": summary["retained_candidates"],
             "baseline": self.baseline,
+            "baseline_comparison": {
+                "path": str(comparison_path.relative_to(REPO)),
+                "schema": comparison["schema"],
+                "record_sha256": comparison["record_sha256"],
+                "resolution": comparison["baseline"]["resolution"],
+                "verdict": comparison["comparison"]["verdict"],
+                "n_candidates": len(comparison["candidates"]),
+                "excluded_as_duplicate": comparison[
+                    "excluded_as_duplicate_of_baseline"],
+            },
             "_the_metric_is_not_the_result": (
                 "the state_eval ranking is a hypothesis generator. A search "
                 "winner is not a demonstrated initialization improvement and "
@@ -374,9 +435,14 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--search-minutes", type=float, required=True,
                     help="base search allowance; funds the affordability check")
     ap.add_argument("--search-deadline-minutes", type=float, required=True,
-                    help="base allowance PLUS the soft-stop reserves, derived "
-                         "by the launcher from the priced envelope; this is "
-                         "what actually bounds the search at runtime")
+                    help="the BEAM's whole envelope: the DEPTH-early base plus "
+                         "beam_composition_risk, and nothing else. It excludes "
+                         "baseline_rebuild_reserve, which is not the beam's to "
+                         "spend")
+    ap.add_argument("--baseline-rebuild-minutes", type=float, required=True,
+                    help="the conditional baseline_rebuild_reserve, spent only "
+                         "if the deterministic rule finds B absent, on a clock "
+                         "that starts then")
     ap.add_argument("--authorization-path",
                     default="logs/budget/approvals/autoinit_c2_authorization.json")
     ap.add_argument("--device", default="cuda")

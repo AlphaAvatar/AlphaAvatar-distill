@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-15T06:48:32+00:00",
+  "created_utc": "2026-09-15T09:39:17+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1061,
-    "bytes": 42889996,
+    "bytes": 42892479,
     "by_disposition": {
       "keep_canonical": 80,
       "keep_immutable": 810,
@@ -4130,8 +4130,8 @@
     },
     {
       "path": "docs/POD_SCRIPTS.md",
-      "size_bytes": 12009,
-      "sha256": "464dced75e46b622a3e662ec68a069a02a7923358f355d0c8b3e927d68dc96d7",
+      "size_bytes": 12239,
+      "sha256": "6767fd7d12f090fa12ec6f200063f5deff54ab8293cc7e95c00bfc0fb92ba292",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -6387,8 +6387,7 @@
       "in_paid_attempt_chain": true,
       "referenced_by": [
         "logs/index.json",
-        "logs/maintenance/inventories/log_inventory.json",
-        "logs/state/current.json"
+        "logs/maintenance/inventories/log_inventory.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -11580,7 +11579,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 111960,
-      "sha256": "0fd03884eb008778f054d8e5410cc0f464f73868449edf773dc5e5c73fb343d9",
+      "sha256": "bcd25445edd54607874c72d7b3d52d39a577be4199ced509272495560ddf23c3",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -11633,7 +11632,6 @@
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json",
-        "logs/state/current.json",
         "scripts/autoinit/record_pod_environment.py",
         "scripts/consolidate/render_log_navigation.py",
         "tests/docs/test_log_organisation.py"
@@ -13436,8 +13434,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json",
-        "logs/state/current.json"
+        "logs/maintenance/inventories/log_inventory.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -17048,8 +17045,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
-      "size_bytes": 21806,
-      "sha256": "176f91f975c09195209e28d4daac9ac8cde2bd4be64238562e4976c8218e3140",
+      "size_bytes": 23972,
+      "sha256": "4e93a8c3573e1fb233ab5bf8b2b15cbf6f591de93fdfb08e7caecfef1438a655",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -20349,8 +20346,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11776,
-      "sha256": "ef59bbf96ee8e861037ff52af1eddd5b7fd672f0a115794920269f55e446506a",
+      "size_bytes": 11779,
+      "sha256": "f6265fcabc576c3219591057b028a88d63024a95af0aabfa96d3f541ded6ad95",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -20390,8 +20387,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 15730,
-      "sha256": "19183a60eb9347a2b4804982f347e2258d0d264e263c5a96b19474fda3141534",
+      "size_bytes": 15814,
+      "sha256": "27b7790ec202179235aae046a3536fdb92f686641041ae99e9d6b89b5ff0f460",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
