@@ -647,7 +647,12 @@ def test_the_simulator_runs_each_session_s_own_ignore_list():
     assert '"PODSIM_CMD": pytest_cmd' in recorder, (
         "the recorder no longer passes a derived PODSIM_CMD, so the simulation "
         "would fall back to the generic default -- the attempt-4 defect")
-    assert "derive_c1_session()" in recorder
+    #: `derive_c1_session()` until 2026-09-15. The recorder drives one
+    #: experiment per invocation now, through the `SweepContract` that
+    #: experiment declares, so the session id it derives the staged view under
+    #: comes from the contract instead of being C1's by construction. Same
+    #: property, one more caller.
+    assert "derive_session(sweep)" in recorder
 
     #: Every session must keep the ~20-minute pre-flight rehearsal out of its
     #: pod gate, whose timeout exits 90 and kills a paid session. C1 states this

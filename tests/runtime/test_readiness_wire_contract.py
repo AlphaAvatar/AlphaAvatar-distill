@@ -114,14 +114,25 @@ class TestTheC1ContractIsUnchanged:
         src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
         code = "\n".join(l for l in src.splitlines()
                          if not l.lstrip().startswith("#"))
-        assert '"schema": C1_RECORD_CONTRACT.schema' in code, (
+        #: These read `C1_RECORD_CONTRACT.schema` and
+        #: `C1_RECORD_CONTRACT.harness_field` until 2026-09-15, when the
+        #: recorder stopped importing any experiment's contract by name and
+        #: started taking it from the `SweepContract` the invocation names. The
+        #: PROPERTY is the same and is stronger now: the schema and the harness
+        #: key come from the contract the verifier checks against, for whichever
+        #: experiment is being swept, rather than from C1's contract regardless.
+        assert '"schema": sweep.record.schema' in code, (
             "the recorder writes a schema string it did not read from the "
             "contract the verifier checks against")
-        assert "C1_RECORD_CONTRACT.harness_field: harness" in code, (
+        assert "sweep.record.harness_field: harness" in code, (
             "the recorder writes the harness under a literal key rather than "
             "the contract's field name")
-        assert '"c1_harness_digest":' not in code, (
-            "a literal harness key survives in the recorder")
+        assert "sweep.harness_n_files_field: harness" in code, (
+            "the recorder writes the harness file COUNT under a literal key")
+        for literal in ('"c1_harness_digest":', '"c1_harness_n_files":',
+                        '"c2_harness_digest":', '"c2_harness_n_files":'):
+            assert literal not in code, (
+                f"the literal harness key {literal} survives in the recorder")
 
     def test_a_c1_shaped_record_verifies_through_the_real_function(self):
         ok, why = PE.verify_record(record_for(C1.C1_RECORD_CONTRACT), REPO,

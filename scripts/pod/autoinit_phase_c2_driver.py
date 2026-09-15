@@ -443,8 +443,14 @@ def build_parser() -> argparse.ArgumentParser:
                     help="the conditional baseline_rebuild_reserve, spent only "
                          "if the deterministic rule finds B absent, on a clock "
                          "that starts then")
-    ap.add_argument("--authorization-path",
-                    default="logs/budget/approvals/autoinit_c2_authorization.json")
+    #: REQUIRED, with no default. It defaulted to a repository-level path that
+    #: no longer exists anywhere: the authorization is owned by the run, so
+    #: there is nothing sensible to fall back to, and a default naming an absent
+    #: file turns "you did not say which run" into "file not found". The
+    #: launcher always passes it, derived from `--run-id`.
+    ap.add_argument("--authorization-path", required=True,
+                    help="this run's authorization, e.g. logs/stages/stage-1/"
+                         "phase_c2/runs/<attempt>/governance/authorization.json")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--top-n", type=int, default=5)
     return ap

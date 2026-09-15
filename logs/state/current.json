@@ -18,14 +18,9 @@
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
-  "any": true,
-  "experiment": "phase_c2 Search-1, run attempt1",
-  "run": "logs/stages/stage-1/phase_c2/runs/attempt1",
-  "grant_committed": "governance/grant.json",
-  "readiness_record": null,
-  "authorization": null,
-  "bundle": null,
-  "note": "MAINTAINER-APPROVED 2026-09-15 against commit 7d0a35a at a $15.0446 ceiling, price basis L40S securePrice <= $1.09/h. The grant is committed; the launch_bound sweep, the one-use authorization and the bundle are owed IN THAT ORDER. A grant is not an authorization and neither is a launch."
+  "any": false,
+  "superseded_run": "logs/stages/stage-1/phase_c2/runs/attempt1",
+  "note": "phase_c2 Search-1 attempt1 is PRE-AUTHORIZATION SUPERSEDED: $0 spend, no authorization, no provider resource, no scientific execution. Its grant and its pod-test-gate probe are preserved unrewritten as evidence. The 2026-09-15 approval bound commit 7d0a35a and the then-current 18-file harness DECLARATION; the C2 executable identity is now a derived closure, so the issuer re-derives that grant's identities and REFUSES it. A fresh maintainer grant is required -- and a grant is not an authorization."
  },
  "budget": {
   "cumulative_spend_usd": 290.5174,
@@ -132,7 +127,7 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "APPROVED FOR ONE EXECUTION, not yet launched. Search-1 is executable and priced; the maintainer approved attempt1 on 2026-09-15 at $15.0446.",
+   "status": "NOT STARTED and NOT AUTHORIZED. Executable and priced; attempt1's grant is PRE-AUTHORIZATION SUPERSEDED -- the issuer re-derives its identities and refuses it. A fresh maintainer grant is required.",
    "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
    "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",

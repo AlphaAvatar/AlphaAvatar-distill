@@ -65,9 +65,15 @@ def driver(registered):
 
 @pytest.fixture(scope="module")
 def session(launcher):
+    #: `--run-id` is REQUIRED since 2026-09-15: every governance artifact this
+    #: session consumes is owned by its run — grant, authorization, readiness
+    #: record, bundle record — and each is resolved from that id. A session with
+    #: no run id has nowhere for its authorization to live that the next
+    #: issuance would not overwrite, which is the state C1 spent a pointer, a
+    #: history file and a migration getting out of.
     args = launcher.build_parser().parse_args(
         ["--scr", "/tmp/c2", "--session-commit", "0" * 40,
-         "--bundle", "aad_00000000.bundle"])
+         "--bundle", "aad_00000000.bundle", "--run-id", "spec_check"])
     return args, launcher.spec(args).validate()
 
 
@@ -345,6 +351,15 @@ def test_the_harness_set_names_every_file_the_session_executes(registered):
     """A new executable in the session's path that the set does not name means a
     grant would certify different code.
 
+    Until 2026-09-15 this compared the digested set to a hand-maintained
+    eighteen-path CONSTANT, and both sides were the same declaration — so the
+    only thing it could catch was somebody editing one of them. The set is now
+    DERIVED by walking import edges and subprocess targets from the declared
+    entry points, which is why the constant is gone from the comparison: the
+    live walk finds 60-odd files that declaration never named, including every
+    module that can spend money. What survives here is the property that
+    mattered: each file the session demonstrably executes is measured.
+
     `comparison.py` decides what the run's baseline evidence IS and is the only
     place a rebuilt B's metric becomes durable, so its bytes are executable by
     consequence — the same reason the artifact specs are in the set.
@@ -355,11 +370,22 @@ def test_the_harness_set_names_every_file_the_session_executes(registered):
         C2_HARNESS_SOURCE_FILES_V1, c2_harness_digest,
     )
 
+    live = c2_harness_digest(REPO)
+    digested = {e["path"] for e in live["files"]}
+    for path in digested:
+        assert (REPO / path).is_file(), path
+    #: The historical declaration is still a valid set of paths — it is what the
+    #: superseded attempt-1 grant binds — and it is no longer what runs.
     for declared in C2_HARNESS_SOURCE_FILES_V1:
         assert (REPO / declared).is_file(), declared
-    digested = {e["path"] for e in c2_harness_digest(REPO)["files"]}
-    assert digested == set(C2_HARNESS_SOURCE_FILES_V1), (
-        "the declared constant and the digested set disagree")
+    assert digested != set(C2_HARNESS_SOURCE_FILES_V1)
+    assert len(digested) > len(C2_HARNESS_SOURCE_FILES_V1)
+    #: Everything that can create or bill a provider resource.
+    for spends in ("src/aadistill/infrastructure/session_runner.py",
+                   "src/aadistill/infrastructure/provider.py",
+                   "src/aadistill/infrastructure/remote.py",
+                   "src/aadistill/infrastructure/budget.py"):
+        assert spends in digested, f"{spends} can spend money and must bind"
 
     #: Every module the driver and launcher import from the experiment layer.
     for required in ("scripts/experiments/phase_c2/comparison.py",

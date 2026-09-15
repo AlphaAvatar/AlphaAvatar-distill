@@ -10,12 +10,17 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **Nothing is running. Nothing is billing. No pod exists**, and no further C1
-attempt is authorized. **One Phase-C2 Search-1 execution IS approved and being
-prepared**: the maintainer approved attempt1 on 2026-09-15 against commit
-`7d0a35a` at a `$15.0446` ceiling. The grant is committed; the `launch_bound`
-sweep, the one-use authorization and the bundle are owed in that order. Attempt 18's pod
+attempt is authorized. **Nothing is prepared for launch.** Attempt 18's pod
 `ygtjrobs456cb5` was deleted after collecting 164 artifacts, the provider
 confirms it is gone, and a live query returns `ZERO_PODS`.
+
+**Phase-C2 Search-1 attempt1 is PRE-AUTHORIZATION SUPERSEDED**: `$0` spend, no
+authorization, no provider resource, no scientific execution. The 2026-09-15
+approval bound commit `7d0a35a` and the 18-file harness *declaration* that was
+current then; the C2 executable identity is now a **derived closure**, so the
+issuer re-derives that grant's identities and refuses it. Its grant and its
+pod-test-gate probe are preserved unrewritten as evidence. A fresh maintainer
+grant is required, and a grant is not an authorization.
 
 **C1 is COMPLETE.** Attempt 18 executed the whole frozen protocol — both replay
 gates, both arms, six probes trained, six evaluated on the frozen battery — and
@@ -24,7 +29,7 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**. C2 Search-1 is **EXECUTABLE and priced, and NOT AUTHORIZED**: space, baseline rule, B→C comparison record, driver, launcher, evidence contract and a `$15.0446` ceiling all exist, with the beam and the baseline rebuild on separate clocks; the grant, readiness record, authorization and bundle deliberately do not | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**. C2 Search-1 is **EXECUTABLE and priced, and NOT AUTHORIZED**: space, baseline rule, B→C comparison record, driver, launcher, evidence contract, a `$15.0446` ceiling, a CPU preflight of its own, a derived executable closure, a readiness contract, an authorization issuer and a bundle transport all exist, with the beam and the baseline rebuild on separate clocks; no grant, readiness record, authorization or bundle does | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | attempt 18's chain is **consumed**, like every chain before it. **No further C1 attempt is authorized, and none is prepared** — a complete verdict ends the round | [`phase_c1/runs/attempt18/governance/`](../stages/stage-1/phase_c1/runs/attempt18/governance/) |

@@ -49,15 +49,143 @@ SCHEMA = "aadistill.autoinit.c2_authorization/v1"
 PRICING_PATH = "logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json"
 PLAN_PATH = "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md"
 
-#: Every file whose bytes decide what the paid C2 session executes. The
-#: authorization measures THIS set; a grant that declares a different one is
-#: certifying different code.
+# ---------------------------------------------------------------------------
+# what a C2 session executes
+# ---------------------------------------------------------------------------
+
+#: The entry points a C2 session actually starts from. An experiment-instance
+#: fact, so it lives with the experiment; the walker that consumes it is generic
+#: and lives in `aadistill.governance.closure`.
+C2_ENTRY_POINTS: tuple[str, ...] = (
+    #: The launcher and the driver: the session, end to end.
+    "scripts/pod/autoinit_phase_c2_launch.py",
+    "scripts/pod/autoinit_phase_c2_driver.py",
+    #: The authorization half. Both are entry points because neither is
+    #: imported by the launcher — an authorization is issued BEFORE a launch, by
+    #: a different process — and code that decides whether a session may spend
+    #: money belongs inside the set that session's grant binds.
+    "scripts/experiments/phase_c2/authorization_payload.py",
+    "scripts/autoinit/issue_c2_authorization.py",
+    #: The artifact collector. Run as a subprocess on the pod, so no import edge
+    #: reaches it, and what it does decides which evidence survives teardown.
+    "scripts/pod/collect_artifacts.py",
+)
+
+#: Files no import edge reaches, whose bytes still decide what runs or what is
+#: authorized. Named explicitly and hashed identically to the modules.
 #:
-#: The two artifact specs are in here for the reason the C1 set names its own:
-#: `collect_artifacts.py` is a spec interpreter, and what actually decides which
-#: evidence survives teardown is the declared pattern list. A session whose
-#: evidence contract can be edited without moving the harness digest has an
-#: unmeasured mutable input at exactly the point where loss is irreversible.
+#: The pricing record is deliberately NOT here, and neither is any other file
+#: under `logs/`. Two reasons, and they point the same way: `load_pricing`
+#: already refuses a record that does not match its own `pricing_sha256`, and
+#: the authorization binds that hash — so the document is bound without being
+#: digested. Pulling a `logs/` file into the executable digest would also mean
+#: that writing a plan document invalidates a readiness sweep, which is the
+#: distinction the two-digest design exists to preserve.
+C2_DECLARED_INPUTS: tuple[str, ...] = (
+    #: The setup script `SessionRunner._launch` uploads and runs. `SetupManifest`
+    #: carries no setup-script field, so no session can substitute another —
+    #: and its `SESSION_KIND` dispatch decides which authorization TYPE the pod
+    #: loads, which is not something that may change unmeasured.
+    "scripts/pod/autoinit_preflight_setup.sh",
+    #: The evidence contract. `collect_artifacts.py` is a spec interpreter, and
+    #: what actually decides which evidence survives teardown is the declared
+    #: pattern list. A session whose evidence contract can be edited without
+    #: moving the digest has an unmeasured mutable input at exactly the point
+    #: where loss is irreversible.
+    "configs/autoinit/c2_artifacts.json",
+    "configs/autoinit/c2_artifacts_failed.json",
+    #: The authorization instance: plan id, stage conditions, the accepted money
+    #: figures the issuer refuses against, and the stage the run layout uses.
+    "configs/experiments/phase_c2/authorization.json",
+)
+
+#: The sys.path roots the C2 entry points insert. They import several helpers by
+#: BARE NAME — `from autoinit_science_inputs import ...`, `from phase_a_search
+#: import ...` — which resolve only because the scripts put these directories on
+#: the path. A walk that did not know them silently missed those files: an
+#: unresolvable bare name looks like a third-party import rather than a gap.
+C2_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
+                                    "scripts/autoinit")
+
+
+def c2_current_executable(repo_root: str | Path = ".") -> dict[str, Any]:
+    """What a C2 session would execute NOW, derived live from the tree.
+
+    `C2_HARNESS_SOURCE_FILES_V1` below is a HISTORICAL declaration: eighteen
+    paths, hand-maintained, and the set the superseded attempt-1 grant binds. It
+    was wrong in the way every hand-maintained closure is eventually wrong — not
+    by naming something absent, but by not naming what had been added. The live
+    walk finds the modules those eighteen files import, the scripts they run as
+    subprocesses, and the transitive `src/aadistill` dependencies of both; the
+    declaration named none of that and could not promise it had.
+
+    So the current set is DERIVED. A grant binds this value, and a grant that
+    binds the old one is refused because it no longer reproduces — which is what
+    makes attempt 1 superseded rather than merely old.
+    """
+    from aadistill.governance.closure import ClosureError, derive
+
+    try:
+        return derive(repo_root, "phase_c2", C2_ENTRY_POINTS,
+                      C2_DECLARED_INPUTS, roots=C2_SOURCE_ROOTS)
+    except ClosureError as exc:
+        raise AuthorizationError(
+            f"cannot derive the C2 executable set: {exc}") from exc
+
+
+# ---------------------------------------------------------------------------
+# where this run's governance artifacts live
+# ---------------------------------------------------------------------------
+
+#: This experiment's key in the run layout and in the run index.
+C2_RUN_EXPERIMENT_ID = "phase_c2"
+
+#: role -> path inside the run. C2 has no repository-level copy of any of these,
+#: deliberately: C1's authorization, readiness record and bundle record were all
+#: single repository-root files that each attempt overwrote, and unwinding that
+#: took a pointer, a history file and a migration. A run owns its governance
+#: artifacts from the start here.
+C2_RUN_ROLES: dict[str, str] = {
+    #: The maintainer decision. An INPUT, committed before the launch-bound
+    #: sweep, because the authorization is issued from it and the sweep must see
+    #: the final clean tree.
+    "grant": "governance/grant.json",
+    "authorization": "governance/authorization.json",
+    "bundle_record": "governance/bundle.json",
+    "readiness_record": "governance/readiness.json",
+}
+
+
+def c2_run_path(run_id: str, role: str, stage_id: str | None = None) -> str:
+    """A run role's repository-relative path. One convention, one place."""
+    if role not in C2_RUN_ROLES:
+        raise AuthorizationError(
+            f"{role!r} is not a declared C2 run role; declared: "
+            f"{sorted(C2_RUN_ROLES)}")
+    if not run_id:
+        raise AuthorizationError(
+            f"the C2 {role} belongs to a run: pass the run id. There is no "
+            "repository-level location for it, deliberately — a shared path is "
+            "how one attempt's governance artifact gets overwritten by the next.")
+    from experiments.run_layout import rel_run_dir
+
+    return (f"{rel_run_dir(C2_RUN_EXPERIMENT_ID, run_id, stage_id)}"
+            f"/{C2_RUN_ROLES[role]}")
+
+
+def c2_authorization_path(run_id: str, stage_id: str | None = None) -> str:
+    return c2_run_path(run_id, "authorization", stage_id)
+
+
+def c2_grant_path(run_id: str, stage_id: str | None = None) -> str:
+    return c2_run_path(run_id, "grant", stage_id)
+
+
+#: HISTORICAL. The hand-maintained set the SUPERSEDED attempt-1 grant binds,
+#: kept so that grant remains readable as the record of what was approved
+#: against which declaration — and so `c2_historical_harness_digest` can
+#: reproduce the figure it names. It is not what a session executes, and
+#: nothing derives a current identity from it.
 C2_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # the session, end to end
     "scripts/pod/autoinit_phase_c2_launch.py",
@@ -200,7 +328,12 @@ class C2Authorization(PhaseAAuthorization):
     stand in for the other.
     """
 
-    harness_source_files: tuple[str, ...] = C2_HARNESS_SOURCE_FILES_V1
+    #: Empty by default, NOT the historical declaration. The gate re-digests
+    #: whatever is in this field and compares it to `harness_source_digest`, so
+    #: a default pointing at the 18 superseded paths would quietly measure the
+    #: wrong set for an artifact that omitted the field. Empty fails closed: it
+    #: digests to nothing and matches nothing. An issuer writes the derived set.
+    harness_source_files: tuple[str, ...] = ()
 
     @property
     def allows_phase_a(self) -> bool:
@@ -274,18 +407,41 @@ class C2Authorization(PhaseAAuthorization):
             scope_note=raw["scope_note"],
             authorized_session_commit=raw.get("authorized_session_commit"),
             harness_source_digest=raw.get("harness_source_digest"),
-            harness_source_files=tuple(raw.get("harness_source_files")
-                                       or C2_HARNESS_SOURCE_FILES_V1),
+            harness_source_files=tuple(raw.get("harness_source_files") or ()),
             per_launch_hard_usd=raw.get("per_launch_hard_usd"),
             provenance_commit=raw.get("provenance_commit"),
             version=int(raw.get("version", 1)))
 
 
-def c2_harness_digest(repo_root: str | Path = ".") -> dict[str, Any]:
+def c2_harness_digest(repo_root: str | Path = ".",
+                      files: tuple[str, ...] | None = None) -> dict[str, Any]:
+    """The digest a C2 grant binds — the LIVE executable closure.
+
+    Passing an explicit `files` tuple digests that set instead, which is how the
+    historical declaration is still reproducible (and how a test presents a
+    deliberately wrong set to a gate).
+    """
+    if files is None:
+        return c2_current_executable(repo_root)
     from aadistill.governance.authorization import harness_source_digest
 
-    return harness_source_digest(repo_root, files=C2_HARNESS_SOURCE_FILES_V1,
-                                 set_version=C2_SOURCE_SET_VERSION)
+    out = dict(harness_source_digest(repo_root, files=files,
+                                     set_version=C2_SOURCE_SET_VERSION))
+    #: Same key as the derived closure's, so a caller reading `n_files` gets an
+    #: answer whichever path produced the dict. Two shapes for one question is
+    #: how a reporting call ends up with a KeyError in a refusal path.
+    out.setdefault("n_files", len(out["files"]))
+    return out
+
+
+def c2_historical_harness_digest(repo_root: str | Path = ".") -> dict[str, Any]:
+    """The digest the SUPERSEDED attempt-1 grant binds: 18 hand-declared paths.
+
+    Kept as an explicit entry point so "the superseded grant no longer
+    reproduces against the live executable" is something a test can execute
+    rather than a claim in a comment.
+    """
+    return c2_harness_digest(repo_root, files=C2_HARNESS_SOURCE_FILES_V1)
 
 
 # ---------------------------------------------------------------------------

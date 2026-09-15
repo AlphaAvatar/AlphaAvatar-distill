@@ -916,12 +916,22 @@ class TestTheWholeTreePredicateModelsThePod:
         assert "shutil.move(str(live), str(stash))" in src, (
             "the sweep no longer stashes the previous record; if it stopped, "
             "this exclusion is now hiding a real partial tree")
-        assert "record_rel = record_path_for(" in src
+        #: `record_rel = record_path_for(...)` until 2026-09-15: the recorder
+        #: called C1's resolver directly. It now stashes the path the
+        #: invocation's own `SweepContract` names, which is the same path for
+        #: C1 and the right one for anybody else.
+        assert "record_rel = sweep.record.record_path" in src
 
-        from experiments.phase_c1.pod_environment import record_path_for
-        stashed = record_path_for("attempt99", "1")
-        assert stashed.endswith(STASHED_BY_THE_SWEEP), (
-            f"the driver stashes {stashed}, which the predicate does not exempt")
+        #: BOTH experiments with a run-owned readiness record, because the
+        #: predicate exempts one filename and a second experiment using a
+        #: different one would be read as a partial tree.
+        from experiments.phase_c1.pod_environment import record_path_for as c1_path
+        from experiments.phase_c2.pod_environment import record_path_for as c2_path
+
+        for stashed in (c1_path("attempt99", "1"), c2_path("attempt99", "1")):
+            assert stashed.endswith(STASHED_BY_THE_SWEEP), (
+                f"the sweep stashes {stashed}, which the predicate does not "
+                "exempt")
 
     def test_a_real_partial_tree_is_still_detected(self, monkeypatch, tmp_path):
         """Both directions. An exemption that swallows everything protects nothing.

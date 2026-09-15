@@ -420,19 +420,34 @@ instant the expensive part succeeds. It is **standalone rather than a
 and elimination, and inheriting it would mean satisfying every contract that
 machinery requires in order to use none of it.
 
-**It still cannot run, and not for want of a flag.** The grant it names,
-`logs/budget/approvals/autoinit_c2_authorization.json`, does not exist, and
-`C2Authorization.load` refuses anything that is not a C2 grant under its own
-schema. There is no readiness record, no bundle and no provider resource.
+**It still cannot run, and not for want of a flag.** Every governance artifact
+it consumes is owned by its run — `runs/<attempt>/governance/{grant,readiness,
+authorization,bundle}.json` — and none of them exists. `C2Authorization.load`
+refuses anything that is not a C2 grant under its own schema, and the launcher
+requires `--run-id` because there is no repository-level location for any of
+those artifacts to fall back to.
 
-Three gates run before a pod is contacted, each refusing at `$0`: the volume
-against the derived 87.4 GiB peak working set; the grant's ceiling against the
-pricing record's own hash-verified figure; and the grant's plan hash against the
-live configured space, so a grant issued before the space moved cannot authorize
-a run after it.
+Seven gates run before a pod is contacted, each refusing at `$0` and each naming
+a failure a paid session in this project has actually had: the session commit's
+executable digest, the authorization it carries and its lineage from the
+authorized base; an independent re-derivation of the executable closure, because
+every other check digests the set the *artifact* declares; the volume against
+the derived 87.4 GiB peak working set; the grant's ceiling against the pricing
+record's own hash-verified figure; the grant's plan hash against the live
+configured space; a `launch_bound` readiness record that still describes this
+executable, this staged view and this commit; and a read-only bundle round-trip
+that answers whether a pod could obtain the authorized code at all.
 
-**Deliberately not built:** the grant, the `launch_bound` readiness record, the
-authorization, the bundle, and any provider resource. Those are the governance
-chain and a maintainer decision, in that order, on the final clean
-pre-authorization tree when a launch is genuinely imminent. Search-2 is not
-implemented either: it is conditional on Search-1's evidence.
+**The mechanisms exist; the artifacts do not.** Since 2026-09-15 the repository
+carries the C2 CPU preflight (`tests/c2_preflight/`, 23 tests, the whole of what
+the paid pod runs), the derived executable closure a grant binds, the readiness
+contract, the authorization issuer and the bundle transport. What is
+deliberately **not built** is every instance: no grant, no readiness record, no
+authorization, no bundle, no provider resource. Those are a maintainer decision
+and then a chain, in that order, on the final clean pre-authorization tree when
+a launch is genuinely imminent.
+
+Attempt 1 is **PRE-AUTHORIZATION SUPERSEDED**: `$0` spend, nothing launched. Its
+grant bound the 18-file harness *declaration*, and the identity a grant binds is
+now derived, so the issuer refuses it. Search-2 is not implemented either: it is
+conditional on Search-1's evidence.

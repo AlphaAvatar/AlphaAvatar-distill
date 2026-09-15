@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 190,
+ "modules_scanned": 192,
  "test_ignores": [],
  "n_predicates": 113,
  "by_signal": {
@@ -1010,7 +1010,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 976,
+   "line": 986,
    "kind": "pytest.skip",
    "function": "test_state_md_agrees_with_the_record_it_links_to",
    "condition": "named and not (REPO / named).is_file()",
@@ -1026,7 +1026,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1148,
+   "line": 1158,
    "kind": "pytest.skip",
    "function": "test_the_frozen_battery_manifest_verifies",
    "condition": "not p.is_file()",
@@ -1042,7 +1042,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1161,
+   "line": 1171,
    "kind": "pytest.skip",
    "function": "test_it_matches_the_canonical_store",
    "condition": "not (a.is_file() and b.is_file())",
@@ -2036,5 +2036,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "b2008adcf905d805c05b2fe8324c75440b9dccfde958424c8f345feda96d63e8"
+ "digest": "fcbe99cb9fb4431dcae074460336304727fb56e0780f55c99c077dc72d244a50"
 }

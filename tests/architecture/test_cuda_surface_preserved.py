@@ -200,6 +200,54 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "definition, so a cost model counting the space cannot disagree "
             "with the beam expanding it.",
      }),
+    ("a6e8063bef05130693a6759df19fc2c0103ec7da",
+     "a second experiment's readiness, and transport as infrastructure",
+     {
+        "src/aadistill/runtime/staging_contract.py":
+            "`ignores_for_selection(selection, repo_root)`. The pod's blocking "
+            "gate is `pytest tests/ $SESSION_TEST_IGNORES` and a session may "
+            "only add flags, so running one preflight directory has to be "
+            "expressed as a COMPLEMENT — and a hand-written complement fails "
+            "UNSAFELY: a test directory added tomorrow says nothing about "
+            "itself and joins the paid suite by default. Derived, the default "
+            "for anything new is EXCLUDED. THIS IS A DECLARED SEMANTIC CHANGE, "
+            "and it is an ADDITION: no existing caller's ignore list changes, "
+            "because nothing called this before. It refuses rather than "
+            "returning an empty tuple when the named selection is not a "
+            "directory, since a complement derived from a missing selection "
+            "would ignore the whole suite.",
+        "src/aadistill/runtime/pod_environment.py":
+            "`SweepContract`. `RecordContract` says what a readiness record "
+            "looks like and `ReadinessGroups` says what a sweep should "
+            "observe; this third type says how to DRIVE one — which launcher "
+            "to load, which session id to derive the staged view under, which "
+            "harness to digest, which record keys to write, and whether the "
+            "experiment has a navigation pointer at all. THIS IS A DECLARED "
+            "SEMANTIC CHANGE to readiness recording, and it is an ADDITION: "
+            "`verify_record`, `evaluate_sweep`, `pod_test_environment_digest` "
+            "and the lineage rule are untouched, and C1's record keys, schema, "
+            "pointer path and prose are reproduced byte for byte by the "
+            "contract it now declares. The recorder previously imported one "
+            "experiment's harness digest at module level, so a second session "
+            "could not have had a readiness record at all.",
+        "src/aadistill/infrastructure/bundle_transport.py":
+            "NEW FILE. The transport question — build the exact commit into a "
+            "bundle, verify it, upload it, download what the pod would fetch, "
+            "clone it, and require the checkout to be the exact session commit "
+            "carrying the exact authorization bytes with the authorized "
+            "executable digest — extracted from one experiment's copy into "
+            "infrastructure, with the relay repository, the path prefix and the "
+            "label supplied by the caller through `TransportSpec`. THIS IS A "
+            "DECLARED SEMANTIC CHANGE by virtue of being new executable core; "
+            "no existing caller is retargeted, and the older copy under "
+            "`scripts/experiments/` is deliberately untouched because it "
+            "belongs to a closed experiment's frozen executable set. Two "
+            "behaviours differ from that copy, both refusals: an empty "
+            "executable set is refused rather than digested (it would pass "
+            "vacuously), and the digest formula is IMPORTED from "
+            "`aadistill.governance.closure` rather than restated, so the "
+            "round-trip and the closure cannot drift apart.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.
@@ -261,6 +309,32 @@ def shape(source: str) -> str:
     return ast.dump(strip_docstrings(ast.parse(source)))
 
 
+def at_base(base: str, path: str) -> str | None:
+    """A core file's source at `base`, or None if it did not exist there."""
+    out = subprocess.run(["git", "show", f"{base}:{path}"], cwd=REPO,
+                         capture_output=True, text=True)
+    return out.stdout if out.returncode == 0 else None
+
+
+def is_semantic(base: str, path: str) -> bool:
+    """Did this file's executable shape change since `base`?
+
+    A file ABSENT at the base is semantic by construction: new executable core
+    is a semantic change whatever its contents, and there is no previous shape
+    to compare it to.
+
+    This used to call `git show` unchecked, so the first round that ADDED a core
+    module did not report an undeclared change — it raised
+    `CalledProcessError` out of the set comprehension and took every
+    parametrisation of this check down with it. A guard that errors instead of
+    answering is a guard whose answer nobody has.
+    """
+    before = at_base(base, path)
+    if before is None:
+        return True
+    return shape(before) != shape((REPO / path).read_text())
+
+
 # --- 1. the preserved surface did not move ----------------------------------
 
 @pytest.mark.parametrize("path", CUDA_VALIDATED_SURFACE)
@@ -301,8 +375,7 @@ def test_every_other_core_change_is_prose_only_or_declared(index):
     base = ROUNDS[index][0]
     changed = [f for f in git("diff", "--name-only", base).split()
                if f.startswith("src/aadistill/") and f.endswith(".py")]
-    semantic = {f for f in changed
-                if shape(git("show", f"{base}:{f}")) != shape((REPO / f).read_text())}
+    semantic = {f for f in changed if is_semantic(base, f)}
     expected = set(declared_from(index))
     assert semantic == expected, (
         f"from {base[:8]} ({ROUNDS[index][1]}), core semantic changes disagree "

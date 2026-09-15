@@ -1,23 +1,35 @@
 """Run the pod-like sweep once, and record what it proved.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/record_pod_environment.py
+    PYTHONPATH=src .venv/bin/python scripts/autoinit/record_pod_environment.py \
+        --experiment phase_c2 --run-id attempt2 --stage-id 1
 
 This drives the real `scripts/pod/simulate_pod_env.sh` — empty HOME, isolated
-`HF_HOME`, synthetic `HF_TOKEN`, gitignored artifacts hidden, the pod's own pytest
-selection — and writes `logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json`.
+`HF_HOME`, synthetic `HF_TOKEN`, gitignored artifacts hidden, the session's own
+pytest selection — and writes that run's readiness record.
+
+**One mechanism, one experiment per invocation.** Everything specific to an
+experiment — its launcher, session id, harness digest, record schema, record
+key names, readiness groups and pointer, if it has one — arrives through the
+`SweepContract` its own `pod_environment` module declares. This file held C1's
+by name until 2026-09-15: a module-level `c1_harness_digest` import, the literal
+session id `autoinit-c1`, the record key `c1_harness_n_files`, a
+`c1_readiness_pointer` schema. A second session's only options were to copy
+seven hundred lines of scar tissue or to have no readiness record at all.
+`--experiment` defaults to `phase_c1`, so every existing invocation still means
+what it meant.
 
 It runs the simulator itself rather than accepting somebody's transcript of one,
 so the command in the record is literally the command that produced the counts.
 A readiness record whose command field was typed by hand is a claim, not
 evidence.
 
-The sweep takes about ten seconds — it runs the session's own pod selection,
-which for C1 is `tests/c1_preflight/`. It took thirteen minutes until
-2026-09-13, when that selection was the whole repository minus four modules.
-The record still exists because `verify_record` re-checks in milliseconds that
-the recorded proof describes the LIVE executable, which is a different question
-from re-running the sweep: a pre-provider gate must not have to run anything
-while a pod waits.
+The sweep takes seconds — it runs the session's own pod selection, which is one
+preflight directory per experiment. It took thirteen minutes until 2026-09-13,
+when C1's selection was the whole repository minus four modules, and a $0 probe
+measured the same shape for C2: 3976 tests, 907 s. The record still exists
+because `verify_record` re-checks in milliseconds that the recorded proof
+describes the LIVE executable, which is a different question from re-running the
+sweep: a pre-provider gate must not have to run anything while a pod waits.
 
 `--kind` defaults to `diagnostic`, the weaker claim: it says the pod-like suite
 passes on this tree and that the machinery works. A `launch_bound` record is the
@@ -45,15 +57,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.phase_c1.authorization import c1_harness_digest  # noqa: E402
-from experiments.phase_c1.pod_environment import (  # noqa: E402
-    C1_RECORD_CONTRACT,
-    RECORD_PATH,
-    RECORD_POINTER,
-    record_path_for,
-    evaluate_sweep,
+from aadistill.runtime.pod_environment import (  # noqa: E402
+    evaluate_sweep as _evaluate_sweep,
     head_commit,
-    pod_test_environment_digest,
+    pod_test_environment_digest as _env_digest,
     read_junit,
     self_hash,
     tree_is_clean,
@@ -67,9 +74,43 @@ from aadistill.runtime.staging_contract import (  # noqa: E402
 
 SIMULATOR = "scripts/pod/simulate_pod_env.sh"
 
+#: `--experiment` -> the factory returning that experiment's `SweepContract`.
+#:
+#: Every value that used to be a top-level import, a literal session id or a
+#: hardcoded record key in this file now arrives through one of these. The
+#: alternative was a second seven-hundred-line copy of a script whose every
+#: comment records a paid failure — and a copy diverges, so the repair for the
+#: next failure would land in one of them.
+EXPERIMENTS: dict[str, tuple[str, str]] = {
+    "phase_c1": ("experiments.phase_c1.pod_environment", "c1_sweep_contract"),
+    "phase_c2": ("experiments.phase_c2.pod_environment", "c2_sweep_contract"),
+}
 
-def derive_c1_session():
-    """C1's own SessionSpec: the staged view AND the setup environment.
+
+def sweep_contract(experiment: str, run_id: str | None, stage_id: str | None,
+                   kind: str | None = None):
+    """The named experiment's sweep contract, or a refusal naming the choices."""
+    import importlib
+
+    if experiment not in EXPERIMENTS:
+        raise SystemExit(
+            f"--experiment {experiment!r} is not declared. Known: "
+            f"{sorted(EXPERIMENTS)}. An experiment declares its readiness "
+            "contract in its own `pod_environment` module; this tool holds the "
+            "mechanism and none of the instances.")
+    module, factory = EXPERIMENTS[experiment]
+    build = getattr(importlib.import_module(module), factory)
+    try:
+        return build(run_id, stage_id, kind)
+    except RuntimeError as exc:
+        #: An experiment may REQUIRE a run — C2 does, because it has no
+        #: repository-level readiness file to fall back to. Reported as a
+        #: refusal with the experiment's own reason, not as a traceback.
+        raise SystemExit(f"{experiment}: {exc}") from exc
+
+
+def derive_session(sweep):
+    """The session's own SessionSpec: the staged view AND the setup environment.
 
     Refuses rather than falling back. A readiness sweep that cannot say what this
     session stages, or under what environment it runs, must not run at all —
@@ -92,20 +133,19 @@ def derive_c1_session():
     _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
     _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
     from session_specs import session_args
-    from experiments.phase_c1.bundle import canonical_bundle_name
 
-    launcher = c1_launcher()
+    launcher = launcher_module(sweep.launcher_module)
     spec = launcher.spec(session_args(launcher))
     head = head_commit(REPO_ROOT)
     setup_env = spec.setup_environment(session_commit=head,
-                                       bundle=canonical_bundle_name(head))
-    contract = derive_contract(spec.setup, session_id="autoinit-c1")
+                                       bundle=sweep.bundle_name(head))
+    contract = derive_contract(spec.setup, session_id=sweep.session_id)
     return spec, contract, describe(contract, REPO_ROOT), setup_env
 
 
-@functools.lru_cache(maxsize=1)
-def c1_launcher():
-    """The launcher module, loaded once.
+@functools.lru_cache(maxsize=4)
+def launcher_module(name: str):
+    """The launcher module, loaded once per name.
 
     Shared by the session derivation and the host-local scan so both describe
     the same launcher, and memoized because `load_session_launcher` builds a
@@ -115,7 +155,7 @@ def c1_launcher():
     _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
     _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
     from session_specs import load_session_launcher
-    return load_session_launcher("autoinit_c1_launch")
+    return load_session_launcher(name)
 
 
 def gate_documents(launcher, repo_root: Path) -> list[str]:
@@ -333,7 +373,8 @@ def _sha256_of(path: str | None) -> str | None:
     return h.hexdigest()
 
 
-def pointer_for(run_id: str, stage_id: str, record: dict, record_rel: str) -> dict:
+def pointer_for(sweep, run_id: str, stage_id: str, record: dict,
+                record_rel: str) -> dict:
     """The navigation document, shared by the sweep and by `--repoint`.
 
     One shape written from two places was how the pointer came to disagree with
@@ -341,7 +382,7 @@ def pointer_for(run_id: str, stage_id: str, record: dict, record_rel: str) -> di
     said `PASS` at `5aafc549`.
     """
     return {
-        "schema": "aadistill.autoinit.c1_readiness_pointer/v1",
+        "schema": sweep.pointer_schema,
         "_what_this_is": (
             "a pointer to the run that owns the live readiness record. NOT "
             "the record: this file used to be the record, which meant each "
@@ -353,7 +394,7 @@ def pointer_for(run_id: str, stage_id: str, record: dict, record_rel: str) -> di
         "record_kind": record.get("record_kind"),
         "verdict": record.get("verdict"),
         "swept_base_commit": record.get("swept_base_commit"),
-        "history": "logs/stages/stage-1/phase_c1/history/readiness_history.json",
+        "history": sweep.pointer_history,
         "_it_lags_by_design": (
             "a launch_bound sweep writes ONLY the run-owned record: rewriting "
             "this tracked file would put an unpermitted change into the tree it "
@@ -366,17 +407,28 @@ def pointer_for(run_id: str, stage_id: str, record: dict, record_rel: str) -> di
     }
 
 
-def repoint(root: Path) -> int:
-    """Point the root file at the newest run-owned record. Runs nothing.
+def repoint(sweep, root: Path) -> int:
+    """Point the experiment's pointer at its newest run-owned record.
 
-    A `launch_bound` sweep leaves the pointer alone on purpose: it is tracked,
-    and rewriting it would put an unpermitted change into the very tree the
-    sweep is certifying. The cost is that navigation lags by one run, and
-    nothing was closing that gap — the pointer still named attempt 13 after
+    Runs nothing. A `launch_bound` sweep leaves the pointer alone on purpose: it
+    is tracked, and rewriting it would put an unpermitted change into the very
+    tree the sweep is certifying. The cost is that navigation lags by one run,
+    and nothing was closing that gap — the pointer still named attempt 13 after
     attempts 13 and 14 had both been swept, closed and consumed.
+
+    **Scoped to `sweep.experiment_id`.** The glob was `logs/stages/*/*/runs/*`,
+    across every experiment, which was harmless while exactly one experiment had
+    run-owned readiness records and became wrong the moment a second did: C2's
+    newest record would have been written into C1's pointer, under C1's schema,
+    as C1's live readiness evidence.
     """
+    if not sweep.pointer_path:
+        print(f"{sweep.experiment_id} declares no readiness pointer: its record "
+              "is run-owned and there is nothing to repoint")
+        return 0
     records = sorted(
-        root.glob("logs/stages/*/*/runs/*/governance/readiness.json"),
+        root.glob(f"logs/stages/*/{sweep.experiment_id}/runs/*/governance/"
+                  "readiness.json"),
         key=lambda p: (int("".join(c for c in p.parents[1].name if c.isdigit())
                            or -1), p.parents[1].name))
     if not records:
@@ -389,8 +441,8 @@ def repoint(root: Path) -> int:
     #: The run is `parents[1]`, the same handle the sort above uses. Reading it
     #: positionally out of `parts` put "runs" in the `run_id` field.
     stage_id = newest.relative_to(root).parts[2].split("-", 1)[1]
-    pointer = pointer_for(newest.parents[1].name, stage_id, doc, rel)
-    p = root / RECORD_POINTER
+    pointer = pointer_for(sweep, newest.parents[1].name, stage_id, doc, rel)
+    p = root / sweep.pointer_path
     body = json.dumps(pointer, indent=1) + "\n"
     if p.is_file() and p.read_text() == body:
         print(f"pointer already names {rel}")
@@ -402,6 +454,11 @@ def repoint(root: Path) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--experiment", default="phase_c1",
+                    choices=sorted(EXPERIMENTS),
+                    help="whose readiness this sweep records. Defaults to "
+                         "phase_c1, so every existing invocation of this tool "
+                         "means exactly what it meant before.")
     #: Defaults are DERIVED per sweep, below, once the head commit is known.
     ap.add_argument("--junit", default=None,
                     help="raw JUnit path. Defaults to a freshly ALLOCATED "
@@ -436,16 +493,19 @@ def main() -> int:
                           "claim."))
     args = ap.parse_args()
 
-    if args.repoint:
-        return repoint(REPO_ROOT)
-
     # Captured BEFORE the record is written: writing it into logs/ is itself a
     # tree modification, and the verdict must describe the tree that was swept.
     if args.run_id and not args.stage_id:
         raise SystemExit("--run-id needs --stage-id: the run's location is "
                          "derived from the stage its experiment declares, and "
                          "guessing it would put the evidence in a second place")
-    record_rel = record_path_for(args.run_id, args.stage_id)
+    sweep = sweep_contract(args.experiment, args.run_id, args.stage_id,
+                           args.kind)
+
+    if args.repoint:
+        return repoint(sweep, REPO_ROOT)
+
+    record_rel = sweep.record.record_path
 
     clean_before = tree_is_clean(REPO_ROOT)
     head = head_commit(REPO_ROOT)
@@ -483,8 +543,9 @@ def main() -> int:
         execution_id = f"explicit:{Path(args.junit).parent.name}"
     Path(args.junit).parent.mkdir(parents=True, exist_ok=True)
     Path(args.log).parent.mkdir(parents=True, exist_ok=True)
-    harness = c1_harness_digest(REPO_ROOT)
-    env_digest = pod_test_environment_digest(REPO_ROOT)
+    harness = sweep.harness(REPO_ROOT)
+    env_digest = _env_digest(REPO_ROOT,
+                             named_files=sweep.record.named_files)
 
     # --- the staged view, DERIVED from the session that will be launched -----
     #
@@ -495,13 +556,14 @@ def main() -> int:
     # that then failed six ways for $0.6986. The visible set now comes from the
     # same SetupManifest the SessionRunner launches, and the hidden set is
     # computed as its complement rather than declared.
-    spec, contract, staged_view, setup_env = derive_c1_session()
+    spec, contract, staged_view, setup_env = derive_session(sweep)
     #: The complement inside the repository, plus the host-local stores outside
     #: it that the session's own documents name. Both are things this machine
     #: holds and the pod does not; only the first was modelled until attempt 14
     #: paid to find the second.
     in_tree = hidden_files(contract, REPO_ROOT)
-    host_local = host_local_stores(c1_launcher(), REPO_ROOT)
+    host_local = host_local_stores(launcher_module(sweep.launcher_module),
+                                   REPO_ROOT)
     hidden = [*in_tree, *host_local]
     pytest_cmd = (".venv/bin/python -m pytest tests/ -q "
                   + " ".join(f"--ignore={i}" for i in contract["test_ignores"]))
@@ -570,17 +632,15 @@ def main() -> int:
         return 2
 
     junit = read_junit(args.junit, REPO_ROOT)
-    findings = evaluate_sweep(junit["outcomes"], junit.get("skip_reasons"))
+    findings = _evaluate_sweep(junit["outcomes"], junit.get("skip_reasons"),
+                               groups=sweep.groups)
 
     record = {
         # The wire format is the SESSION's, read off the contract the verifier
         # will check against. Writing one string here and comparing another
         # somewhere else is how a record and its gate come to disagree.
-        "schema": C1_RECORD_CONTRACT.schema,
-        "_what_this_is": (
-            "one complete pod-like sweep of the CPU test suite: the condition a "
-            "fresh C1 pod is actually in, which is what C1 attempt 3R's setup "
-            "test gate refused for $0.3482 with zero scientific stages run."),
+        "schema": sweep.record.schema,
+        "_what_this_is": sweep.what_this_is,
         #: THE commit the sweep ran on, clean. `pod_environment_gate` requires
         #: the session commit to descend from it with no tracked change beyond
         #: the readiness record (and, once issued, the authorization artifact).
@@ -598,14 +658,14 @@ def main() -> int:
         "record_kind_note": (
             "diagnostic: proves the pod-like suite passes on this exact tree and "
             "that the readiness machinery works. A launch-bound record is the one "
-            "a maintainer-approved C1 launch rests on. It is produced on the final "
+            "a maintainer-approved launch rests on. It is produced on the final "
             "CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are "
             "committed, BEFORE the authorization is issued -- because a sweep run "
             "after issuance adds a second path to the lineage diff and "
             "session_commit_gate refuses."),
         "tree_clean": clean_before,
-        C1_RECORD_CONTRACT.harness_field: harness["digest"],
-        "c1_harness_n_files": harness["n_files"],
+        sweep.record.harness_field: harness["digest"],
+        sweep.harness_n_files_field: harness["n_files"],
         "pod_test_environment_digest": env_digest["digest"],
         "pod_test_environment_n_files": env_digest["n_files"],
         "pod_test_environment_named_files": env_digest["named_files"],
@@ -679,7 +739,9 @@ def main() -> int:
                      "junit_sha256": _sha256_of(args.junit),
                      "pytest_log_sha256": _sha256_of(args.log),
                      "executions_of_this_tree": existing_executions(head)},
-        "renderer_parity_is_proved_by": "logs/stages/stage-1/phase_c1/validations/renderer-parity/c1_renderer_parity.json",
+        #: Whatever else this experiment states about its own readiness. C1
+        #: names the renderer-parity validation here; C2 has no renderer.
+        **dict(sweep.extra_record_fields),
     }
     if realization["problems"]:
         record["problems"] = list(record["problems"]) + realization["problems"]
@@ -710,16 +772,19 @@ def main() -> int:
     #: run-owned record from run_id and stage_id -- and ordinary state
     #: maintenance may refresh it once launch lineage no longer depends on the
     #: pre-authorization tree.
-    if args.run_id and args.kind != "launch_bound":
+    #: An experiment with no pointer has nothing to keep in step: its record is
+    #: run-owned and that is the only place it lives.
+    if sweep.pointer_path and args.run_id and args.kind != "launch_bound":
         #: A POINTER, not a second record: it says where the live evidence is
         #: and what it hashes to, so one stable path still answers "which sweep
         #: is current" without becoming a copy that can drift.
-        pointer = pointer_for(args.run_id, args.stage_id, record, record_rel)
-        (REPO_ROOT / RECORD_POINTER).write_text(
+        pointer = pointer_for(sweep, args.run_id, args.stage_id, record,
+                              record_rel)
+        (REPO_ROOT / sweep.pointer_path).write_text(
             json.dumps(pointer, indent=1) + "\n")
-        print(f"pointer: {RECORD_POINTER} -> {record_rel}")
-    elif args.run_id:
-        print(f"pointer: {RECORD_POINTER} left UNCHANGED — a launch_bound "
+        print(f"pointer: {sweep.pointer_path} -> {record_rel}")
+    elif sweep.pointer_path and args.run_id:
+        print(f"pointer: {sweep.pointer_path} left UNCHANGED — a launch_bound "
               "sweep writes only the run-owned record, so the tree it swept "
               "stays the tree it describes")
 

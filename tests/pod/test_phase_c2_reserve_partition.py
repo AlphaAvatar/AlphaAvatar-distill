@@ -61,9 +61,11 @@ def registered():
 def wired(registered):
     launcher = load(LAUNCHER, "c2_launch_rp")
     driver = load(DRIVER, "c2_driver_rp")
+    #: `--run-id` is REQUIRED since 2026-09-15: the run owns this session's
+    #: governance artifacts, and the authorization path is resolved from it.
     args = launcher.build_parser().parse_args(
         ["--scr", "/tmp/c2", "--session-commit", "0" * 40,
-         "--bundle", "aad_00000000.bundle"])
+         "--bundle", "aad_00000000.bundle", "--run-id", "spec_check"])
     spec = launcher.spec(args).validate()
 
     from aadistill.infrastructure.budget import StepTime, plan_session

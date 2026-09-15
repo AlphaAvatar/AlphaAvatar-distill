@@ -454,6 +454,24 @@ moved both, making those records unverifiable against the current code (P4).
     C1 attempt 5's `--strict` skip-set comparison was correct machinery pointed at
 ```
 
+### `src/aadistill/infrastructure/bundle_transport.py`
+
+Added 2026-09-15, when the transport question was extracted from one
+experiment's copy into reusable infrastructure. The prose the core may not carry:
+
+```text
+    C1 attempt 1 passed all eight pre-provider gates, created a pod and died at
+    `SETUP_RC=1`: the pod could not fetch `transfer/c1`, because no git bundle had
+    been created for the session commit. `$0.0786` for a 404.
+
+    `--bundle c1` was an alias for nothing, and the launcher accepted it.
+
+    The second copy is `scripts/experiments/phase_c1/bundle.py`. It stays because
+    it is a member of C1's frozen executable set: importing the core module from
+    it would move C1's harness digest and invalidate records describing completed
+    attempts, for no benefit to a phase closed by a verdict.
+```
+
 ### `src/aadistill/runtime/device_handoff.py`
 
 ```text

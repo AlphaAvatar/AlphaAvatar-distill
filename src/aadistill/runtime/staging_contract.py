@@ -64,6 +64,39 @@ def _is_tooling(rel: str) -> bool:
             or rel.endswith(".pyc"))
 
 
+def ignores_for_selection(selection: str,
+                          repo_root: str | Path = ".") -> tuple[str, ...]:
+    """The `--ignore` list that leaves exactly `selection` collectable.
+
+    The pod's blocking gate is `pytest tests/ $SESSION_TEST_IGNORES` and a
+    session may only add flags, so "run only my preflight directory" has to be
+    expressed as a COMPLEMENT — and this module's opening argument applies to
+    that complement too. Hand-written, it drifts in the dangerous direction: a
+    test directory added tomorrow says nothing about itself, joins the paid
+    suite by default, and is discovered on a billing machine. Derived, anything
+    new is excluded by default, which is the safe direction for a GPU that
+    charges by the minute; a session that wants it must say so.
+
+    `conftest.py` is never ignored — it is where the suite's fixtures come from,
+    not a test. `__pycache__` and dotted entries are not collectable.
+    """
+    root = Path(repo_root) / "tests"
+    keep = selection.split("/", 1)[1] if "/" in selection else selection
+    if not (root / keep).is_dir():
+        raise FileNotFoundError(
+            f"the declared pod test selection {selection!r} is not a directory "
+            f"under {root}; a complement derived from a missing selection would "
+            "ignore the whole suite")
+    out = []
+    for entry in sorted(root.iterdir()):
+        if (entry.name == keep or entry.name.startswith(".")
+                or entry.name == "__pycache__" or entry.name == "conftest.py"):
+            continue
+        if entry.is_dir() or entry.suffix == ".py":
+            out.append(f"tests/{entry.name}")
+    return tuple(out)
+
+
 def derive_contract(setup: Any, *, session_id: str = "") -> dict[str, Any]:
     """The staged view, read straight off the `SetupManifest` the runner uses.
 

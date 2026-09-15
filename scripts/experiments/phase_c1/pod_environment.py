@@ -199,6 +199,58 @@ def verify_record(record: dict, repo_root=".", **kwargs):
     return _pe.verify_record(record, repo_root, **kwargs)
 
 
+def c1_sweep_contract(run_id: str | None = None,
+                      stage_id: str | None = None,
+                      kind: str | None = None):
+    """How to DRIVE a C1 readiness sweep, for the generic recorder.
+
+    `kind` is accepted and ignored: C1's record path does not depend on it,
+    because `None` already resolves to the historical repository-root pointer
+    path that every pre-2026-09-12 sweep wrote to.
+
+    Every value here was a module-level constant, a hardcoded string or a
+    top-level import inside `scripts/autoinit/record_pod_environment.py`. None of
+    them changes: the schema, the two record key names, the pointer path and its
+    schema, the session id and the prose are exactly what C1's existing records
+    carry, because their self-hashes were computed over those bytes.
+    """
+    from aadistill.runtime.pod_environment import SweepContract
+
+    def bundle_name(commit: str) -> str:
+        from experiments.phase_c1.bundle import canonical_bundle_name
+
+        return canonical_bundle_name(commit)
+
+    def harness(repo_root):
+        from experiments.phase_c1.authorization import c1_harness_digest
+
+        return c1_harness_digest(repo_root)
+
+    return SweepContract(
+        experiment_id="phase_c1",
+        record=c1_record_contract(run_id, stage_id),
+        groups=C1_READINESS_GROUPS,
+        launcher_module="autoinit_c1_launch",
+        session_id="autoinit-c1",
+        bundle_name=bundle_name,
+        harness=harness,
+        harness_n_files_field="c1_harness_n_files",
+        what_this_is=(
+            "one complete pod-like sweep of the CPU test suite: the condition a "
+            "fresh C1 pod is actually in, which is what C1 attempt 3R's setup "
+            "test gate refused for $0.3482 with zero scientific stages run."),
+        pointer_path=RECORD_POINTER,
+        pointer_schema="aadistill.autoinit.c1_readiness_pointer/v1",
+        pointer_history=(
+            "logs/stages/stage-1/phase_c1/history/readiness_history.json"),
+        extra_record_fields={
+            "renderer_parity_is_proved_by":
+                "logs/stages/stage-1/phase_c1/validations/renderer-parity/"
+                "c1_renderer_parity.json",
+        },
+    )
+
+
 def permitted_post_sweep_paths(run_id: str | None = None,
                                stage_id: str | None = None) -> tuple[str, ...]:
     """The tracked paths that may differ after THIS run's sweep.
@@ -217,5 +269,5 @@ PERMITTED_POST_SWEEP_PATHS = permitted_post_sweep_paths()
 
 __all__ = ["C1_RECORD_CONTRACT", "PERMITTED_POST_SWEEP_PATHS",
            "POD_TEST_ENVIRONMENT_FILES_V1", "RECORD_PATH", "SCHEMA",
-           "c1_harness_digest_value", "load_record",
+           "c1_harness_digest_value", "c1_sweep_contract", "load_record",
            "pod_test_environment_digest", "verify_record"]

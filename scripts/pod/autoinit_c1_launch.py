@@ -177,11 +177,18 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #:
 #: The full suite is unchanged and still runs in development, in convergence and
 #: in CI. What changed is that a billing GPU is no longer responsible for it.
-TEST_IGNORES = ("tests/architecture", "tests/autoinit", "tests/data",
-                "tests/docs", "tests/evaluation", "tests/infrastructure",
-                "tests/init", "tests/models", "tests/pod", "tests/rollout",
-                "tests/runtime", "tests/support", "tests/training",
-                "tests/validation", "tests/test_usable_rollout.py")
+#:
+#: `tests/c2_preflight` is here for the reason the derivation exists: it is
+#: another experiment's pod selection, it appeared after C1 closed, and a C1 pod
+#: has no business running it. The list is still hand-written because C1 is
+#: frozen and re-deriving it would move the digest a closed attempt's evidence
+#: describes; a NEW session should use `ignores_for_selection` instead.
+TEST_IGNORES = ("tests/architecture", "tests/autoinit", "tests/c2_preflight",
+                "tests/data", "tests/docs", "tests/evaluation",
+                "tests/infrastructure", "tests/init", "tests/models",
+                "tests/pod", "tests/rollout", "tests/runtime", "tests/support",
+                "tests/training", "tests/validation",
+                "tests/test_usable_rollout.py")
 
 #: The directory that survives those ignores. Named so the contract is greppable
 #: from the launcher rather than only inferable from what is missing.

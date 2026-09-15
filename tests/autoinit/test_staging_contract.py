@@ -371,7 +371,13 @@ def test_the_recorder_derives_and_never_falls_back(contract):
     """No default path. A sweep that cannot say what this session stages must
     not run at all, because that is exactly what attempt 4 did."""
     src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
-    assert "derive_c1_session()" in src
+    #: `derive_c1_session()` until 2026-09-15. The recorder now drives one
+    #: experiment per invocation through the `SweepContract` that experiment
+    #: declares, so the function is `derive_session(sweep)` and the session id
+    #: it derives the contract under comes from the contract rather than from a
+    #: literal here. The PROPERTY is unchanged and is what this asserts: the
+    #: staged view is derived from the session's own manifest, with no default.
+    assert "derive_session(sweep)" in src
     assert '"HIDDEN_PATHS"' in src and '"PODSIM_CMD"' in src
     assert "hidden_files(contract, REPO_ROOT)" in src
     # No except-and-continue around the derivation.
@@ -383,10 +389,10 @@ def test_the_recorder_derives_and_never_falls_back(contract):
     import ast
 
     fn = next(n for n in ast.parse(src).body
-              if isinstance(n, ast.FunctionDef) and n.name == "derive_c1_session")
+              if isinstance(n, ast.FunctionDef) and n.name == "derive_session")
     handlers = [n for n in ast.walk(fn) if isinstance(n, ast.ExceptHandler)]
     assert not handlers, (
-        "derive_c1_session swallows an error and would let the sweep fall back "
+        "derive_session swallows an error and would let the sweep fall back "
         "to the generic simulator default")
 
 
@@ -477,8 +483,11 @@ def test_the_verifier_declares_every_role_and_cross_checks_frozen_counts():
 def _c1_session():
     import sys as _sys
     _sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    from record_pod_environment import derive_c1_session
-    return derive_c1_session()
+    from record_pod_environment import derive_session, sweep_contract
+
+    #: C1's session, through the generic driver. `derive_c1_session()` was this
+    #: call with C1 baked in; the experiment is now named.
+    return derive_session(sweep_contract("phase_c1", None, None))
 
 
 def test_the_setup_environment_comes_from_the_production_method():

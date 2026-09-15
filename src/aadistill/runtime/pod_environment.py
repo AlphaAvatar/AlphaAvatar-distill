@@ -153,6 +153,79 @@ class ReadinessGroups:
         return {n for g in self.expected_skips.values() for n in g}
 
 
+@dataclass(frozen=True)
+class SweepContract:
+    """Everything a readiness SWEEP needs that is an experiment's own fact.
+
+    `RecordContract` says what a record looks like and `ReadinessGroups` says
+    what a sweep should observe. This third piece says how to DRIVE one: which
+    launcher to load, which session id to derive the staged view under, which
+    harness to digest, and what the record's experiment-specific prose is.
+
+    It exists because the recorder — `scripts/autoinit/record_pod_environment.py`
+    — was written against exactly one experiment: it imported
+    `c1_harness_digest` at module level, loaded `autoinit_c1_launch` by name,
+    derived the contract under the literal session id `autoinit-c1`, wrote the
+    record key `c1_harness_n_files`, and maintained a `c1_readiness_pointer`. A
+    second session therefore had two options, and both were wrong: copy seven
+    hundred lines of hard-won scar tissue, or have no readiness record at all.
+
+    The callables stay callables for the same reason `RecordContract.harness_digest`
+    does: they are evaluated against the LIVE tree when the sweep runs, and a
+    value captured at declaration time would describe whatever the tree was when
+    somebody imported this module.
+    """
+
+    #: The experiment's key in the run layout. Also scopes pointer maintenance:
+    #: a glob over every experiment's runs would let one experiment's newest
+    #: record become another's pointer target.
+    experiment_id: str
+    #: The record's wire format, for this run.
+    record: RecordContract
+    #: What the sweep expects to observe.
+    groups: "ReadinessGroups"
+    #: The launcher module's name under `scripts/pod/`, loaded the way the
+    #: structural checks load every launcher.
+    launcher_module: str
+    #: The session id the staging contract is derived under.
+    session_id: str
+    #: `(commit) -> bundle name`. The sweep needs one to build the production
+    #: setup environment; no bundle is staged and none is uploaded.
+    bundle_name: Callable[[str], str]
+    #: `(repo_root) -> {"digest", "n_files", ...}`. The full mapping, not just
+    #: the digest, because the record states both.
+    harness: Callable[[Any], Mapping[str, Any]]
+    #: Which record key holds the harness file COUNT. C1's records say
+    #: `c1_harness_n_files` and renaming it would invalidate their self-hashes.
+    harness_n_files_field: str
+    #: What this record is, in the experiment's own words.
+    what_this_is: str
+    #: A navigation pointer, when the experiment has one. `None` means the
+    #: record is run-owned and there is no second file to drift from it — which
+    #: is where C1's pointer machinery ended up pointing, and the better default
+    #: for anything new.
+    pointer_path: str | None = None
+    pointer_schema: str | None = None
+    pointer_history: str | None = None
+    #: Experiment-specific record fields, merged in as-is.
+    extra_record_fields: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        for name in ("experiment_id", "launcher_module", "session_id",
+                     "harness_n_files_field"):
+            if not str(getattr(self, name) or "").strip():
+                raise ValueError(
+                    f"incomplete sweep contract: {name} carries no value")
+        for name in ("bundle_name", "harness"):
+            if not callable(getattr(self, name)):
+                raise ValueError(f"{name} must be callable: it is evaluated "
+                                 "against the live tree when the sweep runs")
+        if self.pointer_path and not self.pointer_schema:
+            raise ValueError(
+                "a pointer path without a pointer schema: a navigation document "
+                "that cannot say what it is cannot be verified by anything")
+
+
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as fh:
