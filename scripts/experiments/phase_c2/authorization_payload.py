@@ -27,10 +27,8 @@ identity is re-derived here and compared, and an identity this issuer does not
 know how to derive is itself a refusal — a grant cannot introduce a binding
 nobody checks.
 
-Seven identities plus the commit are re-derived from the tree:
+Seven identities are re-derived from the tree, and **none of them is a commit**:
 
-* the clean pre-authorization session commit (the caller's, checked against the
-  commit the grant was reviewed at);
 * the LIVE derived C2 executable closure — digest and file count, from
   `c2_current_executable`, not from any declared list;
 * the C2 plan hash, which covers the session contract AND the configured space;
@@ -44,6 +42,23 @@ Seven identities plus the commit are re-derived from the tree:
 That last one is why this file refuses rather than warns. C1 attempt 2 died at a
 marker because a readiness record described a tree that had moved; the readiness
 check belongs where the authorization is created, not only where it is consumed.
+
+**No commit is a verified identity, and that is deliberate.** A
+`reviewed_commit` was one until 2026-09-16, derived as the issuer's own
+`session_commit` — which made the chain unsatisfiable. The formal order is:
+grant committed → `launch_bound` sweep on that clean grant-containing tree →
+commit only the readiness record → issue on the resulting clean HEAD. The
+issuance HEAD is therefore always later than the grant, so satisfying that
+identity meant predicting a SHA that did not exist yet; and amending the grant
+after the sweep would have invalidated the readiness lineage it was swept under.
+
+Nothing replaced it. The execution tree is bound by the chain: the grant is
+present in the swept base, the launch-bound record binds that base together with
+the executable and environment digests, the authorization is issued against the
+clean post-readiness HEAD and records it as `authorized_session_commit`, and the
+session lineage rule then permits only the authorization artifact after that
+base. A grant may name the commit its review was given against as prose outside
+the identities block — human provenance, not a machine-checked equality.
 
 Building a payload is still not issuing one: nothing here reads a clock, runs
 git, writes to `logs/`, stages a bundle or contacts a provider.
@@ -113,13 +128,32 @@ def flatten_money(grant: Mapping[str, Any],
             "cumulative_cap_usd": float(block[money["cap"]])}
 
 
-def live_identities(session_commit: str,
-                    repo_root: str | Path = ".") -> dict[str, Any]:
+def live_identities(repo_root: str | Path = ".") -> dict[str, Any]:
     """Every identity a C2 grant may assert, DERIVED from this tree.
 
     One function, so the issuer and any checker compare against the same
     derivation. Each value is computed here and now; nothing is read from a
     record that claims it.
+
+    **It takes no commit, and that is the repair.** It used to take
+    `session_commit` and return it as `reviewed_commit`, a verified identity —
+    which made the launch chain unsatisfiable, because the issuer's
+    `session_commit` is the clean HEAD *after* the readiness record has been
+    committed, and a grant is authored *before* the sweep that produces it. The
+    grant would have had to predict a SHA that did not yet exist, and editing
+    the grant afterwards would have invalidated the readiness lineage it was
+    swept under.
+
+    Every identity below is a property of the TREE, not of a point in its
+    history, so each one is satisfiable by a grant written at any time before
+    issuance. Removing the parameter is what keeps it that way: a future commit
+    field cannot be added back by accident when there is no commit to reach for.
+
+    What binds the execution tree is the chain, not a field in the grant: the
+    grant is present in the swept base, the launch-bound record binds that base,
+    the authorization is issued against the post-readiness HEAD and records it
+    as `authorized_session_commit`, and the lineage rule then permits only the
+    authorization artifact after that base.
     """
     from experiments.phase_c2 import baseline as B
     from experiments.phase_c2.search_space import register_c2_operators
@@ -137,7 +171,6 @@ def live_identities(session_commit: str,
     pricing = load_pricing(root)
     spec = B.frozen_baseline_spec(device="cuda")
     return {
-        "reviewed_commit": session_commit,
         "c2_harness_digest": closure["digest"],
         "c2_harness_n_files": closure["n_files"],
         "c2_plan_hash": c2_plan_hash(),
@@ -181,6 +214,22 @@ def verify_asserted_identities(grant: Mapping[str, Any], live: Mapping[str, Any]
     claims = {k: v for k, v in asserted.items() if not k.startswith("_")}
     unknown = sorted(set(claims) - set(known))
     if unknown:
+        #: Named specifically, because it is the one a reader expects to be
+        #: there: every grant written before 2026-09-16 carries it, and the
+        #: reason it is gone is a chronology, not a typo.
+        if "reviewed_commit" in unknown:
+            raise GrantRefused(
+                "the grant asserts `reviewed_commit` inside the identities "
+                "block. No commit is a verified identity: the issuance HEAD is "
+                "the clean tree AFTER the readiness record is committed, so a "
+                "grant authored before the sweep cannot state it, and amending "
+                "the grant afterwards would invalidate the readiness lineage. "
+                "Move it out of the block as prose if it documents which commit "
+                "the review was given against; the execution tree is bound by "
+                "the swept base, the readiness record and "
+                "`authorized_session_commit`."
+                + (f" Also unrecognised: {sorted(set(unknown) - {'reviewed_commit'})}."
+                   if set(unknown) - {"reviewed_commit"} else ""))
         raise GrantRefused(
             f"the grant asserts {unknown}, which this issuer does not derive. "
             f"It derives {sorted(known)}. An identity nobody re-computes is not "
@@ -286,7 +335,7 @@ def build_c2_authorization_payload(
                            ceiling_usd=HARD_CEILING_USD,
                            expected_cap_usd=CUMULATIVE_CAP_USD)
 
-    live = live_identities(session_commit, root)
+    live = live_identities(root)
 
     # --- refuse on any disagreement between the committed objects ----------
     problems = []

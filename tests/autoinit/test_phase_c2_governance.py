@@ -407,7 +407,9 @@ def candidate_grant(repo_root=REPO) -> dict:
     """
     from experiments.phase_c2.authorization_payload import live_identities
 
-    live = live_identities("0" * 40, repo_root)
+    #: No commit argument: `live_identities` takes none, because no commit is a
+    #: verified identity. See the chronology test at the end of this section.
+    live = live_identities(repo_root)
     return {
         "granted_by": "TEST FIXTURE — not a maintainer, not a grant",
         "covers": ("an ephemeral candidate used to drive the real pre-provider "
@@ -496,15 +498,24 @@ def test_the_payload_round_trips_through_the_real_loader(tmp_path):
     assert auth.authorizes_c2_search1 is True
 
 
+#: Every genuine verified identity, one parametrisation each. `reviewed_commit`
+#: was in this list until 2026-09-16; it is not an identity of the tree but a
+#: point in its history, and requiring a grant to reproduce it made the chain
+#: unsatisfiable — see `test_the_real_grant_then_readiness_then_issuance_chronology_works`.
 @pytest.mark.parametrize("identity", [
-    "c2_harness_digest", "c2_plan_hash", "c2_session_contract_hash",
-    "pricing_sha256", "baseline_spec_hash", "baseline_artifact_digest",
-    "reviewed_commit",
+    "c2_harness_digest", "c2_harness_n_files", "c2_plan_hash",
+    "c2_session_contract_hash", "pricing_sha256", "baseline_spec_hash",
+    "baseline_artifact_digest",
 ])
 def test_an_identity_that_no_longer_reproduces_is_refused(identity):
     """Each one separately, because "it refuses something" is not the claim —
     the claim is that it refuses THIS binding, and a single check that only ever
-    exercised one field would pass for a builder that ignored the rest."""
+    exercised one field would pass for a builder that ignored the rest.
+
+    These are the identities that still bind: the executable closure and its
+    file count, the plan hash, the session-contract hash, the pricing hash and
+    B's spec hash and artifact digest. Each is a property of the TREE, so a
+    grant written at any time before issuance can state it truthfully."""
     from experiments.phase_c2.authorization_payload import C2AuthorizationRefused
 
     grant = candidate_grant()
@@ -527,17 +538,150 @@ def test_an_identity_the_issuer_cannot_derive_is_refused():
 
 
 def test_the_superseded_attempt1_grant_is_refused_by_the_issuer():
-    """The whole point of item 1, executed. This grant was valid at the commit
-    it binds; it asserts an eighteen-path harness identity that the derived
-    closure does not reproduce, and a `set_version` the issuer no longer has a
-    mechanism for."""
+    """Executed, not asserted. That grant was valid at the commit it binds, and
+    three separate things now refuse it: an eighteen-path harness identity the
+    derived closure does not reproduce, a `c2_harness_set_version` naming a
+    mechanism that no longer exists, and a `reviewed_commit` inside the
+    identities block, which is no longer a machine-verified identity at all."""
     from experiments.phase_c2.authorization_payload import C2AuthorizationRefused
 
     grant = json.loads((REPO / "logs/stages/stage-1/phase_c2/runs/attempt1/"
                         "governance/grant.json").read_text())
-    with pytest.raises(C2AuthorizationRefused):
-        build(grant=grant, session_commit=grant[
-            "bound_identities_the_issuer_must_reproduce"]["reviewed_commit"])
+    bound = grant["bound_identities_the_issuer_must_reproduce"]
+    #: Read from the historical document, which still carries all three.
+    assert bound["reviewed_commit"].startswith("7d0a35af")
+    assert bound["c2_harness_n_files"] == 18
+    assert "c2_harness_set_version" in bound
+
+    with pytest.raises(C2AuthorizationRefused) as refused:
+        build(grant=grant, session_commit=bound["reviewed_commit"])
+    #: The FIRST thing it hits is the block it may not contain, which is the
+    #: refusal a reader of that grant needs to see.
+    assert "reviewed_commit" in str(refused.value)
+
+
+def test_the_real_grant_then_readiness_then_issuance_chronology_works():
+    """THE chronology, which every fixture above flattens into one commit.
+
+    The formal order has three distinct trees, and no two of them are the same
+    commit:
+
+        1. a maintainer reviews some tree and writes the grant
+        2. the grant is committed                          -> commit G
+        3. the launch_bound sweep runs on G and records it as swept_base
+        4. only the readiness record is committed          -> commit R
+        5. the authorization is issued against R           -> session_commit = R
+
+    `reviewed_commit` was a verified identity derived as the issuer's own
+    `session_commit`, i.e. R. A grant written at step 1 cannot state R: it does
+    not exist, it is two commits in the future, and it depends on the hash of a
+    record produced by sweeping the grant itself. Amending the grant at step 4
+    to add R would change G, and the readiness record's `swept_base_commit`
+    would no longer describe the tree — so there was no order in which the chain
+    could be satisfied. The same impossibility C1 attempt 13 hit from the other
+    direction, and it was in the contract rather than in the code.
+
+    This asserts the repair on the smallest seam there is: the payload builder,
+    called with a `session_commit` that is a REAL and DIFFERENT commit from the
+    one the grant's prose names. No git plumbing, no fixture repository, no new
+    framework — the builder is where the impossibility lived, so it is where the
+    possibility has to be shown.
+    """
+    import subprocess
+
+    from experiments.phase_c2.authorization_payload import (
+        build_c2_authorization_payload,
+    )
+
+    def rev(spec: str) -> str:
+        return subprocess.run(["git", "rev-parse", spec], cwd=REPO,
+                              capture_output=True, text=True,
+                              check=True).stdout.strip()
+
+    #: Two real commits of this repository, standing in for "the tree the
+    #: maintainer reviewed" and "the clean HEAD after the readiness record was
+    #: committed". Real, so the test cannot be satisfied by a string that could
+    #: never be a commit; different, which is the whole point.
+    reviewed, issuance = rev("HEAD~1"), rev("HEAD")
+    assert reviewed != issuance
+
+    grant = candidate_grant()
+    #: Step 1: the grant's own basis is PROSE, outside the identities block.
+    grant["granted_by"] = (
+        "TEST FIXTURE — standing in for a maintainer decision taken after "
+        f"independent review of commit {reviewed}")
+    bound = grant["bound_identities_the_issuer_must_reproduce"]
+    assert "reviewed_commit" not in bound, (
+        "the fixture is back to asserting a commit; the chronology this test "
+        "describes would be unsatisfiable again")
+
+    #: Step 5: issuance happens against a LATER commit, and the grant said
+    #: nothing about it — because it could not have.
+    payload = build_c2_authorization_payload(
+        grant=grant, session_commit=issuance,
+        granted_utc="2026-01-01T00:00:00+00:00", run_id=RUN_ID,
+        stage_id=STAGE_ID, repo_root=REPO, require_readiness_record=False,
+        grant_path="<test fixture>")
+
+    #: It issued, and the tree identities — unchanged across all three commits —
+    #: are what permitted it.
+    from experiments.phase_c2.session import (
+        C2_SESSION_CONTRACT, c2_current_executable, c2_plan_hash,
+    )
+
+    live = c2_current_executable(REPO)
+    assert payload["bound"]["c2_harness_digest"] == live["digest"]
+    assert payload["bound"]["c2_plan_hash"] == c2_plan_hash()
+    assert payload["bound"]["c2_session_contract_hash"] == (
+        C2_SESSION_CONTRACT.contract_hash)
+    assert payload["hard_cap_usd"] == 15.0446
+
+    #: The commit binding lives where it can: the authorization records the
+    #: issuance HEAD, and NO grant field had to predict it.
+    assert payload["authorized_session_commit"] == issuance
+    assert payload["provenance_commit"] == issuance
+    grant_text = json.dumps(payload["grant"])
+    assert issuance not in grant_text, (
+        "a grant field carries the issuance commit, so the grant would again "
+        "have to be written after the readiness sweep it precedes")
+    assert reviewed in grant_text, (
+        "the reviewed commit is not recorded even as provenance; a reader "
+        "cannot tell which tree the decision was taken against")
+    #: And prose is all it is: nothing compares it to anything.
+    assert reviewed != payload["authorized_session_commit"]
+
+
+def test_the_chronology_does_not_weaken_the_identities_that_do_bind():
+    """Removing a commit from the contract must not remove anything else.
+
+    Asked as one statement over the whole set, because the parametrised test
+    above proves each identity refuses individually and this proves the SET is
+    still the one the config declares — a repair that quietly emptied
+    `verified_identities` would satisfy every test above.
+    """
+    from experiments.phase_c2.authorization_payload import (
+        live_identities, load_config,
+    )
+
+    declared = tuple(load_config(REPO)["grant_contract"]["verified_identities"])
+    assert declared == ("c2_harness_digest", "c2_harness_n_files",
+                        "c2_plan_hash", "c2_session_contract_hash",
+                        "pricing_sha256", "baseline_spec_hash",
+                        "baseline_artifact_digest")
+    assert "reviewed_commit" not in declared
+
+    #: Every declared identity is one the issuer actually derives, and the
+    #: derivation offers nothing the contract does not verify.
+    derivable = {k for k in live_identities(REPO) if not k.startswith("_")}
+    assert derivable == set(declared), sorted(derivable ^ set(declared))
+    #: And none of them is a commit-shaped value from this repository's history.
+    import subprocess
+
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO,
+                          capture_output=True, text=True,
+                          check=True).stdout.strip()
+    live = live_identities(REPO)
+    assert head not in {str(v) for v in live.values()}
 
 
 def test_a_grant_with_no_identities_block_is_refused():

@@ -34,8 +34,8 @@
    "spend": "cumulative_spend_usd",
    "cap": "authorized_cap_usd"
   },
+  "_no_commit_is_a_verified_identity": "reviewed_commit was in the list below until 2026-09-16 and it made the launch chain UNSATISFIABLE. live_identities() derived it as the issuer's own session_commit, so a grant could only satisfy it by predicting a SHA that does not exist when the grant is written: the formal order is grant committed -> launch_bound readiness sweep on that clean grant-containing tree -> commit only the readiness record -> issue on the resulting clean HEAD, so the issuance HEAD is necessarily LATER than the grant, and editing the grant after the sweep would invalidate the readiness lineage it was swept under. Nothing replaced it, and nothing should: the exact execution tree is already bound by the chain itself -- the grant is present in the swept base, the launch-bound record binds that base together with the executable and environment digests, the authorization is issued against the clean post-readiness HEAD and records it as authorized_session_commit, and the session lineage rule then permits only the authorization artifact after that base. A grant MAY name the commit its independent review was given against as PROSE outside the identities block; that is human provenance and is not required to equal the future issuance HEAD.",
   "verified_identities": [
-   "reviewed_commit",
    "c2_harness_digest",
    "c2_harness_n_files",
    "c2_plan_hash",

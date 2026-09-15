@@ -462,7 +462,28 @@ authorization, no bundle, no provider resource. Those are a maintainer decision
 and then a chain, in that order, on the final clean pre-authorization tree when
 a launch is genuinely imminent.
 
+**The chain has three commits, and no grant field predicts them.** The formal
+order is: the maintainer reviews a tree and writes the grant; the grant is
+committed; the `launch_bound` sweep runs on that clean grant-containing tree and
+records it as its swept base; only the readiness record is committed; the
+authorization is issued against the resulting clean HEAD, which it records as
+`authorized_session_commit`; the bundle is staged for that commit; the launch
+runs. So the issuance HEAD is necessarily two commits later than the grant.
+
+Until 2026-09-16 the grant contract required a `reviewed_commit` *identity* that
+the issuer derived as its own `session_commit` — the issuance HEAD — which no
+grant authored before the sweep could state, and which could not be added
+afterwards without changing the very tree the readiness record had been swept
+against. It is gone, and nothing replaced it: **no commit is a machine-verified
+grant identity.** The seven that remain — the executable closure and its file
+count, the plan hash, the session-contract hash, the pricing hash, B's spec hash
+and B's artifact digest — are properties of the tree rather than points in its
+history, so a grant can state them truthfully whenever it is written. A grant
+may name the commit its review was given against as prose; that is provenance
+for a reader, not an equality anything checks.
+
 Attempt 1 is **PRE-AUTHORIZATION SUPERSEDED**: `$0` spend, nothing launched. Its
-grant bound the 18-file harness *declaration*, and the identity a grant binds is
-now derived, so the issuer refuses it. Search-2 is not implemented either: it is
-conditional on Search-1's evidence.
+grant bound the 18-file harness *declaration*, names a `c2_harness_set_version`
+whose mechanism no longer exists, and asserts `reviewed_commit` inside the
+identities block — three independent refusals. Search-2 is not implemented
+either: it is conditional on Search-1's evidence.
