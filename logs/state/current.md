@@ -9,16 +9,23 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing. No pod exists**, no further C1
-attempt is authorized, and **nothing is prepared for launch** — attempt3's
-one-use chain is consumed. Attempt 3's pod `o9m4onsnaxrjp4` was deleted 9.2 min
-after creation, the provider confirms it is gone, and an independent query
-returns `ZERO_PODS` with `pod(o9m4onsnaxrjp4) = null`.
+**A PAID SESSION IS RUNNING AND BILLING.** Phase-C2 Search-1 `attempt4`
+launched 2026-09-16 at 18:58 UTC on pod `vqwg6o4ftpda4b`, NVIDIA L40S at
+`$1.09/h`, under a `$15.0446` ceiling with a `$14.4996` soft stop and an
+independent watchdog at 828 min. All nine `$0` pre-provider gates passed.
+Live evidence: `/home/ecs-user/aad-scratch/c2_attempt4/` (launcher, an
+independent read-only cost poller, the watchdog journal). The beam envelope is
+635.96 min, so the session may run ~11 h; it trains nothing.
 
-**Phase-C2 Search-1 `attempt4` is the next formal attempt, and its chain is not
-yet built.** Attempts 2 and 3 both launched and both aborted before the beam
-search — `$0.0552` and `$0.1674`, `$0.2226` together, **no measurement of any
-kind**. Neither is a Search-1 null, partial or scientific result.
+Attempt 4's chain is complete and **consumed**: grant `e76e42b` → launch-bound
+readiness `b852082` → authorization `74cfe3e` → bundle `aad_autoinit_74cfe3e3`
+(`ac7634cd85e5…`). Attempts 1–3 are historical and immutable and none of their
+artifacts is reused.
+
+Attempts 2 and 3 both launched and both aborted before the beam search —
+`$0.0552` and `$0.1674`, `$0.2226` together, **no measurement of any kind**.
+Neither is a Search-1 null, partial or scientific result. Attempt 3's pod was
+deleted 9.2 min after creation and the provider confirmed it gone.
 
 Attempt 2's root cause is repaired *and confirmed on real hardware*: attempt 3's
 setup passed in 2 min 33 s, the frozen-asset step verified C2's own expectation
@@ -42,9 +49,12 @@ after an ordinary pre-science repair without a further approval, inside a
 `$0.0000` of its `$0.25`, and none is planned: the real stage A now executes in
 a fresh interpreter off-pod and verifies the frozen B spec `3a233a90…`.
 
-Attempt 4 owes a grant, then a `launch_bound` sweep, then the authorization,
-then the bundle, **in that order**. Attempts 1–3 are historical and immutable,
-and none of their governance artifacts is reused.
+**If attempt 4 aborts before the beam search begins**, the campaign decision's
+flow applies without asking again: preserve evidence, provider-confirmed
+teardown, reconcile, diagnose, minimal repair, fresh identity, continue — while
+a full ceiling still fits. **Once the beam search has begun, no automatic
+formal retry is authorized**; a failure after that point is preserved, torn
+down, reconciled and reported.
 
 **C1 is COMPLETE.** Attempt 18 executed the whole frozen protocol — both replay
 gates, both arms, six probes trained, six evaluated on the frozen battery — and
