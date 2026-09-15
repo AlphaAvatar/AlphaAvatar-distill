@@ -1785,6 +1785,66 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "8d9f1d5fedcb04c2de67811995809421bbd0307a9359d0289d80ab352e18686c"
+  },
+  {
+   "amendment_id": "PHB-HA-019",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-15T06:46:52+00:00",
+   "reviewed_base_commit": "828a3c4",
+   "source_repair_commit": "8c1da6c1e1b865fa1fa6a9c0a447ab19f55d187f",
+   "source_repair_parent": "828a3c44350f3d0ffcced9ac85a21b88f6f4fc5b",
+   "previous_live_digest": "bb2220a6c24bb6f3849e81b8691527b46df14ce18005724e5479e2ae46e941b2",
+   "new_live_digest": "c20e3a80b6c0366da235fa92d6e97dde06e05bbe0941c1d8d937a29618a50c1c",
+   "changed_files": [
+    "scripts/autoinit/phase_a_search.py",
+    "scripts/pod/autoinit_preflight_setup.sh"
+   ],
+   "file_sha256_before": {
+    "scripts/autoinit/phase_a_search.py": "0c6fa498d6ab4bb877661ac178c61d7b089d5039176c0ac67c0c217b46154813",
+    "scripts/pod/autoinit_preflight_setup.sh": "286191a1b63de04f0c2a268a5f9fbd51d19c4398a3201967e3e5c4f63948287a"
+   },
+   "file_sha256_after": {
+    "scripts/autoinit/phase_a_search.py": "8235665a53765914f99197ec486e44b2e998c91f9ea4ad9eb05304ada36c9d9f",
+    "scripts/pod/autoinit_preflight_setup.sh": "240dafd33a7889b7d1f731e4c2cf06a5393df77fc5d784299cbe93d12daebf69"
+   },
+   "patch_sha256": "6802e49050cc2ba0b2fc53a027df44f3c6e42ebf98399a86a2b5979ecd019810",
+   "numstat": {
+    "scripts/autoinit/phase_a_search.py": [
+     34,
+     1
+    ],
+    "scripts/pod/autoinit_preflight_setup.sh": [
+     26,
+     0
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 1,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "The Phase-C2 Search-1 execution path. Two members of the Phase-B declared set changed so that a search session that is NOT Phase B could exist at all. scripts/autoinit/phase_a_search.py gained one keyword-only parameter, conditional_candidates, a (SearchResult, root_loader) -> entries hook invoked after the ranking is committed and while the teacher and primed evaluator are still alive; its results join the same measured-candidate loop retained_candidates already used. scripts/pod/autoinit_preflight_setup.sh gained a SESSION_KIND=c2 branch loading C2Authorization, because an undeclared kind falls through to the spend branch and a branch that reads an artifact through the wrong type can SUCCEED while binding a session to another phase's file list and price. Both are inert for Phase B: conditional_candidates defaults to None, which reproduces the previous branching exactly, and the new shell branch is unreachable unless SESSION_KIND is literally c2.",
+   "why_the_owner_is_shared_session_runner": "phase_a_search.py is the only entry point any initialization search runs through, and autoinit_preflight_setup.sh is the single setup script SessionRunner uploads and executes for every session -- SetupManifest carries no setup-script field, so no session can substitute another. There is no Phase-B-free way to add a new search session to this repository: it must reach the shared search seam and the shared dispatcher. Phase B is CLOSED and CONSUMED; its authorization binds a non-HEAD commit, so session_commit_gate rejects it and no Phase-B session can launch again.",
+   "why_a_c1_only_override_was_rejected": "Nothing scientific moved. Phase B's result, winner fe9683e6a9c783bbc6fe276a78c851c6, margin, seeds, battery and protocol are untouched, and no Phase-B state id, artifact digest or metric is a function of either change: the hook is not invoked when it is None, and the dispatcher branch is selected by an environment variable no Phase-B launcher sets. The C1 execution preregistration was re-derived because autoinit_preflight_setup.sh is also in the C1 harness set; only head_commit, c1_harness and the document's own sha256 moved, while seeds, battery, decision rule, guardrails, isolation plan, fixed path, replay gates, teacher, calibration and scoring contract are byte-identical. C1 is closed by a GO verdict and is not reopened. C2 Search-1 is NOT authorized: no grant exists.",
+   "maintainer_authorization": "P12.1 autonomous engineering repair and zero-cost implementation inside the approved phase_c1.execution_package.2026-09-11 envelope; no new budget, no scientific change, and no authorization created. The work is $0 implementation for an experiment that remains unauthorized.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "8d9f1d5fedcb04c2de67811995809421bbd0307a9359d0289d80ab352e18686c",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "c3ce06dbdef839b08d9abcf5cc1191e189d7e759648e9989b5e4b4cce8480046"
   }
  ]
 }

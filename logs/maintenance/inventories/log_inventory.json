@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-15T06:45:40+00:00",
+  "created_utc": "2026-09-15T06:48:32+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1061,
-    "bytes": 42882841,
+    "bytes": 42889996,
     "by_disposition": {
       "keep_canonical": 80,
       "keep_immutable": 810,
@@ -6439,8 +6439,8 @@
     },
     {
       "path": "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_post_freeze_changes.json",
-      "size_bytes": 31672,
-      "sha256": "68cf7762bdb5747ee9407a8c854d60ec6ef86b60592078f917f56960f8c8a240",
+      "size_bytes": 33554,
+      "sha256": "a81470af368fb9916b5fa1b4bf20c1e5750de5a6ea9f337e3ad37dcc20e201ae",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9708,8 +9708,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json",
-      "size_bytes": 115929,
-      "sha256": "5c7c77507d99224767b154652b4c1061d73a8e810980dea12b08bdcdd612d3eb",
+      "size_bytes": 121202,
+      "sha256": "fe914ce4b75afed5cdb3ec969222ab80a9d68afa3c54071556fbb957c4398b0b",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
