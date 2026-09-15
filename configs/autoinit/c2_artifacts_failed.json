@@ -1,0 +1,43 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_phase_c2",
+ "note": "FAILED spec: what a Phase-C2 Search-1 run that did not reach ALL_DONE must still bring home. It collects EVIDENCE, and it demands nothing a failed run may legitimately not have produced. An early failure has no search journal and no selection, and requiring either would block teardown on an artifact the run correctly never wrote — which is how a session ends up unable to tear down the pod that is still billing. The session record is the one required entry, because a failure with no record is a failure nobody can diagnose. Everything else is best-effort and is collected WHENEVER IT EXISTS: a search that ran for hours and then hit its deadline has a journal full of per-state timings, and `if terminal == ALL_DONE` is the predicate that deleted $2.82 of verified artifacts on 2026-08-13.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_phase_c2/c2_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "search_journal",
+   "pattern": "autoinit/phase_c2_search/states.jsonl",
+   "required": false,
+   "lifecycle": "best_effort"
+  },
+  {
+   "artifact_class": "search_telemetry",
+   "pattern": "autoinit/phase_c2_search/telemetry.jsonl",
+   "required": false,
+   "lifecycle": "best_effort"
+  },
+  {
+   "artifact_class": "stage1_selection",
+   "pattern": "autoinit/phase_c2_search/stage1_selection.json",
+   "required": false,
+   "lifecycle": "best_effort"
+  },
+  {
+   "artifact_class": "search_summary",
+   "pattern": "audit/autoinit_phase_c2/c2_search_summary.json",
+   "required": false,
+   "lifecycle": "best_effort"
+  },
+  {
+   "artifact_class": "session_logs",
+   "pattern": "audit/autoinit_phase_c2/session/*",
+   "required": false,
+   "lifecycle": "best_effort"
+  }
+ ]
+}

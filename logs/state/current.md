@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-15. The human view. Every number here has an owner named
+**Updated:** 2026-09-16. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -21,7 +21,7 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**. C2 Search-1 is **implemented and priced, and NOT authorized**: a space, a ceiling, no driver, no launcher, no chain | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**. C2 Search-1 is **EXECUTABLE and priced, and NOT AUTHORIZED**: space, baseline rule, driver, launcher, evidence contract and a `$15.0446` ceiling all exist; the grant, readiness record, authorization and bundle deliberately do not | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | attempt 18's chain is **consumed**, like every chain before it. **No further C1 attempt is authorized, and none is prepared** — a complete verdict ends the round | [`phase_c1/runs/attempt18/governance/`](../stages/stage-1/phase_c1/runs/attempt18/governance/) |
@@ -142,6 +142,12 @@ What it needs is a durable large-artifact backend with capacity. The private
 quota is account-wide, and freeing it means permanently deleting historical LFS
 objects or changing a paid plan — a maintainer decision either way. The
 requirement is recorded for future long experiments in AGENTS.md P8.2.1.
+
+**It does not block C2 Search-1.** Search-1 trains no probes and exports no
+checkpoint: its candidates are measured on the pod and their identities come
+home in the search journal, which is kilobytes. The capacity decision becomes a
+precondition only for a later behavioural-confirmation experiment, which would
+produce six 2.22 GiB probes and is separately authorized.
 
 ## The launch chain — nothing owed, because no session is pending
 

@@ -1,0 +1,43 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_phase_c2",
+ "note": "Success spec for a Phase-C2 Search-1 run that reached ALL_DONE. Every pattern is a path the standalone C2 driver writes: audit/autoinit_phase_c2 for the session record, autoinit/phase_c2_search for the search's own journal and its committed selection. Search-1 trains nothing, so there is no probe, battery, generation or eval pattern here and their absence is the session's shape rather than an omission. The search journal is REQUIRED: it carries every state's identity, metrics and per-state timings, and it is the only place the per-expansion costs a future re-pricing needs exist. Phase-B attempt 3 lost exactly that file because the artifact spec named phase_a_search while the driver wrote phase_b_search, the collector matched nothing, min_matches 0 reported missing 0, and a deadline failure came home with no timings. The selection record is REQUIRED for the same reason it exists: it is the durability boundary, written the instant the ranking exists, because Phase-B attempt 4 completed eight hours of science and then raised in a summary dict.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_phase_c2/c2_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "search_summary",
+   "pattern": "audit/autoinit_phase_c2/c2_search_summary.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "search_journal",
+   "pattern": "autoinit/phase_c2_search/states.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "stage1_selection",
+   "pattern": "autoinit/phase_c2_search/stage1_selection.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "search_telemetry",
+   "pattern": "autoinit/phase_c2_search/telemetry.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "session_logs",
+   "pattern": "audit/autoinit_phase_c2/session/*",
+   "required": false,
+   "lifecycle": "best_effort"
+  }
+ ]
+}

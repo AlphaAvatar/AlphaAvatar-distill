@@ -203,6 +203,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                        suite_bundle=None, calibration_items=None,
                        profile=None, profiles=None,
                        retained_candidates=(),
+                       conditional_candidates=None,
                        search_minutes: float | None = None,
                        allowed_impls: tuple[str, ...] | None = None,
                        impl_profiles=None,
@@ -230,6 +231,15 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
     function with two profiles and the whole registry, and could express nothing
     else; a caller that has to fix three operators and vary the fourth had to
     choose between a full factorial and a new copy of this function.
+
+    `conditional_candidates` is `(SearchResult, root_loader) -> entries`,
+    invoked after the ranking has been committed and while the teacher and the
+    primed evaluator are still alive. It exists because whether a candidate
+    needs injecting can be a fact about the search's own output — C2's baseline
+    is re-derived by the search when the beam reaches it and has to be rebuilt
+    when it does not, and injecting both would produce two states with one
+    identity. `root_loader` returns the teacher THIS search used, so a rebuilt
+    candidate cannot come from a second copy or a different revision.
 
     Every default leaves an existing caller unchanged in behaviour AND in
     identity: `allowed_impls=None` already means "the whole registry" inside
@@ -352,6 +362,29 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         evaluator.evaluate(adapter.load(str(init_dir), device=device),
                            control_artifact.artifact_digest))
 
+    # --- candidates the SEARCH RESULT decides on ----------------------------
+    #
+    # `retained_candidates` is unconditional: the caller knows before the search
+    # what it wants injected. Some questions cannot be answered that early. A
+    # baseline that the search may or may not have re-derived is one: whether it
+    # has to be rebuilt is a fact about `result`, and rebuilding one the search
+    # already produced would inject two states whose identities collide by
+    # construction.
+    #
+    # So the caller may pass a callable instead, invoked HERE — after the
+    # ranking and the durability boundary, and while the teacher and the primed
+    # evaluator are still alive. It returns the same entry shape, and returning
+    # nothing is the normal case.
+    # The hook is handed `root_loader` because a candidate it decides to build
+    # must be built from the SAME teacher the search used. Letting it load its
+    # own would put a second 4B model beside the first at exactly the moment the
+    # expensive work is finished, and would let a rebuild silently use a
+    # different revision than the search it is being compared against.
+    conditional = []
+    if conditional_candidates is not None:
+        conditional = list(conditional_candidates(result, lambda: teacher))
+        print(f"conditional candidates: {len(conditional)}", flush=True)
+
     # --- retained cross-phase candidates, injected by digest ----------------
     # Measured HERE, inside the search, because this is where the teacher and the
     # primed evaluator already exist. Measuring them after stage 1 would mean
@@ -360,7 +393,7 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
     # Empty for Phase A, which has none. Phase B passes the two retained Phase-A
     # finalists so its cross-phase comparison has all eight candidates.
     imported = []
-    for entry in retained_candidates:
+    for entry in (*retained_candidates, *conditional):
         directory = Path(entry["checkpoint_dir"])
         if not directory.is_dir():
             raise FileNotFoundError(

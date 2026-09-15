@@ -102,25 +102,59 @@ ranking did retain exactly this prefix — `DEPTH(db)→FFN(db)` was kept at lev
 and `fe9683` was a level-3 leaf — so the evidence is favourable, but a beam of 6
 out of 18 is not a guarantee.
 
-Two honest responses, and the choice belongs with the C2 driver rather than with
-this page:
+**Resolved 2026-09-16, and no longer discretionary.** The fallback is
+implemented, preregistered here, and priced with its own named reserve. It is
+`BaselineFallback` in
+[`scripts/experiments/phase_c2/baseline.py`](../../../../../scripts/experiments/phase_c2/baseline.py),
+and the rule has no judgement in it:
 
-1. **Report it.** If the search does not reach B, say so; the run then has a
-   ranking over candidates and no comparison against the baseline, which is a
-   weaker result than intended but not a wrong one.
-2. **Rebuild B by fixed path, conditionally.** C1 stage D replayed the
-   `DEPTH→FFN→WIDTH` parent in **24.2 min** and stage F built the treatment
-   arm's ATTENTION step in **14 s**, both from the teacher, using
-   `planning/fixed_path.py`. Rebuilding B costs about 25 minutes — roughly
-   **`$0.45`** — and it can run *after* the search, on the already-primed
-   evaluator, only when the search did not produce it. Note that a rebuilt B has
-   the SAME content-derived identity as the searched one, so it must be a
-   fallback and never an addition: injecting it alongside a searched B would
-   introduce a duplicate identity into the candidate set.
+1. **If the search generates and evaluates B, that candidate IS the baseline and
+   nothing is rebuilt.** Detection is by construction — the ordered
+   `(kind, impl_id, profile_id)` of every complete leaf — over all complete
+   leaves rather than the top-N, because a leaf that ranked poorly is still
+   measured, still hash-bound and still the baseline.
+2. **If it does not, B is rebuilt exactly once** through the frozen C1 treatment
+   fixed path, imported from `experiments.phase_c1.session.build_arm_specs`
+   rather than re-declared, and then passed through the `retained_candidates`
+   seam so it takes the identical `identify_checkpoint` → canonical reload →
+   `state_eval` path every searched candidate takes.
 
-Option 2 is the better experiment for about half a percent of the ceiling, and
-is recommended. It is not implemented, because the driver that would hold it
-does not exist yet.
+**Never both.** Their identities collide by construction — that is the same fact
+that lets the search re-derive B at all — so injecting a rebuilt B beside a
+searched one would put two states with one `artifact_digest` into the candidate
+set. `BaselineFallback` is single-shot and refuses a second invocation.
+
+**What proves a rebuilt B is B**, strongest appropriate identity first:
+
+| gate | identity | when |
+| --- | --- | --- |
+| the construction | `FixedPathSpec.spec_hash == 3a233a9017b3…`, the preregistration's `treatment_spec_hash` | **`$0`**, in stage `bind_identities`, before a tensor moves |
+| the shared prefix | `eea90c91…`, the pin the frozen prefix already carries and C1 replayed three times | inside `materialize_fixed_path` |
+| the output | `artifact_digest == 53e30566…` — weights **and** config **and** arch signature **and** tokenizer **and** index | the final step's pin, then again at injection |
+
+All three fail closed. On a mismatch the digest is **decomposed**, because "the
+digest differs" is not a diagnosis: different `weights_digest` is a scientific
+finding about determinism or an operator, a different `config_sha256` with
+identical weights is a runtime fact — a `rope_theta` that moved between
+transformers major versions changed a holdout NLL by 0.35 nats in this project
+with nothing raising — and a reader must be able to tell which happened. C1's
+recorded runtime travels with the explanation for exactly that reason.
+
+The output digest is **observed, not preregistered**:
+`treatment_output_digest_was_pre_pinned` is `false` in attempt 18's record,
+because that run was this operator's first execution and there was no earlier
+digest to pin it to. That makes it the strongest available content identity of B
+and not a prior expectation, and the module says which it is.
+
+**Cost**: **27.66 min**, priced as its own conditional
+`baseline_rebuild_reserve` — **`$0.5026`**, which is **3.3%** of the
+`$15.0446` ceiling, not the half a percent an earlier draft of this page
+claimed. Derived from C1's own stage timestamps: stage C→D is the shared parent
+from the teacher (24.185 min), stage E→F is the treatment's ATTENTION step and
+its materialization (0.240 min), plus the maximum per-candidate
+reload/identify/validate/`state_eval` overhead observed in Phase-B attempt 5
+(3.24 min). Stage E is excluded: it replays the *incumbent's* ATTENTION, which
+this baseline does not need.
 
 **Schedule and metric are unchanged.** `SCHEDULE_V1` (one warmup level, beam
 width 6), `PARETO_V1`, and the existing `state_eval` suite. No new search metric
@@ -163,17 +197,37 @@ took 9.08 h and did not finish. Here the recursion enumerates every beam the
 ranking policy could return and takes the exact extremum, so the maximum is
 attained by some ranking and no ranking exceeds it.
 
-| | search only | session total | at `$1.09/h` |
+**Five envelopes, separately named**, because each answers a different question
+and one number for two of them is one number nobody can interpret. All of them
+are derived by
+[`scripts/autoinit/price_c2.py`](../../../../../scripts/autoinit/price_c2.py)
+into the hash-verified
+[`phase_c2_pricing.json`](phase_c2_pricing.json), which
+`experiments.phase_c2.session.c2_budget_spec` is the only reader of.
+
+| envelope | minutes | at `$1.09/h` | conditional |
 | --- | --- | --- | --- |
-| DEPTH-early — the trajectory with evidence | 300.2 min (5.00 h) | 395.2 min | **`$7.1787` expected** |
-| structural worst case | 636.0 min (10.60 h) | 800.5 min incl. reserves | **`$14.5420` proposed ceiling** |
+| expected path — 95 min of session phases plus the DEPTH-early search (300.2) | 395.2 | **`$7.1787`** | no |
+| + 10% contingency, on the expected path only | 39.5 | `$0.7178` | no |
+| + `beam_composition_risk` — the exact worst case minus DEPTH-early | 335.8 | `$6.1004` | no |
+| + `baseline_rebuild_reserve` — one B rebuild | 27.7 | `$0.5026` | **YES** |
+| + `artifact_recovery_reserve` — teardown and collection | 30.0 | `$0.5450` | no |
+| **hard planning ceiling** | **828.1** | **`$15.0446`** | |
+
+The two reserves land **after** the contingency multiplier and **before** the
+soft stop, which is what makes them protect the work: a reserve added as a phase
+would be inflated by contingency, and one added after the soft stop would not
+protect anything, because `afford()` refuses to start work that would cross the
+soft stop. `baseline_rebuild_reserve` is deliberately **not** folded into
+`artifact_recovery_reserve` — those buy different things, and paying for a
+baseline out of the teardown reserve is how a session ends with a result it
+cannot collect.
 
 Session overhead is 95 min of named phases — setup and asset staging 45,
 transfer 6, teacher fetch and verify 8, machine gates 22, selection commit and
-artifact manifest 8, artifact synchronization 6 — plus 10% contingency on the
-expected path and a 30-minute artifact-recovery reserve. The setup figure is the
-one this repository plans with, not C1 attempt 18's 6-minute observation: the
-same script on the same image and card has also taken 8.5 minutes and over 150.
+artifact manifest 8, artifact synchronization 6. The setup figure is the one this
+repository plans with, not C1 attempt 18's 6-minute observation: the same script
+on the same image and card has also taken 8.5 minutes and over 150.
 
 **The whole cost risk is beam composition, not node cost.** DEPTH costs 26–34
 minutes wherever it runs; what the price turns on is how many beam members still
@@ -188,10 +242,15 @@ intermediates that cannot be relayed for resume.
 
 | beam width | expansions | DEPTH-early | worst case | expected | ceiling |
 | --- | --- | --- | --- | --- | --- |
-| 3 | 32–38 | 4.31 h | 7.33 h | `$6.4239` | `$10.9011` |
-| 4 | 35–43 | 4.47 h | 8.42 h | `$6.5938` | `$12.1066` |
-| 5 | 38–48 | 4.73 h | 9.51 h | `$6.8863` | `$13.3243` |
-| **6** (`SCHEDULE_V1`) | **41–53** | **5.00 h** | **10.60 h** | **`$7.1787`** | **`$14.5420`** |
+| 3 | 32–38 | 4.31 h | 7.33 h | `$6.4239` | `$11.4037` |
+| 4 | 35–43 | 4.47 h | 8.42 h | `$6.5938` | `$12.6091` |
+| 5 | 38–48 | 4.73 h | 9.51 h | `$6.8863` | `$13.8268` |
+| **6** (`SCHEDULE_V1`) | **41–53** | **5.00 h** | **10.60 h** | **`$7.1787`** | **`$15.0446`** |
+
+Every ceiling in that menu now includes the `baseline_rebuild_reserve`. Beam
+width 6 is what `SCHEDULE_V1` declares and what this plan proposes: the menu is
+here so a maintainer can trade breadth for cost deliberately, **not** so the
+authorization number can be made smaller by narrowing the science.
 
 ### The one unmeasured input
 
@@ -228,8 +287,8 @@ C1 package      22.6176   of  51.4425   leaving 28.8249
 C1 formal       22.6176   of  45.4425   leaving 22.8249
 ```
 
-A `$14.5420` C2 ceiling fits the project headroom — `290.5174 + 14.5420 =
-305.0594`, leaving `$14.9406`.
+A `$15.0446` C2 ceiling fits the project headroom — `290.5174 + 15.0446 =
+305.5620`, leaving `$14.4380`.
 
 **It fitting is not permission.** The C1 package is C1's: its formal allowance
 funds C1 sessions, and C1 is finished. A C2 session needs its own maintainer
@@ -308,13 +367,41 @@ This does **not** block Search-1, which produces no probe checkpoints.
 
 ---
 
-## Not implemented
+## Implemented, and what is deliberately not
 
-Search-1 is implemented as a **space and a price**. It has no driver, no
-launcher and no governance chain, and therefore cannot be launched by accident.
+**Search-1 is executable.** As of 2026-09-16 it has a driver, a launcher, an
+evidence contract, an authorization *type* and a derived budget:
 
-Before a C2 launch could happen, and in this order: a maintainer grant with a
-ceiling; a C2 driver and launcher (the Phase-B search session is the model to
-subclass, minus its recovery rungs); a `launch_bound` readiness sweep on the
-clean pre-authorization tree; the one-use authorization; the exact-session
-bundle; a live quote and every pre-provider gate.
+| what | where |
+| --- | --- |
+| the session, declared | [`scripts/pod/autoinit_phase_c2_launch.py`](../../../../../scripts/pod/autoinit_phase_c2_launch.py) |
+| the pod-side driver, two stages | [`scripts/pod/autoinit_phase_c2_driver.py`](../../../../../scripts/pod/autoinit_phase_c2_driver.py) |
+| the space | [`scripts/experiments/phase_c2/search_space.py`](../../../../../scripts/experiments/phase_c2/search_space.py) |
+| the baseline rule | [`scripts/experiments/phase_c2/baseline.py`](../../../../../scripts/experiments/phase_c2/baseline.py) |
+| plan, authorization type, budget | [`scripts/experiments/phase_c2/session.py`](../../../../../scripts/experiments/phase_c2/session.py) |
+| the evidence contract | `configs/autoinit/c2_artifacts.json` and `…_failed.json` |
+| the price | [`phase_c2_pricing.json`](phase_c2_pricing.json), from `scripts/autoinit/price_c2.py` |
+
+The driver runs the beam through the same `run_phase_a_search` Phase A and
+Phase B ran, so it inherits the durability boundary that commits the ranking the
+instant the expensive part succeeds. It is **standalone rather than a
+`PhaseADriver` subclass**: that base class owns probe training, rungs, batteries
+and elimination, and inheriting it would mean satisfying every contract that
+machinery requires in order to use none of it.
+
+**It still cannot run, and not for want of a flag.** The grant it names,
+`logs/budget/approvals/autoinit_c2_authorization.json`, does not exist, and
+`C2Authorization.load` refuses anything that is not a C2 grant under its own
+schema. There is no readiness record, no bundle and no provider resource.
+
+Three gates run before a pod is contacted, each refusing at `$0`: the volume
+against the derived 87.4 GiB peak working set; the grant's ceiling against the
+pricing record's own hash-verified figure; and the grant's plan hash against the
+live configured space, so a grant issued before the space moved cannot authorize
+a run after it.
+
+**Deliberately not built:** the grant, the `launch_bound` readiness record, the
+authorization, the bundle, and any provider resource. Those are the governance
+chain and a maintainer decision, in that order, on the final clean
+pre-authorization tree when a launch is genuinely imminent. Search-2 is not
+implemented either: it is conditional on Search-1's evidence.

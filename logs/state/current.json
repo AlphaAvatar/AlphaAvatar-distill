@@ -1,9 +1,8 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-15T00:00:00Z",
+ "generated_utc": "2026-09-16T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "baseline_commit_meaning": "OWNED by the readiness record's swept_base_commit and NOT duplicated: this snapshot is written BEFORE the commit it would name, and gate 12 forbids editing state after the sweep.",
  "running": {
   "paid_compute": false,
   "pods": 0,
@@ -12,7 +11,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-18 consumed, $22.6176. Attempt 18 returned the frozen Stage-I verdict GO, and a complete verdict ends the round: no further C1 attempt is authorized. This package is C1's.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch. MONEY bounds the sessions -- see budget. Attempts 10-18 consumed, $22.6176. Attempt 18 returned the frozen Stage-I verdict GO, and a complete verdict ends the round. This package is C1's; C2 needs its own.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "c1_attempts": "eighteen labels, FIFTEEN paid, $26.6177. Attempt 18 is COMPLETE with a frozen-rule verdict. Per-attempt cost: logs/budget/ledger.md.",
   "formal_sessions_used": 9,
@@ -53,7 +52,7 @@
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
   "equivalence_interval": 0.011695296982299022,
   "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds from the C0 digest.",
-  "owner": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json and logs/stages/stage-1/phase_c1/plans/execution_preregistration.json own every frozen identity; the hashes above are the ones a reader needs to recognise, not the set.",
+  "owner": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json and .../execution_preregistration.json own every frozen identity; the hashes above are the ones a reader needs to recognise, not the set.",
   "feasibility_floor": 0.3,
   "seeds": {
    "sa": 20260726,
@@ -83,23 +82,20 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE. Attempt 18 returned the frozen Stage-I verdict GO at $10.2018, under its own planning floor.",
-  "then": "maintainer review of the verdict and of the two open items. No further C1 attempt is authorized.",
+  "status": "C1 COMPLETE and CLOSED (attempt 18, GO, $10.2018). C2 Search-1 implemented and priced; NOT authorized and never run.",
+  "then": "a maintainer decision on a C2 grant. Then, in order: grant, launch_bound sweep on the clean pre-authorization tree, authorization, bundle, live quote, launch.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
   "logs/README.md -- START HERE, the index",
-  "logs/state/phase_index.md -- history by phase",
-  "logs/state/current.md -- human view",
-  "logs/index.json -- every run",
-  "logs/state/ownership.md -- ownership"
+  "logs/state/current.md -- the human view"
  ],
  "phases": {
   "phase_a": "COMPLETE / FROZEN",
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
   "phase_c1": "IMPLEMENTED / NOT AUTHORIZED -- status owned by phase_c.c1",
-  "phase_c2": "NOT STARTED -- space implemented and priced -- owned by phase_c.c2",
+  "phase_c2": "SEARCH-1 IMPLEMENTED AND PRICED -- NOT AUTHORIZED -- owned by phase_c.c2",
   "formal_recovery_evidence": "NONE"
  },
  "phase_a_result": {
@@ -125,28 +121,29 @@
    "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
    "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json fb2eeea531f9f0d1",
    "sizing_evidence": "logs/stages/stage-1/phase_c1/plans/phase_c0_sizing_evidence.json 4786242d349e9b21",
-   "authorizes": "nothing",
-   "design": "850 scorable / 950 total; 3 fresh paired seeds; primary correct_overall; SESOI +0.010."
+   "authorizes": "nothing"
   },
   "c1": {
-   "status": "COMPLETE / EIGHTEEN ATTEMPTS RUN, FIFTEEN PAID / REPLAY MEASURED 2-of-2 PASS THREE TIMES / TREATMENT AND ENDPOINT MEASURED ONCE / frozen Stage-I verdict GO -- read the decision record, not this line",
+   "status": "COMPLETE. Eighteen attempts, fifteen paid. Replay MEASURED 2-of-2 three times; treatment and endpoint measured ONCE and the frozen Stage-I verdict is GO -- read the decision record, not this line.",
    "what_it_is": "fixed-path ATTENTION isolation, 2 arms x 3 seeds = 6 probes.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS (attempts 9, 17, 18). treatment + endpoint: MEASURED ONCE, by attempt 18, verdict GO -- read logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json, which owns every figure and states its own claim boundary. Attempt 9 is still NO DECISION after a pre-treatment infrastructure abort, and so is attempt 17.",
-   "not_built": "attempt 18's six probes were NOT preserved: every relay upload was refused for private storage quota, 2.22 GiB each, and the pod is deleted. The pre-ATTENTION parent rebuild and the ~8 GB teacher weights need GPU/network.",
+   "not_built": "attempt 18's six probes were NOT preserved (private storage quota, 2.22 GiB each). Rebuilding the pre-ATTENTION parent needs GPU/network.",
    "owners": {
     "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
     "execution_prereg": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
     "runs": "logs/index.json"
    },
-   "blocker": "none outstanding; see the top-level blocker."
+   "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "NOT STARTED. Search-1 SPACE is implemented and priced; NOT AUTHORIZED, no driver, no launcher, no chain",
+   "status": "NOT STARTED. Search-1 is EXECUTABLE: driver, launcher, artifact specs, authorization type and priced budget all exist. NOT AUTHORIZED -- no grant, no readiness record, no bundle, no pod.",
    "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
-   "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment?",
+   "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
-   "priced": "41-53 expansions; expected $7.1787, ceiling $14.5420 at L40S securePrice $1.09/h. Priced is NOT funded: C2 needs its own grant."
+   "executes": "scripts/pod/autoinit_phase_c2_launch.py -> autoinit_phase_c2_driver.py; two stages, trains nothing",
+   "priced": "41-53 expansions; expected $7.1787, ceiling $15.0446 at L40S securePrice $1.09/h, INCLUDING a named conditional baseline_rebuild_reserve of 27.665 min ($0.5026). Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json. Priced is NOT funded: C2 needs its own grant, and neither project headroom nor C1's unused allowance is permission.",
+   "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both -- the identities collide by construction."
   }
  },
  "storage": {
@@ -155,18 +152,16 @@
    "git": "/home/ecs-user/AlphaAvatar-distill",
    "artifacts": "/home/ecs-user/aad-artifacts"
   },
-  "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1",
-  "free_note": "detail: c1_storage_recovery.json"
+  "c1_battery_canonical": "/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1"
  },
- "blocker": "NONE for C1: the round is ended by a verdict. Two open items recorded in runs/attempt18/closeout/outcome.json -- relay storage quota blocks probe durability, and the relay stream copy of the evidence arrives corrupted.",
+ "blocker": "NONE. C1 is CLOSED by attempt 18's GO verdict and no further C1 execution is authorized. The relay c1_evidence.json corruption is REPAIRED (RelaySpec whole_file, commit 38d1354). Durable large-checkpoint capacity is an open MAINTAINER RESOURCE DECISION and does not block C2 Search-1, which trains no probes. C2 Search-1 is implemented and priced and NOT AUTHORIZED: it needs a grant, which is a maintainer decision.",
  "deferred_not_blocking": {
   "_note": "open, none blocking. Detail: logs/state/current.md",
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
-  "historical_probe_reuse": "REFUSED by scoring_contract_matches_live: the live contract moved v2 -> v3 with the scorer's path. Probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
+  "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
  },
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
- "historical_paid_verification": "2026-08-30T21:18:37Z, continuation attempt 5, the last PAID session to reach ALL_DONE: 8/8 gates, teardown confirmed.",
  "latest_run": {
   "experiment_id": "phase_c1",
   "run_id": "attempt18",
@@ -176,17 +171,16 @@
   "last_executed": "logs/stages/stage-1/phase_c1/runs/attempt18"
  },
  "architecture_migration": {
-  "status": "MERGED to main 2026-09-10 as daf64772, and again 2026-09-11 as 199711af. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
+  "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
   "record": "logs/maintenance/source-relocations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {
-  "status": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada. The stage-F device repair is CONFIRMED ON REAL CUDA.",
-  "campaign": "CLOSED. Three subruns, one active resource at a time, all provider-confirmed non-billing.",
+  "status": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada. The stage-F device repair is CONFIRMED ON REAL CUDA. ENGINEERING EVIDENCE ONLY -- not a C1 result and not an endpoint.",
+  "campaign": "CLOSED. Three subruns, one active resource at a time.",
   "campaign_cost_usd": 0.04,
-  "means": "ENGINEERING EVIDENCE ONLY -- not a C1 treatment result, not an endpoint, not a decision.",
   "authorizes": "nothing",
   "owner": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/ and logs/runs/cuda_stage_f/",
   "amendment": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured."
  },
- "superseded_handoff": "none. A superseded document is deleted rather than shelved: git history holds it, and a second copy in the working tree is one more thing to keep consistent. The handoff is logs/state/current.md, which is the only one."
+ "superseded_handoff": "none. The live handoff is logs/state/current.md."
 }

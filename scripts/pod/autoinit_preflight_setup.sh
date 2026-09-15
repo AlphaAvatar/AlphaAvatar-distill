@@ -687,6 +687,32 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.4f}, C1 {a.authorizes_c1_isolation}, '
       f'search {a.allows_beam_search}, phase A {a.allows_phase_a}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2" ]; then
+  # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
+  # C2 launcher, driver, search space and baseline rule, none of which appear in
+  # any earlier file set, and it carries a ceiling derived from
+  # logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json for ONE search --
+  # with a conditional baseline rebuild -- rather than for probes, a
+  # continuation or a fixed-path replay.
+  #
+  # `allows_recovery_training` is False BY TYPE: this session trains nothing and
+  # has no battery. Every other branch would either refuse the artifact on
+  # schema or -- worse -- accept it while binding C2 to another phase's file
+  # list and price.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from experiments.phase_c2.session import C2Authorization
+a = C2Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c2_search1 is True, 'a C2 session needs a C2 authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_recovery_training is False, 'C2 Search-1 trains nothing'
+assert a.automatic_followon_start is False, 'nothing chains off Search-1'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, C2 {a.authorizes_c2_search1}, '
+      f'training {a.allows_recovery_training}, phase A {a.allows_phase_a}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

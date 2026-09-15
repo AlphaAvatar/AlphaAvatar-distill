@@ -1,0 +1,137 @@
+{
+ "schema": "aadistill.autoinit.c2_pricing/v1",
+ "generated_utc": "2026-09-15T00:00:00Z",
+ "_contract": "A structural cost bound for the Phase-C2 Search-1 session. PRICING ONLY: not an authorization, not a grant, and not permission to launch. Nothing here approves spending, and neither remaining project headroom nor C1's unused formal allowance is permission.",
+ "hardware": {
+  "name": "L40S",
+  "price_per_hour_usd": 1.09,
+  "field": "securePrice",
+  "basis": "quoted live 2026-09-15, stock Medium. `securePrice` is the field session_runner prices on and refuses above --max-price; communityPrice was 0.79 at the same moment and is a different product this launcher never provisions",
+  "a_launch_must_requote": "this quote is planning evidence with a date on it. check_gpu_offered re-queries before any pod exists, and an hour-old price is not a price"
+ },
+ "session_shape": {
+  "kind": "search only \u2014 no training, no probes, no battery",
+  "operator_kinds": 4,
+  "implementations": 4,
+  "order": "free; DEPTH is not pinned",
+  "beam_width": 6,
+  "warmup_levels": 1,
+  "expansions_min": 41,
+  "expansions_max": 53,
+  "search_minutes_min": 297.68,
+  "search_minutes_max": 635.96
+ },
+ "line_items": [
+  {
+   "item": "session setup and asset staging",
+   "minutes": 45.0,
+   "basis": "planned",
+   "source": "the figure this repository plans with (autoinit_preflight_launch.py setup_minutes=45.0), NOT C1 attempt 18's warm-image 6 minutes. The same script on the same image and card has taken 5, 8.5 and over 150",
+   "usd": 0.8175
+  },
+  {
+   "item": "bundle transfer",
+   "minutes": 6.0,
+   "basis": "planned",
+   "source": "preflight plan transfer_minutes=6.0",
+   "usd": 0.109
+  },
+  {
+   "item": "teacher fetch and verify",
+   "minutes": 8.0,
+   "basis": "measured",
+   "source": "C1 attempt 18 stage B, ~6 min, rounded up",
+   "usd": 0.1453
+  },
+  {
+   "item": "machine gates",
+   "minutes": 22.0,
+   "basis": "planned",
+   "source": "preflight plan stage1_machine_gates=22.0",
+   "usd": 0.3997
+  },
+  {
+   "item": "beam search, DEPTH-early trajectory",
+   "minutes": 300.16,
+   "basis": "derived",
+   "source": "43 expansions priced at the MAXIMUM per-expansion minutes measured in Phase-B attempt 5's telemetry, on the trajectory that ranking was observed to take: at Phase-B level 1 all six retained states already contained DEPTH and the epsilon-Pareto front put FFN->DEPTH in front 0. The same model replays that run's real beams and predicts every level's expansion count exactly and its minutes to 0.2%",
+   "usd": 5.4529
+  },
+  {
+   "item": "selection commit and artifact manifest",
+   "minutes": 8.0,
+   "basis": "planned",
+   "source": "preflight plan artifact_manifest=8.0",
+   "usd": 0.1453
+  },
+  {
+   "item": "artifact synchronization",
+   "minutes": 6.0,
+   "basis": "planned",
+   "source": "preflight plan artifact_synchronization=6.0",
+   "usd": 0.109
+  }
+ ],
+ "reserves": [
+  {
+   "reserve": "beam_composition_risk",
+   "minutes": 335.8,
+   "conditional": false,
+   "basis": "derived",
+   "source": "the exact structural worst case (636.0 min) minus the DEPTH-early trajectory (300.2 min). `bound()` enumerates every beam composition the ranking policy could return, so the maximum is attained by some ranking and no ranking exceeds it. NOT a contingency: DEPTH costs 26-34 min wherever it runs, and what this prices is how many beam members still owe it. `children_max x mean` is what authorized Phase-B attempt 3 at 1.91-7.51 h for a run that took 9.08 and did not finish",
+   "usd": 6.1004
+  },
+  {
+   "reserve": "baseline_rebuild_reserve",
+   "minutes": 27.665,
+   "conditional": true,
+   "basis": "measured",
+   "source": "C1 attempt 18, stage C->D (24.185 min, the shared DEPTH->FFN->RESIDUAL_WIDTH parent from the teacher) plus stage E->F (0.240 min, the treatment ATTENTION step and its materialization), plus the maximum per-candidate canonical-reload/identify/validate/state_eval overhead observed in Phase-B attempt 5 (3.24 min). Stage E is excluded: it replays the INCUMBENT's ATTENTION, which the C2 baseline does not need",
+   "detail": {
+    "parent_replay_minutes": 24.185,
+    "treatment_step_minutes": 0.24,
+    "state_eval_minutes": 3.24,
+    "minutes": 27.665,
+    "basis": "measured",
+    "source": "C1 attempt 18, stage C->D (24.185 min, the shared DEPTH->FFN->RESIDUAL_WIDTH parent from the teacher) plus stage E->F (0.240 min, the treatment ATTENTION step and its materialization), plus the maximum per-candidate canonical-reload/identify/validate/state_eval overhead observed in Phase-B attempt 5 (3.24 min). Stage E is excluded: it replays the INCUMBENT's ATTENTION, which the C2 baseline does not need",
+    "conditional_on": "spent ONLY if the Search-1 beam does not re-derive B. B's order and ATTENTION mixture are both inside the searched space and the seed is the frozen one, so the expected case is that the search produces B and this reserve is not touched",
+    "attention_step_now_measured": {
+     "seconds": 11.2732,
+     "what_it_tells_us": "attention.activation_importance_v1 took 11.27 s on the narrow post-WIDTH parent. This is the operator's FIRST measured timing and it confirms the search cost model's 1.5x width.global_pca_v0 proxy is conservative for deeper parents by roughly 3x. The proxy is NOT sharpened here: the search may apply this operator at the ROOT, on the full teacher, which remains unmeasured, and re-pricing an accepted envelope downward is a separate decision from adding a reserve the envelope was missing"
+    }
+   },
+   "usd": 0.5026
+  }
+ ],
+ "totals": {
+  "expected_minutes": 395.16,
+  "expected_usd": 7.1787,
+  "contingency_fraction": 0.1,
+  "soft_stop_minutes": 798.141,
+  "soft_stop_usd": 14.4996,
+  "artifact_recovery_reserve_minutes": 30.0,
+  "hard_ceiling_minutes": 828.141,
+  "hard_ceiling_usd": 15.0446,
+  "hard_ceiling_usd_exact": 15.044561500000002,
+  "hard_ceiling_rounding": "ceil to 4 dp; a ceiling rounds UP or it under-authorizes the plan it prices",
+  "_five_envelopes_stay_separate": "expected path, contingency on it, beam_composition_risk, baseline_rebuild_reserve and artifact_recovery_reserve each answer a different question. One number for two of them is one number nobody can interpret"
+ },
+ "the_unmeasured_input": {
+  "impl_id": "attention.activation_importance_v1",
+  "priced_at": "1.5x the maximum measured width.global_pca_v0 expansion",
+  "why": "it has never run inside a BeamSearch. C1 drove it through fixed_path only. Per token its attention second moment accumulates 36 x 32 x 128^2 = 18.9M MAC against the residual covariance's 36 x 2560^2 = 236M, so the factor is generous in the direction the arithmetic can afford",
+  "now_partly_measured": {
+   "seconds": 11.2732,
+   "what_it_tells_us": "attention.activation_importance_v1 took 11.27 s on the narrow post-WIDTH parent. This is the operator's FIRST measured timing and it confirms the search cost model's 1.5x width.global_pca_v0 proxy is conservative for deeper parents by roughly 3x. The proxy is NOT sharpened here: the search may apply this operator at the ROOT, on the full teacher, which remains unmeasured, and re-pricing an accepted envelope downward is a separate decision from adding a reserve the envelope was missing"
+  }
+ },
+ "what_is_not_priced_here": [
+  "any authorization, which is a separate maintainer decision",
+  "a second attempt after a failure",
+  "Search-2, which is conditional on Search-1's evidence",
+  "behavioural confirmation of any finalist, which is a separate paid experiment in roughly C1's cost class",
+  "durable large-checkpoint storage, which Search-1 does not need because it trains no probes"
+ ],
+ "authorizes": "nothing",
+ "pricing_sha256": "8ae5072445254e226bb6c9e1ca2af70e46103da5d744d9828f47138fa5b079e3"
+}
