@@ -9,8 +9,11 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing. No pod exists. Nothing is prepared for
-launch**, and no further C1 attempt is authorized. Attempt 18's pod
+**Nothing is running. Nothing is billing. No pod exists**, and no further C1
+attempt is authorized. **One Phase-C2 Search-1 execution IS approved and being
+prepared**: the maintainer approved attempt1 on 2026-09-15 against commit
+`7d0a35a` at a `$15.0446` ceiling. The grant is committed; the `launch_bound`
+sweep, the one-use authorization and the bundle are owed in that order. Attempt 18's pod
 `ygtjrobs456cb5` was deleted after collecting 164 artifacts, the provider
 confirms it is gone, and a live query returns `ZERO_PODS`.
 
