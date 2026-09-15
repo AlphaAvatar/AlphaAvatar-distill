@@ -427,16 +427,31 @@ refuses anything that is not a C2 grant under its own schema, and the launcher
 requires `--run-id` because there is no repository-level location for any of
 those artifacts to fall back to.
 
-Seven gates run before a pod is contacted, each refusing at `$0` and each naming
+Eight gates run before a pod is contacted, each refusing at `$0` and each naming
 a failure a paid session in this project has actually had: the session commit's
 executable digest, the authorization it carries and its lineage from the
 authorized base; an independent re-derivation of the executable closure, because
-every other check digests the set the *artifact* declares; the volume against
-the derived 87.4 GiB peak working set; the grant's ceiling against the pricing
-record's own hash-verified figure; the grant's plan hash against the live
-configured space; a `launch_bound` readiness record that still describes this
-executable, this staged view and this commit; and a read-only bundle round-trip
-that answers whether a pod could obtain the authorized code at all.
+every other check digests the set the *artifact* declares; the run identity and
+the number of provider resources the grant permitted, which were prose inside
+the grant and enforced by nothing while `--host-draws` defaulted to 3; the
+volume against the derived 87.4 GiB peak working set; the grant's ceiling
+against the pricing record's own hash-verified figure; the grant's plan hash
+against the live configured space; a `launch_bound` readiness record that still
+describes this executable, this staged view and this commit; and a read-only
+bundle round-trip that answers whether a pod could obtain the authorized code at
+all.
+
+**The run owns the whole formal execution, not just its governance inputs.**
+There is no `--out`: the session record is `runtime/session.json` inside
+`runs/<attempt>/`, derived from `--run-id`, so two attempts cannot write one
+file and an operator cannot aim one attempt's record at another. The launcher
+claims its scratch output root and opens its run *before* the session spec is
+built, so a colliding run id or a scratch directory belonging to another attempt
+costs `$0`; it re-checks that claim at closeout and writes a verified manifest
+over the roles that actually exist, which a session refused at a `$0` gate can
+still do with only its session record. Large search states stay in scratch —
+`artifacts/manifest.json` carries their hashes, and nothing copies a model
+directory into git to satisfy the layout.
 
 **The mechanisms exist; the artifacts do not.** Since 2026-09-15 the repository
 carries the C2 CPU preflight (`tests/c2_preflight/`, 23 tests, the whole of what

@@ -272,7 +272,7 @@ def build_c2_authorization_payload(
     stale candidate and watch the launch gate refuse it. It is applied AFTER
     every agreement check, so such a candidate is stale in exactly one field.
     """
-    from experiments.phase_c2.session import C2Authorization
+    from experiments.phase_c2.session import C2Authorization, C2ResourceScope
 
     root = Path(repo_root)
     cfg = load_config(root)
@@ -317,6 +317,11 @@ def build_c2_authorization_payload(
 
     digest = (harness_digest_override if harness_digest_override is not None
               else live["c2_harness_digest"])
+    #: The maintainer-stated limits, made machine-readable and bound to THIS
+    #: run. They were prose inside the grant until 2026-09-16, which meant "at
+    #: most 3 provider resources" was checked by nobody: `--host-draws`
+    #: defaulted to 3 and an operator could pass any number.
+    scope = C2ResourceScope.from_grant(grant, run_id)
     auth = C2Authorization(
         authorization_id=cfg["authorization_id"],
         granted_utc=granted_utc,
@@ -342,10 +347,14 @@ def build_c2_authorization_payload(
         #: authorizations for two weeks that declared 73 pre-migration paths
         #: while binding a digest over 97 real ones.
         harness_source_files=tuple(live["_harness_source_files"]),
+        resource_scope=scope,
         provenance_commit=session_commit)
 
     payload = auth.as_dict()
-    payload["run_id"] = run_id
+    #: `run_id` is already serialized by `as_dict`, FROM the scope, so the two
+    #: cannot disagree. Asserted rather than re-assigned: writing it again here
+    #: is how a document comes to carry two sources for one fact.
+    assert payload["run_id"] == run_id, (payload["run_id"], run_id)
     payload["stage_id"] = stage_id
     payload["grant"] = {
         "path": str(grant_path),
@@ -371,6 +380,7 @@ def build_c2_authorization_payload(
                      "rule": ("re-derived by constructing the frozen C1 fixed "
                               "path, not read from a constant")},
         "identities_verified": identities,
+        "resource_scope": scope.as_dict(),
         "readiness": readiness,
         "pricing": {
             "expected_usd": float(money["expected_usd"]),

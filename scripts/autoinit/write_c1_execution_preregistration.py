@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write the Phase-C1 execution preregistration.
+"""Derive the Phase-C1 execution preregistration — and REFUSE to rewrite it.
 
     PYTHONPATH=src .venv/bin/python \
         scripts/autoinit/write_c1_execution_preregistration.py
@@ -9,8 +9,31 @@ digest, the hashes from the live objects, the teacher shards from the committed
 binding record. A document whose numbers were typed in by hand describes what
 someone believed rather than what the code will do.
 
-It authorizes nothing. It exists so that when an authorization is eventually
-issued, the thing it binds already exists and cannot be edited afterwards.
+**C1 is closed and this document is frozen.** Attempt 18's authorization names
+it by hash — `bound.execution_preregistration` and
+`bound.execution_preregistration_head_commit` — so it is the binding a completed
+attempt executed under. This script kept running afterwards and rewrote it four
+times, because four separate guards demanded that a document bound BEFORE any
+result existed keep describing the current tree. Nothing scientific ever drifted
+in those rewrites; the live-executable snapshot did, and that snapshot belongs to
+`configs/experiments/phase_c1/executable_closure.json`, which exists to be
+regenerated.
+
+So this still derives the whole document — the derivation IS the check, and a
+science field that stopped reproducing is a real finding — and then refuses,
+three ways:
+
+* rc 0, "every bound science field still reproduces", when the frozen document
+  on disk is the attempt-18 blob and only the tree snapshot differs;
+* rc 2, naming the fields, when a BOUND field no longer reproduces;
+* rc 3 when the document on disk is not the attempt-18 blob at all — because
+  refusing to write is not the same as confirming what is there, and without
+  that check this tool would report a hand-edited file's hash as the binding.
+
+Reopening C1 is a maintainer decision and would need a new preregistration under
+a new identity, not an edit to this one.
+
+It authorizes nothing.
 """
 
 from __future__ import annotations
@@ -28,6 +51,7 @@ sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 from experiments.phase_c1 import session as CS
 from experiments.phase_c1.isolation import BOOTSTRAP_ALGORITHM, BOOTSTRAP_ITERATIONS, BOOTSTRAP_QUANTILE_CONVENTION, BOOTSTRAP_STRATUM_CONVENTION, C0_PREREGISTRATION_SHA256, HISTORICAL_SEEDS, C1Arm, C1IsolationPlan, bootstrap_seed, derive_recovery_seeds  # noqa: E402
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_AUTH_SCHEMA, c1_harness_digest, load_pricing  # noqa: E402
+from experiments.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATION  # noqa: E402
 from experiments.phase_c1.scoring import C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
 from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
 from experiments.calibration import register_builtin_profiles  # noqa: E402
@@ -40,6 +64,14 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 register_builtin_profiles()
 
 OUT = REPO / "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
+
+#: The fields that describe the TREE rather than the experiment, and are
+#: therefore not part of what a closed attempt was bound to. `c1_harness` is a
+#: snapshot of what a current session would execute; `head_commit` is when the
+#: snapshot was taken; `preregistration_sha256` is a function of both. Every
+#: other field is the preregistered science and must reproduce exactly.
+NOT_BOUND_BY_THE_CLOSED_EXPERIMENT: tuple[str, ...] = (
+    "c1_harness", "head_commit", "preregistration_sha256")
 
 #: The two evidence declarations. Restated here rather than imported, because
 #: importing the launcher would pull the whole Phase-A launcher in; the copy is
@@ -643,6 +675,59 @@ def main() -> None:
         "authorizes": "nothing",
     }
     doc["preregistration_sha256"] = sha256_json(doc)
+
+    #: FROZEN. C1 closed with a complete verdict, and attempt 18's authorization
+    #: is the authoritative historical binding: it records the
+    #: `preregistration_sha256` and the `head_commit` of the exact document that
+    #: attempt executed under. This script kept running afterwards, and each run
+    #: rewrote that document's live-harness snapshot and its own hash — so the
+    #: preregistration for a CLOSED experiment drifted four times after the
+    #: experiment it preregisters had finished, and the file no longer matched
+    #: what any attempt ran under.
+    #:
+    #: Nothing scientific ever drifted: the arms, seeds, plan hash, fixed path,
+    #: battery, teacher and scoring contract were identical every time. What
+    #: drifted was `c1_harness`, a snapshot of what a CURRENT session would
+    #: execute — which is exactly what
+    #: `configs/experiments/phase_c1/executable_closure.json` owns and is
+    #: regenerated for. One fact, one owner.
+    #:
+    #: So this refuses rather than writing. It still DERIVES the whole document,
+    #: because the derivation is the check: if a science field ever stopped
+    #: reproducing, that is a real finding and the diff below is where it shows
+    #: up. Reopening C1 is a maintainer decision, and it would need a new
+    #: preregistration under a new identity rather than an edit to this one.
+    frozen = json.loads(OUT.read_text()) if OUT.is_file() else None
+    if frozen is not None:
+        science = {k: v for k, v in doc.items()
+                   if k not in NOT_BOUND_BY_THE_CLOSED_EXPERIMENT}
+        was = {k: v for k, v in frozen.items()
+               if k not in NOT_BOUND_BY_THE_CLOSED_EXPERIMENT}
+        drift = sorted(k for k in set(science) | set(was)
+                       if science.get(k) != was.get(k))
+        stated = frozen.get("preregistration_sha256", "?")
+        print(f"REFUSING to rewrite {OUT.relative_to(REPO)}: C1 is closed and "
+              "this document is frozen to the binding attempt 18 executed "
+              f"under ({ATTEMPT_18_PREREGISTRATION[:16]}…).")
+        #: Refusing to write is not the same as confirming what is there.
+        #: Without this the message above would report whatever hash the file
+        #: currently carries AS the attempt-18 binding, so a hand-edited
+        #: document would be described by this tool as the frozen one.
+        if stated != ATTEMPT_18_PREREGISTRATION:
+            print(f"  ON DISK IS NOT THAT DOCUMENT: it declares {stated[:16]}…, "
+                  f"head_commit {str(frozen.get('head_commit'))[:12]}…. Restore "
+                  "it from the commit that carries the attempt-18 blob; do not "
+                  "regenerate it.")
+            raise SystemExit(3)
+        if drift:
+            print("  SCIENCE DRIFT — investigate, do not overwrite: "
+                  f"{drift}")
+            raise SystemExit(2)
+        print("  every bound science field still reproduces from this tree; "
+              "only the live-executable snapshot differs, and that belongs to "
+              "configs/experiments/phase_c1/executable_closure.json")
+        raise SystemExit(0)
+
     OUT.write_text(json.dumps(doc, indent=1) + "\n")
 
     print(f"wrote {OUT.relative_to(REPO)}")

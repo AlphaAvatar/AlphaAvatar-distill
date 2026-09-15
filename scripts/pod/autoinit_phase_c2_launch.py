@@ -41,6 +41,7 @@ import argparse
 import json
 import math
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -69,6 +70,15 @@ from aadistill.runtime.pod_environment import LAUNCH_BOUND  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
     derive_contract, ignores_for_selection)
 from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+#: The GENERIC run-layout primitives. `scripts/experiments/run_layout.py` owns
+#: the five-area convention, the occupancy rule, the output claim and the
+#: manifest; what is C2's is the role vocabulary in `phase_c2.session` and the
+#: two compositions below. There is no C2 run-layout framework.
+from experiments.run_layout import (  # noqa: E402
+    ArtifactSpec as RunArtifactSpec, claim_output_root, layout_for, open_run,
+    present_roles, record_run, rel_run_dir, require_output_claim,
+    write_run_readmes,
+)
 from experiments.phase_c2 import bundle as BUNDLE  # noqa: E402
 from experiments.phase_c2 import pod_environment as PE  # noqa: E402
 from experiments.phase_c2.session import (  # noqa: E402
@@ -84,6 +94,13 @@ from autoinit_science_inputs import CALIBRATION_V1, CANONICAL_INIT  # noqa: E402
 
 STATUS = f"{WS}/autoinit_phase_c2.status"
 RUN_LOG = f"{WS}/autoinit_phase_c2_run.log"
+
+#: The audit root the driver writes into and the collector walks, named ONCE.
+#: `ArtifactPolicy` books it and `close_c2_run` looks inside the extracted
+#: archive under it; two spellings of this string is how Phase-B attempt 3 came
+#: to write `phase_b_search` while its specs named `phase_a_search`, collected
+#: nothing, and reported `missing: 0`.
+AUDIT_DIRNAME = "autoinit_phase_c2"
 
 #: The stage this experiment's runs are placed under, read from the experiment's
 #: own configuration rather than decided here.
@@ -111,6 +128,232 @@ def bundle_record_for(run_id: str) -> str:
     `session_commit_gate` would refuse.
     """
     return c2_run_path(run_id, "bundle_record", RUN_STAGE_ID)
+
+
+def session_record_path(run_id: str) -> str:
+    """Where THIS run's session record goes, repository-relative.
+
+    ONE rule, called by the parser's `--run-id` action and again by
+    `open_c2_run`, so the path the runner writes to and the directory the run
+    was created in cannot disagree. Two derivations of one path is how they
+    drift.
+    """
+    return c2_run_path(run_id, "session_record", RUN_STAGE_ID)
+
+
+#: The scratch-relative paths this run WRITES and later collects. Ownership of
+#: the scratch root is decided by these alone: a shared model cache or a staged
+#: input living beside them neither claims the directory nor blocks it. The
+#: watchdog journals are matched by PATTERN, because each is named after a pod
+#: that does not exist when the claim is made — and they are exactly the
+#: evidence that a scratch root belonged to a run.
+RUN_OUTPUTS: tuple[str, ...] = (
+    "launch.log",
+    f"relay/{Path(RUN_LOG).name}",
+    f"relay/{Path(STATUS).name}",
+    "relay/c2_evidence.json",
+    "store/manifest.json",
+    "store/c2_search_summary.json",
+    "store/c2_evidence.json",
+    "watchdog_*.jsonl",
+)
+
+#: Scratch-relative source -> role, for the small text records the runner leaves
+#: beside the pod. Copied into the run AFTER the session, because the scratch
+#: directory is outside the repository by design and does not survive as
+#: evidence.
+#:
+#: The relay names are DERIVED from the same constants the relay is built from
+#: — `LogRelay` names each local copy `Path(remote).name` — so renaming the
+#: status file cannot leave this list quietly pointing at a path that stopped
+#: existing. The collection runs once, after teardown, where a wrong name loses
+#: the evidence instead of failing.
+#:
+#: `store/` holds what `ArtifactPolicy.report_names` fetched by scp; `relay/`
+#: holds what was streamed while the pod was alive. Both are named because a
+#: session that ends badly may have one and not the other.
+_RUN_COLLECT: tuple[tuple[str, str], ...] = (
+    ("launch.log", "launcher_log"),
+    (f"relay/{Path(RUN_LOG).name}", "driver_log"),
+    (f"relay/{Path(STATUS).name}", "driver_status"),
+    ("relay/c2_evidence.json", "driver_evidence"),
+    ("store/c2_search_summary.json", "search_summary"),
+    ("store/manifest.json", "artifact_manifest"),
+)
+
+#: Roles written before the run opens, by someone other than the launcher.
+#: Exempt from `open_run`'s occupancy rule and from NOTHING else: prepared
+#: grants no trust and bypasses no gate, and each of these is still validated
+#: independently by the gate that owns it.
+#:
+#: All four are produced by the documented pre-launch sequence, in this order:
+#:
+#:     grant            a maintainer input, authored before anything else
+#:     readiness_record written by the launch-bound sweep, which by contract
+#:                      runs before the authorization is issued
+#:     authorization    written by `issue_c2_authorization.py --run-id`, and
+#:                      read back from this exact path by `session_commit_gate`
+#:     bundle_record    written by `stage_c2_bundle.py --run-id`, and read back
+#:                      from the working tree by `bundle_staged_gate`
+#:
+#: C1 shipped without the last two and the chain became unsatisfiable rather
+#: than merely strict: the issuer writes the authorization into the run, the
+#: launcher reads it from there, nothing copies it in after `open_run` — and
+#: `open_run` then refused the run as occupied by an undeclared file. Attempt 13
+#: died on it at $0. The exemption is per role, BY NAME: a declared role absent
+#: from this tuple is still refused, and an undeclared governance file is still
+#: refused.
+_RUN_PREPARED: tuple[str, ...] = ("grant", "readiness_record",
+                                  "authorization", "bundle_record")
+
+#: What a recorded C2 run must and may contain. `session_record` is the only
+#: requirement, because a session refused at a $0 pre-provider gate produced
+#: exactly that and nothing else — and it must still be able to record itself,
+#: owned, rather than leaving an unowned file in a shared location.
+C2_RUN_SPEC = RunArtifactSpec(
+    spec_id="phase_c2_session_v1",
+    required=("session_record",),
+    optional=tuple(r for r in C2_RUN_ROLES if r != "session_record"))
+
+
+def layout_for_run(repo_root: Path | str, run_id: str):
+    """This attempt's layout, without touching the filesystem."""
+    return layout_for(repo_root, C2_RUN_EXPERIMENT_ID, run_id,
+                      stage_id=RUN_STAGE_ID)
+
+
+def open_c2_run(args, repo_root: Path | None = None):
+    """Claim this attempt's outputs, create its run directory, point `out` at it.
+
+    Runs BEFORE `SessionSpec` construction and therefore before any provider
+    call, so a run id that collides with a recorded run — or a scratch root that
+    belongs to a different attempt — costs `$0` rather than being discovered
+    after a pod exists. `SessionRunner.save()` writes `args.out` without
+    creating its parent, which is the other reason this happens first.
+
+    The scratch claim comes FIRST. The run directory and `--scr` are two
+    independent output locations, and checking only the first is how a fresh run
+    id aimed at a previous attempt's scratch passed the run-directory rule and
+    then collected that attempt's evidence as its own.
+    """
+    repo_root = REPO_ROOT if repo_root is None else Path(repo_root)
+    claim_output_root(args.scr, C2_RUN_EXPERIMENT_ID, args.run_id,
+                      outputs=RUN_OUTPUTS)
+    layout = open_run(repo_root, C2_RUN_EXPERIMENT_ID, args.run_id,
+                      roles=C2_RUN_ROLES, prepared=_RUN_PREPARED,
+                      stage_id=RUN_STAGE_ID)
+    #: Describe the directories as they are created. Documentation only: the
+    #: manifest stays the canonical index, and a README neither counts as a
+    #: produced role nor makes an unexecuted run look like a failed one.
+    write_run_readmes(layout, experiment_id=C2_RUN_EXPERIMENT_ID,
+                      run_id=args.run_id, stage_id=RUN_STAGE_ID,
+                      roles=C2_RUN_ROLES)
+    #: Idempotent for a parser-built namespace, and the whole answer for a
+    #: hand-built one. Same rule either way — see `session_record_path`.
+    args.out = session_record_path(args.run_id)
+    return layout
+
+
+def close_c2_run(layout, args, repo_root: Path | None = None) -> dict:
+    """Collect the small records beside the pod, then write the run manifest.
+
+    Runs after the session on every normal return path, including a launcher
+    error, because the runner already caught that and saved. What it cannot
+    cover is the launcher PROCESS dying: then the run directory exists with no
+    manifest, and that is exactly the state `open_run` refuses to reopen.
+
+    Large working state stays out. The search's intermediate checkpoints are
+    tens of GiB and the collected archive is in scratch; `artifacts/manifest.json`
+    carries their hashes, and nothing here copies a model directory into git to
+    satisfy the layout.
+    """
+    repo_root = REPO_ROOT if repo_root is None else Path(repo_root)
+    scr = Path(args.scr)
+    #: Asked AGAIN here, not assumed from the open. The two happen at opposite
+    #: ends of a session, and what is collected has to be what THIS execution
+    #: produced — otherwise a foreign scratch turns a run that failed before its
+    #: driver started into a manifest full of somebody else's evidence.
+    require_output_claim(scr, C2_RUN_EXPERIMENT_ID, args.run_id)
+    for source, role in _RUN_COLLECT:
+        src = scr / source
+        if src.is_file():
+            shutil.copy2(src, layout.path(C2_RUN_ROLES[role]))
+    #: The comparison record, which the artifact spec marks REQUIRED on a
+    #: successful run. It is fetched into `store/` only if the archive was
+    #: extracted, so it is looked for in both places rather than assumed.
+    for candidate in (scr / "store/c2_baseline_comparison.json",
+                      scr / f"store/extracted/audit/{AUDIT_DIRNAME}/"
+                            "c2_baseline_comparison.json"):
+        if candidate.is_file():
+            shutil.copy2(candidate,
+                         layout.path(C2_RUN_ROLES["baseline_comparison"]))
+            break
+    #: Every resource's watchdog evidence, by the pod id in its name. Resolved
+    #: by glob rather than listed, because how many resources a session held is
+    #: only known once it has ended.
+    wd = layout.path(C2_RUN_ROLES["watchdog_journal"])
+    wd.mkdir(parents=True, exist_ok=True)
+    for src in (sorted(scr.glob("watchdog_*.jsonl"))
+                + sorted(scr.glob("watchdog_*.out"))):
+        shutil.copy2(src, wd / src.name)
+
+    session = json.loads((repo_root / args.out).read_text())
+    return record_run(
+        layout, spec=C2_RUN_SPEC,
+        plan={"session_id": session.get("session_id"),
+              "plan_hash": session.get("session_plan_hash"),
+              "session_commit": getattr(args, "session_commit", None),
+              "bundle": getattr(args, "bundle", None),
+              "scratch_root": str(scr),
+              "scratch_note": ("the artifact archive, the extracted tree and "
+                               "every intermediate search state stay here; "
+                               "artifacts/manifest.json carries their hashes. "
+                               "Large artifacts are not moved into git")},
+        implementation={"launcher": "scripts/pod/autoinit_phase_c2_launch.py",
+                        "driver": "scripts/pod/autoinit_phase_c2_driver.py",
+                        "harness_source_digest": session.get(
+                            "harness_source_digest"),
+                        "authorization": auth_path_for(args.run_id)},
+        status={"passed": session.get("passed"),
+                #: `terminal`, spelled the way the runner writes it. A key the
+                #: record does not have would read as `None` and look like a
+                #: session that produced no marker.
+                "terminal": session.get("terminal"),
+                "pod_id": session.get("pod_id") or None,
+                "cost": session.get("cost"),
+                "provider_confirms_gone": session.get("provider_confirms_gone"),
+                "trains_anything": False,
+                "authorizes": "nothing"},
+        roles=present_roles(layout, C2_RUN_ROLES))
+
+
+#: Exit code for "the session finished, the run did not get recorded".
+#:
+#: Distinct from the session's own codes, and it never overwrites one: a session
+#: that already failed keeps its result, because the pod outcome is what an
+#: operator acts on. But an unrecorded run is not a silent condition either — it
+#: is exactly the state `open_run` refuses to reopen, so a successful session
+#: that could not record itself must not exit 0.
+RUN_NOT_RECORDED = 12
+
+
+class _RunIdSetsOut(argparse.Action):
+    """`--run-id` also produces `out`, because the RUNNER reads `out`.
+
+    `SessionRunner.save()` writes `args.out`, and the structural check
+    `test_every_session_namespace_carries_what_the_runner_reads` requires every
+    such attribute to come from the REAL parser: device-canary attempt 1 died at
+    `$0.0603` on an attribute a hand-written namespace had and the parser did
+    not, after the pod was created and billing. Filling `out` in later would
+    leave the parser's namespace incomplete and that gate red.
+
+    Deriving it here keeps both properties: the namespace is complete, and there
+    is no `--out` flag that could point one attempt's session record at another.
+    """
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        setattr(namespace, self.dest, value)
+        namespace.out = session_record_path(value)
 
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
@@ -266,6 +509,53 @@ def c2_executable_gate(ctx: SessionContext) -> tuple[bool, str]:
     }
     return True, (f"C2 executable closure {live['digest'][:12]}… over "
                   f"{live['n_files']} derived files")
+
+
+def resource_scope_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """This run, and no more provider resources than the grant permitted.
+
+    Three refusals, all at `$0` and all before `create()`:
+
+    * the launcher is running as a run the authorization was not issued for —
+      an authorization belongs to one attempt, whose grant, readiness record
+      and bundle all live in that run;
+    * more host draws are requested than the authorization permits;
+    * the authorization carries no machine-readable scope at all, which is a
+      refusal rather than a permission: an unknown limit is not an unlimited
+      one.
+
+    It adds no mechanism. The two things that actually keep a session safe once
+    it is running already live in the shared runner and are untouched: a second
+    resource is not created until the provider confirms the first is not
+    billing, and every draw shares this session's single dollar ceiling. What
+    was missing was anybody checking the COUNT the maintainer wrote down.
+    """
+    run_id = getattr(ctx.args, "run_id", None)
+    scope = getattr(ctx.auth, "resource_scope", None)
+    if scope is None:
+        return False, (
+            "the authorization carries no resource scope, so the number of "
+            "provider resources it permits is unknown. An unknown limit is not "
+            "an unlimited one; re-issue from a grant that states `one_use` with "
+            "issuances_permitted, launch_attempts_permitted, "
+            "provider_resources_permitted and one_billing_resource_at_a_time.")
+    ok, why = scope.permits_run(run_id)
+    if not ok:
+        return False, why
+    requested = int(getattr(ctx.args, "host_draws", 0) or 0)
+    ok, draws_why = scope.permits_draws(requested)
+    if not ok:
+        return False, draws_why
+    ctx.evidence["resource_scope"] = {
+        **scope.as_dict(),
+        "requested_host_draws": requested,
+        "create_attempts_per_draw": int(getattr(ctx.args, "create_attempts", 0)
+                                        or 0),
+        "enforced_before": "provider creation",
+        "enforced_by": ("this gate for the COUNT; SessionRunner for the "
+                        "confirmed-release rule and the dollar ceiling"),
+    }
+    return True, f"{why}; {draws_why}"
 
 
 def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -537,7 +827,7 @@ def spec(args) -> SessionSpec:
                           "tearing down. Nothing was trained and no permanent "
                           "artifact was replaced.")),
         artifacts=ArtifactPolicy(
-            audit_dirname="autoinit_phase_c2",
+            audit_dirname=AUDIT_DIRNAME,
             evidence_filename="c2_evidence.json",
             archive_basename="c2_search1_artifacts.tar.gz",
             spec_success="configs/autoinit/c2_artifacts.json",
@@ -553,6 +843,9 @@ def spec(args) -> SessionSpec:
         #:   the authorized base in nothing else;
         #: * the executable gate re-derives the closure independently, because
         #:   every other check digests the set the ARTIFACT declares;
+        #: * the resource-scope gate checks the run identity and the number of
+        #:   provider resources the grant actually permitted — the count was
+        #:   prose in the grant and enforced by nothing;
         #: * storage, pricing and plan refuse an under-provisioned volume, a
         #:   mis-priced grant and a grant bound to a moved search space;
         #: * the readiness gate requires a launch-bound sweep that still
@@ -565,6 +858,7 @@ def spec(args) -> SessionSpec:
                                 auth_path_for(getattr(args, "run_id", "")),
                                 check_lineage=True),
             c2_executable_gate,
+            resource_scope_gate,
             storage_gate,
             pricing_identity_gate,
             plan_identity_gate,
@@ -592,12 +886,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--scr", required=True)
     ap.add_argument("--session-commit", required=True)
     ap.add_argument("--bundle", required=True)
-    #: REQUIRED. Every governance artifact this session consumes is owned by its
-    #: run — grant, authorization, readiness record, bundle record — and each is
-    #: resolved from this id. A session with no run id has no grant that can
-    #: belong to it, no readiness record of its own, and nowhere for its
-    #: authorization to live that the next issuance would not overwrite.
-    ap.add_argument("--run-id", required=True,
+    #: REQUIRED, and it is what produces `out`. Every artifact this session
+    #: consumes or produces is owned by its run — grant, authorization,
+    #: readiness record, bundle record, session record, evidence, manifest —
+    #: and each is resolved from this id. A session with no run id has no grant
+    #: that can belong to it and nowhere for its record to live that the next
+    #: attempt would not overwrite.
+    ap.add_argument("--run-id", required=True, action=_RunIdSetsOut,
                     help="the attempt this session runs as, e.g. attempt2")
     ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-artifacts")
     ap.add_argument("--image",
@@ -625,18 +920,41 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
-    ap.add_argument("--out",
-                    default="logs/stages/stage-1/phase_c2/runs/"
-                            "autoinit_phase_c2_session.json")
+    #: No `--out`. It is `run_id` and the layout, or it is nothing.
+    #:
+    #: It was `--out` with a default of
+    #: `logs/stages/stage-1/phase_c2/runs/autoinit_phase_c2_session.json` — a
+    #: file directly in the runs root, belonging to no run, which every attempt
+    #: would have written in turn. `SessionRunner.save()` writes exactly
+    #: `args.out`, so an operator could also point the record of one attempt at
+    #: another. `--run-id` fills `out` through `_RunIdSetsOut`, so the namespace
+    #: the runner reads is complete and there is no flag that could aim it
+    #: anywhere but at its own run.
     return ap
 
 
 def main() -> int:
     args = build_parser().parse_args()
-    return run_session(spec(args), args, REPO_ROOT,
-                       summary=("Search-1 is a terminus: Search-2 is "
-                                "conditional on this evidence and behavioural "
-                                "confirmation is separately authorized."))
+    #: BEFORE `spec(args)` and therefore before anything is priced or created:
+    #: a colliding run id or a foreign scratch root costs $0 here.
+    layout = open_c2_run(args)
+    rc = run_session(spec(args), args, REPO_ROOT,
+                     summary=("Search-1 is a terminus: Search-2 is "
+                              "conditional on this evidence and behavioural "
+                              "confirmation is separately authorized."))
+    try:
+        doc = close_c2_run(layout, args)
+    except Exception as exc:                                      # noqa: BLE001
+        print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
+              f"  the run directory is "
+              f"{rel_run_dir(C2_RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)}; "
+              "it holds whatever the session produced and has no manifest. Do "
+              "not reuse this run id.")
+        return rc or RUN_NOT_RECORDED
+    print(f"run {doc['experiment_id']}/{doc['run_id']} recorded — "
+          f"{len(doc['roles'])} role(s) under "
+          f"{rel_run_dir(doc['experiment_id'], doc['run_id'], RUN_STAGE_ID)}")
+    return rc
 
 
 if __name__ == "__main__":

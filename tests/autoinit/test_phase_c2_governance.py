@@ -417,7 +417,13 @@ def candidate_grant(repo_root=REPO) -> dict:
         "approved_money": {"expected_usd": 7.1787, "soft_stop_usd": 14.4996,
                            "hard_cap_usd": 15.0446,
                            "price_basis_usd_per_hour": 1.09},
-        "one_use": {"issuances_permitted": 1},
+        #: All four keys: the issuer refuses a partial `one_use`, because none
+        #: of these limits has a safe default and a permissive one is the shape
+        #: this must not have.
+        "one_use": {"issuances_permitted": 1,
+                    "launch_attempts_permitted": 1,
+                    "provider_resources_permitted": 3,
+                    "one_billing_resource_at_a_time": True},
         "budget_context_at_approval": {"cumulative_spend_usd": 290.5174,
                                        "authorized_cap_usd": 320.0},
         "bound_identities_the_issuer_must_reproduce": {
@@ -742,6 +748,8 @@ def test_every_gate_runs_before_a_provider_resource_exists(launcher):
     assert names == [
         "session_commit_and_lineage",
         "c2_executable_gate",
+        #: The run identity and the provider-resource COUNT the grant stated.
+        "resource_scope_gate",
         "storage_gate",
         "pricing_identity_gate",
         "plan_identity_gate",

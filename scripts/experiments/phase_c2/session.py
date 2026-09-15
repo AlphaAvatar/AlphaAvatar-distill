@@ -34,9 +34,10 @@ passed so the below-floor guard cannot be satisfied by accident.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from aadistill.governance.authorization import AuthorizationError
 from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
@@ -145,7 +146,16 @@ C2_RUN_EXPERIMENT_ID = "phase_c2"
 #: single repository-root files that each attempt overwrote, and unwinding that
 #: took a pointer, a history file and a migration. A run owns its governance
 #: artifacts from the start here.
+#:
+#: This declared the four GOVERNANCE roles only until 2026-09-16, and the
+#: session record was left to an operator-selectable `--out` with a shared
+#: default — so the governance chain was run-owned while the record of what the
+#: run actually did was not, and two attempts could overwrite one file. The
+#: roles below are what THIS session produces and nothing else: there is no
+#: probe, battery, replay, rung or scoring role, because a search session has
+#: none of those.
 C2_RUN_ROLES: dict[str, str] = {
+    #: --- governance: inputs, prepared before the run opens ----------------
     #: The maintainer decision. An INPUT, committed before the launch-bound
     #: sweep, because the authorization is issued from it and the sweep must see
     #: the final clean tree.
@@ -153,6 +163,36 @@ C2_RUN_ROLES: dict[str, str] = {
     "authorization": "governance/authorization.json",
     "bundle_record": "governance/bundle.json",
     "readiness_record": "governance/readiness.json",
+    #: --- runtime: how it executed ------------------------------------------
+    #: Written by `SessionRunner.save()` on EVERY path, including a launcher
+    #: error and a $0 pre-provider refusal, so it is the one role that is always
+    #: present and the only one the run manifest requires.
+    "session_record": "runtime/session.json",
+    "launcher_log": "runtime/launcher.log",
+    #: A DIRECTORY: a session may hold up to three resources in turn and each
+    #: watchdog writes its own journal from its first tick. One file here would
+    #: mean one resource's backstop evidence collected and the rest left in
+    #: scratch.
+    "watchdog_journal": "runtime/watchdog/",
+    #: --- evidence: what it observed ----------------------------------------
+    "driver_evidence": "evidence/c2_evidence.json",
+    "driver_log": "evidence/driver_run.log",
+    #: The COMPLETE marker sequence. The session record echoes only the last
+    #: status it saw, so the stream is the one place the whole ordering survives.
+    "driver_status": "evidence/driver_status.txt",
+    #: The beam's ranking, small and reviewable. The search JOURNAL and the
+    #: per-state telemetry are NOT roles: they arrive inside the collected
+    #: archive, which stays in scratch, and `artifacts/manifest.json` carries
+    #: their hashes. A run manifest holds a verifiable reference to a large
+    #: artifact; it never holds the artifact.
+    "search_summary": "evidence/c2_search_summary.json",
+    "baseline_comparison": "evidence/c2_baseline_comparison.json",
+    #: --- artifacts and closeout --------------------------------------------
+    "artifact_manifest": "artifacts/manifest.json",
+    #: NOT written by the launcher. A maintainer's post-review classification
+    #: outlives the process that ran the session; declaring the role says where
+    #: it goes and lets a later recorder name it without widening the spec.
+    "outcome": "closeout/outcome.json",
 }
 
 
@@ -320,6 +360,163 @@ def c2_plan_hash() -> str:
 # ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
+class C2ResourceScope:
+    """The one-use and provider-resource limits, machine-readable.
+
+    The grant states them — a maintainer decides how many resources a session
+    may draw — and the issuer copies exactly these four numbers out of the
+    grant's `one_use` block so a gate can read them. Before this they existed
+    only as prose inside the grant, which meant the sentence "at most 3
+    provider resources, never more than one billing at a time" was checked by
+    nobody: `--host-draws` defaulted to 3 and an operator could pass 8.
+
+    **The scope belongs to the AUTHORIZATION, not to the runner.** Putting a
+    number in `SessionRunner` would make one experiment's permission a property
+    of every session that uses the shared runner. The runner already owns the
+    two mechanisms this leans on and neither is duplicated here: it refuses to
+    create a second resource until the provider confirms the first is not
+    billing, and it enforces the dollar hard cap.
+
+    It carries the `run_id` for the same reason: an authorization issued for one
+    attempt must not be usable as another, and that is a comparison something
+    has to actually make.
+    """
+
+    run_id: str
+    issuances_permitted: int
+    launch_attempts_permitted: int
+    provider_resources_permitted: int
+    one_billing_resource_at_a_time: bool
+
+    #: The keys an issuer reads out of a grant's `one_use` block. Named here so
+    #: a grant that omits one is refused at issuance rather than producing a
+    #: scope with a silent default — a permissive default is the one shape this
+    #: type must not have.
+    GRANT_KEYS: ClassVar[tuple[str, ...]] = (
+        "issuances_permitted", "launch_attempts_permitted",
+        "provider_resources_permitted", "one_billing_resource_at_a_time")
+
+    def __post_init__(self) -> None:
+        if not str(self.run_id or "").strip():
+            raise AuthorizationError(
+                "a resource scope with no run id cannot say which attempt it "
+                "permits, so it would permit any of them")
+        for name in ("issuances_permitted", "launch_attempts_permitted",
+                     "provider_resources_permitted"):
+            value = getattr(self, name)
+            if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+                raise AuthorizationError(
+                    f"{name}={value!r} is not a positive integer count")
+        if self.one_billing_resource_at_a_time is not True:
+            raise AuthorizationError(
+                "one_billing_resource_at_a_time must be true. Two resources "
+                "billing at once is the failure the runner's confirmed-release "
+                "rule exists to prevent; an authorization may not waive it.")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "run_id": self.run_id,
+            "issuances_permitted": self.issuances_permitted,
+            "launch_attempts_permitted": self.launch_attempts_permitted,
+            "provider_resources_permitted": self.provider_resources_permitted,
+            "one_billing_resource_at_a_time":
+                self.one_billing_resource_at_a_time,
+            "_what_a_provider_resource_is": (
+                "a resource the provider RETURNED AN ID FOR. A create call that "
+                "returns no id created nothing and billed nothing, so it does "
+                "not consume this count; it is still recorded as a draw with "
+                "pod_id null, because the provider's refusal is the only "
+                "evidence of why."),
+            "_what_this_does_not_relax": (
+                "the dollar ceiling, which every draw in the session shares, "
+                "and the runner's requirement that the provider confirm a "
+                "resource is not billing before the next one is created."),
+        }
+
+    @classmethod
+    def from_dict(cls, raw: Any) -> "C2ResourceScope":
+        if not isinstance(raw, Mapping):
+            raise AuthorizationError(
+                "the authorization carries no usable resource scope, so how "
+                "many provider resources it permits is unknown. An unknown "
+                "limit is not an unlimited one; refusing.")
+        missing = [k for k in ("run_id", *cls.GRANT_KEYS) if k not in raw]
+        if missing:
+            raise AuthorizationError(
+                f"the authorization's resource scope is missing {missing}")
+        return cls(run_id=str(raw["run_id"]),
+                   issuances_permitted=raw["issuances_permitted"],
+                   launch_attempts_permitted=raw["launch_attempts_permitted"],
+                   provider_resources_permitted=(
+                       raw["provider_resources_permitted"]),
+                   one_billing_resource_at_a_time=(
+                       raw["one_billing_resource_at_a_time"]))
+
+    @classmethod
+    def from_grant(cls, grant: Mapping[str, Any], run_id: str
+                   ) -> "C2ResourceScope":
+        """The scope a grant states, refusing anything it does not state."""
+        one_use = grant.get("one_use")
+        if not isinstance(one_use, Mapping):
+            raise AuthorizationError(
+                "the grant states no structured `one_use` block, so the "
+                "issuance, launch and provider-resource limits cannot be made "
+                "machine-readable")
+        missing = [k for k in cls.GRANT_KEYS if k not in one_use]
+        if missing:
+            raise AuthorizationError(
+                f"the grant's one_use block does not state {missing}. Each is a "
+                "maintainer decision and none of them has a safe default.")
+        return cls(run_id=run_id,
+                   **{k: one_use[k] for k in cls.GRANT_KEYS})
+
+    # --- what a gate asks it ------------------------------------------------
+
+    def permits_run(self, run_id: str) -> tuple[bool, str]:
+        if run_id != self.run_id:
+            return False, (
+                f"this authorization was issued for run {self.run_id!r} and the "
+                f"launcher is running as {run_id!r}. An authorization belongs to "
+                "one attempt: its grant, readiness record and bundle all live in "
+                "that run, and consuming it as another attempt would spend one "
+                "attempt's one-use chain under another's identity.")
+        return True, f"authorized for run {self.run_id!r}"
+
+    def permits_draws(self, requested: int) -> tuple[bool, str]:
+        """May this session ask for `requested` host draws?
+
+        Asked of the REQUEST, before a provider is contacted, because a draw
+        that has already happened cannot be un-drawn.
+        """
+        if requested > self.provider_resources_permitted:
+            return False, (
+                f"--host-draws {requested} exceeds the {self.provider_resources_permitted} "
+                "provider resource(s) this authorization permits. A draw is a "
+                "created resource, and the ceiling is shared: drawing more does "
+                "not buy more money, it only means more resources created under "
+                "one permission.")
+        if requested < 1:
+            return False, f"--host-draws {requested} would create nothing"
+        return True, (f"{requested} draw(s) within the "
+                      f"{self.provider_resources_permitted} permitted")
+
+    @staticmethod
+    def provider_resources_used(draws: Any) -> int:
+        """How many PROVIDER RESOURCES a session's draw records describe.
+
+        A create call that returned no id created nothing and billed nothing, so
+        it does not count — the runner records it as a draw with `pod_id: null`
+        and `provider_resource_created: false` precisely so that this
+        distinction survives into the evidence. Counting rows instead of
+        resources would let a provider's refusal consume a permission.
+        """
+        if not isinstance(draws, Sequence):
+            return 0
+        return sum(1 for d in draws
+                   if isinstance(d, Mapping) and d.get("pod_id"))
+
+
+@dataclass(frozen=True)
 class C2Authorization(PhaseAAuthorization):
     """Permits exactly the Phase-C2 Search-1 initialization search.
 
@@ -334,6 +531,12 @@ class C2Authorization(PhaseAAuthorization):
     #: wrong set for an artifact that omitted the field. Empty fails closed: it
     #: digests to nothing and matches nothing. An issuer writes the derived set.
     harness_source_files: tuple[str, ...] = ()
+
+    #: The run this artifact was issued for, and the one-use/provider-resource
+    #: limits its grant stated. `None` is a refusal at the gate, not a
+    #: permission: an authorization that cannot say how many resources it
+    #: permits does not permit an unknown number of them.
+    resource_scope: C2ResourceScope | None = None
 
     @property
     def allows_phase_a(self) -> bool:
@@ -357,6 +560,12 @@ class C2Authorization(PhaseAAuthorization):
         payload["allows_phase_a"] = self.allows_phase_a
         payload["allows_recovery_training"] = self.allows_recovery_training
         payload["authorizes_c2_search1"] = self.authorizes_c2_search1
+        #: The machine-readable scope, or an explicit null. Serialized from the
+        #: object so a document cannot carry a scope the object does not have.
+        payload["resource_scope"] = (self.resource_scope.as_dict()
+                                     if self.resource_scope else None)
+        payload["run_id"] = (self.resource_scope.run_id
+                             if self.resource_scope else None)
         payload["scope"] = (
             "ONE beam search over the Phase-C2 Search-1 space: four operator "
             "kinds, one implementation each, order free, ATTENTION branching "
@@ -408,6 +617,10 @@ class C2Authorization(PhaseAAuthorization):
             authorized_session_commit=raw.get("authorized_session_commit"),
             harness_source_digest=raw.get("harness_source_digest"),
             harness_source_files=tuple(raw.get("harness_source_files") or ()),
+            #: Parsed through `from_dict`, which refuses a partial scope. A
+            #: missing block stays None and the launcher's scope gate refuses.
+            resource_scope=(C2ResourceScope.from_dict(raw["resource_scope"])
+                            if raw.get("resource_scope") is not None else None),
             per_launch_hard_usd=raw.get("per_launch_hard_usd"),
             provenance_commit=raw.get("provenance_commit"),
             version=int(raw.get("version", 1)))

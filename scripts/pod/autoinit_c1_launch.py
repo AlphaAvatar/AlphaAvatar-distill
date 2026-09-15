@@ -56,7 +56,8 @@ from experiments.run_layout import (  # noqa: E402
     open_run, present_roles, record_run, require_output_claim, write_run_readmes,
 )
 from experiments.phase_c1 import session as CS
-from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
+from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT, C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
+from experiments.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATION  # noqa: E402
 from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
 from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
 from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
@@ -742,15 +743,36 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
                        f"contents hash to {recomputed[:12]}…; it was edited after "
                        "it was written")
 
+    #: The FROZEN identity, and then the live one — from two documents, because
+    #: they are two questions.
+    #:
+    #: This compared the preregistration's own `c1_harness` block to the live
+    #: tree until 2026-09-16. That made an unrelated source edit anywhere in
+    #: C1's import graph satisfiable only by rewriting a document bound BEFORE
+    #: any C1 result existed — the document attempt 18's authorization names by
+    #: hash — and it was rewritten four times after C1 closed for exactly that
+    #: reason. No science ever drifted in those rewrites; the harness snapshot
+    #: did, and that snapshot has an owner built to be regenerated.
+    if stated != ATTEMPT_18_PREREGISTRATION:
+        return False, (
+            f"{PREREG} is not the document attempt 18 executed under "
+            f"({ATTEMPT_18_PREREGISTRATION[:12]}…); it is frozen to that "
+            "binding, and a reopened C1 needs a new preregistration under a new "
+            "identity rather than an edit to this one")
     live = c1_harness_digest(REPO_ROOT)["digest"]
-    recorded = (doc.get("c1_harness") or {}).get("digest")
+    snapshot = REPO_ROOT / CURRENT_CLOSURE_SNAPSHOT
+    if not snapshot.is_file():
+        return False, (f"{CURRENT_CLOSURE_SNAPSHOT} is missing; the live "
+                       "executable identity has no recorded owner")
+    recorded = json.loads(snapshot.read_text()).get("digest")
     if recorded != live:
-        return False, (f"the preregistration records harness "
-                       f"{str(recorded)[:12]}… but the tree digests to {live[:12]}…")
+        return False, (f"the recorded executable closure is {str(recorded)[:12]}… "
+                       f"and the tree digests to {live[:12]}…; re-run "
+                       "scripts/architecture/derive_closure.py --write")
     if doc.get("authorizes") != "nothing":
         return False, "the preregistration claims to authorize something"
-    return True, (f"preregistration {stated[:12]}… (self-hash verified), harness "
-                  f"{live[:12]}…")
+    return True, (f"preregistration {stated[:12]}… (self-hash verified, the "
+                  f"attempt-18 binding), live closure {live[:12]}…")
 
 
 def frozen_c1_science_gate(ctx: SessionContext) -> tuple[bool, str]:

@@ -205,10 +205,31 @@ class TestTheRealClosure:
         doc = json.loads((REPO / rel).read_text())
         # 1. it carries its own self-hash
         assert doc["preregistration_sha256"], "nothing would pin its bytes"
-        # 2. and it must record the LIVE harness, which is what makes a stale
-        #    preregistration refusable -- the payload gate compares these.
-        assert doc["c1_harness"]["digest"] == c1_harness_digest(REPO)["digest"], (
-            "re-emit it: scripts/autoinit/write_c1_execution_preregistration.py")
+        # 2. and the LIVE harness is recorded by the CLOSURE SNAPSHOT, not by
+        #    the preregistration.
+        #
+        #    This asserted `doc["c1_harness"]["digest"] == c1_harness_digest()`
+        #    until 2026-09-16 — one of four places that demanded a document
+        #    bound before any C1 result existed keep describing the current
+        #    tree. The only way to satisfy them after any source edit was to
+        #    rewrite it, and it was rewritten four times after C1 closed, until
+        #    the canonical file was three regenerations away from the hash
+        #    attempt 18's authorization names. No science ever drifted in those
+        #    rewrites; the harness snapshot did.
+        #
+        #    So the live question is asked of the document that exists to be
+        #    regenerated, and the frozen one of the document that is frozen.
+        from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT
+        from experiments.phase_c1.authorization_payload import (
+            ATTEMPT_18_PREREGISTRATION,
+        )
+
+        recorded = json.loads((REPO / CURRENT_CLOSURE_SNAPSHOT).read_text())
+        assert recorded["digest"] == c1_harness_digest(REPO)["digest"], (
+            "re-run scripts/architecture/derive_closure.py --write")
+        assert doc["preregistration_sha256"] == ATTEMPT_18_PREREGISTRATION, (
+            "the canonical preregistration is not the document attempt 18 "
+            "executed under; it is frozen to that binding")
 
     def test_it_does_not_reach_another_phase_driver(self):
         """C1 has its own launcher and driver; reaching Phase A's would be wrong."""

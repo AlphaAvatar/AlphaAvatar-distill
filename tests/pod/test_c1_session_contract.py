@@ -24,6 +24,7 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 from experiments.phase_c1.authorization import c1_current_executable  # noqa: E402
 from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_SCHEMA, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest  # noqa: E402
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
+from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 from session_specs import load_session_launcher, session_args  # noqa: E402
 
 #: The LIVE executable set. `C1_HARNESS_SOURCE_FILES_V1` is the
@@ -272,13 +273,123 @@ def test_a_missing_harness_file_raises_rather_than_shrinking_the_digest():
         c1_harness_digest(REPO, files=("src/aadistill/does_not_exist.py",))
 
 
-def test_the_preregistration_records_the_live_harness_digest():
-    doc = json.loads(
-        (REPO / "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json").read_text())
-    assert doc["c1_harness"]["digest"] == c1_harness_digest(REPO)["digest"]
+def test_the_preregistration_is_frozen_to_the_binding_attempt_18_executed_under():
+    """It asserted `doc["c1_harness"]["digest"] == c1_harness_digest(REPO)` —
+    that the CLOSED experiment's preregistration still described the live tree.
+
+    That is not a property a preregistration can have. It is bound before any
+    result exists, and attempt 18's authorization names it by hash, so the only
+    way to satisfy this after any source edit was to REWRITE the document the
+    completed attempt ran under. It was rewritten four times after C1 closed,
+    and by 2026-09-16 the canonical file was three regenerations away from
+    `bound.execution_preregistration`.
+
+    Nothing scientific had drifted — the arms, seeds, plan hash, fixed path,
+    battery, teacher and scoring contract were identical in every version. What
+    drifted was a snapshot of what a CURRENT session would execute, which is
+    what `configs/experiments/phase_c1/executable_closure.json` owns and is
+    regenerated for. So the live question is asked of that document
+    (`test_the_recorded_closure_describes_the_live_tree` below), and this one
+    asks what a frozen binding can answer: is it still the exact blob?
+    """
+    from experiments.phase_c1.authorization_payload import (
+        ATTEMPT_18_PREREGISTRATION,
+    )
+
+    rel = "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
+    doc = json.loads((REPO / rel).read_text())
+    #: Its own hash, recomputed — the document must not have been edited.
+    body = {k: v for k, v in doc.items() if k != "preregistration_sha256"}
+    assert doc["preregistration_sha256"] == sha256_json(body), (
+        f"{rel} does not match its own declared hash")
+    #: And it must be the one attempt 18 was authorized against, by both of the
+    #: fields that attempt's authorization records.
+    a18 = json.loads((REPO / "logs/stages/stage-1/phase_c1/runs/attempt18/"
+                      "governance/authorization.json").read_text())["bound"]
+    assert doc["preregistration_sha256"] == a18["execution_preregistration"]
+    assert doc["head_commit"] == a18["execution_preregistration_head_commit"]
+    assert doc["preregistration_sha256"] == ATTEMPT_18_PREREGISTRATION
+    #: The harness it records is that attempt's, not this tree's, and saying so
+    #: is the point: a closed experiment's binding does not follow the tree.
+    assert doc["c1_harness"]["digest"] == a18["c1_harness_digest"]
+    assert doc["c1_harness"]["n_files"] == a18["c1_harness_n_files"]
+
     assert doc["authorizes"] == "nothing"
     assert doc["authorization"]["schema"] == C1_SCHEMA
     assert "NO GRANT EXISTS" in doc["authorization"]["status"]
+
+
+def test_the_recorded_closure_describes_the_live_tree():
+    """The live half, asked of the document that owns it.
+
+    This is the check the preregistration was being rewritten to satisfy. Here
+    it is satisfiable by regeneration, which is what that file is for.
+    """
+    from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT
+
+    recorded = json.loads((REPO / CURRENT_CLOSURE_SNAPSHOT).read_text())
+    assert recorded["digest"] == c1_harness_digest(REPO)["digest"], (
+        "re-run scripts/architecture/derive_closure.py --write")
+
+
+def test_the_writer_refuses_to_rewrite_the_frozen_preregistration():
+    """And it still derives the whole document, so a science field that stopped
+    reproducing would be reported rather than silently overwritten."""
+    import subprocess
+
+    rel = "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
+    before = (REPO / rel).read_bytes()
+    done = subprocess.run(
+        [sys.executable, "scripts/autoinit/write_c1_execution_preregistration.py"],
+        cwd=REPO, capture_output=True, text=True, timeout=900,
+        env={**os.environ, "PYTHONPATH": "src"})
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert "REFUSING to rewrite" in done.stdout
+    assert "every bound science field still reproduces" in done.stdout, (
+        "the writer no longer confirms the frozen science reproduces: "
+        + done.stdout + done.stderr)
+    assert (REPO / rel).read_bytes() == before, "the frozen document was rewritten"
+
+
+def test_the_writer_refuses_a_document_that_is_not_the_attempt_18_blob(tmp_path):
+    """Refusing to WRITE is not the same as confirming what is THERE.
+
+    Without this the refusal message would report whatever hash the file
+    currently carries as "the binding attempt 18 executed under", so a
+    hand-edited document — or a regenerated one with a perfectly valid
+    self-hash, which is what four guards used to demand — would be described by
+    this tool as the frozen one.
+    """
+    import subprocess
+
+    from aadistill.infrastructure.manifest import sha256_json
+
+    rel = "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
+    path = REPO / rel
+    before = path.read_bytes()
+    try:
+        #: A REGENERATION, not a corruption: the live harness, a new commit
+        #: stamp, and a correctly recomputed self-hash. Every check except the
+        #: frozen-identity one would accept it.
+        doc = json.loads(before)
+        doc["head_commit"] = "f" * 40
+        doc.pop("preregistration_sha256")
+        doc["preregistration_sha256"] = sha256_json(doc)
+        path.write_text(json.dumps(doc, indent=1) + "\n")
+
+        done = subprocess.run(
+            [sys.executable,
+             "scripts/autoinit/write_c1_execution_preregistration.py"],
+            cwd=REPO, capture_output=True, text=True, timeout=900,
+            env={**os.environ, "PYTHONPATH": "src"})
+        assert done.returncode == 3, done.stdout + done.stderr
+        assert "ON DISK IS NOT THAT DOCUMENT" in done.stdout
+        assert "do not regenerate it" in done.stdout
+        #: And it still did not write.
+        assert path.read_text() == json.dumps(doc, indent=1) + "\n"
+    finally:
+        path.write_bytes(before)
+    assert path.read_bytes() == before
 
 
 # --- what the session cannot do --------------------------------------------
@@ -516,9 +627,17 @@ def _prereg_gate(tmp_path, monkeypatch, doc) -> tuple[bool, str]:
     (root / L.PREREG).parent.mkdir(parents=True, exist_ok=True)
     (root / L.PREREG).write_text(json.dumps(doc, indent=1) + "\n")
     monkeypatch.setattr(L, "REPO_ROOT", root)
-    monkeypatch.setattr(L, "c1_harness_digest",
-                        lambda *_a, **_k: {"digest": (doc.get("c1_harness") or {})
-                                           .get("digest", "")})
+    #: The gate asks the LIVE question of the closure snapshot since 2026-09-16,
+    #: because asking it of the preregistration is what forced a closed
+    #: experiment's binding to be rewritten after every source edit. So the
+    #: fixture root carries a snapshot too, agreeing with the digest below —
+    #: the four assertions here are about the SELF-HASH, and this keeps the
+    #: other half of the gate satisfied rather than becoming their subject.
+    live = (doc.get("c1_harness") or {}).get("digest", "")
+    (root / L.CURRENT_CLOSURE_SNAPSHOT).parent.mkdir(parents=True, exist_ok=True)
+    (root / L.CURRENT_CLOSURE_SNAPSHOT).write_text(
+        json.dumps({"digest": live}) + "\n")
+    monkeypatch.setattr(L, "c1_harness_digest", lambda *_a, **_k: {"digest": live})
     return L.preregistration_gate(None)
 
 

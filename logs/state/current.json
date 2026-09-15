@@ -20,7 +20,7 @@
  "prepared_launch": {
   "any": false,
   "superseded_run": "logs/stages/stage-1/phase_c2/runs/attempt1",
-  "note": "phase_c2 Search-1 attempt1 is PRE-AUTHORIZATION SUPERSEDED: $0 spend, no authorization, no provider resource, no scientific execution. Its grant and its pod-test-gate probe are preserved unrewritten as evidence. The 2026-09-15 approval bound commit 7d0a35a and the then-current 18-file harness DECLARATION; the C2 executable identity is now a derived closure, so the issuer re-derives that grant's identities and REFUSES it. A fresh maintainer grant is required -- and a grant is not an authorization."
+  "note": "phase_c2 Search-1 attempt1 is PRE-AUTHORIZATION SUPERSEDED: $0 spend, no authorization, no provider resource, no scientific execution. Its grant and pod-test-gate probe are preserved unrewritten. The grant binds the 18-file harness DECLARATION and the C2 executable identity is now a derived closure, so the issuer re-derives and REFUSES it. A fresh maintainer grant is required -- and a grant is not an authorization."
  },
  "budget": {
   "cumulative_spend_usd": 290.5174,
@@ -131,7 +131,7 @@
    "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
    "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
-   "executes": "scripts/pod/autoinit_phase_c2_launch.py -> autoinit_phase_c2_driver.py; two stages, trains nothing",
+   "executes": "scripts/pod/autoinit_phase_c2_launch.py -> autoinit_phase_c2_driver.py; two stages, trains nothing. run_id owns it all: no --out, record at runs/<attempt>/runtime/session.json, manifest even on a $0 refusal",
    "priced": "41-53 expansions; expected $7.1787, ceiling $15.0446 at L40S securePrice $1.09/h, INCLUDING a named conditional baseline_rebuild_reserve of 27.665 min ($0.5026). Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json. Priced is NOT funded: C2 needs its own grant, and neither project headroom nor C1's unused allowance is permission.",
    "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both -- the identities collide by construction.",
    "baseline_evidence": "audit/autoinit_phase_c2/c2_baseline_comparison.json, REQUIRED by the success artifact spec. Both branches write one schema, so a REBUILT B's state_eval result cannot be lost at teardown. It cites the beam's stage1_selection.json and never rewrites it.",

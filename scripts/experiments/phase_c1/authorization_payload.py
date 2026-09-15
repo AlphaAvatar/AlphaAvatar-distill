@@ -41,13 +41,22 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))   # experiments.* live here
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_hard_ceiling_usd, c1_harness_digest, load_pricing  # noqa: E402
+from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT, C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_hard_ceiling_usd, c1_harness_digest, load_pricing  # noqa: E402
 from aadistill.governance.grant import (  # noqa: E402
     GrantContract, GrantRefused, validate_grant,
 )
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 CONFIG = "configs/experiments/phase_c1/authorization.json"
+
+#: The `preregistration_sha256` of the document attempt 18 actually executed
+#: under, read from `bound.execution_preregistration` in that attempt's own
+#: authorization. Its internal `head_commit` field is
+#: `feb848ab13d9ab69cf311f277ee0d223102365e0` and the blob itself is in the tree
+#: at commit `e80eb60b`. C1 closed with a complete verdict, so this is the
+#: authoritative and final binding.
+ATTEMPT_18_PREREGISTRATION = (
+    "92f8455b2309045cd63aff0d3ccd87cb2a813bbf5fdcc47e501294b8715dce6b")
 
 #: Kept as the module's public exception so both callers can catch one name.
 C1AuthorizationRefused = GrantRefused
@@ -166,8 +175,37 @@ def build_c1_authorization_payload(
         problems.append("pricing floor moved")
     if abs(float(pricing["totals"]["expected_usd"]) - SOFT_STOP_USD) > 1e-9:
         problems.append("pricing expected moved")
-    if harness["digest"] != (doc.get("c1_harness") or {}).get("digest"):
-        problems.append("the preregistration does not record the live harness")
+    #: Against the LIVE CLOSURE SNAPSHOT, not the preregistration.
+    #:
+    #: This compared `doc["c1_harness"]["digest"]` until 2026-09-16, which made
+    #: an unrelated source edit anywhere in C1's import graph refusable only by
+    #: REWRITING the preregistration — a document bound before any C1 result
+    #: existed, and the one attempt 18's authorization names by hash. It was
+    #: rewritten four times after C1 closed for exactly that reason, and it
+    #: stopped matching what any attempt executed under.
+    #:
+    #: The live executable identity has an owner that is meant to be
+    #: regenerated: `configs/experiments/phase_c1/executable_closure.json`. The
+    #: question asked here is unchanged — does the recorded identity still
+    #: describe the code that would run — and it is now asked of the document
+    #: whose job that is. The preregistration is checked for the only thing a
+    #: frozen historical binding can be checked for, below.
+    snapshot = (root / CURRENT_CLOSURE_SNAPSHOT)
+    if not snapshot.is_file():
+        problems.append(f"{CURRENT_CLOSURE_SNAPSHOT} is missing; the live "
+                        "executable identity has no recorded owner")
+    else:
+        recorded = json.loads(snapshot.read_text())
+        if harness["digest"] != recorded.get("digest"):
+            problems.append(
+                "the recorded executable closure does not describe the live "
+                "tree; re-run scripts/architecture/derive_closure.py --write")
+    if doc["preregistration_sha256"] != ATTEMPT_18_PREREGISTRATION:
+        problems.append(
+            "the C1 execution preregistration is not the document attempt 18 "
+            f"executed under ({ATTEMPT_18_PREREGISTRATION[:16]}…). It is frozen "
+            "to that binding; a reopened C1 needs a new preregistration under a "
+            "new identity, not an edit to this one.")
     if doc.get("isolation_plan", {}).get("plan_hash") != plan_hash:
         problems.append("the preregistration does not record the live plan hash")
     if doc.get("scoring_contract", {}).get("digest") != scoring["digest"]:
