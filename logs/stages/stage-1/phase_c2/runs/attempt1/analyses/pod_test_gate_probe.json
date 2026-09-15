@@ -1,0 +1,28 @@
+{
+ "schema": "aadistill.autoinit.c2_pod_test_gate_probe/v1",
+ "_what_this_is": "a $0 dev-box replication of the blocking test gate the C2 pod setup would run, measured because the reviewed C2 launcher declares only two --ignore entries and therefore sends the pod the REPOSITORY-WIDE suite. It is NOT a launch_bound readiness record and authorizes nothing: no staged pod view, no harness binding, no lineage rule, no self-verified record contract.",
+ "measured_utc": "2026-09-15T10:15:22+00:00",
+ "swept_commit": "1349f284a0a18825311e1d60aa48f11be179a3be",
+ "command": "OMP/MKL/OPENBLAS_NUM_THREADS=8 taskset -c 0-15 env <cpu_test_env_args> timeout 2700 python -m pytest tests/ -q --junitxml=... --ignore=tests/data/test_recovery_corpus_pipeline.py --ignore=tests/pod/test_phase_a_stages1_5_execute.py",
+ "environment": "the pod's own CPU-test scope from scripts/pod/cpu_test_env_args.py: neutralized HOME and HF caches, CUDA_VISIBLE_DEVICES empty, AAD_C1_CPU_TEST_SCOPE=1",
+ "result": {
+  "passed": 3976,
+  "skipped": 65,
+  "failed": 0,
+  "errors": 0,
+  "returncode": 0,
+  "pytest_seconds": 904.79,
+  "wall_seconds": 907.19
+ },
+ "gate_budget_seconds": 2700,
+ "fraction_of_gate_budget": 0.336,
+ "finding": "the gate PASSES on this tree with 3976 passed, 65 skipped and 0 failures, using 907.19s of the 2700s timeout (33.6%). So there is no engineering defect that would fail a launch. Two consequences remain, and both trace to ONE declaration -- TEST_IGNORES in the launcher: (1) ~15 min of paid L40S time, about $0.28, is spent running the repository-wide suite, which AGENTS.md P8.2.1 says not to do on a paid experiment machine; (2) the 65 skips make a launch_bound readiness sweep require a populated expected-skip declaration, where C1's ReadinessGroups are empty because its pod selection is 17 tests.",
+ "comparison_with_c1": {
+  "c1_pod_selection": "tests/c1_preflight/ via 14 directory ignores",
+  "c1_launch_bound_sweep": "17 tests, 0 failed, 12.2 seconds",
+  "c2_pod_selection": "tests/ minus two files",
+  "c2_measured": "3976 passed, 65 skipped, 907.2 seconds"
+ },
+ "authorizes": "nothing",
+ "probe_sha256": "abce2832c0c57ac443e7428e300055c49aa748d4a1c10924fcf905e7be5b17fc"
+}
