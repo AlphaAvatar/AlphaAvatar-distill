@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-16T13:20:00Z",
+ "generated_utc": "2026-09-16T13:30:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -18,9 +18,13 @@
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
-  "any": false,
-  "run": null,
-  "note": "attempt7's chain is CONSUMED and closed out; nothing is prepared at this instant. A fresh attempt8 chain is authorized and being built under the 2026-09-16 money rule: $0.1033 + $1.1950 <= $2.3900. Owner: the attempt7 closeout."
+  "any": true,
+  "run": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
+  "grant_committed": "governance/grant.json",
+  "readiness_record": null,
+  "authorization": null,
+  "bundle": null,
+  "note": "attempt8's grant is committed; the launch_bound sweep, the authorization and the bundle are owed IN THAT ORDER, and the launch goes into a tmux server. Nothing of the attempt5/6/7 chains is reused. Owner: the attempt8 grant."
  },
  "budget": {
   "cumulative_spend_usd": 296.9218,
@@ -74,7 +78,7 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE and CLOSED. Search-1 attempt4: search complete, B comparison incomplete. Baseline completion: attempts 5-7 consumed pre-measurement; attempt 8 continuing automatically under the 2026-09-16 money rule.",
+  "status": "C1 COMPLETE and CLOSED. Search-1 attempt4: search complete, B comparison incomplete. Baseline completion: attempts 5-7 consumed pre-measurement; attempt 8's chain is being built.",
   "then": "build attempt8's chain in order -- grant, one launch_bound sweep, authorization, bundle round-trip -- then launch the formal L40S session INSIDE TMUX, with the starting call returning immediately: rebuild B once, measure it once, compute B->C. On a valid result: preserve, push and STOP for independent review; start no Search-2, no behavioural confirmation and no ATTENTION R&D. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule.",
   "budget": "OWNED by the budget block; not restated."
  },
@@ -86,7 +90,7 @@
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
   "phase_c1": "COMPLETE / CLOSED by the attempt-18 GO verdict -- status owned by phase_c.c1",
-  "phase_c2": "SEARCH-1 INCOMPLETE: beam executed, B->C not run. The BEAM is never rerun; COMPLETION attempt 8 is authorized -- owned by phase_c.c2",
+  "phase_c2": "SEARCH-1 INCOMPLETE: beam executed, B->C not run. The BEAM is never rerun; COMPLETION attempt 8 is authorized and prepared -- owned by phase_c.c2",
   "formal_recovery_evidence": "NONE"
  },
  "phase_a_result": {
@@ -137,7 +141,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NONE BLOCKING. Attempts 5-7 all aborted BEFORE any formal measurement, so the 2026-09-16 money rule applies and attempt 8 continues without a further approval: $0.1033 + $1.1950 = $1.2983 <= $2.3900. B still carries no measurement, so Search-1 stays INCOMPLETE until B->C is computed. C1 is CLOSED by attempt 18's GO verdict. Durable large-artifact capacity is a separate open decision and does not gate this session, whose product is a measurement record rather than preserved weights.",
+ "blocker": "NONE BLOCKING. All three prior completion sessions aborted BEFORE any formal measurement, so the 2026-09-16 money rule applies and attempt 8 continues without a further approval. B still carries no measurement, so Search-1 stays INCOMPLETE until B->C is computed. C1 is CLOSED by attempt 18's GO verdict. Durable large-artifact capacity is a separate open decision and does not gate a session whose product is a measurement record rather than weights.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
@@ -146,12 +150,12 @@
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
  "latest_run": {
   "experiment_id": "phase_c2_baseline_completion",
-  "run_id": "attempt7",
-  "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7",
-  "outcome": "not recorded; ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT, $0.0621",
+  "run_id": "attempt8",
+  "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
+  "outcome": "not recorded, and no closeout has been written for this run",
   "index": "logs/index.json",
   "last_executed": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6",
-  "state": "no run manifest; its closeout states: ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO SETUP, NO B REBUILD, NO MEASUREMENT"
+  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
@@ -159,10 +163,10 @@
  },
  "cuda_engineering_validation": {
   "status": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada. The stage-F device repair is CONFIRMED ON REAL CUDA. ENGINEERING EVIDENCE ONLY -- not a C1 result and not an endpoint.",
-  "campaign": "CLOSED. Three subruns, one active resource at a time.",
   "authorizes": "nothing",
   "owner": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/ and logs/runs/cuda_stage_f/",
   "campaign_cost_usd": 0.04,
+  "campaign": "CLOSED. Three subruns, one active resource at a time.",
   "amendment": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured."
  },
  "superseded_handoff": "none. The live handoff is logs/state/current.md."

@@ -13,9 +13,10 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 `e2abgfw36davun` was deleted after 3.42 min; GraphQL returns
 `pod(e2abgfw36davun) = null` with `exists=false`, and an account-wide list
 returns `[]`. Its launcher and its watchdog were both killed before teardown, so
-that check was **explicit rather than automatic** — see below. Every C2 chain is
-consumed and **nothing is prepared for launch** at this instant; a fresh attempt
-8 chain is authorized and is being built.
+that check was **explicit rather than automatic** — see below.
+**Baseline-completion attempt 8 is authorized and its chain is being built** —
+grant, one `launch_bound` sweep, authorization, bundle, then a launch that goes
+into a `tmux` server. Every earlier C2 chain is consumed and none is reused.
 
 **The C2 beam search RAN TO COMPLETION and the comparison it was collected for
 did not run.** Attempt 4 (2026-09-16, `$6.0785`) passed 9/9 `$0` gates, setup,

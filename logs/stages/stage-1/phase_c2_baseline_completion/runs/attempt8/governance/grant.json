@@ -1,0 +1,79 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_grant/v1",
+ "_what_this_is": "the maintainer decision permitting ONE Phase-C2 baseline-completion session -- attempt 8, under the 2026-09-16 decision's BUDGET-based retry authority and its autonomous failure-handling rule. An INPUT to the issuer, which independently re-derives every identity below and REFUSES on any disagreement, on any omission and on any identity it cannot derive.",
+ "_where_this_lives": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/grant.json. Attempts 5, 6 and 7 are historical and CLOSED; no part of any chain is reused. Attempt 5's launcher died in its first statement at $0.0000 with no provider resource. Attempt 6 passed all ten pre-provider gates, billed 2.27 min for $0.0412 and refused at the inherited ROPE_OK setup declaration. Attempt 7 passed all ten gates twice, billed 3.42 min for $0.0621, and its LAUNCHER was killed two minutes in by the agent's own blocking tool call -- setup never ran and the pod outlived its orchestrator until an explicit provider query removed it. None rebuilt B and none measured anything.",
+ "granted_for": "Phase C2 baseline completion -- attempt 8",
+ "granted_by": "the MAINTAINER DECISION of 2026-09-16, under its autonomous failure-handling rule: attempt 7 failed BEFORE any durable baseline_measurement existed, so the flow is teardown with provider-confirmed zero billing, preserve, reconcile, diagnose, minimal repair, fresh identity and fresh chain -- automatically, without a further approval, PROVIDED cumulative completion spend + $1.1950 <= $2.3900. The arithmetic is $0.1033 + $1.1950 = $1.2983 <= $2.3900, so this attempt is authorized. The repair is NOT a repository change: attempt 7's ten gates all passed, the price sat on the boundary, the bundle round-tripped and the pod came up. It died because setsid does not protect a launcher from a supervisor that walks descendants, so attempt 8 starts the launcher inside a tmux server -- not a descendant of the starting call -- and the starting call returns immediately rather than blocking. An identical unchanged failure is therefore not being retried. Commits are HUMAN PROVENANCE and deliberately not machine-verified identities.",
+ "covers": "exactly ONE Phase-C2 baseline-completion session at a hard ceiling of $1.1950: ONE rebuild of the frozen C1 treatment baseline B through its complete deterministic fixed path, ONE state_eval measurement of the rebuilt B on the frozen suite, and ONE B->C comparison against the five candidate measurements Attempt 4 froze and this session reads without recomputing.",
+ "explicitly_not_authorized": [
+  "rerunning the Search-1 beam, under any circumstances",
+  "generating any new C candidate",
+  "remeasuring or replacing any frozen C measurement",
+  "a second state_eval of B once the durable measurement exists",
+  "Search-2, conditional or otherwise",
+  "any behavioural confirmation of B vs C",
+  "recovery training of any kind",
+  "causal-KL ATTENTION R&D",
+  "refactoring the B construction or removing the Qwen3-specific core debt in src/aadistill/models/student.py, which the decision defers to an architecture task AFTER a valid completion result",
+  "any increase to the $320.0000 project cap, the $16.20 C2 campaign envelope, the $2.3900 completion envelope or the $1.1950 per-session ceiling"
+ ],
+ "approved_money": {
+  "expected_usd": 0.7212,
+  "hard_cap_usd": 1.195,
+  "price_basis_usd_per_hour": 1.09,
+  "_the_issuer_rederives_all_three": "from logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json, whose own sha256 it verifies. A grant naming a different expected cost, a different ceiling or a higher rate basis is refused. Search-1's $15.0446 prices a ten-hour beam and authorizes nothing here."
+ },
+ "budget_context_at_approval": {
+  "cumulative_spend_usd": 296.9218,
+  "authorized_cap_usd": 320.0,
+  "_arithmetic": "296.9218 + 1.1950 = 298.1168 <= 320.0000 against the project cap; and $0.1033 of the $2.3900 completion envelope is spent, so 0.1033 + 1.1950 = 1.2983 <= 2.3900 against the envelope. Both boundaries are satisfied and NEITHER is increased. Every figure is derived from the run closeouts by scripts/consolidate/derive_budget.py rather than restated.",
+  "completion_envelope_usd": 2.39,
+  "completion_envelope_spent_usd": 0.1033,
+  "_envelope_meaning": "the cumulative NEW-spend envelope for baseline completion, unchanged by the 2026-09-16 decision. Retry authority is bounded by this money and by the scientific measurement boundary, NOT by an attempt count.",
+  "remaining_is_not_permission": true
+ },
+ "one_use": {
+  "issuances_permitted": 1,
+  "launch_attempts_permitted": 1,
+  "provider_resources_permitted": 2,
+  "one_billing_resource_at_a_time": true,
+  "what_that_means": "this authorization funds ONE launcher session. Inside it the launcher may replace a host that never became usable, up to two provider resources in total, BOTH sharing this session's single $1.1950 ceiling. Two resources are host draws inside one session, not two scientific attempts, and the second is created only after the provider confirms the first is no longer billing.",
+  "machine_readable": "the four values above become a C2ResourceScope in the authorization and are checked by completion_scope_gate, through the scope's own permits_run and permits_draws, before any provider is contacted.",
+  "consumed_when": "the formal launcher is invoked under this authorization, whether or not a provider resource follows and whether or not any money is spent.",
+  "retry_rule": "governed by MONEY, not by attempt number. If this session fails BEFORE the durable baseline_measurement exists, the flow is teardown, provider-confirmed zero billing, preserve, reconcile, diagnose, minimal repair, minimal regression, fresh identity and fresh chain -- automatically, without a further approval, PROVIDED cumulative completion spend + $1.1950 <= $2.3900 still holds. If it does not hold, STOP. An identical unchanged failure is not a repair and may not be retried. The instant the durable measurement exists, no GPU remeasurement of B is authorized: a later comparison failure is repaired at $0 from that measurement plus the frozen five."
+ },
+ "bound_identities_the_issuer_must_reproduce": {
+  "_rule": "stated as the maintainer's approval basis and RE-DERIVED by the issuer from the committed objects; it refuses on any disagreement, on any omission and on any identity it cannot derive. Exactly these eight and NO COMMIT IDENTITY: each is a property of the TREE rather than a point in its history, and a grant that predicted the issuance commit would make its own chain unsatisfiable.",
+  "_closure_moved_and_that_is_expected": "the completion closure is bb3aa38a here, BYTE-IDENTICAL to what attempt 7 was authorized against over the same 92 files: attempt 7's root cause was an orchestration error, so no repository code needed to change and none did. The 2026-09-16 decision permits the executable closure to move after a legitimate engineering repair; this time it did not, and the six scientific identities below are unchanged as always.",
+  "completion_harness_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+  "completion_harness_n_files": 92,
+  "completion_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+  "completion_pricing_sha256": "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+  "baseline_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+  "baseline_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "frozen_candidates_self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+  "search1_selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf"
+ },
+ "approved_runtime": {
+  "gpu": "NVIDIA L40S",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "price_basis_usd_per_hour": 1.09,
+  "host_draws": 2,
+  "_enforced_before_provider_creation": "frozen_runtime_gate refuses any other GPU or image and any max price above the basis; a lower max price is safe. The GPU and image are the protocol's comparability binding, which is what makes B's measurement comparable to the frozen five."
+ },
+ "interpretation_discipline": "the result is a cheap-metric, hypothesis-generation comparison on the frozen state_eval suite. It is NOT behavioural recovery evidence and NOT a demonstrated initialization improvement. Cross-session comparison is accepted for this use subject to the preregistered disclosure: the 0.007782 threshold is the tightest observed C-to-C gap and a conservative disclosure trigger, NOT a noise bound, and cross-session variance remains NOT DIRECTLY MEASURED whether or not any margin is flagged. PARETO epsilon stays 1e-4 and the computed verdict is never altered by the disclosure.",
+ "stop_conditions": [
+  "live securePrice above $1.09/h -- stop at $0",
+  "any $0 pre-provider gate refuses -- stop at $0, diagnose, repair, fresh chain",
+  "a frozen scientific identity moves -- STOP",
+  "the durable baseline_measurement exists and downstream comparison cannot be completed at $0 without changing scientific semantics -- STOP and report",
+  "the $2.3900 completion envelope cannot fund another full $1.1950 session -- STOP",
+  "the $320.0000 project cap would be exceeded -- STOP",
+  "the L40S binding or the $1.09/h boundary would have to change -- STOP",
+  "provider billing ownership becomes uncertain -- reconcile, then STOP",
+  "B has already been formally measured -- STOP",
+  "baseline completion succeeds -- collect, verify, reconcile, push and report; start nothing, and return for independent scientific review of the B->C comparison"
+ ],
+ "authorizes": "nothing by itself; it is the issuer's input",
+ "grant_sha256": "1c8d80e92e5e45d3e87237ff9399efaf7f0087bab85022b2949c28aefc4f83a7"
+}
