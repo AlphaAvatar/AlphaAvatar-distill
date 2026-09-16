@@ -1112,9 +1112,9 @@
    "experiment_id": "phase_c2_baseline_completion",
    "run_id": "attempt5",
    "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5",
-   "n_files": 1,
-   "digest": "409bd7141217bb17c46f4d119f8d0d953e816b7d15916f7d664b9109aa6006c5",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 5,
+   "digest": "94549bac38af7d3cd9687a0786d42794add0cab1e19864e5d42f96007d96b833",
+   "why": "no run manifest; its closeout states: PRE-PROVIDER ABORT \u2014 NO PROVIDER RESOURCE, NO SPEND, NO MEASUREMENT"
   }
  ],
  "authorizes": "nothing"

@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T09:25:20+00:00",
+  "created_utc": "2026-09-16T09:35:39+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 1128,
-    "bytes": 43725105,
+    "files": 1132,
+    "bytes": 43755063,
     "by_disposition": {
       "keep_canonical": 80,
-      "keep_immutable": 871,
+      "keep_immutable": 875,
       "keep_referenced": 162,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 511,
+      "immutable_record": 515,
       "index": 8,
       "narrative": 234,
       "raw_execution_artifact": 354,
@@ -5062,8 +5062,8 @@
     },
     {
       "path": "logs/index.json",
-      "size_bytes": 61488,
-      "sha256": "21e9090d1599fbf574e5af7f07f401b24d7abd31b7720c5d7d4dd28f530b2eca",
+      "size_bytes": 61516,
+      "sha256": "18da33076f0f491f389c96d198f65facf7bd96714c406aa7bc2818b8000b896c",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17166,6 +17166,7 @@
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json",
         "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
+        "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/authorization.json",
         "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/grant.json",
         "scripts/experiments/phase_c2/baseline_completion.py"
       ],
@@ -17187,6 +17188,7 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
+        "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/authorization.json",
         "scripts/experiments/phase_c2/baseline_completion.py",
         "scripts/pod/autoinit_phase_c2_baseline_driver.py"
       ],
@@ -17895,7 +17897,8 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
-        "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json"
+        "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
+        "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/authorization.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -17940,7 +17943,8 @@
       "referenced_by": [
         "configs/experiments/phase_c2/baseline_completion_authorization.json",
         "logs/maintenance/inventories/log_inventory.json",
-        "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json"
+        "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
+        "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/authorization.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -18139,13 +18143,72 @@
       "disposition_reason": "sole copy, no superseding owner"
     },
     {
+      "path": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/closeout/outcome.json",
+      "size_bytes": 3747,
+      "sha256": "ecf29722dcdc4155f9e22bda4c8c6d30ddc497cebbe62964b0969c8e52fad3f5",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/authorization.json",
+      "size_bytes": 14296,
+      "sha256": "b6c441a14d5b31760047750f7142cf94f9fc2824a5bf3082b62c144cd5217f81",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/bundle.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/bundle.json",
+      "size_bytes": 1209,
+      "sha256": "193c8cc4f7730e80c6b460431d99839882f485f755ba22b2f6581ae5d968c3af",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
       "path": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/grant.json",
       "size_bytes": 8231,
       "sha256": "8fc4c68304c3a372682b7adee62719927c6796b4357f2604bd6f223ca0f324ba",
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json"
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/authorization.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/readiness.json",
+      "size_bytes": 10678,
+      "sha256": "0cd2fb15557dcb4c49320b333cf8eff85ce2c4d25c6990ff7ca652bc1a40df35",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/authorization.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,

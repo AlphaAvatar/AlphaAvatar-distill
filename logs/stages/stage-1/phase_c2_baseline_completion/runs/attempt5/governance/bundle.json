@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_bundle/v1",
+ "run_id": "attempt5",
+ "stage_id": "1",
+ "session_commit": "96611c89b2f36d4d5f18645a4236f715fbd566a2",
+ "canonical_bundle_name": "aad_autoinit_96611c89.bundle",
+ "relay_repo": "AlphaAvatar/aadistill-artifacts",
+ "relay_path": "transfer/aad_autoinit_96611c89.bundle",
+ "sha256": "98ec9ff05e31d51b291761756cbcca38a162ffbe1a40ec4154a3f5f7fdd2193d",
+ "bytes": 12966063,
+ "heads": "96611c89b2f36d4d5f18645a4236f715fbd566a2 refs/heads/_bundle_96611c89b2f3",
+ "carries_authorization": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/authorization.json",
+ "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_96611c89.bundle",
+ "transport": "Phase-C2 baseline completion",
+ "note": "the pre-provider bundle_staged_gate downloads this exact object, verifies it, checks it out and requires the resulting HEAD, authorization bytes and COMPLETION executable digest to match -- not Search-1's. This record is the local half; the gate is the remote half. It stays UNCOMMITTED inside the launch window: committing it would add a third path to the session lineage diff and session_commit_gate refuses."
+}

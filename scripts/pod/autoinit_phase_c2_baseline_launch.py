@@ -70,8 +70,8 @@ from experiments.phase_c2.baseline_completion_pod_environment import (  # noqa: 
     LAUNCH_BOUND)
 from experiments.phase_c2.frozen_assets import STATE_EVAL_ASSET  # noqa: E402
 from experiments.run_layout import (  # noqa: E402
-    ArtifactSpec as RunArtifactSpec, claim_output_root, open_run, record_run,
-    rel_run_dir, write_run_readmes,
+    ArtifactSpec as RunArtifactSpec, claim_output_root, open_run, present_roles,
+    record_run, rel_run_dir, write_run_readmes,
 )
 from phase_a_frozen import TEACHER_REVISION  # noqa: E402
 
@@ -120,6 +120,23 @@ PEAK_WORKING_GIB = 32.0
 #: provider creation both read `args.disk_gb`; there is no second knob that
 #: could pass the gate and provision something else.
 COMPLETION_PROVISION_GIB = 60
+
+
+#: The scratch-relative paths this run WRITES and later collects. Ownership of
+#: the scratch root is decided by these alone: a shared model cache or a staged
+#: input living beside them neither claims the directory nor blocks it. The
+#: watchdog journals are matched by PATTERN, because each is named after a pod
+#: that does not exist when the claim is made.
+RUN_OUTPUTS: tuple[str, ...] = (
+    "launch.log",
+    f"relay/{Path(RUN_LOG).name}",
+    f"relay/{Path(STATUS).name}",
+    "relay/c2_baseline_completion_evidence.json",
+    "store/manifest.json",
+    "store/c2_baseline_completion_evidence.json",
+    "store/c2_baseline_comparison.json",
+    "watchdog_*.jsonl",
+)
 
 
 def session_record_path(run_id: str) -> str:
@@ -736,6 +753,12 @@ def close_completion_run(layout, args):
     session = json.loads(record_path.read_text()) if record_path.is_file() else {}
     return record_run(
         layout, spec=COMPLETION_RUN_SPEC,
+        #: What the session PRODUCED, not what it hoped to. A run that aborted
+        #: early has a session record and a launcher log and no comparison, and
+        #: must still be able to write its manifest -- `record_run` refuses a
+        #: declared role whose path is absent, which is how a $0 dry run of this
+        #: function found the bug before a paid session did.
+        roles=present_roles(layout, COMPLETION_RUN_ROLES),
         plan={"session_id": session.get("session_id"),
               "plan_hash": session.get("session_plan_hash"),
               "session_commit": getattr(args, "session_commit", None),
@@ -759,11 +782,20 @@ def main() -> int:
         args.max_price = BC.price_per_hour_usd(REPO_ROOT)
     #: BEFORE anything is priced or created: a colliding run id or a foreign
     #: scratch root costs $0 here.
-    claim_output_root(args.scr, RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)
+    #: `outputs` is a KEYWORD argument naming the scratch-relative paths this
+    #: run owns. Passing the stage id positionally raised TypeError at $0, one
+    #: line into the launcher -- before any provider was contacted, which is the
+    #: cheap place, but still a wasted invocation and a consumed chain.
+    claim_output_root(args.scr, RUN_EXPERIMENT_ID, args.run_id,
+                      outputs=RUN_OUTPUTS)
     layout = open_run(REPO_ROOT, RUN_EXPERIMENT_ID, args.run_id,
                       roles=COMPLETION_RUN_ROLES, prepared=_RUN_PREPARED,
                       stage_id=RUN_STAGE_ID)
-    write_run_readmes(layout, RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)
+    #: Keyword arguments, including `roles`: the README describes the areas the
+    #: run declares, and a positional call raised TypeError at $0.
+    write_run_readmes(layout, experiment_id=RUN_EXPERIMENT_ID,
+                      run_id=args.run_id, stage_id=RUN_STAGE_ID,
+                      roles=COMPLETION_RUN_ROLES)
     #: `args.out` was set by `--run-id`'s action, so the run the layout opened
     #: and the path the runner writes cannot disagree. Asserted rather than
     #: assigned: filling it in here would mean the parser's namespace was

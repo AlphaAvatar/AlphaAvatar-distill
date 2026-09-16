@@ -1,0 +1,41 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_outcome/v1",
+ "_what_this_is": "what Phase-C2 baseline-completion attempt 5 did. Written before any provider existed. AUTHORIZES NOTHING.",
+ "attempt": "attempt5",
+ "classification": "PRE-PROVIDER ABORT \u2014 NO PROVIDER RESOURCE, NO SPEND, NO MEASUREMENT",
+ "terminal_marker": null,
+ "what_ran": {
+  "chain": "complete and verified: grant 5d87e92116339b1d at G=6d7f03b3, launch_bound readiness 45959b9d9295 at R=75b9bf21 (12 passed, 0 skipped), authorization 0481d4a139f4e04c at A=96611c89, canonical bundle aad_autoinit_96611c89.bundle round-tripped with bundle_verify_rc 0, checkout HEAD == A, matching authorization bytes and the completion closure 6085a0ac",
+  "launcher": "INVOKED, and it died in its first statement: claim_output_root was called with the stage id positionally where the signature takes `outputs` as a keyword. TypeError, before any gate, before the price query, before any provider contact.",
+  "provider": "NONE. No create call was made and no resource id exists."
+ },
+ "science": {
+  "b_rebuilt": false,
+  "state_eval_measurements_performed": 0,
+  "durable_baseline_measurement": false,
+  "comparison": null,
+  "_meaning": "nothing scientific happened and nothing was spent. This is not a result of any kind."
+ },
+ "root_cause": {
+  "defects": [
+   "claim_output_root(scr, experiment, run_id, RUN_STAGE_ID) -- the signature takes `outputs` as a KEYWORD naming the scratch-relative paths the run owns; the stage id was passed positionally. This is the one that aborted the launch.",
+   "write_run_readmes(layout, experiment, run_id, stage) -- takes one positional argument and four keywords including `roles`.",
+   "record_run(...) -- requires `roles`, which was omitted.",
+   "record_run(..., roles=COMPLETION_RUN_ROLES) -- refuses a declared role whose path is absent, so an aborted run could not write its own manifest. It must be passed present_roles(layout, roles): a session records what it PRODUCED."
+  ],
+  "class": "inherited contracts, not inherited needs. Four call sites into proven run-layout machinery, each written from what this session wanted rather than from what the function requires. Every one was reachable only by executing the launcher's entry and closeout paths, which no test did.",
+  "why_no_gate_caught_it": "the nine $0 gates run INSIDE run_session, and all four defects are in the code that runs before and after it. The chain verified perfectly -- commit lineage, closure, scope, runtime, frozen inputs, frozen assets, pricing, storage, readiness and the bundle round-trip all passed when driven directly afterwards.",
+  "repair": "all four fixed, and then the whole launcher entry path was executed at $0 with run_session stubbed, every pre-provider gate was run against the real authorization, and close_completion_run was driven to completion against a planted session record and cleaned up. Nine gates PASS; readiness correctly refuses because the repair moved the closure, which is what a fresh chain is for."
+ },
+ "budget": {
+  "this_attempt": 0.0,
+  "provider_resources_created": 0,
+  "project_cumulative_unchanged": 296.8185,
+  "retry_sub_envelope_usd": 2.39,
+  "_consumed_at_zero": "the chain is one-use and the launcher WAS invoked under it, so it is consumed -- the grant's own rule says so whether or not a resource followed and whether or not money was spent. That rule exists to stop an invocation being retried silently, and reading it any other way here would be reading it for convenience.",
+  "next_session_fits": "0.0000 + 1.1950 <= 2.3900, so attempt 6 is funded"
+ },
+ "chain_consumed": true,
+ "what_is_reused": "NOTHING. Attempt 6 gets a fresh grant, sweep, authorization and bundle.",
+ "authorizes": "nothing"
+}
