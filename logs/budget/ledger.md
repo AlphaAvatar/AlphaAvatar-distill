@@ -2555,3 +2555,48 @@ carried into the durable measurement block.
 
 **Both authorized formal sessions are now consumed.** Money remains inside the
 sub-envelope; permission does not. This closes at a report.
+
+## 2026-09-16 — C2 baseline completion attempt 7: the orchestrator died and the pod outlived it, `$0.0621`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| Baseline completion attempt 7: **10/10 `$0` gates passed twice** — once driven directly through the real `spec()` and the real issued authorization *without* invoking the launcher, then again inside it. Pod `e2abgfw36davun` at `$1.09/h`. Created 13:10:28Z, SSH reachable at 13:12:17Z, and the **launcher process was killed at ~13:12:2x** — 2.0 min after it started. Setup never ran; the session record's `stages` block is empty. **No B rebuild and no measurement.** Pod deleted, GraphQL returns `pod(...) = null` and the account-wide list returns `[]` | `$0.0621` | [`runs/attempt7/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt7/) |
+
+**Cumulative: `$296.9218` of the `$320.0000` cap.**
+
+```text
+project      296.8597 + 0.0621 = 296.9218   of 320.0000, leaving 23.0782
+envelope       0.0412 + 0.0621 =   0.1033   of 2.3900, leaving 2.2867
+```
+
+`3.42` min is an **upper bound**: creation is exact from the session timeline,
+termination is bounded above by the independent confirmation, so the figure is
+conservative rather than measured to the second.
+
+**This one was not the repository's fault, and saying otherwise would hide the
+actual defect.** Every gate passed, the live price sat exactly on the `$1.09/h`
+boundary, the bundle round-tripped to the authorized commit, the pod came up and
+SSH answered. The launcher was started from inside a single agent tool call that
+also contained a foreground `sleep`, which that harness blocks; the call ran to
+its 2-minute timeout and was killed, and the kill took the whole process tree —
+`setsid`-detached launcher included.
+
+**The backstop was inside the tree it was supposed to survive.** The watchdog
+journals every minute and has exactly two entries, `13:10:28Z` and `13:11:29Z`.
+It died with the launcher, so the recorded `65.78`-minute hard-terminate could
+never have fired, and this project has never once observed the provider's own
+`--terminate-after` fire. Nothing but an explicit check would have stopped the
+pod billing.
+
+`setsid` defeats a process-*group* signal. It does not defeat a supervisor that
+walks descendants. The operational note in this repository already said `setsid`
+is not sufficient; the half of it that mattered was the other half — **never
+depend on the start channel, confirm the job out of band.** Attempt 8 starts the
+launcher inside a `tmux` server, which is not a descendant of the call that
+starts it, and the starting call returns immediately.
+
+No repository code was changed, no gate was added and no rehearsal layer was
+built: the six frozen scientific identities and the completion closure
+`bb3aa38a` over 92 files are byte-identical to what attempt 7 was authorized
+against. A `$1.1950` ceiling still fits the envelope, so attempt 8 continues
+automatically under the 2026-09-16 money rule.

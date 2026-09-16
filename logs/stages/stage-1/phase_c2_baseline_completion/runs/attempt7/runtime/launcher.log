@@ -1,0 +1,18 @@
+[13:10:19] budget: expected 51 min $0.92 · soft $1.01 · hard $1.19 (authorized $1.20)
+[13:10:20] NVIDIA L40S $1.09/h, stock Low
+[13:10:20] session commit 1aa0e4f8a735 verified: harness digests to bb3aa38a8367…, carries the authorization and only logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7/governance/authorization.json differs from the authorized base
+[13:10:20] completion closure bb3aa38a8367… over 92 derived files
+[13:10:20] authorized for baseline completion of run 'attempt7': 2 draw(s) within the 2 permitted, 1 issuance(s), 1 launch attempt(s), one billing resource at a time, beam NOT authorized
+[13:10:20] runtime bound: NVIDIA L40S, runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404, max price $1.0900/h <= $1.0900/h
+[13:10:20] 5 frozen candidate measurement(s), record 55f667706739…, extracted from the ranking this session cites
+[13:10:21] frozen-asset expectation configs/experiments/phase_c2/frozen_assets.json verifies
+[13:10:21] ceiling $1.1950 matches the pricing record, whose own sha256 verified; plan 9f566eb6f8d7…
+[13:10:21] volume 60 GiB >= 60 for a 32.0 GiB peak working set
+[13:10:22] pod sweep 12 passed / 0 skipped / 0 failed, no declared groups, binds baseline-completion harness bb3aa38a8367… and environment 0fa730a88cff…, staging contract 5c51a83d002e…, swept at cf71c1c4 with only ['logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7/governance/authorization.json', 'logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7/governance/readiness.json'] differs from the swept base
+[13:10:26] aad_autoinit_1aa0e4f8.bundle (13038419 bytes, 4e3b418e3a28…) round-trips to 1aa0e4f8a735… carrying this authorization and executable set bb3aa38a8367…
+[13:10:27] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[13:10:28] watchdog detached — hard 66 min = $1.19
+[13:10:28] created e2abgfw36davun at $1.09/h
+[13:11:22]   starting (60s) — $0.02
+[13:12:15] TCP 22 at 202.181.159.227:18364 after 1.8 min
+[13:12:17] draw 1: ssh reachable — $0.03

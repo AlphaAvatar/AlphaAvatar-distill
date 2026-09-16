@@ -1133,9 +1133,9 @@
    "experiment_id": "phase_c2_baseline_completion",
    "run_id": "attempt7",
    "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7",
-   "n_files": 1,
-   "digest": "d8034a70c99ad209b842ce1fac2ef78ef0ebc0d6c960d660ed8fc995f155ea43",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 15,
+   "digest": "6a9719fbf4028963b5eefa255e664d5efe299dabaf370d38c0b0661c1abd95b4",
+   "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
   }
  ],
  "authorizes": "nothing"

@@ -1,0 +1,100 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_outcome/v1",
+ "_what_this_is": "what Phase-C2 baseline-completion attempt 7 did. Written after provider-confirmed teardown. AUTHORIZES NOTHING.",
+ "attempt": "attempt7",
+ "classification": "ABORTED BEFORE SETUP — ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT",
+ "setup_rc": null,
+ "what_ran": {
+  "zero_dollar_gates": "10 of 10 PASSED, twice: once driven directly at $0 through the real spec(), the real argument namespace and the real issued authorization WITHOUT invoking the launcher, and again inside the launcher itself. Both runs agree line for line.",
+  "provider": "one resource created, draw 1 of the 2 permitted. Pod e2abgfw36davun, NVIDIA L40S, $1.09/h, stock Low.",
+  "reached": [
+   "created e2abgfw36davun at $1.09/h",
+   "starting (60s)",
+   "TCP 22 reachable after 1.8 min",
+   "draw 1: ssh reachable"
+  ],
+  "setup": "NEVER STARTED. The session record's stages block is empty: {}.",
+  "driver": "NEVER STARTED. No stage, no rebuild, no measurement."
+ },
+ "science": {
+  "b_rebuilt": false,
+  "state_eval_measurements_performed": 0,
+  "durable_baseline_measurement": false,
+  "comparison": null,
+  "_meaning": "nothing scientific happened. The B->C comparison remains uncomputed and Attempt 4's five frozen C measurements are untouched."
+ },
+ "root_cause": {
+  "failure": "the LAUNCHER PROCESS was killed 2.0 minutes after it started, while the pod it had just created was billing and idle. The pod survived its orchestrator.",
+  "what_actually_happened": "the launcher was started from inside a single agent tool call that ALSO contained a foreground `sleep 45`, intended to show the first console lines. Foreground sleep is blocked in that harness, so the call blocked until its 2-minute timeout and was then killed -- and the kill took the whole process tree with it, including the `setsid`-detached launcher and the detached watchdog.",
+  "why_setsid_did_not_help": "`setsid` puts the child in a new session, which defeats a process-GROUP signal. It does not defeat a supervisor that walks and kills descendants, which is what happened here. The repository's own operational note already said `setsid` is not sufficient; it was applied anyway, and the second half of that note -- never depend on the start channel -- was the half that mattered.",
+  "the_backstop_was_in_the_same_tree": "the watchdog is detached by the launcher and journals every minute. Its journal has exactly two polls, 13:10:28Z and 13:11:29Z, and then stops: it died with the launcher. So the 65.78-minute hard-terminate backstop recorded in the session plan could never have fired, and the provider's own --terminate-after has never been observed to fire in this project. Had nobody looked, the pod would have idled at $1.09/h.",
+  "class": "AGENT ORCHESTRATION ERROR, not a repository defect. Nothing in the launcher, the driver, the gates, the authorization chain, the bundle or the science misbehaved: all ten gates passed, the price was at the boundary, the bundle round-tripped, the pod came up and SSH was reachable. The session died because of how it was invoked.",
+  "not_a_science_failure": "the space, the plan, the pricing, the B identity contract, the frozen candidate record and the readiness evidence were all verified and all correct."
+ },
+ "repair": {
+  "the_launcher_runs_under_tmux": "a tmux server is not a descendant of the tool call that starts a session in it, so a tool-call timeout or kill cannot reach the launcher through the process tree. nohup and setsid both can be reached, and one of them was.",
+  "never_block_in_the_starting_call": "the call that starts the session returns immediately. Progress is read in LATER, separate calls from the session record and the console log -- the out-of-band confirmation the operational note asks for.",
+  "orphan_check_is_unconditional": "after any launch whose orchestrator cannot be confirmed alive, query the provider directly for the pod and for the account-wide list, and treat the GraphQL answer as the authority rather than the CLI's. That is what found this one.",
+  "no_new_subsystem": "per the research-first workflow, a historical operational failure gets a root-cause fix, not a permanent new gate. Nothing was added to src/aadistill, no gate was added to the launcher and no rehearsal layer was created: the ten gates that exist all passed and would have passed again.",
+  "regressions": [
+   "none is applicable to the repository: no repository code was changed, and the six frozen scientific identities and the completion executable closure bb3aa38a over 92 files are byte-identical to what attempt 7 was authorized against"
+  ],
+  "closure_and_science_unchanged": {
+   "completion_executable_closure": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+   "n_files": 92,
+   "six_frozen_scientific_identities": "all six UNCHANGED",
+   "derived_values": {
+    "completion_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+    "completion_pricing_sha256": "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+    "baseline_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+    "baseline_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "frozen_candidates_self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+    "search1_selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf"
+   }
+  }
+ },
+ "provider": {
+  "pod_id": "e2abgfw36davun",
+  "gpu": "NVIDIA L40S",
+  "quoted_price_per_hour": 1.09,
+  "actual_price_per_hour": 1.09,
+  "price_basis_authorized": 1.09,
+  "stock_status": "Low",
+  "draws_used": 1,
+  "draws_permitted": 2,
+  "provider_resources_created": 1,
+  "created_utc": "2026-09-16T13:10:28Z",
+  "confirmed_gone_by_utc": "2026-09-16T13:13:53Z",
+  "elapsed_minutes": 3.42,
+  "_elapsed_is_an_upper_bound": "creation is exact, from the session record's timeline. Termination is bounded above by the independent confirmation, so 3.42 min is the widest the billing window can have been and the cost below is therefore conservative.",
+  "deleted": true,
+  "provider_confirms_gone": true,
+  "independently_reconfirmed": "GraphQL returned pod(e2abgfw36davun) = null with exists=false and desired_status=TERMINATED, and an account-wide pod list returned []. The CLI's own 'removed' message was not treated as the answer.",
+  "terminate_after_utc_that_was_never_reachable": "2026-09-16T14:16:13Z"
+ },
+ "budget": {
+  "this_attempt": 0.0621,
+  "authorized_usd": 1.195,
+  "within_authorization": true,
+  "project_cumulative_before": 296.8597,
+  "project_cumulative_after": 296.9218,
+  "project_cap": 320.0,
+  "project_remaining_after": 23.0782,
+  "completion_envelope_usd": 2.39,
+  "envelope_spent": 0.1033,
+  "envelope_remaining": 2.2867,
+  "_another_full_ceiling_fits": "0.1033 + 1.1950 = 1.2983 <= 2.3900, and 296.9218 + 1.1950 = 298.1168 <= 320.0000",
+  "_so_a_fresh_chain_is_authorized": "the 2026-09-16 decision bounds retries by MONEY and by the measurement boundary. This attempt aborted BEFORE any setup and therefore before any formal measurement, so the repair-and-continue flow applies without a further approval: attempt 8 gets a fresh grant, a fresh sweep, a fresh authorization and a fresh bundle."
+ },
+ "chain": {
+  "grant_commit_G": "cf71c1c4f12a9510e10248e085bdc90a106e2cf7",
+  "readiness_commit_R": "ee52e60b94183394ce28359c7ac27cb41916757a",
+  "authorization_session_commit_A": "1aa0e4f8a7352a03037fe99b615d6cb315d99c91",
+  "grant_sha256": "b00839961a604e8bd8c1d0c539106f661c794f1ab3e29905fea8bf9e09eaf718",
+  "authorization_sha256": "2b752e925b2868de5ee2c7852c0acb8dd6c8ad5c2761c64fcee16a3f01a88df7",
+  "bundle": "aad_autoinit_1aa0e4f8.bundle sha256 4e3b418e3a28... 13038419 bytes, round-tripped",
+  "completion_closure": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+  "consumed": "YES — the session record states one_use_grant_consumed: true. No part of this chain is reused."
+ },
+ "authorizes": "nothing"
+}
