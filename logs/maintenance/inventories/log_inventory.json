@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T16:45:57+00:00",
+  "created_utc": "2026-09-16T17:32:06+00:00",
   "command": "scripts/consolidate/build_log_inventory.py",
   "roots": [
     "logs",
@@ -11797,7 +11797,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 111960,
-      "sha256": "c4794625749fa7b5b273ab19cb27c36f2d9799d7de44e48c810a31f4ac4c4da8",
+      "sha256": "d8c3d6017d3fafd02ed6cc2ddd1360416c881272637f7db0bca726feb59a9800",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
