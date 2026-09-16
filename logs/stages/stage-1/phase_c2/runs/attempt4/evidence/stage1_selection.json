@@ -1,0 +1,303 @@
+{
+  "schema": "aadistill.autoinit.stage1_selection/v1",
+  "generated_utc": "2026-09-16T00:00:17.110092+00:00",
+  "_contract": "Written the moment a Stage-1 ranking exists, before the control measurement, the retained candidates, the summary, or any other bookkeeping. If this file exists the search COMPLETED and these five leaves were selected, whatever happened afterwards. It is not a search result and not a substitute for the summary.",
+  "search": {
+    "run_id": "autoinit.v1.phase_c2.search1",
+    "config_hash": "628d2abfd8b7ecdc13ac367618fa7771a87de4c9ed6dc3a8321f1d4d70f4980b",
+    "seed": 20260815,
+    "target_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "workdir": "/workspace/aad/artifacts/autoinit/phase_c2_search"
+  },
+  "journal": {
+    "path": "/workspace/aad/artifacts/autoinit/phase_c2_search/states.jsonl",
+    "sha256": "cc4ee3a14b0a0ed03afe1292780a2c372f728a37233f8f294d86060eb956d1ee"
+  },
+  "policy": {
+    "qualified_id": "beam.pareto_multi_objective@v2",
+    "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+  },
+  "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+  },
+  "profiles": [
+    {
+      "qualified_id": "calib.domain_balanced@v1",
+      "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+      "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+    },
+    {
+      "qualified_id": "calib.reasoning_heavy@v2",
+      "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+      "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+    }
+  ],
+  "selected": [
+    {
+      "state_id": "8a2863bc5c4fcde107bf2cfd9ceb14e3",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+      "artifact_digest": "0e760d69a1370d22c71ce81ebe822569dea5e2fcf6b7a7cb0f3202b77e9ca238",
+      "single_shard_sha256": "45ca81452f140721597d65234d1ddb4d9da6ebe2a3e63e9d07b6254fab7e9c40",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_c2_search/states/8a2863bc5c4fcde107bf2cfd9ceb14e3",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "ffn.activation_importance_v0",
+        "depth.causal_kl_greedy_v1",
+        "width.global_pca_v0",
+        "attention.activation_importance_v1"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.reasoning_heavy@v2"
+      ],
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "1486327def0053d02770538c9feb6a87e9a30dd47f4d9e04e00f9a0d914aacec"
+    },
+    {
+      "state_id": "0267b4eb771ed499c7c162260d97c794",
+      "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "artifact_digest": "a359c7dfd06498e61ccd6c728ae4b21f69210147d90621d7ac11109e425328f5",
+      "single_shard_sha256": "15dfbe60b58545725a68ca54cf3604833d3d44b2967c71bb3feb03472b247568",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_c2_search/states/0267b4eb771ed499c7c162260d97c794",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "depth.causal_kl_greedy_v1",
+        "attention.activation_importance_v1",
+        "ffn.activation_importance_v0",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.reasoning_heavy@v2"
+      ],
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "aa4801cef39917f4c94b4b0d919b1374198c0d1a28f1f47fd5a87d29f4c23274"
+    },
+    {
+      "state_id": "b0c1ef82a929a7ca24803c00936f5bb1",
+      "path": "FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "artifact_digest": "02ffe7535fac5523945d2191c6a3019ecaaab9dccd754a4973bb25f24deb79f5",
+      "single_shard_sha256": "77cbdb3fef0efb67e48e11c5a2ab3ca07711370994ef9ce5b84535cd0c1326f9",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_c2_search/states/b0c1ef82a929a7ca24803c00936f5bb1",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "ffn.activation_importance_v0",
+        "attention.activation_importance_v1",
+        "depth.causal_kl_greedy_v1",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.reasoning_heavy@v2"
+      ],
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "ffb7152b579b264fa2ccd2324d11584e873d66552cee655ada5dfbf952d45692"
+    },
+    {
+      "state_id": "993214929a7d4da4dfcbf96c453a11cc",
+      "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "artifact_digest": "a7636a861812b10c224261d702fa6c8bad1fc90415ee299f8ee6dd459e328ad0",
+      "single_shard_sha256": "592e43725e22a849e17248a7fc39652ba5b40b361aed5b7066fbfd37e453d001",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_c2_search/states/993214929a7d4da4dfcbf96c453a11cc",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "depth.causal_kl_greedy_v1",
+        "ffn.activation_importance_v0",
+        "attention.activation_importance_v1",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.reasoning_heavy@v2"
+      ],
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "4a55705275f3a13c3063ecdad61050e33e3b816d944be9221ea81dc7d9a75dff"
+    },
+    {
+      "state_id": "74b2a21ee286d693d749c861b469b6ac",
+      "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "artifact_digest": "217aafb2bf3843d7e264da8db7ef79b00057ee1168b1ff1654650d33557fafa2",
+      "single_shard_sha256": "92a45e1147d396621f09f50a16e7a83340e1f836ccb7d84e1b32cb6378afa665",
+      "checkpoint_path": "/workspace/aad/artifacts/autoinit/phase_c2_search/states/74b2a21ee286d693d749c861b469b6ac",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "attention.activation_importance_v1",
+        "depth.causal_kl_greedy_v1",
+        "ffn.activation_importance_v0",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "calib.domain_balanced@v1",
+        "calib.reasoning_heavy@v2"
+      ],
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "df32195ca71418e298b07570aa40958e67b3bdf15cf515e63085bebeb842e253"
+    }
+  ],
+  "n_selected": 5,
+  "decisions": [
+    {
+      "state_id": "8a2863bc5c4fcde107bf2cfd9ceb14e3",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+      "front": 0,
+      "position_in_front": 0,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.316891066594531,
+        "state.teacher_kl.worst_domain": 8.257769254068792,
+        "state.critical_token_kl": 13.816114569747224
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 7.950554296734661,
+        "state.nll.teacher_reference_pooled": 0.9303420924946204,
+        "state.nll.general": 10.3623710129767,
+        "state.nll.reasoning_math": 6.769606563611469,
+        "state.nll.rag_multihop": 9.075211779351587,
+        "state.nll.code": 7.36514572611699,
+        "state.nll.tool": 7.359666315674563
+      },
+      "reason": "kept: front 0, lineage 'ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0', beam 5"
+    },
+    {
+      "state_id": "db71dcec4f3f2875d028de2b6c3fedf0",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+      "front": 0,
+      "position_in_front": 1,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.396705327885442,
+        "state.teacher_kl.worst_domain": 8.078437062022777,
+        "state.critical_token_kl": 13.639874378444153
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.038828255160015,
+        "state.nll.teacher_reference_pooled": 0.9303420924946204,
+        "state.nll.general": 10.20103974889841,
+        "state.nll.reasoning_math": 6.887299040421947,
+        "state.nll.rag_multihop": 8.993656257809384,
+        "state.nll.code": 7.687202233110549,
+        "state.nll.tool": 7.552531343444586
+      },
+      "reason": "pruned: non-dominated but ranked 2 in front 0 under the tie-break and lineage rotation, beam 5"
+    },
+    {
+      "state_id": "0267b4eb771ed499c7c162260d97c794",
+      "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "front": 0,
+      "position_in_front": 2,
+      "lineage": "depth.causal_kl_greedy_v1|attention.activation_importance_v1|ffn.activation_importance_v0",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.444198137327288,
+        "state.teacher_kl.worst_domain": 7.940465849948067,
+        "state.critical_token_kl": 14.011215608689817
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.134590353106033,
+        "state.nll.teacher_reference_pooled": 0.9303420924946204,
+        "state.nll.general": 9.125819684758657,
+        "state.nll.reasoning_math": 7.117514966265112,
+        "state.nll.rag_multihop": 8.618792061871325,
+        "state.nll.code": 8.210787815960739,
+        "state.nll.tool": 8.164378365564053
+      },
+      "reason": "kept: front 0, lineage 'depth.causal_kl_greedy_v1|attention.activation_importance_v1|ffn.activation_importance_v0', beam 5"
+    },
+    {
+      "state_id": "b0c1ef82a929a7ca24803c00936f5bb1",
+      "path": "FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "front": 0,
+      "position_in_front": 3,
+      "lineage": "ffn.activation_importance_v0|attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.902229180851779,
+        "state.teacher_kl.worst_domain": 8.650269944164549,
+        "state.critical_token_kl": 11.96726408125179
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.667888980661504,
+        "state.nll.teacher_reference_pooled": 0.9303420924946204,
+        "state.nll.general": 9.81762204738623,
+        "state.nll.reasoning_math": 7.430020617165438,
+        "state.nll.rag_multihop": 9.68547188324584,
+        "state.nll.code": 7.665411203264819,
+        "state.nll.tool": 8.854037478051783
+      },
+      "reason": "kept: front 0, lineage 'ffn.activation_importance_v0|attention.activation_importance_v1|depth.causal_kl_greedy_v1', beam 5"
+    },
+    {
+      "state_id": "993214929a7d4da4dfcbf96c453a11cc",
+      "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "front": 0,
+      "position_in_front": 4,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.12958419540784,
+        "state.teacher_kl.worst_domain": 8.658051951545763,
+        "state.critical_token_kl": 11.957476101069478
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.88395158214682,
+        "state.nll.teacher_reference_pooled": 0.9303420924946204,
+        "state.nll.general": 9.451585037415375,
+        "state.nll.reasoning_math": 7.790577789575224,
+        "state.nll.rag_multihop": 9.375570283828761,
+        "state.nll.code": 8.92156253745154,
+        "state.nll.tool": 9.140310854363197
+      },
+      "reason": "kept: front 0, lineage 'depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1', beam 5"
+    },
+    {
+      "state_id": "74b2a21ee286d693d749c861b469b6ac",
+      "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "front": 1,
+      "position_in_front": 0,
+      "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.760484805770986,
+        "state.teacher_kl.worst_domain": 8.762720755445152,
+        "state.critical_token_kl": 14.745713020293472
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.483747847731951,
+        "state.nll.teacher_reference_pooled": 0.9303420924946204,
+        "state.nll.general": 10.654182786150766,
+        "state.nll.reasoning_math": 7.074516001027465,
+        "state.nll.rag_multihop": 9.945753418286174,
+        "state.nll.code": 7.581128192933838,
+        "state.nll.tool": 8.045487563250582
+      },
+      "reason": "kept: front 1, lineage 'attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0', beam 5"
+    },
+    {
+      "state_id": "0d952353f6043b88e3cbcdd408e88d22",
+      "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+      "front": 2,
+      "position_in_front": 0,
+      "lineage": "width.global_pca_v0|attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 9.213940464625649,
+        "state.teacher_kl.worst_domain": 10.164265837442509,
+        "state.critical_token_kl": 16.063511208975495
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 10.080365253143505,
+        "state.nll.teacher_reference_pooled": 0.9303420924946204,
+        "state.nll.general": 10.576668449837529,
+        "state.nll.reasoning_math": 9.038545348044341,
+        "state.nll.rag_multihop": 10.566323465652797,
+        "state.nll.code": 10.444440530426718,
+        "state.nll.tool": 10.194929518573144
+      },
+      "reason": "pruned: epsilon-dominated (front 2) and the beam of 5 was already full"
+    }
+  ],
+  "selection_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf"
+}
