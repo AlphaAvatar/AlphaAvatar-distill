@@ -150,6 +150,23 @@ floor. A complete valid verdict ends the round.
 
 <!-- readiness:end -->
 
+## The full suite is not green, and 11 failures are deliberate
+
+Run it and you will see them; they are **pre-existing**, they were red at the
+reviewed remote HEAD `2774784`, and each fails in the direction that refuses
+rather than permits. Attribution was done against a detached worktree at that
+commit before anything was changed — 28 were red, 17 are now closed, and these
+are the two families left:
+
+| family | tests | why it stays red |
+| --- | --- | --- |
+| Phase B's frozen executable set has drifted **undeclared** — the amendments ledger accounts to `c20e3a80b6c0` and the tree digests to `c9121aadff77`, after ~37 commits since 2026-09-15 touched files in that 59-path set (shared runtime, mostly) | 10 | `preregistration_gate` returns `ok = False`, so a paid Phase-B launch is **refused** — correct. The remedy its own message names is *"re-freeze it"*, which changes a frozen scientific record and is a maintainer decision; reconstructing ~20 ledger entries protects no current experiment |
+| C1's committed readiness record no longer binds the live harness, so the test says a pod sweep is owed | 1 | True, and it will never be collected: C1 is **closed by a verdict** and no C1 launch exists to justify a `launch_bound` sweep (AGENTS.md P8.3). Clearing it means sweeping for no launch, or editing a closed experiment's guard |
+
+A permanently red suite is a hazard — it is exactly what let 14 of those 28 sit
+unnoticed at remote HEAD — so both families are named here rather than left for
+the next reader to re-derive.
+
 ## Budget — four limits that do not transfer
 
 Derived by [`scripts/consolidate/derive_budget.py`](../../scripts/consolidate/derive_budget.py)
