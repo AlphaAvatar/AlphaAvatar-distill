@@ -200,12 +200,67 @@ def completion_scope_gate(ctx: SessionContext) -> tuple[bool, str]:
             "the authorization states no resource scope; one that cannot say "
             "how many provider resources it permits does not permit an unknown "
             "number of them")
-    if scope.run_id != ctx.args.run_id:
-        return False, (f"the authorization is scoped to run {scope.run_id!r} and "
-                       f"this invocation is {ctx.args.run_id!r}")
-    return True, (f"authorized for baseline completion of run {scope.run_id!r}; "
-                  f"{scope.provider_resources_permitted} provider resource(s) "
-                  "permitted, beam NOT authorized")
+
+    #: Through the scope's OWN methods, not a re-implementation of them. The
+    #: gate previously compared `scope.run_id` by hand and never asked about the
+    #: draw count at all -- so an operator could pass `--host-draws 8` under an
+    #: authorization permitting two, and the refusal would have come from the
+    #: provider or from nowhere.
+    for permitted, reason in (scope.permits_run(ctx.args.run_id),
+                              scope.permits_draws(int(ctx.args.host_draws))):
+        if not permitted:
+            return False, reason
+
+    #: Stated as a requirement rather than assumed from the type's validator: an
+    #: authorization reaching this gate with it false would mean two resources
+    #: could bill at once, which is the failure the runner's confirmed-release
+    #: rule exists to prevent.
+    if scope.one_billing_resource_at_a_time is not True:
+        return False, (
+            "the authorization does not require one billing resource at a time; "
+            "two resources billing at once is not something a grant may waive")
+
+    return True, (
+        f"authorized for baseline completion of run {scope.run_id!r}: "
+        f"{ctx.args.host_draws} draw(s) within the "
+        f"{scope.provider_resources_permitted} permitted, "
+        f"{scope.issuances_permitted} issuance(s), "
+        f"{scope.launch_attempts_permitted} launch attempt(s), one billing "
+        "resource at a time, beam NOT authorized")
+
+
+def frozen_runtime_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The runtime the comparability contract BINDS, not merely its defaults.
+
+    The parser defaults to the protocol-bound GPU, image and price basis -- but a
+    default is only what happens when nobody passes a flag. The frozen C
+    measurements were taken on this GPU class and this image, and the formal
+    price basis is the accepted boundary, so a launch that overrode any of them
+    would be measuring B under a runtime the comparability contract does not
+    cover and spending at a rate nobody approved.
+
+    A LOWER max price is safe and permitted: it can only ever refuse a launch.
+    """
+    expected_gpu = BC.gpu_class(REPO_ROOT)
+    expected_image = BC.image_name(REPO_ROOT)
+    basis = BC.price_per_hour_usd(REPO_ROOT)
+
+    if ctx.args.gpu != expected_gpu:
+        return False, (f"--gpu {ctx.args.gpu!r} is not the bound {expected_gpu!r}. "
+                       "The frozen candidate measurements were taken on that "
+                       "class and the comparability contract names it.")
+    if ctx.args.image != expected_image:
+        return False, (f"--image {ctx.args.image!r} is not the bound "
+                       f"{expected_image!r}. A different image is a different "
+                       "numerical runtime for the one measurement this session "
+                       "exists to take.")
+    requested = float(ctx.args.max_price)
+    if requested > basis:
+        return False, (f"--max-price ${requested:.4f}/h exceeds the accepted "
+                       f"formal basis ${basis:.4f}/h. A higher ceiling on the "
+                       "rate is a budget decision, not a launcher flag.")
+    return True, (f"runtime bound: {expected_gpu}, {expected_image}, "
+                  f"max price ${requested:.4f}/h <= ${basis:.4f}/h")
 
 
 def frozen_inputs_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -517,6 +572,7 @@ def spec(args) -> SessionSpec:
                                 check_lineage=True),
             completion_executable_gate,
             completion_scope_gate,
+            frozen_runtime_gate,
             frozen_inputs_gate,
             frozen_assets_gate,
             pricing_and_plan_gate,

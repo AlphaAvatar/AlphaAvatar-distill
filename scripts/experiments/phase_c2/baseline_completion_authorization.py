@@ -143,14 +143,45 @@ def live_identities(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     }
 
 
-def _readiness(repo_root: Path, run_id: str, stage_id: str) -> dict[str, Any]:
-    """A PASSING launch-bound completion readiness record, or a refusal.
+def _staging_contract_digest(run_id: str) -> str:
+    """The LIVE completion staging contract, from the real SessionSpec.
 
-    Refuses rather than warns. An authorization issued without one binds a
-    session to a tree nobody swept -- and it is the COMPLETION's record that is
-    required: a Search-1 record describes another launcher, another session id,
-    another staging contract and another closure.
+    Derived from the completion launcher's own `SetupManifest` under the
+    completion session id -- the same derivation the launcher's readiness gate
+    performs -- so the issuer and the launcher cannot disagree about what this
+    session stages. Deriving it from anything else would let an authorization be
+    issued against a staged view no pod will ever have.
     """
+    import importlib
+
+    from aadistill.runtime.staging_contract import derive_contract
+
+    from experiments.phase_c2 import baseline_completion as _BC
+
+    launcher = importlib.import_module("autoinit_phase_c2_baseline_launch")
+    args = launcher.build_parser().parse_args([
+        "--scr", "/unused", "--session-commit", "0" * 40,
+        "--bundle", "aad_autoinit_00000000.bundle", "--run-id", run_id])
+    return derive_contract(launcher.spec(args).setup,
+                           session_id=_BC.SESSION_ID)["digest"]
+
+
+def _readiness(repo_root: Path, run_id: str, stage_id: str,
+               session_commit: str) -> dict[str, Any]:
+    """The completion readiness record, through the PRODUCTION verifier.
+
+    This used to hand-check the schema, the kind and the verdict and stop there
+    -- which accepted a record whose self-hash was wrong, whose harness digest
+    described other code, whose staged view was another session's, or whose
+    swept base could not possibly be an ancestor of the issuance HEAD. Those are
+    exactly the questions `verify_record` already answers, and answering three
+    of eight by hand is the shape that lets the other five through.
+
+    So the real verifier runs, under this run, this stage, `launch_bound`, the
+    issuance commit, the completion authorization path and the LIVE staging
+    contract. No second readiness mechanism, and no partial acceptance.
+    """
+    from experiments.phase_c2 import baseline_completion as _BC
     from experiments.phase_c2 import baseline_completion_pod_environment as CPE
 
     rel = CPE.record_path_for(run_id, stage_id)
@@ -163,25 +194,82 @@ def _readiness(repo_root: Path, run_id: str, stage_id: str) -> dict[str, Any]:
             f"grant-containing tree: record_pod_environment.py --experiment "
             f"{CPE.EXPERIMENT_ID} --kind {CPE.LAUNCH_BOUND} --run-id {run_id} "
             f"--stage-id {stage_id}") from None
-    if record.get("schema") != CPE.SCHEMA:
+
+    authorization_path = (
+        f"{_run_dir(run_id, stage_id)}/governance/authorization.json")
+    try:
+        staging = _staging_contract_digest(run_id)
+    except Exception as exc:                                    # noqa: BLE001
         raise CompletionAuthorizationRefused(
-            f"{rel} declares schema {record.get('schema')!r}, not "
-            f"{CPE.SCHEMA!r}. A Search-1 readiness record cannot stand in for "
-            "the completion's.")
-    if record.get("record_kind") != CPE.LAUNCH_BOUND:
+            f"cannot derive the completion staging contract: {exc}") from None
+
+    ok, reason = CPE.verify_record(
+        record, repo_root, run_id=run_id, stage_id=stage_id,
+        session_commit=session_commit,
+        authorization_path=authorization_path,
+        required_kind=CPE.LAUNCH_BOUND,
+        staging_contract_digest=staging)
+    if not ok:
         raise CompletionAuthorizationRefused(
-            f"{rel} is a {record.get('record_kind')!r} record. Only a "
-            f"{CPE.LAUNCH_BOUND!r} sweep describes the tree a launch will use.")
-    if record.get("verdict") not in ("PASS", None) or record.get("problems"):
-        raise CompletionAuthorizationRefused(
-            f"{rel} is not a PASS: {record.get('verdict')!r}, problems "
-            f"{record.get('problems')}")
-    return {"record": rel, "self_sha256": record.get("self_sha256"),
+            f"{rel} does not verify against this tree: {reason}")
+
+    return {"record": rel, "verified": True, "verifier_reason": reason,
+            "self_sha256": record.get("self_sha256"),
             "record_kind": record.get("record_kind"),
             "schema": record.get("schema"),
             "swept_base_commit": record.get("swept_base_commit"),
             "completion_harness_digest": record.get("completion_harness_digest"),
-            "staging_contract_digest": record.get("staging_contract_digest")}
+            "staging_contract_digest": record.get("staging_contract_digest"),
+            "live_staging_contract_digest": staging,
+            "_verified_by": (
+                "experiments.phase_c2.baseline_completion_pod_environment."
+                "verify_record, the same production verifier the launcher's "
+                "readiness gate calls -- schema, self hash, verdict, harness "
+                "digest, pod-test-environment digest, staging contract, clean "
+                "swept base, swept-base-to-HEAD lineage and permitted "
+                "post-sweep paths")}
+
+
+def _run_dir(run_id: str, stage_id: str) -> str:
+    from experiments.run_layout import rel_run_dir
+
+    return rel_run_dir("phase_c2_baseline_completion", run_id, stage_id)
+
+
+def check_approved_money(grant: Mapping[str, Any],
+                         repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The maintainer's money boundary, re-derived from the pricing record.
+
+    `approved_money` is a STATED field: the maintainer says what was approved.
+    That makes it evidence of a decision and not of a computation, so every
+    figure in it is recomputed from the canonical pricing record and any
+    difference is a refusal. The grant states them because a person approved
+    them; the machine checks them because a person can mistype.
+
+    Nothing is copied into a second config: the pricing record is the owner.
+    """
+    doc = BC.pricing(repo_root)["totals"]
+    expected = {
+        "expected_usd": round(float(doc["expected_usd"]), 4),
+        "hard_cap_usd": round(float(doc["hard_ceiling_usd"]), 4),
+        "price_basis_usd_per_hour": round(float(doc["price_per_hour"]), 4),
+    }
+    stated = grant.get("approved_money")
+    if not isinstance(stated, Mapping) or not stated:
+        raise CompletionAuthorizationRefused(
+            "the grant states no approved_money. A grant that does not say what "
+            "money was approved is not evidence that any was.")
+    missing = sorted(k for k in expected if k not in stated)
+    if missing:
+        raise CompletionAuthorizationRefused(
+            f"the grant's approved_money is missing {missing}")
+    wrong = {k: {"grant": stated[k], "pricing_record": expected[k]}
+             for k in expected if round(float(stated[k]), 4) != expected[k]}
+    if wrong:
+        raise CompletionAuthorizationRefused(
+            "the grant's approved_money disagrees with the completion pricing "
+            "record: " + json.dumps(wrong, indent=1))
+    return expected
 
 
 def build_payload(*, grant: Mapping[str, Any], session_commit: str,
@@ -204,23 +292,44 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     except GrantRefused as exc:
         raise CompletionAuthorizationRefused(str(exc)) from None
 
-    #: Every asserted identity re-derived and compared. An identity this
-    #: assembler cannot derive is a refusal in itself.
+    #: The maintainer's money boundary, recomputed from the pricing record.
+    approved_money = check_approved_money(grant, repo_root)
+
+    #: Every asserted identity re-derived and compared, and the block required
+    #: to be COMPLETE. Absence of a disagreement is not agreement: a grant that
+    #: asserted two of eight identities used to pass, binding the session to an
+    #: approval that had never named the other six. So the comparison is set
+    #: equality after prose keys are dropped, and each of the four ways it can
+    #: fail is named.
     block = cfg["grant_contract"]["identities_block"]
-    asserted = grant.get(block) or {}
-    if not isinstance(asserted, Mapping):
+    asserted_raw = grant.get(block)
+    if not isinstance(asserted_raw, Mapping) or not asserted_raw:
         raise CompletionAuthorizationRefused(
-            f"the grant's {block!r} is not a mapping")
+            f"the grant's {block!r} is absent or empty. A grant that names no "
+            "machine identity approves nothing a machine can check.")
+    asserted = {k: v for k, v in asserted_raw.items() if not k.startswith("_")}
     derivable = {k: v for k, v in live.items() if not k.startswith("_")}
-    unknown = sorted(k for k in asserted
-                     if not k.startswith("_") and k not in derivable)
+
+    unknown = sorted(set(asserted) - set(derivable))
     if unknown:
         raise CompletionAuthorizationRefused(
             f"the grant asserts {unknown}, which this issuer cannot derive. A "
             "grant may not introduce a binding nobody checks.")
+    incomplete = sorted(set(derivable) - set(asserted))
+    if incomplete:
+        raise CompletionAuthorizationRefused(
+            f"the grant's {block} does not state {incomplete}. The block must "
+            "name every identity the issuer derives: an unstated identity is "
+            "one the maintainer never approved against, and issuing anyway "
+            "would bind this session to an approval that does not mention it.")
+    if "reviewed_commit" in asserted_raw:
+        raise CompletionAuthorizationRefused(
+            "reviewed_commit is not a machine identity. The issuance HEAD is "
+            "necessarily later than the grant, so a commit asserted here makes "
+            "the chain unsatisfiable.")
     disagreements = {
         key: {"grant": asserted[key], "derived": derivable[key]}
-        for key in derivable if key in asserted and asserted[key] != derivable[key]}
+        for key in derivable if asserted[key] != derivable[key]}
     if disagreements:
         raise CompletionAuthorizationRefused(
             "the grant's asserted identities disagree with this tree: "
@@ -231,7 +340,7 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     except AuthorizationError as exc:
         raise CompletionAuthorizationRefused(str(exc)) from None
 
-    readiness = _readiness(repo_root, run_id, stage_id)
+    readiness = _readiness(repo_root, run_id, stage_id, session_commit)
 
     auth = BC.BaselineCompletionAuthorization(
         authorization_id=cfg["authorization_id"],
@@ -284,6 +393,14 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
             "self-hash. None was read from a document that merely claims it."),
     }
     payload["readiness"] = readiness
+    payload["approved_money"] = {
+        **approved_money,
+        "_stated_and_rederived": (
+            "the maintainer STATED these in the grant and the issuer recomputed "
+            "every one from the completion pricing record. A grant naming a "
+            "different expected cost, a different hard cap or a higher rate "
+            "basis is refused."),
+    }
     payload["budget_headroom"] = budget_headroom(
         cumulative_usd=float(flatten_money(grant, cfg)[contract.spend_field]),
         cap_usd=float(cfg["accepted_pricing"]["cumulative_cap_usd"]),

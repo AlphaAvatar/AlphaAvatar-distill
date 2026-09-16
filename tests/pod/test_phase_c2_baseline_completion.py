@@ -1069,7 +1069,11 @@ def _synthetic_grant(**overrides) -> dict:
         "granted_by": "a synthetic maintainer decision, for tests only",
         "covers": "one baseline completion",
         "explicitly_not_authorized": ["the Search-1 beam", "Search-2"],
-        "approved_money": {"hard_cap_usd": live["_hard_ceiling_usd"]},
+        #: The full block the money boundary requires, from the pricing record
+        #: the issuer re-derives it from.
+        "approved_money": {"expected_usd": live["_expected_usd"],
+                           "hard_cap_usd": live["_hard_ceiling_usd"],
+                           "price_basis_usd_per_hour": live["_price_per_hour_usd"]},
         "one_use": {"issuances_permitted": 1, "launch_attempts_permitted": 1,
                     "provider_resources_permitted": 2,
                     "one_billing_resource_at_a_time": True},
@@ -1088,8 +1092,14 @@ def _issue(monkeypatch, tmp_path, grant=None, run_id="attempt5"):
 
     #: The readiness record is STUBBED, not written: creating one at the real
     #: path would create attempt5 as a run, and no completion run is authorized.
+    #: `verify_record` is stubbed to PASS as well, because these cases are about
+    #: identity and money derivation -- the production verifier is driven for
+    #: real by `test_issuance_runs_the_production_readiness_verifier` and
+    #: `test_a_tampered_readiness_record_is_refused_by_the_real_verifier`.
     monkeypatch.setattr(CPE, "load_record",
                         lambda *a, **k: _completion_readiness(run_id))
+    monkeypatch.setattr(CPE, "verify_record",
+                        lambda *a, **k: (True, "stubbed PASS for an identity test"))
     return BCA.build_payload(
         grant=grant if grant is not None else _synthetic_grant(),
         session_commit="1" * 40, granted_utc="2026-09-17T00:00:00+00:00",
@@ -1168,7 +1178,8 @@ def test_the_issuer_refuses_a_search_1_readiness_record(monkeypatch, tmp_path):
 
     monkeypatch.setattr(CPE, "load_record",
                         lambda *a, **k: _completion_readiness(schema=SPE.SCHEMA))
-    with pytest.raises(CompletionAuthorizationRefused, match="schema"):
+    #: The REAL verifier decides. A foreign schema cannot describe this session.
+    with pytest.raises(CompletionAuthorizationRefused, match="does not verify"):
         build_payload(grant=_synthetic_grant(), session_commit="1" * 40,
                       granted_utc="2026-09-17T00:00:00+00:00",
                       run_id="attempt5", stage_id="1", repo_root=REPO)
@@ -1181,7 +1192,7 @@ def test_the_issuer_refuses_a_diagnostic_readiness_record(monkeypatch, tmp_path)
 
     monkeypatch.setattr(CPE, "load_record",
                         lambda *a, **k: _completion_readiness(record_kind="diagnostic"))
-    with pytest.raises(CompletionAuthorizationRefused, match="launch_bound"):
+    with pytest.raises(CompletionAuthorizationRefused, match="does not verify"):
         build_payload(grant=_synthetic_grant(), session_commit="1" * 40,
                       granted_utc="2026-09-17T00:00:00+00:00",
                       run_id="attempt5", stage_id="1", repo_root=REPO)
@@ -1368,3 +1379,337 @@ def test_the_renderer_reports_a_missing_closeout_rather_than_inheriting_one(tmp_
     outcome = _run_outcome(
         REPO, "logs/stages/stage-1/phase_c2/runs/attempt4", recorded=True)
     assert "SEARCH COMPLETE" in outcome and "$6.0785" in outcome
+
+
+# --- 12. the six enforcement repairs ---------------------------------------
+#
+# Each of these was a partial check or an unenforced default: the kind of gap
+# that passes every test written against the happy path and lets a wrong
+# artifact through on the one invocation that matters.
+
+
+def _tampered(record: dict, **changes) -> dict:
+    out = dict(record)
+    out.update(changes)
+    return out
+
+
+def test_issuance_runs_the_production_readiness_verifier(monkeypatch, tmp_path):
+    """Not three of eight checks by hand.
+
+    The assembler used to accept a record on schema, kind and verdict alone,
+    which passes a record whose self-hash is wrong, whose harness digest
+    describes other code, whose staged view is another session's, or whose swept
+    base cannot be an ancestor of the issuance HEAD.
+    """
+    import inspect
+
+    from experiments.phase_c2 import baseline_completion_authorization as BCA
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+
+    source = inspect.getsource(BCA._readiness)
+    assert "CPE.verify_record(" in source, (
+        "the issuer must call the production verifier")
+    for binding in ("required_kind", "session_commit", "authorization_path",
+                    "staging_contract_digest"):
+        assert binding in source, binding
+
+    #: And it must actually refuse what the verifier refuses. The verifier is
+    #: driven here rather than stubbed: a synthetic record with a fake self hash
+    #: cannot verify, whatever else it says.
+    calls = {}
+
+    def spy(record, repo_root=".", **kwargs):
+        calls.update(kwargs)
+        return False, "self_sha256 does not match the record"
+
+    monkeypatch.setattr(CPE, "load_record",
+                        lambda *a, **k: _completion_readiness())
+    monkeypatch.setattr(CPE, "verify_record", spy)
+    #: `build_payload` directly, not through `_issue`: that helper stubs the
+    #: verifier to pass, which would silently replace this spy and make the
+    #: assertion below vacuous.
+    with pytest.raises(BCA.CompletionAuthorizationRefused,
+                       match="does not verify"):
+        BCA.build_payload(grant=_synthetic_grant(), session_commit="1" * 40,
+                          granted_utc="2026-09-17T00:00:00+00:00",
+                          run_id="attempt5", stage_id="1", repo_root=REPO)
+    assert calls["required_kind"] == CPE.LAUNCH_BOUND
+    assert calls["session_commit"] == "1" * 40
+    assert calls["authorization_path"].endswith("governance/authorization.json")
+    assert calls["staging_contract_digest"], (
+        "the LIVE staging contract must be passed, not omitted")
+
+
+def test_the_issuer_derives_the_staging_contract_from_the_real_session_spec():
+    """From the completion launcher's own manifest, under its own session id."""
+    from aadistill.runtime.staging_contract import derive_contract
+    from experiments.phase_c2 import baseline_completion as BC
+    from experiments.phase_c2 import baseline_completion_authorization as BCA
+
+    _, args, spec = _completion_spec()
+    expected = derive_contract(spec.setup, session_id=BC.SESSION_ID)["digest"]
+    assert BCA._staging_contract_digest("attempt5") == expected
+
+
+def test_a_tampered_readiness_record_is_refused_by_the_real_verifier():
+    """Self hash, harness digest and staging contract, each on its own."""
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+
+    good = _completion_readiness()
+    for changes, why in (
+            ({"self_sha256": "0" * 64}, "a fake self hash"),
+            ({"completion_harness_digest": "0" * 64}, "another closure"),
+            ({"staging_contract_digest": "0" * 64}, "another staged view"),
+            ({"record_kind": "diagnostic"}, "a diagnostic sweep"),
+            ({"verdict": "FAIL"}, "a failing sweep")):
+        ok, reason = CPE.verify_record(
+            _tampered(good, **changes), REPO, run_id="attempt5", stage_id="1",
+            required_kind=CPE.LAUNCH_BOUND,
+            staging_contract_digest=good["staging_contract_digest"])
+        assert ok is False, f"{why} was accepted: {reason}"
+
+
+def test_the_identity_block_must_be_complete(monkeypatch, tmp_path):
+    """Absence of a disagreement is not agreement."""
+    from experiments.phase_c2.baseline_completion_authorization import (
+        CompletionAuthorizationRefused)
+
+    grant = _synthetic_grant()
+    block = grant["bound_identities_the_issuer_must_reproduce"]
+    dropped = "baseline_spec_hash"
+    block.pop(dropped)
+    with pytest.raises(CompletionAuthorizationRefused, match="does not state"):
+        _issue(monkeypatch, tmp_path, grant)
+
+    empty = _synthetic_grant()
+    empty["bound_identities_the_issuer_must_reproduce"] = {}
+    with pytest.raises(CompletionAuthorizationRefused, match="absent or empty"):
+        _issue(monkeypatch, tmp_path, empty)
+
+    predictive = _synthetic_grant()
+    predictive["bound_identities_the_issuer_must_reproduce"][
+        "reviewed_commit"] = "a" * 40
+    with pytest.raises(CompletionAuthorizationRefused, match="reviewed_commit"):
+        _issue(monkeypatch, tmp_path, predictive)
+
+
+def test_the_identity_block_must_name_all_eight(monkeypatch, tmp_path):
+    from experiments.phase_c2 import baseline_completion_authorization as BCA
+
+    derivable = {k for k in BCA.live_identities(REPO) if not k.startswith("_")}
+    assert derivable == {
+        "completion_harness_digest", "completion_harness_n_files",
+        "completion_plan_hash", "completion_pricing_sha256",
+        "baseline_spec_hash", "baseline_artifact_digest",
+        "frozen_candidates_self_sha256", "search1_selection_commitment_sha256"}
+    payload = _issue(monkeypatch, tmp_path)
+    assert derivable <= set(payload["bound"])
+
+
+def test_approved_money_is_a_real_boundary(monkeypatch, tmp_path):
+    from experiments.phase_c2.baseline_completion_authorization import (
+        CompletionAuthorizationRefused, check_approved_money)
+
+    assert check_approved_money(_synthetic_grant(), REPO) == {
+        "expected_usd": 0.7212, "hard_cap_usd": 1.1950,
+        "price_basis_usd_per_hour": 1.09}
+
+    for money, why in (
+            (None, "missing"),
+            ({}, "empty"),
+            ({"expected_usd": 0.7212, "hard_cap_usd": 15.0446,
+              "price_basis_usd_per_hour": 1.09}, "Search-1's ceiling"),
+            ({"expected_usd": 7.1787, "hard_cap_usd": 1.1950,
+              "price_basis_usd_per_hour": 1.09}, "Search-1's expected cost"),
+            ({"expected_usd": 0.7212, "hard_cap_usd": 1.1950,
+              "price_basis_usd_per_hour": 1.49}, "a higher rate basis"),
+            ({"hard_cap_usd": 1.1950,
+              "price_basis_usd_per_hour": 1.09}, "a missing figure")):
+        grant = _synthetic_grant()
+        if money is None:
+            grant.pop("approved_money")
+        else:
+            grant["approved_money"] = money
+        with pytest.raises(CompletionAuthorizationRefused):
+            _issue(monkeypatch, tmp_path, grant)
+
+
+def test_the_cap_arithmetic_still_gates_the_ceiling(monkeypatch, tmp_path):
+    """296.8185 + 1.1950 <= 320.0, and a grant that does not fit is refused."""
+    from experiments.phase_c2.baseline_completion_authorization import (
+        CompletionAuthorizationRefused)
+
+    payload = _issue(monkeypatch, tmp_path)
+    headroom = payload["budget_headroom"]
+    assert headroom["remaining_usd"] == round(320.0 - 296.8185, 4)
+
+    over = _synthetic_grant()
+    over["budget_context_at_approval"]["cumulative_spend_usd"] = 319.9
+    with pytest.raises(CompletionAuthorizationRefused, match="exceeds"):
+        _issue(monkeypatch, tmp_path, over)
+
+
+# --- the launcher's enforcement --------------------------------------------
+
+
+class _Ctx:
+    """The fields these gates read off a live SessionContext."""
+
+    def __init__(self, args, auth=None):
+        self.args = args
+        self.auth = auth
+        self.evidence = {}
+
+
+def _scoped_auth(*, run_id="attempt5", draws=2, one_billing=True,
+                 completion=True, search1=False):
+    from experiments.phase_c2.session import C2ResourceScope
+
+    class _Auth:
+        authorizes_c2_baseline_completion = completion
+        authorizes_c2_search1 = search1
+        resource_scope = C2ResourceScope(
+            run_id=run_id, issuances_permitted=1, launch_attempts_permitted=1,
+            provider_resources_permitted=draws,
+            one_billing_resource_at_a_time=one_billing)
+    return _Auth()
+
+
+def test_the_scope_gate_uses_the_scopes_own_methods():
+    import inspect
+
+    import autoinit_phase_c2_baseline_launch as L
+
+    source = inspect.getsource(L.completion_scope_gate)
+    assert "permits_run(" in source and "permits_draws(" in source, (
+        "the gate must ask the scope, not re-implement it")
+
+    _, args, _ = _completion_spec()
+    args.host_draws = 2
+    ok, reason = L.completion_scope_gate(_Ctx(args, _scoped_auth(draws=2)))
+    assert ok, reason
+
+    #: More draws than the grant permits.
+    args.host_draws = 8
+    ok, reason = L.completion_scope_gate(_Ctx(args, _scoped_auth(draws=2)))
+    assert ok is False and "host-draws" in reason
+
+    #: Another run's authorization.
+    args.host_draws = 2
+    ok, reason = L.completion_scope_gate(
+        _Ctx(args, _scoped_auth(run_id="attempt9")))
+    assert ok is False and "attempt9" in reason
+
+    #: And an artifact that could authorize a beam.
+    ok, reason = L.completion_scope_gate(
+        _Ctx(args, _scoped_auth(search1=True)))
+    assert ok is False and "Search-1" in reason
+
+
+def test_the_frozen_runtime_is_enforced_not_merely_defaulted():
+    import autoinit_phase_c2_baseline_launch as L
+    from experiments.phase_c2 import baseline_completion as BC
+
+    _, args, _ = _completion_spec()
+    ok, reason = L.frozen_runtime_gate(_Ctx(args))
+    assert ok, reason
+    assert args.gpu == "NVIDIA L40S"
+    assert args.image == "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
+
+    for attr, value, needle in (("gpu", "NVIDIA H100 PCIe", "--gpu"),
+                                ("image", "runpod/pytorch:2.0.0", "--image"),
+                                ("max_price", 1.49, "max-price")):
+        _, bad, _ = _completion_spec()
+        setattr(bad, attr, value)
+        ok, reason = L.frozen_runtime_gate(_Ctx(bad))
+        assert ok is False, f"{attr}={value!r} was accepted"
+        assert needle in reason, reason
+
+    #: A LOWER max price is safe: it can only refuse a launch.
+    _, cheap, _ = _completion_spec()
+    cheap.max_price = 0.99
+    ok, reason = L.frozen_runtime_gate(_Ctx(cheap))
+    assert ok, reason
+    assert BC.price_per_hour_usd(REPO) == 1.09
+
+
+def test_the_frozen_runtime_gate_is_in_the_pre_provider_set():
+    _, _, spec = _completion_spec()
+    names = [getattr(g, "__name__", type(g).__name__) for g in spec.precheck]
+    assert "frozen_runtime_gate" in names
+    assert names.index("frozen_runtime_gate") < names.index("bundle_staged_gate")
+
+
+# --- the durability boundary ------------------------------------------------
+
+
+def test_the_b_measurement_survives_a_post_measurement_failure(tmp_path, monkeypatch):
+    """The repair that matters: a comparison failure must not discard B.
+
+    The fake evaluation SUCCEEDS and the comparison is then made to fail
+    immediately afterwards. The session's final evidence must still carry the
+    complete B measurement, and the measurement count must still be one.
+    """
+    import autoinit_phase_c2_baseline_driver as D
+    from experiments.phase_c2 import comparison as C
+
+    def explode(**kwargs):
+        raise RuntimeError("serialisation failed after the measurement")
+
+    monkeypatch.setattr(C, "build", explode)
+
+    with pytest.raises(RuntimeError, match="serialisation failed"):
+        _run_stage_b(tmp_path, monkeypatch,
+                     baseline_values=_far_from_every_candidate())
+
+    #: The evidence document on disk, written by `save()` inside the boundary.
+    evidence = json.loads(
+        (tmp_path / "audit" / "c2_baseline_completion_evidence.json").read_text())
+    measurement = evidence["baseline_measurement"]
+    assert measurement["status"] == "MEASURED"
+    assert measurement["state_eval_measurements_performed"] == 1
+    assert measurement["expected_artifact_digest"] == B.B_ARTIFACT_DIGEST
+    assert measurement["actual_artifact_digest"] == B.B_ARTIFACT_DIGEST
+    #: COMPLETE, so the comparison can be rebuilt from it at $0.
+    for key in ("artifact_digest", "suite_id", "suite_hash", "reference",
+                "values", "positions", "detail", "measured_utc"):
+        assert key in measurement["evaluation"], key
+    for objective in PARETO_V1.objectives:
+        assert objective.key in measurement["evaluation"]["values"]
+    assert measurement["suite"]["hash"] == json.loads(
+        FROZEN.read_text())["suite"]["hash"]
+    assert measurement["reference_strategy"] == "recompute"
+    assert measurement["teacher"]["revision"]
+    assert measurement["bound_search1_identity"]["search_run_id"] == (
+        "autoinit.v1.phase_c2.search1")
+    assert measurement["frozen_candidate_inputs"].endswith(
+        "c2_frozen_comparison_inputs.json")
+    assert "no_candidate_was_remeasured" in measurement
+
+
+def test_the_durable_block_is_written_before_any_post_processing():
+    """Ordering, in the source: measure, persist, THEN compare."""
+    import inspect
+
+    import autoinit_phase_c2_baseline_driver as D
+
+    source = inspect.getsource(D.BaselineCompletionDriver.rebuild_measure_compare)
+    measured = source.index("attach_evaluation(")
+    persisted = source.index("persist_baseline_measurement(")
+    disclosure = source.index("numerical_sensitivity_disclosure(")
+    built = source.index("C.build(")
+    assert measured < persisted < disclosure < built, (
+        "the measurement must be durable before any post-processing")
+
+
+def test_exactly_one_state_eval_is_performed(tmp_path, monkeypatch):
+    driver, calls = _run_stage_b(tmp_path, monkeypatch,
+                                 baseline_values=_far_from_every_candidate())
+    assert len(calls["evaluate"]) == 1
+    evidence = json.loads(
+        (tmp_path / "audit" / "c2_baseline_completion_evidence.json").read_text())
+    assert evidence["baseline_measurement"][
+        "state_eval_measurements_performed"] == 1
+    assert driver.ev["stages"]["rebuild_measure_compare"]["detail"][
+        "candidates_remeasured"] == 0

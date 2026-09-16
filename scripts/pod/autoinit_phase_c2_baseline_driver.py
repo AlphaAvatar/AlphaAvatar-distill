@@ -370,6 +370,25 @@ class BaselineCompletionDriver:
             f"{state.evaluation.values['state.teacher_kl.equal_domain_mean']:.6f} "
             "equal-domain mean KL")
 
+        #: THE DURABILITY BOUNDARY, and it is here rather than after the
+        #: comparison for one reason: everything below this line is arithmetic
+        #: over numbers that already exist, and a failure in it would otherwise
+        #: discard the one GPU measurement this session was funded to take.
+        #:
+        #: Phase-B attempt 4 completed eight hours of science, ranked it, and
+        #: raised in a summary dict -- ending with no authoritative record of
+        #: what it had measured. The beam learned to commit its ranking the
+        #: instant it existed; this is the same rule for a single measurement.
+        #:
+        #: It writes into the session evidence document, which the artifact
+        #: specs already collect on BOTH the success and the failure path, so no
+        #: new artifact framework is involved. After this returns, a
+        #: post-processing repair is a $0 host-side job over the durable
+        #: evaluation plus the frozen five, and B is never remeasured.
+        self.persist_baseline_measurement(
+            state=state, artifact=artifact, outcome=outcome, suite=suite,
+            suite_root=suite_root)
+
         #: Pure post-processing from here. One measured B, five frozen C.
         #:
         #: The disclosure is built BEFORE the record and handed to the builder,
@@ -431,6 +450,68 @@ class BaselineCompletionDriver:
             "comparison_record": str(path),
         })
         return True
+
+
+    # -- the durability boundary -------------------------------------------
+    def persist_baseline_measurement(self, *, state, artifact, outcome, suite,
+                                     suite_root) -> None:
+        """Write the ONE formal B measurement into the evidence, immediately.
+
+        Everything needed to reconstruct the comparison later WITHOUT the
+        checkpoint bytes and without measuring anything again: B's identity,
+        its complete `StateEvaluation`, the suite and reference strategy it was
+        taken under, the teacher it was scored against, and the frozen Search-1
+        identities the comparison will be computed against.
+        """
+        from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+
+        evaluation = state.evaluation
+        self.ev["baseline_measurement"] = {
+            "status": "MEASURED",
+            "state_eval_measurements_performed": 1,
+            "measured_utc": (getattr(evaluation, "measured_utc", None)
+                             or datetime.now(timezone.utc).isoformat()),
+            "persisted_utc": datetime.now(timezone.utc).isoformat(),
+            "state_id": state.state_id,
+            "path_label": getattr(state, "path_label", None),
+            "construction": outcome.get("construction"),
+            "expected_artifact_digest": B.B_ARTIFACT_DIGEST,
+            "actual_artifact_digest": artifact.artifact_digest,
+            "artifact_identity": {
+                "weights_digest": getattr(artifact, "weights_digest", None),
+                "config_sha256": getattr(artifact, "config_sha256", None),
+                "arch_signature": getattr(artifact, "arch_signature", None),
+                "tokenizer_sha256": getattr(artifact, "tokenizer_sha256", None),
+                "index_sha256": getattr(artifact, "index_sha256", None),
+                "single_shard_sha256": getattr(artifact, "single_shard_sha256",
+                                               None),
+                "num_parameters": getattr(artifact, "num_parameters", None),
+            },
+            "identity_matches": outcome.get("identity_matches"),
+            #: COMPLETE, so a later session rehydrates the measurement rather
+            #: than recomputing it.
+            "evaluation": evaluation.as_dict(),
+            "suite": {"id": suite.qualified_id, "hash": suite.suite_hash,
+                      "root": str(suite_root)},
+            "reference_strategy": (evaluation.detail or {}).get(
+                "reference_strategy"),
+            "teacher": {"repo_id": TEACHER_ID, "revision": TEACHER_REVISION},
+            "bound_search1_identity": dict(self.frozen),
+            "frozen_candidate_inputs": str(self.a.frozen_inputs),
+            "no_candidate_was_remeasured": (
+                "the five C measurements were READ from the frozen record and "
+                "passed to the comparison untouched. No code path in this "
+                "session measures a candidate, and the count above is the "
+                "session's total."),
+            "_this_is_the_durability_boundary": (
+                "written the instant the measurement existed and before any "
+                "post-processing. If the comparison below fails, THIS survives "
+                "and the comparison can be rebuilt from it plus the frozen five "
+                "at $0. B is not remeasured."),
+        }
+        self.save()
+        mark("BASELINE_MEASURED")
+        say("  B measurement PERSISTED — durable before any post-processing")
 
     # -- the loop ----------------------------------------------------------
     def run(self) -> int:
