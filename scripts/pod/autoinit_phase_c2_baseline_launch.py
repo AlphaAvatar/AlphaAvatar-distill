@@ -556,10 +556,27 @@ def spec(args) -> SessionSpec:
             #: script reads to decide which optional sections run, so omitting
             #: the marker is what stops the work rather than a comment saying it
             #: is unnecessary.
+            #: ROPE_OK is ABSENT, and the guard it names is not. The shared
+            #: step globs `artifacts/stage1/*/checkpoint/config.json` and exits
+            #: 1 when nothing matches -- which is correct: it verifies that a
+            #: STAGED student checkpoint's RoPE base reads back through every
+            #: venv, and this session stages no checkpoint. It REBUILDS B on the
+            #: pod from the teacher, so at setup time there is nothing to check
+            #: and the step refuses. Attempt 6 spent $0.0412 establishing that,
+            #: and C1 attempt 2 spent $0.1013 on the same line.
+            #:
+            #: The risk the step exists for is real here and worse: a loader
+            #: that misreads `rope_theta` by 500x would silently produce a wrong
+            #: state_eval for B, which is the one number this session is funded
+            #: to produce. So the guard MOVES to where the artifact exists --
+            #: `BaselineCompletionDriver.assert_rope_base_of_rebuilt_b`, run on
+            #: the rebuilt checkpoint in the interpreter that measures it, after
+            #: materialization and before the measurement. That is a stronger
+            #: check than the setup-time one, not a weaker one: it asks about
+            #: the actual artifact rather than a staged stand-in.
             setup_markers=("ENV_READY", "REPO_READY", "ASSETS_STAGED",
                            "TRAIN_ENV", "ASSETS_READY", "TEACHER_READY",
-                           "ROPE_OK", "TESTS_OK", "AUTHORIZATION_OK",
-                           "SETUP_DONE"),
+                           "TESTS_OK", "AUTHORIZATION_OK", "SETUP_DONE"),
             env={"SESSION_KIND": "c2_baseline_completion",
                  "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,

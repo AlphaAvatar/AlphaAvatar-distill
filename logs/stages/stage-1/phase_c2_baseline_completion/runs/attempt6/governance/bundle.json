@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_bundle/v1",
+ "run_id": "attempt6",
+ "stage_id": "1",
+ "session_commit": "27747849afc19c40f6424a1243241d456ba2b65c",
+ "canonical_bundle_name": "aad_autoinit_27747849.bundle",
+ "relay_repo": "AlphaAvatar/aadistill-artifacts",
+ "relay_path": "transfer/aad_autoinit_27747849.bundle",
+ "sha256": "f07ba0718f5178425e8b4f78ad40f29328bf0abd460cdd5018ecd57d08895191",
+ "bytes": 13197728,
+ "heads": "27747849afc19c40f6424a1243241d456ba2b65c refs/heads/_bundle_27747849afc1",
+ "carries_authorization": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6/governance/authorization.json",
+ "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_27747849.bundle",
+ "transport": "Phase-C2 baseline completion",
+ "note": "the pre-provider bundle_staged_gate downloads this exact object, verifies it, checks it out and requires the resulting HEAD, authorization bytes and COMPLETION executable digest to match. UNCOMMITTED inside the launch window: committing it would add a third path to the session lineage diff."
+}

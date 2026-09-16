@@ -556,6 +556,13 @@ def _run_stage_b(tmp_path, monkeypatch, *, baseline_values):
     monkeypatch.setattr("aadistill.initialization.specs.artifact.identify_checkpoint",
                         lambda *a, **k: _fake_identity(BL.B_ARTIFACT_DIGEST))
     monkeypatch.setattr(D, "make_retained_state", _fake_retained)
+    #: Model work: it reads a real config and instantiates a rotary module. The
+    #: guard itself is driven for real by
+    #: `test_the_rope_guard_refuses_a_disagreeing_base`.
+    monkeypatch.setattr(
+        D.BaselineCompletionDriver, "assert_rope_base_of_rebuilt_b",
+        lambda self, directory: {"stored": 5_000_000.0, "runtime": 5_000_000.0,
+                                 "transformers": "stub"})
 
     evidence = RUN / "evidence"
     #: REAL argument parsing, through the driver's own parser.
@@ -771,8 +778,12 @@ def test_the_completion_session_stages_only_what_it_needs():
         "this session serves nothing; declaring the marker is what would build "
         "the inference environment")
     for required in ("ENV_READY", "REPO_READY", "TRAIN_ENV", "ASSETS_READY",
-                     "TEACHER_READY", "ROPE_OK", "TESTS_OK", "AUTHORIZATION_OK"):
+                     "TEACHER_READY", "TESTS_OK", "AUTHORIZATION_OK"):
         assert required in setup.setup_markers, required
+    #: ROPE_OK is deliberately absent and the guard it names moved into the
+    #: driver: see `test_the_completion_does_not_declare_rope_ok` and
+    #: `test_undeclaring_rope_ok_did_not_remove_the_guard`.
+    assert "ROPE_OK" not in setup.setup_markers
 
     staged = {asset.dest_name for asset in setup.local_assets}
     assert staged == {"reasoning_heavy_v2", "state_eval_v1"}, staged
@@ -1344,6 +1355,51 @@ def test_attempt_4_frozen_evidence_bytes_are_unchanged():
     assert len(record["candidates_in_committed_order"]) == 5
 
 
+#: The six identities the 2026-09-17 decision froze by value. They are written
+#: out here, once, because they are the ONLY mechanical line between a permitted
+#: engineering repair and a prohibited change to closed science: the same
+#: decision says the completion executable closure is EXPECTED to move, so a
+#: moved closure proves nothing either way. Every repair round since has moved
+#: it -- the RoPE relocation moved it from `89b9a860...` to `bb3aa38a...` over
+#: the same 92 files -- and nothing in the tree checked that the protocol,
+#: pricing, baseline recipe, rebuilt-artifact digest, frozen candidate set and
+#: Search-1 commitment came through untouched.
+FROZEN_SCIENTIFIC_IDENTITIES = {
+    "completion_plan_hash":
+        "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+    "completion_pricing_sha256":
+        "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+    "baseline_spec_hash":
+        "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+    "baseline_artifact_digest":
+        "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "frozen_candidates_self_sha256":
+        "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+    "search1_selection_commitment_sha256":
+        "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf",
+}
+
+
+def test_the_six_frozen_scientific_identities_are_unchanged():
+    """Derived through the PRODUCTION assembler, not recomputed here.
+
+    Recomputing them in the test would check the maintainer's arithmetic
+    against my own and leave the path an authorization actually takes unchecked.
+    `live_identities` is what the issuer binds, so this asserts the values a
+    real chain would carry.
+    """
+    from experiments.phase_c2.baseline_completion_authorization import (
+        live_identities)
+
+    live = live_identities(REPO)
+    moved = {key: (expected, live.get(key))
+             for key, expected in FROZEN_SCIENTIFIC_IDENTITIES.items()
+             if live.get(key) != expected}
+    assert not moved, (
+        "the 2026-09-17 decision froze these by value and a repair may not "
+        f"move them: {json.dumps(moved, indent=1)}")
+
+
 # --- 11. the CURRENT snapshot must not tell two histories ------------------
 
 
@@ -1380,9 +1436,14 @@ def test_the_snapshot_does_not_contradict_itself_about_attempt_4():
     c2 = snapshot["phase_c"]["c2"]
     latest = snapshot["latest_run"]
 
-    #: One history: the search completed and the comparison did not.
+    #: One history: the search completed and the comparison did not. Asserted
+    #: where that history is OWNED -- the phase status, and attempt 4's own
+    #: closeout -- not on `latest_run`, which names whichever run executed most
+    #: recently and now legitimately names a baseline-completion attempt.
     assert "SEARCH COMPLETE" in c2["status"]
-    assert "SEARCH COMPLETE" in latest["outcome"].upper()
+    attempt4 = json.loads((REPO / "logs/stages/stage-1/phase_c2/runs/attempt4"
+                           "/closeout/outcome.json").read_text())
+    assert "SEARCH COMPLETE" in attempt4["classification"].upper()
     for stale in ("PRE-SCIENCE INFRASTRUCTURE ABORT at setup",
                   "nothing measured"):
         assert stale not in latest["outcome"], stale
@@ -1392,16 +1453,25 @@ def test_the_snapshot_does_not_contradict_itself_about_attempt_4():
     assert "ACCEPTED" in nxt
     assert "ruling on the not-yet-quantified" not in nxt, (
         "the cross-session ruling is accepted and recorded in the protocol")
-    #: And the snapshot's own prepared-launch claim must match the tree: a
-    #: grant on disk means something IS prepared, and its absence means nothing
-    #: is. Asserting a fixed value here made this test a statement about one
-    #: moment rather than about consistency.
+    #: And the snapshot's own prepared-launch claim must match the tree.
+    #: Asserting a fixed value here made this test a statement about one moment
+    #: rather than about consistency; asserting merely that a grant EXISTS made
+    #: it wrong in the other direction once chains started being consumed. A
+    #: grant is prepared while its chain is open, and a closeout closes it, so
+    #: the tree's answer is: a grant whose run carries no closeout.
     import autoinit_phase_c2_baseline_launch as L
     runs = REPO / "logs/stages/stage-1" / L.RUN_EXPERIMENT_ID / "runs"
-    granted = bool(list(runs.glob("*/governance/grant.json"))) if runs.exists() else False
-    assert snapshot["prepared_launch"]["any"] is granted, (
+    open_chains = sorted(
+        grant.parents[1].name
+        for grant in (runs.glob("*/governance/grant.json") if runs.exists() else ())
+        if not (grant.parents[1] / "closeout/outcome.json").is_file())
+    assert snapshot["prepared_launch"]["any"] is bool(open_chains), (
         "the snapshot and the tree disagree about whether a completion session "
-        "is prepared")
+        f"is prepared; open chains on disk: {open_chains}")
+    #: A named run must be one of them, so the snapshot cannot point a reader at
+    #: a chain that has already been closed out.
+    named = snapshot["prepared_launch"].get("run")
+    assert (named in open_chains) if named else not open_chains
 
 
 def test_the_renderer_reports_a_missing_closeout_rather_than_inheriting_one(tmp_path):
@@ -1750,3 +1820,91 @@ def test_exactly_one_state_eval_is_performed(tmp_path, monkeypatch):
         "state_eval_measurements_performed"] == 1
     assert driver.ev["stages"]["rebuild_measure_compare"]["detail"][
         "candidates_remeasured"] == 0
+
+
+# --- 13. the RoPE guard, moved to where the artifact exists ----------------
+
+
+def test_the_completion_does_not_declare_rope_ok():
+    """The shared step cannot do its job for a session that stages no checkpoint.
+
+    It globs `artifacts/stage1/*/checkpoint/config.json` and exits 1 on an empty
+    match. C1 attempt 2 paid $0.1013 there and this session's attempt 6 paid
+    $0.0412 -- both correct refusals about a staged checkpoint neither had.
+    """
+    _, _, spec = _completion_spec()
+    assert "ROPE_OK" not in spec.setup.setup_markers
+    #: Everything else it does need is still declared.
+    for required in ("ENV_READY", "REPO_READY", "TRAIN_ENV", "ASSETS_READY",
+                     "TEACHER_READY", "TESTS_OK", "AUTHORIZATION_OK"):
+        assert required in spec.setup.setup_markers, required
+
+
+def test_undeclaring_rope_ok_did_not_remove_the_guard():
+    """Undeclaring the step is only legitimate because the check moved."""
+    import autoinit_phase_c2_baseline_driver as D
+
+    assert hasattr(D.BaselineCompletionDriver, "assert_rope_base_of_rebuilt_b")
+    import inspect
+    source = inspect.getsource(
+        D.BaselineCompletionDriver.rebuild_measure_compare)
+    checked = source.index("assert_rope_base_of_rebuilt_b(")
+    measured = source.index("attach_evaluation(")
+    assert checked < measured, (
+        "the RoPE base must be checked BEFORE the measurement it would "
+        "invalidate")
+
+
+class _Config:
+    """Only the fields the two helpers read."""
+
+    model_type = "qwen3"
+
+    def __init__(self, **fields):
+        self.__dict__.update(fields)
+
+
+def test_the_rope_guard_refuses_a_disagreeing_base(tmp_path, monkeypatch):
+    """A 500x disagreement is the transformers 4.x/5.x field-layout bug.
+
+    Driven through the driver's real method, with only `AutoConfig` and the
+    runtime resolution stubbed -- the comparison and the refusal are the real
+    ones.
+    """
+    import autoinit_phase_c2_baseline_driver as D
+
+    driver = D.BaselineCompletionDriver.__new__(D.BaselineCompletionDriver)
+
+    def run(stored, runtime):
+        monkeypatch.setattr("transformers.AutoConfig.from_pretrained",
+                            staticmethod(lambda *a, **k: _Config(rope_theta=stored)))
+        monkeypatch.setattr(
+            "aadistill.models.student.assert_rope_from_config",
+            lambda config, path="": runtime)
+        return driver.assert_rope_base_of_rebuilt_b(tmp_path)
+
+    #: Agreeing: the guard passes and reports both readings.
+    evidence = run(5_000_000.0, 5_000_000.0)
+    assert evidence["stored"] == evidence["runtime"] == 5_000_000.0
+    assert evidence["checked_on"] == str(tmp_path)
+
+    #: The 500x bug: 10,000 where 5,000,000 is recorded.
+    with pytest.raises(D.CompletionError, match="500x|positional basis"):
+        run(5_000_000.0, 10_000.0)
+
+    #: And a config recording no base at all.
+    monkeypatch.setattr("transformers.AutoConfig.from_pretrained",
+                        staticmethod(lambda *a, **k: _Config()))
+    monkeypatch.setattr("aadistill.models.student.assert_rope_from_config",
+                        lambda config, path="": float("nan"))
+    with pytest.raises(D.CompletionError, match="no RoPE base"):
+        driver.assert_rope_base_of_rebuilt_b(tmp_path)
+
+
+def test_the_rope_reading_is_carried_into_the_durable_measurement(tmp_path, monkeypatch):
+    """Whatever the guard read is part of the evidence B is defended by."""
+    _run_stage_b(tmp_path, monkeypatch, baseline_values=_far_from_every_candidate())
+    evidence = json.loads(
+        (tmp_path / "audit" / "c2_baseline_completion_evidence.json").read_text())
+    rope = evidence["baseline_measurement"]["rope_base"]
+    assert rope["stored"] == rope["runtime"]

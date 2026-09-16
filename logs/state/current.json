@@ -7,7 +7,7 @@
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods. C2 attempt 4's pod vqwg6o4ftpda4b was deleted after 334.6 min, the provider confirms it gone, and an independent query returns ZERO_PODS with pod(...) = null. The cost poller is stopped."
+  "note": "zero pods. attempt6's pod v0h4f5at4112g2 was deleted after 2.27 min, the provider confirms it gone, and an independent query returns ZERO_PODS with pod(...) = null. The cost poller is stopped."
  },
  "authorized": {
   "any": true,
@@ -18,19 +18,15 @@
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
-  "any": true,
-  "experiment": "phase_c2_baseline_completion, run attempt6",
-  "run": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6",
-  "grant_committed": "governance/grant.json",
-  "readiness_record": null,
-  "authorization": null,
-  "bundle": null,
-  "note": "attempt6's grant is committed; the launch_bound sweep, the authorization and the bundle are owed IN THAT ORDER. The SECOND and FINAL automatically authorized session under the 2026-09-17 decision -- attempt5's launcher died at $0.0000 with no provider resource, consuming its chain. Owner: the attempt6 grant."
+  "any": false,
+  "experiment": "phase_c2_baseline_completion",
+  "run": null,
+  "note": "nothing is prepared and NO further session is authorized: the 2026-09-17 decision authorized exactly two formal baseline-completion sessions and both chains are consumed and closed out. $2.3488 remains inside the sub-envelope; remaining money is not permission."
  },
  "budget": {
-  "cumulative_spend_usd": 296.8185,
+  "cumulative_spend_usd": 296.8597,
   "authorized_cap_usd": 320.0,
-  "remaining_usd": 23.1815,
+  "remaining_usd": 23.1403,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -79,8 +75,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE and CLOSED (attempt 18, GO). C2 Search-1 attempt4: search complete, B comparison incomplete -- owned by latest_run and phase_c.c2. Baseline completion: PREPARED, NOT AUTHORIZED, NOT RUN.",
-  "then": "the maintainer's Attempt-5 decision, then the real chain: grant -> launch_bound readiness -> authorization -> bundle -> baseline completion. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule and is no longer an open question; all formal plumbing is executable.",
+  "status": "C1 COMPLETE and CLOSED. Search-1 attempt4: search complete, B comparison incomplete. Baseline completion: two sessions consumed, B not measured, repairs landed.",
+  "then": "a maintainer decision on a third baseline-completion session; nothing else blocks one. The chain machinery has now been executed end to end at $0 -- entry path, all ten gates, closeout -- and both failure lines are closed. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule and is not an open question.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -133,7 +129,7 @@
    "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both.",
    "runtime_partition": "beam 635.96 min; baseline_rebuild_reserve 27.665 min -- MEASURED INSUFFICIENT; 30 min artifact recovery. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json, preserved unchanged as the historical authorization basis.",
    "attempt4_root_cause": "the 27.665-min baseline_rebuild_reserve could not fund the complete frozen path: DEPTH alone is 260 evaluations, observed at 21.30-32.90 min. RUNTIME/PRICING ENVELOPE DEFECT; owner analyses/c2_baseline_reserve_defect.json.",
-   "baseline_completion": "GRANTED, NOT YET AUTHORIZED. attempt5's grant is committed; sweep, authorization and bundle are owed. Establish B once through the complete frozen fixed path, measure it once on the same suite with the evaluator primed by that same teacher object, persist the measurement IMMEDIATELY, then compare against the frozen candidates. No beam, no new candidate, no C remeasured. Once the durable measurement exists, no GPU remeasurement of B is authorized."
+   "baseline_completion": "TWO AUTHORIZED SESSIONS CONSUMED, B STILL NOT MEASURED. attempt5 ($0.0000) and attempt6 ($0.0412) both aborted before any B rebuild, on inherited-declaration defects: four run-layout call sites, then a declared ROPE_OK step that globs a staged checkpoint this session deliberately does not stage. Both repaired and regressed at $0, and the RoPE guard MOVED onto the rebuilt B before its measurement rather than being dropped. The protocol, pricing and all six frozen scientific identities are unchanged. A further session needs a maintainer decision."
   }
  },
  "storage": {
@@ -143,7 +139,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "A MAINTAINER DECISION IS REQUIRED. Two campaign stop conditions hold: formal measurement began before attempt 4 failed, and the envelope can no longer fund a complete formal attempt. C1 is CLOSED by attempt 18's GO verdict. Durable large-checkpoint capacity remains a separate open MAINTAINER RESOURCE DECISION.",
+ "blocker": "A MAINTAINER DECISION IS REQUIRED. Both automatically authorized baseline-completion sessions are consumed and B carries no measurement. The repairs are in and regressed at $0; $2.3488 of the $2.3900 sub-envelope remains but authorizes nothing. C1 is CLOSED by attempt 18's GO verdict; Search-1 attempt 4 is closed as executed with its candidate side frozen.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
@@ -151,12 +147,12 @@
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
  "latest_run": {
-  "experiment_id": "phase_c2",
-  "run_id": "attempt4",
-  "root": "logs/stages/stage-1/phase_c2/runs/attempt4",
-  "outcome": "recorded; SEARCH COMPLETE, COMPARISON NOT RUN \u2014 SEARCH-1 INCOMPLETE. FORMAL MEASUREMENT BEGAN, SO NO AUTONOMOUS RETRY, $6.0785",
+  "experiment_id": "phase_c2_baseline_completion",
+  "run_id": "attempt6",
+  "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6",
+  "outcome": "recorded; ABORTED AT SETUP \u2014 PRE-MEASUREMENT, NO B REBUILD, NO MEASUREMENT, $0.0412",
   "index": "logs/index.json",
-  "last_executed": "logs/stages/stage-1/phase_c2/runs/attempt4",
+  "last_executed": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6",
   "state": "recorded: the run wrote its own manifest"
  },
  "architecture_migration": {

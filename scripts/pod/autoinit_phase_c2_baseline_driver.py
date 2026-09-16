@@ -360,6 +360,9 @@ class BaselineCompletionDriver:
             description=entry["description"], provenance=entry["provenance"],
             expected_artifact_digest=entry["expected_artifact_digest"])
 
+        #: Before the measurement, on the artifact about to be measured.
+        rope = self.assert_rope_base_of_rebuilt_b(directory)
+
         #: ONCE. The identical canonical-reload/state_eval path every searched
         #: candidate took, on the same suite and the same evaluator.
         self.afford(4.0, "the single state_eval of B")
@@ -387,7 +390,7 @@ class BaselineCompletionDriver:
         #: evaluation plus the frozen five, and B is never remeasured.
         self.persist_baseline_measurement(
             state=state, artifact=artifact, outcome=outcome, suite=suite,
-            suite_root=suite_root)
+            suite_root=suite_root, rope=rope)
 
         #: Pure post-processing from here. One measured B, five frozen C.
         #:
@@ -451,10 +454,58 @@ class BaselineCompletionDriver:
         })
         return True
 
+    def assert_rope_base_of_rebuilt_b(self, directory) -> dict:
+        """The RoPE guard, on the artifact this session actually measures.
+
+        The shared setup script checks a STAGED checkpoint's RoPE base in every
+        venv. This session stages none -- it rebuilds B here -- so that step has
+        nothing to look at and correctly refuses; attempt 6 ended at `$0.0412`
+        proving it and C1 attempt 2 at `$0.1013` before that.
+
+        The risk is not removed by undeclaring the step. `transformers` 4.x
+        reads the flat `rope_theta` where 5.x records the nested one, and the
+        two disagree by 500x -- a loader that took the wrong field would give B
+        a different positional basis and a silently wrong state_eval. So the
+        question is asked HERE, of the rebuilt checkpoint, in the interpreter
+        that is about to measure it, through the same two helpers the setup step
+        uses so there is one implementation of the rule.
+        """
+        from transformers import AutoConfig
+
+        from aadistill.models.student import (
+            assert_rope_from_config, stored_rope_base)
+
+        config = AutoConfig.from_pretrained(str(directory))
+        stored = stored_rope_base(config)
+        runtime = assert_rope_from_config(config, str(directory))
+        if stored is None:
+            raise CompletionError(
+                f"{directory} records no RoPE base at all, so the positional "
+                "basis B would be measured under is unknown")
+        #: `assert_rope_from_config` raises on a mismatch; this compares the two
+        #: readings explicitly as well, because a helper that returned NaN
+        #: rather than raising would otherwise pass silently.
+        if not (abs(float(runtime) - float(stored)) <= 1.0):
+            raise CompletionError(
+                f"{directory}: the stored RoPE base is {stored:,.0f} and it "
+                f"resolves at runtime to {runtime:,.0f}. A 500x disagreement "
+                "here is the transformers 4.x/5.x field-layout bug, and it "
+                "would give B a different positional basis from the one the "
+                "frozen candidates were measured under.")
+        evidence = {"stored": float(stored), "runtime": float(runtime),
+                    "transformers": __import__("transformers").__version__,
+                    "checked_on": str(directory),
+                    "_why_here": (
+                        "this session stages no checkpoint, so the shared "
+                        "setup step has nothing to check; the guard belongs "
+                        "where the artifact exists")}
+        say(f"  RoPE base on the rebuilt B: stored {stored:,.0f} resolves to "
+            f"{runtime:,.0f} under transformers {evidence['transformers']}")
+        return evidence
 
     # -- the durability boundary -------------------------------------------
     def persist_baseline_measurement(self, *, state, artifact, outcome, suite,
-                                     suite_root) -> None:
+                                     suite_root, rope=None) -> None:
         """Write the ONE formal B measurement into the evidence, immediately.
 
         Everything needed to reconstruct the comparison later WITHOUT the
@@ -496,6 +547,7 @@ class BaselineCompletionDriver:
             "reference_strategy": (evaluation.detail or {}).get(
                 "reference_strategy"),
             "teacher": {"repo_id": TEACHER_ID, "revision": TEACHER_REVISION},
+            "rope_base": rope,
             "bound_search1_identity": dict(self.frozen),
             "frozen_candidate_inputs": str(self.a.frozen_inputs),
             "no_candidate_was_remeasured": (

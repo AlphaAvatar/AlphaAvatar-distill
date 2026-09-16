@@ -1,0 +1,71 @@
+[09:39:53] budget: expected 51 min $0.92 · soft $1.01 · hard $1.19 (authorized $1.20)
+[09:39:53] NVIDIA L40S $1.09/h, stock Low
+[09:39:54] session commit 27747849afc1 verified: harness digests to 89b9a8606478…, carries the authorization and only logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6/governance/authorization.json differs from the authorized base
+[09:39:54] completion closure 89b9a8606478… over 92 derived files
+[09:39:54] authorized for baseline completion of run 'attempt6': 2 draw(s) within the 2 permitted, 1 issuance(s), 1 launch attempt(s), one billing resource at a time, beam NOT authorized
+[09:39:54] runtime bound: NVIDIA L40S, runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404, max price $1.0900/h <= $1.0900/h
+[09:39:54] 5 frozen candidate measurement(s), record 55f667706739…, extracted from the ranking this session cites
+[09:39:55] frozen-asset expectation configs/experiments/phase_c2/frozen_assets.json verifies
+[09:39:55] ceiling $1.1950 matches the pricing record, whose own sha256 verified; plan 9f566eb6f8d7…
+[09:39:55] volume 60 GiB >= 60 for a 32.0 GiB peak working set
+[09:39:56] pod sweep 12 passed / 0 skipped / 0 failed, no declared groups, binds baseline-completion harness 89b9a8606478… and environment cd3ac137d955…, staging contract 5c51a83d002e…, swept at 46162e17 with only ['logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6/governance/authorization.json', 'logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6/governance/readiness.json'] differs from the swept base
+[09:39:59] aad_autoinit_27747849.bundle (13197728 bytes, f07ba0718f51…) round-trips to 27747849afc1… carrying this authorization and executable set 89b9a8606478…
+[09:40:00] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[09:40:01] watchdog detached — hard 66 min = $1.19
+[09:40:01] created v0h4f5at4112g2 at $1.09/h
+[09:40:23] TCP 22 at 202.181.159.237:12431 after 0.4 min
+[09:40:26] draw 1: ssh reachable — $0.01
+[09:40:49] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[09:40:49] draw 1: running setup
+[09:42:06] setup did not reach SETUP_DONE:
+ + requests==2.34.2
+ + rich==15.0.0
+ + safetensors==0.8.0
+ + setuptools==81.0.0
+ + shellingham==1.5.4
+ + six==1.17.0
+ + sympy==1.14.0
+ + tokenizers==0.22.2
+ + torch==2.11.0+cu128
+ + tqdm==4.68.4
+ + transformers==5.13.1
+ + triton==3.6.0
+ + typer==0.26.8
+ + typing-extensions==4.16.0
+ + urllib3==2.7.0
+ + xxhash==3.8.1
+ + yarl==1.24.2
+Using Python 3.12.3 environment at: /opt/train
+Resolved 1 package in 1ms
+   Building aadistill @ file:///workspace/aad
+      Built aadistill @ file:///workspace/aad
+Prepared 1 package in 260ms
+Installed 1 package in 3ms
+ + aadistill==0.0.1 (from file:///workspace/aad)
+[09:41:38] offline install completed in 10s
+train torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1
+MARKER:TRAIN_ENV
+[09:41:43] verifying the frozen assets against configs/experiments/phase_c2/frozen_assets.json
+{
+  "passed": true,
+  "problems": []
+}
+MARKER:ASSETS_READY
+[09:41:45] step VLLM_READY not declared by this session — skipping
+[09:41:45] downloading the teacher at the pinned revision
+
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]
+Fetching 10 files:  10%|█         | 1/10 [00:00<00:01,  7.15it/s]
+Fetching 10 files:  50%|█████     | 5/10 [00:00<00:00, 19.75it/s]
+Fetching 10 files:  70%|███████   | 7/10 [00:01<00:00,  4.73it/s]
+Fetching 10 files:  90%|█████████ | 9/10 [00:11<00:01,  1.94s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:11<00:00,  1.62s/it]
+Fetching 10 files: 100%|██████████| 10/10 [00:11<00:00,  1.19s/it]
+MARKER:TEACHER_READY
+[09:41:57] checking the RoPE base resolves in every venv this session built
+no staged checkpoint to check
+SETUP_RC=1
+
+[09:42:06] ABORT after draw 1: setup_failed
+[09:42:06] deleting pod (setup setup_failed)
+[09:42:17] pod deleted — 2.3 min, $0.04; provider confirms gone: True

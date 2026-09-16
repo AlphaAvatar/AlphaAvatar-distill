@@ -1,0 +1,105 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_outcome/v1",
+ "_what_this_is": "what Phase-C2 baseline-completion attempt 6 did. Written after provider-confirmed teardown. AUTHORIZES NOTHING.",
+ "attempt": "attempt6",
+ "classification": "ABORTED AT SETUP \u2014 PRE-MEASUREMENT, NO B REBUILD, NO MEASUREMENT",
+ "setup_marker_refused": "ROPE_OK",
+ "setup_rc": 1,
+ "what_ran": {
+  "zero_dollar_gates": "10 of 10 PASSED, and all ten were also driven directly at $0 beforehand: commit/lineage, completion closure re-derived independently, resource scope through the scope's own permits_run/permits_draws, frozen runtime, frozen comparison inputs, frozen assets, pricing/protocol, storage, launch_bound readiness, and the bundle round-trip",
+  "provider": "one resource created, draw 1 of the 2 permitted",
+  "setup_markers_reached": [
+   "ENV_READY",
+   "REPO_READY",
+   "ASSETS_STAGED",
+   "TRAIN_ENV",
+   "ASSETS_READY",
+   "TEACHER_READY"
+  ],
+  "driver": "NEVER STARTED. No stage, no rebuild, no measurement."
+ },
+ "science": {
+  "b_rebuilt": false,
+  "state_eval_measurements_performed": 0,
+  "durable_baseline_measurement": false,
+  "comparison": null,
+  "_meaning": "nothing scientific happened. The B->C comparison remains uncomputed and Attempt 4's five frozen C measurements are untouched."
+ },
+ "root_cause": {
+  "failure": "the shared setup script's ROPE_OK step exited 1 with 'no staged checkpoint to check'. It globs artifacts/stage1/*/checkpoint/config.json and verifies that a STAGED student checkpoint's RoPE base reads back through every venv.",
+  "why_it_ran_at_all": "this session DECLARED ROPE_OK in its SetupManifest, and the declaration is what the shared script reads to decide which optional steps run. The declaration was inherited from Search-1's marker list without asking what the step looks at.",
+  "why_it_could_never_pass": "the completion session stages NO checkpoint. It rebuilds B on the pod from the teacher, so at setup time there is nothing for the step to glob. Search-1 passes the step because it stages the canonical 0.6B control as its measured baseline; this session has no control, deliberately.",
+  "it_was_documented": "C1 attempt 2 died on this exact line for $0.1013, and the same session's own preflight already asserts that the canonical control is NOT staged. The two facts were never put together.",
+  "class": "inherited declaration, not inherited need -- the same class as the four run-layout call sites attempt 5 died on. A marker list copied from a session with different staging.",
+  "not_a_science_failure": "the space, the plan, the pricing, the B identity contract, the frozen candidate record and the readiness evidence were all verified and all correct. Ten gates passed."
+ },
+ "repair": {
+  "undeclared": "ROPE_OK is no longer declared: the step cannot do its job for a session that stages no checkpoint, and its refusal was correct.",
+  "the_guard_moved_rather_than_disappeared": "the risk is real here and worse than for a staged checkpoint: transformers 4.x reads the flat rope_theta where 5.x records the nested one and the two disagree by 500x, so a loader taking the wrong field would give B a different positional basis and a silently wrong state_eval -- the one number this session exists to produce. BaselineCompletionDriver.assert_rope_base_of_rebuilt_b now asks the question of the REBUILT checkpoint, in the interpreter that measures it, after materialization and before the measurement, through the same two helpers the setup step uses. The reading is carried into the durable baseline_measurement block.",
+  "regressions": [
+   "ROPE_OK is not declared",
+   "undeclaring it did not remove the guard, and the guard runs BEFORE the measurement",
+   "the guard refuses a 500x disagreement and a config recording no base at all",
+   "the reading reaches the durable measurement block",
+   "the six frozen scientific identities are unchanged, derived through the production assembler"
+  ],
+  "closure_moved_science_did_not": {
+   "_contract": "the 2026-09-17 decision says the completion executable closure is EXPECTED to move and that a moved closure alone is not a science change. So a moved closure proves nothing either way, and the six identities it froze by value are the only mechanical line between a permitted repair and a prohibited change. Both are stated here, and the six are now asserted by test_the_six_frozen_scientific_identities_are_unchanged, derived through the production assembler rather than recomputed in the test.",
+   "completion_executable_closure": {
+    "authorized_under_attempt_6": "89b9a86064780735e7488d27db89c50ef0a08ada33d756d96dc658d843f675ca",
+    "after_the_repair": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+    "n_files": 92,
+    "note": "same 92 files; the two edited are the driver, which gained the guard, and the launcher, which stopped declaring the setup step"
+   },
+   "six_frozen_scientific_identities": "all six UNCHANGED, re-derived from the repaired tree",
+   "derived_values": {
+    "completion_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+    "completion_pricing_sha256": "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+    "baseline_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+    "baseline_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "frozen_candidates_self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+    "search1_selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf"
+   }
+  }
+ },
+ "provider": {
+  "pod_id": "v0h4f5at4112g2",
+  "gpu": "NVIDIA L40S",
+  "quoted_price_per_hour": 1.09,
+  "price_basis_authorized": 1.09,
+  "stock_status": "Low",
+  "draws_used": 1,
+  "draws_permitted": 2,
+  "provider_resources_created": 1,
+  "elapsed_minutes": 2.27,
+  "deleted": true,
+  "provider_confirms_gone": true,
+  "independently_reconfirmed": "a separate read-only query returned ZERO_PODS and pod(v0h4f5at4112g2) = null after teardown"
+ },
+ "budget": {
+  "this_attempt": 0.0412,
+  "authorized_usd": 1.195,
+  "within_authorization": true,
+  "project_cumulative_before": 296.8185,
+  "project_cumulative_after": 296.8597,
+  "project_cap": 320.0,
+  "project_remaining_after": 23.1403,
+  "retry_sub_envelope_usd": 2.39,
+  "sub_envelope_spent": 0.0412,
+  "sub_envelope_remaining": 2.3488,
+  "_another_full_ceiling_would_fit": "0.0412 + 1.1950 = 1.2362 <= 2.3900",
+  "_but_no_further_session_is_authorized": "the 2026-09-17 decision authorizes exactly two formal sessions and both are consumed: attempt 5 at $0.0000 and attempt 6 at $0.0412. Money remaining is not permission. This closes at a REPORT, not at another chain."
+ },
+ "chain": {
+  "grant_commit_G": "46162e172c805f755e32f1b064e8e164b5a3ef7d",
+  "readiness_commit_R": "0f6b97da5b933fc0c8a4fc5431065edc716109d3",
+  "authorization_session_commit_A": "27747849afc19c40f6424a1243241d456ba2b65c",
+  "grant_sha256": "09f0841ee582be7ae32a9e9b4d9bd3e3fcd6ec321f7144cfd6736f30da64d15b",
+  "authorization_sha256": "986354e77222110c3d09d5deb6861efd3e385f9aa4bf49767f26e08585374e74",
+  "bundle": "aad_autoinit_27747849.bundle sha256 f07ba0718f517842... 13197728 bytes, round-tripped",
+  "completion_closure": "89b9a86064780735e7488d27db89c50ef0a08ada33d756d96dc658d843f675ca",
+  "consumed": "YES. No part of this chain is reused."
+ },
+ "why_this_stops_at_a_report": "attempt 6 was the SECOND and FINAL automatically authorized formal session under the 2026-09-17 decision, and its own grant says so: a failure before the durable baseline_measurement means teardown, preserve, reconcile, diagnose and REPORT -- not another chain. The repair is implemented and regressed at $0 so the next maintainer-authorized session does not meet this line again, but launching it is a maintainer decision.",
+ "authorizes": "nothing"
+}

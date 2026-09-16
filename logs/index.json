@@ -281,8 +281,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 11,
-  "runs_unrecorded": 4,
+  "runs_current": 12,
+  "runs_unrecorded": 3,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": {
@@ -321,8 +321,8 @@
     "total": 4
    },
    "phase_c2_baseline_completion": {
-    "recorded": 0,
-    "unrecorded": 2,
+    "recorded": 1,
+    "unrecorded": 1,
     "total": 2
    },
    "recovery_continuation": {
@@ -1089,6 +1089,19 @@
    },
    "manifest_sha256": "5121eb787deb2817325a4321d9e7a01089104f13a2edd96534875f20b5191943",
    "n_components": 11
+  },
+  {
+   "experiment_id": "phase_c2_baseline_completion",
+   "run_id": "attempt6",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6",
+    "manifest": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6/manifest.json"
+   },
+   "manifest_sha256": "1796e9f53ae9878a480ab027309bbffa95cd4cd6df1f9a6888e2d7e7e1679c79",
+   "n_components": 7
   }
  ],
  "unrecorded": [
@@ -1115,14 +1128,6 @@
    "n_files": 5,
    "digest": "94549bac38af7d3cd9687a0786d42794add0cab1e19864e5d42f96007d96b833",
    "why": "no run manifest; its closeout states: PRE-PROVIDER ABORT \u2014 NO PROVIDER RESOURCE, NO SPEND, NO MEASUREMENT"
-  },
-  {
-   "experiment_id": "phase_c2_baseline_completion",
-   "run_id": "attempt6",
-   "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6",
-   "n_files": 1,
-   "digest": "381ba2811fb974ac9f9d9261364f44c4c177e098549f3b6fcf0314cc74039567",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

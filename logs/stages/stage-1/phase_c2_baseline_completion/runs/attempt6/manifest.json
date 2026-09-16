@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c2_baseline_completion",
+ "run_id": "attempt6",
+ "root": "phase_c2_baseline_completion/runs/attempt6",
+ "artifact_spec": "phase_c2_baseline_completion_session_v1",
+ "plan": {
+  "session_id": "autoinit-phase-c2-baseline-completion",
+  "plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+  "session_commit": "27747849afc19c40f6424a1243241d456ba2b65c",
+  "bundle": "aad_autoinit_27747849.bundle",
+  "scratch_root": "/home/ecs-user/aad-scratch/c2bc_attempt6"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_phase_c2_baseline_launch.py",
+  "driver": "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+  "harness_source_digest": "89b9a86064780735e7488d27db89c50ef0a08ada33d756d96dc658d843f675ca",
+  "authorization": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6/governance/authorization.json"
+ },
+ "status": {
+  "passed": false,
+  "terminal": null,
+  "measures_b_once": true,
+  "runs_a_beam_search": false,
+  "remeasures_any_candidate": false
+ },
+ "roles": {
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "grant": "governance/grant.json",
+  "launcher_log": "runtime/launcher.log",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json",
+  "watchdog_journal": "runtime/watchdog"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "1796e9f53ae9878a480ab027309bbffa95cd4cd6df1f9a6888e2d7e7e1679c79"
+}

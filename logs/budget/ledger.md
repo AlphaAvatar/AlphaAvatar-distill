@@ -2520,3 +2520,38 @@ capacity. The loss is bounded — the search is deterministic under seed
 `20260815` and the recorded config hash, and every selected leaf's
 `artifact_digest` and single-shard sha256 is recorded, so a state can be
 re-derived and proven identical.
+
+## 2026-09-17 — C2 baseline completion attempts 5 and 6: two $0-and-$0.04 pre-measurement aborts
+
+| what | cost | evidence |
+| --- | --- | --- |
+| Baseline completion attempt 5: complete verified chain — grant, launch_bound readiness (12/0/0), authorization, bundle round-trip — and the launcher died in its FIRST statement. `claim_output_root` was passed the stage id positionally where the signature takes `outputs` as a keyword. No gate ran, no price was queried, **no provider resource was created**. The chain was consumed at zero cost because the grant's one-use rule counts the invocation | `$0.0000` | [`runs/attempt5/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt5/) |
+| Baseline completion attempt 6: **10/10 `$0` gates passed**, pod `v0h4f5at4112g2` at `$1.09/h` for 2.27 min. Setup reached `TEACHER_READY` and then refused at **`ROPE_OK`**: the step globs `artifacts/stage1/*/checkpoint/config.json` and this session stages no checkpoint — it rebuilds B on the pod. `SETUP_RC=1`, no driver stage, **no B rebuild and no measurement**. Pod deleted, provider confirms gone | `$0.0412` | [`runs/attempt6/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt6/) |
+
+**Cumulative: `$296.8597` of the `$320.0000` cap.**
+
+```text
+project      296.8185 + 0.0412 = 296.8597   of 320.0000, leaving 23.1403
+sub-envelope   0.0000 + 0.0412 =   0.0412   of 2.3900, leaving 2.3488
+```
+
+Both failures are the same class and it is the one this project keeps paying
+for: **an inherited declaration rather than an inherited need.** Attempt 5 made
+four calls into proven run-layout machinery shaped by what the session wanted
+rather than by what the functions require. Attempt 6 declared `ROPE_OK` because
+Search-1's marker list declares it, without asking what the step looks at — and
+the step looks for a staged student checkpoint, which this session deliberately
+does not stage. C1 attempt 2 died on that same line for `$0.1013`.
+
+The repair does not simply drop the marker. The risk the step guards is worse
+here than for a staged checkpoint: `transformers` 4.x reads the flat
+`rope_theta` where 5.x records the nested one, and the two disagree by 500×, so
+a loader taking the wrong field would give B a different positional basis and a
+silently wrong `state_eval` — the one number the session exists to produce. The
+guard therefore **moved to where the artifact exists**: onto the rebuilt B, in
+the interpreter that measures it, after materialization and before the
+measurement, through the same helpers the setup step uses. Its reading is
+carried into the durable measurement block.
+
+**Both authorized formal sessions are now consumed.** Money remains inside the
+sub-envelope; permission does not. This closes at a report.

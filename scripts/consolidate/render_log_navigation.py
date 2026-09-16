@@ -627,6 +627,8 @@ def readiness_view(root: Path) -> dict:
     return {
         "latest": {"kind": live.get("record_kind"), "verdict": live.get("verdict"),
                    "swept_base_commit": swept, "counts": live.get("counts"),
+                   "run_id": live.get("run_id"),
+                   "experiment": live.get("experiment_id") or "C1",
                    "describes_head": bool(swept) and swept == head},
         "launch_bound_ready": (live.get("record_kind") == "launch_bound"
                                and live.get("verdict") == "PASS"
@@ -647,13 +649,27 @@ def render_readiness(root: Path) -> str:
     c = lt.get("counts") or {}
     lines = [R_BEGIN, "",
              "| readiness | | owner |", "| --- | --- | --- |"]
+    #: Named, not called "the latest sweep". This is a C1 pointer, so the most
+    #: it can ever name is C1's latest run -- and since C1 closed, later
+    #: experiments have swept more recently than the tree it describes. Calling
+    #: it "latest" made the row read as a project-wide claim it cannot support.
+    #: Following the run-owned records instead is what the docstring above
+    #: forbids: this file would then change whenever a sweep finished, inside
+    #: the one tree whose lineage permits a single differing path.
+    who = " ".join(part for part in (lt.get("experiment") or "C1",
+                                     lt.get("run_id") or "") if part)
     lines.append(
-        f"| latest sweep | **{lt['kind']} — {lt['verdict']}**"
+        f"| latest POINTED-TO sweep — {who} | **{lt['kind']} — {lt['verdict']}**"
         + (f" ({c.get('passed')} passed, {c.get('failed', 0)} failed)" if c else "")
         + f", swept at `{lt['swept_base_commit'][:8]}`"
         + ("; describes the current tree" if lt["describes_head"]
            else "; **does not describe the current tree**")
         + f" | [`{Path(READREC).name}`]({_rel_to_state(READREC)}) |")
+    lines.append(
+        "| every other experiment's readiness | **run-owned and not pointed at "
+        "from here** — one record per attempt, under that attempt's "
+        "`governance/readiness.json`, so a later sweep cannot overwrite what an "
+        "earlier one launched under | [`stages/stage-1/`](../stages/stage-1/) |")
     lines.append(
         "| launch-bound for the next session | "
         + ("**PREPARED**" if v["launch_bound_ready"]
