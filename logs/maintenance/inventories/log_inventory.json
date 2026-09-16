@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T00:44:53+00:00",
+  "created_utc": "2026-09-16T00:47:12+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1119,
-    "bytes": 43596372,
+    "bytes": 43598551,
     "by_disposition": {
       "keep_canonical": 80,
       "keep_immutable": 865,
@@ -3748,6 +3748,13 @@
       "files": [
         "logs/budget/decisions.md",
         "logs/stages/stage-1/recovery_continuation/runs/attempt1/README.md"
+      ]
+    },
+    {
+      "sentence": "[`attempt4/closeout/outcome.json`](../stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json).",
+      "files": [
+        "logs/state/artifact_manifests.md",
+        "logs/state/current.md"
       ]
     },
     {
@@ -21263,8 +21270,8 @@
     },
     {
       "path": "logs/state/artifact_manifests.md",
-      "size_bytes": 61677,
-      "sha256": "cc039161916491aaf42dc20310edc1081d8a6b68ab0130884f4855bcd2fb2042",
+      "size_bytes": 63856,
+      "sha256": "fb1a60718002a67618761eda16f1bb08e429d207403f1c7e97c954edc869fb0e",
       "category": "index",
       "in_paid_attempt_chain": false,
       "referenced_by": [

@@ -1042,3 +1042,35 @@ retrain.
   batteries differ in their sample, never in their source.
 - **Status: no model has been evaluated on it.** It exists so the C1 execution
   preregistration can bind it; nothing has been measured.
+
+## Phase-C2 Search-1 attempt 4 — the completed beam search's evidence
+
+- **Store:** `/home/ecs-user/aad-artifacts/autoinit/phase_c2_search1_attempt4/`
+  (external to git; 36 MB, 9 files). Own manifest: `store_manifest.json`; the
+  pod-side collection manifest it was verified against is `manifest.json`.
+- **Why it exists outside the run directory.** The run directory tracks the
+  small records; the search journal alone is 28.9 MB. It was collected into a
+  *scratch* directory, which is not durable storage, and this is the only
+  surviving record of a beam search that completed — 7 leaves, 5 selected.
+- **What it holds:** `autoinit/phase_c2_search/states.jsonl` (28,943,548 B —
+  every state's identity, metrics and per-state timings),
+  `telemetry.jsonl`, `stage1_selection.json` (the committed ranking,
+  `selection_sha256 d5c0ce372aba926c`), `audit/autoinit_phase_c2/c2_evidence.json`,
+  the three session logs, the collection manifest and the archive.
+- **Verification:** every file's sha256 matches the pod-side collection
+  manifest, and a second pass confirmed every listed path is present with a
+  matching on-disk hash. The collection itself reported `missing: []` and
+  `final_streams_quiescent: true`.
+- **Why it matters now.** A maintainer decision on the 27.665-minute baseline
+  rebuild reserve needs measured per-expansion costs, and the journal is where
+  they are. Losing it would mean re-pricing from guesses.
+- **What it does NOT hold:** the searched checkpoint weights, which went with
+  pod `vqwg6o4ftpda4b`. Search-1 declares no off-pod products and the private
+  large-artifact backend has no capacity. The loss is bounded — the search is
+  deterministic under seed `20260815` and the recorded config hash, and every
+  selected leaf's `artifact_digest` and single-shard sha256 is in
+  `stage1_selection.json`, so a state can be re-derived and proven identical.
+- **Status: no comparison exists.** The five selected leaves have `state_eval`
+  objective values and B has none, so nothing here is evidence about any
+  candidate versus B. See
+  [`attempt4/closeout/outcome.json`](../stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json).
