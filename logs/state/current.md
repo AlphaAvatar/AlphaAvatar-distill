@@ -68,45 +68,62 @@ the margin was conservative in the safe direction and is retired. One cell moved
 the other way and it is the one the price turns on:
 `depth.causal_kl_greedy_v1` deeper, `31.10 → 36.07` min.
 
-**THE C2 BEHAVIOURAL STAGE WAS REPAIRED, AND THE CHAIN RE-PRICED.** Independent
-review accepted the full joint *search* design and rejected its behavioural
-stage: an earlier draft reused **Phase-B's** `sa/sb/sc`, its `0.011695…`
-equivalence interval and its successive-selection semantics. **C0 retired that
-design** as scientifically weak — the old interval was ~1.2 SE and Phase B's
-resolving margin ~1.23 SE — and excluded `sa/sb/sc` because the incumbent was
-selected under them. Reverting to it contradicted frozen Phase-C evidence, and
-the frozen Search-1 plan independently says a later behavioural B→C test belongs
-on the Phase-C battery and semantics. That was a real regression; this is its
-repair.
+**C2's BEHAVIOURAL QUESTION IS NOW STATED SIMPLY.** Two rounds of review
+corrected it. C1 already established the behavioural incumbent **B**: after the
+frozen `0.86M` recovery, pooled `correct_overall` was `105/2550 = 4.12%` against
+the old incumbent's `70/2550 = 2.75%`, a paired `+0.01372549` with a `GO`
+verdict. Neither Search-1 nor the full joint search performs any recovery
+training, so the only behavioural question after the search is:
 
-C2c now uses **C1's** discipline: the frozen `c1_confirmation_v1` battery (950
-prompts / 850 scorable), `c1_confirmation_scoring@v1`, the frozen `0.86M`
-recipe, the prompt-cluster bootstrap with seeds as fixed blocks, **SESOI
-`+0.010`**, and **GO / NO-GO / INCONCLUSIVE with no forced winner**. Four
-**fresh** paired seeds are *derived*, by C1's own rule under a `:phase-c2:`
-domain from C0's frozen base digest, skipping the Phase-A/B selection seeds
-**and** C1's three — the latter because the anchor this stage tests against was
-*promoted* under them.
+> Does the selected full-search initialization **C**, after the same frozen
+> `0.86M` recovery, outperform **B**?
 
-The stage is bounded by a **select-then-confirm split on disjoint seeds**:
+**The original control is no longer a C2 arm.** For this comparison it answers
+nothing extra: a candidate that beats the old control but loses to B must not
+promote, and one that beats B gains no promotion information from it. The
+guardrails use the incumbent-relative semantics C1 already used, with B in the
+comparator position. That also keeps the cycle scalable — C4 and beyond challenge
+whatever incumbent the previous turn left, instead of repeatedly retraining the
+project's original initialization.
 
-| rung | seeds | arms | probes | decides |
-| --- | --- | --- | --- | --- |
-| screening | 1 | Top-5 + B | 6 | which **one** candidate advances — ranking only |
-| confirmation | 3 | advanced + B + control | 9 | the C2 incumbent |
+**Screening is now disjoint in BOTH dimensions, and it had to be.** Disjoint
+recovery seeds alone are insufficient: C0's inferential unit is the **prompt**,
+and it measured substantial same-prompt cross-seed dependence — ICC `0.25 ±
+0.095`, `P(correct | correct on another seed) = 0.257` against a `0.022`
+marginal, an `11.7×` lift. Selecting and confirming on the same prompts would
+leak the selection into the confirmation however fresh the seeds were. So
+[`c2_screening_v1`](../stages/stage-1/phase_c2/plans/c2_screening_battery.json)
+was built and frozen: 950 prompts / 850 scorable, C1's mixture preserved exactly,
+content `c04d9d64…`, and **measured** disjoint from `c1_confirmation_v1` by
+stable id *and* normalized prompt content — zero shared on both — as well as
+from calibration, `state_eval`, the recovery corpus and the reserved
+final-promotion battery. It produces no verdict and may promote nothing.
 
-**15 probes, exact** — no conditional rung, because C0 fixed three confirmation
-seeds and `fourth_seed: never`. Exactly one candidate advances, so one
-hypothesis is confirmed and no multiplicity correction is needed; the claim
-boundary records that the candidate was *selected on disjoint screening data*,
-so its interval is not a simultaneous statement about all five.
+| rung | seeds | arms | battery | probes | decides |
+| --- | --- | --- | --- | --- | --- |
+| screening | 1 | Top-5 + B | `c2_screening_v1` | 6 | which **one** candidate advances |
+| confirmation | 3 | C + B | `c1_confirmation_v1` | 6 | the C2 incumbent |
 
-**A mean is no longer doing a bound's job.** The per-probe ceiling now rests on
-the observed **maxima** from C1 attempt 18's per-probe marker stream — training
-spread `1.003×` across six probes and is effectively deterministic; scoring
-spread `1.241×` and is not, so a named `generation_length_risk` reserve funds a
-doubling of its observed maximum for unseen checkpoints rather than pretending
-six probes bound them.
+**12 probes, exact** — down from 15, and no conditional rung. The screening rule
+is frozen: maximize the paired single-seed Δ`correct_overall`(candidate − B), B
+as anchor, `usable_rollout` never positive credit, ties broken by the frozen
+full-search ordering then the deterministic state id.
+
+**The interpretation boundary is recorded.** The search stages are
+initialization-search only and train nothing; their KL/`state_eval` output is
+hypothesis-generation and candidate-selection evidence that may never promote;
+C1's `4.12%` is a *post-recovery* measurement, not raw initialization accuracy;
+and C2 promotion depends only on the fresh recovery comparison of C against B.
+
+**The search execution path exists and was run for real.** The
+[full-search driver](../../scripts/pod/autoinit_phase_c2_full_search_driver.py)
+does `bind_identities` → `full_joint_search` → `commit_top_k` and **stops**, with
+no code path into a behavioural stage. It was executed end to end at toy scale —
+real operators, real checkpoints, real reloads, real measurement — which found
+and closed a real defect (a `relative_to` that raises when the workdir sits
+outside the repository). The behavioural session and the launcher/governance
+chain are **owed at authorization time** and deliberately unbuilt: two
+authorizations, never one.
 
 **THE BLOCKER IS BUDGET, NOT DESIGN.** A funding decision is required, at the
 **standing** beam width 6.
@@ -114,27 +131,25 @@ six probes bound them.
 | | expected | ceiling |
 | --- | --- | --- |
 | full search, **beam 6 — standing design** | `$16.0998` | `$33.1827` |
-| behavioural selection (15 probes) | `$25.4344` | `$36.7378` |
-| **complete standing chain** | **`$41.5342`** | **`$69.9205`** |
-| remaining headroom | | `$22.4910` |
-| **shortfall on ceilings** | | **`$47.4295`** |
-| minimum cumulative cap that contains both | | `$367.4295` |
+| behavioural selection (12 probes) | `$20.6926` | `$29.8788` |
+| **complete standing chain** | **`$36.7924`** | **`$63.0615`** |
+| remaining headroom | | `$22.491` |
+| **shortfall on ceilings** | | **`$40.5705`** |
+| minimum cumulative cap that contains both | | `$360.5705` |
 
 Stating that minimum is **not** requesting it, and these are **not yet**
-funding-decision numbers: the behavioural protocol they price has only just been
+funding-decision numbers: the behavioural protocol they price has just been
 repaired and is awaiting review.
 
-`plan_session` **refuses** the search at the standing width against real
-headroom, and each refusal text is recorded per width in
-[`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json).
+**Beam 2/3/4 are priced as scientific alternatives, not as cost options.**
+Narrowing the beam merely to fit the existing cap is not permitted; the scope was
+not shrunk to fit.
 
-**Beam 2/3/4 are priced as scientific alternatives, not as cost options.** A
-narrower beam leaves the space intact but carries fewer partial paths forward,
-so it explores less of it and can return a different front — adopting one is a
-**changed experiment** with reduced breadth, to be registered as the width
-before launch. **Narrowing the beam merely to fit the existing cap is not
-permitted.** The scope was not shrunk to fit; that is the one repair the budget
-module exists to prevent.
+**A mean is not doing a bound's job.** The per-probe ceiling rests on the
+observed **maxima** from C1 attempt 18's per-probe marker stream — training
+spread `1.003×` and is effectively deterministic, scoring spread `1.241×` and is
+not, so a named `generation_length_risk` reserve funds a doubling of its observed
+maximum for unseen checkpoints.
 
 **A >1-session search is not currently available.** Search state ids are
 content-derived, which gives a state an identity — not its bytes. The frozen
@@ -281,7 +296,7 @@ floor. A complete valid verdict ends the round.
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The next chain cannot be built until the full search is funded | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
 | last attempt | **baseline completion attempt 8 — COMPLETE, `$0.5872`.** Both stages passed, B was rebuilt to digest `53e30566…`, measured **once** on the frozen suite, and the B→C comparison was computed; the pod was deleted behind its teardown gate after 32.32 min. Attempts 5, 6 and 7 aborted before any measurement for `$0.1033` between them | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
-| blocker | **A FUNDING DECISION IS REQUIRED**, on re-derived numbers. The C2 behavioural stage was repaired to Phase-C/C1 semantics — it had wrongly reverted to the Phase-B design C0 retired — so the chain is re-priced: at the **standing** beam width 6 it needs ceilings of `$69.9205` against `$22.4910` remaining, short `$47.4295`, minimum cumulative cap `$367.4295`. Stating that is not requesting it, and these are not yet funding-decision numbers: the repaired protocol awaits review. Narrower beams are scientific **alternatives**, never a way to fit the cap. Nothing may start: the full search, the behavioural stage, the withdrawn Search-2, C3 and any remeasurement of B each need a decision | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| blocker | **A FUNDING DECISION IS REQUIRED**, on twice-corrected numbers. C2c now asks only whether the selected C beats the incumbent **B** after the frozen 0.86M recovery: the original control is not a C2 arm, and screening moved to its own prompt-disjoint battery. **12 probes**, not 15. At the **standing** beam width 6 the chain needs ceilings of `$63.0615` against `$22.491` remaining, short `$40.5705`, minimum cumulative cap `$360.5705`. Stating that is not requesting it, and these are not yet funding-decision numbers: the repaired protocol awaits review. Narrower beams are scientific **alternatives**, never a way to fit the cap. Nothing may start — the search session, the behavioural session, the withdrawn Search-2, C3 and any remeasurement of B each need a decision, and the two C2 sessions need **separate** authorizations | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness

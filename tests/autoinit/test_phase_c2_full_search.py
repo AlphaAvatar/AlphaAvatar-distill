@@ -570,19 +570,24 @@ def test_the_selection_multiplicity_is_handled_prospectively():
     assert "Pareto" in multiplicity["screening_tie_break"]
 
 
-def test_the_probe_schedule_is_exact_and_keeps_both_anchors():
+def test_the_probe_schedule_is_exact_and_b_is_the_only_anchor():
+    """B is the comparator. The original control is not a C2 arm."""
     doc = json.loads(PROTOCOL.read_text())
     schedule = doc["behavioural_selection"]["schedule"]
     anchors = doc["behavioural_selection"]["anchors"]
 
     assert schedule["top_k"] == doc["top_k_selection"]["k"]
-    #: B is unconditional in BOTH rungs; the control is unconditional in
-    #: confirmation, where the veto it binds is evaluated.
-    assert "frozen_c1_treatment_b" in schedule["screening"]["anchors"]
-    assert set(schedule["confirmation"]["anchors"]) == {
-        "frozen_c1_treatment_b", "canonical_control"}
+    #: B is unconditional in BOTH rungs and is the ONLY anchor in either.
+    assert schedule["screening"]["anchors"] == ["frozen_c1_treatment_b"]
+    assert schedule["confirmation"]["anchors"] == ["frozen_c1_treatment_b"]
     assert "UNCONDITIONAL" in anchors["frozen_c1_treatment_b"]
-    assert "UNCONDITIONAL" in anchors["canonical_control"]
+    #: And the absence of the old control is DELIBERATE, with a reason, not an
+    #: omission — a later turn must not quietly reinstate it.
+    assert "_no_canonical_control" in anchors
+    assert "canonical_control" not in schedule["confirmation"]["anchors"]
+    assert "canonical_control" not in schedule["screening"]["anchors"]
+    #: Confirmation is exactly C vs B.
+    assert schedule["confirmation"]["arms"] == 2
 
     #: The counts are arithmetic, not assertions.
     assert schedule["screening"]["probes"] == (
@@ -596,8 +601,12 @@ def test_the_probe_schedule_is_exact_and_keeps_both_anchors():
                                        + schedule["confirmation"]["probes"])
 
 
-def test_the_catastrophic_veto_operand_is_bound_explicitly():
-    """C0 requires the control operand to be named, not silently re-pointed."""
+def test_the_catastrophic_veto_operand_is_bound_to_an_arm_that_is_probed():
+    """C0 requires the control operand to be named, not silently re-pointed.
+
+    And whatever it names must actually be a probed arm: a veto bound to an arm
+    the schedule does not run can never fire.
+    """
     doc = json.loads(PROTOCOL.read_text())["behavioural_selection"]
     veto = doc["frozen_science"]["behavioural_guardrails"][
         "catastrophic_capability_veto"]
@@ -605,10 +614,110 @@ def test_the_catastrophic_veto_operand_is_bound_explicitly():
     assert "candidate_operand" in veto
     assert "open_binding_for_c1" not in veto, (
         "C0's open binding must be RESOLVED here, not carried forward unresolved")
-    #: The arm bound as control must actually be probed.
+
+    #: Incumbent-relative, as C1's was, with B in that position.
+    assert "INCUMBENT" in veto["control_operand"].upper()
     schedule = doc["schedule"]
+    assert "frozen_c1_treatment_b" in schedule["confirmation"]["anchors"], (
+        "the veto binds the incumbent, so the incumbent must be a confirmation "
+        "arm or the veto can never fire")
+    #: If it ever names the canonical control again, that arm must be probed.
     if "CANONICAL CONTROL" in veto["control_operand"].upper():
         assert "canonical_control" in schedule["confirmation"]["anchors"]
+
+
+def test_screening_and_confirmation_score_on_disjoint_prompts():
+    """Seed-disjointness alone is insufficient: C0's unit is the prompt.
+
+    C0 measured same-prompt cross-seed dependence (ICC 0.25 +/- 0.095), so
+    selecting and confirming on the same prompts would let the selection leak
+    into the confirmation through that dependence.
+    """
+    doc = json.loads(PROTOCOL.read_text())["behavioural_selection"]
+    batteries, schedule = doc["batteries"], doc["schedule"]
+
+    assert batteries["screening"]["asset_id"] != batteries["confirmation"]["asset_id"]
+    assert (batteries["screening"]["content_sha256"]
+            != batteries["confirmation"]["content_sha256"])
+    assert schedule["screening"]["battery"] != schedule["confirmation"]["battery"]
+
+    #: Disjointness is a MEASURED zero, not a claim.
+    measured = batteries["prompt_disjoint"]["measured"]
+    assert measured["shared_ids"] == 0
+    assert measured["shared_prompt_hashes"] == 0
+    assert set(batteries["prompt_disjoint"]["by"]) == {
+        "stable source id", "normalized prompt content hash"}
+    #: Same mixture, or a screening delta says nothing about a confirmation one.
+    assert batteries["prompt_disjoint"]["mixture_identical"] is True
+
+    #: And the screening asset may not promote anything.
+    forbidden = " ".join(batteries["screening"]["may_not"]).lower()
+    assert "verdict" in forbidden and "promote" in forbidden
+
+
+def test_the_screening_battery_record_matches_the_built_asset():
+    """The frozen identity must describe the bytes on disk."""
+    record = json.loads(
+        (REPO / "logs/stages/stage-1/phase_c2/plans/"
+                "c2_screening_battery.json").read_text())
+    manifest = json.loads(
+        (REPO / record["path"].split()[0] / "manifest.json").read_text())
+    assert record["content_sha256"] == manifest["content_sha256"]
+    assert record["n_prompts"] == manifest["n_prompts"]
+    assert record["n_scorable_prompts"] == manifest["n_scorable_prompts"]
+    assert record["mixture"] == manifest["mixture"]
+    #: Every per-set hash, against the file it names.
+    import hashlib
+    base = REPO / record["path"].split()[0]
+    for name, digest in record["set_sha256"].items():
+        assert hashlib.sha256(
+            (base / f"{name}.jsonl").read_bytes()).hexdigest() == digest, name
+    #: The record must carry its own hash, and it must verify.
+    assert record["record_sha256"] == sha256_json(
+        {k: v for k, v in record.items() if k != "record_sha256"})
+
+
+def test_the_screening_ranking_rule_is_frozen_and_uses_no_usable_credit():
+    doc = json.loads(PROTOCOL.read_text())["behavioural_selection"]
+    screening = doc["schedule"]["screening"]
+    rule = screening["ranking_rule"].lower()
+    assert "correct_overall" in rule
+    assert "candidate - b" in rule or "candidate-b" in rule
+    assert "usable_rollout is not positive ranking credit" in rule
+    #: B is an anchor, never something that can advance.
+    assert "anchor, never an advancing candidate" in rule
+    #: The tie-break is fixed before any behavioural datum exists.
+    assert "state id" in screening["tie_break"].lower()
+    assert "before any" in screening["tie_break"].lower()
+
+
+def test_the_interpretation_boundary_separates_search_from_recovery():
+    """A cheap-metric front is not a capability claim."""
+    doc = json.loads(PROTOCOL.read_text())["interpretation_boundary"]
+    search = doc["the_search_stages_train_nothing"]
+    assert "NO 0.86M recovery training" in search["what_they_do_not_do"]
+    assert "SELECTION evidence only" in search["status_of_their_output"]
+    assert "may never promote" in search["status_of_their_output"]
+
+    #: C1's level is derived from its committed probe results, not restated.
+    post = doc["c1_incumbent_is_a_post_recovery_measurement"]
+    probes = json.loads((REPO / post["source"]).read_text())["probes"]
+    import collections
+    pooled = collections.defaultdict(lambda: [0, 0])
+    for probe in probes:
+        pooled[probe["arm"]][0] += probe["counts"]["correct"]
+        pooled[probe["arm"]][1] += probe["counts"]["n_scorable"]
+    assert post["b_after_c1"]["correct"] == pooled["treatment"][0]
+    assert post["b_after_c1"]["scorable"] == pooled["treatment"][1]
+    assert post["incumbent_before_c1"]["correct"] == pooled["incumbent"][0]
+    assert post["b_after_c1"]["correct_overall"] == pytest.approx(
+        pooled["treatment"][0] / pooled["treatment"][1], abs=1e-8)
+    assert "NOT raw initialization accuracy" in post["_what_these_numbers_are"]
+
+    #: And promotion depends only on the fresh recovery comparison.
+    assert "ONLY the fresh recovery comparison" in doc[
+        "what_c2_promotion_depends_on"]
+    assert "does C improve on B" in doc["the_target_is_the_current_incumbent"]
 
 
 # --- 7. the documents are plans, and say so --------------------------------

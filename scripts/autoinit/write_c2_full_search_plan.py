@@ -91,6 +91,18 @@ C1_EXECUTION_PREREGISTRATION = ("logs/stages/stage-1/phase_c1/plans/"
 PHASE_B_PREREGISTRATION_NOT_USED = ("logs/stages/stage-1/phase_b/plans/"
                                     "autoinit_phase_b_preregistration.json")
 
+#: The two behavioural assets. Screening and confirmation score on DIFFERENT
+#: prompts by design: C0's inferential unit is the prompt and it measured
+#: substantial same-prompt cross-seed dependence, so disjoint seeds alone would
+#: let a screening selection leak into the confirmation through that dependence.
+C2_SCREENING_BATTERY = "artifacts/stage3/c2_screening_v1"
+C1_CONFIRMATION_BATTERY = "artifacts/stage3/c1_confirmation_v1"
+
+#: The screening battery's frozen identity record, which lives in git while its
+#: bytes do not.
+C2_SCREENING_BATTERY_RECORD = ("logs/stages/stage-1/phase_c2/plans/"
+                               "c2_screening_battery.json")
+
 #: C2's own paired recovery seeds, derived by C1's rule under a C2 domain.
 #: Materialized and hash-bound HERE, before any candidate behavioural result
 #: exists, exactly as C0 required of C1. The base digest is C0's own, frozen
@@ -278,8 +290,142 @@ def selection_schedule() -> SP.ProbeSchedule:
         #: more probes; that is a deliberate trade recorded here, not an
         #: oversight.
         advanced_candidates=1,
+        #: B in both rungs, and NOTHING else in either. The original canonical
+        #: control is not a C2 arm: the comparator is the current incumbent.
         screening_anchors=("frozen_c1_treatment_b",),
-        confirmation_anchors=("frozen_c1_treatment_b", "canonical_control"))
+        confirmation_anchors=("frozen_c1_treatment_b",),
+        screening_battery=C2_SCREENING_BATTERY,
+        confirmation_battery=C1_CONFIRMATION_BATTERY)
+
+
+#: C1's committed probe results, read so the incumbent's behavioural level is a
+#: derived figure rather than a remembered one.
+C1_PROBE_RESULTS = ("logs/stages/stage-1/phase_c1/runs/attempt18/evidence/"
+                    "c1_probe_results.json")
+C1_DECISION = ("logs/stages/stage-1/phase_c1/runs/attempt18/evidence/"
+               "c1_decision.json")
+
+
+def interpretation_boundary() -> dict[str, Any]:
+    """What the search measures, what it does NOT, and what promotion needs.
+
+    Stated because the two halves of this programme are easy to conflate and the
+    conflation would be a serious misreading: a state_eval front is a
+    *pre-recovery* ranking of initializations on a cheap KL surrogate, while
+    C1's `4.12%` is a *post-recovery* behavioural measurement. They are not the
+    same quantity and neither substitutes for the other.
+    """
+    import collections
+
+    probes = json.loads((REPO_ROOT / C1_PROBE_RESULTS).read_text())["probes"]
+    decision = json.loads((REPO_ROOT / C1_DECISION).read_text())
+    pooled: dict[str, list[int]] = collections.defaultdict(lambda: [0, 0])
+    for probe in probes:
+        counts = probe["counts"]
+        pooled[probe["arm"]][0] += counts["correct"]
+        pooled[probe["arm"]][1] += counts["n_scorable"]
+
+    def rate(arm: str) -> dict[str, Any]:
+        correct, scorable = pooled[arm]
+        return {"correct": correct, "scorable": scorable,
+                "correct_overall": round(correct / scorable, 8)}
+
+    return {
+        "the_search_stages_train_nothing": {
+            "applies_to": ["Search-1 (frozen)", "the full joint re-search"],
+            "what_they_do": (
+                "generate initialization states and rank them on the frozen "
+                "cheap state_eval metrics — teacher KL and critical-token KL "
+                "under an epsilon-Pareto policy."),
+            "what_they_do_not_do": (
+                "they perform NO 0.86M recovery training and produce NO "
+                "behavioural measurement of any kind."),
+            "status_of_their_output": (
+                "hypothesis generation and candidate SELECTION evidence only. A "
+                "state_eval front may narrow the field; it may never promote, "
+                "rank behaviourally, or stand in for a recovery comparison."),
+        },
+        "c1_incumbent_is_a_post_recovery_measurement": {
+            "incumbent_before_c1": rate("incumbent"),
+            "b_after_c1": rate("treatment"),
+            "paired_delta": decision["delta"],
+            "lcb_one_sided": decision["lcb_one_sided"],
+            "verdict": decision["verdict"],
+            "_what_these_numbers_are": (
+                "pooled correct_overall over 3 seeds x 850 scorable prompts on "
+                "the frozen Phase-C battery, AFTER the frozen 0.86M recovery. "
+                "They are NOT raw initialization accuracy and must never be "
+                "quoted as such: an un-recovered initialization is not a usable "
+                "model and this battery would not measure one meaningfully."),
+            "source": C1_PROBE_RESULTS,
+        },
+        "what_c2_promotion_depends_on": (
+            "ONLY the fresh recovery comparison of the selected full-search "
+            "candidate C against the current incumbent B, on the frozen 0.86M "
+            "recipe, the frozen confirmation battery and C1's decision rule. "
+            "Nothing from the search stage enters that decision."),
+        "the_target_is_the_current_incumbent": (
+            "the question is 'does C improve on B?', NOT 'does C beat the "
+            "project's original initialization again?'. The original control is "
+            "therefore not a C2 arm, and each later turn of the cycle "
+            "challenges whatever incumbent the previous turn left."),
+        "_why_this_is_written_down": (
+            "a cheap-metric front and a post-recovery behavioural rate are "
+            "different quantities on different scales, and this programme "
+            "produces both. Conflating them would let a KL ranking read as a "
+            "capability claim."),
+    }
+
+
+def behavioural_batteries() -> dict[str, Any]:
+    """The two behavioural assets, by frozen identity.
+
+    Screening and confirmation score on DIFFERENT prompts. That is the second
+    half of the select-then-confirm split, and it is the half that seed-disjoint
+    screening alone does not provide: C0's inferential unit is the prompt and it
+    measured same-prompt cross-seed dependence of ICC `0.25 +/- 0.095`, with
+    `P(correct | correct on another seed) = 0.257` against a `0.022` marginal.
+    Selecting and confirming on the same prompts would let the selection leak
+    into the confirmation through that dependence.
+    """
+    screening = json.loads(
+        (REPO_ROOT / C2_SCREENING_BATTERY_RECORD).read_text())
+    c1 = json.loads((REPO_ROOT / C1_EXECUTION_PREREGISTRATION).read_text())
+    return {
+        "screening": {
+            "asset_id": screening["asset_id"],
+            "path": C2_SCREENING_BATTERY,
+            "content_sha256": screening["content_sha256"],
+            "n_prompts": screening["n_prompts"],
+            "n_scorable_prompts": screening["n_scorable_prompts"],
+            "identity_record": C2_SCREENING_BATTERY_RECORD,
+            "role": screening["role"],
+            "may_not": screening["what_it_may_not_do"],
+        },
+        "confirmation": {
+            "asset_id": c1["battery"]["asset_id"],
+            "path": C1_CONFIRMATION_BATTERY,
+            "content_sha256": c1["battery"]["content_sha256"],
+            "n_prompts": c1["battery"]["n_prompts"],
+            "n_scorable_prompts": c1["battery"]["n_scorable_prompts"],
+            "identity_record": C1_EXECUTION_PREREGISTRATION,
+        },
+        "prompt_disjoint": {
+            "measured": screening["verification"]["disjointness_measured"][
+                "vs_c1_confirmation_v1"],
+            "by": ["stable source id", "normalized prompt content hash"],
+            "mixture_identical": screening["verification"][
+                "mixture_identical_to_c1"],
+            "_why_identical_mixture": (
+                "correct_overall and its +0.010 SESOI are defined ON the "
+                "mixture, so screening and confirmation must share it or a "
+                "screening delta says nothing about a confirmation delta."),
+        },
+        "_both_rungs_are_needed": (
+            "the screening battery ranks and cannot promote; only the "
+            "confirmation battery, under C1's decision rule, may name an "
+            "incumbent."),
+    }
 
 
 def frozen_phase_c_science() -> dict[str, Any]:
@@ -334,21 +480,26 @@ def frozen_phase_c_science() -> dict[str, Any]:
                 **{k: v for k, v in c0["behavioural_guardrails"][
                     "catastrophic_capability_veto"].items()
                    if k != "open_binding_for_c1"},
-                "control_operand": "the CANONICAL CONTROL arm",
-                "candidate_operand": "each advanced C2 candidate",
+                "control_operand": (
+                    "the INCUMBENT arm — the frozen C1 treatment B"),
+                "candidate_operand": "the advanced C2 candidate",
                 "_binding_is_stated_not_inherited": (
                     "C0 requires the control operand to be named explicitly and "
-                    "does not silently re-point it. C1 bound it to the INCUMBENT "
-                    "because C1 had no canonical-control arm. C2 probes the "
-                    "canonical control in confirmation, so the operand is bound "
-                    "to the control — closer to the rule's original semantics "
-                    "than C1's re-pointing, and it gives an absolute floor that "
-                    "an anchor-relative veto cannot: if every candidate AND the "
-                    "anchor collapsed together, a B-bound veto would see "
-                    "nothing."),
+                    "does not silently re-point it. This is C1's own binding, "
+                    "reused: C1 bound it to the incumbent, and for C2 the "
+                    "incumbent is B. The original canonical control is NOT a C2 "
+                    "arm — for this comparison it answers no additional "
+                    "question, since a candidate that beats the old control but "
+                    "loses to B must not promote, and one that beats B gains "
+                    "nothing from it. Adding a third recovery arm solely to "
+                    "preserve an older convention would cost three probes and "
+                    "buy no promotion information. This also keeps the cycle "
+                    "scalable: C4 and beyond challenge the CURRENT incumbent "
+                    "rather than repeatedly retraining the project's original "
+                    "initialization."),
                 "asymmetry": (
-                    "deliberate: it can veto a candidate, never flag the anchor "
-                    "or the control. Never positive ranking evidence."),
+                    "deliberate: it can veto the candidate, never flag the "
+                    "incumbent. Never positive ranking evidence."),
             },
         },
         "what_is_not_reused": {
@@ -517,6 +668,7 @@ def protocol() -> dict[str, Any]:
                 "Search-1 plan independently says a later behavioural B->C test "
                 "should use the Phase-C battery and semantics."),
             "seeds": c2_seeds(),
+            "batteries": behavioural_batteries(),
             "schedule": schedule.as_dict(),
             "multiplicity": {
                 "problem": (
@@ -549,17 +701,23 @@ def protocol() -> dict[str, Any]:
             },
             "anchors": {
                 "frozen_c1_treatment_b": (
-                    "UNCONDITIONAL, in both rungs. It is the incumbent the "
-                    "estimand is a delta against, and Search-1's state_eval "
-                    "evidence cannot substitute for a behavioural comparison. "
-                    "Its frozen state_eval measurement is NOT touched; these "
-                    "are fresh recovery probes of the same initialization under "
+                    "UNCONDITIONAL, in both rungs, and the ONLY anchor. It is "
+                    "the current behavioural incumbent and the arm the estimand "
+                    "is a delta against. Search-1's state_eval evidence cannot "
+                    "substitute for a behavioural comparison against it. Its "
+                    "frozen state_eval measurement is NOT touched; these are "
+                    "fresh recovery probes of the same initialization under "
                     "fresh seeds."),
-                "canonical_control": (
-                    "UNCONDITIONAL in confirmation. It binds the catastrophic "
-                    "capability veto's control operand and provides the "
-                    "absolute behavioural floor that an anchor-relative veto "
-                    "cannot."),
+                "_no_canonical_control": (
+                    "the project's original initialization is NOT carried "
+                    "forward as a C2 arm. It answers no additional C2 question: "
+                    "a candidate that beats the old control but loses to B must "
+                    "not promote, and one that beats B gains no promotion "
+                    "information from it. The behavioural guardrails use the "
+                    "incumbent-relative semantics C1 already used, with B as "
+                    "the comparator. Keeping the cycle scalable depends on "
+                    "this: C4 and beyond challenge the CURRENT incumbent rather "
+                    "than repeatedly retraining the original initialization."),
             },
             "every_probe_is_fresh": SP.reuse_is_admissible(REPO_ROOT),
             "frozen_science": frozen_phase_c_science(),
@@ -579,6 +737,59 @@ def protocol() -> dict[str, Any]:
                 "until the search commits one, and pricing it now is what lets "
                 "the funding decision see the whole chain instead of the first "
                 "half."),
+        },
+        "execution_path": {
+            "_contract": (
+                "Two SEPARATE sessions under two SEPARATE authorizations. "
+                "Combining them would let one approval buy both a search and a "
+                "promotion decision, and the candidate set the behavioural "
+                "session reads does not exist until the search commits one."),
+            "session_1_full_joint_search": {
+                "driver": "scripts/pod/autoinit_phase_c2_full_search_driver.py",
+                "stages": ["bind_identities", "full_joint_search",
+                           "commit_top_k"],
+                "terminus": "commit_top_k — the session STOPS there",
+                "implemented": True,
+                "executed_end_to_end_at_toy_scale": True,
+                "_toy_execution": (
+                    "tests/pod/test_phase_c2_full_search_driver.py drives the "
+                    "real stages with a scaled-down model: real operators, real "
+                    "checkpoints, real reloads, real hashing, real measurement. "
+                    "It found and closed one real defect — a relative_to() that "
+                    "raises when the workdir is outside the repository — which "
+                    "is the reason the test executes the driver rather than "
+                    "asserting about it."),
+                "trains_nothing": True,
+                "measures_no_behaviour": True,
+                "has_no_path_into_the_behavioural_stage": True,
+            },
+            "session_2_behavioural_selection": {
+                "stages": ["screening on c2_screening_v1",
+                           "freeze the selected C",
+                           "confirmation C vs B on c1_confirmation_v1",
+                           "derive GO / NO-GO / INCONCLUSIVE"],
+                "only_go_may_name_an_incumbent": True,
+                "implemented": False,
+                "_why_not_yet": (
+                    "its inputs do not exist: the candidate set is produced by "
+                    "session 1, and the screening rung cannot be written "
+                    "against candidates nobody has generated. Building it now "
+                    "would be machinery for an experiment that is neither "
+                    "funded nor reachable."),
+            },
+            "launcher_and_governance_chain": {
+                "implemented": False,
+                "_deliberately_owed": (
+                    "a launcher, an authorization type, an executable closure, "
+                    "a readiness contract and a bundle transport are "
+                    "per-authorization machinery. They are owed at the moment "
+                    "an authorization is requested and are NOT built now: this "
+                    "experiment is unfunded, and standing up a governance chain "
+                    "for it would be process protecting nothing yet."),
+                "precedent": (
+                    "the baseline-completion session's chain, which is the shape "
+                    "this one would follow"),
+            },
         },
         "execution_capabilities_this_round_did_not_build": {
             "multi_session_continuation": {
@@ -627,6 +838,7 @@ def protocol() -> dict[str, Any]:
             "formal Stage-2/Stage-3 recovery training",
             "any increase to the project cap",
         ],
+        "interpretation_boundary": interpretation_boundary(),
         "interpretation_discipline": (
             "the search stage produces a cheap-metric front and selects a "
             "candidate SET, never an incumbent. Only the behavioural selection "

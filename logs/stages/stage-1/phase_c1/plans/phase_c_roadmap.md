@@ -241,69 +241,108 @@ The search commits a **Top-5** candidate set by the frozen ε-Pareto ranking, an
 that set is closed when it is committed. A candidate set that can grow once
 behavioural results are visible is not a preregistered set.
 
-Then, and only then, behaviour decides. Cheap-metric order is **not** behavioural
-order: E7 measured a `-5.22` nat NLL swing that moved behaviour by `+0.0000`. So
-each admitted candidate is trained under the frozen `0.86M` recovery recipe and
-scored on the **frozen Phase-C battery** `c1_confirmation_v1` under **C1's**
-statistical discipline.
+**The question is simple, and it is about the current incumbent.** C1 already
+established B behaviourally: after the frozen `0.86M` recovery, pooled
+`correct_overall` was `105/2550 = 4.12%` against the old incumbent's
+`70/2550 = 2.75%`, a paired `+0.01372549` with a `GO` verdict. So C2c asks only:
 
-> **This is not Phase-B-style selection, and an earlier draft of it wrongly was.**
-> C0 retired the Phase-A/B behavioural design as scientifically weak — its
-> equivalence interval was ~1.2 SE and Phase B's resolving margin ~1.23 SE — and
-> that is exactly why C1 stopped using `SuccessiveHalvingPlan` and
-> `EquivalenceRule`. C2c therefore uses the 950-prompt / 850-scorable Phase-C
-> battery, `c1_confirmation_scoring@v1`, the prompt-cluster bootstrap with seeds
-> as fixed blocks, **SESOI `+0.010`**, and **GO / NO-GO / INCONCLUSIVE with no
-> forced winner**. Phase B's `sa/sb/sc` and its `0.011695…` interval are **not
-> used**. The frozen Search-1 plan says the same thing independently: a later
-> behavioural B→C test belongs on the Phase-C battery and semantics.
+> Does the selected full-search initialization **C**, after the same frozen
+> `0.86M` recovery, outperform **B**?
 
-**Fresh paired C2 seeds, derived rather than chosen.** Four seeds are drawn by
-C1's own rule under a `:phase-c2:` domain from C0's frozen base digest, skipping
-both the Phase-A/B selection seeds *and* C1's three confirmation seeds — the
-latter because the anchor this stage tests against was **promoted** under them,
-which is the same winner's-curse channel one step along. The values are
-materialized and hash-bound in the protocol before any candidate behavioural
-result exists.
+The target is *improve on the current accepted incumbent*, not *beat the original
+initialization again*. The project's original control is therefore **not a C2
+arm**: if C beats it but loses to B, C must not promote, and if C beats B the old
+control adds no promotion information. The guardrails use the incumbent-relative
+semantics C1 already used, with B in the comparator position. This is also what
+keeps the cycle scalable — C4 and beyond challenge whatever incumbent the
+previous turn left, rather than repeatedly retraining the original.
 
-**The stage is bounded by a select-then-confirm split on disjoint seeds**, which
-is what lets it be cheaper than five full three-seed comparisons without
-becoming uninterpretable:
+> **Phase-C discipline, not Phase B's.** C0 retired the Phase-A/B behavioural
+> design as scientifically weak — its equivalence interval was ~1.2 SE and Phase
+> B's resolving margin ~1.23 SE — which is why C1 stopped using
+> `SuccessiveHalvingPlan` and `EquivalenceRule`. C2c uses the frozen
+> `c1_confirmation_v1` battery, `c1_confirmation_scoring@v1`, the prompt-cluster
+> bootstrap with seeds as fixed blocks, **SESOI `+0.010`**, and **GO / NO-GO /
+> INCONCLUSIVE with no forced winner**. Phase B's `sa/sb/sc` and its `0.011695…`
+> interval are **not used**.
 
-| rung | seeds | arms | probes | decides |
-| --- | --- | --- | --- | --- |
-| screening | 1 | Top-5 + B | 6 | which **one** candidate advances — ranking only, no veto, no promotion |
-| confirmation | 3 | advanced + B + control | 9 | the C2 incumbent, under the frozen Phase-C rule |
+**Fresh paired C2 seeds, derived rather than chosen** — four by C1's own rule
+under a `:phase-c2:` domain from C0's frozen base digest, skipping the Phase-A/B
+selection seeds *and* C1's three, the latter because the anchor this stage tests
+against was **promoted** under them. Materialized and hash-bound in the protocol
+before any candidate behavioural result exists.
 
-**15 probes, exact.** There is no conditional rung: C0 fixed three confirmation
-seeds and `fourth_seed: never`.
+**Screening is disjoint in BOTH dimensions, and that is the point.** Disjoint
+seeds alone are insufficient: C0's inferential unit is the **prompt**, and it
+measured substantial same-prompt cross-seed dependence — ICC `0.25 ± 0.095`, and
+`P(correct | correct on another seed) = 0.257` against a `0.022` marginal, an
+`11.7×` lift. Selecting and confirming on the same prompts would let the
+selection leak into the confirmation through that dependence. So screening gets
+its own prompts as well as its own seed:
 
-Exactly **one** candidate advances, so exactly one hypothesis is confirmed and
-the one-sided 95% LCB needs no multiplicity correction. The claim boundary is
-stated rather than glossed: the confirmed candidate was *selected on disjoint
-screening data*, so its interval is a valid bound for **that** candidate against
-B conditional on the three seeds — not a simultaneous statement about all five,
-and the eliminated candidates receive no verdict. Advancing two would require
-Holm and three more probes; advancing one is a deliberate trade of breadth for a
-clean single-hypothesis confirmation.
+| rung | seeds | arms | battery | probes | decides |
+| --- | --- | --- | --- | --- | --- |
+| screening | 1 | Top-5 + B | `c2_screening_v1` | 6 | which **one** candidate advances |
+| confirmation | 3 | C + B | `c1_confirmation_v1` | 6 | the C2 incumbent |
 
-Two anchors advance unconditionally: the **frozen C1 treatment baseline B**,
-because the question is whether re-optimizing composition beats B
-*behaviourally* and Search-1's `state_eval` evidence cannot substitute for that;
-and the **canonical control**, which binds the catastrophic-capability veto's
-control operand and supplies the absolute floor an anchor-relative veto cannot.
-C0 requires that operand to be named explicitly — C1 bound it to the incumbent
-for want of a control arm; C2 probes a control and binds it there.
+**12 probes, exact.** No conditional rung: C0 fixed three confirmation seeds and
+`fourth_seed: never`.
 
-B's frozen `state_eval` measurement is not touched; these are fresh recovery
-probes of the same initialization under fresh seeds.
+[`c2_screening_v1`](../../phase_c2/plans/c2_screening_battery.json) is built and
+frozen. It preserves C1's mixture exactly — `correct_overall` and its SESOI are
+defined *on* the mixture, so a screening delta only informs a confirmation delta
+if both measure the same distribution — and it is **measured** disjoint from
+`c1_confirmation_v1` by stable id *and* normalized prompt content, as well as
+from calibration, `state_eval`, the recovery-training corpus and the reserved
+final-promotion battery. It produces no verdict and may promote nothing.
+
+The screening ranking rule is frozen: **maximize the paired single-seed
+Δ`correct_overall`(candidate − B)** on `c2_screening_v1`. B is the anchor, never
+an advancing candidate, and `usable_rollout` is never positive ranking credit.
+An exact tie is broken by the already-frozen full-search ordering and then the
+deterministic state id — both fixed before any behavioural datum exists.
+
+Exactly **one** candidate advances, so one hypothesis is confirmed and the
+one-sided 95% LCB needs no multiplicity correction. The claim boundary is
+recorded: the confirmed candidate was *selected on disjoint screening prompts and
+a disjoint seed*, so its interval is a valid bound for **that** candidate against
+B conditional on the three confirmation seeds — not a simultaneous statement
+about all five, and the eliminated candidates receive no verdict.
 
 **Every probe is trained fresh.** The historical-probe-reuse ruling records
-`reuse_verified: false`, so there is no admissible reuse to net off.
+`reuse_verified: false`.
 
 Only this stage may name a **C2 incumbent**, and **INCONCLUSIVE** with no
-incumbent is a legitimate terminal result — not a reason for a fourth seed, a
-second screening rung, or a re-run.
+incumbent is a legitimate terminal result.
+
+### The interpretation boundary, stated
+
+* Search-1 and the full joint re-search are **initialization-search stages
+  only**. They perform **no** `0.86M` recovery training.
+* Their KL / `state_eval` results are **hypothesis-generation and
+  candidate-selection** evidence. They may narrow the field; they may never
+  promote, rank behaviourally, or stand in for a recovery comparison.
+* C1's `4.12%` is a **post-recovery behavioural measurement**, not raw
+  initialization accuracy, and must never be quoted as the latter.
+* C2 promotion depends **only** on the fresh recovery comparison of the selected
+  C against B.
+
+### Execution path · **search session implemented, behavioural session owed**
+
+Two sessions, two authorizations, deliberately not combined:
+
+1. **full joint search** —
+   [`autoinit_phase_c2_full_search_driver.py`](../../../../../scripts/pod/autoinit_phase_c2_full_search_driver.py):
+   `bind_identities` → `full_joint_search` → `commit_top_k`, and it **stops**.
+   It trains nothing, measures no behaviour, and has no code path into a
+   behavioural stage. Executed end to end at toy scale, which found and closed a
+   real defect.
+2. **behavioural selection** — screening → freeze the selected C → confirmation
+   C vs B → derive GO / NO-GO / INCONCLUSIVE. **Not implemented**: its inputs do
+   not exist until session 1 commits a candidate set.
+
+The launcher and governance chain are **owed at authorization time** and are
+deliberately not built for an unfunded experiment.
 
 ---
 

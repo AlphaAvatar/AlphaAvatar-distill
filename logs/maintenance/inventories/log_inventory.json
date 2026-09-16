@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T19:31:25+00:00",
+  "created_utc": "2026-09-16T21:06:34+00:00",
   "command": "scripts/consolidate/build_log_inventory.py",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 1187,
-    "bytes": 44229256,
+    "files": 1188,
+    "bytes": 44259499,
     "by_disposition": {
       "keep_canonical": 81,
-      "keep_immutable": 920,
+      "keep_immutable": 921,
       "keep_referenced": 171,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 533,
+      "immutable_record": 534,
       "index": 8,
       "narrative": 254,
       "raw_execution_artifact": 371,
@@ -3760,6 +3760,13 @@
       ]
     },
     {
+      "sentence": "> Does the selected full-search initialization **C**, after the same frozen",
+      "files": [
+        "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
+        "logs/state/current.md"
+      ]
+    },
+    {
       "sentence": "> No activation-based, forward-logit, or causal ATTENTION formulation competed",
       "files": [
         "logs/budget/decisions.md",
@@ -3858,6 +3865,20 @@
       ]
     },
     {
+      "sentence": "`70/2550 = 2.75%`, a paired `+0.01372549` with a `GO` verdict.",
+      "files": [
+        "logs/budget/decisions.md",
+        "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md"
+      ]
+    },
+    {
+      "sentence": "`P(correct | correct on another seed) = 0.257` against a `0.022` marginal, an",
+      "files": [
+        "logs/budget/decisions.md",
+        "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md"
+      ]
+    },
+    {
       "sentence": "`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` \u2014 allocator segment mapping",
       "files": [
         "docs/AUTOINIT_REFERENCE.md",
@@ -3925,13 +3946,6 @@
       "files": [
         "logs/stages/stage-3/e2/plans/PROPOSAL.md",
         "logs/stages/stage-3/history/EXPERIMENTS.md"
-      ]
-    },
-    {
-      "sentence": "`plan_session` **refuses** the search at the standing width against real",
-      "files": [
-        "logs/budget/decisions.md",
-        "logs/state/current.md"
       ]
     },
     {
@@ -4058,6 +4072,20 @@
       "files": [
         "logs/stages/stage-3/e6/analyses/e6_report.md",
         "logs/stages/stage-3/history/EXPERIMENTS.md"
+      ]
+    },
+    {
+      "sentence": "| confirmation | 3 | C + B | `c1_confirmation_v1` | 6 | the C2 incumbent |",
+      "files": [
+        "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
+        "logs/state/current.md"
+      ]
+    },
+    {
+      "sentence": "| screening | 1 | Top-5 + B | `c2_screening_v1` | 6 | which **one** candidate advances |",
+      "files": [
+        "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
+        "logs/state/current.md"
       ]
     }
   ],
@@ -4313,8 +4341,8 @@
     },
     {
       "path": "docs/OPERATOR_PROMOTION_CYCLE.md",
-      "size_bytes": 10131,
-      "sha256": "79a39c0b078c962cd409a34cbec2edf410a9302073f4a7b2d0951c82a8627414",
+      "size_bytes": 11281,
+      "sha256": "3924ae1434ca8b5632ffc5c17d3e425e99408853643542d4bafb271f478fcd5b",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -4331,8 +4359,8 @@
     },
     {
       "path": "docs/POD_SCRIPTS.md",
-      "size_bytes": 14602,
-      "sha256": "26a38cfcd86fc54e0a62fcfa2c01e9f97eccb8b4d1fc743f251a24c48df46724",
+      "size_bytes": 16000,
+      "sha256": "2fc758a32a8f330967faef4a21b5b0d541c35d3e097301a1925a201848924fff",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -5115,8 +5143,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 863778,
-      "sha256": "b95e873705a02553f33b3c30a746f7220c23b9da635126deef8bf28853da451a",
+      "size_bytes": 871212,
+      "sha256": "c6a42a9713bf9d03304b000910995955f9c740bd4db09e46209302927a22f76b",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -11949,20 +11977,23 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+        "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
         "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
         "logs/state/current.json",
         "scripts/autoinit/write_c1_execution_preregistration.py",
         "scripts/data/build_c1_confirmation_battery.py",
+        "scripts/data/build_c2_screening_battery.py",
         "scripts/experiments/phase_c1/isolation.py"
       ],
       "referenced_by_executable": [
         "scripts/autoinit/write_c1_execution_preregistration.py",
         "scripts/data/build_c1_confirmation_battery.py",
+        "scripts/data/build_c2_screening_battery.py",
         "scripts/experiments/phase_c1/isolation.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/autoinit/write_c1_execution_preregistration.py, scripts/data/build_c1_confirmation_battery.py, scripts/experiments/phase_c1/isolation.py"
+      "disposition_reason": "named by scripts/autoinit/write_c1_execution_preregistration.py, scripts/data/build_c1_confirmation_battery.py, scripts/data/build_c2_screening_battery.py"
     },
     {
       "path": "logs/stages/stage-1/phase_c1/plans/phase_c0_sizing_evidence.json",
@@ -12028,8 +12059,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
-      "size_bytes": 20208,
-      "sha256": "6a167da51e5d6b0fb082f30f7f2da2ad06dcc75f8a06b05b14afc7d6ce36ad72",
+      "size_bytes": 22339,
+      "sha256": "1da96c0859fac61eb2a7432574dbecf2e65af95a0e6afa051fc350a8c8c1d0ca",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -13764,7 +13795,8 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json"
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -17297,6 +17329,20 @@
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
+      "path": "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
+      "size_bytes": 8269,
+      "sha256": "6870bd213a69a4acb20b766408b383e07733954a15036789fe4d2d5545c08fe7",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
       "size_bytes": 9214,
       "sha256": "be5a56eeb7932d59d456d450ee54456f5e22622d5b66eade2d641a52afbbd0ff",
@@ -17360,8 +17406,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
-      "size_bytes": 11571,
-      "sha256": "9c909b1881d95e0d8add0ccfff5d8e4854baaa001dc580efc675ecd9ab049f0f",
+      "size_bytes": 12720,
+      "sha256": "31ab0f958ae20322c7d0d63aecfb6480f454c1fb64d2b49cb4999855887e3548",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17379,8 +17425,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
-      "size_bytes": 32859,
-      "sha256": "24f1b8329023b2caaee45ca5623fd608ca257f63a6fce15848df7b36d08e5910",
+      "size_bytes": 40343,
+      "sha256": "40846c01ccd6180e59030b18a22073c5a384d2148560fb9b90c832b64ce2bf0d",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22480,8 +22526,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11871,
-      "sha256": "f801b64d5ae14ea72b886b9e6d2a77534b7c638070bef1560f310df9fbcebb67",
+      "size_bytes": 11967,
+      "sha256": "07d91f448cb3ee4cade6b5e431a1b577aaa739764781ce7529e5043f344d6b29",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22524,8 +22570,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 35677,
-      "sha256": "2efb81ad2f6269db01316eb695d8199fec914075d231b114a2ca099a024cbc72",
+      "size_bytes": 36809,
+      "sha256": "59308cbadc2027a3dbdc573f7840469856392e63fc4229220f7c5600d495ffcc",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

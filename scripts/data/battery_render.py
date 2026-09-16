@@ -313,21 +313,35 @@ def check_group_parity(group: str) -> dict[str, Any]:
 
 # --- deterministic, outcome-independent selection ---------------------------
 
-def rank_key(base_digest: str, stratum: str, stable_id: str) -> str:
-    """`SHA256(C0_digest + ":phase-c1-battery:" + stratum + ":" + stable_id)`.
+#: The rank-key domain the C1 confirmation battery was built under. Kept as the
+#: DEFAULT so that builder, and the frozen `a285d61f…` identity it produced, are
+#: reproduced byte-for-byte by an unchanged call.
+DEFAULT_RANK_DOMAIN = "phase-c1-battery"
+
+
+def rank_key(base_digest: str, stratum: str, stable_id: str, *,
+             domain: str = DEFAULT_RANK_DOMAIN) -> str:
+    """`SHA256(base_digest + ":" + domain + ":" + stratum + ":" + stable_id)`.
 
     Selection by cryptographic rank rather than by dataset iteration order. The
-    key depends only on a digest frozen before any C1 candidate existed, the
-    stratum name and the example's own stable id — never on a model outcome, a
-    difficulty field, or the order a loader happened to yield rows in.
+    key depends only on a digest frozen before any candidate existed, the domain,
+    the stratum name and the example's own stable id — never on a model outcome,
+    a difficulty field, or the order a loader happened to yield rows in.
+
+    `domain` exists so a LATER battery drawn from the same sources under the same
+    frozen base digest gets an INDEPENDENT ordering rather than simply the next
+    ranks after an earlier battery's. It defaults to C1's domain, so C1's build
+    is unchanged — which is verified by rebuilding that battery and comparing its
+    content hash, not asserted.
     """
     return hashlib.sha256(
-        f"{base_digest}:phase-c1-battery:{stratum}:{stable_id}".encode()).hexdigest()
+        f"{base_digest}:{domain}:{stratum}:{stable_id}".encode()).hexdigest()
 
 
 def rank_take(rows: Iterable[dict], want: int, *, stratum: str, base_digest: str,
               exclude_ids: set[str], exclude_hashes: set[str],
-              make: Callable[[dict], dict | None]) -> list[dict]:
+              make: Callable[[dict], dict | None],
+              domain: str = DEFAULT_RANK_DOMAIN) -> list[dict]:
     """The lowest-ranked `want` eligible examples of one stratum.
 
     Eligibility is decided first and identically to the v1 builder — stable-id

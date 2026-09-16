@@ -84,40 +84,55 @@ there.
    evidence; it never rewrites, remeasures or re-ranks it. The previous
    incumbent becomes an *anchor* that advances unconditionally, because the
    question is whether the new candidates beat it.
-2. **Derive the space, never state it.** Enumerate from the live registry
+2. **Challenge the CURRENT incumbent, and only it.** Each turn's comparator is
+   what the previous turn left, not the project's original initialization.
+   Carrying an older control forward as a third recovery arm buys no promotion
+   information — a candidate that beats the old control but loses to the
+   incumbent must not promote, and one that beats the incumbent gains nothing
+   from the old control — and it costs a probe per seed forever. Bind the
+   guardrails' comparator operand to the incumbent and say so explicitly.
+3. **Screen on held-out PROMPTS, not just held-out seeds.** If the inferential
+   unit is the prompt and same-prompt cross-seed dependence is material — here
+   ICC `0.25`, with an `11.7x` lift in `P(correct | correct on another seed)` —
+   then selecting and confirming on the same prompts leaks the selection into
+   the confirmation however fresh the seeds are. Build the screening rung its
+   own battery, preserve the confirmation battery's mixture exactly so a
+   screening delta informs a confirmation delta, and *measure* the
+   disjointness by id and by normalized content rather than asserting it.
+4. **Derive the space, never state it.** Enumerate from the live registry
    through the same functions the search calls. A product formula silently
    assumes every kind is required and every operator addresses one field, and
    both fail once a composite operator can reach the target in a single step.
    Report the total and the decomposed count separately — they are different
    claims about different sets.
-3. **Derive the cost from every run you have.** Pool the per-expansion telemetry
+5. **Derive the cost from every run you have.** Pool the per-expansion telemetry
    of every completed search on the same hardware and take the per-cell
    *maximum*. A ceiling built on the cheaper of two observations is not a
    ceiling. An operator that has never run inside a search is priced by a
    stated proxy and named as unmeasured — and the proxy is retired the moment
    it runs.
-4. **Bound over beams, not averages.** `children × mean node cost` is what
+6. **Bound over beams, not averages.** `children × mean node cost` is what
    under-priced a search here by more than 4×. Enumerate the beam compositions
    the ranking policy could return and take the extremum; optimise minutes and
    expansion counts *separately*, because deferring the expensive operator is
    cheap now and expensive later.
-5. **The beam width is part of the design, not a discount.** Policy, objectives
+7. **The beam width is part of the design, not a discount.** Policy, objectives
    and ε stay frozen, and so does the standing width. A narrower beam leaves the
    space intact but explores less of it and can return a different front, so
    adopting one is a changed experiment to be registered deliberately —
    **never a way to make an authorization number fit an existing cap.**
    Narrowing the *space* instead turns a joint search back into a restricted
    one, which is a different experiment again.
-6. **Do not assume you can resume across sessions.** Content-derived state ids
+8. **Do not assume you can resume across sessions.** Content-derived state ids
    are an identity, not the bytes; a multi-gigabyte search workdir that cannot
    be relayed means a fresh resource re-derives what was lost. Unless durable
    cross-session staging has been *implemented and validated*, price a search as
    one session and treat "split it up" as a design project rather than a
    contingency.
-7. **Register the candidate rule before the results.** Top-K, the anchors and
+9. **Register the candidate rule before the results.** Top-K, the anchors and
    the rung schedule are fixed in advance. A set that can grow once results are
    visible is not a preregistered set.
-8. **Selecting among K candidates is not the two-arm case.** An isolation
+10. **Selecting among K candidates is not the two-arm case.** An isolation
    experiment compares two arms and needs no selection; a post-search
    behavioural stage picks one of K and then tests it, which is a selection
    problem. Screen on one seed block and confirm on a **disjoint** one, advance
@@ -126,11 +141,11 @@ there.
    simultaneous statement about all K. Confirming on the seeds you selected
    under is the same winner's-curse channel that gets historical seeds excluded
    in the first place.
-9. **Price the whole chain before funding the first half.** A search that fits
+11. **Price the whole chain before funding the first half.** A search that fits
    the budget and a behavioural stage that does not is a chain that cannot reach
    a verdict. When it does not fit, say so — do not shrink the run to fit.
-10. **Every exclusion is a recorded scientific claim.** Cost is not a reason.
-11. **A mean is not a bound.** If per-unit timings exist, build the ceiling on
+12. **Every exclusion is a recorded scientific claim.** Cost is not a reason.
+13. **A mean is not a bound.** If per-unit timings exist, build the ceiling on
     the observed maximum and name every reserve above it. If only an aggregate
     exists, say so and justify the bounding rule — do not let a mean sit in a
     field labelled a hard ceiling.

@@ -1,0 +1,180 @@
+{
+ "schema": "aadistill.autoinit.c2_screening_battery_identity/v1",
+ "_contract": "The frozen identity of the Phase-C2 behavioural SCREENING battery. The bytes live outside git (heavy artifact); this record is what a reviewer and a launch verify them against. AUTHORIZES NOTHING and produces no verdict.",
+ "asset_id": "c2_screening_v1",
+ "role": "C2_SCREENING",
+ "purpose": "the Phase-C2 behavioural SCREENING battery: it ranks the Top-K full-search candidates against the incumbent B on one screening seed so that one candidate advances. It produces no GO/NO-GO verdict, may not promote anything, is never a promotion asset and is never training data.",
+ "path": "artifacts/stage3/c2_screening_v1  (repo-local working copy, gitignored)",
+ "canonical_path": "/home/ecs-user/aad-artifacts/autoinit/c2_screening_v1",
+ "tracked_by_git": false,
+ "n_prompts": 950,
+ "n_scorable_prompts": 850,
+ "mixture": {
+  "gsm8k": 150,
+  "math_verified": 150,
+  "multihop": 150,
+  "rag": 150,
+  "knowledge": 150,
+  "tool": 100,
+  "code": 100
+ },
+ "mixture_rule": "IDENTICAL to c1_confirmation_v1's, imported from that builder rather than restated: the frozen historical 3:3:3:3:3:2 over the scorable sets plus the same relative behaviour-only code component, scaled to 850/950. Screening and confirmation therefore measure correct_overall on the same distribution, which is what makes a screening delta informative about a confirmation delta.",
+ "scorable_sets": [
+  "gsm8k",
+  "knowledge",
+  "math_verified",
+  "multihop",
+  "rag",
+  "tool"
+ ],
+ "behaviour_only_sets": [
+  "code"
+ ],
+ "content_sha256": "c04d9d648b2a9e4e110c485138e6e04d4a33ba8fbbbcc109b8e08cf94ad9358e",
+ "content_sha256_convention": "sha256 over newline-joined sorted 'id:prompt_sha256' pairs",
+ "manifest_sha256": "71692f1ebb13dab9d73beec043ed9bae1ef6e439fca6c365dc648172514796c0",
+ "set_sha256": {
+  "code": "184c89ed767f4e6e61970b0a68174a4074be0c1d6dc442f1089d57911986e9ab",
+  "gsm8k": "c4699f4d29bd910ee0781ca5fb1239518af238c178059d4dd2779123927a059c",
+  "knowledge": "81d138becebf7c78ac74f4c54e3b0e9d76962d71d5ef909d6288116d8c843760",
+  "math_verified": "4184d1409b5b42b117a15182f1c0a891de77f0c98b63c1410a8b2a072942cfb8",
+  "multihop": "3c6041a19db26e9a94c9fd46e0770d23f91610a012ad080e08592c206ada22ba",
+  "rag": "66a0c4865f101d327f0b614e1f949fbf071659f8f5811355fc3639224e970d01",
+  "tool": "6f0ab870f05618287bceadbd36a49afb423e0caeee4715e4a64a1b2dc1a77652"
+ },
+ "set_counts": {
+  "code": 100,
+  "gsm8k": 150,
+  "knowledge": 150,
+  "math_verified": 150,
+  "multihop": 150,
+  "rag": 150,
+  "tool": 100
+ },
+ "sources": {
+  "gsm8k": {
+   "repo_id": "openai/gsm8k",
+   "revision": "740312add88f781978c0658806c59bc2815b9866",
+   "file": "main/test-00000-of-00001.parquet",
+   "size_bytes": 419088,
+   "sha256": "ee7b8da9e381df27b9e3f7758a159ab2bdaa4dbaa910546cbbc47e0cb44e4f59",
+   "n_rows": 1319
+  },
+  "math_verified": {
+   "repo_id": "HuggingFaceH4/MATH-500",
+   "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+   "file": "test.jsonl",
+   "size_bytes": 446564,
+   "sha256": "35dc41080a3680858b27fa7e0533d2d547825316fc5dafe5d316f4ccc5a06132",
+   "n_rows": 500
+  },
+  "multihop": {
+   "repo_id": "hotpotqa/hotpot_qa",
+   "revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+   "file": "distractor/validation-00000-of-00001.parquet",
+   "size_bytes": 27452575,
+   "sha256": "c20b638ca82b21d04fe12e14ff417ad05153d4d215a65de54497fca4e972f7c6",
+   "n_rows": 7405
+  },
+  "rag": {
+   "repo_id": "rajpurkar/squad_v2",
+   "revision": "3ffb306f725f7d2ce8394bc1873b24868140c412",
+   "file": "squad_v2/validation-00000-of-00001.parquet",
+   "size_bytes": 1350511,
+   "sha256": "0560174ab095c5ac0a8c8dc8da05f1625453c45a77e4ce9cabc6947ddfdd24cb",
+   "n_rows": 11873
+  },
+  "knowledge": {
+   "repo_id": "mandarjoshi/trivia_qa",
+   "revision": "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f",
+   "file": "rc.nocontext/validation-00000-of-00001.parquet",
+   "size_bytes": 7335321,
+   "sha256": "48a5005c0eb4f8a4ae5b9868644297fd5bf1e694aeb3dc9c8ab958cac0d5b201",
+   "n_rows": 17944
+  },
+  "tool": {
+   "repo_id": "Salesforce/xlam-function-calling-60k",
+   "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
+   "file": "xlam_function_calling_60k.json",
+   "size_bytes": 96116570,
+   "sha256": "4ef5c6f0dc552f2231f93f5853a9ef431e9e806d7aa514d0f6b615606ce576c6",
+   "n_rows": 60000
+  },
+  "code": {
+   "repo_id": "google-research-datasets/mbpp",
+   "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+   "file": "full/test-00000-of-00001.parquet",
+   "size_bytes": 115824,
+   "sha256": "566fd53060ffba5766dace1d1e2f4c38906781526de222b0dfbdbc325b696c77",
+   "n_rows": 500
+  }
+ },
+ "sampling_rule": {
+  "order": "ascending cryptographic rank, ties by ascending stable id",
+  "rank": "SHA256(C0_preregistration_digest + ':phase-c2-screening-battery:' + stratum + ':' + stable_source_id)",
+  "rank_domain": "phase-c2-screening-battery",
+  "_why_a_distinct_domain": "so this is an INDEPENDENT cryptographic sample of the eligible pool rather than C1's next ranks. Reusing C1's domain would still be deterministic and disjoint, but the screening sample would be the tail of the confirmation sample's ordering.",
+  "base_digest": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+  "base_digest_source": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json, commit be2ab08 \u2014 frozen long before any C2 candidate existed",
+  "outcome_dependence": "NONE \u2014 no model output of any kind is consulted. Not a Search-1 ranking, not a state_eval value, not a C1 probe result.",
+  "difficulty_reweighting": "none. Source-native metadata is retained on the items and may be reported, but does not stratify.",
+  "filter": "skip excluded ids and excluded normalized prompt hashes",
+  "deterministic": true,
+  "normalization": "whitespace-collapsed, lowercased, for cross-role hashing"
+ },
+ "isolation_roles": [
+  "c1_confirmation",
+  "final_promotion",
+  "initializer_state_eval",
+  "operator_calibration",
+  "recovery_search",
+  "recovery_training"
+ ],
+ "disjoint_from_confirmation": {
+  "asset": "artifacts/stage3/c1_confirmation_v1",
+  "by": [
+   "stable source id",
+   "normalized prompt content hash"
+  ],
+  "why": "C0's inferential unit is the prompt and same-prompt cross-seed dependence is substantial, so seed-disjointness alone would let the screening selection leak into the confirmation. Disjoint prompts AND disjoint seeds make the confirmation genuinely held out."
+ },
+ "verification": {
+  "determinism": "an independent rebuild into a separate directory reproduced content_sha256 c04d9d648b2a9e4e... exactly",
+  "disjointness_measured": {
+   "vs_c1_confirmation_v1": {
+    "shared_ids": 0,
+    "shared_prompt_hashes": 0
+   },
+   "vs_final_promotion": {
+    "shared_ids": 0,
+    "shared_prompt_hashes": 0
+   },
+   "vs_recovery_search": {
+    "shared_ids": 0,
+    "shared_prompt_hashes": 0
+   },
+   "vs_recovery_training": {
+    "shared_prompt_hashes": 0
+   },
+   "_method": "measured independently of the builder's own guard, by loading both assets and intersecting stable ids and normalized prompt content hashes. The builder also refuses on any collision; this is the second, outside check."
+  },
+  "mixture_identical_to_c1": true,
+  "c1_battery_unaffected": "battery_render.rank_key gained an optional `domain` defaulting to C1's, and c1_confirmation_v1 was rebuilt to prove it: content_sha256 a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c reproduced exactly. The frozen C1 identity is untouched."
+ },
+ "no_model_has_been_evaluated_on_it": true,
+ "what_it_may_not_do": [
+  "produce a GO / NO-GO / INCONCLUSIVE verdict",
+  "promote any candidate",
+  "serve as a promotion or final-promotion asset",
+  "become training data",
+  "be used as a beam-ranking input"
+ ],
+ "reproducibility": {
+  "builder": "scripts/data/build_c2_screening_battery.py",
+  "renderers": "scripts/data/battery_render.py",
+  "command": "PYTHONPATH=src .venv/bin/python scripts/data/build_c2_screening_battery.py",
+  "_mixture_and_sources_are_c1s": "imported from build_c1_confirmation_battery rather than restated, so the two batteries differ in their sample and nothing else"
+ },
+ "authorizes": "nothing",
+ "record_sha256": "5b471d1b79de31c0933df8778066b1fc3a33c6bcb26145b7d329961ff6ec2a42"
+}

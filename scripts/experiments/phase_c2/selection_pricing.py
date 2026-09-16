@@ -272,31 +272,41 @@ def reuse_is_admissible(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
 class ProbeSchedule:
     """The bounded two-stage C2 schedule, fixed before any candidate exists.
 
-    Phase-C discipline is a PAIRED comparison against an anchor, decided by a
+    Phase-C discipline is a PAIRED comparison against an incumbent, decided by a
     prompt-cluster bootstrap over a fixed seed block. C1 had two arms and needed
     no selection; C2 has `top_k` candidates, so the multiplicity has to be
-    handled prospectively — and the only way to both reduce work and keep the
-    confirmation interval interpretable is to **screen and confirm on disjoint
-    seeds**.
+    handled prospectively.
 
-    That is the same principle C0 used to exclude `sa/sb/sc`: an arm selected
-    under a seed cannot be confirmed under it without leaving a winner's-curse
-    channel. Here the channel is closed by construction rather than argued away.
+    **Screening is disjoint in BOTH dimensions.** A separate seed is not enough:
+    C0's inferential unit is the prompt and it measured substantial same-prompt
+    cross-seed dependence (ICC `0.25 +/- 0.095`; `P(correct | correct on another
+    seed) = 0.257` against a `0.022` marginal). So screening runs on its own
+    seed AND its own prompts, and the confirmation evidence is genuinely held
+    out.
 
-    There is NO conditional rung. C0's terminal states are GO / NO-GO /
+    **Confirmation is the selected candidate against B, and nothing else.** The
+    original canonical control is NOT carried forward: for C2 the scientifically
+    relevant comparator is the current incumbent. If a candidate beats the old
+    control but loses to B it must not promote, and if it beats B the old control
+    adds no promotion information — so a third recovery arm would buy nothing and
+    cost three probes. Guardrails use the incumbent-relative semantics C1 already
+    used, with B as the comparator arm.
+
+    There is NO conditional rung: C0's terminal states are GO / NO-GO /
     INCONCLUSIVE with no forced winner and no fourth seed, so the probe count is
-    exact rather than a range.
+    exact.
     """
 
     top_k: int
     screening_seeds: int
     confirmation_seeds: int
     advanced_candidates: int
-    #: Probed in confirmation alongside the advanced candidate(s). Ordered.
-    confirmation_anchors: tuple[str, ...]
-    #: Probed in screening alongside the candidates, so the screening statistic
-    #: is a delta against the same anchor the confirmation tests.
+    #: The anchor in each rung. B in both; nothing else in either.
     screening_anchors: tuple[str, ...]
+    confirmation_anchors: tuple[str, ...]
+    #: Which battery each rung scores on. Different assets, by design.
+    screening_battery: str
+    confirmation_battery: str
 
     @property
     def screening_probes(self) -> int:
@@ -318,16 +328,27 @@ class ProbeSchedule:
                 "seeds": self.screening_seeds,
                 "arms": self.top_k + len(self.screening_anchors),
                 "anchors": list(self.screening_anchors),
+                "battery": self.screening_battery,
                 "probes": self.screening_probes,
                 "decides": (f"which {self.advanced_candidates} candidate(s) "
                             "advance. Ranking only — no veto is evaluated here "
                             "and no promotion can be claimed from it."),
+                "ranking_rule": (
+                    "maximize the paired single-seed "
+                    "delta correct_overall(candidate - B) on the screening "
+                    "battery. B is the anchor, never an advancing candidate. "
+                    "usable_rollout is NOT positive ranking credit."),
+                "tie_break": (
+                    "the already-frozen full-search ordering, then the "
+                    "deterministic state id. Both are fixed before any "
+                    "behavioural datum exists."),
             },
             "confirmation": {
                 "seeds": self.confirmation_seeds,
                 "arms": self.advanced_candidates + len(
                     self.confirmation_anchors),
                 "anchors": list(self.confirmation_anchors),
+                "battery": self.confirmation_battery,
                 "probes": self.confirmation_probes,
                 "decides": ("the C2 incumbent, under the frozen Phase-C "
                             "decision rule. This is the only evidence that may "
@@ -340,12 +361,49 @@ class ProbeSchedule:
                 "C0's terminal states are GO / NO-GO / INCONCLUSIVE with no "
                 "forced winner and no fourth seed, so there is no tie-break "
                 "rung to reserve for and the probe count is exact."),
-            "_seed_sets_are_disjoint": (
-                "screening and confirmation use DISJOINT preregistered seeds. "
-                "Selecting on screening data and confirming on the same seeds "
-                "would reproduce exactly the winner's-curse channel C0 cited "
-                "when it excluded sa/sb/sc."),
+            "_disjoint_in_both_dimensions": (
+                "screening and confirmation use disjoint preregistered SEEDS "
+                "and disjoint preregistered PROMPTS. Seeds alone would be "
+                "insufficient: C0's inferential unit is the prompt and "
+                "same-prompt cross-seed dependence is substantial, so selecting "
+                "and confirming on the same prompts would let the selection "
+                "leak through that dependence."),
+            "_no_canonical_control": (
+                "the original control is not a C2 arm. The comparator is the "
+                "current incumbent B; a candidate that beats the old control "
+                "but loses to B must not promote, and one that beats B gains "
+                "nothing from the old control. Guardrails are "
+                "incumbent-relative, as C1's were."),
         }
+
+
+def eval_scale(schedule: ProbeSchedule,
+               repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """How the two batteries' sizes scale the measured per-probe scoring cost.
+
+    The measured scoring minutes come from probes scored on
+    `c1_confirmation_v1`. A screening probe is scored on a DIFFERENT asset, so
+    its cost is scaled by scorable-prompt count rather than assumed equal. When
+    the two are the same size the factor is exactly 1 and the arithmetic is a
+    no-op — which is the case today, because the screening battery deliberately
+    preserves C1's mixture and size.
+    """
+    root = Path(repo_root)
+    sizes = {}
+    for role, rel in (("screening", schedule.screening_battery),
+                      ("confirmation", schedule.confirmation_battery)):
+        path = root / rel / "manifest.json"
+        if not path.is_file():
+            raise SelectionPricingError(
+                f"{rel}/manifest.json is missing, so the {role} rung's "
+                "evaluation cost cannot be scaled to the battery it scores on.")
+        sizes[role] = int(json.loads(path.read_text())["n_scorable_prompts"])
+    factor = sizes["screening"] / sizes["confirmation"]
+    return {"scorable_prompts": sizes, "screening_eval_factor": round(factor, 6),
+            "_basis": ("measured scoring minutes were observed on the "
+                       "confirmation battery; the screening rung is scaled by "
+                       "scorable-prompt count"),
+            "_is_a_no_op_today": factor == 1.0}
 
 
 def price(*, schedule: ProbeSchedule, price_per_hour: float,
@@ -364,7 +422,17 @@ def price(*, schedule: ProbeSchedule, price_per_hour: float,
         MEASURED_STEP_SECONDS, Phase, StepTime, plan_session)
 
     cost = measured_probe_cost(repo_root)
+    scale = eval_scale(schedule, repo_root)
     n = schedule.total_probes
+    #: Training is battery-independent; only scoring scales with the asset.
+    train_mean = n * cost.train_minutes_mean
+    eval_mean = (schedule.screening_probes * cost.eval_minutes_mean
+                 * scale["screening_eval_factor"]
+                 + schedule.confirmation_probes * cost.eval_minutes_mean)
+    eval_max = (schedule.screening_probes * cost.eval_minutes_max
+                * scale["screening_eval_factor"]
+                + schedule.confirmation_probes * cost.eval_minutes_max)
+    train_max = n * cost.train_minutes_max
     phases = dict(SESSION_PHASE_MINUTES)
     return plan_session(
         price_per_hour=price_per_hour, authorized_usd=authorized_usd,
@@ -382,18 +450,15 @@ def price(*, schedule: ProbeSchedule, price_per_hour: float,
         other_phases=(
             *(Phase(name, m) for name, m in SESSION_PHASE_MINUTES
               if name not in ("setup_and_asset_staging", "bundle_transfer")),
-            Phase("recovery_probes",
-                  round(n * cost.train_minutes_mean, 2)),
-            Phase("battery_evaluation",
-                  round(n * cost.eval_minutes_mean, 2)),
+            Phase("recovery_probes", round(train_mean, 2)),
+            Phase("battery_evaluation", round(eval_mean, 2)),
         ),
         contingency_fraction=CONTINGENCY_FRACTION,
         soft_stop_reserves=(
             Phase("probe_duration_risk",
-                  round(n * (cost.bounding_minutes
-                             - cost.expected_minutes), 2)),
+                  round((train_max + eval_max) - (train_mean + eval_mean), 2)),
             Phase("generation_length_risk",
-                  round(n * cost.generation_length_reserve_minutes, 2)),
+                  round(eval_max * GENERATION_LENGTH_RISK_MULTIPLE, 2)),
         ),
         artifact_recovery_reserve_minutes=ARTIFACT_RECOVERY_RESERVE_MINUTES)
 
@@ -404,9 +469,11 @@ def report(*, schedule: ProbeSchedule, price_per_hour: float,
     cost = measured_probe_cost(repo_root)
     plan = price(schedule=schedule, price_per_hour=price_per_hour,
                  authorized_usd=10_000.0, repo_root=repo_root)
+    scale = eval_scale(schedule, repo_root)
     n = schedule.total_probes
     return {
         "probe_cost": cost.as_dict(),
+        "battery_scaling": scale,
         "reuse": reuse_is_admissible(repo_root),
         "schedule": schedule.as_dict(),
         "price_per_hour": price_per_hour,
@@ -417,10 +484,18 @@ def report(*, schedule: ProbeSchedule, price_per_hour: float,
         "hard_ceiling_usd": round(
             plan.hard_terminate_minutes / 60 * price_per_hour, 4),
         "bounding_basis": {
-            "probe_minutes_expected": round(n * cost.expected_minutes, 2),
-            "probe_minutes_observed_max": round(n * cost.bounding_minutes, 2),
+            "probe_minutes_expected": round(
+                n * cost.train_minutes_mean
+                + (schedule.screening_probes * scale["screening_eval_factor"]
+                   + schedule.confirmation_probes) * cost.eval_minutes_mean, 2),
+            "probe_minutes_observed_max": round(
+                n * cost.train_minutes_max
+                + (schedule.screening_probes * scale["screening_eval_factor"]
+                   + schedule.confirmation_probes) * cost.eval_minutes_max, 2),
             "generation_length_reserve_minutes": round(
-                n * cost.generation_length_reserve_minutes, 2),
+                (schedule.screening_probes * scale["screening_eval_factor"]
+                 + schedule.confirmation_probes) * cost.eval_minutes_max
+                * GENERATION_LENGTH_RISK_MULTIPLE, 2),
             "_rule": (
                 "expected path on per-probe MEANS; ceiling lifted to the "
                 "observed per-probe MAXIMUM by the probe_duration_risk reserve, "
@@ -444,7 +519,9 @@ def main() -> int:
         top_k=5, screening_seeds=1, confirmation_seeds=3,
         advanced_candidates=1,
         screening_anchors=("frozen_c1_treatment_b",),
-        confirmation_anchors=("frozen_c1_treatment_b", "canonical_control"))
+        confirmation_anchors=("frozen_c1_treatment_b",),
+        screening_battery="artifacts/stage3/c2_screening_v1",
+        confirmation_battery="artifacts/stage3/c1_confirmation_v1")
     print(json.dumps(report(schedule=schedule,
                             price_per_hour=PRICE_PER_HOUR_LAST_QUOTED),
                      indent=1))

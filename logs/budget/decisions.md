@@ -1,5 +1,118 @@
 # Decision records
 
+## 2026-09-17 — C2's behavioural question, stated simply: C against B
+
+- **Maintainer clarification, and it simplifies the science.** C1 already
+  established the behavioural incumbent B: after the frozen `0.86M` recovery,
+  pooled `correct_overall` was `105/2550 = 4.12%` against the old incumbent's
+  `70/2550 = 2.75%`, a paired `+0.01372549` with a `GO` verdict. Neither
+  Search-1 nor the full joint search performs any recovery training, so the only
+  behavioural question after the search is **does the selected C, after the same
+  frozen `0.86M` recovery, outperform B?**
+- **The original control is removed from confirmation.** It answers no
+  additional C2 question: a candidate that beats the old control but loses to B
+  must not promote, and one that beats B gains no promotion information from it.
+  Confirmation is now **C vs B** on three fresh paired seeds, and the
+  behavioural guardrails use the incumbent-relative semantics C1 already used,
+  with B as the comparator operand — C1's own binding, reused rather than
+  re-pointed. A third recovery arm would have cost three probes and bought
+  nothing. It also keeps the cycle scalable: C4 and beyond challenge the CURRENT
+  incumbent instead of repeatedly retraining the original initialization.
+- **Screening is now prompt-disjoint, which is the part seed-disjointness could
+  not fix.** C0's inferential unit is the **prompt** and it measured substantial
+  same-prompt cross-seed dependence — ICC `0.25 ± 0.095`, and
+  `P(correct | correct on another seed) = 0.257` against a `0.022` marginal, an
+  `11.7x` lift. Selecting and confirming on the same prompts leaks the selection
+  into the confirmation however fresh the seeds are. So a second battery was
+  built and frozen:
+
+  ```text
+  c2_screening_v1   950 prompts / 850 scorable   content c04d9d648b2a9e4e…
+  mixture           IDENTICAL to c1_confirmation_v1 (imported, not restated)
+  disjoint from     c1_confirmation_v1: 0 shared ids, 0 shared prompt hashes
+                    final_promotion, recovery_search, recovery_training: 0 / 0
+  rank domain       phase-c2-screening-battery  (independent ordering, not C1's tail)
+  ```
+
+  The mixture is preserved exactly because `correct_overall` and its `+0.010`
+  SESOI are defined **on** the mixture: a screening delta only informs a
+  confirmation delta if both measure the same distribution. Disjointness was
+  measured independently of the builder's own guard.
+- **`battery_render.rank_key` gained an optional `domain`**, defaulting to C1's,
+  so an independent sample is possible without touching the frozen builder. That
+  it is behaviour-preserving is **proven, not asserted**: `c1_confirmation_v1`
+  was rebuilt and reproduced `a285d61f…` exactly.
+- **The schedule, re-derived prospectively:**
+
+  ```text
+  screening      1 seed  x (Top-5 + B)  on c2_screening_v1     =  6 probes   ranks only
+  confirmation   3 seeds x (C + B)      on c1_confirmation_v1  =  6 probes   decides
+  total                                                          12 probes   exact
+  ```
+
+  No conditional rung, no fourth seed. The screening ranking rule is frozen:
+  maximize the paired single-seed Δ`correct_overall`(candidate − B); B is the
+  anchor and never advances; `usable_rollout` is never positive ranking credit;
+  an exact tie breaks on the already-frozen full-search ordering and then the
+  deterministic state id.
+- **Re-priced.** Selection expected `$20.6926`, ceiling
+  `$29.8788` over 12 probes (was `$25.4344` / `$36.7378` over
+  15 with a control arm). Standing beam-6 chain expected
+  `$36.7924`, ceiling `$63.0615`;
+  shortfall `$40.5705`; minimum cumulative cap
+  `$360.5705`. The corrected rule holds: the ceiling
+  rests on observed per-probe maxima plus named reserves, never on a mean. **No
+  project-cap increase is requested** and these are not yet funding-decision
+  numbers.
+- **Execution wiring, and what is deliberately not built.** The full joint search
+  now has its own driver —
+  `scripts/pod/autoinit_phase_c2_full_search_driver.py`: `bind_identities` →
+  `full_joint_search` → `commit_top_k`, and it **stops**. It is a caller of
+  `run_phase_a_search` rather than a copy of Search-1's driver, which is coupled
+  to a conditional baseline rebuild it does not need. It trains nothing, measures
+  no behaviour, and a test parses its AST to refuse any call or import naming
+  recovery, probes, `correct_overall`, screening, confirmation or
+  `usable_rollout` — so one authorization cannot buy both a search and a
+  promotion decision. The behavioural session is **not** implemented, because its
+  candidate set does not exist until the search commits one; the launcher and
+  governance chain are **owed at authorization time** and would be process
+  protecting nothing today.
+- **The toy execution earned its keep.** Driving the real driver end to end at
+  toy scale — real operators, real checkpoints, real reloads, real measurement —
+  found a real defect: `str(selection.relative_to(REPO))` raises whenever the
+  search workdir sits outside the repository. It would not have fired on a pod,
+  where the workdir is under the repo, but it is exactly the crash the C1 battery
+  builder documents as open debt elsewhere, and it was in the LAST stage, where a
+  crash converts a completed search into a failed session.
+- **Two consumers I had not enumerated, both caught by their own tests.** A new
+  `scripts/pod` script must be classified in `docs/POD_SCRIPTS.md`; and my first
+  toy fixture registered substitute profiles under the REAL qualified ids, which
+  poisons the process-global profile registry for every sibling test in the
+  session. Both fixed — the fixture now uses the real materialized mixtures and
+  scales only the items handed to the search.
+- **Alternatives considered:** keeping the canonical control "for the
+  guardrails" — rejected, the guardrail operand is bindable to the incumbent and
+  C1 already did exactly that; making the screening battery smaller to save
+  money — rejected, the mixture and size are what make a screening delta
+  informative, and the saving would be one probe-equivalent; screening on a
+  subset of the confirmation prompts — rejected, that is the leak this repair
+  exists to close.
+- **Risks:** one screening seed on 850 held-out prompts is thin evidence on
+  which to eliminate four candidates, and a genuinely better candidate can be
+  dropped there. That is a power cost of the bounded design, not a validity cost
+  — the confirmation interval stays valid for whatever advances — and the
+  alternative is 5 × 3 + 3 = 18 probes. Recorded so the trade is deliberate.
+- **Where it lives:**
+  `logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json`
+  (`bc7aa6fa…`), `phase_c2_full_search_pricing.json`
+  (`2a8c02ec…`), `c2_screening_battery.json`
+  (`5b471d1b…`), the roadmap's C2c section, and
+  `docs/OPERATOR_PROMOTION_CYCLE.md`, which gained two rules: challenge the
+  current incumbent and only it, and screen on held-out prompts rather than only
+  held-out seeds. Nothing in `src/aadistill`.
+- **Revisit when:** a funding decision is made, or C0's behavioural design is
+  superseded.
+
 ## 2026-09-17 — C2's behavioural stage had reverted to the design C0 retired
 
 - **Reviewer finding, and it was correct.** The accepted full joint SEARCH was
@@ -59,7 +172,10 @@
   bounded only by the effective context), so a `generation_length_risk` reserve
   funds a doubling of scoring's observed maximum for unseen initializations.
   That multiple is an isolated, stated judgement, not a measurement.
-- **Re-priced.** Selection: expected `$25.4344`,
+- **Re-priced.** *(Superseded 2026-09-17: the control arm was removed and
+  screening moved to its own battery, so the schedule is 12 probes and the chain
+  figures changed. See the entry above for the live numbers; the reasoning below
+  still stands.)* Selection: expected `$25.4344`,
   ceiling `$36.7378` over 15 probes
   (was `$19.1122` / `$27.8908` over 11 on a mean basis). Standing beam-6 chain:
   expected `$41.5342`, ceiling

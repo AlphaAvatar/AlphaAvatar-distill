@@ -90,6 +90,15 @@
    "_why_training_max_is_a_sound_bound": "a fixed 860,000-token budget at a fixed block length; six probes spread 1.003x, so the workload is effectively deterministic",
    "_why_scoring_max_is_not": "generation length depends on the checkpoint and under P18 is bounded only by the effective context. Six probes from one experiment's two arms spread 1.241x; the 100% reserve funds a doubling of the observed maximum for unseen initializations."
   },
+  "battery_scaling": {
+   "scorable_prompts": {
+    "screening": 850,
+    "confirmation": 850
+   },
+   "screening_eval_factor": 1.0,
+   "_basis": "measured scoring minutes were observed on the confirmation battery; the screening rung is scaled by scorable-prompt count",
+   "_is_a_no_op_today": true
+  },
   "reuse": {
    "admissible": false,
    "n_admitted": 0,
@@ -105,35 +114,39 @@
     "anchors": [
      "frozen_c1_treatment_b"
     ],
+    "battery": "artifacts/stage3/c2_screening_v1",
     "probes": 6,
-    "decides": "which 1 candidate(s) advance. Ranking only \u2014 no veto is evaluated here and no promotion can be claimed from it."
+    "decides": "which 1 candidate(s) advance. Ranking only \u2014 no veto is evaluated here and no promotion can be claimed from it.",
+    "ranking_rule": "maximize the paired single-seed delta correct_overall(candidate - B) on the screening battery. B is the anchor, never an advancing candidate. usable_rollout is NOT positive ranking credit.",
+    "tie_break": "the already-frozen full-search ordering, then the deterministic state id. Both are fixed before any behavioural datum exists."
    },
    "confirmation": {
     "seeds": 3,
-    "arms": 3,
+    "arms": 2,
     "anchors": [
-     "frozen_c1_treatment_b",
-     "canonical_control"
+     "frozen_c1_treatment_b"
     ],
-    "probes": 9,
+    "battery": "artifacts/stage3/c1_confirmation_v1",
+    "probes": 6,
     "decides": "the C2 incumbent, under the frozen Phase-C decision rule. This is the only evidence that may name one."
    },
    "advanced_candidates": 1,
-   "total_probes": 15,
+   "total_probes": 12,
    "conditional_rung": null,
    "_no_conditional_rung": "C0's terminal states are GO / NO-GO / INCONCLUSIVE with no forced winner and no fourth seed, so there is no tie-break rung to reserve for and the probe count is exact.",
-   "_seed_sets_are_disjoint": "screening and confirmation use DISJOINT preregistered seeds. Selecting on screening data and confirming on the same seeds would reproduce exactly the winner's-curse channel C0 cited when it excluded sa/sb/sc."
+   "_disjoint_in_both_dimensions": "screening and confirmation use disjoint preregistered SEEDS and disjoint preregistered PROMPTS. Seeds alone would be insufficient: C0's inferential unit is the prompt and same-prompt cross-seed dependence is substantial, so selecting and confirming on the same prompts would let the selection leak through that dependence.",
+   "_no_canonical_control": "the original control is not a C2 arm. The comparator is the current incumbent B; a candidate that beats the old control but loses to B must not promote, and one that beats B gains nothing from the old control. Guardrails are incumbent-relative, as C1's were."
   },
   "price_per_hour": 1.09,
-  "n_probes": 15,
-  "expected_minutes": 1400.06,
-  "expected_usd": 25.4344,
-  "hard_ceiling_minutes": 2022.27,
-  "hard_ceiling_usd": 36.7378,
+  "n_probes": 12,
+  "expected_minutes": 1139.04,
+  "expected_usd": 20.6926,
+  "hard_ceiling_minutes": 1644.7,
+  "hard_ceiling_usd": 29.8788,
   "bounding_basis": {
-   "probe_minutes_expected": 1305.05,
-   "probe_minutes_observed_max": 1342.75,
-   "generation_length_reserve_minutes": 414.5,
+   "probe_minutes_expected": 1044.04,
+   "probe_minutes_observed_max": 1074.2,
+   "generation_length_reserve_minutes": 331.6,
    "_rule": "expected path on per-probe MEANS; ceiling lifted to the observed per-probe MAXIMUM by the probe_duration_risk reserve, then again by generation_length_risk for unseen checkpoints. No mean is presented as a maximum."
   },
   "_ceiling_includes": "both named reserves, a 10% contingency and a 30-minute artifact recovery reserve",
@@ -143,28 +156,28 @@
   "chain": "full joint re-search -> Top-5 -> behavioural selection",
   "standing_beam_width": 6,
   "_standing_width_is_the_design": "beam width 6 is what SCHEDULE_V1 declares and what this protocol proposes. The funding requirement below is the standing design's, and the alternatives are recorded so breadth can be traded DELIBERATELY -- never so the authorization number can be made smaller by narrowing the science.",
-  "expected_usd": 41.5342,
-  "hard_ceiling_usd": 69.9205,
+  "expected_usd": 36.7924,
+  "hard_ceiling_usd": 63.0615,
   "search_hard_ceiling_usd": 33.1827,
-  "selection_hard_ceiling_usd": 36.7378,
+  "selection_hard_ceiling_usd": 29.8788,
   "remaining_usd": 22.491,
   "scientific_alternatives_not_cost_options": [
    {
     "beam_width": 4,
-    "expected_usd": 40.8483,
-    "hard_ceiling_usd": 64.1899,
+    "expected_usd": 36.1065,
+    "hard_ceiling_usd": 57.3309,
     "_is_a_different_experiment": "a narrower beam carries less of the same space forward, so it is a scientific trade in breadth with its own result, not a cheaper way to run this one"
    },
    {
     "beam_width": 3,
-    "expected_usd": 40.5053,
-    "hard_ceiling_usd": 61.3245,
+    "expected_usd": 35.7635,
+    "hard_ceiling_usd": 54.4655,
     "_is_a_different_experiment": "a narrower beam carries less of the same space forward, so it is a scientific trade in breadth with its own result, not a cheaper way to run this one"
    },
    {
     "beam_width": 2,
-    "expected_usd": 40.1621,
-    "hard_ceiling_usd": 58.4593,
+    "expected_usd": 35.4203,
+    "hard_ceiling_usd": 51.6003,
     "_is_a_different_experiment": "a narrower beam carries less of the same space forward, so it is a scientific trade in breadth with its own result, not a cheaper way to run this one"
    }
   ],
@@ -181,11 +194,11 @@
   "status": "INSUFFICIENT PROJECT HEADROOM FOR THE STANDING DESIGN",
   "standing_beam_width": 6,
   "remaining_usd": 22.491,
-  "complete_chain_expected_usd": 41.5342,
-  "complete_chain_hard_usd": 69.9205,
-  "shortfall_on_expected_usd": 19.0432,
-  "shortfall_on_hard_ceilings_usd": 47.4295,
-  "minimum_cumulative_cap_usd": 367.4295,
+  "complete_chain_expected_usd": 36.7924,
+  "complete_chain_hard_usd": 63.0615,
+  "shortfall_on_expected_usd": 14.3014,
+  "shortfall_on_hard_ceilings_usd": 40.5705,
+  "minimum_cumulative_cap_usd": 360.5705,
   "_minimum_cap_meaning": "the smallest cumulative project cap that CONTAINS both ceilings: cumulative spend plus the complete standing chain. Stating it is not requesting it.",
   "what_it_means": "the complete chain at the STANDING beam width does not fit the remaining project headroom, and neither does the search alone \u2014 plan_session refuses it, and the refusal text is recorded per width above. This is a maintainer decision and it is deliberately NOT resolved here by shrinking the run to fit, which is the one repair the budget module exists to prevent.",
   "the_narrower_beams_are_not_the_requirement": "beam 2/3/4 are priced above as scientific alternatives. They must NOT be read as the funding requirement for this protocol: the standing design is beam 6, and a narrower beam carries less of the same space forward, which is a different experiment with its own result. Narrowing the beam MERELY to fit the existing cap is not permitted.",
@@ -198,5 +211,5 @@
   "_rounding_note": "every figure here is computed from the 4-dp stored ceilings. A review message that added the DISPLAY-rounded search ceiling ($33.18) reaches a chain of $61.0708 and a minimum cap of $358.5798, which is $0.0027 BELOW the derived figures. A ceiling must round up, so the derived values are the ones to fund: a cap set at the display-rounded figure would not contain both ceilings."
  },
  "authorizes": "nothing",
- "pricing_sha256": "ba930a690d13de86edf8de031801ae91c997a7684da87b48b5c0144e2f4278fa"
+ "pricing_sha256": "2a8c02ec5f4723aceb18d6dfff4497237c310cb28d08fd10e69e8155779abc62"
 }
