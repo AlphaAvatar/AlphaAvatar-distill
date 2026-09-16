@@ -38,14 +38,38 @@ first operator, let alone its other three. Nothing crashed; the deadline
 mechanism stopped the work instead of running to the cost backstop, which is
 its purpose.
 
-**TWO STOP CONDITIONS HOLD AND A MAINTAINER DECISION IS REQUIRED.** Formal
-measurement began, so no autonomous retry is authorized. And the campaign
-envelope can no longer fund a complete formal attempt:
-`6.3011 + 15.0446 = 21.3457 > 16.20`. Every candidate repair — re-pricing the
-reserve, letting the rebuild reuse the search's DEPTH work, or obtaining B's
-number in a separate run — changes a frozen runtime envelope, the pricing
-record, or the B-identity mechanism. See
-[`attempt4/closeout/outcome.json`](../stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json).
+**A BASELINE-COMPLETION PACKAGE IS PREPARED AND NOT AUTHORIZED.** The
+maintainer decision of 2026-09-16 is to preserve the completed beam, rerun
+nothing, and prepare one narrow session whose only scientific work is to
+establish B, measure it once on the same frozen suite, and compute the
+preregistered B→C comparison against the five frozen candidate measurements.
+
+Everything that decision needs before it can be authorized now exists and is
+zero-cost:
+
+| artifact | identity |
+| --- | --- |
+| frozen candidate side of B→C | [`c2_frozen_comparison_inputs.json`](../stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json) · `55f6677067392fd0…` |
+| completion protocol | [`phase_c2_baseline_completion_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json) · `7a24358069280aa3…` |
+| completion pricing | [`phase_c2_baseline_completion_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json) · `dcc64bcf9b3dc9fb…` |
+| the reserve defect | [`c2_baseline_reserve_defect.json`](../stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json) · `f389350cca7782ca…` |
+
+The completion is priced at **`$0.7212` expected and a `$1.1950` hard ceiling**
+(39.70 / 65.78 min at `$1.09/h`) — derived from attempt 4's own telemetry, not
+from the reserve that failed. **No budget increase is requested**, the rate
+boundary is unchanged, and the old Search-1 pricing document is preserved
+exactly as the authorization basis attempts 2–4 ran under.
+
+**One open question belongs to the maintainer.** Cross-session numerical
+comparability is preserved structurally — every checkpoint is scored
+independently against the original teacher under `RECOMPUTE`, with no
+candidate normalized against another — but its *magnitude* is unmeasured: no
+state was ever measured twice anywhere in this project, the per-measurement
+`runtime` block is empty, and the image name does not pin the host driver
+(attempt 3 saw `595.91.07`, attempt 4 `580.126.09`). The five candidates are
+separated by 78–1273 epsilons, so the front structure is not balanced at that
+scale; the protocol therefore pre-registers a disclosure rule, before B exists,
+for any B→C margin at or below the tightest observed gap of `0.007782`.
 
 Attempts 2 and 3 aborted **before** the beam for `$0.0552` and `$0.1674` and
 measured nothing; both root causes are repaired and both repairs were confirmed

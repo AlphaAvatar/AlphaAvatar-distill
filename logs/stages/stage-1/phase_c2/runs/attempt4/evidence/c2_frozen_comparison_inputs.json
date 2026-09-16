@@ -1,0 +1,667 @@
+{
+ "schema": "aadistill.autoinit.c2_frozen_comparison_inputs/v1",
+ "_what_this_is": "the CANDIDATE side of the Phase-C2 Search-1 B->C comparison, frozen. The beam search completed and committed this ranking; the conditional baseline rebuild then failed, so B was never measured and the comparison was never computed. A later baseline-completion session measures B once and computes the comparison against exactly these five measurements.",
+ "no_new_measurement": "NO NEW MEASUREMENT -- deterministic extraction from the journal already hash-bound by stage1_selection.json. No state was materialized, no checkpoint was loaded, no metric was computed and no ranking was recomputed.",
+ "extraction_rule": "c2.frozen_comparison_inputs/v1",
+ "run": {
+  "experiment_id": "phase_c2",
+  "run_id": "attempt4",
+  "stage_id": "1",
+  "run_dir": "logs/stages/stage-1/phase_c2/runs/attempt4",
+  "session_commit": "74cfe3e3c46ab26d22a3c35726936ed481c4a580",
+  "executable_closure_digest": "c5ae8fbc7132aa8c461d76b6d05a1a5d3c444f9f4f85185dd50b7351d2d3783b",
+  "executable_closure_n_files": 85,
+  "terminal": "PHASE_C2_FAILED",
+  "cost_usd": 6.0785
+ },
+ "search": {
+  "run_id": "autoinit.v1.phase_c2.search1",
+  "config_hash": "628d2abfd8b7ecdc13ac367618fa7771a87de4c9ed6dc3a8321f1d4d70f4980b",
+  "seed": 20260815,
+  "target_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "complete_leaves": 7,
+  "n_selected": 5,
+  "generated_utc": "2026-09-16T00:00:17.110092+00:00"
+ },
+ "suite": {
+  "qualified_id": "state_eval@v1",
+  "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "policy": {
+  "qualified_id": "beam.pareto_multi_objective@v2",
+  "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+ },
+ "profiles": [
+  {
+   "qualified_id": "calib.domain_balanced@v1",
+   "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+   "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+  },
+  {
+   "qualified_id": "calib.reasoning_heavy@v2",
+   "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+   "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+  }
+ ],
+ "sources": {
+  "selection_file_sha256": "8b44a5aa48f4170b3eb158a720ac54d54542d12550dee5fb0d6a1fc43b72f48d",
+  "selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf",
+  "journal_sha256": "cc4ee3a14b0a0ed03afe1292780a2c372f728a37233f8f294d86060eb956d1ee",
+  "journal_path_in_selection": "/workspace/aad/artifacts/autoinit/phase_c2_search/states.jsonl",
+  "journal_records": 81,
+  "journal_distinct_states": 44,
+  "telemetry_sha256": "4ee53d0095103bde6e5d80840260b7f86e7e79a8bfefee21f5b79f16e867a11d",
+  "external_collection_manifest_sha256": "ec2778f7b7ec23fb63ec8942456a923bd62a5e192152edc7f6b30b4c0489f19c",
+  "_journal_is_not_in_git": "28.9 MB. Its durable location is registered in logs/state/artifact_manifests.md; this document exists so the candidate side is reviewable without it."
+ },
+ "canonical_record_rule": "StateStore.latest_by_state_id -- the last written record per state id. The journal is append-only and holds more records than states, so this is a decision and it is the search's own.",
+ "ranked_objectives": [
+  "state.teacher_kl.equal_domain_mean",
+  "state.teacher_kl.worst_domain",
+  "state.critical_token_kl"
+ ],
+ "candidates_in_committed_order": [
+  {
+   "state_id": "8a2863bc5c4fcde107bf2cfd9ceb14e3",
+   "path_label": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+   "front": 0,
+   "position_in_front": 0,
+   "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+   "identity": {
+    "artifact_digest": "0e760d69a1370d22c71ce81ebe822569dea5e2fcf6b7a7cb0f3202b77e9ca238",
+    "weights_digest": "1486327def0053d02770538c9feb6a87e9a30dd47f4d9e04e00f9a0d914aacec",
+    "single_shard_sha256": "45ca81452f140721597d65234d1ddb4d9da6ebe2a3e63e9d07b6254fab7e9c40",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "ffn.activation_importance_v0",
+     "depth.causal_kl_greedy_v1",
+     "width.global_pca_v0",
+     "attention.activation_importance_v1"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2"
+    ]
+   },
+   "validity": "measured",
+   "evaluation": {
+    "artifact_digest": "0e760d69a1370d22c71ce81ebe822569dea5e2fcf6b7a7cb0f3202b77e9ca238",
+    "detail": {
+     "per_domain_kl": {
+      "code": 7.087844638307129,
+      "general": 8.257769254068792,
+      "rag_multihop": 7.931776849955634,
+      "reasoning_math": 6.526504518463276,
+      "tool": 6.780560072177819
+     },
+     "per_domain_nll": {
+      "code": 7.36514572611699,
+      "general": 10.3623710129767,
+      "rag_multihop": 9.075211779351587,
+      "reasoning_math": 6.769606563611469,
+      "tool": 7.359666315674563
+     },
+     "per_subtype_kl": {
+      "code": 7.087844638307129,
+      "general": 8.257769254068792,
+      "gsm8k": 6.417823709849149,
+      "multihop_qa": 8.06207875531458,
+      "openmath": 6.635185327077403,
+      "rag_evidence": 7.801474944596687,
+      "tool_calling": 6.780560072177819
+     },
+     "reference_strategy": "recompute",
+     "tagged": {
+      "assistant": {
+       "kl": 7.076611031351364,
+       "positions": 45801
+      },
+      "eos": {
+       "kl": 15.090565960747854,
+       "positions": 70
+      },
+      "final_answer": {
+       "kl": 7.786378333288387,
+       "positions": 10058
+      },
+      "reasoning": {
+       "kl": 6.850491357211956,
+       "positions": 35603
+      },
+      "think_close": {
+       "kl": 14.627561065128871,
+       "positions": 70
+      },
+      "tool_close": {
+       "kl": 17.75995291982378,
+       "positions": 28
+      }
+     }
+    },
+    "measured_utc": null,
+    "positions": 74022,
+    "reference": "root_teacher",
+    "runtime": {},
+    "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+    "suite_id": "state_eval@v1",
+    "values": {
+     "state.critical_token_kl": 13.816114569747224,
+     "state.critical_token_kl.assistant": 7.076611031351364,
+     "state.critical_token_kl.eos": 15.090565960747854,
+     "state.critical_token_kl.final_answer": 7.786378333288387,
+     "state.critical_token_kl.reasoning": 6.850491357211956,
+     "state.critical_token_kl.think_close": 14.627561065128871,
+     "state.critical_token_kl.tool_close": 17.75995291982378,
+     "state.nll.code": 7.36514572611699,
+     "state.nll.general": 10.3623710129767,
+     "state.nll.pooled_all_domains": 7.950554296734661,
+     "state.nll.rag_multihop": 9.075211779351587,
+     "state.nll.reasoning_math": 6.769606563611469,
+     "state.nll.teacher_reference_pooled": 0.9303420924946204,
+     "state.nll.tool": 7.359666315674563,
+     "state.nll_delta_vs_teacher_pooled": 7.02021220424004,
+     "state.reverse_kl.token_mean": 17.634173718098126,
+     "state.teacher_kl.code": 7.087844638307129,
+     "state.teacher_kl.equal_domain_mean": 7.316891066594531,
+     "state.teacher_kl.general": 8.257769254068792,
+     "state.teacher_kl.rag_multihop": 7.931776849955634,
+     "state.teacher_kl.reasoning_math": 6.526504518463276,
+     "state.teacher_kl.token_mean": 7.187588558983956,
+     "state.teacher_kl.tool": 6.780560072177819,
+     "state.teacher_kl.worst_domain": 8.257769254068792,
+     "state.top1_agreement": 0.09451244224689957
+    }
+   },
+   "ranked_objectives": {
+    "state.teacher_kl.equal_domain_mean": 7.316891066594531,
+    "state.teacher_kl.worst_domain": 8.257769254068792,
+    "state.critical_token_kl": 13.816114569747224
+   },
+   "cross_checked_against_selection_decision": true
+  },
+  {
+   "state_id": "0267b4eb771ed499c7c162260d97c794",
+   "path_label": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+   "front": 0,
+   "position_in_front": 2,
+   "lineage": "depth.causal_kl_greedy_v1|attention.activation_importance_v1|ffn.activation_importance_v0",
+   "identity": {
+    "artifact_digest": "a359c7dfd06498e61ccd6c728ae4b21f69210147d90621d7ac11109e425328f5",
+    "weights_digest": "aa4801cef39917f4c94b4b0d919b1374198c0d1a28f1f47fd5a87d29f4c23274",
+    "single_shard_sha256": "15dfbe60b58545725a68ca54cf3604833d3d44b2967c71bb3feb03472b247568",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "depth.causal_kl_greedy_v1",
+     "attention.activation_importance_v1",
+     "ffn.activation_importance_v0",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2"
+    ]
+   },
+   "validity": "measured",
+   "evaluation": {
+    "artifact_digest": "a359c7dfd06498e61ccd6c728ae4b21f69210147d90621d7ac11109e425328f5",
+    "detail": {
+     "per_domain_kl": {
+      "code": 7.940465849948067,
+      "general": 7.209180277563486,
+      "rag_multihop": 7.592570412535909,
+      "reasoning_math": 6.8737959525814665,
+      "tool": 7.604978194007509
+     },
+     "per_domain_nll": {
+      "code": 8.210787815960739,
+      "general": 9.125819684758657,
+      "rag_multihop": 8.618792061871325,
+      "reasoning_math": 7.117514966265112,
+      "tool": 8.164378365564053
+     },
+     "per_subtype_kl": {
+      "code": 7.940465849948067,
+      "general": 7.209180277563486,
+      "gsm8k": 6.729841261589011,
+      "multihop_qa": 7.551148683446605,
+      "openmath": 7.017750643573922,
+      "rag_evidence": 7.633992141625213,
+      "tool_calling": 7.604978194007509
+     },
+     "reference_strategy": "recompute",
+     "tagged": {
+      "assistant": {
+       "kl": 7.414888524839455,
+       "positions": 45801
+      },
+      "eos": {
+       "kl": 9.802896233967372,
+       "positions": 70
+      },
+      "final_answer": {
+       "kl": 8.178450224294794,
+       "positions": 10058
+      },
+      "reasoning": {
+       "kl": 7.158746724664049,
+       "positions": 35603
+      },
+      "think_close": {
+       "kl": 17.736790016719272,
+       "positions": 70
+      },
+      "tool_close": {
+       "kl": 20.326725959777832,
+       "positions": 28
+      }
+     }
+    },
+    "measured_utc": null,
+    "positions": 74022,
+    "reference": "root_teacher",
+    "runtime": {},
+    "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+    "suite_id": "state_eval@v1",
+    "values": {
+     "state.critical_token_kl": 14.011215608689817,
+     "state.critical_token_kl.assistant": 7.414888524839455,
+     "state.critical_token_kl.eos": 9.802896233967372,
+     "state.critical_token_kl.final_answer": 8.178450224294794,
+     "state.critical_token_kl.reasoning": 7.158746724664049,
+     "state.critical_token_kl.think_close": 17.736790016719272,
+     "state.critical_token_kl.tool_close": 20.326725959777832,
+     "state.nll.code": 8.210787815960739,
+     "state.nll.general": 9.125819684758657,
+     "state.nll.pooled_all_domains": 8.134590353106033,
+     "state.nll.rag_multihop": 8.618792061871325,
+     "state.nll.reasoning_math": 7.117514966265112,
+     "state.nll.teacher_reference_pooled": 0.9303420924946204,
+     "state.nll.tool": 8.164378365564053,
+     "state.nll_delta_vs_teacher_pooled": 7.204248260611412,
+     "state.reverse_kl.token_mean": 19.533598813134272,
+     "state.teacher_kl.code": 7.940465849948067,
+     "state.teacher_kl.equal_domain_mean": 7.444198137327288,
+     "state.teacher_kl.general": 7.209180277563486,
+     "state.teacher_kl.rag_multihop": 7.592570412535909,
+     "state.teacher_kl.reasoning_math": 6.8737959525814665,
+     "state.teacher_kl.token_mean": 7.426147898981957,
+     "state.teacher_kl.tool": 7.604978194007509,
+     "state.teacher_kl.worst_domain": 7.940465849948067,
+     "state.top1_agreement": 0.07808489368025721
+    }
+   },
+   "ranked_objectives": {
+    "state.teacher_kl.equal_domain_mean": 7.444198137327288,
+    "state.teacher_kl.worst_domain": 7.940465849948067,
+    "state.critical_token_kl": 14.011215608689817
+   },
+   "cross_checked_against_selection_decision": true
+  },
+  {
+   "state_id": "b0c1ef82a929a7ca24803c00936f5bb1",
+   "path_label": "FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+   "front": 0,
+   "position_in_front": 3,
+   "lineage": "ffn.activation_importance_v0|attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+   "identity": {
+    "artifact_digest": "02ffe7535fac5523945d2191c6a3019ecaaab9dccd754a4973bb25f24deb79f5",
+    "weights_digest": "ffb7152b579b264fa2ccd2324d11584e873d66552cee655ada5dfbf952d45692",
+    "single_shard_sha256": "77cbdb3fef0efb67e48e11c5a2ab3ca07711370994ef9ce5b84535cd0c1326f9",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "ffn.activation_importance_v0",
+     "attention.activation_importance_v1",
+     "depth.causal_kl_greedy_v1",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2"
+    ]
+   },
+   "validity": "measured",
+   "evaluation": {
+    "artifact_digest": "02ffe7535fac5523945d2191c6a3019ecaaab9dccd754a4973bb25f24deb79f5",
+    "detail": {
+     "per_domain_kl": {
+      "code": 7.397725092988376,
+      "general": 7.892443733210687,
+      "rag_multihop": 8.650269944164549,
+      "reasoning_math": 7.195054076628226,
+      "tool": 8.37565305726706
+     },
+     "per_domain_nll": {
+      "code": 7.665411203264819,
+      "general": 9.81762204738623,
+      "rag_multihop": 9.68547188324584,
+      "reasoning_math": 7.430020617165438,
+      "tool": 8.854037478051783
+     },
+     "per_subtype_kl": {
+      "code": 7.397725092988376,
+      "general": 7.892443733210687,
+      "gsm8k": 7.304466570627418,
+      "multihop_qa": 8.257445927866629,
+      "openmath": 7.085641582629034,
+      "rag_evidence": 9.04309396046247,
+      "tool_calling": 8.37565305726706
+     },
+     "reference_strategy": "recompute",
+     "tagged": {
+      "assistant": {
+       "kl": 7.80225366151103,
+       "positions": 45801
+      },
+      "eos": {
+       "kl": 11.071954127720424,
+       "positions": 70
+      },
+      "final_answer": {
+       "kl": 8.41703930382796,
+       "positions": 10058
+      },
+      "reasoning": {
+       "kl": 7.606128480371939,
+       "positions": 35603
+      },
+      "think_close": {
+       "kl": 13.628848389216833,
+       "positions": 70
+      },
+      "tool_close": {
+       "kl": 14.751214504241943,
+       "positions": 28
+      }
+     }
+    },
+    "measured_utc": null,
+    "positions": 74022,
+    "reference": "root_teacher",
+    "runtime": {},
+    "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+    "suite_id": "state_eval@v1",
+    "values": {
+     "state.critical_token_kl": 11.96726408125179,
+     "state.critical_token_kl.assistant": 7.80225366151103,
+     "state.critical_token_kl.eos": 11.071954127720424,
+     "state.critical_token_kl.final_answer": 8.41703930382796,
+     "state.critical_token_kl.reasoning": 7.606128480371939,
+     "state.critical_token_kl.think_close": 13.628848389216833,
+     "state.critical_token_kl.tool_close": 14.751214504241943,
+     "state.nll.code": 7.665411203264819,
+     "state.nll.general": 9.81762204738623,
+     "state.nll.pooled_all_domains": 8.667888980661504,
+     "state.nll.rag_multihop": 9.68547188324584,
+     "state.nll.reasoning_math": 7.430020617165438,
+     "state.nll.teacher_reference_pooled": 0.9303420924946204,
+     "state.nll.tool": 8.854037478051783,
+     "state.nll_delta_vs_teacher_pooled": 7.737546888166883,
+     "state.reverse_kl.token_mean": 21.90040024651765,
+     "state.teacher_kl.code": 7.397725092988376,
+     "state.teacher_kl.equal_domain_mean": 7.902229180851779,
+     "state.teacher_kl.general": 7.892443733210687,
+     "state.teacher_kl.rag_multihop": 8.650269944164549,
+     "state.teacher_kl.reasoning_math": 7.195054076628226,
+     "state.teacher_kl.token_mean": 7.983123486786248,
+     "state.teacher_kl.tool": 8.37565305726706,
+     "state.teacher_kl.worst_domain": 8.650269944164549,
+     "state.top1_agreement": 0.04142011834319527
+    }
+   },
+   "ranked_objectives": {
+    "state.teacher_kl.equal_domain_mean": 7.902229180851779,
+    "state.teacher_kl.worst_domain": 8.650269944164549,
+    "state.critical_token_kl": 11.96726408125179
+   },
+   "cross_checked_against_selection_decision": true
+  },
+  {
+   "state_id": "993214929a7d4da4dfcbf96c453a11cc",
+   "path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+   "front": 0,
+   "position_in_front": 4,
+   "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1",
+   "identity": {
+    "artifact_digest": "a7636a861812b10c224261d702fa6c8bad1fc90415ee299f8ee6dd459e328ad0",
+    "weights_digest": "4a55705275f3a13c3063ecdad61050e33e3b816d944be9221ea81dc7d9a75dff",
+    "single_shard_sha256": "592e43725e22a849e17248a7fc39652ba5b40b361aed5b7066fbfd37e453d001",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "attention.activation_importance_v1",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2"
+    ]
+   },
+   "validity": "measured",
+   "evaluation": {
+    "artifact_digest": "a7636a861812b10c224261d702fa6c8bad1fc90415ee299f8ee6dd459e328ad0",
+    "detail": {
+     "per_domain_kl": {
+      "code": 8.640684447536579,
+      "general": 7.43406254206246,
+      "rag_multihop": 8.363160473838299,
+      "reasoning_math": 7.5519615620561025,
+      "tool": 8.658051951545763
+     },
+     "per_domain_nll": {
+      "code": 8.92156253745154,
+      "general": 9.451585037415375,
+      "rag_multihop": 9.375570283828761,
+      "reasoning_math": 7.790577789575224,
+      "tool": 9.140310854363197
+     },
+     "per_subtype_kl": {
+      "code": 8.640684447536579,
+      "general": 7.43406254206246,
+      "gsm8k": 7.175945038793253,
+      "multihop_qa": 8.148779462191571,
+      "openmath": 7.927978085318952,
+      "rag_evidence": 8.577541485485026,
+      "tool_calling": 8.658051951545763
+     },
+     "reference_strategy": "recompute",
+     "tagged": {
+      "assistant": {
+       "kl": 8.275020206160155,
+       "positions": 45801
+      },
+      "eos": {
+       "kl": 10.770097146715436,
+       "positions": 70
+      },
+      "final_answer": {
+       "kl": 8.692838905108427,
+       "positions": 10058
+      },
+      "reasoning": {
+       "kl": 8.136145052071305,
+       "positions": 35603
+      },
+      "think_close": {
+       "kl": 13.950875445774622,
+       "positions": 70
+      },
+      "tool_close": {
+       "kl": 14.416092906679426,
+       "positions": 28
+      }
+     }
+    },
+    "measured_utc": null,
+    "positions": 74022,
+    "reference": "root_teacher",
+    "runtime": {},
+    "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+    "suite_id": "state_eval@v1",
+    "values": {
+     "state.critical_token_kl": 11.957476101069478,
+     "state.critical_token_kl.assistant": 8.275020206160155,
+     "state.critical_token_kl.eos": 10.770097146715436,
+     "state.critical_token_kl.final_answer": 8.692838905108427,
+     "state.critical_token_kl.reasoning": 8.136145052071305,
+     "state.critical_token_kl.think_close": 13.950875445774622,
+     "state.critical_token_kl.tool_close": 14.416092906679426,
+     "state.nll.code": 8.92156253745154,
+     "state.nll.general": 9.451585037415375,
+     "state.nll.pooled_all_domains": 8.88395158214682,
+     "state.nll.rag_multihop": 9.375570283828761,
+     "state.nll.reasoning_math": 7.790577789575224,
+     "state.nll.teacher_reference_pooled": 0.9303420924946204,
+     "state.nll.tool": 9.140310854363197,
+     "state.nll_delta_vs_teacher_pooled": 7.953609489652199,
+     "state.reverse_kl.token_mean": 21.02913848451483,
+     "state.teacher_kl.code": 8.640684447536579,
+     "state.teacher_kl.equal_domain_mean": 8.12958419540784,
+     "state.teacher_kl.general": 7.43406254206246,
+     "state.teacher_kl.rag_multihop": 8.363160473838299,
+     "state.teacher_kl.reasoning_math": 7.5519615620561025,
+     "state.teacher_kl.token_mean": 8.190494657223093,
+     "state.teacher_kl.tool": 8.658051951545763,
+     "state.teacher_kl.worst_domain": 8.658051951545763,
+     "state.top1_agreement": 0.05145767474534598
+    }
+   },
+   "ranked_objectives": {
+    "state.teacher_kl.equal_domain_mean": 8.12958419540784,
+    "state.teacher_kl.worst_domain": 8.658051951545763,
+    "state.critical_token_kl": 11.957476101069478
+   },
+   "cross_checked_against_selection_decision": true
+  },
+  {
+   "state_id": "74b2a21ee286d693d749c861b469b6ac",
+   "path_label": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+   "front": 1,
+   "position_in_front": 0,
+   "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+   "identity": {
+    "artifact_digest": "217aafb2bf3843d7e264da8db7ef79b00057ee1168b1ff1654650d33557fafa2",
+    "weights_digest": "df32195ca71418e298b07570aa40958e67b3bdf15cf515e63085bebeb842e253",
+    "single_shard_sha256": "92a45e1147d396621f09f50a16e7a83340e1f836ccb7d84e1b32cb6378afa665",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "attention.activation_importance_v1",
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2"
+    ]
+   },
+   "validity": "measured",
+   "evaluation": {
+    "artifact_digest": "217aafb2bf3843d7e264da8db7ef79b00057ee1168b1ff1654650d33557fafa2",
+    "detail": {
+     "per_domain_kl": {
+      "code": 7.318012310484347,
+      "general": 8.392041915954865,
+      "rag_multihop": 8.762720755445152,
+      "reasoning_math": 6.833466252549053,
+      "tool": 7.496182794421516
+     },
+     "per_domain_nll": {
+      "code": 7.581128192933838,
+      "general": 10.654182786150766,
+      "rag_multihop": 9.945753418286174,
+      "reasoning_math": 7.074516001027465,
+      "tool": 8.045487563250582
+     },
+     "per_subtype_kl": {
+      "code": 7.318012310484347,
+      "general": 8.392041915954865,
+      "gsm8k": 6.852511830638319,
+      "multihop_qa": 8.410122505970289,
+      "openmath": 6.814420674459787,
+      "rag_evidence": 9.115319004920012,
+      "tool_calling": 7.496182794421516
+     },
+     "reference_strategy": "recompute",
+     "tagged": {
+      "assistant": {
+       "kl": 7.551531577073331,
+       "positions": 45801
+      },
+      "eos": {
+       "kl": 10.918995584760394,
+       "positions": 70
+      },
+      "final_answer": {
+       "kl": 7.9492114240214375,
+       "positions": 10058
+      },
+      "reasoning": {
+       "kl": 7.403966366245255,
+       "positions": 35603
+      },
+      "think_close": {
+       "kl": 18.896002633231028,
+       "positions": 70
+      },
+      "tool_close": {
+       "kl": 21.218642439161027,
+       "positions": 28
+      }
+     }
+    },
+    "measured_utc": null,
+    "positions": 74022,
+    "reference": "root_teacher",
+    "runtime": {},
+    "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+    "suite_id": "state_eval@v1",
+    "values": {
+     "state.critical_token_kl": 14.745713020293472,
+     "state.critical_token_kl.assistant": 7.551531577073331,
+     "state.critical_token_kl.eos": 10.918995584760394,
+     "state.critical_token_kl.final_answer": 7.9492114240214375,
+     "state.critical_token_kl.reasoning": 7.403966366245255,
+     "state.critical_token_kl.think_close": 18.896002633231028,
+     "state.critical_token_kl.tool_close": 21.218642439161027,
+     "state.nll.code": 7.581128192933838,
+     "state.nll.general": 10.654182786150766,
+     "state.nll.pooled_all_domains": 8.483747847731951,
+     "state.nll.rag_multihop": 9.945753418286174,
+     "state.nll.reasoning_math": 7.074516001027465,
+     "state.nll.teacher_reference_pooled": 0.9303420924946204,
+     "state.nll.tool": 8.045487563250582,
+     "state.nll_delta_vs_teacher_pooled": 7.55340575523733,
+     "state.reverse_kl.token_mean": 18.703646357626166,
+     "state.teacher_kl.code": 7.318012310484347,
+     "state.teacher_kl.equal_domain_mean": 7.760484805770986,
+     "state.teacher_kl.general": 8.392041915954865,
+     "state.teacher_kl.rag_multihop": 8.762720755445152,
+     "state.teacher_kl.reasoning_math": 6.833466252549053,
+     "state.teacher_kl.token_mean": 7.705105518341992,
+     "state.teacher_kl.tool": 7.496182794421516,
+     "state.teacher_kl.worst_domain": 8.762720755445152,
+     "state.top1_agreement": 0.08036799870308826
+    }
+   },
+   "ranked_objectives": {
+    "state.teacher_kl.equal_domain_mean": 7.760484805770986,
+    "state.teacher_kl.worst_domain": 8.762720755445152,
+    "state.critical_token_kl": 14.745713020293472
+   },
+   "cross_checked_against_selection_decision": true
+  }
+ ],
+ "what_this_does_not_contain": [
+  "checkpoint bytes, and no path to any",
+  "any measurement of B, which does not exist",
+  "any comparison, ranking or verdict"
+ ],
+ "authorizes": "nothing",
+ "self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c"
+}

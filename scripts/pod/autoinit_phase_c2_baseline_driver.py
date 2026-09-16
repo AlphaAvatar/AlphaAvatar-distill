@@ -1,0 +1,364 @@
+#!/usr/bin/env python3
+"""Phase C2 baseline completion: establish B, measure it once, compare against frozen C.
+
+    python scripts/pod/autoinit_phase_c2_baseline_driver.py \
+        --protocol logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json \
+        --frozen-inputs .../evidence/c2_frozen_comparison_inputs.json \
+        --rebuild-minutes N --soft-stop-usd X --rate R --spent-usd S
+
+Attempt 4's beam search completed and committed a ranking of five candidates,
+then its conditional baseline rebuild hit a reserve that could not fund the
+work. So the candidate side of the B->C comparison is measured and frozen, and
+the baseline side does not exist. This driver supplies only the missing half.
+
+**The beam search is unreachable from here.** Not by instruction -- by
+construction. Nothing in this module imports `run_phase_a_search`, `BeamSearch`,
+`SCHEDULE_V1` or any search entry point, and there is no code path that could
+generate a candidate. `tests/pod/test_phase_c2_baseline_completion.py` asserts
+that over the module's import graph, so an edit that reintroduces the search
+fails a test rather than quietly widening what a grant authorizes.
+
+**Nothing about C is recomputed.** The five candidate measurements are read from
+the frozen record, verified against their own hash, and passed to the comparison
+builder untouched. There is no code path that measures a candidate.
+
+**Two stages, and the first one spends nothing.** Every identity the comparison
+depends on -- the suite, the policy and its epsilon, the teacher, the B spec,
+and the evaluator implementation itself -- is checked before the teacher is
+loaded. A mismatch there means the two halves of the comparison were produced by
+different machinery, and that is a stop, not something to compensate for.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+import traceback
+from datetime import datetime, timezone
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2]
+for _extra in ("src", "scripts", "scripts/autoinit"):
+    if str(REPO / _extra) not in sys.path:
+        sys.path.insert(0, str(REPO / _extra))
+
+from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
+from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
+from aadistill.initialization.specs.state import make_retained_state  # noqa: E402
+from experiments.phase_c2 import baseline as B  # noqa: E402
+from experiments.phase_c2 import comparison as C  # noqa: E402
+from experiments.phase_c2.frozen_inputs import (  # noqa: E402
+    load_frozen_candidates, load_record, numerically_sensitive_pairs)
+#: At MODULE scope, because the calibration mixtures are data that an
+#: application bootstrap registers and stage A resolves profiles. C2 attempt 3
+#: died one second into its first stage for want of exactly this import being
+#: here rather than inside the stage that needed it.
+from experiments.calibration import register_builtin_profiles  # noqa: E402
+
+register_builtin_profiles()
+
+WS = Path("/workspace")
+STATUS = WS / "autoinit_phase_c2_baseline.status"
+AUDIT = REPO / "artifacts/audit/autoinit_phase_c2_baseline"
+WORK = REPO / "artifacts/autoinit/phase_c2_baseline"
+
+SCHEMA = "aadistill.autoinit.c2_baseline_completion_evidence/v1"
+
+
+class CompletionError(RuntimeError):
+    """The completion cannot proceed on the evidence it was given."""
+
+
+def mark(name: str) -> None:
+    line = f"{datetime.now(timezone.utc):%FT%TZ} MARKER:{name}"
+    print(line, flush=True)
+    STATUS.parent.mkdir(parents=True, exist_ok=True)
+    with STATUS.open("a") as handle:
+        handle.write(line + "\n")
+
+
+def say(message: str) -> None:
+    print(f"[{datetime.now(timezone.utc):%H:%M:%S}] {message}", flush=True)
+
+
+class BaselineCompletionDriver:
+    """Two stages: check every shared identity, then rebuild, measure, compare."""
+
+    def __init__(self, args) -> None:
+        self.a = args
+        self.t0 = time.time()
+        self.completed: list[str] = []
+        AUDIT.mkdir(parents=True, exist_ok=True)
+        self.protocol = json.loads(Path(args.protocol).read_text())
+        self.ev: dict = {
+            "schema": SCHEMA,
+            "_contract": (
+                "the Phase-C2 baseline-completion session record. It supplies the "
+                "baseline half of a comparison whose candidate half was measured "
+                "by Attempt 4 and is read frozen. No beam search is reachable "
+                "from this session and no candidate is remeasured."),
+            "started_utc": datetime.now(timezone.utc).isoformat(),
+            "protocol_sha256": self.protocol.get("protocol_sha256"),
+            "frozen_inputs": str(args.frozen_inputs),
+            "rate_usd_per_hour": args.rate,
+            "soft_stop_usd": args.soft_stop_usd,
+            "trains_anything": False,
+            "runs_a_beam_search": False,
+            "remeasures_any_candidate": False,
+            "stages": {},
+        }
+        self.save()
+
+    # -- bookkeeping -------------------------------------------------------
+    def usd(self) -> float:
+        return self.a.spent_usd + (time.time() - self.t0) / 3600.0 * self.a.rate
+
+    def save(self) -> None:
+        self.ev["elapsed_min"] = round((time.time() - self.t0) / 60, 2)
+        self.ev["spend_usd"] = round(self.usd(), 4)
+        self.ev["stages_completed"] = list(self.completed)
+        (AUDIT / "c2_baseline_completion_evidence.json").write_text(
+            json.dumps(self.ev, indent=2, default=str) + "\n")
+
+    def record(self, stage: str, passed: bool, detail, **extra) -> None:
+        self.ev["stages"][stage] = {
+            "stage_id": stage, "passed": passed,
+            "finished_utc": datetime.now(timezone.utc).isoformat(),
+            "spend_usd": round(self.usd(), 4), "detail": detail, **extra}
+        if passed:
+            self.completed.append(stage)
+            mark(f"STAGE_PASSED:{stage}")
+        else:
+            mark(f"STAGE_FAILED:{stage}")
+        self.save()
+
+    def afford(self, minutes: float, what: str) -> None:
+        projected = self.usd() + minutes / 60.0 * self.a.rate
+        if projected > self.a.soft_stop_usd:
+            raise CompletionError(
+                f"{what} needs {minutes:.1f} min (${projected:.2f} projected) and "
+                f"the soft stop is ${self.a.soft_stop_usd:.2f}")
+
+    # -- stage A -----------------------------------------------------------
+    def bind_identities(self) -> bool:
+        """Everything the two halves must share, before anything is loaded."""
+        from experiments.phase_c2.search_space import register_c2_operators
+        from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+
+        #: `attention.activation_importance_v1` is not a shipped default and the
+        #: frozen B path's last step names it. Registered FIRST, as everywhere.
+        register_c2_operators()
+
+        frozen_record = load_record(self.a.frozen_inputs)
+        bound = self.protocol["cross_session_comparability_contract"]["bound"]
+
+        #: The evaluator that measured C, by source hash. This is the check that
+        #: makes "comparable across sessions" a verified statement rather than an
+        #: assumption: if the implementation moved, the two halves were produced
+        #: by different machinery and no amount of identical configuration makes
+        #: their numbers one measurement series.
+        drifted = {path: sha256_file(REPO / path)
+                   for path, expected in bound["evaluator_implementation_sha256"].items()
+                   if sha256_file(REPO / path) != expected}
+        if drifted:
+            raise CompletionError(
+                "the evaluator implementation has moved since the candidate side "
+                f"was frozen: {json.dumps(drifted, indent=1)}. STOP: the frozen C "
+                "measurements and a new B measurement would not be the same "
+                "measurement series, and that is not something to compensate for.")
+
+        checks = {
+            "suite_hash": (frozen_record["suite"]["hash"], bound["state_eval_suite_hash"]),
+            "policy_hash": (frozen_record["policy"]["hash"], bound["pareto_policy_hash"]),
+            "live_policy_hash": (PARETO_V1.policy_hash, bound["pareto_policy_hash"]),
+            "teacher_repo_id": (TEACHER_ID, bound["teacher_repo_id"]),
+            "teacher_revision": (TEACHER_REVISION, bound["teacher_revision"]),
+        }
+        disagreements = {k: {"live": a, "bound": b} for k, (a, b) in checks.items() if a != b}
+        if disagreements:
+            raise CompletionError(
+                "a frozen identity does not match the protocol: "
+                + json.dumps(disagreements, indent=1))
+
+        live_epsilon = {k: float(v) for k, v in PARETO_V1.epsilon.items()}
+        if live_epsilon != {k: float(v) for k, v in
+                            self.protocol["frozen_identities_that_must_not_move"]
+                            ["pareto_epsilon"].items()}:
+            raise CompletionError(
+                f"the live epsilon {live_epsilon} is not the protocol's. Epsilon may "
+                "not change, and it may certainly not change before B is measured.")
+
+        spec = B.frozen_baseline_spec(device=self.a.device)
+        construction = B.assert_frozen_construction(spec)
+
+        candidates = load_frozen_candidates(
+            self.a.frozen_inputs,
+            expect_suite_hash=bound["state_eval_suite_hash"],
+            expect_policy_hash=bound["pareto_policy_hash"])
+        say(f"  {len(candidates)} frozen candidate measurement(s) loaded, "
+            f"record {frozen_record['self_sha256'][:12]}…")
+        say(f"  frozen baseline construction verified: {spec.spec_hash[:12]}… "
+            f"== {B.B_SPEC_HASH[:12]}…")
+
+        self.candidates = candidates
+        self.ev["frozen_candidate_state_ids"] = [c.state_id for c in candidates]
+        self.record("bind_identities", True, {
+            "frozen_inputs_self_sha256": frozen_record["self_sha256"],
+            "frozen_inputs_extraction_rule": frozen_record["extraction_rule"],
+            "n_frozen_candidates": len(candidates),
+            "source_journal_sha256": frozen_record["sources"]["journal_sha256"],
+            "selection_commitment_sha256":
+                frozen_record["sources"]["selection_commitment_sha256"],
+            "suite": frozen_record["suite"],
+            "policy": frozen_record["policy"],
+            "epsilon": live_epsilon,
+            "teacher": {"repo_id": TEACHER_ID, "revision": TEACHER_REVISION},
+            "baseline_construction": construction,
+            "evaluator_implementation_verified": sorted(
+                bound["evaluator_implementation_sha256"]),
+            "_no_measurement_here": "stage A loads no model and measures nothing",
+        })
+        return True
+
+    # -- stage B -----------------------------------------------------------
+    def rebuild_measure_compare(self) -> bool:
+        """The one unit of scientific work this session exists to do."""
+        from transformers import AutoConfig
+
+        from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
+        from aadistill.initialization.specs.arch import ArchSpec
+        from aadistill.initialization.specs.artifact import identify_checkpoint
+        from load_state_eval import load as load_suite
+        from phase_a_frozen import TARGET_GEOMETRY, TEACHER_ID
+        from aadistill.initialization.planning.metrics import StateEvaluator
+        from aadistill.initialization.specs.metrics import ReferenceStrategy
+
+        suite, items, suite_manifest = load_suite(REPO)
+        target_spec = ArchSpec.of("qwen3", TARGET_GEOMETRY)
+
+        #: RECOMPUTE, explicitly, because it is the strategy the frozen C
+        #: measurements recorded and the property the comparability contract
+        #: rests on: no candidate is normalized against any other.
+        evaluator = StateEvaluator(
+            suite, items, device=self.a.device,
+            reference_strategy=ReferenceStrategy.RECOMPUTE)
+
+        teacher_path = Path(self.a.teacher_path)
+        fallback = B.BaselineFallback(
+            adapter=QWEN3_ADAPTER, workdir=WORK,
+            rebuild_minutes=self.a.rebuild_minutes, afford=self.afford,
+            repo_root=REPO, device=self.a.device, say=say)
+
+        #: The rebuild's own entry point, not the search's conditional hook. The
+        #: hook exists to be called BY a beam; this session has none.
+        entry = fallback.rebuild(
+            lambda: QWEN3_ADAPTER.load(str(teacher_path), dtype="bfloat16",
+                                       device=self.a.device))
+        outcome = fallback.outcome
+
+        directory = Path(entry["checkpoint_dir"])
+        spec = QWEN3_ADAPTER.spec_from_config(AutoConfig.from_pretrained(str(directory)))
+        artifact = identify_checkpoint(directory, adapter=QWEN3_ADAPTER, spec=spec,
+                                       num_parameters=QWEN3_ADAPTER.param_count(spec))
+        state = make_retained_state(
+            state_id=entry["candidate_id"], artifact=artifact, spec=spec,
+            target_spec=target_spec,
+            num_parameters=QWEN3_ADAPTER.param_count(spec),
+            root_teacher_id=TEACHER_ID,
+            root_teacher_sha256=suite_manifest.get("teacher_sha256", "") or "0" * 64,
+            description=entry["description"], provenance=entry["provenance"],
+            expected_artifact_digest=entry["expected_artifact_digest"])
+
+        #: ONCE. The identical canonical-reload/state_eval path every searched
+        #: candidate took, on the same suite and the same evaluator.
+        self.afford(4.0, "the single state_eval of B")
+        state.attach_evaluation(evaluator.evaluate(
+            QWEN3_ADAPTER.load(str(directory), device=self.a.device),
+            artifact.artifact_digest))
+        say(f"  B measured once on {suite.qualified_id}: "
+            f"{state.evaluation.values['state.teacher_kl.equal_domain_mean']:.6f} "
+            "equal-domain mean KL")
+
+        #: Pure post-processing from here. One measured B, five frozen C.
+        record = C.build(
+            baseline=state, baseline_outcome=outcome,
+            candidates=list(self.candidates), suite=suite, policy=PARETO_V1,
+            run_id=self.protocol["the_candidate_side_is_frozen"].get("run_id",
+                                                                     "phase_c2_baseline_completion"),
+            config_hash=self.a.config_hash,
+            selection_record=self.a.frozen_inputs)
+
+        disclosure = self.protocol["cross_session_comparability_contract"][
+            "preregistered_disclosure_RULE_not_a_rule_change"]
+        flagged = numerically_sensitive_pairs(
+            state.evaluation.values, self.candidates,
+            objectives=tuple(o.key for o in PARETO_V1.objectives),
+            threshold=float(disclosure["threshold"]))
+        record["numerically_sensitive_pairs"] = flagged
+        record["_disclosure_rule"] = disclosure["rule"]
+        if flagged:
+            say(f"  DISCLOSURE: {len(flagged)} objective margin(s) at or below "
+                f"{disclosure['threshold']}, registered before B was measured")
+
+        path = C.commit(record, AUDIT)
+        say(f"  comparison written: {path.name}, verdict {record['verdict']}")
+        self.record("rebuild_measure_compare", True, {
+            "baseline_identity": outcome["identity_matches"],
+            "baseline_state_id": state.state_id,
+            "baseline_artifact_digest": artifact.artifact_digest,
+            "state_eval_measurements_performed": 1,
+            "candidates_compared": len(self.candidates),
+            "candidates_remeasured": 0,
+            "verdict": record["verdict"],
+            "numerically_sensitive_pairs": len(flagged),
+            "comparison_record": str(path),
+        })
+        return True
+
+    # -- the loop ----------------------------------------------------------
+    def run(self) -> int:
+        mark("BASELINE_COMPLETION_START")
+        stages = (("bind_identities", self.bind_identities),
+                  ("rebuild_measure_compare", self.rebuild_measure_compare))
+        for name, function in stages:
+            try:
+                ok = function()
+            except Exception as exc:                            # noqa: BLE001
+                self.record(name, False, f"{type(exc).__name__}: {exc}"[-2000:],
+                            traceback=traceback.format_exc()[-6000:])
+                ok = False
+            if not ok:
+                self.ev["outcome"] = "FAILED"
+                self.ev["failed_stage"] = name
+                self.save()
+                mark("BASELINE_COMPLETION_FAILED")
+                return 1
+        self.ev["outcome"] = "ALL_DONE"
+        self.ev["successful"] = True
+        self.save()
+        mark("BASELINE_COMPLETION_ALL_DONE")
+        return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--protocol", required=True)
+    ap.add_argument("--frozen-inputs", required=True)
+    ap.add_argument("--teacher-path", required=True)
+    ap.add_argument("--rebuild-minutes", type=float, required=True)
+    ap.add_argument("--rate", type=float, required=True)
+    ap.add_argument("--spent-usd", type=float, default=0.0)
+    ap.add_argument("--soft-stop-usd", type=float, required=True)
+    ap.add_argument("--config-hash", required=True,
+                    help="the frozen search config hash the candidates were ranked under")
+    ap.add_argument("--device", default="cuda")
+    return ap
+
+
+def main(argv=None) -> int:
+    return BaselineCompletionDriver(build_parser().parse_args(argv)).run()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

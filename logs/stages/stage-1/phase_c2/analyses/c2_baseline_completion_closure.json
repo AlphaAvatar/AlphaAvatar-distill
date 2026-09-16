@@ -1,0 +1,38 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_closure/v1",
+ "_what_this_is": "the executable set a Phase-C2 baseline-completion session would run, derived live from the tree by the same import walk every other experiment's closure uses.",
+ "_informational_until_an_authorization_binds_it": "no grant or authorization exists for this session, so this digest pins nothing yet. It is here so a reviewer can see WHAT would run, and so the authorization step has a figure to bind rather than one to invent.",
+ "digest": "7b826c5b1caa4cda7ca99cdec6ffe1899d79597a1e1a65f2122d4da146e1009f",
+ "n_files": 54,
+ "entry_points": [
+  "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+  "scripts/autoinit/freeze_c2_comparison_inputs.py",
+  "scripts/autoinit/price_c2_baseline_completion.py"
+ ],
+ "declared_non_python_inputs": [
+  "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
+  "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
+  "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json"
+ ],
+ "source_roots": [
+  "src",
+  "scripts",
+  "scripts/pod",
+  "scripts/autoinit"
+ ],
+ "by_area": {
+  "logs/stages": 3,
+  "scripts/autoinit": 4,
+  "scripts/experiments": 8,
+  "scripts/pod": 1,
+  "src/aadistill": 38
+ },
+ "command": "PYTHONPATH=src:scripts python -c \"from aadistill.governance import closure; closure.derive(...)\" with the entry points, declared inputs and roots above",
+ "compared_with_search_1": {
+  "search_1_digest": "c5ae8fbc7132aa8c461d76b6d05a1a5d3c444f9f4f85185dd50b7351d2d3783b",
+  "search_1_n_files": 85,
+  "_note": "Search-1's executable identity is UNCHANGED by this round -- none of the new files is in its closure. The completion set is smaller because it contains no beam search."
+ },
+ "authorizes": "nothing",
+ "self_sha256": "eb3cf95e0787323478a260e816c7b3c3d277f4ef72aecfa2ad8efc6a91ea8a5a"
+}

@@ -1,0 +1,198 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_protocol/v1",
+ "_what_this_is": "the protocol for ONE narrow post-Attempt-4 session that COMPLETES a measurement Attempt 4 began and did not finish. It is not a new search and not a new experiment: the candidate side of the B->C comparison is already measured, frozen and hash-bound.",
+ "supersedes_nothing": "Attempt 4's search result, its selection, its preregistration and its pricing document are historical and unchanged. This document adds the missing half.",
+ "scientific_work": [
+  "1. establish the frozen baseline B through its complete deterministic fixed path",
+  "2. measure B exactly once on the frozen state_eval suite",
+  "3. combine that measurement with the five already-frozen selected-C measurements",
+  "4. produce the preregistered B->C search-stage comparison record"
+ ],
+ "explicitly_forbidden": {
+  "rerun_the_attempt_4_beam": false,
+  "generate_any_new_C_candidate": false,
+  "repeat_or_replace_any_C_measurement": false,
+  "search_2": false,
+  "behavioural_confirmation": false,
+  "_meaning": "each key is a capability this protocol does NOT have. The beam search is unreachable from the completion launcher by construction, not by instruction: see the executable it names."
+ },
+ "the_candidate_side_is_frozen": {
+  "record": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+  "self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+  "extraction_rule": "c2.frozen_comparison_inputs/v1",
+  "n_candidates": 5,
+  "state_ids_in_committed_order": [
+   "8a2863bc5c4fcde107bf2cfd9ceb14e3",
+   "0267b4eb771ed499c7c162260d97c794",
+   "b0c1ef82a929a7ca24803c00936f5bb1",
+   "993214929a7d4da4dfcbf96c453a11cc",
+   "74b2a21ee286d693d749c861b469b6ac"
+  ],
+  "source_journal_sha256": "cc4ee3a14b0a0ed03afe1292780a2c372f728a37233f8f294d86060eb956d1ee",
+  "selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf",
+  "rule": "the completion session READS this record. It does not re-derive it, re-rank it, or measure any candidate again."
+ },
+ "the_baseline_B": {
+  "path": [
+   [
+    "DEPTH",
+    "depth.causal_kl_greedy_v1",
+    "calib.domain_balanced@v1"
+   ],
+   [
+    "FFN",
+    "ffn.activation_importance_v0",
+    "calib.domain_balanced@v1"
+   ],
+   [
+    "RESIDUAL_WIDTH",
+    "width.global_pca_v0",
+    "calib.reasoning_heavy@v2"
+   ],
+   [
+    "ATTENTION",
+    "attention.activation_importance_v1",
+    "calib.domain_balanced@v1"
+   ]
+  ],
+  "path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+  "path_id": "autoinit.v1.phase_c1.treatment",
+  "spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+  "_spec_hash_reproduced_live": true,
+  "expected_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "device_in_the_spec": "cuda",
+  "_device_is_part_of_the_hash": "FixedPathSpec.as_dict includes device, so 'cuda' is not a deployment detail here -- it is part of the frozen identity",
+  "steps": [
+   {
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "profile_id": "calib.domain_balanced@v1",
+    "expected_artifact_digest": null
+   },
+   {
+    "impl_id": "ffn.activation_importance_v0",
+    "profile_id": "calib.domain_balanced@v1",
+    "expected_artifact_digest": null
+   },
+   {
+    "impl_id": "width.global_pca_v0",
+    "profile_id": "calib.reasoning_heavy@v2",
+    "expected_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722"
+   },
+   {
+    "impl_id": "attention.activation_importance_v1",
+    "profile_id": "calib.domain_balanced@v1",
+    "expected_artifact_digest": null
+   }
+  ],
+  "rebuild_mechanism": "materialize_fixed_path over the complete spec, from the teacher",
+  "no_reuse_of_a_parent": "the WIDTH step declares expected_artifact_digest eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722 as its OUTPUT gate. No durable bytes for it exist -- the checkpoint registry's 36 entries do not include it and no stored weights match it -- so there is nothing to reuse and no caching-equivalence question to answer. A complete deterministic rebuild is the design, not a fallback.",
+  "no_reuse_of_attempt_4_depth_decisions": "no mechanism is created to import DEPTH's chosen layers from Attempt 4. DEPTH derives its own decisions, as it does everywhere else, and its output is gated by digest."
+ },
+ "frozen_identities_that_must_not_move": {
+  "teacher": {
+   "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "_source": "Attempt 4 stage A bind_identities, which verified it before the beam ran"
+  },
+  "state_eval_suite": {
+   "qualified_id": "state_eval@v1",
+   "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+  },
+  "ranking_policy": {
+   "qualified_id": "beam.pareto_multi_objective@v2",
+   "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+  },
+  "pareto_epsilon": {
+   "state.teacher_kl.equal_domain_mean": 0.0001,
+   "state.teacher_kl.worst_domain": 0.0001,
+   "state.critical_token_kl": 0.0001
+  },
+  "pareto_objectives": [
+   "state.teacher_kl.equal_domain_mean",
+   "state.teacher_kl.worst_domain",
+   "state.critical_token_kl"
+  ],
+  "calibration_profiles": [
+   {
+    "qualified_id": "calib.domain_balanced@v1",
+    "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+   },
+   {
+    "qualified_id": "calib.reasoning_heavy@v2",
+    "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+    "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+   }
+  ],
+  "search_seed_of_the_frozen_candidates": 20260815,
+  "rule": "every value here must equal Attempt 4's exactly. The suite hash, the policy hash and the epsilon are checked before B is measured, not after."
+ },
+ "after_B_exists_the_comparison_is_post_processing": {
+  "inputs": [
+   "one measured B",
+   "the five frozen C measurements"
+  ],
+  "mechanism": "the existing experiments.phase_c2.comparison.build, unchanged",
+  "ranking": "PARETO_V1.rank over [B, *C] at beam_width=None so nothing is pruned -- the run's own policy through its public entry point, not a second implementation of epsilon-dominance",
+  "no_measurement_occurs": true,
+  "output": "c2_baseline_comparison.json, the record Attempt 4's success spec required"
+ },
+ "cross_session_comparability_contract": {
+  "the_property_being_preserved": "StateEvaluator scores every checkpoint independently against the ORIGINAL teacher and stamps the result with that artifact's digest. Under ReferenceStrategy.RECOMPUTE no candidate is normalized against any other, which is what makes states from different paths -- and from different sessions -- comparable at all.",
+  "bound": {
+   "teacher_repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+   "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "state_eval_suite_id": "state_eval@v1",
+   "state_eval_suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+   "evaluator_implementation_sha256": {
+    "src/aadistill/initialization/planning/metrics.py": "a6dd5d5641ac158266c379fd604dae2e4ff5f4d70599f9597da014ce212b5add",
+    "src/aadistill/initialization/specs/metrics.py": "e00f6b1902647a2d2a78eebcd8485d9625e63a26a02c2f144a23875566dac4ab",
+    "src/aadistill/initialization/planning/ranking.py": "49c3b3b9779086abbf86be4f432f33a06bf53e33630f847b2430c4742f1647a8",
+    "src/aadistill/initialization/planning/fixed_path.py": "94698e18efcf7f17eebac3ea849a796615a3ac6fd4b12a1a4560c47dc3060d57"
+   },
+   "reference_strategy": "RECOMPUTE",
+   "_reference_strategy_observed_in_the_frozen_C": "recompute",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "gpu_class": "NVIDIA L40S",
+   "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "pareto_policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+  },
+  "what_is_NOT_pinned_and_why_it_matters": {
+   "host_driver_version": "the image NAME does not pin the host driver. Attempt 3 observed 595.91.07 and Attempt 4 observed 580.126.09 on the same image. A completion session may observe a third.",
+   "per_measurement_runtime_block_is_empty": "StateEvaluation carries a `runtime` mapping and Attempt 4 recorded {} in it, so the numerical runtime of the frozen C measurements is reconstructed from the SESSION record rather than read off each measurement.",
+   "no_repeat_measurement_exists_anywhere": "the journal holds 81 records over 44 states and 37 states carry two evaluation records, but every such pair shares one measured_utc -- they are re-serializations of a single measurement. No state was measured twice, in this session or any other, so the magnitude of run-to-run or cross-runtime numerical variation is UNMEASURED."
+  },
+  "how_large_the_risk_can_be_before_it_matters": {
+   "epsilon": 0.0001,
+   "smallest_observed_consecutive_gap_per_objective": {
+    "state.teacher_kl.equal_domain_mean": 0.127307,
+    "state.teacher_kl.worst_domain": 0.007782,
+    "state.critical_token_kl": 0.009788
+   },
+   "tightest_gap": 0.007782,
+   "tightest_gap_in_epsilons": 78,
+   "_reading": "the five candidates are separated by 78 to 1273 epsilons on their tightest objective, so the candidate-side front structure is not balanced at the 1e-4 scale. The unquantified risk bites only if B lands within a comparable distance of a candidate."
+  },
+  "preregistered_disclosure_RULE_not_a_rule_change": {
+   "rule": "if measured B falls within the tightest observed candidate gap of any candidate on any ranked objective, the comparison record must FLAG that pair as numerically sensitive and the verdict must say so.",
+   "threshold": 0.007782,
+   "_this_does_not_change_epsilon_or_the_ranking": "epsilon stays 1e-4, PARETO_V1 stays the ranking rule, and front assignment is computed exactly as before. This adds a disclosure obligation, registered BEFORE B exists."
+  },
+  "stop_condition": "if the completion session finds that the frozen C measurements and a new B measurement are not numerically comparable -- a different suite hash, a different teacher revision, a different reference strategy, or an evaluator whose implementation hash has moved -- it must STOP and report the exact reason rather than compensate for it."
+ },
+ "budget": {
+  "pricing_document": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
+  "pricing_sha256": "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+  "expected_minutes": 39.697,
+  "expected_usd": 0.7212,
+  "hard_ceiling_minutes": 65.776,
+  "hard_ceiling_usd": 1.195,
+  "price_basis_usd_per_hour": 1.09,
+  "_not_authorized": "this protocol is not an authorization and the pricing is not a grant. No budget increase is requested and the accepted rate boundary is unchanged.",
+  "why_the_old_reserve_is_not_used": "the reserve was not a valid upper bound for DEPTH + FFN + RESIDUAL_WIDTH + ATTENTION + materialization + canonical reload + identity checks + one state_eval. It was unfundable as specified before attempt 4 started.",
+  "defect_record": "logs/stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json"
+ },
+ "authorizes": "nothing",
+ "protocol_sha256": "7a24358069280aa3294e8daaeb512851a4c317a769bbf5fcf98ce3cdb3f600ae"
+}

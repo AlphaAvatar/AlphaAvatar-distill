@@ -19,9 +19,9 @@
  },
  "prepared_launch": {
   "any": false,
-  "experiment": "phase_c2 Search-1",
+  "experiment": "phase_c2 baseline completion",
   "run": null,
-  "note": "every C2 chain is consumed (attempts 1-4) and nothing is prepared. A MAINTAINER DECISION IS REQUIRED: formal measurement began before attempt 4 failed, so no autonomous retry is authorized, AND the campaign envelope can no longer fund a complete formal attempt (6.3011 + 15.0446 = 21.3457 > 16.20)."
+  "note": "a baseline-completion PACKAGE is prepared and NOT AUTHORIZED: protocol 7a24358069280aa3, pricing dcc64bcf9b3dc9fb ($0.7212 expected, $1.1950 hard ceiling at $1.09/h), frozen candidate side 55f6677067392fd0. No grant, no authorization, no bundle, no run directory. Every C2 search chain (attempts 1-4) is consumed. No budget increase is requested and the rate boundary is unchanged."
  },
  "budget": {
   "cumulative_spend_usd": 296.8185,
@@ -76,7 +76,7 @@
  ],
  "next_starting_point": {
   "status": "C1 COMPLETE and CLOSED (attempt 18, GO, $10.2018). C2 Search-1: the beam search has been executed and its ranking is durable; the B->C comparison record does not exist.",
-  "then": "a maintainer decision on the baseline_rebuild_reserve and the campaign envelope. The searched ranking, journal and telemetry are collected under attempt4/; the searched checkpoint WEIGHTS went with the pod and are re-derivable from seed 20260815 and the recorded config hash.",
+  "then": "a maintainer decision authorizing the baseline-completion session, and a ruling on the not-yet-quantified cross-session numerical margin. See prepared_launch and phase_c.c2.baseline_completion; nothing else is owed.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -116,25 +116,20 @@
    "status": "COMPLETE. Eighteen attempts, fifteen paid. Replay MEASURED 2-of-2 three times; treatment and endpoint measured ONCE and the frozen Stage-I verdict is GO -- read the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS (attempts 9, 17, 18). treatment + endpoint: MEASURED ONCE, by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "not_built": "attempt 18's six probes were NOT preserved (private storage quota, 2.22 GiB each). Rebuilding the pre-ATTENTION parent needs GPU/network.",
-   "owners": {
-    "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
-    "execution_prereg": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
-    "runs": "logs/index.json"
-   },
+   "owners": "logs/stages/stage-1/phase_c1/ -- plans, runs, analyses and the attempt-18 closeout own every C1 figure and artifact.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "SEARCH COMPLETE, COMPARISON NOT RUN -- SEARCH-1 INCOMPLETE. attempt4 ran the beam to completion: 7 complete leaves, 5 committed to stage1_selection.json with journal and hashes. The conditional baseline rebuild then hit its allowance, so there is no c2_baseline_comparison.json and the five selected leaves have objective values with nothing to compare against -- NOT a null result, NOT a partial answer. attempts 1-3 measured nothing; their closeouts own why.",
+   "status": "SEARCH COMPLETE, COMPARISON NOT RUN -- SEARCH-1 INCOMPLETE. attempt4's beam ran to completion (7 complete leaves, 5 committed and journal-verified); the conditional baseline rebuild then hit its allowance, so B carries no measurement and the five candidates have objective values with nothing to compare against. NOT a null result, NOT a partial answer. The beam is NOT rerun. attempts 1-3 measured nothing; their closeouts own why.",
    "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
    "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
-   "executes": "scripts/pod/autoinit_phase_c2_launch.py -> autoinit_phase_c2_driver.py; two stages, trains nothing; run_id owns the whole execution",
-   "priced": "expected $7.1787, ceiling $15.0446 at L40S securePrice $1.09/h, including the named conditional baseline_rebuild_reserve. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json. Priced is not funded.",
+   "executes": "Search-1: scripts/pod/autoinit_phase_c2_launch.py -> autoinit_phase_c2_driver.py (consumed). Baseline completion: scripts/pod/autoinit_phase_c2_baseline_driver.py.",
+   "priced": "Search-1: expected $7.1787, ceiling $15.0446 at $1.09/h. Historical; owner logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json. Baseline completion is priced separately.",
    "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both.",
-   "baseline_evidence": "audit/autoinit_phase_c2/c2_baseline_comparison.json, REQUIRED by the success artifact spec, so a REBUILT B's state_eval result cannot be lost at teardown.",
-   "runtime_partition": "beam 635.96 min; baseline_rebuild_reserve 27.665 min on its own clock -- MEASURED INSUFFICIENT by attempt 4; 30 min artifact recovery reachable by neither. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json.",
-   "attempt4_root_cause": "the 27.665-min baseline_rebuild_reserve cannot fund the frozen C1 treatment path: its first operator runs its own greedy layer search at 7.05 evaluations/min and Phase-B measured a DEPTH expansion at roughly 32 min on an L40S. Unfundable as specified before launch; nothing crashed. The three options a decision would choose between, and why none is an autonomous repair, are in the closeout."
+   "runtime_partition": "beam 635.96 min; baseline_rebuild_reserve 27.665 min -- MEASURED INSUFFICIENT; 30 min artifact recovery. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json, preserved unchanged as the historical authorization basis.",
+   "attempt4_root_cause": "the 27.665-min baseline_rebuild_reserve could not fund the complete frozen path: DEPTH alone is 260 evaluations, observed at 21.30-32.90 min in the same session. Classified RUNTIME/PRICING ENVELOPE DEFECT; owner logs/stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json.",
+   "baseline_completion": "PREPARED, NOT AUTHORIZED. Protocol 7a24358069280aa3: establish B once through the complete frozen fixed path, measure it once on the same suite, compute the preregistered B->C comparison against the frozen candidate record. No beam, no new candidate, no C remeasured, and the driver cannot reach a search entry point. Open maintainer question: cross-session numerical comparability is structurally preserved, its magnitude not yet quantified -- see the protocol's comparability contract."
   }
  },
  "storage": {
@@ -167,9 +162,9 @@
  "cuda_engineering_validation": {
   "status": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada. The stage-F device repair is CONFIRMED ON REAL CUDA. ENGINEERING EVIDENCE ONLY -- not a C1 result and not an endpoint.",
   "campaign": "CLOSED. Three subruns, one active resource at a time.",
-  "campaign_cost_usd": 0.04,
   "authorizes": "nothing",
   "owner": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/ and logs/runs/cuda_stage_f/",
+  "campaign_cost_usd": 0.04,
   "amendment": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured."
  },
  "superseded_handoff": "none. The live handoff is logs/state/current.md."

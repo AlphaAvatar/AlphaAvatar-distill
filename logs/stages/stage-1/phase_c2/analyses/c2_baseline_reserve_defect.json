@@ -1,0 +1,86 @@
+{
+ "schema": "aadistill.autoinit.c2_reserve_defect/v1",
+ "classification": "RUNTIME/PRICING ENVELOPE DEFECT",
+ "_what_it_is_not": "not an operator failure: depth.causal_kl_greedy_v1 behaved correctly and its deadline check stopped the work rather than running to the cost backstop. Not a scientific result: no hypothesis was tested and no measurement was invalidated. Not a defect in the beam search, which completed.",
+ "what_failed": "Phase-C2 Search-1 attempt 4's conditional baseline_rebuild_reserve was not a valid upper bound for the work the fallback executes under it.",
+ "the_reserve_as_authorized": {
+  "minutes": 27.665,
+  "conditional": true,
+  "stated_basis": "measured",
+  "stated_source": "C1 attempt 18, stage C->D (24.185 min, the shared DEPTH->FFN->RESIDUAL_WIDTH parent from the teacher) plus stage E->F (0.240 min, the treatment ATTENTION step and its materialization), plus the maximum per-candidate canonical-reload/identify/validate/state_eval overhead observed in Phase-B attempt 5 (3.24 min). Stage E is excluded: it replays the INCUMBENT's ATTENTION, which the C2 baseline does not need",
+  "components_as_priced": {
+   "parent_replay_minutes": 24.185,
+   "treatment_step_minutes": 0.24,
+   "state_eval_minutes": 3.24,
+   "minutes": 27.665,
+   "basis": "measured",
+   "source": "C1 attempt 18, stage C->D (24.185 min, the shared DEPTH->FFN->RESIDUAL_WIDTH parent from the teacher) plus stage E->F (0.240 min, the treatment ATTENTION step and its materialization), plus the maximum per-candidate canonical-reload/identify/validate/state_eval overhead observed in Phase-B attempt 5 (3.24 min). Stage E is excluded: it replays the INCUMBENT's ATTENTION, which the C2 baseline does not need",
+   "conditional_on": "spent ONLY if the Search-1 beam does not re-derive B. B's order and ATTENTION mixture are both inside the searched space and the seed is the frozen one, so the expected case is that the search produces B and this reserve is not touched",
+   "attention_step_now_measured": {
+    "seconds": 11.2732,
+    "what_it_tells_us": "attention.activation_importance_v1 took 11.27 s on the narrow post-WIDTH parent. This is the operator's FIRST measured timing and it confirms the search cost model's 1.5x width.global_pca_v0 proxy is conservative for deeper parents by roughly 3x. The proxy is NOT sharpened here: the search may apply this operator at the ROOT, on the full teacher, which remains unmeasured, and re-pricing an accepted envelope downward is a separate decision from adding a reserve the envelope was missing"
+   }
+  },
+  "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json",
+  "_preserved_unchanged": "that document is part of the historical authorization basis for attempts 2, 3 and 4 and is NOT edited. This record is the discrepancy, not a correction of it."
+ },
+ "what_the_fallback_actually_executes": {
+  "mechanism": "materialize_fixed_path over the complete frozen B spec",
+  "steps": [
+   "depth.causal_kl_greedy_v1",
+   "ffn.activation_importance_v0",
+   "width.global_pca_v0",
+   "attention.activation_importance_v1"
+  ],
+  "plus": [
+   "per-step materialization",
+   "canonical reload",
+   "identity/digest checks",
+   "one state_eval of the rebuilt B"
+  ],
+  "under": "ONE deadline, the reserve",
+  "depth_is_derived_not_replayed": "the fixed path does not replay DEPTH's decisions: materialize_fixed_path's own docstring records that it now passes a deadline precisely because depth.causal_kl_greedy_v1 'checks it per candidate' and its work 'is measured in hours'. A step whose expected_artifact_digest is checked on OUTPUT still derives its decisions on the way there."
+ },
+ "the_documents_own_contradiction": {
+  "beam_composition_risk_states": "DEPTH costs 26-34 min wherever it runs",
+  "quoted_from": "the exact structural worst case (636.0 min) minus the DEPTH-early trajectory (300.2 min). `bound()` enumerates every beam composition the ranking policy could return, so the maximum is attained by some ranking and no ranking exceeds it. NOT a contingency: DEPTH costs 26-34 min wherever it runs, and what this prices is how many beam members still owe it. `children_max x mean` is what authorized Phase-B attempt 3 at 1.91-7.51 h for a run that took 9.08 and did not finish",
+  "yet_the_reserve_prices": "24.185 min for the whole DEPTH->FFN->RESIDUAL_WIDTH parent from the teacher",
+  "arithmetic": "24.185 < 26, so the parent-replay figure is below the same document's own lower bound for DEPTH ALONE. One historical wall-clock slice was used as an upper bound for a quantity the document itself describes as a range."
+ },
+ "what_attempt_4_measured": {
+  "complete_depth_derivations": 7,
+  "evals_per_complete_derivation": 260,
+  "_eval_count_is_exact": "rounds 0..7 over 36,35,34,33,32,31,30,29 candidates = 260, observed on every one of the seven",
+  "minutes_min": 21.3,
+  "minutes_mean": 25.871,
+  "minutes_max": 32.9,
+  "rate_range_eval_per_min": [
+   7.05,
+   12.22
+  ],
+  "the_refused_rebuild": {
+   "evals": 196,
+   "minutes": 27.8,
+   "rate": 7.05
+  },
+  "device_memory_at_the_rebuild": "2.6 GiB free, so the 16.9 GiB reference cache held 11 of 67 items (16%) and the rest was recomputed per evaluation. The same line appears throughout the beam, so this was the session's steady state rather than an after-effect of the search."
+ },
+ "the_discrepancy": {
+  "reserve_minutes": 27.665,
+  "depth_alone_observed_max_minutes": 32.9,
+  "depth_alone_exceeded_the_whole_reserve_in": "2 of the 7 complete derivations observed in this very session (32.90 and 32.90 min)",
+  "measured_bound_for_the_complete_path_minutes": 50.705,
+  "shortfall_factor": 1.833,
+  "conclusion": "the reserve was not a valid upper bound for DEPTH + FFN + RESIDUAL_WIDTH + ATTENTION + materialization + canonical reload + identity checks + one state_eval. It was unfundable as specified before attempt 4 started."
+ },
+ "corrected_pricing": {
+  "document": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
+  "pricing_sha256": "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+  "expected_minutes": 39.697,
+  "hard_ceiling_minutes": 65.776,
+  "_scope": "prices the baseline-completion session only; it does not re-price Search-1"
+ },
+ "generalizable_lesson": "a single observation of a variable quantity is not a bound, and a stage-to-stage wall-clock slice is not a proxy for work that slice did not execute. Price a derivation in the unit it is performed in -- here, evaluations -- and divide by the slowest rate observed rather than multiplying an average duration.",
+ "authorizes": "nothing",
+ "self_sha256": "f389350cca7782ca68e48d58ffb252962dce3ef16595dbb51177fa4cf003f121"
+}

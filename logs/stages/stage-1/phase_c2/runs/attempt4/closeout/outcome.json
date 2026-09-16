@@ -55,7 +55,8 @@
    "or let the rebuild REUSE the search's already-materialized DEPTH work instead of re-deriving it, which is a caching-equivalence question and needs an identical-decision proof before it may be trusted",
    "or drop the rebuild from the session and obtain B's state_eval number in a separate, correctly priced run"
   ],
-  "_not_an_autonomous_repair": "each option changes a frozen runtime envelope, the pricing record, or the B-identity mechanism. All three are maintainer decisions, and none may be taken under the campaign decision's engineering-repair authority."
+  "_not_an_autonomous_repair": "each option changes a frozen runtime envelope, the pricing record, or the B-identity mechanism. All three are maintainer decisions, and none may be taken under the campaign decision's engineering-repair authority.",
+  "quantitative_defect_record": "logs/stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json -- the independently derived discrepancy, classified RUNTIME/PRICING ENVELOPE DEFECT: the 27.665 min reserve against a measured 50.705 min bound for the complete path, a shortfall factor of 1.833. Added after the fact; nothing else in this closeout is changed."
  },
  "provider": {
   "pod_id": "vqwg6o4ftpda4b",
