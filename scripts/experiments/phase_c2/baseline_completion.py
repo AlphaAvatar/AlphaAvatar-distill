@@ -59,6 +59,13 @@ SELECTION_RECORD = ("logs/stages/stage-1/phase_c2/runs/attempt4/evidence/"
 ENTRY_POINTS: tuple[str, ...] = (
     "scripts/pod/autoinit_phase_c2_baseline_launch.py",
     "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+    #: The assembler and the issuer, because the code that decides what the
+    #: AUTHORIZATION says belongs to the executable identity that authorization
+    #: binds. Search-1's closure names its own pair for the same reason: an
+    #: issuer outside the digest could change what a grant means without
+    #: changing the digest the grant commits to.
+    "scripts/experiments/phase_c2/baseline_completion_authorization.py",
+    "scripts/autoinit/issue_c2_baseline_completion_authorization.py",
     "scripts/pod/collect_artifacts.py",
 )
 
@@ -69,6 +76,10 @@ ENTRY_POINTS: tuple[str, ...] = (
 DECLARED_INPUTS: tuple[str, ...] = (
     PROTOCOL, PRICING, FROZEN_INPUTS, SELECTION_RECORD,
     "configs/experiments/phase_c2/frozen_assets.json",
+    #: The grant contract's field split and the project cap the issuer checks
+    #: against. Read by the assembler, so its bytes decide what a grant is
+    #: allowed to be.
+    "configs/experiments/phase_c2/baseline_completion_authorization.json",
     "scripts/pod/autoinit_preflight_setup.sh",
 )
 
@@ -102,6 +113,33 @@ def pricing(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
             f"{PRICING} does not match its own pricing_sha256; it has been "
             "edited since it was priced")
     return doc
+
+
+def image_name(repo_root: str | Path = REPO_ROOT) -> str:
+    """The accepted C2 image, from the protocol that BINDS it.
+
+    Not a new constant. The comparability contract already names the image the
+    frozen candidates were measured under, because running the completion on a
+    different one is exactly the kind of change that would make the two halves
+    incomparable. So the launcher's default is that binding, and a drift
+    between them is impossible rather than merely discouraged.
+    """
+    bound = protocol(repo_root)["cross_session_comparability_contract"]["bound"]
+    name = bound.get("image_name")
+    if not name:
+        raise AuthorizationError(
+            f"{PROTOCOL} binds no image_name; the session cannot default to an "
+            "image the comparability contract does not name")
+    return name
+
+
+def gpu_class(repo_root: str | Path = REPO_ROOT) -> str:
+    """The accepted GPU class, from the same binding."""
+    bound = protocol(repo_root)["cross_session_comparability_contract"]["bound"]
+    name = bound.get("gpu_class")
+    if not name:
+        raise AuthorizationError(f"{PROTOCOL} binds no gpu_class")
+    return name
 
 
 def hard_ceiling_usd(repo_root: str | Path = REPO_ROOT) -> float:
@@ -251,11 +289,33 @@ class BaselineCompletionAuthorization(C2Authorization):
                 raise AuthorizationError(
                     f"{path} claims {forbidden}. This session rebuilds one "
                     "checkpoint and measures it once.")
+        #: Mapped EXPLICITLY, not by field name. `as_dict` serialises
+        #: `plan_hash` as `phase_a_session_plan_hash` and `science_plan_hash` as
+        #: `phase_a_science_plan_hash`, so a by-name filter drops both and the
+        #: constructor then fails on a required argument. Every sibling loader
+        #: maps them by hand for the same reason, and reasoning from what this
+        #: subclass NEEDS rather than from what the parent REQUIRES is how a
+        #: session comes to die one step after a gate it passed.
         scope = raw.get("resource_scope")
         return cls(
-            **{k: v for k, v in raw.items()
-               if k in cls.__dataclass_fields__ and k != "resource_scope"},
-            resource_scope=C2ResourceScope.from_dict(scope) if scope else None)
+            authorization_id=raw["authorization_id"],
+            granted_utc=raw["granted_utc"], granted_by=raw["granted_by"],
+            plan_id=raw["plan_id"],
+            plan_hash=raw["phase_a_session_plan_hash"],
+            science_plan_hash=raw["phase_a_science_plan_hash"],
+            expected_usd=float(raw["expected_usd"]),
+            hard_cap_usd=float(raw["hard_cap_usd"]),
+            authorized_stages=tuple(raw["authorized_stages"]),
+            stage_conditions=dict(raw["stage_conditions"]),
+            scope_note=raw["scope_note"],
+            authorized_session_commit=raw.get("authorized_session_commit"),
+            harness_source_digest=raw.get("harness_source_digest"),
+            harness_source_files=tuple(raw.get("harness_source_files") or ()),
+            resource_scope=(C2ResourceScope.from_dict(scope)
+                            if scope is not None else None),
+            per_launch_hard_usd=raw.get("per_launch_hard_usd"),
+            provenance_commit=raw.get("provenance_commit"),
+            version=int(raw.get("version", 1)))
 
 
 def current_executable(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:

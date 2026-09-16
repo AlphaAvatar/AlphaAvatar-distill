@@ -2,13 +2,15 @@
  "schema": "aadistill.autoinit.c2_baseline_completion_closure/v1",
  "_what_this_is": "the executable set a Phase-C2 baseline-completion session would run, derived live by the same import walk every other experiment's closure uses. `derive` RAISES on an unresolved internal import, so a digest existing at all means the set is closed.",
  "_informational_until_an_authorization_binds_it": "no grant or authorization exists for this session, so this digest pins nothing yet. It is here so a reviewer can see WHAT would run and so the authorization step binds a derived figure rather than an invented one.",
- "digest": "1c93cc4e921a122b2e082df22c398e0d382b396a862d26dd1e97f6b9e008cfa0",
- "n_files": 82,
+ "digest": "dad8f72563f843720004aec50ffa83b7bebd1127969dcf61b7adaea610912545",
+ "n_files": 92,
  "unresolved_internal_imports": 0,
  "_unresolved_rule": "zero by construction: aadistill.governance.closure.derive raises ClosureError rather than returning a set smaller than what runs",
  "entry_points": [
   "scripts/pod/autoinit_phase_c2_baseline_launch.py",
   "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+  "scripts/experiments/phase_c2/baseline_completion_authorization.py",
+  "scripts/autoinit/issue_c2_baseline_completion_authorization.py",
   "scripts/pod/collect_artifacts.py"
  ],
  "declared_non_python_inputs": [
@@ -17,6 +19,7 @@
   "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
   "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json",
   "configs/experiments/phase_c2/frozen_assets.json",
+  "configs/experiments/phase_c2/baseline_completion_authorization.json",
   "scripts/pod/autoinit_preflight_setup.sh"
  ],
  "source_roots": [
@@ -26,12 +29,12 @@
   "scripts/autoinit"
  ],
  "by_area": {
-  "configs/experiments": 1,
+  "configs/experiments": 2,
   "logs/stages": 4,
-  "scripts/autoinit": 3,
-  "scripts/experiments": 15,
+  "scripts/autoinit": 4,
+  "scripts/experiments": 20,
   "scripts/pod": 6,
-  "src/aadistill": 53
+  "src/aadistill": 56
  },
  "excludes_the_beam": {
   "checked": [
@@ -45,8 +48,9 @@
  "search_1_closure_for_comparison": {
   "digest": "fdb9e000872a13f72bcd70511441aa1ad390f5f313192a52a352f425cbb2e013",
   "n_files": 85,
-  "_note": "Search-1's digest MOVED this round because the shared setup script gained a branch for this session kind and the comparison builder gained its interpretation parameter. Search-1's chain is consumed and closed, so nothing needs to match its old value; the figure is recorded so a reader is not surprised by it."
+  "_note": "Search-1's digest moves whenever a shared file does -- this round the setup script gained the completion's SESSION_KIND branch and the comparison builder gained its interpretation parameter. Search-1's chain is consumed and closed, so nothing needs to match its old value."
  },
  "authorizes": "nothing",
- "self_sha256": "56e2c7c71e39f0e847524a09dc449f320a63eea911c8f5a573e7e91fa3fcf41f"
+ "_grew_this_round": "the formal plumbing round added the completion's readiness contract, its bundle transport, its authorization assembler and its instance config to what a completion session executes, and the launcher now imports the first two. A larger set is the point: every file the session would run is in the digest a grant binds.",
+ "self_sha256": "5c777997d88a24079406517cd35ea7da6369371a2d117ab9ef4015d07fb62c3c"
 }

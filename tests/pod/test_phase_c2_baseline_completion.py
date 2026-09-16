@@ -890,3 +890,481 @@ def test_no_completion_run_or_authorization_exists_yet():
         "session is authorized")
     assert not list(REPO.glob(
         "logs/stages/**/phase_c2_baseline_completion/**/authorization.json"))
+
+
+# --- 10. the formal launch plumbing ----------------------------------------
+#
+# The seams between the completion session and the generic machinery: the
+# runner's argument contract, run ownership of the session record, a readiness
+# instance that is this experiment's rather than Search-1's, the recorder's
+# registry, an issuer that can produce a loadable artifact, and the bundle
+# round-trip. Each was a deterministic refusal or a wrong-record acceptance
+# before this round.
+
+
+def test_the_completion_parser_satisfies_the_runner_argument_contract():
+    """`SessionRunner.__init__` reads eighteen attributes off the namespace.
+
+    It refuses a namespace missing any of them -- before provider creation, so
+    cheaply, but the invocation is still wasted. Device-canary attempt 1 died at
+    $0.0603 on an attribute a hand-written namespace had and the parser did not,
+    after the pod was billing.
+    """
+    from aadistill.infrastructure.session import (
+        RUNNER_ARGUMENT_CONTRACT, missing_arguments)
+
+    _, args, _ = _completion_spec()
+    assert missing_arguments(args) == [], (
+        "the completion parser does not supply every runner argument")
+    for name in RUNNER_ARGUMENT_CONTRACT:
+        assert hasattr(args, name), name
+    #: The accepted operational identities, from their owners.
+    from experiments.phase_c2 import baseline_completion as BC
+    assert args.gpu == BC.gpu_class(REPO)
+    assert args.image == BC.image_name(REPO)
+    assert args.max_price == BC.price_per_hour_usd(REPO) == 1.09
+
+
+def test_the_session_record_path_is_owned_by_the_run():
+    """No `--out`. `run_id` owns the run, and the record lives inside it."""
+    import autoinit_phase_c2_baseline_launch as L
+
+    with pytest.raises(SystemExit):
+        L.build_parser().parse_args([
+            "--scr", "/tmp/x", "--session-commit", "0" * 40, "--bundle", "b",
+            "--run-id", "attempt5", "--out", "/tmp/elsewhere.json"])
+
+    def out_for(run_id: str) -> str:
+        return L.build_parser().parse_args([
+            "--scr", "/tmp/x", "--session-commit", "0" * 40, "--bundle", "b",
+            "--run-id", run_id]).out
+
+    five, six = out_for("attempt5"), out_for("attempt6")
+    assert five != six, "two runs must not share a session-record path"
+    for run_id, path in (("attempt5", five), ("attempt6", six)):
+        assert path == L.session_record_path(run_id)
+        assert f"/{L.RUN_EXPERIMENT_ID}/runs/{run_id}/" in path, path
+        assert path.endswith("runtime/session.json")
+
+
+def test_storage_has_exactly_one_owner():
+    """The `$0` gate and provider creation must read the same attribute."""
+    import inspect
+
+    import autoinit_phase_c2_baseline_launch as L
+
+    _, args, _ = _completion_spec()
+    assert args.disk_gb == L.COMPLETION_PROVISION_GIB == 60
+    source = inspect.getsource(L.storage_gate)
+    assert "disk_gb" in source
+    assert "volume_gib" not in source, (
+        "the gate reads a flag of its own; it could pass while the pod is "
+        "provisioned from a different number")
+    assert "--volume-gib" not in L.build_parser().format_help()
+
+
+# --- readiness: the completion's own, not Search-1's ------------------------
+
+
+def _completion_readiness(run_id="attempt5", stage_id="1", **overrides) -> dict:
+    """A record shaped like the one the recorder would write, for refusal tests."""
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+
+    record = {
+        "schema": CPE.SCHEMA,
+        "record_kind": CPE.LAUNCH_BOUND,
+        "verdict": "PASS",
+        "problems": [],
+        "completion_harness_digest": CPE.harness_digest(REPO),
+        "completion_harness_n_files": CPE.harness(REPO)["n_files"],
+        "staging_contract_digest": "s" * 64,
+        "swept_base_commit": "0" * 40,
+        "self_sha256": "r" * 64,
+    }
+    record.update(overrides)
+    return record
+
+
+def test_the_completion_readiness_contract_is_its_own():
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from experiments.phase_c2 import pod_environment as SPE
+
+    assert CPE.SCHEMA != SPE.SCHEMA, (
+        "sharing Search-1's schema would let one experiment's readiness record "
+        "satisfy the other's verifier")
+    assert CPE.EXPERIMENT_ID == "phase_c2_baseline_completion"
+
+    sweep = CPE.sweep_contract("attempt5", "1")
+    assert sweep.experiment_id == CPE.EXPERIMENT_ID
+    assert sweep.launcher_module == "autoinit_phase_c2_baseline_launch"
+    assert sweep.session_id == "autoinit-phase-c2-baseline-completion"
+    assert sweep.harness_n_files_field == "completion_harness_n_files"
+    assert sweep.record.harness_field == "completion_harness_digest"
+
+    #: The harness is the LIVE completion closure, not Search-1's.
+    from experiments.phase_c2 import baseline_completion as BC
+    from experiments.phase_c2.session import c2_harness_digest
+    assert sweep.harness(REPO)["digest"] == BC.executable_digest(REPO)
+    assert sweep.harness(REPO)["digest"] != c2_harness_digest(REPO)["digest"]
+
+    #: Run-owned, and there is no phase-level path to fall back to.
+    path = CPE.record_path_for("attempt5", "1")
+    assert f"/{CPE.EXPERIMENT_ID}/runs/attempt5/" in path
+    with pytest.raises(CPE.ReadinessError):
+        CPE.record_path_for(None)
+
+
+def test_a_search_1_readiness_record_cannot_satisfy_the_completion():
+    """The schema is the refusal, and it is checked before anything else."""
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from experiments.phase_c2 import pod_environment as SPE
+
+    foreign = _completion_readiness(schema=SPE.SCHEMA)
+    ok, reason = CPE.verify_record(
+        foreign, REPO, run_id="attempt5", stage_id="1",
+        required_kind=CPE.LAUNCH_BOUND)
+    assert ok is False
+    assert "schema" in reason.lower(), reason
+
+
+def test_the_generic_recorder_resolves_the_completion_experiment():
+    """One registry entry, and everything it needs comes through it."""
+    import record_pod_environment as R
+
+    assert "phase_c2_baseline_completion" in R.EXPERIMENTS
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    sweep = R.sweep_contract("phase_c2_baseline_completion", "attempt5", "1",
+                             CPE.LAUNCH_BOUND)
+    assert sweep.experiment_id == "phase_c2_baseline_completion"
+    #: It can LOAD the completion launcher and derive the completion staging
+    #: contract from that launcher's own manifest -- which is what the sweep
+    #: does, and what would otherwise have been derived from Search-1's.
+    launcher = R.launcher_module(sweep.launcher_module)
+    args = launcher.build_parser().parse_args([
+        "--scr", "/tmp/x", "--session-commit", "0" * 40,
+        "--bundle", "aad_autoinit_00000000.bundle", "--run-id", "attempt5"])
+    from aadistill.runtime.staging_contract import derive_contract
+    contract = derive_contract(launcher.spec(args).setup,
+                               session_id=sweep.session_id)
+    assert contract["digest"]
+    from experiments.phase_c2 import baseline_completion as BC
+    assert sweep.harness(REPO)["digest"] == BC.executable_digest(REPO)
+    assert "/phase_c2_baseline_completion/runs/attempt5/" in sweep.record.record_path
+
+
+# --- the issuer -------------------------------------------------------------
+
+
+def _synthetic_grant(**overrides) -> dict:
+    """A grant shaped as the contract requires, with identities DERIVED.
+
+    Synthetic and tmp-path only: no real grant is written this round. The
+    identities are taken from the live derivation deliberately -- a grant that
+    asserted stale ones is a separate refusal with its own test.
+    """
+    from experiments.phase_c2 import baseline_completion_authorization as BCA
+
+    live = BCA.live_identities(REPO)
+    grant = {
+        "granted_by": "a synthetic maintainer decision, for tests only",
+        "covers": "one baseline completion",
+        "explicitly_not_authorized": ["the Search-1 beam", "Search-2"],
+        "approved_money": {"hard_cap_usd": live["_hard_ceiling_usd"]},
+        "one_use": {"issuances_permitted": 1, "launch_attempts_permitted": 1,
+                    "provider_resources_permitted": 2,
+                    "one_billing_resource_at_a_time": True},
+        "budget_context_at_approval": {"cumulative_spend_usd": 296.8185,
+                                       "authorized_cap_usd": 320.0},
+        "bound_identities_the_issuer_must_reproduce": {
+            k: v for k, v in live.items() if not k.startswith("_")},
+    }
+    grant.update(overrides)
+    return grant
+
+
+def _issue(monkeypatch, tmp_path, grant=None, run_id="attempt5"):
+    from experiments.phase_c2 import baseline_completion_authorization as BCA
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+
+    #: The readiness record is STUBBED, not written: creating one at the real
+    #: path would create attempt5 as a run, and no completion run is authorized.
+    monkeypatch.setattr(CPE, "load_record",
+                        lambda *a, **k: _completion_readiness(run_id))
+    return BCA.build_payload(
+        grant=grant if grant is not None else _synthetic_grant(),
+        session_commit="1" * 40, granted_utc="2026-09-17T00:00:00+00:00",
+        run_id=run_id, stage_id="1", repo_root=REPO,
+        grant_path=str(tmp_path / "grant.json"))
+
+
+def test_the_issuer_builds_an_artifact_the_completion_type_loads(monkeypatch, tmp_path):
+    from experiments.phase_c2 import baseline_completion as BC
+
+    payload = _issue(monkeypatch, tmp_path)
+    path = tmp_path / "authorization.json"
+    path.write_text(json.dumps(payload, indent=1))
+
+    auth = BC.BaselineCompletionAuthorization.load(path)
+    assert auth.authorizes_c2_baseline_completion is True
+    assert auth.authorizes_c2_search1 is False
+    assert auth.allows_phase_a is False
+    assert auth.allows_recovery_training is False
+    assert auth.automatic_followon_start is False
+    assert auth.hard_cap_usd == 1.1950
+    assert auth.plan_hash == BC.plan_hash(REPO)
+    assert auth.harness_source_digest == BC.executable_digest(REPO)
+    assert tuple(auth.harness_source_files) == tuple(
+        row["path"] for row in BC.current_executable(REPO)["files"])
+    assert auth.resource_scope.run_id == "attempt5"
+
+
+def test_the_issued_artifact_reproduces_every_derived_identity(monkeypatch, tmp_path):
+    from experiments.phase_c2 import baseline_completion as BC
+    from experiments.phase_c2 import baseline_completion_authorization as BCA
+
+    payload = _issue(monkeypatch, tmp_path)
+    bound, live = payload["bound"], BCA.live_identities(REPO)
+    for key in ("completion_harness_digest", "completion_harness_n_files",
+                "completion_plan_hash", "completion_pricing_sha256",
+                "baseline_spec_hash", "baseline_artifact_digest",
+                "frozen_candidates_self_sha256",
+                "search1_selection_commitment_sha256"):
+        assert bound[key] == live[key], key
+    assert bound["expected_usd"] == 0.7212
+    assert bound["price_per_hour_usd"] == 1.09
+    assert payload["hard_cap_usd"] == 1.1950
+    #: And the artifact's own hash covers all of it.
+    assert payload["authorization_sha256"] == sha256_json(
+        {k: v for k, v in payload.items() if k != "authorization_sha256"})
+
+
+def test_the_issuer_refuses_a_grant_that_asserts_a_stale_identity(monkeypatch, tmp_path):
+    from experiments.phase_c2.baseline_completion_authorization import (
+        CompletionAuthorizationRefused)
+
+    grant = _synthetic_grant()
+    grant["bound_identities_the_issuer_must_reproduce"][
+        "completion_harness_digest"] = "0" * 64
+    with pytest.raises(CompletionAuthorizationRefused, match="disagree"):
+        _issue(monkeypatch, tmp_path, grant)
+
+
+def test_the_issuer_refuses_an_identity_it_cannot_derive(monkeypatch, tmp_path):
+    """A grant may not introduce a binding nobody checks."""
+    from experiments.phase_c2.baseline_completion_authorization import (
+        CompletionAuthorizationRefused)
+
+    grant = _synthetic_grant()
+    grant["bound_identities_the_issuer_must_reproduce"]["invented_identity"] = "x"
+    with pytest.raises(CompletionAuthorizationRefused, match="cannot derive"):
+        _issue(monkeypatch, tmp_path, grant)
+
+
+def test_the_issuer_refuses_a_search_1_readiness_record(monkeypatch, tmp_path):
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from experiments.phase_c2 import pod_environment as SPE
+    from experiments.phase_c2.baseline_completion_authorization import (
+        CompletionAuthorizationRefused, build_payload)
+
+    monkeypatch.setattr(CPE, "load_record",
+                        lambda *a, **k: _completion_readiness(schema=SPE.SCHEMA))
+    with pytest.raises(CompletionAuthorizationRefused, match="schema"):
+        build_payload(grant=_synthetic_grant(), session_commit="1" * 40,
+                      granted_utc="2026-09-17T00:00:00+00:00",
+                      run_id="attempt5", stage_id="1", repo_root=REPO)
+
+
+def test_the_issuer_refuses_a_diagnostic_readiness_record(monkeypatch, tmp_path):
+    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from experiments.phase_c2.baseline_completion_authorization import (
+        CompletionAuthorizationRefused, build_payload)
+
+    monkeypatch.setattr(CPE, "load_record",
+                        lambda *a, **k: _completion_readiness(record_kind="diagnostic"))
+    with pytest.raises(CompletionAuthorizationRefused, match="launch_bound"):
+        build_payload(grant=_synthetic_grant(), session_commit="1" * 40,
+                      granted_utc="2026-09-17T00:00:00+00:00",
+                      run_id="attempt5", stage_id="1", repo_root=REPO)
+
+
+def test_the_completion_config_states_only_what_the_mechanism_needs():
+    from experiments.phase_c2.baseline_completion_authorization import load_config
+
+    cfg = load_config(REPO)
+    assert cfg["authorizes"] == "nothing"
+    #: The project cap the arithmetic needs, and NOT this session's own prices:
+    #: those have canonical owners the issuer derives from.
+    assert set(cfg["accepted_pricing"]) == {"_why_only_the_cap",
+                                            "cumulative_cap_usd"}
+    assert cfg["accepted_pricing"]["cumulative_cap_usd"] == 320.0
+    #: On the VALUES, not on the document's text: the prose deliberately names
+    #: $15.0446 in order to say it is NOT reused, and a substring check would
+    #: fail on its own explanation. This is the third time that trap has been
+    #: hit in this package; asserting on parsed values is the fix.
+    def strip_prose(node):
+        if isinstance(node, dict):
+            return {k: strip_prose(v) for k, v in node.items()
+                    if not k.startswith("_")}
+        if isinstance(node, list):
+            return [strip_prose(v) for v in node]
+        return node
+    values = json.dumps(strip_prose(cfg))
+    for figure in ("15.0446", "1.1950", "0.7212"):
+        assert figure not in values, (
+            f"{figure} has a canonical owner; restating it here creates a "
+            "second place to edit")
+    #: Same rule: the `_no_reviewed_commit` key explains why there is no such
+    #: verified identity, so the phrase legitimately appears in prose.
+    def without_prose(node):
+        if isinstance(node, dict):
+            return {k: without_prose(v) for k, v in node.items()
+                    if not k.startswith("_")}
+        if isinstance(node, list):
+            return [without_prose(v) for v in node]
+        return node
+    assert "reviewed_commit" not in json.dumps(without_prose(cfg))
+
+
+# --- the bundle round-trip --------------------------------------------------
+
+
+def test_the_completion_transport_binds_the_completion_authorization_and_closure():
+    from experiments.phase_c2 import baseline_completion as BC
+    from experiments.phase_c2 import baseline_completion_bundle as BCT
+    from experiments.phase_c2 import bundle as SEARCH1_BUNDLE
+
+    digest, files = BCT.completion_executable_set(REPO)
+    assert digest == BC.executable_digest(REPO)
+    assert tuple(files) == tuple(row["path"] for row in
+                                 BC.current_executable(REPO)["files"])
+    #: A DIFFERENT set from Search-1's, which is the point: a bundle verified
+    #: against the wrong closure would pass while carrying the wrong code.
+    search1_digest, _ = SEARCH1_BUNDLE.c2_executable_set(REPO)
+    assert digest != search1_digest
+
+    #: The relay and prefix are shared; the label is not.
+    assert BCT.COMPLETION_TRANSPORT.relay_repo == "AlphaAvatar/aadistill-artifacts"
+    assert BCT.COMPLETION_TRANSPORT.transfer_prefix == "transfer"
+    assert BCT.COMPLETION_TRANSPORT.label != SEARCH1_BUNDLE.C2_TRANSPORT.label
+    assert BCT.canonical_bundle_name("a" * 40) == "aad_autoinit_aaaaaaaa.bundle"
+
+
+def test_the_launcher_gates_include_the_bundle_round_trip():
+    _, _, spec = _completion_spec()
+    names = [getattr(g, "__name__", type(g).__name__) for g in spec.precheck]
+    assert "bundle_staged_gate" in names, (
+        "the pod downloads the relay object before any scientific stage; a "
+        "launch that never asked whether it exists is C1 attempt 1")
+    #: LAST, because it is the only gate that touches the network.
+    assert names[-1] == "bundle_staged_gate"
+    for required in ("session_commit_and_lineage", "completion_executable_gate",
+                     "completion_scope_gate", "frozen_inputs_gate",
+                     "frozen_assets_gate", "pricing_and_plan_gate",
+                     "storage_gate", "readiness_gate"):
+        assert required in names, required
+
+
+def test_the_bundle_gate_uses_the_completion_transport():
+    import inspect
+
+    import autoinit_phase_c2_baseline_launch as L
+
+    source = inspect.getsource(L.bundle_staged_gate)
+    assert "BCT." in source, "the gate must use the completion transport"
+    assert "BUNDLE." not in source, (
+        "that is Search-1's transport: it re-derives the Search-1 closure and "
+        "resolves the Search-1 authorization path")
+
+
+# --- attempt-4's evidence must not have moved ------------------------------
+
+
+def test_attempt_4_frozen_evidence_bytes_are_unchanged():
+    """The accepted science is closed. Nothing this round may touch it."""
+    import subprocess
+
+    for path in ("logs/stages/stage-1/phase_c2/runs/attempt4/evidence/"
+                 "stage1_selection.json",
+                 "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/"
+                 "c2_frozen_comparison_inputs.json",
+                 "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/"
+                 "telemetry.jsonl"):
+        out = subprocess.run(["git", "diff", "--name-only",
+                              "6c6c699cef62b1190b441bc2e51ea6ca99f5d15e", "--",
+                              path], cwd=REPO, capture_output=True, text=True)
+        assert out.returncode == 0, out.stderr
+        assert not out.stdout.strip(), f"{path} changed since the reviewed HEAD"
+
+    #: And the values themselves still reproduce their own commitments.
+    record = load_record(FROZEN)
+    selection = json.loads((RUN / "evidence/stage1_selection.json").read_text())
+    assert record["sources"]["selection_commitment_sha256"] == selection[
+        "selection_sha256"]
+    assert len(record["candidates_in_committed_order"]) == 5
+
+
+# --- 11. the CURRENT snapshot must not tell two histories ------------------
+
+
+SNAPSHOT = REPO / "logs/state/current.json"
+
+
+def test_the_latest_run_outcome_is_derived_from_that_runs_own_closeout():
+    """The field that says WHAT HAPPENED must come from the run it names.
+
+    It was the one hand-maintained field inside a derived block, so the block
+    advanced its run id to attempt 4 while carrying attempt 2's outcome: the
+    snapshot said "search complete, $6.0785" in one place and "PRE-SCIENCE
+    ABORT at setup, $0.0552" in another, about the same run.
+    """
+    snapshot = json.loads(SNAPSHOT.read_text())
+    latest = snapshot["latest_run"]
+    closeout = json.loads(
+        (REPO / latest["root"] / "closeout/outcome.json").read_text())
+
+    assert latest["run_id"] in latest["root"]
+    assert closeout["attempt"] == latest["run_id"], (
+        "the closeout read is not the named run's")
+    #: The outcome must be THIS run's classification and cost.
+    assert closeout["classification"].rstrip(". ") in latest["outcome"]
+    cost = closeout["budget"]["this_attempt"]
+    assert f"${float(cost):.4f}" in latest["outcome"]
+    #: And specifically not an earlier attempt's.
+    assert "0.0552" not in latest["outcome"], (
+        "attempt 2's cost is attached to a later run")
+
+
+def test_the_snapshot_does_not_contradict_itself_about_attempt_4():
+    snapshot = json.loads(SNAPSHOT.read_text())
+    c2 = snapshot["phase_c"]["c2"]
+    latest = snapshot["latest_run"]
+
+    #: One history: the search completed and the comparison did not.
+    assert "SEARCH COMPLETE" in c2["status"]
+    assert "SEARCH COMPLETE" in latest["outcome"].upper()
+    for stale in ("PRE-SCIENCE INFRASTRUCTURE ABORT at setup",
+                  "nothing measured"):
+        assert stale not in latest["outcome"], stale
+
+    #: The accepted ruling is recorded as accepted, not as owed.
+    nxt = json.dumps(snapshot["next_starting_point"])
+    assert "ACCEPTED" in nxt
+    assert "ruling on the not-yet-quantified" not in nxt, (
+        "the cross-session ruling is accepted and recorded in the protocol")
+    #: And the completion is prepared but not authorized, in both places.
+    assert snapshot["prepared_launch"]["any"] is False
+    assert "NOT AUTHORIZED" in c2["baseline_completion"]
+
+
+def test_the_renderer_reports_a_missing_closeout_rather_than_inheriting_one(tmp_path):
+    """A run with no closeout says so. Nothing is carried over."""
+    sys.path.insert(0, str(REPO / "scripts"))
+    from consolidate.render_log_navigation import _run_outcome
+
+    assert "no closeout" in _run_outcome(tmp_path, "runs/attempt9", recorded=True)
+    assert "no run root" in _run_outcome(tmp_path, None, recorded=True)
+
+    #: And a real closeout is read through, classification and cost together.
+    outcome = _run_outcome(
+        REPO, "logs/stages/stage-1/phase_c2/runs/attempt4", recorded=True)
+    assert "SEARCH COMPLETE" in outcome and "$6.0785" in outcome

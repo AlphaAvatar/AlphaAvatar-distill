@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T07:07:33+00:00",
+  "created_utc": "2026-09-16T08:04:45+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1126,
-    "bytes": 43711384,
+    "bytes": 43713054,
     "by_disposition": {
       "keep_canonical": 79,
       "keep_immutable": 870,
@@ -4213,8 +4213,8 @@
     },
     {
       "path": "docs/POD_SCRIPTS.md",
-      "size_bytes": 13390,
-      "sha256": "d34f6035e2f3a559d0cea7fe0f6b5725fe48a8ffe6374fd79070446db59ec46e",
+      "size_bytes": 14602,
+      "sha256": "26a38cfcd86fc54e0a62fcfa2c01e9f97eccb8b4d1fc743f251a24c48df46724",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17111,8 +17111,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
-      "size_bytes": 2730,
-      "sha256": "0efcbe5b519e873785c521b2aaf140fbe25a617e438dcbb98d3b719d60030a64",
+      "size_bytes": 3247,
+      "sha256": "0dc8fbb42348a2980785d153aff66dde314b11eba95c2c664538483f2c0500a4",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17160,6 +17160,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "configs/experiments/phase_c2/baseline_completion_authorization.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json",
@@ -17180,6 +17181,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "configs/experiments/phase_c2/baseline_completion_authorization.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
         "scripts/experiments/phase_c2/baseline_completion.py",
@@ -17886,6 +17888,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "configs/experiments/phase_c2/baseline_completion_authorization.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
         "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json"
@@ -17931,6 +17934,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "configs/experiments/phase_c2/baseline_completion_authorization.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json"
       ],
@@ -21402,8 +21406,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11994,
-      "sha256": "4a5cd70bbe18668f25adc963dbb928afd982aca6e96ba87b9754ea1bd7dfb7ca",
+      "size_bytes": 11935,
+      "sha256": "90769c0f4fe8ae706f0cc72e6e296afc83043cfe6eaec925b19ea49af8af9ee2",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -21423,6 +21427,7 @@
         "tests/docs/test_log_organisation.py",
         "tests/docs/test_repository_structure.py",
         "tests/pod/test_continuation_b_one_probe_contract.py",
+        "tests/pod/test_phase_c2_baseline_completion.py",
         "tests/runtime/test_run_layout_all_stages.py"
       ],
       "referenced_by_executable": [
@@ -21435,6 +21440,7 @@
         "tests/docs/test_log_organisation.py",
         "tests/docs/test_repository_structure.py",
         "tests/pod/test_continuation_b_one_probe_contract.py",
+        "tests/pod/test_phase_c2_baseline_completion.py",
         "tests/runtime/test_run_layout_all_stages.py"
       ],
       "duplicate_of": null,

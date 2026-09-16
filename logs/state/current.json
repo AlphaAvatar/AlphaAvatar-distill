@@ -11,7 +11,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch; MONEY bounds the sessions, see budget. Attempts 10-18 consumed $22.6176 and attempt 18's GO verdict ended the round. This package is C1's; C2 ran under the 2026-09-16 campaign decision, whose envelope is now exhausted for a full attempt.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch; MONEY bounds the sessions. Attempts 10-18 consumed $22.6176 and attempt 18's GO verdict ended the round. This package is C1's; C2 ran under the 2026-09-16 campaign decision.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -21,7 +21,7 @@
   "any": false,
   "experiment": "phase_c2 baseline completion",
   "run": null,
-  "note": "a baseline-completion PACKAGE is prepared and NOT AUTHORIZED: protocol, pricing ($0.7212 expected, $1.1950 hard ceiling at $1.09/h), frozen candidate side, driver and a thin launcher whose authorization type reports authorizes_c2_search1=False. NO grant, authorization, bundle or run directory; the next run identity would be attempt5. No budget increase is requested and the rate boundary is unchanged. Owner: phase_c.c2.baseline_completion."
+  "note": "a baseline-completion PACKAGE is prepared and NOT AUTHORIZED: $0.7212 expected, $1.1950 hard ceiling at $1.09/h, with its own authorization type reporting authorizes_c2_search1=False. NO grant, readiness record, authorization, bundle or run directory; the next run identity would be attempt5. No budget increase is requested. Owner: phase_c.c2.baseline_completion."
  },
  "budget": {
   "cumulative_spend_usd": 296.8185,
@@ -75,8 +75,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE and CLOSED (attempt 18, GO, $10.2018). C2 Search-1: the beam search has been executed and its ranking is durable; the B->C comparison record does not exist.",
-  "then": "a maintainer decision authorizing the baseline-completion session, and a ruling on the not-yet-quantified cross-session numerical margin. See prepared_launch and phase_c.c2.baseline_completion; nothing else is owed.",
+  "status": "C1 COMPLETE and CLOSED (attempt 18, GO). C2 Search-1 attempt4: search complete, B comparison incomplete -- owned by latest_run and phase_c.c2. Baseline completion: PREPARED, NOT AUTHORIZED, NOT RUN.",
+  "then": "the maintainer's Attempt-5 decision, then the real chain: grant -> launch_bound readiness -> authorization -> bundle -> baseline completion. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule and is no longer an open question; all formal plumbing is executable.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -120,7 +120,7 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "SEARCH COMPLETE, COMPARISON NOT RUN -- SEARCH-1 INCOMPLETE. attempt4's beam ran to completion (7 complete leaves, 5 committed and journal-verified); the conditional baseline rebuild then hit its allowance, so B carries no measurement and the five candidates have objective values with nothing to compare against. NOT a null result. The beam is NOT rerun; see baseline_completion. attempts 1-3 measured nothing.",
+   "status": "SEARCH COMPLETE, COMPARISON NOT RUN -- SEARCH-1 INCOMPLETE. attempt4's beam ran to completion (7 complete leaves, 5 committed and journal-verified) and B carries no measurement, so the five candidates have objective values with nothing to compare against. NOT a null result. The beam is NOT rerun; see baseline_completion. Per-attempt outcomes are derived in latest_run and owned by each run's closeout.",
    "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
    "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
@@ -129,7 +129,7 @@
    "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both.",
    "runtime_partition": "beam 635.96 min; baseline_rebuild_reserve 27.665 min -- MEASURED INSUFFICIENT; 30 min artifact recovery. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json, preserved unchanged as the historical authorization basis.",
    "attempt4_root_cause": "the 27.665-min baseline_rebuild_reserve could not fund the complete frozen path: DEPTH alone is 260 evaluations, observed at 21.30-32.90 min. RUNTIME/PRICING ENVELOPE DEFECT; owner analyses/c2_baseline_reserve_defect.json.",
-   "baseline_completion": "PREPARED, NOT AUTHORIZED. Protocol 9f566eb6f8d71d57, closure 1c93cc4e921a122b over 82 files with no Search-1 module in it. Establish B once through the complete frozen fixed path, measure it once on the same suite with the evaluator primed by that same teacher object, compute the preregistered B->C comparison against the frozen candidates. No beam, no new candidate, no C remeasured. Cross-session comparison ACCEPTED for this cheap-metric use subject to the 0.007782 disclosure threshold, which is the tightest observed C-to-C gap and NOT a noise estimate."
+   "baseline_completion": "PREPARED, NOT AUTHORIZED, NOT RUN. Protocol 9f566eb6f8d71d57; its own closure, readiness contract, authorization type, assembler/issuer and bundle transport all exist, and neither driver nor launcher can reach a search entry point. Establish B once, measure it once, compare against the frozen candidates. Cross-session cheap-metric comparison ACCEPTED under the 0.007782 disclosure threshold, which is the tightest observed C-to-C gap and NOT a noise estimate. Owner: the protocol."
   }
  },
  "storage": {
@@ -150,7 +150,7 @@
   "experiment_id": "phase_c2",
   "run_id": "attempt4",
   "root": "logs/stages/stage-1/phase_c2/runs/attempt4",
-  "outcome": "recorded; PRE-SCIENCE INFRASTRUCTURE ABORT at setup, $0.0552, nothing measured",
+  "outcome": "recorded; SEARCH COMPLETE, COMPARISON NOT RUN \u2014 SEARCH-1 INCOMPLETE. FORMAL MEASUREMENT BEGAN, SO NO AUTONOMOUS RETRY, $6.0785",
   "index": "logs/index.json",
   "last_executed": "logs/stages/stage-1/phase_c2/runs/attempt4",
   "state": "recorded: the run wrote its own manifest"

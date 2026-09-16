@@ -38,7 +38,9 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -53,12 +55,19 @@ from aadistill.infrastructure.session import (  # noqa: E402
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     session_commit_gate)
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
-from aadistill.runtime.pod_environment import LAUNCH_BOUND  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
     derive_contract, ignores_for_selection)
 from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
 from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 from experiments.phase_c2 import baseline_completion as BC  # noqa: E402
+from experiments.phase_c2 import baseline_completion_bundle as BCT  # noqa: E402
+#: The COMPLETION's readiness instance, not the generic runtime module. The
+#: generic module owns the mechanism; which experiment, which schema, which
+#: harness and which staging contract are this experiment's own facts.
+from experiments.phase_c2 import (  # noqa: E402
+    baseline_completion_pod_environment as CPE)
+from experiments.phase_c2.baseline_completion_pod_environment import (  # noqa: E402
+    LAUNCH_BOUND)
 from experiments.phase_c2.frozen_assets import STATE_EVAL_ASSET  # noqa: E402
 from experiments.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, claim_output_root, open_run, record_run,
@@ -101,7 +110,39 @@ TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
 #: GiB), the repository and the venv. No beam, so no 87 GiB of retained search
 #: states -- which is why this asks for a fraction of Search-1's volume.
 PEAK_WORKING_GIB = 32.0
-MIN_VOLUME_GIB = 60
+#: The provision, and the ONE storage value in this session. The `$0` gate and
+#: provider creation both read `args.disk_gb`; there is no second knob that
+#: could pass the gate and provision something else.
+COMPLETION_PROVISION_GIB = 60
+
+
+def session_record_path(run_id: str) -> str:
+    """Where THIS run's session record goes, repository-relative.
+
+    ONE rule, called by the parser's `--run-id` action and again by `main`, so
+    the path the runner writes and the directory the run was opened in cannot
+    disagree.
+    """
+    return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
+            f"/{COMPLETION_RUN_ROLES['session_record']}")
+
+
+class _RunIdSetsOut(argparse.Action):
+    """`--run-id` also produces `out`, because the RUNNER reads `out`.
+
+    `SessionRunner.save()` writes `args.out`, and the argument contract requires
+    every attribute the runner reads to come from the REAL parser -- device
+    canary attempt 1 died at $0.0603 on an attribute a hand-written namespace
+    had and the parser did not, after the pod was billing.
+
+    Deriving it here keeps both properties at once: the namespace is complete,
+    and there is no `--out` flag that could point this attempt's session record
+    at another run or at an arbitrary repository path.
+    """
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        setattr(namespace, self.dest, value)
+        namespace.out = session_record_path(value)
 
 
 def auth_path_for(run_id: str) -> str:
@@ -233,45 +274,62 @@ def pricing_and_plan_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 
 def storage_gate(ctx: SessionContext) -> tuple[bool, str]:
-    """A volume that cannot hold the B path is refused before it is paid for."""
-    requested = int(getattr(ctx.args, "volume_gib", 0) or 0)
-    if requested < MIN_VOLUME_GIB:
-        return False, (f"--volume-gib {requested} is below the {MIN_VOLUME_GIB} "
-                       f"this session needs for a {PEAK_WORKING_GIB:.1f} GiB peak "
-                       "working set plus the repository, the venv and the teacher")
-    return True, (f"volume {requested} GiB >= {MIN_VOLUME_GIB} for a "
+    """A volume that cannot hold the B path is refused before it is paid for.
+
+    Reads `disk_gb` -- the same attribute provider creation reads. A gate that
+    checked its own flag would be a gate that can pass while the pod is
+    provisioned from a different number.
+    """
+    requested = int(getattr(ctx.args, "disk_gb", 0) or 0)
+    if requested < COMPLETION_PROVISION_GIB:
+        return False, (
+            f"--disk-gb {requested} is below the completion provision of "
+            f"{COMPLETION_PROVISION_GIB} GiB. This session holds the teacher in "
+            f"bf16, the four materialized steps of the B path and one "
+            f"measurement at once -- {PEAK_WORKING_GIB:.1f} GiB -- plus the "
+            "checkout and the venv. A volume that fills mid-rebuild loses the "
+            "rebuild.")
+    return True, (f"volume {requested} GiB >= {COMPLETION_PROVISION_GIB} for a "
                   f"{PEAK_WORKING_GIB:.1f} GiB peak working set")
 
 
 def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
-    """A launch-bound sweep, taken for THIS run, describing THIS tree.
+    """A launch-bound sweep taken for THIS run, of THIS session.
 
-    The same mechanism every session uses, asked of this run's own record. A
-    diagnostic sweep proves the machinery works; only a launch-bound one claims
-    to describe the tree a launch will use.
+    Asked through the completion's own readiness instance. The launcher used to
+    call the GENERIC runtime module's `record_path_for` and `load_record`, which
+    resolve under whatever experiment the generic default names -- so a record
+    written for Search-1 would have been found, verified against Search-1's
+    harness and Search-1's staging contract, and reported as this session's
+    readiness. The schema alone now refuses that.
     """
-    from aadistill.runtime import pod_environment as PE
-
     run_id = getattr(ctx.args, "run_id", None)
     if not run_id:
         return False, "this session has no run_id, so it owns no readiness record"
-    record_rel = PE.record_path_for(run_id, RUN_STAGE_ID)
     try:
-        record = PE.load_record(REPO_ROOT, run_id=run_id, stage_id=RUN_STAGE_ID)
+        record_rel = CPE.record_path_for(run_id, RUN_STAGE_ID)
+    except CPE.ReadinessError as exc:
+        return False, str(exc)
+    try:
+        record = CPE.load_record(REPO_ROOT, run_id=run_id, stage_id=RUN_STAGE_ID)
     except FileNotFoundError:
         return False, (
             f"{record_rel} does not exist: no pod-like sweep has been recorded "
-            "for this run. Take one on the clean pre-authorization tree with "
-            "`record_pod_environment.py --kind launch_bound --run-id "
-            f"{run_id} --stage-id {RUN_STAGE_ID}`.")
+            "for this run. Take one on the clean grant-containing tree with "
+            "`record_pod_environment.py --experiment "
+            f"{CPE.EXPERIMENT_ID} --kind {LAUNCH_BOUND} --run-id {run_id} "
+            f"--stage-id {RUN_STAGE_ID}`.")
     except Exception as exc:                                    # noqa: BLE001
         return False, f"cannot read {record_rel}: {exc}"
+
     try:
+        #: Derived from THIS session's own manifest, under THIS session's id.
         live_staging = derive_contract(
             spec(ctx.args).setup, session_id=BC.SESSION_ID)["digest"]
     except Exception as exc:                                    # noqa: BLE001
         return False, f"cannot derive this session's staging contract: {exc}"
-    ok, reason = PE.verify_record(
+
+    ok, reason = CPE.verify_record(
         record, REPO_ROOT, run_id=run_id, stage_id=RUN_STAGE_ID,
         session_commit=getattr(ctx.args, "session_commit", None),
         authorization_path=auth_path_for(run_id),
@@ -281,12 +339,89 @@ def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
         "verdict": "PASS" if ok else "FAIL",
         "record": record_rel,
         "record_self_sha256": record.get("self_sha256"),
+        "record_schema": record.get("schema"),
+        "required_schema": CPE.SCHEMA,
         "record_kind": record.get("record_kind"),
         "required_record_kind": LAUNCH_BOUND,
+        "experiment": CPE.EXPERIMENT_ID,
+        "session_commit": getattr(ctx.args, "session_commit", None),
+        "permitted_post_sweep_paths": [record_rel, auth_path_for(run_id)],
         "live_staging_contract_digest": live_staging,
         "recorded_staging_contract_digest": record.get("staging_contract_digest"),
+        "live_completion_harness_digest": CPE.harness_digest(REPO_ROOT),
+        "recorded_completion_harness_digest": record.get(
+            "completion_harness_digest"),
     }
     return ok, reason
+
+
+def bundle_record_for(run_id: str) -> str:
+    """Where this run's staged-bundle record lives."""
+    return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
+            f"/{COMPLETION_RUN_ROLES['bundle_record']}")
+
+
+def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Can a pod, RIGHT NOW, obtain the exact authorized code?
+
+    The pod's setup downloads the relay object and checks out from it before any
+    scientific stage, so every other gate verifies the CONTENTS of a commit and
+    this one asks whether the pod can reach it at all. C1 attempt 1 answered
+    every other question correctly and died at `SETUP_RC=1` fetching an alias
+    for nothing.
+
+    Read-only: it uploads nothing. Preparation is a separate command, so what
+    this verifies is the relay's state rather than a side effect of its own
+    verification. The round-trip is the generic one, driven by the COMPLETION's
+    transport spec -- so the authorization it looks for inside the bundle is
+    this session's, and the digest it requires is the completion closure's.
+    """
+    run_id = getattr(ctx.args, "run_id", None)
+    commit = ctx.args.session_commit
+    try:
+        BCT.require_canonical_bundle_arg(ctx.args.bundle, commit)
+    except BCT.BundleTransportError as exc:
+        return False, str(exc)
+
+    bundle_rel = bundle_record_for(run_id)
+    staged = REPO_ROOT / bundle_rel
+    if not staged.is_file():
+        return False, (f"{bundle_rel} is missing; stage the canonical bundle for "
+                       f"{commit[:12]}… first")
+    record = json.loads(staged.read_text())
+    if record.get("session_commit") != commit:
+        return False, (f"{bundle_rel} describes a bundle for "
+                       f"{str(record.get('session_commit'))[:12]}…, not the "
+                       f"session commit {commit[:12]}…")
+
+    auth_rel = auth_path_for(run_id)
+    auth_file = REPO_ROOT / auth_rel
+    if not auth_file.is_file():
+        return False, (f"{auth_rel} does not exist, so there is no authorization "
+                       "for the round-trip to find inside the bundle")
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = BCT.roundtrip(
+                session_commit=commit,
+                local_bundle_sha256=record["sha256"],
+                authorization_bytes=auth_file.read_bytes(),
+                authorization_path=auth_rel,
+                #: The AUTHORIZED pair, not the live one.
+                #: `completion_executable_gate` has already required the two to
+                #: agree; asking the round-trip about the live digest instead
+                #: would make a stale authorization unfalsifiable here.
+                expected_harness_digest=ctx.auth.harness_source_digest,
+                harness_files=tuple(ctx.auth.harness_source_files),
+                workdir=Path(tmp))
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"the pod could not obtain the authorized commit: {exc}"
+
+    ctx.evidence["bundle_staged_check"] = evidence
+    return True, (f"{evidence['canonical_bundle_name']} ({evidence['bytes']} "
+                  f"bytes, {evidence['remote_sha256'][:12]}…) round-trips to "
+                  f"{evidence['roundtrip_head'][:12]}… carrying this "
+                  f"authorization and executable set "
+                  f"{evidence['roundtrip_harness_digest'][:12]}…")
 
 
 def driver_command(ctx: SessionContext, plan) -> str:
@@ -387,6 +522,9 @@ def spec(args) -> SessionSpec:
             pricing_and_plan_gate,
             storage_gate,
             readiness_gate,
+            #: LAST, because it is the only gate that touches the network, and
+            #: everything it would verify against must already be checked.
+            bundle_staged_gate,
         ),
     )
 
@@ -430,20 +568,68 @@ _RUN_PREPARED: tuple[str, ...] = ("grant", "readiness_record", "authorization",
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    """The real parser, extracted so a test can assert on the namespace it
+    produces rather than on a transcription of it.
+
+    It must supply every name in `RUNNER_ARGUMENT_CONTRACT`:
+    `SessionRunner.__init__` reads those eighteen attributes and refuses a
+    namespace missing any of them -- deterministically, before provider
+    creation, which is the cheap place but still a wasted invocation.
+
+    The operational defaults are Search-1's, because they are the ones this
+    image and this provider have been observed under. Three differ, and each
+    for a stated reason about THIS workload: a smaller volume, one host draw,
+    and a poll limit sized to a one-hour session rather than a ten-hour one.
+    """
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scr", required=True)
     ap.add_argument("--session-commit", required=True)
     ap.add_argument("--bundle", required=True)
-    ap.add_argument("--run-id", required=True,
-                    help="a FRESH run identity; no chain may be reused")
+    #: REQUIRED, and it is what produces `out`. Every artifact this session
+    #: consumes or produces -- grant, readiness record, authorization, bundle
+    #: record, session record, evidence, comparison, manifest -- is resolved
+    #: from this id.
+    ap.add_argument("--run-id", required=True, action=_RunIdSetsOut,
+                    help="the attempt this session runs as, e.g. attempt5")
+    ap.add_argument("--relay-repo", default=BCT.RELAY_REPO)
+    #: The accepted C2 image. Same image the frozen candidates were measured
+    #: under, which is part of what makes the two halves comparable.
+    ap.add_argument("--image", default=BC.image_name(REPO_ROOT))
+    ap.add_argument("--gpu", default=BC.gpu_class(REPO_ROOT))
+    #: From the completion pricing record, so there is one hand-maintained
+    #: price and it is the one the pricing gate verifies. A stale value here can
+    #: only ever refuse a launch, never buy one.
+    ap.add_argument("--max-price", type=float,
+                    default=BC.price_per_hour_usd(REPO_ROOT))
+    #: THE storage value. The `$0` gate reads the same attribute.
+    ap.add_argument("--disk-gb", type=int, default=COMPLETION_PROVISION_GIB)
+    ap.add_argument("--token-src",
+                    default=os.path.expanduser("~/.cache/huggingface/token"))
+    ap.add_argument("--runpod-config",
+                    default=os.path.expanduser("~/.runpod/config.toml"))
+    ap.add_argument("--startup-limit-min", type=float, default=15.0)
+    ap.add_argument("--create-attempts", type=int, default=8)
+    ap.add_argument("--create-retry-seconds", type=float, default=300.0)
+    #: ONE. Search-1 permitted three host draws because losing a ten-hour beam
+    #: to an unusable host is expensive; a one-hour session that loses its host
+    #: is cheap to relaunch, and the grant owns the real limit either way --
+    #: `completion_scope_gate` enforces what the authorization permits, not this
+    #: default.
     ap.add_argument("--host-draws", type=int, default=1)
-    ap.add_argument("--volume-gib", type=int, default=MIN_VOLUME_GIB)
-    ap.add_argument("--max-price", type=float, default=None,
-                    help="defaults to the accepted L40S securePrice boundary")
-    ap.add_argument("--uv-max-s", type=int, default=1800)
-    ap.add_argument("--tests-max-s", type=int, default=900)
-    ap.add_argument("--out", default=None,
-                    help="the session record; defaults to this run's own path")
+    ap.add_argument("--setup-timeout-s", type=float, default=5400.0)
+    ap.add_argument("--poll-seconds", type=float, default=60.0)
+    #: Sized to THIS session's envelope plus slack, not Search-1's. A poll limit
+    #: below the priced ceiling would stop watching a pod that is still billing;
+    #: one far above it just costs nothing.
+    ap.add_argument("--poll-limit-min", type=float, default=180.0)
+    ap.add_argument("--settle-seconds", type=float, default=20.0)
+    ap.add_argument("--uv-max-s", type=int, default=1500)
+    ap.add_argument("--tests-max-s", type=int, default=2700)
+    #: No `--out`. It is `run_id` and the layout, or it is nothing: a flag that
+    #: could redirect one attempt's session record into another run, or into an
+    #: arbitrary repository path, is a flag that can destroy the evidence of
+    #: what happened.
     return ap
 
 
@@ -481,8 +667,10 @@ def close_completion_run(layout, args):
                   + sorted(scr.glob("watchdog_*.out"))):
         shutil.copy2(found, journals / found.name)
 
-    record_path = Path(args.out) if args.out else layout.path(
-        COMPLETION_RUN_ROLES["session_record"])
+    #: `args.out` is derived from `--run-id` by the parser's action and is
+    #: always inside this run. Resolving it again from the layout would be a
+    #: second derivation of one path.
+    record_path = REPO_ROOT / args.out
     session = json.loads(record_path.read_text()) if record_path.is_file() else {}
     return record_run(
         layout, spec=COMPLETION_RUN_SPEC,
@@ -514,9 +702,11 @@ def main() -> int:
                       roles=COMPLETION_RUN_ROLES, prepared=_RUN_PREPARED,
                       stage_id=RUN_STAGE_ID)
     write_run_readmes(layout, RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)
-    if args.out is None:
-        args.out = str(layout.path(
-            COMPLETION_RUN_ROLES["session_record"]).relative_to(REPO_ROOT))
+    #: `args.out` was set by `--run-id`'s action, so the run the layout opened
+    #: and the path the runner writes cannot disagree. Asserted rather than
+    #: assigned: filling it in here would mean the parser's namespace was
+    #: incomplete, which is the state the argument contract exists to refuse.
+    assert args.out == session_record_path(args.run_id), (args.out, args.run_id)
     rc = run_session(spec(args), args, REPO_ROOT,
                      summary=("baseline completion is a terminus: it measures B "
                               "once and computes the comparison. Search-2 and "

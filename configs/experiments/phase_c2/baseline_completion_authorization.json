@@ -1,0 +1,56 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_authorization_config/v1",
+ "_contract": "The MECHANISM's instance facts for a baseline-completion authorization: which contract, which field split, where the money block is, and the project cap the arithmetic checks against. AUTHORIZES NOTHING.",
+ "_what_is_deliberately_absent": "the ceiling, the expected cost, the price basis, the plan hash, the B identities and the frozen candidate identity. Every one of those has a canonical owner -- the completion pricing record, the completion protocol, the baseline construction and the frozen candidate record -- and the issuer DERIVES each from its owner. Restating any here would create a second place to edit and a way for the two to disagree. In particular Search-1's accepted $15.0446 pricing is NOT reused: it prices a ten-hour beam and authorizes nothing here.",
+ "experiment_id": "phase_c2_baseline_completion",
+ "authorization_id": "autoinit.v1.phase_c2.baseline_completion",
+ "plan_id": "autoinit.v1.phase_c2.baseline_completion",
+ "stage_id": "1",
+ "_stage_id_meaning": "the stage of the overall project this run belongs to, which is the same Stage 1 initialization work Search-1 belongs to. It is the run-layout stage, not a driver stage.",
+ "authorized_stages": [
+  "bind_identities",
+  "rebuild_measure_compare"
+ ],
+ "_authorized_stages_meaning": "the completion driver's two stages. Stage A binds every shared identity and loads nothing; stage B rebuilds B once, measures it once and computes the comparison. There is no third stage and no beam.",
+ "grant_contract": {
+  "contract_id": "phase_c2.baseline_completion_grant/v1",
+  "_field_split": "STATED is what only a person can say. The identities block is the other half: a grant records what the maintainer approved against and the issuer RE-DERIVES every one of them, refusing on any disagreement. An identity the issuer does not know how to derive is itself a refusal, so a grant cannot introduce a binding nobody checks.",
+  "stated_fields": [
+   "granted_by",
+   "covers",
+   "explicitly_not_authorized",
+   "approved_money",
+   "one_use"
+  ],
+  "derived_fields": [
+   "granted_utc",
+   "authorized_session_commit",
+   "harness_source_digest",
+   "harness_source_files"
+  ],
+  "identities_block": "bound_identities_the_issuer_must_reproduce",
+  "money": {
+   "_why": "the generic cap arithmetic in src/aadistill/governance/grant.py takes a FLAT mapping with configurable field names; a grant records the project's position in one nested block. The block is named here and flattened by the assembler, so the arithmetic still happens in exactly one place.",
+   "block": "budget_context_at_approval",
+   "spend_field": "cumulative_spend_usd",
+   "cap_field": "authorized_cap_usd"
+  },
+  "_no_reviewed_commit": "no verified-identity field names a commit. The issuer's HEAD is necessarily LATER than the grant -- the grant is committed, then the readiness sweep runs on that clean tree, then the record is committed, and only then is the authorization issued -- so a grant that predicted the issuance commit would make its own chain unsatisfiable. C1 attempt 15 aborted on exactly that."
+ },
+ "accepted_pricing": {
+  "_why_only_the_cap": "the cap is a PROJECT fact the grant arithmetic checks a ceiling against, and it is not derivable from this session's own pricing. The ceiling, the expected cost and the price basis all come from the completion pricing record.",
+  "cumulative_cap_usd": 320.0
+ },
+ "inputs": {
+  "protocol": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
+  "pricing": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
+  "frozen_candidates": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+  "beam_ranking": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json"
+ },
+ "authorizes": "nothing",
+ "stage_conditions": {
+  "bind_identities": "loads no model and measures nothing. Binds the frozen Search-1 run id and config hash, the selection commitment, the suite hash, the policy hash and its epsilon, the teacher revision, the frozen B construction and the evaluator's own source hashes. A disagreement here is a STOP, not something to compensate for.",
+  "rebuild_measure_compare": "rebuilds the frozen B ONCE through its complete deterministic fixed path, measures it ONCE on the frozen state_eval suite with the evaluator primed by that same original teacher object, and computes the preregistered B->C comparison against the five frozen candidate measurements. No beam, no new candidate, no candidate remeasured."
+ },
+ "_stage_conditions_meaning": "what each authorized stage may do. Carried into the authorization so a reader of the artifact sees the boundary without opening the protocol."
+}

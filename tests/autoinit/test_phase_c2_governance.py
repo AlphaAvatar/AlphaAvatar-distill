@@ -249,11 +249,21 @@ def test_the_c2_readiness_groups_declare_zero_expected_skips():
     assert failed["unexpected_environment_skips"] == [nid]
 
 
-def test_both_experiments_drive_the_same_recorder():
-    """One mechanism. The recorder holds no experiment's names."""
+def test_every_registered_experiment_drives_the_same_recorder():
+    """One mechanism. The recorder holds no experiment's names.
+
+    Asserted as a PROPERTY of the registry rather than as an exhaustive list:
+    registering a new experiment is the supported way to add one, and a list
+    that has to be edited for every addition tests the list rather than the
+    mechanism. What must stay true is that EVERY entry resolves to a contract
+    built outside this file, and that the recorder names none of them.
+    """
     import record_pod_environment as REC
 
-    assert sorted(REC.EXPERIMENTS) == ["phase_c1", "phase_c2"]
+    assert {"phase_c1", "phase_c2"} <= set(REC.EXPERIMENTS)
+    for experiment, (module, factory) in REC.EXPERIMENTS.items():
+        assert module.startswith("experiments."), (experiment, module)
+        assert factory, experiment
     #: The module docstring NAMES the strings it used to hardcode, because that
     #: is the change it is describing.
     code = code_without_prose(Path(REC.__file__))
@@ -280,6 +290,19 @@ def test_both_experiments_drive_the_same_recorder():
     #: it, so there is no second file to drift.
     assert c2.pointer_path is None and c2.extra_record_fields == {}
     assert c2.experiment_id == "phase_c2"
+
+    #: And baseline completion, whose whole reason for being a third entry is
+    #: that it binds a DIFFERENT launcher, session, harness and schema. If any
+    #: of these equalled C2's, one experiment's readiness record could satisfy
+    #: the other's verifier.
+    completion = REC.sweep_contract(
+        "phase_c2_baseline_completion", RUN_ID, STAGE_ID)
+    assert completion.experiment_id == "phase_c2_baseline_completion"
+    assert completion.record.schema != c2.record.schema
+    assert completion.launcher_module != c2.launcher_module
+    assert completion.session_id != c2.session_id
+    assert completion.harness_n_files_field != c2.harness_n_files_field
+    assert completion.pointer_path is None and completion.extra_record_fields == {}
 
 
 def test_the_recorder_assembles_a_c2_record_end_to_end(tmp_path):

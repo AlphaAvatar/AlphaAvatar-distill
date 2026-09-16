@@ -80,6 +80,35 @@ KNOWN: dict[str, tuple[str, str]] = {
 }
 
 
+
+def _run_outcome(root: Path, run_root: str | None, *, recorded: bool) -> str:
+    """What the newest run's own closeout says happened. Never inherited.
+
+    The closeout is written after provider-confirmed teardown and is the
+    canonical owner of a run's classification and cost. Reading it here means a
+    regenerated snapshot cannot carry a stale outcome from an earlier attempt:
+    the outcome and the run id come from the same run by construction.
+    """
+    if not run_root:
+        return "no run root is recorded for this attempt"
+    path = Path(root) / run_root / "closeout/outcome.json"
+    if not path.is_file():
+        return ("recorded; no closeout has been written for this run"
+                if recorded else
+                "not recorded, and no closeout has been written for this run")
+    try:
+        doc = json.loads(path.read_text())
+    except Exception as exc:                                    # noqa: BLE001
+        return f"a closeout exists at {run_root} and does not parse: {exc}"
+    classification = str(doc.get("classification")
+                         or "no classification stated").rstrip(". ")
+    budget = doc.get("budget") or {}
+    cost = budget.get("this_attempt")
+    money = f", ${float(cost):.4f}" if isinstance(cost, (int, float)) else ""
+    prefix = "recorded; " if recorded else "not recorded; "
+    return f"{prefix}{classification}{money}"
+
+
 def load(rel: str, root: Path) -> dict:
     return json.loads((root / rel).read_text())
 
@@ -782,6 +811,19 @@ def main() -> int:
             prior["state"] = (
                 newest["why"] if newest in idx["unrecorded"]
                 else "recorded: the run wrote its own manifest")
+            #: `outcome` used to be the ONE field in this derived block that was
+            #: still hand-maintained -- and it is the field that says what
+            #: happened. So the block advanced its run id to attempt 4 while
+            #: carrying attempt 2's outcome, and the snapshot told two
+            #: incompatible histories about one run: "search complete, $6.0785"
+            #: in the phase block and "PRE-SCIENCE ABORT at setup, $0.0552"
+            #: here.
+            #:
+            #: Derived now from the run's OWN closeout, which is the document
+            #: that owns its outcome. A run with no closeout says so rather than
+            #: inheriting its predecessor's.
+            prior["outcome"] = _run_outcome(root, root_rel,
+                                            recorded=newest in idx["runs"])
             #: `last_executed` was hand-maintained beside two derived fields and
             #: went stale the same way: it still named attempt 12 after attempt
             #: 14 had created a pod, billed and been torn down. A run that wrote
