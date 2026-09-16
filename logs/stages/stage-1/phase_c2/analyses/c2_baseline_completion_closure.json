@@ -2,7 +2,7 @@
  "schema": "aadistill.autoinit.c2_baseline_completion_closure/v1",
  "_what_this_is": "the executable set a Phase-C2 baseline-completion session would run, derived live by the same import walk every other experiment's closure uses. `derive` RAISES on an unresolved internal import, so a digest existing at all means the set is closed.",
  "_informational_until_an_authorization_binds_it": "no grant or authorization exists for this session, so this digest pins nothing yet. It is here so a reviewer can see WHAT would run and so the authorization step binds a derived figure rather than an invented one.",
- "digest": "6085a0ac8e051ac1692c682308ace65ac85b9c26960c0cd5fc387333db1bfb1a",
+ "digest": "89b9a86064780735e7488d27db89c50ef0a08ada33d756d96dc658d843f675ca",
  "n_files": 92,
  "unresolved_internal_imports": 0,
  "_unresolved_rule": "zero by construction: aadistill.governance.closure.derive raises ClosureError rather than returning a set smaller than what runs",
@@ -53,5 +53,5 @@
  "authorizes": "nothing",
  "_grew_this_round": "the formal plumbing round added the completion's readiness contract, its bundle transport, its authorization assembler and its instance config to what a completion session executes, and the launcher now imports the first two. A larger set is the point: every file the session would run is in the digest a grant binds.",
  "_moved_by_the_enforcement_repairs": "from dad8f72563f84372: the six authorized repairs changed the issuer's readiness verification and its identity and money checks, the launcher's scope and runtime gates, the driver's durability ordering, and the session's pod test selection -- which is now its own, because Search-1's preflight requires a canonical control this session does not stage. Not a science change: the six frozen scientific identities are unchanged.",
- "self_sha256": "16a60540f6395d37597ab8d3496e076ce63a24101f06df94c2d7ec78992650f1"
+ "self_sha256": "df3d305e3d9b504ba9f800f80060b16f5bd0fdebb5f8f777e072eeab9228ef95"
 }

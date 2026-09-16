@@ -1,0 +1,74 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_grant/v1",
+ "_what_this_is": "the maintainer decision permitting ONE Phase-C2 baseline-completion session -- attempt 6, the final automatically authorized session under the 2026-09-17 decision's pre-measurement failure rule. An INPUT to the issuer, which independently re-derives every identity below and REFUSES on any disagreement, on any omission and on any identity it cannot derive.",
+ "_where_this_lives": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6/governance/grant.json. Attempt 5 is historical: its chain verified completely and its launcher died in its first statement at $0 with no provider resource, consuming the chain. None of its governance artifacts is reused.",
+ "granted_for": "Phase C2 baseline completion -- attempt 6",
+ "granted_by": "the MAINTAINER DECISION of 2026-09-17, under its pre-measurement failure rule: attempt 5 failed before any durable baseline_measurement existed, at $0.0000 and with no provider resource, so the repair-and-continue flow applies without a further approval while a full $1.1950 ceiling still fits the $2.3900 new-spend sub-envelope -- which it does, since nothing has been spent. The four run-layout call-site defects are repaired at d3365040568d2dadc3dbec2efdb70d04950f80d0 and the launcher's entry path, every pre-provider gate and its closeout path have each been executed at $0. Commits are HUMAN PROVENANCE and deliberately not machine-verified identities.",
+ "covers": "exactly ONE Phase-C2 baseline-completion session at a hard ceiling of $1.1950: ONE rebuild of the frozen C1 treatment baseline B through its complete deterministic fixed path, ONE state_eval measurement of the rebuilt B on the frozen suite, and ONE B->C comparison against the five candidate measurements Attempt 4 froze and this session reads without recomputing.",
+ "explicitly_not_authorized": [
+  "rerunning the Search-1 beam, under any circumstances",
+  "generating any new C candidate",
+  "remeasuring or replacing any frozen C measurement",
+  "a second state_eval of B once the durable measurement exists",
+  "Search-2, conditional or otherwise",
+  "any behavioural confirmation of B vs C",
+  "recovery training of any kind",
+  "causal-KL ATTENTION R&D",
+  "any increase to the $320.0000 project cap, the $16.20 C2 campaign envelope, the $2.3900 retry sub-envelope or the $1.1950 per-session ceiling"
+ ],
+ "approved_money": {
+  "expected_usd": 0.7212,
+  "hard_cap_usd": 1.195,
+  "price_basis_usd_per_hour": 1.09,
+  "_the_issuer_rederives_all_three": "from logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json, whose own sha256 it verifies. A grant naming a different expected cost, a different ceiling or a higher rate basis is refused. Search-1's $15.0446 prices a ten-hour beam and authorizes nothing here."
+ },
+ "budget_context_at_approval": {
+  "cumulative_spend_usd": 296.8185,
+  "authorized_cap_usd": 320.0,
+  "_arithmetic": "296.8185 + 1.1950 = 298.0135 <= 320.0000; and 0.0000 spent of the $2.3900 sub-envelope, so this session fits with one ceiling to spare",
+  "retry_sub_envelope_usd": 2.39,
+  "_sub_envelope_meaning": "exactly two full $1.1950 ceilings of NEW spend. Attempt 5 consumed a chain at $0.0000, so the money is untouched; this is the SECOND and final automatically authorized session under the decision.",
+  "remaining_is_not_permission": true
+ },
+ "one_use": {
+  "issuances_permitted": 1,
+  "launch_attempts_permitted": 1,
+  "provider_resources_permitted": 2,
+  "one_billing_resource_at_a_time": true,
+  "what_that_means": "this authorization funds ONE launcher session. Inside it the launcher may replace a host that never became usable, up to two provider resources in total, BOTH sharing this session's single $1.1950 ceiling. Two resources are host draws inside one session, not two scientific attempts, and the second is created only after the provider confirms the first is no longer billing.",
+  "machine_readable": "the four values above become a C2ResourceScope in the authorization and are checked by completion_scope_gate, through the scope's own permits_run and permits_draws, before any provider is contacted.",
+  "consumed_when": "the formal launcher is invoked under this authorization, whether or not a provider resource follows and whether or not any money is spent.",
+  "retry_rule": "this is the SECOND and FINAL automatically authorized formal session under the 2026-09-17 decision. If it fails before the durable baseline_measurement exists, the flow is teardown, preserve, reconcile, diagnose and REPORT -- not another chain. The instant the durable measurement exists, no GPU remeasurement of B is authorized: a later comparison failure is repaired at $0 from that measurement plus the frozen five."
+ },
+ "bound_identities_the_issuer_must_reproduce": {
+  "_rule": "stated as the maintainer's approval basis and RE-DERIVED by the issuer from the committed objects; it refuses on any disagreement, on any omission and on any identity it cannot derive. Exactly these eight and NO COMMIT IDENTITY: each is a property of the TREE rather than a point in its history, and a grant that predicted the issuance commit would make its own chain unsatisfiable.",
+  "_closure_moved_and_that_is_expected": "the completion closure moved across four $0 engineering iterations, all authorized and none scientific: the six enforcement repairs; the session's own pod test selection; the assembler's launcher import path; and the four run-layout call sites attempt 5 died on. A moved closure is not a science change; the six scientific identities below are unchanged throughout.",
+  "completion_harness_digest": "89b9a86064780735e7488d27db89c50ef0a08ada33d756d96dc658d843f675ca",
+  "completion_harness_n_files": 92,
+  "completion_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+  "completion_pricing_sha256": "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+  "baseline_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+  "baseline_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "frozen_candidates_self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+  "search1_selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf"
+ },
+ "approved_runtime": {
+  "gpu": "NVIDIA L40S",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "price_basis_usd_per_hour": 1.09,
+  "host_draws": 2,
+  "_enforced_before_provider_creation": "frozen_runtime_gate refuses any other GPU or image and any max price above the basis; a lower max price is safe. The GPU and image are the protocol's comparability binding, which is what makes B's measurement comparable to the frozen five."
+ },
+ "interpretation_discipline": "the result is a cheap-metric, hypothesis-generation comparison on the frozen state_eval suite. It is NOT behavioural recovery evidence and NOT a demonstrated initialization improvement. Cross-session comparison is accepted for this use subject to the preregistered disclosure: the 0.007782 threshold is the tightest observed C-to-C gap and a conservative disclosure trigger, NOT a noise bound, and cross-session variance remains NOT DIRECTLY MEASURED whether or not any margin is flagged. PARETO epsilon stays 1e-4 and the computed verdict is never altered by the disclosure.",
+ "stop_conditions": [
+  "live securePrice above $1.09/h -- stop at $0",
+  "any $0 pre-provider gate refuses -- stop at $0, diagnose, repair, fresh chain",
+  "a frozen scientific identity moves -- STOP",
+  "the durable baseline_measurement exists and downstream comparison cannot be completed at $0 without changing scientific semantics -- STOP and report",
+  "the $2.3900 sub-envelope cannot fund another full $1.1950 session -- STOP",
+  "provider billing ownership becomes uncertain -- reconcile, then STOP",
+  "baseline completion succeeds -- collect, verify, reconcile and report; start nothing"
+ ],
+ "authorizes": "nothing by itself; it is the issuer's input",
+ "grant_sha256": "09f0841ee582be7ae32a9e9b4d9bd3e3fcd6ec321f7144cfd6736f30da64d15b"
+}

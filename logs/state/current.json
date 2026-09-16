@@ -19,13 +19,13 @@
  },
  "prepared_launch": {
   "any": true,
-  "experiment": "phase_c2_baseline_completion, run attempt5",
-  "run": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5",
+  "experiment": "phase_c2_baseline_completion, run attempt6",
+  "run": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6",
   "grant_committed": "governance/grant.json",
   "readiness_record": null,
   "authorization": null,
   "bundle": null,
-  "note": "the 2026-09-17 MAINTAINER DECISION authorizes ONE formal baseline completion at the $1.1950 ceiling plus a $2.3900 new-spend retry sub-envelope (two ceilings). It raises no cap. The grant is committed; the launch_bound sweep, the authorization and the bundle are owed IN THAT ORDER. Owner: the attempt5 grant."
+  "note": "attempt6's grant is committed; the launch_bound sweep, the authorization and the bundle are owed IN THAT ORDER. The SECOND and FINAL automatically authorized session under the 2026-09-17 decision -- attempt5's launcher died at $0.0000 with no provider resource, consuming its chain. Owner: the attempt6 grant."
  },
  "budget": {
   "cumulative_spend_usd": 296.8185,
