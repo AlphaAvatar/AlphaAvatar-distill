@@ -1,0 +1,74 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-09-16T14:02:02+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_phase_c2_baseline/c2_baseline_completion_evidence.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "baseline_comparison",
+      "pattern": "audit/autoinit_phase_c2_baseline/c2_baseline_comparison.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_logs",
+      "pattern": "audit/autoinit_phase_c2_baseline/session/*",
+      "required": false,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_phase_c2_baseline/c2_baseline_completion_evidence.json",
+      "artifact_class": "session_evidence",
+      "size_bytes": 14719,
+      "sha256": "50ee514f9db2c6636904189480cd56cc853ef3621bd25571a8e17aa285b26aa9",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_c2_baseline/c2_baseline_comparison.json",
+      "artifact_class": "baseline_comparison",
+      "size_bytes": 37142,
+      "sha256": "2f5080a90845e7fa5624d627445765796e7e1670ed97fcef46c6a7eb50338f07",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_c2_baseline/session/autoinit_phase_c2_baseline.status",
+      "artifact_class": "session_logs",
+      "size_bytes": 643,
+      "sha256": "0895a21f00d549b98c2eb0462486bbd02513a147e3a23c81cc483ae91f415c5e",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_c2_baseline/session/autoinit_phase_c2_baseline_run.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 35282,
+      "sha256": "ad47fafeccc298d2e85cee78dfa63c3df10604401700965f08e4ef09b644c8db",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_c2_baseline/session/setup.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 10894,
+      "sha256": "f29200e55aad3907a9d60b16acf26d81e63216673fe5acd90ff9a9f01a324b8d",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

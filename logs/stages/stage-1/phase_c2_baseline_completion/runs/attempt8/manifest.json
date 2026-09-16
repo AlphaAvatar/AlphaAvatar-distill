@@ -1,0 +1,45 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c2_baseline_completion",
+ "run_id": "attempt8",
+ "root": "phase_c2_baseline_completion/runs/attempt8",
+ "artifact_spec": "phase_c2_baseline_completion_session_v1",
+ "plan": {
+  "session_id": "autoinit-phase-c2-baseline-completion",
+  "plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+  "session_commit": "0270782ffbf823677cc4c047bc740463db337e74",
+  "bundle": "aad_autoinit_0270782f.bundle",
+  "scratch_root": "/home/ecs-user/aad-scratch/c2bc_attempt8"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_phase_c2_baseline_launch.py",
+  "driver": "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+  "harness_source_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+  "authorization": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json"
+ },
+ "status": {
+  "passed": true,
+  "terminal": "BASELINE_COMPLETION_ALL_DONE",
+  "measures_b_once": true,
+  "runs_a_beam_search": false,
+  "remeasures_any_candidate": false
+ },
+ "roles": {
+  "artifact_manifest": "artifacts/manifest.json",
+  "authorization": "governance/authorization.json",
+  "baseline_comparison": "evidence/c2_baseline_comparison.json",
+  "bundle_record": "governance/bundle.json",
+  "driver_log": "evidence/driver_run.log",
+  "driver_status": "evidence/driver_status.txt",
+  "grant": "governance/grant.json",
+  "launcher_log": "runtime/launcher.log",
+  "readiness_record": "governance/readiness.json",
+  "session_evidence": "evidence/c2_baseline_completion_evidence.json",
+  "session_record": "runtime/session.json",
+  "watchdog_journal": "runtime/watchdog"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "b91a12e14d5a07f61c013e0a0bae93d69927d2b12c9448132a953004593a0662"
+}

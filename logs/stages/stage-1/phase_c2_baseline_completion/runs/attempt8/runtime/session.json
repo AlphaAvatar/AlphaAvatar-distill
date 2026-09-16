@@ -1,0 +1,821 @@
+{
+  "schema": "aadistill.autoinit.c2_baseline_completion_session/v1",
+  "session_id": "autoinit-phase-c2-baseline-completion",
+  "session_spec": {
+    "session_id": "autoinit-phase-c2-baseline-completion",
+    "schema": "aadistill.autoinit.c2_baseline_completion_session/v1",
+    "description": "Phase C2 baseline completion: rebuild the frozen C1 treatment baseline B once through its complete deterministic fixed path, measure it once on the frozen state_eval suite, and compute the preregistered B->C comparison against the five candidate measurements Attempt 4 froze. No beam search, no new candidate, no candidate remeasured. Trains nothing.",
+    "deployment": {
+      "artifact_collector": "scripts/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "bebc5060c5411bd0a57323cde0b8a63383991798c3009112191d22358d1de96a",
+    "authorization_path": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json",
+    "authorization_type": "BaselineCompletionAuthorization.load",
+    "plan_id": "autoinit.v1.phase_c2.baseline_completion",
+    "plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+    "status_path": "/workspace/autoinit_phase_c2_baseline.status",
+    "run_log_path": "/workspace/autoinit_phase_c2_baseline_run.log",
+    "driver_job_id": "autoinit_phase_c2_baseline_driver",
+    "markers": {
+      "success": "BASELINE_COMPLETION_ALL_DONE",
+      "failure": [
+        "BASELINE_COMPLETION_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_phase_c2_baseline",
+      "evidence_filename": "c2_baseline_completion_evidence.json",
+      "archive_basename": "c2_baseline_completion_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/c2_baseline_completion_artifacts.json",
+      "spec_failed": "configs/autoinit/c2_baseline_completion_artifacts_failed.json",
+      "report_names": [
+        "c2_baseline_completion_evidence.json",
+        "c2_baseline_comparison.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "c2_baseline_completion",
+        "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c2/frozen_assets.json"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "SESSION_RELAY_INPUTS",
+        "SESSION_KIND",
+        "SESSION_FROZEN_EXPECT",
+        "SESSION_SETUP_MARKERS",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e8_inputs_20260810/calibration_v1/items.jsonl",
+          "dest": "artifacts/stage1/e8_calibration_v1",
+          "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "reasoning_heavy_v2:artifacts/stage1",
+        "state_eval_v1:artifacts/stage1"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [
+        "tests/architecture",
+        "tests/autoinit",
+        "tests/c1_preflight",
+        "tests/c2_preflight",
+        "tests/data",
+        "tests/docs",
+        "tests/evaluation",
+        "tests/infrastructure",
+        "tests/init",
+        "tests/models",
+        "tests/pod",
+        "tests/rollout",
+        "tests/runtime",
+        "tests/support",
+        "tests/test_usable_rollout.py",
+        "tests/training",
+        "tests/validation"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "ASSETS_READY",
+        "TEACHER_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 10,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-09-16T13:31:02+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 51 min $0.92 \u00b7 soft $1.01 \u00b7 hard $1.19 (authorized $1.20)"
+    },
+    {
+      "utc": "2026-09-16T13:31:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-09-16T13:31:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit 0270782ffbf8 verified: harness digests to bb3aa38a8367\u2026, carries the authorization and only logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-09-16T13:31:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "completion closure bb3aa38a8367\u2026 over 92 derived files"
+    },
+    {
+      "utc": "2026-09-16T13:31:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "authorized for baseline completion of run 'attempt8': 2 draw(s) within the 2 permitted, 1 issuance(s), 1 launch attempt(s), one billing resource at a time, beam NOT authorized"
+    },
+    {
+      "utc": "2026-09-16T13:31:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "runtime bound: NVIDIA L40S, runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404, max price $1.0900/h <= $1.0900/h"
+    },
+    {
+      "utc": "2026-09-16T13:31:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "5 frozen candidate measurement(s), record 55f667706739\u2026, extracted from the ranking this session cites"
+    },
+    {
+      "utc": "2026-09-16T13:31:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "frozen-asset expectation configs/experiments/phase_c2/frozen_assets.json verifies"
+    },
+    {
+      "utc": "2026-09-16T13:31:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "ceiling $1.1950 matches the pricing record, whose own sha256 verified; plan 9f566eb6f8d7\u2026"
+    },
+    {
+      "utc": "2026-09-16T13:31:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "volume 60 GiB >= 60 for a 32.0 GiB peak working set"
+    },
+    {
+      "utc": "2026-09-16T13:31:05+00:00",
+      "elapsed_min": 0.0,
+      "msg": "pod sweep 12 passed / 0 skipped / 0 failed, no declared groups, binds baseline-completion harness bb3aa38a8367\u2026 and environment 0fa730a88cff\u2026, staging contract 5c51a83d002e\u2026, swept at f8b3b5bf with only ['logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json', 'logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/readiness.json'] differs from the swept base"
+    },
+    {
+      "utc": "2026-09-16T13:31:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "aad_autoinit_0270782f.bundle (13053293 bytes, 16bf79291db6\u2026) round-trips to 0270782ffbf8\u2026 carrying this authorization and executable set bb3aa38a8367\u2026"
+    },
+    {
+      "utc": "2026-09-16T13:31:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets"
+    },
+    {
+      "utc": "2026-09-16T13:31:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 66 min = $1.19"
+    },
+    {
+      "utc": "2026-09-16T13:31:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 9s9pw0c8873y5g at $1.09/h"
+    },
+    {
+      "utc": "2026-09-16T13:32:04+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-09-16T13:32:59+00:00",
+      "elapsed_min": 1.81,
+      "msg": "TCP 22 at 202.181.159.230:14199 after 1.8 min"
+    },
+    {
+      "utc": "2026-09-16T13:33:01+00:00",
+      "elapsed_min": 1.85,
+      "msg": "draw 1: ssh reachable \u2014 $0.03"
+    },
+    {
+      "utc": "2026-09-16T13:33:24+00:00",
+      "elapsed_min": 2.24,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+    },
+    {
+      "utc": "2026-09-16T13:33:24+00:00",
+      "elapsed_min": 2.24,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-09-16T13:34:57+00:00",
+      "elapsed_min": 3.78,
+      "msg": "draw 1: setup complete \u2014 $0.07"
+    },
+    {
+      "utc": "2026-09-16T13:35:02+00:00",
+      "elapsed_min": 3.86,
+      "msg": "driver detached, pid 1631, confirmed by descriptor_probe \u2014 $0.07"
+    },
+    {
+      "utc": "2026-09-16T13:36:12+00:00",
+      "elapsed_min": 5.03,
+      "msg": "  2026-09-16T13:35:00Z MARKER:STAGE_PASSED:bind_identities \u2014 $0.09"
+    },
+    {
+      "utc": "2026-09-16T14:01:49+00:00",
+      "elapsed_min": 30.65,
+      "msg": "  2026-09-16T14:00:51Z MARKER:BASELINE_COMPLETION_ALL_DONE \u2014 $0.56"
+    },
+    {
+      "utc": "2026-09-16T14:01:49+00:00",
+      "elapsed_min": 30.65,
+      "msg": "polling ended: BASELINE_COMPLETION_ALL_DONE \u2014 $0.56"
+    },
+    {
+      "utc": "2026-09-16T14:03:02+00:00",
+      "elapsed_min": 31.86,
+      "msg": "  manifest rc=0\n5 file(s) across 3 class(es) -> /workspace/manifest.json\n  final_required: 5 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-09-16T14:03:19+00:00",
+      "elapsed_min": 32.14,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-09-16T14:03:19+00:00",
+      "elapsed_min": 32.14,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-09-16T14:03:30+00:00",
+      "elapsed_min": 32.32,
+      "msg": "pod deleted \u2014 32.3 min, $0.59; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.c2_baseline_completion_authorization/v1",
+    "authorization_id": "autoinit.v1.phase_c2.baseline_completion",
+    "version": 1,
+    "granted_utc": "2026-09-16T13:29:41+00:00",
+    "granted_by": "the MAINTAINER DECISION of 2026-09-16, under its autonomous failure-handling rule: attempt 7 failed BEFORE any durable baseline_measurement existed, so the flow is teardown with provider-confirmed zero billing, preserve, reconcile, diagnose, minimal repair, fresh identity and fresh chain -- automatically, without a further approval, PROVIDED cumulative completion spend + $1.1950 <= $2.3900. The arithmetic is $0.1033 + $1.1950 = $1.2983 <= $2.3900, so this attempt is authorized. The repair is NOT a repository change: attempt 7's ten gates all passed, the price sat on the boundary, the bundle round-tripped and the pod came up. It died because setsid does not protect a launcher from a supervisor that walks descendants, so attempt 8 starts the launcher inside a tmux server -- not a descendant of the starting call -- and the starting call returns immediately rather than blocking. An identical unchanged failure is therefore not being retried. Commits are HUMAN PROVENANCE and deliberately not machine-verified identities.",
+    "plan_id": "autoinit.v1.phase_c2.baseline_completion",
+    "phase_a_session_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+    "phase_a_science_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+    "expected_usd": 0.7212,
+    "hard_cap_usd": 1.195,
+    "authorized_stages": [
+      "bind_identities",
+      "rebuild_measure_compare"
+    ],
+    "stage_conditions": {
+      "bind_identities": "loads no model and measures nothing. Binds the frozen Search-1 run id and config hash, the selection commitment, the suite hash, the policy hash and its epsilon, the teacher revision, the frozen B construction and the evaluator's own source hashes. A disagreement here is a STOP, not something to compensate for.",
+      "rebuild_measure_compare": "rebuilds the frozen B ONCE through its complete deterministic fixed path, measures it ONCE on the frozen state_eval suite with the evaluator primed by that same original teacher object, and computes the preregistered B->C comparison against the five frozen candidate measurements. No beam, no new candidate, no candidate remeasured."
+    },
+    "scope_note": "exactly ONE Phase-C2 baseline-completion session at a hard ceiling of $1.1950: ONE rebuild of the frozen C1 treatment baseline B through its complete deterministic fixed path, ONE state_eval measurement of the rebuilt B on the frozen suite, and ONE B->C comparison against the five candidate measurements Attempt 4 froze and this session reads without recomputing.",
+    "phase_a_authorized": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "3a43eb8f6199a5ff843fccfa891e13c6c52bed4f",
+    "harness_source_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+    "harness_source_files": [
+      "configs/experiments/phase_c2/baseline_completion_authorization.json",
+      "configs/experiments/phase_c2/frozen_assets.json",
+      "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
+      "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
+      "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+      "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json",
+      "scripts/autoinit/issue_c2_baseline_completion_authorization.py",
+      "scripts/autoinit/load_state_eval.py",
+      "scripts/autoinit/phase_a_frozen.py",
+      "scripts/autoinit/verify_frozen_assets.py",
+      "scripts/experiments/calibration.py",
+      "scripts/experiments/deployment.py",
+      "scripts/experiments/phase_a/plan.py",
+      "scripts/experiments/phase_c1/session.py",
+      "scripts/experiments/phase_c2/__init__.py",
+      "scripts/experiments/phase_c2/baseline.py",
+      "scripts/experiments/phase_c2/baseline_completion.py",
+      "scripts/experiments/phase_c2/baseline_completion_authorization.py",
+      "scripts/experiments/phase_c2/baseline_completion_bundle.py",
+      "scripts/experiments/phase_c2/baseline_completion_pod_environment.py",
+      "scripts/experiments/phase_c2/bundle.py",
+      "scripts/experiments/phase_c2/comparison.py",
+      "scripts/experiments/phase_c2/frozen_assets.py",
+      "scripts/experiments/phase_c2/frozen_inputs.py",
+      "scripts/experiments/phase_c2/pod_environment.py",
+      "scripts/experiments/phase_c2/search_space.py",
+      "scripts/experiments/phase_c2/session.py",
+      "scripts/experiments/recovery_policy.py",
+      "scripts/experiments/run_layout.py",
+      "scripts/experiments/source_sets.py",
+      "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+      "scripts/pod/autoinit_phase_c2_baseline_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention.py",
+      "src/aadistill/initialization/operators/attention_activation.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite.py",
+      "src/aadistill/initialization/operators/depth.py",
+      "src/aadistill/initialization/operators/ffn.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/attention.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py"
+    ],
+    "per_launch_hard_usd": 1.195,
+    "provenance_commit": "3a43eb8f6199a5ff843fccfa891e13c6c52bed4f",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "allows_phase_a": false,
+    "allows_recovery_training": false,
+    "authorizes_c2_search1": false,
+    "resource_scope": {
+      "run_id": "attempt8",
+      "issuances_permitted": 1,
+      "launch_attempts_permitted": 1,
+      "provider_resources_permitted": 2,
+      "one_billing_resource_at_a_time": true,
+      "_what_a_provider_resource_is": "a resource the provider RETURNED AN ID FOR. A create call that returns no id created nothing and billed nothing, so it does not consume this count; it is still recorded as a draw with pod_id null, because the provider's refusal is the only evidence of why.",
+      "_what_this_does_not_relax": "the dollar ceiling, which every draw in the session shares, and the runner's requirement that the provider confirm a resource is not billing before the next one is created."
+    },
+    "run_id": "attempt8",
+    "scope": "ONE rebuild of the frozen Phase-C1 treatment baseline B through its complete deterministic fixed path, ONE state_eval measurement of the rebuilt B on the frozen suite, and ONE B->C comparison against the five candidate measurements Attempt 4 froze and this session reads without recomputing. NOT a beam search, NOT a new candidate, NOT a remeasurement of any candidate, NOT Search-2, NOT behavioural confirmation, and no recovery training.",
+    "authorizes_c2_baseline_completion": true,
+    "forbids": [
+      "rerunning the Search-1 beam",
+      "generating any new C candidate",
+      "remeasuring or replacing any frozen C measurement",
+      "Search-2",
+      "behavioural confirmation",
+      "recovery training of any kind"
+    ],
+    "authorization_sha256": "03959565812bd13f634cfa0fb7f84b3ab57d4c46521a3baa60b010eb1c72b77a"
+  },
+  "session_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+  "harness_source_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+  "harness_source_files": [
+    "configs/experiments/phase_c2/baseline_completion_authorization.json",
+    "configs/experiments/phase_c2/frozen_assets.json",
+    "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
+    "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
+    "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+    "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json",
+    "scripts/autoinit/issue_c2_baseline_completion_authorization.py",
+    "scripts/autoinit/load_state_eval.py",
+    "scripts/autoinit/phase_a_frozen.py",
+    "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/experiments/calibration.py",
+    "scripts/experiments/deployment.py",
+    "scripts/experiments/phase_a/plan.py",
+    "scripts/experiments/phase_c1/session.py",
+    "scripts/experiments/phase_c2/__init__.py",
+    "scripts/experiments/phase_c2/baseline.py",
+    "scripts/experiments/phase_c2/baseline_completion.py",
+    "scripts/experiments/phase_c2/baseline_completion_authorization.py",
+    "scripts/experiments/phase_c2/baseline_completion_bundle.py",
+    "scripts/experiments/phase_c2/baseline_completion_pod_environment.py",
+    "scripts/experiments/phase_c2/bundle.py",
+    "scripts/experiments/phase_c2/comparison.py",
+    "scripts/experiments/phase_c2/frozen_assets.py",
+    "scripts/experiments/phase_c2/frozen_inputs.py",
+    "scripts/experiments/phase_c2/pod_environment.py",
+    "scripts/experiments/phase_c2/search_space.py",
+    "scripts/experiments/phase_c2/session.py",
+    "scripts/experiments/recovery_policy.py",
+    "scripts/experiments/run_layout.py",
+    "scripts/experiments/source_sets.py",
+    "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+    "scripts/pod/autoinit_phase_c2_baseline_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/pod/watchdog.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention.py",
+    "src/aadistill/initialization/operators/attention_activation.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite.py",
+    "src/aadistill/initialization/operators/depth.py",
+    "src/aadistill/initialization/operators/ffn.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/attention.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 1.195,
+    "expected_minutes": 50.70526095744681,
+    "soft_stop_minutes": 55.77578705319149,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 65.7757870531915,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused: baseline completion trains nothing. It rebuilds one checkpoint and measures it once.",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 3.217
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 2.267
+      },
+      {
+        "name": "driver_startup_and_teacher_load",
+        "minutes": 1.5
+      },
+      {
+        "name": "depth_full_derivation",
+        "minutes": 36.87943262411348
+      },
+      {
+        "name": "ffn",
+        "minutes": 0.8457316666666667
+      },
+      {
+        "name": "residual_width",
+        "minutes": 0.8729916666666667
+      },
+      {
+        "name": "attention",
+        "minutes": 0.7192983333333333
+      },
+      {
+        "name": "materialization_reload_identity",
+        "minutes": 0.4947666666666667
+      },
+      {
+        "name": "state_eval_of_B_once",
+        "minutes": 2.72604
+      },
+      {
+        "name": "b_to_c_comparison",
+        "minutes": 1.0
+      },
+      {
+        "name": "teardown",
+        "minutes": 0.183
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 0.9211,
+    "soft_stop_usd": 1.0133,
+    "artifact_recovery_reserve_usd": 0.1817,
+    "hard_terminate_usd": 1.1949
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Low",
+  "session_commit_check": {
+    "session_commit": "0270782ffbf823677cc4c047bc740463db337e74",
+    "authorized_session_commit": "3a43eb8f6199a5ff843fccfa891e13c6c52bed4f",
+    "harness_digest_at_commit": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+    "authorized_harness_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "3a43eb8f6199a5ff843fccfa891e13c6c52bed4f",
+      "session_commit": "0270782ffbf823677cc4c047bc740463db337e74",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "prechecks": [
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit 0270782ffbf8 verified: harness digests to bb3aa38a8367\u2026, carries the authorization and only logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "completion_executable_gate",
+      "ok": true,
+      "message": "completion closure bb3aa38a8367\u2026 over 92 derived files"
+    },
+    {
+      "check": "completion_scope_gate",
+      "ok": true,
+      "message": "authorized for baseline completion of run 'attempt8': 2 draw(s) within the 2 permitted, 1 issuance(s), 1 launch attempt(s), one billing resource at a time, beam NOT authorized"
+    },
+    {
+      "check": "frozen_runtime_gate",
+      "ok": true,
+      "message": "runtime bound: NVIDIA L40S, runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404, max price $1.0900/h <= $1.0900/h"
+    },
+    {
+      "check": "frozen_inputs_gate",
+      "ok": true,
+      "message": "5 frozen candidate measurement(s), record 55f667706739\u2026, extracted from the ranking this session cites"
+    },
+    {
+      "check": "frozen_assets_gate",
+      "ok": true,
+      "message": "frozen-asset expectation configs/experiments/phase_c2/frozen_assets.json verifies"
+    },
+    {
+      "check": "pricing_and_plan_gate",
+      "ok": true,
+      "message": "ceiling $1.1950 matches the pricing record, whose own sha256 verified; plan 9f566eb6f8d7\u2026"
+    },
+    {
+      "check": "storage_gate",
+      "ok": true,
+      "message": "volume 60 GiB >= 60 for a 32.0 GiB peak working set"
+    },
+    {
+      "check": "readiness_gate",
+      "ok": true,
+      "message": "pod sweep 12 passed / 0 skipped / 0 failed, no declared groups, binds baseline-completion harness bb3aa38a8367\u2026 and environment 0fa730a88cff\u2026, staging contract 5c51a83d002e\u2026, swept at f8b3b5bf with only ['logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json', 'logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/readiness.json'] differs from the swept base"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "aad_autoinit_0270782f.bundle (13053293 bytes, 16bf79291db6\u2026) round-trips to 0270782ffbf8\u2026 carrying this authorization and executable set bb3aa38a8367\u2026"
+    }
+  ],
+  "pod_environment_verification": {
+    "verdict": "PASS",
+    "record": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/readiness.json",
+    "record_self_sha256": "9ef15de4570c56f593876983e96bd0ae5a25587f4088943a46c627d19d1185a1",
+    "record_schema": "aadistill.autoinit.c2_baseline_completion_pod_environment/v1",
+    "required_schema": "aadistill.autoinit.c2_baseline_completion_pod_environment/v1",
+    "record_kind": "launch_bound",
+    "required_record_kind": "launch_bound",
+    "experiment": "phase_c2_baseline_completion",
+    "session_commit": "0270782ffbf823677cc4c047bc740463db337e74",
+    "permitted_post_sweep_paths": [
+      "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/readiness.json",
+      "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json"
+    ],
+    "live_staging_contract_digest": "5c51a83d002e581ae62e504b6bcacddf5811947589e2c9cf795b0279faae8382",
+    "recorded_staging_contract_digest": "5c51a83d002e581ae62e504b6bcacddf5811947589e2c9cf795b0279faae8382",
+    "live_completion_harness_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+    "recorded_completion_harness_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3"
+  },
+  "bundle_staged_check": {
+    "session_commit": "0270782ffbf823677cc4c047bc740463db337e74",
+    "canonical_bundle_name": "aad_autoinit_0270782f.bundle",
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_path": "transfer/aad_autoinit_0270782f.bundle",
+    "n_harness_files": 92,
+    "bytes": 13053293,
+    "remote_sha256": "16bf79291db66540c341c4ccfcad3a5221d31c6d27078dda29c7c6c4422ab4e9",
+    "local_sha256": "16bf79291db66540c341c4ccfcad3a5221d31c6d27078dda29c7c6c4422ab4e9",
+    "bundle_verify_rc": 0,
+    "roundtrip_head": "0270782ffbf823677cc4c047bc740463db337e74",
+    "authorization_sha256": "b6df4a8c33940c4434ad7d9fd2cc1f85ce195f596291ec1c8eac811eb04f49b8",
+    "authorization_matches": true,
+    "roundtrip_harness_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+    "expected_harness_digest": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+    "ok": true,
+    "answers": "a pod can obtain the exact authorized code from the relay right now, not merely that a local file once existed"
+  },
+  "precheck": {
+    "relay_needed": [
+      "e8_inputs_20260810/calibration_v1/items.jsonl"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 1
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1199
+    },
+    "local_assets": [
+      "artifacts/stage1/reasoning_heavy_v2",
+      "artifacts/stage1/state_eval_v1"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "9s9pw0c8873y5g",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-09-16T14:36:56Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/c2bc_attempt8/watchdog_9s9pw0c8873y5g.jsonl"
+  ],
+  "watchdog_owns_pod": "9s9pw0c8873y5g",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.126.09"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_0270782f.bundle",
+    "SESSION_ASSETS": "reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/authorization.json",
+    "SESSION_COMMIT": "0270782ffbf823677cc4c047bc740463db337e74",
+    "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c2/frozen_assets.json",
+    "SESSION_KIND": "c2_baseline_completion",
+    "SESSION_PLAN_HASH": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV ASSETS_READY TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_phase_c2_baseline.status",
+    "SESSION_TEST_IGNORES": "--ignore=tests/architecture --ignore=tests/autoinit --ignore=tests/c1_preflight --ignore=tests/c2_preflight --ignore=tests/data --ignore=tests/docs --ignore=tests/evaluation --ignore=tests/infrastructure --ignore=tests/init --ignore=tests/models --ignore=tests/pod --ignore=tests/rollout --ignore=tests/runtime --ignore=tests/support --ignore=tests/test_usable_rollout.py --ignore=tests/training --ignore=tests/validation",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_phase_c2_baseline_driver",
+    "pid": 1631,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python scripts/pod/autoinit_phase_c2_baseline_driver.py --protocol logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json --frozen-inputs logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json --selection-record logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json --rebuild-minutes 39.812 --rate 1.09 --spent-usd 0.069 --soft-stop-usd 1.01 --device cuda",
+    "log_path": "/workspace/autoinit_phase_c2_baseline_run.log",
+    "status_path": "/workspace/autoinit_phase_c2_baseline.status",
+    "pid_path": "/workspace/jobs/autoinit_phase_c2_baseline_driver.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_phase_c2_baseline_driver.job.json",
+    "exit_path": "/workspace/jobs/autoinit_phase_c2_baseline_driver.exit",
+    "started_utc": "2026-09-16T13:34:59Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "BASELINE_COMPLETION_ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "c2_baseline_completion_evidence.json",
+    "c2_baseline_comparison.json"
+  ],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "this session owes no off-pod products"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 5,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 32.32,
+    "actual_usd": 0.5872,
+    "authorized_usd": 1.195,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-09-16T14:03:30+00:00"
+}

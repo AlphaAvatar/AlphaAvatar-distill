@@ -281,8 +281,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 12,
-  "runs_unrecorded": 5,
+  "runs_current": 13,
+  "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": {
@@ -321,8 +321,8 @@
     "total": 4
    },
    "phase_c2_baseline_completion": {
-    "recorded": 1,
-    "unrecorded": 3,
+    "recorded": 2,
+    "unrecorded": 2,
     "total": 4
    },
    "recovery_continuation": {
@@ -1102,6 +1102,19 @@
    },
    "manifest_sha256": "1796e9f53ae9878a480ab027309bbffa95cd4cd6df1f9a6888e2d7e7e1679c79",
    "n_components": 7
+  },
+  {
+   "experiment_id": "phase_c2_baseline_completion",
+   "run_id": "attempt8",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
+    "manifest": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/manifest.json"
+   },
+   "manifest_sha256": "b91a12e14d5a07f61c013e0a0bae93d69927d2b12c9448132a953004593a0662",
+   "n_components": 12
   }
  ],
  "unrecorded": [
@@ -1136,14 +1149,6 @@
    "n_files": 15,
    "digest": "6a9719fbf4028963b5eefa255e664d5efe299dabaf370d38c0b0661c1abd95b4",
    "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
-  },
-  {
-   "experiment_id": "phase_c2_baseline_completion",
-   "run_id": "attempt8",
-   "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
-   "n_files": 1,
-   "digest": "bb3ac26707cb4165369e5112ebc3ea184ed5f1d35ec034357a7c711978ac9d47",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

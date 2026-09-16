@@ -1,0 +1,122 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_outcome/v1",
+ "_what_this_is": "what Phase-C2 baseline-completion attempt 8 did. Written after provider-confirmed teardown. AUTHORIZES NOTHING.",
+ "attempt": "attempt8",
+ "classification": "COMPLETE — B REBUILT, MEASURED ONCE, B->C COMPARISON COMPUTED",
+ "setup_rc": 0,
+ "what_ran": {
+  "zero_dollar_gates": "10 of 10 PASSED twice: once driven directly through the real spec(), the real argument namespace and the real issued authorization WITHOUT invoking the launcher, then again inside the launcher. Both runs agree line for line.",
+  "provider": "one resource created, draw 1 of the 2 permitted. Pod 9s9pw0c8873y5g, NVIDIA L40S, $1.09/h, stock Low, image runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09.",
+  "setup": "SETUP_RC=0 on draw 1, host not cold. The ROPE_OK step is no longer declared and nothing looked for a staged checkpoint.",
+  "driver": "detached pid 1631, confirmed by descriptor_probe rather than by the start channel.",
+  "stages_completed": [
+   "bind_identities",
+   "rebuild_measure_compare"
+  ],
+  "_no_third_stage": "there is no third stage and no beam. trains_anything=false, runs_a_beam_search=false, remeasures_any_candidate=false, all recorded by the driver."
+ },
+ "science": {
+  "b_rebuilt": true,
+  "state_eval_measurements_performed": 1,
+  "durable_baseline_measurement": true,
+  "comparison": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8/evidence/c2_baseline_comparison.json",
+  "verdict": "CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE",
+  "_verdict_owner": "the comparison record computes it from its three id lists; it is not written beside them, and it is not restated here as a substitute for reading it.",
+  "b_identity_reproduced_exactly": {
+   "expected_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "actual_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+   "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "num_parameters": 596049920,
+   "_all_five_identity_checks_true": "the deterministic fixed path rebuilt the frozen C1 treatment baseline to its expected identity, so the state measured IS B and not something adjacent to it. This is the check that makes the comparison mean anything."
+  },
+  "rope_runtime_evidence": {
+   "stored": 5000000.0,
+   "runtime": 5000000.241530586,
+   "transformers": "5.13.1",
+   "checked_on": "/workspace/aad/artifacts/autoinit/phase_c2_baseline/baseline_rebuild/steps/03_attention",
+   "_this_is_the_attempt_6_repair_executing": "attempt 6 refused at a setup-time ROPE_OK step that globs a staged checkpoint this session deliberately does not stage. The guard moved onto the REBUILT B, in the interpreter that measures it, after materialization and before the one formal state_eval. It ran, it passed, and its reading is inside the durable measurement block. transformers 5.x reads the nested rope_parameters.rope_theta; a 4.x interpreter would have found nothing and silently used a class default 500x away."
+  }
+ },
+ "result": {
+  "_scope": "CHEAP-METRIC HYPOTHESIS GENERATION on the frozen state_eval@v1 suite (hash 6421fa4cf12ee2a1). NOT behavioural recovery evidence, NOT a demonstrated initialization improvement, and NOT a reason to prefer any candidate. A behavioural B->C result needs three paired recovery seeds, the frozen 0.86M budget and the frozen battery, and is a separately authorized paid experiment.",
+  "fronts": "front 0 holds four candidates; B sits in front 1 with one candidate. No candidate is in a worse front than B, and B dominates none of them.",
+  "b_is_dominated_by": [
+   "b0c1ef82a929a7ca24803c00936f5bb1",
+   "993214929a7d4da4dfcbf96c453a11cc"
+  ],
+  "_domination_means": "strictly better on ALL THREE ranked objectives at epsilon 1e-4: equal-domain mean teacher KL, worst-domain teacher KL and critical-token KL. The other two front-0 candidates improve both teacher-KL objectives but are worse on critical-token KL, so they reach front 0 by non-domination rather than by dominating B.",
+  "margins": "the smallest |B <-> C| margin on any ranked objective is 0.395971, about 50x the 0.007782 disclosure threshold. Objective values and signed deltas are in the comparison record; they are not restated here.",
+  "numerical_sensitivity": "NOT_FLAGGED, 0 flagged pairs. This is NOT a determinism claim: cross-session numerical variance remains NOT DIRECTLY MEASURED, no state has ever been measured twice in this project, and the per-measurement runtime block is empty. The threshold is the tightest observed gap BETWEEN frozen candidates, which is a different quantity from a noise bound.",
+  "independently_recomputed": "the Pareto fronts, the set dominating B, and the minimum margin were recomputed from the record's own objective values outside the driver and agree exactly with the record. The verdict was derived, not read."
+ },
+ "search1_status": {
+  "was": "INCOMPLETE — the beam had run to completion and the B->C comparison it was collected for had never been computed, because B carried no measurement anywhere.",
+  "now": "the comparison EXISTS and is self-hashed. Whether that completes Search-1 as a scientific question is for independent review, not for this closeout to declare.",
+  "stage1_selection_not_modified": "the beam ranking artifact is cited, never rewritten. Inserting a state the beam did not generate would make the search's own record describe a candidate set it never produced."
+ },
+ "provider": {
+  "pod_id": "9s9pw0c8873y5g",
+  "gpu": "NVIDIA L40S",
+  "quoted_price_per_hour": 1.09,
+  "actual_price_per_hour": 1.09,
+  "price_basis_authorized": 1.09,
+  "stock_status": "Low",
+  "draws_used": 1,
+  "draws_permitted": 2,
+  "provider_resources_created": 1,
+  "elapsed_minutes": 32.32,
+  "deleted": true,
+  "provider_confirms_gone": true,
+  "teardown_gate": "allowed=True failed=None — deletion followed the gate, not a timer",
+  "independently_reconfirmed": "GraphQL returned pod(9s9pw0c8873y5g) = null with exists=false and desired_status=TERMINATED, and an account-wide pod list returned []."
+ },
+ "budget": {
+  "this_attempt": 0.5872,
+  "authorized_usd": 1.195,
+  "within_authorization": true,
+  "_under_expected": "0.5872 against a 0.7212 expected cost and a 1.1950 ceiling: the session finished at 49% of its ceiling and 81% of its expected cost.",
+  "project_cumulative_before": 296.9218,
+  "project_cumulative_after": 297.509,
+  "project_cap": 320.0,
+  "project_remaining_after": 22.491,
+  "completion_envelope_usd": 2.39,
+  "envelope_spent": 0.6905,
+  "envelope_remaining": 1.6995,
+  "_envelope_arithmetic": "0.0412 (attempt5+6) + 0.0621 (attempt7) + 0.5872 (attempt8) = 0.6905 of 2.3900. Derived from the run closeouts by scripts/consolidate/derive_budget.py, not restated."
+ },
+ "chain": {
+  "grant_commit_G": "f8b3b5bf9e1d55c89b32a1852cf3b865d2f2175e",
+  "readiness_commit_R": "3a43eb8f6199a5ff843fccfa891e13c6c52bed4f",
+  "authorization_session_commit_A": "0270782ffbf823677cc4c047bc740463db337e74",
+  "grant_sha256": "1c8d80e92e5e45d3e87237ff9399efaf7f0087bab85022b2949c28aefc4f83a7",
+  "authorization_sha256": "2a1bd5371f0c2b95fdaf21c4c00771af1372b6eba6464d31e8a45a340f5019fc",
+  "bundle": "aad_autoinit_0270782f.bundle sha256 16bf79291db66540 13053293 bytes, round-tripped",
+  "completion_closure": "bb3aa38a8367f71640cb356e2636883092ec867f7be7d33b20ab688d213382f3",
+  "n_files": 92,
+  "consumed": "YES. No part of this chain is reused.",
+  "_closure_did_not_move": "byte-identical to attempt 7's, because attempt 7's root cause was an orchestration error and no repository code needed to change."
+ },
+ "six_frozen_scientific_identities": {
+  "status": "ALL SIX UNCHANGED throughout attempts 7 and 8, re-derived through the production assembler",
+  "completion_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+  "completion_pricing_sha256": "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+  "baseline_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+  "baseline_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "frozen_candidates_self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+  "search1_selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf"
+ },
+ "what_is_now_forbidden_without_a_new_decision": [
+  "any GPU remeasurement of B — the durable measurement exists, so the authority inverted the instant it was written",
+  "a second state_eval of B, or a fresh formal B session",
+  "Search-2, conditional or otherwise",
+  "any behavioural confirmation of B vs C",
+  "rerunning the Search-1 beam",
+  "generating a new C candidate or remeasuring a frozen one",
+  "causal-KL ATTENTION R&D",
+  "recovery training of any kind"
+ ],
+ "next": "RETURN FOR INDEPENDENT SCIENTIFIC REVIEW of the completed B->C comparison. Nothing else starts.",
+ "authorizes": "nothing"
+}

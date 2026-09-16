@@ -9,61 +9,85 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing. No pod exists.** Attempt 7's pod
-`e2abgfw36davun` was deleted after 3.42 min; GraphQL returns
-`pod(e2abgfw36davun) = null` with `exists=false`, and an account-wide list
-returns `[]`. Its launcher and its watchdog were both killed before teardown, so
-that check was **explicit rather than automatic** — see below.
-**Baseline-completion attempt 8 is authorized and its chain is being built** —
-grant, one `launch_bound` sweep, authorization, bundle, then a launch that goes
-into a `tmux` server. Every earlier C2 chain is consumed and none is reused.
+**Nothing is running. Nothing is billing. No pod exists.** Attempt 8's pod
+`9s9pw0c8873y5g` was deleted after 32.32 min behind its teardown gate; GraphQL
+returns `pod(9s9pw0c8873y5g) = null` with `exists=false`, and an account-wide
+list returns `[]`. **Nothing is prepared for launch and nothing may start** —
+see the durability boundary below.
 
-**The C2 beam search RAN TO COMPLETION and the comparison it was collected for
-did not run.** Attempt 4 (2026-09-16, `$6.0785`) passed 9/9 `$0` gates, setup,
-and stage A; the beam ran 4 h 56 min against its 635.96-min envelope, produced
-**7 complete leaves** and committed **5** to `stage1_selection.json` at
-00:00:17Z with its journal, telemetry and hashes. B was absent from those
-leaves, so the single conditional rebuild started — and hit its **27.66-min
-allowance** inside `depth.causal_kl_greedy_v1` at round 5 candidate 26/31, 196
-evaluations in.
+**B HAS BEEN MEASURED AND THE B→C COMPARISON EXISTS.** Baseline-completion
+attempt 8 (`$0.5872` of a `$1.1950` ceiling, 32.32 min) rebuilt the frozen C1
+treatment baseline through its complete deterministic fixed path, measured it
+**once** on the frozen `state_eval@v1` suite, and computed the preregistered
+comparison against the five candidate measurements attempt 4 froze. The record is
+[`c2_baseline_comparison.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/evidence/c2_baseline_comparison.json),
+self-hashed at `e1837e762cec2a04…`.
 
-So there is **no `c2_baseline_comparison.json` and Search-1 is INCOMPLETE**. B
-has no surviving checkpoint bytes and its `state_eval` number has never been
-measured anywhere, so the five selected leaves have objective values with
-nothing to compare against. **This is not a null result, not a partial answer,
-and not evidence that any candidate beats or loses to B.**
+**The rebuild reproduced B exactly**, which is what makes the comparison mean
+anything: `actual_artifact_digest` equals the expected `53e30566c5f795f1…`, and
+the weights digest, config hash, architecture signature and parameter count all
+match. The state that was measured *is* B, not something adjacent to it.
 
-**Spend was never the constraint** — the session ended at 40.4% of its
-`$15.0446` ceiling. The 27.665-min reserve was. The frozen C1 treatment path's
-first operator runs its own greedy layer search at the observed 7.05
-evaluations/min, and this repository's Phase-B measurements put a DEPTH
-expansion at roughly 32 min on an L40S: the reserve could not fund the path's
-first operator, let alone its other three. Nothing crashed; the deadline
-mechanism stopped the work instead of running to the cost backstop, which is
-its purpose.
+**The verdict is `CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE`.** Front 0 holds
+four candidates; B sits in front 1 with one. **B is dominated on all three ranked
+objectives by two candidates** — `b0c1ef82a929a7ca…` and `993214929a7d4da4…` —
+and dominates none of them. The other two front-0 candidates improve both
+teacher-KL objectives but are *worse* on critical-token KL, so they reach front 0
+by non-domination rather than by beating B outright. The fronts, the dominating
+set and the margins were recomputed outside the driver from the record's own
+values and agree with it exactly; the verdict is derived, never restated.
 
-**THE BASELINE COMPLETION HAS RUN THREE TIMES AND B IS STILL NOT MEASURED.** The
-maintainer decision of 2026-09-17 closed the science for implementation purposes
-and authorized two formal sessions to establish B, measure it once on the same
-frozen suite, and compute the preregistered B→C comparison against the five
-frozen candidate measurements. **Both were consumed without reaching a rebuild.**
+**Read it for exactly what it is: cheap-metric hypothesis generation.** Every
+number is a step-0 `state_eval` measurement. It is **not** behavioural recovery
+evidence, **not** a demonstrated initialization improvement, and **not** a reason
+to prefer any candidate. A behavioural B→C result needs three paired recovery
+seeds, the frozen 0.86M budget and the frozen battery, and is a separately
+authorized paid experiment.
 
-**The retry rule then changed shape.** The decision of 2026-09-16 continues the
-work, raises **no** envelope, and prospectively replaces the two-session limit
+`numerical_sensitivity` is **NOT_FLAGGED** with 0 flagged pairs: the smallest
+B↔C margin on any ranked objective is `0.395971`, roughly 50× the `0.007782`
+disclosure threshold. **That is not a determinism claim.** Cross-session
+numerical variance remains **NOT DIRECTLY MEASURED** — no state has ever been
+measured twice in this project and the per-measurement `runtime` block is empty
+— and the threshold is the tightest gap observed *between* frozen candidates,
+which is a different quantity from a noise bound.
+
+**The durability boundary has inverted.** The measurement was persisted the
+instant it existed, before any post-processing, so from here: **no GPU
+remeasurement of B, no second `state_eval`, no fresh formal B session.** Search-2,
+behavioural confirmation, causal-KL ATTENTION R&D, a Search-1 rerun and any new
+or remeasured C candidate each need a **new maintainer decision**. `$1.6995` of
+the `$2.3900` completion envelope is unspent and that is not permission.
+
+**The `ROPE_OK` repair executed and passed.** On the rebuilt B, in the
+interpreter that measured it, after materialization and before the one formal
+`state_eval`: stored `5000000.0` against runtime `5000000.2415`, under
+`transformers 5.13.1`. The reading sits inside the durable measurement block, so
+a future version drift shows up in the evidence rather than in a wrong number.
+
+## Getting here cost three aborted sessions and `$0.1033`
+
+The maintainer decision of 2026-09-17 authorized two formal sessions to establish
+B, measure it once on the frozen suite, and compute the preregistered B→C
+comparison. **Both were consumed without reaching a rebuild.**
+
+**The retry rule then changed shape.** The decision of 2026-09-16 continued the
+work, raised **no** envelope, and prospectively replaced the two-session limit
 with a **money** boundary: a fresh formal chain requires
 `cumulative completion spend + $1.1950 <= $2.3900`. There is no fixed maximum
 attempt number, and an incrementing attempt number is not a scope expansion — a
 cheap pre-measurement abort consumes its actual cost and its one-use chain,
 nothing more. The ceiling, the `$1.09/h` L40S boundary, the `$320.0000` project
-cap and every frozen scientific identity are unchanged. Attempt 7 ran under that
-rule; `$0.1033 + $1.1950 = $1.2983`, so **attempt 8 is authorized** and
-continues without a further approval.
+cap and every frozen scientific identity stayed unchanged throughout. Attempts 7
+and 8 both ran under that rule, and it is what let the work finish without
+another approval round.
 
 | attempt | where it stopped | cost |
 | --- | --- | --- |
 | [5](../stages/stage-1/phase_c2_baseline_completion/runs/attempt5/closeout/outcome.json) | the launcher's **first statement**: `claim_output_root` took the stage id positionally where the signature takes `outputs` by keyword. No gate ran, no price was queried, **no provider resource existed**. The chain was consumed anyway — its one-use rule counts the invocation | `$0.0000` |
 | [6](../stages/stage-1/phase_c2_baseline_completion/runs/attempt6/closeout/outcome.json) | **10/10 `$0` gates passed** and setup refused at **`ROPE_OK`**, which globs `artifacts/stage1/*/checkpoint/config.json`. This session stages no checkpoint — it rebuilds B on the pod — so the step had nothing to look at. `SETUP_RC=1`, no driver stage | `$0.0412` |
 | [7](../stages/stage-1/phase_c2_baseline_completion/runs/attempt7/closeout/outcome.json) | **10/10 `$0` gates passed twice**, the pod came up and SSH answered — and the **launcher process was killed two minutes in**, by the agent's own blocking tool call. Setup never ran; `stages` is `{}`. The pod outlived its orchestrator and an explicit provider query removed it | `$0.0621` |
+| [8](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) | **COMPLETE.** `SETUP_RC=0`, driver detached and confirmed by descriptor probe, both stages passed, B rebuilt to its expected digest, measured once, comparison computed. Pod deleted behind its teardown gate | `$0.5872` |
 
 **Attempt 7 was not a repository failure, and recording it as one would hide the
 real defect.** Every gate passed, the live price sat exactly on the `$1.09/h`
@@ -162,12 +186,12 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**, and its execution preregistration is now **frozen to the binding attempt 18 ran under**. C2 Search-1 is **INCOMPLETE**: its beam ran to completion and the B→C comparison it was collected for has never been computed, because the baseline completion authorized to supply B was consumed by two pre-measurement aborts. The completion package is **executable, priced, repaired and AUTHORIZED for attempt 7** — protocol, pricing, frozen candidate side, driver, thin launcher, ten `$0` gates, a CPU preflight of its own, a derived closure, a readiness contract, an authorization type and issuer, a bundle transport, run ownership and an enforceable resource scope all exist and have all executed at `$0`. The Search-1 **beam** remains unauthorized and is never rerun | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**, and its execution preregistration is **frozen to the binding attempt 18 ran under**. C2 Search-1's beam ran to completion and the **B→C comparison it was collected for has now been COMPUTED** by baseline-completion attempt 8, which rebuilt B to its expected digest and measured it once. Whether that closes Search-1 as a scientific question is for independent review. The Search-1 **beam** remains unauthorized and is never rerun, and B is never remeasured | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
-| launch chain | **attempt 8's chain is being built fresh** — grant, one `launch_bound` sweep, authorization through the production issuer, canonical bundle — in that order and on clean trees, and the launch itself goes into a `tmux` server. Every earlier C2 chain is **consumed** (Search-1 attempts 1–4, completion attempts 5, 6 and 7) and no part of any of them is reused. No further C1 attempt is authorized or prepared; a complete verdict ended that round | [`phase_c2_baseline_completion/runs/`](../stages/stage-1/phase_c2_baseline_completion/runs/) |
-| last attempt | **baseline completion attempt 7 — ABORTED BEFORE SETUP, `$0.0621`.** Ten `$0` gates passed twice, the pod billed 3.42 min, the launcher was killed two minutes in and setup never ran, so there was no rebuild and no measurement. Before it, attempt 6 refused at `ROPE_OK` for `$0.0412` and attempt 5 consumed its chain at `$0.0000` without creating a resource. The last complete scientific execution remains **C1 attempt 18** (`$10.2018`, `ALL_DONE`, verdict `GO`) | [`attempt7/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt7/closeout/outcome.json) · [`phase_c1/runs/attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
-| blocker | **NONE BLOCKING.** All three completion sessions aborted BEFORE any formal measurement, so the 2026-09-16 money rule applies and attempt 8 continues without a further approval, inside the unchanged `$2.3900` envelope at the unchanged `$1.1950` ceiling. **B still carries no measurement**, so the B→C comparison remains uncomputed and Search-1 stays incomplete until a session reaches it. Durable large-artifact capacity remains a separate open decision and does not gate this one — the completion's product is a measurement record, not preserved weights | [`attempt7/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt7/closeout/outcome.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. Attempt 8's chain (grant `f8b3b5bf`, readiness `3a43eb8f`, authorization `0270782f`, bundle `16bf7929…`) ran the full seven steps and is spent. No further C1 attempt is authorized or prepared either; a complete verdict ended that round | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
+| last attempt | **baseline completion attempt 8 — COMPLETE, `$0.5872`.** Both stages passed, B was rebuilt to digest `53e30566…`, measured **once** on the frozen suite, and the B→C comparison was computed; the pod was deleted behind its teardown gate after 32.32 min. Attempts 5, 6 and 7 aborted before any measurement for `$0.1033` between them | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
+| blocker | **AWAITING INDEPENDENT SCIENTIFIC REVIEW** of the completed B→C comparison. Nothing is running, nothing is prepared, and nothing may start: Search-2, behavioural confirmation, causal-KL ATTENTION R&D, a Search-1 rerun and any remeasurement of B each need a **new maintainer decision**. `$1.6995` of the `$2.3900` completion envelope is unspent and is not permission. Durable large-artifact capacity remains a separate open decision | [`attempt8/evidence/c2_baseline_comparison.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/evidence/c2_baseline_comparison.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness
@@ -215,7 +239,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$296.9218` spent of `$320.0000`, leaving `$23.0782` |
+| project cap | `$297.5090` spent of `$320.0000`, leaving `$22.4910` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

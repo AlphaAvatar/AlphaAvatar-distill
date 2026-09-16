@@ -1,35 +1,31 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-16T13:30:00Z",
+ "generated_utc": "2026-09-16T14:10:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods. attempt7's pod e2abgfw36davun was deleted after 3.42 min; GraphQL returns pod(...) = null with exists=false and an account-wide list returns []. Its launcher and watchdog were both killed first, so the check was explicit, not automatic."
+  "note": "zero pods. attempt8's pod 9s9pw0c8873y5g was deleted after 32.32 min behind its teardown gate; GraphQL returns pod(...) = null with exists=false and an account-wide list returns []."
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch; MONEY bounds the sessions. Attempts 10-18 consumed $22.6176 and attempt 18's GO verdict ended the round. This package is C1's; C2 completion runs under the 2026-09-16 continuation decision, also money-bounded. Owner: logs/budget/decisions.md.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch; MONEY bounds the sessions. That package is C1's and its round ended with a verdict. C2 baseline completion ran under the 2026-09-16 decision and is DONE -- nothing is authorized to launch now. Owner: logs/budget/decisions.md.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
-  "any": true,
-  "run": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
-  "grant_committed": "governance/grant.json",
-  "readiness_record": null,
-  "authorization": null,
-  "bundle": null,
-  "note": "attempt8's grant is committed; the launch_bound sweep, the authorization and the bundle are owed IN THAT ORDER, and the launch goes into a tmux server. Nothing of the attempt5/6/7 chains is reused. Owner: the attempt8 grant."
+  "any": false,
+  "run": null,
+  "note": "nothing is prepared and nothing may start. attempt8 COMPLETED the baseline completion: B was rebuilt, measured once and compared. The durability boundary has inverted -- no GPU remeasurement of B, no second state_eval, no Search-2 and no behavioural confirmation without a new maintainer decision. Owner: the attempt8 closeout."
  },
  "budget": {
-  "cumulative_spend_usd": 296.9218,
+  "cumulative_spend_usd": 297.509,
   "authorized_cap_usd": 320.0,
-  "remaining_usd": 23.0782,
+  "remaining_usd": 22.491,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -78,8 +74,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE and CLOSED. Search-1 attempt4: search complete, B comparison incomplete. Baseline completion: attempts 5-7 consumed pre-measurement; attempt 8's chain is being built.",
-  "then": "build attempt8's chain in order -- grant, one launch_bound sweep, authorization, bundle round-trip -- then launch the formal L40S session INSIDE TMUX, with the starting call returning immediately: rebuild B once, measure it once, compute B->C. On a valid result: preserve, push and STOP for independent review; start no Search-2, no behavioural confirmation and no ATTENTION R&D. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule.",
+  "status": "C1 COMPLETE and CLOSED by a GO verdict. C2 Search-1: beam complete and the B->C comparison COMPUTED by baseline-completion attempt8. No experiment is running or prepared.",
+  "then": "independent scientific review of c2_baseline_comparison.json. Do NOT start Search-2, behavioural confirmation, causal-KL ATTENTION R&D, another B measurement or a Search-1 rerun: each needs a new decision. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -90,7 +86,7 @@
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
   "phase_c1": "COMPLETE / CLOSED by the attempt-18 GO verdict -- status owned by phase_c.c1",
-  "phase_c2": "SEARCH-1 INCOMPLETE: beam executed, B->C not run. The BEAM is never rerun; COMPLETION attempt 8 is authorized and prepared -- owned by phase_c.c2",
+  "phase_c2": "SEARCH-1 beam complete and B->C COMPUTED at attempt8; verdict owned by phase_c.c2. The BEAM is never rerun and B is never remeasured",
   "formal_recovery_evidence": "NONE"
  },
  "phase_a_result": {
@@ -123,7 +119,7 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "SEARCH COMPLETE, COMPARISON NOT RUN -- SEARCH-1 INCOMPLETE. attempt4 beam ran to completion (7 leaves, 5 committed and journal-verified) and B carries no measurement. NOT a null result. The beam is NOT rerun; baseline completion supplies B. Per-attempt outcomes are derived in latest_run.",
+   "status": "SEARCH COMPLETE AND THE B->C COMPARISON IS COMPUTED. attempt4's beam ran to completion (7 leaves, 5 committed) and attempt8 rebuilt B to its expected digest, measured it ONCE on the frozen suite and computed the preregistered comparison. Whether that closes Search-1 as a scientific question is for independent review.",
    "gate": "SATISFIED by C1 (verdict GO); not authorization.",
    "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
@@ -131,7 +127,8 @@
    "priced": "Search-1 (historical basis): plans/phase_c2_pricing.json. Baseline completion, separately: plans/phase_c2_baseline_completion_pricing.json.",
    "baseline": "B has no surviving checkpoint bytes. It is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566.",
    "attempt4_root_cause": "the 27.665-min baseline_rebuild_reserve could not fund the complete frozen path. RUNTIME/PRICING ENVELOPE DEFECT; figures owned by analyses/c2_baseline_reserve_defect.json.",
-   "baseline_completion": "THREE SESSIONS CONSUMED, B STILL NOT MEASURED, ATTEMPT 8 CONTINUING AUTOMATICALLY. attempt5 ($0.0000) and attempt6 ($0.0412) aborted before any B rebuild on inherited-declaration defects, both repaired; attempt7 ($0.0621) passed all ten gates twice and its LAUNCHER was killed by the agent's own blocking tool call two minutes in, orphaning a billing pod that an explicit check then removed -- an orchestration error, no repository defect and no failing test. Protocol, pricing, the closure and all six frozen scientific identities unchanged. Retries are bounded by MONEY and by the measurement boundary, not by attempt count. Per-attempt detail: the run closeouts."
+   "baseline_completion": "COMPLETE at attempt8, $0.5872 of a $1.1950 ceiling. Attempts 5 ($0.0000), 6 ($0.0412) and 7 ($0.0621) all aborted before any formal measurement -- two inherited-declaration defects and one agent orchestration error -- and none is a scientific retry. The ROPE_OK repair EXECUTED on the rebuilt B and passed. Protocol, pricing, the closure and all six frozen scientific identities unchanged throughout.",
+   "result": "verdict CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE. Front 0 holds four candidates; B sits in front 1 with one. B is DOMINATED on all three ranked objectives by two candidates and dominates none. Smallest margin 0.395971, ~50x the 0.007782 disclosure threshold, so numerical_sensitivity is NOT_FLAGGED -- which is not a determinism claim. CHEAP-METRIC HYPOTHESIS GENERATION ONLY, not behavioural evidence. Owner: runs/attempt8/evidence/c2_baseline_comparison.json."
   }
  },
  "storage": {
@@ -141,7 +138,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NONE BLOCKING. All three prior completion sessions aborted BEFORE any formal measurement, so the 2026-09-16 money rule applies and attempt 8 continues without a further approval. B still carries no measurement, so Search-1 stays INCOMPLETE until B->C is computed. C1 is CLOSED by attempt 18's GO verdict. Durable large-artifact capacity is a separate open decision and does not gate a session whose product is a measurement record rather than weights.",
+ "blocker": "AWAITING INDEPENDENT SCIENTIFIC REVIEW of the completed B->C comparison. Nothing is running, nothing is prepared and nothing may start: Search-2, behavioural confirmation, causal-KL ATTENTION R&D, a Search-1 rerun and any remeasurement of B all need a new maintainer decision. $1.6995 of the completion envelope is unspent and is not permission.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
@@ -152,10 +149,10 @@
   "experiment_id": "phase_c2_baseline_completion",
   "run_id": "attempt8",
   "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
-  "outcome": "not recorded, and no closeout has been written for this run",
+  "outcome": "recorded; COMPLETE \u2014 B REBUILT, MEASURED ONCE, B->C COMPARISON COMPUTED, $0.5872",
   "index": "logs/index.json",
-  "last_executed": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6",
-  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  "last_executed": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
+  "state": "recorded: the run wrote its own manifest"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",

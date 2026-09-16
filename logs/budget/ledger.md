@@ -2600,3 +2600,43 @@ built: the six frozen scientific identities and the completion closure
 `bb3aa38a` over 92 files are byte-identical to what attempt 7 was authorized
 against. A `$1.1950` ceiling still fits the envelope, so attempt 8 continues
 automatically under the 2026-09-16 money rule.
+
+## 2026-09-16 — C2 baseline completion attempt 8: COMPLETE, B measured, B→C computed, `$0.5872`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| Baseline completion attempt 8: **10/10 `$0` gates passed twice**, pod `9s9pw0c8873y5g` on an L40S at `$1.09/h` for 32.32 min. `SETUP_RC=0`, driver detached and confirmed by descriptor probe, both authorized stages passed. B was **rebuilt to its expected digest `53e30566…`**, measured **once** on the frozen `state_eval@v1` suite, and the preregistered B→C comparison was computed against the five frozen candidate measurements. Pod deleted behind its teardown gate; GraphQL confirms `pod(...) = null` and the account-wide list returns `[]` | `$0.5872` | [`runs/attempt8/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/) |
+
+**Cumulative: `$297.5090` of the `$320.0000` cap.**
+
+```text
+project      296.9218 + 0.5872 = 297.5090   of 320.0000, leaving 22.4910
+envelope       0.1033 + 0.5872 =   0.6905   of 2.3900, leaving 1.6995
+```
+
+The session finished at **49% of its `$1.1950` ceiling** and 81% of its
+`$0.7212` expected cost, on the pricing derived from attempt 4's own telemetry
+rather than from the reserve that failed. Every figure above is derived from the
+run closeouts by `derive_budget.py`; none is restated by hand.
+
+**What the money bought.** The verdict is
+`CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE`: front 0 holds four candidates, B
+sits in front 1 with one, B is dominated on all three ranked objectives by two
+candidates and dominates none. The smallest B↔C margin is `0.395971`, ~50× the
+`0.007782` disclosure threshold, so `numerical_sensitivity` is `NOT_FLAGGED` —
+which is **not** a determinism claim, since cross-session variance remains
+unmeasured. It is **cheap-metric hypothesis generation**, not behavioural
+evidence.
+
+**The three cheap aborts that preceded it cost `$0.1033` together** and each one
+closed a real line: attempt 5 four run-layout call sites, attempt 6 the inherited
+`ROPE_OK` declaration, attempt 7 an agent orchestration error. The `ROPE_OK`
+repair then **executed** here — on the rebuilt B, in the measuring interpreter,
+before the one `state_eval` — reading stored `5000000.0` against runtime
+`5000000.2415` under `transformers 5.13.1`.
+
+**The durability boundary has inverted.** The measurement was persisted the
+instant it existed, before any post-processing. No GPU remeasurement of B, no
+second `state_eval`, no Search-2 and no behavioural confirmation without a new
+maintainer decision. `$1.6995` remains inside the envelope and is not
+permission.

@@ -1,0 +1,319 @@
+{
+  "schema": "aadistill.autoinit.c2_baseline_completion_evidence/v1",
+  "_contract": "the Phase-C2 baseline-completion session record. It supplies the baseline half of a comparison whose candidate half was measured by Attempt 4 and is read frozen. No beam search is reachable from this session and no candidate is remeasured.",
+  "started_utc": "2026-09-16T13:35:00.808517+00:00",
+  "protocol_sha256": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+  "frozen_inputs": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+  "rate_usd_per_hour": 1.09,
+  "soft_stop_usd": 1.01,
+  "trains_anything": false,
+  "runs_a_beam_search": false,
+  "remeasures_any_candidate": false,
+  "stages": {
+    "bind_identities": {
+      "stage_id": "bind_identities",
+      "passed": true,
+      "finished_utc": "2026-09-16T13:35:00.816701+00:00",
+      "spend_usd": 0.069,
+      "detail": {
+        "bound_search_identity": {
+          "search_run_id": "autoinit.v1.phase_c2.search1",
+          "search_config_hash": "628d2abfd8b7ecdc13ac367618fa7771a87de4c9ed6dc3a8321f1d4d70f4980b",
+          "selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf",
+          "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+          "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+        },
+        "_identities_are_bound_not_supplied": "the Search-1 run id and config hash come from the frozen candidate record; there is no command-line source for either",
+        "beam_ranking_cited": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json",
+        "frozen_inputs_self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+        "frozen_inputs_extraction_rule": "c2.frozen_comparison_inputs/v1",
+        "n_frozen_candidates": 5,
+        "source_journal_sha256": "cc4ee3a14b0a0ed03afe1292780a2c372f728a37233f8f294d86060eb956d1ee",
+        "selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf",
+        "suite": {
+          "qualified_id": "state_eval@v1",
+          "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+        },
+        "policy": {
+          "qualified_id": "beam.pareto_multi_objective@v2",
+          "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+        },
+        "epsilon": {
+          "state.teacher_kl.equal_domain_mean": 0.0001,
+          "state.teacher_kl.worst_domain": 0.0001,
+          "state.critical_token_kl": 0.0001
+        },
+        "teacher": {
+          "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+          "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+        },
+        "baseline_construction": {
+          "path_id": "autoinit.v1.phase_c1.treatment",
+          "path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+          "spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+          "expected_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+          "steps": [
+            {
+              "impl_id": "depth.causal_kl_greedy_v1",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": ""
+            },
+            {
+              "impl_id": "ffn.activation_importance_v0",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": ""
+            },
+            {
+              "impl_id": "width.global_pca_v0",
+              "profile_id": "calib.reasoning_heavy@v2",
+              "expected_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+              "label": "pre-ATTENTION parent b8820f41d062"
+            },
+            {
+              "impl_id": "attention.activation_importance_v1",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": "treatment ATTENTION"
+            }
+          ],
+          "verified": true
+        },
+        "evaluator_implementation_verified": [
+          "src/aadistill/initialization/planning/fixed_path.py",
+          "src/aadistill/initialization/planning/metrics.py",
+          "src/aadistill/initialization/planning/ranking.py",
+          "src/aadistill/initialization/specs/metrics.py"
+        ],
+        "_no_measurement_here": "stage A loads no model and measures nothing"
+      }
+    },
+    "rebuild_measure_compare": {
+      "stage_id": "rebuild_measure_compare",
+      "passed": true,
+      "finished_utc": "2026-09-16T14:00:51.688269+00:00",
+      "spend_usd": 0.5386,
+      "detail": {
+        "baseline_identity": {
+          "artifact_digest": true,
+          "weights_digest": true,
+          "config_sha256": true,
+          "arch_signature": true,
+          "num_parameters": true
+        },
+        "baseline_state_id": "c2-baseline-rebuilt-b",
+        "baseline_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+        "state_eval_measurements_performed": 1,
+        "candidates_compared": 5,
+        "candidates_remeasured": 0,
+        "teacher_instances_loaded": 1,
+        "verdict": "CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE",
+        "numerical_sensitivity": "NOT_FLAGGED",
+        "n_flagged_pairs": 0,
+        "cross_session_variance": "NOT DIRECTLY MEASURED",
+        "suite_root": "/workspace/aad/artifacts/stage1/state_eval_v1",
+        "cites_beam_ranking": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json",
+        "cites_frozen_candidate_inputs": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+        "record_sha256": "e1837e762cec2a0443acbef27d7de5efa63f0b82d80a7cfc09fcf3d2f41c20f8",
+        "comparison_record": "/workspace/aad/artifacts/audit/autoinit_phase_c2_baseline/c2_baseline_comparison.json"
+      }
+    }
+  },
+  "elapsed_min": 25.85,
+  "spend_usd": 0.5386,
+  "stages_completed": [
+    "bind_identities",
+    "rebuild_measure_compare"
+  ],
+  "frozen_candidate_state_ids": [
+    "8a2863bc5c4fcde107bf2cfd9ceb14e3",
+    "0267b4eb771ed499c7c162260d97c794",
+    "b0c1ef82a929a7ca24803c00936f5bb1",
+    "993214929a7d4da4dfcbf96c453a11cc",
+    "74b2a21ee286d693d749c861b469b6ac"
+  ],
+  "bound_search_identity": {
+    "search_run_id": "autoinit.v1.phase_c2.search1",
+    "search_config_hash": "628d2abfd8b7ecdc13ac367618fa7771a87de4c9ed6dc3a8321f1d4d70f4980b",
+    "selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf",
+    "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+    "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+  },
+  "baseline_measurement": {
+    "status": "MEASURED",
+    "state_eval_measurements_performed": 1,
+    "measured_utc": "2026-09-16T14:00:51.684333+00:00",
+    "persisted_utc": "2026-09-16T14:00:51.684352+00:00",
+    "state_id": "c2-baseline-rebuilt-b",
+    "path_label": "ROOT",
+    "construction": {
+      "path_id": "autoinit.v1.phase_c1.treatment",
+      "path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+      "spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+      "expected_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+      "steps": [
+        {
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "profile_id": "calib.domain_balanced@v1",
+          "expected_artifact_digest": null,
+          "label": ""
+        },
+        {
+          "impl_id": "ffn.activation_importance_v0",
+          "profile_id": "calib.domain_balanced@v1",
+          "expected_artifact_digest": null,
+          "label": ""
+        },
+        {
+          "impl_id": "width.global_pca_v0",
+          "profile_id": "calib.reasoning_heavy@v2",
+          "expected_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+          "label": "pre-ATTENTION parent b8820f41d062"
+        },
+        {
+          "impl_id": "attention.activation_importance_v1",
+          "profile_id": "calib.domain_balanced@v1",
+          "expected_artifact_digest": null,
+          "label": "treatment ATTENTION"
+        }
+      ],
+      "verified": true
+    },
+    "expected_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "actual_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "artifact_identity": {
+      "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+      "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "tokenizer_sha256": null,
+      "index_sha256": null,
+      "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+      "num_parameters": 596049920
+    },
+    "identity_matches": {
+      "artifact_digest": true,
+      "weights_digest": true,
+      "config_sha256": true,
+      "arch_signature": true,
+      "num_parameters": true
+    },
+    "evaluation": {
+      "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "suite_id": "state_eval@v1",
+      "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+      "reference": "root_teacher",
+      "values": {
+        "state.critical_token_kl": 12.363234663933099,
+        "state.critical_token_kl.assistant": 8.50740002995508,
+        "state.critical_token_kl.eos": 11.441519287654332,
+        "state.critical_token_kl.final_answer": 8.926238451973063,
+        "state.critical_token_kl.reasoning": 8.367330715454914,
+        "state.critical_token_kl.think_close": 13.8696560723441,
+        "state.critical_token_kl.tool_close": 15.2155248437609,
+        "state.nll.code": 8.667703318988126,
+        "state.nll.general": 10.172550639411817,
+        "state.nll.pooled_all_domains": 9.344086127899477,
+        "state.nll.rag_multihop": 10.504017547210324,
+        "state.nll.reasoning_math": 8.380986281101064,
+        "state.nll.teacher_reference_pooled": 0.9303420924946204,
+        "state.nll.tool": 9.174913540195561,
+        "state.nll_delta_vs_teacher_pooled": 8.413744035404855,
+        "state.reverse_kl.token_mean": 23.149939833552903,
+        "state.teacher_kl.code": 8.401590092015722,
+        "state.teacher_kl.equal_domain_mean": 8.56163196045223,
+        "state.teacher_kl.general": 8.118908772409927,
+        "state.teacher_kl.rag_multihop": 9.481219400537256,
+        "state.teacher_kl.reasoning_math": 8.148122675098985,
+        "state.teacher_kl.token_mean": 8.637250792612688,
+        "state.teacher_kl.tool": 8.658318862199259,
+        "state.teacher_kl.worst_domain": 9.481219400537256,
+        "state.top1_agreement": 0.03494906919564454
+      },
+      "positions": 74022,
+      "detail": {
+        "per_subtype_kl": {
+          "code": 8.401590092015722,
+          "general": 8.118908772409927,
+          "multihop_qa": 9.642045041569755,
+          "rag_evidence": 9.320393759504757,
+          "gsm8k": 8.028432616193442,
+          "openmath": 8.267812734004528,
+          "tool_calling": 8.658318862199259
+        },
+        "per_domain_kl": {
+          "general": 8.118908772409927,
+          "reasoning_math": 8.148122675098985,
+          "rag_multihop": 9.481219400537256,
+          "code": 8.401590092015722,
+          "tool": 8.658318862199259
+        },
+        "per_domain_nll": {
+          "general": 10.172550639411817,
+          "reasoning_math": 8.380986281101064,
+          "rag_multihop": 10.504017547210324,
+          "code": 8.667703318988126,
+          "tool": 9.174913540195561
+        },
+        "tagged": {
+          "assistant": {
+            "positions": 45801,
+            "kl": 8.50740002995508
+          },
+          "eos": {
+            "positions": 70,
+            "kl": 11.441519287654332
+          },
+          "final_answer": {
+            "positions": 10058,
+            "kl": 8.926238451973063
+          },
+          "reasoning": {
+            "positions": 35603,
+            "kl": 8.367330715454914
+          },
+          "think_close": {
+            "positions": 70,
+            "kl": 13.8696560723441
+          },
+          "tool_close": {
+            "positions": 28,
+            "kl": 15.2155248437609
+          }
+        },
+        "reference_strategy": "recompute"
+      },
+      "measured_utc": null,
+      "runtime": {}
+    },
+    "suite": {
+      "id": "state_eval@v1",
+      "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+      "root": "/workspace/aad/artifacts/stage1/state_eval_v1"
+    },
+    "reference_strategy": "recompute",
+    "teacher": {
+      "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+      "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+    },
+    "rope_base": {
+      "stored": 5000000.0,
+      "runtime": 5000000.241530586,
+      "transformers": "5.13.1",
+      "checked_on": "/workspace/aad/artifacts/autoinit/phase_c2_baseline/baseline_rebuild/steps/03_attention",
+      "_why_here": "this session stages no checkpoint, so the shared setup step has nothing to check; the guard belongs where the artifact exists"
+    },
+    "bound_search1_identity": {
+      "search_run_id": "autoinit.v1.phase_c2.search1",
+      "search_config_hash": "628d2abfd8b7ecdc13ac367618fa7771a87de4c9ed6dc3a8321f1d4d70f4980b",
+      "selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf",
+      "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+      "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+    },
+    "frozen_candidate_inputs": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+    "no_candidate_was_remeasured": "the five C measurements were READ from the frozen record and passed to the comparison untouched. No code path in this session measures a candidate, and the count above is the session's total.",
+    "_this_is_the_durability_boundary": "written the instant the measurement existed and before any post-processing. If the comparison below fails, THIS survives and the comparison can be rebuilt from it plus the frozen five at $0. B is not remeasured."
+  },
+  "outcome": "ALL_DONE",
+  "successful": true
+}
