@@ -63,12 +63,52 @@ def required_env(setup_text: str) -> set[str]:
     # Anything the setup gives a default to, or assigns, is not the launcher's job.
     defaulted = set(re.findall(r"\$\{([A-Z][A-Z0-9_]+):-", setup_text))
     assigned = set(re.findall(r"^\s*(?:export\s+)?([A-Z][A-Z0-9_]+)=", setup_text, re.M))
+    #: A `for` loop BINDS its variable, and `VAR=` is not the only way to bind
+    #: one. Modelling assignment alone reported `CAND` and `PY` -- the ROPE_OK
+    #: step's own venv-discovery loop -- as variables every session must supply,
+    #: which turned 13 of these parametrizations red for both families at once.
+    #: The loop was added to that step legitimately; the parser simply did not
+    #: know the construct, so the whole file was committed red and stayed red.
+    assigned |= set(re.findall(r"^\s*for\s+([A-Z][A-Z0-9_]+)\s+in\b",
+                               setup_text, re.M))
     return read - defaulted - assigned - AMBIENT
 
 
 def test_pairs_are_discovered():
     """A discovery bug here would make every assertion below vacuous."""
     assert PAIRS, "no launcher/setup pairs found; the detector is broken"
+
+
+def test_required_env_knows_every_way_the_script_binds_a_variable():
+    """`required_env` is the premise of four tests here and had none of its own.
+
+    It over-reported instead of under-reporting, which is the failure mode that
+    does not look like a bug: 13 parametrizations went red naming `CAND`, a
+    `for`-loop variable in the setup's own venv discovery, as something every
+    session must supply. Nothing was wrong with any session.
+    """
+    script = """
+    export SUPPLIED=$SESSION_THING
+    DEFAULTED=${MAYBE:-fallback}
+    REFUSED="${DEMANDED:?the launcher must name it}"
+    ASSIGNED=1
+    for LOOPVAR in a b; do echo "$LOOPVAR"; done
+    echo "$CONSUMED"
+    """
+    needed = required_env(script)
+    assert "CONSUMED" in needed, "a plainly consumed variable is not reported"
+    assert "SESSION_THING" in needed
+    for bound in ("ASSIGNED", "LOOPVAR", "MAYBE", "SUPPLIED", "DEFAULTED",
+                  "REFUSED"):
+        assert bound not in needed, (
+            f"{bound} is bound or defaulted by the script and is not the "
+            "launcher's job to supply")
+
+    #: And on the real script, which is what the four consumers read.
+    real = required_env(SHARED_SETUP.read_text())
+    for loop_var in ("CAND", "PY"):
+        assert loop_var not in real, (
+            f"{loop_var} is a `for` variable in autoinit_preflight_setup.sh")
 
 
 def forwards(launch: Path, var: str) -> bool:

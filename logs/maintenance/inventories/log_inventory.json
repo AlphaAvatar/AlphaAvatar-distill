@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T10:19:21+00:00",
+  "created_utc": "2026-09-16T11:43:01+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1148,
-    "bytes": 43850428,
+    "bytes": 43852900,
     "by_disposition": {
       "keep_canonical": 80,
       "keep_immutable": 891,
@@ -5087,7 +5087,7 @@
     {
       "path": "logs/index.json",
       "size_bytes": 61982,
-      "sha256": "d89fdbbd68c9325323b8d345394340030580462ad86a022525c6b31873e6a668",
+      "sha256": "70a172bcfefb5e46c3535e728c3d90ece4b2809cbec4f4459147920e066a5fff",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -11696,7 +11696,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 111960,
-      "sha256": "e236bdca983172d5e8fe79979d21886b890ea50b26938f4b7140b1edee5ee43a",
+      "sha256": "c4794625749fa7b5b273ab19cb27c36f2d9799d7de44e48c810a31f4ac4c4da8",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -18178,8 +18178,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/closeout/outcome.json",
-      "size_bytes": 3747,
-      "sha256": "ecf29722dcdc4155f9e22bda4c8c6d30ddc497cebbe62964b0969c8e52fad3f5",
+      "size_bytes": 4666,
+      "sha256": "d2f14d2a63ea272270dc04242310179ba7daa3e8fd0440511b616028d557eb53",
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
@@ -18293,8 +18293,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt6/closeout/outcome.json",
-      "size_bytes": 7922,
-      "sha256": "86fee5ab2d4b77def5152b943f7017ca44b89273816775ffb5af26d2370b0ff3",
+      "size_bytes": 9475,
+      "sha256": "4044ec35e439b656a58c4a8c7a57dab7e020cedf678b4ddf7a34237d729517c1",
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [

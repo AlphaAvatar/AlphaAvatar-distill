@@ -37,5 +37,15 @@
  },
  "chain_consumed": true,
  "what_is_reused": "NOTHING. Attempt 6 gets a fresh grant, sweep, authorization and bundle.",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "chain": {
+  "grant_commit_G": "6d7f03b3bfc9085219116d0c9af308e6b16eec85",
+  "readiness_commit_R": "75b9bf21cdab23e27d19a9d2ae8463a8392e75cd",
+  "authorization_session_commit_A": "96611c89b2f36d4d5f18645a4236f715fbd566a2",
+  "bundle_commit": "d3365040568d2dadc3dbec2efdb70d04950f80d0",
+  "grant_sha256": "8fc4c68304c3a372682b7adee62719927c6796b4357f2604bd6f223ca0f324ba",
+  "authorization_sha256": "b6c441a14d5b31760047750f7142cf94f9fc2824a5bf3082b62c144cd5217f81",
+  "consumed": "YES, at $0.0000. The launcher was invoked and died in its first statement, before any gate and before the price query, so no provider resource existed -- and the grant's one-use rule counts the invocation, not the spend. No part of this chain is reused.",
+  "_recovered_from_git": "these commits were recovered with `git log --diff-filter=A` over each governance artifact; the closeout originally recorded only chain_consumed: true"
+ }
 }

@@ -60,6 +60,13 @@
     "frozen_candidates_self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
     "search1_selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf"
    }
+  },
+  "the_teacher_side_of_the_same_risk": {
+   "_asked_because": "the measurement is a teacher KL, so a misread positional basis on the TEACHER would corrupt it exactly as one on B would -- and worse, B would then be measured against a different reference from the one the five frozen candidates were measured against.",
+   "what_the_setup_step_covered": "staged STUDENT checkpoints only: it globs artifacts/stage1/*/checkpoint/config.json and pins 5,000,000. Nothing anywhere checks the teacher.",
+   "measured_at_zero_cost": "the teacher config at the pinned revision 768f209d9ea81521153ed38c47d515654e938aea carries ONLY the nested rope_parameters.rope_theta = 5,000,000 and no flat field, so the two readers cannot disagree -- but a transformers 4.x interpreter would find nothing to read and silently use its class default.",
+   "why_no_new_guard_was_added": "the exposure is closed by the environment, not by an assertion: /opt/train is pinned offline to transformers 5.13.1 with exact pins, attempt 6's own log observed 5.13.1, and 5.x reads the nested field. Adding an unexercised assertion to a path that has now died twice on unexercised assertions is the failure mode of this round, not a fix for it. The driver's guard records the observed transformers version beside its reading, so a version drift shows up in the evidence instead of in a wrong number.",
+   "for_the_next_session": "if the pinned interpreter ever moves below transformers 5, the teacher's positional basis becomes unguarded and this must be revisited before measuring."
   }
  },
  "provider": {

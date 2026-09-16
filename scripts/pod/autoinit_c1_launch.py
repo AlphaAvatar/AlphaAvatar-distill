@@ -179,12 +179,19 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: The full suite is unchanged and still runs in development, in convergence and
 #: in CI. What changed is that a billing GPU is no longer responsible for it.
 #:
-#: `tests/c2_preflight` is here for the reason the derivation exists: it is
-#: another experiment's pod selection, it appeared after C1 closed, and a C1 pod
-#: has no business running it. The list is still hand-written because C1 is
-#: frozen and re-deriving it would move the digest a closed attempt's evidence
-#: describes; a NEW session should use `ignores_for_selection` instead.
-TEST_IGNORES = ("tests/architecture", "tests/autoinit", "tests/c2_preflight",
+#: `tests/c2_preflight` and `tests/c2_baseline_completion_preflight` are here
+#: for the reason the derivation exists: each is another experiment's pod
+#: selection, each appeared after C1 closed, and a C1 pod has no business
+#: running either. The second one arrived with the baseline completion and was
+#: NOT added at the time, so the launcher's own guard was red — a C1 pod would
+#: have collected the completion's preflight. That is the drift the comment
+#: above predicts, arriving exactly as predicted; adding a test directory has
+#: consumers, and every other session's exclusion complement is one of them.
+#: The list is still hand-written because C1 is frozen and re-deriving it would
+#: move the digest a closed attempt's evidence describes; a NEW session should
+#: use `ignores_for_selection` instead.
+TEST_IGNORES = ("tests/architecture", "tests/autoinit",
+                "tests/c2_baseline_completion_preflight", "tests/c2_preflight",
                 "tests/data", "tests/docs", "tests/evaluation",
                 "tests/infrastructure", "tests/init", "tests/models",
                 "tests/pod", "tests/rollout", "tests/runtime", "tests/support",

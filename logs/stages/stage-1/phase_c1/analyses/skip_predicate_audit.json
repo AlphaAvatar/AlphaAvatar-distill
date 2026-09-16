@@ -1362,7 +1362,7 @@
   },
   {
    "file": "tests/pod/test_launcher_forwards_setup_env.py",
-   "line": 119,
+   "line": 159,
    "kind": "pytest.skip",
    "function": "test_launcher_forwards_every_variable_the_setup_reads",
    "condition": "setup == SHARED_SETUP",
@@ -1378,7 +1378,7 @@
   },
   {
    "file": "tests/pod/test_launcher_forwards_setup_env.py",
-   "line": 198,
+   "line": 238,
    "kind": "pytest.skip",
    "function": "test_forwarded_variables_have_a_launcher_side_default",
    "condition": "setup == SHARED_SETUP",
@@ -2036,5 +2036,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "7d537cc5e7063426e19b90244fcb6dd7f495752178db101544add5a01575b1fa"
+ "digest": "8d75b314d60ec62807ac0081fddc39569d83b3190a5cd6503c3f8df1f6795f1c"
 }
