@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-16T14:10:00Z",
+ "generated_utc": "2026-09-17T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -74,8 +74,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE and CLOSED by a GO verdict. C2 Search-1: beam complete and the B->C comparison COMPUTED by baseline-completion attempt8. No experiment is running or prepared.",
-  "then": "independent scientific review of c2_baseline_comparison.json. Do NOT start Search-2, behavioural confirmation, causal-KL ATTENTION R&D, another B measurement or a Search-1 rerun: each needs a new decision. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule.",
+  "status": "C1 COMPLETE and CLOSED by a GO verdict. C2 Search-1 frozen with B->C computed; the full joint re-search is designed, derived and priced but NOT FUNDED. C3/C4 not started.",
+  "then": "a maintainer funding decision on the pricing record's three options. Do NOT launch the full search, the behavioural selection, the withdrawn Search-2, C3 or any remeasurement of B without one. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -86,7 +86,7 @@
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
   "phase_c1": "COMPLETE / CLOSED by the attempt-18 GO verdict -- status owned by phase_c.c1",
-  "phase_c2": "SEARCH-1 beam complete and B->C COMPUTED at attempt8; verdict owned by phase_c.c2. The BEAM is never rerun and B is never remeasured",
+  "phase_c2": "SEARCH-1 frozen, B->C computed. FULL JOINT re-search planned and priced, NOT FUNDED -- owned by phase_c.c2",
   "formal_recovery_evidence": "NONE"
  },
  "phase_a_result": {
@@ -119,17 +119,17 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "SEARCH COMPLETE AND THE B->C COMPARISON IS COMPUTED. attempt4's beam ran to completion (7 leaves, 5 committed) and attempt8 rebuilt B to its expected digest, measured it ONCE on the frozen suite and computed the preregistered comparison. Whether that closes Search-1 as a scientific question is for independent review.",
-   "gate": "SATISFIED by C1 (verdict GO); not authorization.",
-   "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
-   "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
-   "executes": "Search-1 (consumed): autoinit_phase_c2_{launch,driver}.py. Baseline completion: autoinit_phase_c2_baseline_{launch,driver}.py.",
+   "status": "SEARCH COMPLETE and B->C COMPUTED; Search-1 is DONE and FROZEN. The local Search-2 refinement is WITHDRAWN; C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection of a new incumbent, designed and priced and NOT FUNDED.",
+   "question": "with the promoted ATTENTION operator in the accepted library, what composition is preferred when implementations, applicable calibration profiles and operator ORDER all compete in one search?",
+   "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "priced": "Search-1 (historical basis): plans/phase_c2_pricing.json. Baseline completion, separately: plans/phase_c2_baseline_completion_pricing.json.",
    "baseline": "B has no surviving checkpoint bytes. It is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566.",
-   "attempt4_root_cause": "the 27.665-min baseline_rebuild_reserve could not fund the complete frozen path. RUNTIME/PRICING ENVELOPE DEFECT; figures owned by analyses/c2_baseline_reserve_defect.json.",
-   "baseline_completion": "COMPLETE at attempt8, $0.5872 of a $1.1950 ceiling. Attempts 5 ($0.0000), 6 ($0.0412) and 7 ($0.0621) all aborted before any formal measurement -- two inherited-declaration defects and one agent orchestration error -- and none is a scientific retry. The ROPE_OK repair EXECUTED on the rebuilt B and passed. Protocol, pricing, the closure and all six frozen scientific identities unchanged throughout.",
-   "result": "verdict CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE. Front 0 holds four candidates; B sits in front 1 with one. B is DOMINATED on all three ranked objectives by two candidates and dominates none. Smallest margin 0.395971, ~50x the 0.007782 disclosure threshold, so numerical_sensitivity is NOT_FLAGGED -- which is not a determinism claim. CHEAP-METRIC HYPOTHESIS GENERATION ONLY, not behavioural evidence. Owner: runs/attempt8/evidence/c2_baseline_comparison.json."
-  }
+   "baseline_completion": "COMPLETE at attempt8 ($0.5872): B rebuilt to its expected digest, measured ONCE, B->C computed, verdict CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE. Attempts 5-7 aborted pre-measurement for $0.1033 between them. B is never remeasured. Per-attempt detail: the run closeouts.",
+   "result": "front 0 holds four candidates, B sits in front 1 with one; B is DOMINATED on all three ranked objectives by two candidates and dominates none. Smallest margin 0.395971 vs a 0.007782 threshold, so numerical_sensitivity is NOT_FLAGGED -- not a determinism claim. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
+   "space": "DERIVED from the registry, never stated: 578 reachable leaves (576 decomposed + 2 single-step COMPOSITE) against Phase B's 290. Owner scripts/experiments/phase_c2/full_search_space.py; a test refuses these integers as literals."
+  },
+  "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent: attention.activation_importance_v1 vs a future attention.causal_kl_v1. Cannot start before C2 names an incumbent, and the operator does not exist yet.",
+  "c4": "CONDITIONAL on C3 promoting. Another full joint re-search with the promoted operator, then behavioural selection. Same cycle as C1->C2; pattern in docs/OPERATOR_PROMOTION_CYCLE.md."
  },
  "storage": {
   "measured_utc": "2026-09-01T04:00:00Z",
@@ -138,7 +138,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "AWAITING INDEPENDENT SCIENTIFIC REVIEW of the completed B->C comparison. Nothing is running, nothing is prepared and nothing may start: Search-2, behavioural confirmation, causal-KL ATTENTION R&D, a Search-1 rerun and any remeasurement of B all need a new maintainer decision. $1.6995 of the completion envelope is unspent and is not permission.",
+ "blocker": "FUNDING DECISION REQUIRED. The C2 full joint re-search plus its behavioural selection does not fit the remaining $22.4910 at any priced beam width: cheapest complete chain ceiling $49.6123, shortfall $27.1213, and plan_session REFUSES the search at the standing width. Design, space derivation, pricing and validation are complete; nothing is running and nothing may start. Owner logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."

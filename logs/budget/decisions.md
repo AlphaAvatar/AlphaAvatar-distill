@@ -1,5 +1,113 @@
 # Decision records
 
+## 2026-09-17 — Search-2 withdrawn; C2 becomes a full joint re-search, and it does not fit the budget
+
+- **Maintainer decision.** The Attempt-8 B→C result is accepted as valid
+  **search-stage** evidence. All Attempt-4/8 evidence stays frozen: no Search-1
+  rerun, no remeasurement of B or any frozen C candidate, no rewriting of the
+  selection or comparison records. The previously preregistered **local
+  Search-2 refinement is NOT to be executed.**
+- **Context, and why the direction changed.** Search-1 was a restricted search:
+  ATTENTION's mixture free, DEPTH / FFN / RESIDUAL_WIDTH pinned at the Phase-B
+  incumbent's. It produced a real signal — four of five committed candidates in
+  a better ε-Pareto front than B, two dominating it on all three ranked
+  objectives, at margins ~50× the disclosure threshold. Read correctly that is
+  evidence **about the search procedure**, not about a winner. Polishing
+  locally around the winners of a restricted search would inherit the
+  restriction; the informative move is to widen it.
+- **Decision:** the C2 chain is now
+
+  ```text
+  Search-1 restricted search [DONE / FROZEN]
+    → full joint re-search
+    → Top-K / Top-5 candidate selection
+    → bounded 0.86M behavioural recovery selection
+    → C2 incumbent
+  ```
+
+  The full search exposes implementations, applicable calibration profiles and
+  operator order **jointly**, with the accepted ATTENTION library updated to
+  the promoted `attention.activation_importance_v1`. The incumbent DEPTH / FFN /
+  WIDTH calibration assignments are explicitly **not** assumed to survive the
+  ATTENTION change: they were chosen by a search in which ATTENTION declared
+  `CalibrationNeed.NONE` and was therefore offered once, however many mixtures
+  were active.
+- **The space is derived, and `576` is not the space.** Enumerating the live
+  registry gives **578** reachable leaves: **576** four-operator leaves plus
+  **2** single-step `COMPOSITE_STAGE1` leaves that reach the target directly.
+  The decomposed subspace and the total are different claims and both are
+  reported. Phase B's comparable space was **290**; the growth is exactly one
+  extra branching factor, because the promoted operator consumes calibration
+  where the one it replaced did not. Owner:
+  `scripts/experiments/phase_c2/full_search_space.py`, checked by a test that
+  refuses these integers as literals.
+- **One exclusion, and it is scientific.** `attention.weight_proxy_v0` is out
+  because **C1 is** the isolation experiment between it and the promoted
+  operator and it has a completed `GO` verdict. Promotion is what an isolation
+  verdict is for; re-entering the loser would cost ~50% more search
+  (866 leaves) to re-decide a closed question. Cheap alternatives
+  (`depth.positional_v0`, `composite.stage1_sandwich_v0`) are **in** — cost is
+  not a reason to exclude.
+- **Cost is now better measured than it was.** The table pools both committed
+  searches and takes the per-cell maximum. Two consequences:
+  `attention.activation_importance_v1` is **no longer unmeasured** — Search-1
+  priced it at `1.5 x width.global_pca_v0` and C2 attempt 4 then ran it 14
+  times *below* that proxy, so the margin was conservative in the safe
+  direction and is retired; and `depth.causal_kl_greedy_v1` deeper went the
+  other way, `31.10 → 36.07` min, which is the single figure the price turns on.
+- **THE BLOCKER: the chain does not fit the remaining `$22.4910`.**
+
+  ```text
+  full joint re-search   beam 6   expected $16.10   ceiling $33.18   REFUSED
+                         beam 4   expected $15.41   ceiling $27.45   REFUSED
+                         beam 3   expected $15.07   ceiling $24.59   REFUSED
+                         beam 2   expected $14.73   ceiling $21.72   fits
+  behavioural selection  11 probes, 4 conditional   ceiling $27.8908
+  cheapest complete chain                           ceiling $49.6123
+  shortfall on hard ceilings                                $27.1213
+  ```
+
+  `plan_session` **refuses** the search at the standing beam width against real
+  headroom, and each refusal is recorded per width. Beam 2 fits the search alone
+  and leaves `$0.77` — not enough for any behavioural stage, so funding only the
+  search would fund a chain that cannot reach a verdict.
+- **Not resolved by shrinking.** The budget module exists to prevent exactly
+  that, and the scope was not quietly narrowed to fit. The options — raise the
+  cap, fund the search alone at a registered narrower width, or accept a
+  restricted search again and lose the joint-pruning property — are a scientific
+  trade, and the trade is the maintainer's.
+- **Roadmap restructured** to C1–C4: C1 ATTENTION isolation (COMPLETE, `GO`);
+  C2 restricted evidence + full joint re-search + behavioural selection; C3
+  causal-KL isolation on the C2 incumbent; C4 conditional re-search if C3
+  promotes. The repeated shape is documented family-neutrally in
+  `docs/OPERATOR_PROMOTION_CYCLE.md` so a future family reuses the machinery
+  rather than a Qwen3-shaped copy.
+- **Implementation delta** was one extraction and two instances, not a new
+  subsystem: the branching/bound/trajectory/price arithmetic moved to
+  `scripts/experiments/search_cost_model.py` with every number injected —
+  justified by a real second consumer, and behaviour-preserving, proven by the
+  Search-1 back-test still predicting Phase-B attempt 5's levels exactly.
+  Nothing was added to `src/aadistill`.
+- **Alternatives considered:** keeping Search-2 — rejected by this decision, it
+  inherits the restriction; searching the full space at beam 6 on a cheaper card
+  — rejected for now, the frozen candidate measurements were taken on L40S and
+  changing the card would break comparability with them, which is a separate
+  scientific decision; pinning one calibration to save budget — rejected, it
+  recreates the restriction the experiment exists to remove.
+- **Risks:** the search may still not finish inside any funded envelope; Phase B
+  ran 9.08 h on a *smaller* space without finishing. The bound is over beam
+  compositions rather than averages precisely because that happened, and the
+  search is resumable by content-derived state id, so a multi-session
+  continuation is possible — but it would need its own cumulative envelope.
+- **Where it lives:**
+  `logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json`
+  (`5ace5a4d…`), `phase_c2_full_search_pricing.json` (`b59b28e3…`) — both DETERMINISTIC, so regenerating
+  them is a verification rather than a new document,
+  the roadmap, and `docs/OPERATOR_PROMOTION_CYCLE.md`. Nothing in
+  `src/aadistill`.
+- **Revisit when:** a funding decision is made, or the promoted ATTENTION
+  operator's promotion is withdrawn — which would withdraw the exclusion with it.
+
 ## 2026-09-16 — baseline-completion retries are bounded by money, not by an attempt count
 
 - **Maintainer decision.** Phase-C2 baseline-completion work continues.

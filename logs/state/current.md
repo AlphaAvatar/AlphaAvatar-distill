@@ -11,59 +11,94 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 **Nothing is running. Nothing is billing. No pod exists.** Attempt 8's pod
 `9s9pw0c8873y5g` was deleted after 32.32 min behind its teardown gate; GraphQL
-returns `pod(9s9pw0c8873y5g) = null` with `exists=false`, and an account-wide
-list returns `[]`. **Nothing is prepared for launch and nothing may start** —
-see the durability boundary below.
+returns `pod(9s9pw0c8873y5g) = null`, and an account-wide list returns `[]`.
+**Nothing is prepared for launch and nothing may start.**
 
-**B HAS BEEN MEASURED AND THE B→C COMPARISON EXISTS.** Baseline-completion
-attempt 8 (`$0.5872` of a `$1.1950` ceiling, 32.32 min) rebuilt the frozen C1
-treatment baseline through its complete deterministic fixed path, measured it
-**once** on the frozen `state_eval@v1` suite, and computed the preregistered
-comparison against the five candidate measurements attempt 4 froze. The record is
-[`c2_baseline_comparison.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/evidence/c2_baseline_comparison.json),
-self-hashed at `e1837e762cec2a04…`.
+**B WAS MEASURED, THE B→C COMPARISON EXISTS, AND IT HAS BEEN REVIEWED AND
+ACCEPTED** as valid **search-stage** evidence. Baseline-completion attempt 8
+(`$0.5872`) rebuilt the frozen C1 treatment baseline to its expected digest
+`53e30566…`, measured it once on the frozen `state_eval@v1` suite, and computed
+the preregistered comparison:
+[`c2_baseline_comparison.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/evidence/c2_baseline_comparison.json).
+Verdict `CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE` — front 0 holds four
+candidates, B sits in front 1 with one, and B is dominated on all three ranked
+objectives by two candidates while dominating none. All of that evidence is now
+**frozen**.
 
-**The rebuild reproduced B exactly**, which is what makes the comparison mean
-anything: `actual_artifact_digest` equals the expected `53e30566c5f795f1…`, and
-the weights digest, config hash, architecture signature and parameter count all
-match. The state that was measured *is* B, not something adjacent to it.
+**The next C2 step changed.** The maintainer decision of 2026-09-17 **withdrew**
+the preregistered local Search-2 refinement. Search-1 is kept as a
+**restricted-space validation experiment**: its value is that after promoting
+`attention.activation_importance_v1`, changing order and composition *alone*
+produced a real structural signal on the cheap metric. That is evidence about
+the **search procedure**, so the informative next step is to widen the search
+rather than polish locally inside a restriction.
 
-**The verdict is `CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE`.** Front 0 holds
-four candidates; B sits in front 1 with one. **B is dominated on all three ranked
-objectives by two candidates** — `b0c1ef82a929a7ca…` and `993214929a7d4da4…` —
-and dominates none of them. The other two front-0 candidates improve both
-teacher-KL objectives but are *worse* on critical-token KL, so they reach front 0
-by non-domination rather than by beating B outright. The fronts, the dominating
-set and the margins were recomputed outside the driver from the record's own
-values and agree with it exactly; the verdict is derived, never restated.
+```text
+C2 Search-1 restricted search [DONE / FROZEN]
+  → C2 full joint re-search
+  → Top-K / Top-5 candidate selection
+  → bounded 0.86M behavioural recovery selection
+  → C2 incumbent
+```
 
-**Read it for exactly what it is: cheap-metric hypothesis generation.** Every
-number is a step-0 `state_eval` measurement. It is **not** behavioural recovery
-evidence, **not** a demonstrated initialization improvement, and **not** a reason
-to prefer any candidate. A behavioural B→C result needs three paired recovery
-seeds, the frozen 0.86M budget and the frozen battery, and is a separately
-authorized paid experiment.
+**The full joint space is derived, and `576` is not the space.** Enumerating the
+live registry gives **578** reachable leaves — **576** four-operator leaves plus
+**2** single-step `COMPOSITE_STAGE1` leaves that reach the target directly.
+Phase B's comparable space was **290**, and the growth is exactly one extra
+branching factor: the promoted ATTENTION operator consumes calibration where
+`attention.weight_proxy_v0` declared `CalibrationNeed.NONE` and was therefore
+offered once however many mixtures were active. Nothing is pinned — every
+applicable implementation, every applicable profile and every order compete, so
+calibration choices can affect pruning. Owner:
+[`full_search_space.py`](../../scripts/experiments/phase_c2/full_search_space.py),
+with a test that refuses those integers as literals.
 
-`numerical_sensitivity` is **NOT_FLAGGED** with 0 flagged pairs: the smallest
-B↔C margin on any ranked objective is `0.395971`, roughly 50× the `0.007782`
-disclosure threshold. **That is not a determinism claim.** Cross-session
-numerical variance remains **NOT DIRECTLY MEASURED** — no state has ever been
-measured twice in this project and the per-measurement `runtime` block is empty
-— and the threshold is the tightest gap observed *between* frozen candidates,
-which is a different quantity from a noise bound.
+**One exclusion, and it is scientific, not economic.**
+`attention.weight_proxy_v0` is out because **C1 is** the isolation experiment
+between it and the promoted operator, and it has a completed `GO` verdict.
+Re-admitting the loser would cost ~50% more search (866 leaves) to re-decide a
+closed question. The cheap alternatives `depth.positional_v0` and
+`composite.stage1_sandwich_v0` are **in**.
 
-**The durability boundary has inverted.** The measurement was persisted the
-instant it existed, before any post-processing, so from here: **no GPU
-remeasurement of B, no second `state_eval`, no fresh formal B session.** Search-2,
-behavioural confirmation, causal-KL ATTENTION R&D, a Search-1 rerun and any new
-or remeasured C candidate each need a **new maintainer decision**. `$1.6995` of
-the `$2.3900` completion envelope is unspent and that is not permission.
+**Cost is better measured than it was.** The table pools both committed searches
+and takes the per-cell maximum. `attention.activation_importance_v1` is **no
+longer an unmeasured input** — Search-1 priced it at `1.5×
+width.global_pca_v0`, C2 attempt 4 then ran it 14 times *below* that proxy, so
+the margin was conservative in the safe direction and is retired. One cell moved
+the other way and it is the one the price turns on:
+`depth.causal_kl_greedy_v1` deeper, `31.10 → 36.07` min.
 
-**The `ROPE_OK` repair executed and passed.** On the rebuilt B, in the
-interpreter that measured it, after materialization and before the one formal
-`state_eval`: stored `5000000.0` against runtime `5000000.2415`, under
-`transformers 5.13.1`. The reading sits inside the durable measurement block, so
-a future version drift shows up in the evidence rather than in a wrong number.
+**THE BLOCKER IS BUDGET, NOT DESIGN.** A funding decision is required.
+
+| | expected | ceiling | fits `$22.4910`? |
+| --- | --- | --- | --- |
+| full search, beam 6 (standing) | `$16.10` | `$33.18` | **refused** |
+| beam 4 | `$15.41` | `$27.45` | **refused** |
+| beam 3 | `$15.07` | `$24.59` | **refused** |
+| beam 2 | `$14.73` | `$21.72` | yes |
+| behavioural selection (11 probes + 4 conditional) | `$19.11` | `$27.89` | — |
+| **cheapest complete chain** | `$33.84` | **`$49.61`** | **no — short `$27.12`** |
+
+`plan_session` **refuses** the search at the standing width against real
+headroom, and each refusal text is recorded per width in
+[`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json).
+Beam 2 fits the *search alone* and leaves `$0.77` — not enough for any
+behavioural stage, so funding only the search would fund a chain that cannot
+reach a verdict. **The scope was not shrunk to fit**; that is the one repair the
+budget module exists to prevent. The three options, and the fact that the trade
+is scientific rather than arithmetic, are in that record.
+
+**Every probe is trained fresh.** The historical-probe-reuse ruling records
+`reuse_verified: false` — all eleven examined probes fail
+`scoring_contract_matches_live` — so there is no admissible reuse to net off.
+
+**The roadmap is now C1–C4**, and the repeated shape is written down once as a
+family-neutral pattern in
+[`OPERATOR_PROMOTION_CYCLE.md`](../../docs/OPERATOR_PROMOTION_CYCLE.md):
+operator R&D → isolation → promotion → full joint re-search → behavioural
+selection → new incumbent. C3 is causal-KL ATTENTION isolation on the C2
+incumbent and cannot start before C2 names one; C4 is conditional on C3
+promoting.
 
 ## Getting here cost three aborted sessions and `$0.1033`
 
@@ -186,12 +221,12 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**, and its execution preregistration is **frozen to the binding attempt 18 ran under**. C2 Search-1's beam ran to completion and the **B→C comparison it was collected for has now been COMPUTED** by baseline-completion attempt 8, which rebuilt B to its expected digest and measured it once. Whether that closes Search-1 as a scientific question is for independent review. The Search-1 **beam** remains unauthorized and is never rerun, and B is never remeasured | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a `GO` verdict**. C2 Search-1 is **DONE and FROZEN** and its B→C comparison has been **reviewed and accepted** as search-stage evidence; the local Search-2 refinement is **WITHDRAWN**, and C2 now continues as a **full joint re-search → Top-5 → behavioural selection**, designed and priced but **NOT FUNDED**. C3 (causal-KL isolation on the C2 incumbent) and C4 (conditional re-search) are not started | [`phase_c2/plans/phase_c2_full_search_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
-| launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. Attempt 8's chain (grant `f8b3b5bf`, readiness `3a43eb8f`, authorization `0270782f`, bundle `16bf7929…`) ran the full seven steps and is spent. No further C1 attempt is authorized or prepared either; a complete verdict ended that round | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
+| launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The next chain cannot be built until the full search is funded | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
 | last attempt | **baseline completion attempt 8 — COMPLETE, `$0.5872`.** Both stages passed, B was rebuilt to digest `53e30566…`, measured **once** on the frozen suite, and the B→C comparison was computed; the pod was deleted behind its teardown gate after 32.32 min. Attempts 5, 6 and 7 aborted before any measurement for `$0.1033` between them | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
-| blocker | **AWAITING INDEPENDENT SCIENTIFIC REVIEW** of the completed B→C comparison. Nothing is running, nothing is prepared, and nothing may start: Search-2, behavioural confirmation, causal-KL ATTENTION R&D, a Search-1 rerun and any remeasurement of B each need a **new maintainer decision**. `$1.6995` of the `$2.3900` completion envelope is unspent and is not permission. Durable large-artifact capacity remains a separate open decision | [`attempt8/evidence/c2_baseline_comparison.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/evidence/c2_baseline_comparison.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| blocker | **A FUNDING DECISION IS REQUIRED.** The C2 full joint re-search plus its behavioural selection does not fit the remaining `$22.4910` at any priced beam width — cheapest complete chain ceiling `$49.6123`, short `$27.1213` — and `plan_session` refuses the search at the standing width. Design, space derivation, pricing and validation are complete. Nothing may start: the full search, the behavioural stage, the withdrawn Search-2, C3 and any remeasurement of B each need a decision | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness
@@ -332,12 +367,13 @@ home in the search journal, which is kilobytes. The capacity decision becomes a
 precondition only for a later behavioural-confirmation experiment, which would
 produce six 2.22 GiB probes and is separately authorized.
 
-## The launch chain — C2 completion is building one; C1 owes no step
+## The launch chain — nothing is prepared; the next one waits on funding
 
-**C1 owes no step.** Attempt 18's chain is consumed and the round is ended by a
-verdict. **C2 baseline completion is building attempt 8's chain** through the
-seven steps below, and has now run them three times: the ordering is not
-theoretical. The readiness
+**No chain is owed and none is prepared.** C1's round ended with a verdict and
+C2's baseline completion ended with a measurement. The seven steps below have
+now been executed four times end to end (completion attempts 5–8), so the
+ordering below is not theoretical — and the next chain cannot be built until the
+full joint re-search is funded. The readiness
 block above says the latest sweep does not describe the current tree; that is
 correct and is not a debt — a `launch_bound` sweep describes the tree a launch
 will use, so it is run once, when a launch is actually imminent (AGENTS.md P8.3).

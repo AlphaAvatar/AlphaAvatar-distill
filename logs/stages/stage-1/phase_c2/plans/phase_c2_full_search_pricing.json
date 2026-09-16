@@ -1,0 +1,144 @@
+{
+ "schema": "aadistill.autoinit.c2_full_search_pricing/v1",
+ "_contract": "What the Phase-C2 full joint re-search and its behavioural selection stage cost, derived from the registry, both committed search telemetry files, a committed formal session's probe record and derive_budget.py. AUTHORIZES NOTHING and FUNDS NOTHING.",
+ "search": {
+  "price_per_hour_basis": 1.09,
+  "_price_basis_note": "NVIDIA L40S securePrice, for planning only. A launch re-quotes: an hour-old price is not a price, and securePrice is what the launcher pays \u2014 the same query has returned a lower communityPrice the launcher would never use.",
+  "widths": [
+   {
+    "beam_width": 6,
+    "warmup_levels": 1,
+    "expansions_min": 107,
+    "expansions_max": 119,
+    "costly_early_hours": 13.187,
+    "structural_min_hours": 13.104,
+    "structural_max_hours": 26.882,
+    "expected_minutes": 886.23,
+    "expected_usd": 16.0998,
+    "hard_ceiling_minutes": 1826.57,
+    "hard_ceiling_usd": 33.1827,
+    "fits_remaining_headroom": false,
+    "refusal": "the plan terminates at $33.18 (1827 min at $1.090/h) but only $22.49 is authorized \u2014 a shortfall of $10.69. Expected $16.10, soft stop $32.64, recovery reserve $0.55. Ask for $33.18 or reduce the run; do not shrink it silently to fit."
+   },
+   {
+    "beam_width": 4,
+    "warmup_levels": 1,
+    "expansions_min": 95,
+    "expansions_max": 103,
+    "costly_early_hours": 12.558,
+    "structural_min_hours": 12.502,
+    "structural_max_hours": 21.688,
+    "expected_minutes": 848.47,
+    "expected_usd": 15.4139,
+    "hard_ceiling_minutes": 1511.13,
+    "hard_ceiling_usd": 27.4521,
+    "fits_remaining_headroom": false,
+    "refusal": "the plan terminates at $27.45 (1511 min at $1.090/h) but only $22.49 is authorized \u2014 a shortfall of $4.96. Expected $15.41, soft stop $26.91, recovery reserve $0.55. Ask for $27.45 or reduce the run; do not shrink it silently to fit."
+   },
+   {
+    "beam_width": 3,
+    "warmup_levels": 1,
+    "expansions_min": 89,
+    "expansions_max": 95,
+    "costly_early_hours": 12.243,
+    "structural_min_hours": 12.201,
+    "structural_max_hours": 19.091,
+    "expected_minutes": 829.59,
+    "expected_usd": 15.0709,
+    "hard_ceiling_minutes": 1353.4,
+    "hard_ceiling_usd": 24.5867,
+    "fits_remaining_headroom": false,
+    "refusal": "the plan terminates at $24.59 (1353 min at $1.090/h) but only $22.49 is authorized \u2014 a shortfall of $2.10. Expected $15.07, soft stop $24.04, recovery reserve $0.55. Ask for $24.59 or reduce the run; do not shrink it silently to fit."
+   },
+   {
+    "beam_width": 2,
+    "warmup_levels": 1,
+    "expansions_min": 83,
+    "expansions_max": 87,
+    "costly_early_hours": 11.928,
+    "structural_min_hours": 11.901,
+    "structural_max_hours": 16.493,
+    "expected_minutes": 810.7,
+    "expected_usd": 14.7277,
+    "hard_ceiling_minutes": 1195.68,
+    "hard_ceiling_usd": 21.7215,
+    "fits_remaining_headroom": true,
+    "refusal": null
+   }
+  ],
+  "_what_the_width_changes": "the beam width is the only lever that narrows COST without narrowing the SPACE: every admissible alternative still competes and calibration still affects pruning, but fewer partial paths are carried to the next level. Narrowing the space instead \u2014 pinning a calibration, dropping an implementation \u2014 would change the experiment into a restricted search, which is the thing Search-1 already did."
+ },
+ "behavioural_selection": {
+  "probe_cost": {
+   "train_minutes": 61.779,
+   "eval_minutes": 25.226,
+   "total_minutes": 87.005,
+   "train_usd": 1.1223,
+   "eval_usd": 0.4583,
+   "total_usd": 1.5806,
+   "n_probes_measured": 6,
+   "price_per_hour_observed": 1.09,
+   "source": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_evidence.json: stages F/G/H",
+   "_it_is_a_mean": "recovered by dividing the stage's wall-clock and spend by the 6 probes it processed. It is a per-probe MEAN over that session, not a maximum, and a selection stage with more probes will vary around it."
+  },
+  "reuse": {
+   "admissible": false,
+   "n_admitted": 0,
+   "n_examined": 11,
+   "record": "logs/shared/analyses/autoinit_historical_probe_reuse.json",
+   "why": "every probe is trained fresh: the ruling records reuse_verified=False with 0 admitted of 11 examined"
+  },
+  "schedule": {
+   "top_k": 5,
+   "anchors": [
+    "canonical_control",
+    "frozen_c1_treatment_b"
+   ],
+   "sa_probes": 7,
+   "sb_probes": 4,
+   "sc_probes_worst_case": 4,
+   "minimum_probes": 11,
+   "worst_case_probes": 15
+  },
+  "price_per_hour": 1.09,
+  "expected_minutes": 1052.05,
+  "expected_usd": 19.1122,
+  "hard_ceiling_minutes": 1535.28,
+  "hard_ceiling_usd": 27.8908,
+  "_ceiling_includes": "the conditional sc rung as a soft-stop reserve, a 10% contingency and a 30-minute artifact recovery reserve",
+  "authorizes": "nothing"
+ },
+ "combined": {
+  "chain": "full joint re-search -> Top-5 -> behavioural selection",
+  "expected_usd_at_standing_width": 35.212,
+  "hard_ceiling_usd_at_standing_width": 61.0735,
+  "expected_usd_at_cheapest_width": 33.8399,
+  "hard_ceiling_usd_at_cheapest_width": 49.6123,
+  "remaining_usd": 22.491,
+  "_two_sessions": "these are two separate paid sessions with separate one-use authorizations, not one launch. The behavioural stage cannot start until the search commits a candidate set, so its ceiling is a later obligation rather than a simultaneous one \u2014 but a funding decision that covers only the search would fund a chain that cannot reach a verdict."
+ },
+ "budget_position": {
+  "cumulative_spend_usd": 297.509,
+  "authorized_cap_usd": 320.0,
+  "remaining_usd": 22.491,
+  "_derived_by": "scripts/consolidate/derive_budget.py, which sums every recorded closeout cost across every experiment. Not restated from any document.",
+  "remaining_is_not_permission": true
+ },
+ "blocker": {
+  "status": "INSUFFICIENT PROJECT HEADROOM",
+  "remaining_usd": 22.491,
+  "cheapest_complete_chain_expected_usd": 33.8399,
+  "cheapest_complete_chain_hard_usd": 49.6123,
+  "shortfall_on_expected_usd": 11.3489,
+  "shortfall_on_hard_ceilings_usd": 27.1213,
+  "what_it_means": "the complete chain does not fit the remaining project headroom at ANY priced beam width, and the search alone does not fit at the standing width \u2014 plan_session refuses it, and the refusal text is recorded per width above. This is a maintainer decision: raise the cap, or reduce the scientific scope. It is deliberately NOT resolved here by shrinking the run to fit, which is the one repair the budget module exists to prevent.",
+  "options_for_the_maintainer": [
+   "raise the project cap by at least the shortfall on hard ceilings, keeping the standing beam width and the full space",
+   "fund the search alone at a narrower registered beam width and decide the behavioural stage separately once a candidate set exists \u2014 accepting that a cheap-metric front promotes nothing",
+   "reduce the scientific scope, which means accepting a restricted search again and losing the joint-pruning property this experiment exists to obtain"
+  ],
+  "_not_a_recommendation": "the trade is scientific, not arithmetic: the arithmetic is above and the choice is the maintainer's."
+ },
+ "authorizes": "nothing",
+ "pricing_sha256": "b59b28e362b821faef3895da92951379f35f8bf920b250d1deea1e7685ee4518"
+}

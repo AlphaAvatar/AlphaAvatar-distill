@@ -46,13 +46,20 @@ if str(REPO_ROOT / "src") not in sys.path:
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from aadistill.initialization.specs.arch import ArchSpec, get_adapter
-from aadistill.initialization.operators.base import (
-    applicable_implementations,
-    get_implementation,
-)
+from aadistill.initialization.specs.arch import ArchSpec
 from aadistill.initialization.planning.ranking import SCHEDULE_V1
-from aadistill.initialization.planning.search import expansion_profiles
+
+#: The branching-and-cost machinery, shared with every other search instance.
+#: Extracted when the C2 full joint re-search became a second consumer; the
+#: arithmetic is unchanged and this module keeps its own numbers.
+from experiments.search_cost_model import (
+    Bound, CostModel, SearchSpace, compositions, decomposition, named_profiles,
+    walk_leaves,
+)
+from experiments.search_cost_model import bound as _bound
+from experiments.search_cost_model import level_children as _level_children
+from experiments.search_cost_model import price as _price
+from experiments.search_cost_model import trajectory as _trajectory
 
 # --- identity ---------------------------------------------------------------
 #
@@ -176,13 +183,20 @@ ATTENTION_ACTIVATION_PROXY_IMPL = "width.global_pca_v0"
 ATTENTION_ACTIVATION_PROXY_FACTOR = 1.5
 
 
+#: This instance's cost model, handed to the shared machinery. The table and the
+#: proxy rule are Search-1's facts; the arithmetic over them is not, and lives in
+#: `experiments.search_cost_model`.
+COST = CostModel(
+    minutes=MEASURED_MINUTES,
+    proxies={"attention.activation_importance_v1": (
+        ATTENTION_ACTIVATION_PROXY_IMPL, ATTENTION_ACTIVATION_PROXY_FACTOR)},
+    source=("Phase-B attempt 5 telemetry, plus one proxied row. See "
+            "MEASURED_MINUTES and ATTENTION_ACTIVATION_PROXY_*."))
+
+
 def minutes_for(impl_id: str, *, root: bool, statistic: str = "max") -> float:
     """Minutes for one expansion of `impl_id` on a root / deeper parent."""
-    key = ("root_" if root else "deeper_") + statistic
-    if impl_id == "attention.activation_importance_v1":
-        return round(MEASURED_MINUTES[ATTENTION_ACTIVATION_PROXY_IMPL][key]
-                     * ATTENTION_ACTIVATION_PROXY_FACTOR, 4)
-    return MEASURED_MINUTES[impl_id][key]
+    return COST.minutes_for(impl_id, root=root, statistic=statistic)
 
 
 # --- the class space --------------------------------------------------------
@@ -195,185 +209,37 @@ def minutes_for(impl_id: str, *, root: bool, statistic: str = "max") -> float:
 # expanded and paid for separately.
 
 
-@dataclass(frozen=True)
-class Space:
-    """One search's reachable classes, with the real registry behind them."""
-
-    allowed_impls: tuple[str, ...]
-    profile_ids: tuple[str, ...]
-    impl_profiles: dict[str, tuple[str, ...]] | None
-    teacher: ArchSpec
-    target: ArchSpec
-    family: str = "qwen3"
-
-    @property
-    def adapter(self):
-        return get_adapter(self.family)
-
-    def spec_of(self, applied: frozenset[str]) -> ArchSpec:
-        """The geometry after applying `applied`, in any order."""
-        spec = self.teacher
-        for impl_id in sorted(applied):
-            spec = get_implementation(impl_id).plan(
-                spec, self.target, self.adapter, {}).result_spec
-        return spec
-
-    def branching(self, applied: frozenset[str]) -> list[tuple[str, int]]:
-        """`(impl_id, how many states it generates)` for a parent in this class.
-
-        Both halves come from the code the search runs: which implementations
-        apply is `applicable_implementations`, and how many states each
-        generates is `expansion_profiles` — the same function
-        `BeamSearch._candidate_expansions` calls, which is the point. Counting
-        it here instead predicted 12 children of the root where Phase B
-        generated 10, because a `CalibrationNeed.NONE` operator is offered once
-        however many mixtures are active.
-        """
-        spec = self.spec_of(applied)
-        kinds = tuple(sorted({get_implementation(i).kind for i in applied}))
-        options = applicable_implementations(
-            self.adapter, spec, self.target,
-            exclude_kinds=kinds, allow_impls=sorted(self.allowed_impls))
-        out = []
-        for impl, _ in sorted(options, key=lambda pair: pair[0].impl_id):
-            out.append((impl.impl_id, len(expansion_profiles(
-                impl, _fake_profiles(self.profile_ids), self.impl_profiles))))
-        return out
-
-    def is_complete(self, applied: frozenset[str]) -> bool:
-        return not self.spec_of(applied).diff(self.target)
+#: `Space` is `SearchSpace` with this instance's family bound. The type, the
+#: branching model and the bound all moved to `experiments.search_cost_model`
+#: unchanged; what stays here is which implementations, which mixtures and which
+#: measured minutes — the parts that are Search-1's rather than arithmetic.
+def Space(*, allowed_impls, profile_ids, impl_profiles, teacher, target,
+          family: str = "qwen3") -> SearchSpace:
+    return SearchSpace(allowed_impls=tuple(allowed_impls),
+                       profile_ids=tuple(profile_ids),
+                       impl_profiles=impl_profiles, teacher=teacher,
+                       target=target, family=family)
 
 
-class _NamedProfile:
-    """Only `qualified_id` matters to `expansion_profiles`.
-
-    A real `CalibrationProfile` would have to be registered and, for
-    `calib.reasoning_heavy@v2`, would want its items file present. Counting
-    branches needs neither.
-    """
-
-    def __init__(self, qualified_id: str) -> None:
-        self.qualified_id = qualified_id
+#: Kept as module names because callers and tests use them, and because a search
+#: instance should be able to ask its own questions without importing two
+#: modules. Each is the shared function with this instance's cost model applied
+#: and this project's default schedule filled in.
+_fake_profiles = named_profiles
 
 
-@lru_cache(maxsize=None)
-def _fake_profiles(ids: tuple[str, ...]) -> tuple[_NamedProfile, ...]:
-    return tuple(_NamedProfile(i) for i in ids)
+def level_children(space, beam, *, statistic: str = "max"):
+    return _level_children(space, beam, COST, statistic=statistic)
 
 
-# --- the bound --------------------------------------------------------------
-
-
-@dataclass
-class Bound:
-    min_minutes: float
-    max_minutes: float
-    min_expansions: int
-    max_expansions: int
-    statistic: str
-    unmeasured: tuple[str, ...]
-    beam_width: int
-    warmup_levels: int
-
-    def as_dict(self) -> dict[str, Any]:
-        return {
-            "statistic": self.statistic,
-            "beam_width": self.beam_width,
-            "warmup_levels": self.warmup_levels,
-            "min_minutes": round(self.min_minutes, 2),
-            "max_minutes": round(self.max_minutes, 2),
-            "min_hours": round(self.min_minutes / 60, 3),
-            "max_hours": round(self.max_minutes / 60, 3),
-            "min_expansions": self.min_expansions,
-            "max_expansions": self.max_expansions,
-            "_extrema_are_separate": (
-                "min/max minutes and min/max expansions are each the extremum "
-                "of their OWN quantity over beams. The cheapest beam is not the "
-                "smallest: avoiding DEPTH early is cheap now and generates more "
-                "children later, so one number cannot describe both."),
-            "unmeasured_inputs": list(self.unmeasured),
-        }
-
-
-def level_children(space: Space, beam: tuple[tuple[frozenset[str], int], ...],
-                   *, statistic: str = "max"):
-    """One level of expansion: `(minutes, partial classes -> count, n)`.
-
-    The whole branching model, and the only place it lives. `bound()` optimises
-    over it and `replay_phase_b()` feeds it a real run's beams.
-    """
-    minutes = 0.0
-    n = 0
-    partial: dict[frozenset[str], int] = {}
-    for applied, count in beam:
-        root = not applied
-        for impl_id, branches in space.branching(applied):
-            minutes += count * branches * minutes_for(
-                impl_id, root=root, statistic=statistic)
-            n += count * branches
-            child = applied | {impl_id}
-            if not space.is_complete(child):
-                partial[child] = partial.get(child, 0) + count * branches
-    return minutes, partial, n
-
-
-def _compositions(pool: dict[frozenset[str], int], keep: int | None):
-    """Every sub-multiset of `pool` a beam of `keep` could be."""
-    classes = sorted(pool, key=lambda c: tuple(sorted(c)))
-    total = sum(pool.values())
-    take = total if keep is None else min(keep, total)
-    if take == total:
-        yield tuple((c, pool[c]) for c in classes)
-        return
-    for counts in itertools.product(*(range(pool[c] + 1) for c in classes)):
-        if sum(counts) == take:
-            yield tuple((c, k) for c, k in zip(classes, counts) if k)
-
-
-def bound(space: Space, *, beam_width: int | None = None,
+def bound(space, *, beam_width: int | None = None,
           warmup_levels: int | None = None, statistic: str = "max",
           max_depth: int | None = None) -> Bound:
-    """Exact extrema over every beam the ranking policy could return.
-
-    Not a projection. The recursion enumerates every admissible beam
-    composition, so `max_minutes` is attained by some ranking and no ranking can
-    exceed it. What it deliberately does NOT model is which beam the Pareto
-    policy actually returns: that depends on measurements this function has not
-    taken, and guessing it is what turned Phase B's bound into an underestimate.
-
-    Minutes and expansions are optimised SEPARATELY, because they disagree: the
-    cheapest beam defers DEPTH, which is cheap at this level and buys more
-    children at the next.
-    """
-    width = SCHEDULE_V1.width if beam_width is None else beam_width
-    warmup = (SCHEDULE_V1.warmup_levels if warmup_levels is None
-              else warmup_levels)
-    depth = max_depth if max_depth is not None else len(
-        space.teacher.diff(space.target))
-
-    def extremum(weigh, pick):
-        @lru_cache(maxsize=None)
-        def walk(beam, level):
-            if not beam or level >= depth:
-                return 0.0
-            minutes, partial, n = level_children(space, beam,
-                                                 statistic=statistic)
-            here = weigh(minutes, n)
-            if not partial:
-                return here
-            keep = None if level < warmup else width
-            return here + pick(walk(comp, level + 1) for comp
-                               in _compositions(partial, keep))
-        return walk(((frozenset(), 1),), 0)
-
-    return Bound(
-        min_minutes=extremum(lambda m, n: m, min),
-        max_minutes=extremum(lambda m, n: m, max),
-        min_expansions=int(extremum(lambda m, n: float(n), min)),
-        max_expansions=int(extremum(lambda m, n: float(n), max)),
-        statistic=statistic, beam_width=width, warmup_levels=warmup,
-        unmeasured=tuple(i for i in space.allowed_impls
-                         if i == "attention.activation_importance_v1"))
+    return _bound(
+        space, COST, statistic=statistic, max_depth=max_depth,
+        beam_width=SCHEDULE_V1.width if beam_width is None else beam_width,
+        warmup_levels=(SCHEDULE_V1.warmup_levels if warmup_levels is None
+                       else warmup_levels))
 
 
 # --- the two configured spaces ---------------------------------------------
@@ -429,96 +295,34 @@ SESSION_PHASE_MINUTES: tuple[tuple[str, float], ...] = (
 )
 
 
-def trajectory(space: Space, *, prefer_depth: bool, beam_width: int | None = None,
+def trajectory(space, *, prefer_depth: bool, beam_width: int | None = None,
                warmup_levels: int | None = None,
                statistic: str = "max") -> dict[str, Any]:
-    """Cost ONE nominated beam trajectory, level by level.
+    """Cost ONE nominated beam trajectory. See the shared model's docstring.
 
-    Not a bound — `bound()` is the bound. This answers a different and also
-    necessary question: what does the search cost if the ranking behaves the way
-    it was last observed to behave? At Phase-B level 1 all six retained states
-    contained DEPTH, and the epsilon-Pareto front put `FFN->DEPTH` in front 0, so
-    `prefer_depth=True` is the trajectory with evidence behind it and
-    `prefer_depth=False` is the adversary the ceiling has to survive.
-
-    The gap between them is the whole cost risk, and it is a BEAM-COMPOSITION
-    risk rather than a per-node one: DEPTH costs ~26-34 min wherever it runs, so
-    what the price turns on is how many beam members still owe it.
+    `prefer_depth` is this instance's name for `prefer_costly`: DEPTH *is* the
+    expensive operator in this cost table, and the shared model now DERIVES that
+    rather than being told, so `DEPTH_IMPL` below is an assertion about the table
+    rather than an input to the arithmetic.
     """
-    width = SCHEDULE_V1.width if beam_width is None else beam_width
-    warmup = (SCHEDULE_V1.warmup_levels if warmup_levels is None
-              else warmup_levels)
-    depth = len(space.teacher.diff(space.target))
-
-    beam: tuple[tuple[frozenset[str], int], ...] = ((frozenset(), 1),)
-    minutes = 0.0
-    expansions = 0
-    rows = []
-    for level in range(depth):
-        if not beam:
-            break
-        m, partial, n = level_children(space, beam, statistic=statistic)
-        minutes += m
-        expansions += n
-        rows.append({"level": level, "parents": sum(c for _, c in beam),
-                     "generated": n, "minutes": round(m, 1)})
-        if not partial:
-            break
-        ordered = sorted(partial.items(), key=lambda kv: (
-            (DEPTH_IMPL not in kv[0]) if prefer_depth
-            else (DEPTH_IMPL in kv[0]), tuple(sorted(kv[0]))))
-        keep: list[tuple[frozenset[str], int]] = []
-        room = sum(partial.values()) if level < warmup else width
-        for cls, count in ordered:
-            if room <= 0:
-                break
-            take = min(count, room)
-            keep.append((cls, take))
-            room -= take
-        beam = tuple(keep)
-    return {"minutes": round(minutes, 2), "hours": round(minutes / 60, 3),
-            "expansions": expansions, "levels": rows,
-            "prefer_depth": prefer_depth, "statistic": statistic}
+    out = _trajectory(
+        space, COST, prefer_costly=prefer_depth, statistic=statistic,
+        beam_width=SCHEDULE_V1.width if beam_width is None else beam_width,
+        warmup_levels=(SCHEDULE_V1.warmup_levels if warmup_levels is None
+                       else warmup_levels))
+    return {**out, "prefer_depth": out.pop("prefer_costly")}
 
 
-def price(space: Space, *, price_per_hour: float, authorized_usd: float,
+def price(space, *, price_per_hour: float, authorized_usd: float,
           beam_width: int | None = None, statistic: str = "max"):
-    """A `BudgetPlan` for a search-only session. Priced, which is not funded.
-
-    The expected path carries the DEPTH-early search; the difference up to the
-    structural worst case is a named `soft_stop_reserve`, which is exactly what
-    that field is for — an identified, bounded risk that is not on the expected
-    path, added after the contingency multiplier so it protects the work rather
-    than merely moving the watchdog's kill time.
-    """
-    from aadistill.infrastructure.budget import (
-        MEASURED_STEP_SECONDS, Phase, StepTime, plan_session)
-
-    expected_search = trajectory(space, prefer_depth=True,
-                                 beam_width=beam_width, statistic=statistic)
-    limit = bound(space, beam_width=beam_width, statistic=statistic)
-    return plan_session(
-        price_per_hour=price_per_hour, authorized_usd=authorized_usd,
-        #: No training. The search is a phase, not an arm; `step_time` is
-        #: required by the plan type and multiplies zero arms.
-        arms=0, steps_per_arm=0,
-        step_time=StepTime(
-            seconds=MEASURED_STEP_SECONDS,
-            source=("unused: a search session trains nothing, so arms=0 and "
-                    "the step term is zero. The measured floor is passed so "
-                    "the below-floor guard cannot be satisfied by accident")),
-        setup_minutes=dict(SESSION_PHASE_MINUTES)["setup_and_asset_staging"],
-        transfer_minutes=dict(SESSION_PHASE_MINUTES)["bundle_transfer"],
-        other_phases=(
-            *(Phase(name, m) for name, m in SESSION_PHASE_MINUTES
-              if name not in ("setup_and_asset_staging", "bundle_transfer")),
-            Phase("beam_search_depth_early", expected_search["minutes"]),
-        ),
-        contingency_fraction=0.10,
-        soft_stop_reserves=(
-            Phase("beam_composition_risk",
-                  round(limit.max_minutes - expected_search["minutes"], 2)),),
-        artifact_recovery_reserve_minutes=30.0)
+    """A `BudgetPlan` for a search-only session. Priced, which is not funded."""
+    return _price(
+        space, COST, price_per_hour=price_per_hour,
+        authorized_usd=authorized_usd, session_phases=SESSION_PHASE_MINUTES,
+        setup_phase="setup_and_asset_staging", transfer_phase="bundle_transfer",
+        search_phase_name="beam_search_depth_early", statistic=statistic,
+        beam_width=SCHEDULE_V1.width if beam_width is None else beam_width,
+        warmup_levels=SCHEDULE_V1.warmup_levels)
 
 
 #: Phase B's path labels name KINDS and profiles, not implementations, and the

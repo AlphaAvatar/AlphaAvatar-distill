@@ -1,28 +1,32 @@
 # Phase C — ATTENTION operator R&D · roadmap
 
 
-> **Status correction, 2026-09-12.** This document is the agreed STRUCTURE for
-> Phase C and is kept as written. Its status line — *"C1/C2 NOT STARTED / NOT
-> PRICED / NOT AUTHORIZED"* — was true when written and is now false for C1: C1
-> is priced at `$15.1475` per session, has been authorized under an approved
-> execution package, and has run thirteen labelled sessions of which eleven
-> billed. C2 is still not started. For the current status read
-> [`../../STATE.md`](../../../../state/current.md); this file owns the plan, not the state.
+> **Restructured 2026-09-17** by maintainer decision, after C1 returned a
+> verdict and C2's restricted Search-1 was accepted as validation evidence. The
+> programme is now four phases, C1–C4, and the shape they share is written down
+> once in [`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/OPERATOR_PROMOTION_CYCLE.md)
+> as a family-neutral pattern rather than restated per phase.
+>
+> This file owns the **plan**. For current status read
+> [`current.md`](../../../../state/current.md); for what any phase actually
+> measured, read that phase's own records.
 
-**Status: C0 COMPLETE / APPROVED / FROZEN · C1 NOT STARTED · C2 NOT STARTED.
-NOT PRICED · NOT AUTHORIZED · NO COMPUTE.**
+**Status: C0 COMPLETE / FROZEN · C1 COMPLETE (verdict `GO`) · C2 SEARCH-1 DONE
+AND FROZEN, FULL JOINT RE-SEARCH PLANNED AND PRICED BUT NOT FUNDED · C3 NOT
+STARTED · C4 CONDITIONAL ON C3.**
 
 The Phase-C0 protocol is frozen in
 [`phase_c0_preregistration.json`](phase_c0_preregistration.json), with its sizing
 evidence in [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json).
-Those two files, not this page, are the record of what C1 must do. This page is
-the surrounding structure and rationale.
 
-No Phase-C experiment has run. Nothing here is authorization for compute.
+Nothing on this page is authorization for compute. The C2 full joint re-search
+is **blocked on budget**, not on design: the complete chain does not fit the
+remaining project headroom at any priced beam width — see
+[`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json).
 
 Formal Stage-2/Stage-3 recovery training remains **deferred** until the
-operator-development programme is complete. The Phase-B winner is **not**
-authorization for it.
+operator-development programme is complete. No search-stage front and no Phase-B
+winner is authorization for it.
 
 ---
 
@@ -101,11 +105,18 @@ and promoting it would still require its own decision record.
 
 ---
 
-## Phase C1 — fixed-path ATTENTION isolation · **NOT STARTED**
+## Phase C1 — fixed-path ATTENTION isolation · **COMPLETE, verdict `GO`**
+
+`attention.weight_proxy_v0` → `attention.activation_importance_v1`.
 
 **The causal-ish test neither Phase A nor Phase B contains.** Protocol frozen in
-[`phase_c0_preregistration.json`](phase_c0_preregistration.json); nothing is
-implemented, priced or authorized.
+[`phase_c0_preregistration.json`](phase_c0_preregistration.json). Executed by
+attempt 18: both replay gates passed, six probes trained, six evaluated on the
+frozen battery, and the frozen Stage-I rule returned **`GO`** at `$10.2018`. A
+complete valid verdict ends the round, and the promotion it produced is what the
+later phases build on — the figures live in
+[`../runs/attempt18/evidence/c1_decision.json`](../runs/attempt18/evidence/c1_decision.json),
+not here.
 
 **What C1 is, stated precisely.** C1 *does* execute compute: **2 arms × 3 fresh
 recovery seeds = 6 `E1_KD_HEAVY_0860K` recovery probes**. Calling it "not a
@@ -147,42 +158,137 @@ sizes, or to a population of recovery seeds. Say so in the record.
 
 ---
 
-## Phase C2 — ATTENTION-aware joint re-search
+## Phase C2 — restricted evidence, then the full joint re-search
 
-> **Status, 2026-09-15.** The gate below is **satisfied**: C1 returned `GO`, so
-> `attention.activation_importance_v1` is the operator C2 holds fixed. Search-1
-> is now **implemented and priced, and is NOT authorized** — the space, its
-> predicted size and its ceiling live in
-> [`../../phase_c2/plans/phase_c2_search1_plan.md`](../../phase_c2/plans/phase_c2_search1_plan.md),
-> which supersedes this section on every operational detail. Two things below
-> were narrowed there and the narrower form governs: the anchors are compared as
-> a **chain** (A → B frozen, B → C new) rather than as a simultaneous three-arm
-> estimate, and A is **not** re-measured.
+`C2 = restricted Search-1 evidence + full joint re-search + behavioural
+selection of the new incumbent.`
 
-**Only if C1 identifies a worthwhile new ATTENTION formulation.** If C1 finds
-nothing, C2 does not run.
+### C2a — Search-1, restricted · **DONE / FROZEN**
 
-Put the improved operator back into the joint initialization search and let the
-beam reconsider what it was previously never able to exploit:
+Search-1 held DEPTH, FFN and RESIDUAL_WIDTH at the Phase-B incumbent's mixtures
+and varied only ATTENTION's, with order free. It ran to completion, committed
+five candidates, and the B→C comparison was completed separately once the
+baseline was rebuilt and measured.
 
-* operator ordering;
-* ATTENTION placement in the sequence;
-* ATTENTION calibration profile;
-* interactions with DEPTH / FFN / WIDTH calibration.
+**What it established, and the boundary.** Four of five committed candidates
+landed in a better ε-Pareto front than the frozen C1 treatment baseline B, and
+two dominated it on all three ranked objectives, at margins roughly 50× the
+disclosure threshold. That is evidence **about the search procedure** — after
+promoting the new ATTENTION operator, changing order and composition alone
+produces a real structural signal on the cheap metric. It is **not** behavioural
+evidence, it selected **no** incumbent, and its records are frozen: Search-1 is
+not rerun, B is not remeasured, no frozen C candidate is remeasured, and no
+selection or comparison record is rewritten.
 
-> **Question C2.** Once ATTENTION itself is improved, does the globally preferred
-> initialization composition change?
+**The local Search-2 refinement is WITHDRAWN.** Polishing locally around the
+winners of a restricted search would inherit that restriction. The accepted
+reading of Search-1 points the other way — the procedure works here, so widen it.
 
-**Anchors C2 must preserve**, so the two effects stay separable:
+### C2b — full joint re-search · **PLANNED, PRICED, NOT FUNDED**
 
-1. original `fe9683` — the Phase-B winner;
-2. the best C1 fixed-path ATTENTION replacement;
-3. the C2 re-search candidate(s).
+Protocol and pricing:
+[`phase_c2_full_search_protocol.json`](../../phase_c2/plans/phase_c2_full_search_protocol.json) ·
+[`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json).
+The space is **derived from the registry**, never written down:
+[`full_search_space.py`](../../../../../scripts/experiments/phase_c2/full_search_space.py).
 
-That three-way comparison is what distinguishes **(a)** improvement from the
-ATTENTION operator itself from **(b)** additional benefit from re-optimizing
-composition and order around it. Collapsing them into one number would repeat the
-exact ambiguity Phase A and Phase B leave behind.
+> **Question C2.** With the promoted ATTENTION operator in the accepted library,
+> what is the globally preferred initialization composition when
+> implementations, applicable calibration profiles and operator **order** all
+> compete in one search?
+
+**Nothing is held fixed, and that is the point.** The incumbent DEPTH / FFN /
+WIDTH calibration assignments were chosen by a search in which ATTENTION could
+not consume calibration at all — `attention.weight_proxy_v0` declares
+`CalibrationNeed.NONE` and is therefore offered once, against the
+no-calibration sentinel, however many mixtures are active. Those assignments
+cannot be assumed optimal now that the operator beside them consumes
+calibration. So implementations, profiles and order all compete jointly, and
+calibration choices are allowed to affect pruning.
+
+**Why the space grew.** The promoted operator consumes calibration where the one
+it replaced did not, so ATTENTION branches over every active mixture instead of
+once. Same kinds, same order freedom, one more branching factor. **Do not quote
+a remembered size** — it is enumerated, and the enumeration distinguishes the
+decomposed four-operator subspace from the total, because a composite operator
+reaches the target in a single step and contributes leaves outside the
+decomposition.
+
+**One exclusion, recorded.** `attention.weight_proxy_v0` is out — not for cost,
+but because C1 *is* the isolation experiment between it and the promoted
+operator and it has a completed verdict. Promotion is what an isolation verdict
+is for. Everything else applicable competes, including the cheap
+`depth.positional_v0` and `composite.stage1_sandwich_v0`. If the promotion is
+ever withdrawn, the exclusion is withdrawn with it.
+
+**The beam is a budget lever, not a scientific one.** The ranking policy, its
+objectives and its ε are frozen and unchanged. Beam **width** is the only
+parameter left to the funding decision, because it trades cost against how much
+of the *same* space is carried forward. The chosen width is registered before
+launch. The goal is never exhaustive enumeration of every leaf — it is that
+every admissible alternative *competes inside one search*.
+
+### C2c — Top-K, then bounded behavioural selection · **DEFINED, PRICED, NOT FUNDED**
+
+The search commits a **Top-5** candidate set by the frozen ε-Pareto ranking, and
+that set is closed when it is committed. A candidate set that can grow once
+behavioural results are visible is not a preregistered set.
+
+Then, and only then, behaviour decides. Cheap-metric order is **not** behavioural
+order: E7 measured a `-5.22` nat NLL swing that moved behaviour by `+0.0000`. So
+each admitted candidate is trained under the frozen `0.86M` recovery recipe and
+scored on the frozen battery, Phase-B-style over paired seeds, with the frozen
+feasibility floor, equivalence interval and catastrophic-capability rule reused
+unchanged.
+
+Two anchors advance unconditionally: the **canonical control**, and the **frozen
+C1 treatment baseline B** — because the question is whether re-optimizing
+composition beats B *behaviourally*, which the Search-1 cheap-metric front
+cannot answer. B's frozen `state_eval` measurement is not touched; this is a
+fresh recovery probe of the same initialization.
+
+**Every probe is trained fresh.** The historical-probe-reuse ruling records
+`reuse_verified: false`, so there is no admissible reuse to net off.
+
+Only this stage may name a **C2 incumbent**, and
+`unresolved_equivalence` with no winner is a legitimate terminal result — not a
+reason for a fourth seed.
+
+---
+
+## Phase C3 — causal-KL ATTENTION isolation on the C2 incumbent · **NOT STARTED**
+
+`attention.activation_importance_v1` vs the future `attention.causal_kl_v1`,
+with the rest of the C2 incumbent held fixed as far as scientifically possible.
+
+The same isolation shape as C1, one rung further along: the incumbent moves from
+the Phase-B winner to the C2 incumbent, and the operator under test moves from
+the activation-based formulation to a causal-KL one. C1's structure — paired
+fresh seeds, a fixed path, everything but the one operator held — is what makes
+the result attributable, and it is reused rather than redesigned.
+
+**C3 cannot start before C2 names an incumbent.** Running it against a candidate
+the behavioural stage never selected would isolate an operator on a path nobody
+chose.
+
+`attention.causal_kl_v1` does not exist yet. Building it is operator R&D and is
+not a paid experiment.
+
+---
+
+## Phase C4 — full joint re-search with the promoted causal-KL ATTENTION · **CONDITIONAL**
+
+**Only if C3 promotes.** If C3's verdict promotes causal-KL ATTENTION, then the
+C2b/C2c pair repeats with the newly promoted operator in the accepted library:
+another full joint re-search, another Top-K, another behavioural selection.
+
+If C3 does not promote, C4 does not run and the C2 incumbent stands.
+
+This is the same cycle as C1→C2, and that repetition is deliberate: it is a
+**pattern**, documented family-neutrally in
+[`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/OPERATOR_PROMOTION_CYCLE.md),
+so a future teacher/student family, geometry or compression ratio reuses the
+machinery instead of a Qwen3-shaped copy of it.
 
 ---
 
