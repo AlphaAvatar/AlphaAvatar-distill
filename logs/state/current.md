@@ -50,9 +50,22 @@ zero-cost:
 | artifact | identity |
 | --- | --- |
 | frozen candidate side of B→C | [`c2_frozen_comparison_inputs.json`](../stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json) · `55f6677067392fd0…` |
-| completion protocol | [`phase_c2_baseline_completion_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json) · `7a24358069280aa3…` |
+| completion protocol | [`phase_c2_baseline_completion_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json) · `9f566eb6f8d71d57…` |
 | completion pricing | [`phase_c2_baseline_completion_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json) · `dcc64bcf9b3dc9fb…` |
 | the reserve defect | [`c2_baseline_reserve_defect.json`](../stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json) · `f389350cca7782ca…` |
+| completion executable closure | [`c2_baseline_completion_closure.json`](../stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json) · `1c93cc4e921a122b…`, 82 files |
+
+The **driver and a thin formal launcher** now exist and were repaired against
+seven execution defects that would each have surfaced only after B had been
+rebuilt and measured — the suite root, an unprimed evaluator, a second teacher,
+a caller-supplied search identity, the wrong ranking citation, a nested verdict
+key, and a record mutated after its own hash. An eighth, a missing
+`SESSION_KIND` branch in the shared setup script, would have exited 98 on a
+billing pod. Every one is held by a mutation-verified regression.
+
+The authorization is a **distinct type** reporting `authorizes_c2_search1 =
+False`, and the two loaders refuse each other's schemas, so a completion grant
+cannot buy a beam. The derived closure contains no Search-1 module.
 
 The completion is priced at **`$0.7212` expected and a `$1.1950` hard ceiling**
 (39.70 / 65.78 min at `$1.09/h`) — derived from attempt 4's own telemetry, not

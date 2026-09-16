@@ -4,6 +4,7 @@
     python scripts/pod/autoinit_phase_c2_baseline_driver.py \
         --protocol logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json \
         --frozen-inputs .../evidence/c2_frozen_comparison_inputs.json \
+        --selection-record .../evidence/stage1_selection.json \\
         --rebuild-minutes N --soft-stop-usd X --rate R --spent-usd S
 
 Attempt 4's beam search completed and committed a ranking of five candidates,
@@ -44,12 +45,13 @@ for _extra in ("src", "scripts", "scripts/autoinit"):
         sys.path.insert(0, str(REPO / _extra))
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
+from aadistill.initialization.planning import stage1_selection  # noqa: E402
 from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
 from aadistill.initialization.specs.state import make_retained_state  # noqa: E402
 from experiments.phase_c2 import baseline as B  # noqa: E402
 from experiments.phase_c2 import comparison as C  # noqa: E402
 from experiments.phase_c2.frozen_inputs import (  # noqa: E402
-    load_frozen_candidates, load_record, numerically_sensitive_pairs)
+    load_frozen_candidates, load_record)
 #: At MODULE scope, because the calibration mixtures are data that an
 #: application bootstrap registers and stage A resolves profiles. C2 attempt 3
 #: died one second into its first stage for want of exactly this import being
@@ -201,9 +203,47 @@ class BaselineCompletionDriver:
         say(f"  frozen baseline construction verified: {spec.spec_hash[:12]}… "
             f"== {B.B_SPEC_HASH[:12]}…")
 
+        #: The BEAM RANKING, at a path the caller supplies and this stage
+        #: VERIFIES: its own commitment hash must be the one the frozen
+        #: extraction recorded. So a caller can say where the ranking is and
+        #: cannot say which ranking it is.
+        selection = stage1_selection.load(self.a.selection_record)
+        committed = frozen_record["sources"]["selection_commitment_sha256"]
+        if selection["selection_sha256"] != committed:
+            raise CompletionError(
+                f"{self.a.selection_record} commits "
+                f"{selection['selection_sha256']} and the frozen candidate "
+                f"record was extracted from a selection committing {committed}. "
+                "These are different rankings.")
+
+        #: The Search-1 identities the comparison must describe, taken from the
+        #: frozen record and NOT from the command line. A caller must not be
+        #: able to make a valid B measurement produce a record claiming the
+        #: candidates came from another search configuration.
+        self.frozen = {
+            "search_run_id": frozen_record["search"]["run_id"],
+            "search_config_hash": frozen_record["search"]["config_hash"],
+            "selection_commitment_sha256": committed,
+            "suite_hash": frozen_record["suite"]["hash"],
+            "policy_hash": frozen_record["policy"]["hash"],
+        }
+        if selection["search"]["config_hash"] != self.frozen["search_config_hash"]:
+            raise CompletionError(
+                "the ranking and the frozen extraction disagree about the search "
+                f"config: {selection['search']['config_hash']} vs "
+                f"{self.frozen['search_config_hash']}")
+        say(f"  bound Search-1 identity: {self.frozen['search_run_id']} "
+            f"config {self.frozen['search_config_hash'][:12]}…")
+
         self.candidates = candidates
         self.ev["frozen_candidate_state_ids"] = [c.state_id for c in candidates]
+        self.ev["bound_search_identity"] = dict(self.frozen)
         self.record("bind_identities", True, {
+            "bound_search_identity": dict(self.frozen),
+            "_identities_are_bound_not_supplied": (
+                "the Search-1 run id and config hash come from the frozen "
+                "candidate record; there is no command-line source for either"),
+            "beam_ranking_cited": str(self.a.selection_record),
             "frozen_inputs_self_sha256": frozen_record["self_sha256"],
             "frozen_inputs_extraction_rule": frozen_record["extraction_rule"],
             "n_frozen_candidates": len(candidates),
@@ -221,6 +261,40 @@ class BaselineCompletionDriver:
         })
         return True
 
+    # -- the two expensive loads, isolated so a $0 test can stub them --------
+    def load_suite_bundle(self):
+        """The frozen suite, from the root its own declaration names.
+
+        NOT the repository root, which is what this driver asked for until
+        2026-09-16: `load_state_eval.load` reads `manifest.json` and
+        `items.jsonl` directly beneath the root it is given, and the repository
+        root has neither. The failure would have landed on the pod, after setup,
+        inside the only stage that spends money.
+        """
+        from load_state_eval import load as load_suite
+        from experiments.phase_c2.frozen_assets import state_eval_root
+
+        root = state_eval_root(REPO)
+        say(f"  state_eval root resolved from its declaration: {root}")
+        return (root, *load_suite(root))
+
+    def load_original_teacher(self):
+        """The pinned original teacher, ONCE, at the bound revision.
+
+        By repo id and `revision=`, exactly as `run_phase_a_search` loaded the
+        teacher the frozen C measurements were scored against -- so the revision
+        is enforced by the loader rather than asserted about a directory.
+        """
+        import torch
+        from transformers import AutoModelForCausalLM
+        from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+
+        say(f"  loading the original teacher {TEACHER_ID}@{TEACHER_REVISION[:12]}… "
+            f"once, on {self.a.device}")
+        return AutoModelForCausalLM.from_pretrained(
+            TEACHER_ID, dtype=torch.bfloat16, revision=TEACHER_REVISION,
+        ).to(self.a.device).eval()
+
     # -- stage B -----------------------------------------------------------
     def rebuild_measure_compare(self) -> bool:
         """The one unit of scientific work this session exists to do."""
@@ -229,12 +303,19 @@ class BaselineCompletionDriver:
         from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
         from aadistill.initialization.specs.arch import ArchSpec
         from aadistill.initialization.specs.artifact import identify_checkpoint
-        from load_state_eval import load as load_suite
         from phase_a_frozen import TARGET_GEOMETRY, TEACHER_ID
         from aadistill.initialization.planning.metrics import StateEvaluator
         from aadistill.initialization.specs.metrics import ReferenceStrategy
+        from experiments.phase_c2.frozen_inputs import (
+            numerical_sensitivity_disclosure)
 
-        suite, items, suite_manifest = load_suite(REPO)
+        suite_root, suite, items, suite_manifest = self.load_suite_bundle()
+        if suite.suite_hash != self.frozen["suite_hash"]:
+            raise CompletionError(
+                f"the staged suite at {suite_root} hashes to {suite.suite_hash} "
+                f"and the frozen candidates were measured on "
+                f"{self.frozen['suite_hash']}. Values from two suites are not "
+                "comparable.")
         target_spec = ArchSpec.of("qwen3", TARGET_GEOMETRY)
 
         #: RECOMPUTE, explicitly, because it is the strategy the frozen C
@@ -244,17 +325,26 @@ class BaselineCompletionDriver:
             suite, items, device=self.a.device,
             reference_strategy=ReferenceStrategy.RECOMPUTE)
 
-        teacher_path = Path(self.a.teacher_path)
+        #: ONE teacher object, primed as the reference AND handed to the
+        #: rebuild. Attempt 4's path did exactly this -- `run_phase_a_search`
+        #: primes the evaluator and passes `lambda: teacher` to the conditional
+        #: baseline hook -- and the semantics matter twice over: `evaluate`
+        #: REFUSES against an unprimed evaluator, and a second independently
+        #: loaded teacher would put a second 4B model on the device and let B be
+        #: built from a different object than the one B is scored against.
+        teacher = self.load_original_teacher()
+        evaluator.prime_reference(teacher)
+        say("  evaluator primed with the original teacher (RECOMPUTE)")
+
         fallback = B.BaselineFallback(
             adapter=QWEN3_ADAPTER, workdir=WORK,
             rebuild_minutes=self.a.rebuild_minutes, afford=self.afford,
             repo_root=REPO, device=self.a.device, say=say)
 
         #: The rebuild's own entry point, not the search's conditional hook. The
-        #: hook exists to be called BY a beam; this session has none.
-        entry = fallback.rebuild(
-            lambda: QWEN3_ADAPTER.load(str(teacher_path), dtype="bfloat16",
-                                       device=self.a.device))
+        #: hook exists to be called BY a beam; this session has none. The SAME
+        #: teacher object the evaluator was primed with.
+        entry = fallback.rebuild(lambda: teacher)
         outcome = fallback.outcome
 
         directory = Path(entry["checkpoint_dir"])
@@ -281,28 +371,47 @@ class BaselineCompletionDriver:
             "equal-domain mean KL")
 
         #: Pure post-processing from here. One measured B, five frozen C.
-        record = C.build(
-            baseline=state, baseline_outcome=outcome,
-            candidates=list(self.candidates), suite=suite, policy=PARETO_V1,
-            run_id=self.protocol["the_candidate_side_is_frozen"].get("run_id",
-                                                                     "phase_c2_baseline_completion"),
-            config_hash=self.a.config_hash,
-            selection_record=self.a.frozen_inputs)
-
+        #:
+        #: The disclosure is built BEFORE the record and handed to the builder,
+        #: so it is inside `record_sha256` rather than appended after it. A
+        #: field added afterwards would leave the document differing from the
+        #: object its own self-hash describes.
         disclosure = self.protocol["cross_session_comparability_contract"][
             "preregistered_disclosure_RULE_not_a_rule_change"]
-        flagged = numerically_sensitive_pairs(
+        interpretation = numerical_sensitivity_disclosure(
             state.evaluation.values, self.candidates,
             objectives=tuple(o.key for o in PARETO_V1.objectives),
             threshold=float(disclosure["threshold"]))
-        record["numerically_sensitive_pairs"] = flagged
-        record["_disclosure_rule"] = disclosure["rule"]
-        if flagged:
-            say(f"  DISCLOSURE: {len(flagged)} objective margin(s) at or below "
-                f"{disclosure['threshold']}, registered before B was measured")
+        interpretation["numerical_sensitivity"]["_registered_before_b_existed"] = (
+            disclosure["rule"])
 
+        record = C.build(
+            baseline=state, baseline_outcome=outcome,
+            candidates=list(self.candidates), suite=suite, policy=PARETO_V1,
+            #: The SEARCH that produced C, from the frozen record. This
+            #: session's own run identity lives in its governance and session
+            #: records; conflating the two would let a comparison describe the
+            #: completion session as though it had searched.
+            run_id=self.frozen["search_run_id"],
+            config_hash=self.frozen["search_config_hash"],
+            #: The beam ranking, verified in stage A against the commitment the
+            #: frozen extraction recorded.
+            selection_record=str(self.a.selection_record),
+            #: The derived extraction, cited separately from the ranking.
+            frozen_candidate_inputs=str(self.a.frozen_inputs),
+            interpretation=interpretation)
+
+        sensitivity = record["numerical_sensitivity"]
+        if sensitivity["status"] == "FLAGGED":
+            say(f"  DISCLOSURE: {sensitivity['n_flagged_pairs']} margin(s) at or "
+                f"below {sensitivity['threshold']}; the verdict is unaltered")
+
+        #: The builder nests its computed verdict under `comparison`. Reading
+        #: `record["verdict"]` raised a KeyError -- after B had been rebuilt and
+        #: measured, which is the most expensive possible moment to learn it.
+        verdict = record["comparison"]["verdict"]
         path = C.commit(record, AUDIT)
-        say(f"  comparison written: {path.name}, verdict {record['verdict']}")
+        say(f"  comparison written: {path.name}, verdict {verdict}")
         self.record("rebuild_measure_compare", True, {
             "baseline_identity": outcome["identity_matches"],
             "baseline_state_id": state.state_id,
@@ -310,8 +419,15 @@ class BaselineCompletionDriver:
             "state_eval_measurements_performed": 1,
             "candidates_compared": len(self.candidates),
             "candidates_remeasured": 0,
-            "verdict": record["verdict"],
-            "numerically_sensitive_pairs": len(flagged),
+            "teacher_instances_loaded": 1,
+            "verdict": verdict,
+            "numerical_sensitivity": sensitivity["status"],
+            "n_flagged_pairs": sensitivity["n_flagged_pairs"],
+            "cross_session_variance": sensitivity["cross_session_variance"],
+            "suite_root": str(suite_root),
+            "cites_beam_ranking": str(self.a.selection_record),
+            "cites_frozen_candidate_inputs": str(self.a.frozen_inputs),
+            "record_sha256": record["record_sha256"],
             "comparison_record": str(path),
         })
         return True
@@ -343,15 +459,25 @@ class BaselineCompletionDriver:
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    #: Every argument here is a LOCATION or a BUDGET. None of them is a
+    #: scientific identity: the Search-1 run id, its config hash, the suite
+    #: hash, the policy hash and the selection commitment are all bound in
+    #: stage A from the frozen candidate record, so a caller cannot make a
+    #: valid B measurement produce a record attributing C to another search.
+    #:
+    #: `--config-hash` used to be here and was exactly that hole. There is no
+    #: `--teacher-path` either: the teacher is loaded by pinned repo id and
+    #: revision, so the revision is enforced by the loader.
     ap.add_argument("--protocol", required=True)
     ap.add_argument("--frozen-inputs", required=True)
-    ap.add_argument("--teacher-path", required=True)
+    ap.add_argument("--selection-record", required=True,
+                    help=("the committed beam ranking. Its own commitment hash "
+                          "is checked in stage A against the one the frozen "
+                          "extraction recorded."))
     ap.add_argument("--rebuild-minutes", type=float, required=True)
     ap.add_argument("--rate", type=float, required=True)
     ap.add_argument("--spent-usd", type=float, default=0.0)
     ap.add_argument("--soft-stop-usd", type=float, required=True)
-    ap.add_argument("--config-hash", required=True,
-                    help="the frozen search config hash the candidates were ranked under")
     ap.add_argument("--device", default="cuda")
     return ap
 

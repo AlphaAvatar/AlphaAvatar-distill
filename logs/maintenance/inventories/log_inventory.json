@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T06:18:45+00:00",
+  "created_utc": "2026-09-16T07:07:33+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,11 +11,11 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1126,
-    "bytes": 43707776,
+    "bytes": 43711384,
     "by_disposition": {
       "keep_canonical": 79,
-      "keep_immutable": 871,
-      "keep_referenced": 161,
+      "keep_immutable": 870,
+      "keep_referenced": 162,
       "keep_unique_evidence": 15
     },
     "by_category": {
@@ -17111,8 +17111,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
-      "size_bytes": 1908,
-      "sha256": "17c9e5c53f054f2d0d76336585101b0e12a31eea383d91c641c506a5ef6720d0",
+      "size_bytes": 2730,
+      "sha256": "0efcbe5b519e873785c521b2aaf140fbe25a617e438dcbb98d3b719d60030a64",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17132,8 +17132,7 @@
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
-        "logs/stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json",
-        "logs/state/current.json"
+        "logs/stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -17164,30 +17163,35 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json",
-        "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json"
+        "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
+        "scripts/experiments/phase_c2/baseline_completion.py"
       ],
-      "referenced_by_executable": [],
+      "referenced_by_executable": [
+        "scripts/experiments/phase_c2/baseline_completion.py"
+      ],
       "duplicate_of": null,
-      "disposition": "keep_immutable",
-      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/experiments/phase_c2/baseline_completion.py"
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
-      "size_bytes": 11511,
-      "sha256": "0e2834a35544a3e02a027b35bf0c5cbcfb5c0f9ed50dae0a5c82fe1df58751fe",
+      "size_bytes": 13335,
+      "sha256": "f2f7d5eb65cf6210c03d2d932a91cf79fef17e140e7406a52106de7541151361",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json",
+        "scripts/experiments/phase_c2/baseline_completion.py",
         "scripts/pod/autoinit_phase_c2_baseline_driver.py"
       ],
       "referenced_by_executable": [
+        "scripts/experiments/phase_c2/baseline_completion.py",
         "scripts/pod/autoinit_phase_c2_baseline_driver.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/pod/autoinit_phase_c2_baseline_driver.py"
+      "disposition_reason": "named by scripts/experiments/phase_c2/baseline_completion.py, scripts/pod/autoinit_phase_c2_baseline_driver.py"
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json",
@@ -17927,7 +17931,8 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json"
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c2/analyses/c2_baseline_completion_closure.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -21397,8 +21402,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11966,
-      "sha256": "6db73f3d072c8a60f983c8563c5fd27585b97a7b9f84cc4144f43ab1f57650bb",
+      "size_bytes": 11994,
+      "sha256": "4a5cd70bbe18668f25adc963dbb928afd982aca6e96ba87b9754ea1bd7dfb7ca",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -21438,8 +21443,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 20884,
-      "sha256": "71c3350069552efcc72bce1b1f770205f7c1ac20489b167466404f18b29382ec",
+      "size_bytes": 21818,
+      "sha256": "596653fc8203d337b5d7e1c690c51831dad4c6d8453f764e0458dec9d52c62ac",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

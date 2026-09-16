@@ -1,0 +1,25 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_phase_c2_baseline",
+ "note": "Success spec for a baseline-completion run that reached BASELINE_COMPLETION_ALL_DONE. Two records matter and both are REQUIRED: the session evidence, which carries the stage detail and the bound identities, and the B->C comparison, which is the only place the rebuilt B's state_eval result and the comparison against the five frozen candidates exist. The rebuilt checkpoint itself is NOT collected: it is 2.22 GiB, it is re-derivable from the frozen fixed path under the same seed, and what must survive teardown is its measurement. On lifecycle: the vocabulary is `final_required` and `mutable_snapshot` and nothing else -- `ArtifactSpec.__post_init__` refuses any other value, so an invented word makes this whole document UNLOADABLE and the collector exits 1 before it looks at a single file. `required: false` is what makes an artifact best-effort; `lifecycle` is what a matching file MEANS. Both C2 Search-1 specs said `best_effort` until 2026-09-16 and the failure surfaced during a teardown.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_phase_c2_baseline/c2_baseline_completion_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "baseline_comparison",
+   "pattern": "audit/autoinit_phase_c2_baseline/c2_baseline_comparison.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "session_logs",
+   "pattern": "audit/autoinit_phase_c2_baseline/session/*",
+   "required": false,
+   "lifecycle": "final_required"
+  }
+ ]
+}

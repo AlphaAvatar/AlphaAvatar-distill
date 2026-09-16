@@ -47,7 +47,16 @@ class FrozenCandidate:
     Deliberately not an `InitializationState`: that type owns a lifecycle --
     planned, materialized, validated, measured -- and this object has no
     lifecycle to own. It is a measurement that already happened, and it must not
-    be advanceable, re-materializable or re-measurable.
+    be advanceable, re-materializable or re-measurable. So there is no
+    `attach_evaluation` and no `materialize` here, by construction.
+
+    What it DOES owe is the contract `BeamRankingPolicy.rank` requires of
+    anything it ranks, because the comparison ranks `{B} u C` through that same
+    public entry point rather than reimplementing epsilon-dominance. `rank`
+    reads `validity`, `evaluation`, `state_id`, `path_label` and `impl_ids`, and
+    calls `ready_for_ranking`. Omitting any of them raises an `AttributeError`
+    inside the ranking -- which, for a baseline-completion session, would happen
+    after B had been rebuilt and measured.
     """
 
     state_id: str
@@ -57,6 +66,39 @@ class FrozenCandidate:
     evaluation: StateEvaluation
     front: int | None = None
     lineage: str | None = None
+    #: Read by the policy's diversity grouping. Unused at `beam_width=None`,
+    #: which is how the comparison calls `rank`, and supplied anyway: a contract
+    #: satisfied only on the path that happens to be taken is a contract that
+    #: breaks when the other one is.
+    impl_ids: tuple[str, ...] = ()
+
+    @property
+    def validity(self):
+        """MEASURED, always: an unmeasured state never becomes one of these.
+
+        The freeze refuses any selected state whose canonical journal record is
+        not `measured`, whose evaluation measured different bytes, or whose
+        suite differs -- so by the time a `FrozenCandidate` exists, this is a
+        fact about it rather than a claim it makes.
+        """
+        from aadistill.initialization.specs.state import StateValidity
+        return StateValidity.MEASURED
+
+    def ready_for_ranking(self, required_metrics) -> None:
+        """The same three questions `InitializationState` answers, asked here.
+
+        Not a second ranking rule -- the readiness contract the ranking demands
+        of its inputs. `evaluation.require` is the evaluation's own check, so
+        the metric requirement has one implementation.
+        """
+        if self.evaluation is None:                       # pragma: no cover
+            raise FrozenInputError(f"{self.state_id} carries no evaluation")
+        if self.evaluation.artifact_digest != self.artifact_digest:
+            raise FrozenInputError(
+                f"{self.state_id}: its evaluation measured "
+                f"{self.evaluation.artifact_digest} and its identity is "
+                f"{self.artifact_digest}")
+        self.evaluation.require(list(required_metrics))
 
 
 def _require(condition: bool, message: str) -> None:
@@ -123,6 +165,7 @@ def load_frozen_candidates(
             evaluation=evaluation,
             front=entry.get("front"),
             lineage=entry.get("lineage"),
+            impl_ids=tuple(entry["identity"].get("impl_ids") or ()),
         ))
     _require(bool(candidates), f"{path} carries no candidates")
     return tuple(candidates)
@@ -138,6 +181,69 @@ def _evaluation_of(entry: Mapping[str, Any]) -> StateEvaluation:
             f"{entry.get('state_id')}: the stored evaluation does not match "
             f"StateEvaluation's fields ({exc}). The freeze stores the complete "
             "as_dict() precisely so this reconstruction is exact.") from exc
+
+
+#: What the threshold IS, and what it is not. Stated once, carried into every
+#: record, because a conservative disclosure threshold that comes to be read as
+#: a measured noise bound would make an unquantified uncertainty look quantified.
+THRESHOLD_IS = (
+    "a pre-B conservative sensitivity/disclosure threshold, equal to the tightest "
+    "gap observed BETWEEN the frozen C candidates on any ranked objective.")
+THRESHOLD_IS_NOT = (
+    "NOT an estimated noise bound, NOT a measurement of cross-session variance, "
+    "and NOT evidence of numerical determinism. No state has ever been measured "
+    "twice in this project, so the magnitude of run-to-run or cross-runtime "
+    "variation is unquantified. This threshold is derived from the SPREAD of the "
+    "candidates, which is a different quantity entirely.")
+CROSS_SESSION_VARIANCE = "NOT DIRECTLY MEASURED"
+
+
+def numerical_sensitivity_disclosure(
+    baseline_values: Mapping[str, float],
+    candidates: tuple[FrozenCandidate, ...],
+    *, objectives: tuple[str, ...], threshold: float,
+) -> dict[str, Any]:
+    """The structured disclosure, whether or not anything is flagged.
+
+    Attached to the comparison record BEFORE its self-hash, and it alters
+    nothing: the epsilon-Pareto ranking, its epsilon and the computed verdict
+    are exactly what they would have been without it. What it adds is the
+    obligation to say when a B<->C margin is small enough that an unquantified
+    numerical difference could have moved it -- and, when nothing is flagged, to
+    say that the absence of a flag is not a determinism claim.
+    """
+    flagged = numerically_sensitive_pairs(
+        baseline_values, candidates, objectives=objectives, threshold=threshold)
+    status = "FLAGGED" if flagged else "NOT_FLAGGED"
+    if flagged:
+        reading = (
+            "SENSITIVITY-LIMITED. At least one B<->C ranked-objective margin is at "
+            "or below the disclosure threshold, and cross-session numerical "
+            "variation was never empirically quantified, so this cheap-metric "
+            "result cannot be read as decisive for the affected pair(s). The "
+            "PARETO verdict below is unaltered and remains the computed result.")
+    else:
+        reading = (
+            "No B<->C ranked-objective margin is at or below the disclosure "
+            "threshold. This is NOT a determinism claim: cross-session numerical "
+            "variation remains unquantified, and the absence of a flag means only "
+            "that no margin was small enough to require one.")
+    return {
+        "numerical_sensitivity": {
+            "status": status,
+            "threshold": float(threshold),
+            "_what_the_threshold_is": THRESHOLD_IS,
+            "_what_the_threshold_is_not": THRESHOLD_IS_NOT,
+            "cross_session_variance": CROSS_SESSION_VARIANCE,
+            "n_flagged_pairs": len(flagged),
+            "flagged_pairs": flagged,
+            "interpretation": reading,
+            "_pareto_is_unchanged": (
+                "epsilon remains 1e-4, the ranking policy is unchanged, and the "
+                "computed verdict is not modified by this block. The disclosure "
+                "is reported beside the verdict, never applied to it."),
+        },
+    }
 
 
 def numerically_sensitive_pairs(

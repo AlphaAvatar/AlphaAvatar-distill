@@ -1,0 +1,541 @@
+#!/usr/bin/env python3
+"""Launch ONE Phase-C2 baseline-completion session through the generic runner.
+
+    PYTHONPATH=src python scripts/pod/autoinit_phase_c2_baseline_launch.py \
+        --scr /path/to/scratch --session-commit <sha> --bundle <name> \
+        --run-id attempt5
+
+**Thin on purpose.** Search-1's launcher is large because a ten-hour beam over
+87 GiB of intermediates has a lot of ways to go wrong. This session rebuilds one
+checkpoint, measures it once and writes one record, so it declares less: no
+canonical control to stage, no vLLM environment, no beam envelope, no
+conditional reserve, and a working set an order of magnitude smaller. Everything
+it does use is the machinery every other session uses -- `SessionSpec`, the run
+layout, the grant/authorization primitives, the resource scope, the setup
+declaration, the bundle transport, the readiness record, the artifact collector
+and the teardown policy.
+
+**A grant for this session cannot buy a beam.** The authorization is a distinct
+type with a distinct schema reporting `authorizes_c2_search1 = False`, and
+`BaselineCompletionAuthorization.load` refuses an artifact that claims
+otherwise. The Search-1 launcher's own loader refuses this schema symmetrically.
+Nothing here imports the beam runner, and
+`tests/pod/test_phase_c2_baseline_completion.py` asserts that over the import
+graph.
+
+**What it stages, and nothing else.** The pinned teacher revision, the two
+calibration mixtures the frozen B path consumes, and the frozen `state_eval_v1`
+suite. The protocol, the frozen candidate record and the beam ranking arrive
+with the bundle because they are committed files. Search-1 additionally staged
+the canonical 0.6B init as its measured control; this session has no control and
+does not stage it.
+
+THIS FILE AUTHORIZES NOTHING. It refuses to run without a committed
+authorization, and no baseline-completion authorization has been issued.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
+    if str(REPO_ROOT / _extra) not in sys.path:
+        sys.path.insert(0, str(REPO_ROOT / _extra))
+
+from aadistill.infrastructure.session import (  # noqa: E402
+    ArtifactPolicy, ExecutionCommands, LocalAsset, MarkerPolicy, SessionContext,
+    SessionSpec, SetupManifest, TeardownPolicy,
+)
+from aadistill.infrastructure.session_prechecks import (  # noqa: E402
+    session_commit_gate)
+from aadistill.infrastructure.session_runner import run_session  # noqa: E402
+from aadistill.runtime.pod_environment import LAUNCH_BOUND  # noqa: E402
+from aadistill.runtime.staging_contract import (  # noqa: E402
+    derive_contract, ignores_for_selection)
+from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
+from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from experiments.phase_c2 import baseline_completion as BC  # noqa: E402
+from experiments.phase_c2.frozen_assets import STATE_EVAL_ASSET  # noqa: E402
+from experiments.run_layout import (  # noqa: E402
+    ArtifactSpec as RunArtifactSpec, claim_output_root, open_run, record_run,
+    rel_run_dir, write_run_readmes,
+)
+from phase_a_frozen import TEACHER_REVISION  # noqa: E402
+
+WS = "/workspace"
+STATUS = f"{WS}/autoinit_phase_c2_baseline.status"
+RUN_LOG = f"{WS}/autoinit_phase_c2_baseline_run.log"
+
+AUDIT_DIRNAME = "autoinit_phase_c2_baseline"
+
+RUN_EXPERIMENT_ID = "phase_c2_baseline_completion"
+RUN_STAGE_ID = json.loads(
+    (REPO_ROOT / "configs/experiments/phase_c2/authorization.json").read_text()
+)["stage_id"]
+
+#: The frozen-asset expectation. The same document Search-1 named, because the
+#: asset is the same one and there is exactly one declaration of it.
+FROZEN_EXPECT = "configs/experiments/phase_c2/frozen_assets.json"
+
+#: `calib.reasoning_heavy@v2` and the frozen suite come from the dev box;
+#: `calib.domain_balanced@v1` is already on the relay. Both mixtures are needed
+#: because the frozen B path consumes domain-balanced at DEPTH, FFN and
+#: ATTENTION and reasoning-heavy at RESIDUAL_WIDTH.
+LOCAL_ASSETS = (
+    LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
+               "artifacts/stage1"),
+    LocalAsset(f"artifacts/stage1/{STATE_EVAL_ASSET}", STATE_EVAL_ASSET,
+               "artifacts/stage1"),
+)
+
+POD_TEST_SELECTION = "tests/c2_preflight"
+TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
+
+#: Derived from what this session actually holds at once: the teacher in bf16
+#: (7.5 GiB), the four materialized steps of the B path (the widest is the
+#: pre-DEPTH teacher-width intermediate at ~6.8 GiB, and the final B is 2.22
+#: GiB), the repository and the venv. No beam, so no 87 GiB of retained search
+#: states -- which is why this asks for a fraction of Search-1's volume.
+PEAK_WORKING_GIB = 32.0
+MIN_VOLUME_GIB = 60
+
+
+def auth_path_for(run_id: str) -> str:
+    """Where THIS run's authorization lives, repository-relative."""
+    return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
+            "/governance/authorization.json")
+
+
+# --- the $0 gates -----------------------------------------------------------
+#
+# Fewer than Search-1's, and each one names a failure THIS session can have.
+# The ones deliberately absent: no beam envelope to price-check, no search-space
+# identity to pin, and no 87 GiB volume to defend.
+
+
+def completion_executable_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Re-derive the completion closure, independently of the artifact.
+
+    Every other check digests the file list the authorization STORES. This one
+    derives the live set and requires the artifact to declare exactly it, so a
+    grant carrying Search-1's list -- which would verify perfectly against
+    Search-1's files -- cannot leave this driver, this comparison path and the
+    frozen-input loader unmeasured.
+    """
+    try:
+        live = BC.current_executable(REPO_ROOT)
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"cannot derive the completion executable set: {exc}"
+    expected = tuple(row["path"] for row in live["files"])
+    declared = tuple(getattr(ctx.auth, "harness_source_files", ()) or ())
+    if declared != expected:
+        only_declared = sorted(set(declared) - set(expected))
+        only_live = sorted(set(expected) - set(declared))
+        return False, (
+            f"the authorization declares {len(declared)} executable file(s) and "
+            f"the live closure derives {len(expected)}: "
+            f"declared-only {only_declared[:5]}, live-only {only_live[:5]}")
+    return True, (f"completion closure {live['digest'][:12]}… over "
+                  f"{len(expected)} derived files")
+
+
+def completion_scope_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The authorization must permit completion and REFUSE a beam."""
+    auth = ctx.auth
+    if not getattr(auth, "authorizes_c2_baseline_completion", False):
+        return False, "this authorization does not permit baseline completion"
+    if getattr(auth, "authorizes_c2_search1", False):
+        return False, (
+            "this authorization claims it can authorize the Search-1 beam. A "
+            "completion grant that could buy a ten-hour search is a budget and "
+            "a scientific expansion at once.")
+    scope = getattr(auth, "resource_scope", None)
+    if scope is None:
+        return False, (
+            "the authorization states no resource scope; one that cannot say "
+            "how many provider resources it permits does not permit an unknown "
+            "number of them")
+    if scope.run_id != ctx.args.run_id:
+        return False, (f"the authorization is scoped to run {scope.run_id!r} and "
+                       f"this invocation is {ctx.args.run_id!r}")
+    return True, (f"authorized for baseline completion of run {scope.run_id!r}; "
+                  f"{scope.provider_resources_permitted} provider resource(s) "
+                  "permitted, beam NOT authorized")
+
+
+def frozen_inputs_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The scientific input, verified before a pod exists.
+
+    The candidate side of the comparison is a committed document. If it does not
+    match its own hash, or was not extracted from the ranking this session
+    cites, the session has nothing valid to compare a measured B against -- and
+    learning that after B has been rebuilt costs the whole rebuild.
+    """
+    from aadistill.initialization.planning import stage1_selection
+    from experiments.phase_c2.frozen_inputs import load_frozen_candidates, load_record
+    try:
+        record = load_record(REPO_ROOT / BC.FROZEN_INPUTS)
+        candidates = load_frozen_candidates(
+            REPO_ROOT / BC.FROZEN_INPUTS,
+            expect_suite_hash=record["suite"]["hash"],
+            expect_policy_hash=record["policy"]["hash"])
+        selection = stage1_selection.load(REPO_ROOT / BC.SELECTION_RECORD)
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"the frozen comparison inputs are unusable: {exc}"
+    committed = record["sources"]["selection_commitment_sha256"]
+    if selection["selection_sha256"] != committed:
+        return False, (f"the cited ranking commits {selection['selection_sha256']} "
+                       f"and the frozen extraction came from {committed}")
+    return True, (f"{len(candidates)} frozen candidate measurement(s), record "
+                  f"{record['self_sha256'][:12]}…, extracted from the ranking "
+                  f"this session cites")
+
+
+def frozen_assets_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The suite this session measures B on, checked by the real verifier."""
+    import subprocess
+    #: This gate runs on the DEV BOX, before a pod exists, so it uses this
+    #: interpreter. The pod re-asks the same question through the setup script's
+    #: ASSETS_READY step against the same expectation document.
+    result = subprocess.run(
+        [sys.executable,
+         str(REPO_ROOT / "scripts/autoinit/verify_frozen_assets.py"),
+         "--expect", FROZEN_EXPECT],
+        cwd=str(REPO_ROOT), capture_output=True, text=True,
+        env={"PYTHONPATH": f"{REPO_ROOT}/src:{REPO_ROOT}/scripts", "PATH": "/usr/bin:/bin"})
+    if result.returncode != 0:
+        return False, (f"the frozen-asset expectation does not verify: "
+                       f"{(result.stdout + result.stderr).strip()[-400:]}")
+    return True, f"frozen-asset expectation {FROZEN_EXPECT} verifies"
+
+
+def pricing_and_plan_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The grant's ceiling and plan must be the documents' own."""
+    try:
+        ceiling = BC.hard_ceiling_usd(REPO_ROOT)
+        plan = BC.plan_hash(REPO_ROOT)
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"the completion pricing or protocol does not verify: {exc}"
+    declared_cap = float(getattr(ctx.auth, "hard_cap_usd", 0.0) or 0.0)
+    if abs(declared_cap - ceiling) > 1e-9:
+        return False, (f"the authorization caps ${declared_cap:.4f} and the "
+                       f"pricing record's ceiling is ${ceiling:.4f}")
+    declared_plan = getattr(ctx.auth, "plan_hash", None)
+    if declared_plan and declared_plan != plan:
+        return False, (f"the authorization binds plan {declared_plan} and the "
+                       f"live protocol hashes to {plan}")
+    return True, (f"ceiling ${ceiling:.4f} matches the pricing record, whose own "
+                  f"sha256 verified; plan {plan[:12]}…")
+
+
+def storage_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """A volume that cannot hold the B path is refused before it is paid for."""
+    requested = int(getattr(ctx.args, "volume_gib", 0) or 0)
+    if requested < MIN_VOLUME_GIB:
+        return False, (f"--volume-gib {requested} is below the {MIN_VOLUME_GIB} "
+                       f"this session needs for a {PEAK_WORKING_GIB:.1f} GiB peak "
+                       "working set plus the repository, the venv and the teacher")
+    return True, (f"volume {requested} GiB >= {MIN_VOLUME_GIB} for a "
+                  f"{PEAK_WORKING_GIB:.1f} GiB peak working set")
+
+
+def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """A launch-bound sweep, taken for THIS run, describing THIS tree.
+
+    The same mechanism every session uses, asked of this run's own record. A
+    diagnostic sweep proves the machinery works; only a launch-bound one claims
+    to describe the tree a launch will use.
+    """
+    from aadistill.runtime import pod_environment as PE
+
+    run_id = getattr(ctx.args, "run_id", None)
+    if not run_id:
+        return False, "this session has no run_id, so it owns no readiness record"
+    record_rel = PE.record_path_for(run_id, RUN_STAGE_ID)
+    try:
+        record = PE.load_record(REPO_ROOT, run_id=run_id, stage_id=RUN_STAGE_ID)
+    except FileNotFoundError:
+        return False, (
+            f"{record_rel} does not exist: no pod-like sweep has been recorded "
+            "for this run. Take one on the clean pre-authorization tree with "
+            "`record_pod_environment.py --kind launch_bound --run-id "
+            f"{run_id} --stage-id {RUN_STAGE_ID}`.")
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"cannot read {record_rel}: {exc}"
+    try:
+        live_staging = derive_contract(
+            spec(ctx.args).setup, session_id=BC.SESSION_ID)["digest"]
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"cannot derive this session's staging contract: {exc}"
+    ok, reason = PE.verify_record(
+        record, REPO_ROOT, run_id=run_id, stage_id=RUN_STAGE_ID,
+        session_commit=getattr(ctx.args, "session_commit", None),
+        authorization_path=auth_path_for(run_id),
+        required_kind=LAUNCH_BOUND,
+        staging_contract_digest=live_staging)
+    ctx.evidence["pod_environment_verification"] = {
+        "verdict": "PASS" if ok else "FAIL",
+        "record": record_rel,
+        "record_self_sha256": record.get("self_sha256"),
+        "record_kind": record.get("record_kind"),
+        "required_record_kind": LAUNCH_BOUND,
+        "live_staging_contract_digest": live_staging,
+        "recorded_staging_contract_digest": record.get("staging_contract_digest"),
+    }
+    return ok, reason
+
+
+def driver_command(ctx: SessionContext, plan) -> str:
+    """The driver invocation. Every identity it needs, it BINDS itself."""
+    def floor2(value: float) -> str:
+        #: FLOORED. A limit handed downward rounds DOWN or it is not a limit.
+        return f"{math.floor(value * 100) / 100:.2f}"
+
+    return (f"{POD_IMAGE['remote_python']} "
+            f"scripts/pod/autoinit_phase_c2_baseline_driver.py "
+            f"--protocol {BC.PROTOCOL} "
+            f"--frozen-inputs {BC.FROZEN_INPUTS} "
+            f"--selection-record {BC.SELECTION_RECORD} "
+            f"--rebuild-minutes {BC.rebuild_minutes(REPO_ROOT):.3f} "
+            f"--rate {ctx.price} --spent-usd {ctx.spent_usd:.3f} "
+            f"--soft-stop-usd {floor2(plan.soft_stop_usd)} "
+            f"--device cuda")
+
+
+def spec(args) -> SessionSpec:
+    """The whole session, in one object."""
+    return SessionSpec(
+        session_id=BC.SESSION_ID,
+        schema="aadistill.autoinit.c2_baseline_completion_session/v1",
+        description=(
+            "Phase C2 baseline completion: rebuild the frozen C1 treatment "
+            "baseline B once through its complete deterministic fixed path, "
+            "measure it once on the frozen state_eval suite, and compute the "
+            "preregistered B->C comparison against the five candidate "
+            "measurements Attempt 4 froze. No beam search, no new candidate, no "
+            "candidate remeasured. Trains nothing."),
+        authorization_path=auth_path_for(getattr(args, "run_id", "")),
+        authorization_loader=BC.BaselineCompletionAuthorization.load,
+        commands=ExecutionCommands(
+            watchdog="scripts/pod/watchdog.py",
+            setup_script="scripts/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/pod/collect_artifacts.py",
+            **deployment_commands()),
+        plan_id=BC.PLAN_ID,
+        plan_hash=BC.plan_hash(REPO_ROOT),
+        budget=BC.budget_spec(REPO_ROOT),
+        setup=SetupManifest(
+            #: `calib.domain_balanced@v1`'s items. NOT `CANONICAL_INIT`: that is
+            #: Search-1's measured control and this session has no control.
+            relay_inputs=CALIBRATION_V1,
+            local_assets=LOCAL_ASSETS,
+            required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
+                          "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
+                          "SESSION_ASSETS", "SESSION_RELAY_INPUTS",
+                          "SESSION_KIND", "SESSION_FROZEN_EXPECT",
+                          "SESSION_SETUP_MARKERS", "TEACHER_REVISION"),
+            #: VLLM_READY is ABSENT: this session serves nothing and builds no
+            #: inference environment. The declaration is what the shared setup
+            #: script reads to decide which optional sections run, so omitting
+            #: the marker is what stops the work rather than a comment saying it
+            #: is unnecessary.
+            setup_markers=("ENV_READY", "REPO_READY", "ASSETS_STAGED",
+                           "TRAIN_ENV", "ASSETS_READY", "TEACHER_READY",
+                           "ROPE_OK", "TESTS_OK", "AUTHORIZATION_OK",
+                           "SETUP_DONE"),
+            env={"SESSION_KIND": "c2_baseline_completion",
+                 "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
+            uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
+            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
+        driver_command=driver_command,
+        driver_job_id="autoinit_phase_c2_baseline_driver",
+        status_path=STATUS, run_log_path=RUN_LOG,
+        markers=MarkerPolicy(
+            success="BASELINE_COMPLETION_ALL_DONE",
+            failure=("BASELINE_COMPLETION_FAILED",),
+            incomplete=(),
+            #: One 2.22 GiB checkpoint is rebuilt and it is re-derivable from
+            #: the frozen path; what must survive is its MEASUREMENT, which the
+            #: comparison record carries. So there are no products to fetch.
+            products_eligible=lambda terminal, stages: False,
+            failure_note=("a blocking stage failed — collecting evidence, then "
+                          "tearing down. Nothing was trained, no candidate was "
+                          "remeasured and no committed record was replaced.")),
+        artifacts=ArtifactPolicy(
+            audit_dirname=AUDIT_DIRNAME,
+            evidence_filename="c2_baseline_completion_evidence.json",
+            archive_basename="c2_baseline_completion_artifacts.tar.gz",
+            spec_success="configs/autoinit/c2_baseline_completion_artifacts.json",
+            spec_failed=("configs/autoinit/"
+                         "c2_baseline_completion_artifacts_failed.json"),
+            report_names=("c2_baseline_completion_evidence.json",
+                          "c2_baseline_comparison.json")),
+        teardown=TeardownPolicy(
+            note="delete the pod, verify from the provider that it is gone, STOP"),
+        precheck=(
+            session_commit_gate(REPO_ROOT,
+                                auth_path_for(getattr(args, "run_id", "")),
+                                check_lineage=True),
+            completion_executable_gate,
+            completion_scope_gate,
+            frozen_inputs_gate,
+            frozen_assets_gate,
+            pricing_and_plan_gate,
+            storage_gate,
+            readiness_gate,
+        ),
+    )
+
+
+#: role -> path within the run. The same five areas every run uses.
+COMPLETION_RUN_ROLES: dict[str, str] = {
+    #: --- governance: inputs, prepared before the run opens -----------------
+    "grant": "governance/grant.json",
+    "readiness_record": "governance/readiness.json",
+    "authorization": "governance/authorization.json",
+    "bundle_record": "governance/bundle.json",
+    #: --- runtime: how it executed -------------------------------------------
+    #: Written on EVERY path including a $0 pre-provider refusal, which is why
+    #: it is the one role the manifest requires.
+    "session_record": "runtime/session.json",
+    "launcher_log": "runtime/launcher.log",
+    "watchdog_journal": "runtime/watchdog",
+    #: --- evidence: what it produced ------------------------------------------
+    "driver_log": "evidence/driver_run.log",
+    "driver_status": "evidence/driver_status.txt",
+    "session_evidence": "evidence/c2_baseline_completion_evidence.json",
+    #: The point of the session: B's measurement and the comparison against the
+    #: five frozen candidates.
+    "baseline_comparison": "evidence/c2_baseline_comparison.json",
+    #: --- artifacts / closeout -------------------------------------------------
+    "artifact_manifest": "artifacts/manifest.json",
+    "outcome": "closeout/outcome.json",
+}
+
+COMPLETION_RUN_SPEC = RunArtifactSpec(
+    spec_id="phase_c2_baseline_completion_session_v1",
+    required=("session_record",),
+    optional=tuple(r for r in COMPLETION_RUN_ROLES if r != "session_record"))
+
+#: Exempt from `open_run`'s occupancy rule and from nothing else: these four are
+#: committed BEFORE the run opens, in the order grant -> readiness ->
+#: authorization -> bundle, and a launcher that refused to open a run because
+#: its own inputs were already there could never start.
+_RUN_PREPARED: tuple[str, ...] = ("grant", "readiness_record", "authorization",
+                                  "bundle_record")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--scr", required=True)
+    ap.add_argument("--session-commit", required=True)
+    ap.add_argument("--bundle", required=True)
+    ap.add_argument("--run-id", required=True,
+                    help="a FRESH run identity; no chain may be reused")
+    ap.add_argument("--host-draws", type=int, default=1)
+    ap.add_argument("--volume-gib", type=int, default=MIN_VOLUME_GIB)
+    ap.add_argument("--max-price", type=float, default=None,
+                    help="defaults to the accepted L40S securePrice boundary")
+    ap.add_argument("--uv-max-s", type=int, default=1800)
+    ap.add_argument("--tests-max-s", type=int, default=900)
+    ap.add_argument("--out", default=None,
+                    help="the session record; defaults to this run's own path")
+    return ap
+
+
+def close_completion_run(layout, args):
+    """Copy what the session produced into the run, then record it.
+
+    Small because the session is small: one evidence document, one comparison
+    record, the two logs and whatever watchdog journals its resources wrote.
+    """
+    import shutil
+
+    scr = Path(args.scr)
+    for source, role in (("launch.log", "launcher_log"),
+                         (f"relay/{Path(RUN_LOG).name}", "driver_log"),
+                         (f"relay/{Path(STATUS).name}", "driver_status"),
+                         ("relay/c2_baseline_completion_evidence.json",
+                          "session_evidence"),
+                         ("store/manifest.json", "artifact_manifest")):
+        candidate = scr / source
+        if candidate.is_file():
+            destination = layout.path(COMPLETION_RUN_ROLES[role])
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(candidate, destination)
+
+    #: The comparison, wherever the collector left it in the extracted archive.
+    for found in sorted(scr.glob("store/extracted/**/c2_baseline_comparison.json")):
+        destination = layout.path(COMPLETION_RUN_ROLES["baseline_comparison"])
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(found, destination)
+        break
+
+    journals = layout.path(COMPLETION_RUN_ROLES["watchdog_journal"])
+    journals.mkdir(parents=True, exist_ok=True)
+    for found in (sorted(scr.glob("watchdog_*.jsonl"))
+                  + sorted(scr.glob("watchdog_*.out"))):
+        shutil.copy2(found, journals / found.name)
+
+    record_path = Path(args.out) if args.out else layout.path(
+        COMPLETION_RUN_ROLES["session_record"])
+    session = json.loads(record_path.read_text()) if record_path.is_file() else {}
+    return record_run(
+        layout, spec=COMPLETION_RUN_SPEC,
+        plan={"session_id": session.get("session_id"),
+              "plan_hash": session.get("session_plan_hash"),
+              "session_commit": getattr(args, "session_commit", None),
+              "bundle": getattr(args, "bundle", None),
+              "scratch_root": str(scr)},
+        implementation={
+            "launcher": "scripts/pod/autoinit_phase_c2_baseline_launch.py",
+            "driver": "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+            "harness_source_digest": session.get("harness_source_digest"),
+            "authorization": auth_path_for(args.run_id)},
+        status={"passed": session.get("passed"),
+                "terminal": session.get("terminal"),
+                "measures_b_once": True,
+                "runs_a_beam_search": False,
+                "remeasures_any_candidate": False})
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    if args.max_price is None:
+        args.max_price = BC.price_per_hour_usd(REPO_ROOT)
+    #: BEFORE anything is priced or created: a colliding run id or a foreign
+    #: scratch root costs $0 here.
+    claim_output_root(args.scr, RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)
+    layout = open_run(REPO_ROOT, RUN_EXPERIMENT_ID, args.run_id,
+                      roles=COMPLETION_RUN_ROLES, prepared=_RUN_PREPARED,
+                      stage_id=RUN_STAGE_ID)
+    write_run_readmes(layout, RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)
+    if args.out is None:
+        args.out = str(layout.path(
+            COMPLETION_RUN_ROLES["session_record"]).relative_to(REPO_ROOT))
+    rc = run_session(spec(args), args, REPO_ROOT,
+                     summary=("baseline completion is a terminus: it measures B "
+                              "once and computes the comparison. Search-2 and "
+                              "behavioural confirmation are separately "
+                              "authorized and unreachable from here."))
+    try:
+        doc = close_completion_run(layout, args)
+    except Exception as exc:                                      # noqa: BLE001
+        print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
+              f"  the run directory is "
+              f"{rel_run_dir(RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)}; it "
+              "holds whatever the session produced and has no manifest. Do not "
+              "reuse this run id.")
+        return rc or 1
+    print(f"run {doc['experiment_id']}/{doc['run_id']} recorded — "
+          f"{len(doc['roles'])} role(s) under "
+          f"{rel_run_dir(RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)}")
+    return rc
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

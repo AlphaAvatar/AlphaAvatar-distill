@@ -788,6 +788,35 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.4f}, C2 {a.authorizes_c2_search1}, '
       f'training {a.allows_recovery_training}, phase A {a.allows_phase_a}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2_baseline_completion" ]; then
+  # An EIGHTH type, and the one whose absence would have been most expensive to
+  # discover. Baseline completion carries a ceiling derived for ONE rebuild of
+  # the frozen B plus ONE state_eval -- $1.1950, not Search-1's $15.0446 -- and
+  # its artifact reports `authorizes_c2_search1 = False`.
+  #
+  # Without this branch SESSION_KIND falls through to `spend`, which loads a
+  # PreflightAuthorization and exits 98 AFTER setup has run on a billing pod.
+  # Phase-B attempt 2 paid $0.2300 to establish that a missing branch is not a
+  # type error.
+  #
+  # The `authorizes_c2_search1 is False` assertion is the governance boundary in
+  # its final position: a completion grant reaching the pod must not be able to
+  # authorize a ten-hour beam.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from experiments.phase_c2.baseline_completion import BaselineCompletionAuthorization
+a = BaselineCompletionAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c2_baseline_completion is True, 'this session needs a baseline-completion authorization'
+assert a.authorizes_c2_search1 is False, 'a completion grant must not authorize the Search-1 beam'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_recovery_training is False, 'baseline completion trains nothing'
+assert a.automatic_followon_start is False, 'nothing chains off baseline completion'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, completion {a.authorizes_c2_baseline_completion}, '
+      f'search1 {a.authorizes_c2_search1}, training {a.allows_recovery_training}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

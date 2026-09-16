@@ -172,14 +172,21 @@
    },
    "tightest_gap": 0.007782,
    "tightest_gap_in_epsilons": 78,
-   "_reading": "the five candidates are separated by 78 to 1273 epsilons on their tightest objective, so the candidate-side front structure is not balanced at the 1e-4 scale. The unquantified risk bites only if B lands within a comparable distance of a candidate."
+   "_what_the_threshold_IS": "a pre-B conservative sensitivity/disclosure threshold, equal to the tightest gap observed BETWEEN the frozen C candidates on any ranked objective.",
+   "_what_the_threshold_IS_NOT": "NOT an estimated noise bound, NOT a measurement of cross-session variance, and NOT evidence of numerical determinism. No state has ever been measured twice in this project, so the magnitude of run-to-run or cross-runtime variation is unquantified. This threshold is derived from the SPREAD of the candidates, which is a different quantity entirely.",
+   "reading": "the five candidates are separated by 78 to 1273 epsilons on their tightest objective, so the candidate-side front structure is not balanced at the 1e-4 scale. The threshold below is derived from that SPREAD and is a conservative disclosure trigger, not a noise estimate."
   },
   "preregistered_disclosure_RULE_not_a_rule_change": {
-   "rule": "if measured B falls within the tightest observed candidate gap of any candidate on any ranked objective, the comparison record must FLAG that pair as numerically sensitive and the verdict must say so.",
+   "rule": "if any measured B <-> frozen C ranked-objective margin is at or below the threshold, the comparison record and the reported interpretation MUST disclose the sensitivity flag. The PARETO verdict itself is NOT altered.",
    "threshold": 0.007782,
-   "_this_does_not_change_epsilon_or_the_ranking": "epsilon stays 1e-4, PARETO_V1 stays the ranking rule, and front assignment is computed exactly as before. This adds a disclosure obligation, registered BEFORE B exists."
+   "_this_does_not_change_epsilon_or_the_ranking": "epsilon stays 1e-4, PARETO_V1 stays the ranking rule, and front assignment is computed exactly as before. This adds a disclosure obligation, registered BEFORE B exists.",
+   "structured_field": "numerical_sensitivity.status = FLAGGED | NOT_FLAGGED, written into c2_baseline_comparison.json BEFORE its record_sha256 is computed, together with the threshold, what the threshold is and is not, the flagged pairs, and the reading.",
+   "when_nothing_is_flagged": "the record still states that cross-session variance was NOT DIRECTLY MEASURED. The absence of a flag is NOT a claim of numerical determinism.",
+   "_epsilon_and_ranking_unchanged": "epsilon remains 1e-4, PARETO_V1 remains the ranking rule, front assignment is computed exactly as before, and no candidate is remeasured. The disclosure is reported beside the verdict and never applied to it.",
+   "registered_before_b_exists": true
   },
-  "stop_condition": "if the completion session finds that the frozen C measurements and a new B measurement are not numerically comparable -- a different suite hash, a different teacher revision, a different reference strategy, or an evaluator whose implementation hash has moved -- it must STOP and report the exact reason rather than compensate for it."
+  "stop_condition": "if the completion session finds that the frozen C measurements and a new B measurement are not numerically comparable -- a different suite hash, a different teacher revision, a different reference strategy, or an evaluator whose implementation hash has moved -- it must STOP and report the exact reason rather than compensate for it.",
+  "accepted_ruling_2026_09_16": "cross-session comparison is ACCEPTED for this cheap-metric, hypothesis-generation use, subject to the disclosure below. The basis is that the metric is an independent original-teacher comparison under frozen RECOMPUTE semantics: every checkpoint is scored on its own weights against the same pinned teacher, and no candidate is normalized against any other. Unmeasured cross-session variance is therefore a disclosure obligation, not a blocker to one B measurement."
  },
  "budget": {
   "pricing_document": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
@@ -194,5 +201,5 @@
   "defect_record": "logs/stages/stage-1/phase_c2/analyses/c2_baseline_reserve_defect.json"
  },
  "authorizes": "nothing",
- "protocol_sha256": "7a24358069280aa3294e8daaeb512851a4c317a769bbf5fcf98ce3cdb3f600ae"
+ "protocol_sha256": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c"
 }

@@ -1,18 +1,23 @@
 {
  "schema": "aadistill.autoinit.c2_baseline_completion_closure/v1",
- "_what_this_is": "the executable set a Phase-C2 baseline-completion session would run, derived live from the tree by the same import walk every other experiment's closure uses.",
- "_informational_until_an_authorization_binds_it": "no grant or authorization exists for this session, so this digest pins nothing yet. It is here so a reviewer can see WHAT would run, and so the authorization step has a figure to bind rather than one to invent.",
- "digest": "7b826c5b1caa4cda7ca99cdec6ffe1899d79597a1e1a65f2122d4da146e1009f",
- "n_files": 54,
+ "_what_this_is": "the executable set a Phase-C2 baseline-completion session would run, derived live by the same import walk every other experiment's closure uses. `derive` RAISES on an unresolved internal import, so a digest existing at all means the set is closed.",
+ "_informational_until_an_authorization_binds_it": "no grant or authorization exists for this session, so this digest pins nothing yet. It is here so a reviewer can see WHAT would run and so the authorization step binds a derived figure rather than an invented one.",
+ "digest": "1c93cc4e921a122b2e082df22c398e0d382b396a862d26dd1e97f6b9e008cfa0",
+ "n_files": 82,
+ "unresolved_internal_imports": 0,
+ "_unresolved_rule": "zero by construction: aadistill.governance.closure.derive raises ClosureError rather than returning a set smaller than what runs",
  "entry_points": [
+  "scripts/pod/autoinit_phase_c2_baseline_launch.py",
   "scripts/pod/autoinit_phase_c2_baseline_driver.py",
-  "scripts/autoinit/freeze_c2_comparison_inputs.py",
-  "scripts/autoinit/price_c2_baseline_completion.py"
+  "scripts/pod/collect_artifacts.py"
  ],
  "declared_non_python_inputs": [
   "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
   "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
-  "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json"
+  "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+  "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json",
+  "configs/experiments/phase_c2/frozen_assets.json",
+  "scripts/pod/autoinit_preflight_setup.sh"
  ],
  "source_roots": [
   "src",
@@ -21,18 +26,27 @@
   "scripts/autoinit"
  ],
  "by_area": {
-  "logs/stages": 3,
-  "scripts/autoinit": 4,
-  "scripts/experiments": 8,
-  "scripts/pod": 1,
-  "src/aadistill": 38
+  "configs/experiments": 1,
+  "logs/stages": 4,
+  "scripts/autoinit": 3,
+  "scripts/experiments": 15,
+  "scripts/pod": 6,
+  "src/aadistill": 53
  },
- "command": "PYTHONPATH=src:scripts python -c \"from aadistill.governance import closure; closure.derive(...)\" with the entry points, declared inputs and roots above",
- "compared_with_search_1": {
-  "search_1_digest": "c5ae8fbc7132aa8c461d76b6d05a1a5d3c444f9f4f85185dd50b7351d2d3783b",
-  "search_1_n_files": 85,
-  "_note": "Search-1's executable identity is UNCHANGED by this round -- none of the new files is in its closure. The completion set is smaller because it contains no beam search."
+ "excludes_the_beam": {
+  "checked": [
+   "scripts/autoinit/phase_a_search.py",
+   "scripts/pod/autoinit_phase_c2_driver.py",
+   "scripts/pod/autoinit_phase_c2_launch.py"
+  ],
+  "present": [],
+  "_meaning": "the beam runner and the Search-1 launcher/driver are not in the set this session executes. A completion grant binds this digest, so it cannot pay for code that is not in it."
+ },
+ "search_1_closure_for_comparison": {
+  "digest": "fdb9e000872a13f72bcd70511441aa1ad390f5f313192a52a352f425cbb2e013",
+  "n_files": 85,
+  "_note": "Search-1's digest MOVED this round because the shared setup script gained a branch for this session kind and the comparison builder gained its interpretation parameter. Search-1's chain is consumed and closed, so nothing needs to match its old value; the figure is recorded so a reader is not surprised by it."
  },
  "authorizes": "nothing",
- "self_sha256": "eb3cf95e0787323478a260e816c7b3c3d277f4ef72aecfa2ad8efc6a91ea8a5a"
+ "self_sha256": "56e2c7c71e39f0e847524a09dc449f320a63eea911c8f5a573e7e91fa3fcf41f"
 }

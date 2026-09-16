@@ -45,7 +45,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 for _extra in ("src", "scripts", "scripts/autoinit"):
@@ -109,13 +109,28 @@ def build(*, baseline: Any, baseline_outcome: dict[str, Any],
           candidates: Any, suite: Any, policy: Any,
           run_id: str, config_hash: str,
           selection_record: str | None = None,
-          search_summary: str | None = None) -> dict[str, Any]:
+          search_summary: str | None = None,
+          frozen_candidate_inputs: str | None = None,
+          interpretation: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """The record. `candidates` is the committed top-N selection, in order.
 
     B is removed from `candidates` when the beam selected it, so it is never
     compared with itself: an identical pair would land in the same front and
     read as "no candidate beats the baseline" for a reason that is arithmetic
     rather than scientific.
+
+    `selection_record` cites the BEAM RANKING. `frozen_candidate_inputs` is a
+    separate citation for the later derived extraction a baseline-completion
+    session reads its candidates from -- separate because they are different
+    documents making different claims, and overloading one field would let a
+    record cite a derived extraction where a reader expects the ranking.
+
+    `interpretation` is merged in BEFORE `record_sha256` is computed. That is
+    the whole reason it is a parameter: the completion session has a
+    preregistered numerical-sensitivity disclosure to attach, and a caller that
+    attached it afterwards would leave the document differing from the object
+    its own self-hash describes. Finalization happens once, here, and nothing
+    downstream is expected to re-do it.
     """
     baseline_evaluation = _measured(baseline, "the baseline B")
 
@@ -199,6 +214,10 @@ def build(*, baseline: Any, baseline_outcome: dict[str, Any],
         "search_config_hash": config_hash,
         "cites": {"beam_ranking": selection_record,
                   "search_summary": search_summary,
+                  #: A DERIVED extraction of the ranking's measured candidates,
+                  #: not the ranking. `None` for a session that read the
+                  #: candidates from the live search.
+                  "frozen_candidate_inputs": frozen_candidate_inputs,
                   "_not_modified": (
                       "the beam ranking artifact is cited, never rewritten: "
                       "inserting a state the beam did not generate would make "
@@ -253,6 +272,20 @@ def build(*, baseline: Any, baseline_outcome: dict[str, Any],
         },
         "not_behavioural_evidence": NOT_BEHAVIOURAL,
     }
+    if interpretation:
+        #: Before the hash, and refusing to shadow a computed field: a
+        #: disclosure that could overwrite `comparison` or `candidates` would be
+        #: a way to edit the result through the metadata argument.
+        collisions = sorted(set(interpretation) & set(record))
+        if collisions:
+            raise ComparisonError(
+                f"the interpretation supplies {collisions}, which the record "
+                "already computes. Interpretation is added beside the result, "
+                "never over it.")
+        record.update(dict(interpretation))
+    #: LAST. Every field above is inside the hash, including any
+    #: interpretation, so a reader can recompute this over the document minus
+    #: this key and get the same value.
     record["record_sha256"] = sha256_json(record)
     return record
 
