@@ -54,8 +54,14 @@ from aadistill.runtime.pod_environment import (  # noqa: E402,F401
 
 from experiments.phase_c2 import baseline_completion as BC
 from experiments.phase_c2.pod_environment import (  # noqa: F401
-    POD_TEST_ENVIRONMENT_FILES_V1, POD_TEST_SELECTION, ReadinessError,
+    POD_TEST_ENVIRONMENT_FILES_V1, ReadinessError,
 )
+
+#: The completion's OWN pod selection, named ONCE here and read by the launcher
+#: through this module. Search-1's selection asserts SEARCH-1's staged paths --
+#: including the canonical control this session does not stage -- so reusing it
+#: would fail two tests that are correct about a different session.
+POD_TEST_SELECTION = "tests/c2_baseline_completion_preflight"
 
 #: Its OWN schema. This is the check that makes a Search-1 readiness record
 #: unusable here: `verify_record` compares the record's schema against the
@@ -156,12 +162,13 @@ def sweep_contract(run_id: str | None = None, stage_id: str | None = None,
         harness_n_files_field="completion_harness_n_files",
         what_this_is=(
             "one complete pod-like sweep of the baseline-completion pod "
-            f"selection. The selection is {POD_TEST_SELECTION}/ -- the same "
-            "environmental question Search-1 asks, because it is the same "
-            "question about the same image and the same repository. What this "
-            "record BINDS is the completion session: its launcher, its session "
-            "id, its staging contract and its executable closure. A Search-1 "
-            "readiness record cannot satisfy it, and it cannot satisfy "
+            f"selection, {POD_TEST_SELECTION}/ -- everything the paid session "
+            "can fail before its one measurement, and nothing else. It is this "
+            "session's own selection rather than Search-1's, because Search-1's "
+            "requires the canonical control this session does not stage. What "
+            "this record BINDS is the completion session: its launcher, its "
+            "session id, its staging contract and its executable closure. A "
+            "Search-1 readiness record cannot satisfy it, and it cannot satisfy "
             "Search-1's."),
         #: No pointer. The record is run-owned and there is nothing else to keep
         #: in step with it.

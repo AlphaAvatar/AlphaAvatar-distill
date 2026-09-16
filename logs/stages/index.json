@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 21,
-  "single_stage": 21,
+  "experiment_total": 22,
+  "single_stage": 22,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -148,16 +148,17 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 3,
-    "experiments": 6,
-    "experiments_with_logs": 6,
-    "runs": 52,
-    "canonical_configs": 4,
+    "experiments": 7,
+    "experiments_with_logs": 7,
+    "runs": 53,
+    "canonical_configs": 5,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
    "canonical_configs": [
     "configs/experiments/phase_a/source_sets.json",
     "configs/experiments/phase_c1/authorization.json",
+    "configs/experiments/phase_c2/baseline_completion_authorization.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json"
    ],
@@ -565,6 +566,33 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "It re-optimizes the Stage-1 initialization composition around the operator C1 selected, and its product is a Stage-1 path selection. Like `phase_c1` it would measure with stage-3 confirmation probes if a confirmation were ever authorized; those are the instrument, not the subject."
+  },
+  {
+   "experiment_id": "phase_c2_baseline_completion",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "granted \u2014 attempt5 grant committed, NOT yet authorized",
+   "title": "Phase C2 baseline completion \u2014 the B side of B\u2192C",
+   "question": "What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B\u2192C comparison Attempt 4 collected its ranking to ask can finally be computed?",
+   "canonical_path": "logs/stages/stage-1/phase_c2_baseline_completion",
+   "canonical_config": "configs/experiments/phase_c2/baseline_completion_authorization.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
+     "says": "the protocol: establish the frozen B once, measure it once on the frozen suite, and compute the preregistered B\u2192C comparison against the five candidate measurements Attempt 4 froze. Authorizes nothing"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json",
+     "says": "the price, derived line by line from Attempt 4's own telemetry rather than from the reserve that failed: $0.7212 expected, $1.1950 ceiling at $1.09/h"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/c2_frozen_comparison_inputs.json",
+     "says": "the frozen candidate side of the comparison, extracted deterministically from the journal Attempt 4's selection binds"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "It completes a Stage-1 initialization measurement Attempt 4 began and did not finish: the candidate side of a Stage-1 path comparison is already measured and frozen, and this supplies the baseline side on the same frozen suite. Its product is the same Stage-1 path selection evidence, which is why it belongs to the stage rather than to the confirmation instrument."
   },
   {
    "experiment_id": "measurement",

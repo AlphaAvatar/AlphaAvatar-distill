@@ -881,15 +881,45 @@ def test_the_completion_budget_reproduces_the_accepted_pricing():
         "rebuild IS the session and is priced in the path")
 
 
-def test_no_completion_run_or_authorization_exists_yet():
-    """This round is zero-cost and prepares tooling only."""
+def test_the_governance_chain_is_never_out_of_order():
+    """The chronology, asserted as an invariant that holds at every stage.
+
+    This used to assert that NO completion run existed, which was true while
+    the package was being prepared and false the moment a maintainer granted
+    one. What must hold forever is the ORDER: a readiness record is evidence
+    about a grant-containing tree, and an authorization is issued on a tree that
+    already carries the record. So each artifact implies its predecessor, and a
+    chain that skipped a step would be visible here rather than at a pod.
+    """
     import autoinit_phase_c2_baseline_launch as L
+
     runs = REPO / "logs/stages/stage-1" / L.RUN_EXPERIMENT_ID / "runs"
-    assert not runs.exists() or not any(runs.iterdir()), (
-        f"a completion run directory already exists at {runs}; no completion "
-        "session is authorized")
-    assert not list(REPO.glob(
-        "logs/stages/**/phase_c2_baseline_completion/**/authorization.json"))
+    for run in sorted(runs.glob("*")) if runs.exists() else []:
+        governance = run / "governance"
+        grant = (governance / "grant.json").is_file()
+        readiness = (governance / "readiness.json").is_file()
+        authorization = (governance / "authorization.json").is_file()
+        if readiness:
+            assert grant, f"{run.name}: a readiness record with no grant"
+        if authorization:
+            assert readiness, (
+                f"{run.name}: an authorization issued with no readiness record "
+                "-- the record is evidence about the tree the authorization was "
+                "issued on")
+            assert grant, f"{run.name}: an authorization with no grant"
+
+
+def test_any_completion_authorization_permits_only_completion():
+    """Whatever exists, it cannot authorize a beam."""
+    import autoinit_phase_c2_baseline_launch as L
+    from experiments.phase_c2 import baseline_completion as BC
+
+    runs = REPO / "logs/stages/stage-1" / L.RUN_EXPERIMENT_ID / "runs"
+    for found in sorted(runs.glob("*/governance/authorization.json")) if runs.exists() else []:
+        auth = BC.BaselineCompletionAuthorization.load(found)
+        assert auth.authorizes_c2_baseline_completion is True, found
+        assert auth.authorizes_c2_search1 is False, found
+        assert auth.hard_cap_usd == 1.1950, found
 
 
 # --- 10. the formal launch plumbing ----------------------------------------
@@ -1362,9 +1392,16 @@ def test_the_snapshot_does_not_contradict_itself_about_attempt_4():
     assert "ACCEPTED" in nxt
     assert "ruling on the not-yet-quantified" not in nxt, (
         "the cross-session ruling is accepted and recorded in the protocol")
-    #: And the completion is prepared but not authorized, in both places.
-    assert snapshot["prepared_launch"]["any"] is False
-    assert "NOT AUTHORIZED" in c2["baseline_completion"]
+    #: And the snapshot's own prepared-launch claim must match the tree: a
+    #: grant on disk means something IS prepared, and its absence means nothing
+    #: is. Asserting a fixed value here made this test a statement about one
+    #: moment rather than about consistency.
+    import autoinit_phase_c2_baseline_launch as L
+    runs = REPO / "logs/stages/stage-1" / L.RUN_EXPERIMENT_ID / "runs"
+    granted = bool(list(runs.glob("*/governance/grant.json"))) if runs.exists() else False
+    assert snapshot["prepared_launch"]["any"] is granted, (
+        "the snapshot and the tree disagree about whether a completion session "
+        "is prepared")
 
 
 def test_the_renderer_reports_a_missing_closeout_rather_than_inheriting_one(tmp_path):

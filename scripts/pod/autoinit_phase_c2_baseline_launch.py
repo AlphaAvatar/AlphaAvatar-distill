@@ -101,7 +101,13 @@ LOCAL_ASSETS = (
                "artifacts/stage1"),
 )
 
-POD_TEST_SELECTION = "tests/c2_preflight"
+#: This session's OWN selection. Search-1's asserts that every path SEARCH-1
+#: stages is present, including the canonical control it injects as its measured
+#: baseline -- which this session has no use for and does not stage. Running
+#: Search-1's preflight under this staged view failed two tests that are
+#: entirely correct about Search-1, and narrowing a consumed experiment's gate
+#: to fit this one would stop it guarding the session it was written for.
+POD_TEST_SELECTION = CPE.POD_TEST_SELECTION
 TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
 
 #: Derived from what this session actually holds at once: the teacher in bf16

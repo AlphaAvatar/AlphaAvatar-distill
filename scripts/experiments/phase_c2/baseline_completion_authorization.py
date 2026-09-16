@@ -153,11 +153,20 @@ def _staging_contract_digest(run_id: str) -> str:
     issued against a staged view no pod will ever have.
     """
     import importlib
+    import sys as _sys
 
     from aadistill.runtime.staging_contract import derive_contract
 
     from experiments.phase_c2 import baseline_completion as _BC
 
+    #: `scripts/pod` on the path first: the launcher is a script, not an
+    #: installed module, and every loader of one here says so explicitly. A bare
+    #: `import_module` refused with "No module named ..." the first time this
+    #: ran outside a process that had already arranged the path -- which is the
+    #: issuer's process, the one that matters.
+    pod = str(REPO_ROOT / "scripts/pod")
+    if pod not in _sys.path:
+        _sys.path.insert(0, pod)
     launcher = importlib.import_module("autoinit_phase_c2_baseline_launch")
     args = launcher.build_parser().parse_args([
         "--scr", "/unused", "--session-commit", "0" * 40,

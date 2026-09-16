@@ -1,0 +1,74 @@
+{
+ "schema": "aadistill.autoinit.c2_baseline_completion_grant/v1",
+ "_what_this_is": "the maintainer decision permitting ONE Phase-C2 baseline-completion session -- attempt 5. An INPUT to the issuer, which independently re-derives every identity below and REFUSES on any disagreement, on any omission, and on any identity it cannot derive. It authorizes nothing by itself: no pod, no authorization, no spend.",
+ "_where_this_lives": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5/governance/grant.json. The first run of a new experiment id: Search-1's four attempts belong to phase_c2 and are closed.",
+ "granted_for": "Phase C2 baseline completion -- attempt 5",
+ "granted_by": "the MAINTAINER DECISION of 2026-09-17, which closed the science for implementation purposes, authorized six narrow $0 enforcement repairs, and authorized one formal baseline-completion execution plus a narrow $2.3900 new-spend retry sub-envelope. The reviewed basis was commit 887a432560207a26430887cd281f28d38b574981 and the repairs landed at b6272724e6ecffdda8023c359ae1a87db8a9447c; commits are recorded here as HUMAN PROVENANCE and are deliberately NOT machine-verified identities, because the issuance HEAD is necessarily later than this document.",
+ "covers": "exactly ONE Phase-C2 baseline-completion session at a hard ceiling of $1.1950: ONE rebuild of the frozen C1 treatment baseline B through its complete deterministic fixed path, ONE state_eval measurement of the rebuilt B on the frozen suite, and ONE B->C comparison against the five candidate measurements Attempt 4 froze and this session reads without recomputing.",
+ "explicitly_not_authorized": [
+  "rerunning the Search-1 beam, under any circumstances",
+  "generating any new C candidate",
+  "remeasuring or replacing any frozen C measurement",
+  "a second state_eval of B once the durable measurement exists",
+  "Search-2, conditional or otherwise",
+  "any behavioural confirmation of B vs C",
+  "recovery training of any kind",
+  "causal-KL ATTENTION R&D",
+  "any increase to the $320.0000 project cap, the $16.20 C2 campaign envelope, the $2.3900 retry sub-envelope or the $1.1950 per-session ceiling"
+ ],
+ "approved_money": {
+  "expected_usd": 0.7212,
+  "hard_cap_usd": 1.195,
+  "price_basis_usd_per_hour": 1.09,
+  "_the_issuer_rederives_all_three": "from logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_pricing.json, whose own sha256 it verifies. A grant naming a different expected cost, a different ceiling or a higher rate basis is refused. Search-1's $15.0446 prices a ten-hour beam and authorizes nothing here."
+ },
+ "budget_context_at_approval": {
+  "cumulative_spend_usd": 296.8185,
+  "authorized_cap_usd": 320.0,
+  "_arithmetic": "296.8185 + 1.1950 = 298.0135 <= 320.0000",
+  "retry_sub_envelope_usd": 2.39,
+  "_sub_envelope_meaning": "exactly two full $1.1950 ceilings of NEW spend from this point. It does not raise the project cap, the campaign envelope or the per-session ceiling. Attempt 6 is the final automatically authorized session and only under the pre-measurement failure rule.",
+  "remaining_is_not_permission": true
+ },
+ "one_use": {
+  "issuances_permitted": 1,
+  "launch_attempts_permitted": 1,
+  "provider_resources_permitted": 2,
+  "one_billing_resource_at_a_time": true,
+  "what_that_means": "this authorization funds ONE launcher session. Inside it the launcher may replace a host that never became usable, up to two provider resources in total, BOTH sharing this session's single $1.1950 ceiling. Two resources are host draws inside one session, not two scientific attempts, and the second is created only after the provider confirms the first is no longer billing.",
+  "machine_readable": "the four values above become a C2ResourceScope in the authorization and are checked by completion_scope_gate, through the scope's own permits_run and permits_draws, before any provider is contacted.",
+  "consumed_when": "the formal launcher is invoked under this authorization, whether or not a provider resource follows and whether or not any money is spent.",
+  "retry_rule": "a failure BEFORE the durable baseline_measurement exists is an ordinary pre-measurement engineering failure: teardown, preserve, reconcile, diagnose, minimal repair, one focused regression, fresh closure, require all six frozen scientific identities unchanged, then a FRESH attempt 6 chain -- while a full $1.1950 ceiling still fits the $2.3900 sub-envelope. The INSTANT the durable measurement exists, no GPU remeasurement of B is authorized: a later comparison failure is repaired at $0 from that measurement plus the frozen five."
+ },
+ "bound_identities_the_issuer_must_reproduce": {
+  "_rule": "stated as the maintainer's approval basis and RE-DERIVED by the issuer from the committed objects; it refuses on any disagreement, on any omission and on any identity it cannot derive. Exactly these eight and NO COMMIT IDENTITY: each is a property of the TREE rather than a point in its history, and a grant that predicted the issuance commit would make its own chain unsatisfiable.",
+  "_closure_moved_and_that_is_expected": "the completion closure moved from dad8f72563f84372 over three $0 engineering iterations, all authorized and none scientific: the six enforcement repairs; giving the session its own pod test selection, because Search-1's preflight requires a canonical control this session does not stage; and putting scripts/pod on the path before the assembler imports the launcher, which a $0 issuance attempt found by refusing with 'No module named autoinit_phase_c2_baseline_launch'. A moved closure is not a science change; the six scientific identities below are unchanged throughout.",
+  "completion_harness_digest": "6085a0ac8e051ac1692c682308ace65ac85b9c26960c0cd5fc387333db1bfb1a",
+  "completion_harness_n_files": 92,
+  "completion_plan_hash": "9f566eb6f8d71d570a27c82a945d5e33dd87002338ed8463162e2c0ac595835c",
+  "completion_pricing_sha256": "dcc64bcf9b3dc9fb0085dab39e31604fd53d7d515ecdfb1d465504e95f212cb8",
+  "baseline_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+  "baseline_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "frozen_candidates_self_sha256": "55f6677067392fd072e31bfe8144d4aa969f547187a89804be3e311e916b9b8c",
+  "search1_selection_commitment_sha256": "d5c0ce372aba926c54e31a86edffbef95c4110530a394f145bdac30329e3b4bf"
+ },
+ "approved_runtime": {
+  "gpu": "NVIDIA L40S",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "price_basis_usd_per_hour": 1.09,
+  "host_draws": 2,
+  "_enforced_before_provider_creation": "frozen_runtime_gate refuses any other GPU or image and any max price above the basis; a lower max price is safe. The GPU and image are the protocol's comparability binding, which is what makes B's measurement comparable to the frozen five."
+ },
+ "interpretation_discipline": "the result is a cheap-metric, hypothesis-generation comparison on the frozen state_eval suite. It is NOT behavioural recovery evidence and NOT a demonstrated initialization improvement. Cross-session comparison is accepted for this use subject to the preregistered disclosure: the 0.007782 threshold is the tightest observed C-to-C gap and a conservative disclosure trigger, NOT a noise bound, and cross-session variance remains NOT DIRECTLY MEASURED whether or not any margin is flagged. PARETO epsilon stays 1e-4 and the computed verdict is never altered by the disclosure.",
+ "stop_conditions": [
+  "live securePrice above $1.09/h -- stop at $0",
+  "any $0 pre-provider gate refuses -- stop at $0, diagnose, repair, fresh chain",
+  "a frozen scientific identity moves -- STOP",
+  "the durable baseline_measurement exists and downstream comparison cannot be completed at $0 without changing scientific semantics -- STOP and report",
+  "the $2.3900 sub-envelope cannot fund another full $1.1950 session -- STOP",
+  "provider billing ownership becomes uncertain -- reconcile, then STOP",
+  "baseline completion succeeds -- collect, verify, reconcile and report; start nothing"
+ ],
+ "authorizes": "nothing by itself; it is the issuer's input",
+ "grant_sha256": "5d87e92116339b1db7914f0a66104897ea7a9876d202d420d07a7637848c5cc1"
+}

@@ -596,6 +596,47 @@ STAGE_1 = [
             "are the instrument, not the subject."),
     ),
     dict(
+        id="phase_c2_baseline_completion",
+        kind="experiment",
+        stage_id="1",
+        status="granted — attempt5 grant committed, NOT yet authorized",
+        title="Phase C2 baseline completion — the B side of B→C",
+        #: A separate experiment id rather than another phase_c2 attempt,
+        #: because it binds a different launcher, session, harness, readiness
+        #: schema and authorization TYPE: a completion grant cannot buy a beam
+        #: and a Search-1 grant cannot buy a completion.
+        canonical_config=(
+            "configs/experiments/phase_c2/baseline_completion_authorization.json"),
+        evidence=[
+            E("logs/stages/stage-1/phase_c2/plans/"
+              "phase_c2_baseline_completion_protocol.json",
+              "the protocol: establish the frozen B once, measure it once on "
+              "the frozen suite, and compute the preregistered B→C comparison "
+              "against the five candidate measurements Attempt 4 froze. "
+              "Authorizes nothing"),
+            E("logs/stages/stage-1/phase_c2/plans/"
+              "phase_c2_baseline_completion_pricing.json",
+              "the price, derived line by line from Attempt 4's own telemetry "
+              "rather than from the reserve that failed: $0.7212 expected, "
+              "$1.1950 ceiling at $1.09/h"),
+            E("logs/stages/stage-1/phase_c2/runs/attempt4/evidence/"
+              "c2_frozen_comparison_inputs.json",
+              "the frozen candidate side of the comparison, extracted "
+              "deterministically from the journal Attempt 4's selection binds"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination=(
+            "logs/stages/stage-1/phase_c2_baseline_completion"),
+        classification_reason=(
+            "It completes a Stage-1 initialization measurement Attempt 4 began "
+            "and did not finish: the candidate side of a Stage-1 path "
+            "comparison is already measured and frozen, and this supplies the "
+            "baseline side on the same frozen suite. Its product is the same "
+            "Stage-1 path selection evidence, which is why it belongs to the "
+            "stage rather than to the confirmation instrument."),
+    ),
+    dict(
         id="measurement",
         kind="engineering-measurement",
         stage_id="1",
@@ -1065,6 +1106,11 @@ QUESTIONS = {
                              "Phase A's searched states survive?",
     "phase_c1": "Does a replacement ATTENTION operator beat the frozen "
                 "incumbent with every other operator held on a fixed path?",
+    "phase_c2_baseline_completion":
+        "What does the frozen C1 treatment baseline B score on the same "
+        "state_eval suite the five selected Search-1 candidates were measured "
+        "on -- so that the B→C comparison Attempt 4 collected its ranking to "
+        "ask can finally be computed?",
     "phase_c2": "With that ATTENTION operator now fixed, does re-optimizing "
                 "the operator order and ATTENTION's calibration profile beat "
                 "the frozen C1 treatment?",

@@ -18,10 +18,14 @@
   "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
-  "any": false,
-  "experiment": "phase_c2 baseline completion",
-  "run": null,
-  "note": "a baseline-completion PACKAGE is prepared and NOT AUTHORIZED: $0.7212 expected, $1.1950 hard ceiling at $1.09/h, with its own authorization type reporting authorizes_c2_search1=False. NO grant, readiness record, authorization, bundle or run directory; the next run identity would be attempt5. No budget increase is requested. Owner: phase_c.c2.baseline_completion."
+  "any": true,
+  "experiment": "phase_c2_baseline_completion, run attempt5",
+  "run": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5",
+  "grant_committed": "governance/grant.json",
+  "readiness_record": null,
+  "authorization": null,
+  "bundle": null,
+  "note": "the 2026-09-17 MAINTAINER DECISION authorizes ONE formal baseline completion at the $1.1950 ceiling plus a $2.3900 new-spend retry sub-envelope (two ceilings). It raises no cap. The grant is committed; the launch_bound sweep, the authorization and the bundle are owed IN THAT ORDER. Owner: the attempt5 grant."
  },
  "budget": {
   "cumulative_spend_usd": 296.8185,
@@ -120,7 +124,7 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "SEARCH COMPLETE, COMPARISON NOT RUN -- SEARCH-1 INCOMPLETE. attempt4's beam ran to completion (7 complete leaves, 5 committed and journal-verified) and B carries no measurement, so the five candidates have objective values with nothing to compare against. NOT a null result. The beam is NOT rerun; see baseline_completion. Per-attempt outcomes are derived in latest_run and owned by each run's closeout.",
+   "status": "SEARCH COMPLETE, COMPARISON NOT RUN -- SEARCH-1 INCOMPLETE. attempt4's beam ran to completion (7 leaves, 5 committed and journal-verified) and B carries no measurement. NOT a null result. The beam is NOT rerun; baseline completion supplies B. Per-attempt outcomes are derived in latest_run.",
    "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
    "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
@@ -129,7 +133,7 @@
    "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both.",
    "runtime_partition": "beam 635.96 min; baseline_rebuild_reserve 27.665 min -- MEASURED INSUFFICIENT; 30 min artifact recovery. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json, preserved unchanged as the historical authorization basis.",
    "attempt4_root_cause": "the 27.665-min baseline_rebuild_reserve could not fund the complete frozen path: DEPTH alone is 260 evaluations, observed at 21.30-32.90 min. RUNTIME/PRICING ENVELOPE DEFECT; owner analyses/c2_baseline_reserve_defect.json.",
-   "baseline_completion": "PREPARED, NOT AUTHORIZED, NOT RUN. Protocol 9f566eb6f8d71d57; its own closure, readiness contract, authorization type, assembler/issuer and bundle transport all exist, and neither driver nor launcher can reach a search entry point. Establish B once, measure it once, compare against the frozen candidates. Cross-session cheap-metric comparison ACCEPTED under the 0.007782 disclosure threshold, which is the tightest observed C-to-C gap and NOT a noise estimate. Owner: the protocol."
+   "baseline_completion": "GRANTED, NOT YET AUTHORIZED. attempt5's grant is committed; sweep, authorization and bundle are owed. Establish B once through the complete frozen fixed path, measure it once on the same suite with the evaluator primed by that same teacher object, persist the measurement IMMEDIATELY, then compare against the frozen candidates. No beam, no new candidate, no C remeasured. Once the durable measurement exists, no GPU remeasurement of B is authorized."
   }
  },
  "storage": {

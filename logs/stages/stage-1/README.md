@@ -66,10 +66,11 @@ What each one asked of this stage.
 | `recovery_continuation` — Recovery continuation — finishing Phase A's search under the repaired harness | Finished under the repaired harness, which of Phase A's searched states survive? | [`recovery_continuation/`](recovery_continuation/) | complete |
 | `phase_c1` — Phase C1 — fixed-path ATTENTION isolation | Does a replacement ATTENTION operator beat the frozen incumbent with every other operator held on a fixed path? | [`phase_c1/`](phase_c1/) | authorized — not launched |
 | `phase_c2` — Phase C2 — ATTENTION-aware composition/order re-search | With that ATTENTION operator now fixed, does re-optimizing the operator order and ATTENTION's calibration profile beat the frozen C1 treatment? | [`phase_c2/`](phase_c2/) | planned — space implemented and priced, NOT authorized |
+| `phase_c2_baseline_completion` — Phase C2 baseline completion — the B side of B→C | What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B→C comparison Attempt 4 collected its ranking to ask can finally be computed? | [`phase_c2_baseline_completion/`](phase_c2_baseline_completion/) | granted — attempt5 grant committed, NOT yet authorized |
 
 ## Runs
 
-**52** run(s) are registered for this stage's
+**53** run(s) are registered for this stage's
 experiments. An experiment's plans, analyses, results, history,
 validations and runs are all inside its own directory; the
 canonical run list, across every stage, is
@@ -82,6 +83,7 @@ the config path and hash it ran under.
 
 * `configs/experiments/phase_a/source_sets.json`
 * `configs/experiments/phase_c1/authorization.json`
+* `configs/experiments/phase_c2/baseline_completion_authorization.json`
 * `configs/stage1/qwen3_0p6b_from_4b_thinking.json`
 * `configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json`
 
