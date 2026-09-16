@@ -244,22 +244,66 @@ behavioural results are visible is not a preregistered set.
 Then, and only then, behaviour decides. Cheap-metric order is **not** behavioural
 order: E7 measured a `-5.22` nat NLL swing that moved behaviour by `+0.0000`. So
 each admitted candidate is trained under the frozen `0.86M` recovery recipe and
-scored on the frozen battery, Phase-B-style over paired seeds, with the frozen
-feasibility floor, equivalence interval and catastrophic-capability rule reused
-unchanged.
+scored on the **frozen Phase-C battery** `c1_confirmation_v1` under **C1's**
+statistical discipline.
 
-Two anchors advance unconditionally: the **canonical control**, and the **frozen
-C1 treatment baseline B** — because the question is whether re-optimizing
-composition beats B *behaviourally*, which the Search-1 cheap-metric front
-cannot answer. B's frozen `state_eval` measurement is not touched; this is a
-fresh recovery probe of the same initialization.
+> **This is not Phase-B-style selection, and an earlier draft of it wrongly was.**
+> C0 retired the Phase-A/B behavioural design as scientifically weak — its
+> equivalence interval was ~1.2 SE and Phase B's resolving margin ~1.23 SE — and
+> that is exactly why C1 stopped using `SuccessiveHalvingPlan` and
+> `EquivalenceRule`. C2c therefore uses the 950-prompt / 850-scorable Phase-C
+> battery, `c1_confirmation_scoring@v1`, the prompt-cluster bootstrap with seeds
+> as fixed blocks, **SESOI `+0.010`**, and **GO / NO-GO / INCONCLUSIVE with no
+> forced winner**. Phase B's `sa/sb/sc` and its `0.011695…` interval are **not
+> used**. The frozen Search-1 plan says the same thing independently: a later
+> behavioural B→C test belongs on the Phase-C battery and semantics.
+
+**Fresh paired C2 seeds, derived rather than chosen.** Four seeds are drawn by
+C1's own rule under a `:phase-c2:` domain from C0's frozen base digest, skipping
+both the Phase-A/B selection seeds *and* C1's three confirmation seeds — the
+latter because the anchor this stage tests against was **promoted** under them,
+which is the same winner's-curse channel one step along. The values are
+materialized and hash-bound in the protocol before any candidate behavioural
+result exists.
+
+**The stage is bounded by a select-then-confirm split on disjoint seeds**, which
+is what lets it be cheaper than five full three-seed comparisons without
+becoming uninterpretable:
+
+| rung | seeds | arms | probes | decides |
+| --- | --- | --- | --- | --- |
+| screening | 1 | Top-5 + B | 6 | which **one** candidate advances — ranking only, no veto, no promotion |
+| confirmation | 3 | advanced + B + control | 9 | the C2 incumbent, under the frozen Phase-C rule |
+
+**15 probes, exact.** There is no conditional rung: C0 fixed three confirmation
+seeds and `fourth_seed: never`.
+
+Exactly **one** candidate advances, so exactly one hypothesis is confirmed and
+the one-sided 95% LCB needs no multiplicity correction. The claim boundary is
+stated rather than glossed: the confirmed candidate was *selected on disjoint
+screening data*, so its interval is a valid bound for **that** candidate against
+B conditional on the three seeds — not a simultaneous statement about all five,
+and the eliminated candidates receive no verdict. Advancing two would require
+Holm and three more probes; advancing one is a deliberate trade of breadth for a
+clean single-hypothesis confirmation.
+
+Two anchors advance unconditionally: the **frozen C1 treatment baseline B**,
+because the question is whether re-optimizing composition beats B
+*behaviourally* and Search-1's `state_eval` evidence cannot substitute for that;
+and the **canonical control**, which binds the catastrophic-capability veto's
+control operand and supplies the absolute floor an anchor-relative veto cannot.
+C0 requires that operand to be named explicitly — C1 bound it to the incumbent
+for want of a control arm; C2 probes a control and binds it there.
+
+B's frozen `state_eval` measurement is not touched; these are fresh recovery
+probes of the same initialization under fresh seeds.
 
 **Every probe is trained fresh.** The historical-probe-reuse ruling records
 `reuse_verified: false`, so there is no admissible reuse to net off.
 
-Only this stage may name a **C2 incumbent**, and
-`unresolved_equivalence` with no winner is a legitimate terminal result — not a
-reason for a fourth seed.
+Only this stage may name a **C2 incumbent**, and **INCONCLUSIVE** with no
+incumbent is a legitimate terminal result — not a reason for a fourth seed, a
+second screening rung, or a re-run.
 
 ---
 

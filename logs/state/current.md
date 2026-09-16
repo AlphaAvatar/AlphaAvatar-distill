@@ -68,20 +68,61 @@ the margin was conservative in the safe direction and is retired. One cell moved
 the other way and it is the one the price turns on:
 `depth.causal_kl_greedy_v1` deeper, `31.10 → 36.07` min.
 
-**THE BLOCKER IS BUDGET, NOT DESIGN.** A funding decision is required, and the
-requirement is the **standing design's** — beam width 6, which is what
-`SCHEDULE_V1` declares and what the protocol proposes.
+**THE C2 BEHAVIOURAL STAGE WAS REPAIRED, AND THE CHAIN RE-PRICED.** Independent
+review accepted the full joint *search* design and rejected its behavioural
+stage: an earlier draft reused **Phase-B's** `sa/sb/sc`, its `0.011695…`
+equivalence interval and its successive-selection semantics. **C0 retired that
+design** as scientifically weak — the old interval was ~1.2 SE and Phase B's
+resolving margin ~1.23 SE — and excluded `sa/sb/sc` because the incumbent was
+selected under them. Reverting to it contradicted frozen Phase-C evidence, and
+the frozen Search-1 plan independently says a later behavioural B→C test belongs
+on the Phase-C battery and semantics. That was a real regression; this is its
+repair.
+
+C2c now uses **C1's** discipline: the frozen `c1_confirmation_v1` battery (950
+prompts / 850 scorable), `c1_confirmation_scoring@v1`, the frozen `0.86M`
+recipe, the prompt-cluster bootstrap with seeds as fixed blocks, **SESOI
+`+0.010`**, and **GO / NO-GO / INCONCLUSIVE with no forced winner**. Four
+**fresh** paired seeds are *derived*, by C1's own rule under a `:phase-c2:`
+domain from C0's frozen base digest, skipping the Phase-A/B selection seeds
+**and** C1's three — the latter because the anchor this stage tests against was
+*promoted* under them.
+
+The stage is bounded by a **select-then-confirm split on disjoint seeds**:
+
+| rung | seeds | arms | probes | decides |
+| --- | --- | --- | --- | --- |
+| screening | 1 | Top-5 + B | 6 | which **one** candidate advances — ranking only |
+| confirmation | 3 | advanced + B + control | 9 | the C2 incumbent |
+
+**15 probes, exact** — no conditional rung, because C0 fixed three confirmation
+seeds and `fourth_seed: never`. Exactly one candidate advances, so one
+hypothesis is confirmed and no multiplicity correction is needed; the claim
+boundary records that the candidate was *selected on disjoint screening data*,
+so its interval is not a simultaneous statement about all five.
+
+**A mean is no longer doing a bound's job.** The per-probe ceiling now rests on
+the observed **maxima** from C1 attempt 18's per-probe marker stream — training
+spread `1.003×` across six probes and is effectively deterministic; scoring
+spread `1.241×` and is not, so a named `generation_length_risk` reserve funds a
+doubling of its observed maximum for unseen checkpoints rather than pretending
+six probes bound them.
+
+**THE BLOCKER IS BUDGET, NOT DESIGN.** A funding decision is required, at the
+**standing** beam width 6.
 
 | | expected | ceiling |
 | --- | --- | --- |
 | full search, **beam 6 — standing design** | `$16.0998` | `$33.1827` |
-| behavioural selection (11 probes + 4 conditional) | `$19.1122` | `$27.8908` |
-| **complete standing chain** | **`$35.2120`** | **`$61.0735`** |
+| behavioural selection (15 probes) | `$25.4344` | `$36.7378` |
+| **complete standing chain** | **`$41.5342`** | **`$69.9205`** |
 | remaining headroom | | `$22.4910` |
-| **shortfall on ceilings** | | **`$38.5825`** |
-| minimum cumulative cap that contains both | | `$358.5825` |
+| **shortfall on ceilings** | | **`$47.4295`** |
+| minimum cumulative cap that contains both | | `$367.4295` |
 
-Stating that minimum is **not** requesting it.
+Stating that minimum is **not** requesting it, and these are **not yet**
+funding-decision numbers: the behavioural protocol they price has only just been
+repaired and is awaiting review.
 
 `plan_session` **refuses** the search at the standing width against real
 headroom, and each refusal text is recorded per width in
@@ -92,14 +133,8 @@ narrower beam leaves the space intact but carries fewer partial paths forward,
 so it explores less of it and can return a different front — adopting one is a
 **changed experiment** with reduced breadth, to be registered as the width
 before launch. **Narrowing the beam merely to fit the existing cap is not
-permitted**, and the `$49.61` beam-2 chain must not be read as this protocol's
-funding requirement. The scope was not shrunk to fit; that is the one repair the
-budget module exists to prevent.
-
-> Every figure above is computed from the 4-dp stored ceilings. Adding the
-> *display-rounded* search ceiling (`$33.18`) gives a chain of `$61.0708` and a
-> minimum cap of `$358.5798` — `$0.0027` **below** the derived values. A ceiling
-> rounds up, so the derived figures are the ones to fund.
+permitted.** The scope was not shrunk to fit; that is the one repair the budget
+module exists to prevent.
 
 **A >1-session search is not currently available.** Search state ids are
 content-derived, which gives a state an identity — not its bytes. The frozen
@@ -241,12 +276,12 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a `GO` verdict**. C2 Search-1 is **DONE and FROZEN** and its B→C comparison has been **reviewed and accepted** as search-stage evidence; the local Search-2 refinement is **WITHDRAWN**, and C2 now continues as a **full joint re-search → Top-5 → behavioural selection**, designed and priced but **NOT FUNDED**. C3 (causal-KL isolation on the C2 incumbent) and C4 (conditional re-search) are not started | [`phase_c2/plans/phase_c2_full_search_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a `GO` verdict**. C2 Search-1 is **DONE and FROZEN** and its B→C comparison has been **reviewed and accepted** as search-stage evidence; the local Search-2 refinement is **WITHDRAWN**, and C2 now continues as a **full joint re-search → Top-5 → behavioural selection under Phase-C/C1 discipline**, designed and priced but **NOT FUNDED**. C3 (causal-KL isolation on the C2 incumbent) and C4 (conditional re-search) are not started | [`phase_c2/plans/phase_c2_full_search_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The next chain cannot be built until the full search is funded | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
 | last attempt | **baseline completion attempt 8 — COMPLETE, `$0.5872`.** Both stages passed, B was rebuilt to digest `53e30566…`, measured **once** on the frozen suite, and the B→C comparison was computed; the pod was deleted behind its teardown gate after 32.32 min. Attempts 5, 6 and 7 aborted before any measurement for `$0.1033` between them | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
-| blocker | **A FUNDING DECISION IS REQUIRED.** At the **standing** beam width 6 the full joint re-search plus its behavioural selection needs ceilings of `$61.0735` against `$22.4910` remaining — short `$38.5825`, minimum cumulative cap `$358.5825`, and stating that is not requesting it. `plan_session` refuses the search at that width. Narrower beams are priced as scientific **alternatives**, never as a way to fit the cap. Design, space derivation, pricing and validation are complete. Nothing may start: the full search, the behavioural stage, the withdrawn Search-2, C3 and any remeasurement of B each need a decision | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| blocker | **A FUNDING DECISION IS REQUIRED**, on re-derived numbers. The C2 behavioural stage was repaired to Phase-C/C1 semantics — it had wrongly reverted to the Phase-B design C0 retired — so the chain is re-priced: at the **standing** beam width 6 it needs ceilings of `$69.9205` against `$22.4910` remaining, short `$47.4295`, minimum cumulative cap `$367.4295`. Stating that is not requesting it, and these are not yet funding-decision numbers: the repaired protocol awaits review. Narrower beams are scientific **alternatives**, never a way to fit the cap. Nothing may start: the full search, the behavioural stage, the withdrawn Search-2, C3 and any remeasurement of B each need a decision | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness

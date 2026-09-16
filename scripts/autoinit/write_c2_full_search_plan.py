@@ -70,11 +70,34 @@ STANDING_WIDTH = SCHEDULE_V1.width
 #: merely to fit the existing cap is not permitted.
 PRICED_WIDTHS = (STANDING_WIDTH, 4, 3, 2)
 
-#: The frozen behavioural science this stage reuses UNCHANGED. Every value is
-#: read from the Phase-B preregistration rather than restated, so a drift in
-#: either document is a test failure rather than a silent divergence.
-PHASE_B_PREREGISTRATION = ("logs/stages/stage-1/phase_b/plans/"
-                           "autoinit_phase_b_preregistration.json")
+#: The frozen PHASE-C behavioural design this stage reuses UNCHANGED. Every
+#: value is read from these two documents rather than restated, so a drift is a
+#: test failure rather than a silent divergence.
+#:
+#: **Phase B's behavioural design is deliberately NOT used.** C0 established that
+#: it was scientifically weak — its equivalence interval was ~1.2 SE and Phase
+#: B's resolving margin ~1.23 SE — which is why C1 stopped using
+#: SuccessiveHalvingPlan and EquivalenceRule and moved to the 950-prompt Phase-C
+#: battery, fresh paired seeds, a prompt-cluster bootstrap, a +0.010 SESOI and
+#: GO / NO-GO / INCONCLUSIVE with no forced winner. An earlier draft of this
+#: protocol reverted to sa/sb/sc and the 0.011695 interval; that was a real
+#: scientific regression and this is its repair.
+C0_PREREGISTRATION = ("logs/stages/stage-1/phase_c1/plans/"
+                      "phase_c0_preregistration.json")
+C1_EXECUTION_PREREGISTRATION = ("logs/stages/stage-1/phase_c1/plans/"
+                                "execution_preregistration.json")
+
+#: The Phase-B document, named only so the record can say what it does NOT use.
+PHASE_B_PREREGISTRATION_NOT_USED = ("logs/stages/stage-1/phase_b/plans/"
+                                    "autoinit_phase_b_preregistration.json")
+
+#: C2's own paired recovery seeds, derived by C1's rule under a C2 domain.
+#: Materialized and hash-bound HERE, before any candidate behavioural result
+#: exists, exactly as C0 required of C1. The base digest is C0's own, frozen
+#: long before any C2 candidate existed, so no human choice enters.
+C2_SEED_DOMAIN = ":phase-c2:recovery-seed:"
+C2_BOOTSTRAP_DOMAIN = ":phase-c2:bootstrap"
+C2_SEED_COUNT = 4  # 1 screening + 3 confirmation, disjoint by construction
 
 #: The frozen Search-1 evidence this experiment must not touch.
 FROZEN_SEARCH1 = (
@@ -159,43 +182,195 @@ def search_pricing(space) -> dict[str, Any]:
     }
 
 
-def selection_schedule() -> SP.ProbeSchedule:
-    """The probe schedule, registered before any candidate exists.
+def c2_seeds() -> dict[str, Any]:
+    """C2's paired recovery seeds, derived — not chosen.
 
-    `sa` probes every admitted candidate plus both anchors; `sb` advances the
-    two globally best feasible candidates plus both anchors, which advance
-    unconditionally because the comparison is *against* them; `sc` is
-    conditional and bounded by the number of candidates that can be inside the
-    equivalence interval at once.
+    C1's rule, under a C2 domain string, based on C0's own digest. C0 refused to
+    set its seeds in advance because "no prospective deterministic
+    seed-selection rule exists that could choose them without reference to
+    future candidate results"; the rule below has that property, so the values
+    are determined by a document frozen long before any C2 candidate existed and
+    no human choice enters.
+
+    Excluded: the Phase-A/B selection seeds `sa/sb/sc`, because the Phase-B
+    winner was selected under them; and C1's three confirmation seeds, because
+    the anchor this stage tests against — the C1 treatment — was PROMOTED under
+    them, which is the same winner's-curse channel one step along.
     """
-    anchors = ("canonical_control", "frozen_c1_treatment_b")
-    return SP.ProbeSchedule(
-        top_k=TOP_K, anchors=anchors,
-        sa_probes=TOP_K + len(anchors),
-        sb_probes=2 + len(anchors),
-        sc_probes_worst_case=2 + len(anchors))
+    import hashlib
 
+    c0 = json.loads((REPO_ROOT / C0_PREREGISTRATION).read_text())
+    c1 = json.loads((REPO_ROOT / C1_EXECUTION_PREREGISTRATION).read_text())
+    base = c1["seeds"]["base_digest"]
+    if base != sha256_json(c0):
+        #: C1 recorded the digest of the C0 FILE, not of its canonical JSON.
+        #: Either is fine as a base; what matters is that it is the value C1
+        #: actually used, so the two experiments share one frozen base.
+        pass
+    historical = {int(v) for v in
+                  c0["confirmation_seeds"]["historical_seeds_excluded"].values()
+                  if isinstance(v, int)}
+    excluded = sorted(historical | {int(s) for s in c1["seeds"]["values"]})
 
-def frozen_behavioural_science() -> dict[str, Any]:
-    """The Phase-B behavioural contract, READ rather than restated."""
-    doc = json.loads((REPO_ROOT / PHASE_B_PREREGISTRATION).read_text())
-    plan = doc["science_plan"]
+    drawn: list[int] = []
+    i = 0
+    while len(drawn) < C2_SEED_COUNT:
+        digest = hashlib.sha256(
+            f"{base}{C2_SEED_DOMAIN}{i}".encode()).digest()
+        value = int.from_bytes(digest[:4], "big") % (2 ** 31)
+        if value not in excluded and value not in drawn:
+            drawn.append(value)
+        i += 1
+    bootstrap = int.from_bytes(hashlib.sha256(
+        f"{base}{C2_BOOTSTRAP_DOMAIN}".encode()).digest()[:4], "big") % (2 ** 31)
+
     return {
-        "source": PHASE_B_PREREGISTRATION,
+        "screening": drawn[:1],
+        "confirmation": drawn[1:],
+        "all": drawn,
+        "count": len(drawn),
+        "bootstrap_seed": bootstrap,
+        "derivation": (
+            "seed_i = uint32_be(SHA256(base_digest + "
+            f"'{C2_SEED_DOMAIN}' + decimal(i))[0:4]) mod 2**31, i from 0, "
+            "advancing past any excluded seed or earlier draw; the first draw "
+            "is the screening seed and the next three are the confirmation "
+            "seeds. The bootstrap seed uses the same base under "
+            f"'{C2_BOOTSTRAP_DOMAIN}'."),
+        "base_digest": base,
+        "base_digest_source": (
+            f"{C1_EXECUTION_PREREGISTRATION}:seeds.base_digest, which is C0's "
+            "own digest — the same base C1 drew from"),
+        "excluded": excluded,
+        "_why_excluded": (
+            "sa/sb/sc because the Phase-B winner was selected under them, and "
+            "C1's three because the anchor this stage tests against was "
+            "PROMOTED under them. Reusing either leaves a winner's-curse / "
+            "seed-selection channel, which is exactly why C0 excluded the "
+            "historical set."),
+        "screening_and_confirmation_are_disjoint": True,
+        "no_human_choice": (
+            "the rule leaves no discretion and the base digest predates every "
+            "C2 candidate"),
+        "role": (
+            "FIXED EXPERIMENTAL BLOCKS, as in C0: not a sample from a "
+            "recovery-seed superpopulation for the purposes of the primary CI"),
+    }
+
+
+def selection_schedule() -> SP.ProbeSchedule:
+    """The bounded two-stage schedule, registered before any candidate exists.
+
+    Screening probes every admitted candidate plus the anchor on ONE seed and
+    decides which candidate advances — ranking only, no veto, no promotion.
+    Confirmation probes the advanced candidate plus both anchors on the THREE
+    remaining seeds and is the only evidence that may name an incumbent.
+
+    The seed sets are disjoint, which is what makes the confirmation interval
+    interpretable after a selection: C1 needed no such split because it had two
+    arms and no choice to make.
+    """
+    return SP.ProbeSchedule(
+        top_k=TOP_K, screening_seeds=1, confirmation_seeds=3,
+        #: ONE advances, so exactly one hypothesis is confirmed and no
+        #: multiplicity correction is needed on the confirmation interval.
+        #: Advancing two would require Holm across the advanced set and three
+        #: more probes; that is a deliberate trade recorded here, not an
+        #: oversight.
+        advanced_candidates=1,
+        screening_anchors=("frozen_c1_treatment_b",),
+        confirmation_anchors=("frozen_c1_treatment_b", "canonical_control"))
+
+
+def frozen_phase_c_science() -> dict[str, Any]:
+    """The Phase-C behavioural contract, READ from C0 and C1 rather than restated."""
+    c0 = json.loads((REPO_ROOT / C0_PREREGISTRATION).read_text())
+    c1 = json.loads((REPO_ROOT / C1_EXECUTION_PREREGISTRATION).read_text())
+    return {
+        "sources": {"c0_protocol": C0_PREREGISTRATION,
+                    "c1_execution": C1_EXECUTION_PREREGISTRATION},
         "reused_unchanged": True,
-        "recipe": plan["recipe"],
-        "equivalence_interval": plan["equivalence_interval"],
-        "feasibility_floor": plan["feasibility_floor"],
-        "catastrophic_capability_rule": plan["catastrophic_capability_rule"],
-        "seeds": doc["procedure"]["seeds"],
-        "selection_rule": doc["procedure"]["selection"],
-        "tie_break_authority": doc["procedure"]["tie_break_authority"],
-        "terminal_results": doc["procedure"]["terminal_results"],
+        "battery": {
+            "asset_id": c1["battery"]["asset_id"],
+            "content_sha256": c1["battery"]["content_sha256"],
+            "n_prompts": c1["battery"]["n_prompts"],
+            "n_scorable_prompts": c1["battery"]["n_scorable_prompts"],
+            "mixture_rule": c0["battery"]["mixture_rule"],
+            "_not_the_phase_b_development_battery": (
+                "the Phase-A/B development battery and its equivalence rule are "
+                "NOT used. C0 retired them: the old interval was ~1.2 SE and "
+                "Phase B's resolving margin ~1.23 SE."),
+            "_final_promotion_battery_stays_reserved": c0[
+                "historical_evidence_status"]["final_promotion"],
+        },
+        "scoring_contract": {
+            "contract": c1["scoring_contract"]["contract"],
+            "digest": c1["scoring_contract"]["digest"],
+            "n_files": c1["scoring_contract"]["n_files"],
+        },
+        "recovery_recipe": c1["recovery_recipe"],
+        "endpoints": c0["endpoints"],
+        "estimand": {
+            **c0["estimand"],
+            "_c2_reading": (
+                "identical in form, with the new candidate in place of C1's "
+                "treatment and the frozen C1 treatment B as the incumbent: "
+                "Delta = mean over prompts ( mean over the 3 fixed fresh C2 "
+                "confirmation seeds ( correct_candidate - correct_B ) )."),
+        },
+        "primary_inference": c0["primary_inference"],
+        "bootstrap": {
+            **{k: v for k, v in c1["decision"]["bootstrap"].items()
+               if k not in ("seed", "seed_derivation",
+                            "bound_before_any_c1_datum_exists")},
+            "_seed_is_c2s_own": "see seeds.bootstrap_seed",
+        },
+        "effect_sizes": c0["effect_sizes"],
+        "decision_rule": c0["decision_rule"],
+        "behavioural_guardrails": {
+            "usable_rollout_veto": c0["behavioural_guardrails"][
+                "usable_rollout_veto"],
+            "catastrophic_capability_veto": {
+                **{k: v for k, v in c0["behavioural_guardrails"][
+                    "catastrophic_capability_veto"].items()
+                   if k != "open_binding_for_c1"},
+                "control_operand": "the CANONICAL CONTROL arm",
+                "candidate_operand": "each advanced C2 candidate",
+                "_binding_is_stated_not_inherited": (
+                    "C0 requires the control operand to be named explicitly and "
+                    "does not silently re-point it. C1 bound it to the INCUMBENT "
+                    "because C1 had no canonical-control arm. C2 probes the "
+                    "canonical control in confirmation, so the operand is bound "
+                    "to the control — closer to the rule's original semantics "
+                    "than C1's re-pointing, and it gives an absolute floor that "
+                    "an anchor-relative veto cannot: if every candidate AND the "
+                    "anchor collapsed together, a B-bound veto would see "
+                    "nothing."),
+                "asymmetry": (
+                    "deliberate: it can veto a candidate, never flag the anchor "
+                    "or the control. Never positive ranking evidence."),
+            },
+        },
+        "what_is_not_reused": {
+            "phase_b_document": PHASE_B_PREREGISTRATION_NOT_USED,
+            "phase_b_seeds_sa_sb_sc": c0["confirmation_seeds"][
+                "historical_seeds_excluded"],
+            "phase_b_equivalence_interval": (
+                "the 0.011695296982299022 interval and its successive-selection "
+                "semantics are NOT used. C0 replaced them with a +0.010 SESOI "
+                "and a prompt-cluster bootstrap for the reasons recorded there."),
+            "successive_halving": (
+                "not used. C1's isolation plan records "
+                "successive_halving=false, elimination_rung=false, "
+                "tie_break_rung=false, and C2 keeps that: its two stages are a "
+                "select-then-confirm split on DISJOINT seeds, not a halving "
+                "ladder that eliminates on the data it later confirms with."),
+        },
         "_why_read_not_copied": (
-            "these are the frozen Phase-A/B behavioural semantics and this "
+            "these are the frozen Phase-C behavioural semantics and this "
             "experiment changes none of them. Restating them here would create "
-            "a second place to edit and a way for the two to disagree about "
-            "the interval a verdict is judged against."),
+            "a second place to edit and a way for the two to disagree about the "
+            "boundary a verdict is judged against."),
     }
 
 
@@ -327,22 +502,77 @@ def protocol() -> dict[str, Any]:
                 "choose the C2 incumbent. Cheap-metric order is NOT behavioural "
                 "order: E7 measured a -5.22 nat NLL swing that moved behaviour "
                 "by +0.0000, so a search-stage front cannot promote anything."),
-            "shape": "Phase-B-style rungs over paired seeds",
+            "shape": (
+                "PHASE-C discipline, two stages on DISJOINT preregistered seeds: "
+                "a bounded screening rung that ranks, then a confirmation rung "
+                "that decides under C1's frozen rule."),
+            "_not_phase_b": (
+                "this is the repair of a real regression. An earlier draft of "
+                "this protocol reused Phase-B's sa/sb/sc, its 0.011695 "
+                "equivalence interval and its successive-selection semantics. "
+                "C0 retired that design as scientifically weak — ~1.2 SE "
+                "interval, ~1.23 SE resolving margin — and excluded sa/sb/sc "
+                "because the incumbent was selected under them. Reverting to it "
+                "would have contradicted frozen Phase-C evidence, and the frozen "
+                "Search-1 plan independently says a later behavioural B->C test "
+                "should use the Phase-C battery and semantics."),
+            "seeds": c2_seeds(),
             "schedule": schedule.as_dict(),
+            "multiplicity": {
+                "problem": (
+                    "C1 compared two arms and needed no selection. C2 has "
+                    f"{TOP_K} candidates, so choosing among them and then "
+                    "testing the choice is a selection problem that has to be "
+                    "handled prospectively."),
+                "solution": (
+                    "select on the screening seed, confirm on the three "
+                    "disjoint confirmation seeds. Exactly one candidate "
+                    "advances, so exactly one hypothesis is confirmed and the "
+                    "one-sided 95% LCB needs no multiplicity correction."),
+                "claim_boundary": (
+                    "the confirmed candidate was SELECTED on disjoint screening "
+                    "data. The confirmation interval is a valid one-sided bound "
+                    f"for THAT candidate's Delta against B, conditional on the "
+                    "three preregistered seeds — it is NOT a simultaneous "
+                    f"statement about all {TOP_K}, and the eliminated "
+                    "candidates receive no verdict at all."),
+                "if_more_than_one_advanced": (
+                    "Holm across the advanced set would be required. The "
+                    "schedule advances one, which is a deliberate trade of "
+                    "breadth for a clean single-hypothesis confirmation and is "
+                    "recorded as such rather than left implicit."),
+                "screening_tie_break": (
+                    "the frozen epsilon-Pareto search rank, which is a "
+                    "cheap-metric ordering fixed before any behavioural datum "
+                    "exists and is therefore outcome-independent of the "
+                    "behavioural data it breaks a tie in."),
+            },
             "anchors": {
-                "canonical_control": (
-                    "advances unconditionally; it is the floor every candidate "
-                    "must clear and the control arm of the catastrophic rule"),
                 "frozen_c1_treatment_b": (
-                    "the frozen C1 treatment baseline, artifact 53e30566. It "
-                    "advances unconditionally because the question is whether "
-                    "re-optimizing composition beats it BEHAVIOURALLY, which "
-                    "the Search-1 cheap-metric front cannot answer. Its "
-                    "state_eval measurement is frozen and is NOT remeasured; "
-                    "this is a fresh recovery probe of the same initialization."),
+                    "UNCONDITIONAL, in both rungs. It is the incumbent the "
+                    "estimand is a delta against, and Search-1's state_eval "
+                    "evidence cannot substitute for a behavioural comparison. "
+                    "Its frozen state_eval measurement is NOT touched; these "
+                    "are fresh recovery probes of the same initialization under "
+                    "fresh seeds."),
+                "canonical_control": (
+                    "UNCONDITIONAL in confirmation. It binds the catastrophic "
+                    "capability veto's control operand and provides the "
+                    "absolute behavioural floor that an anchor-relative veto "
+                    "cannot."),
             },
             "every_probe_is_fresh": SP.reuse_is_admissible(REPO_ROOT),
-            "frozen_science": frozen_behavioural_science(),
+            "frozen_science": frozen_phase_c_science(),
+            "terminal_results": [
+                "GO — a named C2 incumbent",
+                "NO_GO — the anchor stands",
+                "INCONCLUSIVE — no incumbent is named",
+            ],
+            "no_forced_winner": True,
+            "_unresolved_is_a_result": (
+                "an INCONCLUSIVE terminal state is valid and is not a reason "
+                "for a fourth seed, a second screening rung, or a re-run. C0 "
+                "fixed three confirmation seeds and 'fourth_seed: never'."),
             "_not_authorized_yet": (
                 "this stage is DEFINED and PRICED and is deliberately NOT "
                 "launched with the search. Its candidate set does not exist "

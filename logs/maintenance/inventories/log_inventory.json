@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T18:36:04+00:00",
+  "created_utc": "2026-09-16T19:31:25+00:00",
   "command": "scripts/consolidate/build_log_inventory.py",
   "roots": [
     "logs",
@@ -11,11 +11,11 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1187,
-    "bytes": 44202336,
+    "bytes": 44229256,
     "by_disposition": {
       "keep_canonical": 81,
-      "keep_immutable": 921,
-      "keep_referenced": 170,
+      "keep_immutable": 920,
+      "keep_referenced": 171,
       "keep_unique_evidence": 15
     },
     "by_category": {
@@ -4313,8 +4313,8 @@
     },
     {
       "path": "docs/OPERATOR_PROMOTION_CYCLE.md",
-      "size_bytes": 8738,
-      "sha256": "378a5f8815024efcafd70670b7a3e874201df85be8b4ed7aa74c68884b54a1c8",
+      "size_bytes": 10131,
+      "sha256": "79a39c0b078c962cd409a34cbec2edf410a9302073f4a7b2d0951c82a8627414",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -5115,8 +5115,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 857355,
-      "sha256": "7eb1696fae2bc170038f67ef9bf253174c7e9850a3a4e0c3a6bbbd50b4ca895f",
+      "size_bytes": 863778,
+      "sha256": "b95e873705a02553f33b3c30a746f7220c23b9da635126deef8bf28853da451a",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -11911,6 +11911,7 @@
         "logs/stages/stage-1/phase_c1/runs/attempt16/manifest.json",
         "logs/stages/stage-1/phase_c1/runs/attempt17/manifest.json",
         "logs/stages/stage-1/phase_c1/runs/attempt18/manifest.json",
+        "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
         "scripts/autoinit/write_c1_execution_preregistration.py",
         "scripts/experiments/phase_c2/baseline.py",
         "scripts/pod/autoinit_c1_launch.py",
@@ -11948,6 +11949,7 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+        "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
         "logs/state/current.json",
         "scripts/autoinit/write_c1_execution_preregistration.py",
         "scripts/data/build_c1_confirmation_battery.py",
@@ -12026,8 +12028,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
-      "size_bytes": 17503,
-      "sha256": "11366ce2ee81e0ad80b8bc07a380363b31a9edd7db73f5310139f91535cdd21c",
+      "size_bytes": 20208,
+      "sha256": "6a167da51e5d6b0fb082f30f7f2da2ad06dcc75f8a06b05b14afc7d6ce36ad72",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -13776,12 +13778,16 @@
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": true,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json"
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+        "scripts/experiments/phase_c2/selection_pricing.py"
       ],
-      "referenced_by_executable": [],
+      "referenced_by_executable": [
+        "scripts/experiments/phase_c2/selection_pricing.py"
+      ],
       "duplicate_of": null,
-      "disposition": "keep_immutable",
-      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/experiments/phase_c2/selection_pricing.py"
     },
     {
       "path": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/driver_status.txt",
@@ -17354,8 +17360,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
-      "size_bytes": 9562,
-      "sha256": "e3ea66181998088246d5acf0afb2f0df0304ccd698497212d3c09af5750b0778",
+      "size_bytes": 11571,
+      "sha256": "9c909b1881d95e0d8add0ccfff5d8e4854baaa001dc580efc675ecd9ab049f0f",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17373,8 +17379,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
-      "size_bytes": 20485,
-      "sha256": "2fdc3904932dc5d337a46c8e1409f47d479bb2f7b52f9aee480d5473760e8167",
+      "size_bytes": 32859,
+      "sha256": "24f1b8329023b2caaee45ca5623fd608ca257f63a6fce15848df7b36d08e5910",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22474,8 +22480,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11977,
-      "sha256": "e2bb8406941f880d2db5a464ce3a540e302c1036adbae4e9bb0ee8f04a273771",
+      "size_bytes": 11871,
+      "sha256": "f801b64d5ae14ea72b886b9e6d2a77534b7c638070bef1560f310df9fbcebb67",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22518,8 +22524,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 33555,
-      "sha256": "86257235e2c49604ce36e219f9ee0a35910ffba32f6338049279e7462412c974",
+      "size_bytes": 35677,
+      "sha256": "2efb81ad2f6269db01316eb695d8199fec914075d231b114a2ca099a024cbc72",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

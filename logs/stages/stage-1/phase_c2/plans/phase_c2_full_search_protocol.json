@@ -262,22 +262,78 @@
  },
  "behavioural_selection": {
   "purpose": "choose the C2 incumbent. Cheap-metric order is NOT behavioural order: E7 measured a -5.22 nat NLL swing that moved behaviour by +0.0000, so a search-stage front cannot promote anything.",
-  "shape": "Phase-B-style rungs over paired seeds",
+  "shape": "PHASE-C discipline, two stages on DISJOINT preregistered seeds: a bounded screening rung that ranks, then a confirmation rung that decides under C1's frozen rule.",
+  "_not_phase_b": "this is the repair of a real regression. An earlier draft of this protocol reused Phase-B's sa/sb/sc, its 0.011695 equivalence interval and its successive-selection semantics. C0 retired that design as scientifically weak \u2014 ~1.2 SE interval, ~1.23 SE resolving margin \u2014 and excluded sa/sb/sc because the incumbent was selected under them. Reverting to it would have contradicted frozen Phase-C evidence, and the frozen Search-1 plan independently says a later behavioural B->C test should use the Phase-C battery and semantics.",
+  "seeds": {
+   "screening": [
+    616738081
+   ],
+   "confirmation": [
+    1936324010,
+    1916380711,
+    1523147638
+   ],
+   "all": [
+    616738081,
+    1936324010,
+    1916380711,
+    1523147638
+   ],
+   "count": 4,
+   "bootstrap_seed": 834816710,
+   "derivation": "seed_i = uint32_be(SHA256(base_digest + ':phase-c2:recovery-seed:' + decimal(i))[0:4]) mod 2**31, i from 0, advancing past any excluded seed or earlier draw; the first draw is the screening seed and the next three are the confirmation seeds. The bootstrap seed uses the same base under ':phase-c2:bootstrap'.",
+   "base_digest": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+   "base_digest_source": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json:seeds.base_digest, which is C0's own digest \u2014 the same base C1 drew from",
+   "excluded": [
+    20260726,
+    20260801,
+    20260813,
+    696460635,
+    1635674081,
+    1656475568
+   ],
+   "_why_excluded": "sa/sb/sc because the Phase-B winner was selected under them, and C1's three because the anchor this stage tests against was PROMOTED under them. Reusing either leaves a winner's-curse / seed-selection channel, which is exactly why C0 excluded the historical set.",
+   "screening_and_confirmation_are_disjoint": true,
+   "no_human_choice": "the rule leaves no discretion and the base digest predates every C2 candidate",
+   "role": "FIXED EXPERIMENTAL BLOCKS, as in C0: not a sample from a recovery-seed superpopulation for the purposes of the primary CI"
+  },
   "schedule": {
    "top_k": 5,
-   "anchors": [
-    "canonical_control",
-    "frozen_c1_treatment_b"
-   ],
-   "sa_probes": 7,
-   "sb_probes": 4,
-   "sc_probes_worst_case": 4,
-   "minimum_probes": 11,
-   "worst_case_probes": 15
+   "screening": {
+    "seeds": 1,
+    "arms": 6,
+    "anchors": [
+     "frozen_c1_treatment_b"
+    ],
+    "probes": 6,
+    "decides": "which 1 candidate(s) advance. Ranking only \u2014 no veto is evaluated here and no promotion can be claimed from it."
+   },
+   "confirmation": {
+    "seeds": 3,
+    "arms": 3,
+    "anchors": [
+     "frozen_c1_treatment_b",
+     "canonical_control"
+    ],
+    "probes": 9,
+    "decides": "the C2 incumbent, under the frozen Phase-C decision rule. This is the only evidence that may name one."
+   },
+   "advanced_candidates": 1,
+   "total_probes": 15,
+   "conditional_rung": null,
+   "_no_conditional_rung": "C0's terminal states are GO / NO-GO / INCONCLUSIVE with no forced winner and no fourth seed, so there is no tie-break rung to reserve for and the probe count is exact.",
+   "_seed_sets_are_disjoint": "screening and confirmation use DISJOINT preregistered seeds. Selecting on screening data and confirming on the same seeds would reproduce exactly the winner's-curse channel C0 cited when it excluded sa/sb/sc."
+  },
+  "multiplicity": {
+   "problem": "C1 compared two arms and needed no selection. C2 has 5 candidates, so choosing among them and then testing the choice is a selection problem that has to be handled prospectively.",
+   "solution": "select on the screening seed, confirm on the three disjoint confirmation seeds. Exactly one candidate advances, so exactly one hypothesis is confirmed and the one-sided 95% LCB needs no multiplicity correction.",
+   "claim_boundary": "the confirmed candidate was SELECTED on disjoint screening data. The confirmation interval is a valid one-sided bound for THAT candidate's Delta against B, conditional on the three preregistered seeds \u2014 it is NOT a simultaneous statement about all 5, and the eliminated candidates receive no verdict at all.",
+   "if_more_than_one_advanced": "Holm across the advanced set would be required. The schedule advances one, which is a deliberate trade of breadth for a clean single-hypothesis confirmation and is recorded as such rather than left implicit.",
+   "screening_tie_break": "the frozen epsilon-Pareto search rank, which is a cheap-metric ordering fixed before any behavioural datum exists and is therefore outcome-independent of the behavioural data it breaks a tie in."
   },
   "anchors": {
-   "canonical_control": "advances unconditionally; it is the floor every candidate must clear and the control arm of the catastrophic rule",
-   "frozen_c1_treatment_b": "the frozen C1 treatment baseline, artifact 53e30566. It advances unconditionally because the question is whether re-optimizing composition beats it BEHAVIOURALLY, which the Search-1 cheap-metric front cannot answer. Its state_eval measurement is frozen and is NOT remeasured; this is a fresh recovery probe of the same initialization."
+   "frozen_c1_treatment_b": "UNCONDITIONAL, in both rungs. It is the incumbent the estimand is a delta against, and Search-1's state_eval evidence cannot substitute for a behavioural comparison. Its frozen state_eval measurement is NOT touched; these are fresh recovery probes of the same initialization under fresh seeds.",
+   "canonical_control": "UNCONDITIONAL in confirmation. It binds the catastrophic capability veto's control operand and provides the absolute behavioural floor that an anchor-relative veto cannot."
   },
   "every_probe_is_fresh": {
    "admissible": false,
@@ -287,59 +343,160 @@
    "why": "every probe is trained fresh: the ruling records reuse_verified=False with 0 admitted of 11 examined"
   },
   "frozen_science": {
-   "source": "logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json",
+   "sources": {
+    "c0_protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
+    "c1_execution": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
+   },
    "reused_unchanged": true,
-   "recipe": {
-    "block_len": 8192,
+   "battery": {
+    "asset_id": "c1_confirmation_v1",
+    "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+    "n_prompts": 950,
+    "n_scorable_prompts": 850,
+    "mixture_rule": "The frozen historical recovery-search top-level mixture 3:3:3:3:3:2 over the scorable sets, with the same relative non-scorable code component. It is preserved EXACTLY. It was not reweighted toward the historically higher-yield sets and no set was dropped for a low historical correctness rate.",
+    "_not_the_phase_b_development_battery": "the Phase-A/B development battery and its equivalence rule are NOT used. C0 retired them: the old interval was ~1.2 SE and Phase B's resolving margin ~1.23 SE.",
+    "_final_promotion_battery_stays_reserved": "artifacts/eval/battery_v2 and the 846-prompt capability battery remain UNTOUCHED and unconsumed, reserved for later final promotion."
+   },
+   "scoring_contract": {
+    "contract": "c1_confirmation_scoring@v1",
+    "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+    "n_files": 11
+   },
+   "recovery_recipe": {
+    "recipe_id": "e1_p1_kd_heavy@0.86M",
     "ce_weight": 0.25,
-    "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations.",
-    "kd_scope": "all",
     "kd_weight": 1.0,
+    "temperature": 1.0,
+    "kd_scope": "all",
+    "tokens": 860000,
     "pack": "artifacts/stage3/ladder_uniform_probe",
     "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
-    "recipe_id": "e1_p1_kd_heavy@0.86M",
-    "temperature": 1.0,
-    "tokens": 860000
+    "block_len": 8192,
+    "description": "The recovery recipe every E1 arm used, at the rung the frozen battery was sampled from. Held fixed so a difference between two probes is a difference between two initializations."
    },
-   "equivalence_interval": 0.011695296982299022,
-   "feasibility_floor": 0.3,
-   "catastrophic_capability_rule": {
-    "candidate_max": 0.1,
-    "control_min": 0.4,
-    "enforced_at": [
-     "rung1",
-     "final"
-    ],
-    "metric": "usable_rollout_rate",
-    "rule_id": "per_capability_collapse",
-    "statement": "candidate usable_rollout_rate < 0.1 AND control usable_rollout_rate > 0.4 -> catastrophic failure, candidate excluded",
-    "version": 1
-   },
-   "seeds": {
-    "sa": 20260726,
-    "sb": 20260801,
-    "sc": 20260813,
-    "fourth_seed": "never"
-   },
-   "selection_rule": "constraint then objective, never a weighted sum: usable_rollout_rate gates by the frozen feasibility floor, correct_overall ranks, correct_given_usable explains",
-   "tie_break_authority": {
-    "may_break_a_tie": [
-     "seed sc, once, for tied candidates only"
-    ],
-    "may_NOT_break_a_tie": [
-     "search-side KL \u2014 it ranks states, not behaviour",
-     "search-side NLL \u2014 E7 measured a -5.22 nat swing moving behaviour by +0.0000",
-     "the canonical Stage-1 NLL diagnostic \u2014 diagnostic only, and not run by this session",
-     "a fourth seed \u2014 never"
+   "endpoints": {
+    "primary": {
+     "metric": "correct_overall",
+     "denominator": "the 850 scorable prompts (the 100 code prompts are behaviour-only and never enter correctness)",
+     "aggregation_reference": "src/aadistill/autoinit/recovery.py :: ScorableAwareSeedAggregation (pooled_counts@v2)"
+    },
+    "secondary": {
+     "metric": "usable_rollout",
+     "reference": "src/aadistill/evaluation/usable_rollout.py",
+     "role": "SECONDARY ONLY. It never contributes positive ranking credit and never reorders arms. It gates via the veto below.",
+     "why": "It is blind to correctness by construction: a terse contentless but well-formed reply scores perfectly."
+    },
+    "diagnostics_only": [
+     "correct_given_usable",
+     "teacher-forced top-1",
+     "teacher-native CE",
+     "FineWeb NLL",
+     "training loss"
     ]
    },
-   "terminal_results": [
-    "a resolved winner",
-    "the control wins",
-    "unresolved_equivalence with winner=None"
-   ],
-   "_why_read_not_copied": "these are the frozen Phase-A/B behavioural semantics and this experiment changes none of them. Restating them here would create a second place to edit and a way for the two to disagree about the interval a verdict is judged against."
+   "estimand": {
+    "definition": "Delta = mean over prompts ( mean over the 3 fixed fresh seeds ( correct_new(prompt,seed) - correct_incumbent(prompt,seed) ) )",
+    "unit_of_analysis": "the prompt",
+    "not_iid": "prompt x seed rows are NOT independent observations. Measured same-prompt cross-seed ICC on correctness is 0.25 +/- 0.095 (jackknife over arms); P(correct on a second seed | correct on the first) = 0.257 against a 0.022 marginal, an 11.7x lift.",
+    "_c2_reading": "identical in form, with the new candidate in place of C1's treatment and the frozen C1 treatment B as the incumbent: Delta = mean over prompts ( mean over the 3 fixed fresh C2 confirmation seeds ( correct_candidate - correct_B ) )."
+   },
+   "primary_inference": {
+    "method": "stratified cluster bootstrap",
+    "resample": "PROMPTS ONLY, with replacement",
+    "cluster_integrity": "each prompt's complete arm x seed vector is kept together",
+    "strata": "the frozen battery strata (gsm8k, math_verified, multihop, rag, knowledge, tool)",
+    "seeds_are_not_resampled": true,
+    "ci_claim_boundary": "The resulting interval represents PROMPT-DISTRIBUTION UNCERTAINTY CONDITIONAL ON THE THREE PREREGISTERED FRESH RECOVERY-SEED CHECKPOINT PAIRS. It is NOT a confidence interval over a population of hypothetical future recovery seeds, and must never be reported as one.",
+    "explicitly_not_used_as_primary": [
+     "seed-level variance component",
+     "two-way bootstrap",
+     "multiway bootstrap",
+     "mixed model"
+    ],
+    "why": "Seed-superpopulation generalization is a different and substantially more expensive question. C1 does not make that claim. A prompt-cluster bootstrap with seeds held fixed cannot observe an arm x seed shock, which is exactly why the conditional claim boundary is stated rather than the interval being presented as more general than it is."
+   },
+   "bootstrap": {
+    "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+    "iterations": 20000,
+    "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+    "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+    "_seed_is_c2s_own": "see seeds.bootstrap_seed"
+   },
+   "effect_sizes": {
+    "sesoi": 0.01,
+    "sesoi_units": "absolute correct_overall on the frozen 850-prompt scorable mixture",
+    "sesoi_role": "DECISION BOUNDARY, not the effect at which the design must have 80% power",
+    "design_alternative": 0.015,
+    "design_power_criterion": "P(GO | true Delta = +0.015) >= 0.80",
+    "expected_behaviour_at_the_boundary": "P(GO) is approximately 0.5 when the true effect lies exactly on the +0.010 promotion boundary. That is expected and not pathological: the point estimate exceeds its own expectation about half the time."
+   },
+   "decision_rule": {
+    "GO": [
+     "one-sided 95% prompt-sampling LCB(Delta) > 0",
+     "AND point estimate Delta >= +0.010",
+     "AND at least 2 of the 3 seed-specific Delta_correct > 0",
+     "AND all behavioural guardrails pass"
+    ],
+    "NO_GO": [
+     "one-sided 95% prompt-sampling UCB(Delta) < +0.010",
+     "OR a preregistered behavioural veto fires"
+    ],
+    "INCONCLUSIVE": "otherwise",
+    "no_forced_winner": true,
+    "seed_robustness_note": "The >=2-of-3 condition is a ROBUSTNESS condition preventing a single seed from driving promotion. It is NOT a seed-level significance test and does not convert the conditional CI into a seed-population claim."
+   },
+   "behavioural_guardrails": {
+    "usable_rollout_veto": {
+     "pooled": "Delta_usable > -0.05 absolute",
+     "per_seed": "every fresh-seed Delta_usable > -0.10 absolute",
+     "status": "practical preregistered promotion boundaries, NOT a claim of precise statistical non-inferiority",
+     "why_not_ni": "usable_rollout carries a real seed-level variance component (measured seed sd 0.0447 against a binomial 0.0360), and three seeds do not support a tight formal NI estimate."
+    },
+    "catastrophic_capability_veto": {
+     "status": "PRESERVED. Recorded verbatim from the existing implementation rather than paraphrased.",
+     "reference": "src/aadistill/autoinit/recovery.py :: CatastrophicCapabilityRule, instance CATASTROPHIC_V1",
+     "rule_id": "per_capability_collapse",
+     "version": 1,
+     "metric": "usable_rollout_rate",
+     "candidate_max": 0.1,
+     "control_min": 0.4,
+     "statement": "candidate usable_rollout_rate < 0.10 AND control usable_rollout_rate > 0.40 -> catastrophic failure, candidate excluded",
+     "capability_schema_reference": "src/aadistill/autoinit/recovery.py :: CAPABILITY_SCHEMA_V1",
+     "capability_schema_expected": [
+      "gsm8k",
+      "math_verified",
+      "multihop",
+      "rag",
+      "knowledge",
+      "tool"
+     ],
+     "capability_schema_policy": "exact set match; missing/extra capabilities, absent metrics, non-numeric values, NaN/Inf and out-of-range rates all raise. No defaults.",
+     "control_operand": "the CANONICAL CONTROL arm",
+     "candidate_operand": "each advanced C2 candidate",
+     "_binding_is_stated_not_inherited": "C0 requires the control operand to be named explicitly and does not silently re-point it. C1 bound it to the INCUMBENT because C1 had no canonical-control arm. C2 probes the canonical control in confirmation, so the operand is bound to the control \u2014 closer to the rule's original semantics than C1's re-pointing, and it gives an absolute floor that an anchor-relative veto cannot: if every candidate AND the anchor collapsed together, a B-bound veto would see nothing.",
+     "asymmetry": "deliberate: it can veto a candidate, never flag the anchor or the control. Never positive ranking evidence."
+    }
+   },
+   "what_is_not_reused": {
+    "phase_b_document": "logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json",
+    "phase_b_seeds_sa_sb_sc": {
+     "sa": 20260726,
+     "sb": 20260801,
+     "sc": 20260813,
+     "why": "fe9683e6a9c783bbc6fe276a78c851c6 was itself selected under sa/sb/sc; reusing them for confirmation leaves a winner's-curse / seed-selection channel"
+    },
+    "phase_b_equivalence_interval": "the 0.011695296982299022 interval and its successive-selection semantics are NOT used. C0 replaced them with a +0.010 SESOI and a prompt-cluster bootstrap for the reasons recorded there.",
+    "successive_halving": "not used. C1's isolation plan records successive_halving=false, elimination_rung=false, tie_break_rung=false, and C2 keeps that: its two stages are a select-then-confirm split on DISJOINT seeds, not a halving ladder that eliminates on the data it later confirms with."
+   },
+   "_why_read_not_copied": "these are the frozen Phase-C behavioural semantics and this experiment changes none of them. Restating them here would create a second place to edit and a way for the two to disagree about the boundary a verdict is judged against."
   },
+  "terminal_results": [
+   "GO \u2014 a named C2 incumbent",
+   "NO_GO \u2014 the anchor stands",
+   "INCONCLUSIVE \u2014 no incumbent is named"
+  ],
+  "no_forced_winner": true,
+  "_unresolved_is_a_result": "an INCONCLUSIVE terminal state is valid and is not a reason for a fourth seed, a second screening rung, or a re-run. C0 fixed three confirmation seeds and 'fourth_seed: never'.",
   "_not_authorized_yet": "this stage is DEFINED and PRICED and is deliberately NOT launched with the search. Its candidate set does not exist until the search commits one, and pricing it now is what lets the funding decision see the whole chain instead of the first half."
  },
  "execution_capabilities_this_round_did_not_build": {
@@ -376,5 +533,5 @@
  "interpretation_discipline": "the search stage produces a cheap-metric front and selects a candidate SET, never an incumbent. Only the behavioural selection stage, under the frozen recipe, battery, feasibility floor and equivalence interval, may name a C2 incumbent \u2014 and unresolved_equivalence with no winner is a legitimate terminal result, not a reason for a fourth seed.",
  "pricing": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
  "authorizes": "nothing",
- "protocol_sha256": "19d293a6704059d388e3b506cb89216498e5f29741c6bdeaba71f62fcad77975"
+ "protocol_sha256": "37d417a47cc97bf96af2882fa9c80b4e508282cefcd1bb4c5b188d1cc10c5103"
 }

@@ -1,5 +1,95 @@
 # Decision records
 
+## 2026-09-17 — C2's behavioural stage had reverted to the design C0 retired
+
+- **Reviewer finding, and it was correct.** The accepted full joint SEARCH was
+  fine; its behavioural selection stage was not. The protocol reused **Phase-B's**
+  `sa/sb/sc`, its `0.011695296982299022` equivalence interval and its
+  successive-selection semantics — a design **C0 explicitly retired** as
+  scientifically weak (~1.2 SE interval, ~1.23 SE Phase-B resolving margin),
+  which is precisely why C1 stopped using `SuccessiveHalvingPlan` and
+  `EquivalenceRule`. C0 also excluded `sa/sb/sc` from confirmation because the
+  incumbent was selected under them. And the frozen Search-1 plan independently
+  says a later behavioural B→C test belongs on the Phase-C battery and
+  semantics. Reverting to Phase B contradicted three frozen records at once.
+- **How it happened:** I reached for the most recent *behavioural selection over
+  a Top-5 candidate set* in the repository, which is Phase B's, and reused its
+  contract wholesale because the shape matched. Shape matched; the science did
+  not. The newest accepted **design** and the newest accepted **shape** were
+  different documents, and I took the wrong one.
+- **Repair — C2c only.** Search-1 is untouched and the accepted full joint search
+  is unchanged. C2c now uses C1's discipline, read from C0 and C1's execution
+  preregistration rather than restated: the frozen `c1_confirmation_v1` battery
+  (950 prompts / 850 scorable), `c1_confirmation_scoring@v1`, the frozen
+  `0.86M` recipe **kept**, the stratified prompt-cluster bootstrap with seeds as
+  fixed blocks, SESOI `+0.010`, design alternative `+0.015`, and **GO / NO-GO /
+  INCONCLUSIVE with no forced winner**. Phase B's interval and successive
+  selection are named in the record as **not used**, so a future reader sees the
+  refusal rather than an absence.
+- **Fresh C2 seeds, derived rather than chosen.** Four seeds by C1's own rule
+  under a `:phase-c2:` domain from C0's frozen base digest, skipping the
+  Phase-A/B selection seeds **and C1's three** — the latter because the anchor
+  this stage tests against was *promoted* under them, the same winner's-curse
+  channel one step along. Materialized and hash-bound in the protocol before any
+  candidate behavioural result exists, as C0 required of C1.
+- **Bounded without becoming uninterpretable.** A select-then-confirm split on
+  **disjoint** seeds: screening (1 seed, Top-5 + B, 6 probes) ranks and cannot
+  promote; confirmation (3 seeds, advanced + B + control, 9 probes) decides.
+  **15 probes, exact** — no conditional rung, because C0 fixed three seeds and
+  `fourth_seed: never`. Exactly one candidate advances, so one hypothesis is
+  confirmed and no multiplicity correction is needed; the claim boundary states
+  that the candidate was selected on disjoint data and the interval is not a
+  simultaneous statement about all five. Advancing two would need Holm and three
+  more probes — recorded as the trade it is.
+- **Anchors.** B is unconditional in both rungs, because Search-1's `state_eval`
+  evidence cannot substitute for a behavioural comparison against it. The
+  canonical control is unconditional in confirmation and **binds the
+  catastrophic-capability veto's control operand** — C0 requires that operand to
+  be named and not silently re-pointed; C1 bound it to the incumbent for want of
+  a control arm, and C2 probes one, which also supplies the absolute floor an
+  anchor-relative veto cannot.
+- **Pricing correction: a mean was doing a bound's job.** `selection_pricing.py`
+  said its per-probe runtime was a MEAN over six C1 probes and then scaled it
+  into a field labelled a hard ceiling. Per-probe timings do exist — C1 attempt
+  18 emitted `PROBE_TRAINED` and `PROBE_SCORED` markers — so the ceiling now
+  rests on the observed **maxima**, with two named reserves above it. The
+  evidence is asymmetric and the record says so: training spread `1.003×` across
+  six probes (fixed 860,000-token budget, so its max is a sound bound), scoring
+  spread `1.241×` (generation length depends on the checkpoint and under P18 is
+  bounded only by the effective context), so a `generation_length_risk` reserve
+  funds a doubling of scoring's observed maximum for unseen initializations.
+  That multiple is an isolated, stated judgement, not a measurement.
+- **Re-priced.** Selection: expected `$25.4344`,
+  ceiling `$36.7378` over 15 probes
+  (was `$19.1122` / `$27.8908` over 11 on a mean basis). Standing beam-6 chain:
+  expected `$41.5342`, ceiling
+  `$69.9205`; shortfall
+  `$47.4295`; minimum cumulative cap
+  `$367.4295`. **No budget increase is
+  requested**, and these are not yet funding-decision numbers: the repaired
+  protocol awaits review.
+- **Alternatives considered:** keeping Phase-B semantics and arguing the
+  interval is adequate — rejected, C0 already measured that it is not; running
+  all five candidates on all three seeds (30 probes) — rejected as unnecessary
+  once screening and confirmation are seed-disjoint, and the reviewer explicitly
+  allowed a valid prospective elimination scheme; screening on a *subset of the
+  confirmation seeds* — rejected, that is the winner's-curse channel C0 named.
+- **Risks:** one screening seed is thin evidence on which to eliminate four
+  candidates, and a genuinely better candidate can be dropped there. That is a
+  power cost of the bounded design, not a validity cost — the confirmation
+  interval remains valid for whatever advances — and the alternative is 30
+  probes. Recorded so a reviewer can trade it deliberately.
+- **Where it lives:**
+  `logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json`
+  (`37d417a4…`), `phase_c2_full_search_pricing.json`
+  (`ba930a69…`), the roadmap's C2c section, and
+  `docs/OPERATOR_PROMOTION_CYCLE.md`, which gained two rules: selecting among K
+  candidates is not the two-arm case, and a mean is not a bound. Nothing in
+  `src/aadistill`.
+- **Revisit when:** a funding decision is made, or C0's behavioural design is
+  itself superseded — in which case this stage follows the newest accepted
+  design rather than the newest matching shape.
+
 ## 2026-09-17 — Search-2 withdrawn; C2 becomes a full joint re-search, and it does not fit the budget
 
 - **Maintainer decision.** The Attempt-8 B→C result is accepted as valid
@@ -58,6 +148,10 @@
 - **THE BLOCKER: the STANDING design does not fit the remaining `$22.4910`.**
   Beam width 6 is what `SCHEDULE_V1` declares and what the protocol proposes, so
   it is the width the funding requirement is priced at.
+
+  > **Superseded 2026-09-17.** The behavioural half of this chain was repaired
+  > to Phase-C semantics and re-priced; the search figures below are unchanged
+  > but the CHAIN figures are not. See the entry above for the live numbers.
 
   ```text
   full joint re-search   beam 6 (STANDING)  expected $16.0998  ceiling $33.1827  REFUSED

@@ -62,11 +62,19 @@ admissible alternative *competes inside the same search*.
 ranks states on a cheap metric, and cheap-metric order is not behavioural order
 — this project measured a `-5.22` nat NLL swing that moved behaviour by
 `+0.0000`. So the search commits a closed Top-K set and behaviour decides among
-them, under a frozen recipe, battery, feasibility floor and equivalence
-interval.
+them, under a frozen recipe, a frozen battery, a frozen decision rule and
+frozen guardrails.
 
-> "No winner" is a result. An equivalence interval that nothing clears is a
-> finding about the candidates, not a licence to add a seed.
+**Use the newest accepted behavioural design, not the one the project started
+with.** This is a live trap here: a development-era design can remain in the
+repository, fully implemented and cheap to call, long after a later phase
+retired it for being underpowered. Reverting to it silently contradicts frozen
+evidence. Check which design the most recent *accepted* phase used, and take the
+battery, the decision rule, the effect-size boundary and the guardrails from
+there.
+
+> "No winner" is a result. A decision boundary that nothing clears is a finding
+> about the candidates, not a licence to add a seed.
 
 ---
 
@@ -109,10 +117,23 @@ interval.
 7. **Register the candidate rule before the results.** Top-K, the anchors and
    the rung schedule are fixed in advance. A set that can grow once results are
    visible is not a preregistered set.
-8. **Price the whole chain before funding the first half.** A search that fits
+8. **Selecting among K candidates is not the two-arm case.** An isolation
+   experiment compares two arms and needs no selection; a post-search
+   behavioural stage picks one of K and then tests it, which is a selection
+   problem. Screen on one seed block and confirm on a **disjoint** one, advance
+   a prospectively fixed number of candidates, and state the claim boundary: the
+   confirmed candidate was *selected* on other data, so its interval is not a
+   simultaneous statement about all K. Confirming on the seeds you selected
+   under is the same winner's-curse channel that gets historical seeds excluded
+   in the first place.
+9. **Price the whole chain before funding the first half.** A search that fits
    the budget and a behavioural stage that does not is a chain that cannot reach
    a verdict. When it does not fit, say so — do not shrink the run to fit.
-9. **Every exclusion is a recorded scientific claim.** Cost is not a reason.
+10. **Every exclusion is a recorded scientific claim.** Cost is not a reason.
+11. **A mean is not a bound.** If per-unit timings exist, build the ceiling on
+    the observed maximum and name every reserve above it. If only an aggregate
+    exists, say so and justify the bounding rule — do not let a mean sit in a
+    field labelled a hard ceiling.
 
 ---
 

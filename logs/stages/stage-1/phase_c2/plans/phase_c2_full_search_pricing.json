@@ -70,16 +70,25 @@
  },
  "behavioural_selection": {
   "probe_cost": {
-   "train_minutes": 61.779,
-   "eval_minutes": 25.226,
-   "total_minutes": 87.005,
-   "train_usd": 1.1223,
-   "eval_usd": 0.4583,
-   "total_usd": 1.5806,
-   "n_probes_measured": 6,
+   "n_probes_observed": 6,
+   "train_minutes": {
+    "mean": 61.778,
+    "max": 61.883,
+    "spread": 1.0017
+   },
+   "eval_minutes": {
+    "mean": 25.225,
+    "max": 27.633,
+    "spread": 1.0955
+   },
+   "expected_minutes_per_probe": 87.0034,
+   "bounding_minutes_per_probe": 89.5167,
+   "generation_length_reserve_minutes_per_probe": 27.6333,
    "price_per_hour_observed": 1.09,
-   "source": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_evidence.json: stages F/G/H",
-   "_it_is_a_mean": "recovered by dividing the stage's wall-clock and spend by the 6 probes it processed. It is a per-probe MEAN over that session, not a maximum, and a selection stage with more probes will vary around it."
+   "source": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_evidence.json stages F/G/H, with per-probe PROBE_TRAINED/PROBE_SCORED markers from logs/stages/stage-1/phase_c1/runs/attempt18/evidence/driver_run.log",
+   "_the_bound_is_not_the_mean": "the expected path uses the MEANS and the ceiling is built on the observed MAXIMA plus a named generation-length reserve. An earlier version of this module scaled the mean into a field labelled a hard ceiling, which is not a bound.",
+   "_why_training_max_is_a_sound_bound": "a fixed 860,000-token budget at a fixed block length; six probes spread 1.003x, so the workload is effectively deterministic",
+   "_why_scoring_max_is_not": "generation length depends on the checkpoint and under P18 is bounded only by the effective context. Six probes from one experiment's two arms spread 1.241x; the 100% reserve funds a doubling of the observed maximum for unseen initializations."
   },
   "reuse": {
    "admissible": false,
@@ -90,50 +99,72 @@
   },
   "schedule": {
    "top_k": 5,
-   "anchors": [
-    "canonical_control",
-    "frozen_c1_treatment_b"
-   ],
-   "sa_probes": 7,
-   "sb_probes": 4,
-   "sc_probes_worst_case": 4,
-   "minimum_probes": 11,
-   "worst_case_probes": 15
+   "screening": {
+    "seeds": 1,
+    "arms": 6,
+    "anchors": [
+     "frozen_c1_treatment_b"
+    ],
+    "probes": 6,
+    "decides": "which 1 candidate(s) advance. Ranking only \u2014 no veto is evaluated here and no promotion can be claimed from it."
+   },
+   "confirmation": {
+    "seeds": 3,
+    "arms": 3,
+    "anchors": [
+     "frozen_c1_treatment_b",
+     "canonical_control"
+    ],
+    "probes": 9,
+    "decides": "the C2 incumbent, under the frozen Phase-C decision rule. This is the only evidence that may name one."
+   },
+   "advanced_candidates": 1,
+   "total_probes": 15,
+   "conditional_rung": null,
+   "_no_conditional_rung": "C0's terminal states are GO / NO-GO / INCONCLUSIVE with no forced winner and no fourth seed, so there is no tie-break rung to reserve for and the probe count is exact.",
+   "_seed_sets_are_disjoint": "screening and confirmation use DISJOINT preregistered seeds. Selecting on screening data and confirming on the same seeds would reproduce exactly the winner's-curse channel C0 cited when it excluded sa/sb/sc."
   },
   "price_per_hour": 1.09,
-  "expected_minutes": 1052.05,
-  "expected_usd": 19.1122,
-  "hard_ceiling_minutes": 1535.28,
-  "hard_ceiling_usd": 27.8908,
-  "_ceiling_includes": "the conditional sc rung as a soft-stop reserve, a 10% contingency and a 30-minute artifact recovery reserve",
+  "n_probes": 15,
+  "expected_minutes": 1400.06,
+  "expected_usd": 25.4344,
+  "hard_ceiling_minutes": 2022.27,
+  "hard_ceiling_usd": 36.7378,
+  "bounding_basis": {
+   "probe_minutes_expected": 1305.05,
+   "probe_minutes_observed_max": 1342.75,
+   "generation_length_reserve_minutes": 414.5,
+   "_rule": "expected path on per-probe MEANS; ceiling lifted to the observed per-probe MAXIMUM by the probe_duration_risk reserve, then again by generation_length_risk for unseen checkpoints. No mean is presented as a maximum."
+  },
+  "_ceiling_includes": "both named reserves, a 10% contingency and a 30-minute artifact recovery reserve",
   "authorizes": "nothing"
  },
  "combined": {
   "chain": "full joint re-search -> Top-5 -> behavioural selection",
   "standing_beam_width": 6,
   "_standing_width_is_the_design": "beam width 6 is what SCHEDULE_V1 declares and what this protocol proposes. The funding requirement below is the standing design's, and the alternatives are recorded so breadth can be traded DELIBERATELY -- never so the authorization number can be made smaller by narrowing the science.",
-  "expected_usd": 35.212,
-  "hard_ceiling_usd": 61.0735,
+  "expected_usd": 41.5342,
+  "hard_ceiling_usd": 69.9205,
   "search_hard_ceiling_usd": 33.1827,
-  "selection_hard_ceiling_usd": 27.8908,
+  "selection_hard_ceiling_usd": 36.7378,
   "remaining_usd": 22.491,
   "scientific_alternatives_not_cost_options": [
    {
     "beam_width": 4,
-    "expected_usd": 34.5261,
-    "hard_ceiling_usd": 55.3429,
+    "expected_usd": 40.8483,
+    "hard_ceiling_usd": 64.1899,
     "_is_a_different_experiment": "a narrower beam carries less of the same space forward, so it is a scientific trade in breadth with its own result, not a cheaper way to run this one"
    },
    {
     "beam_width": 3,
-    "expected_usd": 34.1831,
-    "hard_ceiling_usd": 52.4775,
+    "expected_usd": 40.5053,
+    "hard_ceiling_usd": 61.3245,
     "_is_a_different_experiment": "a narrower beam carries less of the same space forward, so it is a scientific trade in breadth with its own result, not a cheaper way to run this one"
    },
    {
     "beam_width": 2,
-    "expected_usd": 33.8399,
-    "hard_ceiling_usd": 49.6123,
+    "expected_usd": 40.1621,
+    "hard_ceiling_usd": 58.4593,
     "_is_a_different_experiment": "a narrower beam carries less of the same space forward, so it is a scientific trade in breadth with its own result, not a cheaper way to run this one"
    }
   ],
@@ -150,11 +181,11 @@
   "status": "INSUFFICIENT PROJECT HEADROOM FOR THE STANDING DESIGN",
   "standing_beam_width": 6,
   "remaining_usd": 22.491,
-  "complete_chain_expected_usd": 35.212,
-  "complete_chain_hard_usd": 61.0735,
-  "shortfall_on_expected_usd": 12.721,
-  "shortfall_on_hard_ceilings_usd": 38.5825,
-  "minimum_cumulative_cap_usd": 358.5825,
+  "complete_chain_expected_usd": 41.5342,
+  "complete_chain_hard_usd": 69.9205,
+  "shortfall_on_expected_usd": 19.0432,
+  "shortfall_on_hard_ceilings_usd": 47.4295,
+  "minimum_cumulative_cap_usd": 367.4295,
   "_minimum_cap_meaning": "the smallest cumulative project cap that CONTAINS both ceilings: cumulative spend plus the complete standing chain. Stating it is not requesting it.",
   "what_it_means": "the complete chain at the STANDING beam width does not fit the remaining project headroom, and neither does the search alone \u2014 plan_session refuses it, and the refusal text is recorded per width above. This is a maintainer decision and it is deliberately NOT resolved here by shrinking the run to fit, which is the one repair the budget module exists to prevent.",
   "the_narrower_beams_are_not_the_requirement": "beam 2/3/4 are priced above as scientific alternatives. They must NOT be read as the funding requirement for this protocol: the standing design is beam 6, and a narrower beam carries less of the same space forward, which is a different experiment with its own result. Narrowing the beam MERELY to fit the existing cap is not permitted.",
@@ -167,5 +198,5 @@
   "_rounding_note": "every figure here is computed from the 4-dp stored ceilings. A review message that added the DISPLAY-rounded search ceiling ($33.18) reaches a chain of $61.0708 and a minimum cap of $358.5798, which is $0.0027 BELOW the derived figures. A ceiling must round up, so the derived values are the ones to fund: a cap set at the display-rounded figure would not contain both ceilings."
  },
  "authorizes": "nothing",
- "pricing_sha256": "e5441f494fe546c944951898ff8ae309148542939e0ca63307b55007870eb230"
+ "pricing_sha256": "ba930a690d13de86edf8de031801ae91c997a7684da87b48b5c0144e2f4278fa"
 }

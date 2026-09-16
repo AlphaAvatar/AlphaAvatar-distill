@@ -396,19 +396,52 @@ def test_the_budget_position_is_derived_not_restated():
 # --- 6. the behavioural selection stage ------------------------------------
 
 
-def test_the_probe_cost_is_recovered_from_the_committed_session():
+def test_the_probe_bound_is_the_observed_maximum_not_the_mean():
+    """A mean scaled up is not a bound, and this module once did that.
+
+    C1 attempt 18 emitted a per-probe marker per train and per score, so six
+    observed durations of each exist. The expected path may use their means; the
+    CEILING must rest on their maxima plus a named reserve.
+    """
     cost = SP.measured_probe_cost(REPO)
-    evidence = json.loads(
-        (REPO / SP.MEASURED_SOURCE).read_text())["stages"]
-    n = int(evidence["G"]["probes_trained"])
-    assert cost.n_probes == n
-    #: Dollars: the stage boundaries divided by the probe count.
-    assert cost.train_usd == pytest.approx(
-        (evidence["G"]["spend_usd"] - evidence["F"]["spend_usd"]) / n, abs=1e-6)
-    assert cost.eval_usd == pytest.approx(
-        (evidence["H"]["spend_usd"] - evidence["G"]["spend_usd"]) / n, abs=1e-6)
-    #: And the rate it implies must be the rate that session billed at.
-    assert cost.price_per_hour == pytest.approx(1.09, abs=0.01)
+    log = (REPO / SP.MARKER_SOURCE).read_text()
+    evidence = json.loads((REPO / SP.MEASURED_SOURCE).read_text())["stages"]
+
+    trained = SP._markers(log, SP.TRAIN_MARKER)
+    scored = SP._markers(log, SP.SCORE_MARKER)
+    assert len(trained) == len(scored) == int(evidence["G"]["probes_trained"])
+
+    train = SP._consecutive_durations(
+        trained, SP._utc(evidence["F"]["finished_utc"]))
+    evaluate = SP._consecutive_durations(scored, trained[-1][0])
+    assert cost.train_minutes_max == pytest.approx(max(train), abs=1e-6)
+    assert cost.eval_minutes_max == pytest.approx(max(evaluate), abs=1e-6)
+
+    #: The bound must strictly exceed the expected, or it is the mean wearing a
+    #: ceiling's name.
+    assert cost.bounding_minutes > cost.expected_minutes
+    assert cost.generation_length_reserve_minutes > 0
+
+
+def test_the_ceiling_rests_on_the_bound_and_names_its_reserves():
+    """Every minute above the expected path is a named, derivable reserve."""
+    schedule = json.loads(PROTOCOL.read_text())[
+        "behavioural_selection"]["schedule"]
+    doc = json.loads(PRICING.read_text())["behavioural_selection"]
+    cost = SP.measured_probe_cost(REPO)
+    n = schedule["total_probes"]
+
+    basis = doc["bounding_basis"]
+    assert basis["probe_minutes_expected"] == pytest.approx(
+        round(n * cost.expected_minutes, 2), abs=0.02)
+    assert basis["probe_minutes_observed_max"] == pytest.approx(
+        round(n * cost.bounding_minutes, 2), abs=0.02)
+    assert basis["generation_length_reserve_minutes"] == pytest.approx(
+        round(n * cost.generation_length_reserve_minutes, 2), abs=0.02)
+    #: And the ceiling is above the observed-max basis, because the reserves and
+    #: the contingency sit on top of it.
+    assert doc["hard_ceiling_minutes"] > basis["probe_minutes_observed_max"]
+    assert doc["hard_ceiling_usd"] > doc["expected_usd"]
 
 
 def test_no_probe_reuse_is_assumed():
@@ -420,29 +453,162 @@ def test_no_probe_reuse_is_assumed():
     assert committed["reuse_verified"] is False
 
 
-def test_the_probe_schedule_is_closed_and_counts_both_anchors():
+# --- 6b. the behavioural design is PHASE-C, not Phase-B --------------------
+
+
+def test_the_behavioural_design_is_phase_c_and_not_phase_b():
+    """C0 retired the Phase-A/B behavioural design; C2 must not revert to it."""
+    doc = json.loads(PROTOCOL.read_text())["behavioural_selection"]
+    frozen = doc["frozen_science"]
+    c0 = json.loads((REPO / frozen["sources"]["c0_protocol"]).read_text())
+    c1 = json.loads((REPO / frozen["sources"]["c1_execution"]).read_text())
+
+    #: The Phase-C battery and scoring contract, by identity.
+    assert frozen["battery"]["asset_id"] == c1["battery"]["asset_id"]
+    assert frozen["battery"]["content_sha256"] == c1["battery"]["content_sha256"]
+    assert frozen["battery"]["n_scorable_prompts"] == 850
+    assert frozen["scoring_contract"]["digest"] == c1["scoring_contract"]["digest"]
+
+    #: The Phase-C statistics, read from C0.
+    assert frozen["effect_sizes"]["sesoi"] == c0["effect_sizes"]["sesoi"] == 0.01
+    assert frozen["decision_rule"] == c0["decision_rule"]
+    assert frozen["decision_rule"]["no_forced_winner"] is True
+    assert frozen["primary_inference"]["method"] == "stratified cluster bootstrap"
+    assert frozen["primary_inference"]["seeds_are_not_resampled"] is True
+    assert doc["no_forced_winner"] is True
+
+    #: And the Phase-B design is explicitly refused, not merely absent.
+    refused = frozen["what_is_not_reused"]
+    assert "0.011695" in refused["phase_b_equivalence_interval"]
+    assert "not used" in refused["successive_halving"].lower()
+    #: The interval may appear ONLY inside the sentence that refuses it. A blanket
+    #: substring check over the whole block would fail on its own refusal, which
+    #: is the wrong scope: what must not happen is the interval being used as a
+    #: BOUNDARY anywhere else.
+    elsewhere = {k: v for k, v in frozen.items() if k != "what_is_not_reused"}
+    assert "0.011695296982299022" not in json.dumps(elsewhere), (
+        "the Phase-B equivalence interval is being used as a boundary again")
+    assert "0.011695296982299022" in json.dumps(
+        frozen["what_is_not_reused"]), (
+        "the refusal must name the interval it refuses, or a reader cannot "
+        "tell which design was retired")
+    for historical in ("20260726", "20260801", "20260813"):
+        assert historical not in json.dumps(doc["seeds"]["all"]), historical
+
+
+def test_the_c2_seeds_are_fresh_derived_and_split():
+    """New paired seeds, chosen by a rule rather than after seeing outcomes."""
+    doc = json.loads(PROTOCOL.read_text())["behavioural_selection"]["seeds"]
+    c0 = json.loads((REPO / "logs/stages/stage-1/phase_c1/plans/"
+                            "phase_c0_preregistration.json").read_text())
+    c1 = json.loads((REPO / "logs/stages/stage-1/phase_c1/plans/"
+                            "execution_preregistration.json").read_text())
+
+    #: Every excluded seed is excluded, and the exclusion set covers BOTH the
+    #: Phase-A/B selection seeds and C1's confirmation seeds.
+    historical = {int(v) for v in
+                  c0["confirmation_seeds"]["historical_seeds_excluded"].values()
+                  if isinstance(v, int)}
+    c1_seeds = {int(s) for s in c1["seeds"]["values"]}
+    assert historical <= set(doc["excluded"])
+    assert c1_seeds <= set(doc["excluded"])
+
+    #: Checked on the fields that are USED, not only on the `all` aggregate. A
+    #: first version of this test asserted freshness of `all` alone, and a
+    #: mutation that poisoned `screening` with a Phase-B seed survived it: the
+    #: aggregate stayed clean while the field a launch reads did not.
+    forbidden = historical | c1_seeds
+    for role in ("screening", "confirmation", "all"):
+        assert not (set(doc[role]) & forbidden), (
+            f"{role} contains an excluded seed: "
+            f"{sorted(set(doc[role]) & forbidden)}")
+        assert not (set(doc[role]) & set(doc["excluded"])), role
+    #: And the two rungs must ACCOUNT for `all`, so nothing can hide in one.
+    assert set(doc["screening"]) | set(doc["confirmation"]) == set(doc["all"])
+    assert len(doc["screening"]) + len(doc["confirmation"]) == doc["count"]
+
+    #: Screening and confirmation are disjoint, and sized as the schedule says.
+    assert not (set(doc["screening"]) & set(doc["confirmation"]))
+    assert len(doc["screening"]) == 1 and len(doc["confirmation"]) == 3
+    assert doc["screening_and_confirmation_are_disjoint"] is True
+
+    #: Recomputed from the stated rule, so the values are derived not chosen.
+    import hashlib
+    base = doc["base_digest"]
+    drawn, i = [], 0
+    while len(drawn) < doc["count"]:
+        value = int.from_bytes(hashlib.sha256(
+            f"{base}:phase-c2:recovery-seed:{i}".encode()).digest()[:4],
+            "big") % (2 ** 31)
+        if value not in doc["excluded"] and value not in drawn:
+            drawn.append(value)
+        i += 1
+    assert drawn == doc["all"], "the seeds are not what the stated rule produces"
+    assert doc["bootstrap_seed"] == int.from_bytes(hashlib.sha256(
+        f"{base}:phase-c2:bootstrap".encode()).digest()[:4], "big") % (2 ** 31)
+    assert base == c1["seeds"]["base_digest"], (
+        "C2 must draw from the same frozen base C1 drew from")
+
+
+def test_the_selection_multiplicity_is_handled_prospectively():
+    """Five candidates and one confirmed hypothesis, on disjoint seeds."""
+    doc = json.loads(PROTOCOL.read_text())["behavioural_selection"]
+    schedule, multiplicity = doc["schedule"], doc["multiplicity"]
+
+    assert schedule["advanced_candidates"] == 1, (
+        "more than one advanced candidate requires a multiplicity correction; "
+        "the protocol must say which")
+    assert schedule["conditional_rung"] is None
+    #: Screening ranks and cannot promote.
+    assert "no promotion" in schedule["screening"]["decides"].lower()
+    assert "only evidence that may name one" in \
+        schedule["confirmation"]["decides"].lower()
+    #: The claim boundary states the selection explicitly.
+    for phrase in ("SELECTED on disjoint screening data", "NOT a simultaneous"):
+        assert phrase in multiplicity["claim_boundary"], phrase
+    #: The tie-break is outcome-independent of the behavioural data.
+    assert "Pareto" in multiplicity["screening_tie_break"]
+
+
+def test_the_probe_schedule_is_exact_and_keeps_both_anchors():
     doc = json.loads(PROTOCOL.read_text())
     schedule = doc["behavioural_selection"]["schedule"]
     anchors = doc["behavioural_selection"]["anchors"]
+
     assert schedule["top_k"] == doc["top_k_selection"]["k"]
-    assert len(anchors) == len(schedule["anchors"]) == 2
-    #: sa probes every candidate plus both anchors.
-    assert schedule["sa_probes"] == schedule["top_k"] + len(anchors)
-    assert schedule["worst_case_probes"] == (
-        schedule["minimum_probes"] + schedule["sc_probes_worst_case"])
+    #: B is unconditional in BOTH rungs; the control is unconditional in
+    #: confirmation, where the veto it binds is evaluated.
+    assert "frozen_c1_treatment_b" in schedule["screening"]["anchors"]
+    assert set(schedule["confirmation"]["anchors"]) == {
+        "frozen_c1_treatment_b", "canonical_control"}
+    assert "UNCONDITIONAL" in anchors["frozen_c1_treatment_b"]
+    assert "UNCONDITIONAL" in anchors["canonical_control"]
+
+    #: The counts are arithmetic, not assertions.
+    assert schedule["screening"]["probes"] == (
+        schedule["top_k"] + len(schedule["screening"]["anchors"])
+    ) * schedule["screening"]["seeds"]
+    assert schedule["confirmation"]["probes"] == (
+        schedule["advanced_candidates"]
+        + len(schedule["confirmation"]["anchors"])
+    ) * schedule["confirmation"]["seeds"]
+    assert schedule["total_probes"] == (schedule["screening"]["probes"]
+                                       + schedule["confirmation"]["probes"])
 
 
-def test_the_frozen_behavioural_science_is_read_not_restated():
-    """The interval and the floor must equal Phase B's, byte for byte."""
-    doc = json.loads(PROTOCOL.read_text())
-    frozen = doc["behavioural_selection"]["frozen_science"]
-    source = json.loads(
-        (REPO / frozen["source"]).read_text())["science_plan"]
-    assert frozen["equivalence_interval"] == source["equivalence_interval"]
-    assert frozen["feasibility_floor"] == source["feasibility_floor"]
-    assert frozen["recipe"] == source["recipe"]
-    assert frozen["catastrophic_capability_rule"] == source[
-        "catastrophic_capability_rule"]
+def test_the_catastrophic_veto_operand_is_bound_explicitly():
+    """C0 requires the control operand to be named, not silently re-pointed."""
+    doc = json.loads(PROTOCOL.read_text())["behavioural_selection"]
+    veto = doc["frozen_science"]["behavioural_guardrails"][
+        "catastrophic_capability_veto"]
+    assert veto["control_operand"], "the control operand is unbound"
+    assert "candidate_operand" in veto
+    assert "open_binding_for_c1" not in veto, (
+        "C0's open binding must be RESOLVED here, not carried forward unresolved")
+    #: The arm bound as control must actually be probed.
+    schedule = doc["schedule"]
+    if "CANONICAL CONTROL" in veto["control_operand"].upper():
+        assert "canonical_control" in schedule["confirmation"]["anchors"]
 
 
 # --- 7. the documents are plans, and say so --------------------------------
