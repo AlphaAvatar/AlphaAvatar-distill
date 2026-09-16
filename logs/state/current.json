@@ -4,14 +4,14 @@
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
-  "paid_compute": true,
-  "pods": 1,
-  "launchers": 1,
-  "note": "Phase-C2 Search-1 attempt4 is RUNNING AND BILLING on pod vqwg6o4ftpda4b, NVIDIA L40S at $1.09/h, launched 2026-09-16T18:58Z under a $15.0446 ceiling, $14.4996 soft stop and an 828-minute watchdog. Nine $0 gates passed. Live evidence in /home/ecs-user/aad-scratch/c2_attempt4/. It trains nothing."
+  "paid_compute": false,
+  "pods": 0,
+  "launchers": 0,
+  "note": "zero pods. C2 attempt 4's pod vqwg6o4ftpda4b was deleted after 334.6 min, the provider confirms it gone, and an independent query returns ZERO_PODS with pod(...) = null. The cost poller is stopped."
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch; MONEY bounds the sessions, see budget. Attempts 10-18 consumed $22.6176 and attempt 18 returned the frozen Stage-I verdict GO, which ends the round. This package is C1's; C2 runs under the 2026-09-16 campaign decision.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch; MONEY bounds the sessions, see budget. Attempts 10-18 consumed $22.6176 and attempt 18's GO verdict ended the round. This package is C1's; C2 ran under the 2026-09-16 campaign decision, whose envelope is now exhausted for a full attempt.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -19,14 +19,14 @@
  },
  "prepared_launch": {
   "any": false,
-  "experiment": "phase_c2 Search-1, run attempt4",
-  "run": "logs/stages/stage-1/phase_c2/runs/attempt4",
-  "note": "nothing is PREPARED because attempt4 is already LAUNCHED: its chain is complete and consumed -- grant e76e42b, launch-bound readiness b852082, authorization 74cfe3e, bundle aad_autoinit_74cfe3e3 (ac7634cd85e5). See running. If it aborts BEFORE the beam search, the 2026-09-16 campaign decision's repair-and-continue flow applies automatically while a full $15.0446 ceiling still fits inside the $16.20 envelope ($0.2226 spent). Once the beam has begun, NO automatic formal retry is authorized."
+  "experiment": "phase_c2 Search-1",
+  "run": null,
+  "note": "every C2 chain is consumed (attempts 1-4) and nothing is prepared. A MAINTAINER DECISION IS REQUIRED: formal measurement began before attempt 4 failed, so no autonomous retry is authorized, AND the campaign envelope can no longer fund a complete formal attempt (6.3011 + 15.0446 = 21.3457 > 16.20)."
  },
  "budget": {
-  "cumulative_spend_usd": 290.74,
+  "cumulative_spend_usd": 296.8185,
   "authorized_cap_usd": 320.0,
-  "remaining_usd": 29.26,
+  "remaining_usd": 23.1815,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -75,8 +75,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE and CLOSED (attempt 18, GO, $10.2018). C2 Search-1 implemented and priced; launched twice, aborted pre-science twice, never measured.",
-  "then": "attempt4 is running. On a valid completion: collect evidence, confirm zero billing resources, reconcile spend and return for scientific review. On a pre-beam abort: repair and continue automatically per the campaign decision.",
+  "status": "C1 COMPLETE and CLOSED (attempt 18, GO, $10.2018). C2 Search-1: the beam search has been executed and its ranking is durable; the B->C comparison record does not exist.",
+  "then": "a maintainer decision on the baseline_rebuild_reserve and the campaign envelope. The searched ranking, journal and telemetry are collected under attempt4/; the searched checkpoint WEIGHTS went with the pod and are re-derivable from seed 20260815 and the recorded config hash.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -115,7 +115,7 @@
   "c1": {
    "status": "COMPLETE. Eighteen attempts, fifteen paid. Replay MEASURED 2-of-2 three times; treatment and endpoint measured ONCE and the frozen Stage-I verdict is GO -- read the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
-   "measured": "replay MEASURED 2/2 PASS (attempts 9, 17, 18); treatment + endpoint MEASURED ONCE, by attempt 18, verdict GO. Figures and claim boundary: logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json. Attempts 9 and 17 remain NO DECISION, pre-treatment aborts.",
+   "measured": "replay: MEASURED, 2/2 PASS (attempts 9, 17, 18). treatment + endpoint: MEASURED ONCE, by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
    "not_built": "attempt 18's six probes were NOT preserved (private storage quota, 2.22 GiB each). Rebuilding the pre-ATTENTION parent needs GPU/network.",
    "owners": {
     "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
@@ -125,7 +125,7 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "RUNNING: attempt4 launched 2026-09-16T18:58Z, nothing measured yet. attempt2 ABORTED AT SETUP ($0.0552) and attempt3 ABORTED IN STAGE A ($0.1674), both pre-science, neither a null or partial Search-1 result; both root causes repaired, attempt 2's confirmed on real hardware. attempt1 is PRE-AUTHORIZATION SUPERSEDED.",
+   "status": "SEARCH COMPLETE, COMPARISON NOT RUN -- SEARCH-1 INCOMPLETE. attempt4 ran the beam to completion: 7 complete leaves, 5 committed to stage1_selection.json with journal and hashes. The conditional baseline rebuild then hit its allowance, so there is no c2_baseline_comparison.json and the five selected leaves have objective values with nothing to compare against -- NOT a null result, NOT a partial answer. attempts 1-3 measured nothing; their closeouts own why.",
    "gate": "SATISFIED by C1 (verdict GO); that is not authorization.",
    "question": "with ATTENTION fixed to attention.activation_importance_v1, does re-optimizing order and ATTENTION calibration beat the frozen C1 treatment B?",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
@@ -133,8 +133,8 @@
    "priced": "expected $7.1787, ceiling $15.0446 at L40S securePrice $1.09/h, including the named conditional baseline_rebuild_reserve. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json. Priced is not funded.",
    "baseline": "B has no surviving checkpoint bytes. The search re-derives it when the beam reaches it; otherwise it is rebuilt ONCE through the frozen C1 fixed path and proven by artifact digest 53e30566. Never both.",
    "baseline_evidence": "audit/autoinit_phase_c2/c2_baseline_comparison.json, REQUIRED by the success artifact spec, so a REBUILT B's state_eval result cannot be lost at teardown.",
-   "runtime_partition": "beam 635.96 min (DEPTH-early base + beam_composition_risk); baseline_rebuild_reserve 27.665 min on its own clock; 30 min artifact recovery reachable by neither. Owner: the pricing record.",
-   "attempt3_root_cause": "an empty calibration profile registry in stage A: the driver imported the application bootstrap inside stage B. Repaired at module scope. Owner, with the two failure-path defects the abort also exposed: logs/stages/stage-1/phase_c2/runs/attempt3/closeout/outcome.json. Regression: tests/pod/test_phase_c2_collection_and_profiles.py."
+   "runtime_partition": "beam 635.96 min; baseline_rebuild_reserve 27.665 min on its own clock -- MEASURED INSUFFICIENT by attempt 4; 30 min artifact recovery reachable by neither. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json.",
+   "attempt4_root_cause": "the 27.665-min baseline_rebuild_reserve cannot fund the frozen C1 treatment path: its first operator runs its own greedy layer search at 7.05 evaluations/min and Phase-B measured a DEPTH expansion at roughly 32 min on an L40S. Unfundable as specified before launch; nothing crashed. The three options a decision would choose between, and why none is an autonomous repair, are in the closeout."
   }
  },
  "storage": {
@@ -144,7 +144,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NONE BLOCKING attempt 4: the campaign decision authorizes a fresh chain after an ordinary pre-science repair, the repair is done, and a full $15.0446 ceiling still fits. C1 is CLOSED by attempt 18's GO verdict. Durable large-checkpoint capacity remains an open MAINTAINER RESOURCE DECISION and does not block Search-1, which trains nothing.",
+ "blocker": "A MAINTAINER DECISION IS REQUIRED. Two campaign stop conditions hold: formal measurement began before attempt 4 failed, and the envelope can no longer fund a complete formal attempt. C1 is CLOSED by attempt 18's GO verdict. Durable large-checkpoint capacity remains a separate open MAINTAINER RESOURCE DECISION.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
@@ -153,11 +153,11 @@
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
  "latest_run": {
   "experiment_id": "phase_c2",
-  "run_id": "attempt3",
-  "root": "logs/stages/stage-1/phase_c2/runs/attempt3",
+  "run_id": "attempt4",
+  "root": "logs/stages/stage-1/phase_c2/runs/attempt4",
   "outcome": "recorded; PRE-SCIENCE INFRASTRUCTURE ABORT at setup, $0.0552, nothing measured",
   "index": "logs/index.json",
-  "last_executed": "logs/stages/stage-1/phase_c2/runs/attempt3",
+  "last_executed": "logs/stages/stage-1/phase_c2/runs/attempt4",
   "state": "recorded: the run wrote its own manifest"
  },
  "architecture_migration": {

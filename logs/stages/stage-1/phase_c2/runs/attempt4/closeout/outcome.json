@@ -1,0 +1,129 @@
+{
+ "schema": "aadistill.autoinit.c2_outcome/v1",
+ "_what_this_is": "what Phase-C2 Search-1 attempt 4 actually did, and what it means. Written after provider-confirmed teardown. AUTHORIZES NOTHING.",
+ "attempt": "attempt4",
+ "classification": "SEARCH COMPLETE, COMPARISON NOT RUN \u2014 SEARCH-1 INCOMPLETE. FORMAL MEASUREMENT BEGAN, SO NO AUTONOMOUS RETRY.",
+ "terminal_marker": "PHASE_C2_FAILED",
+ "failed_stage": "search_and_baseline",
+ "_read_this_first": "the beam search FINISHED and its ranking is durably recorded. What failed afterwards is the CONDITIONAL rebuild of the frozen C1 baseline B, on its own clock. So this attempt produced real scientific output and no answer to the question that output was collected to ask.",
+ "what_ran": {
+  "zero_dollar_gates": "9 of 9 PASSED",
+  "provider": "one resource created, draw 1 of the 3 permitted",
+  "setup": "PASSED in 3 min 13 s, SETUP_RC=0",
+  "stage_a_bind_identities": "PASSED at 19:04:24Z, one second after DRIVER_START \u2014 the attempt-3 repair confirmed on real hardware. Both mixtures resolved against their recorded content hashes (calib.domain_balanced@v1 67 items d65c1f40e483, calib.reasoning_heavy@v2 62 items cdb2838946b9), the C2 operators registered, and the frozen baseline construction verified 3a233a9017b3 == 3a233a9017b3.",
+  "stage_b_search": "COMPLETED. Beam search over the Search-1 space ran 19:04Z to 00:00Z, about 4 h 56 min against a 635.96 min envelope. 7 complete leaves; the Pareto policy selected 5.",
+  "stage_b_baseline": "FAILED. B was ABSENT from the 7 complete leaves, so the deterministic rule started the single conditional rebuild through the frozen C1 treatment path at 00:02:19Z with a 27.66 min allowance. It was refused at 00:30:07Z."
+ },
+ "science": {
+  "beam_search_began": true,
+  "beam_search_completed": true,
+  "complete_leaves": 7,
+  "leaves_selected": 5,
+  "selection_committed_utc": "2026-09-16T00:00:17Z",
+  "selection_sha256": "d5c0ce372aba926c",
+  "search_config_hash": "628d2abfd8b7ecdc13ac367618fa7771a87de4c9ed6dc3a8321f1d4d70f4980b",
+  "search_seed": 20260815,
+  "policy": "beam.pareto_multi_objective@v2 (30a5305bc06d)",
+  "suite": "state_eval@v1 (6421fa4cf12e)",
+  "objectives": [
+   "state.teacher_kl.equal_domain_mean",
+   "state.teacher_kl.worst_domain",
+   "state.critical_token_kl"
+  ],
+  "top_leaf": {
+   "state_id": "8a2863bc5c4fcde107bf2cfd9ceb14e3",
+   "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+   "artifact_digest": "0e760d69a1370d22c71ce81ebe822569dea5e2fcf6b7a7cb0f3202b77e9ca238",
+   "num_parameters": 596049920,
+   "_note": "front 0, position 0. A DIFFERENT operator order from B's DEPTH->FFN->RESIDUAL_WIDTH->ATTENTION. This is a ranking position, NOT a demonstrated improvement over anything."
+  },
+  "baseline_resolved": false,
+  "baseline_state_eval_measurements": 0,
+  "c2_baseline_comparison": null,
+  "_the_question_is_unanswered": "B has no surviving checkpoint bytes and its state_eval result has never been measured anywhere \u2014 C1 measured behavioural endpoints, not this suite. The rebuild was the only path to a B number, and it did not finish. The five selected leaves therefore have objective values with NOTHING to be compared against: this is not a Search-1 null result, not a partial answer, and not evidence that any candidate beats or loses to B.",
+  "search2_condition": "not evaluable; it is conditional on a B->C comparison that does not exist",
+  "interpretation_discipline": "even with a comparison, a state_eval ranking is hypothesis-generation evidence and never a demonstrated initialization or capability improvement. Behavioural confirmation is separately authorized and was not reached."
+ },
+ "root_cause": {
+  "failure": "SearchDeadlineExceeded \u2014 refused: search deadline exceeded after 27.8 min (budget 27.7 min) at depth.causal_kl_greedy_v1 round 5 candidate 26/31 (196 evaluations done). The search stopped rather than continuing to the cost backstop.",
+  "what_that_means": "the frozen C1 treatment path's FIRST operator is depth.causal_kl_greedy_v1, which runs its own greedy layer search \u2014 31 candidates per round over several rounds at the observed 7.05 evaluations/min. The rebuild consumed its whole 27.66 min allowance inside that one operator and was still at round 5 of an unfinished sequence, with the other three operators of the path not yet started.",
+  "class": "a PLANNING/PRICING boundary, not an engineering defect. Nothing crashed, no contract was violated and no artifact was corrupted: the deadline mechanism did exactly what it exists to do, and it stopped the work instead of running to the cost backstop. What was wrong is the number.",
+  "why_the_search_did_not_hit_it": "the beam's clock is separate and 23x larger (635.96 min), and DEPTH expansions inside it are individually budgeted. The rebuild instead re-runs the entire fixed path under one 27.66 min reserve.",
+  "prior_measurement_that_should_have_priced_it": "this repository's own Phase-B measurements put a DEPTH expansion at roughly 32 min on an L40S and at about 71% of a search's cost. A 27.665 min reserve could not fund the DEPTH step alone, so the rebuild was unfundable as specified before the session started.",
+  "what_a_decision_would_have_to_choose_between": [
+   "price the rebuild reserve from the measured cost of the whole fixed path rather than from a figure that does not cover its first operator",
+   "or let the rebuild REUSE the search's already-materialized DEPTH work instead of re-deriving it, which is a caching-equivalence question and needs an identical-decision proof before it may be trusted",
+   "or drop the rebuild from the session and obtain B's state_eval number in a separate, correctly priced run"
+  ],
+  "_not_an_autonomous_repair": "each option changes a frozen runtime envelope, the pricing record, or the B-identity mechanism. All three are maintainer decisions, and none may be taken under the campaign decision's engineering-repair authority."
+ },
+ "provider": {
+  "pod_id": "vqwg6o4ftpda4b",
+  "gpu": "NVIDIA L40S",
+  "quoted_price_per_hour": 1.09,
+  "price_basis_authorized": 1.09,
+  "_price_note": "the live securePrice was re-queried immediately before creation and was exactly at the 1.09 boundary; stock Medium",
+  "draws_used": 1,
+  "draws_permitted": 3,
+  "provider_resources_created": 1,
+  "elapsed_minutes": 334.59,
+  "peak_working_gib": 87.4,
+  "deleted": true,
+  "provider_confirms_gone": true,
+  "launcher_error": null,
+  "independently_reconfirmed": "a separate read-only query returned ZERO_PODS and pod(vqwg6o4ftpda4b) = null after teardown",
+  "teardown_gate": "allowed=true, emergency=true, failed_check=training_complete \u2014 the clean recorded-loss route for a session that trains nothing and did not reach success. No ArtifactError."
+ },
+ "artifacts": {
+  "manifest_rc": 0,
+  "collected": "7 files across 5 classes, missing: [], final_streams_quiescent: true",
+  "came_home": [
+   "autoinit/phase_c2_search/stage1_selection.json (15123 B) \u2014 the committed ranking",
+   "autoinit/phase_c2_search/states.jsonl (28943548 B) \u2014 every state's identity, metrics and per-state timings",
+   "autoinit/phase_c2_search/telemetry.jsonl (35798 B)",
+   "audit/autoinit_phase_c2/c2_evidence.json",
+   "audit/autoinit_phase_c2/session/{autoinit_phase_c2_run.log, autoinit_phase_c2.status, setup.log}"
+  ],
+  "searched_checkpoint_weights": "NOT preserved; they went with the pod. Search-1 declares no off-pod products by design, the private large-artifact backend has no capacity, and buying or reclaiming storage is a maintainer decision. The loss is bounded: the search is deterministic under seed 20260815 and the recorded config hash, and every selected leaf's artifact_digest and single-shard sha256 is recorded, so a state can be re-derived and proven identical.",
+  "_this_is_the_attempt_3_repair_working": "attempt 3's failure spec was unloadable, so manifest rc=1, no manifest existed, and the launcher raised ArtifactError mid-teardown. Here the same code path collected everything and the gate took its clean route. Had the SUCCESS spec kept the same defect, a completed Search-1 would have collected nothing and held a $1.09/h pod until the 828-minute watchdog."
+ },
+ "budget": {
+  "this_attempt": 6.0785,
+  "authorized_usd": 15.0446,
+  "within_authorization": true,
+  "soft_stop_usd": 14.4996,
+  "_spend_was_not_the_constraint": "the session ended at 40.4% of its ceiling. What bound it was the 27.665 min rebuild reserve, not money.",
+  "project_cumulative_before": 290.74,
+  "project_cumulative_after": 296.8185,
+  "project_cap": 320.0,
+  "project_remaining_after": 23.1815,
+  "campaign_spent_after": 6.3011,
+  "campaign_envelope": 16.2,
+  "campaign_remaining": 9.8989,
+  "campaign_absolute_ceiling": 306.7174,
+  "_absolute_ceiling_check": "296.8185 <= 306.7174",
+  "another_full_formal_attempt_fits": false,
+  "_fit_arithmetic": "6.3011 + 15.0446 = 21.3457 > 16.2000, so the campaign envelope can no longer fund a complete formal attempt at the unchanged ceiling. This is an independent stop-and-report condition, additional to the one below.",
+  "engineering_gpu_validation_spent": 0.0,
+  "engineering_gpu_validation_allowance": 0.25
+ },
+ "chain": {
+  "grant_commit_G": "e76e42bc23e8fc38f9a7b9fea2e856ed39675ea8",
+  "readiness_commit_R": "b8520822c465b101aa5278e6a5e72477c61c32c5",
+  "authorization_session_commit_A": "74cfe3e3c46ab26d22a3c35726936ed481c4a580",
+  "grant_sha256": "25bffaafb5be80c8ea8852858463edbf551bc6cea74f404e2388528b1bf75460",
+  "authorization_sha256": "ba64528395e39929521be45c67fb19a1c3f361a8e3f1f4bebbd9937b634892bc",
+  "bundle": "aad_autoinit_74cfe3e3.bundle sha256 ac7634cd85e5b03f41452b91bf355bd999b2a36f175e10db66d66728c27a7b71",
+  "c2_harness_digest": "c5ae8fbc7132aa8c461d76b6d05a1a5d3c444f9f4f85185dd50b7351d2d3783b",
+  "_scientific_identities_unchanged": "plan 1dc14abf, session contract 8fa41faf, pricing 8ae50724, B spec 3a233a90, B artifact 53e30566 \u2014 byte for byte what attempts 2 and 3 were approved against",
+  "consumed": "YES. No part of this chain is reused."
+ },
+ "why_this_stops_here": "two independent stop conditions from the 2026-09-16 campaign decision hold at once. First, FORMAL MEASUREMENT BEGAN: the beam search ran to completion and committed a ranking, so a failure after that point is preserved, torn down, reconciled and reported, and no autonomous formal retry is authorized. Second, the campaign envelope can no longer fund a complete next attempt at the unchanged $15.0446 ceiling. Beyond both, every available repair for the actual cause would change a frozen runtime envelope, the pricing record, or the B-identity mechanism \u2014 which is a scientific decision, not an engineering one.",
+ "not_done_deliberately": [
+  "no retry, no second launcher invocation, no resumption of the search or the rebuild",
+  "no change to the rebuild reserve, the beam envelope, the pricing record or any frozen identity",
+  "no reinterpretation of the searched ranking as a comparison, a null result or a demonstrated improvement",
+  "no Search-2, no behavioural confirmation, no C1 rerun"
+ ],
+ "authorizes": "nothing"
+}

@@ -1,0 +1,53 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c2",
+ "run_id": "attempt4",
+ "root": "phase_c2/runs/attempt4",
+ "artifact_spec": "phase_c2_session_v1",
+ "plan": {
+  "session_id": "autoinit-phase-c2-search1",
+  "plan_hash": "1dc14abf45ecb57c77934a19870eef9b0638a291be9e1501240f263c9a377241",
+  "session_commit": "74cfe3e3c46ab26d22a3c35726936ed481c4a580",
+  "bundle": "aad_autoinit_74cfe3e3.bundle",
+  "scratch_root": "/home/ecs-user/aad-scratch/c2_attempt4",
+  "scratch_note": "the artifact archive, the extracted tree and every intermediate search state stay here; artifacts/manifest.json carries their hashes. Large artifacts are not moved into git"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_phase_c2_launch.py",
+  "driver": "scripts/pod/autoinit_phase_c2_driver.py",
+  "harness_source_digest": "c5ae8fbc7132aa8c461d76b6d05a1a5d3c444f9f4f85185dd50b7351d2d3783b",
+  "authorization": "logs/stages/stage-1/phase_c2/runs/attempt4/governance/authorization.json"
+ },
+ "status": {
+  "passed": false,
+  "terminal": "PHASE_C2_FAILED",
+  "pod_id": "vqwg6o4ftpda4b",
+  "cost": {
+   "price_per_hour": 1.09,
+   "elapsed_minutes": 334.59,
+   "actual_usd": 6.0785,
+   "authorized_usd": 15.0446,
+   "within_authorization": true
+  },
+  "provider_confirms_gone": true,
+  "trains_anything": false,
+  "authorizes": "nothing"
+ },
+ "roles": {
+  "artifact_manifest": "artifacts/manifest.json",
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "driver_evidence": "evidence/c2_evidence.json",
+  "driver_log": "evidence/driver_run.log",
+  "driver_status": "evidence/driver_status.txt",
+  "grant": "governance/grant.json",
+  "launcher_log": "runtime/launcher.log",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json",
+  "watchdog_journal": "runtime/watchdog/"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "5121eb787deb2817325a4321d9e7a01089104f13a2edd96534875f20b5191943"
+}

@@ -1,0 +1,120 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-09-16T00:30:45+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "session_evidence",
+      "pattern": "audit/autoinit_phase_c2/c2_evidence.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "search_journal",
+      "pattern": "autoinit/phase_c2_search/states.jsonl",
+      "required": false,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "search_telemetry",
+      "pattern": "autoinit/phase_c2_search/telemetry.jsonl",
+      "required": false,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "stage1_selection",
+      "pattern": "autoinit/phase_c2_search/stage1_selection.json",
+      "required": false,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "search_summary",
+      "pattern": "audit/autoinit_phase_c2/c2_search_summary.json",
+      "required": false,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "baseline_comparison",
+      "pattern": "audit/autoinit_phase_c2/c2_baseline_comparison.json",
+      "required": false,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "session_logs",
+      "pattern": "audit/autoinit_phase_c2/session/*",
+      "required": false,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_phase_c2/c2_evidence.json",
+      "artifact_class": "session_evidence",
+      "size_bytes": 5947,
+      "sha256": "8aeafb45c6fe31820d19fbb7797e68f9c3a89d896f2c32d735aafe978abf57e6",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "autoinit/phase_c2_search/states.jsonl",
+      "artifact_class": "search_journal",
+      "size_bytes": 28943548,
+      "sha256": "cc4ee3a14b0a0ed03afe1292780a2c372f728a37233f8f294d86060eb956d1ee",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "autoinit/phase_c2_search/telemetry.jsonl",
+      "artifact_class": "search_telemetry",
+      "size_bytes": 35798,
+      "sha256": "4ee53d0095103bde6e5d80840260b7f86e7e79a8bfefee21f5b79f16e867a11d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "autoinit/phase_c2_search/stage1_selection.json",
+      "artifact_class": "stage1_selection",
+      "size_bytes": 15123,
+      "sha256": "8b44a5aa48f4170b3eb158a720ac54d54542d12550dee5fb0d6a1fc43b72f48d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_c2/session/autoinit_phase_c2.status",
+      "artifact_class": "session_logs",
+      "size_bytes": 603,
+      "sha256": "5eb40aa288110b554df9778291dc3b9214e648886a2db82e19716050363def0c",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_c2/session/autoinit_phase_c2_run.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 269254,
+      "sha256": "da2bc86223d3eb9929ed9e3d26f932715bff0615c0f05f39cb40e6ac03cf3bdc",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_phase_c2/session/setup.log",
+      "artifact_class": "session_logs",
+      "size_bytes": 13646,
+      "sha256": "6066fd107a9113607f4338c36f3dbbc74d5ddaa7dd34ae4968d6ddd72b1cb501",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

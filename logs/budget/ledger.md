@@ -2480,3 +2480,43 @@ fresh attempt identity and a fresh complete governance chain. Engineering GPU
 validation remains `$0.0000` of its `$0.25` allowance — the `$0` route answers
 the question completely, because the real stage A now executes in a fresh
 interpreter off-pod and verifies the frozen B spec `3a233a90…`.
+
+## 2026-09-16 — C2 attempt 4: the search completed, the baseline rebuild did not, `$6.0785`
+
+| what | cost | evidence |
+| --- | --- | --- |
+| Phase-C2 Search-1 attempt 4: 9/9 `$0` gates, setup in 3m13s, stage A passed one second into the driver — the attempt-3 repair confirmed on real hardware. **The beam search RAN TO COMPLETION**: 4 h 56 min against a 635.96 min envelope, 7 complete leaves, 5 committed to `stage1_selection.json` at 00:00:17Z. The **conditional baseline rebuild then hit its 27.66 min allowance** inside `depth.causal_kl_greedy_v1` at round 5 candidate 26/31, 196 evaluations in. No `c2_baseline_comparison.json`, so **Search-1 is INCOMPLETE**. Pod deleted at 334.6 min, provider confirms gone, all 7 artifacts collected with `missing: []` | `$6.0785` | [`runs/phase_c2/attempt4/`](../stages/stage-1/phase_c2/runs/attempt4/) |
+
+**Cumulative: `$296.8185` of the `$320.0000` cap.**
+
+```text
+project   290.7400 + 6.0785 = 296.8185   of 320.0000, leaving 23.1815
+campaign    0.2226 + 6.0785 =   6.3011   of 16.2000 (absolute ceiling 306.7174)
+next formal 6.3011 + 15.0446 =  21.3457  >  16.2000 — a complete attempt NO LONGER FITS
+```
+
+Spend was never the constraint: the session ended at 40.4% of its `$15.0446`
+ceiling. What bound it was the 27.665-minute rebuild reserve.
+
+The frozen C1 treatment path's first operator is `depth.causal_kl_greedy_v1`,
+which runs its own greedy layer search — 31 candidates per round at the observed
+7.05 evaluations/min. This repository's own Phase-B measurements put a DEPTH
+expansion at roughly 32 min on an L40S, so a 27.665-minute reserve could not
+fund the path's first operator, let alone the remaining three. **The rebuild was
+unfundable as specified before the session started.** Nothing crashed: the
+deadline mechanism stopped the work rather than running to the cost backstop,
+which is exactly its purpose.
+
+**Two independent stop conditions hold.** Formal measurement began — the beam
+search completed and committed a ranking — so no autonomous retry is
+authorized. And the campaign envelope can no longer fund a complete formal
+attempt at the unchanged ceiling. Every candidate repair for the actual cause
+would change a frozen runtime envelope, the pricing record, or the B-identity
+mechanism, all of which are maintainer decisions.
+
+The searched checkpoint weights went with the pod, which is by design: Search-1
+declares no off-pod products and the private large-artifact backend has no
+capacity. The loss is bounded — the search is deterministic under seed
+`20260815` and the recorded config hash, and every selected leaf's
+`artifact_digest` and single-shard sha256 is recorded, so a state can be
+re-derived and proven identical.

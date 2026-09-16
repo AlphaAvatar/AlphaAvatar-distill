@@ -9,52 +9,49 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**A PAID SESSION IS RUNNING AND BILLING.** Phase-C2 Search-1 `attempt4`
-launched 2026-09-16 at 18:58 UTC on pod `vqwg6o4ftpda4b`, NVIDIA L40S at
-`$1.09/h`, under a `$15.0446` ceiling with a `$14.4996` soft stop and an
-independent watchdog at 828 min. All nine `$0` pre-provider gates passed.
-Live evidence: `/home/ecs-user/aad-scratch/c2_attempt4/` (launcher, an
-independent read-only cost poller, the watchdog journal). The beam envelope is
-635.96 min, so the session may run ~11 h; it trains nothing.
+**Nothing is running. Nothing is billing. No pod exists.** Attempt 4's pod
+`vqwg6o4ftpda4b` was deleted after 334.6 min, the provider confirms it gone, and
+an independent query returns `ZERO_PODS` with `pod(vqwg6o4ftpda4b) = null`.
+Every C2 chain is consumed and **nothing is prepared for launch**.
 
-Attempt 4's chain is complete and **consumed**: grant `e76e42b` → launch-bound
-readiness `b852082` → authorization `74cfe3e` → bundle `aad_autoinit_74cfe3e3`
-(`ac7634cd85e5…`). Attempts 1–3 are historical and immutable and none of their
-artifacts is reused.
+**The C2 beam search RAN TO COMPLETION and the comparison it was collected for
+did not run.** Attempt 4 (2026-09-16, `$6.0785`) passed 9/9 `$0` gates, setup,
+and stage A; the beam ran 4 h 56 min against its 635.96-min envelope, produced
+**7 complete leaves** and committed **5** to `stage1_selection.json` at
+00:00:17Z with its journal, telemetry and hashes. B was absent from those
+leaves, so the single conditional rebuild started — and hit its **27.66-min
+allowance** inside `depth.causal_kl_greedy_v1` at round 5 candidate 26/31, 196
+evaluations in.
 
-Attempts 2 and 3 both launched and both aborted before the beam search —
-`$0.0552` and `$0.1674`, `$0.2226` together, **no measurement of any kind**.
-Neither is a Search-1 null, partial or scientific result. Attempt 3's pod was
-deleted 9.2 min after creation and the provider confirmed it gone.
+So there is **no `c2_baseline_comparison.json` and Search-1 is INCOMPLETE**. B
+has no surviving checkpoint bytes and its `state_eval` number has never been
+measured anywhere, so the five selected leaves have objective values with
+nothing to compare against. **This is not a null result, not a partial answer,
+and not evidence that any candidate beats or loses to B.**
 
-Attempt 2's root cause is repaired *and confirmed on real hardware*: attempt 3's
-setup passed in 2 min 33 s, the frozen-asset step verified C2's own expectation
-document, and the vLLM environment was never built. Attempt 3 then died one
-second into stage `bind_identities` on an **empty calibration registry** — the
-driver imported the application bootstrap inside stage B while stage A already
-called `get_profile`. Repaired at module scope, where an import cannot be
-ordered after a stage. The same abort exposed two defects in the failure path,
-both repaired: both C2 artifact specs declared a lifecycle that does not exist,
-which made them unloadable — **including the success spec, where a completed
-ten-hour run would have held a `$1.09/h` pod until the 828-minute watchdog** —
-and a session that declares no event streams could not satisfy the emergency
-teardown gate's naming rule once its manifest was gone.
+**Spend was never the constraint** — the session ended at 40.4% of its
+`$15.0446` ceiling. The 27.665-min reserve was. The frozen C1 treatment path's
+first operator runs its own greedy layer search at the observed 7.05
+evaluations/min, and this repository's Phase-B measurements put a DEPTH
+expansion at roughly 32 min on an L40S: the reserve could not fund the path's
+first operator, let alone its other three. Nothing crashed; the deadline
+mechanism stopped the work instead of running to the cost backstop, which is
+its purpose.
 
-The **2026-09-16 maintainer campaign decision** authorizes fresh formal chains
-after an ordinary pre-science repair without a further approval, inside a
-`$16.20` envelope measured from `$290.5174` and *including* attempt 2's
-`$0.0552`. Every formal launcher keeps the unchanged `$15.0446` ceiling and the
-`<= $1.09/h` L40S basis, and a launch requires that a full ceiling still fit:
-`0.2226 + 15.0446 = 15.2672 <= 16.20`. Engineering GPU validation has spent
-`$0.0000` of its `$0.25`, and none is planned: the real stage A now executes in
-a fresh interpreter off-pod and verifies the frozen B spec `3a233a90…`.
+**TWO STOP CONDITIONS HOLD AND A MAINTAINER DECISION IS REQUIRED.** Formal
+measurement began, so no autonomous retry is authorized. And the campaign
+envelope can no longer fund a complete formal attempt:
+`6.3011 + 15.0446 = 21.3457 > 16.20`. Every candidate repair — re-pricing the
+reserve, letting the rebuild reuse the search's DEPTH work, or obtaining B's
+number in a separate run — changes a frozen runtime envelope, the pricing
+record, or the B-identity mechanism. See
+[`attempt4/closeout/outcome.json`](../stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json).
 
-**If attempt 4 aborts before the beam search begins**, the campaign decision's
-flow applies without asking again: preserve evidence, provider-confirmed
-teardown, reconcile, diagnose, minimal repair, fresh identity, continue — while
-a full ceiling still fits. **Once the beam search has begun, no automatic
-formal retry is authorized**; a failure after that point is preserved, torn
-down, reconciled and reported.
+Attempts 2 and 3 aborted **before** the beam for `$0.0552` and `$0.1674` and
+measured nothing; both root causes are repaired and both repairs were confirmed
+on real hardware by attempt 4 — setup and stage A passed, and the artifact
+collection that raised `ArtifactError` in attempt 3 returned `manifest rc=0`
+with all 7 files and `missing: []`.
 
 **C1 is COMPLETE.** Attempt 18 executed the whole frozen protocol — both replay
 gates, both arms, six probes trained, six evaluated on the frozen battery — and
@@ -66,9 +63,9 @@ floor. A complete valid verdict ends the round.
 | phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**, and its execution preregistration is now **frozen to the binding attempt 18 ran under**. C2 Search-1 is **EXECUTABLE and priced, and NOT AUTHORIZED**: space, baseline rule, B→C comparison record, driver, launcher, evidence contract, a `$15.0446` ceiling, a CPU preflight of its own, a derived executable closure, a readiness contract, an authorization issuer, a bundle transport, run ownership of the whole execution and an enforceable provider-resource scope all exist, with the beam and the baseline rebuild on separate clocks; no grant, readiness record, authorization or bundle does | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
-| launch chain | every C2 chain so far is **consumed** — attempts 1, 2 and 3 — and **nothing is prepared**. No further C1 attempt is authorized or prepared either; a complete verdict ended that round | [`phase_c2/runs/attempt3/governance/`](../stages/stage-1/phase_c2/runs/attempt3/governance/) |
-| last attempt | **C2 Search-1 attempt 3 — ABORTED IN STAGE A, `$0.1674`, pre-science, nothing measured.** 9/9 `$0` gates and setup passed; the driver died one second in on an empty calibration registry. Pod deleted and provider-confirmed gone. The last complete scientific execution remains **C1 attempt 18** (`$10.2018`, `ALL_DONE`, verdict `GO`) | [`c2 attempt3`](../stages/stage-1/phase_c2/runs/attempt3/closeout/outcome.json) · [`c1 attempt18`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
-| blocker | **none blocking attempt 4**: the campaign decision authorizes a fresh chain after an ordinary pre-science repair, the repair is done and a full `$15.0446` ceiling still fits. C1 is finished. One **resource** decision remains the maintainer's: durable large-artifact capacity, see the defects block below | [`budget/decisions.md`](../budget/decisions.md) |
+| launch chain | every C2 chain is **consumed** — attempts 1, 2, 3 and 4 — and **nothing is prepared**. No further C1 attempt is authorized or prepared either; a complete verdict ended that round | [`phase_c2/runs/attempt4/governance/`](../stages/stage-1/phase_c2/runs/attempt4/governance/) |
+| last attempt | **C2 Search-1 attempt 4 — SEARCH COMPLETE, COMPARISON NOT RUN, `$6.0785`.** The beam finished (7 leaves, 5 committed); the conditional baseline rebuild hit its 27.66-min allowance inside DEPTH. No comparison record, so Search-1 is INCOMPLETE. Pod deleted and provider-confirmed gone, all 7 artifacts collected. The last complete scientific execution remains **C1 attempt 18** (`$10.2018`, `ALL_DONE`, verdict `GO`) | [`c2 attempt4`](../stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json) · [`c1 attempt18`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
+| blocker | **A MAINTAINER DECISION IS REQUIRED.** Two stop conditions hold: formal measurement began before attempt 4 failed, so no autonomous retry is authorized; and the campaign envelope can no longer fund a complete formal attempt (`6.3011 + 15.0446 = 21.3457 > 16.20`). Every repair for the 27.665-min rebuild reserve changes a frozen envelope, the pricing record or the B-identity mechanism. Durable large-artifact capacity remains a separate open maintainer decision | [`attempt4/closeout/outcome.json`](../stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness
@@ -98,7 +95,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$290.7400` spent of `$320.0000`, leaving `$29.2600` |
+| project cap | `$296.8185` spent of `$320.0000`, leaving `$23.1815` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

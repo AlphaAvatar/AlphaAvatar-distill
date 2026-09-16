@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.autoinit.c2_bundle/v1",
+ "run_id": "attempt4",
+ "stage_id": "1",
+ "session_commit": "74cfe3e3c46ab26d22a3c35726936ed481c4a580",
+ "canonical_bundle_name": "aad_autoinit_74cfe3e3.bundle",
+ "relay_repo": "AlphaAvatar/aadistill-artifacts",
+ "relay_path": "transfer/aad_autoinit_74cfe3e3.bundle",
+ "sha256": "ac7634cd85e5b03f41452b91bf355bd999b2a36f175e10db66d66728c27a7b71",
+ "bytes": 12731568,
+ "carries_authorization": "logs/stages/stage-1/phase_c2/runs/attempt4/governance/authorization.json",
+ "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_74cfe3e3.bundle",
+ "verify": "The bundle contains this ref:\n74cfe3e3c46ab26d22a3c35726936ed481c4a580 refs/heads/_bundle_74cfe3e3c46a\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1",
+ "note": "the pre-provider bundle_staged_gate downloads this exact object, verifies it, checks it out and requires the resulting HEAD, authorization bytes and executable digest to match. This record is the local half; the gate is the remote half. It stays UNCOMMITTED inside a launch window: committing it adds a third path to the session lineage diff and session_commit_gate refuses."
+}

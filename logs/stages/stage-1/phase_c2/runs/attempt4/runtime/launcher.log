@@ -1,0 +1,32 @@
+[18:58:14] budget: expected 395 min $7.18 · soft $14.50 · hard $15.04 (authorized $15.04)
+[18:58:15] NVIDIA L40S $1.09/h, stock Medium
+[18:58:15] session commit 74cfe3e3c46a verified: harness digests to c5ae8fbc7132…, carries the authorization and only logs/stages/stage-1/phase_c2/runs/attempt4/governance/authorization.json differs from the authorized base
+[18:58:15] C2 executable closure c5ae8fbc7132… over 85 derived files
+[18:58:15] authorized for run 'attempt4'; 3 draw(s) within the 3 permitted
+[18:58:16] frozen-asset expectation configs/experiments/phase_c2/frozen_assets.json verifies: ['state_eval_v1'], no scoring contract requested
+[18:58:16] volume 200 GiB >= 200 for a 87.4 GiB peak working set
+[18:58:16] grant cap $15.0446 matches the pricing record, whose own sha256 verified
+[18:58:16] grant binds the live plan 1dc14abf45ec…
+[18:58:17] pod sweep 23 passed / 0 skipped / 0 failed, no declared groups, binds C2 harness c5ae8fbc7132… and environment af6a43d0638e…, staging contract 5243524fe13f…, swept at e76e42bc with only ['logs/stages/stage-1/phase_c2/runs/attempt4/governance/authorization.json', 'logs/stages/stage-1/phase_c2/runs/attempt4/governance/readiness.json'] differs from the swept base
+[18:58:22] aad_autoinit_74cfe3e3.bundle (12731568 bytes, ac7634cd85e5…) round-trips to 74cfe3e3c46a… carrying this authorization and executable set c5ae8fbc7132…
+[18:58:22] precheck OK: 7 relay inputs (7 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[18:58:23] watchdog detached — hard 828 min = $15.04
+[18:58:23] created vqwg6o4ftpda4b at $1.09/h
+[18:59:17]   starting (60s) — $0.02
+[19:00:21]   starting (120s) — $0.04
+[19:00:42] TCP 22 at 202.181.159.211:11996 after 2.3 min
+[19:00:45] draw 1: ssh reachable — $0.04
+[19:01:07] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[19:01:07] draw 1: running setup
+[19:04:20] draw 1: setup complete — $0.11
+[19:04:25] driver detached, pid 2081, confirmed by descriptor_probe — $0.11
+[19:06:35]   2026-09-15T19:04:24Z MARKER:STAGE_PASSED:bind_identities — $0.15
+[00:30:32]   2026-09-16T00:30:07Z MARKER:PHASE_C2_FAILED — $6.03
+[00:30:32] a blocking stage failed — collecting evidence, then tearing down. Nothing was trained and no permanent artifact was replaced.
+[00:30:32] polling ended: PHASE_C2_FAILED — $6.03
+[00:32:25]   manifest rc=0
+7 file(s) across 5 class(es) -> /workspace/manifest.json
+  final_required: 7 · mutable_snapshot: 0 · final_streams_quiescent: True
+[00:32:48] teardown gate: allowed=True failed=training_complete
+[00:32:48] deleting pod (gate passed after PHASE_C2_FAILED)
+[00:32:59] pod deleted — 334.6 min, $6.08; provider confirms gone: True
