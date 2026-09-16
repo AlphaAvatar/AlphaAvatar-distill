@@ -10,6 +10,7 @@ Everything this experiment produced, in one place.
 
 * [`attempt5`](runs/attempt5/)
 * [`attempt6`](runs/attempt6/)
+* [`attempt7`](runs/attempt7/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

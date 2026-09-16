@@ -24,7 +24,7 @@ import ast
 import json
 import shutil
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 
@@ -1413,19 +1413,45 @@ def test_the_latest_run_outcome_is_derived_from_that_runs_own_closeout():
     advanced its run id to attempt 4 while carrying attempt 2's outcome: the
     snapshot said "search complete, $6.0785" in one place and "PRE-SCIENCE
     ABORT at setup, $0.0552" in another, about the same run.
+
+    **The newest run legitimately has no closeout yet.** A grant is committed
+    into a fresh run before its launch-bound sweep, so "prepared but not
+    executed" is a reachable state of the newest run and `_run_outcome` already
+    has a branch for it. This read the closeout unconditionally, so it could
+    only pass while the newest run happened to have one -- a consumer narrower
+    than its producer, which failed the moment a chain was prepared. What is
+    asserted is the derivation being FAITHFUL in whichever state the run is in;
+    the inherited-outcome defect is caught in both branches, because an
+    unexecuted run must not be wearing an earlier attempt's classification or
+    cost either.
     """
     snapshot = json.loads(SNAPSHOT.read_text())
     latest = snapshot["latest_run"]
-    closeout = json.loads(
-        (REPO / latest["root"] / "closeout/outcome.json").read_text())
+    path = REPO / latest["root"] / "closeout/outcome.json"
 
     assert latest["run_id"] in latest["root"]
-    assert closeout["attempt"] == latest["run_id"], (
-        "the closeout read is not the named run's")
-    #: The outcome must be THIS run's classification and cost.
-    assert closeout["classification"].rstrip(". ") in latest["outcome"]
-    cost = closeout["budget"]["this_attempt"]
-    assert f"${float(cost):.4f}" in latest["outcome"]
+    if path.is_file():
+        closeout = json.loads(path.read_text())
+        assert closeout["attempt"] == latest["run_id"], (
+            "the closeout read is not the named run's")
+        #: The outcome must be THIS run's classification and cost.
+        assert closeout["classification"].rstrip(". ") in latest["outcome"]
+        cost = closeout["budget"]["this_attempt"]
+        assert f"${float(cost):.4f}" in latest["outcome"]
+    else:
+        #: No closeout: the outcome must SAY so rather than borrow one, and the
+        #: index must agree the run has not executed.
+        assert "no closeout has been written for this run" in latest["outcome"], (
+            f"{latest['run_id']} has no closeout, so the outcome must say so "
+            f"rather than state {latest['outcome']!r}")
+        assert "$" not in latest["outcome"], (
+            "a run that never executed is carrying a cost")
+        index = json.loads((REPO / "logs/index.json").read_text())
+        unrecorded = {e["run_id"] for e in index["unrecorded"]
+                      if e["experiment_id"] == latest["experiment_id"]}
+        assert latest["run_id"] in unrecorded, (
+            "the snapshot says this run wrote no closeout while the index "
+            "reports it as recorded")
     #: And specifically not an earlier attempt's.
     assert "0.0552" not in latest["outcome"], (
         "attempt 2's cost is attached to a later run")
@@ -1470,8 +1496,20 @@ def test_the_snapshot_does_not_contradict_itself_about_attempt_4():
         f"is prepared; open chains on disk: {open_chains}")
     #: A named run must be one of them, so the snapshot cannot point a reader at
     #: a chain that has already been closed out.
+    #:
+    #: Compared by RUN ID. `prepared_launch.run` carries the run's path, the way
+    #: every other location field in the snapshot does, and this compared it
+    #: against `open_chains`, which holds bare run ids -- so the positive branch
+    #: could never hold. It had never run: the field was null when this was
+    #: written, so the `else` side passed vacuously until a chain was prepared.
     named = snapshot["prepared_launch"].get("run")
-    assert (named in open_chains) if named else not open_chains
+    if named:
+        run_id = PurePosixPath(str(named)).name
+        assert run_id in open_chains, (
+            f"prepared_launch names {named!r}, whose run id {run_id!r} is not "
+            f"an open chain; open chains on disk: {open_chains}")
+    else:
+        assert not open_chains
 
 
 def test_the_renderer_reports_a_missing_closeout_rather_than_inheriting_one(tmp_path):

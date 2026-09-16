@@ -282,7 +282,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 12,
-  "runs_unrecorded": 3,
+  "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
    "continuation_b": {
@@ -322,8 +322,8 @@
    },
    "phase_c2_baseline_completion": {
     "recorded": 1,
-    "unrecorded": 1,
-    "total": 2
+    "unrecorded": 2,
+    "total": 3
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -1128,6 +1128,14 @@
    "n_files": 5,
    "digest": "ad5acd8118d2ba20e22bc4e85d0a0b3949585ea0174155648fdaef478b0df841",
    "why": "no run manifest; its closeout states: PRE-PROVIDER ABORT \u2014 NO PROVIDER RESOURCE, NO SPEND, NO MEASUREMENT"
+  },
+  {
+   "experiment_id": "phase_c2_baseline_completion",
+   "run_id": "attempt7",
+   "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7",
+   "n_files": 1,
+   "digest": "d8034a70c99ad209b842ce1fac2ef78ef0ebc0d6c960d660ed8fc995f155ea43",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

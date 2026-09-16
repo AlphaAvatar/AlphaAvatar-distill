@@ -12,7 +12,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **Nothing is running. Nothing is billing. No pod exists.** Attempt 6's pod
 `v0h4f5at4112g2` was deleted after 2.27 min, the provider confirms it gone, and
 an independent query returns `ZERO_PODS` with `pod(v0h4f5at4112g2) = null`.
-Every C2 chain is consumed and **nothing is prepared for launch**.
+**Baseline-completion attempt 7 is authorized and its chain is being prepared**
+— grant, one `launch_bound` sweep, authorization, bundle, then launch. Every
+earlier C2 chain is consumed and none of it is reused.
 
 **The C2 beam search RAN TO COMPLETION and the comparison it was collected for
 did not run.** Attempt 4 (2026-09-16, `$6.0785`) passed 9/9 `$0` gates, setup,
@@ -38,12 +40,21 @@ first operator, let alone its other three. Nothing crashed; the deadline
 mechanism stopped the work instead of running to the cost backstop, which is
 its purpose.
 
-**THE BASELINE COMPLETION WAS AUTHORIZED, RAN TWICE, AND B IS STILL NOT
-MEASURED.** The maintainer decision of 2026-09-17 closed the science for
-implementation purposes and authorized exactly two formal sessions to establish
-B, measure it once on the same frozen suite, and compute the preregistered B→C
-comparison against the five frozen candidate measurements. **Both are consumed.
-Neither reached a rebuild.**
+**THE BASELINE COMPLETION HAS RUN TWICE AND B IS STILL NOT MEASURED.** The
+maintainer decision of 2026-09-17 closed the science for implementation purposes
+and authorized two formal sessions to establish B, measure it once on the same
+frozen suite, and compute the preregistered B→C comparison against the five
+frozen candidate measurements. **Both are consumed. Neither reached a rebuild.**
+
+**A third session is now authorized, and the retry rule changed shape.** The
+decision of 2026-09-16 continues the work, raises **no** envelope, and
+prospectively replaces the two-session limit with a **money** boundary: a fresh
+formal chain requires `cumulative completion spend + $1.1950 <= $2.3900`.
+`$0.0412 + $1.1950 = $1.2362`, so **attempt 7 is authorized**. There is no fixed
+maximum attempt number, and an incrementing attempt number is not a scope
+expansion — a cheap pre-measurement abort consumes its actual cost and its
+one-use chain, nothing more. The ceiling, the `$1.09/h` L40S boundary, the
+`$320.0000` project cap and every frozen scientific identity are unchanged.
 
 | attempt | where it stopped | cost |
 | --- | --- | --- |
@@ -97,11 +108,16 @@ from the reserve that failed. **No budget increase is requested**, the rate
 boundary is unchanged, and the old Search-1 pricing document is preserved
 exactly as the authorization basis attempts 2–4 ran under.
 
-**A THIRD SESSION NEEDS A MAINTAINER DECISION.** The 2026-09-17 message
-authorized two and made attempt 6 the last automatically authorized one, so its
-own failure rule ends here: teardown, preserve, reconcile, diagnose, repair,
-regress, **report** — not another chain. `$2.3488` of the `$2.3900` retry
-sub-envelope is unspent and that is not permission.
+**Attempt 7 runs under the money rule, and it stops at the measurement.** A
+failure *before* the durable `baseline_measurement` exists is handled
+autonomously — teardown with provider-confirmed zero billing, preserve,
+reconcile, diagnose, minimal repair, minimal regression, fresh identity, fresh
+chain — for as long as `spend + $1.1950 <= $2.3900` holds, and an identical
+unchanged failure is never retried. The instant that measurement exists the
+authority inverts: **no GPU remeasurement of B**, no second `state_eval`, and a
+downstream comparison failure is repaired at `$0` from the durable measurement
+plus the frozen five. `$2.3488` of the `$2.3900` envelope is unspent and that is
+still not permission for anything outside this scope.
 
 **One open question belongs to the maintainer.** Cross-session numerical
 comparability is preserved structurally — every checkpoint is scored
@@ -127,12 +143,12 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**, and its execution preregistration is now **frozen to the binding attempt 18 ran under**. C2 Search-1 is **INCOMPLETE**: its beam ran to completion and the B→C comparison it was collected for has never been computed, because the baseline completion authorized to supply B was consumed by two pre-measurement aborts. The completion package itself is **executable, priced, repaired and NOT AUTHORIZED** — protocol, pricing, frozen candidate side, driver, thin launcher, ten `$0` gates, a CPU preflight of its own, a derived closure, a readiness contract, an authorization type and issuer, a bundle transport, run ownership and an enforceable resource scope all exist and have all now executed at `$0` | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a verdict**, and its execution preregistration is now **frozen to the binding attempt 18 ran under**. C2 Search-1 is **INCOMPLETE**: its beam ran to completion and the B→C comparison it was collected for has never been computed, because the baseline completion authorized to supply B was consumed by two pre-measurement aborts. The completion package is **executable, priced, repaired and AUTHORIZED for attempt 7** — protocol, pricing, frozen candidate side, driver, thin launcher, ten `$0` gates, a CPU preflight of its own, a derived closure, a readiness contract, an authorization type and issuer, a bundle transport, run ownership and an enforceable resource scope all exist and have all executed at `$0`. The Search-1 **beam** remains unauthorized and is never rerun | [`phase_c2/plans/phase_c2_search1_plan.md`](../stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
-| launch chain | every C2 chain is **consumed** — Search-1 attempts 1–4, baseline completion attempts 5 and 6 — and **nothing is prepared**. No further C1 attempt is authorized or prepared either; a complete verdict ended that round | [`phase_c2_baseline_completion/runs/attempt6/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt6/governance/) |
+| launch chain | **attempt 7's chain is being built fresh** — grant, one `launch_bound` sweep, authorization through the production issuer, canonical bundle — in that order and on clean trees. Every earlier C2 chain is **consumed** (Search-1 attempts 1–4, completion attempts 5 and 6) and no part of any of them is reused. No further C1 attempt is authorized or prepared; a complete verdict ended that round | [`phase_c2_baseline_completion/runs/attempt7/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt7/governance/) |
 | last attempt | **baseline completion attempt 6 — ABORTED AT SETUP, `$0.0412`.** Ten `$0` gates passed, the pod billed 2.27 min, setup refused at `ROPE_OK`, and no rebuild or measurement happened. Before it, attempt 5 consumed its chain at `$0.0000` without creating a resource. The last complete scientific execution remains **C1 attempt 18** (`$10.2018`, `ALL_DONE`, verdict `GO`) | [`attempt6/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt6/closeout/outcome.json) · [`phase_c1/runs/attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
-| blocker | **A MAINTAINER DECISION IS REQUIRED.** Both sessions the 2026-09-17 message authorized are consumed and **B still carries no measurement**, so the B→C comparison remains uncomputed and Search-1 stays incomplete. Both root causes are repaired and regressed at `$0`; `$2.3488` of the retry sub-envelope is unspent and is not permission. Durable large-artifact capacity remains a separate open decision | [`attempt6/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt6/closeout/outcome.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| blocker | **NONE BLOCKING.** The 2026-09-16 decision authorizes attempt 7 inside the unchanged `$2.3900` envelope at the unchanged `$1.1950` ceiling. **B still carries no measurement**, so the B→C comparison remains uncomputed and Search-1 stays incomplete until this session runs. Durable large-artifact capacity remains a separate open decision and does not gate this one — the completion's product is a measurement record, not preserved weights | [`attempt7/governance/grant.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt7/governance/grant.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness

@@ -1,5 +1,73 @@
 # Decision records
 
+## 2026-09-16 — baseline-completion retries are bounded by money, not by an attempt count
+
+- **Maintainer decision.** Phase-C2 baseline-completion work continues.
+  Attempt 7 is authorized. **No envelope, ceiling, cap, price boundary or
+  scientific protocol is increased or changed by this decision.** The
+  completion envelope stays `$2.3900` with `$0.0412` consumed, the per-session
+  hard ceiling stays `$1.1950`, expected cost stays `$0.7212`, and the formal
+  L40S `securePrice` boundary stays `<= $1.09/h`.
+- **Context:** the 2026-09-17 decision authorized exactly **two** formal
+  sessions. Both were consumed by pre-measurement engineering aborts — attempt 5
+  at `$0.0000` with no provider resource, attempt 6 at `$0.0412` after 10/10
+  `$0` gates passed and setup refused at the inherited `ROPE_OK` declaration.
+  Neither rebuilt B; neither measured anything. So a two-session count was
+  spent entirely on infrastructure defects while `$2.3488` of the money that
+  was supposed to buy the measurement sat unspent.
+- **Decision:** the fixed two-session limit is **prospectively removed** and
+  replaced by an arithmetic precondition, checked before each fresh formal
+  chain:
+
+  ```text
+  cumulative baseline-completion spend + $1.1950 <= $2.3900
+  ```
+
+  Today: `$0.0412 + $1.1950 = $1.2362 <= $2.3900`, so attempt 7 is authorized.
+  There is **no fixed maximum attempt number**, and an incrementing attempt
+  number is not a scope expansion. A `$0` or very cheap pre-measurement abort
+  does not burn an arbitrary retry slot — it consumes its **actual cost** and
+  its **one-use chain**, and nothing else.
+- **What a retry still costs, every time:** preserved failure evidence,
+  provider-confirmed teardown, reconciled cost, root-cause diagnosis, a minimal
+  coherent repair, the smallest relevant regression, a fresh run identity, a
+  fresh grant, a fresh `launch_bound` readiness record, a fresh authorization
+  and a fresh canonical bundle. A consumed chain is never reused and an
+  identical unchanged failure is never retried.
+- **Where the authority ends — the measurement boundary, unchanged.** The
+  instant a durable `baseline_measurement` exists: no autonomous GPU
+  remeasurement of B, no second `state_eval`, no fresh formal B session. A
+  downstream comparison or serialization failure is repaired at `$0` and B→C is
+  reconstructed from the durable measurement plus the frozen five. If that
+  reconstruction would require changing suite, evaluator, ranking or scientific
+  semantics — STOP.
+- **Alternatives considered:** authorizing two more counted sessions — rejected,
+  it reproduces the failure mode this decision exists to fix, since the count
+  and the money were never measuring the same thing; making retries unbounded
+  inside the envelope with no per-retry obligations — rejected, an unchanged
+  failure repeated cheaply is not a repair and the envelope is not the only
+  safety boundary.
+- **Also settled:** the `ROPE_OK` repair is **accepted** — the completion setup
+  no longer declares the staged-checkpoint step, and the guard now runs on the
+  **rebuilt** B, in the interpreter that measures it, after materialization and
+  before the one formal `state_eval`, with its reading and the observed
+  `transformers` version carried into the durable evidence. No duplicate
+  setup-time assertion and no further rehearsal layer are to be added. The
+  completion **executable closure** may move after a legitimate engineering
+  repair; the **six frozen scientific identities** may not.
+- **Risks:** a long tail of cheap aborts could consume the envelope without ever
+  reaching a measurement. The precondition bounds that in dollars, and the
+  no-identical-failure rule bounds it in kind; the stop conditions in the
+  attempt 7 grant are what a reviewer should check it against.
+- **Where it lives:**
+  `logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7/governance/grant.json`
+  (the authorization basis, with the arithmetic stated), `logs/budget/ledger.md`,
+  `logs/state/current.json` and `logs/state/current.md`. Nothing in
+  `src/aadistill`.
+- **Revisit when:** the `$2.3900` envelope can no longer fund a full `$1.1950`
+  ceiling, a durable `baseline_measurement` exists, or a scientific identity
+  moves.
+
 ## 2026-09-14 — attempt 18 approved, and a narrow retry rule for zero-measurement harness failures
 
 - **Maintainer decision.** Attempt 18 may execute the complete frozen C1
