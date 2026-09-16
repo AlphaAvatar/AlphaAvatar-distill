@@ -202,7 +202,7 @@
   "schedule_id": "beam.delayed_prune",
   "warmup_levels": 1,
   "standing_width": 6,
-  "width_is_a_budget_decision": "the ranking policy, its objectives and its epsilon are FROZEN and unchanged. The beam WIDTH is the one parameter this plan leaves to the funding decision, because it trades cost against how much of the same space is carried forward. The chosen width must be registered before launch.",
+  "width_is_part_of_the_design": "the ranking policy, its objectives and its epsilon are FROZEN and unchanged, and the standing beam width is part of the proposed DESIGN rather than a dial left to the funding decision. A narrower beam carries less of the same space forward, so adopting one is a changed experiment with reduced breadth and its own result \u2014 a scientific decision that must be registered as the width before launch. Narrowing the beam MERELY to fit an existing cap is not permitted; the pricing record prices the alternatives so the trade can be made deliberately, not so the number can be made smaller.",
   "_beam_is_not_exhaustive_enumeration": "the point is not to measure every leaf. It is that every admissible alternative COMPETES inside one search, so a calibration choice can affect pruning and a structurally promising path is not excluded merely because Search-1 held other calibrations fixed."
  },
  "cost_model": {
@@ -342,6 +342,17 @@
   },
   "_not_authorized_yet": "this stage is DEFINED and PRICED and is deliberately NOT launched with the search. Its candidate set does not exist until the search commits one, and pricing it now is what lets the funding decision see the whole chain instead of the first half."
  },
+ "execution_capabilities_this_round_did_not_build": {
+  "multi_session_continuation": {
+   "status": "NOT A CURRENT CAPABILITY \u2014 possible future design option",
+   "why_it_is_tempting": "search state ids are content-derived, so a state has a stable identity across sessions and the journal can be replayed within one.",
+   "why_that_is_not_enough": "an identity is not the bytes. The frozen Search-1 plan records the real constraint: the search workdir holds multi-gigabyte intermediates that CANNOT be relayed for resume, so a fresh provider resource would have to re-derive any lost state \u2014 which is the expensive part. Resuming across sessions would need durable large-artifact staging, cross-session workdir transport and resume semantics.",
+   "implemented_this_round": false,
+   "validated_this_round": false,
+   "_so_do_not_plan_around_it": "no pricing, option or contingency in these documents may assume a >1-session search. If the search cannot finish inside one funded session, that is a scope question, not something a continuation currently rescues.",
+   "source": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md"
+  }
+ },
  "frozen_and_untouchable": {
   "artifacts": [
    "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/stage1_selection.json",
@@ -365,5 +376,5 @@
  "interpretation_discipline": "the search stage produces a cheap-metric front and selects a candidate SET, never an incumbent. Only the behavioural selection stage, under the frozen recipe, battery, feasibility floor and equivalence interval, may name a C2 incumbent \u2014 and unresolved_equivalence with no winner is a legitimate terminal result, not a reason for a fourth seed.",
  "pricing": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
  "authorizes": "nothing",
- "protocol_sha256": "5ace5a4d605da03cf6d1f6812b8d49dcb3f6b2b1484093c6de023b66ef69ee96"
+ "protocol_sha256": "19d293a6704059d388e3b506cb89216498e5f29741c6bdeaba71f62fcad77975"
 }

@@ -68,25 +68,45 @@ the margin was conservative in the safe direction and is retired. One cell moved
 the other way and it is the one the price turns on:
 `depth.causal_kl_greedy_v1` deeper, `31.10 → 36.07` min.
 
-**THE BLOCKER IS BUDGET, NOT DESIGN.** A funding decision is required.
+**THE BLOCKER IS BUDGET, NOT DESIGN.** A funding decision is required, and the
+requirement is the **standing design's** — beam width 6, which is what
+`SCHEDULE_V1` declares and what the protocol proposes.
 
-| | expected | ceiling | fits `$22.4910`? |
-| --- | --- | --- | --- |
-| full search, beam 6 (standing) | `$16.10` | `$33.18` | **refused** |
-| beam 4 | `$15.41` | `$27.45` | **refused** |
-| beam 3 | `$15.07` | `$24.59` | **refused** |
-| beam 2 | `$14.73` | `$21.72` | yes |
-| behavioural selection (11 probes + 4 conditional) | `$19.11` | `$27.89` | — |
-| **cheapest complete chain** | `$33.84` | **`$49.61`** | **no — short `$27.12`** |
+| | expected | ceiling |
+| --- | --- | --- |
+| full search, **beam 6 — standing design** | `$16.0998` | `$33.1827` |
+| behavioural selection (11 probes + 4 conditional) | `$19.1122` | `$27.8908` |
+| **complete standing chain** | **`$35.2120`** | **`$61.0735`** |
+| remaining headroom | | `$22.4910` |
+| **shortfall on ceilings** | | **`$38.5825`** |
+| minimum cumulative cap that contains both | | `$358.5825` |
+
+Stating that minimum is **not** requesting it.
 
 `plan_session` **refuses** the search at the standing width against real
 headroom, and each refusal text is recorded per width in
 [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json).
-Beam 2 fits the *search alone* and leaves `$0.77` — not enough for any
-behavioural stage, so funding only the search would fund a chain that cannot
-reach a verdict. **The scope was not shrunk to fit**; that is the one repair the
-budget module exists to prevent. The three options, and the fact that the trade
-is scientific rather than arithmetic, are in that record.
+
+**Beam 2/3/4 are priced as scientific alternatives, not as cost options.** A
+narrower beam leaves the space intact but carries fewer partial paths forward,
+so it explores less of it and can return a different front — adopting one is a
+**changed experiment** with reduced breadth, to be registered as the width
+before launch. **Narrowing the beam merely to fit the existing cap is not
+permitted**, and the `$49.61` beam-2 chain must not be read as this protocol's
+funding requirement. The scope was not shrunk to fit; that is the one repair the
+budget module exists to prevent.
+
+> Every figure above is computed from the 4-dp stored ceilings. Adding the
+> *display-rounded* search ceiling (`$33.18`) gives a chain of `$61.0708` and a
+> minimum cap of `$358.5798` — `$0.0027` **below** the derived values. A ceiling
+> rounds up, so the derived figures are the ones to fund.
+
+**A >1-session search is not currently available.** Search state ids are
+content-derived, which gives a state an identity — not its bytes. The frozen
+Search-1 plan records that the multi-gigabyte search workdir *cannot be relayed
+for resume*, so a fresh provider resource must re-derive lost state. No durable
+cross-session mechanism was implemented or validated this round, and none was
+built: it is a possible future design option and no plan here assumes it.
 
 **Every probe is trained fresh.** The historical-probe-reuse ruling records
 `reuse_verified: false` — all eleven examined probes fail
@@ -226,7 +246,7 @@ floor. A complete valid verdict ends the round.
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The next chain cannot be built until the full search is funded | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
 | last attempt | **baseline completion attempt 8 — COMPLETE, `$0.5872`.** Both stages passed, B was rebuilt to digest `53e30566…`, measured **once** on the frozen suite, and the B→C comparison was computed; the pod was deleted behind its teardown gate after 32.32 min. Attempts 5, 6 and 7 aborted before any measurement for `$0.1033` between them | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
-| blocker | **A FUNDING DECISION IS REQUIRED.** The C2 full joint re-search plus its behavioural selection does not fit the remaining `$22.4910` at any priced beam width — cheapest complete chain ceiling `$49.6123`, short `$27.1213` — and `plan_session` refuses the search at the standing width. Design, space derivation, pricing and validation are complete. Nothing may start: the full search, the behavioural stage, the withdrawn Search-2, C3 and any remeasurement of B each need a decision | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| blocker | **A FUNDING DECISION IS REQUIRED.** At the **standing** beam width 6 the full joint re-search plus its behavioural selection needs ceilings of `$61.0735` against `$22.4910` remaining — short `$38.5825`, minimum cumulative cap `$358.5825`, and stating that is not requesting it. `plan_session` refuses the search at that width. Narrower beams are priced as scientific **alternatives**, never as a way to fit the cap. Design, space derivation, pricing and validation are complete. Nothing may start: the full search, the behavioural stage, the withdrawn Search-2, C3 and any remeasurement of B each need a decision | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness

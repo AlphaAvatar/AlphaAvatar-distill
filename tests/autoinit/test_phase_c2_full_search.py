@@ -301,24 +301,86 @@ def test_the_search_does_not_fit_the_remaining_headroom(space, registered):
                  authorized_usd=remaining, beam_width=6)
 
 
-def test_the_recorded_shortfall_is_recomputable():
-    """The pricing document's blocker arithmetic must be derivable from it."""
+def test_the_funding_requirement_is_the_standing_design_not_the_cheapest():
+    """The blocker must price the STANDING beam width, not the cheapest one.
+
+    A narrower beam explores less of the same space and can return a different
+    front, so quoting its chain as the funding requirement would fund a
+    different experiment from the one the protocol proposes. Beam 2/3/4 stay
+    documented as scientific alternatives; they must not be the requirement.
+    """
+    from aadistill.initialization.planning.ranking import SCHEDULE_V1
+
     doc = json.loads(PRICING.read_text())
     blocker = doc["blocker"]
+    combined = doc["combined"]
+    selection = doc["behavioural_selection"]
+
+    assert blocker["standing_beam_width"] == SCHEDULE_V1.width
+    standing = next(r for r in doc["search"]["widths"]
+                    if r["beam_width"] == SCHEDULE_V1.width)
+    chain = round(standing["hard_ceiling_usd"]
+                  + selection["hard_ceiling_usd"], 4)
+    assert blocker["complete_chain_hard_usd"] == chain
+    assert combined["hard_ceiling_usd"] == chain
+
+    #: And it is NOT the cheapest chain, which is the mistake being guarded.
     cheapest = min(doc["search"]["widths"],
                    key=lambda r: r["hard_ceiling_usd"])
-    selection = doc["behavioural_selection"]
-    chain = round(cheapest["hard_ceiling_usd"]
-                  + selection["hard_ceiling_usd"], 4)
-    assert blocker["cheapest_complete_chain_hard_usd"] == chain
+    if cheapest["beam_width"] != SCHEDULE_V1.width:
+        assert chain > round(cheapest["hard_ceiling_usd"]
+                             + selection["hard_ceiling_usd"], 4)
+        assert not any("cheapest" in key for key in blocker), (
+            "the blocker still frames a cheapest-width chain as the "
+            "requirement")
+
+    #: The arithmetic a reviewer would redo.
+    remaining = doc["budget_position"]["remaining_usd"]
     assert blocker["shortfall_on_hard_ceilings_usd"] == pytest.approx(
-        round(chain - doc["budget_position"]["remaining_usd"], 4), abs=1e-4)
+        round(chain - remaining, 4), abs=1e-4)
     assert blocker["shortfall_on_hard_ceilings_usd"] > 0
+    assert blocker["minimum_cumulative_cap_usd"] == pytest.approx(
+        round(doc["budget_position"]["cumulative_spend_usd"] + chain, 4),
+        abs=1e-4)
+
+    #: Narrower widths are present, and labelled as alternatives rather than
+    #: offered as cost options.
+    alternatives = {r["beam_width"]
+                    for r in combined["scientific_alternatives_not_cost_options"]}
+    assert alternatives and SCHEDULE_V1.width not in alternatives
+    assert "not permitted" in blocker["the_narrower_beams_are_not_the_requirement"]
+
     #: At least one width must be recorded as refused, with the refusal text.
     refused = [r for r in doc["search"]["widths"]
                if not r["fits_remaining_headroom"]]
     assert refused, "no width was recorded as refused; the blocker has no basis"
     assert all(r["refusal"] for r in refused)
+
+
+def test_multi_session_continuation_is_not_claimed_as_a_capability():
+    """Content-derived ids are an identity, not the bytes.
+
+    The frozen Search-1 plan records that the multi-gigabyte search workdir
+    cannot be relayed for resume, so a fresh provider resource must re-derive
+    lost state. This round implemented and validated no durable cross-session
+    mechanism, and no pricing option may assume one exists.
+    """
+    doc = json.loads(PROTOCOL.read_text())
+    block = doc["execution_capabilities_this_round_did_not_build"][
+        "multi_session_continuation"]
+    assert block["implemented_this_round"] is False
+    assert block["validated_this_round"] is False
+    assert "NOT A CURRENT CAPABILITY" in block["status"]
+
+    #: The claim is sourced to the frozen document that actually says it.
+    source = (REPO / block["source"]).read_text()
+    assert "cannot be relayed for resume" in source
+
+    #: And nothing in the pricing plans around a continuation.
+    pricing = json.loads(PRICING.read_text())
+    for option in pricing["blocker"]["options_for_the_maintainer"]:
+        assert "continuation" not in option.lower()
+        assert "resume" not in option.lower()
 
 
 def test_the_budget_position_is_derived_not_restated():

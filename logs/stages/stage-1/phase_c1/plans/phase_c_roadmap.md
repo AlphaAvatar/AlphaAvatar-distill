@@ -20,9 +20,11 @@ The Phase-C0 protocol is frozen in
 evidence in [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json).
 
 Nothing on this page is authorization for compute. The C2 full joint re-search
-is **blocked on budget**, not on design: the complete chain does not fit the
-remaining project headroom at any priced beam width — see
-[`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json).
+is **blocked on budget**, not on design: the complete chain at the standing beam
+width does not fit the remaining project headroom — see
+[`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json),
+which owns every figure and states the minimum cap that would contain both
+ceilings. Stating that minimum is not requesting it.
 
 Formal Stage-2/Stage-3 recovery training remains **deferred** until the
 operator-development programme is complete. No search-stage front and no Phase-B
@@ -221,12 +223,17 @@ is for. Everything else applicable competes, including the cheap
 `depth.positional_v0` and `composite.stage1_sandwich_v0`. If the promotion is
 ever withdrawn, the exclusion is withdrawn with it.
 
-**The beam is a budget lever, not a scientific one.** The ranking policy, its
-objectives and its ε are frozen and unchanged. Beam **width** is the only
-parameter left to the funding decision, because it trades cost against how much
-of the *same* space is carried forward. The chosen width is registered before
-launch. The goal is never exhaustive enumeration of every leaf — it is that
-every admissible alternative *competes inside one search*.
+**Beam width 6 is part of the design.** The ranking policy, its objectives and
+its ε are frozen and unchanged, and the standing width is what `SCHEDULE_V1`
+declares and what this protocol proposes. A narrower beam leaves the space
+intact but carries fewer partial paths forward, so it explores less of it and
+can return a different front: adopting one is a **changed experiment** with
+reduced breadth, to be registered as the width before launch. **Narrowing the
+beam merely to fit an existing cap is not permitted** — the pricing record
+prices the alternatives so breadth can be traded deliberately, not so the
+authorization number can be made smaller. The goal is never exhaustive
+enumeration of every leaf — it is that every admissible alternative *competes
+inside one search*.
 
 ### C2c — Top-K, then bounded behavioural selection · **DEFINED, PRICED, NOT FUNDED**
 
@@ -283,6 +290,13 @@ C2b/C2c pair repeats with the newly promoted operator in the accepted library:
 another full joint re-search, another Top-K, another behavioural selection.
 
 If C3 does not promote, C4 does not run and the C2 incumbent stands.
+
+> **A >1-session search is not currently available.** Search state ids are
+> content-derived, which gives a state an identity — not its bytes. The frozen
+> Search-1 plan records that the multi-gigabyte search workdir *cannot be
+> relayed for resume*, so a fresh provider resource must re-derive lost state.
+> No durable cross-session mechanism was implemented or validated, and none was
+> built: it is a possible future design option, and no plan here may assume it.
 
 This is the same cycle as C1→C2, and that repetition is deliberate: it is a
 **pattern**, documented family-neutrally in

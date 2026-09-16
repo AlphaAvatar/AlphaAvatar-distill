@@ -55,26 +55,51 @@
   times *below* that proxy, so the margin was conservative in the safe
   direction and is retired; and `depth.causal_kl_greedy_v1` deeper went the
   other way, `31.10 → 36.07` min, which is the single figure the price turns on.
-- **THE BLOCKER: the chain does not fit the remaining `$22.4910`.**
+- **THE BLOCKER: the STANDING design does not fit the remaining `$22.4910`.**
+  Beam width 6 is what `SCHEDULE_V1` declares and what the protocol proposes, so
+  it is the width the funding requirement is priced at.
 
   ```text
-  full joint re-search   beam 6   expected $16.10   ceiling $33.18   REFUSED
-                         beam 4   expected $15.41   ceiling $27.45   REFUSED
-                         beam 3   expected $15.07   ceiling $24.59   REFUSED
-                         beam 2   expected $14.73   ceiling $21.72   fits
-  behavioural selection  11 probes, 4 conditional   ceiling $27.8908
-  cheapest complete chain                           ceiling $49.6123
-  shortfall on hard ceilings                                $27.1213
+  full joint re-search   beam 6 (STANDING)  expected $16.0998  ceiling $33.1827  REFUSED
+  behavioural selection  11 probes + 4 conditional             ceiling $27.8908
+  complete standing chain                   expected $35.2120  ceiling $61.0735
+  remaining headroom                                           $22.4910
+  shortfall on ceilings                                        $38.5825
+  minimum cumulative cap containing both                      $358.5825
   ```
 
-  `plan_session` **refuses** the search at the standing beam width against real
-  headroom, and each refusal is recorded per width. Beam 2 fits the search alone
-  and leaves `$0.77` — not enough for any behavioural stage, so funding only the
-  search would fund a chain that cannot reach a verdict.
+  Stating that minimum is not requesting it.
+
+  **Narrower beams are scientific alternatives, not cost options.**
+
+  ```text
+  beam 4   expected $15.4139  ceiling $27.4521  REFUSED   alternative
+  beam 3   expected $15.0709  ceiling $24.5867  REFUSED   alternative
+  beam 2   expected $14.7277  ceiling $21.7215  fits      alternative
+  ```
+
+  A narrower beam leaves the space intact but carries fewer partial paths
+  forward, so it explores less of it and can return a different front: adopting
+  one is a CHANGED experiment with reduced breadth, registered as the width
+  before launch. **Narrowing the beam merely to fit the existing cap is not
+  permitted**, and the `$49.6123` beam-2 chain is not this protocol's
+  requirement. Beam 2 fits the search *alone* and leaves `$0.77` — not enough
+  for any behavioural stage, so funding only the search would fund a chain that
+  cannot reach a verdict either way.
+
+  `plan_session` **refuses** the search at the standing width against real
+  headroom, and each refusal is recorded per width.
+
+  Every figure is computed from the 4-dp stored ceilings. Adding the
+  *display-rounded* search ceiling (`$33.18`) gives `$61.0708` and a minimum cap
+  of `$358.5798`, `$0.0027` **below** the derived values; a ceiling rounds up, so
+  the derived figures are the ones to fund.
 - **Not resolved by shrinking.** The budget module exists to prevent exactly
-  that, and the scope was not quietly narrowed to fit. The options — raise the
-  cap, fund the search alone at a registered narrower width, or accept a
-  restricted search again and lose the joint-pruning property — are a scientific
+  that, and the scope was not quietly narrowed to fit. The options — fund the
+  standing design by raising the cumulative cap to at least the minimum above;
+  deliberately adopt a narrower beam as a *changed* design with reduced breadth,
+  registered as the width before launch; or decline for now and leave C2 at the
+  accepted Search-1 evidence, which selects no incumbent — are a scientific
   trade, and the trade is the maintainer's.
 - **Roadmap restructured** to C1–C4: C1 ATTENTION isolation (COMPLETE, `GO`);
   C2 restricted evidence + full joint re-search + behavioural selection; C3
@@ -96,12 +121,23 @@
   recreates the restriction the experiment exists to remove.
 - **Risks:** the search may still not finish inside any funded envelope; Phase B
   ran 9.08 h on a *smaller* space without finishing. The bound is over beam
-  compositions rather than averages precisely because that happened, and the
-  search is resumable by content-derived state id, so a multi-session
-  continuation is possible — but it would need its own cumulative envelope.
+  compositions rather than averages precisely because that happened.
+- **Multi-session continuation is NOT a current capability, and an earlier draft
+  of this record wrongly implied it was.** Content-derived state ids give a
+  state an *identity*; they do not preserve the bytes. The frozen Search-1 plan
+  records the actual constraint — "the search workdir holds multi-gigabyte
+  intermediates that cannot be relayed for resume" — so a fresh provider
+  resource would have to **re-derive** any lost state, which is the expensive
+  part. Resuming across sessions would need durable large-artifact staging,
+  cross-session workdir transport and resume semantics that **this round did not
+  implement and did not validate**. It is recorded here as a possible FUTURE
+  DESIGN OPTION only, and no persistence subsystem was built for it: the same
+  reasoning the maintainer applied to probe retention on 2026-09-05 applies
+  here — disproportionate to the present blocker, and it would enlarge the
+  change surface of the next paid attempt.
 - **Where it lives:**
   `logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json`
-  (`5ace5a4d…`), `phase_c2_full_search_pricing.json` (`b59b28e3…`) — both DETERMINISTIC, so regenerating
+  (`19d293a6…`), `phase_c2_full_search_pricing.json` (`e5441f49…`) — both DETERMINISTIC, so regenerating
   them is a verification rather than a new document,
   the roadmap, and `docs/OPERATOR_PROMOTION_CYCLE.md`. Nothing in
   `src/aadistill`.

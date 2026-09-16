@@ -60,10 +60,15 @@ PRICING_OUT = ("logs/stages/stage-1/phase_c2/plans/"
 PROTOCOL_SCHEMA = "aadistill.autoinit.c2_full_search_protocol/v1"
 PRICING_SCHEMA = "aadistill.autoinit.c2_full_search_pricing/v1"
 
-#: The beam widths priced. The standing schedule first, then progressively
-#: narrower ones, because the only lever that does not change the SPACE is how
-#: much of it the beam carries forward.
-PRICED_WIDTHS = (SCHEDULE_V1.width, 4, 3, 2)
+#: The STANDING scientific design: what SCHEDULE_V1 declares and what this
+#: protocol proposes. The funding requirement is this width's chain.
+STANDING_WIDTH = SCHEDULE_V1.width
+
+#: Narrower widths are priced too, as explicit scientific ALTERNATIVES. They are
+#: not cost options: a narrower beam carries less of the same space forward, so
+#: adopting one is a changed experiment with its own result. Narrowing the beam
+#: merely to fit the existing cap is not permitted.
+PRICED_WIDTHS = (STANDING_WIDTH, 4, 3, 2)
 
 #: The frozen behavioural science this stage reuses UNCHANGED. Every value is
 #: read from the Phase-B preregistration rather than restated, so a drift in
@@ -142,13 +147,15 @@ def search_pricing(space) -> dict[str, Any]:
             "the launcher would never use."),
         "widths": rows,
         "_what_the_width_changes": (
-            "the beam width is the only lever that narrows COST without "
-            "narrowing the SPACE: every admissible alternative still competes "
-            "and calibration still affects pruning, but fewer partial paths are "
-            "carried to the next level. Narrowing the space instead — pinning a "
-            "calibration, dropping an implementation — would change the "
-            "experiment into a restricted search, which is the thing Search-1 "
-            "already did."),
+            "a narrower beam leaves the SPACE intact — every admissible "
+            "alternative still competes and calibration still affects pruning — "
+            "but carries fewer partial paths to the next level, so it explores "
+            "less of that space and can return a different front. It is "
+            "therefore a change of EXPERIMENT, not a discount on this one, and "
+            "these rows exist so the trade can be made deliberately rather than "
+            "to supply a smaller authorization number. Narrowing the space "
+            "itself — pinning a calibration, dropping an implementation — would "
+            "recreate the restriction Search-1 already ran."),
     }
 
 
@@ -269,13 +276,18 @@ def protocol() -> dict[str, Any]:
             "epsilon": dict(PARETO_V1.epsilon),
             "schedule_id": SCHEDULE_V1.schedule_id,
             "warmup_levels": SCHEDULE_V1.warmup_levels,
-            "standing_width": SCHEDULE_V1.width,
-            "width_is_a_budget_decision": (
+            "standing_width": STANDING_WIDTH,
+            "width_is_part_of_the_design": (
                 "the ranking policy, its objectives and its epsilon are FROZEN "
-                "and unchanged. The beam WIDTH is the one parameter this plan "
-                "leaves to the funding decision, because it trades cost against "
-                "how much of the same space is carried forward. The chosen "
-                "width must be registered before launch."),
+                "and unchanged, and the standing beam width is part of the "
+                "proposed DESIGN rather than a dial left to the funding "
+                "decision. A narrower beam carries less of the same space "
+                "forward, so adopting one is a changed experiment with reduced "
+                "breadth and its own result — a scientific decision that must be "
+                "registered as the width before launch. Narrowing the beam "
+                "MERELY to fit an existing cap is not permitted; the pricing "
+                "record prices the alternatives so the trade can be made "
+                "deliberately, not so the number can be made smaller."),
             "_beam_is_not_exhaustive_enumeration": (
                 "the point is not to measure every leaf. It is that every "
                 "admissible alternative COMPETES inside one search, so a "
@@ -338,6 +350,33 @@ def protocol() -> dict[str, Any]:
                 "the funding decision see the whole chain instead of the first "
                 "half."),
         },
+        "execution_capabilities_this_round_did_not_build": {
+            "multi_session_continuation": {
+                "status": "NOT A CURRENT CAPABILITY — possible future design option",
+                "why_it_is_tempting": (
+                    "search state ids are content-derived, so a state has a "
+                    "stable identity across sessions and the journal can be "
+                    "replayed within one."),
+                "why_that_is_not_enough": (
+                    "an identity is not the bytes. The frozen Search-1 plan "
+                    "records the real constraint: the search workdir holds "
+                    "multi-gigabyte intermediates that CANNOT be relayed for "
+                    "resume, so a fresh provider resource would have to "
+                    "re-derive any lost state — which is the expensive part. "
+                    "Resuming across sessions would need durable "
+                    "large-artifact staging, cross-session workdir transport "
+                    "and resume semantics."),
+                "implemented_this_round": False,
+                "validated_this_round": False,
+                "_so_do_not_plan_around_it": (
+                    "no pricing, option or contingency in these documents may "
+                    "assume a >1-session search. If the search cannot finish "
+                    "inside one funded session, that is a scope question, not "
+                    "something a continuation currently rescues."),
+                "source": ("logs/stages/stage-1/phase_c2/plans/"
+                           "phase_c2_search1_plan.md"),
+            },
+        },
         "frozen_and_untouchable": {
             "artifacts": list(FROZEN_SEARCH1),
             "rule": (
@@ -378,20 +417,38 @@ def pricing(space) -> dict[str, Any]:
                           repo_root=REPO_ROOT)
     budget = budget_position()
 
-    cheapest = min(search["widths"], key=lambda r: r["hard_ceiling_usd"])
     standing = next(r for r in search["widths"]
-                    if r["beam_width"] == SCHEDULE_V1.width)
+                    if r["beam_width"] == STANDING_WIDTH)
+    #: The FUNDING REQUIREMENT is the standing design's chain. Narrower widths
+    #: are priced as scientific alternatives and are deliberately NOT offered as
+    #: a way to fit the existing cap.
+    alternatives = [
+        {"beam_width": r["beam_width"],
+         "expected_usd": round(r["expected_usd"] + selection["expected_usd"], 4),
+         "hard_ceiling_usd": round(
+             r["hard_ceiling_usd"] + selection["hard_ceiling_usd"], 4),
+         "_is_a_different_experiment": (
+             "a narrower beam carries less of the same space forward, so it is a "
+             "scientific trade in breadth with its own result, not a cheaper way "
+             "to run this one")}
+        for r in search["widths"] if r["beam_width"] != STANDING_WIDTH]
     combined = {
         "chain": "full joint re-search -> Top-5 -> behavioural selection",
-        "expected_usd_at_standing_width": round(
+        "standing_beam_width": STANDING_WIDTH,
+        "_standing_width_is_the_design": (
+            "beam width 6 is what SCHEDULE_V1 declares and what this protocol "
+            "proposes. The funding requirement below is the standing design's, "
+            "and the alternatives are recorded so breadth can be traded "
+            "DELIBERATELY -- never so the authorization number can be made "
+            "smaller by narrowing the science."),
+        "expected_usd": round(
             standing["expected_usd"] + selection["expected_usd"], 4),
-        "hard_ceiling_usd_at_standing_width": round(
+        "hard_ceiling_usd": round(
             standing["hard_ceiling_usd"] + selection["hard_ceiling_usd"], 4),
-        "expected_usd_at_cheapest_width": round(
-            cheapest["expected_usd"] + selection["expected_usd"], 4),
-        "hard_ceiling_usd_at_cheapest_width": round(
-            cheapest["hard_ceiling_usd"] + selection["hard_ceiling_usd"], 4),
+        "search_hard_ceiling_usd": standing["hard_ceiling_usd"],
+        "selection_hard_ceiling_usd": selection["hard_ceiling_usd"],
         "remaining_usd": budget["remaining_usd"],
+        "scientific_alternatives_not_cost_options": alternatives,
         "_two_sessions": (
             "these are two separate paid sessions with separate one-use "
             "authorizations, not one launch. The behavioural stage cannot start "
@@ -401,10 +458,14 @@ def pricing(space) -> dict[str, Any]:
             "cannot reach a verdict."),
     }
     shortfall_expected = round(
-        combined["expected_usd_at_cheapest_width"] - budget["remaining_usd"], 4)
+        combined["expected_usd"] - budget["remaining_usd"], 4)
     shortfall_hard = round(
-        combined["hard_ceiling_usd_at_cheapest_width"]
-        - budget["remaining_usd"], 4)
+        combined["hard_ceiling_usd"] - budget["remaining_usd"], 4)
+    #: What the project cap would have to be to CONTAIN both ceilings, derived
+    #: from the cumulative spend rather than from the headroom, so it does not
+    #: silently depend on the current cap being 320.
+    minimum_cap = round(
+        budget["cumulative_spend_usd"] + combined["hard_ceiling_usd"], 4)
 
     return {
         "schema": PRICING_SCHEMA,
@@ -418,35 +479,53 @@ def pricing(space) -> dict[str, Any]:
         "combined": combined,
         "budget_position": budget,
         "blocker": {
-            "status": "INSUFFICIENT PROJECT HEADROOM",
+            "status": "INSUFFICIENT PROJECT HEADROOM FOR THE STANDING DESIGN",
+            "standing_beam_width": STANDING_WIDTH,
             "remaining_usd": budget["remaining_usd"],
-            "cheapest_complete_chain_expected_usd":
-                combined["expected_usd_at_cheapest_width"],
-            "cheapest_complete_chain_hard_usd":
-                combined["hard_ceiling_usd_at_cheapest_width"],
+            "complete_chain_expected_usd": combined["expected_usd"],
+            "complete_chain_hard_usd": combined["hard_ceiling_usd"],
             "shortfall_on_expected_usd": shortfall_expected,
             "shortfall_on_hard_ceilings_usd": shortfall_hard,
+            "minimum_cumulative_cap_usd": minimum_cap,
+            "_minimum_cap_meaning": (
+                "the smallest cumulative project cap that CONTAINS both "
+                "ceilings: cumulative spend plus the complete standing chain. "
+                "Stating it is not requesting it."),
             "what_it_means": (
-                "the complete chain does not fit the remaining project headroom "
-                "at ANY priced beam width, and the search alone does not fit at "
-                "the standing width — plan_session refuses it, and the refusal "
-                "text is recorded per width above. This is a maintainer "
-                "decision: raise the cap, or reduce the scientific scope. It is "
+                "the complete chain at the STANDING beam width does not fit the "
+                "remaining project headroom, and neither does the search alone "
+                "— plan_session refuses it, and the refusal text is recorded "
+                "per width above. This is a maintainer decision and it is "
                 "deliberately NOT resolved here by shrinking the run to fit, "
                 "which is the one repair the budget module exists to prevent."),
+            "the_narrower_beams_are_not_the_requirement": (
+                "beam 2/3/4 are priced above as scientific alternatives. They "
+                "must NOT be read as the funding requirement for this protocol: "
+                "the standing design is beam 6, and a narrower beam carries less "
+                "of the same space forward, which is a different experiment with "
+                "its own result. Narrowing the beam MERELY to fit the existing "
+                "cap is not permitted."),
             "options_for_the_maintainer": [
-                "raise the project cap by at least the shortfall on hard "
-                "ceilings, keeping the standing beam width and the full space",
-                "fund the search alone at a narrower registered beam width and "
-                "decide the behavioural stage separately once a candidate set "
-                "exists — accepting that a cheap-metric front promotes nothing",
-                "reduce the scientific scope, which means accepting a restricted "
-                "search again and losing the joint-pruning property this "
-                "experiment exists to obtain",
+                "fund the standing design: raise the cumulative project cap to "
+                "at least the minimum above, keeping beam width 6 and the full "
+                "space",
+                "deliberately adopt a narrower beam as a CHANGED scientific "
+                "design, accepting reduced breadth and recording it as the "
+                "registered width before launch — not as a cost workaround",
+                "decline for now and leave C2 at the accepted Search-1 evidence, "
+                "which selects no incumbent",
             ],
             "_not_a_recommendation": (
                 "the trade is scientific, not arithmetic: the arithmetic is "
                 "above and the choice is the maintainer's."),
+            "_rounding_note": (
+                "every figure here is computed from the 4-dp stored ceilings. A "
+                "review message that added the DISPLAY-rounded search ceiling "
+                "($33.18) reaches a chain of $61.0708 and a minimum cap of "
+                "$358.5798, which is $0.0027 BELOW the derived figures. A "
+                "ceiling must round up, so the derived values are the ones to "
+                "fund: a cap set at the display-rounded figure would not "
+                "contain both ceilings."),
         },
         "authorizes": "nothing",
     }
@@ -475,19 +554,24 @@ def main(argv=None) -> int:
               f"Phase-B reference "
               f"{proto['space']['phase_b_reference']['total_leaves']}")
         for row in price_doc["search"]["widths"]:
+            mark = " <- STANDING DESIGN" if row["beam_width"] == STANDING_WIDTH \
+                else " (scientific alternative, not a cost option)"
             print(f"  width {row['beam_width']}: expected "
-                  f"${row['expected_usd']:.2f} ceiling "
-                  f"${row['hard_ceiling_usd']:.2f} "
-                  f"fits={row['fits_remaining_headroom']}")
+                  f"${row['expected_usd']:.4f} ceiling "
+                  f"${row['hard_ceiling_usd']:.4f} "
+                  f"fits={row['fits_remaining_headroom']}{mark}")
         print(f"selection        : expected "
-              f"${price_doc['behavioural_selection']['expected_usd']:.2f} "
+              f"${price_doc['behavioural_selection']['expected_usd']:.4f} "
               f"ceiling "
-              f"${price_doc['behavioural_selection']['hard_ceiling_usd']:.2f}")
+              f"${price_doc['behavioural_selection']['hard_ceiling_usd']:.4f}")
         b = price_doc["blocker"]
-        print(f"BLOCKER          : {b['status']} — remaining "
-              f"${b['remaining_usd']:.4f}, cheapest complete chain "
-              f"${b['cheapest_complete_chain_hard_usd']:.4f}, shortfall "
-              f"${b['shortfall_on_hard_ceilings_usd']:.4f}")
+        print(f"BLOCKER          : {b['status']}")
+        print(f"  standing beam {b['standing_beam_width']} complete chain: "
+              f"expected ${b['complete_chain_expected_usd']:.4f}, ceiling "
+              f"${b['complete_chain_hard_usd']:.4f}")
+        print(f"  remaining ${b['remaining_usd']:.4f}  shortfall "
+              f"${b['shortfall_on_hard_ceilings_usd']:.4f}  minimum cap "
+              f"${b['minimum_cumulative_cap_usd']:.4f}")
         print("nothing written (pass --write)")
         return 0
 

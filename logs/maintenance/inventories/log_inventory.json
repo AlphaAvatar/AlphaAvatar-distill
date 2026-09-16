@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-16T17:32:06+00:00",
+  "created_utc": "2026-09-16T18:36:04+00:00",
   "command": "scripts/consolidate/build_log_inventory.py",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1187,
-    "bytes": 44193504,
+    "bytes": 44202336,
     "by_disposition": {
       "keep_canonical": 81,
       "keep_immutable": 921,
@@ -3928,6 +3928,13 @@
       ]
     },
     {
+      "sentence": "`plan_session` **refuses** the search at the standing width against real",
+      "files": [
+        "logs/budget/decisions.md",
+        "logs/state/current.md"
+      ]
+    },
+    {
       "sentence": "`str(calib_path)` would have written **734,042 characters** of serialized",
       "files": [
         "logs/budget/decisions.md",
@@ -4306,8 +4313,8 @@
     },
     {
       "path": "docs/OPERATOR_PROMOTION_CYCLE.md",
-      "size_bytes": 8099,
-      "sha256": "63cea035ab287cfa9807834b530020998fb339576eb828332f4b169656fa759a",
+      "size_bytes": 8738,
+      "sha256": "378a5f8815024efcafd70670b7a3e874201df85be8b4ed7aa74c68884b54a1c8",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -5108,8 +5115,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 855256,
-      "sha256": "44b710b2d3544a5700ac63da855708e176fd7365c4b5d61401ae5e5f323b6f72",
+      "size_bytes": 857355,
+      "sha256": "7eb1696fae2bc170038f67ef9bf253174c7e9850a3a4e0c3a6bbbd50b4ca895f",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -12019,8 +12026,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
-      "size_bytes": 16565,
-      "sha256": "90ff099b9a692db282b77fac7190517f45b99b6b139474e974c65648bc4cf9d5",
+      "size_bytes": 17503,
+      "sha256": "11366ce2ee81e0ad80b8bc07a380363b31a9edd7db73f5310139f91535cdd21c",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17347,8 +17354,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
-      "size_bytes": 7271,
-      "sha256": "48d20183ffe040cacd5c70d607d03078f77a533c73af780a0983b20f1d3a3e75",
+      "size_bytes": 9562,
+      "sha256": "e3ea66181998088246d5acf0afb2f0df0304ccd698497212d3c09af5750b0778",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17366,8 +17373,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
-      "size_bytes": 19020,
-      "sha256": "ccb58af9aa81f97c34284075822aa92c04b1c789fab80375e01bcc41e810eccb",
+      "size_bytes": 20485,
+      "sha256": "2fdc3904932dc5d337a46c8e1409f47d479bb2f7b52f9aee480d5473760e8167",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17417,6 +17424,7 @@
         "configs/experiments/phase_c2/authorization.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/index.json",
+        "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
         "scripts/consolidate/stage_attribution.py",
         "scripts/experiments/phase_c2/session.py"
       ],
@@ -22466,8 +22474,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11836,
-      "sha256": "aa43d73352bd8471c2d345117d68ac965d8e01796920492da9dd2ee82002095c",
+      "size_bytes": 11977,
+      "sha256": "e2bb8406941f880d2db5a464ce3a540e302c1036adbae4e9bb0ee8f04a273771",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22510,8 +22518,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 32296,
-      "sha256": "4eab19ea87f0f982625e225830154139c9e01c0eb46b55db51bb5d827361234b",
+      "size_bytes": 33555,
+      "sha256": "86257235e2c49604ce36e219f9ee0a35910ffba32f6338049279e7462412c974",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

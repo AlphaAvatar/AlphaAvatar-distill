@@ -93,17 +93,26 @@ interval.
    the ranking policy could return and take the extremum; optimise minutes and
    expansion counts *separately*, because deferring the expensive operator is
    cheap now and expensive later.
-5. **The beam width is the budget lever.** Policy, objectives and ε stay frozen;
-   width trades cost against how much of the same space is carried forward.
+5. **The beam width is part of the design, not a discount.** Policy, objectives
+   and ε stay frozen, and so does the standing width. A narrower beam leaves the
+   space intact but explores less of it and can return a different front, so
+   adopting one is a changed experiment to be registered deliberately —
+   **never a way to make an authorization number fit an existing cap.**
    Narrowing the *space* instead turns a joint search back into a restricted
-   one, which is a different experiment.
-6. **Register the candidate rule before the results.** Top-K, the anchors and
+   one, which is a different experiment again.
+6. **Do not assume you can resume across sessions.** Content-derived state ids
+   are an identity, not the bytes; a multi-gigabyte search workdir that cannot
+   be relayed means a fresh resource re-derives what was lost. Unless durable
+   cross-session staging has been *implemented and validated*, price a search as
+   one session and treat "split it up" as a design project rather than a
+   contingency.
+7. **Register the candidate rule before the results.** Top-K, the anchors and
    the rung schedule are fixed in advance. A set that can grow once results are
    visible is not a preregistered set.
-7. **Price the whole chain before funding the first half.** A search that fits
+8. **Price the whole chain before funding the first half.** A search that fits
    the budget and a behavioural stage that does not is a chain that cannot reach
    a verdict. When it does not fit, say so — do not shrink the run to fit.
-8. **Every exclusion is a recorded scientific claim.** Cost is not a reason.
+9. **Every exclusion is a recorded scientific claim.** Cost is not a reason.
 
 ---
 
