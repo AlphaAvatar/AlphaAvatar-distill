@@ -41,6 +41,7 @@ the full-search protocol; nothing here is retyped.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -179,8 +180,6 @@ def derive_ceiling_usd(price_per_hour: float,
     under-authorizes the plan it is supposed to cover -- the C1 grant found
     this at $15.147403 against a recorded $15.1474.
     """
-    import math
-
     minutes = float(_standing_row(repo_root)["hard_ceiling_minutes"])
     exact = minutes / 60.0 * float(price_per_hour)
     return math.ceil(exact * 10_000) / 10_000
@@ -287,24 +286,42 @@ def _state_gib(spec) -> float:
 
 
 def peak_resident_gib(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
-    """The most search state resident at once, DERIVED from the real space.
+    """The most search state resident at once, following the REAL lifecycle.
 
-    Not inherited from Search-1. Search-1's launcher provisions for a 87.4 GiB
-    peak, reached at level 1 with five retained level-0 states expanded into
-    eighteen children. The joint space is a different shape: every operator kind
-    may go first, so level 0 generates eleven children of which nine continue,
-    and level 1 expands those nine into SIXTY. Carrying the 87.4 across would
-    under-provision by a factor of nearly three, and a volume that fills at
-    level 1 loses every state measured up to that point.
+    Not inherited from Search-1, and not the first model I wrote. Search-1's
+    launcher provisions for a 87.4 GiB peak; the joint space is a different
+    shape, because every operator kind may go first, so level 0 generates
+    eleven children of which nine continue and level 1 expands those nine into
+    sixty.
 
-    The residency model is the search's own behaviour rather than an assumption:
-    `BeamSearch` generates a whole level, ranks it, and only THEN calls
-    `_release_weights` on what it pruned -- so every child of a level is on disk
-    simultaneously. Completed leaves are never released at all, so they
-    accumulate, and the walk adds them.
+    **What is actually released, from `BeamSearch.run`.** `_release_weights` is
+    called in exactly one place: on the PARTIAL children that the current
+    level's ranking pruned. Nothing else is ever released. So the filesystem
+    also holds, permanently:
 
-    The beam kept at each level is the most EXPENSIVE admissible one, not the
-    average: a bound over compositions, for the same reason the cost ceiling is.
+    * the ROOT state;
+    * every state that was SELECTED into a beam and then expanded -- it leaves
+      the beam when its children are ranked, but no call drops its weights;
+    * every DEAD END, a parent with no admissible expansion that is not a leaf;
+    * every COMPLETED LEAF, which is the point of the search.
+
+    An earlier version of this function modelled `current parents + current
+    children + accumulated leaves` and therefore missed the expanded ancestors
+    entirely. That was not a sound upper bound, and review caught it before a
+    volume was provisioned from it. The walk below adds a state when it is
+    generated and removes it only where the search removes it, so the model is
+    the lifecycle rather than a summary of it.
+
+    Two choices keep it an upper BOUND rather than an estimate:
+
+    * the peak is taken after a level's children are all materialized and
+      BEFORE its pruning, because that is the order `run` executes in;
+    * the beam kept at each level is the most EXPENSIVE admissible one, which
+      also minimises what gets released -- both push residency up.
+
+    Classes are level-stratified (a state at level L has exactly L operators
+    applied), so a newly generated child can never be confused with an ancestor
+    of the same class when the pruned ones are subtracted.
     """
     from experiments import search_cost_model as _M
 
@@ -316,63 +333,269 @@ def peak_resident_gib(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     #: A finished leaf is the target geometry, whatever path reached it.
     target_gib = _state_gib(space.target)
 
+    def size_of(multiset: dict) -> float:
+        return sum(_state_gib(space.spec_of(cls)) * n
+                   for cls, n in multiset.items() if n)
+
+    #: The root is generated before the loop and never released.
+    resident: dict[frozenset, int] = {frozenset(): 1}
+    resident_leaf_gib = 0.0
     beam: tuple[tuple[frozenset[str], int], ...] = ((frozenset(), 1),)
-    level, accumulated, levels = 0, 0.0, []
+    level, levels = 0, []
     while beam:
         _minutes, partial, generated = _M.level_children(
             space, beam, cost, statistic="max")
-        parents = sum(_state_gib(space.spec_of(cls)) * n for cls, n in beam)
-        children = sum(_state_gib(space.spec_of(cls)) * n
-                       for cls, n in partial.items())
-        n_leaves = generated - sum(partial.values())
-        resident = parents + children + n_leaves * target_gib + accumulated
+        n_partial = sum(partial.values())
+        n_leaves = generated - n_partial
+
+        #: Every child of this level is materialized before any is ranked.
+        for cls, n in partial.items():
+            resident[cls] = resident.get(cls, 0) + n
+        resident_leaf_gib += n_leaves * target_gib
+        ancestors_gib = size_of({c: n for c, n in resident.items()
+                                 if c not in partial})
+        children_gib = size_of(partial)
+        peak_here = ancestors_gib + children_gib + resident_leaf_gib
+
+        #: Now the level prunes -- and only the partial children it rejected.
+        if level < warmup:
+            kept = dict(partial)
+        else:
+            kept, left = {}, width
+            for cls, n in sorted(partial.items(),
+                                 key=lambda kv: -_state_gib(space.spec_of(kv[0]))):
+                take = min(n, left)
+                if take:
+                    kept[cls] = take
+                    left -= take
+        released = {cls: n - kept.get(cls, 0) for cls, n in partial.items()}
+        for cls, n in released.items():
+            if n:
+                resident[cls] -= n
+
         levels.append({
             "level": level,
             "parents": sum(n for _c, n in beam),
             "generated": generated,
             "completed_leaves": n_leaves,
-            "parents_gib": round(parents, 2),
-            "children_gib": round(children, 2),
-            "accumulated_leaves_gib": round(accumulated, 2),
-            "resident_gib": round(resident, 2),
+            "partial_children": n_partial,
+            "kept_in_beam": sum(kept.values()),
+            "released_here": sum(released.values()),
+            "retained_ancestors_gib": round(ancestors_gib, 2),
+            "children_gib": round(children_gib, 2),
+            "accumulated_leaves_gib": round(resident_leaf_gib, 2),
+            "resident_gib": round(peak_here, 2),
+            "resident_after_pruning_gib": round(
+                size_of(resident) + resident_leaf_gib, 2),
         })
-        accumulated += n_leaves * target_gib
-        if not partial:
-            break
-        #: Largest classes first: a storage bound takes the worst admissible
-        #: beam, never the mean.
-        ordered = sorted(partial.items(),
-                         key=lambda kv: -_state_gib(space.spec_of(kv[0])))
-        if level < warmup:
-            beam = tuple(ordered)
-        else:
-            kept, left = [], width
-            for cls, n in ordered:
-                take = min(n, left)
-                if take:
-                    kept.append((cls, take))
-                    left -= take
-            beam = tuple(kept)
+
+        beam = tuple(kept.items())
         level += 1
         if level > 8:                        # structural backstop, never reached
             raise AuthorizationError(
                 "the space walk exceeded eight levels; the required-kind set "
                 "bounds a decomposition at four, so this is a defect")
 
-    peak = max(row["resident_gib"] for row in levels)
+    peak_row = max(levels, key=lambda r: r["resident_gib"])
     return {
-        "peak_resident_gib": round(peak, 1),
-        "peak_at_level": max(levels, key=lambda r: r["resident_gib"])["level"],
+        "peak_resident_gib": round(peak_row["resident_gib"], 1),
+        "peak_at_level": peak_row["level"],
+        "final_resident_gib": round(levels[-1]["resident_after_pruning_gib"], 1),
         "target_state_gib": round(target_gib, 2),
+        "root_state_gib": round(_state_gib(space.spec_of(frozenset())), 2),
         "beam_width": width,
         "warmup_levels": warmup,
         "levels": levels,
-        "_model": ("BeamSearch generates a whole level, ranks it, and releases "
-                   "pruned weights only afterwards, so every child of a level "
-                   "is resident at once. Completed leaves are never released."),
-        "_excludes": ("the teacher (7.5 GiB in bf16), the checkout, the venv "
-                      "and the staged assets. The launcher's provision covers "
-                      "those on top of this figure."),
+        "_model": (
+            "`BeamSearch.run` releases weights ONLY for the partial children a "
+            "level's ranking pruned. The root, every expanded ancestor, every "
+            "dead end and every completed leaf stay on disk for the whole "
+            "search -- so residency is cumulative, not per-level. The peak is "
+            "taken after a level's children are materialized and before its "
+            "pruning, which is the order `run` executes in."),
+        "_bound_not_estimate": (
+            "the beam kept at each level is the most expensive admissible one, "
+            "which both maximises future parents and minimises what is "
+            "released. A cheaper beam cannot exceed this."),
+        "_excludes": (
+            "the teacher, the checkout, the venv and the staged assets. The "
+            "launcher's provision covers those on top of this figure."),
+    }
+
+
+def teacher_and_environment_gib(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """What sits on the volume besides search states, derived where possible.
+
+    The teacher dominates and is computable from its own geometry rather than
+    remembered: the session loads it in bf16 and holds it for the whole search.
+    The rest -- the checkout, the venv, the staged assets, the journal -- is a
+    stated allowance, because they are not derivable from the space and are
+    small beside the teacher.
+    """
+    from aadistill.initialization.specs.arch import ArchSpec
+
+    FS.register_c2_operators()
+    space = FS.full_joint_space(repo_root)
+    teacher = _state_gib(space.spec_of(frozenset()))
+    assets = 0.0
+    for asset in staged_assets(repo_root):
+        root = Path(repo_root) / asset.repo_path
+        if root.is_dir():
+            assets += sum(f.stat().st_size for f in root.rglob("*")
+                          if f.is_file()) / 1024 ** 3
+    #: The HF snapshot on disk as well as the resident copy: the pod downloads
+    #: the teacher before it loads it, and both occupy the volume.
+    checkout_and_venv = 12.0
+    return {
+        "teacher_resident_gib": round(teacher, 2),
+        "teacher_snapshot_gib": round(teacher, 2),
+        "_why_twice": ("the pod downloads the teacher to the HF cache and then "
+                       "materializes it; both occupy the volume at once"),
+        "staged_assets_gib": round(assets, 3),
+        "checkout_and_venv_gib": checkout_and_venv,
+        "_checkout_and_venv_is_an_allowance": (
+            "stated, not derived: a git checkout plus a built venv with torch "
+            "and CUDA wheels is not computable from the search space, and it "
+            "is small beside the teacher"),
+        "total_gib": round(teacher * 2 + assets + checkout_and_venv, 2),
+    }
+
+
+STORAGE_PRICING = "configs/infrastructure/provider_storage_pricing.json"
+
+#: Headroom over the derived requirement. Disk is cents and a volume that fills
+#: at the residency peak loses every state the search has measured, so the
+#: provision is deliberately generous -- but it is a MULTIPLIER on a derived
+#: figure, not a remembered number.
+PROVISION_HEADROOM = 1.25
+
+
+def storage_pricing(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The provider's separately billed storage basis. NOT a live quote.
+
+    `gpuTypes.securePrice` is re-quoted before every authorization; there is no
+    equivalent query for Container Disk -- `oneMonthPrice` is null and the pod
+    type exposes no disk field -- so this is a dated stated basis and the
+    document says so in a field a machine can read. GPU securePrice being live
+    is not evidence that separately priced storage is free.
+    """
+    doc = json.loads((Path(repo_root) / STORAGE_PRICING).read_text())
+    if doc["container_disk"].get("provider_api_exposes_this") is not False:
+        raise AuthorizationError(
+            f"{STORAGE_PRICING} claims the provider API exposes container-disk "
+            "pricing. It does not, and a stated basis that presents itself as "
+            "a quote is worse than no basis.")
+    return doc
+
+
+def provision_gb(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The `--container-disk-in-gb` value, DERIVED end to end.
+
+    Residency peak plus the teacher and environment, converted from GiB into
+    the provider's decimal GB -- the SMALLER unit, so the conversion rounds the
+    request UP rather than silently delivering 7% less capacity than the
+    requirement -- then multiplied by the headroom and rounded up to a round
+    number.
+
+    An earlier version carried a 25.0 GiB environment allowance and a 350 GiB
+    provision as constants, and got the unit direction backwards in its own
+    note. Both are computed here now.
+    """
+    states = peak_resident_gib(repo_root)
+    env = teacher_and_environment_gib(repo_root)
+    pricing = storage_pricing(repo_root)
+    gb_per_gib = float(pricing["gb_versus_gib"]["gb_per_gib"])
+
+    required_gib = states["peak_resident_gib"] + env["total_gib"]
+    required_gb = required_gib * gb_per_gib
+    with_headroom = required_gb * PROVISION_HEADROOM
+    #: Rounded up to the next 50, because a provider flag takes an integer and
+    #: a round number is what a reader can check against the gate's message.
+    provision = int(math.ceil(with_headroom / 50.0) * 50)
+    return {
+        "peak_resident_states_gib": states["peak_resident_gib"],
+        "peak_at_level": states["peak_at_level"],
+        "teacher_and_environment_gib": env["total_gib"],
+        "required_gib": round(required_gib, 1),
+        "required_gb": round(required_gb, 1),
+        "headroom_multiple": PROVISION_HEADROOM,
+        "provision_gb": provision,
+        "_unit": ("the provider's flag is GB and the requirement is GiB; the "
+                  "conversion assumes DECIMAL GB, the smaller unit, so the "
+                  "request cannot deliver less capacity than the requirement"),
+    }
+
+
+def storage_cost_usd(hours: float, repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """What the container disk costs over `hours`, at the derived provision.
+
+    Billed on the integer handed to `--container-disk-in-gb`, for the pod's
+    whole lifetime rather than only while the GPU is busy -- this session tears
+    down on every path, so the billed window is its wall clock.
+    """
+    pricing = storage_pricing(repo_root)
+    gb = provision_gb(repo_root)["provision_gb"]
+    per_gb_month = float(pricing["container_disk"]["usd_per_gb_month"])
+    hours_per_month = float(pricing["proration"]["hours_per_month"])
+    per_hour = per_gb_month / hours_per_month * gb
+    return {
+        "provisioned_gb": gb,
+        "usd_per_gb_month": per_gb_month,
+        "hours_per_month": hours_per_month,
+        "usd_per_hour": round(per_hour, 6),
+        "hours": round(hours, 4),
+        "usd": math.ceil(per_hour * hours * 10_000) / 10_000,
+        "_rounded_up": "a storage bound rounds up for the same reason a ceiling does",
+    }
+
+
+def effective_rate_usd_per_hour(price_per_hour: float,
+                                repo_root: str | Path = REPO_ROOT) -> float:
+    """GPU rate plus the container disk's hourly share.
+
+    Both accrue against the same wall clock, so the session's real hourly cost
+    is their sum -- and a watchdog given only the GPU rate would stop the pod
+    at a money figure the provider had already exceeded.
+    """
+    per_hour = storage_cost_usd(1.0, repo_root)["usd_per_hour"]
+    return round(float(price_per_hour) + per_hour, 6)
+
+
+def total_ceiling_usd(price_per_hour: float,
+                      repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The ceiling that covers EVERY separately billed provider resource.
+
+    The GPU ceiling alone was $33.1827 while the launcher provisioned hundreds
+    of GB of container disk that the GPU securePrice says nothing about. The
+    minutes are unchanged -- they are the work bound -- and the money is those
+    minutes at the effective rate.
+    """
+    minutes = float(_standing_row(repo_root)["hard_ceiling_minutes"])
+    hours = minutes / 60.0
+    gpu = derive_ceiling_usd(price_per_hour, repo_root)
+    disk = storage_cost_usd(hours, repo_root)
+    effective = effective_rate_usd_per_hour(price_per_hour, repo_root)
+    total = math.ceil(hours * effective * 10_000) / 10_000
+    return {
+        "hard_ceiling_minutes": minutes,
+        "hard_ceiling_hours": round(hours, 4),
+        "gpu_rate_usd_per_hour": round(float(price_per_hour), 4),
+        "gpu_usd": gpu,
+        "_gpu_rate_is_live": ("re-quoted from gpuTypes.securePrice before "
+                              "authorization and bounded by the grant"),
+        "container_disk": disk,
+        "_disk_basis_is_stated_not_quoted": (
+            "the provider exposes no storage price; see "
+            f"{STORAGE_PRICING}. This is the distinction that made the earlier "
+            "ceiling wrong: a live GPU quote is not evidence about separately "
+            "priced storage."),
+        "network_volume_usd": 0.0,
+        "_no_volume": "the launcher passes --volume-in-gb 0",
+        "effective_rate_usd_per_hour": effective,
+        "total_hard_ceiling_usd": total,
+        "_total_covers": ("GPU runtime + container disk + any other separately "
+                          "billed provider resource this session uses, which "
+                          "is none"),
     }
 
 
@@ -629,6 +852,9 @@ __all__ = [
     "budget_spec", "executable_digest", "expected_usd",
     "hard_ceiling_usd",
     "peak_resident_gib", "plan",
+    "PROVISION_HEADROOM", "STORAGE_PRICING",
+    "effective_rate_usd_per_hour", "provision_gb", "storage_cost_usd",
+    "storage_pricing", "teacher_and_environment_gib", "total_ceiling_usd",
     "plan_hash", "price_per_hour_basis", "pricing", "protocol",
     "staged_assets", "standing_beam_width", "tracked_non_source_inputs",
 ]

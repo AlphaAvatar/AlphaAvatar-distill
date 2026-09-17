@@ -817,6 +817,40 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.4f}, completion {a.authorizes_c2_baseline_completion}, '
       f'search1 {a.authorizes_c2_search1}, training {a.allows_recovery_training}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2_full_search" ]; then
+  # A NINTH type, and its absence was caught by review rather than by a pod --
+  # which is the only reason this costs nothing. The full-search launcher sets
+  # SESSION_KIND=c2_full_search and there was no branch for it, so a formal pod
+  # would have completed paid setup and the whole test gate, reached this line,
+  # fallen through to `spend`, loaded a PreflightAuthorization and exited 98
+  # with the beam never started. Exactly the class that cost $0.2300 when
+  # SESSION_KIND=phase_b had no branch: a missing dispatch entry is not a type
+  # error, it is a late refusal on a billing machine.
+  #
+  # The search's artifact reports THREE falses, and each is a governance
+  # boundary in its final position: it must not be able to authorize Search-1's
+  # consumed beam, a baseline rebuild, or any behavioural work. The last matters
+  # most here -- the behavioural session's candidate identities do not exist
+  # until this search commits a Top-5, so an artifact that could authorize it on
+  # the pod would be authorizing work against candidates nobody has selected.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from experiments.phase_c2.full_search import FullSearchAuthorization
+a = FullSearchAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c2_full_search is True, 'this session needs a full-search authorization'
+assert a.authorizes_c2_search1 is False, 'a full-search grant must not authorize the Search-1 beam'
+assert a.authorizes_c2_baseline_completion is False, 'a full-search grant must not authorize a baseline rebuild'
+assert a.authorizes_behavioural_selection is False, 'the Top-5 does not exist yet; nothing may authorize behavioural work here'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_recovery_training is False, 'the full joint search trains nothing'
+assert a.automatic_followon_start is False, 'nothing chains off the full search; it ends at commit_top_k'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, full search {a.authorizes_c2_full_search}, '
+      f'search1 {a.authorizes_c2_search1}, completion {a.authorizes_c2_baseline_completion}, '
+      f'behavioural {a.authorizes_behavioural_selection}, training {a.allows_recovery_training}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

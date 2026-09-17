@@ -113,17 +113,17 @@ LOCAL_ASSETS = FSG.staged_assets(REPO_ROOT)
 POD_TEST_SELECTION = FPE.POD_TEST_SELECTION
 TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
 
-#: DERIVED from the real space at the standing width, not inherited. See the
-#: module docstring for why Search-1's 87.4 GiB is the wrong number here.
+#: DERIVED end to end, not inherited and no longer partly constant. See the
+#: module docstring for why Search-1's 87.4 GiB is the wrong number here, and
+#: `full_search.peak_resident_gib` for what the search actually keeps on disk.
 _STORAGE = FSG.peak_resident_gib(REPO_ROOT)
+_PROVISION = FSG.provision_gb(REPO_ROOT)
 PEAK_WORKING_GIB = float(_STORAGE["peak_resident_gib"])
-#: The teacher in bf16, the checkout, the venv and the staged assets sit on top
-#: of the resident search states, and a beam that fills its volume mid-level
-#: loses every state it has measured. Disk is cents; the provision is generous
-#: on purpose.
-TEACHER_AND_ENVIRONMENT_GIB = 25.0
-FULL_SEARCH_PROVISION_GIB = int(
-    math.ceil((PEAK_WORKING_GIB + TEACHER_AND_ENVIRONMENT_GIB) * 1.25 / 50) * 50)
+#: The provider's flag is GB and the requirement is GiB, so the derivation
+#: converts UP into decimal GB before applying headroom -- treating the flag as
+#: GiB would deliver 7% less capacity than the requirement, and a volume that
+#: fills at the residency peak loses every state the search has measured.
+FULL_SEARCH_PROVISION_GB = int(_PROVISION["provision_gb"])
 
 
 def session_record_path(run_id: str) -> str:
@@ -385,20 +385,48 @@ def pricing_and_plan_gate(ctx: SessionContext) -> tuple[bool, str]:
     try:
         plan = FSG.plan_hash(REPO_ROOT)
         rate = round(float(money["price_basis_usd_per_hour"]), 4)
-        expected_ceiling = FSG.derive_ceiling_usd(rate, REPO_ROOT)
+        total = FSG.total_ceiling_usd(rate, REPO_ROOT)
+        expected_ceiling = total["total_hard_ceiling_usd"]
     except Exception as exc:                                    # noqa: BLE001
         return False, f"the full-search pricing or protocol does not verify: {exc}"
     declared_cap = float(getattr(ctx.auth, "hard_cap_usd", 0.0) or 0.0)
     if abs(declared_cap - expected_ceiling) > 1e-9:
         return False, (f"the authorization caps ${declared_cap:.4f} and the "
                        f"pricing record's minutes at its own ${rate}/h derive "
-                       f"${expected_ceiling:.4f}")
+                       f"${expected_ceiling:.4f} in TOTAL (GPU "
+                       f"${total['gpu_usd']:.4f} + container disk "
+                       f"${total['container_disk']['usd']:.4f} over "
+                       f"{total['container_disk']['provisioned_gb']} GB)")
     declared_plan = getattr(ctx.auth, "plan_hash", None)
     if declared_plan and declared_plan != plan:
         return False, (f"the authorization binds plan {declared_plan} and the "
                        f"live protocol hashes to {plan}")
-    return True, (f"ceiling ${expected_ceiling:.4f} is the pricing record's "
-                  f"minutes at ${rate}/h; plan {plan[:12]}…")
+    #: The GAP between the plan and the cap is the storage bound, CHECKED.
+    #:
+    #: `SessionRunner.make_plan` prices at `--max-price`, which is the GPU
+    #: boundary, so `plan.hard_terminate_usd` is GPU-only and necessarily below
+    #: the authorization's total. That slack is not spare room: it is exactly
+    #: the container disk. Asserting the identity is what stops a reader -- or a
+    #: later gate -- from treating the plan's figure as the session's cost, and
+    #: what would catch a provision changed without the ceiling following it.
+    gpu_plan_usd = float(ctx.plan.hard_terminate_usd) if getattr(
+        ctx, "plan", None) is not None else None
+    if gpu_plan_usd is not None:
+        gap = round(declared_cap - gpu_plan_usd, 4)
+        disk = total["container_disk"]["usd"]
+        if abs(gap - disk) > 0.01:
+            return False, (
+                f"the authorization's ${declared_cap:.4f} exceeds the planned "
+                f"GPU threshold ${gpu_plan_usd:.4f} by ${gap:.4f}, and the "
+                f"derived container-disk bound is ${disk:.4f}. The gap between "
+                "a GPU-only plan and a total ceiling must BE the storage cost; "
+                "any other gap means the provision and the ceiling have come "
+                "apart.")
+    return True, (f"ceiling ${expected_ceiling:.4f} total = GPU "
+                  f"${total['gpu_usd']:.4f} + disk "
+                  f"${total['container_disk']['usd']:.4f} at "
+                  f"${rate}/h over {total['hard_ceiling_minutes']:.0f} min; "
+                  f"plan {plan[:12]}…")
 
 
 def storage_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -409,22 +437,26 @@ def storage_gate(ctx: SessionContext) -> tuple[bool, str]:
     provisioned from a different number.
     """
     requested = int(getattr(ctx.args, "disk_gb", 0) or 0)
-    if requested < FULL_SEARCH_PROVISION_GIB:
+    if requested < FULL_SEARCH_PROVISION_GB:
         return False, (
             f"--disk-gb {requested} is below the full-search provision of "
-            f"{FULL_SEARCH_PROVISION_GIB} GiB. The beam's peak working set is "
+            f"{FULL_SEARCH_PROVISION_GB} GB. The beam's peak working set is "
             f"{PEAK_WORKING_GIB:.1f} GiB of resident states, reached at level "
             f"{_STORAGE['peak_at_level']} where "
             f"{_STORAGE['levels'][_STORAGE['peak_at_level']]['parents']} "
             "retained parents are expanded into "
             f"{_STORAGE['levels'][_STORAGE['peak_at_level']]['generated']} "
             "children, plus the teacher, the checkout and the venv. A volume "
-            "that fills there loses every state measured up to that point -- "
-            "and this space is nearly three times Search-1's peak, so its "
-            "200 GiB is not enough.")
-    return True, (f"volume {requested} GiB >= {FULL_SEARCH_PROVISION_GIB} for a "
-                  f"{PEAK_WORKING_GIB:.1f} GiB peak working set at level "
-                  f"{_STORAGE['peak_at_level']}")
+            "that fills there loses every state measured up to that point. "
+            "The search RELEASES only the partial children a level prunes, so "
+            "the root, every expanded ancestor, every dead end and every "
+            "completed leaf stay resident for the whole run -- residency is "
+            "cumulative. Search-1's 200 is not enough.")
+    return True, (f"volume {requested} GB >= {FULL_SEARCH_PROVISION_GB} for a "
+                  f"{PEAK_WORKING_GIB:.1f} GiB peak at level "
+                  f"{_STORAGE['peak_at_level']} plus "
+                  f"{_PROVISION['teacher_and_environment_gib']:.1f} GiB of "
+                  "teacher and environment")
 
 
 def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -719,7 +751,7 @@ def build_parser() -> argparse.ArgumentParser:
     #: artifact was issued at a re-quoted rate, so defaulting to the record
     #: would refuse every launch whose rate had legitimately moved.
     ap.add_argument("--max-price", type=float, default=None)
-    ap.add_argument("--disk-gb", type=int, default=FULL_SEARCH_PROVISION_GIB)
+    ap.add_argument("--disk-gb", type=int, default=FULL_SEARCH_PROVISION_GB)
     ap.add_argument("--token-src",
                     default=str(Path.home() / ".cache/huggingface/token"))
     ap.add_argument("--runpod-config",

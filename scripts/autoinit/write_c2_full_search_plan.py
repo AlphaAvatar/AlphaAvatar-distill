@@ -888,6 +888,34 @@ def pricing(space) -> dict[str, Any]:
              "scientific trade in breadth with its own result, not a cheaper way "
              "to run this one")}
         for r in search["widths"] if r["beam_width"] != STANDING_WIDTH]
+    #: THE PROVIDER'S OTHER BILL. `securePrice` is the GPU and nothing else,
+    #: and the launcher provisions a large Container Disk that RunPod prices
+    #: separately. A ceiling that was GPU-only therefore did not cover the
+    #: session, and no figure in it disagreed with any other -- which is why
+    #: review found it rather than a gate.
+    from experiments.phase_c2 import full_search as _FSG
+    provider = _FSG.total_ceiling_usd(FS.PRICE_PER_HOUR_LAST_QUOTED)
+    behavioural_hours = selection["hard_ceiling_minutes"] / 60.0
+    #: The behavioural session's storage term is NOT derived: it has no launcher
+    #: and no provision yet. Bounded ABOVE by the search's own 400 GB, which is
+    #: certainly more than twelve probes on a 596M student need, so the chain's
+    #: total is an over-estimate rather than an unstated omission.
+    behavioural_disk_bound = _FSG.storage_cost_usd(behavioural_hours)["usd"]
+    provider_cost = {
+        "_why_this_block_exists": (
+            "the GPU securePrice is re-quotable and the storage price is not, "
+            "so they are derived apart and summed here. A live GPU quote is "
+            "not evidence that separately priced storage is free."),
+        "search": provider,
+        "behavioural_selection_storage_upper_bound_usd": behavioural_disk_bound,
+        "_behavioural_storage_is_bounded_not_derived": (
+            "that session's launcher and provision do not exist, so its disk "
+            "term is bounded by the SEARCH's provision rather than computed "
+            "from its own. When it is bound, the same derivation applies and "
+            "this figure should fall."),
+        "provision_gb": _FSG.provision_gb(),
+        "pricing_basis": _FSG.STORAGE_PRICING,
+    }
     combined = {
         "chain": "full joint re-search -> Top-5 -> behavioural selection",
         "standing_beam_width": STANDING_WIDTH,
@@ -903,7 +931,21 @@ def pricing(space) -> dict[str, Any]:
             standing["hard_ceiling_usd"] + selection["hard_ceiling_usd"], 4),
         "search_hard_ceiling_usd": standing["hard_ceiling_usd"],
         "selection_hard_ceiling_usd": selection["hard_ceiling_usd"],
+        "_those_two_are_GPU_ONLY": (
+            "kept because they are what the pricing model derives, and "
+            "superseded for funding purposes by the totals below: the provider "
+            "bills Container Disk separately and the launcher provisions "
+            f"{provider_cost['provision_gb']['provision_gb']} GB of it."),
+        "search_total_hard_ceiling_usd": provider["total_hard_ceiling_usd"],
+        "selection_total_hard_ceiling_upper_bound_usd": round(
+            selection["hard_ceiling_usd"] + behavioural_disk_bound, 4),
+        "chain_total_hard_ceiling_usd": round(
+            provider["total_hard_ceiling_usd"] + selection["hard_ceiling_usd"]
+            + behavioural_disk_bound, 4),
         "remaining_usd": budget["remaining_usd"],
+        "remaining_after_the_chain_total_usd": round(
+            budget["remaining_usd"] - provider["total_hard_ceiling_usd"]
+            - selection["hard_ceiling_usd"] - behavioural_disk_bound, 4),
         "scientific_alternatives_not_cost_options": alternatives,
         "_two_sessions": (
             "these are two separate paid sessions with separate one-use "
@@ -915,13 +957,18 @@ def pricing(space) -> dict[str, Any]:
     }
     shortfall_expected = round(
         combined["expected_usd"] - budget["remaining_usd"], 4)
+    #: Against the CHAIN TOTAL, which includes the container disk both sessions
+    #: provision. Measuring the shortfall against a GPU-only ceiling was the
+    #: defect: it understated the requirement by the storage bill and nothing in
+    #: the document disagreed.
     shortfall_hard = round(
-        combined["hard_ceiling_usd"] - budget["remaining_usd"], 4)
-    #: What the project cap would have to be to CONTAIN both ceilings, derived
+        combined["chain_total_hard_ceiling_usd"] - budget["remaining_usd"], 4)
+    #: What the project cap would have to be to CONTAIN both totals, derived
     #: from the cumulative spend rather than from the headroom, so it does not
-    #: silently depend on the current cap being 320.
+    #: silently depend on the current cap.
     minimum_cap = round(
-        budget["cumulative_spend_usd"] + combined["hard_ceiling_usd"], 4)
+        budget["cumulative_spend_usd"]
+        + combined["chain_total_hard_ceiling_usd"], 4)
     #: The same chain summed from 2-dp DISPLAY figures, so the record can show
     #: how much a display-rounded reading understates the requirement without
     #: anybody having to remember a past example.
@@ -937,6 +984,7 @@ def pricing(space) -> dict[str, Any]:
             "and derive_budget.py. AUTHORIZES NOTHING and FUNDS NOTHING."),
         "search": search,
         "behavioural_selection": selection,
+        "provider_cost": provider_cost,
         "combined": combined,
         "budget_position": budget,
         #: DERIVED, not restated. This block said "INSUFFICIENT PROJECT
@@ -951,7 +999,10 @@ def pricing(space) -> dict[str, Any]:
             "standing_beam_width": STANDING_WIDTH,
             "remaining_usd": budget["remaining_usd"],
             "complete_chain_expected_usd": combined["expected_usd"],
-            "complete_chain_hard_usd": combined["hard_ceiling_usd"],
+            "complete_chain_hard_usd": combined["chain_total_hard_ceiling_usd"],
+            "_complete_chain_hard_is_the_TOTAL": (
+                "GPU runtime plus the container disk both sessions provision. The GPU-only figures are still in `combined` because they are what the cost model derives, but a funding decision rests on the total."),
+            "complete_chain_gpu_only_hard_usd": combined["hard_ceiling_usd"],
             "headroom_after_the_chain_usd": round(-shortfall_hard, 4),
             "shortfall_on_expected_usd": shortfall_expected,
             "shortfall_on_hard_ceilings_usd": shortfall_hard,

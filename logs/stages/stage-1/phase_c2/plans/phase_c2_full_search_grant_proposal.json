@@ -1,42 +1,77 @@
 {
  "schema": "aadistill.autoinit.c2_full_search_grant_proposal/v1",
- "_contract": "A PROPOSAL, not a grant. It states everything a maintainer would be approving for one formal Phase-C2 full-joint-re-search session, with every machine identity DERIVED from this tree and every figure recomputed, so a launch review has the numbers in front of it. It is deliberately NOT a grant: it states no `granted_by`, it carries no `one_use` block, and its schema is not the one the issuer accepts. scripts/autoinit/issue_c2_full_search_authorization.py cannot turn this into an authorization, and a test asserts that it refuses. AUTHORIZES NOTHING AND APPROVES NOTHING.",
- "_what_it_is_for": "The maintainer's execution sequence ends 'return for FINAL FORMAL SEARCH LAUNCH REVIEW'. This is what that review reads. If the review approves, the maintainer's decision supplies `granted_by`, `covers`, `explicitly_not_authorized`, `approved_money` and `one_use`, and the result is committed as the run's grant.json under the real grant schema. Nothing in this document can be promoted by an agent.",
+ "_contract": "A PROPOSAL, not a grant. It states everything a maintainer would be approving for one formal Phase-C2 full-joint-re-search session, with every machine identity DERIVED from this tree and every figure recomputed. It states no `granted_by`, carries no `one_use`, and its schema is not the one the grant contract names, so the issuer refuses it -- exercised by a test, not asserted. AUTHORIZES NOTHING AND APPROVES NOTHING.",
+ "_what_it_is_for": "the maintainer's execution sequence ends 'return for FINAL FORMAL SEARCH LAUNCH REVIEW'. This is what that review reads. If it approves, the decision supplies `granted_by`, `covers`, `explicitly_not_authorized`, `approved_money` and `one_use`, and the result is committed as the run's grant.json under the real grant schema. Nothing here can be promoted by an agent.",
+ "_generated_by": "scripts/autoinit/write_c2_full_search_grant_proposal.py, deterministically from the live tree. Re-run it: an unchanged tree gives byte-identical output, so a diff means a figure moved.",
  "proposed_for": {
   "experiment_id": "phase_c2_full_search",
   "session": "ONE beam over the derived full joint space at the standing width, ending at a committed Top-5. It trains nothing, scores no battery, produces no correct_overall and cannot name an incumbent.",
   "terminates_at": "commit_top_k",
-  "run_id": "NOT ASSIGNED. The attempt id is chosen when a grant is written; every artifact in the chain is resolved from it."
+  "run_id": "NOT ASSIGNED. The attempt id is chosen when a grant is written; every artifact in the chain resolves from it."
  },
- "money_at_the_re_quoted_rate": {
-  "gpu": "NVIDIA L40S",
-  "live_secure_price_usd_per_hour": 1.09,
-  "_requoted_utc": "2026-09-17, immediately before this proposal",
-  "_priced_basis_usd_per_hour": 1.09,
-  "rate_moved_since_pricing": false,
-  "_so_no_rederivation_was_needed": "the live securePrice equals the basis the record was priced at, so the ceiling below is the record's figure for the right reason rather than by coincidence. Had it moved, `full_search.derive_ceiling_usd` would have recomputed the same MINUTES at the new price -- and beam width 6 would not have changed. communityPrice read $0.79 and is not what the launcher pays.",
-  "ceiling_minutes": 1826.57,
+ "money": {
+  "_the_ceiling_is_not_the_gpu_price_times_the_minutes": "the provider bills Container Disk separately from the GPU, and this session provisions 400 GB of it. An earlier version of this proposal stated a GPU-only ceiling while the launcher provisioned hundreds of GB, and no figure in it disagreed with any other -- review found it, not a gate. A live GPU quote is not evidence that separately priced storage is free.",
+  "gpu": {
+   "card": "NVIDIA L40S",
+   "securePrice_usd_per_hour": 1.09,
+   "_requoted": "live at generation, and RE-QUOTED again by the issuer immediately before it writes an authorization; a moved rate refuses and prints the re-derived ceiling",
+   "provider_api_exposes_this": true,
+   "hard_ceiling_usd": 33.1827
+  },
+  "container_disk": {
+   "provisioned_gb": 400,
+   "usd_per_gb_month": 0.1,
+   "hours_per_month": 720.0,
+   "usd_per_hour": 0.055556,
+   "hours": 30.4428,
+   "usd": 1.6913,
+   "_rounded_up": "a storage bound rounds up for the same reason a ceiling does",
+   "provider_api_exposes_this": false,
+   "_basis": "configs/infrastructure/provider_storage_pricing.json"
+  },
+  "network_volume_usd": 0.0,
+  "_no_volume": "the launcher passes --volume-in-gb 0",
+  "hard_ceiling_minutes": 1826.57,
+  "effective_rate_usd_per_hour": 1.145556,
   "expected_usd": 16.0998,
-  "hard_ceiling_usd": 33.1827,
+  "TOTAL_hard_ceiling_usd": 34.874,
   "max_price_usd_per_hour": 1.09,
-  "_the_boundary": "a launch is refused above this rate, by the launcher's runtime gate and by the issuer's live re-quote. A higher rate needs the ceiling re-derived and a new decision; it is not a launcher flag."
+  "_the_boundary": "a launch is refused above this GPU rate, by the launcher's runtime gate and by the issuer's live re-quote. A higher rate needs the ceiling re-derived and a new decision; it is not a launcher flag, and beam width 6 is not narrowed to absorb it."
+ },
+ "provisioning": {
+  "peak_resident_search_states_gib": 250.9,
+  "peak_at_level": 1,
+  "final_resident_gib": 118.0,
+  "teacher_and_environment_gib": 26.99,
+  "required_gib": 277.9,
+  "required_gb": 298.4,
+  "provision_gb": 400,
+  "headroom_multiple": 1.25,
+  "_residency_is_cumulative": "`BeamSearch.run` releases weights ONLY for the partial children a level's ranking pruned. The root, every expanded ancestor, every dead end and every completed leaf stay on disk for the whole search -- so residency is cumulative, not per-level. The peak is taken after a level's children are materialized and before its pruning, which is the order `run` executes in.",
+  "_why_not_search_1s_200": "Search-1 provisions for a 87.4 GiB peak: five retained level-0 states expanded into eighteen children. Here every operator kind may go first, so level 0 generates eleven children of which nine continue and level 1 expands those nine into SIXTY -- and because the search releases ONLY the partial children a level prunes, the root, every expanded ancestor, every dead end and every completed leaf stay resident for the whole run. An earlier derivation modelled parents + children + leaves and missed the retained ancestors, giving 243.4 GiB; review caught that it was not an upper bound before a volume was provisioned from it.",
+  "_cross_checked": "the derivation puts a finished leaf at 1.11 GiB and the CUDA engineering validation weighed the real 596M student's checkpoint at exactly that.",
+  "_units": "the provider's flag is GB and the requirement is GiB; the conversion assumes DECIMAL GB, the smaller unit, so the request cannot deliver less capacity than the requirement"
  },
  "budget_position": {
   "cumulative_spend_usd": 297.6543,
   "authorized_cap_usd": 370.0,
   "remaining_usd": 72.3457,
-  "remaining_after_the_search_ceiling_usd": 39.163,
-  "behavioural_session_ceiling_usd": 29.8788,
-  "remaining_after_both_usd": 9.2842,
+  "search_total_hard_ceiling_usd": 34.874,
+  "remaining_after_the_search_usd": 37.4717,
+  "behavioural_gpu_hard_ceiling_usd": 29.8788,
+  "behavioural_storage_upper_bound_usd": 1.5229,
+  "_behavioural_storage_is_bounded_not_derived": "that session's launcher and provision do not exist yet, so its disk term is bounded ABOVE by the search's own 400 GB -- certainly more than twelve probes on a 596M student need. The chain total is therefore an over-estimate rather than an unstated omission, and the figure should fall when that session is bound.",
+  "chain_total_hard_ceiling_usd": 66.2757,
+  "remaining_after_the_whole_chain_usd": 6.07,
   "_derived_by": "scripts/consolidate/derive_budget.py :: project_balance, from the package anchor plus every recorded run closeout. The cap's canonical owner is configs/experiments/phase_c1/authorization.json :: accepted_pricing.cumulative_cap_usd.",
-  "_fitting_is_not_permission": "the cap rose to 370.00 on 2026-09-17 as an ACCOUNTING ENVELOPE, explicitly not a spend authorization and not transferable to C3/C4. Both C2 sessions fit inside it with $9.2842 left over. That is a feasibility statement.",
-  "_two_authorizations_never_one": "the behavioural ceiling is shown so the review can see both halves at once, NOT because this proposal covers it. The behavioural session's candidate identities do not exist until this search commits a Top-5, so it cannot be authorized yet even in principle."
+  "_fitting_is_not_permission": "the cap rose to 370.00 on 2026-09-17 as an ACCOUNTING ENVELOPE, explicitly not a spend authorization and not transferable to C3/C4. Both sessions fit inside it at their corrected totals. That is a feasibility statement.",
+  "_two_authorizations_never_one": "the behavioural figures are shown so a review can see both halves at once, NOT because this proposal covers them. That session's candidate identities do not exist until this search commits a Top-5, so it cannot be authorized yet even in principle."
  },
  "bound_identities_the_issuer_will_reproduce": {
-  "full_search_harness_digest": "97b478c83a47da5e643b40c7719025a6f657203d50c8ab116317608081d66837",
+  "full_search_harness_digest": "8113c17baec36d292d3a9e99bc8883440f88929efc17753608fdb767eccbc06f",
   "full_search_harness_n_files": 90,
   "full_search_plan_hash": "26de0bb67d2382357541791ece75388fef31ef7bca6c88b5f1fdd35e997ca289",
-  "full_search_pricing_sha256": "bca4964b4cfbc010e37651ba606008739068962200b694ebb951daaffb7cc74a",
+  "full_search_pricing_sha256": "d48f7de69666c2cc9ca9a39985d111a348baf8549fd077ae0a202e681473ea32",
   "joint_space_total_leaves": 578,
   "joint_space_decomposed_leaves": 576,
   "joint_space_allowed_impls": [
@@ -65,25 +100,19 @@
    "phase_c2_attempt4"
   ]
  },
- "_identities_note": "every one of these is DERIVED by full_search_authorization.live_identities and re-derived at issuance; a grant that asserted a different value, omitted one, or introduced one the issuer cannot derive is refused. The space figures are what make a Search-1 grant unusable here: Search-1 fixed three operators and varied one, this searches all four jointly with calibration unpinned.",
- "provisioning": {
-  "peak_resident_search_states_gib": 243.4,
-  "peak_at_level": 1,
-  "provision_gib": 350,
-  "_why_not_search_1s_200": "DERIVED for this space rather than inherited. Search-1 provisions for a 87.4 GiB peak: five retained level-0 states expanded into eighteen children. In the joint space every operator kind may go first, so level 0 generates eleven children of which nine continue, and level 1 expands those nine into SIXTY -- 243.4 GiB resident. The search generates a whole level before it prunes, and completed leaves are never released, so that is simultaneous. A volume that fills at level 1 loses every state measured up to that point, and 200 GiB would fill.",
-  "_cross_checked": "the derivation puts a finished leaf at 1.11 GiB and the CUDA engineering validation weighed the real 596M student's checkpoint at exactly that."
- },
+ "_identities_note": "every one is DERIVED by full_search_authorization.live_identities and re-derived at issuance; a grant that asserted a different value, omitted one, or introduced one the issuer cannot derive is refused. The space figures are what make a Search-1 grant unusable here: Search-1 fixed three operators and varied one, this searches all four jointly with calibration unpinned.",
  "what_a_grant_would_still_have_to_supply": [
   "granted_by -- only a person can say who approved",
   "covers -- the scope sentence carried into the authorization",
   "explicitly_not_authorized -- what the approval refuses",
-  "approved_money -- expected, ceiling, live rate and rate boundary, which the issuer recomputes from the pricing record at the stated rate",
+  "approved_money -- expected, the TOTAL ceiling, the live rate and the rate boundary, which the issuer recomputes from the pricing record's minutes at the stated rate plus the derived storage bound",
   "one_use -- how many provider resources the session may draw, which becomes the enforceable resource scope"
  ],
  "engineering_evidence_this_rests_on": {
   "cuda_validation": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/closeout.json",
   "verdict": "PASS. The full-search driver reached C2_FULL_SEARCH_ALL_DONE on a real L40S over the real 578-leaf joint space; all 35 materialized states reloaded on cuda in bfloat16; the real 596M student reloaded canonically with its rope base and tied head intact. $0.1453 of a $0.9000 ceiling, every teardown provider-confirmed.",
-  "_what_it_does_not_establish": "that the formal search fits its budget -- it ran toy geometry for 20 seconds -- and nothing behavioural whatsoever."
+  "setup_dispatch": "the shared setup script's c2_full_search authorization branch is EXECUTED at $0 against real artifacts -- admitting a valid one and refusing each governance boundary. It was missing entirely at 5535c6a, which would have refused a formal pod after paid setup: the same class as SESSION_KIND=phase_b, which cost $0.2300.",
+  "_what_none_of_it_establishes": "that the formal search fits its budget -- the validation ran toy geometry for 20 seconds -- and nothing behavioural whatsoever."
  },
  "authorizes": "nothing",
  "approves": "nothing"

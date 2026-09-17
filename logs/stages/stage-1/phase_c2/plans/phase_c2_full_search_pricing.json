@@ -152,6 +152,44 @@
   "_ceiling_includes": "both named reserves, a 10% contingency and a 30-minute artifact recovery reserve",
   "authorizes": "nothing"
  },
+ "provider_cost": {
+  "_why_this_block_exists": "the GPU securePrice is re-quotable and the storage price is not, so they are derived apart and summed here. A live GPU quote is not evidence that separately priced storage is free.",
+  "search": {
+   "hard_ceiling_minutes": 1826.57,
+   "hard_ceiling_hours": 30.4428,
+   "gpu_rate_usd_per_hour": 1.09,
+   "gpu_usd": 33.1827,
+   "_gpu_rate_is_live": "re-quoted from gpuTypes.securePrice before authorization and bounded by the grant",
+   "container_disk": {
+    "provisioned_gb": 400,
+    "usd_per_gb_month": 0.1,
+    "hours_per_month": 720.0,
+    "usd_per_hour": 0.055556,
+    "hours": 30.4428,
+    "usd": 1.6913,
+    "_rounded_up": "a storage bound rounds up for the same reason a ceiling does"
+   },
+   "_disk_basis_is_stated_not_quoted": "the provider exposes no storage price; see configs/infrastructure/provider_storage_pricing.json. This is the distinction that made the earlier ceiling wrong: a live GPU quote is not evidence about separately priced storage.",
+   "network_volume_usd": 0.0,
+   "_no_volume": "the launcher passes --volume-in-gb 0",
+   "effective_rate_usd_per_hour": 1.145556,
+   "total_hard_ceiling_usd": 34.874,
+   "_total_covers": "GPU runtime + container disk + any other separately billed provider resource this session uses, which is none"
+  },
+  "behavioural_selection_storage_upper_bound_usd": 1.5229,
+  "_behavioural_storage_is_bounded_not_derived": "that session's launcher and provision do not exist, so its disk term is bounded by the SEARCH's provision rather than computed from its own. When it is bound, the same derivation applies and this figure should fall.",
+  "provision_gb": {
+   "peak_resident_states_gib": 250.9,
+   "peak_at_level": 1,
+   "teacher_and_environment_gib": 26.99,
+   "required_gib": 277.9,
+   "required_gb": 298.4,
+   "headroom_multiple": 1.25,
+   "provision_gb": 400,
+   "_unit": "the provider's flag is GB and the requirement is GiB; the conversion assumes DECIMAL GB, the smaller unit, so the request cannot deliver less capacity than the requirement"
+  },
+  "pricing_basis": "configs/infrastructure/provider_storage_pricing.json"
+ },
  "combined": {
   "chain": "full joint re-search -> Top-5 -> behavioural selection",
   "standing_beam_width": 6,
@@ -160,7 +198,12 @@
   "hard_ceiling_usd": 63.0615,
   "search_hard_ceiling_usd": 33.1827,
   "selection_hard_ceiling_usd": 29.8788,
+  "_those_two_are_GPU_ONLY": "kept because they are what the pricing model derives, and superseded for funding purposes by the totals below: the provider bills Container Disk separately and the launcher provisions 400 GB of it.",
+  "search_total_hard_ceiling_usd": 34.874,
+  "selection_total_hard_ceiling_upper_bound_usd": 31.4017,
+  "chain_total_hard_ceiling_usd": 66.2757,
   "remaining_usd": 72.3457,
+  "remaining_after_the_chain_total_usd": 6.07,
   "scientific_alternatives_not_cost_options": [
    {
     "beam_width": 4,
@@ -195,12 +238,14 @@
   "standing_beam_width": 6,
   "remaining_usd": 72.3457,
   "complete_chain_expected_usd": 36.7924,
-  "complete_chain_hard_usd": 63.0615,
-  "headroom_after_the_chain_usd": 9.2842,
+  "complete_chain_hard_usd": 66.2757,
+  "_complete_chain_hard_is_the_TOTAL": "GPU runtime plus the container disk both sessions provision. The GPU-only figures are still in `combined` because they are what the cost model derives, but a funding decision rests on the total.",
+  "complete_chain_gpu_only_hard_usd": 63.0615,
+  "headroom_after_the_chain_usd": 6.07,
   "shortfall_on_expected_usd": -35.5533,
-  "shortfall_on_hard_ceilings_usd": -9.2842,
+  "shortfall_on_hard_ceilings_usd": -6.07,
   "_a_negative_shortfall_is_headroom": "both figures are chain minus remaining, so a negative value means the chain fits with that much to spare. The status above is derived from the sign rather than written beside it.",
-  "minimum_cumulative_cap_usd": 360.7158,
+  "minimum_cumulative_cap_usd": 363.93,
   "_minimum_cap_meaning": "the smallest cumulative project cap that CONTAINS both ceilings: cumulative spend plus the complete standing chain.",
   "fitting_is_not_permission": "the 2026-09-17 cap raise to $370.0000 is a project ACCOUNTING envelope. It is not a spend authorization and not permission to launch either session, and its headroom is not transferable to C3, C4 or any unrelated experiment. Each session still needs its own grant, launch-bound readiness record, one-use authorization and staged bundle, and the full joint search additionally needs the bounded real-GPU engineering validation that the CPU toy execution cannot substitute for.",
   "the_price_basis_is_planning_evidence_only": "the search ceiling above rests on a quoted $1.09/h L40S securePrice. It MUST be re-quoted live immediately before authorization and the ceiling re-derived if the rate has moved. An hour-old price is not a price.",
@@ -214,5 +259,5 @@
   }
  },
  "authorizes": "nothing",
- "pricing_sha256": "bca4964b4cfbc010e37651ba606008739068962200b694ebb951daaffb7cc74a"
+ "pricing_sha256": "d48f7de69666c2cc9ca9a39985d111a348baf8549fd077ae0a202e681473ea32"
 }

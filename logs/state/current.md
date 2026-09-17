@@ -141,10 +141,24 @@ authorizations, never one.
 | --- | --- | --- |
 | full search, **beam 6 — standing design** | `$16.0998` | `$33.1827` |
 | behavioural selection (12 probes) | `$20.6926` | `$29.8788` |
-| **complete standing chain** | **`$36.7924`** | **`$63.0615`** |
+| full search, container disk (400 GB) | | `$1.6913` |
+| behavioural selection, disk upper bound | | `$1.5229` |
+| **complete standing chain, TOTAL** | **`$36.7924`** | **`$66.2757`** |
 | remaining headroom | | `$72.3457` |
-| **headroom after the chain's ceiling** | | **`$9.2842`** |
-| minimum cumulative cap that contains both | | `$360.7158` |
+| **headroom after the chain's total** | | **`$6.0700`** |
+| minimum cumulative cap that contains both | | `$363.9300` |
+
+The two ceiling rows above are **GPU runtime only**. The provider bills
+Container Disk separately at `$0.10/GB/month`, and this session
+provisions 400 GB of it, so a GPU-only ceiling did not cover the
+session — and no figure in the record disagreed with any other, which is
+why review found it rather than a gate. The GPU rate is re-quoted live;
+the storage price is a dated stated basis and
+[`provider_storage_pricing.json`](../../configs/infrastructure/provider_storage_pricing.json)
+says so in a field a machine reads. The behavioural session's disk term
+is **bounded, not derived**: its launcher and provision do not exist yet,
+so it is bounded above by the search's own 400 GB and should fall when
+that session is bound.
 
 The chain **fits the accounting envelope and is still NOT AUTHORIZED**: the
 maintainer raised the cumulative cap to `$370.0000` on 2026-09-17 as an
@@ -313,7 +327,7 @@ floor. A complete valid verdict ends the round.
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The next chain cannot be built until the full search is funded | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
 | last attempt | **baseline completion attempt 8 — COMPLETE, `$0.5872`.** Both stages passed, B was rebuilt to digest `53e30566…`, measured **once** on the frozen suite, and the B→C comparison was computed; the pod was deleted behind its teardown gate after 32.32 min. Attempts 5, 6 and 7 aborted before any measurement for `$0.1033` between them | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
-| blocker | **THE FORMAL FULL-SEARCH CHAIN IS BUILT AND UNCONSUMED; THE LAUNCH REVIEW IS OWED.** The cap rose to `$370.0000` on 2026-09-17, so the standing beam-6 chain's `$63.0615` of ceilings now FITS the `$72.3457` remaining with `$9.2842` to spare — an accounting envelope, **not** a spend authorization and not transferable to C3/C4. C2c asks only whether the selected C beats the incumbent **B** after the frozen 0.86M recovery, on **12 probes**. The real-GPU engineering validation of the search driver is **PASSED and CLOSED** for `$0.1453`, and the chain it validated is now built: launcher, grant contract, launch-bound readiness, one-use authorization type and issuer, derived executable closure over 90 files, bundle transport, artifact contract and live budget position, with eleven `$0` gates and 45 exercised checks. The live securePrice was re-quoted at `$1.09/h` — **unchanged**, so the beam-6 ceiling stands at `$33.1827` for the right reason rather than by coincidence. **No grant is approved, so no authorization is issued and nothing is consumed.** What a review reads is [`phase_c2_full_search_grant_proposal.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_grant_proposal.json), which approves nothing and which the issuer refuses. Narrower beams are scientific **alternatives**, never a way to fit the cap. Nothing may start — the search session, the behavioural session, the withdrawn Search-2, C3 and any remeasurement of B each need a decision, and the two C2 sessions need **separate** authorizations | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| blocker | **THE FORMAL FULL-SEARCH CHAIN IS BUILT AND UNCONSUMED; THE LAUNCH REVIEW IS OWED.** The cap rose to `$370.0000` on 2026-09-17, so the standing beam-6 chain's `$63.0615` of ceilings now FITS the `$72.3457` remaining with `$9.2842` to spare — an accounting envelope, **not** a spend authorization and not transferable to C3/C4. C2c asks only whether the selected C beats the incumbent **B** after the frozen 0.86M recovery, on **12 probes**. The real-GPU engineering validation of the search driver is **PASSED and CLOSED** for `$0.1453`, and the chain it validated is now built — with three repairs an independent review found before any pod existed: the shared setup script had **no `c2_full_search` authorization branch**, so a formal pod would have completed paid setup and the whole test gate and then refused; the storage walk counted parents, children and leaves but **not the expanded ancestors the search never releases**, understating the peak; and the ceiling was **GPU runtime only** while the launcher provisioned hundreds of GB of separately billed disk. The chain is: launcher, grant contract, launch-bound readiness, one-use authorization type and issuer, derived executable closure over 90 files, bundle transport, artifact contract and live budget position, with eleven `$0` gates and 45 exercised checks. The live securePrice was re-quoted at `$1.09/h` — **unchanged**, so the beam-6 ceiling stands at `$33.1827` for the right reason rather than by coincidence. **No grant is approved, so no authorization is issued and nothing is consumed.** What a review reads is [`phase_c2_full_search_grant_proposal.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_grant_proposal.json), which approves nothing and which the issuer refuses. Narrower beams are scientific **alternatives**, never a way to fit the cap. Nothing may start — the search session, the behavioural session, the withdrawn Search-2, C3 and any remeasurement of B each need a decision, and the two C2 sessions need **separate** authorizations | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness

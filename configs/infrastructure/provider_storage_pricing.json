@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.provider_storage_pricing/v1",
+ "_contract": "The provider's SEPARATELY BILLED storage pricing and its billing convention. A session's ceiling is not the GPU rate times its minutes: RunPod prices Container Disk and Network Volume apart from the GPU, and a pod provisioned with a large container disk therefore has a cost the GPU securePrice says nothing about. AUTHORIZES NOTHING.",
+ "_why_this_file_exists": "The full-search ceiling was $33.1827 of GPU runtime alone while the launcher provisioned hundreds of GB of container disk. The GPU price is re-quotable from the provider's API and this is not, so the two cannot live in the same place: conflating them would let an unqueryable constant inherit the credibility of a live quote. Review caught the omission before a pod was created.",
+ "provider": "RunPod",
+ "container_disk": {
+  "usd_per_gb_month": 0.1,
+  "_basis": "RunPod's published Container Disk price, https://www.runpod.io/pricing, as stated on 2026-09-17.",
+  "provider_api_exposes_this": false,
+  "_why_that_matters": "`gpuTypes.securePrice` is re-quoted live before every authorization and refuses a launch above its boundary. There is no equivalent query for storage -- `oneMonthPrice` is null and no disk field exists on the pod type -- so this number is a DATED STATED BASIS, not a quote. A reader must be able to tell the difference, and a maintainer must re-check it when the provider's pricing page changes. GPU securePrice being live is not evidence that separately priced storage is free.",
+  "billed_while": "the pod exists, running or stopped",
+  "_billed_while_note": "Container Disk is part of the pod, so it is charged for the pod's whole lifetime rather than only while the GPU is busy. This session tears the pod down on every path, so the billed window is the session's wall clock -- which is what the hard runtime window below bounds."
+ },
+ "network_volume": {
+  "usd_per_gb_month": 0.07,
+  "_basis": "RunPod's published Network Volume price, same source and date.",
+  "used_by_the_full_search_session": false,
+  "_why_recorded_anyway": "so a future session that DOES attach a volume has the basis in the same place rather than discovering the omission the way this one was discovered. The full-search launcher passes --volume-in-gb 0."
+ },
+ "proration": {
+  "hours_per_month": 720,
+  "_why_720_and_not_730": "30 days, which is the SHORTER month and therefore the HIGHER hourly rate: 0.10/720 = $0.00013889 per GB-hour against 0.00013699 at 730. A ceiling takes the dearer convention, because a bound that assumed the cheaper one would under-authorize in February.",
+  "rule": "usd_per_gb_month / hours_per_month * provisioned_gb * hours",
+  "_conservative_in_three_ways": [
+   "the shorter month, per above",
+   "the PROVISIONED size, not the used size: the provider charges for what the pod was created with, and the search's residency peak is well below its provision by design",
+   "the HARD runtime window, not the expected one: the expected path is roughly half the ceiling, so the storage bound is paid for a session that runs to its limit"
+  ]
+ },
+ "gb_versus_gib": {
+  "provider_flag": "--container-disk-in-gb",
+  "assume": "DECIMAL GB (10^9 bytes), the smaller unit",
+  "gib_per_gb": 0.93132257461548,
+  "gb_per_gib": 1.073741824,
+  "_why_assume_the_smaller_unit": "the residency requirement is derived in GiB (2^30) and the provider's flag says GB. If the provider means decimal GB, a request of N delivers only 0.931*N GiB -- so treating the flag as GiB would UNDER-PROVISION by 7%, and a volume that fills at level 1 loses every state the search has measured. So the required GiB is converted UP into GB before the headroom is applied. If the provider actually means GiB the session simply has more room than it needs, which costs $0.10/GB/month on the difference and nothing else.",
+  "_the_price_applies_to_the_NUMBER_PASSED": "whatever the unit means for capacity, the provider bills on the integer handed to --container-disk-in-gb. So the storage cost is computed from the provisioned NUMBER and the conversion never appears in the money.",
+  "_an_earlier_draft_had_this_backwards": "it claimed 350 GB was 'more than the 350 GiB figure demands', which is false -- 350 GB is 326 GiB -- and would have provisioned 24 GiB short."
+ },
+ "authorizes": "nothing"
+}

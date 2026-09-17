@@ -186,7 +186,13 @@ def check_approved_money(grant: Mapping[str, Any],
             "a new maintainer budget decision; it is not a price to chase and "
             "the beam is not narrowed to absorb it.")
 
-    ceiling = FSG.derive_ceiling_usd(rate, repo_root)
+    #: The TOTAL, covering every separately billed provider resource. The GPU
+    #: ceiling alone was what an earlier version required, while the launcher
+    #: provisioned hundreds of GB of container disk that `securePrice` says
+    #: nothing about -- so a grant could state a ceiling the session would
+    #: exceed without any figure disagreeing.
+    total = FSG.total_ceiling_usd(rate, repo_root)
+    ceiling = total["total_hard_ceiling_usd"]
     expected_minutes_usd = round(
         FSG.expected_usd(repo_root) / FSG.price_per_hour_basis(repo_root)
         * rate, 4)
@@ -195,6 +201,10 @@ def check_approved_money(grant: Mapping[str, Any],
         "hard_cap_usd": ceiling,
         "price_basis_usd_per_hour": rate,
         "max_price_usd_per_hour": boundary,
+        "gpu_hard_ceiling_usd": total["gpu_usd"],
+        "container_disk_hard_ceiling_usd": total["container_disk"]["usd"],
+        "provisioned_container_disk_gb": total["container_disk"]["provisioned_gb"],
+        "effective_rate_usd_per_hour": total["effective_rate_usd_per_hour"],
     }
     wrong = {k: {"grant": round(float(stated[k]), 4), "derived": expected[k]}
              for k in ("expected_usd", "hard_cap_usd")
@@ -205,8 +215,10 @@ def check_approved_money(grant: Mapping[str, Any],
             f"derivation at its own ${rate}/h rate over the pricing record's "
             f"{expected['hard_cap_usd']} ceiling minutes: "
             + json.dumps(wrong, indent=1)
-            + "\nThe minutes are the plan and the dollars are the minutes times "
-              "the rate. Re-derive, do not adjust the beam.")
+            + "\nThe minutes are the plan and the dollars are those minutes at "
+              "the EFFECTIVE rate -- GPU securePrice plus the container disk's "
+              "hourly share. Re-derive; do not adjust the beam and do not "
+              "shrink the provision.")
     return expected
 
 

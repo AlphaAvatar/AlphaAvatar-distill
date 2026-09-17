@@ -174,7 +174,7 @@ def test_approved_money_must_match_the_derivation_at_its_own_rate():
     good = {
         "price_basis_usd_per_hour": rate,
         "max_price_usd_per_hour": 1.50,
-        "hard_cap_usd": FSG.derive_ceiling_usd(rate, REPO),
+        "hard_cap_usd": FSG.total_ceiling_usd(rate, REPO)["total_hard_ceiling_usd"],
         "expected_usd": round(FSG.expected_usd(REPO)
                               / FSG.price_per_hour_basis(REPO) * rate, 4),
     }
@@ -184,6 +184,13 @@ def test_approved_money_must_match_the_derivation_at_its_own_rate():
     stale = {**good, "hard_cap_usd": FSG.hard_ceiling_usd(REPO)}
     with pytest.raises(FA.FullSearchAuthorizationRefused, match="mechanical"):
         FA.check_approved_money({"approved_money": stale}, REPO)
+
+    #: And a GPU-ONLY ceiling at the CORRECT rate -- the defect review found:
+    #: every figure self-consistent, and the session would still have exceeded
+    #: it by the container disk nobody had priced.
+    gpu_only = {**good, "hard_cap_usd": FSG.derive_ceiling_usd(rate, REPO)}
+    with pytest.raises(FA.FullSearchAuthorizationRefused, match="mechanical"):
+        FA.check_approved_money({"approved_money": gpu_only}, REPO)
 
     #: A rate above the boundary the grant itself states.
     chasing = {**good, "max_price_usd_per_hour": 1.09}
@@ -235,7 +242,8 @@ def test_the_identity_block_must_be_complete_not_merely_undisputed():
         "approved_money": {
             "price_basis_usd_per_hour": 1.09,
             "max_price_usd_per_hour": 1.09,
-            "hard_cap_usd": FSG.derive_ceiling_usd(1.09, REPO),
+            "hard_cap_usd": FSG.total_ceiling_usd(
+                1.09, REPO)["total_hard_ceiling_usd"],
             "expected_usd": FSG.expected_usd(REPO)},
         "budget_context_at_approval": {"cumulative_spend_usd": 297.6543,
                                        "authorized_cap_usd": 370.0},
@@ -258,7 +266,8 @@ def test_an_identity_the_issuer_cannot_derive_is_refused():
         "approved_money": {
             "price_basis_usd_per_hour": 1.09,
             "max_price_usd_per_hour": 1.09,
-            "hard_cap_usd": FSG.derive_ceiling_usd(1.09, REPO),
+            "hard_cap_usd": FSG.total_ceiling_usd(
+                1.09, REPO)["total_hard_ceiling_usd"],
             "expected_usd": FSG.expected_usd(REPO)},
         "budget_context_at_approval": {"cumulative_spend_usd": 297.6543,
                                        "authorized_cap_usd": 370.0},
@@ -282,33 +291,140 @@ def test_the_config_names_the_cap_the_project_owns():
 
 # --- the storage bound ------------------------------------------------------
 
-def test_the_storage_bound_is_derived_and_is_not_search_1s():
-    """The number that can lose the whole search.
+def test_the_storage_walk_follows_the_REAL_release_lifecycle():
+    """The correction review forced, and the reason it matters.
 
-    Search-1 provisions for 87.4 GiB. Inheriting it here would under-provision
-    by nearly three times, because every operator kind may go first in the joint
-    space: level 0 generates eleven children of which nine continue, and level 1
-    expands those nine into sixty.
+    `BeamSearch.run` calls `_release_weights` in exactly one place: on the
+    PARTIAL children a level's ranking pruned. So the root, every state that was
+    selected and then expanded, every dead end and every completed leaf stay on
+    disk for the whole run -- residency is CUMULATIVE.
+
+    An earlier version modelled `current parents + current children +
+    accumulated leaves` and therefore missed the retained ancestors, which is
+    not an upper bound. The observable signature of the fix is that residency
+    after pruning never decreases.
     """
     report = FSG.peak_resident_gib(REPO)
     assert report["peak_at_level"] == 1
-    assert report["peak_resident_gib"] > 200, (
-        "the derived peak is suspiciously small; a joint beam holds more than "
-        "Search-1's restricted one")
     assert report["beam_width"] == 6
     level1 = report["levels"][1]
     assert level1["parents"] == 9 and level1["generated"] == 60
+
+    #: Monotonic: nothing but pruned partial children is ever released, so what
+    #: is left after a level can only grow.
+    after = [row["resident_after_pruning_gib"] for row in report["levels"]]
+    assert after == sorted(after), (
+        f"residency fell between levels ({after}); something is being released "
+        "that the search does not release")
+    #: And the ancestors are actually counted: level 2 must carry more retained
+    #: ancestor bytes than level 1, because level 1's kept beam joined them.
+    assert (report["levels"][2]["retained_ancestors_gib"]
+            > report["levels"][1]["retained_ancestors_gib"])
 
     #: Cross-checked against reality: a finished leaf is the 596M target, and
     #: the CUDA engineering validation weighed its real checkpoint at 1.11 GiB.
     assert report["target_state_gib"] == pytest.approx(1.11, abs=0.01)
 
 
-def test_the_provision_covers_the_peak_with_the_environment(launcher):
-    assert launcher.PEAK_WORKING_GIB == FSG.peak_resident_gib(REPO)["peak_resident_gib"]
-    assert launcher.FULL_SEARCH_PROVISION_GIB >= launcher.PEAK_WORKING_GIB + 25.0
-    #: And Search-1's 200 is NOT enough, which is the whole point of deriving it.
-    assert launcher.FULL_SEARCH_PROVISION_GIB > 200
+def test_the_corrected_peak_exceeds_the_model_that_missed_the_ancestors():
+    """A regression on the DIRECTION of the correction.
+
+    The superseded model returned 243.4 GiB. The corrected one must return more,
+    because it adds states the old one ignored -- so an edit that quietly
+    reinstated the cheaper model would fail here rather than silently shrinking
+    a provision.
+    """
+    assert FSG.peak_resident_gib(REPO)["peak_resident_gib"] > 243.4
+
+
+def test_the_environment_allowance_derives_the_teacher():
+    env = FSG.teacher_and_environment_gib(REPO)
+    assert env["teacher_resident_gib"] == pytest.approx(7.49, abs=0.1)
+    #: Counted twice on purpose: the HF snapshot and the materialized copy.
+    assert env["total_gib"] > env["teacher_resident_gib"] * 2
+
+
+# --- the provider bills more than the GPU -----------------------------------
+
+def test_the_total_ceiling_covers_the_container_disk():
+    """The blocker: `securePrice` is the GPU and nothing else.
+
+    A ceiling of GPU minutes times the GPU rate did not cover a session that
+    provisions hundreds of GB of separately priced container disk -- and no
+    figure in the record disagreed with any other, which is why review found it
+    rather than a gate.
+    """
+    total = FSG.total_ceiling_usd(1.09, REPO)
+    assert total["gpu_usd"] == FSG.derive_ceiling_usd(1.09, REPO)
+    assert total["container_disk"]["usd"] > 0
+    assert total["total_hard_ceiling_usd"] > total["gpu_usd"]
+    hours = total["hard_ceiling_hours"]
+    assert total["total_hard_ceiling_usd"] == pytest.approx(
+        hours * total["effective_rate_usd_per_hour"], abs=1e-3)
+    assert total["effective_rate_usd_per_hour"] > 1.09
+    assert total["network_volume_usd"] == 0.0
+
+
+def test_the_storage_basis_declares_that_it_is_not_a_quote():
+    """The distinction the maintainer asked to be machine-readable.
+
+    The GPU rate is re-quoted live and refuses a launch above its boundary.
+    There is no equivalent query for storage, so the basis is dated and stated
+    -- and a document presenting it as a quote would let an unqueryable constant
+    inherit a live quote's credibility.
+    """
+    pricing = FSG.storage_pricing(REPO)
+    assert pricing["container_disk"]["provider_api_exposes_this"] is False
+    assert "2026-09-17" in pricing["container_disk"]["_basis"]
+    assert pricing["proration"]["hours_per_month"] == 720, (
+        "the shorter month is the dearer hourly rate, which is what a bound "
+        "takes")
+
+
+def test_a_basis_claiming_to_be_a_quote_is_refused(tmp_path):
+    """The guard must actually fire."""
+    doc = json.loads((REPO / FSG.STORAGE_PRICING).read_text())
+    doc["container_disk"]["provider_api_exposes_this"] = True
+    fake = tmp_path / "configs/infrastructure"
+    fake.mkdir(parents=True)
+    (fake / "provider_storage_pricing.json").write_text(json.dumps(doc))
+    with pytest.raises(Exception, match="does not"):
+        FSG.storage_pricing(tmp_path)
+
+
+def test_the_storage_cost_scales_with_the_provision_and_the_window():
+    """Both terms, so neither can be inert."""
+    one = FSG.storage_cost_usd(1.0, REPO)["usd"]
+    ten = FSG.storage_cost_usd(10.0, REPO)["usd"]
+    assert ten > one * 9, "the cost does not scale with hours"
+    pricing = FSG.storage_pricing(REPO)
+    gb = FSG.provision_gb(REPO)["provision_gb"]
+    expected = (pricing["container_disk"]["usd_per_gb_month"]
+                / pricing["proration"]["hours_per_month"] * gb)
+    #: The reported figure is rounded to 6 dp on purpose, and UP at this value
+    #: (0.0555555... -> 0.055556), so the tolerance is the declared precision
+    #: rather than tighter than it.
+    reported = FSG.storage_cost_usd(1.0, REPO)["usd_per_hour"]
+    assert reported == pytest.approx(expected, abs=5e-7)
+    assert reported >= expected, "the hourly rate rounds DOWN; a bound rounds up"
+
+
+def test_the_provision_is_derived_in_the_providers_unit(launcher):
+    """GiB in, GB out, converted UP.
+
+    The provider's flag says GB and the requirement is GiB. Treating the flag
+    as GiB would deliver 7% less capacity than the requirement -- and an
+    earlier draft of the pricing note had this backwards, claiming 350 GB was
+    more than a 350 GiB requirement needs.
+    """
+    provision = FSG.provision_gb(REPO)
+    assert provision["provision_gb"] == launcher.FULL_SEARCH_PROVISION_GB
+    assert provision["required_gb"] > provision["required_gib"]
+    assert (provision["provision_gb"]
+            >= provision["required_gb"] * provision["headroom_multiple"])
+    assert provision["provision_gb"] > 200
+    assert launcher.PEAK_WORKING_GIB == FSG.peak_resident_gib(
+        REPO)["peak_resident_gib"]
 
 
 def test_the_storage_gate_refuses_an_under_provisioned_volume(launcher):
@@ -316,7 +432,7 @@ def test_the_storage_gate_refuses_an_under_provisioned_volume(launcher):
         args=launch_args(launcher, disk_gb=200), evidence={}, auth=None)
     ok, why = launcher.storage_gate(ctx)
     assert not ok and "below the full-search provision" in why
-    ctx.args.disk_gb = launcher.FULL_SEARCH_PROVISION_GIB
+    ctx.args.disk_gb = launcher.FULL_SEARCH_PROVISION_GB
     ok, why = launcher.storage_gate(ctx)
     assert ok, why
 
@@ -686,18 +802,57 @@ PROPOSAL = (REPO / "logs/stages/stage-1/phase_c2/plans/"
 
 
 def test_the_proposal_states_the_figures_a_launch_review_needs():
+    """Including both halves of the provider's bill, and the arithmetic between
+    them, so a review is not asked to add anything up itself."""
     doc = json.loads(PROPOSAL.read_text())
     assert doc["authorizes"] == "nothing" and doc["approves"] == "nothing"
-    money = doc["money_at_the_re_quoted_rate"]
-    assert money["live_secure_price_usd_per_hour"] == 1.09
-    assert money["hard_ceiling_usd"] == FSG.derive_ceiling_usd(
-        money["live_secure_price_usd_per_hour"], REPO)
+
+    money = doc["money"]
+    assert money["gpu"]["securePrice_usd_per_hour"] == 1.09
+    assert money["gpu"]["provider_api_exposes_this"] is True
+    #: And the storage half says it is NOT a quote, which is the distinction.
+    assert money["container_disk"]["provider_api_exposes_this"] is False
+    total = FSG.total_ceiling_usd(money["gpu"]["securePrice_usd_per_hour"], REPO)
+    assert money["gpu"]["hard_ceiling_usd"] == total["gpu_usd"]
+    assert money["container_disk"]["usd"] == total["container_disk"]["usd"]
+    assert money["TOTAL_hard_ceiling_usd"] == total["total_hard_ceiling_usd"]
+    assert money["TOTAL_hard_ceiling_usd"] > money["gpu"]["hard_ceiling_usd"]
+
     position = doc["budget_position"]
-    assert round(position["remaining_usd"] - money["hard_ceiling_usd"], 4) == \
-        position["remaining_after_the_search_ceiling_usd"]
-    assert round(position["remaining_after_the_search_ceiling_usd"]
-                 - position["behavioural_session_ceiling_usd"], 4) == \
-        position["remaining_after_both_usd"]
+    assert round(position["remaining_usd"]
+                 - position["search_total_hard_ceiling_usd"], 4) == \
+        position["remaining_after_the_search_usd"]
+    assert round(position["search_total_hard_ceiling_usd"]
+                 + position["behavioural_gpu_hard_ceiling_usd"]
+                 + position["behavioural_storage_upper_bound_usd"], 4) == \
+        position["chain_total_hard_ceiling_usd"]
+    assert round(position["remaining_usd"]
+                 - position["chain_total_hard_ceiling_usd"], 4) == \
+        position["remaining_after_the_whole_chain_usd"]
+    #: It still fits, and the proposal says so by arithmetic rather than claim.
+    assert position["remaining_after_the_whole_chain_usd"] > 0
+
+
+def test_the_proposal_regenerates_byte_identically():
+    """Deterministic, so a diff means a figure moved.
+
+    The first version was hand-written and went stale the moment the storage
+    derivation was corrected -- a review reading a stale proposal is reading
+    another tree's numbers.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "write_proposal",
+        REPO / "scripts/autoinit/write_c2_full_search_grant_proposal.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["write_proposal"] = module
+    spec.loader.exec_module(module)
+
+    regenerated = json.dumps(module.proposal(), indent=1) + "\n"
+    assert regenerated == PROPOSAL.read_text(), (
+        "the committed proposal is not what the generator produces from this "
+        "tree; regenerate it")
 
 
 def test_the_proposal_reproduces_the_live_identities():

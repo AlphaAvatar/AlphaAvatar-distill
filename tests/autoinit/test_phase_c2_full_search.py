@@ -332,27 +332,48 @@ def test_the_funding_requirement_is_the_standing_design_not_the_cheapest():
     assert blocker["standing_beam_width"] == SCHEDULE_V1.width
     standing = next(r for r in doc["search"]["widths"]
                     if r["beam_width"] == SCHEDULE_V1.width)
-    chain = round(standing["hard_ceiling_usd"]
-                  + selection["hard_ceiling_usd"], 4)
-    assert blocker["complete_chain_hard_usd"] == chain
-    assert combined["hard_ceiling_usd"] == chain
+    #: The GPU-only chain, which is what the cost model derives and what this
+    #: test used to compare against. Still recorded, because it is a real
+    #: intermediate -- but it is no longer the funding requirement.
+    gpu_only = round(standing["hard_ceiling_usd"]
+                     + selection["hard_ceiling_usd"], 4)
+    assert combined["hard_ceiling_usd"] == gpu_only
+    assert blocker["complete_chain_gpu_only_hard_usd"] == gpu_only
+
+    #: THE FUNDING FIGURE IS THE TOTAL. The provider bills Container Disk
+    #: separately from the GPU and both sessions provision it, so a requirement
+    #: quoted at the GPU ceiling would fund a chain the provider then exceeds.
+    #: This test asserted the GPU-only sum until 2026-09-17 and was correct for
+    #: a world in which storage was free; it is not that world.
+    provider = doc["provider_cost"]
+    total = round(provider["search"]["total_hard_ceiling_usd"]
+                  + selection["hard_ceiling_usd"]
+                  + provider["behavioural_selection_storage_upper_bound_usd"], 4)
+    assert blocker["complete_chain_hard_usd"] == total
+    assert combined["chain_total_hard_ceiling_usd"] == total
+    assert total > gpu_only, (
+        "the total does not exceed the GPU-only chain, so the storage term is "
+        "inert")
 
     #: And it is NOT the cheapest chain, which is the mistake being guarded.
     cheapest = min(doc["search"]["widths"],
                    key=lambda r: r["hard_ceiling_usd"])
     if cheapest["beam_width"] != SCHEDULE_V1.width:
-        assert chain > round(cheapest["hard_ceiling_usd"]
-                             + selection["hard_ceiling_usd"], 4)
+        assert gpu_only > round(cheapest["hard_ceiling_usd"]
+                                + selection["hard_ceiling_usd"], 4)
         assert not any("cheapest" in key for key in blocker), (
             "the blocker still frames a cheapest-width chain as the "
             "requirement")
 
     #: The arithmetic a reviewer would redo.
     remaining = doc["budget_position"]["remaining_usd"]
+    #: Against the TOTAL, which is what the shortfall now measures. Measuring
+    #: it against a GPU-only ceiling understated the requirement by the storage
+    #: bill, and nothing in the document disagreed.
     assert blocker["shortfall_on_hard_ceilings_usd"] == pytest.approx(
-        round(chain - remaining, 4), abs=1e-4)
+        round(total - remaining, 4), abs=1e-4)
     assert blocker["minimum_cumulative_cap_usd"] == pytest.approx(
-        round(doc["budget_position"]["cumulative_spend_usd"] + chain, 4),
+        round(doc["budget_position"]["cumulative_spend_usd"] + total, 4),
         abs=1e-4)
     #: And the STATUS must follow the sign rather than be asserted beside it.
     #: This block once read "INSUFFICIENT PROJECT HEADROOM" while printing a
@@ -378,11 +399,14 @@ def test_the_funding_requirement_is_the_standing_design_not_the_cheapest():
     assert alternatives and SCHEDULE_V1.width not in alternatives
     assert "different experiment" in blocker[
         "the_narrower_beams_are_not_the_requirement"]
-    #: The rounding comparison is derived, not recounted.
+    #: The rounding comparison is derived, not recounted. It is about the two
+    #: GPU ceilings specifically -- it demonstrates how much a display-rounded
+    #: reading of THOSE understates them -- so it stays on the GPU-only chain
+    #: rather than following the total.
     rounding = blocker["_rounding"]
-    assert rounding["chain_from_4dp_ceilings_usd"] == chain
+    assert rounding["chain_from_4dp_ceilings_usd"] == gpu_only
     assert rounding["understatement_usd"] == pytest.approx(
-        chain - rounding["chain_from_2dp_display_ceilings_usd"], abs=1e-6)
+        gpu_only - rounding["chain_from_2dp_display_ceilings_usd"], abs=1e-6)
 
     #: Every width's fit flag and its refusal text must agree with each other:
     #: a width that does not fit owes the refusal, and one that fits must not

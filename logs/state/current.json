@@ -124,8 +124,8 @@
    "priced": "plans/phase_c2_full_search_pricing.json (Search-1's historical basis: plans/phase_c2_pricing.json).",
    "result": "B is DOMINATED on all three ranked objectives by two front-0 candidates and dominates none; NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
    "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat the incumbent B after the frozen 0.86M recovery? The original control is NOT a C2 arm; screening is disjoint in seed AND prompt (c2_screening_v1, 0ad76fc7). Owner: the protocol.",
-   "execution_path": "full-search driver implemented, toy-executed and CONFIRMED ON REAL CUDA; the formal chain is BUILT and unconsumed, provisioning 350 GiB for a derived 243.4 GiB peak. Commits a Top-5 and STOPS. Two authorizations, never one.",
-   "funding": "cap 370.0000 (accounting envelope only); chain ceiling fits with headroom. NOT AUTHORIZED. Figures owned by plans/phase_c2_full_search_pricing.json:funding."
+   "execution_path": "full-search driver CONFIRMED ON REAL CUDA; the formal chain is BUILT and unconsumed, provisioning 400 GB for a derived 250.9 GiB peak. Commits a Top-5 and STOPS. Two authorizations, never one.",
+   "funding": "cap 370.0000 (accounting envelope only); chain total fits with headroom. NOT AUTHORIZED. Owner: plans/phase_c2_full_search_pricing.json:funding."
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent: attention.activation_importance_v1 vs a future attention.causal_kl_v1. Cannot start before C2 names an incumbent, and the operator does not exist yet.",
   "c4": "CONDITIONAL on C3 promoting. Another full joint re-search with the promoted operator, then behavioural selection. Same cycle as C1->C2; pattern in docs/OPERATOR_PROMOTION_CYCLE.md."
@@ -137,7 +137,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOT AUTHORIZED. The formal full-search chain is BUILT and UNCONSUMED -- every component exercised, no grant approved, so no authorization issued. The live L40S securePrice re-quoted at $1.09/h, unchanged, so the beam-6 ceiling stands at $33.1827 for the right reason. Both C2 sessions FIT the $370.0000 ACCOUNTING ENVELOPE with $9.2842 over; fitting is NOT permission and it is NOT transferable to C3/C4. Owed: the FINAL FORMAL SEARCH LAUNCH REVIEW, which reads plans/phase_c2_full_search_grant_proposal.json -- a proposal that approves nothing and that the issuer refuses.",
+ "blocker": "NOT AUTHORIZED. The formal full-search chain is BUILT and UNCONSUMED, after three review-found repairs: a missing c2_full_search setup-dispatch branch, a storage walk that missed the ancestors the search never releases (250.9 GiB, so 400 GB), and a GPU-only ceiling that ignored separately billed Container Disk. Session total $34.8740 = GPU $33.1827 + disk $1.6913; chain total $66.2757 FITS the $370.0000 ACCOUNTING ENVELOPE with $6.0700 over -- fitting is NOT permission, NOT transferable to C3/C4. Live securePrice re-quoted $1.09/h, unchanged. Owed: the FINAL FORMAL SEARCH LAUNCH REVIEW, reading plans/phase_c2_full_search_grant_proposal.json, which approves nothing and which the issuer refuses.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live. Detail: logs/state/current.md."
