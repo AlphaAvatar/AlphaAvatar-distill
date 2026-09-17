@@ -40,8 +40,10 @@
   "hard_ceiling_usd": 15.1475,
   "planning_floor_usd": 13.4401,
   "soft_stop_usd": 14.7841,
-  "cumulative_cap_usd": 320.0,
-  "_cap_amendment": "2026-09-11: the PROJECT cumulative cap rose from 283.76 to 320.00 (+36.24) with the approved execution package below. The per-attempt ceiling did NOT move and no minute assumption changed. The issuer refuses a grant naming any other cap, which is why this value lives here rather than being inferred from the ledger."
+  "cumulative_cap_usd": 370.0,
+  "_cap_amendment": "2026-09-11: the PROJECT cumulative cap rose from 283.76 to 320.00 (+36.24) with the approved execution package below. AMENDED AGAIN 2026-09-17: 320.00 -> 370.00 (+50.00), on the maintainer decision closing the Phase-C2 preparation round. The per-attempt ceiling did NOT move and no minute assumption changed. The issuer refuses a grant naming any other cap, which is why this value lives here rather than being inferred from the ledger.",
+  "_the_2026_09_17_raise_is_an_accounting_envelope": "NOT a spend authorization and NOT permission to launch either C2 session. It is the project's cumulative accounting bound, which the C2 chain's ceilings must fit inside; each session still needs its own grant, readiness record, one-use authorization and bundle. The headroom is NOT transferable to C3, C4 or any unrelated experiment, and the C1 formal/engineering/package allowances below did NOT move.",
+  "_why_this_experiments_config_owns_a_project_number": "historical: the cap was first stated with C1's approved package and derive_budget.py reads it from here (scripts/consolidate/derive_budget.py :: project_balance). It is a PROJECT fact living in one experiment's config, which is poor ownership; it is left in place because moving it would repoint every consumer during a round whose purpose is a governance chain, and a cap with two owners is worse than a cap with an awkward one."
  },
  "execution_package": {
   "_contract": "The maintainer decision this experiment's attempts run under. INSTANCE POLICY, which is why it is configuration and not core: the core knows nothing about attempts, packages, dollars or retries. AUTHORIZES NOTHING BY ITSELF -- a launch still needs a grant, an authorization, a launch-bound readiness record and a bundle.",

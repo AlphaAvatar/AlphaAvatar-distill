@@ -11,20 +11,36 @@
 > [`current.md`](../../../../state/current.md); for what any phase actually
 > measured, read that phase's own records.
 
-**Status: C0 COMPLETE / FROZEN · C1 COMPLETE (verdict `GO`) · C2 SEARCH-1 DONE
-AND FROZEN, FULL JOINT RE-SEARCH PLANNED AND PRICED BUT NOT FUNDED · C3 NOT
+**Status: C0 COMPLETE / FROZEN · C1 COMPLETE (verdict `GO`) · C2 PREPARATION
+CLOSED AND ACCEPTED — the full joint re-search is designed, derived and priced,
+it FITS the raised accounting envelope, and it is NOT AUTHORIZED · C3 NOT
 STARTED · C4 CONDITIONAL ON C3.**
 
 The Phase-C0 protocol is frozen in
 [`phase_c0_preregistration.json`](phase_c0_preregistration.json), with its sizing
 evidence in [`phase_c0_sizing_evidence.json`](phase_c0_sizing_evidence.json).
 
-Nothing on this page is authorization for compute. The C2 full joint re-search
-is **blocked on budget**, not on design: the complete chain at the standing beam
-width does not fit the remaining project headroom — see
-[`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json),
-which owns every figure and states the minimum cap that would contain both
-ceilings. Stating that minimum is not requesting it.
+Nothing on this page is authorization for compute. The C2 preparation round was
+**accepted and closed on 2026-09-17** and the project cumulative cap was raised
+`$320.0000` → `$370.0000` as an **accounting envelope**, so the complete chain
+(ceiling `$63.0615`) now fits the remaining
+`$72.491` with `$9.4295` to spare —
+see [`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json),
+which owns every figure and derives the verdict.
+
+**Fitting is not permission.** The envelope is neither a spend authorization nor
+transferable to C3, C4 or any unrelated experiment. Before any launch review the
+search owes its own launcher, grant, launch-bound readiness record, one-use
+authorization, derived executable closure and staged bundle — **and** one
+bounded real-GPU engineering validation of the CUDA / device / BF16 /
+model-materialization integration that the CPU toy execution cannot reach. The
+`$33.1827` search ceiling is planning evidence: the L40S securePrice is
+re-quoted live immediately before authorization and the ceiling re-derived if it
+has moved. Beam width 6 is **not** narrowed to absorb a price change.
+
+After a successful formal search commits its Top-5 the session **stops**; the
+behavioural stage is then bound against that actual frozen set, re-priced, and
+authorized separately.
 
 Formal Stage-2/Stage-3 recovery training remains **deferred** until the
 operator-development programme is complete. No search-stage front and no Phase-B
@@ -186,7 +202,7 @@ selection or comparison record is rewritten.
 winners of a restricted search would inherit that restriction. The accepted
 reading of Search-1 points the other way — the procedure works here, so widen it.
 
-### C2b — full joint re-search · **PLANNED, PRICED, NOT FUNDED**
+### C2b — full joint re-search · **ACCEPTED, PRICED, FITS THE ENVELOPE, NOT AUTHORIZED**
 
 Protocol and pricing:
 [`phase_c2_full_search_protocol.json`](../../phase_c2/plans/phase_c2_full_search_protocol.json) ·
@@ -235,7 +251,7 @@ authorization number can be made smaller. The goal is never exhaustive
 enumeration of every leaf — it is that every admissible alternative *competes
 inside one search*.
 
-### C2c — Top-K, then bounded behavioural selection · **DEFINED, PRICED, NOT FUNDED**
+### C2c — Top-K, then bounded behavioural selection · **ACCEPTED, PRICED, NOT AUTHORIZED**
 
 The search commits a **Top-5** candidate set by the frozen ε-Pareto ranking, and
 that set is closed when it is committed. A candidate set that can grow once

@@ -887,6 +887,13 @@ def main() -> int:
         if "cumulative_spend_usd" in project:
             b["cumulative_spend_usd"] = project["cumulative_spend_usd"]
             b["remaining_usd"] = project["remaining_usd"]
+            #: The CAP too, and it was the one figure of the three left
+            #: hand-maintained. When the maintainer raised it from $320 to $370
+            #: the snapshot kept the old cap beside a newly derived remainder,
+            #: so it claimed `320.0000 - 297.5090 = 72.4910`. Deriving two of
+            #: three related numbers and remembering the third is the same
+            #: defect this function was written to remove from `latest_run`.
+            b["authorized_cap_usd"] = project["cap_usd"]
             #: The per-experiment breakdown stays in the DERIVER. The snapshot
             #: is the minimal view and has a size guard; it carries the number,
             #: and `derive_budget.py --json` carries how it was reached.

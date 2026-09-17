@@ -20,10 +20,17 @@ stage record; the budget position from `derive_budget.py`, which sums the run
 closeouts. Nothing is transcribed from a handoff message, and the generator is
 re-runnable so a reviewer can reproduce both documents from the tree.
 
-**Why this is a plan and not an authorization.** The search does not fit the
-project's remaining headroom at the standing beam width — `plan_session` refuses
-it — and that refusal is reported rather than worked around. Deciding what to do
-about it is a maintainer decision.
+**Why this is a plan and not an authorization.** Fitting the accounting envelope
+is not permission: each session still needs its own grant, launch-bound readiness
+record, one-use authorization and staged bundle, and the search additionally owes
+a bounded real-GPU engineering validation. The `funding` block DERIVES whether
+the chain fits from the arithmetic rather than asserting it — it once said
+"insufficient headroom" while printing a negative shortfall beside it, the moment
+the cap moved.
+
+**The price basis is planning evidence.** The L40S securePrice must be re-quoted
+live immediately before authorization and the ceiling re-derived if it has moved.
+Beam width 6 is the standing design and is not narrowed to absorb a price change.
 """
 from __future__ import annotations
 
@@ -839,12 +846,19 @@ def protocol() -> dict[str, Any]:
             "any increase to the project cap",
         ],
         "interpretation_boundary": interpretation_boundary(),
+        #: Prose aligned 2026-09-17. It described the decision boundary as a
+        #: "feasibility floor and equivalence interval" and its terminal state as
+        #: "unresolved_equivalence" — Phase-A/B vocabulary for the design C0
+        #: retired. The SEMANTICS below were already Phase-C's throughout; only
+        #: this sentence lagged, which is why aligning it does not reopen the
+        #: protocol.
         "interpretation_discipline": (
             "the search stage produces a cheap-metric front and selects a "
-            "candidate SET, never an incumbent. Only the behavioural selection "
-            "stage, under the frozen recipe, battery, feasibility floor and "
-            "equivalence interval, may name a C2 incumbent — and "
-            "unresolved_equivalence with no winner is a legitimate terminal "
+            "candidate SET, never an incumbent. Only the behavioural "
+            "confirmation of the selected C against the incumbent B, under the "
+            "frozen recipe, the frozen Phase-C battery, the +0.010 SESOI and "
+            "C1's GO / NO-GO / INCONCLUSIVE rule, may name a C2 incumbent — and "
+            "INCONCLUSIVE with no incumbent named is a legitimate terminal "
             "result, not a reason for a fourth seed."),
         "pricing": PRICING_OUT,
         "authorizes": "nothing",
@@ -925,61 +939,66 @@ def pricing(space) -> dict[str, Any]:
         "behavioural_selection": selection,
         "combined": combined,
         "budget_position": budget,
-        "blocker": {
-            "status": "INSUFFICIENT PROJECT HEADROOM FOR THE STANDING DESIGN",
+        #: DERIVED, not restated. This block said "INSUFFICIENT PROJECT
+        #: HEADROOM" while printing a NEGATIVE shortfall beside it the moment the
+        #: cap rose — a prose conclusion contradicting its own arithmetic, which
+        #: is a failure this project has already paid for. The status is now
+        #: computed from the numbers.
+        "funding": {
+            "status": ("FITS THE ACCOUNTING ENVELOPE — NOT AUTHORIZED"
+                       if shortfall_hard <= 0 else
+                       "INSUFFICIENT PROJECT HEADROOM FOR THE STANDING DESIGN"),
             "standing_beam_width": STANDING_WIDTH,
             "remaining_usd": budget["remaining_usd"],
             "complete_chain_expected_usd": combined["expected_usd"],
             "complete_chain_hard_usd": combined["hard_ceiling_usd"],
+            "headroom_after_the_chain_usd": round(-shortfall_hard, 4),
             "shortfall_on_expected_usd": shortfall_expected,
             "shortfall_on_hard_ceilings_usd": shortfall_hard,
+            "_a_negative_shortfall_is_headroom": (
+                "both figures are chain minus remaining, so a negative value "
+                "means the chain fits with that much to spare. The status above "
+                "is derived from the sign rather than written beside it."),
             "minimum_cumulative_cap_usd": minimum_cap,
             "_minimum_cap_meaning": (
                 "the smallest cumulative project cap that CONTAINS both "
-                "ceilings: cumulative spend plus the complete standing chain. "
-                "Stating it is not requesting it."),
-            "what_it_means": (
-                "the complete chain at the STANDING beam width does not fit the "
-                "remaining project headroom, and neither does the search alone "
-                "— plan_session refuses it, and the refusal text is recorded "
-                "per width above. This is a maintainer decision and it is "
-                "deliberately NOT resolved here by shrinking the run to fit, "
-                "which is the one repair the budget module exists to prevent."),
+                "ceilings: cumulative spend plus the complete standing chain."),
+            "fitting_is_not_permission": (
+                "the 2026-09-17 cap raise to $370.0000 is a project ACCOUNTING "
+                "envelope. It is not a spend authorization and not permission to "
+                "launch either session, and its headroom is not transferable to "
+                "C3, C4 or any unrelated experiment. Each session still needs "
+                "its own grant, launch-bound readiness record, one-use "
+                "authorization and staged bundle, and the full joint search "
+                "additionally needs the bounded real-GPU engineering validation "
+                "that the CPU toy execution cannot substitute for."),
+            "the_price_basis_is_planning_evidence_only": (
+                "the search ceiling above rests on a quoted "
+                f"${FS.PRICE_PER_HOUR_LAST_QUOTED}/h L40S securePrice. It MUST "
+                "be re-quoted live immediately before authorization and the "
+                "ceiling re-derived if the rate has moved. An hour-old price is "
+                "not a price."),
+            "if_the_rate_rises": (
+                "re-derive the ceiling at the new rate and seek the funding it "
+                "implies. Beam width 6 is the standing design and is NOT "
+                "narrowed to absorb a price change — that would buy a cheaper "
+                "number by running a different experiment."),
             "the_narrower_beams_are_not_the_requirement": (
                 "beam 2/3/4 are priced above as scientific alternatives. They "
                 "must NOT be read as the funding requirement for this protocol: "
                 "the standing design is beam 6, and a narrower beam carries less "
                 "of the same space forward, which is a different experiment with "
-                "its own result. Narrowing the beam MERELY to fit the existing "
-                "cap is not permitted."),
-            "options_for_the_maintainer": [
-                "fund the standing design: raise the cumulative project cap to "
-                "at least the minimum above, keeping beam width 6 and the full "
-                "space",
-                "deliberately adopt a narrower beam as a CHANGED scientific "
-                "design, accepting reduced breadth and recording it as the "
-                "registered width before launch — not as a cost workaround",
-                "decline for now and leave C2 at the accepted Search-1 evidence, "
-                "which selects no incumbent",
-            ],
-            "_not_a_recommendation": (
-                "the trade is scientific, not arithmetic: the arithmetic is "
-                "above and the choice is the maintainer's."),
-            "rounding": {
+                "its own result."),
+            "_rounding": {
                 "_rule": (
-                    "every figure in this record is computed from the 4-dp "
-                    "stored ceilings. A ceiling rounds UP or it under-authorizes "
-                    "the plan it prices, so a chain summed from "
-                    "DISPLAY-rounded components is not safe to fund."),
+                    "every figure here is computed from the 4-dp stored "
+                    "ceilings. A ceiling rounds UP or it under-authorizes the "
+                    "plan it prices, so a chain summed from DISPLAY-rounded "
+                    "components is not safe to fund."),
                 "chain_from_4dp_ceilings_usd": combined["hard_ceiling_usd"],
                 "chain_from_2dp_display_ceilings_usd": display_chain,
                 "understatement_usd": round(
                     combined["hard_ceiling_usd"] - display_chain, 4),
-                "_why_this_is_here": (
-                    "a review once summed the display-rounded search ceiling "
-                    "and reached a chain below the derived one. The comparison "
-                    "is DERIVED here rather than recounted, so it cannot go "
-                    "stale when the components move — which they have, twice."),
             },
         },
         "authorizes": "nothing",
@@ -1019,13 +1038,13 @@ def main(argv=None) -> int:
               f"${price_doc['behavioural_selection']['expected_usd']:.4f} "
               f"ceiling "
               f"${price_doc['behavioural_selection']['hard_ceiling_usd']:.4f}")
-        b = price_doc["blocker"]
-        print(f"BLOCKER          : {b['status']}")
+        b = price_doc["funding"]
+        print(f"FUNDING          : {b['status']}")
         print(f"  standing beam {b['standing_beam_width']} complete chain: "
               f"expected ${b['complete_chain_expected_usd']:.4f}, ceiling "
               f"${b['complete_chain_hard_usd']:.4f}")
-        print(f"  remaining ${b['remaining_usd']:.4f}  shortfall "
-              f"${b['shortfall_on_hard_ceilings_usd']:.4f}  minimum cap "
+        print(f"  remaining ${b['remaining_usd']:.4f}  headroom after the "
+              f"chain ${b['headroom_after_the_chain_usd']:.4f}  minimum cap "
               f"${b['minimum_cumulative_cap_usd']:.4f}")
         print("nothing written (pass --write)")
         return 0

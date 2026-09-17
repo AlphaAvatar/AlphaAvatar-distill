@@ -286,23 +286,36 @@ def test_the_cost_of_not_excluding_is_derived(registered):
 # --- 5. the price refuses instead of shrinking ------------------------------
 
 
-def test_the_search_does_not_fit_the_remaining_headroom(space, registered):
-    """At the standing beam width, `plan_session` must REFUSE.
+def test_the_headroom_verdict_matches_what_plan_session_actually_does(
+        space, registered):
+    """Whatever the record claims about fitting, `plan_session` must agree.
 
-    This is the blocker, asserted rather than described. If headroom is ever
-    raised enough for this to pass, the pricing record and the roadmap status
-    are stale and must be regenerated.
+    This asserted a REFUSAL while the cap was $320, with a docstring saying that
+    if headroom ever rose enough for it to pass, the records were stale. The cap
+    rose to $370 on 2026-09-17 and it did. So the test now checks the INVARIANT
+    rather than one side of it: the pricing record's derived verdict and the
+    budget module's behaviour cannot disagree.
     """
     from derive_budget import derive
 
     remaining = derive(REPO)["project"]["remaining_usd"]
-    with pytest.raises(BudgetError, match="shortfall"):
+    recorded_fits = "FITS" in json.loads(PRICING.read_text())["funding"]["status"]
+    try:
         FS.price(space, price_per_hour=FS.PRICE_PER_HOUR_LAST_QUOTED,
                  authorized_usd=remaining, beam_width=6)
+        actually_fits = True
+    except BudgetError:
+        actually_fits = False
+    assert actually_fits is recorded_fits, (
+        f"the pricing record says fits={recorded_fits} and plan_session says "
+        f"{actually_fits}; one of them is stale")
+    #: And fitting is never permission — the record must carry that either way.
+    funding = json.loads(PRICING.read_text())["funding"]
+    assert "NOT AUTHORIZED" in funding["status"] or not actually_fits
 
 
 def test_the_funding_requirement_is_the_standing_design_not_the_cheapest():
-    """The blocker must price the STANDING beam width, not the cheapest one.
+    """The funding block must price the STANDING beam width, not the cheapest.
 
     A narrower beam explores less of the same space and can return a different
     front, so quoting its chain as the funding requirement would fund a
@@ -312,7 +325,7 @@ def test_the_funding_requirement_is_the_standing_design_not_the_cheapest():
     from aadistill.initialization.planning.ranking import SCHEDULE_V1
 
     doc = json.loads(PRICING.read_text())
-    blocker = doc["blocker"]
+    blocker = doc["funding"]
     combined = doc["combined"]
     selection = doc["behavioural_selection"]
 
@@ -338,23 +351,49 @@ def test_the_funding_requirement_is_the_standing_design_not_the_cheapest():
     remaining = doc["budget_position"]["remaining_usd"]
     assert blocker["shortfall_on_hard_ceilings_usd"] == pytest.approx(
         round(chain - remaining, 4), abs=1e-4)
-    assert blocker["shortfall_on_hard_ceilings_usd"] > 0
     assert blocker["minimum_cumulative_cap_usd"] == pytest.approx(
         round(doc["budget_position"]["cumulative_spend_usd"] + chain, 4),
         abs=1e-4)
+    #: And the STATUS must follow the sign rather than be asserted beside it.
+    #: This block once read "INSUFFICIENT PROJECT HEADROOM" while printing a
+    #: negative shortfall, the moment the cap rose.
+    fits = blocker["shortfall_on_hard_ceilings_usd"] <= 0
+    assert ("FITS" in blocker["status"]) is fits, (
+        f"status {blocker['status']!r} contradicts a shortfall of "
+        f"{blocker['shortfall_on_hard_ceilings_usd']}")
+    assert blocker["headroom_after_the_chain_usd"] == pytest.approx(
+        -blocker["shortfall_on_hard_ceilings_usd"], abs=1e-4)
+    #: Fitting is never permission, and the record must say so.
+    assert "not a spend authorization" in blocker["fitting_is_not_permission"]
+    assert "not transferable" in blocker["fitting_is_not_permission"]
+    #: The rate is planning evidence and must be re-quoted.
+    assert "re-quoted live" in blocker[
+        "the_price_basis_is_planning_evidence_only"]
+    assert "NOT narrowed" in blocker["if_the_rate_rises"]
 
     #: Narrower widths are present, and labelled as alternatives rather than
     #: offered as cost options.
     alternatives = {r["beam_width"]
                     for r in combined["scientific_alternatives_not_cost_options"]}
     assert alternatives and SCHEDULE_V1.width not in alternatives
-    assert "not permitted" in blocker["the_narrower_beams_are_not_the_requirement"]
+    assert "different experiment" in blocker[
+        "the_narrower_beams_are_not_the_requirement"]
+    #: The rounding comparison is derived, not recounted.
+    rounding = blocker["_rounding"]
+    assert rounding["chain_from_4dp_ceilings_usd"] == chain
+    assert rounding["understatement_usd"] == pytest.approx(
+        chain - rounding["chain_from_2dp_display_ceilings_usd"], abs=1e-6)
 
-    #: At least one width must be recorded as refused, with the refusal text.
-    refused = [r for r in doc["search"]["widths"]
-               if not r["fits_remaining_headroom"]]
-    assert refused, "no width was recorded as refused; the blocker has no basis"
-    assert all(r["refusal"] for r in refused)
+    #: Every width's fit flag and its refusal text must agree with each other:
+    #: a width that does not fit owes the refusal, and one that fits must not
+    #: carry one. Requiring at least one refusal was right while the cap was
+    #: $320 and became wrong when it rose — a test that assumes a shortfall is a
+    #: test that expires.
+    for row in doc["search"]["widths"]:
+        if row["fits_remaining_headroom"]:
+            assert row["refusal"] is None, row["beam_width"]
+        else:
+            assert row["refusal"], row["beam_width"]
 
 
 def test_multi_session_continuation_is_not_claimed_as_a_capability():
@@ -376,11 +415,16 @@ def test_multi_session_continuation_is_not_claimed_as_a_capability():
     source = (REPO / block["source"]).read_text()
     assert "cannot be relayed for resume" in source
 
-    #: And nothing in the pricing plans around a continuation.
+    #: And nothing in the pricing plans around a continuation. Scanned over the
+    #: WHOLE funding block rather than one list: the options list is gone now
+    #: that the maintainer has decided, and a guard keyed on a field that no
+    #: longer exists would pass vacuously.
     pricing = json.loads(PRICING.read_text())
-    for option in pricing["blocker"]["options_for_the_maintainer"]:
-        assert "continuation" not in option.lower()
-        assert "resume" not in option.lower()
+    funding = json.dumps(pricing["funding"]).lower()
+    for forbidden in ("continuation", "resume", "multi-session"):
+        assert forbidden not in funding, (
+            f"the funding block plans around {forbidden!r}, which is not a "
+            "current capability")
 
 
 def test_the_budget_position_is_derived_not_restated():

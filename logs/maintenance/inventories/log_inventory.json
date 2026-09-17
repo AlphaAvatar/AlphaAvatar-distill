@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-17T05:50:25+00:00",
+  "created_utc": "2026-09-17T06:57:02+00:00",
   "command": "scripts/consolidate/build_log_inventory.py",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1188,
-    "bytes": 44268624,
+    "bytes": 44276203,
     "by_disposition": {
       "keep_canonical": 81,
       "keep_immutable": 921,
@@ -4005,6 +4005,13 @@
       ]
     },
     {
+      "sentence": "real-GPU engineering validation of the CUDA/device/BF16/materialization",
+      "files": [
+        "logs/budget/decisions.md",
+        "logs/budget/ledger.md"
+      ]
+    },
+    {
       "sentence": "session record is [`../autoinit_phase_a_session.json`](../autoinit_phase_a_session.json).",
       "files": [
         "logs/stages/stage-1/phase_a/runs/attempt6/README.md",
@@ -5143,8 +5150,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 875994,
-      "sha256": "3adf5207693747c8b03e1be860a57484f40589343c73c4e0512075585fd189b1",
+      "size_bytes": 881281,
+      "sha256": "53bdb0231db07c3f72277d8014913a27df20216c191b6117da888e168b112188",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -5177,8 +5184,8 @@
     },
     {
       "path": "logs/budget/ledger.md",
-      "size_bytes": 158284,
-      "sha256": "03b8c030206ab43d3f1d398f9d622f9250c064ab3398ed27851a03edb6be338e",
+      "size_bytes": 160343,
+      "sha256": "81813a39b1c0098985ee765217f418b8acc4b855c1f22fce97ac195cf4b340f9",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -12059,8 +12066,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
-      "size_bytes": 22339,
-      "sha256": "1da96c0859fac61eb2a7432574dbecf2e65af95a0e6afa051fc350a8c8c1d0ca",
+      "size_bytes": 23344,
+      "sha256": "fa06c31bd95cb123f71af86d931b4ee904867b68dc118f1713c492e606987118",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -17407,14 +17414,13 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
-      "size_bytes": 12941,
-      "sha256": "d8e49e442326ea239ee9537b61dae8e5342d388a4df487cab578d29d2dcf56bb",
+      "size_bytes": 12168,
+      "sha256": "2c5f9438ea9e5136ca9ebb7993c84df972ddd7f5961e0dbcbfed36209975ca68",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
-        "logs/state/current.json",
         "tests/autoinit/test_phase_c2_full_search.py"
       ],
       "referenced_by_executable": [
@@ -17426,8 +17432,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
-      "size_bytes": 40343,
-      "sha256": "a81f0e8f5f90f9eedee648df71292905ca2649e28385bcf119449992482b977a",
+      "size_bytes": 40414,
+      "sha256": "746b4dfd13978b10167361a55fc83c13c863b0f0a7044b028add080612caed79",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22527,8 +22533,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11976,
-      "sha256": "1a787509e1e421d1dffebadb689a6446af81dd1cf77f58074395857bb72bbe46",
+      "size_bytes": 11906,
+      "sha256": "22120fbbbfbd094250d5df53cc789a555f9afb95a638ef6ee9e92f8c418224ac",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22572,7 +22578,7 @@
     {
       "path": "logs/state/current.md",
       "size_bytes": 37434,
-      "sha256": "d7eda054cfc00d012b40b165f4153ded28a6791c987b46d8ed07076b5bdc6755",
+      "sha256": "fd7fd852ca213143a415d54eb1ed1f5e0bd885d04fe9ae8d992be7e755db51af",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

@@ -638,8 +638,8 @@
   "the_target_is_the_current_incumbent": "the question is 'does C improve on B?', NOT 'does C beat the project's original initialization again?'. The original control is therefore not a C2 arm, and each later turn of the cycle challenges whatever incumbent the previous turn left.",
   "_why_this_is_written_down": "a cheap-metric front and a post-recovery behavioural rate are different quantities on different scales, and this programme produces both. Conflating them would let a KL ranking read as a capability claim."
  },
- "interpretation_discipline": "the search stage produces a cheap-metric front and selects a candidate SET, never an incumbent. Only the behavioural selection stage, under the frozen recipe, battery, feasibility floor and equivalence interval, may name a C2 incumbent \u2014 and unresolved_equivalence with no winner is a legitimate terminal result, not a reason for a fourth seed.",
+ "interpretation_discipline": "the search stage produces a cheap-metric front and selects a candidate SET, never an incumbent. Only the behavioural confirmation of the selected C against the incumbent B, under the frozen recipe, the frozen Phase-C battery, the +0.010 SESOI and C1's GO / NO-GO / INCONCLUSIVE rule, may name a C2 incumbent \u2014 and INCONCLUSIVE with no incumbent named is a legitimate terminal result, not a reason for a fourth seed.",
  "pricing": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
  "authorizes": "nothing",
- "protocol_sha256": "b883870dacb7c8e4916526488c1cddecce0cdeaeee6e02c7817bcc0f500bd7b7"
+ "protocol_sha256": "26de0bb67d2382357541791ece75388fef31ef7bca6c88b5f1fdd35e997ca289"
 }

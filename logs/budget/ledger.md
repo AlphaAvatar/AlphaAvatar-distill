@@ -2640,3 +2640,45 @@ instant it existed, before any post-processing. No GPU remeasurement of B, no
 second `state_eval`, no Search-2 and no behavioural confirmation without a new
 maintainer decision. `$1.6995` remains inside the envelope and is not
 permission.
+
+## 2026-09-17 — APPROVED: the project cumulative cap raised to `$370.0000`
+
+**An accounting envelope, not a spend authorization.**
+
+```text
+cumulative spend                        297.5090   (unchanged; nothing was spent)
+project cap              320.0000  ->   370.0000   +50.0000
+project remaining         22.4910  ->    72.4910
+```
+
+Granted on the maintainer decision closing the Phase-C2 preparation round, so
+that the accepted C2 chain fits inside the project's accounting bound:
+
+```text
+full joint search, standing beam 6   expected 16.0998   ceiling 33.1827
+behavioural selection, 12 probes     expected 20.6926   ceiling 29.8788
+complete C2 chain                    expected 36.7924   ceiling 63.0615
+headroom after the chain                                  9.4295
+```
+
+**What did NOT move.** C1's execution-package allowances are untouched —
+`$22.8249` formal, `$6.0000` engineering, `$28.8249` package — and the four
+limits continue to bind separately. The headroom is **not transferable** to C3,
+C4 or any unrelated experiment.
+
+**What this does not buy.** Neither C2 session is authorized. The search still
+owes a launcher, a grant, a launch-bound readiness record, a one-use
+authorization, a derived executable closure, a staged bundle **and** a bounded
+real-GPU engineering validation of the CUDA/device/BF16/materialization
+integration the CPU toy execution cannot reach. The behavioural session is
+additionally bound to a Top-5 that does not exist yet and needs its own
+authorization. Remaining money is not permission.
+
+**The `$33.1827` is planning evidence.** It rests on a quoted `$1.09/h` L40S
+securePrice and must be re-quoted live immediately before authorization, with
+the ceiling re-derived if the rate has moved. Beam width 6 is the standing
+design and is **not** narrowed to absorb a price change.
+
+The cap is owned by `configs/experiments/phase_c1/authorization.json ::
+accepted_pricing.cumulative_cap_usd`, which `derive_budget.py` reads; every
+figure above is derived from there and from the run closeouts, not restated.

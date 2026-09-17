@@ -17,8 +17,8 @@
     "expected_usd": 16.0998,
     "hard_ceiling_minutes": 1826.57,
     "hard_ceiling_usd": 33.1827,
-    "fits_remaining_headroom": false,
-    "refusal": "the plan terminates at $33.18 (1827 min at $1.090/h) but only $22.49 is authorized \u2014 a shortfall of $10.69. Expected $16.10, soft stop $32.64, recovery reserve $0.55. Ask for $33.18 or reduce the run; do not shrink it silently to fit."
+    "fits_remaining_headroom": true,
+    "refusal": null
    },
    {
     "beam_width": 4,
@@ -32,8 +32,8 @@
     "expected_usd": 15.4139,
     "hard_ceiling_minutes": 1511.13,
     "hard_ceiling_usd": 27.4521,
-    "fits_remaining_headroom": false,
-    "refusal": "the plan terminates at $27.45 (1511 min at $1.090/h) but only $22.49 is authorized \u2014 a shortfall of $4.96. Expected $15.41, soft stop $26.91, recovery reserve $0.55. Ask for $27.45 or reduce the run; do not shrink it silently to fit."
+    "fits_remaining_headroom": true,
+    "refusal": null
    },
    {
     "beam_width": 3,
@@ -47,8 +47,8 @@
     "expected_usd": 15.0709,
     "hard_ceiling_minutes": 1353.4,
     "hard_ceiling_usd": 24.5867,
-    "fits_remaining_headroom": false,
-    "refusal": "the plan terminates at $24.59 (1353 min at $1.090/h) but only $22.49 is authorized \u2014 a shortfall of $2.10. Expected $15.07, soft stop $24.04, recovery reserve $0.55. Ask for $24.59 or reduce the run; do not shrink it silently to fit."
+    "fits_remaining_headroom": true,
+    "refusal": null
    },
    {
     "beam_width": 2,
@@ -160,7 +160,7 @@
   "hard_ceiling_usd": 63.0615,
   "search_hard_ceiling_usd": 33.1827,
   "selection_hard_ceiling_usd": 29.8788,
-  "remaining_usd": 22.491,
+  "remaining_usd": 72.491,
   "scientific_alternatives_not_cost_options": [
    {
     "beam_width": 4,
@@ -185,37 +185,34 @@
  },
  "budget_position": {
   "cumulative_spend_usd": 297.509,
-  "authorized_cap_usd": 320.0,
-  "remaining_usd": 22.491,
+  "authorized_cap_usd": 370.0,
+  "remaining_usd": 72.491,
   "_derived_by": "scripts/consolidate/derive_budget.py, which sums every recorded closeout cost across every experiment. Not restated from any document.",
   "remaining_is_not_permission": true
  },
- "blocker": {
-  "status": "INSUFFICIENT PROJECT HEADROOM FOR THE STANDING DESIGN",
+ "funding": {
+  "status": "FITS THE ACCOUNTING ENVELOPE \u2014 NOT AUTHORIZED",
   "standing_beam_width": 6,
-  "remaining_usd": 22.491,
+  "remaining_usd": 72.491,
   "complete_chain_expected_usd": 36.7924,
   "complete_chain_hard_usd": 63.0615,
-  "shortfall_on_expected_usd": 14.3014,
-  "shortfall_on_hard_ceilings_usd": 40.5705,
+  "headroom_after_the_chain_usd": 9.4295,
+  "shortfall_on_expected_usd": -35.6986,
+  "shortfall_on_hard_ceilings_usd": -9.4295,
+  "_a_negative_shortfall_is_headroom": "both figures are chain minus remaining, so a negative value means the chain fits with that much to spare. The status above is derived from the sign rather than written beside it.",
   "minimum_cumulative_cap_usd": 360.5705,
-  "_minimum_cap_meaning": "the smallest cumulative project cap that CONTAINS both ceilings: cumulative spend plus the complete standing chain. Stating it is not requesting it.",
-  "what_it_means": "the complete chain at the STANDING beam width does not fit the remaining project headroom, and neither does the search alone \u2014 plan_session refuses it, and the refusal text is recorded per width above. This is a maintainer decision and it is deliberately NOT resolved here by shrinking the run to fit, which is the one repair the budget module exists to prevent.",
-  "the_narrower_beams_are_not_the_requirement": "beam 2/3/4 are priced above as scientific alternatives. They must NOT be read as the funding requirement for this protocol: the standing design is beam 6, and a narrower beam carries less of the same space forward, which is a different experiment with its own result. Narrowing the beam MERELY to fit the existing cap is not permitted.",
-  "options_for_the_maintainer": [
-   "fund the standing design: raise the cumulative project cap to at least the minimum above, keeping beam width 6 and the full space",
-   "deliberately adopt a narrower beam as a CHANGED scientific design, accepting reduced breadth and recording it as the registered width before launch \u2014 not as a cost workaround",
-   "decline for now and leave C2 at the accepted Search-1 evidence, which selects no incumbent"
-  ],
-  "_not_a_recommendation": "the trade is scientific, not arithmetic: the arithmetic is above and the choice is the maintainer's.",
-  "rounding": {
-   "_rule": "every figure in this record is computed from the 4-dp stored ceilings. A ceiling rounds UP or it under-authorizes the plan it prices, so a chain summed from DISPLAY-rounded components is not safe to fund.",
+  "_minimum_cap_meaning": "the smallest cumulative project cap that CONTAINS both ceilings: cumulative spend plus the complete standing chain.",
+  "fitting_is_not_permission": "the 2026-09-17 cap raise to $370.0000 is a project ACCOUNTING envelope. It is not a spend authorization and not permission to launch either session, and its headroom is not transferable to C3, C4 or any unrelated experiment. Each session still needs its own grant, launch-bound readiness record, one-use authorization and staged bundle, and the full joint search additionally needs the bounded real-GPU engineering validation that the CPU toy execution cannot substitute for.",
+  "the_price_basis_is_planning_evidence_only": "the search ceiling above rests on a quoted $1.09/h L40S securePrice. It MUST be re-quoted live immediately before authorization and the ceiling re-derived if the rate has moved. An hour-old price is not a price.",
+  "if_the_rate_rises": "re-derive the ceiling at the new rate and seek the funding it implies. Beam width 6 is the standing design and is NOT narrowed to absorb a price change \u2014 that would buy a cheaper number by running a different experiment.",
+  "the_narrower_beams_are_not_the_requirement": "beam 2/3/4 are priced above as scientific alternatives. They must NOT be read as the funding requirement for this protocol: the standing design is beam 6, and a narrower beam carries less of the same space forward, which is a different experiment with its own result.",
+  "_rounding": {
+   "_rule": "every figure here is computed from the 4-dp stored ceilings. A ceiling rounds UP or it under-authorizes the plan it prices, so a chain summed from DISPLAY-rounded components is not safe to fund.",
    "chain_from_4dp_ceilings_usd": 63.0615,
    "chain_from_2dp_display_ceilings_usd": 63.06,
-   "understatement_usd": 0.0015,
-   "_why_this_is_here": "a review once summed the display-rounded search ceiling and reached a chain below the derived one. The comparison is DERIVED here rather than recounted, so it cannot go stale when the components move \u2014 which they have, twice."
+   "understatement_usd": 0.0015
   }
  },
  "authorizes": "nothing",
- "pricing_sha256": "65d77a7f55ab7315a3069e0e8199fdd2fde58e167123224f87f5db3bf715974b"
+ "pricing_sha256": "9e0f1357ffec97de6b16ad4dd888cf139b003f94f6fe75ebd8204c6b555c73f0"
 }

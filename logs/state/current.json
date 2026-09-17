@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-17T08:00:00Z",
+ "generated_utc": "2026-09-17T10:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -24,8 +24,8 @@
  },
  "budget": {
   "cumulative_spend_usd": 297.509,
-  "authorized_cap_usd": 320.0,
-  "remaining_usd": 22.491,
+  "authorized_cap_usd": 370.0,
+  "remaining_usd": 72.491,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -74,8 +74,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE and CLOSED by a GO verdict. C2 Search-1 frozen with B->C computed; the full joint re-search is designed, derived and priced but NOT FUNDED. C3/C4 not started.",
-  "then": "a maintainer funding decision on the re-derived pricing, at the STANDING beam width. Do NOT launch either session, the withdrawn Search-2, C3 or any remeasurement of B without one. Multi-session continuation is NOT a current capability. The cross-session cheap-metric comparison is ACCEPTED under the existing disclosure rule.",
+  "status": "C1 COMPLETE and CLOSED by a GO verdict. C2 preparation CLOSED and ACCEPTED: derived 578-leaf space at beam 6, 12-probe behavioural schedule, search core stopping at a committed Top-5. Nothing is authorized.",
+  "then": "build the full-search governance chain, then ONE bounded real-GPU engineering validation, then return for final launch review. Do NOT launch before that review; after a Top-5 is committed, STOP and bind the behavioural session separately. Re-quote the live L40S securePrice before authorization and re-derive the ceiling; do NOT narrow beam 6 to absorb a price change. Build no resume machinery.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -122,10 +122,10 @@
    "status": "SEARCH COMPLETE and B->C COMPUTED; Search-1 is DONE and FROZEN. The local Search-2 refinement is WITHDRAWN; C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection of a new incumbent, designed and priced and NOT FUNDED.",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "priced": "plans/phase_c2_full_search_pricing.json (Search-1's historical basis: plans/phase_c2_pricing.json).",
-   "baseline_completion": "COMPLETE at attempt8 ($0.5872): B rebuilt to its expected digest, measured ONCE, B->C computed, verdict CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE and ACCEPTED on review. Attempts 5-7 aborted pre-measurement for $0.1033. B is never remeasured.",
    "result": "front 0 holds four candidates, B sits in front 1 with one; B is DOMINATED on all three ranked objectives by two and dominates none. Smallest margin 0.395971 vs a 0.007782 threshold, NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY -- not a behavioural result. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
    "behavioural_selection": "PHASE-C semantics. The only question: does the selected C, after the frozen 0.86M recovery, beat the incumbent B? The original control is NOT a C2 arm. Screening is disjoint in BOTH dimensions -- own seed AND own prompt-disjoint battery c2_screening_v1 (0ad76fc7, REBUILT after a rank-domain bug), because C0's unit is the prompt. 6 + 6 = 12 probes, exact. SESOI +0.010, no forced winner. Owner: the protocol.",
-   "execution_path": "full-joint-search driver IMPLEMENTED and toy-executed; it commits a Top-5 and STOPS with no path into a behavioural stage. The behavioural session and the launcher/governance chain are owed at authorization time. Two authorizations, never one."
+   "execution_path": "full-search driver implemented and toy-executed; commits a Top-5 and STOPS. The launcher/governance chain and the behavioural session are owed. Two authorizations, never one.",
+   "funding": "cap 370.0000 (accounting envelope only); chain ceiling fits with headroom. NOT AUTHORIZED. Figures owned by plans/phase_c2_full_search_pricing.json:funding."
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent: attention.activation_importance_v1 vs a future attention.causal_kl_v1. Cannot start before C2 names an incumbent, and the operator does not exist yet.",
   "c4": "CONDITIONAL on C3 promoting. Another full joint re-search with the promoted operator, then behavioural selection. Same cycle as C1->C2; pattern in docs/OPERATOR_PROMOTION_CYCLE.md."
@@ -137,7 +137,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "FUNDING DECISION REQUIRED, on re-derived numbers. C2c was repaired again: confirmation is now C vs B only (the original control is not a C2 arm), and screening moved to its own prompt-disjoint battery c2_screening_v1. 12 probes, not 15. At the STANDING beam width 6 the chain needs ceilings of $63.0615 against $22.491 remaining -- short $40.5705, minimum cumulative cap $360.5705. Narrower beams are scientific ALTERNATIVES. Nothing is running and nothing may start. Owner logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json.",
+ "blocker": "NOT AUTHORIZED, and the next steps are engineering. Phase-C2 preparation is CLOSED and ACCEPTED; the project cap rose 320.0000 -> 370.0000 as an ACCOUNTING ENVELOPE, so the C2 chain now fits with headroom. Fitting is NOT permission and the headroom is NOT transferable to C3/C4. Owed before launch review: the full-search governance chain, and ONE bounded real-GPU engineering validation of the CUDA/device/BF16/materialization integration the CPU toy run cannot reach. Figures owned by plans/phase_c2_full_search_pricing.json:funding.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."

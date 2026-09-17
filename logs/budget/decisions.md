@@ -1,5 +1,85 @@
 # Decision records
 
+## 2026-09-17 — Phase-C2 preparation CLOSED; project cap raised to `$370.0000`
+
+- **Maintainer decision.** The Phase-C2 preparation round is **accepted and
+  closed**: the derived 578-leaf space at standing beam width 6, the Top-5 +
+  B screening on one fresh seed and the prompt-disjoint screening battery, the
+  frozen paired single-seed Δ`correct_overall`(candidate − B) screening rule, the
+  selected-C-vs-incumbent-B confirmation on three fresh paired seeds and the
+  frozen C1 confirmation battery, the exactly-12-probe schedule, and the
+  full-search execution core that stops at a committed Top-5. The planning
+  figures are accepted as stated.
+- **The cumulative project cap rises from `$320.0000` to `$370.0000`** (+`$50.00`).
+
+  ```text
+  cumulative spend                     297.5090
+  cap                     320.0000  ->  370.0000
+  remaining                22.4910  ->   72.4910
+  complete C2 chain ceiling                63.0615
+  headroom after the chain                  9.4295
+  ```
+
+- **It is an ACCOUNTING ENVELOPE, not a spend authorization.** It is not
+  permission to launch either C2 session, and its headroom is **not
+  transferable** to C3, C4 or any unrelated experiment. C1's formal
+  (`$22.8249`), engineering (`$6.0000`) and package (`$28.8249`) remainders did
+  **not** move; the four limits still bind separately.
+- **Where the cap lives, and why that is awkward.** `derive_budget.py` reads it
+  from `configs/experiments/phase_c1/authorization.json :: accepted_pricing`, so
+  one value was amended. That is a PROJECT fact living in one experiment's
+  config — poor ownership, recorded as such in the config itself, and left in
+  place because repointing every consumer during a governance round would be a
+  larger change than the one being made, and a cap with two owners is worse than
+  a cap with an awkward one. The closed C2 configs keep `320.0` deliberately:
+  they describe what their consumed one-use authorizations ran under, and
+  raising them would imply those closed experiments could be re-authorized.
+- **The funding verdict is now DERIVED, which the cap raise proved necessary.**
+  The pricing record's block said `INSUFFICIENT PROJECT HEADROOM` while printing
+  a **negative** shortfall beside it the instant the cap moved — a prose
+  conclusion contradicting its own arithmetic, the exact failure this project
+  has paid for before. It is now a `funding` block whose status is computed from
+  the sign of the shortfall, reporting
+  **`FITS THE ACCOUNTING ENVELOPE — NOT AUTHORIZED`**, and five mutations confirm the guard fires: an
+  insufficient status against a negative shortfall, a width that claims to fit
+  while carrying a refusal, a weakened fitting-is-not-permission clause, a
+  dropped re-quote requirement, and prose permitting the beam to be narrowed for
+  a price change.
+- **Two expired tests, inverted rather than deleted.** One asserted
+  `plan_session` REFUSES the search, with a docstring saying that if headroom
+  ever rose enough for it to pass, the records were stale. The cap rose and it
+  did. It now checks the **invariant** — the record's derived verdict and the
+  budget module's behaviour cannot disagree — instead of one side of it. The
+  other required at least one refused width, which was right at `$320` and wrong
+  at `$370`; it now requires each width's fit flag and refusal text to agree
+  with each other. A test that assumes a shortfall is a test that expires.
+- **The price basis is planning evidence only.** `$33.1827` rests on a quoted
+  `$1.09/h` L40S securePrice. It must be re-quoted live immediately before
+  authorization and the ceiling re-derived if the rate has moved. **Beam width 6
+  is not narrowed to absorb a price change** — that would buy a cheaper number
+  by running a different experiment.
+- **Documentation cleanup, non-blocking and taken.** The protocol's final
+  `interpretation_discipline` sentence still described the decision boundary as a
+  "feasibility floor and equivalence interval" with an "unresolved_equivalence"
+  terminal state — Phase-A/B vocabulary for the design C0 retired. The
+  semantics were Phase-C's throughout; only that sentence lagged, which is why
+  aligning it to the `+0.010` SESOI and GO / NO-GO / INCONCLUSIVE did not reopen
+  the protocol. The phrase now survives in exactly one place: the field that
+  names Phase B's interval in order to refuse it.
+- **The execution sequence, as instructed:** build the full-search
+  launcher/grant/readiness/authorization/closure/bundle chain; then one bounded
+  real-GPU engineering validation of the CUDA/device/BF16/materialization
+  integration the CPU toy run cannot reach; repair ordinary engineering failures
+  inside it autonomously; return with the GPU evidence and the completed chain
+  for final launch review; do not launch the formal search before that review;
+  after a successful search commits its Top-5, **stop**; bind the behavioural
+  session against the actual frozen Top-5 afterwards, under its own
+  authorization.
+- **Not built, deliberately:** multi-session resume machinery. It remains a
+  possible future design option and no plan assumes it.
+- **Revisit when:** the governance chain and the bounded GPU validation are
+  complete and returned for launch review.
+
 ## 2026-09-17 — `rank_take` dropped its domain, so the screening battery's provenance was wrong
 
 - **Reviewer finding, and it was exactly right.** `battery_render.rank_take()`
