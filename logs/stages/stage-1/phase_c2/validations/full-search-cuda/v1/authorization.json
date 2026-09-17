@@ -16,14 +16,23 @@
   "_why_the_target_card": "the card the formal search will use. Validating device integration on a different card would leave the real one unverified, which is the failure this validation exists to prevent.",
   "price_basis_usd_per_hour": 1.09,
   "_price_basis_is_re_quoted": "the launcher queries the live securePrice and refuses above the basis. An hour-old price is not a price.",
-  "provider_resources_max": 1,
-  "provider_create_attempts_max": 1,
-  "retries_or_replacement_pods": 0,
   "engineering_soft_cap_usd": 0.6,
   "total_resource_cost_ceiling_usd": 0.9,
   "teardown_reserve_usd": 0.3,
   "_teardown_reserve": "WITHIN the $0.90 ceiling, not added to it.",
-  "_minute_budgets_follow_the_rate": "$0.60/rate is the work stop and $0.90/rate the hard limit, so a dearer GPU buys proportionally less time: 33.0 and 49.5 minutes at $1.09/h."
+  "_minute_budgets_follow_the_rate": "$0.60/rate is the work stop and $0.90/rate the hard limit, so a dearer GPU buys proportionally less time: 33.0 and 49.5 minutes at $1.09/h.",
+  "_amendment_2026_09_17": "The count-based clauses {\"provider_create_attempts_max\": 1, \"provider_resources_max\": 1, \"retries_or_replacement_pods\": 0} are WITHDRAWN by the maintainer decision of 2026-09-17, prospectively, on the standing rule that ATTEMPT COUNT IS NOT BUDGET. A $0 create failure, a cold or unusable host, or an ordinary provider transient must not force another maintainer round merely because it was 'attempt 1' -- the cumulative ceiling is what bounds this validation, and it is unchanged. What replaces them is a SAFETY boundary rather than a counter: one BILLING resource at any instant, and a replacement only after the previous one is provider-confirmed gone.",
+  "hard_constraints": [
+   "total validation spend across EVERY draw, resource and retry <= $0.9000 -- cumulative, reset by nothing",
+   "soft work stop at $0.6000: stop starting new work, with the teardown reserve INSIDE the ceiling and never added to it",
+   "only an NVIDIA L40S meeting the declared capability requirement; no other card, no substitution to make a cheaper device pass",
+   "live securePrice <= $1.09/h, re-quoted immediately before each draw; a rate above it needs a new maintainer budget decision, not a price chase",
+   "at most ONE BILLING resource at any instant",
+   "a replacement or redraw only after the previous resource is PROVIDER-CONFIRMED gone -- confirmed by query, never by a delete call returning",
+   "every draw and every cost is recorded, including $0 draws, and the cumulative total is recomputed from those components rather than carried forward",
+   "no scope expansion: the subject, dtype, card and workload above are the whole validation"
+  ],
+  "_retries_are_bounded_by_money_not_by_count": "An ordinary pre-measurement failure -- provider transient, cold host, or a deterministic engineering defect the validation exposes -- is diagnosed, minimally repaired, minimally retested and rerun autonomously for as long as the SAME $0.9000 cumulative ceiling still funds a useful attempt plus the teardown reserve. The ceiling is never expanded to fund a retry. Repeating an identical failure unchanged is not a repair."
  },
  "capability_requirement": {
   "compute_capability_min": "8.0",
@@ -42,8 +51,9 @@
   "any recovery training or probe",
   "a Search-1 rerun, or remeasurement of B or any frozen C candidate",
   "C3 or C4 work of any kind",
-  "a second provider resource, a replacement pod, or any retry that would exceed the ceiling above",
-  "spending C1's $6.0000 engineering allowance, which belongs to C1's package and does not transfer"
+  "spending C1's $6.0000 engineering allowance, which belongs to C1's package and does not transfer",
+  "more than one BILLING resource at any instant, or a replacement before the previous resource is provider-confirmed gone",
+  "any draw, retry or repair that would carry cumulative validation spend past $0.9000, or that would raise that ceiling"
  ],
  "budget_context": {
   "cumulative_spend_before_usd": 297.509,
@@ -57,5 +67,13 @@
   "_note": "feasibility arithmetic, not permission to execute the formal search"
  },
  "formal_c2_status_unchanged": "the full joint search remains NOT AUTHORIZED. This validation produces engineering evidence for a later launch review and nothing else; its report carries scientific_use: false.",
- "authorization_sha256": "f418a4fed109bf7ffa1bdc21a897e7b4ea3a43a631c12c52474f7e90478eca41"
+ "stop_and_report_only_if": [
+  "the budget or the scope would have to change",
+  "resource billing cannot be reconciled, or ownership of a resource is uncertain",
+  "the target hardware or rate contract would have to change",
+  "frozen scientific evidence would have to change",
+  "the validation uncovers something that changes the formal C2 scientific protocol"
+ ],
+ "_not_a_stop_condition": "another ordinary engineering failure, or the fact that a draw was 'the first one'. Per P12.1 and the maintainer's step 3, those are diagnosed and repaired inside this envelope without a further approval.",
+ "authorization_sha256": "32e9b45fe9262ea9bffbaceabc29b9796399f04a8ff5378368b2970e18e1e678"
 }

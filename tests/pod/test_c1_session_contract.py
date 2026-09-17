@@ -214,6 +214,69 @@ def test_a_ceiling_that_rounds_down_would_fail_closed():
         c1_budget_spec(REPO).plan(price_per_hour=1.09, authorized_usd=15.1474)
 
 
+def test_no_prose_in_the_live_config_restates_a_stale_project_cap():
+    """One live config stated two different current project caps at once.
+
+    `accepted_pricing.cumulative_cap_usd` is the cap's canonical owner and
+    `derive_budget` reads it. When the cap rose 320 -> 370 that field moved and
+    `execution_package.what_still_binds` did not, so the same file simultaneously
+    said the current cap was $370 and $320. Nothing read the prose, which is why
+    nothing caught it -- and a reviewer reading the package section would have
+    been told the wrong number by the document that owns the right one.
+
+    The rule is the narrow one: prose may mention a project cap, but a figure
+    that is not the canonical value must be marked as history. This is the
+    restated-vs-derived defect class, in a file whose whole purpose is to be the
+    single owner of these amounts.
+    """
+    import re
+
+    canonical = _accepted_cap_usd()
+    raw = (REPO / "configs/experiments/phase_c1/authorization.json").read_text()
+    config = json.loads(raw)
+
+    def strings(node):
+        if isinstance(node, dict):
+            for value in node.values():
+                yield from strings(value)
+        elif isinstance(node, list):
+            for value in node:
+                yield from strings(value)
+        elif isinstance(node, str):
+            yield node
+
+    #: A dollar figure within a short distance of the phrase, either order.
+    near = re.compile(
+        r"(?:\$([\d,]+(?:\.\d+)?)[^$]{0,60}?project (?:cumulative )?cap"
+        r"|project (?:cumulative )?cap[^$]{0,60}?\$([\d,]+(?:\.\d+)?))",
+        re.IGNORECASE,
+    )
+    #: Words that mark a figure as a historical fact rather than a live one.
+    historical = ("was ", "at package time", "amend", "rose from", "->", "no longer", "superseded")
+
+    mentions, offenders = 0, []
+    for text in strings(config):
+        found = near.findall(text)
+        if not found:
+            continue
+        mentions += 1
+        marked = any(word in text.lower() for word in historical)
+        for left, right in found:
+            amount = float((left or right).replace(",", ""))
+            if abs(amount - canonical) < 1e-9 or marked:
+                continue
+            offenders.append((amount, text[:160]))
+
+    assert mentions, (
+        "the finder matched no project-cap prose at all, so a pass proves "
+        "nothing -- the regex or the config's wording has moved"
+    )
+    assert not offenders, (
+        f"live prose states a project cap that is neither the canonical "
+        f"${canonical:.4f} nor marked as history: {offenders}"
+    )
+
+
 def test_the_pricing_record_authorizes_nothing():
     pricing = json.loads((REPO / "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json").read_text())
     assert pricing["authorizes"] == "nothing"

@@ -1,31 +1,47 @@
 #!/usr/bin/env python3
-"""Run the CUDA stage-F engineering validation on one authorized GPU.
+"""Run ONE bounded real-CUDA engineering validation on one authorized GPU.
 
     PYTHONPATH=src:scripts python scripts/validation/cuda_engineering_launch.py \
-        --run-id <unique-engineering-run-id> --scr <scratch-dir>
+        --run-id <unique-engineering-run-id> --scr <scratch-dir> \
+        [--authorization <engineering-authorization.json>] \
+        [--check <pod-side-script>] [--check-config <json>] \
+        [--experiment-id <logs/runs key>] [--ship <path> ...]
 
 A THIN entry point. It builds no provider controller and no authorization
 framework of its own: `RunPodProvider`, `scripts/pod/watchdog.py`, `SSHTarget`
 and the artifact/teardown helpers are the same ones every paid session uses.
 What it adds is the one thing those sessions cannot express -- a run that needs
 no bundle, no teacher weights, no venv build and no formal authorization, and
-that must fit inside `$0.40`.
+that must fit inside the small ceiling its own authorization states.
 
-**It is not a C1 session.** It reads
-`logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json`, an engineering
-authorization recorded under this validation's own governance evidence. It
-cannot read, and does not accept, a formal C1 grant.
+**It is not a formal session.** It reads an ENGINEERING authorization recorded
+under the validation's own governance evidence -- `--authorization`, defaulting
+to C1's stage-F one. It cannot read, and does not accept, a formal grant.
+
+Every per-validation constant comes from that authorization or from a flag: the
+card, the rate bound, the caps, the pod-side check, the shipped paths and the
+`logs/runs/` key. Nothing about stage F is wired in. A second validation is a
+different `--authorization` and `--check`, not a fork of this file.
 
 The spend contract, enforced here rather than hoped for:
 
-* **exactly one** provider-create attempt. Not a loop over candidates -- the
-  canary loops, and a loop is a second create;
+* **one create call per invocation.** A retry is a new invocation with a new
+  subrun id, which is why the ledger below is cumulative;
+* **at most one BILLING resource at any instant**, checked against the live
+  provider inventory before a create rather than by making a retry
+  unreachable. Attempt count is not budget: a $0 create failure or a cold host
+  is an ordinary failure, and what bounds this validation is money;
+* a replacement only after the previous resource is PROVIDER-CONFIRMED gone --
+  confirmed by query, never by a delete call returning;
 * the watchdog is detached the instant a pod id exists, before anything else;
 * the accepted rate decides the minute budgets. There is no fixed allowance:
-  `$0.25 / rate` is the work stop and `$0.40 / rate` the hard limit, so a
-  dearer GPU buys proportionally less time;
-* a pod that provisions ABOVE the accepted rate is registered, torn down and
-  never used. It is not replaced;
+  the soft cap over the rate is the work stop and the ceiling over the rate the
+  hard limit, so a dearer GPU buys proportionally less time;
+* the authorization's `price_basis_usd_per_hour` is a CEILING on the rate, not
+  a guess: a card quoted above it is refused, and one that PROVISIONS above the
+  quote is registered, torn down and never used;
+* every subrun's cost is booked to the campaign ledger whether it passed or
+  failed, and the cumulative total is recomputed from those components;
 * on success or on the first substantive exception, work stops immediately and
   teardown begins. The remaining allowance is not spent.
 """
@@ -61,13 +77,15 @@ from experiments.run_layout import (  # noqa: E402
     record_run, require_output_claim, write_run_readmes,
 )
 
-#: This validation's key in `logs/runs/` and in the run index.
+#: The DEFAULT key in `logs/runs/` and in the run index; `--experiment-id`
+#: overrides it, because a second validation writing into stage F's directory
+#: would make "show me the stage-F runs" return someone else's probe.
 #:
 #: `cuda_stage_f`, not `cuda-stage-f`: a run id validates as a single path
 #: segment, and refusing a hyphen is how a separator or `..` cannot resolve
 #: outside the run root. The dry run found this at `$0`, in a line only a
-#: completed run reaches.
-RUN_EXPERIMENT_ID = "cuda_stage_f"
+#: completed run reaches. The same rule binds any value passed in.
+DEFAULT_EXPERIMENT_ID = "cuda_stage_f"
 
 #: NOT a pipeline stage. This validates that a CUDA device executes an operator
 #: correctly; it trains nothing, evaluates nothing and produces no stage
@@ -101,31 +119,53 @@ RUN_SPEC = ArtifactSpec(
 RUN_OUTPUTS: tuple[str, ...] = (
     "validation_stdout.txt", "artifacts", "watchdog_*.jsonl")
 
-AUTHORIZATION = REPO_ROOT / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json"
-VALIDATION_DIR = REPO_ROOT / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1"
-#: THIS run's image, not the formal C1 one. `configs/infrastructure/pod_image.json`
+DEFAULT_AUTHORIZATION = "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json"
+#: THIS run's image, not a formal session's. `configs/infrastructure/pod_image.json`
 #: describes an image whose `/opt/train/bin/python` is built by a long setup this
 #: run does not perform.
 DEPLOYMENT_CONFIG = REPO_ROOT / "configs/validation/cuda_engineering_deployment.json"
-#: Cumulative cost across every resource and subrun of this task. A rerun does
-#: NOT reset it and a replacement resource does NOT get a fresh allocation.
-CAMPAIGN = REPO_ROOT / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/campaign.json"
 
-#: Candidates that can satisfy cc >= 8.0 with native BF16 and >= 2 GiB. The
-#: cheapest AVAILABLE one is chosen from a single bounded quote pass -- not a
-#: predetermined SKU, and not a stock-polling loop.
-CANDIDATES = (
+#: Candidates when the authorization does NOT pin a card: any that can satisfy
+#: cc >= 8.0 with native BF16, cheapest AVAILABLE one from a single bounded
+#: quote pass -- not a predetermined SKU, and not a stock-polling loop.
+#:
+#: An authorization that names `resource_contract.gpu` overrides this, and that
+#: is the stricter case rather than the looser one: a validation of DEVICE
+#: integration on the wrong card leaves the real card unverified, which is the
+#: failure such a validation exists to prevent.
+DEFAULT_CANDIDATES = (
     "NVIDIA RTX 2000 Ada Generation", "NVIDIA RTX A4000", "NVIDIA RTX A4500",
     "NVIDIA RTX A5000", "NVIDIA L4", "NVIDIA GeForce RTX 3090",
     "NVIDIA GeForce RTX 4090", "NVIDIA RTX A6000", "NVIDIA L40S",
 )
 
-#: What the pod needs. Everything else -- torch, CUDA -- is in the image.
-SHIP = ("src", "scripts/validation", "scripts/experiments", "configs/validation")
+#: What the pod needs by default. Everything else -- torch, CUDA -- is in the
+#: image. `--ship` appends; a check that imports from elsewhere in the tree
+#: must say so, because an unshipped import fails on the pod after it bills.
+DEFAULT_SHIP = ("src", "scripts/validation", "scripts/experiments",
+                "configs/validation")
 
 
 class Stop(RuntimeError):
     """Stop work now, preserve what exists, and tear down."""
+
+
+def _relative(path: Path) -> str:
+    """Repo-relative when it can be, absolute when it cannot.
+
+    `Path.relative_to` RAISES for a path outside the repository, and both
+    callers here are reporting rather than resolving: one builds an error
+    message and one records evidence. An authorization or ledger under a
+    temporary directory is a legitimate input, and a crash inside the line that
+    explains a failure replaces a clear diagnosis with a traceback.
+
+    The same defect in the full-search driver turned a completed search into a
+    failed session, in its last stage. It is cheap to not have twice.
+    """
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
 
 
 class Engineering:
@@ -136,16 +176,70 @@ class Engineering:
         #: Before the budget arithmetic and long before `create()`, so a scratch
         #: belonging to another subrun refuses at `$0` rather than after a pod
         #: exists.
-        claim_output_root(self.scr, RUN_EXPERIMENT_ID, args.run_id,
+        self.experiment_id = args.experiment_id
+        if "/" in self.experiment_id or self.experiment_id in ("", ".", ".."):
+            raise Stop(f"--experiment-id must be one path segment, "
+                       f"got {self.experiment_id!r}")
+        claim_output_root(self.scr, self.experiment_id, args.run_id,
                           outputs=RUN_OUTPUTS)
-        self.auth = json.loads(AUTHORIZATION.read_text())
+        #: Every per-validation path hangs off the authorization, so naming ONE
+        #: file cannot select someone else's ledger or evidence directory.
+        self.auth_path = (REPO_ROOT / args.authorization).resolve()
+        self.validation_dir = self.auth_path.parent
+        self.campaign_path = self.validation_dir / "campaign.json"
+        self.auth = json.loads(self.auth_path.read_text())
         rc = self.auth["resource_contract"]
         #: TASK-CUMULATIVE caps, not per-invocation allocations.
         self.soft_usd = float(rc["engineering_soft_cap_usd"])
         self.hard_usd = float(rc["total_resource_cost_ceiling_usd"])
         self.reserve_usd = float(rc["teardown_reserve_usd"])
+        #: A CEILING on the rate, from the authorization rather than from
+        #: whatever the cheapest quote happens to be. A card quoted above it
+        #: needs a new maintainer budget decision, not a price chase.
+        #:
+        #: OPTIONAL, and the absence is meaningful rather than a default: stage
+        #: F's contract had no absolute rate ceiling at all -- it accepted the
+        #: cheapest available candidate and was bounded only by minutes over
+        #: rate. Inventing a figure for it would put a number in the evidence
+        #: that no authorization states. So absence means unbounded-by-rate and
+        #: is RECORDED as such, while a document that states a basis has it
+        #: enforced at `$0` in `quote`.
+        basis = rc.get("price_basis_usd_per_hour")
+        self.rate_ceiling = float("inf") if basis is None else float(basis)
+        #: The card, when the authorization pins one. `quote()` then has a
+        #: one-element candidate list, which is a narrower contract than the
+        #: cheapest-available default, not a looser one.
+        pinned = rc.get("gpu")
+        self.candidates = ((pinned,) if isinstance(pinned, str) and pinned
+                           else tuple(args.gpu) or DEFAULT_CANDIDATES)
 
-        self.campaign = json.loads(CAMPAIGN.read_text())
+        #: Appended, never replaced: a check that needs another tree path adds
+        #: it, and the defaults every check needs cannot be dropped by accident.
+        self.ship_paths = tuple(DEFAULT_SHIP) + tuple(
+            p for p in args.ship if p not in DEFAULT_SHIP)
+        for rel in self.ship_paths:
+            if not (REPO_ROOT / rel).exists():
+                raise Stop(f"--ship path does not exist: {rel}")
+        if not (REPO_ROOT / args.check).is_file():
+            raise Stop(f"--check script does not exist: {args.check}")
+        if not (REPO_ROOT / args.check_config).is_file():
+            raise Stop(f"--check-config does not exist: {args.check_config}")
+        #: The check and its config must be INSIDE what gets shipped, or the pod
+        #: bills while running a command whose script is not there. A $0 check
+        #: for the failure class that has cost this repository four paid pods.
+        for rel in (args.check, args.check_config):
+            if not any(rel == s or rel.startswith(s.rstrip("/") + "/")
+                       for s in self.ship_paths):
+                raise Stop(
+                    f"{rel} is not inside any shipped path {self.ship_paths}; "
+                    "the pod would bill and then fail to find it")
+
+        if not self.campaign_path.is_file():
+            raise Stop(
+                f"no campaign ledger at {_relative(self.campaign_path)}. "
+                "The cumulative ledger is what bounds a retry, so a validation "
+                "without one cannot know what it has already spent.")
+        self.campaign = json.loads(self.campaign_path.read_text())
         #: What earlier subruns already spent. Booked, never refunded by a
         #: rerun policy -- the first subrun's $0.0073 reduces what this one may
         #: use, which is the whole point of a cumulative cap.
@@ -158,10 +252,20 @@ class Engineering:
                 f"${self.remaining_total:.4f} of the ${self.hard_usd:.2f} "
                 f"ceiling, which does not clear the ${self.reserve_usd:.2f} "
                 "teardown reserve. Stop.")
-        if rc["provider_create_attempts_max"] != 1 or rc["retries_or_replacement_pods"] != 0:
-            raise Stop("this entry point implements exactly one create and no retry")
         if self.reserve_usd >= self.hard_usd:
             raise Stop("the teardown reserve must sit INSIDE the ceiling")
+        #: This used to refuse unless the contract said `create_attempts_max: 1`
+        #: and `retries_or_replacement_pods: 0`. Those count-based clauses were
+        #: WITHDRAWN on 2026-09-17 on the standing rule that attempt count is
+        #: not budget: a $0 create failure or a cold host must not force a
+        #: maintainer round merely because it was the first draw. What bounds a
+        #: retry is the cumulative ceiling above, enforced across invocations by
+        #: the ledger, plus the one-billing-resource check in `create`.
+        #:
+        #: Reading the withdrawn keys is worse than not reading them, because an
+        #: authorization written under the new contract omits them and the old
+        #: assertion would KeyError -- refusing the very run it was meant to
+        #: guard, on a document that is stricter rather than looser.
 
         self.deploy = json.loads(DEPLOYMENT_CONFIG.read_text())
         self.ev_deploy = {k: v for k, v in self.deploy.items()
@@ -193,6 +297,14 @@ class Engineering:
             "campaign_booked_before_usd": self.booked_usd,
             "campaign_remaining_total_usd": self.remaining_total,
             "campaign_remaining_to_soft_usd": self.remaining_soft,
+            "authorization_path": _relative(self.auth_path),
+            "candidate_gpus": list(self.candidates),
+            #: null, not a number, when the authorization states no basis. A
+            #: reader must be able to tell "unbounded by rate" from "bounded at
+            #: some figure I inferred".
+            "authorized_rate_ceiling_usd_per_hour": (
+                None if self.rate_ceiling == float("inf")
+                else self.rate_ceiling),
             "execution_sha": args.execution_sha,
             "deployment": None,
             "timeline": [],
@@ -228,7 +340,7 @@ class Engineering:
     def quote(self) -> tuple[str, float]:
         """One read-only pass. The cheapest available candidate wins."""
         quotes = []
-        for gpu in CANDIDATES:
+        for gpu in self.candidates:
             try:
                 d = self.provider._gql(
                     'query { gpuTypes(input:{id:"%s"}) { id securePrice '
@@ -253,9 +365,20 @@ class Engineering:
                               "stock": st, "vram_gb": m}
                              for s, g, st, m in sorted(quotes)]
         if not quotes:
-            raise Stop("no candidate GPU is both quoted and in stock")
+            raise Stop(
+                f"no candidate GPU is both quoted and in stock "
+                f"(candidates: {', '.join(self.candidates)})")
         quotes.sort()
         rate, gpu, stock, mem = quotes[0]
+        #: Before the minute arithmetic: a rate above the authorized basis is
+        #: not a cheaper attempt, it is an unauthorized one. Checked here rather
+        #: than only after provisioning, so it costs $0.
+        if rate > self.rate_ceiling + 1e-9:
+            raise Stop(
+                f"cheapest available is {gpu} at ${rate}/h, above the "
+                f"authorized ${self.rate_ceiling}/h basis. A rate above the "
+                "basis needs a new maintainer budget decision; this is not a "
+                "price to chase and not a card to substitute.")
         #: The ceiling must buy enough time to be worth starting. Below this
         #: the run cannot finish setup, so creating a pod would only spend.
         #: Against what is LEFT, minus the reserve -- not against the original
@@ -279,10 +402,45 @@ class Engineering:
                  f"({self.remaining_total / rate * 60:.1f} min)")
         return gpu, rate
 
-    # -- 2. exactly one create --------------------------------------------
+    def refuse_if_a_resource_is_already_billing(self) -> None:
+        """The invariant that replaced the attempt counter.
+
+        The standing rule is at most ONE BILLING resource at any instant, and a
+        replacement only after the previous one is provider-confirmed gone. A
+        counter enforced neither: it refused a legitimate second subrun while
+        doing nothing about a pod an earlier subrun had left alive.
+
+        Read-only, and a transport failure is a REFUSAL rather than a pass: an
+        unknown resource state is exactly the condition under which nothing else
+        may be created.
+        """
+        try:
+            d = self.provider._gql(
+                "query { myself { pods { id name desiredStatus costPerHr } } }")
+        except Exception as exc:                                   # noqa: BLE001
+            raise Stop(
+                f"cannot read the provider inventory ({type(exc).__name__}: "
+                f"{exc}), so whether a resource is already billing is UNKNOWN. "
+                "Creating another would risk two billing resources at once.")
+        pods = ((d.get("data") or {}).get("myself") or {}).get("pods") or []
+        self.ev["inventory_before_create"] = pods
+        live = [p for p in pods
+                if (p.get("desiredStatus") or "").upper() != "TERMINATED"]
+        if live:
+            raise Stop(
+                f"{len(live)} resource(s) already present: "
+                f"{[p.get('id') for p in live]}. At most one BILLING resource "
+                "at any instant, and a replacement only after the previous one "
+                "is provider-confirmed gone. Reconcile and tear that down "
+                "first; do not create beside it.")
+        self.say("provider inventory is empty — no resource is billing")
+
+    # -- 2. one create per invocation --------------------------------------
     def create(self, gpu: str, quoted: float) -> None:
         if self.created:
-            raise Stop("a create has already been attempted; there is no second")
+            raise Stop("this invocation has already called create; a retry is a "
+                       "new invocation with a new subrun id, not a loop here")
+        self.refuse_if_a_resource_is_already_billing()
         hard_minutes = self.remaining_total / quoted * 60
         deadline = datetime.now(timezone.utc) + timedelta(minutes=hard_minutes)
         argv = [self.cli, "pod", "create", "--image", self.deploy["image"],
@@ -298,7 +456,8 @@ class Engineering:
         self.created = 1
         self.start_epoch = time.time()
         self.rate = quoted
-        self.say(f"creating ONE pod (attempt 1 of 1) — {' '.join(argv[2:8])}")
+        self.say(f"creating ONE pod (one create per invocation) — "
+                 f"{' '.join(argv[2:8])}")
         raw = subprocess.run(argv, capture_output=True, text=True, timeout=300)
         (self.scr / "create_raw.txt").write_text(raw.stdout + raw.stderr)
         self.ev["create_stdout_tail"] = (raw.stdout + raw.stderr)[-2000:]
@@ -315,7 +474,9 @@ class Engineering:
             pid = self.reconcile()
         if not pid:
             raise Stop("create returned no id and no pod matches this run name; "
-                       "no resource was created and none will be retried")
+                       "no resource was created, so this subrun books $0. A "
+                       "corrected retry is a new invocation while the ceiling "
+                       "still funds one -- not a second create here.")
         self.register(pid)
 
     def reconcile(self) -> str:
@@ -402,11 +563,27 @@ class Engineering:
     # -- 3. endpoint, ship, run -------------------------------------------
     def endpoint(self) -> tuple[str, str]:
         deadline = time.time() + self.a.startup_limit_min * 60
+        #: Tolerated, not ignored. An uncaught transport blip here used to end
+        #: the subrun -- a pod paid for, torn down, and nothing learned, for a
+        #: failure that a second query would have survived. Recorded so a
+        #: provider genuinely down still shows up in the evidence.
+        blips: list[str] = []
         while time.time() < deadline:
             self.check_soft_cap("the endpoint appeared")
-            d = self.provider._gql(
-                'query { pod(input:{podId:"%s"}) { runtime { ports '
-                "{ ip publicPort privatePort type } } } }" % self.pod_id)
+            try:
+                d = self.provider._gql(
+                    'query { pod(input:{podId:"%s"}) { runtime { ports '
+                    "{ ip publicPort privatePort type } } } }" % self.pod_id)
+            except Exception as exc:                               # noqa: BLE001
+                blips.append(f"{type(exc).__name__}: {exc}")
+                self.ev["endpoint_transport_errors"] = blips
+                if len(blips) > 12:
+                    raise Stop(
+                        f"{len(blips)} consecutive provider transport failures "
+                        f"while waiting for the endpoint; last: {blips[-1]}")
+                time.sleep(15)
+                continue
+            blips.clear()
             rt = ((d.get("data") or {}).get("pod") or {}).get("runtime")
             for p in ((rt or {}).get("ports") or []):
                 if p.get("privatePort") == 22 and p.get("ip"):
@@ -418,7 +595,7 @@ class Engineering:
     def ship(self, target: SSHTarget, host: str, port: str) -> None:
         tar = self.scr / "payload.tar.gz"
         with tarfile.open(tar, "w:gz") as t:
-            for rel in SHIP:
+            for rel in self.ship_paths:
                 t.add(REPO_ROOT / rel, arcname=rel)
         size = tar.stat().st_size
         self.ev["payload_bytes"] = size
@@ -570,8 +747,8 @@ print(json.dumps(out)); print("PROBE_OK")
         repo = POD_IMAGE["checkout_root"]
         py = self.deploy["remote_python"]
         cmd = (f"cd {repo} && PYTHONPATH=src:scripts {py} "
-               f"scripts/validation/cuda_engineering_check.py "
-               f"--config configs/validation/cuda_engineering.json "
+               f"{self.a.check} "
+               f"--config {self.a.check_config} "
                f"--run-id {self.a.run_id}")
         self.ev["validation_command"] = cmd
         self.say(f"running: {cmd}")
@@ -659,7 +836,7 @@ print(json.dumps(out)); print("PROBE_OK")
         Written whether it passed or failed. A failed subrun that did not book
         its spend would hand the next one a budget that does not exist.
         """
-        doc = json.loads(CAMPAIGN.read_text())
+        doc = json.loads(self.campaign_path.read_text())
         if any(x["subrun_id"] == self.a.run_id for x in doc["subruns"]):
             return                       # already booked; never double-count
         doc["subruns"].append({
@@ -675,10 +852,10 @@ print(json.dumps(out)); print("PROBE_OK")
             "teardown_confirmed": bool(
                 (self.ev.get("teardown") or {}).get("provider_confirms_gone")),
             "execution_sha": self.a.execution_sha or None,
-            "record": f"logs/runs/cuda_stage_f/{self.a.run_id}/",
+            "record": f"logs/runs/{self.experiment_id}/{self.a.run_id}/",
         })
         doc["booked_usd"] = round(sum(x["cost_usd"] for x in doc["subruns"]), 4)
-        CAMPAIGN.write_text(json.dumps(doc, indent=1) + "\n")
+        self.campaign_path.write_text(json.dumps(doc, indent=1) + "\n")
         self.say(f"campaign ledger: {len(doc['subruns'])} subrun(s), "
                  f"${doc['booked_usd']:.4f} booked of ${self.hard_usd:.2f}")
 
@@ -751,11 +928,11 @@ print(json.dumps(out)); print("PROBE_OK")
         #: Asked again at the collecting end, for the same reason the C1
         #: session asks: the open and the closeout are far apart, and what is
         #: recorded has to be what THIS subrun produced.
-        require_output_claim(self.scr, RUN_EXPERIMENT_ID, self.a.run_id)
-        layout = open_run(repo_root, RUN_EXPERIMENT_ID, self.a.run_id,
+        require_output_claim(self.scr, self.experiment_id, self.a.run_id)
+        layout = open_run(repo_root, self.experiment_id, self.a.run_id,
                           stage_id=RUN_STAGE_ID,
                           roles=RUN_ROLES)
-        write_run_readmes(layout, experiment_id=RUN_EXPERIMENT_ID,
+        write_run_readmes(layout, experiment_id=self.experiment_id,
                           run_id=self.a.run_id,
                           stage_id=RUN_STAGE_ID, roles=RUN_ROLES)
         layout.path(RUN_ROLES["evidence"]).write_text(
@@ -775,7 +952,7 @@ print(json.dumps(out)); print("PROBE_OK")
                             dirs_exist_ok=True)
         doc = record_run(
             layout, spec=RUN_SPEC,
-            plan={"validation": "cuda-stage-f", "execution_sha":
+            plan={"validation": self.validation_dir.name, "execution_sha":
                   self.a.execution_sha, "image": self.a.image},
             implementation={"launcher":
                             "scripts/validation/cuda_engineering_launch.py"},
@@ -799,6 +976,22 @@ def main() -> int:
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--scr", required=True)
     ap.add_argument("--execution-sha", default="")
+    ap.add_argument("--authorization", default=DEFAULT_AUTHORIZATION,
+                    help="engineering authorization; its directory also holds "
+                         "the cumulative campaign ledger")
+    ap.add_argument("--experiment-id", default=DEFAULT_EXPERIMENT_ID,
+                    help="the logs/runs/ key; one path segment")
+    ap.add_argument("--check",
+                    default="scripts/validation/cuda_engineering_check.py",
+                    help="the pod-side check, repo-relative")
+    ap.add_argument("--check-config",
+                    default="configs/validation/cuda_engineering.json")
+    ap.add_argument("--ship", action="append", default=[],
+                    help="extra repo-relative paths to ship; appends to the "
+                         "default set")
+    ap.add_argument("--gpu", action="append", default=[],
+                    help="candidate card(s); ignored when the authorization "
+                         "pins resource_contract.gpu, which is stricter")
     ap.add_argument("--image",
                     default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
     ap.add_argument("--remote-python", default="python")

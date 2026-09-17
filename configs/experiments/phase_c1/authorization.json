@@ -95,7 +95,8 @@
   ],
   "_attempts_amendment_2026_09_11b": "The three-attempt cap and the one-provider-resource-per-invocation rule are WITHDRAWN, prospectively, by a maintainer decision of 2026-09-11 taken after attempt 11. Ordinary infrastructure failures, setup failures and $0 pre-provider refusals -- where it is CONFIRMED that no formal probe training has started -- are now diagnosed, handled and retried autonomously inside the remaining budget, with no package-level cap on the number of launcher invocations. Attempts 10 and 11 keep their records, costs, numbering and the authorization semantics they actually ran under; what is withdrawn is a future constraint, not a record.",
   "what_still_binds": [
-   "the money: $45.4425 C1 formal, $6.0000 engineering, $51.4425 package, $320.0000 project cap",
+   "the money: $45.4425 C1 formal, $6.0000 engineering, $51.4425 package -- these package allowances are what this document authorizes and they have NOT moved",
+   "the CURRENT project cumulative cap is deliberately not restated here. It was $320.0000 when this package was approved and has since been amended; its canonical owner is accepted_pricing.cumulative_cap_usd in this same file, which derive_budget reads. Do not read a current cap from this list -- restating it is exactly how one live file came to state two different current caps",
    "$15.1475 per launcher SESSION, covering every host draw inside it -- draws do not each get a ceiling",
    "at most ONE BILLING resource at any instant, now enforced by SessionRunner.release_and_confirm rather than by making the redraw branch unreachable",
    "secure L40S at no more than $1.09/h; no other GPU, no price chasing",

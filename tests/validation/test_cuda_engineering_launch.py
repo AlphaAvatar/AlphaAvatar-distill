@@ -33,6 +33,9 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 ENTRY = REPO / "scripts/validation/cuda_engineering_launch.py"
 AUTH = REPO / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json"
+#: The ledger is the authorization's sibling, which is how the launcher
+#: resolves it too -- naming ONE file cannot select someone else's ledger.
+CAMPAIGN = AUTH.parent / "campaign.json"
 
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
@@ -50,11 +53,36 @@ def mod():
     return m
 
 
+def mod_default(name: str):
+    """Read a module-level default without importing the launcher twice.
+
+    `args()` is called outside the `mod` fixture in several tests, so it cannot
+    take the module as a parameter. The defaults are plain constants; reading
+    them from the source keeps the fixture honest if one is renamed.
+    """
+    import ast
+    tree = ast.parse(ENTRY.read_text())
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+                getattr(t, "id", None) == name for t in node.targets):
+            return ast.literal_eval(node.value)
+    raise AssertionError(f"{name} is not a module-level constant any more")
+
+
 def args(**over):
     base = dict(run_id="t-run", scr="", execution_sha="deadbeef",
                 image="img", remote_python="python", disk_gb=20,
                 startup_limit_min=1.0, run_limit_min=1.0, min_minutes=25.0,
-                dry_run=False)
+                dry_run=False,
+                #: The per-validation profile. Defaults to stage F's, which
+                #: is what these tests exercise -- the launcher is now
+                #: parameterized, and every constant it used to hold is a
+                #: flag resolved here.
+                authorization=mod_default("DEFAULT_AUTHORIZATION"),
+                experiment_id=mod_default("DEFAULT_EXPERIMENT_ID"),
+                check="scripts/validation/cuda_engineering_check.py",
+                check_config="configs/validation/cuda_engineering.json",
+                ship=[], gpu=[])
     base.update(over)
     return types.SimpleNamespace(**base)
 
@@ -81,6 +109,11 @@ def test_it_reads_the_engineering_authorization_not_a_c1_grant():
     doc = json.loads(AUTH.read_text())
     assert doc["schema"] == "aadistill.engineering_validation_authorization/v1"
     rc = doc["resource_contract"]
+    #: The count-based clauses are HISTORY: stage F ran under them, and they
+    #: were withdrawn on 2026-09-17 because attempt count is not budget. They
+    #: are asserted here as a fact about a closed record, not as a contract
+    #: the launcher still enforces -- it no longer reads them, and an
+    #: authorization written after the withdrawal omits them.
     assert rc["provider_resources_max"] == 1
     assert rc["provider_create_attempts_max"] == 1
     assert rc["retries_or_replacement_pods"] == 0
@@ -114,7 +147,7 @@ def test_a_second_create_is_refused_structurally(eng, mod, monkeypatch):
     monkeypatch.setattr(eng, "launch_watchdog", lambda: None)
     eng.create("NVIDIA RTX A4000", 0.25)
     assert eng.created == 1
-    with pytest.raises(mod.Stop, match="no second"):
+    with pytest.raises(mod.Stop, match="already called create"):
         eng.create("NVIDIA RTX A4000", 0.25)
 
 
@@ -236,31 +269,105 @@ def test_a_pod_at_or_below_the_accepted_rate_proceeds(eng, monkeypatch):
 # --- an empty create response is reconciled, not assumed to be $0 -----------
 
 def test_an_empty_response_is_reconciled_by_run_name(eng, mod, monkeypatch):
-    monkeypatch.setattr(mod.subprocess, "run",
-                        lambda *a, **k: types.SimpleNamespace(
-                            stdout="", stderr="", returncode=1))
+    #: SEQUENCE-AWARE, because `create` now queries the inventory TWICE for two
+    #: different questions: is anything already billing (before), and did the
+    #: silent create leave a pod behind (after). A stub answering both with the
+    #: same populated inventory would make the pre-create guard refuse this
+    #: run's own resource -- so the fake models what the provider really does,
+    #: where the pod does not exist until create is called.
+    created = []
+
+    def run(*a, **k):
+        created.append(1)
+        return types.SimpleNamespace(stdout="", stderr="", returncode=1)
+
+    monkeypatch.setattr(mod.subprocess, "run", run)
     monkeypatch.setattr(eng.provider, "_gql", lambda q: {"data": {"myself": {
-        "pods": [{"id": "orphan-1", "name": "aad-cuda-eng-t-run",
-                  "desiredStatus": "RUNNING", "costPerHr": 0.25}]}}})
+        "pods": ([{"id": "orphan-1", "name": "aad-cuda-eng-t-run",
+                   "desiredStatus": "RUNNING", "costPerHr": 0.25}]
+                 if created else [])}}})
     monkeypatch.setattr(eng, "launch_watchdog", lambda: None)
     eng.create("NVIDIA RTX A4000", 0.25)
     assert eng.pod_id == "orphan-1", "an unreturned id was left unowned"
     assert eng.ev["provider_resource_created"] is True
 
 
-def test_a_failed_reconcile_does_not_claim_no_resource(eng, mod, monkeypatch):
-    """It says the state is unknown rather than $0."""
+def test_a_live_resource_refuses_the_create_before_it_happens(eng, mod, monkeypatch):
+    """The invariant that replaced the attempt counter.
+
+    A counter refused a legitimate second subrun and did nothing about a pod an
+    earlier subrun had left alive. This is the property that actually matters:
+    at most ONE billing resource at any instant. Nothing may be created beside
+    something already running, whatever the attempt number is.
+    """
+    calls = []
+    monkeypatch.setattr(mod.subprocess, "run",
+                        lambda *a, **k: calls.append(1))
+    monkeypatch.setattr(eng.provider, "_gql", lambda q: {"data": {"myself": {
+        "pods": [{"id": "someone-elses", "name": "aad-other",
+                  "desiredStatus": "RUNNING", "costPerHr": 1.09}]}}})
+    with pytest.raises(_stop_cls(eng), match="already present"):
+        eng.create("NVIDIA L40S", 1.09)
+    assert not calls, "a create was issued beside a live resource"
+    assert eng.created == 0
+
+
+def test_a_terminated_resource_does_not_block_a_replacement(eng, mod, monkeypatch):
+    """The other half: a replacement IS allowed once the previous one is gone.
+
+    Provider-confirmed gone means absent or TERMINATED in the inventory. If a
+    terminated pod still blocked, the money-bounded retry the contract permits
+    would be unreachable -- which is the counter coming back under another name.
+    """
     monkeypatch.setattr(mod.subprocess, "run",
                         lambda *a, **k: types.SimpleNamespace(
-                            stdout="", stderr="", returncode=1))
+                            stdout='{"id":"pod-2"}', stderr="", returncode=0))
+    monkeypatch.setattr(eng.provider, "_gql", lambda q: {"data": {"myself": {
+        "pods": [{"id": "old-one", "name": "aad-cuda-eng-earlier",
+                  "desiredStatus": "TERMINATED", "costPerHr": 0}]}}})
+    monkeypatch.setattr(eng, "launch_watchdog", lambda: None)
+    eng.create("NVIDIA L40S", 1.09)
+    assert eng.pod_id == "pod-2"
+
+
+def test_an_unreadable_inventory_refuses_rather_than_proceeding(eng, mod, monkeypatch):
+    """Unknown resource state is the condition under which nothing is created."""
+    calls = []
+    monkeypatch.setattr(mod.subprocess, "run", lambda *a, **k: calls.append(1))
 
     def boom(q):
         raise OSError("network down")
 
     monkeypatch.setattr(eng.provider, "_gql", boom)
+    with pytest.raises(_stop_cls(eng), match="UNKNOWN"):
+        eng.create("NVIDIA L40S", 1.09)
+    assert not calls
+
+
+def test_a_failed_reconcile_does_not_claim_no_resource(eng, mod, monkeypatch):
+    """It says the state is unknown rather than $0.
+
+    The pre-create guard must SUCCEED here and the post-create reconcile must
+    FAIL, or this tests the guard instead of the reconcile.
+    """
+    created = []
+
+    def run(*a, **k):
+        created.append(1)
+        return types.SimpleNamespace(stdout="", stderr="", returncode=1)
+
+    monkeypatch.setattr(mod.subprocess, "run", run)
+
+    def gql(q):
+        if created:
+            raise OSError("network down")
+        return {"data": {"myself": {"pods": []}}}
+
+    monkeypatch.setattr(eng.provider, "_gql", gql)
     with pytest.raises(_stop_cls(eng)):
         eng.create("NVIDIA RTX A4000", 0.25)
-    assert "reconcile_error" in eng.ev
+    assert "reconcile_error" in eng.ev, (
+        "the guard refused instead of the reconcile failing")
 
 
 # --- teardown is confirmed, not requested -----------------------------------
@@ -378,15 +485,42 @@ class TestPriorSpendReducesTheNextResourcesLimits:
 
     def test_a_campaign_that_has_exhausted_its_ceiling_refuses_to_start(
             self, mod, tmp_path, monkeypatch):
-        """Not at create time -- at construction, before anything is quoted."""
-        camp = json.loads(mod.CAMPAIGN.read_text())
+        """Not at create time -- at construction, before anything is quoted.
+
+        Through the REAL resolution path: the ledger is the authorization's
+        sibling, so this points `--authorization` at a directory holding both.
+        Patching a module constant would no longer test how the launcher finds
+        its ledger, which is the part that can now go wrong.
+        """
+        home = tmp_path / "validations" / "exhausted" / "v1"
+        home.mkdir(parents=True)
+        (home / "authorization.json").write_text(AUTH.read_text())
+        camp = json.loads(CAMPAIGN.read_text())
         camp["booked_usd"] = 0.39          # leaves less than the $0.15 reserve
-        spent = tmp_path / "campaign.json"
-        spent.write_text(json.dumps(camp))
-        monkeypatch.setattr(mod, "CAMPAIGN", spent)
+        (home / "campaign.json").write_text(json.dumps(camp))
         monkeypatch.setattr(mod, "read_api_key", lambda p: "k")
         with pytest.raises(mod.Stop, match="teardown reserve"):
-            mod.Engineering(args(scr=str(tmp_path / "s")))
+            mod.Engineering(args(
+                scr=str(tmp_path / "s"),
+                authorization=str(home / "authorization.json")))
+
+    def test_a_validation_without_a_ledger_refuses_to_start(
+            self, mod, tmp_path, monkeypatch):
+        """The cumulative ledger is what bounds a retry.
+
+        With the attempt counter withdrawn, money is the only bound left. A
+        validation that cannot read what it already spent would treat every
+        invocation as a fresh allocation -- the exact failure a cumulative cap
+        exists to prevent.
+        """
+        home = tmp_path / "no-ledger" / "v1"
+        home.mkdir(parents=True)
+        (home / "authorization.json").write_text(AUTH.read_text())
+        monkeypatch.setattr(mod, "read_api_key", lambda p: "k")
+        with pytest.raises(mod.Stop, match="campaign ledger"):
+            mod.Engineering(args(
+                scr=str(tmp_path / "s"),
+                authorization=str(home / "authorization.json")))
 
     def test_the_feasibility_test_uses_remaining_minus_reserve(self, eng,
                                                                monkeypatch):
@@ -404,10 +538,10 @@ class TestPriorSpendReducesTheNextResourcesLimits:
                                                    tmp_path):
         """A failed subrun that did not book its spend hands the next one a
         budget that does not exist."""
-        camp = json.loads(mod.CAMPAIGN.read_text())
+        camp = json.loads(eng.campaign_path.read_text())
         target = tmp_path / "campaign.json"
         target.write_text(json.dumps(camp))
-        monkeypatch.setattr(mod, "CAMPAIGN", target)
+        monkeypatch.setattr(eng, "campaign_path", target)
         eng.created, eng.pod_id, eng.rate = 1, "pod-x", 0.24
         eng.start_epoch = mod.time.time() - 60
         eng.ev["elapsed_minutes"] = 1.0
@@ -419,10 +553,10 @@ class TestPriorSpendReducesTheNextResourcesLimits:
         assert after["booked_usd"] > camp["booked_usd"]
 
     def test_booking_is_idempotent(self, eng, mod, monkeypatch, tmp_path):
-        camp = json.loads(mod.CAMPAIGN.read_text())
+        camp = json.loads(eng.campaign_path.read_text())
         target = tmp_path / "campaign.json"
         target.write_text(json.dumps(camp))
-        monkeypatch.setattr(mod, "CAMPAIGN", target)
+        monkeypatch.setattr(eng, "campaign_path", target)
         eng.created, eng.pod_id, eng.rate = 1, "pod-x", 0.24
         eng.start_epoch = mod.time.time() - 60
         eng.book_subrun("FAIL", "setup")

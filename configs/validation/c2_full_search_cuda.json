@@ -1,0 +1,65 @@
+{
+ "schema": "aadistill.c2_full_search_cuda_validation/v1",
+ "_contract": "Inputs for the real-CUDA engineering check of the Phase-C2 full-joint-search DRIVER. ENGINEERING validation, not science: it answers 'does this driver execute on a real device without a placement, dtype or path error', and nothing about model quality. It trains nothing, measures no behaviour, produces no correct_overall and ranks no candidate for promotion. Every artifact it writes is disposable. AUTHORIZES NOTHING.",
+ "validation_id": "c2_full_search_cuda_v1",
+ "family": "qwen3",
+ "adapter": "qwen3",
+ "dtype": "bfloat16",
+ "_why_bf16": "What the formal search runs. Validating device integration in fp32 or fp16 would leave the dtype the search actually uses unverified, and bf16 is also why the capability floor is cc >= 8.0 -- the dtype is NOT lowered to make a cheaper unsupported device pass.",
+ "seed": 20260917,
+ "capability_requirement": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 8,
+  "_owner": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/authorization.json declares this floor; it is restated here because the pod-side check enforces it before any work, and a floor only the launcher knows is a floor the check cannot apply."
+ },
+ "stages": {
+  "driver": {
+   "enabled": true,
+   "_question": "Does the real driver -- all three stages, the real derived joint space, the real BeamSearch, the real selection parsing -- execute on a real CUDA device, and do the states it materializes actually sit there in the dtype that was asked for?"
+  },
+  "geometry": {
+   "enabled": true,
+   "_question": "Does the REAL target geometry (1024x28, ~596M) build, save, reload through the canonical loader and keep its identity, on a real device in bf16? Needs the teacher's CONFIG at the pinned revision, NOT its weights."
+  }
+ },
+ "driver": {
+  "_why_toy_geometry": "The defects this looks for are about WHERE tensors are, what dtype they carry, which arguments the driver forwards and which paths it resolves -- none of which depend on model size. A real-scale search would cost hours and re-verify six operators that already have real-L40S evidence from paid sessions.",
+  "toy": {
+   "teacher": {
+    "hidden_size": 32,
+    "num_hidden_layers": 6,
+    "intermediate_size": 48,
+    "num_attention_heads": 4,
+    "num_key_value_heads": 2,
+    "head_dim": 8,
+    "vocab_size": 128,
+    "tie_word_embeddings": true
+   },
+   "target": {
+    "hidden_size": 16,
+    "num_hidden_layers": 4,
+    "intermediate_size": 24,
+    "num_attention_heads": 2,
+    "num_key_value_heads": 2,
+    "head_dim": 8,
+    "vocab_size": 128,
+    "tie_word_embeddings": true
+   },
+   "_why_tied_embeddings": "The real Qwen3 students tie the lm head to the embedding and the operators rely on it: with an untied head the surgery guard correctly refuses, because lm_head.weight would be left holding random values. An untied fixture would test a model this project does not build.",
+   "max_position_embeddings": 256,
+   "rope_theta": 5000000.0,
+   "items_per_profile": 2,
+   "seq_len": 24
+  },
+  "top_n": 5,
+  "_why_top_n_5": "The Top-5 the formal search commits. The selection-size guard in commit_top_k compares against exactly this, so a different value here would leave that guard unexercised.",
+  "rate": 1.09,
+  "authorized_usd": 0.9,
+  "soft_stop_usd": 0.6,
+  "_why_the_real_money": "The driver's afford guard is one of the lines under test. Handing it a fictional budget large enough to never bind would execute the call and skip the branch.",
+  "search_minutes": 6.0,
+  "search_deadline_minutes": 8.0,
+  "_why_these_minutes": "Bounded well inside the ceiling, and large enough that the toy beam completes rather than expiring -- an expired deadline would end the search with no leaf, which reads like a broken operator rather than a short clock. These are the TOY run's numbers and have nothing to do with the formal search's envelope, which the launcher derives from the pricing record."
+ }
+}
