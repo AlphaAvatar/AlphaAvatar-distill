@@ -30,8 +30,8 @@ import torch
 
 from aadistill.initialization.statistics.contribution import (
     bypassed_blocks,
-    distortion,
     domain_balanced_score,
+    forward_kl_mean,
     expected_evaluations,
     greedy_removal,
 )
@@ -176,11 +176,12 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         # changes no behaviour — it removes the last operator that read the
         # intent instead of the fact.
         compute = model_device(model)
-        # On the compute device, like E8a's `prepare()`: "Token tensors, targets
-        # and boolean tag masks, once, on the device." These meet the logits
-        # inside `distortion`'s `gather`, so a host target would drag the whole
-        # reduction back to the host — which is exactly what happened.
-        targets = [item["input_ids"][0, 1:].to(compute) for item in items]
+        # NO TARGETS. They existed for `distortion`'s two cross-entropy
+        # gathers, and this operator's objective is forward KL: `forward_kl_mean`
+        # needs the two logit tensors and nothing else. The comment they carried
+        # -- "a host target would drag the whole reduction back to the host" --
+        # was correct and is now enforced one level down, where `distortion` and
+        # `forward_kl_mean` both keep their accumulators wherever the logits are.
         reference = _ReferenceLogits(model, items, compute)
 
         # Operational timings, kept OUT of every returned metric and hash.
@@ -206,7 +207,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             per_subtype: dict[str, list[float]] = {}
             timing["candidate_subsets"] += 1
             item_started = time.perf_counter()
-            for item, tgt in zip(items, targets):
+            for item in items:
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
                 t0 = time.perf_counter()
@@ -218,14 +219,23 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 if cuda_sync:
                     cuda_sync()
                 t2 = time.perf_counter()
-                sums = distortion(ref, abl, tgt, chunk=512).as_dict()
+                #: FORWARD KL ONLY. This operator's objective is forward KL
+                #: and it read exactly `sums["kl"]` from a six-quantity
+                #: reduction -- 17,420 times per expansion. `forward_kl_mean`
+                #: computes that one quantity with the same float32
+                #: log-softmax, the same chunk boundaries and the same float64
+                #: accumulation, and skips the reverse-KL term, both
+                #: cross-entropy gathers and both argmaxes. With no CE the
+                #: targets are not needed either, which is why `tgt` no longer
+                #: reaches the reduction.
+                kl = forward_kl_mean(ref, abl, chunk=512)
                 t3 = time.perf_counter()
                 timing["reference_seconds"] += t1 - t0
                 timing["ablated_seconds"] += t2 - t1
                 timing["distortion_seconds"] += t3 - t2
                 timing["ablated_forwards"] += 1
                 timing["distortion_calls"] += 1
-                per_subtype.setdefault(item["subtype"], []).append(sums["kl"])
+                per_subtype.setdefault(item["subtype"], []).append(kl)
                 del abl
             timing["item_seconds"] += time.perf_counter() - item_started
             means = {k: sum(v) / len(v) for k, v in per_subtype.items()}
@@ -385,6 +395,9 @@ class _ReferenceLogits:
                             for i in items}
         positions = sum(int(i["input_ids"].shape[1]) - 1 for i in items)
         self.estimate_bytes = positions * vocab * itemsize
+        #: BEFORE the availability probe, so the snapshot describes the state
+        #: the probe is about to read rather than the state after it.
+        self.memory_before = memory_snapshot(device)
         self.available_bytes, self.headroom_source = _available_memory_bytes(device)
 
         budget = (None if self.available_bytes is None
@@ -468,6 +481,10 @@ class _ReferenceLogits:
             "admitted_gib": round(self.admitted_bytes / 2**30, 3),
             "available_bytes": self.available_bytes,
             "budget_fraction": self.BUDGET_FRACTION,
+            #: DIAGNOSTIC. Why the availability above was what it was -- the
+            #: distinction between a card held by live tensors and one held by
+            #: an allocator hoarding freed blocks. See `memory_snapshot`.
+            "memory_at_admission": self.memory_before,
             "headroom_source": self.headroom_source,
             "fallback": None if self.enabled else (
                 f"{self.mode}: {len(self.admitted)}/{n_items} items resident, the "
@@ -478,6 +495,68 @@ class _ReferenceLogits:
         """Telemetry only — hits, fills and recomputes over the whole expansion."""
         return {"reference_hits": self.hits, "reference_fills": self.fills,
                 "reference_recomputes": self.recomputes}
+
+
+def memory_snapshot(device: Any) -> dict[str, Any]:
+    """What is actually occupying the device, at one instant.
+
+    DIAGNOSTIC ONLY: never returned into a metric, a score or a hash.
+
+    It exists because the reference cache's admission decision varied wildly
+    across real runs -- 67/67 items cached in one expansion, 11/67 in six
+    consecutive ones, with `mem_get_info` reporting 26.3 GiB free in the first
+    case and 2.6 GiB in the last, on the same 48 GB card. That cost 14,560
+    reference recomputes in a single expansion, and pooled over the nineteen
+    committed DEPTH expansions the recomputes are 36.1% of every forward pass
+    the operator performed.
+
+    Whether that is recoverable depends on a distinction `mem_get_info` alone
+    cannot make:
+
+    * `memory_allocated` is what the allocator has handed to live tensors;
+    * `memory_reserved` is what it has taken from the driver, INCLUDING freed
+      blocks it is holding for reuse;
+    * `mem_get_info` free is what the driver has left, which counts reserved-
+      but-unused blocks as unavailable.
+
+    So if `reserved - allocated` is large, the cache is being sized against
+    memory that PyTorch is merely hoarding and `empty_cache()` would return --
+    a real, cheap fix. If `allocated` is itself large, live tensors hold the
+    card and releasing the allocator's cache would achieve nothing. The two
+    have opposite remedies, which is why this measures before anything decides.
+    """
+    dev = torch.device(device) if not isinstance(device, torch.device) else device
+    if dev.type != "cuda":
+        return {"device": str(dev), "kind": dev.type,
+                "_why_empty": "not an accelerator; there is no device allocator "
+                              "to distinguish from the driver's view"}
+    try:
+        free, total = torch.cuda.mem_get_info(dev)
+        allocated = int(torch.cuda.memory_allocated(dev))
+        reserved = int(torch.cuda.memory_reserved(dev))
+    except Exception as exc:                                       # noqa: BLE001
+        return {"device": str(dev), "error": f"{type(exc).__name__}: {exc}"}
+    return {
+        "device": str(dev),
+        "kind": "cuda",
+        "driver_free_bytes": int(free),
+        "driver_total_bytes": int(total),
+        "allocator_allocated_bytes": allocated,
+        "allocator_reserved_bytes": reserved,
+        #: THE NUMBER THE DIAGNOSIS TURNS ON. Reserved-but-unallocated is what
+        #: `empty_cache()` could return to the driver, and it is invisible to
+        #: `mem_get_info`.
+        "allocator_reserved_not_allocated_bytes": max(reserved - allocated, 0),
+        "driver_free_gib": round(free / 2**30, 3),
+        "allocator_allocated_gib": round(allocated / 2**30, 3),
+        "allocator_reserved_gib": round(reserved / 2**30, 3),
+        "reclaimable_by_empty_cache_gib": round(
+            max(reserved - allocated, 0) / 2**30, 3),
+        #: What the driver cannot account for through this process's allocator:
+        #: another context, another process, or a non-PyTorch allocation.
+        "unaccounted_gib": round(
+            max(total - free - reserved, 0) / 2**30, 3),
+    }
 
 
 def _available_memory_bytes(device: Any) -> tuple[int | None, str]:

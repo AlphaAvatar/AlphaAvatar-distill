@@ -174,6 +174,75 @@ class DistortionSums:
 
 
 @torch.no_grad()
+def forward_kl_mean(
+    ref_logits: torch.Tensor,
+    abl_logits: torch.Tensor,
+    *,
+    chunk: int = 512,
+) -> float:
+    """Mean forward KL(reference || ablated) over positions. Nothing else.
+
+    `distortion` computes six quantities for every (candidate, item) pair:
+    forward KL, reverse KL, reference CE, ablated CE, top-1 agreement and the
+    tagged KL sums. `depth.causal_kl_greedy_v1` reads exactly one of them --
+    `sums["kl"]` -- and discards the rest, 260 candidate subsets x 67 items per
+    expansion.
+
+    What this drops, relative to `distortion`:
+
+    * `q_log.exp()` and its reduction, the reverse-KL term;
+    * two `gather`s over the vocabulary, the two cross-entropies. With no CE to
+      compute, the TARGETS are not needed at all and are not taken;
+    * two `argmax`es over the vocabulary, the top-1 agreement.
+
+    What it preserves EXACTLY, because these are what make the result the same
+    number rather than a similar one:
+
+    * float32 `log_softmax`, computed on the same upcast inputs;
+    * the same chunk loop and the same chunk boundaries -- measured to matter
+      at ~9e-8 relative, so chunking is a real constraint and not a formality;
+    * the same per-chunk float32 reduction accumulated in float64;
+    * device residency, with one host transfer at the end.
+
+    It reports a MEAN rather than sums because that is what the caller reads;
+    `distortion` remains the function for anything that needs more than KL.
+    """
+    if ref_logits.shape != abl_logits.shape:
+        raise ValueError(f"logit shape mismatch: {tuple(ref_logits.shape)} vs "
+                         f"{tuple(abl_logits.shape)}")
+    positions = int(ref_logits.shape[0])
+    if positions == 0:
+        raise ValueError("no positions to reduce")
+    resident = _reduce_on_device(ref_logits.device)
+    total = (torch.zeros((), dtype=torch.float64, device=ref_logits.device)
+             if resident else 0.0)
+    for a in range(0, positions, chunk):
+        b = min(a + chunk, positions)
+        p_log = F.log_softmax(ref_logits[a:b].float(), dim=-1)
+        q_log = F.log_softmax(abl_logits[a:b].float(), dim=-1)
+        per_pos = (p_log.exp() * (p_log - q_log)).sum(-1)
+        if resident:
+            total += per_pos.sum().double()
+        else:
+            total += float(per_pos.sum())
+    return (float(total.item()) if resident else float(total)) / positions
+
+
+def _reduce_on_device(device: torch.device) -> bool:
+    """Whether to keep the accumulators where the logits are.
+
+    A named function rather than an inline `device.type != "cpu"` for one
+    reason: it is the only thing separating the two accumulation paths, and a
+    branch that can only be taken on a machine with an accelerator is a branch
+    no `$0` test executes. Four paid pods in this project have died inside lines
+    no test had reached. A test overrides this to drive the device path with
+    host tensors, which exercises the real accumulator code -- the arithmetic --
+    while leaving the kernel question to the GPU validation that owns it.
+    """
+    return device.type != "cpu"
+
+
+@torch.no_grad()
 def distortion(
     ref_logits: torch.Tensor,
     abl_logits: torch.Tensor,
@@ -204,6 +273,26 @@ def distortion(
             raise ValueError(f"tag {name!r} mask has the wrong length")
 
     out = DistortionSums()
+    device = ref_logits.device
+    resident = _reduce_on_device(device)
+    #: DEVICE-RESIDENT ACCUMULATORS when the logits are not on the host.
+    #:
+    #: The arithmetic is unchanged -- each chunk is still reduced in float32 and
+    #: accumulated in float64, in the same order -- but on an accelerator the
+    #: per-chunk `float(...)` calls were SYNCHRONISATION POINTS. Six of them per
+    #: chunk, each stalling the pipeline until the kernel finished, on a loop
+    #: that runs once per (candidate, item) pair. Keeping the accumulators on
+    #: the device lets the chunks pipeline and returns one host transfer per
+    #: call instead of `6 * ceil(T/chunk)`.
+    #:
+    #: float64 deliberately: the current path adds a float32 chunk sum into a
+    #: Python float, which is a float64 accumulator. Accumulating in float32
+    #: here would be a different -- and worse -- summation than the one this
+    #: replaces, so the dtype follows the behaviour rather than the tensors.
+    if resident:
+        acc = torch.zeros(5, dtype=torch.float64, device=device)
+        tag_acc = {name: torch.zeros(2, dtype=torch.float64, device=device)
+                   for name in tags}
     for a in range(0, ref_logits.shape[0], chunk):
         b = min(a + chunk, ref_logits.shape[0])
         p_log = F.log_softmax(ref_logits[a:b].float(), dim=-1)
@@ -212,16 +301,43 @@ def distortion(
         per_pos = (p * (p_log - q_log)).sum(-1)
         tg = targets[a:b]
         out.positions += int(b - a)
-        out.kl += float(per_pos.sum())
-        out.reverse_kl += float((q_log.exp() * (q_log - p_log)).sum(-1).sum())
-        out.ref_ce += float(-p_log.gather(1, tg[:, None]).sum())
-        out.abl_ce += float(-q_log.gather(1, tg[:, None]).sum())
-        out.top1_agree += int((p_log.argmax(-1) == q_log.argmax(-1)).sum())
-        for name, mask in tags.items():
-            m = mask[a:b]
-            k = int(m.sum())
-            if k:
-                out.add_tagged(name, float(per_pos[m].sum()), k)
+        if resident:
+            acc[0] += per_pos.sum().double()
+            acc[1] += (q_log.exp() * (q_log - p_log)).sum(-1).sum().double()
+            acc[2] += (-p_log.gather(1, tg[:, None]).sum()).double()
+            acc[3] += (-q_log.gather(1, tg[:, None]).sum()).double()
+            acc[4] += (p_log.argmax(-1) == q_log.argmax(-1)).sum().double()
+            for name, mask in tags.items():
+                m = mask[a:b]
+                tag_acc[name][0] += per_pos[m].sum().double()
+                tag_acc[name][1] += m.sum().double()
+        else:
+            out.kl += float(per_pos.sum())
+            out.reverse_kl += float((q_log.exp() * (q_log - p_log)).sum(-1).sum())
+            out.ref_ce += float(-p_log.gather(1, tg[:, None]).sum())
+            out.abl_ce += float(-q_log.gather(1, tg[:, None]).sum())
+            out.top1_agree += int((p_log.argmax(-1) == q_log.argmax(-1)).sum())
+            for name, mask in tags.items():
+                m = mask[a:b]
+                k = int(m.sum())
+                if k:
+                    out.add_tagged(name, float(per_pos[m].sum()), k)
+    if resident:
+        #: ONE transfer, at the end. The only values that cross to the host are
+        #: these reduced scalars -- never a `[T, V]` logit tensor.
+        kl, rkl, ref_ce, abl_ce, top1 = acc.tolist()
+        out.kl += kl
+        out.reverse_kl += rkl
+        out.ref_ce += ref_ce
+        out.abl_ce += abl_ce
+        out.top1_agree += int(round(top1))
+        for name, pair in tag_acc.items():
+            kl_sum, count = pair.tolist()
+            #: A tag with no matching position is OMITTED, exactly as the host
+            #: path's `if k:` omits it -- an entry with zero positions would
+            #: make `as_dict` report a tag the suite never saw.
+            if count:
+                out.add_tagged(name, kl_sum, int(round(count)))
     return out
 
 

@@ -86,6 +86,15 @@ class StateEvaluator:
                     f"{needed / 2**30:.1f} GiB, over the {cache_budget_bytes / 2**30:.1f} "
                     "GiB budget. Use ReferenceStrategy.RECOMPUTE: one teacher forward "
                     "per candidate is seconds, and it does not scale with vocabulary.")
+            #: THE BUDGET NOW MEANS DEVICE MEMORY when `device` is not the host,
+            #: because `prime_reference` keeps the cached references where the
+            #: reduction runs. Stated rather than left to be discovered: the
+            #: same number used to bound host RAM, and a caller that had sized
+            #: it against 64 GiB of system memory would be sizing it against a
+            #: GPU. The frozen suite needs 33.8 GiB and this budget is 2 GiB, so
+            #: the real search is refused here and runs RECOMPUTE either way --
+            #: which is why no committed run's behaviour changes.
+            self._cache_on_device = device != "cpu"
             self._cache_bytes = needed
 
     @torch.no_grad()
@@ -95,15 +104,31 @@ class StateEvaluator:
         if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
             for item in self.items:
                 ids = item.input_ids.to(self.device)
-                self._ref_logits[item.item_id] = teacher(ids).logits[0, :-1].float().cpu()
+                #: On the COMPUTE DEVICE, not the host. See `_reference_for`.
+                self._ref_logits[item.item_id] = (
+                    teacher(ids).logits[0, :-1].float())
         self._ref_ready = True
 
     @torch.no_grad()
     def _reference_for(self, item: SuiteItem) -> torch.Tensor:
+        """The reference logits, left ON THE COMPUTE DEVICE.
+
+        These used to be `.float().cpu()`. Both tensors are `[T_pred, V]` with
+        V ~152k, so at the frozen suite that is ~0.5 GiB crossing the bus per
+        model per item -- and then the whole float32 reduction ran on the host,
+        where a 152k-wide log-softmax is orders of magnitude slower than on the
+        accelerator that had just produced the logits.
+        `state_evaluation_seconds` is 67-80% of every non-DEPTH expansion in
+        both committed telemetry files, so this is where that time went.
+
+        `distortion` is device-agnostic and accumulates on the device when the
+        logits are not on the host, returning only reduced scalars -- which is
+        what the DEPTH operator has always relied on.
+        """
         if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
             return self._ref_logits[item.item_id]
         ids = item.input_ids.to(self.device)
-        return self._teacher(ids).logits[0, :-1].float().cpu()
+        return self._teacher(ids).logits[0, :-1].float()
 
     @torch.no_grad()
     def evaluate(self, model, artifact_digest: str, *, reference: str = "root_teacher",
@@ -123,14 +148,26 @@ class StateEvaluator:
             # intended suite that is ~0.5 GiB each rather than 33.8 GiB held for
             # the whole run.
             ref = self._reference_for(item)
-            cand = model(ids).logits[0, :-1].float().cpu()
+            cand = model(ids).logits[0, :-1].float()
             if cand.shape != ref.shape:
                 raise MeasurementError(
                     f"item {item.item_id}: candidate logits {tuple(cand.shape)} do not "
                     f"match the reference {tuple(ref.shape)}; the two models are not "
                     "logit-comparable, so no KL against the original teacher exists")
-            targets = item.input_ids[0, 1:].cpu()
-            sums = distortion(ref, cand, targets, tags=item.tags, chunk=self.chunk)
+            #: On the device the logits are on: they meet those logits inside
+            #: `distortion`'s `gather`, and a host target would drag the whole
+            #: reduction back to the host -- which is what the DEPTH operator
+            #: documents having already been bitten by.
+            targets = item.input_ids[0, 1:].to(ref.device)
+            #: Tag masks on the logits' device too. They index `per_pos`
+            #: inside `distortion`, and a host boolean mask indexing a CUDA
+            #: tensor RAISES -- so this line is not an optimization, it is what
+            #: makes the device-resident path run at all. `SuiteItem.tags` are
+            #: built on the host by the battery renderer, which is correct;
+            #: moving them is the consumer's job and it is cheap (one bool per
+            #: position, against ~152k floats per position of logits).
+            tags = {name: mask.to(ref.device) for name, mask in item.tags.items()}
+            sums = distortion(ref, cand, targets, tags=tags, chunk=self.chunk)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
             totals.merge(sums)
             del ref, cand

@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 100,
- "digest": "85d872d00abfc2ba21fbb2a10013eb8a6cf4e64d8943a4207eee4d5a94363f6e",
+ "digest": "2710655a9bdc5e5bfe4d1a98bd4971b5d65ea01c1c29ea6e825797c1c702ae3e",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -389,8 +389,8 @@
   },
   {
    "path": "src/aadistill/initialization/operators/depth.py",
-   "sha256": "b1f5c9914e5bdbccd3ee52a5e56ff4050e533f7f8416360aca79f584341f7846",
-   "bytes": 27371
+   "sha256": "4fd594a4ec8570f47f903da81230a80325c6fead8dd01ae2cfe270cdc9edeb7b",
+   "bytes": 31718
   },
   {
    "path": "src/aadistill/initialization/operators/ffn.py",
@@ -459,8 +459,8 @@
   },
   {
    "path": "src/aadistill/initialization/statistics/contribution.py",
-   "sha256": "984a4ed3a277e26c5c50d8f75ca5319049d7b8b219726bc705f1bc176b3f29c3",
-   "bytes": 15551
+   "sha256": "4828c7e9e3628a1859f07922cc45751819332a350aa2b0b66f372ca1380864d1",
+   "bytes": 21202
   },
   {
    "path": "src/aadistill/initialization/statistics/spec.py",
