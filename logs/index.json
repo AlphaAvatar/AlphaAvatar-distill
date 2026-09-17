@@ -282,7 +282,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 17,
+  "runs_current": 20,
   "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
@@ -290,6 +290,11 @@
     "recorded": 4,
     "unrecorded": 0,
     "total": 4
+   },
+   "c2_full_search_perf": {
+    "recorded": 3,
+    "unrecorded": 0,
+    "total": 3
    },
    "continuation_b": {
     "recorded": 5,
@@ -1004,6 +1009,45 @@
    },
    "manifest_sha256": "0ff5528eaa83a4bad48cee12724ee8200dd43364a9c2235e6d3cd94da8c2114c",
    "n_components": 4
+  },
+  {
+   "experiment_id": "c2_full_search_perf",
+   "run_id": "c2_full_search_perf_20260918_p1",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p1",
+    "manifest": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p1/manifest.json"
+   },
+   "manifest_sha256": "da0929f887d073f4488fcb0997677dcecf4e0539e7684ff9ee263a2efa8e0734",
+   "n_components": 5
+  },
+  {
+   "experiment_id": "c2_full_search_perf",
+   "run_id": "c2_full_search_perf_20260918_p2",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p2",
+    "manifest": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p2/manifest.json"
+   },
+   "manifest_sha256": "fc56e3a4c677ddad19f897c08d0f583756239b497e741a3fef982b170f4edd17",
+   "n_components": 5
+  },
+  {
+   "experiment_id": "c2_full_search_perf",
+   "run_id": "c2_full_search_perf_20260918_p3",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p3",
+    "manifest": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p3/manifest.json"
+   },
+   "manifest_sha256": "b11a91ce7100507592cf2195f84a276573488b7a7e14301f232859913e33ee27",
+   "n_components": 5
   },
   {
    "experiment_id": "phase_c1",

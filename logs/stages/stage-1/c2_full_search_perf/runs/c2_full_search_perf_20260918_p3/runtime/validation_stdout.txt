@@ -1,0 +1,14 @@
+[17:12:00] CUDA NVIDIA L40S cc8.9 bf16=True free=43.97GiB torch=2.9.1+cu130 cuda=13.0
+[17:12:02] loading Qwen/Qwen3-4B-Thinking-2507@768f209d9ea8 in bf16
+[17:12:21] teacher resident in 18.8s
+[17:12:21] calib.domain_balanced@v1: 67 items available, using 67
+[17:12:21] --- stage reduction ---
+[17:12:30] stage R: 75.996x  (old 3.80s -> new 0.05s), worst drift 3.032e-05
+[17:12:30] --- stage memory ---
+[17:12:30]   before: driver free 36.322 GiB, allocated 7.553, reserved 7.566, reclaimable 0.013
+[17:12:30]   after empty_cache: driver free 36.322 GiB; admission 67 -> 67 of 67
+[17:12:30] --- stage depth ---
+[17:15:50]   old (full reduction): 71 candidate evaluations in 199.8s -> removed [17, 18]
+[17:15:58]   new (forward-KL only): 71 candidate evaluations in 8.7s -> removed [17, 18]
+[17:15:59] FAIL: candidate-table drift 1.539e-05 exceeds 1e-09
+[17:15:59] verdict: FAIL

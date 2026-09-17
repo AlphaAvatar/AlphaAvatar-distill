@@ -1,17 +1,17 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-17T10:00:00Z",
+ "generated_utc": "2026-09-18T18:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
   "paid_compute": false,
   "pods": 0,
   "launchers": 0,
-  "note": "zero pods. attempt8's pod 9s9pw0c8873y5g was deleted after 32.32 min behind its teardown gate; GraphQL returns pod(...) = null with exists=false and an account-wide list returns []."
+  "note": "zero pods. The last three were the performance round's, all provider-confirmed gone; no launcher is alive."
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: MONEY bounds the sessions, not a count. An approval is NOT a launch. That package is C1's and its round ended with a verdict; C2 baseline completion is DONE. NOTHING is authorized to launch now. Owner: logs/budget/decisions.md.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: MONEY bounds the sessions, not a count. An approval is NOT a launch. That package is C1's and its round ended with a verdict; C2 baseline completion is DONE. NOTHING may launch now. Owner: logs/budget/decisions.md.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -20,12 +20,12 @@
  "prepared_launch": {
   "any": false,
   "run": null,
-  "note": "nothing is prepared and nothing may start. attempt8 COMPLETED the baseline completion: B was rebuilt, measured once and compared. The durability boundary has inverted -- no GPU remeasurement of B, no second state_eval, no Search-2 and no behavioural confirmation without a new maintainer decision. Owner: the attempt8 closeout."
+  "note": "nothing is prepared and nothing may start. The durability boundary has inverted: no GPU remeasurement of B, no second state_eval, no Search-2 and no behavioural confirmation without a new maintainer decision. Owner: the attempt8 closeout."
  },
  "budget": {
-  "cumulative_spend_usd": 297.6543,
+  "cumulative_spend_usd": 297.8795,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 72.3457,
+  "remaining_usd": 72.1205,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -34,13 +34,11 @@
   "full_ceiling_sessions_fundable": 1,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
   "_project_spend_before_this_package_usd": 267.8998,
-  "_anchor_note": "the project total when the package opened. The project cumulative is derived from it plus every recorded closeout cost across all experiments; see derive_budget.py.",
-  "_limits_do_not_transfer": "formal, engineering, package and project bind SEPARATELY; see derive_budget.py.",
   "ledger": "logs/budget/ledger.md",
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
-  "planning_floor_usd": 13.4401,
-  "_planning_floor_note": "from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json:totals.floor_usd. Priced is not funded.",
-  "_package_spent_usd": 22.6176
+  "_package_spent_usd": 22.6176,
+  "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
+  "planning_floor_usd": 13.4401
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -48,7 +46,7 @@
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
   "equivalence_interval": 0.011695296982299022,
   "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds from the C0 digest.",
-  "owner": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json and .../execution_preregistration.json own every frozen identity; the hashes above are the ones a reader needs to recognise, not the set.",
+  "owner": "logs/stages/stage-1/phase_c1/plans/ owns every frozen identity, in phase_c0_preregistration.json and execution_preregistration.json. The hashes above are the ones a reader needs to recognise, not the set.",
   "feasibility_floor": 0.3,
   "seeds": {
    "sa": 20260726,
@@ -74,8 +72,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 CLOSED by a GO verdict; C2 preparation CLOSED/ACCEPTED and its CUDA engineering validation PASS/CLOSED. Nothing is authorized. Detail owned by phase_c and cuda_engineering_validation.",
-  "then": "the chain is complete; next is the maintainer's FINAL FORMAL SEARCH LAUNCH REVIEW. If it approves, the decision becomes the run's grant.json, then sweep -> readiness -> authorization -> bundle in that order. Do NOT launch before the review. After Top-5 is committed, STOP: the behavioural session's candidate identities do not exist until then. Re-quote the rate before issuance and re-derive the ceiling mechanically if it moved; do NOT narrow beam 6.",
+  "status": "C1 CLOSED by a GO verdict; C2 preparation CLOSED/ACCEPTED, its CUDA validation PASS/CLOSED and its performance round COMPLETE/CLOSED. Nothing is authorized.",
+  "then": "the chain is complete and re-priced; next is the maintainer's FINAL FORMAL SEARCH LAUNCH REVIEW, which now also owes blocker (2)'s frozen-record decision. If approved: grant.json, then sweep -> readiness -> authorization -> bundle, in that order. Do NOT launch before the review. After Top-5 is committed, STOP. Re-quote the rate before issuance and re-derive the ceiling if it moved; do NOT narrow beam 6.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -84,10 +82,8 @@
  "phases": {
   "phase_a": "COMPLETE / FROZEN",
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
-  "phase_c0": "COMPLETE / APPROVED / FROZEN",
-  "phase_c1": "COMPLETE / CLOSED by the attempt-18 GO verdict -- status owned by phase_c.c1",
-  "phase_c2": "SEARCH-1 frozen, B->C computed. FULL JOINT re-search planned and priced, ceilings FIT the accounting envelope, NOT AUTHORIZED -- owned by phase_c.c2",
-  "formal_recovery_evidence": "NONE"
+  "formal_recovery_evidence": "NONE",
+  "_c_phases": "phase_c owns c0..c4; they are deliberately not restated here."
  },
  "phase_a_result": {
   "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
@@ -100,8 +96,11 @@
   "status": "RESOLVED",
   "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
   "winner_is_control": false,
+  "tie_break_ran": true,
   "clears_by": 7e-05,
-  "read_with_care": "clears by 0.000070 -- ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable. SELECTION evidence under a fixed 0.86M probe; authorizes nothing.",
+  "read_with_care": "clears by 0.000070 -- ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
+  "not_capability": "SELECTION evidence under a fixed 0.86M probe.",
+  "authorizes": "nothing",
   "owner": "logs/stages/stage-1/phase_b/"
  },
  "phase_c": {
@@ -114,18 +113,18 @@
   "c1": {
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
-   "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE, by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
+   "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
    "owners": "logs/stages/stage-1/phase_c1/ -- plans, runs, analyses and the attempt-18 closeout own every C1 figure and artifact.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "SEARCH COMPLETE and B->C COMPUTED; Search-1 is DONE and FROZEN. The local Search-2 refinement is WITHDRAWN; C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection of a new incumbent, designed and priced and NOT AUTHORIZED.",
+   "status": "Search-1 DONE and FROZEN; B->C COMPUTED. The local Search-2 refinement is WITHDRAWN. C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection of a new incumbent: designed, priced, re-priced on measured evidence, NOT AUTHORIZED.",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "priced": "plans/phase_c2_full_search_pricing.json (Search-1's historical basis: plans/phase_c2_pricing.json).",
-   "result": "B is DOMINATED on all three ranked objectives by two front-0 candidates and dominates none; NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
-   "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat the incumbent B after the frozen 0.86M recovery? The original control is NOT a C2 arm; screening is disjoint in seed AND prompt (c2_screening_v1, 0ad76fc7). Owner: the protocol.",
-   "execution_path": "full-search driver CONFIRMED ON REAL CUDA; the formal chain is BUILT and unconsumed, provisioning 400 GB for a derived 250.9 GiB peak. Commits a Top-5 and STOPS. Two authorizations, never one.",
-   "funding": "cap 370.0000 (accounting envelope only); chain total fits with headroom. NOT AUTHORIZED. Owner: plans/phase_c2_full_search_pricing.json:funding."
+   "result": "B is DOMINATED on all three ranked objectives by two front-0 candidates and dominates none; NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Both sides were measured by ONE evaluator implementation, so the finding stands. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
+   "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat incumbent B after the frozen 0.86M recovery? Screening is seed- AND prompt-disjoint (c2_screening_v1, 0ad76fc7). Owner: the protocol.",
+   "execution_path": "full-search driver CONFIRMED ON REAL CUDA; the chain is BUILT and UNCONSUMED, provisioning 400 GB for a derived 250.9 GiB peak. Cost model REFRESHED from measurement: 1826.57 -> 1445.54 min, beam 6 untouched. Commits a Top-5 and STOPS. Two authorizations, never one.",
+   "funding": "cap 370.0000 (accounting envelope only); chain total 59.0009 fits with 13.1196 over. NOT AUTHORIZED. Owner: plans/phase_c2_full_search_pricing.json:funding."
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent: attention.activation_importance_v1 vs a future attention.causal_kl_v1. Cannot start before C2 names an incumbent, and the operator does not exist yet.",
   "c4": "CONDITIONAL on C3 promoting. Another full joint re-search with the promoted operator, then behavioural selection. Same cycle as C1->C2; pattern in docs/OPERATOR_PROMOTION_CYCLE.md."
@@ -137,11 +136,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOT AUTHORIZED. The formal full-search chain is BUILT and UNCONSUMED, after three review-found repairs: a missing c2_full_search setup-dispatch branch, a storage walk that missed the ancestors the search never releases (250.9 GiB, so 400 GB), and a GPU-only ceiling that ignored separately billed Container Disk. Session total $34.8740 = GPU $33.1827 + disk $1.6913; chain total $66.2757 FITS the $370.0000 ACCOUNTING ENVELOPE with $6.0700 over -- fitting is NOT permission, NOT transferable to C3/C4. Live securePrice re-quoted $1.09/h, unchanged. Owed: the FINAL FORMAL SEARCH LAUNCH REVIEW, reading plans/phase_c2_full_search_grant_proposal.json, which approves nothing and which the issuer refuses.",
- "deferred_not_blocking": {
-  "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
-  "historical_probe_reuse": "REFUSED by scoring_contract_matches_live. Detail: logs/state/current.md."
- },
+ "blocker": "TWO things are owed, neither mine to settle. (1) NOT AUTHORIZED: the formal full-search chain is BUILT and UNCONSUMED, and the maintainer's FINAL FORMAL SEARCH LAUNCH REVIEW is owed. It reads logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_grant_proposal.json, which approves nothing and which the issuer refuses. Ceilings cover GPU AND separately billed disk and FIT the envelope; fitting is NOT permission and NOT transferable to C3/C4. (2) A FROZEN-RECORD DECISION: adopting the state_eval optimization moved planning/metrics.py a6dd5d56 -> d193cc90, which phase_c2_baseline_completion_protocol.json binds by hash. The gate fires CORRECTLY, refusing a FUTURE B re-measurement; no completed result is affected and the full-search protocol does not bind it. Amending a frozen protocol and reverting a measured optimization are both maintainer calls. Options, detail and the six red tests: logs/state/current.md.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
  "latest_run": {
@@ -150,8 +145,8 @@
   "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
   "outcome": "recorded; COMPLETE \u2014 B REBUILT, MEASURED ONCE, B->C COMPARISON COMPUTED, $0.5872",
   "index": "logs/index.json",
-  "last_executed": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
-  "state": "recorded: the run wrote its own manifest"
+  "state": "recorded: the run wrote its own manifest",
+  "last_executed": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
@@ -159,9 +154,11 @@
  },
  "cuda_engineering_validation": {
   "_what": "engineering evidence only -- neither validation is a scientific result and neither authorizes anything.",
-  "stage_f": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, campaign CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/ (its interpretation_amendment_1.json is APPEND-ONLY).",
-  "c2_full_search": "PASS 2026-09-17 on an L40S: the full-search driver reached C2_FULL_SEARCH_ALL_DONE on real CUDA in BF16 over the real 578-leaf space, and the real 596M student reloaded canonically intact. $0.1453 of $0.9000, three subruns, every teardown provider-confirmed, nothing billing. CLOSED -- no further GPU validation is required before the chain. Measurements owned by logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/, runs at logs/stages/stage-1/c2_full_search_cuda/runs/.",
-  "authorizes": "nothing"
+  "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, campaign CLOSED. Owner: phase_c1/validations/cuda-stage-f/v1/.",
+  "c2_full_search": "PASS 2026-09-17 on an L40S: the driver reached C2_FULL_SEARCH_ALL_DONE on real CUDA in BF16 over the 578-leaf space, and the real 596M student reloaded canonically intact. $0.1453 of $0.9000, three subruns, every teardown provider-confirmed. CLOSED. Owner: validations/full-search-cuda/v1/closeout.json.",
+  "authorizes": "nothing",
+  "c2_full_search_performance": "COMPLETE and CLOSED 2026-09-18 on an L40S, changing no science: two optimizations ADOPTED on measured decision-level equivalence (76.0x and 1.10x, drift 3.03e-05, 257x below the search's own threshold), one REFUSED on memory evidence, one instrumented to a REFUTED hypothesis. NOT recorded as PASS: no subrun exited 0 and every failure was in the instrumentation. $0.2252 of $1.5000, three subruns, all torn down. It also moved a hash a frozen protocol binds -- see blocker (2). Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/closeout.json."
  },
- "superseded_handoff": "none. The live handoff is logs/state/current.md."
+ "superseded_handoff": "none. The live handoff is logs/state/current.md.",
+ "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything."
 }

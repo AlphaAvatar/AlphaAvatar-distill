@@ -1,0 +1,142 @@
+{
+ "schema": "aadistill.c2_full_search_performance_check/v1",
+ "run_id": "c2_full_search_perf_20260918_p3",
+ "validation_id": "c2_full_search_performance_v1",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "sync_telemetry_enabled": false,
+ "started_utc": "2026-09-17T17:12:00.795107+00:00",
+ "kernel_tolerance": 0.00018588,
+ "_kernel_tolerance_is_derived": "four times float32's sqrt(V)*eps floor for the real 151936-class vocabulary, which is 4.647e-05. A bound below that floor asserts float32 is exact.",
+ "accum_tolerance": 1e-09,
+ "search_decision_threshold": 0.007782,
+ "decision_margin_required": 50,
+ "stages": {
+  "reduction": {
+   "items": [
+    {
+     "item_id": "general/fineweb-40000",
+     "positions": 628,
+     "old_seconds": 1.1469,
+     "new_seconds": 0.0154,
+     "speedup": 74.346,
+     "worst_relative_drift": 2.421315542867811e-05,
+     "old_kl": 0.02676471251590996,
+     "new_kl": 0.02676406445776581
+    },
+    {
+     "item_id": "general/fineweb-40001",
+     "positions": 233,
+     "old_seconds": 0.4046,
+     "new_seconds": 0.0057,
+     "speedup": 70.899,
+     "worst_relative_drift": 2.235118452969022e-05,
+     "old_kl": 0.027330511117697784,
+     "new_kl": 0.027330030187516764
+    },
+    {
+     "item_id": "general/fineweb-40002",
+     "positions": 526,
+     "old_seconds": 0.9628,
+     "new_seconds": 0.013,
+     "speedup": 73.804,
+     "worst_relative_drift": 2.139856919177352e-05,
+     "old_kl": 0.03223993864349539,
+     "new_kl": 0.03223939528936669
+    },
+    {
+     "item_id": "general/fineweb-40003",
+     "positions": 645,
+     "old_seconds": 1.2853,
+     "new_seconds": 0.0158,
+     "speedup": 81.25,
+     "worst_relative_drift": 3.0319411605575326e-05,
+     "old_kl": 0.030478923265324084,
+     "new_kl": 0.030477999162304308
+    }
+   ],
+   "tolerance": 0.00018588,
+   "item_ordering_identical": true,
+   "old_seconds_total": 3.8,
+   "new_seconds_total": 0.05,
+   "speedup": 75.996,
+   "worst_relative_drift": 3.0319411605575326e-05,
+   "tolerance_used": 0.00018588,
+   "_which_bound": "host-vs-device: the old path transferred both tensors and reduced on the host, so the bound covers kernel disagreement and not only accumulation",
+   "top1_agreement_exact": true,
+   "decision_threshold": 0.007782,
+   "drift_is_below_threshold_by": 256.7
+  },
+  "memory": {
+   "before": {
+    "device": "cuda",
+    "kind": "cuda",
+    "driver_free_bytes": 39000014848,
+    "driver_total_bytes": 47667740672,
+    "allocator_allocated_bytes": 8110229504,
+    "allocator_reserved_bytes": 8124366848,
+    "allocator_reserved_not_allocated_bytes": 14137344,
+    "driver_free_gib": 36.322,
+    "allocator_allocated_gib": 7.553,
+    "allocator_reserved_gib": 7.566,
+    "reclaimable_by_empty_cache_gib": 0.013,
+    "unaccounted_gib": 0.506
+   },
+   "after_empty_cache": {
+    "device": "cuda",
+    "kind": "cuda",
+    "driver_free_bytes": 39000014848,
+    "driver_total_bytes": 47667740672,
+    "allocator_allocated_bytes": 8110229504,
+    "allocator_reserved_bytes": 8124366848,
+    "allocator_reserved_not_allocated_bytes": 14137344,
+    "driver_free_gib": 36.322,
+    "allocator_allocated_gib": 7.553,
+    "allocator_reserved_gib": 7.566,
+    "reclaimable_by_empty_cache_gib": 0.013,
+    "unaccounted_gib": 0.506
+   },
+   "driver_free_recovered_gib": 0.0,
+   "admission_before": {
+    "mode": "cached",
+    "items_total": 67,
+    "items_cached": 67,
+    "items_recomputed_per_candidate": 0,
+    "estimate_gib": 16.913,
+    "admitted_gib": 16.913,
+    "available_bytes": 39000014848
+   },
+   "admission_after_empty_cache": {
+    "mode": "cached",
+    "items_total": 67,
+    "items_cached": 67,
+    "items_recomputed_per_candidate": 0,
+    "estimate_gib": 16.913,
+    "admitted_gib": 16.913,
+    "available_bytes": 39000014848
+   },
+   "empty_cache_changes_admission": false,
+   "_what_this_decides": "if admission improves, sizing the cache after an empty_cache() is a real and cheap fix for the 36.1% of DEPTH forward passes that are reference recomputes. If it does not, live tensors hold the card and releasing the allocator's cache achieves nothing -- and the remedy is the item-outer loop restructuring recorded in the performance-round analysis, which is a larger change.",
+   "_no_behaviour_was_changed": "the operator still sizes its cache exactly as before. This stage measures; it does not install an empty_cache() in the hot path."
+  }
+ },
+ "device": {
+  "device": "NVIDIA L40S",
+  "capability": "8.9",
+  "bf16_supported": true,
+  "free_gib": 43.97,
+  "total_gib": 44.39,
+  "torch": "2.9.1+cu130",
+  "cuda_runtime": "13.0"
+ },
+ "teacher": {
+  "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "load_seconds": 18.75
+ },
+ "items_used": 67,
+ "failure": "candidate-table drift 1.539e-05 exceeds 1e-09",
+ "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/validation/c2_full_search_performance_check.py\", line 638, in main\n    report[\"stages\"][name] = fn(cfg, teacher, items, report, a.device)\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/validation/c2_full_search_performance_check.py\", line 445, in stage_depth\n    assert worst < ACCUM_TOLERANCE, (\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: candidate-table drift 1.539e-05 exceeds 1e-09\n",
+ "verdict": "FAIL",
+ "finished_utc": "2026-09-17T17:15:59.000971+00:00"
+}

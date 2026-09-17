@@ -1,0 +1,7 @@
+[17:07:03] CUDA NVIDIA L40S cc8.9 bf16=True free=43.97GiB torch=2.9.1+cu130 cuda=13.0
+[17:07:05] loading Qwen/Qwen3-4B-Thinking-2507@768f209d9ea8 in bf16
+[17:07:32] teacher resident in 27.6s
+[17:07:32] calib.domain_balanced@v1: 67 items available, using 67
+[17:07:32] --- stage reduction ---
+[17:07:53] FAIL: reduction drift 3.032e-05 exceeds the predeclared 1e-06 host-vs-device bound
+[17:07:53] verdict: FAIL

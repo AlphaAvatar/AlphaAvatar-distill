@@ -5,7 +5,50 @@
  "package_id": "phase_c2.full_search_performance_validation.2026-09-18",
  "_why_its_own_package_id": "so the deriver does not charge this to C1's $6.0000 GPU engineering allowance, which this validation's own authorization forbids. With no package_id stated, `_attribute` falls back to dates and books it to C1.",
  "authorization": "logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/authorization.json",
- "subruns": [],
+ "subruns": [
+  {
+   "subrun_id": "c2_full_search_perf_20260918_p1",
+   "pod_id": "4gvvwu0sjw83h0",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 3.657,
+   "cost_usd": 0.0664,
+   "cost_basis": "elapsed x confirmed rate",
+   "verdict": "FAIL",
+   "failure_class": "operator",
+   "teardown_confirmed": true,
+   "execution_sha": null,
+   "record": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p1/"
+  },
+  {
+   "subrun_id": "c2_full_search_perf_20260918_p2",
+   "pod_id": "w70qw5g7dzls4u",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 2.756,
+   "cost_usd": 0.0501,
+   "cost_basis": "elapsed x confirmed rate",
+   "verdict": "FAIL",
+   "failure_class": "operator",
+   "teardown_confirmed": true,
+   "execution_sha": null,
+   "record": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p2/"
+  },
+  {
+   "subrun_id": "c2_full_search_perf_20260918_p3",
+   "pod_id": "mpdglbd21b3tt7",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 5.984,
+   "cost_usd": 0.1087,
+   "cost_basis": "elapsed x confirmed rate",
+   "verdict": "FAIL",
+   "failure_class": "operator",
+   "teardown_confirmed": true,
+   "execution_sha": null,
+   "record": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p3/"
+  }
+ ],
  "authorizes": "nothing",
- "booked_usd": 0.0
+ "booked_usd": 0.2252
 }

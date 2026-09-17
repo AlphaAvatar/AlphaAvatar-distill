@@ -177,18 +177,81 @@ never reaches a metric, a score or a hash.
 
 ---
 
-## What is still owed
+## What was owed, and what it measured
 
-A bounded real-L40S engineering/performance validation, because these changes
-touch the CUDA hot path and the existing validation certified a different
-executable. It must establish numerical equivalence on real kernels, identical
-DEPTH greedy decisions, identical state-eval/Pareto decisions, real wall-clock
-improvement, device/dtype correctness, and the memory behaviour above — and it
-must run with `AADISTILL_DEPTH_SYNC_TELEMETRY=1`, because without it the
-forward/reduction split is unattributed and the share candidates 2 and 3 act on
-is unmeasured.
+A bounded real-L40S engineering/performance validation was owed, because these
+changes touch the CUDA hot path and the existing validation certified a
+different executable. **It ran on 2026-09-18 and is closed** for `$0.2252` of a
+`$1.50` ceiling over three subruns, every teardown provider-confirmed:
+[`validations/full-search-performance/v1/closeout.json`](../validations/full-search-performance/v1/closeout.json).
 
-**No new formal cost may be claimed from any of this until that run measures
-it.** The pricing refresh follows the telemetry, not the other way round.
+| what it had to establish | result |
+| --- | --- |
+| numerical equivalence on real kernels | worst relative drift `3.03e-05` |
+| identical DEPTH greedy decisions | removal order `[17, 18]` from both variants, `71` candidate evaluations each |
+| identical state-eval orderings | `item_ordering_identical: true`, top-1 agreement exact |
+| real wall-clock improvement | reduction **`76.0×`** (`3.80s → 0.05s`); DEPTH scoring `1.10×` |
+| device/dtype correctness | L40S cc 8.9, bf16, torch `2.9.1+cu130`, real pinned teacher |
+| the memory behaviour above | `0.013 GiB` reclaimable, cache admits `67/67`, `empty_cache()` changes nothing |
+
+**The second hypothesis is the true one, and it was the cheaper remedy that
+was wrong.** `reserved − allocated` is `0.013 GiB`: there is nothing for
+`empty_cache()` to recover, and on a card holding only the teacher the
+`16.91 GiB` cache is admitted in full. So the historical `2.6 GiB`-free
+observations are live tensors elsewhere in the search — and a clean card cannot
+show that, because the crowding does not exist there. Measuring it requires
+instrumentation inside a running search. Nothing was flushed and **no saving is
+claimed**.
+
+**Equivalence is of the decisions, not of the digits, and that distinction was
+paid for.** The round's second subrun died against a predeclared `1e-06` bound
+that sits *below* float32's own `sqrt(V)·ε` noise floor of `4.65e-05` for a
+`151936`-class vocabulary — a bound no implementation could have met. The
+repair was to derive the kernel bound from that floor rather than guess it, and
+to assert every drift against the search's own smallest decision threshold
+(`0.007782`) with a `50×` margin. The measured `3.03e-05` clears that by
+`257×`. Re-deriving a tolerance after a failure is normally how a gate gets
+talked out of firing, so the reason it is legitimate here is recorded in the
+check itself: the criterion is the decision boundary, and the guess was below
+the arithmetic's noise.
+
+`AADISTILL_DEPTH_SYNC_TELEMETRY=1` was set for the depth stage, so the
+forward/reduction split is attributed rather than assumed.
+
+## The pricing refresh followed the telemetry
+
+Now that it is measured, each cost cell is adjusted by the component saving it
+actually contains, capped at the phase that saving belongs to — never a ratio
+applied to a whole cell. Every input is named in
+[`phase_c2_measured_optimization.json`](../plans/phase_c2_measured_optimization.json).
+
+* DEPTH `36.07 → 30.79` min; the other cells `3.93 → 1.65` and below.
+* Beam-6 bounding minutes `1826.57 → 1445.54`; **beam width 6 was never a
+  lever and is unchanged.**
+* GPU ceiling `$33.1827 → $26.2606`; session total `$27.5992` including
+  separately billed disk; chain total `$59.0009`; headroom `$13.1196`.
+
+One structural note for a reviewer: the protocol document **embeds its own cost
+model**, so re-pricing moved its hash from `26de0bb6` to `d7678d7d`. Exactly two
+top-level keys differ — `cost_model` and the document's own `protocol_sha256` —
+which is `29` changed leaves plus the self-hash. The science subtree — space,
+beam, ranking, Top-5, behavioural protocol, interpretation boundary — hashes
+**identically** before and after at
+`4897d470eed2b5a365e55ad4b94e070bc802a49b0a6365af80c5a612a677f5cc`.
+
+That subtree is the document with `cost_model` and `protocol_sha256` removed and
+the rest canonicalized with sorted keys, so `git show HEAD:<protocol>` against
+the working tree reproduces both figures:
+
+```python
+science = {k: v for k, v in doc.items()
+           if k not in ("cost_model", "protocol_sha256")}
+hashlib.sha256(json.dumps(science, sort_keys=True,
+                          separators=(",", ":")).encode()).hexdigest()
+```
+
+A document declared frozen as science should probably not move when a price
+does. Nothing was restructured here on that account — raising it is the action
+taken.
 
 AUTHORIZES NOTHING.

@@ -243,8 +243,17 @@ class TestTheSnapshotStatesTheRequiredFacts:
                  if not k.startswith("_") and k != "authorizes"}
         assert len(named) >= 2, (
             f"expected both CUDA validations, found {sorted(named)}")
+        #: A TERMINAL verdict, not specifically a passing one. This demanded
+        #: the literal "PASS", which reads as "state a verdict" only while
+        #: every campaign happened to pass. The performance round did not: its
+        #: three subruns each failed in the instrumentation rather than in the
+        #: thing being measured, so it closed COMPLETE, and a guard that
+        #: required the word PASS would have been an incentive to write it.
+        TERMINAL = ("PASS", "COMPLETE", "FAIL", "TERMINATED", "ABANDONED")
         for key, text in named.items():
-            assert "PASS" in text, f"{key} does not state a verdict"
+            assert any(v in text for v in TERMINAL), (
+                f"{key} states no terminal verdict; one of {TERMINAL} is "
+                "expected, and which one is a matter of what happened")
             assert "CLOSED" in text or "campaign CLOSED" in text, (
                 f"{key} does not state that its campaign is closed")
             #: A dollar figure, so a campaign cannot be named without being

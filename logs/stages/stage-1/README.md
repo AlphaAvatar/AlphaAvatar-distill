@@ -71,7 +71,7 @@ What each one asked of this stage.
 
 ## Runs
 
-**60** run(s) are registered for this stage's
+**63** run(s) are registered for this stage's
 experiments. An experiment's plans, analyses, results, history,
 validations and runs are all inside its own directory; the
 canonical run list, across every stage, is
@@ -89,6 +89,7 @@ the config path and hash it ran under.
 * `configs/stage1/qwen3_0p6b_from_4b_thinking.json`
 * `configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json`
 * `configs/validation/c2_full_search_cuda.json`
+* `configs/validation/c2_full_search_performance.json`
 
 ## Canonical data and artifact manifests
 

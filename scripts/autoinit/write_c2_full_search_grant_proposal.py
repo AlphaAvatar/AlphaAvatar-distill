@@ -251,10 +251,90 @@ def proposal() -> dict:
                 "entirely at 5535c6a, which would have refused a formal pod "
                 "after paid setup: the same class as SESSION_KIND=phase_b, which "
                 "cost $0.2300."),
+            #: The price rests on this one, so it is cited beside the driver
+            #: validation rather than left in the analysis: the cost cells were
+            #: refreshed from ITS measurement, and a reviewer reading the money
+            #: above needs to know which campaign produced the reduction and
+            #: what equivalence was established at the same time.
+            "performance_validation": ("logs/stages/stage-1/phase_c2/"
+                                       "validations/full-search-performance/"
+                                       "v1/closeout.json"),
+            "performance_verdict": (
+                "COMPLETE, and NOT recorded as PASS: no subrun exited 0, and "
+                "each failure was in the instrumentation rather than in the "
+                "optimizations. What it measured on the real pinned teacher: "
+                "the state_eval reduction 76.0x, the DEPTH forward-KL-only "
+                "path 1.10x, worst relative drift 3.03e-05 -- 257x below the "
+                "search's own 0.007782 decision threshold and under float32's "
+                "own 4.65e-05 floor for this vocabulary -- with item ordering "
+                "identical, top-1 exact and DEPTH's removal order unchanged. "
+                "$0.2252 of a $1.5000 ceiling, three subruns, every teardown "
+                "provider-confirmed."),
+            "_this_is_what_moved_the_price": (
+                "the hard ceiling above is 1445.54 min, down from 1826.57, "
+                "because those two component speedups were MEASURED. The beam "
+                "width is unchanged at 6 and was never a cost lever. The "
+                "refresh is an adjustment of pooled per-expansion minutes by "
+                "component savings capped at the phase each belongs to, with "
+                "every input named in "
+                "logs/stages/stage-1/phase_c2/plans/"
+                "phase_c2_measured_optimization.json -- not a new pooled "
+                "observation from a real search, and not a ratio applied to a "
+                "whole cell."),
             "_what_none_of_it_establishes": (
-                "that the formal search fits its budget -- the validation ran "
-                "toy geometry for 20 seconds -- and nothing behavioural "
-                "whatsoever."),
+                "that the formal search fits its budget -- the driver "
+                "validation ran toy geometry for 20 seconds and the "
+                "performance validation measured components over 4 items and "
+                "2 removals -- and nothing behavioural whatsoever. The "
+                "largest known saving in the search, the reference cache's "
+                "36.1% recompute waste, was DIAGNOSED and not fixed, so it is "
+                "deliberately not priced in."),
+            #: A CONSEQUENCE of the adoption, surfaced HERE because this is
+            #: the document the launch review reads. It is not a defect in the
+            #: chain and it does not gate this search; it is a second decision
+            #: the same review now owes, and burying it in an analysis file
+            #: would be the way to get a launch approved without it being seen.
+            "a_second_decision_this_review_also_owes": {
+                "what_moved": ("adopting the state_eval optimization changed "
+                               "src/aadistill/initialization/planning/"
+                               "metrics.py, hash a6dd5d56... -> d193cc90..."),
+                "what_binds_it": (
+                    "logs/stages/stage-1/phase_c2/plans/"
+                    "phase_c2_baseline_completion_protocol.json :: "
+                    "cross_session_comparability_contract.bound."
+                    "evaluator_implementation_sha256, which names four files "
+                    "by content. That one moved; the other three did not."),
+                "effect": (
+                    "bind_identities in the baseline-completion driver now "
+                    "REFUSES, which is the gate working. Six tests in "
+                    "tests/pod/test_phase_c2_baseline_completion.py are red "
+                    "for this single reason and were deliberately left red."),
+                "what_is_NOT_affected": (
+                    "no completed result: both sides of every finished "
+                    "comparison were measured by ONE implementation, so "
+                    "c2_baseline_comparison.json stands. THIS search is not "
+                    "gated on it -- the full-search protocol does not bind the "
+                    "evaluator by hash and rescores all 578 leaves with one "
+                    "implementation. What is refused is a FUTURE B "
+                    "re-measurement joining the old series, which is already "
+                    "barred without a new decision."),
+                "measured_disagreement": (
+                    "3.03e-05 relative, 257x below the smallest decision "
+                    "threshold the search is known to use (0.007782)"),
+                "options_all_of_which_are_the_maintainers": [
+                    "amend the frozen contract to name both hashes, with the "
+                    "measured equivalence as the stated justification",
+                    "re-measure B with the new evaluator (a GPU session, "
+                    "currently barred)",
+                    "revert the optimization, forfeiting the measured 76.0x "
+                    "and the $7.2748 the search ceiling fell by",
+                ],
+                "_nothing_was_done_in_any_of_those_directions": (
+                    "changing a frozen scientific protocol is an explicit "
+                    "stop condition (AGENTS.md P12.1), and loosening the "
+                    "guard to make a suite green is the move the guard exists "
+                    "to prevent."),
+            },
         },
 
         "authorizes": "nothing",

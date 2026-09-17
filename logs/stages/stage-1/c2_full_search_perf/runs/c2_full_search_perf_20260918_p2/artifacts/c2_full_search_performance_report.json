@@ -1,0 +1,31 @@
+{
+ "schema": "aadistill.c2_full_search_performance_check/v1",
+ "run_id": "c2_full_search_perf_20260918_p2",
+ "validation_id": "c2_full_search_performance_v1",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "sync_telemetry_enabled": false,
+ "started_utc": "2026-09-17T17:07:03.219684+00:00",
+ "kernel_tolerance": 1e-06,
+ "accum_tolerance": 1e-09,
+ "stages": {},
+ "device": {
+  "device": "NVIDIA L40S",
+  "capability": "8.9",
+  "bf16_supported": true,
+  "free_gib": 43.97,
+  "total_gib": 44.39,
+  "torch": "2.9.1+cu130",
+  "cuda_runtime": "13.0"
+ },
+ "teacher": {
+  "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "load_seconds": 27.6
+ },
+ "items_used": 67,
+ "failure": "reduction drift 3.032e-05 exceeds the predeclared 1e-06 host-vs-device bound",
+ "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/validation/c2_full_search_performance_check.py\", line 583, in main\n    report[\"stages\"][name] = fn(cfg, teacher, items, report, a.device)\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/validation/c2_full_search_performance_check.py\", line 305, in stage_reduction\n    assert worst < KERNEL_TOLERANCE, (\n           ^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: reduction drift 3.032e-05 exceeds the predeclared 1e-06 host-vs-device bound\n",
+ "verdict": "FAIL",
+ "finished_utc": "2026-09-17T17:07:53.679379+00:00"
+}

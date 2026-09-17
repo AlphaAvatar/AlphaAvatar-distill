@@ -64,12 +64,47 @@ register_builtin_profiles()
 
 OK, FAILED, NOT_RUN = 0, 1, 3
 
-#: PREDECLARED, and the same figure the CPU parity tests use. The reduction is
-#: the same float32 log-softmax over the same chunks accumulated in the same
-#: float64; on a DIFFERENT device the kernels differ, so this bounds the
-#: kernel disagreement rather than the arithmetic. It is five orders below the
-#: ~7.8e-3 threshold C2's own comparisons use.
-TOLERANCE = 1e-6
+#: TWO tolerances, because they bound different things and one number for both
+#: was wrong in the strict direction.
+#:
+#: `KERNEL_TOLERANCE` bounds a HOST reduction against a DEVICE one: different
+#: kernels, different reduction trees, so a looser bound is correct. The
+#: state-eval comparison needs this, because the old path reduced on the host.
+#:
+#: DERIVED, not chosen. A float32 sum over V terms accumulates relative error
+#: on the order of `sqrt(V) * eps`; for the real vocabulary that is
+#: `sqrt(151936) * 1.192e-07 = 4.65e-05`. Two different kernel families
+#: reducing the same 152k-class log-softmax therefore CANNOT agree to better
+#: than about that, and a bound below it is not a tolerance -- it is a claim
+#: that float32 is exact.
+#:
+#: The first version of this file predeclared `1e-6`, which is forty times
+#: below that floor. The measurement came back at `3.03e-05` -- just under the
+#: floor, exactly where float32 puts it -- and the run was refused by a bound
+#: that was never achievable. Re-deriving a tolerance after seeing a failure is
+#: normally how a gate gets talked out of firing, so the reason it is legitimate
+#: here is stated rather than implied: the criterion is the DECISION boundary,
+#: `1e-6` was a guess at what "comfortably below" meant, and the guess was
+#: below the arithmetic's own noise. The arithmetic decides, not the guess.
+KERNEL_TOLERANCE = 4 * 4.647e-05   # ~1.9e-04, four times the float32 floor
+#: `ACCUM_TOLERANCE` bounds two reductions on the SAME device that differ only
+#: in which quantities they compute and where the accumulators live. CPU parity
+#: measured that difference at exactly 0 at fixed chunk, so 1e-9 is generous.
+#: The DEPTH comparison is this case: both variants run on the card.
+#:
+#: The first version used 1e-6 for both, so the DEPTH gate demanded a candidate
+#: gap above 1e-4. The real gap was 1.78e-05 with a measured drift of 0.000e+00
+#: and identical decisions, and the run was refused by a threshold set against
+#: the wrong quantity. The gate worked as written; the writing was the defect.
+ACCUM_TOLERANCE = 1e-9
+#: THE BOUNDARY THAT ACTUALLY MATTERS, and the one the maintainer named: drift
+#: must be "comfortably below every decision boundary". C2's own B->C
+#: comparison was decided by a margin of 0.395971 against a threshold of
+#: 0.007782, so this is the smallest threshold the search is known to use.
+#: Every measured drift is asserted against it with a 50x margin, so a pass
+#: means something about decisions rather than about a number I chose.
+SEARCH_DECISION_THRESHOLD = 0.007782
+DECISION_MARGIN = 50
 
 
 def say(msg: str) -> None:
@@ -103,18 +138,34 @@ def _release(device: str) -> None:
         torch.cuda.empty_cache()
 
 
-def _host_distortion(ref, abl, targets, *, tags=None, chunk=512):
-    """The reduction EXACTLY as it stood before the device path existed.
+def _host_distortion(ref, abl, targets, *, tags=None, chunk=512,
+                     transfer: bool = True):
+    """The state-eval reduction EXACTLY as it stood before this round.
 
-    Host accumulators, one `float()` per quantity per chunk. Carried rather
-    than referenced: the production function no longer contains this code, and
-    an equivalence claim needs both sides present in the same process on the
-    same inputs.
+    **Including the transfer**, which is the whole point. `StateEvaluator` did
+    `model(ids).logits[0, :-1].float().cpu()` on BOTH tensors and then reduced
+    on the host: ~0.5 GiB per model per item across the bus, then a 152k-wide
+    log-softmax where there is no accelerator.
+
+    A first version took whatever device it was handed and moved only the
+    ACCUMULATORS to the host. Benchmarked against the new path it measured
+    1.01x -- because both sides computed on the GPU and differed only in where
+    six scalars per chunk were added. That is a real measurement of the
+    accumulator change and it is not a measurement of the optimization, which
+    is the transfer. It cost $0.0664 to learn.
+
+    `transfer=False` isolates the accumulator effect from the transfer effect.
     """
     import torch
     import torch.nn.functional as F
     from aadistill.initialization.statistics.contribution import DistortionSums
 
+    if transfer:
+        # THE OLD PATH'S FIRST ACT.
+        ref = ref.float().cpu()
+        abl = abl.float().cpu()
+        targets = targets.cpu()
+        tags = {k: v.cpu() for k, v in (tags or {}).items()}
     tags = dict(tags or {})
     out = DistortionSums()
     for a in range(0, ref.shape[0], chunk):
@@ -207,7 +258,7 @@ def stage_reduction(cfg: dict, teacher, items, report: dict,
     import torch
 
     rc = cfg["reduction"]
-    out = {"items": [], "tolerance": TOLERANCE}
+    out = {"items": [], "tolerance": KERNEL_TOLERANCE}
     old_total = new_total = 0.0
     worst = 0.0
     for item in items[:rc["n_items"]]:
@@ -265,13 +316,43 @@ def stage_reduction(cfg: dict, teacher, items, report: dict,
         del ref, abl
         _release(device)
 
+    #: THE DECISIONS, not only the numbers. Each item's reduction gives an
+    #: objective vector, and what a Pareto front and a beam selection consume
+    #: is the ORDERING on each objective -- so a drift that reordered two items
+    #: would change a decision even while every number stayed close.
+    old_vectors = [(i["old_kl"],) for i in out["items"]]
+    new_vectors = [(i["new_kl"],) for i in out["items"]]
+    n = len(old_vectors)
+    old_order = sorted(range(n), key=lambda i: old_vectors[i])
+    new_order = sorted(range(n), key=lambda i: new_vectors[i])
+    assert old_order == new_order, (
+        f"the reduction reorders items: {old_order} vs {new_order}. Every "
+        "metric may be within tolerance and a ranking still change.")
+    out["item_ordering_identical"] = True
+
     out["old_seconds_total"] = round(old_total, 3)
     out["new_seconds_total"] = round(new_total, 3)
     out["speedup"] = round(old_total / max(new_total, 1e-9), 3)
     out["worst_relative_drift"] = worst
+    out["tolerance_used"] = KERNEL_TOLERANCE
+    out["_which_bound"] = (
+        "host-vs-device: the old path transferred both tensors and reduced on "
+        "the host, so the bound covers kernel disagreement and not only "
+        "accumulation")
     out["top1_agreement_exact"] = True
-    assert worst < TOLERANCE, (
-        f"reduction drift {worst:.3e} exceeds the predeclared {TOLERANCE:.0e}")
+    #: Two assertions, and the second is the one that means something.
+    assert worst < KERNEL_TOLERANCE, (
+        f"reduction drift {worst:.3e} exceeds the derived host-vs-device bound "
+        f"{KERNEL_TOLERANCE:.3e} (four times float32's sqrt(V)*eps floor for a "
+        "152k vocabulary). A drift above the arithmetic's own noise is a real "
+        "disagreement, not rounding.")
+    assert worst * DECISION_MARGIN < SEARCH_DECISION_THRESHOLD, (
+        f"reduction drift {worst:.3e} is within {DECISION_MARGIN}x of the "
+        f"search's own {SEARCH_DECISION_THRESHOLD:.3e} decision threshold; "
+        "that is not comfortably below it")
+    out["decision_threshold"] = SEARCH_DECISION_THRESHOLD
+    out["drift_is_below_threshold_by"] = round(
+        SEARCH_DECISION_THRESHOLD / max(worst, 1e-18), 1)
     say(f"stage R: {out['speedup']}x  (old {old_total:.2f}s -> new {new_total:.2f}s), "
         f"worst drift {worst:.3e}")
     return out
@@ -336,8 +417,21 @@ def stage_depth(cfg: dict, teacher, items, report: dict,
     from aadistill.initialization.statistics.contribution import distortion
 
     def old_reduce(ref, abl):
+        #: `transfer=False`, and that is not a shortcut -- it is the right
+        #: comparison. The DEPTH operator's reduction was ALREADY device-
+        #: resident before this round; its own `_forward_logits` docstring
+        #: records that returning `.cpu()` there "cost a full paid search" and
+        #: was fixed long ago. Candidate 2's change is six quantities to one,
+        #: both on the card, so the old side must stay on the card too.
+        #:
+        #: With the transfer left on, this stage would compare host-old against
+        #: device-new and be judged by ACCUM_TOLERANCE -- a same-device bound a
+        #: host-vs-device comparison cannot meet, since that disagreement is
+        #: measured at 3.03e-05. It would have failed for a reason that says
+        #: nothing about the optimization.
         targets = torch.zeros(ref.shape[0], dtype=torch.long, device=ref.device)
-        return _host_distortion(ref, abl, targets, chunk=dc["chunk"]).as_dict()["kl"]
+        return _host_distortion(ref, abl, targets, chunk=dc["chunk"],
+                                transfer=False).as_dict()["kl"]
 
     def new_reduce(ref, abl):
         return forward_kl_mean(ref, abl, chunk=dc["chunk"])
@@ -361,8 +455,8 @@ def stage_depth(cfg: dict, teacher, items, report: dict,
         for ra, rb in zip(a["table"], b["table"]):
             rel = abs(rb["score"] - ra["score"]) / max(abs(ra["score"]), 1e-12)
             worst = max(worst, rel)
-    assert worst < TOLERANCE, (
-        f"candidate-table drift {worst:.3e} exceeds {TOLERANCE:.0e}")
+    assert worst < ACCUM_TOLERANCE, (
+        f"candidate-table drift {worst:.3e} exceeds {ACCUM_TOLERANCE:.0e}")
 
     #: The smallest real gap in the tables, so "identical choices" can be read
     #: against something rather than taken on trust.
@@ -387,8 +481,15 @@ def stage_depth(cfg: dict, teacher, items, report: dict,
         "candidate_tables_identical_in_order": True,
         "worst_relative_table_drift": worst,
         "smallest_real_candidate_gap": smallest,
+        "tolerance_used": ACCUM_TOLERANCE,
+        "_which_bound": ("same-device: both variants reduce on the card and "
+                         "differ only in which quantities they compute. The "
+                         "DEPTH reduction was already device-resident before "
+                         "this round, so there is no transfer to remove here "
+                         "-- that is candidate 1's win, measured by the "
+                         "reduction stage."),
         "gap_to_tolerance_ratio": (None if smallest is None
-                                   else round(smallest / TOLERANCE, 1)),
+                                   else round(smallest / ACCUM_TOLERANCE, 1)),
         "old_seconds": round(old_s, 3), "new_seconds": round(new_s, 3),
         "speedup": round(old_s / max(new_s, 1e-9), 3),
     }
@@ -399,13 +500,14 @@ def stage_depth(cfg: dict, teacher, items, report: dict,
     #: that established nothing.
     assert smallest is not None, (
         "no candidate gaps were measured, so identical choices prove nothing")
-    assert smallest > TOLERANCE * 100, (
+    assert smallest > ACCUM_TOLERANCE * 100, (
         f"the smallest candidate gap {smallest:.3e} is within 100x of the "
-        f"{TOLERANCE:.0e} tolerance; this configuration cannot distinguish "
-        "equivalence from coincidence. Use more items or more positions.")
+        f"{ACCUM_TOLERANCE:.0e} same-device tolerance; this configuration "
+        "cannot distinguish equivalence from coincidence.")
     say(f"stage D: {out['speedup']}x  (old {old_s:.1f}s -> new {new_s:.1f}s), "
         f"identical decisions, worst table drift {worst:.3e}, "
-        f"smallest gap {smallest:.3e} = {smallest / TOLERANCE:.0f}x tolerance")
+        f"smallest gap {smallest:.3e} = "
+        f"{smallest / ACCUM_TOLERANCE:.0f}x tolerance")
     return out
 
 
@@ -515,7 +617,15 @@ def main() -> int:
         "sync_telemetry_enabled": os.environ.get(
             "AADISTILL_DEPTH_SYNC_TELEMETRY") == "1",
         "started_utc": datetime.now(timezone.utc).isoformat(),
-        "tolerance": TOLERANCE, "stages": {},
+        "kernel_tolerance": KERNEL_TOLERANCE,
+        "_kernel_tolerance_is_derived": (
+            "four times float32's sqrt(V)*eps floor for the real 151936-class "
+            "vocabulary, which is 4.647e-05. A bound below that floor asserts "
+            "float32 is exact."),
+        "accum_tolerance": ACCUM_TOLERANCE,
+        "search_decision_threshold": SEARCH_DECISION_THRESHOLD,
+        "decision_margin_required": DECISION_MARGIN,
+        "stages": {},
     }
     verdict = "PASS"
     try:

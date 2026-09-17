@@ -1,0 +1,113 @@
+{
+ "schema": "aadistill.autoinit.c2_measured_optimization/v1",
+ "_contract": "The measured effect of the 2026-09-18 performance round on each cost cell. An ADJUSTMENT of pooled per-expansion minutes by measured component savings, not a new pooled observation. Every input is named and the arithmetic is one formula. AUTHORIZES NOTHING and FUNDS NOTHING.",
+ "measured": {
+  "reduction": {
+   "run": "c2_full_search_perf_20260918_p3",
+   "old_ms_per_position": 1.8699,
+   "new_ms_per_position": 0.0246,
+   "speedup": 76.01,
+   "worst_relative_drift": 3.0319411605575326e-05,
+   "_what_the_old_side_was": "the `.float().cpu()` transfer of both [T, ~152k] tensors plus the host reduction, which is what StateEvaluator did",
+   "_equivalence": "drift 3.03e-05, which is 257x below the search's own 0.007782 decision threshold and just under float32's sqrt(V)*eps floor of 4.65e-05 for a 151936-class vocabulary. Item ordering identical; top-1 agreement exact."
+  },
+  "depth_reduction": {
+   "run": "c2_full_search_perf_20260918_p1",
+   "old_seconds": 10.0,
+   "new_seconds": 9.1,
+   "speedup": 1.099,
+   "_both_sides_device_resident": "which is the correct comparison for this candidate: the DEPTH reduction was already device-resident before this round, so there is no transfer to remove -- that is candidate 1's win and it is measured separately",
+   "_equivalence": "removal order [17, 18] from both variants, 71 candidate evaluations each, identical per-round tables"
+  },
+  "state_eval_suite": {
+   "artifact": "artifacts/stage1/state_eval_v1/items.jsonl",
+   "prediction_positions": 74022,
+   "_not_the_calibration_mixture": "an earlier draft of this arithmetic used the calibration mixture's 59,763 positions, a different artifact, 24% low"
+  },
+  "state_eval_saving_minutes": 2.2765
+ },
+ "cells": {
+  "attention.activation_importance_v1": {
+   "observed_total_minutes": 3.591,
+   "observed_state_evaluation_minutes": 2.726,
+   "observed_operator_minutes": 0.7193,
+   "state_eval_saving_applied_minutes": 2.2765,
+   "state_eval_saving_was_capped": false,
+   "operator_saving_applied_minutes": 0.0,
+   "refreshed_total_minutes": 1.3144,
+   "reduction_factor": 2.732,
+   "source": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/telemetry.jsonl"
+  },
+  "attention.weight_proxy_v0": {
+   "observed_total_minutes": 3.8601,
+   "observed_state_evaluation_minutes": 2.5865,
+   "observed_operator_minutes": 0.6239,
+   "state_eval_saving_applied_minutes": 2.2765,
+   "state_eval_saving_was_capped": false,
+   "operator_saving_applied_minutes": 0.0,
+   "refreshed_total_minutes": 1.5835,
+   "reduction_factor": 2.438,
+   "source": "logs/stages/stage-1/phase_b/runs/attempt5/search_telemetry.jsonl"
+  },
+  "composite.stage1_sandwich_v0": {
+   "observed_total_minutes": 3.8794,
+   "observed_state_evaluation_minutes": 3.0912,
+   "observed_operator_minutes": 0.7648,
+   "state_eval_saving_applied_minutes": 2.2765,
+   "state_eval_saving_was_capped": false,
+   "operator_saving_applied_minutes": 0.0,
+   "refreshed_total_minutes": 1.6029,
+   "reduction_factor": 2.42,
+   "source": "logs/stages/stage-1/phase_b/runs/attempt5/search_telemetry.jsonl"
+  },
+  "depth.causal_kl_greedy_v1": {
+   "observed_total_minutes": 36.07,
+   "observed_state_evaluation_minutes": 2.6174,
+   "observed_operator_minutes": 33.3383,
+   "state_eval_saving_applied_minutes": 2.2765,
+   "state_eval_saving_was_capped": false,
+   "operator_saving_applied_minutes": 3.0004,
+   "refreshed_total_minutes": 30.793,
+   "reduction_factor": 1.171,
+   "source": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/telemetry.jsonl"
+  },
+  "depth.positional_v0": {
+   "observed_total_minutes": 3.7292,
+   "observed_state_evaluation_minutes": 2.9595,
+   "observed_operator_minutes": 0.644,
+   "state_eval_saving_applied_minutes": 2.2765,
+   "state_eval_saving_was_capped": false,
+   "operator_saving_applied_minutes": 0.0,
+   "refreshed_total_minutes": 1.4527,
+   "reduction_factor": 2.567,
+   "source": "logs/stages/stage-1/phase_b/runs/attempt5/search_telemetry.jsonl"
+  },
+  "ffn.activation_importance_v0": {
+   "observed_total_minutes": 3.0038,
+   "observed_state_evaluation_minutes": 2.3208,
+   "observed_operator_minutes": 0.6148,
+   "state_eval_saving_applied_minutes": 2.2765,
+   "state_eval_saving_was_capped": false,
+   "operator_saving_applied_minutes": 0.0,
+   "refreshed_total_minutes": 0.7273,
+   "reduction_factor": 4.13,
+   "source": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/telemetry.jsonl"
+  },
+  "width.global_pca_v0": {
+   "observed_total_minutes": 3.9313,
+   "observed_state_evaluation_minutes": 2.9188,
+   "observed_operator_minutes": 0.945,
+   "state_eval_saving_applied_minutes": 2.2765,
+   "state_eval_saving_was_capped": false,
+   "operator_saving_applied_minutes": 0.0,
+   "refreshed_total_minutes": 1.6548,
+   "reduction_factor": 2.376,
+   "source": "logs/stages/stage-1/phase_b/runs/attempt5/search_telemetry.jsonl"
+  }
+ },
+ "deliberately_not_claimed": {
+  "reference_cache_recomputes": "182,780 reference recomputes against 323,180 ablated forwards across the nineteen measured DEPTH expansions -- 36.1% of every forward pass, and the largest known saving in the search. This round INSTRUMENTED it and changed nothing: the L40S measurement found 0.013 GiB reclaimable by `empty_cache()` on a card holding only the teacher, with the 67-item cache admitting in full, so allocator hoarding does not explain the historical 2.6-GiB-free observations. No behaviour changed, so no saving is claimed.",
+  "candidate_3": "not adopted. Caching the normalized reference needs 33.83 GiB against a 16.91 GiB binding constraint."
+ },
+ "authorizes": "nothing"
+}

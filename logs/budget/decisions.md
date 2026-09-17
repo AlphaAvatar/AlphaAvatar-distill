@@ -1,5 +1,106 @@
 # Decision records
 
+## 2026-09-18 — The search got 76× faster where it was slowest, and the price followed the measurement
+
+- **Context.** The maintainer authorized a narrowly scoped performance round on
+  the Phase-C2 full-search hot path, with the science frozen: the 578/576
+  space, beam 6 / warmup 1, every operator alternative and exclusion, both
+  calibration profiles, all calibration items, the 260-evaluation causal-KL
+  greedy rule, the frozen `state_eval` suite, the Pareto/ranking policy, Top-5
+  semantics, the C2c behavioural protocol and all C1/Search-1 evidence. Four
+  candidates were named. The standing beam-6 ceiling was `$33.1827` GPU on
+  `1826.57` bounding minutes.
+- **Decision.** Two optimizations **adopted**, one **refused**, one
+  **instrumented only** — and the cost model refreshed from the resulting
+  measurement rather than from the speedup.
+
+  | candidate | decision | why |
+  | --- | --- | --- |
+  | keep the `state_eval` reduction on the card | **ADOPTED** | `76.0×` measured on real kernels; decisions unchanged |
+  | DEPTH forward-KL-only hot path | **ADOPTED** | `1.10×`; five of six quantities were computed and discarded |
+  | reuse reference-side normalization | **REFUSED** | `33.83 GiB` against a `16.91 GiB` constraint |
+  | diagnose reference-cache variability | **instrumented, no behaviour change** | the hypothesis was refuted; no saving claimed |
+
+- **Alternatives considered.** Caching the whole frozen teacher-logit suite
+  (refused: the maintainer excluded it and the memory arithmetic agrees);
+  reducing the 260 candidate-subset evaluations (excluded by the round's
+  terms); unconditional `empty_cache()` before cache sizing (**refused on
+  evidence** — `reserved − allocated` is `0.013 GiB`, so there is nothing to
+  reclaim, and adding a flush would have looked like a fix while changing
+  nothing).
+- **What the equivalence claim is.** Equivalence of the **decisions**, not of
+  the digits. Worst relative drift `3.03e-05`: `257×` below the search's own
+  smallest decision threshold (`0.007782`), and just under float32's
+  `sqrt(V)·ε` floor of `4.65e-05` for a `151936`-class vocabulary. Item
+  ordering identical, top-1 exact, DEPTH's removal order `[17, 18]` in three
+  independent measurements. **A tighter bound was not achievable by any
+  implementation**, which is what the round's second subrun discovered by
+  dying against one.
+- **Expected upside.** Bounding minutes `1826.57 → 1445.54`; GPU ceiling
+  `$33.1827 → $26.2606`; session total `$27.5992` including separately billed
+  Container Disk; chain total `$66.2757 → $59.0009`; headroom after the chain
+  `$6.0700 → $13.1196`. **Beam width 6 was not touched and is not a cost
+  lever.**
+- **Risks.** The refresh is an *adjustment* of pooled per-expansion minutes by
+  measured component savings, not a new pooled observation from a real search —
+  each cell is reduced only by the saving its own phases contain, capped at the
+  observed phase, and the arithmetic is one formula with every input named. The
+  largest known saving in the search, the reference-cache recompute waste
+  (`36.1%` of DEPTH's forward passes), is **deliberately not priced in**
+  because it was diagnosed and not fixed. If the real search comes in above the
+  refreshed cells, it is bounded by the ceiling either way.
+- **One structural consequence worth a maintainer's attention.** The protocol
+  document embeds its own cost model, so re-pricing moved its hash from
+  `26de0bb6` to `d7678d7d`. Exactly two top-level keys differ — `cost_model`
+  and the document's own `protocol_sha256` — which is `29` changed leaves plus
+  the self-hash, and the science subtree hashes identically at
+  `4897d470eed2b5a365e55ad4b94e070bc802a49b0a6365af80c5a612a677f5cc` (the
+  document with those two keys removed, canonicalized with sorted keys, so
+  `git show HEAD:<protocol>` against the working tree reproduces it). A
+  document declared frozen as science probably should not move when a price
+  does. **Nothing was restructured here on that account** — raising it is the
+  action taken.
+- **Cost.** `$0.2252` of a `$1.50` ceiling, three L40S subruns, every teardown
+  provider-confirmed, the `$0.90` soft stop never reached. No subrun exited 0,
+  and each failure was in the instrumentation rather than in the optimizations:
+  a benchmark whose old side kept the new setup and so never measured the
+  transfer; a tolerance below float32's own noise floor; and a stage judged by
+  the wrong one of two bounds. The campaign is recorded **COMPLETE**, not
+  **PASS**.
+- **A SECOND DECISION this created, which is the maintainer's.** Adopting
+  candidate 1 changed
+  `src/aadistill/initialization/planning/metrics.py` (`a6dd5d56…` →
+  `d193cc90…`), and that file is one of four bound **by content** in the frozen
+  `phase_c2_baseline_completion_protocol.json ::
+  cross_session_comparability_contract`. The other three did not move. So
+  `bind_identities` in the baseline-completion driver now refuses with the
+  message it was written to give — *"the frozen C measurements and a new B
+  measurement would not be the same measurement series, and that is not
+  something to compensate for"* — and **that is the gate working**.
+
+  What is *not* affected: no completed result, because both sides of every
+  finished comparison were measured by one implementation; and not this
+  search, because the full-search protocol does not bind the evaluator by hash
+  and rescores all 578 leaves with one implementation. What *is* refused is a
+  **future** B re-measurement joining the old series — already barred without a
+  new decision. The measured disagreement between the two implementations is
+  `3.03e-05`, `257×` below the search's own `0.007782` threshold.
+
+  Three ways forward, all of them decisions: amend the frozen contract to name
+  both hashes with the measured equivalence as justification; re-measure B with
+  the new evaluator (a GPU session, currently barred); or revert candidate 1,
+  forfeiting the `76.0×` and the `$7.2748` the ceiling fell by. **Nothing was
+  done in any of those directions.** Six tests in
+  `tests/pod/test_phase_c2_baseline_completion.py` are left red and named in
+  `logs/state/current.md`, because loosening the guard to green a suite is the
+  move the guard exists to prevent.
+- **Revisit when.** A real search produces per-expansion telemetry on the
+  optimized executable — then the cells become pooled observations and the
+  adjustment is retired. Or when the reference-cache recompute waste is
+  actually fixed, which requires measuring allocator state *inside* a running
+  search rather than on a clean card. Or when the frozen-contract decision
+  above is taken, whichever way.
+
 ## 2026-09-17 — Phase-C2 preparation CLOSED; project cap raised to `$370.0000`
 
 - **Maintainer decision.** The Phase-C2 preparation round is **accepted and

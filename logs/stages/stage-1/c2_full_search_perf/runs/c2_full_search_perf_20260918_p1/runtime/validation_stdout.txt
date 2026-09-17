@@ -1,0 +1,14 @@
+[17:01:12] CUDA NVIDIA L40S cc8.9 bf16=True free=43.97GiB torch=2.9.1+cu130 cuda=13.0
+[17:01:14] loading Qwen/Qwen3-4B-Thinking-2507@768f209d9ea8 in bf16
+[17:01:37] teacher resident in 22.3s
+[17:01:37] calib.domain_balanced@v1: 67 items available, using 67
+[17:01:37] --- stage reduction ---
+[17:01:37] stage R: 1.01x  (old 0.05s -> new 0.05s), worst drift 0.000e+00
+[17:01:37] --- stage memory ---
+[17:01:37]   before: driver free 36.32 GiB, allocated 7.553, reserved 7.566, reclaimable 0.013
+[17:01:37]   after empty_cache: driver free 36.32 GiB; admission 67 -> 67 of 67
+[17:01:37] --- stage depth ---
+[17:01:48]   old (full reduction): 71 candidate evaluations in 10.0s -> removed [17, 18]
+[17:01:57]   new (forward-KL only): 71 candidate evaluations in 9.1s -> removed [17, 18]
+[17:01:57] FAIL: the smallest candidate gap 1.778e-05 is within 100x of the 1e-06 tolerance; this configuration cannot distinguish equivalence from coincidence. Use more items or more positions.
+[17:01:57] verdict: FAIL

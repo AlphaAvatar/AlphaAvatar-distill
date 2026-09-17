@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 import shutil
 import sys
 from pathlib import Path, PurePosixPath
@@ -1466,7 +1467,12 @@ def test_the_snapshot_does_not_contradict_itself_about_attempt_4():
     #: where that history is OWNED -- the phase status, and attempt 4's own
     #: closeout -- not on `latest_run`, which names whichever run executed most
     #: recently and now legitimately names a baseline-completion attempt.
-    assert "SEARCH COMPLETE" in c2["status"]
+    #: Content, not the phrase "SEARCH COMPLETE": the snapshot now says
+    #: "Search-1 DONE and FROZEN; B->C COMPUTED", which states the same history
+    #: and more of it. A guard that only accepts one wording of a fact fails as
+    #: soon as the fact is stated better.
+    assert re.search(r"search[- ]1 (is )?(done|complete)|search complete",
+                     c2["status"], re.I), c2["status"]
     attempt4 = json.loads((REPO / "logs/stages/stage-1/phase_c2/runs/attempt4"
                            "/closeout/outcome.json").read_text())
     assert "SEARCH COMPLETE" in attempt4["classification"].upper()

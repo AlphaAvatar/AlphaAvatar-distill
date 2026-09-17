@@ -304,6 +304,57 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "reachable only from a pod whose collector failed is a branch no "
             "`$0` check can execute; as a function it is four unit tests.",
      }),
+    ("7b376424f45924b8745184b4bc9bf98fe5463d4b",
+     "where the search spends its time, measured on an L40S",
+     {
+        "src/aadistill/initialization/statistics/contribution.py":
+            "`_reduce_on_device(device)`, float64 accumulators that stay on "
+            "the accelerator through `distortion()`'s chunk loop with one "
+            "`.tolist()` at the end, and a new `forward_kl_mean(ref, abl, *, "
+            "chunk=512)`. THIS IS A DECLARED SEMANTIC CHANGE to the search's "
+            "numerics and NOT an optimization that leaves the arithmetic "
+            "alone: the summation order is the same, but the chunk partials "
+            "are now added in device float64 rather than host float64, so the "
+            "six quantities move. Calling it a refactor would be the misreport "
+            "this file exists to catch. It is admissible because the movement "
+            "was MEASURED rather than argued -- worst relative drift "
+            "3.03e-05 on the real pinned teacher, 257x below the smallest "
+            "decision threshold the search is known to use (0.007782) and just "
+            "under float32's own `sqrt(V)*eps` floor of 4.65e-05 for a "
+            "151936-class vocabulary, with item ordering identical and top-1"
+            " agreement exact. Equivalence of the DECISIONS is the claim; "
+            "equality of the digits is not, and no bound below that floor "
+            "could have been met by any implementation. The saving is the "
+            "`.float().cpu()` transfer of two `[T, ~152k]` tensors per item: "
+            "76.0x on the reduction, from "
+            "`logs/stages/stage-1/phase_c2/validations/full-search-performance/"
+            "v1/closeout.json`.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "`StateEvaluator` no longer calls `.float().cpu()` on the two "
+            "logit tensors; targets and tag masks are moved to the reference's "
+            "device instead. THIS IS A DECLARED SEMANTIC CHANGE, and it is "
+            "the one that realises the saving above -- the reduction could "
+            "stay on the card and still be handed host tensors by its only "
+            "production caller, which is exactly what subrun p1 accidentally "
+            "measured and reported as 1.01x.",
+        "src/aadistill/initialization/operators/depth.py":
+            "`memory_snapshot(device)` -- driver free/total, allocator "
+            "allocated/reserved, and the two derived quantities "
+            "`reclaimable_by_empty_cache_gib` and `unaccounted_gib` -- taken "
+            "before the reference cache's availability probe and carried into "
+            "`decision()[\"memory_at_admission\"]`; and the candidate scoring "
+            "loop now calls `forward_kl_mean` instead of building targets and "
+            "reducing all six quantities. THIS IS A DECLARED SEMANTIC CHANGE "
+            "to what DEPTH computes per candidate: five of the six quantities "
+            "were computed and discarded, and the greedy rule reads forward KL "
+            "only. Measured at 1.10x with both sides device-resident, removal "
+            "order `[17, 18]` identical in three independent measurements. The "
+            "snapshot is instrumentation and changes no behaviour -- it was "
+            "added to test whether allocator hoarding explains the historical "
+            "2.6-GiB-free observations, and it REFUTED that: 0.013 GiB "
+            "reclaimable on a card holding only the teacher, cache admitting "
+            "67/67. Nothing was flushed and no saving is claimed from it.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.
@@ -460,6 +511,12 @@ NAMED_SEMANTIC_CHANGES = (
     #: compositions, and it went undeclared for exactly that reason.
     ("src/aadistill/runtime/run_layout.py",
      "8a6bbcaafa761ffca0b2697c5f68182798a2709d"),
+    #: The one most easily called a performance refactor: its diff is a device
+    #: argument and an accumulator that stays where it was computed, and the
+    #: numbers it produces MOVE. A round that described this as leaving the
+    #: arithmetic alone would be reporting a numerics change as a no-op.
+    ("src/aadistill/initialization/statistics/contribution.py",
+     "7b376424f45924b8745184b4bc9bf98fe5463d4b"),
 )
 
 

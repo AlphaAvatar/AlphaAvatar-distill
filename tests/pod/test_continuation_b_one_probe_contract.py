@@ -475,8 +475,20 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     for axis in ("treatment", "endpoint"):
         assert axis in measured.lower(), axis
     assert re.search(r"\bno decision\b", measured, re.I), measured
-    assert re.search(r"attempt 9 is still NO DECISION", measured, re.I), (
-        f"attempt 9's pre-treatment abort has stopped being stated: {measured}")
+    #: THE FIFTH break, and the previous fix did not actually land: the comment
+    #: above says this stops matching a phrase, and the line below it matched
+    #: the phrase "attempt 9 is still NO DECISION" verbatim. Attempt 17 then
+    #: aborted pre-treatment too, the snapshot said so in one sentence about
+    #: both, and the guard failed for a sentence that states MORE of the fact
+    #: it protects. So it is content now: some sentence must put attempt 9 in
+    #: the NO-DECISION set, in whatever words.
+    no_decision = [s for s in re.split(r"(?<=[.;])\s+", measured)
+                   if re.search(r"no decision", s, re.I)]
+    assert no_decision, f"nothing is stated as NO DECISION: {measured}"
+    assert any(re.search(r"\battempts?\b[^.;]*\b9\b", s, re.I)
+               for s in no_decision), (
+        "attempt 9's pre-treatment abort has stopped being stated as NO "
+        f"DECISION: {measured}")
     # A grant WAS issued and consumed, so "never authorized" would be false.
     #
     # Nor is "nothing is authorized" the invariant: on 2026-09-11 a Phase-C1
@@ -487,10 +499,31 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
     # whichever direction is true. What this module owns is narrower and does not
     # move: **C1 execution has produced no science**, whatever is authorized.
     c1 = state["phase_c"]["c1"]
-    assert re.search(r"not currently authorized|no current grant|"
-                     r"treatment and endpoint unmeasured|"
-                     r"frozen stage-i verdict", c1["status"], re.I), (
-        c1["status"])
+    #: This required one of four PRE-VERDICT wordings — "not currently
+    #: authorized", "no current grant", "treatment and endpoint unmeasured",
+    #: "frozen stage-i verdict" — because the invariant stated above was that
+    #: C1 execution had produced no science. Attempt 18 then produced some, and
+    #: the invariant expired by experiment rather than by edit: C1 is CLOSED by
+    #: a GO verdict. A guard whose accept-list describes only states the
+    #: experiment has left will fail forever or be made green by regressing the
+    #: snapshot, so it now accepts EITHER shape and, for the terminal one,
+    #: requires the verdict to be attributed rather than asserted.
+    status = c1["status"]
+    pre_verdict = re.search(
+        r"not currently authorized|no current grant|"
+        r"treatment and endpoint unmeasured|frozen stage-i verdict",
+        status, re.I)
+    terminal = re.search(r"\b(closed|complete)\b", status, re.I) and re.search(
+        r"\bverdict\b", status, re.I)
+    assert pre_verdict or terminal, (
+        "C1's status states neither a pre-verdict position nor a terminal "
+        f"verdict: {status!r}")
+    if terminal and not pre_verdict:
+        #: The verdict itself lives in the decision record, and `measured`
+        #: above is required to cite it. So a terminal status may be short, but
+        #: it may not be the only place the verdict exists.
+        assert "c1_decision.json" in measured, (
+            "C1 is claimed closed by a verdict and no record is cited")
     if state["authorized"]["any"]:
         #: `formal_sessions_used` since 2026-09-11, when the attempt CAP was
         #: withdrawn and the counted thing was renamed to what it always was --
@@ -517,9 +550,26 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
             assert record.is_file(), record
             assert json.loads(record.read_text())["verdict"] in (
                 "GO", "NO-GO", "INCONCLUSIVE")
-    assert "NOT STARTED" in state["phase_c"]["c2"]["status"]
-    # Nothing that needs a GPU may be claimed as built.
-    assert "pre-ATTENTION parent" in state["phase_c"]["c1"]["not_built"]
+    #: The same expiry, one phase later. This required C2 to say "NOT STARTED",
+    #: which was true until C2's Search-1 ran and computed the B->C comparison.
+    #: What this module owns is that no LATER phase is live while it is about
+    #: Phase B, so the assertion is that C2 is not started OR not authorized to
+    #: start — never that it is running.
+    c2_status = state["phase_c"]["c2"]["status"]
+    assert re.search(r"NOT STARTED|NOT AUTHORIZED|NOT FUNDED", c2_status), (
+        f"C2's status claims neither un-started nor unauthorized: {c2_status!r}")
+    assert not re.search(r"\b(RUNNING|IN PROGRESS|LAUNCHED)\b", c2_status, re.I), (
+        f"C2 is described as live in the snapshot: {c2_status!r}")
+    #: Nothing that needs a GPU may be claimed as built. This read a
+    #: `not_built` key naming the "pre-ATTENTION parent"; the snapshot has since
+    #: been condensed and carries the same fact on `incumbent`, which states
+    #: that the winning checkpoint is NOT recovered. The fact is what matters,
+    #: so it is looked for across C1's fields instead of in one key that a
+    #: later trim can rename.
+    c1_text = json.dumps(state["phase_c"]["c1"])
+    assert re.search(r"not (built|recovered)", c1_text, re.I), (
+        "C1 no longer states that any GPU artifact is unbuilt/unrecovered: "
+        f"{c1_text}")
 
     # No superseded scope or ceiling described as current.
     assert "at most 2 conditional sc" not in blob
@@ -632,13 +682,39 @@ def current_region(text: str) -> str:
     the whole file would make every honest historical record look like a stale
     current claim, and the fix for that would be deleting history.
 
-    So the boundary is the first dated block, `^> **`.
+    So the boundary is the first **dated** block: a `^> **` blockquote that
+    actually carries a date, or the `## History` heading, whichever comes
+    first.
+
+    It used to be any `^> **` line at all, which is not the same thing. STATE.md
+    also uses that quote style for undated ASIDES -- "it was rebuilt once, for
+    a real bug" -- and the first of those sits at line 102 of a ~660-line file,
+    so the region being checked was the top sixth of the document and the
+    budget table, the blocker and the whole current picture were outside it.
+    The guard then failed for the one reason it must never fail for: it could
+    not see the figures it exists to check. A boundary that is too early does
+    not make this test strict, it makes it blind.
     """
     import re
 
+    dated = re.compile(r"\b20\d\d-\d\d-\d\d\b")
     lines = text.splitlines()
-    end = next((i for i, l in enumerate(lines) if re.match(r"^> \*\*", l)),
-               len(lines))
+    end = len(lines)
+    for i, line in enumerate(lines):
+        if line.startswith("## History"):
+            end = i
+            break
+        if re.match(r"^> \*\*", line):
+            #: The date may be anywhere in the block, not only on its first
+            #: line, so the whole contiguous quote is what gets read.
+            block = []
+            for follower in lines[i:]:
+                if not follower.startswith(">"):
+                    break
+                block.append(follower)
+            if dated.search("\n".join(block)):
+                end = i
+                break
     return "\n".join(lines[:end])
 
 

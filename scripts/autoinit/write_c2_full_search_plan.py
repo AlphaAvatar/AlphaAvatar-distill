@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -169,8 +170,22 @@ def search_pricing(space) -> dict[str, Any]:
         row["expected_usd"] = round(
             plan.expected_minutes / 60 * FS.PRICE_PER_HOUR_LAST_QUOTED, 4)
         row["hard_ceiling_minutes"] = round(plan.hard_terminate_minutes, 2)
-        row["hard_ceiling_usd"] = round(
-            plan.hard_terminate_minutes / 60 * FS.PRICE_PER_HOUR_LAST_QUOTED, 4)
+        #: Rounded UP, like every other ceiling in this repository: C1's grant
+        #: found a $15.147403 plan under-authorized at a recorded $15.1474, and
+        #: a ceiling that rounds DOWN under-authorizes the plan it covers.
+        #:
+        #: It does NOT close the $0.0001 gap between this row ($26.2606) and
+        #: the launcher's re-derivation ($26.2607), and that gap is not a
+        #: defect. This row prices the EXACT bound, 1445.535 min. The launcher
+        #: re-prices from the RECORDED `hard_ceiling_minutes`, which is rounded
+        #: to 1445.54 for display — 0.3 s more — so it authorizes a hundredth
+        #: of a cent above the true bound. Both figures are at or above the
+        #: cost, and the launcher's is the larger, which is the direction a
+        #: ceiling is allowed to err in. Recorded here because the two numbers
+        #: appear side by side in the grant proposal and look like a mistake.
+        row["hard_ceiling_usd"] = math.ceil(
+            plan.hard_terminate_minutes / 60
+            * FS.PRICE_PER_HOUR_LAST_QUOTED * 10_000) / 10_000
         try:
             FS.price(space, price_per_hour=FS.PRICE_PER_HOUR_LAST_QUOTED,
                      authorized_usd=remaining, beam_width=width)

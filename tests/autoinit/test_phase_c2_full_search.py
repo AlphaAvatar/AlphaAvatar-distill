@@ -184,10 +184,32 @@ def test_the_depth_cell_that_got_more_expensive_is_carried(registered):
     This is the one cell where pooling makes the ceiling HIGHER, and it is the
     figure the whole price turns on. If pooling ever silently preferred the
     older run, the search would be priced below what it has been seen to cost.
+
+    Measured on the POOLED table, before the measured-optimization refresh.
+    That refresh legitimately takes the cell BELOW Phase B's historical max --
+    the executable is faster than the one Phase B ran, measured rather than
+    argued -- so reading the refreshed cell here would test the refresh and
+    stop testing the pooling. Both are checked, separately.
     """
-    pooled = FS.cost_model(REPO).minutes["depth.causal_kl_greedy_v1"]
-    phase_b_only = SS.MEASURED_MINUTES["depth.causal_kl_greedy_v1"]
-    assert pooled["deeper_max"] > phase_b_only["deeper_max"]
+    impl = "depth.causal_kl_greedy_v1"
+    pooled = FS.derive_cost_table(REPO)["minutes"][impl]
+    phase_b_only = SS.MEASURED_MINUTES[impl]
+    assert pooled["deeper_max"] > phase_b_only["deeper_max"], (
+        "pooling preferred the older run's cheaper observation")
+
+    #: And the drop below it is the refresh, at the factor the record states --
+    #: not an observation quietly going missing from the pool.
+    refreshed = FS.cost_model(REPO).minutes[impl]
+    record = json.loads(
+        (REPO / FS.MEASURED_OPTIMIZATION).read_text())["cells"][impl]
+    factor = record["refreshed_total_minutes"] / record["observed_total_minutes"]
+    assert refreshed["deeper_max"] == pytest.approx(
+        pooled["deeper_max"] * factor, abs=0.01)
+    assert refreshed["deeper_max"] < phase_b_only["deeper_max"], (
+        "the refreshed DEPTH cell is expected to sit below Phase B's "
+        "historical max, because the forward-KL-only path was measured at "
+        f"{1 / factor:.2f}x on a real L40S. If this ever reverses, the "
+        "refresh stopped applying and the price silently rose.")
 
 
 def test_the_attention_proxy_is_retired_and_was_conservative(registered):

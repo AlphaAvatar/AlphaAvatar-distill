@@ -610,6 +610,32 @@ STAGE_1 = [
             "type, so its runs do not sit among Search-1's attempts."),
     ),
     dict(
+        id="c2_full_search_perf",
+        kind="engineering",
+        stage_id="1",
+        status="in progress — engineering evidence, authorizes nothing",
+        title="C2 full-search hot path — old-vs-new performance and equivalence",
+        canonical_config="configs/validation/c2_full_search_performance.json",
+        evidence=[
+            E("logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/authorization.json",
+              "its engineering authorization, filed under the experiment it serves"),
+            E("logs/stages/stage-1/phase_c2/analyses/full_search_performance_round.md",
+              "what the round measured, what it adopted and what it refused"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/c2_full_search_perf",
+        classification_reason=(
+            "Stage 1 for the same reason the CUDA validation is: validation "
+            "material is Stage-1 material rather than stage-neutral, and what "
+            "it validates is a Stage-1 initialization search. It is "
+            "`engineering`, not an experiment -- it trains nothing, measures no "
+            "behaviour and ranks no candidate. Separate from the CUDA "
+            "validation because the subject differs: that one certified the "
+            "driver's device integration, this one benchmarks the reduction "
+            "kernels and their equivalence."),
+    ),
+    dict(
         id="c2_full_search_cuda",
         kind="engineering",
         stage_id="1",

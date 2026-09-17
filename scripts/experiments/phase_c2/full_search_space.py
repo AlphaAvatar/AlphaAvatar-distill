@@ -84,6 +84,12 @@ class FullSearchSpaceError(RuntimeError):
 
 FAMILY = "qwen3"
 
+#: The measured-optimization record the cost table is refreshed by, when
+#: it exists. Absent, the pooled pre-optimization figures stand -- which
+#: is the safe direction: they over-state rather than under-state.
+MEASURED_OPTIMIZATION = ("logs/stages/stage-1/phase_c2/plans/"
+                        "phase_c2_measured_optimization.json")
+
 # --- the two committed telemetry sources ------------------------------------
 
 #: Every search this project has run on this image and card. The cost table is
@@ -186,11 +192,50 @@ def cost_model(repo_root: str | Path = REPO_ROOT) -> CostModel:
             continue
         for statistic in ("max", "mean"):
             row.setdefault(f"deeper_{statistic}", row[f"root_{statistic}"])
-    return CostModel(
-        minutes=table, proxies={},
-        source=("derived at import from " + ", ".join(derived["sources"])
-                + "; per-cell max across both. No proxied rows: every "
-                  "implementation in this space has run inside a real search."))
+    #: THE MEASURED REFRESH, applied if it exists.
+    #:
+    #: The pooled table above is per-expansion minutes from committed searches
+    #: on the PRE-optimization executable. The 2026-09-18 performance round
+    #: made the state-eval reduction device-resident (76.0x measured on a real
+    #: L40S) and gave DEPTH a forward-KL-only path (1.10x), so those cells now
+    #: over-state what an expansion costs.
+    #:
+    #: Applied as a named ADJUSTMENT rather than folded in: the record states
+    #: every input, the arithmetic is one formula, and the pre-refresh figures
+    #: stay visible in it. A ratio applied to a whole cell would have been
+    #: wrong -- the saving is a component of one phase, capped at that phase.
+    refresh_path = Path(repo_root) / MEASURED_OPTIMIZATION
+    refreshed: dict[str, float] = {}
+    if refresh_path.is_file():
+        record = json.loads(refresh_path.read_text())
+        for impl, cell in record["cells"].items():
+            if impl not in table:
+                continue
+            was = cell["observed_total_minutes"]
+            now = cell["refreshed_total_minutes"]
+            if was <= 0:
+                continue
+            factor = now / was
+            #: Scale BOTH statistics by the same measured factor. The max is
+            #: what the ceiling rests on and the mean is what the expected path
+            #: uses, and the optimization applies to both.
+            for statistic in ("max", "mean"):
+                for where in ("root", "deeper"):
+                    key = f"{where}_{statistic}"
+                    if key in table[impl]:
+                        table[impl][key] = round(table[impl][key] * factor, 4)
+            refreshed[impl] = round(factor, 4)
+
+    source = ("derived at import from " + ", ".join(derived["sources"])
+              + "; per-cell max across both. No proxied rows: every "
+                "implementation in this space has run inside a real search.")
+    if refreshed:
+        source += (" REFRESHED by " + MEASURED_OPTIMIZATION + ": measured "
+                   "component speedups from the 2026-09-18 performance round, "
+                   "applied per cell as " + json.dumps(refreshed) + ". The "
+                   "reference-cache recompute waste is deliberately NOT "
+                   "claimed -- it was instrumented, not fixed.")
+    return CostModel(minutes=table, proxies={}, source=source)
 
 
 # --- the space ---------------------------------------------------------------

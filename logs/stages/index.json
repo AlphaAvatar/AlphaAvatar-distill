@@ -22,7 +22,7 @@
   "non_experiment_rows": {
    "alias": 1,
    "arm": 1,
-   "engineering": 1,
+   "engineering": 2,
    "engineering-measurement": 1,
    "experiment-spanning": 1,
    "pipeline-activity": 6,
@@ -151,8 +151,8 @@
     "pipeline_activity": 3,
     "experiments": 8,
     "experiments_with_logs": 8,
-    "runs": 60,
-    "canonical_configs": 7,
+    "runs": 63,
+    "canonical_configs": 8,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -163,7 +163,8 @@
     "configs/experiments/phase_c2/full_search_authorization.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
-    "configs/validation/c2_full_search_cuda.json"
+    "configs/validation/c2_full_search_cuda.json",
+    "configs/validation/c2_full_search_performance.json"
    ],
    "canonical_data_manifests": [
     "data/warmup/holdout_v1.manifest.json"
@@ -579,6 +580,29 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "Stage 1 because it is an initialization search: it generates student states and ranks them on the frozen cheap state_eval metrics. It trains nothing and measures no behaviour, so it is a Stage-1 experiment whose instrument is not a Stage-3 probe. It is separate from `phase_c2` because Search-1's restricted space is a consumed, frozen measurement and this searches all four operator kinds jointly -- a different question with its own authorization type, so its runs do not sit among Search-1's attempts."
+  },
+  {
+   "experiment_id": "c2_full_search_perf",
+   "stage_id": "1",
+   "classification": "engineering",
+   "status": "in progress \u2014 engineering evidence, authorizes nothing",
+   "title": "C2 full-search hot path \u2014 old-vs-new performance and equivalence",
+   "question": null,
+   "canonical_path": "logs/stages/stage-1/c2_full_search_perf",
+   "canonical_config": "configs/validation/c2_full_search_performance.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/authorization.json",
+     "says": "its engineering authorization, filed under the experiment it serves"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2/analyses/full_search_performance_round.md",
+     "says": "what the round measured, what it adopted and what it refused"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "Stage 1 for the same reason the CUDA validation is: validation material is Stage-1 material rather than stage-neutral, and what it validates is a Stage-1 initialization search. It is `engineering`, not an experiment -- it trains nothing, measures no behaviour and ranks no candidate. Separate from the CUDA validation because the subject differs: that one certified the driver's device integration, this one benchmarks the reduction kernels and their equivalence."
   },
   {
    "experiment_id": "c2_full_search_cuda",

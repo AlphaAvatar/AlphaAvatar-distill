@@ -1,0 +1,168 @@
+{
+ "schema": "aadistill.engineering_validation_closeout/v1",
+ "_contract": "Terminal result of the bounded L40S performance validation of the Phase-C2 full-search hot path. ENGINEERING evidence. It trains nothing, measures no behaviour and ranks no candidate. AUTHORIZES NOTHING, and in particular does not authorize the formal full joint search.",
+ "validation_id": "c2_full_search_performance_v1",
+ "authorization": "logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/authorization.json",
+ "verdict": "COMPLETE \u2014 the two measurements this round needed were taken",
+ "_why_not_PASS": "no subrun exited 0. Three did not, and each failure was in MY instrumentation rather than in the optimizations: a benchmark whose old side kept the new setup, a tolerance below float32's own noise floor, and a stage judged by the wrong one of two bounds. What the round was for -- the reduction speedup, the equivalence, the decision identity and the memory diagnosis -- was measured, and reporting that as a PASS would overstate how it was obtained.",
+ "closed_utc": "2026-09-18T17:16:14Z",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "money": {
+  "ceiling_usd": 1.5,
+  "soft_stop_usd": 0.9,
+  "booked_usd": 0.2252,
+  "_recomputed_from_components": "0.0664 + 0.0501 + 0.1087 = 0.2252",
+  "unspent_usd": 1.2748,
+  "never_reached_the_soft_stop": true,
+  "rate_usd_per_hour": 1.09,
+  "project_cumulative_after_usd": 297.8795,
+  "project_remaining_after_usd": 72.1205
+ },
+ "resources": {
+  "provider_resources_created": 3,
+  "_three_is_not_a_scope_expansion": "attempt count is not budget. Each subrun had a recorded failure, a corrective action, a fresh identity and sufficient remaining ceiling; $0.2252 of $1.5000 bounded all three.",
+  "one_billing_resource_at_any_instant": true,
+  "teardowns_provider_confirmed": 3,
+  "pods_remaining": 0,
+  "gpu": "NVIDIA L40S",
+  "card_was_the_formal_target": true
+ },
+ "subruns": [
+  {
+   "subrun_id": "c2_full_search_perf_20260918_p1",
+   "pod_id": "4gvvwu0sjw83h0",
+   "cost_usd": 0.0664,
+   "elapsed_minutes": 3.657,
+   "verdict": "FAIL",
+   "failed_at": "stage depth, the candidate-gap gate",
+   "cause": "the smallest real candidate gap was 1.778e-05 against a gate requiring 100x of a 1e-06 tolerance",
+   "root_cause": "ONE tolerance served two unrelated comparisons. The state-eval stage compares a HOST reduction against a DEVICE one -- different kernels -- while the DEPTH stage compares two SAME-DEVICE reductions differing only in which quantities they compute, measured at exactly 0 drift on CPU. The gate multiplied the wrong one by 100. The gate worked as written; the writing was the defect.",
+   "repair": "KERNEL_TOLERANCE and ACCUM_TOLERANCE are separate constants, each cited by the assertion that uses it",
+   "what_it_measured_anyway": {
+    "depth_decisions_identical": "removal order [17, 18] from both variants, 71 candidate evaluations each",
+    "depth_speedup": "10.0s -> 9.1s = 1.10x on the scoring loop",
+    "reduction_speedup_INVALID": "1.01x, and the number is not a measurement of the optimization -- see p2's root cause",
+    "memory": {
+     "driver_free_gib": 36.32,
+     "allocator_allocated_gib": 7.553,
+     "allocator_reserved_gib": 7.566,
+     "reclaimable_by_empty_cache_gib": 0.013,
+     "unaccounted_gib": 0.506,
+     "admission": "67 of 67 items cached, 38.998 GB available, mode `cached`",
+     "empty_cache_changes_admission": false,
+     "_finding": "on a card holding only the teacher the 16.91 GiB reference cache FITS and there is nothing for empty_cache() to return. So allocator hoarding does NOT explain the historical 2.6-GiB-free observations, and the remedy candidate 4 was checking for is not the remedy. What holds the card mid-search is live tensors, and the measurement has to be taken there rather than on a clean card."
+    }
+   }
+  },
+  {
+   "subrun_id": "c2_full_search_perf_20260918_p2",
+   "pod_id": "w70qw5g7dzls4u",
+   "cost_usd": 0.0501,
+   "elapsed_minutes": 2.756,
+   "verdict": "FAIL",
+   "failed_at": "stage reduction, the host-vs-device equivalence bound",
+   "cause": "measured drift 3.032e-05 against a predeclared 1e-06",
+   "root_cause": "TWO defects, one in the benchmark and one in the bound. (1) My frozen copy of the old reduction took whatever device it was handed and moved only the ACCUMULATORS to the host; the real old path began with `.float().cpu()` on both [T, 152k] tensors and reduced where there is no accelerator. So p1's 1.01x compared device-compute+host-accumulate against device-compute+device-accumulate and never measured the transfer, which IS the optimization. (2) With the transfer restored the real comparison ran, and 1e-06 turned out to be BELOW float32's own noise floor: a sum over V terms carries ~sqrt(V)*eps relative error, and sqrt(151936)*1.192e-07 = 4.647e-05. The measured 3.032e-05 sits just under that floor, exactly where float32 arithmetic puts it. The bound was never achievable and I should have computed sqrt(V)*eps before predeclaring it.",
+   "repair": "the old path includes the transfer; KERNEL_TOLERANCE is DERIVED as four times the float32 floor (1.859e-04) rather than chosen; and every drift is additionally asserted to be 50x below the search's own 0.007782 decision threshold, which is the criterion that was asked for. Re-deriving a tolerance after a failure is normally how a gate gets talked out of firing, so the reason it is legitimate here is recorded: the criterion is the decision boundary, 1e-06 was a guess at 'comfortably below', and the guess was below the arithmetic's noise.",
+   "_the_measurement_is_the_result": "3.032e-05 is 257x below the search's smallest known decision threshold. That is the number a reviewer should judge, not the bound I first guessed."
+  },
+  {
+   "subrun_id": "c2_full_search_perf_20260918_p3",
+   "pod_id": "mpdglbd21b3tt7",
+   "cost_usd": 0.1087,
+   "elapsed_minutes": 5.984,
+   "verdict": "FAIL (the reduction and memory stages PASSED; depth failed on a bound it should not have been judged by)",
+   "what_passed": {
+    "reduction": {
+     "speedup": 75.996,
+     "old_seconds": 3.8,
+     "new_seconds": 0.05,
+     "worst_relative_drift": 3.0319411605575326e-05,
+     "drift_is_below_the_search_threshold_by": 256.7,
+     "item_ordering_identical": true,
+     "top1_agreement_exact": true,
+     "_this_is_the_headline": "measured on the real pinned 4B teacher in bf16 over four real items of the frozen mixture, 2032 prediction positions. The old side includes the .float().cpu() transfer, because that is what StateEvaluator did."
+    },
+    "memory": {
+     "driver_free_gib": 36.322,
+     "allocator_allocated_gib": 7.553,
+     "allocator_reserved_gib": 7.566,
+     "reclaimable_by_empty_cache_gib": 0.013,
+     "admission": "67 of 67 cached, mode `cached`",
+     "empty_cache_changes_admission": false,
+     "_finding": "candidate 4's hypothesis is REFUTED in this context: on a card holding only the teacher there is nothing for empty_cache() to return and the 16.91 GiB cache admits in full. So the historical 2.6-GiB-free observations are live tensors elsewhere in the search, not allocator hoarding -- and the remedy being checked for is not the remedy. Measuring it on a clean card cannot answer it; the measurement has to be taken mid-search."
+    }
+   },
+   "what_failed": {
+    "stage": "depth",
+    "cause": "candidate-table drift 1.539e-05 exceeded ACCUM_TOLERANCE 1e-09",
+    "root_cause": "the old side inherited transfer=True after p2's repair, so this stage compared a HOST reduction against a DEVICE one and was judged by the SAME-DEVICE bound. The DEPTH reduction was already device-resident before this round -- its own _forward_logits docstring records that returning .cpu() there 'cost a full paid search' -- so candidate 2's comparison must keep both sides on the card.",
+    "repair": "transfer=False in stage_depth's old_reduce, with the reason recorded at the call site",
+    "_it_still_showed_identical_decisions": "removal order [17, 18] from both variants, 71 candidate evaluations each -- the third independent confirmation, after p1 and the CPU parity suite",
+    "_and_candidate_2_does_not_need_a_rerun": "p1 measured it correctly: 10.0s -> 9.1s = 1.10x with BOTH sides device-resident, which p1 was by the same defect that invalidated its reduction number. The defect that made p1's candidate-1 measurement wrong is what made its candidate-2 measurement right."
+   }
+  }
+ ],
+ "what_it_establishes": {
+  "candidate_1_state_eval_reduction": "ADOPTED and MEASURED at 76.0x. Equivalence: drift 3.03e-05, 257x below the search's own 0.007782 threshold and just under float32's 4.65e-05 noise floor for a 151936-class vocabulary; item ordering identical; top-1 exact.",
+  "candidate_2_forward_kl_only": "ADOPTED and MEASURED at 1.10x on the DEPTH scoring loop, both sides device-resident. Identical removal order in three independent measurements.",
+  "candidate_3": "NOT ADOPTED. 33.83 GiB against a 16.91 GiB constraint.",
+  "candidate_4": "INSTRUMENTED, hypothesis REFUTED on a clean card, no behaviour changed and NO saving claimed.",
+  "_what_none_of_it_establishes": "that the formal search fits its budget end to end. The counts were reduced -- 4 items for the reduction, 3 items and 2 removals for DEPTH -- and nothing behavioural was touched."
+ },
+ "cost_model_refreshed": {
+  "record": "logs/stages/stage-1/phase_c2/plans/phase_c2_measured_optimization.json",
+  "state_eval_saving_minutes": 2.2765,
+  "cells": {
+   "attention.activation_importance_v1": {
+    "was": 3.591,
+    "now": 1.3144
+   },
+   "attention.weight_proxy_v0": {
+    "was": 3.8601,
+    "now": 1.5835
+   },
+   "composite.stage1_sandwich_v0": {
+    "was": 3.8794,
+    "now": 1.6029
+   },
+   "depth.causal_kl_greedy_v1": {
+    "was": 36.07,
+    "now": 30.793
+   },
+   "depth.positional_v0": {
+    "was": 3.7292,
+    "now": 1.4527
+   },
+   "ffn.activation_importance_v0": {
+    "was": 3.0038,
+    "now": 0.7273
+   },
+   "width.global_pca_v0": {
+    "was": 3.9313,
+    "now": 1.6548
+   }
+  },
+  "search_ceiling_minutes": "1826.57 -> 1445.54",
+  "search_total_ceiling_usd": "34.8740 -> 27.5992",
+  "chain_total_ceiling_usd": "66.2757 -> 59.0009",
+  "headroom_after_the_chain_usd": "6.0700 -> 13.1196",
+  "_protocol_hash_moved_and_the_science_did_not": "the protocol document embeds the cost model, so re-pricing moved its hash from 26de0bb6 to d7678d7d. All 30 changed fields are under .cost_model, and the science subtree -- space, beam, ranking, Top-5, behavioural protocol, interpretation boundary -- hashes IDENTICALLY at 4897d470 before and after. Worth a maintainer's attention: a document declared closed as frozen science has a cost model inside it, so its 'science plan hash' is sensitive to any re-pricing. The subtree is the document with `cost_model` and its own `protocol_sha256` removed, canonicalized with sorted keys, so `git show HEAD:<protocol>` against the working tree reproduces both figures. Exactly those two top-level keys differ: 29 changed leaves under `.cost_model` plus the self-hash."
+ },
+ "formal_c2_status_unchanged": "the full joint search remains NOT AUTHORIZED. This validation produces engineering evidence for a later launch review.",
+ "a_consequence_of_adoption_needing_a_maintainer_decision": {
+  "what_moved": "src/aadistill/initialization/planning/metrics.py, a6dd5d5641ac1582... -> d193cc906a3f39ed..., by candidate 1",
+  "what_binds_it": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json :: cross_session_comparability_contract.bound.evaluator_implementation_sha256. It names four files by content; this one moved and the other three did not.",
+  "effect": "bind_identities in the baseline-completion driver REFUSES, with the message it was written to give: the frozen C measurements and a new B measurement would not be the same measurement series. Six tests are red for this single reason and were left red.",
+  "not_affected": "no completed result -- both sides of every finished comparison used ONE implementation. The full-search protocol does not bind the evaluator by hash and rescores all 578 leaves with one implementation. What is refused is a FUTURE B re-measurement joining the old series, already barred without a new decision.",
+  "measured_disagreement": "3.03e-05 relative, 257x below the search's own 0.007782 threshold",
+  "options": [
+   "amend the frozen contract to name both hashes with the measured equivalence as justification",
+   "re-measure B with the new evaluator (a GPU session, barred)",
+   "revert candidate 1, forfeiting 76.0x and $7.2748 of ceiling"
+  ],
+  "_what_was_done": "nothing in any of those directions. Changing a frozen scientific protocol is an explicit stop condition, and loosening a guard to green a suite is the move the guard exists to prevent."
+ },
+ "closeout_sha256": "ae807822ba675038e54db9e3f7a69fe042ee07ee4226133274fb1dd177c406e9"
+}

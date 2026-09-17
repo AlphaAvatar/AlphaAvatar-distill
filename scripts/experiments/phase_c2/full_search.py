@@ -620,6 +620,13 @@ def tracked_non_source_inputs() -> tuple[str, ...]:
         out.append(telemetry)
         if result:
             out.append(result)
+    #: And the measured-optimization record the cost table is REFRESHED by.
+    #: Named unconditionally, not "if it exists": `cost_model()` falls back to
+    #: the pooled pre-optimization figures when it is missing, so a pod without
+    #: this file would build a DIFFERENT, more expensive cost model than the one
+    #: the grant priced -- and nothing would say so, because the fallback is by
+    #: design and silent. Declaring it turns that into a bundle failure.
+    out.append(FS.MEASURED_OPTIMIZATION)
     return tuple(dict.fromkeys(out))
 
 
