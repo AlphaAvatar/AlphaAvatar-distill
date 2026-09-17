@@ -1,0 +1,78 @@
+{
+ "schema": "aadistill.engineering_validation_authorization/v1",
+ "_contract": "The approval for ONE real-L40S engineering/PERFORMANCE validation of the Phase-C2 full-search hot path. Recorded here, under this validation's own governance evidence, and deliberately NOT in any formal C2 artifact: it permits an engineering measurement and confers nothing on the scientific search.",
+ "authorization_id": "c2_full_search_performance.2026-09-18",
+ "granted_utc": "2026-09-18T00:00:00Z",
+ "granted_by": "the maintainer decision of 2026-09-18 opening a narrowly scoped performance round, which requires 'ONE bounded real-L40S engineering/performance validation' after CPU/unit parity converges and states that the existing engineering validation cannot automatically certify the modified executable. That decision approved the run and stated no dollar amount, so the amount is derived and bounded here -- P12.1 requires an engineering validation to have a stated budget and scope.",
+ "subject": "old-vs-new benchmark and equivalence check of the device-resident state-eval reduction (candidate 1), the forward-KL-only DEPTH reduction (candidate 2), and the reference-cache memory instrumentation (candidate 4)",
+ "why_the_existing_validation_does_not_cover_it": "that run certified the full-search DRIVER's device integration at execution SHA 7b376424 and passed. These changes edit the CUDA hot path itself -- the reduction kernels and where their accumulators live -- so the executable it certified is not this one. CPU parity is established and exact at fixed chunk, but a host run cannot say whether CUDA's log_softmax agrees with the host's to the same tolerance.",
+ "scope": {
+  "real_model": "the pinned 4B teacher at its frozen revision, in bf16 on the L40S",
+  "real_items": "the frozen calibration mixtures and the frozen state_eval suite",
+  "reduced_counts": "fewer calibration items and fewer removals than a formal expansion. What is under test is numerical and DECISION equivalence plus a wall-clock ratio, and neither needs 67 items to be meaningful -- a full DEPTH expansion is 27-36 min per variant and two variants would not fit any bounded validation. The model, the items and the greedy rule are real; only the counts are reduced, and the reduction is recorded with the result.",
+  "must_establish": [
+   "numerical equivalence on real kernels",
+   "identical DEPTH greedy decisions -- tables, chosen layers, removal order",
+   "identical state-eval metric and Pareto/ranking decisions",
+   "real wall-clock improvement, old vs new, same inputs",
+   "GPU/device/dtype correctness",
+   "memory and reference-cache behaviour, with the allocator/driver split"
+  ],
+  "sync_telemetry": "AADISTILL_DEPTH_SYNC_TELEMETRY=1 is REQUIRED. Without it the forward/reduction split is unattributed -- CUDA is asynchronous and the reduction absorbs the forward's compute -- so the share candidates 2 and 3 act on stays unmeasured, which is the question this run exists to answer."
+ },
+ "resource_contract": {
+  "gpu": "NVIDIA L40S",
+  "_why_the_target_card": "the card the formal search will use and the card both telemetry files were measured on. A speedup measured elsewhere would not refresh this cost model.",
+  "price_basis_usd_per_hour": 1.09,
+  "_price_basis_is_re_quoted": "the launcher queries the live securePrice and refuses above the basis.",
+  "engineering_soft_cap_usd": 0.9,
+  "total_resource_cost_ceiling_usd": 1.5,
+  "teardown_reserve_usd": 0.25,
+  "_teardown_reserve": "WITHIN the $1.50 ceiling, not added to it.",
+  "_minute_budgets_follow_the_rate": "$0.90/rate is the work stop and $1.50/rate the hard limit: 49.5 and 82.6 minutes at $1.09/h.",
+  "hard_constraints": [
+   "total validation spend across EVERY draw <= $1.5000 -- cumulative, reset by nothing",
+   "soft work stop at $0.9000, with the teardown reserve INSIDE the ceiling",
+   "only an NVIDIA L40S meeting the declared capability requirement",
+   "live securePrice <= $1.09/h, re-quoted immediately before each draw",
+   "at most ONE BILLING resource at any instant",
+   "a replacement only after the previous resource is PROVIDER-CONFIRMED gone",
+   "every draw and every cost recorded, including $0 draws",
+   "no scope expansion"
+  ],
+  "_retries_are_bounded_by_money_not_by_count": "attempt count is not budget. An ordinary pre-measurement failure is diagnosed, repaired and rerun autonomously while the SAME ceiling funds a useful attempt plus the teardown reserve. The ceiling is never expanded to fund a retry."
+ },
+ "capability_requirement": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 40,
+  "_why": "the 4B teacher in bf16 is 7.5 GiB and the reduction holds two [T, 152k] float32 tensors plus its chunks. bf16 needs cc >= 8.0, and the dtype is NOT lowered to fit a cheaper device -- it is what the formal search runs."
+ },
+ "authorizes": [
+  "one real-L40S engineering/performance validation at the stated resource, capability and budget contract",
+  "autonomous diagnosis, minimal repair and minimal retest of ORDINARY engineering failures inside this envelope"
+ ],
+ "does_not_authorize": [
+  "the formal Phase-C2 full joint search",
+  "any formal C2 grant, authorization, readiness record or bundle",
+  "the behavioural screening or confirmation session",
+  "any recovery training or probe",
+  "a Search-1 rerun, or remeasurement of B or any frozen C candidate",
+  "C3 or C4 work of any kind",
+  "claiming a lower formal cost from anything other than this run's own measurements",
+  "spending C1's $6.0000 engineering allowance, which belongs to C1's package and does not transfer"
+ ],
+ "budget_context": {
+  "cumulative_spend_before_usd": 297.6543,
+  "authorized_cap_usd": 370.0,
+  "remaining_before_usd": 72.3457,
+  "worst_case_cumulative_after_usd": 299.1543,
+  "worst_case_remaining_after_usd": 70.8457,
+  "c2_chain_total_ceiling_usd": 66.2757,
+  "reserve_after_the_c2_chain_usd": 4.57,
+  "_it_comes_from_the_project_envelope": "not from C1's engineering allowance, which is that package's and does not transfer. The C2 chain still fits after this run's worst case, and if the measurement supports a cheaper beam the chain's own ceiling falls -- which is not assumed here.",
+  "_note": "feasibility arithmetic, not permission to execute the formal search"
+ },
+ "formal_c2_status_unchanged": "the full joint search remains NOT AUTHORIZED. This validation produces engineering evidence for a later launch review and nothing else; its report carries scientific_use: false.",
+ "authorization_sha256": "24f3e7c2836bea76eadda5354f0d59a6c5a088ab2a9a1159004f77bb2f7be385"
+}

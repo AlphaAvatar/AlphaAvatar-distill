@@ -1,0 +1,44 @@
+{
+ "schema": "aadistill.c2_full_search_performance_validation/v1",
+ "_contract": "Inputs for the old-vs-new benchmark and equivalence check of the Phase-C2 full-search hot path. ENGINEERING validation, not science: it answers 'do the optimized reductions produce the same numbers and the same decisions on real kernels, and are they actually faster'. It trains nothing, measures no behaviour and produces no correct_overall. AUTHORIZES NOTHING.",
+ "validation_id": "c2_full_search_performance_v1",
+
+ "profile_id": "calib.domain_balanced@v1",
+ "_why_this_profile": "the mixture the frozen DEPTH path consumes at three of its four steps, and the one whose 67 items give the 16.91 GiB reference-cache estimate the memory stage is about. Real items from a real frozen mixture; only the COUNT is reduced.",
+
+ "capability_requirement": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 40,
+  "_why": "the 4B teacher in bf16 is 7.5 GiB and each reduction holds two [T, ~152k] float32 tensors plus its chunks. bf16 needs cc >= 8.0, and the dtype is NOT lowered to fit a cheaper device -- it is what the formal search runs.",
+  "_owner": "logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/authorization.json declares this floor; it is restated here because the pod-side check enforces it before any work."
+ },
+
+ "reduction": {
+  "enabled": true,
+  "_question": "Does the device-resident state-eval reduction produce the same metrics as the host path it replaces, on real teacher logits and real CUDA kernels, and how much faster is it?",
+  "n_items": 4,
+  "chunk": 512,
+  "_chunk_is_the_production_value": "512, the same value StateEvaluator and the DEPTH operator pass. Chunk size moves the result by ~9e-8 relative, so benchmarking at a different one would compare two things that are not the same reduction.",
+  "seed": 20260918,
+  "perturbation": 0.35,
+  "_why_a_perturbation": "a real candidate is a compressed student. Perturbing the teacher's own logits gives the same reduction shapes and a KL in the range a real state produces, without materializing a second 4B model inside a bounded validation. What is under test is the reduction, not the model that produced its inputs."
+ },
+
+ "depth": {
+  "enabled": true,
+  "_question": "Driven through the real greedy_removal over real calibration items, do the full reduction and the forward-KL-only one choose the same layers in the same order, with identical per-round tables?",
+  "n_items": 3,
+  "n_remove": 2,
+  "chunk": 512,
+  "_counts_are_reduced_and_nothing_else_is": "a formal expansion is 260 candidate evaluations over 67 items and takes 27-36 minutes; this runs TWO variants inside a bounded validation, so it uses 3 items and 2 removals. The model, the items, the reduction and greedy_removal's tie-breaking and candidate order are the real ones. Equivalence of decisions does not need 67 items to be meaningful -- what makes it meaningful is that the candidate gaps are orders above the tolerance, which the check measures and reports."
+ },
+
+ "memory": {
+  "enabled": true,
+  "_question": "Is the reference cache being sized against memory PyTorch is merely hoarding, or against a card held by live tensors? The two have opposite remedies.",
+  "n_items": 67,
+  "_why_all_67": "the admission decision is what is under test and it depends on the whole mixture's 16.91 GiB estimate. Sizing it over a subset would answer a question nobody has.",
+  "_it_measures_and_changes_nothing": "the stage calls empty_cache() and re-asks the admission decision to see whether it improves. The operator's own behaviour is untouched: no empty_cache() has been installed in the hot path, because doing that without this evidence is exactly what the maintainer's instruction forbids."
+ }
+}

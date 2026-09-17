@@ -1,0 +1,11 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "_contract": "Cumulative cost of the Phase-C2 full-search PERFORMANCE validation, across every resource and subrun. A rerun does NOT reset it.",
+ "campaign_id": "c2_full_search_performance",
+ "package_id": "phase_c2.full_search_performance_validation.2026-09-18",
+ "_why_its_own_package_id": "so the deriver does not charge this to C1's $6.0000 GPU engineering allowance, which this validation's own authorization forbids. With no package_id stated, `_attribute` falls back to dates and books it to C1.",
+ "authorization": "logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/authorization.json",
+ "subruns": [],
+ "authorizes": "nothing",
+ "booked_usd": 0.0
+}
