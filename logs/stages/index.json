@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 22,
-  "single_stage": 22,
+  "experiment_total": 23,
+  "single_stage": 23,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -149,10 +149,10 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 3,
-    "experiments": 7,
-    "experiments_with_logs": 7,
+    "experiments": 8,
+    "experiments_with_logs": 8,
     "runs": 60,
-    "canonical_configs": 6,
+    "canonical_configs": 7,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -160,6 +160,7 @@
     "configs/experiments/phase_a/source_sets.json",
     "configs/experiments/phase_c1/authorization.json",
     "configs/experiments/phase_c2/baseline_completion_authorization.json",
+    "configs/experiments/phase_c2/full_search_authorization.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
     "configs/validation/c2_full_search_cuda.json"
@@ -545,6 +546,39 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "The only experiment in the repository that declares its own stage. It also measures with stage-3 confirmation probes, which is what calibrates the subject-vs-instrument rule for the others."
+  },
+  {
+   "experiment_id": "phase_c2_full_search",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "chain built \u2014 NOT AUTHORIZED, no grant approved",
+   "title": "Phase C2 full joint re-search \u2014 all four operator kinds, Top-5",
+   "question": "After ATTENTION was promoted by C1, which JOINT assignment of DEPTH, FFN, RESIDUAL_WIDTH and ATTENTION -- including their order and each step's calibration mixture -- produces the best initialization on the frozen state_eval metrics? Search-1 could not answer it: it fixed three operators at the incumbent's assignment and varied one, so an ATTENTION change that moved the best DEPTH or WIDTH was invisible to it. The answer is a preregistered Top-5 candidate set, not an incumbent: which candidate becomes the incumbent is a BEHAVIOURAL question a separate session asks.",
+   "canonical_path": "logs/stages/stage-1/phase_c2_full_search",
+   "canonical_config": "configs/experiments/phase_c2/full_search_authorization.json",
+   "evidence": [
+    {
+     "path": "configs/experiments/phase_c2/full_search_authorization.json",
+     "says": "declares stage_id \"1\"",
+     "field": "stage_id",
+     "equals": "1"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+     "says": "the frozen protocol: the space, the ranking policy and what a Top-5 may be read as"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_grant_proposal.json",
+     "says": "what a launch review reads. A PROPOSAL: it approves nothing and the issuer refuses it"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/closeout.json",
+     "says": "its engineering validation, filed under the experiment it serves"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "Stage 1 because it is an initialization search: it generates student states and ranks them on the frozen cheap state_eval metrics. It trains nothing and measures no behaviour, so it is a Stage-1 experiment whose instrument is not a Stage-3 probe. It is separate from `phase_c2` because Search-1's restricted space is a consumed, frozen measurement and this searches all four operator kinds jointly -- a different question with its own authorization type, so its runs do not sit among Search-1's attempts."
   },
   {
    "experiment_id": "c2_full_search_cuda",

@@ -1,0 +1,37 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_phase_c2_full_search",
+ "note": "FAILED-path spec. Only the session evidence is required, because an early failure legitimately produces nothing else: a session that stopped in stage A has no journal, no telemetry and no selection, and demanding them would block the collection of what a failed run DOES have. Everything the search may have produced before it stopped is best-effort and collected if present -- a beam that ran for hours and then failed at commit has a journal and a telemetry stream worth keeping, and those are exactly the observations the next session's cost table pools over. Gated on presence, never on session success: `$2.82` of verified checkpoints were once lost to a collector keyed on `terminal == ALL_DONE`. On lifecycle: the vocabulary is `final_required` and `mutable_snapshot` and nothing else -- an invented word makes this document UNLOADABLE and the collector exits 1 before it looks at a single file.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_phase_c2_full_search/c2_full_search_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "stage1_selection",
+   "pattern": "autoinit/phase_c2_full_search/stage1_selection.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "search_journal",
+   "pattern": "autoinit/phase_c2_full_search/states.jsonl",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "search_telemetry",
+   "pattern": "autoinit/phase_c2_full_search/telemetry.jsonl",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "session_logs",
+   "pattern": "audit/autoinit_phase_c2_full_search/session/*",
+   "required": false,
+   "lifecycle": "final_required"
+  }
+ ]
+}

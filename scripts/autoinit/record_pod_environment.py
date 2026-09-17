@@ -93,6 +93,20 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     "phase_c2_baseline_completion": (
         "experiments.phase_c2.baseline_completion_pod_environment",
         "sweep_contract"),
+    #: A FOURTH entry, for the same reason the third is not a mode of the
+    #: second: the full joint re-search binds its own launcher, session id and
+    #: executable closure, and its record declares its own schema, so no other
+    #: C2 record can satisfy its verifier or it theirs.
+    #:
+    #: Without this line the chain is unusable at exactly the step a launch
+    #: review authorizes -- the launch-bound sweep could not be DRIVEN, and the
+    #: launcher's readiness gate would refuse forever with a message about a
+    #: missing record rather than a missing registration. A new experiment's
+    #: dispatch entry is the thing this repository has forgotten before:
+    #: `SESSION_KIND=phase_b` had no branch in the setup script and cost $0.23.
+    "phase_c2_full_search": (
+        "experiments.phase_c2.full_search_pod_environment",
+        "sweep_contract"),
 }
 
 

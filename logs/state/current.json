@@ -75,7 +75,7 @@
  ],
  "next_starting_point": {
   "status": "C1 CLOSED by a GO verdict; C2 preparation CLOSED/ACCEPTED and its CUDA engineering validation PASS/CLOSED. Nothing is authorized. Detail owned by phase_c and cuda_engineering_validation.",
-  "then": "build the formal full-search chain, then return for FINAL FORMAL SEARCH LAUNCH REVIEW. Do NOT launch before it; after Top-5 is committed, STOP -- the behavioural session's candidate identities do not exist until the search succeeds. Re-quote the live securePrice immediately before pricing and re-derive the beam-6 ceiling mechanically if it moved; do NOT narrow beam 6. Derive shipped non-source inputs from code, never a list. No resume machinery.",
+  "then": "the chain is complete; next is the maintainer's FINAL FORMAL SEARCH LAUNCH REVIEW. If it approves, the decision becomes the run's grant.json, then sweep -> readiness -> authorization -> bundle in that order. Do NOT launch before the review. After Top-5 is committed, STOP: the behavioural session's candidate identities do not exist until then. Re-quote the rate before issuance and re-derive the ceiling mechanically if it moved; do NOT narrow beam 6.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -124,7 +124,7 @@
    "priced": "plans/phase_c2_full_search_pricing.json (Search-1's historical basis: plans/phase_c2_pricing.json).",
    "result": "B is DOMINATED on all three ranked objectives by two front-0 candidates and dominates none; NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
    "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat the incumbent B after the frozen 0.86M recovery? The original control is NOT a C2 arm; screening is disjoint in seed AND prompt (c2_screening_v1, 0ad76fc7). Owner: the protocol.",
-   "execution_path": "full-search driver implemented, toy-executed and CONFIRMED ON REAL CUDA; commits a Top-5 and STOPS. The formal chain is owed. Two authorizations, never one.",
+   "execution_path": "full-search driver implemented, toy-executed and CONFIRMED ON REAL CUDA; the formal chain is BUILT and unconsumed, provisioning 350 GiB for a derived 243.4 GiB peak. Commits a Top-5 and STOPS. Two authorizations, never one.",
    "funding": "cap 370.0000 (accounting envelope only); chain ceiling fits with headroom. NOT AUTHORIZED. Figures owned by plans/phase_c2_full_search_pricing.json:funding."
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent: attention.activation_importance_v1 vs a future attention.causal_kl_v1. Cannot start before C2 names an incumbent, and the operator does not exist yet.",
@@ -137,7 +137,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOT AUTHORIZED, and the only pre-launch work left is engineering. C2 preparation is CLOSED/ACCEPTED and the CUDA engineering validation is PASS/CLOSED -- no further GPU validation is required. The cap rose to 370.0000 as an ACCOUNTING ENVELOPE and the chain's ceilings now FIT it: fitting is NOT permission, the headroom is NOT transferable to C3/C4, and the word is NOT AUTHORIZED rather than NOT FUNDED because the money fits. Owed: the formal chain (launcher, grant, launch-bound readiness, one-use authorization, executable closure, bundle) and a fresh live securePrice quote. Money owned by the budget block; validation by cuda_engineering_validation; figures by plans/phase_c2_full_search_pricing.json:funding.",
+ "blocker": "NOT AUTHORIZED. The formal full-search chain is BUILT and UNCONSUMED -- every component exercised, no grant approved, so no authorization issued. The live L40S securePrice re-quoted at $1.09/h, unchanged, so the beam-6 ceiling stands at $33.1827 for the right reason. Both C2 sessions FIT the $370.0000 ACCOUNTING ENVELOPE with $9.2842 over; fitting is NOT permission and it is NOT transferable to C3/C4. Owed: the FINAL FORMAL SEARCH LAUNCH REVIEW, which reads plans/phase_c2_full_search_grant_proposal.json -- a proposal that approves nothing and that the issuer refuses.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
   "historical_probe_reuse": "REFUSED by scoring_contract_matches_live. Detail: logs/state/current.md."

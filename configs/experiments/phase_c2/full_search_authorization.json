@@ -1,0 +1,58 @@
+{
+ "schema": "aadistill.autoinit.c2_full_search_authorization_config/v1",
+ "_contract": "The MECHANISM's instance facts for a full-search authorization: which contract, which field split, where the money block is, and the project cap the arithmetic checks against. AUTHORIZES NOTHING.",
+ "_what_is_deliberately_absent": "the ceiling, the expected cost, the price basis, the beam width, the space size and the plan hash. Every one has a canonical owner -- the full-search pricing record, the frozen ranking schedule, the operator registry and the full-search protocol -- and the issuer DERIVES each from its owner. Restating any here would create a second place to edit and a way for the two to disagree. In particular the BEAM WIDTH is absent on purpose: it comes from SCHEDULE_V1, so a narrower beam cannot become this session's design by an edit to a governance config.",
+ "experiment_id": "phase_c2_full_search",
+ "authorization_id": "autoinit.v1.phase_c2.full_search",
+ "plan_id": "autoinit.v1.phase_c2.full_search",
+ "stage_id": "1",
+ "_stage_id_meaning": "the stage of the overall project this run belongs to -- the same Stage 1 initialization work Search-1 and the baseline completion belong to. It is the run-layout stage, not a driver stage.",
+ "authorized_stages": [
+  "bind_identities",
+  "full_joint_search",
+  "commit_top_k"
+ ],
+ "_authorized_stages_meaning": "the full-search driver's three stages, and there is no fourth. Stage A binds every identity and loads no model; stage B runs one beam over the derived joint space; stage C freezes the Top-5 and the session ENDS. A stage after commit_top_k would be the behavioural session, which is separately authorized and whose candidate identities do not exist until this search succeeds.",
+ "grant_contract": {
+  "contract_id": "phase_c2.full_search_grant/v1",
+  "_field_split": "STATED is what only a person can say. The identities block is the other half: a grant records what the maintainer approved against and the issuer RE-DERIVES every one of them, refusing on any disagreement. An identity the issuer does not know how to derive is itself a refusal, so a grant cannot introduce a binding nobody checks.",
+  "stated_fields": [
+   "granted_by",
+   "covers",
+   "explicitly_not_authorized",
+   "approved_money",
+   "one_use"
+  ],
+  "derived_fields": [
+   "granted_utc",
+   "authorized_session_commit",
+   "harness_source_digest",
+   "harness_source_files"
+  ],
+  "identities_block": "bound_identities_the_issuer_must_reproduce",
+  "money": {
+   "_why": "the generic cap arithmetic in src/aadistill/governance/grant.py takes a FLAT mapping with configurable field names; a grant records the project's position in one nested block. The block is named here and flattened by the assembler, so the arithmetic still happens in exactly one place.",
+   "block": "budget_context_at_approval",
+   "spend_field": "cumulative_spend_usd",
+   "cap_field": "authorized_cap_usd"
+  },
+  "_no_reviewed_commit": "no verified-identity field names a commit. The issuer's HEAD is necessarily LATER than the grant -- the grant is committed, then the readiness sweep runs on that clean tree, then the record is committed, and only then is the authorization issued -- so a grant that predicted the issuance commit would make its own chain unsatisfiable. C1 attempt 15 aborted on exactly that."
+ },
+ "accepted_pricing": {
+  "_why_only_the_cap": "the cap is a PROJECT fact the grant arithmetic checks a ceiling against, and it is not derivable from this session's own pricing. The ceiling, the expected cost and the price basis all come from the full-search pricing record, and the LIVE ceiling is re-derived from the re-quoted rate at issuance.",
+  "cumulative_cap_usd": 370.0,
+  "_cap_provenance": "the maintainer decision of 2026-09-17 raised the project cumulative cap 320.00 -> 370.00 as an ACCOUNTING ENVELOPE. It is not a spend authorization, not permission to launch, and not transferable to C3/C4. Its canonical owner is configs/experiments/phase_c1/authorization.json :: accepted_pricing.cumulative_cap_usd, which derive_budget reads; this copy exists because the grant arithmetic needs the number and a test pins the two together."
+ },
+ "inputs": {
+  "protocol": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+  "pricing": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+  "_non_source_inputs_are_derived": "the telemetry the cost model pools over and the calibration item files the search resolves are NOT listed here. scripts/experiments/phase_c2/full_search.py derives both from the code that reads them -- TELEMETRY_SOURCES and each profile's items_path -- because two paid subruns of the CUDA engineering validation died one per producer when a hand-maintained list named only the producer its author had thought of."
+ },
+ "authorizes": "nothing",
+ "stage_conditions": {
+  "bind_identities": "loads no model and measures nothing. Binds the derived joint-space size and its branching functions, the excluded implementation and why, the two calibration mixtures by qualified id and materialization, the frozen state_eval suite, the policy hash and its epsilon, the teacher revision and the pooled cost table's sources. A disagreement here is a STOP, not something to compensate for.",
+  "full_joint_search": "ONE beam over the derived full joint space at the standing width, with impl_profiles UNPINNED so calibration competes, and no conditional baseline candidate -- B is measured and frozen and this session compares nothing. It trains nothing and scores no battery.",
+  "commit_top_k": "freezes the Top-5 ranking as a PREREGISTERED candidate set and STOPS. The set is committed before any probe result exists, so it cannot grow once one does; a session that continued into screening would select and confirm on the same evidence."
+ },
+ "_stage_conditions_meaning": "what each authorized stage may do. Carried into the authorization so a reader of the artifact sees the boundary without opening the protocol."
+}

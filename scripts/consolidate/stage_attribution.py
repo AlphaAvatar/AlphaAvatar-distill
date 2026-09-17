@@ -568,6 +568,48 @@ STAGE_1 = [
             "calibrates the subject-vs-instrument rule for the others."),
     ),
     dict(
+        id="phase_c2_full_search",
+        kind="experiment",
+        stage_id="1",
+        status="chain built — NOT AUTHORIZED, no grant approved",
+        title="Phase C2 full joint re-search — all four operator kinds, Top-5",
+        question=("After ATTENTION was promoted by C1, which JOINT assignment "
+                  "of DEPTH, FFN, RESIDUAL_WIDTH and ATTENTION -- including "
+                  "their order and each step's calibration mixture -- produces "
+                  "the best initialization on the frozen state_eval metrics? "
+                  "Search-1 could not answer it: it fixed three operators at "
+                  "the incumbent's assignment and varied one, so an ATTENTION "
+                  "change that moved the best DEPTH or WIDTH was invisible to "
+                  "it. The answer is a preregistered Top-5 candidate set, not "
+                  "an incumbent: which candidate becomes the incumbent is a "
+                  "BEHAVIOURAL question a separate session asks."),
+        canonical_config="configs/experiments/phase_c2/full_search_authorization.json",
+        evidence=[
+            E("configs/experiments/phase_c2/full_search_authorization.json",
+              'declares stage_id "1"', field="stage_id", equals="1"),
+            E("logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+              "the frozen protocol: the space, the ranking policy and what a "
+              "Top-5 may be read as"),
+            E("logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_grant_proposal.json",
+              "what a launch review reads. A PROPOSAL: it approves nothing and "
+              "the issuer refuses it"),
+            E("logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/closeout.json",
+              "its engineering validation, filed under the experiment it serves"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_c2_full_search",
+        classification_reason=(
+            "Stage 1 because it is an initialization search: it generates "
+            "student states and ranks them on the frozen cheap state_eval "
+            "metrics. It trains nothing and measures no behaviour, so it is a "
+            "Stage-1 experiment whose instrument is not a Stage-3 probe. It is "
+            "separate from `phase_c2` because Search-1's restricted space is a "
+            "consumed, frozen measurement and this searches all four operator "
+            "kinds jointly -- a different question with its own authorization "
+            "type, so its runs do not sit among Search-1's attempts."),
+    ),
+    dict(
         id="c2_full_search_cuda",
         kind="engineering",
         stage_id="1",

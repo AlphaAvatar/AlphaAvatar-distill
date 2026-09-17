@@ -1,0 +1,37 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_phase_c2_full_search",
+ "note": "Success spec for a full-search run that reached C2_FULL_SEARCH_ALL_DONE. Four records are REQUIRED and they are the session's whole product: the evidence, which carries the stage detail and the bound identities; `stage1_selection.json`, which IS the committed Top-5 and the only place the preregistered candidate set exists; and the journal plus the telemetry, which are what makes the ranking auditable and what the NEXT search's cost table pools over -- C2 attempt 4's telemetry is already half of this session's own cost model, so losing this session's would make the next one unpriceable. The five selected CHECKPOINTS are products rather than artifacts: they are fetched by the runner's product path when `commit_top_k` completed, gated on that stage rather than on session success, because a behavioural session needs the weights and a multi-hour beam is what found them. PATHS ARE OBSERVED, NOT GUESSED: the real CUDA engineering validation wrote exactly these three filenames into the search workdir and this evidence filename into the audit directory. On lifecycle: the vocabulary is `final_required` and `mutable_snapshot` and nothing else -- `ArtifactSpec.__post_init__` refuses any other value, so an invented word makes this whole document UNLOADABLE and the collector exits 1 before it looks at a single file. `required: false` is what makes an artifact best-effort; `lifecycle` is what a matching file MEANS. Both C2 Search-1 specs said `best_effort` until 2026-09-16 and the failure surfaced during a teardown.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_phase_c2_full_search/c2_full_search_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "stage1_selection",
+   "pattern": "autoinit/phase_c2_full_search/stage1_selection.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "search_journal",
+   "pattern": "autoinit/phase_c2_full_search/states.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "search_telemetry",
+   "pattern": "autoinit/phase_c2_full_search/telemetry.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "session_logs",
+   "pattern": "audit/autoinit_phase_c2_full_search/session/*",
+   "required": false,
+   "lifecycle": "final_required"
+  }
+ ]
+}

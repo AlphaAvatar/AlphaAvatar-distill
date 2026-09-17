@@ -65,6 +65,7 @@ What each one asked of this stage.
 | `continuation_b` — Continuation B — resolving the Phase-B behavioural selection at rung 2 | Which Phase-B candidate wins once the behavioural comparison is carried to rung 2? | [`continuation_b/`](continuation_b/) | complete |
 | `recovery_continuation` — Recovery continuation — finishing Phase A's search under the repaired harness | Finished under the repaired harness, which of Phase A's searched states survive? | [`recovery_continuation/`](recovery_continuation/) | complete |
 | `phase_c1` — Phase C1 — fixed-path ATTENTION isolation | Does a replacement ATTENTION operator beat the frozen incumbent with every other operator held on a fixed path? | [`phase_c1/`](phase_c1/) | authorized — not launched |
+| `phase_c2_full_search` — Phase C2 full joint re-search — all four operator kinds, Top-5 | After ATTENTION was promoted by C1, which JOINT assignment of DEPTH, FFN, RESIDUAL_WIDTH and ATTENTION -- including their order and each step's calibration mixture -- produces the best initialization on the frozen state_eval metrics? Search-1 could not answer it: it fixed three operators at the incumbent's assignment and varied one, so an ATTENTION change that moved the best DEPTH or WIDTH was invisible to it. The answer is a preregistered Top-5 candidate set, not an incumbent: which candidate becomes the incumbent is a BEHAVIOURAL question a separate session asks. | [`phase_c2_full_search/`](phase_c2_full_search/) | chain built — NOT AUTHORIZED, no grant approved |
 | `phase_c2` — Phase C2 — ATTENTION-aware composition/order re-search | With that ATTENTION operator now fixed, does re-optimizing the operator order and ATTENTION's calibration profile beat the frozen C1 treatment? | [`phase_c2/`](phase_c2/) | planned — space implemented and priced, NOT authorized |
 | `phase_c2_baseline_completion` — Phase C2 baseline completion — the B side of B→C | What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B→C comparison Attempt 4 collected its ranking to ask can finally be computed? | [`phase_c2_baseline_completion/`](phase_c2_baseline_completion/) | granted — attempt5 grant committed, NOT yet authorized |
 
@@ -84,6 +85,7 @@ the config path and hash it ran under.
 * `configs/experiments/phase_a/source_sets.json`
 * `configs/experiments/phase_c1/authorization.json`
 * `configs/experiments/phase_c2/baseline_completion_authorization.json`
+* `configs/experiments/phase_c2/full_search_authorization.json`
 * `configs/stage1/qwen3_0p6b_from_4b_thinking.json`
 * `configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json`
 * `configs/validation/c2_full_search_cuda.json`
