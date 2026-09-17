@@ -882,7 +882,16 @@ print(json.dumps(out)); print("PROBE_OK")
             "teardown_confirmed": bool(
                 (self.ev.get("teardown") or {}).get("provider_confirms_gone")),
             "execution_sha": self.a.execution_sha or None,
-            "record": f"logs/runs/{self.experiment_id}/{self.a.run_id}/",
+            #: From `rel_run_dir`, not an f-string. This WAS
+            #: `f"logs/runs/{experiment_id}/{run_id}/"`, a shape that has
+            #: never existed since runs were grouped by stage -- so every
+            #: ledger entry pointed at a path with no file in it. That is
+            #: precisely the defect `rel_run_dir` was extracted to end:
+            #: its docstring records four earlier call sites that
+            #: "silently kept naming the pre-stage location", and this was
+            #: a fifth.
+            "record": rel_run_dir(self.experiment_id, self.a.run_id,
+                                  self.stage_id) + "/",
         })
         doc["booked_usd"] = round(sum(x["cost_usd"] for x in doc["subruns"]), 4)
         self.campaign_path.write_text(json.dumps(doc, indent=1) + "\n")

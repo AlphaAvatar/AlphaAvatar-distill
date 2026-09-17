@@ -227,13 +227,35 @@ class TestTheSnapshotStatesTheRequiredFacts:
         assert not bad, f"{why}; still present in:\n" + "\n".join(
             f"  {p}: {v}" for p, v in bad.items())
 
-    def test_the_engineering_campaign_is_closed(self):
+    def test_every_engineering_campaign_is_closed_and_priced(self):
+        """There are TWO now, and a single `campaign_cost_usd` could only ever
+        describe one of them.
+
+        This read stage F's cost from a flat key. When the C2 full-search
+        validation closed, the snapshot grew a second campaign and the flat key
+        had to become per-validation — so the assertion is now over EVERY
+        validation the snapshot names, and a new one that forgets to state its
+        cost or its closure fails here rather than being silently uncounted.
+        """
         cv = snapshot()["cuda_engineering_validation"]
-        assert cv["campaign_cost_usd"] == 0.04
-        assert "CLOSED" in cv["campaign"]
         assert cv["authorizes"] == "nothing"
-        assert (REPO / cv["amendment"].split()[0]).is_file(), (
-            "the snapshot names an interpretation amendment that does not exist")
+        named = {k: v for k, v in cv.items()
+                 if not k.startswith("_") and k != "authorizes"}
+        assert len(named) >= 2, (
+            f"expected both CUDA validations, found {sorted(named)}")
+        for key, text in named.items():
+            assert "PASS" in text, f"{key} does not state a verdict"
+            assert "CLOSED" in text or "campaign CLOSED" in text, (
+                f"{key} does not state that its campaign is closed")
+            #: A dollar figure, so a campaign cannot be named without being
+            #: priced -- the condition under which spend goes uncounted.
+            assert re.search(r"\$\d+\.\d{4}", text), (
+                f"{key} states no cost; an unpriced campaign is how "
+                f"engineering spend stops reaching the project book")
+            #: Every path it names must exist.
+            for token in re.findall(r"logs/[\w./-]+", text):
+                assert (REPO / token.rstrip(".,")).exists(), (
+                    f"{key} names {token}, which is not in the tree")
 
     def test_an_approved_package_is_not_an_issued_authorization(self):
         """The distinction the whole launch contract rests on.

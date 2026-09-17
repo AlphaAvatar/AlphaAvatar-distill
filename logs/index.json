@@ -261,6 +261,7 @@
    "logs/runs/stage-1/phase_c1": "logs/stages/stage-1/phase_c1/runs",
    "logs/scratch_closeout_20260831.json": "logs/maintenance/cleanup/scratch_closeout_20260831.json",
    "logs/scratch_inventory_20260829.json": "logs/maintenance/inventories/scratch_inventory_20260829.json",
+   "logs/stages/stage-shared/c2_full_search_cuda": "logs/stages/stage-1/c2_full_search_cuda",
    "logs/storage_closeout_20260831.json": "logs/maintenance/storage/storage_closeout_20260831.json",
    "logs/storage_measurements.json": "logs/maintenance/storage/storage_measurements.json",
    "logs/superseded/autoinit_continuation_b_authorization_20260829T115028Z_UNUSED.json": "logs/stages/stage-1/continuation_b/history/superseded_authorizations/autoinit_continuation_b_authorization_20260829T115028Z_UNUSED.json",

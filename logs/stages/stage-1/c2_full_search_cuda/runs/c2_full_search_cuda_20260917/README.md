@@ -1,6 +1,6 @@
 # c2_full_search_cuda / c2_full_search_cuda_20260917
 
-One run of `c2_full_search_cuda`, at `logs/stages/stage-shared/c2_full_search_cuda/runs/c2_full_search_cuda_20260917/`.
+One run of `c2_full_search_cuda`, at `logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917/`.
 
 **Canonical index: `manifest.json` in this directory.** It names every role this run recorded, its status and its cost. Read it rather than this file for anything factual: this README describes the layout and is not evidence that the run executed, succeeded or was authorized.
 
@@ -13,3 +13,5 @@ One run of `c2_full_search_cuda`, at `logs/stages/stage-shared/c2_full_search_cu
 | `closeout/` | how it ended: the outcome classification, the measured cost and the provider teardown confirmation. |
 
 The repository-wide index of every run is `logs/index.json`.
+
+This run executed at `logs/stages/stage-shared/c2_full_search_cuda/runs/c2_full_search_cuda_20260917/` and was retained here when the validation's runs moved into the stage its governance lives in. The old address resolves through `logs/index.json :: historical_paths`; nothing measured changed.

@@ -18,7 +18,8 @@
    "failure_class": "operator",
    "teardown_confirmed": true,
    "execution_sha": null,
-   "record": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a1/"
+   "record": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a1/",
+   "_record_at_execution_time": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a1/"
   },
   {
    "subrun_id": "c2_full_search_cuda_20260917_a2",
@@ -32,7 +33,8 @@
    "failure_class": "operator",
    "teardown_confirmed": true,
    "execution_sha": null,
-   "record": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a2/"
+   "record": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a2/",
+   "_record_at_execution_time": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a2/"
   },
   {
    "subrun_id": "c2_full_search_cuda_20260917_a3",
@@ -46,11 +48,13 @@
    "failure_class": null,
    "teardown_confirmed": true,
    "execution_sha": null,
-   "record": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a3/"
+   "record": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a3/",
+   "_record_at_execution_time": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a3/"
   }
  ],
  "authorizes": "nothing",
  "booked_usd": 0.1453,
  "package_id": "phase_c2.full_search_cuda_validation.2026-09-17",
- "_why_its_own_package_id": "So the deriver does NOT charge this to C1's $6.0000 GPU engineering allowance. It nearly did: with no package_id stated, `_attribute` falls back to dates, and a campaign authorized after 2026-09-11 is booked to `phase_c1.execution_package.2026-09-11` -- the deriver reported 'engineering 5.8547 remaining of 6.0000' for spend this validation's own authorization explicitly says it may not take. C1's allowance belongs to C1's package and does not transfer. This validation is funded from the PROJECT envelope, and its spend reaches the project cumulative through each subrun's own recorded cost, not through any package book."
+ "_why_its_own_package_id": "So the deriver does NOT charge this to C1's $6.0000 GPU engineering allowance. It nearly did: with no package_id stated, `_attribute` falls back to dates, and a campaign authorized after 2026-09-11 is booked to `phase_c1.execution_package.2026-09-11` -- the deriver reported 'engineering 5.8547 remaining of 6.0000' for spend this validation's own authorization explicitly says it may not take. C1's allowance belongs to C1's package and does not transfer. This validation is funded from the PROJECT envelope, and its spend reaches the project cumulative through each subrun's own recorded cost, not through any package book.",
+ "_record_pointers_repaired_2026_09_17": "Every `record` now resolves to the retained canonical run; the path each entry carried when it was written is kept beside it as `_record_at_execution_time` rather than presented as the current address. TWO different staleness causes, and only one of them was a move: the launcher built this field as `f\"logs/runs/{experiment_id}/{run_id}/\"`, a shape that has not existed since runs were grouped by stage, so these pointers named a directory with nothing in it from the moment they were written. `rel_run_dir` exists to end exactly that -- its docstring records four earlier f-string call sites that silently kept naming the pre-stage location -- and the launcher now calls it. The runs THEN also moved from the launcher's `shared` default to stage 1, where this validation's governance lives. No cost, verdict, timestamp, elapsed time or CUDA measurement is altered by this."
 }

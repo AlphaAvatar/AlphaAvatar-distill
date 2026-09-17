@@ -11,7 +11,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: the three-session cap and the one-provider-resource rule are WITHDRAWN prospectively. An approval is NOT a launch; MONEY bounds the sessions. That package is C1's and its round ended with a verdict. C2 baseline completion ran under the 2026-09-16 decision and is DONE -- nothing is authorized to launch now. Owner: logs/budget/decisions.md.",
+  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: MONEY bounds the sessions, not a count. An approval is NOT a launch. That package is C1's and its round ended with a verdict; C2 baseline completion is DONE. NOTHING is authorized to launch now. Owner: logs/budget/decisions.md.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -74,8 +74,8 @@
   "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
  ],
  "next_starting_point": {
-  "status": "C1 COMPLETE and CLOSED by a GO verdict. C2 preparation CLOSED and ACCEPTED: derived 578-leaf space at beam 6, 12-probe behavioural schedule, search core stopping at a committed Top-5. Nothing is authorized.",
-  "then": "build the full-search governance chain, then ONE bounded real-GPU engineering validation, then return for final launch review. Do NOT launch before that review; after a Top-5 is committed, STOP and bind the behavioural session separately. Re-quote the live L40S securePrice before authorization and re-derive the ceiling; do NOT narrow beam 6 to absorb a price change. Build no resume machinery.",
+  "status": "C1 CLOSED by a GO verdict; C2 preparation CLOSED/ACCEPTED and its CUDA engineering validation PASS/CLOSED. Nothing is authorized. Detail owned by phase_c and cuda_engineering_validation.",
+  "then": "build the formal full-search chain, then return for FINAL FORMAL SEARCH LAUNCH REVIEW. Do NOT launch before it; after Top-5 is committed, STOP -- the behavioural session's candidate identities do not exist until the search succeeds. Re-quote the live securePrice immediately before pricing and re-derive the beam-6 ceiling mechanically if it moved; do NOT narrow beam 6. Derive shipped non-source inputs from code, never a list. No resume machinery.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -86,7 +86,7 @@
   "phase_b": "COMPLETE / RESOLVED / FROZEN",
   "phase_c0": "COMPLETE / APPROVED / FROZEN",
   "phase_c1": "COMPLETE / CLOSED by the attempt-18 GO verdict -- status owned by phase_c.c1",
-  "phase_c2": "SEARCH-1 frozen, B->C computed. FULL JOINT re-search planned and priced, NOT FUNDED -- owned by phase_c.c2",
+  "phase_c2": "SEARCH-1 frozen, B->C computed. FULL JOINT re-search planned and priced, ceilings FIT the accounting envelope, NOT AUTHORIZED -- owned by phase_c.c2",
   "formal_recovery_evidence": "NONE"
  },
  "phase_a_result": {
@@ -112,19 +112,19 @@
    "authorizes": "nothing"
   },
   "c1": {
-   "status": "COMPLETE and CLOSED by a verdict. Eighteen attempts, fifteen paid. See measured below, and the decision record -- not this line.",
+   "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
-   "measured": "replay: MEASURED, 2/2 PASS (attempts 9, 17, 18). treatment + endpoint: MEASURED ONCE, by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
+   "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE, by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
    "owners": "logs/stages/stage-1/phase_c1/ -- plans, runs, analyses and the attempt-18 closeout own every C1 figure and artifact.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "SEARCH COMPLETE and B->C COMPUTED; Search-1 is DONE and FROZEN. The local Search-2 refinement is WITHDRAWN; C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection of a new incumbent, designed and priced and NOT FUNDED.",
+   "status": "SEARCH COMPLETE and B->C COMPUTED; Search-1 is DONE and FROZEN. The local Search-2 refinement is WITHDRAWN; C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection of a new incumbent, designed and priced and NOT AUTHORIZED.",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "priced": "plans/phase_c2_full_search_pricing.json (Search-1's historical basis: plans/phase_c2_pricing.json).",
-   "result": "front 0 holds four candidates, B sits in front 1 with one; B is DOMINATED on all three ranked objectives by two and dominates none. Smallest margin 0.395971 vs a 0.007782 threshold, NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY -- not a behavioural result. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
-   "behavioural_selection": "PHASE-C semantics. The only question: does the selected C, after the frozen 0.86M recovery, beat the incumbent B? The original control is NOT a C2 arm. Screening is disjoint in BOTH dimensions -- own seed AND own prompt-disjoint battery c2_screening_v1 (0ad76fc7, REBUILT after a rank-domain bug), because C0's unit is the prompt. 6 + 6 = 12 probes, exact. SESOI +0.010, no forced winner. Owner: the protocol.",
-   "execution_path": "full-search driver implemented and toy-executed; commits a Top-5 and STOPS. The launcher/governance chain and the behavioural session are owed. Two authorizations, never one.",
+   "result": "B is DOMINATED on all three ranked objectives by two front-0 candidates and dominates none; NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
+   "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat the incumbent B after the frozen 0.86M recovery? The original control is NOT a C2 arm; screening is disjoint in seed AND prompt (c2_screening_v1, 0ad76fc7). Owner: the protocol.",
+   "execution_path": "full-search driver implemented, toy-executed and CONFIRMED ON REAL CUDA; commits a Top-5 and STOPS. The formal chain is owed. Two authorizations, never one.",
    "funding": "cap 370.0000 (accounting envelope only); chain ceiling fits with headroom. NOT AUTHORIZED. Figures owned by plans/phase_c2_full_search_pricing.json:funding."
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent: attention.activation_importance_v1 vs a future attention.causal_kl_v1. Cannot start before C2 names an incumbent, and the operator does not exist yet.",
@@ -137,10 +137,10 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOT AUTHORIZED, and the next steps are engineering. Phase-C2 preparation is CLOSED and ACCEPTED; the project cap rose 320.0000 -> 370.0000 as an ACCOUNTING ENVELOPE, so the C2 chain now fits with headroom. Fitting is NOT permission and the headroom is NOT transferable to C3/C4. Owed before launch review: the full-search governance chain, and ONE bounded real-GPU engineering validation of the CUDA/device/BF16/materialization integration the CPU toy run cannot reach. Figures owned by plans/phase_c2_full_search_pricing.json:funding.",
+ "blocker": "NOT AUTHORIZED, and the only pre-launch work left is engineering. C2 preparation is CLOSED/ACCEPTED and the CUDA engineering validation is PASS/CLOSED -- no further GPU validation is required. The cap rose to 370.0000 as an ACCOUNTING ENVELOPE and the chain's ceilings now FIT it: fitting is NOT permission, the headroom is NOT transferable to C3/C4, and the word is NOT AUTHORIZED rather than NOT FUNDED because the money fits. Owed: the formal chain (launcher, grant, launch-bound readiness, one-use authorization, executable closure, bundle) and a fresh live securePrice quote. Money owned by the budget block; validation by cuda_engineering_validation; figures by plans/phase_c2_full_search_pricing.json:funding.",
  "deferred_not_blocking": {
   "duplicate_checkpoints": "2.92 GiB, KEEP / unresolved ownership -- maintainer decision",
-  "historical_probe_reuse": "REFUSED by scoring_contract_matches_live; probes reconstruct and the numbers are unchanged. Detail: logs/state/current.md."
+  "historical_probe_reuse": "REFUSED by scoring_contract_matches_live. Detail: logs/state/current.md."
  },
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
@@ -158,12 +158,10 @@
   "record": "logs/maintenance/source-relocations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {
-  "status": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada. The stage-F device repair is CONFIRMED ON REAL CUDA. ENGINEERING EVIDENCE ONLY -- not a C1 result and not an endpoint.",
-  "authorizes": "nothing",
-  "owner": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/ and logs/runs/cuda_stage_f/",
-  "campaign_cost_usd": 0.04,
-  "campaign": "CLOSED. Three subruns, one active resource at a time.",
-  "amendment": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/interpretation_amendment_1.json -- APPEND-ONLY, corrects two explanatory claims and nothing measured."
+  "_what": "engineering evidence only -- neither validation is a scientific result and neither authorizes anything.",
+  "stage_f": "PASS 2026-09-10, execution SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, campaign CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/ (its interpretation_amendment_1.json is APPEND-ONLY).",
+  "c2_full_search": "PASS 2026-09-17 on an L40S: the full-search driver reached C2_FULL_SEARCH_ALL_DONE on real CUDA in BF16 over the real 578-leaf space, and the real 596M student reloaded canonically intact. $0.1453 of $0.9000, three subruns, every teardown provider-confirmed, nothing billing. CLOSED -- no further GPU validation is required before the chain. Measurements owned by logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/, runs at logs/stages/stage-1/c2_full_search_cuda/runs/.",
+  "authorizes": "nothing"
  },
  "superseded_handoff": "none. The live handoff is logs/state/current.md."
 }
