@@ -21,7 +21,8 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/data"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
-from battery_render import (FROZEN_SOURCES, RENDERERS, check_group_parity,  # noqa: E402
+from battery_render import (DEFAULT_RANK_DOMAIN, FROZEN_SOURCES,  # noqa: E402
+                            RENDERERS, check_group_parity,
                             norm, rank_key, rank_take)
 
 BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
@@ -234,6 +235,96 @@ def test_a_different_base_digest_would_select_a_different_sample():
 
 def test_the_stratum_is_part_of_the_key():
     assert rank_key(C0_DIGEST, "gsm8k", "x") != rank_key(C0_DIGEST, "rag", "x")
+
+
+def test_the_domain_is_part_of_the_key():
+    assert rank_key(C0_DIGEST, "gsm8k", "x") != rank_key(
+        C0_DIGEST, "gsm8k", "x", domain="phase-c2-screening-battery")
+    #: And the default is C1's, so an unchanged call is an unchanged key.
+    assert rank_key(C0_DIGEST, "gsm8k", "x") == rank_key(
+        C0_DIGEST, "gsm8k", "x", domain=DEFAULT_RANK_DOMAIN)
+
+
+def test_rank_take_FORWARDS_its_domain_to_the_key():
+    """The bug this exists for: `rank_take` accepted `domain` and dropped it.
+
+    `rank_key` gained the parameter, `rank_take` gained it, the C2 screening
+    builder passed it — and the call between them still said
+    `rank_key(base, stratum, id)`, so every caller silently got
+    `DEFAULT_RANK_DOMAIN`. Nothing failed: the sample was still deterministic,
+    still exclusion-correct and still disjoint, so the only symptom was a
+    manifest describing a sampling rule its sample had not been drawn under.
+
+    Asserting that two domains merely DIFFER is not enough on its own, so this
+    pins the contract: the order `rank_take` returns must be the order
+    `rank_key` produces under the SAME domain.
+    """
+    rows = [{"_index": i, "question": f"q{i}", "answer": f"x #### {i}"}
+            for i in range(200)]
+    for domain in (DEFAULT_RANK_DOMAIN, "phase-c2-screening-battery",
+                   "some-other-domain"):
+        taken = rank_take(rows, 20, stratum="gsm8k", base_digest=C0_DIGEST,
+                          exclude_ids=set(), exclude_hashes=set(),
+                          make=RENDERERS["gsm8k"], domain=domain)
+        expected = [
+            item["id"] for _key, item in sorted(
+                ((rank_key(C0_DIGEST, "gsm8k", str(r["id"]), domain=domain),
+                  r) for r in (RENDERERS["gsm8k"](row) for row in rows)),
+                key=lambda pair: (pair[0], str(pair[1]["id"])))][:20]
+        assert [i["id"] for i in taken] == expected, (
+            f"rank_take did not rank under domain {domain!r}; it is most "
+            "likely not forwarding the argument to rank_key")
+
+
+def test_a_different_rank_domain_would_select_a_different_sample():
+    """The direct catch: same rows, same base, same stratum, two domains."""
+    rows = [{"_index": i, "question": f"q{i}", "answer": f"x #### {i}"}
+            for i in range(200)]
+    a = rank_take(rows, 20, stratum="gsm8k", base_digest=C0_DIGEST,
+                  exclude_ids=set(), exclude_hashes=set(),
+                  make=RENDERERS["gsm8k"])
+    b = rank_take(rows, 20, stratum="gsm8k", base_digest=C0_DIGEST,
+                  exclude_ids=set(), exclude_hashes=set(),
+                  make=RENDERERS["gsm8k"], domain="phase-c2-screening-battery")
+    assert [i["id"] for i in a] != [i["id"] for i in b], (
+        "two rank domains produced the same sample; the domain is not reaching "
+        "the key")
+
+
+def test_the_default_domain_still_reproduces_the_frozen_c1_identity(tmp_path):
+    """C1's frozen battery must be byte-identical after the domain change.
+
+    The whole reason `domain` defaults to C1's is that this identity may not
+    move. Rebuilding is the only check that proves it; asserting the default's
+    value would prove only that a constant is spelled correctly.
+    """
+    import subprocess
+
+    manifest = json.loads(
+        (REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json").read_text())
+    out = tmp_path / "rebuild"
+    #: The hub cache is passed EXPLICITLY, resolved in-process, rather than by
+    #: handing the subprocess a `$HOME` to infer it from. `hub_cache()` documents
+    #: that precedence, and a `$HOME`-derived premise is the class that aborted
+    #: C1 attempt 3R: a pod exports `HF_HOME` and holds nothing under `$HOME`,
+    #: so a test that reads one and a pod that reads the other decide
+    #: differently for reasons unrelated to what is being tested.
+    from battery_render import hub_cache
+
+    result = subprocess.run(
+        [sys.executable, "scripts/data/build_c1_confirmation_battery.py",
+         "--out", str(out)],
+        cwd=REPO, capture_output=True, text=True,
+        env={"PYTHONPATH": "src", "PATH": "/usr/bin:/bin",
+             "HF_HUB_CACHE": str(hub_cache())})
+    if result.returncode != 0:
+        pytest.skip(f"C1 sources unavailable in this environment: "
+                    f"{result.stderr[-300:]}")
+    rebuilt = json.loads((out / "manifest.json").read_text())
+    assert rebuilt["content_sha256"] == manifest["content_sha256"]
+    assert rebuilt["n_prompts"] == manifest["n_prompts"]
+    for name, entry in manifest["sets"].items():
+        assert rebuilt["sets"][name]["sha256"] == entry["sha256"], name
 
 
 # --- rendering parity with the frozen recovery-search battery ---------------

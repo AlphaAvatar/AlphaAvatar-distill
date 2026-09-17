@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-17T06:00:00Z",
+ "generated_utc": "2026-09-17T08:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -124,7 +124,7 @@
    "priced": "plans/phase_c2_full_search_pricing.json (Search-1's historical basis: plans/phase_c2_pricing.json).",
    "baseline_completion": "COMPLETE at attempt8 ($0.5872): B rebuilt to its expected digest, measured ONCE, B->C computed, verdict CANDIDATE_IN_A_BETTER_FRONT_THAN_BASELINE and ACCEPTED on review. Attempts 5-7 aborted pre-measurement for $0.1033. B is never remeasured.",
    "result": "front 0 holds four candidates, B sits in front 1 with one; B is DOMINATED on all three ranked objectives by two and dominates none. Smallest margin 0.395971 vs a 0.007782 threshold, NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY -- not a behavioural result. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
-   "behavioural_selection": "PHASE-C semantics. The only question: does the selected C, after the frozen 0.86M recovery, beat the incumbent B? The original control is NOT a C2 arm; guardrails are incumbent-relative. Screening is disjoint in BOTH dimensions -- own seed AND own prompt-disjoint battery c2_screening_v1, because C0's unit is the prompt. 6 + 6 = 12 probes, exact. SESOI +0.010, no forced winner. Owner: the protocol.",
+   "behavioural_selection": "PHASE-C semantics. The only question: does the selected C, after the frozen 0.86M recovery, beat the incumbent B? The original control is NOT a C2 arm. Screening is disjoint in BOTH dimensions -- own seed AND own prompt-disjoint battery c2_screening_v1 (0ad76fc7, REBUILT after a rank-domain bug), because C0's unit is the prompt. 6 + 6 = 12 probes, exact. SESOI +0.010, no forced winner. Owner: the protocol.",
    "execution_path": "full-joint-search driver IMPLEMENTED and toy-executed; it commits a Top-5 and STOPS with no path into a behavioural stage. The behavioural session and the launcher/governance chain are owed at authorization time. Two authorizations, never one."
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent: attention.activation_importance_v1 vs a future attention.causal_kl_v1. Cannot start before C2 names an incumbent, and the operator does not exist yet.",

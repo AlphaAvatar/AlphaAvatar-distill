@@ -301,7 +301,7 @@
    "screening": {
     "asset_id": "c2_screening_v1",
     "path": "artifacts/stage3/c2_screening_v1",
-    "content_sha256": "c04d9d648b2a9e4e110c485138e6e04d4a33ba8fbbbcc109b8e08cf94ad9358e",
+    "content_sha256": "0ad76fc79f5e7ebf9e8146710add07cc33554526a23507f97f0b458aec2cae1f",
     "n_prompts": 950,
     "n_scorable_prompts": 850,
     "identity_record": "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
@@ -641,5 +641,5 @@
  "interpretation_discipline": "the search stage produces a cheap-metric front and selects a candidate SET, never an incumbent. Only the behavioural selection stage, under the frozen recipe, battery, feasibility floor and equivalence interval, may name a C2 incumbent \u2014 and unresolved_equivalence with no winner is a legitimate terminal result, not a reason for a fourth seed.",
  "pricing": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
  "authorizes": "nothing",
- "protocol_sha256": "bc7aa6fab956c2ba3d816cfd874fea010ad6920e7926091f8517eb6672359b3c"
+ "protocol_sha256": "b883870dacb7c8e4916526488c1cddecce0cdeaeee6e02c7817bcc0f500bd7b7"
 }

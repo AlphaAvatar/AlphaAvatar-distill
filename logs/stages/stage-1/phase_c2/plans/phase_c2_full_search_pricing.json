@@ -208,8 +208,14 @@
    "decline for now and leave C2 at the accepted Search-1 evidence, which selects no incumbent"
   ],
   "_not_a_recommendation": "the trade is scientific, not arithmetic: the arithmetic is above and the choice is the maintainer's.",
-  "_rounding_note": "every figure here is computed from the 4-dp stored ceilings. A review message that added the DISPLAY-rounded search ceiling ($33.18) reaches a chain of $61.0708 and a minimum cap of $358.5798, which is $0.0027 BELOW the derived figures. A ceiling must round up, so the derived values are the ones to fund: a cap set at the display-rounded figure would not contain both ceilings."
+  "rounding": {
+   "_rule": "every figure in this record is computed from the 4-dp stored ceilings. A ceiling rounds UP or it under-authorizes the plan it prices, so a chain summed from DISPLAY-rounded components is not safe to fund.",
+   "chain_from_4dp_ceilings_usd": 63.0615,
+   "chain_from_2dp_display_ceilings_usd": 63.06,
+   "understatement_usd": 0.0015,
+   "_why_this_is_here": "a review once summed the display-rounded search ceiling and reached a chain below the derived one. The comparison is DERIVED here rather than recounted, so it cannot go stale when the components move \u2014 which they have, twice."
+  }
  },
  "authorizes": "nothing",
- "pricing_sha256": "2a8c02ec5f4723aceb18d6dfff4497237c310cb28d08fd10e69e8155779abc62"
+ "pricing_sha256": "65d77a7f55ab7315a3069e0e8199fdd2fde58e167123224f87f5db3bf715974b"
 }

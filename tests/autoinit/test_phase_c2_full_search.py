@@ -677,6 +677,78 @@ def test_the_screening_battery_record_matches_the_built_asset():
         {k: v for k, v in record.items() if k != "record_sha256"})
 
 
+def test_the_screening_sample_was_drawn_under_the_domain_it_claims():
+    """The bug this exists for: a manifest claiming a rule it was not drawn under.
+
+    `rank_take` accepted `domain` and dropped it, so the first build of this
+    asset was sampled under C1's ordering while its manifest declared
+    `phase-c2-screening-battery`. It was still disjoint, still deterministic and
+    still exclusion-correct — the only wrong thing was its provenance, which no
+    disjointness check can see.
+
+    So this re-derives one stratum from the real source rows and the real
+    exclusion sets under the DECLARED domain, and requires the frozen sample to
+    be exactly that. It is the claim, checked rather than described.
+    """
+    import importlib
+
+    sys.path.insert(0, str(REPO / "scripts/data"))
+    from battery_render import RENDERERS, rank_take, read_rows
+    build = importlib.import_module("build_c2_screening_battery")
+    c1_builder = importlib.import_module("build_c1_confirmation_battery")
+
+    record = json.loads(
+        (REPO / "logs/stages/stage-1/phase_c2/plans/"
+                "c2_screening_battery.json").read_text())
+    declared = record["sampling_rule"]["rank_domain"]
+    assert declared == build.RANK_DOMAIN
+
+    class _Args:
+        battery = "artifacts/eval/battery_v2"
+        recovery_search = "artifacts/stage3/recovery_search_v2"
+        sessions = "artifacts/stage3/corpus_v2/sessions.jsonl"
+        state_eval = "artifacts/stage1/state_eval_v1"
+        calibration = "artifacts/stage1/e8_calibration_v1"
+        c1_confirmation = build.C1_CONFIRMATION
+
+    for path in (_Args.battery, _Args.sessions, _Args.c1_confirmation):
+        if not (REPO / path).exists():
+            pytest.skip(f"{path} is not present in this environment")
+
+    ids, hashes, _ = c1_builder.excluded_identities(_Args)
+    build.exclude_c1_confirmation(_Args.c1_confirmation, ids, hashes)
+
+    #: One stratum is enough to falsify the provenance claim, and `gsm8k` is the
+    #: cheapest to read.
+    stratum = "gsm8k"
+    want = c1_builder.SETS[stratum][1]
+    repo_id, revision, rel = c1_builder.SOURCES[stratum]
+    rows = [dict(r, _index=i)
+            for i, r in enumerate(read_rows(repo_id, revision, rel))]
+
+    def sample(domain):
+        return {str(i["id"]) for i in rank_take(
+            rows, want, stratum=stratum, base_digest=c1_builder.C0_DIGEST,
+            exclude_ids=ids, exclude_hashes=hashes,
+            make=RENDERERS[stratum], domain=domain)}
+
+    frozen = set()
+    asset = REPO / record["path"].split()[0] / f"{stratum}.jsonl"
+    for line in asset.read_text().splitlines():
+        if line.strip():
+            frozen.add(str(json.loads(line)["id"]))
+
+    assert sample(declared) == frozen, (
+        "the frozen screening sample is not what the declared rank domain "
+        "produces; its manifest describes a sampling rule it was not drawn "
+        "under")
+    #: And it is NOT the default domain's sample, which is what the bug produced.
+    from battery_render import DEFAULT_RANK_DOMAIN
+    assert sample(DEFAULT_RANK_DOMAIN) != frozen, (
+        "the frozen sample equals the DEFAULT-domain sample, which is exactly "
+        "the symptom of rank_take dropping its domain argument")
+
+
 def test_the_screening_ranking_rule_is_frozen_and_uses_no_usable_credit():
     doc = json.loads(PROTOCOL.read_text())["behavioural_selection"]
     screening = doc["schedule"]["screening"]

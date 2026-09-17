@@ -1,5 +1,74 @@
 # Decision records
 
+## 2026-09-17 — `rank_take` dropped its domain, so the screening battery's provenance was wrong
+
+- **Reviewer finding, and it was exactly right.** `battery_render.rank_take()`
+  accepted a `domain` parameter and `build_c2_screening_battery.py` passed
+  `domain="phase-c2-screening-battery"`, but the call *inside* `rank_take` was
+  still `rank_key(base_digest, stratum, stable_id)` — so it silently fell back to
+  `DEFAULT_RANK_DOMAIN = "phase-c1-battery"`. The asset was disjoint,
+  deterministic and exclusion-correct; what was wrong was its **provenance**. It
+  had been drawn under C1's ordering with C1's prompts excluded, while its
+  manifest and the protocol claimed a distinct C2 domain.
+- **How it happened, because the mechanism matters.** I applied three
+  `str.replace` edits to that file and asserted `old in t` for two of them. The
+  third pattern's indentation did not match the file, and `str.replace` with no
+  match is a **silent no-op**. So the parameter was threaded through the
+  signature, through the caller and into the docstring, and never into the one
+  line that used it.
+- **The bug was load-bearing, not cosmetic.** Rebuilding under the real domain
+  moved the content hash from `c04d9d64…` to `0ad76fc7…` and
+  **every per-set hash changed**: the repaired sample differs from the first in
+  every stratum. That is why the asset was rebuilt rather than re-documented.
+- **Repair, in order:** forward `domain=domain`; add the regressions; rebuild;
+  remeasure; regenerate.
+- **Three regressions, each confirmed to FAIL with the bug reinstated:**
+  `test_rank_take_FORWARDS_its_domain_to_the_key` pins the contract between the
+  two functions under three domains, so it catches a dropped argument rather
+  than only a changed output; `test_a_different_rank_domain_would_select_a_different_sample`
+  is the direct catch, the sibling of the `base_digest` test that already
+  existed and should have had a `domain` twin from the start; and
+  `test_the_screening_sample_was_drawn_under_the_domain_it_claims` re-derives one
+  stratum from the real sources and real exclusions and requires the frozen
+  sample to be the declared domain's *and not* the default domain's — the
+  provenance claim itself, which no disjointness check can see.
+  `test_the_default_domain_still_reproduces_the_frozen_c1_identity` rebuilds
+  `c1_confirmation_v1` and compares `content_sha256`, because asserting the
+  default's spelling would only prove a constant is typed correctly.
+- **Remeasured disjointness, after the rebuild.** All four required zeros hold:
+  `c1_confirmation_v1` 0 shared ids / 0 shared prompt hashes; final promotion
+  0/0; recovery search 0/0; recovery-training corpus 0. Measured independently
+  of the builder's own guard, which also refuses on any collision.
+- **The battery is otherwise unchanged**: 950 prompts / 850 scorable, C1's
+  mixture imported rather than restated, rebuild deterministic, bytes
+  canonicalized beside C1's and both copies verified against the manifest before
+  the identity was frozen.
+- **Regenerated, not hand-preserved.** Protocol `b883870d…`,
+  pricing `65d77a7f…`. The schedule is still 12 probes and the
+  battery still 950/850 with the same mixture, so the chain figures are
+  unchanged — selection expected `$20.6926`
+  ceiling `$29.8788`, standing beam-6
+  chain ceiling `$63.0615`, shortfall
+  `$40.5705`, minimum cap
+  `$360.5705`. The generator derived all of
+  them; none was carried over by hand.
+- **The stale `_rounding_note` is gone.** It cited the superseded
+  `$61.0708 / $358.5798` chain and was framed as an anecdote about one review
+  message. It is now a `rounding` block that **derives** the comparison — the
+  4-dp chain against the same chain summed from 2-dp display figures, with the
+  understatement computed — so it cannot go stale when the components move,
+  which they now have twice.
+- **Untouched, deliberately:** Search-1, the accepted 578-leaf full-search space,
+  C1 evidence, B's measurement, the C3/C4 roadmap, and `src/aadistill`. The
+  launcher/grant/authorization/readiness/bundle chain remains unimplemented and
+  the driver still does not consume `--authorization-path`; both are recorded as
+  owed at authorization time and were not expanded into by this repair.
+- **Risks:** none introduced. The repair narrows an identity claim to what the
+  bytes actually are. The residual risk is unchanged and already recorded: the
+  CPU toy execution leaves CUDA and device placement unverified, so a bounded
+  real-GPU engineering validation is owed before any formal launch.
+- **Revisit when:** a funding decision is made.
+
 ## 2026-09-17 — C2's behavioural question, stated simply: C against B
 
 - **Maintainer clarification, and it simplifies the science.** C1 already
@@ -28,6 +97,8 @@
 
   ```text
   c2_screening_v1   950 prompts / 850 scorable   content c04d9d648b2a9e4e…
+                  SUPERSEDED 2026-09-17: drawn under the WRONG rank domain;
+                  rebuilt as 0ad76fc79f5e7ebf…  (see the entry above)
   mixture           IDENTICAL to c1_confirmation_v1 (imported, not restated)
   disjoint from     c1_confirmation_v1: 0 shared ids, 0 shared prompt hashes
                     final_promotion, recovery_search, recovery_training: 0 / 0

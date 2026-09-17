@@ -53,6 +53,13 @@
   "tests/autoinit/test_frozen_records.py": {
    "class": "devbox_only_artifact"
   },
+  "tests/autoinit/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims": {
+   "class": "pinned_snapshot_source"
+  },
+  "tests/autoinit/test_stage1_import.py": {
+   "class": "devbox_only_artifact",
+   "why": "the whole module runs against the retained Phase-A checkpoints at the host-local artifact store. It was accounted for by being in C1's four-module ignore list; that list became a positive selection of tests/c1_preflight/ on 2026-09-13, so it is classified here instead \u2014 where every other development-side predicate already is."
+  },
   "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible": {
    "class": "staging_premise_property",
    "note": "the other two guards in this module (the destination-absent and nothing-undeclared premises) need NO entry: they resolve automatically to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint, which C1's manifest stages, so the audit proves the premise travels."
@@ -68,6 +75,10 @@
   },
   "tests/data/test_e7_streams.py": {
    "class": "devbox_only_artifact"
+  },
+  "tests/data/test_recovery_corpus_pipeline.py::tokenizer": {
+   "class": "devbox_only_artifact",
+   "why": "the fixture needs the recovery corpus and its tokenizer, neither of which any session stages. Same reason as the entry above: it was covered by C1's ignore list until that list stopped being a list of exclusions from the whole repository."
   },
   "tests/data/test_sessions.py::tokenizer": {
    "class": "local_hf_cache"
@@ -163,14 +174,6 @@
   },
   "tests/training/test_train.py::teacher_tokenizer": {
    "class": "local_hf_cache"
-  },
-  "tests/autoinit/test_stage1_import.py": {
-   "class": "devbox_only_artifact",
-   "why": "the whole module runs against the retained Phase-A checkpoints at the host-local artifact store. It was accounted for by being in C1's four-module ignore list; that list became a positive selection of tests/c1_preflight/ on 2026-09-13, so it is classified here instead \u2014 where every other development-side predicate already is."
-  },
-  "tests/data/test_recovery_corpus_pipeline.py::tokenizer": {
-   "class": "devbox_only_artifact",
-   "why": "the fixture needs the recovery corpus and its tokenizer, neither of which any session stages. Same reason as the entry above: it was covered by C1's ignore list until that list stopped being a list of exclusions from the whole repository."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",

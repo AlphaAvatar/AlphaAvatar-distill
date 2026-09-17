@@ -3,22 +3,22 @@
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
  "modules_scanned": 199,
  "test_ignores": [],
- "n_predicates": 113,
+ "n_predicates": 115,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
   "filesystem_premise_onpod": 46,
-  "filesystem_premise_unresolved": 5,
+  "filesystem_premise_unresolved": 6,
   "gpu": 1,
   "optional_dependency": 9,
-  "repository_content": 3,
+  "repository_content": 4,
   "staged_artifact": 3,
   "unrecognised": 28,
   "unstaged_artifact": 11
  },
  "n_differs_on_pod": 27,
- "n_unrecognised": 33,
- "n_registered": 41,
+ "n_unrecognised": 34,
+ "n_registered": 42,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
@@ -65,6 +65,7 @@
   ],
   "pinned_snapshot_source": [
    "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
+   "tests/autoinit/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims",
    "tests/data/test_c1_battery.py::require_role",
    "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte"
   ],
@@ -105,8 +106,8 @@
  "parity_by_resolution": {
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
-  "normalized_by_contract": 34,
-  "same_on_pod": 60
+  "normalized_by_contract": 35,
+  "same_on_pod": 61
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -150,6 +151,7 @@
   "tests/autoinit/test_c1_confirmation_scoring.py",
   "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
   "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
+  "tests/autoinit/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims",
   "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
   "tests/data/test_c1_battery.py::require_role",
   "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
@@ -705,6 +707,22 @@
    "parity_why": "every path it inspects is tracked or staged"
   },
   {
+   "file": "tests/autoinit/test_phase_c2_full_search.py",
+   "line": 716,
+   "kind": "pytest.skip",
+   "function": "test_the_screening_sample_was_drawn_under_the_domain_it_claims",
+   "condition": "not (REPO / path).exists()",
+   "expanded": "not (REPO / path).exists() | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_unresolved",
+   "verdict": "unknown",
+   "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
+   "nodeid": "tests/autoinit/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims",
+   "readiness_group": null,
+   "registered_as": "pinned_snapshot_source",
+   "parity": "normalized_by_contract",
+   "parity_why": "the seven pinned snapshots live in the Hugging Face hub cache. The contract sets HF_HOME/HF_HUB_CACHE to an empty isolated root and clears HUGGINGFACE_HUB_CACHE, HF_DATASETS_CACHE, TRANSFORMERS_CACHE and XDG_CACHE_HOME, so the cache is empty on the pod too and the same cases skip."
+  },
+  {
    "file": "tests/autoinit/test_reasoning_heavy_v2.py",
    "line": 51,
    "kind": "skipif",
@@ -850,7 +868,7 @@
   },
   {
    "file": "tests/data/test_c1_battery.py",
-   "line": 63,
+   "line": 64,
    "kind": "pytest.skip",
    "function": "require_role",
    "condition": "path.is_dir() and not any(path.glob(\"*.jsonl\"))",
@@ -866,7 +884,7 @@
   },
   {
    "file": "tests/data/test_c1_battery.py",
-   "line": 66,
+   "line": 67,
    "kind": "pytest.skip",
    "function": "require_role",
    "condition": "not path.exists()",
@@ -882,7 +900,23 @@
   },
   {
    "file": "tests/data/test_c1_battery.py",
-   "line": 260,
+   "line": 321,
+   "kind": "pytest.skip",
+   "function": "test_the_default_domain_still_reproduces_the_frozen_c1_identity",
+   "condition": "result.returncode != 0",
+   "expanded": "result.returncode != 0 | result=subprocess.run(\n        [sys.executable, \"scripts/data/build_c1_confirmation_battery.py\",\n         \"--out\", str(out)],\n        cwd=REPO, capture_output=True, text=True,\n        env={\"PYTHONPATH\": \"src\", \"PATH\": \"/usr/bin:/bin\",\n             \"HF_HUB_CACHE\": str(hub_cache())}) | REPO=Path(__file__).resolve().parents[2] | out=tmp_path / \"rebuild\"",
+   "signal": "repository_content",
+   "verdict": "same_on_pod",
+   "why": "tracked content the bundle checkout carries",
+   "nodeid": "tests/data/test_c1_battery.py::test_the_default_domain_still_reproduces_the_frozen_c1_identity",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "the bundle checkout carries it"
+  },
+  {
+   "file": "tests/data/test_c1_battery.py",
+   "line": 351,
    "kind": "pytest.skip",
    "function": "test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
    "condition": "result[\"status\"] == \"SOURCE_ABSENT\"",
@@ -2036,5 +2070,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "fdf5ae1ca25bd979f1a8c101ff4bb457fd3faa01704c23513e67d2271474c330"
+ "digest": "57df2c7991a1f409495871cd5895585b1c30b3fc8adf6441c21dc09cd2abb857"
 }

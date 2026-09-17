@@ -908,6 +908,11 @@ def pricing(space) -> dict[str, Any]:
     #: silently depend on the current cap being 320.
     minimum_cap = round(
         budget["cumulative_spend_usd"] + combined["hard_ceiling_usd"], 4)
+    #: The same chain summed from 2-dp DISPLAY figures, so the record can show
+    #: how much a display-rounded reading understates the requirement without
+    #: anybody having to remember a past example.
+    display_chain = round(round(standing["hard_ceiling_usd"], 2)
+                          + round(selection["hard_ceiling_usd"], 2), 4)
 
     return {
         "schema": PRICING_SCHEMA,
@@ -960,14 +965,22 @@ def pricing(space) -> dict[str, Any]:
             "_not_a_recommendation": (
                 "the trade is scientific, not arithmetic: the arithmetic is "
                 "above and the choice is the maintainer's."),
-            "_rounding_note": (
-                "every figure here is computed from the 4-dp stored ceilings. A "
-                "review message that added the DISPLAY-rounded search ceiling "
-                "($33.18) reaches a chain of $61.0708 and a minimum cap of "
-                "$358.5798, which is $0.0027 BELOW the derived figures. A "
-                "ceiling must round up, so the derived values are the ones to "
-                "fund: a cap set at the display-rounded figure would not "
-                "contain both ceilings."),
+            "rounding": {
+                "_rule": (
+                    "every figure in this record is computed from the 4-dp "
+                    "stored ceilings. A ceiling rounds UP or it under-authorizes "
+                    "the plan it prices, so a chain summed from "
+                    "DISPLAY-rounded components is not safe to fund."),
+                "chain_from_4dp_ceilings_usd": combined["hard_ceiling_usd"],
+                "chain_from_2dp_display_ceilings_usd": display_chain,
+                "understatement_usd": round(
+                    combined["hard_ceiling_usd"] - display_chain, 4),
+                "_why_this_is_here": (
+                    "a review once summed the display-rounded search ceiling "
+                    "and reached a chain below the derived one. The comparison "
+                    "is DERIVED here rather than recounted, so it cannot go "
+                    "stale when the components move — which they have, twice."),
+            },
         },
         "authorizes": "nothing",
     }

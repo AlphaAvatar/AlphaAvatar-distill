@@ -30,17 +30,17 @@
  "behaviour_only_sets": [
   "code"
  ],
- "content_sha256": "c04d9d648b2a9e4e110c485138e6e04d4a33ba8fbbbcc109b8e08cf94ad9358e",
+ "content_sha256": "0ad76fc79f5e7ebf9e8146710add07cc33554526a23507f97f0b458aec2cae1f",
  "content_sha256_convention": "sha256 over newline-joined sorted 'id:prompt_sha256' pairs",
- "manifest_sha256": "71692f1ebb13dab9d73beec043ed9bae1ef6e439fca6c365dc648172514796c0",
+ "manifest_sha256": "5b2d285556c97cd2e0b383a98a42c9230f299f63de2533aab9140de3bbdd910e",
  "set_sha256": {
-  "code": "184c89ed767f4e6e61970b0a68174a4074be0c1d6dc442f1089d57911986e9ab",
-  "gsm8k": "c4699f4d29bd910ee0781ca5fb1239518af238c178059d4dd2779123927a059c",
-  "knowledge": "81d138becebf7c78ac74f4c54e3b0e9d76962d71d5ef909d6288116d8c843760",
-  "math_verified": "4184d1409b5b42b117a15182f1c0a891de77f0c98b63c1410a8b2a072942cfb8",
-  "multihop": "3c6041a19db26e9a94c9fd46e0770d23f91610a012ad080e08592c206ada22ba",
-  "rag": "66a0c4865f101d327f0b614e1f949fbf071659f8f5811355fc3639224e970d01",
-  "tool": "6f0ab870f05618287bceadbd36a49afb423e0caeee4715e4a64a1b2dc1a77652"
+  "code": "589c8b2ed902a03b82f0eb6980f4d9ed1bffea6f5b7b5e98ff4a0799d30fc91d",
+  "gsm8k": "23db209b4f414e47c2e2030c747c212f46ec7dbfe0a531450f82aef7e0d981ec",
+  "knowledge": "37a22f307e7d58368ceb64199520d8bfb1542d426ea0e5b8aabcea37b09d1449",
+  "math_verified": "29f09c55c6c79d8e7d962eb45d2a3fd53cf35bd64c020df3745b3c016d5bfde0",
+  "multihop": "ee2eac9205be3aa20c890b321bedd307518e6a22924dd2f305c6620ba228aeb2",
+  "rag": "269b5c3baf424f18d99b8e8165be9ada477f57f46e4cb3285a7090511b16847a",
+  "tool": "379a33b18552c881099cdd37ac7d6e48cbcb2e238fe650755c535f084e328789"
  },
  "set_counts": {
   "code": 100,
@@ -139,7 +139,7 @@
   "why": "C0's inferential unit is the prompt and same-prompt cross-seed dependence is substantial, so seed-disjointness alone would let the screening selection leak into the confirmation. Disjoint prompts AND disjoint seeds make the confirmation genuinely held out."
  },
  "verification": {
-  "determinism": "an independent rebuild into a separate directory reproduced content_sha256 c04d9d648b2a9e4e... exactly",
+  "determinism": "an independent rebuild into a separate directory reproduced content_sha256 0ad76fc79f5e7ebf... exactly",
   "disjointness_measured": {
    "vs_c1_confirmation_v1": {
     "shared_ids": 0,
@@ -156,10 +156,18 @@
    "vs_recovery_training": {
     "shared_prompt_hashes": 0
    },
-   "_method": "measured independently of the builder's own guard, by loading both assets and intersecting stable ids and normalized prompt content hashes. The builder also refuses on any collision; this is the second, outside check."
+   "_method": "measured independently of the builder's own guard, by loading both assets and intersecting stable ids and normalized prompt content hashes. The builder also refuses on any collision; this is the second, outside check. REMEASURED after the rank-domain repair."
   },
   "mixture_identical_to_c1": true,
-  "c1_battery_unaffected": "battery_render.rank_key gained an optional `domain` defaulting to C1's, and c1_confirmation_v1 was rebuilt to prove it: content_sha256 a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c reproduced exactly. The frozen C1 identity is untouched."
+  "c1_battery_unaffected": "battery_render.rank_key gained an optional `domain` defaulting to C1's, and c1_confirmation_v1 was rebuilt to prove it: content_sha256 a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c reproduced exactly. The frozen C1 identity is untouched, and a regression now rebuilds it rather than trusting the default's spelling.",
+  "rank_domain_repair": {
+   "what_was_wrong": "rank_take accepted `domain` and did not forward it to rank_key, so every caller silently got DEFAULT_RANK_DOMAIN. The first build of this asset was therefore drawn under C1's ordering with C1's prompts excluded \u2014 disjoint, deterministic and exclusion-correct, but NOT sampled under the domain its manifest claimed.",
+   "superseded_content_sha256": "c04d9d648b2a9e4e110c485138e6e04d4a33ba8fbbbcc109b8e08cf94ad9358e",
+   "content_sha256_after_repair": "0ad76fc79f5e7ebf9e8146710add07cc33554526a23507f97f0b458aec2cae1f",
+   "every_per_set_hash_moved": true,
+   "_so_the_bug_was_load_bearing": "the repaired sample differs from the first one in every stratum, which is why the asset was rebuilt rather than merely re-documented.",
+   "regression": "tests/data/test_c1_battery.py::test_rank_take_FORWARDS_its_domain_to_the_key pins the contract between rank_take and rank_key under three domains, and ::test_a_different_rank_domain_would_select_a_different_sample is the direct catch. Both were confirmed to FAIL with the bug reinstated."
+  }
  },
  "no_model_has_been_evaluated_on_it": true,
  "what_it_may_not_do": [
@@ -176,5 +184,5 @@
   "_mixture_and_sources_are_c1s": "imported from build_c1_confirmation_battery rather than restated, so the two batteries differ in their sample and nothing else"
  },
  "authorizes": "nothing",
- "record_sha256": "5b471d1b79de31c0933df8778066b1fc3a33c6bcb26145b7d329961ff6ec2a42"
+ "record_sha256": "35eb52c59aeb93918826c39f0d52099aee7e09eac47f6eaf62454ee425d18b71"
 }

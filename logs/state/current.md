@@ -94,10 +94,19 @@ marginal, an `11.7×` lift. Selecting and confirming on the same prompts would
 leak the selection into the confirmation however fresh the seeds were. So
 [`c2_screening_v1`](../stages/stage-1/phase_c2/plans/c2_screening_battery.json)
 was built and frozen: 950 prompts / 850 scorable, C1's mixture preserved exactly,
-content `c04d9d64…`, and **measured** disjoint from `c1_confirmation_v1` by
-stable id *and* normalized prompt content — zero shared on both — as well as
-from calibration, `state_eval`, the recovery corpus and the reserved
-final-promotion battery. It produces no verdict and may promote nothing.
+content `0ad76fc7…`, and **measured** disjoint from
+`c1_confirmation_v1` by stable id *and* normalized prompt content — zero shared
+on both — as well as from calibration, `state_eval`, the recovery corpus and the
+reserved final-promotion battery. It produces no verdict and may promote nothing.
+
+> **It was rebuilt once, for a real bug.** `rank_take` accepted a `domain`
+> argument and did not forward it to `rank_key`, so the first build silently used
+> C1's rank domain: disjoint and deterministic, but drawn under an ordering its
+> own manifest did not claim. The repaired sample differs in **every** stratum
+> (`c04d9d64…` → `0ad76fc7…`). Three regressions now cover it,
+> each confirmed to fail with the bug reinstated — including one that re-derives
+> a stratum under the declared domain and requires the frozen sample to be that
+> one and *not* the default domain's, which is the provenance claim itself.
 
 | rung | seeds | arms | battery | probes | decides |
 | --- | --- | --- | --- | --- | --- |

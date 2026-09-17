@@ -360,7 +360,12 @@ def rank_take(rows: Iterable[dict], want: int, *, stratum: str, base_digest: str
         if h in exclude_hashes:
             continue
         item["prompt_sha256"] = h
-        candidates.append((rank_key(base_digest, stratum, str(item["id"])), item))
+        #: `domain=domain` is load-bearing. Without it this call silently fell
+        #: back to `DEFAULT_RANK_DOMAIN`, so a caller that asked for a distinct
+        #: domain got C1's ordering anyway — and the only visible symptom was a
+        #: manifest claiming a sampling rule the sample had not been drawn under.
+        candidates.append((rank_key(base_digest, stratum, str(item["id"]),
+                                    domain=domain), item))
 
     candidates.sort(key=lambda t: (t[0], str(t[1]["id"])))
     out: list[dict] = []
