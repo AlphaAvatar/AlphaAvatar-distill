@@ -1,0 +1,58 @@
+{
+ "schema": "aadistill.engineering_validation_scope/v1",
+ "_contract": "What real-GPU evidence the full joint search's device integration ALREADY has, so the bounded validation can be scoped to what is genuinely unverified rather than re-buying evidence that exists. AUTHORIZES NOTHING.",
+ "question": "the maintainer asked for a bounded real-GPU validation of the CUDA/device/BF16/model-materialization integration that the CPU toy run cannot verify. This asks first: which of it is unverified?",
+ "operators_the_joint_space_needs": [
+  "attention.activation_importance_v1",
+  "composite.stage1_sandwich_v0",
+  "depth.causal_kl_greedy_v1",
+  "depth.positional_v0",
+  "ffn.activation_importance_v0",
+  "width.global_pca_v0"
+ ],
+ "gpu_expansions_already_observed": {
+  "attention.activation_importance_v1": {
+   "phase_c2_attempt4": 14,
+   "total": 14
+  },
+  "composite.stage1_sandwich_v0": {
+   "phase_b_attempt5": 2,
+   "total": 2
+  },
+  "depth.causal_kl_greedy_v1": {
+   "phase_b_attempt5": 12,
+   "phase_c2_attempt4": 7,
+   "total": 19
+  },
+  "depth.positional_v0": {
+   "phase_b_attempt5": 6,
+   "total": 6
+  },
+  "ffn.activation_importance_v0": {
+   "phase_b_attempt5": 20,
+   "phase_c2_attempt4": 9,
+   "total": 29
+  },
+  "width.global_pca_v0": {
+   "phase_b_attempt5": 24,
+   "phase_c2_attempt4": 14,
+   "total": 38
+  }
+ },
+ "every_operator_has_l40s_evidence": true,
+ "sources": {
+  "phase_b_attempt5": "logs/stages/stage-1/phase_b/runs/attempt5/search_telemetry.jsonl",
+  "phase_c2_attempt4": "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/telemetry.jsonl"
+ },
+ "_what_that_evidence_covers": "each expansion above is a real L40S execution of that operator through the real BeamSearch against the real 4B teacher: plan, apply, materialize, canonical from_pretrained reload, identity hash and a state_eval measurement, in the session's production dtype. So operator device placement, dtype handling and real-scale model materialization are evidenced for all six implementations by paid sessions.",
+ "unrestricted_profiles_also_evidenced": "Phase-B attempt 5 ran with impl_profiles=None over the whole shipped registry and two active mixtures, which is the same unpinned branching the joint search uses. The joint configuration is therefore a branching-count difference from an already-executed GPU run, not a device difference.",
+ "what_remains_unverified_on_gpu": [
+  "scripts/pod/autoinit_phase_c2_full_search_driver.py has never run on a GPU at all. Its stage sequencing, its afford check, the arguments it forwards to run_phase_a_search and its commit_top_k parsing are exercised only by a CPU toy execution \u2014 which already found one real defect in that wrapper.",
+  "the driver's pod-side path resolution (AAD_REPO / AAD_WORKSPACE, the audit and search workdirs) has only ever resolved on the dev box.",
+  "real-geometry student materialization and canonical reload in bf16 initiated BY THIS DRIVER rather than by Search-1's."
+ ],
+ "therefore_the_bounded_scope_is": "run THIS driver on one real L40S at toy geometry with --device cuda, exercising the full joint space through the real BeamSearch with placement and dtype asserted, plus one real-geometry materialization and canonical reload probe. It deliberately does NOT re-run the six operators at real scale: that evidence exists above, and re-buying it would cost hours without answering a question.",
+ "_assert_placement_not_arithmetic": "the defect class is a tensor on the wrong device or in the wrong dtype, which is invisible when there is only one device. Numerical agreement between CPU and GPU is NOT the check and is not asserted.",
+ "authorizes": "nothing",
+ "record_sha256": "649644ec74d9d89735699e7d67d54bb87d7e14f0193f7e2c22b3e184af192e4d"
+}

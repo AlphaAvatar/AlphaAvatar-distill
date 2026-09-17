@@ -1,0 +1,61 @@
+{
+ "schema": "aadistill.engineering_validation_authorization/v1",
+ "_contract": "The approval for ONE real-GPU engineering validation of the Phase-C2 full-joint-search driver. Recorded HERE, under this validation's own governance evidence, and deliberately NOT in any formal C2 artifact: it permits an engineering observation and confers nothing on the scientific search.",
+ "authorization_id": "c2_full_search_cuda_engineering.2026-09-17",
+ "granted_utc": "2026-09-17T00:00:00Z",
+ "granted_by": "the maintainer decision of 2026-09-17 closing the Phase-C2 preparation round, whose execution sequence requires 'one bounded real-GPU engineering validation of the full-search path sufficient to exercise the CUDA/device/BF16/model-materialization integration that the CPU toy run cannot verify' before any formal scientific search. That decision approved the validation and stated no dollar amount, so the amount is derived and bounded here \u2014 P12.1 requires an engineering validation to have a stated budget and scope, and each task's amounts live in that task's governance artifact.",
+ "subject": "real-CUDA engineering validation of scripts/pod/autoinit_phase_c2_full_search_driver.py",
+ "scope_is_narrow_and_why": {
+  "record": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/scope.json",
+  "finding": "all six implementations the joint space searches ALREADY have real-L40S evidence from paid sessions \u2014 14/2/19/6/29/38 expansions across Phase-B attempt 5 and C2 attempt 4 \u2014 each a real plan/apply/materialize/canonical reload/identity/state_eval against the real 4B teacher. Phase B also ran with impl_profiles=None over two mixtures, which is the joint search's own unpinned branching. So operator device placement, dtype handling and real-scale materialization are evidenced, and re-running them would cost hours without answering a question.",
+  "what_is_actually_unverified": "THIS DRIVER has never run on a GPU. Its stage sequencing, its afford check, the arguments it forwards to run_phase_a_search, its commit_top_k parsing and its pod-side path resolution are exercised only by a CPU toy execution \u2014 which already found one real defect in that wrapper.",
+  "so_the_validation_is": "the driver itself, on one real L40S, at toy geometry with --device cuda and bf16, through the real BeamSearch over the full joint space, with DEVICE PLACEMENT and DTYPE asserted; plus one real-geometry student materialization and canonical-reload probe, which needs the teacher's config at the pinned revision and NOT its weights."
+ },
+ "resource_contract": {
+  "gpu": "NVIDIA L40S",
+  "_why_the_target_card": "the card the formal search will use. Validating device integration on a different card would leave the real one unverified, which is the failure this validation exists to prevent.",
+  "price_basis_usd_per_hour": 1.09,
+  "_price_basis_is_re_quoted": "the launcher queries the live securePrice and refuses above the basis. An hour-old price is not a price.",
+  "provider_resources_max": 1,
+  "provider_create_attempts_max": 1,
+  "retries_or_replacement_pods": 0,
+  "engineering_soft_cap_usd": 0.6,
+  "total_resource_cost_ceiling_usd": 0.9,
+  "teardown_reserve_usd": 0.3,
+  "_teardown_reserve": "WITHIN the $0.90 ceiling, not added to it.",
+  "_minute_budgets_follow_the_rate": "$0.60/rate is the work stop and $0.90/rate the hard limit, so a dearer GPU buys proportionally less time: 33.0 and 49.5 minutes at $1.09/h."
+ },
+ "capability_requirement": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 8,
+  "_why": "the driver runs bf16 because that is what the formal search runs; bf16 needs cc >= 8.0. The dtype, the operator set and the workload must NOT be changed to make a cheaper unsupported device pass."
+ },
+ "authorizes": [
+  "one real-CUDA engineering validation of the full-search driver, at the stated resource, capability and budget contract",
+  "autonomous diagnosis, minimal repair and minimal retest of ORDINARY engineering failures inside this envelope, per the maintainer's step 3 and P12.1, without a further approval"
+ ],
+ "does_not_authorize": [
+  "the formal Phase-C2 full joint search",
+  "any formal C2 grant, authorization, readiness record or bundle",
+  "the behavioural screening or confirmation session",
+  "any recovery training or probe",
+  "a Search-1 rerun, or remeasurement of B or any frozen C candidate",
+  "C3 or C4 work of any kind",
+  "a second provider resource, a replacement pod, or any retry that would exceed the ceiling above",
+  "spending C1's $6.0000 engineering allowance, which belongs to C1's package and does not transfer"
+ ],
+ "budget_context": {
+  "cumulative_spend_before_usd": 297.509,
+  "authorized_cap_usd": 370.0,
+  "remaining_before_usd": 72.491,
+  "reserved_c2_chain_ceiling_usd": 63.0615,
+  "worst_case_cumulative_after_usd": 298.409,
+  "worst_case_remaining_after_usd": 71.591,
+  "reserve_after_the_c2_chain_usd": 8.5295,
+  "_it_comes_from_the_project_envelope": "not from C1's engineering allowance, which is that package's and does not transfer. The arithmetic above shows the C2 chain still fits after this validation's worst case.",
+  "_note": "feasibility arithmetic, not permission to execute the formal search"
+ },
+ "formal_c2_status_unchanged": "the full joint search remains NOT AUTHORIZED. This validation produces engineering evidence for a later launch review and nothing else; its report carries scientific_use: false.",
+ "authorization_sha256": "f418a4fed109bf7ffa1bdc21a897e7b4ea3a43a631c12c52474f7e90478eca41"
+}
