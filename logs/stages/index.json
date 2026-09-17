@@ -22,6 +22,7 @@
   "non_experiment_rows": {
    "alias": 1,
    "arm": 1,
+   "engineering": 1,
    "engineering-measurement": 1,
    "experiment-spanning": 1,
    "pipeline-activity": 6,
@@ -150,8 +151,8 @@
     "pipeline_activity": 3,
     "experiments": 7,
     "experiments_with_logs": 7,
-    "runs": 56,
-    "canonical_configs": 5,
+    "runs": 60,
+    "canonical_configs": 6,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -160,7 +161,8 @@
     "configs/experiments/phase_c1/authorization.json",
     "configs/experiments/phase_c2/baseline_completion_authorization.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
-    "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json"
+    "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
+    "configs/validation/c2_full_search_cuda.json"
    ],
    "canonical_data_manifests": [
     "data/warmup/holdout_v1.manifest.json"
@@ -543,6 +545,33 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "The only experiment in the repository that declares its own stage. It also measures with stage-3 confirmation probes, which is what calibrates the subject-vs-instrument rule for the others."
+  },
+  {
+   "experiment_id": "c2_full_search_cuda",
+   "stage_id": "1",
+   "classification": "engineering",
+   "status": "PASS \u2014 engineering evidence, authorizes nothing",
+   "title": "C2 full-search driver \u2014 real-CUDA engineering validation",
+   "question": null,
+   "canonical_path": "logs/stages/stage-1/c2_full_search_cuda",
+   "canonical_config": "configs/validation/c2_full_search_cuda.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/authorization.json",
+     "says": "its engineering authorization, filed under the experiment it serves"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/closeout.json",
+     "says": "its terminal verdict and the money it cost"
+    },
+    {
+     "path": "logs/stages/stage-1/c2_full_search_cuda/runs",
+     "says": "its three subruns, in the SAME stage its governance lives in"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "Stage 1 because the repository has declared that validation material is Stage-1 material rather than stage-neutral, and because the thing it validates is a Stage-1 initialization search. It is `engineering`, not an experiment: it trains nothing, measures no behaviour, produces no correct_overall and ranks no candidate for promotion. Its runs sit in their own destination rather than among phase_c2's formal attempts, so 'show me the C2 attempts' does not return an engineering probe -- while still sharing the stage, so one validation's evidence is not split across two stage areas. The first run to use the launcher's `shared` default created an undeclared stage area, which is what surfaced this."
   },
   {
    "experiment_id": "phase_c2",

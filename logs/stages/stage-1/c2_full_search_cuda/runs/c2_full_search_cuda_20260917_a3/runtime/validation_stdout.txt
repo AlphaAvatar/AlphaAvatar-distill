@@ -1,0 +1,225 @@
+[08:52:48] 5 declared repository input(s) present
+[08:52:48] CUDA NVIDIA L40S cc8.9 bf16=True free=43.97GiB torch=2.9.1+cu130 cuda=13.0
+[08:52:48] capability floor satisfied
+[08:52:48] --- stage driver ---
+[08:52:50] stage bind_identities
+2026-09-17T08:52:50Z MARKER:STAGE_PASSED:bind_identities
+[08:52:50] space: 578 reachable leaves (576 decomposed) over 6 implementations, profiles unpinned
+[08:52:50] stage full_joint_search
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001641 · 1 evals · 0.0 min · 959.07 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.002263 · 2 evals · 0.0 min · 1704.49 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000538 · 3 evals · 0.0 min · 2302.66 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000737 · 4 evals · 0.0 min · 2791.17 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000655 · 5 evals · 0.0 min · 3198.09 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000634 · 6 evals · 0.0 min · 3542.61 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000538; runner-up 5 margin 9.546e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001798 · 7 evals · 0.0 min · 3879.56 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.002243 · 8 evals · 0.0 min · 4178.72 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001255 · 9 evals · 0.0 min · 4445.76 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.001006 · 10 evals · 0.0 min · 4683.13 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001210 · 11 evals · 0.0 min · 4898.08 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 4 score 0.001006; runner-up 5 margin 2.034e-04
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001923 · 1 evals · 0.0 min · 3173.62 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001436 · 2 evals · 0.0 min · 4303.72 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000903 · 3 evals · 0.0 min · 4890.37 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.001168 · 4 evals · 0.0 min · 5253.08 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000631 · 5 evals · 0.0 min · 5395.02 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000762 · 6 evals · 0.0 min · 5636.25 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000631; runner-up 5 margin 1.310e-04
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.002127 · 7 evals · 0.0 min · 5807.50 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001780 · 8 evals · 0.0 min · 5932.09 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001628 · 9 evals · 0.0 min · 6055.56 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001607 · 10 evals · 0.0 min · 6251.67 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001543 · 11 evals · 0.0 min · 6423.31 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.001543; runner-up 3 margin 6.412e-05
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001655 · 1 evals · 0.0 min · 3731.36 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.002306 · 2 evals · 0.0 min · 5062.93 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000539 · 3 evals · 0.0 min · 5748.54 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000726 · 4 evals · 0.0 min · 6168.14 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000636 · 5 evals · 0.0 min · 6446.69 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000621 · 6 evals · 0.0 min · 6652.34 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000539; runner-up 5 margin 8.235e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001811 · 7 evals · 0.0 min · 6928.35 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.002251 · 8 evals · 0.0 min · 7157.46 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001243 · 9 evals · 0.0 min · 7344.58 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000987 · 10 evals · 0.0 min · 7499.93 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001201 · 11 evals · 0.0 min · 7633.92 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 4 score 0.000987; runner-up 5 margin 2.141e-04
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001923 · 1 evals · 0.0 min · 3605.56 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001521 · 2 evals · 0.0 min · 4910.99 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000867 · 3 evals · 0.0 min · 5586.56 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.001130 · 4 evals · 0.0 min · 6012.22 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000641 · 5 evals · 0.0 min · 6309.64 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000751 · 6 evals · 0.0 min · 6519.53 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000641; runner-up 5 margin 1.095e-04
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.002170 · 7 evals · 0.0 min · 6720.54 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001867 · 8 evals · 0.0 min · 6924.32 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001575 · 9 evals · 0.0 min · 7106.76 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001597 · 10 evals · 0.0 min · 7261.09 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001544 · 11 evals · 0.0 min · 7398.74 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.001544; runner-up 2 margin 3.139e-05
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001641 · 1 evals · 0.0 min · 3740.39 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.002252 · 2 evals · 0.0 min · 5068.65 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000539 · 3 evals · 0.0 min · 5751.77 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000726 · 4 evals · 0.0 min · 6172.68 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000631 · 5 evals · 0.0 min · 6456.52 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000624 · 6 evals · 0.0 min · 6659.07 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000539; runner-up 5 margin 8.530e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001777 · 7 evals · 0.0 min · 6936.30 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.002244 · 8 evals · 0.0 min · 7160.87 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001257 · 9 evals · 0.0 min · 7350.48 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000965 · 10 evals · 0.0 min · 7509.25 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001194 · 11 evals · 0.0 min · 7641.84 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 4 score 0.000965; runner-up 5 margin 2.284e-04
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001933 · 1 evals · 0.0 min · 3267.04 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001507 · 2 evals · 0.0 min · 4399.30 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000888 · 3 evals · 0.0 min · 4996.36 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.001119 · 4 evals · 0.0 min · 5347.44 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000642 · 5 evals · 0.0 min · 5586.18 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000752 · 6 evals · 0.0 min · 5761.48 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000642; runner-up 5 margin 1.100e-04
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.002148 · 7 evals · 0.0 min · 6000.05 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001825 · 8 evals · 0.0 min · 6202.12 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001633 · 9 evals · 0.0 min · 6359.20 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001569 · 10 evals · 0.0 min · 6495.61 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001547 · 11 evals · 0.0 min · 6610.18 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.001547; runner-up 3 margin 2.230e-05
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000733 · 1 evals · 0.0 min · 3704.40 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001073 · 2 evals · 0.0 min · 4898.63 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000269 · 3 evals · 0.0 min · 5571.38 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000795 · 4 evals · 0.0 min · 5986.83 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000413 · 5 evals · 0.0 min · 6276.20 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000318 · 6 evals · 0.0 min · 6468.43 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000269; runner-up 5 margin 4.878e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.000834 · 7 evals · 0.0 min · 6655.99 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001440 · 8 evals · 0.0 min · 6834.98 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001267 · 9 evals · 0.0 min · 7018.18 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000671 · 10 evals · 0.0 min · 7179.68 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.000552 · 11 evals · 0.0 min · 7295.79 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.000552; runner-up 4 margin 1.195e-04
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000740 · 1 evals · 0.0 min · 3423.78 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.000747 · 2 evals · 0.0 min · 4680.26 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000647 · 3 evals · 0.0 min · 5331.64 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000456 · 4 evals · 0.0 min · 5741.38 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000484 · 5 evals · 0.0 min · 6051.57 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000367 · 6 evals · 0.0 min · 6301.77 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 5 score 0.000367; runner-up 3 margin 8.843e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001061 · 7 evals · 0.0 min · 6604.56 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001045 · 8 evals · 0.0 min · 6856.39 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001004 · 9 evals · 0.0 min · 7066.06 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.000828 · 10 evals · 0.0 min · 7239.05 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 4) score 0.000996 · 11 evals · 0.0 min · 7389.91 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 3 score 0.000828; runner-up 4 margin 1.677e-04
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000889 · 1 evals · 0.0 min · 3633.63 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.000904 · 2 evals · 0.0 min · 4951.23 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000353 · 3 evals · 0.0 min · 5635.66 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000340 · 4 evals · 0.0 min · 6067.81 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000427 · 5 evals · 0.0 min · 6369.01 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000322 · 6 evals · 0.0 min · 6584.42 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 5 score 0.000322; runner-up 3 margin 1.719e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001035 · 7 evals · 0.0 min · 6868.45 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001139 · 8 evals · 0.0 min · 7105.10 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.000596 · 9 evals · 0.0 min · 7300.05 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.000573 · 10 evals · 0.0 min · 7463.28 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 4) score 0.000662 · 11 evals · 0.0 min · 7598.68 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 3 score 0.000573; runner-up 2 margin 2.264e-05
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000487 · 1 evals · 0.0 min · 3757.78 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.000679 · 2 evals · 0.0 min · 5100.21 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000402 · 3 evals · 0.0 min · 5781.62 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000468 · 4 evals · 0.0 min · 6196.14 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000450 · 5 evals · 0.0 min · 6478.64 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000468 · 6 evals · 0.0 min · 6682.30 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000402; runner-up 4 margin 4.807e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.000928 · 7 evals · 0.0 min · 6963.88 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.000922 · 8 evals · 0.0 min · 7189.75 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.000698 · 9 evals · 0.0 min · 7376.96 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000777 · 10 evals · 0.0 min · 7536.68 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.000680 · 11 evals · 0.0 min · 7673.86 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.000680; runner-up 3 margin 1.819e-05
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.003835 · 1 evals · 0.0 min · 3765.77 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.002602 · 2 evals · 0.0 min · 4929.17 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.001111 · 3 evals · 0.0 min · 5638.67 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000784 · 4 evals · 0.0 min · 6077.23 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000829 · 5 evals · 0.0 min · 6372.34 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000718 · 6 evals · 0.0 min · 6587.27 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 5 score 0.000718; runner-up 3 margin 6.589e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.003210 · 7 evals · 0.0 min · 6870.91 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.002789 · 8 evals · 0.0 min · 7099.63 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001915 · 9 evals · 0.0 min · 7285.48 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001314 · 10 evals · 0.0 min · 7444.34 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 4) score 0.001315 · 11 evals · 0.0 min · 7583.12 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 3 score 0.001314; runner-up 4 margin 1.442e-06
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001859 · 1 evals · 0.0 min · 3681.27 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001261 · 2 evals · 0.0 min · 4978.85 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000535 · 3 evals · 0.0 min · 5281.58 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000976 · 4 evals · 0.0 min · 5418.02 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000480 · 5 evals · 0.0 min · 5494.87 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000543 · 6 evals · 0.0 min · 5423.36 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000480; runner-up 2 margin 5.563e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.002117 · 7 evals · 0.0 min · 5482.00 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001836 · 8 evals · 0.0 min · 5521.40 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001052 · 9 evals · 0.0 min · 5757.00 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001405 · 10 evals · 0.0 min · 5943.45 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001263 · 11 evals · 0.0 min · 6110.21 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 2 score 0.001052; runner-up 5 margin 2.109e-04
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000845 · 1 evals · 0.0 min · 3736.32 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001139 · 2 evals · 0.0 min · 5063.53 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000514 · 3 evals · 0.0 min · 5750.02 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000579 · 4 evals · 0.0 min · 6176.36 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000344 · 5 evals · 0.0 min · 6458.30 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000514 · 6 evals · 0.0 min · 6664.03 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000344; runner-up 2 margin 1.699e-04
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001264 · 7 evals · 0.0 min · 6938.87 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001426 · 8 evals · 0.0 min · 7166.34 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.000759 · 9 evals · 0.0 min · 7353.33 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001164 · 10 evals · 0.0 min · 7508.51 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.000868 · 11 evals · 0.0 min · 7639.15 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 2 score 0.000759; runner-up 5 margin 1.089e-04
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001595 · 1 evals · 0.0 min · 3739.12 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001511 · 2 evals · 0.0 min · 5070.70 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000719 · 3 evals · 0.0 min · 5751.77 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000477 · 4 evals · 0.0 min · 6170.05 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000677 · 5 evals · 0.0 min · 6445.39 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000601 · 6 evals · 0.0 min · 6646.80 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 3 score 0.000477; runner-up 5 margin 1.240e-04
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001968 · 7 evals · 0.0 min · 6921.39 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001596 · 8 evals · 0.0 min · 7146.18 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.000980 · 9 evals · 0.0 min · 7329.70 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.001152 · 10 evals · 0.0 min · 7488.88 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001012 · 11 evals · 0.0 min · 7621.66 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 2 score 0.000980; runner-up 5 margin 3.139e-05
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000714 · 1 evals · 0.0 min · 3704.67 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001070 · 2 evals · 0.0 min · 5040.70 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000261 · 3 evals · 0.0 min · 5735.21 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000807 · 4 evals · 0.0 min · 6161.32 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000416 · 5 evals · 0.0 min · 6447.52 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000319 · 6 evals · 0.0 min · 6656.57 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000261; runner-up 5 margin 5.822e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.000813 · 7 evals · 0.0 min · 6939.94 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001412 · 8 evals · 0.0 min · 7167.38 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001272 · 9 evals · 0.0 min · 7356.06 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000660 · 10 evals · 0.0 min · 7512.01 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.000546 · 11 evals · 0.0 min · 7641.30 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.000546; runner-up 4 margin 1.135e-04
+depth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000748 · 1 evals · 0.0 min · 3736.69 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.000774 · 2 evals · 0.0 min · 5076.02 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000664 · 3 evals · 0.0 min · 5760.95 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000438 · 4 evals · 0.0 min · 6178.84 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000491 · 5 evals · 0.0 min · 6460.16 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000355 · 6 evals · 0.0 min · 6666.72 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 5 score 0.000355; runner-up 3 margin 8.325e-05
+depth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001066 · 7 evals · 0.0 min · 6934.69 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001055 · 8 evals · 0.0 min · 7158.96 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001008 · 9 evals · 0.0 min · 7329.84 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.000802 · 10 evals · 0.0 min · 7473.82 eval/min
+depth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 4) score 0.000986 · 11 evals · 0.0 min · 7611.85 eval/min
+depth.causal_kl_greedy_v1: ROUND 1 chose layer 3 score 0.000802; runner-up 4 margin 1.840e-04
+stage-1 selection committed: /workspace/aad/artifacts/validation/work/search/stage1_selection.json (5 leaves)
+2026-09-17T08:53:10Z MARKER:STAGE_PASSED:full_joint_search
+[08:53:10] stage commit_top_k
+2026-09-17T08:53:10Z MARKER:STAGE_PASSED:commit_top_k
+2026-09-17T08:53:10Z MARKER:C2_FULL_SEARCH_ALL_DONE
+[08:53:11] stage D passed in 20.0s — 35 state(s), all on cuda in bfloat16
+[08:53:11] --- stage geometry ---
+[08:53:19] stage M passed in 7.47s — 596,049,920 parameters, reloaded on cuda in bfloat16, rope 5000000.0, peak 1.118 GiB
+[08:53:19] verdict: PASS

@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.engineering_subrun_outcome/v1",
+ "run_id": "c2_full_search_cuda_20260917_a1",
+ "experiment_id": "c2_full_search_cuda",
+ "validation": "full-search-cuda",
+ "verdict": "FAIL",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "budget": {
+  "this_attempt": 0.0299,
+  "_basis": "elapsed x confirmed rate",
+  "_source": "backfilled from the campaign ledger, which booked these three subruns before the launcher learned to write this file. The ledger is the single source; nothing here is a second measurement."
+ },
+ "pod_id": "9olm9hi8pge3dc",
+ "teardown_confirmed": true,
+ "elapsed_minutes": 1.648
+}

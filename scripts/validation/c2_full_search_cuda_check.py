@@ -50,7 +50,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import sys
+import tempfile
 import time
 import traceback
 from datetime import datetime, timezone
@@ -116,6 +118,64 @@ def require_cuda(requested: str) -> dict:
         f"bf16={info['bf16_supported']} free={info['free_gib']}GiB "
         f"torch={info['torch']} cuda={info['cuda_runtime']}")
     return info
+
+
+def declared_inputs() -> list[str]:
+    """Every non-source file the driver reads, DERIVED FROM CODE.
+
+    Not a list in a config beside the code. Two pod subruns died on this, one
+    per producer, because a hand-maintained list can only name the producer its
+    author happened to think of:
+
+    * a1 ($0.0299) -- stage A pools its cost table over the committed telemetry
+      and refused to price from a partial history when none was shipped;
+    * a2 ($0.0208) -- stage B resolves the two real calibration mixtures, whose
+      item files live in the out-of-tree artifact store. I had declared the
+      first producer's inputs and not the second's.
+
+    Asking the code closes the class rather than the instance: `TELEMETRY_SOURCES`
+    is what the cost model reads and `items_path` is what each profile resolves,
+    so a new telemetry source or a reweighted mixture is covered without anyone
+    remembering to add it. The launch invocation builds its `--ship` arguments
+    from this same function, which is why the two cannot disagree.
+    """
+    from aadistill.initialization.calibration.profiles import get_profile
+
+    paths: list[str] = []
+    for _name, telemetry, result in _FS.TELEMETRY_SOURCES:
+        paths.append(telemetry)
+        if result:
+            paths.append(result)
+    for qualified in _FS.PROFILE_IDS:
+        items = getattr(get_profile(qualified), "items_path", None)
+        if items:
+            paths.append(str(items))
+    #: Order-stable and duplicate-free: two profiles may share a pool.
+    return list(dict.fromkeys(paths))
+
+
+def require_repo_inputs(cfg: dict) -> list[str]:
+    """The files `declared_inputs` names, checked FIRST.
+
+    Before CUDA, before the capability floor, before anything expensive --
+    because a missing input is not a device problem, and on a1 it surfaced as a
+    search-space error deep inside stage A rather than as "a file you needed is
+    not here", which sent the diagnosis at the cost model instead of the ship
+    set.
+
+    `cfg` may override the derived list, which is how the refusal itself is
+    testable; production passes no override and gets the derivation.
+    """
+    override = (cfg.get("required_repo_inputs") or {}).get("paths")
+    declared = list(override) if override is not None else declared_inputs()
+    missing = [rel for rel in declared if not (REPO / rel).is_file()]
+    if missing:
+        raise AssertionError(
+            f"{len(missing)} declared repository input(s) are absent from this "
+            f"tree: {missing}. The driver reads them to derive its cost table "
+            "and refuses to price from a partial history. Ship them.")
+    say(f"{len(declared)} declared repository input(s) present")
+    return declared
 
 
 def require_capability(info: dict, need: dict) -> None:
@@ -395,7 +455,16 @@ def stage_geometry(cfg: dict, device: str, dtype_name: str, work: Path) -> dict:
     model = adapter.build_model(config, dtype, cfg["seed"])
     built = placement_of(model)
     params = sum(p.numel() for p in model.parameters())
-    root = work / "real_geometry"
+    #: OUTSIDE the collected directory, and deleted below.
+    #:
+    #: A 596M bf16 student is ~1.2 GiB, and the launcher scp's the whole
+    #: artifact directory home while the pod BILLS. Subrun a3 passed both stages
+    #: in 27 seconds and then spent ten minutes and roughly $0.19 downloading a
+    #: checkpoint whose only purpose was to be reloaded once, in the same
+    #: function, and never looked at again. The measurements are the evidence;
+    #: the bytes are scratch.
+    root = Path(tempfile.mkdtemp(prefix="c2-real-geometry-",
+                                 dir=os.environ.get("AAD_SCRATCH") or None))
     adapter.save(model, str(root))
     del model
     torch.cuda.empty_cache()
@@ -434,6 +503,12 @@ def stage_geometry(cfg: dict, device: str, dtype_name: str, work: Path) -> dict:
     }
     del reloaded
     torch.cuda.empty_cache()
+    #: Deleted once it has been reloaded and measured. Leaving 1.2 GiB of
+    #: scratch behind is how a 27-second validation became a ten-minute one.
+    shutil.rmtree(root, ignore_errors=True)
+    out["_checkpoint_was_scratch"] = (
+        "written outside the collected directory and deleted after the reload: "
+        "the measurements above are the evidence, the bytes were not")
 
     assert place["devices"] == [device], (
         f"the reloaded student sits on {place['devices']}, expected [{device!r}]")
@@ -483,6 +558,9 @@ def main() -> int:
     }
 
     try:
+        #: BEFORE CUDA. A missing input is not a device problem, and reporting
+        #: it as one sent a pod's worth of money looking in the wrong place.
+        report["required_repo_inputs"] = require_repo_inputs(cfg)
         device_info = require_cuda(a.device)
     except SystemExit as exc:
         #: Two different refusals arrive here and they are NOT the same verdict:
@@ -507,6 +585,19 @@ def main() -> int:
             json.dumps(report, indent=1) + "\n")
         say(f"verdict: {report['verdict']} — {report['reason']}")
         return code
+    except AssertionError as exc:
+        #: `require_repo_inputs` refuses with an AssertionError, and this block
+        #: used to catch only SystemExit -- so the one refusal added AFTER the
+        #: try block was written would have escaped `main` as a traceback with
+        #: no report at all. A launcher reads the report; a run whose refusal
+        #: does not reach it looks like a crash rather than a missing file.
+        report["verdict"] = "FAIL"
+        report["reason"] = str(exc)
+        report["finished_utc"] = datetime.now(timezone.utc).isoformat()
+        (out_dir / "c2_full_search_cuda_report.json").write_text(
+            json.dumps(report, indent=1) + "\n")
+        say(f"verdict: {report['verdict']} — {report['reason']}")
+        return FAILED
 
     report["device"] = device_info
     dtype_name = cfg["dtype"]

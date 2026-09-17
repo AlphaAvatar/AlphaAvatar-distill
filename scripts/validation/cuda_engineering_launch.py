@@ -87,11 +87,22 @@ from experiments.run_layout import (  # noqa: E402
 #: completed run reaches. The same rule binds any value passed in.
 DEFAULT_EXPERIMENT_ID = "cuda_stage_f"
 
-#: NOT a pipeline stage. This validates that a CUDA device executes an operator
-#: correctly; it trains nothing, evaluates nothing and produces no stage
-#: artifact. Filing it under whichever stage the operator happens to belong to
-#: would make "show me Stage 3 runs" return an engineering probe.
-RUN_STAGE_ID = "shared"
+#: The DEFAULT stage area; `--stage-id` overrides it.
+#:
+#: `shared` was chosen because a CUDA check is not a pipeline activity: it
+#: trains nothing and produces no stage artifact, and filing it under whichever
+#: stage the operator belongs to would make "show me Stage 3 runs" return an
+#: engineering probe. That reasoning still holds for a stage-neutral probe.
+#:
+#: It is no longer right for every caller, though. The repository has since
+#: declared that `shared/validations/` material is **Stage-1 material, not
+#: stage-neutral**, and stage F's validation is filed as evidence INSIDE the
+#: experiment it serves. A validation whose governance already lives at
+#: `logs/stages/stage-1/<phase>/validations/…` should put its runs in the same
+#: stage, or one validation's evidence is split across two stage areas — and
+#: the first run to use this default created a brand-new `stage-shared` area
+#: that the stage index did not declare.
+DEFAULT_STAGE_ID = "shared"
 
 #: role -> path inside this run. NOT C1's vocabulary: this validation has no
 #: authorization snapshot to keep, no bundle, no driver evidence and no probe
@@ -100,6 +111,16 @@ RUN_STAGE_ID = "shared"
 #: makes the same mechanism carry both.
 RUN_ROLES: dict[str, str] = {
     "evidence": "evidence/evidence.json",
+    #: The subrun's COST, in the field and at the path the budget deriver reads.
+    #:
+    #: Without this an engineering subrun is invisible to the project
+    #: cumulative. `project_sessions` prices a run from
+    #: `<run>/closeout/outcome.json :: budget.this_attempt`, and this launcher
+    #: wrote its cost only under `status.subrun_cost_usd` in the manifest -- so
+    #: the C2 full-search validation booked `$0.1453` to its campaign ledger and
+    #: the project book could not see a cent of it. A measurement that lives
+    #: under a key nobody reads is not evidence.
+    "closeout": "closeout/outcome.json",
     "validation_stdout": "runtime/validation_stdout.txt",
     #: A directory: one journal per resource, named by pod id.
     "watchdog": "runtime/watchdog/",
@@ -108,7 +129,7 @@ RUN_ROLES: dict[str, str] = {
 
 RUN_SPEC = ArtifactSpec(
     spec_id="cuda_engineering_run_v1",
-    required=("evidence",),
+    required=("evidence", "closeout"),
     optional=("validation_stdout", "watchdog", "artifacts"))
 
 #: The scratch-relative paths this run writes and later collects. Same rule as
@@ -187,6 +208,15 @@ class Engineering:
         self.auth_path = (REPO_ROOT / args.authorization).resolve()
         self.validation_dir = self.auth_path.parent
         self.campaign_path = self.validation_dir / "campaign.json"
+        #: A LABEL for the record, resolved once. `write_evidence` used to
+        #: reach for `self.validation_dir.name`, which coupled a plan field to
+        #: a filesystem path and made every caller that builds an Engineering
+        #: without `__init__` owe a directory it has no use for.
+        self.validation_label = self.validation_dir.name
+        #: The stage area the run records land in. Not a module constant:
+        #: a validation whose governance lives under stage 1 must not
+        #: scatter its runs into a different stage area.
+        self.stage_id = args.stage_id
         self.auth = json.loads(self.auth_path.read_text())
         rc = self.auth["resource_contract"]
         #: TASK-CUMULATIVE caps, not per-invocation allocations.
@@ -930,13 +960,38 @@ print(json.dumps(out)); print("PROBE_OK")
         #: recorded has to be what THIS subrun produced.
         require_output_claim(self.scr, self.experiment_id, self.a.run_id)
         layout = open_run(repo_root, self.experiment_id, self.a.run_id,
-                          stage_id=RUN_STAGE_ID,
+                          stage_id=self.stage_id,
                           roles=RUN_ROLES)
         write_run_readmes(layout, experiment_id=self.experiment_id,
                           run_id=self.a.run_id,
-                          stage_id=RUN_STAGE_ID, roles=RUN_ROLES)
+                          stage_id=self.stage_id, roles=RUN_ROLES)
         layout.path(RUN_ROLES["evidence"]).write_text(
             json.dumps(self.ev, indent=1) + "\n")
+        #: The cost, where the deriver looks. `this_attempt` is THIS subrun, not
+        #: the campaign total: the campaign ledger already owns the cumulative,
+        #: and summing per-subrun figures is how the project book avoids
+        #: double-counting a rerun.
+        layout.path(RUN_ROLES["closeout"]).write_text(json.dumps({
+            "schema": "aadistill.engineering_subrun_outcome/v1",
+            "run_id": self.a.run_id,
+            "experiment_id": self.experiment_id,
+            "validation": self.validation_label,
+            "verdict": self.ev.get("verdict"),
+            "scientific_use": False,
+            "authorizes": "nothing",
+            "budget": {
+                "this_attempt": self.ev.get("subrun_cost_usd"),
+                "_basis": self.ev.get("_cost_basis"),
+                "campaign_after_usd": self.ev.get("campaign_cost_after_usd"),
+                "_the_campaign_owns_the_cumulative": (
+                    "this file states only what THIS subrun cost, so the "
+                    "project book can sum subruns without double counting a "
+                    "rerun against the campaign total"),
+            },
+            "pod_id": self.ev.get("pod_id"),
+            "teardown_confirmed": bool(
+                (self.ev.get("teardown") or {}).get("provider_confirms_gone")),
+        }, indent=1) + "\n")
         src = self.scr / "validation_stdout.txt"
         if src.is_file():
             shutil.copy2(src, layout.path(RUN_ROLES["validation_stdout"]))
@@ -952,7 +1007,7 @@ print(json.dumps(out)); print("PROBE_OK")
                             dirs_exist_ok=True)
         doc = record_run(
             layout, spec=RUN_SPEC,
-            plan={"validation": self.validation_dir.name, "execution_sha":
+            plan={"validation": self.validation_label, "execution_sha":
                   self.a.execution_sha, "image": self.a.image},
             implementation={"launcher":
                             "scripts/validation/cuda_engineering_launch.py"},
@@ -967,7 +1022,7 @@ print(json.dumps(out)); print("PROBE_OK")
             roles=present_roles(layout, RUN_ROLES))
         print(f"\nverdict: {self.ev.get('verdict')}")
         print("evidence: "
-              f"{rel_run_dir(doc['experiment_id'], doc['run_id'], RUN_STAGE_ID)}  "
+              f"{rel_run_dir(doc['experiment_id'], doc['run_id'], self.stage_id)}  "
               f"({len(doc['roles'])} role(s) recorded)")
 
 
@@ -981,6 +1036,9 @@ def main() -> int:
                          "the cumulative campaign ledger")
     ap.add_argument("--experiment-id", default=DEFAULT_EXPERIMENT_ID,
                     help="the logs/runs/ key; one path segment")
+    ap.add_argument("--stage-id", default=DEFAULT_STAGE_ID,
+                    help="the stage area the run records land in; use the "
+                         "stage the validation's governance lives under")
     ap.add_argument("--check",
                     default="scripts/validation/cuda_engineering_check.py",
                     help="the pod-side check, repo-relative")

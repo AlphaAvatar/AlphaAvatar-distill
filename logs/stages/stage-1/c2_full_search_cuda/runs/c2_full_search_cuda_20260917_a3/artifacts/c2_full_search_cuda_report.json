@@ -1,0 +1,420 @@
+{
+ "schema": "aadistill.c2_full_search_cuda_check/v1",
+ "run_id": "c2_full_search_cuda_20260917_a3",
+ "validation_id": "c2_full_search_cuda_v1",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "started_utc": "2026-09-17T08:52:48.450762+00:00",
+ "stages": {
+  "driver": {
+   "forwarded": {
+    "device": "cuda",
+    "impl_profiles": null,
+    "conditional_candidates": null,
+    "allowed_impls": [
+     "attention.activation_importance_v1",
+     "composite.stage1_sandwich_v0",
+     "depth.causal_kl_greedy_v1",
+     "depth.positional_v0",
+     "ffn.activation_importance_v0",
+     "width.global_pca_v0"
+    ],
+    "top_n": 5,
+    "run_id": "autoinit.v1.phase_c2.full_search",
+    "search_minutes": 8.0,
+    "profiles": [
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2"
+    ]
+   },
+   "placements": [
+    {
+     "root": "033195ee0b921797d3004b1206fb8502",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "19ee6c6fe6001242d6f238e0cc8bb676",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "1c4e320a3d4b0fc1d60b3ac73c8380b7",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "1c678accbf2c6570f5eb9d14301238b1",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "1dc2b911a841d617d1056867cce3be94",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "302ce2b2fe40b5c1da8c7385035d8f83",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "38b11dac9e3d5674c5f13ff505058898",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "43193bc5e35baa9e4c65fe4897716d4f",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "43db9e17b4b1da073c0aa4eaa59cd27c",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "4f212d124cf6f62ec57e4d2f601d54e7",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "6787187da9292755118571813ecec902",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "7e2d2703d75ff015d8224572735c0f0b",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "84691d41d314a03a9d66512e3ff0540b",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "94ca9ce6395b8b0d7c726e3a9ff6351e",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "97a2cde33e9bc12e1ef6de56679eb22e",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "99c1fcbb0afc4b01f85014fb80ea4713",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "a29be7391fa4b2bc1d0502b205f1aa05",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "a3d0c88029b57e9265d4d01291aae5cd",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "ad4e6810caaba83a5de1a1db7739e897",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "ae151f00590a579abb6b369bc09dc90f",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "aef18f70f6b0f7633cceadc6171d50a0",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "b60cb731071654baae9186b00c25be1e",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "bbe6185a35e1e855efd79f6aa33885cb",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "c056321610d9caa042899195bdfcafc4",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "c46ee5eb65c9501bf49260a2c8d4322d",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "c5dca2c890bb8b1b45025fb009a915f6",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "cab3d3293a891623aa2977ad4f6b6f8d",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "d8ecaf0855aed838ff9912e87ea378d5",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "dae8ee71af91c16d34e8401443e459bb",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "dc7ad93afb2e7728487cacd24ccdc80b",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "e4fd59439d48cc2075bced8e99cfe75b",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "e781f09c967cc2c68ec42a88c2e0743c",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "f1e793a197eaba7bd1ebb9fab1037378",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "f71391d9cfd54b49fddc5b2af8979590",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    },
+    {
+     "root": "fb3314cbd3ebf04ce8259eacb6446ddb",
+     "devices": [
+      "cuda"
+     ],
+     "dtypes": [
+      "torch.bfloat16"
+     ]
+    }
+   ],
+   "state_dirs": 35,
+   "driver_returncode": 0,
+   "elapsed_seconds": 20.0,
+   "distinct_devices": [
+    "cuda"
+   ],
+   "distinct_dtypes": [
+    "torch.bfloat16"
+   ],
+   "space_leaves": 578,
+   "profile_ids": [
+    "calib.domain_balanced@v1",
+    "calib.reasoning_heavy@v2"
+   ]
+  },
+  "geometry": {
+   "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+   "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "_weights_not_downloaded": "the pinned CONFIG only",
+   "target_geometry": {
+    "hidden_size": 1024,
+    "num_hidden_layers": 28,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "head_dim": 128,
+    "vocab_size": 151936,
+    "tie_word_embeddings": true
+   },
+   "parameters": 596049920,
+   "parameters_after_reload": 596049920,
+   "built_placement": {
+    "devices": [
+     "cpu"
+    ],
+    "dtypes": [
+     "torch.bfloat16"
+    ]
+   },
+   "reloaded_placement": {
+    "devices": [
+     "cuda"
+    ],
+    "dtypes": [
+     "torch.bfloat16"
+    ]
+   },
+   "rope_theta_from_the_loaded_model": 5000000.0,
+   "rope_theta_from_the_teacher_config": 5000000.0,
+   "transformers_version": "5.17.0",
+   "tie_word_embeddings": true,
+   "peak_cuda_gib": 1.118,
+   "elapsed_seconds": 7.47
+  }
+ },
+ "required_repo_inputs": [
+  "logs/stages/stage-1/phase_b/runs/attempt5/search_telemetry.jsonl",
+  "logs/stages/stage-1/phase_b/runs/attempt5/search_result.json",
+  "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/telemetry.jsonl",
+  "artifacts/stage1/e8_calibration_v1/items.jsonl",
+  "artifacts/stage1/reasoning_heavy_v2/items.jsonl"
+ ],
+ "device": {
+  "device": "NVIDIA L40S",
+  "capability": "8.9",
+  "bf16_supported": true,
+  "free_gib": 43.97,
+  "total_gib": 44.39,
+  "torch": "2.9.1+cu130",
+  "cuda_runtime": "13.0"
+ },
+ "verdict": "PASS",
+ "finished_utc": "2026-09-17T08:53:19.634824+00:00"
+}

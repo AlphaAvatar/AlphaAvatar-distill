@@ -1,0 +1,344 @@
+{
+ "schema": "aadistill.cuda_engineering_run/v1",
+ "run_id": "c2_full_search_cuda_20260917_a3",
+ "scientific_use": false,
+ "is_formal_c1": false,
+ "authorizes": "nothing",
+ "authorization": "c2_full_search_cuda_engineering.2026-09-17",
+ "authorization_sha256": "32e9b45fe9262ea9bffbaceabc29b9796399f04a8ff5378368b2970e18e1e678",
+ "campaign_id": "c2_full_search_cuda",
+ "subrun_id": "c2_full_search_cuda_20260917_a3",
+ "campaign_booked_before_usd": 0.0551,
+ "campaign_remaining_total_usd": 0.8449,
+ "campaign_remaining_to_soft_usd": 0.5449,
+ "authorization_path": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/authorization.json",
+ "candidate_gpus": [
+  "NVIDIA L40S"
+ ],
+ "authorized_rate_ceiling_usd_per_hour": 1.09,
+ "execution_sha": "",
+ "deployment": {
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "remote_python": "/workspace/eng-venv/bin/python",
+  "min_cuda_version": "13.0",
+  "container_disk_gb": 20,
+  "pip_deps": [
+   "numpy",
+   "transformers"
+  ],
+  "authorizes": "nothing",
+  "venv": {
+   "path": "/workspace/eng-venv",
+   "system_site_packages": true,
+   "_why": "--system-site-packages so the image's CUDA-enabled torch is inherited rather than reinstalled. A plain venv would hide it, and `pip install torch` into an empty venv can resolve to a CPU build -- which would silently turn a GPU validation into a CPU one.",
+   "_why_not_break_system_packages": "The image's interpreter is PEP 668 externally managed, and --break-system-packages is the override that refusal names. It is a justified last resort for a disposable pod, not a generic requirement, so the venv is the default and the override is declared per deployment."
+  },
+  "allow_break_system_packages": false,
+  "capability": {
+   "compute_capability_min": [
+    8,
+    0
+   ],
+   "dtype": "bfloat16",
+   "min_free_vram_gib": 2,
+   "_probe": "the readiness probe must import, see CUDA, meet the capability floor, support the dtype AND complete a real allocation and matmul on the device. Printing CUDA=False beside an IMPORTS_OK marker is not GPU readiness."
+  }
+ },
+ "timeline": [
+  {
+   "utc": "2026-09-17T08:51:28.115724+00:00",
+   "msg": "  NVIDIA L40S: securePrice $1.09/h, 48GB, stock Low"
+  },
+  {
+   "utc": "2026-09-17T08:51:28.115763+00:00",
+   "msg": "accepted NVIDIA L40S at $1.09/h \u2014 $0.0551 booked, $0.5449 to the soft stop (30.0 min), $0.8449 to the ceiling (46.5 min)"
+  },
+  {
+   "utc": "2026-09-17T08:51:28.527113+00:00",
+   "msg": "provider inventory is empty \u2014 no resource is billing"
+  },
+  {
+   "utc": "2026-09-17T08:51:28.527160+00:00",
+   "msg": "creating ONE pod (one create per invocation) \u2014 create --image runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 --gpu-id NVIDIA L40S --gpu-count"
+  },
+  {
+   "utc": "2026-09-17T08:51:29.442625+00:00",
+   "msg": "created jt42hkhgnx2khg \u2014 registering and starting the watchdog NOW"
+  },
+  {
+   "utc": "2026-09-17T08:51:29.443074+00:00",
+   "msg": "watchdog detached (launch #1) \u2014 hard 46.5 min / $0.8449 remaining"
+  },
+  {
+   "utc": "2026-09-17T08:51:29.811127+00:00",
+   "msg": "actual rate $1.09/h confirmed at or below the quote"
+  },
+  {
+   "utc": "2026-09-17T08:52:02.561943+00:00",
+   "msg": "endpoint 160.250.71.213:54350"
+  },
+  {
+   "utc": "2026-09-17T08:52:04.480056+00:00",
+   "msg": "shipping 4.66 MB of source"
+  },
+  {
+   "utc": "2026-09-17T08:52:23.918976+00:00",
+   "msg": "environment /workspace/eng-venv ready (Python 3.12.3)"
+  },
+  {
+   "utc": "2026-09-17T08:52:40.034740+00:00",
+   "msg": "installed: numpy==2.5.3, safetensors==0.8.0, torch==2.9.1+cu130, transformers==5.17.0"
+  },
+  {
+   "utc": "2026-09-17T08:52:44.971669+00:00",
+   "msg": "GPU ready \u2014 NVIDIA L40S cc[8, 9] bf16=True free=43.97GiB torch=2.9.1+cu130"
+  },
+  {
+   "utc": "2026-09-17T08:52:44.971703+00:00",
+   "msg": "running: cd /workspace/aad && PYTHONPATH=src:scripts /workspace/eng-venv/bin/python scripts/validation/c2_full_search_cuda_check.py --config configs/validation/c2_full_search_cuda.json --run-id c2_full_search_cuda_20260917_a3"
+  },
+  {
+   "utc": "2026-09-17T08:53:20.357488+00:00",
+   "msg": "validation exited 0"
+  },
+  {
+   "utc": "2026-09-17T08:56:15.293793+00:00",
+   "msg": "collected 117 artifact file(s)"
+  },
+  {
+   "utc": "2026-09-17T08:56:15.293814+00:00",
+   "msg": "tearing down jt42hkhgnx2khg"
+  },
+  {
+   "utc": "2026-09-17T08:56:26.315054+00:00",
+   "msg": "provider confirms the pod is gone and not billing"
+  },
+  {
+   "utc": "2026-09-17T08:56:26.315321+00:00",
+   "msg": "campaign ledger: 3 subrun(s), $0.1453 booked of $0.90"
+  }
+ ],
+ "quotes": [
+  {
+   "gpu": "NVIDIA L40S",
+   "secure_price_per_hour": 1.09,
+   "stock": "Low",
+   "vram_gb": 48
+  }
+ ],
+ "accepted_quote": {
+  "gpu": "NVIDIA L40S",
+  "secure_price_per_hour": 1.09,
+  "stock": "Low",
+  "vram_gb": 48
+ },
+ "inventory_before_create": [],
+ "create_command": [
+  "/home/ecs-user/.local/bin/runpodctl",
+  "pod",
+  "create",
+  "--image",
+  "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "--gpu-id",
+  "NVIDIA L40S",
+  "--gpu-count",
+  "1",
+  "--container-disk-in-gb",
+  "20",
+  "--volume-in-gb",
+  "0",
+  "--min-cuda-version",
+  "13.0",
+  "--ports",
+  "22/tcp",
+  "--name",
+  "aad-cuda-eng-c2_full_search_cuda_20260917_a3",
+  "--terminate-after",
+  "2026-09-17T09:37:59Z"
+ ],
+ "create_stdout_tail": "{\n  \"containerDiskInGb\": 20,\n  \"costPerHr\": 1.09,\n  \"desiredStatus\": \"RUNNING\",\n  \"env\": [\n    \"PUBLIC_KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHyLTGGhfoY+v3w7CEP8xX0shw4wzWxHnJDqsh60731 alphaavatar-runpod\\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X+f7hsoLZFbJeFXGStjQiea01LsDIFDE5LdnKCrOjGQK10BvmiW593WTL27OChjStN+xb0zMIyTu/rKas9wNL5msNlUbljmwwj4pIPTEMK31FPhUiBpy2vTlHrH1hdNapHX9nh5iOTTvgZV/Vu+a2lxZvdTFkl5GtTLs2TGsHSmKijnrPro2j++BLUd69VTvW8tFsN/w6VALIAnmrt23wUq15Chjhgs3Ar2SI9A/Ww5+T6aRnP6nOKk+DPGAB5RIVL1Rla88sG3lyraNVSFpBfC8tDnyq7PO6uzolWBJ+Dw4I9HP9eia5IJcGRoi+pGCD0Ml0bFmSQiA1coT2zw1 runpodctl-ssh-key\"\n  ],\n  \"gpuCount\": 1,\n  \"id\": \"jt42hkhgnx2khg\",\n  \"imageName\": \"runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404\",\n  \"lastStatusChange\": \"Rented by User: Thu Sep 17 2026 08:51:29 GMT+0000 (Coordinated Universal Time)\",\n  \"machine\": {\n    \"gpuDisplayName\": \"L40S\",\n    \"location\": \"AU\"\n  },\n  \"memoryInGb\": 94,\n  \"name\": \"aad-cuda-eng-c2_full_search_cuda_20260917_a3\",\n  \"ports\": \"22/tcp\",\n  \"vcpuCount\": 16,\n  \"volumeInGb\": 0,\n  \"volumeMountPath\": \"/workspace\"\n}\n",
+ "provider_resource_created": true,
+ "pod_id": "jt42hkhgnx2khg",
+ "watchdog_launches": 1,
+ "watchdog_journal": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/777b935e-0bbf-45ca-8e94-dc7e3f1761c0/scratchpad/a3/watchdog_jt42hkhgnx2khg.jsonl",
+ "actual_price_per_hour": 1.09,
+ "payload_bytes": 4888011,
+ "unpack_rc": 0,
+ "venv_setup": "Python 3.12.3\nRC=0\nWarning: Permanently added '[160.250.71.213]:54350' (ECDSA) to the list of known hosts.\n",
+ "pip_rc": 0,
+ "pip_output_tail": "PIP_RC=0\nWarning: Permanently added '[160.250.71.213]:54350' (ECDSA) to the list of known hosts.\n",
+ "installed_versions": [
+  "numpy==2.5.3",
+  "safetensors==0.8.0",
+  "torch==2.9.1+cu130",
+  "transformers==5.17.0"
+ ],
+ "validation_interpreter": "/workspace/eng-venv/bin/python",
+ "readiness_probe": {
+  "rc": 0,
+  "output": "{\"torch\": \"2.9.1+cu130\", \"numpy\": \"2.5.3\", \"transformers\": \"5.17.0\", \"cuda_available\": true, \"cuda_runtime\": \"13.0\", \"device\": \"NVIDIA L40S\", \"capability\": [8, 9], \"free_gib\": 43.97, \"total_gib\": 44.394, \"bf16_supported\": true, \"device_matmul_finite\": true}\nPROBE_OK\nPROBE_RC=0\nWarning: Permanently added '[160.250.71.213]:54350' (ECDSA) to the list of known hosts.\n",
+  "report": {
+   "torch": "2.9.1+cu130",
+   "numpy": "2.5.3",
+   "transformers": "5.17.0",
+   "cuda_available": true,
+   "cuda_runtime": "13.0",
+   "device": "NVIDIA L40S",
+   "capability": [
+    8,
+    9
+   ],
+   "free_gib": 43.97,
+   "total_gib": 44.394,
+   "bf16_supported": true,
+   "device_matmul_finite": true
+  }
+ },
+ "validation_command": "cd /workspace/aad && PYTHONPATH=src:scripts /workspace/eng-venv/bin/python scripts/validation/c2_full_search_cuda_check.py --config configs/validation/c2_full_search_cuda.json --run-id c2_full_search_cuda_20260917_a3",
+ "validation": {
+  "started_utc": "2026-09-17T08:52:44.971706+00:00",
+  "finished_utc": "2026-09-17T08:53:20.357184+00:00",
+  "returncode": 0,
+  "stdout": ") score 0.000621 \u00b7 6 evals \u00b7 0.0 min \u00b7 6652.34 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000539; runner-up 5 margin 8.235e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001811 \u00b7 7 evals \u00b7 0.0 min \u00b7 6928.35 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.002251 \u00b7 8 evals \u00b7 0.0 min \u00b7 7157.46 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001243 \u00b7 9 evals \u00b7 0.0 min \u00b7 7344.58 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000987 \u00b7 10 evals \u00b7 0.0 min \u00b7 7499.93 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001201 \u00b7 11 evals \u00b7 0.0 min \u00b7 7633.92 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 4 score 0.000987; runner-up 5 margin 2.141e-04\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001923 \u00b7 1 evals \u00b7 0.0 min \u00b7 3605.56 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001521 \u00b7 2 evals \u00b7 0.0 min \u00b7 4910.99 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000867 \u00b7 3 evals \u00b7 0.0 min \u00b7 5586.56 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.001130 \u00b7 4 evals \u00b7 0.0 min \u00b7 6012.22 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000641 \u00b7 5 evals \u00b7 0.0 min \u00b7 6309.64 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000751 \u00b7 6 evals \u00b7 0.0 min \u00b7 6519.53 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000641; runner-up 5 margin 1.095e-04\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.002170 \u00b7 7 evals \u00b7 0.0 min \u00b7 6720.54 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001867 \u00b7 8 evals \u00b7 0.0 min \u00b7 6924.32 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001575 \u00b7 9 evals \u00b7 0.0 min \u00b7 7106.76 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001597 \u00b7 10 evals \u00b7 0.0 min \u00b7 7261.09 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001544 \u00b7 11 evals \u00b7 0.0 min \u00b7 7398.74 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.001544; runner-up 2 margin 3.139e-05\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001641 \u00b7 1 evals \u00b7 0.0 min \u00b7 3740.39 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.002252 \u00b7 2 evals \u00b7 0.0 min \u00b7 5068.65 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000539 \u00b7 3 evals \u00b7 0.0 min \u00b7 5751.77 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000726 \u00b7 4 evals \u00b7 0.0 min \u00b7 6172.68 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000631 \u00b7 5 evals \u00b7 0.0 min \u00b7 6456.52 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000624 \u00b7 6 evals \u00b7 0.0 min \u00b7 6659.07 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000539; runner-up 5 margin 8.530e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001777 \u00b7 7 evals \u00b7 0.0 min \u00b7 6936.30 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.002244 \u00b7 8 evals \u00b7 0.0 min \u00b7 7160.87 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001257 \u00b7 9 evals \u00b7 0.0 min \u00b7 7350.48 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000965 \u00b7 10 evals \u00b7 0.0 min \u00b7 7509.25 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001194 \u00b7 11 evals \u00b7 0.0 min \u00b7 7641.84 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 4 score 0.000965; runner-up 5 margin 2.284e-04\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001933 \u00b7 1 evals \u00b7 0.0 min \u00b7 3267.04 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001507 \u00b7 2 evals \u00b7 0.0 min \u00b7 4399.30 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000888 \u00b7 3 evals \u00b7 0.0 min \u00b7 4996.36 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.001119 \u00b7 4 evals \u00b7 0.0 min \u00b7 5347.44 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000642 \u00b7 5 evals \u00b7 0.0 min \u00b7 5586.18 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000752 \u00b7 6 evals \u00b7 0.0 min \u00b7 5761.48 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000642; runner-up 5 margin 1.100e-04\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.002148 \u00b7 7 evals \u00b7 0.0 min \u00b7 6000.05 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001825 \u00b7 8 evals \u00b7 0.0 min \u00b7 6202.12 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001633 \u00b7 9 evals \u00b7 0.0 min \u00b7 6359.20 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001569 \u00b7 10 evals \u00b7 0.0 min \u00b7 6495.61 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001547 \u00b7 11 evals \u00b7 0.0 min \u00b7 6610.18 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.001547; runner-up 3 margin 2.230e-05\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000733 \u00b7 1 evals \u00b7 0.0 min \u00b7 3704.40 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001073 \u00b7 2 evals \u00b7 0.0 min \u00b7 4898.63 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000269 \u00b7 3 evals \u00b7 0.0 min \u00b7 5571.38 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000795 \u00b7 4 evals \u00b7 0.0 min \u00b7 5986.83 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000413 \u00b7 5 evals \u00b7 0.0 min \u00b7 6276.20 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000318 \u00b7 6 evals \u00b7 0.0 min \u00b7 6468.43 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000269; runner-up 5 margin 4.878e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.000834 \u00b7 7 evals \u00b7 0.0 min \u00b7 6655.99 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001440 \u00b7 8 evals \u00b7 0.0 min \u00b7 6834.98 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001267 \u00b7 9 evals \u00b7 0.0 min \u00b7 7018.18 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000671 \u00b7 10 evals \u00b7 0.0 min \u00b7 7179.68 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.000552 \u00b7 11 evals \u00b7 0.0 min \u00b7 7295.79 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.000552; runner-up 4 margin 1.195e-04\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000740 \u00b7 1 evals \u00b7 0.0 min \u00b7 3423.78 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.000747 \u00b7 2 evals \u00b7 0.0 min \u00b7 4680.26 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000647 \u00b7 3 evals \u00b7 0.0 min \u00b7 5331.64 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000456 \u00b7 4 evals \u00b7 0.0 min \u00b7 5741.38 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000484 \u00b7 5 evals \u00b7 0.0 min \u00b7 6051.57 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000367 \u00b7 6 evals \u00b7 0.0 min \u00b7 6301.77 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 5 score 0.000367; runner-up 3 margin 8.843e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001061 \u00b7 7 evals \u00b7 0.0 min \u00b7 6604.56 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001045 \u00b7 8 evals \u00b7 0.0 min \u00b7 6856.39 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001004 \u00b7 9 evals \u00b7 0.0 min \u00b7 7066.06 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.000828 \u00b7 10 evals \u00b7 0.0 min \u00b7 7239.05 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 4) score 0.000996 \u00b7 11 evals \u00b7 0.0 min \u00b7 7389.91 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 3 score 0.000828; runner-up 4 margin 1.677e-04\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000889 \u00b7 1 evals \u00b7 0.0 min \u00b7 3633.63 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.000904 \u00b7 2 evals \u00b7 0.0 min \u00b7 4951.23 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000353 \u00b7 3 evals \u00b7 0.0 min \u00b7 5635.66 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000340 \u00b7 4 evals \u00b7 0.0 min \u00b7 6067.81 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000427 \u00b7 5 evals \u00b7 0.0 min \u00b7 6369.01 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000322 \u00b7 6 evals \u00b7 0.0 min \u00b7 6584.42 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 5 score 0.000322; runner-up 3 margin 1.719e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001035 \u00b7 7 evals \u00b7 0.0 min \u00b7 6868.45 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001139 \u00b7 8 evals \u00b7 0.0 min \u00b7 7105.10 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.000596 \u00b7 9 evals \u00b7 0.0 min \u00b7 7300.05 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.000573 \u00b7 10 evals \u00b7 0.0 min \u00b7 7463.28 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 4) score 0.000662 \u00b7 11 evals \u00b7 0.0 min \u00b7 7598.68 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 3 score 0.000573; runner-up 2 margin 2.264e-05\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000487 \u00b7 1 evals \u00b7 0.0 min \u00b7 3757.78 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.000679 \u00b7 2 evals \u00b7 0.0 min \u00b7 5100.21 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000402 \u00b7 3 evals \u00b7 0.0 min \u00b7 5781.62 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000468 \u00b7 4 evals \u00b7 0.0 min \u00b7 6196.14 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000450 \u00b7 5 evals \u00b7 0.0 min \u00b7 6478.64 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000468 \u00b7 6 evals \u00b7 0.0 min \u00b7 6682.30 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000402; runner-up 4 margin 4.807e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.000928 \u00b7 7 evals \u00b7 0.0 min \u00b7 6963.88 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.000922 \u00b7 8 evals \u00b7 0.0 min \u00b7 7189.75 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.000698 \u00b7 9 evals \u00b7 0.0 min \u00b7 7376.96 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000777 \u00b7 10 evals \u00b7 0.0 min \u00b7 7536.68 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.000680 \u00b7 11 evals \u00b7 0.0 min \u00b7 7673.86 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.000680; runner-up 3 margin 1.819e-05\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.003835 \u00b7 1 evals \u00b7 0.0 min \u00b7 3765.77 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.002602 \u00b7 2 evals \u00b7 0.0 min \u00b7 4929.17 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.001111 \u00b7 3 evals \u00b7 0.0 min \u00b7 5638.67 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000784 \u00b7 4 evals \u00b7 0.0 min \u00b7 6077.23 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000829 \u00b7 5 evals \u00b7 0.0 min \u00b7 6372.34 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000718 \u00b7 6 evals \u00b7 0.0 min \u00b7 6587.27 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 5 score 0.000718; runner-up 3 margin 6.589e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.003210 \u00b7 7 evals \u00b7 0.0 min \u00b7 6870.91 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.002789 \u00b7 8 evals \u00b7 0.0 min \u00b7 7099.63 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001915 \u00b7 9 evals \u00b7 0.0 min \u00b7 7285.48 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001314 \u00b7 10 evals \u00b7 0.0 min \u00b7 7444.34 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 4) score 0.001315 \u00b7 11 evals \u00b7 0.0 min \u00b7 7583.12 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 3 score 0.001314; runner-up 4 margin 1.442e-06\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001859 \u00b7 1 evals \u00b7 0.0 min \u00b7 3681.27 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001261 \u00b7 2 evals \u00b7 0.0 min \u00b7 4978.85 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000535 \u00b7 3 evals \u00b7 0.0 min \u00b7 5281.58 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000976 \u00b7 4 evals \u00b7 0.0 min \u00b7 5418.02 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000480 \u00b7 5 evals \u00b7 0.0 min \u00b7 5494.87 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000543 \u00b7 6 evals \u00b7 0.0 min \u00b7 5423.36 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000480; runner-up 2 margin 5.563e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.002117 \u00b7 7 evals \u00b7 0.0 min \u00b7 5482.00 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001836 \u00b7 8 evals \u00b7 0.0 min \u00b7 5521.40 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001052 \u00b7 9 evals \u00b7 0.0 min \u00b7 5757.00 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001405 \u00b7 10 evals \u00b7 0.0 min \u00b7 5943.45 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001263 \u00b7 11 evals \u00b7 0.0 min \u00b7 6110.21 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 2 score 0.001052; runner-up 5 margin 2.109e-04\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000845 \u00b7 1 evals \u00b7 0.0 min \u00b7 3736.32 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001139 \u00b7 2 evals \u00b7 0.0 min \u00b7 5063.53 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000514 \u00b7 3 evals \u00b7 0.0 min \u00b7 5750.02 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000579 \u00b7 4 evals \u00b7 0.0 min \u00b7 6176.36 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000344 \u00b7 5 evals \u00b7 0.0 min \u00b7 6458.30 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000514 \u00b7 6 evals \u00b7 0.0 min \u00b7 6664.03 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 4 score 0.000344; runner-up 2 margin 1.699e-04\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001264 \u00b7 7 evals \u00b7 0.0 min \u00b7 6938.87 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001426 \u00b7 8 evals \u00b7 0.0 min \u00b7 7166.34 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.000759 \u00b7 9 evals \u00b7 0.0 min \u00b7 7353.33 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.001164 \u00b7 10 evals \u00b7 0.0 min \u00b7 7508.51 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.000868 \u00b7 11 evals \u00b7 0.0 min \u00b7 7639.15 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 2 score 0.000759; runner-up 5 margin 1.089e-04\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.001595 \u00b7 1 evals \u00b7 0.0 min \u00b7 3739.12 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001511 \u00b7 2 evals \u00b7 0.0 min \u00b7 5070.70 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000719 \u00b7 3 evals \u00b7 0.0 min \u00b7 5751.77 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000477 \u00b7 4 evals \u00b7 0.0 min \u00b7 6170.05 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000677 \u00b7 5 evals \u00b7 0.0 min \u00b7 6445.39 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000601 \u00b7 6 evals \u00b7 0.0 min \u00b7 6646.80 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 3 score 0.000477; runner-up 5 margin 1.240e-04\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001968 \u00b7 7 evals \u00b7 0.0 min \u00b7 6921.39 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001596 \u00b7 8 evals \u00b7 0.0 min \u00b7 7146.18 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.000980 \u00b7 9 evals \u00b7 0.0 min \u00b7 7329.70 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.001152 \u00b7 10 evals \u00b7 0.0 min \u00b7 7488.88 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.001012 \u00b7 11 evals \u00b7 0.0 min \u00b7 7621.66 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 2 score 0.000980; runner-up 5 margin 3.139e-05\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000714 \u00b7 1 evals \u00b7 0.0 min \u00b7 3704.67 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.001070 \u00b7 2 evals \u00b7 0.0 min \u00b7 5040.70 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000261 \u00b7 3 evals \u00b7 0.0 min \u00b7 5735.21 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000807 \u00b7 4 evals \u00b7 0.0 min \u00b7 6161.32 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000416 \u00b7 5 evals \u00b7 0.0 min \u00b7 6447.52 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000319 \u00b7 6 evals \u00b7 0.0 min \u00b7 6656.57 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 2 score 0.000261; runner-up 5 margin 5.822e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.000813 \u00b7 7 evals \u00b7 0.0 min \u00b7 6939.94 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001412 \u00b7 8 evals \u00b7 0.0 min \u00b7 7167.38 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 3) score 0.001272 \u00b7 9 evals \u00b7 0.0 min \u00b7 7356.06 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 4) score 0.000660 \u00b7 10 evals \u00b7 0.0 min \u00b7 7512.01 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 5) score 0.000546 \u00b7 11 evals \u00b7 0.0 min \u00b7 7641.30 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 5 score 0.000546; runner-up 4 margin 1.135e-04\ndepth.causal_kl_greedy_v1: round 0 candidate 1/6 (layer 0) score 0.000748 \u00b7 1 evals \u00b7 0.0 min \u00b7 3736.69 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 2/6 (layer 1) score 0.000774 \u00b7 2 evals \u00b7 0.0 min \u00b7 5076.02 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 3/6 (layer 2) score 0.000664 \u00b7 3 evals \u00b7 0.0 min \u00b7 5760.95 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 4/6 (layer 3) score 0.000438 \u00b7 4 evals \u00b7 0.0 min \u00b7 6178.84 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 5/6 (layer 4) score 0.000491 \u00b7 5 evals \u00b7 0.0 min \u00b7 6460.16 eval/min\ndepth.causal_kl_greedy_v1: round 0 candidate 6/6 (layer 5) score 0.000355 \u00b7 6 evals \u00b7 0.0 min \u00b7 6666.72 eval/min\ndepth.causal_kl_greedy_v1: ROUND 0 chose layer 5 score 0.000355; runner-up 3 margin 8.325e-05\ndepth.causal_kl_greedy_v1: round 1 candidate 1/5 (layer 0) score 0.001066 \u00b7 7 evals \u00b7 0.0 min \u00b7 6934.69 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 2/5 (layer 1) score 0.001055 \u00b7 8 evals \u00b7 0.0 min \u00b7 7158.96 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 3/5 (layer 2) score 0.001008 \u00b7 9 evals \u00b7 0.0 min \u00b7 7329.84 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 4/5 (layer 3) score 0.000802 \u00b7 10 evals \u00b7 0.0 min \u00b7 7473.82 eval/min\ndepth.causal_kl_greedy_v1: round 1 candidate 5/5 (layer 4) score 0.000986 \u00b7 11 evals \u00b7 0.0 min \u00b7 7611.85 eval/min\ndepth.causal_kl_greedy_v1: ROUND 1 chose layer 3 score 0.000802; runner-up 4 margin 1.840e-04\nstage-1 selection committed: /workspace/aad/artifacts/validation/work/search/stage1_selection.json (5 leaves)\n2026-09-17T08:53:10Z MARKER:STAGE_PASSED:full_joint_search\n[08:53:10] stage commit_top_k\n2026-09-17T08:53:10Z MARKER:STAGE_PASSED:commit_top_k\n2026-09-17T08:53:10Z MARKER:C2_FULL_SEARCH_ALL_DONE\n[08:53:11] stage D passed in 20.0s \u2014 35 state(s), all on cuda in bfloat16\n[08:53:11] --- stage geometry ---\n[08:53:19] stage M passed in 7.47s \u2014 596,049,920 parameters, reloaded on cuda in bfloat16, rope 5000000.0, peak 1.118 GiB\n[08:53:19] verdict: PASS\n",
+  "stderr": "ights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12340.92it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1176.85it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12474.17it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13230.34it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1165.73it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13131.29it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 14478.31it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1198.03it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12535.77it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12830.03it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1157.05it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13331.81it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13876.44it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1193.26it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12280.44it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 14046.15it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1188.19it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12468.53it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12823.21it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1195.64it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13061.94it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12260.15it/s]\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00, 1212.58it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12094.91it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13859.49it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12042.82it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13823.74it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13235.78it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12786.66it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12700.81it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12995.96it/s]\n\nLoading weights:   0%|          | 0/68 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 68/68 [00:00<00:00, 12872.35it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13316.17it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13573.80it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12721.74it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13705.90it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13112.54it/s]\n\nLoading weights:   0%|          | 0/68 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 68/68 [00:00<00:00, 13689.77it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13156.36it/s]\n\nLoading weights:   0%|          | 0/68 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 68/68 [00:00<00:00, 13124.09it/s]\n\nLoading weights:   0%|          | 0/68 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 68/68 [00:00<00:00, 10518.24it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 14064.59it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12933.23it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13140.23it/s]\n\nLoading weights:   0%|          | 0/68 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 68/68 [00:00<00:00, 12618.35it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13870.45it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13774.40it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 14401.58it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13683.54it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 15886.21it/s]\n\nLoading weights:   0%|          | 0/68 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 68/68 [00:00<00:00, 12838.16it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13779.32it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13125.03it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13136.65it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13082.32it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 12912.46it/s]\n\nLoading weights:   0%|          | 0/68 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 68/68 [00:00<00:00, 11795.40it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13739.09it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13001.21it/s]\n\nLoading weights:   0%|          | 0/46 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 46/46 [00:00<00:00, 13478.03it/s]\nWarning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n\nWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00,  8.88it/s]\nWriting model shards: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00,  8.86it/s]\n\nLoading weights:   0%|          | 0/310 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 310/310 [00:00<00:00, 12349.08it/s]\n"
+ },
+ "collected_files": [
+  "artifacts/c2_full_search_cuda_report.json",
+  "artifacts/work/audit/c2_full_search_evidence.json",
+  "artifacts/work/control/config.json",
+  "artifacts/work/control/generation_config.json",
+  "artifacts/work/control/model.safetensors",
+  "artifacts/work/real_geometry/config.json",
+  "artifacts/work/real_geometry/generation_config.json",
+  "artifacts/work/real_geometry/model.safetensors",
+  "artifacts/work/search/stage1_selection.json",
+  "artifacts/work/search/states.jsonl",
+  "artifacts/work/search/states/033195ee0b921797d3004b1206fb8502/config.json",
+  "artifacts/work/search/states/033195ee0b921797d3004b1206fb8502/generation_config.json",
+  "artifacts/work/search/states/033195ee0b921797d3004b1206fb8502/model.safetensors",
+  "artifacts/work/search/states/19ee6c6fe6001242d6f238e0cc8bb676/config.json",
+  "artifacts/work/search/states/19ee6c6fe6001242d6f238e0cc8bb676/generation_config.json",
+  "artifacts/work/search/states/19ee6c6fe6001242d6f238e0cc8bb676/model.safetensors",
+  "artifacts/work/search/states/1c4e320a3d4b0fc1d60b3ac73c8380b7/config.json",
+  "artifacts/work/search/states/1c4e320a3d4b0fc1d60b3ac73c8380b7/generation_config.json",
+  "artifacts/work/search/states/1c4e320a3d4b0fc1d60b3ac73c8380b7/model.safetensors",
+  "artifacts/work/search/states/1c678accbf2c6570f5eb9d14301238b1/config.json",
+  "artifacts/work/search/states/1c678accbf2c6570f5eb9d14301238b1/generation_config.json",
+  "artifacts/work/search/states/1c678accbf2c6570f5eb9d14301238b1/model.safetensors",
+  "artifacts/work/search/states/1dc2b911a841d617d1056867cce3be94/config.json",
+  "artifacts/work/search/states/1dc2b911a841d617d1056867cce3be94/generation_config.json",
+  "artifacts/work/search/states/1dc2b911a841d617d1056867cce3be94/model.safetensors",
+  "artifacts/work/search/states/302ce2b2fe40b5c1da8c7385035d8f83/config.json",
+  "artifacts/work/search/states/302ce2b2fe40b5c1da8c7385035d8f83/generation_config.json",
+  "artifacts/work/search/states/302ce2b2fe40b5c1da8c7385035d8f83/model.safetensors",
+  "artifacts/work/search/states/38b11dac9e3d5674c5f13ff505058898/config.json",
+  "artifacts/work/search/states/38b11dac9e3d5674c5f13ff505058898/generation_config.json",
+  "artifacts/work/search/states/38b11dac9e3d5674c5f13ff505058898/model.safetensors",
+  "artifacts/work/search/states/43193bc5e35baa9e4c65fe4897716d4f/config.json",
+  "artifacts/work/search/states/43193bc5e35baa9e4c65fe4897716d4f/generation_config.json",
+  "artifacts/work/search/states/43193bc5e35baa9e4c65fe4897716d4f/model.safetensors",
+  "artifacts/work/search/states/43db9e17b4b1da073c0aa4eaa59cd27c/config.json",
+  "artifacts/work/search/states/43db9e17b4b1da073c0aa4eaa59cd27c/generation_config.json",
+  "artifacts/work/search/states/43db9e17b4b1da073c0aa4eaa59cd27c/model.safetensors",
+  "artifacts/work/search/states/4f212d124cf6f62ec57e4d2f601d54e7/config.json",
+  "artifacts/work/search/states/4f212d124cf6f62ec57e4d2f601d54e7/generation_config.json",
+  "artifacts/work/search/states/4f212d124cf6f62ec57e4d2f601d54e7/model.safetensors",
+  "artifacts/work/search/states/6787187da9292755118571813ecec902/config.json",
+  "artifacts/work/search/states/6787187da9292755118571813ecec902/generation_config.json",
+  "artifacts/work/search/states/6787187da9292755118571813ecec902/model.safetensors",
+  "artifacts/work/search/states/7e2d2703d75ff015d8224572735c0f0b/config.json",
+  "artifacts/work/search/states/7e2d2703d75ff015d8224572735c0f0b/generation_config.json",
+  "artifacts/work/search/states/7e2d2703d75ff015d8224572735c0f0b/model.safetensors",
+  "artifacts/work/search/states/84691d41d314a03a9d66512e3ff0540b/config.json",
+  "artifacts/work/search/states/84691d41d314a03a9d66512e3ff0540b/generation_config.json",
+  "artifacts/work/search/states/84691d41d314a03a9d66512e3ff0540b/model.safetensors",
+  "artifacts/work/search/states/94ca9ce6395b8b0d7c726e3a9ff6351e/config.json",
+  "artifacts/work/search/states/94ca9ce6395b8b0d7c726e3a9ff6351e/generation_config.json",
+  "artifacts/work/search/states/94ca9ce6395b8b0d7c726e3a9ff6351e/model.safetensors",
+  "artifacts/work/search/states/97a2cde33e9bc12e1ef6de56679eb22e/config.json",
+  "artifacts/work/search/states/97a2cde33e9bc12e1ef6de56679eb22e/generation_config.json",
+  "artifacts/work/search/states/97a2cde33e9bc12e1ef6de56679eb22e/model.safetensors",
+  "artifacts/work/search/states/99c1fcbb0afc4b01f85014fb80ea4713/config.json",
+  "artifacts/work/search/states/99c1fcbb0afc4b01f85014fb80ea4713/generation_config.json",
+  "artifacts/work/search/states/99c1fcbb0afc4b01f85014fb80ea4713/model.safetensors",
+  "artifacts/work/search/states/a29be7391fa4b2bc1d0502b205f1aa05/config.json",
+  "artifacts/work/search/states/a29be7391fa4b2bc1d0502b205f1aa05/generation_config.json",
+  "artifacts/work/search/states/a29be7391fa4b2bc1d0502b205f1aa05/model.safetensors",
+  "artifacts/work/search/states/a3d0c88029b57e9265d4d01291aae5cd/config.json",
+  "artifacts/work/search/states/a3d0c88029b57e9265d4d01291aae5cd/generation_config.json",
+  "artifacts/work/search/states/a3d0c88029b57e9265d4d01291aae5cd/model.safetensors",
+  "artifacts/work/search/states/ad4e6810caaba83a5de1a1db7739e897/config.json",
+  "artifacts/work/search/states/ad4e6810caaba83a5de1a1db7739e897/generation_config.json",
+  "artifacts/work/search/states/ad4e6810caaba83a5de1a1db7739e897/model.safetensors",
+  "artifacts/work/search/states/ae151f00590a579abb6b369bc09dc90f/config.json",
+  "artifacts/work/search/states/ae151f00590a579abb6b369bc09dc90f/generation_config.json",
+  "artifacts/work/search/states/ae151f00590a579abb6b369bc09dc90f/model.safetensors",
+  "artifacts/work/search/states/aef18f70f6b0f7633cceadc6171d50a0/config.json",
+  "artifacts/work/search/states/aef18f70f6b0f7633cceadc6171d50a0/generation_config.json",
+  "artifacts/work/search/states/aef18f70f6b0f7633cceadc6171d50a0/model.safetensors",
+  "artifacts/work/search/states/b60cb731071654baae9186b00c25be1e/config.json",
+  "artifacts/work/search/states/b60cb731071654baae9186b00c25be1e/generation_config.json",
+  "artifacts/work/search/states/b60cb731071654baae9186b00c25be1e/model.safetensors",
+  "artifacts/work/search/states/bbe6185a35e1e855efd79f6aa33885cb/config.json",
+  "artifacts/work/search/states/bbe6185a35e1e855efd79f6aa33885cb/generation_config.json",
+  "artifacts/work/search/states/bbe6185a35e1e855efd79f6aa33885cb/model.safetensors",
+  "artifacts/work/search/states/c056321610d9caa042899195bdfcafc4/config.json",
+  "artifacts/work/search/states/c056321610d9caa042899195bdfcafc4/generation_config.json",
+  "artifacts/work/search/states/c056321610d9caa042899195bdfcafc4/model.safetensors",
+  "artifacts/work/search/states/c46ee5eb65c9501bf49260a2c8d4322d/config.json",
+  "artifacts/work/search/states/c46ee5eb65c9501bf49260a2c8d4322d/generation_config.json",
+  "artifacts/work/search/states/c46ee5eb65c9501bf49260a2c8d4322d/model.safetensors",
+  "artifacts/work/search/states/c5dca2c890bb8b1b45025fb009a915f6/config.json",
+  "artifacts/work/search/states/c5dca2c890bb8b1b45025fb009a915f6/generation_config.json",
+  "artifacts/work/search/states/c5dca2c890bb8b1b45025fb009a915f6/model.safetensors",
+  "artifacts/work/search/states/cab3d3293a891623aa2977ad4f6b6f8d/config.json",
+  "artifacts/work/search/states/cab3d3293a891623aa2977ad4f6b6f8d/generation_config.json",
+  "artifacts/work/search/states/cab3d3293a891623aa2977ad4f6b6f8d/model.safetensors",
+  "artifacts/work/search/states/d8ecaf0855aed838ff9912e87ea378d5/config.json",
+  "artifacts/work/search/states/d8ecaf0855aed838ff9912e87ea378d5/generation_config.json",
+  "artifacts/work/search/states/d8ecaf0855aed838ff9912e87ea378d5/model.safetensors",
+  "artifacts/work/search/states/dae8ee71af91c16d34e8401443e459bb/config.json",
+  "artifacts/work/search/states/dae8ee71af91c16d34e8401443e459bb/generation_config.json",
+  "artifacts/work/search/states/dae8ee71af91c16d34e8401443e459bb/model.safetensors",
+  "artifacts/work/search/states/dc7ad93afb2e7728487cacd24ccdc80b/config.json",
+  "artifacts/work/search/states/dc7ad93afb2e7728487cacd24ccdc80b/generation_config.json",
+  "artifacts/work/search/states/dc7ad93afb2e7728487cacd24ccdc80b/model.safetensors",
+  "artifacts/work/search/states/e4fd59439d48cc2075bced8e99cfe75b/config.json",
+  "artifacts/work/search/states/e4fd59439d48cc2075bced8e99cfe75b/generation_config.json",
+  "artifacts/work/search/states/e4fd59439d48cc2075bced8e99cfe75b/model.safetensors",
+  "artifacts/work/search/states/e781f09c967cc2c68ec42a88c2e0743c/config.json",
+  "artifacts/work/search/states/e781f09c967cc2c68ec42a88c2e0743c/generation_config.json",
+  "artifacts/work/search/states/e781f09c967cc2c68ec42a88c2e0743c/model.safetensors",
+  "artifacts/work/search/states/f1e793a197eaba7bd1ebb9fab1037378/config.json",
+  "artifacts/work/search/states/f1e793a197eaba7bd1ebb9fab1037378/generation_config.json",
+  "artifacts/work/search/states/f1e793a197eaba7bd1ebb9fab1037378/model.safetensors",
+  "artifacts/work/search/states/f71391d9cfd54b49fddc5b2af8979590/config.json",
+  "artifacts/work/search/states/f71391d9cfd54b49fddc5b2af8979590/generation_config.json",
+  "artifacts/work/search/states/f71391d9cfd54b49fddc5b2af8979590/model.safetensors",
+  "artifacts/work/search/states/fb3314cbd3ebf04ce8259eacb6446ddb/config.json",
+  "artifacts/work/search/states/fb3314cbd3ebf04ce8259eacb6446ddb/generation_config.json",
+  "artifacts/work/search/states/fb3314cbd3ebf04ce8259eacb6446ddb/model.safetensors",
+  "artifacts/work/search/telemetry.jsonl",
+  "artifacts/work/status.txt"
+ ],
+ "teardown": {
+  "remove_rc": 0,
+  "remove_output": "pod \"jt42hkhgnx2khg\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead\n",
+  "provider_confirms_gone": true,
+  "polls": [
+   {
+    "pods": []
+   }
+  ]
+ },
+ "final_pod_inventory": {
+  "pods": []
+ },
+ "verdict": "CUDA ENGINEERING VALIDATION PASS",
+ "elapsed_minutes": 4.963,
+ "estimated_cost_usd": 0.1453,
+ "_cost_basis": "elapsed wall clock x the provider-confirmed hourly rate. An ESTIMATE: the provider bills per second from provisioning, and this is the evidence available at teardown.",
+ "subrun_cost_usd": 0.0902,
+ "campaign_cost_after_usd": 0.1453,
+ "provider_create_attempts": 1
+}

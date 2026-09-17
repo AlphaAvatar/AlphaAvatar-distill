@@ -1,0 +1,8 @@
+{
+ "_what": "the stage-M student's weights, DELETED from this run record",
+ "_why": "1.2 GiB of disposable scratch. Stage M builds a real-geometry student only to reload it once, in the same function, and assert placement, dtype, parameter count, tie and rope base. Those assertions and their values ARE the evidence; the bytes are not, and .gitignore:88 un-ignores run directories, so leaving them here would have committed a checkpoint to git against P2.5.",
+ "bytes": 1192135096,
+ "sha256": "a806796cd6ee0763b4ce57c100028281a0c69e5da885edb70aebbbc48def2b83",
+ "_the_check_no_longer_writes_it_here": "repaired after this subrun: stage M now writes to a tempdir outside the collected tree and deletes it after the reload, so a future run neither pays to download it nor leaves it to be cleaned up",
+ "config_and_generation_config_are_retained": true
+}

@@ -1,0 +1,27 @@
+{
+ "schema": "aadistill.c2_full_search_cuda_check/v1",
+ "run_id": "c2_full_search_cuda_20260917_a2",
+ "validation_id": "c2_full_search_cuda_v1",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "started_utc": "2026-09-17T08:48:16.530292+00:00",
+ "stages": {},
+ "required_repo_inputs": [
+  "logs/stages/stage-1/phase_b/runs/attempt5/search_telemetry.jsonl",
+  "logs/stages/stage-1/phase_b/runs/attempt5/search_result.json",
+  "logs/stages/stage-1/phase_c2/runs/attempt4/evidence/telemetry.jsonl"
+ ],
+ "device": {
+  "device": "NVIDIA L40S",
+  "capability": "8.9",
+  "bf16_supported": true,
+  "free_gib": 43.97,
+  "total_gib": 44.39,
+  "torch": "2.9.1+cu130",
+  "cuda_runtime": "13.0"
+ },
+ "failure": "the driver returned 1",
+ "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/validation/c2_full_search_cuda_check.py\", line 562, in main\n    report[\"stages\"][name] = fn(cfg, a.device, dtype_name, work)\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/validation/c2_full_search_cuda_check.py\", line 372, in stage_driver\n    assert rc == 0, f\"the driver returned {rc}\"\n           ^^^^^^^\nAssertionError: the driver returned 1\n",
+ "verdict": "FAIL",
+ "finished_utc": "2026-09-17T08:48:18.669756+00:00"
+}

@@ -568,6 +568,38 @@ STAGE_1 = [
             "calibrates the subject-vs-instrument rule for the others."),
     ),
     dict(
+        id="c2_full_search_cuda",
+        kind="engineering",
+        stage_id="1",
+        status="PASS — engineering evidence, authorizes nothing",
+        title="C2 full-search driver — real-CUDA engineering validation",
+        canonical_config="configs/validation/c2_full_search_cuda.json",
+        evidence=[
+            E("logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/authorization.json",
+              "its engineering authorization, filed under the experiment it serves"),
+            E("logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/closeout.json",
+              "its terminal verdict and the money it cost"),
+            E("logs/stages/stage-1/c2_full_search_cuda/runs",
+              "its three subruns, in the SAME stage its governance lives in"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/c2_full_search_cuda",
+        classification_reason=(
+            "Stage 1 because the repository has declared that validation "
+            "material is Stage-1 material rather than stage-neutral, and "
+            "because the thing it validates is a Stage-1 initialization search. "
+            "It is `engineering`, not an experiment: it trains nothing, "
+            "measures no behaviour, produces no correct_overall and ranks no "
+            "candidate for promotion. Its runs sit in their own destination "
+            "rather than among phase_c2's formal attempts, so 'show me the C2 "
+            "attempts' does not return an engineering probe -- while still "
+            "sharing the stage, so one validation's evidence is not split "
+            "across two stage areas. The first run to use the launcher's "
+            "`shared` default created an undeclared stage area, which is what "
+            "surfaced this."),
+    ),
+    dict(
         id="phase_c2",
         kind="experiment",
         stage_id="1",

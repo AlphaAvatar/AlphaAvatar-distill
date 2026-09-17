@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.c2_full_search_cuda_check/v1",
+ "run_id": "c2_full_search_cuda_20260917_a1",
+ "validation_id": "c2_full_search_cuda_v1",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "started_utc": "2026-09-17T08:43:58.126207+00:00",
+ "stages": {},
+ "device": {
+  "device": "NVIDIA L40S",
+  "capability": "8.9",
+  "bf16_supported": true,
+  "free_gib": 43.97,
+  "total_gib": 44.39,
+  "torch": "2.9.1+cu130",
+  "cuda_runtime": "13.0"
+ },
+ "failure": "the driver returned 1",
+ "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/validation/c2_full_search_cuda_check.py\", line 521, in main\n    report[\"stages\"][name] = fn(cfg, a.device, dtype_name, work)\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/validation/c2_full_search_cuda_check.py\", line 347, in stage_driver\n    assert rc == 0, f\"the driver returned {rc}\"\n           ^^^^^^^\nAssertionError: the driver returned 1\n",
+ "verdict": "FAIL",
+ "finished_utc": "2026-09-17T08:44:00.249587+00:00"
+}

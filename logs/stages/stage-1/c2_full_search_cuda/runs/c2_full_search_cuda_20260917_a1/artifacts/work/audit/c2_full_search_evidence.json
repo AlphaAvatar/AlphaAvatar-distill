@@ -1,0 +1,34 @@
+{
+  "schema": "aadistill.autoinit.c2_full_search_evidence/v1",
+  "_contract": "The Phase-C2 full-joint-re-search session record, REWRITTEN on every state change. It is relayed as a `whole_file` spec for exactly that reason: mirrored by byte offset, a rewritten document comes home as the head of an early version with the tail of the final one appended.",
+  "run_id": "autoinit.v1.phase_c2.full_search",
+  "started_utc": "2026-09-17T08:44:00.188440+00:00",
+  "image_digest": "",
+  "rate_usd_per_hour": 1.09,
+  "authorized_usd": 0.9,
+  "soft_stop_usd": 0.6,
+  "trains_anything": false,
+  "measures_behaviour": false,
+  "runs_recovery_probes": false,
+  "names_an_incumbent": false,
+  "_what_those_flags_mean": "this session is an initialization search. It ranks states on the frozen cheap state_eval metrics and commits a candidate SET. It performs no 0.86M recovery, measures no correct_overall, and has no code path that could promote anything. The behavioural stages are separately authorized.",
+  "stages": {
+    "bind_identities": {
+      "stage_id": "bind_identities",
+      "passed": false,
+      "finished_utc": "2026-09-17T08:44:00.219549+00:00",
+      "spend_usd": 0.0,
+      "detail": {
+        "error": "FullSearchSpaceError: phase_b_attempt5: logs/stages/stage-1/phase_b/runs/attempt5/search_telemetry.jsonl is missing, so the cost table would be built over a smaller set of observations than the repository actually holds. Refusing to price from a partial history."
+      }
+    }
+  },
+  "elapsed_min": 0.0,
+  "spend_usd": 0.0,
+  "stages_completed": [],
+  "successful": false,
+  "failed_stage": "bind_identities",
+  "outcome": "FAILED",
+  "followon_reachable_from_this_driver": false,
+  "_no_followon": "there is no behavioural stage in this driver. Screening and confirmation require a separate authorization and a separate session; combining them would let one approval buy both a search and a promotion decision."
+}

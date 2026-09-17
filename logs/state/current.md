@@ -142,9 +142,14 @@ authorizations, never one.
 | full search, **beam 6 — standing design** | `$16.0998` | `$33.1827` |
 | behavioural selection (12 probes) | `$20.6926` | `$29.8788` |
 | **complete standing chain** | **`$36.7924`** | **`$63.0615`** |
-| remaining headroom | | `$22.491` |
-| **shortfall on ceilings** | | **`$40.5705`** |
-| minimum cumulative cap that contains both | | `$360.5705` |
+| remaining headroom | | `$72.3457` |
+| **headroom after the chain's ceiling** | | **`$9.2842`** |
+| minimum cumulative cap that contains both | | `$360.7158` |
+
+The chain **fits the accounting envelope and is still NOT AUTHORIZED**: the
+maintainer raised the cumulative cap to `$370.0000` on 2026-09-17 as an
+accounting envelope, explicitly not a spend authorization and not transferable
+to C3 or C4. Fitting is not permission.
 
 Stating that minimum is **not** requesting it, and these are **not yet**
 funding-decision numbers: the behavioural protocol they price has just been
@@ -191,8 +196,11 @@ with a **money** boundary: a fresh formal chain requires
 `cumulative completion spend + $1.1950 <= $2.3900`. There is no fixed maximum
 attempt number, and an incrementing attempt number is not a scope expansion — a
 cheap pre-measurement abort consumes its actual cost and its one-use chain,
-nothing more. The ceiling, the `$1.09/h` L40S boundary, the `$320.0000` project
-cap and every frozen scientific identity stayed unchanged throughout. Attempts 7
+nothing more. The ceiling, the `$1.09/h` L40S boundary and every frozen
+scientific identity stayed unchanged throughout; the project cap was
+`$320.0000` for those attempts and is now `$370.0000`, owned by
+`configs/experiments/phase_c1/authorization.json ::
+accepted_pricing.cumulative_cap_usd`. Attempts 7
 and 8 both ran under that rule, and it is what let the work finish without
 another approval round.
 
@@ -305,7 +313,7 @@ floor. A complete valid verdict ends the round.
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The next chain cannot be built until the full search is funded | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
 | last attempt | **baseline completion attempt 8 — COMPLETE, `$0.5872`.** Both stages passed, B was rebuilt to digest `53e30566…`, measured **once** on the frozen suite, and the B→C comparison was computed; the pod was deleted behind its teardown gate after 32.32 min. Attempts 5, 6 and 7 aborted before any measurement for `$0.1033` between them | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
-| blocker | **A FUNDING DECISION IS REQUIRED**, on twice-corrected numbers. C2c now asks only whether the selected C beats the incumbent **B** after the frozen 0.86M recovery: the original control is not a C2 arm, and screening moved to its own prompt-disjoint battery. **12 probes**, not 15. At the **standing** beam width 6 the chain needs ceilings of `$63.0615` against `$22.491` remaining, short `$40.5705`, minimum cumulative cap `$360.5705`. Stating that is not requesting it, and these are not yet funding-decision numbers: the repaired protocol awaits review. Narrower beams are scientific **alternatives**, never a way to fit the cap. Nothing may start — the search session, the behavioural session, the withdrawn Search-2, C3 and any remeasurement of B each need a decision, and the two C2 sessions need **separate** authorizations | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| blocker | **THE FORMAL FULL-SEARCH GOVERNANCE CHAIN DOES NOT EXIST YET.** The cap rose to `$370.0000` on 2026-09-17, so the standing beam-6 chain's `$63.0615` of ceilings now FITS the `$72.3457` remaining with `$9.2842` to spare — an accounting envelope, **not** a spend authorization and not transferable to C3/C4. C2c asks only whether the selected C beats the incumbent **B** after the frozen 0.86M recovery, on **12 probes**. The real-GPU engineering validation of the search driver is **PASSED and CLOSED** for `$0.1453`; the launcher, grant, readiness, authorization, executable-closure and bundle chain is the remaining work, and the live L40S securePrice must be re-quoted immediately before any authorization. Narrower beams are scientific **alternatives**, never a way to fit the cap. Nothing may start — the search session, the behavioural session, the withdrawn Search-2, C3 and any remeasurement of B each need a decision, and the two C2 sessions need **separate** authorizations | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness
@@ -353,7 +361,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$297.5090` spent of `$370.0000`, leaving `$72.4910` |
+| project cap | `$297.6543` spent of `$370.0000`, leaving `$72.3457` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 
@@ -540,11 +548,23 @@ the launch chain is unaffected by it.
 
 ## Engineering, not results
 
-The initialization migration and the CUDA stage-F validation are engineering
+The initialization migration and the two CUDA validations are engineering
 records. The stage-F device repair is **CONFIRMED ON REAL CUDA** at execution
 SHA `7027a8f4`. Neither is a C1 result and neither authorizes anything:
 [`maintenance/source-relocations/initialization-core/v1/`](../maintenance/source-relocations/initialization-core/v1/) ·
 [`phase_c1/validations/cuda-stage-f/v1/`](../stages/stage-1/phase_c1/validations/cuda-stage-f/v1/)
+
+The **C2 full-search driver** is likewise **CONFIRMED ON REAL CUDA**: one
+L40S (cc 8.9, bf16, torch 2.9.1+cu130) drove all three driver stages to
+`ALL_DONE` over the real 578-leaf joint space, and every one of the 35
+materialized states reloaded on `cuda` in `bfloat16`; the real 1024x28
+student (596,049,920 parameters) built, saved, reloaded canonically and kept
+its rope base of `5000000.0` and its tied head, peaking at 1.118 GiB. Three
+subruns, `$0.1453` of a `$0.9000` ceiling, every teardown provider-confirmed.
+Two of the three failed first, each on a different producer of non-source
+input, which is now derived from code rather than listed. It measures no
+behaviour and authorizes nothing, least of all the formal search:
+[`phase_c2/validations/full-search-cuda/v1/`](../stages/stage-1/phase_c2/validations/full-search-cuda/v1/)
 
 ## History
 

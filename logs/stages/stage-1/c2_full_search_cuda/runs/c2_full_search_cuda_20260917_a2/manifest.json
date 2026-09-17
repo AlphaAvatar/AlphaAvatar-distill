@@ -1,0 +1,32 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "c2_full_search_cuda",
+ "run_id": "c2_full_search_cuda_20260917_a2",
+ "root": "c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a2",
+ "artifact_spec": "cuda_engineering_run_v1",
+ "plan": {
+  "validation": "v1",
+  "execution_sha": "",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
+ },
+ "implementation": {
+  "launcher": "scripts/validation/cuda_engineering_launch.py"
+ },
+ "status": {
+  "verdict": "FAIL",
+  "pod_id": "fwirl8i32kn2r4",
+  "subrun_cost_usd": 0.0252,
+  "campaign_cost_after_usd": 0.0551,
+  "authorizes": "nothing"
+ },
+ "roles": {
+  "artifacts": "artifacts/",
+  "evidence": "evidence/evidence.json",
+  "validation_stdout": "runtime/validation_stdout.txt",
+  "watchdog": "runtime/watchdog/"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "5c688958f524fd97084bbbe4be9802bc2183a5c186dd33e73782bab3a3950133"
+}

@@ -80,6 +80,7 @@ def args(**over):
                 #: flag resolved here.
                 authorization=mod_default("DEFAULT_AUTHORIZATION"),
                 experiment_id=mod_default("DEFAULT_EXPERIMENT_ID"),
+                stage_id=mod_default("DEFAULT_STAGE_ID"),
                 check="scripts/validation/cuda_engineering_check.py",
                 check_config="configs/validation/cuda_engineering.json",
                 ship=[], gpu=[])

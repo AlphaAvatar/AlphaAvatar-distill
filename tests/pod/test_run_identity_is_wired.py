@@ -439,7 +439,7 @@ def test_the_cuda_validation_records_its_run_too(tmp_path):
     scr.mkdir(parents=True)
     #: `Engineering.__init__` claims the scratch before any provider call; this
     #: builds the receiver without it, so the claim is made the same way here.
-    claim_output_root(scr, mod.RUN_EXPERIMENT_ID, "cuda_stage_f_20260911_s1",
+    claim_output_root(scr, mod.DEFAULT_EXPERIMENT_ID, "cuda_stage_f_20260911_s1",
                       outputs=mod.RUN_OUTPUTS)
     (scr / "artifacts" / "cuda_engineering").mkdir(parents=True)
     (scr / "artifacts" / "cuda_engineering" / "suffix_evidence.json").parent.mkdir(parents=True, exist_ok=True)
@@ -451,12 +451,34 @@ def test_the_cuda_validation_records_its_run_too(tmp_path):
     eng.a = types.SimpleNamespace(run_id="cuda_stage_f_20260911_s1",
                                   execution_sha="a" * 40, image="img:tag")
     eng.scr = scr
+    #: `write_evidence` reads the INSTANCE's key now, not a module constant: the
+    #: launcher is parameterized, so one validation's `logs/runs/` key must not
+    #: be a property of every validation that shares the entry point. A bypass
+    #: constructor owes what `__init__` would have set.
+    eng.experiment_id = mod.DEFAULT_EXPERIMENT_ID
+    eng.validation_label = "cuda-stage-f"
+    eng.stage_id = mod.DEFAULT_STAGE_ID
     eng.ev = {"verdict": "CUDA ENGINEERING VALIDATION PASS", "pod_id": "p1",
               "subrun_cost_usd": 0.0182, "campaign_cost_after_usd": 0.04}
     eng.write_evidence(repo)
 
     doc = read_run(repo, "cuda_stage_f", "cuda_stage_f_20260911_s1", "shared")
-    assert set(doc["roles"]) == {"evidence", "validation_stdout", "artifacts"}
+    #: `closeout` joined the set when engineering subruns started pricing
+    #: themselves. Without it the project budget cumulative cannot see an
+    #: engineering campaign's spend at all: `project_sessions` reads
+    #: `<run>/closeout/outcome.json :: budget.this_attempt`, and the C2
+    #: full-search validation booked $0.1453 that the project book could not
+    #: see. So this is an added role, not a renamed one.
+    assert set(doc["roles"]) == {"evidence", "validation_stdout", "artifacts",
+                                 "closeout"}
+    #: Located the way the layout writes it, rather than by joining `doc["root"]`
+    #: -- that field is stage-relative and the join silently lands outside the
+    #: stage area.
+    found = list(repo.rglob("cuda_stage_f_20260911_s1/closeout/outcome.json"))
+    assert len(found) == 1, f"expected one closeout, found {found}"
+    outcome = json.loads(found[0].read_text())
+    assert "this_attempt" in outcome["budget"], (
+        "the closeout must state the cost in the field the budget deriver reads")
     assert doc["status"]["verdict"] == "CUDA ENGINEERING VALIDATION PASS"
     assert doc["status"]["subrun_cost_usd"] == 0.0182
     assert doc["artifact_spec"] == "cuda_engineering_run_v1"
@@ -485,7 +507,7 @@ def test_the_engineering_run_collects_its_watchdog_journals_by_pod(tmp_path):
     repo, scr = tmp_path / "repo", tmp_path / "scr"
     (repo / "logs").mkdir(parents=True)
     scr.mkdir(parents=True)
-    claim_output_root(scr, mod.RUN_EXPERIMENT_ID, "r1", outputs=mod.RUN_OUTPUTS)
+    claim_output_root(scr, mod.DEFAULT_EXPERIMENT_ID, "r1", outputs=mod.RUN_OUTPUTS)
     #: Exactly the names the launcher's own `launch_watchdog` derives.
     (scr / watchdog_journal_name("p1")).write_text('{"event":"tick"}\n')
     (scr / watchdog_journal_name("p1", "out")).write_text("detached\n")
@@ -494,6 +516,9 @@ def test_the_engineering_run_collects_its_watchdog_journals_by_pod(tmp_path):
     eng.a = types.SimpleNamespace(run_id="r1", execution_sha="a" * 40,
                                   image="img:tag")
     eng.scr = scr
+    eng.experiment_id = mod.DEFAULT_EXPERIMENT_ID
+    eng.validation_label = "cuda-stage-f"
+    eng.stage_id = mod.DEFAULT_STAGE_ID
     eng.ev = {"verdict": "PASS", "pod_id": "p1"}
     eng.write_evidence(repo)
 
@@ -529,7 +554,7 @@ def test_an_unclaimed_scratch_holding_only_a_journal_is_still_refused(tmp_path):
     (scr / "watchdog_p1.jsonl").parent.mkdir(parents=True, exist_ok=True)
     (scr / "watchdog_p1.jsonl").write_text("{}\n")
     with pytest.raises(OutputOwnershipError) as exc:
-        claim_output_root(scr, mod.RUN_EXPERIMENT_ID, "r1",
+        claim_output_root(scr, mod.DEFAULT_EXPERIMENT_ID, "r1",
                           outputs=mod.RUN_OUTPUTS)
     assert "watchdog_*.jsonl" in str(exc.value)
     #: And it really was left alone.
@@ -546,7 +571,7 @@ def test_the_two_consumers_share_no_role_name():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     assert set(L.C1_RUN_ROLES) & set(mod.RUN_ROLES) == set()
-    assert L.RUN_EXPERIMENT_ID != mod.RUN_EXPERIMENT_ID
+    assert L.RUN_EXPERIMENT_ID != mod.DEFAULT_EXPERIMENT_ID
 
 
 # --- the index sees both, and says so when it cannot -----------------------

@@ -1,0 +1,144 @@
+{
+ "schema": "aadistill.engineering_validation_closeout/v1",
+ "_contract": "The terminal result of the bounded real-CUDA engineering validation of the Phase-C2 full-joint-search driver. ENGINEERING evidence for a later launch review. It trains nothing, measures no behaviour, produces no correct_overall and ranks no candidate for promotion. AUTHORIZES NOTHING, and in particular does not authorize the formal full joint search.",
+ "validation_id": "c2_full_search_cuda_v1",
+ "authorization": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/authorization.json",
+ "authorization_sha256": "32e9b45fe9262ea9bffbaceabc29b9796399f04a8ff5378368b2970e18e1e678",
+ "scope": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/scope.json",
+ "campaign": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/campaign.json",
+ "verdict": "PASS",
+ "closed_utc": "2026-09-17T08:56:26Z",
+ "scientific_use": false,
+ "authorizes": "nothing",
+
+ "money": {
+  "ceiling_usd": 0.9,
+  "soft_stop_usd": 0.6,
+  "booked_usd": 0.1453,
+  "_booked_is_recomputed_from_components": "0.0299 + 0.0252 + 0.0902 = 0.1453; the stated total is never read back",
+  "unspent_usd": 0.7547,
+  "never_reached_the_soft_stop": true,
+  "rate_usd_per_hour": 1.09,
+  "_rate_was_re_quoted_live": "L40S securePrice was $1.09/h immediately before the first draw -- exactly the authorized basis, so no ceiling re-derivation was needed. communityPrice read $0.79 and is NOT what the launcher prices on.",
+  "project_cumulative_after_usd": 297.6543,
+  "project_cap_usd": 370.0,
+  "project_remaining_after_usd": 72.3457,
+  "reserve_after_the_c2_chain_ceiling_usd": 9.2842
+ },
+
+ "resources": {
+  "provider_resources_created": 3,
+  "_three_is_not_a_scope_expansion": "the count-based clauses were withdrawn on 2026-09-17 because attempt count is not budget. Each subrun had a recorded failure, a corrective action, a fresh subrun identity and sufficient remaining ceiling; the cumulative $0.9000 bounded all three and was never approached. At most ONE resource was ever alive: each draw was preceded by a read-only inventory check that refuses if anything is present, and each teardown was provider-CONFIRMED by query before the next draw.",
+  "one_billing_resource_at_any_instant": true,
+  "teardowns_provider_confirmed": 3,
+  "pods_remaining": 0,
+  "gpu": "NVIDIA L40S",
+  "card_was_the_formal_target": true
+ },
+
+ "subruns": [
+  {
+   "subrun_id": "c2_full_search_cuda_20260917_a1",
+   "pod_id": "9olm9hi8pge3dc",
+   "cost_usd": 0.0299,
+   "verdict": "FAIL",
+   "failed_at": "driver stage A, bind_identities",
+   "cause": "FullSearchSpaceError: the phase_b attempt5 search telemetry was absent, so the cost table would have been pooled over fewer observations than the repository holds. The guard REFUSED to price from a partial history, which is correct behaviour.",
+   "root_cause": "the ship set carried src, scripts and configs and nothing under logs/. A missing input, not a device or code defect.",
+   "repair": "declared the driver's non-source inputs and checked them before CUDA, so the message names the cause instead of surfacing as a cost-model error"
+  },
+  {
+   "subrun_id": "c2_full_search_cuda_20260917_a2",
+   "pod_id": "fwirl8i32kn2r4",
+   "cost_usd": 0.0252,
+   "verdict": "FAIL",
+   "failed_at": "driver stage B, full_joint_search",
+   "cause": "CalibrationError: artifacts/stage1/e8_calibration_v1/items.jsonl is missing",
+   "progress_over_a1": "stage A PASSED and the space derived as 578 reachable leaves (576 decomposed) over 6 implementations with profiles unpinned, on the real device",
+   "root_cause": "the SECOND producer of non-source input. The two real calibration mixtures resolve items_path files in the out-of-tree artifact store, which is gitignored. a1's repair declared the first producer's inputs and not the second's.",
+   "repair": "stopped maintaining a list. `declared_inputs()` now derives from TELEMETRY_SOURCES and each profile's items_path, and the launch invocation builds its --ship arguments from the same function, so the two cannot disagree. This closes the class rather than the instance."
+  },
+  {
+   "subrun_id": "c2_full_search_cuda_20260917_a3",
+   "pod_id": "jt42hkhgnx2khg",
+   "cost_usd": 0.0902,
+   "elapsed_minutes": 4.963,
+   "verdict": "CUDA ENGINEERING VALIDATION PASS",
+   "record": "logs/stages/stage-shared/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a3/"
+  }
+ ],
+
+ "what_the_pass_establishes": {
+  "device": {
+   "gpu": "NVIDIA L40S",
+   "compute_capability": "8.9",
+   "native_bf16": true,
+   "free_gib": 43.97,
+   "torch": "2.9.1+cu130",
+   "cuda_runtime": "13.0",
+   "transformers": "5.17.0",
+   "_the_capability_floor_was_enforced_not_assumed": "cc >= 8.0, native bf16 and >= 8 GiB free were checked before any work, and neither the dtype nor the workload was lowered to make a device pass"
+  },
+  "stage_D_the_driver_on_a_real_device": {
+   "driver_returncode": 0,
+   "stages_reached": ["bind_identities", "full_joint_search", "commit_top_k"],
+   "terminal_marker": "C2_FULL_SEARCH_ALL_DONE",
+   "elapsed_seconds": 20.0,
+   "space_leaves_derived_on_the_device": 578,
+   "states_materialized_and_reloaded": 35,
+   "distinct_devices_across_every_reloaded_state": ["cuda"],
+   "distinct_dtypes_across_every_reloaded_state": ["torch.bfloat16"],
+   "_placement_was_read_from_what_the_search_WROTE": "every state directory was reloaded through the canonical loader and its whole parameter and buffer set inspected, not a spot check on one tensor: a partially-relocated model is the defect this looks for, and `next(model.parameters())` would miss exactly that",
+   "forwarded_to_run_phase_a_search": {
+    "device": "cuda",
+    "_device_was_NOT_substituted": "the CPU execution of this same driver passes device='cpu', and that override is the entire reason this validation exists. The wrapper asserts the forwarded value is the requested one.",
+    "impl_profiles": null,
+    "conditional_candidates": null,
+    "top_n": 5,
+    "run_id": "autoinit.v1.phase_c2.full_search",
+    "allowed_impls": ["attention.activation_importance_v1", "composite.stage1_sandwich_v0", "depth.causal_kl_greedy_v1", "depth.positional_v0", "ffn.activation_importance_v0", "width.global_pca_v0"],
+    "profiles": ["calib.domain_balanced@v1", "calib.reasoning_heavy@v2"]
+   },
+   "selection_committed": "5 leaves",
+   "_and_it_stopped_there": "commit_top_k is the terminus. The driver has no code path into recovery, probes or behavioural scoring."
+  },
+  "stage_M_the_real_student_geometry": {
+   "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+   "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "_config_only_no_weights": "what kept this cheap; a 4B download would have dominated a validation that does not need it",
+   "parameters": 596049920,
+   "parameters_after_canonical_reload": 596049920,
+   "built_placement": {"devices": ["cpu"], "dtypes": ["torch.bfloat16"]},
+   "reloaded_placement": {"devices": ["cuda"], "dtypes": ["torch.bfloat16"]},
+   "_the_build_is_host_side_and_that_is_recorded_rather_than_hidden": "adapter.build_model takes no device, so the student is constructed on the host and the canonical reload is what places it. That is also what a session does -- build, save, reload -- so the reload is the path worth asserting, and both placements are reported.",
+   "rope_theta_from_the_loaded_model": 5000000.0,
+   "rope_theta_from_the_teacher_config": 5000000.0,
+   "_read_through_stored_rope_base": "transformers moved rope_theta from a flat config key into a nested rope_parameters dict between 4.x and 5.x. On 5.x a flat config.rope_theta read RAISES; across a mixed pair it silently returns the 4.x class default, which is the 500x misread that reports a wrong NLL instead of failing. The repo's own reader handles both layouts and a second local read would be a second owner of one fact.",
+   "tie_word_embeddings": true,
+   "peak_cuda_gib": 1.118,
+   "elapsed_seconds": 7.47
+  },
+  "assertions_are_about_placement_and_dtype": "not arithmetic. CPU and CUDA do not agree bit-for-bit and are not required to; demanding numerical equality would fail for a reason that is not a defect."
+ },
+
+ "what_it_does_NOT_establish": [
+  "that the formal full joint search fits its budget -- this ran toy geometry for 20 seconds, and the formal envelope is derived from the pricing record",
+  "anything about the SIX operators' numerics, which already had real-L40S evidence from paid sessions and were deliberately not re-run",
+  "any behavioural or correctness property whatsoever",
+  "that the formal chain exists or is launchable -- that is separate work"
+ ],
+
+ "findings_for_the_formal_chain": [
+  "The formal search needs the same non-source inputs plus more: the existing formal launchers transfer artifacts/stage1/reasoning_heavy_v2 and the state_eval asset from the dev box via a LocalAsset relay, with calib.domain_balanced@v1 already on the relay. A cheap validation can tar 1.5 MB into the payload; a formal session should use the relay.",
+  "Search-1's launcher provisions for C2_PEAK_WORKING_GIB = 87.4 with C2_PROVISION_GIB = 200, because the beam retains materialized intermediates. The full joint search's peak must be re-derived for ITS beam compositions rather than inherited from Search-1's restricted space.",
+  "Stage M's 1.2 GiB checkpoint was collected home over billed minutes -- 27 seconds of validation, then roughly three minutes of download. Repaired here by writing it to a tempdir outside the collected tree and deleting it after the reload; the same trap exists for anything a formal session leaves in its artifact directory."
+ ],
+
+ "repository_hygiene": {
+  "_the_collected_checkpoint_was_removed": "stage M's 1.2 GiB model.safetensors was deleted from the a3 run record and replaced by model.safetensors.REMOVED.json carrying its byte count and sha256. .gitignore:88 UN-ignores logs/stages/**/runs/**/, so leaving it would have committed a checkpoint to git against P2.5.",
+  "run_record_size_after": "3.9 MB",
+  "retained": "the report, the driver evidence, the stdout transcript, the watchdog journals, the 35 toy state directories and the real-geometry config.json"
+ },
+
+ "formal_c2_status_unchanged": "the Phase-C2 full joint search remains NOT AUTHORIZED. This document is engineering evidence for a later launch review and confers nothing."
+}

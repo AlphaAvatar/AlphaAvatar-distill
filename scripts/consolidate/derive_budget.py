@@ -340,6 +340,46 @@ def _package_booked(root: Path, sessions: list[dict]) -> float:
     return round(best, 4)
 
 
+def _historical(rel: str, root: Path) -> str:
+    """Where a path recorded before the log reorganization lives now.
+
+    Delegates to the migration's own table rather than hardcoding a prefix
+    rewrite here: the mapping has one owner, and a second copy of it would be a
+    second thing to update at the next move. Returns `rel` unchanged when the
+    table has nothing for it, so a caller can simply try both.
+    """
+    try:
+        sys.path.insert(0, str(root / "scripts"))
+        from architecture.record_run_index import resolve_historical
+    except ImportError:
+        return rel
+    try:
+        return resolve_historical(rel, root)
+    except Exception:                                          # noqa: BLE001
+        return rel
+
+
+def _campaign_records(root: Path) -> list[Path]:
+    """Every engineering campaign ledger in the tree, wherever `logs/` puts it.
+
+    This was `root.glob("logs/validations/*/*/campaign.json")`, a shape that
+    stopped existing when the logs were reorganized under
+    `logs/stages/stage-<n>/phase_<x>/validations/…`. The glob then matched
+    NOTHING while two campaigns holding real spend sat in the tree, and the
+    deriver reported `engineering … spent 0.0000` — the under-report its own
+    docstring calls worse than no deriver. Found when the C2 full-search CUDA
+    validation booked `$0.1453` and the project cumulative could not see a cent
+    of it.
+
+    So it searches by NAME rather than by a path shape. A campaign contributes
+    the day it exists, at whatever depth the log layout happens to use, and the
+    next reorganization does not silently zero the engineering book again.
+    """
+    found = {p.resolve(): p for p in root.rglob("campaign.json")
+             if "validations" in p.parts and ".git" not in p.parts}
+    return sorted(found.values())
+
+
 def engineering_campaigns(root: Path) -> list[dict]:
     """Every engineering campaign, with what it cost and which package it is on.
 
@@ -359,7 +399,7 @@ def engineering_campaigns(root: Path) -> list[dict]:
     `attribution: "unknown"`. It is never silently read as zero.
     """
     out: list[dict] = []
-    for p in sorted(root.glob("logs/validations/*/*/campaign.json")):
+    for p in _campaign_records(root):
         try:
             doc = json.loads(p.read_text())
         except (json.JSONDecodeError, OSError):
@@ -382,11 +422,26 @@ def engineering_campaigns(root: Path) -> list[dict]:
                "granted_utc": None, "attribution": None}
         auth_rel = doc.get("authorization")
         if isinstance(auth_rel, str):
-            try:
-                rec["granted_utc"] = json.loads(
-                    (root / auth_rel).read_text()).get("granted_utc")
-            except (json.JSONDecodeError, OSError):
-                pass
+            #: Through the HISTORICAL-PATH table, because a campaign record
+            #: written before the logs were reorganized names its authorization
+            #: at the old `logs/validations/…` path. Stage F's does, and with the
+            #: discovery glob fixed the deriver could suddenly find that record,
+            #: fail to resolve its date, call the attribution "unknown" and
+            #: correctly refuse to state how many sessions remain fundable.
+            #:
+            #: The record is NOT repointed to fix that. Its bytes are bound by
+            #: sha256 in the stage-F interpretation amendment, which is
+            #: hash-anchored evidence about a closed validation -- editing it to
+            #: satisfy an accounting deriver is backwards, and a test caught the
+            #: attempt. `resolve_historical` is the table that already exists
+            #: for exactly this, and it is what the amendment's own test uses.
+            for cand in (root / auth_rel, root / _historical(auth_rel, root)):
+                try:
+                    rec["granted_utc"] = json.loads(
+                        cand.read_text()).get("granted_utc")
+                except (json.JSONDecodeError, OSError):
+                    continue
+                break
         out.append(rec)
     return out
 

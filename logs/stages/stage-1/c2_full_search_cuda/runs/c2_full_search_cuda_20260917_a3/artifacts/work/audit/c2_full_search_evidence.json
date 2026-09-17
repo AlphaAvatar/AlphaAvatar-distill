@@ -1,0 +1,109 @@
+{
+  "schema": "aadistill.autoinit.c2_full_search_evidence/v1",
+  "_contract": "The Phase-C2 full-joint-re-search session record, REWRITTEN on every state change. It is relayed as a `whole_file` spec for exactly that reason: mirrored by byte offset, a rewritten document comes home as the head of an early version with the tail of the final one appended.",
+  "run_id": "autoinit.v1.phase_c2.full_search",
+  "started_utc": "2026-09-17T08:52:50.599328+00:00",
+  "image_digest": "",
+  "rate_usd_per_hour": 1.09,
+  "authorized_usd": 0.9,
+  "soft_stop_usd": 0.6,
+  "trains_anything": false,
+  "measures_behaviour": false,
+  "runs_recovery_probes": false,
+  "names_an_incumbent": false,
+  "_what_those_flags_mean": "this session is an initialization search. It ranks states on the frozen cheap state_eval metrics and commits a candidate SET. It performs no 0.86M recovery, measures no correct_overall, and has no code path that could promote anything. The behavioural stages are separately authorized.",
+  "stages": {
+    "bind_identities": {
+      "stage_id": "bind_identities",
+      "passed": true,
+      "finished_utc": "2026-09-17T08:52:50.630369+00:00",
+      "spend_usd": 0.0,
+      "detail": {
+        "space": {
+          "allowed_impls": [
+            "attention.activation_importance_v1",
+            "composite.stage1_sandwich_v0",
+            "depth.causal_kl_greedy_v1",
+            "depth.positional_v0",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ],
+          "profile_ids": [
+            "calib.domain_balanced@v1",
+            "calib.reasoning_heavy@v2"
+          ],
+          "impl_profiles": null,
+          "required_fields": [
+            "hidden_size",
+            "intermediate_size",
+            "num_attention_heads",
+            "num_hidden_layers"
+          ],
+          "total_leaves": 578,
+          "decomposed_leaves": 576,
+          "exclusions": {
+            "attention.weight_proxy_v0": "CLOSED BY C1, not held out for cost. C1 was the isolation experiment between exactly this operator and attention.activation_importance_v1 on a fixed path, three paired seeds, the frozen 0.86M recipe and the frozen battery, and its preregistered Stage-I rule returned GO. Re-entering the loser as a branch would spend roughly half again as much search budget re-deciding a question that has a completed verdict, and would make this search's result depend on it. Promotion is what an isolation verdict is FOR. If the promotion is ever withdrawn, this exclusion is withdrawn with it."
+          }
+        },
+        "_impl_profiles_is_none": "every operator that consumes calibration branches over every active profile. Search-1 pinned three of four; that is the restriction this session reopens.",
+        "cost_model_source": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search.",
+        "unmeasured_cost_inputs": [],
+        "teacher": {
+          "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+          "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+        },
+        "search_seed": 20260815,
+        "top_n": 5,
+        "state_eval_root": "/workspace/aad/artifacts/validation/work/unused_state_eval",
+        "profiles_materialized": [
+          "calib.domain_balanced@v1",
+          "calib.reasoning_heavy@v2"
+        ]
+      }
+    },
+    "full_joint_search": {
+      "stage_id": "full_joint_search",
+      "passed": true,
+      "finished_utc": "2026-09-17T08:53:10.592137+00:00",
+      "spend_usd": 0.0061,
+      "detail": {
+        "run_id": "autoinit.v1.phase_c2.full_search",
+        "deadline_minutes": 8.0,
+        "deadline_expired": false,
+        "_deadline_is_the_beams_only_clock": "derived by the launcher as the costly-early base plus the beam-composition reserve. There is no baseline rebuild reserve to exclude, because this session rebuilds nothing."
+      }
+    },
+    "commit_top_k": {
+      "stage_id": "commit_top_k",
+      "passed": true,
+      "finished_utc": "2026-09-17T08:53:10.595323+00:00",
+      "spend_usd": 0.0061,
+      "detail": {
+        "selection_artifact": "artifacts/validation/work/search/stage1_selection.json",
+        "selection_sha256": "1864413674c2321bfa0c72bf476d1177cc122f31c31343732160158ded79d5c5",
+        "n_selected": 5,
+        "state_ids": [
+          "cab3d3293a891623aa2977ad4f6b6f8d",
+          "302ce2b2fe40b5c1da8c7385035d8f83",
+          "a29be7391fa4b2bc1d0502b205f1aa05",
+          "aef18f70f6b0f7633cceadc6171d50a0",
+          "b60cb731071654baae9186b00c25be1e"
+        ],
+        "search_config_hash": "a63fc68e1dc9c6d880d6e69193ad3369ce775c870af6c63b5f7c4c09266f20dc",
+        "_this_is_the_terminus": "the session ends here. The candidate set is cheap-metric SELECTION evidence and promotes nothing; the behavioural screening and confirmation that decide the C2 incumbent are a separate session under a separate authorization."
+      }
+    }
+  },
+  "elapsed_min": 0.33,
+  "spend_usd": 0.0061,
+  "stages_completed": [
+    "bind_identities",
+    "full_joint_search",
+    "commit_top_k"
+  ],
+  "successful": true,
+  "failed_stage": null,
+  "outcome": "ALL_DONE",
+  "followon_reachable_from_this_driver": false,
+  "_no_followon": "there is no behavioural stage in this driver. Screening and confirmation require a separate authorization and a separate session; combining them would let one approval buy both a search and a promotion decision."
+}

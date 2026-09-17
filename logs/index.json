@@ -281,10 +281,15 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 13,
+  "runs_current": 17,
   "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
+   "c2_full_search_cuda": {
+    "recorded": 4,
+    "unrecorded": 0,
+    "total": 4
+   },
    "continuation_b": {
     "recorded": 5,
     "unrecorded": 0,
@@ -946,6 +951,58 @@
    },
    "aggregate_digest": "d08989c0dfafd035e4607bacf71d845442c0f50e552a7af9a489c536e6eddd74",
    "n_components": 1
+  },
+  {
+   "experiment_id": "c2_full_search_cuda",
+   "run_id": "c2_full_search_cuda_20260917",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917",
+    "manifest": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917/manifest.json"
+   },
+   "manifest_sha256": "0c03e4ccbcc3d35b1634a981a6c53a0c1b8329729dd37bf0a3ef43a3faae88c9",
+   "n_components": 1
+  },
+  {
+   "experiment_id": "c2_full_search_cuda",
+   "run_id": "c2_full_search_cuda_20260917_a1",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a1",
+    "manifest": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a1/manifest.json"
+   },
+   "manifest_sha256": "9caff20a7fb7fc601aec82939cb46d9701cab1c76ecb3ede8b4bef89b06cf100",
+   "n_components": 4
+  },
+  {
+   "experiment_id": "c2_full_search_cuda",
+   "run_id": "c2_full_search_cuda_20260917_a2",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a2",
+    "manifest": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a2/manifest.json"
+   },
+   "manifest_sha256": "5c688958f524fd97084bbbe4be9802bc2183a5c186dd33e73782bab3a3950133",
+   "n_components": 4
+  },
+  {
+   "experiment_id": "c2_full_search_cuda",
+   "run_id": "c2_full_search_cuda_20260917_a3",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a3",
+    "manifest": "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a3/manifest.json"
+   },
+   "manifest_sha256": "0ff5528eaa83a4bad48cee12724ee8200dd43364a9c2235e6d3cd94da8c2114c",
+   "n_components": 4
   },
   {
    "experiment_id": "phase_c1",

@@ -1,0 +1,12 @@
+[08:48:16] 3 declared repository input(s) present
+[08:48:16] CUDA NVIDIA L40S cc8.9 bf16=True free=43.97GiB torch=2.9.1+cu130 cuda=13.0
+[08:48:16] capability floor satisfied
+[08:48:16] --- stage driver ---
+[08:48:18] stage bind_identities
+2026-09-17T08:48:18Z MARKER:STAGE_PASSED:bind_identities
+[08:48:18] space: 578 reachable leaves (576 decomposed) over 6 implementations, profiles unpinned
+[08:48:18] stage full_joint_search
+2026-09-17T08:48:18Z MARKER:STAGE_FAILED:full_joint_search
+2026-09-17T08:48:18Z MARKER:C2_FULL_SEARCH_FAILED
+[08:48:18] FAIL: the driver returned 1
+[08:48:18] verdict: FAIL

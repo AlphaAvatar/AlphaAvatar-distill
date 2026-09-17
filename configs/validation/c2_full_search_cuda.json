@@ -61,5 +61,10 @@
   "search_minutes": 6.0,
   "search_deadline_minutes": 8.0,
   "_why_these_minutes": "Bounded well inside the ceiling, and large enough that the toy beam completes rather than expiring -- an expired deadline would end the search with no leaf, which reads like a broken operator rather than a short clock. These are the TOY run's numbers and have nothing to do with the formal search's envelope, which the launcher derives from the pricing record."
+ },
+ "required_repo_inputs": {
+  "_derived_not_declared": "There is deliberately NO path list here. Two pod subruns died on this, one per producer -- a1 on the telemetry the cost model pools and a2 on the calibration item files the profiles resolve -- because a list beside the code can only name the producer its author thought of. The check's `declared_inputs()` asks the code instead: TELEMETRY_SOURCES for the first and each profile's items_path for the second. The launch invocation builds its --ship arguments from the same function, so the two cannot disagree.",
+  "_derived_from": "experiments.phase_c2.full_search_space.TELEMETRY_SOURCES and PROFILE_IDS -> get_profile(...).items_path",
+  "_override_is_for_tests_only": "a `paths` key here overrides the derivation, which is how the refusal is testable. Production passes none."
  }
 }

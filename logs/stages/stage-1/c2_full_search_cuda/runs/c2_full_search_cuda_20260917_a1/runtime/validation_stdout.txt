@@ -1,0 +1,8 @@
+[08:43:58] CUDA NVIDIA L40S cc8.9 bf16=True free=43.97GiB torch=2.9.1+cu130 cuda=13.0
+[08:43:58] capability floor satisfied
+[08:43:58] --- stage driver ---
+[08:44:00] stage bind_identities
+2026-09-17T08:44:00Z MARKER:STAGE_FAILED:bind_identities
+2026-09-17T08:44:00Z MARKER:C2_FULL_SEARCH_FAILED
+[08:44:00] FAIL: the driver returned 1
+[08:44:00] verdict: FAIL

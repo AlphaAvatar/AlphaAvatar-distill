@@ -1,0 +1,56 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "_contract": "Cumulative cost of the Phase-C2 full-search CUDA engineering campaign, across every resource and subrun. The launcher READS this before each paid action and refuses when the remaining allowance cannot fund a useful attempt plus the teardown reserve. A rerun does NOT reset it, and a replacement resource does NOT receive a fresh allocation.",
+ "campaign_id": "c2_full_search_cuda",
+ "authorization": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/authorization.json",
+ "scope": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/scope.json",
+ "_why_a_ledger_and_not_a_counter": "The count-based clauses were withdrawn on 2026-09-17 because attempt count is not budget. This file is what bounds a retry instead: an ordinary failure may be repaired and rerun for as long as $0.9000 minus what is booked here still funds a useful attempt plus the $0.3000 teardown reserve. Without it every invocation would treat the ceiling as a fresh allocation, which is the exact failure a cumulative cap exists to prevent.",
+ "subruns": [
+  {
+   "subrun_id": "c2_full_search_cuda_20260917_a1",
+   "pod_id": "9olm9hi8pge3dc",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 1.648,
+   "cost_usd": 0.0299,
+   "cost_basis": "elapsed x confirmed rate",
+   "verdict": "FAIL",
+   "failure_class": "operator",
+   "teardown_confirmed": true,
+   "execution_sha": null,
+   "record": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a1/"
+  },
+  {
+   "subrun_id": "c2_full_search_cuda_20260917_a2",
+   "pod_id": "fwirl8i32kn2r4",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 1.389,
+   "cost_usd": 0.0252,
+   "cost_basis": "elapsed x confirmed rate",
+   "verdict": "FAIL",
+   "failure_class": "operator",
+   "teardown_confirmed": true,
+   "execution_sha": null,
+   "record": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a2/"
+  },
+  {
+   "subrun_id": "c2_full_search_cuda_20260917_a3",
+   "pod_id": "jt42hkhgnx2khg",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 4.963,
+   "cost_usd": 0.0902,
+   "cost_basis": "elapsed x confirmed rate",
+   "verdict": "CUDA ENGINEERING VALIDATION PASS",
+   "failure_class": null,
+   "teardown_confirmed": true,
+   "execution_sha": null,
+   "record": "logs/runs/c2_full_search_cuda/c2_full_search_cuda_20260917_a3/"
+  }
+ ],
+ "authorizes": "nothing",
+ "booked_usd": 0.1453,
+ "package_id": "phase_c2.full_search_cuda_validation.2026-09-17",
+ "_why_its_own_package_id": "So the deriver does NOT charge this to C1's $6.0000 GPU engineering allowance. It nearly did: with no package_id stated, `_attribute` falls back to dates, and a campaign authorized after 2026-09-11 is booked to `phase_c1.execution_package.2026-09-11` -- the deriver reported 'engineering 5.8547 remaining of 6.0000' for spend this validation's own authorization explicitly says it may not take. C1's allowance belongs to C1's package and does not transfer. This validation is funded from the PROJECT envelope, and its spend reaches the project cumulative through each subrun's own recorded cost, not through any package book."
+}

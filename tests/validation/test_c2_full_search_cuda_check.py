@@ -16,6 +16,16 @@ before any pod existed:
 * `int(exc.code)` raising ValueError on the string-coded refusal, so the line
   meant to REPORT a refusal crashed instead of reporting it.
 
+Two more came from the pod itself, one per producer of non-source input, and
+both are now closed by a derivation rather than by a longer list:
+
+* a1 ($0.0299) died in stage A -- the cost table pools over committed telemetry
+  and none of `logs/` was shipped;
+* a2 ($0.0208) got stage A to PASS with the space derived as 578 leaves, then
+  died in stage B -- the two real calibration mixtures resolve item files in the
+  out-of-tree artifact store, which a list naming only the first producer could
+  not have covered.
+
 Every one of those is in a line a $0 run reaches and no static check does.
 """
 
@@ -205,6 +215,96 @@ def test_stage_m_runs_ALONE_in_a_fresh_process(tmp_path):
         f"stage or another test having registered something for it:\n"
         f"{r.stdout[-2000:]}\n{r.stderr[-3000:]}")
     assert "PARAMS 596049920" in r.stdout, r.stdout[-2000:]
+
+
+# --- the inputs the driver reads and is not source --------------------------
+
+def test_the_declared_inputs_cover_BOTH_producers_the_driver_reads_from():
+    """Derived from code, not typed beside it -- because a list is per-producer.
+
+    The targeted regression for two observed pod failures, one per producer:
+
+    * a1 ($0.0299) reached a real L40S, passed the capability floor and died in
+      stage A: `full_search_space` pools its cost table over the committed
+      telemetry and correctly refused to price from a partial history when none
+      of `logs/` was shipped;
+    * a2 ($0.0208) got stage A to PASS with the space derived as 578 leaves,
+      then died in stage B: the two real calibration mixtures resolve item
+      files in the out-of-tree artifact store, and I had declared the first
+      producer's inputs and not the second's.
+
+    So the assertion is about the DERIVATION covering both, which closes the
+    class. A hand-written list would have been corrected twice and could still
+    be short a third time.
+    """
+    from aadistill.initialization.calibration.profiles import get_profile
+    from experiments.phase_c2 import full_search_space as FS
+
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("c2_inputs", CHECK)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["c2_inputs"] = module
+    spec.loader.exec_module(module)
+    derived = module.declared_inputs()
+
+    expected = []
+    for _name, telemetry, result in FS.TELEMETRY_SOURCES:
+        expected.append(telemetry)
+        if result:
+            expected.append(result)
+    for qualified in FS.PROFILE_IDS:
+        expected.append(str(get_profile(qualified).items_path))
+
+    assert sorted(derived) == sorted(dict.fromkeys(expected))
+    #: BOTH producers are represented. Either alone is one of the two failures.
+    assert any(x.startswith("logs/") for x in derived), "no telemetry input"
+    assert any(x.startswith("artifacts/") for x in derived), (
+        "no calibration item file -- this is the a2 failure")
+    for rel in derived:
+        assert (REPO / rel).is_file(), rel
+
+    #: And the config must NOT carry a competing list.
+    assert "paths" not in json.loads(CONFIG.read_text())["required_repo_inputs"], (
+        "a path list beside the derivation is a second owner of one fact, and "
+        "it is what was short twice")
+
+
+def test_a_missing_declared_input_refuses_BEFORE_cuda(check, cfg, tmp_path,
+                                                      monkeypatch):
+    """And it refuses with the CAUSE, not with a search-space error.
+
+    On the pod the missing file surfaced as `FullSearchSpaceError: ... refusing
+    to price from a partial history` inside stage A -- true, but it sent the
+    diagnosis looking at the cost model rather than at the ship set.
+    """
+    broken = {**cfg, "required_repo_inputs": {
+        "paths": ["logs/stages/stage-1/phase_b/runs/attempt5/nope.jsonl"]}}
+    with pytest.raises(AssertionError, match="declared repository input"):
+        check.require_repo_inputs(broken)
+
+
+def test_a_missing_input_still_writes_a_report_rather_than_a_traceback(
+        check, tmp_path, monkeypatch):
+    """A launcher reads the report. A refusal that never reaches it looks like
+    a crash instead of a missing file.
+
+    This branch was genuinely absent when the input check was added: `main`
+    caught only `SystemExit`, so the AssertionError would have escaped.
+    """
+    config = json.loads(CONFIG.read_text())
+    config["required_repo_inputs"]["paths"] = ["logs/definitely/absent.jsonl"]
+    local = tmp_path / "cfg.json"
+    local.write_text(json.dumps(config))
+    monkeypatch.setattr(sys, "argv", [
+        "check", "--run-id", "missing-input", "--config", str(local),
+        "--out", str(tmp_path / "out")])
+    assert check.main() == check.FAILED
+    doc = json.loads((tmp_path / "out"
+                      / "c2_full_search_cuda_report.json").read_text())
+    assert doc["verdict"] == "FAIL"
+    assert "declared repository input" in doc["reason"]
+    #: And it did NOT get as far as reporting a device.
+    assert "device" not in doc
 
 
 # --- the refusals -----------------------------------------------------------

@@ -269,6 +269,13 @@ def _cuda_engineering(scr: Path, run_id: str):
     eng.a = types.SimpleNamespace(run_id=run_id, execution_sha="a" * 40,
                                   image="img:tag")
     eng.scr = scr
+    #: `write_evidence` reads the INSTANCE's experiment id now, because the
+    #: launcher is parameterized -- a module constant would make one
+    #: validation's `logs/runs/` key a property of every validation that uses
+    #: this entry point. This bypass constructor must set what `__init__` would.
+    eng.experiment_id = mod.DEFAULT_EXPERIMENT_ID
+    eng.validation_label = "cuda-stage-f"
+    eng.stage_id = mod.DEFAULT_STAGE_ID
     eng.ev = {"verdict": "CUDA ENGINEERING VALIDATION PASS", "pod_id": "p1",
               "subrun_cost_usd": 0.0182, "campaign_cost_after_usd": 0.04}
     return mod, eng
@@ -300,7 +307,7 @@ def test_the_cuda_validation_claims_and_requires_the_same_way(tmp_path):
 
     _, eng = _cuda_engineering(scr, "subrun_a")
     eng.write_evidence(repo)
-    doc = read_run(repo, "cuda_stage_f", "subrun_a", mod.RUN_STAGE_ID)
+    doc = read_run(repo, "cuda_stage_f", "subrun_a", mod.DEFAULT_STAGE_ID)
     assert "validation_stdout" in doc["roles"]
 
 
