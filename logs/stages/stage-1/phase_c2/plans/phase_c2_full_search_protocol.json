@@ -206,49 +206,49 @@
   "_beam_is_not_exhaustive_enumeration": "the point is not to measure every leaf. It is that every admissible alternative COMPETES inside one search, so a calibration choice can affect pruning and a structurally promising path is not excluded merely because Search-1 held other calibrations fixed."
  },
  "cost_model": {
-  "source": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. REFRESHED by logs/stages/stage-1/phase_c2/plans/phase_c2_measured_optimization.json: measured component speedups from the 2026-09-18 performance round, applied per cell as {\"attention.activation_importance_v1\": 0.366, \"attention.weight_proxy_v0\": 0.4102, \"composite.stage1_sandwich_v0\": 0.4132, \"depth.causal_kl_greedy_v1\": 0.8537, \"depth.positional_v0\": 0.3895, \"ffn.activation_importance_v0\": 0.2421, \"width.global_pca_v0\": 0.4209}. The reference-cache recompute waste is deliberately NOT claimed -- it was instrumented, not fixed.",
+  "source": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. NOT adjusted by the measured 2026-09-18 component speedups: this is the conservative authorization basis, and optimized_planning_estimate() carries that adjustment as an estimate instead.",
   "minutes": {
    "attention.activation_importance_v1": {
-    "root_max": 1.3144,
-    "root_mean": 1.2617,
-    "deeper_max": 1.1038,
-    "deeper_mean": 0.8895
+    "root_max": 3.591,
+    "root_mean": 3.447,
+    "deeper_max": 3.0156,
+    "deeper_mean": 2.4302
    },
    "attention.weight_proxy_v0": {
-    "root_max": 1.5767,
-    "root_mean": 1.5767,
-    "deeper_max": 1.5835,
-    "deeper_mean": 0.5907
+    "root_max": 3.8435,
+    "root_mean": 3.8435,
+    "deeper_max": 3.8601,
+    "deeper_mean": 1.44
    },
    "composite.stage1_sandwich_v0": {
-    "root_max": 1.6029,
-    "root_mean": 1.5875,
-    "deeper_max": 1.6029,
-    "deeper_mean": 1.5875
+    "root_max": 3.8794,
+    "root_mean": 3.8422,
+    "deeper_max": 3.8794,
+    "deeper_mean": 3.8422
    },
    "depth.causal_kl_greedy_v1": {
-    "root_max": 29.328,
-    "root_mean": 24.9692,
-    "deeper_max": 30.793,
-    "deeper_mean": 23.5435
+    "root_max": 34.3539,
+    "root_mean": 29.2482,
+    "deeper_max": 36.07,
+    "deeper_mean": 27.5781
    },
    "depth.positional_v0": {
-    "root_max": 1.4527,
-    "root_mean": 1.4527,
-    "deeper_max": 0.9967,
-    "deeper_mean": 0.5575
+    "root_max": 3.7292,
+    "root_mean": 3.7292,
+    "deeper_max": 2.5587,
+    "deeper_mean": 1.4311
    },
    "ffn.activation_importance_v0": {
-    "root_max": 0.6262,
-    "root_mean": 0.5994,
-    "deeper_max": 0.7273,
-    "deeper_mean": 0.4837
+    "root_max": 2.5863,
+    "root_mean": 2.4755,
+    "deeper_max": 3.0038,
+    "deeper_mean": 1.9978
    },
    "width.global_pca_v0": {
-    "root_max": 1.6548,
-    "root_mean": 1.5413,
-    "deeper_max": 1.3548,
-    "deeper_mean": 0.8917
+    "root_max": 3.9313,
+    "root_mean": 3.6616,
+    "deeper_max": 3.2187,
+    "deeper_mean": 2.1185
    }
   },
   "unmeasured_inputs": [],
@@ -641,5 +641,5 @@
  "interpretation_discipline": "the search stage produces a cheap-metric front and selects a candidate SET, never an incumbent. Only the behavioural confirmation of the selected C against the incumbent B, under the frozen recipe, the frozen Phase-C battery, the +0.010 SESOI and C1's GO / NO-GO / INCONCLUSIVE rule, may name a C2 incumbent \u2014 and INCONCLUSIVE with no incumbent named is a legitimate terminal result, not a reason for a fourth seed.",
  "pricing": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
  "authorizes": "nothing",
- "protocol_sha256": "d7678d7d291be072a8796fb3911ce1c39ead4730049522ae4e575f18fe74ecbb"
+ "protocol_sha256": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da"
 }

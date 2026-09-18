@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-18T18:00:00Z",
- "_contract": "Minimal machine-readable CURRENT snapshot: live facts only. History: logs/budget/decisions.md. Human view: logs/state/current.md. Ownership: logs/state/ownership.md.",
+ "generated_utc": "2026-09-19T09:00:00Z",
+ "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, each with its owner named. Human view: logs/state/current.md. History: logs/budget/decisions.md. Index: logs/README.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
   "paid_compute": false,
@@ -15,7 +15,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
-  "_sessions_max_meaning": "null is the AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
+  "_sessions_max_meaning": "the 2026-09-11b AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
   "any": false,
@@ -23,9 +23,9 @@
   "note": "nothing is prepared and nothing may start. The durability boundary has inverted: no GPU remeasurement of B, no second state_eval, no Search-2 and no behavioural confirmation without a new maintainer decision. Owner: the attempt8 closeout."
  },
  "budget": {
-  "cumulative_spend_usd": 297.8795,
+  "cumulative_spend_usd": 298.7241,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 72.1205,
+  "remaining_usd": 71.2759,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -68,12 +68,11 @@
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
  "abandoned": [
-  "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed",
-  "the paid device-canary path: TERMINATED 2026-08-18, evidence kept"
+  "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
  "next_starting_point": {
   "status": "C1 CLOSED by a GO verdict; C2 preparation CLOSED/ACCEPTED, its CUDA validation PASS/CLOSED and its performance round COMPLETE/CLOSED. Nothing is authorized.",
-  "then": "the chain is complete and re-priced; next is the maintainer's FINAL FORMAL SEARCH LAUNCH REVIEW, which now also owes blocker (2)'s frozen-record decision. If approved: grant.json, then sweep -> readiness -> authorization -> bundle, in that order. Do NOT launch before the review. After Top-5 is committed, STOP. Re-quote the rate before issuance and re-derive the ceiling if it moved; do NOT narrow beam 6.",
+  "then": "the chain is complete and re-priced on the conservative basis. Next is the maintainer's FINAL FORMAL SEARCH LAUNCH REVIEW, which also owes the certification's boundary-case judgment and the frozen-record position. If approved: grant.json, then sweep -> readiness -> authorization -> bundle, in that order. Do NOT launch before the review. After Top-5 is committed, STOP. Re-quote the rate before issuance; do NOT narrow beam 6.",
   "budget": "OWNED by the budget block; not restated."
  },
  "read_order": [
@@ -106,39 +105,35 @@
  "phase_c": {
   "c0": {
    "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
-   "protocol": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json fb2eeea531f9f0d1",
-   "sizing_evidence": "logs/stages/stage-1/phase_c1/plans/phase_c0_sizing_evidence.json 4786242d349e9b21",
+   "owner": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json fb2eeea531f9f0d1 and .../phase_c0_sizing_evidence.json 4786242d349e9b21",
    "authorizes": "nothing"
   },
   "c1": {
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ -- plans, runs, analyses and the attempt-18 closeout own every C1 figure and artifact.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "Search-1 DONE and FROZEN; B->C COMPUTED. The local Search-2 refinement is WITHDRAWN. C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection of a new incumbent: designed, priced, re-priced on measured evidence, NOT AUTHORIZED.",
+   "status": "Search-1 DONE and FROZEN; B->C COMPUTED; the local Search-2 refinement WITHDRAWN. C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection. Designed, driver CONFIRMED ON REAL CUDA, chain BUILT and UNCONSUMED, priced on the CONSERVATIVE basis, NOT AUTHORIZED. Commits a Top-5 and STOPS; two authorizations, never one.",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
-   "priced": "plans/phase_c2_full_search_pricing.json (Search-1's historical basis: plans/phase_c2_pricing.json).",
+   "priced": "plans/phase_c2_full_search_pricing.json \u2014 the ceiling and the planning estimate, labelled apart, and the funding verdict.",
    "result": "B is DOMINATED on all three ranked objectives by two front-0 candidates and dominates none; NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Both sides were measured by ONE evaluator implementation, so the finding stands. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
-   "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat incumbent B after the frozen 0.86M recovery? Screening is seed- AND prompt-disjoint (c2_screening_v1, 0ad76fc7). Owner: the protocol.",
-   "execution_path": "full-search driver CONFIRMED ON REAL CUDA; the chain is BUILT and UNCONSUMED, provisioning 400 GB for a derived 250.9 GiB peak. Cost model REFRESHED from measurement: 1826.57 -> 1445.54 min, beam 6 untouched. Commits a Top-5 and STOPS. Two authorizations, never one.",
-   "funding": "cap 370.0000 (accounting envelope only); chain total 59.0009 fits with 13.1196 over. NOT AUTHORIZED. Owner: plans/phase_c2_full_search_pricing.json:funding."
+   "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat incumbent B after the frozen 0.86M recovery? Screening is seed- AND prompt-disjoint (0ad76fc7). Owner: the protocol."
   },
-  "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent: attention.activation_importance_v1 vs a future attention.causal_kl_v1. Cannot start before C2 names an incumbent, and the operator does not exist yet.",
-  "c4": "CONDITIONAL on C3 promoting. Another full joint re-search with the promoted operator, then behavioural selection. Same cycle as C1->C2; pattern in docs/OPERATOR_PROMOTION_CYCLE.md."
+  "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent; cannot start before C2 names one, and the operator does not exist yet.",
+  "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
  "storage": {
-  "measured_utc": "2026-09-01T04:00:00Z",
   "roots": {
    "git": "/home/ecs-user/AlphaAvatar-distill",
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "TWO things are owed, neither mine to settle. (1) NOT AUTHORIZED: the formal full-search chain is BUILT and UNCONSUMED, and the maintainer's FINAL FORMAL SEARCH LAUNCH REVIEW is owed. It reads logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_grant_proposal.json, which approves nothing and which the issuer refuses. Ceilings cover GPU AND separately billed disk and FIT the envelope; fitting is NOT permission and NOT transferable to C3/C4. (2) A FROZEN-RECORD DECISION: adopting the state_eval optimization moved planning/metrics.py a6dd5d56 -> d193cc90, which phase_c2_baseline_completion_protocol.json binds by hash. The gate fires CORRECTLY, refusing a FUTURE B re-measurement; no completed result is affected and the full-search protocol does not bind it. Amending a frozen protocol and reverting a measured optimization are both maintainer calls. Options, detail and the six red tests: logs/state/current.md.",
+ "blocker": "NOT AUTHORIZED, and ONE JUDGMENT IS OWED. The formal full-search chain is BUILT and UNCONSUMED; the FINAL FORMAL SEARCH LAUNCH REVIEW reads plans/phase_c2_full_search_grant_proposal.json, which approves nothing and which the issuer refuses. The ceiling is the CONSERVATIVE 1826.58-min window; the optimized 1445.54-min figure is a recorded PLANNING ESTIMATE only, and the certification showed why -- 2.63x on the whole state-eval pass where a four-item benchmark implied 76x. Money: the pricing record. THE JUDGMENT: the certification met its predeclared absolute-drift target and kept every real-candidate Pareto decision identical, but 2 of 5 epsilon-boundary cases flipped -- both closer to the boundary than the drift. Options: logs/state/current.md. The frozen baseline-completion contract stays frozen and keeps refusing; owner plans/phase_c2_evaluator_lineage.json.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
- "history": "per-attempt records, failure patterns and cost history: logs/budget/decisions.md, logs/budget/ledger.md and the per-run dirs.",
+ "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
   "experiment_id": "phase_c2_baseline_completion",
   "run_id": "attempt8",
@@ -155,9 +150,10 @@
  "cuda_engineering_validation": {
   "_what": "engineering evidence only -- neither validation is a scientific result and neither authorizes anything.",
   "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, campaign CLOSED. Owner: phase_c1/validations/cuda-stage-f/v1/.",
-  "c2_full_search": "PASS 2026-09-17 on an L40S: the driver reached C2_FULL_SEARCH_ALL_DONE on real CUDA in BF16 over the 578-leaf space, and the real 596M student reloaded canonically intact. $0.1453 of $0.9000, three subruns, every teardown provider-confirmed. CLOSED. Owner: validations/full-search-cuda/v1/closeout.json.",
+  "c2_full_search": "PASS 2026-09-17 on an L40S: the driver reached C2_FULL_SEARCH_ALL_DONE on real CUDA in BF16 over the 578-leaf space and the real 596M student reloaded canonically intact. $0.1453 of $0.9000, three subruns, all torn down. CLOSED. Owner: validations/full-search-cuda/v1/closeout.json.",
   "authorizes": "nothing",
-  "c2_full_search_performance": "COMPLETE and CLOSED 2026-09-18 on an L40S, changing no science: two optimizations ADOPTED on measured decision-level equivalence (76.0x and 1.10x, drift 3.03e-05, 257x below the search's own threshold), one REFUSED on memory evidence, one instrumented to a REFUTED hypothesis. NOT recorded as PASS: no subrun exited 0 and every failure was in the instrumentation. $0.2252 of $1.5000, three subruns, all torn down. It also moved a hash a frozen protocol binds -- see blocker (2). Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/closeout.json."
+  "c2_full_search_performance": "COMPLETE and CLOSED 2026-09-18: two optimizations ADOPTED on measured equivalence, one REFUSED, one instrumented to a REFUTED hypothesis. NOT a PASS -- no subrun exited 0 and every failure was in the instrumentation. $0.2252 of $1.5000. Its 76x figure is SUPERSEDED on the complete suite by the certification below, and it moved a hash a frozen protocol binds. Owner: validations/full-search-performance/v1/closeout.json.",
+  "c2_state_eval_certification": "MEASURED and CLOSED 2026-09-19 on the COMPLETE frozen suite. Ranked ABSOLUTE drift 9.032e-06 -- inside the predeclared 1e-5 target, 11.1x below the 1e-4 epsilon -- with real-candidate fronts, ordering and selected ids IDENTICAL. NOT a PASS: 2 of 5 epsilon-boundary cases flipped, both closer to the boundary than the drift. The judgment RETURNS TO REVIEW. Also measured: the 76x does NOT hold at full scale (reduction 10.06x, pass 2.63x). $0.8446 of $1.5000, two subruns, both torn down. Owner: validations/state-eval-certification/v1/closeout.json."
  },
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything."

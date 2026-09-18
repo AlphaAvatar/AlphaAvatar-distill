@@ -1,0 +1,33 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "c2_state_eval_cert",
+ "run_id": "c2_state_eval_cert_20260919_s2",
+ "root": "c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s2",
+ "artifact_spec": "cuda_engineering_run_v1",
+ "plan": {
+  "validation": "v1",
+  "execution_sha": "",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
+ },
+ "implementation": {
+  "launcher": "scripts/validation/cuda_engineering_launch.py"
+ },
+ "status": {
+  "verdict": "FAIL",
+  "pod_id": "q6fdziseu7i18s",
+  "subrun_cost_usd": 0.3521,
+  "campaign_cost_after_usd": 0.8446,
+  "authorizes": "nothing"
+ },
+ "roles": {
+  "artifacts": "artifacts/",
+  "closeout": "closeout/outcome.json",
+  "evidence": "evidence/evidence.json",
+  "validation_stdout": "runtime/validation_stdout.txt",
+  "watchdog": "runtime/watchdog/"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "3f5b3c5ecbe01dbcf6d0a2eb203165062486f83cf3875a3ceac46a2b3be9379b"
+}

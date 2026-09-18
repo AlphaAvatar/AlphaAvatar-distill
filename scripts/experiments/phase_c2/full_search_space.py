@@ -84,9 +84,11 @@ class FullSearchSpaceError(RuntimeError):
 
 FAMILY = "qwen3"
 
-#: The measured-optimization record the cost table is refreshed by, when
-#: it exists. Absent, the pooled pre-optimization figures stand -- which
-#: is the safe direction: they over-state rather than under-state.
+#: The measured-optimization record, read ONLY by
+#: `optimized_planning_estimate()`. It is NOT applied to `cost_model()`, which
+#: is the authorization basis -- see that function for why review reverted
+#: that. Absent, there is simply no estimate; the ceiling never moves either
+#: way.
 MEASURED_OPTIMIZATION = ("logs/stages/stage-1/phase_c2/plans/"
                         "phase_c2_measured_optimization.json")
 
@@ -192,50 +194,78 @@ def cost_model(repo_root: str | Path = REPO_ROOT) -> CostModel:
             continue
         for statistic in ("max", "mean"):
             row.setdefault(f"deeper_{statistic}", row[f"root_{statistic}"])
-    #: THE MEASURED REFRESH, applied if it exists.
+    #: DELIBERATELY NOT REFRESHED. This is the AUTHORIZATION basis, and it
+    #: stays on the pooled per-expansion minutes that two committed searches
+    #: actually observed.
     #:
-    #: The pooled table above is per-expansion minutes from committed searches
-    #: on the PRE-optimization executable. The 2026-09-18 performance round
-    #: made the state-eval reduction device-resident (76.0x measured on a real
-    #: L40S) and gave DEPTH a forward-KL-only path (1.10x), so those cells now
-    #: over-state what an expansion costs.
+    #: The 2026-09-18 performance round measured two real component speedups
+    #: (76.0x on the state-eval reduction, 1.10x on the DEPTH scoring loop) and
+    #: this function briefly applied them here, which took the beam-6 window
+    #: from 1826.57 to 1445.54 minutes. Review reverted that for the first
+    #: optimized formal search: a hard ceiling derived by COMPONENT-LEVEL
+    #: EXTRAPOLATION can under-authorize a run, and an optimized
+    #: implementation that finishes early simply spends less than its ceiling
+    #: -- the ceiling does not have to pretend the optimization is slower, but
+    #: it also must not be the first place the extrapolation is tested.
     #:
-    #: Applied as a named ADJUSTMENT rather than folded in: the record states
-    #: every input, the arithmetic is one formula, and the pre-refresh figures
-    #: stay visible in it. A ratio applied to a whole cell would have been
-    #: wrong -- the saving is a component of one phase, capped at that phase.
-    refresh_path = Path(repo_root) / MEASURED_OPTIMIZATION
-    refreshed: dict[str, float] = {}
-    if refresh_path.is_file():
-        record = json.loads(refresh_path.read_text())
-        for impl, cell in record["cells"].items():
-            if impl not in table:
-                continue
-            was = cell["observed_total_minutes"]
-            now = cell["refreshed_total_minutes"]
-            if was <= 0:
-                continue
-            factor = now / was
-            #: Scale BOTH statistics by the same measured factor. The max is
-            #: what the ceiling rests on and the mean is what the expected path
-            #: uses, and the optimization applies to both.
-            for statistic in ("max", "mean"):
-                for where in ("root", "deeper"):
-                    key = f"{where}_{statistic}"
-                    if key in table[impl]:
-                        table[impl][key] = round(table[impl][key] * factor, 4)
-            refreshed[impl] = round(factor, 4)
-
+    #: The measured adjustment is still recorded, as an engineering PLANNING
+    #: ESTIMATE, by `optimized_planning_estimate()` below. After the first
+    #: optimized formal search completes, ITS per-expansion telemetry becomes
+    #: the measured basis and the adjustment retires.
     source = ("derived at import from " + ", ".join(derived["sources"])
               + "; per-cell max across both. No proxied rows: every "
-                "implementation in this space has run inside a real search.")
-    if refreshed:
-        source += (" REFRESHED by " + MEASURED_OPTIMIZATION + ": measured "
-                   "component speedups from the 2026-09-18 performance round, "
-                   "applied per cell as " + json.dumps(refreshed) + ". The "
-                   "reference-cache recompute waste is deliberately NOT "
-                   "claimed -- it was instrumented, not fixed.")
+                "implementation in this space has run inside a real search. "
+                "NOT adjusted by the measured 2026-09-18 component speedups: "
+                "this is the conservative authorization basis, and "
+                "optimized_planning_estimate() carries that adjustment as an "
+                "estimate instead.")
     return CostModel(minutes=table, proxies={}, source=source)
+
+
+def optimized_planning_estimate(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The measured component adjustment, as an ESTIMATE and nothing else.
+
+    Returns the per-cell factors the 2026-09-18 performance round measured, the
+    cost table they would produce, and the beam-width window that table
+    implies. **Nothing authorizes spending from this.** It exists so the
+    expected duration of the first optimized formal search is on the record and
+    can be compared against what that search actually costs -- which is the
+    measurement that will replace it.
+
+    Empty when the record is absent, which is the safe direction: no record
+    means no estimate, never a silently different ceiling.
+    """
+    record_path = Path(repo_root) / MEASURED_OPTIMIZATION
+    if not record_path.is_file():
+        return {"available": False,
+                "_why": f"{MEASURED_OPTIMIZATION} is not in the tree"}
+    record = json.loads(record_path.read_text())
+    conservative = cost_model(repo_root)
+    table = {impl: dict(row) for impl, row in conservative.minutes.items()}
+    factors: dict[str, float] = {}
+    for impl, cell in record["cells"].items():
+        if impl not in table or cell["observed_total_minutes"] <= 0:
+            continue
+        factor = cell["refreshed_total_minutes"] / cell["observed_total_minutes"]
+        for statistic in ("max", "mean"):
+            for where in ("root", "deeper"):
+                key = f"{where}_{statistic}"
+                if key in table[impl]:
+                    table[impl][key] = round(table[impl][key] * factor, 4)
+        factors[impl] = round(factor, 4)
+    return {
+        "available": True,
+        "record": MEASURED_OPTIMIZATION,
+        "factors": factors,
+        "estimated_minutes": table,
+        "_status": ("ENGINEERING PLANNING ESTIMATE. Derived by adjusting each "
+                    "pooled cell by the component saving its own phases "
+                    "contain, capped at the observed phase. It is NOT the "
+                    "authorization basis and no ceiling is derived from it."),
+        "_retires_when": ("the first optimized formal search produces its own "
+                          "per-expansion telemetry, which becomes the measured "
+                          "basis for every later cost model"),
+    }
 
 
 # --- the space ---------------------------------------------------------------
@@ -335,9 +365,12 @@ def phase_b_reference_space(repo_root: str | Path = REPO_ROOT) -> SearchSpace:
 
 def bound(space: SearchSpace, *, beam_width: int | None = None,
           warmup_levels: int | None = None, statistic: str = "max",
-          repo_root: str | Path = REPO_ROOT):
+          repo_root: str | Path = REPO_ROOT, cost=None):
+    """The structural window. `cost` overrides the conservative table; see
+    `price` for why that override exists and who may not use it."""
     return _bound(
-        space, cost_model(repo_root), statistic=statistic,
+        space, cost if cost is not None else cost_model(repo_root),
+        statistic=statistic,
         beam_width=SCHEDULE_V1.width if beam_width is None else beam_width,
         warmup_levels=(SCHEDULE_V1.warmup_levels if warmup_levels is None
                        else warmup_levels))
@@ -356,7 +389,7 @@ def trajectory(space: SearchSpace, *, prefer_costly: bool = True,
 
 def price(space: SearchSpace, *, price_per_hour: float, authorized_usd: float,
           beam_width: int | None = None, statistic: str = "max",
-          repo_root: str | Path = REPO_ROOT):
+          repo_root: str | Path = REPO_ROOT, cost=None):
     """A `BudgetPlan` for the full-search session. Priced, which is not funded.
 
     RAISES `BudgetError` when the plan does not fit `authorized_usd`. That
@@ -364,9 +397,17 @@ def price(space: SearchSpace, *, price_per_hour: float, authorized_usd: float,
     instead of being quietly shrunk to fit — and at the standing beam width it
     does refuse against the project's remaining headroom. See the pricing
     record and the decision it asks for.
+
+    `cost` overrides the conservative table, and **nothing that authorizes
+    spending passes it.** It exists so the optimized PLANNING ESTIMATE can be
+    derived through this same function rather than by a second route: an
+    estimate computed a different way than the ceiling it sits beside is not
+    comparable to it. The default -- `cost_model(repo_root)` -- is what every
+    launch, gate and authorization uses.
     """
     return _price(
-        space, cost_model(repo_root), price_per_hour=price_per_hour,
+        space, cost if cost is not None else cost_model(repo_root),
+        price_per_hour=price_per_hour,
         authorized_usd=authorized_usd, session_phases=SESSION_PHASE_MINUTES,
         setup_phase="setup_and_asset_staging", transfer_phase="bundle_transfer",
         search_phase_name="beam_search_costly_early", statistic=statistic,

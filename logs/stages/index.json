@@ -22,7 +22,7 @@
   "non_experiment_rows": {
    "alias": 1,
    "arm": 1,
-   "engineering": 2,
+   "engineering": 3,
    "engineering-measurement": 1,
    "experiment-spanning": 1,
    "pipeline-activity": 6,
@@ -151,8 +151,8 @@
     "pipeline_activity": 3,
     "experiments": 8,
     "experiments_with_logs": 8,
-    "runs": 63,
-    "canonical_configs": 8,
+    "runs": 66,
+    "canonical_configs": 9,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -164,7 +164,8 @@
     "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
     "configs/validation/c2_full_search_cuda.json",
-    "configs/validation/c2_full_search_performance.json"
+    "configs/validation/c2_full_search_performance.json",
+    "configs/validation/c2_state_eval_certification.json"
    ],
    "canonical_data_manifests": [
     "data/warmup/holdout_v1.manifest.json"
@@ -603,6 +604,29 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "Stage 1 for the same reason the CUDA validation is: validation material is Stage-1 material rather than stage-neutral, and what it validates is a Stage-1 initialization search. It is `engineering`, not an experiment -- it trains nothing, measures no behaviour and ranks no candidate. Separate from the CUDA validation because the subject differs: that one certified the driver's device integration, this one benchmarks the reduction kernels and their equivalence."
+  },
+  {
+   "experiment_id": "c2_state_eval_cert",
+   "stage_id": "1",
+   "classification": "engineering",
+   "status": "in progress \u2014 engineering evidence, authorizes nothing",
+   "title": "C2 state-eval reduction \u2014 full-suite equivalence and Pareto-decision certification",
+   "question": null,
+   "canonical_path": "logs/stages/stage-1/c2_state_eval_cert",
+   "canonical_config": "configs/validation/c2_state_eval_certification.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json",
+     "says": "its engineering authorization, with the drift target and the Pareto-decision requirements predeclared before execution"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_evaluator_lineage.json",
+     "says": "which evaluator implementation measured what, and what may therefore be compared with what"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "Stage 1, engineering, for the same reasons as the two validations above: it trains nothing, measures no behaviour and ranks no scientific candidate. Separate from the performance round because the subject differs -- that one benchmarked the reduction on four calibration items, this one certifies the aggregate metrics and the PARETO_V1 decisions over the COMPLETE frozen state_eval suite, which is the decision path the earlier evidence did not reach."
   },
   {
    "experiment_id": "c2_full_search_cuda",

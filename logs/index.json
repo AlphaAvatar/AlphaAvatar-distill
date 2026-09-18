@@ -282,7 +282,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 20,
+  "runs_current": 23,
   "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
@@ -292,6 +292,11 @@
     "total": 4
    },
    "c2_full_search_perf": {
+    "recorded": 3,
+    "unrecorded": 0,
+    "total": 3
+   },
+   "c2_state_eval_cert": {
     "recorded": 3,
     "unrecorded": 0,
     "total": 3
@@ -1047,6 +1052,45 @@
     "manifest": "logs/stages/stage-1/c2_full_search_perf/runs/c2_full_search_perf_20260918_p3/manifest.json"
    },
    "manifest_sha256": "b11a91ce7100507592cf2195f84a276573488b7a7e14301f232859913e33ee27",
+   "n_components": 5
+  },
+  {
+   "experiment_id": "c2_state_eval_cert",
+   "run_id": "c2_state_eval_cert_20260919_s1",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s1",
+    "manifest": "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s1/manifest.json"
+   },
+   "manifest_sha256": "488ce1588d7aa530b6a53f337ea631e9c98216b0c1e850c1db326d828a5ab545",
+   "n_components": 4
+  },
+  {
+   "experiment_id": "c2_state_eval_cert",
+   "run_id": "c2_state_eval_cert_20260919_s1_dry",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s1_dry",
+    "manifest": "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s1_dry/manifest.json"
+   },
+   "manifest_sha256": "d87382711af7356ff3e5e9dca057200b75c22272cc759b26e4e0159a44db09ab",
+   "n_components": 2
+  },
+  {
+   "experiment_id": "c2_state_eval_cert",
+   "run_id": "c2_state_eval_cert_20260919_s2",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s2",
+    "manifest": "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s2/manifest.json"
+   },
+   "manifest_sha256": "3f5b3c5ecbe01dbcf6d0a2eb203165062486f83cf3875a3ceac46a2b3be9379b",
    "n_components": 5
   },
   {

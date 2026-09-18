@@ -167,7 +167,8 @@ def price_per_hour_basis(repo_root: str | Path = REPO_ROOT) -> float:
 
 
 def derive_ceiling_usd(price_per_hour: float,
-                       repo_root: str | Path = REPO_ROOT) -> float:
+                       repo_root: str | Path = REPO_ROOT,
+                       *, minutes: float | None = None) -> float:
     """The ceiling at a LIVE rate, from the priced minutes.
 
     The minutes are the plan; the dollars are the minutes times whatever the
@@ -179,8 +180,12 @@ def derive_ceiling_usd(price_per_hour: float,
     Rounded UP at four decimals, because a ceiling that rounds DOWN
     under-authorizes the plan it is supposed to cover -- the C1 grant found
     this at $15.147403 against a recorded $15.1474.
+
+    `minutes` overrides the committed row, for the writer computing the block
+    it is about to write. See `total_ceiling_usd`.
     """
-    minutes = float(_standing_row(repo_root)["hard_ceiling_minutes"])
+    minutes = (float(minutes) if minutes is not None
+               else float(_standing_row(repo_root)["hard_ceiling_minutes"]))
     exact = minutes / 60.0 * float(price_per_hour)
     return math.ceil(exact * 10_000) / 10_000
 
@@ -562,17 +567,27 @@ def effective_rate_usd_per_hour(price_per_hour: float,
 
 
 def total_ceiling_usd(price_per_hour: float,
-                      repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+                      repo_root: str | Path = REPO_ROOT,
+                      *, minutes: float | None = None) -> dict[str, Any]:
     """The ceiling that covers EVERY separately billed provider resource.
 
     The GPU ceiling alone was $33.1827 while the launcher provisioned hundreds
     of GB of container disk that the GPU securePrice says nothing about. The
     minutes are unchanged -- they are the work bound -- and the money is those
     minutes at the effective rate.
+
+    `minutes` overrides the committed pricing row. A LAUNCH must not pass it:
+    the committed record is what a grant bound and what the pod verifies. The
+    PRICING WRITER must, because it is computing the block it is about to
+    write, and reading the row off disk made the document derive from its own
+    previous version -- two consecutive regenerations produced two different
+    hashes the first time the standing minutes changed. A figure derived from
+    the document that carries it is self-consistent whatever it says.
     """
-    minutes = float(_standing_row(repo_root)["hard_ceiling_minutes"])
+    minutes = (float(minutes) if minutes is not None
+               else float(_standing_row(repo_root)["hard_ceiling_minutes"]))
     hours = minutes / 60.0
-    gpu = derive_ceiling_usd(price_per_hour, repo_root)
+    gpu = derive_ceiling_usd(price_per_hour, repo_root, minutes=minutes)
     disk = storage_cost_usd(hours, repo_root)
     effective = effective_rate_usd_per_hour(price_per_hour, repo_root)
     total = math.ceil(hours * effective * 10_000) / 10_000
@@ -620,12 +635,19 @@ def tracked_non_source_inputs() -> tuple[str, ...]:
         out.append(telemetry)
         if result:
             out.append(result)
-    #: And the measured-optimization record the cost table is REFRESHED by.
-    #: Named unconditionally, not "if it exists": `cost_model()` falls back to
-    #: the pooled pre-optimization figures when it is missing, so a pod without
-    #: this file would build a DIFFERENT, more expensive cost model than the one
-    #: the grant priced -- and nothing would say so, because the fallback is by
-    #: design and silent. Declaring it turns that into a bundle failure.
+    #: And the measured-optimization record.
+    #:
+    #: It is NO LONGER read by `cost_model()`: review reverted that refresh, so
+    #: the authorization basis is the conservative pooled table and this record
+    #: feeds only `optimized_planning_estimate()`, which the pricing WRITER
+    #: calls and the pod does not. So this is an OVER-declaration, stated as
+    #: one rather than left to look like a dependency.
+    #:
+    #: Kept because the asymmetry is not close: under-declaring a non-source
+    #: input has cost this project two paid subruns, one per producer, and
+    #: over-declaring costs 3 KB in a bundle. The record is also the basis of
+    #: the estimate embedded in the pricing document the pod verifies, so
+    #: shipping it keeps that document reproducible on the pod.
     out.append(FS.MEASURED_OPTIMIZATION)
     return tuple(dict.fromkeys(out))
 

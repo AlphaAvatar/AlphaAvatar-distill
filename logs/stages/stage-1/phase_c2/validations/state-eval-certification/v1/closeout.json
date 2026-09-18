@@ -1,0 +1,194 @@
+{
+ "schema": "aadistill.engineering_validation_closeout/v1",
+ "_contract": "Terminal result of the bounded L40S certification of the device-resident state-eval reduction on the COMPLETE frozen suite. ENGINEERING evidence. It trains nothing, measures no behaviour, re-measures no frozen scientific checkpoint and AUTHORIZES NOTHING.",
+ "validation_id": "c2_state_eval_certification_v1",
+ "authorization": "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json",
+ "closed_utc": "2026-09-19T08:39:59Z",
+ "verdict": "MEASURED \u2014 one predeclared requirement MET, one NOT MET, and the judgment returns to review",
+ "_why_not_PASS": "the predeclared ABSOLUTE drift target on the ranked objectives was met (9.032e-06 < 1e-5, 11.1x below epsilon) and the real-candidate Pareto decisions were identical, but two of five epsilon-boundary cases changed a decision. Review's instruction was explicit: an exceeded target stops the run and the judgment comes back. The boundary construction is not re-engineered after seeing the result.",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "money": {
+  "ceiling_usd": 1.5,
+  "soft_stop_usd": 0.9,
+  "booked_usd": 0.8446,
+  "_recomputed_from_components": "0.4925 + 0.3521 = 0.8446",
+  "unspent_to_ceiling_usd": 0.6554,
+  "to_soft_stop_usd": 0.0554,
+  "rate_usd_per_hour": 1.09,
+  "_no_third_attempt": "a third attempt would cost about as much again, crossing the soft work stop, and -- more decisively -- it would not be an engineering repair. What is unresolved is whether a 9.032e-06 absolute drift is acceptable against a 1e-4 epsilon, which is a review judgment, and re-running with a different boundary construction after seeing the outcome is precisely the move the authorization forbids."
+ },
+ "resources": {
+  "provider_resources_created": 2,
+  "one_billing_resource_at_any_instant": true,
+  "teardowns_provider_confirmed": 2,
+  "pods_remaining": 0,
+  "gpu": "NVIDIA L40S",
+  "card_was_the_formal_target": true
+ },
+ "what_was_measured": {
+  "suite": {
+   "id": "state_eval@v1",
+   "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+   "items": 80,
+   "positions": 74022,
+   "domains": [
+    "general",
+    "reasoning_math",
+    "rag_multihop",
+    "code",
+    "tool"
+   ],
+   "critical_tags": [
+    "think_close",
+    "eos",
+    "final_answer",
+    "tool_close"
+   ],
+   "_this_is_the_complete_frozen_suite": "checked before any work: 80 items and 74,022 prediction positions or the run refuses. The four-item benchmark it supersedes covered 2032."
+  },
+  "logits_were_identical": {
+   "mechanism": "a sha256 per distinct id sequence, recorded on first sight and checked on every later forward in any pass for any candidate",
+   "forward_bitwise_reproducible": true,
+   "mismatches": 0,
+   "_why_it_matters": "the two implementations are compared across two passes. Without this the drift below could be the forward's rather than the reduction's."
+  },
+  "ranked_objectives_ABSOLUTE_drift": {
+   "worst": 9.032066797642901e-06,
+   "on": "state.teacher_kl.worst_domain",
+   "predeclared_target": 1e-05,
+   "target_met": true,
+   "pareto_epsilon": 0.0001,
+   "below_epsilon_by": 11.1,
+   "per_candidate": {
+    "0.05": {
+     "state.teacher_kl.equal_domain_mean": 3.441890728049339e-09,
+     "state.teacher_kl.worst_domain": 1.448692506017188e-09,
+     "state.critical_token_kl": 7.737191811628522e-09
+    },
+    "0.35": {
+     "state.teacher_kl.equal_domain_mean": 3.867013458266899e-07,
+     "state.teacher_kl.worst_domain": 1.2890438816984262e-06,
+     "state.critical_token_kl": 9.329670177041227e-09
+    },
+    "1.0": {
+     "state.teacher_kl.equal_domain_mean": 2.6677634438476705e-06,
+     "state.teacher_kl.worst_domain": 9.032066797642901e-06,
+     "state.critical_token_kl": 1.0464824085412716e-08
+    }
+   },
+   "_the_drift_is_PROPORTIONAL_to_the_value": "relative disagreement is ~1.7e-05 at every magnitude, so the ABSOLUTE drift tracks the metric. The worst figure, 9.032e-06, is at m=1.0 where worst_domain KL is 0.316; at m=0.05, where it is 0.0008, the drift is 1.4e-09. A real candidate's absolute drift therefore depends on how far that candidate sits from the teacher, and this certification bounds the coefficient rather than the number."
+  },
+  "critical_token_metrics": {
+   "emitted": [
+    "state.critical_token_kl",
+    "state.critical_token_kl.assistant",
+    "state.critical_token_kl.eos",
+    "state.critical_token_kl.final_answer",
+    "state.critical_token_kl.reasoning",
+    "state.critical_token_kl.think_close",
+    "state.critical_token_kl.tool_close"
+   ],
+   "worst_absolute_drift": 5.960354038896511e-08,
+   "tag_position_counts_identical": true,
+   "_the_rare_classes_are_covered": "think_close and eos cover 70 positions each and tool_close 28, out of 74,022. These are the classes that decide termination and the ones the four-item benchmark contained none of. Their absolute drifts are 1.0e-08 and 5.1e-08 -- the largest relative disagreements in the run and the smallest absolute ones, because the values themselves are ~1e-07."
+  },
+  "top1_agreement": {
+   "absolute_drift": 0.0,
+   "_exact": "identical under both implementations, at every magnitude"
+  },
+  "diagnostics": {
+   "worst_absolute_drift": 1.6362371274336596e-05,
+   "worst_relative_drift": 0.9571841780597724,
+   "bound": "|drift| <= 1.859e-04 * max(|value|, 1.0)",
+   "offenders": [],
+   "_the_large_relative_figure_is_not_a_finding": "0.957 relative, on a metric whose own value is ~1e-05. Nothing prunes on diagnostics and dividing by a small number is not evidence; the absolute disagreement is 1.6e-05 nats on a pooled NLL of 2.58."
+  },
+  "pareto_decisions": {
+   "real_candidates_identical": true,
+   "selected_ids": [
+    "m0_05",
+    "m0_35",
+    "m1_0"
+   ],
+   "fronts": [
+    [
+     "m0_05"
+    ],
+    [
+     "m0_35"
+    ],
+    [
+     "m1_0"
+    ]
+   ],
+   "_verified_both_ways": "the stage asserted selected ids and front membership equal before the boundary cases ran, and the stored value sets reproduce it at $0."
+  },
+  "wall_clock_complete_suite": {
+   "positions": 74022,
+   "old_pass_seconds": 228.663,
+   "new_pass_seconds": 86.845,
+   "pass_speedup": 2.633,
+   "old_reduction_seconds": 133.322,
+   "new_reduction_seconds": 13.256,
+   "reduction_speedup": 10.057,
+   "forward_seconds": 73.59,
+   "_the_76x_DOES_NOT_HOLD_on_the_complete_suite": "the four-item benchmark measured the new reduction at 0.0246 ms/position and reported 76.0x. On the complete suite the new reduction is 13.256 s over 74,022 positions = 0.179 ms/position, SEVEN TIMES slower per position, while the old path reproduces almost exactly (133.322 s = 1.80 ms/position against 1.8699 measured before). So the honest full-suite figures are 10.06x on the reduction and 2.63x on the whole state-eval pass. This is exactly the extrapolation review forbade, and it is why the conservative 1826.57-minute window was the right call: the planning estimate applied the 76x figure to the whole state_evaluation phase.",
+   "_and_this_pass_is_not_an_expansion": "an expansion forwards the 4B teacher AND a 596M student; this forwards the teacher once and perturbs its logits. 73.59 s of each pass is the forward. No new cost model is derived from these numbers and the ceiling is untouched."
+  }
+ },
+ "what_did_not_pass": {
+  "requirement": "identical PARETO_V1 decisions on deliberately close cases straddling the epsilon boundary",
+  "cases_that_changed": [
+   "at_epsilon",
+   "just_outside_epsilon"
+  ],
+  "cases_that_held": [
+   "just_inside_epsilon",
+   "epsilon_minus_drift",
+   "epsilon_plus_drift"
+  ],
+  "reproduced_at_zero_cost": true,
+  "_what_actually_happened": "the two cases that changed are the two whose distance from the boundary is SMALLER than the measured drift: `at_epsilon` sits at 0 and `just_outside_epsilon` at 1.0e-07, against a drift of 9.032e-06. The three cases placed at or beyond the drift from the boundary all held, including both cases placed at exactly epsilon +/- the drift. So the flip region is narrower than the drift on each side.",
+  "_is_this_a_finding_about_the_optimization": "NO, and that is the honest reading. ANY nonzero measurement disagreement flips a decision for a candidate pair whose gap lies within that disagreement of epsilon -- including the float32 noise of a single implementation against itself, which this project has never measured. The requirement as I implemented it was unsatisfiable: placing a pair 1e-07 outside a boundary and then applying a 9e-06 disagreement must cross it. `at_epsilon` is worse still -- at exactly the boundary the epsilon rule is decided by `>` versus `>=` on a difference that floating point does not represent exactly, so the clean pair already dominated.",
+  "_what_was_NOT_done_about_it": "the construction was not re-engineered and the run was not repeated. Review's instruction was that an exceeded target stops the run, reports the measured values, and returns the judgment -- and rewriting a predeclared decision rule after seeing the outcome is the failure mode this project has already paid for twice.",
+  "what_review_is_being_asked": "whether a 9.032e-06 absolute drift is acceptable given a 1e-4 epsilon, knowing that it can only move a decision for candidates whose gap on a ranked objective lies within ~9% of epsilon of the boundary, that the real-candidate decisions were identical, and that the drift scales with the metric value rather than being a fixed offset."
+ },
+ "subruns": [
+  {
+   "subrun_id": "c2_state_eval_cert_20260919_s1",
+   "pod_id": "gjm8v44ykc41oq",
+   "cost_usd": 0.4925,
+   "elapsed_minutes": 27.1,
+   "verdict": "FAIL",
+   "failed_at": "stage evaluate, the diagnostic relative-drift bound",
+   "cause": "a diagnostic drifted 9.572e-01 RELATIVE, above a 1.859e-04 bound",
+   "root_cause": "the bound was purely relative, and `nll_delta_vs_teacher_pooled` is a DIFFERENCE of two cross-entropies whose own value at the smallest perturbation is ~1e-05. A tiny absolute disagreement therefore reads as 96%. The message also did not name the metric, so the run reported a number nobody could act on.",
+   "repairs": [
+    "the diagnostic bound is |drift| <= tol * max(|value|, 1.0) -- relative where there is a scale, absolute near zero -- and the message names every offending metric with its old and new values",
+    "--out defaults to the directory the launcher collects, and the report is written on every exit path. s1 measured all three candidates and wrote NOTHING: the launcher collected 0 files and $0.4925 of measurement survives only as a stdout tail",
+    "the candidate reuses the reference forward instead of forwarding the 4B teacher a second time -- four forwards per item per candidate became two",
+    "the forward is timed separately, so the REDUCTION wall time review asked for is isolated instead of mixed into the pass"
+   ],
+   "_what_it_measured_anyway": {
+    "ranked_absolute_drift": 9.032e-06,
+    "_identical_to_s2": "the same figure to four significant digits on an independent pod, which is the only reproducibility evidence this certification has",
+    "pass_seconds": "311.3 / 313.7 / 311.2 old, 156.0 / 159.5 / 153.4 new"
+   }
+  },
+  {
+   "subrun_id": "c2_state_eval_cert_20260919_s2",
+   "pod_id": "q6fdziseu7i18s",
+   "cost_usd": 0.3521,
+   "elapsed_minutes": 19.4,
+   "verdict": "FAIL",
+   "failed_at": "stage pareto, the epsilon-boundary cases",
+   "cause": "2 of 5 boundary cases changed a decision under the measured drift -- see what_did_not_pass",
+   "_everything_before_it_passed": "the fingerprint stage, the full-suite evaluation of all three candidates, the predeclared absolute-drift target, the emitted-metric set, the critical-token position counts, the diagnostic bound and the real-candidate Pareto comparison",
+   "report": "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s2/artifacts/c2_state_eval_certification_report.json",
+   "_and_this_time_the_evidence_survived": "one artifact collected, containing every per-metric, per-domain, per-subtype and per-tag drift for all three candidates -- which is what s1's repair was for"
+  }
+ ],
+ "formal_c2_status_unchanged": "the full joint search remains NOT AUTHORIZED, and its hard ceiling remains the conservative 1826.58-minute window. Nothing here re-prices anything.",
+ "closeout_sha256": "66e5d1ea8dd9b769500cb15ca42d12794afdeaec05a1dfbebcef011aaf1484c5"
+}

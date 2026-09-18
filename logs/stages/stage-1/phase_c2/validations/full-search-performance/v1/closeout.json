@@ -79,10 +79,10 @@
      "old_seconds": 3.8,
      "new_seconds": 0.05,
      "worst_relative_drift": 3.0319411605575326e-05,
-     "drift_is_below_the_search_threshold_by": 256.7,
      "item_ordering_identical": true,
      "top1_agreement_exact": true,
-     "_this_is_the_headline": "measured on the real pinned 4B teacher in bf16 over four real items of the frozen mixture, 2032 prediction positions. The old side includes the .float().cpu() transfer, because that is what StateEvaluator did."
+     "_this_is_the_headline": "measured on the real pinned 4B teacher in bf16 over four real items of the frozen mixture, 2032 prediction positions. The old side includes the .float().cpu() transfer, because that is what StateEvaluator did.",
+     "_relative_not_absolute": "3.03e-05 is a RELATIVE drift on pooled per-item KL over four calibration items. It is not comparable to an absolute epsilon and it is not an aggregate the beam ranks on."
     },
     "memory": {
      "driver_free_gib": 36.322,
@@ -148,7 +148,8 @@
   "search_total_ceiling_usd": "34.8740 -> 27.5992",
   "chain_total_ceiling_usd": "66.2757 -> 59.0009",
   "headroom_after_the_chain_usd": "6.0700 -> 13.1196",
-  "_protocol_hash_moved_and_the_science_did_not": "the protocol document embeds the cost model, so re-pricing moved its hash from 26de0bb6 to d7678d7d. All 30 changed fields are under .cost_model, and the science subtree -- space, beam, ranking, Top-5, behavioural protocol, interpretation boundary -- hashes IDENTICALLY at 4897d470 before and after. Worth a maintainer's attention: a document declared closed as frozen science has a cost model inside it, so its 'science plan hash' is sensitive to any re-pricing. The subtree is the document with `cost_model` and its own `protocol_sha256` removed, canonicalized with sorted keys, so `git show HEAD:<protocol>` against the working tree reproduces both figures. Exactly those two top-level keys differ: 29 changed leaves under `.cost_model` plus the self-hash."
+  "_protocol_hash_moved_and_the_science_did_not": "the protocol document embeds the cost model, so re-pricing moved its hash from 26de0bb6 to d7678d7d. All 30 changed fields are under .cost_model, and the science subtree -- space, beam, ranking, Top-5, behavioural protocol, interpretation boundary -- hashes IDENTICALLY at 4897d470 before and after. Worth a maintainer's attention: a document declared closed as frozen science has a cost model inside it, so its 'science plan hash' is sensitive to any re-pricing. The subtree is the document with `cost_model` and its own `protocol_sha256` removed, canonicalized with sorted keys, so `git show HEAD:<protocol>` against the working tree reproduces both figures. Exactly those two top-level keys differ: 29 changed leaves under `.cost_model` plus the self-hash.",
+  "_SUPERSEDED_BY_REVIEW": "the refreshed figures are RECORDED as an engineering planning estimate and are NOT the formal authorization hard ceiling. Review kept the conservative 1826.57-minute window for the first optimized formal search, because a hard ceiling derived by component-level extrapolation can under-authorize a run. Owner of both figures: logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json -- the ceiling in search.widths, the estimate in optimized_planning_estimate."
  },
  "formal_c2_status_unchanged": "the full joint search remains NOT AUTHORIZED. This validation produces engineering evidence for a later launch review.",
  "a_consequence_of_adoption_needing_a_maintainer_decision": {
@@ -164,5 +165,6 @@
   ],
   "_what_was_done": "nothing in any of those directions. Changing a frozen scientific protocol is an explicit stop condition, and loosening a guard to green a suite is the move the guard exists to prevent."
  },
- "closeout_sha256": "ae807822ba675038e54db9e3f7a69fe042ee07ee4226133274fb1dd177c406e9"
+ "_interpretation_corrected": "TWO INTERPRETATION CORRECTIONS, from the review of 245cf1719aeb447e4b3ff740e58a64ff8e9df805. (1) 0.007782 is C2's pre-B numerical-SENSITIVITY DISCLOSURE threshold -- the tightest gap between the frozen C candidates on worst_domain -- and NOT the Pareto decision epsilon, which is 1e-4 ABSOLUTE per objective. Dividing it by a RELATIVE drift also yields a ratio with no units, so the '257x' reported throughout this record was not a decision-safety factor. (2) sqrt(V)*eps may be used as an error-SCALE heuristic but is NOT a hard float32 floor below which agreement is impossible. The measured values below are unchanged and remain valid as KERNEL-level evidence; the decision-level claim comes from the full-suite certification in ../../state-eval-certification/v1/, which measures ABSOLUTE drift on the ranked objectives against the 1e-4 epsilon and checks the PARETO_V1 decisions directly.",
+ "closeout_sha256": "3e00043711b1055623e624494b60f86fac8324a6eebc6187a74cad0428f2b2f9"
 }

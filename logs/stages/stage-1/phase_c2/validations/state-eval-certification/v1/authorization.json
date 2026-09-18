@@ -1,0 +1,95 @@
+{
+ "schema": "aadistill.engineering_validation_authorization/v1",
+ "_contract": "The approval for ONE real-L40S engineering certification of the device-resident state-eval reduction on the COMPLETE frozen suite. Recorded under this validation's own governance evidence and deliberately NOT in any formal C2 artifact: it permits an engineering measurement and confers nothing on the scientific search.",
+ "authorization_id": "c2_state_eval_certification.2026-09-19",
+ "granted_utc": "2026-09-19T00:00:00Z",
+ "granted_by": "the maintainer review of 245cf1719aeb447e4b3ff740e58a64ff8e9df805, which accepted the performance direction, kept candidates 1 and 2, and made formal launch NO-GO for one narrow reason: candidate 1's GPU equivalence evidence does not yet certify the actual full state_eval_v1 decision path. It directs 'one small engineering-only certification' and states no dollar amount, so the amount is derived and bounded here -- P12.1 requires an engineering validation to have a stated budget and scope.",
+ "subject": "the device-resident state-eval reduction (candidate 1), certified against the host path it replaces on the complete frozen suite: every declared domain, sub-type and critical-token class, the aggregate metrics PARETO_V1 consumes, and the Pareto decisions themselves.",
+ "why_the_existing_evidence_does_not_cover_it": "the performance round measured four calibration items and 2032 prediction positions with the reduction's own pooled KL. That demonstrated the speedup and the kernel-level agreement; it exercised none of the aggregation the beam ranks on -- the unweighted two-level domain mean, the worst-domain maximum, the unweighted mean over critical-token classes -- and it contained no rare tag. think_close and eos cover 70 prediction positions each and tool_close covers 28, out of 74,022: those classes decide termination and have the least averaging to hide a per-position drift behind.",
+ "candidate_2_needs_no_further_gpu_run": "review's determination: its same-device KL-only transformation, the CPU parity evidence and the existing real-L40S greedy evidence are sufficient. This run does not re-measure it.",
+ "predeclared_before_execution": {
+  "_this_is_the_point": "every threshold below is fixed BEFORE the run and is in the committed source as well as here. If the target is exceeded the run STOPS and reports the measured values; the tolerance is NOT adjusted afterwards. This project has twice re-derived a bound after seeing it fail, and both times the re-derivation was defensible and the sequence was not.",
+  "ranked_objective_absolute_drift_target": 1e-05,
+  "pareto_epsilon": 0.0001,
+  "margin_below_epsilon": 10,
+  "ranked_objectives": [
+   "state.teacher_kl.equal_domain_mean",
+   "state.teacher_kl.worst_domain",
+   "state.critical_token_kl"
+  ],
+  "_drift_is_ABSOLUTE": "absolute nats on the same objective epsilon is stated in, so the quotient of the two is a margin. The earlier round compared a RELATIVE drift against 0.007782 -- a quotient with no units, against a number that is C2's pre-B numerical-sensitivity DISCLOSURE trigger and not a decision threshold. Both errors are corrected in the records.",
+  "also_required_identical": [
+   "objective ordering across the candidate set",
+   "Pareto-front membership",
+   "PARETO_V1 selected ids, at the standing beam width 6",
+   "PARETO_V1 decisions on deliberately close cases straddling epsilon, including epsilon plus and minus the measured drift applied in the gap-closing direction",
+   "the set of emitted metrics: a metric present under one implementation and absent under the other is a changed measurement",
+   "the position count of every critical-token class"
+  ],
+  "diagnostic_relative_scale_bound": 0.00018588,
+  "_scale_bound_is_a_heuristic": "sqrt(V)*eps for a 151936-class vocabulary is ~4.65e-05. It is an error-SCALE estimate and NOT a hard floor below which agreement is impossible -- review corrected that description. Nothing prunes on the diagnostics; the load-bearing evidence is the measured absolute drift on the ranked objectives and the unchanged decisions."
+ },
+ "scope": {
+  "suite": "artifacts/stage1/state_eval_v1, COMPLETE: 80 items, 74,022 prediction positions, 5 domains, 7 sub-types, 4 critical tags. The counts are checked before any work; a smaller suite would be a different claim.",
+  "real_model": "the pinned 4B teacher at its frozen revision, in bf16 on the L40S",
+  "candidates": "ENGINEERING-ONLY. Deterministic structured perturbations of the teacher's own logits at three magnitudes. No frozen scientific checkpoint is loaded and no frozen measurement is repeated: the question is the reduction and its aggregation, not model capability.",
+  "must_establish": [
+   "the full StateEvaluation reconstructed under BOTH implementations on provably identical logits",
+   "absolute and relative drift for every emitted metric, including every per-domain teacher KL, critical_token_kl, every emitted critical-token metric, top-1 agreement and the diagnostic NLLs",
+   "identical PARETO_V1 fronts, ordering and selected ids",
+   "identical decisions at the epsilon boundary under the measured drift",
+   "the COMPLETE-SUITE wall clock for each implementation, measured directly"
+  ],
+  "may_not": [
+   "re-measure frozen B or any frozen C candidate",
+   "amend phase_c2_baseline_completion_protocol.json",
+   "revert candidate 1",
+   "change the search space, beam width, calibration sets, the 260-evaluation DEPTH rule, the state-eval suite, the ranking policy or the C2c protocol",
+   "extrapolate a formal hard ceiling from it -- review kept the conservative 1826.57-minute window for the first optimized formal search"
+  ]
+ },
+ "resource_contract": {
+  "gpu": "NVIDIA L40S",
+  "_why_the_target_card": "the card the formal search will use and the card both telemetry files were measured on. Host-vs-device agreement measured elsewhere would certify a different pair of kernels.",
+  "price_basis_usd_per_hour": 1.09,
+  "_price_basis_is_re_quoted": "the launcher queries the live securePrice and refuses above the basis.",
+  "engineering_soft_cap_usd": 0.9,
+  "total_resource_cost_ceiling_usd": 1.5,
+  "teardown_reserve_usd": 0.25,
+  "_teardown_reserve": "WITHIN the $1.50 ceiling, not added to it.",
+  "_minute_budgets_follow_the_rate": "$0.90/rate is the work stop and $1.50/rate the hard limit: 49.5 and 82.6 minutes at $1.09/h.",
+  "_expected_work": "three candidates x two complete passes. Per candidate: 320 teacher forwards over ~925-token sequences, one device reduction over 74,022 positions (~2 s at the measured 0.0246 ms/position) and one host reduction over the same (~138 s at the measured 1.8699). About 10-11 minutes of compute, so the ceiling funds a slow setup and one retry. Setup time on this image has varied 30x in this project, which is why the ceiling is not sized to the expected case.",
+  "hard_constraints": [
+   "total validation spend across EVERY draw <= $1.5000 -- cumulative, reset by nothing",
+   "soft work stop at $0.9000, with the teardown reserve INSIDE the ceiling",
+   "only an NVIDIA L40S meeting the declared capability requirement",
+   "live securePrice <= $1.09/h, re-quoted immediately before each draw",
+   "at most ONE BILLING resource at any instant",
+   "a replacement only after the previous resource is PROVIDER-CONFIRMED gone",
+   "every draw and every cost recorded, including $0 draws",
+   "no scope expansion"
+  ],
+  "_retries_are_bounded_by_money_not_by_count": "attempt count is not budget. An ordinary pre-measurement failure is diagnosed, repaired and rerun autonomously while the SAME ceiling funds a useful attempt plus the teardown reserve. The ceiling is never expanded to fund a retry."
+ },
+ "stop_and_report": [
+  "the predeclared absolute-drift target is exceeded -- report the measured values and do not adjust the target",
+  "a Pareto decision, front or selected id differs between the two implementations",
+  "the teacher forward is not bitwise reproducible, which would mean the two passes are not comparing identical logits",
+  "the remaining budget cannot fund a corrected attempt plus teardown",
+  "a resource may still be billing and cannot be reconciled",
+  "continuing would require changing frozen science or permissions"
+ ],
+ "inputs": {
+  "check": "scripts/validation/c2_state_eval_certification_check.py",
+  "check_sha256": "537b3be95355dedcd6a5ee5e84e4d6d8eb3a1ec0fe380859bcfdbbf8f2dbcd4d",
+  "config": "configs/validation/c2_state_eval_certification.json",
+  "config_sha256": "e0864de579314ee4c10171695d4736a14a7eb04d92630f6f6c608631f1f04eb5",
+  "_why_hashed_here": "the thresholds are IN the check. Hashing it at authorization time is what makes 'predeclared' checkable rather than asserted."
+ },
+ "authorizes": [
+  "one real-L40S engineering certification at the stated resource, capability and budget contract",
+  "autonomous diagnosis, minimal repair and minimal retest of ORDINARY engineering failures inside this envelope"
+ ],
+ "does_not_authorize": "the formal Phase-C2 full joint search, any behavioural session, any re-measurement of frozen B or frozen C, any amendment to a frozen protocol, and any change to the conservative formal hard ceiling.",
+ "authorization_sha256": "02069fc19d8c367ab6ccd4d5e3b766a6f0370eb9f9db85aadf6fa13e4f37b8de"
+}

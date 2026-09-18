@@ -150,19 +150,25 @@ authorizations, never one.
 
 | | expected | ceiling |
 | --- | --- | --- |
-| full search, **beam 6 — standing design** | `$11.3878` | `$26.2606` |
+| full search, **beam 6 — standing design** | `$16.0998` | `$33.1829` |
 | behavioural selection (12 probes) | `$20.6926` | `$29.8788` |
-| full search, container disk (400 GB) | | `$1.3385` |
+| full search, container disk (400 GB) | | `$1.6913` |
 | behavioural selection, disk upper bound | | `$1.5229` |
-| **complete standing chain, TOTAL** | **`$32.0804`** | **`$59.0009`** |
+| **complete standing chain, TOTAL** | **`$36.7924`** | **`$66.2759`** |
 | remaining headroom | | `$72.1205` |
-| **headroom after the chain's total** | | **`$13.1196`** |
-| minimum cumulative cap that contains both | | `$356.8804` |
+| **headroom after the chain's total** | | **`$5.8446`** |
+| minimum cumulative cap that contains both | | `$364.1554` |
+| *(estimate only)* optimized window, not the ceiling | | *`$26.2607` GPU over `1445.54` min* |
 
-The search rows fell by `$7.2748` on **2026-09-18**, from `1826.57` bounding
-minutes to `1445.54`. That is a **measured** reduction, not a re-estimate: see
-the performance round below. The disk term fell with it because the pod's
-billed window is its wall clock.
+**The window above is the CONSERVATIVE one, deliberately.** The measured
+component speedups imply `1445.54` bounding minutes and `$27.5992`, and that
+figure is recorded — in the pricing record's `optimized_planning_estimate`
+block — as an engineering **planning estimate**. Review kept `1826.57` as the
+authorization basis for the first optimized formal search: a hard ceiling
+derived by component-level extrapolation can under-authorize a run, and an
+optimized implementation that finishes early simply spends less than its
+ceiling. After that search completes, **its own** per-expansion telemetry
+becomes the measured basis and the adjustment retires.
 
 The two ceiling rows above are **GPU runtime only**. The provider bills
 Container Disk separately at `$0.10/GB/month`, and this session
@@ -214,6 +220,88 @@ selection → new incumbent. C3 is causal-KL ATTENTION isolation on the C2
 incumbent and cannot start before C2 names one; C4 is conditional on C3
 promoting.
 
+## The state-eval certification — `$0.8446`, and what it did and did not settle
+
+**Closed 2026-09-19.** The full-suite certification review made a launch
+precondition. Evidence:
+[`validations/state-eval-certification/v1/closeout.json`](../stages/stage-1/phase_c2/validations/state-eval-certification/v1/closeout.json)
+· the collected report is in
+[`c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s2/artifacts/`](../stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s2/artifacts/).
+
+Run on the **complete** frozen suite — 80 items, `74,022` prediction positions,
+5 domains, 7 sub-types, 4 declared critical-token classes — with the full
+`StateEvaluation` reconstructed under both implementations on **provably
+identical** logits (a sha256 per id sequence, checked on every later forward in
+any pass).
+
+| predeclared requirement | result |
+| --- | --- |
+| ranked-objective **absolute** drift `< 1e-5` | **`9.032e-06`** on `worst_domain` — **MET**, `11.1×` below the `1e-4` epsilon |
+| identical objective ordering | **MET** |
+| identical Pareto front membership and selected ids | **MET** — `[['m0_05'], ['m0_35'], ['m1_0']]` under both |
+| identical decisions at the epsilon boundary | **NOT MET** — 2 of 5 cases changed |
+| every emitted metric present on both sides | MET |
+| identical critical-token position counts | MET, all 6 emitted tags |
+| top-1 agreement | drift **exactly `0`** |
+
+**The drift is proportional to the metric, not a fixed offset.** Relative
+disagreement is ~`1.7e-05` at every magnitude, so the absolute figure tracks
+the value: `9.032e-06` at `m=1.0` where `worst_domain` KL is `0.316`, and
+`1.4e-09` at `m=0.05` where it is `0.0008`. What this certifies is the
+coefficient; a real candidate's absolute drift depends on how far that
+candidate sits from the teacher.
+
+**The two boundary cases that changed are the two closer to the boundary than
+the drift.** `at_epsilon` sits at `0` from it and `just_outside_epsilon` at
+`1.0e-07`, against a drift of `9.032e-06`. The three cases placed at or beyond
+the drift all held — including both placed at exactly `ε ± drift`. Reproduced
+at `$0`.
+
+That is **not a finding about the optimization**: any nonzero disagreement
+flips a decision for a pair whose gap lies within it of `ε`, including the
+float32 noise of one implementation against itself, which this project has
+never measured. The requirement as I implemented it was unsatisfiable —
+placing a pair `1e-07` outside a boundary and applying a `9e-06` disagreement
+must cross it, and at *exactly* `ε` the rule turns on `>` versus `≥` of a
+difference floating point does not represent exactly. **I did not re-engineer
+the construction or re-run.** The instruction was that an exceeded target stops
+the run and the judgment returns to review.
+
+> **What review is being asked:** whether a `9.032e-06` absolute drift is
+> acceptable against a `1e-4` epsilon, knowing it can only move a decision for
+> candidates whose gap on a ranked objective lies within ~9% of `ε` of the
+> boundary, that the real-candidate decisions were identical, and that the
+> drift scales with the metric value.
+
+### The 76× does not survive the complete suite
+
+| | old | new | ratio |
+| --- | --- | --- | --- |
+| whole state-eval pass | `228.7 s` | `86.8 s` | **`2.63×`** |
+| the reduction alone | `133.3 s` | `13.3 s` | **`10.06×`** |
+| the forward (unchanged) | | `73.6 s` | |
+
+The four-item benchmark measured the new reduction at `0.0246` ms/position and
+reported `76.0×`. On the complete suite it is `13.256 s / 74,022 = 0.179`
+ms/position — **seven times slower per position** — while the old path
+reproduces almost exactly (`1.80` against `1.8699` ms/position). So the honest
+full-suite figures are `10.06×` on the reduction and `2.63×` on the pass.
+
+**This is precisely the extrapolation review forbade, and it is why keeping the
+conservative `1826.58`-minute window was right**: the planning estimate applied
+the `76×` figure to the whole `state_evaluation` phase. Nothing here re-prices
+anything — and this pass is not an expansion either, since an expansion
+forwards a 596M student where this perturbs the teacher's own logits.
+
+Two subruns, `$0.8446` of a `$1.50` ceiling, both pods provider-confirmed gone,
+one billing resource at a time. **s1 failed on my instrumentation and cost
+`$0.4925` of evidence**: `--out` defaulted to `None` while the launcher
+collects `artifacts/validation` and passes no `--out`, so the run measured all
+three candidates and wrote nothing. Its repairs — report on every exit path, a
+diagnostic bound that does not divide by a near-zero value, the forward timed
+apart from the reduction, and the candidate reusing the reference forward — are
+each held by a `$0` test.
+
 ## The performance round — `$0.2252`, and the price it moved
 
 **Closed 2026-09-18.** Four candidates, two adopted, one refused on evidence
@@ -232,15 +320,27 @@ behavioural protocol are all as they were. Evidence:
 | **3.** reuse reference-side normalization | **NOT ADOPTED** | needs `33.83 GiB` against a `16.91 GiB` constraint |
 | **4.** diagnose reference-cache variability | **instrumented only** | `0.013 GiB` reclaimable; cache admits `67/67` |
 
-**Equivalence is of the decisions, not of the digits.** Worst relative drift is
-`3.03e-05` — `257×` below the smallest decision threshold the search is known
-to use (`0.007782`), and just *under* float32's own `sqrt(V)·ε` floor of
-`4.65e-05` for a `151936`-class vocabulary. Item ordering identical, top-1
-agreement exact, DEPTH's removal order `[17, 18]` in three independent
-measurements. A tighter bound was not achievable by any implementation: the
-round's second subrun died against a `1e-06` bound that sat *below* the
-arithmetic's noise, and the repair was to derive the bound from `sqrt(V)·ε`
-rather than guess it.
+**What that round measured, and two corrections review made to how it was
+read.** Worst **relative** drift `3.03e-05`, on pooled per-item KL over four
+calibration items; item ordering identical, top-1 agreement exact, DEPTH's
+removal order `[17, 18]` in three independent measurements. That is a valid
+**kernel-level** result. It was reported as a decision-level one, twice over:
+
+* **`0.007782` is not the search's decision threshold.** It is C2's pre-B
+  numerical-**sensitivity disclosure** trigger — the tightest gap observed
+  *between the frozen C candidates* on `worst_domain` — and its own record says
+  it is "NOT an estimated noise bound, NOT a measurement of cross-session
+  variance, and NOT evidence of numerical determinism". The Pareto decision
+  epsilon is **`1e-4` absolute**, per objective. Dividing an absolute gap by a
+  *relative* drift also gives a number in no units, so the `257×` was not a
+  safety factor.
+* **`sqrt(V)·ε` is an error-scale heuristic, not a hard floor.** It is fine for
+  setting a tolerance and proves nothing about what agreement is achievable.
+
+The decision-level claim is the
+[state-eval certification](../stages/stage-1/phase_c2/validations/state-eval-certification/v1/)'s:
+**absolute** drift on the ranked objectives over the complete frozen suite,
+against the `1e-4` epsilon, with the Pareto decisions checked directly.
 
 **Candidate 4 refuted its own hypothesis.** It was instrumented to test whether
 allocator hoarding explains the historical `2.6 GiB`-free observations. On a
@@ -423,24 +523,21 @@ floor. A complete valid verdict ends the round.
 
 <!-- readiness:end -->
 
-## The full suite is not green: 20 failures, two families, one of them new
+## The full suite is not green: 14 failures, one family
 
-Measured on the settled tree, 2026-09-18, over
-`tests/{docs,architecture,autoinit,initialization,validation,init,runtime}` plus
-every `tests/pod` file these touch: **20 failures**, `3381 passed` in the
-widest run. Every one fails in the direction that **refuses** rather than
-permits, and each is listed by nodeid below so a reader can check the count
-rather than take it.
+Measured on the settled tree, 2026-09-19: **14 failed, 3207 passed, 15
+skipped** over `tests/{docs,pod,architecture,autoinit,validation}`, with
+`tests/{initialization,runtime,init}` clean in the same round. Every one fails
+in the direction that **refuses** rather than permits, and all fourteen are one
+family.
 
 | family | tests | why it stays red |
 | --- | --- | --- |
-| **A committed digest no longer describes the live tree.** Phase B's amendments ledger accounts to `c20e3a80b6c0` while the tree digests to `c9121aadff77`; C1's preregistration, readiness record, skip-predicate audit and preflight selection are in the same position. ~37 commits since 2026-09-15 touched files in those declared sets, shared runtime mostly — and this round's three core-file changes are among them | 14 | The gates return `ok = False`, so a paid Phase-B or C1 launch is **refused** — correct. The remedy each message names is *"re-freeze it"*, which edits a frozen scientific record, and no C1 or Phase-B launch exists to justify a `launch_bound` sweep (AGENTS.md P8.3). Reconstructing ~20 ledger entries protects no current experiment |
-| **NEW — the evaluator identity a frozen protocol binds has moved**, because candidate 1 was adopted | 6 | See below. It arrived **today** and is the second thing the launch review owes |
+| **A committed digest no longer describes the live tree.** Phase B's amendments ledger accounts to `c20e3a80b6c0` while the tree digests to `c9121aadff77`; C1's preregistration, readiness record, skip-predicate audit and preflight selection are in the same position | 14 | The gates return `ok = False`, so a paid Phase-B or C1 launch is **refused** — correct. The remedy each message names is *"re-freeze it"*, which edits a frozen scientific record, and no C1 or Phase-B launch exists to justify a `launch_bound` sweep (AGENTS.md P8.3). Review confirmed these stay red as fail-closed guards and are not a blocker to the C2 full search |
 
-<details><summary>the 20, by nodeid</summary>
+<details><summary>the 14, by nodeid</summary>
 
 ```text
-# a committed digest no longer describes the live tree (14)
 autoinit/test_phase_b_historical_amendments.py::test_the_ledger_verifies_against_the_live_tree
 autoinit/test_phase_b_historical_amendments.py::test_an_incorrect_source_commit_is_refused
 autoinit/test_phase_b_historical_amendments.py::test_a_missing_changed_file_is_refused
@@ -455,78 +552,29 @@ autoinit/test_c1_readiness_gates.py::test_the_pod_selection_is_exactly_the_prefl
 pod/test_c1_session_contract.py::test_the_writer_refuses_to_rewrite_the_frozen_preregistration
 pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest
 pod/test_phase_b_driver_and_launcher.py::test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe
-
-# the evaluator identity a frozen protocol binds has moved (6)
-pod/test_phase_c2_baseline_completion.py::test_the_protocol_binds_the_identities_it_claims_to
-pod/test_phase_c2_baseline_completion.py::test_stage_b_orchestration_is_correct_end_to_end
-pod/test_phase_c2_baseline_completion.py::test_exactly_one_state_eval_is_performed
-pod/test_phase_c2_baseline_completion.py::test_a_close_baseline_is_flagged_without_changing_the_verdict
-pod/test_phase_c2_baseline_completion.py::test_the_b_measurement_survives_a_post_measurement_failure
-pod/test_phase_c2_baseline_completion.py::test_the_rope_reading_is_carried_into_the_durable_measurement
 ```
 
 </details>
 
+**The evaluator-drift family is closed.** Six tests were red because adopting
+the device-resident reduction moved `planning/metrics.py`, which C2's frozen
+baseline-completion contract binds by content. Review's decision was to keep
+that protocol and its historical hash **frozen exactly as they are** — the
+contract is doing the correct thing by refusing a future measurement joining
+the old B↔C series under a different evaluator. So the tests now assert the
+**refusal**, and the position is recorded prospectively in
+[`phase_c2_evaluator_lineage.json`](../stages/stage-1/phase_c2/plans/phase_c2_evaluator_lineage.json):
+baseline completion is COMPLETE/CLOSED; its B and frozen C measurements remain
+valid because both sides used the historical evaluator; the optimized evaluator
+is the current Full Search implementation and is **not** eligible to append to
+that series; reopening it needs a new explicit scientific decision.
+
 **Attribute against the commit the session started from, not `HEAD`.** Eleven
-architecture-guard cases were red in *both* the working tree and a detached
-worktree at `HEAD`, which read as pre-existing — they were mine, from a commit
-two back in the same session that changed three core files without declaring
-them. And a worktree has no untracked files, so four of the six new failures
-looked pre-existing there for an unrelated reason (`artifacts/stage1/
-state_eval_v1` is simply absent). Both traps were hit in one afternoon.
-
-### The new family, and the decision it needs
-
-Adopting the `state_eval` reduction changed
-`src/aadistill/initialization/planning/metrics.py`, whose hash moved
-`a6dd5d56…` → `d193cc90…`. That file is **one of four bound by content** in
-
-```text
-logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json
-  :: cross_session_comparability_contract.bound.evaluator_implementation_sha256
-```
-
-which is a **frozen record of completed work** — attempt 8's B measurement and
-the B→C comparison. The other three are unchanged. `bind_identities` in the
-baseline driver now refuses:
-
-> *the evaluator implementation has moved since the candidate side was frozen …
-> STOP: the frozen C measurements and a new B measurement would not be the same
-> measurement series, and that is not something to compensate for.*
-
-**That is the gate working.** What it is protecting, precisely:
-
-* **No completed result is affected.** Both sides of every finished comparison
-  — Search-1's C candidates and attempt 8's B — were measured by *one*
-  implementation. `c2_baseline_comparison.json` stands as it is.
-* **The full joint re-search is not gated on this** and does not bind the
-  evaluator by hash: it rescores all 578 leaves with one implementation, so it
-  is internally consistent.
-* **What is refused is a *future* B re-measurement joining the old series** —
-  which the maintainer has already barred without a new decision, so nothing
-  currently planned is blocked.
-* The measured disagreement between the two implementations is `3.03e-05`,
-  **257× below** the smallest decision threshold the search is known to use.
-
-Three ways forward, and **all three are the maintainer's call**, not an
-autonomous repair (AGENTS.md P12.1 — changing a frozen scientific protocol is
-an explicit stop condition):
-
-1. **Amend the contract** to name both hashes with the measured equivalence as
-   the stated justification. Cheapest, and it edits a frozen record.
-2. **Re-measure B** with the new evaluator. Scientifically cleanest, costs a
-   GPU session, and is currently barred.
-3. **Revert candidate 1.** Forfeits the measured 76×, and with it the
-   `$7.2748` the search ceiling fell by.
-
-Nothing was done in any of those directions. The gate is left firing, the six
-tests are left red, and the optimization is left adopted with its equivalence
-measured — because loosening the guard to make the suite green is exactly the
-move the guard exists to prevent.
-
-A permanently red suite is a hazard — it is what let 14 of an earlier 28 sit
-unnoticed at remote HEAD — so both families are named here, by nodeid, rather
-than left for the next reader to re-derive.
+architecture-guard cases once read as pre-existing in both the working tree and
+a detached worktree at `HEAD` — they were mine, from a commit two back in the
+same session. And a worktree has no untracked files, so four failures looked
+pre-existing there for an unrelated reason (`artifacts/stage1/state_eval_v1` is
+simply absent).
 
 ## Budget — four limits that do not transfer
 
@@ -541,7 +589,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$297.8795` spent of `$370.0000`, leaving `$72.1205` |
+| project cap | `$298.7241` spent of `$370.0000`, leaving `$71.2759` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

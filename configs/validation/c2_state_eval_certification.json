@@ -1,0 +1,46 @@
+{
+ "schema": "aadistill.c2_state_eval_certification/v1",
+ "_contract": "Inputs for the full-suite certification of the device-resident state-eval reduction. ENGINEERING evidence: it answers 'on the COMPLETE frozen suite, do the two implementations produce the same metrics and the same PARETO_V1 decisions, and how long does each actually take'. It trains nothing, measures no behaviour, re-measures no frozen scientific checkpoint and AUTHORIZES NOTHING.",
+ "validation_id": "c2_state_eval_certification_v1",
+ "suite": {
+  "root": "artifacts/stage1/state_eval_v1",
+  "_why_the_complete_suite": "the performance round used four calibration items and 2032 positions, which demonstrated the speedup and did NOT exercise the decision path: all five domains, all seven sub-types, all four critical-token classes, or the aggregates PARETO_V1 ranks on. Every count below is checked before any work, because a certification of a smaller suite would be a different claim wearing this one's name.",
+  "items": 80,
+  "prediction_positions": 74022,
+  "suite_hash_prefix": "6421fa4cf12ee2a1",
+  "_rare_tags_are_the_point": "think_close and eos cover 70 prediction positions each and tool_close covers 28, out of 74,022. Those are the classes that decide termination, they are where a per-position drift has the least averaging to hide behind, and a four-item benchmark contains none of them."
+ },
+ "capability_requirement": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 40,
+  "_why": "the 4B teacher in bf16 is 7.5 GiB, and the longest suite item is 2001 prediction positions -- two [2001, 151936] float32 tensors is 2.4 GiB, plus the chunk temporaries, held on the device for the new path and on the host for the old one. bf16 needs cc >= 8.0 and the dtype is NOT lowered to fit a cheaper card: it is what the formal search runs.",
+  "_owner": "the validation's authorization record declares this floor; it is restated here because the pod-side check enforces it before any work."
+ },
+ "evaluate": {
+  "chunk": 512,
+  "_chunk_is_the_production_value": "512, the value StateEvaluator and the DEPTH operator pass. Chunk size moves the result by ~9e-8 relative, so certifying at a different one would certify a different reduction.",
+  "seed": 20260919,
+  "magnitudes": [
+   0.05,
+   0.35,
+   1.0
+  ],
+  "_why_three_magnitudes": "a candidate's distance from the teacher is the one thing a perturbation can vary, and the drift between two reductions could plausibly depend on it. 0.05 is near-teacher, 1.0 is far, 0.35 is the magnitude the performance round used -- so one of the three is comparable to that measurement. Three is also what the wall clock allows: each magnitude is TWO complete passes over 74,022 positions, and the old host path is the slow one.",
+  "_why_a_perturbation_and_not_a_checkpoint": "the question is whether the reduction and its aggregation agree, not what any model can do. A deterministic structured perturbation of the teacher's own logits gives the real shapes, the real tags and a KL in the range a real state produces, and it materializes no checkpoint -- so no frozen scientific measurement is touched or repeated."
+ },
+ "pareto": {
+  "beam_width": 6,
+  "_beam_width_is_the_standing_one": "SCHEDULE_V1's width, so the selection this stage compares is the selection the search would make.",
+  "_boundary_cases": "the real candidates are far apart on every objective, so identical decisions between them is an easy result. The stage additionally constructs pairs separated by EXACTLY epsilon, just inside it, just outside it, and epsilon plus or minus the measured drift -- with the drift applied in the direction that closes the gap. That is the question a reviewer is asking: could this drift move a decision if two states were as close as the policy allows?"
+ },
+ "ship_paths": [
+  "src",
+  "scripts/validation",
+  "scripts/experiments",
+  "scripts/autoinit",
+  "configs/validation",
+  "artifacts/stage1/state_eval_v1"
+ ],
+ "_ship_paths": "What the pod needs, DECLARED rather than remembered at launch time. The launcher's DEFAULT_SHIP is src, scripts/validation, scripts/experiments and configs/validation -- which does NOT include scripts/autoinit, where `load_state_eval` and `phase_a_frozen` live, and does not include the suite itself, which is in the gitignored artifact store. Two paid subruns of the CUDA validation died one per unshipped producer, so a test asserts that every module this check imports resolves under one of these roots."
+}

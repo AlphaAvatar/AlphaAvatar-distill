@@ -1,0 +1,87 @@
+{
+ "schema": "aadistill.cuda_engineering_run/v1",
+ "run_id": "c2_state_eval_cert_20260919_s1_dry",
+ "scientific_use": false,
+ "is_formal_c1": false,
+ "authorizes": "nothing",
+ "authorization": "c2_state_eval_certification.2026-09-19",
+ "authorization_sha256": "02069fc19d8c367ab6ccd4d5e3b766a6f0370eb9f9db85aadf6fa13e4f37b8de",
+ "campaign_id": "c2_state_eval_certification",
+ "subrun_id": "c2_state_eval_cert_20260919_s1_dry",
+ "campaign_booked_before_usd": 0.0,
+ "campaign_remaining_total_usd": 1.5,
+ "campaign_remaining_to_soft_usd": 0.9,
+ "authorization_path": "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json",
+ "candidate_gpus": [
+  "NVIDIA L40S"
+ ],
+ "authorized_rate_ceiling_usd_per_hour": 1.09,
+ "execution_sha": "",
+ "deployment": {
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "remote_python": "/workspace/eng-venv/bin/python",
+  "min_cuda_version": "13.0",
+  "container_disk_gb": 20,
+  "pip_deps": [
+   "numpy",
+   "transformers"
+  ],
+  "authorizes": "nothing",
+  "venv": {
+   "path": "/workspace/eng-venv",
+   "system_site_packages": true,
+   "_why": "--system-site-packages so the image's CUDA-enabled torch is inherited rather than reinstalled. A plain venv would hide it, and `pip install torch` into an empty venv can resolve to a CPU build -- which would silently turn a GPU validation into a CPU one.",
+   "_why_not_break_system_packages": "The image's interpreter is PEP 668 externally managed, and --break-system-packages is the override that refusal names. It is a justified last resort for a disposable pod, not a generic requirement, so the venv is the default and the override is declared per deployment."
+  },
+  "allow_break_system_packages": false,
+  "capability": {
+   "compute_capability_min": [
+    8,
+    0
+   ],
+   "dtype": "bfloat16",
+   "min_free_vram_gib": 2,
+   "_probe": "the readiness probe must import, see CUDA, meet the capability floor, support the dtype AND complete a real allocation and matmul on the device. Printing CUDA=False beside an IMPORTS_OK marker is not GPU readiness."
+  }
+ },
+ "timeline": [
+  {
+   "utc": "2026-09-18T07:46:45.931793+00:00",
+   "msg": "  NVIDIA L40S: securePrice $1.09/h, 48GB, stock Low"
+  },
+  {
+   "utc": "2026-09-18T07:46:45.931832+00:00",
+   "msg": "accepted NVIDIA L40S at $1.09/h \u2014 $0.0000 booked, $0.9000 to the soft stop (49.5 min), $1.5000 to the ceiling (82.6 min)"
+  },
+  {
+   "utc": "2026-09-18T07:46:45.931841+00:00",
+   "msg": "DRY RUN: stopping before provider creation"
+  }
+ ],
+ "quotes": [
+  {
+   "gpu": "NVIDIA L40S",
+   "secure_price_per_hour": 1.09,
+   "stock": "Low",
+   "vram_gb": 48
+  }
+ ],
+ "accepted_quote": {
+  "gpu": "NVIDIA L40S",
+  "secure_price_per_hour": 1.09,
+  "stock": "Low",
+  "vram_gb": 48
+ },
+ "teardown": {
+  "needed": false
+ },
+ "verdict": "NOT RUN",
+ "verdict_reason": "dry run: stopped before creation",
+ "elapsed_minutes": 0.0,
+ "estimated_cost_usd": 0.0,
+ "_cost_basis": "elapsed wall clock x the provider-confirmed hourly rate. An ESTIMATE: the provider bills per second from provisioning, and this is the evidence available at teardown.",
+ "subrun_cost_usd": 0.0,
+ "campaign_cost_after_usd": 0.0,
+ "provider_create_attempts": 0,
+ "watchdog_launches": 0
+}

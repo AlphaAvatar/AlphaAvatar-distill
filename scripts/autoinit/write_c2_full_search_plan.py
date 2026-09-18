@@ -145,6 +145,71 @@ def budget_position() -> dict[str, Any]:
     }
 
 
+def _planning_estimate(space) -> dict[str, Any]:
+    """What the optimized implementation is EXPECTED to cost. Not a ceiling.
+
+    Priced at the standing width only, because that is the session being
+    planned, and reported beside the conservative ceiling so the difference is
+    visible rather than inferred. Nothing derives an authorization from this:
+    `FullSearchAuthorization` and the launcher both read
+    `search.widths[...].hard_ceiling_*`, which is the conservative basis.
+    """
+    est = FS.optimized_planning_estimate(REPO_ROOT)
+    if not est.get("available"):
+        return {"available": False, "_why": est.get("_why", "no record")}
+    #: Re-bound the SAME space against the estimated table, through the same
+    #: `bound`/`price` code the ceiling uses -- an estimate derived by a
+    #: different route than the thing it is compared against would not be
+    #: comparable to it.
+    from experiments.search_cost_model import CostModel
+
+    model = CostModel(minutes=est["estimated_minutes"], proxies={},
+                      source=est["_status"])
+    plan = FS.price(space, price_per_hour=FS.PRICE_PER_HOUR_LAST_QUOTED,
+                    authorized_usd=10_000.0, beam_width=STANDING_WIDTH,
+                    cost=model) if _price_takes_cost() else None
+    out = {
+        "available": True,
+        "status": "ENGINEERING PLANNING ESTIMATE — NOT THE AUTHORIZATION BASIS",
+        "record": est["record"],
+        "factors": est["factors"],
+        "beam_width": STANDING_WIDTH,
+        "_what_it_is_for": (
+            "so the expected duration of the first optimized formal search is "
+            "on the record before it runs, and can be compared against what "
+            "that search actually costs -- which is the measurement that "
+            "retires this estimate."),
+        "_retires_when": est["_retires_when"],
+        "authorizes": "nothing",
+    }
+    if plan is not None:
+        minutes = math.ceil(plan.hard_terminate_minutes * 100) / 100
+        out["estimated_window_minutes"] = minutes
+        out["estimated_gpu_usd"] = math.ceil(
+            minutes / 60 * FS.PRICE_PER_HOUR_LAST_QUOTED * 10_000) / 10_000
+        out["estimated_expected_minutes"] = round(plan.expected_minutes, 2)
+    else:
+        out["estimated_window_minutes"] = None
+        out["_why_no_window"] = (
+            "FS.price does not accept an injected cost model, so a window "
+            "cannot be derived through the same code the ceiling uses. The "
+            "per-cell factors above are the whole estimate; a window derived "
+            "by a second, different route would not be comparable to the "
+            "ceiling it sits beside.")
+    return out
+
+
+def _price_takes_cost() -> bool:
+    """Whether `FS.price` accepts an injected cost model.
+
+    Asked rather than assumed: if it does not, the estimate reports its factors
+    and says why it has no window, instead of inventing one.
+    """
+    import inspect
+
+    return "cost" in inspect.signature(FS.price).parameters
+
+
 def search_pricing(space) -> dict[str, Any]:
     """Cost the search at each priced width, and record every refusal."""
     remaining = budget_position()["remaining_usd"]
@@ -169,22 +234,22 @@ def search_pricing(space) -> dict[str, Any]:
         row["expected_minutes"] = round(plan.expected_minutes, 2)
         row["expected_usd"] = round(
             plan.expected_minutes / 60 * FS.PRICE_PER_HOUR_LAST_QUOTED, 4)
-        row["hard_ceiling_minutes"] = round(plan.hard_terminate_minutes, 2)
-        #: Rounded UP, like every other ceiling in this repository: C1's grant
-        #: found a $15.147403 plan under-authorized at a recorded $15.1474, and
-        #: a ceiling that rounds DOWN under-authorizes the plan it covers.
-        #:
-        #: It does NOT close the $0.0001 gap between this row ($26.2606) and
-        #: the launcher's re-derivation ($26.2607), and that gap is not a
-        #: defect. This row prices the EXACT bound, 1445.535 min. The launcher
-        #: re-prices from the RECORDED `hard_ceiling_minutes`, which is rounded
-        #: to 1445.54 for display — 0.3 s more — so it authorizes a hundredth
-        #: of a cent above the true bound. Both figures are at or above the
-        #: cost, and the launcher's is the larger, which is the direction a
-        #: ceiling is allowed to err in. Recorded here because the two numbers
-        #: appear side by side in the grant proposal and look like a mistake.
+        #: The MINUTES round up too, and that is not cosmetic. Everything
+        #: downstream -- `derive_ceiling_usd`, `total_ceiling_usd`, the
+        #: watchdog's deadline -- re-prices from this RECORDED number, so a
+        #: recorded window below the true bound authorizes less work than the
+        #: plan needs. `round()` here put 1826.5666… at 1826.57 in one
+        #: direction and would put 1826.5733… at 1826.57 in the other, which is
+        #: how the row and the launcher came to disagree by $0.0001 with the
+        #: launcher on the LOW side. A bound rounds outward.
+        row["hard_ceiling_minutes"] = math.ceil(
+            plan.hard_terminate_minutes * 100) / 100
+        #: And the dollars, for the same reason: C1's grant found a $15.147403
+        #: plan under-authorized at a recorded $15.1474. Derived from the
+        #: recorded minutes, not from the exact ones, so this row and every
+        #: re-derivation from it agree by construction.
         row["hard_ceiling_usd"] = math.ceil(
-            plan.hard_terminate_minutes / 60
+            row["hard_ceiling_minutes"] / 60
             * FS.PRICE_PER_HOUR_LAST_QUOTED * 10_000) / 10_000
         try:
             FS.price(space, price_per_hour=FS.PRICE_PER_HOUR_LAST_QUOTED,
@@ -909,7 +974,18 @@ def pricing(space) -> dict[str, Any]:
     #: session, and no figure in it disagreed with any other -- which is why
     #: review found it rather than a gate.
     from experiments.phase_c2 import full_search as _FSG
-    provider = _FSG.total_ceiling_usd(FS.PRICE_PER_HOUR_LAST_QUOTED)
+    #: Priced on the minutes THIS run computed, not on the committed record's.
+    #: `total_ceiling_usd` reads that record by default, which is right for a
+    #: launch and wrong here: the block below goes INTO that record, so reading
+    #: it made this document derive from its own previous version. The first
+    #: time the standing window moved, two consecutive regenerations produced
+    #: two different pricing hashes -- and a self-consistent document is
+    #: self-consistent whatever it says.
+    standing_row = next(r for r in search["widths"]
+                        if r["beam_width"] == STANDING_WIDTH)
+    provider = _FSG.total_ceiling_usd(
+        FS.PRICE_PER_HOUR_LAST_QUOTED,
+        minutes=standing_row["hard_ceiling_minutes"])
     behavioural_hours = selection["hard_ceiling_minutes"] / 60.0
     #: The behavioural session's storage term is NOT derived: it has no launcher
     #: and no provision yet. Bounded ABOVE by the search's own 400 GB, which is
@@ -1001,6 +1077,16 @@ def pricing(space) -> dict[str, Any]:
         "behavioural_selection": selection,
         "provider_cost": provider_cost,
         "combined": combined,
+        #: MEASURED, and deliberately NOT the ceiling. The 2026-09-18
+        #: performance round measured two real component speedups, and applying
+        #: them to the pooled cells takes the beam-6 window from 1826.57 to
+        #: 1445.54 minutes. Review kept the CONSERVATIVE window for the first
+        #: optimized formal search: a hard ceiling derived by component-level
+        #: extrapolation can under-authorize a run, and an optimized
+        #: implementation that finishes early simply spends less than its
+        #: ceiling. So the estimate is recorded here, beside the ceiling it is
+        #: not, and the first optimized search's own telemetry will replace it.
+        "optimized_planning_estimate": _planning_estimate(space),
         "budget_position": budget,
         #: DERIVED, not restated. This block said "INSUFFICIENT PROJECT
         #: HEADROOM" while printing a NEGATIVE shortfall beside it the moment the

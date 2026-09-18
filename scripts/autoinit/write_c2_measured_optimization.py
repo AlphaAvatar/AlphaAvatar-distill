@@ -167,10 +167,28 @@ def refreshed() -> dict:
                     "the `.float().cpu()` transfer of both [T, ~152k] tensors "
                     "plus the host reduction, which is what StateEvaluator did"),
                 "_equivalence": (
-                    "drift 3.03e-05, which is 257x below the search's own "
-                    "0.007782 decision threshold and just under float32's "
-                    "sqrt(V)*eps floor of 4.65e-05 for a 151936-class "
-                    "vocabulary. Item ordering identical; top-1 agreement exact."),
+                    "RELATIVE drift 3.03e-05 on the pooled per-item KL of four "
+                    "calibration items, with item ordering identical and top-1 "
+                    "agreement exact. That is a kernel-level result and NOT a "
+                    "decision-level one -- see _what_this_is_not below."),
+                "_what_this_is_not": (
+                    "This field claimed the drift was '257x below the search's "
+                    "own 0.007782 decision threshold and just under float32's "
+                    "sqrt(V)*eps floor'. Review corrected both halves. (1) "
+                    "0.007782 is C2's pre-B numerical-SENSITIVITY DISCLOSURE "
+                    "trigger -- the tightest gap between the frozen C "
+                    "candidates on worst_domain -- and its own record states it "
+                    "is not a noise bound, not a variance measurement and not "
+                    "evidence of determinism. The Pareto decision epsilon is "
+                    "1e-4 ABSOLUTE per objective. (2) Dividing an absolute gap "
+                    "by a RELATIVE drift yields a ratio with no units, so the "
+                    "quotient was not a safety factor. (3) sqrt(V)*eps is an "
+                    "error-SCALE heuristic, not a hard floor below which "
+                    "agreement is impossible. The decision-level evidence is "
+                    "the ABSOLUTE drift on the ranked objectives over the "
+                    "COMPLETE suite, certified separately in "
+                    "logs/stages/stage-1/phase_c2/validations/"
+                    "state-eval-certification/v1/."),
             },
             "depth_reduction": {
                 "run": DEPTH_RUN,

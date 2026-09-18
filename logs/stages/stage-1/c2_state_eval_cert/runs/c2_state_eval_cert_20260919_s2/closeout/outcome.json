@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.engineering_subrun_outcome/v1",
+ "run_id": "c2_state_eval_cert_20260919_s2",
+ "experiment_id": "c2_state_eval_cert",
+ "validation": "v1",
+ "verdict": "FAIL",
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "budget": {
+  "this_attempt": 0.3521,
+  "_basis": "elapsed wall clock x the provider-confirmed hourly rate. An ESTIMATE: the provider bills per second from provisioning, and this is the evidence available at teardown.",
+  "campaign_after_usd": 0.8446,
+  "_the_campaign_owns_the_cumulative": "this file states only what THIS subrun cost, so the project book can sum subruns without double counting a rerun against the campaign total"
+ },
+ "pod_id": "q6fdziseu7i18s",
+ "teardown_confirmed": true
+}

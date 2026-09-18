@@ -264,23 +264,46 @@ def proposal() -> dict:
                 "each failure was in the instrumentation rather than in the "
                 "optimizations. What it measured on the real pinned teacher: "
                 "the state_eval reduction 76.0x, the DEPTH forward-KL-only "
-                "path 1.10x, worst relative drift 3.03e-05 -- 257x below the "
-                "search's own 0.007782 decision threshold and under float32's "
-                "own 4.65e-05 floor for this vocabulary -- with item ordering "
-                "identical, top-1 exact and DEPTH's removal order unchanged. "
-                "$0.2252 of a $1.5000 ceiling, three subruns, every teardown "
+                "path 1.10x, worst RELATIVE drift 3.03e-05 on pooled per-item "
+                "KL over four calibration items, with item ordering identical, "
+                "top-1 exact and DEPTH's removal order unchanged. $0.2252 of a "
+                "$1.5000 ceiling, three subruns, every teardown "
                 "provider-confirmed."),
-            "_this_is_what_moved_the_price": (
-                "the hard ceiling above is 1445.54 min, down from 1826.57, "
-                "because those two component speedups were MEASURED. The beam "
-                "width is unchanged at 6 and was never a cost lever. The "
-                "refresh is an adjustment of pooled per-expansion minutes by "
-                "component savings capped at the phase each belongs to, with "
-                "every input named in "
-                "logs/stages/stage-1/phase_c2/plans/"
-                "phase_c2_measured_optimization.json -- not a new pooled "
-                "observation from a real search, and not a ratio applied to a "
-                "whole cell."),
+            "_that_was_a_kernel_result_not_a_decision_result": (
+                "the earlier version of this field called 3.03e-05 '257x below "
+                "the search's own 0.007782 decision threshold and under "
+                "float32's own floor'. Review corrected both halves: 0.007782 "
+                "is C2's pre-B numerical-sensitivity DISCLOSURE trigger and not "
+                "a decision threshold, the Pareto epsilon is 1e-4 ABSOLUTE, "
+                "dividing an absolute gap by a relative drift is not a margin "
+                "in any units, and sqrt(V)*eps is an error-scale heuristic "
+                "rather than a floor below which agreement is impossible. The "
+                "decision-level claim comes from the certification below."),
+            "state_eval_certification": ("logs/stages/stage-1/phase_c2/"
+                                         "validations/state-eval-certification/"
+                                         "v1/"),
+            "_why_a_second_validation": (
+                "review made launch NO-GO for one narrow reason: the four-item "
+                "benchmark demonstrated the speedup and exercised none of the "
+                "aggregation the beam ranks on -- the unweighted two-level "
+                "domain mean, the worst-domain maximum, the unweighted mean "
+                "over critical-token classes -- and contained no rare tag. "
+                "The certification runs the COMPLETE frozen suite, 74,022 "
+                "positions over 5 domains, 7 sub-types and 4 critical-token "
+                "classes, reconstructs the full StateEvaluation under both "
+                "implementations on provably identical logits, and checks the "
+                "PARETO_V1 decisions including deliberately close cases at the "
+                "epsilon boundary. Its targets were predeclared."),
+            "_the_ceiling_is_the_CONSERVATIVE_one": (
+                "1826.57 min, NOT the 1445.54 the measured component speedups "
+                "imply. Review kept the previously accepted window for the "
+                "first optimized formal search: a hard ceiling derived by "
+                "component-level extrapolation can under-authorize a run, and "
+                "an optimized implementation that finishes early simply spends "
+                "less than its ceiling. The optimized figure is recorded as an "
+                "engineering PLANNING ESTIMATE in the pricing record's "
+                "optimized_planning_estimate block, and the first optimized "
+                "search's own per-expansion telemetry will replace it."),
             "_what_none_of_it_establishes": (
                 "that the formal search fits its budget -- the driver "
                 "validation ran toy geometry for 20 seconds and the "
@@ -319,8 +342,12 @@ def proposal() -> dict:
                     "re-measurement joining the old series, which is already "
                     "barred without a new decision."),
                 "measured_disagreement": (
-                    "3.03e-05 relative, 257x below the smallest decision "
-                    "threshold the search is known to use (0.007782)"),
+                    "3.03e-05 RELATIVE on pooled per-item KL over four "
+                    "calibration items. The decision-level figure -- ABSOLUTE "
+                    "drift on the ranked objectives over the complete frozen "
+                    "suite, against the 1e-4 Pareto epsilon -- comes from the "
+                    "state-eval certification, and is the one a reader should "
+                    "use."),
                 "options_all_of_which_are_the_maintainers": [
                     "amend the frozen contract to name both hashes, with the "
                     "measured equivalence as the stated justification",

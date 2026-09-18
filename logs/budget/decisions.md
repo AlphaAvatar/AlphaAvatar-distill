@@ -1,5 +1,77 @@
 # Decision records
 
+## 2026-09-19 — Launch stays NO-GO for one narrow reason, and three things review settled
+
+- **Maintainer decision**, on review of `245cf17`. The performance direction is
+  **accepted**: candidates 1 and 2 are kept, 3 stays refused, 4 stays
+  instrumentation only. Do not revert candidate 1, do not re-measure B, and
+  change nothing about the 578/576 space, beam width 6, the calibration sets,
+  the 260-evaluation DEPTH rule, the state-eval suite, the ranking policy, the
+  C2c protocol or any frozen C1/Search-1 evidence.
+- **Why launch is still NO-GO.** Candidate 1's GPU evidence does not certify
+  the actual full `state_eval_v1` decision path. The four-item benchmark used
+  2032 positions and the reduction's own pooled KL; it exercised none of the
+  aggregation the beam ranks on — the unweighted two-level domain mean, the
+  worst-domain maximum, the unweighted mean over critical-token classes — and
+  contained no rare tag. `think_close` and `eos` cover 70 positions each and
+  `tool_close` covers 28, out of 74,022: those classes decide termination and
+  have the least averaging to hide a per-position drift behind.
+- **Two interpretation corrections, both mine to own.**
+  1. `0.007782` is C2's **pre-B numerical-sensitivity disclosure trigger** —
+     the tightest gap between the frozen C candidates on `worst_domain` — not
+     the Pareto decision epsilon, which is **`1e-4` absolute** per objective.
+     Worse, I divided it by a *relative* drift and called the quotient a
+     decision-safety factor; that ratio has no units. The document I was
+     citing states in terms that the threshold is "NOT an estimated noise
+     bound, NOT a measurement of cross-session variance, and NOT evidence of
+     numerical determinism", so the refutation was inside the source.
+  2. `sqrt(V)·ε` may be used as an **error-scale heuristic** and must not be
+     described as a hard float32 floor below which agreement is impossible. It
+     is fine for setting a tolerance and proves nothing about achievability.
+- **The certification.** One bounded L40S engineering-only run over the
+  **complete** frozen suite: 80 items, 74,022 prediction positions, 5 domains,
+  7 sub-types, 4 critical-token classes. Old host reduction against new
+  device-resident reduction on **provably identical** logits, the full
+  `StateEvaluation` reconstructed under both, and the `PARETO_V1` decisions
+  checked directly. Predeclared before execution: ranked-objective **absolute**
+  drift `< 1e-5` (≥10× below epsilon); identical objective ordering; identical
+  Pareto-front membership; identical selected ids, including deliberately close
+  cases straddling epsilon. An exceeded target **stops** the run; the tolerance
+  is not adjusted afterwards. Candidate 2 needs no further GPU run.
+  Governance: `logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/`.
+- **Pricing: the conservative window stands.** The optimized executable is
+  kept, and the `1445.54` min / `$27.5992` result is **recorded as an
+  engineering planning estimate** rather than used as the authorization
+  ceiling. The first optimized formal search retains the `1826.57`-minute GPU
+  window plus the 400-GB Container Disk bound — `$33.1829 + $1.6913 =
+  $34.8742`, mechanically re-derived at issuance. A hard ceiling derived by
+  component-level extrapolation can under-authorize a run; an optimized
+  implementation that finishes early simply spends less than its ceiling. Chain
+  total `$66.2759`, headroom `$5.8446`, and there is no scientific reason to
+  spend safety margin the envelope does not require.
+- **The frozen baseline-completion contract is NOT amended.** It refuses a
+  future measurement joining the historical B↔C series under a different
+  evaluator implementation, and that is correct. Recorded prospectively in
+  `plans/phase_c2_evaluator_lineage.json`: baseline completion is
+  COMPLETE/CLOSED; its B and frozen C measurements remain valid because both
+  sides used the historical evaluator; the optimized evaluator is the current
+  Full Search implementation and is **not** eligible to append a future B
+  measurement to that series; reopening it needs a new explicit scientific
+  decision. The six tests now assert that the current tree causes the contract
+  to **refuse**, rather than requiring the tree to remain able to recreate a
+  closed series.
+- **The other 14 historical digest failures** stay red as fail-closed guards
+  and are not a blocker to the C2 full search. Phase B and C1 records are not
+  re-frozen for this launch.
+- **Risks.** The certification's candidates are perturbations, not compressed
+  students: it certifies the reduction and its aggregation, not what a real
+  state's metrics look like. The complete-suite wall clock it measures is
+  informational — review explicitly forbids deriving a new formal ceiling from
+  it, and nothing does.
+- **Revisit when** the first optimized formal search produces per-expansion
+  telemetry, which replaces both the planning estimate and the conservative
+  basis with one measurement.
+
 ## 2026-09-18 — The search got 76× faster where it was slowest, and the price followed the measurement
 
 - **Context.** The maintainer authorized a narrowly scoped performance round on
@@ -28,19 +100,30 @@
   evidence** — `reserved − allocated` is `0.013 GiB`, so there is nothing to
   reclaim, and adding a flush would have looked like a fix while changing
   nothing).
-- **What the equivalence claim is.** Equivalence of the **decisions**, not of
-  the digits. Worst relative drift `3.03e-05`: `257×` below the search's own
-  smallest decision threshold (`0.007782`), and just under float32's
-  `sqrt(V)·ε` floor of `4.65e-05` for a `151936`-class vocabulary. Item
-  ordering identical, top-1 exact, DEPTH's removal order `[17, 18]` in three
-  independent measurements. **A tighter bound was not achievable by any
-  implementation**, which is what the round's second subrun discovered by
-  dying against one.
-- **Expected upside.** Bounding minutes `1826.57 → 1445.54`; GPU ceiling
-  `$33.1827 → $26.2606`; session total `$27.5992` including separately billed
-  Container Disk; chain total `$66.2757 → $59.0009`; headroom after the chain
-  `$6.0700 → $13.1196`. **Beam width 6 was not touched and is not a cost
-  lever.**
+- **What the equivalence claim is — as corrected by review.** Worst
+  **relative** drift `3.03e-05` on pooled per-item KL over four calibration
+  items, item ordering identical, top-1 exact, DEPTH's removal order
+  `[17, 18]` in three independent measurements. That is **kernel-level**
+  evidence. It was reported as decision-level, and two things were wrong with
+  that: `0.007782` is C2's pre-B numerical-**sensitivity disclosure** trigger,
+  not the decision threshold (the Pareto epsilon is `1e-4` **absolute**), and
+  dividing an absolute gap by a relative drift gives a ratio in no units. The
+  claim that "a tighter bound was not achievable by any implementation" also
+  overstated `sqrt(V)·ε`, which is an error-**scale** heuristic and not a hard
+  floor. The decision-level claim comes from the full-suite state-eval
+  certification instead.
+- **Expected upside, and what review did with it.** The measured component
+  speedups imply bounding minutes `1826.57 → 1445.54`, GPU `$33.1829 →
+  `$26.2607`, session total `$34.8742 → $27.5992`. **Review kept the
+  conservative window as the authorization basis** for the first optimized
+  formal search: a hard ceiling derived by component-level extrapolation can
+  under-authorize a run, and an optimized implementation that finishes early
+  simply spends less than its ceiling. So the chain ceiling stays `$66.2759`
+  with `$5.8446` of headroom, and the optimized figure is recorded as an
+  engineering **planning estimate** in the pricing record. After the first
+  optimized search completes, its own per-expansion telemetry becomes the
+  measured basis and the adjustment retires. **Beam width 6 was not touched
+  and is not a cost lever.**
 - **Risks.** The refresh is an *adjustment* of pooled per-expansion minutes by
   measured component savings, not a new pooled observation from a real search —
   each cell is reduced only by the saving its own phases contain, capped at the
@@ -84,7 +167,8 @@
   and rescores all 578 leaves with one implementation. What *is* refused is a
   **future** B re-measurement joining the old series — already barred without a
   new decision. The measured disagreement between the two implementations is
-  `3.03e-05`, `257×` below the search's own `0.007782` threshold.
+  `3.03e-05` relative, on four calibration items; the decision-level figure is
+  the certification's absolute drift against the `1e-4` Pareto epsilon.
 
   Three ways forward, all of them decisions: amend the frozen contract to name
   both hashes with the measured equivalence as justification; re-measure B with
@@ -99,7 +183,9 @@
   adjustment is retired. Or when the reference-cache recompute waste is
   actually fixed, which requires measuring allocator state *inside* a running
   search rather than on a clean card. Or when the frozen-contract decision
-  above is taken, whichever way.
+  above is taken, whichever way. The certification review asked for is
+  recorded separately, under
+  `logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/`.
 
 ## 2026-09-17 — Phase-C2 preparation CLOSED; project cap raised to `$370.0000`
 

@@ -57,6 +57,8 @@ for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
         sys.path.insert(0, str(REPO / _extra))
 
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
+from aadistill.initialization.planning.ranking import (  # noqa: E402
+    PARETO_V1 as _PARETO_V1)
 from experiments.calibration import register_builtin_profiles  # noqa: E402
 
 register_builtin_adapters()
@@ -71,22 +73,24 @@ OK, FAILED, NOT_RUN = 0, 1, 3
 #: kernels, different reduction trees, so a looser bound is correct. The
 #: state-eval comparison needs this, because the old path reduced on the host.
 #:
-#: DERIVED, not chosen. A float32 sum over V terms accumulates relative error
+#: Set from an ERROR-SCALE HEURISTIC, which is a weaker thing than a derivation
+#: and is now labelled as one. A float32 sum over V terms carries relative error
 #: on the order of `sqrt(V) * eps`; for the real vocabulary that is
-#: `sqrt(151936) * 1.192e-07 = 4.65e-05`. Two different kernel families
-#: reducing the same 152k-class log-softmax therefore CANNOT agree to better
-#: than about that, and a bound below it is not a tolerance -- it is a claim
-#: that float32 is exact.
+#: `sqrt(151936) * 1.192e-07 = 4.65e-05`, so agreement far below that between
+#: two different kernel families is not what one would expect.
 #:
-#: The first version of this file predeclared `1e-6`, which is forty times
-#: below that floor. The measurement came back at `3.03e-05` -- just under the
-#: floor, exactly where float32 puts it -- and the run was refused by a bound
-#: that was never achievable. Re-deriving a tolerance after seeing a failure is
-#: normally how a gate gets talked out of firing, so the reason it is legitimate
-#: here is stated rather than implied: the criterion is the DECISION boundary,
-#: `1e-6` was a guess at what "comfortably below" meant, and the guess was
-#: below the arithmetic's own noise. The arithmetic decides, not the guess.
-KERNEL_TOLERANCE = 4 * 4.647e-05   # ~1.9e-04, four times the float32 floor
+#: **It is NOT a hard floor below which agreement is impossible**, and this
+#: file said it was. Review corrected that: the quantity is a scale estimate
+#: for a worst-case walk, actual cancellation is usually far better, and no
+#: claim about achievability should rest on it. What is load-bearing is the
+#: MEASURED drift and whether the decisions move -- never this number.
+#:
+#: The first version predeclared `1e-6`, the measurement came back at
+#: `3.03e-05`, and the run was refused. Re-deriving a tolerance after seeing a
+#: failure is normally how a gate gets talked out of firing, so what makes it
+#: legitimate here is stated rather than implied: the criterion is the DECISION
+#: boundary, and `1e-6` was a guess at "comfortably below" it.
+KERNEL_TOLERANCE = 4 * 4.647e-05   # ~1.9e-04, four times the sqrt(V)*eps scale
 #: `ACCUM_TOLERANCE` bounds two reductions on the SAME device that differ only
 #: in which quantities they compute and where the accumulators live. CPU parity
 #: measured that difference at exactly 0 at fixed chunk, so 1e-9 is generous.
@@ -97,14 +101,26 @@ KERNEL_TOLERANCE = 4 * 4.647e-05   # ~1.9e-04, four times the float32 floor
 #: and identical decisions, and the run was refused by a threshold set against
 #: the wrong quantity. The gate worked as written; the writing was the defect.
 ACCUM_TOLERANCE = 1e-9
-#: THE BOUNDARY THAT ACTUALLY MATTERS, and the one the maintainer named: drift
-#: must be "comfortably below every decision boundary". C2's own B->C
-#: comparison was decided by a margin of 0.395971 against a threshold of
-#: 0.007782, so this is the smallest threshold the search is known to use.
-#: Every measured drift is asserted against it with a 50x margin, so a pass
-#: means something about decisions rather than about a number I chose.
-SEARCH_DECISION_THRESHOLD = 0.007782
-DECISION_MARGIN = 50
+#: THE BOUNDARY THAT ACTUALLY MATTERS: `PARETO_V1`'s epsilon, which is what
+#: decides whether two candidates are practically equivalent on a ranked
+#: objective. It is `1e-4` ABSOLUTE, per objective, read from the policy rather
+#: than restated, so it cannot drift away from the rule it describes.
+#:
+#: This file used `0.007782` and called it the search's decision threshold. It
+#: is not. That number is C2's pre-B numerical-SENSITIVITY DISCLOSURE trigger,
+#: equal to the tightest gap observed *between the frozen C candidates* on the
+#: `worst_domain` objective -- and the document it comes from says in terms
+#: that it is "NOT an estimated noise bound, NOT a measurement of cross-session
+#: variance, and NOT evidence of numerical determinism". Dividing it by a
+#: RELATIVE drift also compares two different quantities and yields a ratio
+#: that means nothing. Both errors are review corrections, recorded here
+#: because the wrong version was published.
+#:
+#: The certification that supersedes this stage compares ABSOLUTE drift on the
+#: ranked objectives against this epsilon, and checks the Pareto decisions
+#: directly. See scripts/validation/c2_state_eval_certification_check.py.
+PARETO_EPSILON = min(_PARETO_V1.epsilon.values())
+DECISION_MARGIN = 10
 
 
 def say(msg: str) -> None:
@@ -340,19 +356,32 @@ def stage_reduction(cfg: dict, teacher, items, report: dict,
         "the host, so the bound covers kernel disagreement and not only "
         "accumulation")
     out["top1_agreement_exact"] = True
-    #: Two assertions, and the second is the one that means something.
     assert worst < KERNEL_TOLERANCE, (
-        f"reduction drift {worst:.3e} exceeds the derived host-vs-device bound "
-        f"{KERNEL_TOLERANCE:.3e} (four times float32's sqrt(V)*eps floor for a "
-        "152k vocabulary). A drift above the arithmetic's own noise is a real "
-        "disagreement, not rounding.")
-    assert worst * DECISION_MARGIN < SEARCH_DECISION_THRESHOLD, (
-        f"reduction drift {worst:.3e} is within {DECISION_MARGIN}x of the "
-        f"search's own {SEARCH_DECISION_THRESHOLD:.3e} decision threshold; "
-        "that is not comfortably below it")
-    out["decision_threshold"] = SEARCH_DECISION_THRESHOLD
-    out["drift_is_below_threshold_by"] = round(
-        SEARCH_DECISION_THRESHOLD / max(worst, 1e-18), 1)
+        f"relative reduction drift {worst:.3e} exceeds the host-vs-device "
+        f"bound {KERNEL_TOLERANCE:.3e} (four times the sqrt(V)*eps error scale "
+        "for a 152k vocabulary). Above the arithmetic's expected scale, a "
+        "disagreement is more likely real than rounding.")
+    #: ABSOLUTE drift too, on the pooled KL this stage actually compares, and
+    #: beside the epsilon that decides a ranked objective. The earlier version
+    #: asserted `worst * 50 < 0.007782` -- a RELATIVE drift against an ABSOLUTE
+    #: gap, whose quotient is not a safety factor in any units, and against a
+    #: number that is C2's sensitivity-disclosure trigger rather than a
+    #: decision threshold at all.
+    #:
+    #: This stage's four items are NOT the ranked objectives: those are
+    #: equal-domain-mean, worst-domain and critical-token KL over the complete
+    #: frozen suite, and certifying them is a different run's job. What is
+    #: recorded here is the measured absolute drift on what this stage did
+    #: compare, with no claim beyond it.
+    abs_drift = max(abs(i["new_kl"] - i["old_kl"]) for i in out["items"])
+    out["worst_absolute_drift_on_pooled_item_kl"] = abs_drift
+    out["pareto_epsilon"] = PARETO_EPSILON
+    out["_absolute_drift_is_not_yet_a_decision_claim"] = (
+        f"{abs_drift:.3e} against an epsilon of {PARETO_EPSILON:.0e}, on "
+        "POOLED PER-ITEM KL over four calibration items. The ranked objectives "
+        "are aggregates over the complete state_eval_v1 suite and are "
+        "certified by scripts/validation/c2_state_eval_certification_check.py, "
+        "which is where a Pareto-decision claim comes from.")
     say(f"stage R: {out['speedup']}x  (old {old_total:.2f}s -> new {new_total:.2f}s), "
         f"worst drift {worst:.3e}")
     return out
@@ -618,13 +647,20 @@ def main() -> int:
             "AADISTILL_DEPTH_SYNC_TELEMETRY") == "1",
         "started_utc": datetime.now(timezone.utc).isoformat(),
         "kernel_tolerance": KERNEL_TOLERANCE,
-        "_kernel_tolerance_is_derived": (
-            "four times float32's sqrt(V)*eps floor for the real 151936-class "
-            "vocabulary, which is 4.647e-05. A bound below that floor asserts "
-            "float32 is exact."),
+        "_kernel_tolerance_basis": (
+            "four times the sqrt(V)*eps ERROR SCALE for the real 151936-class "
+            "vocabulary, 4.647e-05. A scale heuristic, not a floor: agreement "
+            "below it is not impossible, only unexpected, and no claim rests "
+            "on it. The measured drift and the decisions are what count."),
         "accum_tolerance": ACCUM_TOLERANCE,
-        "search_decision_threshold": SEARCH_DECISION_THRESHOLD,
-        "decision_margin_required": DECISION_MARGIN,
+        "pareto_epsilon": PARETO_EPSILON,
+        "_pareto_epsilon_is_the_real_boundary": (
+            "1e-4 absolute per ranked objective, read from PARETO_V1. The "
+            "0.007782 this file used to call the decision threshold is C2's "
+            "pre-B numerical-sensitivity DISCLOSURE trigger -- the tightest "
+            "gap between the frozen C candidates on worst_domain -- and its "
+            "own record says it is not a noise bound, not a variance "
+            "measurement and not evidence of determinism."),
         "stages": {},
     }
     verdict = "PASS"

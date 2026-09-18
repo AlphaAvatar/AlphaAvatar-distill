@@ -1,0 +1,229 @@
+{
+ "schema": "aadistill.cuda_engineering_run/v1",
+ "run_id": "c2_state_eval_cert_20260919_s2",
+ "scientific_use": false,
+ "is_formal_c1": false,
+ "authorizes": "nothing",
+ "authorization": "c2_state_eval_certification.2026-09-19",
+ "authorization_sha256": "02069fc19d8c367ab6ccd4d5e3b766a6f0370eb9f9db85aadf6fa13e4f37b8de",
+ "campaign_id": "c2_state_eval_certification",
+ "subrun_id": "c2_state_eval_cert_20260919_s2",
+ "campaign_booked_before_usd": 0.4925,
+ "campaign_remaining_total_usd": 1.0075,
+ "campaign_remaining_to_soft_usd": 0.4075,
+ "authorization_path": "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json",
+ "candidate_gpus": [
+  "NVIDIA L40S"
+ ],
+ "authorized_rate_ceiling_usd_per_hour": 1.09,
+ "execution_sha": "",
+ "deployment": {
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "remote_python": "/workspace/eng-venv/bin/python",
+  "min_cuda_version": "13.0",
+  "container_disk_gb": 20,
+  "pip_deps": [
+   "numpy",
+   "transformers"
+  ],
+  "authorizes": "nothing",
+  "venv": {
+   "path": "/workspace/eng-venv",
+   "system_site_packages": true,
+   "_why": "--system-site-packages so the image's CUDA-enabled torch is inherited rather than reinstalled. A plain venv would hide it, and `pip install torch` into an empty venv can resolve to a CPU build -- which would silently turn a GPU validation into a CPU one.",
+   "_why_not_break_system_packages": "The image's interpreter is PEP 668 externally managed, and --break-system-packages is the override that refusal names. It is a justified last resort for a disposable pod, not a generic requirement, so the venv is the default and the override is declared per deployment."
+  },
+  "allow_break_system_packages": false,
+  "capability": {
+   "compute_capability_min": [
+    8,
+    0
+   ],
+   "dtype": "bfloat16",
+   "min_free_vram_gib": 2,
+   "_probe": "the readiness probe must import, see CUDA, meet the capability floor, support the dtype AND complete a real allocation and matmul on the device. Printing CUDA=False beside an IMPORTS_OK marker is not GPU readiness."
+  }
+ },
+ "timeline": [
+  {
+   "utc": "2026-09-18T08:20:36.542351+00:00",
+   "msg": "  NVIDIA L40S: securePrice $1.09/h, 48GB, stock Low"
+  },
+  {
+   "utc": "2026-09-18T08:20:36.542388+00:00",
+   "msg": "accepted NVIDIA L40S at $1.09/h \u2014 $0.4925 booked, $0.4075 to the soft stop (22.4 min), $1.0075 to the ceiling (55.5 min)"
+  },
+  {
+   "utc": "2026-09-18T08:20:36.997141+00:00",
+   "msg": "provider inventory is empty \u2014 no resource is billing"
+  },
+  {
+   "utc": "2026-09-18T08:20:36.997184+00:00",
+   "msg": "creating ONE pod (one create per invocation) \u2014 create --image runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 --gpu-id NVIDIA L40S --gpu-count"
+  },
+  {
+   "utc": "2026-09-18T08:20:38.075830+00:00",
+   "msg": "created q6fdziseu7i18s \u2014 registering and starting the watchdog NOW"
+  },
+  {
+   "utc": "2026-09-18T08:20:38.076304+00:00",
+   "msg": "watchdog detached (launch #1) \u2014 hard 55.5 min / $1.0075 remaining"
+  },
+  {
+   "utc": "2026-09-18T08:20:38.449284+00:00",
+   "msg": "actual rate $1.09/h confirmed at or below the quote"
+  },
+  {
+   "utc": "2026-09-18T08:22:43.964326+00:00",
+   "msg": "endpoint 202.181.159.240:12421"
+  },
+  {
+   "utc": "2026-09-18T08:22:45.897960+00:00",
+   "msg": "shipping 4.79 MB of source"
+  },
+  {
+   "utc": "2026-09-18T08:23:04.919097+00:00",
+   "msg": "environment /workspace/eng-venv ready (Python 3.12.3)"
+  },
+  {
+   "utc": "2026-09-18T08:23:20.428812+00:00",
+   "msg": "installed: numpy==2.5.3, safetensors==0.8.0, torch==2.9.1+cu130, transformers==5.17.0"
+  },
+  {
+   "utc": "2026-09-18T08:23:25.607681+00:00",
+   "msg": "GPU ready \u2014 NVIDIA L40S cc[8, 9] bf16=True free=43.968GiB torch=2.9.1+cu130"
+  },
+  {
+   "utc": "2026-09-18T08:23:25.607714+00:00",
+   "msg": "running: cd /workspace/aad && PYTHONPATH=src:scripts /workspace/eng-venv/bin/python scripts/validation/c2_state_eval_certification_check.py --config configs/validation/c2_state_eval_certification.json --run-id c2_state_eval_cert_20260919_s2"
+  },
+  {
+   "utc": "2026-09-18T08:39:45.449186+00:00",
+   "msg": "validation exited 1"
+  },
+  {
+   "utc": "2026-09-18T08:39:48.805375+00:00",
+   "msg": "collected 1 artifact file(s)"
+  },
+  {
+   "utc": "2026-09-18T08:39:48.805397+00:00",
+   "msg": "tearing down q6fdziseu7i18s"
+  },
+  {
+   "utc": "2026-09-18T08:39:59.734806+00:00",
+   "msg": "provider confirms the pod is gone and not billing"
+  },
+  {
+   "utc": "2026-09-18T08:39:59.735093+00:00",
+   "msg": "campaign ledger: 2 subrun(s), $0.8446 booked of $1.50"
+  }
+ ],
+ "quotes": [
+  {
+   "gpu": "NVIDIA L40S",
+   "secure_price_per_hour": 1.09,
+   "stock": "Low",
+   "vram_gb": 48
+  }
+ ],
+ "accepted_quote": {
+  "gpu": "NVIDIA L40S",
+  "secure_price_per_hour": 1.09,
+  "stock": "Low",
+  "vram_gb": 48
+ },
+ "inventory_before_create": [],
+ "create_command": [
+  "/home/ecs-user/.local/bin/runpodctl",
+  "pod",
+  "create",
+  "--image",
+  "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "--gpu-id",
+  "NVIDIA L40S",
+  "--gpu-count",
+  "1",
+  "--container-disk-in-gb",
+  "20",
+  "--volume-in-gb",
+  "0",
+  "--min-cuda-version",
+  "13.0",
+  "--ports",
+  "22/tcp",
+  "--name",
+  "aad-cuda-eng-c2_state_eval_cert_20260919_s2",
+  "--terminate-after",
+  "2026-09-18T09:16:04Z"
+ ],
+ "create_stdout_tail": "{\n  \"containerDiskInGb\": 20,\n  \"costPerHr\": 1.09,\n  \"desiredStatus\": \"RUNNING\",\n  \"env\": [\n    \"PUBLIC_KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHyLTGGhfoY+v3w7CEP8xX0shw4wzWxHnJDqsh60731 alphaavatar-runpod\\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X+f7hsoLZFbJeFXGStjQiea01LsDIFDE5LdnKCrOjGQK10BvmiW593WTL27OChjStN+xb0zMIyTu/rKas9wNL5msNlUbljmwwj4pIPTEMK31FPhUiBpy2vTlHrH1hdNapHX9nh5iOTTvgZV/Vu+a2lxZvdTFkl5GtTLs2TGsHSmKijnrPro2j++BLUd69VTvW8tFsN/w6VALIAnmrt23wUq15Chjhgs3Ar2SI9A/Ww5+T6aRnP6nOKk+DPGAB5RIVL1Rla88sG3lyraNVSFpBfC8tDnyq7PO6uzolWBJ+Dw4I9HP9eia5IJcGRoi+pGCD0Ml0bFmSQiA1coT2zw1 runpodctl-ssh-key\"\n  ],\n  \"gpuCount\": 1,\n  \"id\": \"q6fdziseu7i18s\",\n  \"imageName\": \"runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404\",\n  \"lastStatusChange\": \"Rented by User: Fri Sep 18 2026 08:20:37 GMT+0000 (Coordinated Universal Time)\",\n  \"machine\": {\n    \"gpuDisplayName\": \"L40S\",\n    \"location\": \"SE\"\n  },\n  \"memoryInGb\": 188,\n  \"name\": \"aad-cuda-eng-c2_state_eval_cert_20260919_s2\",\n  \"ports\": \"22/tcp\",\n  \"vcpuCount\": 16,\n  \"volumeInGb\": 0,\n  \"volumeMountPath\": \"/workspace\"\n}\n",
+ "provider_resource_created": true,
+ "pod_id": "q6fdziseu7i18s",
+ "watchdog_launches": 1,
+ "watchdog_journal": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/777b935e-0bbf-45ca-8e94-dc7e3f1761c0/scratchpad/c2_state_eval_cert_20260919_s2/watchdog_q6fdziseu7i18s.jsonl",
+ "actual_price_per_hour": 1.09,
+ "payload_bytes": 5024212,
+ "unpack_rc": 0,
+ "venv_setup": "Python 3.12.3\nRC=0\nWarning: Permanently added '[202.181.159.240]:12421' (ECDSA) to the list of known hosts.\n",
+ "pip_rc": 0,
+ "pip_output_tail": "PIP_RC=0\nWarning: Permanently added '[202.181.159.240]:12421' (ECDSA) to the list of known hosts.\n",
+ "installed_versions": [
+  "numpy==2.5.3",
+  "safetensors==0.8.0",
+  "torch==2.9.1+cu130",
+  "transformers==5.17.0"
+ ],
+ "validation_interpreter": "/workspace/eng-venv/bin/python",
+ "readiness_probe": {
+  "rc": 0,
+  "output": "{\"torch\": \"2.9.1+cu130\", \"numpy\": \"2.5.3\", \"transformers\": \"5.17.0\", \"cuda_available\": true, \"cuda_runtime\": \"13.0\", \"device\": \"NVIDIA L40S\", \"capability\": [8, 9], \"free_gib\": 43.968, \"total_gib\": 44.392, \"bf16_supported\": true, \"device_matmul_finite\": true}\nPROBE_OK\nPROBE_RC=0\nWarning: Permanently added '[202.181.159.240]:12421' (ECDSA) to the list of known hosts.\n",
+  "report": {
+   "torch": "2.9.1+cu130",
+   "numpy": "2.5.3",
+   "transformers": "5.17.0",
+   "cuda_available": true,
+   "cuda_runtime": "13.0",
+   "device": "NVIDIA L40S",
+   "capability": [
+    8,
+    9
+   ],
+   "free_gib": 43.968,
+   "total_gib": 44.392,
+   "bf16_supported": true,
+   "device_matmul_finite": true
+  }
+ },
+ "validation_command": "cd /workspace/aad && PYTHONPATH=src:scripts /workspace/eng-venv/bin/python scripts/validation/c2_state_eval_certification_check.py --config configs/validation/c2_state_eval_certification.json --run-id c2_state_eval_cert_20260919_s2",
+ "validation": {
+  "started_utc": "2026-09-18T08:23:25.607716+00:00",
+  "finished_utc": "2026-09-18T08:39:45.448977+00:00",
+  "returncode": 1,
+  "stdout": "[08:23:29] CUDA NVIDIA L40S cc8.9 bf16=True free=43.97GiB torch=2.9.1+cu130 cuda=13.0\n[08:23:29] suite state_eval@v1 6421fa4cf12e: 80 items, 74022 positions, 5 domains, 7 sub-types, 4 critical tags\n[08:23:31] loading Qwen/Qwen3-4B-Thinking-2507@768f209d9ea8 in bf16\n[08:23:47] teacher resident in 16.7s\n[08:23:47] --- stage fingerprint ---\n[08:23:57] stage F: 3 probe items, forward bitwise reproducible\n[08:23:57] --- stage evaluate ---\n[08:23:57]   candidate m=0.05: two full-suite passes\n[08:29:14]     old 230.1s -> new 86.2s (2.669x), 74022 positions\n[08:29:14]   candidate m=0.35: two full-suite passes\n[08:34:29]     old 227.8s -> new 87.0s (2.619x), 74022 positions\n[08:34:29]   candidate m=1.0: two full-suite passes\n[08:39:44]     old 228.1s -> new 87.4s (2.611x), 74022 positions\n[08:39:44] stage E: worst ranked-objective ABSOLUTE drift 9.032e-06 on state.teacher_kl.worst_domain (target < 1e-05, epsilon 1e-04)\n[08:39:44] stage E: complete suite -- PASS 2.633x (old 228.7s -> new 86.8s), REDUCTION 10.057x (old 133.3s -> new 13.3s), forward 73.6s\n[08:39:44] --- stage pareto ---\n[08:39:44] FAIL: AssertionError: the measured drift 9.032e-06 changes a PARETO_V1 decision at the epsilon boundary in case(s) ['at_epsilon', 'just_outside_epsilon']. That is the decision-level failure this stage exists to find.\n[08:39:44] verdict: FAIL\n[08:39:44] wrote /workspace/aad/artifacts/validation/c2_state_eval_certification_report.json\n",
+  "stderr": "Warning: Permanently added '[202.181.159.240]:12421' (ECDSA) to the list of known hosts.\nWarning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n\nFetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]\nFetching 3 files:  33%|\u2588\u2588\u2588\u258e      | 1/3 [00:02<00:04,  2.09s/it]\nFetching 3 files:  67%|\u2588\u2588\u2588\u2588\u2588\u2588\u258b   | 2/3 [00:13<00:07,  7.85s/it]\nFetching 3 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 3/3 [00:14<00:00,  4.46s/it]\nFetching 3 files: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 3/3 [00:14<00:00,  4.80s/it]\n\nLoading weights:   0%|          | 0/398 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 398/398 [00:00<00:00, 8979.78it/s]\n"
+ },
+ "collected_files": [
+  "artifacts/c2_state_eval_certification_report.json"
+ ],
+ "teardown": {
+  "remove_rc": 0,
+  "remove_output": "pod \"q6fdziseu7i18s\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead\n",
+  "provider_confirms_gone": true,
+  "polls": [
+   {
+    "pods": []
+   }
+  ]
+ },
+ "final_pod_inventory": {
+  "pods": []
+ },
+ "verdict": "FAIL",
+ "verdict_reason": "validation exited 1",
+ "elapsed_minutes": 19.379,
+ "estimated_cost_usd": 0.8446,
+ "_cost_basis": "elapsed wall clock x the provider-confirmed hourly rate. An ESTIMATE: the provider bills per second from provisioning, and this is the evidence available at teardown.",
+ "subrun_cost_usd": 0.3521,
+ "campaign_cost_after_usd": 0.8446,
+ "provider_create_attempts": 1
+}

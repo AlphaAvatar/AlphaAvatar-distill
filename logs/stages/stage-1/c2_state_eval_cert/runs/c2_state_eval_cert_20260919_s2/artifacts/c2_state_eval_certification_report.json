@@ -1,0 +1,1173 @@
+{
+ "schema": "aadistill.c2_state_eval_certification_report/v1",
+ "_contract": "ENGINEERING certification of the device-resident state-eval reduction on the COMPLETE frozen suite. It compares two implementations on provably identical logits and checks the decisions PARETO_V1 makes from them. It trains nothing, measures no behaviour, re-measures no frozen scientific checkpoint, and AUTHORIZES NOTHING.",
+ "validation_id": "c2_state_eval_certification_v1",
+ "run_id": "c2_state_eval_cert_20260919_s2",
+ "started_utc": "2026-09-18T08:23:28.975421+00:00",
+ "predeclared": {
+  "ranked_abs_tolerance": 1e-05,
+  "pareto_epsilon": 0.0001,
+  "ranked_keys": [
+   "state.teacher_kl.equal_domain_mean",
+   "state.teacher_kl.worst_domain",
+   "state.critical_token_kl"
+  ],
+  "diagnostic_rel_tolerance": 0.00018588,
+  "_declared_before_execution": "these constants are in the committed source and in the validation's authorization record, both of which predate any measurement. An exceeded target STOPS the run; it is never widened afterwards.",
+  "_what_epsilon_is": "PARETO_V1's practical-equivalence epsilon, 1e-4 ABSOLUTE per ranked objective, read from the policy. NOT 0.007782, which is C2's pre-B numerical-sensitivity disclosure trigger and is not a decision threshold."
+ },
+ "stages": {
+  "fingerprint": {
+   "probe_items": [
+    {
+     "item_id": "code/mbpp-000004#t1",
+     "positions": 1796,
+     "bitwise_identical": true
+    },
+    {
+     "item_id": "code/mbpp-000005#t1",
+     "positions": 1406,
+     "bitwise_identical": true
+    },
+    {
+     "item_id": "code/mbpp-000065#t1",
+     "positions": 1744,
+     "bitwise_identical": true
+    }
+   ],
+   "bitwise_reproducible": true
+  },
+  "evaluate": {
+   "chunk": 512,
+   "candidates": [
+    {
+     "magnitude": 0.05,
+     "seed": 20260919,
+     "artifact_digest": "engineering-only:perturbation=0.05:seed=20260919",
+     "positions": 74022,
+     "old_seconds": 230.093,
+     "new_seconds": 86.194,
+     "speedup": 2.669,
+     "old_forward_seconds": 95.484,
+     "new_forward_seconds": 73.119,
+     "old_reduction_seconds": 134.609,
+     "new_reduction_seconds": 13.075,
+     "reduction_speedup": 10.295,
+     "_what_the_two_ratios_mean": "`speedup` is the whole state-eval pass, which is what an expansion's state_evaluation phase pays. `reduction_speedup` isolates the part this optimization changed. A cost model must use the former; a claim about the reduction must use the latter.",
+     "forwards_per_pass": 80,
+     "reference_forwards": {
+      "old": 80,
+      "new": 80
+     },
+     "candidate_reused_the_reference": {
+      "old": 80,
+      "new": 80
+     },
+     "candidate_extra_forwards": {
+      "old": 0,
+      "new": 0
+     },
+     "logits_verified_identical": true,
+     "metrics": {
+      "state.critical_token_kl": {
+       "old": 2.525878648815761e-05,
+       "new": 2.5251049296345983e-05,
+       "absolute": 7.737191811628522e-09,
+       "relative": 0.00030631684603122343
+      },
+      "state.critical_token_kl.assistant": {
+       "old": 0.0001917761850214923,
+       "new": 0.00019177724844123695,
+       "absolute": 1.0634197446506444e-09,
+       "relative": 5.545108453020208e-06
+      },
+      "state.critical_token_kl.eos": {
+       "old": 2.9823772433085602e-05,
+       "new": 2.9833893996433374e-05,
+       "absolute": 1.0121563347771921e-08,
+       "relative": 0.00033937904302620554
+      },
+      "state.critical_token_kl.final_answer": {
+       "old": 7.09169192467137e-05,
+       "new": 7.091669758877969e-05,
+       "absolute": 2.2165793400513896e-10,
+       "relative": 3.1256001580386e-06
+      },
+      "state.critical_token_kl.reasoning": {
+       "old": 0.0002266730284873739,
+       "new": 0.00022667441702529654,
+       "absolute": 1.388537922635642e-09,
+       "relative": 6.125730669862145e-06
+      },
+      "state.critical_token_kl.think_close": {
+       "old": 2.4108412332500354e-07,
+       "new": 2.513205133526851e-07,
+       "absolute": 1.0236390027681565e-08,
+       "relative": 0.0424598264145415
+      },
+      "state.critical_token_kl.tool_close": {
+       "old": 5.337014950614259e-08,
+       "new": 2.2850868181783265e-09,
+       "absolute": 5.1085062687964266e-08,
+       "relative": 0.9571841780597724
+      },
+      "state.nll.code": {
+       "old": 0.24224744812018503,
+       "new": 0.2422479028010591,
+       "absolute": 4.5468087406241864e-07,
+       "relative": 1.8769274045637833e-06
+      },
+      "state.nll.general": {
+       "old": 2.58482269292683,
+       "new": 2.5848390552981044,
+       "absolute": 1.6362371274336596e-05,
+       "relative": 6.330171628062139e-06
+      },
+      "state.nll.pooled_all_domains": {
+       "old": 0.9314440785786128,
+       "new": 0.9314479511279427,
+       "absolute": 3.872549329875241e-06,
+       "relative": 4.157575767495099e-06
+      },
+      "state.nll.rag_multihop": {
+       "old": 1.408991815205666,
+       "new": 1.4089985800432947,
+       "absolute": 6.764837628736586e-06,
+       "relative": 4.801190152938642e-06
+      },
+      "state.nll.reasoning_math": {
+       "old": 0.23532295096634515,
+       "new": 0.23532351977391422,
+       "absolute": 5.68807569073515e-07,
+       "relative": 2.4171359688365604e-06
+      },
+      "state.nll.teacher_reference_pooled": {
+       "old": 0.9305761485149987,
+       "new": 0.9305800182676692,
+       "absolute": 3.869752670526694e-06,
+       "relative": 4.1584481578450026e-06
+      },
+      "state.nll.tool": {
+       "old": 0.7800085664480428,
+       "new": 0.7800095683650108,
+       "absolute": 1.0019169679464923e-06,
+       "relative": 1.28449482613885e-06
+      },
+      "state.nll_delta_vs_teacher_pooled": {
+       "old": 0.0008679300636140534,
+       "new": 0.0008679328602734747,
+       "absolute": 2.7966594212973026e-09,
+       "relative": 3.222217478735598e-06
+      },
+      "state.reverse_kl.token_mean": {
+       "old": 0.0003568544850245767,
+       "new": 0.0003568423502291749,
+       "absolute": 1.2134795401809104e-08,
+       "relative": 3.4004884094348364e-05
+      },
+      "state.teacher_kl.code": {
+       "old": 0.0001900390193459324,
+       "new": 0.00019004313265279485,
+       "absolute": 4.113306862436536e-09,
+       "relative": 2.1644538456331373e-05
+      },
+      "state.teacher_kl.equal_domain_mean": {
+       "old": 0.0003900428455210707,
+       "new": 0.00039004628741179875,
+       "absolute": 3.441890728049339e-09,
+       "relative": 8.824391390774537e-06
+      },
+      "state.teacher_kl.general": {
+       "old": 0.0007963590942501013,
+       "new": 0.0007963605429426073,
+       "absolute": 1.448692506017188e-09,
+       "relative": 1.819144800978712e-06
+      },
+      "state.teacher_kl.rag_multihop": {
+       "old": 0.0004733881122900433,
+       "new": 0.000473391231172283,
+       "absolute": 3.118882239711712e-09,
+       "relative": 6.588425350657693e-06
+      },
+      "state.teacher_kl.reasoning_math": {
+       "old": 0.0001716160310669695,
+       "new": 0.00017161956678981194,
+       "absolute": 3.5357228424367712e-09,
+       "relative": 2.060252075784826e-05
+      },
+      "state.teacher_kl.token_mean": {
+       "old": 0.00035713945809723785,
+       "new": 0.000357143217006945,
+       "absolute": 3.758909707151162e-09,
+       "relative": 1.0525047350348303e-05
+      },
+      "state.teacher_kl.tool": {
+       "old": 0.00031881197065230686,
+       "new": 0.0003188169635014967,
+       "absolute": 4.992849189861329e-09,
+       "relative": 1.566079585921973e-05
+      },
+      "state.teacher_kl.worst_domain": {
+       "old": 0.0007963590942501013,
+       "new": 0.0007963605429426073,
+       "absolute": 1.448692506017188e-09,
+       "relative": 1.819144800978712e-06
+      },
+      "state.top1_agreement": {
+       "old": 0.9909486368917348,
+       "new": 0.9909486368917348,
+       "absolute": 0.0,
+       "relative": 0.0
+      }
+     },
+     "per_domain_kl": {
+      "code": {
+       "old": 0.0001900390193459324,
+       "new": 0.00019004313265279485,
+       "absolute": 4.113306862436536e-09,
+       "relative": 2.1644538456331373e-05
+      },
+      "general": {
+       "old": 0.0007963590942501013,
+       "new": 0.0007963605429426073,
+       "absolute": 1.448692506017188e-09,
+       "relative": 1.819144800978712e-06
+      },
+      "rag_multihop": {
+       "old": 0.0004733881122900433,
+       "new": 0.000473391231172283,
+       "absolute": 3.118882239711712e-09,
+       "relative": 6.588425350657693e-06
+      },
+      "reasoning_math": {
+       "old": 0.0001716160310669695,
+       "new": 0.00017161956678981194,
+       "absolute": 3.5357228424367712e-09,
+       "relative": 2.060252075784826e-05
+      },
+      "tool": {
+       "old": 0.00031881197065230686,
+       "new": 0.0003188169635014967,
+       "absolute": 4.992849189861329e-09,
+       "relative": 1.566079585921973e-05
+      }
+     },
+     "per_subtype_kl": {
+      "code": {
+       "old": 0.0001900390193459324,
+       "new": 0.00019004313265279485,
+       "absolute": 4.113306862436536e-09,
+       "relative": 2.1644538456331373e-05
+      },
+      "general": {
+       "old": 0.0007963590942501013,
+       "new": 0.0007963605429426073,
+       "absolute": 1.448692506017188e-09,
+       "relative": 1.819144800978712e-06
+      },
+      "gsm8k": {
+       "old": 0.00017256929278902436,
+       "new": 0.00017257399382282062,
+       "absolute": 4.7010337962617634e-09,
+       "relative": 2.724142702496348e-05
+      },
+      "multihop_qa": {
+       "old": 0.0005189579875175898,
+       "new": 0.0005189672280350981,
+       "absolute": 9.24051750828686e-09,
+       "relative": 1.7805906702560692e-05
+      },
+      "openmath": {
+       "old": 0.00017066276934491463,
+       "new": 0.0001706651397568033,
+       "absolute": 2.370411888665989e-09,
+       "relative": 1.3889449337806741e-05
+      },
+      "rag_evidence": {
+       "old": 0.00042781823706249675,
+       "new": 0.0004278152343094679,
+       "absolute": 3.0027530288634363e-09,
+       "relative": 7.018758829640044e-06
+      },
+      "tool_calling": {
+       "old": 0.00031881197065230686,
+       "new": 0.0003188169635014967,
+       "absolute": 4.992849189861329e-09,
+       "relative": 1.566079585921973e-05
+      }
+     },
+     "per_domain_nll": {
+      "code": {
+       "old": 0.24224744812018503,
+       "new": 0.2422479028010591,
+       "absolute": 4.5468087406241864e-07,
+       "relative": 1.8769274045637833e-06
+      },
+      "general": {
+       "old": 2.58482269292683,
+       "new": 2.5848390552981044,
+       "absolute": 1.6362371274336596e-05,
+       "relative": 6.330171628062139e-06
+      },
+      "rag_multihop": {
+       "old": 1.408991815205666,
+       "new": 1.4089985800432947,
+       "absolute": 6.764837628736586e-06,
+       "relative": 4.801190152938642e-06
+      },
+      "reasoning_math": {
+       "old": 0.23532295096634515,
+       "new": 0.23532351977391422,
+       "absolute": 5.68807569073515e-07,
+       "relative": 2.4171359688365604e-06
+      },
+      "tool": {
+       "old": 0.7800085664480428,
+       "new": 0.7800095683650108,
+       "absolute": 1.0019169679464923e-06,
+       "relative": 1.28449482613885e-06
+      }
+     },
+     "tagged_positions_identical": {
+      "assistant": true,
+      "eos": true,
+      "final_answer": true,
+      "reasoning": true,
+      "think_close": true,
+      "tool_close": true
+     },
+     "_old_values": {
+      "state.teacher_kl.equal_domain_mean": 0.0003900428455210707,
+      "state.teacher_kl.worst_domain": 0.0007963590942501013,
+      "state.teacher_kl.token_mean": 0.00035713945809723785,
+      "state.reverse_kl.token_mean": 0.0003568544850245767,
+      "state.nll.pooled_all_domains": 0.9314440785786128,
+      "state.nll.teacher_reference_pooled": 0.9305761485149987,
+      "state.nll_delta_vs_teacher_pooled": 0.0008679300636140534,
+      "state.top1_agreement": 0.9909486368917348,
+      "state.teacher_kl.general": 0.0007963590942501013,
+      "state.teacher_kl.reasoning_math": 0.0001716160310669695,
+      "state.teacher_kl.rag_multihop": 0.0004733881122900433,
+      "state.teacher_kl.code": 0.0001900390193459324,
+      "state.teacher_kl.tool": 0.00031881197065230686,
+      "state.nll.general": 2.58482269292683,
+      "state.nll.reasoning_math": 0.23532295096634515,
+      "state.nll.rag_multihop": 1.408991815205666,
+      "state.nll.code": 0.24224744812018503,
+      "state.nll.tool": 0.7800085664480428,
+      "state.critical_token_kl.assistant": 0.0001917761850214923,
+      "state.critical_token_kl.eos": 2.9823772433085602e-05,
+      "state.critical_token_kl.final_answer": 7.09169192467137e-05,
+      "state.critical_token_kl.reasoning": 0.0002266730284873739,
+      "state.critical_token_kl.think_close": 2.4108412332500354e-07,
+      "state.critical_token_kl.tool_close": 5.337014950614259e-08,
+      "state.critical_token_kl": 2.525878648815761e-05
+     },
+     "_new_values": {
+      "state.teacher_kl.equal_domain_mean": 0.00039004628741179875,
+      "state.teacher_kl.worst_domain": 0.0007963605429426073,
+      "state.teacher_kl.token_mean": 0.000357143217006945,
+      "state.reverse_kl.token_mean": 0.0003568423502291749,
+      "state.nll.pooled_all_domains": 0.9314479511279427,
+      "state.nll.teacher_reference_pooled": 0.9305800182676692,
+      "state.nll_delta_vs_teacher_pooled": 0.0008679328602734747,
+      "state.top1_agreement": 0.9909486368917348,
+      "state.teacher_kl.general": 0.0007963605429426073,
+      "state.teacher_kl.reasoning_math": 0.00017161956678981194,
+      "state.teacher_kl.rag_multihop": 0.000473391231172283,
+      "state.teacher_kl.code": 0.00019004313265279485,
+      "state.teacher_kl.tool": 0.0003188169635014967,
+      "state.nll.general": 2.5848390552981044,
+      "state.nll.reasoning_math": 0.23532351977391422,
+      "state.nll.rag_multihop": 1.4089985800432947,
+      "state.nll.code": 0.2422479028010591,
+      "state.nll.tool": 0.7800095683650108,
+      "state.critical_token_kl.assistant": 0.00019177724844123695,
+      "state.critical_token_kl.eos": 2.9833893996433374e-05,
+      "state.critical_token_kl.final_answer": 7.091669758877969e-05,
+      "state.critical_token_kl.reasoning": 0.00022667441702529654,
+      "state.critical_token_kl.think_close": 2.513205133526851e-07,
+      "state.critical_token_kl.tool_close": 2.2850868181783265e-09,
+      "state.critical_token_kl": 2.5251049296345983e-05
+     }
+    },
+    {
+     "magnitude": 0.35,
+     "seed": 20260919,
+     "artifact_digest": "engineering-only:perturbation=0.35:seed=20260919",
+     "positions": 74022,
+     "old_seconds": 227.81,
+     "new_seconds": 86.985,
+     "speedup": 2.619,
+     "old_forward_seconds": 95.375,
+     "new_forward_seconds": 73.339,
+     "old_reduction_seconds": 132.435,
+     "new_reduction_seconds": 13.646,
+     "reduction_speedup": 9.705,
+     "_what_the_two_ratios_mean": "`speedup` is the whole state-eval pass, which is what an expansion's state_evaluation phase pays. `reduction_speedup` isolates the part this optimization changed. A cost model must use the former; a claim about the reduction must use the latter.",
+     "forwards_per_pass": 80,
+     "reference_forwards": {
+      "old": 80,
+      "new": 80
+     },
+     "candidate_reused_the_reference": {
+      "old": 80,
+      "new": 80
+     },
+     "candidate_extra_forwards": {
+      "old": 0,
+      "new": 0
+     },
+     "logits_verified_identical": true,
+     "metrics": {
+      "state.critical_token_kl": {
+       "old": 0.001258587466271355,
+       "new": 0.001258578136601178,
+       "absolute": 9.329670177041227e-09,
+       "relative": 7.412810334653152e-06
+      },
+      "state.critical_token_kl.assistant": {
+       "old": 0.009373045792136471,
+       "new": 0.009373042498469927,
+       "absolute": 3.2936665443628055e-09,
+       "relative": 3.5139767983701e-07
+      },
+      "state.critical_token_kl.eos": {
+       "old": 0.0015841862797401501,
+       "new": 0.0015841793075744562,
+       "absolute": 6.97216569396121e-09,
+       "relative": 4.4011021829483565e-06
+      },
+      "state.critical_token_kl.final_answer": {
+       "old": 0.003433802600729912,
+       "new": 0.0034338021953733773,
+       "absolute": 4.0535653479667477e-10,
+       "relative": 1.1804887523543417e-07
+      },
+      "state.critical_token_kl.reasoning": {
+       "old": 0.01108773378141299,
+       "new": 0.01108772951035087,
+       "absolute": 4.271062120295155e-09,
+       "relative": 3.8520604881900966e-07
+      },
+      "state.critical_token_kl.think_close": {
+       "old": 1.37735668331069e-05,
+       "new": 1.3764910603494432e-05,
+       "absolute": 8.6562296124683e-09,
+       "relative": 0.0006284668101846874
+      },
+      "state.critical_token_kl.tool_close": {
+       "old": 2.5874177822515776e-06,
+       "new": 2.5661328533845207e-06,
+       "absolute": 2.1284928867056884e-08,
+       "relative": 0.008226320856670733
+      },
+      "state.nll.code": {
+       "old": 0.25154925336197465,
+       "new": 0.2515497078308268,
+       "absolute": 4.5446885216238186e-07,
+       "relative": 1.806679392160269e-06
+      },
+      "state.nll.general": {
+       "old": 2.6312990651908086,
+       "new": 2.631315019756871,
+       "absolute": 1.5954566062514886e-05,
+       "relative": 6.06337997591237e-06
+      },
+      "state.nll.pooled_all_domains": {
+       "old": 0.9515567877447051,
+       "new": 0.9515605648406054,
+       "absolute": 3.777095900270311e-06,
+       "relative": 3.969385693966249e-06
+      },
+      "state.nll.rag_multihop": {
+       "old": 1.4359739500382018,
+       "new": 1.4359805470677194,
+       "absolute": 6.597029517552144e-06,
+       "relative": 4.594115037655551e-06
+      },
+      "state.nll.reasoning_math": {
+       "old": 0.24351457275501515,
+       "new": 0.24351513595187507,
+       "absolute": 5.631968599262294e-07,
+       "relative": 2.3127850360431064e-06
+      },
+      "state.nll.teacher_reference_pooled": {
+       "old": 0.9305761485149987,
+       "new": 0.9305800182676692,
+       "absolute": 3.869752670526694e-06,
+       "relative": 4.1584481578450026e-06
+      },
+      "state.nll.tool": {
+       "old": 0.7987695888815938,
+       "new": 0.7987705565507073,
+       "absolute": 9.676691135052096e-07,
+       "relative": 1.2114496182310877e-06
+      },
+      "state.nll_delta_vs_teacher_pooled": {
+       "old": 0.020980639229706385,
+       "new": 0.020980546572936125,
+       "absolute": 9.265677025985242e-08,
+       "relative": 4.416298724047461e-06
+      },
+      "state.reverse_kl.token_mean": {
+       "old": 0.017283746802017493,
+       "new": 0.017283644864156206,
+       "absolute": 1.0193786128750992e-07,
+       "relative": 5.89790295213136e-06
+      },
+      "state.teacher_kl.code": {
+       "old": 0.00925876793860329,
+       "new": 0.009258747021321881,
+       "absolute": 2.0917281408697197e-08,
+       "relative": 2.2591862705063786e-06
+      },
+      "state.teacher_kl.equal_domain_mean": {
+       "old": 0.01901530970628372,
+       "new": 0.019014923004937893,
+       "absolute": 3.867013458266899e-07,
+       "relative": 2.0336315936989562e-05
+      },
+      "state.teacher_kl.general": {
+       "old": 0.03892422865445295,
+       "new": 0.03892293961057125,
+       "absolute": 1.2890438816984262e-06,
+       "relative": 3.311674826344848e-05
+      },
+      "state.teacher_kl.rag_multihop": {
+       "old": 0.02286195736797047,
+       "new": 0.022861424453939592,
+       "absolute": 5.32914030876297e-07,
+       "relative": 2.331007893588796e-05
+      },
+      "state.teacher_kl.reasoning_math": {
+       "old": 0.00842520475301412,
+       "new": 0.008425176701322477,
+       "absolute": 2.805169164316057e-08,
+       "relative": 3.3294967262516758e-06
+      },
+      "state.teacher_kl.token_mean": {
+       "old": 0.01740527150248583,
+       "new": 0.017404977467279006,
+       "absolute": 2.940352068249441e-07,
+       "relative": 1.6893457064599644e-05
+      },
+      "state.teacher_kl.tool": {
+       "old": 0.015606389817377771,
+       "new": 0.015606327237534254,
+       "absolute": 6.257984351727697e-08,
+       "relative": 4.009885966554167e-06
+      },
+      "state.teacher_kl.worst_domain": {
+       "old": 0.03892422865445295,
+       "new": 0.03892293961057125,
+       "absolute": 1.2890438816984262e-06,
+       "relative": 3.311674826344848e-05
+      },
+      "state.top1_agreement": {
+       "old": 0.9531895922833752,
+       "new": 0.9531895922833752,
+       "absolute": 0.0,
+       "relative": 0.0
+      }
+     },
+     "per_domain_kl": {
+      "code": {
+       "old": 0.00925876793860329,
+       "new": 0.009258747021321881,
+       "absolute": 2.0917281408697197e-08,
+       "relative": 2.2591862705063786e-06
+      },
+      "general": {
+       "old": 0.03892422865445295,
+       "new": 0.03892293961057125,
+       "absolute": 1.2890438816984262e-06,
+       "relative": 3.311674826344848e-05
+      },
+      "rag_multihop": {
+       "old": 0.02286195736797047,
+       "new": 0.022861424453939592,
+       "absolute": 5.32914030876297e-07,
+       "relative": 2.331007893588796e-05
+      },
+      "reasoning_math": {
+       "old": 0.00842520475301412,
+       "new": 0.008425176701322477,
+       "absolute": 2.805169164316057e-08,
+       "relative": 3.3294967262516758e-06
+      },
+      "tool": {
+       "old": 0.015606389817377771,
+       "new": 0.015606327237534254,
+       "absolute": 6.257984351727697e-08,
+       "relative": 4.009885966554167e-06
+      }
+     },
+     "per_subtype_kl": {
+      "code": {
+       "old": 0.00925876793860329,
+       "new": 0.009258747021321881,
+       "absolute": 2.0917281408697197e-08,
+       "relative": 2.2591862705063786e-06
+      },
+      "general": {
+       "old": 0.03892422865445295,
+       "new": 0.03892293961057125,
+       "absolute": 1.2890438816984262e-06,
+       "relative": 3.311674826344848e-05
+      },
+      "gsm8k": {
+       "old": 0.008448791819749848,
+       "new": 0.008448765070119976,
+       "absolute": 2.674962987225804e-08,
+       "relative": 3.166089358448655e-06
+      },
+      "multihop_qa": {
+       "old": 0.02511722345298992,
+       "new": 0.02511661689246462,
+       "absolute": 6.065605253000039e-07,
+       "relative": 2.414918696866551e-05
+      },
+      "openmath": {
+       "old": 0.008401617686278392,
+       "new": 0.008401588332524978,
+       "absolute": 2.93537534140631e-08,
+       "relative": 3.493821607951044e-06
+      },
+      "rag_evidence": {
+       "old": 0.02060669128295102,
+       "new": 0.020606232015414564,
+       "absolute": 4.5926753645605944e-07,
+       "relative": 2.228730125326016e-05
+      },
+      "tool_calling": {
+       "old": 0.015606389817377771,
+       "new": 0.015606327237534254,
+       "absolute": 6.257984351727697e-08,
+       "relative": 4.009885966554167e-06
+      }
+     },
+     "per_domain_nll": {
+      "code": {
+       "old": 0.25154925336197465,
+       "new": 0.2515497078308268,
+       "absolute": 4.5446885216238186e-07,
+       "relative": 1.806679392160269e-06
+      },
+      "general": {
+       "old": 2.6312990651908086,
+       "new": 2.631315019756871,
+       "absolute": 1.5954566062514886e-05,
+       "relative": 6.06337997591237e-06
+      },
+      "rag_multihop": {
+       "old": 1.4359739500382018,
+       "new": 1.4359805470677194,
+       "absolute": 6.597029517552144e-06,
+       "relative": 4.594115037655551e-06
+      },
+      "reasoning_math": {
+       "old": 0.24351457275501515,
+       "new": 0.24351513595187507,
+       "absolute": 5.631968599262294e-07,
+       "relative": 2.3127850360431064e-06
+      },
+      "tool": {
+       "old": 0.7987695888815938,
+       "new": 0.7987705565507073,
+       "absolute": 9.676691135052096e-07,
+       "relative": 1.2114496182310877e-06
+      }
+     },
+     "tagged_positions_identical": {
+      "assistant": true,
+      "eos": true,
+      "final_answer": true,
+      "reasoning": true,
+      "think_close": true,
+      "tool_close": true
+     },
+     "_old_values": {
+      "state.teacher_kl.equal_domain_mean": 0.01901530970628372,
+      "state.teacher_kl.worst_domain": 0.03892422865445295,
+      "state.teacher_kl.token_mean": 0.01740527150248583,
+      "state.reverse_kl.token_mean": 0.017283746802017493,
+      "state.nll.pooled_all_domains": 0.9515567877447051,
+      "state.nll.teacher_reference_pooled": 0.9305761485149987,
+      "state.nll_delta_vs_teacher_pooled": 0.020980639229706385,
+      "state.top1_agreement": 0.9531895922833752,
+      "state.teacher_kl.general": 0.03892422865445295,
+      "state.teacher_kl.reasoning_math": 0.00842520475301412,
+      "state.teacher_kl.rag_multihop": 0.02286195736797047,
+      "state.teacher_kl.code": 0.00925876793860329,
+      "state.teacher_kl.tool": 0.015606389817377771,
+      "state.nll.general": 2.6312990651908086,
+      "state.nll.reasoning_math": 0.24351457275501515,
+      "state.nll.rag_multihop": 1.4359739500382018,
+      "state.nll.code": 0.25154925336197465,
+      "state.nll.tool": 0.7987695888815938,
+      "state.critical_token_kl.assistant": 0.009373045792136471,
+      "state.critical_token_kl.eos": 0.0015841862797401501,
+      "state.critical_token_kl.final_answer": 0.003433802600729912,
+      "state.critical_token_kl.reasoning": 0.01108773378141299,
+      "state.critical_token_kl.think_close": 1.37735668331069e-05,
+      "state.critical_token_kl.tool_close": 2.5874177822515776e-06,
+      "state.critical_token_kl": 0.001258587466271355
+     },
+     "_new_values": {
+      "state.teacher_kl.equal_domain_mean": 0.019014923004937893,
+      "state.teacher_kl.worst_domain": 0.03892293961057125,
+      "state.teacher_kl.token_mean": 0.017404977467279006,
+      "state.reverse_kl.token_mean": 0.017283644864156206,
+      "state.nll.pooled_all_domains": 0.9515605648406054,
+      "state.nll.teacher_reference_pooled": 0.9305800182676692,
+      "state.nll_delta_vs_teacher_pooled": 0.020980546572936125,
+      "state.top1_agreement": 0.9531895922833752,
+      "state.teacher_kl.general": 0.03892293961057125,
+      "state.teacher_kl.reasoning_math": 0.008425176701322477,
+      "state.teacher_kl.rag_multihop": 0.022861424453939592,
+      "state.teacher_kl.code": 0.009258747021321881,
+      "state.teacher_kl.tool": 0.015606327237534254,
+      "state.nll.general": 2.631315019756871,
+      "state.nll.reasoning_math": 0.24351513595187507,
+      "state.nll.rag_multihop": 1.4359805470677194,
+      "state.nll.code": 0.2515497078308268,
+      "state.nll.tool": 0.7987705565507073,
+      "state.critical_token_kl.assistant": 0.009373042498469927,
+      "state.critical_token_kl.eos": 0.0015841793075744562,
+      "state.critical_token_kl.final_answer": 0.0034338021953733773,
+      "state.critical_token_kl.reasoning": 0.01108772951035087,
+      "state.critical_token_kl.think_close": 1.3764910603494432e-05,
+      "state.critical_token_kl.tool_close": 2.5661328533845207e-06,
+      "state.critical_token_kl": 0.001258578136601178
+     }
+    },
+    {
+     "magnitude": 1.0,
+     "seed": 20260919,
+     "artifact_digest": "engineering-only:perturbation=1.0:seed=20260919",
+     "positions": 74022,
+     "old_seconds": 228.086,
+     "new_seconds": 87.357,
+     "speedup": 2.611,
+     "old_forward_seconds": 95.163,
+     "new_forward_seconds": 74.311,
+     "old_reduction_seconds": 132.923,
+     "new_reduction_seconds": 13.046,
+     "reduction_speedup": 10.189,
+     "_what_the_two_ratios_mean": "`speedup` is the whole state-eval pass, which is what an expansion's state_evaluation phase pays. `reduction_speedup` isolates the part this optimization changed. A cost model must use the former; a claim about the reduction must use the latter.",
+     "forwards_per_pass": 80,
+     "reference_forwards": {
+      "old": 80,
+      "new": 80
+     },
+     "candidate_reused_the_reference": {
+      "old": 80,
+      "new": 80
+     },
+     "candidate_extra_forwards": {
+      "old": 0,
+      "new": 0
+     },
+     "logits_verified_identical": true,
+     "metrics": {
+      "state.critical_token_kl": {
+       "old": 0.010701416908764205,
+       "new": 0.01070140644394012,
+       "absolute": 1.0464824085412716e-08,
+       "relative": 9.778914488269562e-07
+      },
+      "state.critical_token_kl.assistant": {
+       "old": 0.0754708522945692,
+       "new": 0.07547082497816261,
+       "absolute": 2.7316406581157082e-08,
+       "relative": 3.619464435692181e-07
+      },
+      "state.critical_token_kl.eos": {
+       "old": 0.014907298536762686,
+       "new": 0.014907292864427747,
+       "absolute": 5.67233493856123e-09,
+       "relative": 3.80507234397484e-07
+      },
+      "state.critical_token_kl.final_answer": {
+       "old": 0.02767698732644895,
+       "new": 0.027676987801901098,
+       "absolute": 4.754521464034323e-10,
+       "relative": 1.7178609102049053e-08
+      },
+      "state.critical_token_kl.reasoning": {
+       "old": 0.08926919754581485,
+       "new": 0.08926916191662489,
+       "absolute": 3.562918995947406e-08,
+       "relative": 3.991207598924411e-07
+      },
+      "state.critical_token_kl.think_close": {
+       "old": 0.00019124194921005255,
+       "new": 0.00019126489033689204,
+       "absolute": 2.2941126839485593e-08,
+       "relative": 0.0001199586541250318
+      },
+      "state.critical_token_kl.tool_close": {
+       "old": 3.013982263512714e-05,
+       "new": 3.0080219094738174e-05,
+       "absolute": 5.960354038896511e-08,
+       "relative": 0.0019775677219645883
+      },
+      "state.nll.code": {
+       "old": 0.31711523561490385,
+       "new": 0.31711568213293634,
+       "absolute": 4.4651803249307065e-07,
+       "relative": 1.4080623771584095e-06
+      },
+      "state.nll.general": {
+       "old": 2.9265464797577905,
+       "new": 2.926560850711248,
+       "absolute": 1.4370953457465419e-05,
+       "relative": 4.9105502191288625e-06
+      },
+      "state.nll.pooled_all_domains": {
+       "old": 1.0806158066785214,
+       "new": 1.0806192559074066,
+       "absolute": 3.449228885177291e-06,
+       "relative": 3.1919104494493315e-06
+      },
+      "state.nll.rag_multihop": {
+       "old": 1.6033610864930612,
+       "new": 1.6033670834262486,
+       "absolute": 5.996933187368825e-06,
+       "relative": 3.740226227197249e-06
+      },
+      "state.nll.reasoning_math": {
+       "old": 0.3033012659385354,
+       "new": 0.3033018172161263,
+       "absolute": 5.512775909100043e-07,
+       "relative": 1.8175908010279184e-06
+      },
+      "state.nll.teacher_reference_pooled": {
+       "old": 0.9305761485149987,
+       "new": 0.9305800182676692,
+       "absolute": 3.869752670526694e-06,
+       "relative": 4.1584481578450026e-06
+      },
+      "state.nll.tool": {
+       "old": 0.9168419704692723,
+       "new": 0.9168429042289965,
+       "absolute": 9.33759724208727e-07,
+       "relative": 1.0184522025434717e-06
+      },
+      "state.nll_delta_vs_teacher_pooled": {
+       "old": 0.15003965816352272,
+       "new": 0.1500392376397373,
+       "absolute": 4.2052378540491375e-07,
+       "relative": 2.802750889678783e-06
+      },
+      "state.reverse_kl.token_mean": {
+       "old": 0.13588594536029738,
+       "new": 0.13588506354286115,
+       "absolute": 8.818174362379416e-07,
+       "relative": 6.4893939833132116e-06
+      },
+      "state.teacher_kl.code": {
+       "old": 0.07431985241087238,
+       "new": 0.07431965692671949,
+       "absolute": 1.9548415289283305e-07,
+       "relative": 2.6303086800026438e-06
+      },
+      "state.teacher_kl.equal_domain_mean": {
+       "old": 0.1530409527851691,
+       "new": 0.15303828502172526,
+       "absolute": 2.6677634438476705e-06,
+       "relative": 1.743169651846416e-05
+      },
+      "state.teacher_kl.general": {
+       "old": 0.31608744995988536,
+       "new": 0.3160784178930877,
+       "absolute": 9.032066797642901e-06,
+       "relative": 2.8574582125260462e-05
+      },
+      "state.teacher_kl.rag_multihop": {
+       "old": 0.180297994906447,
+       "new": 0.18029451195261936,
+       "absolute": 3.482953827627089e-06,
+       "relative": 1.931776240459204e-05
+      },
+      "state.teacher_kl.reasoning_math": {
+       "old": 0.06834630368734404,
+       "new": 0.06834605993365891,
+       "absolute": 2.43753685125192e-07,
+       "relative": 3.566450151280513e-06
+      },
+      "state.teacher_kl.token_mean": {
+       "old": 0.13982532243074958,
+       "new": 0.1398233179370519,
+       "absolute": 2.0044936976659766e-06,
+       "relative": 1.4335698733387365e-05
+      },
+      "state.teacher_kl.tool": {
+       "old": 0.12615316296129672,
+       "new": 0.12615277840254077,
+       "absolute": 3.8455875595033717e-07,
+       "relative": 3.0483481105290893e-06
+      },
+      "state.teacher_kl.worst_domain": {
+       "old": 0.31608744995988536,
+       "new": 0.3160784178930877,
+       "absolute": 9.032066797642901e-06,
+       "relative": 2.8574582125260462e-05
+      },
+      "state.top1_agreement": {
+       "old": 0.8802923455188998,
+       "new": 0.8802923455188998,
+       "absolute": 0.0,
+       "relative": 0.0
+      }
+     },
+     "per_domain_kl": {
+      "code": {
+       "old": 0.07431985241087238,
+       "new": 0.07431965692671949,
+       "absolute": 1.9548415289283305e-07,
+       "relative": 2.6303086800026438e-06
+      },
+      "general": {
+       "old": 0.31608744995988536,
+       "new": 0.3160784178930877,
+       "absolute": 9.032066797642901e-06,
+       "relative": 2.8574582125260462e-05
+      },
+      "rag_multihop": {
+       "old": 0.180297994906447,
+       "new": 0.18029451195261936,
+       "absolute": 3.482953827627089e-06,
+       "relative": 1.931776240459204e-05
+      },
+      "reasoning_math": {
+       "old": 0.06834630368734404,
+       "new": 0.06834605993365891,
+       "absolute": 2.43753685125192e-07,
+       "relative": 3.566450151280513e-06
+      },
+      "tool": {
+       "old": 0.12615316296129672,
+       "new": 0.12615277840254077,
+       "absolute": 3.8455875595033717e-07,
+       "relative": 3.0483481105290893e-06
+      }
+     },
+     "per_subtype_kl": {
+      "code": {
+       "old": 0.07431985241087238,
+       "new": 0.07431965692671949,
+       "absolute": 1.9548415289283305e-07,
+       "relative": 2.6303086800026438e-06
+      },
+      "general": {
+       "old": 0.31608744995988536,
+       "new": 0.3160784178930877,
+       "absolute": 9.032066797642901e-06,
+       "relative": 2.8574582125260462e-05
+      },
+      "gsm8k": {
+       "old": 0.06794669315836051,
+       "new": 0.06794644497671257,
+       "absolute": 2.4818164794104813e-07,
+       "relative": 3.652593472983616e-06
+      },
+      "multihop_qa": {
+       "old": 0.19969802588153188,
+       "new": 0.19969388547849368,
+       "absolute": 4.140403038199736e-06,
+       "relative": 2.0733319820877815e-05
+      },
+      "openmath": {
+       "old": 0.06874591421632759,
+       "new": 0.06874567489060528,
+       "absolute": 2.393257223093359e-07,
+       "relative": 3.481308308101524e-06
+      },
+      "rag_evidence": {
+       "old": 0.16089796393136208,
+       "new": 0.16089513842674508,
+       "absolute": 2.8255046169989306e-06,
+       "relative": 1.756084755804785e-05
+      },
+      "tool_calling": {
+       "old": 0.12615316296129672,
+       "new": 0.12615277840254077,
+       "absolute": 3.8455875595033717e-07,
+       "relative": 3.0483481105290893e-06
+      }
+     },
+     "per_domain_nll": {
+      "code": {
+       "old": 0.31711523561490385,
+       "new": 0.31711568213293634,
+       "absolute": 4.4651803249307065e-07,
+       "relative": 1.4080623771584095e-06
+      },
+      "general": {
+       "old": 2.9265464797577905,
+       "new": 2.926560850711248,
+       "absolute": 1.4370953457465419e-05,
+       "relative": 4.9105502191288625e-06
+      },
+      "rag_multihop": {
+       "old": 1.6033610864930612,
+       "new": 1.6033670834262486,
+       "absolute": 5.996933187368825e-06,
+       "relative": 3.740226227197249e-06
+      },
+      "reasoning_math": {
+       "old": 0.3033012659385354,
+       "new": 0.3033018172161263,
+       "absolute": 5.512775909100043e-07,
+       "relative": 1.8175908010279184e-06
+      },
+      "tool": {
+       "old": 0.9168419704692723,
+       "new": 0.9168429042289965,
+       "absolute": 9.33759724208727e-07,
+       "relative": 1.0184522025434717e-06
+      }
+     },
+     "tagged_positions_identical": {
+      "assistant": true,
+      "eos": true,
+      "final_answer": true,
+      "reasoning": true,
+      "think_close": true,
+      "tool_close": true
+     },
+     "_old_values": {
+      "state.teacher_kl.equal_domain_mean": 0.1530409527851691,
+      "state.teacher_kl.worst_domain": 0.31608744995988536,
+      "state.teacher_kl.token_mean": 0.13982532243074958,
+      "state.reverse_kl.token_mean": 0.13588594536029738,
+      "state.nll.pooled_all_domains": 1.0806158066785214,
+      "state.nll.teacher_reference_pooled": 0.9305761485149987,
+      "state.nll_delta_vs_teacher_pooled": 0.15003965816352272,
+      "state.top1_agreement": 0.8802923455188998,
+      "state.teacher_kl.general": 0.31608744995988536,
+      "state.teacher_kl.reasoning_math": 0.06834630368734404,
+      "state.teacher_kl.rag_multihop": 0.180297994906447,
+      "state.teacher_kl.code": 0.07431985241087238,
+      "state.teacher_kl.tool": 0.12615316296129672,
+      "state.nll.general": 2.9265464797577905,
+      "state.nll.reasoning_math": 0.3033012659385354,
+      "state.nll.rag_multihop": 1.6033610864930612,
+      "state.nll.code": 0.31711523561490385,
+      "state.nll.tool": 0.9168419704692723,
+      "state.critical_token_kl.assistant": 0.0754708522945692,
+      "state.critical_token_kl.eos": 0.014907298536762686,
+      "state.critical_token_kl.final_answer": 0.02767698732644895,
+      "state.critical_token_kl.reasoning": 0.08926919754581485,
+      "state.critical_token_kl.think_close": 0.00019124194921005255,
+      "state.critical_token_kl.tool_close": 3.013982263512714e-05,
+      "state.critical_token_kl": 0.010701416908764205
+     },
+     "_new_values": {
+      "state.teacher_kl.equal_domain_mean": 0.15303828502172526,
+      "state.teacher_kl.worst_domain": 0.3160784178930877,
+      "state.teacher_kl.token_mean": 0.1398233179370519,
+      "state.reverse_kl.token_mean": 0.13588506354286115,
+      "state.nll.pooled_all_domains": 1.0806192559074066,
+      "state.nll.teacher_reference_pooled": 0.9305800182676692,
+      "state.nll_delta_vs_teacher_pooled": 0.1500392376397373,
+      "state.top1_agreement": 0.8802923455188998,
+      "state.teacher_kl.general": 0.3160784178930877,
+      "state.teacher_kl.reasoning_math": 0.06834605993365891,
+      "state.teacher_kl.rag_multihop": 0.18029451195261936,
+      "state.teacher_kl.code": 0.07431965692671949,
+      "state.teacher_kl.tool": 0.12615277840254077,
+      "state.nll.general": 2.926560850711248,
+      "state.nll.reasoning_math": 0.3033018172161263,
+      "state.nll.rag_multihop": 1.6033670834262486,
+      "state.nll.code": 0.31711568213293634,
+      "state.nll.tool": 0.9168429042289965,
+      "state.critical_token_kl.assistant": 0.07547082497816261,
+      "state.critical_token_kl.eos": 0.014907292864427747,
+      "state.critical_token_kl.final_answer": 0.027676987801901098,
+      "state.critical_token_kl.reasoning": 0.08926916191662489,
+      "state.critical_token_kl.think_close": 0.00019126489033689204,
+      "state.critical_token_kl.tool_close": 3.0080219094738174e-05,
+      "state.critical_token_kl": 0.01070140644394012
+     }
+    }
+   ],
+   "ranked_keys": [
+    "state.teacher_kl.equal_domain_mean",
+    "state.teacher_kl.worst_domain",
+    "state.critical_token_kl"
+   ],
+   "ranked_abs_tolerance": 1e-05,
+   "pareto_epsilon": 0.0001,
+   "diagnostic_rel_tolerance": 0.00018588,
+   "worst_ranked_absolute_drift": 9.032066797642901e-06,
+   "worst_ranked_objective": "state.teacher_kl.worst_domain",
+   "ranked_drift_below_epsilon_by": 11.1,
+   "_ratio_is_absolute_over_absolute": "epsilon and the drift are both ABSOLUTE nats on the same objective, so their quotient is a margin. The earlier round divided an absolute gap by a RELATIVE drift, which is not a margin in any units.",
+   "diagnostic_bound": "|drift| <= 1.859e-04 * max(|value|, 1.0)",
+   "worst_diagnostic_absolute_drift": 1.6362371274336596e-05,
+   "worst_diagnostic_relative_drift": 0.9571841780597724,
+   "_worst_relative_is_reported_not_asserted": "a near-zero diagnostic can carry a large RELATIVE drift while its absolute disagreement is negligible. Reported so a reader sees it; not asserted, because dividing by a small number is not a finding.",
+   "diagnostic_offenders": [],
+   "complete_suite": {
+    "positions": 74022,
+    "old_pass_seconds_mean": 228.663,
+    "new_pass_seconds_mean": 86.845,
+    "pass_speedup": 2.633,
+    "old_reduction_seconds_mean": 133.322,
+    "new_reduction_seconds_mean": 13.256,
+    "reduction_speedup": 10.057,
+    "forward_seconds_mean": 73.59,
+    "_measured_not_extrapolated": "every figure is one complete pass over all 74022 prediction positions of the frozen suite, timed end to end. No figure here is scaled up from a smaller benchmark, which is the thing the four-item measurement could not do.",
+    "_read_the_pass_ratio_for_cost": "an expansion's `state_evaluation` phase pays the whole pass, forward included, so the PASS ratio is the one a cost model may use. The reduction ratio is the claim about the optimization. Subrun s1 reported only the pass and called it the reduction.",
+    "_and_this_pass_is_not_an_expansion": "an expansion forwards the 4B teacher AND a 596M student; this forwards the teacher once and perturbs its logits. The forward share here is therefore larger than a real expansion's teacher share and smaller than its total, so the pass ratio is evidence about this workload and not a drop-in expansion figure."
+   },
+   "complete_suite_old_seconds_mean": 228.663,
+   "complete_suite_new_seconds_mean": 86.845,
+   "complete_suite_speedup": 2.633
+  }
+ },
+ "device": {
+  "device": "NVIDIA L40S",
+  "capability": "8.9",
+  "bf16_supported": true,
+  "free_gib": 43.97,
+  "total_gib": 44.39,
+  "torch": "2.9.1+cu130",
+  "cuda_runtime": "13.0"
+ },
+ "suite": {
+  "suite_id": "state_eval@v1",
+  "suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+  "items": 80,
+  "positions": 74022,
+  "domains": [
+   "general",
+   "reasoning_math",
+   "rag_multihop",
+   "code",
+   "tool"
+  ],
+  "critical_tags": [
+   "think_close",
+   "eos",
+   "final_answer",
+   "tool_close"
+  ],
+  "manifest_artifact": "state_eval_v1"
+ },
+ "teacher": {
+  "teacher_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "load_seconds": 16.68
+ },
+ "error": {
+  "type": "AssertionError",
+  "message": "the measured drift 9.032e-06 changes a PARETO_V1 decision at the epsilon boundary in case(s) ['at_epsilon', 'just_outside_epsilon']. That is the decision-level failure this stage exists to find.",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/validation/c2_state_eval_certification_check.py\", line 1037, in main\n    report[\"stages\"][\"pareto\"] = stage_pareto(cfg, ev, report)\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/validation/c2_state_eval_certification_check.py\", line 933, in stage_pareto\n    assert not changed, (\n           ^^^^^^^^^^^\nAssertionError: the measured drift 9.032e-06 changes a PARETO_V1 decision at the epsilon boundary in case(s) ['at_epsilon', 'just_outside_epsilon']. That is the decision-level failure this stage exists to find.\n"
+ },
+ "verdict": "FAIL",
+ "finished_utc": "2026-09-18T08:39:44.552283+00:00"
+}

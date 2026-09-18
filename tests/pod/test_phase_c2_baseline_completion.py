@@ -48,6 +48,10 @@ PROTOCOL = (REPO / "logs/stages/stage-1/phase_c2/plans"
             / "phase_c2_baseline_completion_protocol.json")
 PRICING = (REPO / "logs/stages/stage-1/phase_c2/plans"
            / "phase_c2_baseline_completion_pricing.json")
+#: Which evaluator implementation measured what, and what may be compared with
+#: what. The canonical owner of the boundary the frozen contract enforces.
+LINEAGE = (REPO / "logs/stages/stage-1/phase_c2/plans"
+           / "phase_c2_evaluator_lineage.json")
 DEFECT = (REPO / "logs/stages/stage-1/phase_c2/analyses"
           / "c2_baseline_reserve_defect.json")
 
@@ -225,10 +229,35 @@ def test_the_protocol_binds_the_identities_it_claims_to():
     frozen = protocol["frozen_identities_that_must_not_move"]
     assert {k: float(v) for k, v in frozen["pareto_epsilon"].items()} == {
         k: float(v) for k, v in PARETO_V1.epsilon.items()}
-    #: The contract must name the evaluator it is binding, by content, and those
-    #: hashes must describe the tree as it is now.
-    for path, expected in bound["evaluator_implementation_sha256"].items():
-        assert sha256_file(REPO / path) == expected, path
+    #: The contract must name the evaluator it is binding, BY CONTENT. It used
+    #: to also require every hash to describe the tree as it is now, and that
+    #: stopped being the right assertion on 2026-09-18: adopting the
+    #: device-resident reduction moved `planning/metrics.py`, and review's
+    #: decision was to keep the protocol and its historical hash frozen exactly
+    #: as they are, precisely so a future B measurement CANNOT join the old
+    #: series. Requiring the tree to keep matching would have meant reverting a
+    #: measured optimization or editing a frozen scientific record.
+    #:
+    #: So what is asserted is the SHAPE and the drift SET: four named files,
+    #: three unchanged, exactly one moved, and the one that moved is documented.
+    assert len(bound["evaluator_implementation_sha256"]) == 4
+    drift = _live_evaluator_drift()
+    moved = sorted(p for p, v in drift.items() if not v["matches"])
+    assert moved == ["src/aadistill/initialization/planning/metrics.py"], (
+        f"bound evaluator files that no longer match the tree: {moved}. One is "
+        "expected and recorded; a different set is an undocumented change.")
+    for path, entry in drift.items():
+        assert len(entry["frozen"]) == 64 and len(entry["live"]) == 64, path
+    #: And the reason is written down where a reader will look, not only here.
+    lineage = json.loads(LINEAGE.read_text())
+    assert lineage["historical_evaluator_is_frozen"] is True
+    assert lineage["optimized_evaluator_may_append_to_the_series"] is False
+    assert (lineage["moved"]["path"]
+            == "src/aadistill/initialization/planning/metrics.py")
+    assert drift[lineage["moved"]["path"]]["live"].startswith(
+        lineage["moved"]["optimized_sha256_prefix"])
+    assert drift[lineage["moved"]["path"]]["frozen"].startswith(
+        lineage["moved"]["historical_sha256_prefix"])
 
 
 # --- 4. the completion path cannot reach a beam search ----------------------
@@ -487,6 +516,104 @@ def _fake_identity(digest: str):
     return _FakeIdentity(digest)
 
 
+def _live_evaluator_drift() -> dict[str, dict]:
+    """Which bound evaluator files still match the tree, and which do not.
+
+    Derived from the frozen protocol and the live files, never transcribed, so
+    a second file moving shows up as a changed answer rather than as a passing
+    test.
+    """
+    from aadistill.infrastructure.manifest import sha256_file
+
+    bound = json.loads(PROTOCOL.read_text())[
+        "cross_session_comparability_contract"]["bound"]
+    out = {}
+    for path, expected in bound["evaluator_implementation_sha256"].items():
+        live = sha256_file(REPO / path)
+        out[path] = {"frozen": expected, "live": live, "matches": live == expected}
+    return out
+
+
+def _historical_contract_copy(tmp_path):
+    """The frozen protocol with its evaluator hashes set to the LIVE files.
+
+    A `tmp_path` copy, so the frozen record on disk is untouched. It
+    reconstructs the contract as the closed measurement satisfied it: at that
+    time every bound hash matched the tree, and the orchestration tests are
+    about the driver given a satisfied contract.
+
+    Deliberately NOT a hand-written hash list. It asks the tree what the files
+    hash to now, which means these tests cannot silently encode one historical
+    value and keep passing while the contract's MEANING changes -- and the
+    separate refusal test is what holds the live comparison.
+    """
+    from aadistill.infrastructure.manifest import sha256_file
+
+    doc = json.loads(PROTOCOL.read_text())
+    bound = doc["cross_session_comparability_contract"]["bound"]
+    bound["evaluator_implementation_sha256"] = {
+        path: sha256_file(REPO / path)
+        for path in bound["evaluator_implementation_sha256"]}
+    bound["_this_is_a_test_copy"] = (
+        "the evaluator hashes are the LIVE files, so the driver's stage-B "
+        "orchestration can be exercised against a satisfied contract. The "
+        "frozen record on disk is unchanged and still refuses.")
+    out = tmp_path / "historical_contract_protocol.json"
+    out.write_text(json.dumps(doc, indent=1) + "\n")
+    return out
+
+
+def test_the_frozen_contract_refuses_a_replay_under_the_optimized_evaluator(
+        tmp_path, monkeypatch):
+    """The live tree must REFUSE to append a B measurement to the old series.
+
+    This is the assertion that replaced "today's tree can still recreate the
+    closed measurement". Adopting the device-resident state-eval reduction
+    moved `planning/metrics.py`, which the frozen baseline-completion contract
+    binds by content, so a future replay is refused -- and the refusal must
+    happen at stage A, before a teacher is loaded or anything is measured.
+    """
+    import autoinit_phase_c2_baseline_driver as D
+    from aadistill.initialization.planning.metrics import StateEvaluator
+
+    drift = _live_evaluator_drift()
+    moved = sorted(p for p, v in drift.items() if not v["matches"])
+    assert moved == ["src/aadistill/initialization/planning/metrics.py"], (
+        "the set of bound evaluator files that no longer match the tree is "
+        f"{moved}. Exactly one is expected to have moved -- the state-eval "
+        "reduction -- and it is recorded in the evaluator-lineage decision. A "
+        "different set means something else drifted and needs its own reading.")
+
+    loads: list[str] = []
+    monkeypatch.setattr(D.BaselineCompletionDriver, "load_original_teacher",
+                        lambda self: loads.append("teacher"))
+    monkeypatch.setattr(StateEvaluator, "evaluate",
+                        lambda *a, **k: loads.append("evaluate"))
+    monkeypatch.setattr(D, "AUDIT", tmp_path / "audit")
+    (tmp_path / "audit").mkdir(parents=True, exist_ok=True)
+
+    evidence = RUN / "evidence"
+    args = D.build_parser().parse_args([
+        "--protocol", str(PROTOCOL),
+        "--frozen-inputs", str(evidence / "c2_frozen_comparison_inputs.json"),
+        "--selection-record", str(evidence / "stage1_selection.json"),
+        "--rebuild-minutes", "45", "--rate", "1.09", "--soft-stop-usd", "1.10",
+        "--device", "cuda"])
+    driver = D.BaselineCompletionDriver(args)
+    with pytest.raises(D.CompletionError) as excinfo:
+        driver.bind_identities()
+    message = str(excinfo.value)
+    assert "evaluator implementation has moved" in message
+    assert "planning/metrics.py" in message
+    #: The message must say WHY, not only that something changed: a refusal a
+    #: reader cannot act on gets worked around.
+    assert "measurement series" in message and "STOP" in message
+    #: And it refused BEFORE spending anything. A contract that refuses after
+    #: the teacher is resident has already cost the thing it was protecting.
+    assert loads == [], (
+        f"work happened before the contract refused: {loads}")
+
+
 def _run_stage_b(tmp_path, monkeypatch, *, baseline_values):
     """Drive the real stage B with the expensive work stubbed. Returns (driver, calls)."""
     import autoinit_phase_c2_baseline_driver as D
@@ -566,9 +693,28 @@ def _run_stage_b(tmp_path, monkeypatch, *, baseline_values):
                                  "transformers": "stub"})
 
     evidence = RUN / "evidence"
-    #: REAL argument parsing, through the driver's own parser.
+    #: THE HISTORICAL CONTRACT, explicitly, and this is the whole subtlety of
+    #: these tests since 2026-09-18.
+    #:
+    #: The frozen protocol binds four evaluator source files BY CONTENT, and
+    #: `planning/metrics.py` no longer matches: adopting the device-resident
+    #: reduction moved it. `bind_identities` therefore REFUSES on the live tree,
+    #: which is the contract doing its job -- the frozen C measurements and any
+    #: new B measurement would not be one measurement series. That refusal is
+    #: asserted directly by
+    #: `test_the_frozen_contract_refuses_a_replay_under_the_optimized_evaluator`.
+    #:
+    #: What the tests BELOW are about is different: whether the driver's stage-B
+    #: orchestration is correct given a contract it satisfies. That is a
+    #: statement about code, and it stays checkable by handing the driver the
+    #: contract AS OF THE CLOSED MEASUREMENT -- a historical artifact, recorded
+    #: in the protocol's own history and in the evaluator-lineage record. It is
+    #: NOT a claim that today's tree can recreate that series, and it does not
+    #: touch the frozen protocol: the file on disk is unchanged and the copy
+    #: below lives in `tmp_path`.
+    protocol_path = _historical_contract_copy(tmp_path)
     args = D.build_parser().parse_args([
-        "--protocol", str(PROTOCOL),
+        "--protocol", str(protocol_path),
         "--frozen-inputs", str(evidence / "c2_frozen_comparison_inputs.json"),
         "--selection-record", str(evidence / "stage1_selection.json"),
         "--rebuild-minutes", "45", "--rate", "1.09", "--soft-stop-usd", "1.10",

@@ -626,7 +626,19 @@ def test_the_runner_plans_exactly_the_pricing_record(launcher):
                             authorized_usd=1_000.0)
     row = FSG._standing_row(REPO)
     assert round(plan.expected_minutes, 2) == row["expected_minutes"]
-    assert round(plan.hard_terminate_minutes, 2) == row["hard_ceiling_minutes"]
+    #: The recorded window is the planned one rounded OUTWARD, never inward.
+    #: This asserted `round(...) == recorded`, which encoded rounding to
+    #: nearest -- and rounding a bound to nearest lets the recorded figure sit
+    #: BELOW the plan it is supposed to cover. Everything downstream re-prices
+    #: from the recorded number, so 1826.573 recorded as 1826.57 authorizes
+    #: less work than the plan needs. The property is the inequality plus a
+    #: tightness bound, so a wildly generous window fails here too.
+    import math
+
+    recorded = float(row["hard_ceiling_minutes"])
+    assert recorded == math.ceil(plan.hard_terminate_minutes * 100) / 100
+    assert recorded >= plan.hard_terminate_minutes
+    assert recorded - plan.hard_terminate_minutes < 0.01
 
 
 def test_the_poll_limit_outlasts_the_ceiling(launcher):

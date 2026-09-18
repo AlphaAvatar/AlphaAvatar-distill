@@ -197,19 +197,32 @@ def test_the_depth_cell_that_got_more_expensive_is_carried(registered):
     assert pooled["deeper_max"] > phase_b_only["deeper_max"], (
         "pooling preferred the older run's cheaper observation")
 
-    #: And the drop below it is the refresh, at the factor the record states --
-    #: not an observation quietly going missing from the pool.
-    refreshed = FS.cost_model(REPO).minutes[impl]
+    #: THE AUTHORIZATION BASIS IS THE POOLED TABLE, unadjusted. `cost_model()`
+    #: briefly applied the measured component speedups, which took the beam-6
+    #: window from 1826.57 to 1445.54 minutes; review reverted that for the
+    #: first optimized formal search, because a hard ceiling derived by
+    #: component-level extrapolation can under-authorize a run -- and the
+    #: full-suite certification then measured 2.63x on the whole state-eval
+    #: pass where the four-item benchmark had implied 76x.
+    served = FS.cost_model(REPO).minutes[impl]
+    assert served == pooled, (
+        "cost_model() is not serving the pooled table; the authorization basis "
+        "has been adjusted by something")
+    assert served["deeper_max"] > phase_b_only["deeper_max"]
+
+    #: The adjustment still EXISTS, separately, as an estimate -- and it is
+    #: lower, which is the whole reason it must not be the ceiling.
+    estimate = FS.optimized_planning_estimate(REPO)
+    assert estimate["available"] is True
     record = json.loads(
         (REPO / FS.MEASURED_OPTIMIZATION).read_text())["cells"][impl]
     factor = record["refreshed_total_minutes"] / record["observed_total_minutes"]
-    assert refreshed["deeper_max"] == pytest.approx(
+    estimated = estimate["estimated_minutes"][impl]
+    assert estimated["deeper_max"] == pytest.approx(
         pooled["deeper_max"] * factor, abs=0.01)
-    assert refreshed["deeper_max"] < phase_b_only["deeper_max"], (
-        "the refreshed DEPTH cell is expected to sit below Phase B's "
-        "historical max, because the forward-KL-only path was measured at "
-        f"{1 / factor:.2f}x on a real L40S. If this ever reverses, the "
-        "refresh stopped applying and the price silently rose.")
+    assert estimated["deeper_max"] < served["deeper_max"], (
+        "the planning estimate is not below the conservative basis, so either "
+        "the adjustment stopped applying or the basis moved")
 
 
 def test_the_attention_proxy_is_retired_and_was_conservative(registered):

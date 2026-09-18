@@ -203,17 +203,38 @@ show that, because the crowding does not exist there. Measuring it requires
 instrumentation inside a running search. Nothing was flushed and **no saving is
 claimed**.
 
-**Equivalence is of the decisions, not of the digits, and that distinction was
-paid for.** The round's second subrun died against a predeclared `1e-06` bound
-that sits *below* float32's own `sqrt(V)·ε` noise floor of `4.65e-05` for a
-`151936`-class vocabulary — a bound no implementation could have met. The
-repair was to derive the kernel bound from that floor rather than guess it, and
-to assert every drift against the search's own smallest decision threshold
-(`0.007782`) with a `50×` margin. The measured `3.03e-05` clears that by
-`257×`. Re-deriving a tolerance after a failure is normally how a gate gets
-talked out of firing, so the reason it is legitimate here is recorded in the
-check itself: the criterion is the decision boundary, and the guess was below
-the arithmetic's noise.
+**What that drift is, and what it is not — two review corrections.** The round's
+second subrun died against a predeclared `1e-06` bound. `sqrt(V)·ε` for a
+`151936`-class vocabulary is `4.65e-05`, so `1e-06` was forty times below the
+scale at which two different kernel families would be expected to agree, and
+the bound was re-derived from that scale. Both of the claims built on top of
+that are now corrected:
+
+* **`sqrt(V)·ε` is an error-SCALE heuristic, not a hard floor.** This document
+  called it a "noise floor … a bound no implementation could have met".
+  Cancellation is usually far better than the worst-case walk, so nothing about
+  achievability should rest on it. It sets a tolerance; it proves nothing.
+* **`0.007782` is not the search's decision threshold.** It is C2's pre-B
+  numerical-**sensitivity disclosure** trigger — the tightest gap observed
+  *between the frozen C candidates* on `worst_domain` — and
+  [its own record](../plans/phase_c2_baseline_completion_protocol.json) states
+  it is "NOT an estimated noise bound, NOT a measurement of cross-session
+  variance, and NOT evidence of numerical determinism". The decision epsilon is
+  **`1e-4` absolute**, per objective, in `PARETO_V1`. And `0.007782 / 3.03e-05`
+  divides an absolute gap by a *relative* drift, so the `257×` this document
+  reported was not a safety factor in any units.
+
+`3.03e-05` remains a valid **kernel-level** result on four calibration items.
+The **decision-level** claim — absolute drift on the ranked objectives over the
+complete suite, against the `1e-4` epsilon, with the Pareto decisions checked
+directly — is the
+[state-eval certification](../validations/state-eval-certification/v1/)'s, and
+that is the figure to read.
+
+Re-deriving a tolerance after a failure is normally how a gate gets talked out
+of firing, so what makes it legitimate here is recorded in the check itself:
+the criterion is the decision boundary, and `1e-06` was a guess at what
+"comfortably below" it meant.
 
 `AADISTILL_DEPTH_SYNC_TELEMETRY=1` was set for the depth stage, so the
 forward/reduction split is attributed rather than assumed.

@@ -636,6 +636,35 @@ STAGE_1 = [
             "kernels and their equivalence."),
     ),
     dict(
+        id="c2_state_eval_cert",
+        kind="engineering",
+        stage_id="1",
+        status="in progress — engineering evidence, authorizes nothing",
+        title=("C2 state-eval reduction — full-suite equivalence and "
+               "Pareto-decision certification"),
+        canonical_config="configs/validation/c2_state_eval_certification.json",
+        evidence=[
+            E("logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json",
+              "its engineering authorization, with the drift target and the "
+              "Pareto-decision requirements predeclared before execution"),
+            E("logs/stages/stage-1/phase_c2/plans/phase_c2_evaluator_lineage.json",
+              "which evaluator implementation measured what, and what may "
+              "therefore be compared with what"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/c2_state_eval_cert",
+        classification_reason=(
+            "Stage 1, engineering, for the same reasons as the two validations "
+            "above: it trains nothing, measures no behaviour and ranks no "
+            "scientific candidate. Separate from the performance round because "
+            "the subject differs -- that one benchmarked the reduction on four "
+            "calibration items, this one certifies the aggregate metrics and "
+            "the PARETO_V1 decisions over the COMPLETE frozen state_eval "
+            "suite, which is the decision path the earlier evidence did not "
+            "reach."),
+    ),
+    dict(
         id="c2_full_search_cuda",
         kind="engineering",
         stage_id="1",

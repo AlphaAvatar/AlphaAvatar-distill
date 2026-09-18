@@ -1,0 +1,16 @@
+[07:49:55] CUDA NVIDIA L40S cc8.9 bf16=True free=43.97GiB torch=2.9.1+cu130 cuda=13.0
+[07:49:55] suite state_eval@v1 6421fa4cf12e: 80 items, 74022 positions, 5 domains, 7 sub-types, 4 critical tags
+[07:49:56] loading Qwen/Qwen3-4B-Thinking-2507@768f209d9ea8 in bf16
+[07:50:17] teacher resident in 20.3s
+[07:50:17] --- stage fingerprint ---
+[07:50:27] stage F: 3 probe items, forward bitwise reproducible
+[07:50:27] --- stage evaluate ---
+[07:50:27]   candidate m=0.05: two full-suite passes
+[07:58:14]     old 311.3s -> new 156.0s (1.996x), 74022 positions
+[07:58:14]   candidate m=0.35: two full-suite passes
+[08:06:07]     old 313.7s -> new 159.5s (1.967x), 74022 positions
+[08:06:07]   candidate m=1.0: two full-suite passes
+[08:13:52]     old 311.2s -> new 153.4s (2.029x), 74022 positions
+[08:13:52] stage E: worst ranked-objective ABSOLUTE drift 9.032e-06 on state.teacher_kl.worst_domain (target < 1e-05, epsilon 1e-04)
+[08:13:52] FAIL: AssertionError: a diagnostic metric drifted 9.572e-01 relative, above the host-vs-device scale bound 1.859e-04. Nothing prunes on these, but a drift above the expected error scale is a finding rather than rounding.
+[08:13:52] verdict: FAIL
