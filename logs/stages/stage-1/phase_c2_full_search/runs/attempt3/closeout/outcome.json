@@ -3,7 +3,7 @@
  "_contract": "Terminal record for attempt 3 of the Phase-C2 full joint re-search. THE BEAM RAN AND PRODUCED A TOP-5. The session then failed in a post-selection step, the driver never reached commit_top_k, and the five checkpoints were on the deleted pod. This record RETURNS TO REVIEW; it retries nothing.",
  "experiment_id": "phase_c2_full_search",
  "run_id": "attempt3",
- "classification": "FORMAL MEASUREMENT COMPLETED, SESSION FAILED AFTER IT \u2014 returned to review, not retried",
+ "classification": "SEARCH SCIENCE COMPLETE / TOP-5 SELECTION FROZEN / CHECKPOINT DURABILITY FAILED / SESSION FAILED",
  "terminal": "C2_FULL_SEARCH_FAILED after the stage-1 selection was written",
  "closed_utc": "2026-09-19T03:10:00Z",
  "budget": {
@@ -58,38 +58,152 @@
     "rank": 1,
     "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
     "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "impl_ids": [
+     "depth.causal_kl_greedy_v1",
+     "attention.activation_importance_v1",
+     "ffn.activation_importance_v0",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1"
+    ],
     "artifact_digest": "5d042dcc80212cfda0b97e10e21fca9c62574274bdc0d7e62a57e03a9e48f184",
-    "num_parameters": 596049920
+    "weights_digest": "615810e1314bdc9b0c5c01f31518cb50ed0089020a3177fba07234b51a63981f",
+    "single_shard_sha256": "85f8f0558b9cb657a4f8e4b076d79b5e49cf263e1c0af261e4042f2957d9ea8f",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "tokenizer_sha256": null,
+    "total_bytes": 1192135096
    },
    {
     "rank": 2,
     "state_id": "7da1e4e2254e59766581e777b8066b7e",
     "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "impl_ids": [
+     "attention.activation_importance_v1",
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1"
+    ],
     "artifact_digest": "181245b694316ed10dc299597cffbb97b4ece547c2f488a9c31c446b3e22210a",
-    "num_parameters": 596049920
+    "weights_digest": "03a07d7abca0fae1306519bcb22db4dde4df3aaf2c874ac165ef797cd37a36f4",
+    "single_shard_sha256": "4d693520981b2124f2465cf0ef15e325e996bb548a87574a573e6995c8982ff0",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "tokenizer_sha256": null,
+    "total_bytes": 1192135096
    },
    {
     "rank": 3,
     "state_id": "1d2844488f3ad630414c3cd69b6fa395",
     "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+    "impl_ids": [
+     "ffn.activation_importance_v0",
+     "depth.causal_kl_greedy_v1",
+     "width.global_pca_v0",
+     "attention.activation_importance_v1"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2",
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1"
+    ],
     "artifact_digest": "a25271ad0898ac3727ed4ed496fb7569299932f864f0d54a48b9b2deb9b4da41",
-    "num_parameters": 596049920
+    "weights_digest": "33ad2a2d243fdcc83f458d119b04a7d84a915aa3d639c67b0d308de0b16de7a3",
+    "single_shard_sha256": "313e206d12dce3db049835caa39140b629b4505ba2b97074a5f56a912d1ba697",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "tokenizer_sha256": null,
+    "total_bytes": 1192135096
    },
    {
     "rank": 4,
     "state_id": "88086555a6662b206e00ae28fc9d3ca3",
     "path": "DEPTH(calib.none@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "impl_ids": [
+     "depth.positional_v0",
+     "attention.activation_importance_v1",
+     "ffn.activation_importance_v0",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.none@v1",
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2",
+     "calib.domain_balanced@v1"
+    ],
     "artifact_digest": "d0d26ed3fee7f976935439ecba8b059f38e51d92d7b1672e6f467e6251938860",
-    "num_parameters": 596049920
+    "weights_digest": "f93f15d30eebcc2ce3c2429d2bf757bd02a294c650131ffce708786873dd1939",
+    "single_shard_sha256": "695813e6054bc12ce82728106e4d0eae62eb5de374194ee63417665be2aad0ab",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "tokenizer_sha256": null,
+    "total_bytes": 1192135096
    },
    {
     "rank": 5,
     "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
     "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+    "impl_ids": [
+     "width.global_pca_v0",
+     "attention.activation_importance_v1",
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0"
+    ],
+    "calibration_profiles": [
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1",
+     "calib.domain_balanced@v1"
+    ],
     "artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
-    "num_parameters": 596049920
+    "weights_digest": "5009272294a1aa7ac69a85b7bcd688f18683403aadd4d02c315ce64c0026ba05",
+    "single_shard_sha256": "03f9a0836b78c5d9882e9eb74f3410eb9734459c529dcf2a46ab4a1da66fb394",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "tokenizer_sha256": null,
+    "total_bytes": 1192135096
    }
-  ]
+  ],
+  "ruling": "ACCEPTED and FROZEN by independent review",
+  "_why_admissible": "run_phase_a_search computes result.top_n(...) and ATOMICALLY COMMITS stage1_selection.json BEFORE canonical-control injection, retained candidates or summary bookkeeping. stage1_selection is explicitly the durability boundary for exactly this failure class. commit_top_k does not re-run or alter the ranking -- it re-reads the committed selection, checks cardinality and records it into driver-stage evidence.",
+  "_therefore": [
+   "DO NOT rerun the full beam",
+   "DO NOT create a fourth Full Search attempt",
+   "DO NOT re-rank the 14 leaves",
+   "DO NOT regenerate a new Top-5 from the journal"
+  ],
+  "bound_identities": {
+   "selection_sha256": "7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673",
+   "journal_sha256": "eb008ee252ce9d35e7478c3cc346ef7db29acf3eb5bfb2486c6023e19abe4ef0",
+   "search_config_hash": "76573c1467e9f831c8471c0376f6d70a0fc35bbd00a805f1facb04910f6d433b",
+   "seed": 20260815,
+   "pareto_policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+   "state_eval_suite_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833",
+   "calibration_profiles": [
+    {
+     "qualified_id": "calib.domain_balanced@v1",
+     "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+     "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+    },
+    {
+     "qualified_id": "calib.reasoning_heavy@v2",
+     "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+     "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+    }
+   ],
+   "_all_verified_against_the_committed_record": true
+  }
  },
  "what_failed": {
   "error": "OSError: Repo id must be in the form 'repo_name' or 'namespace/repo_name': '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint'. Use `repo_type` argument if needed.",
@@ -102,7 +216,8 @@
   "top_5_weights_retrieved": false,
   "_why": "review's instruction was to 'fetch Top-5 checkpoint products as soon as commit_top_k completes'. commit_top_k never ran, so the failed-run artifact policy collected evidence rather than weights, and the pod was deleted behind its teardown gate. This is the failure mode AGENTS.md names in as many words: C1 attempt 17 trained six probes over ten hours and lost every one the same way.",
   "what_survived": "each of the 202 states carries its checkpoint_path and checkpoint_sha256, and every Top-5 candidate carries its artifact_digest and 596,049,920 parameters. So the five are IDENTIFIED exactly; their bytes are gone.",
-  "_re_materialization_is_possible_in_principle_and_is_NOT_my_call": "the search is seeded (20260815), its config hash is recorded, the space and policy are frozen, and each candidate's operator path and calibration profiles are recorded -- so re-deriving the five checkpoints is a deterministic replay rather than a new search. Whether that replay is scientifically equivalent to the originals, and whether it may stand in for them in a behavioural comparison, is a scientific decision for review. It also costs GPU time that no current authorization covers."
+  "_re_materialization_is_possible_in_principle_and_is_NOT_my_call": "the search is seeded (20260815), its config hash is recorded, the space and policy are frozen, and each candidate's operator path and calibration profiles are recorded -- so re-deriving the five checkpoints is a deterministic replay rather than a new search. Whether that replay is scientifically equivalent to the originals, and whether it may stand in for them in a behavioural comparison, is a scientific decision for review. It also costs GPU time that no current authorization covers.",
+  "_ruling": "ONE replay-only artifact-reconstruction session is authorized. It is NOT Full Search attempt 4: no beam, no ranking, no selection-bearing state evaluation, no control comparison, no behavioural recovery, no candidate substitution. Its only purpose is to reconstruct the five checkpoint BYTE artifacts this selection already chose."
  },
  "evidence_preserved": {
   "evidence/stage1_selection.json": "the committed Top-5, with its own sha256",
@@ -112,15 +227,12 @@
   "evidence/c2_full_search_evidence.json": "the driver's own record",
   "runtime/": "the driver log, the setup log, the status stream and the watchdog journal",
   "_the_full_journal_is_out_of_tree": "61.4 MiB, 98% of it per-state `steps` records. AGENTS.md 2.5: heavy bytes stay outside git and the run's records carry the location and the hash. The selection's own journal sha256 matches the moved file, so the chain is checkable.",
-  "_it_is_on_ONE_MACHINE": "the dev box's artifact store. Nothing off this host holds a copy, so if that journal matters beyond the compact form a durable-storage decision is owed."
+  "_it_is_on_ONE_MACHINE": "the dev box's artifact store. Nothing off this host holds a copy, so if that journal matters beyond the compact form a durable-storage decision is owed.",
+  "_the_full_journal_is_now_DURABLE": "uploaded to AlphaAvatar/aadistill-artifacts:phase_c2_full_search/attempt3/states.jsonl and ROUND-TRIP VERIFIED -- downloaded again and re-hashed, and the bytes that arrived match eb008ee2.... The dev-box copy is now a convenience rather than the only complete raw artifact."
  },
- "what_review_is_being_asked": [
-  "whether the Top-5 selection is an admissible scientific result, given that the beam completed and wrote it but the driver's own terminus never ran",
-  "whether the five candidates may be re-materialized by deterministic replay from the recorded seed, config hash and operator paths -- and whether such a replay may stand in for the originals in the behavioural comparison",
-  "if not, whether a fourth attempt is authorized, at what ceiling, given $7.16 of the $34.8742 is now spent across three attempts",
-  "whether the post-search control injection should be removed from this session's path rather than staged, since the driver passes no conditional candidate and compares nothing"
- ],
  "authorizes": "nothing",
  "_no_retry_was_attempted": "no fourth chain was built, no grant was written, no sweep was run and no provider resource was created after this failure.",
- "closeout_sha256": "b4bdc7208b80d67436a93f796f002a29da87e2870e9f16b74971dca762ea4d66"
+ "_classification_is_the_reviewed_one": "set by the independent review of 4cbcef1066f735805c58fb97df39944b6490d7dc. Attempt 3 is NOT rewritten as ALL_DONE and no commit_top_k marker is fabricated: that stage did not occur. The session failed; the SEARCH SCIENCE inside it did not.",
+ "_review_answered": "the selection is ACCEPTED and FROZEN; the beam is not repeated; a replay-only reconstruction is authorized at a $5.00 all-in ceiling; and the post-search control injection is to be REMOVED from the full-search path rather than satisfied by staging a checkpoint this session does not need.",
+ "closeout_sha256": "2c9d6723cc978b7d4265c4d1668a96d27969945228cd51d0199263b37fac0af6"
 }

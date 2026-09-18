@@ -267,6 +267,13 @@ class FullSearchDriver:
             run_id=RUN_ID,
             purpose=PURPOSE,
             search_minutes=self.a.search_deadline_minutes,
+            #: SEARCH ONLY. This session compares nothing -- no conditional
+            #: candidate, no baseline, no control -- so it must not trigger the
+            #: canonical-control injection, which resolves a 0.6B checkpoint it
+            #: deliberately does not stage. Attempt 3 ran the complete beam,
+            #: committed its Top-5 and then died there, losing five
+            #: checkpoints that existed on the pod at the time.
+            include_canonical_control=False,
         )
         deadline = Deadline.from_minutes(self.a.search_deadline_minutes)
         self.record("full_joint_search", True, {

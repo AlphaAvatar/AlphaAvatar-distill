@@ -133,6 +133,76 @@ def test_the_search_ran_and_produced_measured_leaves(searched):
         assert leaf.checkpoint_path and Path(leaf.checkpoint_path).is_dir()
 
 
+def test_a_search_only_caller_returns_without_resolving_the_canonical_control(
+        tmp_path):
+    """The repair for the failure that lost attempt 3's five checkpoints.
+
+    Attempt 3 ran the complete beam for 386.2 minutes, committed its Top-5, and
+    then raised in `AutoConfig.from_pretrained` on a canonical control it
+    deliberately does not stage -- so the path was read as a HuggingFace repo
+    id. The checkpoints were on the pod and the pod was deleted.
+
+    This drives the REAL post-ranking path with `include_canonical_control=
+    False` and NO control directory on disk at all. If anything after the
+    ranking still resolves `canonical_init`, this raises exactly as the pod
+    did. A test that created the directory anyway would pass while the defect
+    stood.
+    """
+    from phase_a_search import run_phase_a_search
+
+    adapter = get_adapter("qwen3")
+    teacher = _teacher()
+
+    #: NO canonical_control directory is built. `repo_root` is an empty tmp
+    #: dir, so `repo_root / canonical_init` does not exist -- the pod's
+    #: condition, reproduced rather than described.
+    assert not (tmp_path / "canonical_control").exists()
+
+    found = run_phase_a_search(
+        workdir=tmp_path / "search", state_eval=tmp_path / "unused", top_n=3,
+        device="cpu", repo_root=tmp_path,
+        teacher_id="rehearsal-tiny-teacher",
+        canonical_init="canonical_control",
+        canonical_sha256=None,
+        teacher_loader=lambda: teacher,
+        target_geometry=TARGET_GEOMETRY,
+        suite_bundle=_suite_bundle(),
+        calibration_items=_items(7, 2),
+        profile=_profile(),
+        include_canonical_control=False)
+
+    #: the science still happened
+    assert found.summary["summary"]["n_states"] > 0
+    assert found.top_n.selected, "no leaves were selected"
+    assert len(found.summary["top_n"]["selected"]) == len(found.top_n.selected)
+
+    #: and the selection was COMMITTED -- the durability boundary is what makes
+    #: returning here legitimate
+    committed = tmp_path / "search/stage1_selection.json"
+    assert committed.is_file(), "the selection was not committed"
+    import json as _json
+    doc = _json.loads(committed.read_text())
+    assert doc["n_selected"] == len(found.top_n.selected)
+    assert doc["selection_sha256"]
+
+    #: no control, and the summary SAYS no control rather than omitting it
+    assert found.control is None
+    assert found.summary["control"]["injected"] is False
+    assert "compares nothing" in found.summary["control"]["_why"]
+
+
+def test_the_default_still_injects_the_control(searched):
+    """The flag must not change Phase A, Phase B or Search-1.
+
+    Guard on the guard above: a seam that silently defaulted to skipping would
+    make every existing caller stop measuring its baseline, and the test above
+    would still pass.
+    """
+    assert searched.control is not None
+    assert searched.summary["control"].get("injected") is not False
+    assert searched.summary["control"]["state_id"]
+
+
 def test_the_control_is_injected_measured_and_marked_retained(searched):
     control = searched.control
     assert control.provenance == "retained_canonical"

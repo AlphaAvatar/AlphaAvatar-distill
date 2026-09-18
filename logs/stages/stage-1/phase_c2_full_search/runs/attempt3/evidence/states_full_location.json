@@ -1,10 +1,22 @@
 {
  "schema": "aadistill.autoinit.external_artifact/v1",
- "_contract": "the COMPLETE state journal is 61.4 MiB and does not belong in git (AGENTS.md 2.5: heavy bytes stay outside the repository; the run's records carry the durable location and the hash). states_compact.jsonl beside this file holds every field needed to identify, rank or re-materialize a state; what is dropped is the per-layer arch_spec, whose HASH is kept and which is derivable from the recorded path.",
+ "_contract": "the COMPLETE state journal is 61.4 MiB and does not belong in git (AGENTS.md 2.5). states_compact.jsonl beside this file carries every field needed to identify, rank or RECONSTRUCT a state -- including the full `artifact` record, whose weights_digest, single_shard_sha256, arch_signature, num_parameters and tokenizer_sha256 are what the replay's exact-identity requirement binds. What is dropped is the per-state `steps` record, 98% of the bytes.",
  "artifact": "states.jsonl",
  "bytes": 64386774,
  "sha256": "eb008ee252ce9d35e7478c3cc346ef7db29acf3eb5bfb2486c6023e19abe4ef0",
  "rows": 202,
- "external_location": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3/states.jsonl",
- "_dev_box_only": "the out-of-tree artifact store on this development machine. It is NOT a durable backend: nothing off this host holds a copy, so a maintainer decision about durable storage is owed if this journal matters beyond the compact form."
+ "durable_location": {
+  "backend": "huggingface",
+  "repo_id": "AlphaAvatar/aadistill-artifacts",
+  "repo_type": "model",
+  "private": true,
+  "path_in_repo": "phase_c2_full_search/attempt3/states.jsonl",
+  "uploaded_utc": "2026-09-19T04:00:00Z",
+  "round_trip_verified": true,
+  "_how": "downloaded again after upload and re-hashed; the sha256 of the bytes that ARRIVED matches the recorded one. An upload that returns 200 is not evidence that the bytes are there."
+ },
+ "dev_box_copy": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3/states.jsonl",
+ "_why_two_copies": "the dev-box store alone was not sufficient as the only complete raw artifact: nothing off this host held it. The durable backend is now the primary and the local copy is a convenience.",
+ "_the_selection_binds_this_hash": "stage1_selection.json records journal.sha256 = eb008ee2..., the same value. So the selection, the compact journal and the durable artifact are one chain a reader can check.",
+ "authorizes": "nothing \u2014 evidence preservation only"
 }

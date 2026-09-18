@@ -210,8 +210,25 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                        run_id: str = "autoinit.v1.phase_a",
                        purpose: str = ("AutoInitializer Phase A, the "
                                        "preregistered search"),
+                       include_canonical_control: bool = True,
                        ) -> PhaseASearch:
     """Search, then inject and measure the canonical control on the same suite.
+
+    `include_canonical_control=False` returns a SEARCH-ONLY result: the beam,
+    the ranking and the committed selection, and nothing after them. The
+    default is `True`, so Phase A, Phase B and Search-1 are untouched.
+
+    The flag exists because the C2 FULL JOINT re-search compares nothing. It
+    passes `conditional_candidates=None`, its driver says so in as many words,
+    and it deliberately does not stage the canonical 0.6B checkpoint. Injecting
+    a control it never reads made `AutoConfig.from_pretrained` treat an absent
+    path as a HuggingFace repo id and raise -- AFTER a complete beam. Attempt 3
+    ran 386.2 minutes, committed its Top-5, died here, and lost five
+    checkpoints that were on the pod.
+
+    Staging the control to satisfy the side effect was the other option and the
+    wrong one: it would ship 1.2 GiB to a pod so that a measurement nothing
+    consumes can be taken.
 
     The control is measured here rather than assumed: `require_recovery_admissible`
     refuses a candidate that is not MEASURED, and a control carrying no
@@ -343,24 +360,32 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
           f"({len(ranking.selected)} leaves)", flush=True)
 
     # --- the canonical control, injected by frozen hash ---------------------
-    init_dir = Path(repo_root) / canonical_init
-    control_model_config = AutoConfig.from_pretrained(str(init_dir))
-    control_spec = adapter.spec_from_config(control_model_config)
-    control_artifact = identify_checkpoint(
-        init_dir, adapter=adapter, spec=control_spec,
-        num_parameters=adapter.param_count(control_spec))
-    control = make_control_state(
-        control_id="qwen3_0p6b_init_v0", artifact=control_artifact,
-        spec=control_spec, target_spec=target_spec,
-        num_parameters=adapter.param_count(control_spec),
-        root_teacher_id=teacher_id,
-        root_teacher_sha256=suite_manifest.get("teacher_sha256", "") or "0" * 64,
-        description=("the retained canonical initialization; a re-executed "
-                     "composite is not the historical incumbent"),
-        expected_single_file_sha256=canonical_sha256)
-    control.attach_evaluation(
-        evaluator.evaluate(adapter.load(str(init_dir), device=device),
-                           control_artifact.artifact_digest))
+    #
+    # SKIPPED ENTIRELY for a search-only caller. Everything above this point --
+    # the beam, the ranking and the atomic `stage1_selection.commit` -- has
+    # already happened, which is why a caller that does not want a control can
+    # simply return: the durability boundary is behind it.
+    control = None
+    control_artifact = None
+    if include_canonical_control:
+        init_dir = Path(repo_root) / canonical_init
+        control_model_config = AutoConfig.from_pretrained(str(init_dir))
+        control_spec = adapter.spec_from_config(control_model_config)
+        control_artifact = identify_checkpoint(
+            init_dir, adapter=adapter, spec=control_spec,
+            num_parameters=adapter.param_count(control_spec))
+        control = make_control_state(
+            control_id="qwen3_0p6b_init_v0", artifact=control_artifact,
+            spec=control_spec, target_spec=target_spec,
+            num_parameters=adapter.param_count(control_spec),
+            root_teacher_id=teacher_id,
+            root_teacher_sha256=suite_manifest.get("teacher_sha256", "") or "0" * 64,
+            description=("the retained canonical initialization; a re-executed "
+                         "composite is not the historical incumbent"),
+            expected_single_file_sha256=canonical_sha256)
+        control.attach_evaluation(
+            evaluator.evaluate(adapter.load(str(init_dir), device=device),
+                               control_artifact.artifact_digest))
 
     # --- candidates the SEARCH RESULT decides on ----------------------------
     #
@@ -452,13 +477,23 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
                          for s in ranking.selected],
             "decisions": ranking.decisions,
         },
-        "control": {
+        #: A search-only caller has no control, and the summary SAYS SO rather
+        #: than omitting the key or inventing a null identity: a reader must be
+        #: able to tell "no control was injected" from "a control was injected
+        #: and something about it is missing".
+        "control": ({
             "state_id": control.state_id,
             "provenance": control.provenance,
             "artifact_digest": control.artifact_digest,
             "single_shard_sha256": control.checkpoint_sha256,
             "frozen_sha256_verified": canonical_sha256 is not None,
-        },
+        } if control is not None else {
+            "injected": False,
+            "_why": ("this caller passed include_canonical_control=False. It "
+                     "compares nothing, so a canonical control would be a "
+                     "measurement nothing consumes and a 1.2 GiB staging "
+                     "dependency for a side effect."),
+        }),
     }
     return PhaseASearch(result=result, control=control, top_n=ranking,
                         summary=summary, imported=imported)
