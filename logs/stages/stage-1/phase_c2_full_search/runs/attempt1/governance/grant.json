@@ -49,7 +49,7 @@
  },
  "bound_identities_the_issuer_must_reproduce": {
   "_rule": "stated as the maintainer's approval basis and RE-DERIVED by the issuer from the committed tree. Any disagreement is a refusal, and an identity the issuer cannot derive is also a refusal -- a grant may not introduce a binding nobody checks. These are the post-certification identities.",
-  "full_search_harness_digest": "190757379336556460c413a523cbc9baf442ef676e6a35e92918249b7ce754a7",
+  "full_search_harness_digest": "32e4e05010160fa81dab56759bd04c91d7ca9669b6842272d2bdebb375bfffac",
   "full_search_harness_n_files": 91,
   "full_search_plan_hash": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da",
   "full_search_pricing_sha256": "bf0a8124e8ad5543bf83136470d66875460d307e2aeea7444d6f22a4b1dd854d",
@@ -110,31 +110,44 @@
  ],
  "authorizes": "nothing by itself; it is the issuer's input",
  "_amended": {
-  "amended_utc": "2026-09-19T13:00:00Z",
-  "what_changed": "one bound identity: full_search_harness_digest",
-  "from": "03a0838646ca6ab4ad60937aa9927f5bed81daae0a526da2814a03a9c533892c",
-  "to": "190757379336556460c413a523cbc9baf442ef676e6a35e92918249b7ce754a7",
-  "n_files_unchanged": 91,
-  "why": "the FIRST launch-bound readiness sweep on the committed grant tree REFUSED, and it was right to. The full search was sweeping Search-1's pod selection, which asserts that every path SEARCH-1 stages is present -- including the canonical 0.6B control Search-1 injects as its measured baseline and that this session deliberately does not stage. The simulator hides what a session does not stage, correctly, so two tests entirely correct about Search-1 refused a correct full-search tree: test_every_declared_staged_path_is_present on artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja, and test_the_canonical_control_checkpoint_is_readable on the same directory's model.safetensors.",
-  "the_repair": "the full search now sweeps its OWN selection, tests/c2_full_search_preflight, as the baseline completion already did for exactly this reason -- its module says so in almost these words. Narrowing Search-1's gate was the other option and the wrong one: it is a consumed experiment's satisfiable gate, and a guard narrowed to fit the session under test stops guarding the session it was written for. Repointing the selection edited full_search_pod_environment.py, which is inside the executable closure, so the harness digest moved. The file COUNT did not: 91 before and after.",
-  "_why_this_is_not_a_scope_change": "AGENTS.md P12.1: ordinary engineering failures inside an approved envelope are diagnosed and repaired without a further approval. Nothing the maintainer approved moved -- not the space, the beam, the operators, the calibration, the evaluator, the ranking policy, the terminus, the ceiling or the provision. Fifteen of the sixteen bound identities are BYTE IDENTICAL to the granted ones; the sixteenth is the harness the repair lives in. The amendment is recorded rather than the grant rewritten, because a grant that silently re-derived itself would prove nothing.",
-  "_identities_unchanged": [
-   "beam_schedule_id",
-   "beam_warmup_levels",
-   "beam_width",
-   "calibration_profile_ids",
-   "cost_table_sources",
-   "excluded_implementations",
-   "full_search_harness_n_files",
-   "full_search_plan_hash",
-   "full_search_pricing_sha256",
-   "joint_space_allowed_impls",
-   "joint_space_decomposed_leaves",
-   "joint_space_impl_profiles_are_unpinned",
-   "joint_space_total_leaves",
-   "ranking_policy_hash",
-   "state_eval_content_sha256"
-  ]
+  "_this_is_the_second_amendment": "both are the same class: a $0 gate found a defect in this session's own machinery, the repair edited a file inside the executable closure, and the harness digest moved. Nothing the maintainer approved moved either time. The amendments are recorded rather than the grant rewritten.",
+  "second": {
+   "amended_utc": "2026-09-19T14:00:00Z",
+   "what_changed": "one bound identity: full_search_harness_digest",
+   "from": "190757379336556460c413a523cbc9baf442ef676e6a35e92918249b7ce754a7",
+   "to": "32e4e05010160fa81dab56759bd04c91d7ca9669b6842272d2bdebb375bfffac",
+   "n_files_unchanged": 91,
+   "why": "the FIRST $0 dry run of the pre-provider gates refused at the readiness gate, on a readiness record that had just swept PASS. The gate asked `record.get(\"kind\")`; the recorder writes `record_kind`, and so do the shared pod_environment.verify_record and every other session's launcher. So the gate refused every launch-bound record it was ever shown -- an accept path that could not pass -- and reported the record's kind as None. The only test covering it presented an ABSENT record, which refuses either way, while its name claimed a diagnostic case its body never built.",
+   "the_repair": "the gate reads `record_kind`, and reports `swept_base_commit` instead of a `commit` key no record carries. A targeted regression presents both a diagnostic and a launch_bound record through the module the gate loads from, requires refuse-then-accept, and requires the refusal message not to say None; reinstating the defect makes it fail. Editing the launcher moved the closure digest, 91 files unchanged.",
+   "_also_in_this_commit": "scripts/autoinit/stage_c2_full_search_bundle.py, which did not exist. stage_c2_bundle.py is bound to SEARCH-1's transport and record schema, so this session had no way to stage its bundle through a tool -- the same class of gap as the missing SESSION_KIND=c2_full_search setup dispatch branch. It is a dev-box tool and is NOT in the executable closure, so it does not move the digest."
+  },
+  "first": {
+   "amended_utc": "2026-09-19T13:00:00Z",
+   "what_changed": "one bound identity: full_search_harness_digest",
+   "from": "03a0838646ca6ab4ad60937aa9927f5bed81daae0a526da2814a03a9c533892c",
+   "to": "190757379336556460c413a523cbc9baf442ef676e6a35e92918249b7ce754a7",
+   "n_files_unchanged": 91,
+   "why": "the FIRST launch-bound readiness sweep on the committed grant tree REFUSED, and it was right to. The full search was sweeping Search-1's pod selection, which asserts that every path SEARCH-1 stages is present -- including the canonical 0.6B control Search-1 injects as its measured baseline and that this session deliberately does not stage. The simulator hides what a session does not stage, correctly, so two tests entirely correct about Search-1 refused a correct full-search tree: test_every_declared_staged_path_is_present on artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja, and test_the_canonical_control_checkpoint_is_readable on the same directory's model.safetensors.",
+   "the_repair": "the full search now sweeps its OWN selection, tests/c2_full_search_preflight, as the baseline completion already did for exactly this reason -- its module says so in almost these words. Narrowing Search-1's gate was the other option and the wrong one: it is a consumed experiment's satisfiable gate, and a guard narrowed to fit the session under test stops guarding the session it was written for. Repointing the selection edited full_search_pod_environment.py, which is inside the executable closure, so the harness digest moved. The file COUNT did not: 91 before and after.",
+   "_why_this_is_not_a_scope_change": "AGENTS.md P12.1: ordinary engineering failures inside an approved envelope are diagnosed and repaired without a further approval. Nothing the maintainer approved moved -- not the space, the beam, the operators, the calibration, the evaluator, the ranking policy, the terminus, the ceiling or the provision. Fifteen of the sixteen bound identities are BYTE IDENTICAL to the granted ones; the sixteenth is the harness the repair lives in. The amendment is recorded rather than the grant rewritten, because a grant that silently re-derived itself would prove nothing.",
+   "_identities_unchanged": [
+    "beam_schedule_id",
+    "beam_warmup_levels",
+    "beam_width",
+    "calibration_profile_ids",
+    "cost_table_sources",
+    "excluded_implementations",
+    "full_search_harness_n_files",
+    "full_search_plan_hash",
+    "full_search_pricing_sha256",
+    "joint_space_allowed_impls",
+    "joint_space_decomposed_leaves",
+    "joint_space_impl_profiles_are_unpinned",
+    "joint_space_total_leaves",
+    "ranking_policy_hash",
+    "state_eval_content_sha256"
+   ]
+  }
  },
- "grant_sha256": "818cfd1916f3518048f1ab5261bd1806dd58be8e116b814c5d62c9ab17e38fba"
+ "grant_sha256": "d59ec66c388e8d63d6b3567f6005fdb6e7ec9e4594a95e15be8f4429866ce705"
 }

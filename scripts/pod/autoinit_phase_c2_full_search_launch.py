@@ -467,8 +467,15 @@ def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
     except FileNotFoundError:
         return False, (f"{FPE.record_path_for(run_id, RUN_STAGE_ID)} does not "
                        "exist; a launch-bound sweep is owed for this run")
-    if record.get("kind") != FPE.LAUNCH_BOUND:
-        return False, (f"the readiness record is {record.get('kind')!r}, not "
+    #: `record_kind`, which is what the recorder WRITES and what the shared
+    #: `pod_environment.verify_record` and every other session's launcher read.
+    #: This asked for `kind`, which no record has ever carried, so the gate
+    #: refused every launch-bound record it was ever shown -- a gate that could
+    #: not pass. Found by the $0 dry run on a PASSing record, which is what a
+    #: dry run is for.
+    kind = record.get("record_kind")
+    if kind != FPE.LAUNCH_BOUND:
+        return False, (f"the readiness record is {kind!r}, not "
                        f"{FPE.LAUNCH_BOUND!r}. Only a launch-bound record "
                        "describes the tree a launch will use.")
     try:
@@ -477,8 +484,12 @@ def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
                           session_commit=ctx.args.session_commit)
     except Exception as exc:                                    # noqa: BLE001
         return False, f"the readiness record does not describe this tree: {exc}"
-    return True, (f"launch-bound readiness at {record.get('commit', '?')[:12]}… "
-                  f"binds harness {str(record.get('full_search_harness_digest'))[:12]}…")
+    #: `swept_base_commit` for the same reason: `commit` is not a key the
+    #: recorder writes, so the message said "?…" about a record it had just
+    #: accepted.
+    swept = str(record.get("swept_base_commit", "?"))
+    return True, (f"launch-bound readiness at {swept[:12]}… binds harness "
+                  f"{str(record.get('full_search_harness_digest'))[:12]}…")
 
 
 def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:

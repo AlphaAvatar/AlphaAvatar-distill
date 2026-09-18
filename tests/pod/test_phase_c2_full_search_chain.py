@@ -612,6 +612,50 @@ def test_the_readiness_gate_refuses_an_absent_and_a_diagnostic_record(launcher):
     assert not ok and "launch-bound sweep is owed" in why
 
 
+def test_the_readiness_gate_reads_the_key_the_recorder_writes(launcher,
+                                                              monkeypatch):
+    """The accept path, which could not pass and which nothing exercised.
+
+    The gate asked `record.get("kind")`. The recorder writes `record_kind`, and
+    so do the shared `pod_environment.verify_record` and every other session's
+    launcher -- so the gate refused every launch-bound record it was ever
+    shown, with a message saying the record was `None`. The test above covers
+    only the ABSENT case, which passes either way, and its name claimed a
+    diagnostic case its body never presented. The defect surfaced in a `$0` dry
+    run against a record that had just swept PASS.
+
+    So both kinds are presented here, through the module the gate loads from.
+    """
+    import experiments.phase_c2.full_search_pod_environment as FPE
+
+    def record(kind):
+        return {"schema": FPE.SCHEMA, "record_kind": kind, "verdict": "PASS",
+                "swept_base_commit": "0" * 40,
+                "full_search_harness_digest": "a" * 64,
+                "full_search_harness_n_files": 91}
+
+    seen = {}
+    monkeypatch.setattr(FPE, "verify_record",
+                        lambda *a, **k: seen.setdefault("verified", True))
+
+    ctx = types.SimpleNamespace(args=launch_args(launcher), evidence={},
+                                auth=None)
+
+    monkeypatch.setattr(FPE, "load_record", lambda *a, **k: record("diagnostic"))
+    ok, why = launcher.readiness_gate(ctx)
+    assert not ok and "'diagnostic'" in why, why
+    assert "None" not in why, (
+        "the gate reported None for a record that states its kind, so it is "
+        "reading a key the recorder does not write")
+
+    monkeypatch.setattr(FPE, "load_record", lambda *a, **k: record("launch_bound"))
+    ok, why = launcher.readiness_gate(ctx)
+    assert ok, why
+    assert seen.get("verified"), "the gate accepted without verifying the record"
+    #: and it reports the commit it swept, not "?…"
+    assert "0000000" in why, why
+
+
 def test_the_frozen_assets_gate_runs_the_real_verifier(launcher):
     ctx = types.SimpleNamespace(args=launch_args(launcher), evidence={}, auth=None)
     ok, why = launcher.frozen_assets_gate(ctx)
