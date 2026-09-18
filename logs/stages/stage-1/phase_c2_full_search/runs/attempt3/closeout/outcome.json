@@ -1,0 +1,126 @@
+{
+ "schema": "aadistill.autoinit.c2_full_search_closeout/v1",
+ "_contract": "Terminal record for attempt 3 of the Phase-C2 full joint re-search. THE BEAM RAN AND PRODUCED A TOP-5. The session then failed in a post-selection step, the driver never reached commit_top_k, and the five checkpoints were on the deleted pod. This record RETURNS TO REVIEW; it retries nothing.",
+ "experiment_id": "phase_c2_full_search",
+ "run_id": "attempt3",
+ "classification": "FORMAL MEASUREMENT COMPLETED, SESSION FAILED AFTER IT \u2014 returned to review, not retried",
+ "terminal": "C2_FULL_SEARCH_FAILED after the stage-1 selection was written",
+ "closed_utc": "2026-09-19T03:10:00Z",
+ "budget": {
+  "this_attempt": 7.02,
+  "_basis": "386.2 min of an L40S at the confirmed $1.09/h",
+  "authorized_usd": 34.8742,
+  "unspent_usd": 27.8542,
+  "driver_measured_spend_at_failure": 6.9474,
+  "provider_resources_created": 1,
+  "pod_id": "ulit767od813i8",
+  "teardown_provider_confirmed": true,
+  "pods_remaining": 0,
+  "_key_name_matters": "derive_budget.py reads budget.this_attempt. A cost under any other name does not reach the project book."
+ },
+ "did_formal_measurement_begin": {
+  "answer": "YES \u2014 and this is why the session returns to review rather than retrying",
+  "_the_boundary": "review's instruction: 'Once full_joint_search has begun producing formal search measurements, do not treat loss of the session as an ordinary engineering retry. Preserve evidence, tear down, reconcile spend and return for review before repeating formal scientific work.' It produced 108 expansions over 6.3 hours and a committed Top-5. So: preserved, torn down, reconciled, and returned."
+ },
+ "what_the_search_produced": {
+  "expansions": 108,
+  "expansions_by_implementation": {
+   "width.global_pca_v0": 34,
+   "ffn.activation_importance_v0": 26,
+   "attention.activation_importance_v1": 22,
+   "depth.causal_kl_greedy_v1": 16,
+   "depth.positional_v0": 8,
+   "composite.stage1_sandwich_v0": 2
+  },
+  "states_journalled": 202,
+  "states_by_path_length": {
+   "1": 20,
+   "2": 120,
+   "3": 50,
+   "4": 12
+  },
+  "complete_leaves": 14,
+  "states_with_an_evaluation": 202,
+  "ranked_decisions": 14,
+  "n_selected": 5,
+  "operator_and_load_minutes": 354.1,
+  "elapsed_min": 377.47,
+  "_the_beam_looks_COMPLETE_and_that_is_for_review_to_confirm": "20 states at path length 1 (every child of the root, which warmup level 1 retains), 120 at length 2, 50 at length 3 and 12 at length 4, with 14 complete leaves ranked and 5 selected. That is the shape beam width 6 with one warmup level produces over a four-operator space. The selection was WRITTEN by the search and carries its own sha256, the journal's sha256, the policy hash, the config hash, the seed, the suite and both profiles. Whether it is an admissible scientific result is a REVIEW judgment: the driver's own terminus, commit_top_k, never executed."
+ },
+ "the_committed_top_5": {
+  "selection_record": "evidence/stage1_selection.json",
+  "selection_sha256": "7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673",
+  "policy": null,
+  "search_config_hash": "76573c1467e9f831c8471c0376f6d70a0fc35bbd00a805f1facb04910f6d433b",
+  "seed": 20260815,
+  "candidates": [
+   {
+    "rank": 1,
+    "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
+    "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "artifact_digest": "5d042dcc80212cfda0b97e10e21fca9c62574274bdc0d7e62a57e03a9e48f184",
+    "num_parameters": 596049920
+   },
+   {
+    "rank": 2,
+    "state_id": "7da1e4e2254e59766581e777b8066b7e",
+    "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "artifact_digest": "181245b694316ed10dc299597cffbb97b4ece547c2f488a9c31c446b3e22210a",
+    "num_parameters": 596049920
+   },
+   {
+    "rank": 3,
+    "state_id": "1d2844488f3ad630414c3cd69b6fa395",
+    "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+    "artifact_digest": "a25271ad0898ac3727ed4ed496fb7569299932f864f0d54a48b9b2deb9b4da41",
+    "num_parameters": 596049920
+   },
+   {
+    "rank": 4,
+    "state_id": "88086555a6662b206e00ae28fc9d3ca3",
+    "path": "DEPTH(calib.none@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "artifact_digest": "d0d26ed3fee7f976935439ecba8b059f38e51d92d7b1672e6f467e6251938860",
+    "num_parameters": 596049920
+   },
+   {
+    "rank": 5,
+    "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
+    "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+    "artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
+    "num_parameters": 596049920
+   }
+  ]
+ },
+ "what_failed": {
+  "error": "OSError: Repo id must be in the form 'repo_name' or 'namespace/repo_name': '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint'. Use `repo_type` argument if needed.",
+  "when": "AFTER the line 'stage-1 selection committed: .../stage1_selection.json (5 leaves)' in the driver log",
+  "root_cause": "`run_phase_a_search` injects the canonical 0.6B control checkpoint as its measured control once the beam finishes. This session does NOT stage that checkpoint -- deliberately, because the driver passes conditional_candidates=None and its own comment says 'B is now measured and frozen, and this session compares nothing'. With the path absent on the pod, `from_pretrained` read it as a HuggingFace repo id and raised.",
+  "_this_was_written_down_and_I_did_not_act_on_it": "Search-1's preflight contains `test_the_canonical_control_checkpoint_is_readable`, whose docstring says: 'run_phase_a_search injects it as the measured control and verifies its frozen single-file sha256; A MISSING CONFIG ABORTS AFTER THE SEARCH.' I read that test while building this session's preflight, used it to conclude the control is Search-1's concern, and asserted positively that this session does not stage it. I checked the DRIVER and the LAUNCHER for references to CANONICAL_INIT and found none. I did not check the shared search entry point they call, which is where the reference lives. The sentence that predicted this failure was in front of me.",
+  "_why_no_gate_caught_it": "every gate and the whole 18-test preflight run BEFORE the beam. This reference is reached only after a complete beam finishes, so no $0 check and no toy-scale rehearsal executes it -- the same class as the four paid pods this project has lost inside lines no test had reached."
+ },
+ "the_checkpoints_are_LOST": {
+  "top_5_weights_retrieved": false,
+  "_why": "review's instruction was to 'fetch Top-5 checkpoint products as soon as commit_top_k completes'. commit_top_k never ran, so the failed-run artifact policy collected evidence rather than weights, and the pod was deleted behind its teardown gate. This is the failure mode AGENTS.md names in as many words: C1 attempt 17 trained six probes over ten hours and lost every one the same way.",
+  "what_survived": "each of the 202 states carries its checkpoint_path and checkpoint_sha256, and every Top-5 candidate carries its artifact_digest and 596,049,920 parameters. So the five are IDENTIFIED exactly; their bytes are gone.",
+  "_re_materialization_is_possible_in_principle_and_is_NOT_my_call": "the search is seeded (20260815), its config hash is recorded, the space and policy are frozen, and each candidate's operator path and calibration profiles are recorded -- so re-deriving the five checkpoints is a deterministic replay rather than a new search. Whether that replay is scientifically equivalent to the originals, and whether it may stand in for them in a behavioural comparison, is a scientific decision for review. It also costs GPU time that no current authorization covers."
+ },
+ "evidence_preserved": {
+  "evidence/stage1_selection.json": "the committed Top-5, with its own sha256",
+  "evidence/telemetry.jsonl": "108 per-expansion rows, the measured basis for any future cost model",
+  "evidence/states_compact.jsonl": "202 states with identity, digests, checkpoint hashes and evaluations",
+  "evidence/states_full_location.json": "where the 61.4 MiB full journal lives and its sha256",
+  "evidence/c2_full_search_evidence.json": "the driver's own record",
+  "runtime/": "the driver log, the setup log, the status stream and the watchdog journal",
+  "_the_full_journal_is_out_of_tree": "61.4 MiB, 98% of it per-state `steps` records. AGENTS.md 2.5: heavy bytes stay outside git and the run's records carry the location and the hash. The selection's own journal sha256 matches the moved file, so the chain is checkable.",
+  "_it_is_on_ONE_MACHINE": "the dev box's artifact store. Nothing off this host holds a copy, so if that journal matters beyond the compact form a durable-storage decision is owed."
+ },
+ "what_review_is_being_asked": [
+  "whether the Top-5 selection is an admissible scientific result, given that the beam completed and wrote it but the driver's own terminus never ran",
+  "whether the five candidates may be re-materialized by deterministic replay from the recorded seed, config hash and operator paths -- and whether such a replay may stand in for the originals in the behavioural comparison",
+  "if not, whether a fourth attempt is authorized, at what ceiling, given $7.16 of the $34.8742 is now spent across three attempts",
+  "whether the post-search control injection should be removed from this session's path rather than staged, since the driver passes no conditional candidate and compares nothing"
+ ],
+ "authorizes": "nothing",
+ "_no_retry_was_attempted": "no fourth chain was built, no grant was written, no sweep was run and no provider resource was created after this failure.",
+ "closeout_sha256": "b4bdc7208b80d67436a93f796f002a29da87e2870e9f16b74971dca762ea4d66"
+}

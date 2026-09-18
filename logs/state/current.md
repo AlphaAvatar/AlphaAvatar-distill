@@ -9,36 +9,88 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**THE FORMAL PHASE-C2 FULL JOINT RE-SEARCH IS RUNNING.** Attempt 3, pod
-`ulit767od813i8`, an L40S at `$1.09/h`, watchdog on a 1827-minute / `$33.18`
-hard limit inside the `$34.8742` total ceiling. `bind_identities` passed — 578
-reachable leaves, 576 decomposed, both mixtures materialized — and
-`full_joint_search` is materializing states, so **formal measurement has
-begun**.
+**Nothing is running. Nothing is billing. No pod exists.** Attempt 3's pod
+`ulit767od813i8` was deleted behind its teardown gate after 386.2 min; the
+provider confirms it is gone and an account-wide list returns `[]`. **Nothing
+is prepared for launch.**
 
-> **From here, losing the session is not an engineering retry.** Preserve
-> evidence, tear down, reconcile spend and return for review. Do not repeat
-> formal scientific work.
+## The full joint re-search RAN, produced a Top-5, and then lost it
 
-It terminates at `commit_top_k` and starts nothing after it, and **nothing is
-prepared for launch** behind it: the behavioural-selection session is
-separately authorized, unreachable from this driver, and must be constructed
-against the **actual** committed Top-5.
+**Attempt 3, 386.2 min, `$7.02`, RETURNED TO REVIEW — not retried.** Formal
+measurement had begun, so the instruction is preserve, tear down, reconcile and
+return, and that is what happened: no fourth chain, no grant, no sweep, no
+provider resource.
 
-**Two attempts ended before any measurement**, for `$0.0000` and `$0.1400`, and
-each closeout records why. Attempt 1 refused at a `$0` gate: `readiness_gate`
-read `record.get("kind")` where the recorder writes `record_kind`, so its
-accept path could never pass. Attempt 2 passed all eleven gates and setup, then
-refused to *start* the beam — the launcher had handed it the session's whole
-hard window as the beam's own envelope, and the driver checks a stage's
-envelope against the soft stop, which is that window minus the recovery
-reserve. Unaffordable by construction, for any reserve above zero. A third gap
-surfaced on the way: there was no full-search bundle stager at all.
+What the beam produced, before anything went wrong:
 
-Each is repaired with a regression that fails when the defect is reinstated,
-and the chain was rebuilt from the grant each time — three sweeps, three
-issuances, three bundles. Attempt count is not budget; `$0.14` of the ceiling
-is spent.
+| | |
+| --- | --- |
+| expansions | **108** — width 34, FFN 26, ATTENTION 22, DEPTH-causal 16, DEPTH-positional 8, composite 2 |
+| states journalled | **202** — 20 at path length 1, 120 at 2, 50 at 3, 12 at 4 |
+| complete leaves ranked | **14** |
+| **selected** | **5**, with the selection carrying its own `sha256` and the journal's |
+| operator + load time | 354.1 min of the 386.2 |
+
+That is the shape beam width 6 with one warmup level produces over a
+four-operator space, and the selection records the policy hash, the config
+hash, the seed `20260815`, the suite and both profiles. **Whether it is an
+admissible scientific result is a review judgment**: the driver's own terminus,
+`commit_top_k`, never executed.
+
+### What failed, and that it was written down
+
+After the line `stage-1 selection committed: … (5 leaves)`:
+
+```
+OSError: Repo id must be in the form 'repo_name' or 'namespace/repo_name':
+'/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint'
+```
+
+`run_phase_a_search` injects the canonical 0.6B control as its measured control
+once the beam finishes. This session **deliberately does not stage it** — the
+driver passes `conditional_candidates=None` and its own comment says *"B is now
+measured and frozen, and this session compares nothing"*. Absent on the pod,
+the path was read as a HuggingFace repo id.
+
+**Search-1's preflight predicted this in as many words.**
+`test_the_canonical_control_checkpoint_is_readable` says: *"`run_phase_a_search`
+injects it as the measured control and verifies its frozen single-file sha256;
+**a missing config aborts after the search**."* I read that test while building
+this session's preflight, used it to conclude the control was Search-1's
+concern, and asserted positively that this session does not stage it. I checked
+the **driver** and the **launcher** for `CANONICAL_INIT` and found nothing. I
+did not check the shared search entry point they call, which is where the
+reference lives.
+
+No gate could have caught it: every gate and all 18 preflight tests run
+*before* the beam. This line is reached only after a complete beam finishes.
+
+### The five checkpoints are lost
+
+`commit_top_k` never ran, so the failed-run artifact policy collected evidence
+rather than weights, and the pod was deleted. The five are **identified
+exactly** — state ids, paths, artifact digests, `checkpoint_sha256` each, and
+596,049,920 parameters — and their bytes are gone. This is the failure mode
+AGENTS.md names outright: C1 attempt 17 trained six probes over ten hours and
+lost every one the same way.
+
+Re-materializing them is a **deterministic replay** in principle, not a new
+search: the seed, config hash, space, policy, operator paths and calibration
+profiles are all recorded. Whether that replay is scientifically equivalent,
+and whether it may stand in for the originals, is a decision for review — and
+it costs GPU time no authorization covers.
+
+### Evidence preserved
+
+`evidence/` holds the selection, 108 telemetry rows, a 202-state compact
+journal with every digest and checkpoint hash, the driver's record, and a
+pointer to the 61.4 MiB full journal — which lives out of tree per §2.5, with
+its `sha256` matching the one the selection itself recorded. That journal is on
+**one machine**; if it matters beyond the compact form, a durable-storage
+decision is owed.
+
+`$7.16` of the `$34.8742` ceiling is spent across three attempts. Project
+cumulative `$305.8841` of `$370.0000`.
 
 **TWO DECISIONS ARE OWED, and the second one arrived today.** The launch review
 is the first. The second is that adopting the measured `state_eval`
@@ -614,7 +666,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$298.8641` spent of `$370.0000`, leaving `$71.1359` |
+| project cap | `$305.8841` spent of `$370.0000`, leaving `$64.1159` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

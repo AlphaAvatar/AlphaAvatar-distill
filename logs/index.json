@@ -282,8 +282,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 25,
-  "runs_unrecorded": 5,
+  "runs_current": 26,
+  "runs_unrecorded": 4,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -342,8 +342,8 @@
     "total": 4
    },
    "phase_c2_full_search": {
-    "recorded": 2,
-    "unrecorded": 1,
+    "recorded": 3,
+    "unrecorded": 0,
     "total": 3
    },
    "recovery_continuation": {
@@ -1292,6 +1292,19 @@
    },
    "manifest_sha256": "55bb2ca49e08296824671d7c060bc96952812801207a17d8925a714f30cf75bc",
    "n_components": 5
+  },
+  {
+   "experiment_id": "phase_c2_full_search",
+   "run_id": "attempt3",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3",
+    "manifest": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/manifest.json"
+   },
+   "manifest_sha256": "2282a08856f3c0735326c0bb85ca329055a4c3e54a8607a183f06febfb309cc5",
+   "n_components": 5
   }
  ],
  "unrecorded": [
@@ -1326,14 +1339,6 @@
    "n_files": 15,
    "digest": "6a9719fbf4028963b5eefa255e664d5efe299dabaf370d38c0b0661c1abd95b4",
    "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
-  },
-  {
-   "experiment_id": "phase_c2_full_search",
-   "run_id": "attempt3",
-   "root": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3",
-   "n_files": 11,
-   "digest": "30d59612c44f7cbe8c4dd4e52499c0726300b7d2b6d6437023d6f857a5f3c895",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],
  "authorizes": "nothing"

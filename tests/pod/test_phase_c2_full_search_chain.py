@@ -947,8 +947,29 @@ def test_the_proposal_states_the_figures_a_launch_review_needs():
     assert round(position["remaining_usd"]
                  - position["chain_total_hard_ceiling_usd"], 4) == \
         position["remaining_after_the_whole_chain_usd"]
-    #: It still fits, and the proposal says so by arithmetic rather than claim.
-    assert position["remaining_after_the_whole_chain_usd"] > 0
+    #: The figure is DERIVED and the funding verdict AGREES WITH ITS SIGN.
+    #:
+    #: This asserted the figure was positive -- "it still fits" -- which was
+    #: true when written and is a demand rather than a check. After three
+    #: full-search attempts spent $7.16, the complete chain exceeds the
+    #: remaining envelope by $2.16, and a test that required the chain to fit
+    #: could be satisfied only by shrinking the beam or the storage, which
+    #: review forbade in as many words. So what is checked is that the record
+    #: does not contradict its own arithmetic.
+    pricing = json.loads(
+        (REPO / "logs/stages/stage-1/phase_c2/plans"
+         / "phase_c2_full_search_pricing.json").read_text())
+    headroom = position["remaining_after_the_whole_chain_usd"]
+    status = pricing["funding"]["status"].upper()
+    if headroom < 0:
+        assert "INSUFFICIENT" in status, (
+            f"headroom is {headroom} and the funding block says {status!r}; a "
+            "prose verdict that contradicts the arithmetic beside it is the "
+            "failure this project has already paid for")
+        assert pricing["funding"]["shortfall_on_hard_ceilings_usd"] == \
+            round(-headroom, 4)
+    else:
+        assert "INSUFFICIENT" not in status, status
 
 
 def test_the_proposal_regenerates_byte_identically():
@@ -1001,14 +1022,27 @@ def test_the_proposal_cannot_be_promoted_by_the_issuer():
                          run_id="attempt1", repo_root=REPO)
 
 
-def test_no_authorization_exists_for_any_full_search_run():
-    """The chain is built and NOT consumed. An issued artifact would mean an
-    agent had granted itself money."""
+def test_no_full_search_authorization_is_armed():
+    """Nothing is armed to launch. Consumed authorizations are history.
+
+    This asserted that NO authorization existed anywhere -- true while the
+    chain was built and unconsumed, and a claim that expires the moment a
+    maintainer approves a launch. Three attempts have since run; an
+    authorization for a run that executed is evidence, not an agent granting
+    itself money.
+
+    What must stay true is that every authorization belongs to a run that has
+    been CLOSED OUT. An issued artifact in a run with no closeout is one that
+    could still be launched against.
+    """
     runs = REPO / "logs/stages/stage-1/phase_c2_full_search/runs"
     if not runs.is_dir():
         return
-    issued = list(runs.rglob("governance/authorization.json"))
-    assert not issued, f"a full-search authorization exists: {issued}"
+    armed = [auth for auth in runs.rglob("governance/authorization.json")
+             if not (auth.parent.parent / "closeout/outcome.json").is_file()]
+    assert not armed, (
+        f"an authorization exists for a run with no closeout: {armed}. Either "
+        "the run is still live, or it ended without being closed.")
 
 
 def test_the_sweep_can_actually_be_DRIVEN_for_this_experiment():

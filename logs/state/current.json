@@ -1,13 +1,12 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-19T20:35:00Z",
+ "generated_utc": "2026-09-19T03:15:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, each with its owner named. Human view: logs/state/current.md. History: logs/budget/decisions.md. Index: logs/README.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
-  "paid_compute": true,
-  "pods": 1,
-  "pod_id": "ulit767od813i8",
-  "note": "THE FORMAL PHASE-C2 FULL JOINT RE-SEARCH IS RUNNING \u2014 attempt 3, L40S at $1.09/h, watchdog on 1827 min / $33.18 inside a $34.8742 total ceiling. bind_identities PASSED and full_joint_search is MATERIALIZING STATES, so FORMAL MEASUREMENT HAS BEGUN. It terminates at commit_top_k and starts nothing after it. Owner: runs/attempt3/."
+  "paid_compute": false,
+  "pods": 0,
+  "note": "zero pods. Attempt 3's pod ulit767od813i8 was deleted behind its teardown gate after 386.2 min; the provider confirms it is gone and an account-wide list returns []."
  },
  "authorized": {
   "any": true,
@@ -19,13 +18,13 @@
  },
  "prepared_launch": {
   "any": false,
-  "run": "phase_c2_full_search/attempt3 is RUNNING, not prepared",
-  "note": "nothing further is prepared. The behavioural-selection session is separately authorized, unreachable from this driver, and must be built against the ACTUAL committed Top-5 after review."
+  "run": null,
+  "note": "nothing is prepared and nothing may start. The formal full joint re-search RAN, produced a Top-5, and then failed after writing it. It is RETURNED TO REVIEW, not retried: formal measurement had begun. Owner: runs/attempt3/closeout/outcome.json."
  },
  "budget": {
-  "cumulative_spend_usd": 298.8641,
+  "cumulative_spend_usd": 305.8841,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 71.1359,
+  "remaining_usd": 64.1159,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -116,7 +115,7 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "Search-1 DONE and FROZEN; B->C COMPUTED; the local Search-2 refinement WITHDRAWN. C2 continues as a FULL JOINT re-search + Top-5 + bounded behavioural selection. Designed, driver CONFIRMED ON REAL CUDA, chain BUILT and UNCONSUMED, priced on the CONSERVATIVE basis, NOT AUTHORIZED. Commits a Top-5 and STOPS; two authorizations, never one.",
+   "status": "Search-1 DONE and FROZEN; B->C COMPUTED. The FULL JOINT re-search RAN (attempt 3) and produced a Top-5, then failed after writing it and lost the five checkpoints. RETURNED TO REVIEW; nothing is authorized to continue. Owner: runs/attempt3/closeout/outcome.json.",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "priced": "plans/phase_c2_full_search_pricing.json \u2014 the ceiling and the planning estimate, labelled apart, and the funding verdict.",
    "result": "B is DOMINATED on all three ranked objectives by two front-0 candidates and dominates none; NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Both sides were measured by ONE evaluator implementation, so the finding stands. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
@@ -131,7 +130,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "THE FORMAL FULL JOINT RE-SEARCH IS RUNNING (attempt 3, pod ulit767od813i8) and FORMAL MEASUREMENT HAS BEGUN. Nothing else may start. When it reaches commit_top_k: fetch the Top-5 checkpoint products, provider-confirm teardown, commit evidence, journal, Top-5 identities, reconciliation, manifest and closeout, and STOP -- the behavioural-selection session needs its own construction and authorization against the ACTUAL committed Top-5. If the session is lost from here, preserve, tear down, reconcile and RETURN FOR REVIEW; it is no longer an engineering retry. Attempts 1 and 2 ended before any measurement, for $0.0000 and $0.1400, and their closeouts record why. Options, figures and history: logs/state/current.md.",
+ "blocker": "RETURNED TO REVIEW. The formal full joint re-search RAN for 386.2 min at $7.02 and DID produce a Top-5: 108 expansions, 202 states, 14 complete leaves ranked, 5 selected, the selection carrying its own sha256 and the journal's. It then FAILED in a post-selection step -- run_phase_a_search injects the canonical 0.6B control, which this session deliberately does not stage -- so commit_top_k never executed and THE FIVE CHECKPOINTS WERE ON THE DELETED POD. They are identified exactly (state ids, artifact digests, checkpoint sha256s, 596,049,920 parameters each) and their bytes are gone. Formal measurement had begun, so no retry was attempted: no fourth chain, no grant, no sweep, no provider resource. What review is asked -- whether the Top-5 is admissible given the driver's terminus never ran, whether deterministic replay from the recorded seed and paths may stand in for the lost checkpoints, and whether a fourth attempt is authorized -- is listed in the closeout. $7.16 of $34.8742 spent across three attempts; project cumulative $305.8841 of $370.0000.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
