@@ -41,8 +41,27 @@ from aadistill.runtime.pod_environment import (  # noqa: E402,F401
 
 from experiments.phase_c2 import full_search as FSG
 from experiments.phase_c2.pod_environment import (  # noqa: F401
-    POD_TEST_ENVIRONMENT_FILES_V1, POD_TEST_SELECTION, ReadinessError,
+    POD_TEST_ENVIRONMENT_FILES_V1, ReadinessError,
 )
+
+#: The full search's OWN pod selection, named ONCE here and read by the launcher
+#: through this module.
+#:
+#: It was Search-1's until 2026-09-19, with a docstring that named the hazard
+#: and accepted it anyway. The hazard then arrived: the first launch-bound
+#: sweep failed on `test_every_declared_staged_path_is_present` and
+#: `test_the_canonical_control_checkpoint_is_readable`, both asserting the
+#: canonical 0.6B control that SEARCH-1 injects as its measured baseline and
+#: that this session deliberately does not stage. The simulator hides what the
+#: session does not stage, correctly, so two tests entirely correct about
+#: Search-1 refused a correct full-search tree.
+#:
+#: The baseline completion had already met this and solved it the same way --
+#: its module says so in almost these words. Narrowing Search-1's gate was the
+#: other option and the wrong one: it is a consumed experiment's satisfiable
+#: gate, and a guard narrowed to fit the session under test stops guarding the
+#: session it was written for.
+POD_TEST_SELECTION = "tests/c2_full_search_preflight"
 
 #: Its OWN schema. This is the check that makes a Search-1 or a
 #: baseline-completion readiness record unusable here.

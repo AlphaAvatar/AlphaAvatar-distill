@@ -1,22 +1,22 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 199,
+ "modules_scanned": 206,
  "test_ignores": [],
- "n_predicates": 115,
+ "n_predicates": 116,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
   "filesystem_premise_onpod": 46,
   "filesystem_premise_unresolved": 6,
-  "gpu": 1,
+  "gpu": 2,
   "optional_dependency": 9,
   "repository_content": 4,
   "staged_artifact": 3,
   "unrecognised": 28,
   "unstaged_artifact": 11
  },
- "n_differs_on_pod": 27,
+ "n_differs_on_pod": 28,
  "n_unrecognised": 34,
  "n_registered": 42,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
@@ -106,7 +106,7 @@
  "parity_by_resolution": {
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
-  "normalized_by_contract": 35,
+  "normalized_by_contract": 36,
   "same_on_pod": 61
  },
  "parity_unresolved": [],
@@ -708,7 +708,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_c2_full_search.py",
-   "line": 716,
+   "line": 819,
    "kind": "pytest.skip",
    "function": "test_the_screening_sample_was_drawn_under_the_domain_it_claims",
    "condition": "not (REPO / path).exists()",
@@ -2017,6 +2017,22 @@
    "registered_as": "local_hf_cache",
    "parity": "normalized_by_contract",
    "parity_why": "the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
+  },
+  {
+   "file": "tests/validation/test_c2_full_search_cuda_check.py",
+   "line": 337,
+   "kind": "pytest.skip",
+   "function": "test_no_cuda_device_is_NOT_RUN_rather_than_a_pass",
+   "condition": "torch.cuda.is_available()",
+   "expanded": "torch.cuda.is_available()",
+   "signal": "gpu",
+   "verdict": "differs_on_pod",
+   "why": "the pod has an L40S and the dev box has none, so this decides the OPPOSITE way there \u2014 it skips here and runs on the pod",
+   "nodeid": "tests/validation/test_c2_full_search_cuda_check.py::test_no_cuda_device_is_NOT_RUN_rather_than_a_pass",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "normalized_by_contract",
+   "parity_why": "CUDA_VISIBLE_DEVICES=\"\" is set for the pytest command on BOTH machines, so torch reports no accelerator on the L40S too. The one such predicate RUNS without CUDA and SKIPS with it, so without this it would have decided the OPPOSITE way on the pod."
   }
  ],
  "signal_definitions": {
@@ -2070,5 +2086,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "57df2c7991a1f409495871cd5895585b1c30b3fc8adf6441c21dc09cd2abb857"
+ "digest": "cbbb7c5aa0c3f594ee4d6711f2c40ce4e806a9be6dabdae94b7f83634741ca0a"
 }
