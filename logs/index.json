@@ -283,7 +283,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 23,
-  "runs_unrecorded": 4,
+  "runs_unrecorded": 5,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -340,6 +340,11 @@
     "recorded": 2,
     "unrecorded": 2,
     "total": 4
+   },
+   "phase_c2_full_search": {
+    "recorded": 0,
+    "unrecorded": 1,
+    "total": 1
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -1295,6 +1300,14 @@
    "n_files": 15,
    "digest": "6a9719fbf4028963b5eefa255e664d5efe299dabaf370d38c0b0661c1abd95b4",
    "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
+  },
+  {
+   "experiment_id": "phase_c2_full_search",
+   "run_id": "attempt1",
+   "root": "logs/stages/stage-1/phase_c2_full_search/runs/attempt1",
+   "n_files": 1,
+   "digest": "00652f5c04945f56cf751701b9b85cb5a54f45cfa5601d251ea32fa3e0f35c67",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

@@ -1,0 +1,113 @@
+{
+ "schema": "aadistill.autoinit.c2_full_search_grant/v1",
+ "_what_this_is": "the maintainer decision permitting ONE Phase-C2 full joint re-search session -- attempt 1 -- under the final independent review of db91852ad073dfdb7cc324a3a11050e7ed3d2b2f. It is the ISSUER'S INPUT and authorizes nothing by itself.",
+ "_where_this_lives": "logs/stages/stage-1/phase_c2_full_search/runs/attempt1/governance/grant.json",
+ "granted_for": "Phase C2 full joint re-search \u2014 attempt 1",
+ "granted_by": "the MAINTAINER DECISION on the final independent review of db91852ad073dfdb7cc324a3a11050e7ed3d2b2f: 'The Phase-C2 Full Joint Search is approved to proceed through its formal grant/readiness/authorization/bundle chain and then launch.' The complete-suite state-eval certification is ACCEPTED -- measured ranked-objective absolute drift 9.0320668e-06 against the frozen PARETO_V1 epsilon 1.0e-04, meeting the predeclared <1e-05 acceptance target. The two synthetic epsilon-boundary flips are interpreted as the expected numerical uncertainty band of two floating-point implementations and do NOT block the formal search. No additional GPU certification is required.",
+ "covers": "exactly ONE Phase-C2 full joint re-search session at a TOTAL hard ceiling of $34.8742: the derived 578-leaf space (576 decomposed), standing beam width 6, warmup level 1, both frozen calibration profiles, the accepted operator library with its frozen exclusion, the CURRENT OPTIMIZED state evaluator, the current DEPTH forward-KL-only implementation, frozen PARETO_V1 ranking, terminating at a committed Top-5. The session MUST end at commit_top_k.",
+ "explicitly_not_authorized": [
+  "behavioural screening or confirmation of any kind",
+  "recovery training of any kind",
+  "re-measuring the frozen baseline B",
+  "rerunning Search-1",
+  "rebuilding the baseline",
+  "C3 or C4",
+  "any automatic follow-on session",
+  "starting the 12-probe behavioural-selection session after commit_top_k",
+  "changing the PARETO epsilon, the ranking policy or the optimized evaluator on account of the synthetic boundary cases",
+  "amending the frozen baseline-completion evaluator contract, or making the two evaluator hashes interchangeable",
+  "using the optimized 1445.54-minute planning estimate to lower this session's authorization ceiling",
+  "narrowing beam width 6 or the storage provision to absorb a price change"
+ ],
+ "approved_money": {
+  "expected_usd": 16.0998,
+  "hard_cap_usd": 34.8742,
+  "price_basis_usd_per_hour": 1.09,
+  "max_price_usd_per_hour": 1.09,
+  "_the_issuer_rederives_all_of_this": "every figure is recomputed by check_approved_money from the pricing record's minutes at this grant's own rate, and any difference is a refusal. Stated here because a grant is evidence of a DECISION; the arithmetic is evidence of a computation.",
+  "_the_basis_is_the_CONSERVATIVE_one": "1826.58 minutes, the window the pooled per-expansion telemetry supports. The optimized implementation is expected to finish well inside it -- the recorded engineering planning estimate is 1445.54 min -- and review directed that the estimate must NOT lower this ceiling: a hard ceiling derived by component-level extrapolation can under-authorize a run, and the full-suite certification measured 2.63x on the whole state-eval pass where a four-item benchmark had implied 76x.",
+  "_it_covers_every_separately_billed_resource": "GPU $33.1829 + Container Disk $1.6913 over 400 GB + Network Volume $0.00 = $34.8742, at an effective $1.145556/h. A live GPU quote is not evidence that separately priced storage is free.",
+  "_live_rate_at_grant_time": "re-quoted immediately before writing this grant: securePrice $1.09/h, 48GB, stock Low. Equal to the reviewed rate, so the reviewed ceiling stands unchanged. The issuer re-quotes again and refuses on any move."
+ },
+ "budget_context_at_approval": {
+  "cumulative_spend_usd": 298.7241,
+  "authorized_cap_usd": 370.0,
+  "_arithmetic": "298.7241 + 34.8742 = 333.5983 <= 370.0",
+  "remaining_before_usd": 71.2759,
+  "_the_rest_of_the_chain": "the complete future C2 chain is conservatively bounded at $66.2759, leaving $5.0000 of project headroom. That is an accounting envelope and not permission for the behavioural session, which needs its own decision against the actual committed Top-5.",
+  "_derived_by": "scripts/consolidate/derive_budget.py, from every recorded closeout"
+ },
+ "one_use": {
+  "issuances_permitted": 1,
+  "launch_attempts_permitted": 1,
+  "provider_resources_permitted": 3,
+  "one_billing_resource_at_a_time": true,
+  "what_that_means": "this grant funds ONE launcher session. Inside it the launcher may replace a host that never became usable, up to three provider resources in total, ALL sharing this session's single $34.8742 ceiling. Three rather than two because the live quote reports stock Low for the L40S and a draw that never becomes usable costs minutes; the MONEY is the real bound and it does not move. A replacement is created only after the provider confirms the previous resource is no longer billing.",
+  "machine_readable": "the four values above become a resource scope in the authorization and are checked before any provider is contacted.",
+  "consumed_when": "the formal launcher is invoked under this authorization, whether or not a provider resource follows and whether or not any money is spent.",
+  "retry_rule": "PRE-SCIENCE ONLY. Ordinary provider acquisition or startup failures may be diagnosed and handled inside this grant's existing resource and money scope when NO scientific measurement has begun AND the previous resource is provider-confirmed non-billing. THE INSTANT full_joint_search begins producing formal search measurements, loss of the session is NOT an ordinary engineering retry: preserve evidence, tear down, reconcile spend and RETURN FOR REVIEW before repeating any formal scientific work. If it is uncertain whether formal measurement started, that uncertainty is itself a stop condition."
+ },
+ "bound_identities_the_issuer_must_reproduce": {
+  "_rule": "stated as the maintainer's approval basis and RE-DERIVED by the issuer from the committed tree. Any disagreement is a refusal, and an identity the issuer cannot derive is also a refusal -- a grant may not introduce a binding nobody checks. These are the post-certification identities.",
+  "full_search_harness_digest": "03a0838646ca6ab4ad60937aa9927f5bed81daae0a526da2814a03a9c533892c",
+  "full_search_harness_n_files": 91,
+  "full_search_plan_hash": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da",
+  "full_search_pricing_sha256": "bf0a8124e8ad5543bf83136470d66875460d307e2aeea7444d6f22a4b1dd854d",
+  "joint_space_total_leaves": 578,
+  "joint_space_decomposed_leaves": 576,
+  "joint_space_allowed_impls": [
+   "attention.activation_importance_v1",
+   "composite.stage1_sandwich_v0",
+   "depth.causal_kl_greedy_v1",
+   "depth.positional_v0",
+   "ffn.activation_importance_v0",
+   "width.global_pca_v0"
+  ],
+  "joint_space_impl_profiles_are_unpinned": true,
+  "excluded_implementations": [
+   "attention.weight_proxy_v0"
+  ],
+  "calibration_profile_ids": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ],
+  "ranking_policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+  "beam_schedule_id": "beam.delayed_prune",
+  "beam_width": 6,
+  "beam_warmup_levels": 1,
+  "state_eval_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "cost_table_sources": [
+   "phase_b_attempt5",
+   "phase_c2_attempt4"
+  ]
+ },
+ "approved_runtime": {
+  "gpu": "NVIDIA L40S",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "price_basis_usd_per_hour": 1.09,
+  "container_disk_gb": 400,
+  "network_volume_gb": 0,
+  "host_draws": 3,
+  "_enforced_before_provider_creation": "the launcher's frozen-runtime gate refuses any other GPU or image and any max price above the basis; a lower max price is safe.",
+  "_provision_is_derived": "400 GB for a derived 250.9 GiB peak of resident search states plus 26.99 GiB of teacher and environment, at a 1.25 headroom multiple. Review confirmed the provision; it is not shrunk to absorb a price change."
+ },
+ "interpretation_discipline": "the result is a CHEAP-METRIC selection over the frozen state_eval suite. It trains nothing, scores no battery, produces no correct_overall and cannot name an incumbent. The committed Top-5 are candidates for a SEPARATE behavioural-selection session that this grant does not authorize and that must be constructed and approved against the actual committed Top-5.",
+ "numerical_uncertainty_band": {
+  "_recorded_because_review_stated_it": "old/new decision identity is NOT guaranteed for a candidate pair whose objective gap lies within approximately 9.032e-06 of an epsilon boundary -- about 9.03% of the 1e-4 epsilon. All constructed cases at or outside the measured-drift scale remained stable, the complete-suite engineering candidates retained identical Pareto fronts, ordering and selected IDs, and this formal search evaluates every state consistently with ONE optimized evaluator.",
+  "measured_absolute_drift": 9.0320668e-06,
+  "pareto_epsilon": 0.0001,
+  "fraction_of_epsilon": 0.0903,
+  "evidence": "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/closeout.json"
+ },
+ "evaluator_lineage": "the historical Search-1 C measurements and the baseline-completion B belong to the HISTORICAL evaluator series and that completed B<->C comparison remains valid. The optimized evaluator is the CURRENT Full Search evaluator and may not append a future B measurement to the closed historical series. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_evaluator_lineage.json.",
+ "stop_conditions": [
+  "live securePrice above $1.09/h \u2014 STOP at $0 and mechanically re-derive the total ceiling for a new maintainer decision; do not narrow beam 6 or storage",
+  "any $0 pre-provider gate refuses \u2014 STOP at $0, diagnose, repair, fresh chain",
+  "the total hard ceiling is reached \u2014 the watchdog stops the resource",
+  "formal search measurement has begun and the session is lost \u2014 preserve, tear down, reconcile, RETURN FOR REVIEW; do not repeat formal work",
+  "resource ownership or billing status cannot be reconciled \u2014 create nothing else, prioritise teardown, escalate",
+  "commit_top_k completes \u2014 STOP. Do not start the behavioural session."
+ ],
+ "authorizes": "nothing by itself; it is the issuer's input",
+ "grant_sha256": "bf862fe53f949a4e822967a7d3eb76f94e3e5d5922033aaa1d78c9ad881f0c39"
+}
