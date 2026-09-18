@@ -1,0 +1,55 @@
+{
+ "schema": "aadistill.autoinit.c2_full_search_closeout/v1",
+ "_contract": "Terminal record for attempt 2 of the Phase-C2 full joint re-search. It created ONE provider resource for 7.6 minutes, spent $0.14, and produced NO scientific measurement: the beam refused to start.",
+ "experiment_id": "phase_c2_full_search",
+ "run_id": "attempt2",
+ "classification": "PRE-SCIENCE REFUSAL \u2014 the beam never started, nothing was measured",
+ "terminal": "C2_FULL_SEARCH_FAILED at stage full_joint_search, before any expansion",
+ "closed_utc": "2026-09-19T16:00:00Z",
+ "did_formal_measurement_begin": {
+  "answer": "NO, and this is the question that decides what happens next",
+  "stages_completed": [
+   "bind_identities"
+  ],
+  "failed_stage": "full_joint_search",
+  "expansions_performed": 0,
+  "states_materialized": 0,
+  "checkpoints_written": 0,
+  "trains_anything": false,
+  "measures_behaviour": false,
+  "_evidence": "the driver's own record: stages_completed is ['bind_identities'] and full_joint_search recorded passed=false with an AuthorizationError raised BEFORE the beam was constructed. `bind_identities` loads no model and derives the space; it is the stage whose whole purpose is to be checkable before anything expensive. So there is no measurement to preserve, no candidate to rank and nothing that a retry could pool or contaminate.",
+  "_so_this_is_an_engineering_retry": "review's boundary: 'Once full_joint_search has begun producing formal search measurements, do not treat loss of the session as an ordinary engineering retry.' It produced none. AGENTS.md P12.1 therefore applies: diagnose, minimal repair, targeted regression, fresh chain, continue without a further approval. The cumulative envelope still governs."
+ },
+ "what_failed": {
+  "error": "AuthorizationError: the full joint beam (full envelope) needs 1826.6 min ($33.27 projected) and the soft stop is $32.63. Refusing to start work that would leave nothing for collection.",
+  "root_cause": "the launcher passed the SESSION's hard window as the BEAM's envelope. `driver_command` sent `--search-minutes 1826.58`, which is hard_ceiling_minutes: beam plus setup, transfer, collection and the 30-minute artifact-recovery reserve. The driver checks a stage's full envelope against the SOFT STOP before starting it -- correctly, because a beam that consumed the whole ceiling would leave nothing for collection -- and the soft stop IS the hard window minus that reserve. So the beam was unaffordable by construction, for any reserve above zero, whatever the space costs. The line's own adjacent comment already said 'the beam's ENVELOPE'; the value did not.",
+  "_why_no_gate_caught_it": "the eleven $0 gates check the session's ceiling, its provision, its closure and its identities. This is a quantity INSIDE the driver command, consumed by a check that runs on the pod. Nothing compared the envelope the launcher emits against the soft stop it emits beside it.",
+  "the_repair": "`beam_envelope_minutes(row)` derives the beam's own bound from the priced row's `structural_max_hours` -- 1612.92 min against the session's 1826.58 -- and RAISES rather than falling back to the session window if the row does not state it. Projected at stage B: $29.39 against a $32.63 soft stop, leaving $3.24 for collection.",
+  "the_regression": "tests/pod/test_phase_c2_full_search_chain.py::test_the_beam_envelope_the_driver_is_handed_is_affordable parses the EMITTED command and asserts the envelope it carries is affordable against the soft stop it carries, that it is strictly below the session window, and that it equals the beam's own bound. Reinstating the defect makes it fail."
+ },
+ "what_passed_before_it": {
+  "pre_provider_gates": 11,
+  "_all_of_them": "session commit and lineage, executable closure, authorization scope, joint space, runtime bound, frozen assets, staged inputs, ceiling and plan, provision, launch-bound readiness and the bundle round-trip",
+  "setup": "complete in 3.1 min, driver detached and confirmed by descriptor probe",
+  "bind_identities": "PASSED: 578 reachable leaves (576 decomposed) over 6 implementations, profiles unpinned, both mixtures materialized, the frozen exclusion recorded",
+  "teardown": "gate passed, pod deleted, provider confirms gone"
+ },
+ "next": {
+  "attempt": "attempt3",
+  "_why_a_new_identity": "the launcher records a run when it is invoked and a recorded run is not reopened. The repair also edits a file inside the executable closure, so the harness digest moves and the whole chain -- grant, sweep, authorization, bundle -- is rebuilt against it.",
+  "_budget": "$0.14 of $34.8742 is spent. Attempt 3 runs under the same approved ceiling; attempt count is not budget and the cumulative envelope is unchanged."
+ },
+ "authorizes": "nothing",
+ "budget": {
+  "this_attempt": 0.14,
+  "_basis": "7.6 min of an L40S at the confirmed $1.09/h",
+  "authorized_usd": 34.8742,
+  "unspent_usd": 34.7342,
+  "provider_resources_created": 1,
+  "pod_id": "llprq3y2moxzev",
+  "teardown_provider_confirmed": true,
+  "pods_remaining": 0,
+  "_key_name_matters": "derive_budget.py reads budget.this_attempt or cost.actual_usd. A cost recorded under any other name does not reach the project book, which is how engineering spend has gone missing here before."
+ },
+ "closeout_sha256": "3be25f649b184a40808f8fb7ecaf8335339a25c6c4637ce037779b909596697e"
+}

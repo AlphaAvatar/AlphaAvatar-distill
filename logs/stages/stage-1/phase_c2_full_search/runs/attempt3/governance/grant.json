@@ -1,0 +1,187 @@
+{
+ "schema": "aadistill.autoinit.c2_full_search_grant/v1",
+ "_what_this_is": "the maintainer decision permitting ONE Phase-C2 full joint re-search session -- attempt 3 -- under the final independent review of db91852ad073dfdb7cc324a3a11050e7ed3d2b2f. Attempts 1 and 2 both ended BEFORE any formal measurement: attempt 1 refused at a $0 gate, attempt 2 passed all eleven gates and setup and then refused to START the beam, because the launcher handed it the session's hard window as the beam's envelope. No expansion was performed, no state was materialized and no candidate was ranked in either. AGENTS.md P12.1 therefore directs a fresh chain under a new attempt identity without a further approval. The approval terms are unchanged. It is the ISSUER'S INPUT and authorizes nothing by itself.",
+ "_where_this_lives": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/governance/grant.json",
+ "granted_for": "Phase C2 full joint re-search \u2014 attempt 3",
+ "granted_by": "the MAINTAINER DECISION on the final independent review of db91852ad073dfdb7cc324a3a11050e7ed3d2b2f: 'The Phase-C2 Full Joint Search is approved to proceed through its formal grant/readiness/authorization/bundle chain and then launch.' The complete-suite state-eval certification is ACCEPTED -- measured ranked-objective absolute drift 9.0320668e-06 against the frozen PARETO_V1 epsilon 1.0e-04, meeting the predeclared <1e-05 acceptance target. The two synthetic epsilon-boundary flips are interpreted as the expected numerical uncertainty band of two floating-point implementations and do NOT block the formal search. No additional GPU certification is required.",
+ "covers": "exactly ONE Phase-C2 full joint re-search session at a TOTAL hard ceiling of $34.8742: the derived 578-leaf space (576 decomposed), standing beam width 6, warmup level 1, both frozen calibration profiles, the accepted operator library with its frozen exclusion, the CURRENT OPTIMIZED state evaluator, the current DEPTH forward-KL-only implementation, frozen PARETO_V1 ranking, terminating at a committed Top-5. The session MUST end at commit_top_k.",
+ "explicitly_not_authorized": [
+  "behavioural screening or confirmation of any kind",
+  "recovery training of any kind",
+  "re-measuring the frozen baseline B",
+  "rerunning Search-1",
+  "rebuilding the baseline",
+  "C3 or C4",
+  "any automatic follow-on session",
+  "starting the 12-probe behavioural-selection session after commit_top_k",
+  "changing the PARETO epsilon, the ranking policy or the optimized evaluator on account of the synthetic boundary cases",
+  "amending the frozen baseline-completion evaluator contract, or making the two evaluator hashes interchangeable",
+  "using the optimized 1445.54-minute planning estimate to lower this session's authorization ceiling",
+  "narrowing beam width 6 or the storage provision to absorb a price change"
+ ],
+ "approved_money": {
+  "expected_usd": 16.0998,
+  "hard_cap_usd": 34.8742,
+  "price_basis_usd_per_hour": 1.09,
+  "max_price_usd_per_hour": 1.09,
+  "_the_issuer_rederives_all_of_this": "every figure is recomputed by check_approved_money from the pricing record's minutes at this grant's own rate, and any difference is a refusal. Stated here because a grant is evidence of a DECISION; the arithmetic is evidence of a computation.",
+  "_the_basis_is_the_CONSERVATIVE_one": "1826.58 minutes, the window the pooled per-expansion telemetry supports. The optimized implementation is expected to finish well inside it -- the recorded engineering planning estimate is 1445.54 min -- and review directed that the estimate must NOT lower this ceiling: a hard ceiling derived by component-level extrapolation can under-authorize a run, and the full-suite certification measured 2.63x on the whole state-eval pass where a four-item benchmark had implied 76x.",
+  "_it_covers_every_separately_billed_resource": "GPU $33.1829 + Container Disk $1.6913 over 400 GB + Network Volume $0.00 = $34.8742, at an effective $1.145556/h. A live GPU quote is not evidence that separately priced storage is free.",
+  "_live_rate_at_grant_time": "re-quoted immediately before writing this grant: securePrice $1.09/h, 48GB, stock Low. Equal to the reviewed rate, so the reviewed ceiling stands unchanged. The issuer re-quotes again and refuses on any move."
+ },
+ "budget_context_at_approval": {
+  "cumulative_spend_usd": 298.8641,
+  "authorized_cap_usd": 370.0,
+  "_arithmetic": "298.8641 + 34.8742 = 333.7383 <= 370.0",
+  "remaining_before_usd": 71.1359,
+  "_the_rest_of_the_chain": "the complete future C2 chain is conservatively bounded at $66.2759, leaving $5.0000 of project headroom. That is an accounting envelope and not permission for the behavioural session, which needs its own decision against the actual committed Top-5.",
+  "_derived_by": "scripts/consolidate/derive_budget.py, from every recorded closeout"
+ },
+ "one_use": {
+  "issuances_permitted": 1,
+  "launch_attempts_permitted": 1,
+  "provider_resources_permitted": 3,
+  "one_billing_resource_at_a_time": true,
+  "what_that_means": "this grant funds ONE launcher session. Inside it the launcher may replace a host that never became usable, up to three provider resources in total, ALL sharing this session's single $34.8742 ceiling. Three rather than two because the live quote reports stock Low for the L40S and a draw that never becomes usable costs minutes; the MONEY is the real bound and it does not move. A replacement is created only after the provider confirms the previous resource is no longer billing.",
+  "machine_readable": "the four values above become a resource scope in the authorization and are checked before any provider is contacted.",
+  "consumed_when": "the formal launcher is invoked under this authorization, whether or not a provider resource follows and whether or not any money is spent.",
+  "retry_rule": "PRE-SCIENCE ONLY. Ordinary provider acquisition or startup failures may be diagnosed and handled inside this grant's existing resource and money scope when NO scientific measurement has begun AND the previous resource is provider-confirmed non-billing. THE INSTANT full_joint_search begins producing formal search measurements, loss of the session is NOT an ordinary engineering retry: preserve evidence, tear down, reconcile spend and RETURN FOR REVIEW before repeating any formal scientific work. If it is uncertain whether formal measurement started, that uncertainty is itself a stop condition."
+ },
+ "bound_identities_the_issuer_must_reproduce": {
+  "_rule": "stated as the maintainer's approval basis and RE-DERIVED by the issuer from the committed tree. Any disagreement is a refusal, and an identity the issuer cannot derive is also a refusal -- a grant may not introduce a binding nobody checks. These are the post-certification identities.",
+  "full_search_harness_digest": "ec4f9e6c8ac08a22e39dc9cb1ae3a5d8cacf3e3ac040778708cd19d91eee5625",
+  "full_search_harness_n_files": 91,
+  "full_search_plan_hash": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da",
+  "full_search_pricing_sha256": "5fae57070d3dda76b9af5a82987fda35937670d935968ce06b5f27cd3c46e882",
+  "joint_space_total_leaves": 578,
+  "joint_space_decomposed_leaves": 576,
+  "joint_space_allowed_impls": [
+   "attention.activation_importance_v1",
+   "composite.stage1_sandwich_v0",
+   "depth.causal_kl_greedy_v1",
+   "depth.positional_v0",
+   "ffn.activation_importance_v0",
+   "width.global_pca_v0"
+  ],
+  "joint_space_impl_profiles_are_unpinned": true,
+  "excluded_implementations": [
+   "attention.weight_proxy_v0"
+  ],
+  "calibration_profile_ids": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ],
+  "ranking_policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+  "beam_schedule_id": "beam.delayed_prune",
+  "beam_width": 6,
+  "beam_warmup_levels": 1,
+  "state_eval_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "cost_table_sources": [
+   "phase_b_attempt5",
+   "phase_c2_attempt4"
+  ]
+ },
+ "approved_runtime": {
+  "gpu": "NVIDIA L40S",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "price_basis_usd_per_hour": 1.09,
+  "container_disk_gb": 400,
+  "network_volume_gb": 0,
+  "host_draws": 3,
+  "_enforced_before_provider_creation": "the launcher's frozen-runtime gate refuses any other GPU or image and any max price above the basis; a lower max price is safe.",
+  "_provision_is_derived": "400 GB for a derived 250.9 GiB peak of resident search states plus 26.99 GiB of teacher and environment, at a 1.25 headroom multiple. Review confirmed the provision; it is not shrunk to absorb a price change."
+ },
+ "interpretation_discipline": "the result is a CHEAP-METRIC selection over the frozen state_eval suite. It trains nothing, scores no battery, produces no correct_overall and cannot name an incumbent. The committed Top-5 are candidates for a SEPARATE behavioural-selection session that this grant does not authorize and that must be constructed and approved against the actual committed Top-5.",
+ "numerical_uncertainty_band": {
+  "_recorded_because_review_stated_it": "old/new decision identity is NOT guaranteed for a candidate pair whose objective gap lies within approximately 9.032e-06 of an epsilon boundary -- about 9.03% of the 1e-4 epsilon. All constructed cases at or outside the measured-drift scale remained stable, the complete-suite engineering candidates retained identical Pareto fronts, ordering and selected IDs, and this formal search evaluates every state consistently with ONE optimized evaluator.",
+  "measured_absolute_drift": 9.0320668e-06,
+  "pareto_epsilon": 0.0001,
+  "fraction_of_epsilon": 0.0903,
+  "evidence": "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/closeout.json"
+ },
+ "evaluator_lineage": "the historical Search-1 C measurements and the baseline-completion B belong to the HISTORICAL evaluator series and that completed B<->C comparison remains valid. The optimized evaluator is the CURRENT Full Search evaluator and may not append a future B measurement to the closed historical series. Owner: logs/stages/stage-1/phase_c2/plans/phase_c2_evaluator_lineage.json.",
+ "stop_conditions": [
+  "live securePrice above $1.09/h \u2014 STOP at $0 and mechanically re-derive the total ceiling for a new maintainer decision; do not narrow beam 6 or storage",
+  "any $0 pre-provider gate refuses \u2014 STOP at $0, diagnose, repair, fresh chain",
+  "the total hard ceiling is reached \u2014 the watchdog stops the resource",
+  "formal search measurement has begun and the session is lost \u2014 preserve, tear down, reconcile, RETURN FOR REVIEW; do not repeat formal work",
+  "resource ownership or billing status cannot be reconciled \u2014 create nothing else, prioritise teardown, escalate",
+  "commit_top_k completes \u2014 STOP. Do not start the behavioural session."
+ ],
+ "authorizes": "nothing by itself; it is the issuer's input",
+ "_amended": {
+  "_this_is_the_second_amendment": "both are the same class: a $0 gate found a defect in this session's own machinery, the repair edited a file inside the executable closure, and the harness digest moved. Nothing the maintainer approved moved either time. The amendments are recorded rather than the grant rewritten.",
+  "second": {
+   "amended_utc": "2026-09-19T14:00:00Z",
+   "what_changed": "one bound identity: full_search_harness_digest",
+   "from": "190757379336556460c413a523cbc9baf442ef676e6a35e92918249b7ce754a7",
+   "to": "32e4e05010160fa81dab56759bd04c91d7ca9669b6842272d2bdebb375bfffac",
+   "n_files_unchanged": 91,
+   "why": "the FIRST $0 dry run of the pre-provider gates refused at the readiness gate, on a readiness record that had just swept PASS. The gate asked `record.get(\"kind\")`; the recorder writes `record_kind`, and so do the shared pod_environment.verify_record and every other session's launcher. So the gate refused every launch-bound record it was ever shown -- an accept path that could not pass -- and reported the record's kind as None. The only test covering it presented an ABSENT record, which refuses either way, while its name claimed a diagnostic case its body never built.",
+   "the_repair": "the gate reads `record_kind`, and reports `swept_base_commit` instead of a `commit` key no record carries. A targeted regression presents both a diagnostic and a launch_bound record through the module the gate loads from, requires refuse-then-accept, and requires the refusal message not to say None; reinstating the defect makes it fail. Editing the launcher moved the closure digest, 91 files unchanged.",
+   "_also_in_this_commit": "scripts/autoinit/stage_c2_full_search_bundle.py, which did not exist. stage_c2_bundle.py is bound to SEARCH-1's transport and record schema, so this session had no way to stage its bundle through a tool -- the same class of gap as the missing SESSION_KIND=c2_full_search setup dispatch branch. It is a dev-box tool and is NOT in the executable closure, so it does not move the digest."
+  },
+  "first": {
+   "amended_utc": "2026-09-19T13:00:00Z",
+   "what_changed": "one bound identity: full_search_harness_digest",
+   "from": "03a0838646ca6ab4ad60937aa9927f5bed81daae0a526da2814a03a9c533892c",
+   "to": "190757379336556460c413a523cbc9baf442ef676e6a35e92918249b7ce754a7",
+   "n_files_unchanged": 91,
+   "why": "the FIRST launch-bound readiness sweep on the committed grant tree REFUSED, and it was right to. The full search was sweeping Search-1's pod selection, which asserts that every path SEARCH-1 stages is present -- including the canonical 0.6B control Search-1 injects as its measured baseline and that this session deliberately does not stage. The simulator hides what a session does not stage, correctly, so two tests entirely correct about Search-1 refused a correct full-search tree: test_every_declared_staged_path_is_present on artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja, and test_the_canonical_control_checkpoint_is_readable on the same directory's model.safetensors.",
+   "the_repair": "the full search now sweeps its OWN selection, tests/c2_full_search_preflight, as the baseline completion already did for exactly this reason -- its module says so in almost these words. Narrowing Search-1's gate was the other option and the wrong one: it is a consumed experiment's satisfiable gate, and a guard narrowed to fit the session under test stops guarding the session it was written for. Repointing the selection edited full_search_pod_environment.py, which is inside the executable closure, so the harness digest moved. The file COUNT did not: 91 before and after.",
+   "_why_this_is_not_a_scope_change": "AGENTS.md P12.1: ordinary engineering failures inside an approved envelope are diagnosed and repaired without a further approval. Nothing the maintainer approved moved -- not the space, the beam, the operators, the calibration, the evaluator, the ranking policy, the terminus, the ceiling or the provision. Fifteen of the sixteen bound identities are BYTE IDENTICAL to the granted ones; the sixteenth is the harness the repair lives in. The amendment is recorded rather than the grant rewritten, because a grant that silently re-derived itself would prove nothing.",
+   "_identities_unchanged": [
+    "beam_schedule_id",
+    "beam_warmup_levels",
+    "beam_width",
+    "calibration_profile_ids",
+    "cost_table_sources",
+    "excluded_implementations",
+    "full_search_harness_n_files",
+    "full_search_plan_hash",
+    "full_search_pricing_sha256",
+    "joint_space_allowed_impls",
+    "joint_space_decomposed_leaves",
+    "joint_space_impl_profiles_are_unpinned",
+    "joint_space_total_leaves",
+    "ranking_policy_hash",
+    "state_eval_content_sha256"
+   ]
+  }
+ },
+ "_prior_attempts": {
+  "attempt1": {
+   "outcome": "PRE-PROVIDER GATE REFUSAL at $0",
+   "cost_usd": 0.0,
+   "provider_resources": 0,
+   "formal_measurement_began": false,
+   "cause": "readiness_gate read `record.get(\"kind\")`; the recorder writes `record_kind`. An accept path that could not pass.",
+   "closeout": "runs/attempt1/closeout/outcome.json"
+  },
+  "attempt2": {
+   "outcome": "PRE-SCIENCE REFUSAL \u2014 the beam never started",
+   "cost_usd": 0.14,
+   "provider_resources": 1,
+   "formal_measurement_began": false,
+   "stages_completed": [
+    "bind_identities"
+   ],
+   "cause": "the launcher passed the SESSION's hard window (1826.58 min) as the BEAM's envelope. The driver checks a stage's full envelope against the soft stop before starting it, and the soft stop is the hard window minus the recovery reserve -- so the beam was unaffordable by construction.",
+   "repair": "beam_envelope_minutes() derives the beam's own bound from the priced row's structural_max_hours: 1612.92 min, projecting $29.39 against a $32.63 soft stop.",
+   "closeout": "runs/attempt2/closeout/outcome.json"
+  },
+  "_cumulative": {
+   "spent_usd": 0.14,
+   "_against": "this session's approved ceiling of $34.8742",
+   "_attempt_count_is_not_budget": "both prior attempts ended before formal measurement, which is the boundary review drew. The money is the bound and it has barely moved."
+  }
+ },
+ "_rederived_on_the_final_tree": {
+  "identities_that_moved_since_the_first_draft": [
+   "full_search_harness_digest",
+   "full_search_pricing_sha256"
+  ],
+  "_why": "the grant is written LAST, after every generated document settles. Attempt 2's $0.14 reached the project book, which moved the pricing record, which is inside the executable closure -- so both the pricing identity and the harness digest moved. A grant drafted before the generators settle binds a tree that no longer exists."
+ },
+ "grant_sha256": "5536686be12b42829af8aee9c3ec4383a987980cb3daea71e0b8b165ef22f445"
+}

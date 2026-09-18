@@ -1,0 +1,6 @@
+[11:59:05] stage bind_identities
+2026-09-18T11:59:05Z MARKER:STAGE_PASSED:bind_identities
+[11:59:05] space: 578 reachable leaves (576 decomposed) over 6 implementations, profiles unpinned
+[11:59:05] stage full_joint_search
+2026-09-18T11:59:05Z MARKER:STAGE_FAILED:full_joint_search
+2026-09-18T11:59:05Z MARKER:C2_FULL_SEARCH_FAILED

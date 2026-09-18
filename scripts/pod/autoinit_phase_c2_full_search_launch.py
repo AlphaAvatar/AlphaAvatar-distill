@@ -553,6 +553,30 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
                   f"{evidence['roundtrip_harness_digest'][:12]}…")
 
 
+def beam_envelope_minutes(row: dict) -> float:
+    """The BEAM's own full envelope, in minutes, from the priced row.
+
+    Not the session's hard window. The row prices both: `hard_ceiling_minutes`
+    is the whole session -- beam, setup, transfer, collection and the
+    artifact-recovery reserve -- while `structural_max_hours` is the bound on
+    the beam itself, the costly-early base plus the beam-composition reserve
+    the driver's own record describes.
+
+    The distinction is not cosmetic. The driver refuses to START work whose
+    full envelope would cross the soft stop, and the soft stop is the hard
+    window minus the recovery reserve. So a beam handed the hard window can
+    never be afforded, whatever the space costs -- which is how attempt 2 died
+    at $0.14 after passing every gate.
+    """
+    hours = row.get("structural_max_hours")
+    if hours is None:
+        raise KeyError(
+            "the priced row states no structural_max_hours, so the beam's own "
+            "envelope cannot be derived. Refusing to fall back to the session "
+            "window: that is the substitution this function exists to prevent.")
+    return float(hours) * 60.0
+
+
 def driver_command(ctx: SessionContext, plan) -> str:
     """The driver invocation. Every identity it needs, it BINDS itself."""
     def floor2(value: float) -> str:
@@ -567,12 +591,23 @@ def driver_command(ctx: SessionContext, plan) -> str:
             f"--rate {ctx.price} --spent-usd {ctx.spent_usd:.3f} "
             f"--authorized-usd {ctx.auth.hard_cap_usd:.4f} "
             f"--soft-stop-usd {floor2(plan.soft_stop_usd)} "
-            #: The beam's ENVELOPE and its CLOCK, both from the pricing record's
-            #: row for the standing width. The driver defaults neither: a driver
-            #: that invented its own budget is one that can outrun the plan that
-            #: funded it.
-            f"--search-minutes {float(row['hard_ceiling_minutes']):.2f} "
-            f"--search-deadline-minutes {float(row['hard_ceiling_minutes']):.2f} "
+            #: The beam's ENVELOPE and its CLOCK, both from the pricing
+            #: record's row for the standing width. The driver defaults
+            #: neither: a driver that invented its own budget is one that can
+            #: outrun the plan that funded it.
+            #:
+            #: `structural_max_hours` is the BEAM's own bound. This passed
+            #: `hard_ceiling_minutes`, which is the whole SESSION window --
+            #: beam plus setup, transfer, collection and the 30-minute
+            #: artifact-recovery reserve -- and the driver checks that envelope
+            #: against the SOFT STOP before starting. Handing it the session
+            #: window therefore made the beam unaffordable by construction, for
+            #: any reserve above zero: attempt 2 refused at $0.14 with "needs
+            #: 1826.6 min ($33.27 projected) and the soft stop is $32.63".
+            #: The adjacent comment already said "the beam's envelope"; the
+            #: value did not.
+            f"--search-minutes {floor2(beam_envelope_minutes(row))} "
+            f"--search-deadline-minutes {floor2(beam_envelope_minutes(row))} "
             f"--top-n 5 "
             f"--device cuda")
 

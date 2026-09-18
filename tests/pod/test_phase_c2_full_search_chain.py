@@ -664,6 +664,68 @@ def test_the_frozen_assets_gate_runs_the_real_verifier(launcher):
 
 # --- the plan the runner uses is the plan the record states -----------------
 
+def test_the_beam_envelope_the_driver_is_handed_is_affordable(launcher):
+    """The check attempt 2 died for, at $0.14 after passing all eleven gates.
+
+    The driver refuses to START work whose full envelope would cross the soft
+    stop -- correctly: a beam that consumed the whole ceiling would leave
+    nothing for collection. The launcher handed it
+    `hard_ceiling_minutes`, which is the SESSION window: beam plus setup,
+    transfer, collection and the 30-minute artifact-recovery reserve. So the
+    beam was unaffordable by construction, for any reserve above zero, and no
+    gate could see it -- the gates check the session's ceiling, and this is a
+    quantity inside the driver command.
+
+    Asserted as the driver asserts it, on the value the command actually
+    carries.
+    """
+    import re
+
+    import experiments.phase_c2.full_search as FSG
+
+    spec = launcher.spec(launch_args(launcher))
+    rate = FSG.price_per_hour_basis(REPO)
+    plan = spec.budget.plan(price_per_hour=rate, authorized_usd=FSG.total_ceiling_usd(
+        rate, REPO)["total_hard_ceiling_usd"])
+
+    class _Auth:
+        hard_cap_usd = FSG.total_ceiling_usd(rate, REPO)["total_hard_ceiling_usd"]
+        harness_source_digest = "x" * 64
+        harness_source_files = ()
+
+    ctx = types.SimpleNamespace(args=launch_args(launcher), evidence={},
+                                auth=_Auth(), image_digest="test",
+                                price=rate, spent_usd=0.0)
+    command = spec.driver_command(ctx, plan)
+
+    def number(flag):
+        m = re.search(rf"--{flag} ([0-9.]+)", command)
+        assert m, f"the command states no --{flag}: {command}"
+        return float(m.group(1))
+
+    envelope = number("search-minutes")
+    soft_stop = number("soft-stop-usd")
+    #: A generous allowance for what stage A spends before the beam starts --
+    #: attempt 2 had spent $0.092 by then. The point is the MARGIN, not the
+    #: exact figure.
+    spent_by_stage_b = 0.50
+    projected = spent_by_stage_b + envelope / 60.0 * rate
+    assert projected <= soft_stop, (
+        f"the beam's envelope of {envelope:.2f} min projects ${projected:.2f} "
+        f"against a soft stop of ${soft_stop:.2f}. The driver refuses to start "
+        "work that would leave nothing for collection, so this beam could "
+        "never begin.")
+
+    #: and it must be the BEAM's bound, not the session's window
+    row = FSG._standing_row(REPO)
+    assert envelope < float(row["hard_ceiling_minutes"]), (
+        "the beam envelope equals or exceeds the whole session window, so it "
+        "is the session's number rather than the beam's")
+    assert envelope == pytest.approx(
+        float(row["structural_max_hours"]) * 60.0, abs=0.01)
+    assert number("search-deadline-minutes") == envelope
+
+
 def test_the_runner_plans_exactly_the_pricing_record(launcher):
     spec = launcher.spec(launch_args(launcher))
     plan = spec.budget.plan(price_per_hour=FSG.price_per_hour_basis(REPO),

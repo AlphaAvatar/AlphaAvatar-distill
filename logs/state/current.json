@@ -23,9 +23,9 @@
   "note": "nothing is prepared and nothing may start. The durability boundary has inverted: no GPU remeasurement of B, no second state_eval, no Search-2 and no behavioural confirmation without a new maintainer decision. Owner: the attempt8 closeout."
  },
  "budget": {
-  "cumulative_spend_usd": 298.7241,
+  "cumulative_spend_usd": 298.8641,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 71.2759,
+  "remaining_usd": 71.1359,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,

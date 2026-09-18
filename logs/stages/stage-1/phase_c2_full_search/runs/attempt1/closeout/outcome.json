@@ -6,12 +6,6 @@
  "classification": "PRE-PROVIDER GATE REFUSAL at $0 \u2014 the chain is consumed, no science began",
  "terminal": "ABORTED AT A $0 GATE",
  "closed_utc": "2026-09-19T15:00:00Z",
- "money": {
-  "this_attempt": 0.0,
-  "_basis": "no provider resource was created. The abort happened during the pre-provider gate pass, before any create call.",
-  "provider_resources_created": 0,
-  "pods_remaining": 0
- },
  "what_happened": {
   "gates_passed": [
    "session_commit_and_lineage",
@@ -50,5 +44,12 @@
   "_the_live_chain_is": "attempt2, built fresh under its own grant"
  },
  "authorizes": "nothing",
- "closeout_sha256": "e6561e426791678bbcc3cb629306cc5533ceda8021da102e42575f23a3943dcb"
+ "budget": {
+  "this_attempt": 0.0,
+  "_basis": "no provider resource was created. The abort happened during the pre-provider gate pass, before any create call.",
+  "provider_resources_created": 0,
+  "pods_remaining": 0,
+  "_key_name_matters": "derive_budget.py reads budget.this_attempt or cost.actual_usd. A cost recorded under any other name does not reach the project book, which is how engineering spend has gone missing here before."
+ },
+ "closeout_sha256": "d25786863c8c2a8795ca6e6cf00a2ecc03c64fd875cf20b2db9729a9a40c0d3f"
 }
