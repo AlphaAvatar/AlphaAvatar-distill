@@ -1,0 +1,54 @@
+{
+ "schema": "aadistill.autoinit.c2_full_search_closeout/v1",
+ "_contract": "Terminal record for attempt 1 of the Phase-C2 full joint re-search. It created NO provider resource, spent NOTHING, and produced no scientific measurement. It is engineering evidence that the $0 gates work.",
+ "experiment_id": "phase_c2_full_search",
+ "run_id": "attempt1",
+ "classification": "PRE-PROVIDER GATE REFUSAL at $0 \u2014 the chain is consumed, no science began",
+ "terminal": "ABORTED AT A $0 GATE",
+ "closed_utc": "2026-09-19T15:00:00Z",
+ "money": {
+  "this_attempt": 0.0,
+  "_basis": "no provider resource was created. The abort happened during the pre-provider gate pass, before any create call.",
+  "provider_resources_created": 0,
+  "pods_remaining": 0
+ },
+ "what_happened": {
+  "gates_passed": [
+   "session_commit_and_lineage",
+   "full_search_executable_gate",
+   "full_search_scope_gate",
+   "frozen_space_gate",
+   "frozen_runtime_gate",
+   "frozen_assets_gate",
+   "staged_inputs_gate",
+   "pricing_and_plan_gate",
+   "storage_gate"
+  ],
+  "n_gates_passed": 9,
+  "gate_that_refused": "readiness_gate",
+  "refusal": "the readiness record is None, not 'launch_bound'. Only a launch-bound record describes the tree a launch will use.",
+  "_the_defect": "`readiness_gate` asked `record.get(\"kind\")` while the recorder writes `record_kind`, as do the shared pod_environment.verify_record and every other session's launcher. The gate therefore refused every launch-bound record it was ever shown -- an accept path that could not pass -- and reported the kind as None for a record that had just swept PASS with 18 passed, 0 skipped, 0 failed.",
+  "_repaired_in": "698ab720b2449b689ca9c0b25468f88c2cfa991a",
+  "_regression": "tests/pod/test_phase_c2_full_search_chain.py::test_the_readiness_gate_reads_the_key_the_recorder_writes, which fails when the defect is reinstated",
+  "_a_second_gap_the_same_pass_exposed": "there was no full-search bundle stager. stage_c2_bundle.py is bound to Search-1's transport and record schema. scripts/autoinit/stage_c2_full_search_bundle.py now exists."
+ },
+ "why_a_new_attempt_identity": "the launcher records a run when it is invoked, and a recorded run is not reopened -- its manifest describes an execution a second invocation would overwrite. So this chain is CONSUMED even at $0, exactly as the grant's one_use rule states: 'consumed_when: the formal launcher is invoked under this authorization, whether or not a provider resource follows and whether or not any money is spent.' The standing maintainer rule (AGENTS.md P12.1) is that a formal launcher invocation aborting before measurement is an ENGINEERING subrun: preserve and close it, diagnose, repair, and build a FRESH chain under a new attempt identity without another approval. The incrementing attempt number is not a scope expansion and the cumulative budget is unchanged.",
+ "no_science_began": {
+  "stages_executed": [],
+  "provider_resources": 0,
+  "spend": 0.0,
+  "_so_nothing_is_owed_to_review": "review must be returned to when formal measurement has begun and the session is lost. Nothing began: the abort is nine gates into a $0 pass."
+ },
+ "superseded_artifacts": {
+  "removed_from_this_run": [
+   "governance/authorization.json",
+   "governance/readiness.json",
+   "governance/bundle.json"
+  ],
+  "_why": "all three were rebuilt under this run id AFTER the gate refused and BEFORE the launcher revealed that a recorded run cannot be reopened. They describe a chain that can never execute: the authorization binds run_id attempt1, whose manifest already exists, so the launcher refuses to open it. An issued authorization sitting in a consumed run's governance directory reads as current, which is the one thing it must not do.",
+  "_what_remains_here": "the grant, the aborted session record and this closeout -- the evidence that nine $0 gates passed and the tenth refused, which is what this attempt is for.",
+  "_the_live_chain_is": "attempt2, built fresh under its own grant"
+ },
+ "authorizes": "nothing",
+ "closeout_sha256": "e6561e426791678bbcc3cb629306cc5533ceda8021da102e42575f23a3943dcb"
+}
