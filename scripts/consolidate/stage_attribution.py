@@ -610,6 +610,54 @@ STAGE_1 = [
             "type, so its runs do not sit among Search-1's attempts."),
     ),
     dict(
+        id="phase_c2_replay",
+        kind="experiment",
+        stage_id="1",
+        status=("built and gated — STOPPED BEFORE CREATING A RESOURCE, "
+                "$5.27 derived against $5.00 authorized"),
+        title=("Phase C2 replay-only artifact reconstruction — attempt 3's "
+               "Top-5 checkpoints"),
+        question=("Can the five checkpoints behind the frozen Top-5 be rebuilt "
+                  "byte-for-byte from the committed evidence? The full joint "
+                  "re-search committed its selection and then lost the weights "
+                  "when the pod was torn down, so the ranking survives and the "
+                  "artifacts it ranked do not. This session replays each "
+                  "selected path with EVERY step pinned to the artifact digest "
+                  "attempt 3 recorded, and either reproduces each leaf's exact "
+                  "identity or stops. It decides nothing: no beam, no ranking, "
+                  "no selection, no selection-bearing evaluation, no control "
+                  "comparison and no behavioural work. A digest mismatch would "
+                  "be a scientific finding, not a retryable engineering "
+                  "failure."),
+        canonical_config="configs/autoinit/c2_replay_artifacts.json",
+        evidence=[
+            E("logs/stages/stage-1/phase_c2_replay/plans/replay_requirement.json",
+              "the derived money requirement, and the stop before any provider "
+              "resource existed", field="authorized_usd", equals=5.0),
+            E("logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/"
+              "stage1_selection.json",
+              "the frozen Top-5 this session reconstructs, named by its own "
+              "commitment hash",
+              field="selection_sha256",
+              equals="7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673"),
+            E("logs/stages/stage-1/phase_c2_replay/plans/leaf_destination_decision.md",
+              "why the leaves go to the development host's store and not the "
+              "hub, measured at the LFS batch endpoint for $0"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_c2_replay",
+        classification_reason=(
+            "Stage 1 because it reconstructs Stage-1 initialization artifacts. "
+            "It is separate from `phase_c2_full_search` because it is not an "
+            "attempt of that search and must never be counted as one: the "
+            "search is complete, its selection is frozen and accepted, and the "
+            "review that authorized this work was explicit that there is no "
+            "fourth Full Search attempt. It produces no ranking and no "
+            "measurement of its own -- only the weights behind a decision that "
+            "was already made."),
+    ),
+    dict(
         id="c2_full_search_perf",
         kind="engineering",
         stage_id="1",

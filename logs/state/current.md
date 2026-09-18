@@ -14,6 +14,30 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 provider confirms it is gone and an account-wide list returns `[]`. **Nothing
 is prepared for launch.**
 
+**The authorized replay is BUILT and BLOCKED ON `$0.27`.** The
+artifact-reconstruction session — five digest-pinned paths rebuilding the
+checkpoints behind attempt 3's frozen Top-5 — is implemented, rehearsed at toy
+scale and gated, and it **stopped before creating a provider resource** because
+the derived hard window costs `$5.27` all-in against the `$5.00` authorized. The
+repository's own budget planner is what refused: *"the plan terminates at $5.18
+(285 min at $1.090/h) but only $5.00 is authorized — a shortfall of $0.18. Ask
+for $5.18 or reduce the run; do not shrink it silently to fit."* Owner:
+[`replay_requirement.json`](../stages/stage-1/phase_c2_replay/plans/replay_requirement.json).
+
+Two findings from building it, both `$0`:
+
+* **The hub cannot hold the leaves.** Asked at the LFS batch endpoint with no
+  bytes sent: one 1.11 GiB leaf is granted, five (5.55 GiB) return `403 Private
+  repository storage limit reached`. Largest admitted single object **1.756
+  GiB**. The five leaves therefore go to the development host's out-of-tree
+  store; the hub keeps identities and hashes only. Owner:
+  [`leaf_destination_decision.md`](../stages/stage-1/phase_c2_replay/plans/leaf_destination_decision.md).
+  Purging or upgrading hub storage is a maintainer decision and was not done.
+* **The replay must stay on L40S.** A40 (`$0.49`) and RTX A6000 (`$0.53`) were
+  quoted and rejected: the session's entire content is byte-exact digest
+  agreement with artifacts an L40S produced, and a different architecture can
+  present as a replay mismatch for an infrastructural reason.
+
 ## The full joint re-search RAN, produced a Top-5, and then lost it
 
 **Attempt 3, 386.2 min, `$7.02`, RETURNED TO REVIEW — not retried.** Formal

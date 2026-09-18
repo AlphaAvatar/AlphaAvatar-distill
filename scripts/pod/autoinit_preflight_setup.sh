@@ -851,6 +851,33 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'search1 {a.authorizes_c2_search1}, completion {a.authorizes_c2_baseline_completion}, '
       f'behavioural {a.authorizes_behavioural_selection}, training {a.allows_recovery_training}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2_replay" ]; then
+  # A TENTH type. The replay reconstructs the checkpoints behind a frozen Top-5
+  # and decides nothing, so its artifact must be unable to buy any of the work
+  # that WOULD decide something. The full-search flag is the one that matters
+  # most here and it is the one a careless reuse would set: the search is
+  # COMPLETE, the review forbade a fourth attempt, and an artifact that could
+  # authorize a beam would buy exactly the forbidden thing at a tenth of the
+  # price under a name that sounds like bookkeeping.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from experiments.phase_c2.replay import ReplayAuthorization
+a = ReplayAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c2_replay is True, 'this session needs a replay authorization'
+assert a.authorizes_c2_full_search is False, 'a replay grant must not authorize a beam'
+assert a.authorizes_c2_search1 is False, 'a replay grant must not authorize the Search-1 beam'
+assert a.authorizes_c2_baseline_completion is False, 'a replay grant must not authorize a baseline rebuild'
+assert a.authorizes_behavioural_selection is False, 'a replay grant must not authorize behavioural work'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_recovery_training is False, 'the replay trains nothing'
+assert a.automatic_followon_start is False, 'nothing chains off the replay'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, replay {a.authorizes_c2_replay}, '
+      f'full search {a.authorizes_c2_full_search}, '
+      f'behavioural {a.authorizes_behavioural_selection}, training {a.allows_recovery_training}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

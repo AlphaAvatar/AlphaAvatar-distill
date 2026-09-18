@@ -1,0 +1,121 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_requirement/v1",
+ "_contract": "The derived money requirement for the authorized replay-only reconstruction. It is a DERIVATION, not a request for scope: the session, the five paths and the GPU are exactly what the review authorized. Only the ceiling is short.",
+ "verdict": "STOPPED BEFORE CREATING A RESOURCE \u2014 the authorized ceiling does not cover the derived hard window",
+ "authorized_usd": 5.0,
+ "soft_stop_usd": 4.0,
+ "derived_all_in_usd": 5.27,
+ "shortfall_usd": 0.27,
+ "price": {
+  "gpu": "NVIDIA L40S",
+  "securePrice_usd_per_hour": 1.09,
+  "quoted_utc": "2026-09-19",
+  "stock": "Low",
+  "_why_not_cheaper": "A40 at $0.49 and RTX A6000 at $0.53 were quoted and REJECTED. This session's entire content is byte-exact digest agreement with artifacts produced on an L40S. A different GPU architecture can select different kernels and change the low bits, which would present as a replay mismatch \u2014 a scientific STOP condition \u2014 for a reason that is purely infrastructural. Saving $0.60/h by risking a false mismatch is not a saving.",
+  "_community_price_not_used": "communityPrice is $0.79; the launcher prices on securePrice and so does this record."
+ },
+ "window": {
+  "expected_minutes": 245.75,
+  "soft_stop_minutes": 270.33,
+  "hard_terminate_minutes": 285.33,
+  "contingency_fraction": 0.1,
+  "artifact_recovery_reserve_minutes": 15.0
+ },
+ "cost": {
+  "gpu_usd": 5.19,
+  "container_disk_gb": 120,
+  "container_disk_usd": 0.08,
+  "network_volume_usd": 0.0,
+  "all_in_usd": 5.27,
+  "_disk_is_billed_separately": "RunPod bills container disk at $0.10/GB/month independently of the GPU. A GPU-only ceiling has already missed $1.69 in this programme."
+ },
+ "phases_minutes": {
+  "shared_session": [
+   [
+    "setup_and_asset_staging",
+    45.0
+   ],
+   [
+    "bundle_transfer",
+    6.0
+   ],
+   [
+    "teacher_fetch_and_verify",
+    8.0
+   ],
+   [
+    "machine_gates",
+    22.0
+   ],
+   [
+    "selection_commit_and_artifact_manifest",
+    8.0
+   ],
+   [
+    "artifact_synchronization",
+    6.0
+   ]
+  ],
+  "reconstruct_five_pinned_paths": 150.75,
+  "leaf_recovery_reserve": 15.0
+ },
+ "per_path_bound": [
+  {
+   "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
+   "bounded_minutes": 30.15
+  },
+  {
+   "state_id": "7da1e4e2254e59766581e777b8066b7e",
+   "bounded_minutes": 30.15
+  },
+  {
+   "state_id": "1d2844488f3ad630414c3cd69b6fa395",
+   "bounded_minutes": 30.15
+  },
+  {
+   "state_id": "88086555a6662b206e00ae28fc9d3ca3",
+   "bounded_minutes": 30.15
+  },
+  {
+   "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
+   "bounded_minutes": 30.15
+  }
+ ],
+ "worst_seconds_by_kind": {
+  "ATTENTION": 63.64,
+  "COMPOSITE_STAGE1": 44.82,
+  "DEPTH": 1540.69,
+  "FFN": 57.55,
+  "RESIDUAL_WIDTH": 56.88
+ },
+ "_why_bounded_not_measured": "Attempt 3's MEASURED per-step timings total 91.5 minutes for the five paths, which would price the session at about $3.4 and fit comfortably. They are not the bound. The search reused states it had already computed: one selected path records a DEPTH step at 0.6 minutes where the same operator took 25.7 minutes elsewhere. A fresh replay gets no such reuse, so every step is priced at the worst observation of its kind anywhere in the run, giving 150.8 minutes. Averages are not bounds.",
+ "_what_the_ceiling_buys": "The expected case finishes all five leaves at roughly $4.46 and fits. What does not fit is the conservative hard window, which is what an authorization must cover. The driver's admission control would keep actual spend under the $4.00 soft stop by refusing to start a path it cannot afford to finish \u2014 so the session would be SAFE at $5.00, but it would secure four leaves instead of five under worst-case timings, and the fifth would need another session with its own setup cost of about $1.70. Funding the derived window once is cheaper than funding a partial run twice.",
+ "options": [
+  {
+   "option": "raise the ceiling to the derived requirement",
+   "all_in_usd": 5.27,
+   "effect": "all five leaves reconstructed and secured in one session",
+   "recommended": true
+  },
+  {
+   "option": "proceed at $5.00 unchanged",
+   "all_in_usd": 5.0,
+   "effect": "safe but possibly incomplete: admission control stops before overspending, likely securing 4 of 5 leaves under worst-case timings and all 5 under measured timings",
+   "recommended": false
+  },
+  {
+   "option": "reduce the run",
+   "effect": "split the five paths across two authorized sessions; pays the ~95-minute shared overhead twice",
+   "recommended": false
+  }
+ ],
+ "not_requested": [
+  "a wider scope",
+  "a different GPU",
+  "a beam",
+  "any behavioural work",
+  "a project cap increase"
+ ],
+ "source_binding_plan_hash": "f5969a276561892c1831a422330d2278f1fb99e06cfc00167323f645cc64ccd5",
+ "requirement_sha256": "d1501b6c0bf637b0d90c47826a52dfeb1a09fbc4e474a0cd858e0a62b6b51be3"
+}

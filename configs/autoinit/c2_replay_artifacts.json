@@ -1,0 +1,13 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_c2_replay",
+ "note": "Success spec for a replay-only reconstruction that reached C2_REPLAY_ALL_DONE. The session's whole product is WEIGHTS, and weights are fetched by the runner's product path rather than by this spec -- gated on leaves having been reconstructed, never on session success, which is the rule $2.82 of verified checkpoints was once lost to. What this document collects is the evidence that says which weights those are: the replay evidence carries the machine-readable source binding to attempt 3's session commit, every step's realized digest against its pin, and each leaf's identity compared field by field against the frozen selection. Without it a directory of five checkpoints is five anonymous files. The per-leaf sidecars travel WITH the leaves, so they are not listed here. On lifecycle: the vocabulary is `final_required` and `mutable_snapshot` and nothing else -- ArtifactSpec.__post_init__ refuses any other value, so an invented word makes this whole document UNLOADABLE and the collector exits 1 before it looks at a single file.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_c2_replay/c2_replay_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  }
+ ]
+}

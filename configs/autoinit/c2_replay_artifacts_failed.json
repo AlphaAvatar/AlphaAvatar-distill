@@ -1,0 +1,13 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_c2_replay",
+ "note": "FAILED-path spec. Only the session evidence is required: a replay that stopped in stage A produced no leaf at all, and demanding one would block the collection of what a failed run DOES have. A failure here is frequently the MOST informative outcome the session can produce -- a digest mismatch is a scientific finding, and the evidence carries the step index, the pinned digest, the realized digest and the operator that diverged. Leaves reconstructed before the failure are fetched by the runner's product path on exactly the same terms as on the success path, because a failure at leaf N must not discard leaves 1..N-1. On lifecycle: the vocabulary is `final_required` and `mutable_snapshot` and nothing else -- an invented word makes this document UNLOADABLE and the collector exits 1 before it looks at a single file.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_c2_replay/c2_replay_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  }
+ ]
+}

@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 23,
-  "single_stage": 23,
+  "experiment_total": 24,
+  "single_stage": 24,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -149,14 +149,15 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 3,
-    "experiments": 8,
-    "experiments_with_logs": 8,
+    "experiments": 9,
+    "experiments_with_logs": 9,
     "runs": 69,
-    "canonical_configs": 9,
+    "canonical_configs": 10,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
    "canonical_configs": [
+    "configs/autoinit/c2_replay_artifacts.json",
     "configs/experiments/phase_a/source_sets.json",
     "configs/experiments/phase_c1/authorization.json",
     "configs/experiments/phase_c2/baseline_completion_authorization.json",
@@ -581,6 +582,37 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "Stage 1 because it is an initialization search: it generates student states and ranks them on the frozen cheap state_eval metrics. It trains nothing and measures no behaviour, so it is a Stage-1 experiment whose instrument is not a Stage-3 probe. It is separate from `phase_c2` because Search-1's restricted space is a consumed, frozen measurement and this searches all four operator kinds jointly -- a different question with its own authorization type, so its runs do not sit among Search-1's attempts."
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "built and gated \u2014 STOPPED BEFORE CREATING A RESOURCE, $5.27 derived against $5.00 authorized",
+   "title": "Phase C2 replay-only artifact reconstruction \u2014 attempt 3's Top-5 checkpoints",
+   "question": "Can the five checkpoints behind the frozen Top-5 be rebuilt byte-for-byte from the committed evidence? The full joint re-search committed its selection and then lost the weights when the pod was torn down, so the ranking survives and the artifacts it ranked do not. This session replays each selected path with EVERY step pinned to the artifact digest attempt 3 recorded, and either reproduces each leaf's exact identity or stops. It decides nothing: no beam, no ranking, no selection, no selection-bearing evaluation, no control comparison and no behavioural work. A digest mismatch would be a scientific finding, not a retryable engineering failure.",
+   "canonical_path": "logs/stages/stage-1/phase_c2_replay",
+   "canonical_config": "configs/autoinit/c2_replay_artifacts.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c2_replay/plans/replay_requirement.json",
+     "says": "the derived money requirement, and the stop before any provider resource existed",
+     "field": "authorized_usd",
+     "equals": 5.0
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+     "says": "the frozen Top-5 this session reconstructs, named by its own commitment hash",
+     "field": "selection_sha256",
+     "equals": "7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c2_replay/plans/leaf_destination_decision.md",
+     "says": "why the leaves go to the development host's store and not the hub, measured at the LFS batch endpoint for $0"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "Stage 1 because it reconstructs Stage-1 initialization artifacts. It is separate from `phase_c2_full_search` because it is not an attempt of that search and must never be counted as one: the search is complete, its selection is frozen and accepted, and the review that authorized this work was explicit that there is no fourth Full Search attempt. It produces no ranking and no measurement of its own -- only the weights behind a decision that was already made."
   },
   {
    "experiment_id": "c2_full_search_perf",
