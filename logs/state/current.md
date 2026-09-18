@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-18. The human view. Every number here has an owner named
+**Updated:** 2026-09-19. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,11 +9,36 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing. No pod exists.** The last three were
-the performance round's, all provider-confirmed gone; attempt 8's pod
-`9s9pw0c8873y5g` was deleted after 32.32 min behind its teardown gate, GraphQL
-returns `pod(9s9pw0c8873y5g) = null`, and an account-wide list returns `[]`.
-**Nothing is prepared for launch and nothing may start.**
+**THE FORMAL PHASE-C2 FULL JOINT RE-SEARCH IS RUNNING.** Attempt 3, pod
+`ulit767od813i8`, an L40S at `$1.09/h`, watchdog on a 1827-minute / `$33.18`
+hard limit inside the `$34.8742` total ceiling. `bind_identities` passed — 578
+reachable leaves, 576 decomposed, both mixtures materialized — and
+`full_joint_search` is materializing states, so **formal measurement has
+begun**.
+
+> **From here, losing the session is not an engineering retry.** Preserve
+> evidence, tear down, reconcile spend and return for review. Do not repeat
+> formal scientific work.
+
+It terminates at `commit_top_k` and starts nothing after it, and **nothing is
+prepared for launch** behind it: the behavioural-selection session is
+separately authorized, unreachable from this driver, and must be constructed
+against the **actual** committed Top-5.
+
+**Two attempts ended before any measurement**, for `$0.0000` and `$0.1400`, and
+each closeout records why. Attempt 1 refused at a `$0` gate: `readiness_gate`
+read `record.get("kind")` where the recorder writes `record_kind`, so its
+accept path could never pass. Attempt 2 passed all eleven gates and setup, then
+refused to *start* the beam — the launcher had handed it the session's whole
+hard window as the beam's own envelope, and the driver checks a stage's
+envelope against the soft stop, which is that window minus the recovery
+reserve. Unaffordable by construction, for any reserve above zero. A third gap
+surfaced on the way: there was no full-search bundle stager at all.
+
+Each is repaired with a regression that fails when the defect is reinstated,
+and the chain was rebuilt from the grant each time — three sweeps, three
+issuances, three bundles. Attempt count is not budget; `$0.14` of the ceiling
+is spent.
 
 **TWO DECISIONS ARE OWED, and the second one arrived today.** The launch review
 is the first. The second is that adopting the measured `state_eval`

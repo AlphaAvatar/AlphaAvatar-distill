@@ -1331,9 +1331,9 @@
    "experiment_id": "phase_c2_full_search",
    "run_id": "attempt3",
    "root": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3",
-   "n_files": 1,
-   "digest": "03847062bc9b72a45aba25a3ef8e3cbcb061c0a6ddf21a4cb24bd4dcbe41cd06",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 11,
+   "digest": "30d59612c44f7cbe8c4dd4e52499c0726300b7d2b6d6437023d6f857a5f3c895",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],
  "authorizes": "nothing"
