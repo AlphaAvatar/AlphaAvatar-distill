@@ -75,8 +75,8 @@ def say(msg: str) -> None:
     print(f"{datetime.now(timezone.utc):%FT%TZ} {msg}", flush=True)
 
 
-def load_root(spec, device: str):
-    """The teacher THIS path was pinned to, named by the spec and nothing else.
+def load_root(spec, device: str, config_overrides=None):
+    """The teacher THIS path was pinned to, in the ROOT STATE it was expanded from.
 
     `FixedPathSpec` records `root_repo_id` and `root_revision` because the root
     is part of the path's identity. Reading the teacher from a module constant
@@ -84,15 +84,32 @@ def load_root(spec, device: str):
     whenever the constant moved, and the digests would diverge four steps later
     with nothing in the record pointing at the cause.
 
+    `config_overrides` reproduces the historical root state. The search reused
+    ONE teacher object across all 108 expansions, and `DepthCausalKLGreedyV1`
+    sets `use_cache = False` on the model it is handed — so once any causal-KL
+    DEPTH expansion had run, every later expansion of any path began from a
+    mutated root, and that flag is serialized into every descendant's config and
+    therefore into its `artifact_digest`. A replay loading a fresh teacher gets
+    the hub default and cannot reproduce those paths.
+
+    The overrides are DERIVED per path from attempt 3's own recorded step-0
+    config hash (`replay_specs.derive_root_overrides`), not keyed on state ids
+    and not asserted here. They reproduce a historical state; they change
+    nothing about what any operator computes, and every intermediate and final
+    digest is still gated against attempt 3's record.
+
     Deliberately small and deliberately named: it is the one function a toy
     rehearsal must replace, so everything around it can be executed for real.
     """
     import torch
     from transformers import AutoModelForCausalLM
 
-    return AutoModelForCausalLM.from_pretrained(
+    model = AutoModelForCausalLM.from_pretrained(
         spec.root_repo_id, dtype=torch.bfloat16,
         revision=spec.root_revision).to(device).eval()
+    for key, value in (config_overrides or {}).items():
+        setattr(model.config, key, value)
+    return model
 
 
 class ReplayDriver:
@@ -221,8 +238,13 @@ class ReplayDriver:
                     "pinned. Every intermediate must be pinned, not just the "
                     "leaf; a path that agrees only at its end leaves the "
                     "operators behind it unverified.")
+            root = dict(leaf.root_config_overrides)
+            prov = leaf.root_override_provenance
             say(f"  {leaf.state_id[:12]}… {len(leaf.spec.steps)} steps, all "
-                f"pinned → {leaf.artifact_digest[:12]}…")
+                f"pinned → {leaf.artifact_digest[:12]}…; root "
+                f"{root or 'hub default'}"
+                + (" (ambiguous, either reproduces)"
+                   if prov.get("root_state_is_ambiguous") else ""))
 
         #: Headroom for the worst single path plus every leaf retained on the
         #: pod. Measured against the workdir's filesystem, which is where both
@@ -285,8 +307,8 @@ class ReplayDriver:
             #: would begin from an already-compressed model and diverge at step
             #: one. After the first load the weights are in the local cache, so
             #: this is a disk read; the alternative is wrong.
-            def root_loader(_spec=leaf.spec):
-                return load_root(_spec, self.a.device)
+            def root_loader(_spec=leaf.spec, _ov=dict(leaf.root_config_overrides)):
+                return load_root(_spec, self.a.device, _ov)
 
             path_dir = self.workdir / "paths" / leaf.state_id
             path_dir.mkdir(parents=True, exist_ok=True)

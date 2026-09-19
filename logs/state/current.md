@@ -14,48 +14,48 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 provider confirms it is gone and an account-wide list returns `[]`. **Nothing
 is prepared for launch.**
 
-**The replay RAN and returned a finding: the weights reproduce, the config does
-not.** Attempt 8, pod `cat1v3vafsfv2g`, 62.1 min, `$1.13` — cumulative `$1.20`
-across eight attempts, all inside the `$4.77` authorized. The pod is deleted and
-the provider confirms it is gone.
+**The replay's mismatch has a root cause, found for `$0`, and it is fixable.**
+Attempt 8 (pod `cat1v3vafsfv2g`, 62.1 min, `$1.13`) reconstructed two of the
+five paths **byte-identically** and stopped on the third. What diverged was only
+`config.json`: `weights_digest`, `single_shard_sha256`, `arch_signature`,
+`num_parameters` and `result_spec_hash` were all identical, and the kept-neuron
+selection matched across all 36 layers.
 
-Two of the five paths reconstructed **byte-identically** to attempt 3 — every
-intermediate digest and the full leaf identity — in 23.3 and 33.3 min. The third
-stopped the session at its first step, as a pinned replay must.
+The cause is **one field, `use_cache`**, recovered from CONTENT rather than
+inferred from a hash: three retained Phase-A configs diffed against
+reconstructions of their own geometry leave exactly that key, and one of them
+hashes to `f69c2fb3a120…`, the value attempt 3 recorded for three of the five
+leaves. `DepthCausalKLGreedyV1.apply` sets `use_cache = False` on the parent
+model it is handed (block bypass cannot use a layer-indexed KV cache);
+`build_config` copies the parent's dict, so every descendant inherits it; and the
+search reused **one** teacher object across all 108 expansions. A path's root
+state therefore depends on beam order, not on the path. The replay loads a fresh
+teacher and gets the hub default.
 
-**What diverged is narrower than "a mismatch".** Comparing the recorded
-identities field by field: `weights_digest`, `single_shard_sha256`,
-`arch_signature`, `num_parameters` and `result_spec_hash` are all IDENTICAL —
-the 4,364,480,296 bytes of `model.safetensors` are the same bytes. The neuron
-selection is identical across all 36 layers, checked element-wise against the
-complete 61.4 MiB journal. **Only `config.json` differs.** `artifact_digest`
-covers config and weights together, so it failed on metadata while the model
-itself reproduced exactly.
+The model reproduces all three observed outcomes and predicted the rest, so no
+GPU was spent to learn it. Owner:
+[`config_lineage_forensic.json`](../stages/stage-1/phase_c2_replay/results/config_lineage_forensic.json).
 
-Reproducing that config on the dev box at `$0`, with no pod, gives attempt 8's
-hash and not attempt 3's — while the same procedure reproduces attempt 3 exactly
-for ATTENTION-only, ATTENTION+FFN and COMPOSITE states. The software stacks
-match (torch 2.11.0+cu128, transformers 5.13.1, L40S both times); the only
-recorded environmental difference is the host NVIDIA driver (580.126.09 →
-580.159.03), which demonstrably did not move the weights. **No cause is
-established.** Owner:
-[`replay_mismatch_finding.json`](../stages/stage-1/phase_c2_replay/results/replay_mismatch_finding.json).
+`artifact_digest` remains the acceptance criterion — `use_cache` is the default
+for whether a forward pass builds and returns a KV cache, so it is not
+provenance-only and no semantic-equivalence bridge was requested. The repair is
+an **evidence-bound root pin**: for each path the replay solves for the root
+state that reproduces attempt 3's own recorded step-0 config, refuses if no
+candidate does, and records every candidate it tried. Two paths derive to the
+hub default — which is exactly what attempt 8 used for the two that reproduced.
 
-**The two reconstructed leaves were LOST, and that was my defect, not the
-experiment's.** `reconstructed_leaves` read a path nothing writes; the runner
-extracts the verified archive to `<scr>/store/extracted/<spec pattern>` before
-calling `fetch_products`. It returned `[]`, `leaves_secured` reported *"no leaf
-was reconstructed, so none is owed off-pod"*, the teardown gate allowed, and the
-pod was deleted with 56 minutes of finished GPU work on it — every check green.
-The exact failure this session exists to repair, reproduced by the code meant to
-repair it. The evidence path is now derived from the artifact spec, and an
-unreadable evidence file returns UNKNOWN rather than empty, with teardown
-refused on UNKNOWN: *"I found no evidence"* and *"nothing was reconstructed"* are
-different findings.
+Also repaired this round: a generic per-poll durability hook, so each leaf is
+fetched, re-identified at the destination and given a durable ACK the moment it
+completes rather than at closeout; the `$HOME` per-attempt scratch roots
+(`aad-scratch-c2replay-a2…a8`, `c1_scr…c1_scr4`) inventoried, their unique
+content preserved into the run tree, and removed in one pass, with
+`.scratch/stage-<N>/<experiment>/<run>/` replacing them; and the budget
+refreshed mechanically once the replay runs were registered in `logs/index.json`
+— they had been invisible to the derivation, which is why the cumulative was
+stale.
 
-**Nothing is running. Nothing is billing.** The mismatch is a stop condition
-under the authorizing ruling: not retried, nothing substituted, no behavioural
-work started.
+**Nothing is running. Nothing is billing.** Campaign: `$4.77` authorized,
+`$1.20` spent, `$3.57` left. Project: `$307.0841` of `$370.0000`.
 
 ## The full joint re-search RAN, produced a Top-5, and then lost it
 
@@ -709,7 +709,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$305.8841` spent of `$370.0000`, leaving `$64.1159` |
+| project cap | `$307.0841` spent of `$370.0000`, leaving `$62.9159` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

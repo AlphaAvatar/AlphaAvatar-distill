@@ -10,7 +10,14 @@ Everything this experiment produced, in one place.
 
 ## Runs
 
-* none recorded
+* [`attempt1`](runs/attempt1/)
+* [`attempt2`](runs/attempt2/)
+* [`attempt3`](runs/attempt3/)
+* [`attempt4`](runs/attempt4/)
+* [`attempt5`](runs/attempt5/)
+* [`attempt6`](runs/attempt6/)
+* [`attempt7`](runs/attempt7/)
+* [`attempt8`](runs/attempt8/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

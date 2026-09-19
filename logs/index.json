@@ -282,8 +282,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 26,
-  "runs_unrecorded": 4,
+  "runs_current": 32,
+  "runs_unrecorded": 6,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -345,6 +345,11 @@
     "recorded": 3,
     "unrecorded": 0,
     "total": 3
+   },
+   "phase_c2_replay": {
+    "recorded": 6,
+    "unrecorded": 2,
+    "total": 8
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -1305,6 +1310,84 @@
    },
    "manifest_sha256": "2282a08856f3c0735326c0bb85ca329055a4c3e54a8607a183f06febfb309cc5",
    "n_components": 5
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt3",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt3",
+    "manifest": "logs/stages/stage-1/phase_c2_replay/runs/attempt3/manifest.json"
+   },
+   "n_components": 14,
+   "manifest_sha256": "57ce50a5ba824ecb48e38cc0ed00b7ece1c906a1a0fbb01c5bda4383287a96d1"
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt4",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt4",
+    "manifest": "logs/stages/stage-1/phase_c2_replay/runs/attempt4/manifest.json"
+   },
+   "n_components": 14,
+   "manifest_sha256": "bbc1e0086364f7275016eebb5d165eecf6d152e7648463f153d52f6f41fda57e"
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt5",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt5",
+    "manifest": "logs/stages/stage-1/phase_c2_replay/runs/attempt5/manifest.json"
+   },
+   "n_components": 14,
+   "manifest_sha256": "65e8fdd0ad0a0681b3bf12c18277c8d6afb784462f6ed9aead3b9768d7eb3bcd"
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt6",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt6",
+    "manifest": "logs/stages/stage-1/phase_c2_replay/runs/attempt6/manifest.json"
+   },
+   "n_components": 16,
+   "manifest_sha256": "8e3ed2f14309fb46578466b02ab397f5affd04d5ce57047caba1f73189ba7639"
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt7",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt7",
+    "manifest": "logs/stages/stage-1/phase_c2_replay/runs/attempt7/manifest.json"
+   },
+   "n_components": 16,
+   "manifest_sha256": "57a3e31d264db33ce3e215122604a24b8623c6e942fb954ee16de4359bf61fb1"
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt8",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt8",
+    "manifest": "logs/stages/stage-1/phase_c2_replay/runs/attempt8/manifest.json"
+   },
+   "n_components": 18,
+   "manifest_sha256": "c0d21151a2def93f2db7f7ba6c258a75df45e9d2544be6518c5b49ca64c3010e"
   }
  ],
  "unrecorded": [
@@ -1339,6 +1422,28 @@
    "n_files": 15,
    "digest": "6a9719fbf4028963b5eefa255e664d5efe299dabaf370d38c0b0661c1abd95b4",
    "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt1",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt1"
+   },
+   "n_components": 11
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt2",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt2"
+   },
+   "n_components": 11
   }
  ],
  "authorizes": "nothing"

@@ -170,11 +170,18 @@ def toy_root(monkeypatch, calib):
 
     calls = []
 
-    def fake_load_root(spec, device):
+    def fake_load_root(spec, device, config_overrides=None):
         calls.append({"root_repo_id": spec.root_repo_id,
                       "root_revision": spec.root_revision,
-                      "device": device, "path_id": spec.path_id})
-        return build_tiny_model(TEACHER_GEOMETRY)
+                      "device": device, "path_id": spec.path_id,
+                      "config_overrides": dict(config_overrides or {})})
+        model = build_tiny_model(TEACHER_GEOMETRY)
+        #: The production loader applies these to the loaded model's config;
+        #: the fake must too, or the rehearsal would certify a loader that
+        #: accepts the overrides and ignores them.
+        for key, value in (config_overrides or {}).items():
+            setattr(model.config, key, value)
+        return model
 
     monkeypatch.setattr(driver_mod, "load_root", fake_load_root)
 
@@ -232,6 +239,9 @@ def test_the_driver_reconstructs_pinned_leaves_and_secures_each_one(
     assert {c["root_repo_id"] for c in toy_root} == {"test/teacher"}
     assert {c["root_revision"] for c in toy_root} == {"deadbeef"}
     assert {c["device"] for c in toy_root} == {"cpu"}
+    #: The root state reaches the loader. These toy leaves carry no override,
+    #: so it must arrive as an empty mapping rather than be absent.
+    assert [c["config_overrides"] for c in toy_root] == [{}, {}]
 
 
 def test_a_digest_mismatch_stops_the_session_without_retrying(
@@ -433,3 +443,35 @@ def test_a_path_is_not_started_unless_the_budget_can_see_it_finish(
     #: The affordable leaf was still secured before the stop.
     assert (work / "leaves" / "state0" / "replay_leaf.json").exists()
     assert not (work / "leaves" / "state1").exists()
+
+
+def test_a_paths_root_override_reaches_the_loaded_teacher(
+        tmp_path, monkeypatch, calib, toy_root):
+    """The historical root state must arrive at the model, not just at the spec.
+
+    The replay reproduces attempt 3's hidden root config — `use_cache=False` for
+    paths expanded after a causal-KL DEPTH sibling had mutated the shared
+    teacher. A loader that accepted the override and ignored it would leave the
+    replay reconstructing from the hub default and diverging at step 0, which is
+    exactly the failure this pin exists to remove.
+    """
+    from dataclasses import replace
+
+    ids = true_digests(tmp_path, calib)
+    pins = (ids[0].artifact_digest, ids[1].artifact_digest)
+    leaf = replace(build_leaf(ids[-1], toy_spec("leaf0", pins), "state0"),
+                   root_config_overrides={"use_cache": False},
+                   root_override_provenance={"why": "toy",
+                                             "root_state_is_ambiguous": False})
+    install_toy_leaves(monkeypatch, [leaf], calib=calib)
+
+    work = tmp_path / "work"
+    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"))
+    driver_mod.ReplayDriver(args).run()
+
+    assert [c["config_overrides"] for c in toy_root] == [{"use_cache": False}]
+    #: And the bind stage must SAY which root it is using, because a reader of
+    #: a paid run's log has no other way to tell which of the two it took.
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
+    assert ev["stages"][0]["stage"] == "bind_identities"

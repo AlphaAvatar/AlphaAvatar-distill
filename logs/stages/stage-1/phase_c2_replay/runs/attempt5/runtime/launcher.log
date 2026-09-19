@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/home/ecs-user/AlphaAvatar-distill/scripts/pod/autoinit_c2_replay_launch.py", line 746, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/ecs-user/AlphaAvatar-distill/scripts/pod/autoinit_c2_replay_launch.py", line 693, in main
+    layout = open_run(REPO_ROOT, EXPERIMENT_ID, args.run_id,
+                      roles=REPLAY_RUN_ROLES, prepared=_RUN_PREPARED,
+                      stage_id=STAGE_ID)
+  File "/home/ecs-user/AlphaAvatar-distill/scripts/experiments/run_layout.py", line 340, in open_run
+    raise RunConventionError(
+    ...<2 lines>...
+        "manifest describes an execution that this one would overwrite")
+experiments.run_layout.RunConventionError: phase_c2_replay/runs/attempt5 is already recorded (manifest.json exists). Use a new run_id; a recorded run is not reopened, because its manifest describes an execution that this one would overwrite
+LAUNCHER_EXIT=1

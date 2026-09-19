@@ -1,0 +1,30 @@
+[07:46:53] budget: expected 221 min $4.01 · soft $4.41 · hard $4.68 (authorized $4.69)
+[07:46:54] NVIDIA L40S $1.09/h, stock Low
+[07:46:54] session commit 8d544115f38a verified: harness digests to 12daaa00da8c…, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt8/governance/authorization.json differs from the authorized base
+[07:46:54] replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900
+[07:46:54] authorization binds to source binding 0b6a9e626f11…
+[07:46:54] no operator-bearing file has moved since 2421f630bc81…; 5 leaves, 20 pinned steps, selection 7271091c9141…
+[07:46:54] destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves
+[07:46:54] launch-bound readiness at 0b022f0cf593… binds harness 12daaa00da8c… (33 passed, 0 skipped)
+[07:46:58] aad_autoinit_8d544115.bundle (14197468 bytes, 85d806793e07…) round-trips to 8d544115f38a… carrying this authorization and executable set 12daaa00da8c…
+[07:46:59] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[07:47:00] watchdog detached — hard 258 min = $4.68
+[07:47:00] created cat1v3vafsfv2g at $1.09/h
+[07:47:21] TCP 22 at 64.247.206.217:13674 after 0.4 min
+[07:47:25] draw 1: ssh reachable — $0.01
+[07:48:02] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[07:48:02] draw 1: running setup
+[07:49:39] draw 1: setup complete — $0.05
+[07:49:47] driver detached, pid 1690, confirmed by descriptor_probe — $0.05
+[07:51:04]   2026-09-19T07:49:36Z MARKER:SETUP_DONE — $0.07
+[08:47:43] driver no longer running: EXITED:1
+[08:47:43] polling ended: DRIVER_EXITED:1 — $1.10
+[08:48:32]   manifest rc=0
+1 file(s) across 1 class(es) -> /workspace/manifest.json
+  final_required: 1 · mutable_snapshot: 0 · final_streams_quiescent: True
+[08:48:56] teardown gate: allowed=True failed=training_complete
+[08:48:56] deleting pod (gate passed after DRIVER_EXITED:1)
+[08:49:07] pod deleted — 62.1 min, $1.13; provider confirms gone: True
+
+autoinit-phase-c2-replay INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_c2_replay/runs/attempt8/runtime/session.json. the replay is a TERMINUS: it reconstructs the five checkpoints behind a frozen Top-5 and stops. It decides nothing, and behavioural screening is separately authorized and unreachable from here.
+LAUNCHER_EXIT=11

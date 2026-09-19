@@ -1,0 +1,31 @@
+[06:58:46] budget: expected 221 min $4.01 · soft $4.41 · hard $4.68 (authorized $4.69)
+[06:58:46] NVIDIA L40S $1.09/h, stock Medium
+[06:58:47] session commit 56fed7a83b8a verified: harness digests to 4c81d1192df6…, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt4/governance/authorization.json differs from the authorized base
+[06:58:47] replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900
+[06:58:47] authorization binds to source binding 0b6a9e626f11…
+[06:58:47] no operator-bearing file has moved since 2421f630bc81…; 5 leaves, 20 pinned steps, selection 7271091c9141…
+[06:58:47] destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves
+[06:58:47] launch-bound readiness at 00472ab86a45… binds harness 4c81d1192df6… (26 passed, 0 skipped)
+[06:58:52] aad_autoinit_56fed7a8.bundle (14144737 bytes, 5e24dccd42bd…) round-trips to 56fed7a83b8a… carrying this authorization and executable set 4c81d1192df6…
+[06:58:53] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[06:58:53] LAUNCHER ERROR: TypeError: expected str, bytes or os.PathLike object, not dict
+[06:59:33] budget: expected 221 min $4.01 · soft $4.41 · hard $4.68 (authorized $4.69)
+[06:59:34] NVIDIA L40S $1.09/h, stock Medium
+[06:59:34] session commit 56fed7a83b8a verified: harness digests to 4c81d1192df6…, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt4/governance/authorization.json differs from the authorized base
+[06:59:34] replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900
+[06:59:34] authorization binds to source binding 0b6a9e626f11…
+[06:59:34] no operator-bearing file has moved since 2421f630bc81…; 5 leaves, 20 pinned steps, selection 7271091c9141…
+[06:59:34] destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves
+[06:59:34] launch-bound readiness at 00472ab86a45… binds harness 4c81d1192df6… (26 passed, 0 skipped)
+[06:59:38] aad_autoinit_56fed7a8.bundle (14144737 bytes, 5e24dccd42bd…) round-trips to 56fed7a83b8a… carrying this authorization and executable set 4c81d1192df6…
+[06:59:38] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[06:59:48] budget: expected 221 min $4.01 · soft $4.41 · hard $4.68 (authorized $4.69)
+[06:59:48] NVIDIA L40S $1.09/h, stock Medium
+[06:59:48] session commit 56fed7a83b8a verified: harness digests to 4c81d1192df6…, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt4/governance/authorization.json differs from the authorized base
+[06:59:48] replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900
+[06:59:48] authorization binds to source binding 0b6a9e626f11…
+[06:59:48] no operator-bearing file has moved since 2421f630bc81…; 5 leaves, 20 pinned steps, selection 7271091c9141…
+[06:59:48] destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves
+[06:59:49] launch-bound readiness at 00472ab86a45… binds harness 4c81d1192df6… (26 passed, 0 skipped)
+[06:59:52] aad_autoinit_56fed7a8.bundle (14144737 bytes, 5e24dccd42bd…) round-trips to 56fed7a83b8a… carrying this authorization and executable set 4c81d1192df6…
+[06:59:53] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets

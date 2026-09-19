@@ -889,6 +889,17 @@ class SessionRunner:
                 terminal = hit[0]
                 self.say(self.spec.markers.failure_note)
                 break
+            #: Secure anything that has FINISHED, now, rather than at
+            #: closeout. Never allowed to disturb the run: a durability
+            #: convenience that can kill a paid session is worse than none.
+            hook = self.spec.artifacts.on_poll
+            if hook is not None:
+                try:
+                    hook(self.context())
+                except Exception as exc:                          # noqa: BLE001
+                    self.ev.setdefault("on_poll_errors", []).append(
+                        f"{type(exc).__name__}: {exc}")
+
             state = self.provider.get(self.pod_id)
             if not state.billing:
                 terminal = "POD_GONE"

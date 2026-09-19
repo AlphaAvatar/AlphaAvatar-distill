@@ -1,0 +1,9 @@
+[06:55:49] budget: expected 221 min $4.01 · soft $4.41 · hard $4.68 (authorized $4.69)
+[06:55:49] NVIDIA L40S $1.09/h, stock Low
+[06:55:49] session commit 9d49805c07ab verified: harness digests to e1e2b8a3d39b…, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt3/governance/authorization.json differs from the authorized base
+[06:55:49] replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900
+[06:55:49] authorization binds to source binding 0b6a9e626f11…
+[06:55:49] no operator-bearing file has moved since 2421f630bc81…; 5 leaves, 20 pinned steps, selection 7271091c9141…
+[06:55:49] destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves
+[06:55:50] launch-bound readiness at 23683d885dd6… binds harness e1e2b8a3d39b… (25 passed, 0 skipped)
+[06:55:50] ABORT at $0: the pod could not obtain the authorized commit: module 'experiments.phase_c2.replay_bundle' has no attribute 'roundtrip'

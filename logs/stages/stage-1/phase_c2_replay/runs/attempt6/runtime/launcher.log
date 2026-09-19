@@ -1,0 +1,36 @@
+[07:07:05] budget: expected 221 min $4.01 · soft $4.41 · hard $4.68 (authorized $4.69)
+[07:07:06] NVIDIA L40S $1.09/h, stock Low
+[07:07:06] session commit f418b56c63fd verified: harness digests to b3e3fe7f0980…, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt6/governance/authorization.json differs from the authorized base
+[07:07:06] replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900
+[07:07:06] authorization binds to source binding 0b6a9e626f11…
+[07:07:06] no operator-bearing file has moved since 2421f630bc81…; 5 leaves, 20 pinned steps, selection 7271091c9141…
+[07:07:06] destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves
+[07:07:06] launch-bound readiness at 530a33e929cd… binds harness b3e3fe7f0980… (28 passed, 0 skipped)
+[07:07:10] aad_autoinit_f418b56c.bundle (14238133 bytes, eb2af19a952d…) round-trips to f418b56c63fd… carrying this authorization and executable set b3e3fe7f0980…
+[07:07:11] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[07:07:12] watchdog detached — hard 258 min = $4.68
+[07:07:12] created 04u1mava7qhf4x at $1.09/h
+[07:07:23] TCP 22 at 103.196.86.50:27468 after 0.2 min
+[07:07:26] draw 1: ssh reachable — $0.00
+[07:07:57] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[07:07:57] draw 1: running setup
+[07:08:13] setup did not reach SETUP_DONE:
+[07:08:00] apt: git, ninja, zstd
+W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+debconf: delaying package configuration, since apt-utils is not installed
+MARKER:ENV_READY
+/workspace/autoinit_preflight_setup.sh: line 33: /workspace/aad/scratch/autoinit_c2_replay.status: No such file or directory
+SETUP_RC=1
+
+[07:08:13] ABORT after draw 1: setup_failed
+[07:08:13] deleting pod (setup setup_failed)
+[07:08:24] pod deleted — 1.2 min, $0.02; provider confirms gone: True
+
+autoinit-phase-c2-replay INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_c2_replay/runs/attempt6/runtime/session.json. the replay is a TERMINUS: it reconstructs the five checkpoints behind a frozen Top-5 and stops. It decides nothing, and behavioural screening is separately authorized and unreachable from here.
+
+SETUP_RC=1
+
+[07:08:13] ABORT after draw 1: setup_failed
+[07:08:13] deleting pod (setup setup_failed)
+[07:08:24] pod deleted — 1.2 min, $0.02; provider confirms gone: True
+LAUNCHER_EXIT=11

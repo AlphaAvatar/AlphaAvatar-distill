@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.autoinit.price_refused_launches/v1",
+ "_contract": "Launcher invocations that were REFUSED on price before any provider resource existed. $0 each, no pod, no measurement. Preserved because they are the only record of the refusal actually firing, and because the runner prices BEFORE it runs its gates -- so a price-refused launch has run zero gates, which is easy to misread as 'the gates passed'.",
+ "cost_usd": 0.0,
+ "pods_created": 0,
+ "_what_they_show": "the priced basis was $0.99/h and the live securePrice was $1.09/h, so the launcher aborted. Both were recovered from scratch roots during the 2026-09-19 workspace cleanup before those roots were removed.",
+ "entries": [
+  {
+   "scratch_root": "c1_scr3",
+   "transcript": "[18:31:17] budget: expected 740 min $12.21 \u00b7 soft $13.43 \u00b7 hard $13.76 (authorized $13.76)\n[18:31:17] NVIDIA L40S $1.09/h, stock Low\n[18:31:17] ABORT: $1.09/h above the priced $0.99/h\n\nautoinit-c1 INCOMPLETE \u2014 /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search."
+  },
+  {
+   "scratch_root": "c1_scr4",
+   "transcript": "[18:51:56] budget: expected 740 min $12.21 \u00b7 soft $13.43 \u00b7 hard $13.76 (authorized $13.76)\n[18:51:56] NVIDIA L40S $1.09/h, stock Medium\n[18:51:56] ABORT: $1.09/h above the priced $0.99/h\n\nautoinit-c1 INCOMPLETE \u2014 /home/ecs-user/AlphaAvatar-distill/logs/autoinit_c1_session.json. STOP for review. C1 replayed one frozen path under two digest gates and ran no search."
+  }
+ ]
+}

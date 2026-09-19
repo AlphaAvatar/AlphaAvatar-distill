@@ -485,6 +485,18 @@ class ArtifactPolicy:
     #: Fetch what this session PRODUCED and cannot regenerate for free. Returns
     #: a list of records for the session evidence.
     fetch_products: Callable[["SessionContext"], list] = lambda ctx: []
+    #: Called once per poll iteration while the driver runs, with the session
+    #: context. Optional, and for ONE purpose: securing a unit of work at the
+    #: moment it completes rather than at closeout. AGENTS.md requires a
+    #: finished unit to survive a later stage's failure, and a collector that
+    #: only runs at closeout cannot honour that if the pod dies — a replay lost
+    #: two verified checkpoints exactly that way.
+    #:
+    #: It MUST NOT raise and MUST NOT block: the runner swallows and records
+    #: anything it throws, because a durability convenience that can kill a
+    #: paid session is worse than no durability at all.
+    on_poll: Callable[["SessionContext"], None] | None = None
+
     #: Did this session secure the products it OWES off-pod? Returns `(ok, why)`
     #: and feeds the `required_products_secured` teardown check.
     #:

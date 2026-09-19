@@ -119,3 +119,10 @@ artifacts/audit/
 
 # Git bundles used to ship the session to a pod; built in scratch, never here.
 *.bundle
+
+# Ephemeral per-run working directories, one project-owned hierarchy:
+#   .scratch/stage-<N>/<experiment>/<run>/
+# Replaces the top-level per-attempt roots (aad-scratch-c2replay-a*, c1_scr*)
+# that accumulated in $HOME. Durable bytes never live here -- they go to the
+# out-of-repo store at /home/ecs-user/aad-artifacts.
+.scratch/

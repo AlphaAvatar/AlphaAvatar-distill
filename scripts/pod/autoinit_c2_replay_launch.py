@@ -470,6 +470,28 @@ def fetch_leaves(ctx: SessionContext) -> list:
         ctx.say("  the driver reconstructed no leaf; nothing to fetch")
         return fetched
 
+    #: Whatever the poll hook already secured counts, and is not pulled twice.
+    #: `leaves_secured` reads the RETURNED list, so those records must appear
+    #: here even though this call did not transfer them.
+    already = {r["state_id"]: r for r in ctx.evidence.get("leaves_secured", [])}
+    pending = [leaf for leaf in leaves if leaf["state_id"] not in already]
+    if already:
+        ctx.say(f"  {len(already)} leaf/leaves already secured during the run")
+    return list(already.values()) + _fetch_and_verify(ctx, pending)
+
+
+def _fetch_and_verify(ctx: SessionContext, leaves: list) -> list:
+    """Pull each named leaf and re-identify it from the bytes that land.
+
+    ONE implementation, used by the poll hook and by the closeout, so a leaf
+    secured mid-run and a leaf secured at the end are verified identically.
+    """
+    from aadistill.initialization.specs.arch import get_adapter
+    from aadistill.runtime.leaf_durability import (
+        LeafDurabilityError, verify_transferred_leaf,
+    )
+
+    fetched: list = []
     adapter = get_adapter("qwen3")
     store = Path(ctx.args.ckpt_store) / "phase_c2_full_search" / "attempt3_replay"
     for leaf in leaves:
@@ -503,7 +525,56 @@ def fetch_leaves(ctx: SessionContext) -> list:
                         "matched": matched, "why": why})
         ctx.say(f"  leaf {state_id[:12]}…: rc={rc.returncode}, "
                 f"{size / 2**30:.2f} GiB -> {dest} [{why}]")
+        if matched:
+            #: The durable ACK: recorded beside the bytes, so a reader of the
+            #: destination can tell a verified arrival from a partial copy.
+            (dest / "durable_ack.json").write_text(json.dumps({
+                "schema": "aadistill.autoinit.c2_replay_leaf_ack/v1",
+                "state_id": state_id,
+                "verified_utc": __import__("datetime").datetime.now(
+                    __import__("datetime").timezone.utc).isoformat(),
+                "bytes": size,
+                "re_identified_from_delivered_bytes": True,
+                "_what_this_means": (
+                    "the bytes at this path were re-identified after transfer "
+                    "and match the identity attempt 3 recorded. It is not a "
+                    "claim about the session, only about this leaf."),
+            }, indent=1) + "\n")
     return fetched
+
+
+def secure_finished_leaves(ctx: SessionContext) -> None:
+    """Fetch and verify every leaf that has FINISHED, while the driver runs.
+
+    The contract the replay exists to restore: materialize -> exact identity
+    gate -> fetch -> destination re-identify -> durable ACK, per leaf, before
+    the next one starts. Attempt 8 reconstructed two leaves and lost both
+    because nothing left the pod until closeout and the closeout could not read
+    its own evidence.
+
+    Called from the runner's poll loop, which relays the driver's evidence
+    live, so a leaf announced at minute 23 is off-pod by minute 24 rather than
+    at minute 62 — or never. Idempotent: leaves already secured are skipped.
+
+    MUST NOT raise. The runner swallows exceptions, but a durability helper that
+    throws into a paid session's poll loop is a defect regardless of who
+    catches it.
+    """
+    try:
+        leaves = reconstructed_leaves(ctx)
+        if not leaves:
+            return
+        already = {r["state_id"] for r in ctx.evidence.get("leaves_secured", [])}
+        pending = [leaf for leaf in leaves if leaf["state_id"] not in already]
+        if not pending:
+            return
+        fetched = _fetch_and_verify(ctx, pending)
+        ctx.evidence.setdefault("leaves_secured", []).extend(
+            r for r in fetched if r.get("matched"))
+        ctx.evidence.setdefault("leaf_fetch_attempts", []).extend(fetched)
+    except Exception as exc:                                    # noqa: BLE001
+        ctx.evidence.setdefault("on_poll_errors", []).append(
+            f"secure_finished_leaves: {type(exc).__name__}: {exc}")
 
 
 def leaves_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
@@ -667,6 +738,7 @@ def spec(args) -> SessionSpec:
             spec_success="configs/autoinit/c2_replay_artifacts.json",
             spec_failed="configs/autoinit/c2_replay_artifacts_failed.json",
             report_names=("c2_replay_evidence.json",),
+            on_poll=secure_finished_leaves,
             fetch_products=fetch_leaves,
             products_secured=leaves_secured),
         teardown=TeardownPolicy(

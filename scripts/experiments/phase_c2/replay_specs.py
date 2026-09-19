@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import json
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -110,6 +110,13 @@ class ReplayLeaf:
     #: a path it cannot afford to finish, which is what makes the session's cost
     #: bounded by construction rather than by hope.
     bounded_minutes: float = 0.0
+    #: The root model config state this path's FIRST operator was expanded from
+    #: in attempt 3, as `{field: value}` applied to a freshly loaded teacher.
+    #: DERIVED from attempt 3's own recorded step-0 config hash, never asserted:
+    #: see `derive_root_overrides`. Empty means the hub default reproduces it.
+    root_config_overrides: Mapping[str, Any] = field(default_factory=dict)
+    #: Why that override, in a form a reader can check.
+    root_override_provenance: Mapping[str, Any] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -123,6 +130,8 @@ class ReplayLeaf:
             "num_parameters": self.num_parameters,
             "step_digests": list(self.step_digests),
             "bounded_minutes": self.bounded_minutes,
+            "root_config_overrides": dict(self.root_config_overrides),
+            "root_override_provenance": dict(self.root_override_provenance),
             "spec": self.spec.as_dict(),
         }
 
@@ -259,6 +268,137 @@ def resolve_ancestry(states: Mapping[str, Mapping[str, Any]],
     return chain
 
 
+#: Candidate root config states a replay may start a path from, in the order
+#: they are tried. The search reused ONE teacher model object across all 108
+#: expansions, and `DepthCausalKLGreedyV1.apply` sets `use_cache = False` on the
+#: model it is handed — so once any causal-KL DEPTH expansion had run, every
+#: later expansion of any path began from a mutated root. A replay loads a fresh
+#: teacher per path and gets the hub default.
+#:
+#: These are CANDIDATES, not a rule keyed on which operator a path starts with.
+#: Which one is right for a given path is decided by attempt 3's own recorded
+#: step-0 config hash, so the derivation is falsifiable: if no candidate
+#: reproduces it, the replay refuses rather than guessing.
+ROOT_CONFIG_CANDIDATES: tuple[tuple[str, dict[str, Any]], ...] = (
+    ("hub default — the path was expanded before any sibling mutated the "
+     "shared teacher", {}),
+    ("post-DEPTH — a causal-KL DEPTH expansion had already set use_cache=False "
+     "on the shared teacher object", {"use_cache": False}),
+)
+
+
+def _teacher_config(repo_root: str | Path):
+    """The pinned teacher's config. Config only — no weights, no device."""
+    from transformers import AutoConfig
+
+    import sys as _sys
+    for extra in ("scripts", "scripts/autoinit"):
+        candidate = str(Path(repo_root) / extra)
+        if candidate not in _sys.path:
+            _sys.path.insert(0, candidate)
+    from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+
+    return AutoConfig.from_pretrained(TEACHER_ID, revision=TEACHER_REVISION)
+
+
+#: Operators that mutate their parent model's config before building the child,
+#: so the child's config does not depend on the root's prior state for that
+#: field. Named so the derivation can say when a root is genuinely ambiguous
+#: rather than reporting a choice it did not really make.
+_MUTATES_USE_CACHE = ("depth.causal_kl_greedy_v1",)
+
+
+def _config_sha_after(root_config, overrides: Mapping[str, Any],
+                      first_spec, first_impl_id: str = "") -> str:
+    """The config hash a first step produces from a root in the given state.
+
+    Serialized and read back, because `CheckpointIdentity` hashes the file a
+    later `from_pretrained` will read, not an in-memory dict.
+    """
+    import json as _json
+    import tempfile
+
+    from aadistill.infrastructure.manifest import sha256_json
+    from aadistill.initialization.adapters import register_builtin_adapters
+    from aadistill.initialization.specs.arch import get_adapter
+
+    register_builtin_adapters()
+    adapter = get_adapter("qwen3")
+
+    root = type(root_config).from_dict(root_config.to_dict())
+    for key, value in overrides.items():
+        setattr(root, key, value)
+    #: `DepthCausalKLGreedyV1.apply` sets this on the PARENT before it builds
+    #: the child, so a path starting with it produces the same child config from
+    #: either root. Modelled here so the derivation reports that honestly.
+    if first_impl_id in _MUTATES_USE_CACHE:
+        root.use_cache = False
+    child = adapter.build_config(root, first_spec)
+    with tempfile.TemporaryDirectory() as tmp:
+        child.save_pretrained(tmp)
+        return sha256_json(_json.loads((Path(tmp) / "config.json").read_text()))
+
+
+def derive_root_overrides(first_step_spec, recorded_config_sha256: str,
+                          root_config, first_impl_id: str = "",
+                          ) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Solve for the root state attempt 3's first step was expanded from.
+
+    Returns `(overrides, provenance)`. The provenance records every candidate
+    tried and the hash it produced, so a reader can see that exactly one
+    reproduced the recorded value rather than taking the answer on trust.
+
+    Raises when none does. A replay that guessed here would be fitting a root
+    to an outcome, which is the opposite of what a pinned replay is for.
+    """
+    tried = []
+    chosen = None
+    for why, overrides in ROOT_CONFIG_CANDIDATES:
+        got = _config_sha_after(root_config, overrides, first_step_spec,
+                                first_impl_id)
+        tried.append({"overrides": dict(overrides), "why": why,
+                      "config_sha256": got,
+                      "reproduces_attempt3": got == recorded_config_sha256})
+        if got == recorded_config_sha256 and chosen is None:
+            chosen = (dict(overrides), why)
+    if chosen is None:
+        raise ReplaySourceError(
+            "no candidate root config state reproduces attempt 3's recorded "
+            f"step-0 config {recorded_config_sha256[:12]}…. Tried: "
+            + "; ".join(f"{t['overrides']} -> {t['config_sha256'][:12]}…"
+                        for t in tried)
+            + ". The replay refuses to guess a root: fitting one to an outcome "
+              "is the opposite of pinning a path.")
+    overrides, why = chosen
+    reproducing = [t for t in tried if t["reproduces_attempt3"]]
+    ambiguous = len(reproducing) > 1
+    return overrides, {
+        "chosen": dict(overrides), "why": why,
+        "root_state_is_ambiguous": ambiguous,
+        "_ambiguity": (
+            f"{len(reproducing)} candidate root states reproduce attempt 3's "
+            f"step-0 config, because the first operator ({first_impl_id}) sets "
+            "the field itself before building the child. The historical root "
+            "value is therefore unknowable from this evidence and does not "
+            "matter: every candidate yields the same child. The least-"
+            "intervention candidate is used."
+            if ambiguous else
+            "exactly one candidate root state reproduces attempt 3's step-0 "
+            "config, so the historical root state is determined by the "
+            "evidence."),
+        "attempt3_step0_config_sha256": recorded_config_sha256,
+        "candidates_tried": tried,
+        "_mechanism": (
+            "DepthCausalKLGreedyV1.apply sets use_cache=False on the parent "
+            "model it is handed; build_config copies the parent's dict, so "
+            "every descendant inherits it. The search reused one teacher object "
+            "across all expansions, so a path's root state depends on whether a "
+            "causal-KL DEPTH sibling had already run — beam order, not the "
+            "path. This override reproduces that historical state; it does not "
+            "change what any operator computes."),
+    }
+
+
 def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
                         *, device: str = "cuda",
                         max_shard_size: str | int | None = None,
@@ -300,6 +440,9 @@ def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
     selection = load_selection(repo_root)
     states = load_states(repo_root)
     worst = worst_seconds_by_impl(repo_root)
+    #: Loaded ONCE. Config only, from the local cache on a pod as on the dev
+    #: box; the weights are not touched here.
+    root_config = _teacher_config(repo_root)
 
     #: One teacher load per path. Paths are run independently because the
     #: operators mutate the module they are given, so each pays it.
@@ -358,6 +501,27 @@ def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
                 f"leaf {sid}: journal shard sha disagrees with the selection")
         bounded = root_load_minutes + sum(
             worst[node["impl_ids"][-1]] for node in chain) / 60.0
+
+        #: The root state attempt 3 expanded this path's FIRST operator from,
+        #: solved against its own recorded step-0 config hash.
+        first = chain[0]
+        recorded_step0_config = ((first.get("artifact") or {})
+                                 .get("config_sha256"))
+        if not recorded_step0_config:
+            raise ReplaySourceError(
+                f"leaf {sid}: the journal records no config_sha256 for step 0 "
+                f"({first['state_id']}), so the root state it was expanded "
+                "from cannot be derived and the path cannot be pinned.")
+        if not first.get("arch_spec"):
+            raise ReplaySourceError(
+                f"leaf {sid}: the journal records no arch_spec for step 0 "
+                f"({first['state_id']}), so the config its first operator "
+                "produced cannot be rebuilt and the root state cannot be "
+                "derived.")
+        overrides, provenance = derive_root_overrides(
+            ArchSpec.of("qwen3", first["arch_spec"]),
+            recorded_step0_config, root_config,
+            first_impl_id=first["impl_ids"][-1])
         leaves.append(ReplayLeaf(
             state_id=sid,
             path_label=entry["path"],
@@ -370,6 +534,8 @@ def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
             num_parameters=int(entry["num_parameters"]),
             step_digests=tuple(n["artifact_digest"] for n in chain),
             bounded_minutes=round(bounded, 2),
+            root_config_overrides=overrides,
+            root_override_provenance=provenance,
         ))
     return leaves
 

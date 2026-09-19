@@ -1,0 +1,85 @@
+[07:39:08] budget: expected 221 min $4.01 · soft $4.41 · hard $4.68 (authorized $4.69)
+[07:39:08] NVIDIA L40S $1.09/h, stock Low
+[07:39:08] session commit 44ea4f72ef01 verified: harness digests to 7659326717a6…, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt7/governance/authorization.json differs from the authorized base
+[07:39:08] replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900
+[07:39:08] authorization binds to source binding 0b6a9e626f11…
+[07:39:08] no operator-bearing file has moved since 2421f630bc81…; 5 leaves, 20 pinned steps, selection 7271091c9141…
+[07:39:08] destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves
+[07:39:09] launch-bound readiness at c785533514a2… binds harness 7659326717a6… (30 passed, 0 skipped)
+[07:39:13] aad_autoinit_44ea4f72.bundle (14248942 bytes, 324e95b8b53e…) round-trips to 44ea4f72ef01… carrying this authorization and executable set 7659326717a6…
+[07:39:13] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[07:39:14] watchdog detached — hard 258 min = $4.68
+[07:39:14] created q2bss1lxkaa2ps at $1.09/h
+[07:39:37] TCP 22 at 160.250.71.212:14880 after 0.4 min
+[07:39:39] draw 1: ssh reachable — $0.01
+[07:40:03] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[07:40:03] draw 1: running setup
+[07:41:44] setup did not reach SETUP_DONE:
+ + pandas==3.0.3
+ + pillow==12.3.0
+ + pluggy==1.6.0
+ + propcache==0.5.2
+ + pyarrow==25.0.0
+ + pygments==2.20.0
+ + pyparsing==3.3.2
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pyyaml==6.0.3
+ + regex==2026.7.10
+ + requests==2.34.2
+ + rich==15.0.0
+ + safetensors==0.8.0
+ + setuptools==81.0.0
+ + shellingham==1.5.4
+ + six==1.17.0
+ + sympy==1.14.0
+ + tokenizers==0.22.2
+ + torch==2.11.0+cu128
+ + tqdm==4.68.4
+ + transformers==5.13.1
+ + triton==3.6.0
+ + typer==0.26.8
+ + typing-extensions==4.16.0
+ + urllib3==2.7.0
+ + xxhash==3.8.1
+ + yarl==1.24.2
+Using Python 3.12.3 environment at: /opt/train
+Resolved 1 package in 2ms
+   Building aadistill @ file:///workspace/aad
+      Built aadistill @ file:///workspace/aad
+Prepared 1 package in 275ms
+Installed 1 package in 1ms
+ + aadistill==0.0.1 (from file:///workspace/aad)
+[07:41:33] offline install completed in 12s
+train torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1
+MARKER:TRAIN_ENV
+/workspace/autoinit_preflight_setup.sh: line 362: SESSION_FROZEN_EXPECT: a session declaring ASSETS_READY must name its frozen-asset expectation document
+SETUP_RC=1
+
+[07:41:44] ABORT after draw 1: setup_failed
+[07:41:44] deleting pod (setup setup_failed)
+[07:41:55] pod deleted — 2.7 min, $0.05; provider confirms gone: True
+
+autoinit-phase-c2-replay INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_c2_replay/runs/attempt7/runtime/session.json. the replay is a TERMINUS: it reconstructs the five checkpoints behind a frozen Top-5 and stops. It decides nothing, and behavioural screening is separately authorized and unreachable from here.
+r==0.26.8
+ + typing-extensions==4.16.0
+ + urllib3==2.7.0
+ + xxhash==3.8.1
+ + yarl==1.24.2
+Using Python 3.12.3 environment at: /opt/train
+Resolved 1 package in 2ms
+   Building aadistill @ file:///workspace/aad
+      Built aadistill @ file:///workspace/aad
+Prepared 1 package in 275ms
+Installed 1 package in 1ms
+ + aadistill==0.0.1 (from file:///workspace/aad)
+[07:41:33] offline install completed in 12s
+train torch 2.11.0+cu128 NVIDIA L40S | transformers 5.13.1
+MARKER:TRAIN_ENV
+/workspace/autoinit_preflight_setup.sh: line 362: SESSION_FROZEN_EXPECT: a session declaring ASSETS_READY must name its frozen-asset expectation document
+SETUP_RC=1
+
+[07:41:44] ABORT after draw 1: setup_failed
+[07:41:44] deleting pod (setup setup_failed)
+[07:41:55] pod deleted — 2.7 min, $0.05; provider confirms gone: True
+LAUNCHER_EXIT=11
