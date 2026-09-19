@@ -4,7 +4,7 @@
   "counts": {
     "error": 0,
     "failed": 0,
-    "passed": 22,
+    "passed": 23,
     "skipped": 0
   },
   "environment": {
@@ -21,12 +21,12 @@
     "executions_of_this_tree": [
       "exec-001"
     ],
-    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-2e7b0f65ee39/exec-001/junit.xml",
-    "junit_sha256": "a9f29ccf0b567db5b2f817258beabb9899df52b55f4bd8478fd7e10f1f01d7da",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-2e7b0f65ee39/exec-001/pytest.log",
-    "pytest_log_sha256": "08cb3053223b8027e8b30f844371607fa2002f213a1ee0d814120734780a535f"
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-b44894359409/exec-001/junit.xml",
+    "junit_sha256": "492c2c8526fa65e955306b34bfd36d61b7c6a99825b68e037d0afa62f003baa2",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-b44894359409/exec-001/pytest.log",
+    "pytest_log_sha256": "435ae9159b9518131fe1ba22707801cea40097fbdfcd25ea26e36ee20acab03b"
   },
-  "execution_id": "sweep-2e7b0f65ee39/exec-001",
+  "execution_id": "sweep-b44894359409/exec-001",
   "expected_environment_skips": [],
   "failed_nodeids": [],
   "findings": {
@@ -36,7 +36,7 @@
     "counts": {
       "error": 0,
       "failed": 0,
-      "passed": 22,
+      "passed": 23,
       "skipped": 0
     },
     "expected_environment_skips": [],
@@ -116,8 +116,8 @@
     "setup_environment_realized": true,
     "staging_contract_digest": "bff95d7913a2749f78629e4f684ec84772afa040ec8fb09b99217b25a57179ec"
   },
-  "n_tests": 22,
-  "pod_test_environment_digest": "49db521e4522b4fae7c82c022258f8f02ee1635667c0505d6d6e1009d42171a7",
+  "n_tests": 23,
+  "pod_test_environment_digest": "02aa4f969dd513467d2a5654059c2110df500db079a0c588ca43ecfb17f7910d",
   "pod_test_environment_n_files": 220,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
@@ -128,18 +128,18 @@
   "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
   "record_kind": "launch_bound",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved launch rests on. It is produced on the final CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are committed, BEFORE the authorization is issued -- because a sweep run after issuance adds a second path to the lineage diff and session_commit_gate refuses.",
-  "replay_harness_digest": "a90ad9c165d2ce5cda75b9fa0ea9b33f884af7a1222bb76b39a344f476d9868e",
+  "replay_harness_digest": "427a359285cf6e7f69c33c5ccab832b047cc58d2987374117ff2210c60048701",
   "replay_harness_n_files": 83,
   "schema": "aadistill.autoinit.c2_replay_pod_environment/v1",
-  "seconds": 10.2,
-  "self_sha256": "70fca0790115d5acdf5f4ba77eec0926fc422c9675c7e611854d355f3c602d20",
+  "seconds": 10.9,
+  "self_sha256": "98b35a854acd3d66433d241803c935609b140245f7df2d6daf1f2c188b25af79",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_2e7b0f65.bundle",
+    "BUNDLE_NAME": "aad_autoinit_b4489435.bundle",
     "SESSION_ASSETS": "e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1",
     "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_c2_replay/runs/spec_check/governance/authorization.json",
-    "SESSION_COMMIT": "2e7b0f65ee395da1f2528adb08f40f19a46b2a5b",
+    "SESSION_COMMIT": "b44894359409be6c4c80321b100b8abbbf641975",
     "SESSION_KIND": "c2_replay",
-    "SESSION_PLAN_HASH": "54fe889c553dcf3b371ab619aada18294c074d3640a18e487ec17fc22126ef8f",
+    "SESSION_PLAN_HASH": "edb4d37cfebdcbc3351531421c4780add7ee2416eef0439d7bbb0861e3fddc35",
     "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"}]",
     "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV ASSETS_READY TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
     "SESSION_STATUS": "/workspace/aad/scratch/autoinit_c2_replay.status",
@@ -150,7 +150,7 @@
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1121 derived paths, contract bff95d7913a2> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-2e7b0f65ee39/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-2e7b0f65ee39/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1121 derived paths, contract bff95d7913a2> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-b44894359409/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-b44894359409/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
   "simulator_exit_code": 0,
   "staging_contract": {
     "digest": "bff95d7913a2749f78629e4f684ec84772afa040ec8fb09b99217b25a57179ec",
@@ -189,7 +189,7 @@
   },
   "staging_contract_digest": "bff95d7913a2749f78629e4f684ec84772afa040ec8fb09b99217b25a57179ec",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "2e7b0f65ee395da1f2528adb08f40f19a46b2a5b",
+  "swept_base_commit": "b44894359409be6c4c80321b100b8abbbf641975",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "PASS"
