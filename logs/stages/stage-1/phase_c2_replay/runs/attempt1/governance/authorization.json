@@ -4,11 +4,11 @@
  "run_id": "attempt1",
  "stage_id": "1",
  "plan_id": "autoinit.v1.phase_c2.replay",
- "plan_hash": "ee831510c2981068f8e3bb68c68f5e5c2e1969e60433c7be6c17538bb5961e54",
- "issued_utc": "2026-09-19T06:41:12.965284+00:00",
- "authorized_session_commit": "0c4e024e462b890c42b251b65abd8ab97e7c9a51",
- "provenance_commit": "0c4e024e462b890c42b251b65abd8ab97e7c9a51",
- "harness_source_digest": "c007e05fb3a5694a2b363353e3c60baa4a61eba2ac863c180b7193c4acd9082f",
+ "plan_hash": "902fd382ae57115b1becab18de714ea86aa5208e4fca11be3d76c26ef322ebc3",
+ "issued_utc": "2026-09-19T06:44:53.630883+00:00",
+ "authorized_session_commit": "0040e4cb464358e231de704ce061cf6745d5a07a",
+ "provenance_commit": "0040e4cb464358e231de704ce061cf6745d5a07a",
+ "harness_source_digest": "a90ad9c165d2ce5cda75b9fa0ea9b33f884af7a1222bb76b39a344f476d9868e",
  "harness_source_files": [
   "configs/autoinit/c2_replay_artifacts.json",
   "configs/autoinit/c2_replay_artifacts_failed.json",
@@ -149,7 +149,7 @@
   ],
   "operators": {
    "source_commit": "2421f630bc812d414ae25245e855059ffe29610d",
-   "head": "0c4e024e462b890c42b251b65abd8ab97e7c9a51",
+   "head": "0040e4cb464358e231de704ce061cf6745d5a07a",
    "checked": {
     "src/aadistill/initialization": {
      "files_at_source": 44
@@ -261,5 +261,5 @@
   "note": "every step of every path is pinned to the artifact digest attempt 3 recorded for it, not merely the final output. A mismatch at any step is a STOP condition and a scientific finding, not a retryable engineering failure."
  },
  "_scope": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5. It decides nothing.",
- "authorization_sha256": "04654ffd280b04858c6191dab599fed02c086106e32fe2b28b73216b69d59634"
+ "authorization_sha256": "259657fdfe7f1130599d628c96fb7130339df987555824828991d88a95cf2b48"
 }
