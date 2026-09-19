@@ -1,0 +1,30 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt4",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "ABORTED_BEFORE_PROVIDER",
+ "successful": false,
+ "provider_resource_created": false,
+ "reconstructed_leaves": 0,
+ "budget": {
+  "this_attempt": 0.0,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0
+ },
+ "gates_passed": 7,
+ "gates_total": 7,
+ "what_happened": "ALL SEVEN $0 gates passed, including the read-only transport gate: the bundle round-tripped to the session commit carrying this authorization and executable set. The launcher then failed inside create() because --image defaulted to POD_IMAGE, which is the deployment-commands MAPPING and not an image reference, putting a dict on the provider command line.",
+ "what_it_exposed": "The more serious finding is that it reached create() AT ALL under --dry-run. Nothing in the shared SessionRunner consulted the flag: run() went from the prechecks straight to create(), so every launcher in this repository advertising 'run every $0 gate and stop before provider creation' would have created a billing pod once its gates passed. The flag was safe only when a gate refused first. Now implemented in shared core with its own test file, including a guards-the-guard case asserting that WITHOUT the flag create() is still reached.",
+ "budget_consumed_usd": 0.0,
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true
+ },
+ "next": "attempt5, under a fresh chain on the repaired tree"
+}

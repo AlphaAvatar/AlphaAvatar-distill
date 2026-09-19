@@ -50,8 +50,7 @@ from aadistill.runtime.staging_contract import (  # noqa: E402
     ignores_for_selection)
 
 from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
-from experiments.deployment import (  # noqa: E402
-    POD_IMAGE, deployment_commands)
+from experiments.deployment import deployment_commands  # noqa: E402
 from experiments.phase_c2 import replay as RG  # noqa: E402
 from experiments.phase_c2 import replay_bundle as RT  # noqa: E402
 from experiments.phase_c2 import replay_pod_environment as RPE  # noqa: E402
@@ -102,9 +101,12 @@ TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
 
 CONTAINER_DISK_GB = 120
 
-#: The image attempt 3 ran. The replay reproduces artifacts that
-#: image produced, so it is pinned rather than defaulted.
-BOUND_IMAGE = POD_IMAGE
+#: The image attempt 3 ran, as a STRING. `POD_IMAGE` is the deployment-commands
+#: mapping — workspace roots, remote python, min CUDA — not an image reference,
+#: and passing it here put a dict on the `runpodctl pod create` command line.
+#: The replay reproduces artifacts this image produced, so it is pinned rather
+#: than defaulted.
+BOUND_IMAGE = "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
 
 
 #: Every path this run writes, by role. One mapping, so the launcher, the

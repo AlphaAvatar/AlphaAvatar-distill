@@ -1,0 +1,556 @@
+{
+  "schema": "aadistill.autoinit.c2_replay_session/v1",
+  "session_id": "autoinit-phase-c2-replay",
+  "session_spec": {
+    "session_id": "autoinit-phase-c2-replay",
+    "schema": "aadistill.autoinit.c2_replay_session/v1",
+    "description": "Replay-only reconstruction of the five checkpoints behind Phase-C2 Full Joint Search attempt 3's frozen Top-5. Every path is pinned at every step to the artifact digest attempt 3 recorded. It runs no beam, ranks nothing, produces no selection, evaluates nothing that bears on a decision, injects no control and trains nothing. A digest mismatch is a scientific finding and stops the session.",
+    "deployment": {
+      "artifact_collector": "scripts/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "bebc5060c5411bd0a57323cde0b8a63383991798c3009112191d22358d1de96a",
+    "authorization_path": "logs/stages/stage-1/phase_c2_replay/runs/attempt4/governance/authorization.json",
+    "authorization_type": "ReplayAuthorization.load",
+    "plan_id": "autoinit.v1.phase_c2.replay",
+    "plan_hash": "0b6a9e626f11f5849fbb4cb4e8edeed3547c2e922971c2a0a86ea73548e664a1",
+    "status_path": "/workspace/aad/scratch/autoinit_c2_replay.status",
+    "run_log_path": "/workspace/aad/scratch/autoinit_c2_replay_run.log",
+    "driver_job_id": "autoinit_c2_replay_driver",
+    "markers": {
+      "success": "C2_REPLAY_ALL_DONE",
+      "failure": [
+        "C2_REPLAY_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_c2_replay",
+      "evidence_filename": "c2_replay_evidence.json",
+      "archive_basename": "c2_replay_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/c2_replay_artifacts.json",
+      "spec_failed": "configs/autoinit/c2_replay_artifacts_failed.json",
+      "report_names": [
+        "c2_replay_evidence.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "c2_replay"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "SESSION_RELAY_INPUTS",
+        "SESSION_KIND",
+        "SESSION_SETUP_MARKERS",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e8_inputs_20260810/calibration_v1/items.jsonl",
+          "dest": "artifacts/stage1/e8_calibration_v1",
+          "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "e8_calibration_v1:artifacts/stage1",
+        "reasoning_heavy_v2:artifacts/stage1"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [
+        "tests/architecture",
+        "tests/autoinit",
+        "tests/c1_preflight",
+        "tests/c2_baseline_completion_preflight",
+        "tests/c2_full_search_preflight",
+        "tests/c2_preflight",
+        "tests/data",
+        "tests/docs",
+        "tests/evaluation",
+        "tests/infrastructure",
+        "tests/init",
+        "tests/initialization",
+        "tests/models",
+        "tests/pod",
+        "tests/rollout",
+        "tests/runtime",
+        "tests/support",
+        "tests/test_usable_rollout.py",
+        "tests/training",
+        "tests/validation"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "ASSETS_READY",
+        "TEACHER_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 7,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-09-19T06:58:46+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 221 min $4.01 \u00b7 soft $4.41 \u00b7 hard $4.68 (authorized $4.69)"
+    },
+    {
+      "utc": "2026-09-19T06:58:46+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Medium"
+    },
+    {
+      "utc": "2026-09-19T06:58:47+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit 56fed7a83b8a verified: harness digests to 4c81d1192df6\u2026, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt4/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-09-19T06:58:47+00:00",
+      "elapsed_min": 0.0,
+      "msg": "replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900"
+    },
+    {
+      "utc": "2026-09-19T06:58:47+00:00",
+      "elapsed_min": 0.0,
+      "msg": "authorization binds to source binding 0b6a9e626f11\u2026"
+    },
+    {
+      "utc": "2026-09-19T06:58:47+00:00",
+      "elapsed_min": 0.0,
+      "msg": "no operator-bearing file has moved since 2421f630bc81\u2026; 5 leaves, 20 pinned steps, selection 7271091c9141\u2026"
+    },
+    {
+      "utc": "2026-09-19T06:58:47+00:00",
+      "elapsed_min": 0.0,
+      "msg": "destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves"
+    },
+    {
+      "utc": "2026-09-19T06:58:47+00:00",
+      "elapsed_min": 0.0,
+      "msg": "launch-bound readiness at 00472ab86a45\u2026 binds harness 4c81d1192df6\u2026 (26 passed, 0 skipped)"
+    },
+    {
+      "utc": "2026-09-19T06:58:52+00:00",
+      "elapsed_min": 0.0,
+      "msg": "aad_autoinit_56fed7a8.bundle (14144737 bytes, 5e24dccd42bd\u2026) round-trips to 56fed7a83b8a\u2026 carrying this authorization and executable set 4c81d1192df6\u2026"
+    },
+    {
+      "utc": "2026-09-19T06:58:53+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets"
+    },
+    {
+      "utc": "2026-09-19T06:58:53+00:00",
+      "elapsed_min": 0.0,
+      "msg": "LAUNCHER ERROR: TypeError: expected str, bytes or os.PathLike object, not dict"
+    }
+  ],
+  "stages": {},
+  "authorization": {
+    "schema": "aadistill.autoinit.c2_replay_authorization/v1",
+    "authorization_id": "autoinit.v1.phase_c2.replay",
+    "version": 1,
+    "granted_utc": "2026-09-19T06:58:20.571819+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "autoinit.v1.phase_c2.replay",
+    "phase_a_session_plan_hash": "0b6a9e626f11f5849fbb4cb4e8edeed3547c2e922971c2a0a86ea73548e664a1",
+    "phase_a_science_plan_hash": "0b6a9e626f11f5849fbb4cb4e8edeed3547c2e922971c2a0a86ea73548e664a1",
+    "expected_usd": 4.69,
+    "hard_cap_usd": 4.69,
+    "authorized_stages": [
+      "bind_identities",
+      "reconstruct"
+    ],
+    "stage_conditions": {
+      "bind_identities": "binds the source binding, builds the five pinned specs and checks disk headroom. Loads no model.",
+      "reconstruct": "materializes each pinned path in order, gating every intermediate on its recorded digest, and secures each finished leaf before the next path starts. A digest mismatch is TERMINAL."
+    },
+    "scope_note": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5 (selection 7271091c9141\u2026), from session commit 2421f630bc81\u2026. It decides nothing: no beam, no ranking, no selection, no selection-bearing evaluation, no control comparison, no training and no behavioural work.",
+    "phase_a_authorized": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "5c29757a00b8585d2ec7b9dde76d2ec57e5dd991",
+    "harness_source_digest": "4c81d1192df6ac6f14899c4067f64196e8f02d6f8540372a9295d4fbd75a7026",
+    "harness_source_files": [
+      "configs/autoinit/c2_replay_artifacts.json",
+      "configs/autoinit/c2_replay_artifacts_failed.json",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/telemetry.jsonl",
+      "scripts/autoinit/issue_c2_replay_authorization.py",
+      "scripts/autoinit/phase_a_frozen.py",
+      "scripts/experiments/calibration.py",
+      "scripts/experiments/deployment.py",
+      "scripts/experiments/phase_a/plan.py",
+      "scripts/experiments/phase_c2/__init__.py",
+      "scripts/experiments/phase_c2/bundle.py",
+      "scripts/experiments/phase_c2/full_search_space.py",
+      "scripts/experiments/phase_c2/pod_environment.py",
+      "scripts/experiments/phase_c2/replay.py",
+      "scripts/experiments/phase_c2/replay_bundle.py",
+      "scripts/experiments/phase_c2/replay_pod_environment.py",
+      "scripts/experiments/phase_c2/replay_specs.py",
+      "scripts/experiments/phase_c2/search_space.py",
+      "scripts/experiments/phase_c2/session.py",
+      "scripts/experiments/recovery_policy.py",
+      "scripts/experiments/run_layout.py",
+      "scripts/experiments/search_cost_model.py",
+      "scripts/pod/autoinit_c2_replay_driver.py",
+      "scripts/pod/autoinit_c2_replay_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention.py",
+      "src/aadistill/initialization/operators/attention_activation.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite.py",
+      "src/aadistill/initialization/operators/depth.py",
+      "src/aadistill/initialization/operators/ffn.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/attention.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py"
+    ],
+    "per_launch_hard_usd": null,
+    "provenance_commit": "5c29757a00b8585d2ec7b9dde76d2ec57e5dd991",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "allows_phase_a": false,
+    "allows_recovery_training": false,
+    "authorizes_c2_search1": false,
+    "resource_scope": null,
+    "run_id": null,
+    "scope": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5, each path pinned at EVERY step to the artifact digest attempt 3 recorded, and each finished leaf secured off the pod. NOT a fourth Full Search attempt, NOT a beam, NOT a re-ranking, NOT a regeneration of a Top-5, NOT a selection-bearing evaluation, NOT a control comparison, and NOT behavioural work of any kind.",
+    "authorization_sha256": "06bec03a8497f0fdcace6901b0e9c34e72f2a7d18ee9282989d006b808ccc796",
+    "authorizes_c2_baseline_completion": false,
+    "authorizes_c2_full_search": false,
+    "authorizes_behavioural_selection": false,
+    "authorizes_c2_replay": true,
+    "forbids": [
+      "any beam search or expansion",
+      "ranking or re-ranking the 14 complete leaves",
+      "producing or replacing a selection",
+      "any selection-bearing evaluation",
+      "injecting or comparing against the canonical control",
+      "substituting a functionally similar checkpoint for a mismatch",
+      "retrying a deterministic digest mismatch",
+      "recovery training of any kind",
+      "any behavioural screening or confirmation probe"
+    ],
+    "on_mismatch": "STOP. A digest mismatch is a replay mismatch and a scientific finding: preserve the evidence, tear down, and refer it to review. It is not an ordinary engineering failure and must not be retried, because the path is deterministic and would diverge identically."
+  },
+  "session_plan_hash": "0b6a9e626f11f5849fbb4cb4e8edeed3547c2e922971c2a0a86ea73548e664a1",
+  "harness_source_digest": "4c81d1192df6ac6f14899c4067f64196e8f02d6f8540372a9295d4fbd75a7026",
+  "harness_source_files": [
+    "configs/autoinit/c2_replay_artifacts.json",
+    "configs/autoinit/c2_replay_artifacts_failed.json",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/telemetry.jsonl",
+    "scripts/autoinit/issue_c2_replay_authorization.py",
+    "scripts/autoinit/phase_a_frozen.py",
+    "scripts/experiments/calibration.py",
+    "scripts/experiments/deployment.py",
+    "scripts/experiments/phase_a/plan.py",
+    "scripts/experiments/phase_c2/__init__.py",
+    "scripts/experiments/phase_c2/bundle.py",
+    "scripts/experiments/phase_c2/full_search_space.py",
+    "scripts/experiments/phase_c2/pod_environment.py",
+    "scripts/experiments/phase_c2/replay.py",
+    "scripts/experiments/phase_c2/replay_bundle.py",
+    "scripts/experiments/phase_c2/replay_pod_environment.py",
+    "scripts/experiments/phase_c2/replay_specs.py",
+    "scripts/experiments/phase_c2/search_space.py",
+    "scripts/experiments/phase_c2/session.py",
+    "scripts/experiments/recovery_policy.py",
+    "scripts/experiments/run_layout.py",
+    "scripts/experiments/search_cost_model.py",
+    "scripts/pod/autoinit_c2_replay_driver.py",
+    "scripts/pod/autoinit_c2_replay_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/pod/watchdog.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention.py",
+    "src/aadistill/initialization/operators/attention_activation.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite.py",
+    "src/aadistill/initialization/operators/depth.py",
+    "src/aadistill/initialization/operators/ffn.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/attention.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 4.69,
+    "expected_minutes": 220.68,
+    "soft_stop_minutes": 242.74800000000002,
+    "artifact_recovery_reserve_minutes": 15.0,
+    "hard_terminate_minutes": 257.74800000000005,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused: a replay trains nothing, so arms=0. The bound is the sum of the five paths' worst-case operator timings from attempt 3's telemetry",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 6.0
+      },
+      {
+        "name": "teacher_fetch_and_verify",
+        "minutes": 8.0
+      },
+      {
+        "name": "machine_gates",
+        "minutes": 22.0
+      },
+      {
+        "name": "selection_commit_and_artifact_manifest",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 6.0
+      },
+      {
+        "name": "reconstruct_five_pinned_paths",
+        "minutes": 125.68
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 4.009,
+    "soft_stop_usd": 4.4099,
+    "artifact_recovery_reserve_usd": 0.2725,
+    "hard_terminate_usd": 4.6824
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Medium",
+  "session_commit_check": {
+    "session_commit": "56fed7a83b8a62149fc7d39f9c2c9f4bb42eabd5",
+    "authorized_session_commit": "5c29757a00b8585d2ec7b9dde76d2ec57e5dd991",
+    "harness_digest_at_commit": "4c81d1192df6ac6f14899c4067f64196e8f02d6f8540372a9295d4fbd75a7026",
+    "authorized_harness_digest": "4c81d1192df6ac6f14899c4067f64196e8f02d6f8540372a9295d4fbd75a7026",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "5c29757a00b8585d2ec7b9dde76d2ec57e5dd991",
+      "session_commit": "56fed7a83b8a62149fc7d39f9c2c9f4bb42eabd5",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_c2_replay/runs/attempt4/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_c2_replay/runs/attempt4/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "prechecks": [
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit 56fed7a83b8a verified: harness digests to 4c81d1192df6\u2026, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt4/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "replay_scope_gate",
+      "ok": true,
+      "message": "replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $4.6900"
+    },
+    {
+      "check": "plan_binding_gate",
+      "ok": true,
+      "message": "authorization binds to source binding 0b6a9e626f11\u2026"
+    },
+    {
+      "check": "source_binding_gate",
+      "ok": true,
+      "message": "no operator-bearing file has moved since 2421f630bc81\u2026; 5 leaves, 20 pinned steps, selection 7271091c9141\u2026"
+    },
+    {
+      "check": "destination_gate",
+      "ok": true,
+      "message": "destination /home/ecs-user/aad-artifacts: 47.2 GiB free for 5.55 GiB of leaves"
+    },
+    {
+      "check": "readiness_gate",
+      "ok": true,
+      "message": "launch-bound readiness at 00472ab86a45\u2026 binds harness 4c81d1192df6\u2026 (26 passed, 0 skipped)"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "aad_autoinit_56fed7a8.bundle (14144737 bytes, 5e24dccd42bd\u2026) round-trips to 56fed7a83b8a\u2026 carrying this authorization and executable set 4c81d1192df6\u2026"
+    }
+  ],
+  "bundle_staged_check": {
+    "session_commit": "56fed7a83b8a62149fc7d39f9c2c9f4bb42eabd5",
+    "canonical_bundle_name": "aad_autoinit_56fed7a8.bundle",
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_path": "transfer/aad_autoinit_56fed7a8.bundle",
+    "n_harness_files": 83,
+    "bytes": 14144737,
+    "remote_sha256": "5e24dccd42bd683751702a7487ccb23d5a22e1b349a2f5ae20f8bd7e3a54d02e",
+    "local_sha256": "5e24dccd42bd683751702a7487ccb23d5a22e1b349a2f5ae20f8bd7e3a54d02e",
+    "bundle_verify_rc": 0,
+    "roundtrip_head": "56fed7a83b8a62149fc7d39f9c2c9f4bb42eabd5",
+    "authorization_sha256": "0ed8ebbec43002867a52c02119af79e14fd84e1dff94e2af40c2a5b2a5b5abd4",
+    "authorization_matches": true,
+    "roundtrip_harness_digest": "4c81d1192df6ac6f14899c4067f64196e8f02d6f8540372a9295d4fbd75a7026",
+    "expected_harness_digest": "4c81d1192df6ac6f14899c4067f64196e8f02d6f8540372a9295d4fbd75a7026",
+    "ok": true,
+    "answers": "a pod can obtain the exact authorized code from the relay right now, not merely that a local file once existed"
+  },
+  "precheck": {
+    "relay_needed": [
+      "e8_inputs_20260810/calibration_v1/items.jsonl"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 1
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1210
+    },
+    "local_assets": [
+      "artifacts/stage1/e8_calibration_v1",
+      "artifacts/stage1/reasoning_heavy_v2"
+    ],
+    "local_missing": []
+  },
+  "launcher_error": "TypeError: expected str, bytes or os.PathLike object, not dict",
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-09-19T06:58:53+00:00"
+}

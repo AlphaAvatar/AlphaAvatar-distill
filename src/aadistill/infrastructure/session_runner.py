@@ -731,6 +731,30 @@ class SessionRunner:
     def run(self) -> bool:
         if not self.make_plan() or not self.run_prechecks():
             return False
+
+        #: `--dry-run` MEANS something. Several launchers have advertised the
+        #: flag as "run every $0 gate and stop before provider creation" and
+        #: nothing consulted it: the runner went straight from the prechecks to
+        #: `create()`, so a dry run whose gates all passed created a real pod
+        #: and billed for it. The flag was only ever "safe" because a gate
+        #: happened to refuse first.
+        #:
+        #: `getattr` because not every caller's namespace declares it, and a
+        #: launcher without the flag must keep behaving exactly as before.
+        if getattr(self.a, "dry_run", False):
+            self.ev["dry_run"] = True
+            self.ev["provider_resource_created"] = False
+            self.ev["terminal"] = "DRY_RUN_GATES_PASSED"
+            self.ev["_dry_run_is_not_a_pass"] = (
+                "every pre-provider gate passed and nothing was created. That "
+                "is evidence the chain is launchable, not evidence the session "
+                "succeeded: no pod existed, no stage ran and nothing was "
+                "measured.")
+            self.say("DRY RUN: every pre-provider gate passed; stopping before "
+                     "provider creation. Nothing was created and nothing bills.")
+            self.save()
+            return False
+
         for draw in range(1, self.a.host_draws + 1):
             self.draw = draw
             if not self.create():

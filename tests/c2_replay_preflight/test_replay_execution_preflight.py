@@ -438,6 +438,45 @@ def test_every_transport_name_the_launcher_uses_exists_and_is_callable():
         assert needed in params, f"roundtrip takes no {needed}"
 
 
+def test_the_bound_image_is_an_image_reference():
+    """It was `POD_IMAGE`, which is the deployment-commands MAPPING — workspace
+    roots, remote python, min CUDA — not an image reference. That put a dict on
+    the `runpodctl pod create` command line, and it surfaced inside `create()`,
+    which is one line away from a billing resource."""
+    import autoinit_c2_replay_launch as L
+
+    assert isinstance(L.BOUND_IMAGE, str), type(L.BOUND_IMAGE)
+    assert "/" in L.BOUND_IMAGE and ":" in L.BOUND_IMAGE, L.BOUND_IMAGE
+    args = L.build_parser().parse_args(
+        ["--scr", "/tmp/x", "--session-commit", "d" * 40,
+         "--bundle", "b.bundle", "--run-id", "preflight"])
+    assert args.image == L.BOUND_IMAGE
+
+
+def test_the_dry_run_flag_actually_stops_before_provider_creation():
+    """The flag is declared by this launcher and honoured by the shared runner.
+
+    It was honoured by nothing: `SessionRunner.run` went from the prechecks
+    straight to `create()`, so a dry run whose gates all passed created a real
+    pod.
+    """
+    import inspect
+
+    from aadistill.infrastructure.session_runner import SessionRunner
+
+    import autoinit_c2_replay_launch as L
+
+    args = L.build_parser().parse_args(
+        ["--scr", "/tmp/x", "--session-commit", "d" * 40,
+         "--bundle", "b.bundle", "--run-id", "preflight", "--dry-run"])
+    assert args.dry_run is True
+    source = inspect.getsource(SessionRunner.run)
+    assert "dry_run" in source, (
+        "the runner does not consult dry_run; this launcher's --dry-run would "
+        "create a provider resource")
+    assert source.index("run_prechecks") < source.index('"dry_run"')
+
+
 def test_the_setup_script_dispatches_this_session_kind():
     """A missing branch is not a type error — it is a late refusal on a billing
     machine, and it has cost this project two paid sessions."""

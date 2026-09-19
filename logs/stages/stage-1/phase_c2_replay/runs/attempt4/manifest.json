@@ -1,0 +1,35 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c2_replay",
+ "run_id": "attempt4",
+ "root": "phase_c2_replay/runs/attempt4",
+ "artifact_spec": "phase_c2_replay_session_v1",
+ "plan": {
+  "session": "autoinit-phase-c2-replay",
+  "plan_id": "autoinit.v1.phase_c2.replay",
+  "session_commit": "56fed7a83b8a62149fc7d39f9c2c9f4bb42eabd5",
+  "bundle": "aad_autoinit_56fed7a8.bundle",
+  "reconstructs_selection": "7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673",
+  "source_session_commit": "2421f630bc812d414ae25245e855059ffe29610d"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_c2_replay_launch.py",
+  "driver": "scripts/pod/autoinit_c2_replay_driver.py"
+ },
+ "status": {
+  "authorizes": "nothing",
+  "terminates_at": "reconstruct",
+  "decides": "nothing \u2014 it restores artifacts behind a selection that is already frozen"
+ },
+ "roles": {
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "grant": "governance/grant.json",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "74bdf2736e37d0103a2b40805f8059e86d864f3e4eead4b40da88c63f8d570f0"
+}
