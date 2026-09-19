@@ -293,6 +293,49 @@ def test_the_launcher_builds_its_session_spec_on_this_tree():
     assert spec.artifacts.products_secured is not None
 
 
+def test_the_authorization_document_round_trips_through_its_own_loader(tmp_path):
+    """Assemble one, then load it. The two halves were written independently
+    and did not agree.
+
+    `as_dict` serialises `plan_hash` as `phase_a_session_plan_hash` and
+    `science_plan_hash` as `phase_a_science_plan_hash`, and the constructor
+    requires eleven fields. A document assembled from what this session felt it
+    needed parsed as nothing the loader could read — and the failure surfaced in
+    the dry run, AFTER the sweep, the authorization and the bundle had all been
+    built on it, costing a whole governance chain.
+
+    Built here rather than read off the tree, because the sweep runs BEFORE the
+    authorization exists: a preflight that asserted the artifact could never
+    pass on the tree it is meant to certify.
+    """
+    import json as _json
+
+    from issue_c2_replay_authorization import build_authorization_record
+
+    grant = _json.loads(
+        (ROOT / "logs/stages/stage-1/phase_c2_replay/runs/attempt1"
+                "/governance/grant.json").read_text())
+    record = build_authorization_record(
+        grant=grant, approved=grant["approved_money"],
+        commit="d" * 40, dirty=False, rate=1.09,
+        binding=RS.source_binding(ROOT), live=RG.current_executable(ROOT),
+        plan_hash=RG.plan_hash(ROOT))
+
+    path = tmp_path / "authorization.json"
+    path.write_text(_json.dumps(record, indent=1) + "\n")
+    a = RG.ReplayAuthorization.load(path)
+
+    assert a.authorization_id == RG.PLAN_ID
+    assert tuple(a.authorized_stages) == RG.AUTHORIZED_STAGES
+    assert a.hard_cap_usd == RG.GPU_HARD_USD
+    assert a.plan_hash == RG.plan_hash(ROOT)
+    assert a.authorizes_c2_replay is True
+    assert a.authorizes_c2_full_search is False
+    assert a.harness_source_digest and a.harness_source_files
+    #: And the money the type does not carry.
+    assert record["money"]["all_in_usd"] == RG.ALL_IN_USD
+
+
 def test_the_launcher_satisfies_the_runners_argument_contract():
     """The runner reads attributes off the namespace and calls `run_session`
     with a fixed signature. Both were wrong here and neither is visible from

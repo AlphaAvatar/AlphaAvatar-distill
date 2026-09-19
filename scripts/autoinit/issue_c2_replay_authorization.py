@@ -58,6 +58,86 @@ def git(*args: str) -> str:
                           cwd=REPO_ROOT).stdout.strip()
 
 
+def build_authorization_record(*, grant, approved, commit, dirty, rate,
+                               binding, live, plan_hash,
+                               run_id: str = "attempt1") -> dict:
+    """Assemble the document. Extracted so a $0 test can round-trip it.
+
+    The assembly and the loader were written independently and did not
+    agree; the disagreement surfaced in a dry run, after the sweep, the
+    authorization and the bundle had all been built on it. A test can now
+    build and load one without an issued artifact on the tree — which
+    matters, because the sweep runs BEFORE the authorization exists.
+    """
+    #: BUILT as the object and then serialised, never hand-written. The
+    #: loader maps `plan_hash` from `phase_a_session_plan_hash` and
+    #: `science_plan_hash` from `phase_a_science_plan_hash`, and the
+    #: constructor requires eleven fields; a document assembled from what this
+    #: session felt it needed parsed as nothing the loader could read, and the
+    #: dry run refused it after the whole chain had been issued.
+    auth = RG.ReplayAuthorization(
+        authorization_id=RG.PLAN_ID,
+        granted_utc=datetime.now(timezone.utc).isoformat(),
+        granted_by=grant["granted_by"],
+        plan_id=RG.PLAN_ID,
+        #: The plan IS the source binding: the five digest-pinned paths and the
+        #: attempt-3 commit they came from.
+        plan_hash=plan_hash,
+        #: No separate science plan. This session produces no measurement, so
+        #: the two hashes are the same object rather than one being invented.
+        science_plan_hash=plan_hash,
+        expected_usd=float(approved.get("expected_usd", RG.GPU_HARD_USD)),
+        hard_cap_usd=RG.GPU_HARD_USD,
+        authorized_stages=RG.AUTHORIZED_STAGES,
+        stage_conditions={
+            "bind_identities": ("binds the source binding, builds the five "
+                                "pinned specs and checks disk headroom. Loads "
+                                "no model."),
+            "reconstruct": ("materializes each pinned path in order, gating "
+                            "every intermediate on its recorded digest, and "
+                            "secures each finished leaf before the next path "
+                            "starts. A digest mismatch is TERMINAL."),
+        },
+        scope_note=(
+            "ONE replay-only reconstruction of the five checkpoints behind "
+            "attempt 3's frozen Top-5 (selection "
+            f"{RS.SELECTION_SHA256[:12]}…), from session commit "
+            f"{RS.ATTEMPT3_SESSION_COMMIT[:12]}…. It decides nothing: no beam, "
+            "no ranking, no selection, no selection-bearing evaluation, no "
+            "control comparison, no training and no behavioural work."),
+        authorized_session_commit=commit,
+        harness_source_digest=live["digest"],
+        harness_source_files=tuple(row["path"] for row in live["files"]),
+        provenance_commit=f"{commit}{'+dirty' if dirty else ''}",
+    )
+    record = auth.as_dict()
+    #: Facts the TYPE does not carry, added beside it rather than in place of
+    #: it. The separately billed disk is here because `hard_cap_usd` is GPU
+    #: money and a ceiling that folded the two together would hide one of them.
+    record["run_id"] = run_id
+    record["stage_id"] = STAGE_ID
+    record["rate_usd_per_hour"] = rate
+    record["one_use"] = True
+    record["max_provider_resources"] = 1
+    record["money"] = {
+        "gpu_hard_usd": RG.GPU_HARD_USD,
+        "disk_usd": RG.DISK_USD,
+        "all_in_usd": RG.ALL_IN_USD,
+        "_why_two_numbers": (
+            "the provider bills container disk separately from the GPU. "
+            "`hard_cap_usd` is GPU money, which is what the budget planner and "
+            "the watchdog spend against; the disk is real and is recorded "
+            "beside it rather than folded in."),
+    }
+    record["grant_path"] = governance_path(run_id, "grant.json")
+    record["source_binding"] = binding
+    #: Recomputed LAST, over everything above, because the loader verifies the
+    #: document it is given and not the object that produced it.
+    record.pop("authorization_sha256", None)
+    record["authorization_sha256"] = sha256_json(record)
+    return record
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         description=__doc__,
@@ -111,42 +191,10 @@ def main(argv=None) -> int:
     live = RG.current_executable(REPO_ROOT)
     plan_hash = RG.plan_hash(REPO_ROOT)
 
-    record = {
-        "schema": RG.SCHEMA,
-        "authorization_id": RG.PLAN_ID,
-        "run_id": args.run_id,
-        "stage_id": STAGE_ID,
-        "plan_id": RG.PLAN_ID,
-        "plan_hash": plan_hash,
-        "issued_utc": datetime.now(timezone.utc).isoformat(),
-        "authorized_session_commit": commit,
-        "provenance_commit": f"{commit}{'+dirty' if dirty else ''}",
-        "harness_source_digest": live["digest"],
-        "harness_source_files": [row["path"] for row in live["files"]],
-        "authorized_stages": list(RG.AUTHORIZED_STAGES),
-        "one_use": True,
-        "max_provider_resources": 1,
-        "rate_usd_per_hour": args.rate,
-        "hard_cap_usd": RG.GPU_HARD_USD,
-        "money": {
-            "gpu_hard_usd": RG.GPU_HARD_USD,
-            "disk_usd": RG.DISK_USD,
-            "all_in_usd": RG.ALL_IN_USD,
-            "_why_two_numbers": (
-                "the provider bills container disk separately from the GPU. "
-                "`hard_cap_usd` is GPU money, which is what the budget planner "
-                "and the watchdog spend against; the disk is real and is "
-                "recorded beside it rather than folded in."),
-        },
-        "granted_by": grant["granted_by"],
-        "grant_path": grant_rel,
-        "source_binding": binding,
-        "_scope": (
-            "ONE replay-only reconstruction of the five checkpoints behind "
-            "attempt 3's frozen Top-5. It decides nothing."),
-    }
-    record["authorization_sha256"] = sha256_json(
-        {k: v for k, v in record.items() if k != "authorization_sha256"})
+    record = build_authorization_record(
+        grant=grant, approved=approved, commit=commit, dirty=dirty,
+        rate=args.rate, binding=binding, live=live, plan_hash=plan_hash,
+        run_id=args.run_id)
 
     out_rel = governance_path(args.run_id, "authorization.json")
     out = REPO_ROOT / out_rel

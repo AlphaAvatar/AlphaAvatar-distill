@@ -294,10 +294,65 @@ class ReplayAuthorization(C2Authorization):
 
     @classmethod
     def load(cls, path: str | Path) -> "ReplayAuthorization":
-        record = json.loads(Path(path).read_text())
-        if record.get("schema") != SCHEMA:
-            raise ValueError(
-                f"{path} carries schema {record.get('schema')!r}, not {SCHEMA!r}. "
-                "The replay session refuses an authorization issued for another "
-                "kind of session, whatever its money says.")
-        return super().load(path)
+        """Its own schema check, and an EXPLICIT field mapping.
+
+        Not `super().load()`: the parent pins the Search-1 schema, so
+        delegating refuses this artifact by construction. And not a by-name
+        filter either — `as_dict` serialises `plan_hash` as
+        `phase_a_session_plan_hash` and `science_plan_hash` as
+        `phase_a_science_plan_hash`, so a by-name round trip drops both and the
+        constructor fails on a required argument. Every sibling loader maps by
+        hand for the same reason. Reasoning from what this subclass NEEDS rather
+        than from what the parent REQUIRES is how a session dies one step after
+        a gate it passed.
+        """
+        from aadistill.governance.authorization import AuthorizationError
+
+        from experiments.phase_c2.session import C2ResourceScope
+
+        raw = json.loads(Path(path).read_text())
+        stated = raw.get("authorization_sha256")
+        check = {k: v for k, v in raw.items() if k != "authorization_sha256"}
+        if stated != sha256_json(check):
+            raise AuthorizationError(
+                f"{path} does not match its own authorization_sha256; it has "
+                "been edited since it was granted")
+        if raw.get("schema") != SCHEMA:
+            raise AuthorizationError(
+                f"{path} declares schema {raw.get('schema')!r}, not {SCHEMA!r}. "
+                "A search, a baseline rebuild and a behavioural session each "
+                "price different work; none of them can authorize this replay, "
+                "and this cannot authorize any of them.")
+        for forbidden in ("authorizes_c2_full_search", "authorizes_c2_search1",
+                          "authorizes_c2_baseline_completion",
+                          "authorizes_behavioural_selection",
+                          "allows_phase_a", "allows_recovery_training"):
+            if raw.get(forbidden):
+                raise AuthorizationError(
+                    f"{path} claims {forbidden}. This session reconstructs "
+                    "artifacts behind a frozen selection and decides nothing; "
+                    "an artifact claiming more is not one of these.")
+        stages = tuple(raw.get("authorized_stages") or ())
+        if stages != AUTHORIZED_STAGES:
+            raise AuthorizationError(
+                f"{path} authorizes stages {stages}, not {AUTHORIZED_STAGES}.")
+        scope = raw.get("resource_scope")
+        return cls(
+            authorization_id=raw["authorization_id"],
+            granted_utc=raw["granted_utc"], granted_by=raw["granted_by"],
+            plan_id=raw["plan_id"],
+            plan_hash=raw["phase_a_session_plan_hash"],
+            science_plan_hash=raw["phase_a_science_plan_hash"],
+            expected_usd=float(raw["expected_usd"]),
+            hard_cap_usd=float(raw["hard_cap_usd"]),
+            authorized_stages=tuple(raw["authorized_stages"]),
+            stage_conditions=dict(raw["stage_conditions"]),
+            scope_note=raw["scope_note"],
+            authorized_session_commit=raw.get("authorized_session_commit"),
+            harness_source_digest=raw.get("harness_source_digest"),
+            harness_source_files=tuple(raw.get("harness_source_files") or ()),
+            resource_scope=(C2ResourceScope.from_dict(scope)
+                            if scope is not None else None),
+            per_launch_hard_usd=raw.get("per_launch_hard_usd"),
+            provenance_commit=raw.get("provenance_commit"),
+            version=int(raw.get("version", 1)))
