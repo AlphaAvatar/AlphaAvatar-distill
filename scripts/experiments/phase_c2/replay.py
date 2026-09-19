@@ -188,16 +188,41 @@ HARD_CEILING_USD = ALL_IN_USD
 TEARDOWN_RESERVE_USD = 0.25
 
 
-def plan_hash(repo_root: str | Path = REPO_ROOT) -> str:
-    """The source binding IS the plan.
+def plan_payload(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The decision-bearing part of the source binding.
 
-    What this session does is fully determined by the five digest-pinned paths
-    and the commit they came from, so the plan hash is the hash of that binding.
-    A second plan document would be a second place to edit.
+    What this session DOES is fully determined by the five digest-pinned paths,
+    the selection they come from and the attempt-3 commit that produced them.
+    Everything else in the binding is provenance.
+
+    The distinction is not cosmetic. `source_binding` records the LIVE `head`
+    alongside the source commit, so hashing the whole document made the plan
+    hash move with every commit — including the commit that carries the
+    authorization itself. An authorization is issued against the plan hash and
+    checked against it at launch, so a plan hash containing `head` can never
+    survive from issuance to launch: it was a binding that could not hold.
     """
     from experiments.phase_c2.replay_specs import source_binding
 
-    return sha256_json(source_binding(repo_root))
+    binding = source_binding(repo_root)
+    return {
+        "reconstructs": binding["reconstructs"],
+        "source_session_commit": binding["source_session_commit"],
+        "selection_sha256": binding["selection_sha256"],
+        "journal_file_sha256": binding["journal_file_sha256"],
+        "full_journal_sha256": binding["full_journal_sha256"],
+        "search": binding["search"],
+        "policy": binding["policy"],
+        "suite": binding["suite"],
+        "profiles": binding["profiles"],
+        "leaves": binding["leaves"],
+    }
+
+
+def plan_hash(repo_root: str | Path = REPO_ROOT) -> str:
+    """The plan IS the five pinned paths. A second document would be a second
+    place to edit."""
+    return sha256_json(plan_payload(repo_root))
 
 
 def window_minutes(rate_usd_per_hour: float) -> float:

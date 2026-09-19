@@ -58,7 +58,7 @@ from experiments.phase_c2 import replay_pod_environment as RPE  # noqa: E402
 from experiments.phase_c2 import replay_specs as RS  # noqa: E402
 from experiments.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, claim_output_root, open_run,
-    record_run, rel_run_dir, write_run_readmes,
+    present_roles, record_run, rel_run_dir, write_run_readmes,
 )
 from phase_a_frozen import TEACHER_REVISION  # noqa: E402
 
@@ -713,7 +713,24 @@ def main() -> int:
                                   "authorized and unreachable from here."))
     finally:
         try:
-            record_run(layout, spec=REPLAY_RUN_SPEC)
+            record_run(
+                layout, spec=REPLAY_RUN_SPEC,
+                plan={"session": RG.SESSION_ID, "plan_id": RG.PLAN_ID,
+                      "session_commit": args.session_commit,
+                      "bundle": args.bundle,
+                      "reconstructs_selection": RS.SELECTION_SHA256,
+                      "source_session_commit": RS.ATTEMPT3_SESSION_COMMIT},
+                implementation={
+                    "launcher": "scripts/pod/autoinit_c2_replay_launch.py",
+                    "driver": "scripts/pod/autoinit_c2_replay_driver.py"},
+                status={"authorizes": "nothing",
+                        "terminates_at": "reconstruct",
+                        "decides": "nothing — it restores artifacts behind a "
+                                   "selection that is already frozen"},
+                #: PRESENT roles only: a manifest naming a role the run never
+                #: produced fails its own verification, and a $0 pre-provider
+                #: refusal legitimately produces almost none of them.
+                roles=present_roles(layout, REPLAY_RUN_ROLES))
         except Exception as exc:                                  # noqa: BLE001
             print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
                   f"  the run directory is "

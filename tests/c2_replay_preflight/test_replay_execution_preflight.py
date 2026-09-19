@@ -130,7 +130,33 @@ def test_the_plan_hash_is_the_source_binding():
     """Not a separate document that could drift from the pins."""
     from aadistill.infrastructure.manifest import sha256_json
 
-    assert RG.plan_hash(ROOT) == sha256_json(RS.source_binding(ROOT))
+    assert RG.plan_hash(ROOT) == sha256_json(RG.plan_payload(ROOT))
+
+
+def test_the_plan_hash_does_not_move_when_the_tree_does():
+    """An authorization is issued against the plan hash and checked against it
+    at launch, with at least one commit in between — the commit that carries
+    the authorization itself.
+
+    The first version hashed the whole source binding, which records the LIVE
+    `head` beside the source commit. So the plan hash moved with every commit
+    and the binding could never hold from issuance to launch. It failed at the
+    launcher, after the sweep, the authorization and the bundle had been built
+    on it.
+    """
+    payload = RG.plan_payload(ROOT)
+    flat = json.dumps(payload)
+    import subprocess
+
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
+                          capture_output=True, text=True).stdout.strip()
+    assert head, "no HEAD to compare against"
+    assert head not in flat, (
+        "the plan payload contains the live HEAD, so the plan hash moves with "
+        "every commit and no authorization can survive to launch")
+    #: The attempt-3 commit SHOULD be in it — that one is the plan.
+    assert RS.ATTEMPT3_SESSION_COMMIT in flat
+    assert RS.SELECTION_SHA256 in flat
 
 
 def test_the_authorization_type_refuses_every_adjacent_session():
@@ -362,6 +388,26 @@ def test_the_launcher_satisfies_the_runners_argument_contract():
     source = inspect.getsource(L.main)
     assert "run_session(spec(args), args, REPO_ROOT" in source, (
         f"run_session requires {required}; main() must pass them all")
+
+
+def test_the_launcher_records_its_run_with_what_record_run_requires():
+    """`record_run` is keyword-only and requires plan, implementation, status
+    and roles. Called with the spec alone it raises — inside the `finally` that
+    exists to record a failed run, so the failure path itself failed and the
+    attempt id was burned."""
+    import inspect
+
+    import autoinit_c2_replay_launch as L
+    from experiments.run_layout import record_run
+
+    required = {name for name, p in
+                inspect.signature(record_run).parameters.items()
+                if p.kind is p.KEYWORD_ONLY
+                and p.default is inspect.Parameter.empty}
+    source = inspect.getsource(L.main)
+    for name in sorted(required):
+        assert f"{name}=" in source, (
+            f"record_run requires {sorted(required)}; main() passes no {name}=")
 
 
 def test_the_setup_script_dispatches_this_session_kind():

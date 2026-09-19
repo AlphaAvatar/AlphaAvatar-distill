@@ -1,0 +1,28 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt2",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "ABORTED_BEFORE_PROVIDER",
+ "successful": false,
+ "provider_resource_created": false,
+ "reconstructed_leaves": 0,
+ "budget": {
+  "this_attempt": 0.0,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0
+ },
+ "what_happened": "Refused at the launcher before any provider resource existed. The plan hash hashed the whole source binding, which records the LIVE head beside the source commit, so it moved with every commit -- including the one carrying the authorization. The binding could not hold from issuance to launch. Also record_run was called without its four required keyword arguments, so the finally that exists to record a failed run failed too.",
+ "budget_consumed_usd": 0.0,
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true,
+  "_why": "consumed by the invocation, never reused"
+ },
+ "next": "attempt3, under a fresh chain on the repaired tree"
+}
