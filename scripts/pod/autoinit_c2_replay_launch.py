@@ -392,18 +392,57 @@ RS_LEAF_BYTES = 1_192_135_096
 
 
 # -- products ---------------------------------------------------------------
-def reconstructed_leaves(ctx: SessionContext) -> list[dict]:
-    """What the driver says it reconstructed, read from the evidence it wrote."""
-    evidence = (Path(ctx.args.scr) / "autoinit_c2_replay"
-                / "c2_replay_evidence.json")
-    if not evidence.is_file():
-        return []
-    try:
-        record = json.loads(evidence.read_text())
-    except json.JSONDecodeError:
-        return []
-    return [leaf for leaf in record.get("leaves", [])
-            if leaf.get("identity_matches_attempt3")]
+def evidence_locations(ctx: SessionContext) -> tuple[Path, ...]:
+    """Where the fetched driver evidence can be, DERIVED from the spec.
+
+    The runner extracts the verified archive to `<scr>/store/extracted/` before
+    it calls `fetch_products`, so the evidence is already on this machine at the
+    artifact spec's own pattern. It also mirrors the driver's live evidence to
+    `<scr>/relay/` during the run, which is the fallback when an archive could
+    not be built.
+
+    The first version guessed `<scr>/autoinit_c2_replay/…`, a path nothing ever
+    writes. It found no evidence, reported no reconstructed leaves, and the
+    session tore down a pod holding two leaves that had reconstructed
+    byte-identically — 56 minutes of GPU, gone, with every check green. That is
+    the exact failure this session exists to repair, reproduced by the code
+    meant to repair it.
+    """
+    from collect_artifacts import load_specs
+
+    scr = Path(ctx.args.scr)
+    out: list[Path] = []
+    specs = load_specs(str(REPO_ROOT / "configs/autoinit/c2_replay_artifacts.json"))
+    for entry in specs:
+        if entry.artifact_class == "session_evidence":
+            out.append(scr / "store" / "extracted" / entry.pattern)
+    out.append(scr / "relay" / "c2_replay_evidence.json")
+    out.append(scr / "store" / "c2_replay_evidence.json")
+    return tuple(out)
+
+
+def reconstructed_leaves(ctx: SessionContext) -> list[dict] | None:
+    """What the driver says it reconstructed, or None when that is UNKNOWN.
+
+    The distinction is the whole point. `[]` means the driver ran and
+    reconstructed nothing; `None` means its evidence could not be read, which
+    is not the same claim and must never be reported as one. Collapsing the two
+    is what let a teardown proceed on "no leaf was reconstructed" while two
+    finished leaves sat on the pod.
+    """
+    for path in evidence_locations(ctx):
+        if not path.is_file():
+            continue
+        try:
+            record = json.loads(path.read_text())
+        except json.JSONDecodeError:
+            continue
+        ctx.evidence["leaf_evidence_read_from"] = str(path)
+        return [leaf for leaf in record.get("leaves", [])
+                if leaf.get("identity_matches_attempt3")]
+    ctx.evidence["leaf_evidence_unreadable"] = [
+        str(p) for p in evidence_locations(ctx)]
+    return None
 
 
 def fetch_leaves(ctx: SessionContext) -> list:
@@ -419,13 +458,21 @@ def fetch_leaves(ctx: SessionContext) -> list:
     )
 
     fetched: list = []
-    if not ctx.products_eligible:
-        ctx.say("  no leaf was reconstructed; nothing to fetch")
+    leaves = reconstructed_leaves(ctx)
+    if leaves is None:
+        #: Do NOT return quietly. The evidence is unreadable, so what is on the
+        #: pod is unknown, and `leaves_secured` must be able to refuse teardown
+        #: rather than infer emptiness from a failed read.
+        ctx.say("  CANNOT READ the driver evidence; what was reconstructed is "
+                "UNKNOWN and teardown must not assume nothing was")
+        return fetched
+    if not leaves:
+        ctx.say("  the driver reconstructed no leaf; nothing to fetch")
         return fetched
 
     adapter = get_adapter("qwen3")
     store = Path(ctx.args.ckpt_store) / "phase_c2_full_search" / "attempt3_replay"
-    for leaf in reconstructed_leaves(ctx):
+    for leaf in leaves:
         state_id = leaf["state_id"]
         dest = store / state_id
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -461,9 +508,18 @@ def fetch_leaves(ctx: SessionContext) -> list:
 
 def leaves_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
     """Teardown may not proceed while a reconstructed leaf is only on the pod."""
-    want = {leaf["state_id"] for leaf in reconstructed_leaves(ctx)}
+    leaves = reconstructed_leaves(ctx)
+    if leaves is None:
+        return False, (
+            "the driver evidence could not be read, so what it reconstructed "
+            "is UNKNOWN. Refusing teardown: 'I found no evidence' and 'nothing "
+            "was reconstructed' are different findings, and treating the first "
+            "as the second is how a pod holding finished leaves gets deleted "
+            f"with every check green. Looked in: "
+            f"{[str(p) for p in evidence_locations(ctx)]}")
+    want = {leaf["state_id"] for leaf in leaves}
     if not want:
-        return True, "no leaf was reconstructed, so none is owed off-pod"
+        return True, "the driver reconstructed no leaf, so none is owed off-pod"
     got = {f["state_id"] for f in fetched
            if isinstance(f, Mapping) and f.get("artifact") == "c2_replay_leaf"
            and f.get("rc") == 0 and f.get("matched")}

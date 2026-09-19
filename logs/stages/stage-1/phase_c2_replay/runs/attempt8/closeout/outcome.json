@@ -1,0 +1,41 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt8",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "REPLAY_MISMATCH",
+ "successful": false,
+ "provider_resource_created": true,
+ "pod_id": "cat1v3vafsfv2g",
+ "pod_minutes": 62.1,
+ "provider_confirms_deleted": true,
+ "reconstructed_leaves": 2,
+ "leaves_secured_off_pod": 0,
+ "budget": {
+  "this_attempt": 1.13,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 1.13,
+  "gpu_usd": 1.13,
+  "disk_usd": 0.0,
+  "rate_usd_per_hour": 1.09
+ },
+ "gates_passed": 7,
+ "gates_total": 7,
+ "what_happened": "Setup completed in 1.6 min and the driver ran 57.9 min. Two of the five paths reconstructed byte-identically to attempt 3 -- every intermediate digest and the full leaf identity -- in 23.3 and 33.3 min. The third diverged at its FIRST step, ffn.activation_importance_v0 applied directly to the teacher, and the driver stopped as it must: a digest mismatch is a scientific finding, not a retryable failure. The remaining two paths were never attempted.",
+ "the_finding": "results/replay_mismatch_finding.json",
+ "what_went_wrong_in_MY_code": "The two reconstructed leaves were LOST. `reconstructed_leaves` read `<scr>/autoinit_c2_replay/c2_replay_evidence.json`, a path nothing writes; the runner extracts the verified archive to `<scr>/store/extracted/<spec pattern>` before calling fetch_products. The reader returned [], `leaves_secured` reported 'no leaf was reconstructed, so none is owed off-pod', the teardown gate allowed, and the pod was deleted with two finished leaves on it. 56 minutes of GPU, every check green. This is the exact failure the session exists to repair, reproduced by the code meant to repair it.",
+ "repairs": [
+  "the evidence path is DERIVED from the artifact spec's own pattern, not guessed, with the relay mirror as a fallback",
+  "an unreadable evidence file now returns None (UNKNOWN) rather than [] (nothing), and leaves_secured REFUSES teardown on UNKNOWN -- 'I found no evidence' and 'nothing was reconstructed' are different findings",
+  "8 tests build the real <scr>/store/extracted layout, including one that replays attempt 8's own evidence file and asserts the two lost state ids would now be found, and one guards-the-guard case allowing teardown when the driver genuinely reconstructed nothing"
+ ],
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true
+ },
+ "cumulative_experiment_usd": 1.2,
+ "next": "STOP. A replay mismatch is a stop condition under the authorizing ruling. Returning to review with the finding; not retried, nothing substituted, no behavioural work started."
+}

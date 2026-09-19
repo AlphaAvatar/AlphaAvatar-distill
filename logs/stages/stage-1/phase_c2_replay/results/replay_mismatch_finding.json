@@ -1,0 +1,155 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_finding/v1",
+ "_contract": "A REPLAY MISMATCH, reported as a scientific finding and not retried. The ruling that authorized this session is explicit: a digest that differs is a STOP condition, the path is deterministic so the same inputs would diverge the same way, and no functionally similar checkpoint may be substituted.",
+ "verdict": "REPLAY MISMATCH, LOCALIZED TO THE CONFIG \u2014 the weights reproduced byte-for-byte; only config.json differs",
+ "run": {
+  "run_id": "attempt8",
+  "pod_id": "cat1v3vafsfv2g",
+  "pod_minutes": 62.1,
+  "usd": 1.13,
+  "driver_minutes": 57.95
+ },
+ "reproduced_exactly": [
+  {
+   "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
+   "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+   "seconds": 1400.0,
+   "all_four_steps_matched": true,
+   "identity_matched": [
+    "artifact_digest",
+    "weights_digest",
+    "single_shard_sha256",
+    "arch_signature",
+    "num_parameters",
+    "tokenizer_sha256 is None"
+   ]
+  },
+  {
+   "state_id": "7da1e4e2254e59766581e777b8066b7e",
+   "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+   "seconds": 1995.5,
+   "all_four_steps_matched": true,
+   "identity_matched": [
+    "artifact_digest",
+    "weights_digest",
+    "single_shard_sha256",
+    "arch_signature",
+    "num_parameters",
+    "tokenizer_sha256 is None"
+   ]
+  }
+ ],
+ "diverged": {
+  "state_id": "1d2844488f3ad630414c3cd69b6fa395",
+  "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+  "step_index": 0,
+  "operator": "ffn.activation_importance_v0",
+  "profile": "calib.domain_balanced@v1",
+  "expected_artifact_digest": "449c71cf3f1a325833bc83ce336d62b65fb38321286a0b874fcaf1b22ba5ac1c",
+  "actual_artifact_digest": "5c479cd3a8c6d7746e6e1fa1fc658a39ec9722f2fe93fc17414d8edc174a041f",
+  "seconds": 74,
+  "_position": "step 0 \u2014 the operator was applied DIRECTLY to the teacher, not to an already-compressed intermediate. The two paths that reproduced exactly begin with DEPTH and ATTENTION respectively and apply FFN later, where it operated on a model those operators had already reduced.",
+  "what_actually_differs": {
+   "_measured_by_comparing_the_recorded_identities_field_by_field": true,
+   "weights_digest": {
+    "attempt3": "b57cd9e9c20cdc49\u2026",
+    "attempt8": "b57cd9e9c20cdc49\u2026",
+    "same": true
+   },
+   "single_shard_sha256": {
+    "attempt3": "1303d435e74a526e\u2026",
+    "attempt8": "1303d435e74a526e\u2026",
+    "same": true
+   },
+   "arch_signature": {
+    "attempt3": "781870802ea75969\u2026",
+    "attempt8": "781870802ea75969\u2026",
+    "same": true
+   },
+   "num_parameters": {
+    "attempt3": 2182217216,
+    "attempt8": 2182217216,
+    "same": true
+   },
+   "result_spec_hash": {
+    "attempt3": "781870802ea75969\u2026",
+    "attempt8": "781870802ea75969\u2026",
+    "same": true
+   },
+   "config_sha256": {
+    "attempt3": "94ecfd1cee0fbb64\u2026",
+    "attempt8": "d39b2e9b0f33f4b2\u2026",
+    "same": false
+   },
+   "_so": "the 4,364,480,296 bytes of model.safetensors are IDENTICAL. `artifact_digest` covers the config as well as the weights, so it diverged on metadata while the model itself reproduced exactly."
+  },
+  "the_operator_decision_reproduced": {
+   "kept_neurons": "IDENTICAL across all 36 layers",
+   "_how_checked": "attempt 3's per-step selection artifacts survive in the complete 61.4 MiB journal (the compact one in git drops them). The two lists were compared element-wise off-pod at $0.",
+   "_so": "this is NOT a near-degenerate ranking that flipped under low-bit noise, which was the first hypothesis. The operator selected exactly the same neurons and wrote exactly the same weights."
+  },
+  "current_code_reproduces_attempt8_not_attempt3": {
+   "_experiment": "on the dev box, with no GPU and no pod: load the pinned teacher config, apply the geometry attempt 3 recorded for this state, save_pretrained, hash the result.",
+   "local_config_sha256": "d39b2e9b0f33f4b2f1f23eef194c902ec580a8625695ae346d2146dea858a5fe",
+   "matches_attempt8": true,
+   "matches_attempt3": false,
+   "_control": "the same procedure reproduces attempt 3's config EXACTLY for ATTENTION-only, ATTENTION+FFN, ATTENTION+RESIDUAL_WIDTH and COMPOSITE_STAGE1 states (91a478176ed7\u2026 among others), so the method is sound and the environment agrees with attempt 3 for those.",
+   "_caveat": "the reconstruction truncates `layer_types` naively, so it cannot speak for DEPTH-modified states; their disagreements here are the reconstruction's limitation, not evidence."
+  }
+ },
+ "not_attempted": [
+  {
+   "state_id": "88086555a6662b206e00ae28fc9d3ca3",
+   "why": "the session stopped at the mismatch"
+  },
+  {
+   "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
+   "why": "the session stopped at the mismatch"
+  }
+ ],
+ "environment_difference": {
+  "_this_is_recorded_not_asserted_as_the_cause": "The host NVIDIA driver differs between the run that produced the pins and the run replaying them. That is a real difference and a plausible source of low-bit divergence in a reduction-heavy operator; it is NOT established here as the cause, and this document does not claim it is.",
+  "attempt3_search": {
+   "pod": "ulit767od813i8",
+   "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "driver": "580.126.09"
+  },
+  "attempt8_replay": {
+   "pod": "cat1v3vafsfv2g",
+   "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "driver": "580.159.03"
+  },
+  "gpu": "NVIDIA L40S in both",
+  "_what_was_pinned": "the GPU model, the image name, the teacher repo and revision, the calibration mixtures by content hash, the operator source trees by git blob, and every one of the 20 artifact digests. The host driver version is not selectable at the provider and was not pinned.",
+  "software_stack": {
+   "attempt3": "torch 2.11.0+cu128, transformers 5.13.1, NVIDIA L40S",
+   "attempt8": "torch 2.11.0+cu128, transformers 5.13.1, NVIDIA L40S",
+   "same": true,
+   "_so": "the host driver is the only recorded environmental difference, and it demonstrably did NOT affect the weights \u2014 they are byte-identical. It is therefore an unlikely explanation for a config-only divergence."
+  }
+ },
+ "what_this_does_and_does_not_show": {
+  "does": [
+   "the replay mechanism works: two independent four-step paths reproduced attempt 3's artifacts byte-for-byte, across a host driver change, including every intermediate digest and the full leaf identity",
+   "the digest gate works: it stopped at the first divergent step rather than letting it propagate into a leaf that would have looked plausible",
+   "the third path's MODEL reproduced exactly too \u2014 identical neuron selection, identical weight bytes. Only its config.json differs"
+  ],
+  "does_not": [
+   "it does not show that attempt 3's Top-5 is irreproducible \u2014 three of the five were never attempted, and the one that 'failed' produced identical weights",
+   "it does not identify WHICH config field differs. Neither run's config.json survives; both pods are gone and the leaves were lost to a separate defect",
+   "it does not establish a cause. The software versions match and the driver difference did not move the weights"
+  ]
+ },
+ "open_questions_for_review": [
+  "Is `artifact_digest` \u2014 config plus weights \u2014 the right acceptance criterion for a replay? On this evidence a checkpoint can be the SAME MODEL, byte-for-byte in its weights, and still fail. A weights-and-architecture criterion would have accepted this path.",
+  "Which config field differs, and why does it differ only for FFN-modified states? Answerable cheaply by materializing one FFN-first intermediate and diffing its config.json against a fresh one \u2014 no pod needed, the teacher is cached on the dev box.",
+  "Do the two unattempted paths reproduce? Still the cheapest evidence about how general this is."
+ ],
+ "what_was_NOT_done": [
+  "the mismatch was not retried",
+  "no functionally similar checkpoint was substituted",
+  "no behavioural work was started",
+  "no scientific record of attempt 3 was altered"
+ ],
+ "finding_sha256": "68f409e952d225c1005a3a4d4077c44517764d973a50defec67ad4784c3e22f5"
+}

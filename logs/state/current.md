@@ -14,39 +14,48 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 provider confirms it is gone and an account-wide list returns `[]`. **Nothing
 is prepared for launch.**
 
-**The authorized replay is BUILT and FITS `$4.77` all-in.** The
-artifact-reconstruction session — five digest-pinned paths rebuilding the
-checkpoints behind attempt 3's frozen Top-5 — is implemented, rehearsed at toy
-scale and gated.
+**The replay RAN and returned a finding: the weights reproduce, the config does
+not.** Attempt 8, pod `cat1v3vafsfv2g`, 62.1 min, `$1.13` — cumulative `$1.20`
+across eight attempts, all inside the `$4.77` authorized. The pod is deleted and
+the provider confirms it is gone.
 
-It stopped once, correctly, and the stop was then **withdrawn by a correction**.
-A first derivation bounded each step by the worst observation of its operator
-KIND, came to `$5.27` against `$5.00`, and the session stopped before creating a
-provider resource and returned the requirement — the planner itself refused:
-*"the plan terminates at $5.18 … do not shrink it silently to fit."* A raise to
-`$5.27` was approved. The bound was then found to be **wrong**: two DEPTH
-implementations appear in the selected paths — `depth.causal_kl_greedy_v1` at up
-to 25.7 min and `depth.positional_v0` at 0.6, the latter carrying the
-`calib.none@v1` no-calibration sentinel — and bounding by kind charged the cheap
-one at the expensive one's rate, about 25 phantom minutes on one leaf. Bounding
-per **implementation** gives 125.7 min of reconstruction and `$4.77` all-in,
-inside the ORIGINAL `$5.00`. **The approved raise is not taken.** Owner:
-[`replay_requirement.json`](../stages/stage-1/phase_c2_replay/plans/replay_requirement.json)
-(v2, which records v1's figure rather than replacing it).
+Two of the five paths reconstructed **byte-identically** to attempt 3 — every
+intermediate digest and the full leaf identity — in 23.3 and 33.3 min. The third
+stopped the session at its first step, as a pinned replay must.
 
-Two findings from building it, both `$0`:
+**What diverged is narrower than "a mismatch".** Comparing the recorded
+identities field by field: `weights_digest`, `single_shard_sha256`,
+`arch_signature`, `num_parameters` and `result_spec_hash` are all IDENTICAL —
+the 4,364,480,296 bytes of `model.safetensors` are the same bytes. The neuron
+selection is identical across all 36 layers, checked element-wise against the
+complete 61.4 MiB journal. **Only `config.json` differs.** `artifact_digest`
+covers config and weights together, so it failed on metadata while the model
+itself reproduced exactly.
 
-* **The hub cannot hold the leaves.** Asked at the LFS batch endpoint with no
-  bytes sent: one 1.11 GiB leaf is granted, five (5.55 GiB) return `403 Private
-  repository storage limit reached`. Largest admitted single object **1.756
-  GiB**. The five leaves therefore go to the development host's out-of-tree
-  store; the hub keeps identities and hashes only. Owner:
-  [`leaf_destination_decision.md`](../stages/stage-1/phase_c2_replay/plans/leaf_destination_decision.md).
-  Purging or upgrading hub storage is a maintainer decision and was not done.
-* **The replay must stay on L40S.** A40 (`$0.49`) and RTX A6000 (`$0.53`) were
-  quoted and rejected: the session's entire content is byte-exact digest
-  agreement with artifacts an L40S produced, and a different architecture can
-  present as a replay mismatch for an infrastructural reason.
+Reproducing that config on the dev box at `$0`, with no pod, gives attempt 8's
+hash and not attempt 3's — while the same procedure reproduces attempt 3 exactly
+for ATTENTION-only, ATTENTION+FFN and COMPOSITE states. The software stacks
+match (torch 2.11.0+cu128, transformers 5.13.1, L40S both times); the only
+recorded environmental difference is the host NVIDIA driver (580.126.09 →
+580.159.03), which demonstrably did not move the weights. **No cause is
+established.** Owner:
+[`replay_mismatch_finding.json`](../stages/stage-1/phase_c2_replay/results/replay_mismatch_finding.json).
+
+**The two reconstructed leaves were LOST, and that was my defect, not the
+experiment's.** `reconstructed_leaves` read a path nothing writes; the runner
+extracts the verified archive to `<scr>/store/extracted/<spec pattern>` before
+calling `fetch_products`. It returned `[]`, `leaves_secured` reported *"no leaf
+was reconstructed, so none is owed off-pod"*, the teardown gate allowed, and the
+pod was deleted with 56 minutes of finished GPU work on it — every check green.
+The exact failure this session exists to repair, reproduced by the code meant to
+repair it. The evidence path is now derived from the artifact spec, and an
+unreadable evidence file returns UNKNOWN rather than empty, with teardown
+refused on UNKNOWN: *"I found no evidence"* and *"nothing was reconstructed"* are
+different findings.
+
+**Nothing is running. Nothing is billing.** The mismatch is a stop condition
+under the authorizing ruling: not retried, nothing substituted, no behavioural
+work started.
 
 ## The full joint re-search RAN, produced a Top-5, and then lost it
 
