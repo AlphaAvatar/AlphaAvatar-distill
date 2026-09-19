@@ -49,17 +49,33 @@ never seen and the session was classified by exit code. The driver exited 0. The
 label is wrong; the result is not, and the driver now appends its markers to the
 file the launcher tails.
 
-**The C2 behavioural selection is PROPOSED, not authorized.** Twelve probes
-exactly — six screening over the five reconstructed candidates plus incumbent B
-on one preregistered seed, then six confirmation on the one advanced candidate
-plus B over three paired seeds. Only confirmation may name an incumbent.
-Derived, not inherited: storage **90 GB** from this session's own topology
-against the full search's 400, and at a live `$1.09/h` L40S quote the ceiling is
-**`$30.2215` all-in** (`$29.8788` GPU + `$0.3427` disk) with `$20.9299`
-expected. Project headroom after it: `$30.5742`. No grant, readiness record,
-authorization, bundle or provider resource exists. Owner:
+**The C2 behavioural selection is IMPLEMENTED and PROPOSED, not authorized.**
+Twelve probes exactly — six screening over the five reconstructed candidates
+plus incumbent B on one preregistered seed, then six confirmation on the one
+advanced candidate plus B over three paired seeds. Only confirmation may name an
+incumbent; `NO_GO` and `INCONCLUSIVE` are results.
+
+**B is not a staged input and the proposal no longer pretends it is.**
+Baseline-completion attempt 8 rebuilt it exactly and preserved its evidence, not
+its bytes. The session now materializes B from the frozen C1 treatment path —
+construction bound from C1's own constructor, spec hash `3a233a9017b3…` matching
+what C1's preregistration froze — and gates it on its exact identity; if that
+gate fails, no screening probe starts. Preparing B is initialization, bounded at
+30.15 min from the replay's own measurements, and the protocol stays at twelve
+probes.
+
+Derived, not inherited: storage **120 GB**, converted GiB→GB through the
+repository's recorded basis rather than rounded across units — the earlier 90 GB
+repeated a unit error the full search had already been repaired for. At a live
+`$1.09/h` L40S quote the ceiling is **`$30.8918` all-in** (`$30.4265` GPU +
+`$0.4653` disk) with `$21.5651` expected. Project headroom after it: `$29.9039`.
+
+The schedule and driver are built and rehearsed end to end — screening →
+advancement → confirmation on the real candidates, the real frozen seeds and the
+real batteries, with only C1's two hardware seams replaced. The **launcher is
+not built** and the proposal says so. No grant, readiness record, authorization,
+bundle or provider resource exists. Owner:
 [`c2_behavioural_grant_proposal.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json).
-The launcher and driver are **not built** and the proposal says so.
 
 **Nothing is running. Nothing is billing.** Replay campaign: `$4.77` authorized,
 `$3.27` spent across nine attempts, `$1.50` left and no further replay owed.

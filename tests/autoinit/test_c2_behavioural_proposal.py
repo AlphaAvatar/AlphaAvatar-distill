@@ -106,7 +106,7 @@ def test_a_missing_product_is_refused_rather_than_reconstructed(tmp_path):
 
 def test_the_storage_provision_is_derived_and_is_not_the_full_searchs():
     cands = B.candidate_manifest(ROOT)
-    st = B.storage_requirement(cands, B.schedule(ROOT))
+    st = B.storage_requirement(cands, B.schedule(ROOT), ROOT)
     assert st["provision_gb"] < 400, (
         "the full search's provision was carried over; it was sized for a beam "
         "holding sixty states at a level boundary")
@@ -123,8 +123,9 @@ def test_the_storage_provision_is_derived_and_is_not_the_full_searchs():
 def test_gpu_and_storage_money_are_derived_apart():
     """A live GPU quote is not evidence that separately priced storage is free."""
     cands = B.candidate_manifest(ROOT)
-    st = B.storage_requirement(cands, B.schedule(ROOT))
-    m = B.money(ROOT, gpu_rate_usd_per_hour=1.09, provision_gb=st["provision_gb"])
+    st = B.storage_requirement(cands, B.schedule(ROOT), ROOT)
+    m = B.money(ROOT, gpu_rate_usd_per_hour=1.09, provision_gb=st["provision_gb"],
+                b_preparation_minutes=B.b_preparation_minutes(ROOT)["bounded_minutes"])
     for label in ("expected", "hard_ceiling"):
         x = m[label]
         assert x["disk_usd"] > 0, "storage costed at zero again"
@@ -143,9 +144,54 @@ def test_the_ceiling_fits_the_project_cap_with_headroom():
 
 
 def test_the_proposal_states_what_is_not_built():
-    """An implementation plan that claims a driver exists would be the most
+    """An implementation plan that claims a launcher exists would be the most
     expensive kind of wrong."""
     state = proposal()["implementation_state"]
-    assert "NOT BUILT" in state["launcher_and_driver"]
-    for key in ("governance_module", "candidate_manifest", "storage_derivation"):
+    assert "NOT BUILT" in state["launcher"]
+    for key in ("governance_module", "schedule_control_flow", "driver",
+                "b_binding", "storage_derivation"):
         assert "BUILT" in state[key]
+
+
+def test_the_units_are_converted_through_the_recorded_basis():
+    """The residency is GiB and the provider's flag is GB. Rounding one into the
+    other under-provisions by 7%, which is the bug the full search was already
+    repaired for and which this file repeated."""
+    import json as _json
+
+    st = B.storage_requirement(B.candidate_manifest(ROOT), B.schedule(ROOT), ROOT)
+    basis = _json.loads((ROOT / B.STORAGE_PRICING).read_text())["gb_versus_gib"]
+    assert st["gb_per_gib"] == basis["gb_per_gib"]
+    assert st["with_margin_gb"] > st["with_margin_gib"], (
+        "the conversion went the wrong way; GB are smaller than GiB so the "
+        "number must grow")
+    assert st["provision_gb"] >= st["with_margin_gb"]
+
+
+def test_incumbent_b_is_bound_to_c1s_frozen_construction():
+    """B is the sixth arm and is NOT a staged durable input. Its construction
+    comes from C1's own constructor and its spec hash must be what C1's
+    preregistration froze."""
+    from experiments.phase_c2 import baseline as BL
+
+    b = B.b_binding(ROOT)
+    assert b["construction"]["spec_hash"] == BL.B_SPEC_HASH
+    assert b["required_identity"]["artifact_digest"] == BL.B_ARTIFACT_DIGEST
+    assert b["construction"]["built_by"].endswith("build_arm_specs")
+    #: The bytes really are gone; the proposal must not pretend otherwise.
+    assert b["availability"]["must_materialize"] is True
+    assert "NO SCREENING PROBE MAY START" in b["gate"]
+
+
+def test_b_preparation_is_bounded_from_evidence_and_is_not_a_probe():
+    prep = B.b_preparation_minutes(ROOT)
+    assert len(prep["steps"]) == 4
+    assert prep["bounded_minutes"] > 25, (
+        "B's path includes causal-KL DEPTH; a bound under 25 minutes is not "
+        "bounding that operator")
+    #: It lengthens the session, it does not add a thirteenth probe.
+    assert B.schedule(ROOT)["total_probes"] == 12
+    m = B.money(ROOT, gpu_rate_usd_per_hour=1.09, provision_gb=120,
+                b_preparation_minutes=prep["bounded_minutes"])
+    assert (m["expected"]["minutes"]
+            == m["probe_minutes"]["expected"] + prep["bounded_minutes"])

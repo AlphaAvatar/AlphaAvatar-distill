@@ -149,6 +149,150 @@ def candidate_manifest(repo_root: str | Path = REPO_ROOT,
 
 
 # --------------------------------------------------------------------------
+# the sixth arm: incumbent B
+# --------------------------------------------------------------------------
+
+#: Where a prepared B is kept, beside the reconstructed candidates. One
+#: directory, so "is B available" has a single answer and a later infrastructure
+#: failure does not force another rebuild of something already built once.
+B_DURABLE_PATH = ("/home/ecs-user/aad-artifacts/phase_c2_full_search"
+                  "/incumbent_b")
+
+
+def b_binding(repo_root: str | Path = REPO_ROOT, *,
+              durable_path: str | Path = B_DURABLE_PATH,
+              device: str = "cuda") -> dict[str, Any]:
+    """The incumbent arm: its construction, its identity, and whether it exists.
+
+    B is the sixth screening arm and the only anchor, and it is NOT a staged
+    durable input the way the five candidates are. Baseline-completion attempt 8
+    rebuilt it exactly, but that session's artifact manifest preserved evidence
+    and logs rather than checkpoint bytes — so the bytes are gone and the
+    identity is not.
+
+    This binds the CONSTRUCTION from its canonical owner rather than
+    re-declaring it: `baseline.frozen_baseline_spec` builds the path from C1's
+    own `build_arm_specs`, and `assert_frozen_construction` refuses anything
+    whose spec hash is not what C1's preregistration froze. Re-deriving the
+    steps here would be a second construction of the thing whose sameness is the
+    point.
+
+    Preparing B is INITIALIZATION, not a probe. The protocol is twelve probes
+    and stays twelve: B's materialization produces the arm that six of them
+    measure against.
+    """
+    from aadistill.initialization.operators.register import (
+        register_builtin_operators,
+    )
+
+    from experiments.phase_c2 import baseline as BL
+    from experiments.phase_c2.search_space import register_c2_operators
+
+    #: EXPLICIT, and before the spec is built. `build_arm_specs` resolves every
+    #: impl_id against the registry and B's last step is
+    #: `attention.activation_importance_v1`, which is not a shipped default. A
+    #: builder that only worked when some other entry point had registered
+    #: would be a builder that works by luck.
+    register_builtin_operators()
+    register_c2_operators()
+
+    spec = BL.frozen_baseline_spec(device=device)
+    construction = BL.assert_frozen_construction(spec)
+
+    d = Path(durable_path)
+    available, observed = False, None
+    if (d / "model.safetensors").is_file() and (d / "config.json").is_file():
+        ack = d / "durable_ack.json"
+        if ack.is_file():
+            observed = json.loads(ack.read_text())
+            available = bool(observed.get("re_identified_from_delivered_bytes"))
+
+    return {
+        "role": "frozen_c1_treatment_b -- the behavioural incumbent and the only anchor",
+        "construction": {
+            "owner": "scripts/experiments/phase_c2/baseline.py",
+            "built_by": "experiments.phase_c1.session.build_arm_specs",
+            "spec_hash": construction["spec_hash"],
+            "expected_spec_hash": BL.B_SPEC_HASH,
+            "path_label": construction["path_label"],
+            "steps": construction["steps"],
+            "parent_digest": BL.B_PARENT_DIGEST,
+            "_bound_not_redeclared": (
+                "the steps come from C1's own constructor and the spec hash is "
+                "checked against the value C1's preregistration froze. A second "
+                "declaration of this path is how two constructions of one thing "
+                "come to differ."),
+        },
+        "required_identity": {
+            "artifact_digest": BL.B_ARTIFACT_DIGEST,
+            "weights_digest": BL.B_WEIGHTS_DIGEST,
+            "config_sha256": BL.B_CONFIG_SHA256,
+            "arch_signature": BL.B_ARCH_SIGNATURE,
+            "single_shard_sha256": BL.B_SINGLE_SHARD_SHA256,
+            "num_parameters": BL.B_NUM_PARAMETERS,
+            "_observed_not_preregistered": (
+                "these come from c1_arm_identities.json, which recorded what "
+                "attempt 18 actually built. `treatment_output_digest_was_pre_"
+                "pinned` is False there, because that attempt was the "
+                "operator's first execution. It is the strongest available "
+                "content identity of B, and this says which it is."),
+        },
+        "availability": {
+            "durable_path": str(d),
+            "available": available,
+            "must_materialize": not available,
+            "observed_ack": observed,
+            "_why_it_is_not_staged": (
+                "baseline-completion attempt 8 rebuilt B exactly and its "
+                "artifact manifest preserved evidence and logs, not checkpoint "
+                "bytes. The identity survived; the weights did not."),
+        },
+        "gate": (
+            "the materialized B must match every field of required_identity. "
+            "If it does not, NO SCREENING PROBE MAY START: an anchor that is "
+            "not the frozen incumbent makes every delta meaningless."),
+        "_not_a_thirteenth_probe": (
+            "preparing B is initialization. The protocol is twelve probes and "
+            "remains twelve; B's construction produces the arm six of them are "
+            "measured against."),
+    }
+
+
+def b_preparation_minutes(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """What materializing B costs, bounded from the replay's own measurements.
+
+    B's path is the same four structural kinds the replay reconstructed, so its
+    cost is bounded the same way: each step at the worst observation of THAT
+    IMPLEMENTATION anywhere in attempt 3's telemetry, plus one teacher load.
+    Bounding by operator kind rather than by implementation is what overpriced
+    a replay path by 25 minutes.
+    """
+    from experiments.phase_c2 import baseline as BL
+    from experiments.phase_c2 import replay_specs as RS
+
+    worst = RS.worst_seconds_by_impl(repo_root)
+    per_step = []
+    total = 1.5          # one teacher load, as the replay charges per path
+    for kind, impl_id, profile in BL.B_PATH:
+        if impl_id not in worst:
+            raise BehaviouralProposalError(
+                f"no measured timing for {impl_id}; B's preparation cannot be "
+                "bounded from evidence and will not be guessed")
+        minutes = worst[impl_id] / 60.0
+        per_step.append({"kind": kind, "impl_id": impl_id,
+                         "profile_id": profile, "bounded_minutes": round(minutes, 2)})
+        total += minutes
+    return {
+        "steps": per_step,
+        "teacher_load_minutes": 1.5,
+        "bounded_minutes": round(total, 2),
+        "_basis": ("the worst observation of each implementation anywhere in "
+                   "attempt 3's telemetry, the same bound the replay spent "
+                   "against and which reproduced all five paths"),
+    }
+
+
+# --------------------------------------------------------------------------
 # storage, derived from what the session holds
 # --------------------------------------------------------------------------
 
@@ -164,8 +308,16 @@ TEACHER_GIB = 7.51
 IMAGE_AND_ENV_GIB = 30.0
 
 
+#: The worst single fixed path's intermediates, measured during the replay: a
+#: four-step construction holds its predecessors while it builds. B's path is
+#: four steps of the same kinds, so this bounds its transient residency.
+B_MATERIALIZATION_TRANSIENT_GIB = 16.12
+
+
 def storage_requirement(candidates: list[dict[str, Any]],
-                        sched: dict[str, Any]) -> dict[str, Any]:
+                        sched: dict[str, Any],
+                        repo_root: str | Path = REPO_ROOT, *,
+                        b_must_materialize: bool = True) -> dict[str, Any]:
     """What this session actually needs on disk, component by component.
 
     Derived from the artifacts rather than inherited. The full search provisions
@@ -194,6 +346,18 @@ def storage_requirement(candidates: list[dict[str, Any]],
     components = {
         "teacher": round(TEACHER_GIB, 3),
         "staged_initializations": round(n_screening_arms * leaf_gib, 3),
+        "b_materialization_transient": (
+            B_MATERIALIZATION_TRANSIENT_GIB if b_must_materialize else 0.0),
+        "_b_materialization_transient_is": (
+            "B is NOT a staged durable input -- baseline-completion attempt 8 "
+            "preserved its evidence and not its bytes -- so this session "
+            "rebuilds it from the frozen C1 treatment path before any probe. A "
+            "four-step construction holds its predecessors while it builds; "
+            "this is the worst single path's intermediates as measured during "
+            "the replay. It is transient and released once B is verified"
+            if b_must_materialize else
+            "zero: a verified durable B already exists and is staged, not "
+            "rebuilt"),
         "_staged_initializations_is": (
             f"{n_screening_arms} screening arms -- the five reconstructed "
             "candidates and the incumbent B, each staged before any probe runs"),
@@ -212,12 +376,33 @@ def storage_requirement(candidates: list[dict[str, Any]],
     #: A provision is an integer handed to the provider and it is billed whole,
     #: so it rounds UP, with a margin that is named rather than folded in.
     margin = 0.25
-    provision = int(math.ceil(subtotal * (1 + margin) / 10.0) * 10)
+    with_margin_gib = subtotal * (1 + margin)
+
+    #: GiB -> GB, through the repository's OWN recorded conversion rather than a
+    #: second local convention. The residency above is derived in GiB (2^30) and
+    #: `--container-disk-in-gb` says GB; if the provider means decimal GB, a
+    #: request of N delivers only 0.931*N GiB, so treating the flag as GiB
+    #: UNDER-PROVISIONS by 7%. This file made exactly that error -- it rounded a
+    #: GiB subtotal straight into a GB flag -- which is the unit bug the full
+    #: search had already been repaired for.
+    conv = storage_pricing(repo_root)["gb_versus_gib"]
+    gb_per_gib = float(conv["gb_per_gib"])
+    with_margin_gb = with_margin_gib * gb_per_gib
+    provision = int(math.ceil(with_margin_gb / 10.0) * 10)
     return {
         "components_gib": components,
         "subtotal_gib": round(subtotal, 3),
         "margin_fraction": margin,
+        "with_margin_gib": round(with_margin_gib, 4),
+        "gb_per_gib": gb_per_gib,
+        "with_margin_gb": round(with_margin_gb, 4),
         "provision_gb": provision,
+        "_units": (
+            "the residency is derived in GiB and the provider's flag is GB. "
+            "The conversion is the one recorded in "
+            "configs/infrastructure/provider_storage_pricing.json, not a local "
+            "convention: rounding a GiB subtotal straight into a GB flag "
+            "under-provisions by 7%."),
         "_why_not_400": (
             "the full search's 400 GB was derived for a beam that generates a "
             "whole level before pruning and holds sixty compressed states at "
@@ -247,7 +432,8 @@ def storage_pricing(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
 
 def money(repo_root: str | Path = REPO_ROOT, *,
           gpu_rate_usd_per_hour: float,
-          provision_gb: int) -> dict[str, Any]:
+          provision_gb: int,
+          b_preparation_minutes: float = 0.0) -> dict[str, Any]:
     """Expected and hard-ceiling cost, GPU and separately billed storage apart.
 
     The GPU minutes come from the frozen pricing record, which derived them from
@@ -258,8 +444,14 @@ def money(repo_root: str | Path = REPO_ROOT, *,
     """
     pricing = json.loads((Path(repo_root) / PRICING).read_text())
     beh = pricing["behavioural_selection"]
-    expected_min = float(beh["expected_minutes"])
-    hard_min = float(beh["hard_ceiling_minutes"])
+    probe_expected = float(beh["expected_minutes"])
+    probe_hard = float(beh["hard_ceiling_minutes"])
+
+    #: B's preparation is initialization, not a probe, so it is added to the
+    #: session's runtime rather than to the probe count. The protocol stays at
+    #: twelve probes; the pod is simply alive for longer.
+    expected_min = probe_expected + b_preparation_minutes
+    hard_min = probe_hard + b_preparation_minutes
 
     disk = storage_pricing(repo_root)
     per_gb_month = float(disk["container_disk"]["usd_per_gb_month"])
@@ -279,6 +471,13 @@ def money(repo_root: str | Path = REPO_ROOT, *,
         "_gpu_rate_is_live": ("re-quoted from gpuTypes.securePrice; the "
                               "authorization must re-quote again at issue"),
         "probe_minutes_basis": beh["probe_cost"]["source"],
+        "probe_minutes": {"expected": probe_expected, "hard_ceiling": probe_hard},
+        "b_preparation_minutes": b_preparation_minutes,
+        "_b_preparation_is_initialization": (
+            "added to the session's runtime, not to the probe count. The "
+            "protocol is twelve probes and stays twelve; the pod is alive "
+            "longer because the sixth arm has to be built before any of them "
+            "can measure against it."),
         "expected": {"minutes": expected_min, "gpu_usd": gpu_expected,
                      "disk_usd": disk_expected,
                      "all_in_usd": round(gpu_expected + disk_expected, 4)},

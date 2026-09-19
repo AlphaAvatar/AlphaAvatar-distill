@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 213,
+ "modules_scanned": 215,
  "test_ignores": [],
  "n_predicates": 116,
  "by_signal": {
@@ -2086,5 +2086,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "ef00d3082514a2dac36fbebf08ebea37479df472333747911544008640ba75f3"
+ "digest": "2ca26441ab4ca2d2e7629b34113ddeda2cb28da8b07dc415ee0f8b0b86d0df2b"
 }

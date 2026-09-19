@@ -70,9 +70,10 @@
   "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
  "next_starting_point": {
-  "status": "C1 CLOSED by a GO verdict; C2 preparation CLOSED/ACCEPTED, its CUDA validation PASS/CLOSED and its performance round COMPLETE/CLOSED. Nothing is authorized.",
-  "then": "the chain is complete and re-priced on the conservative basis. Next is the maintainer's FINAL FORMAL SEARCH LAUNCH REVIEW, which also owes the certification's boundary-case judgment and the frozen-record position. If approved: grant.json, then sweep -> readiness -> authorization -> bundle, in that order. Do NOT launch before the review. After Top-5 is committed, STOP. Re-quote the rate before issuance; do NOT narrow beam 6.",
-  "budget": "OWNED by the budget block; not restated."
+  "status": "C1 CLOSED by a GO verdict. The C2 full joint re-search is COMPLETE and its Top-5 is ACCEPTED and FROZEN; its five checkpoints were lost with attempt 3's pod and have been RECONSTRUCTED exact and durable. The replay campaign is CLOSED. Nothing is authorized.",
+  "then": "the C2 BEHAVIOURAL SELECTION -- 12 probes exactly, six screening and six confirmation -- is designed, implemented and proposed. It awaits the maintainer's final behavioural launch review. If approved: grant.json, then sweep -> readiness -> authorization -> bundle, in that order, re-quoting the rate at issuance. Only the confirmation rung may name a C2 incumbent, and NO_GO and INCONCLUSIVE are results. After the decision, STOP.",
+  "not_next": "no Full Search rerun, no re-ranking of the 14 leaves, no B remeasurement outside the 12-probe protocol, no C3 or C4, no further replay -- its remaining allowance is not to be spent.",
+  "owner": "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json"
  },
  "read_order": [
   "logs/README.md -- START HERE, the index"
@@ -115,15 +116,14 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "Search-1 DONE and FROZEN; B->C COMPUTED. The FULL JOINT re-search RAN (attempt 3) and produced a Top-5, then failed after writing it and lost the five checkpoints. RETURNED TO REVIEW; nothing is authorized to continue. Owner: runs/attempt3/closeout/outcome.json.",
+   "status": "Search-1 DONE and FROZEN; B->C COMPUTED. The FULL JOINT re-search is COMPLETE: attempt 3 ranked 14 leaves and committed a Top-5, which is ACCEPTED and FROZEN. Its five checkpoints were lost with the pod and are now RECONSTRUCTED exact and durable. The behavioural selection that chooses among them is PROPOSED and NOT authorized.",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
-   "priced": "plans/phase_c2_full_search_pricing.json \u2014 the ceiling and the planning estimate, labelled apart, and the funding verdict.",
-   "result": "B is DOMINATED on all three ranked objectives by two front-0 candidates and dominates none; NOT_FLAGGED. CHEAP-METRIC HYPOTHESIS GENERATION ONLY. Both sides were measured by ONE evaluator implementation, so the finding stands. Owner: runs/attempt8/evidence/c2_baseline_comparison.json.",
-   "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat incumbent B after the frozen 0.86M recovery? Screening is seed- AND prompt-disjoint (0ad76fc7). Owner: the protocol."
+   "priced": "plans/phase_c2_full_search_pricing.json for the search; phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json for the behavioural session, whose storage and money are re-derived from its own topology.",
+   "top_5": "5/5 exact and durable -- logs/stages/stage-1/phase_c2_replay/"
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent; cannot start before C2 names one, and the operator does not exist yet.",
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md.",
-  "c2_full_search": "COMPLETE -- Top-5 ACCEPTED and FROZEN; its five checkpoints reconstructed exact and durable by the replay. Owner: phase_c2_replay above."
+  "c2_full_search": "COMPLETE -- Top-5 ACCEPTED and FROZEN; its five checkpoints reconstructed exact and durable by the replay. The behavioural selection is the next step and is proposed, not authorized."
  },
  "storage": {
   "roots": {

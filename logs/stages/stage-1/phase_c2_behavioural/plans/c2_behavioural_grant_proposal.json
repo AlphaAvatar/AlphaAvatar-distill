@@ -1,5 +1,5 @@
 {
- "schema": "aadistill.autoinit.c2_behavioural_proposal/v1",
+ "schema": "aadistill.autoinit.c2_behavioural_proposal/v2",
  "_contract": "A PROPOSAL for the Phase-C2 behavioural selection. It AUTHORIZES NOTHING and FUNDS NOTHING: there is no grant, no readiness record, no authorization, no bundle and no provider resource. It exists so a review can see the exact inputs, the exact protocol, the derived storage and the derived money before any of those are created.",
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
@@ -131,13 +131,20 @@
   ],
   "anchor_b": {
    "role": "frozen_c1_treatment_b -- the behavioural incumbent and the only anchor",
-   "_not_remeasured_outside_this_protocol": true
+   "_is_not_a_staged_durable_input": "baseline-completion attempt 8 rebuilt B exactly and its artifact manifest preserved evidence and logs, not checkpoint bytes. The identity survived; the weights did not.",
+   "materialized_this_session": true,
+   "construction_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+   "required_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "gate": "the materialized B must match every field of required_identity. If it does not, NO SCREENING PROBE MAY START: an anchor that is not the frozen incumbent makes every delta meaningless.",
+   "_not_a_thirteenth_probe": "preparing B is initialization. The protocol is twelve probes and remains twelve; B's construction produces the arm six of them are measured against."
   }
  },
  "storage": {
   "components_gib": {
    "teacher": 7.51,
    "staged_initializations": 6.662,
+   "b_materialization_transient": 16.12,
+   "_b_materialization_transient_is": "B is NOT a staged durable input -- baseline-completion attempt 8 preserved its evidence and not its bytes -- so this session rebuilds it from the frozen C1 treatment path before any probe. A four-step construction holds its predecessors while it builds; this is the worst single path's intermediates as measured during the replay. It is transient and released once B is verified",
    "_staged_initializations_is": "6 screening arms -- the five reconstructed candidates and the incumbent B, each staged before any probe runs",
    "one_probe_training_working_set": 7.772,
    "_working_set_is": "596,049,920 parameters as bf16 weights plus an fp32 gradient and AdamW's two fp32 moments. Probes run sequentially, so exactly one of these is resident at a time",
@@ -147,9 +154,13 @@
    "batteries_and_ladder": 1.0,
    "image_and_environment": 30.0
   },
-  "subtotal_gib": 68.267,
+  "subtotal_gib": 84.387,
   "margin_fraction": 0.25,
-  "provision_gb": 90,
+  "with_margin_gib": 105.4838,
+  "gb_per_gib": 1.073741824,
+  "with_margin_gb": 113.2623,
+  "provision_gb": 120,
+  "_units": "the residency is derived in GiB and the provider's flag is GB. The conversion is the one recorded in configs/infrastructure/provider_storage_pricing.json, not a local convention: rounding a GiB subtotal straight into a GB flag under-provisions by 7%.",
   "_why_not_400": "the full search's 400 GB was derived for a beam that generates a whole level before pruning and holds sixty compressed states at the level boundary. This session holds one training working set at a time and retains twelve small checkpoints; carrying 400 GB here would bill for storage nothing uses.",
   "_why_it_rounds_up": "a volume that fills mid-probe loses the probe. The margin is 25% over a component sum that is itself derived from measured artifact sizes."
  },
@@ -157,30 +168,36 @@
   "gpu_rate_usd_per_hour": 1.09,
   "_gpu_rate_is_live": "re-quoted from gpuTypes.securePrice; the authorization must re-quote again at issue",
   "probe_minutes_basis": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_evidence.json stages F/G/H, with per-probe PROBE_TRAINED/PROBE_SCORED markers from logs/stages/stage-1/phase_c1/runs/attempt18/evidence/driver_run.log",
+  "probe_minutes": {
+   "expected": 1139.04,
+   "hard_ceiling": 1644.7
+  },
+  "b_preparation_minutes": 30.15,
+  "_b_preparation_is_initialization": "added to the session's runtime, not to the probe count. The protocol is twelve probes and stays twelve; the pod is alive longer because the sixth arm has to be built before any of them can measure against it.",
   "expected": {
-   "minutes": 1139.04,
-   "gpu_usd": 20.6926,
-   "disk_usd": 0.2373,
-   "all_in_usd": 20.9299
+   "minutes": 1169.19,
+   "gpu_usd": 21.2403,
+   "disk_usd": 0.3248,
+   "all_in_usd": 21.5651
   },
   "hard_ceiling": {
-   "minutes": 1644.7,
-   "gpu_usd": 29.8788,
-   "disk_usd": 0.3427,
-   "all_in_usd": 30.2215
+   "minutes": 1674.8500000000001,
+   "gpu_usd": 30.4265,
+   "disk_usd": 0.4653,
+   "all_in_usd": 30.8918
   },
   "container_disk": {
-   "provisioned_gb": 90,
+   "provisioned_gb": 120,
    "usd_per_gb_month": 0.1,
    "hours_per_month": 720.0,
-   "usd_per_hour": 0.0125,
+   "usd_per_hour": 0.016667,
    "_billed_for_the_pods_whole_lifetime": true
   },
   "_ceiling_includes": "both named reserves, a 10% contingency and a 30-minute artifact recovery reserve",
   "_two_numbers": "the GPU rate is re-quotable from the provider and the storage price is not, so they are derived apart and summed. A live GPU quote is not evidence that separately priced storage is free.",
   "gpu": "NVIDIA L40S",
   "quoted_utc": "2026-09-19",
-  "stock": "High",
+  "stock": "Low",
   "_historical_planning_reference": {
    "expected_gpu_usd": 20.6926,
    "gpu_hard_ceiling_usd": 29.8788,
@@ -192,9 +209,9 @@
   "cumulative_spend_usd": 309.2043,
   "authorized_cap_usd": 370.0,
   "remaining_before_usd": 60.7957,
-  "this_ceiling_all_in_usd": 30.2215,
-  "cumulative_if_fully_spent_usd": 339.4258,
-  "headroom_after_usd": 30.5742,
+  "this_ceiling_all_in_usd": 30.8918,
+  "cumulative_if_fully_spent_usd": 340.0961,
+  "headroom_after_usd": 29.9039,
   "_no_cap_increase_requested": true,
   "_remaining_is_not_permission": true
  },
@@ -208,12 +225,118 @@
   "a project-cap increase"
  ],
  "implementation_state": {
-  "governance_module": "scripts/experiments/phase_c2/behavioural.py -- BUILT",
-  "protocol_binding": "BUILT and verified against the frozen protocol's own hash",
-  "candidate_manifest": "BUILT; all five join and verify",
-  "storage_derivation": "BUILT; 90 GB derived from measured artifact sizes",
-  "money_derivation": "BUILT; live quote, GPU and storage derived apart",
-  "launcher_and_driver": "NOT BUILT. The session is structurally C1's probe machinery run twice: stage the six arms from durable products rather than building them (replacing C1 stages B/C/DE/F), train and score six screening probes (C1 stages G/H), rank and advance exactly one, then train and score six confirmation probes on three paired seeds and decide under C1's frozen rule. Stated as outstanding rather than sketched: a driver written without being rehearsed at toy scale is how four paid pods in this programme died in lines nothing had executed."
+  "governance_module": "scripts/experiments/phase_c2/behavioural.py \u2014 BUILT",
+  "schedule_control_flow": "scripts/experiments/phase_c2/behavioural_schedule.py \u2014 BUILT and rehearsed end to end: 26 tests covering descriptors, ranking, the frozen tie-break, advancement, the completeness gate and every case the protocol forbids",
+  "driver": "scripts/pod/autoinit_c2_behavioural_driver.py \u2014 BUILT. Subclasses C1Driver so the training loop is inherited rather than copied; `train_one` and the battery scorer remain the seams C1 built for $0 regressions. Stages P/S/R/C/D rehearsed screening -> advancement -> confirmation on the real candidates, the real frozen seeds and the real batteries, with only those two seams replaced.",
+  "b_binding": "BUILT; construction hash matches C1's frozen 3a233a9017b3\u2026",
+  "storage_derivation": "BUILT; 120 GB, GiB->GB through the repository's recorded conversion",
+  "money_derivation": "BUILT; live quote, GPU and storage apart, B's preparation included",
+  "launcher": "NOT BUILT. The session spec, its $0 gates and the bundle staging follow the same shape as the replay's and are the remaining work before a launch chain could be assembled. Stated rather than sketched."
  },
- "proposal_sha256": "12117dc13cdf8726ae70297951e537c6576a4da2d99041c451a1ad26b8060466"
+ "incumbent_b": {
+  "role": "frozen_c1_treatment_b -- the behavioural incumbent and the only anchor",
+  "construction": {
+   "owner": "scripts/experiments/phase_c2/baseline.py",
+   "built_by": "experiments.phase_c1.session.build_arm_specs",
+   "spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+   "expected_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+   "path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+   "steps": [
+    {
+     "impl_id": "depth.causal_kl_greedy_v1",
+     "profile_id": "calib.domain_balanced@v1",
+     "expected_artifact_digest": null,
+     "label": ""
+    },
+    {
+     "impl_id": "ffn.activation_importance_v0",
+     "profile_id": "calib.domain_balanced@v1",
+     "expected_artifact_digest": null,
+     "label": ""
+    },
+    {
+     "impl_id": "width.global_pca_v0",
+     "profile_id": "calib.reasoning_heavy@v2",
+     "expected_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+     "label": "pre-ATTENTION parent b8820f41d062"
+    },
+    {
+     "impl_id": "attention.activation_importance_v1",
+     "profile_id": "calib.domain_balanced@v1",
+     "expected_artifact_digest": null,
+     "label": "treatment ATTENTION"
+    }
+   ],
+   "parent_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+   "_bound_not_redeclared": "the steps come from C1's own constructor and the spec hash is checked against the value C1's preregistration froze. A second declaration of this path is how two constructions of one thing come to differ."
+  },
+  "required_identity": {
+   "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+   "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+   "num_parameters": 596049920,
+   "_observed_not_preregistered": "these come from c1_arm_identities.json, which recorded what attempt 18 actually built. `treatment_output_digest_was_pre_pinned` is False there, because that attempt was the operator's first execution. It is the strongest available content identity of B, and this says which it is."
+  },
+  "availability": {
+   "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/incumbent_b",
+   "available": false,
+   "must_materialize": true,
+   "observed_ack": null,
+   "_why_it_is_not_staged": "baseline-completion attempt 8 rebuilt B exactly and its artifact manifest preserved evidence and logs, not checkpoint bytes. The identity survived; the weights did not."
+  },
+  "gate": "the materialized B must match every field of required_identity. If it does not, NO SCREENING PROBE MAY START: an anchor that is not the frozen incumbent makes every delta meaningless.",
+  "_not_a_thirteenth_probe": "preparing B is initialization. The protocol is twelve probes and remains twelve; B's construction produces the arm six of them are measured against."
+ },
+ "incumbent_b_preparation": {
+  "steps": [
+   {
+    "kind": "DEPTH",
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "profile_id": "calib.domain_balanced@v1",
+    "bounded_minutes": 25.68
+   },
+   {
+    "kind": "FFN",
+    "impl_id": "ffn.activation_importance_v0",
+    "profile_id": "calib.domain_balanced@v1",
+    "bounded_minutes": 0.96
+   },
+   {
+    "kind": "RESIDUAL_WIDTH",
+    "impl_id": "width.global_pca_v0",
+    "profile_id": "calib.reasoning_heavy@v2",
+    "bounded_minutes": 0.95
+   },
+   {
+    "kind": "ATTENTION",
+    "impl_id": "attention.activation_importance_v1",
+    "profile_id": "calib.domain_balanced@v1",
+    "bounded_minutes": 1.06
+   }
+  ],
+  "teacher_load_minutes": 1.5,
+  "bounded_minutes": 30.15,
+  "_basis": "the worst observation of each implementation anywhere in attempt 3's telemetry, the same bound the replay spent against and which reproduced all five paths"
+ },
+ "executable_closure": {
+  "digest": "a2fb4610e96dd5067ef0b9a77a2542a9db7e0cdb71d91e09cf0a2c33b6ed7984",
+  "n_files": 87,
+  "entry_points": [
+   "scripts/pod/autoinit_c2_behavioural_driver.py",
+   "scripts/experiments/phase_c2/behavioural.py",
+   "scripts/experiments/phase_c2/behavioural_schedule.py",
+   "scripts/experiments/phase_c2/baseline.py",
+   "scripts/pod/autoinit_c1_driver.py"
+  ]
+ },
+ "execution_sequence": [
+  "P  verify the five durable candidates; materialize B from the frozen C1 treatment path and gate on its exact identity. If that gate fails, no screening probe starts.",
+  "S  six fresh screening probes -- five candidates and B on the one frozen screening seed -- each persisted as it completes.",
+  "R  score c2_screening_v1, rank by paired delta against B, advance EXACTLY one by the frozen tie-break. No verdict may leave this stage.",
+  "C  six fresh confirmation probes -- the advanced candidate and B, paired across the three frozen seeds. Cannot begin until every screening probe is trained AND scored.",
+  "D  score c1_confirmation_v1 and apply C1's frozen decision rule. The only stage that may name a C2 incumbent. Then STOP."
+ ],
+ "proposal_sha256": "aa5332398f84908a66c4580340cfccead4308cbb0580b8e5f9d22417ee76a801"
 }
