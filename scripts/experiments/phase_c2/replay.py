@@ -69,6 +69,7 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
 
     return (
         SELECTION_REL, JOURNAL_REL, TELEMETRY_REL,
+        "configs/experiments/phase_c2/replay_frozen_assets.json",
         "configs/autoinit/c2_replay_artifacts.json",
         "configs/autoinit/c2_replay_artifacts_failed.json",
         "scripts/pod/autoinit_preflight_setup.sh",

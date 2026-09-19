@@ -76,6 +76,13 @@ WS = "/workspace"
 REPO = f"{WS}/aad"
 WORKDIR = f"{REPO}/artifacts/autoinit/c2_replay"
 LEAF_DIR = f"{WORKDIR}/leaves"
+#: This session declares ASSETS_READY, and the setup script refuses a session
+#: that declares it and names no expectation — explicit or refused, never
+#: inherited. Search-1's document names ONE asset, the state_eval metric suite,
+#: which this session neither stages nor needs because it ranks nothing; the
+#: replay's names the two calibration mixtures its five paths actually read.
+FROZEN_EXPECT = "configs/experiments/phase_c2/replay_frozen_assets.json"
+
 AUDIT_DIRNAME = "autoinit_c2_replay"
 #: Where the driver writes its evidence, and where the collector
 #: looks. ONE constant, so the two cannot disagree.
@@ -576,7 +583,8 @@ def spec(args) -> SessionSpec:
             setup_markers=("ENV_READY", "REPO_READY", "ASSETS_STAGED",
                            "TRAIN_ENV", "ASSETS_READY", "TEACHER_READY",
                            "TESTS_OK", "AUTHORIZATION_OK", "SETUP_DONE"),
-            env={"SESSION_KIND": "c2_replay"},
+            env={"SESSION_KIND": "c2_replay",
+                 "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
             teacher_revision=TEACHER_REVISION,
             test_ignores=TEST_IGNORES),

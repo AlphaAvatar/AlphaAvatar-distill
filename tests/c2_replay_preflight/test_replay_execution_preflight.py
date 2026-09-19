@@ -548,6 +548,89 @@ def test_the_driver_writes_its_evidence_where_the_collector_looks():
     assert f"--audit-dir {L.AUDIT_DIR}" in command, command
 
 
+def test_every_marker_this_session_declares_has_what_the_script_demands():
+    """DERIVED from the setup script, not a list of the requirements we know.
+
+    The script guards blocks with `step_declared <MARKER>` and inside them uses
+    `${SESSION_X:?why}` to refuse a session that declared the marker without
+    naming what the block needs. Attempt 7 declared ASSETS_READY and named no
+    frozen-asset expectation: setup died at that line, 2.7 minutes and $0.05
+    into a billing pod, for a requirement written in the script it was running.
+
+    This parses the guards out of the script, so a requirement added tomorrow is
+    checked without anyone remembering to add a test for it.
+    """
+    import re as _re
+
+    import autoinit_c2_replay_launch as L
+
+    text = (ROOT / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    spec = L.spec(L.build_parser().parse_args(
+        ["--scr", "/tmp/x", "--session-commit", "d" * 40,
+         "--bundle", "b.bundle", "--run-id", "preflight"]))
+    declared = set(spec.setup.setup_markers)
+    provided = dict(spec.setup.env)
+
+    #: Split the script into `step_declared <MARKER>` blocks.
+    blocks = _re.split(r"^if step_declared (\w+); then$", text, flags=_re.M)
+    found_any = False
+    for i in range(1, len(blocks), 2):
+        marker, body = blocks[i], blocks[i + 1]
+        if marker not in declared:
+            continue
+        for var in _re.findall(r'[:"]?\$\{(SESSION_\w+):\?', body):
+            found_any = True
+            assert var in provided or var in spec.setup.required_env, (
+                f"the script refuses a session that declares {marker} without "
+                f"{var}; this session declares {marker} and provides neither "
+                f"env nor required_env for it")
+    assert found_any, (
+        "the probe matched no requirements at all; either the script changed "
+        "shape or this test is checking nothing")
+
+    #: And the document it names must exist and be the one for THIS session.
+    expect = ROOT / provided["SESSION_FROZEN_EXPECT"]
+    assert expect.is_file(), expect
+
+
+def test_the_frozen_asset_expectation_names_what_the_five_paths_read():
+    """Not Search-1's document, and not more than this session stages."""
+    import json as _json
+
+    import autoinit_c2_replay_launch as L
+
+    doc = _json.loads((ROOT / L.FROZEN_EXPECT).read_text())
+    roots = {e["root"] for e in doc["assets"].values()}
+    assert roots == {a.repo_path for a in L.LOCAL_ASSETS}, (
+        roots, [a.repo_path for a in L.LOCAL_ASSETS])
+    assert "scoring_contract" not in doc, (
+        "the replay consumes no scoring contract; naming one would make the "
+        "verifier check a thing this session does not have")
+
+    #: The content hashes must be the mixtures the SELECTION was searched
+    #: against — the same values the frozen selection records.
+    declared = {p["content_sha256"] for p in RS.load_selection(ROOT)["profiles"]}
+    assert {e["content_sha256"] for e in doc["assets"].values()} == declared
+
+
+def test_the_frozen_asset_verifier_passes_against_this_expectation():
+    """Run the real verifier. A document that merely parses is not evidence."""
+    import subprocess
+    import tempfile
+
+    import autoinit_c2_replay_launch as L
+
+    with tempfile.TemporaryDirectory() as tmp:
+        out = subprocess.run(
+            [sys.executable, "scripts/autoinit/verify_frozen_assets.py",
+             "--expect", L.FROZEN_EXPECT,
+             "--out", str(Path(tmp) / "check.json")],
+            cwd=ROOT, capture_output=True, text=True, timeout=600,
+            env={**__import__("os").environ, "PYTHONPATH": "src:scripts"})
+    assert out.returncode == 0, out.stdout[-2000:] + out.stderr[-2000:]
+    assert '"passed": true' in out.stdout
+
+
 def test_the_setup_script_dispatches_this_session_kind():
     """A missing branch is not a type error — it is a late refusal on a billing
     machine, and it has cost this project two paid sessions."""

@@ -1,0 +1,23 @@
+{
+ "schema": "aadistill.autoinit.frozen_asset_expectation/v1",
+ "_contract": "What the Phase-C2 REPLAY requires the pod's frozen assets to BE, checked by scripts/autoinit/verify_frozen_assets.py --expect before anything is materialized. AUTHORIZES NOTHING.",
+ "_why_this_exists": "The replay declares ASSETS_READY, and a session that declares it must name its own expectation -- explicit or refused, never inherited. Search-1's document names exactly one asset, state_eval_v1, the metric suite every candidate is ranked on. This session RANKS NOTHING and does not stage that suite, so pointing at Search-1's document would demand an artifact this session neither stages nor needs. That is the $0.0552 Phase-C2 abort with the names changed. Attempt 7 cost $0.05 establishing the same thing from the other direction: declaring the marker and naming no document at all.",
+ "_what_the_replay_consumes": "exactly the two calibration mixtures its five pinned paths name: calib.domain_balanced@v1 at 17 of the 20 steps and calib.reasoning_heavy@v2 at 2. The twentieth step is depth.positional_v0, which carries the calib.none@v1 sentinel and reads no items at all. The mixtures matter because an operator resolves its profile from disk: a drifted mixture would change every statistic without changing any recorded identity, and every artifact digest downstream of it would diverge.",
+ "_scoring_contract_is_absent": "deliberately, not omitted by accident. The verifier checks a contract only when an expectation asks for one, and the replay consumes no scoring contract: it trains nothing and scores nothing.",
+ "_identities_are_derived_not_transcribed": "computed by this project's own hashing -- content_sha256 read from each manifest, manifest_sha256 canonicalized by verify_frozen_assets.canonical_manifest_sha256, items_sha256 over the raw bytes of items.jsonl.",
+ "authorizes": "nothing",
+ "assets": {
+  "calib_domain_balanced_v1": {
+   "root": "artifacts/stage1/e8_calibration_v1",
+   "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "manifest_sha256": "ecb72aa3b88818e93fb058d5d012e66274db9bc7b90234219501f0df86cef460",
+   "items_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+  },
+  "calib_reasoning_heavy_v2": {
+   "root": "artifacts/stage1/reasoning_heavy_v2",
+   "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370",
+   "manifest_sha256": "60ccc324d60d30a072b4afbd0bf151ba1161018fafd55843213c052fbf122bf5",
+   "items_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"
+  }
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt7",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "SETUP_FAILED",
+ "successful": false,
+ "provider_resource_created": true,
+ "pod_id": "q2bss1lxkaa2ps",
+ "pod_minutes": 2.7,
+ "provider_confirms_deleted": true,
+ "reconstructed_leaves": 0,
+ "budget": {
+  "this_attempt": 0.05,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 0.05,
+  "gpu_usd": 0.05,
+  "disk_usd": 0.0,
+  "rate_usd_per_hour": 1.09
+ },
+ "gates_passed": 7,
+ "gates_total": 7,
+ "what_happened": "Setup reached ENV_READY, REPO_READY, ASSETS_STAGED and TRAIN_ENV -- torch 2.11.0+cu128 on an L40S, transformers 5.13.1, offline install in 12s -- and died at ASSETS_READY: a session declaring that marker must name its own frozen-asset expectation, and this one named none. The pod was deleted behind the teardown path and the provider confirms it is gone.",
+ "why_not_search1s_document": "Search-1's expectation names exactly one asset, the state_eval metric suite. This session ranks nothing and does not stage it, so pointing at that document would demand an artifact the session neither stages nor needs -- the $0.0552 Phase-C2 abort with the names changed. The replay now has its own, naming the two calibration mixtures its five paths read, whose content hashes are the ones the frozen selection was searched against.",
+ "repair": "A DERIVED check: the preflight parses `step_declared <MARKER>` blocks out of the setup script, collects the `${SESSION_X:?}` requirements inside each, and refuses a session that declares a marker without providing what that block demands. It finds this exact gap when SESSION_FROZEN_EXPECT is removed and none with it. A requirement added to the script tomorrow is covered without anyone remembering to write a test.",
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true
+ },
+ "cumulative_experiment_usd": 0.07,
+ "next": "attempt8 carries the live launch"
+}
