@@ -208,22 +208,41 @@ def destination_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 
 def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
-    """A launch-bound sweep of THIS tree, recorded and committed."""
-    path = REPO_ROOT / governance_path(ctx.args.run_id, "readiness.json")
-    if not path.is_file():
-        return False, f"no readiness record at {path.relative_to(REPO_ROOT)}"
-    record = json.loads(path.read_text())
-    if record.get("record_kind") != "launch_bound":
-        return False, (f"readiness record is {record.get('record_kind')!r}, "
-                       "not 'launch_bound'")
-    swept = record.get("swept_base_commit")
-    if swept != ctx.auth.authorized_session_commit:
-        return False, (f"the sweep describes {str(swept)[:12]}… and the "
-                       f"authorization is for "
-                       f"{ctx.auth.authorized_session_commit[:12]}…")
-    if not record.get("ok"):
-        return False, "the readiness sweep did not pass"
-    return True, f"launch-bound sweep of {str(swept)[:12]}… passed"
+    """A launch-bound sweep taken for THIS run, of THIS session.
+
+    Delegated to the shared `verify_record`, which knows the lineage rule: the
+    sweep runs on the clean PRE-authorization tree, so the swept base is the
+    authorization's parent and not the session commit. The first version of this
+    gate compared those two for equality and also asked for an `ok` field no
+    record carries — a gate that could not pass, which is precisely the defect
+    the full-search launcher was repaired for. Hence a delegation rather than a
+    second implementation of the same rule.
+    """
+    run_id = getattr(ctx.args, "run_id", None)
+    try:
+        record = RPE.load_record(REPO_ROOT, run_id=run_id, stage_id=STAGE_ID)
+    except FileNotFoundError:
+        return False, (f"{RPE.record_path_for(run_id, STAGE_ID)} does not "
+                       "exist; a launch-bound sweep is owed for this run")
+    kind = record.get("record_kind")
+    if kind != RPE.LAUNCH_BOUND:
+        return False, (f"the readiness record is {kind!r}, not "
+                       f"{RPE.LAUNCH_BOUND!r}. Only a launch-bound record "
+                       "describes the tree a launch will use.")
+    if record.get("verdict") != "PASS":
+        return False, (f"the sweep recorded {record.get('verdict')!r} with "
+                       f"problems {record.get('problems')}")
+    try:
+        RPE.verify_record(record, REPO_ROOT, run_id=run_id, stage_id=STAGE_ID,
+                          session_commit=ctx.args.session_commit)
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"the readiness record does not describe this tree: {exc}"
+    swept = str(record.get("swept_base_commit", "?"))
+    counts = record.get("counts", {})
+    return True, (f"launch-bound readiness at {swept[:12]}… binds harness "
+                  f"{str(record.get('replay_harness_digest'))[:12]}… "
+                  f"({counts.get('passed')} passed, "
+                  f"{counts.get('skipped')} skipped)")
 
 
 def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
