@@ -107,6 +107,15 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     "phase_c2_full_search": (
         "experiments.phase_c2.full_search_pod_environment",
         "sweep_contract"),
+    #: A FIFTH, and the comment above is why: the replay binds its own launcher,
+    #: session id and executable closure, and its record declares its own
+    #: schema, so no other C2 record can satisfy its verifier or it theirs. It
+    #: also runs its OWN pod selection -- the full search's asserts that
+    #: session's staged assets and Search-1's asserts a canonical control this
+    #: session does not stage, so either would fail a correct replay tree.
+    "phase_c2_replay": (
+        "experiments.phase_c2.replay_pod_environment",
+        "sweep_contract"),
 }
 
 
