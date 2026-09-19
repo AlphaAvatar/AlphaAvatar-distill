@@ -284,21 +284,60 @@ def test_the_per_path_bound_is_derived_from_the_telemetry_not_a_constant():
         assert leaf.bounded_minutes > 0
 
 
-def test_the_session_fits_its_authorized_money_at_the_approved_rate():
-    """The planner refuses a plan it cannot fund. It refused once already, at
-    the original ceiling, which is why this session has the ceiling it has."""
+def test_the_session_fits_its_money_while_there_is_work_left():
+    """The planner refuses a plan it cannot fund. It refused once already.
+
+    Conditional on whether work REMAINS, because the question changes when the
+    campaign finishes: once every selected leaf is reconstructed and durable,
+    demanding that the remaining money still fund a full five-path run would
+    require the campaign to fund a sixth run nobody needs. The condition is
+    derived from the durable store, not from a flag somebody sets.
+    """
     import autoinit_c2_replay_launch as L
 
+    money = RG.remaining_usd(ROOT)
+    outstanding = [leaf for leaf in RS.build_replay_leaves(ROOT, device="cpu")
+                   if not (Path(L.DURABLE_STORE) / leaf.state_id
+                           / "durable_ack.json").is_file()]
+    if not outstanding:
+        #: Campaign complete. What is left is what is left.
+        assert money["remaining_all_in_usd"] >= 0, money
+        return
+
+    assert money["this_attempt_gpu_usd"] > 0, (
+        f"{len(outstanding)} leaves are still outstanding and the campaign has "
+        "nothing left to authorize; that is a maintainer decision, not a test "
+        "failure")
     args = L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", "d" * 40,
          "--bundle", "b.bundle", "--run-id", "preflight"])
-    money = RG.remaining_usd(ROOT)
-    assert money["this_attempt_gpu_usd"] > 0, (
-        "the campaign has nothing left to authorize")
     plan = L.budget(args).plan(price_per_hour=1.09,
                                authorized_usd=money["this_attempt_gpu_usd"])
     assert plan.hard_terminate_minutes / 60.0 * 1.09 <= money["this_attempt_gpu_usd"]
     assert plan.soft_stop_minutes < plan.hard_terminate_minutes
+
+
+def test_every_selected_leaf_is_durable_and_exact():
+    """The deliverable, checked against the FROZEN SELECTION rather than
+    against any run's claims about itself."""
+    import autoinit_c2_replay_launch as L
+
+    store = Path(L.DURABLE_STORE)
+    selection = {e["state_id"]: e for e in RS.load_selection(ROOT)["selected"]}
+    missing = [sid for sid in selection
+               if not (store / sid / "durable_ack.json").is_file()]
+    if missing:
+        #: Not a failure before the work is done — this file is also the
+        #: PREFLIGHT for a run that has not happened yet.
+        return
+    for sid, entry in selection.items():
+        sidecar = json.loads((store / sid / "replay_leaf.json").read_text())
+        assert sidecar["identity"]["artifact_digest"] == entry["artifact_digest"]
+        assert sidecar["identity"]["single_shard_sha256"] == \
+            entry["single_shard_sha256"]
+        assert sidecar["identity"]["num_parameters"] == entry["num_parameters"]
+        assert sidecar["identity"]["tokenizer_sha256"] is None
+        assert (store / sid / "model.safetensors").stat().st_size == 1_192_135_096
 
 
 def test_the_attempt_is_authorized_for_the_campaign_remainder_not_its_ceiling():
@@ -652,6 +691,54 @@ def test_the_frozen_asset_verifier_passes_against_this_expectation():
             env={**__import__("os").environ, "PYTHONPATH": "src:scripts"})
     assert out.returncode == 0, out.stdout[-2000:] + out.stderr[-2000:]
     assert '"passed": true' in out.stdout
+
+
+def test_the_drivers_markers_reach_the_file_the_launcher_tails(tmp_path):
+    """The runner decides a session's terminal from the STATUS FILE.
+
+    Attempt 9 reconstructed all five leaves exactly and was recorded
+    INCOMPLETE: the driver printed C2_REPLAY_ALL_DONE to stdout, the runner
+    tails the status file and never saw it, and the session was classified by
+    the exit code instead. The setup script appends to the same file, which is
+    why SETUP_DONE was visible and nothing after it was.
+    """
+    import autoinit_c2_replay_driver as D
+    import autoinit_c2_replay_launch as L
+
+    status = tmp_path / "session.status"
+    saved = D.STATUS_PATH
+    try:
+        D.STATUS_PATH = status
+        D.mark(D.SUCCESS_MARKER)
+        D.mark(D.LEAF_MARKER, "abc123")
+    finally:
+        D.STATUS_PATH = saved
+
+    written = status.read_text()
+    assert f"MARKER:{D.SUCCESS_MARKER}" in written
+    assert f"MARKER:{D.LEAF_MARKER}:abc123" in written
+
+    #: And the launcher must hand the driver that path.
+    ctx = type("C", (), {"image_digest": "", "price": 1.09, "spent_usd": 0.0,
+                         "args": L.build_parser().parse_args(
+                             ["--scr", "/tmp/x", "--session-commit", "d" * 40,
+                              "--bundle", "b.bundle", "--run-id", "preflight"]),
+                         "auth": type("A", (), {"hard_cap_usd": 3.49})()})()
+    command = L.driver_command(ctx, type("P", (), {"soft_stop_usd": 2.85})())
+    assert f"--status-path {L.STATUS}" in command, command
+
+
+def test_a_marker_write_failure_does_not_kill_the_driver(tmp_path):
+    """A driver that died because it could not append to a status file would
+    lose the work the file exists to report."""
+    import autoinit_c2_replay_driver as D
+
+    saved = D.STATUS_PATH
+    try:
+        D.STATUS_PATH = tmp_path / "no" / "such" / "dir" / "session.status"
+        D.mark(D.FAILURE_MARKER)          # must not raise
+    finally:
+        D.STATUS_PATH = saved
 
 
 def test_the_setup_script_dispatches_this_session_kind():

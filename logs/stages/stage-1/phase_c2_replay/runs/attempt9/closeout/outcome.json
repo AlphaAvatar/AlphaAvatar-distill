@@ -1,0 +1,118 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt9",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "ALL_DONE",
+ "successful": true,
+ "provider_resource_created": true,
+ "pod_id": "i0uku41wc6ph3e",
+ "pod_minutes": 113.8,
+ "provider_confirms_deleted": true,
+ "reconstructed_leaves": 5,
+ "leaves_secured_off_pod": 5,
+ "budget": {
+  "this_attempt": 2.07,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 2.07,
+  "gpu_usd": 2.07,
+  "disk_usd": 0.0,
+  "rate_usd_per_hour": 1.09,
+  "authorized_gpu_usd": 3.49
+ },
+ "gates_passed": 7,
+ "gates_total": 7,
+ "what_happened": "All five selected paths reconstructed byte-for-byte. Every one of the 20 intermediate artifact digests matched the value attempt 3 recorded, and every leaf matched its full identity -- artifact_digest, weights_digest, single_shard_sha256, arch_signature, num_parameters, and no tokenizer. The driver exited 0 and the pod was deleted behind the teardown gate; the provider confirms it is gone.",
+ "the_repair_that_made_it_work": "The evidence-bound root pin. Path 3 (1d2844488f3a, FFN-first) failed at step 0 in attempt 8 with expected 449c71cf\u2026 and actual 5c479cd3\u2026; under the derived root state use_cache=False it produced 449c71cf\u2026 exactly. Paths 4 and 5, never attempted before and predicted by the $0 forensic to fail at step 0, both reproduced completely. One bit of unpinned mutable state was the whole divergence.",
+ "durability": "Each leaf was fetched, re-identified from the delivered bytes and given a durable ACK while the NEXT path computed -- the first at 11:32, the last before teardown -- so no completed work waited on closeout. The closeout reported '5 leaf/leaves already secured during the run' and transferred nothing again.",
+ "leaves": [
+  {
+   "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
+   "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+   "artifact_digest": "5d042dcc80212cfda0b97e10e21fca9c62574274bdc0d7e62a57e03a9e48f184",
+   "weights_digest": "615810e1314bdc9b0c5c01f31518cb50ed0089020a3177fba07234b51a63981f",
+   "single_shard_sha256": "85f8f0558b9cb657a4f8e4b076d79b5e49cf263e1c0af261e4042f2957d9ea8f",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "num_parameters": 596049920,
+   "bytes": 1192135096,
+   "durable_location": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9",
+   "re_identified_at_destination": true,
+   "secured_during_the_run": true,
+   "verified_utc": "2026-09-19T11:32:49.621179+00:00"
+  },
+  {
+   "state_id": "7da1e4e2254e59766581e777b8066b7e",
+   "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+   "artifact_digest": "181245b694316ed10dc299597cffbb97b4ece547c2f488a9c31c446b3e22210a",
+   "weights_digest": "03a07d7abca0fae1306519bcb22db4dde4df3aaf2c874ac165ef797cd37a36f4",
+   "single_shard_sha256": "4d693520981b2124f2465cf0ef15e325e996bb548a87574a573e6995c8982ff0",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "num_parameters": 596049920,
+   "bytes": 1192135096,
+   "durable_location": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e",
+   "re_identified_at_destination": true,
+   "secured_during_the_run": true,
+   "verified_utc": "2026-09-19T12:04:53.012156+00:00"
+  },
+  {
+   "state_id": "1d2844488f3ad630414c3cd69b6fa395",
+   "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+   "artifact_digest": "a25271ad0898ac3727ed4ed496fb7569299932f864f0d54a48b9b2deb9b4da41",
+   "weights_digest": "33ad2a2d243fdcc83f458d119b04a7d84a915aa3d639c67b0d308de0b16de7a3",
+   "single_shard_sha256": "313e206d12dce3db049835caa39140b629b4505ba2b97074a5f56a912d1ba697",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "num_parameters": 596049920,
+   "bytes": 1192135096,
+   "durable_location": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395",
+   "re_identified_at_destination": true,
+   "secured_during_the_run": true,
+   "verified_utc": "2026-09-19T12:29:42.906577+00:00"
+  },
+  {
+   "state_id": "88086555a6662b206e00ae28fc9d3ca3",
+   "path": "DEPTH(calib.none@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+   "artifact_digest": "d0d26ed3fee7f976935439ecba8b059f38e51d92d7b1672e6f467e6251938860",
+   "weights_digest": "f93f15d30eebcc2ce3c2429d2bf757bd02a294c650131ffce708786873dd1939",
+   "single_shard_sha256": "695813e6054bc12ce82728106e4d0eae62eb5de374194ee63417665be2aad0ab",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "num_parameters": 596049920,
+   "bytes": 1192135096,
+   "durable_location": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3",
+   "re_identified_at_destination": true,
+   "secured_during_the_run": true,
+   "verified_utc": "2026-09-19T12:37:06.385607+00:00"
+  },
+  {
+   "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
+   "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+   "artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
+   "weights_digest": "5009272294a1aa7ac69a85b7bcd688f18683403aadd4d02c315ce64c0026ba05",
+   "single_shard_sha256": "03f9a0836b78c5d9882e9eb74f3410eb9734459c529dcf2a46ab4a1da66fb394",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "num_parameters": 596049920,
+   "bytes": 1192135096,
+   "durable_location": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f",
+   "re_identified_at_destination": true,
+   "secured_during_the_run": true,
+   "verified_utc": "2026-09-19T12:54:31.416277+00:00"
+  }
+ ],
+ "verification": "Re-run independently after teardown, on the dev box, against the frozen selection rather than against the run's own claims: 5/5 leaves re-identified EXACT, each 1,192,135,096 bytes.",
+ "a_reporting_defect_not_a_science_one": "The session record says INCOMPLETE and the launcher exited 11. The runner decides a session's terminal by reading the driver's markers from the STATUS FILE, and this driver writes its markers only to stdout -- so the runner never saw C2_REPLAY_ALL_DONE and fell back to classifying by the driver's exit code. The driver did exit 0, all five leaves are exact and all five are durable. The label is wrong; the result is not.",
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true
+ },
+ "campaign": {
+  "all_in_usd": 4.77,
+  "spent_before_this_attempt_usd": 1.2,
+  "this_attempt_usd": 2.07,
+  "total_spent_usd": 3.27,
+  "remaining_usd": 1.5
+ },
+ "next": "STOP. All five Top-5 artifacts have exact attempt-3 identities and are verified durable off-pod. Returning for review. No behavioural screening started.",
+ "outcome_sha256": "054ae8c74b02e36c30d92ae9e9a56c03295a44210a503d6c09213ee6ee26b00b"
+}

@@ -64,11 +64,31 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+#: Where the LAUNCHER reads this driver's markers. The runner decides a
+#: session's terminal by tailing the status file, not the driver's stdout: a
+#: marker printed only to stdout is invisible to it, and attempt 9 was recorded
+#: INCOMPLETE after reconstructing all five leaves exactly, because the runner
+#: never saw C2_REPLAY_ALL_DONE and fell back to the exit code. The setup
+#: script appends to this same file, which is why SETUP_DONE was visible and
+#: nothing after it was.
+STATUS_PATH: Path | None = None
+
+
 def mark(name: str, detail: str = "") -> None:
     line = f"{datetime.now(timezone.utc):%FT%TZ} MARKER:{name}"
     if detail:
         line += f":{detail}"
     print(line, flush=True)
+    if STATUS_PATH is not None:
+        try:
+            with open(STATUS_PATH, "a") as fh:
+                fh.write(line + "\n")
+        except OSError as exc:
+            #: Never fatal. A driver that died because it could not append to a
+            #: status file would lose the work the file exists to report.
+            print(f"{datetime.now(timezone.utc):%FT%TZ} "
+                  f"could not write the marker to {STATUS_PATH}: {exc}",
+                  flush=True)
 
 
 def say(msg: str) -> None:
@@ -508,6 +528,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="the accepted provider rate, USD/hour")
     ap.add_argument("--authorized-usd", type=float, required=True)
     ap.add_argument("--soft-stop-usd", type=float, required=True)
+    ap.add_argument("--status-path", default=None,
+                    help="the session status file the LAUNCHER tails. Markers "
+                         "are appended here as well as printed; the runner "
+                         "reads this file and nothing else to decide a "
+                         "session's terminal.")
     ap.add_argument("--image-digest", default="")
     ap.add_argument("--already-spent-usd", type=float, default=0.0,
                     help="what this pod had already billed when the driver "
@@ -517,7 +542,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    global STATUS_PATH
+
     args = build_parser().parse_args()
+    if args.status_path:
+        STATUS_PATH = Path(args.status_path)
     if args.leaf_dir is None:
         args.leaf_dir = str(Path(args.workdir) / "leaves")
     if args.audit_dir is None:

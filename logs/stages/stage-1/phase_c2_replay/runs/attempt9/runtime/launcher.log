@@ -1,0 +1,36 @@
+[11:01:50] budget: expected 143 min $2.59 · soft $2.85 · hard $3.00 (authorized $3.49)
+[11:01:51] NVIDIA L40S $1.09/h, stock High
+[11:01:51] session commit 29d8c53158b2 verified: harness digests to d0b928acfdcf…, carries the authorization and only logs/stages/stage-1/phase_c2_replay/runs/attempt9/governance/authorization.json differs from the authorized base
+[11:01:51] replay-only scope confirmed; stages ['bind_identities', 'reconstruct'], hard $3.4900
+[11:01:51] authorization binds to source binding a23c0f1c179d…
+[11:01:51] no operator-bearing file has moved since 2421f630bc81…; 5 leaves, 20 pinned steps, selection 7271091c9141…
+[11:01:51] destination /home/ecs-user/aad-artifacts: 47.9 GiB free for 5.55 GiB of leaves
+[11:01:51] launch-bound readiness at 76261a997f94… binds harness d0b928acfdcf… (42 passed, 0 skipped)
+[11:01:55] aad_autoinit_29d8c531.bundle (14813512 bytes, d63421a64691…) round-trips to 29d8c53158b2… carrying this authorization and executable set d0b928acfdcf…
+[11:01:56] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[11:01:57] watchdog detached — hard 165 min = $3.00
+[11:01:57] created i0uku41wc6ph3e at $1.09/h
+[11:02:08] TCP 22 at 64.247.206.229:12659 after 0.2 min
+[11:02:11] draw 1: ssh reachable — $0.00
+[11:02:45] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[11:02:45] draw 1: running setup
+[11:04:23] draw 1: setup complete — $0.04
+[11:04:29] driver detached, pid 2457, confirmed by descriptor_probe — $0.05
+[11:05:42]   2026-09-19T11:04:19Z MARKER:SETUP_DONE — $0.07
+[11:32:49]   leaf d005dfb27e7b…: rc=0, 1.11 GiB -> /home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9 [re-identified from the delivered bytes]
+[12:04:53]   leaf 7da1e4e2254e…: rc=0, 1.11 GiB -> /home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e [re-identified from the delivered bytes]
+[12:29:42]   leaf 1d2844488f3a…: rc=0, 1.11 GiB -> /home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395 [re-identified from the delivered bytes]
+[12:37:06]   leaf 88086555a666…: rc=0, 1.11 GiB -> /home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3 [re-identified from the delivered bytes]
+[12:54:31]   leaf 1a2b5b030e7e…: rc=0, 1.11 GiB -> /home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f [re-identified from the delivered bytes]
+[12:54:35] driver no longer running: EXITED:0
+[12:54:35] polling ended: DRIVER_EXITED:0 — $2.05
+[12:55:13]   manifest rc=0
+1 file(s) across 1 class(es) -> /workspace/manifest.json
+  final_required: 1 · mutable_snapshot: 0 · final_streams_quiescent: True
+[12:55:33]   5 leaf/leaves already secured during the run
+[12:55:33] teardown gate: allowed=True failed=training_complete
+[12:55:33] deleting pod (gate passed after DRIVER_EXITED:0)
+[12:55:44] pod deleted — 113.8 min, $2.07; provider confirms gone: True
+
+autoinit-phase-c2-replay INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_c2_replay/runs/attempt9/runtime/session.json. the replay is a TERMINUS: it reconstructs the five checkpoints behind a frozen Top-5 and stops. It decides nothing, and behavioural screening is separately authorized and unreachable from here.
+LAUNCHER_EXIT=11

@@ -282,7 +282,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 32,
+  "runs_current": 33,
   "runs_unrecorded": 6,
   "legacy_components": 77,
   "by_experiment": {
@@ -347,9 +347,9 @@
     "total": 3
    },
    "phase_c2_replay": {
-    "recorded": 6,
+    "recorded": 7,
     "unrecorded": 2,
-    "total": 8
+    "total": 9
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -1388,6 +1388,19 @@
    },
    "n_components": 18,
    "manifest_sha256": "c0d21151a2def93f2db7f7ba6c258a75df45e9d2544be6518c5b49ca64c3010e"
+  },
+  {
+   "experiment_id": "phase_c2_replay",
+   "run_id": "attempt9",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt9",
+    "manifest": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/manifest.json"
+   },
+   "n_components": 18,
+   "manifest_sha256": "80389aa479bd90ae9430dc8457c427bc2d35dc742843e35228c833d72844dcc3"
   }
  ],
  "unrecorded": [

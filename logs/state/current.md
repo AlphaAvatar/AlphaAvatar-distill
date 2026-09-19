@@ -14,48 +14,44 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 provider confirms it is gone and an account-wide list returns `[]`. **Nothing
 is prepared for launch.**
 
-**The replay's mismatch has a root cause, found for `$0`, and it is fixable.**
-Attempt 8 (pod `cat1v3vafsfv2g`, 62.1 min, `$1.13`) reconstructed two of the
-five paths **byte-identically** and stopped on the third. What diverged was only
-`config.json`: `weights_digest`, `single_shard_sha256`, `arch_signature`,
-`num_parameters` and `result_spec_hash` were all identical, and the kept-neuron
-selection matched across all 36 layers.
+**All five Top-5 checkpoints are reconstructed, exact, and durable off-pod.**
+Attempt 9 (pod `i0uku41wc6ph3e`, 113.8 min, `$2.07`) reproduced every one of the
+20 intermediate artifact digests and every leaf identity attempt 3 recorded.
+Verified again independently after teardown, against the frozen selection rather
+than the run's own claims: **5/5 exact**, each 1,192,135,096 bytes, at
+`/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/`.
 
-The cause is **one field, `use_cache`**, recovered from CONTENT rather than
-inferred from a hash: three retained Phase-A configs diffed against
-reconstructions of their own geometry leave exactly that key, and one of them
-hashes to `f69c2fb3a120…`, the value attempt 3 recorded for three of the five
-leaves. `DepthCausalKLGreedyV1.apply` sets `use_cache = False` on the parent
-model it is handed (block bypass cannot use a layer-indexed KV cache);
-`build_config` copies the parent's dict, so every descendant inherits it; and the
-search reused **one** teacher object across all 108 expansions. A path's root
-state therefore depends on beam order, not on the path. The replay loads a fresh
-teacher and gets the hub default.
+| leaf | first operator | time | result |
+| --- | --- | --- | --- |
+| `d005dfb2` | DEPTH causal-KL | 22.2 min | exact |
+| `7da1e4e2` | ATTENTION | 32.1 min | exact |
+| `1d284448` | FFN | 24.8 min | exact — **failed at step 0 in attempt 8** |
+| `88086555` | DEPTH positional | 2.5 min | exact — never attempted before |
+| `1a2b5b03` | WIDTH | 20.6 min | exact — never attempted before |
 
-The model reproduces all three observed outcomes and predicted the rest, so no
-GPU was spent to learn it. Owner:
-[`config_lineage_forensic.json`](../stages/stage-1/phase_c2_replay/results/config_lineage_forensic.json).
+The repair was the **evidence-bound root pin**. Path 3 failed in attempt 8 with
+expected `449c71cf…` and actual `5c479cd3…`; under the derived root state
+`use_cache=False` it produced `449c71cf…` exactly. The two paths the `$0`
+forensic predicted would fail at step 0 both reproduced completely. One bit of
+unpinned mutable state was the entire divergence, and `artifact_digest` was
+never weakened to find that out.
 
-`artifact_digest` remains the acceptance criterion — `use_cache` is the default
-for whether a forward pass builds and returns a KV cache, so it is not
-provenance-only and no semantic-equivalence bridge was requested. The repair is
-an **evidence-bound root pin**: for each path the replay solves for the root
-state that reproduces attempt 3's own recorded step-0 config, refuses if no
-candidate does, and records every candidate it tried. Two paths derive to the
-hub default — which is exactly what attempt 8 used for the two that reproduced.
+Each leaf was fetched, re-identified from the delivered bytes and given a
+durable ACK **while the next path computed** — the first at 11:32, all five
+before teardown. The closeout reported *"5 leaf/leaves already secured during
+the run"* and transferred nothing again. Attempt 8's loss cannot recur on this
+path.
 
-Also repaired this round: a generic per-poll durability hook, so each leaf is
-fetched, re-identified at the destination and given a durable ACK the moment it
-completes rather than at closeout; the `$HOME` per-attempt scratch roots
-(`aad-scratch-c2replay-a2…a8`, `c1_scr…c1_scr4`) inventoried, their unique
-content preserved into the run tree, and removed in one pass, with
-`.scratch/stage-<N>/<experiment>/<run>/` replacing them; and the budget
-refreshed mechanically once the replay runs were registered in `logs/index.json`
-— they had been invisible to the derivation, which is why the cumulative was
-stale.
+One defect remains recorded rather than hidden: attempt 9's session record says
+`INCOMPLETE` because the runner reads the driver's markers from the **status
+file** and this driver wrote them only to stdout, so `C2_REPLAY_ALL_DONE` was
+never seen and the session was classified by exit code. The driver exited 0. The
+label is wrong; the result is not, and the driver now appends its markers to the
+file the launcher tails.
 
-**Nothing is running. Nothing is billing.** Campaign: `$4.77` authorized,
-`$1.20` spent, `$3.57` left. Project: `$307.0841` of `$370.0000`.
+**Nothing is running. Nothing is billing.** Replay campaign: `$4.77` authorized,
+`$3.27` spent across nine attempts, `$1.50` left and no further replay owed.
+Project: `$309.1541` of `$370.0000`.
 
 ## The full joint re-search RAN, produced a Top-5, and then lost it
 
@@ -709,7 +705,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$307.0841` spent of `$370.0000`, leaving `$62.9159` |
+| project cap | `$309.1541` spent of `$370.0000`, leaving `$60.8459` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

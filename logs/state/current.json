@@ -22,9 +22,9 @@
   "note": "nothing is prepared and nothing may start. The formal full joint re-search RAN, produced a Top-5, and then failed after writing it. It is RETURNED TO REVIEW, not retried: formal measurement had begun. Owner: runs/attempt3/closeout/outcome.json."
  },
  "budget": {
-  "cumulative_spend_usd": 307.0841,
+  "cumulative_spend_usd": 309.1541,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 62.9159,
+  "remaining_usd": 60.8459,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,

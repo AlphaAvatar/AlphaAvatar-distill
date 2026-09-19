@@ -83,6 +83,12 @@ LEAF_DIR = f"{WORKDIR}/leaves"
 #: replay's names the two calibration mixtures its five paths actually read.
 FROZEN_EXPECT = "configs/experiments/phase_c2/replay_frozen_assets.json"
 
+#: Where reconstructed leaves live off-pod. ONE constant: the fetcher writes
+#: here and the preflight reads here, so "is this leaf already durable" has a
+#: single answer.
+DURABLE_STORE = ("/home/ecs-user/aad-artifacts/phase_c2_full_search"
+                 "/attempt3_replay")
+
 AUDIT_DIRNAME = "autoinit_c2_replay"
 #: Where the driver writes its evidence, and where the collector
 #: looks. ONE constant, so the two cannot disagree.
@@ -493,7 +499,7 @@ def _fetch_and_verify(ctx: SessionContext, leaves: list) -> list:
 
     fetched: list = []
     adapter = get_adapter("qwen3")
-    store = Path(ctx.args.ckpt_store) / "phase_c2_full_search" / "attempt3_replay"
+    store = Path(DURABLE_STORE)
     for leaf in leaves:
         state_id = leaf["state_id"]
         dest = store / state_id
@@ -607,7 +613,7 @@ def leaves_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
 def driver_command(ctx: SessionContext, plan) -> str:
     return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_c2_replay_driver.py "
             f"--workdir {WORKDIR} --leaf-dir {LEAF_DIR} "
-            f"--audit-dir {AUDIT_DIR} "
+            f"--audit-dir {AUDIT_DIR} --status-path {STATUS} "
             f"--image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--already-spent-usd {ctx.spent_usd:.4f} "
