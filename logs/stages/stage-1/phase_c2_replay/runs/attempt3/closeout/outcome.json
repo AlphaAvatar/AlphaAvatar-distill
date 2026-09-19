@@ -1,0 +1,29 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt3",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "ABORTED_BEFORE_PROVIDER",
+ "successful": false,
+ "provider_resource_created": false,
+ "reconstructed_leaves": 0,
+ "budget": {
+  "this_attempt": 0.0,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0
+ },
+ "gates_passed": 6,
+ "gates_total": 7,
+ "what_happened": "Six of seven $0 gates passed: the session commit verified and carried the authorization with exactly one differing path, the scope was confirmed, the plan hash bound, no operator-bearing file had moved since attempt 3's commit, 20 pinned steps across 5 leaves were present, the destination had 47.2 GiB free for 5.55 GiB of leaves, and the launch-bound sweep bound the live harness. The seventh -- the read-only transport gate -- aborted because replay_bundle had no `roundtrip`: the launcher reaches into it by attribute and nothing had checked the names it uses.",
+ "budget_consumed_usd": 0.0,
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true
+ },
+ "next": "attempt4, under a fresh chain on the repaired tree"
+}

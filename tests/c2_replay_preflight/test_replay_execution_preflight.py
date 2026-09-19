@@ -410,6 +410,34 @@ def test_the_launcher_records_its_run_with_what_record_run_requires():
             f"record_run requires {sorted(required)}; main() passes no {name}=")
 
 
+def test_every_transport_name_the_launcher_uses_exists_and_is_callable():
+    """The launcher reaches into the bundle module by attribute.
+
+    `bundle_staged_gate` called `RT.roundtrip` and the module had no such name,
+    so the launch aborted at the seventh gate after the whole chain had been
+    issued. Checked by reading the launcher's source for `RT.<name>` rather
+    than by listing names somebody remembered.
+    """
+    import inspect
+    import re as _re
+
+    import autoinit_c2_replay_launch as L
+    from experiments.phase_c2 import replay_bundle as RT
+
+    used = set(_re.findall(r"\bRT\.([A-Za-z_][A-Za-z0-9_]*)",
+                           inspect.getsource(L)))
+    assert used, "the probe found no RT.<name> uses; it is not checking anything"
+    for name in sorted(used):
+        attr = getattr(RT, name, None)
+        assert attr is not None, f"replay_bundle has no {name!r}"
+    #: And the one that actually transports must accept what the gate passes.
+    params = inspect.signature(RT.roundtrip).parameters
+    for needed in ("session_commit", "local_bundle_sha256",
+                   "authorization_bytes", "authorization_path",
+                   "expected_harness_digest", "harness_files", "workdir"):
+        assert needed in params, f"roundtrip takes no {needed}"
+
+
 def test_the_setup_script_dispatches_this_session_kind():
     """A missing branch is not a type error — it is a late refusal on a billing
     machine, and it has cost this project two paid sessions."""

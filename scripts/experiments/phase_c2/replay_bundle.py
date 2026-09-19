@@ -72,3 +72,37 @@ def stage_bundle(session_commit: str, *, workdir: str | Path,
     """Build, upload and verify this session's bundle on the shared relay."""
     return _bt.stage_bundle(REPLAY_TRANSPORT, Path(repo_root), session_commit,
                             workdir=Path(workdir))
+
+
+def roundtrip(*, session_commit: str, local_bundle_sha256: str,
+              authorization_bytes: bytes, authorization_path: str,
+              workdir: Path, download=hf_download,
+              expected_harness_digest: str | None = None,
+              harness_files: tuple[str, ...] | None = None,
+              repo_root: str | Path = REPO) -> dict[str, Any]:
+    """READ-ONLY transport gate for the replay. Writes nothing.
+
+    Downloads the object a pod would fetch, checks out the session commit from
+    it, and re-digests the authorized executable set inside that checkout — so
+    the gate verifies what the pod will actually run rather than what this
+    machine happens to hold.
+
+    The expected digest and file set default to the LIVE replay closure and may
+    be overridden only so a test can present a deliberately wrong pair and watch
+    the gate refuse it.
+
+    It exists because `bundle_staged_gate` called `RT.roundtrip` and this module
+    had no such name: the launch aborted at the seventh gate, at $0, but after
+    the whole chain had been issued.
+    """
+    if expected_harness_digest is None or harness_files is None:
+        digest, files = replay_executable_set(repo_root)
+        expected_harness_digest = expected_harness_digest or digest
+        harness_files = harness_files or files
+    return _bt.roundtrip(
+        REPLAY_TRANSPORT, session_commit=session_commit,
+        local_bundle_sha256=local_bundle_sha256,
+        authorization_bytes=authorization_bytes,
+        authorization_path=authorization_path,
+        expected_harness_digest=expected_harness_digest,
+        harness_files=harness_files, download=download, workdir=Path(workdir))
