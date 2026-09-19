@@ -1,0 +1,37 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_grant/v1",
+ "contract_id": "phase_c2.replay_grant/v1",
+ "_what_this_is": "What a person approved, in the fields only a person can fill. The issuer re-derives every identity beside it and refuses on any disagreement, so this document cannot introduce a binding nobody checks.",
+ "granted_by": "maintainer",
+ "granted_utc": "2026-09-19",
+ "run_id": "attempt6",
+ "experiment_id": "phase_c2_replay",
+ "stage_id": "1",
+ "covers": "ONE replay-only reconstruction of the five checkpoints behind Phase-C2 Full Joint Search attempt 3's frozen Top-5 (selection 7271091c\u2026), each path pinned at EVERY step to the artifact digest attempt 3 recorded, on ONE L40S, ending when the five leaves are reconstructed and verified off-pod or when the budget stops it.",
+ "explicitly_not_authorized": [
+  "a fourth Full Search attempt, or any beam",
+  "re-ranking the 14 complete leaves or regenerating a Top-5",
+  "any selection-bearing evaluation",
+  "injecting or comparing against the canonical control",
+  "substituting a functionally similar checkpoint for a digest mismatch",
+  "retrying a deterministic digest mismatch",
+  "recovery training or behavioural screening of any kind",
+  "a second provider resource, concurrently or in succession"
+ ],
+ "approved_money": {
+  "gpu_hard_usd": 4.69,
+  "disk_usd": 0.08,
+  "all_in_usd": 4.77,
+  "max_rate_usd_per_hour": 1.09,
+  "gpu": "NVIDIA L40S",
+  "container_disk_gb": 120,
+  "_basis": "DERIVED, and corrected once. The review set $4.00 soft / $5.00 all-in. A first derivation bounded each step by the worst observation of its operator KIND, came to $5.27, exceeded the ceiling, and the session STOPPED before creating a resource and returned the requirement as instructed. A raise to $5.27 was approved. The bound was then found to be wrong: two DEPTH implementations appear in the selected paths -- depth.causal_kl_greedy_v1 at up to 25.7 min and depth.positional_v0 at 0.6 -- and bounding by kind charged the cheap one at the expensive one's rate. Bounding per IMPLEMENTATION gives $4.77 all-in, inside the ORIGINAL $5.00. The approved raise is NOT taken: a ceiling is a derivation, and headroom nobody derived is authorization to spend money nobody costed.",
+  "_why_not_a_cheaper_gpu": "A40 at $0.49 and RTX A6000 at $0.53 were quoted and rejected. The session's success criterion IS byte-exact digest agreement with artifacts an L40S produced; a different architecture can select different kernels and present as a replay mismatch, which this programme treats as a scientific STOP condition. That would manufacture a false finding and burn the session."
+ },
+ "one_use": true,
+ "max_provider_resources": 1,
+ "on_mismatch": "STOP and return to review. A digest mismatch is a replay mismatch and a scientific finding, not an ordinary engineering failure: the path is deterministic and would diverge identically on a retry.",
+ "on_partial": "Leaves reconstructed before a stop are VALID and must be fetched and verified off-pod. A failure at leaf N does not invalidate 1..N-1, and teardown is refused while any reconstructed leaf is only on the pod.",
+ "grant_sha256": "d879b38b38541c86fec7fd937910199a5bee896249f474c7aa50e3b91057ffe0",
+ "_supersedes": "attempts 1-5, all $0 and none of which created a provider resource. Attempt 5 passed all seven gates and stopped in a dry run; a dry run writes a manifest and so consumes its attempt id. Same scope, same money, same GPU."
+}

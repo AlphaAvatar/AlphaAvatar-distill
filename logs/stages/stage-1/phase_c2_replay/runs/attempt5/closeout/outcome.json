@@ -1,0 +1,29 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt5",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "DRY_RUN_GATES_PASSED",
+ "successful": false,
+ "provider_resource_created": false,
+ "reconstructed_leaves": 0,
+ "budget": {
+  "this_attempt": 0.0,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0
+ },
+ "gates_passed": 7,
+ "gates_total": 7,
+ "what_happened": "All seven $0 gates passed and the dry run stopped before provider creation -- the first invocation in this programme where --dry-run did what it says. Nothing was created and nothing billed.",
+ "_a_dry_run_consumes_the_attempt_id": "It writes a manifest, and open_run refuses to reopen a recorded run because that manifest describes an execution a second one would overwrite. So the workflow is: dry-run on attempt N, launch on N+1. That is the machinery's contract, established here rather than assumed.",
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true
+ },
+ "next": "attempt6 carries the live launch"
+}
