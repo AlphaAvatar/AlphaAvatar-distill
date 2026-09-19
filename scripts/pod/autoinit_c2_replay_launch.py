@@ -56,7 +56,10 @@ from experiments.phase_c2 import replay as RG  # noqa: E402
 from experiments.phase_c2 import replay_bundle as RT  # noqa: E402
 from experiments.phase_c2 import replay_pod_environment as RPE  # noqa: E402
 from experiments.phase_c2 import replay_specs as RS  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from experiments.run_layout import (  # noqa: E402
+    ArtifactSpec as RunArtifactSpec, claim_output_root, open_run,
+    record_run, rel_run_dir, write_run_readmes,
+)
 from phase_a_frozen import TEACHER_REVISION  # noqa: E402
 
 EXPERIMENT_ID = "phase_c2_replay"
@@ -104,8 +107,68 @@ CONTAINER_DISK_GB = 120
 BOUND_IMAGE = POD_IMAGE
 
 
+#: Every path this run writes, by role. One mapping, so the launcher, the
+#: collector and the closeout cannot disagree about where a thing lives.
+REPLAY_RUN_ROLES: dict[str, str] = {
+    #: --- governance: inputs, prepared before the run opens ------------------
+    "grant": "governance/grant.json",
+    "readiness_record": "governance/readiness.json",
+    "authorization": "governance/authorization.json",
+    "bundle_record": "governance/bundle.json",
+    #: --- runtime: how it executed -------------------------------------------
+    #: Written on EVERY path including a $0 pre-provider refusal, which is why
+    #: it is the one role the manifest requires.
+    "session_record": "runtime/session.json",
+    "launcher_log": "runtime/launcher.log",
+    "watchdog_journal": "runtime/watchdog",
+    #: --- evidence: what it produced -----------------------------------------
+    "driver_log": "evidence/driver_run.log",
+    "driver_status": "evidence/driver_status.txt",
+    "session_evidence": "evidence/c2_replay_evidence.json",
+    #: --- artifacts / closeout -----------------------------------------------
+    "artifact_manifest": "artifacts/manifest.json",
+    "outcome": "closeout/outcome.json",
+}
+
+REPLAY_RUN_SPEC = RunArtifactSpec(
+    spec_id="phase_c2_replay_session_v1",
+    required=("session_record",),
+    optional=tuple(r for r in REPLAY_RUN_ROLES if r != "session_record"))
+
+#: Exempt from `open_run`'s occupancy rule and from nothing else: these four are
+#: committed BEFORE the run opens, in the order grant -> readiness ->
+#: authorization -> bundle, and a launcher that refused to open a run because
+#: its own inputs were already there could never start.
+_RUN_PREPARED = ("grant", "readiness_record", "authorization", "bundle_record")
+
+
 def governance_path(run_id: str, name: str) -> str:
     return f"{rel_run_dir(EXPERIMENT_ID, run_id, STAGE_ID)}/governance/{name}"
+
+
+def session_record_path(run_id: str) -> str:
+    """Where THIS run's session record goes, repository-relative.
+
+    ONE rule, called by the parser's `--run-id` action and again by `main`, so
+    the path the runner writes and the directory the run was opened in cannot
+    disagree.
+    """
+    return (f"{rel_run_dir(EXPERIMENT_ID, run_id, STAGE_ID)}"
+            f"/{REPLAY_RUN_ROLES['session_record']}")
+
+
+class _RunIdSetsOut(argparse.Action):
+    """`--run-id` also produces `out`, because the RUNNER reads `out`.
+
+    `SessionRunner.save()` writes `args.out`, and the argument contract requires
+    every attribute the runner reads to come from the REAL parser — another
+    session died at $0.0603 on an attribute a hand-written namespace had and the
+    parser did not, after the pod was billing.
+    """
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        setattr(namespace, self.dest, value)
+        namespace.out = session_record_path(value)
 
 
 def auth_path_for(run_id: str) -> str:
@@ -567,7 +630,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--scr", required=True)
     ap.add_argument("--session-commit", required=True)
     ap.add_argument("--bundle", required=True)
-    ap.add_argument("--run-id", required=True,
+    ap.add_argument("--run-id", required=True, action=_RunIdSetsOut,
                     help="the attempt this session runs as, e.g. attempt1")
     ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-transport")
     ap.add_argument("--image", default=BOUND_IMAGE)
@@ -604,7 +667,50 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    return run_session(spec(args), args)
+    if args.max_price is None:
+        #: From the AUTHORIZATION, which was issued at a re-quoted rate. Not
+        #: from a constant: the ceiling was derived at that rate, so defaulting
+        #: to anything else would authorize a window the money does not fund.
+        auth_file = REPO_ROOT / auth_path_for(args.run_id)
+        if not auth_file.is_file():
+            raise SystemExit(
+                f"{auth_path_for(args.run_id)} does not exist. The max price "
+                "defaults to the rate the authorization's ceiling was derived "
+                "at, so there is nothing to default to and nothing to launch.")
+        rate = json.loads(auth_file.read_text()).get("rate_usd_per_hour")
+        if rate is None:
+            raise SystemExit(
+                "the authorization states no rate, so --max-price has no safe "
+                "default. Pass one explicitly at or below the rate the ceiling "
+                "was derived at.")
+        args.max_price = float(rate)
+
+    #: BEFORE anything is priced or created: a colliding run id or a foreign
+    #: scratch root costs $0 here.
+    claim_output_root(args.scr, EXPERIMENT_ID, args.run_id, outputs=RUN_OUTPUTS)
+    layout = open_run(REPO_ROOT, EXPERIMENT_ID, args.run_id,
+                      roles=REPLAY_RUN_ROLES, prepared=_RUN_PREPARED,
+                      stage_id=STAGE_ID)
+    write_run_readmes(layout, experiment_id=EXPERIMENT_ID,
+                      run_id=args.run_id, stage_id=STAGE_ID,
+                      roles=REPLAY_RUN_ROLES)
+    assert args.out == session_record_path(args.run_id), (args.out, args.run_id)
+
+    rc = run_session(spec(args), args, REPO_ROOT,
+                     summary=("the replay is a TERMINUS: it reconstructs the "
+                              "five checkpoints behind a frozen Top-5 and "
+                              "stops. It decides nothing, and behavioural "
+                              "screening is separately authorized and "
+                              "unreachable from here."))
+    try:
+        record_run(layout, spec=REPLAY_RUN_SPEC)
+    except Exception as exc:                                      # noqa: BLE001
+        print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
+              f"  the run directory is "
+              f"{rel_run_dir(EXPERIMENT_ID, args.run_id, STAGE_ID)}; it holds "
+              "whatever the session produced and has no manifest. Do not reuse "
+              "this run id.")
+    return rc
 
 
 if __name__ == "__main__":

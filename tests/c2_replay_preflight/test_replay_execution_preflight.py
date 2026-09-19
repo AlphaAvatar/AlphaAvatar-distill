@@ -293,6 +293,34 @@ def test_the_launcher_builds_its_session_spec_on_this_tree():
     assert spec.artifacts.products_secured is not None
 
 
+def test_the_launcher_satisfies_the_runners_argument_contract():
+    """The runner reads attributes off the namespace and calls `run_session`
+    with a fixed signature. Both were wrong here and neither is visible from
+    building the spec: `--run-id` produced no `out`, and `run_session` was
+    called without `repo_root`. A launcher that cannot be invoked is a launcher
+    that fails after its authorization has been issued, which costs a whole
+    governance chain to discover.
+    """
+    import inspect
+
+    import autoinit_c2_replay_launch as L
+    from aadistill.infrastructure.session_runner import run_session
+
+    args = L.build_parser().parse_args(
+        ["--scr", "/tmp/x", "--session-commit", "d" * 40,
+         "--bundle", "b.bundle", "--run-id", "preflight"])
+    #: `SessionRunner.save()` writes `args.out`.
+    assert args.out == L.session_record_path("preflight")
+
+    required = [name for name, p in
+                inspect.signature(run_session).parameters.items()
+                if p.default is inspect.Parameter.empty
+                and p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)]
+    source = inspect.getsource(L.main)
+    assert "run_session(spec(args), args, REPO_ROOT" in source, (
+        f"run_session requires {required}; main() must pass them all")
+
+
 def test_the_setup_script_dispatches_this_session_kind():
     """A missing branch is not a type error — it is a late refusal on a billing
     machine, and it has cost this project two paid sessions."""
