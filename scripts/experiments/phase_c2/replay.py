@@ -173,9 +173,54 @@ def executable_digest(repo_root: str | Path = REPO_ROOT) -> str:
 #: would either refuse a fitting plan or hide the disk, and a GPU-only ceiling
 #: has already missed $1.69 in this programme. `ALL_IN_USD` is their sum and is
 #: the figure the ledger and any review read.
-GPU_HARD_USD = 4.69
-DISK_USD = 0.08
-ALL_IN_USD = 4.77
+#: The CAMPAIGN's ceiling, across every attempt. It does not reset.
+CAMPAIGN_GPU_USD = 4.69
+CAMPAIGN_DISK_USD = 0.08
+CAMPAIGN_ALL_IN_USD = 4.77
+
+#: Names kept for readers of the campaign figures.
+GPU_HARD_USD = CAMPAIGN_GPU_USD
+DISK_USD = CAMPAIGN_DISK_USD
+ALL_IN_USD = CAMPAIGN_ALL_IN_USD
+
+
+def campaign_spent_usd(repo_root: str | Path = REPO_ROOT) -> float:
+    """What this campaign has already spent, from the run closeouts.
+
+    Derived, never restated. A cumulative ceiling that a new attempt reads as
+    its own allowance is not a ceiling: eight attempts at $4.77 each would be
+    $38, and the campaign is $4.77 in total.
+    """
+    import json as _json
+
+    runs = Path(repo_root) / "logs/stages/stage-1/phase_c2_replay/runs"
+    total = 0.0
+    if not runs.is_dir():
+        return 0.0
+    for outcome in sorted(runs.glob("*/closeout/outcome.json")):
+        doc = _json.loads(outcome.read_text())
+        cost = ((doc.get("budget") or {}).get("this_attempt")
+                or (doc.get("cost") or {}).get("actual_usd") or 0.0)
+        total += float(cost)
+    return round(total, 4)
+
+
+def remaining_usd(repo_root: str | Path = REPO_ROOT) -> dict[str, float]:
+    """This attempt's money: the campaign, less what the campaign has spent.
+
+    The disk allowance is held back whole rather than prorated — the provider
+    bills it per hour of pod life regardless of how much GPU money is left, and
+    a ceiling that spent it on GPU minutes would be short exactly when a session
+    ran long.
+    """
+    spent = campaign_spent_usd(repo_root)
+    all_in = round(CAMPAIGN_ALL_IN_USD - spent, 4)
+    gpu = round(all_in - CAMPAIGN_DISK_USD, 4)
+    return {"campaign_all_in_usd": CAMPAIGN_ALL_IN_USD,
+            "campaign_spent_usd": spent,
+            "remaining_all_in_usd": all_in,
+            "this_attempt_gpu_usd": gpu,
+            "disk_usd": CAMPAIGN_DISK_USD}
 
 #: Kept for callers that ask for one number. It is the ALL-IN figure, because a
 #: single number that excluded the disk would understate the session.

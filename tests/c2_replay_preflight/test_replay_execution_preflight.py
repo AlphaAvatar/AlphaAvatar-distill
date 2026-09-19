@@ -292,10 +292,30 @@ def test_the_session_fits_its_authorized_money_at_the_approved_rate():
     args = L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", "d" * 40,
          "--bundle", "b.bundle", "--run-id", "preflight"])
+    money = RG.remaining_usd(ROOT)
+    assert money["this_attempt_gpu_usd"] > 0, (
+        "the campaign has nothing left to authorize")
     plan = L.budget(args).plan(price_per_hour=1.09,
-                               authorized_usd=RG.GPU_HARD_USD)
-    assert plan.hard_terminate_minutes / 60.0 * 1.09 <= RG.GPU_HARD_USD
+                               authorized_usd=money["this_attempt_gpu_usd"])
+    assert plan.hard_terminate_minutes / 60.0 * 1.09 <= money["this_attempt_gpu_usd"]
     assert plan.soft_stop_minutes < plan.hard_terminate_minutes
+
+
+def test_the_attempt_is_authorized_for_the_campaign_remainder_not_its_ceiling():
+    """A cumulative ceiling read as a per-attempt allowance is not a ceiling.
+
+    Nine attempts at $4.77 each would be $43 against a $4.77 campaign. The
+    remainder is DERIVED from the recorded closeouts, so it cannot drift from
+    what was actually spent.
+    """
+    money = RG.remaining_usd(ROOT)
+    assert money["campaign_all_in_usd"] == RG.CAMPAIGN_ALL_IN_USD
+    assert money["campaign_spent_usd"] > 0, (
+        "no spend is visible; either the closeouts moved or this campaign has "
+        "not run, and a fresh campaign should not be reading this test")
+    assert (money["remaining_all_in_usd"]
+            == round(RG.CAMPAIGN_ALL_IN_USD - money["campaign_spent_usd"], 4))
+    assert money["this_attempt_gpu_usd"] < RG.CAMPAIGN_GPU_USD
 
 
 def test_the_teacher_revision_is_the_one_the_paths_are_rooted_at():
@@ -353,13 +373,16 @@ def test_the_authorization_document_round_trips_through_its_own_loader(tmp_path)
 
     assert a.authorization_id == RG.PLAN_ID
     assert tuple(a.authorized_stages) == RG.AUTHORIZED_STAGES
-    assert a.hard_cap_usd == RG.GPU_HARD_USD
+    #: The REMAINDER, not the campaign ceiling.
+    assert a.hard_cap_usd == RG.remaining_usd(ROOT)["this_attempt_gpu_usd"]
     assert a.plan_hash == RG.plan_hash(ROOT)
     assert a.authorizes_c2_replay is True
     assert a.authorizes_c2_full_search is False
     assert a.harness_source_digest and a.harness_source_files
     #: And the money the type does not carry.
-    assert record["money"]["all_in_usd"] == RG.ALL_IN_USD
+    assert record["money"]["all_in_usd"] == (
+        RG.remaining_usd(ROOT)["remaining_all_in_usd"])
+    assert record["money"]["campaign_all_in_usd"] == RG.CAMPAIGN_ALL_IN_USD
 
 
 def test_the_launcher_satisfies_the_runners_argument_contract():

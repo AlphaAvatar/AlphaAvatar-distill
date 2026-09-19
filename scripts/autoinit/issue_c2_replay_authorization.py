@@ -75,6 +75,16 @@ def build_authorization_record(*, grant, approved, commit, dirty, rate,
     #: constructor requires eleven fields; a document assembled from what this
     #: session felt it needed parsed as nothing the loader could read, and the
     #: dry run refused it after the whole chain had been issued.
+    #: The campaign REMAINDER, derived from the recorded closeouts. Computed
+    #: here rather than passed in, so every caller of this builder — the issuer
+    #: and the $0 round-trip test — prices the same way.
+    money = RG.remaining_usd()
+    if money["this_attempt_gpu_usd"] <= 0:
+        raise ValueError(
+            f"the campaign has spent ${money['campaign_spent_usd']:.4f} of "
+            f"${money['campaign_all_in_usd']:.2f}; nothing remains to "
+            "authorize. A new ceiling is a maintainer decision.")
+
     auth = RG.ReplayAuthorization(
         authorization_id=RG.PLAN_ID,
         granted_utc=datetime.now(timezone.utc).isoformat(),
@@ -86,8 +96,10 @@ def build_authorization_record(*, grant, approved, commit, dirty, rate,
         #: No separate science plan. This session produces no measurement, so
         #: the two hashes are the same object rather than one being invented.
         science_plan_hash=plan_hash,
-        expected_usd=float(approved.get("expected_usd", RG.GPU_HARD_USD)),
-        hard_cap_usd=RG.GPU_HARD_USD,
+        expected_usd=float(approved.get("expected_usd", money["this_attempt_gpu_usd"])),
+        #: The campaign REMAINDER, not the campaign ceiling. Eight attempts at
+        #: the ceiling would be $38 against a $4.77 campaign.
+        hard_cap_usd=money["this_attempt_gpu_usd"],
         authorized_stages=RG.AUTHORIZED_STAGES,
         stage_conditions={
             "bind_identities": ("binds the source binding, builds the five "
@@ -120,9 +132,10 @@ def build_authorization_record(*, grant, approved, commit, dirty, rate,
     record["one_use"] = True
     record["max_provider_resources"] = 1
     record["money"] = {
-        "gpu_hard_usd": RG.GPU_HARD_USD,
-        "disk_usd": RG.DISK_USD,
-        "all_in_usd": RG.ALL_IN_USD,
+        **money,
+        "gpu_hard_usd": money["this_attempt_gpu_usd"],
+        "disk_usd": money["disk_usd"],
+        "all_in_usd": money["remaining_all_in_usd"],
         "_why_two_numbers": (
             "the provider bills container disk separately from the GPU. "
             "`hard_cap_usd` is GPU money, which is what the budget planner and "
@@ -207,8 +220,9 @@ def main(argv=None) -> int:
         "plan_hash": plan_hash[:16] + "…",
         "harness_digest": live["digest"][:16] + "…",
         "harness_n_files": live["n_files"],
-        "gpu_hard_usd": RG.GPU_HARD_USD,
-        "all_in_usd": RG.ALL_IN_USD,
+        "gpu_hard_usd": money["this_attempt_gpu_usd"],
+        "all_in_usd": money["remaining_all_in_usd"],
+        "campaign_spent_usd": money["campaign_spent_usd"],
         "rate": args.rate,
     }, indent=1))
     return 0

@@ -638,30 +638,35 @@ def budget(args) -> BudgetSpec:
     """
     from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 
-    from experiments.phase_c2.full_search_space import SESSION_PHASE_MINUTES
-
-    phases = dict(SESSION_PHASE_MINUTES)
     leaves = RS.build_replay_leaves(REPO_ROOT, device="cuda")
     reconstruction = sum(leaf.bounded_minutes for leaf in leaves)
 
-    #: 5.55 GiB at the measured 11.5 MB/s dev-box downlink is 8.6 minutes; the
-    #: reserve is that, with margin, rather than the generic 30.
-    leaf_transfer = 15.0
+    #: MEASURED on this session's own attempt 8, not inherited from the full
+    #: search's phase table. That table budgets 95 minutes of shared session
+    #: overhead for a beam that stages a metric suite and commits a ranking;
+    #: this session staged two calibration directories and ran a driver, and the
+    #: pod spent 62.12 minutes of which the driver held 57.95 — 4.2 minutes of
+    #: everything else, end to end, including image pull, environment build,
+    #: the test gate and teardown. Doubling that is the allowance here.
+    #:
+    #: Using the inherited 95 would price this session at $4.01 expected against
+    #: $3.57 of remaining campaign money and refuse a run that comfortably fits.
+    measured_overhead = 8.4
+
+    #: Leaves now leave the pod DURING the run, one at a time, overlapping the
+    #: next path's compute. 1.11 GiB at the measured 11.5 MB/s is ~1.7 min each.
+    leaf_transfer = 5 * 1.7
 
     return BudgetSpec(
         arms=0, steps_per_arm=0,
-        #: `arms=0` multiplies the step term out entirely. The measured floor is
-        #: passed because the below-floor guard refuses a zero, not because a
-        #: step time means anything to a session that trains nothing.
         step_seconds=MEASURED_STEP_SECONDS,
         step_source=("unused: a replay trains nothing, so arms=0. The bound is "
-                     "the sum of the five paths' worst-case operator timings "
-                     "from attempt 3's telemetry"),
-        setup_minutes=phases["setup_and_asset_staging"],
-        transfer_minutes=phases["bundle_transfer"],
+                     "the sum of the five paths' worst-case per-implementation "
+                     "timings from attempt 3's telemetry, plus this session's "
+                     "own measured overhead from attempt 8"),
+        setup_minutes=measured_overhead,
+        transfer_minutes=leaf_transfer,
         other_phases=(
-            *(Phase(name, minutes) for name, minutes in SESSION_PHASE_MINUTES
-              if name not in ("setup_and_asset_staging", "bundle_transfer")),
             Phase("reconstruct_five_pinned_paths", round(reconstruction, 2)),
         ),
         contingency_fraction=0.10,
