@@ -11,15 +11,21 @@
  "reconstructed_leaves": 5,
  "leaves_secured_off_pod": 5,
  "budget": {
-  "this_attempt": 2.07,
-  "currency": "USD"
+  "this_attempt": 2.1017,
+  "currency": "USD",
+  "_this_attempt_is_all_in": "observed GPU plus the accrued storage estimate, so the project cumulative books what the session actually costs rather than only the half the provider quotes."
  },
  "cost": {
   "actual_usd": 2.07,
   "gpu_usd": 2.07,
-  "disk_usd": 0.0,
+  "disk_usd": 0.0317,
   "rate_usd_per_hour": 1.09,
-  "authorized_gpu_usd": 3.49
+  "authorized_gpu_usd": 3.49,
+  "disk_usd_basis": "accrued_estimate",
+  "_disk_is_not_observed": "The provider API does not expose an actual container-disk bill, and `unobserved` is not `$0`. This is an ACCRUED ESTIMATE from the stated basis: 120 GB provisioned x $0.1/GB/month, prorated over 720.0 h/month for the pod's whole 113.8 min lifetime, rounded up. The GPU figure beside it IS observed.",
+  "provisioned_container_disk_gb": 120,
+  "disk_usd_per_hour": 0.016667,
+  "all_in_usd": 2.1017
  },
  "gates_passed": 7,
  "gates_total": 7,
@@ -114,5 +120,6 @@
   "remaining_usd": 1.5
  },
  "next": "STOP. All five Top-5 artifacts have exact attempt-3 identities and are verified durable off-pod. Returning for review. No behavioural screening started.",
- "outcome_sha256": "054ae8c74b02e36c30d92ae9e9a56c03295a44210a503d6c09213ee6ee26b00b"
+ "classification": "COMPLETE. All five Top-5 checkpoints reconstructed byte-for-byte and verified durable off-pod before teardown.",
+ "outcome_sha256": "b0768458d5de84f48d3a16a3e177fbf929057fc5b4c29149d7ded714a7f136b9"
 }

@@ -6,7 +6,7 @@
  "running": {
   "paid_compute": false,
   "pods": 0,
-  "note": "zero pods. Attempt 3's pod ulit767od813i8 was deleted behind its teardown gate after 386.2 min; the provider confirms it is gone and an account-wide list returns []."
+  "_verified": "an account-wide provider query returned [] after teardown"
  },
  "authorized": {
   "any": true,
@@ -19,12 +19,12 @@
  "prepared_launch": {
   "any": false,
   "run": null,
-  "note": "nothing is prepared and nothing may start. The formal full joint re-search RAN, produced a Top-5, and then failed after writing it. It is RETURNED TO REVIEW, not retried: formal measurement had begun. Owner: runs/attempt3/closeout/outcome.json."
+  "note": "nothing is prepared for launch. The replay campaign is CLOSED -- all five Top-5 checkpoints are reconstructed exact and durable -- and the C2 behavioural session is a PROPOSAL with no grant, readiness record, authorization or bundle."
  },
  "budget": {
-  "cumulative_spend_usd": 309.1541,
+  "cumulative_spend_usd": 309.2043,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 60.8459,
+  "remaining_usd": 60.7957,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -122,7 +122,8 @@
    "behavioural_selection": "PHASE-C semantics, 12 probes exact: does the selected C beat incumbent B after the frozen 0.86M recovery? Screening is seed- AND prompt-disjoint (0ad76fc7). Owner: the protocol."
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent; cannot start before C2 names one, and the operator does not exist yet.",
-  "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
+  "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md.",
+  "c2_full_search": "COMPLETE -- Top-5 ACCEPTED and FROZEN; its five checkpoints reconstructed exact and durable by the replay. Owner: phase_c2_replay above."
  },
  "storage": {
   "roots": {
@@ -130,30 +131,45 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "RETURNED TO REVIEW. The formal full joint re-search RAN for 386.2 min at $7.02 and DID produce a Top-5: 108 expansions, 202 states, 14 complete leaves ranked, 5 selected, the selection carrying its own sha256 and the journal's. It then FAILED in a post-selection step -- run_phase_a_search injects the canonical 0.6B control, which this session deliberately does not stage -- so commit_top_k never executed and THE FIVE CHECKPOINTS WERE ON THE DELETED POD. They are identified exactly (state ids, artifact digests, checkpoint sha256s, 596,049,920 parameters each) and their bytes are gone. Formal measurement had begun, so no retry was attempted: no fourth chain, no grant, no sweep, no provider resource. What review is asked -- whether the Top-5 is admissible given the driver's terminus never ran, whether deterministic replay from the recorded seed and paths may stand in for the lost checkpoints, and whether a fourth attempt is authorized -- is listed in the closeout. $7.16 of $34.8742 spent across three attempts; project cumulative $305.8841 of $370.0000.",
+ "blocker": "NOTHING IS BLOCKED AND NOTHING MAY LAUNCH. The full joint re-search is COMPLETE and its Top-5 is ACCEPTED and FROZEN; the five checkpoints lost with attempt 3's pod are RECONSTRUCTED exact and durable (attempt 9). The replay campaign is CLOSED and its remaining allowance is not to be spent. What is owed next is a SEPARATE C2 behavioural-selection session -- 12 probes exactly -- designed and proposed but NOT authorized.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
-  "experiment_id": "phase_c2_baseline_completion",
-  "run_id": "attempt8",
-  "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8",
-  "outcome": "recorded; COMPLETE \u2014 B REBUILT, MEASURED ONCE, B->C COMPARISON COMPUTED, $0.5872",
+  "experiment_id": "phase_c2_replay",
+  "run_id": "attempt9",
+  "root": "logs/stages/stage-1/phase_c2_replay/runs/attempt9",
+  "outcome": "recorded; COMPLETE. All five Top-5 checkpoints reconstructed byte-for-byte and verified durable off-pod before teardown, $2.1017",
   "index": "logs/index.json",
   "state": "recorded: the run wrote its own manifest",
-  "last_executed": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt8"
+  "last_executed": "logs/stages/stage-1/phase_c2_replay/runs/attempt9"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
   "record": "logs/maintenance/source-relocations/initialization-core/v1/"
  },
  "cuda_engineering_validation": {
-  "_what": "engineering evidence only -- neither validation is a scientific result and neither authorizes anything.",
-  "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, campaign CLOSED. Owner: phase_c1/validations/cuda-stage-f/v1/.",
-  "c2_full_search": "PASS 2026-09-17 on an L40S: the driver reached C2_FULL_SEARCH_ALL_DONE on real CUDA in BF16 over the 578-leaf space and the real 596M student reloaded canonically intact. $0.1453 of $0.9000, three subruns, all torn down. CLOSED. Owner: validations/full-search-cuda/v1/closeout.json.",
+  "_what": "engineering evidence only -- none of these is a scientific result and none authorizes anything.",
   "authorizes": "nothing",
-  "c2_full_search_performance": "COMPLETE and CLOSED 2026-09-18: two optimizations ADOPTED on measured equivalence, one REFUSED, one instrumented to a REFUTED hypothesis. NOT a PASS -- no subrun exited 0 and every failure was in the instrumentation. $0.2252 of $1.5000. Its 76x figure is SUPERSEDED on the complete suite by the certification below, and it moved a hash a frozen protocol binds. Owner: validations/full-search-performance/v1/closeout.json.",
-  "c2_state_eval_certification": "MEASURED and CLOSED 2026-09-19 on the COMPLETE frozen suite. Ranked ABSOLUTE drift 9.032e-06 -- inside the predeclared 1e-5 target, 11.1x below the 1e-4 epsilon -- with real-candidate fronts, ordering and selected ids IDENTICAL. NOT a PASS: 2 of 5 epsilon-boundary cases flipped, both closer to the boundary than the drift. The judgment RETURNS TO REVIEW. Also measured: the 76x does NOT hold at full scale (reduction 10.06x, pass 2.63x). $0.8446 of $1.5000, two subruns, both torn down. Owner: validations/state-eval-certification/v1/closeout.json."
+  "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, campaign CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/",
+  "c2_full_search": "PASS 2026-09-17 on an L40S; the real 596M student reloaded canonically intact. $0.1453, CLOSED. Owner: logs/stages/stage-1/phase_c2/validations/full-search-cuda/",
+  "c2_full_search_performance": "COMPLETE and CLOSED 2026-09-18: two optimizations adopted on measured equivalence, one refused, one refuted. NOT a PASS. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
+  "c2_state_eval_certification": "COMPLETE and CLOSED 2026-09-19 on the complete frozen suite; ranked absolute drift 9.032e-06, inside the predeclared 1e-5. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/"
  },
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
- "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything."
+ "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
+ "phase_c2_replay": {
+  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c\u2026)",
+  "reconstruction": "attempt 9 COMPLETE; 5/5 exact and durable",
+  "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
+  "campaign": "CLOSED; remaining allowance not to be spent",
+  "acceptance_rule": "artifact_digest, unchanged",
+  "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
+ },
+ "behavioural_session": {
+  "authorized": false,
+  "state": "PROPOSAL ONLY",
+  "protocol": "12 probes exact: 6 screening, 6 confirmation. Only confirmation may name the C2 incumbent.",
+  "owner": "logs/stages/stage-1/phase_c2_behavioural/plans/"
+ },
+ "next": "review the C2 behavioural-selection grant proposal. No Full Search rerun, no re-ranking, no B remeasurement outside the 12-probe protocol, no C3/C4."
 }

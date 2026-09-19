@@ -26,5 +26,7 @@
   "authorization": true,
   "bundle": true
  },
- "next": "attempt5, under a fresh chain on the repaired tree"
+ "next": "attempt5, under a fresh chain on the repaired tree",
+ "classification": "ABORTED BEFORE PROVIDER inside create(); exposed that --dry-run created pods; $0.",
+ "outcome_sha256": "53511bf641ed74ec429708effa2f530c18bbc6909f8d1647e41ce560fb824da7"
 }

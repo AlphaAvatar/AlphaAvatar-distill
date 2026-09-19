@@ -24,5 +24,7 @@
   "bundle": true,
   "_why": "consumed by the invocation, never reused"
  },
- "next": "attempt3, under a fresh chain on the repaired tree"
+ "next": "attempt3, under a fresh chain on the repaired tree",
+ "classification": "ABORTED BEFORE PROVIDER. The plan hash contained the live HEAD and could not bind; $0.",
+ "outcome_sha256": "207d75087a48d0796ead93dd7935252e101cae95aae30fd74f1f54304e08bb9a"
 }

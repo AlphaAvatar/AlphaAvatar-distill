@@ -10,14 +10,20 @@
  "provider_confirms_deleted": true,
  "reconstructed_leaves": 0,
  "budget": {
-  "this_attempt": 0.05,
-  "currency": "USD"
+  "this_attempt": 0.0508,
+  "currency": "USD",
+  "_this_attempt_is_all_in": "observed GPU plus the accrued storage estimate, so the project cumulative books what the session actually costs rather than only the half the provider quotes."
  },
  "cost": {
   "actual_usd": 0.05,
   "gpu_usd": 0.05,
-  "disk_usd": 0.0,
-  "rate_usd_per_hour": 1.09
+  "disk_usd": 0.0008,
+  "rate_usd_per_hour": 1.09,
+  "disk_usd_basis": "accrued_estimate",
+  "_disk_is_not_observed": "The provider API does not expose an actual container-disk bill, and `unobserved` is not `$0`. This is an ACCRUED ESTIMATE from the stated basis: 120 GB provisioned x $0.1/GB/month, prorated over 720.0 h/month for the pod's whole 2.7 min lifetime, rounded up. The GPU figure beside it IS observed.",
+  "provisioned_container_disk_gb": 120,
+  "disk_usd_per_hour": 0.016667,
+  "all_in_usd": 0.0508
  },
  "gates_passed": 7,
  "gates_total": 7,
@@ -31,5 +37,7 @@
   "bundle": true
  },
  "cumulative_experiment_usd": 0.07,
- "next": "attempt8 carries the live launch"
+ "next": "attempt8 carries the live launch",
+ "classification": "SETUP FAILURE. Declared ASSETS_READY with no frozen-asset expectation; pod deleted and provider-confirmed gone.",
+ "outcome_sha256": "46bd1330a9e97e67e30c610767caec2f250edd704a261bfb375085473a21446a"
 }

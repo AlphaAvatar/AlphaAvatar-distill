@@ -187,6 +187,33 @@ def load_states(repo_root: str | Path = REPO_ROOT) -> dict[str, dict[str, Any]]:
 #: The telemetry attempt 3 collected, beside the journal.
 TELEMETRY_REL = f"{EVIDENCE_REL}/telemetry.jsonl"
 
+#: DERIVED replay-side evidence, on the replay's side of the tree. The root
+#: derivation needs each state's ArchSpec to rebuild its config, and the compact
+#: journal carries only `arch_spec_hash` — which cannot be inverted. The specs
+#: were briefly added to attempt 3's compact journal during the config forensic;
+#: that enriched a FROZEN run's evidence retrospectively, so the journal was
+#: restored byte-for-byte and the information lives here instead, labelled as
+#: derived and sourced from the complete journal by sha.
+ARCH_SPEC_LINEAGE_REL = ("logs/stages/stage-1/phase_c2_replay/plans/"
+                         "attempt3_arch_spec_lineage.json")
+
+
+def load_arch_specs(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """`state_id -> ArchSpec dict`, from the derived lineage table."""
+    path = Path(repo_root) / ARCH_SPEC_LINEAGE_REL
+    if not path.is_file():
+        raise ReplaySourceError(
+            f"{ARCH_SPEC_LINEAGE_REL} is missing. It is derived from the "
+            "complete attempt-3 journal and is what lets the replay rebuild a "
+            "state's config; without it no root state can be derived.")
+    doc = json.loads(path.read_text())
+    if doc.get("source", {}).get("sha256") != FULL_JOURNAL_SHA256:
+        raise ReplaySourceError(
+            f"{ARCH_SPEC_LINEAGE_REL} was derived from journal "
+            f"{doc.get('source', {}).get('sha256')}, not the "
+            f"{FULL_JOURNAL_SHA256} the frozen selection commits.")
+    return doc["arch_spec_by_state_id"]
+
 #: Everything a replay pays per step. `state_evaluation_seconds` is deliberately
 #: absent: the replay evaluates nothing, so charging it would inflate the bound
 #: with work this session does not do.
@@ -443,6 +470,7 @@ def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
     #: Loaded ONCE. Config only, from the local cache on a pod as on the dev
     #: box; the weights are not touched here.
     root_config = _teacher_config(repo_root)
+    arch_specs = load_arch_specs(repo_root)
 
     #: One teacher load per path. Paths are run independently because the
     #: operators mutate the module they are given, so each pays it.
@@ -512,14 +540,15 @@ def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
                 f"leaf {sid}: the journal records no config_sha256 for step 0 "
                 f"({first['state_id']}), so the root state it was expanded "
                 "from cannot be derived and the path cannot be pinned.")
-        if not first.get("arch_spec"):
+        first_arch = arch_specs.get(first["state_id"])
+        if not first_arch:
             raise ReplaySourceError(
-                f"leaf {sid}: the journal records no arch_spec for step 0 "
-                f"({first['state_id']}), so the config its first operator "
+                f"leaf {sid}: the derived lineage records no arch_spec for step "
+                f"0 ({first['state_id']}), so the config its first operator "
                 "produced cannot be rebuilt and the root state cannot be "
                 "derived.")
         overrides, provenance = derive_root_overrides(
-            ArchSpec.of("qwen3", first["arch_spec"]),
+            ArchSpec.of("qwen3", first_arch),
             recorded_step0_config, root_config,
             first_impl_id=first["impl_ids"][-1])
         leaves.append(ReplayLeaf(

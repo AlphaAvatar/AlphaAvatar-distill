@@ -25,5 +25,7 @@
   "authorization": true,
   "bundle": true
  },
- "next": "attempt4, under a fresh chain on the repaired tree"
+ "next": "attempt4, under a fresh chain on the repaired tree",
+ "classification": "ABORTED BEFORE PROVIDER at the transport gate; $0.",
+ "outcome_sha256": "be089d37f74069d3f0fe403396164049e57e565f0d78871a90240c770858ed2d"
 }

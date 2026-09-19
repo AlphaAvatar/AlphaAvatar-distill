@@ -41,6 +41,15 @@ source of truth.
 * `artifacts/stage1/state_eval_v1` — the state-evaluation suite the AutoInitializer search scores candidate initializations with
 * `artifacts/stage1/e8_contribution_init_v1` — the contribution-guided depth variant, built for E8
 
+## This stage's own areas
+
+Material that belongs to the stage rather than to one of its
+experiments.
+
+| area | what it holds |
+| --- | --- |
+| [`history/`](history/) | records spanning this stage's experiments, kept verbatim |
+
 ## Pipeline activity
 
 The stage's own work, and measurements supporting it. Not

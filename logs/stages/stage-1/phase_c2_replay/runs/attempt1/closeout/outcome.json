@@ -23,5 +23,7 @@
   "bundle": true,
   "_why": "a chain is consumed by the launcher's invocation, whether or not a provider resource followed, and is never reused. The incrementing attempt number is not a scope expansion (P12.1)."
  },
- "next": "attempt2, under a fresh chain on the repaired tree"
+ "next": "attempt2, under a fresh chain on the repaired tree",
+ "classification": "ABORTED BEFORE PROVIDER. The launcher refused before any resource existed; $0.",
+ "outcome_sha256": "86a97f862be9d9d95fecc58cc33248f67685d40870f602a188abfc9be0fceea8"
 }

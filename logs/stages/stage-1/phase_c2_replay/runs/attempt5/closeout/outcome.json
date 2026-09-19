@@ -25,5 +25,7 @@
   "authorization": true,
   "bundle": true
  },
- "next": "attempt6 carries the live launch"
+ "next": "attempt6 carries the live launch",
+ "classification": "DRY RUN. All seven $0 gates passed and it stopped before provider creation; $0.",
+ "outcome_sha256": "397a2ef8e2936bfbb81d22d20703558d3ceeafa851afd68b487a19251f7cf580"
 }
