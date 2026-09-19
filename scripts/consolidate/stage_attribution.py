@@ -658,6 +658,50 @@ STAGE_1 = [
             "was already made."),
     ),
     dict(
+        id="phase_c2_behavioural",
+        kind="experiment",
+        stage_id="1",
+        status="PROPOSED — not authorized; no grant, readiness, authorization or bundle",
+        title="Phase C2 behavioural selection — 12 probes over the frozen Top-5",
+        question=("Does any of the five reconstructed Full-Search candidates "
+                  "beat the behavioural incumbent B, and by enough to take its "
+                  "place? Cheap-metric order is not behavioural order, so the "
+                  "search's own ranking cannot promote anything. Six screening "
+                  "probes rank the five candidates against B on one "
+                  "preregistered seed; exactly one advances; six confirmation "
+                  "probes test that one against B on three disjoint paired "
+                  "seeds under C1's frozen decision rule. Only the "
+                  "confirmation rung may name a C2 incumbent, and NO_GO and "
+                  "INCONCLUSIVE are results."),
+        canonical_config=("logs/stages/stage-1/phase_c2/plans/"
+                          "phase_c2_full_search_protocol.json"),
+        evidence=[
+            E("logs/stages/stage-1/phase_c2_behavioural/plans/"
+              "c2_behavioural_grant_proposal.json",
+              "the proposal: protocol binding, candidate manifest, derived "
+              "storage and derived money. Authorizes nothing",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/phase_c2/plans/"
+              "phase_c2_full_search_protocol.json",
+              "the frozen protocol whose behavioural_selection block is the "
+              "science this session executes"),
+            E("logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/"
+              "outcome.json",
+              "the reconstruction that produced its five inputs"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_c2_behavioural",
+        classification_reason=(
+            "Stage 1 because it selects a Stage-1 initialization, even though "
+            "its instrument is a Stage-3 recovery probe. It is separate from "
+            "`phase_c2_full_search` because the search ranks on frozen cheap "
+            "metrics and explicitly cannot promote, and separate from "
+            "`phase_c2_replay` because that reconstructed artifacts and "
+            "decided nothing. This is the only experiment that may name a C2 "
+            "incumbent."),
+    ),
+    dict(
         id="c2_full_search_perf",
         kind="engineering",
         stage_id="1",

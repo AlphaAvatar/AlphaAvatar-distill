@@ -1,0 +1,219 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_proposal/v1",
+ "_contract": "A PROPOSAL for the Phase-C2 behavioural selection. It AUTHORIZES NOTHING and FUNDS NOTHING: there is no grant, no readiness record, no authorization, no bundle and no provider resource. It exists so a review can see the exact inputs, the exact protocol, the derived storage and the derived money before any of those are created.",
+ "authorizes": "nothing",
+ "plan_id": "autoinit.v1.phase_c2.behavioural",
+ "session_id": "autoinit-phase-c2-behavioural",
+ "proposed_utc": "2026-09-19",
+ "protocol_binding": {
+  "source": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+  "protocol_sha256": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da",
+  "_read_not_restated": "the schedule, seeds, batteries, anchor, ranking rule and tie-break are READ from the frozen protocol. A second copy is how two documents come to disagree about an experiment that has not run.",
+  "total_probes": 12,
+  "screening": {
+   "probes": 6,
+   "arms": 6,
+   "seeds": [
+    616738081
+   ],
+   "battery": "c2_screening_v1",
+   "battery_sha256": "0ad76fc79f5e7ebf9e8146710add07cc33554526a23507f97f0b458aec2cae1f",
+   "anchor": "frozen_c1_treatment_b",
+   "ranking_rule": "maximize the paired single-seed delta correct_overall(candidate - B) on the screening battery. B is the anchor, never an advancing candidate. usable_rollout is NOT positive ranking credit.",
+   "tie_break": "the already-frozen full-search ordering, then the deterministic state id. Both are fixed before any behavioural datum exists.",
+   "decides": "which 1 candidate(s) advance. Ranking only \u2014 no veto is evaluated here and no promotion can be claimed from it.",
+   "_b_never_advances": true,
+   "_no_verdict_here": "screening may not produce GO/NO_GO/INCONCLUSIVE and may not promote"
+  },
+  "confirmation": {
+   "probes": 6,
+   "arms": 2,
+   "seeds": [
+    1936324010,
+    1916380711,
+    1523147638
+   ],
+   "battery": "c1_confirmation_v1",
+   "battery_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+   "anchor": "frozen_c1_treatment_b",
+   "decides": "the C2 incumbent, under the frozen Phase-C decision rule. This is the only evidence that may name one.",
+   "_only_this_may_name_an_incumbent": true
+  },
+  "advanced_candidates": 1,
+  "terminal_results": [
+   "GO \u2014 a named C2 incumbent",
+   "NO_GO \u2014 the anchor stands",
+   "INCONCLUSIVE \u2014 no incumbent is named"
+  ],
+  "no_forced_winner": true,
+  "prompt_disjoint": {
+   "shared_ids": 0,
+   "shared_prompt_hashes": 0
+  },
+  "no_canonical_control": "the project's original initialization is NOT carried forward as a C2 arm. It answers no additional C2 question: a candidate that beats the old control but loses to B must not promote, and one that bea"
+ },
+ "candidate_inputs": {
+  "_joined_not_transcribed": "each entry is attempt 3's frozen selection JOINED to the destination-verified durable product the replay reconstructed. The join IS the check: a product whose identity differs from what the selection commits is refused, so this session cannot be pointed at a checkpoint nobody reconstructed.",
+  "selection_sha256": "7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673",
+  "durable_store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
+  "reconstruction_run": "logs/stages/stage-1/phase_c2_replay/runs/attempt9",
+  "candidates": [
+   {
+    "rank_in_frozen_selection": 0,
+    "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
+    "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "lineage": "depth.causal_kl_greedy_v1|attention.activation_importance_v1|ffn.activation_importance_v0",
+    "artifact_digest": "5d042dcc80212cfda0b97e10e21fca9c62574274bdc0d7e62a57e03a9e48f184",
+    "weights_digest": "615810e1314bdc9b0c5c01f31518cb50ed0089020a3177fba07234b51a63981f",
+    "single_shard_sha256": "85f8f0558b9cb657a4f8e4b076d79b5e49cf263e1c0af261e4042f2957d9ea8f",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9",
+    "bytes": 1192135096,
+    "destination_verified_utc": "2026-09-19T11:32:49.621179+00:00"
+   },
+   {
+    "rank_in_frozen_selection": 1,
+    "state_id": "7da1e4e2254e59766581e777b8066b7e",
+    "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+    "artifact_digest": "181245b694316ed10dc299597cffbb97b4ece547c2f488a9c31c446b3e22210a",
+    "weights_digest": "03a07d7abca0fae1306519bcb22db4dde4df3aaf2c874ac165ef797cd37a36f4",
+    "single_shard_sha256": "4d693520981b2124f2465cf0ef15e325e996bb548a87574a573e6995c8982ff0",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e",
+    "bytes": 1192135096,
+    "destination_verified_utc": "2026-09-19T12:04:53.012156+00:00"
+   },
+   {
+    "rank_in_frozen_selection": 2,
+    "state_id": "1d2844488f3ad630414c3cd69b6fa395",
+    "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+    "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+    "artifact_digest": "a25271ad0898ac3727ed4ed496fb7569299932f864f0d54a48b9b2deb9b4da41",
+    "weights_digest": "33ad2a2d243fdcc83f458d119b04a7d84a915aa3d639c67b0d308de0b16de7a3",
+    "single_shard_sha256": "313e206d12dce3db049835caa39140b629b4505ba2b97074a5f56a912d1ba697",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395",
+    "bytes": 1192135096,
+    "destination_verified_utc": "2026-09-19T12:29:42.906577+00:00"
+   },
+   {
+    "rank_in_frozen_selection": 3,
+    "state_id": "88086555a6662b206e00ae28fc9d3ca3",
+    "path": "DEPTH(calib.none@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "lineage": "depth.positional_v0|attention.activation_importance_v1|ffn.activation_importance_v0",
+    "artifact_digest": "d0d26ed3fee7f976935439ecba8b059f38e51d92d7b1672e6f467e6251938860",
+    "weights_digest": "f93f15d30eebcc2ce3c2429d2bf757bd02a294c650131ffce708786873dd1939",
+    "single_shard_sha256": "695813e6054bc12ce82728106e4d0eae62eb5de374194ee63417665be2aad0ab",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3",
+    "bytes": 1192135096,
+    "destination_verified_utc": "2026-09-19T12:37:06.385607+00:00"
+   },
+   {
+    "rank_in_frozen_selection": 4,
+    "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
+    "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+    "lineage": "width.global_pca_v0|attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+    "artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
+    "weights_digest": "5009272294a1aa7ac69a85b7bcd688f18683403aadd4d02c315ce64c0026ba05",
+    "single_shard_sha256": "03f9a0836b78c5d9882e9eb74f3410eb9734459c529dcf2a46ab4a1da66fb394",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f",
+    "bytes": 1192135096,
+    "destination_verified_utc": "2026-09-19T12:54:31.416277+00:00"
+   }
+  ],
+  "anchor_b": {
+   "role": "frozen_c1_treatment_b -- the behavioural incumbent and the only anchor",
+   "_not_remeasured_outside_this_protocol": true
+  }
+ },
+ "storage": {
+  "components_gib": {
+   "teacher": 7.51,
+   "staged_initializations": 6.662,
+   "_staged_initializations_is": "6 screening arms -- the five reconstructed candidates and the incumbent B, each staged before any probe runs",
+   "one_probe_training_working_set": 7.772,
+   "_working_set_is": "596,049,920 parameters as bf16 weights plus an fp32 gradient and AdamW's two fp32 moments. Probes run sequentially, so exactly one of these is resident at a time",
+   "trained_probe_checkpoints": 13.323,
+   "_trained_is": "12 probes x 1.110 GiB retained",
+   "saved_generations": 2.0,
+   "batteries_and_ladder": 1.0,
+   "image_and_environment": 30.0
+  },
+  "subtotal_gib": 68.267,
+  "margin_fraction": 0.25,
+  "provision_gb": 90,
+  "_why_not_400": "the full search's 400 GB was derived for a beam that generates a whole level before pruning and holds sixty compressed states at the level boundary. This session holds one training working set at a time and retains twelve small checkpoints; carrying 400 GB here would bill for storage nothing uses.",
+  "_why_it_rounds_up": "a volume that fills mid-probe loses the probe. The margin is 25% over a component sum that is itself derived from measured artifact sizes."
+ },
+ "money": {
+  "gpu_rate_usd_per_hour": 1.09,
+  "_gpu_rate_is_live": "re-quoted from gpuTypes.securePrice; the authorization must re-quote again at issue",
+  "probe_minutes_basis": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_evidence.json stages F/G/H, with per-probe PROBE_TRAINED/PROBE_SCORED markers from logs/stages/stage-1/phase_c1/runs/attempt18/evidence/driver_run.log",
+  "expected": {
+   "minutes": 1139.04,
+   "gpu_usd": 20.6926,
+   "disk_usd": 0.2373,
+   "all_in_usd": 20.9299
+  },
+  "hard_ceiling": {
+   "minutes": 1644.7,
+   "gpu_usd": 29.8788,
+   "disk_usd": 0.3427,
+   "all_in_usd": 30.2215
+  },
+  "container_disk": {
+   "provisioned_gb": 90,
+   "usd_per_gb_month": 0.1,
+   "hours_per_month": 720.0,
+   "usd_per_hour": 0.0125,
+   "_billed_for_the_pods_whole_lifetime": true
+  },
+  "_ceiling_includes": "both named reserves, a 10% contingency and a 30-minute artifact recovery reserve",
+  "_two_numbers": "the GPU rate is re-quotable from the provider and the storage price is not, so they are derived apart and summed. A live GPU quote is not evidence that separately priced storage is free.",
+  "gpu": "NVIDIA L40S",
+  "quoted_utc": "2026-09-19",
+  "stock": "High",
+  "_historical_planning_reference": {
+   "expected_gpu_usd": 20.6926,
+   "gpu_hard_ceiling_usd": 29.8788,
+   "conservative_all_in_upper_bound_usd": 31.4017,
+   "_what_changed": "the GPU minutes are unchanged -- they come from the same six measured probes. The all-in ceiling is LOWER because the storage provision is derived from this session's own topology (90 GB) instead of carrying the full search's 400 GB, which was sized for a beam holding sixty compressed states at a level boundary."
+  }
+ },
+ "project_position": {
+  "cumulative_spend_usd": 309.2043,
+  "authorized_cap_usd": 370.0,
+  "remaining_before_usd": 60.7957,
+  "this_ceiling_all_in_usd": 30.2215,
+  "cumulative_if_fully_spent_usd": 339.4258,
+  "headroom_after_usd": 30.5742,
+  "_no_cap_increase_requested": true,
+  "_remaining_is_not_permission": true
+ },
+ "explicitly_not_proposed": [
+  "any Full Search rerun",
+  "any re-ranking of the 14 complete leaves",
+  "any B remeasurement outside the 12-probe protocol",
+  "the original canonical control as a C2 arm",
+  "a Search-1 rerun",
+  "C3 or C4",
+  "a project-cap increase"
+ ],
+ "implementation_state": {
+  "governance_module": "scripts/experiments/phase_c2/behavioural.py -- BUILT",
+  "protocol_binding": "BUILT and verified against the frozen protocol's own hash",
+  "candidate_manifest": "BUILT; all five join and verify",
+  "storage_derivation": "BUILT; 90 GB derived from measured artifact sizes",
+  "money_derivation": "BUILT; live quote, GPU and storage derived apart",
+  "launcher_and_driver": "NOT BUILT. The session is structurally C1's probe machinery run twice: stage the six arms from durable products rather than building them (replacing C1 stages B/C/DE/F), train and score six screening probes (C1 stages G/H), rank and advance exactly one, then train and score six confirmation probes on three paired seeds and decide under C1's frozen rule. Stated as outstanding rather than sketched: a driver written without being rehearsed at toy scale is how four paid pods in this programme died in lines nothing had executed."
+ },
+ "proposal_sha256": "12117dc13cdf8726ae70297951e537c6576a4da2d99041c451a1ad26b8060466"
+}

@@ -49,6 +49,18 @@ never seen and the session was classified by exit code. The driver exited 0. The
 label is wrong; the result is not, and the driver now appends its markers to the
 file the launcher tails.
 
+**The C2 behavioural selection is PROPOSED, not authorized.** Twelve probes
+exactly — six screening over the five reconstructed candidates plus incumbent B
+on one preregistered seed, then six confirmation on the one advanced candidate
+plus B over three paired seeds. Only confirmation may name an incumbent.
+Derived, not inherited: storage **90 GB** from this session's own topology
+against the full search's 400, and at a live `$1.09/h` L40S quote the ceiling is
+**`$30.2215` all-in** (`$29.8788` GPU + `$0.3427` disk) with `$20.9299`
+expected. Project headroom after it: `$30.5742`. No grant, readiness record,
+authorization, bundle or provider resource exists. Owner:
+[`c2_behavioural_grant_proposal.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json).
+The launcher and driver are **not built** and the proposal says so.
+
 **Nothing is running. Nothing is billing.** Replay campaign: `$4.77` authorized,
 `$3.27` spent across nine attempts, `$1.50` left and no further replay owed.
 Project: `$309.1541` of `$370.0000`.
