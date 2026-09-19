@@ -46,12 +46,15 @@ from aadistill.infrastructure.session import (  # noqa: E402
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     session_commit_gate)
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
+from aadistill.runtime.staging_contract import (  # noqa: E402
+    ignores_for_selection)
 
 from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
 from experiments.deployment import (  # noqa: E402
     POD_IMAGE, deployment_commands)
 from experiments.phase_c2 import replay as RG  # noqa: E402
 from experiments.phase_c2 import replay_bundle as RT  # noqa: E402
+from experiments.phase_c2 import replay_pod_environment as RPE  # noqa: E402
 from experiments.phase_c2 import replay_specs as RS  # noqa: E402
 from experiments.run_layout import rel_run_dir  # noqa: E402
 from phase_a_frozen import TEACHER_REVISION  # noqa: E402
@@ -77,6 +80,17 @@ RUN_LOG = f"{WS}/scratch/autoinit_c2_replay_run.log"
 #: 16.12 GiB, the teacher is 7.29 GiB, the five retained leaves are 5.55 GiB, and
 #: the image and environment want room of their own. 120 GB is comfortable for
 #: all of it and costs about $0.04 over a session of this length.
+#: This session's pod selection, read from the module that owns it. The
+#: complement is DERIVED: the pod's blocking gate is `pytest tests/
+#: $SESSION_TEST_IGNORES` and a session may only add flags, so "run only my
+#: preflight" is expressed as an ignore list. Hand-written it drifts in the
+#: dangerous direction — a test directory added tomorrow joins the paid suite by
+#: default and is discovered on a billing machine. Without this the sweep ran
+#: `pytest tests/` and two C1 tests errored on artifacts this session correctly
+#: does not stage.
+POD_TEST_SELECTION = RPE.POD_TEST_SELECTION
+TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
+
 CONTAINER_DISK_GB = 120
 
 #: The image attempt 3 ran. The replay reproduces artifacts that
@@ -462,7 +476,8 @@ def spec(args) -> SessionSpec:
                            "TESTS_OK", "AUTHORIZATION_OK", "SETUP_DONE"),
             env={"SESSION_KIND": "c2_replay"},
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
-            teacher_revision=TEACHER_REVISION),
+            teacher_revision=TEACHER_REVISION,
+            test_ignores=TEST_IGNORES),
         driver_command=driver_command,
         driver_job_id="autoinit_c2_replay_driver",
         status_path=STATUS, run_log_path=RUN_LOG,
