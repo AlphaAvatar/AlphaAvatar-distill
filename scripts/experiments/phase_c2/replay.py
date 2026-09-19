@@ -18,9 +18,14 @@ import json
 from pathlib import Path
 from typing import Any
 
+from aadistill.governance.closure import ClosureError, derive, digest_of
 from aadistill.infrastructure.manifest import sha256_json
 
 from experiments.phase_c2.session import C2Authorization
+
+
+class ReplayGovernanceError(RuntimeError):
+    """The replay's own governance cannot be derived from this tree."""
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -44,17 +49,72 @@ ENTRY_POINTS: tuple[str, ...] = (
     "scripts/pod/collect_artifacts.py",
 )
 
-#: The maintainer's stated money for this session. Both figures are stated, not
-#: derived: the review set them directly, and a derivation that produced a
-#: different number would be overriding the approval rather than implementing
-#: it. They live here — in this task's governance artifact — and not in
-#: reusable core, per P12.1.
-SOFT_STOP_USD = 4.00
-HARD_CEILING_USD = 5.00
+#: Where the closure follows imports. Same roots as the full search: the replay
+#: runs the same operators from the same trees.
+SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
+                                 "scripts/autoinit")
 
-#: Reconstructing five pinned paths is GPU work of roughly two hours; the
-#: session is bounded by money, not by a separately invented deadline. The
-#: window is derived from the ceiling and the accepted rate at issue time.
+
+def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
+    """Every non-python input whose BYTES decide what this session does.
+
+    Attempt 3's selection and journal are here because they are not context —
+    they ARE the plan. The specs, the pins and the identities every leaf is
+    checked against are read out of those two files, so a change to either is a
+    change to what the session executes, and the executable identity must move
+    with them. Two paid pods in this programme died one per producer because a
+    non-source input was shipped for one consumer and not the other.
+    """
+    from experiments.phase_c2.replay_specs import JOURNAL_REL, SELECTION_REL, TELEMETRY_REL
+
+    return (
+        SELECTION_REL, JOURNAL_REL, TELEMETRY_REL,
+        "configs/autoinit/c2_replay_artifacts.json",
+        "configs/autoinit/c2_replay_artifacts_failed.json",
+        "scripts/pod/autoinit_preflight_setup.sh",
+    )
+
+
+def current_executable(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """What a replay session would execute NOW, derived live from the tree."""
+    try:
+        return derive(Path(repo_root), "phase_c2_replay",
+                      ENTRY_POINTS, declared_inputs(repo_root),
+                      roots=SOURCE_ROOTS)
+    except ClosureError as exc:
+        raise ReplayGovernanceError(
+            f"cannot derive the replay executable set: {exc}") from exc
+
+
+def executable_digest(repo_root: str | Path = REPO_ROOT) -> str:
+    live = current_executable(repo_root)
+    return live["digest"] if isinstance(live, dict) else digest_of(live)
+
+#: This session's money, and the two halves of it are kept apart on purpose.
+#: The review first set $4.00/$5.00; the derived hard window did not fit, the
+#: requirement was returned as `replay_requirement.json`, and the ceiling was
+#: raised to the derived figure on 2026-09-19. The scope did not change — same
+#: five paths, same GPU, same single session.
+#:
+#: `GPU_HARD_USD` is what the budget planner is authorized against: it prices
+#: GPU minutes and nothing else. `DISK_USD` is billed separately by the provider
+#: at $0.10/GB/month and is NOT GPU money; a ceiling that folded the two together
+#: would either refuse a fitting plan or hide the disk, and a GPU-only ceiling
+#: has already missed $1.69 in this programme. `ALL_IN_USD` is their sum and is
+#: the figure the ledger and any review read.
+GPU_HARD_USD = 5.19
+DISK_USD = 0.08
+ALL_IN_USD = 5.27
+
+#: Kept for callers that ask for one number. It is the ALL-IN figure, because a
+#: single number that excluded the disk would understate the session.
+HARD_CEILING_USD = ALL_IN_USD
+
+#: The soft stop is DERIVED, not stated: `BudgetSpec.plan` computes it from the
+#: same phases the ceiling comes from, so raising the ceiling moves it in step.
+#: Pinning it at the old $4.00 under the new ceiling would have left admission
+#: control refusing the fifth path for budget that exists — the precise thing
+#: raising the ceiling was meant to buy.
 TEARDOWN_RESERVE_USD = 0.25
 
 
@@ -78,7 +138,9 @@ def window_minutes(rate_usd_per_hour: float) -> float:
     """
     if rate_usd_per_hour <= 0:
         raise ValueError("a rate must be positive to derive a window from it")
-    usable = HARD_CEILING_USD - TEARDOWN_RESERVE_USD
+    #: GPU money buys GPU minutes. The separately billed disk does not
+    #: shorten the window, so it is not subtracted from it.
+    usable = GPU_HARD_USD - TEARDOWN_RESERVE_USD
     return (usable / rate_usd_per_hour) * 60.0
 
 

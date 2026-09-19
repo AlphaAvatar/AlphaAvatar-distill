@@ -176,7 +176,19 @@ class ReplayDriver:
     # -- stage A ------------------------------------------------------------
     def bind_identities(self) -> bool:
         """Everything the replay is pinned to, before a single byte is computed."""
+        from experiments.calibration import register_builtin_profiles
         from experiments.phase_c2 import replay_specs
+
+        #: EXPLICIT, and first, exactly as every other pod driver does it. The
+        #: driver passes no `calibration_items`, so `materialize_fixed_path`
+        #: resolves each profile from the registry — and this module's own import
+        #: chain registers none. Without this line the session completes setup,
+        #: passes every gate, and dies at path 1 step 1 with `no calibration
+        #: profile 'calib.domain_balanced@v1'`, on a billing machine. The toy
+        #: rehearsal could not see it: its fixture registers a toy profile of its
+        #: own, which is what made the branch look covered.
+        registered = register_builtin_profiles()
+        say(f"  {len(registered)} calibration profile(s) registered")
 
         binding = replay_specs.source_binding(REPO_ROOT)
         self.ev["source_binding"] = binding

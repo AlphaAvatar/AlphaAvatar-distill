@@ -30,6 +30,7 @@ import argparse
 import json
 import subprocess
 import sys
+import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -50,6 +51,7 @@ from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
 from experiments.deployment import (  # noqa: E402
     POD_IMAGE, deployment_commands)
 from experiments.phase_c2 import replay as RG  # noqa: E402
+from experiments.phase_c2 import replay_bundle as RT  # noqa: E402
 from experiments.phase_c2 import replay_specs as RS  # noqa: E402
 from experiments.run_layout import rel_run_dir  # noqa: E402
 from phase_a_frozen import TEACHER_REVISION  # noqa: E402
@@ -202,6 +204,66 @@ def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
     if not record.get("ok"):
         return False, "the readiness sweep did not pass"
     return True, f"launch-bound sweep of {str(swept)[:12]}… passed"
+
+
+def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Can a pod, RIGHT NOW, obtain the exact authorized code?
+
+    Every other gate verifies the CONTENTS of a commit; this one asks whether
+    the pod can reach it at all. C1 attempt 1 answered every other question
+    correctly and died at `SETUP_RC=1` fetching an alias for nothing — eight
+    gates verified the commit and none that a bundle for it could be fetched.
+
+    Read-only: it uploads nothing. LAST, because it is the only gate that
+    touches the network and everything it verifies against must already be
+    checked.
+    """
+    run_id = getattr(ctx.args, "run_id", None)
+    commit = ctx.args.session_commit
+    try:
+        RT.require_canonical_bundle_arg(ctx.args.bundle, commit)
+    except RT.BundleTransportError as exc:
+        return False, str(exc)
+
+    bundle_rel = bundle_record_for(run_id)
+    staged = REPO_ROOT / bundle_rel
+    if not staged.is_file():
+        return False, (f"{bundle_rel} is missing; stage the canonical bundle "
+                       f"for {commit[:12]}… first")
+    record = json.loads(staged.read_text())
+    if record.get("session_commit") != commit:
+        return False, (f"{bundle_rel} describes a bundle for "
+                       f"{str(record.get('session_commit'))[:12]}…, not the "
+                       f"session commit {commit[:12]}…")
+
+    auth_rel = auth_path_for(run_id)
+    auth_file = REPO_ROOT / auth_rel
+    if not auth_file.is_file():
+        return False, (f"{auth_rel} does not exist, so there is no "
+                       "authorization for the round-trip to find in the bundle")
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = RT.roundtrip(
+                session_commit=commit,
+                local_bundle_sha256=record["sha256"],
+                authorization_bytes=auth_file.read_bytes(),
+                authorization_path=auth_rel,
+                #: The AUTHORIZED pair, not the live one. Asking the round-trip
+                #: about the live digest would make a stale authorization
+                #: unfalsifiable here.
+                expected_harness_digest=ctx.auth.harness_source_digest,
+                harness_files=tuple(ctx.auth.harness_source_files),
+                workdir=Path(tmp))
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"the pod could not obtain the authorized commit: {exc}"
+
+    ctx.evidence["bundle_staged_check"] = evidence
+    return True, (f"{evidence['canonical_bundle_name']} "
+                  f"({evidence['bytes']} bytes, "
+                  f"{evidence['remote_sha256'][:12]}…) round-trips to "
+                  f"{evidence['roundtrip_head'][:12]}… carrying this "
+                  f"authorization and executable set "
+                  f"{evidence['roundtrip_harness_digest'][:12]}…")
 
 
 RS_LEAF_BYTES = 1_192_135_096
@@ -437,6 +499,9 @@ def spec(args) -> SessionSpec:
             source_binding_gate,
             destination_gate,
             readiness_gate,
+            #: LAST, because it is the only gate that touches the network and
+            #: everything it verifies against must already be checked.
+            bundle_staged_gate,
         ),
     )
 
