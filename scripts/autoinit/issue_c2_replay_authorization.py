@@ -214,6 +214,7 @@ def main(argv=None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(record, indent=1) + "\n")
 
+    money = RG.remaining_usd(REPO_ROOT)
     print(json.dumps({
         "wrote": out_rel,
         "authorized_session_commit": commit,
