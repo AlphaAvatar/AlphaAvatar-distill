@@ -1,0 +1,297 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_authorization/v1",
+ "authorization_id": "autoinit.v1.phase_c2.replay",
+ "version": 1,
+ "granted_utc": "2026-09-19T06:51:41.702514+00:00",
+ "granted_by": "maintainer",
+ "plan_id": "autoinit.v1.phase_c2.replay",
+ "phase_a_session_plan_hash": "91b93c4ea0f0541f390d87e110b6d9cf2a4b280cc06865697375889f3390c07e",
+ "phase_a_science_plan_hash": "91b93c4ea0f0541f390d87e110b6d9cf2a4b280cc06865697375889f3390c07e",
+ "expected_usd": 4.69,
+ "hard_cap_usd": 4.69,
+ "authorized_stages": [
+  "bind_identities",
+  "reconstruct"
+ ],
+ "stage_conditions": {
+  "bind_identities": "binds the source binding, builds the five pinned specs and checks disk headroom. Loads no model.",
+  "reconstruct": "materializes each pinned path in order, gating every intermediate on its recorded digest, and secures each finished leaf before the next path starts. A digest mismatch is TERMINAL."
+ },
+ "scope_note": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5 (selection 7271091c9141\u2026), from session commit 2421f630bc81\u2026. It decides nothing: no beam, no ranking, no selection, no selection-bearing evaluation, no control comparison, no training and no behavioural work.",
+ "phase_a_authorized": false,
+ "automatic_followon_start": false,
+ "authorized_session_commit": "9b623656d01bea8331cead7d0514bc25fe0ae0c0",
+ "harness_source_digest": "05b3e3caa79736cffcd86c38296422463924d56159193d11c0acca035c6b39a2",
+ "harness_source_files": [
+  "configs/autoinit/c2_replay_artifacts.json",
+  "configs/autoinit/c2_replay_artifacts_failed.json",
+  "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+  "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+  "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/telemetry.jsonl",
+  "scripts/autoinit/issue_c2_replay_authorization.py",
+  "scripts/autoinit/phase_a_frozen.py",
+  "scripts/experiments/calibration.py",
+  "scripts/experiments/deployment.py",
+  "scripts/experiments/phase_a/plan.py",
+  "scripts/experiments/phase_c2/__init__.py",
+  "scripts/experiments/phase_c2/bundle.py",
+  "scripts/experiments/phase_c2/full_search_space.py",
+  "scripts/experiments/phase_c2/pod_environment.py",
+  "scripts/experiments/phase_c2/replay.py",
+  "scripts/experiments/phase_c2/replay_bundle.py",
+  "scripts/experiments/phase_c2/replay_pod_environment.py",
+  "scripts/experiments/phase_c2/replay_specs.py",
+  "scripts/experiments/phase_c2/search_space.py",
+  "scripts/experiments/phase_c2/session.py",
+  "scripts/experiments/recovery_policy.py",
+  "scripts/experiments/run_layout.py",
+  "scripts/experiments/search_cost_model.py",
+  "scripts/pod/autoinit_c2_replay_driver.py",
+  "scripts/pod/autoinit_c2_replay_launch.py",
+  "scripts/pod/autoinit_preflight_setup.sh",
+  "scripts/pod/autoinit_science_inputs.py",
+  "scripts/pod/collect_artifacts.py",
+  "scripts/pod/watchdog.py",
+  "src/aadistill/data/extra_stream.py",
+  "src/aadistill/governance/authorization.py",
+  "src/aadistill/governance/closure.py",
+  "src/aadistill/infrastructure/__init__.py",
+  "src/aadistill/infrastructure/artifact_gate.py",
+  "src/aadistill/infrastructure/budget.py",
+  "src/aadistill/infrastructure/bundle_transport.py",
+  "src/aadistill/infrastructure/log_relay.py",
+  "src/aadistill/infrastructure/manifest.py",
+  "src/aadistill/infrastructure/provider.py",
+  "src/aadistill/infrastructure/remote.py",
+  "src/aadistill/infrastructure/session.py",
+  "src/aadistill/infrastructure/session_prechecks.py",
+  "src/aadistill/infrastructure/session_runner.py",
+  "src/aadistill/infrastructure/watchdog.py",
+  "src/aadistill/initialization/adapters/__init__.py",
+  "src/aadistill/initialization/adapters/qwen3.py",
+  "src/aadistill/initialization/calibration/datasets.py",
+  "src/aadistill/initialization/calibration/items.py",
+  "src/aadistill/initialization/calibration/profiles.py",
+  "src/aadistill/initialization/device.py",
+  "src/aadistill/initialization/operators/__init__.py",
+  "src/aadistill/initialization/operators/_common.py",
+  "src/aadistill/initialization/operators/attention.py",
+  "src/aadistill/initialization/operators/attention_activation.py",
+  "src/aadistill/initialization/operators/base.py",
+  "src/aadistill/initialization/operators/composite.py",
+  "src/aadistill/initialization/operators/depth.py",
+  "src/aadistill/initialization/operators/ffn.py",
+  "src/aadistill/initialization/operators/register.py",
+  "src/aadistill/initialization/operators/width.py",
+  "src/aadistill/initialization/planning/__init__.py",
+  "src/aadistill/initialization/planning/fixed_path.py",
+  "src/aadistill/initialization/planning/ranking.py",
+  "src/aadistill/initialization/planning/recovery.py",
+  "src/aadistill/initialization/planning/search.py",
+  "src/aadistill/initialization/planning/stage1_selection.py",
+  "src/aadistill/initialization/specs/arch.py",
+  "src/aadistill/initialization/specs/artifact.py",
+  "src/aadistill/initialization/specs/metrics.py",
+  "src/aadistill/initialization/specs/state.py",
+  "src/aadistill/initialization/statistics/attention.py",
+  "src/aadistill/initialization/statistics/collect.py",
+  "src/aadistill/initialization/statistics/contribution.py",
+  "src/aadistill/initialization/statistics/spec.py",
+  "src/aadistill/initialization/transforms/project.py",
+  "src/aadistill/initialization/transforms/sandwich.py",
+  "src/aadistill/models/student.py",
+  "src/aadistill/runtime/__init__.py",
+  "src/aadistill/runtime/leaf_durability.py",
+  "src/aadistill/runtime/pod_environment.py",
+  "src/aadistill/runtime/run_layout.py",
+  "src/aadistill/runtime/staging_contract.py",
+  "src/aadistill/runtime/telemetry.py"
+ ],
+ "per_launch_hard_usd": null,
+ "provenance_commit": "9b623656d01bea8331cead7d0514bc25fe0ae0c0",
+ "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+ "allows_phase_a": false,
+ "allows_recovery_training": false,
+ "authorizes_c2_search1": false,
+ "resource_scope": null,
+ "run_id": "attempt2",
+ "scope": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5, each path pinned at EVERY step to the artifact digest attempt 3 recorded, and each finished leaf secured off the pod. NOT a fourth Full Search attempt, NOT a beam, NOT a re-ranking, NOT a regeneration of a Top-5, NOT a selection-bearing evaluation, NOT a control comparison, and NOT behavioural work of any kind.",
+ "authorizes_c2_baseline_completion": false,
+ "authorizes_c2_full_search": false,
+ "authorizes_behavioural_selection": false,
+ "authorizes_c2_replay": true,
+ "forbids": [
+  "any beam search or expansion",
+  "ranking or re-ranking the 14 complete leaves",
+  "producing or replacing a selection",
+  "any selection-bearing evaluation",
+  "injecting or comparing against the canonical control",
+  "substituting a functionally similar checkpoint for a mismatch",
+  "retrying a deterministic digest mismatch",
+  "recovery training of any kind",
+  "any behavioural screening or confirmation probe"
+ ],
+ "on_mismatch": "STOP. A digest mismatch is a replay mismatch and a scientific finding: preserve the evidence, tear down, and refer it to review. It is not an ordinary engineering failure and must not be retried, because the path is deterministic and would diverge identically.",
+ "stage_id": "1",
+ "rate_usd_per_hour": 1.09,
+ "one_use": true,
+ "max_provider_resources": 1,
+ "money": {
+  "gpu_hard_usd": 4.69,
+  "disk_usd": 0.08,
+  "all_in_usd": 4.77,
+  "_why_two_numbers": "the provider bills container disk separately from the GPU. `hard_cap_usd` is GPU money, which is what the budget planner and the watchdog spend against; the disk is real and is recorded beside it rather than folded in."
+ },
+ "grant_path": "logs/stages/stage-1/phase_c2_replay/runs/attempt2/governance/grant.json",
+ "source_binding": {
+  "schema": "aadistill.autoinit.c2_replay_source_binding/v1",
+  "reconstructs": "phase_c2_full_search/attempt3 Top-5 checkpoints",
+  "source_session_commit": "2421f630bc812d414ae25245e855059ffe29610d",
+  "selection_sha256": "7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673",
+  "selection_file": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+  "selection_file_sha256": "1f963cdcd010e7a102049f26fce99e5a5a32d0fb1603caef197becadb7d7d1c4",
+  "journal_file": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+  "journal_file_sha256": "ef97584f47d04bd2b189900e51b4bcc3898badd12e02d9fde050ffc6570ce60b",
+  "full_journal_sha256": "eb008ee252ce9d35e7478c3cc346ef7db29acf3eb5bfb2486c6023e19abe4ef0",
+  "search": {
+   "run_id": "autoinit.v1.phase_c2.full_search",
+   "config_hash": "76573c1467e9f831c8471c0376f6d70a0fc35bbd00a805f1facb04910f6d433b",
+   "seed": 20260815,
+   "target_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "workdir": "/workspace/aad/artifacts/autoinit/phase_c2_full_search"
+  },
+  "policy": {
+   "qualified_id": "beam.pareto_multi_objective@v2",
+   "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+  },
+  "suite": {
+   "qualified_id": "state_eval@v1",
+   "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+  },
+  "profiles": [
+   {
+    "qualified_id": "calib.domain_balanced@v1",
+    "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f"
+   },
+   {
+    "qualified_id": "calib.reasoning_heavy@v2",
+    "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+    "content_sha256": "cdb2838946b9355294406d2bc398bc8390306ced84a35b09900f45a033ccc370"
+   }
+  ],
+  "operators": {
+   "source_commit": "2421f630bc812d414ae25245e855059ffe29610d",
+   "head": "9b623656d01bea8331cead7d0514bc25fe0ae0c0",
+   "checked": {
+    "src/aadistill/initialization": {
+     "files_at_source": 44
+    },
+    "scripts/experiments/phase_c2": {
+     "files_at_source": 20
+    },
+    "scripts/autoinit/phase_a_frozen.py": {
+     "files_at_source": 1
+    }
+   },
+   "modified_or_removed": {},
+   "added_since_source": [
+    "scripts/experiments/phase_c2/replay.py",
+    "scripts/experiments/phase_c2/replay_bundle.py",
+    "scripts/experiments/phase_c2/replay_pod_environment.py",
+    "scripts/experiments/phase_c2/replay_specs.py"
+   ],
+   "rule": "modified or removed files are refused; files added after the source commit cannot have influenced it and are allowed",
+   "verdict": "no operator-bearing file has moved"
+  },
+  "leaves": [
+   {
+    "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
+    "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "lineage": "depth.causal_kl_greedy_v1|attention.activation_importance_v1|ffn.activation_importance_v0",
+    "artifact_digest": "5d042dcc80212cfda0b97e10e21fca9c62574274bdc0d7e62a57e03a9e48f184",
+    "weights_digest": "615810e1314bdc9b0c5c01f31518cb50ed0089020a3177fba07234b51a63981f",
+    "single_shard_sha256": "85f8f0558b9cb657a4f8e4b076d79b5e49cf263e1c0af261e4042f2957d9ea8f",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "step_digests": [
+     "ea630bd9bdcc3337e45e70ccb9603bf4f45cc8fe0a766868443947e47e0acb55",
+     "62d782298eb300bbef0f3305641422ceee26b2f26ce103ad94eb16723bb4dfcd",
+     "e893c90fe49ac0535d7af1b055079ccb5a9effe1c20e3d00a7583ef0162b1b27",
+     "5d042dcc80212cfda0b97e10e21fca9c62574274bdc0d7e62a57e03a9e48f184"
+    ],
+    "bounded_minutes": 30.15
+   },
+   {
+    "state_id": "7da1e4e2254e59766581e777b8066b7e",
+    "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+    "artifact_digest": "181245b694316ed10dc299597cffbb97b4ece547c2f488a9c31c446b3e22210a",
+    "weights_digest": "03a07d7abca0fae1306519bcb22db4dde4df3aaf2c874ac165ef797cd37a36f4",
+    "single_shard_sha256": "4d693520981b2124f2465cf0ef15e325e996bb548a87574a573e6995c8982ff0",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "step_digests": [
+     "fa273aa17cca0060638cc4e8332b8e4465048adeb10c6fd1b7e1a0e14fdabf1f",
+     "fb34e42ce19baf68f27ac971fd44c4db7b9caa9a1153879262b51ae0f3f1c87b",
+     "a541db86594c35b85bb066ba60014f2530520bc80654b3548150ab647a2fb382",
+     "181245b694316ed10dc299597cffbb97b4ece547c2f488a9c31c446b3e22210a"
+    ],
+    "bounded_minutes": 30.15
+   },
+   {
+    "state_id": "1d2844488f3ad630414c3cd69b6fa395",
+    "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+    "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+    "artifact_digest": "a25271ad0898ac3727ed4ed496fb7569299932f864f0d54a48b9b2deb9b4da41",
+    "weights_digest": "33ad2a2d243fdcc83f458d119b04a7d84a915aa3d639c67b0d308de0b16de7a3",
+    "single_shard_sha256": "313e206d12dce3db049835caa39140b629b4505ba2b97074a5f56a912d1ba697",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "step_digests": [
+     "449c71cf3f1a325833bc83ce336d62b65fb38321286a0b874fcaf1b22ba5ac1c",
+     "9cc531ef76ceff9ac21a578e8149fd92cafc4b3b9185a4b7a648efd029bb832b",
+     "0b4682a578994d6435a9ebd2c76c38ac90a91dd5d9533eeb9ec5e3d9654f7eb0",
+     "a25271ad0898ac3727ed4ed496fb7569299932f864f0d54a48b9b2deb9b4da41"
+    ],
+    "bounded_minutes": 30.15
+   },
+   {
+    "state_id": "88086555a6662b206e00ae28fc9d3ca3",
+    "path": "DEPTH(calib.none@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "lineage": "depth.positional_v0|attention.activation_importance_v1|ffn.activation_importance_v0",
+    "artifact_digest": "d0d26ed3fee7f976935439ecba8b059f38e51d92d7b1672e6f467e6251938860",
+    "weights_digest": "f93f15d30eebcc2ce3c2429d2bf757bd02a294c650131ffce708786873dd1939",
+    "single_shard_sha256": "695813e6054bc12ce82728106e4d0eae62eb5de374194ee63417665be2aad0ab",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "step_digests": [
+     "5bfbb29517a1085d85ba5c06d4eb7cf838d05ef6f36188ee88e84f0efebc3a17",
+     "23c8ae3a5e71d9356a369ddd5b5230dc5ef357d8000962f431a4d610c6b6ceb2",
+     "49e6aff2ad766b7a30de4b617815fca687b6d0463e1c3f0277a2e03eaa5a5be1",
+     "d0d26ed3fee7f976935439ecba8b059f38e51d92d7b1672e6f467e6251938860"
+    ],
+    "bounded_minutes": 5.08
+   },
+   {
+    "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
+    "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+    "lineage": "width.global_pca_v0|attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+    "artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
+    "weights_digest": "5009272294a1aa7ac69a85b7bcd688f18683403aadd4d02c315ce64c0026ba05",
+    "single_shard_sha256": "03f9a0836b78c5d9882e9eb74f3410eb9734459c529dcf2a46ab4a1da66fb394",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "step_digests": [
+     "be04e695c46c0fdfa1dd5d21e2077edcb0e3ce2b7380f61c0ee71d96ed9f70cc",
+     "0eab57cbac44e11c6615b63ee1200d70ea0bd731b7f344ee18182d8cb50c20f9",
+     "58c9cd38335079782896772c3b7a58ad07168b942248db180e87fafe52232402",
+     "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf"
+    ],
+    "bounded_minutes": 30.15
+   }
+  ],
+  "note": "every step of every path is pinned to the artifact digest attempt 3 recorded for it, not merely the final output. A mismatch at any step is a STOP condition and a scientific finding, not a retryable engineering failure."
+ },
+ "authorization_sha256": "782fbb481b491c0a8f0327e794b7ecfa0c94f25fd71aead7fae322612165d375"
+}
