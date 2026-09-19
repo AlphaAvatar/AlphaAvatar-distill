@@ -587,7 +587,7 @@
    "experiment_id": "phase_c2_replay",
    "stage_id": "1",
    "classification": "experiment",
-   "status": "built and gated \u2014 STOPPED BEFORE CREATING A RESOURCE, $5.27 derived against $5.00 authorized",
+   "status": "built and gated \u2014 $4.77 all-in derived, inside the original $5.00; chain not yet consumed",
    "title": "Phase C2 replay-only artifact reconstruction \u2014 attempt 3's Top-5 checkpoints",
    "question": "Can the five checkpoints behind the frozen Top-5 be rebuilt byte-for-byte from the committed evidence? The full joint re-search committed its selection and then lost the weights when the pod was torn down, so the ranking survives and the artifacts it ranked do not. This session replays each selected path with EVERY step pinned to the artifact digest attempt 3 recorded, and either reproduces each leaf's exact identity or stops. It decides nothing: no beam, no ranking, no selection, no selection-bearing evaluation, no control comparison and no behavioural work. A digest mismatch would be a scientific finding, not a retryable engineering failure.",
    "canonical_path": "logs/stages/stage-1/phase_c2_replay",
@@ -595,9 +595,9 @@
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_c2_replay/plans/replay_requirement.json",
-     "says": "the derived money requirement, and the stop before any provider resource existed",
-     "field": "authorized_usd",
-     "equals": 5.0
+     "says": "the derived money, corrected once and recording both figures",
+     "field": "derived_all_in_usd",
+     "equals": 4.77
     },
     {
      "path": "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",

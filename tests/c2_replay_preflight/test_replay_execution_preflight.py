@@ -242,10 +242,10 @@ def test_the_workdir_filesystem_can_hold_the_worst_path_and_every_leaf():
 def test_the_per_path_bound_is_derived_from_the_telemetry_not_a_constant():
     """Admission control spends against this number, so it must come from the
     record rather than from a literal somebody updated once."""
-    worst = RS.worst_seconds_by_kind(ROOT)
-    assert worst["DEPTH"] > 20 * 60, (
-        "DEPTH bounds below 20 minutes; the telemetry was probably read with "
-        "cache hits included, which underprices every path")
+    worst = RS.worst_seconds_by_impl(ROOT)
+    assert worst["depth.causal_kl_greedy_v1"] > 20 * 60, (
+        "the causal-KL DEPTH operator bounds below 20 minutes; the telemetry was "
+        "probably read wrong, which underprices every path carrying it")
 
     states = RS.load_states(ROOT)
     for leaf in RS.build_replay_leaves(ROOT, device="cpu"):
@@ -253,7 +253,7 @@ def test_the_per_path_bound_is_derived_from_the_telemetry_not_a_constant():
         #: this cannot pass by reading the builder's own answer back.
         chain = RS.resolve_ancestry(states, leaf.state_id)
         expected = 1.5 + sum(
-            worst[node["applied_kinds"][-1]] for node in chain) / 60.0
+            worst[node["impl_ids"][-1]] for node in chain) / 60.0
         assert leaf.bounded_minutes == round(expected, 2), leaf.state_id
         assert leaf.bounded_minutes > 0
 

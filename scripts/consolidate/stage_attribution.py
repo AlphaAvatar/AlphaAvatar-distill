@@ -613,8 +613,8 @@ STAGE_1 = [
         id="phase_c2_replay",
         kind="experiment",
         stage_id="1",
-        status=("built and gated — STOPPED BEFORE CREATING A RESOURCE, "
-                "$5.27 derived against $5.00 authorized"),
+        status=("built and gated — $4.77 all-in derived, inside the "
+                "original $5.00; chain not yet consumed"),
         title=("Phase C2 replay-only artifact reconstruction — attempt 3's "
                "Top-5 checkpoints"),
         question=("Can the five checkpoints behind the frozen Top-5 be rebuilt "
@@ -632,8 +632,8 @@ STAGE_1 = [
         canonical_config="configs/autoinit/c2_replay_artifacts.json",
         evidence=[
             E("logs/stages/stage-1/phase_c2_replay/plans/replay_requirement.json",
-              "the derived money requirement, and the stop before any provider "
-              "resource existed", field="authorized_usd", equals=5.0),
+              "the derived money, corrected once and recording both figures",
+              field="derived_all_in_usd", equals=4.77),
             E("logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/"
               "stage1_selection.json",
               "the frozen Top-5 this session reconstructs, named by its own "

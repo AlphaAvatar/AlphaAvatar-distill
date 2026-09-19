@@ -19,18 +19,18 @@
   "a second provider resource, concurrently or in succession"
  ],
  "approved_money": {
-  "gpu_hard_usd": 5.19,
+  "gpu_hard_usd": 4.69,
   "disk_usd": 0.08,
-  "all_in_usd": 5.27,
+  "all_in_usd": 4.77,
   "max_rate_usd_per_hour": 1.09,
   "gpu": "NVIDIA L40S",
   "container_disk_gb": 120,
-  "_basis": "DERIVED, not stated. The review first set $4.00 soft / $5.00 all-in; the conservative hard window came to $5.27 at the live securePrice and the session STOPPED before creating a resource and returned the requirement, as instructed. The ceiling was then raised to the derived figure. Scope did not change: same five paths, same GPU, one session. See plans/replay_requirement.json.",
+  "_basis": "DERIVED, and corrected once. The review set $4.00 soft / $5.00 all-in. A first derivation bounded each step by the worst observation of its operator KIND, came to $5.27, exceeded the ceiling, and the session STOPPED before creating a resource and returned the requirement as instructed. A raise to $5.27 was approved. The bound was then found to be wrong: two DEPTH implementations appear in the selected paths -- depth.causal_kl_greedy_v1 at up to 25.7 min and depth.positional_v0 at 0.6 -- and bounding by kind charged the cheap one at the expensive one's rate. Bounding per IMPLEMENTATION gives $4.77 all-in, inside the ORIGINAL $5.00. The approved raise is NOT taken: a ceiling is a derivation, and headroom nobody derived is authorization to spend money nobody costed.",
   "_why_not_a_cheaper_gpu": "A40 at $0.49 and RTX A6000 at $0.53 were quoted and rejected. The session's success criterion IS byte-exact digest agreement with artifacts an L40S produced; a different architecture can select different kernels and present as a replay mismatch, which this programme treats as a scientific STOP condition. That would manufacture a false finding and burn the session."
  },
  "one_use": true,
  "max_provider_resources": 1,
  "on_mismatch": "STOP and return to review. A digest mismatch is a replay mismatch and a scientific finding, not an ordinary engineering failure: the path is deterministic and would diverge identically on a retry.",
  "on_partial": "Leaves reconstructed before a stop are VALID and must be fetched and verified off-pod. A failure at leaf N does not invalidate 1..N-1, and teardown is refused while any reconstructed leaf is only on the pod.",
- "grant_sha256": "603e0a5e9202fe1cf527dad8f742acb2b6c3cee11ec6db224d9188d1466f4bf6"
+ "grant_sha256": "d67d5df2f7c83ec7c1d8508096a272c5de6a6a458a5abf5c0e242bc5c20ac6e7"
 }

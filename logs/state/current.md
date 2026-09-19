@@ -14,15 +14,25 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 provider confirms it is gone and an account-wide list returns `[]`. **Nothing
 is prepared for launch.**
 
-**The authorized replay is BUILT and BLOCKED ON `$0.27`.** The
+**The authorized replay is BUILT and FITS `$4.77` all-in.** The
 artifact-reconstruction session — five digest-pinned paths rebuilding the
 checkpoints behind attempt 3's frozen Top-5 — is implemented, rehearsed at toy
-scale and gated, and it **stopped before creating a provider resource** because
-the derived hard window costs `$5.27` all-in against the `$5.00` authorized. The
-repository's own budget planner is what refused: *"the plan terminates at $5.18
-(285 min at $1.090/h) but only $5.00 is authorized — a shortfall of $0.18. Ask
-for $5.18 or reduce the run; do not shrink it silently to fit."* Owner:
-[`replay_requirement.json`](../stages/stage-1/phase_c2_replay/plans/replay_requirement.json).
+scale and gated.
+
+It stopped once, correctly, and the stop was then **withdrawn by a correction**.
+A first derivation bounded each step by the worst observation of its operator
+KIND, came to `$5.27` against `$5.00`, and the session stopped before creating a
+provider resource and returned the requirement — the planner itself refused:
+*"the plan terminates at $5.18 … do not shrink it silently to fit."* A raise to
+`$5.27` was approved. The bound was then found to be **wrong**: two DEPTH
+implementations appear in the selected paths — `depth.causal_kl_greedy_v1` at up
+to 25.7 min and `depth.positional_v0` at 0.6, the latter carrying the
+`calib.none@v1` no-calibration sentinel — and bounding by kind charged the cheap
+one at the expensive one's rate, about 25 phantom minutes on one leaf. Bounding
+per **implementation** gives 125.7 min of reconstruction and `$4.77` all-in,
+inside the ORIGINAL `$5.00`. **The approved raise is not taken.** Owner:
+[`replay_requirement.json`](../stages/stage-1/phase_c2_replay/plans/replay_requirement.json)
+(v2, which records v1's figure rather than replacing it).
 
 Two findings from building it, both `$0`:
 

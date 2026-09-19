@@ -75,6 +75,68 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
     )
 
 
+def staged_assets(repo_root: str | Path = REPO_ROOT):
+    """Dev-box artifacts the launcher stages, DERIVED from what this session reads.
+
+    These cannot travel in the bundle: they live in the out-of-tree artifact
+    store, which is gitignored, so the relay is how they reach a pod.
+
+    Derived from the profiles THE FIVE PATHS NAME, not from a constant and not
+    from the profile list the search declared. The first version staged only
+    `calib.domain_balanced@v1` — under a comment claiming both were needed — and
+    the launch-bound sweep caught it: two of the twenty steps name
+    `calib.reasoning_heavy@v2`, so the session would have run path 1 and then
+    died resolving a mixture that never arrived.
+
+    A profile whose implementation needs no calibration stages nothing.
+    `depth.positional_v0` carries the `calib.none@v1` sentinel, which is not a
+    registered profile and has no items by construction; asking the registry for
+    it would raise on a step that reads no items at all.
+
+    No metric suite: this session evaluates nothing.
+    """
+    from aadistill.infrastructure.session import LocalAsset
+    from aadistill.initialization.calibration.profiles import get_profile
+
+    from experiments.calibration import register_builtin_profiles
+    from experiments.phase_c2.replay_specs import build_replay_leaves
+
+    #: Registered HERE rather than assumed. `get_profile` raises on an empty
+    #: registry, and a governance function that asked a registry somebody else
+    #: was supposed to fill would answer "no assets to stage" in a fresh process
+    #: — so the launcher would stage nothing and the pod would die resolving the
+    #: mixtures. Idempotent.
+    register_builtin_profiles()
+
+    wanted: list[str] = []
+    for leaf in build_replay_leaves(repo_root, device="cpu"):
+        for step in leaf.spec.steps:
+            if step.profile_id not in wanted:
+                wanted.append(step.profile_id)
+
+    roots: list[str] = []
+    for qualified in wanted:
+        try:
+            profile = get_profile(qualified)
+        except KeyError:
+            #: The no-calibration sentinel. Not an asset and not an error.
+            continue
+        items = getattr(profile, "items_path", None)
+        if not items:
+            raise ReplayGovernanceError(
+                f"calibration profile {qualified!r} is registered but resolves "
+                "no items_path, so the launcher cannot stage what a step that "
+                "names it will read")
+        #: The DIRECTORY, because the manifest beside the items is part of the
+        #: asset's identity.
+        root = str(Path(items).parent)
+        if root not in roots:
+            roots.append(root)
+
+    return tuple(LocalAsset(root, Path(root).name, str(Path(root).parent))
+                 for root in roots)
+
+
 def current_executable(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     """What a replay session would execute NOW, derived live from the tree."""
     try:
@@ -91,10 +153,18 @@ def executable_digest(repo_root: str | Path = REPO_ROOT) -> str:
     return live["digest"] if isinstance(live, dict) else digest_of(live)
 
 #: This session's money, and the two halves of it are kept apart on purpose.
-#: The review first set $4.00/$5.00; the derived hard window did not fit, the
-#: requirement was returned as `replay_requirement.json`, and the ceiling was
-#: raised to the derived figure on 2026-09-19. The scope did not change — same
-#: five paths, same GPU, same single session.
+#:
+#: The figures moved twice and the second move was a CORRECTION, not a
+#: negotiation. The review set $4.00/$5.00. A first derivation bounded each step
+#: by the worst observation of its operator KIND and came to $5.27, over the
+#: ceiling, so the session stopped before creating a resource and returned the
+#: requirement. That bound was wrong: two DEPTH implementations appear in the
+#: selected paths, `depth.causal_kl_greedy_v1` at up to 25.7 minutes and
+#: `depth.positional_v0` at 0.6, and bounding by kind charged the cheap one at
+#: the expensive one's rate — about 25 minutes of phantom cost on one leaf.
+#: Bounding per IMPLEMENTATION gives 125.7 minutes of reconstruction and the
+#: figures below, which fit the ORIGINAL $5.00 ceiling. The raise that was
+#: approved in the meantime is not needed and is not taken.
 #:
 #: `GPU_HARD_USD` is what the budget planner is authorized against: it prices
 #: GPU minutes and nothing else. `DISK_USD` is billed separately by the provider
@@ -102,9 +172,9 @@ def executable_digest(repo_root: str | Path = REPO_ROOT) -> str:
 #: would either refuse a fitting plan or hide the disk, and a GPU-only ceiling
 #: has already missed $1.69 in this programme. `ALL_IN_USD` is their sum and is
 #: the figure the ledger and any review read.
-GPU_HARD_USD = 5.19
+GPU_HARD_USD = 4.69
 DISK_USD = 0.08
-ALL_IN_USD = 5.27
+ALL_IN_USD = 4.77
 
 #: Kept for callers that ask for one number. It is the ALL-IN figure, because a
 #: single number that excluded the disk would understate the session.

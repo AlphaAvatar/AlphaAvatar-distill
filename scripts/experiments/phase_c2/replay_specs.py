@@ -193,34 +193,36 @@ def _seconds(row: Mapping[str, Any], field: str) -> float:
     return float(value or 0.0)
 
 
-def worst_seconds_by_kind(repo_root: str | Path = REPO_ROOT,
+def worst_seconds_by_impl(repo_root: str | Path = REPO_ROOT,
                           ) -> dict[str, float]:
-    """The most expensive observation of each operator kind in the whole search.
+    """The most expensive observation of each IMPLEMENTATION in the whole search.
 
-    A bound, not an average. The search got cache hits a fresh replay will not:
-    one selected path recorded a DEPTH step at 0.6 minutes where the same
-    operator took 25.7 minutes elsewhere, because that state had already been
-    computed. Pricing the replay from the measured per-step values would
-    therefore underestimate it by a factor of ten on that path, and the bound is
-    what the session's admission control spends against.
+    A bound, not an average: a fresh replay reuses nothing, so each step is
+    priced at the worst that implementation was ever observed to cost rather
+    than at what it happened to cost on the selected path.
+
+    Keyed on `impl_id` and NOT on operator kind, which was the first version and
+    was wrong. Two implementations of DEPTH appear in the selected paths —
+    `depth.causal_kl_greedy_v1` at up to 25.7 minutes and `depth.positional_v0`
+    at 0.6 — and they are different operators, not the same one with and without
+    a cache. Bounding by kind charged the cheap one at the expensive one's rate
+    and overpriced that path by about 25 minutes, which is most of a leaf.
     """
-    states = load_states(repo_root)
     worst: dict[str, float] = {}
     path = Path(repo_root) / TELEMETRY_REL
     for line in path.read_text().splitlines():
         if not line.strip():
             continue
         row = json.loads(line)
-        state = states.get(row.get("state_id") or "")
-        if not state:
+        impl = row.get("impl_id")
+        if not impl:
             continue
-        kind = state["applied_kinds"][-1]
         total = sum(_seconds(row, f) for f in _COST_FIELDS)
-        worst[kind] = max(worst.get(kind, 0.0), total)
+        worst[impl] = max(worst.get(impl, 0.0), total)
     if not worst:
         raise ReplaySourceError(
-            f"{TELEMETRY_REL} yielded no per-kind timings; the replay cannot "
-            "bound what it cannot price.")
+            f"{TELEMETRY_REL} yielded no per-implementation timings; the replay "
+            "cannot bound what it cannot price.")
     return worst
 
 
@@ -297,7 +299,7 @@ def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
 
     selection = load_selection(repo_root)
     states = load_states(repo_root)
-    worst = worst_seconds_by_kind(repo_root)
+    worst = worst_seconds_by_impl(repo_root)
 
     #: One teacher load per path. Paths are run independently because the
     #: operators mutate the module they are given, so each pays it.
@@ -355,7 +357,7 @@ def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
             raise ReplaySourceError(
                 f"leaf {sid}: journal shard sha disagrees with the selection")
         bounded = root_load_minutes + sum(
-            worst[node["applied_kinds"][-1]] for node in chain) / 60.0
+            worst[node["impl_ids"][-1]] for node in chain) / 60.0
         leaves.append(ReplayLeaf(
             state_id=sid,
             path_label=entry["path"],

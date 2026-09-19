@@ -2,9 +2,9 @@
   "_what_this_is": "one complete pod-like sweep of the replay's own pod selection, tests/c2_replay_preflight/ \u2014 everything the paid session can fail before its first operator runs, and nothing else. It checks that the committed evidence arrived and parses, that five specs build with all twenty steps pinned, that no operator has moved since attempt 3's commit, that both calibration mixtures resolve from disk and hash to what the selection was searched against, that the driver leaves its profile registry populated in a FRESH interpreter, and that the plan fits its authorized money. What this record BINDS is the REPLAY session: its launcher, its session id and its executable closure. A full-search readiness record cannot satisfy it, and it cannot satisfy a full search's.",
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
   "counts": {
-    "error": 2,
-    "failed": 0,
-    "passed": 0,
+    "error": 0,
+    "failed": 1,
+    "passed": 20,
     "skipped": 0
   },
   "environment": {
@@ -21,36 +21,34 @@
     "executions_of_this_tree": [
       "exec-001"
     ],
-    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-48f41a3a2fd4/exec-001/junit.xml",
-    "junit_sha256": "bb3da3094d42e36f55bee9f687bb3680a2fdf5a117e1d06e04a5dd13846a67aa",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-48f41a3a2fd4/exec-001/pytest.log",
-    "pytest_log_sha256": "30b1a80c5d49c3bb8900c6cfbc6999a25ee5f737add2c56bd8d84b8da41b8d65"
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-bbff0e1f340e/exec-001/junit.xml",
+    "junit_sha256": "99e00917bf5f71272260db346150efcb6dbc00db8de7088a57b5711641db7388",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-bbff0e1f340e/exec-001/pytest.log",
+    "pytest_log_sha256": "34eb5a4362fe0eca0b7b6ddb5ce0865e917c82473f6465386d9fbcea2a544b1c"
   },
-  "execution_id": "sweep-48f41a3a2fd4/exec-001",
+  "execution_id": "sweep-bbff0e1f340e/exec-001",
   "expected_environment_skips": [],
   "failed_nodeids": [
-    "tests.autoinit.test_c1_confirmation_scoring",
-    "tests.pod.test_c1_artifact_specs"
+    "tests/c2_replay_preflight/test_replay_execution_preflight.py::test_both_calibration_profiles_resolve_from_disk_on_this_pod"
   ],
   "findings": {
     "all_skipped_nodeids": [],
     "battery_staged_role_nodeid": null,
     "battery_staged_role_outcome": null,
     "counts": {
-      "error": 2,
-      "failed": 0,
-      "passed": 0,
+      "error": 0,
+      "failed": 1,
+      "passed": 20,
       "skipped": 0
     },
     "expected_environment_skips": [],
     "failed_nodeids": [
-      "tests.autoinit.test_c1_confirmation_scoring",
-      "tests.pod.test_c1_artifact_specs"
+      "tests/c2_replay_preflight/test_replay_execution_preflight.py::test_both_calibration_profiles_resolve_from_disk_on_this_pod"
     ],
     "known_non_environment_skips": [],
     "n_skipped": 0,
     "problems": [
-      "2 failed/errored: ['tests.autoinit.test_c1_confirmation_scoring', 'tests.pod.test_c1_artifact_specs']"
+      "1 failed/errored: ['tests/c2_replay_preflight/test_replay_execution_preflight.py::test_both_calibration_profiles_resolve_from_disk_on_this_pod']"
     ],
     "skip_reasons": {},
     "skip_set_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -59,9 +57,51 @@
     "verdict": "FAIL"
   },
   "invocation_realized": {
-    "declared_test_ignores": [],
+    "declared_test_ignores": [
+      "tests/architecture",
+      "tests/autoinit",
+      "tests/c1_preflight",
+      "tests/c2_baseline_completion_preflight",
+      "tests/c2_full_search_preflight",
+      "tests/c2_preflight",
+      "tests/data",
+      "tests/docs",
+      "tests/evaluation",
+      "tests/infrastructure",
+      "tests/init",
+      "tests/initialization",
+      "tests/models",
+      "tests/pod",
+      "tests/rollout",
+      "tests/runtime",
+      "tests/support",
+      "tests/test_usable_rollout.py",
+      "tests/training",
+      "tests/validation"
+    ],
     "hidden_paths_passed": true,
-    "invoked_test_ignores": [],
+    "invoked_test_ignores": [
+      "tests/architecture",
+      "tests/autoinit",
+      "tests/c1_preflight",
+      "tests/c2_baseline_completion_preflight",
+      "tests/c2_full_search_preflight",
+      "tests/c2_preflight",
+      "tests/data",
+      "tests/docs",
+      "tests/evaluation",
+      "tests/infrastructure",
+      "tests/init",
+      "tests/initialization",
+      "tests/models",
+      "tests/pod",
+      "tests/rollout",
+      "tests/runtime",
+      "tests/support",
+      "tests/test_usable_rollout.py",
+      "tests/training",
+      "tests/validation"
+    ],
     "problems": [],
     "rule": "a manifest fact that is hashed but not realized in the invocation is refused here, before any PASS record exists",
     "setup_environment_keys": [
@@ -80,9 +120,9 @@
       "UV_MAX_S"
     ],
     "setup_environment_realized": true,
-    "staging_contract_digest": "e682d58dfd9e32a84a79d95769ac65889f35736c8192a278f004a26e5f2677ac"
+    "staging_contract_digest": "8344f8054fe62127b2cab1ad9d09a08e13d9f8acdb0a4a38be6fa4c86683cd07"
   },
-  "n_tests": 2,
+  "n_tests": 21,
   "pod_test_environment_digest": "eb3c9ccb408dcaf14b563412fd9d28a305b76bc76548f3de468047ad04fe52ad",
   "pod_test_environment_n_files": 220,
   "pod_test_environment_named_files": [
@@ -90,38 +130,38 @@
     "scripts/autoinit/record_pod_environment.py"
   ],
   "problems": [
-    "2 failed/errored: ['tests.autoinit.test_c1_confirmation_scoring', 'tests.pod.test_c1_artifact_specs']"
+    "1 failed/errored: ['tests/c2_replay_preflight/test_replay_execution_preflight.py::test_both_calibration_profiles_resolve_from_disk_on_this_pod']"
   ],
-  "pytest_command": ".venv/bin/python -m pytest tests/ -q ",
+  "pytest_command": ".venv/bin/python -m pytest tests/ -q --ignore=tests/architecture --ignore=tests/autoinit --ignore=tests/c1_preflight --ignore=tests/c2_baseline_completion_preflight --ignore=tests/c2_full_search_preflight --ignore=tests/c2_preflight --ignore=tests/data --ignore=tests/docs --ignore=tests/evaluation --ignore=tests/infrastructure --ignore=tests/init --ignore=tests/initialization --ignore=tests/models --ignore=tests/pod --ignore=tests/rollout --ignore=tests/runtime --ignore=tests/support --ignore=tests/test_usable_rollout.py --ignore=tests/training --ignore=tests/validation",
   "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
   "record_kind": "launch_bound",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved launch rests on. It is produced on the final CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are committed, BEFORE the authorization is issued -- because a sweep run after issuance adds a second path to the lineage diff and session_commit_gate refuses.",
-  "replay_harness_digest": "bce0daf7d443740fd67ea989a11073efa8489c897c8a4150beb92a614ca0c08b",
-  "replay_harness_n_files": 77,
+  "replay_harness_digest": "0dbaacc7d3d52d289e35305996e42ccf45a7fc437db8fb1638b869fbb33f4660",
+  "replay_harness_n_files": 83,
   "schema": "aadistill.autoinit.c2_replay_pod_environment/v1",
-  "seconds": 49.3,
-  "self_sha256": "5fdc0056b3582a27c6d7e8a16c944c885ee4fe049befa4ba7dc39a198d0e48e3",
+  "seconds": 10.5,
+  "self_sha256": "1c80a362adeae93cfe4166d189c44c06f9d2831620e7d6ab5824f0b4722ca008",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_48f41a3a.bundle",
+    "BUNDLE_NAME": "aad_autoinit_bbff0e1f.bundle",
     "SESSION_ASSETS": "",
     "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_c2_replay/runs/spec_check/governance/authorization.json",
-    "SESSION_COMMIT": "48f41a3a2fd4be63a8215b8ae4fac356bb93bd27",
+    "SESSION_COMMIT": "bbff0e1f340e371884828a8d15429df753c8cad4",
     "SESSION_KIND": "c2_replay",
-    "SESSION_PLAN_HASH": "59e7d59be5378c2640948555c98ea06f63bb9c9f81281bbfa1f436c8dd3c39ad",
+    "SESSION_PLAN_HASH": "54734bfd24b2af024e495daa950d37bf5b214a4e1f13570535e62ab1e4afc602",
     "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"}]",
     "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV ASSETS_READY TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
     "SESSION_STATUS": "/workspace/aad/scratch/autoinit_c2_replay.status",
-    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_IGNORES": "--ignore=tests/architecture --ignore=tests/autoinit --ignore=tests/c1_preflight --ignore=tests/c2_baseline_completion_preflight --ignore=tests/c2_full_search_preflight --ignore=tests/c2_preflight --ignore=tests/data --ignore=tests/docs --ignore=tests/evaluation --ignore=tests/infrastructure --ignore=tests/init --ignore=tests/initialization --ignore=tests/models --ignore=tests/pod --ignore=tests/rollout --ignore=tests/runtime --ignore=tests/support --ignore=tests/test_usable_rollout.py --ignore=tests/training --ignore=tests/validation",
     "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
     "TESTS_MAX_S": "2700",
     "UV_MAX_S": "1500"
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1129 derived paths, contract e682d58dfd9e> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-48f41a3a2fd4/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-48f41a3a2fd4/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
-  "simulator_exit_code": 2,
+  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1129 derived paths, contract 8344f8054fe6> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-bbff0e1f340e/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-bbff0e1f340e/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_exit_code": 1,
   "staging_contract": {
-    "digest": "e682d58dfd9e32a84a79d95769ac65889f35736c8192a278f004a26e5f2677ac",
+    "digest": "8344f8054fe62127b2cab1ad9d09a08e13d9f8acdb0a4a38be6fa4c86683cd07",
     "local_asset_destinations": [],
     "n_hidden_files": 1129,
     "n_staged_files": 1,
@@ -129,11 +169,32 @@
       "artifacts/stage1/e8_calibration_v1/items.jsonl"
     ],
     "session_kind": "c2_replay",
-    "test_ignores": []
+    "test_ignores": [
+      "tests/architecture",
+      "tests/autoinit",
+      "tests/c1_preflight",
+      "tests/c2_baseline_completion_preflight",
+      "tests/c2_full_search_preflight",
+      "tests/c2_preflight",
+      "tests/data",
+      "tests/docs",
+      "tests/evaluation",
+      "tests/infrastructure",
+      "tests/init",
+      "tests/initialization",
+      "tests/models",
+      "tests/pod",
+      "tests/rollout",
+      "tests/runtime",
+      "tests/support",
+      "tests/test_usable_rollout.py",
+      "tests/training",
+      "tests/validation"
+    ]
   },
-  "staging_contract_digest": "e682d58dfd9e32a84a79d95769ac65889f35736c8192a278f004a26e5f2677ac",
+  "staging_contract_digest": "8344f8054fe62127b2cab1ad9d09a08e13d9f8acdb0a4a38be6fa4c86683cd07",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "48f41a3a2fd4be63a8215b8ae4fac356bb93bd27",
+  "swept_base_commit": "bbff0e1f340e371884828a8d15429df753c8cad4",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "FAIL"

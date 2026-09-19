@@ -88,6 +88,12 @@ RUN_LOG = f"{WS}/scratch/autoinit_c2_replay_run.log"
 #: default and is discovered on a billing machine. Without this the sweep ran
 #: `pytest tests/` and two C1 tests errored on artifacts this session correctly
 #: does not stage.
+#: The out-of-tree calibration item directories the five paths read, derived
+#: from the profiles those paths NAME. Two of the twenty steps use
+#: `calib.reasoning_heavy@v2`; staging only the domain-balanced mixture would
+#: have run path 1 and then died resolving one that never arrived.
+LOCAL_ASSETS = RG.staged_assets(REPO_ROOT)
+
 POD_TEST_SELECTION = RPE.POD_TEST_SELECTION
 TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
 
@@ -456,7 +462,7 @@ def spec(args) -> SessionSpec:
         budget=budget(args),
         setup=SetupManifest(
             relay_inputs=CALIBRATION_V1,
-            local_assets=(),
+            local_assets=LOCAL_ASSETS,
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
                           "SESSION_ASSETS", "SESSION_RELAY_INPUTS",
