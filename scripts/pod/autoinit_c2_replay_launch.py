@@ -696,20 +696,30 @@ def main() -> int:
                       roles=REPLAY_RUN_ROLES)
     assert args.out == session_record_path(args.run_id), (args.out, args.run_id)
 
-    rc = run_session(spec(args), args, REPO_ROOT,
-                     summary=("the replay is a TERMINUS: it reconstructs the "
-                              "five checkpoints behind a frozen Top-5 and "
-                              "stops. It decides nothing, and behavioural "
-                              "screening is separately authorized and "
-                              "unreachable from here."))
+    #: `record_run` in a `finally`, not after a successful return. A run_session
+    #: that RAISES leaves the run directory populated and unrecorded, and the
+    #: next invocation is then refused by the occupancy rule — correctly, since
+    #: an unrecorded directory is indistinguishable from a launcher that died
+    #: mid-flight. That is exactly what happened here, and it cost an attempt
+    #: id: the chain is consumed by the invocation whether or not a provider
+    #: resource followed.
+    rc = 1
     try:
-        record_run(layout, spec=REPLAY_RUN_SPEC)
-    except Exception as exc:                                      # noqa: BLE001
-        print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
-              f"  the run directory is "
-              f"{rel_run_dir(EXPERIMENT_ID, args.run_id, STAGE_ID)}; it holds "
-              "whatever the session produced and has no manifest. Do not reuse "
-              "this run id.")
+        rc = run_session(spec(args), args, REPO_ROOT,
+                         summary=("the replay is a TERMINUS: it reconstructs "
+                                  "the five checkpoints behind a frozen Top-5 "
+                                  "and stops. It decides nothing, and "
+                                  "behavioural screening is separately "
+                                  "authorized and unreachable from here."))
+    finally:
+        try:
+            record_run(layout, spec=REPLAY_RUN_SPEC)
+        except Exception as exc:                                  # noqa: BLE001
+            print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
+                  f"  the run directory is "
+                  f"{rel_run_dir(EXPERIMENT_ID, args.run_id, STAGE_ID)}; it "
+                  "holds whatever the session produced and has no manifest. "
+                  "Do not reuse this run id.")
     return rc
 
 

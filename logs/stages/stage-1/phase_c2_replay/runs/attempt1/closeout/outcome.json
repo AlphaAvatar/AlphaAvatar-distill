@@ -1,0 +1,27 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt1",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "ABORTED_BEFORE_PROVIDER",
+ "successful": false,
+ "provider_resource_created": false,
+ "reconstructed_leaves": 0,
+ "budget": {
+  "this_attempt": 0.0,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0
+ },
+ "what_happened": "The launcher was invoked and refused before any provider resource existed. Two defects surfaced, both $0 and both now repaired with regressions: the authorization document could not be read back by its own loader, and run_session raised so the run was never recorded -- which is why this closeout exists and why the next attempt takes a new id.",
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true,
+  "_why": "a chain is consumed by the launcher's invocation, whether or not a provider resource followed, and is never reused. The incrementing attempt number is not a scope expansion (P12.1)."
+ },
+ "next": "attempt2, under a fresh chain on the repaired tree"
+}
