@@ -1,14 +1,27 @@
 {
  "schema": "aadistill.autoinit.c2_replay_authorization/v1",
  "authorization_id": "autoinit.v1.phase_c2.replay",
- "run_id": "attempt1",
- "stage_id": "1",
+ "version": 1,
+ "granted_utc": "2026-09-19T06:49:04.354492+00:00",
+ "granted_by": "maintainer",
  "plan_id": "autoinit.v1.phase_c2.replay",
- "plan_hash": "902fd382ae57115b1becab18de714ea86aa5208e4fca11be3d76c26ef322ebc3",
- "issued_utc": "2026-09-19T06:44:53.630883+00:00",
- "authorized_session_commit": "0040e4cb464358e231de704ce061cf6745d5a07a",
- "provenance_commit": "0040e4cb464358e231de704ce061cf6745d5a07a",
- "harness_source_digest": "a90ad9c165d2ce5cda75b9fa0ea9b33f884af7a1222bb76b39a344f476d9868e",
+ "phase_a_session_plan_hash": "8a3bb338de733e55e5330956de0384ac1cd90755317c7250d22b7317acaadbb1",
+ "phase_a_science_plan_hash": "8a3bb338de733e55e5330956de0384ac1cd90755317c7250d22b7317acaadbb1",
+ "expected_usd": 4.69,
+ "hard_cap_usd": 4.69,
+ "authorized_stages": [
+  "bind_identities",
+  "reconstruct"
+ ],
+ "stage_conditions": {
+  "bind_identities": "binds the source binding, builds the five pinned specs and checks disk headroom. Loads no model.",
+  "reconstruct": "materializes each pinned path in order, gating every intermediate on its recorded digest, and secures each finished leaf before the next path starts. A digest mismatch is TERMINAL."
+ },
+ "scope_note": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5 (selection 7271091c9141\u2026), from session commit 2421f630bc81\u2026. It decides nothing: no beam, no ranking, no selection, no selection-bearing evaluation, no control comparison, no training and no behavioural work.",
+ "phase_a_authorized": false,
+ "automatic_followon_start": false,
+ "authorized_session_commit": "6f90cfc6088c12495c57c14be40fe6a0a9f814ee",
+ "harness_source_digest": "427a359285cf6e7f69c33c5ccab832b047cc58d2987374117ff2210c60048701",
  "harness_source_files": [
   "configs/autoinit/c2_replay_artifacts.json",
   "configs/autoinit/c2_replay_artifacts_failed.json",
@@ -94,21 +107,41 @@
   "src/aadistill/runtime/staging_contract.py",
   "src/aadistill/runtime/telemetry.py"
  ],
- "authorized_stages": [
-  "bind_identities",
-  "reconstruct"
+ "per_launch_hard_usd": null,
+ "provenance_commit": "6f90cfc6088c12495c57c14be40fe6a0a9f814ee",
+ "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+ "allows_phase_a": false,
+ "allows_recovery_training": false,
+ "authorizes_c2_search1": false,
+ "resource_scope": null,
+ "run_id": "attempt1",
+ "scope": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5, each path pinned at EVERY step to the artifact digest attempt 3 recorded, and each finished leaf secured off the pod. NOT a fourth Full Search attempt, NOT a beam, NOT a re-ranking, NOT a regeneration of a Top-5, NOT a selection-bearing evaluation, NOT a control comparison, and NOT behavioural work of any kind.",
+ "authorizes_c2_baseline_completion": false,
+ "authorizes_c2_full_search": false,
+ "authorizes_behavioural_selection": false,
+ "authorizes_c2_replay": true,
+ "forbids": [
+  "any beam search or expansion",
+  "ranking or re-ranking the 14 complete leaves",
+  "producing or replacing a selection",
+  "any selection-bearing evaluation",
+  "injecting or comparing against the canonical control",
+  "substituting a functionally similar checkpoint for a mismatch",
+  "retrying a deterministic digest mismatch",
+  "recovery training of any kind",
+  "any behavioural screening or confirmation probe"
  ],
+ "on_mismatch": "STOP. A digest mismatch is a replay mismatch and a scientific finding: preserve the evidence, tear down, and refer it to review. It is not an ordinary engineering failure and must not be retried, because the path is deterministic and would diverge identically.",
+ "stage_id": "1",
+ "rate_usd_per_hour": 1.09,
  "one_use": true,
  "max_provider_resources": 1,
- "rate_usd_per_hour": 1.09,
- "hard_cap_usd": 4.69,
  "money": {
   "gpu_hard_usd": 4.69,
   "disk_usd": 0.08,
   "all_in_usd": 4.77,
   "_why_two_numbers": "the provider bills container disk separately from the GPU. `hard_cap_usd` is GPU money, which is what the budget planner and the watchdog spend against; the disk is real and is recorded beside it rather than folded in."
  },
- "granted_by": "maintainer",
  "grant_path": "logs/stages/stage-1/phase_c2_replay/runs/attempt1/governance/grant.json",
  "source_binding": {
   "schema": "aadistill.autoinit.c2_replay_source_binding/v1",
@@ -149,7 +182,7 @@
   ],
   "operators": {
    "source_commit": "2421f630bc812d414ae25245e855059ffe29610d",
-   "head": "0040e4cb464358e231de704ce061cf6745d5a07a",
+   "head": "6f90cfc6088c12495c57c14be40fe6a0a9f814ee",
    "checked": {
     "src/aadistill/initialization": {
      "files_at_source": 44
@@ -260,6 +293,5 @@
   ],
   "note": "every step of every path is pinned to the artifact digest attempt 3 recorded for it, not merely the final output. A mismatch at any step is a STOP condition and a scientific finding, not a retryable engineering failure."
  },
- "_scope": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5. It decides nothing.",
- "authorization_sha256": "259657fdfe7f1130599d628c96fb7130339df987555824828991d88a95cf2b48"
+ "authorization_sha256": "b3e2b15f0bb50a4eced856ec7f2af10f2d2794c373dca8a2263dbfc837715d49"
 }
