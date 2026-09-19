@@ -477,6 +477,77 @@ def test_the_dry_run_flag_actually_stops_before_provider_creation():
     assert source.index("run_prechecks") < source.index('"dry_run"')
 
 
+def test_the_pod_paths_agree_with_the_setup_script():
+    """The launcher's pod paths are the SCRIPT's, read from it, not invented.
+
+    This file first declared `WS=/workspace/aad` and `REPO=/workspace/aad/repo`
+    and put the status file under a `scratch/` subdirectory nothing creates.
+    The script's very first `mark()` writes to that file, so setup died one line
+    after ENV_READY — 1.2 minutes and $0.02 into a billing pod, for a path that
+    could have been read here.
+    """
+    import re as _re
+
+    import autoinit_c2_replay_launch as L
+
+    text = (ROOT / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    ws = _re.search(r"^WS=(\S+)", text, _re.M)
+    repo = _re.search(r"^REPO=(\S+)", text, _re.M)
+    assert ws and repo, "the setup script no longer declares WS and REPO"
+    assert L.WS == ws.group(1), (L.WS, ws.group(1))
+    assert L.REPO == repo.group(1).replace("$WS", L.WS), (L.REPO, repo.group(1))
+
+    #: The status and run log live directly in WS. `mark()` appends to the
+    #: status file before anything has created a subdirectory, so a path with
+    #: one in it cannot work.
+    for path in (L.STATUS, L.RUN_LOG):
+        assert path.startswith(L.WS + "/"), path
+        assert "/" not in path[len(L.WS) + 1:], (
+            f"{path} puts the file in a subdirectory of {L.WS}; nothing creates "
+            "one before the script's first mark()")
+
+    #: And everything the driver writes lives under the checkout.
+    for path in (L.WORKDIR, L.LEAF_DIR):
+        assert path.startswith(L.REPO + "/"), path
+
+
+def test_the_driver_writes_its_evidence_where_the_collector_looks():
+    """One required artifact, two places that must name the same path.
+
+    The artifact spec patterns the evidence at `audit/<dirname>/...` under the
+    pod's artifacts root; the driver first wrote it into its workdir. It is the
+    session's ONE required artifact, so a torn-down run would have come home
+    with no record of itself — and on a failure path the evidence is the only
+    thing worth having.
+
+    Both ends are read here, not restated: the spec's pattern and the launcher's
+    driver command.
+    """
+    from collect_artifacts import load_specs
+
+    import autoinit_c2_replay_launch as L
+
+    specs = load_specs(str(ROOT / "configs/autoinit/c2_replay_artifacts.json"))
+    required = [x for x in specs if x.required]
+    assert len(required) == 1, [x.pattern for x in required]
+    pattern = required[0].pattern
+    assert pattern.startswith(f"audit/{L.AUDIT_DIRNAME}/"), pattern
+
+    #: `AUDIT_DIR` is the absolute form of that same pattern on the pod.
+    assert L.AUDIT_DIR == f"{L.REPO}/artifacts/audit/{L.AUDIT_DIRNAME}"
+    assert L.AUDIT_DIR.endswith("/" + pattern.rsplit("/", 1)[0])
+
+    #: And the launcher must actually hand it to the driver.
+    ctx = type("C", (), {"image_digest": "", "price": 1.09, "spent_usd": 0.0,
+                         "args": L.build_parser().parse_args(
+                             ["--scr", "/tmp/x", "--session-commit", "d" * 40,
+                              "--bundle", "b.bundle", "--run-id", "preflight"]),
+                         "auth": type("A", (), {"hard_cap_usd": 4.69})()})()
+    plan = type("P", (), {"soft_stop_usd": 4.41})()
+    command = L.driver_command(ctx, plan)
+    assert f"--audit-dir {L.AUDIT_DIR}" in command, command
+
+
 def test_the_setup_script_dispatches_this_session_kind():
     """A missing branch is not a type error — it is a late refusal on a billing
     machine, and it has cost this project two paid sessions."""

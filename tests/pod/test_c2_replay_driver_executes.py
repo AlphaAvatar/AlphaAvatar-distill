@@ -108,6 +108,9 @@ class Args:
         self.soft_stop_usd = 4.0
         self.image_digest = "sha256:toy"
         self.already_spent_usd = 0.0
+        #: The collector patterns the evidence here, not in the
+        #: workdir; the real launcher passes it explicitly.
+        self.audit_dir = None
         self.__dict__.update(kw)
 
 
@@ -198,11 +201,12 @@ def test_the_driver_reconstructs_pinned_leaves_and_secures_each_one(
     install_toy_leaves(monkeypatch, leaves, calib=calib)
 
     work = tmp_path / "work"
-    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"))
+    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"))
     rc = driver_mod.ReplayDriver(args).run()
     assert rc == 0
 
-    ev = json.loads((work / "c2_replay_evidence.json").read_text())
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
     assert ev["outcome"] == "ALL_DONE"
     assert ev["n_reconstructed"] == 2
     #: The claims a reviewer checks instead of reading the prose.
@@ -242,11 +246,12 @@ def test_a_digest_mismatch_stops_the_session_without_retrying(
     install_toy_leaves(monkeypatch, leaves, calib=calib)
 
     work = tmp_path / "work"
-    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"))
+    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"))
     rc = driver_mod.ReplayDriver(args).run()
     assert rc == 1
 
-    ev = json.loads((work / "c2_replay_evidence.json").read_text())
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
     assert ev["outcome"] == "FAILED"
     assert ev["digest_mismatch"]["step_index"] == 1
     assert ev["digest_mismatch"]["expected"] == "0" * 64
@@ -279,11 +284,12 @@ def test_an_identity_that_matches_the_digest_but_not_attempt_3_is_refused(
     install_toy_leaves(monkeypatch, [wrong], calib=calib)
 
     work = tmp_path / "work"
-    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"))
+    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"))
     rc = driver_mod.ReplayDriver(args).run()
     assert rc == 1
 
-    ev = json.loads((work / "c2_replay_evidence.json").read_text())
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
     failed = [s for s in ev["stages"] if not s["ok"]][-1]
     assert "num_parameters" in failed["error"]
     assert not (work / "leaves" / "state0").exists()
@@ -298,10 +304,11 @@ def test_an_unpinned_intermediate_is_refused_before_anything_is_computed(
     install_toy_leaves(monkeypatch, [leaf], calib=calib)
 
     work = tmp_path / "work"
-    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"))
+    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"))
     rc = driver_mod.ReplayDriver(args).run()
     assert rc == 1
-    ev = json.loads((work / "c2_replay_evidence.json").read_text())
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
     assert ev["failed_stage"] == "bind_identities"
     assert "1 of 2 steps pinned" in ev["stages"][-1]["error"]
 
@@ -316,10 +323,11 @@ def test_insufficient_disk_is_refused_at_bind_not_at_path_four(
     monkeypatch.setattr(driver_mod, "WORST_PATH_BYTES", 1 << 60)
 
     work = tmp_path / "work"
-    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"))
+    args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"))
     rc = driver_mod.ReplayDriver(args).run()
     assert rc == 1
-    ev = json.loads((work / "c2_replay_evidence.json").read_text())
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
     assert ev["failed_stage"] == "bind_identities"
     assert "Provision the disk" in ev["stages"][-1]["error"]
 
@@ -336,10 +344,11 @@ def test_the_soft_stop_keeps_the_leaves_it_already_secured(
     #: A soft stop already exhausted when the driver starts, so the FIRST path
     #: is refused and the record must still be coherent.
     args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"),
                 soft_stop_usd=0.0, authorized_usd=5.0)
     rc = driver_mod.ReplayDriver(args).run()
     assert rc == 1
-    ev = json.loads((work / "c2_replay_evidence.json").read_text())
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
     assert ev["stopped_at_soft_stop"] is True
     assert ev["n_reconstructed"] == 0
     assert "does not invalidate them" in ev["_partial_is_not_waste"]
@@ -375,11 +384,12 @@ def test_setup_spend_counts_against_the_soft_stop(
     work = tmp_path / "work"
     #: Setup already spent past the soft stop before the driver ever ran.
     args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"),
                 already_spent_usd=4.10, soft_stop_usd=4.00)
     rc = driver_mod.ReplayDriver(args).run()
     assert rc == 1
 
-    ev = json.loads((work / "c2_replay_evidence.json").read_text())
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
     assert ev["stopped_at_soft_stop"] is True
     assert ev["already_spent_usd_at_driver_start"] == 4.10
     assert ev["n_reconstructed"] == 0
@@ -407,11 +417,12 @@ def test_a_path_is_not_started_unless_the_budget_can_see_it_finish(
 
     work = tmp_path / "work"
     args = Args(workdir=str(work), leaf_dir=str(work / "leaves"),
+                audit_dir=str(work / "audit"),
                 rate=1.09, soft_stop_usd=1.00, authorized_usd=5.00)
     rc = driver_mod.ReplayDriver(args).run()
     assert rc == 1
 
-    ev = json.loads((work / "c2_replay_evidence.json").read_text())
+    ev = json.loads((work / "audit" / "c2_replay_evidence.json").read_text())
     assert ev["stopped_at_soft_stop"] is True
     assert ev["n_reconstructed"] == 1
     stop = [s for s in ev["stages"] if s["stage"] == "soft_stop"][0]

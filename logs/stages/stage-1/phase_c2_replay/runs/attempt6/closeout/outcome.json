@@ -1,0 +1,37 @@
+{
+ "schema": "aadistill.autoinit.c2_replay_outcome/v1",
+ "run_id": "attempt6",
+ "experiment_id": "phase_c2_replay",
+ "terminal": "SETUP_FAILED",
+ "successful": false,
+ "provider_resource_created": true,
+ "pod_id": "04u1mava7qhf4x",
+ "pod_minutes": 1.2,
+ "provider_confirms_deleted": true,
+ "reconstructed_leaves": 0,
+ "budget": {
+  "this_attempt": 0.02,
+  "currency": "USD"
+ },
+ "cost": {
+  "actual_usd": 0.02,
+  "gpu_usd": 0.02,
+  "disk_usd": 0.0,
+  "rate_usd_per_hour": 1.09
+ },
+ "gates_passed": 7,
+ "gates_total": 7,
+ "what_happened": "All seven $0 gates passed, the pod was created and SSH came up in 0.2 min, and setup died one line after ENV_READY: the launcher declared WS=/workspace/aad and REPO=/workspace/aad/repo and put the session status file under a scratch/ subdirectory, while autoinit_preflight_setup.sh declares WS=/workspace and REPO=$WS/aad and nothing creates a subdirectory before its first mark(). The pod was deleted behind the teardown path and the provider confirms it is gone.",
+ "what_it_exposed": "A second path defect that had not yet fired: the driver wrote its evidence into the workdir while c2_replay_artifacts.json patterns it at audit/autoinit_c2_replay/. That is the session's ONE required artifact, so a torn-down run would have come home with no record of itself -- and on a failure path the evidence is the only thing worth having.",
+ "repairs": [
+  "pod paths read from the setup script rather than invented, with a test that parses WS= and REPO= out of it and refuses a status file in a subdirectory",
+  "evidence written to --audit-dir, with a test that reads the artifact spec's pattern and the launcher's driver command and requires them to name the same directory"
+ ],
+ "consumed_chain": {
+  "grant": true,
+  "readiness": true,
+  "authorization": true,
+  "bundle": true
+ },
+ "next": "attempt7 carries the live launch"
+}

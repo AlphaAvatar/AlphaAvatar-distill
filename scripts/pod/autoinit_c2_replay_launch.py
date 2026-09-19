@@ -64,13 +64,24 @@ from phase_a_frozen import TEACHER_REVISION  # noqa: E402
 EXPERIMENT_ID = "phase_c2_replay"
 STAGE_ID = "1"
 
-REPO = "/workspace/aad/repo"
-WS = "/workspace/aad"
+#: The POD's layout, and it is the setup script's, not one invented here.
+#: `autoinit_preflight_setup.sh` declares `WS=/workspace` and `REPO=$WS/aad`.
+#: This file first said `WS=/workspace/aad` and `REPO=/workspace/aad/repo` and
+#: put the status file under a `scratch/` subdirectory nothing creates, so the
+#: script's very first `mark()` failed on a missing directory: setup died at
+#: ENV_READY, 1.2 min and $0.02 into a billing pod. `test_the_pod_paths_agree_
+#: with_the_setup_script` now reads these out of the script rather than
+#: trusting them here.
+WS = "/workspace"
+REPO = f"{WS}/aad"
 WORKDIR = f"{REPO}/artifacts/autoinit/c2_replay"
 LEAF_DIR = f"{WORKDIR}/leaves"
 AUDIT_DIRNAME = "autoinit_c2_replay"
-STATUS = f"{WS}/scratch/autoinit_c2_replay.status"
-RUN_LOG = f"{WS}/scratch/autoinit_c2_replay_run.log"
+#: Where the driver writes its evidence, and where the collector
+#: looks. ONE constant, so the two cannot disagree.
+AUDIT_DIR = f"{REPO}/artifacts/audit/{AUDIT_DIRNAME}"
+STATUS = f"{WS}/autoinit_c2_replay.status"
+RUN_LOG = f"{WS}/autoinit_c2_replay_run.log"
 
 #: The relay inputs the search itself used. Both calibration mixtures are
 #: needed: the five paths between them name `calib.domain_balanced@v1` and
@@ -462,6 +473,7 @@ def leaves_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
 def driver_command(ctx: SessionContext, plan) -> str:
     return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_c2_replay_driver.py "
             f"--workdir {WORKDIR} --leaf-dir {LEAF_DIR} "
+            f"--audit-dir {AUDIT_DIR} "
             f"--image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--already-spent-usd {ctx.spent_usd:.4f} "

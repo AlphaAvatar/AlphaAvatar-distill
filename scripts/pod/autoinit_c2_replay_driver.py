@@ -110,8 +110,16 @@ class ReplayDriver:
         self.secured: dict[str, dict] = {}
         self.workdir = Path(a.workdir)
         self.leaf_out = Path(a.leaf_dir)
+        #: The evidence goes where the COLLECTOR looks, which is not the
+        #: workdir. `c2_replay_artifacts.json` patterns it at
+        #: `audit/<audit_dirname>/` under the pod's `artifacts/` root, and it is
+        #: the session's one REQUIRED artifact — written into the workdir it
+        #: would simply not be collected, and a torn-down session would come
+        #: home with no record of itself.
+        self.audit = Path(a.audit_dir)
         self.workdir.mkdir(parents=True, exist_ok=True)
         self.leaf_out.mkdir(parents=True, exist_ok=True)
+        self.audit.mkdir(parents=True, exist_ok=True)
 
         self.ev: dict = {
             "schema": "aadistill.autoinit.c2_replay_evidence/v1",
@@ -149,7 +157,7 @@ class ReplayDriver:
         self.ev["elapsed_minutes"] = round((time.time() - self.t0) / 60.0, 3)
         self.ev["cost_so_far_usd"] = round(
             self.ev["elapsed_minutes"] / 60.0 * self.a.rate, 4)
-        out = self.workdir / "c2_replay_evidence.json"
+        out = self.audit / "c2_replay_evidence.json"
         tmp = out.with_suffix(".partial")
         tmp.write_text(json.dumps(self.ev, indent=1) + "\n")
         os.replace(tmp, out)
@@ -466,6 +474,10 @@ def build_parser() -> argparse.ArgumentParser:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--workdir", required=True)
+    ap.add_argument("--audit-dir", default=None,
+                    help="where the session evidence is written; must be the "
+                         "directory the artifact spec patterns. Defaults to "
+                         "<repo>/artifacts/audit/autoinit_c2_replay.")
     ap.add_argument("--leaf-dir", default=None,
                     help="where finished leaves are copied for collection; "
                          "defaults to <workdir>/leaves")
@@ -486,6 +498,8 @@ def main() -> int:
     args = build_parser().parse_args()
     if args.leaf_dir is None:
         args.leaf_dir = str(Path(args.workdir) / "leaves")
+    if args.audit_dir is None:
+        args.audit_dir = str(REPO_ROOT / "artifacts/audit/autoinit_c2_replay")
     if args.soft_stop_usd >= args.authorized_usd:
         raise SystemExit(
             f"soft stop ${args.soft_stop_usd:.2f} must leave room under the "
