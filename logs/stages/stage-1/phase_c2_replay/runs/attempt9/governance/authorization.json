@@ -2,7 +2,7 @@
  "schema": "aadistill.autoinit.c2_replay_authorization/v1",
  "authorization_id": "autoinit.v1.phase_c2.replay",
  "version": 1,
- "granted_utc": "2026-09-19T10:58:54.112685+00:00",
+ "granted_utc": "2026-09-19T11:01:16.480762+00:00",
  "granted_by": "maintainer",
  "plan_id": "autoinit.v1.phase_c2.replay",
  "phase_a_session_plan_hash": "a23c0f1c179d217a2d51209d4d5a3afb728d536073cf6890c338719ce30f99c9",
@@ -20,8 +20,8 @@
  "scope_note": "ONE replay-only reconstruction of the five checkpoints behind attempt 3's frozen Top-5 (selection 7271091c9141\u2026), from session commit 2421f630bc81\u2026. It decides nothing: no beam, no ranking, no selection, no selection-bearing evaluation, no control comparison, no training and no behavioural work.",
  "phase_a_authorized": false,
  "automatic_followon_start": false,
- "authorized_session_commit": "98dd9fcafb4cf1e9d72f4db413345ea3a525f36d",
- "harness_source_digest": "6eaba8f865b13c45fe7beaf661bd1e73b839487894060a3a45f8c418c8bd8aa1",
+ "authorized_session_commit": "b9c600b2549513bf42c6ab7ea3b73064d9224868",
+ "harness_source_digest": "d0b928acfdcf61c86861d3f3659cfa9bcea335dd5f2ccb83630056d9cf79aff5",
  "harness_source_files": [
   "configs/autoinit/c2_replay_artifacts.json",
   "configs/autoinit/c2_replay_artifacts_failed.json",
@@ -108,7 +108,7 @@
   "src/aadistill/runtime/telemetry.py"
  ],
  "per_launch_hard_usd": null,
- "provenance_commit": "98dd9fcafb4cf1e9d72f4db413345ea3a525f36d",
+ "provenance_commit": "b9c600b2549513bf42c6ab7ea3b73064d9224868",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
  "allows_phase_a": false,
  "allows_recovery_training": false,
@@ -186,7 +186,7 @@
   ],
   "operators": {
    "source_commit": "2421f630bc812d414ae25245e855059ffe29610d",
-   "head": "98dd9fcafb4cf1e9d72f4db413345ea3a525f36d",
+   "head": "b9c600b2549513bf42c6ab7ea3b73064d9224868",
    "checked": {
     "src/aadistill/initialization": {
      "files_at_source": 44
@@ -297,5 +297,5 @@
   ],
   "note": "every step of every path is pinned to the artifact digest attempt 3 recorded for it, not merely the final output. A mismatch at any step is a STOP condition and a scientific finding, not a retryable engineering failure."
  },
- "authorization_sha256": "9d36d329dd591742fbc023823bec853e923138149415ff829f1e1c5b2aa7b019"
+ "authorization_sha256": "072393cdef2c10e751ecbca751545b435781096ec20fb2769cf3a9108cd54c71"
 }
