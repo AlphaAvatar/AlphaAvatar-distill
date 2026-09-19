@@ -125,4 +125,9 @@ artifacts/audit/
 # Replaces the top-level per-attempt roots (aad-scratch-c2replay-a*, c1_scr*)
 # that accumulated in $HOME. Durable bytes never live here -- they go to the
 # out-of-repo store at /home/ecs-user/aad-artifacts.
-.scratch/
+.scratch/*
+# ...but the README explaining the convention is documentation, not scratch. A
+# gitignored doc gets moved aside by the pod simulator along with every other
+# ignored artifact, and a sweep that is interrupted leaves it there — which
+# then REFUSES the next sweep until it is restored by hand. It happened once.
+!.scratch/README.md
