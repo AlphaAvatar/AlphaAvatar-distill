@@ -373,8 +373,15 @@ class C2BehaviouralDriver:
         #: stage P cannot build work the pre-provider budget did not fund. A
         #: manifest that names none is a fresh campaign in all but name and
         #: leaves every arm owed.
-        declared = (manifest.get("remaining") or {}).get("arms_needed")
-        self.arms_needed = set(declared) if declared else None
+        remaining = manifest.get("remaining") or {}
+        #: PRESENCE, not truthiness. An EMPTY list means this campaign owes no
+        #: arm at all — every remaining probe is a restored checkpoint waiting
+        #: to be scored — and treating that as "no manifest" would rebuild all
+        #: six for work the budget did not fund and nothing will read.
+        self.arms_needed = (set(remaining["arms_needed"])
+                            if "arms_needed" in remaining
+                            and remaining["arms_needed"] is not None
+                            else None)
 
         (self.audit / "probes").mkdir(parents=True, exist_ok=True)
         restored: list[dict[str, Any]] = []

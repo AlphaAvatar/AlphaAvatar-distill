@@ -107,7 +107,7 @@ def test_the_launcher_applies_no_second_contingency_or_recovery_reserve():
     assert spec.arms == 0 and spec.steps_per_arm == 0
     named = {p.name for p in spec.other_phases}
     assert "materialize_arms" in named
-    assert any(n.endswith("_probes_remaining") for n in named), named
+    assert any(n.endswith("_probes_train_and_score") for n in named), named
     assert {r.name for r in spec.soft_stop_reserves} == {
         "probe_model_contingency", "probe_duration_risk",
         "generation_length_risk"}
@@ -628,3 +628,29 @@ def test_the_scope_gate_still_reads_the_object_not_the_text(tmp_path):
 
     ok, why = L.scope_gate(_Ctx())
     assert ok, why
+
+
+@pytest.mark.parametrize("field,delta", [
+    (("train_minutes", "mean"), 5.0),
+    (("train_minutes", "max"), 5.0),
+    (("eval_minutes", "mean"), 5.0),
+    (("eval_minutes", "max"), 5.0),
+])
+def test_a_record_whose_per_probe_parts_stop_summing_is_refused(
+        tmp_path, field, delta):
+    """The train/score split is DERIVED from the record and reconciled to it.
+
+    Twelve times the per-probe train and eval figures must reconstruct the
+    record's own `bounding_basis` totals. Without that check the split would be
+    an assumption about a frozen document, and a continuation that prices
+    score-only work apart from training would be doing it on faith.
+    """
+    src = json.loads((REPO / BH.PRICING).read_text())
+    cost = src["behavioural_selection"]["probe_cost"]
+    cost[field[0]][field[1]] += delta
+    fake = tmp_path / BH.PRICING
+    fake.parent.mkdir(parents=True, exist_ok=True)
+    fake.write_text(json.dumps(src))
+    with pytest.raises(BH.BehaviouralProposalError,
+                       match="no longer sum to the whole"):
+        BH.session_decomposition(tmp_path, materialization_minutes=10.0)

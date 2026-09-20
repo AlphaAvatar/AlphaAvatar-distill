@@ -456,21 +456,34 @@ def storage_pricing(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
 #: a named number of minutes.
 def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
                           materialization_minutes: float,
-                          probes_remaining: int = 12,
+                          train_and_score_probes: int = 12,
+                          score_only_probes: int = 0,
                           restore_minutes: float = 0.0) -> dict[str, Any]:
     """Expected phases, named reserves and the recovery reserve. ONE owner.
 
     **It prices REMAINING work, and a fresh campaign's remaining work is all of
-    it.** The defaults — twelve probes, no restore — reproduce the full session
-    exactly: 1294.87 expected and 1800.53 hard minutes, the figures the proposal
-    is authorized against. A continuation passes what its campaign still owes.
+    it.** The defaults — twelve probes to train and score, none to score alone,
+    no restore — reproduce the full session exactly: 1294.87 expected and
+    1800.53 hard minutes, the figures the proposal is authorized against. A
+    continuation passes what its campaign still owes.
 
-    That generalisation is the whole of it, and it is here rather than in a
-    second function because a continuation budget derived beside this one would
-    be the same defect the launcher's duplicate budget was. The probe-derived
-    terms are linear in the probe count by construction — the frozen record
-    derives each from a per-probe mean or maximum times twelve — so scaling them
-    is arithmetic on the model, not a new model.
+    **Two kinds of remaining probe, because the driver executes two kinds.** A
+    probe absent from the campaign is trained and then scored. A probe whose
+    checkpoint was restored but whose scoring failed resumes AT SCORING and is
+    never retrained, so it owes the battery and not the trainer. Pricing both
+    as full probes over-reserved in the safe direction, but it could refuse a
+    continuation that genuinely fitted the campaign ceiling — and R10 is about
+    pricing what the campaign still OWES.
+
+    The split is not invented: the frozen record carries `train_minutes` and
+    `eval_minutes` per probe, as means and as observed maxima, and twelve times
+    each reconstructs its own `bounding_basis` totals. That reconstruction is
+    checked below, so a record whose parts stop summing to its own totals
+    refuses rather than being split on an assumption.
+
+    All of this is here rather than in a second function because a continuation
+    budget derived beside this one would be the same defect the launcher's
+    duplicate budget was.
 
     A continuation may not re-reserve work it cannot execute. A completed probe
     is never retrained, so it is not owed; the arms of the probes that DO remain
@@ -551,27 +564,56 @@ def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
             "window.")
 
     total_probes = int(beh["n_probes"])
-    if not 0 <= int(probes_remaining) <= total_probes:
+    n_train, n_score = int(train_and_score_probes), int(score_only_probes)
+    if n_train < 0 or n_score < 0 or n_train + n_score > total_probes:
         raise BehaviouralProposalError(
-            f"{probes_remaining} probes remaining is outside 0..{total_probes}. "
-            "A continuation owes some subset of the frozen protocol's probes, "
-            "never more of them.")
-    #: Linear in the probe count BY CONSTRUCTION: the frozen record derives
-    #: each probe term from a per-probe mean or observed maximum times twelve.
-    #: Scaling is arithmetic on that model, not a second model.
-    scale = int(probes_remaining) / total_probes
-    probe_minutes_owed = round(probe_minutes * scale, 2)
+            f"{n_train} probes to train and {n_score} to score is outside "
+            f"0..{total_probes} probes. A continuation owes some subset of the "
+            "frozen protocol's probes, never more of them.")
+
+    #: THE PER-PROBE SPLIT, from the record's own measured fields, RECONCILED
+    #: against the totals it derives from them. A record whose parts stop
+    #: summing to its own `bounding_basis` cannot be split on an assumption.
+    cost = beh["probe_cost"]
+    train_mean = float(cost["train_minutes"]["mean"])
+    train_max = float(cost["train_minutes"]["max"])
+    eval_mean = float(cost["eval_minutes"]["mean"])
+    eval_max = float(cost["eval_minutes"]["max"])
+    for label, parts, whole in (
+            ("expected", total_probes * (train_mean + eval_mean), probe_minutes),
+            ("observed maximum", total_probes * (train_max + eval_max),
+             float(bounding["probe_minutes_observed_max"])),
+            ("generation-length reserve", total_probes * eval_max,
+             float(bounding["generation_length_reserve_minutes"]))):
+        if abs(parts - whole) > 0.01:
+            raise BehaviouralProposalError(
+                f"the record's per-probe train and eval minutes give "
+                f"{parts:.3f} for the {label} and it states {whole}. The parts "
+                "no longer sum to the whole, so train-only and score-only work "
+                "cannot be priced apart from them.")
+
+    #: Training is owed only by probes that will be trained. Evaluation is owed
+    #: by every probe that will generate, which is both kinds. These are the
+    #: PHASE values, and the contingency below is taken from their sum rather
+    #: than from a parallel expression of the same quantity — two computations
+    #: of one number are two things to keep in agreement.
+    train_phase_minutes = round(n_train * (train_mean + eval_mean), 2)
+    score_phase_minutes = round(n_score * eval_mean, 2)
+    probe_minutes_owed = round(train_phase_minutes + score_phase_minutes, 2)
+    duration_risk = round(
+        n_train * ((train_max + eval_max) - (train_mean + eval_mean))
+        + n_score * (eval_max - eval_mean), 2)
+    generation_risk = round(
+        (n_train + n_score) * eval_max * SP.GENERATION_LENGTH_RISK_MULTIPLE, 2)
 
     #: The contingency follows the work it covers — the session overheads plus
-    #: the probes that remain. At the default it is exactly the frozen model's
-    #: own figure, `1139.04 x 0.10`.
+    #: the probe minutes that remain. At the default it is exactly the frozen
+    #: model's own figure, `1139.04 x 0.10`.
     reserves = (
         ("probe_model_contingency",
          round((overhead_total + probe_minutes_owed) * SP.CONTINGENCY_FRACTION, 2)),
-        ("probe_duration_risk", round(dict(full_reserves)["probe_duration_risk"]
-                                      * scale, 2)),
-        ("generation_length_risk",
-         round(dict(full_reserves)["generation_length_risk"] * scale, 2)),
+        ("probe_duration_risk", duration_risk),
+        ("generation_length_risk", generation_risk),
     )
     reserve_total = sum(m for _, m in reserves)
 
@@ -589,8 +631,13 @@ def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
         #: rounding note.
         phases.append(("restore_verified_probes",
                        round(float(restore_minutes), 2)))
-    phases.append((f"{int(probes_remaining)}_probes_remaining",
-                   probe_minutes_owed))
+    #: Named apart so a reader can see which probes are being trained and
+    #: which are only being scored, rather than a single count that hides it.
+    if n_train or not n_score:
+        phases.append((f"{n_train}_probes_train_and_score",
+                       train_phase_minutes))
+    if n_score:
+        phases.append((f"{n_score}_probes_score_only", score_phase_minutes))
     expected_phases = tuple(phases)
     expected = round(sum(m for _, m in expected_phases), 2)
     soft_stop = round(expected + reserve_total, 2)
@@ -598,15 +645,25 @@ def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
     return {
         "expected_phases": expected_phases,
         "soft_stop_reserves": reserves,
-        "probes_remaining": int(probes_remaining),
+        "probes_remaining": n_train + n_score,
+        "train_and_score_probes": n_train,
+        "score_only_probes": n_score,
         "probes_in_protocol": total_probes,
+        "per_probe_minutes": {
+            "train_mean": train_mean, "train_max": train_max,
+            "eval_mean": eval_mean, "eval_max": eval_max,
+            "_reconciled": ("twelve times each reconstructs the record's own "
+                            "bounding_basis totals; checked, not assumed"),
+        },
         "restore_minutes": round(float(restore_minutes), 2),
         "_remaining_work_only": (
             "a completed probe is never retrained, so it is not priced again. "
-            "The arms its remaining probes measure against ARE priced, because "
-            "a replacement resource has a fresh filesystem and must rebuild "
-            "them; that is a replacement runtime necessity, not completed "
-            "science charged twice."),
+            "A probe whose checkpoint was restored but whose scoring failed "
+            "owes the BATTERY and not the trainer, because that is what the "
+            "driver will do with it. The arms the UNTRAINED probes measure "
+            "against ARE priced, because a replacement resource has a fresh "
+            "filesystem and must rebuild them; that is a replacement runtime "
+            "necessity, not completed science charged twice."),
         "full_session_reserves": full_reserves,
         "artifact_recovery_reserve_minutes": recovery,
         #: For a `BudgetSpec`. ZERO, deliberately: see the module note above.

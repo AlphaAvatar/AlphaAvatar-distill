@@ -1261,7 +1261,11 @@ def budget_work(args) -> dict:
                               exclude_attempt=getattr(args, "run_id", ""))
     work = BC.remaining_work(REPO_ROOT, state=state)
     return {"materialization_minutes": work["materialization_minutes"],
-            "probes_remaining": work["n_probes_remaining"],
+            #: THREE states, priced as the driver executes them: an untrained
+            #: probe is trained and scored, a restored trained-but-unscored
+            #: probe owes the battery only.
+            "train_and_score_probes": work["n_train_and_score"],
+            "score_only_probes": work["n_score_only"],
             "restore_minutes": work["restore"]["minutes"]}
 
 

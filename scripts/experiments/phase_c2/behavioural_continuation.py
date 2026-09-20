@@ -333,16 +333,32 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
     remaining = sorted(set(unscored) | set(untrained))
 
     per_arm = arm_minutes(repo_root)
-    arms_needed = sorted({expected[pid] for pid in remaining})
-    #: The unknown confirmation candidate, bounded by the dearest admissible
-    #: one rather than by a mean.
+    #: ARMS ARE OWED BY UNTRAINED PROBES ONLY. A trained-but-unscored probe
+    #: already HAS its trained checkpoint; rebuilding the initialization it was
+    #: trained from would be building bytes nothing will read.
+    arms_needed = {expected[pid] for pid in untrained}
     if "<unranked>" in arms_needed:
-        arms_needed.remove("<unranked>")
-        dearest = max((a for a in per_arm if a != SCH.ANCHOR),
-                      key=lambda a: per_arm[a])
-        if dearest not in arms_needed:
-            arms_needed.append(dearest)
-        arms_needed.sort()
+        #: SCREENING HAS NOT COMMITTED, so any of the five can still be the
+        #: advanced candidate — and which one wins is decided by screening
+        #: scores, which have nothing to do with build cost.
+        #:
+        #: This used to substitute the DEAREST admissible candidate as a cost
+        #: proxy and then hand that id to Stage P as an arm to materialize. A
+        #: proxy chosen for its price was thereby deciding which candidate's
+        #: bytes exist: if the ranking advanced any other leaf, stage C would
+        #: meet `durable_path = NOT_MATERIALIZED` and the campaign would fail
+        #: for a winner that was perfectly legitimate.
+        #:
+        #: So every candidate that can still win is materialized. The bound is
+        #: more conservative than a single worst case and it is EXACTLY what
+        #: executes, which is the property a proxy cannot have. Deferring the
+        #: winner's build to after the ranking would price it more tightly, at
+        #: the cost of a new conditional materialization on the paid path; the
+        #: saving is a couple of arms and the risk is a new failure mode
+        #: between stages R and C.
+        arms_needed.discard("<unranked>")
+        arms_needed |= {c for c in per_arm if c != SCH.ANCHOR}
+    arms_needed = sorted(arms_needed)
     unknown_arms = [a for a in arms_needed if a not in per_arm]
     if unknown_arms:
         raise ContinuationError(
@@ -356,7 +372,8 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
 
     decomposition = BH.session_decomposition(
         repo_root, materialization_minutes=materialization,
-        probes_remaining=len(remaining), restore_minutes=minutes)
+        train_and_score_probes=len(untrained),
+        score_only_probes=len(unscored), restore_minutes=minutes)
     return {
         "probes_expected": len(expected),
         "probes_complete": complete,
@@ -364,9 +381,18 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
         "probes_untrained": untrained,
         "probes_remaining": remaining,
         "n_probes_remaining": len(remaining),
+        "n_train_and_score": len(untrained),
+        "n_score_only": len(unscored),
         "committed_candidate": committed,
         "screening_committed": bool(committed),
         "arms_needed": arms_needed,
+        "_arms_are_owed_by_untrained_probes": (
+            "a trained-but-unscored probe already holds its trained "
+            "checkpoint and resumes at scoring, so the initialization it was "
+            "trained from is not rebuilt. When screening has not committed, "
+            "every candidate that can still be advanced IS materialized: which "
+            "one wins is decided by screening scores, and a cost proxy must "
+            "never decide which candidate's bytes exist."),
         "materialization_minutes": materialization,
         "restore": {
             "probes": restorable,

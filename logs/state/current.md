@@ -226,6 +226,38 @@ rehearsal fixture hid this by pre-writing a completed record, which is stronger
 than anything production produces; the new test drives the real order and
 pre-writes nothing.
 
+### R10's last two edges: a cost proxy is not an identity, and three states price as three
+
+**A cost proxy was deciding which candidate's bytes exist.** While screening is
+uncommitted the confirmation rung's candidate is unknown, so the dearest
+admissible candidate was substituted as a materialization bound — sound as a
+*cost* figure, and then handed to Stage P as an *arm identity*. Screening
+scores decide who wins and have nothing to do with build cost, so a ranking
+that advanced any other leaf would meet `NOT_MATERIALIZED` at stage C and the
+campaign would fail for a perfectly legitimate winner. The old
+partial-screening test stopped at "a partial field cannot rank" and never ran
+`P → S → R → C`, so it could not see it.
+
+**Plan A**, chosen over deferring the winner's build to after the ranking:
+while screening is uncommitted, every candidate that can still be advanced is
+materialized. The bound is more conservative than one worst case and it is
+*exactly what executes*, which is the property a proxy cannot have. The
+alternative saves a couple of arms and buys a new conditional materialization
+between stages R and C — new machinery on the paid path for about `$0.8`.
+Once screening has committed, only the advanced candidate and the anchor are
+owed.
+
+**Remaining work now prices the three states the driver executes.** A
+trained-but-unscored probe resumes at scoring, so it owes the battery and not
+the trainer, and owes no arm rebuild at all — it already holds its trained
+checkpoint. `session_decomposition` takes `train_and_score_probes` and
+`score_only_probes`; `arms_needed` is derived from the *untrained* probes only.
+The split is not invented: the frozen record carries per-probe `train_minutes`
+and `eval_minutes` as means and observed maxima, twelve times each
+reconstructs its own `bounding_basis` totals, and that reconstruction is
+checked — a record whose parts stop summing refuses rather than being split on
+an assumption. Defaults still reproduce `1294.87` / `1800.53` exactly.
+
 **Cumulative campaign spend is all-in.** `SessionRunner` records
 `cost.actual_usd` from `self.usd()`, which is GPU only — the provider bills the
 provisioned container disk separately and the runner never sees it. Summing

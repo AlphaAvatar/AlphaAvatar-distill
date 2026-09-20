@@ -86,8 +86,9 @@
    "rule": "A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those probes need rebuilt on a fresh filesystem, and the restore of its verified probes \u2014 never on a fresh full session.",
    "why": "reserving a whole session per attempt refused every continuation by construction: with a ceiling sized for one session, any prior spend above $0 made settled + reserved exceed it. Pricing the remainder is what makes the cumulative rule usable instead of merely safe.",
    "enforced_by": "autoinit_c2_behavioural_launch.py :: campaign_remaining_work",
-   "_how": "behavioural.session_decomposition prices remaining work, and a fresh campaign's remaining work is all of it, so the full session and every continuation come from ONE derivation. A completed probe is never priced again; a complete campaign owes nothing and may not continue at all. Stage P CONSUMES that decision: it materializes only the arms the continuation manifest lists, so the GPU work it does and the budget that permitted it describe the same arms. It used to rebuild all six unconditionally, which let a continuation budget sit below the work.",
-   "_fail_closed": "if the remainder does not fit the approved campaign ceiling the gate refuses and returns to the maintainer. The experiment is not shortened to fit and the ceiling is not raised."
+   "_how": "behavioural.session_decomposition prices remaining work, and a fresh campaign's remaining work is all of it, so the full session and every continuation come from ONE derivation. It prices the THREE states the driver executes: a completed probe is never priced again; a probe whose checkpoint was restored but whose scoring failed owes the battery and not the trainer, and owes no initialization rebuild because it already holds its trained checkpoint; an untrained probe owes training, scoring and its arm. The train/eval split comes from the record's own measured per-probe fields and is reconciled against the totals it derives from them, so it is never an assumption about a frozen document. Stage P CONSUMES the resulting arms_needed, so the GPU work it does and the budget that permitted it describe the same arms.",
+   "_fail_closed": "if the remainder does not fit the approved campaign ceiling the gate refuses and returns to the maintainer. The experiment is not shortened to fit and the ceiling is not raised.",
+   "_a_cost_proxy_never_decides_identity": "while screening is uncommitted, ANY of the five candidates can still be advanced, and which one wins is decided by screening scores that have nothing to do with build cost. So every candidate that can still win is materialized. Naming the dearest admissible candidate as the confirmation arm was a sound COST bound and an unsound EXECUTION identity: if the ranking advanced any other leaf, stage C would meet an unmaterialized arm and the campaign would fail for a legitimate winner. Once screening has committed, only the advanced candidate and the anchor are owed."
   }
  ],
  "what_a_resume_may_never_do": [
@@ -108,7 +109,10 @@
   "consume restored bytes that carry no training descriptor",
   "count a predecessor's spend as GPU-only against an all-in ceiling",
   "default an unreadable predecessor cost to $0",
-  "materialize arms the remaining-work budget did not fund, or train from arms it did not materialize"
+  "materialize arms the remaining-work budget did not fund, or train from arms it did not materialize",
+  "let a cost proxy decide which candidate's bytes are materialized",
+  "rebuild the initialization of a probe that already holds its trained checkpoint",
+  "price a score-only probe as a full training probe"
  ],
  "if_a_campaign_cannot_be_completed": "stop and report. A behavioural selection that trained nine of twelve probes has no verdict and must not be presented as having a partial one. The nine preserved probes are evidence about what was trained, not about which candidate wins. Whether a fresh campaign may reuse them is a maintainer decision, and this document's default answer is NO.",
  "_pre_science_retries_are_different": "an invocation that aborts BEFORE formal training begins produced no measurement to retry. AGENTS.md P12.1 permits diagnosing, repairing and retrying that under a fresh attempt identity inside the same cumulative budget. This document governs the case where training HAS begun.",
@@ -136,5 +140,5 @@
    "arms": "a continuation rebuilds only the arms its remaining probes need, which is what its budget paid for. Every candidate's frozen METADATA is assembled either way, so the schedule, the ranking and the frozen tie-break are unchanged by building fewer arms. Training from an arm that was not built is a refusal, not an improvisation."
   }
  },
- "record_sha256": "ad1a792c0ed1887cbc116c95a827632eb29bb8fb4beea6a6abde54d797f6d7c1"
+ "record_sha256": "15451b6325e03466f97e01d2acc8ef06fa097b75e2e69a9a68a10dc912bdfbdf"
 }

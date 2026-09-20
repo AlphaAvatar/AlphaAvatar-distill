@@ -225,7 +225,7 @@ def _produce(pod: _Pod, probe_id: str, *, rung: str, arm: str, seed: int,
     record = {"probe_id": probe_id, "campaign": BG.CAMPAIGN_ID,
               "rung": rung, "arm": arm, "seed": seed,
               "model_dir": model_remote,
-              "initialization_artifact_digest": f"init-{arm}",
+              "initialization_artifact_digest": _init_digest(arm),
               "config_sha256": "c" * 64, "complete": True,
               "durable": {"identity": identity}}
     if scored:
@@ -286,6 +286,21 @@ def _candidate_ids() -> list[str]:
     container that has no such path.
     """
     return [leaf.state_id for leaf in BG.candidate_leaves(REPO)]
+
+
+def _init_digest(arm: str) -> str:
+    """The REAL initialization digest the schedule derives for this arm.
+
+    Not a placeholder. `assert_reuse_matches` compares a restored probe's
+    descriptor against the descriptor the rung builds from the frozen record,
+    so a fixture using `init-<arm>` describes a probe no rung would accept —
+    and any test that drove the real schedule would fail for the wrong reason.
+    """
+    if arm == SCH.ANCHOR:
+        return BH.b_binding(REPO, device="cuda")[
+            "required_identity"]["artifact_digest"]
+    return next(leaf.artifact_digest for leaf in BG.candidate_leaves(REPO)
+                if leaf.state_id == arm)
 
 
 def _screening_ids() -> list[tuple[str, str, int]]:
@@ -707,9 +722,12 @@ def test_partial_screening_continuation_owes_only_the_rest(tmp_path, repo,
         REPO, state=BC.campaign_state(L.campaign_store(BG.CAMPAIGN_ID, store)))
     assert len(work["probes_complete"]) == 3
     assert work["n_probes_remaining"] == 9
-    #: Only the arms the REMAINING probes need, plus the dearest admissible
-    #: candidate for the unranked confirmation rung.
-    assert len(work["arms_needed"]) == 4
+    assert work["n_train_and_score"] == 9 and work["n_score_only"] == 0
+    #: SCREENING HAS NOT COMMITTED, so any of the five can still be advanced
+    #: and every one of them is materialized. A cost proxy must never decide
+    #: which candidate's bytes exist — which is what naming the dearest
+    #: admissible candidate as the confirmation arm did.
+    assert set(work["arms_needed"]) == set(_candidate_ids()) | {SCH.ANCHOR}
     assert work["decomposition"]["hard_minutes"] < 1800.53
 
     driver = _driver(pod2, "attempt2")
@@ -1184,7 +1202,7 @@ def test_a_restored_unscored_probe_is_scored_not_retrained(tmp_path, repo,
     name, arm, seed = ids[0]
     assert name in driver.training and name not in driver.scores
 
-    probe = SCH.Probe("screening", arm, seed, f"init-{arm}", "/unused")
+    probe = SCH.Probe("screening", arm, seed, _init_digest(arm), "/unused")
     #: `train_one` raises if called. The rung must not call it.
     driver.run_rung("screening", [probe], REPO / C2S.BATTERY_PATH)
     assert name in driver.scores
@@ -1215,7 +1233,7 @@ def test_scoring_a_restored_probe_charges_the_battery_not_the_trainer(
     driver.load_campaign_journal()
     name, arm, seed = ids[0]
     driver.run_rung("screening",
-                    [SCH.Probe("screening", arm, seed, f"init-{arm}", "/x")],
+                    [SCH.Probe("screening", arm, seed, _init_digest(arm), "/x")],
                     REPO / C2S.BATTERY_PATH)
     assert name in driver.scores
 
@@ -1426,3 +1444,246 @@ def test_the_disk_rate_comes_from_the_authorizations_own_figures(tmp_path,
     #: quantum.
     raw = DISK_HARD / RUNTIME * 60.0
     assert raw <= actual["disk_usd"] <= raw + BG.DOLLAR_QUANTUM_USD
+
+
+# ---------------------------------------------------------------------------
+# R10: a cost proxy must never decide which candidate's bytes exist
+# ---------------------------------------------------------------------------
+
+class _FullFlow(_StageP):
+    """Drives the real P -> S -> R -> C, with only hardware seams replaced.
+
+    `score_probe` returns a controlled `correct_overall` per arm so the test
+    decides which candidate the MECHANICAL ranking advances. Everything that
+    chooses arms, refuses unbuilt ones, ranks, breaks ties and schedules
+    confirmation is production code.
+    """
+
+    #: arm -> correct_overall. Anything unlisted scores low.
+    wants: dict = {}
+
+    def train_one(self, name, config) -> Path:
+        out = Path(self.a.eval_dir) / "_train" / name
+        _write_checkpoint(out / "checkpoints" / "step_0001023" / "model")
+        (out / "checkpoints" / "latest.txt").write_text("step_0001023\n")
+        (out / "run_completion.json").write_text(
+            json.dumps({"final_step": 1023}) + "\n")
+        return out
+
+    def probe_config(self, probe) -> Path:
+        cfg = Path(self.a.eval_dir) / f"{probe.probe_id}.cfg.json"
+        cfg.parent.mkdir(parents=True, exist_ok=True)
+        cfg.write_text(json.dumps({"probe": probe.probe_id}) + "\n")
+        return cfg
+
+    def attest(self, battery):
+        self.evaluation_protocol = object()
+        return {"battery": battery.name, "evaluation_protocol_hash": "x"}
+
+    def score_probe(self, probe, model_dir, *, battery, run_completion) -> dict:
+        rows = [{"id": f"p{i:04d}", "set": "gsm8k", "scorable": True,
+                 "correct": True, "usable": True} for i in range(10)]
+        per_sample = self.audit / f"{probe.probe_id}_per_sample.jsonl"
+        per_sample.write_text("".join(json.dumps(r) + "\n" for r in rows))
+        return {"probe_id": probe.probe_id, "rung": probe.rung,
+                "arm": probe.arm, "seed": probe.seed,
+                "correct_overall": self.wants.get(probe.arm, 0.10),
+                "usable_rollout_rate": 1.0,
+                "result_path": "r", "result_sha256": "s",
+                "per_sample_path": str(per_sample), "per_sample_sha256": "t"}
+
+
+def test_the_screening_winner_may_be_any_candidate_not_the_cost_proxy(
+        tmp_path, repo, transport):
+    """R10 edge case 1, driven through P -> S -> R -> C for real.
+
+    The dearest candidate is a COST bound for an unranked confirmation rung. It
+    used to be handed to Stage P as an arm identity, so if the mechanical
+    ranking advanced any other leaf — which screening scores decide, and they
+    have nothing to do with build cost — stage C met `NOT_MATERIALIZED` and the
+    campaign failed for a perfectly legitimate winner. The old partial-screening
+    test never ran past the rank, so it could not see this.
+    """
+    store = tmp_path / "store"
+    per_arm = BC.arm_minutes(REPO)
+    candidates = _candidate_ids()
+    dearest = max(candidates, key=lambda a: per_arm[a])
+
+    #: A partial screening continuation: three probes restored, three owed.
+    done = [(pid, "screening", arm, seed)
+            for pid, arm, seed in _screening_ids()[:3]]
+    restored_arms = {arm for _, arm, _ in _screening_ids()[:3]}
+    #: The CHEAPEST candidate whose screening probe this session still runs —
+    #: so the controlled score decides the ranking, and the winner is the last
+    #: arm any cost proxy would have named.
+    winner = min((c for c in candidates if c not in restored_arms),
+                 key=lambda a: per_arm[a])
+    assert winner != dearest
+    pod2, _ = _continue_to(tmp_path, store, transport, complete=done)
+
+    work = BC.remaining_work(
+        REPO, state=BC.campaign_state(L.campaign_store(BG.CAMPAIGN_ID, store)))
+    assert work["screening_committed"] is False
+    assert winner in work["arms_needed"], (
+        "the winner's arm is not in the set the budget funded, so a cost "
+        "proxy is still deciding which candidate's bytes exist")
+    assert dearest in work["arms_needed"]
+
+    driver = _FullFlow(_stage_p_driver(pod2, "attempt2",
+                                       manifest=_pod_view(pod2)).a)
+    driver.wants = {winner: 0.99}
+    driver.restore_campaign()
+    driver.load_campaign_journal()
+    driver.stage_p()
+
+    #: Every candidate that can still win was built, the proxy among them.
+    assert winner in driver.built and dearest in driver.built
+    assert all(c["materialized"] for c in driver.candidates)
+
+    driver.stage_s()
+    driver.stage_r()
+    assert driver.advanced["state_id"] == winner, (
+        "this test only means something if the ranking advances a leaf that "
+        "is not the cost proxy")
+    assert driver.advanced["state_id"] != dearest
+
+    #: THE POINT: confirmation runs for the winner, from real bytes.
+    driver.stage_c()
+    assert len(driver.confirmation) == 6
+    assert {p.arm for p in driver.confirmation} == {winner, SCH.ANCHOR}
+    for probe in driver.confirmation:
+        assert probe.initialization_path != D.C2BehaviouralDriver.NOT_MATERIALIZED
+        assert probe.probe_id in driver.scores
+
+
+def test_only_a_trained_unscored_probe_remains(tmp_path, repo, transport):
+    """R10 edge case 2: no arm is owed and nothing is trained.
+
+    Its checkpoint exists and was verified; rebuilding the initialization it
+    was trained from would be building bytes nothing reads, and pricing it as a
+    full probe charges a trainer that will not run.
+    """
+    store = tmp_path / "store"
+    advanced = _candidate_ids()[0]
+    seeds = BH.protocol(REPO)["behavioural_selection"]["seeds"]["confirmation"]
+    done = [(pid, "screening", arm, seed)
+            for pid, arm, seed in _screening_ids()]
+    last = None
+    for seed in seeds:
+        for arm in (advanced, SCH.ANCHOR):
+            pid = f"confirmation.{arm}.s{seed}"
+            done.append((pid, "confirmation", arm, int(seed)))
+            last = pid
+    pod2, _ = _continue_to(tmp_path, store, transport, complete=done,
+                           ranking=advanced, unscored={last})
+
+    work = BC.remaining_work(
+        REPO, state=BC.campaign_state(L.campaign_store(BG.CAMPAIGN_ID, store)))
+    assert work["probes_trained_not_scored"] == [last]
+    assert work["probes_untrained"] == []
+    assert work["n_train_and_score"] == 0
+    assert work["n_score_only"] == 1
+    assert work["arms_needed"] == [], (
+        "a trained-but-unscored probe already holds its checkpoint; its "
+        "initialization must not be rebuilt")
+    assert work["materialization_minutes"] == 0.0
+
+    d = work["decomposition"]
+    assert d["train_and_score_probes"] == 0 and d["score_only_probes"] == 1
+    assert not any(n.endswith("_probes_train_and_score")
+                   for n, _ in d["expected_phases"])
+    assert any(n == "1_probes_score_only" for n, _ in d["expected_phases"])
+    #: The minutes come from the RECORD's own per-probe eval mean — not from a
+    #: second call to the function under test, which would move with it and
+    #: could never fail.
+    cost = json.loads((REPO / BH.PRICING).read_text())[
+        "behavioural_selection"]["probe_cost"]
+    eval_mean = float(cost["eval_minutes"]["mean"])
+    train_mean = float(cost["train_minutes"]["mean"])
+    assert dict(d["expected_phases"])["1_probes_score_only"] == pytest.approx(
+        eval_mean, abs=0.01), (
+        "a score-only probe is being charged the trainer")
+    assert d["per_probe_minutes"]["train_mean"] == train_mean
+    #: And materially cheaper than a full probe, by about the training mean.
+    as_full = BH.session_decomposition(
+        REPO, materialization_minutes=0.0, train_and_score_probes=1,
+        score_only_probes=0, restore_minutes=d["restore_minutes"])
+    assert d["hard_minutes"] < as_full["hard_minutes"]
+    assert (as_full["expected_minutes"] - d["expected_minutes"]
+            ) == pytest.approx(train_mean, abs=0.02)
+
+    #: And the driver really does only score it.
+    driver = _NeverTrains(_stage_p_driver(pod2, "attempt2",
+                                          manifest=_pod_view(pod2)).a)
+    driver.restore_campaign()
+    assert driver.arms_needed == set(), (
+        "an empty arms_needed must mean 'none owed', not 'no manifest'")
+    driver.stage_p()
+    assert driver.built == []
+    driver.load_campaign_journal()
+    arm, seed = advanced if last.startswith("confirmation." + advanced) else SCH.ANCHOR, int(seeds[-1])
+    probe = SCH.Probe("confirmation", last.split(".")[1], seed,
+                      _init_digest(last.split(".")[1]), "/unused")
+    driver.run_rung("confirmation", [probe], REPO / C2S.BATTERY_PATH)
+    assert last in driver.scores
+
+
+def test_a_mixed_campaign_state_buckets_every_probe_correctly(tmp_path, repo,
+                                                              transport):
+    """R10, all three buckets at once, and Stage P prepares only the untrained.
+
+    Complete, trained-but-unscored and untrained probes must land in different
+    cost buckets, and only the untrained ones may cause an initialization to be
+    built.
+    """
+    store = tmp_path / "store"
+    ids = _screening_ids()
+    #: Four restored: three scored, one trained-only. Two never started.
+    done = [(pid, "screening", arm, seed) for pid, arm, seed in ids[:4]]
+    unscored_id = ids[3][0]
+    pod2, _ = _continue_to(tmp_path, store, transport, complete=done,
+                           unscored={unscored_id})
+
+    work = BC.remaining_work(
+        REPO, state=BC.campaign_state(L.campaign_store(BG.CAMPAIGN_ID, store)))
+    assert len(work["probes_complete"]) == 3
+    assert work["probes_trained_not_scored"] == [unscored_id]
+    #: Two screening probes never started, plus all six confirmation probes.
+    assert len(work["probes_untrained"]) == 8
+    assert work["n_train_and_score"] == 8
+    assert work["n_score_only"] == 1
+    assert work["n_probes_remaining"] == 9
+
+    #: The unscored probe's arm is NOT owed on its account. Screening is
+    #: uncommitted, so every candidate is owed for the confirmation rung
+    #: anyway — what must hold is that the anchor and candidates come from the
+    #: untrained probes, never from the restored one.
+    from_untrained = {ids_arm for pid, ids_arm, _ in ids
+                      if pid in work["probes_untrained"]}
+    assert from_untrained <= set(work["arms_needed"])
+
+    driver = _NeverTrains(_stage_p_driver(pod2, "attempt2",
+                                          manifest=_pod_view(pod2)).a)
+    driver.restore_campaign()
+    assert driver.arms_needed == set(work["arms_needed"])
+    driver.stage_p()
+    assert sorted(driver.built) == sorted(work["arms_needed"])
+
+    #: Pricing: eight trainings and one scoring, not nine trainings — asserted
+    #: in absolute minutes from the record's own per-probe figures.
+    d = work["decomposition"]
+    cost = json.loads((REPO / BH.PRICING).read_text())[
+        "behavioural_selection"]["probe_cost"]
+    train_mean = float(cost["train_minutes"]["mean"])
+    eval_mean = float(cost["eval_minutes"]["mean"])
+    phases = dict(d["expected_phases"])
+    assert phases["8_probes_train_and_score"] == pytest.approx(
+        8 * (train_mean + eval_mean), abs=0.01)
+    assert phases["1_probes_score_only"] == pytest.approx(eval_mean, abs=0.01)
+    nine_full = BH.session_decomposition(
+        REPO, materialization_minutes=work["materialization_minutes"],
+        train_and_score_probes=9, score_only_probes=0,
+        restore_minutes=d["restore_minutes"])
+    assert d["hard_minutes"] < nine_full["hard_minutes"]
+    assert (nine_full["expected_minutes"] - d["expected_minutes"]
+            ) == pytest.approx(train_mean, abs=0.02)
