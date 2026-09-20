@@ -11,8 +11,22 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 **Nothing is running. Nothing is billing. No pod exists.** Attempt 3's pod
 `ulit767od813i8` was deleted behind its teardown gate after 386.2 min; the
-provider confirms it is gone and an account-wide list returns `[]`. **Nothing
-is prepared for launch.**
+provider confirms it is gone and an account-wide list returns `[]`.
+
+**The C2 behavioural launch is AUTHORIZED and the chain is being built.** An
+independent final review returned **GO** on `197088e` and the maintainer
+granted the spend on 2026-09-21: campaign `c2-behavioural-12probe-v1`, a
+**cumulative** all-in ceiling of **`$33.2099`** across every run attempt and
+provider resource, at a quoted L40S securePrice of `$1.09/h`. The live
+securePrice was re-queried at issuance and is `$1.09/h` — the reviewed basis
+unchanged, so no dollar authorization was materially altered and no return to
+the maintainer was owed. Owner:
+[`attempt1/governance/grant.json`](../stages/stage-1/phase_c2_behavioural/runs/attempt1/governance/grant.json).
+
+Chain order, and it is binding: grant → launch-bound readiness → commit only
+the record → authorization → commit only the artifact → exact-session bundle →
+final live quote and all pre-provider gates → provider resource → formal
+execution → evidence, closeout, provider-confirmed teardown.
 
 **All five Top-5 checkpoints are reconstructed, exact, and durable off-pod.**
 Attempt 9 (pod `i0uku41wc6ph3e`, 113.8 min, `$2.07`) reproduced every one of the
@@ -317,8 +331,10 @@ Three defects were found adjacent to this work and fixed, all `$0`:
   a reason nobody could reproduce. The seed is now a stable sha256 of the
   probe's identity.
 
-**No grant, readiness record, authorization, bundle or provider resource
-exists**, and none may be created without a maintainer decision. Owners:
+**The grant now exists; the rest of the chain is being built in order.** What
+this section said before — that no grant existed and none could be created
+without a maintainer decision — was true until 2026-09-21, when that decision
+was made. Owners:
 [`c2_behavioural_grant_proposal.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json)
 (regenerate with `scripts/autoinit/write_c2_behavioural_proposal.py`) and
 [`c2_behavioural_resume_preregistration.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_resume_preregistration.json).

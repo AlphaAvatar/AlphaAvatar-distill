@@ -116,6 +116,20 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     "phase_c2_replay": (
         "experiments.phase_c2.replay_pod_environment",
         "sweep_contract"),
+    #: A SIXTH, and the warning three entries above is why this line exists at
+    #: all: without it the behavioural chain is unusable at exactly the step a
+    #: launch review authorizes. The launch-bound sweep could not be DRIVEN,
+    #: and `readiness_gate` would refuse forever with a message about a missing
+    #: record rather than a missing registration.
+    #:
+    #: It binds its own launcher, its own session id, its own executable
+    #: closure and its own pod selection — `tests/c2_behavioural_preflight`,
+    #: which the other five would each fail on a correct behavioural tree — and
+    #: its record declares its own schema, so no other C2 record can satisfy
+    #: its verifier or it theirs.
+    "phase_c2_behavioural": (
+        "experiments.phase_c2.behavioural_pod_environment",
+        "sweep_contract"),
 }
 
 
