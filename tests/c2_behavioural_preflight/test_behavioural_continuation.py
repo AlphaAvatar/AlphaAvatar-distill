@@ -39,6 +39,7 @@ from experiments.phase_c2 import behavioural as BH  # noqa: E402
 from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
 from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
 from experiments.phase_c2 import behavioural_schedule as SCH  # noqa: E402
+from experiments.phase_c2 import scoring as C2S  # noqa: E402
 
 import autoinit_c2_behavioural_launch as L  # noqa: E402
 import autoinit_c2_behavioural_driver as D  # noqa: E402
@@ -70,7 +71,7 @@ class _Ctx:
     """A `SessionContext` as the restore and durability steps actually use it."""
 
     def __init__(self, pod: _Pod, store: Path, run_id: str, *,
-                 scr: Path | None = None) -> None:
+                 scr: Path | None = None, all_in: float = ALL_IN) -> None:
         self.pod = pod
         self.evidence: dict = {}
         self.host = "fake-host"
@@ -82,7 +83,7 @@ class _Ctx:
             "scr": str(scr or pod.root / "scr")})()
         self.auth = type("Auth", (), {
             "campaign_id": BG.CAMPAIGN_ID, "gpu_hard_usd": GPU_HARD,
-            "disk_hard_usd": DISK_HARD, "all_in_hard_usd": ALL_IN,
+            "disk_hard_usd": DISK_HARD, "all_in_hard_usd": all_in,
             "rate_usd_per_hour": 1.09, "hard_runtime_minutes": RUNTIME})()
         self.target = _Target(pod)
 
@@ -150,6 +151,12 @@ def transport(monkeypatch):
                 pod = pods.get(host)
                 if pod is None:
                     raise AssertionError(f"scp to unregistered pod {host!r}")
+                #: A driver run in-process is given HOST paths for its audit
+                #: and eval directories, so what it records is already inside
+                #: this pod's root and must not be prefixed twice. A
+                #: pod-absolute path (`/workspace/…`) still maps.
+                if Path(remote).is_relative_to(pod.root):
+                    return Path(remote)
                 return pod.local(remote)
             return Path(spec)
 
@@ -294,14 +301,42 @@ def _screening_ids() -> list[tuple[str, str, int]]:
 # ---------------------------------------------------------------------------
 
 def _session_record(repo_root: Path, run_id: str, *, created=True,
-                    confirmed_gone=True, actual_usd=0.0) -> Path:
+                    confirmed_gone=True, actual_usd=0.0,
+                    elapsed_minutes: float | None = None,
+                    omit_elapsed: bool = False) -> Path:
+    """A predecessor's session record, in the shape `SessionRunner` writes.
+
+    `elapsed_minutes` is not decoration: the container disk is billed for the
+    pod's whole lifetime and the runner records only GPU dollars, so the
+    predecessor's disk has to be derived from its minutes. A record without
+    them is UNKNOWN, which `omit_elapsed` exists to exercise.
+
+    Defaults to the minutes that GPU spend implies at the authorized rate, so
+    a test that only cares about dollars stays self-consistent.
+    """
     path = repo_root / L.session_record_path(run_id)
     path.parent.mkdir(parents=True, exist_ok=True)
+    cost: dict = {"actual_usd": actual_usd}
+    if not omit_elapsed:
+        cost["elapsed_minutes"] = (
+            actual_usd / 1.09 * 60.0 if elapsed_minutes is None
+            else elapsed_minutes)
     path.write_text(json.dumps({
         "provider_resource_created": created,
         "provider_confirms_gone": confirmed_gone,
-        "cost": {"actual_usd": actual_usd}}))
+        "cost": cost}))
     return path
+
+
+def _expected_disk_usd(minutes: float) -> float:
+    """The disk the gate must charge a predecessor, from the SAME basis.
+
+    Ceiled to the 4-decimal quantum, because a derived spend accumulating
+    against a ceiling rounds UP.
+    """
+    import math
+
+    return math.ceil(DISK_HARD / RUNTIME * minutes * 10_000) / 10_000
 
 
 def _run_manifest(repo_root: Path, run_id: str,
@@ -375,7 +410,17 @@ def test_a_paid_attempt_with_no_durable_probe_is_still_a_predecessor(
     ctx = _Ctx(_Pod(tmp_path / "pod2"), store, "attempt2")
     ok, why = L.campaign_continuation_gate(ctx)
     assert "first resource" not in why
-    assert ctx.evidence["campaign"]["settled_campaign_spend_usd"] == 3.41
+    #: ALL-IN: the record's GPU actual PLUS the disk that pod's minutes imply.
+    camp = ctx.evidence["campaign"]
+    minutes = 3.41 / 1.09 * 60.0
+    assert camp["settled_campaign_gpu_usd"] == pytest.approx(3.41, abs=1e-4)
+    assert camp["settled_campaign_disk_usd"] == pytest.approx(
+        _expected_disk_usd(minutes), abs=1e-4)
+    assert camp["settled_campaign_spend_usd"] == pytest.approx(
+        3.41 + _expected_disk_usd(minutes), abs=1e-4)
+    assert camp["settled_campaign_spend_usd"] > 3.41, (
+        "the predecessor's container disk is missing from the cumulative "
+        "campaign spend again")
     #: A full session's remaining work plus $3.41 does not fit one ceiling.
     assert not ok
     assert "cumulative across every resource" in why
@@ -853,7 +898,10 @@ def test_a_continuation_that_fits_the_remaining_ceiling_is_permitted(
     ok, why = L.campaign_continuation_gate(ctx)
     assert ok, why
     campaign = ctx.evidence["campaign"]
-    assert campaign["settled_campaign_spend_usd"] == 20.0
+    minutes = 20.0 / 1.09 * 60.0
+    assert campaign["settled_campaign_gpu_usd"] == pytest.approx(20.0, abs=1e-4)
+    assert campaign["settled_campaign_spend_usd"] == pytest.approx(
+        20.0 + _expected_disk_usd(minutes), abs=1e-4)
     assert (campaign["settled_campaign_spend_usd"]
             + campaign["this_session_planned_all_in_usd"]) <= (
         campaign["campaign_approved_all_in_usd"] + BG.DOLLAR_QUANTUM_USD)
@@ -959,3 +1007,422 @@ def test_an_empty_attempt_directory_is_not_a_predecessor(tmp_path, repo):
     assert L.campaign_attempts(BG.CAMPAIGN_ID, exclude="attempt2",
                                store=tmp_path / "store",
                                repo_root=repo) == []
+
+
+# ---------------------------------------------------------------------------
+# Stage P consumes `arms_needed`, and `run_rung` has three states
+# ---------------------------------------------------------------------------
+
+class _StageP(D.C2BehaviouralDriver):
+    """The real driver with only the hardware seams replaced.
+
+    `materialize_arm` and `materialize_b` RECORD what they were asked to build
+    and write a real checkpoint; the budget admission inside them is production
+    code and still runs. Everything that decides WHICH arms are asked for —
+    `arm_is_needed`, the frozen-order assertion, the metadata assembly — is the
+    production path.
+    """
+
+    def __init__(self, args) -> None:
+        super().__init__(args)
+        self.built: list[str] = []
+
+    def verify_teacher(self) -> None:
+        self.teacher_path = "/fake/teacher"
+
+    def release_device(self) -> dict:
+        return {"verdict": "no device"}
+
+    def materialize_arm(self, label, spec, *, required, bounded_minutes,
+                        config_overrides=None) -> str:
+        if not self.afford(bounded_minutes, f"materializing {label}"):
+            raise D.C2DriverError(f"budget refuses {label}")
+        self.built.append(label)
+        d = _write_checkpoint(Path(self.a.b_workdir) / label / "model")
+        return str(d)
+
+    def materialize_b(self, binding) -> str:
+        if not self.afford(self.a.b_build_minutes, "materializing B"):
+            raise D.C2DriverError("budget refuses B")
+        self.built.append(SCH.ANCHOR)
+        return str(_write_checkpoint(Path(self.a.b_workdir) / "B" / "model"))
+
+
+def _stage_p_driver(pod: _Pod, run_attempt: str, *, manifest: Path | None):
+    args = D.build_parser().parse_args([
+        "--campaign", BG.CAMPAIGN_ID, "--run-attempt", run_attempt,
+        *(["--continuation-manifest", str(manifest)] if manifest else []),
+        "--audit-dir", str(pod.local(L.AUDIT_DIR)),
+        "--eval-dir", str(pod.local(L.EVAL_DIR)),
+        "--b-workdir", str(pod.local(L.ARM_DIR)),
+        "--status-path", str(pod.root / "status.txt"), "--device", "cuda",
+        "--b-build-minutes", "31", "--probe-train-minutes", "75",
+        "--probe-battery-minutes", "45", "--rate", "1.09",
+        "--soft-stop-usd", "300", "--authorized-usd", "320"])
+    return _StageP(args)
+
+
+def test_a_fresh_campaign_stage_p_materializes_all_six(tmp_path, repo):
+    """No manifest, nothing verified: every arm is owed and every arm is built."""
+    pod = _Pod(tmp_path / "pod1")
+    driver = _stage_p_driver(pod, "attempt1", manifest=None)
+    driver.restore_campaign()
+    assert driver.arms_needed is None
+    driver.stage_p()
+
+    assert len(driver.built) == 6, driver.built
+    assert SCH.ANCHOR in driver.built
+    assert sorted(set(driver.built) - {SCH.ANCHOR}) == sorted(_candidate_ids())
+    assert all(c["materialized"] for c in driver.candidates)
+    assert driver.ev["stages"]["P"]["arms_needed"] is None
+
+    #: And the budget for the same state agrees it owes six.
+    work = BC.remaining_work(REPO, state=BC.campaign_state(tmp_path / "none"))
+    assert len(work["arms_needed"]) == 6
+
+
+def test_a_partial_confirmation_continuation_stage_p_builds_only_two(
+        tmp_path, repo, transport):
+    """THE budget/work parity that was broken.
+
+    `remaining_work` charged a continuation for `{advanced, B}` while stage P
+    rebuilt all six unconditionally, so the pre-provider budget could sit below
+    the GPU work the driver would actually do.
+    """
+    store = tmp_path / "store"
+    advanced = _candidate_ids()[0]
+    seeds = BH.protocol(REPO)["behavioural_selection"]["seeds"]["confirmation"]
+    done = [(pid, "screening", arm, seed)
+            for pid, arm, seed in _screening_ids()]
+    for seed in seeds[:2]:
+        for arm in (advanced, SCH.ANCHOR):
+            done.append((f"confirmation.{arm}.s{seed}", "confirmation", arm,
+                         int(seed)))
+    pod2, _ = _continue_to(tmp_path, store, transport, complete=done,
+                           ranking=advanced)
+
+    work = BC.remaining_work(
+        REPO, state=BC.campaign_state(L.campaign_store(BG.CAMPAIGN_ID, store)))
+    assert set(work["arms_needed"]) == {advanced, SCH.ANCHOR}
+
+    driver = _stage_p_driver(pod2, "attempt2", manifest=_pod_view(pod2))
+    driver.restore_campaign()
+    assert driver.arms_needed == {advanced, SCH.ANCHOR}
+    driver.stage_p()
+
+    assert sorted(driver.built) == sorted([advanced, SCH.ANCHOR]), driver.built
+    assert driver.ev["stages"]["P"]["arms_materialized"] == sorted(
+        [advanced, SCH.ANCHOR])
+    #: Metadata for all five candidates survives, so the schedule, the ranking
+    #: and the frozen tie-break are unchanged by building only two.
+    assert [c["state_id"] for c in driver.candidates] == _candidate_ids()
+    assert [c["rank_in_frozen_selection"] for c in driver.candidates] == list(
+        range(5))
+    unbuilt = [c for c in driver.candidates if not c["materialized"]]
+    assert len(unbuilt) == 4
+    assert all(c["durable_path"] == D.C2BehaviouralDriver.NOT_MATERIALIZED
+               for c in unbuilt)
+    assert all(c["artifact_digest"] and c["num_parameters"] for c in unbuilt)
+
+
+def test_training_from_an_unbuilt_arm_is_refused(tmp_path, repo):
+    """A budget and a work plan that disagree must stop, not improvise."""
+    pod = _Pod(tmp_path / "pod")
+    driver = _stage_p_driver(pod, "attempt2", manifest=None)
+    probe = SCH.Probe("screening", "some-arm", 1, "a" * 64,
+                      D.C2BehaviouralDriver.NOT_MATERIALIZED)
+    with pytest.raises(D.C2DriverError, match="did not materialize"):
+        driver.require_materialized_arm(probe)
+    #: A real path passes.
+    driver.require_materialized_arm(
+        SCH.Probe("screening", "some-arm", 1, "a" * 64, "/arms/some-arm"))
+
+
+class _NeverTrains(_StageP):
+    """`train_one` is a defect here: a restored probe must never be retrained."""
+
+    def train_one(self, name, config):
+        raise AssertionError(
+            f"{name} was retrained; R3 forbids retraining a completed probe "
+            "for any outcome")
+
+    def attest(self, battery):
+        self.evaluation_protocol = object()
+        return {"battery": battery.name, "evaluation_protocol_hash": "x"}
+
+    def score_probe(self, probe, model_dir, *, battery, run_completion) -> dict:
+        assert Path(model_dir).is_dir(), model_dir
+        assert run_completion is None, (
+            "the producing pod's run_completion cannot exist here")
+        self.scored_from = getattr(self, "scored_from", [])
+        self.scored_from.append(str(model_dir))
+        return {"probe_id": probe.probe_id, "rung": probe.rung,
+                "arm": probe.arm, "seed": probe.seed,
+                "correct_overall": 0.5, "usable_rollout_rate": 1.0,
+                "result_path": "r", "result_sha256": "s",
+                "per_sample_path": "p", "per_sample_sha256": "t"}
+
+
+def test_a_restored_unscored_probe_is_scored_not_retrained(tmp_path, repo,
+                                                           transport):
+    """State 2 of the rung, which `run_rung` did not implement.
+
+    Its only test was `name in self.scores`, so a trained, destination-verified
+    probe whose scoring had failed fell through to `train_one` and was
+    retrained — against R3 and against this module's own contract.
+    """
+    store = tmp_path / "store"
+    ids = _screening_ids()[:1]
+    done = [(pid, "screening", arm, seed) for pid, arm, seed in ids]
+    pod2, _ = _continue_to(tmp_path, store, transport, complete=done,
+                           unscored={ids[0][0]})
+
+    driver = _NeverTrains(_stage_p_driver(pod2, "attempt2",
+                                          manifest=_pod_view(pod2)).a)
+    driver.restore_campaign()
+    driver.load_campaign_journal()
+    name, arm, seed = ids[0]
+    assert name in driver.training and name not in driver.scores
+
+    probe = SCH.Probe("screening", arm, seed, f"init-{arm}", "/unused")
+    #: `train_one` raises if called. The rung must not call it.
+    driver.run_rung("screening", [probe], REPO / C2S.BATTERY_PATH)
+    assert name in driver.scores
+    assert driver.scored_from == [driver.training[name]["model_dir"]]
+    assert driver.training[name]["scored_on_restored_checkpoint"] is True
+    #: And the record on disk now carries both the descriptor and the score.
+    on_disk = json.loads(
+        (driver.audit / "probes" / f"{name}.json").read_text())
+    assert on_disk["arm"] == arm and on_disk["seed"] == seed
+    assert on_disk["score"]["correct_overall"] == 0.5
+
+
+def test_scoring_a_restored_probe_charges_the_battery_not_the_trainer(
+        tmp_path, repo, transport):
+    """Charging the trainer again would refuse affordable continuations."""
+    store = tmp_path / "store"
+    ids = _screening_ids()[:1]
+    pod2, _ = _continue_to(
+        tmp_path, store, transport,
+        complete=[(pid, "screening", arm, seed) for pid, arm, seed in ids],
+        unscored={ids[0][0]})
+    args = _stage_p_driver(pod2, "attempt2", manifest=_pod_view(pod2)).a
+    #: Enough for the battery, NOT enough for training plus the battery.
+    args.soft_stop_usd = args.rate * (args.probe_battery_minutes + 5) / 60
+    args.authorized_usd = args.soft_stop_usd
+    driver = _NeverTrains(args)
+    driver.restore_campaign()
+    driver.load_campaign_journal()
+    name, arm, seed = ids[0]
+    driver.run_rung("screening",
+                    [SCH.Probe("screening", arm, seed, f"init-{arm}", "/x")],
+                    REPO / C2S.BATTERY_PATH)
+    assert name in driver.scores
+
+
+# ---------------------------------------------------------------------------
+# the REAL scoring-failure path, in production order
+# ---------------------------------------------------------------------------
+
+class _ScoringFails(_StageP):
+    """Trains for real, announces for real, and then scoring raises.
+
+    This is the sequence that actually happens on a pod: training succeeds, the
+    checkpoint becomes durable off-pod, and scoring dies. Before this round the
+    per-probe record was written only AFTER a successful score, so that
+    sequence left the destination holding verified bytes and an ack carrying
+    only the checkpoint's identity — nothing to say which probe it was.
+    """
+
+    def train_one(self, name, config) -> Path:
+        out = Path(self.a.eval_dir) / "_train" / name
+        _write_checkpoint(out / "checkpoints" / "step_0001023" / "model")
+        (out / "checkpoints" / "latest.txt").write_text("step_0001023\n")
+        (out / "run_completion.json").write_text(
+            json.dumps({"final_step": 1023}) + "\n")
+        return out
+
+    def probe_config(self, probe) -> Path:
+        cfg = Path(self.a.eval_dir) / f"{probe.probe_id}.json"
+        cfg.parent.mkdir(parents=True, exist_ok=True)
+        cfg.write_text(json.dumps({"probe": probe.probe_id}) + "\n")
+        return cfg
+
+    def attest(self, battery):
+        self.evaluation_protocol = object()
+        return {"battery": battery.name, "evaluation_protocol_hash": "x"}
+
+    def score_probe(self, probe, model_dir, *, battery, run_completion):
+        raise D.C2DriverError(
+            f"{probe.probe_id}: the evaluator died after training")
+
+
+def test_a_real_scoring_failure_leaves_a_continuable_probe(tmp_path, repo,
+                                                           transport):
+    """End to end, in production order, with nothing pre-written.
+
+    The fixture does NOT write a completed probe record up front — doing that
+    is what hid this defect, because it is stronger than anything the
+    production failure path produces.
+    """
+    store = tmp_path / "store"
+    pod1, pod2 = _Pod(tmp_path / "pod1"), _Pod(tmp_path / "pod2")
+    transport.pods["fake-host"] = pod1
+
+    name, arm, seed = _screening_ids()[0]
+    driver = _ScoringFails(_stage_p_driver(pod1, "attempt1", manifest=None).a)
+    driver.arm_arch = {arm: ("sig", 16)}
+    probe = SCH.Probe("screening", arm, seed, f"init-{arm}", "/arms/x")
+
+    with pytest.raises(D.C2DriverError, match="evaluator died"):
+        driver.run_rung("screening", [probe], REPO / C2S.BATTERY_PATH)
+
+    #: TRAINED, ANNOUNCED, AND ITS DESCRIPTOR IS ON DISK — written before
+    #: scoring was attempted.
+    record_path = driver.audit / "probes" / f"{name}.json"
+    assert record_path.is_file(), (
+        "the training descriptor was not persisted before scoring, so a "
+        "scoring failure leaves bytes nothing can identify as this probe")
+    on_disk = json.loads(record_path.read_text())
+    assert "score" not in on_disk
+    for field in ("rung", "arm", "seed", "initialization_artifact_digest",
+                  "config_sha256"):
+        assert on_disk[field], field
+    unit = driver.durable[-1]
+    assert unit["kind"] == "probe" and unit["identity"]
+
+    #: The launcher secures the bytes and whatever evidence exists.
+    ctx1 = _Ctx(pod1, store, "attempt1")
+    fetched = _secure(ctx1, [unit])
+    assert all(f["matched"] for f in fetched), fetched
+
+    state = BC.campaign_state(L.campaign_store(BG.CAMPAIGN_ID, store))
+    assert name in state["probes"], state["rejected"]
+    assert state["probes"][name]["scored"] is False
+    assert state["probes"][name]["record"]["arm"] == arm
+
+    #: THE PRODUCER IS GONE.
+    shutil.rmtree(pod1.root)
+    transport.pods["fake-host"] = pod2
+    ctx2 = _Ctx(pod2, store, "attempt2")
+    assert L.restore_campaign_probes(ctx2) is True, ctx2.said
+
+    work = BC.remaining_work(REPO, state=state)
+    assert name in work["probes_trained_not_scored"]
+    assert arm in work["arms_needed"]
+
+    #: The replacement scores it and never trains it.
+    second = _NeverTrains(_stage_p_driver(pod2, "attempt2",
+                                          manifest=_pod_view(pod2)).a)
+    second.restore_campaign()
+    journal = second.load_campaign_journal()
+    assert [r["probe_id"] for r in journal["restored"]] == [name]
+    assert journal["restored"][0]["scored"] is False
+    second.run_rung("screening", [probe], REPO / C2S.BATTERY_PATH)
+    assert name in second.scores
+    assert second.training[name]["scored_on_restored_checkpoint"] is True
+
+
+def test_bytes_without_a_descriptor_are_preserved_but_not_consumable(
+        tmp_path, repo, transport):
+    """The state the old code would have left, refused explicitly.
+
+    Re-identified bytes prove the file is what was announced; they say nothing
+    about WHICH probe it is. Without the training record no rung may consume
+    them, and saying so is better than a manifest of `null` descriptors that
+    the driver refuses later.
+    """
+    store = tmp_path / "store"
+    pod1 = _Pod(tmp_path / "pod1")
+    transport.pods["fake-host"] = pod1
+    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)
+             for pid, arm, seed in _screening_ids()[:1]]
+    _secure(_Ctx(pod1, store, "attempt1"), units)
+
+    root = L.campaign_store(BG.CAMPAIGN_ID, store)
+    next(root.rglob(BC.RECORD_NAME)).unlink()
+    state = BC.campaign_state(root)
+    assert state["probes"] == {}
+    assert any("no training descriptor" in r["why"]
+               for r in state["rejected"]), state["rejected"]
+    #: And the campaign therefore owes that probe again, honestly.
+    work = BC.remaining_work(REPO, state=state)
+    assert work["n_probes_remaining"] == 12
+
+
+# ---------------------------------------------------------------------------
+# cumulative all-in, and UNKNOWN
+# ---------------------------------------------------------------------------
+
+def test_prior_disk_actual_enters_cumulative_campaign_spend(tmp_path, repo):
+    """A ten-hour predecessor's disk is real money and was being dropped."""
+    _run_manifest(repo, "attempt1")
+    _session_record(repo, "attempt1", actual_usd=10.90,
+                    elapsed_minutes=600.0)
+    ctx = _Ctx(_Pod(tmp_path / "pod2"), tmp_path / "store", "attempt2")
+    actual = L.prior_attempt_actual(ctx, "attempt1")
+
+    assert actual["gpu_usd"] == pytest.approx(10.90, abs=1e-4)
+    assert actual["elapsed_minutes"] == 600.0
+    assert actual["disk_usd"] == pytest.approx(_expected_disk_usd(600.0),
+                                              abs=1e-4)
+    assert actual["all_in_usd"] == pytest.approx(
+        10.90 + _expected_disk_usd(600.0), abs=1e-4)
+    assert actual["all_in_usd"] > actual["gpu_usd"], (
+        "the predecessor's container disk is not in its all-in actual")
+
+    L.campaign_continuation_gate(ctx)
+    camp = ctx.evidence["campaign"]
+    assert camp["settled_campaign_gpu_usd"] == pytest.approx(10.90, abs=1e-4)
+    assert camp["settled_campaign_disk_usd"] == pytest.approx(
+        _expected_disk_usd(600.0), abs=1e-4)
+    assert camp["settled_campaign_spend_usd"] == pytest.approx(
+        actual["all_in_usd"], abs=1e-4)
+
+
+def test_a_predecessor_whose_cost_cannot_be_established_refuses(tmp_path, repo):
+    """UNKNOWN, never $0. Defaulting a paid predecessor to zero is the defect."""
+    _run_manifest(repo, "attempt1")
+    _session_record(repo, "attempt1", actual_usd=7.02, omit_elapsed=True)
+    ctx = _Ctx(_Pod(tmp_path / "pod2"), tmp_path / "store", "attempt2")
+
+    actual = L.prior_attempt_actual(ctx, "attempt1")
+    assert "unknown" in actual
+    assert "gpu_usd" not in actual
+
+    ok, why = L.campaign_continuation_gate(ctx)
+    assert not ok
+    assert "UNKNOWN" in why
+    assert "not zero" in why
+
+
+def test_a_zero_dollar_pre_provider_refusal_owes_nothing(tmp_path, repo):
+    """No resource existed, so neither GPU nor disk was billed."""
+    _run_manifest(repo, "attempt1")
+    _session_record(repo, "attempt1", created=False, confirmed_gone=False,
+                    actual_usd=0.0, omit_elapsed=True)
+    ctx = _Ctx(_Pod(tmp_path / "pod2"), tmp_path / "store", "attempt2",
+               all_in=ALL_IN + 1.0)
+    actual = L.prior_attempt_actual(ctx, "attempt1")
+    assert actual["all_in_usd"] == 0.0
+    assert "unknown" not in actual
+    ok, why = L.campaign_continuation_gate(ctx)
+    assert ok, why
+
+
+def test_the_disk_rate_comes_from_the_authorizations_own_figures(tmp_path,
+                                                                 repo):
+    """One basis for the ceiling and for the predecessor, not two."""
+    _run_manifest(repo, "attempt1")
+    _session_record(repo, "attempt1", actual_usd=1.09, elapsed_minutes=60.0)
+    ctx = _Ctx(_Pod(tmp_path / "pod2"), tmp_path / "store", "attempt2")
+    actual = L.prior_attempt_actual(ctx, "attempt1")
+    #: An hour of the provisioned volume, derived from disk_hard_usd over the
+    #: authorized runtime — the same quotient the ceiling was built from.
+    assert actual["disk_usd_per_minute"] == pytest.approx(
+        DISK_HARD / RUNTIME, abs=1e-8)
+    assert actual["disk_usd"] == _expected_disk_usd(60.0)
+    #: A ceiling, so never under the raw arithmetic and never by more than the
+    #: quantum.
+    raw = DISK_HARD / RUNTIME * 60.0
+    assert raw <= actual["disk_usd"] <= raw + BG.DOLLAR_QUANTUM_USD

@@ -191,6 +191,52 @@ freeing Hugging Face private storage would move the restore to the `$0` pre-pod
 relay and delete those billed minutes entirely** — that is the single largest
 lever on continuation cost, and it is a maintainer decision.
 
+### Four places the production path disagreed with all that
+
+The third review accepted the handoff and refused C again on four mismatches
+between what was *priced* or *written down* and what the driver actually does.
+
+**Stage P now consumes `arms_needed`.** `remaining_work` charged a continuation
+for only the arms its remaining probes need — `{advanced, B}` after a committed
+screening — while `stage_p` rebuilt all six unconditionally. The budget could
+therefore sit *below* the GPU work, which is the one direction a budget must
+never be wrong in. Stage P reads `arms_needed` from the continuation manifest
+(the set the launcher priced before a pod existed), builds only those, and
+records both sets in its stage evidence. Every candidate's frozen **metadata**
+is assembled either way, so the schedule, the ranking and the frozen tie-break
+are unchanged by building two arms instead of six; a non-materialized
+candidate's `durable_path` is a sentinel that names its own reason, and
+training from one is a refusal.
+
+**`run_rung` has three states, not two.** Its only test was `name in
+self.scores`, so a probe that trained, became destination-verified, and then
+failed scoring was **retrained** on the replacement — against R3 and against
+this repository's own continuation text. A restored trained-but-unscored probe
+now resumes at scoring through `score_existing`, which never calls the trainer
+and charges the battery only.
+
+**The training descriptor is durable before scoring.** The per-probe record was
+written only after a *successful* score, so the real failure sequence — train,
+become durable, scoring dies, pod dies — left the destination holding verified
+bytes and an ack carrying only the checkpoint's identity, with nothing to say
+which probe it was. It is now written when training finishes and again after
+the durability announcement, both before scoring is attempted. Bytes without
+that descriptor are preserved and explicitly **not** consumable. The old
+rehearsal fixture hid this by pre-writing a completed record, which is stronger
+than anything production produces; the new test drives the real order and
+pre-writes nothing.
+
+**Cumulative campaign spend is all-in.** `SessionRunner` records
+`cost.actual_usd` from `self.usd()`, which is GPU only — the provider bills the
+provisioned container disk separately and the runner never sees it. Summing
+that against `all_in_hard_usd` checked `prior GPU + future GPU + future disk`
+and dropped every predecessor's disk. `prior_attempt_actual` now derives it
+from the authorization's own disk rate times that resource's elapsed minutes,
+ceiled to the 4-decimal quantum because a spend accumulating against a ceiling
+rounds up. A created resource whose cost or minutes cannot be read is
+**UNKNOWN and refuses** — never `$0`. Generic core is unchanged: the arithmetic
+belongs to whoever holds the all-in ceiling.
+
 **Live-rate authorization.** `authorized_gpu_usd()` derived from the `$1.09/h`
 constant and `main()` called `window_minutes(args.max_price)` without the
 authorization's own GPU amount, so a valid authorization re-quoted at another

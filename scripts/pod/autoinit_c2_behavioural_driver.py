@@ -199,6 +199,12 @@ class C2BehaviouralDriver:
         self.candidates: list[dict[str, Any]] = []
         self.anchor: dict[str, Any] = {}
         self.arm_arch: dict[str, tuple[str, int]] = {}
+        #: Which arms' BYTES this session must rebuild. `None` until the
+        #: continuation manifest is read, and `None` afterwards when there is
+        #: no manifest — a fresh campaign owes every arm. It is the same set
+        #: the launcher priced before a pod existed, so stage P's GPU work and
+        #: the budget that permitted it describe the same arms.
+        self.arms_needed: set[str] | None = None
         self.screening: list[SCH.Probe] = []
         self.confirmation: list[SCH.Probe] = []
         self.ranked: list[dict[str, Any]] = []
@@ -350,7 +356,9 @@ class C2BehaviouralDriver:
             #: launcher always ships a manifest, so its absence means the
             #: restore step never ran and this is not a continuation.
             summary = {"manifest": None, "restored": [], "n": 0,
-                       "_means": "no continuation manifest; nothing to adopt"}
+                        "arms_needed": None,
+                        "_means": ("no continuation manifest; nothing to adopt "
+                                   "and every arm is owed")}
             self.ev["continuation"] = summary
             return summary
 
@@ -360,6 +368,13 @@ class C2BehaviouralDriver:
                 f"{path} is a continuation manifest for campaign "
                 f"{manifest.get('campaign_id')!r}, not {self.a.campaign!r}. "
                 "One experiment's probes may never be pooled into another.")
+
+        #: THE ARMS THE LAUNCHER PRICED. Read before anything is restored, so
+        #: stage P cannot build work the pre-provider budget did not fund. A
+        #: manifest that names none is a fresh campaign in all but name and
+        #: leaves every arm owed.
+        declared = (manifest.get("remaining") or {}).get("arms_needed")
+        self.arms_needed = set(declared) if declared else None
 
         (self.audit / "probes").mkdir(parents=True, exist_ok=True)
         restored: list[dict[str, Any]] = []
@@ -441,6 +456,8 @@ class C2BehaviouralDriver:
         summary = {
             "manifest": str(path), "restored": restored, "n": len(restored),
             "committed_candidate": manifest.get("committed_candidate"),
+            "arms_needed": (None if self.arms_needed is None
+                            else sorted(self.arms_needed)),
             "_re_identified_here": (
                 "every restored probe's bytes reproduced the identity its "
                 "campaign announced, at the path on THIS pod. The manifest and "
@@ -696,20 +713,62 @@ class C2BehaviouralDriver:
         return payload
 
     # -- P: build the six arms, because none of them can be shipped here ----
+    #: What a candidate's `durable_path` says when its BYTES were not built.
+    #: Deliberately not an empty string: a path that is merely falsy gets
+    #: passed to a loader by something that forgot to check, and this one names
+    #: its own reason in any traceback that reaches it.
+    NOT_MATERIALIZED = "<arm not materialized: no remaining probe needs it>"
+
+    def arm_is_needed(self, arm: str) -> bool:
+        """Does a REMAINING probe need this arm's bytes rebuilt?
+
+        `self.arms_needed` comes from the continuation manifest, which the
+        launcher derived from the campaign's verified state before a pod
+        existed and PRICED. `None` means no manifest — a fresh campaign, or the
+        `$0` rehearsal — and then every arm is needed.
+
+        This is the parity that was missing: `remaining_work` charged a
+        continuation for only the arms its remaining probes need, while this
+        stage rebuilt all six unconditionally. The budget could therefore be
+        below the GPU work the driver would actually do, which is the one
+        direction a budget must never be wrong in.
+        """
+        return self.arms_needed is None or arm in self.arms_needed
+
+    def require_materialized_arm(self, probe: SCH.Probe) -> None:
+        """Refuse to train from an arm whose bytes were never built."""
+        path = probe.initialization_path
+        if path == self.NOT_MATERIALIZED or not path:
+            raise C2DriverError(
+                f"{probe.probe_id} is owed training from arm {probe.arm}, "
+                "whose bytes this session did not materialize because the "
+                "continuation manifest did not list it among the arms the "
+                "remaining probes need. The budget and the work disagree; "
+                "training from a path that was never built is not the "
+                "alternative.")
+
     def stage_p(self) -> None:
-        """Materialize all six arms from the teacher, each gated on its digest.
+        """Materialize the arms the remaining probes need, each digest-gated.
 
         Not a search. Each arm is a FIXED path whose every step carries the
         artifact digest attempt 3 recorded, and a mismatch stops the session as
         a scientific finding rather than being retried.
 
-        The five candidates are built rather than staged because neither
-        transport can carry them: the scp path gives each asset 600 seconds
-        against a dev-box uplink that needs 1650 for one of them — the
-        arithmetic that killed continuation attempt 2 — and the hub relay
-        refuses 5.95 GB for private-storage quota, measured at $0 twice. B is
-        built for a different reason: its bytes no longer exist. One mechanism
-        for all six, and each identity-gated at the moment it is built.
+        The candidates are built rather than staged because neither transport
+        can carry them: the scp path gives each asset 600 seconds against a
+        dev-box uplink that needs 1650 for one of them — the arithmetic that
+        killed continuation attempt 2 — and the hub relay refuses 5.95 GB for
+        private-storage quota, measured at `$0` twice. B is built for a
+        different reason: its bytes no longer exist. One mechanism for all of
+        them, each identity-gated at the moment it is built.
+
+        **A fresh campaign builds all six.** A continuation builds only the
+        arms its remaining probes need, which is what its budget paid for. The
+        frozen METADATA of every candidate is assembled either way — the
+        schedule, the ranking and the tie-break read state ids, digests and the
+        frozen ordering, none of which needs bytes — so a continuation that
+        rebuilds two arms still ranks over the same five candidates in the same
+        frozen order.
         """
         self.mark("STAGE_START:P")
         self.verify_teacher()
@@ -728,16 +787,23 @@ class C2BehaviouralDriver:
                 f"the frozen selection orders {[s[:8] for s in order]}. The "
                 "screening tie-break is that ordering, so the two must agree.")
 
+        built: list[str] = []
         for leaf in leaves:
-            path = self.materialize_arm(
-                leaf.state_id, leaf.spec,
-                required={"artifact_digest": leaf.artifact_digest,
-                          "weights_digest": leaf.weights_digest,
-                          "single_shard_sha256": leaf.single_shard_sha256,
-                          "arch_signature": leaf.arch_signature,
-                          "num_parameters": leaf.num_parameters},
-                bounded_minutes=float(leaf.bounded_minutes),
-                config_overrides=leaf.root_config_overrides)
+            if self.arm_is_needed(leaf.state_id):
+                path = self.materialize_arm(
+                    leaf.state_id, leaf.spec,
+                    required={"artifact_digest": leaf.artifact_digest,
+                              "weights_digest": leaf.weights_digest,
+                              "single_shard_sha256": leaf.single_shard_sha256,
+                              "arch_signature": leaf.arch_signature,
+                              "num_parameters": leaf.num_parameters},
+                    bounded_minutes=float(leaf.bounded_minutes),
+                    config_overrides=leaf.root_config_overrides)
+                built.append(leaf.state_id)
+            else:
+                path = self.NOT_MATERIALIZED
+            #: METADATA for every candidate, built or not. The frozen identity
+            #: and the frozen rank come from the record, not from the bytes.
             self.candidates.append({
                 "state_id": leaf.state_id,
                 "artifact_digest": leaf.artifact_digest,
@@ -747,14 +813,21 @@ class C2BehaviouralDriver:
                 "durable_path": path,
                 "rank_in_frozen_selection": len(self.candidates),
                 "path_label": leaf.path_label,
+                "materialized": path != self.NOT_MATERIALIZED,
             })
-        say(f"  {len(self.candidates)} candidates materialized and identity-gated")
+        say(f"  {len(built)} of {len(self.candidates)} candidate arms "
+            f"materialized and identity-gated"
+            + ("" if self.arms_needed is None else
+               " (only those the remaining probes need)"))
 
         binding = BH.b_binding(REPO, device=self.a.device)
         say(f"  B construction {binding['construction']['spec_hash'][:12]}… == "
             f"frozen {binding['construction']['expected_spec_hash'][:12]}…")
-        b_path = self.materialize_b(binding)
-        materialized = True
+        if self.arm_is_needed(SCH.ANCHOR):
+            b_path = self.materialize_b(binding)
+            materialized = True
+        else:
+            b_path, materialized = self.NOT_MATERIALIZED, False
 
         required = binding["required_identity"]
         self.anchor = {
@@ -775,6 +848,10 @@ class C2BehaviouralDriver:
                                      required["num_parameters"])
         self.mark(B_READY_MARKER)
         self.complete("P", candidates=len(self.candidates),
+                      arms_materialized=sorted(
+                          built + ([SCH.ANCHOR] if materialized else [])),
+                      arms_needed=(None if self.arms_needed is None
+                                   else sorted(self.arms_needed)),
                       b_spec_hash=binding["construction"]["spec_hash"],
                       b_artifact_digest=self.anchor["artifact_digest"],
                       b_materialized=materialized)
@@ -1263,8 +1340,86 @@ class C2BehaviouralDriver:
             "usable_rollout_rate": result["usable_rollout_rate"],
         }
 
+    def persist_probe_record(self, name: str, record: Mapping[str, Any], *,
+                             score: Mapping[str, Any] | None = None) -> None:
+        """Write this probe's journal entry. ONE writer, called twice.
+
+        Once when TRAINING finishes and before scoring starts, and again when
+        the score exists. The early write is the whole point: scoring can fail
+        after a checkpoint is already durable off-pod, and the descriptor —
+        rung, arm, seed, initialization digest, config hash — is what proves
+        those bytes are the measurement a later rung is asking for.
+
+        Before this, the record was written only after a SUCCESSFUL score. So a
+        real scoring failure left the destination holding verified bytes and an
+        ack that carries only the checkpoint's identity, with nothing to say
+        which probe it was; a replacement resource could not have shown it was
+        this arm's measurement and would have had to refuse it. The rehearsal
+        did not catch that because its fixture wrote a completed record up
+        front, which is stronger than the production failure path.
+        """
+        (self.audit / "probes").mkdir(parents=True, exist_ok=True)
+        payload = dict(record)
+        if score is not None:
+            payload["score"] = dict(score)
+        (self.audit / "probes" / f"{name}.json").write_text(
+            json.dumps(payload, indent=2, default=str) + "\n")
+
+    def score_existing(self, probe: SCH.Probe, battery: Path,
+                       attested: Any) -> tuple[dict, Any]:
+        """Score a probe whose checkpoint already exists. NEVER trains.
+
+        The preregistered policy says a probe trained but not validly scored
+        resumes AT SCORING, and `run_rung` did not implement it: its only test
+        was `name in self.scores`, so a restored trained-but-unscored probe
+        fell through to `train_one` and was retrained — against R3, which
+        forbids retraining a completed probe for any outcome.
+
+        Budget admission charges the BATTERY only. Charging the trainer again
+        for work that will not run would refuse affordable continuations.
+        """
+        name = probe.probe_id
+        record = dict(self.training[name])
+        model_dir = Path(record.get("model_dir") or "")
+        if not model_dir.is_dir():
+            raise C2DriverError(
+                f"{name}: the journal records model_dir={model_dir} and it is "
+                "not a directory on this pod. A trained probe resumes at "
+                "scoring, and scoring reads the weights; there is nothing to "
+                "score and retraining is forbidden.")
+        if not self.afford(self.a.probe_battery_minutes,
+                           f"{name} (scoring a restored checkpoint)"):
+            raise C2DriverError(
+                f"budget refuses scoring {name}; no probe is skipped to make "
+                "progress and a partial rung decides nothing")
+        if attested is None:
+            attested = self.attest(battery)
+        #: `run_completion` was the PRODUCING pod's and does not exist here.
+        #: `scorer_argv` treats it as optional and omits `--trained-run` when
+        #: it is absent, so the scorer runs on the checkpoint alone.
+        score = self.score_probe(probe, model_dir, battery=battery,
+                                 run_completion=None)
+        record["scored_on_restored_checkpoint"] = True
+        self.training[name] = record
+        self.scores[name] = score
+        self.persist_probe_record(name, record, score=score)
+        self.save()
+        self.mark(f"{PROBE_MARKER}:{name}")
+        say(f"  {name}: NOT retrained — restored checkpoint scored, "
+            f"correct_overall={score['correct_overall']:.4f}, "
+            f"usable={score['usable_rollout_rate']:.4f}")
+        return score, attested
+
     def run_rung(self, rung: str, probes: list[SCH.Probe], battery: Path) -> None:
-        """Train and score one rung, announcing each probe as it completes."""
+        """Train and score one rung, announcing each probe as it completes.
+
+        THREE states per probe, not two:
+
+        1. **scored** — complete. Its descriptor is checked and it is skipped.
+        2. **trained but not scored** — its checkpoint was restored and is
+           real; it resumes at SCORING and is never retrained.
+        3. **absent** — trained, announced for durability, then scored.
+        """
         self.release_device()
         attested = None
         for probe in probes:
@@ -1280,6 +1435,15 @@ class C2BehaviouralDriver:
                 self.assert_reuse_matches(probe)
                 say(f"  {name}: already complete in this campaign — not retrained")
                 continue
+            if name in self.training:
+                #: State 2. Same descriptor check, then scoring only.
+                self.assert_reuse_matches(probe)
+                _, attested = self.score_existing(probe, battery, attested)
+                continue
+            #: State 3. Training this probe needs its arm's BYTES, so an arm
+            #: the remaining-work budget did not fund is a refusal rather than
+            #: a train from a path that was never built.
+            self.require_materialized_arm(probe)
             if not self.afford(self.a.probe_train_minutes
                                + self.a.probe_battery_minutes, name):
                 raise C2DriverError(
@@ -1299,7 +1463,11 @@ class C2BehaviouralDriver:
                       "train_minutes": round((time.time() - t0) / 60, 2),
                       "complete": True}
             self.training[name] = record
-            #: The moment it exists, before anything else can fail.
+            #: THE DESCRIPTOR, DURABLE, BEFORE SCORING CAN FAIL. Written here
+            #: rather than after a successful score so a scoring crash leaves
+            #: bytes that can still be shown to be this probe.
+            self.persist_probe_record(name, record)
+            #: The bytes, the moment they exist, before anything else can fail.
             arch_signature, num_parameters = self.arm_arch[probe.arm]
             record["durable"] = self.announce_durable(
                 name, model_dir, kind="probe", rung=rung, arm=probe.arm,
@@ -1307,6 +1475,7 @@ class C2BehaviouralDriver:
                 num_parameters=num_parameters,
                 initialization_artifact_digest=
                     probe.initialization_artifact_digest)
+            self.persist_probe_record(name, record)
             self.save()
 
             #: Attested once per rung, after the first probe exists — the
@@ -1318,9 +1487,7 @@ class C2BehaviouralDriver:
             score = self.score_probe(probe, model_dir, battery=battery,
                                      run_completion=run_completion)
             self.scores[name] = score
-            (self.audit / "probes" / f"{name}.json").write_text(
-                json.dumps({**record, "score": score}, indent=2,
-                           default=str) + "\n")
+            self.persist_probe_record(name, record, score=score)
             self.save()
             self.mark(f"{PROBE_MARKER}:{name}")
             say(f"  {name}: trained and scored, correct_overall="

@@ -160,7 +160,27 @@ def campaign_state(campaign_root: str | Path, *,
                 record = json.loads(record_path.read_text())
             except json.JSONDecodeError:
                 record = None
-        score = (record or {}).get("score") or None
+
+        #: THE DESCRIPTOR IS PART OF ADMISSION. Re-identified bytes prove the
+        #: file is what was announced; they say nothing about WHICH probe it
+        #: is. The ack carries only the checkpoint's identity, so without the
+        #: training record a replacement resource holds verified bytes it
+        #: cannot show to be any particular measurement — and the rung that
+        #: wants them would have to refuse. The driver now writes this record
+        #: when training finishes and BEFORE scoring starts, so a scoring
+        #: failure leaves it behind.
+        descriptor = ("rung", "arm", "seed",
+                      "initialization_artifact_digest", "config_sha256")
+        absent = [f for f in descriptor
+                  if (record or {}).get(f) in (None, "")]
+        if absent:
+            rejected.append({"probe_id": unit, "path": str(d), "why": (
+                f"no training descriptor for {absent}: the bytes are "
+                "preserved and re-identified, but nothing says which probe "
+                "they are, so no rung may consume them")})
+            continue
+
+        score = record.get("score") or None
         #: A score whose evidence did not survive is not a usable score: the
         #: verdict reads the per-sample rows, not the summary.
         if score and not (result_path.is_file() and per_sample.is_file()):

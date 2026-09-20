@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-20T12:12:54.742960+00:00",
+ "proposed_utc": "2026-09-20T13:47:18.349300+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -14,10 +14,13 @@
   "handoff": {
    "why": "a replacement pod has a FRESH FILESYSTEM. The previous pod's audit/probes/*.json is gone and every model_dir it recorded points at nothing, and those are the two things the driver's campaign journal reads. Without a restore the registered continuation policy is unreachable in production however correct the campaign id is.",
    "transport": "the launcher's materialize_inputs step \u2014 after setup, before the driver starts, pod torn down on failure \u2014 pushes each eligible probe's bytes and science evidence from the durable destination to a NEW pod path, with a manifest naming that path and the identity to reproduce there. Verified three times: at the destination when the probe landed, on this host before it is sent, and on the replacement pod from the bytes that arrive.",
+   "arms": "a continuation materializes only the arms its remaining probes need \u2014 the set the remaining-work budget paid for \u2014 and Stage P reads that set from the manifest rather than rebuilding all six. Every candidate's frozen metadata is assembled either way, so the schedule, the ranking and the frozen tie-break are unchanged.",
+   "descriptor_before_scoring": "each probe's training record \u2014 rung, arm, seed, initialization digest, config hash \u2014 is written when training finishes and BEFORE scoring starts, so a scoring failure leaves bytes that can still be shown to be that probe. Bytes without it are preserved and not consumable: re-identification proves what a file is, never which measurement it is.",
+   "unscored_probes_resume_at_scoring": "a restored probe with no valid score is scored, never retrained, and charges the battery only.",
    "why_bytes_not_just_identities": "a probe trained but not validly scored resumes AT SCORING and scoring reads the weights. Retraining it is forbidden, so the weights have to travel.",
    "cost": "billed pod time \u2014 any scp to a pod happens after it exists \u2014 bounded at the slowest recorded dev-box uplink, 0.23 MB/s, about 80 minutes per 1.11 GiB probe. Those minutes are a phase in the remaining-work bound, so an unaffordable restore is refused before a pod exists. Freeing Hugging Face private storage would move this to the $0 pre-pod relay; that is a maintainer decision."
   },
-  "_the_ceiling_is_cumulative": "all_in_hard_usd below bounds the CAMPAIGN across every resource and run attempt it takes. A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those need rebuilt, and the restore \u2014 never on a fresh full session, which refused every continuation by construction. If the remainder does not fit, the gate refuses and returns to the maintainer: the experiment is not shortened and the ceiling is not raised."
+  "_the_ceiling_is_cumulative": "all_in_hard_usd below bounds the CAMPAIGN across every resource and run attempt it takes, ALL-IN: each predecessor's GPU actual plus its container disk, derived from this authorization's own disk rate times that resource's elapsed minutes, because the runner records GPU only. A created resource whose cost cannot be read is UNKNOWN and refuses, never $0. A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those need rebuilt, and the restore \u2014 never on a fresh full session, which refused every continuation by construction. If the remainder does not fit, the gate refuses and returns to the maintainer: the experiment is not shortened and the ceiling is not raised."
  },
  "authorization_terms": {
   "at_the_quoted_rate": {
@@ -474,7 +477,7 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "91cbd6060f46ce48556ab050e8122c074c24ea50f9fdb4377108e5d465f153fc",
+  "digest": "808910c4f6c59cd71f3954e4fd787a94bba27cb210d4326a965bec1ebeb48671",
   "n_files": 134,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
@@ -524,5 +527,5 @@
   "rehearsal": "tests/c2_behavioural_preflight/ \u2014 BUILT. One production-path rehearsal drives the real driver P through D and reaches all three terminal states from separate deterministic fixtures, replacing only hardware-bound calls.",
   "grant": "NOT REQUESTED \u2014 no grant, readiness record, authorization, bundle or provider resource exists for this session, and none may be created without a maintainer decision."
  },
- "proposal_sha256": "d12a6fc13971997b143592f02a9d2b605851d79859bfc31472a956e09dc7672e"
+ "proposal_sha256": "f2dffdff15b2ba9575c7f4271bb14c956e4bfc93eb5c54481e8be28c99307dc5"
 }

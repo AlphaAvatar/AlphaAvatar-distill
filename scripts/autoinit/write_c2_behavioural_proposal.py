@@ -172,6 +172,24 @@ def build() -> dict:
                     "there. Verified three times: at the destination when the "
                     "probe landed, on this host before it is sent, and on the "
                     "replacement pod from the bytes that arrive."),
+                "arms": (
+                    "a continuation materializes only the arms its remaining "
+                    "probes need — the set the remaining-work budget paid for "
+                    "— and Stage P reads that set from the manifest rather "
+                    "than rebuilding all six. Every candidate's frozen "
+                    "metadata is assembled either way, so the schedule, the "
+                    "ranking and the frozen tie-break are unchanged."),
+                "descriptor_before_scoring": (
+                    "each probe's training record — rung, arm, seed, "
+                    "initialization digest, config hash — is written when "
+                    "training finishes and BEFORE scoring starts, so a scoring "
+                    "failure leaves bytes that can still be shown to be that "
+                    "probe. Bytes without it are preserved and not "
+                    "consumable: re-identification proves what a file is, "
+                    "never which measurement it is."),
+                "unscored_probes_resume_at_scoring": (
+                    "a restored probe with no valid score is scored, never "
+                    "retrained, and charges the battery only."),
                 "why_bytes_not_just_identities": (
                     "a probe trained but not validly scored resumes AT SCORING "
                     "and scoring reads the weights. Retraining it is "
@@ -187,7 +205,12 @@ def build() -> dict:
             },
             "_the_ceiling_is_cumulative": (
                 "all_in_hard_usd below bounds the CAMPAIGN across every "
-                "resource and run attempt it takes. A continuation is budgeted "
+                "resource and run attempt it takes, ALL-IN: each "
+                "predecessor's GPU actual plus its container disk, derived "
+                "from this authorization's own disk rate times that "
+                "resource's elapsed minutes, because the runner records GPU "
+                "only. A created resource whose cost cannot be read is "
+                "UNKNOWN and refuses, never $0. A continuation is budgeted "
                 "on the work the campaign still OWES — its incomplete probes, "
                 "the arms those need rebuilt, and the restore — never on a "
                 "fresh full session, which refused every continuation by "

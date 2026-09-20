@@ -31,14 +31,15 @@
    "id": "R2",
    "rule": "A probe may be reused only when its bytes still re-identify to the artifact_digest that was announced when it finished.",
    "why": "the bytes decide. A directory that is gone, truncated or overwritten is not a completed probe.",
-   "enforced_by": "autoinit_c2_behavioural_driver.py :: reidentify"
+   "enforced_by": "autoinit_c2_behavioural_driver.py :: reidentify",
+   "_how": "on a replacement resource the bytes are restored from the durable destination and re-identified at the new local path before the journal admits them; `score_existing` then scores that checkpoint. The producing pod's `run_completion.json` does not exist there and `scorer_argv` treats it as optional, so the scorer runs on the checkpoint alone."
   },
   {
    "id": "R3",
    "rule": "A completed probe is NEVER retrained.",
    "why": "retraining a finished probe and keeping whichever result is preferred is selection on the outcome. It does not become acceptable because the first result was disappointing.",
    "enforced_by": "autoinit_c2_behavioural_driver.py :: run_rung",
-   "_how": "the rung loop continues past any probe already present in `self.scores`, which only the campaign journal populates. There is no flag that forces a retrain."
+   "_how": "`run_rung` has THREE states per probe, not two. A probe with a score is skipped; a probe with a restored checkpoint and no valid score resumes at SCORING through `score_existing`, which never calls the trainer and charges the battery only; a probe absent from the journal is trained. Its only test used to be `name in self.scores`, so a trained but unscored probe fell through to the trainer and was retrained. There is still no flag that forces a retrain."
   },
   {
    "id": "R4",
@@ -75,16 +76,17 @@
   },
   {
    "id": "R9",
-   "rule": "A replacement resource may not launch while a previous resource of the campaign is unreconciled, and may not launch when settled campaign spend plus its own planned all-in exceeds the campaign's approved all-in ceiling.",
+   "rule": "A replacement resource may not launch while a previous resource of the campaign is unreconciled, and may not launch when settled campaign ALL-IN spend plus its own planned all-in exceeds the campaign's approved all-in ceiling.",
    "why": "at most one resource of a campaign may bill at a time, and the budget is cumulative across every resource and subrun. An unknown billing state is itself a stop condition.",
-   "enforced_by": "autoinit_c2_behavioural_launch.py :: campaign_continuation_gate"
+   "enforced_by": "autoinit_c2_behavioural_launch.py :: campaign_continuation_gate",
+   "_how": "settled spend is each predecessor's GPU actual from its session record PLUS its container disk, derived from the authorization's own disk rate times that resource's elapsed minutes. The runner records GPU only \u2014 the provider bills the provisioned volume separately and the runner never sees it \u2014 so summing `cost.actual_usd` alone compared GPU-only prior spend against an all-in ceiling and omitted every predecessor's disk. A resource that was created but whose cost or elapsed minutes cannot be read is UNKNOWN and refuses; it is never defaulted to $0."
   },
   {
    "id": "R10",
    "rule": "A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those probes need rebuilt on a fresh filesystem, and the restore of its verified probes \u2014 never on a fresh full session.",
    "why": "reserving a whole session per attempt refused every continuation by construction: with a ceiling sized for one session, any prior spend above $0 made settled + reserved exceed it. Pricing the remainder is what makes the cumulative rule usable instead of merely safe.",
    "enforced_by": "autoinit_c2_behavioural_launch.py :: campaign_remaining_work",
-   "_how": "behavioural.session_decomposition prices remaining work, and a fresh campaign's remaining work is all of it, so the full session and every continuation come from ONE derivation. A completed probe is never priced again; a complete campaign owes nothing and may not continue at all.",
+   "_how": "behavioural.session_decomposition prices remaining work, and a fresh campaign's remaining work is all of it, so the full session and every continuation come from ONE derivation. A completed probe is never priced again; a complete campaign owes nothing and may not continue at all. Stage P CONSUMES that decision: it materializes only the arms the continuation manifest lists, so the GPU work it does and the budget that permitted it describe the same arms. It used to rebuild all six unconditionally, which let a continuation budget sit below the work.",
    "_fail_closed": "if the remainder does not fit the approved campaign ceiling the gate refuses and returns to the maintainer. The experiment is not shortened to fit and the ceiling is not raised."
   }
  ],
@@ -101,7 +103,12 @@
   "spend past the campaign's cumulative approved all-in ceiling",
   "admit a restored probe whose bytes do not reproduce its announced identity at the new local path",
   "treat the previous resource's filesystem as still existing",
-  "budget a continuation as though no probe had been completed"
+  "budget a continuation as though no probe had been completed",
+  "retrain a probe whose checkpoint was restored but whose scoring failed",
+  "consume restored bytes that carry no training descriptor",
+  "count a predecessor's spend as GPU-only against an all-in ceiling",
+  "default an unreadable predecessor cost to $0",
+  "materialize arms the remaining-work budget did not fund, or train from arms it did not materialize"
  ],
  "if_a_campaign_cannot_be_completed": "stop and report. A behavioural selection that trained nine of twelve probes has no verdict and must not be presented as having a partial one. The nine preserved probes are evidence about what was trained, not about which candidate wins. Whether a fresh campaign may reuse them is a maintainer decision, and this document's default answer is NO.",
  "_pre_science_retries_are_different": "an invocation that aborts BEFORE formal training begins produced no measurement to retry. AGENTS.md P12.1 permits diagnosing, repairing and retrying that under a fresh attempt identity inside the same cumulative budget. This document governs the case where training HAS begun.",
@@ -124,8 +131,10 @@
    "eligibility": "only probes whose durable_ack.json records a destination-side re-identification that MATCHED. The launcher re-identifies them AGAIN on this host before sending, because an ack is a record and a record is not a checkpoint, and the driver re-identifies them a third time from the bytes that land on the pod.",
    "why_the_bytes_and_not_just_the_identities": "a probe trained but not validly scored resumes AT SCORING under R2, and scoring reads the weights. A manifest of identities would leave such a probe unscoreable, and R3 forbids retraining it.",
    "cost": "the restore is billed pod time \u2014 any scp to a pod happens after it exists \u2014 bounded at the slowest recorded dev-box uplink, 0.23 MB/s, so one 1.11 GiB probe is about 80 minutes. Those minutes are a phase in the remaining-work bound R10 checks, so a restore that does not fit the campaign ceiling is refused before a pod exists. A maintainer freeing Hugging Face private storage would move this to the $0 pre-pod relay and remove the minutes; that is a maintainer decision.",
-   "the_old_path_is_not_the_truth": "the producing pod's model_dir is not carried as a directive. The driver's journal records the new local path, after verifying it."
+   "the_old_path_is_not_the_truth": "the producing pod's model_dir is not carried as a directive. The driver's journal records the new local path, after verifying it.",
+   "descriptor_is_durable_before_scoring": "the driver writes each probe's training record \u2014 rung, arm, seed, initialization digest, config hash \u2014 when TRAINING finishes and before scoring starts. It used to write it only after a successful score, so a real scoring failure left the destination holding verified bytes and an ack carrying only the checkpoint's identity, with nothing to say which probe it was. Bytes without that descriptor are preserved and explicitly NOT consumable: re-identification proves the file is what was announced, never which measurement it is.",
+   "arms": "a continuation rebuilds only the arms its remaining probes need, which is what its budget paid for. Every candidate's frozen METADATA is assembled either way, so the schedule, the ranking and the frozen tie-break are unchanged by building fewer arms. Training from an arm that was not built is a refusal, not an improvisation."
   }
  },
- "record_sha256": "6f54fde983e13d8dacdef39067c36c2a7a0b1106aeb11a2ea30caf46012733f1"
+ "record_sha256": "ad1a792c0ed1887cbc116c95a827632eb29bb8fb4beea6a6abde54d797f6d7c1"
 }

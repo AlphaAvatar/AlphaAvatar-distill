@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import subprocess
 import sys
 from collections.abc import Mapping
@@ -432,6 +433,83 @@ def continuation_all_in_usd(ctx: SessionContext, work: dict) -> float:
     return gpu + disk_per_minute * minutes
 
 
+def prior_attempt_actual(ctx: SessionContext, attempt: str) -> dict:
+    """One predecessor's ACTUAL all-in spend, GPU and disk. Or UNKNOWN.
+
+    `SessionRunner` records `cost.actual_usd` from `self.usd()`, which is GPU
+    only — container disk is billed separately by the provider and the runner
+    never sees it. Summing that field alone and then comparing against
+    `all_in_hard_usd` made the campaign check
+
+        prior GPU + future GPU + future disk <= all-in ceiling
+
+    which silently omits every predecessor's disk. R9 says the ceiling is
+    cumulative across every resource and subrun, and `all_in_hard_usd` means
+    all-in, so the predecessor's disk has to be in it.
+
+    It is DERIVED rather than looked up, because nothing records it: the
+    provisioned volume is billed for the pod's whole lifetime, so it is the
+    authorization's own disk rate per minute times the minutes that pod ran.
+    Generic core is not changed for this — the arithmetic belongs to whoever
+    holds the all-in ceiling.
+
+    A resource that was CREATED but whose cost or elapsed minutes cannot be
+    read is `UNKNOWN`, never `$0`. Defaulting a paid predecessor to zero is
+    how a cumulative ceiling comes to be checked against a fraction of what
+    was spent.
+    """
+    record = REPO_ROOT / session_record_path(attempt)
+    if not record.is_file():
+        return {"attempt": attempt, "unknown": "no session record",
+                "path": session_record_path(attempt)}
+    try:
+        ev = json.loads(record.read_text())
+    except json.JSONDecodeError as exc:
+        return {"attempt": attempt, "unknown": f"unreadable record: {exc}"}
+
+    created = bool(ev.get("provider_resource_created"))
+    cost = ev.get("cost") or {}
+    if not created:
+        #: A `$0` pre-provider refusal. No resource existed, so nothing was
+        #: billed and there is nothing to derive.
+        return {"attempt": attempt, "provider_resource_created": False,
+                "gpu_usd": 0.0, "disk_usd": 0.0, "all_in_usd": 0.0,
+                "elapsed_minutes": 0.0,
+                "_why_zero": ("no provider resource was created, so neither "
+                              "GPU nor disk was billed")}
+    gpu, minutes = cost.get("actual_usd"), cost.get("elapsed_minutes")
+    if gpu is None or minutes is None:
+        return {"attempt": attempt, "provider_resource_created": True,
+                "unknown": ("the record states "
+                            f"actual_usd={gpu!r} and "
+                            f"elapsed_minutes={minutes!r}; a resource that "
+                            "billed cannot be accounted from either alone")}
+    #: The authorization's own disk price per minute: `disk_hard_usd` is what
+    #: the provisioned volume costs over `hard_runtime_minutes`, so the rate is
+    #: that quotient. One basis for the ceiling and for the predecessor.
+    disk_per_minute = (float(ctx.auth.disk_hard_usd)
+                       / float(ctx.auth.hard_runtime_minutes))
+    #: Rounded UP to the 4-decimal quantum every amount in this programme
+    #: uses. A derived SPEND accumulating against a ceiling rounds up, the way
+    #: `money()` ceils its amounts: rounding a predecessor's cost to nearest
+    #: lets a campaign creep past its ceiling a hundredth of a cent at a time.
+    disk = math.ceil(disk_per_minute * float(minutes) * 10_000) / 10_000
+    return {"attempt": attempt, "provider_resource_created": True,
+            "gpu_usd": float(gpu),
+            "elapsed_minutes": float(minutes),
+            "disk_usd": disk,
+            "all_in_usd": math.ceil((float(gpu) + disk) * 10_000) / 10_000,
+            "disk_usd_per_minute": round(disk_per_minute, 8),
+            "provisioned_disk_gb": int(getattr(ctx.args, "disk_gb",
+                                               CONTAINER_DISK_GB)),
+            "_disk_is_derived": (
+                "the provider bills the provisioned container disk for the "
+                "pod's whole lifetime and the runner never sees it, so it is "
+                "derived from the authorization's own disk rate times this "
+                "resource's elapsed minutes"),
+            "provider_confirms_gone": bool(ev.get("provider_confirms_gone"))}
+
+
 def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
     """A replacement RESOURCE may continue this campaign. It may not restart it,
     and it may not spend past the campaign's ceiling.
@@ -489,30 +567,39 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
 
     from experiments.run_layout import rel_run_dir
 
-    settled, unconfirmed, unreadable = 0.0, [], []
-    for attempt in prior:
-        record = REPO_ROOT / session_record_path(attempt)
-        if not record.is_file():
-            unreadable.append(attempt)
-            continue
-        try:
-            ev = json.loads(record.read_text())
-        except json.JSONDecodeError:
-            unreadable.append(attempt)
-            continue
-        settled += float((ev.get("cost") or {}).get("actual_usd") or 0.0)
-        if ev.get("provider_resource_created") and not ev.get(
-                "provider_confirms_gone"):
-            unconfirmed.append(attempt)
-    ctx.evidence["campaign"]["settled_campaign_spend_usd"] = round(settled, 4)
+    actuals = [prior_attempt_actual(ctx, a) for a in prior]
+    unreadable = [a["attempt"] for a in actuals if a.get("unknown")]
+    unconfirmed = [a["attempt"] for a in actuals
+                   if a.get("provider_resource_created")
+                   and not a.get("unknown")
+                   and not a.get("provider_confirms_gone")]
+    #: ALL-IN, not GPU. Every predecessor's derived disk is in here; see
+    #: `prior_attempt_actual` for why it has to be derived at all.
+    settled_gpu = sum(float(a.get("gpu_usd") or 0.0) for a in actuals
+                      if not a.get("unknown"))
+    settled_disk = sum(float(a.get("disk_usd") or 0.0) for a in actuals
+                       if not a.get("unknown"))
+    settled = settled_gpu + settled_disk
+    ctx.evidence["campaign"].update({
+        "prior_attempt_actuals": actuals,
+        "settled_campaign_gpu_usd": round(settled_gpu, 4),
+        "settled_campaign_disk_usd": round(settled_disk, 4),
+        "settled_campaign_spend_usd": round(settled, 4),
+        "_settled_is_all_in": (
+            "GPU actual from each predecessor's session record plus its "
+            "container disk derived from the authorization's own disk rate. "
+            "The runner records GPU only, and comparing GPU-only prior spend "
+            "against an all-in ceiling omitted every predecessor's disk."),
+    })
     if unreadable:
         return False, (
             f"campaign {campaign} has prior run attempt(s) {unreadable} whose "
-            f"session record could not be read at "
-            f"{[session_record_path(a) for a in unreadable]}. Whether those "
-            "resources are still billing is therefore UNKNOWN, and an unknown "
-            "billing state is a stop condition, not a clear one. Reconcile "
-            "them before launching another.")
+            f"actual spend could not be established: "
+            f"{[a.get('unknown') for a in actuals if a.get('unknown')]}. A "
+            "resource that may have billed is UNKNOWN, not zero, and an "
+            "unknown billing state is a stop condition. Reconcile them before "
+            "launching another. Records: "
+            f"{[session_record_path(a) for a in unreadable]}")
     if unconfirmed:
         return False, (
             f"run attempt(s) {unconfirmed} of campaign {campaign} created a "
@@ -533,7 +620,8 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
 
     if settled + planned > approved + BG.DOLLAR_QUANTUM_USD:
         return False, (
-            f"campaign {campaign} has settled ${settled:.4f} across "
+            f"campaign {campaign} has settled ${settled:.4f} all-in "
+            f"(${settled_gpu:.4f} GPU + ${settled_disk:.4f} disk) across "
             f"{len(prior)} prior run attempt(s) and the work it still owes — "
             f"{work['n_probes_remaining']} probes, "
             f"{len(work['arms_needed'])} arm rebuild(s) and "
@@ -545,8 +633,9 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
             "decision about funding the campaign — the experiment is NOT "
             "shortened to fit, and this gate may not raise the ceiling.")
     return True, (
-        f"campaign continuation OK: ${settled:.4f} settled across {len(prior)} "
-        f"prior attempt(s) plus ${planned:.4f} for the remaining "
+        f"campaign continuation OK: ${settled:.4f} all-in settled "
+        f"(${settled_gpu:.4f} GPU + ${settled_disk:.4f} disk) across "
+        f"{len(prior)} prior attempt(s) plus ${planned:.4f} for the remaining "
         f"{work['n_probes_remaining']} probes is inside the ${approved:.4f} "
         f"campaign ceiling, and every prior resource is provider-confirmed "
         "released")
