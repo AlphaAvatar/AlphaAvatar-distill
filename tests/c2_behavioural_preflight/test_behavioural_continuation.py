@@ -315,6 +315,30 @@ def _screening_ids() -> list[tuple[str, str, int]]:
 # A. a paid attempt that finished no probe is still a prior resource
 # ---------------------------------------------------------------------------
 
+def _refuse_to_write_into_the_repository(path: Path) -> Path:
+    """Never write a run artifact into the actual repository.
+
+    The mirror is supposed to make this impossible, and for one commit it did
+    not: it symlinked the real `runs/` children into the tmp tree, so
+    `_run_manifest` and `_session_record` wrote THROUGH those symlinks and left
+    a fabricated session record in the repository claiming a provider resource
+    had been created and $1.09 spent. `campaign_continuation_gate` would have
+    read that as a real predecessor, and `open_run` would have refused the real
+    launch as an already-recorded run.
+
+    So the helpers check the destination rather than trusting the fixture. A
+    guard at the point of writing costs nothing and does not depend on another
+    function being right.
+    """
+    resolved = path.resolve()
+    if resolved.is_relative_to(REPO):
+        raise AssertionError(
+            f"refusing to write {resolved}: it is inside the repository. A run "
+            "artifact written here is indistinguishable, to a later reader, "
+            "from evidence of a run that actually happened.")
+    return path
+
+
 def _session_record(repo_root: Path, run_id: str, *, created=True,
                     confirmed_gone=True, actual_usd=0.0,
                     elapsed_minutes: float | None = None,
@@ -329,7 +353,8 @@ def _session_record(repo_root: Path, run_id: str, *, created=True,
     Defaults to the minutes that GPU spend implies at the authorized rate, so
     a test that only cares about dollars stays self-consistent.
     """
-    path = repo_root / L.session_record_path(run_id)
+    path = _refuse_to_write_into_the_repository(
+        repo_root / L.session_record_path(run_id))
     path.parent.mkdir(parents=True, exist_ok=True)
     cost: dict = {"actual_usd": actual_usd}
     if not omit_elapsed:
@@ -356,8 +381,9 @@ def _expected_disk_usd(minutes: float) -> float:
 
 def _run_manifest(repo_root: Path, run_id: str,
                   campaign: str | None = BG.CAMPAIGN_ID) -> Path:
-    path = (repo_root / L.rel_run_dir(L.EXPERIMENT_ID, run_id, L.STAGE_ID)
-            / "manifest.json")
+    path = _refuse_to_write_into_the_repository(
+        repo_root / L.rel_run_dir(L.EXPERIMENT_ID, run_id, L.STAGE_ID)
+        / "manifest.json")
     path.parent.mkdir(parents=True, exist_ok=True)
     plan = {} if campaign is None else {"campaign_id": campaign}
     path.write_text(json.dumps({"plan": plan}))
@@ -387,11 +413,20 @@ def _mirror_repo(root: Path) -> Path:
                 (cursor / child.name).symlink_to(child)
         cursor, source = cursor / part, source / part
         cursor.mkdir()
-        if depth == len(writable) - 1:
-            #: The runs directory itself: real, empty, and ours.
-            for child in source.iterdir() if source.is_dir() else ():
-                if child.name != "runs":
-                    (cursor / child.name).symlink_to(child)
+    #: The runs directory is left REAL, EMPTY and ours. It used to symlink
+    #: `source`'s children here under a filter that excluded a name called
+    #: "runs" — but at this depth `source` IS the runs directory, so its
+    #: children are ATTEMPTS and the filter excluded none of them. That was
+    #: invisible while the repository had no behavioural runs and became a
+    #: three-test failure the moment attempt1's grant created one: every test
+    #: that asserts "this campaign has no predecessor" inherited a real
+    #: attempt1 from the actual repository.
+    #:
+    #: The launch-bound sweep caught it, which is what a launch-bound sweep is
+    #: for — the same three tests run in the paid pod's blocking TESTS_OK gate,
+    #: on a tree that always has a run directory in it by the time a pod
+    #: exists.
+    assert not any(cursor.iterdir()), f"{cursor} must be empty"
     return root
 
 
