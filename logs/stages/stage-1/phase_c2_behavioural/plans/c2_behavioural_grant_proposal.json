@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-20T19:02:36.465480+00:00",
+ "proposed_utc": "2026-09-20T22:46:25.502451+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -20,10 +20,13 @@
    "why_bytes_not_just_identities": "a probe trained but not validly scored resumes AT SCORING and scoring reads the weights. Retraining it is forbidden, so the weights have to travel.",
    "cost": "billed pod time \u2014 any scp to a pod happens after it exists \u2014 bounded at the slowest recorded dev-box uplink, 0.23 MB/s, about 80 minutes per 1.11 GiB probe. Those minutes are a phase in the remaining-work bound, so an unaffordable restore is refused before a pod exists. Freeing Hugging Face private storage would move this to the $0 pre-pod relay; that is a maintainer decision."
   },
-  "_the_ceiling_is_cumulative": "all_in_hard_usd below bounds the CAMPAIGN across every resource and run attempt it takes, ALL-IN: each predecessor's GPU actual plus its container disk, derived from this authorization's own disk rate times that resource's elapsed minutes, because the runner records GPU only. A created resource whose cost cannot be read is UNKNOWN and refuses, never $0. A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those need rebuilt, and the restore \u2014 never on a fresh full session, which refused every continuation by construction. If the remainder does not fit, the gate refuses and returns to the maintainer: the experiment is not shortened and the ceiling is not raised."
+  "_two_ceilings_not_one": "campaign_all_in_hard_usd bounds the CAMPAIGN across every resource and run attempt it takes, ALL-IN: each predecessor's GPU actual plus its container disk, derived from this authorization's own disk rate times that resource's elapsed minutes, because the runner records GPU only. A created resource whose cost cannot be read is UNKNOWN and refuses, never $0. all_in_hard_usd bounds only THIS session, and is what the window, the watchdog and every in-pod spend check are built from. The two were the same number until attempt3 spent $2.5425 without reaching a verdict; raising the campaign ceiling to fund another attempt must not, and does not, lengthen a session. A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those need rebuilt, and the restore \u2014 never on a fresh full session, which refused every continuation by construction. If the remainder does not fit, the gate refuses and returns to the maintainer: the experiment is not shortened and neither ceiling is raised."
  },
  "authorization_terms": {
   "at_the_quoted_rate": {
+   "campaign_all_in_hard_usd": 35.76,
+   "_campaign_ceiling_is_cumulative": "bounds this campaign across every run attempt and provider resource, INCLUDING spend that has already settled. It is not a fresh allocation per attempt, and it is deliberately a different field from all_in_hard_usd, which bounds ONE session and is reconciled against gpu_hard_usd + disk_hard_usd.",
+   "_campaign_ceiling_buys_no_science": "it does not extend hard_runtime_minutes, gpu_hard_usd, disk_hard_usd, the provisioned disk, the probe count, the seeds or the scope. The session window is derived from gpu_hard_usd and hard_runtime_minutes, and the work from the frozen decomposition; neither reads this field.",
    "rate_usd_per_hour": 1.09,
    "hard_runtime_minutes": 1800.53,
    "gpu_hard_usd": 32.7097,
@@ -37,7 +40,7 @@
    "_all_in_is_the_campaign_ceiling": "one authorization funds one 12-probe campaign. all_in_hard_usd bounds the campaign cumulatively across every resource and run attempt, not each attempt separately."
   },
   "_derive_again_at_issuance": "these are the amounts at the rate this proposal was priced at. Issuance must re-quote gpuTypes.securePrice and derive them again at that rate: an authorization carrying a dollar window derived from a stale quote is a window that does not bound the bill. If the re-quote materially changes the dollar authorization, it goes back to the maintainer.",
-  "_five_distinct_amounts": "rate, authorized runtime, GPU dollars, separately billed disk dollars and the all-in total. The launcher derives its deadline from gpu_hard_usd and hard_runtime_minutes at the live rate \u2014 the shorter of the two \u2014 so a card above the authorized rate is refused and torn down rather than paid for, and a card below it does not extend the experiment."
+  "_five_distinct_amounts": "rate, authorized runtime, GPU dollars, separately billed disk dollars and the all-in total. The launcher derives its deadline from gpu_hard_usd and hard_runtime_minutes at the live rate \u2014 the shorter of the two \u2014 so a card above the authorized rate is refused and torn down rather than paid for, and a card below it does not extend the experiment. campaign_all_in_hard_usd is a SIXTH amount and is not one of them: it is not derived from the rate, it never enters the window, and it bounds the campaign rather than this session."
  },
  "protocol_binding": {
   "document": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
@@ -456,13 +459,13 @@
    "_why": "the C1 execution package funds C1 formal sessions and its own GPU engineering validation, at a per-session ceiling derived for that work. This is a different experiment with a ceiling derived from its own topology, so it needs its own authorization and must not be presented as fitting inside a remainder reserved for something else. Dividing the wrong balance by the wrong per-session ceiling is how this repository once came to state that three full-ceiling sessions were fundable when two were.",
    "_the_envelope_is_not_permission": "fitting the project envelope is an accounting fact. It is not launch permission and never has been."
   },
-  "cumulative_spend_usd": 309.2043,
+  "cumulative_spend_usd": 311.7468,
   "cumulative_cap_usd": 370.0,
   "authorized_cap_usd": 370.0,
-  "remaining_before_usd": 60.7957,
+  "remaining_before_usd": 58.2532,
   "this_ceiling_all_in_usd": 33.2099,
-  "cumulative_if_fully_spent_usd": 342.4142,
-  "headroom_after_usd": 27.5858,
+  "cumulative_if_fully_spent_usd": 344.9567,
+  "headroom_after_usd": 25.0433,
   "_no_cap_increase_requested": true,
   "_remaining_is_not_permission": true,
   "_not_permission": "remaining headroom is not authorization. A paid run needs a maintainer-written grant naming this session."
@@ -486,7 +489,7 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "9566bfb44ee4a5629889130a9cf877057c176651bef7374932c3e149c8316564",
+  "digest": "41406ffcdf5ddbc26bfc9c1ce158f23f2f0b08f250cf968fbd98f1e4fb42ecba",
   "n_files": 134,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
@@ -536,5 +539,5 @@
   "rehearsal": "tests/c2_behavioural_preflight/ \u2014 BUILT. One production-path rehearsal drives the real driver P through D and reaches all three terminal states from separate deterministic fixtures, replacing only hardware-bound calls.",
   "grant": "NOT REQUESTED \u2014 no grant, readiness record, authorization, bundle or provider resource exists for this session, and none may be created without a maintainer decision."
  },
- "proposal_sha256": "a96b1e2f016cb3ad5b34a7809c91d8e48f92a55bbc32a7e80aea0c5f59febe9f"
+ "proposal_sha256": "a84279e1bf0ad5b0da5334955b77d91bfc705bcbf5c1c22bb39093501fb729c1"
 }

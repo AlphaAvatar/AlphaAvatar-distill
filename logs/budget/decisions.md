@@ -8447,3 +8447,46 @@ on a paid pod.
   edits.
 - **Revisit when:** the executable closure gains or loses an entry point, or a
   future migration moves source paths again.
+
+## 2026-09-20 — The C2 behavioural CAMPAIGN ceiling rises to `$35.7600`, and a session ceiling is not the same number
+
+- **Context:** the campaign was authorized at a cumulative all-in ceiling of
+  `$33.2099`, a figure that at the time coincided *exactly* with what one fresh
+  full-length session may cost at `$1.09/h` on an L40S with 120 GB. The two
+  roles — "how much may this campaign spend in total" and "how much may this
+  one attempt spend" — were therefore the same number, and the code could not
+  tell them apart. attempt3 then spent `$2.5425` and stopped in stage P on
+  ENOSPC with no verdict, at which point `campaign_continuation_gate` correctly
+  refused a successor: settled `$2.5425` plus a remaining-work bound of
+  `$33.2098` does not fit under `$33.2099`.
+- **Decision:** the maintainer raised the **cumulative campaign** ceiling to
+  `$35.7600`, an increase of `$2.5501`, and held attempt4 at NO-GO until three
+  `$0` repairs were made and reviewed. The **session** ceiling did not move and
+  must not: `1800.53` min, `$32.7097` GPU, `$0.5002` disk, `$33.2099` all-in,
+  120 GB, at a re-quoted `$1.09/h`.
+- **What the separation is in code:** `campaign_all_in_hard_usd` is a sixth
+  authorization amount, deliberately outside `AUTHORIZATION_AMOUNT_FIELDS`. The
+  five session amounts are reconciled against each other and against the frozen
+  record; the campaign figure is reconciled against nothing but the session
+  all-in it must be able to fund. `window_minutes` takes no campaign argument,
+  so there is no path from it into the deadline, and `session_decomposition`
+  reads the frozen record, so there is none into the work. The maintainer's
+  number lives in the reviewed tree as
+  `behavioural_governance.CAMPAIGN_ALL_IN_CEILING_USD`, and issuance refuses a
+  grant that disagrees with it — a grant is hand-written, and that is where a
+  ceiling typo would enter unreviewed.
+- **Alternatives considered:** raising `all_in_hard_usd` to `$35.7600` — refused
+  by the maintainer and by the loader, which reconciles all-in against
+  `gpu + disk`; a `$35.7600` all-in would fail that identity, and had it somehow
+  passed, every consumer deriving a window would have read the larger number as
+  permission for a longer, dearer session. Shortening the experiment to fit the
+  original ceiling — refused: the protocol is frozen at twelve probes and the
+  funding question is the maintainer's, not the gate's.
+- **Risks:** the campaign ceiling now funds `$35.7600` of a `$370.0000` project
+  cap against a corrected cumulative of `$311.7468`, leaving `$58.2532`. One
+  full attempt4 plus the settled `$2.5425` consumes `$35.7524` of it. A second
+  full attempt after that would need another maintainer decision, and the gate
+  is where that need becomes visible rather than an overrun.
+- **Revisit when:** attempt4 reaches a terminal behavioural result — GO, NO_GO
+  or INCONCLUSIVE, all complete — or when a further attempt would exceed
+  `$35.7600`.

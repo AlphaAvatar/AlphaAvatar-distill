@@ -131,6 +131,7 @@ def build_authorization_record(*, grant: dict, terms: dict, commit: str,
         gpu_hard_usd=float(terms["gpu_hard_usd"]),
         disk_hard_usd=float(terms["disk_hard_usd"]),
         all_in_hard_usd=float(terms["all_in_hard_usd"]),
+        campaign_all_in_hard_usd=float(terms["campaign_all_in_hard_usd"]),
     )
     record = auth.as_dict()
     record["run_id"] = run_id
@@ -139,11 +140,18 @@ def build_authorization_record(*, grant: dict, terms: dict, commit: str,
     record["max_provider_resources"] = int(grant["max_provider_resources"])
     record["grant_path"] = governance_path(run_id, "grant.json")
     record["terms_basis"] = terms
-    record["_the_ceiling_is_cumulative"] = (
-        "all_in_hard_usd bounds the CAMPAIGN across every run attempt and "
-        "provider resource, not each attempt separately. "
-        "`campaign_continuation_gate` sums each predecessor's GPU actual plus "
-        "its derived container disk before permitting another resource.")
+    record["_two_ceilings"] = (
+        "all_in_hard_usd bounds THIS SESSION: it is derived from the live rate "
+        "and the frozen runtime, and it is what the watchdog, the window and "
+        "every spend check inside the pod are built from. "
+        "campaign_all_in_hard_usd bounds the CAMPAIGN cumulatively across every "
+        "attempt and provider resource; it is a maintainer number, not a "
+        "derived one. `campaign_continuation_gate` sums each predecessor's GPU "
+        "actual plus its derived container disk, adds this session's remaining "
+        "planned work, and compares that total to the CAMPAIGN ceiling. "
+        "Raising the campaign ceiling funds another attempt. It buys no "
+        "runtime, no disk, no probes, no seeds and no scientific scope: those "
+        "come from the frozen record through the session ceiling alone.")
     #: Recomputed LAST, over everything above, because the loader verifies the
     #: document it is given and not the object that produced it.
     record.pop("authorization_sha256", None)
@@ -184,6 +192,22 @@ def main(argv=None) -> int:
             f"the grant names campaign {grant.get('campaign_id')!r} and this "
             f"tree declares {BG.CAMPAIGN_ID!r}.")
 
+    #: A GRANT IS WRITTEN BY HAND AND ITS DATE FIELD SAYS `utc`. attempt3's
+    #: said 2026-09-21 while the session ran on 2026-09-20 UTC — a local
+    #: timezone date in a UTC field, which nothing detected because nothing
+    #: read it. It distorted no money there, since run costs are attributed
+    #: from closeouts through the run index. But a grant dated after the work
+    #: it authorizes is not a record anyone can reason from, and the check is
+    #: one comparison against the clock.
+    granted = str(grant.get("granted_utc", ""))[:10]
+    today = datetime.now(timezone.utc).date().isoformat()
+    if granted > today:
+        raise SystemExit(
+            f"the grant is dated {granted} and today is {today} UTC. A grant "
+            "cannot be issued from the future: either the date was written "
+            "from a local timezone — which is what happened to attempt3 — or "
+            "the clock is wrong. Fix the grant before issuing against it.")
+
     approved = grant["approved_money"]
     if float(args.rate) > float(approved["max_rate_usd_per_hour"]):
         raise SystemExit(
@@ -193,15 +217,43 @@ def main(argv=None) -> int:
             "was approved. Re-derive and return for a decision — the "
             "experiment is NOT shortened to fit a price increase.")
 
+    #: THE CAMPAIGN CEILING IS NOT DERIVED. It is the maintainer's cumulative
+    #: number for the whole campaign and it is read, never computed: no rate,
+    #: no runtime and no amount of remaining work may move it. It is required
+    #: explicitly, because a grant that names only one ceiling cannot say which
+    #: of the two it meant, and guessing would silently fund a session at the
+    #: campaign number.
+    if "campaign_all_in_usd" not in approved:
+        raise SystemExit(
+            "the grant's approved_money names no campaign_all_in_usd. Since "
+            "the two ceilings diverged, a grant must state BOTH the cumulative "
+            "campaign ceiling and this session's all_in_usd; one number cannot "
+            "say which it is, and reading the session ceiling as the campaign "
+            "one would under-fund the campaign while reading it the other way "
+            "would hand a single session the campaign's whole budget.")
+    campaign_ceiling = float(approved["campaign_all_in_usd"])
+    if abs(campaign_ceiling - BG.CAMPAIGN_ALL_IN_CEILING_USD) > MATERIAL_USD:
+        raise SystemExit(
+            f"the grant approves a ${campaign_ceiling} cumulative campaign "
+            f"ceiling and this reviewed tree declares "
+            f"${BG.CAMPAIGN_ALL_IN_CEILING_USD}. The campaign ceiling is a "
+            "maintainer decision, so the two must agree: a grant is written by "
+            "hand, and this is exactly where a ceiling typo would enter "
+            "unreviewed. If the maintainer raised it, the raise belongs in the "
+            "reviewed tree too.")
+
     #: DERIVED AT THE LIVE RATE, then compared to what was approved. A quote
     #: that moves the dollar authorization materially is a number nobody
-    #: reviewed, and the grant's own rule is to stop and return.
-    terms = BG.authorization_terms(REPO_ROOT, rate_usd_per_hour=args.rate)
+    #: reviewed, and the grant's own rule is to stop and return. This compares
+    #: the SESSION ceilings: the campaign ceiling is not a function of the rate,
+    #: so a live quote can never justify moving it.
+    terms = BG.authorization_terms(REPO_ROOT, rate_usd_per_hour=args.rate,
+                                   campaign_all_in_hard_usd=campaign_ceiling)
     drift = abs(float(terms["all_in_hard_usd"]) - float(approved["all_in_usd"]))
     if drift > MATERIAL_USD:
         raise SystemExit(
-            f"at the live rate ${args.rate}/h the campaign ceiling derives to "
-            f"${terms['all_in_hard_usd']} and the grant approves "
+            f"at the live rate ${args.rate}/h this session's ceiling derives "
+            f"to ${terms['all_in_hard_usd']} and the grant approves "
             f"${approved['all_in_usd']} — a ${drift:.4f} change. That is a "
             "materially different dollar authorization from the reviewed "
             "basis. STOP and return to the maintainer before creating a "
@@ -251,6 +303,7 @@ def main(argv=None) -> int:
         "gpu_hard_usd": reloaded.gpu_hard_usd,
         "disk_hard_usd": reloaded.disk_hard_usd,
         "all_in_hard_usd": reloaded.all_in_hard_usd,
+        "campaign_all_in_hard_usd": reloaded.campaign_all_in_hard_usd,
         "expected_all_in_usd": terms["expected_all_in_usd"],
         "loaded_back": True,
     }, indent=1))

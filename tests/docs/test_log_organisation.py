@@ -1171,3 +1171,91 @@ class TestARelocationRewritesOnlyWhatItOwns:
             pytest.skip("one of the copies is not present on this machine")
         assert sha256_file(a) == sha256_file(b), (
             "the working copy has drifted from the canonical artifact")
+
+
+# --- a closeout's cost is read in ITS OWN shape ------------------------------
+
+class TestProjectSessionCostShapes:
+    """Three shapes exist because three generations of closeout exist.
+
+    The behavioural closeout states `money.all_in_usd` and neither older key,
+    so `$2.5425` of settled spend sat outside the project cumulative entirely
+    while every individual record was correct. Adding the shape is half the
+    fix; the other half is that a cost which is genuinely unknown must stay
+    UNKNOWN rather than becoming a silent `$0`.
+    """
+
+    def _mod(self):
+        from consolidate import derive_budget as m
+        return m
+
+    def _run(self, root: Path, name: str, doc: dict):
+        rel = f"logs/stages/stage-1/{name}/runs/attempt1"
+        d = root / rel / "closeout"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "outcome.json").write_text(json.dumps(doc))
+        idx = root / "logs/index.json"
+        cur = json.loads(idx.read_text()) if idx.is_file() else {"runs": []}
+        cur.setdefault("runs", []).append(
+            {"experiment_id": name, "run_id": "attempt1", "root": rel})
+        idx.parent.mkdir(parents=True, exist_ok=True)
+        idx.write_text(json.dumps(cur))
+
+    def _one(self, root: Path, name: str):
+        rows = [r for r in self._mod().project_sessions(root)
+                if r["experiment_id"] == name]
+        assert len(rows) == 1, rows
+        return rows[0]
+
+    @pytest.mark.parametrize("doc,cost,shape", [
+        ({"budget": {"this_attempt": 1.5}}, 1.5, "budget.this_attempt"),
+        ({"cost": {"actual_usd": 2.0}}, 2.0, "cost.actual_usd"),
+        ({"money": {"all_in_usd": 2.5425}}, 2.5425, "money.all_in_usd"),
+        #: Affirmatively nothing: no resource ever existed to bill.
+        ({"provider_resource_created": False, "money": {"spent_usd": 0.0}},
+         0.0, "no_provider_resource"),
+    ])
+    def test_each_shape_is_read_and_names_itself(self, tmp_path, doc, cost,
+                                                 shape):
+        self._run(tmp_path, "exp", doc)
+        got = self._one(tmp_path, "exp")
+        assert got["cost_usd"] == pytest.approx(cost)
+        assert got["shape"] == shape
+
+    @pytest.mark.parametrize("doc", [
+        {},
+        {"money": {"gpu_actual_usd": 3.0}},          # not the all-in key
+        {"provider_resource_created": True},          # a resource DID exist
+        {"provider_resource_created": None},          # says nothing
+        {"cost": {}, "budget": {}, "money": {}},
+    ])
+    def test_an_unreadable_cost_stays_unknown_and_never_becomes_zero(
+            self, tmp_path, doc):
+        self._run(tmp_path, "exp", doc)
+        got = self._one(tmp_path, "exp")
+        assert got["cost_usd"] is None, got
+        assert got["shape"] is None
+
+    def test_an_unknown_cost_is_named_rather_than_summed(self, tmp_path):
+        """`project_balance` must show it, not quietly drop it from the total."""
+        m = self._mod()
+        self._run(tmp_path, "priced", {"money": {"all_in_usd": 4.0}})
+        self._run(tmp_path, "silent", {"provider_resource_created": True})
+        bal = m.project_balance(
+            tmp_path, {"cumulative_spend_usd_at_approval": None,
+                       "cumulative_spend_at_approval_usd": 100.0}, 200.0)
+        assert bal["spent_since_anchor_usd"] == pytest.approx(4.0)
+        assert "silent/attempt1" in bal["sessions_without_recorded_cost"]
+        assert "priced/attempt1" not in bal["sessions_without_recorded_cost"]
+
+    def test_the_real_behavioural_attempt_is_priced_from_its_own_closeout(self):
+        """The regression itself, against the committed tree."""
+        rows = {r["run_id"]: r for r in self._mod().project_sessions(REPO)
+                if r["experiment_id"] == "phase_c2_behavioural"}
+        assert set(rows) == {"attempt1", "attempt2", "attempt3"}, sorted(rows)
+        assert rows["attempt3"]["cost_usd"] == pytest.approx(2.5425)
+        assert rows["attempt3"]["shape"] == "money.all_in_usd"
+        #: Both retired chains created no provider resource, and say so.
+        for a in ("attempt1", "attempt2"):
+            assert rows[a]["cost_usd"] == 0.0
+            assert rows[a]["shape"] == "no_provider_resource"

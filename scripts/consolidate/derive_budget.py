@@ -155,17 +155,52 @@ def project_sessions(root: Path) -> list[dict]:
             continue
         seen.add(key)
         rec = {"experiment_id": key[0], "run_id": key[1],
-               "cost_usd": None, "source": None}
+               "cost_usd": None, "source": None, "shape": None}
         for cand in _outcome_paths(root, entry):
             if not cand.is_file():
                 continue
             doc = json.loads(cand.read_text())
-            cost = (doc.get("budget") or {}).get("this_attempt")
-            if cost is None:
-                cost = (doc.get("cost") or {}).get("actual_usd")
-            if cost is not None:
+            #: THE CLOSEOUT'S OWN AUTHORITATIVE FIGURE FIRST, then the older
+            #: shapes, which remain supported because the closeouts that use
+            #: them are frozen evidence and are not being rewritten.
+            #:
+            #: `money.all_in_usd` is the behavioural closeout's shape and it is
+            #: the only one of the three that is ALL-IN: `cost.actual_usd`
+            #: carries GPU alone, because the runner reads GPU alone from the
+            #: provider. Container disk is billed separately at $0.10/GB/month
+            #: and a GPU-only figure silently understates a 120 GB session.
+            #: Ordered last all the same: a document that states both must be
+            #: read the way its own experiment's ledger reads it, and only the
+            #: behavioural closeout states `money` at all.
+            for shape, cost in (
+                    ("budget.this_attempt",
+                     (doc.get("budget") or {}).get("this_attempt")),
+                    ("cost.actual_usd",
+                     (doc.get("cost") or {}).get("actual_usd")),
+                    ("money.all_in_usd",
+                     (doc.get("money") or {}).get("all_in_usd")),
+                    #: AFFIRMATIVELY $0, which is not the same as unknown. A
+                    #: closeout that states no provider resource was ever
+                    #: created has said what it cost: nothing was billed
+                    #: because nothing existed to bill. Without this, a
+                    #: post-anchor attempt that was retired before reaching a
+                    #: provider lands in `sessions_without_recorded_cost`
+                    #: beside the pre-anchor runs, and a reader can no longer
+                    #: tell "excluded because it predates the anchor" from
+                    #: "post-anchor and nobody knows". It is the same rule the
+                    #: launcher's `prior_attempt_actual` applies, and it is
+                    #: guarded the same way: the document must SAY `false`.
+                    #: Missing, null or true all fall through to UNKNOWN.
+                    ("no_provider_resource",
+                     0.0 if doc.get("provider_resource_created") is False
+                     else None)):
+                if cost is None:
+                    continue
                 rec["cost_usd"] = float(cost)
                 rec["source"] = str(cand.relative_to(root))
+                rec["shape"] = shape
+                break
+            if rec["cost_usd"] is not None:
                 break
         out.append(rec)
     return out

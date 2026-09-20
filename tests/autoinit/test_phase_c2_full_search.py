@@ -334,19 +334,39 @@ def test_the_headroom_verdict_matches_what_plan_session_actually_does(
     from derive_budget import derive
 
     remaining = derive(REPO)["project"]["remaining_usd"]
-    recorded_fits = "FITS" in json.loads(PRICING.read_text())["funding"]["status"]
+    record = json.loads(PRICING.read_text())
+    funding = record["funding"]
+
+    #: ONE QUANTITY PER VERDICT. This compared `funding.status` — a verdict
+    #: about the COMPLETE C2 chain, both sessions' GPU plus the container disk
+    #: they each provision — against `FS.price`, which prices ONE session's GPU
+    #: at one beam width. The two agreed while the cap was tight enough for
+    #: both to refuse, and diverged the moment the chain stopped fitting while
+    #: a single search session still did. That is not staleness; it is two
+    #: different questions sharing a name.
+    width = funding["standing_beam_width"]
+    row = next(r for r in record["search"]["widths"] if r["beam_width"] == width)
     try:
         FS.price(space, price_per_hour=FS.PRICE_PER_HOUR_LAST_QUOTED,
-                 authorized_usd=remaining, beam_width=6)
+                 authorized_usd=remaining, beam_width=width)
         actually_fits = True
     except BudgetError:
         actually_fits = False
-    assert actually_fits is recorded_fits, (
-        f"the pricing record says fits={recorded_fits} and plan_session says "
+    assert actually_fits is row["fits_remaining_headroom"], (
+        f"the pricing record says the beam-{width} SEARCH SESSION fits="
+        f"{row['fits_remaining_headroom']} and plan_session says "
         f"{actually_fits}; one of them is stale")
+
+    #: The chain-level verdict is derived from the chain's own arithmetic, and
+    #: is checked as such rather than against a single session's.
+    chain_fits = funding["complete_chain_hard_usd"] <= remaining
+    assert chain_fits is ("FITS" in funding["status"]), (
+        f"the funding status is {funding['status']!r} while the chain costs "
+        f"${funding['complete_chain_hard_usd']} against ${remaining} remaining")
+    assert (funding["headroom_after_the_chain_usd"] >= 0) is chain_fits
+
     #: And fitting is never permission — the record must carry that either way.
-    funding = json.loads(PRICING.read_text())["funding"]
-    assert "NOT AUTHORIZED" in funding["status"] or not actually_fits
+    assert "NOT AUTHORIZED" in funding["status"] or not chain_fits
 
 
 def test_the_funding_requirement_is_the_standing_design_not_the_cheapest():

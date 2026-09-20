@@ -30,18 +30,101 @@ def proposal() -> dict:
     return json.loads((ROOT / PROPOSAL).read_text())
 
 
+_RUNS = ROOT / "logs/stages/stage-1/phase_c2_behavioural/runs"
+
+
+def attempts_with_governance(runs: Path) -> list[str]:
+    """Every run attempt under `runs` that holds a governance artifact."""
+    if not runs.is_dir():
+        return []
+    return sorted({p.parent.parent.name for p in runs.rglob("*.json")
+                   if p.parent.name == "governance"})
+
+
+def open_chains(runs: Path, *, role: str = "*.json") -> list[str]:
+    """Governance artifacts belonging to an attempt with NO closeout.
+
+    A closeout is what makes a chain consumed. Until one exists the artifacts
+    are live permission, and a proposal-only stage must hold none.
+
+    Taking `runs` as an argument rather than reading the repository is what
+    makes the predicate testable: against the committed tree it returns `[]`,
+    and a version that always returns `[]` would be indistinguishable. It is
+    exercised on synthetic trees by `TestTheOpenChainPredicate` below.
+    """
+    if not runs.is_dir():
+        return []
+    return sorted(
+        str(p.relative_to(runs)) for p in runs.glob(f"*/governance/{role}")
+        if not (p.parent.parent / "closeout/outcome.json").is_file())
+
+
+class TestTheOpenChainPredicate:
+    """The predicate itself, on trees built for the purpose.
+
+    Without these, neutering `open_chains` to `return []` passes the whole
+    file: the committed tree holds no open chain, so every caller's assertion
+    is satisfied by a blind answer. That mutation survived once.
+    """
+
+    def _tree(self, root: Path, attempt: str, *, roles=("grant.json",),
+              closed: bool) -> Path:
+        gov = root / attempt / "governance"
+        gov.mkdir(parents=True, exist_ok=True)
+        for role in roles:
+            (gov / role).write_text("{}")
+        if closed:
+            close = root / attempt / "closeout"
+            close.mkdir(parents=True, exist_ok=True)
+            (close / "outcome.json").write_text("{}")
+        return root
+
+    def test_an_unclosed_attempt_is_open(self, tmp_path):
+        self._tree(tmp_path, "attempt4", closed=False)
+        assert open_chains(tmp_path) == ["attempt4/governance/grant.json"]
+
+    def test_a_closed_attempt_is_not_open(self, tmp_path):
+        self._tree(tmp_path, "attempt3", closed=True)
+        assert open_chains(tmp_path) == []
+        assert attempts_with_governance(tmp_path) == ["attempt3"]
+
+    def test_closed_and_open_together_report_only_the_open_one(self, tmp_path):
+        self._tree(tmp_path, "attempt3", closed=True)
+        self._tree(tmp_path, "attempt4", roles=("authorization.json",),
+                   closed=False)
+        assert open_chains(tmp_path) == [
+            "attempt4/governance/authorization.json"]
+        assert attempts_with_governance(tmp_path) == ["attempt3", "attempt4"]
+
+    def test_the_role_filter_narrows_without_hiding(self, tmp_path):
+        self._tree(tmp_path, "attempt4",
+                   roles=("grant.json", "bundle.json"), closed=False)
+        assert open_chains(tmp_path, role="grant.json") == [
+            "attempt4/governance/grant.json"]
+        assert len(open_chains(tmp_path)) == 2
+
+    def test_a_missing_runs_directory_is_empty_not_an_error(self, tmp_path):
+        assert open_chains(tmp_path / "nope") == []
+        assert attempts_with_governance(tmp_path / "nope") == []
+
+
 def test_the_proposal_authorizes_nothing():
     """The whole point. A proposal that could be mistaken for a grant is worse
     than no proposal."""
     doc = proposal()
     assert doc["authorizes"] == "nothing"
     assert doc["project_position"]["_no_cap_increase_requested"] is True
-    #: None of the artifacts that DO authorize may exist yet.
-    run_dir = ROOT / "logs/stages/stage-1/phase_c2_behavioural/runs"
+    #: None of the artifacts that DO authorize may belong to an OPEN attempt.
+    #: This read "none may exist at all", which was the same sentence while
+    #: nothing had launched and stopped being one the moment attempt1 did: a
+    #: consumed chain is evidence of a closed attempt, and demanding its
+    #: absence would require deleting the record of what was authorized.
     for role in ("grant.json", "readiness.json", "authorization.json",
                  "bundle.json"):
-        assert not list(run_dir.glob(f"*/governance/{role}")), (
-            f"a {role} exists; this stage is a proposal only")
+        assert open_chains(_RUNS, role=role) == [], (
+            f"a {role} exists for an attempt with no closeout; a chain that "
+            "is built but not closed is either running or abandoned, and this "
+            "stage is a proposal only")
 
 
 def test_the_schedule_is_the_frozen_one_and_totals_twelve():
@@ -183,10 +266,18 @@ def test_no_authorizing_artifact_is_claimed_or_present():
     assert doc["authorizes"] == "nothing"
     assert "NOT REQUESTED" in doc["implementation_state"]["grant"]
 
-    runs = ROOT / "logs/stages/stage-1/phase_c2_behavioural/runs"
-    found = sorted(str(p.relative_to(ROOT)) for p in runs.rglob("*.json")
-                   if p.parent.name == "governance") if runs.is_dir() else []
-    assert found == [], f"authorizing artifacts already exist: {found}"
+    #: Same correction as above, and for the same reason: the invariant is
+    #: that nothing here PERMITS a paid run, not that no attempt ever did.
+    open_ = open_chains(_RUNS)
+    assert open_ == [], f"governance artifacts for an unclosed attempt: {open_}"
+    #: And the attempts that DO hold artifacts are all closed, so what exists
+    #: is a record rather than a permission. Asserted positively, because an
+    #: empty `open_chains` is also what a blind predicate returns.
+    closed = attempts_with_governance(_RUNS)
+    assert closed, "no attempt holds governance artifacts; the guard above " \
+                   "would pass on an empty tree and prove nothing"
+    for attempt in closed:
+        assert (_RUNS / attempt / "closeout/outcome.json").is_file(), attempt
 
 
 def test_the_units_are_converted_through_the_recorded_basis():

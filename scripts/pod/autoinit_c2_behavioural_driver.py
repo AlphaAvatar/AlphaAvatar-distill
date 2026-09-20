@@ -1030,7 +1030,25 @@ class C2BehaviouralDriver:
         #: AFTER the gate and AFTER the announcement, never before: a
         #: provenance finding must keep every intermediate it diverged through,
         #: and a verified arm must be durable before anything is removed.
-        self.release_intermediates(label, results, workdir)
+        released = self.release_intermediates(label, results, workdir)
+        #: FAIL CLOSED HERE, at the caller. The helper stays non-raising — a
+        #: cleanup error must not destroy a verified, announced arm — but the
+        #: 120 GB provision is only correct BECAUSE these are released. If a
+        #: release failed, the lifecycle assumption the bound rests on has been
+        #: falsified, and continuing would build the next arm under a storage
+        #: bound that no longer describes the program. attempt3 is what that
+        #: looks like when it is discovered five arms later: ENOSPC, 32.8
+        #: minutes of completed compute thrown away, and no verdict.
+        if released["failed"]:
+            raise C2DriverError(
+                f"{label}: the arm is built, identity-gated and announced, but "
+                f"its intermediates could not be released — {released['failed']}"
+                ". The 120 GB provision is derived on the assumption that each "
+                "arm's construction intermediates are freed when it is "
+                "verified, so that assumption has now been falsified and the "
+                "storage bound no longer describes this session. NO FURTHER "
+                "ARM MAY BE BUILT under a bound that does not hold. The "
+                "verified arm and its evidence are preserved.")
         return str(final.checkpoint_path)
 
     def release_intermediates(self, label: str, results, workdir: Path) -> dict:
@@ -1051,8 +1069,14 @@ class C2BehaviouralDriver:
         A resource bound has to follow the real free() call sites. This is that
         call site.
 
-        NEVER RAISES. A cleanup failure must not destroy a verified arm that is
-        already announced and gated; it is recorded and the session continues.
+        NEVER RAISES, and that is not the same as tolerating failure. A cleanup
+        error must not destroy a verified arm that is already announced and
+        gated, so the error is recorded here and returned in `failed`. The
+        CALLER then stops: `materialize_arm` refuses to build another arm,
+        because the 120 GB bound is derived on the assumption these are freed,
+        and a failed release falsifies it. Deciding here would conflate two
+        separate things — whether this arm survives, and whether the next one
+        may begin.
         """
         import shutil
 

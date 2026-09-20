@@ -203,25 +203,31 @@ def build() -> dict:
                     "Freeing Hugging Face private storage would move this to "
                     "the $0 pre-pod relay; that is a maintainer decision."),
             },
-            "_the_ceiling_is_cumulative": (
-                "all_in_hard_usd below bounds the CAMPAIGN across every "
+            "_two_ceilings_not_one": (
+                "campaign_all_in_hard_usd bounds the CAMPAIGN across every "
                 "resource and run attempt it takes, ALL-IN: each "
                 "predecessor's GPU actual plus its container disk, derived "
                 "from this authorization's own disk rate times that "
                 "resource's elapsed minutes, because the runner records GPU "
                 "only. A created resource whose cost cannot be read is "
-                "UNKNOWN and refuses, never $0. A continuation is budgeted "
-                "on the work the campaign still OWES — its incomplete probes, "
-                "the arms those need rebuilt, and the restore — never on a "
-                "fresh full session, which refused every continuation by "
+                "UNKNOWN and refuses, never $0. all_in_hard_usd bounds only "
+                "THIS session, and is what the window, the watchdog and every "
+                "in-pod spend check are built from. The two were the same "
+                "number until attempt3 spent $2.5425 without reaching a "
+                "verdict; raising the campaign ceiling to fund another attempt "
+                "must not, and does not, lengthen a session. A continuation is "
+                "budgeted on the work the campaign still OWES — its incomplete "
+                "probes, the arms those need rebuilt, and the restore — never "
+                "on a fresh full session, which refused every continuation by "
                 "construction. If the remainder does not fit, the gate refuses "
                 "and returns to the maintainer: the experiment is not shortened "
-                "and the ceiling is not raised."),
+                "and neither ceiling is raised."),
         },
 
         "authorization_terms": {
             "at_the_quoted_rate": BG.authorization_terms(
-                REPO, rate_usd_per_hour=BG.QUOTED_RATE_USD_PER_HOUR),
+                REPO, rate_usd_per_hour=BG.QUOTED_RATE_USD_PER_HOUR,
+                campaign_all_in_hard_usd=BG.CAMPAIGN_ALL_IN_CEILING_USD),
             "_derive_again_at_issuance": (
                 "these are the amounts at the rate this proposal was priced "
                 "at. Issuance must re-quote gpuTypes.securePrice and derive "
@@ -235,7 +241,10 @@ def build() -> dict:
                 "deadline from gpu_hard_usd and hard_runtime_minutes at the "
                 "live rate — the shorter of the two — so a card above the "
                 "authorized rate is refused and torn down rather than paid "
-                "for, and a card below it does not extend the experiment."),
+                "for, and a card below it does not extend the experiment. "
+                "campaign_all_in_hard_usd is a SIXTH amount and is not one of "
+                "them: it is not derived from the rate, it never enters the "
+                "window, and it bounds the campaign rather than this session."),
         },
 
         "protocol_binding": {

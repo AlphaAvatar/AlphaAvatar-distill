@@ -308,10 +308,12 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
       replacement, not completed science charged twice;
     * once screening has committed a candidate, confirmation is owed for THAT
       candidate and screening is not owed at all;
-    * before screening commits, the confirmation candidate is unknown, so the
-      materialization bound takes the most expensive admissible candidate —
-      bounding by an average is how a ceiling comes to be exceeded by the arm
-      that was actually chosen.
+    * before screening commits, the confirmation candidate is unknown, so
+      EVERY candidate's arm is owed. Not the most expensive one as a cost
+      proxy: a proxy chosen for its price would have become the execution
+      identity downstream, and stage P would have built the arm the budget
+      named rather than the arm the ranking chose. The bound is the union, and
+      it is honest because it is also what a fresh filesystem actually needs.
 
     Returns `n_probes_remaining == 0` when the campaign owes nothing. That is
     not permission to do anything: a complete verdict is terminal, and NO_GO and

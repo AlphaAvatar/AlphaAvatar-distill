@@ -319,6 +319,25 @@ QUOTED_RATE_USD_PER_HOUR = 1.09
 #: deadline can still stop and delete its pod.
 TEARDOWN_RESERVE_USD = 0.25
 
+#: THE CUMULATIVE CAMPAIGN CEILING, as approved by the maintainer on
+#: 2026-09-20 UTC. Everything else in this module is DERIVED — from the frozen
+#: record, from the live rate, from the schedule. This one number is not: it is
+#: a maintainer decision about how much of the project's remaining budget this
+#: campaign may consume in total, across every attempt and every provider
+#: resource it takes.
+#:
+#: History: approved at $33.2099, which at the time coincided exactly with a
+#: single fresh session's all-in ceiling — so the two were the same number and
+#: the code could not tell them apart. attempt3 then spent $2.5425 and stopped
+#: at ENOSPC without a verdict, and the maintainer raised the CAMPAIGN ceiling
+#: by that much plus the quantum, to $35.7600, so one more full-length attempt
+#: still fits. The session ceiling did NOT move and must not: $35.76 funds
+#: another attempt, and buys no runtime, no disk, no probes, no seeds and no
+#: scientific scope. A grant states this number and issuance refuses a grant
+#: that disagrees with it, because a hand-written grant is exactly where a
+#: ceiling typo would enter unreviewed.
+CAMPAIGN_ALL_IN_CEILING_USD = 35.76
+
 
 def ceiling(repo_root: str | Path = REPO_ROOT, *,
             gpu_rate_usd_per_hour: float = QUOTED_RATE_USD_PER_HOUR,
@@ -351,9 +370,27 @@ AUTHORIZATION_AMOUNT_FIELDS: tuple[str, ...] = (
     "rate_usd_per_hour", "hard_runtime_minutes", "gpu_hard_usd",
     "disk_hard_usd", "all_in_hard_usd")
 
+#: THE CAMPAIGN CEILING, and it is a DIFFERENT QUANTITY from the session's.
+#:
+#: `all_in_hard_usd` is what ONE session may cost and it is reconciled against
+#: `gpu_hard_usd + disk_hard_usd`; that identity is what stops a GPU-only cap
+#: from silently permitting the disk amount of extra spend. The campaign
+#: ceiling is cumulative across every attempt and resource, and after a failed
+#: attempt it necessarily exceeds one session's — so it CANNOT be the same
+#: field. Raising `all_in_hard_usd` to carry a campaign figure would break the
+#: session identity and, worse, would be read by everything that derives the
+#: session window as permission for a longer, dearer session.
+#:
+#: It buys exactly one thing: room for a fresh attempt beside spend that has
+#: already settled. It does not extend runtime, GPU dollars, disk, probes,
+#: seeds or scope — those all come from the session amounts and the frozen
+#: decomposition, and nothing here reaches them.
+CAMPAIGN_AMOUNT_FIELD = "campaign_all_in_hard_usd"
+
 
 def authorization_terms(repo_root: str | Path = REPO_ROOT, *,
                         rate_usd_per_hour: float,
+                        campaign_all_in_hard_usd: float,
                         provision_gb: int = PROVISION_GB) -> dict[str, Any]:
     """The amounts an authorization carries, derived MECHANICALLY at a live rate.
 
@@ -376,7 +413,30 @@ def authorization_terms(repo_root: str | Path = REPO_ROOT, *,
     c = ceiling(repo_root, gpu_rate_usd_per_hour=rate_usd_per_hour,
                 provision_gb=provision_gb)
     hard, expected = c["hard_ceiling"], c["expected"]
+    #: The campaign ceiling is a MAINTAINER NUMBER, not a derivation: it is
+    #: whatever decision funds this campaign, and it is passed in rather than
+    #: computed so nothing here can quietly grant more of it.
+    campaign = float(campaign_all_in_hard_usd)
+    if campaign < float(hard["all_in_usd"]) - DOLLAR_QUANTUM_USD:
+        raise BehaviouralGovernanceError(
+            f"the campaign ceiling ${campaign} is below one session's all-in "
+            f"${hard['all_in_usd']}. A campaign that cannot fund a single "
+            "attempt of its own experiment is not a ceiling, it is a refusal "
+            "written as a number.")
     return {
+        CAMPAIGN_AMOUNT_FIELD: campaign,
+        "_campaign_ceiling_is_cumulative": (
+            "bounds this campaign across every run attempt and provider "
+            "resource, INCLUDING spend that has already settled. It is not a "
+            "fresh allocation per attempt, and it is deliberately a different "
+            "field from all_in_hard_usd, which bounds ONE session and is "
+            "reconciled against gpu_hard_usd + disk_hard_usd."),
+        "_campaign_ceiling_buys_no_science": (
+            "it does not extend hard_runtime_minutes, gpu_hard_usd, "
+            "disk_hard_usd, the provisioned disk, the probe count, the seeds "
+            "or the scope. The session window is derived from gpu_hard_usd and "
+            "hard_runtime_minutes, and the work from the frozen decomposition; "
+            "neither reads this field."),
         "rate_usd_per_hour": float(rate_usd_per_hour),
         "hard_runtime_minutes": float(hard["minutes"]),
         "gpu_hard_usd": float(hard["gpu_usd"]),
@@ -556,6 +616,33 @@ def _load_amounts(path: str | Path, raw: dict[str, Any]) -> dict[str, float]:
             f"${out['gpu_hard_usd']} of GPU plus ${out['disk_hard_usd']} of "
             "separately billed container disk. An all-in figure that is not the "
             "sum is how $1.69 of disk went unledgered once already.")
+    #: THE CAMPAIGN CEILING, loaded and checked as its OWN quantity. The
+    #: session identity below is unaffected by it and must stay that way: an
+    #: authorization whose all_in_hard_usd had been raised to carry a campaign
+    #: figure would fail the gpu+disk identity, and if it somehow passed, every
+    #: consumer that derives a session window would read the larger number as
+    #: permission for a longer, dearer session.
+    campaign = raw.get(CAMPAIGN_AMOUNT_FIELD)
+    if campaign is None:
+        raise AuthorizationError(
+            f"{path} states no {CAMPAIGN_AMOUNT_FIELD}. The campaign ceiling is "
+            "cumulative across every attempt and resource; without it "
+            "campaign_continuation_gate has nothing to bound prior spend "
+            "against, and a session ceiling is not a substitute — after one "
+            "failed attempt they are different numbers.")
+    try:
+        out[CAMPAIGN_AMOUNT_FIELD] = float(campaign)
+    except (TypeError, ValueError) as exc:
+        raise AuthorizationError(
+            f"{path} states {CAMPAIGN_AMOUNT_FIELD}={campaign!r}, which is not "
+            "a number") from exc
+    if out[CAMPAIGN_AMOUNT_FIELD] < out["all_in_hard_usd"] - DOLLAR_QUANTUM_USD:
+        raise AuthorizationError(
+            f"{path} states a campaign ceiling of "
+            f"${out[CAMPAIGN_AMOUNT_FIELD]} below its own session all-in of "
+            f"${out['all_in_hard_usd']}. A campaign that cannot fund a single "
+            "attempt of its own experiment is not a ceiling.")
+
     cap = float(raw.get("hard_cap_usd", 0.0))
     if abs(cap - out["gpu_hard_usd"]) > DOLLAR_QUANTUM_USD:
         raise AuthorizationError(
@@ -600,6 +687,9 @@ class BehaviouralAuthorization(C2Authorization):
     #: issuer. A permissive default on a money field is the one shape this type
     #: must not have.
     campaign_id: str | None = None
+    #: CUMULATIVE across the campaign, and deliberately not `all_in_hard_usd`.
+    #: See CAMPAIGN_AMOUNT_FIELD for why these cannot be one field.
+    campaign_all_in_hard_usd: float | None = None
     rate_usd_per_hour: float | None = None
     hard_runtime_minutes: float | None = None
     gpu_hard_usd: float | None = None
@@ -674,6 +764,13 @@ class BehaviouralAuthorization(C2Authorization):
         payload["campaign_id"] = self.campaign_id
         for field in AUTHORIZATION_AMOUNT_FIELDS:
             payload[field] = getattr(self, field)
+        payload[CAMPAIGN_AMOUNT_FIELD] = self.campaign_all_in_hard_usd
+        payload["_session_versus_campaign"] = (
+            "all_in_hard_usd bounds ONE session and equals gpu_hard_usd + "
+            "disk_hard_usd. campaign_all_in_hard_usd bounds the CAMPAIGN "
+            "cumulatively, including spend that has already settled, and is "
+            "the only figure campaign_continuation_gate compares against. "
+            "Neither the session window nor the scientific work reads it.")
         payload["_amounts_are_distinct"] = (
             "GPU money, separately billed container disk and the authorized "
             "runtime are three different quantities. The launcher derives its "

@@ -253,7 +253,8 @@ def test_the_window_is_derived_from_the_rate_not_fixed():
     buy fewer minutes.
     """
     terms = BG.authorization_terms(
-        REPO, rate_usd_per_hour=BG.QUOTED_RATE_USD_PER_HOUR)
+        REPO, rate_usd_per_hour=BG.QUOTED_RATE_USD_PER_HOUR,
+        campaign_all_in_hard_usd=BG.CAMPAIGN_ALL_IN_CEILING_USD)
     kw = {"gpu_hard_usd": terms["gpu_hard_usd"],
           "hard_runtime_minutes": terms["hard_runtime_minutes"]}
     assert BG.window_minutes(1.5, **kw) > BG.window_minutes(2.0, **kw)

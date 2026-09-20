@@ -438,14 +438,14 @@ def prior_attempt_actual(ctx: SessionContext, attempt: str) -> dict:
 
     `SessionRunner` records `cost.actual_usd` from `self.usd()`, which is GPU
     only — container disk is billed separately by the provider and the runner
-    never sees it. Summing that field alone and then comparing against
-    `all_in_hard_usd` made the campaign check
+    never sees it. Summing that field alone made the campaign check
 
         prior GPU + future GPU + future disk <= all-in ceiling
 
     which silently omits every predecessor's disk. R9 says the ceiling is
-    cumulative across every resource and subrun, and `all_in_hard_usd` means
-    all-in, so the predecessor's disk has to be in it.
+    cumulative across every resource and subrun, and the ceiling it is checked
+    against — `campaign_all_in_hard_usd` — means all-in, so the predecessor's
+    disk has to be in it.
 
     It is DERIVED rather than looked up, because nothing records it: the
     provisioned volume is billed for the pod's whole lifetime, so it is the
@@ -560,20 +560,29 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
       all-in ceiling.** The ceiling is cumulative across every resource and
       subrun: a rerun does not reset it and a replacement resource does not
       receive a fresh allocation. So the check is settled campaign spend plus
-      this session's planned all-in against `all_in_hard_usd`.
+      this session's planned all-in against `campaign_all_in_hard_usd` — the
+      CAMPAIGN's ceiling, never `all_in_hard_usd`, which bounds one session.
 
-    This gate fails CLOSED and says why. With a ceiling sized for one full
-    session, a continuation after a resource that already spent real money will
-    be REFUSED here rather than permitted to overspend — funding a campaign for
-    more than one full session is a maintainer decision, and this gate is where
-    that need becomes visible instead of becoming an overrun.
+    This gate fails CLOSED and says why. While a campaign ceiling is sized for
+    exactly one full session, a continuation after a resource that already
+    spent real money is REFUSED here rather than permitted to overspend —
+    funding a campaign for more than one full session is a maintainer decision,
+    and this gate is where that need becomes visible instead of becoming an
+    overrun. It is what happened after attempt3: the gate refused, the
+    maintainer raised the CAMPAIGN ceiling by what attempt3 had spent, and the
+    session ceiling did not move. Raising it is not this gate's to do, and a
+    larger campaign ceiling reaches nothing in this file except this comparison.
     """
     campaign = ctx.auth.campaign_id
     prior = campaign_attempts(campaign, exclude=ctx.args.run_id,
                               store=ctx.args.ckpt_store, repo_root=REPO_ROOT)
     work = campaign_remaining_work(ctx)
     planned = continuation_all_in_usd(ctx, work)
-    approved = float(ctx.auth.all_in_hard_usd)
+    #: THE CAMPAIGN CEILING, never the session's. They are the same number only
+    #: until the first attempt spends something; after that a session ceiling
+    #: would refuse every continuation by exactly what was already spent, which
+    #: is what it did to attempt3's successor.
+    approved = float(ctx.auth.campaign_all_in_hard_usd)
     ctx.evidence["campaign"] = {
         "campaign_id": campaign, "run_attempt": ctx.args.run_id,
         "prior_attempts": prior,
@@ -581,6 +590,15 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
                            if not k.startswith("_")},
         "this_session_planned_all_in_usd": round(planned, 4),
         "campaign_approved_all_in_usd": approved,
+        "session_all_in_hard_usd": float(ctx.auth.all_in_hard_usd),
+        "_two_ceilings": (
+            "the session ceiling bounds ONE attempt and equals its GPU plus "
+            "its disk. The campaign ceiling bounds the campaign cumulatively "
+            "and is the only one prior spend is charged against. A larger "
+            "campaign ceiling buys room beside settled spend, never a longer "
+            "or dearer session: the window comes from gpu_hard_usd and "
+            "hard_runtime_minutes, and the work from the frozen "
+            "decomposition."),
         "_continuation_is_not_pooling": (
             "a replacement resource is a new RESOURCE and a new run attempt "
             "inside the SAME scientific campaign. Consuming its predecessor's "
@@ -660,11 +678,13 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
             f"{len(work['arms_needed'])} arm rebuild(s) and "
             f"{work['restore']['gib']} GiB of probe restore — bounds at "
             f"${planned:.4f} all-in, which is ${settled + planned:.4f} against "
-            f"an approved campaign ceiling of ${approved:.4f}. The ceiling is "
-            "cumulative across every resource and subrun; a replacement "
-            "resource does not receive a fresh allocation. This is a maintainer "
-            "decision about funding the campaign — the experiment is NOT "
-            "shortened to fit, and this gate may not raise the ceiling.")
+            f"an approved CAMPAIGN ceiling of ${approved:.4f} (one session's "
+            f"all-in is ${float(ctx.auth.all_in_hard_usd):.4f}). The campaign "
+            "ceiling is cumulative across every resource and subrun; a "
+            "replacement resource does not receive a fresh allocation. This is "
+            "a maintainer decision about funding the campaign — the experiment "
+            "is NOT shortened to fit, and this gate may not raise the "
+            "ceiling.")
     return True, (
         f"campaign continuation OK: ${settled:.4f} all-in settled "
         f"(${settled_gpu:.4f} GPU + ${settled_disk:.4f} disk) across "

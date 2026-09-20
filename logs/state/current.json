@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-19T03:15:00Z",
+ "generated_utc": "2026-09-20T20:40:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, each with its owner named. Human view: logs/state/current.md. History: logs/budget/decisions.md. Index: logs/README.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -19,12 +19,12 @@
  "prepared_launch": {
   "any": false,
   "run": null,
-  "note": "nothing is prepared for launch. The replay campaign is CLOSED -- all five Top-5 checkpoints are reconstructed exact and durable -- and the C2 behavioural session is a PROPOSAL with no grant, readiness record, authorization or bundle."
+  "note": "nothing is prepared for launch. The replay campaign is CLOSED -- all five Top-5 checkpoints are reconstructed exact and durable. attempt4 of the C2 behavioural campaign has no grant, readiness record, authorization or bundle and is NO-GO pending review."
  },
  "budget": {
-  "cumulative_spend_usd": 309.2043,
+  "cumulative_spend_usd": 311.7468,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 60.7957,
+  "remaining_usd": 58.2532,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,

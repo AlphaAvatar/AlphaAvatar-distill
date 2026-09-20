@@ -22,6 +22,7 @@ defective line because its fake matched the consumer rather than the producer.
 """
 from __future__ import annotations
 
+import inspect
 import json
 import shutil
 import subprocess
@@ -71,7 +72,8 @@ class _Ctx:
     """A `SessionContext` as the restore and durability steps actually use it."""
 
     def __init__(self, pod: _Pod, store: Path, run_id: str, *,
-                 scr: Path | None = None, all_in: float = ALL_IN) -> None:
+                 scr: Path | None = None, all_in: float = ALL_IN,
+                 campaign: float | None = None) -> None:
         self.pod = pod
         self.evidence: dict = {}
         self.host = "fake-host"
@@ -81,9 +83,14 @@ class _Ctx:
             "run_id": run_id, "ckpt_store": str(store),
             "ckpt_fetch_limit_min": 20, "restore_limit_min": 150,
             "scr": str(scr or pod.root / "scr")})()
+        #: The two ceilings default to the same figure so that the tests
+        #: written when they WERE the same figure keep testing the gate's
+        #: arithmetic. Which of the two the gate actually reads is asserted
+        #: separately, by driving them apart.
         self.auth = type("Auth", (), {
             "campaign_id": BG.CAMPAIGN_ID, "gpu_hard_usd": GPU_HARD,
             "disk_hard_usd": DISK_HARD, "all_in_hard_usd": all_in,
+            "campaign_all_in_hard_usd": all_in if campaign is None else campaign,
             "rate_usd_per_hour": 1.09, "hard_runtime_minutes": RUNTIME})()
         self.target = _Target(pod)
 
@@ -2016,3 +2023,226 @@ def test_materialize_arm_calls_the_release(tmp_path, monkeypatch):
     for step in steps[:-1]:
         assert not Path(step.checkpoint_path).exists(), step.impl_id
     assert (Path(steps[-1].checkpoint_path) / "model.safetensors").is_file()
+
+
+def test_a_failed_release_stops_stage_p_before_the_next_arm(tmp_path,
+                                                            monkeypatch):
+    """The 120 GB bound holds only if intermediates are actually released.
+
+    `release_intermediates` stays non-raising — a cleanup error must not
+    destroy a verified, announced arm — so the fail-closed decision belongs to
+    the CALLER. If a release failed, the lifecycle assumption the storage bound
+    rests on has been falsified, and building the next arm under a bound that
+    no longer describes the program is how attempt3 reached ENOSPC five arms
+    later with no verdict.
+
+    Proves all three: the verified arm survives, the failure is recorded, and
+    no next arm begins.
+    """
+    import shutil
+
+    from aadistill.initialization.planning import fixed_path as FP
+
+    built: list[str] = []
+
+    class _Identity:
+        arch_signature, num_parameters = "sig", 16
+
+    def _steps_for(label):
+        steps = _path_on_disk(tmp_path / "arms" / label, 3)
+        for s in steps:
+            s.identity = _Identity()
+        return steps
+
+    made = {}
+
+    def _fake(*a, **k):
+        label = Path(k["workdir"]).name
+        built.append(label)
+        made[label] = _steps_for(label)
+        return made[label]
+
+    monkeypatch.setattr(FP, "materialize_fixed_path", _fake)
+    monkeypatch.setattr(
+        shutil, "rmtree",
+        lambda *a, **k: (_ for _ in ()).throw(OSError("device busy")))
+
+    binding = json.loads(
+        (REPO / "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
+         ).read_text())
+    spec = type("S", (), {"root_repo_id": binding["repo_id"],
+                          "root_revision": binding["revision"]})()
+
+    class _Arm(D.C2BehaviouralDriver):
+        def reuse_arm(self, label, required):
+            return None
+
+        def announce_durable(self, *a, **k):
+            self.announced.append(a[0])
+            return {"identity": None}
+
+        def afford(self, minutes, what):
+            return True
+
+    driver = _Arm.__new__(_Arm)
+    driver.a = type("A", (), {"b_workdir": str(tmp_path / "arms"),
+                              "device": "cpu", "campaign": BG.CAMPAIGN_ID})()
+    driver.ev, driver.durable, driver.announced = {}, [], []
+    driver.teacher_path = "/fake/teacher"
+    required = {"arch_signature": "sig", "num_parameters": 16}
+
+    with pytest.raises(D.C2DriverError, match="NO FURTHER ARM MAY BE BUILT"):
+        driver.materialize_arm("armOne", spec, required=required,
+                               bounded_minutes=1.0)
+
+    #: 1. the verified arm survives, bytes intact
+    final = Path(made["armOne"][-1].checkpoint_path)
+    assert (final / "model.safetensors").is_file()
+    #: 2. it was announced BEFORE the release was attempted, so it is durable
+    assert driver.announced == ["armOne"]
+    #: 3. the failure is recorded rather than swallowed
+    rec = driver.ev["intermediates_released"][0]
+    assert rec["arm"] == "armOne" and len(rec["failed"]) == 2
+    #: 4. NO NEXT ARM BEGAN — the raise propagates out of materialize_arm, so
+    #:    stage P cannot proceed to the next one.
+    assert built == ["armOne"], built
+
+
+def test_a_clean_release_lets_the_next_arm_begin(tmp_path, monkeypatch):
+    """The permitted case, so the refusal above is known to be selective."""
+    from aadistill.initialization.planning import fixed_path as FP
+
+    class _Identity:
+        arch_signature, num_parameters = "sig", 16
+
+    built: list[str] = []
+
+    def _fake(*a, **k):
+        label = Path(k["workdir"]).name
+        built.append(label)
+        steps = _path_on_disk(tmp_path / "arms" / label, 3)
+        for s in steps:
+            s.identity = _Identity()
+        return steps
+
+    monkeypatch.setattr(FP, "materialize_fixed_path", _fake)
+    binding = json.loads(
+        (REPO / "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
+         ).read_text())
+    spec = type("S", (), {"root_repo_id": binding["repo_id"],
+                          "root_revision": binding["revision"]})()
+
+    class _Arm(D.C2BehaviouralDriver):
+        def reuse_arm(self, label, required):
+            return None
+
+        def announce_durable(self, *a, **k):
+            return {"identity": None}
+
+        def afford(self, minutes, what):
+            return True
+
+    driver = _Arm.__new__(_Arm)
+    driver.a = type("A", (), {"b_workdir": str(tmp_path / "arms"),
+                              "device": "cpu", "campaign": BG.CAMPAIGN_ID})()
+    driver.ev, driver.durable = {}, []
+    driver.teacher_path = "/fake/teacher"
+    required = {"arch_signature": "sig", "num_parameters": 16}
+
+    for label in ("armOne", "armTwo"):
+        driver.materialize_arm(label, spec, required=required,
+                               bounded_minutes=1.0)
+    assert built == ["armOne", "armTwo"]
+    assert all(not r["failed"] for r in driver.ev["intermediates_released"])
+
+
+# ---------------------------------------------------------------------------
+# Two ceilings: the campaign's funds another attempt and buys nothing else
+# ---------------------------------------------------------------------------
+
+def test_the_continuation_gate_reads_the_campaign_ceiling_not_the_session_one(
+        tmp_path, repo):
+    """Drive them apart, and check which number the gate actually compares to.
+
+    They were the same figure until attempt3 spent $2.5425 without reaching a
+    verdict. While they agreed, a gate reading either one passed every test —
+    so the only way to know which it reads is to make them disagree.
+    """
+    _run_manifest(repo, "attempt1")
+    _session_record(repo, "attempt1", actual_usd=2.5042, elapsed_minutes=137.8)
+
+    remaining = None
+    for campaign, expect in ((ALL_IN, False), (ALL_IN + 3.0, True)):
+        ctx = _Ctx(_Pod(tmp_path / f"pod-{campaign}"), tmp_path / "store",
+                   "attempt2", all_in=ALL_IN, campaign=campaign)
+        ok, why = L.campaign_continuation_gate(ctx)
+        assert ok is expect, (campaign, why)
+        ev = ctx.evidence["campaign"]
+        #: The session ceiling is recorded either way, so a reader can see both
+        #: numbers and tell which one bound the decision.
+        assert ev["session_all_in_hard_usd"] == pytest.approx(ALL_IN)
+        assert ev["campaign_approved_all_in_usd"] == pytest.approx(campaign)
+        #: The remaining planned work does NOT move with the campaign ceiling.
+        if remaining is None:
+            remaining = ev["this_session_planned_all_in_usd"]
+        assert ev["this_session_planned_all_in_usd"] == pytest.approx(remaining)
+
+    #: And the refusal is the honest one: a full session's remaining work no
+    #: longer fits beside a spent predecessor under the OLD ceiling.
+    assert remaining > 0
+
+
+def test_raising_the_campaign_ceiling_buys_no_runtime_disk_probes_or_seeds():
+    """The maintainer's constraint, asserted against the production derivation.
+
+    A larger cumulative ceiling funds another attempt. It must not extend the
+    session window, raise the GPU dollars, enlarge the disk, add probes, add
+    seeds, or alter scientific scope — all of which come from the frozen
+    record through the SESSION ceiling.
+    """
+    small = BG.authorization_terms(REPO, rate_usd_per_hour=1.09,
+                                   campaign_all_in_hard_usd=33.2099)
+    large = BG.authorization_terms(REPO, rate_usd_per_hour=1.09,
+                                   campaign_all_in_hard_usd=99.0)
+
+    #: Every session amount is identical, field by field.
+    for field in BG.AUTHORIZATION_AMOUNT_FIELDS:
+        assert small[field] == large[field], field
+    assert small["provisioned_disk_gb"] == large["provisioned_disk_gb"]
+    assert small["expected_all_in_usd"] == large["expected_all_in_usd"]
+    #: Only the campaign field moved.
+    assert small[BG.CAMPAIGN_AMOUNT_FIELD] != large[BG.CAMPAIGN_AMOUNT_FIELD]
+
+    #: The window the launcher runs on is unmoved.
+    assert BG.window_minutes(
+        1.09, gpu_hard_usd=small["gpu_hard_usd"],
+        hard_runtime_minutes=small["hard_runtime_minutes"]) == \
+        BG.window_minutes(
+            1.09, gpu_hard_usd=large["gpu_hard_usd"],
+            hard_runtime_minutes=large["hard_runtime_minutes"])
+
+    #: And the science: the schedule is a function of the frozen record, and
+    #: `window_minutes` takes no campaign figure at all, so there is no path
+    #: from the campaign ceiling into either.
+    assert "campaign" not in inspect.signature(BG.window_minutes).parameters
+    sched = BH.session_decomposition(REPO, materialization_minutes=100.0)
+    assert sched["train_and_score_probes"] == 12
+
+
+def test_a_campaign_ceiling_below_the_session_ceiling_is_refused():
+    """Not a funding decision — an incoherent one: the session cannot run."""
+    with pytest.raises(BG.BehaviouralGovernanceError, match="campaign"):
+        BG.authorization_terms(REPO, rate_usd_per_hour=1.09,
+                               campaign_all_in_hard_usd=10.0)
+
+
+def test_an_authorization_missing_the_campaign_ceiling_will_not_load(tmp_path):
+    """Fail closed: a document with one ceiling cannot say which it means."""
+    doc = json.loads(
+        (REPO / "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3"
+         / "governance/authorization.json").read_text())
+    doc.pop(BG.CAMPAIGN_AMOUNT_FIELD, None)
+    p = tmp_path / "authorization.json"
+    p.write_text(json.dumps(doc))
+    with pytest.raises(Exception, match="campaign"):
+        BG.BehaviouralAuthorization.load(p)

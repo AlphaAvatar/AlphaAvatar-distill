@@ -708,7 +708,7 @@
   },
   {
    "file": "tests/autoinit/test_phase_c2_full_search.py",
-   "line": 819,
+   "line": 839,
    "kind": "pytest.skip",
    "function": "test_the_screening_sample_was_drawn_under_the_domain_it_claims",
    "condition": "not (REPO / path).exists()",
@@ -2086,5 +2086,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "c17e41e5405c75a8a57370b44d58357e54fc43f5519ec3f3ab1a2681652d7e45"
+ "digest": "169f6f1974255ca589572a6f860ec87ff28f0288e794827b9bbc4a629326849f"
 }

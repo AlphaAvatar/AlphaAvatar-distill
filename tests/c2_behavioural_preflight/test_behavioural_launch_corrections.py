@@ -257,8 +257,7 @@ def test_the_campaign_id_is_stable_and_is_not_a_run_id():
     """
     assert BG.CAMPAIGN_ID
     assert "attempt" not in BG.CAMPAIGN_ID
-    assert BG.CAMPAIGN_ID == BG.authorization_terms(
-        REPO, rate_usd_per_hour=BG.QUOTED_RATE_USD_PER_HOUR)["campaign_id"]
+    assert BG.CAMPAIGN_ID == _terms()["campaign_id"]
 
 
 def test_the_driver_command_sends_the_campaign_and_the_run_attempt_apart():
@@ -439,8 +438,10 @@ def test_the_preregistration_no_longer_calls_a_replacement_pod_a_new_campaign():
 
 # -- D. the window is authorization-bound ------------------------------------
 
-def _terms(rate: float = BG.QUOTED_RATE_USD_PER_HOUR) -> dict:
-    return BG.authorization_terms(REPO, rate_usd_per_hour=rate)
+def _terms(rate: float = BG.QUOTED_RATE_USD_PER_HOUR,
+           campaign: float = BG.CAMPAIGN_ALL_IN_CEILING_USD) -> dict:
+    return BG.authorization_terms(REPO, rate_usd_per_hour=rate,
+                                  campaign_all_in_hard_usd=campaign)
 
 
 def test_the_authorization_carries_five_distinct_amounts():
@@ -456,13 +457,24 @@ def test_the_authorization_carries_five_distinct_amounts():
 
 
 def test_the_terms_are_derived_at_the_live_rate_not_the_quoted_constant():
-    """A different quote must produce a different dollar authorization."""
-    cheap, dear = _terms(0.79), _terms(2.18)
+    """A different quote must produce a different dollar authorization.
+
+    Both probes are given a campaign ceiling wide enough to hold the session
+    they imply. That is not the real ceiling and it is not meant to be: at
+    $2.18/h the real `$35.7600` could not fund one attempt and
+    `authorization_terms` refuses outright, which is a DIFFERENT and correct
+    behaviour asserted below. Here the question is only whether the amounts
+    follow the live rate.
+    """
+    cheap, dear = _terms(0.79, campaign=999.0), _terms(2.18, campaign=999.0)
     #: The experiment does not get shorter or longer because the card moved.
     assert cheap["hard_runtime_minutes"] == dear["hard_runtime_minutes"]
     assert cheap["gpu_hard_usd"] < dear["gpu_hard_usd"]
     #: And neither equals the quoted-rate figure by accident.
     assert cheap["gpu_hard_usd"] != _terms()["gpu_hard_usd"]
+    #: The campaign ceiling is NOT a function of the rate, so a live re-quote
+    #: can never move it. That is the whole reason it is a separate field.
+    assert cheap[BG.CAMPAIGN_AMOUNT_FIELD] == dear[BG.CAMPAIGN_AMOUNT_FIELD]
 
 
 @pytest.mark.parametrize("live,expect", [
@@ -547,6 +559,12 @@ def _authorization_document(**overrides) -> dict:
         "campaign_id": BG.CAMPAIGN_ID,
         "resource_scope": None,
         **{f: terms[f] for f in BG.AUTHORIZATION_AMOUNT_FIELDS},
+        #: The campaign ceiling is a SIXTH amount, deliberately outside
+        #: AUTHORIZATION_AMOUNT_FIELDS: those five are the session's and are
+        #: reconciled against each other, while this one is the maintainer's
+        #: cumulative figure and is reconciled against nothing but the session
+        #: all-in it must be able to fund.
+        BG.CAMPAIGN_AMOUNT_FIELD: terms[BG.CAMPAIGN_AMOUNT_FIELD],
     }
     doc.update(overrides)
     doc.pop("authorization_sha256", None)

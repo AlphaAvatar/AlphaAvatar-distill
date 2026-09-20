@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-19. The human view. Every number here has an owner named
+**Updated:** 2026-09-20. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -12,6 +12,10 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **Nothing is running. Nothing is billing.** Pod `1fv2t0y39lwhml` was deleted
 behind its teardown gate after 137.8 min; the provider confirms it is gone and
 an account-wide list returns `[]`.
+
+**And nothing is prepared for launch.** attempt4 has no grant, no readiness
+record, no authorization and no bundle; attempts 1–3 hold theirs as consumed
+evidence. Owner: [`current.json`](current.json) `:: prepared_launch`.
 
 **attempt3 FAILED in stage P and there is no verdict.** Not `NO_GO`, not
 `INCONCLUSIVE` — those are complete results of a run that measured something.
@@ -33,12 +37,53 @@ is verified". Nothing released it. Repaired: intermediates are now freed after
 the identity gate and after the durable announcement. 120 GB remains correct;
 peak residency with the repair is ~59 GiB.
 
-**BLOCKED ON A MAINTAINER DECISION.** The `$33.2099` ceiling is cumulative.
-attempt3 spent `$2.5425` and produced no probe, so a fresh full attempt
-(`$33.2098`) no longer fits — over by `$2.5424`, exactly what attempt3 spent.
-`campaign_continuation_gate` refuses it before a pod exists, correctly. Raising
-a ceiling is a maintainer decision and never an autonomous repair. No science
-is being asked to change: the plan hash has never moved.
+**The campaign ceiling was raised and attempt4 is NOT yet authorized to launch.**
+attempt3 spent `$2.5425` and produced no probe, so a fresh full attempt no
+longer fitted under the original `$33.2099`. The maintainer raised the
+**cumulative campaign** ceiling to **`$35.7600`** (+`$2.5501`) on 2026-09-20 and
+held attempt4 at NO-GO pending three `$0` repairs, now complete and awaiting
+independent review. No science changed: the plan hash has never moved and is
+still `31088b98…`.
+
+**The two ceilings are now separate numbers.** They were one figure doing two
+jobs, which is why a gate reading either passed every test:
+
+```text
+session   1800.53 min · GPU 32.7097 · disk 0.5002 · all-in 33.2099   derived
+campaign                                            all-in 35.7600   maintainer
+```
+
+`all_in_hard_usd` bounds ONE attempt and is what the window, the watchdog and
+every in-pod spend check are built from. `campaign_all_in_hard_usd` bounds the
+campaign cumulatively and is the only figure prior spend is charged against. The
+larger campaign ceiling buys another attempt and nothing else — no runtime, no
+disk, no probes, no seeds, no scientific scope. Owners:
+`behavioural_governance.CAMPAIGN_ALL_IN_CEILING_USD` and
+`authorization_terms`; the separation is asserted by driving the two apart in
+`tests/c2_behavioural_preflight/test_behavioural_continuation.py`.
+
+**Cleanup failure now fails closed at the caller.** `release_intermediates`
+stays non-raising — a cleanup error must not destroy a verified, announced arm
+— but if anything failed to delete, stage P stops there and no next arm is
+built. The 120 GB provision is derived on the assumption that a verified arm's
+intermediates are freed; a failed release falsifies it, and attempt3 is what
+discovering that five arms later costs.
+
+**The project cumulative was corrected to `$311.7468`** of the `$370.0000` cap,
+from `$309.2043`. The `$2.5425` was invisible for two independent reasons, both
+closed: no behavioural run was in `logs/index.json`, and the extractor read only
+`budget.this_attempt` and `cost.actual_usd` while the behavioural closeout
+states `money.all_in_usd` — the only one of the three that is all-in. An
+affirmative `provider_resource_created: false` is now read as a stated `$0.0000`;
+a genuinely unknown cost still stays UNKNOWN, leaving **`$58.2532`**. Owner:
+[`budget/ledger.md`](../budget/ledger.md), derived by `derive_budget.py`.
+
+**attempt3's grant carries a wrong date.** `granted_utc = 2026-09-21` while the
+session ran on 2026-09-20 UTC — a local-timezone date in a UTC field. The grant
+is consumed evidence and is not rewritten; the anomaly is recorded in
+[`attempt3/closeout/README.md`](../stages/stage-1/phase_c2_behavioural/runs/attempt3/closeout/README.md)
+and it distorts no money. Issuance now refuses a grant dated after the current
+UTC date.
 
 Earlier: the REPLAY's attempt 3 pod
 `ulit767od813i8` was deleted behind its teardown gate after 386.2 min; the
@@ -46,9 +91,12 @@ provider confirms it is gone and an account-wide list returns `[]`.
 
 **The C2 behavioural launch is AUTHORIZED and the chain is being built.** An
 independent final review returned **GO** on `197088e` and the maintainer
-granted the spend on 2026-09-21: campaign `c2-behavioural-12probe-v1`, a
-**cumulative** all-in ceiling of **`$33.2099`** across every run attempt and
-provider resource, at a quoted L40S securePrice of `$1.09/h`. The live
+granted the spend: campaign `c2-behavioural-12probe-v1`, a
+**cumulative** all-in ceiling of `$33.2099` — **since raised to `$35.7600`**,
+see above — across every run attempt and
+provider resource, at a quoted L40S securePrice of `$1.09/h`. (The grant's
+`granted_utc = 2026-09-21` is the timezone anomaly noted above; the real date
+was 2026-09-20 UTC.) The live
 securePrice was re-queried at issuance and is `$1.09/h` — the reviewed basis
 unchanged, so no dollar authorization was materially altered and no return to
 the maintainer was owed. Owner:
@@ -146,7 +194,9 @@ Derived, not inherited: storage **120 GB**, converted GiB→GB through the
 repository's recorded basis. At a live `$1.09/h` L40S quote the ceiling is
 **`$33.2099` all-in** (`$32.7097` GPU + `$0.5002` disk) with `$23.8832`
 expected — up from `$30.8918` because the arms are now built rather than
-staged. Project headroom after it: **`$27.5858`**.
+staged. Project headroom if a full attempt4 were spent in full: **`$25.0433`**,
+derived by `write_c2_behavioural_proposal.py` from the corrected `$311.7468`
+cumulative.
 
 What is built: the launch governance and its one-use authorization type, the
 launcher with eight `$0` prechecks, a **standalone** driver (it does *not*
@@ -1090,7 +1140,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$309.2043` spent of `$370.0000`, leaving `$60.7957` |
+| project cap | `$311.7468` spent of `$370.0000`, leaving `$58.2532` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

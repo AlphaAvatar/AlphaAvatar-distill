@@ -190,10 +190,22 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: The list is still hand-written because C1 is frozen and re-deriving it would
 #: move the digest a closed attempt's evidence describes; a NEW session should
 #: use `ignores_for_selection` instead.
+#: Four MORE arrived and were again not added at the time: the full search's,
+#: the replay's and the behavioural campaign's preflights, plus
+#: `tests/initialization`. Three C2 sessions in a row therefore each left C1's
+#: guard red, and each one is a directory C1's pod would have collected on its
+#: own meter to prove another experiment passes. The prediction above has now
+#: come true four times, which is the argument for deriving — and the reason
+#: not to is unchanged and stated above, so the entries are added by hand and
+#: the guard stays the thing that catches the next one.
 TEST_IGNORES = ("tests/architecture", "tests/autoinit",
-                "tests/c2_baseline_completion_preflight", "tests/c2_preflight",
+                "tests/c2_baseline_completion_preflight",
+                "tests/c2_behavioural_preflight",
+                "tests/c2_full_search_preflight", "tests/c2_preflight",
+                "tests/c2_replay_preflight",
                 "tests/data", "tests/docs", "tests/evaluation",
-                "tests/infrastructure", "tests/init", "tests/models",
+                "tests/infrastructure", "tests/init", "tests/initialization",
+                "tests/models",
                 "tests/pod", "tests/rollout", "tests/runtime", "tests/support",
                 "tests/training", "tests/validation",
                 "tests/test_usable_rollout.py")

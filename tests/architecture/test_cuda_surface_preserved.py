@@ -355,6 +355,40 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "reclaimable on a card holding only the teacher, cache admitting "
             "67/67. Nothing was flushed and no saving is claimed from it.",
      }),
+    #: TWO ROUNDS THAT NEVER DECLARED THEMSELVES, found by this check when a
+    #: later round ran it from an older base. Both landed while the replay
+    #: campaign was relaunching attempt after attempt, both edited the shared
+    #: runner, and neither appended an entry here — which is the exact shape
+    #: this file exists to catch, just with the delay that comes of only ever
+    #: reading the newest base. The tip is the commit both rounds started from.
+    ("56fed7a83b8a62149fc7d39f9c2c9f4bb42eabd5",
+     "--dry-run, and securing a unit of work when it finishes (late declaration)",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "TWO DECLARED SEMANTIC CHANGES, from 09e2ab59 and 8e02f025. "
+            "(1) `run()` consults `getattr(self.a, \"dry_run\", False)` after "
+            "the prechecks and returns before `create()`, recording "
+            "`DRY_RUN_GATES_PASSED` and `provider_resource_created: False`. "
+            "Several launchers advertised the flag as \"run every $0 gate and "
+            "stop before provider creation\" while nothing consulted it, so a "
+            "dry run whose gates all passed created a real pod and billed for "
+            "it; the flag was only ever safe because some gate happened to "
+            "refuse first. `getattr` because a launcher without the flag must "
+            "keep behaving exactly as before. (2) the poll loop calls "
+            "`spec.artifacts.on_poll(self.context())` once per iteration inside "
+            "`try/except Exception`, appending failures to `on_poll_errors`. "
+            "The broad catch is deliberate and is the point: a durability "
+            "convenience that can kill a paid session is worse than none.",
+        "src/aadistill/infrastructure/session.py":
+            "`ArtifactPolicy.on_poll`, an optional `Callable[[SessionContext], "
+            "None] | None = None`. THIS IS A DECLARED SEMANTIC CHANGE to the "
+            "policy's shape, though not to any existing session's behaviour: "
+            "the default is `None` and a policy that does not set it runs "
+            "exactly as before. It exists because AGENTS.md requires a "
+            "finished unit of work to survive a LATER stage's failure, and a "
+            "collector that only runs at closeout cannot honour that when the "
+            "pod dies — a replay lost two verified checkpoints that way.",
+     }),
     ("c87f8767a5a006796d68daaf42b7e6ca8e9731e7",
      "one identity construction for a transferred checkpoint",
      {

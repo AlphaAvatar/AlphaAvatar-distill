@@ -2682,3 +2682,76 @@ design and is **not** narrowed to absorb a price change.
 The cap is owned by `configs/experiments/phase_c1/authorization.json ::
 accepted_pricing.cumulative_cap_usd`, which `derive_budget.py` reads; every
 figure above is derived from there and from the run closeouts, not restated.
+
+## 2026-09-20 — C2 behavioural attempts 1–3: two `$0` retired chains and one `$2.5425` ENOSPC abort
+
+| what | cost | evidence |
+| --- | --- | --- |
+| **attempt1** — retired before any provider resource. The launch-bound readiness gate read a field (`kind`) that no readiness record carries and never checked the verdict, so the chain could not have passed on its own terms. Repaired, fresh chain. | `$0.0000` | [`runs/attempt1/`](../stages/stage-1/phase_c2_behavioural/runs/attempt1/) |
+| **attempt2** — retired before any provider resource. `prior_attempt_actual` returned UNKNOWN for a retired predecessor, which is correct for a resource that may have billed and wrong for one that provably did not. Repaired to accept an affirmative `provider_resource_created: false`, fresh chain. | `$0.0000` | [`runs/attempt2/`](../stages/stage-1/phase_c2_behavioural/runs/attempt2/) |
+| **attempt3** — pod `1fv2t0y39lwhml`, L40S at `$1.09/h` for 137.85 min. All 8 pre-provider gates passed, setup `rc=0`, driver detached and confirmed. Stage P built and durably announced **five** arms, then hit **ENOSPC** on the sixth: `materialize_fixed_path` retains every intermediate step checkpoint, and the 120 GB provision was derived on the assumption that a verified arm's intermediates are released. No probe was trained; no science ran. Pod deleted behind its teardown gate, provider confirms gone. | `$2.5425` | [`runs/attempt3/`](../stages/stage-1/phase_c2_behavioural/runs/attempt3/) |
+
+```text
+attempt3   GPU  2.5042  (provider actual)
+           disk 0.0383  (120 GB × 137.85 min, derived at the authorization's own rate)
+           all-in       2.5425
+```
+
+**Cumulative: `$311.7468` of the `$370.0000` cap, leaving `$58.2532`.**
+
+**The `$2.5425` was invisible to the project balance until this round**, which
+reported `$309.2043`. Two independent causes, both now closed:
+
+* none of the three behavioural runs was in `logs/index.json`, so
+  `project_sessions` never looked at their closeouts;
+* the behavioural closeout states its authoritative figure as
+  `money.all_in_usd`, and the extractor read only `budget.this_attempt` and
+  `cost.actual_usd` — the two older shapes. It now reads all three, records
+  **which** shape each figure came from, and reads an affirmative
+  `provider_resource_created: false` as a stated `$0.0000` rather than leaving
+  a post-anchor attempt in `sessions_without_recorded_cost` beside the
+  pre-anchor runs. A cost that is genuinely unknown still stays UNKNOWN.
+
+`money.all_in_usd` is the only one of the three shapes that is **all-in**:
+`cost.actual_usd` carries GPU alone, because the runner reads GPU alone from
+the provider, and container disk is billed separately.
+
+**Grant timestamp anomaly.** attempt3's consumed grant records
+`granted_utc = 2026-09-21` while the session actually ran on **2026-09-20 UTC**
+— a local-timezone date written into a UTC field. The grant is consumed
+evidence and is **not** rewritten. It distorts no money: run costs are
+attributed from closeouts through the run index, and `_attribute()` reads
+timestamps only from engineering campaign ledgers, which this is not. attempt4's
+grant takes its timestamp from `datetime.now(timezone.utc)` in code rather than
+by hand.
+
+## 2026-09-20 — APPROVED: the C2 behavioural CAMPAIGN ceiling raised to `$35.7600`
+
+The maintainer raised the **cumulative campaign** ceiling for
+`c2-behavioural-12probe-v1` from `$33.2099` to `$35.7600`, an increase of
+`$2.5501`, so that one more full-length attempt still fits beside attempt3's
+settled `$2.5425`.
+
+**The session ceiling did not move**, and the two are now separate numbers in
+the code rather than one number serving both roles:
+
+```text
+session   1800.53 min · GPU 32.7097 · disk 0.5002 · all-in 33.2099   (derived)
+campaign                                            all-in 35.7600   (maintainer)
+```
+
+`all_in_hard_usd` bounds one attempt and is what the window, the watchdog and
+every in-pod spend check are built from. `campaign_all_in_hard_usd` bounds the
+campaign cumulatively and is the only figure prior spend is charged against.
+The larger campaign ceiling buys **another attempt** — no runtime, no disk, no
+probes, no seeds and no scientific scope, all of which come from the frozen
+record through the session ceiling alone.
+
+The campaign figure is not derived from the rate, so a live re-quote can never
+move it; it is declared in the reviewed tree as
+`behavioural_governance.CAMPAIGN_ALL_IN_CEILING_USD`, and issuance refuses a
+grant that disagrees with it, because a hand-written grant is where a ceiling
+typo would enter unreviewed.
+
+**This authorizes no launch.** attempt4 has no grant, no readiness record, no
+authorization and no bundle. Remaining money is not permission.
