@@ -1845,6 +1845,66 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "c3ce06dbdef839b08d9abcf5cc1191e189d7e759648e9989b5e4b4cce8480046"
+  },
+  {
+   "amendment_id": "PHB-HA-020",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-20T08:01:06+00:00",
+   "reviewed_base_commit": "c87f8767a5a006796d68daaf42b7e6ca8e9731e7",
+   "source_repair_commit": "db5feec65a5d44113910336d1a906f10cb566754",
+   "source_repair_parent": "c87f8767a5a006796d68daaf42b7e6ca8e9731e7",
+   "previous_live_digest": "c20e3a80b6c0366da235fa92d6e97dde06e05bbe0941c1d8d937a29618a50c1c",
+   "new_live_digest": "52d4a88abb0b0ac1c794d9adf0fd0dd0d6c0cca3a7981a97eac24a23cdb425c7",
+   "changed_files": [
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "src/aadistill/runtime/leaf_durability.py"
+   ],
+   "file_sha256_before": {
+    "scripts/pod/autoinit_preflight_setup.sh": "9848ad75e1e7843dbe234b954768025e014e770a933769de639c8ed302d1ff6a",
+    "src/aadistill/runtime/leaf_durability.py": "b215de1aaa012d6a6fed47f442c62f7d1bd1ff334716cc7c26053590a1e8ec43"
+   },
+   "file_sha256_after": {
+    "scripts/pod/autoinit_preflight_setup.sh": "85e02f0aa99c21945afb4c6e4f9511e57c03d38252e63d488ba5ba05d071bf31",
+    "src/aadistill/runtime/leaf_durability.py": "843ff7715d2171512c59c3028f2e0bd3c07eea72722d96cdfbe76d6ddcb6ddb0"
+   },
+   "patch_sha256": "6515238aec7b717240eca50fea3b1c88170d122824d744e97ce302d9a72f5267",
+   "numstat": {
+    "scripts/pod/autoinit_preflight_setup.sh": [
+     28,
+     0
+    ],
+    "src/aadistill/runtime/leaf_durability.py": [
+     73,
+     24
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 24,
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "The Phase-C2 behavioural selection executable. Two members of the Phase-B declared set moved so that a behavioural session could exist at all. scripts/pod/autoinit_preflight_setup.sh gained one SESSION_KIND branch, c2_behavioural, which loads BehaviouralAuthorization and asserts its scope; without it SESSION_KIND falls through to the default spend path, which loads a narrow artifact type that refuses this session's authorization, and setup would exit 98 before any work. It is the eleventh such branch and touches none of the other ten. src/aadistill/runtime/leaf_durability.py gained identify_for_transfer, and verify_transferred_leaf now calls it instead of rebuilding the identity inline; the arithmetic is byte-for-byte what was already there, moved so a sender and a receiver compute identity by ONE construction. artifact_digest covers tokenizer_sha256, so a sender recording None while the receiver hashed the tokenizer files that arrived would mismatch on every transfer of a checkpoint carrying one -- a disagreement about bookkeeping, reported as corruption. The return value additionally carries config_sha256, arch_signature, num_parameters and a three-valued config_matched; no existing key changed meaning and every existing caller reads the same flags it read before.",
+   "why_the_owner_is_shared_session_runner": "Both files are SHARED runtime owned by no single experiment, and both are named by several declared sets at once -- Phase B's, continuation-B's and the current sessions'. The setup script is the one entry point every pod session authenticates through, so any new session kind must add a branch to it; the durability module is the one place a transferred checkpoint's identity is computed, so a correctness repair to that computation belongs there and nowhere else. Neither change is Phase-B logic, neither was made for Phase B, and neither can be made in a C2-local file: duplicating either would create a second owner of a fact this repository requires to have exactly one.",
+   "why_a_c1_only_override_was_rejected": "C1 is not the owner of either file and this drift is not C1's. The C1 execution package, its formal and engineering allowances and its per-session ceiling are separate and non-transferable, and the C2 behavioural session is a new authorization checked against the $370 project envelope rather than against any C1 remainder. Recording this under a C1 override would attribute shared-runtime drift to an experiment that neither caused it nor funds it.",
+   "maintainer_authorization": "Maintainer decision, 2026-09-20: 'I authorize one $0, append-only historical amendment accounting for the shared runtime drift introduced by this C2 behavioural implementation where current generic/shared files intersect Phase-B / continuation-B historical hash-bound source sets.' HISTORICAL ACCOUNTING ONLY. It does NOT authorize re-freezing Phase B, making the current tree launch-compatible with the Phase-B preregistration, any Phase-B execution, any reinterpretation or alteration of the completed Phase-B result, any change to Phase-B science or frozen evidence, any GPU/provider spending, or the C2 behavioural launch.",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "c3ce06dbdef839b08d9abcf5cc1191e189d7e759648e9989b5e4b4cce8480046",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "064029456615a4d410b2f72298534ae5f590a0864fd03c2c0f3e08510a9ed7fa"
   }
  ]
 }
