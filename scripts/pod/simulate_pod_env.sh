@@ -177,8 +177,16 @@ restore_env() {
 # exactly the false confidence this script has already cost once.
 restore() {
   restore_env
-  for p in "$HIDE"/*; do
-    [ -e "$p" ] || continue
+  # `find`, NOT `for p in "$HIDE"/*`. The hidden names are repo paths flattened
+  # with `@`, so a repo path beginning with a dot -- `.scratch/...` is the one
+  # that occurs -- flattens to a name beginning with a dot, and `*` does not
+  # match those. The loop therefore restored NOTHING for any dotted path,
+  # printed "restored the hidden artifacts" anyway, and left them in $HIDE; the
+  # next sweep then refused with "a previous sweep did not restore". Fifteen of
+  # the replay's `.scratch` artifacts had been displaced that way, and the
+  # refusal is the only reason anyone noticed.
+  restored=0
+  while IFS= read -r -d '' p; do
     n=$(basename "$p" | tr '@' '/')
     mkdir -p "$(dirname "$n")"
     if [ -e "$n" ]; then
@@ -189,11 +197,20 @@ restore() {
       mv "$n" "$QUAR/$(basename "$p").recreated.$$" 2>/dev/null
       echo "  quarantined a recreated $n -> $QUAR"
     fi
-    mv "$p" "$n"
-  done
+    mv "$p" "$n" && restored=$((restored+1))
+  done < <(find "$HIDE" -mindepth 1 -maxdepth 1 -print0 2>/dev/null)
   rmdir "$HIDE" 2>/dev/null
   rmdir "$LOCK" 2>/dev/null
-  echo "restored the hidden artifacts"
+  # Do not CLAIM a clean restore without checking. The old message was
+  # unconditional, which is how a silent failure survived several sweeps.
+  left=$(ls -A "$HIDE" 2>/dev/null | wc -l)
+  if [ "$left" -gt 0 ]; then
+    echo "WARNING: restored $restored path(s) but $left remain in $HIDE." >&2
+    echo "  The tree is DISPLACED. Restore them before simulating again." >&2
+    ls -A "$HIDE" | sed 's/^/    /' >&2
+  else
+    echo "restored the hidden artifacts ($restored path(s))"
+  fi
 }
 trap restore EXIT INT TERM
 
