@@ -132,6 +132,56 @@ def build() -> dict:
         "proposed_utc": datetime.now(timezone.utc).isoformat(),
         "plan_hash": BG.plan_hash(REPO),
 
+        "campaign": {
+            "campaign_id": BG.CAMPAIGN_ID,
+            "is": (
+                "ONE 12-probe scientific experiment. The campaign is the unit "
+                "the grant funds and the unit within which a completed probe "
+                "may be reused; a run attempt is one launcher invocation and "
+                "the provider resource it draws."),
+            "_they_were_the_same_string": (
+                "the launcher passed the run id as the campaign id, which made "
+                "the registered continuation policy unreachable: R1 permits "
+                "reuse only inside one campaign, so a replacement resource "
+                "became a different campaign and had to refuse every probe the "
+                "previous resource had trained and verified off-pod."),
+            "continuation": (
+                "a replacement resource is a new RESOURCE and a new run attempt "
+                "inside the same campaign. It may consume that campaign's "
+                "destination-verified probes under the four conditions the "
+                "resume preregistration registers — descriptor identity, "
+                "re-identified bytes, a provider-confirmed non-billing "
+                "predecessor, and cumulative spend inside the campaign "
+                "ceiling. That is continuation of one preregistered experiment, "
+                "not pooling across experiments."),
+            "_the_ceiling_is_cumulative": (
+                "all_in_hard_usd below bounds the CAMPAIGN across every "
+                "resource and run attempt it takes. With a ceiling sized for "
+                "one full session, a continuation after a resource that already "
+                "spent real money is REFUSED at the gate rather than permitted "
+                "to overspend. Funding a campaign for more than one full "
+                "session is a maintainer decision."),
+        },
+
+        "authorization_terms": {
+            "at_the_quoted_rate": BG.authorization_terms(
+                REPO, rate_usd_per_hour=BG.QUOTED_RATE_USD_PER_HOUR),
+            "_derive_again_at_issuance": (
+                "these are the amounts at the rate this proposal was priced "
+                "at. Issuance must re-quote gpuTypes.securePrice and derive "
+                "them again at that rate: an authorization carrying a dollar "
+                "window derived from a stale quote is a window that does not "
+                "bound the bill. If the re-quote materially changes the dollar "
+                "authorization, it goes back to the maintainer."),
+            "_five_distinct_amounts": (
+                "rate, authorized runtime, GPU dollars, separately billed disk "
+                "dollars and the all-in total. The launcher derives its "
+                "deadline from gpu_hard_usd and hard_runtime_minutes at the "
+                "live rate — the shorter of the two — so a card above the "
+                "authorized rate is refused and torn down rather than paid "
+                "for, and a card below it does not extend the experiment."),
+        },
+
         "protocol_binding": {
             "document": BH.PROTOCOL,
             "protocol_sha256": proto["protocol_sha256"],
@@ -220,11 +270,16 @@ def build() -> dict:
             "record": ("logs/stages/stage-1/phase_c2_behavioural/plans/"
                        "c2_behavioural_resume_preregistration.json"),
             "summary": (
-                "a probe may be reused only within the SAME campaign, only "
-                "when its bytes still re-identify to what was announced, and "
-                "it is never retrained. Ranking waits for all six screening "
-                "results; no verdict is computed from a partial confirmation "
-                "field."),
+                "a probe may be reused only within the same scientific "
+                "CAMPAIGN — across run attempts and replacement resources of "
+                "that campaign, never across campaigns — only when it matches "
+                "the descriptor its rung derives from the frozen protocol, and "
+                "only when its bytes still re-identify to what was announced. "
+                "It is never retrained. Screening commits once: a continuation "
+                "confirms the candidate its own campaign advanced and may not "
+                "rerun screening for another outcome. Ranking waits for all six "
+                "screening results; no verdict is computed from a partial "
+                "confirmation field."),
         },
 
         "explicitly_not_proposed": [
@@ -289,9 +344,13 @@ def build() -> dict:
                 "would inherit C1's authorization, plan identity, seeds and "
                 "audit roots.",
             "launcher":
-                "scripts/pod/autoinit_c2_behavioural_launch.py — BUILT. Seven "
-                "$0 prechecks, per-poll durability, destination re-identification "
-                "and a teardown gate that refuses while evidence is unreadable.",
+                "scripts/pod/autoinit_c2_behavioural_launch.py — BUILT. Eight "
+                "$0 prechecks including the campaign continuation gate, a "
+                "budget built from the ONE canonical phase decomposition, a "
+                "deadline derived from the authorization's own rate, GPU "
+                "dollars and authorized runtime, per-poll durability, "
+                "destination re-identification and a teardown gate that "
+                "refuses while evidence is unreadable.",
             "b_binding": "BUILT",
             "storage_derivation": "BUILT",
             "rehearsal":

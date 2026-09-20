@@ -245,20 +245,18 @@ def test_the_plan_fits_its_derived_ceiling():
 
 
 def test_the_window_is_derived_from_the_rate_not_fixed():
-    """A deadline set without reference to price can outlive the budget."""
-    cheap = BG.window_minutes(0.5, REPO)
-    dear = BG.window_minutes(2.0, REPO)
-    assert cheap > dear
+    """A deadline set without reference to price can outlive the budget.
 
-
-def test_the_durable_store_can_hold_twelve_probes():
-    """A durability mechanism needs a backend with room for what it protects."""
-    import shutil
-
-    store = Path("/home/ecs-user/aad-artifacts")
-    assert store.is_dir(), "the out-of-tree artifact store must exist"
-    need = 12 * 1.11 * 2**30
-    assert shutil.disk_usage(store).free > need
+    Both bounds come from the AUTHORIZATION's own amounts rather than from a
+    constant rate; `test_behavioural_launch_corrections.py` covers the runtime
+    cap and the refusals. Here it is only the monotonicity: a dearer card must
+    buy fewer minutes.
+    """
+    terms = BG.authorization_terms(
+        REPO, rate_usd_per_hour=BG.QUOTED_RATE_USD_PER_HOUR)
+    kw = {"gpu_hard_usd": terms["gpu_hard_usd"],
+          "hard_runtime_minutes": terms["hard_runtime_minutes"]}
+    assert BG.window_minutes(1.5, **kw) > BG.window_minutes(2.0, **kw)
 
 
 # -- the resume policy is registered, and its rules name real enforcement ----

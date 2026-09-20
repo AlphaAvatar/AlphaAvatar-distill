@@ -4,8 +4,32 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-20T07:54:40.016440+00:00",
- "plan_hash": "4da5cd306b24f122e71fd817520730b9f47adc21340f8752402417bea12156cf",
+ "proposed_utc": "2026-09-20T11:19:53.467070+00:00",
+ "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+ "campaign": {
+  "campaign_id": "c2-behavioural-12probe-v1",
+  "is": "ONE 12-probe scientific experiment. The campaign is the unit the grant funds and the unit within which a completed probe may be reused; a run attempt is one launcher invocation and the provider resource it draws.",
+  "_they_were_the_same_string": "the launcher passed the run id as the campaign id, which made the registered continuation policy unreachable: R1 permits reuse only inside one campaign, so a replacement resource became a different campaign and had to refuse every probe the previous resource had trained and verified off-pod.",
+  "continuation": "a replacement resource is a new RESOURCE and a new run attempt inside the same campaign. It may consume that campaign's destination-verified probes under the four conditions the resume preregistration registers \u2014 descriptor identity, re-identified bytes, a provider-confirmed non-billing predecessor, and cumulative spend inside the campaign ceiling. That is continuation of one preregistered experiment, not pooling across experiments.",
+  "_the_ceiling_is_cumulative": "all_in_hard_usd below bounds the CAMPAIGN across every resource and run attempt it takes. With a ceiling sized for one full session, a continuation after a resource that already spent real money is REFUSED at the gate rather than permitted to overspend. Funding a campaign for more than one full session is a maintainer decision."
+ },
+ "authorization_terms": {
+  "at_the_quoted_rate": {
+   "rate_usd_per_hour": 1.09,
+   "hard_runtime_minutes": 1800.53,
+   "gpu_hard_usd": 32.7097,
+   "disk_hard_usd": 0.5002,
+   "all_in_hard_usd": 33.2099,
+   "expected_all_in_usd": 23.8832,
+   "provisioned_disk_gb": 120,
+   "campaign_id": "c2-behavioural-12probe-v1",
+   "_rate_is_live_at_issuance": "re-quoted from gpuTypes.securePrice \u2014 never communityPrice, which is a lower number the launcher does not pay. If the quote moves before issuance the proposal is regenerated and a materially changed dollar authorization goes back to the maintainer.",
+   "_the_runtime_binds_too": "hard_runtime_minutes is the authorized length of the experiment. A card offered below the authorized rate buys more minutes than this; the session may not use them.",
+   "_all_in_is_the_campaign_ceiling": "one authorization funds one 12-probe campaign. all_in_hard_usd bounds the campaign cumulatively across every resource and run attempt, not each attempt separately."
+  },
+  "_derive_again_at_issuance": "these are the amounts at the rate this proposal was priced at. Issuance must re-quote gpuTypes.securePrice and derive them again at that rate: an authorization carrying a dollar window derived from a stale quote is a window that does not bound the bill. If the re-quote materially changes the dollar authorization, it goes back to the maintainer.",
+  "_five_distinct_amounts": "rate, authorized runtime, GPU dollars, separately billed disk dollars and the all-in total. The launcher derives its deadline from gpu_hard_usd and hard_runtime_minutes at the live rate \u2014 the shorter of the two \u2014 so a card above the authorized rate is refused and torn down rather than paid for, and a card below it does not extend the experiment."
+ },
  "protocol_binding": {
   "document": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
   "protocol_sha256": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da",
@@ -281,8 +305,74 @@
    "expected": 1139.04,
    "hard_ceiling": 1644.7
   },
-  "b_preparation_minutes": 155.83,
-  "_b_preparation_is_initialization": "added to the session's runtime, not to the probe count. The protocol is twelve probes and stays twelve; the pod is alive longer because the sixth arm has to be built before any of them can measure against it.",
+  "materialization_minutes": 155.83,
+  "decomposition": {
+   "expected_phases": [
+    [
+     "setup_and_asset_staging",
+     45.0
+    ],
+    [
+     "bundle_transfer",
+     6.0
+    ],
+    [
+     "teacher_fetch_and_verify",
+     8.0
+    ],
+    [
+     "machine_gates",
+     22.0
+    ],
+    [
+     "selection_commit_and_artifact_manifest",
+     8.0
+    ],
+    [
+     "artifact_synchronization",
+     6.0
+    ],
+    [
+     "materialize_six_arms",
+     155.83
+    ],
+    [
+     "twelve_probes",
+     1044.04
+    ]
+   ],
+   "soft_stop_reserves": [
+    [
+     "probe_model_contingency",
+     113.9
+    ],
+    [
+     "probe_duration_risk",
+     30.16
+    ],
+    [
+     "generation_length_risk",
+     331.6
+    ]
+   ],
+   "artifact_recovery_reserve_minutes": 30.0,
+   "contingency_fraction": 0.0,
+   "_contingency_is_a_named_reserve": "the frozen probe model's 10% contingency is carried in soft_stop_reserves as a fixed number of minutes. A consumer that also set contingency_fraction=0.10 would apply it twice, which is the defect this decomposition exists to remove.",
+   "_overhead_phase_names_are_the_pricing_models": "the first six phases are selection_pricing.SESSION_PHASE_MINUTES verbatim, because that is what the frozen record's 95 non-probe minutes ARE and renaming them would break the reconciliation. They are a cost model shared with the full search, not a claim about this session's stages: `selection_commit_and_artifact_manifest` funds the closeout minutes, and this session commits no selection \u2014 it consumes one that is already frozen.",
+   "expected_minutes": 1294.87,
+   "soft_stop_minutes": 1770.53,
+   "hard_minutes": 1800.53,
+   "probe_model": {
+    "record": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+    "expected_minutes": 1139.04,
+    "hard_ceiling_minutes": 1644.7,
+    "probe_minutes_expected": 1044.04,
+    "contingency_fraction": 0.1
+   },
+   "_reconciled": "the overhead phases reconstruct the record's non-probe expected minutes and the reserves reconstruct its hard ceiling; both are checked here rather than assumed"
+  },
+  "_one_decomposition": "session_decomposition is the single canonical phase decomposition of this session. The proposal prices it here and the launcher's BudgetSpec carries the same phases and reserves, so the two cannot derive different hard windows.",
+  "_materialization_is_initialization": "added to the session's runtime, not to the probe count. The protocol is twelve probes and stays twelve; the pod is alive longer because the six arms have to be built before any probe can measure against them.",
   "expected": {
    "minutes": 1294.87,
    "gpu_usd": 23.5235,
@@ -349,7 +439,7 @@
  },
  "resume_policy": {
   "record": "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_resume_preregistration.json",
-  "summary": "a probe may be reused only within the SAME campaign, only when its bytes still re-identify to what was announced, and it is never retrained. Ranking waits for all six screening results; no verdict is computed from a partial confirmation field."
+  "summary": "a probe may be reused only within the same scientific CAMPAIGN \u2014 across run attempts and replacement resources of that campaign, never across campaigns \u2014 only when it matches the descriptor its rung derives from the frozen protocol, and only when its bytes still re-identify to what was announced. It is never retrained. Screening commits once: a continuation confirms the candidate its own campaign advanced and may not rerun screening for another outcome. Ranking waits for all six screening results; no verdict is computed from a partial confirmation field."
  },
  "explicitly_not_proposed": [
   "any beam search or expansion",
@@ -360,8 +450,8 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "fe057599eac4e42a5e1aed4b4fe7d9a2196943a8884e0a7aaf885182bf0aef21",
-  "n_files": 128,
+  "digest": "156ca68cd1548eced6d2495ddae8b1185e81dd7d54102162a8758fc3047dbb8e",
+  "n_files": 133,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
    "scripts/pod/autoinit_c2_behavioural_driver.py",
@@ -382,7 +472,11 @@
    "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
    "configs/stage3/e1/e1_r0860k_sa_pca.json",
    "configs/infrastructure/provider_storage_pricing.json",
-   "scripts/pod/autoinit_preflight_setup.sh"
+   "scripts/pod/autoinit_preflight_setup.sh",
+   "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+   "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+   "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/telemetry.jsonl",
+   "logs/stages/stage-1/phase_c2_replay/plans/attempt3_arch_spec_lineage.json"
   ]
  },
  "execution_sequence": [
@@ -399,11 +493,11 @@
   "decision": "scripts/experiments/phase_c2/behavioural_decision.py \u2014 BUILT. Composes C1's paired_differences, decision_inputs, stratified_cluster_bootstrap and decide; supplies a C2 decision-rule view derived from the frozen protocol rather than instantiating a C1IsolationPlan whose invariants do not describe this experiment.",
   "screening_scorer": "scripts/autoinit/score_c2_screening.py \u2014 BUILT. Reuses C1's battery-agnostic scoring loop and result builder unchanged, pinned to the C2 screening battery's own identity record. C1's entry point keeps its equality pins.",
   "driver": "scripts/pod/autoinit_c2_behavioural_driver.py \u2014 BUILT, STANDALONE. Composes train_stage3.py, uncapped_eval.py, the two scorers, build_evaluation_package, the admission gate and the Phase-C inference. It does NOT subclass C1Driver, which would inherit C1's authorization, plan identity, seeds and audit roots.",
-  "launcher": "scripts/pod/autoinit_c2_behavioural_launch.py \u2014 BUILT. Seven $0 prechecks, per-poll durability, destination re-identification and a teardown gate that refuses while evidence is unreadable.",
+  "launcher": "scripts/pod/autoinit_c2_behavioural_launch.py \u2014 BUILT. Eight $0 prechecks including the campaign continuation gate, a budget built from the ONE canonical phase decomposition, a deadline derived from the authorization's own rate, GPU dollars and authorized runtime, per-poll durability, destination re-identification and a teardown gate that refuses while evidence is unreadable.",
   "b_binding": "BUILT",
   "storage_derivation": "BUILT",
   "rehearsal": "tests/c2_behavioural_preflight/ \u2014 BUILT. One production-path rehearsal drives the real driver P through D and reaches all three terminal states from separate deterministic fixtures, replacing only hardware-bound calls.",
   "grant": "NOT REQUESTED \u2014 no grant, readiness record, authorization, bundle or provider resource exists for this session, and none may be created without a maintainer decision."
  },
- "proposal_sha256": "97d2a47ed25f990fbf45afe1cb431a0daf7c3ec7c29bec7b286429cbdfd6b0f9"
+ "proposal_sha256": "a4e209d2437826136dc5c7f4d4358776a2023286a83c3f165c23eb0398e535a3"
 }

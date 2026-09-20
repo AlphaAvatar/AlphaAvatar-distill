@@ -217,7 +217,12 @@ class C2BehaviouralDriver:
         self.ev: dict[str, Any] = {
             "schema": "aadistill.autoinit.c2_behavioural_evidence/v1",
             "run_id": RUN_ID,
+            #: THREE identities, and they are not interchangeable. `run_id`
+            #: above is the plan id. `campaign` is the scientific experiment and
+            #: the scope within which a completed probe may be reused.
+            #: `run_attempt` is this invocation and its provider resource.
             "campaign": a.campaign,
+            "run_attempt": getattr(a, "run_attempt", "") or None,
             "started_utc": datetime.now(timezone.utc).isoformat(),
             "stages": {},
             "durable_units": [],
@@ -324,9 +329,11 @@ class C2BehaviouralDriver:
         A probe may be reused only when all of this holds:
 
         * it was recorded under THIS campaign id. A replacement pod is a new
-          campaign and may not pool with the previous one's probes: the twelve
-          probes are one experiment, and silently mixing two resources' work
-          would make the design something nobody preregistered.
+          RESOURCE and a new run attempt inside the same campaign, so it may
+          continue with that campaign's completed probes; a probe from a
+          DIFFERENT campaign is a different experiment and may never be pooled
+          in, because the executed design would then be something nobody
+          preregistered and the mixture would be invisible in the result.
         * its model directory is still present AND its identity still matches
           what was announced, re-derived from the bytes on disk. An entry whose
           weights are gone or changed is not a completed probe, it is a claim
@@ -352,7 +359,7 @@ class C2BehaviouralDriver:
                 rejected.append({"probe_id": name, "why": (
                     f"belongs to campaign {entry['campaign']!r}, not "
                     f"{self.a.campaign!r}; probes are not pooled across "
-                    "resources")})
+                    "experiments")})
                 continue
             ok, why = self.reidentify(entry)
             if not ok:
@@ -369,6 +376,64 @@ class C2BehaviouralDriver:
             say(f"  resume: {len(restored)} probe(s) restored, "
                 f"{len(rejected)} rejected")
         return summary
+
+    def committed_ranking(self, path: Path) -> dict[str, Any] | None:
+        """This CAMPAIGN's already-committed screening ranking, or None.
+
+        A record from another campaign is not this campaign's commitment and is
+        refused rather than ignored: reading it would let one experiment's
+        selection decide another's confirmation, and silently ignoring it would
+        leave a foreign ranking sitting in this run's evidence.
+        """
+        if not path.is_file():
+            return None
+        record = json.loads(path.read_text())
+        if record.get("campaign") != self.a.campaign:
+            raise C2DriverError(
+                f"{path} holds a screening ranking committed under campaign "
+                f"{record.get('campaign')!r}, not {self.a.campaign!r}. One "
+                "experiment's selection may not decide another's confirmation.")
+        if not (record.get("advanced") or {}).get("state_id"):
+            raise C2DriverError(
+                f"{path} exists but names no advanced candidate. A ranking "
+                "record that cannot say what advanced is not a commitment, and "
+                "overwriting it would destroy the only evidence of what the "
+                "previous attempt did.")
+        return record
+
+    def assert_reuse_matches(self, probe: SCH.Probe) -> None:
+        """A restored probe must BE the probe this rung asked for.
+
+        Continuation inside one campaign is permitted; substitution is not. The
+        journal's own record is self-consistent by construction, so the check
+        that means anything compares it to the descriptor the schedule built
+        from the frozen protocol and the six materialized arms: same rung, same
+        arm, same seed, same initialization digest.
+
+        An initialization digest that differs is the sharpest case. It would
+        mean a probe trained from a different checkpoint is standing in for this
+        arm's measurement — and every field here is derivable from the frozen
+        protocol, so a mismatch is never ambiguous.
+        """
+        record = self.training.get(probe.probe_id) or {}
+        for field, want in (
+                ("rung", probe.rung), ("arm", probe.arm), ("seed", probe.seed),
+                ("initialization_artifact_digest",
+                 probe.initialization_artifact_digest)):
+            got = record.get(field)
+            if got != want:
+                raise C2DriverError(
+                    f"{probe.probe_id}: the restored probe records "
+                    f"{field}={got!r} and this rung's descriptor requires "
+                    f"{want!r}. A continuation may consume its campaign's "
+                    "completed probes; it may not substitute a different "
+                    "measurement for one of them.")
+        if not record.get("config_sha256"):
+            raise C2DriverError(
+                f"{probe.probe_id}: the restored probe records no "
+                "config_sha256, so the training configuration it ran under "
+                "cannot be identified. An unidentifiable probe is not a "
+                "completed one.")
 
     def reidentify(self, entry: Mapping[str, Any]) -> tuple[bool, str]:
         """Do the bytes on disk still ARE the probe this entry describes?"""
@@ -430,6 +495,7 @@ class C2BehaviouralDriver:
         """
         payload: dict[str, Any] = {
             "unit_id": unit_id, "kind": kind, "campaign": self.a.campaign,
+            "run_attempt": getattr(self.a, "run_attempt", "") or None,
             "announced_utc": datetime.now(timezone.utc).isoformat(),
             "path": str(model_dir), "identity": None, "identity_error": None,
             "authorizes": ("nothing. Preservation and reuse are separate "
@@ -1046,6 +1112,14 @@ class C2BehaviouralDriver:
         for probe in probes:
             name = probe.probe_id
             if name in self.scores:
+                #: The identity the preregistration names, checked against THIS
+                #: schedule's descriptor and not only against the journal's own
+                #: copy of itself. `load_campaign_journal` already proved the
+                #: bytes are what was announced; that is a claim about the file,
+                #: not about whether it is the probe this rung is asking for. A
+                #: continuation whose arm, seed or initialization differed would
+                #: otherwise substitute one measurement for another silently.
+                self.assert_reuse_matches(probe)
                 say(f"  {name}: already complete in this campaign — not retrained")
                 continue
             if not self.afford(self.a.probe_train_minutes
@@ -1109,7 +1183,16 @@ class C2BehaviouralDriver:
         self.complete("S", probes=len(self.screening), gate=why)
 
     def stage_r(self) -> None:
-        """Rank and advance exactly one. NO VERDICT LEAVES THIS STAGE."""
+        """Rank and advance exactly one. NO VERDICT LEAVES THIS STAGE.
+
+        Committed ONCE per campaign. Screening is mechanical and deterministic
+        from six scores, so a continuation recomputing it should reach the same
+        candidate — "should" being exactly the word that makes it worth
+        checking. If a ranking is already committed under this campaign, the
+        recomputation must agree with it and the committed candidate is the one
+        that advances. A continuation may not rerun screening for another
+        outcome, and this is where that is enforced rather than assumed.
+        """
         self.mark("STAGE_START:R")
         ok, why = SCH.screening_is_complete(
             self.screening, self.training, self.scores)
@@ -1122,14 +1205,40 @@ class C2BehaviouralDriver:
         self.ranked = SCH.rank_screening(scores, self.candidates)
         SCH.assert_screening_emits_no_verdict({"ranked": self.ranked})
         self.advanced = SCH.advance_one(self.ranked)
-        (self.audit / "c2_screening_ranking.json").write_text(json.dumps({
-            "schema": "aadistill.autoinit.c2_screening_ranking/v1",
-            "battery": C2S.BATTERY_PATH,
-            "seed": self.proto["seeds"]["screening"],
-            "anchor_correct_overall": scores[SCH.ANCHOR],
-            "ranked": self.ranked, "advanced": self.advanced,
-            "may_not": list(C2S.SCREENING_MAY_NOT),
-        }, indent=2) + "\n")
+
+        ranking_path = self.audit / "c2_screening_ranking.json"
+        committed = self.committed_ranking(ranking_path)
+        if committed is not None:
+            was = committed["advanced"]["state_id"]
+            if was != self.advanced["state_id"]:
+                raise C2DriverError(
+                    f"campaign {self.a.campaign!r} already committed "
+                    f"{was} as its advanced candidate and this run's ranking "
+                    f"advances {self.advanced['state_id']}. Screening commits "
+                    "once: a continuation must confirm the candidate its own "
+                    "campaign selected, and a second ranking that names "
+                    "another one is a different experiment. Neither result is "
+                    "discarded here — both are evidence and this goes to "
+                    "review.")
+            say(f"  screening already committed {was[:12]}… in this campaign; "
+                "the recomputed ranking agrees and it is not re-decided")
+            self.advanced = committed["advanced"]
+            self.ranked = committed["ranked"]
+        else:
+            ranking_path.write_text(json.dumps({
+                "schema": "aadistill.autoinit.c2_screening_ranking/v1",
+                "campaign": self.a.campaign,
+                "run_attempt": getattr(self.a, "run_attempt", "") or None,
+                "battery": C2S.BATTERY_PATH,
+                "seed": self.proto["seeds"]["screening"],
+                "anchor_correct_overall": scores[SCH.ANCHOR],
+                "ranked": self.ranked, "advanced": self.advanced,
+                "may_not": list(C2S.SCREENING_MAY_NOT),
+                "_committed_once": (
+                    "the advanced candidate of this campaign. A later run "
+                    "attempt of the same campaign must confirm THIS candidate "
+                    "and may not rerun screening for another outcome."),
+            }, indent=2) + "\n")
         self.mark(f"{ADVANCED_MARKER}:{self.advanced['state_id']}")
         say(f"  advanced {self.advanced['state_id'][:12]}…, delta vs B "
             f"{self.advanced['delta_vs_b']:+.4f}"
@@ -1208,7 +1317,16 @@ def build_parser() -> argparse.ArgumentParser:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--campaign", required=True,
-                    help="campaign id; probes may only be reused within one")
+                    help=("the SCIENTIFIC campaign: one 12-probe behavioural "
+                          "experiment. Stable across replacement resources, and "
+                          "the scope within which a completed probe may be "
+                          "reused"))
+    ap.add_argument("--run-attempt", default="",
+                    help=("this launcher invocation and provider resource, for "
+                          "logs and evidence. NOT the campaign: when these were "
+                          "the same string, a replacement resource became a new "
+                          "campaign and had to refuse its predecessor's "
+                          "destination-verified probes"))
     ap.add_argument("--audit-dir", required=True)
     ap.add_argument("--eval-dir", required=True)
     ap.add_argument("--b-workdir", required=True,

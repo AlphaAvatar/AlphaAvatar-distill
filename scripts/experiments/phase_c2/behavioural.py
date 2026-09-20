@@ -435,28 +435,166 @@ def storage_pricing(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     return doc
 
 
+#: THE canonical phase decomposition of the complete behavioural session, and
+#: the reason it exists as one function.
+#:
+#: The launcher used to build a SECOND decomposition on top of this module's
+#: FINAL figure. `ceiling()` reported a hard window of 1800.53 min that already
+#: contained the frozen probe model's named reserves, its 10% contingency and
+#: its artifact-recovery reserve; the launcher then subtracted the
+#: materialization term back out, fed the remainder into a fresh `BudgetSpec`
+#: beside `setup`, `transfer` and `materialize` phases, and applied a SECOND
+#: contingency and a SECOND artifact-recovery reserve. `plan_session` answered
+#: 2036.62 hard minutes — about `$36.9987` of GPU at `$1.09/h`, larger than the
+#: whole proposed all-in ceiling. That is not extra conservatism: a correct
+#: authorization derived from the proposal would have REFUSED the launch, at the
+#: gate, for reserves nobody granted twice.
+#:
+#: So both consumers read this one decomposition. The proposal prices it; the
+#: launcher's `BudgetSpec` carries its phases and its reserves verbatim and
+#: applies no contingency of its own, because the contingency is already here as
+#: a named number of minutes.
+def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
+                          materialization_minutes: float) -> dict[str, Any]:
+    """Expected phases, named reserves and the recovery reserve. ONE owner.
+
+    Every figure is read from the frozen pricing record or from the pricing
+    model that wrote it, and the two are RECONCILED here rather than trusted:
+
+    * the overhead phases must sum to the record's own expected-minus-probe
+      remainder, or the record and the model disagree about what a session does
+      besides train;
+    * the three named reserves plus the recovery reserve must sum to the
+      record's own `hard_ceiling_minutes` minus its `expected_minutes`, or the
+      reserve block has moved since the record was frozen.
+
+    A mismatch raises. A window derived from a decomposition that no longer
+    reconstructs its own source is a window that bounds nothing.
+
+    The 10% contingency is carried as a named RESERVE in minutes rather than as
+    a fraction, for two reasons. It is the frozen model's contingency on the
+    frozen model's expected path, so re-deriving it from a phase sum that also
+    contains the materialization would silently change a frozen figure. And the
+    materialization term is already the worst observation of each operator
+    IMPLEMENTATION anywhere in attempt 3's telemetry — a bound, not a mean — so
+    multiplying it by a contingency built for means would charge a risk margin
+    on a number that is already the risk margin.
+
+    **There is no separate probe-transfer phase, and that is deliberate.** The
+    launcher's old second budget added `12 x 1.7 = 20.4` minutes of probe
+    transfer as a serial phase and then reused the same 20.4 as its recovery
+    reserve. Probes leave the pod from the runner's POLL LOOP, concurrently with
+    the next probe's training, so those minutes are not serial wall clock; the
+    frozen model already carries `artifact_synchronization` for the part that
+    is, and a 30-minute recovery reserve — larger than the 20.4 it replaces —
+    for the collection that happens after the soft stop.
+    """
+    from experiments.phase_c2 import selection_pricing as SP
+
+    beh = json.loads(
+        (Path(repo_root) / PRICING).read_text())["behavioural_selection"]
+    bounding = beh["bounding_basis"]
+    probe_expected = float(beh["expected_minutes"])
+    probe_hard = float(beh["hard_ceiling_minutes"])
+    probe_minutes = float(bounding["probe_minutes_expected"])
+
+    overheads = tuple((name, float(minutes))
+                      for name, minutes in SP.SESSION_PHASE_MINUTES)
+    overhead_total = sum(m for _, m in overheads)
+    if abs(overhead_total - (probe_expected - probe_minutes)) > 0.01:
+        raise BehaviouralProposalError(
+            f"the pricing model's session overheads sum to {overhead_total} min "
+            f"and the frozen record's expected path leaves "
+            f"{probe_expected - probe_minutes} min beside its probes. The record "
+            "and the model that wrote it disagree about what a session does "
+            "besides train, so neither can be decomposed into phases.")
+
+    recovery = float(SP.ARTIFACT_RECOVERY_RESERVE_MINUTES)
+    reserves = (
+        ("probe_model_contingency",
+         round(probe_expected * SP.CONTINGENCY_FRACTION, 2)),
+        ("probe_duration_risk",
+         round(float(bounding["probe_minutes_observed_max"]) - probe_minutes, 2)),
+        ("generation_length_risk",
+         float(bounding["generation_length_reserve_minutes"])),
+    )
+    reserve_total = sum(m for _, m in reserves)
+    if abs(probe_hard - (probe_expected + reserve_total + recovery)) > 0.01:
+        raise BehaviouralProposalError(
+            f"the named reserves ({reserve_total} min) plus the recovery "
+            f"reserve ({recovery} min) do not reconstruct the frozen record's "
+            f"hard ceiling: {probe_expected} + {reserve_total} + {recovery} != "
+            f"{probe_hard}. The reserve block has moved since the record was "
+            "frozen and this decomposition would bound the wrong window.")
+
+    #: Materializing the six arms is INITIALIZATION, not a probe. The protocol
+    #: is twelve probes and stays twelve; the pod is alive longer because the
+    #: arms have to exist before any probe can measure against them.
+    expected_phases = (
+        *overheads,
+        ("materialize_six_arms", round(float(materialization_minutes), 2)),
+        ("twelve_probes", probe_minutes),
+    )
+    expected = round(sum(m for _, m in expected_phases), 2)
+    soft_stop = round(expected + reserve_total, 2)
+    hard = round(soft_stop + recovery, 2)
+    return {
+        "expected_phases": expected_phases,
+        "soft_stop_reserves": reserves,
+        "artifact_recovery_reserve_minutes": recovery,
+        #: For a `BudgetSpec`. ZERO, deliberately: see the module note above.
+        "contingency_fraction": 0.0,
+        "_contingency_is_a_named_reserve": (
+            "the frozen probe model's 10% contingency is carried in "
+            "soft_stop_reserves as a fixed number of minutes. A consumer that "
+            "also set contingency_fraction=0.10 would apply it twice, which is "
+            "the defect this decomposition exists to remove."),
+        "_overhead_phase_names_are_the_pricing_models": (
+            "the first six phases are selection_pricing.SESSION_PHASE_MINUTES "
+            "verbatim, because that is what the frozen record's 95 non-probe "
+            "minutes ARE and renaming them would break the reconciliation. "
+            "They are a cost model shared with the full search, not a claim "
+            "about this session's stages: `selection_commit_and_artifact_"
+            "manifest` funds the closeout minutes, and this session commits no "
+            "selection — it consumes one that is already frozen."),
+        "expected_minutes": expected,
+        "soft_stop_minutes": soft_stop,
+        "hard_minutes": hard,
+        "probe_model": {
+            "record": PRICING,
+            "expected_minutes": probe_expected,
+            "hard_ceiling_minutes": probe_hard,
+            "probe_minutes_expected": probe_minutes,
+            "contingency_fraction": SP.CONTINGENCY_FRACTION,
+        },
+        "_reconciled": (
+            "the overhead phases reconstruct the record's non-probe expected "
+            "minutes and the reserves reconstruct its hard ceiling; both are "
+            "checked here rather than assumed"),
+    }
+
+
 def money(repo_root: str | Path = REPO_ROOT, *,
           gpu_rate_usd_per_hour: float,
           provision_gb: int,
-          b_preparation_minutes: float = 0.0) -> dict[str, Any]:
+          materialization_minutes: float = 0.0) -> dict[str, Any]:
     """Expected and hard-ceiling cost, GPU and separately billed storage apart.
 
-    The GPU minutes come from the frozen pricing record, which derived them from
-    six real probes: the expected path on per-probe means, the ceiling on the
-    observed maxima plus a named generation-length reserve. This module does not
-    re-derive them — it re-prices them at a live rate and adds the storage the
-    old record never costed for this session.
+    The minutes come from `session_decomposition`, which is the ONE canonical
+    phase decomposition of this session: the frozen probe model's overheads and
+    probe minutes, the six arms' materialization bound, and the frozen model's
+    own named reserves. This module does not re-derive any of them — it prices
+    that decomposition at a live rate and adds the storage the old record never
+    costed for this session.
     """
-    pricing = json.loads((Path(repo_root) / PRICING).read_text())
-    beh = pricing["behavioural_selection"]
+    decomposition = session_decomposition(
+        repo_root, materialization_minutes=materialization_minutes)
+    expected_min = decomposition["expected_minutes"]
+    hard_min = decomposition["hard_minutes"]
+    beh = json.loads(
+        (Path(repo_root) / PRICING).read_text())["behavioural_selection"]
     probe_expected = float(beh["expected_minutes"])
     probe_hard = float(beh["hard_ceiling_minutes"])
-
-    #: B's preparation is initialization, not a probe, so it is added to the
-    #: session's runtime rather than to the probe count. The protocol stays at
-    #: twelve probes; the pod is simply alive for longer.
-    expected_min = probe_expected + b_preparation_minutes
-    hard_min = probe_hard + b_preparation_minutes
 
     disk = storage_pricing(repo_root)
     per_gb_month = float(disk["container_disk"]["usd_per_gb_month"])
@@ -477,12 +615,18 @@ def money(repo_root: str | Path = REPO_ROOT, *,
                               "authorization must re-quote again at issue"),
         "probe_minutes_basis": beh["probe_cost"]["source"],
         "probe_minutes": {"expected": probe_expected, "hard_ceiling": probe_hard},
-        "b_preparation_minutes": b_preparation_minutes,
-        "_b_preparation_is_initialization": (
+        "materialization_minutes": materialization_minutes,
+        "decomposition": decomposition,
+        "_one_decomposition": (
+            "session_decomposition is the single canonical phase decomposition "
+            "of this session. The proposal prices it here and the launcher's "
+            "BudgetSpec carries the same phases and reserves, so the two cannot "
+            "derive different hard windows."),
+        "_materialization_is_initialization": (
             "added to the session's runtime, not to the probe count. The "
             "protocol is twelve probes and stays twelve; the pod is alive "
-            "longer because the sixth arm has to be built before any of them "
-            "can measure against it."),
+            "longer because the six arms have to be built before any probe can "
+            "measure against them."),
         "expected": {"minutes": expected_min, "gpu_usd": gpu_expected,
                      "disk_usd": disk_expected,
                      "all_in_usd": round(gpu_expected + disk_expected, 4)},

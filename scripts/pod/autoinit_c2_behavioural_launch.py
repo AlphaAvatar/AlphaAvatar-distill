@@ -99,6 +99,36 @@ FROZEN_EXPECT = "configs/experiments/phase_c2/behavioural_frozen_assets.json"
 #: the preflight reads here, so "is this probe already durable" has one answer.
 DURABLE_STORE = "/home/ecs-user/aad-artifacts/phase_c2_behavioural"
 
+
+def campaign_store(campaign_id: str, store: str | Path = DURABLE_STORE) -> Path:
+    """This CAMPAIGN's durable root. The campaign owns its probes, not a run.
+
+    A probe belongs to the twelve-probe experiment, and a replacement resource
+    continuing that experiment has to be able to see what the previous one
+    produced. Keyed under the run attempt alone — which is what the destination
+    used to be — a continuation could not find its own campaign's work.
+
+    Each run attempt still gets its own subdirectory inside. Two attempts of one
+    campaign must never write the same bytes: a deterministic pipeline
+    reproduces identical unit ids across sessions, so a flat campaign directory
+    would let a second attempt silently overwrite the first attempt's verified
+    checkpoint with an unverified partial copy.
+    """
+    return Path(store) / campaign_id
+
+
+def probe_destination(ctx: SessionContext, unit_id: str) -> Path:
+    """Where ONE probe's bytes land. Read by the fetcher and by the gates.
+
+    From `--ckpt-store` rather than from the constant, so the flag that says
+    where probes are secured is the flag every consumer reads. `destination_gate`
+    checking one volume while the fetcher wrote to another would verify capacity
+    on a disk nothing uses.
+    """
+    return (campaign_store(ctx.auth.campaign_id, ctx.args.ckpt_store)
+            / ctx.args.run_id / unit_id)
+
+
 CONTAINER_DISK_GB = BG.PROVISION_GB
 
 #: The image, pinned. Same family the replay and the search ran on.
@@ -277,7 +307,10 @@ def destination_gate(ctx: SessionContext) -> tuple[bool, str]:
     """
     import shutil
 
-    store = Path(DURABLE_STORE)
+    #: From the FLAG, and the campaign's own root, because that is where
+    #: `probe_destination` writes. Checking `DURABLE_STORE` while the fetcher
+    #: honoured `--ckpt-store` would verify capacity on a volume nothing uses.
+    store = campaign_store(ctx.auth.campaign_id, ctx.args.ckpt_store)
     try:
         store.mkdir(parents=True, exist_ok=True)
         free = shutil.disk_usage(store).free
@@ -292,6 +325,125 @@ def destination_gate(ctx: SessionContext) -> tuple[bool, str]:
             "cannot preserve is a run that will lose it.")
     return True, (f"destination OK: {free / 2**30:.1f} GiB free at {store} for "
                   f"{need / 2**30:.1f} GiB of probes")
+
+
+def campaign_attempts(campaign_id: str, *, exclude: str = "",
+                      store: str | Path = DURABLE_STORE) -> list[str]:
+    """Run attempts of this campaign that left durable probes, in name order.
+
+    Name order, not chronological — `attempt10` sorts before `attempt2` — and
+    the gate does not care, because it sums every prior attempt's spend and
+    reconciles every prior resource rather than looking at the latest one.
+
+    The durable store is the authority, not the run log: a run attempt whose
+    launcher died before it recorded itself still produced probes, and those
+    probes are the thing a continuation would consume.
+    """
+    root = campaign_store(campaign_id, store)
+    if not root.is_dir():
+        return []
+    return sorted(d.name for d in root.iterdir()
+                  if d.is_dir() and d.name != exclude
+                  and any(d.iterdir()))
+
+
+def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """A replacement RESOURCE may continue this campaign. It may not restart it,
+    and it may not spend past the campaign's ceiling.
+
+    The preregistered policy (R1-R6) governs which probes a continuation may
+    consume, and two of its conditions are not the driver's to check because
+    they are about resources and money rather than bytes:
+
+    * **the previous resource must be provider-confirmed non-billing.** At most
+      one resource of a campaign may bill at a time. A continuation launched
+      while an earlier pod's release was never confirmed would put two on the
+      meter, and "the remove call returned zero" is not confirmation — only the
+      provider reporting the resource not billing is.
+    * **cumulative campaign spend must stay inside the campaign's approved
+      all-in ceiling.** The ceiling is cumulative across every resource and
+      subrun: a rerun does not reset it and a replacement resource does not
+      receive a fresh allocation. So the check is settled campaign spend plus
+      this session's planned all-in against `all_in_hard_usd`.
+
+    This gate fails CLOSED and says why. With a ceiling sized for one full
+    session, a continuation after a resource that already spent real money will
+    be REFUSED here rather than permitted to overspend — funding a campaign for
+    more than one full session is a maintainer decision, and this gate is where
+    that need becomes visible instead of becoming an overrun.
+    """
+    campaign = ctx.auth.campaign_id
+    prior = campaign_attempts(campaign, exclude=ctx.args.run_id,
+                              store=ctx.args.ckpt_store)
+    ctx.evidence["campaign"] = {
+        "campaign_id": campaign, "run_attempt": ctx.args.run_id,
+        "prior_attempts_with_durable_probes": prior,
+        "_continuation_is_not_pooling": (
+            "a replacement resource is a new RESOURCE and a new run attempt "
+            "inside the SAME scientific campaign. Consuming its predecessor's "
+            "destination-verified probes is continuation of one preregistered "
+            "experiment, not pooling across experiments."),
+    }
+    if not prior:
+        return True, (f"campaign {campaign} has no prior run attempt holding "
+                      "durable probes; this is its first resource")
+
+    from experiments.run_layout import rel_run_dir
+
+    settled, unconfirmed, unreadable = 0.0, [], []
+    for attempt in prior:
+        record = REPO_ROOT / session_record_path(attempt)
+        if not record.is_file():
+            unreadable.append(attempt)
+            continue
+        try:
+            ev = json.loads(record.read_text())
+        except json.JSONDecodeError:
+            unreadable.append(attempt)
+            continue
+        settled += float((ev.get("cost") or {}).get("actual_usd") or 0.0)
+        if ev.get("provider_resource_created") and not ev.get(
+                "provider_confirms_gone"):
+            unconfirmed.append(attempt)
+    if unreadable:
+        return False, (
+            f"campaign {campaign} has durable probes from run attempt(s) "
+            f"{unreadable} whose session record could not be read at "
+            f"{[session_record_path(a) for a in unreadable]}. Whether those "
+            "resources are still billing is therefore UNKNOWN, and an unknown "
+            "billing state is a stop condition, not a clear one. Reconcile "
+            "them before launching another.")
+    if unconfirmed:
+        return False, (
+            f"run attempt(s) {unconfirmed} of campaign {campaign} created a "
+            "provider resource that was never confirmed released. At most one "
+            "resource of a campaign may bill at a time, and a zero return code "
+            "on a remove call is not evidence of release. Reconcile and tear "
+            "down before creating another. Run dir(s): "
+            f"{[rel_run_dir(EXPERIMENT_ID, a, STAGE_ID) for a in unconfirmed]}")
+
+    planned = float(ctx.auth.gpu_hard_usd) + float(ctx.auth.disk_hard_usd)
+    approved = float(ctx.auth.all_in_hard_usd)
+    ctx.evidence["campaign"].update({
+        "settled_campaign_spend_usd": round(settled, 4),
+        "this_session_planned_all_in_usd": round(planned, 4),
+        "campaign_approved_all_in_usd": approved,
+    })
+    if settled + planned > approved + BG.DOLLAR_QUANTUM_USD:
+        return False, (
+            f"campaign {campaign} has settled ${settled:.4f} across "
+            f"{len(prior)} prior run attempt(s) and this session plans "
+            f"${planned:.4f} all-in, which is ${settled + planned:.4f} against "
+            f"an approved campaign ceiling of ${approved:.4f}. The ceiling is "
+            "cumulative across every resource and subrun; a replacement "
+            "resource does not receive a fresh allocation. Continuing would "
+            "need a maintainer decision to fund the campaign for more than one "
+            "full session — it is not something this gate may grant.")
+    return True, (
+        f"campaign continuation OK: ${settled:.4f} settled across {len(prior)} "
+        f"prior attempt(s) plus ${planned:.4f} planned is inside the "
+        f"${approved:.4f} campaign ceiling, and every prior resource is "
+        "provider-confirmed released")
 
 
 def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -421,10 +573,9 @@ def _fetch_and_verify(ctx: SessionContext, units: list) -> list:
 
     fetched: list = []
     adapter = get_adapter("qwen3")
-    store = Path(DURABLE_STORE)
     for unit in units:
         unit_id = unit["unit_id"]
-        dest = store / ctx.args.run_id / unit_id
+        dest = probe_destination(ctx, unit_id)
         dest.parent.mkdir(parents=True, exist_ok=True)
         rc = subprocess.run(
             ["timeout", f"{ctx.args.ckpt_fetch_limit_min}m", "scp", "-r",
@@ -478,6 +629,12 @@ def _fetch_and_verify(ctx: SessionContext, units: list) -> list:
             (dest / "durable_ack.json").write_text(json.dumps({
                 "schema": "aadistill.autoinit.c2_behavioural_probe_ack/v1",
                 "unit_id": unit_id, "campaign": unit.get("campaign"),
+                #: BOTH identities. The campaign says which experiment this
+                #: probe belongs to and therefore which later resource may
+                #: continue with it; the run attempt says which invocation and
+                #: which provider resource produced it.
+                "authorized_campaign": ctx.auth.campaign_id,
+                "run_attempt": ctx.args.run_id,
                 "run_id": ctx.args.run_id,
                 "bytes": size,
                 "identity": unit["identity"],
@@ -585,9 +742,22 @@ def probes_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
 # ---------------------------------------------------------------------------
 
 def driver_command(ctx: SessionContext, plan) -> str:
+    """The campaign is the SCIENCE; the run attempt is this invocation.
+
+    `--campaign` used to be `ctx.args.run_id`, which made the two the same
+    string and the preregistered continuation policy unreachable: R1 permits
+    reuse only inside one campaign, so a replacement provider resource became a
+    different campaign and had to refuse every probe the previous resource had
+    trained and verified off-pod.
+
+    The campaign comes from the AUTHORIZATION rather than from a constant read
+    here, so an artifact that does not name this campaign cannot permit work
+    under it.
+    """
     return (f"/opt/train/bin/python "
             f"{REPO}/scripts/pod/autoinit_c2_behavioural_driver.py "
-            f"--campaign {ctx.args.run_id} "
+            f"--campaign {ctx.auth.campaign_id} "
+            f"--run-attempt {ctx.args.run_id} "
             f"--audit-dir {AUDIT_DIR} --eval-dir {EVAL_DIR} "
             f"--b-workdir {ARM_DIR} --status-path {STATUS} "
             f"--image-digest '{ctx.image_digest}' "
@@ -601,12 +771,25 @@ def driver_command(ctx: SessionContext, plan) -> str:
 
 
 def budget(args) -> BudgetSpec:
-    """Built from what this session actually runs: six arms, then twelve probes.
+    """THE canonical decomposition, carried verbatim. Nothing is re-derived here.
 
-    `arms=0`: the generic step term does not describe this shape. The probe
-    minutes come from the frozen pricing record, which derived them from six
-    real probes on a real L40S, and the materialization minutes from attempt 3's
-    telemetry bounded per operator IMPLEMENTATION.
+    This function used to build a SECOND budget model on top of the proposal's
+    FINAL one. `BG.ceiling()` reports a hard window that already contains the
+    frozen probe model's named reserves, its 10% contingency and its
+    artifact-recovery reserve; this function subtracted the materialization term
+    back out, fed the remainder into a fresh `BudgetSpec` beside its own
+    `setup`, `transfer` and `materialize` phases, and applied a SECOND
+    contingency and a SECOND recovery reserve. `plan_session` then answered
+    2036.62 hard minutes — about `$36.9987` of GPU at `$1.09/h`, bigger than the
+    proposal's entire `$33.2099` all-in ceiling. A correct authorization derived
+    from the proposal would have refused this launch at the gate, for reserves
+    nobody granted twice.
+
+    So the phases, the named reserves and the recovery reserve all come from
+    `BH.session_decomposition`, and the contingency fraction is ZERO because the
+    contingency is already one of those named reserves in minutes.
+    `test_the_launcher_and_the_proposal_derive_one_hard_window` asserts the two
+    agree at the same quoted rate.
 
     What keeps the money inside the authorization is not this estimate but the
     driver's admission control, which starts a unit only when the remaining
@@ -616,33 +799,32 @@ def budget(args) -> BudgetSpec:
     """
     from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 
-    #: `--max-price` is None until `main` resolves it from the authorization's
-    #: own accepted rate. The phase MINUTES below do not depend on the rate at
-    #: all, so the quoted rate is a safe basis for deriving them; the money that
-    #: binds comes from the authorization, not from here.
-    rate = args.max_price or BG.QUOTED_RATE_USD_PER_HOUR
-    c = BG.ceiling(REPO_ROOT, gpu_rate_usd_per_hour=rate)
-    mat = c["materialization"]
-    probes = float(c["hard_ceiling"]["minutes"]) - float(mat["total_minutes"])
-
-    #: Probes leave the pod DURING the run, overlapping the next probe's
-    #: compute. 1.11 GiB at the measured 11.5 MB/s is ~1.7 min each.
-    probe_transfer = 12 * 1.7
+    prep = BG.materialization_minutes(REPO_ROOT)
+    d = BH.session_decomposition(
+        REPO_ROOT, materialization_minutes=prep["total_minutes"])
 
     return BudgetSpec(
+        #: `arms=0` and both generic phases at zero: the generic
+        #: arms x steps + setup + transfer shape does not describe six
+        #: materializations followed by twelve probes, and every phase this
+        #: session has is named in the decomposition instead.
         arms=0, steps_per_arm=0,
         step_seconds=MEASURED_STEP_SECONDS,
         step_source=("unused: the generic arms x steps term does not describe "
-                     "six materializations followed by twelve probes. Both "
-                     "phase figures below are bounds from committed records."),
-        setup_minutes=12.0,
-        transfer_minutes=probe_transfer,
-        other_phases=(
-            Phase("materialize_six_arms", round(mat["total_minutes"], 2)),
-            Phase("twelve_probes", round(probes, 2)),
-        ),
-        contingency_fraction=0.10,
-        artifact_recovery_reserve_minutes=probe_transfer,
+                     "six materializations followed by twelve probes. Every "
+                     "phase is named in BH.session_decomposition, which is "
+                     "derived from committed records and reconciled against "
+                     "them."),
+        setup_minutes=0.0,
+        transfer_minutes=0.0,
+        other_phases=tuple(Phase(name, minutes)
+                           for name, minutes in d["expected_phases"]),
+        #: ZERO. The frozen model's 10% contingency is a named reserve below.
+        contingency_fraction=d["contingency_fraction"],
+        soft_stop_reserves=tuple(Phase(name, minutes)
+                                 for name, minutes in d["soft_stop_reserves"]),
+        artifact_recovery_reserve_minutes=(
+            d["artifact_recovery_reserve_minutes"]),
     )
 
 
@@ -729,6 +911,7 @@ def spec(args) -> SessionSpec:
             plan_binding_gate,
             source_binding_gate,
             destination_gate,
+            campaign_continuation_gate,
             readiness_gate,
             #: LAST, because it is the only gate that touches the network.
             bundle_staged_gate,
@@ -777,9 +960,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--host-draws", type=int, default=2)
     ap.add_argument("--setup-timeout-s", type=float, default=5400.0)
     ap.add_argument("--poll-seconds", type=float, default=60.0)
-    #: Sized to the derived hard window at the quoted rate, not to a generic
-    #: hour. `main` narrows it to the window the ACCEPTED rate actually funds.
-    ap.add_argument("--poll-limit-min", type=float, default=1800.0)
+    #: DERIVED, not defaulted. `main` sets it from the authorization's own
+    #: window: the shorter of what its GPU dollars buy at the accepted rate and
+    #: its authorized runtime. A literal default here was 1800.0 against a
+    #: 1800.53-minute authorized runtime, so the generic number silently
+    #: truncated the authorized experiment by half a minute; a larger literal
+    #: would have been worse in the other direction.
+    ap.add_argument("--poll-limit-min", type=float, default=None)
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--uv-max-s", type=int, default=2400)
     ap.add_argument("--tests-max-s", type=int, default=1800)
@@ -794,29 +981,50 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    if args.max_price is None:
-        #: From the AUTHORIZATION, which was issued at a re-quoted rate. Not
-        #: from a constant: the ceiling was derived at that rate, so defaulting
-        #: to anything else would authorize a window the money does not fund.
-        auth_file = REPO_ROOT / auth_path_for(args.run_id)
-        if not auth_file.is_file():
-            raise SystemExit(
-                f"{auth_path_for(args.run_id)} does not exist. The max price "
-                "defaults to the rate the authorization's ceiling was derived "
-                "at, so there is nothing to default to and nothing to launch.")
-        rate = json.loads(auth_file.read_text()).get("rate_usd_per_hour")
-        if rate is None:
-            raise SystemExit(
-                "the authorization states no rate, so --max-price has no safe "
-                "default. Pass one explicitly at or below the rate the ceiling "
-                "was derived at.")
-        args.max_price = float(rate)
 
-    #: The deadline follows the PRICE. A fixed authorized amount at a dearer
-    #: rate buys fewer minutes, and a poll limit set without reference to that
-    #: is a deadline that can outlive the budget.
-    funded = BG.window_minutes(args.max_price, REPO_ROOT)
-    args.poll_limit_min = min(args.poll_limit_min, funded)
+    #: THROUGH ITS REAL LOADER, before anything is priced. `load` verifies the
+    #: document against its own hash, its schema, its scope, its campaign and
+    #: the internal consistency of its five amounts; reading the rate out with
+    #: `json.loads(...).get(...)` — which this did — would accept a document
+    #: whose dollars and deadline described different experiments.
+    auth_file = REPO_ROOT / auth_path_for(args.run_id)
+    if not auth_file.is_file():
+        raise SystemExit(
+            f"{auth_path_for(args.run_id)} does not exist. Every amount this "
+            "launcher derives — the rate, the window, the campaign ceiling — "
+            "comes from the authorization, so there is nothing to derive them "
+            "from and nothing to launch.")
+    auth = BG.BehaviouralAuthorization.load(auth_file)
+
+    if args.max_price is None:
+        #: The rate the authorization's own ceiling was derived at.
+        args.max_price = float(auth.rate_usd_per_hour)
+    elif args.max_price > float(auth.rate_usd_per_hour) + BG.DOLLAR_QUANTUM_USD:
+        #: A `$0` refusal, before `check_gpu_offered` and long before `create`.
+        #: The runner already refuses a live quote above `--max-price`, at `$0`
+        #: pre-provider and by confirmed teardown post-provider; that protection
+        #: is only worth the authorized rate if `--max-price` cannot be raised
+        #: above it here.
+        raise SystemExit(
+            f"--max-price ${args.max_price}/h is above the ${auth.rate_usd_per_hour}"
+            "/h this authorization's ceiling was derived at. A price increase is "
+            "not solved by paying more per hour, and it is not solved by "
+            "shortening the scientific experiment either: re-quote, regenerate "
+            "the proposal, and take a materially changed dollar authorization "
+            "back to the maintainer.")
+
+    #: The deadline is the SHORTER of what the authorized dollars buy at the
+    #: live rate and the authorized runtime, and both bounds come from the
+    #: authorization. Deriving it from `QUOTED_RATE_USD_PER_HOUR` instead —
+    #: which this did — meant a valid authorization re-derived at a different
+    #: live quote still inherited the old `$1.09/h` dollar window and could
+    #: truncate the experiment; and a card cheaper than the authorized rate
+    #: funds more minutes than the experiment is authorized to use.
+    window = BG.window_minutes(
+        args.max_price, gpu_hard_usd=float(auth.gpu_hard_usd),
+        hard_runtime_minutes=float(auth.hard_runtime_minutes))
+    args.poll_limit_min = (window if args.poll_limit_min is None
+                           else min(args.poll_limit_min, window))
 
     #: BEFORE anything is priced or created: a colliding run id or a foreign
     #: scratch root costs $0 here.
@@ -849,6 +1057,13 @@ def main() -> int:
             record_run(
                 layout, spec=BEHAVIOURAL_RUN_SPEC,
                 plan={"session": BG.SESSION_ID, "plan_id": BG.PLAN_ID,
+                      #: The scientific campaign, recorded beside the run
+                      #: attempt. The continuation gate reads prior attempts of
+                      #: THIS campaign, so a run that does not say which
+                      #: campaign it belonged to is a run a later attempt
+                      #: cannot reconcile.
+                      "campaign_id": BG.CAMPAIGN_ID,
+                      "run_attempt": args.run_id,
                       "session_commit": args.session_commit,
                       "bundle": args.bundle,
                       "plan_hash": BG.plan_hash(REPO_ROOT),
@@ -861,11 +1076,21 @@ def main() -> int:
                         "terminates_at": "decide",
                         "decides": "the C2 incumbent, under the frozen "
                                    "Phase-C rule, or no incumbent at all"},
-                present=present_roles(layout, BEHAVIOURAL_RUN_ROLES),
-                stage_id=STAGE_ID)
+                #: PRESENT roles only, under the parameter name `record_run`
+                #: actually takes. This call passed `present=` and `stage_id=`,
+                #: neither of which exists in that signature, so every
+                #: invocation raised `TypeError` into the `except` below and
+                #: printed a warning — the run manifest was never written, on
+                #: any path, including the `$0` refusals whose only evidence it
+                #: is. A swallowed exception in a `finally` is exactly where a
+                #: signature mismatch can hide forever.
+                roles=present_roles(layout, BEHAVIOURAL_RUN_ROLES))
         except Exception as exc:                                # noqa: BLE001
-            print(f"WARNING: could not record the run: "
-                  f"{type(exc).__name__}: {exc}")
+            print(f"\nRUN NOT RECORDED: {type(exc).__name__}: {exc}\n"
+                  f"  the run directory is "
+                  f"{rel_run_dir(EXPERIMENT_ID, args.run_id, STAGE_ID)}; it "
+                  f"holds whatever this invocation produced and the chain is "
+                  f"consumed either way.\n")
     return rc
 
 

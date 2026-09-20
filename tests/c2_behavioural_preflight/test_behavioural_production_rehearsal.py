@@ -153,8 +153,13 @@ class _Rehearsal(D.C2BehaviouralDriver):
         }
 
 
-def _run(tmp_path: Path, effect, *, authorized=40.0) -> _Rehearsal:
+def _run(tmp_path: Path, effect, *, authorized=40.0,
+         run_attempt="attempt1") -> _Rehearsal:
     argv = ["--campaign", "rehearsal-1",
+            #: The campaign and the run attempt, apart. They are separate flags
+            #: because they are separate identities: a replacement resource is a
+            #: new attempt inside the same campaign.
+            "--run-attempt", run_attempt,
             "--audit-dir", str(tmp_path / "audit"),
             "--eval-dir", str(tmp_path / "eval"),
             "--b-workdir", str(tmp_path / "arms"),
@@ -337,6 +342,10 @@ def test_the_launcher_builds_a_command_this_driver_can_parse(tmp_path):
 
         class auth:
             hard_cap_usd = 33.21
+            #: From the authorization, which names the CAMPAIGN. The launcher
+            #: used to pass the run id here, which made the two identities one
+            #: string and the continuation policy unreachable.
+            campaign_id = BG.CAMPAIGN_ID
 
     class _Plan:
         soft_stop_usd = 30.0
@@ -346,7 +355,8 @@ def test_the_launcher_builds_a_command_this_driver_can_parse(tmp_path):
     flags = command.split("autoinit_c2_behavioural_driver.py", 1)[1].split()
     #: The REAL parser decides whether the REAL command is acceptable.
     parsed = D.build_parser().parse_args([f.strip("'") for f in flags])
-    assert parsed.campaign == "attempt1"
+    assert parsed.campaign == BG.CAMPAIGN_ID
+    assert parsed.run_attempt == "attempt1"
     assert parsed.authorized_usd == pytest.approx(33.21)
     assert parsed.rate == pytest.approx(1.09)
 
@@ -388,6 +398,95 @@ def test_a_completed_probe_is_restored_and_never_retrained(tmp_path):
     assert len(summary["restored"]) == 12
     assert summary["rejected"] == []
     assert all(r["scored"] for r in summary["restored"])
+
+
+def test_a_replacement_resource_completes_the_campaign_without_retraining(
+        tmp_path):
+    """Continuation, end to end, across two run/resource identities.
+
+    The same campaign under a second run attempt, driven P through D by the
+    real `run()`: every probe is restored and none is retrained, the committed
+    screening ranking is adopted rather than re-decided, and the verdict is the
+    one the campaign's own evidence produces.
+
+    This is the property the old code made impossible. `--campaign` was the run
+    id, so a replacement resource was a different campaign and had to refuse
+    all twelve probes — the rule meant to prevent cross-experiment pooling was
+    instead preventing continuation of one experiment.
+    """
+    first = _run(tmp_path / "one", (0.45, 0.25, 0.90, 0.90),
+                 run_attempt="attempt1")
+    assert first.rc == 0
+    trained_first = {name: rec["train_minutes"]
+                     for name, rec in first.training.items()}
+    assert len(trained_first) == 12
+    committed = json.loads(
+        (first.audit / "c2_screening_ranking.json").read_text())
+    assert committed["campaign"] == "rehearsal-1"
+    assert committed["run_attempt"] == "attempt1"
+
+    #: A REPLACEMENT resource: new run attempt, same campaign, same durable
+    #: evidence. `train_one` would raise if it were called, because nothing may
+    #: be retrained.
+    class _NoRetraining(_Rehearsal):
+        def train_one(self, name, config):
+            raise AssertionError(
+                f"{name} was retrained on a continuation; a completed probe is "
+                "never retrained, for any outcome")
+
+    second = _NoRetraining(D.build_parser().parse_args(
+        ["--campaign", "rehearsal-1", "--run-attempt", "attempt2",
+         "--audit-dir", str(first.a.audit_dir),
+         "--eval-dir", str(first.a.eval_dir),
+         "--b-workdir", str(first.a.b_workdir),
+         "--status-path", str(tmp_path / "s_continuation.txt"),
+         "--device", "cuda",
+         "--b-build-minutes", "31", "--probe-train-minutes", "75",
+         "--probe-battery-minutes", "45", "--rate", "1.09",
+         "--soft-stop-usd", "39", "--authorized-usd", "40"]))
+    second.effect = first.effect
+    assert second.run() == 0, second.ev["stages"]
+
+    assert set(second.scores) == set(first.scores)
+    #: The ranking was ADOPTED, not re-decided: the record still names the
+    #: attempt that committed it.
+    after = json.loads((first.audit / "c2_screening_ranking.json").read_text())
+    assert after["run_attempt"] == "attempt1"
+    assert second.advanced["state_id"] == committed["advanced"]["state_id"]
+    assert (second.ev["stages"]["D"]["terminal_state"]
+            == first.ev["stages"]["D"]["terminal_state"])
+    assert D.SUCCESS_MARKER in Path(second.a.status_path).read_text()
+
+
+def test_a_continuation_that_would_advance_another_candidate_is_refused(
+        tmp_path):
+    """Screening commits once. A second ranking naming another candidate stops.
+
+    Mutating the committed record is the only way to reach this branch, because
+    the ranking is deterministic from six scores — which is exactly why the
+    check is worth having: determinism is an argument, not a guarantee.
+    """
+    first = _run(tmp_path / "one", (0.45, 0.25, 0.90, 0.90))
+    path = first.audit / "c2_screening_ranking.json"
+    record = json.loads(path.read_text())
+    record["advanced"] = {**record["advanced"], "state_id": "a-different-leaf"}
+    path.write_text(json.dumps(record))
+
+    second = _Rehearsal(D.build_parser().parse_args(
+        ["--campaign", "rehearsal-1", "--run-attempt", "attempt2",
+         "--audit-dir", str(first.a.audit_dir),
+         "--eval-dir", str(first.a.eval_dir),
+         "--b-workdir", str(first.a.b_workdir),
+         "--status-path", str(tmp_path / "s_conflict.txt"), "--device", "cuda",
+         "--b-build-minutes", "31", "--probe-train-minutes", "75",
+         "--probe-battery-minutes", "45", "--rate", "1.09",
+         "--soft-stop-usd", "39", "--authorized-usd", "40"]))
+    second.effect = first.effect
+    assert second.run() == 1
+    assert second.ev["stages"]["R"]["passed"] is False
+    assert "commits once" in second.ev["stages"]["R"]["reason"]
+    #: And it stopped BEFORE confirmation, so no verdict was reached.
+    assert "D" not in second.ev["stages"]
 
 
 def test_a_probe_from_another_campaign_is_refused(tmp_path):

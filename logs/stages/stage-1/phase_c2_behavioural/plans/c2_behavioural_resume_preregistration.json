@@ -10,17 +10,21 @@
   "identity": [
    "probe_id",
    "campaign",
+   "rung",
+   "arm",
+   "seed",
    "initialization_artifact_digest",
    "config_sha256",
    "artifact_digest of the trained weights"
   ],
-  "_a_record_is_not_a_checkpoint": "a journal entry claiming a probe finished is not the probe. Reuse re-derives the identity from the bytes on disk through `identify_for_transfer` and refuses anything that does not match what was announced. Without that, a replacement resource could substitute for a measurement."
+  "_a_record_is_not_a_checkpoint": "a journal entry claiming a probe finished is not the probe. Reuse re-derives the identity from the bytes on disk through `identify_for_transfer` and refuses anything that does not match what was announced. Without that, a replacement resource could substitute for a measurement.",
+  "_the_descriptor_decides": "the journal's record is self-consistent by construction, so checking it against itself proves nothing about whether it is the probe the rung asked for. The comparison that means something is against the descriptor the schedule builds from the frozen protocol."
  },
  "rules": [
   {
    "id": "R1",
-   "rule": "A probe may be reused ONLY within the same campaign id.",
-   "why": "a replacement pod is a new campaign. The twelve probes are ONE experiment; silently mixing two resources' work would make the executed design something nobody preregistered, and the mixture would be invisible in the result.",
+   "rule": "A probe may be reused ONLY within the same scientific campaign id, and the campaign id is not the run attempt.",
+   "why": "the twelve probes are ONE experiment. A replacement pod is a new RESOURCE and a new run attempt inside the same campaign, so it may continue with that campaign's completed probes; a probe from a DIFFERENT campaign is a different experiment, and silently mixing two experiments' work would make the executed design something nobody preregistered and the mixture would be invisible in the result.",
    "enforced_by": "autoinit_c2_behavioural_driver.py :: load_campaign_journal"
   },
   {
@@ -55,17 +59,53 @@
    "rule": "A resumed session re-materializes its arms rather than trusting a staged copy, unless that copy re-identifies to the pinned digest.",
    "why": "arms are cheap to rebuild and are digest-pinned at every step; trusting an unverified copy would be the one place a substituted initialization could enter the experiment.",
    "enforced_by": "autoinit_c2_behavioural_driver.py :: materialize_arm"
+  },
+  {
+   "id": "R7",
+   "rule": "A continuation must consume its campaign's probes as the probes the rung asks for: probe id, rung, arm, seed and initialization digest must match the descriptor, and the training configuration must be identified.",
+   "why": "re-identifying the bytes proves the file is what was announced. It does not prove the file is this arm's measurement. Without the descriptor comparison, a probe trained from a different initialization could stand in for one of the twelve.",
+   "enforced_by": "autoinit_c2_behavioural_driver.py :: assert_reuse_matches"
+  },
+  {
+   "id": "R8",
+   "rule": "Screening commits ONCE per campaign. Once the advanced candidate is mechanically committed, a later run attempt must confirm that same candidate and may not rerun screening for another outcome.",
+   "why": "screening is deterministic from six scores, so a recomputation should agree \u2014 and 'should' is the word that makes it worth checking. A continuation that ranked again and advanced a different candidate would be selecting on which attempt survived.",
+   "enforced_by": "autoinit_c2_behavioural_driver.py :: committed_ranking",
+   "_how": "stage R recomputes the ranking, refuses when it disagrees with the committed record, and then advances the COMMITTED candidate. Neither result is discarded: both are evidence and the disagreement goes to review."
+  },
+  {
+   "id": "R9",
+   "rule": "A replacement resource may not launch while a previous resource of the campaign is unreconciled, and may not launch when settled campaign spend plus its own planned all-in exceeds the campaign's approved all-in ceiling.",
+   "why": "at most one resource of a campaign may bill at a time, and the budget is cumulative across every resource and subrun. An unknown billing state is itself a stop condition.",
+   "enforced_by": "autoinit_c2_behavioural_launch.py :: campaign_continuation_gate"
   }
  ],
  "what_a_resume_may_never_do": [
-  "pool probes across campaigns or resources",
+  "pool probes across CAMPAIGNS, which are different experiments",
+  "substitute a probe that does not match the rung's descriptor",
   "retrain a completed probe for a different outcome",
+  "rerun screening for a different advanced candidate",
   "rank, advance or decide on a partial field",
   "substitute a functionally similar checkpoint for an identity mismatch",
   "extend the seed set, add a tie-break rung, or force a winner",
-  "continue after a complete valid scientific verdict"
+  "continue after a complete valid scientific verdict",
+  "launch while a previous resource of the campaign may still be billing",
+  "spend past the campaign's cumulative approved all-in ceiling"
  ],
  "if_a_campaign_cannot_be_completed": "stop and report. A behavioural selection that trained nine of twelve probes has no verdict and must not be presented as having a partial one. The nine preserved probes are evidence about what was trained, not about which candidate wins. Whether a fresh campaign may reuse them is a maintainer decision, and this document's default answer is NO.",
  "_pre_science_retries_are_different": "an invocation that aborts BEFORE formal training begins produced no measurement to retry. AGENTS.md P12.1 permits diagnosing, repairing and retrying that under a fresh attempt identity inside the same cumulative budget. This document governs the case where training HAS begun.",
- "record_sha256": "2ebb6fbe085f921a0cedf24c67ee1835dc94075fa5a0ffb111b08d37c0366cd5"
+ "campaign_versus_resource": {
+  "campaign_id": "c2-behavioural-12probe-v1",
+  "campaign_is": "ONE 12-probe scientific experiment: six screening probes, one mechanical ranking, six confirmation probes, one verdict. It is bound by the grant and the authorization, which name this campaign and no other.",
+  "run_attempt_is": "ONE launcher invocation and the provider resource it draws. It is unique per invocation and per resource, and it exists so logs, evidence, spend and teardown can be attributed to the resource that produced them.",
+  "_the_correction": "an earlier version of R1 said 'a replacement pod is a new campaign'. That was wrong, and it made this document's own continuation policy unreachable: the launcher passed the run id as the campaign id, so a replacement resource could not consume a single probe the previous resource had trained and verified off-pod. A replacement pod is a new RESOURCE and a new run attempt INSIDE THE SAME scientific campaign. Consuming its predecessor's destination-verified probes is continuation of one preregistered experiment, not pooling across experiments.",
+  "continuation_conditions": [
+   "the probe's identity matches the descriptor this rung derives from the frozen protocol and the six materialized arms: same probe id, rung, arm, seed and initialization artifact digest, and an identified training configuration",
+   "the destination bytes still re-identify to the artifact identity that was announced when the probe finished",
+   "the previous resource is PROVIDER-CONFIRMED non-billing; a zero return code on a remove call is not evidence of release",
+   "cumulative campaign spend, settled across every prior resource and run attempt plus this session's planned all-in, remains inside the campaign's approved all-in ceiling"
+  ],
+  "_cumulative_means_cumulative": "the approved all-in ceiling bounds the CAMPAIGN, not each resource. A rerun does not reset it and a replacement resource does not receive a fresh allocation. A continuation that does not fit refuses at the gate; funding a campaign for more than one full session is a maintainer decision."
+ },
+ "record_sha256": "b34ea9fa0cebf81ef29afc97728e548440688305c9887974a7af7242fb332f80"
 }

@@ -84,14 +84,97 @@ expected — up from `$30.8918` because the arms are now built rather than
 staged. Project headroom after it: **`$27.5858`**.
 
 What is built: the launch governance and its one-use authorization type, the
-launcher with seven `$0` prechecks, a **standalone** driver (it does *not*
+launcher with eight `$0` prechecks, a **standalone** driver (it does *not*
 subclass `C1Driver`, which would inherit C1's authorization, plan identity,
 seeds and audit roots), the C2 decision module, a screening scorer pinned to its
 own battery identity record, per-poll off-pod durability with destination
 re-identification against all six identity fields, and a registered resume
 policy. One `$0` production-path rehearsal drives the real driver P→D and
-reaches **all three terminal states** from separate deterministic fixtures;
-45 preflight tests pass and four of its guards were verified by mutation.
+reaches **all three terminal states** from separate deterministic fixtures, and
+a second rehearsal completes the same campaign from a *replacement* run attempt
+without retraining a probe.
+
+### The final launch review's five corrections are implemented
+
+A `$0` independent review of `147b2c6` accepted the behavioural science and
+refused the launch for four execution/governance blockers and one
+authorization-scope error. All five are closed, and none needed a GPU.
+
+**One budget model.** The launcher built a second budget on top of the
+proposal's final one: it subtracted the materialization term out of the already
+final 1800.53-minute window, fed the remainder into a fresh `BudgetSpec` beside
+its own setup/transfer/materialize phases, and applied the frozen probe model's
+10% contingency and artifact-recovery reserve a *second* time. `plan_session`
+answered **2036.62 hard minutes, ≈`$36.9987`** of GPU — larger than the whole
+proposed `$33.2099` all-in ceiling, so a correct authorization would have
+refused the launch at the gate for reserves nobody granted twice. There is now
+ONE canonical decomposition, `behavioural.session_decomposition`, which both the
+proposal and the launcher's `BudgetSpec` consume; it reconciles against the
+frozen pricing record's own expected and hard figures and refuses if either has
+moved. The ceiling was **not** raised to pay for the duplication: expected
+`$23.8832` and hard `$33.2099` are unchanged.
+
+**The closure names what the executable reads.** The prepare stage calls
+`build_replay_leaves`, whose output is decided by attempt 3's frozen selection,
+compact state journal, telemetry and architecture-spec lineage — which is to say
+by *which six checkpoints get built* — and none of the four was declared. They
+are now named through `replay_specs`' own constants. The closure went 128 → 133
+files: those four plus `selection_pricing.py`, which the budget decomposition
+reads. All five are git-tracked and travel in the bundle.
+
+**Campaign identity ≠ run identity.** `--campaign` was `ctx.args.run_id`, so a
+replacement resource became a new *campaign* and R1 forced it to refuse every
+probe its predecessor had trained and verified off-pod — the rule against
+cross-experiment pooling was preventing continuation of one experiment. There is
+now a stable `BG.CAMPAIGN_ID`, carried by the authorization and in the plan
+hash; the run attempt stays unique per invocation and resource. The durable
+store is keyed campaign-then-attempt, restored probes are checked against the
+descriptor their rung derives (not only against their own record), screening
+**commits once** per campaign, and a new `$0` `campaign_continuation_gate`
+requires every prior resource to be provider-confirmed non-billing and refuses
+when settled campaign spend plus this session's planned all-in exceeds the
+campaign ceiling. *With a ceiling sized for one full session that gate refuses a
+continuation after any real prior spend — deliberately. Funding a campaign for
+more than one session is a maintainer decision, and the gate is where that need
+becomes visible instead of becoming an overrun.*
+
+**Live-rate authorization.** `authorized_gpu_usd()` derived from the `$1.09/h`
+constant and `main()` called `window_minutes(args.max_price)` without the
+authorization's own GPU amount, so a valid authorization re-quoted at another
+rate still inherited the old dollar window. The authorization now carries
+`rate_usd_per_hour`, `hard_runtime_minutes`, `gpu_hard_usd`, `disk_hard_usd` and
+`all_in_hard_usd` distinctly; its loader refuses a missing amount and reconciles
+the dollars against the runtime and the all-in against the sum; and the deadline
+is the **shorter** of what the authorized dollars buy at the live rate and the
+authorized runtime. `--max-price` above the authorized rate is a `$0` refusal.
+
+**Scope.** The authorization said "Plus ONE materialization of B"; six execute.
+It now states six exact-digest-gated fixed-path materializations followed by
+exactly twelve probes, and still forbids every beam, re-ranking, B
+state-eval remeasurement, fourth seed, C3 and C4.
+
+Three defects were found adjacent to this work and fixed, all `$0`:
+
+* the launcher's `record_run` call passed `present=` and `stage_id=`, neither of
+  which exists in that signature, so every invocation raised `TypeError` into a
+  `finally`'s `except` and printed a warning — **the run manifest was never
+  written on any path**, including the `$0` refusals whose only evidence it is.
+  The continuation gate reads those records, which is how it surfaced.
+* **a pod-side test asserted a dev-box path.**
+  `test_the_durable_store_can_hold_twelve_probes` lived in the pod selection and
+  asserted `/home/ecs-user/aad-artifacts` is a directory. True on the dev box,
+  true under `simulate_pod_env.sh` — which isolates `$HOME` as an *environment
+  variable* and does not hide absolute paths outside the repository — and false
+  on a container that has no `/home/ecs-user`. So the launch-bound readiness
+  sweep would have been green about a gate that fails at TESTS_OK a minute or
+  two into a billing pod. Reproduced at `$0` with `unshare -r -m` and a tmpfs
+  over the store: **at `147b2c6` the selection fails; on this tree all 121 pass.**
+  The check moved to `tests/autoinit/test_c2_behavioural_launch_governance.py`
+  with the other three dev-box-only cases, and its real production caller,
+  `destination_gate`, now has tests — it had none, and had drifted to reading
+  the `DURABLE_STORE` constant while the fetcher honoured `--ckpt-store`.
+* the three new `tests/**/test_*.py` files staled the committed skip-predicate
+  audit digest, as they always do; regenerated.
 
 **No grant, readiness record, authorization, bundle or provider resource
 exists**, and none may be created without a maintainer decision. Owners:

@@ -125,7 +125,8 @@ def test_gpu_and_storage_money_are_derived_apart():
     cands = B.candidate_manifest(ROOT)
     st = B.storage_requirement(cands, B.schedule(ROOT), ROOT)
     m = B.money(ROOT, gpu_rate_usd_per_hour=1.09, provision_gb=st["provision_gb"],
-                b_preparation_minutes=B.b_preparation_minutes(ROOT)["bounded_minutes"])
+                materialization_minutes=(
+                    B.b_preparation_minutes(ROOT)["bounded_minutes"]))
     for label in ("expected", "hard_ceiling"):
         x = m[label]
         assert x["disk_usd"] > 0, "storage costed at zero again"
@@ -227,6 +228,6 @@ def test_b_preparation_is_bounded_from_evidence_and_is_not_a_probe():
     #: It lengthens the session, it does not add a thirteenth probe.
     assert B.schedule(ROOT)["total_probes"] == 12
     m = B.money(ROOT, gpu_rate_usd_per_hour=1.09, provision_gb=120,
-                b_preparation_minutes=prep["bounded_minutes"])
+                materialization_minutes=prep["bounded_minutes"])
     assert (m["expected"]["minutes"]
             == m["probe_minutes"]["expected"] + prep["bounded_minutes"])

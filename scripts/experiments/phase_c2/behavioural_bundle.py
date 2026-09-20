@@ -7,11 +7,14 @@ bundle from another, not the name — so only the label differs, and a refusal
 about this session reads as being about it.
 
 **What the bundle carries.** The repository at the session commit, so the frozen
-protocol, both battery identity records, attempt 3's selection and journal, the
-teacher binding and the recovery recipe all travel with it. Those are not
-context: they ARE the plan. The seeds, the batteries, the SESOI, the guardrails,
-the bootstrap seed, the six arms' pinned construction paths and the identity
-each is gated against are read out of them.
+protocol, both battery identity records, attempt 3's selection, compact state
+journal, telemetry and architecture-spec lineage, the teacher binding and the
+recovery recipe all travel with it. Those are not context: they ARE the plan.
+The seeds, the batteries, the SESOI, the guardrails, the bootstrap seed, the six
+arms' pinned construction paths and the identity each is gated against are read
+out of them — and all four of attempt 3's evidence files are now named in the
+declared closure, so the bundle's re-digest inside the checkout measures them
+rather than assuming them.
 
 It does NOT carry anything under `artifacts/`, which is gitignored: the
 calibration mixtures, the recovery pack, the evaluation tokenizer sidecars and

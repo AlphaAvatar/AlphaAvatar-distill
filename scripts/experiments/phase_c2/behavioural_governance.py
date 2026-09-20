@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import math
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +35,27 @@ SCHEMA = "aadistill.autoinit.c2_behavioural_authorization/v1"
 
 PLAN_ID = BH.PLAN_ID
 SESSION_ID = BH.SESSION_ID
+
+#: THE SCIENTIFIC CAMPAIGN, which is not the invocation.
+#:
+#: One campaign is one 12-probe behavioural experiment: six screening probes,
+#: one mechanical ranking, six confirmation probes, one verdict. A run id names
+#: a launcher invocation and the provider resource it draws; it changes whenever
+#: a resource is replaced, and that is exactly what evidence and logs need it
+#: for.
+#:
+#: They used to be the same string — the launcher passed `--campaign
+#: <run_id>` — which made the preregistered continuation policy unreachable by
+#: construction. R1 permits reuse only inside one campaign, so a replacement
+#: resource became a DIFFERENT campaign and had to refuse every probe the
+#: previous resource had trained and verified off-pod. The rule meant to prevent
+#: cross-experiment pooling was instead preventing continuation of one
+#: experiment.
+#:
+#: Stable, and bound by the authorization: an artifact that does not name this
+#: campaign cannot permit work under it, so the campaign cannot be renamed into
+#: a fresh permission.
+CAMPAIGN_ID = "c2-behavioural-12probe-v1"
 
 
 class BehaviouralGovernanceError(RuntimeError):
@@ -75,9 +97,23 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
     The two battery identity records are here for the same reason, and the
     pricing record because the ceiling is derived from it.
 
+    **And attempt 3's evidence, because the prepare stage READS it.** The
+    behavioural prepare stage calls `replay_specs.build_replay_leaves`, whose
+    output is decided by the frozen selection, the compact state journal, the
+    telemetry and the architecture-spec lineage: they determine each path's
+    ancestry, its calibration profiles, every pinned intermediate digest, the
+    historical root-config override that made step 0 reproduce, and the
+    materialization admission bounds. Four files that decide which six
+    checkpoints get built, and none of them was named here. "Recorded closure ==
+    live closure" means nothing until the closure actually names everything the
+    executable reads. They are named through `replay_specs`' own constants
+    rather than retyped, so a relocation moves one string.
+
     Two paid pods in this programme died one per producer because a non-source
     input was shipped for one consumer and not the other.
     """
+    from experiments.phase_c2 import replay_specs as RS
+
     return (
         BH.PROTOCOL,
         BH.PRICING,
@@ -87,6 +123,11 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
         "configs/stage3/e1/e1_r0860k_sa_pca.json",
         BH.STORAGE_PRICING,
         "scripts/pod/autoinit_preflight_setup.sh",
+        #: The runtime scientific inputs of the prepare stage.
+        RS.SELECTION_REL,
+        RS.JOURNAL_REL,
+        RS.TELEMETRY_REL,
+        RS.ARCH_SPEC_LINEAGE_REL,
     )
 
 
@@ -297,42 +338,106 @@ def ceiling(repo_root: str | Path = REPO_ROOT, *,
     prep = materialization_minutes(repo_root)
     out = BH.money(repo_root, gpu_rate_usd_per_hour=gpu_rate_usd_per_hour,
                    provision_gb=provision_gb,
-                   b_preparation_minutes=prep["total_minutes"])
+                   materialization_minutes=prep["total_minutes"])
     out["materialization"] = prep
     return out
 
 
-def authorized_gpu_usd(repo_root: str | Path = REPO_ROOT) -> float:
-    """The GPU dollars an authorization would carry: the ceiling at the QUOTE.
+#: The five amounts an authorization must carry DISTINCTLY. Named here because
+#: the launcher reads them by name and a missing one is a refusal, never a
+#: default: a window derived from a constant rate while the authorization was
+#: issued at a different one is a window the money does not fund.
+AUTHORIZATION_AMOUNT_FIELDS: tuple[str, ...] = (
+    "rate_usd_per_hour", "hard_runtime_minutes", "gpu_hard_usd",
+    "disk_hard_usd", "all_in_hard_usd")
 
-    A fixed figure. An authorization is a dollar amount granted once, not a
-    formula re-evaluated at launch.
+
+def authorization_terms(repo_root: str | Path = REPO_ROOT, *,
+                        rate_usd_per_hour: float,
+                        provision_gb: int = PROVISION_GB) -> dict[str, Any]:
+    """The amounts an authorization carries, derived MECHANICALLY at a live rate.
+
+    Issuance re-quotes `gpuTypes.securePrice` and calls this with that number.
+    Nothing here reads `QUOTED_RATE_USD_PER_HOUR`: that constant is the basis
+    the PROPOSAL was priced at, recorded so a reader can see what moved, and an
+    authorization derived from it after the price changed would carry a dollar
+    window that does not match its own runtime.
+
+    The amounts are kept apart all the way through. GPU money and separately
+    billed container disk are different bills — folding them together has
+    already cost `$1.69` unledgered once — and the authorized runtime is a
+    quantity that follows from neither: a card offered below the authorized rate
+    buys more minutes than the experiment is authorized to use, and the session
+    must not take them.
     """
-    return float(ceiling(repo_root,
-                         gpu_rate_usd_per_hour=QUOTED_RATE_USD_PER_HOUR
-                         )["hard_ceiling"]["gpu_usd"])
+    if rate_usd_per_hour <= 0:
+        raise BehaviouralGovernanceError(
+            "an authorization cannot be derived at a non-positive rate")
+    c = ceiling(repo_root, gpu_rate_usd_per_hour=rate_usd_per_hour,
+                provision_gb=provision_gb)
+    hard, expected = c["hard_ceiling"], c["expected"]
+    return {
+        "rate_usd_per_hour": float(rate_usd_per_hour),
+        "hard_runtime_minutes": float(hard["minutes"]),
+        "gpu_hard_usd": float(hard["gpu_usd"]),
+        "disk_hard_usd": float(hard["disk_usd"]),
+        "all_in_hard_usd": float(hard["all_in_usd"]),
+        "expected_all_in_usd": float(expected["all_in_usd"]),
+        "provisioned_disk_gb": int(provision_gb),
+        "campaign_id": CAMPAIGN_ID,
+        "_rate_is_live_at_issuance": (
+            "re-quoted from gpuTypes.securePrice — never communityPrice, which "
+            "is a lower number the launcher does not pay. If the quote moves "
+            "before issuance the proposal is regenerated and a materially "
+            "changed dollar authorization goes back to the maintainer."),
+        "_the_runtime_binds_too": (
+            "hard_runtime_minutes is the authorized length of the experiment. A "
+            "card offered below the authorized rate buys more minutes than "
+            "this; the session may not use them."),
+        "_all_in_is_the_campaign_ceiling": (
+            "one authorization funds one 12-probe campaign. all_in_hard_usd "
+            "bounds the campaign cumulatively across every resource and run "
+            "attempt, not each attempt separately."),
+    }
 
 
-def window_minutes(rate_usd_per_hour: float,
-                   repo_root: str | Path = REPO_ROOT, *,
-                   gpu_hard_usd: float | None = None) -> float:
-    """How long a FIXED authorized amount buys at the LIVE rate.
+def window_minutes(rate_usd_per_hour: float, *,
+                   gpu_hard_usd: float,
+                   hard_runtime_minutes: float) -> float:
+    """The session's deadline: the shorter of what the money buys and the runtime.
 
-    The dollars are fixed and the rate is live, which is the only arrangement
-    in which a deadline cannot outlive its budget. Re-deriving the ceiling at
-    the live rate instead — which an earlier version did — makes the ceiling
-    scale with the price and the window nearly rate-independent, so a launch at
-    double the quoted rate would run just as long and spend twice as much. The
-    preflight caught that by asserting the obvious property: a dearer card must
-    buy fewer minutes.
+    Both bounds are AUTHORIZATION-BOUND and both are required. There is no
+    default, because the only available default was `QUOTED_RATE_USD_PER_HOUR`'s
+    derived ceiling — so a valid authorization re-derived at a different live
+    quote would still have inherited the old `$1.09/h` dollar window and could
+    have truncated the experiment.
+
+    Two distinct ways a deadline can be wrong, and both are closed here:
+
+    * **too long for the money.** The dollars are fixed and the rate is live,
+      which is the only arrangement in which a deadline cannot outlive its
+      budget. Re-deriving the ceiling at the live rate instead — which an
+      earlier version did — makes the ceiling scale with the price and the
+      window nearly rate-independent, so a launch at double the quoted rate
+      would run just as long and spend twice as much.
+    * **too long for the experiment.** A card at half the authorized rate funds
+      twice the minutes. Those minutes are not authorized: the grant permits a
+      12-probe experiment of a stated length, not as much work as the money
+      happens to reach.
 
     The separately billed container disk does not shorten the GPU window, so it
     is not subtracted from it.
     """
     if rate_usd_per_hour <= 0:
         raise ValueError("a rate must be positive to derive a window from it")
-    gpu = authorized_gpu_usd(repo_root) if gpu_hard_usd is None else gpu_hard_usd
-    return ((gpu - TEARDOWN_RESERVE_USD) / rate_usd_per_hour) * 60.0
+    if gpu_hard_usd <= TEARDOWN_RESERVE_USD:
+        raise ValueError(
+            f"a GPU authorization of ${gpu_hard_usd} cannot fund the "
+            f"${TEARDOWN_RESERVE_USD} teardown reserve, let alone an experiment")
+    if hard_runtime_minutes <= 0:
+        raise ValueError("an authorized runtime must be positive")
+    funded = ((gpu_hard_usd - TEARDOWN_RESERVE_USD) / rate_usd_per_hour) * 60.0
+    return min(funded, float(hard_runtime_minutes))
 
 
 # -- the plan ----------------------------------------------------------------
@@ -350,6 +455,11 @@ def plan_payload(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     binding = BH.b_binding(repo_root, device="cuda")
     return {
         "plan_id": PLAN_ID,
+        #: The SCIENTIFIC campaign, in the plan an authorization binds. A
+        #: continuation of this experiment is the same campaign under a new run
+        #: attempt; a different campaign is a different experiment and needs its
+        #: own plan, its own money and its own decision.
+        "campaign_id": CAMPAIGN_ID,
         "protocol_sha256": BH.protocol(repo_root)["protocol_sha256"],
         "schedule": proto["schedule"],
         "seeds": proto["seeds"],
@@ -381,8 +491,85 @@ def plan_hash(repo_root: str | Path = REPO_ROOT) -> str:
 
 
 # -- the authorization -------------------------------------------------------
+#: The dollar quantum the proposal's ceiling rounds to. `money()` derives every
+#: amount with `math.ceil(... * 10_000) / 10_000` — a ceiling rounds UP, so a
+#: stated amount can exceed its own arithmetic by up to this much and no more.
+#: It is the tolerance every reconciliation of a stated amount against its
+#: derivation uses, and it is named once so a reader can check which quantity it
+#: bounds rather than meeting an anonymous epsilon.
+DOLLAR_QUANTUM_USD = 1e-4
+
+
+def _load_amounts(path: str | Path, raw: dict[str, Any]) -> dict[str, float]:
+    """Read the five amounts and RECONCILE them. A stated amount is a claim.
+
+    Three things are checked, and each has a way of being wrong that a reader
+    of the document could not see:
+
+    * every field is PRESENT and positive — a missing money field must refuse,
+      never default;
+    * `gpu_hard_usd` is what `hard_runtime_minutes` costs at
+      `rate_usd_per_hour` — otherwise the dollars and the deadline describe two
+      different experiments, and the launcher would take whichever is longer;
+    * `all_in_hard_usd` is `gpu_hard_usd + disk_hard_usd` — a GPU-only ceiling
+      has already missed `$1.69` of separately billed container disk in this
+      programme, and an all-in figure that is not the sum hides it again.
+
+    `hard_cap_usd` must equal `gpu_hard_usd`: the runner compares the plan's
+    hard threshold, which is GPU dollars, against `hard_cap_usd`. An all-in cap
+    there would silently permit the disk amount of extra GPU overrun.
+    """
+    from aadistill.governance.authorization import AuthorizationError
+
+    out: dict[str, float] = {}
+    for field in AUTHORIZATION_AMOUNT_FIELDS:
+        value = raw.get(field)
+        if value is None:
+            raise AuthorizationError(
+                f"{path} states no {field}. The launcher derives its deadline "
+                "and its spend checks from the authorization's own amounts; "
+                "with one missing there is nothing to derive them from, and the "
+                "only available default was a constant quoted rate that may no "
+                "longer be the price.")
+        try:
+            out[field] = float(value)
+        except (TypeError, ValueError) as exc:
+            raise AuthorizationError(
+                f"{path} states {field}={value!r}, which is not a number") from exc
+        if out[field] <= 0:
+            raise AuthorizationError(
+                f"{path} states {field}={value!r}; every authorized amount must "
+                "be positive")
+
+    derived_gpu = out["hard_runtime_minutes"] / 60.0 * out["rate_usd_per_hour"]
+    if abs(out["gpu_hard_usd"] - derived_gpu) > DOLLAR_QUANTUM_USD:
+        raise AuthorizationError(
+            f"{path} authorizes {out['hard_runtime_minutes']} min at "
+            f"${out['rate_usd_per_hour']}/h, which is ${derived_gpu:.4f}, but "
+            f"states gpu_hard_usd=${out['gpu_hard_usd']}. The dollars and the "
+            "deadline describe different experiments; a launcher given both "
+            "would run to whichever is longer.")
+    all_in = out["gpu_hard_usd"] + out["disk_hard_usd"]
+    if abs(out["all_in_hard_usd"] - all_in) > DOLLAR_QUANTUM_USD:
+        raise AuthorizationError(
+            f"{path} states all_in_hard_usd=${out['all_in_hard_usd']} against "
+            f"${out['gpu_hard_usd']} of GPU plus ${out['disk_hard_usd']} of "
+            "separately billed container disk. An all-in figure that is not the "
+            "sum is how $1.69 of disk went unledgered once already.")
+    cap = float(raw.get("hard_cap_usd", 0.0))
+    if abs(cap - out["gpu_hard_usd"]) > DOLLAR_QUANTUM_USD:
+        raise AuthorizationError(
+            f"{path} states hard_cap_usd=${cap} and gpu_hard_usd="
+            f"${out['gpu_hard_usd']}. The runner checks the planned hard "
+            "threshold — which is GPU dollars — against hard_cap_usd, so these "
+            "must be the same number. An all-in cap there permits the disk "
+            "amount of extra GPU spend.")
+    return out
+
+
+@dataclass(frozen=True)
 class BehaviouralAuthorization(C2Authorization):
-    """Permits exactly one Phase-C2 behavioural selection session.
+    """Permits exactly one Phase-C2 behavioural selection CAMPAIGN.
 
     Structurally a `C2Authorization` — same commit binding, same derived-harness
     rule, same hash-of-itself check — and a different type with a different
@@ -394,7 +581,30 @@ class BehaviouralAuthorization(C2Authorization):
     and its `load` refuses any document claiming otherwise, so delegating to it
     would refuse this artifact by construction — the exact failure a sibling
     loader already hit by inheriting a contract instead of satisfying it.
+
+    It carries six fields the parent does not, and each is load-bearing rather
+    than descriptive:
+
+    * `campaign_id` — WHICH 12-probe experiment this permits. A run attempt is
+      an invocation; the campaign is the science, and reuse of a completed probe
+      is scoped to it.
+    * `rate_usd_per_hour`, `hard_runtime_minutes`, `gpu_hard_usd`,
+      `disk_hard_usd`, `all_in_hard_usd` — the amounts, kept DISTINCT. The
+      launcher derives its deadline from these and not from
+      `QUOTED_RATE_USD_PER_HOUR`, so an authorization re-derived at a different
+      live quote cannot inherit the old dollar window.
     """
+
+    #: `None` fails closed: `load` refuses a document that omits any of them,
+    #: and nothing constructs one of these without going through `load` or an
+    #: issuer. A permissive default on a money field is the one shape this type
+    #: must not have.
+    campaign_id: str | None = None
+    rate_usd_per_hour: float | None = None
+    hard_runtime_minutes: float | None = None
+    gpu_hard_usd: float | None = None
+    disk_hard_usd: float | None = None
+    all_in_hard_usd: float | None = None
 
     @property
     def allows_recovery_training(self) -> bool:
@@ -459,16 +669,38 @@ class BehaviouralAuthorization(C2Authorization):
         payload["authorizes_later_cycles"] = self.authorizes_later_cycles
         payload["authorizes_behavioural_selection"] = (
             self.authorizes_behavioural_selection)
+        #: The campaign and the five amounts, from the fields. A document that
+        #: carried a scope the object does not have would be worse than none.
+        payload["campaign_id"] = self.campaign_id
+        for field in AUTHORIZATION_AMOUNT_FIELDS:
+            payload[field] = getattr(self, field)
+        payload["_amounts_are_distinct"] = (
+            "GPU money, separately billed container disk and the authorized "
+            "runtime are three different quantities. The launcher derives its "
+            "deadline from gpu_hard_usd and hard_runtime_minutes at the LIVE "
+            "rate, never from a constant.")
+        payload["_the_ceiling_is_cumulative_over_the_campaign"] = (
+            "all_in_hard_usd bounds this campaign across every provider "
+            "resource and run attempt it takes. A replacement resource does not "
+            "receive a fresh allocation.")
         payload["scope"] = (
-            "ONE Phase-C2 behavioural selection: six screening probes on one "
-            "preregistered seed over five reconstructed candidates plus the "
-            "frozen C1 treatment B, a mechanical ranking that advances exactly "
-            "one candidate, six confirmation probes on three disjoint "
-            "preregistered seeds, and one verdict under C1's frozen decision "
-            "rule. Plus ONE materialization of B, gated on its frozen "
-            "identity, because its bytes no longer exist. NOT a search, NOT a "
-            "re-ranking of the frozen Top-5, NOT a re-measurement of B's state "
-            "evaluation, and NOT any part of a later cycle.")
+            "ONE Phase-C2 behavioural selection campaign: SIX deterministic "
+            "fixed-path arm materializations — the five frozen Top-5 C "
+            "candidates and the frozen C1 treatment B — each built from the "
+            "verified teacher along a path pinned at every step and gated on "
+            "its exact recorded identity before any probe starts, followed by "
+            "exactly twelve behavioural probes: six screening probes on one "
+            "preregistered seed over those six arms, a mechanical ranking that "
+            "advances exactly one candidate, six confirmation probes on three "
+            "disjoint preregistered seeds, and one verdict under C1's frozen "
+            "decision rule. All six arms are materialized because neither "
+            "available transport can carry six 1.19 GB checkpoints to a pod; "
+            "B's bytes no longer exist at all. NOT a search, NOT a beam or "
+            "expansion, NOT a re-ranking of the frozen Top-5, NOT a "
+            "re-measurement of B's completed state evaluation, NOT a fourth "
+            "seed, and NOT any part of C3 or C4.")
+        payload["authorized_materializations"] = 6
+        payload["authorized_probes"] = 12
         payload["forbids"] = [
             "any beam search or expansion",
             "re-ranking the frozen Top-5 or regenerating a selection",
@@ -534,8 +766,18 @@ class BehaviouralAuthorization(C2Authorization):
         if stages != AUTHORIZED_STAGES:
             raise AuthorizationError(
                 f"{path} authorizes stages {stages}, not {AUTHORIZED_STAGES}.")
+        if raw.get("campaign_id") != CAMPAIGN_ID:
+            raise AuthorizationError(
+                f"{path} names campaign {raw.get('campaign_id')!r}, not "
+                f"{CAMPAIGN_ID!r}. One authorization funds one 12-probe "
+                "behavioural campaign; an artifact naming another campaign "
+                "permits a different experiment, and renaming the campaign is "
+                "not a way to obtain a second one.")
+        amounts = _load_amounts(path, raw)
         scope = raw.get("resource_scope")
         return cls(
+            campaign_id=raw["campaign_id"],
+            **amounts,
             authorization_id=raw["authorization_id"],
             granted_utc=raw["granted_utc"], granted_by=raw["granted_by"],
             plan_id=raw["plan_id"],
