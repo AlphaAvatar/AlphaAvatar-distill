@@ -9,7 +9,16 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing. No pod exists.** Attempt 3's pod
+**A PAID SESSION IS RUNNING.** Pod `1fv2t0y39lwhml`, NVIDIA L40S at
+`$1.09/h`, created 2026-09-21 for behavioural campaign
+`c2-behavioural-12probe-v1`, run attempt3, session commit `0ab1e84f`. All eight
+pre-provider gates passed and the watchdog is detached at a 1801-minute /
+`$32.71` hard limit. The launcher runs under tmux session `c2beh`; its log is
+`/home/ecs-user/aad-scratch/launch-logs/attempt3.log`. **If this session is
+handed over while that pod exists, the pod is still billing** — check it, and
+tear it down if the launcher is not alive.
+
+Earlier history in this section: attempt 3 of the REPLAY's pod
 `ulit767od813i8` was deleted behind its teardown gate after 386.2 min; the
 provider confirms it is gone and an account-wide list returns `[]`.
 
@@ -28,8 +37,14 @@ the record → authorization → commit only the artifact → exact-session bund
 final live quote and all pre-provider gates → provider resource → formal
 execution → evidence, closeout, provider-confirmed teardown.
 
-**attempt1's chain is RETIRED at `$0`, before any provider contact, and
-attempt2 is building on a repaired tree.** Running the eight pre-provider gates
+**attempts 1 and 2 are RETIRED at `$0`, before any provider contact;
+attempt3 is the live chain.** Two launcher repairs, each found by running the
+eight pre-provider gates before creating a resource rather than discovering
+them on a meter, each moving the executable closure and so each forcing a fresh
+chain. Neither spent anything, so the cumulative `$33.2099` ceiling was entirely
+intact when attempt3 launched. Closure `f08d2aaf…` → `d99ef79c…` → `ec2c894c…`;
+**the plan hash never moved**, so no science changed. Both amendments are
+recorded in attempt3's grant. Running the eight pre-provider gates
 before creating a resource — rather than discovering them on a meter — found
 that `readiness_gate` compared `record.get("kind")` when no readiness record
 this repository writes carries that field. It is `record_kind`. The gate could
