@@ -878,6 +878,34 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'full search {a.authorizes_c2_full_search}, '
       f'behavioural {a.authorizes_behavioural_selection}, training {a.allows_recovery_training}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2_behavioural" ]; then
+  # An ELEVENTH type, and the ONLY C2 session that trains. Every other C2
+  # artifact reports allows_recovery_training False and C2Authorization.load
+  # refuses a document claiming it, so this branch must load the behavioural
+  # type specifically — delegating to the shared loader would refuse the only
+  # artifact that can authorize twelve recovery probes. The flags below are the
+  # ones a careless reuse would set: this must not be able to buy a beam, a
+  # re-ranking of the frozen Top-5, a re-measurement of B, or C3/C4 work.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from experiments.phase_c2.behavioural_governance import BehaviouralAuthorization
+a = BehaviouralAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_behavioural_selection is True, 'this session needs a behavioural authorization'
+assert a.allows_recovery_training is True, 'every one of the twelve probes is a training run'
+assert a.authorizes_c2_full_search is False, 'a behavioural grant must not authorize a beam'
+assert a.authorizes_c2_search1 is False, 'a behavioural grant must not authorize the Search-1 beam'
+assert a.authorizes_c2_baseline_completion is False, 'B is measured and frozen; this rebuilds bytes, it does not remeasure'
+assert a.authorizes_c2_replay is False, 'the replay is closed; its output is an input here'
+assert a.authorizes_later_cycles is False, 'C3 and C4 challenge whatever incumbent THIS session leaves'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.automatic_followon_start is False, 'nothing chains off the verdict'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, behavioural {a.authorizes_behavioural_selection}, '
+      f'training {a.allows_recovery_training}, full search {a.authorizes_c2_full_search}, '
+      f'later cycles {a.authorizes_later_cycles}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

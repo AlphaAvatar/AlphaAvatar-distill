@@ -355,6 +355,28 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "reclaimable on a card holding only the teacher, cache admitting "
             "67/67. Nothing was flushed and no saving is claimed from it.",
      }),
+    ("c87f8767a5a006796d68daaf42b7e6ca8e9731e7",
+     "one identity construction for a transferred checkpoint",
+     {
+        "src/aadistill/runtime/leaf_durability.py":
+            "`identify_for_transfer(directory, *, adapter, arch_signature, "
+            "num_parameters)` extracted, and `verify_transferred_leaf` now "
+            "calls it instead of rebuilding the identity inline. THIS IS A "
+            "DECLARED SEMANTIC CHANGE, and a deliberately small one: the "
+            "arithmetic is byte-for-byte the code that was already there, "
+            "moved so that the SENDER and the RECEIVER compute identity by one "
+            "construction rather than two. `artifact_digest` covers "
+            "`tokenizer_sha256`, so a sender recording `None` while the "
+            "receiver hashed the tokenizer files that arrived would mismatch "
+            "on every transfer of a checkpoint carrying a tokenizer -- a "
+            "disagreement about bookkeeping, reported as corruption. The "
+            "return value additionally carries `config_sha256`, "
+            "`arch_signature`, `num_parameters` and a THREE-VALUED "
+            "`config_matched` (None when the record predates the field, so "
+            "'not recorded' and 'did not match' stay distinct); no existing "
+            "key changed meaning and every existing caller reads the same "
+            "flags it read before.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.

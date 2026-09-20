@@ -44,12 +44,57 @@ from aadistill.initialization.specs.artifact import (
     identify_checkpoint,
 )
 
-__all__ = ["LeafDurabilityError", "free_bytes_at", "persist_selected_leaves",
-           "verify_transferred_leaf"]
+__all__ = ["LeafDurabilityError", "free_bytes_at", "identify_for_transfer",
+           "persist_selected_leaves", "verify_transferred_leaf"]
 
 
 class LeafDurabilityError(RuntimeError):
     """A selected leaf could not be durably preserved. Stage 2 must not start."""
+
+
+def identify_for_transfer(directory: str | Path, *, adapter: Any,
+                          arch_signature: str, num_parameters: int):
+    """Identify a checkpoint directory the way a transfer will be checked.
+
+    `identify_checkpoint` takes an `ArchSpec` and reads `spec.spec_hash`, which
+    suits a checkpoint a search just constructed. A *trained* checkpoint has no
+    spec of its own — training changes weights, not architecture — so its
+    `arch_signature` and `num_parameters` come from the initialization it was
+    trained from, and are passed in.
+
+    This exists so the SOURCE and the DESTINATION compute identity by one
+    construction rather than two. `artifact_digest` covers `tokenizer_sha256`,
+    so a sender that recorded `None` while the receiver hashed the tokenizer
+    files that arrived would produce a mismatch on every transfer of a
+    checkpoint carrying a tokenizer — a disagreement about bookkeeping,
+    reported as corruption. `verify_transferred_leaf` calls this too.
+    """
+    from aadistill.initialization.specs.artifact import (
+        CheckpointIdentity, ShardRecord,
+    )
+    from aadistill.infrastructure.manifest import sha256_file, sha256_json
+
+    import json as _json
+
+    d = Path(directory)
+    if not d.is_dir():
+        raise LeafDurabilityError(f"{d}: not a checkpoint directory")
+    names = sorted(adapter.weight_files(str(d)))
+    if not names:
+        raise LeafDurabilityError(f"{d}: no weight shards")
+    config = d / "config.json"
+    if not config.is_file():
+        raise LeafDurabilityError(f"{d}: config.json is missing")
+    index_name = adapter.index_file(str(d))
+    return CheckpointIdentity(
+        path=str(d),
+        shards=tuple(ShardRecord(n, sha256_file(d / n), (d / n).stat().st_size)
+                     for n in names),
+        config_sha256=sha256_json(_json.loads(config.read_text())),
+        arch_signature=arch_signature,
+        num_parameters=int(num_parameters),
+        index_sha256=sha256_file(d / index_name) if index_name else None,
+        tokenizer_sha256=_tokenizer_digest(d))
 
 
 def free_bytes_at(destination: str | Path) -> int:
@@ -170,32 +215,19 @@ def verify_transferred_leaf(directory: str | Path, record: Mapping[str, Any], *,
     transfer that truncated a shard or mangled a config is caught here rather
     than assumed away.
     """
-    from aadistill.initialization.specs.artifact import CheckpointIdentity, ShardRecord
-    from aadistill.infrastructure.manifest import sha256_file, sha256_json
-
-    import json as _json
-
     d = Path(directory)
     if not d.is_dir():
         raise LeafDurabilityError(f"{d}: nothing arrived")
-    names = sorted(adapter.weight_files(str(d)))
-    if not names:
-        raise LeafDurabilityError(
-            f"{d}: no weight shards arrived; the transfer moved no weights")
-    config = d / "config.json"
-    if not config.is_file():
-        raise LeafDurabilityError(f"{d}: config.json did not arrive")
 
-    index_name = adapter.index_file(str(d))
-    local = CheckpointIdentity(
-        path=str(d),
-        shards=tuple(ShardRecord(n, sha256_file(d / n), (d / n).stat().st_size)
-                     for n in names),
-        config_sha256=sha256_json(_json.loads(config.read_text())),
-        arch_signature=record["arch_signature"],
-        num_parameters=int(record["num_parameters"]),
-        index_sha256=sha256_file(d / index_name) if index_name else None,
-        tokenizer_sha256=_tokenizer_digest(d))
+    #: ONE construction, shared with the sender. Re-deriving the identity here
+    #: would be a second implementation of the thing whose sameness is the
+    #: entire point of the comparison below.
+    try:
+        local = identify_for_transfer(
+            d, adapter=adapter, arch_signature=record["arch_signature"],
+            num_parameters=record["num_parameters"])
+    except LeafDurabilityError as exc:
+        raise LeafDurabilityError(f"{d}: {exc}; the transfer is incomplete") from exc
 
     recorded = record["artifact_digest"]
     return {
@@ -205,6 +237,23 @@ def verify_transferred_leaf(directory: str | Path, record: Mapping[str, Any], *,
         "matched": local.artifact_digest == recorded,
         "weights_digest": local.weights_digest,
         "weights_digest_matched": local.weights_digest == record.get("weights_digest"),
+        "config_sha256": local.config_sha256,
+        #: Three-valued on purpose: `None` when the record does not carry a
+        #: config hash at all. "not recorded" and "did not match" are different
+        #: findings, and older records predate this field.
+        #:
+        #: Read with `.get`, never by subscript, and the distinction is load
+        #: bearing rather than stylistic: a caller derives this function's
+        #: REQUIRED record fields by scanning its own source for subscripted
+        #: record reads, and asserts that whoever writes the record declares
+        #: every one of them. A subscript here would announce a requirement no
+        #: writer satisfies and none has reason to — this field is optional by
+        #: design. (That scan reads COMMENTS too, so this note spells out no
+        #: subscripted field name of its own.)
+        "config_matched": (None if record.get("config_sha256") is None
+                           else local.config_sha256 == record.get("config_sha256")),
+        "arch_signature": local.arch_signature,
+        "num_parameters": local.num_parameters,
         "single_shard_sha256": local.single_shard_sha256,
         "shard_matched": local.single_shard_sha256 == record.get("single_shard_sha256"),
         "tokenizer_sha256": local.tokenizer_sha256,

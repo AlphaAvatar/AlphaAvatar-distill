@@ -922,7 +922,7 @@ def test_the_protocol_does_not_pin_any_calibration():
     assert doc["beam_and_ranking"]["standing_width"] > 0
 
 
-def test_the_documents_are_deterministic_and_regenerating_verifies_them():
+def test_the_documents_are_deterministic_and_regenerating_verifies_them(tmp_path):
     """Regenerating must produce IDENTICAL bytes, so a reviewer can check them.
 
     The first draft of these documents carried a `generated_utc`, which moved
@@ -930,21 +930,41 @@ def test_the_documents_are_deterministic_and_regenerating_verifies_them():
     a verification. This project has already had a pricing hash become a bound
     identity that a launch verifies, so an unreproducible plan hash is a trap
     rather than an inconvenience.
-    """
-    import subprocess
 
-    before = {path: path.read_bytes() for path in (PROTOCOL, PRICING)}
-    result = subprocess.run(
-        [sys.executable, "scripts/autoinit/write_c2_full_search_plan.py",
-         "--write"],
-        cwd=REPO, capture_output=True, text=True,
-        env={"PYTHONPATH": "src:scripts:scripts/autoinit", "PATH": "/usr/bin:/bin"})
-    assert result.returncode == 0, result.stderr[-2000:]
-    for path, original in before.items():
-        assert path.read_bytes() == original, (
-            f"{path.name} changed when regenerated from the same tree; the "
-            "generator is not deterministic and its self-hash cannot be "
-            "reproduced")
-    #: And no clock field crept back in.
-    for path in (PROTOCOL, PRICING):
-        assert "generated_utc" not in json.loads(path.read_text())
+    **This builds the bytes and never writes to `logs/`.** It used to invoke the
+    writer with `--write` against the live tree, which meant a FAILING run
+    mutated the committed planning document it was checking — the comparison
+    then passed on the next run, having silently rewritten the thing under
+    review. It did exactly that here: the derived budget figures had moved with
+    a recorded closeout, so the first run rewrote `phase_c2_full_search_pricing.json`
+    and the second agreed with itself. A test must never be able to edit a
+    governance or planning artifact; the same failure class was already repaired
+    in `test_phase_b_historical_amendments.py`.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "write_c2_full_search_plan",
+        REPO / "scripts/autoinit/write_c2_full_search_plan.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["write_c2_full_search_plan"] = module
+    spec.loader.exec_module(module)
+
+    #: The same two documents `main(--write)` would emit, assembled the same
+    #: way, serialized to a scratch directory instead of the committed path.
+    module.FS.register_c2_operators()
+    space = module.FS.full_joint_space()
+    proto = module.protocol()
+    proto["protocol_sha256"] = sha256_json(proto)
+    price_doc = module.pricing(space)
+    price_doc["pricing_sha256"] = sha256_json(price_doc)
+
+    for committed, doc in ((PROTOCOL, proto), (PRICING, price_doc)):
+        scratch = tmp_path / committed.name
+        scratch.write_text(json.dumps(doc, indent=1) + "\n")
+        assert scratch.read_bytes() == committed.read_bytes(), (
+            f"{committed.name} is not what the generator produces from this "
+            "tree; regenerate it with "
+            "`python scripts/autoinit/write_c2_full_search_plan.py --write`")
+        #: And no clock field crept back in.
+        assert "generated_utc" not in doc

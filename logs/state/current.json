@@ -122,8 +122,7 @@
    "top_5": "5/5 exact and durable -- logs/stages/stage-1/phase_c2_replay/"
   },
   "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent; cannot start before C2 names one, and the operator does not exist yet.",
-  "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md.",
-  "c2_full_search": "COMPLETE -- Top-5 ACCEPTED and FROZEN; its five checkpoints reconstructed exact and durable by the replay. The behavioural selection is the next step and is proposed, not authorized."
+  "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
  "storage": {
   "roots": {
@@ -167,9 +166,18 @@
  },
  "behavioural_session": {
   "authorized": false,
-  "state": "PROPOSAL ONLY",
+  "state": "IMPLEMENTED; PROPOSAL ONLY",
   "protocol": "12 probes exact: 6 screening, 6 confirmation. Only confirmation may name the C2 incumbent.",
+  "arms_transport": "materialize_on_pod_from_pinned_paths: six 1.19 GB arms fit neither transport, so each is rebuilt digest-pinned and identity-gated. 155.83 bounded min. Not a search.",
+  "money": "$23.8832 expected / $33.2099 hard / 120 GB at $1.09/h; headroom $27.5858",
+  "not_created": [
+   "grant",
+   "readiness_record",
+   "authorization",
+   "bundle",
+   "provider resource"
+  ],
   "owner": "logs/stages/stage-1/phase_c2_behavioural/plans/"
  },
- "next": "review the C2 behavioural-selection grant proposal. No Full Search rerun, no re-ranking, no B remeasurement outside the 12-probe protocol, no C3/C4."
+ "next": "review the C2 behavioural-selection grant proposal \u2014 now at $33.2099 all-in because the six arms must be BUILT on the pod (neither transport can carry 7.1 GB of checkpoints). No Full Search rerun, no re-ranking, no B remeasurement outside the 12-probe protocol, no C3/C4."
 }

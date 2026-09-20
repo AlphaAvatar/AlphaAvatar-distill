@@ -1,0 +1,13 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_c2_behavioural",
+ "note": "FAILED-path spec. ONLY the session evidence is required: a run that stopped while building its first arm produced no ranking, no decision and no probe, and demanding any of them would block the collection of what a failed run DOES have. A failure here can be the most informative outcome available -- an arm whose rebuilt digest does not match the frozen record is a scientific finding, and the evidence carries the step, the pinned digest, the realized digest and the operator that diverged. Probes finished before the failure are fetched by the runner's product path on exactly the same terms as on the success path, because a failure at probe N must not discard probes 1..N-1. On lifecycle: the vocabulary is `final_required` and `mutable_snapshot` and nothing else -- an invented word makes this document UNLOADABLE and the collector exits 1 before it looks at a single file.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_c2_behavioural/c2_behavioural_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  }
+ ]
+}

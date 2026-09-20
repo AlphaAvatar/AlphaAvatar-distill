@@ -1,0 +1,71 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_resume_preregistration/v1",
+ "_contract": "What may and may not be reused if a Phase-C2 behavioural session is interrupted. Registered BEFORE the run it governs, because a reuse rule written after seeing a result is a rule chosen by the result. AUTHORIZES NOTHING.",
+ "authorizes": "nothing",
+ "registered_utc": "2026-09-20T00:00:00Z",
+ "plan_id": "autoinit.v1.phase_c2.behavioural",
+ "why_this_exists": "Twelve probes is ~27 hours of L40S. An interruption part-way through is likely enough that the reuse question will be asked under time pressure, and that is the worst moment to decide it. AGENTS.md is explicit that preservation is not permission: saving a checkpoint authorizes nothing about reusing it, and whether preserved work may be pooled or resumed is a separate scientific decision governed by the experiment's retry policy.",
+ "the_unit_of_reuse": {
+  "unit": "one probe: one arm trained from one initialization under one seed",
+  "identity": [
+   "probe_id",
+   "campaign",
+   "initialization_artifact_digest",
+   "config_sha256",
+   "artifact_digest of the trained weights"
+  ],
+  "_a_record_is_not_a_checkpoint": "a journal entry claiming a probe finished is not the probe. Reuse re-derives the identity from the bytes on disk through `identify_for_transfer` and refuses anything that does not match what was announced. Without that, a replacement resource could substitute for a measurement."
+ },
+ "rules": [
+  {
+   "id": "R1",
+   "rule": "A probe may be reused ONLY within the same campaign id.",
+   "why": "a replacement pod is a new campaign. The twelve probes are ONE experiment; silently mixing two resources' work would make the executed design something nobody preregistered, and the mixture would be invisible in the result.",
+   "enforced_by": "autoinit_c2_behavioural_driver.py :: load_campaign_journal"
+  },
+  {
+   "id": "R2",
+   "rule": "A probe may be reused only when its bytes still re-identify to the artifact_digest that was announced when it finished.",
+   "why": "the bytes decide. A directory that is gone, truncated or overwritten is not a completed probe.",
+   "enforced_by": "autoinit_c2_behavioural_driver.py :: reidentify"
+  },
+  {
+   "id": "R3",
+   "rule": "A completed probe is NEVER retrained.",
+   "why": "retraining a finished probe and keeping whichever result is preferred is selection on the outcome. It does not become acceptable because the first result was disappointing.",
+   "enforced_by": "autoinit_c2_behavioural_driver.py :: run_rung",
+   "_how": "the rung loop continues past any probe already present in `self.scores`, which only the campaign journal populates. There is no flag that forces a retrain."
+  },
+  {
+   "id": "R4",
+   "rule": "No ranking until all six screening results exist.",
+   "why": "ranking a partial field selects on who happened to finish first, which is a different experiment from the preregistered one.",
+   "enforced_by": "behavioural_schedule.py :: screening_is_complete",
+   "_how": "checked at the end of stage S and again at the start of stage R, so neither a resumed nor a fresh run can rank a partial field."
+  },
+  {
+   "id": "R5",
+   "rule": "No verdict from a partial confirmation field. All six confirmation probes must exist before the decision rule runs.",
+   "why": "the estimand is a paired difference over three seeds; a verdict from four probes is not the preregistered quantity.",
+   "enforced_by": "behavioural_decision.py :: confirm",
+   "_how": "refuses any field that is not exactly six probes covering exactly the three frozen seeds with both arms present."
+  },
+  {
+   "id": "R6",
+   "rule": "A resumed session re-materializes its arms rather than trusting a staged copy, unless that copy re-identifies to the pinned digest.",
+   "why": "arms are cheap to rebuild and are digest-pinned at every step; trusting an unverified copy would be the one place a substituted initialization could enter the experiment.",
+   "enforced_by": "autoinit_c2_behavioural_driver.py :: materialize_arm"
+  }
+ ],
+ "what_a_resume_may_never_do": [
+  "pool probes across campaigns or resources",
+  "retrain a completed probe for a different outcome",
+  "rank, advance or decide on a partial field",
+  "substitute a functionally similar checkpoint for an identity mismatch",
+  "extend the seed set, add a tie-break rung, or force a winner",
+  "continue after a complete valid scientific verdict"
+ ],
+ "if_a_campaign_cannot_be_completed": "stop and report. A behavioural selection that trained nine of twelve probes has no verdict and must not be presented as having a partial one. The nine preserved probes are evidence about what was trained, not about which candidate wins. Whether a fresh campaign may reuse them is a maintainer decision, and this document's default answer is NO.",
+ "_pre_science_retries_are_different": "an invocation that aborts BEFORE formal training begins produced no measurement to retry. AGENTS.md P12.1 permits diagnosing, repairing and retrying that under a fresh attempt identity inside the same cumulative budget. This document governs the case where training HAS begun.",
+ "record_sha256": "2ebb6fbe085f921a0cedf24c67ee1835dc94075fa5a0ffb111b08d37c0366cd5"
+}

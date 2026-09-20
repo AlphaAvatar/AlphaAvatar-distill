@@ -1,0 +1,31 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_c2_behavioural",
+ "note": "Success spec for a behavioural selection that reached C2_BEHAVIOURAL_ALL_DONE. The session's expensive products are twelve trained PROBES, and weights are fetched by the runner's product path rather than by this spec -- gated on probes having FINISHED, never on session success, which is the rule $2.82 of verified checkpoints was once lost to. What this document collects is the evidence that says what those weights are and what they decided: the session evidence carries every probe's identity and durability announcement, the screening ranking carries the paired deltas and which candidate advanced, and the decision carries the bootstrap, the guardrails and the terminal verdict. On lifecycle: the vocabulary is `final_required` and `mutable_snapshot` and nothing else -- ArtifactSpec.__post_init__ refuses any other value, so an invented word makes this whole document UNLOADABLE and the collector exits 1 before it looks at a single file.",
+ "entries": [
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_c2_behavioural/c2_behavioural_evidence.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_c2_behavioural/c2_screening_ranking.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_c2_behavioural/c2_decision.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_c2_behavioural/probes",
+   "required": true,
+   "lifecycle": "final_required"
+  }
+ ]
+}

@@ -143,14 +143,49 @@ def test_the_ceiling_fits_the_project_cap_with_headroom():
             == pos["cumulative_if_fully_spent_usd"])
 
 
-def test_the_proposal_states_what_is_not_built():
-    """An implementation plan that claims a launcher exists would be the most
-    expensive kind of wrong."""
+def test_every_built_claim_names_a_file_that_exists():
+    """A proposal claiming more exists than does is the expensive kind of wrong.
+
+    Derived rather than phrased. The first version of this test asserted the
+    literal string "NOT BUILT" in the launcher's entry, which was true when the
+    launcher did not exist and became a false failure the moment it did. What
+    actually matters is that a BUILT claim can be checked against the tree, so
+    every claim naming a path is checked against that path.
+    """
+    import re
+
     state = proposal()["implementation_state"]
-    assert "NOT BUILT" in state["launcher"]
-    for key in ("governance_module", "schedule_control_flow", "driver",
-                "b_binding", "storage_derivation"):
-        assert "BUILT" in state[key]
+    checked = 0
+    for key, claim in state.items():
+        for path in re.findall(r"(?:scripts|tests|src|configs)/[\w./-]+", claim):
+            target = ROOT / path.rstrip(".")
+            if "BUILT" in claim and "NOT BUILT" not in claim:
+                assert target.exists(), (
+                    f"implementation_state[{key!r}] claims {path} is BUILT and "
+                    "it does not exist")
+                checked += 1
+            else:
+                assert not target.exists(), (
+                    f"implementation_state[{key!r}] claims {path} is not built "
+                    "and it does exist")
+    assert checked >= 6, f"only {checked} BUILT claims were checkable"
+
+
+def test_no_authorizing_artifact_is_claimed_or_present():
+    """The proposal proposes. Nothing here may permit a paid run.
+
+    This is the invariant the old launcher-phrasing assertion was really
+    reaching for: not that a particular file is absent, but that no grant,
+    readiness record, authorization or bundle exists for this session.
+    """
+    doc = proposal()
+    assert doc["authorizes"] == "nothing"
+    assert "NOT REQUESTED" in doc["implementation_state"]["grant"]
+
+    runs = ROOT / "logs/stages/stage-1/phase_c2_behavioural/runs"
+    found = sorted(str(p.relative_to(ROOT)) for p in runs.rglob("*.json")
+                   if p.parent.name == "governance") if runs.is_dir() else []
+    assert found == [], f"authorizing artifacts already exist: {found}"
 
 
 def test_the_units_are_converted_through_the_recorded_basis():

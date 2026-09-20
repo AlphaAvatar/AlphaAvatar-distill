@@ -518,8 +518,22 @@ def _fetch_and_verify(ctx: SessionContext, leaves: list) -> list:
             sidecar = dest / "replay_leaf.json"
             try:
                 record = json.loads(sidecar.read_text())["identity"]
-                verify_transferred_leaf(dest, record, adapter=adapter)
-                matched, why = True, "re-identified from the delivered bytes"
+                #: READ THE VERDICT. `verify_transferred_leaf` raises only on a
+                #: structurally unreadable arrival — a missing config, no
+                #: shards — and reports a digest MISMATCH as `matched: False`
+                #: in its return value. Calling it and keeping only the absence
+                #: of an exception accepted any arrival that parsed, which is
+                #: the opposite of what it is for. Every other caller in the
+                #: tree checks the returned flags; this one did not.
+                v = verify_transferred_leaf(dest, record, adapter=adapter)
+                matched = bool(v["matched"] and v["weights_digest_matched"]
+                               and v["shard_matched"])
+                why = ("re-identified from the delivered bytes" if matched else
+                       f"DIGEST MISMATCH: artifact={v['matched']}, "
+                       f"weights={v['weights_digest_matched']}, "
+                       f"shard={v['shard_matched']}; got "
+                       f"{v['artifact_digest'][:12]}… want "
+                       f"{v['recorded_digest'][:12]}…")
             except (LeafDurabilityError, OSError, KeyError,
                     json.JSONDecodeError) as exc:
                 why = f"{type(exc).__name__}: {exc}"

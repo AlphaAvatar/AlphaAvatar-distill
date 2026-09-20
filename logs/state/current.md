@@ -49,37 +49,103 @@ never seen and the session was classified by exit code. The driver exited 0. The
 label is wrong; the result is not, and the driver now appends its markers to the
 file the launcher tails.
 
-**The C2 behavioural selection is IMPLEMENTED and PROPOSED, not authorized.**
-Twelve probes exactly — six screening over the five reconstructed candidates
-plus incumbent B on one preregistered seed, then six confirmation on the one
-advanced candidate plus B over three paired seeds. Only confirmation may name an
-incumbent; `NO_GO` and `INCONCLUSIVE` are results.
+**The C2 behavioural selection is FULLY IMPLEMENTED and PROPOSED, not
+authorized.** Twelve probes exactly — six screening over the five reconstructed
+candidates plus incumbent B on one preregistered seed, then six confirmation on
+the one advanced candidate plus B over three paired seeds. Only confirmation may
+name an incumbent; `NO_GO` and `INCONCLUSIVE` are results.
 
-**B is not a staged input and the proposal no longer pretends it is.**
-Baseline-completion attempt 8 rebuilt it exactly and preserved its evidence, not
-its bytes. The session now materializes B from the frozen C1 treatment path —
-construction bound from C1's own constructor, spec hash `3a233a9017b3…` matching
-what C1's preregistration froze — and gates it on its exact identity; if that
-gate fails, no screening probe starts. Preparing B is initialization, bounded at
-30.15 min from the replay's own measurements, and the protocol stays at twelve
-probes.
+**The six arms are BUILT on the pod, not shipped to it.** This changed after
+measuring, not after guessing. Each arm is a 1.19 GB checkpoint and neither
+transport can carry six: `local_assets` are scp'd *after* the pod exists, with a
+hardcoded 600 s per-asset timeout against a dev-box uplink needing ~1650 s for
+one of them — the arithmetic that killed recovery-continuation attempt 2 at
+exactly this size — and the hub relay, which repaired that attempt, refuses
+5.95 GB for private-storage quota. The LFS batch endpoint was asked directly at
+`$0` on 2026-09-19 and again on 2026-09-20: one 1.19 GB object ACCEPTED, 5.95 GB
+REFUSED. So every arm is materialized from the teacher along a path pinned at
+every step to the digest the frozen record holds — the mechanism the replay just
+proved by reproducing all five byte-for-byte — and gated on its exact identity
+before any probe starts. It is not a search: no beam, no expansion, no ranking.
+*A maintainer freeing or buying HF storage would remove these minutes; that is a
+maintainer decision, never an autonomous repair.*
+
+B is built the same way for a different reason: baseline-completion attempt 8
+preserved its evidence and not its bytes. Its construction is bound from C1's
+own constructor, spec hash `3a233a9017b3…` matching what C1's preregistration
+froze. Preparing the six arms is initialization, bounded at **155.83 min**
+(125.68 for the candidates + 30.15 for B) from attempt 3's telemetry bounded per
+operator *implementation*. The protocol stays at twelve probes.
 
 Derived, not inherited: storage **120 GB**, converted GiB→GB through the
-repository's recorded basis rather than rounded across units — the earlier 90 GB
-repeated a unit error the full search had already been repaired for. At a live
-`$1.09/h` L40S quote the ceiling is **`$30.8918` all-in** (`$30.4265` GPU +
-`$0.4653` disk) with `$21.5651` expected. Project headroom after it: `$29.9039`.
+repository's recorded basis. At a live `$1.09/h` L40S quote the ceiling is
+**`$33.2099` all-in** (`$32.7097` GPU + `$0.5002` disk) with `$23.8832`
+expected — up from `$30.8918` because the arms are now built rather than
+staged. Project headroom after it: **`$27.5858`**.
 
-The schedule and driver are built and rehearsed end to end — screening →
-advancement → confirmation on the real candidates, the real frozen seeds and the
-real batteries, with only C1's two hardware seams replaced. The **launcher is
-not built** and the proposal says so. No grant, readiness record, authorization,
-bundle or provider resource exists. Owner:
-[`c2_behavioural_grant_proposal.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json).
+What is built: the launch governance and its one-use authorization type, the
+launcher with seven `$0` prechecks, a **standalone** driver (it does *not*
+subclass `C1Driver`, which would inherit C1's authorization, plan identity,
+seeds and audit roots), the C2 decision module, a screening scorer pinned to its
+own battery identity record, per-poll off-pod durability with destination
+re-identification against all six identity fields, and a registered resume
+policy. One `$0` production-path rehearsal drives the real driver P→D and
+reaches **all three terminal states** from separate deterministic fixtures;
+45 preflight tests pass and four of its guards were verified by mutation.
+
+**No grant, readiness record, authorization, bundle or provider resource
+exists**, and none may be created without a maintainer decision. Owners:
+[`c2_behavioural_grant_proposal.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json)
+(regenerate with `scripts/autoinit/write_c2_behavioural_proposal.py`) and
+[`c2_behavioural_resume_preregistration.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_resume_preregistration.json).
 
 **Nothing is running. Nothing is billing.** Replay campaign: `$4.77` authorized,
 `$3.27` spent across nine attempts, `$1.50` left and no further replay owed.
-Project: `$309.1541` of `$370.0000`.
+Project: `$309.2043` of `$370.0000` — owner
+`scripts/consolidate/derive_budget.py --json :: project`.
+
+## The suite is 38 red, and a reader deserves the attribution
+
+A permanently red suite is a hazard — it is what let 14 failures sit unnoticed
+at a remote HEAD once — so the count is named here rather than left as folklore.
+Every one of the 38 fails in the direction that REFUSES rather than permits, and
+none blocks development.
+
+**35 were already red at `c87f876`**, verified by running each failing module in
+a detached worktree at that commit. They are two long-standing families, both
+needing a maintainer because re-cutting a frozen digest is a change to a frozen
+record:
+
+| family | count | what it says |
+| --- | --- | --- |
+| Phase-B / continuation-B frozen executable drift | 21 | the declared set no longer describes the tree; launch gates refuse, correctly |
+| C1 session contract and readiness | 13 | C1's committed readiness record no longer binds the live harness, for an experiment closed by a verdict |
+| C2 full-search proposal + architecture declarations | 4 | recorded proposals and core-change declarations predate later commits |
+
+**3 are new, and they are mine.** All three are the same fact: this round edited
+two files that belong to *other phases'* declared harness sets —
+`src/aadistill/runtime/leaf_durability.py` (one identity construction shared by
+sender and receiver) and `scripts/pod/autoinit_preflight_setup.sh` (the
+`SESSION_KIND=c2_behavioural` branch, without which the session cannot
+authenticate at all). Both edits are required and neither is revertible without
+breaking the work they enable.
+
+* `test_phase_b_historical_amendments.py::test_the_writer_refuses_to_reaccount_for_the_same_tree`
+* `test_continuation_b_executes.py::test_the_SHARED_commit_gate_accepts_the_continuation_source_identity`
+* `test_continuation_b_executes.py::test_the_gate_probe_itself_can_fail`
+
+The repository HAS the mechanism for this — the Phase-B historical amendment
+ledger, 19 entries, which records why a shared-owner file moved and why it does
+not invalidate the frozen experiment. **It was deliberately not used here.** Its
+writer takes a `--maintainer` argument, and the family it would touch is the one
+a previous session explicitly reserved: *"re-freezing is a change to a frozen
+record."* Recording an amendment autonomously would move a frozen record's
+status without the decision that owns it. It is offered as the obvious repair,
+not taken.
+
+One core change WAS declared, because that mechanism is agent-usable and has no
+maintainer field: `tests/architecture/test_cuda_surface_preserved.py` gained a
+round declaring the `leaf_durability.py` extraction, which closed 10 failures.
 
 ## The full joint re-search RAN, produced a Top-5, and then lost it
 

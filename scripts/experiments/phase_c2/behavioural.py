@@ -349,18 +349,23 @@ def storage_requirement(candidates: list[dict[str, Any]],
         "b_materialization_transient": (
             B_MATERIALIZATION_TRANSIENT_GIB if b_must_materialize else 0.0),
         "_b_materialization_transient_is": (
-            "B is NOT a staged durable input -- baseline-completion attempt 8 "
-            "preserved its evidence and not its bytes -- so this session "
-            "rebuilds it from the frozen C1 treatment path before any probe. A "
-            "four-step construction holds its predecessors while it builds; "
-            "this is the worst single path's intermediates as measured during "
-            "the replay. It is transient and released once B is verified"
+            "ONE arm's construction intermediates, resident while that arm "
+            "builds and released when it is verified. A four-step path holds "
+            "its predecessors as it goes; this is the worst single path's "
+            "intermediates as measured during the replay. Counted once, not "
+            "six times, because the arms are built SEQUENTIALLY -- at the last "
+            "build, five finished arms are resident plus this transient, which "
+            "is what the sum below already charges"
             if b_must_materialize else
-            "zero: a verified durable B already exists and is staged, not "
-            "rebuilt"),
+            "zero: every arm already exists and is staged, not rebuilt"),
         "_staged_initializations_is": (
             f"{n_screening_arms} screening arms -- the five reconstructed "
-            "candidates and the incumbent B, each staged before any probe runs"),
+            "candidates and the incumbent B -- resident before any probe runs. "
+            "They are MATERIALIZED on the pod rather than shipped to it: each "
+            "is a 1.19 GB checkpoint, the scp path allows one asset 600 s "
+            "against a dev-box uplink needing ~1650, and the hub relay refuses "
+            "5.95 GB for private-storage quota. Residency is the same either "
+            "way; only the transient above is added by building them here"),
         "one_probe_training_working_set": round(working_set, 3),
         "_working_set_is": (
             f"{params:,} parameters as bf16 weights plus an fp32 gradient and "

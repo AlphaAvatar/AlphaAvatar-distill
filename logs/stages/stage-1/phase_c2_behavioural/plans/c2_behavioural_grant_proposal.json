@@ -1,237 +1,198 @@
 {
- "schema": "aadistill.autoinit.c2_behavioural_proposal/v2",
- "_contract": "A PROPOSAL for the Phase-C2 behavioural selection. It AUTHORIZES NOTHING and FUNDS NOTHING: there is no grant, no readiness record, no authorization, no bundle and no provider resource. It exists so a review can see the exact inputs, the exact protocol, the derived storage and the derived money before any of those are created.",
+ "schema": "aadistill.autoinit.c2_behavioural_proposal/v3",
+ "_contract": "A PROPOSAL for the Phase-C2 behavioural selection. Every figure is derived by scripts/autoinit/write_c2_behavioural_proposal.py from the frozen protocol, the committed evidence and the live tree. AUTHORIZES NOTHING.",
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-19",
+ "proposed_utc": "2026-09-20T07:54:40.016440+00:00",
+ "plan_hash": "4da5cd306b24f122e71fd817520730b9f47adc21340f8752402417bea12156cf",
  "protocol_binding": {
-  "source": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+  "document": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
   "protocol_sha256": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da",
-  "_read_not_restated": "the schedule, seeds, batteries, anchor, ranking rule and tie-break are READ from the frozen protocol. A second copy is how two documents come to disagree about an experiment that has not run.",
-  "total_probes": 12,
-  "screening": {
-   "probes": 6,
-   "arms": 6,
-   "seeds": [
+  "schedule": {
+   "top_k": 5,
+   "screening": {
+    "seeds": 1,
+    "arms": 6,
+    "anchors": [
+     "frozen_c1_treatment_b"
+    ],
+    "battery": "artifacts/stage3/c2_screening_v1",
+    "probes": 6,
+    "decides": "which 1 candidate(s) advance. Ranking only \u2014 no veto is evaluated here and no promotion can be claimed from it.",
+    "ranking_rule": "maximize the paired single-seed delta correct_overall(candidate - B) on the screening battery. B is the anchor, never an advancing candidate. usable_rollout is NOT positive ranking credit.",
+    "tie_break": "the already-frozen full-search ordering, then the deterministic state id. Both are fixed before any behavioural datum exists."
+   },
+   "confirmation": {
+    "seeds": 3,
+    "arms": 2,
+    "anchors": [
+     "frozen_c1_treatment_b"
+    ],
+    "battery": "artifacts/stage3/c1_confirmation_v1",
+    "probes": 6,
+    "decides": "the C2 incumbent, under the frozen Phase-C decision rule. This is the only evidence that may name one."
+   },
+   "advanced_candidates": 1,
+   "total_probes": 12,
+   "conditional_rung": null,
+   "_no_conditional_rung": "C0's terminal states are GO / NO-GO / INCONCLUSIVE with no forced winner and no fourth seed, so there is no tie-break rung to reserve for and the probe count is exact.",
+   "_disjoint_in_both_dimensions": "screening and confirmation use disjoint preregistered SEEDS and disjoint preregistered PROMPTS. Seeds alone would be insufficient: C0's inferential unit is the prompt and same-prompt cross-seed dependence is substantial, so selecting and confirming on the same prompts would let the selection leak through that dependence.",
+   "_no_canonical_control": "the original control is not a C2 arm. The comparator is the current incumbent B; a candidate that beats the old control but loses to B must not promote, and one that beats B gains nothing from the old control. Guardrails are incumbent-relative, as C1's were."
+  },
+  "seeds": {
+   "screening": [
     616738081
    ],
-   "battery": "c2_screening_v1",
-   "battery_sha256": "0ad76fc79f5e7ebf9e8146710add07cc33554526a23507f97f0b458aec2cae1f",
-   "anchor": "frozen_c1_treatment_b",
-   "ranking_rule": "maximize the paired single-seed delta correct_overall(candidate - B) on the screening battery. B is the anchor, never an advancing candidate. usable_rollout is NOT positive ranking credit.",
-   "tie_break": "the already-frozen full-search ordering, then the deterministic state id. Both are fixed before any behavioural datum exists.",
-   "decides": "which 1 candidate(s) advance. Ranking only \u2014 no veto is evaluated here and no promotion can be claimed from it.",
-   "_b_never_advances": true,
-   "_no_verdict_here": "screening may not produce GO/NO_GO/INCONCLUSIVE and may not promote"
-  },
-  "confirmation": {
-   "probes": 6,
-   "arms": 2,
-   "seeds": [
+   "confirmation": [
     1936324010,
     1916380711,
     1523147638
    ],
-   "battery": "c1_confirmation_v1",
-   "battery_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
-   "anchor": "frozen_c1_treatment_b",
-   "decides": "the C2 incumbent, under the frozen Phase-C decision rule. This is the only evidence that may name one.",
-   "_only_this_may_name_an_incumbent": true
+   "all": [
+    616738081,
+    1936324010,
+    1916380711,
+    1523147638
+   ],
+   "count": 4,
+   "bootstrap_seed": 834816710,
+   "derivation": "seed_i = uint32_be(SHA256(base_digest + ':phase-c2:recovery-seed:' + decimal(i))[0:4]) mod 2**31, i from 0, advancing past any excluded seed or earlier draw; the first draw is the screening seed and the next three are the confirmation seeds. The bootstrap seed uses the same base under ':phase-c2:bootstrap'.",
+   "base_digest": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+   "base_digest_source": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json:seeds.base_digest, which is C0's own digest \u2014 the same base C1 drew from",
+   "excluded": [
+    20260726,
+    20260801,
+    20260813,
+    696460635,
+    1635674081,
+    1656475568
+   ],
+   "_why_excluded": "sa/sb/sc because the Phase-B winner was selected under them, and C1's three because the anchor this stage tests against was PROMOTED under them. Reusing either leaves a winner's-curse / seed-selection channel, which is exactly why C0 excluded the historical set.",
+   "screening_and_confirmation_are_disjoint": true,
+   "no_human_choice": "the rule leaves no discretion and the base digest predates every C2 candidate",
+   "role": "FIXED EXPERIMENTAL BLOCKS, as in C0: not a sample from a recovery-seed superpopulation for the purposes of the primary CI"
   },
-  "advanced_candidates": 1,
+  "batteries": {
+   "screening": {
+    "asset_id": "c2_screening_v1",
+    "path": "artifacts/stage3/c2_screening_v1",
+    "content_sha256": "0ad76fc79f5e7ebf9e8146710add07cc33554526a23507f97f0b458aec2cae1f",
+    "n_prompts": 950,
+    "n_scorable_prompts": 850,
+    "identity_record": "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
+    "role": "C2_SCREENING",
+    "may_not": [
+     "produce a GO / NO-GO / INCONCLUSIVE verdict",
+     "promote any candidate",
+     "serve as a promotion or final-promotion asset",
+     "become training data",
+     "be used as a beam-ranking input"
+    ]
+   },
+   "confirmation": {
+    "asset_id": "c1_confirmation_v1",
+    "path": "artifacts/stage3/c1_confirmation_v1",
+    "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+    "n_prompts": 950,
+    "n_scorable_prompts": 850,
+    "identity_record": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
+   },
+   "prompt_disjoint": {
+    "measured": {
+     "shared_ids": 0,
+     "shared_prompt_hashes": 0
+    },
+    "by": [
+     "stable source id",
+     "normalized prompt content hash"
+    ],
+    "mixture_identical": true,
+    "_why_identical_mixture": "correct_overall and its +0.010 SESOI are defined ON the mixture, so screening and confirmation must share it or a screening delta says nothing about a confirmation delta."
+   },
+   "_both_rungs_are_needed": "the screening battery ranks and cannot promote; only the confirmation battery, under C1's decision rule, may name an incumbent."
+  },
+  "decision_rule": {
+   "GO": [
+    "one-sided 95% prompt-sampling LCB(Delta) > 0",
+    "AND point estimate Delta >= +0.010",
+    "AND at least 2 of the 3 seed-specific Delta_correct > 0",
+    "AND all behavioural guardrails pass"
+   ],
+   "NO_GO": [
+    "one-sided 95% prompt-sampling UCB(Delta) < +0.010",
+    "OR a preregistered behavioural veto fires"
+   ],
+   "INCONCLUSIVE": "otherwise",
+   "no_forced_winner": true,
+   "seed_robustness_note": "The >=2-of-3 condition is a ROBUSTNESS condition preventing a single seed from driving promotion. It is NOT a seed-level significance test and does not convert the conditional CI into a seed-population claim."
+  },
   "terminal_results": [
    "GO \u2014 a named C2 incumbent",
    "NO_GO \u2014 the anchor stands",
    "INCONCLUSIVE \u2014 no incumbent is named"
-  ],
-  "no_forced_winner": true,
-  "prompt_disjoint": {
-   "shared_ids": 0,
-   "shared_prompt_hashes": 0
-  },
-  "no_canonical_control": "the project's original initialization is NOT carried forward as a C2 arm. It answers no additional C2 question: a candidate that beats the old control but loses to B must not promote, and one that bea"
+  ]
  },
  "candidate_inputs": {
-  "_joined_not_transcribed": "each entry is attempt 3's frozen selection JOINED to the destination-verified durable product the replay reconstructed. The join IS the check: a product whose identity differs from what the selection commits is refused, so this session cannot be pointed at a checkpoint nobody reconstructed.",
-  "selection_sha256": "7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673",
-  "durable_store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
-  "reconstruction_run": "logs/stages/stage-1/phase_c2_replay/runs/attempt9",
+  "n": 5,
+  "source": "attempt 3's frozen Top-5 selection, joined to the destination-verified products the replay reconstructed",
   "candidates": [
    {
-    "rank_in_frozen_selection": 0,
     "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
-    "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
-    "lineage": "depth.causal_kl_greedy_v1|attention.activation_importance_v1|ffn.activation_importance_v0",
     "artifact_digest": "5d042dcc80212cfda0b97e10e21fca9c62574274bdc0d7e62a57e03a9e48f184",
     "weights_digest": "615810e1314bdc9b0c5c01f31518cb50ed0089020a3177fba07234b51a63981f",
-    "single_shard_sha256": "85f8f0558b9cb657a4f8e4b076d79b5e49cf263e1c0af261e4042f2957d9ea8f",
     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
     "num_parameters": 596049920,
-    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9",
-    "bytes": 1192135096,
-    "destination_verified_utc": "2026-09-19T11:32:49.621179+00:00"
+    "rank_in_frozen_selection": 0
    },
    {
-    "rank_in_frozen_selection": 1,
     "state_id": "7da1e4e2254e59766581e777b8066b7e",
-    "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
-    "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
     "artifact_digest": "181245b694316ed10dc299597cffbb97b4ece547c2f488a9c31c446b3e22210a",
     "weights_digest": "03a07d7abca0fae1306519bcb22db4dde4df3aaf2c874ac165ef797cd37a36f4",
-    "single_shard_sha256": "4d693520981b2124f2465cf0ef15e325e996bb548a87574a573e6995c8982ff0",
     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
     "num_parameters": 596049920,
-    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e",
-    "bytes": 1192135096,
-    "destination_verified_utc": "2026-09-19T12:04:53.012156+00:00"
+    "rank_in_frozen_selection": 1
    },
    {
-    "rank_in_frozen_selection": 2,
     "state_id": "1d2844488f3ad630414c3cd69b6fa395",
-    "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
-    "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
     "artifact_digest": "a25271ad0898ac3727ed4ed496fb7569299932f864f0d54a48b9b2deb9b4da41",
     "weights_digest": "33ad2a2d243fdcc83f458d119b04a7d84a915aa3d639c67b0d308de0b16de7a3",
-    "single_shard_sha256": "313e206d12dce3db049835caa39140b629b4505ba2b97074a5f56a912d1ba697",
     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
     "num_parameters": 596049920,
-    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395",
-    "bytes": 1192135096,
-    "destination_verified_utc": "2026-09-19T12:29:42.906577+00:00"
+    "rank_in_frozen_selection": 2
    },
    {
-    "rank_in_frozen_selection": 3,
     "state_id": "88086555a6662b206e00ae28fc9d3ca3",
-    "path": "DEPTH(calib.none@v1)->ATTENTION(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
-    "lineage": "depth.positional_v0|attention.activation_importance_v1|ffn.activation_importance_v0",
     "artifact_digest": "d0d26ed3fee7f976935439ecba8b059f38e51d92d7b1672e6f467e6251938860",
     "weights_digest": "f93f15d30eebcc2ce3c2429d2bf757bd02a294c650131ffce708786873dd1939",
-    "single_shard_sha256": "695813e6054bc12ce82728106e4d0eae62eb5de374194ee63417665be2aad0ab",
     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
     "num_parameters": 596049920,
-    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3",
-    "bytes": 1192135096,
-    "destination_verified_utc": "2026-09-19T12:37:06.385607+00:00"
+    "rank_in_frozen_selection": 3
    },
    {
-    "rank_in_frozen_selection": 4,
     "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
-    "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
-    "lineage": "width.global_pca_v0|attention.activation_importance_v1|depth.causal_kl_greedy_v1",
     "artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
     "weights_digest": "5009272294a1aa7ac69a85b7bcd688f18683403aadd4d02c315ce64c0026ba05",
-    "single_shard_sha256": "03f9a0836b78c5d9882e9eb74f3410eb9734459c529dcf2a46ab4a1da66fb394",
     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
     "num_parameters": 596049920,
-    "durable_path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f",
-    "bytes": 1192135096,
-    "destination_verified_utc": "2026-09-19T12:54:31.416277+00:00"
+    "rank_in_frozen_selection": 4
    }
-  ],
-  "anchor_b": {
-   "role": "frozen_c1_treatment_b -- the behavioural incumbent and the only anchor",
-   "_is_not_a_staged_durable_input": "baseline-completion attempt 8 rebuilt B exactly and its artifact manifest preserved evidence and logs, not checkpoint bytes. The identity survived; the weights did not.",
-   "materialized_this_session": true,
-   "construction_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
-   "required_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
-   "gate": "the materialized B must match every field of required_identity. If it does not, NO SCREENING PROBE MAY START: an anchor that is not the frozen incumbent makes every delta meaningless.",
-   "_not_a_thirteenth_probe": "preparing B is initialization. The protocol is twelve probes and remains twelve; B's construction produces the arm six of them are measured against."
+  ]
+ },
+ "candidate_transport": {
+  "mode": "materialize_on_pod_from_pinned_paths",
+  "_why_not_staged": "each arm is a 1.19 GB checkpoint and there are six. The scp path copies local assets AFTER the pod exists, so they bill, and the shared runner gives each asset a hardcoded 600-second timeout; one of these needs ~1650 s against a dev-box uplink measured at 0.44-0.79 MB/s. Recovery-continuation attempt 2 died on exactly that, staging exactly this size, and its write-up concluded the failure was 'arithmetic rather than luck'. The hub-relay route that repaired attempt 2 needs quota this account does not have: the LFS batch endpoint was asked directly at $0 on 2026-09-19 and again on 2026-09-20 and ACCEPTS one 1.19 GB object while REFUSING 5.95 GB for 'Private repository storage limit reached'.",
+  "_what_is_done_instead": "every arm is materialized on the pod from the teacher along a path pinned at EVERY step to the artifact digest the frozen record holds \u2014 the mechanism the replay proved by reproducing all five byte-for-byte. It is not a search: no beam, no expansion, no ranking, no selection. A digest mismatch stops the session as a scientific finding.",
+  "_maintainer_alternative": "freeing or buying Hugging Face private storage would allow the arms to be published at $0 before launch and pulled at hub speed, removing the materialization minutes below. That is a maintainer decision and never an autonomous repair.",
+  "materialization": {
+   "candidates_minutes": 125.68,
+   "n_candidates": 5,
+   "incumbent_b_minutes": 30.15,
+   "total_minutes": 155.83,
+   "basis": "the worst observation of each implementation anywhere in attempt 3's telemetry, the same bound the replay spent against and which reproduced all five paths",
+   "transport": "materialize_on_pod_from_pinned_paths",
+   "_teacher_loaded_once": "the per-leaf bound includes a teacher load each; six sequential materializations in one process load it once, so the real cost is below this bound. A bound is not an estimate and is not lowered by an optimization that has not been measured here."
   }
- },
- "storage": {
-  "components_gib": {
-   "teacher": 7.51,
-   "staged_initializations": 6.662,
-   "b_materialization_transient": 16.12,
-   "_b_materialization_transient_is": "B is NOT a staged durable input -- baseline-completion attempt 8 preserved its evidence and not its bytes -- so this session rebuilds it from the frozen C1 treatment path before any probe. A four-step construction holds its predecessors while it builds; this is the worst single path's intermediates as measured during the replay. It is transient and released once B is verified",
-   "_staged_initializations_is": "6 screening arms -- the five reconstructed candidates and the incumbent B, each staged before any probe runs",
-   "one_probe_training_working_set": 7.772,
-   "_working_set_is": "596,049,920 parameters as bf16 weights plus an fp32 gradient and AdamW's two fp32 moments. Probes run sequentially, so exactly one of these is resident at a time",
-   "trained_probe_checkpoints": 13.323,
-   "_trained_is": "12 probes x 1.110 GiB retained",
-   "saved_generations": 2.0,
-   "batteries_and_ladder": 1.0,
-   "image_and_environment": 30.0
-  },
-  "subtotal_gib": 84.387,
-  "margin_fraction": 0.25,
-  "with_margin_gib": 105.4838,
-  "gb_per_gib": 1.073741824,
-  "with_margin_gb": 113.2623,
-  "provision_gb": 120,
-  "_units": "the residency is derived in GiB and the provider's flag is GB. The conversion is the one recorded in configs/infrastructure/provider_storage_pricing.json, not a local convention: rounding a GiB subtotal straight into a GB flag under-provisions by 7%.",
-  "_why_not_400": "the full search's 400 GB was derived for a beam that generates a whole level before pruning and holds sixty compressed states at the level boundary. This session holds one training working set at a time and retains twelve small checkpoints; carrying 400 GB here would bill for storage nothing uses.",
-  "_why_it_rounds_up": "a volume that fills mid-probe loses the probe. The margin is 25% over a component sum that is itself derived from measured artifact sizes."
- },
- "money": {
-  "gpu_rate_usd_per_hour": 1.09,
-  "_gpu_rate_is_live": "re-quoted from gpuTypes.securePrice; the authorization must re-quote again at issue",
-  "probe_minutes_basis": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_evidence.json stages F/G/H, with per-probe PROBE_TRAINED/PROBE_SCORED markers from logs/stages/stage-1/phase_c1/runs/attempt18/evidence/driver_run.log",
-  "probe_minutes": {
-   "expected": 1139.04,
-   "hard_ceiling": 1644.7
-  },
-  "b_preparation_minutes": 30.15,
-  "_b_preparation_is_initialization": "added to the session's runtime, not to the probe count. The protocol is twelve probes and stays twelve; the pod is alive longer because the sixth arm has to be built before any of them can measure against it.",
-  "expected": {
-   "minutes": 1169.19,
-   "gpu_usd": 21.2403,
-   "disk_usd": 0.3248,
-   "all_in_usd": 21.5651
-  },
-  "hard_ceiling": {
-   "minutes": 1674.8500000000001,
-   "gpu_usd": 30.4265,
-   "disk_usd": 0.4653,
-   "all_in_usd": 30.8918
-  },
-  "container_disk": {
-   "provisioned_gb": 120,
-   "usd_per_gb_month": 0.1,
-   "hours_per_month": 720.0,
-   "usd_per_hour": 0.016667,
-   "_billed_for_the_pods_whole_lifetime": true
-  },
-  "_ceiling_includes": "both named reserves, a 10% contingency and a 30-minute artifact recovery reserve",
-  "_two_numbers": "the GPU rate is re-quotable from the provider and the storage price is not, so they are derived apart and summed. A live GPU quote is not evidence that separately priced storage is free.",
-  "gpu": "NVIDIA L40S",
-  "quoted_utc": "2026-09-19",
-  "stock": "Low",
-  "_historical_planning_reference": {
-   "expected_gpu_usd": 20.6926,
-   "gpu_hard_ceiling_usd": 29.8788,
-   "conservative_all_in_upper_bound_usd": 31.4017,
-   "_what_changed": "the GPU minutes are unchanged -- they come from the same six measured probes. The all-in ceiling is LOWER because the storage provision is derived from this session's own topology (90 GB) instead of carrying the full search's 400 GB, which was sized for a beam holding sixty compressed states at a level boundary."
-  }
- },
- "project_position": {
-  "cumulative_spend_usd": 309.2043,
-  "authorized_cap_usd": 370.0,
-  "remaining_before_usd": 60.7957,
-  "this_ceiling_all_in_usd": 30.8918,
-  "cumulative_if_fully_spent_usd": 340.0961,
-  "headroom_after_usd": 29.9039,
-  "_no_cap_increase_requested": true,
-  "_remaining_is_not_permission": true
- },
- "explicitly_not_proposed": [
-  "any Full Search rerun",
-  "any re-ranking of the 14 complete leaves",
-  "any B remeasurement outside the 12-probe protocol",
-  "the original canonical control as a C2 arm",
-  "a Search-1 rerun",
-  "C3 or C4",
-  "a project-cap increase"
- ],
- "implementation_state": {
-  "governance_module": "scripts/experiments/phase_c2/behavioural.py \u2014 BUILT",
-  "schedule_control_flow": "scripts/experiments/phase_c2/behavioural_schedule.py \u2014 BUILT and rehearsed end to end: 26 tests covering descriptors, ranking, the frozen tie-break, advancement, the completeness gate and every case the protocol forbids",
-  "driver": "scripts/pod/autoinit_c2_behavioural_driver.py \u2014 BUILT. Subclasses C1Driver so the training loop is inherited rather than copied; `train_one` and the battery scorer remain the seams C1 built for $0 regressions. Stages P/S/R/C/D rehearsed screening -> advancement -> confirmation on the real candidates, the real frozen seeds and the real batteries, with only those two seams replaced.",
-  "b_binding": "BUILT; construction hash matches C1's frozen 3a233a9017b3\u2026",
-  "storage_derivation": "BUILT; 120 GB, GiB->GB through the repository's recorded conversion",
-  "money_derivation": "BUILT; live quote, GPU and storage apart, B's preparation included",
-  "launcher": "NOT BUILT. The session spec, its $0 gates and the bundle staging follow the same shape as the replay's and are the remaining work before a launch chain could be assembled. Stated rather than sketched."
  },
  "incumbent_b": {
   "role": "frozen_c1_treatment_b -- the behavioural incumbent and the only anchor",
@@ -285,58 +246,164 @@
    "must_materialize": true,
    "observed_ack": null,
    "_why_it_is_not_staged": "baseline-completion attempt 8 rebuilt B exactly and its artifact manifest preserved evidence and logs, not checkpoint bytes. The identity survived; the weights did not."
+  }
+ },
+ "storage": {
+  "components_gib": {
+   "teacher": 7.51,
+   "staged_initializations": 6.662,
+   "b_materialization_transient": 16.12,
+   "_b_materialization_transient_is": "ONE arm's construction intermediates, resident while that arm builds and released when it is verified. A four-step path holds its predecessors as it goes; this is the worst single path's intermediates as measured during the replay. Counted once, not six times, because the arms are built SEQUENTIALLY -- at the last build, five finished arms are resident plus this transient, which is what the sum below already charges",
+   "_staged_initializations_is": "6 screening arms -- the five reconstructed candidates and the incumbent B -- resident before any probe runs. They are MATERIALIZED on the pod rather than shipped to it: each is a 1.19 GB checkpoint, the scp path allows one asset 600 s against a dev-box uplink needing ~1650, and the hub relay refuses 5.95 GB for private-storage quota. Residency is the same either way; only the transient above is added by building them here",
+   "one_probe_training_working_set": 7.772,
+   "_working_set_is": "596,049,920 parameters as bf16 weights plus an fp32 gradient and AdamW's two fp32 moments. Probes run sequentially, so exactly one of these is resident at a time",
+   "trained_probe_checkpoints": 13.323,
+   "_trained_is": "12 probes x 1.110 GiB retained",
+   "saved_generations": 2.0,
+   "batteries_and_ladder": 1.0,
+   "image_and_environment": 30.0
   },
-  "gate": "the materialized B must match every field of required_identity. If it does not, NO SCREENING PROBE MAY START: an anchor that is not the frozen incumbent makes every delta meaningless.",
-  "_not_a_thirteenth_probe": "preparing B is initialization. The protocol is twelve probes and remains twelve; B's construction produces the arm six of them are measured against."
+  "subtotal_gib": 84.387,
+  "margin_fraction": 0.25,
+  "with_margin_gib": 105.4838,
+  "gb_per_gib": 1.073741824,
+  "with_margin_gb": 113.2623,
+  "provision_gb": 120,
+  "_units": "the residency is derived in GiB and the provider's flag is GB. The conversion is the one recorded in configs/infrastructure/provider_storage_pricing.json, not a local convention: rounding a GiB subtotal straight into a GB flag under-provisions by 7%.",
+  "_why_not_400": "the full search's 400 GB was derived for a beam that generates a whole level before pruning and holds sixty compressed states at the level boundary. This session holds one training working set at a time and retains twelve small checkpoints; carrying 400 GB here would bill for storage nothing uses.",
+  "_why_it_rounds_up": "a volume that fills mid-probe loses the probe. The margin is 25% over a component sum that is itself derived from measured artifact sizes."
  },
- "incumbent_b_preparation": {
-  "steps": [
-   {
-    "kind": "DEPTH",
-    "impl_id": "depth.causal_kl_greedy_v1",
-    "profile_id": "calib.domain_balanced@v1",
-    "bounded_minutes": 25.68
-   },
-   {
-    "kind": "FFN",
-    "impl_id": "ffn.activation_importance_v0",
-    "profile_id": "calib.domain_balanced@v1",
-    "bounded_minutes": 0.96
-   },
-   {
-    "kind": "RESIDUAL_WIDTH",
-    "impl_id": "width.global_pca_v0",
-    "profile_id": "calib.reasoning_heavy@v2",
-    "bounded_minutes": 0.95
-   },
-   {
-    "kind": "ATTENTION",
-    "impl_id": "attention.activation_importance_v1",
-    "profile_id": "calib.domain_balanced@v1",
-    "bounded_minutes": 1.06
-   }
-  ],
-  "teacher_load_minutes": 1.5,
-  "bounded_minutes": 30.15,
-  "_basis": "the worst observation of each implementation anywhere in attempt 3's telemetry, the same bound the replay spent against and which reproduced all five paths"
+ "money": {
+  "gpu_rate_usd_per_hour": 1.09,
+  "_gpu_rate_is_live": "re-quoted from gpuTypes.securePrice; the authorization must re-quote again at issue",
+  "probe_minutes_basis": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_evidence.json stages F/G/H, with per-probe PROBE_TRAINED/PROBE_SCORED markers from logs/stages/stage-1/phase_c1/runs/attempt18/evidence/driver_run.log",
+  "probe_minutes": {
+   "expected": 1139.04,
+   "hard_ceiling": 1644.7
+  },
+  "b_preparation_minutes": 155.83,
+  "_b_preparation_is_initialization": "added to the session's runtime, not to the probe count. The protocol is twelve probes and stays twelve; the pod is alive longer because the sixth arm has to be built before any of them can measure against it.",
+  "expected": {
+   "minutes": 1294.87,
+   "gpu_usd": 23.5235,
+   "disk_usd": 0.3597,
+   "all_in_usd": 23.8832
+  },
+  "hard_ceiling": {
+   "minutes": 1800.53,
+   "gpu_usd": 32.7097,
+   "disk_usd": 0.5002,
+   "all_in_usd": 33.2099
+  },
+  "container_disk": {
+   "provisioned_gb": 120,
+   "usd_per_gb_month": 0.1,
+   "hours_per_month": 720.0,
+   "usd_per_hour": 0.016667,
+   "_billed_for_the_pods_whole_lifetime": true
+  },
+  "_ceiling_includes": "both named reserves, a 10% contingency and a 30-minute artifact recovery reserve",
+  "_two_numbers": "the GPU rate is re-quotable from the provider and the storage price is not, so they are derived apart and summed. A live GPU quote is not evidence that separately priced storage is free.",
+  "materialization": {
+   "candidates_minutes": 125.68,
+   "n_candidates": 5,
+   "incumbent_b_minutes": 30.15,
+   "total_minutes": 155.83,
+   "basis": "the worst observation of each implementation anywhere in attempt 3's telemetry, the same bound the replay spent against and which reproduced all five paths",
+   "transport": "materialize_on_pod_from_pinned_paths",
+   "_teacher_loaded_once": "the per-leaf bound includes a teacher load each; six sequential materializations in one process load it once, so the real cost is below this bound. A bound is not an estimate and is not lowered by an optimization that has not been measured here."
+  }
  },
+ "project_position": {
+  "source": "scripts/consolidate/derive_budget.py --json :: project",
+  "funding_ownership": {
+   "checked_against": "the $370 project accounting envelope",
+   "is_a_new_c2_behavioural_authorization": true,
+   "consumes_c1_execution_package": false,
+   "subject_to_the_c1_per_session_ceiling": false,
+   "c1_balances_are_separate_and_non_transferable": {
+    "formal_remaining_usd": 22.8249,
+    "engineering_remaining_usd": 6.0,
+    "package_remaining_usd": 28.8249,
+    "c1_per_session_ceiling_usd": 15.1475
+   },
+   "_why": "the C1 execution package funds C1 formal sessions and its own GPU engineering validation, at a per-session ceiling derived for that work. This is a different experiment with a ceiling derived from its own topology, so it needs its own authorization and must not be presented as fitting inside a remainder reserved for something else. Dividing the wrong balance by the wrong per-session ceiling is how this repository once came to state that three full-ceiling sessions were fundable when two were.",
+   "_the_envelope_is_not_permission": "fitting the project envelope is an accounting fact. It is not launch permission and never has been."
+  },
+  "cumulative_spend_usd": 309.2043,
+  "cumulative_cap_usd": 370.0,
+  "authorized_cap_usd": 370.0,
+  "remaining_before_usd": 60.7957,
+  "this_ceiling_all_in_usd": 33.2099,
+  "cumulative_if_fully_spent_usd": 342.4142,
+  "headroom_after_usd": 27.5858,
+  "_no_cap_increase_requested": true,
+  "_remaining_is_not_permission": true,
+  "_not_permission": "remaining headroom is not authorization. A paid run needs a maintainer-written grant naming this session."
+ },
+ "durability": {
+  "mechanism": "the driver announces each finished unit's identity to its evidence; the launcher's poll hook pulls the bytes off-pod during the run and re-identifies them at the destination against artifact_digest, weights_digest, config_sha256, single_shard_sha256, arch_signature and num_parameters.",
+  "destination": "/home/ecs-user/aad-artifacts/phase_c2_behavioural",
+  "_backend_has_room": "12 probes x 1.11 GiB = 13.3 GiB against 43 GB free, checked by destination_gate before a pod is created. The Hugging Face route is NOT used: C1 attempt 18 ran a correct preservation mechanism on six probes and preserved none, because every upload was refused for quota.",
+  "_preservation_is_not_permission": "saving a probe authorizes nothing about reusing it. Reuse is governed by the resume rules, not by the existence of a file."
+ },
+ "resume_policy": {
+  "record": "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_resume_preregistration.json",
+  "summary": "a probe may be reused only within the SAME campaign, only when its bytes still re-identify to what was announced, and it is never retrained. Ranking waits for all six screening results; no verdict is computed from a partial confirmation field."
+ },
+ "explicitly_not_proposed": [
+  "any beam search or expansion",
+  "re-ranking the frozen Top-5 or regenerating a selection",
+  "re-measuring B's completed state evaluation",
+  "retraining a completed probe for a different outcome",
+  "a fourth seed, a tie-break rung or a forced winner",
+  "any C3 or C4 work"
+ ],
  "executable_closure": {
-  "digest": "a2fb4610e96dd5067ef0b9a77a2542a9db7e0cdb71d91e09cf0a2c33b6ed7984",
-  "n_files": 87,
+  "digest": "fe057599eac4e42a5e1aed4b4fe7d9a2196943a8884e0a7aaf885182bf0aef21",
+  "n_files": 128,
   "entry_points": [
+   "scripts/pod/autoinit_c2_behavioural_launch.py",
    "scripts/pod/autoinit_c2_behavioural_driver.py",
    "scripts/experiments/phase_c2/behavioural.py",
+   "scripts/experiments/phase_c2/behavioural_governance.py",
    "scripts/experiments/phase_c2/behavioural_schedule.py",
-   "scripts/experiments/phase_c2/baseline.py",
-   "scripts/pod/autoinit_c1_driver.py"
+   "scripts/experiments/phase_c2/behavioural_decision.py",
+   "scripts/experiments/phase_c2/scoring.py",
+   "scripts/autoinit/score_c2_screening.py",
+   "scripts/autoinit/score_c1_confirmation.py",
+   "scripts/pod/collect_artifacts.py"
+  ],
+  "declared_inputs": [
+   "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+   "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+   "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
+   "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+   "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+   "configs/stage3/e1/e1_r0860k_sa_pca.json",
+   "configs/infrastructure/provider_storage_pricing.json",
+   "scripts/pod/autoinit_preflight_setup.sh"
   ]
  },
  "execution_sequence": [
-  "P  verify the five durable candidates; materialize B from the frozen C1 treatment path and gate on its exact identity. If that gate fails, no screening probe starts.",
-  "S  six fresh screening probes -- five candidates and B on the one frozen screening seed -- each persisted as it completes.",
-  "R  score c2_screening_v1, rank by paired delta against B, advance EXACTLY one by the frozen tie-break. No verdict may leave this stage.",
-  "C  six fresh confirmation probes -- the advanced candidate and B, paired across the three frozen seeds. Cannot begin until every screening probe is trained AND scored.",
-  "D  score c1_confirmation_v1 and apply C1's frozen decision rule. The only stage that may name a C2 incumbent. Then STOP."
+  "P  verify the teacher by shard hash, then materialize all six arms \u2014 the five candidates and B \u2014 each along its pinned path and each gated on its exact recorded identity. A mismatch stops the session as a provenance finding; no probe starts.",
+  "S  six fresh screening probes \u2014 five candidates and B on the one frozen screening seed \u2014 each announced for durability the moment it finishes and pulled off-pod while the next one trains.",
+  "R  score c2_screening_v1 through its own pinned scorer, rank by paired delta against B, advance EXACTLY one by the frozen tie-break. No verdict may leave this stage.",
+  "C  six fresh confirmation probes \u2014 the advanced candidate and B, paired across the three frozen seeds. Cannot begin until every screening probe is trained AND scored.",
+  "D  score c1_confirmation_v1, apply the frozen Phase-C rule at C2's own bootstrap seed, and STOP. GO, NO_GO and INCONCLUSIVE are all complete results."
  ],
- "proposal_sha256": "aa5332398f84908a66c4580340cfccead4308cbb0580b8e5f9d22417ee76a801"
+ "implementation_state": {
+  "governance_module": "scripts/experiments/phase_c2/behavioural.py \u2014 BUILT",
+  "launch_governance": "scripts/experiments/phase_c2/behavioural_governance.py \u2014 BUILT",
+  "schedule_control_flow": "scripts/experiments/phase_c2/behavioural_schedule.py \u2014 BUILT",
+  "decision": "scripts/experiments/phase_c2/behavioural_decision.py \u2014 BUILT. Composes C1's paired_differences, decision_inputs, stratified_cluster_bootstrap and decide; supplies a C2 decision-rule view derived from the frozen protocol rather than instantiating a C1IsolationPlan whose invariants do not describe this experiment.",
+  "screening_scorer": "scripts/autoinit/score_c2_screening.py \u2014 BUILT. Reuses C1's battery-agnostic scoring loop and result builder unchanged, pinned to the C2 screening battery's own identity record. C1's entry point keeps its equality pins.",
+  "driver": "scripts/pod/autoinit_c2_behavioural_driver.py \u2014 BUILT, STANDALONE. Composes train_stage3.py, uncapped_eval.py, the two scorers, build_evaluation_package, the admission gate and the Phase-C inference. It does NOT subclass C1Driver, which would inherit C1's authorization, plan identity, seeds and audit roots.",
+  "launcher": "scripts/pod/autoinit_c2_behavioural_launch.py \u2014 BUILT. Seven $0 prechecks, per-poll durability, destination re-identification and a teardown gate that refuses while evidence is unreadable.",
+  "b_binding": "BUILT",
+  "storage_derivation": "BUILT",
+  "rehearsal": "tests/c2_behavioural_preflight/ \u2014 BUILT. One production-path rehearsal drives the real driver P through D and reaches all three terminal states from separate deterministic fixtures, replacing only hardware-bound calls.",
+  "grant": "NOT REQUESTED \u2014 no grant, readiness record, authorization, bundle or provider resource exists for this session, and none may be created without a maintainer decision."
+ },
+ "proposal_sha256": "97d2a47ed25f990fbf45afe1cb431a0daf7c3ec7c29bec7b286429cbdfd6b0f9"
 }

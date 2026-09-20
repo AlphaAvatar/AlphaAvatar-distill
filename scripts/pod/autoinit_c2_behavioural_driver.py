@@ -1,267 +1,1136 @@
 #!/usr/bin/env python3
 """The Phase-C2 behavioural selection: twelve probes, two rungs, one decision.
 
-    PYTHONPATH=src:scripts python \
-        scripts/pod/autoinit_c2_behavioural_driver.py --stage all ...
+    /opt/train/bin/python scripts/pod/autoinit_c2_behavioural_driver.py \
+        --audit-dir <dir> --b-workdir <dir> --campaign <id> ...
 
 Stages, in the order the frozen protocol fixes them:
 
-    P  prepare  — verify the five durable candidates and MATERIALIZE incumbent B
-                  from the frozen C1 treatment path, gated on B's exact identity
-    S  screen   — six fresh recovery probes, one seed, five candidates plus B
-    R  rank     — score `c2_screening_v1`, rank by paired delta, advance ONE
-    C  confirm  — six fresh probes, the advanced candidate and B, three seeds
-    D  decide   — score `c1_confirmation_v1`, apply C1's frozen rule, STOP
+    P  prepare  — verify the teacher, then MATERIALIZE all six arms along their
+                  pinned paths, each gated on its exact recorded identity
+    S  screen   — six fresh recovery probes: five candidates plus B, one seed
+    R  rank     — rank by paired delta against B, advance exactly ONE
+    C  confirm  — six fresh probes: the advanced candidate and B, three seeds
+    D  decide   — apply the frozen Phase-C rule, and STOP
 
-It does not implement recovery training or battery scoring. Those are C1's,
-already executed on real hardware across three attempts, and `train_one` /
-`score_one` are seams C1 built precisely so a `$0` regression can replace them.
-This driver subclasses that machinery and changes what it has to: which probes
-exist, when the second rung may begin, and who advances.
+**Standalone, composing C1's proven primitives.** An earlier draft subclassed
+`C1Driver`, which was wrong in four concrete ways rather than one stylistic one:
+it inherited C1's authorization, plan identity, recovery seeds and audit roots,
+all of which describe a different experiment; its `complete()` resolved stage
+letters through C1's session registry, which has no P/S/R/C/D; its `stage_c`
+silently overrode C1's stage C; and `materialize_b` called `self.load_teacher()`,
+which does not exist. What is genuinely reusable is the *machinery* — the
+trainer, the evaluator, the packaging, the admission gate, the scorers, the
+paired inference — and that is called here directly. Constants that are FROZEN
+ASSETS rather than C1 session state (the evaluation tokenizer and its pinned
+sidecar hashes, the recovery recipe, the pack, the teacher binding) are imported
+from their one owner rather than re-typed into this file.
 
-**Screening never decides.** It ranks and advances exactly one candidate, and
-`assert_screening_emits_no_verdict` refuses a screening result that carries a
-verdict, an incumbent or a promotion. Only the confirmation rung, on three
-disjoint seeds, may name a C2 incumbent — and `NO_GO` and `INCONCLUSIVE` are
-results, not failures to be retried.
+**The six arms are built here, not shipped here.** Each is a 1.19 GB
+checkpoint. The scp path gives an asset 600 seconds against a dev-box uplink
+that needs 1650 for one of them — the arithmetic that killed continuation
+attempt 2 staging exactly this size — and the hub relay refuses 5.95 GB for
+private-storage quota, asked directly at $0 and refused twice. So every arm is
+materialized from the teacher along a path pinned at EVERY step to the artifact
+digest the frozen record holds, which is the mechanism the replay proved by
+reproducing all five byte-for-byte. It is not a search: no beam, no expansion,
+no ranking, no selection, and a digest mismatch stops the session as a
+scientific finding.
+
+**Screening never decides.** It ranks and advances exactly one candidate, on a
+battery whose own scorer refuses to emit a verdict. Only the confirmation rung,
+on three disjoint seeds, may name a C2 incumbent — and `NO_GO` and
+`INCONCLUSIVE` are results, not failures to retry.
 
 **Confirmation cannot start early.** All six screening probes must be trained
 AND scored and the winner mechanically determined first; otherwise the candidate
 being confirmed was chosen from whoever happened to finish.
 
-**Finished probes are persisted as they complete.** C1 attempt 17 trained six
-probes over ten hours and lost every one; `preserve_probe` is inherited for that
-reason and is called from both rungs.
+**Finished work is announced for durability the moment it exists.** C1 attempt
+17 trained six probes over ten hours and lost every one when a later stage
+failed. This driver does not push bytes itself: it writes each completed unit's
+identity to its evidence, and the launcher's poll hook pulls the bytes off-pod
+and re-identifies them at the destination while the session is still running.
+That route is used instead of C1's Hugging Face relay because the relay failed
+under an account-wide storage quota and preserved nothing.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
 import time
+import traceback
+from collections.abc import Mapping
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
-    if str(REPO_ROOT / _extra) not in sys.path:
-        sys.path.insert(0, str(REPO_ROOT / _extra))
+REPO = Path(__file__).resolve().parents[2]
+for _p in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
+    if str(REPO / _p) not in sys.path:
+        sys.path.insert(0, str(REPO / _p))
 
+#: Frozen assets and proven free functions, from their one owner. Importing the
+#: C1 driver module is inert — it defines constants and registers the builtin
+#: profiles and adapters, which this session needs too — and `C1Driver` itself
+#: is deliberately NOT imported.
 from autoinit_c1_driver import (  # noqa: E402
-    AUDIT, C1Driver, C1DriverError, mark, say,
+    C1_PROBE_OVERRIDES, ENGINE_PROBE, FROZEN_RECIPE, PACK_DIR, TEACHER_BINDING,
+    TOKENIZER_SIDECAR_SHA256, TOKENIZER_SOURCE, TRAINER, UNCAPPED_EVAL,
+    _trainer_bytes, trained_model_dir,
 )
 
+from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
+from aadistill.initialization.planning.generation import (  # noqa: E402
+    RecoveryEvaluationProtocol, declared_generation_protocol,
+    observe_generation_protocol,
+)
+from aadistill.runtime.device_handoff import (  # noqa: E402
+    complete_release, cuda_memory, require_headroom, require_released,
+)
+from experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
+from experiments.phase_c1.scoring import c1_scoring_contract  # noqa: E402
 from experiments.phase_c2 import behavioural as BH  # noqa: E402
+from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
+from experiments.phase_c2 import behavioural_decision as BD  # noqa: E402
 from experiments.phase_c2 import behavioural_schedule as SCH  # noqa: E402
+from experiments.phase_c2 import scoring as C2S  # noqa: E402
+from experiments.source_sets import generation_source_digest  # noqa: E402
 
 RUN_ID = "autoinit.v1.phase_c2.behavioural"
+EVIDENCE_FILENAME = "c2_behavioural_evidence.json"
+
 SUCCESS_MARKER = "C2_BEHAVIOURAL_ALL_DONE"
 FAILURE_MARKER = "C2_BEHAVIOURAL_FAILED"
 B_READY_MARKER = "C2_BEHAVIOURAL_B_READY"
 PROBE_MARKER = "C2_BEHAVIOURAL_PROBE_DONE"
+DURABLE_MARKER = "C2_BEHAVIOURAL_DURABLE_UNIT"
 ADVANCED_MARKER = "C2_BEHAVIOURAL_ADVANCED"
 
+C2_SCREENING_SCORER = REPO / "scripts/autoinit/score_c2_screening.py"
+C1_SCORER = REPO / "scripts/autoinit/score_c1_confirmation.py"
 
-class BehaviouralDriverError(RuntimeError):
+#: The stages, in order. Own registry: C1's session registry describes C1's
+#: stages and resolving a C2 letter through it raises.
+STAGES = ("P", "S", "R", "C", "D")
+
+
+class C2DriverError(RuntimeError):
     """This session cannot proceed on the evidence it has."""
 
 
-class C2BehaviouralDriver(C1Driver):
-    """C1's probe machinery, two rungs, and a selection between them.
+class C2ProvenanceError(RuntimeError):
+    """A scientific finding, not a retryable engineering failure."""
 
-    Subclassed rather than reimplemented: a harness that rebuilt the training
-    loop could not notice the loop being broken, and this programme has already
-    certified a defective line that way once.
+
+def _rel(p) -> str:
+    """Repo-relative when it can be, absolute otherwise.
+
+    `relative_to` raises outside the root and the audit root is redirectable —
+    the `$0` rehearsal points it at a tmp tree. A path recorded for provenance
+    must never be the thing that fails a stage.
     """
+    try:
+        return str(Path(p).relative_to(REPO))
+    except ValueError:
+        return str(p)
+
+
+def scorer_argv(probe, *, battery: Path, gen_dir: Path, out: Path,
+                per_sample: Path, generation_fingerprint: str,
+                run_completion: Path | None = None) -> list[str]:
+    """Which scorer runs for this probe, and how the arm is named to it.
+
+    A free function so the mapping can be checked at `$0` instead of only on a
+    paid pod. It carries three decisions that are easy to get quietly wrong:
+
+    * **which entry point.** The screening rung gets its own, because C1's pins
+      its battery by equality on purpose — "the production path cannot be aimed
+      anywhere else" — and the rung it guards is the one that may name an
+      incumbent. Loosening that pin so screening could borrow the entry point
+      would weaken a guard for a consumer that does not need it weakened.
+    * **how the arm is named.** Confirmation maps B to `incumbent` and the
+      advanced candidate to `treatment`, which is the direction the estimand is
+      defined in. Screening has SIX arms and C1's incumbent/treatment pair does
+      not describe them, so it passes `--screening-arm` instead and nothing
+      downstream can read a screening result as half of a confirmation pair.
+    * **which fingerprint.** The OBSERVED one, reconstructed from this probe's
+      own summaries, never the attested one. They are equal by the admission
+      gate; the direction of provenance is the point.
+    """
+    screening = probe.rung == "screening"
+    argv = [str(C2_SCREENING_SCORER if screening else C1_SCORER),
+            "--generations", str(gen_dir), "--label", probe.probe_id,
+            "--seed", str(probe.seed), "--out", str(out),
+            "--per-sample", str(per_sample),
+            "--battery", str(battery),
+            "--init-digest", probe.initialization_artifact_digest,
+            "--generation-fingerprint", generation_fingerprint]
+    if screening:
+        argv += ["--screening-arm", probe.arm]
+    else:
+        argv += ["--arm", BD.INCUMBENT_ARM if probe.arm == SCH.ANCHOR
+                 else BD.TREATMENT_ARM]
+    if run_completion is not None and Path(run_completion).is_file():
+        argv += ["--trained-run", str(run_completion)]
+    return argv
+
+
+def say(msg: str) -> None:
+    print(f"[{datetime.now(timezone.utc):%H:%M:%S}] {msg}", flush=True)
+
+
+class C2BehaviouralDriver:
+    """Twelve probes, two rungs, one decision — and no inherited experiment."""
 
     def __init__(self, a) -> None:
-        super().__init__(a)
+        self.a = a
+        self.t0 = time.time()
+        self.audit = Path(a.audit_dir)
+        (self.audit / "probes").mkdir(parents=True, exist_ok=True)
+        self.status = Path(a.status_path)
+
+        self.rule = BD.decision_rule(REPO)
+        self.proto = BH.protocol(REPO)["behavioural_selection"]
+
         self.candidates: list[dict[str, Any]] = []
         self.anchor: dict[str, Any] = {}
+        self.arm_arch: dict[str, tuple[str, int]] = {}
         self.screening: list[SCH.Probe] = []
         self.confirmation: list[SCH.Probe] = []
         self.ranked: list[dict[str, Any]] = []
         self.advanced: dict[str, Any] | None = None
-        #: Keyed by probe_id, not by (arm, seed): the same arm appears in both
-        #: rungs and on repeated seeds, and a key that collided would let one
-        #: rung's probe satisfy the other's completeness check.
-        self.probe_training: dict[str, dict] = {}
-        self.probe_scores: dict[str, dict] = {}
+        self.evaluation_protocol: RecoveryEvaluationProtocol | None = None
+        self.teacher_path: str | None = None
 
-    # -- P: the inputs, including the one that does not exist yet ------------
+        #: Keyed by probe_id, never by (arm, seed): the same arm appears in both
+        #: rungs and B appears on four seeds, so a key that collided would let
+        #: one rung's probe satisfy the other's completeness check.
+        self.training: dict[str, dict] = {}
+        self.scores: dict[str, dict] = {}
+        self.durable: list[dict] = []
+        self.completed: list[str] = []
+
+        self.ev: dict[str, Any] = {
+            "schema": "aadistill.autoinit.c2_behavioural_evidence/v1",
+            "run_id": RUN_ID,
+            "campaign": a.campaign,
+            "started_utc": datetime.now(timezone.utc).isoformat(),
+            "stages": {},
+            "durable_units": [],
+            "probes_trained": 0,
+            "probes_scored": 0,
+        }
+
+    # -- bookkeeping --------------------------------------------------------
+    def mark(self, name: str) -> None:
+        line = f"{datetime.now(timezone.utc):%FT%TZ} MARKER:{name}"
+        print(line, flush=True)
+        self.status.parent.mkdir(parents=True, exist_ok=True)
+        with self.status.open("a") as f:
+            f.write(line + "\n")
+
+    def usd(self) -> float:
+        return self.a.spent_usd + (time.time() - self.t0) / 3600 * self.a.rate
+
+    def afford(self, minutes: float, what: str) -> bool:
+        """Admission control, not a trip-wire.
+
+        Asks whether the *whole* unit fits before starting it. A check that only
+        refuses once the budget is already gone would let a 30-minute probe
+        start on two minutes of headroom and then be killed mid-training, which
+        spends the money and produces nothing.
+        """
+        projected = self.usd() + minutes / 60 * self.a.rate
+        if projected > self.a.soft_stop_usd:
+            say(f"SOFT STOP: {what} needs ~{minutes:.0f} min "
+                f"(${projected:.2f} > ${self.a.soft_stop_usd:.2f}) — not starting")
+            return False
+        if projected > self.a.authorized_usd:
+            say(f"AUTHORIZATION: {what} would reach ${projected:.2f} against an "
+                f"authorized ${self.a.authorized_usd:.2f} — not starting")
+            return False
+        return True
+
+    def child_env(self) -> dict:
+        return {**os.environ, "PYTHONPATH": f"{REPO}/src",
+                "AADISTILL_IMAGE_DIGEST": self.a.image_digest}
+
+    def save(self) -> None:
+        self.ev["elapsed_min"] = round((time.time() - self.t0) / 60, 2)
+        self.ev["spend_usd"] = round(self.usd(), 4)
+        self.ev["stages_completed"] = list(self.completed)
+        self.ev["durable_units"] = self.durable
+        self.ev["probes_trained"] = len(self.training)
+        self.ev["probes_scored"] = len(self.scores)
+        (self.audit / EVIDENCE_FILENAME).write_text(
+            json.dumps(self.ev, indent=2, default=str) + "\n")
+
+    def gate(self, name: str, argv: list[str], *, timeout: float,
+             python: str = "/opt/train/bin/python") -> subprocess.CompletedProcess:
+        out = subprocess.run([python, *argv], capture_output=True, text=True,
+                             timeout=timeout, env=self.child_env())
+        (self.audit / f"{name}.log").write_text(
+            f"$ {python} {' '.join(argv)}\nrc={out.returncode}\n"
+            f"--- stdout ---\n{out.stdout}\n--- stderr ---\n{out.stderr}\n")
+        return out
+
+    def complete(self, letter: str, **payload) -> None:
+        """Record a finished stage and refuse an out-of-order execution."""
+        if letter not in STAGES:
+            raise C2DriverError(f"{letter!r} is not a C2 stage {STAGES}")
+        expected = STAGES[len(self.completed)]
+        if letter != expected:
+            raise C2DriverError(
+                f"stage {letter} completed but {expected} was next; the "
+                f"protocol fixes the order {STAGES} and a rung that ran early "
+                "was not the preregistered experiment")
+        self.completed.append(letter)
+        self.ev["stages"][letter] = {
+            "passed": True,
+            "finished_utc": datetime.now(timezone.utc).isoformat(),
+            "spend_usd": round(self.usd(), 4), **payload}
+        self.mark(f"STAGE_PASSED:{letter}")
+        self.save()
+
+    def fail(self, letter: str, reason: str, **payload) -> None:
+        self.ev["stages"][letter] = {
+            "passed": False, "reason": str(reason)[-2000:],
+            "finished_utc": datetime.now(timezone.utc).isoformat(),
+            "spend_usd": round(self.usd(), 4), **payload}
+        self.mark(f"STAGE_FAILED:{letter}")
+        self.save()
+        say(f"STAGE {letter} FAILED: {reason}")
+
+    def runtime_identity(self) -> dict:
+        import torch
+        import transformers
+
+        return {"image_digest": self.a.image_digest,
+                "torch": torch.__version__,
+                "transformers": transformers.__version__,
+                "cuda_runtime": getattr(torch.version, "cuda", None),
+                "gpu": (torch.cuda.get_device_name(0)
+                        if torch.cuda.is_available() else None),
+                "driver": os.environ.get("NVIDIA_DRIVER_VERSION")}
+
+    # -- resume -------------------------------------------------------------
+    def load_campaign_journal(self) -> dict[str, Any]:
+        """Restore probes this CAMPAIGN already completed. Pre-registered rules.
+
+        A probe may be reused only when all of this holds:
+
+        * it was recorded under THIS campaign id. A replacement pod is a new
+          campaign and may not pool with the previous one's probes: the twelve
+          probes are one experiment, and silently mixing two resources' work
+          would make the design something nobody preregistered.
+        * its model directory is still present AND its identity still matches
+          what was announced, re-derived from the bytes on disk. An entry whose
+          weights are gone or changed is not a completed probe, it is a claim
+          about one — which is how a replacement resource could substitute for
+          a measurement.
+        * it carries a score. A trained-but-unscored probe resumes at scoring,
+          not at the verdict.
+
+        A restored probe is NEVER retrained. Retraining a completed probe and
+        keeping whichever result one prefers is the failure this rule exists to
+        prevent, and it does not become acceptable because the first result was
+        disappointing.
+        """
+        restored, rejected = [], []
+        for path in sorted((self.audit / "probes").glob("*.json")):
+            try:
+                entry = json.loads(path.read_text())
+            except json.JSONDecodeError as exc:
+                rejected.append({"path": str(path), "why": f"unreadable: {exc}"})
+                continue
+            name = entry.get("probe_id") or path.stem
+            if entry.get("campaign") and entry["campaign"] != self.a.campaign:
+                rejected.append({"probe_id": name, "why": (
+                    f"belongs to campaign {entry['campaign']!r}, not "
+                    f"{self.a.campaign!r}; probes are not pooled across "
+                    "resources")})
+                continue
+            ok, why = self.reidentify(entry)
+            if not ok:
+                rejected.append({"probe_id": name, "why": why})
+                continue
+            self.training[name] = entry
+            if entry.get("score"):
+                self.scores[name] = entry["score"]
+            restored.append({"probe_id": name, "scored": bool(entry.get("score"))})
+        summary = {"restored": restored, "rejected": rejected,
+                   "campaign": self.a.campaign}
+        self.ev["resume"] = summary
+        if restored or rejected:
+            say(f"  resume: {len(restored)} probe(s) restored, "
+                f"{len(rejected)} rejected")
+        return summary
+
+    def reidentify(self, entry: Mapping[str, Any]) -> tuple[bool, str]:
+        """Do the bytes on disk still ARE the probe this entry describes?"""
+        durable = (entry.get("durable") or {})
+        identity = durable.get("identity")
+        if not identity:
+            return False, "no recorded identity to check the bytes against"
+        model_dir = Path(entry.get("model_dir") or "")
+        if not model_dir.is_dir():
+            return False, f"{model_dir} is gone; a record is not a checkpoint"
+        try:
+            from aadistill.initialization.specs.arch import get_adapter
+            from aadistill.runtime.leaf_durability import identify_for_transfer
+
+            now = identify_for_transfer(
+                model_dir, adapter=get_adapter("qwen3"),
+                arch_signature=identity["arch_signature"],
+                num_parameters=identity["num_parameters"])
+        except Exception as exc:                                  # noqa: BLE001
+            return False, f"cannot re-identify: {type(exc).__name__}: {exc}"
+        if now.artifact_digest != identity["artifact_digest"]:
+            return False, (
+                f"the bytes hash to {now.artifact_digest[:12]}… but the record "
+                f"says {identity['artifact_digest'][:12]}…")
+        return True, "re-identified"
+
+    # -- durability ---------------------------------------------------------
+    def announce_durable(self, unit_id: str, model_dir: Path, *,
+                         kind: str, arch_signature: str, num_parameters: int,
+                         **extra) -> dict:
+        """Publish a finished unit's identity so the launcher can secure it.
+
+        Not a push. This driver runs on the pod, and bytes written beside the
+        process that made them are a copy that dies with the pod — which is
+        exactly how C1 attempt 17 lost six probes. The launcher polls this
+        evidence, pulls each announced unit off-pod, and re-identifies it from
+        the bytes that land; the announcement is the identity that
+        re-identification is checked against.
+
+        The identity is rebuilt from the bytes on disk, not copied from
+        whatever record asked for the announcement, so a probe whose weights
+        were truncated on the way to disk is caught here rather than at the
+        destination. It is built by `identify_for_transfer`, the same
+        construction the destination re-identification uses, so the two cannot
+        disagree about bookkeeping and report it as corruption.
+
+        `arch_signature` and `num_parameters` come from the INITIALIZATION this
+        unit was trained from. No file in a checkpoint carries them, and
+        training changes weights rather than architecture, so the arm's own
+        values are the right ones and are passed in rather than guessed.
+
+        PRESERVATION IS NOT PERMISSION. Announcing a probe authorizes nothing
+        about reusing it: whether a preserved checkpoint may be pooled, resumed
+        or reused across attempts is a separate scientific decision, recorded in
+        the payload so a later reader cannot mistake the one for the other.
+
+        NEVER RAISES. A durability failure must not destroy the training it
+        exists to protect.
+        """
+        payload: dict[str, Any] = {
+            "unit_id": unit_id, "kind": kind, "campaign": self.a.campaign,
+            "announced_utc": datetime.now(timezone.utc).isoformat(),
+            "path": str(model_dir), "identity": None, "identity_error": None,
+            "authorizes": ("nothing. Preservation and reuse are separate "
+                           "decisions: this checkpoint may not be pooled, "
+                           "resumed or reused across formal attempts without "
+                           "an explicit retry contract."),
+            **extra,
+        }
+        try:
+            from aadistill.initialization.specs.arch import get_adapter
+            from aadistill.runtime.leaf_durability import identify_for_transfer
+
+            d = Path(model_dir)
+            ident = identify_for_transfer(
+                d, adapter=get_adapter("qwen3"), arch_signature=arch_signature,
+                num_parameters=num_parameters)
+            #: Every field the destination re-identification compares. Recorded
+            #: together, because a destination check that can only compare the
+            #: fields it happens to find is not a check.
+            payload["identity"] = {
+                "artifact_digest": ident.artifact_digest,
+                "weights_digest": ident.weights_digest,
+                "config_sha256": ident.config_sha256,
+                "single_shard_sha256": ident.single_shard_sha256,
+                "arch_signature": ident.arch_signature,
+                "num_parameters": ident.num_parameters,
+                "tokenizer_sha256": ident.tokenizer_sha256,
+                "total_bytes": ident.total_bytes,
+            }
+            (d / "c2_durable_unit.json").write_text(
+                json.dumps(payload, indent=1) + "\n")
+            self.mark(f"{DURABLE_MARKER}:{unit_id}")
+            say(f"  {unit_id}: announced {ident.total_bytes / 2**30:.2f} GiB, "
+                f"digest {ident.artifact_digest[:12]}…")
+        except Exception as exc:                                  # noqa: BLE001
+            payload["identity_error"] = f"{type(exc).__name__}: {exc}"
+            say(f"  {unit_id}: NOT announced — {payload['identity_error']}")
+        self.durable.append(payload)
+        self.save()
+        return payload
+
+    # -- P: build the six arms, because none of them can be shipped here ----
     def stage_p(self) -> None:
-        """Verify the five candidates; materialize and gate the sixth arm."""
-        mark("STAGE_START:P")
-        self.candidates = BH.candidate_manifest(REPO_ROOT)
-        say(f"  {len(self.candidates)} durable candidates verified against the "
-            "frozen selection")
+        """Materialize all six arms from the teacher, each gated on its digest.
 
-        binding = BH.b_binding(REPO_ROOT, device=self.a.device)
+        Not a search. Each arm is a FIXED path whose every step carries the
+        artifact digest attempt 3 recorded, and a mismatch stops the session as
+        a scientific finding rather than being retried.
+
+        The five candidates are built rather than staged because neither
+        transport can carry them: the scp path gives each asset 600 seconds
+        against a dev-box uplink that needs 1650 for one of them — the
+        arithmetic that killed continuation attempt 2 — and the hub relay
+        refuses 5.95 GB for private-storage quota, measured at $0 twice. B is
+        built for a different reason: its bytes no longer exist. One mechanism
+        for all six, and each identity-gated at the moment it is built.
+        """
+        self.mark("STAGE_START:P")
+        self.verify_teacher()
+
+        #: The tie-break is "the frozen full-search ordering", so the rank must
+        #: come from the selection document rather than from the order a
+        #: builder happened to return. Asserted, not assumed: a silent
+        #: reordering would change which candidate advances on a tie.
+        from experiments.phase_c2.replay_specs import load_selection
+
+        order = [s["state_id"] for s in load_selection(REPO)["selected"]]
+        leaves = BG.candidate_leaves(REPO, device=self.a.device)
+        if [leaf.state_id for leaf in leaves] != order:
+            raise C2ProvenanceError(
+                f"the builder returned {[l.state_id[:8] for l in leaves]} but "
+                f"the frozen selection orders {[s[:8] for s in order]}. The "
+                "screening tie-break is that ordering, so the two must agree.")
+
+        for leaf in leaves:
+            path = self.materialize_arm(
+                leaf.state_id, leaf.spec,
+                required={"artifact_digest": leaf.artifact_digest,
+                          "weights_digest": leaf.weights_digest,
+                          "single_shard_sha256": leaf.single_shard_sha256,
+                          "arch_signature": leaf.arch_signature,
+                          "num_parameters": leaf.num_parameters},
+                bounded_minutes=float(leaf.bounded_minutes),
+                config_overrides=leaf.root_config_overrides)
+            self.candidates.append({
+                "state_id": leaf.state_id,
+                "artifact_digest": leaf.artifact_digest,
+                "weights_digest": leaf.weights_digest,
+                "arch_signature": leaf.arch_signature,
+                "num_parameters": leaf.num_parameters,
+                "durable_path": path,
+                "rank_in_frozen_selection": len(self.candidates),
+                "path_label": leaf.path_label,
+            })
+        say(f"  {len(self.candidates)} candidates materialized and identity-gated")
+
+        binding = BH.b_binding(REPO, device=self.a.device)
         say(f"  B construction {binding['construction']['spec_hash'][:12]}… == "
             f"frozen {binding['construction']['expected_spec_hash'][:12]}…")
+        b_path = self.materialize_b(binding)
+        materialized = True
 
-        if binding["availability"]["available"]:
-            say("  B is already durable; staging rather than rebuilding")
-            b_path = binding["availability"]["durable_path"]
-        else:
-            b_path = self.materialize_b(binding)
-
+        required = binding["required_identity"]
         self.anchor = {
             "state_id": SCH.ANCHOR,
-            "artifact_digest": binding["required_identity"]["artifact_digest"],
+            "artifact_digest": required["artifact_digest"],
             "durable_path": b_path,
+            "arch_signature": required["arch_signature"],
+            "num_parameters": required["num_parameters"],
         }
-        mark(B_READY_MARKER)
+        #: A probe's architecture is its INITIALIZATION's — training changes
+        #: weights, not shape — and no checkpoint file carries `arch_signature`
+        #: or `num_parameters`. Held per arm so each announced probe can be
+        #: re-identified at the destination against all six identity fields.
+        self.arm_arch = {c["state_id"]: (c["arch_signature"],
+                                         c["num_parameters"])
+                         for c in self.candidates}
+        self.arm_arch[SCH.ANCHOR] = (required["arch_signature"],
+                                     required["num_parameters"])
+        self.mark(B_READY_MARKER)
         self.complete("P", candidates=len(self.candidates),
                       b_spec_hash=binding["construction"]["spec_hash"],
                       b_artifact_digest=self.anchor["artifact_digest"],
-                      b_materialized=not binding["availability"]["available"])
+                      b_materialized=materialized)
 
-    def materialize_b(self, binding: dict[str, Any]) -> str:
-        """Build B from the frozen C1 treatment path, then gate on its identity.
+    def verify_teacher(self) -> None:
+        """The teacher, by shard hash. Shared frozen binding, not a C1 asset."""
+        import hashlib
 
-        The construction comes from `baseline.frozen_baseline_spec`, which builds
-        it with C1's own constructor; this method only runs it and checks the
-        result. If the result is not B, no screening probe may start: an anchor
-        that is not the frozen incumbent makes every delta meaningless.
+        from huggingface_hub import snapshot_download
+
+        binding = json.loads(TEACHER_BINDING.read_text())
+        local = snapshot_download(binding["repo_id"],
+                                  revision=binding["revision"])
+        bad = []
+        for name, want in binding["expected_shard_sha256"].items():
+            p = Path(local) / name
+            if not p.is_file():
+                bad.append(f"{name}: absent after fetch")
+                continue
+            got = hashlib.sha256(p.read_bytes()).hexdigest()
+            if got != want:
+                bad.append(f"{name}: {got} != {want}")
+        if bad:
+            raise C2DriverError("teacher verification FAILED: " + "; ".join(bad))
+        self.teacher_path = local
+        say(f"  teacher {binding['repo_id']}@{binding['revision'][:12]} verified, "
+            f"{len(binding['expected_shard_sha256'])} shards")
+
+    def reuse_arm(self, label: str, required: dict[str, Any]) -> str | None:
+        """An arm already on disk, IF its bytes are the arm this path names.
+
+        Returns the path when the checkpoint present re-identifies to the
+        pinned `artifact_digest`, and `None` otherwise — including when it is
+        absent, unreadable, or present with a different digest. A mismatch here
+        is not an error: it means this directory holds something else, and the
+        caller simply builds. What it must never do is return a path it has not
+        checked.
+        """
+        for candidate in (Path(self.a.b_workdir) / label / "model",
+                          Path(self.a.b_workdir) / label):
+            if not (candidate / "config.json").is_file():
+                continue
+            try:
+                from aadistill.initialization.specs.arch import get_adapter
+                from aadistill.runtime.leaf_durability import (
+                    identify_for_transfer,
+                )
+
+                ident = identify_for_transfer(
+                    candidate, adapter=get_adapter("qwen3"),
+                    arch_signature=required["arch_signature"],
+                    num_parameters=required["num_parameters"])
+            except Exception:                                     # noqa: BLE001
+                continue
+            if ident.artifact_digest == required["artifact_digest"]:
+                return str(candidate)
+        return None
+
+    def materialize_arm(self, label: str, spec, *, required: dict[str, Any],
+                        bounded_minutes: float,
+                        config_overrides: Any = None) -> str:
+        """Build one arm along its pinned path, then gate it on its identity.
+
+        The one place an arm comes into existence, used by all six. A mismatch
+        is a PROVENANCE finding and stops the session: the path is
+        deterministic, so retrying would diverge identically, and an arm that is
+        not the one the protocol names makes every delta measured against it
+        meaningless.
+
+        Only the fields the record actually carries are compared. A candidate
+        leaf records no `config_sha256`, and comparing against a missing value
+        would fail every arm for a field nobody recorded — which is a check
+        that refuses correct work.
         """
         from aadistill.initialization.planning.fixed_path import (
             materialize_fixed_path,
         )
         from aadistill.initialization.specs.arch import get_adapter
 
-        from experiments.phase_c2 import baseline as BL
+        if self.teacher_path is None:
+            raise C2DriverError(
+                f"the teacher must be verified before {label} is built")
+        if not self.afford(bounded_minutes, f"materializing {label}"):
+            raise C2DriverError(
+                f"budget refuses to materialize {label}; an arm that does not "
+                "exist cannot be measured and no probe may start without all six")
 
-        say("  B is not durable — materializing it from the frozen treatment path")
-        spec = BL.frozen_baseline_spec(device=self.a.device)
-        BL.assert_frozen_construction(spec)
-
-        workdir = Path(self.a.b_workdir)
+        adapter = get_adapter("qwen3")
+        workdir = Path(self.a.b_workdir) / label
         workdir.mkdir(parents=True, exist_ok=True)
+
+        #: Resume rule R6: reuse an arm already on disk ONLY if its bytes
+        #: re-identify to the digest this path is pinned to. Rebuilding all six
+        #: costs ~156 minutes, so a restart that has them is worth honouring —
+        #: but a copy that merely exists proves nothing, and trusting one is the
+        #: single place a substituted initialization could enter the experiment.
+        existing = self.reuse_arm(label, required)
+        if existing is not None:
+            say(f"  {label[:12]}… reused: {existing}")
+            return existing
+
+        #: The evidence-bound root pin, applied IN THE LOADER — which is where
+        #: it belongs and the only place it can go: `materialize_fixed_path`
+        #: takes no config-override parameter. The search reused one teacher
+        #: object across all 108 expansions and `DepthCausalKLGreedyV1` leaves
+        #: `use_cache = False` on the model it is handed, so paths expanded
+        #: after any causal-KL DEPTH step began from a mutated root and that
+        #: flag is serialized into every descendant's config, and therefore
+        #: into its `artifact_digest`. A loader taking the hub default cannot
+        #: reproduce those paths. Derived per path from attempt 3's own
+        #: recorded step-0 config hash, never keyed on state ids.
+        #: The root comes from the SPEC's own `root_repo_id`/`root_revision`,
+        #: at the SPEC's dtype — byte-for-byte the loader that reproduced all
+        #: five candidates in the replay. Reading the teacher from a local
+        #: snapshot path or letting the dtype default instead would be a
+        #: different root, and the digests would diverge four steps later with
+        #: nothing in the record pointing at the cause. The verified teacher is
+        #: checked to BE that root rather than substituted for it.
+        def loader(_spec=spec, _ov=dict(config_overrides or {})):
+            import torch
+            from transformers import AutoModelForCausalLM
+
+            model = AutoModelForCausalLM.from_pretrained(
+                _spec.root_repo_id, dtype=torch.bfloat16,
+                revision=_spec.root_revision).to(self.a.device).eval()
+            for key, value in _ov.items():
+                setattr(model.config, key, value)
+            return model
+
+        pinned = json.loads(TEACHER_BINDING.read_text())
+        if (spec.root_repo_id, spec.root_revision) != (pinned["repo_id"],
+                                                       pinned["revision"]):
+            raise C2ProvenanceError(
+                f"{label} is pinned to root {spec.root_repo_id}@"
+                f"{spec.root_revision[:12]} but the verified teacher binding is "
+                f"{pinned['repo_id']}@{pinned['revision'][:12]}. The root is "
+                "part of the path's identity; building from a different one "
+                "would diverge at the first step.")
+
         t0 = time.time()
         results = materialize_fixed_path(
-            spec, adapter=get_adapter("qwen3"),
-            root_loader=lambda: self.load_teacher(), workdir=workdir,
-            repo_root=REPO_ROOT)
+            spec, adapter=adapter, root_loader=loader, workdir=workdir,
+            repo_root=REPO)
         final = results[-1]
 
-        required = binding["required_identity"]
         observed = final.identity
         mismatched = [
             f"{field}: required {required[field]!r}, built "
             f"{getattr(observed, field)!r}"
-            for field in ("artifact_digest", "weights_digest",
+            for field in ("artifact_digest", "weights_digest", "config_sha256",
                           "single_shard_sha256", "arch_signature",
                           "num_parameters")
-            if getattr(observed, field) != required[field]
+            if required.get(field) is not None
+            and getattr(observed, field) != required[field]
         ]
         if mismatched:
-            raise BehaviouralDriverError(
-                "the rebuilt B is not the frozen incumbent — "
+            raise C2ProvenanceError(
+                f"the rebuilt {label} is not the arm the protocol names — "
                 + "; ".join(mismatched)
-                + ". NO SCREENING PROBE MAY START: an anchor that is not B "
-                  "makes every delta meaningless. This is a provenance "
-                  "finding, not a retryable failure.")
-        say(f"  B rebuilt and identity-gated in {(time.time() - t0) / 60:.1f} min")
+                + ". NO PROBE MAY START. This is a provenance finding, not a "
+                  "retryable engineering failure: the path is deterministic "
+                  "and a retry would diverge identically.")
+        say(f"  {label[:12]}… built and identity-gated in "
+            f"{(time.time() - t0) / 60:.1f} min")
+        self.announce_durable(
+            label, Path(final.checkpoint_path), kind="arm_initialization",
+            arch_signature=required["arch_signature"],
+            num_parameters=required["num_parameters"])
+        return str(final.checkpoint_path)
 
-        #: Persisted immediately. B costs half an hour of GPU to build and a
-        #: later infrastructure failure must not force it again.
-        dest = Path(self.a.b_durable)
-        preserved = self.preserve_probe("incumbent_b", Path(final.checkpoint_path),
-                                        {"probe_id": "incumbent_b",
-                                         "artifact_digest": required["artifact_digest"]})
-        (AUDIT / "incumbent_b.identity.json").write_text(json.dumps({
+    def materialize_b(self, binding: dict[str, Any]) -> str:
+        """Build B from the frozen C1 treatment path, then gate on its identity.
+
+        The construction comes from `baseline.frozen_baseline_spec`, which uses
+        C1's own constructor, and `assert_frozen_construction` refuses anything
+        whose spec hash is not what C1's preregistration froze. This adds the
+        construction check to the shared materialization; the identity gate and
+        the durability announcement are that one path's.
+        """
+        from experiments.phase_c2 import baseline as BL
+
+        say("  B's bytes no longer exist — rebuilding from the frozen treatment path")
+        spec = BL.frozen_baseline_spec(device=self.a.device)
+        BL.assert_frozen_construction(spec)
+        required = binding["required_identity"]
+        path = self.materialize_arm(
+            "incumbent_b", spec, required=required,
+            bounded_minutes=self.a.b_build_minutes)
+
+        (self.audit / "incumbent_b.identity.json").write_text(json.dumps({
             "schema": "aadistill.autoinit.c2_incumbent_b/v1",
             "construction": binding["construction"],
             "required_identity": required,
-            "built_identity": final.as_dict(),
-            "preserved": preserved,
-            "durable_path": str(dest),
-            "_not_a_probe": binding["_not_a_thirteenth_probe"],
-        }, indent=1) + "\n")
-        return str(final.checkpoint_path)
+            "built_path": path,
+            #: The built identity lives in the durable announcement, which is
+            #: computed from the bytes on disk by the same construction the
+            #: destination re-identification uses. Restating it here would be a
+            #: second record of one fact.
+            "announced": f"durable_units[{'incumbent_b'}]",
+            "_not_a_probe": binding.get("_not_a_thirteenth_probe"),
+        }, indent=2, default=str) + "\n")
+        return path
 
-    # -- the two rungs -------------------------------------------------------
-    def descriptors(self) -> list[dict]:
-        """C1's contract, answered for whichever rung is in flight.
+    # -- the two rungs ------------------------------------------------------
+    def probe_config(self, probe: SCH.Probe) -> Path:
+        """Derive this probe's training config from the frozen recovery recipe.
 
-        The parent's loop reads this; overriding it is what makes the inherited
-        stage-G body train THIS session's probes without the loop being copied.
+        The override set is C1's, unchanged: the seed is the replicate and the
+        initialization is the treatment, and everything else being identical is
+        what makes two probes at the same seed comparable.
         """
-        probes = self.confirmation if self.advanced else self.screening
-        return [{**p.as_dict(), "student_path": p.initialization_path}
-                for p in probes]
+        frozen = json.loads(FROZEN_RECIPE.read_text())
+        name = probe.probe_id
+        derived = {**frozen, "run_name": name,
+                   "out_dir": f"artifacts/stage3/c2_behavioural/{name}",
+                   "data_dir": PACK_DIR, "seed": probe.seed,
+                   "student_path": probe.initialization_path,
+                   "_purpose": (
+                       f"Phase C2 {probe.rung} probe, arm {probe.arm}, seed "
+                       f"{probe.seed}. Identical recovery; the only intended "
+                       "difference between probes at one seed is the "
+                       f"initialization. Derived from {FROZEN_RECIPE.name} by "
+                       "overriding run identity, pack path, seed and "
+                       "student_path.")}
+        diff = sorted(k for k in set(frozen) | set(derived)
+                      if frozen.get(k) != derived.get(k))
+        if not set(diff) <= C1_PROBE_OVERRIDES:
+            raise C2DriverError(
+                f"{name}: the derived probe config differs from the frozen "
+                f"recipe in {sorted(set(diff) - C1_PROBE_OVERRIDES)}, outside "
+                f"the allowed override set {sorted(C1_PROBE_OVERRIDES)}")
+        path = self.audit / "configs" / f"{name}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(derived, indent=2) + "\n")
+        return path
 
-    def run_rung(self, rung: str, probes: list[SCH.Probe], battery: str) -> None:
-        """Train and score one rung, persisting each probe as it completes."""
+    def release_device(self) -> dict:
+        """Hand the card to the trainer, and prove the handoff before training.
+
+        Not scope exit: a C1 attempt read a verdict saying 7.55 GiB was still
+        allocated, started the trainer anyway and lost the probe. Both
+        conditions are enforced — the release worked, and the card has room for
+        the measured peak plus its observed overheads.
+        """
+        before = cuda_memory()
+        import gc
+
+        gc.collect()
+        handoff = complete_release(before)
+        (self.audit / "c2_device_handoff.json").write_text(
+            json.dumps(handoff, indent=2, default=str) + "\n")
+        require_released(handoff, what="the C2 recovery trainer")
+        require_headroom(handoff["after"], need_bytes=_trainer_bytes(),
+                         what="the C2 recovery trainer")
+        say(f"  device handoff: {handoff.get('verdict', 'n/a')}")
+        return handoff
+
+    def train_one(self, name: str, config: Path) -> Path:
+        """Spawn the recovery trainer. A HARDWARE SEAM.
+
+        Everything around it — the budget check, the override check, the
+        journal, the durability announcement, the completion count — is this
+        driver's business, and the `$0` rehearsal replaces exactly this method
+        and its two siblings. A harness that reimplemented the loop could not
+        notice the loop being broken, which this programme has already done once.
+        """
+        rc = subprocess.run(
+            ["/opt/train/bin/python", str(TRAINER), "--config", str(config)],
+            capture_output=True, text=True,
+            timeout=int(self.a.probe_train_minutes * 60 * 2),
+            env=self.child_env())
+        (self.audit / f"{name}_train_tail.log").write_text(
+            (rc.stdout + rc.stderr)[-1500:])
+        if rc.returncode != 0:
+            raise C2DriverError(
+                f"{name}: training failed rc={rc.returncode}; tail: "
+                f"...{(rc.stdout + rc.stderr)[-1200:]}")
+        return REPO / "artifacts/stage3/c2_behavioural" / name
+
+    def generate_one(self, name: str, package: Path, gen_dir: Path,
+                     battery: Path, sets) -> None:
+        """Run the evaluator. A HARDWARE SEAM."""
+        out = self.gate(
+            f"{name}_generation",
+            [str(UNCAPPED_EVAL), "--model", str(package), "--label", name,
+             "--prompts", *[str(battery / f"{s}.jsonl") for s in sets],
+             "--out-dir", str(gen_dir), "--diagnostics"],
+            timeout=int(self.a.probe_battery_minutes * 60 * 3),
+            python="/opt/vllm/bin/python")
+        if out.returncode != 0:
+            raise C2DriverError(
+                f"{name}: generation rc={out.returncode}; tail: "
+                f"...{(out.stdout + out.stderr)[-1200:]}")
+
+    def attest(self, battery: Path) -> dict:
+        """Attest the evaluation protocol for one rung's battery.
+
+        Done ONCE PER RUNG, not once per session: the two rungs read different
+        batteries, and an attestation naming the screening battery cannot
+        certify a confirmation probe. The generation protocol itself is
+        observed from a real engine probe, exactly as C1 does it.
+        """
+        sample = next(iter(self.training.values()))
+        package = Path(self.a.eval_dir) / "_attestation_package"
+        build_evaluation_package(
+            Path(sample["model_dir"]), tokenizer_source=TOKENIZER_SOURCE,
+            dest=package, expected_sidecar_sha256=TOKENIZER_SIDECAR_SHA256)
+        probe_out = self.audit / f"engine_probe_{battery.name}.json"
+        engine = self.gate(
+            f"engine_probe_{battery.name}",
+            [str(ENGINE_PROBE), "--model", str(package), "--out", str(probe_out),
+             "--image-digest", self.a.image_digest],
+            timeout=1800, python="/opt/vllm/bin/python")
+        if engine.returncode != 0:
+            raise C2DriverError(
+                f"engine probe rc={engine.returncode}; tail: "
+                f"...{(engine.stdout + engine.stderr)[-1200:]}")
+        observed = json.loads(probe_out.read_text())
+
+        gen = declared_generation_protocol().materialized(
+            generation_source_digest=generation_source_digest(REPO)["digest"],
+            degeneration_source_digest=sha256_file(
+                REPO / "src/aadistill/evaluation/degeneration.py"))
+        gen = gen.materialized(
+            vllm_version=observed["vllm_version"],
+            transformers_version=observed["transformers_version"],
+            torch_version=observed["torch_version"],
+            runtime_digest=observed["runtime_digest"], dtype=observed["dtype"],
+            gpu_memory_utilization=observed["gpu_memory_utilization"],
+            max_num_seqs=observed["max_num_seqs"],
+            max_num_batched_tokens=observed["max_num_batched_tokens"],
+            enforce_eager=observed["enforce_eager"],
+            tokenizer_sha256=observed["tokenizer_sha256"],
+            chat_template_sha256=observed["chat_template_sha256"],
+            resolved_context=observed["resolved_context"],
+            context_source=observed["context_source"],
+            stop_token_ids=tuple(observed["stop_token_ids"]))
+        gen.require_materialized(context=f"phase C2 battery {battery.name}")
+
+        manifest = json.loads((battery / "manifest.json").read_text())
+        contract = c1_scoring_contract(REPO)
+        protocol = RecoveryEvaluationProtocol(
+            generation=gen, scoring_contract=contract["contract"],
+            scoring_digest=contract["digest"],
+            battery_artifact=manifest["artifact"],
+            battery_manifest_sha256=sha256_json(
+                {k: v for k, v in manifest.items() if k != "manifest_sha256"}),
+            battery_content_sha256=manifest["content_sha256"])
+        self.evaluation_protocol = protocol
+
+        attested = {
+            "schema": "aadistill.autoinit.c2_attested_protocol/v1",
+            "generated_utc": datetime.now(timezone.utc).isoformat(),
+            "battery": manifest["artifact"],
+            "runtime": self.runtime_identity(),
+            "generation_source_digest": generation_source_digest(REPO),
+            "generation_protocol_fingerprint": gen.fingerprint,
+            "scoring_contract": contract,
+            "evaluation_protocol": protocol.as_dict(),
+            "evaluation_protocol_hash": protocol.evaluation_protocol_hash,
+            "tokenizer": {
+                "source_rule": "the evaluated checkpoint",
+                "packaged_from": _rel(TOKENIZER_SOURCE),
+                "sidecar_sha256": dict(TOKENIZER_SIDECAR_SHA256),
+                "observed_sha256": observed["tokenizer_sha256"],
+                "observed_chat_template_sha256":
+                    observed["chat_template_sha256"],
+            },
+            "_per_rung": ("attested once per battery. An attestation naming one "
+                          "rung's battery cannot certify the other's probes."),
+        }
+        attested["report_sha256"] = sha256_json(attested)
+        (self.audit / f"c2_attested_protocol_{battery.name}.json").write_text(
+            json.dumps(attested, indent=2) + "\n")
+        say(f"  attested {battery.name}: protocol "
+            f"{protocol.evaluation_protocol_hash[:12]}…")
+        return attested
+
+    def admit_generation(self, name: str, gen_dir: Path, battery: Path) -> dict:
+        """Refuse a probe whose generations were not produced under the protocol.
+
+        The attestation says what the runtime is expected to do, once, from an
+        engine probe; it is not evidence about any particular probe's rollouts.
+        This reconstructs the protocol from THIS probe's raw per-set summaries
+        and requires it to be comparable to the attested one.
+
+        Fail-closed and BEFORE the scorer runs. Scoring first and recording the
+        observed fingerprint afterwards let a result claim an identity before
+        the evidence for it had been admitted, and never compared the two.
+        """
+        summaries = [json.loads(p.read_text())
+                     for p in sorted(gen_dir.glob("*.json"))
+                     if not p.name.endswith(".generations.jsonl")]
+        observed_gen = observe_generation_protocol(summaries).protocol
+        manifest = json.loads((battery / "manifest.json").read_text())
+        contract = c1_scoring_contract(REPO)
+        observed = RecoveryEvaluationProtocol(
+            generation=observed_gen, scoring_contract=contract["contract"],
+            scoring_digest=contract["digest"],
+            battery_artifact=manifest["artifact"],
+            battery_manifest_sha256=sha256_json(
+                {k: v for k, v in manifest.items() if k != "manifest_sha256"}),
+            battery_content_sha256=manifest["content_sha256"])
+        record = {
+            "probe_id": name,
+            "generation_fingerprint": observed_gen.fingerprint,
+            "evaluation_protocol_hash": observed.evaluation_protocol_hash,
+            "attested_evaluation_protocol_hash":
+                self.evaluation_protocol.evaluation_protocol_hash,
+            "n_summaries": len(summaries),
+        }
+        try:
+            observed.require_comparable(self.evaluation_protocol, context=name)
+        except Exception as exc:                                  # noqa: BLE001
+            record["comparable"] = False
+            record["reason"] = str(exc)[-1500:]
+            (self.audit / f"{name}_generation_admission.json").write_text(
+                json.dumps(record, indent=2) + "\n")
+            raise C2DriverError(
+                f"{name}: the generations were not produced under the attested "
+                "evaluation protocol, so this probe cannot be scored and no "
+                f"later probe may be evaluated. {exc}") from exc
+        record["comparable"] = True
+        (self.audit / f"{name}_generation_admission.json").write_text(
+            json.dumps(record, indent=2) + "\n")
+        say(f"  {name}: generation protocol admitted "
+            f"({record['evaluation_protocol_hash'][:12]}…)")
+        return record
+
+    def score_probe(self, probe: SCH.Probe, model_dir: Path, *,
+                    battery: Path, run_completion: Path | None) -> dict:
+        """Package, generate, ADMIT, then score. One probe, one rung's battery.
+
+        Real production code, parameterized by the rung's battery — not a seam.
+        The two hardware-bound calls inside it (`generate_one`, and the engine
+        probe behind the attestation) are the seams; everything else here runs
+        unchanged in the `$0` rehearsal.
+
+        The battery decides which scorer runs. They are separate entry points on
+        purpose: C1's pins its battery by equality so the rung that may name an
+        incumbent cannot be aimed elsewhere, and the screening rung gets its own
+        pinned entry point rather than a flag that would loosen that guard. Both
+        apply the same metric contract, which is what the frozen protocol
+        requires of the two rungs.
+        """
+        name = probe.probe_id
+        screening = probe.rung == "screening"
+        manifest = json.loads((battery / "manifest.json").read_text())
+
+        package = Path(self.a.eval_dir) / name / "package"
+        build_evaluation_package(
+            model_dir, tokenizer_source=TOKENIZER_SOURCE, dest=package,
+            expected_sidecar_sha256=TOKENIZER_SIDECAR_SHA256)
+
+        gen_dir = Path(self.a.eval_dir) / name
+        self.generate_one(name, package, gen_dir, battery, manifest["sets"])
+        observed = self.admit_generation(name, gen_dir, battery)
+
+        scored = self.audit / f"{name}_result.json"
+        per_sample = self.audit / f"{name}_per_sample.jsonl"
+        argv = scorer_argv(
+            probe, battery=battery, gen_dir=gen_dir, out=scored,
+            per_sample=per_sample,
+            generation_fingerprint=observed["generation_fingerprint"],
+            run_completion=run_completion)
+
+        rc = self.gate(f"{name}_scoring", argv, timeout=1800,
+                       python=sys.executable)
+        if rc.returncode != 0:
+            raise C2DriverError(
+                f"{name}: scoring rc={rc.returncode}; tail: "
+                f"...{(rc.stdout + rc.stderr)[-1200:]}")
+        result = json.loads(scored.read_text())
+        return {
+            "probe_id": name, "rung": probe.rung, "arm": probe.arm,
+            "seed": probe.seed,
+            "result": result,
+            "result_path": _rel(scored),
+            "result_sha256": sha256_file(scored),
+            "per_sample_path": _rel(per_sample),
+            "per_sample_sha256": sha256_file(per_sample),
+            "observed_generation": observed["generation_fingerprint"],
+            "observed_evaluation_protocol_hash":
+                observed["evaluation_protocol_hash"],
+            "correct_overall": result["correct_overall"],
+            "usable_rollout_rate": result["usable_rollout_rate"],
+        }
+
+    def run_rung(self, rung: str, probes: list[SCH.Probe], battery: Path) -> None:
+        """Train and score one rung, announcing each probe as it completes."""
+        self.release_device()
+        attested = None
         for probe in probes:
             name = probe.probe_id
-            if name in self.probe_scores:
-                say(f"  {name}: restored from the journal")
+            if name in self.scores:
+                say(f"  {name}: already complete in this campaign — not retrained")
                 continue
             if not self.afford(self.a.probe_train_minutes
                                + self.a.probe_battery_minutes, name):
-                raise BehaviouralDriverError(
+                raise C2DriverError(
                     f"budget refuses {name}; no probe is skipped to make "
                     "progress and a partial rung decides nothing")
-            d = {**probe.as_dict(), "student_path": probe.initialization_path}
-            config = self.probe_config(d)
+            config = self.probe_config(probe)
             t0 = time.time()
             out_dir = self.train_one(name, config)
-            record = {"probe_id": name, "rung": rung, "arm": probe.arm,
-                      "seed": probe.seed, "out_dir": str(out_dir),
-                      "train_minutes": round((time.time() - t0) / 60, 2)}
-            record["preserved"] = self.preserve_probe(
-                name, Path(out_dir), record)
-            self.probe_training[name] = record
-            score = self.score_probe(name, out_dir, battery)
-            self.probe_scores[name] = score
-            (AUDIT / "probes" / f"{name}.json").write_text(
-                json.dumps({**record, "score": score}, indent=1) + "\n")
+            model_dir = trained_model_dir(out_dir)
+            record = {"probe_id": name, "campaign": self.a.campaign,
+                      "rung": rung, "arm": probe.arm,
+                      "seed": probe.seed, "out_dir": _rel(out_dir),
+                      "model_dir": str(model_dir),
+                      "initialization_artifact_digest":
+                          probe.initialization_artifact_digest,
+                      "config_sha256": sha256_file(config),
+                      "train_minutes": round((time.time() - t0) / 60, 2),
+                      "complete": True}
+            self.training[name] = record
+            #: The moment it exists, before anything else can fail.
+            arch_signature, num_parameters = self.arm_arch[probe.arm]
+            record["durable"] = self.announce_durable(
+                name, model_dir, kind="probe", rung=rung, arm=probe.arm,
+                seed=probe.seed, arch_signature=arch_signature,
+                num_parameters=num_parameters,
+                initialization_artifact_digest=
+                    probe.initialization_artifact_digest)
             self.save()
-            mark(f"{PROBE_MARKER}:{name}")
+
+            #: Attested once per rung, after the first probe exists — the
+            #: attestation packages a real trained checkpoint.
+            if attested is None:
+                attested = self.attest(battery)
+
+            run_completion = out_dir / "run_completion.json"
+            score = self.score_probe(probe, model_dir, battery=battery,
+                                     run_completion=run_completion)
+            self.scores[name] = score
+            (self.audit / "probes" / f"{name}.json").write_text(
+                json.dumps({**record, "score": score}, indent=2,
+                           default=str) + "\n")
+            self.save()
+            self.mark(f"{PROBE_MARKER}:{name}")
             say(f"  {name}: trained and scored, correct_overall="
-                f"{score['correct_overall']:.4f}")
+                f"{score['correct_overall']:.4f}, usable="
+                f"{score['usable_rollout_rate']:.4f}")
 
-    def score_probe(self, name: str, out_dir: Path, battery: str) -> dict:
-        """Score one probe on one battery. A SEAM, like C1's `train_one`.
-
-        Everything around it — the rung loop, the completeness gate, the
-        ranking — is this driver's business and is exercised without hardware.
-        """
-        raise NotImplementedError(
-            "score_probe is bound at session construction to C1's battery "
-            "scorer; a driver that reached here has not been wired")
-
+    # -- S / R / C / D ------------------------------------------------------
     def stage_s(self) -> None:
-        mark("STAGE_START:S")
-        proto = BH.protocol(REPO_ROOT)["behavioural_selection"]
+        self.mark("STAGE_START:S")
         self.screening = SCH.screening_probes(
-            self.candidates, self.anchor, proto["seeds"]["screening"])
+            self.candidates, self.anchor, self.proto["seeds"]["screening"])
         self.run_rung("screening", self.screening,
-                      proto["batteries"]["screening"]["asset_id"])
+                      REPO / C2S.BATTERY_PATH)
         ok, why = SCH.screening_is_complete(
-            self.screening, self.probe_training, self.probe_scores)
+            self.screening, self.training, self.scores)
         if not ok:
-            raise BehaviouralDriverError(why)
-        self.complete("S", probes=len(self.screening), **{"gate": why})
+            raise C2DriverError(why)
+        self.complete("S", probes=len(self.screening), gate=why)
 
     def stage_r(self) -> None:
         """Rank and advance exactly one. NO VERDICT LEAVES THIS STAGE."""
-        mark("STAGE_START:R")
+        self.mark("STAGE_START:R")
         ok, why = SCH.screening_is_complete(
-            self.screening, self.probe_training, self.probe_scores)
+            self.screening, self.training, self.scores)
         if not ok:
-            raise BehaviouralDriverError(
+            raise C2DriverError(
                 f"{why} Ranking a partial field selects on who finished first.")
 
-        scores = {p.arm: self.probe_scores[p.probe_id]["correct_overall"]
+        scores = {p.arm: self.scores[p.probe_id]["correct_overall"]
                   for p in self.screening}
         self.ranked = SCH.rank_screening(scores, self.candidates)
-        result = {"ranked": self.ranked}
-        SCH.assert_screening_emits_no_verdict(result)
+        SCH.assert_screening_emits_no_verdict({"ranked": self.ranked})
         self.advanced = SCH.advance_one(self.ranked)
-        mark(f"{ADVANCED_MARKER}:{self.advanced['state_id']}")
+        (self.audit / "c2_screening_ranking.json").write_text(json.dumps({
+            "schema": "aadistill.autoinit.c2_screening_ranking/v1",
+            "battery": C2S.BATTERY_PATH,
+            "seed": self.proto["seeds"]["screening"],
+            "anchor_correct_overall": scores[SCH.ANCHOR],
+            "ranked": self.ranked, "advanced": self.advanced,
+            "may_not": list(C2S.SCREENING_MAY_NOT),
+        }, indent=2) + "\n")
+        self.mark(f"{ADVANCED_MARKER}:{self.advanced['state_id']}")
         say(f"  advanced {self.advanced['state_id'][:12]}…, delta vs B "
             f"{self.advanced['delta_vs_b']:+.4f}"
             + (" (tie broken on the frozen order)"
@@ -270,51 +1139,67 @@ class C2BehaviouralDriver(C1Driver):
                       emits_verdict=False)
 
     def stage_c(self) -> None:
-        mark("STAGE_START:C")
+        self.mark("STAGE_START:C")
         if self.advanced is None:
-            raise BehaviouralDriverError("no candidate has advanced")
-        proto = BH.protocol(REPO_ROOT)["behavioural_selection"]
+            raise C2DriverError("no candidate has advanced")
         chosen = next(c for c in self.candidates
                       if c["state_id"] == self.advanced["state_id"])
         self.confirmation = SCH.confirmation_probes(
-            chosen, self.anchor, proto["seeds"]["confirmation"])
+            chosen, self.anchor, self.rule.seeds)
         self.run_rung("confirmation", self.confirmation,
-                      proto["batteries"]["confirmation"]["asset_id"])
+                      REPO / self.proto["batteries"]["confirmation"]["path"])
         self.complete("C", probes=len(self.confirmation),
                       arm=self.advanced["state_id"])
 
     def stage_d(self) -> None:
-        """Apply C1's frozen decision rule. The ONLY stage that may name one."""
-        mark("STAGE_START:D")
-        deltas = []
-        for seed in {p.seed for p in self.confirmation}:
-            pair = {p.arm: self.probe_scores[p.probe_id]["correct_overall"]
-                    for p in self.confirmation if p.seed == seed}
-            deltas.append({"seed": seed,
-                           "delta": round(pair[self.advanced["state_id"]]
-                                          - pair[SCH.ANCHOR], 10)})
-        verdict = self.apply_frozen_decision_rule(deltas)
-        self.complete("D", deltas=deltas, **verdict)
+        """Apply the frozen decision rule. The ONLY stage that may name one."""
+        self.mark("STAGE_START:D")
+        rows: dict[tuple[str, int], list[dict]] = {}
+        for probe in self.confirmation:
+            s = self.scores[probe.probe_id]
+            arm = (BD.INCUMBENT_ARM if probe.arm == SCH.ANCHOR
+                   else BD.TREATMENT_ARM)
+            path = Path(s["per_sample_path"])
+            path = path if path.is_absolute() else REPO / path
+            rows[(arm, probe.seed)] = [
+                json.loads(line) for line in path.open() if line.strip()]
 
-    def apply_frozen_decision_rule(self, deltas: list[dict]) -> dict:
-        """C1's rule, imported rather than restated. A SEAM for the same reason."""
-        raise NotImplementedError(
-            "apply_frozen_decision_rule is bound at session construction to "
-            "C1's frozen rule; a driver that reached here has not been wired")
+        decision = BD.confirm(rows, rule=self.rule)
+        decision["advanced_candidate"] = self.advanced["state_id"]
+        decision["anchor"] = self.anchor["artifact_digest"]
+        decision["probe_results"] = {
+            k: {"result_sha256": v["result_sha256"],
+                "per_sample_sha256": v["per_sample_sha256"]}
+            for k, v in sorted(self.scores.items())}
+        (self.audit / "c2_decision.json").write_text(
+            json.dumps(decision, indent=2) + "\n")
+        d = decision["decision"]
+        say(f"DECISION: {decision['terminal_state']} · delta {d['delta']:+.4f} "
+            f"· LCB {d['lcb_one_sided']:+.4f}")
+        self.complete("D", terminal_state=decision["terminal_state"],
+                      delta=d["delta"], lcb=d["lcb_one_sided"],
+                      bootstrap_seed=decision["bootstrap_seed_used"])
 
-    # -- run -----------------------------------------------------------------
+    # -- run ----------------------------------------------------------------
     def run(self) -> int:
+        self.mark("DRIVER_START")
+        #: Before anything is trained. A probe this campaign already finished
+        #: is restored and never retrained; one from another campaign, or one
+        #: whose bytes no longer match what was announced, is refused.
+        self.load_campaign_journal()
+        self.save()
         stages = (("P", self.stage_p), ("S", self.stage_s), ("R", self.stage_r),
                   ("C", self.stage_c), ("D", self.stage_d))
         for letter, fn in stages:
             say(f"stage {letter}")
             try:
                 fn()
-            except Exception as exc:                            # noqa: BLE001
-                self.fail(letter, exc)
-                mark(FAILURE_MARKER)
+            except Exception as exc:                              # noqa: BLE001
+                self.fail(letter, f"{type(exc).__name__}: {exc}",
+                          traceback=traceback.format_exc()[-3000:])
+                self.mark(FAILURE_MARKER)
                 return 1
-        mark(SUCCESS_MARKER)
+        self.mark(SUCCESS_MARKER)
         return 0
 
 
@@ -322,15 +1207,28 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--stage", default="all")
-    ap.add_argument("--device", default="cuda")
+    ap.add_argument("--campaign", required=True,
+                    help="campaign id; probes may only be reused within one")
+    ap.add_argument("--audit-dir", required=True)
+    ap.add_argument("--eval-dir", required=True)
     ap.add_argument("--b-workdir", required=True,
                     help="where incumbent B is materialized before it is gated")
-    ap.add_argument("--b-durable", default=BH.B_DURABLE_PATH)
+    ap.add_argument("--status-path", required=True)
+    ap.add_argument("--device", default="cuda")
+    ap.add_argument("--b-build-minutes", type=float, required=True)
     ap.add_argument("--probe-train-minutes", type=float, required=True)
     ap.add_argument("--probe-battery-minutes", type=float, required=True)
     ap.add_argument("--rate", type=float, required=True)
+    ap.add_argument("--spent-usd", type=float, default=0.0)
     ap.add_argument("--soft-stop-usd", type=float, required=True)
     ap.add_argument("--authorized-usd", type=float, required=True)
     ap.add_argument("--image-digest", default="")
     return ap
+
+
+def main() -> int:
+    return C2BehaviouralDriver(build_parser().parse_args()).run()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
