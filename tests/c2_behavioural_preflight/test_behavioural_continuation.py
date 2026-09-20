@@ -1722,3 +1722,70 @@ def test_a_mixed_campaign_state_buckets_every_probe_correctly(tmp_path, repo,
     assert d["hard_minutes"] < nine_full["hard_minutes"]
     assert (nine_full["expected_minutes"] - d["expected_minutes"]
             ) == pytest.approx(train_mean, abs=0.02)
+
+
+# ---------------------------------------------------------------------------
+# the readiness gate: a gate that cannot pass, and a gate that passes a FAIL
+# ---------------------------------------------------------------------------
+
+def _readiness(repo_root: Path, run_id: str, **over) -> Path:
+    """A readiness record in the shape the recorder actually writes."""
+    from experiments.phase_c2 import behavioural_pod_environment as BPE
+
+    path = repo_root / BPE.record_path_for(run_id, L.STAGE_ID)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    record = {"record_kind": "launch_bound", "verdict": "PASS",
+              "counts": {"passed": 152, "failed": 0, "skipped": 0, "error": 0},
+              "problems": []}
+    record.update(over)
+    path.write_text(json.dumps(record))
+    return path
+
+
+@pytest.mark.parametrize("over,why", [
+    ({}, None),
+    ({"record_kind": "diagnostic"}, "not 'launch_bound'"),
+    ({"verdict": "FAIL", "problems": ["3 failed"]}, "does not rest on a sweep"),
+    ({"verdict": None}, "does not rest on a sweep"),
+])
+def test_the_readiness_gate_reads_record_kind_and_the_verdict(
+        tmp_path, monkeypatch, over, why):
+    """The gate read `kind`, which NO record carries, so it could not pass.
+
+    Every readiness record this repository writes names the field
+    `record_kind`; `kind` is absent, so the comparison was
+    `None != "launch_bound"` on a perfectly good record. The replay launcher's
+    docstring names that shape as the defect the full-search launcher was
+    repaired for. It would have refused this launch at gate seven of eight.
+
+    And it never asked the verdict, which is the more dangerous half: the first
+    behavioural sweep FAILED, and a gate that only asks "is this launch-bound"
+    lets a failing tree through.
+    """
+    from experiments.phase_c2 import behavioural_pod_environment as BPE
+
+    root = _mirror_repo(tmp_path / "repo")
+    monkeypatch.setattr(L, "REPO_ROOT", root)
+    _readiness(root, "attempt1", **over)
+    #: `verify_record` binds the record to a tree and is not what is under test
+    #: here; it has its own coverage in the pod-environment contract.
+    monkeypatch.setattr(BPE, "verify_record",
+                        lambda *a, **k: {"ok": True})
+
+    ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt1")
+    ok, message = L.readiness_gate(ctx)
+    if why is None:
+        assert ok, message
+        assert "launch_bound" in message and "PASS" in message
+    else:
+        assert not ok
+        assert why in message
+
+
+def test_a_missing_readiness_record_refuses(tmp_path, monkeypatch):
+    root = _mirror_repo(tmp_path / "repo")
+    monkeypatch.setattr(L, "REPO_ROOT", root)
+    ok, message = L.readiness_gate(
+        _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt1"))
+    assert not ok
+    assert "no behavioural readiness record" in message

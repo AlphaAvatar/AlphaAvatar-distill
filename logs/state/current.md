@@ -28,6 +28,20 @@ the record → authorization → commit only the artifact → exact-session bund
 final live quote and all pre-provider gates → provider resource → formal
 execution → evidence, closeout, provider-confirmed teardown.
 
+**attempt1's chain is RETIRED at `$0`, before any provider contact, and
+attempt2 is building on a repaired tree.** Running the eight pre-provider gates
+before creating a resource — rather than discovering them on a meter — found
+that `readiness_gate` compared `record.get("kind")` when no readiness record
+this repository writes carries that field. It is `record_kind`. The gate could
+not have passed for any record, and it never checked the sweep's verdict
+either, so a FAILED sweep would have satisfied it. Both halves are repaired and
+regression-tested. The repair is inside the executable closure, so the closure
+moved `f08d2aaf…` → `d99ef79c…` and attempt1's authorization — which binds the
+old one — is superseded rather than edited. Nothing billed; the whole
+`$33.2099` campaign ceiling is intact. The amendment is recorded in attempt2's
+grant with the before/after closure and the reason. **The plan hash is
+byte-identical: no science moved.**
+
 **All five Top-5 checkpoints are reconstructed, exact, and durable off-pod.**
 Attempt 9 (pod `i0uku41wc6ph3e`, 113.8 min, `$2.07`) reproduced every one of the
 20 intermediate artifact digests and every leaf identity attempt 3 recorded.

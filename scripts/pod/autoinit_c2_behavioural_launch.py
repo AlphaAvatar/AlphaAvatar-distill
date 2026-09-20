@@ -642,7 +642,27 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 
 def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
-    """A launch-bound readiness record for THIS run, on THIS tree."""
+    """A launch-bound readiness record for THIS run, on THIS tree, that PASSED.
+
+    Three questions, and this gate used to get two of them wrong.
+
+    It read `record.get("kind")`. **No readiness record carries `kind`** — the
+    field is `record_kind`, and every sibling launcher reads that. So the
+    comparison was `None != "launch_bound"` on every correct record and the
+    gate COULD NOT PASS. The replay launcher's own docstring names this exact
+    shape as the defect the full-search launcher was repaired for: "a gate that
+    could not pass". Found here at `$0` by running the gates before creating a
+    provider resource; it would otherwise have refused the launch at gate seven
+    of eight and consumed the chain.
+
+    And it never asked the verdict. A sweep that FAILED would have satisfied a
+    kind check, which is the more dangerous half: the first behavioural sweep
+    DID fail, and a gate that only asks "is this launch-bound" would have let a
+    failing tree through.
+
+    `verify_record` stays: a record that passed on another tree is evidence
+    about that tree, not this one.
+    """
     run_id = getattr(ctx.args, "run_id", "")
     try:
         record = BPE.load_record(REPO_ROOT, run_id=run_id, stage_id=STAGE_ID)
@@ -652,12 +672,18 @@ def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
         BPE.verify_record(record, REPO_ROOT, run_id=run_id, stage_id=STAGE_ID)
     except Exception as exc:                                    # noqa: BLE001
         return False, f"the readiness record does not describe this tree: {exc}"
-    if record.get("kind") != BPE.LAUNCH_BOUND:
+    kind = record.get("record_kind")
+    if kind != BPE.LAUNCH_BOUND:
         return False, (
-            f"the readiness record is {record.get('kind')!r}, not "
-            f"{BPE.LAUNCH_BOUND!r}. Only a launch-bound sweep describes the tree "
-            "a launch will use.")
-    return True, f"readiness OK ({record.get('kind')})"
+            f"the readiness record is {kind!r}, not {BPE.LAUNCH_BOUND!r}. Only "
+            "a launch-bound sweep describes the tree a launch will use.")
+    if record.get("verdict") != "PASS":
+        return False, (
+            f"the launch-bound sweep recorded {record.get('verdict')!r} with "
+            f"problems {record.get('problems')}. A launch does not rest on a "
+            "sweep that failed.")
+    return True, (f"readiness OK ({kind}, {record.get('verdict')}, "
+                  f"{record.get('counts')})")
 
 
 def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:

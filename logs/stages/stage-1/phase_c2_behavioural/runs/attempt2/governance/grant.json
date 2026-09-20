@@ -1,0 +1,116 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_grant/v1",
+ "contract_id": "phase_c2.behavioural_grant/v1",
+ "_what_this_is": "What a person approved, in the fields only a person can fill. The issuer re-derives every identity beside it and refuses on any disagreement, so this document cannot introduce a binding nobody checks.",
+ "granted_by": "maintainer",
+ "granted_utc": "2026-09-21",
+ "run_id": "attempt2",
+ "experiment_id": "phase_c2_behavioural",
+ "stage_id": "1",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "reviewed_baseline": {
+  "origin_main": "197088e56742363f9fc74f7d4b7d8ffd7a7655da",
+  "proposal_sha256": "20e025c4aa6ab2448cbd7b0fd4dc469759183edad8887b829c48d8476f80077b",
+  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+  "executable_closure": "d99ef79cf460598ac6fe86d3fc0ad541742ff5902168670e655989e641c41661",
+  "closure_files": 134,
+  "resume_preregistration_sha256": "15451b6325e03466f97e01d2acc8ef06fa097b75e2e69a9a68a10dc912bdfbdf",
+  "_the_issuer_rederives_these": "every identity here is re-derived live at issuance and a disagreement is a refusal. They are recorded so a reader can see WHAT was reviewed, not so anything trusts the copy.",
+  "_closure_moved_by_amendment_1": "the REVIEWED closure was f08d2aaf\u2026 at origin/main 197088e, and the reviewer's GO was given against it. Amendment 1 above moved it by one launcher-gate repair. The value here is what this chain binds and what the issuer checks; the reviewed value and the reason it moved are recorded so the difference is visible rather than silent.",
+  "plan_hash_is_the_reviewed_one": true
+ },
+ "covers": "ONE Phase-C2 behavioural selection campaign: the five frozen Top-5 C candidates and incumbent B, materialized along deterministic digest-gated fixed paths as the reviewed execution path requires, six screening probes, exactly one mechanical screening advancement, six confirmation probes, the frozen screening and confirmation batteries, the frozen seeds, the frozen scoring contract, bootstrap seed 834816710, and the frozen Phase-C GO / NO_GO / INCONCLUSIVE decision rule. Same-campaign continuation only, under preregistered R1-R10.",
+ "terminal_results": [
+  "GO",
+  "NO_GO",
+  "INCONCLUSIVE"
+ ],
+ "_any_terminal_result_ends_the_campaign": "a complete GO, NO_GO or INCONCLUSIVE is a valid terminal result and ends this campaign. None of them is a reason to start another attempt.",
+ "explicitly_not_authorized": [
+  "any beam search",
+  "any new Full Search",
+  "any re-ranking of the frozen Top-5",
+  "any regeneration of the selection",
+  "any B state-eval remeasurement",
+  "any fourth seed",
+  "any tie-break rung beyond the frozen rule",
+  "any forced winner",
+  "any C3 work",
+  "any C4 work",
+  "any C1 rerun",
+  "any Replay rerun",
+  "any frozen scientific protocol change"
+ ],
+ "approved_money": {
+  "max_rate_usd_per_hour": 1.09,
+  "expected_all_in_usd": 23.8832,
+  "gpu_hard_usd": 32.7097,
+  "disk_hard_usd": 0.5002,
+  "all_in_usd": 33.2099,
+  "gpu": "NVIDIA L40S",
+  "container_disk_gb": 120,
+  "_is_a_campaign_ceiling": "the $33.2099 is CUMULATIVE across every run attempt and provider resource of campaign c2-behavioural-12probe-v1. It is not a fresh allocation for each replacement resource.",
+  "_basis": "the reviewed proposal basis at a quoted L40S securePrice of $1.09/h. Issuance re-quotes the live securePrice and derives the authorization terms mechanically from it."
+ },
+ "project_position": {
+  "before_usd": 309.2043,
+  "cap_usd": 370.0,
+  "if_fully_spent_usd": 342.4142,
+  "headroom_after_usd": 27.5858
+ },
+ "live_rate_issuance_rule": [
+  "re-query the provider's live gpuTypes.securePrice",
+  "derive the authorization terms mechanically from that live rate",
+  "bind rate_usd_per_hour, hard_runtime_minutes, gpu_hard_usd, disk_hard_usd and all_in_hard_usd distinctly",
+  "retain the reviewed scientific runtime and work scope",
+  "do not shorten the scientific experiment merely because the provider price increased",
+  "do not extend runtime or work because the provider price decreased",
+  "if the live quote materially changes the dollar authorization from the reviewed basis, STOP and return to the maintainer before creating the provider resource",
+  "a provider-returned rate above the authorized rate must refuse and tear down under the existing fail-closed contract"
+ ],
+ "one_use": true,
+ "max_provider_resources": 1,
+ "_one_use_is_per_chain": "this grant authorizes ONE launch chain. A replacement resource inside the same campaign is a new run attempt with a fresh chain, permitted under R1-R10 and bounded by the SAME cumulative campaign ceiling above \u2014 not by a new allocation.",
+ "autonomous_engineering_repair": {
+  "permitted": "inside this scientific scope and the same cumulative campaign ceiling, ordinary engineering failures are handled autonomously: preserve evidence, confirm teardown and non-billing, diagnose, minimal repair, focused regression, fresh run identity and chain where required, continue. No approval is needed after each ordinary failure.",
+  "stop_and_return_if": [
+   "continuing would require increasing the $33.2099 campaign ceiling",
+   "continuing would change the scientific protocol, arms, seeds, batteries, scoring or decision rule",
+   "continuing would change the approved provider or rate boundary",
+   "billing or resource ownership is uncertain",
+   "continuing would mutate frozen evidence",
+   "a scientific identity mismatch would be treated as an engineering retry",
+   "a complete valid verdict already exists"
+  ]
+ },
+ "on_identity_mismatch": "an arm whose rebuilt digest does not match the frozen record is a SCIENTIFIC FINDING and a stop condition, not a retryable engineering failure. The path is deterministic and would diverge identically on a retry. Preserve, tear down, and return it to review unchanged.",
+ "execution_chain": [
+  "grant",
+  "launch-bound readiness",
+  "commit only the readiness record",
+  "authorization",
+  "commit only the authorization artifact",
+  "exact-session bundle",
+  "final live quote and all pre-provider gates",
+  "provider resource",
+  "formal behavioural execution",
+  "evidence collection, closeout, provider-confirmed teardown"
+ ],
+ "_ordering_is_binding": "the binding-sensitive steps may not be skipped or reordered. The bundle must carry the authorization, so the authorization must exist first; and the lineage check permits exactly one tracked path to differ between the authorized base and the session commit, so the readiness record and the authorization are separate commits.",
+ "_this_grant_restates_attempt1": "the maintainer's decision of 2026-09-21 is unchanged: same campaign, same scope, same not-authorized list, same CUMULATIVE $33.2099 all-in ceiling, same live-rate rule. attempt1 spent nothing, so the whole ceiling remains. What differs is the baseline this chain binds, recorded below.",
+ "engineering_amendments": [
+  {
+   "amendment": 1,
+   "utc": "2026-09-21",
+   "kind": "ordinary engineering repair, inside the approved envelope",
+   "what": "scripts/pod/autoinit_c2_behavioural_launch.py :: readiness_gate read `record.get('kind')`. No readiness record carries that field; it is `record_kind`. The gate could not pass for any record, so the launch would have refused at gate seven of eight. It also never checked the sweep's verdict, so a FAILED sweep would have satisfied it \u2014 and the first behavioural sweep did fail.",
+   "found": "by running every pre-provider gate at $0 under attempt1, before any provider resource was created",
+   "closure_before": "f08d2aaf20841750a695ba37dc6876fcfdd1387694fe14e431aae033d7cf8400",
+   "closure_after": "d99ef79cf460598ac6fe86d3fc0ad541742ff5902168670e655989e641c41661",
+   "plan_hash_unchanged": true,
+   "money_unchanged": true,
+   "regression": "tests/c2_behavioural_preflight/test_behavioural_continuation.py :: test_the_readiness_gate_reads_record_kind_and_the_verdict and test_a_missing_readiness_record_refuses. Both halves of the repair were mutated back and the regression caught each.",
+   "_why_this_is_not_a_scope_change": "no science moved. The plan hash is byte-identical, the protocol, arms, seeds, batteries, scoring and decision rule are untouched, the money is unchanged, and the provider and rate boundary are unchanged. The maintainer's envelope covers ordinary engineering failures inside the approved scope and names 'fresh run identity/chain where required', which is exactly what a closure-moving repair requires."
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_outcome/v1",
+ "run_id": "attempt1",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT",
+ "provider_resource_created": false,
+ "spend_usd": 0.0,
+ "billing": "none \u2014 no provider resource was ever created for this run",
+ "what_happened": "the chain was built in order \u2014 grant, launch-bound readiness (PASS, 152/0/0), authorization at a re-quoted $1.09/h, exact-session bundle \u2014 and then every pre-provider gate was run at $0 before creating a resource. Seven of eight passed. `readiness_gate` refused, and it was RIGHT to refuse in the sense that mattered: it could not have passed for any record. It compared `record.get('kind')`, and no readiness record this repository writes carries that field \u2014 the field is `record_kind`. It also never checked the verdict, so a FAILED sweep would have satisfied it.",
+ "why_a_fresh_chain": "the repair is in scripts/pod/autoinit_c2_behavioural_launch.py, which is IN the executable closure. Fixing it necessarily moves the closure digest, and this attempt's authorization binds the old one. An authorization cannot be edited to match a tree that changed under it, so the chain is retired and attempt2 gets a fresh one. This is the 'fresh run identity/chain where required' branch of the approved autonomous-repair envelope, not a scope change.",
+ "closure_at_this_attempt": "f08d2aaf20841750a695ba37dc6876fcfdd1387694fe14e431aae033d7cf8400",
+ "artifacts": {
+  "grant": "governance/grant.json",
+  "readiness": "governance/readiness.json \u2014 launch_bound, PASS, and still valid evidence about the tree it swept (a6b0262)",
+  "authorization": "governance/authorization.json \u2014 CONSUMED and superseded; it authorizes a closure that no longer exists",
+  "bundle": "governance/bundle.json \u2014 uncommitted by design; the object is on the relay at transfer/aad_autoinit_8256414e.bundle and is inert"
+ },
+ "money": {
+  "authorized_all_in_usd": 33.2099,
+  "spent_usd": 0.0,
+  "campaign_remaining_all_in_usd": 33.2099,
+  "_the_ceiling_is_untouched": "nothing billed, so the cumulative campaign ceiling is entirely intact for attempt2. A retired chain does not consume money."
+ },
+ "authorizes": "nothing"
+}
