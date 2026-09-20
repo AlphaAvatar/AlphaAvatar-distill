@@ -1,0 +1,18 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_outcome/v1",
+ "run_id": "attempt2",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT",
+ "provider_resource_created": false,
+ "spend_usd": 0.0,
+ "billing": "none \u2014 no provider resource was ever created for this run",
+ "what_happened": "the chain was built in order and every pre-provider gate was run at $0. Seven of eight passed, including the repaired readiness_gate. `campaign_continuation_gate` refused, correctly: attempt1 is a prior run attempt of this campaign with no session record, and a resource that may have billed is UNKNOWN rather than zero. attempt1 provably never reached the launcher \u2014 its closeout says so \u2014 but the gate could not read that.",
+ "why_a_fresh_chain": "the repair teaches prior_attempt_actual to accept an AFFIRMATIVE closeout statement that no provider resource was created, while leaving absence as UNKNOWN. It is in the launcher, which is in the executable closure, so the closure moved and this attempt's authorization binds the old digest.",
+ "closure_at_this_attempt": "d99ef79cf460598ac6fe86d3fc0ad541742ff5902168670e655989e641c41661",
+ "money": {
+  "authorized_all_in_usd": 33.2099,
+  "spent_usd": 0.0,
+  "campaign_remaining_all_in_usd": 33.2099
+ },
+ "authorizes": "nothing"
+}

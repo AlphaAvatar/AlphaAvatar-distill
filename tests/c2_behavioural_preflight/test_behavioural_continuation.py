@@ -1789,3 +1789,68 @@ def test_a_missing_readiness_record_refuses(tmp_path, monkeypatch):
         _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt1"))
     assert not ok
     assert "no behavioural readiness record" in message
+
+
+def _closeout(repo_root: Path, run_id: str, **over) -> Path:
+    """A retired chain's closeout, in the shape the launcher writes."""
+    path = _refuse_to_write_into_the_repository(
+        repo_root / L.rel_run_dir(L.EXPERIMENT_ID, run_id, L.STAGE_ID)
+        / "closeout" / "outcome.json")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    record = {"run_id": run_id,
+              "terminal": "CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT",
+              "provider_resource_created": False, "spend_usd": 0.0}
+    record.update(over)
+    path.write_text(json.dumps(record))
+    return path
+
+
+def test_a_retired_chain_is_zero_not_unknown(tmp_path, repo):
+    """A chain retired before the launcher ran created nothing, and says so.
+
+    No session record has TWO causes that must not be conflated: a launcher
+    that died mid-flight, which may have created a resource, and a chain
+    retired before the launcher ran at all. Only an affirmative statement tells
+    them apart. A retirement is not rare — any repair inside the executable
+    closure forces one — so without this the campaign's first retirement blocks
+    every later attempt forever.
+    """
+    _run_manifest(repo, "attempt1")
+    _closeout(repo, "attempt1")
+    ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt2")
+
+    actual = L.prior_attempt_actual(ctx, "attempt1")
+    assert "unknown" not in actual
+    assert actual["all_in_usd"] == 0.0 and actual["basis"] == "closeout"
+
+    ok, why = L.campaign_continuation_gate(ctx)
+    assert ok, why
+    assert ctx.evidence["campaign"]["settled_campaign_spend_usd"] == 0.0
+
+
+@pytest.mark.parametrize("over,label", [
+    ({"provider_resource_created": True}, "a closeout that created a resource"),
+    ({}, "no closeout at all"),
+])
+def test_a_run_without_an_affirmative_closeout_stays_unknown(tmp_path, repo,
+                                                             over, label):
+    """Absence is never zero, and a closeout that DID create refuses too."""
+    _run_manifest(repo, "attempt1")
+    if over:
+        _closeout(repo, "attempt1", **over)
+    ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt2")
+
+    assert "unknown" in L.prior_attempt_actual(ctx, "attempt1"), label
+    ok, why = L.campaign_continuation_gate(ctx)
+    assert not ok and "UNKNOWN" in why, label
+
+
+def test_an_unreadable_closeout_stays_unknown(tmp_path, repo):
+    _run_manifest(repo, "attempt1")
+    path = (repo / L.rel_run_dir(L.EXPERIMENT_ID, "attempt1", L.STAGE_ID)
+            / "closeout" / "outcome.json")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("{ not json")
+    ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt2")
+    actual = L.prior_attempt_actual(ctx, "attempt1")
+    assert "unreadable closeout" in actual["unknown"]

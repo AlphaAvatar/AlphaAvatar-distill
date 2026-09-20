@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-20T16:25:28.835310+00:00",
+ "proposed_utc": "2026-09-20T16:34:07.531464+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -486,7 +486,7 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "d99ef79cf460598ac6fe86d3fc0ad541742ff5902168670e655989e641c41661",
+  "digest": "ec2c894c1a6d0fbb455d5a36f2ae106146ca297d69d5602267daf156ae970e48",
   "n_files": 134,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
@@ -536,5 +536,5 @@
   "rehearsal": "tests/c2_behavioural_preflight/ \u2014 BUILT. One production-path rehearsal drives the real driver P through D and reaches all three terminal states from separate deterministic fixtures, replacing only hardware-bound calls.",
   "grant": "NOT REQUESTED \u2014 no grant, readiness record, authorization, bundle or provider resource exists for this session, and none may be created without a maintainer decision."
  },
- "proposal_sha256": "20e025c4aa6ab2448cbd7b0fd4dc469759183edad8887b829c48d8476f80077b"
+ "proposal_sha256": "322dd24ae61aacfc1efca640ab4a41f6c851400122cd68d3f22b241eab82c9c8"
 }

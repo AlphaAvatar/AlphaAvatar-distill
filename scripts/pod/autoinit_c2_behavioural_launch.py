@@ -460,6 +460,39 @@ def prior_attempt_actual(ctx: SessionContext, attempt: str) -> dict:
     """
     record = REPO_ROOT / session_record_path(attempt)
     if not record.is_file():
+        #: No session record means `run_session` never wrote one, and that has
+        #: TWO causes which must not be conflated: a launcher that died
+        #: mid-flight (UNKNOWN — it may have created a resource), and a chain
+        #: RETIRED before the launcher ran at all (nothing was ever created).
+        #:
+        #: Only an affirmative statement can tell them apart, so only an
+        #: affirmative statement is accepted: a closeout that explicitly
+        #: records `provider_resource_created: false`. Absence stays UNKNOWN.
+        #: A retired chain is not rare — a repair inside the executable closure
+        #: forces one every time — and without this the campaign's first
+        #: retirement would block every later attempt forever.
+        outcome = REPO_ROOT / (
+            f"{rel_run_dir(EXPERIMENT_ID, attempt, STAGE_ID)}/closeout/"
+            "outcome.json")
+        if outcome.is_file():
+            try:
+                closed = json.loads(outcome.read_text())
+            except json.JSONDecodeError as exc:
+                return {"attempt": attempt,
+                        "unknown": f"unreadable closeout: {exc}"}
+            if closed.get("provider_resource_created") is False:
+                return {
+                    "attempt": attempt, "provider_resource_created": False,
+                    "gpu_usd": 0.0, "disk_usd": 0.0, "all_in_usd": 0.0,
+                    "elapsed_minutes": 0.0,
+                    "basis": "closeout", "terminal": closed.get("terminal"),
+                    "_why_zero": (
+                        "this run has no session record because its chain was "
+                        "retired before the launcher ran. Its closeout states "
+                        "affirmatively that no provider resource was created, "
+                        "so nothing was billed. Absence of a closeout would "
+                        "still be UNKNOWN."),
+                }
         return {"attempt": attempt, "unknown": "no session record",
                 "path": session_record_path(attempt)}
     try:
