@@ -9,16 +9,38 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**A PAID SESSION IS RUNNING.** Pod `1fv2t0y39lwhml`, NVIDIA L40S at
-`$1.09/h`, created 2026-09-21 for behavioural campaign
-`c2-behavioural-12probe-v1`, run attempt3, session commit `0ab1e84f`. All eight
-pre-provider gates passed and the watchdog is detached at a 1801-minute /
-`$32.71` hard limit. The launcher runs under tmux session `c2beh`; its log is
-`/home/ecs-user/aad-scratch/launch-logs/attempt3.log`. **If this session is
-handed over while that pod exists, the pod is still billing** — check it, and
-tear it down if the launcher is not alive.
+**Nothing is running. Nothing is billing.** Pod `1fv2t0y39lwhml` was deleted
+behind its teardown gate after 137.8 min; the provider confirms it is gone and
+an account-wide list returns `[]`.
 
-Earlier history in this section: attempt 3 of the REPLAY's pod
+**attempt3 FAILED in stage P and there is no verdict.** Not `NO_GO`, not
+`INCONCLUSIVE` — those are complete results of a run that measured something.
+This one stopped in initialization, having trained no probe. `$2.5425` all-in.
+
+**All five frozen Top-5 candidates rebuilt to their exact recorded digests** on
+fresh hardware, each identity-gated before it was announced — a real second
+reproduction of the replay, and it survives the failure. `1d284448` among them,
+the leaf that failed at step 0 in replay attempt 8: the evidence-bound root pin
+holds on new hardware.
+
+The sixth arm, incumbent B, completed all seven greedy rounds of
+`depth.causal_kl_greedy_v1` in 32.8 min and then died at `Writing model shards`
+with **`No space left on device`**. No digest mismatched. The cause:
+`materialize_fixed_path` writes every step of a four-step path and nothing
+deleted the intermediates, so all six arms' full paths stayed resident — while
+the storage derivation charged that transient exactly ONCE, "released when it
+is verified". Nothing released it. Repaired: intermediates are now freed after
+the identity gate and after the durable announcement. 120 GB remains correct;
+peak residency with the repair is ~59 GiB.
+
+**BLOCKED ON A MAINTAINER DECISION.** The `$33.2099` ceiling is cumulative.
+attempt3 spent `$2.5425` and produced no probe, so a fresh full attempt
+(`$33.2098`) no longer fits — over by `$2.5424`, exactly what attempt3 spent.
+`campaign_continuation_gate` refuses it before a pod exists, correctly. Raising
+a ceiling is a maintainer decision and never an autonomous repair. No science
+is being asked to change: the plan hash has never moved.
+
+Earlier: the REPLAY's attempt 3 pod
 `ulit767od813i8` was deleted behind its teardown gate after 386.2 min; the
 provider confirms it is gone and an account-wide list returns `[]`.
 

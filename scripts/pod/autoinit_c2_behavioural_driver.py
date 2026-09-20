@@ -1027,7 +1027,59 @@ class C2BehaviouralDriver:
             label, Path(final.checkpoint_path), kind="arm_initialization",
             arch_signature=required["arch_signature"],
             num_parameters=required["num_parameters"])
+        #: AFTER the gate and AFTER the announcement, never before: a
+        #: provenance finding must keep every intermediate it diverged through,
+        #: and a verified arm must be durable before anything is removed.
+        self.release_intermediates(label, results, workdir)
         return str(final.checkpoint_path)
+
+    def release_intermediates(self, label: str, results, workdir: Path) -> dict:
+        """Delete this arm's intermediate steps, keeping the final checkpoint.
+
+        THE DEFECT THIS EXISTS FOR. `materialize_fixed_path` writes every step
+        of a four-step path to the arm's workdir and returns them all; nothing
+        deleted them, so all six arms' full paths stayed resident for the whole
+        of stage P. The storage derivation, meanwhile, charged
+        `b_materialization_transient` ONCE, in as many words: "resident while
+        that arm builds and released when it is verified". Nothing released
+        them, so the bound described a program that did not exist.
+
+        attempt3 died on exactly that: five arms rebuilt to their exact frozen
+        digests, and B failed at `Writing model shards` with `No space left on
+        device` after 32.8 minutes of completed compute, at `$2.50`.
+
+        A resource bound has to follow the real free() call sites. This is that
+        call site.
+
+        NEVER RAISES. A cleanup failure must not destroy a verified arm that is
+        already announced and gated; it is recorded and the session continues.
+        """
+        import shutil
+
+        final = Path(results[-1].checkpoint_path).resolve()
+        freed, removed, failed = 0, [], []
+        for step in results[:-1]:
+            p = Path(step.checkpoint_path).resolve()
+            #: Two guards, because this deletes. Never the final, and never
+            #: anything outside this arm's own workdir.
+            if p == final or not p.is_relative_to(workdir.resolve()):
+                continue
+            try:
+                size = sum(f.stat().st_size
+                           for f in p.rglob("*") if f.is_file())
+                shutil.rmtree(p)
+                freed += size
+                removed.append(step.impl_id)
+            except OSError as exc:                                # noqa: PERF203
+                failed.append(f"{step.impl_id}: {exc}")
+        out = {"arm": label, "removed_steps": removed,
+               "freed_gib": round(freed / 2**30, 3), "failed": failed,
+               "kept": str(final)}
+        self.ev.setdefault("intermediates_released", []).append(out)
+        say(f"  {label[:12]}… released {len(removed)} intermediate(s), "
+            f"{freed / 2**30:.2f} GiB"
+            + (f" (FAILED: {failed})" if failed else ""))
+        return out
 
     def materialize_b(self, binding: dict[str, Any]) -> str:
         """Build B from the frozen C1 treatment path, then gate on its identity.

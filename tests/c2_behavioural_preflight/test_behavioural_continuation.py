@@ -1854,3 +1854,165 @@ def test_an_unreadable_closeout_stays_unknown(tmp_path, repo):
     ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt2")
     actual = L.prior_attempt_actual(ctx, "attempt1")
     assert "unreadable closeout" in actual["unknown"]
+
+
+# ---------------------------------------------------------------------------
+# stage P must release what it writes, or the storage bound is fiction
+# ---------------------------------------------------------------------------
+
+class _Step:
+    def __init__(self, impl_id: str, path: Path) -> None:
+        self.impl_id, self.checkpoint_path = impl_id, str(path)
+
+
+def _path_on_disk(workdir: Path, n: int) -> list:
+    """An n-step arm build, every step written, as fixed_path leaves it."""
+    steps = []
+    for i in range(n):
+        d = workdir / f"step_{i}"
+        _write_checkpoint(d)
+        steps.append(_Step(f"impl.{i}", d))
+    return steps
+
+
+def test_stage_p_releases_intermediates_and_keeps_the_final(tmp_path):
+    """attempt3 died here, at $2.50, with five arms already rebuilt exactly.
+
+    `materialize_fixed_path` writes every step of a four-step path and returns
+    them all, and nothing deleted them — so all six arms' full paths stayed
+    resident for the whole of stage P. The storage derivation charged that
+    transient ONCE, in as many words: "resident while that arm builds and
+    released when it is verified". Nothing released them, so the bound
+    described a program that did not exist and B failed at `Writing model
+    shards` with ENOSPC after 32.8 minutes of completed compute.
+    """
+    driver = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
+    driver.ev = {}
+    workdir = tmp_path / "arms" / "leafA"
+    steps = _path_on_disk(workdir, 4)
+
+    out = driver.release_intermediates("leafA", steps, workdir)
+
+    assert out["failed"] == []
+    assert len(out["removed_steps"]) == 3
+    assert out["freed_gib"] >= 0
+    for step in steps[:-1]:
+        assert not Path(step.checkpoint_path).exists(), step.impl_id
+    #: The final survives, with its bytes.
+    final = Path(steps[-1].checkpoint_path)
+    assert (final / "model.safetensors").is_file()
+    assert driver.ev["intermediates_released"][0]["arm"] == "leafA"
+
+
+def test_release_never_touches_the_final_or_anything_outside_the_workdir(
+        tmp_path):
+    """Two guards, because this deletes."""
+    driver = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
+    driver.ev = {}
+    workdir = tmp_path / "arms" / "leafB"
+    steps = _path_on_disk(workdir, 2)
+
+    #: A step that points OUTSIDE the arm's workdir — the shape a path-handling
+    #: slip would produce — must be left alone rather than deleted.
+    outside = tmp_path / "somewhere_else"
+    _write_checkpoint(outside)
+    steps.insert(0, _Step("impl.outside", outside))
+    #: And a step whose path IS the final must never be removed.
+    steps.insert(1, _Step("impl.dup", Path(steps[-1].checkpoint_path)))
+
+    driver.release_intermediates("leafB", steps, workdir)
+
+    assert (outside / "model.safetensors").is_file(), (
+        "release deleted a path outside the arm's workdir")
+    assert (Path(steps[-1].checkpoint_path) / "model.safetensors").is_file(), (
+        "release deleted the final checkpoint")
+
+
+def test_release_never_raises(tmp_path, monkeypatch):
+    """A cleanup failure must not destroy a verified, announced arm."""
+    import shutil
+
+    driver = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
+    driver.ev = {}
+    workdir = tmp_path / "arms" / "leafC"
+    steps = _path_on_disk(workdir, 3)
+    monkeypatch.setattr(
+        shutil, "rmtree",
+        lambda *a, **k: (_ for _ in ()).throw(OSError("device busy")))
+
+    out = driver.release_intermediates("leafC", steps, workdir)
+    assert out["removed_steps"] == []
+    assert len(out["failed"]) == 2
+    #: Everything still there — nothing half-deleted, nothing raised.
+    for step in steps:
+        assert Path(step.checkpoint_path).exists()
+
+
+def test_a_single_step_path_releases_nothing(tmp_path):
+    """The final is the only step; there is nothing to free."""
+    driver = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
+    driver.ev = {}
+    workdir = tmp_path / "arms" / "leafD"
+    steps = _path_on_disk(workdir, 1)
+    out = driver.release_intermediates("leafD", steps, workdir)
+    assert out["removed_steps"] == [] and out["freed_gib"] == 0.0
+    assert (Path(steps[0].checkpoint_path) / "model.safetensors").is_file()
+
+
+def test_materialize_arm_calls_the_release(tmp_path, monkeypatch):
+    """The wiring, not just the mechanism.
+
+    Found by mutation: deleting the `release_intermediates(...)` call from
+    `materialize_arm` left every test above green, because they call the
+    release directly. Tests prove a mechanism works; only this proves stage P
+    uses it — and stage P not using it is precisely what cost attempt3.
+
+    Drives the REAL `materialize_arm` with only the builder replaced.
+    """
+    from aadistill.initialization.planning import fixed_path as FP
+
+    workdir = tmp_path / "arms" / "leafE"
+    steps = _path_on_disk(workdir, 4)
+
+    class _Identity:
+        arch_signature, num_parameters = "sig", 16
+    for s in steps:
+        s.identity = _Identity()
+
+    monkeypatch.setattr(FP, "materialize_fixed_path",
+                        lambda *a, **k: steps)
+
+    binding = json.loads(
+        (REPO / "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
+         ).read_text())
+    spec = type("S", (), {"root_repo_id": binding["repo_id"],
+                          "root_revision": binding["revision"]})()
+
+    class _Arm(D.C2BehaviouralDriver):
+        def reuse_arm(self, label, required):
+            return None
+
+        def announce_durable(self, *a, **k):
+            return {"identity": None}
+
+        def afford(self, minutes, what):
+            return True
+
+    driver = _Arm.__new__(_Arm)
+    driver.a = type("A", (), {"b_workdir": str(tmp_path / "arms"),
+                              "device": "cpu", "campaign": BG.CAMPAIGN_ID})()
+    driver.ev, driver.durable = {}, []
+    driver.teacher_path = "/fake/teacher"
+
+    out = driver.materialize_arm(
+        "leafE", spec,
+        required={"arch_signature": "sig", "num_parameters": 16},
+        bounded_minutes=1.0)
+
+    assert out == steps[-1].checkpoint_path
+    assert driver.ev.get("intermediates_released"), (
+        "materialize_arm did not release its intermediates; stage P would "
+        "retain every step of all six arms, which is what filled the disk")
+    for step in steps[:-1]:
+        assert not Path(step.checkpoint_path).exists(), step.impl_id
+    assert (Path(steps[-1].checkpoint_path) / "model.safetensors").is_file()
