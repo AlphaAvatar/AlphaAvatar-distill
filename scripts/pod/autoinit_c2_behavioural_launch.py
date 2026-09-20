@@ -59,6 +59,7 @@ from autoinit_c1_launch import C1_EVAL_TOKENIZER, C1_ROPE_INPUT  # noqa: E402
 from experiments.deployment import deployment_commands  # noqa: E402
 from experiments.phase_c2 import behavioural as BH  # noqa: E402
 from experiments.phase_c2 import behavioural_bundle as BT  # noqa: E402
+from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
 from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
 from experiments.phase_c2 import behavioural_pod_environment as BPE  # noqa: E402
 from experiments.run_layout import (  # noqa: E402
@@ -223,6 +224,18 @@ def session_record_path(run_id: str) -> str:
     return f"{rel_run_dir(EXPERIMENT_ID, run_id, STAGE_ID)}/runtime/session.json"
 
 
+def runs_root_rel() -> str:
+    """Where THIS experiment's run directories live, repo-relative.
+
+    Derived from `rel_run_dir`, the one function that knows the convention.
+    `runs_root_for` is the LEGACY root (`logs/runs/stage-1`) and is not where
+    `open_run` writes; a gate that enumerated attempts there would find none
+    and report a campaign's paid predecessors as absent — the exact shape of
+    the bug this enumeration exists to fix.
+    """
+    return str(Path(rel_run_dir(EXPERIMENT_ID, "_", STAGE_ID)).parent)
+
+
 # ---------------------------------------------------------------------------
 # prechecks — everything that can refuse before a pod exists
 # ---------------------------------------------------------------------------
@@ -328,23 +341,95 @@ def destination_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 
 def campaign_attempts(campaign_id: str, *, exclude: str = "",
-                      store: str | Path = DURABLE_STORE) -> list[str]:
-    """Run attempts of this campaign that left durable probes, in name order.
+                      store: str | Path = DURABLE_STORE,
+                      repo_root: str | Path = REPO_ROOT) -> list[str]:
+    """Every prior run attempt of this campaign. THE UNION OF TWO SOURCES.
 
     Name order, not chronological — `attempt10` sorts before `attempt2` — and
-    the gate does not care, because it sums every prior attempt's spend and
-    reconciles every prior resource rather than looking at the latest one.
+    the gate does not care, because it reconciles every prior resource and sums
+    every prior spend rather than looking at the latest one.
 
-    The durable store is the authority, not the run log: a run attempt whose
-    launcher died before it recorded itself still produced probes, and those
-    probes are the thing a continuation would consume.
+    **The durable store is not a resource ledger, and using it as one missed a
+    paid pod.** Derived from durable probes alone, this returned `[]` for the
+    most ordinary failure there is: attempt 1 creates a pod, bills, and dies in
+    setup or arm materialization before the first probe finishes. The next
+    attempt then called itself the campaign's *first resource*, neither summing
+    attempt 1's spend nor checking whether attempt 1 was provider-confirmed
+    released — in direct conflict with R9, whose whole content is that the
+    ceiling is cumulative across every resource and subrun and that a previous
+    resource must be confirmed non-billing.
+
+    So the authority for *a resource existed* is the campaign's RUN RECORDS,
+    and the durable store contributes only the attempts that left science.
+    Neither source subsumes the other: a launcher that died before writing its
+    manifest can still have left probes, and a pod that died before its first
+    probe leaves a record and no probes.
+
+    A run whose manifest names a different campaign is a different experiment
+    and is excluded. A run with no readable manifest is INCLUDED, because
+    "which campaign was that?" is a question the gate must answer with a
+    refusal rather than by omitting the attempt.
     """
+    names: set[str] = set()
     root = campaign_store(campaign_id, store)
-    if not root.is_dir():
-        return []
-    return sorted(d.name for d in root.iterdir()
-                  if d.is_dir() and d.name != exclude
-                  and any(d.iterdir()))
+    if root.is_dir():
+        names.update(d.name for d in root.iterdir()
+                     if d.is_dir() and any(d.iterdir()))
+
+    runs = Path(repo_root) / runs_root_rel()
+    if runs.is_dir():
+        for d in runs.iterdir():
+            if not d.is_dir():
+                continue
+            declared = None
+            manifest = d / "manifest.json"
+            if manifest.is_file():
+                try:
+                    declared = (json.loads(manifest.read_text()).get("plan")
+                                or {}).get("campaign_id")
+                except json.JSONDecodeError:
+                    declared = None
+            if declared is None or declared == campaign_id:
+                names.add(d.name)
+    names.discard(exclude)
+    return sorted(names)
+
+
+def campaign_remaining_work(ctx: SessionContext) -> dict:
+    """What this campaign still owes, from the durable destination. `$0`.
+
+    Cached on the context: the gate, the budget and the restore step must all
+    price the SAME state, and re-reading the store between them would let a
+    probe arriving mid-launch change the answer under one of them.
+    """
+    cached = ctx.evidence.get("_remaining_work")
+    if cached is None:
+        state = BC.campaign_state(
+            campaign_store(ctx.auth.campaign_id, ctx.args.ckpt_store),
+            exclude_attempt=ctx.args.run_id)
+        cached = BC.remaining_work(REPO_ROOT, state=state)
+        cached["_state"] = state
+        ctx.evidence["_remaining_work"] = cached
+    return cached
+
+
+def continuation_all_in_usd(ctx: SessionContext, work: dict) -> float:
+    """All-in dollars for the REMAINING work at the authorized rate.
+
+    GPU and separately billed container disk, summed at the end, over the
+    remaining-work hard window rather than a fresh full session's. Reserving a
+    whole session per attempt — which this gate did — refused every
+    continuation by construction: with `approved` sized for one session, any
+    prior spend above `$0` made `settled + approved > approved`.
+    """
+    minutes = float(work["decomposition"]["hard_minutes"])
+    gpu = minutes / 60.0 * float(ctx.auth.rate_usd_per_hour)
+    #: The disk rate the authorization was derived at, re-derived from its own
+    #: figures rather than re-quoted: `disk_hard_usd` is what the full window
+    #: costs, so the per-minute rate is that over the full window.
+    disk_per_minute = (float(ctx.auth.disk_hard_usd)
+                       / float(ctx.auth.hard_runtime_minutes))
+    return gpu + disk_per_minute * minutes
 
 
 def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -374,19 +459,33 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
     """
     campaign = ctx.auth.campaign_id
     prior = campaign_attempts(campaign, exclude=ctx.args.run_id,
-                              store=ctx.args.ckpt_store)
+                              store=ctx.args.ckpt_store, repo_root=REPO_ROOT)
+    work = campaign_remaining_work(ctx)
+    planned = continuation_all_in_usd(ctx, work)
+    approved = float(ctx.auth.all_in_hard_usd)
     ctx.evidence["campaign"] = {
         "campaign_id": campaign, "run_attempt": ctx.args.run_id,
-        "prior_attempts_with_durable_probes": prior,
+        "prior_attempts": prior,
+        "remaining_work": {k: v for k, v in work.items()
+                           if not k.startswith("_")},
+        "this_session_planned_all_in_usd": round(planned, 4),
+        "campaign_approved_all_in_usd": approved,
         "_continuation_is_not_pooling": (
             "a replacement resource is a new RESOURCE and a new run attempt "
             "inside the SAME scientific campaign. Consuming its predecessor's "
             "destination-verified probes is continuation of one preregistered "
             "experiment, not pooling across experiments."),
+        "_prior_attempts_source": (
+            "the union of this campaign's run records and its durable store. "
+            "Derived from durable probes alone this missed a pod that billed "
+            "and died before its first probe, and the next attempt then called "
+            "itself the campaign's first resource."),
     }
     if not prior:
-        return True, (f"campaign {campaign} has no prior run attempt holding "
-                      "durable probes; this is its first resource")
+        return True, (f"campaign {campaign} has no prior run attempt; this is "
+                      f"its first resource, owing {work['n_probes_remaining']} "
+                      f"probes and ${planned:.4f} all-in against the "
+                      f"${approved:.4f} ceiling")
 
     from experiments.run_layout import rel_run_dir
 
@@ -405,10 +504,11 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
         if ev.get("provider_resource_created") and not ev.get(
                 "provider_confirms_gone"):
             unconfirmed.append(attempt)
+    ctx.evidence["campaign"]["settled_campaign_spend_usd"] = round(settled, 4)
     if unreadable:
         return False, (
-            f"campaign {campaign} has durable probes from run attempt(s) "
-            f"{unreadable} whose session record could not be read at "
+            f"campaign {campaign} has prior run attempt(s) {unreadable} whose "
+            f"session record could not be read at "
             f"{[session_record_path(a) for a in unreadable]}. Whether those "
             "resources are still billing is therefore UNKNOWN, and an unknown "
             "billing state is a stop condition, not a clear one. Reconcile "
@@ -422,28 +522,34 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
             "down before creating another. Run dir(s): "
             f"{[rel_run_dir(EXPERIMENT_ID, a, STAGE_ID) for a in unconfirmed]}")
 
-    planned = float(ctx.auth.gpu_hard_usd) + float(ctx.auth.disk_hard_usd)
-    approved = float(ctx.auth.all_in_hard_usd)
-    ctx.evidence["campaign"].update({
-        "settled_campaign_spend_usd": round(settled, 4),
-        "this_session_planned_all_in_usd": round(planned, 4),
-        "campaign_approved_all_in_usd": approved,
-    })
+    if work["n_probes_remaining"] == 0:
+        return False, (
+            f"campaign {campaign} owes no probe: all "
+            f"{work['probes_expected']} are complete and verified off-pod. A "
+            "complete behavioural selection is TERMINAL — GO, NO_GO and "
+            "INCONCLUSIVE are all complete results, and none of them is a "
+            "reason to start another attempt. There is nothing here to "
+            "continue.")
+
     if settled + planned > approved + BG.DOLLAR_QUANTUM_USD:
         return False, (
             f"campaign {campaign} has settled ${settled:.4f} across "
-            f"{len(prior)} prior run attempt(s) and this session plans "
+            f"{len(prior)} prior run attempt(s) and the work it still owes — "
+            f"{work['n_probes_remaining']} probes, "
+            f"{len(work['arms_needed'])} arm rebuild(s) and "
+            f"{work['restore']['gib']} GiB of probe restore — bounds at "
             f"${planned:.4f} all-in, which is ${settled + planned:.4f} against "
             f"an approved campaign ceiling of ${approved:.4f}. The ceiling is "
             "cumulative across every resource and subrun; a replacement "
-            "resource does not receive a fresh allocation. Continuing would "
-            "need a maintainer decision to fund the campaign for more than one "
-            "full session — it is not something this gate may grant.")
+            "resource does not receive a fresh allocation. This is a maintainer "
+            "decision about funding the campaign — the experiment is NOT "
+            "shortened to fit, and this gate may not raise the ceiling.")
     return True, (
         f"campaign continuation OK: ${settled:.4f} settled across {len(prior)} "
-        f"prior attempt(s) plus ${planned:.4f} planned is inside the "
-        f"${approved:.4f} campaign ceiling, and every prior resource is "
-        "provider-confirmed released")
+        f"prior attempt(s) plus ${planned:.4f} for the remaining "
+        f"{work['n_probes_remaining']} probes is inside the ${approved:.4f} "
+        f"campaign ceiling, and every prior resource is provider-confirmed "
+        "released")
 
 
 def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -553,6 +659,122 @@ def finished_probes(ctx: SessionContext) -> list[dict] | None:
     ctx.evidence["probe_evidence_unreadable"] = [
         str(p) for p in evidence_locations(ctx)]
     return None
+
+
+def _scp_from_pod(ctx: SessionContext, remote: str, dest: Path, *,
+                  limit_min: int = 5) -> int:
+    """One small file off the pod. Returns the return code; never raises."""
+    return subprocess.run(
+        ["timeout", f"{limit_min}m", "scp",
+         "-P", str(ctx.target.port), "-o", "StrictHostKeyChecking=no",
+         "-o", "UserKnownHostsFile=/dev/null",
+         f"root@{ctx.host}:{remote}", str(dest)],
+        capture_output=True, timeout=None).returncode
+
+
+def secure_probe_evidence(ctx: SessionContext, units: list) -> list:
+    """Pull each probe's SCIENCE evidence beside its bytes, during the run.
+
+    The weights alone cannot continue a campaign. What the remaining stages
+    read is the score and the per-sample rows: ranking needs
+    `correct_overall`, and the verdict reads the per-sample JSONL. Those live
+    in the pod's audit directory, and on the path where continuation is
+    actually needed — a session that FAILED — the failed artifact spec collects
+    only the session evidence. So the ranking, the probe records and the
+    per-sample rows would not have come home at all, and a replacement resource
+    would have had verified checkpoints it could not score against and a
+    commitment it could not honour.
+
+    They are tiny — a 950-row per-sample file is well under a megabyte — so
+    they travel on every poll until they are complete, beside the probe they
+    describe, under the destination's own names.
+
+    A probe is announced when it finishes TRAINING, before it is scored, so the
+    record arrives without a score first and is re-fetched until it has one.
+    That ordering is the reason this is idempotent rather than once-only.
+
+    MUST NOT raise: a durability helper that throws into a paid session's poll
+    loop is a defect regardless of who catches it.
+    """
+    import shutil
+
+    secured: list[dict] = []
+    for unit in units:
+        unit_id = unit["unit_id"]
+        dest = probe_destination(ctx, unit_id)
+        if not dest.is_dir():
+            #: The bytes have not landed yet; the evidence follows them.
+            continue
+        record_dest = dest / BC.RECORD_NAME
+        if record_dest.is_file():
+            try:
+                if (json.loads(record_dest.read_text()).get("score")
+                        and (dest / BC.RESULT_NAME).is_file()
+                        and (dest / BC.PER_SAMPLE_NAME).is_file()):
+                    continue          # complete; nothing more to pull
+            except json.JSONDecodeError:
+                pass
+        want = {
+            BC.RECORD_NAME: f"{AUDIT_DIR}/probes/{unit_id}.json",
+            BC.RESULT_NAME: f"{AUDIT_DIR}/{unit_id}_result.json",
+            BC.PER_SAMPLE_NAME: f"{AUDIT_DIR}/{unit_id}_per_sample.jsonl",
+        }
+        got = {}
+        for name, remote in want.items():
+            tmp = dest / f".{name}.part"
+            rc = _scp_from_pod(ctx, remote, tmp)
+            if rc == 0 and tmp.is_file() and tmp.stat().st_size > 0:
+                shutil.move(str(tmp), str(dest / name))
+                got[name] = True
+            else:
+                tmp.unlink(missing_ok=True)
+                got[name] = False
+        secured.append({"unit_id": unit_id, "evidence": got})
+        ctx.say(f"  probe {unit_id} evidence: "
+                f"{sorted(n for n, ok in got.items() if ok)}")
+    return secured
+
+
+def secure_campaign_ranking(ctx: SessionContext) -> dict:
+    """Pull the campaign's screening commitment to the CAMPAIGN root.
+
+    Screening commits once per campaign, so the commitment belongs to the
+    experiment rather than to the attempt that happened to compute it. A
+    replacement resource must confirm the candidate its campaign advanced, and
+    it can only do that if the record outlived the pod — which, on the failed
+    path, the artifact spec does not collect.
+
+    Written atomically and never overwritten once present: a second attempt
+    must not be able to replace the commitment it is supposed to honour.
+    """
+    import shutil
+
+    root = campaign_store(ctx.auth.campaign_id, ctx.args.ckpt_store)
+    dest = root / BC.RANKING_NAME
+    if dest.is_file():
+        return {"already_present": True, "path": str(dest)}
+    root.mkdir(parents=True, exist_ok=True)
+    tmp = root / f".{BC.RANKING_NAME}.part"
+    rc = _scp_from_pod(ctx, f"{AUDIT_DIR}/{BC.RANKING_NAME}", tmp)
+    if rc != 0 or not tmp.is_file() or tmp.stat().st_size == 0:
+        tmp.unlink(missing_ok=True)
+        #: Not an error: before stage R there is no ranking to secure.
+        return {"secured": False, "rc": rc}
+    try:
+        record = json.loads(tmp.read_text())
+    except json.JSONDecodeError as exc:
+        tmp.unlink(missing_ok=True)
+        return {"secured": False, "why": f"unreadable: {exc}"}
+    if record.get("campaign") != ctx.auth.campaign_id:
+        tmp.unlink(missing_ok=True)
+        return {"secured": False, "why": (
+            f"the ranking names campaign {record.get('campaign')!r}, not "
+            f"{ctx.auth.campaign_id!r}; it is not this campaign's commitment")}
+    shutil.move(str(tmp), str(dest))
+    ctx.say(f"  campaign ranking secured: advanced "
+            f"{(record.get('advanced') or {}).get('state_id', '?')[:12]}…")
+    return {"secured": True, "path": str(dest),
+            "advanced": (record.get("advanced") or {}).get("state_id")}
 
 
 def _fetch_and_verify(ctx: SessionContext, units: list) -> list:
@@ -666,18 +888,24 @@ def secure_finished_probes(ctx: SessionContext) -> None:
             return
         already = {r["unit_id"] for r in ctx.evidence.get("probes_secured", [])}
         pending = [u for u in units if u["unit_id"] not in already]
-        if not pending:
-            return
-        fetched = _fetch_and_verify(ctx, pending)
-        #: Anything that ARRIVED is done, verified or not. Keying only on
-        #: `matched` would re-scp an unverifiable probe on every poll for the
-        #: rest of the session, and a retry cannot make an identity the driver
-        #: never computed appear.
-        ctx.evidence.setdefault("probes_secured", []).extend(
-            r for r in fetched
-            if r.get("rc") == 0 and (r.get("matched")
-                                     or not r.get("identity_announced")))
-        ctx.evidence.setdefault("probe_fetch_attempts", []).extend(fetched)
+        if pending:
+            fetched = _fetch_and_verify(ctx, pending)
+            #: Anything that ARRIVED is done, verified or not. Keying only on
+            #: `matched` would re-scp an unverifiable probe on every poll for
+            #: the rest of the session, and a retry cannot make an identity the
+            #: driver never computed appear.
+            ctx.evidence.setdefault("probes_secured", []).extend(
+                r for r in fetched
+                if r.get("rc") == 0 and (r.get("matched")
+                                         or not r.get("identity_announced")))
+            ctx.evidence.setdefault("probe_fetch_attempts", []).extend(fetched)
+        #: The science evidence and the campaign's commitment, EVERY poll and
+        #: not only for newly arrived probes: a probe is announced when its
+        #: training finishes and scored afterwards, so its score lands on a
+        #: later poll than its bytes.
+        ctx.evidence["probe_evidence_secured"] = secure_probe_evidence(
+            ctx, units)
+        ctx.evidence["campaign_ranking_secured"] = secure_campaign_ranking(ctx)
     except Exception as exc:                                    # noqa: BLE001
         ctx.evidence.setdefault("on_poll_errors", []).append(
             f"secure_finished_probes: {type(exc).__name__}: {exc}")
@@ -695,6 +923,16 @@ def fetch_probes(ctx: SessionContext) -> list:
         r for r in fetched
         if r.get("rc") == 0 and (r.get("matched")
                                  or not r.get("identity_announced")))
+    #: The LAST chance for the evidence, on the same terms as the bytes. A
+    #: probe whose score landed between the final poll and teardown would
+    #: otherwise be a verified checkpoint nothing can rank.
+    try:
+        ctx.evidence["probe_evidence_secured"] = secure_probe_evidence(
+            ctx, units)
+        ctx.evidence["campaign_ranking_secured"] = secure_campaign_ranking(ctx)
+    except Exception as exc:                                    # noqa: BLE001
+        ctx.evidence.setdefault("closeout_errors", []).append(
+            f"secure_probe_evidence: {type(exc).__name__}: {exc}")
     return list(ctx.evidence.get("probe_fetch_attempts", [])) + fetched
 
 
@@ -741,6 +979,151 @@ def probes_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
 # the session
 # ---------------------------------------------------------------------------
 
+#: Where a replacement pod's restored probes land, and where the manifest that
+#: names them lives. NEW paths: the producing pod's absolute `model_dir` does
+#: not exist on a replacement resource and must not be the truth about one.
+RESTORE_DIR = f"{WORKDIR}/restored"
+RESTORE_MANIFEST = f"{WORKDIR}/campaign_continuation.json"
+
+
+def restore_campaign_probes(ctx: SessionContext) -> bool:
+    """Put this campaign's verified probes on the replacement pod. `False` aborts.
+
+    THE PRODUCTION HANDOFF, and the whole reason it has to exist: a replacement
+    resource has a FRESH FILESYSTEM. The previous pod's `audit/probes/*.json`
+    is gone, every `model_dir` it recorded points at nothing, and the driver's
+    `load_campaign_journal` reads exactly those two things. Without this step
+    the preregistered continuation policy is unreachable in production no
+    matter how correct the campaign id is — which is what it was.
+
+    Runs from `materialize_inputs`: after setup, before the driver starts, and
+    the runner tears the pod down if it returns `False`. That placement is the
+    point — a probe restored after the driver had begun would be a probe the
+    campaign journal had already decided was absent.
+
+    What travels, and from where:
+
+    * the BYTES, from the durable destination on this host — the only copy that
+      survived the previous pod. Only probes whose `durable_ack.json` records a
+      destination-side re-identification that MATCHED are eligible;
+    * their science evidence, because the remaining stages read the score and
+      the per-sample rows, not the weights;
+    * the campaign's screening commitment, if it has one;
+    * a small manifest naming each probe's NEW pod path and the identity the
+      driver must reproduce there.
+
+    This is the expensive step of a continuation and it is priced as one: the
+    restore minutes are a phase in the remaining-work decomposition the
+    continuation gate checks, so a restore that does not fit the campaign
+    ceiling is refused before a pod exists rather than discovered on a meter.
+    """
+    work = campaign_remaining_work(ctx)
+    state = work["_state"]
+    manifest = BC.build_manifest(
+        REPO_ROOT, campaign_id=ctx.auth.campaign_id,
+        run_attempt=ctx.args.run_id, state=state, work=work,
+        pod_root=RESTORE_DIR)
+    ctx.evidence["campaign_restore"] = {
+        "n_probes": len(manifest["probes"]),
+        "gib": work["restore"]["gib"],
+        "bounded_minutes": work["restore"]["minutes"],
+        "committed_candidate": manifest["committed_candidate"],
+        "pod_root": RESTORE_DIR,
+        "probes": [],
+    }
+
+    #: The manifest always travels, even empty: the driver must be able to tell
+    #: "this campaign restored nothing" from "the restore step never ran", and
+    #: an absent file cannot say which.
+    ctx.target.run(f"mkdir -p {RESTORE_DIR}", timeout=60)
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        local = Path(tmp) / "campaign_continuation.json"
+        local.write_text(json.dumps(manifest, indent=1) + "\n")
+        rc = subprocess.run(
+            list(ctx.scp) + [str(local),
+                             f"root@{ctx.host}:{RESTORE_MANIFEST}"],
+            capture_output=True, timeout=600)
+    if rc.returncode != 0:
+        ctx.say(f"ABORT: the continuation manifest did not reach the pod: "
+                f"{(rc.stderr or b'')[-200:]!r}")
+        return False
+
+    if not manifest["probes"]:
+        ctx.say("campaign restore: nothing to restore — this campaign holds no "
+                "destination-verified probe, so the pod starts from the "
+                "protocol's first probe")
+        return True
+
+    from aadistill.initialization.specs.arch import get_adapter
+    from aadistill.runtime.leaf_durability import (
+        LeafDurabilityError, verify_transferred_leaf,
+    )
+
+    adapter = get_adapter("qwen3")
+    for entry in manifest["probes"]:
+        pid, source = entry["probe_id"], Path(entry["durable_path"])
+        #: RE-IDENTIFIED HERE TOO, before a byte is sent. The ack says these
+        #: bytes matched when they landed; it does not say they still do. An
+        #: ack is a record, and a record is not a checkpoint.
+        try:
+            v = verify_transferred_leaf(source, entry["identity"],
+                                        adapter=adapter)
+            local_ok = bool(v["matched"] and v["weights_digest_matched"]
+                            and v["shard_matched"]
+                            and v["config_matched"] is not False)
+            why = "re-identified at the destination" if local_ok else (
+                f"DESTINATION MISMATCH: artifact={v['matched']}, "
+                f"weights={v['weights_digest_matched']}, "
+                f"shard={v['shard_matched']}, config={v['config_matched']}")
+        except (LeafDurabilityError, OSError, KeyError,
+                json.JSONDecodeError) as exc:
+            local_ok, why = False, f"{type(exc).__name__}: {exc}"
+        if not local_ok:
+            ctx.say(f"ABORT: {pid} is named for restore and no longer "
+                    f"re-identifies on this host — {why}. A continuation that "
+                    "shipped unverifiable bytes would be substituting for a "
+                    "measurement.")
+            ctx.evidence["campaign_restore"]["probes"].append(
+                {"probe_id": pid, "sent": False, "why": why})
+            return False
+
+        dest = f"{RESTORE_DIR}/{pid}"
+        ctx.target.run(f"mkdir -p {dest}", timeout=60)
+        #: The launcher's OWN timeout, not the shared runner's hardcoded 600 s
+        #: for `local_assets`: one 1.11 GiB probe needs far longer than that
+        #: against this uplink, and continuation attempt 2 died on exactly that
+        #: arithmetic. `--restore-limit-min` is sized from the same bound the
+        #: continuation gate priced.
+        out = subprocess.run(
+            ["timeout", f"{ctx.args.restore_limit_min}m", *ctx.scp, "-r",
+             *[str(p) for p in sorted(source.iterdir()) if p.is_file()],
+             f"root@{ctx.host}:{dest}/"],
+            capture_output=True, timeout=None)
+        probe = ctx.target.run(
+            f"test -s {dest}/model.safetensors && test -s {dest}/config.json "
+            f"&& echo PRESENT=1 || echo PRESENT=0", timeout=120)
+        present = "PRESENT=1" in probe.stdout
+        ctx.evidence["campaign_restore"]["probes"].append({
+            "probe_id": pid, "sent": out.returncode == 0, "present": present,
+            "bytes": entry["bytes"], "scored": entry["scored"],
+            "destination_reverified": True, "pod_path": dest})
+        ctx.say(f"  restored {pid}: rc={out.returncode} present={present} "
+                f"({entry['bytes'] / 2**30:.2f} GiB)")
+        if out.returncode != 0 or not present:
+            ctx.say(f"ABORT: {pid} did not arrive on the pod. The driver would "
+                    "treat a completed probe as absent and the protocol "
+                    "forbids retraining it, so there is nothing safe to do "
+                    "here but stop.")
+            return False
+
+    ctx.say(f"campaign restore: {len(manifest['probes'])} verified probe(s) on "
+            f"the pod at {RESTORE_DIR}; the driver re-identifies each one THERE "
+            "before admitting it")
+    return True
+
+
 def driver_command(ctx: SessionContext, plan) -> str:
     """The campaign is the SCIENCE; the run attempt is this invocation.
 
@@ -758,6 +1141,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
             f"{REPO}/scripts/pod/autoinit_c2_behavioural_driver.py "
             f"--campaign {ctx.auth.campaign_id} "
             f"--run-attempt {ctx.args.run_id} "
+            f"--continuation-manifest {RESTORE_MANIFEST} "
             f"--audit-dir {AUDIT_DIR} --eval-dir {EVAL_DIR} "
             f"--b-workdir {ARM_DIR} --status-path {STATUS} "
             f"--image-digest '{ctx.image_digest}' "
@@ -768,6 +1152,28 @@ def driver_command(ctx: SessionContext, plan) -> str:
             f"--spent-usd {ctx.spent_usd:.4f} "
             f"--soft-stop-usd {plan.soft_stop_usd:.4f} "
             f"--authorized-usd {ctx.auth.hard_cap_usd:.4f}")
+
+
+def budget_work(args) -> dict:
+    """The decomposition arguments for THIS attempt: full session or remainder.
+
+    Read from the durable destination, at `$0`, before a pod exists — the same
+    source and the same derivation the continuation gate uses, so the plan the
+    driver spends admission control against and the gate that permitted the
+    launch cannot describe different work.
+
+    A campaign with nothing verified off-pod owes the whole protocol, which is
+    what makes the default path and the continuation path one code path rather
+    than two.
+    """
+    campaign = BG.CAMPAIGN_ID
+    store = getattr(args, "ckpt_store", DURABLE_STORE)
+    state = BC.campaign_state(campaign_store(campaign, store),
+                              exclude_attempt=getattr(args, "run_id", ""))
+    work = BC.remaining_work(REPO_ROOT, state=state)
+    return {"materialization_minutes": work["materialization_minutes"],
+            "probes_remaining": work["n_probes_remaining"],
+            "restore_minutes": work["restore"]["minutes"]}
 
 
 def budget(args) -> BudgetSpec:
@@ -799,22 +1205,25 @@ def budget(args) -> BudgetSpec:
     """
     from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 
-    prep = BG.materialization_minutes(REPO_ROOT)
+    #: REMAINING work, and a fresh campaign's remaining work is all of it. The
+    #: same decomposition either way — a continuation budget derived beside
+    #: this one would be the duplicate-budget defect again — and it is the same
+    #: figures the continuation gate checked, because both read the campaign
+    #: state from the durable destination on this host at `$0`.
     d = BH.session_decomposition(
-        REPO_ROOT, materialization_minutes=prep["total_minutes"])
+        REPO_ROOT, **budget_work(args))
 
     return BudgetSpec(
         #: `arms=0` and both generic phases at zero: the generic
-        #: arms x steps + setup + transfer shape does not describe six
-        #: materializations followed by twelve probes, and every phase this
-        #: session has is named in the decomposition instead.
+        #: arms x steps + setup + transfer shape does not describe arm
+        #: materializations followed by probes, and every phase this session
+        #: has is named in the decomposition instead.
         arms=0, steps_per_arm=0,
         step_seconds=MEASURED_STEP_SECONDS,
         step_source=("unused: the generic arms x steps term does not describe "
-                     "six materializations followed by twelve probes. Every "
-                     "phase is named in BH.session_decomposition, which is "
-                     "derived from committed records and reconciled against "
-                     "them."),
+                     "arm materializations followed by probes. Every phase is "
+                     "named in BH.session_decomposition, which is derived from "
+                     "committed records and reconciled against them."),
         setup_minutes=0.0,
         transfer_minutes=0.0,
         other_phases=tuple(Phase(name, minutes)
@@ -874,6 +1283,9 @@ def spec(args) -> SessionSpec:
             teacher_revision=TEACHER_REVISION,
             test_ignores=TEST_IGNORES),
         driver_command=driver_command,
+        #: The replacement-resource handoff, AFTER setup and BEFORE the driver
+        #: starts. The runner tears the pod down if it returns False.
+        materialize_inputs=restore_campaign_probes,
         driver_job_id="autoinit_c2_behavioural_driver",
         status_path=STATUS, run_log_path=RUN_LOG,
         markers=MarkerPolicy(
@@ -950,6 +1362,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--ckpt-store", default=DURABLE_STORE,
                     help="where finished probes are secured off-pod")
     ap.add_argument("--ckpt-fetch-limit-min", type=int, default=20)
+    #: The RESTORE direction, which is the slow one: the dev-box uplink is
+    #: bounded at 0.23 MB/s, so one 1.11 GiB probe needs ~80 minutes. The
+    #: shared runner's hardcoded 600 s for `local_assets` is why the restore
+    #: does not go through them -- continuation attempt 2 died on exactly that
+    #: arithmetic, staging exactly this size.
+    ap.add_argument("--restore-limit-min", type=int, default=150)
     ap.add_argument("--token-src",
                     default=str(Path.home() / ".cache/huggingface/token"))
     ap.add_argument("--runpod-config",

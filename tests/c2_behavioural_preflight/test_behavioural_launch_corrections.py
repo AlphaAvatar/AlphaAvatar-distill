@@ -106,7 +106,8 @@ def test_the_launcher_applies_no_second_contingency_or_recovery_reserve():
     assert spec.setup_minutes == 0.0 and spec.transfer_minutes == 0.0
     assert spec.arms == 0 and spec.steps_per_arm == 0
     named = {p.name for p in spec.other_phases}
-    assert "materialize_six_arms" in named and "twelve_probes" in named
+    assert "materialize_arms" in named
+    assert any(n.endswith("_probes_remaining") for n in named), named
     assert {r.name for r in spec.soft_stop_reserves} == {
         "probe_model_contingency", "probe_duration_risk",
         "generation_length_risk"}
@@ -114,10 +115,17 @@ def test_the_launcher_applies_no_second_contingency_or_recovery_reserve():
 
 def test_the_decomposition_is_reconciled_against_the_frozen_record():
     """Its own source must reconstruct from it, or it bounds nothing."""
+    from experiments.phase_c2 import selection_pricing as SP
+
     d = BH.session_decomposition(REPO, materialization_minutes=100.0)
     model = d["probe_model"]
+    #: The overhead names come from their OWNER, so a rename of the probe or
+    #: materialization phases cannot silently fold them into this sum. Naming
+    #: the phases to EXCLUDE is what broke when they were renamed for the
+    #: remaining-work generalisation, and the test then summed everything.
+    overhead_names = {name for name, _ in SP.SESSION_PHASE_MINUTES}
     overheads = sum(m for name, m in d["expected_phases"]
-                    if name not in ("materialize_six_arms", "twelve_probes"))
+                    if name in overhead_names)
     assert overheads == pytest.approx(
         model["expected_minutes"] - model["probe_minutes_expected"], abs=0.01)
     reserves = sum(m for _, m in d["soft_stop_reserves"])
@@ -125,9 +133,15 @@ def test_the_decomposition_is_reconciled_against_the_frozen_record():
         "artifact_recovery_reserve_minutes"] == pytest.approx(
         model["hard_ceiling_minutes"], abs=0.01)
     #: And the materialization really is carried, once.
-    assert dict(d["expected_phases"])["materialize_six_arms"] == 100.0
+    assert dict(d["expected_phases"])["materialize_arms"] == 100.0
     assert d["hard_minutes"] == pytest.approx(
         model["hard_ceiling_minutes"] + 100.0, abs=0.01)
+    #: The reserve block reconciled above is the FULL-session one; at the
+    #: default probe count the scaled block equals it, which is what keeps the
+    #: authorized figures unchanged by the remaining-work generalisation.
+    assert sum(m for _, m in d["soft_stop_reserves"]) == pytest.approx(
+        sum(m for _, m in d["full_session_reserves"]), abs=0.01)
+    assert d["probes_remaining"] == d["probes_in_protocol"] == 12
 
 
 def test_a_record_whose_reserve_block_moved_is_refused(tmp_path, monkeypatch):
@@ -405,7 +419,13 @@ def test_the_preregistration_no_longer_calls_a_replacement_pod_a_new_campaign():
         "logs/stages/stage-1/phase_c2_behavioural/plans/"
         "c2_behavioural_resume_preregistration.json")).read_text())
     assert doc["campaign_versus_resource"]["campaign_id"] == BG.CAMPAIGN_ID
-    assert len(doc["campaign_versus_resource"]["continuation_conditions"]) == 4
+    #: CONTENT, not arity. This asserted `== 4` and the continuation round
+    #: legitimately registered a fifth condition, so a correct advance turned
+    #: the guard red. What has to hold is that each condition is still there.
+    conditions = " ".join(
+        doc["campaign_versus_resource"]["continuation_conditions"]).lower()
+    for required in ("descriptor", "re-identif", "non-billing", "cumulative"):
+        assert required in conditions, required
     r1 = next(r for r in doc["rules"] if r["id"] == "R1")
     assert "a replacement pod is a new campaign" not in r1["why"]
     assert "new RESOURCE" in r1["why"]

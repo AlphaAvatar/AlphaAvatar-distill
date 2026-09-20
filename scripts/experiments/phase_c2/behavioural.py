@@ -455,8 +455,27 @@ def storage_pricing(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
 #: applies no contingency of its own, because the contingency is already here as
 #: a named number of minutes.
 def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
-                          materialization_minutes: float) -> dict[str, Any]:
+                          materialization_minutes: float,
+                          probes_remaining: int = 12,
+                          restore_minutes: float = 0.0) -> dict[str, Any]:
     """Expected phases, named reserves and the recovery reserve. ONE owner.
+
+    **It prices REMAINING work, and a fresh campaign's remaining work is all of
+    it.** The defaults — twelve probes, no restore — reproduce the full session
+    exactly: 1294.87 expected and 1800.53 hard minutes, the figures the proposal
+    is authorized against. A continuation passes what its campaign still owes.
+
+    That generalisation is the whole of it, and it is here rather than in a
+    second function because a continuation budget derived beside this one would
+    be the same defect the launcher's duplicate budget was. The probe-derived
+    terms are linear in the probe count by construction — the frozen record
+    derives each from a per-probe mean or maximum times twelve — so scaling them
+    is arithmetic on the model, not a new model.
+
+    A continuation may not re-reserve work it cannot execute. A completed probe
+    is never retrained, so it is not owed; the arms of the probes that DO remain
+    must be rebuilt on a fresh pod, so they are; and restoring verified probes
+    from the durable destination is billed pod time, so it is a phase.
 
     Every figure is read from the frozen pricing record or from the pricing
     model that wrote it, and the two are RECONCILED here rather than trusted:
@@ -510,7 +529,10 @@ def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
             "besides train, so neither can be decomposed into phases.")
 
     recovery = float(SP.ARTIFACT_RECOVERY_RESERVE_MINUTES)
-    reserves = (
+    #: The FULL-session reserve block, reconciled against the frozen record
+    #: before anything is scaled. Reconciling a scaled block against an
+    #: unscaled record would be checking arithmetic against itself.
+    full_reserves = (
         ("probe_model_contingency",
          round(probe_expected * SP.CONTINGENCY_FRACTION, 2)),
         ("probe_duration_risk",
@@ -518,29 +540,74 @@ def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
         ("generation_length_risk",
          float(bounding["generation_length_reserve_minutes"])),
     )
-    reserve_total = sum(m for _, m in reserves)
-    if abs(probe_hard - (probe_expected + reserve_total + recovery)) > 0.01:
+    full_reserve_total = sum(m for _, m in full_reserves)
+    if abs(probe_hard - (probe_expected + full_reserve_total + recovery)) > 0.01:
         raise BehaviouralProposalError(
-            f"the named reserves ({reserve_total} min) plus the recovery "
+            f"the named reserves ({full_reserve_total} min) plus the recovery "
             f"reserve ({recovery} min) do not reconstruct the frozen record's "
-            f"hard ceiling: {probe_expected} + {reserve_total} + {recovery} != "
-            f"{probe_hard}. The reserve block has moved since the record was "
-            "frozen and this decomposition would bound the wrong window.")
+            f"hard ceiling: {probe_expected} + {full_reserve_total} + "
+            f"{recovery} != {probe_hard}. The reserve block has moved since the "
+            "record was frozen and this decomposition would bound the wrong "
+            "window.")
 
-    #: Materializing the six arms is INITIALIZATION, not a probe. The protocol
-    #: is twelve probes and stays twelve; the pod is alive longer because the
-    #: arms have to exist before any probe can measure against them.
-    expected_phases = (
-        *overheads,
-        ("materialize_six_arms", round(float(materialization_minutes), 2)),
-        ("twelve_probes", probe_minutes),
+    total_probes = int(beh["n_probes"])
+    if not 0 <= int(probes_remaining) <= total_probes:
+        raise BehaviouralProposalError(
+            f"{probes_remaining} probes remaining is outside 0..{total_probes}. "
+            "A continuation owes some subset of the frozen protocol's probes, "
+            "never more of them.")
+    #: Linear in the probe count BY CONSTRUCTION: the frozen record derives
+    #: each probe term from a per-probe mean or observed maximum times twelve.
+    #: Scaling is arithmetic on that model, not a second model.
+    scale = int(probes_remaining) / total_probes
+    probe_minutes_owed = round(probe_minutes * scale, 2)
+
+    #: The contingency follows the work it covers — the session overheads plus
+    #: the probes that remain. At the default it is exactly the frozen model's
+    #: own figure, `1139.04 x 0.10`.
+    reserves = (
+        ("probe_model_contingency",
+         round((overhead_total + probe_minutes_owed) * SP.CONTINGENCY_FRACTION, 2)),
+        ("probe_duration_risk", round(dict(full_reserves)["probe_duration_risk"]
+                                      * scale, 2)),
+        ("generation_length_risk",
+         round(dict(full_reserves)["generation_length_risk"] * scale, 2)),
     )
+    reserve_total = sum(m for _, m in reserves)
+
+    #: Materializing an arm is INITIALIZATION, not a probe. The protocol is
+    #: twelve probes and stays twelve; the pod is alive longer because the arms
+    #: a remaining probe measures against have to exist first.
+    phases: list[tuple[str, float]] = [
+        *overheads,
+        ("materialize_arms", round(float(materialization_minutes), 2)),
+    ]
+    if restore_minutes:
+        #: Billed pod minutes: `local_assets` and any scp to a pod happen AFTER
+        #: it exists. Restoring verified probes from the durable destination is
+        #: real wall clock on a running meter, so it is a phase and not a
+        #: rounding note.
+        phases.append(("restore_verified_probes",
+                       round(float(restore_minutes), 2)))
+    phases.append((f"{int(probes_remaining)}_probes_remaining",
+                   probe_minutes_owed))
+    expected_phases = tuple(phases)
     expected = round(sum(m for _, m in expected_phases), 2)
     soft_stop = round(expected + reserve_total, 2)
     hard = round(soft_stop + recovery, 2)
     return {
         "expected_phases": expected_phases,
         "soft_stop_reserves": reserves,
+        "probes_remaining": int(probes_remaining),
+        "probes_in_protocol": total_probes,
+        "restore_minutes": round(float(restore_minutes), 2),
+        "_remaining_work_only": (
+            "a completed probe is never retrained, so it is not priced again. "
+            "The arms its remaining probes measure against ARE priced, because "
+            "a replacement resource has a fresh filesystem and must rebuild "
+            "them; that is a replacement runtime necessity, not completed "
+            "science charged twice."),
+        "full_session_reserves": full_reserves,
         "artifact_recovery_reserve_minutes": recovery,
         #: For a `BudgetSpec`. ZERO, deliberately: see the module note above.
         "contingency_fraction": 0.0,
@@ -556,7 +623,9 @@ def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
             "They are a cost model shared with the full search, not a claim "
             "about this session's stages: `selection_commit_and_artifact_"
             "manifest` funds the closeout minutes, and this session commits no "
-            "selection — it consumes one that is already frozen."),
+            "selection — it consumes one that is already frozen. They are NOT "
+            "scaled by the probe count: a replacement resource pays setup, the "
+            "bundle, the teacher fetch and the machine gates in full."),
         "expected_minutes": expected,
         "soft_stop_minutes": soft_stop,
         "hard_minutes": hard,

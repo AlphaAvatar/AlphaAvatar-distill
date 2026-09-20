@@ -17,7 +17,7 @@
    "config_sha256",
    "artifact_digest of the trained weights"
   ],
-  "_a_record_is_not_a_checkpoint": "a journal entry claiming a probe finished is not the probe. Reuse re-derives the identity from the bytes on disk through `identify_for_transfer` and refuses anything that does not match what was announced. Without that, a replacement resource could substitute for a measurement.",
+  "_a_record_is_not_a_checkpoint": "a journal entry claiming a probe finished is not the probe. Reuse re-derives the identity from the bytes on disk through `identify_for_transfer` and refuses anything that does not match what was announced \u2014 at the destination when the probe lands, again on the host before a continuation ships it, and again on the replacement pod from the bytes that arrive there. Without that, a replacement resource could substitute for a measurement.",
   "_the_descriptor_decides": "the journal's record is self-consistent by construction, so checking it against itself proves nothing about whether it is the probe the rung asked for. The comparison that means something is against the descriptor the schedule builds from the frozen protocol."
  },
  "rules": [
@@ -56,8 +56,8 @@
   },
   {
    "id": "R6",
-   "rule": "A resumed session re-materializes its arms rather than trusting a staged copy, unless that copy re-identifies to the pinned digest.",
-   "why": "arms are cheap to rebuild and are digest-pinned at every step; trusting an unverified copy would be the one place a substituted initialization could enter the experiment.",
+   "rule": "A resumed session re-materializes its arms rather than trusting a staged copy, unless that copy re-identifies to the pinned digest; and it restores completed probes from the durable destination rather than expecting the previous resource's filesystem to still exist.",
+   "why": "arms are cheap to rebuild and are digest-pinned at every step, so trusting an unverified copy would be the one place a substituted initialization could enter the experiment. Probes are not cheap to rebuild and may not be rebuilt at all, so they travel from the only copy that survived the previous resource.",
    "enforced_by": "autoinit_c2_behavioural_driver.py :: materialize_arm"
   },
   {
@@ -78,6 +78,14 @@
    "rule": "A replacement resource may not launch while a previous resource of the campaign is unreconciled, and may not launch when settled campaign spend plus its own planned all-in exceeds the campaign's approved all-in ceiling.",
    "why": "at most one resource of a campaign may bill at a time, and the budget is cumulative across every resource and subrun. An unknown billing state is itself a stop condition.",
    "enforced_by": "autoinit_c2_behavioural_launch.py :: campaign_continuation_gate"
+  },
+  {
+   "id": "R10",
+   "rule": "A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those probes need rebuilt on a fresh filesystem, and the restore of its verified probes \u2014 never on a fresh full session.",
+   "why": "reserving a whole session per attempt refused every continuation by construction: with a ceiling sized for one session, any prior spend above $0 made settled + reserved exceed it. Pricing the remainder is what makes the cumulative rule usable instead of merely safe.",
+   "enforced_by": "autoinit_c2_behavioural_launch.py :: campaign_remaining_work",
+   "_how": "behavioural.session_decomposition prices remaining work, and a fresh campaign's remaining work is all of it, so the full session and every continuation come from ONE derivation. A completed probe is never priced again; a complete campaign owes nothing and may not continue at all.",
+   "_fail_closed": "if the remainder does not fit the approved campaign ceiling the gate refuses and returns to the maintainer. The experiment is not shortened to fit and the ceiling is not raised."
   }
  ],
  "what_a_resume_may_never_do": [
@@ -90,7 +98,10 @@
   "extend the seed set, add a tie-break rung, or force a winner",
   "continue after a complete valid scientific verdict",
   "launch while a previous resource of the campaign may still be billing",
-  "spend past the campaign's cumulative approved all-in ceiling"
+  "spend past the campaign's cumulative approved all-in ceiling",
+  "admit a restored probe whose bytes do not reproduce its announced identity at the new local path",
+  "treat the previous resource's filesystem as still existing",
+  "budget a continuation as though no probe had been completed"
  ],
  "if_a_campaign_cannot_be_completed": "stop and report. A behavioural selection that trained nine of twelve probes has no verdict and must not be presented as having a partial one. The nine preserved probes are evidence about what was trained, not about which candidate wins. Whether a fresh campaign may reuse them is a maintainer decision, and this document's default answer is NO.",
  "_pre_science_retries_are_different": "an invocation that aborts BEFORE formal training begins produced no measurement to retry. AGENTS.md P12.1 permits diagnosing, repairing and retrying that under a fresh attempt identity inside the same cumulative budget. This document governs the case where training HAS begun.",
@@ -103,9 +114,18 @@
    "the probe's identity matches the descriptor this rung derives from the frozen protocol and the six materialized arms: same probe id, rung, arm, seed and initialization artifact digest, and an identified training configuration",
    "the destination bytes still re-identify to the artifact identity that was announced when the probe finished",
    "the previous resource is PROVIDER-CONFIRMED non-billing; a zero return code on a remove call is not evidence of release",
-   "cumulative campaign spend, settled across every prior resource and run attempt plus this session's planned all-in, remains inside the campaign's approved all-in ceiling"
+   "cumulative campaign spend, settled across every prior resource and run attempt plus this session's planned all-in, remains inside the campaign's approved all-in ceiling",
+   "the probe's bytes and its score evidence are restored to the replacement resource from the durable destination and re-identified there, at the new local path, before the campaign journal admits them"
   ],
-  "_cumulative_means_cumulative": "the approved all-in ceiling bounds the CAMPAIGN, not each resource. A rerun does not reset it and a replacement resource does not receive a fresh allocation. A continuation that does not fit refuses at the gate; funding a campaign for more than one full session is a maintainer decision."
+  "_cumulative_means_cumulative": "the approved all-in ceiling bounds the CAMPAIGN, not each resource. A rerun does not reset it and a replacement resource does not receive a fresh allocation. A continuation that does not fit refuses at the gate; funding a campaign for more than one full session is a maintainer decision.",
+  "how_a_replacement_resource_gets_the_probes": {
+   "why_this_needed_saying": "the campaign id alone made the policy expressible, not reachable. A replacement pod has a FRESH FILESYSTEM: the previous pod's audit/probes/*.json is gone and every model_dir it recorded points at nothing, and those two things are exactly what the driver's journal reads. The only surviving copy is the durable destination on the launcher host.",
+   "transport": "the launcher's materialize_inputs step \u2014 after setup, before the driver starts, and the pod is torn down if it fails \u2014 pushes each eligible probe's bytes and science evidence from the durable destination to a NEW path on the replacement pod, together with a small manifest naming that path and the identity to reproduce there.",
+   "eligibility": "only probes whose durable_ack.json records a destination-side re-identification that MATCHED. The launcher re-identifies them AGAIN on this host before sending, because an ack is a record and a record is not a checkpoint, and the driver re-identifies them a third time from the bytes that land on the pod.",
+   "why_the_bytes_and_not_just_the_identities": "a probe trained but not validly scored resumes AT SCORING under R2, and scoring reads the weights. A manifest of identities would leave such a probe unscoreable, and R3 forbids retraining it.",
+   "cost": "the restore is billed pod time \u2014 any scp to a pod happens after it exists \u2014 bounded at the slowest recorded dev-box uplink, 0.23 MB/s, so one 1.11 GiB probe is about 80 minutes. Those minutes are a phase in the remaining-work bound R10 checks, so a restore that does not fit the campaign ceiling is refused before a pod exists. A maintainer freeing Hugging Face private storage would move this to the $0 pre-pod relay and remove the minutes; that is a maintainer decision.",
+   "the_old_path_is_not_the_truth": "the producing pod's model_dir is not carried as a directive. The driver's journal records the new local path, after verifying it."
+  }
  },
- "record_sha256": "b34ea9fa0cebf81ef29afc97728e548440688305c9887974a7af7242fb332f80"
+ "record_sha256": "6f54fde983e13d8dacdef39067c36c2a7a0b1106aeb11a2ea30caf46012733f1"
 }

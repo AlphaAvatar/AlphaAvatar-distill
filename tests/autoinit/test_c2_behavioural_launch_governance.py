@@ -88,6 +88,45 @@ def test_the_continuation_gate_is_in_the_launchers_precheck_chain():
     assert names[-1] == "bundle_staged_gate"
 
 
+def test_the_replacement_resource_handoff_is_wired_into_the_session():
+    """A mechanism with no production caller protects nothing.
+
+    Found by mutation: deleting `materialize_inputs=restore_campaign_probes`
+    from the spec left every continuation test green, because they call the
+    restore step directly. Tests prove a mechanism works; only this proves the
+    session uses it.
+
+    `materialize_inputs` is the right seam and not an arbitrary one: the runner
+    calls it AFTER setup and BEFORE the driver starts, and tears the pod down
+    if it returns `False`. A probe restored after the driver had begun would be
+    a probe the campaign journal had already decided was absent — and the
+    protocol forbids retraining it.
+    """
+    args = L.build_parser().parse_args(
+        ["--scr", "/tmp/probe", "--session-commit", "abc123", "--bundle", "b",
+         "--run-id", "attempt1", "--max-price", "1.09"])
+    spec = L.spec(args)
+    assert spec.materialize_inputs is L.restore_campaign_probes, (
+        "the session does not declare the continuation restore step, so a "
+        "replacement resource would start its driver on a fresh filesystem "
+        "with none of its campaign's verified probes")
+    #: And the driver is told where to find what that step staged.
+    class _Ctx:
+        image_digest = "sha256:abc"
+        price = 1.09
+        spent_usd = 0.0
+        args = L.build_parser().parse_args(
+            ["--scr", "/tmp/probe", "--session-commit", "abc123",
+             "--bundle", "b", "--run-id", "attempt1", "--max-price", "1.09"])
+
+        class auth:
+            hard_cap_usd = 32.7097
+            campaign_id = BG.CAMPAIGN_ID
+
+    command = L.driver_command(_Ctx(), type("P", (), {"soft_stop_usd": 30.0})())
+    assert f"--continuation-manifest {L.RESTORE_MANIFEST}" in command
+
+
 def test_the_session_plan_carries_the_one_canonical_budget():
     """The launcher's SessionSpec prices the same decomposition as the proposal.
 

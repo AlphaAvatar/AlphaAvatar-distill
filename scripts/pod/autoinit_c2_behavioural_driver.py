@@ -322,6 +322,164 @@ class C2BehaviouralDriver:
                         if torch.cuda.is_available() else None),
                 "driver": os.environ.get("NVIDIA_DRIVER_VERSION")}
 
+    # -- continuation across a replacement resource -------------------------
+    def restore_campaign(self) -> dict[str, Any]:
+        """Adopt this campaign's restored probes. BEFORE the journal is read.
+
+        A replacement resource has a fresh filesystem: nothing of the previous
+        pod's audit directory exists and every `model_dir` it recorded points
+        at nothing. The launcher has put the campaign's destination-verified
+        probes under `--continuation-manifest`'s `pod_root`, and this turns
+        them back into journal entries — at the NEW local paths, after
+        re-identifying the bytes HERE.
+
+        The re-identification is not a formality. The manifest is a document,
+        the ack behind it is a record, and neither is a checkpoint; the only
+        thing that makes a restored probe a measurement is that its bytes
+        reproduce the identity its own campaign announced, on this machine, at
+        the path this process will read. A mismatch RAISES: a continuation that
+        admitted unverifiable bytes would be substituting for a measurement,
+        which is the one failure the whole campaign contract exists to prevent.
+
+        The committed screening ranking travels the same way, so a continuation
+        confirms the candidate its campaign advanced rather than re-deciding.
+        """
+        path = Path(self.a.continuation_manifest or "")
+        if not self.a.continuation_manifest or not path.is_file():
+            #: No manifest at all. Distinguished from an empty one: the
+            #: launcher always ships a manifest, so its absence means the
+            #: restore step never ran and this is not a continuation.
+            summary = {"manifest": None, "restored": [], "n": 0,
+                       "_means": "no continuation manifest; nothing to adopt"}
+            self.ev["continuation"] = summary
+            return summary
+
+        manifest = json.loads(path.read_text())
+        if manifest.get("campaign_id") != self.a.campaign:
+            raise C2DriverError(
+                f"{path} is a continuation manifest for campaign "
+                f"{manifest.get('campaign_id')!r}, not {self.a.campaign!r}. "
+                "One experiment's probes may never be pooled into another.")
+
+        (self.audit / "probes").mkdir(parents=True, exist_ok=True)
+        restored: list[dict[str, Any]] = []
+        for entry in manifest.get("probes", []):
+            pid = entry["probe_id"]
+            pod_path = Path(entry["pod_path"])
+            identity = entry["identity"]
+            #: FROM THE BYTES, at the path this pod will read them from.
+            try:
+                from aadistill.initialization.specs.arch import get_adapter
+                from aadistill.runtime.leaf_durability import (
+                    verify_transferred_leaf,
+                )
+
+                v = verify_transferred_leaf(pod_path, identity,
+                                            adapter=get_adapter("qwen3"))
+                ok = bool(v["matched"] and v["weights_digest_matched"]
+                          and v["shard_matched"]
+                          and v["config_matched"] is not False)
+                why = "re-identified on this pod" if ok else (
+                    f"artifact={v['matched']}, "
+                    f"weights={v['weights_digest_matched']}, "
+                    f"shard={v['shard_matched']}, config={v['config_matched']}")
+            except Exception as exc:                              # noqa: BLE001
+                ok, why = False, f"{type(exc).__name__}: {exc}"
+            if not ok:
+                raise C2DriverError(
+                    f"{pid}: the restored bytes at {pod_path} do not reproduce "
+                    f"the identity this campaign announced ({why}). A "
+                    "continuation may consume its campaign's completed probes; "
+                    "it may not accept bytes that cannot be shown to be them.")
+
+            #: A journal entry with the NEW model_dir. The producing pod's
+            #: absolute path is deliberately not carried in the manifest and is
+            #: not reconstructed here: it does not exist on this machine, and a
+            #: path that cannot be checked is not evidence.
+            record = {
+                "probe_id": pid, "campaign": self.a.campaign,
+                "rung": entry.get("rung"), "arm": entry.get("arm"),
+                "seed": entry.get("seed"),
+                "model_dir": str(pod_path),
+                "initialization_artifact_digest":
+                    entry.get("initialization_artifact_digest"),
+                "config_sha256": entry.get("config_sha256"),
+                "complete": True,
+                "restored_from": {
+                    "campaign": manifest["campaign_id"],
+                    "source_attempt": entry.get("source_attempt"),
+                    "durable_path": entry.get("durable_path"),
+                    "re_identified_on_this_pod": True,
+                },
+                "durable": {"identity": identity},
+            }
+            if entry.get("score"):
+                #: The score's own evidence, restored beside it and re-pointed
+                #: at this pod. The verdict reads the per-sample ROWS, so a
+                #: score whose rows did not travel is not a usable score.
+                score = self._restore_score_evidence(pid, pod_path,
+                                                     dict(entry["score"]))
+                record["score"] = score
+            (self.audit / "probes" / f"{pid}.json").write_text(
+                json.dumps(record, indent=2, default=str) + "\n")
+            restored.append({"probe_id": pid, "pod_path": str(pod_path),
+                             "scored": bool(entry.get("score"))})
+            say(f"  restored {pid}: re-identified here, "
+                f"{'scored' if entry.get('score') else 'TRAINED ONLY'}")
+
+        ranking = manifest.get("committed_ranking")
+        if ranking:
+            #: The campaign's commitment, written where `committed_ranking`
+            #: looks. Stage R will recompute, refuse on disagreement, and
+            #: advance THIS candidate.
+            (self.audit / "c2_screening_ranking.json").write_text(
+                json.dumps(ranking, indent=2) + "\n")
+            say(f"  campaign already advanced "
+                f"{manifest['committed_candidate'][:12]}…; screening will not "
+                "be re-decided")
+
+        summary = {
+            "manifest": str(path), "restored": restored, "n": len(restored),
+            "committed_candidate": manifest.get("committed_candidate"),
+            "_re_identified_here": (
+                "every restored probe's bytes reproduced the identity its "
+                "campaign announced, at the path on THIS pod. The manifest and "
+                "the destination ack are records; the bytes are the evidence."),
+        }
+        self.ev["continuation"] = summary
+        return summary
+
+    def _restore_score_evidence(self, pid: str, pod_path: Path,
+                                score: dict[str, Any]) -> dict[str, Any]:
+        """Re-point a restored score at this pod's copies, and hash-check them.
+
+        The score record's `result_path` and `per_sample_path` were the
+        PRODUCING pod's. They are rewritten to the restored copies and verified
+        against the hashes the score itself carries, so a truncated per-sample
+        file is caught here rather than inside the decision rule.
+        """
+        moved: dict[str, str] = {}
+        for key, name in (("result_path", "result.json"),
+                          ("per_sample_path", "per_sample.jsonl")):
+            src = pod_path / name
+            if not src.is_file():
+                raise C2DriverError(
+                    f"{pid}: the restored score names {key} but {src} did not "
+                    "arrive. The verdict reads these rows; a score without "
+                    "them is not a usable score.")
+            dest = self.audit / f"{pid}_{name}"
+            dest.write_bytes(src.read_bytes())
+            want = score.get(key.replace("_path", "_sha256"))
+            got = sha256_file(dest)
+            if want and want != got:
+                raise C2DriverError(
+                    f"{pid}: the restored {name} hashes to {got[:12]}… and the "
+                    f"score records {want[:12]}…. The evidence changed in "
+                    "transit and cannot decide anything.")
+            moved[key] = str(dest)
+        score.update(moved)
+        return score
+
     # -- resume -------------------------------------------------------------
     def load_campaign_journal(self) -> dict[str, Any]:
         """Restore probes this CAMPAIGN already completed. Pre-registered rules.
@@ -1292,9 +1450,16 @@ class C2BehaviouralDriver:
     # -- run ----------------------------------------------------------------
     def run(self) -> int:
         self.mark("DRIVER_START")
-        #: Before anything is trained. A probe this campaign already finished
-        #: is restored and never retrained; one from another campaign, or one
-        #: whose bytes no longer match what was announced, is refused.
+        #: FIRST: adopt what the launcher restored from the durable
+        #: destination. A replacement resource has a fresh filesystem, so
+        #: without this the journal below would find nothing and the campaign's
+        #: completed probes would look absent -- and the protocol forbids
+        #: retraining them.
+        self.restore_campaign()
+        #: Then the journal, over whatever is now on this filesystem. A probe
+        #: this campaign already finished is restored and never retrained; one
+        #: from another campaign, or one whose bytes no longer match what was
+        #: announced, is refused.
         self.load_campaign_journal()
         self.save()
         stages = (("P", self.stage_p), ("S", self.stage_s), ("R", self.stage_r),
@@ -1327,6 +1492,12 @@ def build_parser() -> argparse.ArgumentParser:
                           "the same string, a replacement resource became a new "
                           "campaign and had to refuse its predecessor's "
                           "destination-verified probes"))
+    ap.add_argument("--continuation-manifest", default="",
+                    help=("path on this pod to the campaign continuation "
+                          "manifest the launcher staged. Names the verified "
+                          "probes this CAMPAIGN already holds and where their "
+                          "bytes were restored to. Absent means this is not a "
+                          "continuation; empty means the campaign holds none"))
     ap.add_argument("--audit-dir", required=True)
     ap.add_argument("--eval-dir", required=True)
     ap.add_argument("--b-workdir", required=True,

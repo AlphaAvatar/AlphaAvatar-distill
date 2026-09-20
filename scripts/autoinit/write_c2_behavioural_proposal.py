@@ -148,19 +148,52 @@ def build() -> dict:
             "continuation": (
                 "a replacement resource is a new RESOURCE and a new run attempt "
                 "inside the same campaign. It may consume that campaign's "
-                "destination-verified probes under the four conditions the "
-                "resume preregistration registers — descriptor identity, "
-                "re-identified bytes, a provider-confirmed non-billing "
-                "predecessor, and cumulative spend inside the campaign "
-                "ceiling. That is continuation of one preregistered experiment, "
-                "not pooling across experiments."),
+                "destination-verified probes under the conditions the resume "
+                "preregistration registers — descriptor identity, re-identified "
+                "bytes, a provider-confirmed non-billing predecessor, "
+                "cumulative spend inside the campaign ceiling, and a restore "
+                "that re-identifies on the replacement pod itself. That is "
+                "continuation of one preregistered experiment, not pooling "
+                "across experiments."),
+            "handoff": {
+                "why": (
+                    "a replacement pod has a FRESH FILESYSTEM. The previous "
+                    "pod's audit/probes/*.json is gone and every model_dir it "
+                    "recorded points at nothing, and those are the two things "
+                    "the driver's campaign journal reads. Without a restore "
+                    "the registered continuation policy is unreachable in "
+                    "production however correct the campaign id is."),
+                "transport": (
+                    "the launcher's materialize_inputs step — after setup, "
+                    "before the driver starts, pod torn down on failure — "
+                    "pushes each eligible probe's bytes and science evidence "
+                    "from the durable destination to a NEW pod path, with a "
+                    "manifest naming that path and the identity to reproduce "
+                    "there. Verified three times: at the destination when the "
+                    "probe landed, on this host before it is sent, and on the "
+                    "replacement pod from the bytes that arrive."),
+                "why_bytes_not_just_identities": (
+                    "a probe trained but not validly scored resumes AT SCORING "
+                    "and scoring reads the weights. Retraining it is "
+                    "forbidden, so the weights have to travel."),
+                "cost": (
+                    "billed pod time — any scp to a pod happens after it "
+                    "exists — bounded at the slowest recorded dev-box uplink, "
+                    "0.23 MB/s, about 80 minutes per 1.11 GiB probe. Those "
+                    "minutes are a phase in the remaining-work bound, so an "
+                    "unaffordable restore is refused before a pod exists. "
+                    "Freeing Hugging Face private storage would move this to "
+                    "the $0 pre-pod relay; that is a maintainer decision."),
+            },
             "_the_ceiling_is_cumulative": (
                 "all_in_hard_usd below bounds the CAMPAIGN across every "
-                "resource and run attempt it takes. With a ceiling sized for "
-                "one full session, a continuation after a resource that already "
-                "spent real money is REFUSED at the gate rather than permitted "
-                "to overspend. Funding a campaign for more than one full "
-                "session is a maintainer decision."),
+                "resource and run attempt it takes. A continuation is budgeted "
+                "on the work the campaign still OWES — its incomplete probes, "
+                "the arms those need rebuilt, and the restore — never on a "
+                "fresh full session, which refused every continuation by "
+                "construction. If the remainder does not fit, the gate refuses "
+                "and returns to the maintainer: the experiment is not shortened "
+                "and the ceiling is not raised."),
         },
 
         "authorization_terms": {
@@ -279,7 +312,11 @@ def build() -> dict:
                 "confirms the candidate its own campaign advanced and may not "
                 "rerun screening for another outcome. Ranking waits for all six "
                 "screening results; no verdict is computed from a partial "
-                "confirmation field."),
+                "confirmation field. A replacement resource restores its "
+                "campaign's verified probes from the durable destination and "
+                "re-identifies them on the pod before admitting any, and it is "
+                "budgeted on the work the campaign still owes rather than on a "
+                "fresh session."),
         },
 
         "explicitly_not_proposed": [
@@ -351,6 +388,13 @@ def build() -> dict:
                 "dollars and authorized runtime, per-poll durability, "
                 "destination re-identification and a teardown gate that "
                 "refuses while evidence is unreadable.",
+            "continuation":
+                "scripts/experiments/phase_c2/behavioural_continuation.py — "
+                "BUILT. Reads the campaign's verified state from the durable "
+                "destination, derives the remaining work mechanically, and "
+                "builds the manifest a replacement pod reads. The launcher's "
+                "materialize_inputs step performs the handoff and the driver "
+                "re-identifies every restored probe at its new local path.",
             "b_binding": "BUILT",
             "storage_derivation": "BUILT",
             "rehearsal":

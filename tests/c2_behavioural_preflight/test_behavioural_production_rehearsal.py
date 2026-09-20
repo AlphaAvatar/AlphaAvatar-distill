@@ -71,6 +71,14 @@ def _write_checkpoint(directory: Path) -> Path:
     return directory
 
 
+def _stable_seed(probe_id: str, seed: int) -> int:
+    """A per-probe fixture seed that does not move between processes."""
+    import hashlib
+
+    digest = hashlib.sha256(f"{probe_id}:{seed}".encode()).hexdigest()
+    return int(digest[:8], 16)
+
+
 def _rows(seed: int, *, correct_rate: float, usable_rate: float) -> list[dict]:
     """One probe's per-sample rows, in the schema the scorer writes.
 
@@ -131,11 +139,21 @@ class _Rehearsal(D.C2BehaviouralDriver):
         return {"battery": battery.name, "evaluation_protocol_hash": "rehearsed"}
 
     def score_probe(self, probe, model_dir, *, battery, run_completion) -> dict:
-        """Write this probe's per-sample rows; everything downstream is real."""
+        """Write this probe's per-sample rows; everything downstream is real.
+
+        The row seed is a STABLE hash of the probe's identity. It was Python's
+        built-in `hash()`, which is randomized per process by `PYTHONHASHSEED`,
+        so the fixture's data — and therefore the decision the real rule
+        reached on it — changed from run to run: `PYTHONHASHSEED=7` made
+        `test_a_null_effect_does_not_manufacture_a_winner` come out GO. That is
+        a roughly one-in-eight failure in a test that runs inside the PAID
+        pod's blocking TESTS_OK gate, which is a launch killed at setup on a
+        billing machine for a reason nobody could reproduce.
+        """
         t_correct, i_correct, t_usable, i_usable = self.effect
         is_anchor = probe.arm == SCH.ANCHOR
         rows = _rows(
-            hash((probe.probe_id, probe.seed)) % (2**31),
+            _stable_seed(probe.probe_id, probe.seed),
             correct_rate=i_correct if is_anchor else t_correct,
             usable_rate=i_usable if is_anchor else t_usable)
         per_sample = self.audit / f"{probe.probe_id}_per_sample.jsonl"

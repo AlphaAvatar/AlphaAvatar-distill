@@ -130,13 +130,66 @@ now a stable `BG.CAMPAIGN_ID`, carried by the authorization and in the plan
 hash; the run attempt stays unique per invocation and resource. The durable
 store is keyed campaign-then-attempt, restored probes are checked against the
 descriptor their rung derives (not only against their own record), screening
-**commits once** per campaign, and a new `$0` `campaign_continuation_gate`
-requires every prior resource to be provider-confirmed non-billing and refuses
-when settled campaign spend plus this session's planned all-in exceeds the
-campaign ceiling. *With a ceiling sized for one full session that gate refuses a
-continuation after any real prior spend — deliberately. Funding a campaign for
-more than one session is a maintainer decision, and the gate is where that need
-becomes visible instead of becoming an overrun.*
+**commits once** per campaign, and a `$0` `campaign_continuation_gate` requires
+every prior resource to be provider-confirmed non-billing and bounds cumulative
+campaign spend.
+
+### Continuation is now REACHABLE, not merely expressible
+
+The second review accepted A/B/D/E and refused C on production grounds: the
+campaign id made the policy expressible while three things kept it unreachable.
+All three are closed.
+
+**A replacement pod could not get the probes.** `load_campaign_journal` reads
+`audit/probes/*.json` and each entry's `model_dir` — both of which die with the
+producing pod. The old continuation test handed attempt 2 attempt 1's own
+`--audit-dir`/`--eval-dir`/`--b-workdir`, so it proved only that a second
+*process* can read a first process's files. There is now a real handoff:
+`behavioural_continuation.py` reads the campaign's verified state from the
+durable destination, and the launcher's `materialize_inputs` step — after setup,
+before the driver starts, pod torn down on failure — pushes each eligible
+probe's bytes and science evidence to a **new** pod path with a manifest naming
+the identity to reproduce there. Verified three times: at the destination when
+the probe landed, on the host before it is sent, and **on the replacement pod
+from the bytes that arrive**. Only probes whose `durable_ack.json` records a
+matched destination re-identification are eligible. *The bytes are not
+ceremony:* a probe trained but not validly scored resumes at scoring, and
+scoring reads the weights.
+
+A gap inside that: the probe records, scores and per-sample rows were collected
+only by the **success** artifact spec, so on the one path where continuation is
+needed — a failed session — the science evidence never came home and the
+campaign's screening commitment did not either. Both are now secured beside the
+bytes during the run, on every poll, and again at closeout.
+
+**A paid attempt that finished no probe was invisible.** `campaign_attempts`
+derived predecessors from durable probes alone, so the most ordinary failure
+there is — a pod that bills and dies in setup or arm materialization — returned
+`[]`, and the next attempt called itself the campaign's *first resource*,
+summing no spend and checking no release. It is now the union of the campaign's
+**run records** and the durable store: the run record is the authority for *a
+resource existed*, the store only for *it left science*. A run naming another
+campaign is excluded; a run whose campaign cannot be read is included and
+refuses as UNKNOWN.
+
+**A continuation reserved a whole fresh session.** `planned = gpu_hard + disk_hard`
+meant `settled + 33.2099 > 33.2099` for any prior spend above `$0`, so no
+continuation could ever pass. `session_decomposition` now prices **remaining
+work** — and a fresh campaign's remaining work is all of it, so the full session
+and every continuation come from one derivation, with the authorized `$23.8832`
+/ `$33.2099` unchanged at the defaults. A completed probe is never priced again;
+the arms its *remaining* probes need are, because a replacement filesystem must
+rebuild them; the restore is a phase, bounded at the slowest recorded uplink
+(0.23 MB/s, ~80 min per 1.11 GiB probe) because it is billed pod time. A
+complete campaign owes nothing and the gate refuses to continue it at all —
+GO, NO_GO and INCONCLUSIVE are terminal.
+
+*Still fail-closed where it matters:* if the remainder does not fit the approved
+campaign ceiling the gate refuses and returns to the maintainer. The experiment
+is never shortened to fit and the ceiling is never raised. **A maintainer
+freeing Hugging Face private storage would move the restore to the `$0` pre-pod
+relay and delete those billed minutes entirely** — that is the single largest
+lever on continuation cost, and it is a maintainer decision.
 
 **Live-rate authorization.** `authorized_gpu_usd()` derived from the `$1.09/h`
 constant and `main()` called `window_minutes(args.max_price)` without the
@@ -175,6 +228,16 @@ Three defects were found adjacent to this work and fixed, all `$0`:
   the `DURABLE_STORE` constant while the fetcher honoured `--ckpt-store`.
 * the three new `tests/**/test_*.py` files staled the committed skip-predicate
   audit digest, as they always do; regenerated.
+* **a one-in-eight flake inside the paid pod's blocking gate.** The rehearsal's
+  per-sample fixture seeded itself from Python's built-in `hash()`, which is
+  randomized per process, so the decision the real rule reached on that data
+  moved between runs: at `PYTHONHASHSEED=7`,
+  `test_a_null_effect_does_not_manufacture_a_winner` comes out GO and fails.
+  Confirmed identical at `147b2c6` in a detached worktree. That test runs in
+  `tests/c2_behavioural_preflight/`, which IS the pod's TESTS_OK gate — so
+  roughly one launch in eight would have died at setup on a billing machine for
+  a reason nobody could reproduce. The seed is now a stable sha256 of the
+  probe's identity.
 
 **No grant, readiness record, authorization, bundle or provider resource
 exists**, and none may be created without a maintainer decision. Owners:
