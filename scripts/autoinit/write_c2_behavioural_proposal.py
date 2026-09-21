@@ -34,6 +34,34 @@ from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
 OUT = ("logs/stages/stage-1/phase_c2_behavioural/plans/"
        "c2_behavioural_grant_proposal.json")
 
+#: Fields EXCLUDED from `proposal_sha256`, because they describe the act of
+#: writing rather than what was written. `proposed_utc` is a wall clock, so
+#: with it inside the hash the proposal's identity changed every time the
+#: document was regenerated from an unchanged tree — which is not an identity
+#: at all. It sent a reviewer a `proposal_sha256` that a regeneration sixteen
+#: minutes later no longer produced, and the issuer's binding check would then
+#: have refused a launch because time had passed. The timestamp stays in the
+#: document: it is useful provenance, it is simply not part of what the hash
+#: promises.
+IDENTITY_EXCLUDES = ("proposal_sha256", "proposed_utc")
+
+
+def proposal_identity(doc: dict) -> str:
+    """THE canonical hash of a proposal document, owned by its writer.
+
+    The issuer re-derives the reviewed proposal's identity at issuance and
+    refuses a disagreement, so there must be exactly one definition of what
+    that hash covers. It asks this function rather than reimplementing it: two
+    canonicalizations of one document is how a checker comes to refuse a
+    correct tree.
+
+    Not the file hash. `sha256sum` of the serialised bytes is a different
+    number that no governance artifact binds, and it has already been reported
+    to a maintainer under this name.
+    """
+    return sha256_json({k: v for k, v in doc.items()
+                        if k not in IDENTITY_EXCLUDES})
+
 def project_position(all_in: float) -> dict:
     """Where this ceiling sits against the cumulative cap.
 
@@ -440,7 +468,13 @@ def build() -> dict:
                      "maintainer decision.",
         },
     }
-    doc["proposal_sha256"] = sha256_json(doc)
+    doc["_proposal_sha256_excludes"] = (
+        "proposal_sha256 covers this document EXCEPT "
+        f"{list(IDENTITY_EXCLUDES)}. proposed_utc is a wall clock and would "
+        "make the identity change on every regeneration of an unchanged tree; "
+        "the hash is a function of the proposal's content, so a grant can bind "
+        "it and the issuer can re-derive it.")
+    doc["proposal_sha256"] = proposal_identity(doc)
     return doc
 
 

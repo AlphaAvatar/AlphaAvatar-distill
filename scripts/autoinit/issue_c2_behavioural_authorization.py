@@ -49,13 +49,16 @@ EXPERIMENT_ID = "phase_c2_behavioural"
 STAGE_ID = "1"
 
 
-def _proposal_writer_out() -> str:
-    """Where the proposal writer puts the proposal, asked of the writer.
+def _proposal_writer():
+    """The proposal's WRITER, so its path and its canonicalization come from
+    the one place that defines them.
 
     Imported by path because `scripts/autoinit/` is a directory of entry
     points rather than a package, and because the alternative — a second copy
-    of the literal — is the defect: the checker would keep verifying the old
-    location after a move and report PASS on a file the review never saw.
+    of the literal and a second copy of the hash rule — is the defect: the
+    checker would keep verifying the old location after a move, or compute a
+    different hash over the same document, and report PASS or refuse a correct
+    tree.
     """
     import importlib.util
 
@@ -63,7 +66,7 @@ def _proposal_writer_out() -> str:
     spec = importlib.util.spec_from_file_location("_c2b_proposal_writer", src)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    return mod.OUT
+    return mod
 
 #: How much the live quote may move the dollar authorization before this stops
 #: and returns to the maintainer. The grant's rule is "materially changes"; a
@@ -71,10 +74,12 @@ def _proposal_writer_out() -> str:
 #: than this is not a number anybody reviewed.
 MATERIAL_USD = 0.05
 
-#: The reviewed proposal, from its WRITER rather than re-typed here: two
-#: spellings of one path is how a checker comes to verify a document nobody
-#: reads.
-PROPOSAL_REL = _proposal_writer_out()
+#: The reviewed proposal and its canonical hash rule, both from its WRITER
+#: rather than restated here: two spellings of one path is how a checker comes
+#: to verify a document nobody reads, and two canonicalizations of one document
+#: is how it comes to refuse a correct tree.
+PROPOSAL_WRITER = _proposal_writer()
+PROPOSAL_REL = PROPOSAL_WRITER.OUT
 
 
 def governance_path(run_id: str, name: str) -> str:
@@ -89,18 +94,21 @@ def git(*args: str) -> str:
 def reviewed_proposal_hash(repo_root: Path) -> str:
     """The proposal's own canonical hash, recomputed from the document.
 
-    Computed the way its writer computes it — `sha256_json` over the document
-    with `proposal_sha256` removed — and NOT by hashing the file. Those are
-    two different numbers, and reporting the file hash under this name has
-    already sent a maintainer a value that no governance artifact records.
+    Computed by ASKING its writer, through `proposal_identity`, and NOT by
+    hashing the file. Those are two different numbers, and reporting the file
+    hash under this name has already sent a maintainer a value that no
+    governance artifact records.
 
     Refuses a proposal that does not match its own stated hash: such a
     document is not the one it claims to be, and an authorization issued over
     it would name a review that never happened.
     """
     doc = json.loads((repo_root / PROPOSAL_REL).read_text())
-    stated = doc.pop("proposal_sha256", None)
-    recomputed = sha256_json(doc)
+    stated = doc.get("proposal_sha256")
+    #: THE WRITER'S rule, not a local one. It excludes `proposed_utc` as well
+    #: as the hash field, because a wall clock inside the identity made the
+    #: proposal's hash change on every regeneration of an unchanged tree.
+    recomputed = PROPOSAL_WRITER.proposal_identity(doc)
     if stated is None:
         raise SystemExit(
             f"{PROPOSAL_REL} states no proposal_sha256, so it carries no "

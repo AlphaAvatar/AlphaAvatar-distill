@@ -211,3 +211,91 @@ def test_the_issuer_refuses_a_dirty_tree_before_reading_anything():
     #: Either refusal is correct and which one depends on the working tree;
     #: what must never happen is an authorization for a run with no grant.
     assert ("dirty tree" in out.stderr or "no grant at" in out.stderr), out.stderr
+
+
+# --- the identity must survive a regeneration -------------------------------
+
+class TestTheProposalIdentityIsReproducible:
+    """An identity that changes with the clock is not an identity.
+
+    `proposal_sha256` covered the whole document including `proposed_utc`, a
+    wall clock, so regenerating the proposal from an UNCHANGED tree produced a
+    different hash every time. A reviewer was sent `51129b3d…`; a regeneration
+    sixteen minutes later produced `9fac1595…` with nothing but the timestamp
+    between them. Since the issuer now refuses a grant whose reviewed proposal
+    hash it cannot re-derive, that would have refused a launch because time
+    had passed — a gate failing on a correct tree.
+    """
+
+    def _writer(self):
+        src = REPO / "scripts/autoinit/write_c2_behavioural_proposal.py"
+        spec = importlib.util.spec_from_file_location("_c2b_writer2", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_two_builds_of_the_same_tree_have_one_identity(self):
+        """The load-bearing property, from the real builder, run twice."""
+        w = self._writer()
+        a, b = w.build(), w.build()
+        assert a["proposed_utc"] != b["proposed_utc"] or True  # may tie
+        assert a["proposal_sha256"] == b["proposal_sha256"]
+        #: And with a deliberately different timestamp, which is the case a
+        #: same-second tie would hide.
+        c = dict(a, proposed_utc="1999-01-01T00:00:00+00:00")
+        assert w.proposal_identity(c) == w.proposal_identity(a)
+
+    def test_the_committed_document_is_what_the_builder_produces(self):
+        """Excluding only what the identity excludes.
+
+        A byte-identical check is impossible while `proposed_utc` is in the
+        document, and removing the timestamp would lose real provenance. So
+        the comparison is over exactly the content the hash covers.
+        """
+        w = self._writer()
+        fresh = w.build()
+        committed = json.loads(PROPOSAL.read_text())
+        assert w.proposal_identity(fresh) == w.proposal_identity(committed)
+        assert committed["proposal_sha256"] == w.proposal_identity(committed)
+        for k in w.IDENTITY_EXCLUDES:
+            fresh.pop(k, None)
+            committed.pop(k, None)
+        #: Through a JSON round-trip, because that is what the committed
+        #: document IS: the builder returns tuples where the file holds lists,
+        #: and `sha256_json` canonicalizes both to the same bytes. Comparing
+        #: the live objects raw reports a difference the identity does not
+        #: have, which would make this test fail on a correct tree.
+        assert json.loads(json.dumps(fresh)) == committed, (
+            "the committed proposal is stale; regenerate it with "
+            "write_c2_behavioural_proposal.py --write")
+
+    def test_a_content_change_still_moves_the_identity(self):
+        """Mutation: excluding fields must not exclude the document.
+
+        An identity that ignored too much would be stable and worthless, and
+        `IDENTITY_EXCLUDES` is exactly the knob that could grow until it did.
+        """
+        w = self._writer()
+        base = w.build()
+        for field in ("plan_hash", "authorizes"):
+            if field not in base:
+                continue
+            moved = dict(base, **{field: "CHANGED"})
+            assert w.proposal_identity(moved) != w.proposal_identity(base), field
+        assert set(w.IDENTITY_EXCLUDES) == {"proposal_sha256", "proposed_utc"}, (
+            "IDENTITY_EXCLUDES grew; every addition removes something from what "
+            "the reviewed identity promises and needs its own justification")
+
+    def test_the_issuer_uses_the_writers_rule_not_its_own(self):
+        """One canonicalization. Two would refuse a correct tree."""
+        w = self._writer()
+        assert ISS.PROPOSAL_WRITER.proposal_identity is not None
+        assert ISS.reviewed_proposal_hash(REPO) == w.proposal_identity(
+            json.loads(PROPOSAL.read_text()))
+        src = (REPO / "scripts/autoinit/issue_c2_behavioural_authorization.py"
+               ).read_text()
+        body = src.split("def reviewed_proposal_hash(", 1)[1].split("\ndef ")[0]
+        assert "PROPOSAL_WRITER.proposal_identity(doc)" in body
+        assert "sha256_json(" not in body, (
+            "the issuer canonicalizes the proposal itself again; the rule "
+            "belongs to the writer alone")
