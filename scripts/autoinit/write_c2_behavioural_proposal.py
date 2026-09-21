@@ -462,10 +462,25 @@ def build() -> dict:
                 "rehearsal drives the real driver P through D and reaches all "
                 "three terminal states from separate deterministic fixtures, "
                 "replacing only hardware-bound calls.",
-            "grant": "NOT REQUESTED — no grant, readiness record, "
-                     "authorization, bundle or provider resource exists for "
-                     "this session, and none may be created without a "
-                     "maintainer decision.",
+            #: STATED AS OF THE REVIEW, and deliberately not derived from the
+            #: tree. This proposal's hash is what a grant BINDS, so a field
+            #: tracking the launch chain would move the identity the moment a
+            #: grant was committed — and the grant would then bind a proposal
+            #: that no longer exists. It said "no grant ... exists for this
+            #: session", which was true until attempt4's grant was written and
+            #: false immediately afterwards. The chain's live state has one
+            #: owner, the run directories, and this document does not restate
+            #: it.
+            "grant": "THIS PROPOSAL REQUESTS AND AUTHORIZES NOTHING. It is "
+                     "the document a maintainer decision is made against; it "
+                     "is not that decision, and it permits no grant, "
+                     "readiness record, authorization, bundle or provider "
+                     "resource. Whether a launch chain exists, and how far it "
+                     "has been built, is recorded per attempt under "
+                     "`runs/<attempt>/governance/` and is NOT restated here: "
+                     "this document's hash is what a grant binds, so a field "
+                     "that tracked the chain would move the identity the "
+                     "moment the chain advanced.",
         },
     }
     doc["_proposal_sha256_excludes"] = (

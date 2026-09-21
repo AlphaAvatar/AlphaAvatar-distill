@@ -45,18 +45,54 @@ def open_chains(runs: Path, *, role: str = "*.json") -> list[str]:
     """Governance artifacts belonging to an attempt with NO closeout.
 
     A closeout is what makes a chain consumed. Until one exists the artifacts
-    are live permission, and a proposal-only stage must hold none.
+    are live permission.
 
     Taking `runs` as an argument rather than reading the repository is what
-    makes the predicate testable: against the committed tree it returns `[]`,
-    and a version that always returns `[]` would be indistinguishable. It is
-    exercised on synthetic trees by `TestTheOpenChainPredicate` below.
+    makes the predicate testable: a version that always returns `[]` would
+    otherwise be indistinguishable from a clean tree. It is exercised on
+    synthetic trees by `TestTheOpenChainPredicate` below.
     """
     if not runs.is_dir():
         return []
     return sorted(
         str(p.relative_to(runs)) for p in runs.glob(f"*/governance/{role}")
         if not (p.parent.parent / "closeout/outcome.json").is_file())
+
+
+def newest_attempt(runs: Path) -> str | None:
+    """The highest-numbered attempt directory, or None.
+
+    Numeric, not lexical: `attempt10` sorts before `attempt4` as a string, and
+    the campaign will reach double digits.
+    """
+    if not runs.is_dir():
+        return None
+    nums = [(int(d.name[len("attempt"):]), d.name) for d in runs.iterdir()
+            if d.is_dir() and d.name.startswith("attempt")
+            and d.name[len("attempt"):].isdigit()]
+    return max(nums)[1] if nums else None
+
+
+def chains_open_behind_the_newest(runs: Path) -> list[str]:
+    """Open governance artifacts that do NOT belong to the newest attempt.
+
+    A chain under construction is legitimate: the grant is committed before
+    the launch-bound sweep, so "prepared but not executed" is a reachable
+    state of the newest attempt and was the whole point of building it. What
+    must never exist is a SECOND open chain — an older attempt left half-built
+    and unclosed, whose artifacts still read as live permission while a newer
+    chain is being issued against a different baseline. One campaign, one
+    resource, one chain at a time.
+
+    This replaces "no open chain at all", which was true only while nothing
+    had been prepared and fired the moment attempt4's grant was committed —
+    exactly the consumer-narrower-than-its-producer shape that
+    `test_the_latest_run_outcome_is_derived_from_that_runs_own_closeout`
+    already records for the same reason.
+    """
+    newest = newest_attempt(runs)
+    return [rel for rel in open_chains(runs)
+            if newest is None or not rel.startswith(f"{newest}/")]
 
 
 class TestTheOpenChainPredicate:
@@ -106,6 +142,40 @@ class TestTheOpenChainPredicate:
     def test_a_missing_runs_directory_is_empty_not_an_error(self, tmp_path):
         assert open_chains(tmp_path / "nope") == []
         assert attempts_with_governance(tmp_path / "nope") == []
+        assert newest_attempt(tmp_path / "nope") is None
+        assert chains_open_behind_the_newest(tmp_path / "nope") == []
+
+    def test_the_newest_attempt_may_be_open(self, tmp_path):
+        """A chain under construction is the expected state after a GO."""
+        self._tree(tmp_path, "attempt3", closed=True)
+        self._tree(tmp_path, "attempt4", closed=False)
+        assert open_chains(tmp_path) == ["attempt4/governance/grant.json"]
+        assert chains_open_behind_the_newest(tmp_path) == []
+
+    def test_an_older_open_chain_is_reported(self, tmp_path):
+        """Two open chains at once is the thing that must never exist."""
+        self._tree(tmp_path, "attempt3", closed=False)
+        self._tree(tmp_path, "attempt4", closed=False)
+        assert chains_open_behind_the_newest(tmp_path) == [
+            "attempt3/governance/grant.json"]
+
+    def test_the_newest_attempt_is_numeric_not_lexical(self, tmp_path):
+        """`attempt10` sorts before `attempt4` as a string.
+
+        Lexical ordering would call attempt4 the newest at ten attempts and
+        report the real newest chain as stale permission.
+        """
+        for n in (4, 9, 10, 11):
+            self._tree(tmp_path, f"attempt{n}", closed=n != 11)
+        assert newest_attempt(tmp_path) == "attempt11"
+        assert chains_open_behind_the_newest(tmp_path) == []
+
+    def test_a_non_numeric_attempt_name_is_ignored_not_crashed(self, tmp_path):
+        """`attempt3r` exists in this repository's history."""
+        self._tree(tmp_path, "attempt3r", closed=True)
+        self._tree(tmp_path, "attempt4", closed=False)
+        assert newest_attempt(tmp_path) == "attempt4"
+        assert chains_open_behind_the_newest(tmp_path) == []
 
 
 def test_the_proposal_authorizes_nothing():
@@ -119,12 +189,13 @@ def test_the_proposal_authorizes_nothing():
     #: nothing had launched and stopped being one the moment attempt1 did: a
     #: consumed chain is evidence of a closed attempt, and demanding its
     #: absence would require deleting the record of what was authorized.
-    for role in ("grant.json", "readiness.json", "authorization.json",
-                 "bundle.json"):
-        assert open_chains(_RUNS, role=role) == [], (
-            f"a {role} exists for an attempt with no closeout; a chain that "
-            "is built but not closed is either running or abandoned, and this "
-            "stage is a proposal only")
+    #: The PROPOSAL authorizes nothing — that is a property of this document,
+    #: asserted above. What the tree may not hold is a second open chain: see
+    #: `test_at_most_one_launch_chain_is_open`. This test does not scan the
+    #: tree, because "the proposal permits nothing" and "no chain has been
+    #: prepared" are different claims and conflating them made this fire the
+    #: moment the maintainer's GO was acted on.
+    assert "AUTHORIZES NOTHING" in doc["implementation_state"]["grant"]
 
 
 def test_the_schedule_is_the_frozen_one_and_totals_twelve():
@@ -264,20 +335,53 @@ def test_no_authorizing_artifact_is_claimed_or_present():
     """
     doc = proposal()
     assert doc["authorizes"] == "nothing"
-    assert "NOT REQUESTED" in doc["implementation_state"]["grant"]
+    assert "AUTHORIZES NOTHING" in doc["implementation_state"]["grant"]
+    #: And it must NOT claim a tree state, which decays. It said "no grant ...
+    #: exists for this session" and was false the moment attempt4's grant was
+    #: committed — while the proposal's hash is what that grant binds, so
+    #: correcting it moved the identity the grant had to be rewritten around.
+    assert "exists for this session" not in doc["implementation_state"]["grant"]
 
-    #: Same correction as above, and for the same reason: the invariant is
-    #: that nothing here PERMITS a paid run, not that no attempt ever did.
-    open_ = open_chains(_RUNS)
-    assert open_ == [], f"governance artifacts for an unclosed attempt: {open_}"
-    #: And the attempts that DO hold artifacts are all closed, so what exists
-    #: is a record rather than a permission. Asserted positively, because an
-    #: empty `open_chains` is also what a blind predicate returns.
-    closed = attempts_with_governance(_RUNS)
-    assert closed, "no attempt holds governance artifacts; the guard above " \
-                   "would pass on an empty tree and prove nothing"
-    for attempt in closed:
+    #: The invariant is that nothing in THIS DOCUMENT permits a paid run, not
+    #: that no attempt ever did. The tree-level invariant is the one below.
+    stale = chains_open_behind_the_newest(_RUNS)
+    assert stale == [], (
+        f"governance artifacts for an unclosed attempt behind the newest: "
+        f"{stale}. An older half-built chain still reads as live permission.")
+    #: Asserted positively, because an empty result is also what a blind
+    #: predicate returns.
+    held = attempts_with_governance(_RUNS)
+    assert held, "no attempt holds governance artifacts; the guard above " \
+                 "would pass on an empty tree and prove nothing"
+    newest = newest_attempt(_RUNS)
+    for attempt in held:
+        if attempt == newest:
+            continue
         assert (_RUNS / attempt / "closeout/outcome.json").is_file(), attempt
+
+
+def test_at_most_one_launch_chain_is_open():
+    """One campaign, one resource, one chain at a time.
+
+    The newest attempt may legitimately be mid-construction — a grant is
+    committed before its launch-bound sweep. Every attempt behind it must be
+    closed, or its artifacts still read as permission for a resource while a
+    newer chain is being issued against a different baseline.
+    """
+    assert chains_open_behind_the_newest(_RUNS) == []
+    newest = newest_attempt(_RUNS)
+    assert newest, "no attempt directory at all"
+    #: And the newest attempt's own chain must not have skipped a step: a
+    #: readiness record without a grant, or an authorization without a
+    #: readiness record, is a reordered chain.
+    gov = _RUNS / newest / "governance"
+    have = {f.name for f in gov.glob("*.json")} if gov.is_dir() else set()
+    order = ["grant.json", "readiness.json", "authorization.json",
+             "bundle.json"]
+    built = [r for r in order if r in have]
+    assert built == order[:len(built)], (
+        f"{newest} holds {sorted(have)}, which is not a prefix of the binding "
+        f"chain order {order}")
 
 
 def test_the_units_are_converted_through_the_recorded_basis():

@@ -11,7 +11,7 @@
  "campaign_id": "c2-behavioural-12probe-v1",
  "reviewed_baseline": {
   "origin_main": "b6a2ed470230ba32fede5366ea5fbc5d78fa4b32",
-  "proposal_sha256": "420176226abb824e4921b8a5d2f0c67758cca071606f2bea08550de5a5d14c3f",
+  "proposal_sha256": "d7a7d5e5ba0928bdea3e8a5d5cdc7b3335f18b40b3f07ffabcd152b8f6d4d14c",
   "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
   "executable_closure": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
   "closure_files": 134,
@@ -19,7 +19,7 @@
   "_the_issuer_rederives_these": "every identity here is re-derived live at issuance and a disagreement is a refusal. They are recorded so a reader can see WHAT was reviewed, not so anything trusts the copy. This is now true of proposal_sha256 as well: under attempt3 it was recorded and believed while only the plan hash and the closure were checked.",
   "_reviewer_go_was_given_at": "22090909f76ad5e10daf232048fee0eea34127d7",
   "_closure_is_the_reviewed_one": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da, byte-identical to the closure the reviewer's GO named. The two amendments below repair dev-box issuance code, which the pod does not execute and which is therefore outside the behavioural executable closure. No amendment moved it.",
-  "_proposal_identity_rule_changed_not_its_content": "the reviewer's GO named proposal_sha256 = 51129b3dfc4a3998ec536c05df7ac59f9e5b044657da64073c1dc209f62630f6. Amendment 2 below changed what that hash COVERS -- it now excludes the wall-clock proposed_utc -- so the same reviewed content now hashes to 420176226abb824e4921b8a5d2f0c67758cca071606f2bea08550de5a5d14c3f. The proposal's substantive content is unchanged and a test compares a fresh build to the committed document over exactly the hashed fields. Recorded here because a moved identity must never be silent, even when the document did not move.",
+  "_proposal_identity_rule_changed_not_its_content": "the reviewer's GO named proposal_sha256 = 51129b3dfc4a3998ec536c05df7ac59f9e5b044657da64073c1dc209f62630f6. Amendment 2 changed what that hash COVERS -- it now excludes the wall-clock proposed_utc, so the identity is reproducible at all -- and amendment 3 corrected one false sentence inside the document. The reviewed content is otherwise unchanged and now hashes to d7a7d5e5ba0928bdea3e8a5d5cdc7b3335f18b40b3f07ffabcd152b8f6d4d14c. Every move is recorded here rather than left silent, and a test compares a fresh build to the committed document over exactly the hashed fields.",
   "plan_hash_is_the_reviewed_one": true
  },
  "covers": "ONE Phase-C2 behavioural selection campaign: the five frozen Top-5 C candidates and incumbent B, materialized along deterministic digest-gated fixed paths as the reviewed execution path requires, six screening probes, exactly one mechanical screening advancement, six confirmation probes, the frozen screening and confirmation batteries, the frozen seeds, the frozen scoring contract, bootstrap seed 834816710, and the frozen Phase-C GO / NO_GO / INCONCLUSIVE decision rule. Same-campaign continuation only, under preregistered R1-R10.",
@@ -131,6 +131,20 @@
    "proposal_identity_after": "420176226abb824e4921b8a5d2f0c67758cca071606f2bea08550de5a5d14c3f",
    "_the_document_did_not_change": "only the hash rule did. A test compares a fresh build to the committed document over exactly the hashed fields and asserts they are equal.",
    "regression": "tests/autoinit/test_c2_behavioural_issuance.py :: TestTheProposalIdentityIsReproducible -- two builds, a deliberately altered timestamp so a same-second tie cannot hide it, a content change that must still move the hash, and IDENTITY_EXCLUDES pinned to exactly two fields. Mutated back two ways -- the timestamp inside the identity, and the excludes widened to swallow plan_hash and money -- both caught."
+  },
+  {
+   "amendment": 3,
+   "utc": "2026-09-21",
+   "kind": "ordinary engineering repair, inside the approved envelope",
+   "what": "the proposal's `implementation_state.grant` read \"NOT REQUESTED -- no grant, readiness record, authorization, bundle or provider resource exists for this session\". Committing THIS grant made that false, and two proposal guards fired for the same reason: one asserted the tree held no open chain at all. Both conflated \"the proposal permits nothing\" with \"no chain has been prepared\". The field now states only what cannot decay -- that the proposal requests and authorizes nothing -- and points at `runs/<attempt>/governance/` as the one owner of the chain's live state. The tree-level invariant became the one that is actually true and actually protective: at most ONE open chain, it is the newest attempt, and its artifacts form a prefix of the binding chain order. A second half-built chain behind the newest is what must never exist, because its artifacts still read as permission for a resource.",
+   "found": "by committing the attempt4 grant and watching my own guard from the previous round fire. It was right about the tree and wrong about what the invariant should be.",
+   "closure_unchanged": true,
+   "plan_hash_unchanged": true,
+   "money_unchanged": true,
+   "proposal_identity_before": "420176226abb824e4921b8a5d2f0c67758cca071606f2bea08550de5a5d14c3f",
+   "proposal_identity_after": "d7a7d5e5ba0928bdea3e8a5d5cdc7b3335f18b40b3f07ffabcd152b8f6d4d14c",
+   "_why_this_grant_was_amended_rather_than_retired": "no downstream artifact binds it: there is no readiness record, no authorization, no bundle and no provider resource for attempt4, and the chain's first step is this document. Amending it before the launch-bound sweep is the minimal honest action; retiring attempt4 unstarted and opening attempt5 would consume an attempt number to record nothing. Once a readiness record exists this stops being true and a change means a fresh chain.",
+   "regression": "tests/autoinit/test_c2_behavioural_proposal.py -- the newest attempt may be open, an older open chain is reported, attempt ordering is numeric not lexical, a non-numeric name like attempt3r is ignored, and the chain's artifacts must be a prefix of grant/readiness/authorization/bundle. Mutated four ways -- a second open chain, a skipped chain step, lexical ordering, and the behind-the-newest filter going blind -- each caught."
   }
  ],
  "_authorizes_no_other_stage": "C3, C4, a new Full Search, a Top-5 re-rank, a B remeasurement, a C1 rerun and a Replay rerun are each separately unauthorized and unreachable from this chain."

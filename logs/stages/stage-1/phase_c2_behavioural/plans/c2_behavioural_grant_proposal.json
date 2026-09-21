@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-21T05:37:40.205198+00:00",
+ "proposed_utc": "2026-09-21T05:48:22.739916+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -536,8 +536,8 @@
   "b_binding": "BUILT",
   "storage_derivation": "BUILT",
   "rehearsal": "tests/c2_behavioural_preflight/ \u2014 BUILT. One production-path rehearsal drives the real driver P through D and reaches all three terminal states from separate deterministic fixtures, replacing only hardware-bound calls.",
-  "grant": "NOT REQUESTED \u2014 no grant, readiness record, authorization, bundle or provider resource exists for this session, and none may be created without a maintainer decision."
+  "grant": "THIS PROPOSAL REQUESTS AND AUTHORIZES NOTHING. It is the document a maintainer decision is made against; it is not that decision, and it permits no grant, readiness record, authorization, bundle or provider resource. Whether a launch chain exists, and how far it has been built, is recorded per attempt under `runs/<attempt>/governance/` and is NOT restated here: this document's hash is what a grant binds, so a field that tracked the chain would move the identity the moment the chain advanced."
  },
  "_proposal_sha256_excludes": "proposal_sha256 covers this document EXCEPT ['proposal_sha256', 'proposed_utc']. proposed_utc is a wall clock and would make the identity change on every regeneration of an unchanged tree; the hash is a function of the proposal's content, so a grant can bind it and the issuer can re-derive it.",
- "proposal_sha256": "420176226abb824e4921b8a5d2f0c67758cca071606f2bea08550de5a5d14c3f"
+ "proposal_sha256": "d7a7d5e5ba0928bdea3e8a5d5cdc7b3335f18b40b3f07ffabcd152b8f6d4d14c"
 }

@@ -1249,13 +1249,31 @@ class TestProjectSessionCostShapes:
         assert "priced/attempt1" not in bal["sessions_without_recorded_cost"]
 
     def test_the_real_behavioural_attempt_is_priced_from_its_own_closeout(self):
-        """The regression itself, against the committed tree."""
+        """The regression itself, against the committed tree.
+
+        Pinned the attempt SET at first, which decayed the moment attempt4's
+        chain was opened — the same consumer-narrower-than-its-producer shape
+        the launch guards were corrected for. What must hold is per-attempt:
+        each CLOSED attempt is priced from its own closeout in its own shape,
+        and an attempt with no closeout yet is UNKNOWN rather than $0.
+        """
         rows = {r["run_id"]: r for r in self._mod().project_sessions(REPO)
                 if r["experiment_id"] == "phase_c2_behavioural"}
-        assert set(rows) == {"attempt1", "attempt2", "attempt3"}, sorted(rows)
+        assert {"attempt1", "attempt2", "attempt3"} <= set(rows), sorted(rows)
+        #: The paid attempt, from the closeout's own all-in field.
         assert rows["attempt3"]["cost_usd"] == pytest.approx(2.5425)
         assert rows["attempt3"]["shape"] == "money.all_in_usd"
         #: Both retired chains created no provider resource, and say so.
         for a in ("attempt1", "attempt2"):
             assert rows[a]["cost_usd"] == 0.0
             assert rows[a]["shape"] == "no_provider_resource"
+        #: An attempt whose chain is still being built has no closeout, so its
+        #: cost is not yet knowable. It must read UNKNOWN: a prepared-but-
+        #: unexecuted attempt priced at $0 would understate the campaign the
+        #: moment it started billing.
+        for run_id, row in rows.items():
+            closed = (REPO / "logs/stages/stage-1/phase_c2_behavioural/runs"
+                      / run_id / "closeout/outcome.json").is_file()
+            if not closed:
+                assert row["cost_usd"] is None, (run_id, row)
+                assert row["shape"] is None, (run_id, row)

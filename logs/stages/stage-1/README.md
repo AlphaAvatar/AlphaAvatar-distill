@@ -82,7 +82,7 @@ What each one asked of this stage.
 
 ## Runs
 
-**81** run(s) are registered for this stage's
+**82** run(s) are registered for this stage's
 experiments. An experiment's plans, analyses, results, history,
 validations and runs are all inside its own directory; the
 canonical run list, across every stage, is
