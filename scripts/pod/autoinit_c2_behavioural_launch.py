@@ -1618,15 +1618,34 @@ def main() -> int:
 
     #: BEFORE anything is priced or created: a colliding run id or a foreign
     #: scratch root costs $0 here.
-    claim_output_root(args.scr, EXPERIMENT_ID, args.run_id,
+    #: A DRY RUN MUST NOT CONSUME THE CHAIN IT EXISTS TO DE-RISK. Every
+    #: invocation records the run — deliberately, so a launcher that dies
+    #: mid-flight cannot be silently re-invoked against one authorization — and
+    #: `open_run` then refuses a recorded or occupied directory. A dry run
+    #: inherited both: it advertises "run every $0 gate and stop before
+    #: provider creation", consumed attempt4's one-use chain at $0, and the
+    #: real launch that followed seconds later was refused by the occupancy
+    #: rule. The flag was a trap, and the trap fired.
+    #:
+    #: So a dry run writes its evidence to its OWN run directory and leaves the
+    #: real one pristine. `args.run_id` is NOT redirected: every gate resolves
+    #: the grant, readiness record, authorization, bundle and the campaign's
+    #: prior attempts from it, so a dry run under a different id would check a
+    #: different chain and prove nothing about this one. Only the OUTPUT
+    #: locations move.
+    layout_run_id = f"{args.run_id}-dryrun" if args.dry_run else args.run_id
+    if args.dry_run:
+        args.out = session_record_path(layout_run_id)
+    claim_output_root(args.scr, EXPERIMENT_ID, layout_run_id,
                       outputs=("store", "relay"))
-    layout = open_run(REPO_ROOT, EXPERIMENT_ID, args.run_id,
+    layout = open_run(REPO_ROOT, EXPERIMENT_ID, layout_run_id,
                       roles=BEHAVIOURAL_RUN_ROLES, prepared=_RUN_PREPARED,
                       stage_id=STAGE_ID)
     write_run_readmes(layout, experiment_id=EXPERIMENT_ID,
-                      run_id=args.run_id, stage_id=STAGE_ID,
+                      run_id=layout_run_id, stage_id=STAGE_ID,
                       roles=BEHAVIOURAL_RUN_ROLES)
-    assert args.out == session_record_path(args.run_id), (args.out, args.run_id)
+    assert args.out == session_record_path(layout_run_id), (
+        args.out, layout_run_id)
 
     #: `record_run` in a `finally`, not after a successful return. A run_session
     #: that RAISES leaves the run directory populated and unrecorded, and the

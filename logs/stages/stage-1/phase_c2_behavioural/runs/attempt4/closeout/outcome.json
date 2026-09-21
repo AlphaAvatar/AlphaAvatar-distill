@@ -1,0 +1,45 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_outcome/v1",
+ "run_id": "attempt4",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "CHAIN_CONSUMED_BY_A_DRY_RUN_BEFORE_PROVIDER_CONTACT",
+ "provider_resource_created": false,
+ "spend_usd": 0.0,
+ "billing": "none \u2014 no provider resource was ever created for this run",
+ "what_happened": "the chain was built in order \u2014 grant, launch-bound readiness (PASS, 174/0/0/0), authorization at a re-quoted live securePrice of $1.09/h, exact-session bundle \u2014 and then every pre-provider gate was run at $0 under `--dry-run` before creating a resource. ALL ELEVEN PASSED, including the repaired campaign continuation gate: $2.5425 settled plus $33.2098 of remaining work is $35.7523 against the $35.7600 campaign ceiling, which the old $33.2099 session ceiling would have refused. The dry run then stopped before provider creation exactly as designed and nothing billed. The real launch, seconds later, was refused: `open_run` found the run already recorded.",
+ "why_a_fresh_chain": "EVERY launcher invocation records its run, deliberately, so a launcher that died mid-flight cannot be silently re-invoked against one authorization \u2014 and `open_run` then refuses a recorded or occupied directory. `--dry-run` inherited both, so the invocation whose entire contract is 'change nothing' consumed this one-use chain at $0. That is the AGENTS.md P12.1 case in as many words: a formal launcher invocation that aborts before measurement began is an engineering subrun, it consumed its chain even at $0, and the response is to close it, repair, and build a fresh chain under a new attempt identity. No budget moved, no science moved, and no approval is owed.",
+ "the_defect_and_its_repair": {
+  "defect": "`--dry-run` advertised 'run every $0 gate and stop before provider creation' while consuming the one-use chain it existed to de-risk. The flag was a trap and the trap fired on its first use.",
+  "repair": "a dry run now writes its evidence to its own run directory (`<run_id>-dryrun`) and leaves the real one pristine and unconsumed. `args.run_id` is NOT redirected: every gate resolves the grant, readiness record, authorization, bundle and the campaign's prior attempts from it, so a dry run under a different id would check a different chain and prove nothing about the one about to launch. Only the output locations move.",
+  "regression": "tests/c2_behavioural_preflight/test_behavioural_continuation.py :: test_a_dry_run_writes_to_its_own_run_directory and test_the_dry_run_id_is_not_a_campaign_attempt_number. Mutated two ways \u2014 the dry run pointed back at the real directory, and `args.run_id` redirected instead so the gates would read the wrong chain \u2014 both caught.",
+  "_why_the_dry_run_id_is_not_an_attempt": "`attempt4-dryrun` has a non-numeric suffix, so the launch guards' numeric `newest_attempt` ignores it and cannot mistake it for the newest chain."
+ },
+ "what_the_dry_run_proved": {
+  "gates_passed": 11,
+  "session_commit": "df66254f7da266aefa545481ca0f33c2c2d3fe01",
+  "harness_digest_at_commit": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
+  "lineage": "only logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/governance/authorization.json differs from the authorized base d001c594",
+  "live_rate_usd_per_hour": 1.09,
+  "campaign_continuation": "$2.5425 all-in settled ($2.5042 GPU + $0.0383 disk) across 3 prior attempts plus $33.2098 for the remaining 12 probes = $35.7523, inside the $35.7600 campaign ceiling",
+  "destination": "37.1 GiB free for 13.3 GiB of probes",
+  "_this_evidence_survives": "the gates passed on a tree whose only subsequent change is the dry-run repair itself, so attempt5's chain inherits a strong prior that it will pass too. It is not a substitute for attempt5's own gates, which run again from scratch."
+ },
+ "closure_at_this_attempt": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
+ "artifacts": {
+  "grant": "governance/grant.json",
+  "readiness": "governance/readiness.json \u2014 launch_bound, PASS 174/0/0/0, and still valid evidence about the tree it swept (cae3ede)",
+  "authorization": "governance/authorization.json \u2014 CONSUMED. It binds a closure that the dry-run repair moved, and an authorization is never edited to match a tree that changed under it.",
+  "bundle": "governance/bundle.json \u2014 the object is on the relay at transfer/aad_autoinit_df66254f.bundle and is inert",
+  "dry_run_record": "../attempt4-dryrun/ does NOT exist: the repair landed after this dry run, which is why this attempt's own runtime/session.json is where the dry run wrote it."
+ },
+ "money": {
+  "authorized_session_all_in_usd": 33.2099,
+  "campaign_ceiling_all_in_usd": 35.76,
+  "spent_usd": 0.0,
+  "campaign_settled_all_in_usd": 2.5425,
+  "campaign_remaining_all_in_usd": 33.2175,
+  "_nothing_billed": "no provider resource was created, so the campaign's settled spend is unchanged at attempt3's $2.5425 and the project cumulative is unchanged at $311.7468. A consumed chain costs an attempt number, not money."
+ },
+ "authorizes": "nothing",
+ "next": "attempt5: a fresh grant binding the post-repair identities, a fresh launch-bound readiness sweep, a fresh authorization at a re-quoted live rate, a fresh bundle, and then the real launch."
+}

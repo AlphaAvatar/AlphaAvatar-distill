@@ -2246,3 +2246,57 @@ def test_an_authorization_missing_the_campaign_ceiling_will_not_load(tmp_path):
     p.write_text(json.dumps(doc))
     with pytest.raises(Exception, match="campaign"):
         BG.BehaviouralAuthorization.load(p)
+
+
+# ---------------------------------------------------------------------------
+# A dry run must not consume the chain it exists to de-risk
+# ---------------------------------------------------------------------------
+
+def test_a_dry_run_writes_to_its_own_run_directory(tmp_path):
+    """attempt4 was consumed at `$0` by the flag meant to protect it.
+
+    Every launcher invocation records its run — deliberately, so a launcher
+    that died mid-flight cannot be silently re-invoked against one
+    authorization — and `open_run` then refuses a recorded or occupied
+    directory. `--dry-run` inherited both, so the invocation that advertises
+    "run every $0 gate and stop before provider creation" consumed attempt4's
+    one-use chain, and the real launch seconds later was refused by the
+    occupancy rule.
+
+    The GATE inputs must stay on the real run id: a dry run resolving its
+    grant, readiness record, authorization, bundle and prior campaign attempts
+    from a different id would check a different chain and prove nothing about
+    the one about to launch. Only the outputs move.
+    """
+    src = (REPO / "scripts/pod/autoinit_c2_behavioural_launch.py").read_text()
+    body = src.split("def main(", 1)[1]
+
+    #: The output locations are keyed on the dry-run id...
+    for call in ("claim_output_root(args.scr, EXPERIMENT_ID, layout_run_id",
+                 "layout = open_run(REPO_ROOT, EXPERIMENT_ID, layout_run_id",
+                 "args.out = session_record_path(layout_run_id)"):
+        assert call in body, call
+    #: ...and it differs from the real one exactly when --dry-run is set.
+    assert 'layout_run_id = f"{args.run_id}-dryrun" if args.dry_run' in body
+    #: ...while `args.run_id` is NOT reassigned, so every gate still binds the
+    #: real chain. A reassignment is the one edit that would make this pass
+    #: while checking the wrong authorization.
+    assert "args.run_id =" not in body, (
+        "args.run_id is reassigned in main(); the gates would resolve a "
+        "different chain's governance artifacts")
+
+
+def test_the_dry_run_id_is_not_a_campaign_attempt_number():
+    """`newest_attempt`-style numeric parsing must not see it as an attempt.
+
+    A dry-run directory sitting beside the real attempts must not be mistaken
+    for the newest one, or the launch guards would call the real chain stale.
+    """
+    import autoinit_c2_behavioural_launch as LL
+
+    rid = "attempt4-dryrun"
+    assert not rid[len("attempt"):].isdigit()
+    #: And it is a distinct path from the run it rehearses, which is the whole
+    #: point: the real directory stays unoccupied.
+    assert LL.session_record_path(rid) != LL.session_record_path("attempt4")
+    assert "attempt4-dryrun" in LL.session_record_path(rid)

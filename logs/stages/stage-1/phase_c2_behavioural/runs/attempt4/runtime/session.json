@@ -1,0 +1,1138 @@
+{
+  "schema": "aadistill.autoinit.c2_behavioural_session/v1",
+  "session_id": "autoinit-phase-c2-behavioural",
+  "session_spec": {
+    "session_id": "autoinit-phase-c2-behavioural",
+    "schema": "aadistill.autoinit.c2_behavioural_session/v1",
+    "description": "The Phase-C2 behavioural selection. Six arms materialized from the teacher along digest-pinned paths, six screening probes on one preregistered seed, a mechanical ranking that advances exactly one candidate, six confirmation probes on three disjoint preregistered seeds, and one verdict under the frozen Phase-C decision rule. It runs no beam, re-ranks nothing, re-measures no frozen result, and reaches no later cycle. GO, NO_GO and INCONCLUSIVE are all complete results.",
+    "deployment": {
+      "artifact_collector": "scripts/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "bebc5060c5411bd0a57323cde0b8a63383991798c3009112191d22358d1de96a",
+    "authorization_path": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/governance/authorization.json",
+    "authorization_type": "BehaviouralAuthorization.load",
+    "plan_id": "autoinit.v1.phase_c2.behavioural",
+    "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+    "status_path": "/workspace/autoinit_c2_behavioural.status",
+    "run_log_path": "/workspace/autoinit_c2_behavioural_run.log",
+    "driver_job_id": "autoinit_c2_behavioural_driver",
+    "markers": {
+      "success": "C2_BEHAVIOURAL_ALL_DONE",
+      "failure": [
+        "C2_BEHAVIOURAL_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_c2_behavioural",
+      "evidence_filename": "c2_behavioural_evidence.json",
+      "archive_basename": "c2_behavioural_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/c2_behavioural_artifacts.json",
+      "spec_failed": "configs/autoinit/c2_behavioural_artifacts_failed.json",
+      "report_names": [
+        "c2_behavioural_evidence.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "c2_behavioural",
+        "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c2/behavioural_frozen_assets.json"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "SESSION_RELAY_INPUTS",
+        "SESSION_KIND",
+        "SESSION_SETUP_MARKERS",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e8_inputs_20260810/calibration_v1/items.jsonl",
+          "dest": "artifacts/stage1/e8_calibration_v1",
+          "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "e8_calibration_v1:artifacts/stage1",
+        "reasoning_heavy_v2:artifacts/stage1",
+        "c1_confirmation_v1:artifacts/stage3",
+        "c2_screening_v1:artifacts/stage3",
+        "state_eval_v1:artifacts/stage1",
+        "recovery_search_v2:artifacts/stage3"
+      ],
+      "uv_max_seconds": 2400,
+      "tests_max_seconds": 1800,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [
+        "tests/architecture",
+        "tests/autoinit",
+        "tests/c1_preflight",
+        "tests/c2_baseline_completion_preflight",
+        "tests/c2_full_search_preflight",
+        "tests/c2_preflight",
+        "tests/c2_replay_preflight",
+        "tests/data",
+        "tests/docs",
+        "tests/evaluation",
+        "tests/infrastructure",
+        "tests/init",
+        "tests/initialization",
+        "tests/models",
+        "tests/pod",
+        "tests/rollout",
+        "tests/runtime",
+        "tests/support",
+        "tests/test_usable_rollout.py",
+        "tests/training",
+        "tests/validation"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "ASSETS_READY",
+        "TEACHER_READY",
+        "ROPE_OK",
+        "VLLM_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 8,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-09-21T06:25:43+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 1295 min $23.52 \u00b7 soft $32.16 \u00b7 hard $32.71 (authorized $32.71)"
+    },
+    {
+      "utc": "2026-09-21T06:25:44+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Medium"
+    },
+    {
+      "utc": "2026-09-21T06:25:44+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit df66254f7da2 verified: harness digests to 5e6ef59edac2\u2026, carries the authorization and only logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-09-21T06:25:44+00:00",
+      "elapsed_min": 0.0,
+      "msg": "scope OK: behavioural selection with recovery training, and nothing else reachable"
+    },
+    {
+      "utc": "2026-09-21T06:25:44+00:00",
+      "elapsed_min": 0.0,
+      "msg": "plan binding OK (31088b981499\u2026)"
+    },
+    {
+      "utc": "2026-09-21T06:25:45+00:00",
+      "elapsed_min": 0.0,
+      "msg": "source binding OK (134 files, 5e6ef59edac2\u2026)"
+    },
+    {
+      "utc": "2026-09-21T06:25:45+00:00",
+      "elapsed_min": 0.0,
+      "msg": "destination OK: 37.1 GiB free at /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1 for 13.3 GiB of probes"
+    },
+    {
+      "utc": "2026-09-21T06:25:45+00:00",
+      "elapsed_min": 0.0,
+      "msg": "campaign continuation OK: $2.5425 all-in settled ($2.5042 GPU + $0.0383 disk) across 3 prior attempt(s) plus $33.2098 for the remaining 12 probes is inside the $35.7600 campaign ceiling, and every prior resource is provider-confirmed released"
+    },
+    {
+      "utc": "2026-09-21T06:25:46+00:00",
+      "elapsed_min": 0.0,
+      "msg": "readiness OK (launch_bound, PASS, {'error': 0, 'failed': 0, 'passed': 174, 'skipped': 0})"
+    },
+    {
+      "utc": "2026-09-21T06:25:53+00:00",
+      "elapsed_min": 0.0,
+      "msg": "bundle OK (df66254f7da2\u2026)"
+    },
+    {
+      "utc": "2026-09-21T06:25:54+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 6 local assets"
+    },
+    {
+      "utc": "2026-09-21T06:25:54+00:00",
+      "elapsed_min": 0.0,
+      "msg": "DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills."
+    }
+  ],
+  "stages": {},
+  "authorization": {
+    "schema": "aadistill.autoinit.c2_behavioural_authorization/v1",
+    "authorization_id": "autoinit.v1.phase_c2.behavioural",
+    "version": 1,
+    "granted_utc": "2026-09-21T06:23:55.353579+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "autoinit.v1.phase_c2.behavioural",
+    "phase_a_session_plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+    "phase_a_science_plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+    "expected_usd": 23.8832,
+    "hard_cap_usd": 32.7097,
+    "authorized_stages": [
+      "prepare",
+      "screen",
+      "rank",
+      "confirm",
+      "decide"
+    ],
+    "stage_conditions": {
+      "prepare": "verifies the teacher by shard hash and materializes the arms the remaining probes need, each along its pinned path and each gated on its exact recorded identity. A mismatch is a scientific finding and stops the session; no probe starts.",
+      "screen": "six fresh screening probes on the one frozen screening seed, each announced for durability the moment it finishes and pulled off-pod while the next trains.",
+      "rank": "scores the screening battery through its own pinned scorer, ranks by paired delta against B, and advances EXACTLY one by the frozen tie-break. No verdict leaves this stage.",
+      "confirm": "six fresh confirmation probes \u2014 the advanced candidate and B, paired across the three frozen seeds. Cannot begin until every screening probe is trained AND scored.",
+      "decide": "applies the frozen Phase-C rule at C2's own bootstrap seed and STOPS. GO, NO_GO and INCONCLUSIVE are all complete results."
+    },
+    "scope_note": "ONE Phase-C2 behavioural selection campaign: the five frozen Top-5 C candidates and incumbent B, materialized along deterministic digest-gated fixed paths as the reviewed execution path requires, six screening probes, exactly one mechanical screening advancement, six confirmation probes, the frozen screening and confirmation batteries, the frozen seeds, the frozen scoring contract, bootstrap seed 834816710, and the frozen Phase-C GO / NO_GO / INCONCLUSIVE decision rule. Same-campaign continuation only, under preregistered R1-R10.",
+    "phase_a_authorized": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "d001c5940dbab56d557dbc5ec1bfabcb5cd0413c",
+    "harness_source_digest": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
+    "harness_source_files": [
+      "configs/infrastructure/provider_storage_pricing.json",
+      "configs/stage3/e1/e1_r0860k_sa_pca.json",
+      "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+      "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+      "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
+      "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+      "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/telemetry.jsonl",
+      "logs/stages/stage-1/phase_c2_replay/plans/attempt3_arch_spec_lineage.json",
+      "scripts/autoinit/audit_tool_scoring.py",
+      "scripts/autoinit/phase_a_frozen.py",
+      "scripts/autoinit/renderer_parity_gate.py",
+      "scripts/autoinit/score_c1_confirmation.py",
+      "scripts/autoinit/score_c2_screening.py",
+      "scripts/autoinit/score_recovery_search.py",
+      "scripts/autoinit/verify_frozen_assets.py",
+      "scripts/evaluation/uncapped_eval.py",
+      "scripts/experiments/calibration.py",
+      "scripts/experiments/deployment.py",
+      "scripts/experiments/phase_a/plan.py",
+      "scripts/experiments/phase_c1/__init__.py",
+      "scripts/experiments/phase_c1/authorization.py",
+      "scripts/experiments/phase_c1/authorization_payload.py",
+      "scripts/experiments/phase_c1/bundle.py",
+      "scripts/experiments/phase_c1/isolation.py",
+      "scripts/experiments/phase_c1/packaging.py",
+      "scripts/experiments/phase_c1/pod_environment.py",
+      "scripts/experiments/phase_c1/probe_results.py",
+      "scripts/experiments/phase_c1/scoring.py",
+      "scripts/experiments/phase_c1/session.py",
+      "scripts/experiments/phase_c2/__init__.py",
+      "scripts/experiments/phase_c2/baseline.py",
+      "scripts/experiments/phase_c2/behavioural.py",
+      "scripts/experiments/phase_c2/behavioural_bundle.py",
+      "scripts/experiments/phase_c2/behavioural_continuation.py",
+      "scripts/experiments/phase_c2/behavioural_decision.py",
+      "scripts/experiments/phase_c2/behavioural_governance.py",
+      "scripts/experiments/phase_c2/behavioural_pod_environment.py",
+      "scripts/experiments/phase_c2/behavioural_schedule.py",
+      "scripts/experiments/phase_c2/bundle.py",
+      "scripts/experiments/phase_c2/pod_environment.py",
+      "scripts/experiments/phase_c2/replay_specs.py",
+      "scripts/experiments/phase_c2/scoring.py",
+      "scripts/experiments/phase_c2/search_space.py",
+      "scripts/experiments/phase_c2/selection_pricing.py",
+      "scripts/experiments/phase_c2/session.py",
+      "scripts/experiments/recovery_policy.py",
+      "scripts/experiments/run_layout.py",
+      "scripts/experiments/search_cost_model.py",
+      "scripts/experiments/source_sets.py",
+      "scripts/pod/autoinit_c1_driver.py",
+      "scripts/pod/autoinit_c1_launch.py",
+      "scripts/pod/autoinit_c2_behavioural_driver.py",
+      "scripts/pod/autoinit_c2_behavioural_launch.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
+      "scripts/training/train_stage3.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention.py",
+      "src/aadistill/initialization/operators/attention_activation.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite.py",
+      "src/aadistill/initialization/operators/depth.py",
+      "src/aadistill/initialization/operators/ffn.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/attention.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/train.py"
+    ],
+    "per_launch_hard_usd": null,
+    "provenance_commit": "d001c5940dbab56d557dbc5ec1bfabcb5cd0413c",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "allows_phase_a": false,
+    "allows_recovery_training": true,
+    "authorizes_c2_search1": false,
+    "resource_scope": {
+      "run_id": "attempt4",
+      "issuances_permitted": 1,
+      "launch_attempts_permitted": 1,
+      "provider_resources_permitted": 1,
+      "one_billing_resource_at_a_time": true,
+      "_what_a_provider_resource_is": "a resource the provider RETURNED AN ID FOR. A create call that returns no id created nothing and billed nothing, so it does not consume this count; it is still recorded as a draw with pod_id null, because the provider's refusal is the only evidence of why.",
+      "_what_this_does_not_relax": "the dollar ceiling, which every draw in the session shares, and the runner's requirement that the provider confirm a resource is not billing before the next one is created."
+    },
+    "run_id": "attempt4",
+    "scope": "ONE Phase-C2 behavioural selection campaign: SIX deterministic fixed-path arm materializations \u2014 the five frozen Top-5 C candidates and the frozen C1 treatment B \u2014 each built from the verified teacher along a path pinned at every step and gated on its exact recorded identity before any probe starts, followed by exactly twelve behavioural probes: six screening probes on one preregistered seed over those six arms, a mechanical ranking that advances exactly one candidate, six confirmation probes on three disjoint preregistered seeds, and one verdict under C1's frozen decision rule. All six arms are materialized because neither available transport can carry six 1.19 GB checkpoints to a pod; B's bytes no longer exist at all. NOT a search, NOT a beam or expansion, NOT a re-ranking of the frozen Top-5, NOT a re-measurement of B's completed state evaluation, NOT a fourth seed, and NOT any part of C3 or C4.",
+    "authorizes_c2_full_search": false,
+    "authorizes_c2_baseline_completion": false,
+    "authorizes_c2_replay": false,
+    "authorizes_later_cycles": false,
+    "authorizes_behavioural_selection": true,
+    "campaign_id": "c2-behavioural-12probe-v1",
+    "rate_usd_per_hour": 1.09,
+    "hard_runtime_minutes": 1800.53,
+    "gpu_hard_usd": 32.7097,
+    "disk_hard_usd": 0.5002,
+    "all_in_hard_usd": 33.2099,
+    "campaign_all_in_hard_usd": 35.76,
+    "_session_versus_campaign": "all_in_hard_usd bounds ONE session and equals gpu_hard_usd + disk_hard_usd. campaign_all_in_hard_usd bounds the CAMPAIGN cumulatively, including spend that has already settled, and is the only figure campaign_continuation_gate compares against. Neither the session window nor the scientific work reads it.",
+    "_amounts_are_distinct": "GPU money, separately billed container disk and the authorized runtime are three different quantities. The launcher derives its deadline from gpu_hard_usd and hard_runtime_minutes at the LIVE rate, never from a constant.",
+    "authorized_materializations": 6,
+    "authorized_probes": 12,
+    "forbids": [
+      "any beam search or expansion",
+      "re-ranking the frozen Top-5 or regenerating a selection",
+      "re-measuring B's completed state evaluation",
+      "retraining a probe that already completed, for a different outcome",
+      "ranking before all six screening results exist",
+      "any verdict from a partial confirmation field",
+      "a fourth seed, a tie-break rung or a forced winner",
+      "any C3 or C4 work"
+    ],
+    "terminal_results": [
+      "GO",
+      "NO_GO",
+      "INCONCLUSIVE"
+    ],
+    "_no_forced_winner": "NO_GO and INCONCLUSIVE are complete results. Neither is a reason to retry, extend or re-seed this experiment.",
+    "authorization_sha256": "d736ada59c62673e2a692b77ffabaedd8cc28afbe5dab1b66465205307d583a7"
+  },
+  "session_plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+  "harness_source_digest": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
+  "harness_source_files": [
+    "configs/infrastructure/provider_storage_pricing.json",
+    "configs/stage3/e1/e1_r0860k_sa_pca.json",
+    "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+    "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+    "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
+    "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+    "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/telemetry.jsonl",
+    "logs/stages/stage-1/phase_c2_replay/plans/attempt3_arch_spec_lineage.json",
+    "scripts/autoinit/audit_tool_scoring.py",
+    "scripts/autoinit/phase_a_frozen.py",
+    "scripts/autoinit/renderer_parity_gate.py",
+    "scripts/autoinit/score_c1_confirmation.py",
+    "scripts/autoinit/score_c2_screening.py",
+    "scripts/autoinit/score_recovery_search.py",
+    "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/evaluation/uncapped_eval.py",
+    "scripts/experiments/calibration.py",
+    "scripts/experiments/deployment.py",
+    "scripts/experiments/phase_a/plan.py",
+    "scripts/experiments/phase_c1/__init__.py",
+    "scripts/experiments/phase_c1/authorization.py",
+    "scripts/experiments/phase_c1/authorization_payload.py",
+    "scripts/experiments/phase_c1/bundle.py",
+    "scripts/experiments/phase_c1/isolation.py",
+    "scripts/experiments/phase_c1/packaging.py",
+    "scripts/experiments/phase_c1/pod_environment.py",
+    "scripts/experiments/phase_c1/probe_results.py",
+    "scripts/experiments/phase_c1/scoring.py",
+    "scripts/experiments/phase_c1/session.py",
+    "scripts/experiments/phase_c2/__init__.py",
+    "scripts/experiments/phase_c2/baseline.py",
+    "scripts/experiments/phase_c2/behavioural.py",
+    "scripts/experiments/phase_c2/behavioural_bundle.py",
+    "scripts/experiments/phase_c2/behavioural_continuation.py",
+    "scripts/experiments/phase_c2/behavioural_decision.py",
+    "scripts/experiments/phase_c2/behavioural_governance.py",
+    "scripts/experiments/phase_c2/behavioural_pod_environment.py",
+    "scripts/experiments/phase_c2/behavioural_schedule.py",
+    "scripts/experiments/phase_c2/bundle.py",
+    "scripts/experiments/phase_c2/pod_environment.py",
+    "scripts/experiments/phase_c2/replay_specs.py",
+    "scripts/experiments/phase_c2/scoring.py",
+    "scripts/experiments/phase_c2/search_space.py",
+    "scripts/experiments/phase_c2/selection_pricing.py",
+    "scripts/experiments/phase_c2/session.py",
+    "scripts/experiments/recovery_policy.py",
+    "scripts/experiments/run_layout.py",
+    "scripts/experiments/search_cost_model.py",
+    "scripts/experiments/source_sets.py",
+    "scripts/pod/autoinit_c1_driver.py",
+    "scripts/pod/autoinit_c1_launch.py",
+    "scripts/pod/autoinit_c2_behavioural_driver.py",
+    "scripts/pod/autoinit_c2_behavioural_launch.py",
+    "scripts/pod/autoinit_engine_probe.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/pod/watchdog.py",
+    "scripts/training/train_stage3.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention.py",
+    "src/aadistill/initialization/operators/attention_activation.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite.py",
+    "src/aadistill/initialization/operators/depth.py",
+    "src/aadistill/initialization/operators/ffn.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/attention.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 32.7097,
+    "expected_minutes": 1294.87,
+    "soft_stop_minutes": 1770.53,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 1800.53,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused: the generic arms x steps term does not describe arm materializations followed by probes. Every phase is named in BH.session_decomposition, which is derived from committed records and reconciled against them.",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 0.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 0.0
+      },
+      {
+        "name": "setup_and_asset_staging",
+        "minutes": 45.0
+      },
+      {
+        "name": "bundle_transfer",
+        "minutes": 6.0
+      },
+      {
+        "name": "teacher_fetch_and_verify",
+        "minutes": 8.0
+      },
+      {
+        "name": "machine_gates",
+        "minutes": 22.0
+      },
+      {
+        "name": "selection_commit_and_artifact_manifest",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 6.0
+      },
+      {
+        "name": "materialize_arms",
+        "minutes": 155.83
+      },
+      {
+        "name": "12_probes_train_and_score",
+        "minutes": 1044.04
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "probe_model_contingency",
+        "minutes": 113.9
+      },
+      {
+        "name": "probe_duration_risk",
+        "minutes": 30.16
+      },
+      {
+        "name": "generation_length_risk",
+        "minutes": 331.6
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 475.66,
+    "expected_usd": 23.5235,
+    "soft_stop_usd": 32.1646,
+    "artifact_recovery_reserve_usd": 0.545,
+    "hard_terminate_usd": 32.7096
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Medium",
+  "session_commit_check": {
+    "session_commit": "df66254f7da266aefa545481ca0f33c2c2d3fe01",
+    "authorized_session_commit": "d001c5940dbab56d557dbc5ec1bfabcb5cd0413c",
+    "harness_digest_at_commit": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
+    "authorized_harness_digest": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "d001c5940dbab56d557dbc5ec1bfabcb5cd0413c",
+      "session_commit": "df66254f7da266aefa545481ca0f33c2c2d3fe01",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "prechecks": [
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit df66254f7da2 verified: harness digests to 5e6ef59edac2\u2026, carries the authorization and only logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "scope_gate",
+      "ok": true,
+      "message": "scope OK: behavioural selection with recovery training, and nothing else reachable"
+    },
+    {
+      "check": "plan_binding_gate",
+      "ok": true,
+      "message": "plan binding OK (31088b981499\u2026)"
+    },
+    {
+      "check": "source_binding_gate",
+      "ok": true,
+      "message": "source binding OK (134 files, 5e6ef59edac2\u2026)"
+    },
+    {
+      "check": "destination_gate",
+      "ok": true,
+      "message": "destination OK: 37.1 GiB free at /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1 for 13.3 GiB of probes"
+    },
+    {
+      "check": "campaign_continuation_gate",
+      "ok": true,
+      "message": "campaign continuation OK: $2.5425 all-in settled ($2.5042 GPU + $0.0383 disk) across 3 prior attempt(s) plus $33.2098 for the remaining 12 probes is inside the $35.7600 campaign ceiling, and every prior resource is provider-confirmed released"
+    },
+    {
+      "check": "readiness_gate",
+      "ok": true,
+      "message": "readiness OK (launch_bound, PASS, {'error': 0, 'failed': 0, 'passed': 174, 'skipped': 0})"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "bundle OK (df66254f7da2\u2026)"
+    }
+  ],
+  "_remaining_work": {
+    "probes_expected": 12,
+    "probes_complete": [],
+    "probes_trained_not_scored": [],
+    "probes_untrained": [
+      "confirmation.<unranked>.s1523147638",
+      "confirmation.<unranked>.s1916380711",
+      "confirmation.<unranked>.s1936324010",
+      "confirmation.B.s1523147638",
+      "confirmation.B.s1916380711",
+      "confirmation.B.s1936324010",
+      "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "screening.B.s616738081",
+      "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+    ],
+    "probes_remaining": [
+      "confirmation.<unranked>.s1523147638",
+      "confirmation.<unranked>.s1916380711",
+      "confirmation.<unranked>.s1936324010",
+      "confirmation.B.s1523147638",
+      "confirmation.B.s1916380711",
+      "confirmation.B.s1936324010",
+      "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "screening.B.s616738081",
+      "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+    ],
+    "n_probes_remaining": 12,
+    "n_train_and_score": 12,
+    "n_score_only": 0,
+    "committed_candidate": null,
+    "screening_committed": false,
+    "arms_needed": [
+      "1a2b5b030e7e4e202fda3a810ed53c5f",
+      "1d2844488f3ad630414c3cd69b6fa395",
+      "7da1e4e2254e59766581e777b8066b7e",
+      "88086555a6662b206e00ae28fc9d3ca3",
+      "B",
+      "d005dfb27e7bb5adc46eb988ae79e2a9"
+    ],
+    "_arms_are_owed_by_untrained_probes": "a trained-but-unscored probe already holds its trained checkpoint and resumes at scoring, so the initialization it was trained from is not rebuilt. When screening has not committed, every candidate that can still be advanced IS materialized: which one wins is decided by screening scores, and a cost proxy must never decide which candidate's bytes exist.",
+    "materialization_minutes": 155.83,
+    "restore": {
+      "probes": [],
+      "n": 0,
+      "bytes": 0,
+      "gib": 0.0,
+      "minutes": 0.0,
+      "rate_mb_per_second": 0.23,
+      "_basis": "the slowest recorded dev-box uplink observation (0.23 MB/s, from a real 3.7 MB bundle upload; the project's recorded figure is 0.72 MB/s and observations span 0.23-0.79). A bound takes the slowest, not the mean. logs/shared/analyses/autoinit_relay_capacity.md"
+    },
+    "decomposition": {
+      "expected_phases": [
+        [
+          "setup_and_asset_staging",
+          45.0
+        ],
+        [
+          "bundle_transfer",
+          6.0
+        ],
+        [
+          "teacher_fetch_and_verify",
+          8.0
+        ],
+        [
+          "machine_gates",
+          22.0
+        ],
+        [
+          "selection_commit_and_artifact_manifest",
+          8.0
+        ],
+        [
+          "artifact_synchronization",
+          6.0
+        ],
+        [
+          "materialize_arms",
+          155.83
+        ],
+        [
+          "12_probes_train_and_score",
+          1044.04
+        ]
+      ],
+      "soft_stop_reserves": [
+        [
+          "probe_model_contingency",
+          113.9
+        ],
+        [
+          "probe_duration_risk",
+          30.16
+        ],
+        [
+          "generation_length_risk",
+          331.6
+        ]
+      ],
+      "probes_remaining": 12,
+      "train_and_score_probes": 12,
+      "score_only_probes": 0,
+      "probes_in_protocol": 12,
+      "per_probe_minutes": {
+        "train_mean": 61.778,
+        "train_max": 61.883,
+        "eval_mean": 25.225,
+        "eval_max": 27.633,
+        "_reconciled": "twelve times each reconstructs the record's own bounding_basis totals; checked, not assumed"
+      },
+      "restore_minutes": 0.0,
+      "_remaining_work_only": "a completed probe is never retrained, so it is not priced again. A probe whose checkpoint was restored but whose scoring failed owes the BATTERY and not the trainer, because that is what the driver will do with it. The arms the UNTRAINED probes measure against ARE priced, because a replacement resource has a fresh filesystem and must rebuild them; that is a replacement runtime necessity, not completed science charged twice.",
+      "full_session_reserves": [
+        [
+          "probe_model_contingency",
+          113.9
+        ],
+        [
+          "probe_duration_risk",
+          30.16
+        ],
+        [
+          "generation_length_risk",
+          331.6
+        ]
+      ],
+      "artifact_recovery_reserve_minutes": 30.0,
+      "contingency_fraction": 0.0,
+      "_contingency_is_a_named_reserve": "the frozen probe model's 10% contingency is carried in soft_stop_reserves as a fixed number of minutes. A consumer that also set contingency_fraction=0.10 would apply it twice, which is the defect this decomposition exists to remove.",
+      "_overhead_phase_names_are_the_pricing_models": "the first six phases are selection_pricing.SESSION_PHASE_MINUTES verbatim, because that is what the frozen record's 95 non-probe minutes ARE and renaming them would break the reconciliation. They are a cost model shared with the full search, not a claim about this session's stages: `selection_commit_and_artifact_manifest` funds the closeout minutes, and this session commits no selection \u2014 it consumes one that is already frozen. They are NOT scaled by the probe count: a replacement resource pays setup, the bundle, the teacher fetch and the machine gates in full.",
+      "expected_minutes": 1294.87,
+      "soft_stop_minutes": 1770.53,
+      "hard_minutes": 1800.53,
+      "probe_model": {
+        "record": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+        "expected_minutes": 1139.04,
+        "hard_ceiling_minutes": 1644.7,
+        "probe_minutes_expected": 1044.04,
+        "contingency_fraction": 0.1
+      },
+      "_reconciled": "the overhead phases reconstruct the record's non-probe expected minutes and the reserves reconstruct its hard ceiling; both are checked here rather than assumed"
+    },
+    "_a_completed_probe_is_never_retrained": "probes_complete is excluded from the remaining probe count and from the arms priced. The protocol forbids retraining a finished probe for a different outcome, so pricing one again would reserve money for work that may not be done.",
+    "_zero_remaining_is_not_permission": "a campaign that owes nothing has a verdict or has nothing left to run. GO, NO_GO and INCONCLUSIVE are all terminal, and none of them is a reason to start another attempt.",
+    "_state": {
+      "campaign_root": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1",
+      "probes": {},
+      "rejected": [],
+      "committed_ranking": null,
+      "committed_candidate": null,
+      "_source_is_the_destination": "read from the durable destination on the launcher host, never from a pod's own journal. A pod's journal dies with the pod, and a replacement resource has a fresh filesystem."
+    }
+  },
+  "campaign": {
+    "campaign_id": "c2-behavioural-12probe-v1",
+    "run_attempt": "attempt4",
+    "prior_attempts": [
+      "attempt1",
+      "attempt2",
+      "attempt3"
+    ],
+    "remaining_work": {
+      "probes_expected": 12,
+      "probes_complete": [],
+      "probes_trained_not_scored": [],
+      "probes_untrained": [
+        "confirmation.<unranked>.s1523147638",
+        "confirmation.<unranked>.s1916380711",
+        "confirmation.<unranked>.s1936324010",
+        "confirmation.B.s1523147638",
+        "confirmation.B.s1916380711",
+        "confirmation.B.s1936324010",
+        "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+        "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+        "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+        "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+        "screening.B.s616738081",
+        "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+      ],
+      "probes_remaining": [
+        "confirmation.<unranked>.s1523147638",
+        "confirmation.<unranked>.s1916380711",
+        "confirmation.<unranked>.s1936324010",
+        "confirmation.B.s1523147638",
+        "confirmation.B.s1916380711",
+        "confirmation.B.s1936324010",
+        "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+        "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+        "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+        "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+        "screening.B.s616738081",
+        "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+      ],
+      "n_probes_remaining": 12,
+      "n_train_and_score": 12,
+      "n_score_only": 0,
+      "committed_candidate": null,
+      "screening_committed": false,
+      "arms_needed": [
+        "1a2b5b030e7e4e202fda3a810ed53c5f",
+        "1d2844488f3ad630414c3cd69b6fa395",
+        "7da1e4e2254e59766581e777b8066b7e",
+        "88086555a6662b206e00ae28fc9d3ca3",
+        "B",
+        "d005dfb27e7bb5adc46eb988ae79e2a9"
+      ],
+      "materialization_minutes": 155.83,
+      "restore": {
+        "probes": [],
+        "n": 0,
+        "bytes": 0,
+        "gib": 0.0,
+        "minutes": 0.0,
+        "rate_mb_per_second": 0.23,
+        "_basis": "the slowest recorded dev-box uplink observation (0.23 MB/s, from a real 3.7 MB bundle upload; the project's recorded figure is 0.72 MB/s and observations span 0.23-0.79). A bound takes the slowest, not the mean. logs/shared/analyses/autoinit_relay_capacity.md"
+      },
+      "decomposition": {
+        "expected_phases": [
+          [
+            "setup_and_asset_staging",
+            45.0
+          ],
+          [
+            "bundle_transfer",
+            6.0
+          ],
+          [
+            "teacher_fetch_and_verify",
+            8.0
+          ],
+          [
+            "machine_gates",
+            22.0
+          ],
+          [
+            "selection_commit_and_artifact_manifest",
+            8.0
+          ],
+          [
+            "artifact_synchronization",
+            6.0
+          ],
+          [
+            "materialize_arms",
+            155.83
+          ],
+          [
+            "12_probes_train_and_score",
+            1044.04
+          ]
+        ],
+        "soft_stop_reserves": [
+          [
+            "probe_model_contingency",
+            113.9
+          ],
+          [
+            "probe_duration_risk",
+            30.16
+          ],
+          [
+            "generation_length_risk",
+            331.6
+          ]
+        ],
+        "probes_remaining": 12,
+        "train_and_score_probes": 12,
+        "score_only_probes": 0,
+        "probes_in_protocol": 12,
+        "per_probe_minutes": {
+          "train_mean": 61.778,
+          "train_max": 61.883,
+          "eval_mean": 25.225,
+          "eval_max": 27.633,
+          "_reconciled": "twelve times each reconstructs the record's own bounding_basis totals; checked, not assumed"
+        },
+        "restore_minutes": 0.0,
+        "_remaining_work_only": "a completed probe is never retrained, so it is not priced again. A probe whose checkpoint was restored but whose scoring failed owes the BATTERY and not the trainer, because that is what the driver will do with it. The arms the UNTRAINED probes measure against ARE priced, because a replacement resource has a fresh filesystem and must rebuild them; that is a replacement runtime necessity, not completed science charged twice.",
+        "full_session_reserves": [
+          [
+            "probe_model_contingency",
+            113.9
+          ],
+          [
+            "probe_duration_risk",
+            30.16
+          ],
+          [
+            "generation_length_risk",
+            331.6
+          ]
+        ],
+        "artifact_recovery_reserve_minutes": 30.0,
+        "contingency_fraction": 0.0,
+        "_contingency_is_a_named_reserve": "the frozen probe model's 10% contingency is carried in soft_stop_reserves as a fixed number of minutes. A consumer that also set contingency_fraction=0.10 would apply it twice, which is the defect this decomposition exists to remove.",
+        "_overhead_phase_names_are_the_pricing_models": "the first six phases are selection_pricing.SESSION_PHASE_MINUTES verbatim, because that is what the frozen record's 95 non-probe minutes ARE and renaming them would break the reconciliation. They are a cost model shared with the full search, not a claim about this session's stages: `selection_commit_and_artifact_manifest` funds the closeout minutes, and this session commits no selection \u2014 it consumes one that is already frozen. They are NOT scaled by the probe count: a replacement resource pays setup, the bundle, the teacher fetch and the machine gates in full.",
+        "expected_minutes": 1294.87,
+        "soft_stop_minutes": 1770.53,
+        "hard_minutes": 1800.53,
+        "probe_model": {
+          "record": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+          "expected_minutes": 1139.04,
+          "hard_ceiling_minutes": 1644.7,
+          "probe_minutes_expected": 1044.04,
+          "contingency_fraction": 0.1
+        },
+        "_reconciled": "the overhead phases reconstruct the record's non-probe expected minutes and the reserves reconstruct its hard ceiling; both are checked here rather than assumed"
+      }
+    },
+    "this_session_planned_all_in_usd": 33.2098,
+    "campaign_approved_all_in_usd": 35.76,
+    "session_all_in_hard_usd": 33.2099,
+    "_two_ceilings": "the session ceiling bounds ONE attempt and equals its GPU plus its disk. The campaign ceiling bounds the campaign cumulatively and is the only one prior spend is charged against. A larger campaign ceiling buys room beside settled spend, never a longer or dearer session: the window comes from gpu_hard_usd and hard_runtime_minutes, and the work from the frozen decomposition.",
+    "_continuation_is_not_pooling": "a replacement resource is a new RESOURCE and a new run attempt inside the SAME scientific campaign. Consuming its predecessor's destination-verified probes is continuation of one preregistered experiment, not pooling across experiments.",
+    "_prior_attempts_source": "the union of this campaign's run records and its durable store. Derived from durable probes alone this missed a pod that billed and died before its first probe, and the next attempt then called itself the campaign's first resource.",
+    "prior_attempt_actuals": [
+      {
+        "attempt": "attempt1",
+        "provider_resource_created": false,
+        "gpu_usd": 0.0,
+        "disk_usd": 0.0,
+        "all_in_usd": 0.0,
+        "elapsed_minutes": 0.0,
+        "basis": "closeout",
+        "terminal": "CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT",
+        "_why_zero": "this run has no session record because its chain was retired before the launcher ran. Its closeout states affirmatively that no provider resource was created, so nothing was billed. Absence of a closeout would still be UNKNOWN."
+      },
+      {
+        "attempt": "attempt2",
+        "provider_resource_created": false,
+        "gpu_usd": 0.0,
+        "disk_usd": 0.0,
+        "all_in_usd": 0.0,
+        "elapsed_minutes": 0.0,
+        "basis": "closeout",
+        "terminal": "CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT",
+        "_why_zero": "this run has no session record because its chain was retired before the launcher ran. Its closeout states affirmatively that no provider resource was created, so nothing was billed. Absence of a closeout would still be UNKNOWN."
+      },
+      {
+        "attempt": "attempt3",
+        "provider_resource_created": true,
+        "gpu_usd": 2.5042,
+        "elapsed_minutes": 137.85,
+        "disk_usd": 0.0383,
+        "all_in_usd": 2.5425,
+        "disk_usd_per_minute": 0.00027781,
+        "provisioned_disk_gb": 120,
+        "_disk_is_derived": "the provider bills the provisioned container disk for the pod's whole lifetime and the runner never sees it, so it is derived from the authorization's own disk rate times this resource's elapsed minutes",
+        "provider_confirms_gone": true
+      }
+    ],
+    "settled_campaign_gpu_usd": 2.5042,
+    "settled_campaign_disk_usd": 0.0383,
+    "settled_campaign_spend_usd": 2.5425,
+    "_settled_is_all_in": "GPU actual from each predecessor's session record plus its container disk derived from the authorization's own disk rate. The runner records GPU only, and comparing GPU-only prior spend against an all-in ceiling omitted every predecessor's disk."
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "e8_inputs_20260810/calibration_v1/items.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 8
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1219
+    },
+    "local_assets": [
+      "artifacts/stage1/e8_calibration_v1",
+      "artifacts/stage1/reasoning_heavy_v2",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/c2_screening_v1",
+      "artifacts/stage1/state_eval_v1",
+      "artifacts/stage3/recovery_search_v2"
+    ],
+    "local_missing": []
+  },
+  "dry_run": true,
+  "provider_resource_created": false,
+  "terminal": "DRY_RUN_GATES_PASSED",
+  "_dry_run_is_not_a_pass": "every pre-provider gate passed and nothing was created. That is evidence the chain is launchable, not evidence the session succeeded: no pod existed, no stage ran and nothing was measured.",
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-09-21T06:25:54+00:00"
+}
