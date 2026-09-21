@@ -454,10 +454,15 @@ def authorization_terms(repo_root: str | Path = REPO_ROOT, *,
             "hard_runtime_minutes is the authorized length of the experiment. A "
             "card offered below the authorized rate buys more minutes than "
             "this; the session may not use them."),
-        "_all_in_is_the_campaign_ceiling": (
-            "one authorization funds one 12-probe campaign. all_in_hard_usd "
-            "bounds the campaign cumulatively across every resource and run "
-            "attempt, not each attempt separately."),
+        #: `_all_in_is_the_campaign_ceiling` was emitted here and said
+        #: "all_in_hard_usd bounds the campaign cumulatively across every
+        #: resource and run attempt". It was true while the two ceilings were
+        #: one number and became false the moment they separated, and the same
+        #: document already states the correct contract in
+        #: `_campaign_ceiling_is_cumulative` above. It is DELETED rather than
+        #: reworded into a compatibility note: a governance artifact that
+        #: contradicts itself is worse evidence than one that says less, and
+        #: the reader cannot tell which of two statements the code obeys.
     }
 
 
@@ -776,10 +781,13 @@ class BehaviouralAuthorization(C2Authorization):
             "runtime are three different quantities. The launcher derives its "
             "deadline from gpu_hard_usd and hard_runtime_minutes at the LIVE "
             "rate, never from a constant.")
-        payload["_the_ceiling_is_cumulative_over_the_campaign"] = (
-            "all_in_hard_usd bounds this campaign across every provider "
-            "resource and run attempt it takes. A replacement resource does not "
-            "receive a fresh allocation.")
+        #: `_the_ceiling_is_cumulative_over_the_campaign` was emitted here and
+        #: attributed the cumulative bound to `all_in_hard_usd`. That was the
+        #: contract while the two ceilings were one number; it is now false,
+        #: and it contradicted `_session_versus_campaign` in the same payload.
+        #: DELETED rather than reworded: the fact it was reaching for — that a
+        #: replacement resource receives no fresh allocation — is stated once,
+        #: above, against the field that actually bounds it.
         payload["scope"] = (
             "ONE Phase-C2 behavioural selection campaign: SIX deterministic "
             "fixed-path arm materializations — the five frozen Top-5 C "

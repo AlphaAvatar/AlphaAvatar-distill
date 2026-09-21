@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-20T22:46:25.502451+00:00",
+ "proposed_utc": "2026-09-21T05:09:35.845448+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -36,8 +36,7 @@
    "provisioned_disk_gb": 120,
    "campaign_id": "c2-behavioural-12probe-v1",
    "_rate_is_live_at_issuance": "re-quoted from gpuTypes.securePrice \u2014 never communityPrice, which is a lower number the launcher does not pay. If the quote moves before issuance the proposal is regenerated and a materially changed dollar authorization goes back to the maintainer.",
-   "_the_runtime_binds_too": "hard_runtime_minutes is the authorized length of the experiment. A card offered below the authorized rate buys more minutes than this; the session may not use them.",
-   "_all_in_is_the_campaign_ceiling": "one authorization funds one 12-probe campaign. all_in_hard_usd bounds the campaign cumulatively across every resource and run attempt, not each attempt separately."
+   "_the_runtime_binds_too": "hard_runtime_minutes is the authorized length of the experiment. A card offered below the authorized rate buys more minutes than this; the session may not use them."
   },
   "_derive_again_at_issuance": "these are the amounts at the rate this proposal was priced at. Issuance must re-quote gpuTypes.securePrice and derive them again at that rate: an authorization carrying a dollar window derived from a stale quote is a window that does not bound the bill. If the re-quote materially changes the dollar authorization, it goes back to the maintainer.",
   "_five_distinct_amounts": "rate, authorized runtime, GPU dollars, separately billed disk dollars and the all-in total. The launcher derives its deadline from gpu_hard_usd and hard_runtime_minutes at the live rate \u2014 the shorter of the two \u2014 so a card above the authorized rate is refused and torn down rather than paid for, and a card below it does not extend the experiment. campaign_all_in_hard_usd is a SIXTH amount and is not one of them: it is not derived from the rate, it never enters the window, and it bounds the campaign rather than this session."
@@ -489,7 +488,7 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "41406ffcdf5ddbc26bfc9c1ce158f23f2f0b08f250cf968fbd98f1e4fb42ecba",
+  "digest": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
   "n_files": 134,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
@@ -539,5 +538,5 @@
   "rehearsal": "tests/c2_behavioural_preflight/ \u2014 BUILT. One production-path rehearsal drives the real driver P through D and reaches all three terminal states from separate deterministic fixtures, replacing only hardware-bound calls.",
   "grant": "NOT REQUESTED \u2014 no grant, readiness record, authorization, bundle or provider resource exists for this session, and none may be created without a maintainer decision."
  },
- "proposal_sha256": "a84279e1bf0ad5b0da5334955b77d91bfc705bcbf5c1c22bb39093501fb729c1"
+ "proposal_sha256": "51129b3dfc4a3998ec536c05df7ac59f9e5b044657da64073c1dc209f62630f6"
 }

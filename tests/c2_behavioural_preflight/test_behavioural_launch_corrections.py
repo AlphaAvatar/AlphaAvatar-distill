@@ -672,3 +672,103 @@ def test_a_record_whose_per_probe_parts_stop_summing_is_refused(
     with pytest.raises(BH.BehaviouralProposalError,
                        match="no longer sum to the whole"):
         BH.session_decomposition(tmp_path, materialization_minutes=10.0)
+
+
+# -- the metadata must not contradict the fields -----------------------------
+
+def _loaded_authorization(tmp: Path | None = None):
+    """The real object, through the real loader, from the real document shape.
+
+    Built here rather than asserted against a dict literal: the descriptions
+    under test are emitted by `as_dict()`, and a fixture that assembled them
+    by hand could not detect one going stale.
+    """
+    import tempfile
+
+    d = tmp or Path(tempfile.mkdtemp())
+    path = d / "authorization.json"
+    path.write_text(json.dumps(_authorization_document()))
+    return BG.BehaviouralAuthorization.load(path)
+
+
+def _ceiling_claims(payload: dict) -> list[tuple[str, str]]:
+    """Every emitted description that attributes a CAMPAIGN bound to the
+    per-session field.
+
+    `all_in_hard_usd` is one session's hard all-in and equals
+    `gpu_hard_usd + disk_hard_usd`; `campaign_all_in_hard_usd` is the
+    cumulative bound across every resource and run attempt. A description
+    saying otherwise is a false statement in formal governance evidence.
+    """
+    import re
+
+    out = []
+    for key, value in payload.items():
+        if not isinstance(value, str):
+            continue
+        text = " ".join(value.split())
+        #: The negative lookbehind matters: `campaign_all_in_hard_usd` ends in
+        #: the session field's name, so a naive search flags every correct
+        #: sentence and the check would have to be weakened to pass.
+        for m in re.finditer(r"(?<!campaign_)all_in_hard_usd[^.]{0,200}", text):
+            if re.search(r"\b(campaign|cumulativ)", m.group(0), re.I):
+                out.append((key, m.group(0)))
+    return out
+
+
+def test_no_emitted_description_calls_the_session_ceiling_cumulative():
+    """The two ceilings separated; two descriptions did not follow.
+
+    `authorization_terms` emitted `_all_in_is_the_campaign_ceiling` and
+    `as_dict` emitted `_the_ceiling_is_cumulative_over_the_campaign`, both
+    saying `all_in_hard_usd` bounds the campaign cumulatively. Both were true
+    while the ceilings were one number and false afterwards, and both sat in
+    the same document as the correct contract — so a newly issued
+    authorization contradicted itself in machine-readable governance metadata.
+    The executable paths read the right fields throughout, so nothing
+    overspent; the evidence was still wrong, and formal evidence that
+    contradicts itself cannot be reviewed.
+    """
+    terms = _terms()
+    assert _ceiling_claims(terms) == [], _ceiling_claims(terms)
+    assert "_all_in_is_the_campaign_ceiling" not in terms
+
+    payload = _loaded_authorization().as_dict()
+    assert _ceiling_claims(payload) == [], _ceiling_claims(payload)
+    assert "_the_ceiling_is_cumulative_over_the_campaign" not in payload
+
+    #: And the contract IS stated, once, so deleting the false claims did not
+    #: leave the artifact silent about which field bounds what.
+    contract = payload["_session_versus_campaign"]
+    assert "all_in_hard_usd bounds ONE session" in contract
+    assert f"{BG.CAMPAIGN_AMOUNT_FIELD} bounds the CAMPAIGN" in contract
+    assert "_campaign_ceiling_is_cumulative" in terms
+    assert "_campaign_ceiling_buys_no_science" in terms
+
+
+def test_the_claim_detector_finds_a_planted_contradiction():
+    """Mutation: the check above passes on an empty detector.
+
+    A predicate that never matches is indistinguishable from a clean payload,
+    and the lookbehind that keeps `campaign_all_in_hard_usd` from matching is
+    exactly the kind of expression that silently matches nothing.
+    """
+    planted = {
+        "_stale": ("all_in_hard_usd bounds the campaign cumulatively across "
+                   "every resource."),
+        "_also_stale": "the all_in_hard_usd ceiling is cumulative.",
+    }
+    found = dict(_ceiling_claims(planted))
+    assert set(found) == {"_stale", "_also_stale"}, found
+
+    #: And the CORRECT sentences must not be flagged, or the guard would force
+    #: the artifact to stop describing the campaign field at all.
+    clean = {
+        "_ok": (f"{BG.CAMPAIGN_AMOUNT_FIELD} bounds the CAMPAIGN cumulatively "
+                "across every resource and run attempt."),
+        "_ok2": ("all_in_hard_usd bounds ONE session and equals gpu_hard_usd "
+                 "+ disk_hard_usd."),
+        "_ok3": ("it is deliberately a different field from all_in_hard_usd, "
+                 "which bounds ONE session."),
+    }
+    assert _ceiling_claims(clean) == [], _ceiling_claims(clean)
