@@ -48,11 +48,33 @@ from experiments.run_layout import rel_run_dir  # noqa: E402
 EXPERIMENT_ID = "phase_c2_behavioural"
 STAGE_ID = "1"
 
+
+def _proposal_writer_out() -> str:
+    """Where the proposal writer puts the proposal, asked of the writer.
+
+    Imported by path because `scripts/autoinit/` is a directory of entry
+    points rather than a package, and because the alternative — a second copy
+    of the literal — is the defect: the checker would keep verifying the old
+    location after a move and report PASS on a file the review never saw.
+    """
+    import importlib.util
+
+    src = Path(__file__).with_name("write_c2_behavioural_proposal.py")
+    spec = importlib.util.spec_from_file_location("_c2b_proposal_writer", src)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.OUT
+
 #: How much the live quote may move the dollar authorization before this stops
 #: and returns to the maintainer. The grant's rule is "materially changes"; a
 #: cent on a $33 ceiling is not material and a re-quote that moves it by more
 #: than this is not a number anybody reviewed.
 MATERIAL_USD = 0.05
+
+#: The reviewed proposal, from its WRITER rather than re-typed here: two
+#: spellings of one path is how a checker comes to verify a document nobody
+#: reads.
+PROPOSAL_REL = _proposal_writer_out()
 
 
 def governance_path(run_id: str, name: str) -> str:
@@ -62,6 +84,70 @@ def governance_path(run_id: str, name: str) -> str:
 def git(*args: str) -> str:
     return subprocess.run(["git", *args], capture_output=True, text=True,
                           cwd=REPO_ROOT).stdout.strip()
+
+
+def reviewed_proposal_hash(repo_root: Path) -> str:
+    """The proposal's own canonical hash, recomputed from the document.
+
+    Computed the way its writer computes it — `sha256_json` over the document
+    with `proposal_sha256` removed — and NOT by hashing the file. Those are
+    two different numbers, and reporting the file hash under this name has
+    already sent a maintainer a value that no governance artifact records.
+
+    Refuses a proposal that does not match its own stated hash: such a
+    document is not the one it claims to be, and an authorization issued over
+    it would name a review that never happened.
+    """
+    doc = json.loads((repo_root / PROPOSAL_REL).read_text())
+    stated = doc.pop("proposal_sha256", None)
+    recomputed = sha256_json(doc)
+    if stated is None:
+        raise SystemExit(
+            f"{PROPOSAL_REL} states no proposal_sha256, so it carries no "
+            "identity for a grant to bind. Regenerate it with "
+            "write_c2_behavioural_proposal.py --write.")
+    if stated != recomputed:
+        raise SystemExit(
+            f"{PROPOSAL_REL} states proposal_sha256={stated} and recomputes "
+            f"to {recomputed}. The committed proposal does not match its own "
+            "hash, so it is not the document it claims to be; regenerate it "
+            "before issuing against it.")
+    return recomputed
+
+
+def reviewed_identity_disagreements(reviewed: dict, *, plan_hash: str,
+                                    executable_closure: str,
+                                    closure_files: int,
+                                    proposal_sha256: str) -> list[str]:
+    """Every reviewed identity this tree does not reproduce.
+
+    THE PROPOSAL HASH IS ONE OF THEM. The grant asserts that every identity in
+    `reviewed_baseline` is re-derived at issuance and that a disagreement is a
+    refusal; for `proposal_sha256` that was false — the plan hash and the
+    closure were checked and the proposal was recorded and trusted. It is not
+    implied by the other two: the plan hash covers the frozen science and the
+    closure covers the executable, so an edit to the proposal WRITER moves
+    this and neither of those, and the authorization would then name a review
+    document nobody read.
+
+    Pure, and returns the disagreements rather than raising, so every field can
+    be exercised without an issuance. An identity the grant does not state is
+    not checked — a grant may legitimately record fewer than it binds — but one
+    it DOES state must agree.
+    """
+    out = []
+    for label, key, mine in (
+            ("plan hash", "plan_hash", plan_hash),
+            ("executable closure", "executable_closure", executable_closure),
+            ("closure file count", "closure_files", closure_files),
+            ("proposal hash", "proposal_sha256", proposal_sha256)):
+        theirs = reviewed.get(key)
+        if theirs is not None and mine != theirs:
+            out.append(
+                f"the reviewed {label} is {theirs} and this tree derives "
+                f"{mine}. The tree has moved since the review; an "
+                "authorization issued over it would bind work nobody reviewed.")
+    return out
 
 
 def build_authorization_record(*, grant: dict, terms: dict, commit: str,
@@ -262,20 +348,16 @@ def main(argv=None) -> int:
     live = BG.current_executable(REPO_ROOT)
     plan_hash = BG.plan_hash(REPO_ROOT)
 
+    proposal_sha256 = reviewed_proposal_hash(REPO_ROOT)
+
     #: The reviewed identities, re-derived and CHECKED. The grant records them
     #: so a reader can see what was reviewed; nothing trusts that copy.
-    reviewed = grant.get("reviewed_baseline") or {}
-    for label, mine, theirs in (
-            ("plan hash", plan_hash, reviewed.get("plan_hash")),
-            ("executable closure", live["digest"],
-             reviewed.get("executable_closure")),
-            ("closure file count", live["n_files"],
-             reviewed.get("closure_files"))):
-        if theirs is not None and mine != theirs:
-            raise SystemExit(
-                f"the reviewed {label} is {theirs} and this tree derives "
-                f"{mine}. The tree has moved since the review; an "
-                "authorization issued over it would bind work nobody reviewed.")
+    disagreements = reviewed_identity_disagreements(
+        grant.get("reviewed_baseline") or {},
+        plan_hash=plan_hash, executable_closure=live["digest"],
+        closure_files=live["n_files"], proposal_sha256=proposal_sha256)
+    if disagreements:
+        raise SystemExit("\n".join(disagreements))
 
     record = build_authorization_record(
         grant=grant, terms=terms, commit=commit, dirty=dirty, live=live,
