@@ -10,17 +10,17 @@
  "stage_id": "1",
  "campaign_id": "c2-behavioural-12probe-v1",
  "reviewed_baseline": {
-  "origin_main": "b6a2ed470230ba32fede5366ea5fbc5d78fa4b32",
+  "origin_main": "22090909f76ad5e10daf232048fee0eea34127d7",
   "proposal_sha256": "d7a7d5e5ba0928bdea3e8a5d5cdc7b3335f18b40b3f07ffabcd152b8f6d4d14c",
   "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
   "executable_closure": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da",
   "closure_files": 134,
   "resume_preregistration_sha256": "15451b6325e03466f97e01d2acc8ef06fa097b75e2e69a9a68a10dc912bdfbdf",
   "_the_issuer_rederives_these": "every identity here is re-derived live at issuance and a disagreement is a refusal. They are recorded so a reader can see WHAT was reviewed, not so anything trusts the copy. This is now true of proposal_sha256 as well: under attempt3 it was recorded and believed while only the plan hash and the closure were checked.",
-  "_reviewer_go_was_given_at": "22090909f76ad5e10daf232048fee0eea34127d7",
   "_closure_is_the_reviewed_one": "5e6ef59edac2bc079fe992f7f5b8622b6dfe5b591070f3cfd3d791f2565f94da, byte-identical to the closure the reviewer's GO named. The two amendments below repair dev-box issuance code, which the pod does not execute and which is therefore outside the behavioural executable closure. No amendment moved it.",
   "_proposal_identity_rule_changed_not_its_content": "the reviewer's GO named proposal_sha256 = 51129b3dfc4a3998ec536c05df7ac59f9e5b044657da64073c1dc209f62630f6. Amendment 2 changed what that hash COVERS -- it now excludes the wall-clock proposed_utc, so the identity is reproducible at all -- and amendment 3 corrected one false sentence inside the document. The reviewed content is otherwise unchanged and now hashes to d7a7d5e5ba0928bdea3e8a5d5cdc7b3335f18b40b3f07ffabcd152b8f6d4d14c. Every move is recorded here rather than left silent, and a test compares a fresh build to the committed document over exactly the hashed fields.",
-  "plan_hash_is_the_reviewed_one": true
+  "plan_hash_is_the_reviewed_one": true,
+  "_origin_main_is_the_reviewed_baseline": "the commit the reviewer's GO was given at, as attempt3's grant recorded 197088e for the same reason. It is NOT the commit this chain runs from: the three amendments below landed after it, each recorded with what it moved. The issuer re-derives the plan hash, the closure, the closure file count and the proposal hash live and refuses a disagreement, so the session commit is bound by those rather than by this field."
  },
  "covers": "ONE Phase-C2 behavioural selection campaign: the five frozen Top-5 C candidates and incumbent B, materialized along deterministic digest-gated fixed paths as the reviewed execution path requires, six screening probes, exactly one mechanical screening advancement, six confirmation probes, the frozen screening and confirmation batteries, the frozen seeds, the frozen scoring contract, bootstrap seed 834816710, and the frozen Phase-C GO / NO_GO / INCONCLUSIVE decision rule. Same-campaign continuation only, under preregistered R1-R10.",
  "terminal_results": [
