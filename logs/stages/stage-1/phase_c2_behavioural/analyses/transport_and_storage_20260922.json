@@ -1,0 +1,158 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_transport_and_storage/v1",
+ "measured_utc": "2026-09-22",
+ "authorizes": "nothing",
+ "_what_this_is": "the Option-2 engineering round's measurements: what the transport actually does, what the storage model was getting wrong, and what the authorized Hugging Face cleanup recovered. Measured, not argued.",
+ "measured_throughput": {
+  "dev_box_egress_mb_per_second": [
+   0.72,
+   0.64
+  ],
+  "_how": "8 MB and 32 MB POSTed to a discarding endpoint (speed.cloudflare.com/__up) from the dev box, $0, nothing stored. Consistent with the project's recorded 0.72 MB/s and far above the 0.23 MB/s bound the restore model uses.",
+  "pod_to_dev_box_mb_per_second": 10.4,
+  "_how_down": "attempt5's own launcher log: probe confirmation.B.s1916380711 announced 23:26:59 and fetched and verified by 23:31:15 -- 2.22 GiB in 3.8 min. The link is ASYMMETRIC by ~15x, which is why fetching ten probes was routine and restoring them is the problem.",
+  "local_copy_mb_per_second": 130,
+  "_the_direction_that_matters": "only dev-box -> replacement pod. Everything else in this campaign's transport is already fast enough."
+ },
+ "hugging_face_capacity": {
+  "authorized_by": "maintainer, 2026-09-22, for the Option-2 round",
+  "inventory_before_gib": 92.14,
+  "inventory_after_gib": 91.029,
+  "recovered_gib": 1.11,
+  "recorded_limit_gib": 93.13,
+  "quota_endpoint_after_cleanup": {
+   "1.00_gib": "ACCEPT",
+   "2.00_gib": "REFUSE",
+   "2.22_gib": "REFUSE",
+   "_how": "the LFS batch endpoint answers 'would N bytes be accepted' without sending or storing anything. One probe is 2.22 GiB."
+  },
+  "verdict": "HUGGING FACE CANNOT HOLD EVEN ONE PROBE. It is not a viable durable staging backend for this continuation, before or after the cleanup.",
+  "deleted": [
+   {
+    "object": "AlphaAvatar/aadistill-transport:phase_b_attempt5/selected_leaves/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors",
+    "bytes": 1192099840,
+    "file_oid": "d025f38da5088038\u2026",
+    "why_safe": "byte-identical canonical local copy verified by sha256 AT THE MOMENT OF DELETION, at /home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors. No current session declares this remote path. The 2026-08-22 quota finding had already recorded it as 'a re-creatable copy whose canonical original is intact and verified on the dev box; left in place for the maintainer to dispose of'.",
+    "canonical_remains": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6/",
+    "equivalence_established_by": "sha256 == the object's LFS file_oid",
+    "reclaim_method": "permanently_delete_lfs_files(rewrite_history=True). Ordinary deletion reclaims nothing on this repo -- measured twice, 2026-08-02 and 2026-08-14."
+   }
+  ],
+  "preserved_and_why": [
+   {
+    "group": "e1_scaling_20260801",
+    "gib": 42.394,
+    "why": "NO local copy of any of its 19 checkpoints. Hugging Face is the ONLY surviving copy, and e1_r0860k_* is the provenance of the frozen recovery recipe e1_p1_kd_heavy@0.86M that every probe in this campaign runs. Fail-closed: preserve."
+   },
+   {
+    "group": "stage3",
+    "gib": 26.777,
+    "why": "NO local copy of any of its 12 checkpoints, and each is referenced by committed repository records. Fail-closed: preserve."
+   },
+   {
+    "group": "transfer/wheelhouse_cu128_cp312 + wheelhouse_vllm_cp312",
+    "gib": 7.441,
+    "why": "the offline uv/vLLM wheelhouses on the PAID critical path; already in the retirement tool's PROTECTED_PREFIXES. Removing them would slow or break every future pod setup."
+   },
+   {
+    "group": "aadistill-transport/phase_a_attempt12",
+    "gib": 5.551,
+    "why": "REFUSED BY THE TOOL'S OWN RE-VERIFICATION: a current session spec declares these five remote paths as relay inputs. My analysis step had cleared them on local-copy equivalence alone and missed that; the tool's independent check caught it. This is the two-step design working."
+   },
+   {
+    "group": "permanent_controls / stage1/qwen3_0p6b_init_v0 / stage3_recovery_corpus_v2 / e8_inputs_20260810",
+    "gib": 7.649,
+    "why": "protected prefixes: the permanent controls, the canonical initialization, the ladder pack and the calibration items."
+   }
+  ],
+  "_historical_records_not_rewritten": "the 2026-08-22 quota finding still names the retired object. That historical fact is preserved; this record is the prospective storage-cleanup evidence beside it."
+ },
+ "storage_model_defects_repaired": [
+  {
+   "defect": "`storage_requirement` charged a trained probe at `total_probes * leaf_gib` -- the size of the bf16 INITIALIZATION LEAF -- while the recipe every probe derives from declares `dtype: \"float32\"`. The model contradicted the config it ran under, by exactly the two dtypes' ratio.",
+   "was_gib": 13.323,
+   "now_gib": 26.654,
+   "fix": "derived through `aadistill.runtime.cost.CheckpointFootprint` from the SAVE dtype read out of the frozen recipe. Nothing about this model family, parameter count or experiment is in the generic arithmetic -- every dtype is an argument, and an unknown dtype raises rather than defaulting."
+  },
+  {
+   "defect": "the training working set assumed bf16 weights; autocast changes the COMPUTE dtype, not the parameters.",
+   "was_gib": 7.772,
+   "now_gib": 8.882,
+   "fix": "weights, gradient and moment count all read from the recipe."
+  },
+  {
+   "defect": "container storage and durable capacity were one number. The bytes that must merely survive teardown were charged to the pod's own disk, and the destination gate checked the dev-box store while NOTHING checked the pod's.",
+   "fix": "`container_residency` and `durable_backend` are derived separately; `destination_gate` charges the derived durable requirement and a new `container_gate` charges peak local residency against the provisioned disk."
+  },
+  {
+   "defect": "nothing released a probe's local workdir. `announce_durable` runs BEFORE the transfer, so it cannot authorize a release, and there was no later point that could.",
+   "fix": "a real acknowledgement boundary: the launcher writes a release ack only after the bytes arrived off-pod AND re-identified there; the driver releases acked probes before training the next one and RAISES if a release fails."
+  },
+  {
+   "defect": "every bound was a derivation, and a derivation can be wrong in the one direction that costs a session.",
+   "fix": "`require_probe_headroom` measures the filesystem before each probe and refuses if it cannot hold the next one. A modelling error now costs a clean stop with every finished probe durable."
+  }
+ ],
+ "r2_identity_validated_on_a_real_probe": {
+  "probe": "confirmation.B.s1936324010",
+  "bytes": 2384234968,
+  "what_ran": "the production `verify_transferred_leaf` against the bytes at a NEW local path, with the identity the durable ack announced.",
+  "matched": true,
+  "fields_agreeing": [
+   "artifact_digest",
+   "weights_digest",
+   "single_shard_sha256",
+   "arch_signature",
+   "num_parameters",
+   "config_sha256",
+   "total_bytes"
+  ],
+  "negative_control": "one flipped byte in model.safetensors -> matched=False",
+  "_what_this_does_NOT_cover": "the network leg. A local copytree faithfully tests re-identification from ARRIVED bytes, which is R2's substance, and tests nothing about a remote backend's throughput or semantics. That is the piece still owed once a backend is chosen."
+ },
+ "repriced_continuation": {
+  "campaign_settled_all_in_usd": 22.2466,
+  "campaign_ceiling_all_in_usd": 35.76,
+  "available_usd": 13.5134,
+  "owed": {
+   "probes": 2,
+   "arms": [
+    "1a2b5b030e7e4e202fda3a810ed53c5f",
+    "B"
+   ]
+  },
+  "options": [
+   {
+    "transport": "dev box -> pod, at the 0.23 MB/s bound",
+    "restore_minutes": 1728.3,
+    "hard_usd": 39.5094,
+    "settled_plus_hard_usd": 61.756,
+    "fits": false
+   },
+   {
+    "transport": "dev box -> pod, at the measured 0.68 MB/s",
+    "restore_minutes": 584.6,
+    "hard_usd": 18.7315,
+    "settled_plus_hard_usd": 40.9781,
+    "fits": false
+   },
+   {
+    "transport": "dev box -> pod, measured, CONFIRMATION PROBES ONLY",
+    "restore_minutes": 233.8,
+    "hard_usd": 12.3595,
+    "settled_plus_hard_usd": 34.6061,
+    "fits": true,
+    "_but": "this narrows which probes' bytes travel, which is an R2 interpretation and not an engineering choice. NOT taken."
+   },
+   {
+    "transport": "high-bandwidth durable backend, pod side at 100 MB/s",
+    "restore_minutes": 4.0,
+    "hard_usd": 8.1839,
+    "settled_plus_hard_usd": 30.4305,
+    "fits": true,
+    "_needs": "a durable backend the dev box can fill UNBILLED before the pod exists and the pod can drain at datacenter speed. Hugging Face cannot: measured, it refuses 2 GiB."
+   }
+  ],
+  "recommendation": "the high-bandwidth durable backend. It preserves R2 for all ten probes, leaves $5.33 of margin against the campaign ceiling, and fixes the architecture rather than the arithmetic. A RunPod network volume is the obvious candidate at roughly $0.07/GB/month; it is a paid storage change and therefore a maintainer decision."
+ }
+}

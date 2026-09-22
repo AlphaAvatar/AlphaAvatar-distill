@@ -53,16 +53,16 @@
   "_units": "the provider's flag is GB and the requirement is GiB; the conversion assumes DECIMAL GB, the smaller unit, so the request cannot deliver less capacity than the requirement"
  },
  "budget_position": {
-  "cumulative_spend_usd": 311.7468,
+  "cumulative_spend_usd": 331.4509,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 58.2532,
+  "remaining_usd": 38.5491,
   "search_total_hard_ceiling_usd": 34.8742,
-  "remaining_after_the_search_usd": 23.379,
+  "remaining_after_the_search_usd": 3.6749,
   "behavioural_gpu_hard_ceiling_usd": 29.8788,
   "behavioural_storage_upper_bound_usd": 1.5229,
   "_behavioural_storage_is_bounded_not_derived": "that session's launcher and provision do not exist yet, so its disk term is bounded ABOVE by the search's own 400 GB -- certainly more than twelve probes on a 596M student need. The chain total is therefore an over-estimate rather than an unstated omission, and the figure should fall when that session is bound.",
   "chain_total_hard_ceiling_usd": 66.2759,
-  "remaining_after_the_whole_chain_usd": -8.0227,
+  "remaining_after_the_whole_chain_usd": -27.7268,
   "_derived_by": "scripts/consolidate/derive_budget.py :: project_balance, from the package anchor plus every recorded run closeout. The cap's canonical owner is configs/experiments/phase_c1/authorization.json :: accepted_pricing.cumulative_cap_usd.",
   "_fitting_is_not_permission": "the cap rose to 370.00 on 2026-09-17 as an ACCOUNTING ENVELOPE, explicitly not a spend authorization and not transferable to C3/C4. Both sessions fit inside it at their corrected totals. That is a feasibility statement.",
   "_two_authorizations_never_one": "the behavioural figures are shown so a review can see both halves at once, NOT because this proposal covers them. That session's candidate identities do not exist until this search commits a Top-5, so it cannot be authorized yet even in principle."

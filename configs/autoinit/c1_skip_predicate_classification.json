@@ -174,6 +174,10 @@
   },
   "tests/training/test_train.py::teacher_tokenizer": {
    "class": "local_hf_cache"
+  },
+  "tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk": {
+   "class": "devbox_only_artifact",
+   "why": "the premise is a real trained probe under /home/ecs-user/aad-artifacts, a gitignored artifact of attempt5 that no SetupManifest stages. On the dev box it checks the derived checkpoint footprint against bytes that actually exist, which is the whole point of the test; on a pod there is no probe and it skips by design. The derivation itself is checked unconditionally by the other tests in that file."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",

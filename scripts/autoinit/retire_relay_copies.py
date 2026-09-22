@@ -119,20 +119,28 @@ def main() -> None:
         wanted = {r["filename"] for r in json.load(open(args.table))["rows"]
                   if r.get("deletable")}
 
+    #: BOTH repos. This iterated only RELAY while the module's own docstring
+    #: is about the TRANSPORT repo's redundant copies -- the five Attempt-12
+    #: leaves and the Phase-B one that the 2026-08-22 finding left "in place
+    #: for the maintainer to dispose of". They were unreachable by the tool
+    #: written to dispose of them. `check` re-derives every safety property per
+    #: object, so widening the scan weakens nothing.
     plan, refused = [], []
-    for obj in api.list_lfs_files(RELAY, repo_type="model"):
-        if wanted is not None and obj.filename not in wanted:
-            continue
-        ok, why, local = check(obj, declared)
-        (plan if ok else refused).append((obj, why, local))
+    for repo in (RELAY, TRANSPORT):
+        for obj in api.list_lfs_files(repo, repo_type="model"):
+            if wanted is not None and obj.filename not in wanted:
+                continue
+            ok, why, local = check(obj, declared)
+            (plan if ok else refused).append((obj, why, local, repo))
 
     print(f"declared remote paths in current sessions: {len(declared)}")
-    for obj, why, _ in refused:
-        print(f"  REFUSED {obj.filename}: {why}")
+    for obj, why, _, repo in refused:
+        print(f"  REFUSED {repo.split('/')[1]}:{obj.filename}: {why}")
     total = 0
-    for obj, why, local in plan:
+    for obj, why, local, repo in plan:
         total += obj.size
-        print(f"  RETIRE  {obj.size / 2**30:7.3f} GiB  {obj.filename}")
+        print(f"  RETIRE  {obj.size / 2**30:7.3f} GiB  "
+              f"{repo.split('/')[1]}:{obj.filename}")
         print(f"          oid {obj.file_oid[:16]}…  local {local}")
     print(f"\n{len(plan)} objects, {total / 2**30:.3f} GiB")
 
@@ -142,9 +150,15 @@ def main() -> None:
     if not plan:
         print("nothing to do")
         return
-    api.permanently_delete_lfs_files(RELAY, [o for o, _, _ in plan],
-                                     rewrite_history=True, repo_type="model")
-    print(f"retired {len(plan)} remote copies from {RELAY}")
+    #: Per repo: `permanently_delete_lfs_files` takes objects of ONE repo, and
+    #: handing it a mixed list would delete from the wrong one or fail.
+    for repo in (RELAY, TRANSPORT):
+        objs = [o for o, _, _, r in plan if r == repo]
+        if not objs:
+            continue
+        api.permanently_delete_lfs_files(repo, objs, rewrite_history=True,
+                                         repo_type="model")
+        print(f"retired {len(objs)} remote copies from {repo}")
 
 
 if __name__ == "__main__":

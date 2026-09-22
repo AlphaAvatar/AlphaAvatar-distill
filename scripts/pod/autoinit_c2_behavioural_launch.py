@@ -330,15 +330,83 @@ def destination_gate(ctx: SessionContext) -> tuple[bool, str]:
         free = shutil.disk_usage(store).free
     except OSError as exc:
         return False, f"the durable store {store} is unusable: {exc}"
+    #: THE DURABLE REQUIREMENT, DERIVED. This charged
+    #: `total_probes * int(1.11 * 2**30)` -- a hardcoded 1.11 GiB that is the
+    #: bf16 size of the INITIALIZATION LEAF, not the fp32 size of a trained
+    #: probe. It approved 37.0 GiB of free space against a claimed 13.3 GiB
+    #: need whose real value is 26.7 GiB: it passed for the wrong reason, and
+    #: with 15 GiB free it would also have passed and then failed mid-campaign
+    #: with every earlier probe already durable and irreplaceable.
+    #:
+    #: Now read from `storage_requirement`'s `durable_backend`, which derives
+    #: the SAVE footprint from the recipe's own dtype -- so a recipe that saves
+    #: in another precision, or a model family with a different parameter
+    #: count, moves this without an edit here.
     sched = BH.schedule(REPO_ROOT)
-    need = int(sched["total_probes"]) * int(1.11 * 2**30)
+    req = BH.storage_requirement(BH.candidate_manifest(REPO_ROOT), sched,
+                                 REPO_ROOT)
+    need = int(float(req["durable_backend"]["gib"]) * 2**30)
     if free < need:
         return False, (
-            f"{store} has {free / 2**30:.1f} GiB free and the twelve probes it "
-            f"must hold need {need / 2**30:.1f} GiB. A run that trains work it "
-            "cannot preserve is a run that will lose it.")
+            f"{store} has {free / 2**30:.1f} GiB free and the "
+            f"{sched['total_probes']} probes it must hold need "
+            f"{need / 2**30:.1f} GiB "
+            f"({req['components_gib']['_probe_checkpoint_footprint']['gib']} "
+            "GiB each, the save footprint of this recipe's dtype). A run that "
+            "trains work it cannot preserve is a run that will lose it.")
     return True, (f"destination OK: {free / 2**30:.1f} GiB free at {store} for "
-                  f"{need / 2**30:.1f} GiB of probes")
+                  f"{need / 2**30:.1f} GiB of probes (durable requirement, "
+                  "derived from the recipe's save dtype)")
+
+
+def container_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The PROVISIONED container disk must hold the peak LOCAL residency.
+
+    The other half of `destination_gate`, and it did not exist. The durable
+    requirement was checked against the dev-box store while nothing checked
+    the pod's own disk against the work it would do there -- so attempt5 was
+    provisioned 120 GB by a model that charged trained probes at half their
+    size, and the trainer hit `No space left on device` on probe 11 of 12.
+
+    Two resources, each against its owner: this one is container storage, and
+    the probes that must merely SURVIVE teardown are the destination gate's.
+    """
+    sched = BH.schedule(REPO_ROOT)
+    req = BH.storage_requirement(BH.candidate_manifest(REPO_ROOT), sched,
+                                 REPO_ROOT)
+    res = req["container_residency"]
+    peak_gib = float(res["peak_gib"])
+    #: The FLAG the pod will actually be created with, not the constant: a
+    #: session that overrode it must be checked against what it asked for.
+    gb = int(getattr(ctx.args, "disk_gb", CONTAINER_DISK_GB))
+    #: GB -> GiB through the repository's recorded conversion, the same one the
+    #: provision was derived with. Treating the provider's GB flag as GiB
+    #: over-states capacity by 7%, which is the direction that hurts.
+    conv = BH.storage_pricing(REPO_ROOT)["gb_versus_gib"]
+    have_gib = gb / float(conv["gb_per_gib"])
+    ctx.evidence["container_storage"] = {
+        "provisioned_gb": gb, "provisioned_gib": round(have_gib, 3),
+        "peak_local_residency_gib": peak_gib,
+        "peak_at_unit": res["peak_at_unit"],
+        "headroom_gib": round(have_gib - peak_gib, 3),
+        "retained_bytes_per_probe": res["retained_bytes_per_probe"],
+        "release_is_enforced": res["released_on_completion"],
+        "_two_resources": (
+            "this is CONTAINER storage. The bytes that must outlive the pod "
+            "are the destination gate's and are not charged here; charging "
+            "them to both is what produced a 140 GB provision request from a "
+            "model that had already double-counted them."),
+    }
+    if have_gib < peak_gib:
+        return False, (
+            f"the session would provision {gb} GB ({have_gib:.1f} GiB) and its "
+            f"peak local residency is {peak_gib:.1f} GiB, at "
+            f"{res['peak_at_unit']}. A pod that cannot hold the work is a pod "
+            "that fails partway through it, which is how attempt5 lost probe "
+            "11 of 12 and the campaign's verdict.")
+    return True, (f"container OK: {gb} GB ({have_gib:.1f} GiB) provisioned for "
+                  f"a {peak_gib:.1f} GiB peak local residency, "
+                  f"{have_gib - peak_gib:.1f} GiB spare")
 
 
 def campaign_attempts(campaign_id: str, *, exclude: str = "",
@@ -1036,7 +1104,74 @@ def _fetch_and_verify(ctx: SessionContext, units: list) -> list:
                 "authorizes": ("nothing. Preservation and reuse are separate "
                                "decisions."),
             }, indent=1) + "\n")
+            #: AND TELL THE POD. This is the acknowledgement boundary the
+            #: probe-local lifecycle needs: until the bytes are independently
+            #: durable AND re-identified HERE, the pod's copy is the only one
+            #: and deleting it would be a durability race. After this file
+            #: exists the pod may release that probe's training workdir.
+            #:
+            #: attempt5 had no such boundary, so nothing was ever released and
+            #: twelve probes' workdirs accumulated until the trainer could not
+            #: write probe 11. `announce_durable` deliberately only announces;
+            #: it cannot know that the transfer succeeded, because it runs
+            #: before the transfer does.
+            release_ack(ctx, unit_id, size)
     return fetched
+
+
+#: Where the pod looks for the launcher's release acknowledgements. One small
+#: file per probe, written only after destination re-identification matched.
+#: Composed from the SHARED repo-relative constant, so the launcher that writes
+#: it and the driver that reads it cannot disagree about where it is.
+RELEASE_ACK_DIR = f"{REPO}/{BC.RELEASE_ACK_REL}"
+
+
+def release_ack(ctx: SessionContext, unit_id: str, size: int) -> bool:
+    """Tell the pod that this probe's bytes are durable, so it may release.
+
+    MUST NOT raise: it runs inside the runner's poll loop, where a durability
+    helper that throws into a paid session is a defect whoever swallows it.
+    A failure here costs disk on the pod, which the fail-closed caller in the
+    driver then reports; it must never cost the session.
+
+    Returns whether the acknowledgement landed, so the evidence can say.
+    """
+    payload = json.dumps({
+        "schema": "aadistill.autoinit.c2_behavioural_release_ack/v1",
+        "unit_id": unit_id, "bytes": size,
+        "destination_re_identified": True,
+        "_what_this_permits": (
+            "releasing this probe's LOCAL training workdir on the pod. It "
+            "permits nothing about reuse: whether a preserved probe may be "
+            "consumed by a later attempt is R1-R10's decision, not this "
+            "file's."),
+    })
+    #: Copied as a FILE rather than echoed through a shell: the payload is
+    #: JSON with quotes and braces, and a heredoc that a remote shell decides
+    #: to expand writes something the driver cannot parse. `run` is the pod
+    #: exec this launcher already uses; `ssh` is not a method on the target.
+    import tempfile
+
+    try:
+        ctx.target.run(f"mkdir -p {RELEASE_ACK_DIR}", timeout=60)
+        with tempfile.TemporaryDirectory() as tmp:
+            local = Path(tmp) / f"{unit_id}.json"
+            local.write_text(payload + "\n")
+            rc = subprocess.run(
+                [*ctx.scp, str(local),
+                 f"root@{ctx.host}:{RELEASE_ACK_DIR}/{unit_id}.json"],
+                capture_output=True, text=True, timeout=120)
+        ok = rc.returncode == 0
+    except Exception as exc:                                    # noqa: BLE001
+        ctx.evidence.setdefault("release_ack_errors", []).append(
+            f"{unit_id}: {type(exc).__name__}: {exc}")
+        return False
+    ctx.evidence.setdefault("release_acks", []).append(
+        {"unit_id": unit_id, "delivered": ok})
+    if not ok:
+        ctx.say(f"  probe {unit_id}: release ack NOT delivered; the pod keeps "
+                f"its local copy and its storage bound no longer holds")
+    return ok
 
 
 def secure_finished_probes(ctx: SessionContext) -> None:
@@ -1495,6 +1630,7 @@ def spec(args) -> SessionSpec:
             plan_binding_gate,
             source_binding_gate,
             destination_gate,
+            container_gate,
             campaign_continuation_gate,
             readiness_gate,
             #: LAST, because it is the only gate that touches the network.

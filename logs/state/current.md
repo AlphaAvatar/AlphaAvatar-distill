@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-20. The human view. Every number here has an owner named
+**Updated:** 2026-09-22. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,9 +9,51 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing.** Pod `1fv2t0y39lwhml` was deleted
-behind its teardown gate after 137.8 min; the provider confirms it is gone and
+**Nothing is running. Nothing is billing.** Pod `0x48foz4j4xkcg` was deleted
+behind its teardown gate after 1068.3 min; the provider confirms it is gone and
 an account-wide list returns `[]`.
+
+**attempt5 measured ten of twelve probes and then ran out of disk.** The
+trainer hit `No space left on device` writing probe 11; all ten completed
+probes are trained, scored and durable off-pod with their per-prompt rows.
+**There is no verdict**, and that is R5 working: the estimand is a paired
+difference over three seeds and four confirmation probes are not that quantity.
+`$19.7041`. Campaign settled **`$22.2466`** of `$35.7600`; project
+**`$331.4509`** of `$370.0000`, leaving `$38.5491`.
+
+**GO is already arithmetically excluded** — both completed confirmation seeds
+put the candidate behind B (−0.0036, −0.0035) and the frozen rule needs 2 of 3
+positive. NO_GO versus INCONCLUSIVE still needs the third seed and the
+bootstrap. B scored `0.0412` on the confirmation battery against C1's
+treatment pooling `105/2550 = 0.0412` on the same battery, so B reproduces its
+own lineage and the `0.0247` screening figure was a disjoint, harder prompt
+set rather than a regression.
+
+**The root cause was a storage derivation that contradicted its own config,
+and I had found it fourteen hours earlier and bounded the wrong quantity.**
+`storage_requirement` charged a trained probe at the size of the bf16 leaf it
+started from while the recipe declares `dtype: float32`. I recorded that,
+then computed headroom from the 2.22 GiB durable artifact size instead of the
+~5.6 GiB a probe actually occupies locally, and called it comfortable.
+
+Repaired, and the repairs are the point rather than the number:
+
+* the byte model is generic and lives in `aadistill.runtime.cost` — every
+  dtype is an argument, an unknown dtype raises instead of defaulting, and no
+  parameter count, model family or experiment name appears in it;
+* **container residency and durable capacity are two resources.**
+  `destination_gate` charges the derived durable requirement (26.654 GiB, was
+  a hardcoded 13.3) and a new `container_gate` charges peak local residency
+  (72.174 GiB) against the provisioned disk. The derived provision fell from a
+  double-counted 140 GB to 100 GB; the authorization stays at 120;
+* **the probe-local lifecycle has a real acknowledgement boundary.** The
+  launcher writes a release ack only after a probe's bytes arrived off-pod AND
+  re-identified there; the driver releases acked probes before training the
+  next one and refuses to continue if a release fails. `announce_durable`
+  could never have authorized this — it runs before the transfer;
+* **and the driver measures.** `require_probe_headroom` reads the filesystem
+  before each probe and refuses if it cannot hold the next one, so a wrong
+  derivation costs a clean stop with every finished probe durable.
 
 **And nothing is prepared for launch.** attempt4 has no grant, no readiness
 record, no authorization and no bundle; attempts 1–3 hold theirs as consumed
@@ -69,8 +111,9 @@ built. The 120 GB provision is derived on the assumption that a verified arm's
 intermediates are freed; a failed release falsifies it, and attempt3 is what
 discovering that five arms later costs.
 
-**The project cumulative was corrected to `$311.7468`** of the `$370.0000` cap,
-from `$309.2043`. The `$2.5425` was invisible for two independent reasons, both
+**The project cumulative is `$331.4509`** of the `$370.0000` cap, leaving
+`$38.5491`. It was corrected from `$309.2043` to `$311.7468` before attempt5
+and attempt5's `$19.7041` took it to `$331.4509`. The `$2.5425` was invisible for two independent reasons, both
 closed: no behavioural run was in `logs/index.json`, and the extractor read only
 `budget.this_attempt` and `cost.actual_usd` while the behavioural closeout
 states `money.all_in_usd` — the only one of the three that is all-in. An
@@ -1140,7 +1183,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$311.7468` spent of `$370.0000`, leaving `$58.2532` |
+| project cap | `$331.4509` spent of `$370.0000`, leaving `$38.5491` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

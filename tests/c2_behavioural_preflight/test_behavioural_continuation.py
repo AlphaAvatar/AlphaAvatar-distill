@@ -1031,10 +1031,20 @@ def test_the_destination_gate_checks_the_volume_the_fetcher_writes_to(
     """
     ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt1")
     ok, why = L.destination_gate(ctx)
-    assert ok, why
     root = L.campaign_store(BG.CAMPAIGN_ID, ctx.args.ckpt_store)
-    assert str(root) in why
+    #: WHICH VOLUME, not whether it happens to be big enough. The verdict here
+    #: depends on how much room the test host's tmpfs has, and it flipped when
+    #: the durable requirement was corrected from the understated 13.3 GiB to
+    #: the real 26.7 GiB -- a correct repair turning a test red for a reason
+    #: the test is not about. What must hold either way is that the gate reads
+    #: the store the fetcher writes to and SAYS which one it read.
+    assert str(root) in why, why
     assert L.probe_destination(ctx, "screening.B.s1").is_relative_to(root)
+    #: And the capacity arithmetic it applies is the derived durable
+    #: requirement, whichever way it came out.
+    req = BH.storage_requirement(BH.candidate_manifest(REPO),
+                                 BH.schedule(REPO), REPO)
+    assert f"{req['durable_backend']['gib']:.1f}" in why.replace(",", ""), why
 
 
 def test_the_destination_gate_refuses_an_unusable_store(tmp_path, repo):

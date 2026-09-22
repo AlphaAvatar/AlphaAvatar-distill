@@ -411,6 +411,30 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "key changed meaning and every existing caller reads the same "
             "flags it read before.",
      }),
+    ("dbf71be578fc221ce554b21efd16cc30d3fe2732",
+     "the storage derivation, after attempt5 ran out of disk",
+     {
+        "src/aadistill/runtime/cost.py":
+            "a generic storage model: `BYTES_PER_PARAM` covering both the "
+            "short and the TORCH dtype spellings real configs are written in, "
+            "`bytes_per_param` which RAISES on an unknown name rather than "
+            "defaulting, `CheckpointFootprint`, `training_working_set_bytes`, "
+            "`ResidencyUnit`, `peak_local_residency_bytes` and "
+            "`durable_backend_bytes`. THIS IS A DECLARED SEMANTIC CHANGE, and "
+            "it is additive: every existing caller of `checkpoint_bytes` is "
+            "untouched and its bf16 default still applies to whoever relied "
+            "on it. Every dtype is an ARGUMENT -- no parameter count, model "
+            "family or experiment name is encoded, and a test asserts that. "
+            "It exists because `behavioural.storage_requirement` charged a "
+            "trained probe at the size of the bf16 leaf it started from while "
+            "the recipe declares `dtype: float32`, so every retained probe "
+            "was charged at half its real size and attempt5's trainer hit "
+            "`No space left on device` writing probe 11 of 12. Separating "
+            "`peak_local_residency_bytes` from `durable_backend_bytes` is the "
+            "second half: container storage and durable capacity were one "
+            "quantity, so bytes that must merely survive teardown were "
+            "charged to the pod's own disk.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.

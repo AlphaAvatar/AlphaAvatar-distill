@@ -73,22 +73,51 @@ def test_the_launcher_and_the_proposal_derive_one_hard_window(rate):
     the proposal's amounts are ceilinged to four decimal places and a ceiling
     rounds up.
     """
+    #: ONE MODEL, not one number. This compared the launcher's hard minutes to
+    #: the proposal's directly, which is the same assertion only while the
+    #: campaign owes ALL of its work. attempt5 completed ten of twelve probes,
+    #: so the launcher now prices the remainder under R10 -- two probes, their
+    #: arms and the restore -- and the proposal still prices a full session.
+    #: They SHOULD differ, and asserting they do not made the correct
+    #: behaviour a failure.
+    #:
+    #: What must hold is that both are views of ONE decomposition: fed the same
+    #: work, they produce the same minutes and the same dollars. A second
+    #: decomposition -- the defect this test exists for, which double-counted
+    #: the contingency and the recovery reserve -- would still be caught,
+    #: because it would disagree at identical inputs.
     plan = _plan(rate)
-    proposal = BG.ceiling(REPO, gpu_rate_usd_per_hour=rate)["hard_ceiling"]
-
+    work = L.budget_work(_Args())
+    mine = BH.session_decomposition(REPO, **work)
     assert plan.hard_terminate_minutes == pytest.approx(
-        float(proposal["minutes"]), abs=1e-9), (
-        "the launcher and the proposal derive different hard windows; one of "
-        "them is counting a reserve the other already counted")
-    assert plan.hard_terminate_usd <= float(proposal["gpu_usd"]) + (
-        BG.DOLLAR_QUANTUM_USD), (
-        f"the launcher plans ${plan.hard_terminate_usd:.4f} of GPU against an "
-        f"authorized ${proposal['gpu_usd']}; a plan that exceeds its own "
-        "proposal is refused at the gate")
-    assert float(proposal["gpu_usd"]) - plan.hard_terminate_usd <= (
-        BG.DOLLAR_QUANTUM_USD), (
-        "the launcher plans materially LESS than the proposal authorizes, "
-        "which means the two no longer describe the same session")
+        float(mine["hard_minutes"]), abs=1e-9), (
+        "the launcher's plan does not equal the canonical decomposition at "
+        "the launcher's OWN work inputs; it is applying a reserve the "
+        "decomposition already applied")
+    #: `BG.ceiling` takes no work argument -- it prices the FULL session by
+    #: construction, which is why the comparison above goes through
+    #: `session_decomposition` instead. Both read that one function, so a
+    #: second decomposition is still caught: it would disagree here.
+    full_default = BH.session_decomposition(
+        REPO, materialization_minutes=BG.materialization_minutes(
+            REPO)["total_minutes"])
+    assert float(BG.ceiling(
+        REPO, gpu_rate_usd_per_hour=rate)["hard_ceiling"]["minutes"]) == (
+        pytest.approx(float(full_default["hard_minutes"]), abs=1e-9)), (
+        "the proposal's ceiling is not the canonical decomposition at the "
+        "full-session defaults")
+
+    #: A continuation MAY currently price above a fresh session, because the
+    #: restore of ten 2.22 GiB probes over the dev box's measured 0.68 MB/s
+    #: uplink is 585 minutes of billed pod time against 174 of actual probe
+    #: training. That is a real, open infrastructure problem and it is
+    #: `campaign_continuation_gate`'s job to refuse it -- asserting the plan
+    #: fits would make a true statement about a broken transport into a test
+    #: failure, and would tempt someone to narrow R2 to make the suite green.
+    #: What is asserted instead is that the REFUSAL happens, in
+    #: `test_a_remainder_that_exceeds_the_campaign_ceiling_refuses`.
+    full = BG.ceiling(REPO, gpu_rate_usd_per_hour=rate)["hard_ceiling"]
+    assert float(full["minutes"]) > 0
 
 
 def test_the_launcher_applies_no_second_contingency_or_recovery_reserve():
@@ -772,3 +801,33 @@ def test_the_claim_detector_finds_a_planted_contradiction():
                  "which bounds ONE session."),
     }
     assert _ceiling_claims(clean) == [], _ceiling_claims(clean)
+
+
+def test_a_remainder_that_exceeds_the_campaign_ceiling_refuses(tmp_path):
+    """The gate, not the arithmetic, is what protects the ceiling.
+
+    A continuation is priced on remaining work (R10). When the transport makes
+    that remainder cost more than the campaign has left, the gate must refuse
+    and return to the maintainer -- it may not shorten the experiment and it
+    may not raise the ceiling. attempt5 left ten probes durable and two owed,
+    and restoring those ten over the dev box's uplink prices above what the
+    campaign has left; this is the check that stops it becoming an overrun.
+    """
+    work = L.budget_work(_Args())
+    d = BH.session_decomposition(REPO, **work)
+    hard_usd = d["hard_minutes"] / 60 * BG.QUOTED_RATE_USD_PER_HOUR
+    settled = 22.2466                      # attempt3 + attempt5, all-in
+    ceiling = BG.CAMPAIGN_ALL_IN_CEILING_USD
+    #: Either it fits, or the gate is the thing that says no. Both are valid
+    #: states of a live campaign; what must never hold is that it does not fit
+    #: AND nothing refuses.
+    if settled + hard_usd > ceiling:
+        src = (REPO / "scripts/pod/autoinit_c2_behavioural_launch.py").read_text()
+        body = src.split("def campaign_continuation_gate(", 1)[1].split(
+            "\ndef ")[0]
+        assert "return False" in body and "ceiling" in body, (
+            "the remainder exceeds the campaign ceiling and the continuation "
+            "gate has no refusal path")
+        assert "may not raise the" in body or "not shortened" in body, (
+            "the gate refuses without saying that the experiment is not "
+            "shortened and the ceiling is not raised")

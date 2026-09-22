@@ -97,6 +97,7 @@ from experiments.phase_c2 import behavioural as BH  # noqa: E402
 from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
 from experiments.phase_c2 import behavioural_decision as BD  # noqa: E402
 from experiments.phase_c2 import behavioural_schedule as SCH  # noqa: E402
+from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
 from experiments.phase_c2 import scoring as C2S  # noqa: E402
 from experiments.source_sets import generation_source_digest  # noqa: E402
 
@@ -1051,6 +1052,129 @@ class C2BehaviouralDriver:
                 "verified arm and its evidence are preserved.")
         return str(final.checkpoint_path)
 
+    def probe_local_need_bytes(self) -> dict[str, Any]:
+        """Local bytes ONE probe needs: its transient set plus what it retains.
+
+        Derived from the recipe the trainer runs under, through the generic
+        footprint -- not a constant, and not this model's parameter count. A
+        different dtype, optimizer or `keep_last` moves it without an edit.
+        """
+        from aadistill.runtime import cost as COST
+
+        tr = BH.training_dtypes(REPO)
+        params = int(self.required_identity["num_parameters"]
+                     if getattr(self, "required_identity", None)
+                     else BH.candidate_manifest(REPO)[0]["num_parameters"])
+        ck = COST.CheckpointFootprint(
+            params, tr["save_dtype"],
+            extra_bytes=int(tr["checkpoint_extra_bytes"]))
+        transient = COST.training_working_set_bytes(
+            params, weight_dtype=tr["weight_dtype"],
+            grad_dtype=tr["grad_dtype"], moment_dtype=tr["moment_dtype"],
+            n_moments=tr["n_moments"])
+        retained = (1 + int(tr["keep_last"])) * ck.bytes
+        return {"transient_bytes": transient, "retained_bytes": retained,
+                "need_bytes": transient + retained,
+                "checkpoint": ck.as_dict(), "keep_last": tr["keep_last"]}
+
+    def require_probe_headroom(self, name: str) -> dict[str, Any]:
+        """Refuse BEFORE training if the disk cannot hold this probe.
+
+        The measurement the model is not. `storage_requirement` bounds the
+        PROVISION; this bounds the next unit of work against what the
+        filesystem actually reports, so a wrong derivation produces a refusal
+        with every completed probe durable rather than an ENOSPC halfway
+        through a checkpoint write.
+        """
+        from aadistill.runtime.leaf_durability import free_bytes_at
+
+        need = self.probe_local_need_bytes()
+        free = free_bytes_at(self.a.b_workdir)
+        rec = {"probe": name, "free_bytes": free,
+               "free_gib": round(free / 2**30, 3),
+               "need_gib": round(need["need_bytes"] / 2**30, 3), **need}
+        self.ev.setdefault("probe_headroom", []).append(rec)
+        if free < need["need_bytes"]:
+            raise C2DriverError(
+                f"{name}: {free / 2**30:.2f} GiB free where this probe needs "
+                f"{need['need_bytes'] / 2**30:.2f} GiB "
+                f"({need['transient_bytes'] / 2**30:.2f} transient + "
+                f"{need['retained_bytes'] / 2**30:.2f} retained). REFUSING "
+                "BEFORE training rather than discovering it in the middle of a "
+                "checkpoint write: every probe finished so far is durable and "
+                "this stop preserves them. attempt5 learned this the other way "
+                "and lost probe 11's compute and the campaign's verdict.")
+        say(f"  {name}: {free / 2**30:.1f} GiB free, needs "
+            f"{need['need_bytes'] / 2**30:.1f} GiB")
+        return rec
+
+    def release_acked_probe_workdirs(self) -> dict[str, Any]:
+        """Release the local workdir of every probe the launcher has ACKED.
+
+        THE ACKNOWLEDGEMENT BOUNDARY. `announce_durable` cannot authorize this:
+        it runs BEFORE the transfer, so at announcement time the pod's copy is
+        still the only one and deleting it would be a durability race. The
+        launcher writes an ack only after the bytes arrived off-pod and
+        re-identified there, which is exactly the condition R2 needs anyway.
+
+        The final `model/` directory is kept until its probe is acked, and the
+        intermediate checkpoint the recipe's `keep_last` retains goes with it:
+        both live under the probe's out_dir and neither is needed locally once
+        the bytes are durable elsewhere.
+
+        NEVER RAISES, and that is not tolerance: a cleanup error must not kill
+        a paid session mid-rung. The CALLER fails closed on a non-empty
+        `failed`, because the storage bound assumes the release happened.
+        """
+        import shutil
+
+        out = {"released": [], "failed": [], "freed_gib": 0.0, "kept": []}
+        ack_dir = REPO / BC.RELEASE_ACK_REL
+        try:
+            acked = {f.stem for f in ack_dir.glob("*.json")}
+        except OSError as exc:
+            out["failed"].append(f"cannot read {ack_dir}: {exc}")
+            self.ev.setdefault("probe_workdirs_released", []).append(out)
+            return out
+        freed = 0
+        for name, rec in sorted(self.training.items()):
+            d = rec.get("out_dir")
+            if not d:
+                continue
+            local = (REPO / d) if not str(d).startswith("/") else Path(d)
+            if not local.is_dir():
+                continue
+            if name not in acked:
+                #: Not an error. The launcher pulls asynchronously, so a probe
+                #: finished moments ago legitimately has no ack yet; it is
+                #: released before the NEXT probe instead.
+                out["kept"].append(name)
+                continue
+            try:
+                size = sum(f.stat().st_size for f in local.rglob("*")
+                           if f.is_file())
+                shutil.rmtree(local)
+                freed += size
+                out["released"].append(name)
+            except OSError as exc:                            # noqa: PERF203
+                out["failed"].append(f"{name}: {exc}")
+        out["freed_gib"] = round(freed / 2**30, 3)
+        self.ev.setdefault("probe_workdirs_released", []).append(out)
+        if out["released"] or out["failed"]:
+            say(f"  released {len(out['released'])} probe workdir(s), "
+                f"{out['freed_gib']:.2f} GiB"
+                + (f" (FAILED: {out['failed']})" if out["failed"] else "")
+                + (f"; {len(out['kept'])} not yet acked" if out["kept"] else ""))
+        if out["failed"]:
+            raise C2DriverError(
+                f"probe workdir release failed: {out['failed']}. The storage "
+                "bound this session runs under assumes each probe's local "
+                "workdir is freed once its bytes are durable off-pod, so that "
+                "assumption has now been falsified and NO FURTHER PROBE MAY "
+                "BE TRAINED under a bound that does not hold. Every durable "
+                "probe and its evidence are preserved.")
+        return out
+
     def release_intermediates(self, label: str, results, workdir: Path) -> dict:
         """Delete this arm's intermediate steps, keeping the final checkpoint.
 
@@ -1523,6 +1647,21 @@ class C2BehaviouralDriver:
                 self.assert_reuse_matches(probe)
                 _, attested = self.score_existing(probe, battery, attested)
                 continue
+            #: BEFORE committing another probe's worth of disk: release every
+            #: earlier probe whose bytes the launcher has confirmed durable.
+            #: attempt5 had no such point, so twelve probes' workdirs
+            #: accumulated and the trainer could not write probe 11 of 12.
+            #: Fails CLOSED, because the storage bound this session runs under
+            #: assumes the release happens.
+            self.release_acked_probe_workdirs()
+            #: AND MEASURE, rather than trust the model. Every storage bound in
+            #: this repository is a derivation, and attempt5 proved a derivation
+            #: can be wrong in the one direction that costs a session: its model
+            #: said the pod had room and the trainer hit `No space left on
+            #: device` writing probe 11 of 12, losing that probe's completed
+            #: compute and the campaign's verdict. A refusal here costs a clean
+            #: stop with every finished probe durable; an ENOSPC costs the run.
+            self.require_probe_headroom(name)
             #: State 3. Training this probe needs its arm's BYTES, so an arm
             #: the remaining-work budget did not fund is a refusal rather than
             #: a train from a path that was never built.

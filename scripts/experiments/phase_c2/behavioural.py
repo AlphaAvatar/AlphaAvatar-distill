@@ -28,6 +28,13 @@ import math
 from pathlib import Path
 from typing import Any
 
+from aadistill.runtime import cost as COST
+
+#: The config every probe's training config is derived from, by the driver's
+#: own `probe_config`. Named here so the storage model reads the SAME
+#: document the trainer runs under instead of restating its dtypes.
+FROZEN_RECIPE_REL = "configs/stage3/e1/e1_r0860k_sa_pca.json"
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 SCHEMA = "aadistill.autoinit.c2_behavioural_proposal/v1"
@@ -314,6 +321,68 @@ IMAGE_AND_ENV_GIB = 30.0
 B_MATERIALIZATION_TRANSIENT_GIB = 16.12
 
 
+#: Bytes of config/tokenizer/generation-config/evidence a probe's save writes
+#: beside the weights, measured from the ten real attempt5 probes (they agree
+#: to within a few KB). Small beside the weights and not zero.
+#: Owner: logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/closeout/.
+PROBE_CHECKPOINT_EXTRA_BYTES = 800_000
+
+
+def training_dtypes(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The dtypes a probe actually trains and SAVES in, from the frozen recipe.
+
+    READ, never assumed. `storage_requirement` used to charge a trained probe
+    at the bf16 size of the initialization leaf it started from, while the
+    recipe this driver derives every probe config from declares
+    `dtype: "float32"` -- so the model contradicted the config it was running
+    under, by a factor of exactly the two dtypes' ratio.
+
+    * the SAVE dtype is the model's parameter dtype: `save_pretrained` writes
+      the parameters as they are, and under autocast the master weights stay
+      in the declared dtype while only the compute is bf16;
+    * the moment count comes from the optimizer's own betas, so an optimizer
+      with one moment or none gives a different answer without an edit here.
+
+    Nothing about Phase C2, this model family or this parameter count appears
+    in the arithmetic -- that lives in `aadistill.runtime.cost`, which takes
+    every dtype as an argument.
+    """
+    from pathlib import Path as _P
+
+    recipe = json.loads((_P(repo_root) / FROZEN_RECIPE_REL).read_text())
+    declared = str(recipe.get("dtype") or "").lower()
+    if declared not in COST.BYTES_PER_PARAM:
+        raise BehaviouralProposalError(
+            f"{FROZEN_RECIPE_REL} declares dtype={recipe.get('dtype')!r}, "
+            f"which is not a per-parameter byte count this repository knows "
+            f"({sorted(COST.BYTES_PER_PARAM)}). A storage bound may not guess "
+            "it: the ratio between two dtypes is exactly the factor by which "
+            "the bound would be wrong.")
+    betas = recipe.get("optim", {}).get("betas")
+    if not isinstance(betas, list) or not betas:
+        raise BehaviouralProposalError(
+            f"{FROZEN_RECIPE_REL} states no optim.betas, so the optimizer's "
+            "moment count cannot be derived and the training working set "
+            "cannot be bounded")
+    return {
+        "keep_last": int(recipe.get("checkpoint", {}).get("keep_last", 0)),
+        "save_dtype": declared,
+        "weight_dtype": declared,
+        "grad_dtype": declared,
+        "moment_dtype": declared,
+        "n_moments": len(betas),
+        "autocast_bf16": bool(recipe.get("autocast_bf16")),
+        "checkpoint_extra_bytes": PROBE_CHECKPOINT_EXTRA_BYTES,
+        "_source": FROZEN_RECIPE_REL,
+        "_why_save_equals_weight": (
+            "autocast changes the COMPUTE dtype, not the parameters. The "
+            "master weights, their gradient and AdamW's moments are all the "
+            "declared dtype, and save_pretrained writes the parameters as "
+            "they are -- which is why a probe on disk measures 4.00 bytes per "
+            "parameter while the leaf it started from measures 2.00."),
+    }
+
+
 def storage_requirement(candidates: list[dict[str, Any]],
                         sched: dict[str, Any],
                         repo_root: str | Path = REPO_ROOT, *,
@@ -334,13 +403,29 @@ def storage_requirement(candidates: list[dict[str, Any]],
     leaf_gib = candidates[0]["bytes"] / 2**30
     n_screening_arms = int(sched["screening"]["arms"])
 
-    #: One probe at a time: weights, gradient and the two AdamW moments.
-    working_set = (params * _BF16 + params * _FP32 * 3) / 2**30
+    #: One probe at a time: weights, gradient and the optimizer's moments. Every
+    #: term comes from the recipe rather than from this module, because an
+    #: optimizer that keeps one moment or bf16 moments gives a different answer
+    #: and none of them is a property of Phase C2.
+    tr = training_dtypes(repo_root)
+    working_set = COST.training_working_set_bytes(
+        params, weight_dtype=tr["weight_dtype"], grad_dtype=tr["grad_dtype"],
+        moment_dtype=tr["moment_dtype"], n_moments=tr["n_moments"]) / 2**30
 
-    #: Every probe writes a trained checkpoint, and P18 requires the complete
-    #: raw generation for every evaluated sample. The generations are text and
-    #: small beside the weights, but they are not nothing.
-    trained = int(sched["total_probes"]) * leaf_gib
+    #: A TRAINED PROBE IS NOT THE SIZE OF THE LEAF IT STARTED FROM. This read
+    #: `total_probes * leaf_gib`, which assumes the training output is as large
+    #: as its input initialization. The frozen leaves are bf16 and the trainer
+    #: saves fp32, so every retained probe was charged at exactly half its real
+    #: size -- 1.110 GiB against a measured 2.220 -- and attempt5's pod ran out
+    #: of disk on probe 11 of 12 with a storage model that said it had room.
+    #:
+    #: Derived from the recipe's SAVE dtype through the generic footprint, so a
+    #: recipe that trains or saves in another precision moves this figure
+    #: without an edit here, and a model family with a different parameter
+    #: count does too.
+    probe_ckpt = COST.CheckpointFootprint(
+        params, tr["save_dtype"], extra_bytes=int(tr["checkpoint_extra_bytes"]))
+    trained = int(sched["total_probes"]) * probe_ckpt.gib
     generations = 2.0
 
     components = {
@@ -372,16 +457,59 @@ def storage_requirement(candidates: list[dict[str, Any]],
             "AdamW's two fp32 moments. Probes run sequentially, so exactly one "
             "of these is resident at a time"),
         "trained_probe_checkpoints": round(trained, 3),
-        "_trained_is": f"{sched['total_probes']} probes x {leaf_gib:.3f} GiB retained",
+        "_trained_is": (
+            f"{sched['total_probes']} probes x {probe_ckpt.gib:.3f} GiB, the "
+            f"SAVE footprint of {params:,} parameters in "
+            f"{tr['save_dtype']} plus {tr['checkpoint_extra_bytes']:,} bytes of "
+            "config/tokenizer/evidence. NOT the leaf size: the leaves are "
+            f"{leaf_gib:.3f} GiB in the initialization dtype and charging the "
+            "output at the input's size understated this by their dtype ratio"),
+        "_probe_checkpoint_footprint": probe_ckpt.as_dict(),
         "saved_generations": generations,
         "batteries_and_ladder": 1.0,
         "image_and_environment": IMAGE_AND_ENV_GIB,
     }
+    #: TWO RESOURCES, NOT ONE. `trained_probe_checkpoints` above is what must
+    #: SURVIVE teardown; charging it to container storage says every completed
+    #: probe stays on every future pod, which is both false after the release
+    #: repair and the arithmetic that overflowed attempt5's disk. The container
+    #: bound and the durable bound are now derived separately, each against the
+    #: resource that actually owns it.
+    #:
+    #: `released_on_completion` is a statement about the CODE: the driver's
+    #: `release_acked_probe_workdirs` frees a probe's workdir once the launcher
+    #: has confirmed its bytes durable off-pod, and fails closed if it cannot.
+    #: A bound derived with this True while nothing freed anything would
+    #: describe a program that does not exist -- which is what the previous
+    #: bound did.
+    n_probes = int(sched["total_probes"])
+    retained_per_probe = int((1 + int(tr["keep_last"])) * probe_ckpt.bytes)
+    units = [COST.ResidencyUnit(
+        label=f"probe_{i + 1}", durable_bytes=probe_ckpt.bytes,
+        retained_bytes=retained_per_probe,
+        transient_bytes=int(working_set * 2**30),
+        released_on_completion=True) for i in range(n_probes)]
+    fixed = int(sum(
+        components[k] for k in ("teacher", "staged_initializations",
+                                "saved_generations", "batteries_and_ladder",
+                                "image_and_environment")) * 2**30)
+    container = COST.peak_local_residency_bytes(units, fixed_bytes=fixed)
+    durable = COST.durable_backend_bytes(units)
+    container_gib = container["peak_gib"] + components[
+        "b_materialization_transient"]
+
     subtotal = sum(v for k, v in components.items() if not k.startswith("_"))
     #: A provision is an integer handed to the provider and it is billed whole,
     #: so it rounds UP, with a margin that is named rather than folded in.
     margin = 0.25
-    with_margin_gib = subtotal * (1 + margin)
+    #: DERIVED FROM CONTAINER RESIDENCY, because a provision provisions
+    #: CONTAINER storage. It was derived from `subtotal`, which adds the
+    #: durable requirement to the local one -- so correcting the probe
+    #: footprint made it ask for 140 GB when the pod's real peak is 72 GiB
+    #: inside a 120 GB disk with 40 GiB to spare. Charging one quantity to two
+    #: resources inflates the bill in one direction and, when the local term
+    #: was the understated one, hid an overflow in the other.
+    with_margin_gib = container_gib * (1 + margin)
 
     #: GiB -> GB, through the repository's OWN recorded conversion rather than a
     #: second local convention. The residency above is derived in GiB (2^30) and
@@ -396,7 +524,43 @@ def storage_requirement(candidates: list[dict[str, Any]],
     provision = int(math.ceil(with_margin_gb / 10.0) * 10)
     return {
         "components_gib": components,
+        "container_residency": {
+            "peak_gib": round(container_gib, 3),
+            "peak_at_unit": container["peak_at_unit"],
+            "retained_bytes_per_probe": retained_per_probe,
+            "_retained_is": (
+                f"(keep_last={tr['keep_last']} + 1) x {probe_ckpt.gib:.3f} GiB "
+                "-- the recipe's retained intermediate checkpoint plus the "
+                "final save, both under the probe's out_dir. Derived from the "
+                "recipe's own checkpoint policy, not measured and pinned"),
+            "released_on_completion": True,
+            "_release_is_enforced_by": (
+                "autoinit_c2_behavioural_driver.py :: "
+                "release_acked_probe_workdirs, which frees a probe's workdir "
+                "once the launcher has confirmed the bytes durable off-pod and "
+                "re-identified them there, and RAISES if a release fails so no "
+                "further probe is trained under a bound that no longer holds"),
+            "_what_this_bounds": (
+                "peak LOCAL bytes on the provider's container disk. It does "
+                "NOT include the durable requirement below: a completed "
+                "probe's bytes must survive teardown somewhere, which is no "
+                "reason for them to stay on every future machine"),
+        },
+        "durable_backend": {
+            "gib": round(durable["gib"], 3),
+            "n_units": durable["n_units"],
+            "_what_this_bounds": (
+                "the bytes that must outlive the provider resource, checked "
+                "against the DURABLE backend's free capacity. Charging these "
+                "to container storage is what overflowed attempt5's disk"),
+        },
         "subtotal_gib": round(subtotal, 3),
+        "_subtotal_is_the_legacy_sum": (
+            "every component added together, which double-charges the probe "
+            "checkpoints: they are counted once as container residency and "
+            "once as the durable requirement. Retained because the frozen "
+            "provision was derived from it; `container_residency` and "
+            "`durable_backend` above are the two quantities a gate should read"),
         "margin_fraction": margin,
         "with_margin_gib": round(with_margin_gib, 4),
         "gb_per_gib": gb_per_gib,

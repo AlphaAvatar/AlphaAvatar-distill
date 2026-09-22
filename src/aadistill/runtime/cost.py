@@ -121,6 +121,168 @@ def checkpoint_bytes(spec: ArchSpec, adapter: ArchitectureAdapter,
     return adapter.param_count(spec) * bytes_per_param
 
 
+#: Bytes per parameter, by the dtype a caller actually saves or trains in.
+#: Named rather than inlined because the SAVE dtype and the TRAIN dtype are
+#: different decisions and a storage model that conflates them is wrong by
+#: exactly their ratio -- which is how a 120 GB pod ran out of disk with six
+#: probes to go while its own model said it had room.
+#: Both the short forms and the TORCH spellings real configs are written in.
+#: `configs/stage3/e1/e1_r0860k_sa_pca.json` says `"dtype": "float32"`, and a
+#: table that knew only `fp32` refused a correct config -- a gate failing on
+#: valid input, which is worse than the gap it closes. Unknown names still
+#: raise: an alias table that falls back to a default would reintroduce the
+#: silent assumption this replaces.
+BYTES_PER_PARAM = {
+    "bf16": 2, "bfloat16": 2,
+    "fp16": 2, "float16": 2, "half": 2,
+    "fp32": 4, "float32": 4, "float": 4,
+    "fp64": 8, "float64": 8, "double": 8,
+    "fp8": 1, "float8": 1, "float8_e4m3fn": 1, "float8_e5m2": 1,
+    "int8": 1, "uint8": 1,
+    "int4": 0.5, "nf4": 0.5, "mxfp4": 0.5,
+}
+
+
+def bytes_per_param(dtype: str) -> float:
+    """Bytes one parameter occupies in `dtype`. Raises on an unknown name.
+
+    Fails rather than defaulting. A default here is a silent assumption about
+    someone else's checkpoint, and the caller always knows its own dtype.
+    """
+    try:
+        return BYTES_PER_PARAM[str(dtype).lower()]
+    except KeyError:
+        raise ValueError(
+            f"unknown dtype {dtype!r} for a per-parameter byte count; known: "
+            f"{sorted(BYTES_PER_PARAM)}. A storage bound may not guess this: "
+            "the ratio between two dtypes is exactly the factor by which the "
+            "bound would be wrong.") from None
+
+
+@dataclass(frozen=True)
+class CheckpointFootprint:
+    """What ONE saved checkpoint occupies, and in which dtype.
+
+    `extra_bytes` is everything beside the weights that the save writes --
+    tokenizer files, config, generation config, per-sample evidence. Small
+    beside the weights and not zero, and a caller that measures it should pass
+    it rather than letting a model pretend it is nothing.
+    """
+
+    num_parameters: int
+    save_dtype: str
+    extra_bytes: int = 0
+
+    @property
+    def bytes(self) -> int:
+        return int(self.num_parameters * bytes_per_param(self.save_dtype)
+                   + self.extra_bytes)
+
+    @property
+    def gib(self) -> float:
+        return self.bytes / 2**30
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"num_parameters": self.num_parameters,
+                "save_dtype": self.save_dtype,
+                "bytes_per_parameter": bytes_per_param(self.save_dtype),
+                "extra_bytes": self.extra_bytes,
+                "bytes": self.bytes, "gib": round(self.gib, 3)}
+
+
+def training_working_set_bytes(num_parameters: int, *, weight_dtype: str,
+                               grad_dtype: str, moment_dtype: str,
+                               n_moments: int) -> int:
+    """The TRANSIENT set resident while one unit trains.
+
+    Every term is the caller's: an optimizer with one moment, or a fused one
+    that keeps none, or bf16 moments, all give different answers and none of
+    them is a property of this function.
+    """
+    return int(num_parameters * (bytes_per_param(weight_dtype)
+                                 + bytes_per_param(grad_dtype)
+                                 + n_moments * bytes_per_param(moment_dtype)))
+
+
+@dataclass(frozen=True)
+class ResidencyUnit:
+    """One unit of work's contribution to PEAK LOCAL residency.
+
+    Three quantities, deliberately separate, because conflating them is the
+    defect this type exists to prevent:
+
+    * `durable_bytes` -- what must survive provider teardown. It leaves for a
+      durable backend and is bounded against THAT resource, not this one.
+    * `retained_bytes` -- what the unit's working directory still holds
+      locally after the unit completes, until something releases it. If
+      nothing releases it, this accumulates once per unit.
+    * `transient_bytes` -- resident only while the unit runs. One unit's
+      worth, if units run sequentially.
+
+    `released_on_completion` says whether `retained_bytes` is actually freed.
+    It is a statement about the CODE, not an intention: a bound derived with
+    it True while no call site frees anything describes a program that does
+    not exist.
+    """
+
+    label: str
+    durable_bytes: int
+    retained_bytes: int
+    transient_bytes: int
+    released_on_completion: bool
+
+
+def peak_local_residency_bytes(units: Sequence[ResidencyUnit], *,
+                               fixed_bytes: int) -> dict[str, Any]:
+    """Peak local bytes for a SEQUENTIAL program, unit by unit.
+
+    Charges, at the worst moment: the fixed floor, every retained contribution
+    that was NOT released before then, and ONE transient -- the largest, since
+    the units are sequential.
+
+    Returns the peak and the unit it occurs at, because "which unit overflows"
+    is the question a refusal has to answer.
+    """
+    accumulated = 0
+    peak, at, trace = fixed_bytes, None, []
+    for u in units:
+        here = fixed_bytes + accumulated + u.transient_bytes
+        trace.append({"label": u.label, "accumulated_before": accumulated,
+                      "transient": u.transient_bytes, "local_peak_here": here})
+        if here > peak:
+            peak, at = here, u.label
+        if not u.released_on_completion:
+            accumulated += u.retained_bytes
+    return {"peak_bytes": peak, "peak_gib": round(peak / 2**30, 3),
+            "peak_at_unit": at, "fixed_bytes": fixed_bytes,
+            "accumulated_retained_bytes": accumulated,
+            "n_units": len(units), "trace": trace,
+            "_what_this_is": (
+                "PEAK LOCAL residency for a sequential program: the fixed "
+                "floor, plus every retained contribution not released before "
+                "the worst moment, plus ONE transient. It is not the durable "
+                "requirement -- durable bytes are bounded against the backend "
+                "that holds them, which survives teardown and this does not.")}
+
+
+def durable_backend_bytes(units: Sequence[ResidencyUnit]) -> dict[str, Any]:
+    """What must survive teardown: every unit's durable contribution.
+
+    Separate from `peak_local_residency_bytes` on purpose. A completed unit's
+    bytes must remain durable SOMEWHERE; that is no reason for them to remain
+    on every future machine.
+    """
+    total = sum(u.durable_bytes for u in units)
+    return {"bytes": total, "gib": round(total / 2**30, 3),
+            "n_units": len(units),
+            "per_unit": [{"label": u.label, "bytes": u.durable_bytes}
+                         for u in units],
+            "_what_this_is": (
+                "the bytes that must outlive the provider resource. Bounded "
+                "against the durable backend's capacity, never against "
+                "container storage.")}
+
+
 def activation_stats_bytes(spec: ArchSpec) -> int:
     """float64 residual second moments dominate: (L+1) x d x d x 8 bytes.
 

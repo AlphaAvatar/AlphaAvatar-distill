@@ -202,8 +202,8 @@
   "search_total_hard_ceiling_usd": 34.8742,
   "selection_total_hard_ceiling_upper_bound_usd": 31.4017,
   "chain_total_hard_ceiling_usd": 66.2759,
-  "remaining_usd": 58.2532,
-  "remaining_after_the_chain_total_usd": -8.0227,
+  "remaining_usd": 38.5491,
+  "remaining_after_the_chain_total_usd": -27.7268,
   "scientific_alternatives_not_cost_options": [
    {
     "beam_width": 4,
@@ -248,25 +248,25 @@
   "estimated_expected_minutes": 626.85
  },
  "budget_position": {
-  "cumulative_spend_usd": 311.7468,
+  "cumulative_spend_usd": 331.4509,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 58.2532,
+  "remaining_usd": 38.5491,
   "_derived_by": "scripts/consolidate/derive_budget.py, which sums every recorded closeout cost across every experiment. Not restated from any document.",
   "remaining_is_not_permission": true
  },
  "funding": {
   "status": "INSUFFICIENT PROJECT HEADROOM FOR THE STANDING DESIGN",
   "standing_beam_width": 6,
-  "remaining_usd": 58.2532,
+  "remaining_usd": 38.5491,
   "complete_chain_expected_usd": 36.7924,
   "complete_chain_hard_usd": 66.2759,
   "_complete_chain_hard_is_the_TOTAL": "GPU runtime plus the container disk both sessions provision. The GPU-only figures are still in `combined` because they are what the cost model derives, but a funding decision rests on the total.",
   "complete_chain_gpu_only_hard_usd": 63.0617,
-  "headroom_after_the_chain_usd": -8.0227,
-  "shortfall_on_expected_usd": -21.4608,
-  "shortfall_on_hard_ceilings_usd": 8.0227,
+  "headroom_after_the_chain_usd": -27.7268,
+  "shortfall_on_expected_usd": -1.7567,
+  "shortfall_on_hard_ceilings_usd": 27.7268,
   "_a_negative_shortfall_is_headroom": "both figures are chain minus remaining, so a negative value means the chain fits with that much to spare. The status above is derived from the sign rather than written beside it.",
-  "minimum_cumulative_cap_usd": 378.0227,
+  "minimum_cumulative_cap_usd": 397.7268,
   "_minimum_cap_meaning": "the smallest cumulative project cap that CONTAINS both ceilings: cumulative spend plus the complete standing chain.",
   "fitting_is_not_permission": "the 2026-09-17 cap raise to $370.0000 is a project ACCOUNTING envelope. It is not a spend authorization and not permission to launch either session, and its headroom is not transferable to C3, C4 or any unrelated experiment. Each session still needs its own grant, launch-bound readiness record, one-use authorization and staged bundle, and the full joint search additionally needs the bounded real-GPU engineering validation that the CPU toy execution cannot substitute for.",
   "the_price_basis_is_planning_evidence_only": "the search ceiling above rests on a quoted $1.09/h L40S securePrice. It MUST be re-quoted live immediately before authorization and the ceiling re-derived if the rate has moved. An hour-old price is not a price.",
@@ -280,5 +280,5 @@
   }
  },
  "authorizes": "nothing",
- "pricing_sha256": "b781fbb82e16267664e504565a26dc0481a22ed7e81c77ca4e9446bbb4649049"
+ "pricing_sha256": "dccae6bee85813c3e67ac4ec69aea962a727f7480cdd8df2fdb92831f8f1df43"
 }

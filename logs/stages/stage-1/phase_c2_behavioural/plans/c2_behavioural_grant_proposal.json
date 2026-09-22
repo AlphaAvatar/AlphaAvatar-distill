@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-21T06:35:57.431794+00:00",
+ "proposed_utc": "2026-09-22T06:31:36.818478+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -290,20 +290,43 @@
    "b_materialization_transient": 16.12,
    "_b_materialization_transient_is": "ONE arm's construction intermediates, resident while that arm builds and released when it is verified. A four-step path holds its predecessors as it goes; this is the worst single path's intermediates as measured during the replay. Counted once, not six times, because the arms are built SEQUENTIALLY -- at the last build, five finished arms are resident plus this transient, which is what the sum below already charges",
    "_staged_initializations_is": "6 screening arms -- the five reconstructed candidates and the incumbent B -- resident before any probe runs. They are MATERIALIZED on the pod rather than shipped to it: each is a 1.19 GB checkpoint, the scp path allows one asset 600 s against a dev-box uplink needing ~1650, and the hub relay refuses 5.95 GB for private-storage quota. Residency is the same either way; only the transient above is added by building them here",
-   "one_probe_training_working_set": 7.772,
+   "one_probe_training_working_set": 8.882,
    "_working_set_is": "596,049,920 parameters as bf16 weights plus an fp32 gradient and AdamW's two fp32 moments. Probes run sequentially, so exactly one of these is resident at a time",
-   "trained_probe_checkpoints": 13.323,
-   "_trained_is": "12 probes x 1.110 GiB retained",
+   "trained_probe_checkpoints": 26.654,
+   "_trained_is": "12 probes x 2.221 GiB, the SAVE footprint of 596,049,920 parameters in float32 plus 800,000 bytes of config/tokenizer/evidence. NOT the leaf size: the leaves are 1.110 GiB in the initialization dtype and charging the output at the input's size understated this by their dtype ratio",
+   "_probe_checkpoint_footprint": {
+    "num_parameters": 596049920,
+    "save_dtype": "float32",
+    "bytes_per_parameter": 4,
+    "extra_bytes": 800000,
+    "bytes": 2384999680,
+    "gib": 2.221
+   },
    "saved_generations": 2.0,
    "batteries_and_ladder": 1.0,
    "image_and_environment": 30.0
   },
-  "subtotal_gib": 84.387,
+  "container_residency": {
+   "peak_gib": 72.174,
+   "peak_at_unit": "probe_1",
+   "retained_bytes_per_probe": 4769999360,
+   "_retained_is": "(keep_last=1 + 1) x 2.221 GiB -- the recipe's retained intermediate checkpoint plus the final save, both under the probe's out_dir. Derived from the recipe's own checkpoint policy, not measured and pinned",
+   "released_on_completion": true,
+   "_release_is_enforced_by": "autoinit_c2_behavioural_driver.py :: release_acked_probe_workdirs, which frees a probe's workdir once the launcher has confirmed the bytes durable off-pod and re-identified them there, and RAISES if a release fails so no further probe is trained under a bound that no longer holds",
+   "_what_this_bounds": "peak LOCAL bytes on the provider's container disk. It does NOT include the durable requirement below: a completed probe's bytes must survive teardown somewhere, which is no reason for them to stay on every future machine"
+  },
+  "durable_backend": {
+   "gib": 26.654,
+   "n_units": 12,
+   "_what_this_bounds": "the bytes that must outlive the provider resource, checked against the DURABLE backend's free capacity. Charging these to container storage is what overflowed attempt5's disk"
+  },
+  "subtotal_gib": 98.828,
+  "_subtotal_is_the_legacy_sum": "every component added together, which double-charges the probe checkpoints: they are counted once as container residency and once as the durable requirement. Retained because the frozen provision was derived from it; `container_residency` and `durable_backend` above are the two quantities a gate should read",
   "margin_fraction": 0.25,
-  "with_margin_gib": 105.4838,
+  "with_margin_gib": 90.2175,
   "gb_per_gib": 1.073741824,
-  "with_margin_gb": 113.2623,
-  "provision_gb": 120,
+  "with_margin_gb": 96.8703,
+  "provision_gb": 100,
   "_units": "the residency is derived in GiB and the provider's flag is GB. The conversion is the one recorded in configs/infrastructure/provider_storage_pricing.json, not a local convention: rounding a GiB subtotal straight into a GB flag under-provisions by 7%.",
   "_why_not_400": "the full search's 400 GB was derived for a beam that generates a whole level before pruning and holds sixty compressed states at the level boundary. This session holds one training working set at a time and retains twelve small checkpoints; carrying 400 GB here would bill for storage nothing uses.",
   "_why_it_rounds_up": "a volume that fills mid-probe loses the probe. The margin is 25% over a component sum that is itself derived from measured artifact sizes."
@@ -458,13 +481,13 @@
    "_why": "the C1 execution package funds C1 formal sessions and its own GPU engineering validation, at a per-session ceiling derived for that work. This is a different experiment with a ceiling derived from its own topology, so it needs its own authorization and must not be presented as fitting inside a remainder reserved for something else. Dividing the wrong balance by the wrong per-session ceiling is how this repository once came to state that three full-ceiling sessions were fundable when two were.",
    "_the_envelope_is_not_permission": "fitting the project envelope is an accounting fact. It is not launch permission and never has been."
   },
-  "cumulative_spend_usd": 311.7468,
+  "cumulative_spend_usd": 331.4509,
   "cumulative_cap_usd": 370.0,
   "authorized_cap_usd": 370.0,
-  "remaining_before_usd": 58.2532,
+  "remaining_before_usd": 38.5491,
   "this_ceiling_all_in_usd": 33.2099,
-  "cumulative_if_fully_spent_usd": 344.9567,
-  "headroom_after_usd": 25.0433,
+  "cumulative_if_fully_spent_usd": 364.6608,
+  "headroom_after_usd": 5.3392,
   "_no_cap_increase_requested": true,
   "_remaining_is_not_permission": true,
   "_not_permission": "remaining headroom is not authorization. A paid run needs a maintainer-written grant naming this session."
@@ -488,8 +511,8 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "bf09b89cc47dac509a027af99cd2c4d7f2db8afafed19933f832708aa71f8133",
-  "n_files": 134,
+  "digest": "0072e32fac5e30d55ea3d0573fa588c7109e7abb42beeca11639106b3f8ee520",
+  "n_files": 135,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
    "scripts/pod/autoinit_c2_behavioural_driver.py",
@@ -539,5 +562,5 @@
   "grant": "THIS PROPOSAL REQUESTS AND AUTHORIZES NOTHING. It is the document a maintainer decision is made against; it is not that decision, and it permits no grant, readiness record, authorization, bundle or provider resource. Whether a launch chain exists, and how far it has been built, is recorded per attempt under `runs/<attempt>/governance/` and is NOT restated here: this document's hash is what a grant binds, so a field that tracked the chain would move the identity the moment the chain advanced."
  },
  "_proposal_sha256_excludes": "proposal_sha256 covers this document EXCEPT ['proposal_sha256', 'proposed_utc']. proposed_utc is a wall clock and would make the identity change on every regeneration of an unchanged tree; the hash is a function of the proposal's content, so a grant can bind it and the issuer can re-derive it.",
- "proposal_sha256": "5d2508ce3104ee7c0a047efeb947243fc156451a7028a8092dedd2da867dc436"
+ "proposal_sha256": "4f58bc539f5cf7cb54e3194164681e225a9bf2feb9702e6c806038c873901880"
 }

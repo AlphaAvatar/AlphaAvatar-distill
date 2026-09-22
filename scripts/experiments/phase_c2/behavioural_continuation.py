@@ -71,6 +71,13 @@ RANKING_NAME = "c2_screening_ranking.json"
 #: a campaign will not fit a ceiling sized for one session and the gate will
 #: refuse it. A maintainer freeing Hugging Face private storage would move this
 #: transfer to the `$0` pre-pod relay and remove the minutes entirely; that is
+#: Where the launcher writes a probe's RELEASE acknowledgement and where the
+#: driver looks for it, repo-relative so the two processes cannot end up with
+#: two spellings of one path. The launcher writes it only after the probe's
+#: bytes arrived off-pod AND re-identified at the destination; until then the
+#: pod's copy is the only one and releasing it would be a durability race.
+RELEASE_ACK_REL = "artifacts/autoinit/c2_behavioural/release_acks"
+
 #: a maintainer decision, never an autonomous repair.
 RESTORE_MB_PER_SECOND = 0.23
 RESTORE_RATE_BASIS = (

@@ -140,10 +140,23 @@ def test_the_session_plan_carries_the_one_canonical_budget():
     spec = L.spec(args)
     plan = spec.budget.plan(price_per_hour=BG.QUOTED_RATE_USD_PER_HOUR,
                             authorized_usd=10_000.0)
-    prep = BG.materialization_minutes(REPO)
-    d = BH.session_decomposition(REPO,
-                                 materialization_minutes=prep["total_minutes"])
+    #: AT THE LAUNCHER'S OWN WORK INPUTS. This compared the spec's plan to the
+    #: decomposition at the FULL-session defaults, which is the same thing only
+    #: while the campaign owes all twelve probes. attempt5 completed ten, so
+    #: the launcher now prices the remainder under R10 and the two figures
+    #: legitimately differ -- and the assertion made that correct behaviour a
+    #: failure. One MODEL is what must hold: the spec a launch builds carries
+    #: the canonical decomposition, whatever work it is fed.
+    work = L.budget_work(args)
+    d = BH.session_decomposition(REPO, **work)
     assert plan.hard_terminate_minutes == d["hard_minutes"]
     assert plan.expected_minutes == d["expected_minutes"]
     assert plan.soft_stop_minutes == d["soft_stop_minutes"]
+    #: and at the full-session defaults it is still the proposal's ceiling
+    full = BH.session_decomposition(
+        REPO, materialization_minutes=BG.materialization_minutes(
+            REPO)["total_minutes"])
+    assert float(BG.ceiling(
+        REPO, gpu_rate_usd_per_hour=BG.QUOTED_RATE_USD_PER_HOUR
+    )["hard_ceiling"]["minutes"]) == full["hard_minutes"]
     assert spec.plan_hash == BG.plan_hash(REPO)
