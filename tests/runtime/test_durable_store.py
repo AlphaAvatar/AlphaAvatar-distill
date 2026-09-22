@@ -240,11 +240,39 @@ def test_a_missing_object_raises_rather_than_producing_an_empty_restore(
 
 # --- the store is not allowed to interpret a key ---------------------------
 
-@pytest.mark.parametrize("key", ["../escape", "a/../../escape", "/abs/escape"])
+@pytest.mark.parametrize("key", ["../escape", "a/../../escape", "/abs/escape",
+                                 "..", "../../etc/passwd"])
 def test_a_key_cannot_escape_the_store_root(tmp_path, key):
     store = LocalDirStore(tmp_path / "backend")
     with pytest.raises(ValueError, match="escapes the store root"):
         store._at(key)
+
+
+def test_a_sibling_whose_name_merely_starts_with_the_root_is_outside_it(
+        tmp_path):
+    """`str.startswith` is not a containment predicate, and this used it.
+
+    With a root of `<t>/backend`, the sibling `<t>/backend_evil/x` has the
+    root as a STRING prefix and passed. Containment compares path COMPONENTS.
+    """
+    (tmp_path / "backend_evil").mkdir(parents=True)
+    store = LocalDirStore(tmp_path / "backend")
+    with pytest.raises(ValueError, match="escapes the store root"):
+        store._at("../backend_evil/x")
+    #: and the string predicate it replaced WOULD have allowed it, which is
+    #: what makes this a regression rather than a restatement
+    escaped = (store.root / "../backend_evil/x").resolve()
+    assert str(escaped).startswith(str(store.root.resolve())), (
+        "the sibling no longer collides by string prefix, so this test no "
+        "longer exercises the defect it was written for")
+    assert not escaped.is_relative_to(store.root.resolve())
+
+
+def test_a_legitimate_nested_key_is_allowed(tmp_path):
+    """So the refusals above are known to be selective."""
+    store = LocalDirStore(tmp_path / "backend")
+    assert store._at("campaign/probe/one").is_relative_to(
+        store.root.resolve())
 
 
 def test_the_local_backend_reports_capacity_and_the_object_one_does_not():
@@ -261,3 +289,182 @@ def test_the_local_backend_reports_capacity_and_the_object_one_does_not():
     assert S3CompatibleStore(
         endpoint_url="https://x.example/", bucket="b",
         access_key_env="K", secret_key_env="S").free_bytes() is None
+
+
+# --- an upload is not durable until the STORED bytes say so ----------------
+
+class TestTheUploadAcknowledgement:
+    """`verified=True` is what a producer releases its only local copy on.
+
+    It used to mean "the source identity was computed and the PUT returned",
+    which proves nothing about the bytes in the backend.
+    """
+
+    def _setup(self, tmp_path, monkeypatch):
+        _Identity.install(monkeypatch)
+        src = _Probe.make(tmp_path / "src")
+        return src, LocalDirStore(tmp_path / "backend")
+
+    def test_it_is_established_by_reading_the_stored_bytes_back(
+            self, tmp_path, monkeypatch):
+        src, store = self._setup(tmp_path, monkeypatch)
+        up = DS.upload_checkpoint(store, src, "k", adapter=None,
+                                  arch_signature="sig", num_parameters=8,
+                                  scratch=tmp_path)
+        assert up.verified
+        assert up.as_dict()["verified_by"] == "readback of the stored bytes"
+        assert up.as_dict()["source_identity_matched"] is True
+
+    def test_corrupted_stored_bytes_fail_the_upload_not_only_the_restore(
+            self, tmp_path, monkeypatch):
+        """The whole point: the producer must not release on a bad store.
+
+        The transport is made to corrupt what it writes, so the PUT returns
+        success and the stored bytes are wrong -- which is precisely the case
+        a source-side identity cannot see.
+        """
+        src, store = self._setup(tmp_path, monkeypatch)
+        real_put = store.put_tree
+
+        def corrupting_put(local_dir, key):
+            out = real_put(local_dir, key)
+            f = store.root / key / "model.safetensors"
+            raw = bytearray(f.read_bytes())
+            raw[-1] ^= 0x01
+            f.write_bytes(bytes(raw))
+            return out
+
+        monkeypatch.setattr(store, "put_tree", corrupting_put)
+        with pytest.raises(DS.DurableStoreError, match="do not re-identify"):
+            DS.upload_checkpoint(store, src, "k", adapter=None,
+                                 arch_signature="sig", num_parameters=8,
+                                 scratch=tmp_path)
+        assert (store.root / "k").is_dir(), (
+            "the stored object was removed; it is evidence about the transport")
+
+    def test_verify_false_records_itself_and_is_not_an_acknowledgement(
+            self, tmp_path, monkeypatch):
+        src, store = self._setup(tmp_path, monkeypatch)
+        up = DS.upload_checkpoint(store, src, "k", adapter=None,
+                                  arch_signature="sig", num_parameters=8,
+                                  verify=False, scratch=tmp_path)
+        assert up.verified is False
+        assert up.as_dict()["verified_by"] is None
+        assert "must NOT be treated as a durable acknowledgement" in \
+            up.as_dict()["_not_verified"]
+
+    def test_the_scratch_readback_leaves_nothing_behind(
+            self, tmp_path, monkeypatch):
+        """It is transient, not a second durable copy -- including on failure."""
+        src, store = self._setup(tmp_path, monkeypatch)
+        scratch = tmp_path / "scratch"
+        scratch.mkdir()
+        DS.upload_checkpoint(store, src, "k", adapter=None,
+                             arch_signature="sig", num_parameters=8,
+                             scratch=scratch)
+        assert list(scratch.iterdir()) == []
+
+    def test_no_backend_metadata_is_trusted(self):
+        """Provider-neutral: only `get_tree` is used to verify.
+
+        An ETag is a digest of digests whose value depends on the client's
+        part size, so it is not a cryptographic identity of the content.
+        """
+        import ast
+
+        src = (REPO / "src/aadistill/runtime/durable_store.py").read_text()
+        #: CODE ONLY. The docstring explains WHY an ETag is not an identity,
+        #: so a substring search over the source flags the very sentence that
+        #: forbids it -- a test that cannot tell code from the prose
+        #: describing it fails on a correct implementation.
+        fn = next(n for n in ast.walk(ast.parse(src))
+                  if isinstance(n, ast.FunctionDef)
+                  and n.name == "_stored_identity_matches")
+        body = fn.body[1:] if (fn.body and isinstance(fn.body[0], ast.Expr)
+                               and isinstance(fn.body[0].value, ast.Constant)
+                               ) else fn.body
+        code = "\n".join(ast.unparse(s) for s in body)
+        for meta in ("etag", "ETag", "checksum", "ContentMD5", "md5"):
+            assert meta not in code, f"{meta} is trusted as an identity"
+        assert "store.get_tree(" in code, (
+            "the readback does not go through the store's own transport, so "
+            "it is not provider-neutral")
+
+
+# --- a scientific artifact's key is immutable -------------------------------
+
+class TestKeysAreImmutable:
+    def _setup(self, tmp_path, monkeypatch):
+        _Identity.install(monkeypatch)
+        return _Probe.make(tmp_path / "src"), LocalDirStore(tmp_path / "backend")
+
+    def test_re_uploading_the_same_artifact_is_idempotent(
+            self, tmp_path, monkeypatch):
+        src, store = self._setup(tmp_path, monkeypatch)
+        first = DS.upload_checkpoint(store, src, "k", adapter=None,
+                                     arch_signature="sig", num_parameters=8,
+                                     scratch=tmp_path)
+        again = DS.upload_checkpoint(store, src, "k", adapter=None,
+                                     arch_signature="sig", num_parameters=8,
+                                     scratch=tmp_path)
+        assert again.as_dict()["already_present"] is True and again.verified
+        assert again.identity["artifact_digest"] == \
+            first.identity["artifact_digest"]
+
+    def test_a_different_artifact_at_the_same_key_is_refused(
+            self, tmp_path, monkeypatch):
+        src, store = self._setup(tmp_path, monkeypatch)
+        DS.upload_checkpoint(store, src, "k", adapter=None,
+                             arch_signature="sig", num_parameters=8,
+                             scratch=tmp_path)
+        other = _Probe.make(tmp_path / "other", payload=b"different" * 1024)
+        with pytest.raises(DS.DurableStoreError, match="already occupied by a "
+                                                       "DIFFERENT artifact"):
+            DS.upload_checkpoint(store, other, "k", adapter=None,
+                                 arch_signature="sig", num_parameters=8,
+                                 scratch=tmp_path)
+
+    def test_an_occupied_key_with_verify_false_is_refused(
+            self, tmp_path, monkeypatch):
+        """Without a readback there is no way to know it is the same artifact."""
+        src, store = self._setup(tmp_path, monkeypatch)
+        DS.upload_checkpoint(store, src, "k", adapter=None,
+                             arch_signature="sig", num_parameters=8,
+                             scratch=tmp_path)
+        with pytest.raises(DS.DurableStoreError, match="verify=False"):
+            DS.upload_checkpoint(store, src, "k", adapter=None,
+                                 arch_signature="sig", num_parameters=8,
+                                 verify=False, scratch=tmp_path)
+
+    def test_the_backend_itself_refuses_rather_than_emptying(self, tmp_path):
+        """It called `rmtree` first -- destroying possibly the only copy of a
+        completed measurement to make room for unverified bytes."""
+        src = _Probe.make(tmp_path / "src")
+        store = LocalDirStore(tmp_path / "backend")
+        store.put_tree(src, "k")
+        with pytest.raises(FileExistsError, match="immutable"):
+            store.put_tree(src, "k")
+        assert (store.root / "k" / "model.safetensors").is_file()
+
+    def test_a_stale_file_cannot_survive_into_a_later_restore(
+            self, tmp_path, monkeypatch):
+        """The failure mode the immutability rule exists for.
+
+        An upload that merged would leave `stale.bin` under the prefix, and a
+        restore would reassemble a directory that was never any measurement.
+        """
+        src, store = self._setup(tmp_path, monkeypatch)
+        store.put_tree(src, "k")
+        (store.root / "k" / "stale.bin").write_bytes(b"left over")
+        smaller = _Probe.make(tmp_path / "smaller")
+        with pytest.raises((DS.DurableStoreError, FileExistsError)):
+            DS.upload_checkpoint(store, smaller, "k", adapter=None,
+                                 arch_signature="sig", num_parameters=8,
+                                 scratch=tmp_path)
+
+    def test_the_object_backend_refuses_a_populated_prefix_too(self):
+        """Object stores have no directory to replace, so it is explicit."""
+        body = (REPO / "scripts/experiments/durable_stores.py").read_text()
+        s3 = body.split("class S3CompatibleStore", 1)[1]
+        put = s3.split("def put_tree", 1)[1].split("\n    def ")[0]
+        assert "self.stat_tree(key)" in put and "FileExistsError" in put

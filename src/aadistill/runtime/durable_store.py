@@ -52,7 +52,17 @@ class DurableStore(Protocol):
     """
 
     def put_tree(self, local_dir: Path, key: str) -> dict[str, Any]:
-        """Upload a directory. Returns `{bytes, n_files, seconds, ...}`."""
+        """Upload a directory to an UNOCCUPIED key.
+
+        MUST refuse a key that already holds anything. A scientific artifact's
+        key is immutable: an upload that merges into a populated prefix leaves
+        whatever the previous upload wrote and the new source does not, and a
+        later restore then reassembles a directory that was never any one
+        measurement. Overwriting silently is worse -- it destroys the only
+        remaining copy of whatever was there.
+
+        Returns `{bytes, n_files, seconds, ...}`.
+        """
 
     def get_tree(self, key: str, local_dir: Path) -> dict[str, Any]:
         """Download into `local_dir`, which must not already exist."""
@@ -93,20 +103,74 @@ class TransferRecord:
 
 def upload_checkpoint(store: DurableStore, local_dir: str | Path, key: str, *,
                       adapter: Any, arch_signature: str,
-                      num_parameters: int) -> TransferRecord:
-    """Identify a checkpoint, then upload it UNCHANGED.
+                      num_parameters: int, verify: bool = True,
+                      scratch: str | Path | None = None) -> TransferRecord:
+    """Identify a checkpoint, upload it UNCHANGED, then verify what is STORED.
 
-    The identity is computed BEFORE the transfer and travels with the record,
-    because that is what the destination has to re-derive. Nothing here
-    re-saves, re-serialises or converts: a transport that rewrites the bytes it
-    carries is not transporting the same artifact, and the whole point is that
-    the object at the far end is the same scientific product.
+    Nothing here re-saves, re-serialises or converts: a transport that rewrites
+    the bytes it carries is not transporting the same artifact.
+
+    **A successful PUT is not durability.** `verified` used to mean "the source
+    identity was computed and the upload call returned", which proves nothing
+    about the bytes now in the backend. That distinction becomes load-bearing
+    at exactly the moment it matters: the producer releases its only local copy
+    on the strength of this record. So the identity is re-derived from what the
+    BACKEND holds, by reading it back through the store's own `get_tree` into a
+    scratch directory that is deleted afterwards.
+
+    The readback is a round trip through the real transport, which is the
+    property an acknowledgement should assert, and it reuses
+    `verify_transferred_leaf` rather than adding a second identity
+    construction. It is deliberately NOT an ETag comparison: a multipart
+    upload's ETag is a digest of digests whose value depends on the part size
+    the client chose, so it is not a cryptographic identity of the content and
+    two correct backends can disagree about it.
+
+    `verify=False` exists for a caller that will verify separately and wants
+    the upload timing alone; it is not the default and it records itself.
     """
+    import shutil
+    import tempfile
+
     from aadistill.runtime.leaf_durability import identify_for_transfer
 
     src = Path(local_dir)
     if not src.is_dir():
         raise DurableStoreError(f"{src} is not a directory to upload")
+
+    #: IMMUTABLE KEYS. An occupied key is refused rather than merged into or
+    #: overwritten, unless what is already there is byte-identical to what is
+    #: being uploaded -- which makes a re-upload idempotent instead of
+    #: destructive, and is established by reading the stored bytes rather than
+    #: by comparing sizes.
+    existing = store.stat_tree(key)
+    if existing:
+        if not verify:
+            raise DurableStoreError(
+                f"{key!r} is already occupied ({existing}) and verify=False, "
+                "so whether it already holds this exact artifact cannot be "
+                "established. A scientific artifact's key is immutable.")
+        same = _stored_identity_matches(
+            store, key, adapter=adapter, arch_signature=arch_signature,
+            num_parameters=num_parameters, source=src, scratch=scratch)
+        if same["matched"]:
+            return TransferRecord(
+                key=key, direction="upload", bytes=int(existing["bytes"]),
+                n_files=int(existing["n_files"]), seconds=0.0,
+                identity=same["identity"], verified=True,
+                store=type(store).__name__,
+                detail={"already_present": True,
+                        "verified_by": "readback of the stored bytes",
+                        "_idempotent": (
+                            "the key already held this exact artifact, "
+                            "established by re-deriving the identity from the "
+                            "backend's bytes. Nothing was uploaded and nothing "
+                            "was overwritten.")})
+        raise DurableStoreError(
+            f"{key!r} is already occupied by a DIFFERENT artifact "
+            f"({same.get('why')}). A scientific artifact's key is immutable: "
+            "merging would let a stale file survive into a later restore, and "
+            "overwriting would destroy whatever is there. Choose a fresh key.")
     ident = identify_for_transfer(
         src, adapter=adapter, arch_signature=arch_signature,
         num_parameters=num_parameters)
@@ -121,15 +185,94 @@ def upload_checkpoint(store: DurableStore, local_dir: str | Path, key: str, *,
                 "arch_signature": arch_signature,
                 "num_parameters": int(num_parameters)}
     out = store.put_tree(src, key)
+    if not verify:
+        return TransferRecord(
+            key=key, direction="upload", bytes=int(out["bytes"]),
+            n_files=int(out["n_files"]), seconds=float(out["seconds"]),
+            identity=identity, verified=False,
+            store=type(store).__name__,
+            detail={"verified_by": None,
+                    "_not_verified": (
+                        "verify=False: the upload call returned and nothing "
+                        "has read the stored bytes. This record must NOT be "
+                        "treated as a durable acknowledgement, and the "
+                        "producer's local copy must not be released on it.")})
+
+    check = _stored_identity_matches(
+        store, key, adapter=adapter, arch_signature=arch_signature,
+        num_parameters=num_parameters, source=src, scratch=scratch)
+    if not check["matched"]:
+        raise DurableStoreError(
+            f"{key!r} uploaded but the STORED bytes do not re-identify to what "
+            f"was announced: {check.get('why')}. The object is left in place as "
+            "evidence about the transport, and the producer's local copy must "
+            "NOT be released.")
     return TransferRecord(
         key=key, direction="upload", bytes=int(out["bytes"]),
         n_files=int(out["n_files"]), seconds=float(out["seconds"]),
-        identity=identity, verified=True,
+        identity=check["identity"], verified=True,
         store=type(store).__name__,
-        detail={"_verified_means": (
-            "the identity was computed from the SOURCE bytes and recorded "
-            "with the object. Whether the arrival matches is the download's "
-            "question, and it is asked there.")})
+        detail={"verified_by": "readback of the stored bytes",
+                "source_identity_matched": (
+                    check["identity"].get("artifact_digest")
+                    == identity.get("artifact_digest")),
+                "_verified_means": (
+                    "the identity was re-derived from the bytes the BACKEND "
+                    "holds, by reading them back through the store. A PUT that "
+                    "returned successfully proves nothing about what is stored, "
+                    "and this record is what a producer releases its only local "
+                    "copy on.")})
+
+
+def _stored_identity_matches(store: DurableStore, key: str, *, adapter: Any,
+                             arch_signature: str, num_parameters: int,
+                             source: Path | None,
+                             scratch: str | Path | None) -> dict[str, Any]:
+    """Re-derive a stored object's identity by reading it back.
+
+    Provider-neutral by construction: it uses only `get_tree`, so a backend
+    that can be read can be verified, and no backend-specific metadata --
+    an ETag, a checksum header, a vendor field -- is trusted or required.
+
+    The scratch copy is transient and is always removed, including on failure.
+    It is not a second durable copy; it exists for as long as it takes to hash.
+    """
+    import shutil
+    import tempfile
+
+    from aadistill.runtime.leaf_durability import (identify_for_transfer,
+                                                   verify_transferred_leaf)
+
+    base = Path(scratch) if scratch else Path(tempfile.gettempdir())
+    base.mkdir(parents=True, exist_ok=True)
+    tmp = Path(tempfile.mkdtemp(dir=base))
+    back = tmp / "readback"
+    try:
+        store.get_tree(key, back)
+        ident = identify_for_transfer(
+            back, adapter=adapter, arch_signature=arch_signature,
+            num_parameters=num_parameters)
+        identity = {**ident.as_dict(),
+                    "artifact_digest": ident.artifact_digest,
+                    "weights_digest": ident.weights_digest,
+                    "arch_signature": arch_signature,
+                    "num_parameters": int(num_parameters)}
+        if source is None:
+            return {"matched": True, "identity": identity}
+        v = verify_transferred_leaf(
+            back, {**identify_for_transfer(
+                source, adapter=adapter, arch_signature=arch_signature,
+                num_parameters=num_parameters).as_dict(),
+                "arch_signature": arch_signature,
+                "num_parameters": int(num_parameters)},
+            adapter=adapter)
+        return {"matched": bool(v.get("matched")), "identity": identity,
+                "why": v}
+    except Exception as exc:                                    # noqa: BLE001
+        return {"matched": False, "identity": {},
+                "why": f"{type(exc).__name__}: {exc}"}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def restore_checkpoint(store: DurableStore, key: str, local_dir: str | Path, *,

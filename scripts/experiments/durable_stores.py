@@ -40,15 +40,31 @@ class LocalDirStore:
         #: Keys are opaque and must not escape the root. A key containing `..`
         #: would write outside the store, which is the one interpretation of a
         #: key this class is allowed to make.
-        p = (self.root / key).resolve()
-        if not str(p).startswith(str(self.root.resolve())):
+        #:
+        #: `str.startswith` is NOT a containment predicate and this used it:
+        #: with a root of `/tmp/backend`, the sibling `/tmp/backend_evil/x`
+        #: has the root as a string prefix and passed. A resolved
+        #: `is_relative_to` compares path COMPONENTS, so a sibling whose name
+        #: merely begins with the root's is outside it.
+        root = self.root.resolve()
+        p = (root / key).resolve()
+        if p != root and not p.is_relative_to(root):
             raise ValueError(f"key {key!r} escapes the store root")
         return p
 
     def put_tree(self, local_dir: Path, key: str) -> dict[str, Any]:
         dest = self._at(key)
+        #: AN OCCUPIED KEY IS REFUSED, never emptied. This called
+        #: `shutil.rmtree(dest)` first, which destroys whatever is there --
+        #: possibly the only remaining copy of a completed measurement -- to
+        #: make room for bytes nobody has verified yet. A scientific
+        #: artifact's key is immutable; the generic layer decides whether an
+        #: existing object is the same artifact, and it does so by reading it.
         if dest.exists():
-            shutil.rmtree(dest)
+            raise FileExistsError(
+                f"{key!r} is already occupied at {dest}. A scientific "
+                "artifact's key is immutable: this store will not overwrite "
+                "or merge into it.")
         dest.parent.mkdir(parents=True, exist_ok=True)
         t0 = time.time()
         shutil.copytree(local_dir, dest)
@@ -134,6 +150,18 @@ class S3CompatibleStore:
 
     def put_tree(self, local_dir: Path, key: str) -> dict[str, Any]:
         c = self._client()
+        #: AN OCCUPIED PREFIX IS REFUSED. Writing each file under an existing
+        #: prefix is a directory SYNC, not an upload: anything the previous
+        #: upload wrote and this source does not still sits there, and a later
+        #: restore reassembles a directory that was never any one measurement.
+        #: Object stores have no directories to replace, so the refusal has to
+        #: be explicit here.
+        if self.stat_tree(key):
+            raise FileExistsError(
+                f"{key!r} is already occupied in {self.bucket}. A scientific "
+                "artifact's key is immutable: this store will not overwrite "
+                "or merge into it, because a stale object left under the "
+                "prefix would survive into a later restore.")
         files = sorted(f for f in Path(local_dir).rglob("*") if f.is_file())
         t0, total = time.time(), 0
         for f in files:
