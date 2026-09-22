@@ -435,6 +435,29 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "quantity, so bytes that must merely survive teardown were "
             "charged to the pod's own disk.",
      }),
+    ("b46d10fad973f969e936ba971fc2531e87283619",
+     "a durable object store with no vendor in it",
+     {
+        "src/aadistill/runtime/durable_store.py":
+            "NEW MODULE. A generic durable object-store interface -- the "
+            "`DurableStore` protocol of four methods, `TransferRecord`, and "
+            "`upload_checkpoint` / `restore_checkpoint` which compose a "
+            "transport with `identify_for_transfer` and "
+            "`verify_transferred_leaf`. THIS IS A DECLARED SEMANTIC ADDITION "
+            "to the shared runtime and it has no caller yet: wiring it into "
+            "the behavioural launcher needs a backend that does not exist. Its "
+            "purpose is that identity cannot be skipped -- upload records the "
+            "source identity with the object, restore re-identifies from the "
+            "ARRIVED bytes and refuses a mismatch, leaving the arrival in "
+            "place as evidence about the transport. It names no provider, "
+            "protocol, bucket, region, endpoint, experiment, model family or "
+            "parameter count, and tests assert each; backends live in the "
+            "application layer where a vendor and a credential belong. It "
+            "exists because the transport that pushes multi-GiB objects from a "
+            "dev box to an already-billing machine charges the slow leg at the "
+            "accelerator's rate, which priced one continuation above a fresh "
+            "session.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.

@@ -2052,6 +2052,55 @@
    "previous_entry_sha256": "456367bbf50310606ea5386f7cf0cfcade8562cbdb76a2cff4acd0e624748438",
    "also_affected_hash_bound_sets": [],
    "entry_sha256": "23ced0a0433066a217d2bb31fa75878fe97fdaa6f102fa2180a9878771f96a02"
+  },
+  {
+   "amendment_id": "PHB-HA-024",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-22T10:06:53+00:00",
+   "reviewed_base_commit": "beb8ef30",
+   "source_repair_commit": "f90ea5fc0277d5ac7b1b54143b8538be02cbc966",
+   "source_repair_parent": "b46d10fad973f969e936ba971fc2531e87283619",
+   "previous_live_digest": "b202d13273c80418416ac9687a82f75ab13b0cc29d41590579a1de9811f08862",
+   "new_live_digest": "ee10065f8e6fdccdb7e94cf5a4ba2c92433895528e6bfc5255878019db91064c",
+   "changed_files": [
+    "src/aadistill/runtime/cost.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/runtime/cost.py": "e4ff7ebb50247cd8f55bf0071064d8eb6b2ca4fbb912ab410534de7747d3b342"
+   },
+   "file_sha256_after": {
+    "src/aadistill/runtime/cost.py": "88313e5e3c4ef4bde22e573ce93ef61bcf865d8706d76309254e92717faf8702"
+   },
+   "patch_sha256": "5bdbd6f8e735b6603679e68b36b5feccba9d8be9cbe4d75190238d8ea797823e",
+   "numstat": {
+    "src/aadistill/runtime/cost.py": [
+     4,
+     3
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 3,
+   "_additive_only_is_derived": "from `numstat` above, the measured `git diff --numstat` of this repair. An additive entry here is still HISTORICAL accounting and still confers nothing -- `launch_compatible_with_frozen_preregistration` is False either way. The legacy additive note is sealed by hash and cannot take a new entry, so a purely additive post-freeze change to the shared runtime has no other recorder.",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "src/aadistill/runtime/durable_store.py added: a generic durable object-store interface (DurableStore protocol, TransferRecord, upload_checkpoint, restore_checkpoint) that composes a transport with identify_for_transfer and verify_transferred_leaf so no caller can transfer a checkpoint without re-identifying the bytes that arrived. One comment in cost.py that named an experiment's config path was rewritten. New file plus a prose edit; no existing symbol changed meaning.",
+   "why_the_owner_is_shared_session_runner": "durable transport of a completed unit of work is a shared-runtime concern: every stage that produces a checkpoint a later resource must consume needs it, and the identity rules it enforces already live in the shared runtime as leaf_durability. Putting it in an experiment layer would make the next stage reimplement the part that must not vary -- that the ARRIVED bytes are re-identified. It names no provider, so backends stay in the application layer.",
+   "why_a_c1_only_override_was_rejected": "a new module with no C1 caller, plus a comment change. Nothing C1 executed is affected, no existing symbol changed meaning, and no paid gate reads this ledger.",
+   "maintainer_authorization": "maintainer, transport-backend engineering/design round of 2026-09-22",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "23ced0a0433066a217d2bb31fa75878fe97fdaa6f102fa2180a9878771f96a02",
+   "also_affected_hash_bound_sets": [],
+   "entry_sha256": "508c5cf67ed08637e39e6c7a61c924f25ab03e5d9442a18e209a1ce06ca0d428"
   }
  ]
 }
