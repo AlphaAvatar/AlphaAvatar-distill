@@ -109,9 +109,20 @@ def test_the_ledger_declares_itself_unusable_as_permission():
         assert e["launch_compatible_with_frozen_preregistration"] is False
         assert e["phase_b_science_changed"] is False
         assert e["phase_b_results_changed"] is False
-        assert e["additive_only"] is False
-        assert e["lines_removed"] > 0, (
-            "an amendment that removes nothing belongs in the additive note")
+        #: SELF-CONSISTENT, not non-additive. This demanded
+        #: `additive_only is False` and `lines_removed > 0` on the reasoning
+        #: that "an amendment that removes nothing belongs in the additive
+        #: note" -- but that note is LEGACY, sealed by hash, and cannot take a
+        #: new entry, so a purely additive post-freeze change to the shared
+        #: runtime had no recorder at all. The writer already computes both
+        #: fields from git; what must hold is that they agree, so a removal
+        #: cannot be declared additive.
+        assert e["additive_only"] is (e["lines_removed"] == 0), (
+            f"{e.get('amendment_id')}: additive_only="
+            f"{e['additive_only']} with lines_removed={e['lines_removed']}; a "
+            "removal declared additive is the misreport this ledger exists "
+            "to prevent")
+        assert e["lines_removed"] >= 0
         assert e["maintainer_authorization"].strip()
         assert e["entry_sha256"] == entry_self_hash(e)
 

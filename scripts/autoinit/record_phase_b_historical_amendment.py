@@ -166,8 +166,24 @@ def main() -> int:
         "patch_sha256": hashlib.sha256(patch.encode()).hexdigest(),
         "numstat": numstat,
         "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
-        "additive_only": False,
+        #: DERIVED from this entry's own numstat, not asserted. It was
+        #: hardcoded `False`, which is a claim about which LEDGER this is
+        #: rather than about the change -- and the first purely additive
+        #: shared-runtime repair produced an entry declaring itself
+        #: non-additive while measuring zero removals, a record that
+        #: contradicts itself. `additive_only` being False is what makes the
+        #: ledger the right home for a change that REMOVES something; it must
+        #: not be stamped on one that does not.
+        "additive_only": sum(v[1] for v in numstat.values()) == 0,
         "lines_removed": sum(v[1] for v in numstat.values()),
+        "_additive_only_is_derived": (
+            "from `numstat` above, the measured `git diff --numstat` of this "
+            "repair. An additive entry here is still HISTORICAL accounting "
+            "and still confers nothing -- "
+            "`launch_compatible_with_frozen_preregistration` is False either "
+            "way. The legacy additive note is sealed by hash and cannot take "
+            "a new entry, so a purely additive post-freeze change to the "
+            "shared runtime has no other recorder."),
         "historical_only": True,
         "launch_compatible_with_frozen_preregistration": False,
         "phase_b_science_changed": False,

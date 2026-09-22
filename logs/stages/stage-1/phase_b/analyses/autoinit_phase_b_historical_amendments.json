@@ -1905,6 +1905,55 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "064029456615a4d410b2f72298534ae5f590a0864fd03c2c0f3e08510a9ed7fa"
+  },
+  {
+   "amendment_id": "PHB-HA-021",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-22T07:24:21+00:00",
+   "reviewed_base_commit": "dbf71be578fc221ce554b21efd16cc30d3fe2732",
+   "source_repair_commit": "c0a327bf5c4b284d154ae14f76c554b226d33fb9",
+   "source_repair_parent": "dbf71be578fc221ce554b21efd16cc30d3fe2732",
+   "previous_live_digest": "52d4a88abb0b0ac1c794d9adf0fd0dd0d6c0cca3a7981a97eac24a23cdb425c7",
+   "new_live_digest": "68f012a7b4964840667319f937863789d9a34dfbee9067c2abac1a791a64ea42",
+   "changed_files": [
+    "src/aadistill/runtime/cost.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/runtime/cost.py": "e87956c507ab84602914a3121b474f809a33a70aec477721956e514ff9a5591e"
+   },
+   "file_sha256_after": {
+    "src/aadistill/runtime/cost.py": "b985734f48cf47d5c47c32f87991d7efef3d6fc35291c3ef82e89bee84f45683"
+   },
+   "patch_sha256": "41d6585516a870ace187e5359dfe52130b6620dc421702c0b23e2bd49a58f92a",
+   "numstat": {
+    "src/aadistill/runtime/cost.py": [
+     162,
+     0
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": true,
+   "lines_removed": 0,
+   "_additive_only_is_derived": "from `numstat` above, the measured `git diff --numstat` of this repair. An additive entry here is still HISTORICAL accounting and still confers nothing -- `launch_compatible_with_frozen_preregistration` is False either way. The legacy additive note is sealed by hash and cannot take a new entry, so a purely additive post-freeze change to the shared runtime has no other recorder.",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "src/aadistill/runtime/cost.py gained a generic storage model: BYTES_PER_PARAM over both the short and the torch dtype spellings, bytes_per_param which raises on an unknown name rather than defaulting, CheckpointFootprint, training_working_set_bytes, ResidencyUnit, peak_local_residency_bytes and durable_backend_bytes. PURELY ADDITIVE -- 162 insertions, 0 removals: every existing caller of checkpoint_bytes is untouched and its bf16 default still applies.",
+   "why_the_owner_is_shared_session_runner": "cost.py is the shared runtime's byte model, used wherever a checkpoint or a training working set has to be sized. The defect it repairs surfaced in a Phase-C2 consumer -- behavioural.storage_requirement charged a trained probe at the size of the bf16 leaf it started from while the recipe declares float32, and attempt5's pod ran out of disk on probe 11 of 12 -- but the correct arithmetic is generic: parameters times bytes-per-dtype, with every dtype an argument. A float32 constant in the C2 layer would have left the next experiment to rediscover the same 2x error.",
+   "why_a_c1_only_override_was_rejected": "C1 is closed and its execution preregistration is frozen to attempt 18's binding. Nothing here alters what C1 executed: the change is additive, no existing symbol changed meaning, and no C1 caller reads the new functions. Historical accounting of a shared-runtime edit, not a C1 amendment, and the Phase-B launch gate never reads this ledger.",
+   "maintainer_authorization": "maintainer, Option-2 transport and lifecycle engineering GO of 2026-09-22",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "064029456615a4d410b2f72298534ae5f590a0864fd03c2c0f3e08510a9ed7fa",
+   "also_affected_hash_bound_sets": [],
+   "entry_sha256": "30b65d5856b9fc5dd832c1365bc1e8135510706a50f5f6474cd4550f89c5b57e"
   }
  ]
 }
