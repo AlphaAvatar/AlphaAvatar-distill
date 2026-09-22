@@ -178,6 +178,10 @@
   "tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk": {
    "class": "devbox_only_artifact",
    "why": "the premise is a real trained probe under /home/ecs-user/aad-artifacts, a gitignored artifact of attempt5 that no SetupManifest stages. On the dev box it checks the derived checkpoint footprint against bytes that actually exist, which is the whole point of the test; on a pod there is no probe and it skips by design. The derivation itself is checked unconditionally by the other tests in that file."
+  },
+  "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so": {
+   "class": "machine_capability",
+   "why": "the premise is whether an S3-API client library is importable on this machine. It is not installed anywhere today -- the object storage backend is a lazy import precisely so a backend nobody has configured adds no dependency to every pod -- so the test exercises the missing-library refusal here and skips wherever one IS present. Either decision is correct and neither depends on the staged view: it is a property of the interpreter, like a GPU's presence."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",

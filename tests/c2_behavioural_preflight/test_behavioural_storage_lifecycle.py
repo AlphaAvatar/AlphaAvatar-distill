@@ -45,13 +45,66 @@ import autoinit_c2_behavioural_driver as D  # noqa: E402
 class TestTheGenericByteModel:
     """It lives in `aadistill.runtime.cost` and knows nothing about C2."""
 
+    #: The maintainer's hard rule, as a pattern table rather than a word list:
+    #: generic core carries no experiment-instance or model-instance fact. A
+    #: current experiment may PASS all of these in from its config, protocol
+    #: or application layer; none of them may be written down here.
+    INSTANCE_FACTS = {
+        "experiment names": r"\b(phase_c[0-9]|c2_behavioural|attempt[0-9]|behavioural)\b",
+        "model family": r"\b([Qq]wen|llama|mistral)\b",
+        "a parameter count": r"\b\d{3}[,_]\d{3}[,_]\d{3}\b",
+        "config or recipe paths": r"configs/[a-z0-9_/]+\.json",
+        "candidate ids": r"\b[0-9a-f]{32}\b",
+        "seeds or batteries": r"\b(616738081|1936324010|1916380711|1523147638"
+                              r"|834816710|screening_v1|confirmation_v1)\b",
+        "budgets": r"\$\d+\.\d{2}",
+        "provider paths": r"(/workspace|runpod|aad-artifacts)",
+        "CUDA ordinals": r"cuda:\d",
+        "compression ratios": r"\b0\.86M\b",
+    }
+
     def test_no_experiment_or_model_facts_are_encoded(self):
+        """Including in COMMENTS. Provenance belongs to the experiment's logs.
+
+        A comment naming the run that motivated a line is tempting and is
+        still an instance fact in generic code -- it dates the module to one
+        experiment and invites the next one to add its own.
+        """
+        import re
+
         src = (REPO / "src/aadistill/runtime/cost.py").read_text()
-        for leak in ("596049920", "596,049,920", "phase_c2", "c2_behavioural",
-                     "qwen", "Qwen", "0.86M", "5.6 GiB", "attempt5"):
-            assert leak not in src, (
-                f"{leak!r} appears in generic runtime code; a model-instance or "
-                "experiment-instance fact there is a design smell")
+        found = {label: sorted({m.group(0) for m in re.finditer(pat, src)})
+                 for label, pat in self.INSTANCE_FACTS.items()}
+        found = {k: v for k, v in found.items() if v}
+        assert not found, (
+            f"generic runtime code encodes instance facts: {found}. A current "
+            "experiment may pass these in from its config, protocol or "
+            "application layer; it may not write them down here.")
+
+    def test_every_new_symbol_takes_its_facts_as_arguments(self):
+        """Generic means parameterized, not merely free of names.
+
+        Each of the seven added symbols must accept the model's size, its
+        dtypes and its policies rather than reading them from anywhere.
+        """
+        import inspect
+
+        for name in ("bytes_per_param", "training_working_set_bytes",
+                     "peak_local_residency_bytes", "durable_backend_bytes"):
+            fn = getattr(COST, name)
+            assert inspect.signature(fn).parameters, name
+        for cls, fields in (
+                (COST.CheckpointFootprint,
+                 {"num_parameters", "save_dtype", "extra_bytes"}),
+                (COST.TrainerCheckpointFootprint,
+                 {"num_parameters", "trainable_parameters", "save_dtype",
+                  "moment_dtype", "n_moments", "extra_bytes"}),
+                (COST.ResidencyUnit,
+                 {"label", "durable_bytes", "retained_bytes",
+                  "transient_bytes", "released_on_completion",
+                  "materializing_bytes"})):
+            have = set(inspect.signature(cls).parameters)
+            assert fields <= have, (cls.__name__, sorted(fields - have))
 
     @pytest.mark.parametrize("dtype,per_param", [
         ("bf16", 2), ("bfloat16", 2), ("fp32", 4), ("float32", 4),

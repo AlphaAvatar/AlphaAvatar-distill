@@ -1,0 +1,57 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_continuation_price/v1",
+ "authorizes": "nothing",
+ "_derived_by": "scripts/autoinit/price_c2_behavioural_continuation.py -- every figure from the production functions the launcher calls, never restated beside them",
+ "transport": {
+  "restore_mb_per_second": 0.68,
+  "restore_bytes": 23850825745,
+  "restore_gib": 22.213,
+  "restore_minutes": 584.58,
+  "durable_backend_usd": 0.0
+ },
+ "work_owed": {
+  "n_probes_remaining": 2,
+  "n_train_and_score": 2,
+  "n_score_only": 0,
+  "arms_needed": [
+   "1a2b5b030e7e4e202fda3a810ed53c5f",
+   "B"
+  ],
+  "materialization_minutes": 60.3
+ },
+ "window": {
+  "expected_minutes": 913.89,
+  "hard_minutes": 1031.09
+ },
+ "money": {
+  "rate_usd_per_hour": 1.09,
+  "disk_usd_per_minute": 0.00027781,
+  "expected_gpu_usd": 16.6023,
+  "expected_disk_usd": 0.2539,
+  "expected_all_in_usd": 16.8562,
+  "hard_gpu_usd": 18.7315,
+  "hard_disk_usd": 0.2864,
+  "hard_all_in_usd": 19.0179,
+  "_all_in_includes": "GPU at the live rate PLUS the separately billed container disk, derived by autoinit_c2_behavioural_launch :: continuation_all_in_usd. A GPU-only figure is not an all-in figure and must not be labelled as one."
+ },
+ "campaign": {
+  "settled_all_in_usd": 22.2466,
+  "settled_per_attempt": {
+   "attempt1": 0.0,
+   "attempt2": 0.0,
+   "attempt3": 2.5425,
+   "attempt4": 0.0,
+   "attempt5": 19.7041
+  },
+  "ceiling_all_in_usd": 35.76,
+  "settled_plus_hard_plus_backend_usd": 41.2645,
+  "fits": false,
+  "headroom_usd": -5.5045
+ },
+ "project": {
+  "cumulative_usd": 331.4509,
+  "cap_usd": 370.0,
+  "worst_case_usd": 350.4688,
+  "fits": true
+ }
+}

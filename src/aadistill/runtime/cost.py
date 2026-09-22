@@ -127,9 +127,10 @@ def checkpoint_bytes(spec: ArchSpec, adapter: ArchitectureAdapter,
 #: exactly their ratio -- which is how a provisioned disk can run out while
 #: the model that sized it reports room to spare.
 #: Both the short forms and the TORCH spellings real configs are written in.
-#: `configs/stage3/e1/e1_r0860k_sa_pca.json` says `"dtype": "float32"`, and a
-#: table that knew only `fp32` refused a correct config -- a gate failing on
-#: valid input, which is worse than the gap it closes. Unknown names still
+#: A training config that declares `"dtype": "float32"` is refused by a table
+#: knowing only `fp32` -- a gate failing on valid input, which is worse than
+#: the gap it closes. (Which config, and which experiment met it, belong to
+#: that experiment's own records, not here.) Unknown names still
 #: raise: an alias table that falls back to a default would reintroduce the
 #: silent assumption this replaces.
 BYTES_PER_PARAM = {

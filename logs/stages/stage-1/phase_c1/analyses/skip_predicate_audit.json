@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 221,
+ "modules_scanned": 222,
  "test_ignores": [],
- "n_predicates": 117,
+ "n_predicates": 118,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
@@ -13,12 +13,12 @@
   "optional_dependency": 9,
   "repository_content": 4,
   "staged_artifact": 3,
-  "unrecognised": 28,
+  "unrecognised": 29,
   "unstaged_artifact": 12
  },
  "n_differs_on_pod": 29,
- "n_unrecognised": 34,
- "n_registered": 43,
+ "n_unrecognised": 35,
+ "n_registered": 44,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
@@ -53,7 +53,8 @@
    "tests/training/test_train.py::teacher_tokenizer"
   ],
   "machine_capability": [
-   "tests/pod/test_setup_end_to_end.py::sandbox"
+   "tests/pod/test_setup_end_to_end.py::sandbox",
+   "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so"
   ],
   "manifest_derived": [
    "tests/pod/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers",
@@ -107,7 +108,7 @@
  "parity_by_resolution": {
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
-  "normalized_by_contract": 37,
+  "normalized_by_contract": 38,
   "same_on_pod": 61
  },
  "parity_unresolved": [],
@@ -175,6 +176,7 @@
   "tests/pod/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
   "tests/pod/test_session_architecture.py::test_every_declared_asset_is_a_directory_the_launcher_can_actually_send",
   "tests/pod/test_setup_end_to_end.py::sandbox",
+  "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so",
   "tests/training/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init",
   "tests/training/test_train.py::teacher_tokenizer"
  ],
@@ -869,7 +871,7 @@
   },
   {
    "file": "tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py",
-   "line": 79,
+   "line": 132,
    "kind": "pytest.skip",
    "function": "test_the_footprint_reproduces_a_real_probe_on_disk",
    "condition": "not probes",
@@ -1892,6 +1894,22 @@
    "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
+   "file": "tests/runtime/test_durable_store.py",
+   "line": 109,
+   "kind": "pytest.skip",
+   "function": "test_a_configured_backend_with_no_client_library_says_so",
+   "condition": "pytest.skip(\"a client library is installed on this host\")",
+   "expanded": "pytest.skip(\"a client library is installed on this host\") | s=S3CompatibleStore(endpoint_url=\"https://x.example/\", bucket=\"b\",\n                          access_key_env=\"SOME_KEY\",\n                          secret_key_env=\"SOME_SECRET\")",
+   "signal": "unrecognised",
+   "verdict": "unknown",
+   "why": "no known signal matched; a human must say whether a pod sees the same premise",
+   "nodeid": "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so",
+   "readiness_group": null,
+   "registered_as": "machine_capability",
+   "parity": "normalized_by_contract",
+   "parity_why": "`_skip_reason()` needs bubblewrap, `.venv/bin/python`, the canonical `model.safetensors` and a 196-wheel wheelhouse at `expanduser(\"~/aad-artifacts/...\")`. Under the contract's fresh HOME the wheelhouse is empty and the checkpoint is hidden/unstaged, so the dev box skips for the same reason the pod does. (bwrap is present here and likely absent on the pod, but the decision is already SKIP on both before that matters.)"
+  },
+  {
    "file": "tests/training/test_e4_configs.py",
    "line": 115,
    "kind": "skipif",
@@ -2103,5 +2121,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "565aead065f79a94a18b9c0d23c29ec196bc359a0505308499156bf5b0e32cc1"
+ "digest": "00656f65991f336a1d378d18d3a01a2682662ac2f3d04560af82a3a0074d962a"
 }
