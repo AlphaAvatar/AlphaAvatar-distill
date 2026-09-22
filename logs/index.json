@@ -282,7 +282,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 35,
+  "runs_current": 36,
   "runs_unrecorded": 8,
   "legacy_components": 77,
   "by_experiment": {
@@ -342,9 +342,9 @@
     "total": 4
    },
    "phase_c2_behavioural": {
-    "recorded": 2,
+    "recorded": 3,
     "unrecorded": 2,
-    "total": 4
+    "total": 5
    },
    "phase_c2_full_search": {
     "recorded": 3,
@@ -1301,6 +1301,19 @@
     "manifest": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/manifest.json"
    },
    "manifest_sha256": "e65f3620cbe6c72689df40567e3e089aab71053affa0792704cf244cc22b59f4",
+   "n_components": 5
+  },
+  {
+   "experiment_id": "phase_c2_behavioural",
+   "run_id": "attempt5",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt5",
+    "manifest": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/manifest.json"
+   },
+   "manifest_sha256": "c9a5d2d087138d22790082c534918a70022abe6dccf154d17c8e01f215946690",
    "n_components": 5
   },
   {

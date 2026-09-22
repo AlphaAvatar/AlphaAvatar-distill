@@ -1,0 +1,2709 @@
+{
+  "schema": "aadistill.autoinit.c2_behavioural_session/v1",
+  "session_id": "autoinit-phase-c2-behavioural",
+  "session_spec": {
+    "session_id": "autoinit-phase-c2-behavioural",
+    "schema": "aadistill.autoinit.c2_behavioural_session/v1",
+    "description": "The Phase-C2 behavioural selection. Six arms materialized from the teacher along digest-pinned paths, six screening probes on one preregistered seed, a mechanical ranking that advances exactly one candidate, six confirmation probes on three disjoint preregistered seeds, and one verdict under the frozen Phase-C decision rule. It runs no beam, re-ranks nothing, re-measures no frozen result, and reaches no later cycle. GO, NO_GO and INCONCLUSIVE are all complete results.",
+    "deployment": {
+      "artifact_collector": "scripts/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "bebc5060c5411bd0a57323cde0b8a63383991798c3009112191d22358d1de96a",
+    "authorization_path": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/governance/authorization.json",
+    "authorization_type": "BehaviouralAuthorization.load",
+    "plan_id": "autoinit.v1.phase_c2.behavioural",
+    "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+    "status_path": "/workspace/autoinit_c2_behavioural.status",
+    "run_log_path": "/workspace/autoinit_c2_behavioural_run.log",
+    "driver_job_id": "autoinit_c2_behavioural_driver",
+    "markers": {
+      "success": "C2_BEHAVIOURAL_ALL_DONE",
+      "failure": [
+        "C2_BEHAVIOURAL_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_c2_behavioural",
+      "evidence_filename": "c2_behavioural_evidence.json",
+      "archive_basename": "c2_behavioural_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/c2_behavioural_artifacts.json",
+      "spec_failed": "configs/autoinit/c2_behavioural_artifacts_failed.json",
+      "report_names": [
+        "c2_behavioural_evidence.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "c2_behavioural",
+        "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c2/behavioural_frozen_assets.json"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "SESSION_RELAY_INPUTS",
+        "SESSION_KIND",
+        "SESSION_SETUP_MARKERS",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e8_inputs_20260810/calibration_v1/items.jsonl",
+          "dest": "artifacts/stage1/e8_calibration_v1",
+          "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "e8_calibration_v1:artifacts/stage1",
+        "reasoning_heavy_v2:artifacts/stage1",
+        "c1_confirmation_v1:artifacts/stage3",
+        "c2_screening_v1:artifacts/stage3",
+        "state_eval_v1:artifacts/stage1",
+        "recovery_search_v2:artifacts/stage3"
+      ],
+      "uv_max_seconds": 2400,
+      "tests_max_seconds": 1800,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [
+        "tests/architecture",
+        "tests/autoinit",
+        "tests/c1_preflight",
+        "tests/c2_baseline_completion_preflight",
+        "tests/c2_full_search_preflight",
+        "tests/c2_preflight",
+        "tests/c2_replay_preflight",
+        "tests/data",
+        "tests/docs",
+        "tests/evaluation",
+        "tests/infrastructure",
+        "tests/init",
+        "tests/initialization",
+        "tests/models",
+        "tests/pod",
+        "tests/rollout",
+        "tests/runtime",
+        "tests/support",
+        "tests/test_usable_rollout.py",
+        "tests/training",
+        "tests/validation"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "ASSETS_READY",
+        "TEACHER_READY",
+        "ROPE_OK",
+        "VLLM_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 8,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-09-21T07:00:02+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 1295 min $23.52 \u00b7 soft $32.16 \u00b7 hard $32.71 (authorized $32.71)"
+    },
+    {
+      "utc": "2026-09-21T07:00:02+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Medium"
+    },
+    {
+      "utc": "2026-09-21T07:00:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit 1013f46f0957 verified: harness digests to bf09b89cc47d\u2026, carries the authorization and only logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-09-21T07:00:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "scope OK: behavioural selection with recovery training, and nothing else reachable"
+    },
+    {
+      "utc": "2026-09-21T07:00:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "plan binding OK (31088b981499\u2026)"
+    },
+    {
+      "utc": "2026-09-21T07:00:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "source binding OK (134 files, bf09b89cc47d\u2026)"
+    },
+    {
+      "utc": "2026-09-21T07:00:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "destination OK: 37.0 GiB free at /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1 for 13.3 GiB of probes"
+    },
+    {
+      "utc": "2026-09-21T07:00:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "campaign continuation OK: $2.5425 all-in settled ($2.5042 GPU + $0.0383 disk) across 4 prior attempt(s) plus $33.2098 for the remaining 12 probes is inside the $35.7600 campaign ceiling, and every prior resource is provider-confirmed released"
+    },
+    {
+      "utc": "2026-09-21T07:00:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "readiness OK (launch_bound, PASS, {'error': 0, 'failed': 0, 'passed': 176, 'skipped': 0})"
+    },
+    {
+      "utc": "2026-09-21T07:00:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "bundle OK (1013f46f0957\u2026)"
+    },
+    {
+      "utc": "2026-09-21T07:00:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 6 local assets"
+    },
+    {
+      "utc": "2026-09-21T07:00:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 1801 min = $32.71"
+    },
+    {
+      "utc": "2026-09-21T07:00:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 0x48foz4j4xkcg at $1.09/h"
+    },
+    {
+      "utc": "2026-09-21T07:00:55+00:00",
+      "elapsed_min": 0.73,
+      "msg": "TCP 22 at 202.181.159.234:14214 after 0.7 min"
+    },
+    {
+      "utc": "2026-09-21T07:00:59+00:00",
+      "elapsed_min": 0.79,
+      "msg": "draw 1: ssh reachable \u2014 $0.01"
+    },
+    {
+      "utc": "2026-09-21T07:02:48+00:00",
+      "elapsed_min": 2.61,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+    },
+    {
+      "utc": "2026-09-21T07:02:48+00:00",
+      "elapsed_min": 2.61,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-09-21T07:07:02+00:00",
+      "elapsed_min": 6.84,
+      "msg": "draw 1: setup complete \u2014 $0.12"
+    },
+    {
+      "utc": "2026-09-21T07:07:10+00:00",
+      "elapsed_min": 6.97,
+      "msg": "campaign restore: nothing to restore \u2014 this campaign holds no destination-verified probe, so the pod starts from the protocol's first probe"
+    },
+    {
+      "utc": "2026-09-21T07:07:17+00:00",
+      "elapsed_min": 7.09,
+      "msg": "driver detached, pid 3208, confirmed by descriptor_probe \u2014 $0.13"
+    },
+    {
+      "utc": "2026-09-21T07:08:31+00:00",
+      "elapsed_min": 8.33,
+      "msg": "  2026-09-21T07:07:14Z MARKER:STAGE_START:P \u2014 $0.15"
+    },
+    {
+      "utc": "2026-09-21T07:28:37+00:00",
+      "elapsed_min": 28.43,
+      "msg": "  2026-09-21T07:28:37Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:d005dfb27e7bb5adc46eb988ae79e2a9 \u2014 $0.52"
+    },
+    {
+      "utc": "2026-09-21T07:59:36+00:00",
+      "elapsed_min": 59.41,
+      "msg": "  2026-09-21T07:58:36Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:7da1e4e2254e59766581e777b8066b7e \u2014 $1.08"
+    },
+    {
+      "utc": "2026-09-21T08:22:44+00:00",
+      "elapsed_min": 82.55,
+      "msg": "  2026-09-21T08:22:13Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:1d2844488f3ad630414c3cd69b6fa395 \u2014 $1.50"
+    },
+    {
+      "utc": "2026-09-21T08:25:10+00:00",
+      "elapsed_min": 84.97,
+      "msg": "  2026-09-21T08:24:40Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:88086555a6662b206e00ae28fc9d3ca3 \u2014 $1.54"
+    },
+    {
+      "utc": "2026-09-21T08:45:50+00:00",
+      "elapsed_min": 105.64,
+      "msg": "  2026-09-21T08:44:41Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:1a2b5b030e7e4e202fda3a810ed53c5f \u2014 $1.92"
+    },
+    {
+      "utc": "2026-09-21T09:19:57+00:00",
+      "elapsed_min": 139.76,
+      "msg": "  2026-09-21T09:19:18Z MARKER:STAGE_START:S \u2014 $2.54"
+    },
+    {
+      "utc": "2026-09-21T10:20:55+00:00",
+      "elapsed_min": 200.72,
+      "msg": "  2026-09-21T10:19:54Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 \u2014 $3.65"
+    },
+    {
+      "utc": "2026-09-21T10:24:43+00:00",
+      "elapsed_min": 204.52,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T10:24:51+00:00",
+      "elapsed_min": 204.66,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:26:14+00:00",
+      "elapsed_min": 206.04,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:27:37+00:00",
+      "elapsed_min": 207.43,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:29:00+00:00",
+      "elapsed_min": 208.82,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:30:24+00:00",
+      "elapsed_min": 210.21,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:31:48+00:00",
+      "elapsed_min": 211.61,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:33:11+00:00",
+      "elapsed_min": 212.99,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:34:34+00:00",
+      "elapsed_min": 214.37,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:35:57+00:00",
+      "elapsed_min": 215.77,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:37:21+00:00",
+      "elapsed_min": 217.16,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:38:44+00:00",
+      "elapsed_min": 218.54,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:40:08+00:00",
+      "elapsed_min": 219.94,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:41:31+00:00",
+      "elapsed_min": 221.33,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:42:55+00:00",
+      "elapsed_min": 222.72,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T10:44:10+00:00",
+      "elapsed_min": 223.98,
+      "msg": "  2026-09-21T10:43:49Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 \u2014 $4.07"
+    },
+    {
+      "utc": "2026-09-21T10:44:20+00:00",
+      "elapsed_min": 224.14,
+      "msg": "  probe screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T11:44:52+00:00",
+      "elapsed_min": 284.67,
+      "msg": "  2026-09-21T11:44:19Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:screening.7da1e4e2254e59766581e777b8066b7e.s616738081 \u2014 $5.17"
+    },
+    {
+      "utc": "2026-09-21T11:49:09+00:00",
+      "elapsed_min": 288.97,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.7da1e4e2254e59766581e777b8066b7e.s616738081 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T11:49:17+00:00",
+      "elapsed_min": 289.1,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T11:50:41+00:00",
+      "elapsed_min": 290.49,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T11:52:04+00:00",
+      "elapsed_min": 291.87,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T11:53:27+00:00",
+      "elapsed_min": 293.26,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T11:54:51+00:00",
+      "elapsed_min": 294.65,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T11:56:14+00:00",
+      "elapsed_min": 296.04,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T11:57:37+00:00",
+      "elapsed_min": 297.43,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T11:59:01+00:00",
+      "elapsed_min": 298.82,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:00:25+00:00",
+      "elapsed_min": 300.22,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:01:48+00:00",
+      "elapsed_min": 301.61,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:03:11+00:00",
+      "elapsed_min": 303.0,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:04:35+00:00",
+      "elapsed_min": 304.39,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:05:58+00:00",
+      "elapsed_min": 305.78,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:07:22+00:00",
+      "elapsed_min": 307.17,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:08:45+00:00",
+      "elapsed_min": 308.56,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:10:08+00:00",
+      "elapsed_min": 309.95,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:11:32+00:00",
+      "elapsed_min": 311.34,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:12:55+00:00",
+      "elapsed_min": 312.73,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:14:18+00:00",
+      "elapsed_min": 314.11,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T12:15:34+00:00",
+      "elapsed_min": 315.37,
+      "msg": "  2026-09-21T12:14:25Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:screening.7da1e4e2254e59766581e777b8066b7e.s616738081 \u2014 $5.73"
+    },
+    {
+      "utc": "2026-09-21T12:15:44+00:00",
+      "elapsed_min": 315.54,
+      "msg": "  probe screening.7da1e4e2254e59766581e777b8066b7e.s616738081 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T13:16:13+00:00",
+      "elapsed_min": 376.02,
+      "msg": "  2026-09-21T13:15:02Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 \u2014 $6.83"
+    },
+    {
+      "utc": "2026-09-21T13:19:57+00:00",
+      "elapsed_min": 379.77,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T13:20:05+00:00",
+      "elapsed_min": 379.9,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:21:29+00:00",
+      "elapsed_min": 381.29,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:22:53+00:00",
+      "elapsed_min": 382.69,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:24:16+00:00",
+      "elapsed_min": 384.08,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:25:40+00:00",
+      "elapsed_min": 385.47,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:27:03+00:00",
+      "elapsed_min": 386.86,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:28:27+00:00",
+      "elapsed_min": 388.25,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:29:50+00:00",
+      "elapsed_min": 389.65,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:31:14+00:00",
+      "elapsed_min": 391.04,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:32:37+00:00",
+      "elapsed_min": 392.43,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:34:01+00:00",
+      "elapsed_min": 393.82,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:35:24+00:00",
+      "elapsed_min": 395.21,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:36:47+00:00",
+      "elapsed_min": 396.6,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T13:38:03+00:00",
+      "elapsed_min": 397.86,
+      "msg": "  2026-09-21T13:37:53Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 \u2014 $7.23"
+    },
+    {
+      "utc": "2026-09-21T13:38:13+00:00",
+      "elapsed_min": 398.03,
+      "msg": "  probe screening.1d2844488f3ad630414c3cd69b6fa395.s616738081 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T14:39:18+00:00",
+      "elapsed_min": 459.11,
+      "msg": "  2026-09-21T14:38:16Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 \u2014 $8.34"
+    },
+    {
+      "utc": "2026-09-21T14:43:16+00:00",
+      "elapsed_min": 463.08,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T14:43:24+00:00",
+      "elapsed_min": 463.21,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:44:47+00:00",
+      "elapsed_min": 464.6,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:46:11+00:00",
+      "elapsed_min": 465.99,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:47:34+00:00",
+      "elapsed_min": 467.37,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:48:57+00:00",
+      "elapsed_min": 468.76,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:50:20+00:00",
+      "elapsed_min": 470.15,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:51:44+00:00",
+      "elapsed_min": 471.55,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:53:08+00:00",
+      "elapsed_min": 472.94,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:54:31+00:00",
+      "elapsed_min": 474.32,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:55:54+00:00",
+      "elapsed_min": 475.71,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:57:18+00:00",
+      "elapsed_min": 477.1,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T14:58:41+00:00",
+      "elapsed_min": 478.5,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T15:00:05+00:00",
+      "elapsed_min": 479.89,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T15:01:29+00:00",
+      "elapsed_min": 481.29,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T15:02:52+00:00",
+      "elapsed_min": 482.68,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T15:04:16+00:00",
+      "elapsed_min": 484.08,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T15:05:39+00:00",
+      "elapsed_min": 485.47,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T15:07:04+00:00",
+      "elapsed_min": 486.87,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T15:08:19+00:00",
+      "elapsed_min": 488.13,
+      "msg": "  2026-09-21T15:07:23Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 \u2014 $8.87"
+    },
+    {
+      "utc": "2026-09-21T15:08:29+00:00",
+      "elapsed_min": 488.3,
+      "msg": "  probe screening.88086555a6662b206e00ae28fc9d3ca3.s616738081 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T16:07:52+00:00",
+      "elapsed_min": 547.67,
+      "msg": "  2026-09-21T16:07:43Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 \u2014 $9.95"
+    },
+    {
+      "utc": "2026-09-21T16:11:32+00:00",
+      "elapsed_min": 551.34,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T16:11:40+00:00",
+      "elapsed_min": 551.47,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:13:04+00:00",
+      "elapsed_min": 552.87,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:14:28+00:00",
+      "elapsed_min": 554.27,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:15:51+00:00",
+      "elapsed_min": 555.66,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:17:15+00:00",
+      "elapsed_min": 557.05,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:18:38+00:00",
+      "elapsed_min": 558.45,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:20:02+00:00",
+      "elapsed_min": 559.84,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:21:25+00:00",
+      "elapsed_min": 561.23,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:22:49+00:00",
+      "elapsed_min": 562.62,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:24:12+00:00",
+      "elapsed_min": 564.02,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:25:36+00:00",
+      "elapsed_min": 565.41,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:27:00+00:00",
+      "elapsed_min": 566.8,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:28:24+00:00",
+      "elapsed_min": 568.21,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:29:48+00:00",
+      "elapsed_min": 569.6,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:31:11+00:00",
+      "elapsed_min": 570.99,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:32:35+00:00",
+      "elapsed_min": 572.39,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:33:58+00:00",
+      "elapsed_min": 573.78,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T16:35:14+00:00",
+      "elapsed_min": 575.04,
+      "msg": "  2026-09-21T16:34:01Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 \u2014 $10.45"
+    },
+    {
+      "utc": "2026-09-21T16:35:24+00:00",
+      "elapsed_min": 575.21,
+      "msg": "  probe screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T17:34:46+00:00",
+      "elapsed_min": 634.58,
+      "msg": "  2026-09-21T17:34:37Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:screening.B.s616738081 \u2014 $11.53"
+    },
+    {
+      "utc": "2026-09-21T17:38:27+00:00",
+      "elapsed_min": 638.25,
+      "msg": "  probe screening.B.s616738081: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.B.s616738081 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T17:38:35+00:00",
+      "elapsed_min": 638.39,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:39:58+00:00",
+      "elapsed_min": 639.78,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:41:21+00:00",
+      "elapsed_min": 641.17,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:42:45+00:00",
+      "elapsed_min": 642.56,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:44:09+00:00",
+      "elapsed_min": 643.96,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:45:33+00:00",
+      "elapsed_min": 645.36,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:46:56+00:00",
+      "elapsed_min": 646.75,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:48:20+00:00",
+      "elapsed_min": 648.14,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:49:43+00:00",
+      "elapsed_min": 649.53,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:51:07+00:00",
+      "elapsed_min": 650.92,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:52:31+00:00",
+      "elapsed_min": 652.32,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:53:54+00:00",
+      "elapsed_min": 653.71,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:55:17+00:00",
+      "elapsed_min": 655.1,
+      "msg": "  probe screening.B.s616738081 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T17:56:33+00:00",
+      "elapsed_min": 656.36,
+      "msg": "  2026-09-21T17:55:21Z MARKER:STAGE_START:C \u2014 $11.92"
+    },
+    {
+      "utc": "2026-09-21T17:56:43+00:00",
+      "elapsed_min": 656.52,
+      "msg": "  probe screening.B.s616738081 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T17:56:46+00:00",
+      "elapsed_min": 656.57,
+      "msg": "  campaign ranking secured: advanced 1a2b5b030e7e\u2026"
+    },
+    {
+      "utc": "2026-09-21T18:56:35+00:00",
+      "elapsed_min": 716.39,
+      "msg": "  2026-09-21T18:55:44Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 \u2014 $13.01"
+    },
+    {
+      "utc": "2026-09-21T19:00:13+00:00",
+      "elapsed_min": 720.02,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T19:00:21+00:00",
+      "elapsed_min": 720.15,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:01:42+00:00",
+      "elapsed_min": 721.5,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:03:03+00:00",
+      "elapsed_min": 722.85,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:04:23+00:00",
+      "elapsed_min": 724.2,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:05:44+00:00",
+      "elapsed_min": 725.54,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:07:05+00:00",
+      "elapsed_min": 726.89,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:08:26+00:00",
+      "elapsed_min": 728.23,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:09:47+00:00",
+      "elapsed_min": 729.58,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:11:07+00:00",
+      "elapsed_min": 730.93,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:12:28+00:00",
+      "elapsed_min": 732.28,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:13:49+00:00",
+      "elapsed_min": 733.63,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:15:11+00:00",
+      "elapsed_min": 734.99,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:16:32+00:00",
+      "elapsed_min": 736.34,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:17:53+00:00",
+      "elapsed_min": 737.69,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:19:14+00:00",
+      "elapsed_min": 739.04,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:20:35+00:00",
+      "elapsed_min": 740.4,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:21:56+00:00",
+      "elapsed_min": 741.75,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:23:18+00:00",
+      "elapsed_min": 743.11,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:24:39+00:00",
+      "elapsed_min": 744.45,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:26:00+00:00",
+      "elapsed_min": 745.8,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:27:21+00:00",
+      "elapsed_min": 747.15,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:28:42+00:00",
+      "elapsed_min": 748.5,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T19:29:55+00:00",
+      "elapsed_min": 749.73,
+      "msg": "  2026-09-21T19:29:02Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 \u2014 $13.62"
+    },
+    {
+      "utc": "2026-09-21T19:30:05+00:00",
+      "elapsed_min": 749.89,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T20:29:57+00:00",
+      "elapsed_min": 809.76,
+      "msg": "  2026-09-21T20:29:23Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:confirmation.B.s1936324010 \u2014 $14.71"
+    },
+    {
+      "utc": "2026-09-21T20:33:37+00:00",
+      "elapsed_min": 813.43,
+      "msg": "  probe confirmation.B.s1936324010: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1936324010 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T20:33:45+00:00",
+      "elapsed_min": 813.56,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:35:06+00:00",
+      "elapsed_min": 814.91,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:36:27+00:00",
+      "elapsed_min": 816.27,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:37:48+00:00",
+      "elapsed_min": 817.61,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:39:10+00:00",
+      "elapsed_min": 818.98,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:40:31+00:00",
+      "elapsed_min": 820.33,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:41:53+00:00",
+      "elapsed_min": 821.69,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:43:13+00:00",
+      "elapsed_min": 823.03,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:44:34+00:00",
+      "elapsed_min": 824.38,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:45:55+00:00",
+      "elapsed_min": 825.73,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:47:17+00:00",
+      "elapsed_min": 827.1,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:48:38+00:00",
+      "elapsed_min": 828.45,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:49:59+00:00",
+      "elapsed_min": 829.8,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:51:20+00:00",
+      "elapsed_min": 831.15,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:52:41+00:00",
+      "elapsed_min": 832.5,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:54:02+00:00",
+      "elapsed_min": 833.85,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:55:24+00:00",
+      "elapsed_min": 835.2,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T20:56:37+00:00",
+      "elapsed_min": 836.43,
+      "msg": "  2026-09-21T20:56:08Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:confirmation.B.s1936324010 \u2014 $15.20"
+    },
+    {
+      "utc": "2026-09-21T20:56:47+00:00",
+      "elapsed_min": 836.59,
+      "msg": "  probe confirmation.B.s1936324010 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T21:56:39+00:00",
+      "elapsed_min": 896.46,
+      "msg": "  2026-09-21T21:56:35Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 \u2014 $16.29"
+    },
+    {
+      "utc": "2026-09-21T22:00:27+00:00",
+      "elapsed_min": 900.26,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T22:00:35+00:00",
+      "elapsed_min": 900.39,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:01:57+00:00",
+      "elapsed_min": 901.75,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:03:17+00:00",
+      "elapsed_min": 903.1,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:04:38+00:00",
+      "elapsed_min": 904.45,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:05:59+00:00",
+      "elapsed_min": 905.8,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:07:20+00:00",
+      "elapsed_min": 907.15,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:08:41+00:00",
+      "elapsed_min": 908.5,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:10:03+00:00",
+      "elapsed_min": 909.85,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:11:24+00:00",
+      "elapsed_min": 911.21,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:12:45+00:00",
+      "elapsed_min": 912.56,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:14:06+00:00",
+      "elapsed_min": 913.91,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:15:28+00:00",
+      "elapsed_min": 915.27,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:16:49+00:00",
+      "elapsed_min": 916.62,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:18:10+00:00",
+      "elapsed_min": 917.97,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:19:31+00:00",
+      "elapsed_min": 919.33,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:20:52+00:00",
+      "elapsed_min": 920.68,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:22:13+00:00",
+      "elapsed_min": 922.03,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:23:34+00:00",
+      "elapsed_min": 923.38,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:24:55+00:00",
+      "elapsed_min": 924.73,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:26:16+00:00",
+      "elapsed_min": 926.08,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T22:27:30+00:00",
+      "elapsed_min": 927.3,
+      "msg": "  2026-09-21T22:26:24Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 \u2014 $16.85"
+    },
+    {
+      "utc": "2026-09-21T22:27:40+00:00",
+      "elapsed_min": 927.47,
+      "msg": "  probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-21T23:27:33+00:00",
+      "elapsed_min": 987.36,
+      "msg": "  2026-09-21T23:26:59Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:confirmation.B.s1916380711 \u2014 $17.94"
+    },
+    {
+      "utc": "2026-09-21T23:31:15+00:00",
+      "elapsed_min": 991.06,
+      "msg": "  probe confirmation.B.s1916380711: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1916380711 [re-identified from the delivered bytes]"
+    },
+    {
+      "utc": "2026-09-21T23:31:23+00:00",
+      "elapsed_min": 991.19,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:32:44+00:00",
+      "elapsed_min": 992.54,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:34:05+00:00",
+      "elapsed_min": 993.89,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:35:27+00:00",
+      "elapsed_min": 995.26,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:36:48+00:00",
+      "elapsed_min": 996.61,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:38:10+00:00",
+      "elapsed_min": 997.97,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:39:31+00:00",
+      "elapsed_min": 999.32,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:40:51+00:00",
+      "elapsed_min": 1000.67,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:42:13+00:00",
+      "elapsed_min": 1002.02,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:43:34+00:00",
+      "elapsed_min": 1003.37,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:44:55+00:00",
+      "elapsed_min": 1004.72,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:46:16+00:00",
+      "elapsed_min": 1006.07,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['probe_record.json']"
+    },
+    {
+      "utc": "2026-09-21T23:47:29+00:00",
+      "elapsed_min": 1007.29,
+      "msg": "  2026-09-21T23:46:52Z MARKER:C2_BEHAVIOURAL_PROBE_DONE:confirmation.B.s1916380711 \u2014 $18.30"
+    },
+    {
+      "utc": "2026-09-21T23:47:39+00:00",
+      "elapsed_min": 1007.46,
+      "msg": "  probe confirmation.B.s1916380711 evidence: ['per_sample.jsonl', 'probe_record.json', 'result.json']"
+    },
+    {
+      "utc": "2026-09-22T00:47:31+00:00",
+      "elapsed_min": 1067.33,
+      "msg": "  2026-09-22T00:47:00Z MARKER:C2_BEHAVIOURAL_FAILED \u2014 $19.39"
+    },
+    {
+      "utc": "2026-09-22T00:47:31+00:00",
+      "elapsed_min": 1067.33,
+      "msg": "the session stopped before its verdict. Whatever probes FINISHED are fetched and verified first. A provenance mismatch on an arm is a scientific finding, not a retryable engineering failure, and goes to review unchanged."
+    },
+    {
+      "utc": "2026-09-22T00:47:31+00:00",
+      "elapsed_min": 1067.33,
+      "msg": "polling ended: C2_BEHAVIOURAL_FAILED \u2014 $19.39"
+    },
+    {
+      "utc": "2026-09-22T00:48:04+00:00",
+      "elapsed_min": 1067.88,
+      "msg": "  manifest rc=0\n1 file(s) across 1 class(es) -> /workspace/manifest.json\n  final_required: 1 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-09-22T00:48:18+00:00",
+      "elapsed_min": 1068.11,
+      "msg": "teardown gate: allowed=True failed=training_complete"
+    },
+    {
+      "utc": "2026-09-22T00:48:18+00:00",
+      "elapsed_min": 1068.11,
+      "msg": "deleting pod (gate passed after C2_BEHAVIOURAL_FAILED)"
+    },
+    {
+      "utc": "2026-09-22T00:48:29+00:00",
+      "elapsed_min": 1068.29,
+      "msg": "pod deleted \u2014 1068.3 min, $19.41; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.c2_behavioural_authorization/v1",
+    "authorization_id": "autoinit.v1.phase_c2.behavioural",
+    "version": 1,
+    "granted_utc": "2026-09-21T06:58:51.583481+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "autoinit.v1.phase_c2.behavioural",
+    "phase_a_session_plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+    "phase_a_science_plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+    "expected_usd": 23.8832,
+    "hard_cap_usd": 32.7097,
+    "authorized_stages": [
+      "prepare",
+      "screen",
+      "rank",
+      "confirm",
+      "decide"
+    ],
+    "stage_conditions": {
+      "prepare": "verifies the teacher by shard hash and materializes the arms the remaining probes need, each along its pinned path and each gated on its exact recorded identity. A mismatch is a scientific finding and stops the session; no probe starts.",
+      "screen": "six fresh screening probes on the one frozen screening seed, each announced for durability the moment it finishes and pulled off-pod while the next trains.",
+      "rank": "scores the screening battery through its own pinned scorer, ranks by paired delta against B, and advances EXACTLY one by the frozen tie-break. No verdict leaves this stage.",
+      "confirm": "six fresh confirmation probes \u2014 the advanced candidate and B, paired across the three frozen seeds. Cannot begin until every screening probe is trained AND scored.",
+      "decide": "applies the frozen Phase-C rule at C2's own bootstrap seed and STOPS. GO, NO_GO and INCONCLUSIVE are all complete results."
+    },
+    "scope_note": "ONE Phase-C2 behavioural selection campaign: the five frozen Top-5 C candidates and incumbent B, materialized along deterministic digest-gated fixed paths as the reviewed execution path requires, six screening probes, exactly one mechanical screening advancement, six confirmation probes, the frozen screening and confirmation batteries, the frozen seeds, the frozen scoring contract, bootstrap seed 834816710, and the frozen Phase-C GO / NO_GO / INCONCLUSIVE decision rule. Same-campaign continuation only, under preregistered R1-R10.",
+    "phase_a_authorized": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "d69d2dc2551b7945c20c1cf11ad9ad184d1869d9",
+    "harness_source_digest": "bf09b89cc47dac509a027af99cd2c4d7f2db8afafed19933f832708aa71f8133",
+    "harness_source_files": [
+      "configs/infrastructure/provider_storage_pricing.json",
+      "configs/stage3/e1/e1_r0860k_sa_pca.json",
+      "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+      "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+      "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
+      "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+      "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+      "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/telemetry.jsonl",
+      "logs/stages/stage-1/phase_c2_replay/plans/attempt3_arch_spec_lineage.json",
+      "scripts/autoinit/audit_tool_scoring.py",
+      "scripts/autoinit/phase_a_frozen.py",
+      "scripts/autoinit/renderer_parity_gate.py",
+      "scripts/autoinit/score_c1_confirmation.py",
+      "scripts/autoinit/score_c2_screening.py",
+      "scripts/autoinit/score_recovery_search.py",
+      "scripts/autoinit/verify_frozen_assets.py",
+      "scripts/evaluation/uncapped_eval.py",
+      "scripts/experiments/calibration.py",
+      "scripts/experiments/deployment.py",
+      "scripts/experiments/phase_a/plan.py",
+      "scripts/experiments/phase_c1/__init__.py",
+      "scripts/experiments/phase_c1/authorization.py",
+      "scripts/experiments/phase_c1/authorization_payload.py",
+      "scripts/experiments/phase_c1/bundle.py",
+      "scripts/experiments/phase_c1/isolation.py",
+      "scripts/experiments/phase_c1/packaging.py",
+      "scripts/experiments/phase_c1/pod_environment.py",
+      "scripts/experiments/phase_c1/probe_results.py",
+      "scripts/experiments/phase_c1/scoring.py",
+      "scripts/experiments/phase_c1/session.py",
+      "scripts/experiments/phase_c2/__init__.py",
+      "scripts/experiments/phase_c2/baseline.py",
+      "scripts/experiments/phase_c2/behavioural.py",
+      "scripts/experiments/phase_c2/behavioural_bundle.py",
+      "scripts/experiments/phase_c2/behavioural_continuation.py",
+      "scripts/experiments/phase_c2/behavioural_decision.py",
+      "scripts/experiments/phase_c2/behavioural_governance.py",
+      "scripts/experiments/phase_c2/behavioural_pod_environment.py",
+      "scripts/experiments/phase_c2/behavioural_schedule.py",
+      "scripts/experiments/phase_c2/bundle.py",
+      "scripts/experiments/phase_c2/pod_environment.py",
+      "scripts/experiments/phase_c2/replay_specs.py",
+      "scripts/experiments/phase_c2/scoring.py",
+      "scripts/experiments/phase_c2/search_space.py",
+      "scripts/experiments/phase_c2/selection_pricing.py",
+      "scripts/experiments/phase_c2/session.py",
+      "scripts/experiments/recovery_policy.py",
+      "scripts/experiments/run_layout.py",
+      "scripts/experiments/search_cost_model.py",
+      "scripts/experiments/source_sets.py",
+      "scripts/pod/autoinit_c1_driver.py",
+      "scripts/pod/autoinit_c1_launch.py",
+      "scripts/pod/autoinit_c2_behavioural_driver.py",
+      "scripts/pod/autoinit_c2_behavioural_launch.py",
+      "scripts/pod/autoinit_engine_probe.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/autoinit_science_inputs.py",
+      "scripts/pod/collect_artifacts.py",
+      "scripts/pod/watchdog.py",
+      "scripts/training/train_stage3.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention.py",
+      "src/aadistill/initialization/operators/attention_activation.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite.py",
+      "src/aadistill/initialization/operators/depth.py",
+      "src/aadistill/initialization/operators/ffn.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/attention.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/train.py"
+    ],
+    "per_launch_hard_usd": null,
+    "provenance_commit": "d69d2dc2551b7945c20c1cf11ad9ad184d1869d9",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "allows_phase_a": false,
+    "allows_recovery_training": true,
+    "authorizes_c2_search1": false,
+    "resource_scope": {
+      "run_id": "attempt5",
+      "issuances_permitted": 1,
+      "launch_attempts_permitted": 1,
+      "provider_resources_permitted": 1,
+      "one_billing_resource_at_a_time": true,
+      "_what_a_provider_resource_is": "a resource the provider RETURNED AN ID FOR. A create call that returns no id created nothing and billed nothing, so it does not consume this count; it is still recorded as a draw with pod_id null, because the provider's refusal is the only evidence of why.",
+      "_what_this_does_not_relax": "the dollar ceiling, which every draw in the session shares, and the runner's requirement that the provider confirm a resource is not billing before the next one is created."
+    },
+    "run_id": "attempt5",
+    "scope": "ONE Phase-C2 behavioural selection campaign: SIX deterministic fixed-path arm materializations \u2014 the five frozen Top-5 C candidates and the frozen C1 treatment B \u2014 each built from the verified teacher along a path pinned at every step and gated on its exact recorded identity before any probe starts, followed by exactly twelve behavioural probes: six screening probes on one preregistered seed over those six arms, a mechanical ranking that advances exactly one candidate, six confirmation probes on three disjoint preregistered seeds, and one verdict under C1's frozen decision rule. All six arms are materialized because neither available transport can carry six 1.19 GB checkpoints to a pod; B's bytes no longer exist at all. NOT a search, NOT a beam or expansion, NOT a re-ranking of the frozen Top-5, NOT a re-measurement of B's completed state evaluation, NOT a fourth seed, and NOT any part of C3 or C4.",
+    "authorizes_c2_full_search": false,
+    "authorizes_c2_baseline_completion": false,
+    "authorizes_c2_replay": false,
+    "authorizes_later_cycles": false,
+    "authorizes_behavioural_selection": true,
+    "campaign_id": "c2-behavioural-12probe-v1",
+    "rate_usd_per_hour": 1.09,
+    "hard_runtime_minutes": 1800.53,
+    "gpu_hard_usd": 32.7097,
+    "disk_hard_usd": 0.5002,
+    "all_in_hard_usd": 33.2099,
+    "campaign_all_in_hard_usd": 35.76,
+    "_session_versus_campaign": "all_in_hard_usd bounds ONE session and equals gpu_hard_usd + disk_hard_usd. campaign_all_in_hard_usd bounds the CAMPAIGN cumulatively, including spend that has already settled, and is the only figure campaign_continuation_gate compares against. Neither the session window nor the scientific work reads it.",
+    "_amounts_are_distinct": "GPU money, separately billed container disk and the authorized runtime are three different quantities. The launcher derives its deadline from gpu_hard_usd and hard_runtime_minutes at the LIVE rate, never from a constant.",
+    "authorized_materializations": 6,
+    "authorized_probes": 12,
+    "forbids": [
+      "any beam search or expansion",
+      "re-ranking the frozen Top-5 or regenerating a selection",
+      "re-measuring B's completed state evaluation",
+      "retraining a probe that already completed, for a different outcome",
+      "ranking before all six screening results exist",
+      "any verdict from a partial confirmation field",
+      "a fourth seed, a tie-break rung or a forced winner",
+      "any C3 or C4 work"
+    ],
+    "terminal_results": [
+      "GO",
+      "NO_GO",
+      "INCONCLUSIVE"
+    ],
+    "_no_forced_winner": "NO_GO and INCONCLUSIVE are complete results. Neither is a reason to retry, extend or re-seed this experiment.",
+    "authorization_sha256": "4a028fd477374c64d19c66c955a66b886310dd7ab6b3ee75c59a9660f6167228"
+  },
+  "session_plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+  "harness_source_digest": "bf09b89cc47dac509a027af99cd2c4d7f2db8afafed19933f832708aa71f8133",
+  "harness_source_files": [
+    "configs/infrastructure/provider_storage_pricing.json",
+    "configs/stage3/e1/e1_r0860k_sa_pca.json",
+    "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+    "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+    "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
+    "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+    "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/stage1_selection.json",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/states_compact.jsonl",
+    "logs/stages/stage-1/phase_c2_full_search/runs/attempt3/evidence/telemetry.jsonl",
+    "logs/stages/stage-1/phase_c2_replay/plans/attempt3_arch_spec_lineage.json",
+    "scripts/autoinit/audit_tool_scoring.py",
+    "scripts/autoinit/phase_a_frozen.py",
+    "scripts/autoinit/renderer_parity_gate.py",
+    "scripts/autoinit/score_c1_confirmation.py",
+    "scripts/autoinit/score_c2_screening.py",
+    "scripts/autoinit/score_recovery_search.py",
+    "scripts/autoinit/verify_frozen_assets.py",
+    "scripts/evaluation/uncapped_eval.py",
+    "scripts/experiments/calibration.py",
+    "scripts/experiments/deployment.py",
+    "scripts/experiments/phase_a/plan.py",
+    "scripts/experiments/phase_c1/__init__.py",
+    "scripts/experiments/phase_c1/authorization.py",
+    "scripts/experiments/phase_c1/authorization_payload.py",
+    "scripts/experiments/phase_c1/bundle.py",
+    "scripts/experiments/phase_c1/isolation.py",
+    "scripts/experiments/phase_c1/packaging.py",
+    "scripts/experiments/phase_c1/pod_environment.py",
+    "scripts/experiments/phase_c1/probe_results.py",
+    "scripts/experiments/phase_c1/scoring.py",
+    "scripts/experiments/phase_c1/session.py",
+    "scripts/experiments/phase_c2/__init__.py",
+    "scripts/experiments/phase_c2/baseline.py",
+    "scripts/experiments/phase_c2/behavioural.py",
+    "scripts/experiments/phase_c2/behavioural_bundle.py",
+    "scripts/experiments/phase_c2/behavioural_continuation.py",
+    "scripts/experiments/phase_c2/behavioural_decision.py",
+    "scripts/experiments/phase_c2/behavioural_governance.py",
+    "scripts/experiments/phase_c2/behavioural_pod_environment.py",
+    "scripts/experiments/phase_c2/behavioural_schedule.py",
+    "scripts/experiments/phase_c2/bundle.py",
+    "scripts/experiments/phase_c2/pod_environment.py",
+    "scripts/experiments/phase_c2/replay_specs.py",
+    "scripts/experiments/phase_c2/scoring.py",
+    "scripts/experiments/phase_c2/search_space.py",
+    "scripts/experiments/phase_c2/selection_pricing.py",
+    "scripts/experiments/phase_c2/session.py",
+    "scripts/experiments/recovery_policy.py",
+    "scripts/experiments/run_layout.py",
+    "scripts/experiments/search_cost_model.py",
+    "scripts/experiments/source_sets.py",
+    "scripts/pod/autoinit_c1_driver.py",
+    "scripts/pod/autoinit_c1_launch.py",
+    "scripts/pod/autoinit_c2_behavioural_driver.py",
+    "scripts/pod/autoinit_c2_behavioural_launch.py",
+    "scripts/pod/autoinit_engine_probe.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/autoinit_science_inputs.py",
+    "scripts/pod/collect_artifacts.py",
+    "scripts/pod/watchdog.py",
+    "scripts/training/train_stage3.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention.py",
+    "src/aadistill/initialization/operators/attention_activation.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite.py",
+    "src/aadistill/initialization/operators/depth.py",
+    "src/aadistill/initialization/operators/ffn.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/attention.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 32.7097,
+    "expected_minutes": 1294.87,
+    "soft_stop_minutes": 1770.53,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 1800.53,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused: the generic arms x steps term does not describe arm materializations followed by probes. Every phase is named in BH.session_decomposition, which is derived from committed records and reconciled against them.",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 0.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 0.0
+      },
+      {
+        "name": "setup_and_asset_staging",
+        "minutes": 45.0
+      },
+      {
+        "name": "bundle_transfer",
+        "minutes": 6.0
+      },
+      {
+        "name": "teacher_fetch_and_verify",
+        "minutes": 8.0
+      },
+      {
+        "name": "machine_gates",
+        "minutes": 22.0
+      },
+      {
+        "name": "selection_commit_and_artifact_manifest",
+        "minutes": 8.0
+      },
+      {
+        "name": "artifact_synchronization",
+        "minutes": 6.0
+      },
+      {
+        "name": "materialize_arms",
+        "minutes": 155.83
+      },
+      {
+        "name": "12_probes_train_and_score",
+        "minutes": 1044.04
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "probe_model_contingency",
+        "minutes": 113.9
+      },
+      {
+        "name": "probe_duration_risk",
+        "minutes": 30.16
+      },
+      {
+        "name": "generation_length_risk",
+        "minutes": 331.6
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 475.66,
+    "expected_usd": 23.5235,
+    "soft_stop_usd": 32.1646,
+    "artifact_recovery_reserve_usd": 0.545,
+    "hard_terminate_usd": 32.7096
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Medium",
+  "session_commit_check": {
+    "session_commit": "1013f46f09576ad469d830518d291a9c074d435b",
+    "authorized_session_commit": "d69d2dc2551b7945c20c1cf11ad9ad184d1869d9",
+    "harness_digest_at_commit": "bf09b89cc47dac509a027af99cd2c4d7f2db8afafed19933f832708aa71f8133",
+    "authorized_harness_digest": "bf09b89cc47dac509a027af99cd2c4d7f2db8afafed19933f832708aa71f8133",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "d69d2dc2551b7945c20c1cf11ad9ad184d1869d9",
+      "session_commit": "1013f46f09576ad469d830518d291a9c074d435b",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "prechecks": [
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit 1013f46f0957 verified: harness digests to bf09b89cc47d\u2026, carries the authorization and only logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "scope_gate",
+      "ok": true,
+      "message": "scope OK: behavioural selection with recovery training, and nothing else reachable"
+    },
+    {
+      "check": "plan_binding_gate",
+      "ok": true,
+      "message": "plan binding OK (31088b981499\u2026)"
+    },
+    {
+      "check": "source_binding_gate",
+      "ok": true,
+      "message": "source binding OK (134 files, bf09b89cc47d\u2026)"
+    },
+    {
+      "check": "destination_gate",
+      "ok": true,
+      "message": "destination OK: 37.0 GiB free at /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1 for 13.3 GiB of probes"
+    },
+    {
+      "check": "campaign_continuation_gate",
+      "ok": true,
+      "message": "campaign continuation OK: $2.5425 all-in settled ($2.5042 GPU + $0.0383 disk) across 4 prior attempt(s) plus $33.2098 for the remaining 12 probes is inside the $35.7600 campaign ceiling, and every prior resource is provider-confirmed released"
+    },
+    {
+      "check": "readiness_gate",
+      "ok": true,
+      "message": "readiness OK (launch_bound, PASS, {'error': 0, 'failed': 0, 'passed': 176, 'skipped': 0})"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "bundle OK (1013f46f0957\u2026)"
+    }
+  ],
+  "_remaining_work": {
+    "probes_expected": 12,
+    "probes_complete": [],
+    "probes_trained_not_scored": [],
+    "probes_untrained": [
+      "confirmation.<unranked>.s1523147638",
+      "confirmation.<unranked>.s1916380711",
+      "confirmation.<unranked>.s1936324010",
+      "confirmation.B.s1523147638",
+      "confirmation.B.s1916380711",
+      "confirmation.B.s1936324010",
+      "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "screening.B.s616738081",
+      "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+    ],
+    "probes_remaining": [
+      "confirmation.<unranked>.s1523147638",
+      "confirmation.<unranked>.s1916380711",
+      "confirmation.<unranked>.s1936324010",
+      "confirmation.B.s1523147638",
+      "confirmation.B.s1916380711",
+      "confirmation.B.s1936324010",
+      "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "screening.B.s616738081",
+      "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+    ],
+    "n_probes_remaining": 12,
+    "n_train_and_score": 12,
+    "n_score_only": 0,
+    "committed_candidate": null,
+    "screening_committed": false,
+    "arms_needed": [
+      "1a2b5b030e7e4e202fda3a810ed53c5f",
+      "1d2844488f3ad630414c3cd69b6fa395",
+      "7da1e4e2254e59766581e777b8066b7e",
+      "88086555a6662b206e00ae28fc9d3ca3",
+      "B",
+      "d005dfb27e7bb5adc46eb988ae79e2a9"
+    ],
+    "_arms_are_owed_by_untrained_probes": "a trained-but-unscored probe already holds its trained checkpoint and resumes at scoring, so the initialization it was trained from is not rebuilt. When screening has not committed, every candidate that can still be advanced IS materialized: which one wins is decided by screening scores, and a cost proxy must never decide which candidate's bytes exist.",
+    "materialization_minutes": 155.83,
+    "restore": {
+      "probes": [],
+      "n": 0,
+      "bytes": 0,
+      "gib": 0.0,
+      "minutes": 0.0,
+      "rate_mb_per_second": 0.23,
+      "_basis": "the slowest recorded dev-box uplink observation (0.23 MB/s, from a real 3.7 MB bundle upload; the project's recorded figure is 0.72 MB/s and observations span 0.23-0.79). A bound takes the slowest, not the mean. logs/shared/analyses/autoinit_relay_capacity.md"
+    },
+    "decomposition": {
+      "expected_phases": [
+        [
+          "setup_and_asset_staging",
+          45.0
+        ],
+        [
+          "bundle_transfer",
+          6.0
+        ],
+        [
+          "teacher_fetch_and_verify",
+          8.0
+        ],
+        [
+          "machine_gates",
+          22.0
+        ],
+        [
+          "selection_commit_and_artifact_manifest",
+          8.0
+        ],
+        [
+          "artifact_synchronization",
+          6.0
+        ],
+        [
+          "materialize_arms",
+          155.83
+        ],
+        [
+          "12_probes_train_and_score",
+          1044.04
+        ]
+      ],
+      "soft_stop_reserves": [
+        [
+          "probe_model_contingency",
+          113.9
+        ],
+        [
+          "probe_duration_risk",
+          30.16
+        ],
+        [
+          "generation_length_risk",
+          331.6
+        ]
+      ],
+      "probes_remaining": 12,
+      "train_and_score_probes": 12,
+      "score_only_probes": 0,
+      "probes_in_protocol": 12,
+      "per_probe_minutes": {
+        "train_mean": 61.778,
+        "train_max": 61.883,
+        "eval_mean": 25.225,
+        "eval_max": 27.633,
+        "_reconciled": "twelve times each reconstructs the record's own bounding_basis totals; checked, not assumed"
+      },
+      "restore_minutes": 0.0,
+      "_remaining_work_only": "a completed probe is never retrained, so it is not priced again. A probe whose checkpoint was restored but whose scoring failed owes the BATTERY and not the trainer, because that is what the driver will do with it. The arms the UNTRAINED probes measure against ARE priced, because a replacement resource has a fresh filesystem and must rebuild them; that is a replacement runtime necessity, not completed science charged twice.",
+      "full_session_reserves": [
+        [
+          "probe_model_contingency",
+          113.9
+        ],
+        [
+          "probe_duration_risk",
+          30.16
+        ],
+        [
+          "generation_length_risk",
+          331.6
+        ]
+      ],
+      "artifact_recovery_reserve_minutes": 30.0,
+      "contingency_fraction": 0.0,
+      "_contingency_is_a_named_reserve": "the frozen probe model's 10% contingency is carried in soft_stop_reserves as a fixed number of minutes. A consumer that also set contingency_fraction=0.10 would apply it twice, which is the defect this decomposition exists to remove.",
+      "_overhead_phase_names_are_the_pricing_models": "the first six phases are selection_pricing.SESSION_PHASE_MINUTES verbatim, because that is what the frozen record's 95 non-probe minutes ARE and renaming them would break the reconciliation. They are a cost model shared with the full search, not a claim about this session's stages: `selection_commit_and_artifact_manifest` funds the closeout minutes, and this session commits no selection \u2014 it consumes one that is already frozen. They are NOT scaled by the probe count: a replacement resource pays setup, the bundle, the teacher fetch and the machine gates in full.",
+      "expected_minutes": 1294.87,
+      "soft_stop_minutes": 1770.53,
+      "hard_minutes": 1800.53,
+      "probe_model": {
+        "record": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+        "expected_minutes": 1139.04,
+        "hard_ceiling_minutes": 1644.7,
+        "probe_minutes_expected": 1044.04,
+        "contingency_fraction": 0.1
+      },
+      "_reconciled": "the overhead phases reconstruct the record's non-probe expected minutes and the reserves reconstruct its hard ceiling; both are checked here rather than assumed"
+    },
+    "_a_completed_probe_is_never_retrained": "probes_complete is excluded from the remaining probe count and from the arms priced. The protocol forbids retraining a finished probe for a different outcome, so pricing one again would reserve money for work that may not be done.",
+    "_zero_remaining_is_not_permission": "a campaign that owes nothing has a verdict or has nothing left to run. GO, NO_GO and INCONCLUSIVE are all terminal, and none of them is a reason to start another attempt.",
+    "_state": {
+      "campaign_root": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1",
+      "probes": {},
+      "rejected": [],
+      "committed_ranking": null,
+      "committed_candidate": null,
+      "_source_is_the_destination": "read from the durable destination on the launcher host, never from a pod's own journal. A pod's journal dies with the pod, and a replacement resource has a fresh filesystem."
+    }
+  },
+  "campaign": {
+    "campaign_id": "c2-behavioural-12probe-v1",
+    "run_attempt": "attempt5",
+    "prior_attempts": [
+      "attempt1",
+      "attempt2",
+      "attempt3",
+      "attempt4"
+    ],
+    "remaining_work": {
+      "probes_expected": 12,
+      "probes_complete": [],
+      "probes_trained_not_scored": [],
+      "probes_untrained": [
+        "confirmation.<unranked>.s1523147638",
+        "confirmation.<unranked>.s1916380711",
+        "confirmation.<unranked>.s1936324010",
+        "confirmation.B.s1523147638",
+        "confirmation.B.s1916380711",
+        "confirmation.B.s1936324010",
+        "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+        "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+        "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+        "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+        "screening.B.s616738081",
+        "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+      ],
+      "probes_remaining": [
+        "confirmation.<unranked>.s1523147638",
+        "confirmation.<unranked>.s1916380711",
+        "confirmation.<unranked>.s1936324010",
+        "confirmation.B.s1523147638",
+        "confirmation.B.s1916380711",
+        "confirmation.B.s1936324010",
+        "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+        "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+        "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+        "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+        "screening.B.s616738081",
+        "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+      ],
+      "n_probes_remaining": 12,
+      "n_train_and_score": 12,
+      "n_score_only": 0,
+      "committed_candidate": null,
+      "screening_committed": false,
+      "arms_needed": [
+        "1a2b5b030e7e4e202fda3a810ed53c5f",
+        "1d2844488f3ad630414c3cd69b6fa395",
+        "7da1e4e2254e59766581e777b8066b7e",
+        "88086555a6662b206e00ae28fc9d3ca3",
+        "B",
+        "d005dfb27e7bb5adc46eb988ae79e2a9"
+      ],
+      "materialization_minutes": 155.83,
+      "restore": {
+        "probes": [],
+        "n": 0,
+        "bytes": 0,
+        "gib": 0.0,
+        "minutes": 0.0,
+        "rate_mb_per_second": 0.23,
+        "_basis": "the slowest recorded dev-box uplink observation (0.23 MB/s, from a real 3.7 MB bundle upload; the project's recorded figure is 0.72 MB/s and observations span 0.23-0.79). A bound takes the slowest, not the mean. logs/shared/analyses/autoinit_relay_capacity.md"
+      },
+      "decomposition": {
+        "expected_phases": [
+          [
+            "setup_and_asset_staging",
+            45.0
+          ],
+          [
+            "bundle_transfer",
+            6.0
+          ],
+          [
+            "teacher_fetch_and_verify",
+            8.0
+          ],
+          [
+            "machine_gates",
+            22.0
+          ],
+          [
+            "selection_commit_and_artifact_manifest",
+            8.0
+          ],
+          [
+            "artifact_synchronization",
+            6.0
+          ],
+          [
+            "materialize_arms",
+            155.83
+          ],
+          [
+            "12_probes_train_and_score",
+            1044.04
+          ]
+        ],
+        "soft_stop_reserves": [
+          [
+            "probe_model_contingency",
+            113.9
+          ],
+          [
+            "probe_duration_risk",
+            30.16
+          ],
+          [
+            "generation_length_risk",
+            331.6
+          ]
+        ],
+        "probes_remaining": 12,
+        "train_and_score_probes": 12,
+        "score_only_probes": 0,
+        "probes_in_protocol": 12,
+        "per_probe_minutes": {
+          "train_mean": 61.778,
+          "train_max": 61.883,
+          "eval_mean": 25.225,
+          "eval_max": 27.633,
+          "_reconciled": "twelve times each reconstructs the record's own bounding_basis totals; checked, not assumed"
+        },
+        "restore_minutes": 0.0,
+        "_remaining_work_only": "a completed probe is never retrained, so it is not priced again. A probe whose checkpoint was restored but whose scoring failed owes the BATTERY and not the trainer, because that is what the driver will do with it. The arms the UNTRAINED probes measure against ARE priced, because a replacement resource has a fresh filesystem and must rebuild them; that is a replacement runtime necessity, not completed science charged twice.",
+        "full_session_reserves": [
+          [
+            "probe_model_contingency",
+            113.9
+          ],
+          [
+            "probe_duration_risk",
+            30.16
+          ],
+          [
+            "generation_length_risk",
+            331.6
+          ]
+        ],
+        "artifact_recovery_reserve_minutes": 30.0,
+        "contingency_fraction": 0.0,
+        "_contingency_is_a_named_reserve": "the frozen probe model's 10% contingency is carried in soft_stop_reserves as a fixed number of minutes. A consumer that also set contingency_fraction=0.10 would apply it twice, which is the defect this decomposition exists to remove.",
+        "_overhead_phase_names_are_the_pricing_models": "the first six phases are selection_pricing.SESSION_PHASE_MINUTES verbatim, because that is what the frozen record's 95 non-probe minutes ARE and renaming them would break the reconciliation. They are a cost model shared with the full search, not a claim about this session's stages: `selection_commit_and_artifact_manifest` funds the closeout minutes, and this session commits no selection \u2014 it consumes one that is already frozen. They are NOT scaled by the probe count: a replacement resource pays setup, the bundle, the teacher fetch and the machine gates in full.",
+        "expected_minutes": 1294.87,
+        "soft_stop_minutes": 1770.53,
+        "hard_minutes": 1800.53,
+        "probe_model": {
+          "record": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
+          "expected_minutes": 1139.04,
+          "hard_ceiling_minutes": 1644.7,
+          "probe_minutes_expected": 1044.04,
+          "contingency_fraction": 0.1
+        },
+        "_reconciled": "the overhead phases reconstruct the record's non-probe expected minutes and the reserves reconstruct its hard ceiling; both are checked here rather than assumed"
+      }
+    },
+    "this_session_planned_all_in_usd": 33.2098,
+    "campaign_approved_all_in_usd": 35.76,
+    "session_all_in_hard_usd": 33.2099,
+    "_two_ceilings": "the session ceiling bounds ONE attempt and equals its GPU plus its disk. The campaign ceiling bounds the campaign cumulatively and is the only one prior spend is charged against. A larger campaign ceiling buys room beside settled spend, never a longer or dearer session: the window comes from gpu_hard_usd and hard_runtime_minutes, and the work from the frozen decomposition.",
+    "_continuation_is_not_pooling": "a replacement resource is a new RESOURCE and a new run attempt inside the SAME scientific campaign. Consuming its predecessor's destination-verified probes is continuation of one preregistered experiment, not pooling across experiments.",
+    "_prior_attempts_source": "the union of this campaign's run records and its durable store. Derived from durable probes alone this missed a pod that billed and died before its first probe, and the next attempt then called itself the campaign's first resource.",
+    "prior_attempt_actuals": [
+      {
+        "attempt": "attempt1",
+        "provider_resource_created": false,
+        "gpu_usd": 0.0,
+        "disk_usd": 0.0,
+        "all_in_usd": 0.0,
+        "elapsed_minutes": 0.0,
+        "basis": "closeout",
+        "terminal": "CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT",
+        "_why_zero": "this run has no session record because its chain was retired before the launcher ran. Its closeout states affirmatively that no provider resource was created, so nothing was billed. Absence of a closeout would still be UNKNOWN."
+      },
+      {
+        "attempt": "attempt2",
+        "provider_resource_created": false,
+        "gpu_usd": 0.0,
+        "disk_usd": 0.0,
+        "all_in_usd": 0.0,
+        "elapsed_minutes": 0.0,
+        "basis": "closeout",
+        "terminal": "CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT",
+        "_why_zero": "this run has no session record because its chain was retired before the launcher ran. Its closeout states affirmatively that no provider resource was created, so nothing was billed. Absence of a closeout would still be UNKNOWN."
+      },
+      {
+        "attempt": "attempt3",
+        "provider_resource_created": true,
+        "gpu_usd": 2.5042,
+        "elapsed_minutes": 137.85,
+        "disk_usd": 0.0383,
+        "all_in_usd": 2.5425,
+        "disk_usd_per_minute": 0.00027781,
+        "provisioned_disk_gb": 120,
+        "_disk_is_derived": "the provider bills the provisioned container disk for the pod's whole lifetime and the runner never sees it, so it is derived from the authorization's own disk rate times this resource's elapsed minutes",
+        "provider_confirms_gone": true
+      },
+      {
+        "attempt": "attempt4",
+        "provider_resource_created": false,
+        "gpu_usd": 0.0,
+        "disk_usd": 0.0,
+        "all_in_usd": 0.0,
+        "elapsed_minutes": 0.0,
+        "_why_zero": "no provider resource was created, so neither GPU nor disk was billed"
+      }
+    ],
+    "settled_campaign_gpu_usd": 2.5042,
+    "settled_campaign_disk_usd": 0.0383,
+    "settled_campaign_spend_usd": 2.5425,
+    "_settled_is_all_in": "GPU actual from each predecessor's session record plus its container disk derived from the authorization's own disk rate. The runner records GPU only, and comparing GPU-only prior spend against an all-in ceiling omitted every predecessor's disk."
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "e8_inputs_20260810/calibration_v1/items.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 8
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1220
+    },
+    "local_assets": [
+      "artifacts/stage1/e8_calibration_v1",
+      "artifacts/stage1/reasoning_heavy_v2",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/c2_screening_v1",
+      "artifacts/stage1/state_eval_v1",
+      "artifacts/stage3/recovery_search_v2"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "0x48foz4j4xkcg",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-09-22T13:00:42Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/c2b-attempt5/watchdog_0x48foz4j4xkcg.jsonl"
+  ],
+  "watchdog_owns_pod": "0x48foz4j4xkcg",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.126.09"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_1013f46f.bundle",
+    "SESSION_ASSETS": "e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1,c1_confirmation_v1:artifacts/stage3,c2_screening_v1:artifacts/stage3,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/governance/authorization.json",
+    "SESSION_COMMIT": "1013f46f09576ad469d830518d291a9c074d435b",
+    "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c2/behavioural_frozen_assets.json",
+    "SESSION_KIND": "c2_behavioural",
+    "SESSION_PLAN_HASH": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV ASSETS_READY TEACHER_READY ROPE_OK VLLM_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_c2_behavioural.status",
+    "SESSION_TEST_IGNORES": "--ignore=tests/architecture --ignore=tests/autoinit --ignore=tests/c1_preflight --ignore=tests/c2_baseline_completion_preflight --ignore=tests/c2_full_search_preflight --ignore=tests/c2_preflight --ignore=tests/c2_replay_preflight --ignore=tests/data --ignore=tests/docs --ignore=tests/evaluation --ignore=tests/infrastructure --ignore=tests/init --ignore=tests/initialization --ignore=tests/models --ignore=tests/pod --ignore=tests/rollout --ignore=tests/runtime --ignore=tests/support --ignore=tests/test_usable_rollout.py --ignore=tests/training --ignore=tests/validation",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "1800",
+    "UV_MAX_S": "2400"
+  },
+  "campaign_restore": {
+    "n_probes": 0,
+    "gib": 0.0,
+    "bounded_minutes": 0.0,
+    "committed_candidate": null,
+    "pod_root": "/workspace/aad/artifacts/autoinit/c2_behavioural/restored",
+    "probes": []
+  },
+  "driver_job": {
+    "job_id": "autoinit_c2_behavioural_driver",
+    "pid": 3208,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_c2_behavioural_driver.py --campaign c2-behavioural-12probe-v1 --run-attempt attempt5 --continuation-manifest /workspace/aad/artifacts/autoinit/c2_behavioural/campaign_continuation.json --audit-dir /workspace/aad/artifacts/audit/autoinit_c2_behavioural --eval-dir /workspace/aad/artifacts/eval/c2_behavioural --b-workdir /workspace/aad/artifacts/autoinit/c2_behavioural/arms --status-path /workspace/autoinit_c2_behavioural.status --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' --b-build-minutes 31.00 --probe-train-minutes 75.00 --probe-battery-minutes 45.00 --rate 1.09 --spent-usd 0.1266 --soft-stop-usd 32.1646 --authorized-usd 32.7097",
+    "log_path": "/workspace/autoinit_c2_behavioural_run.log",
+    "status_path": "/workspace/autoinit_c2_behavioural.status",
+    "pid_path": "/workspace/jobs/autoinit_c2_behavioural_driver.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_c2_behavioural_driver.job.json",
+    "exit_path": "/workspace/jobs/autoinit_c2_behavioural_driver.exit",
+    "started_utc": "2026-09-21T07:07:13Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "probe_evidence_read_from": "/home/ecs-user/aad-scratch/c2b-attempt5/store/extracted/audit/autoinit_c2_behavioural/c2_behavioural_evidence.json",
+  "probes_secured": [
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.B.s616738081",
+      "rc": 0,
+      "bytes": 2384237807,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.B.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+      "rc": 0,
+      "bytes": 2384237912,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.B.s1936324010",
+      "rc": 0,
+      "bytes": 2384237819,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1936324010",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+      "rc": 0,
+      "bytes": 2384237912,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.B.s1916380711",
+      "rc": 0,
+      "bytes": 2384237819,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1916380711",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    }
+  ],
+  "probe_fetch_attempts": [
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.B.s616738081",
+      "rc": 0,
+      "bytes": 2384237807,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.B.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+      "rc": 0,
+      "bytes": 2384237912,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.B.s1936324010",
+      "rc": 0,
+      "bytes": 2384237819,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1936324010",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+      "rc": 0,
+      "bytes": 2384237912,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.B.s1916380711",
+      "rc": 0,
+      "bytes": 2384237819,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1916380711",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    }
+  ],
+  "probe_evidence_secured": [],
+  "campaign_ranking_secured": {
+    "already_present": true,
+    "path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/c2_screening_ranking.json"
+  },
+  "terminal": "C2_BEHAVIOURAL_FAILED",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "c2_behavioural_evidence.json"
+  ],
+  "checkpoints_fetched": [
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "rc": 0,
+      "bytes": 2384237900,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "screening.B.s616738081",
+      "rc": 0,
+      "bytes": 2384237807,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.B.s616738081",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+      "rc": 0,
+      "bytes": 2384237912,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.B.s1936324010",
+      "rc": 0,
+      "bytes": 2384237819,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1936324010",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+      "rc": 0,
+      "bytes": 2384237912,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    },
+    {
+      "artifact": "c2_behavioural_probe",
+      "unit_id": "confirmation.B.s1916380711",
+      "rc": 0,
+      "bytes": 2384237819,
+      "dest": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1916380711",
+      "matched": true,
+      "identity_announced": true,
+      "why": "re-identified from the delivered bytes"
+    }
+  ],
+  "required_products_secured": {
+    "ok": true,
+    "why": "all 10 finished probes off-pod (10 re-identified)"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": true,
+    "failed_check": "training_complete",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (C2_BEHAVIOURAL_FAILED); the products of the stages that did not run do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete'] are LOST.",
+    "checks": {
+      "training_complete": false,
+      "evaluation_complete": false,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 1,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 1068.29,
+    "actual_usd": 19.4073,
+    "authorized_usd": 32.7097,
+    "within_authorization": true
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-09-22T00:48:29+00:00"
+}

@@ -1,0 +1,110 @@
+{
+  "schema": "aadistill.autoinit.c2_behavioural_outcome/v1",
+  "run_id": "attempt5",
+  "campaign_id": "c2-behavioural-12probe-v1",
+  "terminal": "STAGE_C_FAILED_ENOSPC_AT_PROBE_11_OF_12",
+  "verdict": null,
+  "_no_verdict": "R5 forbids a verdict from a partial confirmation field: the estimand is a paired difference over THREE seeds and four probes are not that quantity. Ten of twelve probes are complete, trained AND scored, and all ten are durable off-pod with their per-prompt rows. This is NOT NO_GO and NOT INCONCLUSIVE -- those are results of a run that measured its whole field.",
+  "provider_resource_created": true,
+  "pod_id": "0x48foz4j4xkcg",
+  "final_pod_state": "deleted behind the teardown gate; provider confirms gone",
+  "provider_confirms_gone": true,
+  "what_failed": "probe 11 of 12 -- confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638 -- died in the trainer's `save_checkpoint` with `SafetensorError: Error while serializing: I/O error: No space left on device (os error 28)`. The pod's overlay was 120G/120G used, 546M free. Stage C raised C2DriverError, the driver emitted MARKER:C2_BEHAVIOURAL_FAILED, the launcher fetched and verified every FINISHED probe, and the teardown gate deleted the pod.",
+  "root_cause": {
+    "defect": "`behavioural.storage_requirement` charges `trained_probe_checkpoints: 13.323 GiB` as '12 probes x 1.110 GiB retained'. 1.110 GiB is the bf16 size of 596,049,920 parameters; the trainer writes fp32, so a probe's weights are 2.220 GiB. The retained figure is understated exactly 2x.",
+    "but_that_alone_did_not_kill_it": "the model's 84.387 GiB subtotal also charges `b_materialization_transient: 16.12 GiB`, which the attempt3 release_intermediates repair now frees. That freed headroom is why the arms and ten probes fitted at all.",
+    "what_actually_overflowed": "per-probe pod residency, not the durable artifact size. Measured: 57 GiB free after probe 1, 0.5 GiB free when probe 11 wrote -- about 5.6 GiB consumed per probe cycle against the 2.220 GiB the durable probe occupies. Nothing releases a probe's training working directory after its durable announcement; `announce_durable` does not delete the local copy. The exact composition of the extra ~3.4 GiB per probe is inferred from the trainer's save path and was NOT measured before the pod was deleted.",
+    "_my_error_not_the_frameworks": "I found the fp32/bf16 discrepancy at probe 1, fourteen hours before the failure, recorded it, and computed the headroom as 11 probes x 2.220 GiB = 24.4 GiB against 57 GiB free -- concluding 'comfortable'. That used the DURABLE ARTIFACT size as the POD RESIDENCY per probe. They differ by 2.5x. I had the defect in hand and bounded the wrong quantity. 'Averages are not bounds' and 'a resource bound must follow the real free() call sites' are both recorded lessons in this project and I applied neither.",
+    "second_defect": "`destination_gate` approved 37.0 GiB of dev-box free space against the same understated 13.3 GiB requirement. It passed for the wrong reason; with 15 GiB free it would also have passed and then failed mid-campaign."
+  },
+  "science_preserved": {
+    "probes_complete": 10,
+    "all_scored": true,
+    "all_durable_off_pod": true,
+    "destination": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5",
+    "screening": "all six complete; the mechanical ranking committed 1a2b5b030e7e4e202fda3a810ed53c5f, margin 0.0071 over the runner-up, no tie-break",
+    "confirmation": "4 of 6 -- seeds 1936324010 and 1916380711 both complete",
+    "missing": [
+      "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638",
+      "confirmation.B.s1523147638"
+    ]
+  },
+  "what_the_partial_field_shows": {
+    "_this_is_not_a_verdict": "reported because it is measured and because R5's refusal is about the VERDICT, not about looking at collected data. The frozen decision rule runs on six probes through a stratified cluster bootstrap; none of this is that computation.",
+    "per_seed": [
+      {
+        "seed": 1936324010,
+        "candidate_correct_overall": 0.0376,
+        "b_correct_overall": 0.0412,
+        "delta_correct": -0.0036,
+        "candidate_usable": 0.6211,
+        "b_usable": 0.5937,
+        "delta_usable": 0.0274
+      },
+      {
+        "seed": 1916380711,
+        "candidate_correct_overall": 0.0412,
+        "b_correct_overall": 0.0447,
+        "delta_correct": -0.0035,
+        "candidate_usable": 0.6368,
+        "b_usable": 0.6853,
+        "delta_usable": -0.0485
+      }
+    ],
+    "go_is_arithmetically_excluded": "GO requires at least 2 of 3 seed-specific Delta_correct > 0. Both completed confirmation seeds are negative, so even a positive third seed gives at most 1 of 3. This follows from the frozen rule, not from an interpretation of the numbers.",
+    "b_reproduces_its_c1_rate": "B scores 0.0412 on the confirmation battery, and C1's treatment arm -- which is B's lineage -- pooled 105/2550 = 0.0412 on c1_confirmation_v1. The screening battery's 0.0247 for B is a different, deliberately disjoint prompt set, not a regression.",
+    "screening_did_not_predict_confirmation": "the candidate led B by +0.0106 on screening and trails on both confirmation seeds. C1's own treatment varied 1.06 percentage points across recovery seeds alone -- the same magnitude as the entire screening margin."
+  },
+  "money": {
+    "gpu_actual_usd": 19.4073,
+    "elapsed_minutes": 1068.29,
+    "disk_actual_usd_derived": 0.2968,
+    "all_in_usd": 19.7041,
+    "authorized_gpu_usd": 32.7097,
+    "authorized_session_all_in_usd": 33.2099,
+    "within_authorization": true,
+    "campaign_ceiling_all_in_usd": 35.76,
+    "campaign_settled_all_in_usd": 22.2466,
+    "campaign_remaining_all_in_usd": 13.5134
+  },
+  "continuation": {
+    "permitted_in_principle": "yes, and it is the PREREGISTERED path: R1-R10 were registered 2026-09-20, before this run, and the grant names them. Screening is committed (R8), the ten complete probes are never retrained (R3), and the campaign owes exactly two probes plus their two arms.",
+    "but_it_does_not_fit": {
+      "remaining_work_expected_usd": 37.38,
+      "remaining_work_hard_usd": 38.41,
+      "campaign_remaining_all_in_usd": 13.5134,
+      "breakdown_minutes": {
+        "restore_verified_probes": 1728.3,
+        "two_probes_train_and_score": 174.0,
+        "materialize_two_arms": 60.3,
+        "other_overhead": 95.0
+      },
+      "_the_restore_is_84_percent_of_it": "10 probes x 2.22 GiB = 22.2 GiB bounded at the slowest recorded dev-box uplink, 0.23 MB/s = 1728 minutes = $31.40. The science the campaign still owes is $3.16 of probe training."
+    },
+    "why_the_restore_may_not_simply_be_narrowed": "the decision function is `confirm(per_sample, *, rule)` and reads per-prompt rows -- all ten probes' non-weight evidence is 8.08 MiB, a 0.6 minute transfer. It is tempting to ship only that. But R2 requires re-identification from the bytes at THREE points including 'again on the replacement pod from the bytes that arrive there', and `restore_campaign` states the reason: the manifest is a document, the ack is a record, neither is a checkpoint, and the only thing that makes a restored probe a measurement is its bytes. Narrowing the restore to the small evidence would remove precisely the anti-substitution guarantee R2 exists for. That is a protocol question and not an engineering optimization, so it is NOT taken here.",
+    "options_for_the_maintainer": [
+      {
+        "option": "raise the campaign ceiling to cover the restore",
+        "cost": "campaign would need about $60.66 all-in",
+        "note": "spends about $31 of GPU time moving bytes, and changes no science"
+      },
+      {
+        "option": "fix the TRANSPORT rather than the protocol",
+        "what": "the probes sit on the dev box only because the Hugging Face private-storage quota refused them; a durable backend with real bandwidth turns a 1728-minute restore into minutes and preserves R2 completely. Freeing hub quota by permanent deletion is a maintainer decision, never an autonomous repair. The architectural form is for the POD to push probes to that backend directly, so a replacement pod pulls at datacenter speed and never via the dev box.",
+        "note": "the only option that reaches a verdict without paying to move bytes or touching R2"
+      },
+      {
+        "option": "close the campaign without a verdict",
+        "note": "the ten probes stand as evidence and GO is already arithmetically excluded, but R5 means there is no verdict and the C2 incumbent question stays open"
+      }
+    ]
+  },
+  "repairs_owed_before_any_continuation": [
+    "derive the retained-probe size from the dtype the trainer actually saves, or measure it once against a real probe and pin it with a test that reads one -- a written constant that was never checked against the artifact is what this cost",
+    "charge per-probe POD RESIDENCY, not the durable artifact size: about 5.6 GiB measured, against the 2.220 GiB the model would imply",
+    "release a probe's training working directory after its durable announcement, the same lifecycle fix the arms got after attempt3, with the same fail-closed caller",
+    "have destination_gate charge the corrected figure"
+  ],
+  "authorizes": "nothing",
+  "next": "a maintainer decision on the continuation. No attempt6 chain exists and none may be built until that decision is made: the remainder as priced exceeds the campaign ceiling, and R10 says the gate refuses and returns rather than shortening the experiment or raising the ceiling."
+}
