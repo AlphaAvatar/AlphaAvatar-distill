@@ -2003,6 +2003,55 @@
    "previous_entry_sha256": "30b65d5856b9fc5dd832c1365bc1e8135510706a50f5f6474cd4550f89c5b57e",
    "also_affected_hash_bound_sets": [],
    "entry_sha256": "456367bbf50310606ea5386f7cf0cfcade8562cbdb76a2cff4acd0e624748438"
+  },
+  {
+   "amendment_id": "PHB-HA-023",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-22T08:54:40+00:00",
+   "reviewed_base_commit": "1fb0b31c",
+   "source_repair_commit": "beb8ef30030fbb64124aa0122106b8864738bab6",
+   "source_repair_parent": "1fb0b31c150d8cd1ff7af949c707f5f1cf80bec3",
+   "previous_live_digest": "f36d326f78b70081ba2a6977efd2ae60d34f601a8aab886a3729681f322b6817",
+   "new_live_digest": "b202d13273c80418416ac9687a82f75ab13b0cc29d41590579a1de9811f08862",
+   "changed_files": [
+    "src/aadistill/runtime/cost.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/runtime/cost.py": "f9601cd8b672aeb12e48f85d1506d3cd32d9c1825c915a39b329f36c1446a10c"
+   },
+   "file_sha256_after": {
+    "src/aadistill/runtime/cost.py": "e4ff7ebb50247cd8f55bf0071064d8eb6b2ca4fbb912ab410534de7747d3b342"
+   },
+   "patch_sha256": "d6a0bf5e98f721f1f116dec5feeba9293a040fddc3834a32c2b8f310d36348d2",
+   "numstat": {
+    "src/aadistill/runtime/cost.py": [
+     4,
+     3
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 3,
+   "_additive_only_is_derived": "from `numstat` above, the measured `git diff --numstat` of this repair. An additive entry here is still HISTORICAL accounting and still confers nothing -- `launch_compatible_with_frozen_preregistration` is False either way. The legacy additive note is sealed by hash and cannot take a new entry, so a purely additive post-freeze change to the shared runtime has no other recorder.",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "src/aadistill/runtime/cost.py comments only: three passages that named a specific experiment run were rewritten to describe the failure MODE instead. No code, no symbol, no expression changed -- the AST with docstrings stripped is identical.",
+   "why_the_owner_is_shared_session_runner": "the repository's own rule is that generic runtime code carries no experiment-instance or model-instance fact, and a comment naming a particular paid run is one. The digest is over file bytes, so a prose change moves it and is accounted here like any other.",
+   "why_a_c1_only_override_was_rejected": "prose only. Nothing C1 executed or could execute is affected, no symbol changed meaning, and no paid gate reads this ledger.",
+   "maintainer_authorization": "maintainer, Option-2 transport and lifecycle engineering GO of 2026-09-22",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "456367bbf50310606ea5386f7cf0cfcade8562cbdb76a2cff4acd0e624748438",
+   "also_affected_hash_bound_sets": [],
+   "entry_sha256": "23ced0a0433066a217d2bb31fa75878fe97fdaa6f102fa2180a9878771f96a02"
   }
  ]
 }
