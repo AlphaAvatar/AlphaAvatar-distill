@@ -124,8 +124,8 @@ def checkpoint_bytes(spec: ArchSpec, adapter: ArchitectureAdapter,
 #: Bytes per parameter, by the dtype a caller actually saves or trains in.
 #: Named rather than inlined because the SAVE dtype and the TRAIN dtype are
 #: different decisions and a storage model that conflates them is wrong by
-#: exactly their ratio -- which is how a 120 GB pod ran out of disk with six
-#: probes to go while its own model said it had room.
+#: exactly their ratio -- which is how a provisioned disk can run out while
+#: the model that sized it reports room to spare.
 #: Both the short forms and the TORCH spellings real configs are written in.
 #: `configs/stage3/e1/e1_r0860k_sa_pca.json` says `"dtype": "float32"`, and a
 #: table that knew only `fp32` refused a correct config -- a gate failing on
@@ -309,7 +309,8 @@ class ResidencyUnit:
     #: puts a new tree down before any retention policy prunes the old one, so
     #: the two are on disk together. A peak model that charges only the floor,
     #: the earlier units and a transient misses exactly the instant that
-    #: overflows -- which is the instant attempt5's trainer died in.
+    #: overflows -- and a trainer writing its last checkpoint is the
+    #: likeliest moment for a disk to run out.
     materializing_bytes: int = 0
 
 

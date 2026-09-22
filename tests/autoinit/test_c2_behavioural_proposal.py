@@ -268,10 +268,25 @@ def test_the_storage_provision_is_derived_and_is_not_the_full_searchs():
     parts = {k: v for k, v in st["components_gib"].items()
              if not k.startswith("_")}
     assert abs(sum(parts.values()) - st["subtotal_gib"]) < 1e-6
-    assert st["provision_gb"] >= st["subtotal_gib"], (
-        "the provision is below the derived requirement")
-    #: And it must cover the largest single thing the session holds.
-    assert parts["one_probe_training_working_set"] > parts["staged_initializations"] / 2
+    #: AGAINST THE CONTAINER BOUND, not the legacy subtotal. `subtotal_gib`
+    #: adds the durable requirement to the local one and additionally used to
+    #: include the in-memory training set, so a provision sized from it asked
+    #: for 140 GB where the pod's real filesystem peak is 74 GiB. The
+    #: provision provisions CONTAINER storage and is derived from
+    #: `container_residency`.
+    assert st["provision_gb"] >= st["container_residency"]["peak_gib"], (
+        "the provision is below the derived peak local residency")
+    #: And the peak must cover the biggest thing that is on disk at once: a
+    #: trainer checkpoint tree being written while the retained one still
+    #: exists, on top of the arms and the teacher.
+    c = st["container_residency"]
+    tree = c["trainer_checkpoint_tree"]["bytes"] / 2**30
+    assert c["peak_gib"] > parts["staged_initializations"] + 2 * tree
+    #: The in-memory set is REPORTED and not summed into a disk bound.
+    assert "_one_probe_training_memory_gib" in st["components_gib"]
+    assert "one_probe_training_working_set" not in parts, (
+        "the in-memory training set is back in the disk components; RAM and "
+        "VRAM belong in no filesystem bound")
 
 
 def test_gpu_and_storage_money_are_derived_apart():
