@@ -223,13 +223,19 @@ def build() -> dict:
                     "and scoring reads the weights. Retraining it is "
                     "forbidden, so the weights have to travel."),
                 "cost": (
-                    "billed pod time — any scp to a pod happens after it "
-                    "exists — bounded at the slowest recorded dev-box uplink, "
-                    "0.23 MB/s, about 80 minutes per 1.11 GiB probe. Those "
-                    "minutes are a phase in the remaining-work bound, so an "
-                    "unaffordable restore is refused before a pod exists. "
-                    "Freeing Hugging Face private storage would move this to "
-                    "the $0 pre-pod relay; that is a maintainer decision."),
+                    "a probe's DEPLOYABLE model is 2.221 GiB -- 596,049,920 "
+                    "parameters in the recipe's float32 save dtype -- so ten "
+                    "of them are 22.2 GiB. Over the dev box's measured "
+                    "0.64-0.72 MB/s uplink that is about 585 minutes of "
+                    "BILLED pod time, because an scp to a pod happens after "
+                    "the pod exists. It is a phase in the remaining-work "
+                    "bound, so an unaffordable restore is refused before a pod "
+                    "is created -- and at that price it IS unaffordable "
+                    "against what the campaign has left. The repair is a "
+                    "durable backend the dev box can fill UNBILLED before any "
+                    "pod exists and a replacement pod can drain at datacenter "
+                    "speed; Hugging Face cannot be it, measured, because its "
+                    "quota endpoint refuses 2 GiB and one probe is 2.221."),
             },
             "_two_ceilings_not_one": (
                 "campaign_all_in_hard_usd bounds the CAMPAIGN across every "
@@ -301,18 +307,23 @@ def build() -> dict:
         "candidate_transport": {
             "mode": BG.CANDIDATE_TRANSPORT,
             "_why_not_staged": (
-                "each arm is a 1.19 GB checkpoint and there are six. The scp "
-                "path copies local assets AFTER the pod exists, so they bill, "
-                "and the shared runner gives each asset a hardcoded 600-second "
-                "timeout; one of these needs ~1650 s against a dev-box uplink "
-                "measured at 0.44-0.79 MB/s. Recovery-continuation attempt 2 "
+                "each arm is a 1.19 GB bf16 initialization leaf and there "
+                "are six. The scp path copies local assets AFTER the pod "
+                "exists, so they bill, and the shared runner gives each asset "
+                "a hardcoded 600-second timeout; one of these needs ~1650 s "
+                "against a dev-box uplink measured at 0.64-0.79 MB/s. Recovery-continuation attempt 2 "
                 "died on exactly that, staging exactly this size, and its "
                 "write-up concluded the failure was 'arithmetic rather than "
                 "luck'. The hub-relay route that repaired attempt 2 needs quota "
                 "this account does not have: the LFS batch endpoint was asked "
-                "directly at $0 on 2026-09-19 and again on 2026-09-20 and "
-                "ACCEPTS one 1.19 GB object while REFUSING 5.95 GB for "
-                "'Private repository storage limit reached'."),
+                "directly at $0 on 2026-09-19, 2026-09-20 and again on "
+                "2026-09-22 AFTER a maintainer-authorized cleanup recovered "
+                "1.110 GiB. It now ACCEPTS 1 GiB and REFUSES 2 GiB with "
+                "'Private repository storage limit reached' -- so it cannot "
+                "take one 1.19 GB leaf reliably and certainly not one 2.221 "
+                "GiB trained probe. Everything larger on the account is "
+                "preserved fail-closed: e1_scaling_20260801 and stage3 have no "
+                "local copy at all and Hugging Face is their only one."),
             "_what_is_done_instead": (
                 "every arm is materialized on the pod from the teacher along a "
                 "path pinned at EVERY step to the artifact digest the frozen "
@@ -349,11 +360,17 @@ def build() -> dict:
                 "single_shard_sha256, arch_signature and num_parameters."),
             "destination": "/home/ecs-user/aad-artifacts/phase_c2_behavioural",
             "_backend_has_room": (
-                "12 probes x 1.11 GiB = 13.3 GiB against 43 GB free, checked "
-                "by destination_gate before a pod is created. The Hugging Face "
-                "route is NOT used: C1 attempt 18 ran a correct preservation "
-                "mechanism on six probes and preserved none, because every "
-                "upload was refused for quota."),
+                "12 trained probes x 2.221 GiB = 26.654 GiB, DERIVED from "
+                "the recipe's float32 save dtype rather than from the bf16 "
+                "size of the initialization leaf -- that error charged the "
+                "durable requirement at 13.3 GiB, half its real value, and "
+                "destination_gate approved 37 GiB of free space for the wrong "
+                "reason. It is checked before a pod is created. The Hugging "
+                "Face route is NOT used: its quota endpoint refuses 2 GiB, "
+                "measured on 2026-09-22 after an authorized cleanup, and one "
+                "probe is 2.221 GiB. C1 attempt 18 had already run a correct "
+                "preservation mechanism on six probes and preserved none for "
+                "the same reason."),
             "_preservation_is_not_permission": (
                 "saving a probe authorizes nothing about reusing it. Reuse is "
                 "governed by the resume rules, not by the existence of a file."),

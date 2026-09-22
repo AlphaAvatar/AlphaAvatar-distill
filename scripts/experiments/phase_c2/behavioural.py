@@ -328,6 +328,97 @@ B_MATERIALIZATION_TRANSIENT_GIB = 16.12
 PROBE_CHECKPOINT_EXTRA_BYTES = 800_000
 
 
+def trainable_parameter_count(repo_root: str | Path = REPO_ROOT, *,
+                              checkpoint: str | Path | None = None
+                              ) -> dict[str, Any]:
+    """How many parameters the recipe's `trainable_patterns` actually select.
+
+    DERIVED FROM THE ARTIFACT AND THE RECIPE, not assumed and not measured
+    once and pinned. A safetensors file carries every tensor's name and shape
+    in its header, so the same regexes `select_trainable` applies to
+    `model.named_parameters()` can be applied here without loading a model or
+    touching a GPU.
+
+    It matters because the optimizer state in a trainer checkpoint is
+    `n_moments` tensors per TRAINABLE parameter. This recipe freezes the
+    embeddings and the lm head, so 73.9% of the parameters are trainable and a
+    bound that charged all of them would overstate the tree -- while one that
+    ignored the optimizer entirely understates it by 3.28 GiB, which is most
+    of what overflowed attempt5's disk.
+
+    Generic: any checkpoint, any pattern list, any model family. Nothing about
+    this architecture is encoded.
+    """
+    import re
+    import struct
+    from pathlib import Path as _P
+
+    recipe = json.loads((_P(repo_root) / FROZEN_RECIPE_REL).read_text())
+    patterns = recipe.get("trainable_patterns")
+    if not patterns:
+        raise BehaviouralProposalError(
+            f"{FROZEN_RECIPE_REL} declares no trainable_patterns, so the "
+            "optimizer state in a checkpoint cannot be bounded")
+
+    src = _P(checkpoint) if checkpoint else _reference_checkpoint(repo_root)
+    with open(src, "rb") as f:
+        n = struct.unpack("<Q", f.read(8))[0]
+        header = json.loads(f.read(n))
+
+    def numel(shape: list[int]) -> int:
+        out = 1
+        for d in shape:
+            out *= int(d)
+        return out
+
+    tensors = {k: v for k, v in header.items() if k != "__metadata__"}
+    total = sum(numel(v["shape"]) for v in tensors.values())
+    if patterns == "all":
+        trainable = total
+        matched = sorted(tensors)
+    else:
+        matched = sorted(k for k in tensors
+                         if any(re.search(pt, k) for pt in patterns))
+        trainable = sum(numel(tensors[k]["shape"]) for k in matched)
+    if not matched:
+        raise BehaviouralProposalError(
+            f"no tensor in {src} matches trainable_patterns {patterns}; the "
+            "recipe and the checkpoint disagree about the architecture")
+    return {"num_parameters": total, "trainable_parameters": trainable,
+            "trainable_fraction": round(trainable / total, 4),
+            "n_tensors": len(tensors), "n_trainable_tensors": len(matched),
+            "source": str(src), "patterns": patterns,
+            "dtypes": sorted({v["dtype"] for v in tensors.values()}),
+            "_derived_how": (
+                "the recipe's own trainable_patterns applied to the tensor "
+                "names in a real checkpoint's safetensors header -- the same "
+                "regexes train.py :: select_trainable applies to "
+                "model.named_parameters(), without loading a model")}
+
+
+def _reference_checkpoint(repo_root: str | Path) -> Path:
+    """A real checkpoint whose header can be read, from the frozen manifest.
+
+    The frozen Top-5 candidates are the natural reference: they are the
+    architecture every probe trains, their paths are in the manifest, and one
+    of them exists wherever a proposal is being derived. Raises rather than
+    guessing a shape if none is reachable.
+    """
+    for cand in candidate_manifest(repo_root):
+        for key in ("durable_path", "path"):
+            d = cand.get(key)
+            if not d:
+                continue
+            f = Path(d) / "model.safetensors"
+            if f.is_file():
+                return f
+    raise BehaviouralProposalError(
+        "no frozen candidate checkpoint is reachable, so the trainable "
+        "parameter count cannot be derived from an artifact. It is not "
+        "guessed: the optimizer state it bounds is 3.28 GiB of the 5.50 GiB "
+        "a trainer checkpoint occupies.")
+
+
 def training_dtypes(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     """The dtypes a probe actually trains and SAVES in, from the frozen recipe.
 
@@ -447,15 +538,22 @@ def storage_requirement(candidates: list[dict[str, Any]],
             f"{n_screening_arms} screening arms -- the five reconstructed "
             "candidates and the incumbent B -- resident before any probe runs. "
             "They are MATERIALIZED on the pod rather than shipped to it: each "
-            "is a 1.19 GB checkpoint, the scp path allows one asset 600 s "
-            "against a dev-box uplink needing ~1650, and the hub relay refuses "
-            "5.95 GB for private-storage quota. Residency is the same either "
-            "way; only the transient above is added by building them here"),
-        "one_probe_training_working_set": round(working_set, 3),
-        "_working_set_is": (
-            f"{params:,} parameters as bf16 weights plus an fp32 gradient and "
-            "AdamW's two fp32 moments. Probes run sequentially, so exactly one "
-            "of these is resident at a time"),
+            "is a 1.19 GB bf16 initialization leaf, the scp path allows one "
+            "asset 600 s against a dev-box uplink measured at 0.64-0.72 MB/s "
+            "and needing ~1650, and the hub relay has no quota for them. "
+            "Residency is the same either way; only the transient above is "
+            "added by building them here. NOTE that a leaf is the INPUT: a "
+            "trained probe is 2.221 GiB, charged separately below"),
+        "_one_probe_training_memory_gib": round(working_set, 3),
+        "_training_memory_is_not_disk": (
+            f"{params:,} parameters as {tr['weight_dtype']} master weights, a "
+            f"{tr['grad_dtype']} gradient and {tr['n_moments']} "
+            f"{tr['moment_dtype']} optimizer moments -- "
+            f"{round(working_set, 3)} GiB resident in RAM/VRAM while one "
+            "probe trains. It was summed into the disk subtotal, where it "
+            "does not belong: none of it materializes on the filesystem "
+            "except through a checkpoint, which the trainer tree above "
+            "charges. Underscored so it is reported and NOT summed."),
         "trained_probe_checkpoints": round(trained, 3),
         "_trained_is": (
             f"{sched['total_probes']} probes x {probe_ckpt.gib:.3f} GiB, the "
@@ -483,11 +581,37 @@ def storage_requirement(candidates: list[dict[str, Any]],
     #: describe a program that does not exist -- which is what the previous
     #: bound did.
     n_probes = int(sched["total_probes"])
-    retained_per_probe = int((1 + int(tr["keep_last"])) * probe_ckpt.bytes)
+    #: THE TRAINER'S OWN PRODUCER, not the deployable model. `save_checkpoint`
+    #: writes `checkpoints/<tag>/model` AND `trainer_state.pt`, and the latter
+    #: holds AdamW's moments for the TRAINABLE parameters -- 73.9% of them
+    #: under this recipe, which freezes the embeddings and the head. A tree is
+    #: 5.50 GiB where the deployable model is 2.22, and charging the tree at
+    #: the model's size is 3.28 GiB per probe of pure understatement.
+    counts = trainable_parameter_count(repo_root)
+    tree = COST.TrainerCheckpointFootprint(
+        num_parameters=counts["num_parameters"],
+        trainable_parameters=counts["trainable_parameters"],
+        save_dtype=tr["save_dtype"], moment_dtype=tr["moment_dtype"],
+        n_moments=tr["n_moments"],
+        extra_bytes=int(tr["checkpoint_extra_bytes"]))
+
+    #: `keep_last` PRUNES AFTER THE WRITE. `save_checkpoint` puts the new tree
+    #: down and only then deletes the stale ones, so at that instant
+    #: `keep_last` trees plus the one being written are all on disk. That
+    #: instant is where attempt5's trainer died, and the old bound did not
+    #: charge it at all.
+    keep = int(tr["keep_last"])
+    retained_per_probe = keep * tree.bytes
+    materializing_per_probe = tree.bytes
+
     units = [COST.ResidencyUnit(
         label=f"probe_{i + 1}", durable_bytes=probe_ckpt.bytes,
         retained_bytes=retained_per_probe,
-        transient_bytes=int(working_set * 2**30),
+        materializing_bytes=materializing_per_probe,
+        #: ZERO. The weights, gradient and moments are RAM/VRAM; they do not
+        #: materialize on disk and a filesystem bound that charges them is
+        #: describing the wrong resource. They are reported separately below.
+        transient_bytes=0,
         released_on_completion=True) for i in range(n_probes)]
     fixed = int(sum(
         components[k] for k in ("teacher", "staged_initializations",
@@ -528,11 +652,28 @@ def storage_requirement(candidates: list[dict[str, Any]],
             "peak_gib": round(container_gib, 3),
             "peak_at_unit": container["peak_at_unit"],
             "retained_bytes_per_probe": retained_per_probe,
+            "materializing_bytes_per_probe": materializing_per_probe,
+            "trainer_checkpoint_tree": tree.as_dict(),
+            "trainable_parameters": counts,
             "_retained_is": (
-                f"(keep_last={tr['keep_last']} + 1) x {probe_ckpt.gib:.3f} GiB "
-                "-- the recipe's retained intermediate checkpoint plus the "
-                "final save, both under the probe's out_dir. Derived from the "
-                "recipe's own checkpoint policy, not measured and pinned"),
+                f"keep_last={keep} x {tree.gib:.3f} GiB of trainer checkpoint "
+                f"TREE -- the deployable model ({tree.model_bytes / 2**30:.3f} "
+                f"GiB) plus trainer_state.pt's optimizer moments "
+                f"({tree.optimizer_bytes / 2**30:.3f} GiB for "
+                f"{counts['trainable_parameters']:,} trainable of "
+                f"{counts['num_parameters']:,} parameters). Derived from the "
+                "recipe's checkpoint policy and its trainable_patterns "
+                "applied to a real checkpoint's tensor names"),
+            "_materializing_is": (
+                f"one more tree, {tree.gib:.3f} GiB, because save_checkpoint "
+                "writes the new one BEFORE keep_last prunes the old. That "
+                "instant is the filesystem peak and the previous bound did "
+                "not charge it"),
+            "_memory_is_not_charged_here": (
+                "the weights, gradient and optimizer moments resident during "
+                "training are RAM/VRAM. They are reported as "
+                "`training_memory_gib` and deliberately excluded from a "
+                "filesystem bound"),
             "released_on_completion": True,
             "_release_is_enforced_by": (
                 "autoinit_c2_behavioural_driver.py :: "

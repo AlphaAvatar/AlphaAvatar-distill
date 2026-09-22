@@ -146,11 +146,15 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
 #: * **The hub relay cannot.** The fix continuation attempt 3 adopted — publish
 #:   to a private transport repo at $0, let the pod pull at hub speed — needs
 #:   quota this account does not have. Asked directly at $0 via the LFS batch
-#:   endpoint on 2026-09-19 and again on 2026-09-20: one 1.19 GB object is
-#:   ACCEPTED, 5.95 GB is REFUSED with "Private repository storage limit
-#:   reached". Headroom bisected to 1.756 GiB against 93.08 GiB occupied.
-#:   Freeing or buying storage is a maintainer decision, never an autonomous
-#:   repair.
+#:   endpoint on 2026-09-19, 2026-09-20, and again on 2026-09-22 after a
+#:   maintainer-authorized cleanup recovered 1.110 GiB: it ACCEPTS 1 GiB and
+#:   REFUSES 2 GiB with "Private repository storage limit reached", against
+#:   91.029 GiB occupied of a recorded ~93.13 limit. A trained probe is 2.221
+#:   GiB, so the relay cannot carry even one. Everything larger on the account
+#:   is preserved fail-closed — e1_scaling_20260801 (42.4 GiB) and stage3
+#:   (26.8 GiB) have NO local copy, so Hugging Face is their only one, and
+#:   e1_r0860k_* is the provenance of this campaign's own recovery recipe.
+#:   Buying storage remains a maintainer decision.
 #:
 #: What IS available is the mechanism the replay just proved: every candidate
 #: reconstructs from the teacher, byte-for-byte, through a path pinned to the

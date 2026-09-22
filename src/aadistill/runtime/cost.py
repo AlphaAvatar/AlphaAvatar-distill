@@ -190,6 +190,80 @@ class CheckpointFootprint:
                 "bytes": self.bytes, "gib": round(self.gib, 3)}
 
 
+@dataclass(frozen=True)
+class TrainerCheckpointFootprint:
+    """What ONE of the trainer's checkpoint directories occupies ON DISK.
+
+    THREE QUANTITIES ARE DISTINCT and this is the middle one:
+
+    * the DEPLOYABLE model -- `CheckpointFootprint` -- is what travels to a
+      durable backend and what an evaluator loads;
+    * this is the trainer's whole checkpoint TREE, which additionally holds the
+      optimizer state the trainer needs to resume;
+    * `training_working_set_bytes` is RAM/VRAM and belongs in NO disk bound.
+
+    Charging the tree at the deployable model's size understates it by the
+    optimizer state, which for Adam-family optimizers is `n_moments` tensors
+    per TRAINABLE parameter -- not per parameter. A recipe that freezes
+    embeddings and the head has materially fewer trainable parameters than it
+    has parameters, and a bound that ignores the distinction is wrong in both
+    directions depending on the recipe.
+
+    `extra_bytes` is everything else the save writes: rng state, the step and
+    consumed-block counters, a LoRA state file and its meta when adapters are
+    in use, config and tokenizer files.
+    """
+
+    num_parameters: int
+    trainable_parameters: int
+    save_dtype: str
+    moment_dtype: str
+    n_moments: int
+    extra_bytes: int = 0
+
+    def __post_init__(self) -> None:
+        if self.trainable_parameters > self.num_parameters:
+            raise ValueError(
+                f"{self.trainable_parameters:,} trainable parameters of "
+                f"{self.num_parameters:,} total: a subset cannot be larger "
+                "than the set, so one of the two was derived wrongly")
+
+    @property
+    def model_bytes(self) -> int:
+        return int(self.num_parameters * bytes_per_param(self.save_dtype))
+
+    @property
+    def optimizer_bytes(self) -> int:
+        return int(self.n_moments * self.trainable_parameters
+                   * bytes_per_param(self.moment_dtype))
+
+    @property
+    def bytes(self) -> int:
+        return self.model_bytes + self.optimizer_bytes + self.extra_bytes
+
+    @property
+    def gib(self) -> float:
+        return self.bytes / 2**30
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"num_parameters": self.num_parameters,
+                "trainable_parameters": self.trainable_parameters,
+                "trainable_fraction": round(
+                    self.trainable_parameters / self.num_parameters, 4),
+                "save_dtype": self.save_dtype,
+                "moment_dtype": self.moment_dtype,
+                "n_moments": self.n_moments,
+                "model_bytes": self.model_bytes,
+                "optimizer_bytes": self.optimizer_bytes,
+                "extra_bytes": self.extra_bytes,
+                "bytes": self.bytes, "gib": round(self.gib, 3),
+                "_what_this_is": (
+                    "one trainer checkpoint TREE on disk: the deployable "
+                    "model plus the optimizer state for the TRAINABLE "
+                    "parameters. Not the deployable footprint, and not the "
+                    "in-memory training set.")}
+
+
 def training_working_set_bytes(num_parameters: int, *, weight_dtype: str,
                                grad_dtype: str, moment_dtype: str,
                                n_moments: int) -> int:
@@ -230,6 +304,13 @@ class ResidencyUnit:
     retained_bytes: int
     transient_bytes: int
     released_on_completion: bool
+    #: Bytes this unit MATERIALIZES while it runs, on top of `retained_bytes`,
+    #: at the moment they coexist. The dangerous instant is a save: the writer
+    #: puts a new tree down before any retention policy prunes the old one, so
+    #: the two are on disk together. A peak model that charges only the floor,
+    #: the earlier units and a transient misses exactly the instant that
+    #: overflows -- which is the instant attempt5's trainer died in.
+    materializing_bytes: int = 0
 
 
 def peak_local_residency_bytes(units: Sequence[ResidencyUnit], *,
@@ -246,8 +327,15 @@ def peak_local_residency_bytes(units: Sequence[ResidencyUnit], *,
     accumulated = 0
     peak, at, trace = fixed_bytes, None, []
     for u in units:
-        here = fixed_bytes + accumulated + u.transient_bytes
+        #: The unit's OWN bytes are charged at its own worst moment: what it
+        #: retains PLUS what it is materializing on top of that. Charging only
+        #: `transient` left the save instant -- new tree written before the old
+        #: one is pruned -- out of the bound entirely.
+        here = (fixed_bytes + accumulated + u.retained_bytes
+                + u.materializing_bytes + u.transient_bytes)
         trace.append({"label": u.label, "accumulated_before": accumulated,
+                      "own_retained": u.retained_bytes,
+                      "materializing": u.materializing_bytes,
                       "transient": u.transient_bytes, "local_peak_here": here})
         if here > peak:
             peak, at = here, u.label
@@ -258,11 +346,14 @@ def peak_local_residency_bytes(units: Sequence[ResidencyUnit], *,
             "accumulated_retained_bytes": accumulated,
             "n_units": len(units), "trace": trace,
             "_what_this_is": (
-                "PEAK LOCAL residency for a sequential program: the fixed "
-                "floor, plus every retained contribution not released before "
-                "the worst moment, plus ONE transient. It is not the durable "
-                "requirement -- durable bytes are bounded against the backend "
-                "that holds them, which survives teardown and this does not.")}
+                "PEAK LOCAL FILESYSTEM residency for a sequential program: "
+                "the fixed floor, every retained contribution not released "
+                "before the worst moment, and the running unit's own retained "
+                "plus materializing plus transient bytes. It is not the "
+                "durable requirement -- durable bytes are bounded against the "
+                "backend that holds them, which survives teardown and this "
+                "does not -- and it is not memory: RAM and VRAM terms belong "
+                "in no disk bound and are not charged here.")}
 
 
 def durable_backend_bytes(units: Sequence[ResidencyUnit]) -> dict[str, Any]:

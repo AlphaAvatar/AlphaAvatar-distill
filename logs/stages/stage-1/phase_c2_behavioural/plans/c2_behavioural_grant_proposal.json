@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-22T06:31:36.818478+00:00",
+ "proposed_utc": "2026-09-22T08:27:56.453374+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -18,7 +18,7 @@
    "descriptor_before_scoring": "each probe's training record \u2014 rung, arm, seed, initialization digest, config hash \u2014 is written when training finishes and BEFORE scoring starts, so a scoring failure leaves bytes that can still be shown to be that probe. Bytes without it are preserved and not consumable: re-identification proves what a file is, never which measurement it is.",
    "unscored_probes_resume_at_scoring": "a restored probe with no valid score is scored, never retrained, and charges the battery only.",
    "why_bytes_not_just_identities": "a probe trained but not validly scored resumes AT SCORING and scoring reads the weights. Retraining it is forbidden, so the weights have to travel.",
-   "cost": "billed pod time \u2014 any scp to a pod happens after it exists \u2014 bounded at the slowest recorded dev-box uplink, 0.23 MB/s, about 80 minutes per 1.11 GiB probe. Those minutes are a phase in the remaining-work bound, so an unaffordable restore is refused before a pod exists. Freeing Hugging Face private storage would move this to the $0 pre-pod relay; that is a maintainer decision."
+   "cost": "a probe's DEPLOYABLE model is 2.221 GiB -- 596,049,920 parameters in the recipe's float32 save dtype -- so ten of them are 22.2 GiB. Over the dev box's measured 0.64-0.72 MB/s uplink that is about 585 minutes of BILLED pod time, because an scp to a pod happens after the pod exists. It is a phase in the remaining-work bound, so an unaffordable restore is refused before a pod is created -- and at that price it IS unaffordable against what the campaign has left. The repair is a durable backend the dev box can fill UNBILLED before any pod exists and a replacement pod can drain at datacenter speed; Hugging Face cannot be it, measured, because its quota endpoint refuses 2 GiB and one probe is 2.221."
   },
   "_two_ceilings_not_one": "campaign_all_in_hard_usd bounds the CAMPAIGN across every resource and run attempt it takes, ALL-IN: each predecessor's GPU actual plus its container disk, derived from this authorization's own disk rate times that resource's elapsed minutes, because the runner records GPU only. A created resource whose cost cannot be read is UNKNOWN and refuses, never $0. all_in_hard_usd bounds only THIS session, and is what the window, the watchdog and every in-pod spend check are built from. The two were the same number until attempt3 spent $2.5425 without reaching a verdict; raising the campaign ceiling to fund another attempt must not, and does not, lengthen a session. A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those need rebuilt, and the restore \u2014 never on a fresh full session, which refused every continuation by construction. If the remainder does not fit, the gate refuses and returns to the maintainer: the experiment is not shortened and neither ceiling is raised."
  },
@@ -216,7 +216,7 @@
  },
  "candidate_transport": {
   "mode": "materialize_on_pod_from_pinned_paths",
-  "_why_not_staged": "each arm is a 1.19 GB checkpoint and there are six. The scp path copies local assets AFTER the pod exists, so they bill, and the shared runner gives each asset a hardcoded 600-second timeout; one of these needs ~1650 s against a dev-box uplink measured at 0.44-0.79 MB/s. Recovery-continuation attempt 2 died on exactly that, staging exactly this size, and its write-up concluded the failure was 'arithmetic rather than luck'. The hub-relay route that repaired attempt 2 needs quota this account does not have: the LFS batch endpoint was asked directly at $0 on 2026-09-19 and again on 2026-09-20 and ACCEPTS one 1.19 GB object while REFUSING 5.95 GB for 'Private repository storage limit reached'.",
+  "_why_not_staged": "each arm is a 1.19 GB bf16 initialization leaf and there are six. The scp path copies local assets AFTER the pod exists, so they bill, and the shared runner gives each asset a hardcoded 600-second timeout; one of these needs ~1650 s against a dev-box uplink measured at 0.64-0.79 MB/s. Recovery-continuation attempt 2 died on exactly that, staging exactly this size, and its write-up concluded the failure was 'arithmetic rather than luck'. The hub-relay route that repaired attempt 2 needs quota this account does not have: the LFS batch endpoint was asked directly at $0 on 2026-09-19, 2026-09-20 and again on 2026-09-22 AFTER a maintainer-authorized cleanup recovered 1.110 GiB. It now ACCEPTS 1 GiB and REFUSES 2 GiB with 'Private repository storage limit reached' -- so it cannot take one 1.19 GB leaf reliably and certainly not one 2.221 GiB trained probe. Everything larger on the account is preserved fail-closed: e1_scaling_20260801 and stage3 have no local copy at all and Hugging Face is their only one.",
   "_what_is_done_instead": "every arm is materialized on the pod from the teacher along a path pinned at EVERY step to the artifact digest the frozen record holds \u2014 the mechanism the replay proved by reproducing all five byte-for-byte. It is not a search: no beam, no expansion, no ranking, no selection. A digest mismatch stops the session as a scientific finding.",
   "_maintainer_alternative": "freeing or buying Hugging Face private storage would allow the arms to be published at $0 before launch and pulled at hub speed, removing the materialization minutes below. That is a maintainer decision and never an autonomous repair.",
   "materialization": {
@@ -289,9 +289,9 @@
    "staged_initializations": 6.662,
    "b_materialization_transient": 16.12,
    "_b_materialization_transient_is": "ONE arm's construction intermediates, resident while that arm builds and released when it is verified. A four-step path holds its predecessors as it goes; this is the worst single path's intermediates as measured during the replay. Counted once, not six times, because the arms are built SEQUENTIALLY -- at the last build, five finished arms are resident plus this transient, which is what the sum below already charges",
-   "_staged_initializations_is": "6 screening arms -- the five reconstructed candidates and the incumbent B -- resident before any probe runs. They are MATERIALIZED on the pod rather than shipped to it: each is a 1.19 GB checkpoint, the scp path allows one asset 600 s against a dev-box uplink needing ~1650, and the hub relay refuses 5.95 GB for private-storage quota. Residency is the same either way; only the transient above is added by building them here",
-   "one_probe_training_working_set": 8.882,
-   "_working_set_is": "596,049,920 parameters as bf16 weights plus an fp32 gradient and AdamW's two fp32 moments. Probes run sequentially, so exactly one of these is resident at a time",
+   "_staged_initializations_is": "6 screening arms -- the five reconstructed candidates and the incumbent B -- resident before any probe runs. They are MATERIALIZED on the pod rather than shipped to it: each is a 1.19 GB bf16 initialization leaf, the scp path allows one asset 600 s against a dev-box uplink measured at 0.64-0.72 MB/s and needing ~1650, and the hub relay has no quota for them. Residency is the same either way; only the transient above is added by building them here. NOTE that a leaf is the INPUT: a trained probe is 2.221 GiB, charged separately below",
+   "_one_probe_training_memory_gib": 8.882,
+   "_training_memory_is_not_disk": "596,049,920 parameters as float32 master weights, a float32 gradient and 2 float32 optimizer moments -- 8.882 GiB resident in RAM/VRAM while one probe trains. It was summed into the disk subtotal, where it does not belong: none of it materializes on the filesystem except through a checkpoint, which the trainer tree above charges. Underscored so it is reported and NOT summed.",
    "trained_probe_checkpoints": 26.654,
    "_trained_is": "12 probes x 2.221 GiB, the SAVE footprint of 596,049,920 parameters in float32 plus 800,000 bytes of config/tokenizer/evidence. NOT the leaf size: the leaves are 1.110 GiB in the initialization dtype and charging the output at the input's size understated this by their dtype ratio",
    "_probe_checkpoint_footprint": {
@@ -307,10 +307,46 @@
    "image_and_environment": 30.0
   },
   "container_residency": {
-   "peak_gib": 72.174,
+   "peak_gib": 74.298,
    "peak_at_unit": "probe_1",
-   "retained_bytes_per_probe": 4769999360,
-   "_retained_is": "(keep_last=1 + 1) x 2.221 GiB -- the recipe's retained intermediate checkpoint plus the final save, both under the probe's out_dir. Derived from the recipe's own checkpoint policy, not measured and pinned",
+   "retained_bytes_per_probe": 5908739328,
+   "materializing_bytes_per_probe": 5908739328,
+   "trainer_checkpoint_tree": {
+    "num_parameters": 596049920,
+    "trainable_parameters": 440467456,
+    "trainable_fraction": 0.739,
+    "save_dtype": "float32",
+    "moment_dtype": "float32",
+    "n_moments": 2,
+    "model_bytes": 2384199680,
+    "optimizer_bytes": 3523739648,
+    "extra_bytes": 800000,
+    "bytes": 5908739328,
+    "gib": 5.503,
+    "_what_this_is": "one trainer checkpoint TREE on disk: the deployable model plus the optimizer state for the TRAINABLE parameters. Not the deployable footprint, and not the in-memory training set."
+   },
+   "trainable_parameters": {
+    "num_parameters": 596049920,
+    "trainable_parameters": 440467456,
+    "trainable_fraction": 0.739,
+    "n_tensors": 310,
+    "n_trainable_tensors": 309,
+    "source": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9/model.safetensors",
+    "patterns": [
+     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+     "input_layernorm",
+     "post_attention_layernorm",
+     "model\\.norm\\."
+    ],
+    "dtypes": [
+     "BF16"
+    ],
+    "_derived_how": "the recipe's own trainable_patterns applied to the tensor names in a real checkpoint's safetensors header -- the same regexes train.py :: select_trainable applies to model.named_parameters(), without loading a model"
+   },
+   "_retained_is": "keep_last=1 x 5.503 GiB of trainer checkpoint TREE -- the deployable model (2.220 GiB) plus trainer_state.pt's optimizer moments (3.282 GiB for 440,467,456 trainable of 596,049,920 parameters). Derived from the recipe's checkpoint policy and its trainable_patterns applied to a real checkpoint's tensor names",
+   "_materializing_is": "one more tree, 5.503 GiB, because save_checkpoint writes the new one BEFORE keep_last prunes the old. That instant is the filesystem peak and the previous bound did not charge it",
+   "_memory_is_not_charged_here": "the weights, gradient and optimizer moments resident during training are RAM/VRAM. They are reported as `training_memory_gib` and deliberately excluded from a filesystem bound",
    "released_on_completion": true,
    "_release_is_enforced_by": "autoinit_c2_behavioural_driver.py :: release_acked_probe_workdirs, which frees a probe's workdir once the launcher has confirmed the bytes durable off-pod and re-identified them there, and RAISES if a release fails so no further probe is trained under a bound that no longer holds",
    "_what_this_bounds": "peak LOCAL bytes on the provider's container disk. It does NOT include the durable requirement below: a completed probe's bytes must survive teardown somewhere, which is no reason for them to stay on every future machine"
@@ -320,12 +356,12 @@
    "n_units": 12,
    "_what_this_bounds": "the bytes that must outlive the provider resource, checked against the DURABLE backend's free capacity. Charging these to container storage is what overflowed attempt5's disk"
   },
-  "subtotal_gib": 98.828,
+  "subtotal_gib": 89.946,
   "_subtotal_is_the_legacy_sum": "every component added together, which double-charges the probe checkpoints: they are counted once as container residency and once as the durable requirement. Retained because the frozen provision was derived from it; `container_residency` and `durable_backend` above are the two quantities a gate should read",
   "margin_fraction": 0.25,
-  "with_margin_gib": 90.2175,
+  "with_margin_gib": 92.8725,
   "gb_per_gib": 1.073741824,
-  "with_margin_gb": 96.8703,
+  "with_margin_gb": 99.7211,
   "provision_gb": 100,
   "_units": "the residency is derived in GiB and the provider's flag is GB. The conversion is the one recorded in configs/infrastructure/provider_storage_pricing.json, not a local convention: rounding a GiB subtotal straight into a GB flag under-provisions by 7%.",
   "_why_not_400": "the full search's 400 GB was derived for a beam that generates a whole level before pruning and holds sixty compressed states at the level boundary. This session holds one training working set at a time and retains twelve small checkpoints; carrying 400 GB here would bill for storage nothing uses.",
@@ -495,7 +531,7 @@
  "durability": {
   "mechanism": "the driver announces each finished unit's identity to its evidence; the launcher's poll hook pulls the bytes off-pod during the run and re-identifies them at the destination against artifact_digest, weights_digest, config_sha256, single_shard_sha256, arch_signature and num_parameters.",
   "destination": "/home/ecs-user/aad-artifacts/phase_c2_behavioural",
-  "_backend_has_room": "12 probes x 1.11 GiB = 13.3 GiB against 43 GB free, checked by destination_gate before a pod is created. The Hugging Face route is NOT used: C1 attempt 18 ran a correct preservation mechanism on six probes and preserved none, because every upload was refused for quota.",
+  "_backend_has_room": "12 trained probes x 2.221 GiB = 26.654 GiB, DERIVED from the recipe's float32 save dtype rather than from the bf16 size of the initialization leaf -- that error charged the durable requirement at 13.3 GiB, half its real value, and destination_gate approved 37 GiB of free space for the wrong reason. It is checked before a pod is created. The Hugging Face route is NOT used: its quota endpoint refuses 2 GiB, measured on 2026-09-22 after an authorized cleanup, and one probe is 2.221 GiB. C1 attempt 18 had already run a correct preservation mechanism on six probes and preserved none for the same reason.",
   "_preservation_is_not_permission": "saving a probe authorizes nothing about reusing it. Reuse is governed by the resume rules, not by the existence of a file."
  },
  "resume_policy": {
@@ -511,7 +547,7 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "0072e32fac5e30d55ea3d0573fa588c7109e7abb42beeca11639106b3f8ee520",
+  "digest": "18b2ee654dfdb9333a7a2c8014e8aac5946d9ec5b04bb6e29175f6565ab41fd3",
   "n_files": 135,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
@@ -562,5 +598,5 @@
   "grant": "THIS PROPOSAL REQUESTS AND AUTHORIZES NOTHING. It is the document a maintainer decision is made against; it is not that decision, and it permits no grant, readiness record, authorization, bundle or provider resource. Whether a launch chain exists, and how far it has been built, is recorded per attempt under `runs/<attempt>/governance/` and is NOT restated here: this document's hash is what a grant binds, so a field that tracked the chain would move the identity the moment the chain advanced."
  },
  "_proposal_sha256_excludes": "proposal_sha256 covers this document EXCEPT ['proposal_sha256', 'proposed_utc']. proposed_utc is a wall clock and would make the identity change on every regeneration of an unchanged tree; the hash is a function of the proposal's content, so a grant can bind it and the issuer can re-derive it.",
- "proposal_sha256": "4f58bc539f5cf7cb54e3194164681e225a9bf2feb9702e6c806038c873901880"
+ "proposal_sha256": "e83fa5fcf23888a870f4c1382ae6bd7edef806fc6d93857ea7bc40404f4f22c8"
 }

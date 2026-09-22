@@ -153,6 +153,65 @@
     "_needs": "a durable backend the dev box can fill UNBILLED before the pod exists and the pod can drain at datacenter speed. Hugging Face cannot: measured, it refuses 2 GiB."
    }
   ],
-  "recommendation": "the high-bandwidth durable backend. It preserves R2 for all ten probes, leaves $5.33 of margin against the campaign ceiling, and fixes the architecture rather than the arithmetic. A RunPod network volume is the obvious candidate at roughly $0.07/GB/month; it is a paid storage change and therefore a maintainer decision."
+  "recommendation": "the high-bandwidth durable backend. It preserves R2 for all ten probes, leaves $5.33 of margin against the campaign ceiling, and fixes the architecture rather than the arithmetic. A RunPod network volume is the obvious candidate at roughly $0.07/GB/month; it is a paid storage change and therefore a maintainer decision.",
+  "measured_backend_rate": "NOT MEASURED. No volume could be provisioned in a datacenter that also has L40S, and the S3 leg could not be authenticated, so there is no measured backend->pod rate to bound the continuation with. The 100 MB/s scenario remains an engineering hypothesis and is NOT used as a bound.",
+  "verdict": "the continuation does not fit under any transport that could actually be provisioned this round. The cheapest provisionable path prices at $40.98 settled-plus-hard against a $35.7600 campaign ceiling."
+ },
+ "network_volume_investigation": {
+  "authorized_by": "maintainer, 2026-09-22: one 50 GB RunPod Standard Network Volume, cumulative storage spend capped at $1.00",
+  "created": {
+   "id": "p6rp4akk9m",
+   "name": "c2b-durable-probes",
+   "size_gb": 50,
+   "data_center": "EU-NL-1"
+  },
+  "deleted": true,
+  "incurred_storage_cost_usd": 0.01,
+  "_cost_basis": "the volume existed about 15 minutes. At RunPod's $0.07/GB/month for volumes under 1 TB, 50 GB is $0.00486/hour, so the incurred charge is ~$0.001 and is reported as <=$0.01. Well inside the $1.00 authorization.",
+  "_why_deleted": "as placed it had no working fill path, so it could not serve the purpose it was approved for, and an idle volume burns the storage authorization while the conflict below is decided. Recreating it is one API call in whichever datacenter the decision picks.",
+  "the_measured_conflict": {
+   "_what": "the maintainer's three conditions cannot all be met today. Condition 1 wants Network Volume / S3 access; condition 2 wants L40S availability compatible with the formal continuation. Measured across all 16 storage-capable, listed datacenters, NO datacenter has both.",
+   "datacenters_with_storage_and_s3_but_no_l40s": [
+    "EU-RO-1",
+    "EUR-IS-1",
+    "EUR-NO-1",
+    "US-CA-2",
+    "US-IL-1",
+    "US-MO-2",
+    "US-NC-2"
+   ],
+   "datacenters_with_l40s": [
+    "EU-NL-1"
+   ],
+   "_l40s_is_scarce_everywhere": "EU-NL-1 is the only datacenter reporting L40S at all right now, storage-capable or not, and its stock status is Low. Six non-storage datacenters were probed as a control and returned no L40S either, so a null is 'no GPU there' rather than a malformed query.",
+   "s3_service_is_real": "https://s3api-eur-is-1.runpod.io/<volume-id>/ answers HTTP 401 AccessDenied 'missing Authorization header' -- a live S3 service. s3api-eu-nl-1.runpod.io does not resolve at all, so the S3 rollout is partial and EU-NL-1 is not in it.",
+   "s3_needs_a_key_i_cannot_mint": "RunPod's S3 API uses a separate S3 API key created in the console. The GraphQL key this repository holds is not one, and no mutation in the schema creates one. Even in an S3 datacenter the transfer could not be authenticated from here.",
+   "why_eu_nl_1_alone_does_not_solve_it": "without S3, the only way bytes reach a volume is through a pod, and the dev box is the only source. EU-NL-1 offers exactly two GPU types -- L40S at $1.09/h and B300 at $7.89/h -- so the cheapest machine that can fill the volume IS the L40S. 22.2 GiB at the measured 0.68 MB/s is 584.6 minutes = $10.62 of billed L40S time, which is precisely the cost the backend was approved to eliminate.",
+   "_not_resolved_autonomously": "the maintainer's instruction is explicit: do not change the approved GPU/provider class merely to accommodate the volume without returning for review. Every remaining option changes something that is the maintainer's to change."
+  },
+  "options_for_the_maintainer": [
+   {
+    "option": "an S3 API key plus an S3 datacenter, and accept that L40S must become available there before attempt6 launches",
+    "cost": "$0 for the fill leg -- the dev box uploads unbilled before any pod exists -- plus storage. The drain leg is datacenter speed and is minutes, but is UNMEASURED because no volume could be provisioned where it could be tested.",
+    "needs": [
+     "a console-created S3 API key",
+     "L40S availability in an S3 datacenter, which does not exist today"
+    ]
+   },
+   {
+    "option": "fill the EU-NL-1 volume from a billed L40S pod once, then let attempt6 mount the already-filled volume",
+    "cost": "$10.62 of L40S fill time, outside the $1.00 storage authorization",
+    "note": "it does work, and it is a one-off: the volume survives, so only the first fill pays. But settled $22.2466 + $10.62 fill + $8.18 continuation = $41.05 against a $35.7600 campaign ceiling, so it needs a ceiling decision."
+   },
+   {
+    "option": "a different GPU class in an S3 datacenter",
+    "note": "explicitly requires review; not taken"
+   },
+   {
+    "option": "accept the dev-box -> pod restore at measured throughput",
+    "cost": "$18.73 hard; settled + hard = $40.98 against $35.7600",
+    "fits": false
+   }
+  ]
  }
 }
