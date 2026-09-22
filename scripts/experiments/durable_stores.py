@@ -25,6 +25,33 @@ from pathlib import Path
 from typing import Any
 
 
+#: How long a fetch plan's signatures stay valid. Long enough for a pod to be
+#: created, set up and restore ten probes; short enough that a leaked plan
+#: stops working the same day. It is a URL lifetime, not a session budget.
+PRESIGN_TTL_SECONDS = 12 * 3600
+
+
+def safe_join(root: Path, rel: str) -> Path:
+    """`root / rel`, refusing anything that resolves outside `root`.
+
+    A remote object's key suffix becomes a local path on restore, so a key
+    containing `..` -- or an absolute one -- would write outside the
+    destination. Our own uploader is the only writer to the buckets in use, so
+    this is low-risk today; it is here because a restore path is exactly the
+    place a future stage would inherit the assumption without noticing, and
+    because the same store is meant to serve Stage 0 through 6 and beyond.
+
+    Component semantics, not a string prefix: a sibling directory whose name
+    merely begins with the root's is outside it.
+    """
+    base = Path(root).resolve()
+    out = (base / rel).resolve()
+    if out != base and not out.is_relative_to(base):
+        raise ValueError(
+            f"object suffix {rel!r} resolves outside the restore root {base}")
+    return out
+
+
 class LocalDirStore:
     """A directory tree under `root`. Real storage, not a stub.
 
@@ -46,11 +73,10 @@ class LocalDirStore:
         #: has the root as a string prefix and passed. A resolved
         #: `is_relative_to` compares path COMPONENTS, so a sibling whose name
         #: merely begins with the root's is outside it.
-        root = self.root.resolve()
-        p = (root / key).resolve()
-        if p != root and not p.is_relative_to(root):
-            raise ValueError(f"key {key!r} escapes the store root")
-        return p
+        try:
+            return safe_join(self.root, key)
+        except ValueError:
+            raise ValueError(f"key {key!r} escapes the store root") from None
 
     def put_tree(self, local_dir: Path, key: str) -> dict[str, Any]:
         dest = self._at(key)
@@ -185,7 +211,7 @@ class S3CompatibleStore:
                 rel = obj["Key"][len(key) + 1:]
                 if not rel:
                     continue
-                out = dest / rel
+                out = safe_join(dest, rel)
                 out.parent.mkdir(parents=True, exist_ok=True)
                 c.download_file(self.bucket, obj["Key"], str(out))
                 total += int(obj["Size"])
@@ -206,9 +232,131 @@ class S3CompatibleStore:
                 n += 1
         return {"bytes": total, "n_files": n} if n else None
 
+    def presign_fetch_plan(self, key: str, *,
+                           expires_in: int = PRESIGN_TTL_SECONDS
+                           ) -> "PresignedFetchPlan":
+        """Sign a time-limited GET per object under `key`.
+
+        The credential stays here. What crosses to the machine that downloads
+        is a set of URLs that expire, which is both less to leak and less to
+        install: the fetching side needs no client library at all.
+        """
+        c = self._client()
+        urls, sizes = {}, {}
+        paginator = c.get_paginator("list_objects_v2")
+        for page in paginator.paginate(Bucket=self.bucket, Prefix=f"{key}/"):
+            for obj in page.get("Contents") or []:
+                rel = obj["Key"][len(key) + 1:]
+                if not rel:
+                    continue
+                urls[rel] = c.generate_presigned_url(
+                    "get_object",
+                    Params={"Bucket": self.bucket, "Key": obj["Key"]},
+                    ExpiresIn=int(expires_in))
+                sizes[rel] = int(obj["Size"])
+        if not urls:
+            raise FileNotFoundError(f"no object under {key!r} in {self.bucket}")
+        return PresignedFetchPlan(key, urls, sizes, expires_in)
+
     def free_bytes(self) -> int | None:
         #: Object storage does not report remaining capacity, and guessing one
         #: would make a capacity gate green about a number nobody measured.
         #: A quota-bearing backend's headroom is asked of the backend by
         #: whoever configured the quota.
+        return None
+
+
+class PresignedFetchPlan:
+    """Signed, time-limited GET URLs for one object, and nothing else.
+
+    WHY THIS EXISTS. The pod is the side that downloads, and giving it the
+    bucket credentials would put a long-lived secret on a machine the project
+    does not own, in an environment whose logs are collected as evidence. It
+    would also make every pod carry an S3 client library it needs for one
+    fetch.
+
+    A plan is the alternative: the dev box, which already holds the
+    credentials, signs a URL per object; the pod fetches them over plain HTTP
+    and holds no secret that outlives the plan.
+
+    **A plan IS a secret while it is valid.** Each URL carries a signature that
+    grants read access without any further credential, so a plan must never be
+    committed, logged, or written into evidence. `redacted()` is what a record
+    may contain.
+    """
+
+    def __init__(self, key: str, urls: dict[str, str],
+                 sizes: dict[str, int], expires_in: int) -> None:
+        self.key, self._urls = key, dict(urls)
+        self.sizes, self.expires_in = dict(sizes), int(expires_in)
+
+    def __len__(self) -> int:
+        return len(self._urls)
+
+    def items(self):
+        return self._urls.items()
+
+    def redacted(self) -> dict[str, Any]:
+        """What may appear in a record: shape and sizes, never a signature."""
+        return {"key": self.key, "n_objects": len(self._urls),
+                "bytes": sum(self.sizes.values()),
+                "relative_paths": sorted(self._urls),
+                "expires_in_seconds": self.expires_in,
+                "_urls_are_omitted": (
+                    "each URL carries a signature granting read access without "
+                    "a credential. A plan is a secret while it is valid and is "
+                    "never committed, logged or written into evidence.")}
+
+    def __repr__(self) -> str:          # pragma: no cover - defensive
+        return f"<PresignedFetchPlan {self.key} n={len(self._urls)} REDACTED>"
+
+    __str__ = __repr__
+
+
+class PresignedHttpStore:
+    """A read-only backend that fetches a `PresignedFetchPlan` over HTTP.
+
+    It satisfies the same `DurableStore` shape as any other, so the pod runs
+    the SAME `restore_checkpoint` -- identity re-derived from the bytes that
+    arrived -- with no branch for how they got there. It cannot upload, and
+    says so rather than pretending.
+    """
+
+    def __init__(self, plan: PresignedFetchPlan) -> None:
+        self.plan = plan
+
+    def put_tree(self, local_dir: Path, key: str) -> dict[str, Any]:
+        raise NotImplementedError(
+            "a presigned fetch plan grants READ access only. The side that "
+            "uploads is the side that holds the credentials, and that is "
+            "deliberately not this one.")
+
+    def get_tree(self, key: str, local_dir: Path) -> dict[str, Any]:
+        import urllib.request
+
+        if key != self.plan.key:
+            raise KeyError(
+                f"this plan is for {self.plan.key!r}, not {key!r}; a plan "
+                "covers exactly one object")
+        dest = Path(local_dir)
+        dest.mkdir(parents=True, exist_ok=False)
+        t0, total = time.time(), 0
+        for rel, url in sorted(self.plan.items()):
+            out = safe_join(dest, rel)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            with urllib.request.urlopen(url, timeout=600) as r, \
+                    open(out, "wb") as f:
+                while chunk := r.read(1 << 22):
+                    f.write(chunk)
+            total += out.stat().st_size
+        return {"bytes": total, "n_files": len(self.plan),
+                "seconds": time.time() - t0, "from": "presigned plan"}
+
+    def stat_tree(self, key: str) -> dict[str, Any] | None:
+        if key != self.plan.key or not len(self.plan):
+            return None
+        return {"bytes": sum(self.plan.sizes.values()),
+                "n_files": len(self.plan)}
+
+    def free_bytes(self) -> int | None:
         return None

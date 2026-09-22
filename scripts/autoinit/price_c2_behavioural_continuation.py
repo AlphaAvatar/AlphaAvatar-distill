@@ -83,16 +83,22 @@ def settled_campaign_all_in(repo_root: Path) -> dict:
     return {"per_attempt": per_attempt, "total_usd": round(total, 4)}
 
 
-def price(repo_root: Path, *, restore_mb_per_second: float,
-          backend_usd: float, rate: float) -> dict:
+def price(repo_root: Path, *, backend_usd: float, rate: float,
+          transport_reserve_minutes: float | None = None,
+          observed_transfer_minutes: float | None = None) -> dict:
     store = Path("/home/ecs-user/aad-artifacts/phase_c2_behavioural") / BG.CAMPAIGN_ID
     state = BC.campaign_state(store)
     work = BC.remaining_work(repo_root, state=state)
 
-    #: The restore phase at the rate being priced, through the SAME
-    #: decomposition the launcher builds its window from.
+    #: THE TRANSPORT RESERVE, not a rate times bytes. Network throughput
+    #: varies with time of day, routing and provider load, so a measurement of
+    #: it is an observation rather than a constant, and pricing a hard bound
+    #: on one would be wrong by however much it has moved since.
     nbytes = int(work["restore"]["bytes"])
-    minutes = round(nbytes / (restore_mb_per_second * 1e6) / 60.0, 2)
+    reserve = (float(transport_reserve_minutes)
+               if transport_reserve_minutes is not None
+               else BC.TRANSPORT_RESERVE_MINUTES)
+    minutes = BC.restore_minutes(nbytes, reserve)
     d = BH.session_decomposition(
         repo_root, materialization_minutes=work["materialization_minutes"],
         train_and_score_probes=work["n_train_and_score"],
@@ -130,10 +136,19 @@ def price(repo_root: Path, *, restore_mb_per_second: float,
                         "-- every figure from the production functions the "
                         "launcher calls, never restated beside them"),
         "transport": {
-            "restore_mb_per_second": restore_mb_per_second,
-            "restore_bytes": nbytes,
-            "restore_gib": round(nbytes / 2**30, 3),
-            "restore_minutes": minutes,
+            "reserve_minutes": minutes,
+            "_reserve_is_not_a_throughput": BC.TRANSPORT_RESERVE_BASIS,
+            "bytes_to_move": nbytes,
+            "gib_to_move": round(nbytes / 2**30, 3),
+            "implied_mb_per_second_at_the_reserve": round(
+                nbytes / (minutes * 60) / 1e6, 2),
+            "observed_transfer_minutes": observed_transfer_minutes,
+            "_observed_is_diagnostic": (
+                "a real transfer time, if one has been taken. It is evidence "
+                "that the path works and roughly how it performed on one "
+                "occasion. It is NOT the bound and is never promoted to one: "
+                "re-running a transfer to refine it would spend billed time "
+                "manufacturing false precision about a number that moves."),
             "durable_backend_usd": backend_usd,
         },
         "work_owed": {k: v for k, v in work.items()
@@ -142,6 +157,8 @@ def price(repo_root: Path, *, restore_mb_per_second: float,
                                "materialization_minutes")},
         "window": {"expected_minutes": d["expected_minutes"],
                    "hard_minutes": d["hard_minutes"]},
+        "components_hard_usd": _components(d, rate, disk_per_min, minutes,
+                                            work, backend_usd),
         "money": {
             "rate_usd_per_hour": float(terms["rate_usd_per_hour"]),
             "disk_usd_per_minute": round(disk_per_min, 8),
@@ -176,16 +193,80 @@ def price(repo_root: Path, *, restore_mb_per_second: float,
     }
 
 
+def _components(d: dict, rate: float, disk_per_min: float,
+                transport_minutes: float, work: dict,
+                backend_usd: float) -> dict:
+    """The hard bound, split into what each part of it BUYS.
+
+    A single total says whether a continuation fits; it does not say what
+    would change if the transport got cheaper or the science got larger. The
+    split is the thing a maintainer decides against.
+    """
+    phases = dict(d["expected_phases"])
+    probe_phase = next((m for n, m in d["expected_phases"]
+                        if n.endswith("_probes_train_and_score")), 0.0)
+    arms = float(phases.get("materialize_arms", 0.0))
+    overhead = sum(m for n, m in d["expected_phases"]
+                   if not n.endswith("_probes_train_and_score")
+                   and n not in ("materialize_arms",
+                                 "restore_verified_probes"))
+    reserves = sum(m for _, m in d["soft_stop_reserves"])
+    recovery = float(d["artifact_recovery_reserve_minutes"])
+
+    def usd(minutes: float) -> dict:
+        return {"minutes": round(minutes, 2),
+                "gpu_usd": round(minutes / 60 * rate, 4),
+                "disk_usd": round(disk_per_min * minutes, 4),
+                "all_in_usd": round(minutes / 60 * rate
+                                    + disk_per_min * minutes, 4)}
+
+    return {
+        "scientific_work": {**usd(probe_phase),
+                            "_is": "training and scoring the probes the "
+                                   "campaign still owes"},
+        "arm_materialization": {**usd(arms),
+                                "_is": "rebuilding the arms those probes need "
+                                       "on a fresh filesystem"},
+        "transport_reserve": {**usd(transport_minutes),
+                              "_is": "a conservative reserve for a "
+                                     "time-varying transfer, not a rate"},
+        "session_overhead": {**usd(overhead),
+                             "_is": "setup, bundle transfer, teacher fetch, "
+                                    "machine gates, artifact synchronisation"},
+        "variability_reserves": {**usd(reserves),
+                                 "_is": "the frozen probe model's own "
+                                        "contingency and duration risk"},
+        "teardown_recovery_reserve": {**usd(recovery),
+                                      "_is": "held so a session at its "
+                                             "deadline can still stop and "
+                                             "delete its resource"},
+        "durable_backend": {"minutes": 0.0, "gpu_usd": 0.0, "disk_usd": 0.0,
+                            "all_in_usd": round(backend_usd, 4),
+                            "_is": "object storage and requests, billed by "
+                                   "the backend and not by the hour"},
+        "_container_disk_is_inside_each_line": (
+            "every line carries its own separately billed container disk at "
+            "the authorization's own rate, so the lines sum to the all-in "
+            "figure rather than to a GPU-only one."),
+    }
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--restore-mb-per-second", type=float, required=True)
+    ap.add_argument("--transport-reserve-minutes", type=float, default=None,
+                    help="override the named conservative reserve. Not a "
+                         "throughput: a reserve. Omit to use the declared one.")
+    ap.add_argument("--observed-transfer-minutes", type=float, default=None,
+                    help="a real transfer time, recorded as DIAGNOSTIC "
+                         "evidence. It never becomes the bound.")
     ap.add_argument("--backend-usd", type=float, default=0.0)
     ap.add_argument("--rate", type=float,
                     default=BG.QUOTED_RATE_USD_PER_HOUR)
     ap.add_argument("--write", action="store_true")
     a = ap.parse_args(argv)
-    out = price(REPO, restore_mb_per_second=a.restore_mb_per_second,
-                backend_usd=a.backend_usd, rate=a.rate)
+    out = price(REPO, backend_usd=a.backend_usd, rate=a.rate,
+                transport_reserve_minutes=a.transport_reserve_minutes,
+                observed_transfer_minutes=a.observed_transfer_minutes)
     print(json.dumps(out, indent=1))
     if a.write:
         p = REPO / ANALYSIS

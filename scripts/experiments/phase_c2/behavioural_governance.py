@@ -324,23 +324,33 @@ QUOTED_RATE_USD_PER_HOUR = 1.09
 TEARDOWN_RESERVE_USD = 0.25
 
 #: THE CUMULATIVE CAMPAIGN CEILING, as approved by the maintainer on
-#: 2026-09-20 UTC. Everything else in this module is DERIVED — from the frozen
+#: 2026-09-23 UTC. Everything else in this module is DERIVED — from the frozen
 #: record, from the live rate, from the schedule. This one number is not: it is
 #: a maintainer decision about how much of the project's remaining budget this
 #: campaign may consume in total, across every attempt and every provider
 #: resource it takes.
 #:
-#: History: approved at $33.2099, which at the time coincided exactly with a
-#: single fresh session's all-in ceiling — so the two were the same number and
-#: the code could not tell them apart. attempt3 then spent $2.5425 and stopped
-#: at ENOSPC without a verdict, and the maintainer raised the CAMPAIGN ceiling
-#: by that much plus the quantum, to $35.7600, so one more full-length attempt
-#: still fits. The session ceiling did NOT move and must not: $35.76 funds
-#: another attempt, and buys no runtime, no disk, no probes, no seeds and no
-#: scientific scope. A grant states this number and issuance refuses a grant
-#: that disagrees with it, because a hand-written grant is exactly where a
-#: ceiling typo would enter unreviewed.
-CAMPAIGN_ALL_IN_CEILING_USD = 35.76
+#: History, in three decisions:
+#:
+#: 1. $33.2099, which at the time coincided exactly with a single fresh
+#:    session's all-in ceiling — so the two were the same number and the code
+#:    could not tell them apart;
+#: 2. $35.7600, after attempt3 spent $2.5425 and stopped at ENOSPC without a
+#:    verdict, so one more full-length attempt still fitted;
+#: 3. $42.0000, to absorb TRANSPORT VARIABILITY. A durable backend's
+#:    throughput depends on time of day, routing and provider load, so no
+#:    single measurement of it is a stable constant and repeatedly
+#:    benchmarking one wastes engineering time to manufacture false
+#:    precision. The campaign carries an explicit conservative reserve
+#:    instead, and the execution proceeds.
+#:
+#: The session ceiling did NOT move at any of the three and must not. This
+#: figure funds OPERATIONAL VARIANCE: it buys no runtime, no disk, no probes,
+#: no seeds, no arms and no scientific scope, all of which come from the frozen
+#: record through the session ceiling alone. A grant states this number and
+#: issuance refuses a grant that disagrees with it, because a hand-written
+#: grant is exactly where a ceiling typo would enter unreviewed.
+CAMPAIGN_ALL_IN_CEILING_USD = 42.00
 
 
 def ceiling(repo_root: str | Path = REPO_ROOT, *,

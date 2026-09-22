@@ -57,20 +57,6 @@ PER_SAMPLE_NAME = "per_sample.jsonl"
 #: must honour the one its campaign made.
 RANKING_NAME = "c2_screening_ranking.json"
 
-#: MB/s used to BOUND the restore of verified probes to a replacement pod.
-#:
-#: The project's recorded dev-box uplink figure is 0.72 MB/s, and observations
-#: span 0.23-0.79 MB/s — the 0.23 came from a real 3.7 MB bundle upload. A
-#: bound takes the SLOWEST recorded observation, because an average is not a
-#: bound and this number decides whether a continuation is affordable: pricing
-#: the restore at the mean and then running at the floor is how continuation
-#: attempt 2 died mid-transfer, "arithmetic rather than luck".
-#:
-#: The honest consequence is stated rather than softened: at this rate one
-#: 1.11 GiB probe is ~80 minutes of BILLED pod time, so a continuation late in
-#: a campaign will not fit a ceiling sized for one session and the gate will
-#: refuse it. A maintainer freeing Hugging Face private storage would move this
-#: transfer to the `$0` pre-pod relay and remove the minutes entirely; that is
 #: Where the launcher writes a probe's RELEASE acknowledgement and where the
 #: driver looks for it, repo-relative so the two processes cannot end up with
 #: two spellings of one path. The launcher writes it only after the probe's
@@ -78,13 +64,35 @@ RANKING_NAME = "c2_screening_ranking.json"
 #: pod's copy is the only one and releasing it would be a durability race.
 RELEASE_ACK_REL = "artifacts/autoinit/c2_behavioural/release_acks"
 
-#: a maintainer decision, never an autonomous repair.
-RESTORE_MB_PER_SECOND = 0.23
-RESTORE_RATE_BASIS = (
-    "the slowest recorded dev-box uplink observation (0.23 MB/s, from a real "
-    "3.7 MB bundle upload; the project's recorded figure is 0.72 MB/s and "
-    "observations span 0.23-0.79). A bound takes the slowest, not the mean. "
-    "logs/shared/analyses/autoinit_relay_capacity.md")
+#: BILLED MINUTES RESERVED FOR THE RESTORE. A budget reserve, not a throughput
+#: claim, and that distinction is the point.
+#:
+#: This was `RESTORE_MB_PER_SECOND = 0.23` — the slowest recorded dev-box
+#: uplink — multiplied by the bytes. That was the right shape while the dev box
+#: PUSHED to an already-billing pod: the rate was the binding constraint and a
+#: bound takes the slowest observation. It is the wrong shape now. The bytes
+#: are pre-staged to a durable backend while nothing is billing, and the pod
+#: PULLS them, so what remains on the meter is a datacenter-to-datacenter
+#: fetch whose rate depends on time of day, routing and provider load.
+#:
+#: No single measurement of that is a stable constant, and repeatedly
+#: benchmarking it would spend GPU time manufacturing false precision about a
+#: number that moves. So the campaign reserves minutes instead. At this
+#: reserve, 22.2 GiB of probes needs only ~4.4 MB/s to fit — roughly an order
+#: of magnitude under what object storage to a datacenter pod does on a bad
+#: day — and if a transfer is faster the session simply finishes sooner,
+#: because the reserve bounds the bill rather than scheduling the work.
+#:
+#: An observed transfer time is recorded as DIAGNOSTIC evidence. It does not
+#: become this number.
+TRANSPORT_RESERVE_MINUTES = 90.0
+TRANSPORT_RESERVE_BASIS = (
+    "a conservative reserve for transport variability, approved 2026-09-23, "
+    "NOT a measured or claimed throughput. Network rates vary with time of "
+    "day, routing and provider load, so one measurement is not a constant and "
+    "re-measuring it is not evidence. 22.2 GiB inside 90 minutes is ~4.4 MB/s, "
+    "far under what a datacenter fetch sustains; an observed time is recorded "
+    "as diagnostic and never promoted to this figure.")
 
 
 class ContinuationError(RuntimeError):
@@ -292,11 +300,31 @@ def arm_minutes(repo_root: str | Path = REPO_ROOT) -> dict[str, float]:
 
 
 def restore_minutes(total_bytes: int,
-                    rate_mb_per_second: float = RESTORE_MB_PER_SECOND) -> float:
-    """Billed minutes to push `total_bytes` to a replacement pod. A BOUND."""
-    if rate_mb_per_second <= 0:
-        raise ContinuationError("a restore rate must be positive")
-    return round(total_bytes / (rate_mb_per_second * 1e6) / 60.0, 2)
+                    reserve_minutes: float = TRANSPORT_RESERVE_MINUTES
+                    ) -> float:
+    """Billed minutes RESERVED for the restore. Flat, and deliberately so.
+
+    It took `total_bytes` and a rate. That was right when the dev box pushed
+    to a billing pod and the uplink was the binding constraint; it is wrong
+    for a pre-staged pull, where the rate is a time-varying property of
+    somebody else's network. Multiplying bytes by a number that moves does not
+    make the product a bound -- it makes it a bound that is wrong by however
+    much the number moved since it was measured.
+
+    `total_bytes` is still taken, and still reported, because how much has to
+    move is a real property of the work. It just no longer decides the money:
+    a reserve that covers a bad day covers a good one too.
+    """
+    if reserve_minutes <= 0:
+        raise ContinuationError("a transport reserve must be positive")
+    #: NOTHING TO MOVE COSTS NOTHING. A fresh campaign holds no verified probe,
+    #: so there is no transfer to reserve for -- and charging one would have
+    #: raised the FROZEN session ceiling from $33.2099, which is exactly what
+    #: the reserve must not do. The reserve covers a transfer's variability; it
+    #: is not a fee for existing.
+    if total_bytes <= 0:
+        return 0.0
+    return round(float(reserve_minutes), 2)
 
 
 def remaining_work(repo_root: str | Path = REPO_ROOT, *,
@@ -409,8 +437,8 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
             "bytes": restore_bytes,
             "gib": round(restore_bytes / 2**30, 3),
             "minutes": minutes,
-            "rate_mb_per_second": RESTORE_MB_PER_SECOND,
-            "_basis": RESTORE_RATE_BASIS,
+            "reserve_minutes": TRANSPORT_RESERVE_MINUTES,
+            "_basis": TRANSPORT_RESERVE_BASIS,
         },
         "decomposition": decomposition,
         "_a_completed_probe_is_never_retrained": (

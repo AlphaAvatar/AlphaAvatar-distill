@@ -468,3 +468,108 @@ class TestKeysAreImmutable:
         s3 = body.split("class S3CompatibleStore", 1)[1]
         put = s3.split("def put_tree", 1)[1].split("\n    def ")[0]
         assert "self.stat_tree(key)" in put and "FileExistsError" in put
+
+
+# --- the pod-side backend, exercised over a real HTTP server ---------------
+
+class TestThePresignedFetchPath:
+    """The side that downloads holds no credential and no client library.
+
+    Giving the pod the bucket keys would put a long-lived secret on a machine
+    the project does not own, in an environment whose logs are collected as
+    evidence, and would make every pod carry an S3 client for one fetch. A
+    signed, expiring URL per object is less to leak and nothing to install.
+
+    Run against a REAL http server over a REAL directory. A stubbed transport
+    would prove that the test's fake works; four paid pods in this project
+    have died inside lines no `$0` path ever executed.
+    """
+
+    @staticmethod
+    def _serve(root: Path):
+        import functools
+        import http.server
+        import threading
+
+        handler = functools.partial(http.server.SimpleHTTPRequestHandler,
+                                    directory=str(root))
+        srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        t = threading.Thread(target=srv.serve_forever, daemon=True)
+        t.start()
+        return srv, f"http://127.0.0.1:{srv.server_address[1]}"
+
+    def test_it_fetches_a_real_tree_and_re_identifies_it(self, tmp_path,
+                                                         monkeypatch):
+        from experiments.durable_stores import (PresignedFetchPlan,
+                                                PresignedHttpStore)
+        _Identity.install(monkeypatch)
+        src = _Probe.make(tmp_path / "src")
+        #: `_Probe.make` returns the probe DIRECTORY, one level below the root
+        #: it was given. Serving the root instead put every object one path
+        #: segment deeper than the plan named them.
+        srv, base = self._serve(src)
+        try:
+            files = {f.name: f.stat().st_size
+                     for f in src.iterdir() if f.is_file()}
+            plan = PresignedFetchPlan(
+                "k", {n: f"{base}/{n}" for n in files}, files, 3600)
+            store = PresignedHttpStore(plan)
+            assert store.stat_tree("k")["n_files"] == len(files)
+            up_identity = {"artifact_digest": __import__("hashlib").sha256(
+                b"").hexdigest()}
+            #: the real generic restore, over the real socket
+            import aadistill.runtime.leaf_durability as LD
+            ident = LD.identify_for_transfer(src, adapter=None,
+                                             arch_signature="s",
+                                             num_parameters=1)
+            rec = DS.restore_checkpoint(
+                store, "k", tmp_path / "arrived", adapter=None,
+                identity={"artifact_digest": ident.artifact_digest})
+            assert rec.verified and rec.n_files == len(files)
+            for name in files:
+                assert (tmp_path / "arrived" / name).read_bytes() == \
+                    (src / name).read_bytes(), f"{name} did not survive"
+        finally:
+            srv.shutdown()
+
+    def test_it_cannot_upload_and_says_why(self, tmp_path):
+        from experiments.durable_stores import (PresignedFetchPlan,
+                                                PresignedHttpStore)
+        store = PresignedHttpStore(PresignedFetchPlan("k", {"a": "u"},
+                                                      {"a": 1}, 60))
+        with pytest.raises(NotImplementedError, match="READ access only"):
+            store.put_tree(tmp_path, "k")
+
+    def test_a_plan_covers_exactly_one_object(self, tmp_path):
+        from experiments.durable_stores import (PresignedFetchPlan,
+                                                PresignedHttpStore)
+        store = PresignedHttpStore(PresignedFetchPlan("k", {"a": "u"},
+                                                      {"a": 1}, 60))
+        with pytest.raises(KeyError, match="covers exactly one object"):
+            store.get_tree("other", tmp_path / "x")
+
+    def test_a_malicious_object_name_cannot_escape_the_restore_root(
+            self, tmp_path):
+        """The narrow hardening: a key suffix becomes a local path."""
+        from experiments.durable_stores import (PresignedFetchPlan,
+                                                PresignedHttpStore)
+        srv, base = self._serve(tmp_path)
+        try:
+            store = PresignedHttpStore(PresignedFetchPlan(
+                "k", {"../escaped": f"{base}/x"}, {"../escaped": 1}, 60))
+            with pytest.raises(ValueError, match="outside the restore root"):
+                store.get_tree("k", tmp_path / "arrived")
+        finally:
+            srv.shutdown()
+
+    def test_a_plan_never_prints_its_signatures(self):
+        from experiments.durable_stores import PresignedFetchPlan
+
+        plan = PresignedFetchPlan(
+            "k", {"a": "https://x/?X-Amz-Signature=DEADBEEF"}, {"a": 1}, 60)
+        for rendered in (repr(plan), str(plan), str(plan.redacted())):
+            assert "DEADBEEF" not in rendered, (
+                "a signature reached a rendered form; a plan grants read "
+                "access without a credential and must never be logged, "
+                "committed or written into evidence")
+        assert plan.redacted()["n_objects"] == 1

@@ -1001,18 +1001,46 @@ def test_a_cheaper_card_does_not_buy_more_remaining_work(tmp_path):
                              hard_runtime_minutes=RUNTIME) == RUNTIME
 
 
-def test_the_restore_bound_is_the_slowest_recorded_uplink(tmp_path):
-    """A bound takes the slowest observation. An average is not a bound."""
-    assert BC.RESTORE_MB_PER_SECOND == 0.23
-    assert "slowest" in BC.RESTORE_RATE_BASIS
-    one_probe = int(1.11 * 2**30)
-    minutes = BC.restore_minutes(one_probe)
-    assert 70 < minutes < 95, (
-        f"one 1.11 GiB probe bounds at {minutes} min; the figure a reader "
-        "needs is that this is real billed pod time")
-    #: Monotone, and zero bytes is zero minutes.
+def test_the_restore_is_a_named_reserve_not_a_throughput_claim():
+    """A rate was the right shape for a push; it is wrong for a pull.
+
+    While the dev box PUSHED to an already-billing pod, the uplink was the
+    binding constraint and a bound took the slowest observation. The bytes are
+    now pre-staged while nothing bills and the pod PULLS them, so what is left
+    on the meter is a datacenter fetch whose rate moves with time of day,
+    routing and load. Multiplying bytes by a number that moves does not make
+    the product a bound; it makes it wrong by however much the number moved.
+    """
+    assert BC.TRANSPORT_RESERVE_MINUTES == 90.0
+    for word in ("NOT a measured", "vary", "diagnostic"):
+        assert word in BC.TRANSPORT_RESERVE_BASIS, word
+    assert not hasattr(BC, "RESTORE_MB_PER_SECOND"), (
+        "the rate is back; a time-varying quantity must not be a hard bound")
+
+    #: FLAT: the same reserve whatever has to move. Ten probes and one probe
+    #: cost the same reserved minutes, because the reserve bounds the BILL and
+    #: not the schedule -- a faster transfer just finishes sooner.
+    one, ten = int(2.22 * 2**30), int(22.2 * 2**30)
+    assert BC.restore_minutes(one) == BC.restore_minutes(ten) == 90.0
+
+    #: AND NOTHING TO MOVE COSTS NOTHING. A fresh campaign holds no verified
+    #: probe, so there is no transfer to reserve for. Charging one raised the
+    #: FROZEN session ceiling from $33.2099 -- the one thing a reserve for
+    #: operational variance must never do.
     assert BC.restore_minutes(0) == 0.0
-    assert BC.restore_minutes(2 * one_probe) > minutes
+
+    #: And it is conservative in the direction that matters: 22.2 GiB inside
+    #: the reserve needs only a few MB/s, far under a datacenter fetch.
+    implied = ten / (90.0 * 60) / 1e6
+    assert implied < 6.0, f"the reserve implies {implied:.1f} MB/s, not conservative"
+
+    with pytest.raises(BC.ContinuationError):
+        BC.restore_minutes(one, reserve_minutes=0)
+    #: NOT monotone in bytes any more, and deliberately: the reserve bounds
+    #: the BILL for a transfer whose rate is not ours to predict, so twice the
+    #: bytes reserves the same minutes. The old assertion was right for a
+    #: rate-times-bytes bound and is wrong for a reserve.
+    assert BC.restore_minutes(2 * ten) == BC.restore_minutes(ten)
 
 
 # ---------------------------------------------------------------------------

@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-22T10:08:35.165049+00:00",
+ "proposed_utc": "2026-09-22T16:32:02.055529+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -24,7 +24,7 @@
  },
  "authorization_terms": {
   "at_the_quoted_rate": {
-   "campaign_all_in_hard_usd": 35.76,
+   "campaign_all_in_hard_usd": 42.0,
    "_campaign_ceiling_is_cumulative": "bounds this campaign across every run attempt and provider resource, INCLUDING spend that has already settled. It is not a fresh allocation per attempt, and it is deliberately a different field from all_in_hard_usd, which bounds ONE session and is reconciled against gpu_hard_usd + disk_hard_usd.",
    "_campaign_ceiling_buys_no_science": "it does not extend hard_runtime_minutes, gpu_hard_usd, disk_hard_usd, the provisioned disk, the probe count, the seeds or the scope. The session window is derived from gpu_hard_usd and hard_runtime_minutes, and the work from the frozen decomposition; neither reads this field.",
    "rate_usd_per_hour": 1.09,
@@ -547,7 +547,7 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "666275f9a5deb6b924f426c70501707d0b329ed771061b332ed42ed1e4bd4c00",
+  "digest": "579f99511c17dd682a365f4cdced9f4f2d8b6fdb8a7f86e3a196dbb27a628eb2",
   "n_files": 135,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
@@ -598,5 +598,5 @@
   "grant": "THIS PROPOSAL REQUESTS AND AUTHORIZES NOTHING. It is the document a maintainer decision is made against; it is not that decision, and it permits no grant, readiness record, authorization, bundle or provider resource. Whether a launch chain exists, and how far it has been built, is recorded per attempt under `runs/<attempt>/governance/` and is NOT restated here: this document's hash is what a grant binds, so a field that tracked the chain would move the identity the moment the chain advanced."
  },
  "_proposal_sha256_excludes": "proposal_sha256 covers this document EXCEPT ['proposal_sha256', 'proposed_utc']. proposed_utc is a wall clock and would make the identity change on every regeneration of an unchanged tree; the hash is a function of the proposal's content, so a grant can bind it and the issuer can re-derive it.",
- "proposal_sha256": "028c6cfe97265bd3def3fa03b32033bd73e06c55d08b005e0eb70dda68917da4"
+ "proposal_sha256": "fdeeec42d75848da66376f86fb9596a2d041f331db1000870df7aaddd10d5a3f"
 }

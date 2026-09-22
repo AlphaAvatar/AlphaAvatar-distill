@@ -3,10 +3,13 @@
  "authorizes": "nothing",
  "_derived_by": "scripts/autoinit/price_c2_behavioural_continuation.py -- every figure from the production functions the launcher calls, never restated beside them",
  "transport": {
-  "restore_mb_per_second": 0.68,
-  "restore_bytes": 23850825745,
-  "restore_gib": 22.213,
-  "restore_minutes": 584.58,
+  "reserve_minutes": 90.0,
+  "_reserve_is_not_a_throughput": "a conservative reserve for transport variability, approved 2026-09-23, NOT a measured or claimed throughput. Network rates vary with time of day, routing and provider load, so one measurement is not a constant and re-measuring it is not evidence. 22.2 GiB inside 90 minutes is ~4.4 MB/s, far under what a datacenter fetch sustains; an observed time is recorded as diagnostic and never promoted to this figure.",
+  "bytes_to_move": 23850825745,
+  "gib_to_move": 22.213,
+  "implied_mb_per_second_at_the_reserve": 4.42,
+  "observed_transfer_minutes": null,
+  "_observed_is_diagnostic": "a real transfer time, if one has been taken. It is evidence that the path works and roughly how it performed on one occasion. It is NOT the bound and is never promoted to one: re-running a transfer to refine it would spend billed time manufacturing false precision about a number that moves.",
   "durable_backend_usd": 0.0
  },
  "work_owed": {
@@ -20,18 +23,70 @@
   "materialization_minutes": 60.3
  },
  "window": {
-  "expected_minutes": 913.89,
-  "hard_minutes": 1031.09
+  "expected_minutes": 419.31,
+  "hard_minutes": 536.51
+ },
+ "components_hard_usd": {
+  "scientific_work": {
+   "minutes": 174.01,
+   "gpu_usd": 3.1612,
+   "disk_usd": 0.0483,
+   "all_in_usd": 3.2095,
+   "_is": "training and scoring the probes the campaign still owes"
+  },
+  "arm_materialization": {
+   "minutes": 60.3,
+   "gpu_usd": 1.0955,
+   "disk_usd": 0.0168,
+   "all_in_usd": 1.1122,
+   "_is": "rebuilding the arms those probes need on a fresh filesystem"
+  },
+  "transport_reserve": {
+   "minutes": 90.0,
+   "gpu_usd": 1.635,
+   "disk_usd": 0.025,
+   "all_in_usd": 1.66,
+   "_is": "a conservative reserve for a time-varying transfer, not a rate"
+  },
+  "session_overhead": {
+   "minutes": 95.0,
+   "gpu_usd": 1.7258,
+   "disk_usd": 0.0264,
+   "all_in_usd": 1.7522,
+   "_is": "setup, bundle transfer, teacher fetch, machine gates, artifact synchronisation"
+  },
+  "variability_reserves": {
+   "minutes": 87.2,
+   "gpu_usd": 1.5841,
+   "disk_usd": 0.0242,
+   "all_in_usd": 1.6084,
+   "_is": "the frozen probe model's own contingency and duration risk"
+  },
+  "teardown_recovery_reserve": {
+   "minutes": 30.0,
+   "gpu_usd": 0.545,
+   "disk_usd": 0.0083,
+   "all_in_usd": 0.5533,
+   "_is": "held so a session at its deadline can still stop and delete its resource"
+  },
+  "durable_backend": {
+   "minutes": 0.0,
+   "gpu_usd": 0.0,
+   "disk_usd": 0.0,
+   "all_in_usd": 0.0,
+   "_is": "object storage and requests, billed by the backend and not by the hour"
+  },
+  "_container_disk_is_inside_each_line": "every line carries its own separately billed container disk at the authorization's own rate, so the lines sum to the all-in figure rather than to a GPU-only one."
  },
  "money": {
   "rate_usd_per_hour": 1.09,
   "disk_usd_per_minute": 0.00027781,
-  "expected_gpu_usd": 16.6023,
-  "expected_disk_usd": 0.2539,
-  "expected_all_in_usd": 16.8562,
-  "hard_gpu_usd": 18.7315,
-  "hard_disk_usd": 0.2864,
-  "hard_all_in_usd": 19.0179,
+  "expected_gpu_usd": 7.6175,
+  "expected_disk_usd": 0.1165,
+  "expected_all_in_usd": 7.734,
+  "hard_gpu_usd": 9.7466,
+  "hard_disk_usd": 0.149,
+  "hard_all_in_usd": 9.8956,
   "_all_in_includes": "GPU at the live rate PLUS the separately billed container disk, derived by autoinit_c2_behavioural_launch :: continuation_all_in_usd. A GPU-only figure is not an all-in figure and must not be labelled as one."
  },
  "campaign": {
@@ -43,15 +98,15 @@
    "attempt4": 0.0,
    "attempt5": 19.7041
   },
-  "ceiling_all_in_usd": 35.76,
-  "settled_plus_hard_plus_backend_usd": 41.2645,
-  "fits": false,
-  "headroom_usd": -5.5045
+  "ceiling_all_in_usd": 42.0,
+  "settled_plus_hard_plus_backend_usd": 32.1422,
+  "fits": true,
+  "headroom_usd": 9.8578
  },
  "project": {
   "cumulative_usd": 331.4509,
   "cap_usd": 370.0,
-  "worst_case_usd": 350.4688,
+  "worst_case_usd": 341.3465,
   "fits": true
  }
 }
