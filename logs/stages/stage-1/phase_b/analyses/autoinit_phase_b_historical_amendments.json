@@ -2101,6 +2101,60 @@
    "previous_entry_sha256": "23ced0a0433066a217d2bb31fa75878fe97fdaa6f102fa2180a9878771f96a02",
    "also_affected_hash_bound_sets": [],
    "entry_sha256": "508c5cf67ed08637e39e6c7a61c924f25ab03e5d9442a18e209a1ce06ca0d428"
+  },
+  {
+   "amendment_id": "PHB-HA-025",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-23T00:39:42+00:00",
+   "reviewed_base_commit": "8966ae12cd5f898928b2df443601a8936e03ba1e",
+   "source_repair_commit": "6ff2e6dcbbf56196a918bb05999b9de80a3c2d4f",
+   "source_repair_parent": "8966ae12cd5f898928b2df443601a8936e03ba1e",
+   "previous_live_digest": "ee10065f8e6fdccdb7e94cf5a4ba2c92433895528e6bfc5255878019db91064c",
+   "new_live_digest": "f38bc4545ac86dde888793d2988a3ac455600e6df9394aebf52964883be78dd2",
+   "changed_files": [
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/infrastructure/session_runner.py": "9919bd8c4e68fc1823b96ced027dd24c287d1eb804c9ceb69f4fee119d80b95a"
+   },
+   "file_sha256_after": {
+    "src/aadistill/infrastructure/session_runner.py": "5902c1032d4f3c90649eba0d40869ee637249127f85f82c7118ffc0e9c00c862"
+   },
+   "patch_sha256": "d36f293571eaaac79fed90095eb9548d21ab853c1cbc1ebe1ce64f4057b7dbd7",
+   "numstat": {
+    "src/aadistill/infrastructure/session_runner.py": [
+     50,
+     2
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 2,
+   "_additive_only_is_derived": "from `numstat` above, the measured `git diff --numstat` of this repair. An additive entry here is still HISTORICAL accounting and still confers nothing -- `launch_compatible_with_frozen_preregistration` is False either way. The legacy additive note is sealed by hash and cannot take a new entry, so a purely additive post-freeze change to the shared runtime has no other recorder.",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "the C2 durable backend became a provider network volume, and a session ceiling became bounded by what its campaign can still fund. In the SHARED runtime, one change: SessionRunner.create splices attached_volume() where it hardcoded --volume-in-gb 0, so a session may attach a volume the provider already holds, at a mount path it names, in the datacenter the volume lives in. A launcher naming none of --network-volume-id, --volume-mount-path or --data-center-ids produces the identical provider command line; a volume named without a mount path raises rather than defaulting onto a checkout root. runtime/durable_store.py gained a status note and no behaviour.",
+   "why_the_owner_is_shared_session_runner": "session_runner.py is the one runner every paid session in this repository goes through, so any change to pod provisioning is necessarily a change to a file Phase B's declared executable set names. The change is additive and optional, and its default path is asserted byte-identical to the previous command line by tests/runtime/test_attached_volume.py.",
+   "why_a_c1_only_override_was_rejected": "C1 is closed by a verdict and runs nothing. This is Phase-C2 engineering inside an approved envelope; it confers nothing on any frozen Phase-A or Phase-B identity, the entry asserts launch_compatible_with_frozen_preregistration false as every entry does, and the paid Phase-B launch gate never reads this ledger.",
+   "maintainer_authorization": "maintainer, under the 2026-09-23 execute-to-completion authorization for C2",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "508c5cf67ed08637e39e6c7a61c924f25ab03e5d9442a18e209a1ce06ca0d428",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "a48c1cc347596c436322c781678c63ce06f4593bcefde645ec3fd565b0ea08bd"
   }
  ]
 }
