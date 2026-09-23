@@ -1518,8 +1518,8 @@
    "experiment_id": "phase_c2_behavioural",
    "run_id": "attempt10",
    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10",
-   "n_files": 1,
-   "digest": "36ee6976894f38d2eed4eef3e19b3a4af3967b1d9ee816df87bf4d7a2018b121",
+   "n_files": 2,
+   "digest": "c5342b432a7a665a57a5add8a340a0702a8494f9e0ef92cf96902c5ecefe00f2",
    "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   },
   {

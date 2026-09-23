@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-23T11:17:46+00:00",
+  "created_utc": "2026-09-23T11:25:50+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 1736,
-    "bytes": 56651983,
+    "files": 1737,
+    "bytes": 56694803,
     "by_disposition": {
       "keep_canonical": 187,
-      "keep_immutable": 1352,
+      "keep_immutable": 1353,
       "keep_referenced": 182,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 758,
+      "immutable_record": 759,
       "index": 8,
       "narrative": 475,
       "raw_execution_artifact": 474,
@@ -6136,7 +6136,7 @@
     {
       "path": "logs/index.json",
       "size_bytes": 77574,
-      "sha256": "bc2bdd756aae9ecd0e5ec4e036bfc5978a8ecf84d516902d0997d06fde85cd74",
+      "sha256": "6e2333b249fb94953064809f3290a18b089a4b9744998620cbbc79822b21fe0e",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -24133,8 +24133,22 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/governance/grant.json",
-      "size_bytes": 15376,
-      "sha256": "10f03355a0e74270a6c989a75c695eea5d9702970c064b7b09f22a84826b034d",
+      "size_bytes": 15753,
+      "sha256": "fb692e38a95c9b43d70bbd6893cb9718d19b42b2990b9261c08c8fc8328da0dd",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/governance/readiness.json",
+      "size_bytes": 42443,
+      "sha256": "9a055d33c557c9cda3c24998c479bfcfa8b0743e6e080fde848c37ad9c963ac2",
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [

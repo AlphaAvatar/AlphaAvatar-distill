@@ -48,18 +48,66 @@ LAUNCHER_MODULE = "autoinit_c2_behavioural_launch"
 
 RUN_READINESS_ROLE = "governance/readiness.json"
 
-#: Everything in the selection passes and nothing skips, enforced by the
-#: machinery rather than by a list somebody maintains. The selection is written
-#: with no conditional skips for exactly this reason: a `skipif` keyed on a
-#: simulator-set marker is INVERTED on the pod, and a gate can check THAT a
-#: test skipped but never WHY.
+#: THE ONE CLASS OF CASE THIS SCOPE CANNOT RUN ON A POD, declared rather
+#: than discovered. Each of these reads the out-of-tree durable store --
+#: the five reconstructed replay products and the campaign's completed
+#: probes, under `$HOME/aad-artifacts`. A session stages an asset's BYTES
+#: and never the store they were frozen in, so no pod has it.
+#:
+#: They were NOT declared before, and the comment below said "nothing
+#: skips". That was true and it was also why attempt9 died: with the
+#: stores reached by absolute paths they did not skip, they FAILED, and
+#: the launch-bound sweep could not see it because an absolute path
+#: survives the simulator's fresh empty HOME. The stores are now located
+#: through `$HOME`, the cases skip on the condition rather than on any
+#: simulator marker, and the expectation is pinned in BOTH directions:
+#: declaring a case here means the gate refuses if it RUNS on a pod too.
+HOST_LOCAL_STORE_CASES: tuple[str, ...] = (
+    f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_a_fresh_campaign_is_still_charged_for_every_probe",
+    f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_a_real_scoring_failure_leaves_a_continuable_probe",
+    f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_the_destination_is_charged_for_the_probes_this_session_produces",
+    f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_the_screening_winner_may_be_any_candidate_not_the_cost_proxy",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_completed_probe_is_restored_and_never_retrained",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_continuation_that_would_advance_another_candidate_is_refused",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_null_effect_does_not_manufacture_a_winner",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_probe_from_another_campaign_is_refused",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_probe_whose_bytes_changed_is_refused",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_replacement_resource_completes_the_campaign_without_retraining",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_all_five_stages_ran_in_the_frozen_order",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_every_probe_was_announced_for_durability_with_a_full_identity",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_exactly_one_candidate_advanced_and_it_is_not_the_anchor",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_confirmation_passes_c2s_bootstrap_seed_to_the_bootstrap",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_driver_reaches_its_terminal_states[effect0-GO]",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_driver_reaches_its_terminal_states[effect1-NO_GO]",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_driver_reaches_its_terminal_states[effect2-NO_GO]",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_screening_ranking_carries_no_verdict",
+    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_twelve_probes_and_no_more",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_passes_the_authorized_provision",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_reads_the_flag_rather_than_the_constant",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_refuses_a_provision_that_cannot_hold_the_work",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheGenericByteModel::test_the_footprint_reproduces_a_real_probe_on_disk",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheRuntimeHeadroomRefusal::test_it_passes_and_records_when_there_is_room",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheRuntimeHeadroomRefusal::test_it_refuses_when_the_disk_cannot_hold_the_next_probe",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheRuntimeHeadroomRefusal::test_the_need_is_derived_from_the_recipe",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::test_container_and_durable_are_separate_bounds",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::test_the_probe_is_charged_at_its_save_size_not_its_leaf_size",
+)
+
+
+#: Everything else in the selection passes. A `skipif` keyed on a simulator-set
+#: marker would be INVERTED on the pod and a gate can check THAT a test skipped
+#: but never WHY, so the only skips admitted here are keyed on the CONDITION --
+#: whether this machine has the store -- and each one is named above.
 READINESS_GROUPS = ReadinessGroups(
-    expected_skips={},
+    expected_skips={"host_local_durable_stores": HOST_LOCAL_STORE_CASES},
     must_pass={},
     staged_role_nodeid=None,
     known_non_environment_skips=(),
     watched=(POD_TEST_SELECTION,),
-    refusal_notes={},
+    refusal_notes={"host_local_durable_stores": (
+        "these cases read $HOME/aad-artifacts, which a pod never "
+        "receives; they must skip there and must run on a dev box "
+        "that has it")},
 )
 
 
