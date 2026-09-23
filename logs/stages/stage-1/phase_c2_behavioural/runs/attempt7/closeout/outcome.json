@@ -1,0 +1,31 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_closeout/v1",
+ "run_id": "attempt7",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "RETIRED_AT_ZERO_BEFORE_PROVIDER_CONTACT",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0
+ },
+ "closed_utc": "2026-09-23T06:55:07+00:00",
+ "what_happened": "The $0 dry run reached the NINTH of nine pre-provider gates. Eight passed: session commit and lineage, scope, plan binding, source binding (135 files, 9585ec39), destination (19.6 GiB free for the 2 probes owed), container (120 GB for a 74.3 GiB peak), and volume (no probe needs its weights; ten completed probes contribute 8.06 MiB of evidence and their 22.213 GiB of checkpoints have no remaining consumer). The budget resolved to 339 expected minutes, $6.16 expected, $8.29 hard against $19.46 authorized.\\n\\n`campaign_continuation_gate` then refused: the dry run had just created `runs/attempt7_dryrun`, and `campaign_attempts` enumerates that directory -- so it read the rehearsal as a prior RESOURCE of the campaign whose billing state could not be established, which is a stop condition. The gate refused the launch it had just rehearsed.",
+ "why_a_fresh_chain": "a dry run contacts no provider, so it is not a resource. Both enumerations of this campaign's run directories -- the launcher's `campaign_attempts` and the governance module's `settled_campaign_all_in` -- now exclude it, and the suffix they agree on is owned by one module rather than derived twice. That is a launcher change, the launcher is in the executable closure, so the closure moved and attempt7's authorization and bundle no longer bind this tree.",
+ "consumed": "nothing. No provider was contacted, no resource created; the dry run's own directory and scratch claim were removed. This is the THIRD defect in the dry-run mechanism found at $0 by running it: the id was invalid, and then the directory it writes was counted as a campaign resource. Each was found for free, which is what the rehearsal is for.",
+ "gates_passed_at_zero": [
+  "session_commit_gate (lineage: one tracked path differs)",
+  "scope_gate",
+  "plan_binding_gate",
+  "source_binding_gate",
+  "destination_gate",
+  "container_gate",
+  "volume_gate"
+ ],
+ "gate_that_refused": "campaign_continuation_gate",
+ "preserved": [
+  "governance/grant.json",
+  "governance/readiness.json",
+  "governance/authorization.json",
+  "governance/bundle.json"
+ ],
+ "authorizes": "nothing"
+}

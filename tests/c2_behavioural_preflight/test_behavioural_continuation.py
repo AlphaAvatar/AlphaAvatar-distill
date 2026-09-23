@@ -3174,3 +3174,60 @@ def test_the_journal_refuses_an_evidence_entry_without_a_score(tmp_path,
     assert ok and "evidence-only" in why
     ok, why = drv.reidentify({"evidence_only": True})
     assert not ok and "no score" in why
+
+
+def test_a_dry_run_directory_is_not_a_campaign_RESOURCE(tmp_path, repo):
+    """THE third defect in the dry-run mechanism, and the deepest of them.
+
+    `--dry-run` writes to its own run id so it cannot consume the chain it
+    exists to de-risk. That puts its directory under `runs/`, beside the real
+    attempts — and `campaign_attempts` enumerates exactly that. attempt7's dry
+    run reached the ninth gate, created `attempt7_dryrun`, and then the gate
+    read it as a prior RESOURCE of the campaign whose billing state could not
+    be established, and refused the launch it had just rehearsed.
+
+    A dry run contacts no provider. That is what the flag means, and both
+    enumerations of this campaign's run directories have to agree about it,
+    which is why the suffix is owned by `behavioural_governance` rather than by
+    the launcher that happens to derive it.
+    """
+    store = tmp_path / "store"
+    _run_manifest(repo, "attempt1")
+    _session_record(repo, "attempt1", actual_usd=3.41)
+    #: A dry-run directory that looks exactly like a run that billed and left
+    #: no session record — the shape that refuses.
+    _run_manifest(repo, f"attempt2{BG.DRY_RUN_SUFFIX}")
+
+    prior = L.campaign_attempts(BG.CAMPAIGN_ID, exclude="attempt2",
+                                store=store, repo_root=repo)
+    assert prior == ["attempt1"], (
+        "a dry-run directory was counted as a prior provider resource")
+
+    #: And it contributes nothing to SETTLED SPEND either, for the same
+    #: reason. A dry-run directory with no closeout is skipped anyway, so the
+    #: exclusion only does work when one HAS a closeout — which is what a dry
+    #: run's own `finally` would write. Give it one.
+    dry = f"attempt3{BG.DRY_RUN_SUFFIX}"
+    out = (repo / L.rel_run_dir(L.EXPERIMENT_ID, dry, L.STAGE_ID)
+           / "closeout/outcome.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"provider_resource_created": False,
+                               "money": {"all_in_usd": 99.99}}) + "\n")
+    settled = BG.settled_campaign_all_in(repo)
+    assert not any(BG.is_dry_run_id(k) for k in settled["per_attempt"]), (
+        settled["per_attempt"])
+    assert settled["total_usd"] < 99.99, (
+        "a dry run's closeout entered the campaign's settled spend")
+
+
+def test_the_dry_run_suffix_has_one_owner():
+    """Two enumerations agreeing by coincidence is two chances to diverge."""
+    assert L.DRY_RUN_SUFFIX is BG.DRY_RUN_SUFFIX
+    assert BG.is_dry_run_id("attempt7_dryrun")
+    assert not BG.is_dry_run_id("attempt7")
+    #: And it is a valid run id, which a hyphen was not.
+    from experiments.run_layout import layout_for
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        layout_for(tmp, L.EXPERIMENT_ID, f"attempt7{BG.DRY_RUN_SUFFIX}",
+                   L.STAGE_ID)

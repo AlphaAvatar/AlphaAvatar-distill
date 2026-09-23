@@ -416,6 +416,29 @@ CAMPAIGN_AMOUNT_FIELD = "campaign_all_in_hard_usd"
 EXPERIMENT_ID = "phase_c2_behavioural"
 STAGE_ID = "1"
 
+#: THE SUFFIX A DRY RUN'S OUTPUT LOCATIONS TAKE, and the reason it lives here
+#: rather than in the launcher: two separate enumerations of this campaign's
+#: run directories have to agree about what is NOT a run.
+#:
+#: A `--dry-run` writes its evidence to its own run directory so it cannot
+#: consume the chain it exists to de-risk. That directory then sits under
+#: `runs/` beside the real attempts -- and `campaign_attempts` enumerates
+#: exactly that, so `attempt7_dryrun` was read as a prior RESOURCE of the
+#: campaign whose spend could not be established, and the gate refused the
+#: launch it had just rehearsed. A dry run creates no provider resource by
+#: construction; that is what the flag means.
+DRY_RUN_SUFFIX = "_dryrun"
+
+
+def is_dry_run_id(run_id: str) -> bool:
+    """Is this a dry run's output id rather than a real run attempt?
+
+    Asked by every enumeration of this campaign's run directories. A dry run
+    contacts no provider, so it is not a resource, not a predecessor, and not
+    something whose billing state could be unknown.
+    """
+    return str(run_id).endswith(DRY_RUN_SUFFIX)
+
 
 def campaign_runs_rel() -> str:
     """This campaign's run directories, repo-relative."""
@@ -448,6 +471,11 @@ def settled_campaign_all_in(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]
     per_attempt: dict[str, float] = {}
     total = 0.0
     for d in sorted(root.iterdir()) if root.is_dir() else []:
+        #: A DRY RUN IS NOT A RUN. It contacts no provider and spends nothing,
+        #: so its directory must not enter a settled-spend total -- see
+        #: `is_dry_run_id`.
+        if is_dry_run_id(d.name):
+            continue
         outcome = d / "closeout/outcome.json"
         if not outcome.is_file():
             continue

@@ -158,10 +158,10 @@ def probe_destination(ctx: SessionContext, unit_id: str) -> Path:
             / ctx.args.run_id / unit_id)
 
 
-#: The suffix a dry run's OUTPUT locations take. Named, because a test that
-#: compares the implementation's own text cannot check that the result is a
-#: valid run id -- and a hyphen here raised inside `open_run`.
-DRY_RUN_SUFFIX = "_dryrun"
+#: The suffix a dry run's OUTPUT locations take. Owned by
+#: `behavioural_governance`, because two separate enumerations of this
+#: campaign's run directories have to agree about what is NOT a run.
+DRY_RUN_SUFFIX = BG.DRY_RUN_SUFFIX
 
 CONTAINER_DISK_GB = BG.PROVISION_GB
 
@@ -643,7 +643,12 @@ def campaign_attempts(campaign_id: str, *, exclude: str = "",
             if declared is None or declared == campaign_id:
                 names.add(d.name)
     names.discard(exclude)
-    return sorted(names)
+    #: A DRY RUN IS NOT A RESOURCE. `--dry-run` writes to its own run id so it
+    #: cannot consume the chain, which puts that directory under `runs/` beside
+    #: the real attempts -- and this function reads it as a prior resource whose
+    #: spend could not be established, then refuses the launch it had just
+    #: rehearsed at $0. A dry run contacts no provider by construction.
+    return sorted(n for n in names if not BG.is_dry_run_id(n))
 
 
 def campaign_remaining_work(ctx: SessionContext) -> dict:
