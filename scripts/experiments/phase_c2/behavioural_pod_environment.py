@@ -54,43 +54,31 @@ RUN_READINESS_ROLE = "governance/readiness.json"
 #: probes, under `$HOME/aad-artifacts`. A session stages an asset's BYTES
 #: and never the store they were frozen in, so no pod has it.
 #:
-#: They were NOT declared before, and the comment below said "nothing
-#: skips". That was true and it was also why attempt9 died: with the
-#: stores reached by absolute paths they did not skip, they FAILED, and
-#: the launch-bound sweep could not see it because an absolute path
-#: survives the simulator's fresh empty HOME. The stores are now located
-#: through `$HOME`, the cases skip on the condition rather than on any
-#: simulator marker, and the expectation is pinned in BOTH directions:
-#: declaring a case here means the gate refuses if it RUNS on a pod too.
+#: This list was 28 and is now 8, and the shrinking is the point. Twenty of
+#: those cases were not host-dependent at all: the CODE they covered asked
+#: `candidate_manifest` for a parameter count the frozen selection already
+#: commits, so it reached for host bytes a pod never receives. Marking them
+#: made the sweep agree with the pod and silenced the tests that would have
+#: caught that -- and stage C then failed on exactly that line, on a pod,
+#: for $1.20. A skip that hides a defect is worse than a failure that shows
+#: one.
+#:
+#: What remains genuinely needs the durable products' BYTE SIZES, not just
+#: their identities: `storage_requirement` joins the selection to the
+#: checkpoints on the machine that froze them, and no pod path reaches it --
+#: the launcher's container gate runs on the dev box. Each is keyed on the
+#: CONDITION rather than on any simulator marker, and the expectation is
+#: pinned in BOTH directions: declaring a case here means the gate refuses
+#: if it RUNS on a pod too.
 HOST_LOCAL_STORE_CASES: tuple[str, ...] = (
-    f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_a_fresh_campaign_is_still_charged_for_every_probe",
-    f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_a_real_scoring_failure_leaves_a_continuable_probe",
     f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_the_destination_is_charged_for_the_probes_this_session_produces",
-    f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_the_screening_winner_may_be_any_candidate_not_the_cost_proxy",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_completed_probe_is_restored_and_never_retrained",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_continuation_that_would_advance_another_candidate_is_refused",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_null_effect_does_not_manufacture_a_winner",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_probe_from_another_campaign_is_refused",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_probe_whose_bytes_changed_is_refused",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_a_replacement_resource_completes_the_campaign_without_retraining",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_all_five_stages_ran_in_the_frozen_order",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_every_probe_was_announced_for_durability_with_a_full_identity",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_exactly_one_candidate_advanced_and_it_is_not_the_anchor",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_confirmation_passes_c2s_bootstrap_seed_to_the_bootstrap",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_driver_reaches_its_terminal_states[effect0-GO]",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_driver_reaches_its_terminal_states[effect1-NO_GO]",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_driver_reaches_its_terminal_states[effect2-NO_GO]",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_the_screening_ranking_carries_no_verdict",
-    f"{POD_TEST_SELECTION}/test_behavioural_production_rehearsal.py::test_twelve_probes_and_no_more",
-    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_passes_the_authorized_provision",
-    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_reads_the_flag_rather_than_the_constant",
-    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_refuses_a_provision_that_cannot_hold_the_work",
+    f"{POD_TEST_SELECTION}/test_behavioural_continuation.py::test_a_fresh_campaign_is_still_charged_for_every_probe",
     f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheGenericByteModel::test_the_footprint_reproduces_a_real_probe_on_disk",
-    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheRuntimeHeadroomRefusal::test_it_passes_and_records_when_there_is_room",
-    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheRuntimeHeadroomRefusal::test_it_refuses_when_the_disk_cannot_hold_the_next_probe",
-    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheRuntimeHeadroomRefusal::test_the_need_is_derived_from_the_recipe",
-    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::test_container_and_durable_are_separate_bounds",
     f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::test_the_probe_is_charged_at_its_save_size_not_its_leaf_size",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::test_container_and_durable_are_separate_bounds",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_passes_the_authorized_provision",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_refuses_a_provision_that_cannot_hold_the_work",
+    f"{POD_TEST_SELECTION}/test_behavioural_storage_lifecycle.py::TestTheContainerGate::test_it_reads_the_flag_rather_than_the_constant",
 )
 
 

@@ -39,7 +39,10 @@ from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
 import autoinit_c2_behavioural_launch as L  # noqa: E402
 import autoinit_c2_behavioural_driver as D  # noqa: E402
 
-from _host_local_stores import needs_host_local_stores  # noqa: E402
+from _host_local_stores import (  # noqa: E402
+    host_local_stores_are_absent,
+    needs_host_local_stores,
+)
 
 from aadistill.runtime.cpu_test_env import host_local_store  # noqa: E402
 
@@ -400,6 +403,52 @@ class TestTheReleaseBoundary:
 
 # --- 6. and the driver MEASURES, because a derivation can be wrong --------
 
+def test_the_parameter_count_comes_from_the_selection_not_the_host_store():
+    """The storage bound must be derivable on a machine with no host store.
+
+    `probe_local_need_bytes` asked `candidate_manifest`, which joins the frozen
+    selection to the durable products on the machine that froze them. A pod
+    receives an asset's BYTES and never that store, so the call raised there --
+    while asking nothing more than how big the model is, which the selection
+    itself commits.
+
+    The branch is reached by every CONTINUATION and only by a continuation:
+    `required_identity` is set when an arm is built for a rung, a
+    continuation's screening probes are all already scored so none is built,
+    and stage C is the first rung to ask. attempt11 built both arms over
+    fifty-one minutes and died on this line, $1.20, with stages P, S and R
+    passed and nothing trained.
+
+    Asserted against the manifest's own answer where both are available, so
+    this cannot drift into a second opinion about the parameter count.
+    """
+    count = BH.candidate_parameter_count(REPO)
+    assert count > 0
+    if not host_local_stores_are_absent():
+        assert count == int(BH.candidate_manifest(REPO)[0]["num_parameters"]), (
+            "the selection and the joined manifest disagree about the "
+            "candidates' parameter count")
+
+
+def test_the_headroom_need_is_derivable_with_no_arm_and_no_store(tmp_path):
+    """The exact state a continuation is in when stage C asks.
+
+    No arm built this session, so no `required_identity`; and nothing that
+    reaches the host store. This is the call that failed on attempt11's pod.
+    """
+    drv = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
+    drv.ev = {}
+    drv.a = type("A", (), {"b_workdir": str(tmp_path)})()
+    assert not getattr(drv, "required_identity", None)
+
+    need = drv.probe_local_need_bytes()
+    tr = BH.training_dtypes(REPO)
+    assert need["need_bytes"] == (need["transient_bytes"]
+                                  + need["retained_bytes"])
+    assert need["keep_last"] == tr["keep_last"]
+    assert need["checkpoint"]["save_dtype"] == tr["save_dtype"]
+
+
 class TestTheRuntimeHeadroomRefusal:
     def _drv(self, tmp_path):
         drv = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
@@ -407,7 +456,6 @@ class TestTheRuntimeHeadroomRefusal:
         drv.a = type("A", (), {"b_workdir": str(tmp_path)})()
         return drv
 
-    @needs_host_local_stores
     def test_the_need_is_derived_from_the_recipe(self, tmp_path):
         need = self._drv(tmp_path).probe_local_need_bytes()
         tr = BH.training_dtypes(REPO)
@@ -416,7 +464,6 @@ class TestTheRuntimeHeadroomRefusal:
         assert need["need_bytes"] == (need["transient_bytes"]
                                       + need["retained_bytes"])
 
-    @needs_host_local_stores
     def test_it_refuses_when_the_disk_cannot_hold_the_next_probe(
             self, tmp_path, monkeypatch):
         from aadistill.runtime import leaf_durability as LD
@@ -426,7 +473,6 @@ class TestTheRuntimeHeadroomRefusal:
             drv.require_probe_headroom("probe_x")
         assert drv.ev["probe_headroom"][-1]["free_gib"] < 1
 
-    @needs_host_local_stores
     def test_it_passes_and_records_when_there_is_room(self, tmp_path,
                                                       monkeypatch):
         from aadistill.runtime import leaf_durability as LD

@@ -1516,7 +1516,6 @@ class _ScoringFails(_StageP):
             f"{probe.probe_id}: the evaluator died after training")
 
 
-@needs_host_local_stores
 def test_a_real_scoring_failure_leaves_a_continuable_probe(tmp_path, repo,
                                                            transport):
     """End to end, in production order, with nothing pre-written.
@@ -1785,7 +1784,6 @@ class _FullFlow(_StageP):
                 "per_sample_path": str(per_sample), "per_sample_sha256": "t"}
 
 
-@needs_host_local_stores
 def test_the_screening_winner_may_be_any_candidate_not_the_cost_proxy(
         tmp_path, repo, transport):
     """R10 edge case 1, driven through P -> S -> R -> C for real.

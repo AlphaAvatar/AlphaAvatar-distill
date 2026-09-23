@@ -403,6 +403,38 @@ def trainable_parameter_count(repo_root: str | Path = REPO_ROOT, *,
                 "model.named_parameters(), without loading a model")}
 
 
+def candidate_parameter_count(repo_root: str | Path = REPO_ROOT) -> int:
+    """The candidates' parameter count, FROM THE FROZEN SELECTION ALONE. `$0`.
+
+    `candidate_manifest` answers this too, but it joins the selection to the
+    durable products on the machine that froze them, so it needs bytes a pod
+    never receives. A pod asking only "how big is the model I am about to
+    train" does not need that join: the selection commits `num_parameters` for
+    every candidate, it is committed evidence, and it ships in the bundle.
+
+    The driver's storage bound asked through the manifest, on a fallback branch
+    reached only when no arm has been built this session -- which is every
+    CONTINUATION, because a continuation's screening probes are all already
+    scored and nothing sets the identity the primary branch reads. So the first
+    execution of that line was on a paid pod, in stage C, after fifty-one
+    minutes of arm building: attempt11, $1.20.
+
+    All five candidates share an architecture, so the count is one number and a
+    disagreement is a defect rather than a choice.
+    """
+    from experiments.phase_c2 import replay_specs as RS
+
+    selected = RS.load_selection(repo_root)["selected"]
+    counts = {int(e["num_parameters"]) for e in selected}
+    if len(counts) != 1:
+        raise BehaviouralProposalError(
+            f"the frozen selection commits {sorted(counts)} distinct parameter "
+            "counts across its candidates. They are meant to share an "
+            "architecture, so a storage bound cannot be derived from 'the' "
+            "count until that is explained.")
+    return counts.pop()
+
+
 def _reference_checkpoint(repo_root: str | Path) -> Path:
     """A real checkpoint whose header can be read, from the frozen manifest.
 

@@ -1153,9 +1153,21 @@ class C2BehaviouralDriver:
         from aadistill.runtime import cost as COST
 
         tr = BH.training_dtypes(REPO)
+        #: The arm's own identity when one has been built this session, and the
+        #: FROZEN SELECTION otherwise. The fallback asked `candidate_manifest`,
+        #: which joins the selection to the durable products on the machine
+        #: that froze them -- bytes a pod never receives -- so it raised here
+        #: on a pod while asking nothing more than how big the model is.
+        #:
+        #: The branch is reached by every CONTINUATION and only by a
+        #: continuation: `required_identity` is set when an arm is built for a
+        #: rung, a continuation's screening probes are all already scored so
+        #: none is built, and stage C is then the first rung to ask. attempt11
+        #: spent fifty-one minutes building both arms and died here, $1.20,
+        #: with stages P, S and R passed and nothing trained.
         params = int(self.required_identity["num_parameters"]
                      if getattr(self, "required_identity", None)
-                     else BH.candidate_manifest(REPO)[0]["num_parameters"])
+                     else BH.candidate_parameter_count(REPO))
         ck = COST.CheckpointFootprint(
             params, tr["save_dtype"],
             extra_bytes=int(tr["checkpoint_extra_bytes"]))

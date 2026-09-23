@@ -872,7 +872,7 @@
   },
   {
    "file": "tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py",
-   "line": 141,
+   "line": 144,
    "kind": "pytest.skip",
    "function": "test_the_footprint_reproduces_a_real_probe_on_disk",
    "condition": "not probes",
@@ -2122,5 +2122,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "f7d7be3268d9f36abed2345dc75a6cc3b72e27c927fe64727c0cae859ac6f727"
+ "digest": "c2508a1d2535f954a4c59a45b6ef11dae8af0fb9349946896dc273bcf16e02b8"
 }
