@@ -137,11 +137,11 @@
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
   "experiment_id": "phase_c2_behavioural",
-  "run_id": "attempt8",
-  "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt8",
-  "outcome": "recorded; RETIRED_AT_ZERO_NO_RESOURCE_ACQUIRED, $0.0000",
+  "run_id": "attempt9",
+  "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt9",
+  "outcome": "not recorded, and no closeout has been written for this run",
   "index": "logs/index.json",
-  "state": "recorded: the run wrote its own manifest",
+  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
   "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt8"
  },
  "architecture_migration": {
