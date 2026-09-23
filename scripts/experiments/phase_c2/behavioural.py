@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 from aadistill.runtime import cost as COST
+from aadistill.runtime.cpu_test_env import host_local_store
 
 #: The config every probe's training config is derived from, by the driver's
 #: own `probe_config`. Named here so the storage model reads the SAME
@@ -49,9 +50,15 @@ PROTOCOL = ("logs/stages/stage-1/phase_c2/plans/"
 #: The measured probe cost, from six real probes on a real L40S.
 PRICING = "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json"
 
-#: Where the replay left the five reconstructed products.
-DURABLE_STORE = ("/home/ecs-user/aad-artifacts/phase_c2_full_search"
-                 "/attempt3_replay")
+#: Where the replay left the five reconstructed products. LOCATED THROUGH
+#: `$HOME`, by the one helper that owns this derivation, because a hardcoded
+#: absolute path is immune to the simulator's fresh empty HOME — so host-local
+#: cases ran in the launch-bound sweep and failed on the pod, which has the
+#: bytes a session stages and never the store they were frozen in. That blind
+#: spot cost C1 attempt 14 $0.40, and behavioural attempt9 $0.11 in the same
+#: shape: 27 tests passed the sweep and failed the pod's own gate.
+DURABLE_STORE = str(host_local_store() / "phase_c2_full_search"
+                    / "attempt3_replay")
 
 STORAGE_PRICING = "configs/infrastructure/provider_storage_pricing.json"
 

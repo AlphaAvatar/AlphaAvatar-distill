@@ -52,6 +52,9 @@ from aadistill.infrastructure.session import (  # noqa: E402
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     session_commit_gate)
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
+from aadistill.runtime.cpu_test_env import (  # noqa: E402
+    host_local_store,
+)
 from aadistill.runtime.staging_contract import (  # noqa: E402
     ignores_for_selection)
 
@@ -99,7 +102,14 @@ FROZEN_EXPECT = "configs/experiments/phase_c2/behavioural_frozen_assets.json"
 
 #: Where finished probes live off-pod. ONE constant: the fetcher writes here and
 #: the preflight reads here, so "is this probe already durable" has one answer.
-DURABLE_STORE = "/home/ecs-user/aad-artifacts/phase_c2_behavioural"
+#:
+#: LOCATED THROUGH `$HOME` rather than written absolute. On this dev box the two
+#: resolve identically, so nothing about a real launch changes — but an absolute
+#: path survives the simulator's fresh empty HOME, and that is what let the
+#: launch-bound sweep certify a machine the pod could not reproduce. See
+#: `aadistill.runtime.cpu_test_env.host_local_store`, which exists for exactly
+#: this and which this module was not using.
+DURABLE_STORE = str(host_local_store() / "phase_c2_behavioural")
 
 #: THE PRE-STAGED BACKEND. A provider network volume holding this campaign's
 #: completed probes, written by `scripts/autoinit/stage_c2_probes_to_volume.py`

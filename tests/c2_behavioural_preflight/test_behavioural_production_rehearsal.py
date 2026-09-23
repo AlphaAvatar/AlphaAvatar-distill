@@ -47,6 +47,8 @@ from experiments.phase_c2 import behavioural_decision as BD
 from experiments.phase_c2 import behavioural_governance as BG
 from experiments.phase_c2 import behavioural_schedule as SCH
 
+from conftest import needs_host_local_stores  # noqa: E402
+
 N_PROMPTS, N_SCORABLE = 950, 850
 STRATA = ("gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool")
 
@@ -218,6 +220,7 @@ def _status(driver) -> str:
     #: rollout collapses on the candidate. NO_GO by veto, not by the interval.
     ((0.45, 0.25, 0.30, 0.95), "NO_GO"),
 ])
+@needs_host_local_stores
 def test_the_driver_reaches_its_terminal_states(tmp_path, effect, expected):
     driver = _run(tmp_path, effect)
     assert driver.rc == 0, driver.ev["stages"]
@@ -226,6 +229,7 @@ def test_the_driver_reaches_its_terminal_states(tmp_path, effect, expected):
     assert D.SUCCESS_MARKER in _status(driver)
 
 
+@needs_host_local_stores
 def test_a_null_effect_does_not_manufacture_a_winner(tmp_path):
     """No forced winner. A true zero effect must not come out GO."""
     driver = _run(tmp_path, (0.30, 0.30, 0.90, 0.90))
@@ -236,6 +240,7 @@ def test_a_null_effect_does_not_manufacture_a_winner(tmp_path):
 
 # -- what the run did on the way there --------------------------------------
 
+@needs_host_local_stores
 def test_the_confirmation_passes_c2s_bootstrap_seed_to_the_bootstrap(
         tmp_path, monkeypatch):
     """Observe the CALL, not a field the caller wrote about itself.
@@ -266,6 +271,7 @@ def test_the_confirmation_passes_c2s_bootstrap_seed_to_the_bootstrap(
     assert decision["rule"]["seeds"] == [1936324010, 1916380711, 1523147638]
 
 
+@needs_host_local_stores
 def test_all_five_stages_ran_in_the_frozen_order(tmp_path):
     driver = _run(tmp_path, (0.45, 0.25, 0.90, 0.90))
     assert driver.completed == list(D.STAGES)
@@ -273,6 +279,7 @@ def test_all_five_stages_ran_in_the_frozen_order(tmp_path):
         assert driver.ev["stages"][letter]["passed"] is True
 
 
+@needs_host_local_stores
 def test_twelve_probes_and_no_more(tmp_path):
     driver = _run(tmp_path, (0.45, 0.25, 0.90, 0.90))
     assert len(driver.training) == 12
@@ -281,6 +288,7 @@ def test_twelve_probes_and_no_more(tmp_path):
     assert len(driver.confirmation) == 6
 
 
+@needs_host_local_stores
 def test_exactly_one_candidate_advanced_and_it_is_not_the_anchor(tmp_path):
     driver = _run(tmp_path, (0.45, 0.25, 0.90, 0.90))
     ranking = json.loads((driver.audit / "c2_screening_ranking.json").read_text())
@@ -289,6 +297,7 @@ def test_exactly_one_candidate_advanced_and_it_is_not_the_anchor(tmp_path):
     assert sum(1 for r in ranking["ranked"] if r.get("advanced")) <= 1
 
 
+@needs_host_local_stores
 def test_the_screening_ranking_carries_no_verdict(tmp_path):
     """Screening ranks. It may not promote, decide or name an incumbent."""
     driver = _run(tmp_path, (0.45, 0.25, 0.90, 0.90))
@@ -297,6 +306,7 @@ def test_the_screening_ranking_carries_no_verdict(tmp_path):
     assert "verdict" not in ranking and "incumbent" not in ranking
 
 
+@needs_host_local_stores
 def test_every_probe_was_announced_for_durability_with_a_full_identity(tmp_path):
     """The moment it exists, with every field the destination will compare."""
     driver = _run(tmp_path, (0.45, 0.25, 0.90, 0.90))
@@ -400,6 +410,7 @@ def test_a_failed_stage_writes_the_failure_marker(tmp_path):
     assert driver.ev["stages"]["P"]["passed"] is False
 
 
+@needs_host_local_stores
 def test_a_completed_probe_is_restored_and_never_retrained(tmp_path):
     """Resume, as pre-registered: same campaign, bytes re-identified, no retrain."""
     first = _run(tmp_path / "one", (0.45, 0.25, 0.90, 0.90))
@@ -418,6 +429,7 @@ def test_a_completed_probe_is_restored_and_never_retrained(tmp_path):
     assert all(r["scored"] for r in summary["restored"])
 
 
+@needs_host_local_stores
 def test_a_replacement_resource_completes_the_campaign_without_retraining(
         tmp_path):
     """Continuation, end to end, across two run/resource identities.
@@ -476,6 +488,7 @@ def test_a_replacement_resource_completes_the_campaign_without_retraining(
     assert D.SUCCESS_MARKER in Path(second.a.status_path).read_text()
 
 
+@needs_host_local_stores
 def test_a_continuation_that_would_advance_another_candidate_is_refused(
         tmp_path):
     """Screening commits once. A second ranking naming another candidate stops.
@@ -507,6 +520,7 @@ def test_a_continuation_that_would_advance_another_candidate_is_refused(
     assert "D" not in second.ev["stages"]
 
 
+@needs_host_local_stores
 def test_a_probe_from_another_campaign_is_refused(tmp_path):
     """A replacement resource may not pool with the previous one's probes."""
     first = _run(tmp_path / "one", (0.45, 0.25, 0.90, 0.90))
@@ -524,6 +538,7 @@ def test_a_probe_from_another_campaign_is_refused(tmp_path):
     assert all("campaign" in r["why"] for r in summary["rejected"])
 
 
+@needs_host_local_stores
 def test_a_probe_whose_bytes_changed_is_refused(tmp_path):
     """A record is not a checkpoint. The bytes decide."""
     import torch

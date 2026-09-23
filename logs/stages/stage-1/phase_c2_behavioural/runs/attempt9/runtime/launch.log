@@ -1,0 +1,73 @@
+volume: not attached — no remaining operation reads a pre-staged checkpoint — 10 completed probe(s) contribute 8.06 MiB of evidence and 22.213 GiB of checkpoints have no consumer — so no volume is attached and the draw is not pinned to one datacenter
+
+[09:33:03] budget: expected 339 min $6.16 · soft $7.75 · hard $8.29 (authorized $19.46)
+[09:33:03] NVIDIA L40S $1.09/h, stock Low
+[09:33:03] session commit 293f5ed60667 verified: harness digests to 40bb610a2b88…, carries the authorization and only logs/stages/stage-1/phase_c2_behavioural/runs/attempt9/governance/authorization.json differs from the authorized base
+[09:33:03] scope OK: behavioural selection with recovery training, and nothing else reachable
+[09:33:04] plan binding OK (31088b981499…)
+[09:33:04] source binding OK (135 files, 40bb610a2b88…)
+[09:33:05] destination OK: 19.3 GiB free at /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1 for the 2 probe(s) owed, 4.4 GiB (of 26.7 GiB for the whole protocol; the rest is already there)
+[09:33:05] container OK: 120 GB (111.8 GiB) provisioned for a 74.3 GiB peak local residency, 37.5 GiB spare
+[09:33:05] volume OK: no probe needs its weights on the pod — 10 completed probe(s) contribute 8.06 MiB of evidence and their 22.213 GiB of checkpoints have no remaining consumer
+[09:33:05] campaign continuation OK: $22.2466 all-in settled ($21.9115 GPU + $0.3351 disk) across 8 prior attempt(s) plus $8.4201 for the remaining 2 probes is inside the $42.0000 campaign ceiling, and every prior resource is provider-confirmed released
+[09:33:06] readiness OK (launch_bound, PASS, {'error': 0, 'failed': 0, 'passed': 236, 'skipped': 0})
+[09:33:10] bundle OK (293f5ed60667…)
+[09:33:11] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 6 local assets
+[09:33:11] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[09:38:12] watchdog detached — hard 457 min = $8.29
+[09:38:12] created 4yumqr65qp5c00 at $1.09/h
+[09:38:44] TCP 22 at 64.247.206.218:13953 after 0.5 min
+[09:38:48] draw 1: ssh reachable — $0.01
+[09:40:55] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[09:40:55] draw 1: running setup
+[09:44:14] setup did not reach SETUP_DONE:
+iments.phase_c2.behavioural.BehaviouralProposalError: candidate d005dfb27e7bb5adc46eb988ae79e2a9 has no destination-verified product at /home/ecs-user/aad-
+  WHY test_the_screening_winner_may_be_any_candidate_not_the_cost_proxy: experiments.phase_c2.behavioural.BehaviouralProposalError: candidate d005dfb27e7bb5adc46eb988ae79e2a9 has no destination-verified product at /home/ecs-user/aad-
+  WHY test_a_completed_probe_is_restored_and_never_retrained: assert 0 == 12
+  WHY test_a_continuation_that_would_advance_another_candidate_is_refused: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/test_a_continuation_that_would0/one/audit/c2_screening_ranking.json'
+  WHY test_a_null_effect_does_not_manufacture_a_winner: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/test_a_null_effect_does_not_ma0/audit/c2_decision.json'
+  WHY test_a_probe_from_another_campaign_is_refused: assert 0 == 12
+  WHY test_a_probe_whose_bytes_changed_is_refused: IndexError: list index out of range
+  WHY test_a_replacement_resource_completes_the_campaign_without_retraining: assert 1 == 0
+  WHY test_all_five_stages_ran_in_the_frozen_order: AssertionError: assert ['P'] == ['P', 'S', 'R', 'C', 'D']
+  WHY test_every_probe_was_announced_for_durability_with_a_full_identity: assert 0 == 12
+skip set digest: 5beed50500f3502f… (1 skipped, all named in the JSON)
+skip-set comparison: DIFFERS from the launch-bound sweep (0 expected vs 1 actual)
+  1 unexpected POD-ONLY skip:
+    tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py::TestTheGenericByteModel::test_the_footprint_reproduces_a_real_probe_on_disk
+REFUSING: the pod's skip set is not the launch-bound sweep's. The sweep therefore did not certify this machine, which is the condition that cost attempt 5 a grant.
+[09:44:04] real runtime intact after the CPU-test scope: CUDA available, teacher cache at /root/.cache/huggingface/hub
+[09:44:04] test suite failed rc=1
+SETUP_RC=1
+
+[09:44:14] ABORT after draw 1: setup_failed
+[09:44:14] deleting pod (setup setup_failed)
+[09:44:25] pod deleted — 6.2 min, $0.11; provider confirms gone: True
+
+autoinit-phase-c2-behavioural INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_c2_behavioural/runs/attempt9/runtime/session.json. the behavioural selection is a TERMINUS: it names a C2 incumbent or it does not, and NO_GO and INCONCLUSIVE are complete results. C3 is separately authorized and unreachable from here.
+== 12
+  WHY test_a_continuation_that_would_advance_another_candidate_is_refused: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/test_a_continuation_that_would0/one/audit/c2_screening_ranking.json'
+  WHY test_a_null_effect_does_not_manufacture_a_winner: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-root/pytest-0/test_a_null_effect_does_not_ma0/audit/c2_decision.json'
+  WHY test_a_probe_from_another_campaign_is_refused: assert 0 == 12
+  WHY test_a_probe_whose_bytes_changed_is_refused: IndexError: list index out of range
+  WHY test_a_replacement_resource_completes_the_campaign_without_retraining: assert 1 == 0
+  WHY test_all_five_stages_ran_in_the_frozen_order: AssertionError: assert ['P'] == ['P', 'S', 'R', 'C', 'D']
+  WHY test_every_probe_was_announced_for_durability_with_a_full_identity: assert 0 == 12
+skip set digest: 5beed50500f3502f… (1 skipped, all named in the JSON)
+skip-set comparison: DIFFERS from the launch-bound sweep (0 expected vs 1 actual)
+  1 unexpected POD-ONLY skip:
+    tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py::TestTheGenericByteModel::test_the_footprint_reproduces_a_real_probe_on_disk
+REFUSING: the pod's skip set is not the launch-bound sweep's. The sweep therefore did not certify this machine, which is the condition that cost attempt 5 a grant.
+[09:44:04] real runtime intact after the CPU-test scope: CUDA available, teacher cache at /root/.cache/huggingface/hub
+[09:44:04] test suite failed rc=1
+SETUP_RC=1
+
+[09:44:14] ABORT after draw 1: setup_failed
+[09:44:14] deleting pod (setup setup_failed)
+[09:44:25] pod deleted — 6.2 min, $0.11; provider confirms gone: True
+LAUNCH_EXIT=11

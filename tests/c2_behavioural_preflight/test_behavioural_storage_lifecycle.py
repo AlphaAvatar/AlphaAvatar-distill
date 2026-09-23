@@ -39,6 +39,8 @@ from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
 import autoinit_c2_behavioural_launch as L  # noqa: E402
 import autoinit_c2_behavioural_driver as D  # noqa: E402
 
+from conftest import needs_host_local_stores  # noqa: E402
+
 
 # --- 1. the generic byte model takes every dtype as an argument -------------
 
@@ -200,6 +202,7 @@ class TestTheDtypesAreRead:
 
 # --- 3. the storage requirement charges the save footprint -----------------
 
+@needs_host_local_stores
 def test_the_probe_is_charged_at_its_save_size_not_its_leaf_size():
     sched = BH.schedule(REPO)
     req = BH.storage_requirement(BH.candidate_manifest(REPO), sched, REPO)
@@ -212,6 +215,7 @@ def test_the_probe_is_charged_at_its_save_size_not_its_leaf_size():
         int(sched["total_probes"]) * fp["gib"], abs=0.01)
 
 
+@needs_host_local_stores
 def test_container_and_durable_are_separate_bounds():
     req = BH.storage_requirement(BH.candidate_manifest(REPO),
                                  BH.schedule(REPO), REPO)
@@ -247,16 +251,19 @@ class TestTheContainerGate:
             self.args = type("A", (), {"disk_gb": gb})()
             self.evidence = {}
 
+    @needs_host_local_stores
     def test_it_passes_the_authorized_provision(self):
         ok, why = L.container_gate(self._Ctx(120))
         assert ok, why
 
+    @needs_host_local_stores
     def test_it_refuses_a_provision_that_cannot_hold_the_work(self):
         ctx = self._Ctx(48)
         ok, why = L.container_gate(ctx)
         assert not ok and "peak local residency" in why
         assert ctx.evidence["container_storage"]["headroom_gib"] < 0
 
+    @needs_host_local_stores
     def test_it_reads_the_flag_rather_than_the_constant(self):
         """A session that overrode the flag must be checked against what it
         asked for, not against what the module's default says."""
@@ -393,6 +400,7 @@ class TestTheRuntimeHeadroomRefusal:
         drv.a = type("A", (), {"b_workdir": str(tmp_path)})()
         return drv
 
+    @needs_host_local_stores
     def test_the_need_is_derived_from_the_recipe(self, tmp_path):
         need = self._drv(tmp_path).probe_local_need_bytes()
         tr = BH.training_dtypes(REPO)
@@ -401,6 +409,7 @@ class TestTheRuntimeHeadroomRefusal:
         assert need["need_bytes"] == (need["transient_bytes"]
                                       + need["retained_bytes"])
 
+    @needs_host_local_stores
     def test_it_refuses_when_the_disk_cannot_hold_the_next_probe(
             self, tmp_path, monkeypatch):
         from aadistill.runtime import leaf_durability as LD
@@ -410,6 +419,7 @@ class TestTheRuntimeHeadroomRefusal:
             drv.require_probe_headroom("probe_x")
         assert drv.ev["probe_headroom"][-1]["free_gib"] < 1
 
+    @needs_host_local_stores
     def test_it_passes_and_records_when_there_is_room(self, tmp_path,
                                                       monkeypatch):
         from aadistill.runtime import leaf_durability as LD

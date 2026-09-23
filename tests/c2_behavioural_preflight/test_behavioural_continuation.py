@@ -46,6 +46,8 @@ from experiments.phase_c2 import scoring as C2S  # noqa: E402
 import autoinit_c2_behavioural_launch as L  # noqa: E402
 import autoinit_c2_behavioural_driver as D  # noqa: E402
 
+from conftest import needs_host_local_stores  # noqa: E402
+
 GPU_HARD, DISK_HARD, RUNTIME = 32.7097, 0.5002, 1800.53
 ALL_IN = round(GPU_HARD + DISK_HARD, 4)
 
@@ -1504,6 +1506,7 @@ class _ScoringFails(_StageP):
             f"{probe.probe_id}: the evaluator died after training")
 
 
+@needs_host_local_stores
 def test_a_real_scoring_failure_leaves_a_continuable_probe(tmp_path, repo,
                                                            transport):
     """End to end, in production order, with nothing pre-written.
@@ -1723,6 +1726,7 @@ class _FullFlow(_StageP):
                 "per_sample_path": str(per_sample), "per_sample_sha256": "t"}
 
 
+@needs_host_local_stores
 def test_the_screening_winner_may_be_any_candidate_not_the_cost_proxy(
         tmp_path, repo, transport):
     """R10 edge case 1, driven through P -> S -> R -> C for real.
@@ -3086,6 +3090,7 @@ def test_an_over_reported_closeout_is_safe_and_does_not_block(
 # the durable destination is charged for what the session still owes
 # ---------------------------------------------------------------------------
 
+@needs_host_local_stores
 def test_the_destination_is_charged_for_the_probes_this_session_produces(
         tmp_path, repo, transport, monkeypatch):
     """A probe already in the store OCCUPIES it; it is not also a need.
@@ -3141,6 +3146,7 @@ def test_the_destination_is_charged_for_the_probes_this_session_produces(
     assert "still owes" in why
 
 
+@needs_host_local_stores
 def test_a_fresh_campaign_is_still_charged_for_every_probe(tmp_path, repo,
                                                            monkeypatch):
     """The remainder of a fresh campaign is all of it, so nothing is weakened.
