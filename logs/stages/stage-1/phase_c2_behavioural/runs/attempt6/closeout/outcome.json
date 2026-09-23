@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_closeout/v1",
+ "run_id": "attempt6",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "RETIRED_AT_ZERO_BEFORE_PROVIDER_CONTACT",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0
+ },
+ "closed_utc": "2026-09-23T06:47:00+00:00",
+ "what_happened": "The chain was built complete -- grant, launch-bound readiness (232 passed, 0 failed), authorization at a live $1.09/h, and the exact-session bundle aad_autoinit_0f6f68a0.bundle. The $0 dry run that follows, whose whole purpose is to run every pre-provider gate without consuming the chain, then RAISED inside `open_run`: its output run id was `attempt6-dryrun`, and `run_layout` validates a run id against ^[a-z0-9][a-z0-9_]*$ and refuses a hyphen rather than resolving it. The repair that introduced that suffix was itself the repair for a dry run consuming attempt4's chain, and both of its tests read the implementation's own text -- so neither could see that the id it derived was invalid.",
+ "why_a_fresh_chain": "the fix is one character in the launcher, and the launcher is in the executable closure. The closure moved 4bf674c8 -> 9585ec39, so the authorization and the bundle issued over 4bf674c8 would bind work this tree no longer contains. attempt1 and attempt2 of this campaign were retired for exactly this, each for a launcher repair that moved the closure.",
+ "consumed": "nothing. `open_run` never ran for attempt6, so there is no manifest and no session record; no provider was contacted and no resource was created. The crashed dry run's only side effect was an output claim in the scratch root naming `attempt6-dryrun`, which was removed.",
+ "preserved": [
+  "governance/grant.json",
+  "governance/readiness.json",
+  "governance/authorization.json",
+  "governance/bundle.json"
+ ],
+ "_the_bundle_is_still_on_the_relay": "aad_autoinit_0f6f68a0.bundle, sha256 10fa7e4d..., 17755594 bytes. It is the tree at the session commit it was built from and is left in place as evidence; attempt7 stages its own.",
+ "authorizes": "nothing"
+}

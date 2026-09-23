@@ -158,6 +158,11 @@ def probe_destination(ctx: SessionContext, unit_id: str) -> Path:
             / ctx.args.run_id / unit_id)
 
 
+#: The suffix a dry run's OUTPUT locations take. Named, because a test that
+#: compares the implementation's own text cannot check that the result is a
+#: valid run id -- and a hyphen here raised inside `open_run`.
+DRY_RUN_SUFFIX = "_dryrun"
+
 CONTAINER_DISK_GB = BG.PROVISION_GB
 
 #: The image, pinned. Same family the replay and the search ran on.
@@ -2121,7 +2126,14 @@ def main() -> int:
     #: prior attempts from it, so a dry run under a different id would check a
     #: different chain and prove nothing about this one. Only the OUTPUT
     #: locations move.
-    layout_run_id = f"{args.run_id}-dryrun" if args.dry_run else args.run_id
+    #: UNDERSCORE, not a hyphen. `run_layout` validates a run id against
+    #: `^[a-z0-9][a-z0-9_]*$` and refuses anything else rather than resolving
+    #: it, so `attempt6-dryrun` raised inside `open_run` -- and the repair that
+    #: introduced it was itself a repair for the dry run CONSUMING the chain.
+    #: It crashed at $0 before any output was claimed, so it consumed nothing;
+    #: but a rehearsal that cannot run is a rehearsal nobody gets.
+    layout_run_id = (f"{args.run_id}{DRY_RUN_SUFFIX}" if args.dry_run
+                     else args.run_id)
     if args.dry_run:
         args.out = session_record_path(layout_run_id)
     claim_output_root(args.scr, EXPERIMENT_ID, layout_run_id,

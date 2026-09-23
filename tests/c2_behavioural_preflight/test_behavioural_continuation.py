@@ -2465,7 +2465,8 @@ def test_a_dry_run_writes_to_its_own_run_directory(tmp_path):
                  "args.out = session_record_path(layout_run_id)"):
         assert call in body, call
     #: ...and it differs from the real one exactly when --dry-run is set.
-    assert 'layout_run_id = f"{args.run_id}-dryrun" if args.dry_run' in body
+    assert 'layout_run_id = (f"{args.run_id}{DRY_RUN_SUFFIX}" if args.dry_run'\
+           in body
     #: ...while `args.run_id` is NOT reassigned, so every gate still binds the
     #: real chain. A reassignment is the one edit that would make this pass
     #: while checking the wrong authorization.
@@ -2474,20 +2475,44 @@ def test_a_dry_run_writes_to_its_own_run_directory(tmp_path):
         "different chain's governance artifacts")
 
 
-def test_the_dry_run_id_is_not_a_campaign_attempt_number():
-    """`newest_attempt`-style numeric parsing must not see it as an attempt.
+def test_the_dry_run_id_is_a_VALID_run_id(tmp_path):
+    """THE defect string comparison could not see.
 
-    A dry-run directory sitting beside the real attempts must not be mistaken
-    for the newest one, or the launch guards would call the real chain stale.
+    Both checks above read the implementation's own text, so they confirmed
+    that the id is derived and distinct -- and said nothing about whether
+    `run_layout` will accept it. `attempt6-dryrun` contains a hyphen, which
+    `^[a-z0-9][a-z0-9_]*$` refuses rather than resolves, so the dry run raised
+    inside `open_run` on the very launch it existed to de-risk. It cost
+    nothing, because it crashed before any output was claimed; a rehearsal
+    nobody can run is the whole loss.
+
+    So this builds the layout FOR REAL, which is the only thing that would
+    have caught it.
     """
     import autoinit_c2_behavioural_launch as LL
+    from experiments.run_layout import layout_for
 
-    rid = "attempt4-dryrun"
+    from aadistill.runtime.run_layout import RunLayoutError
+
+    rid = f"attempt6{LL.DRY_RUN_SUFFIX}"
+    #: Constructing the layout is what VALIDATES the id. It raised on the
+    #: hyphen, and no string comparison could have known.
+    layout = layout_for(tmp_path, LL.EXPERIMENT_ID, rid, LL.STAGE_ID)
+    assert layout.run_id == rid
+
+    #: And the validator really does refuse: without this the line above
+    #: passes for any id at all, which is how the hyphen survived.
+    with pytest.raises(RunLayoutError, match="not valid here"):
+        layout_for(tmp_path, LL.EXPERIMENT_ID, "attempt6-dryrun", LL.STAGE_ID)
+
+    #: `newest_attempt`-style numeric parsing must not see it as an attempt: a
+    #: dry-run directory beside the real ones must not be mistaken for the
+    #: newest, or the launch guards would call the real chain stale.
     assert not rid[len("attempt"):].isdigit()
     #: And it is a distinct path from the run it rehearses, which is the whole
     #: point: the real directory stays unoccupied.
-    assert LL.session_record_path(rid) != LL.session_record_path("attempt4")
-    assert "attempt4-dryrun" in LL.session_record_path(rid)
+    assert LL.session_record_path(rid) != LL.session_record_path("attempt6")
+    assert rid in LL.session_record_path(rid)
 
 
 # ---------------------------------------------------------------------------
