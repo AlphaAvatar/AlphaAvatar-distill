@@ -1,0 +1,263 @@
+{
+  "schema": "aadistill.autoinit.c2_probe_volume_staging/v1",
+  "authorizes": "nothing",
+  "_contract": "One staging run: the campaign's verified probes copied onto a provider network volume and re-hashed from the bytes that landed there. This is transport infrastructure. It admits nothing into the experiment \u2014 a continuation still re-identifies every probe against the identity its campaign announced, on the pod that consumes it.",
+  "run_id": "c2-durable-staging-4",
+  "campaign_id": "c2-behavioural-12probe-v1",
+  "volume_id": "59qt99zeg5",
+  "data_center": "EU-NL-1",
+  "mount": "/durable",
+  "started_utc": "2026-09-23T15:46:26+00:00",
+  "probes": [
+    {
+      "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638",
+      "action": "staged",
+      "verified": true,
+      "bytes": 2384241184,
+      "seconds": 3615.9,
+      "observed_mb_per_second": 0.659,
+      "source_attempt": "attempt12",
+      "artifact_digest": "d9af797a565291b3ed0da58e040922c6ffd8a22b5856f2fca193465850510a16"
+    },
+    {
+      "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+      "action": "skipped",
+      "verified": true,
+      "bytes": 2385070201,
+      "seconds": 0.0,
+      "source_attempt": "attempt5",
+      "artifact_digest": "fc27d599bda027bd5223f02a2c5713f67e749389ce7c85530576a4cfa6029060"
+    },
+    {
+      "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+      "action": "skipped",
+      "verified": true,
+      "bytes": 2385073708,
+      "seconds": 0.0,
+      "source_attempt": "attempt5",
+      "artifact_digest": "172699354a3756e703a3d7ce23993bf9baaffdca90aa8dcea3afa127661b6aed"
+    },
+    {
+      "probe_id": "confirmation.B.s1916380711",
+      "action": "skipped",
+      "verified": true,
+      "bytes": 2385049384,
+      "seconds": 0.0,
+      "source_attempt": "attempt5",
+      "artifact_digest": "4243f522ba80d1c5c3f43324db54d91cc97a735bfc18600ae49b4a1a955ba714"
+    },
+    {
+      "probe_id": "confirmation.B.s1936324010",
+      "action": "skipped",
+      "verified": true,
+      "bytes": 2385029571,
+      "seconds": 0.0,
+      "source_attempt": "attempt5",
+      "artifact_digest": "58297504e12d2710a3b7083d3d07acbb93a493af07d053f643157d6bc1f91e68"
+    },
+    {
+      "probe_id": "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+      "action": "skipped",
+      "verified": true,
+      "bytes": 2385109995,
+      "seconds": 0.0,
+      "source_attempt": "attempt5",
+      "artifact_digest": "9d1b1e3f904657b29b71f4a090e15997623cfbcef4937233c4f1db41f5e14e8f"
+    },
+    {
+      "probe_id": "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+      "action": "skipped",
+      "verified": true,
+      "bytes": 2385111125,
+      "seconds": 0.0,
+      "source_attempt": "attempt5",
+      "artifact_digest": "388bdf66a0a42f948e758779d04bfafea5dee073f18ca404fd2a869a3a5370c0"
+    },
+    {
+      "probe_id": "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+      "action": "skipped",
+      "verified": true,
+      "bytes": 2385159310,
+      "seconds": 0.0,
+      "source_attempt": "attempt5",
+      "artifact_digest": "bbdea0842bb82410a2b97b07fec8a6f28c926eaaa59055dffb6b92b088a0d0ac"
+    },
+    {
+      "probe_id": "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+      "action": "skipped",
+      "verified": true,
+      "bytes": 2385081698,
+      "seconds": 0.0,
+      "source_attempt": "attempt5",
+      "artifact_digest": "f2388763e126ac003e589bbc3cde7d4bbe3a15bc017e6da686742d6e066934db"
+    }
+  ],
+  "local_rsync": "/usr/bin/rsync",
+  "source": {
+    "campaign_root": "/home/ecs-user/aad-scratch/c2b-stage-root",
+    "probe_count": 9,
+    "total_bytes": 21464926176,
+    "files_hashed": 70,
+    "source_attempts": [
+      "attempt12",
+      "attempt5"
+    ]
+  },
+  "draws": [
+    {
+      "draw": 1,
+      "pod_id": "rjbxi6lv2j6w0i",
+      "terminal": "STAGED",
+      "error": null,
+      "teardown": {
+        "pod_id": "rjbxi6lv2j6w0i",
+        "why": "staging complete",
+        "attempts": [
+          {
+            "method": "runpodctl remove pod",
+            "verified_transport": true,
+            "ok": true,
+            "returncode": 0,
+            "response": "pod \"rjbxi6lv2j6w0i\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead",
+            "error": null
+          }
+        ],
+        "verified_gone": true,
+        "last_status": "ABSENT",
+        "elapsed_minutes": 63.735,
+        "quoted_usd_per_hour": 0.06,
+        "gpu_usd": 0.0637,
+        "_verification": "termination is confirmed by polling the control plane until the pod stops billing; the terminate call's own exit status has never been treated as proof"
+      },
+      "money": {
+        "gpu_usd": 0.0637,
+        "quoted_usd_per_hour": 0.06,
+        "elapsed_minutes": 63.735,
+        "_disk_note": "container disk and the network volume are billed by the provider separately from compute and are reconciled in the campaign ledger, not here"
+      },
+      "host_health": {
+        "load1": 27.15,
+        "cpus": 2,
+        "load_per_cpu": 13.57,
+        "limit_per_cpu": 100.0
+      },
+      "transport_floor": {
+        "sampled_mib": 32,
+        "seconds": 64.6,
+        "observed_mb_per_second": 0.52,
+        "floor_mb_per_second": 0.15,
+        "_observed_is_diagnostic": "one observation of a rate that moves. It is recorded, and it is never promoted into a schedule or a bound."
+      }
+    }
+  ],
+  "draw": 1,
+  "create_raw": "{\n  \"containerDiskInGb\": 15,\n  \"costPerHr\": 0.06,\n  \"createdAt\": \"2026-09-23 15:47:50.418 +0000 UTC\",\n  \"desiredStatus\": \"RUNNING\",\n  \"env\": {\n    \"PUBLIC_KEY\": \"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHyLTGGhfoY+v3w7CEP8xX0shw4wzWxHnJDqsh60731 alphaavatar-runpod\\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X+f7hsoLZFbJeFXGStjQiea01LsDIFDE5LdnKCrOjGQK10BvmiW593WTL27OChjStN+xb0zMIyTu/rKas9wNL5msNlUbljmwwj4pIPTEMK31FPhUiBpy2vTlHrH1hdNapHX9nh5iOTTvgZV/Vu+a2lxZvdTFkl5GtTLs2TGsHSmKijnrPro2j++BLUd69VTvW8tFsN/w6VALIAnmrt23wUq15Chjhgs3Ar2SI9A/Ww5+T6aRnP6nOKk+DPGAB5RIVL1Rla88sG3lyraNVSFpBfC8tDnyq7PO6uzolWBJ+Dw4I9HP9eia5IJcGRoi+pGCD0Ml0bFmSQiA1coT2zw1 runpodctl-ssh-key\"\n  },\n  \"gpuCount\": 0,\n  \"id\": \"rjbxi6lv2j6w0i\",\n  \"imageName\": \"runpod/base:1.0.2-ubuntu2404\",\n  \"lastStatusChange\": \"Rented by User: Wed Sep 23 2026 15:47:50 GMT+0000 (Coordinated Universal Time)\",\n  \"machine\": {\n    \"dataCenterId\": \"EU-NL-1\",\n    \"diskThroughputMBps\": 7179,\n    \"gpuId\": \"unknown\",\n    \"location\": \"NL\",\n    \"maxDownloadSpeedMbps\": 8662,\n    \"maxUploadSpeedMbps\": 8493,\n    \"reservedCountVersion\": 188092,\n    \"secureCloud\": true,\n    \"supportPublicIp\": true\n  },\n  \"memoryInGb\": 4,\n  \"name\": \"aad-c2-durable-staging-4\",\n  \"ports\": [\n    \"22/tcp\"\n  ],\n  \"vcpuCount\": 2,\n  \"volumeInGb\": 0,\n  \"volumeMountPath\": \"/durable\"\n}\n",
+  "pod_id": "rjbxi6lv2j6w0i",
+  "pod_started_utc": "2026-09-23T15:47:50+00:00",
+  "quoted_usd_per_hour": 0.06,
+  "volume": {
+    "provisioned_gb": 40,
+    "capacity_bytes": 40000000000,
+    "occupied_bytes_at_start": 21057623907,
+    "ours_bytes_at_start": 21057623907,
+    "other_bytes_on_the_volume": 0,
+    "need_bytes": 21464926176,
+    "_need_is_a_total_not_an_increment": "need is the final size of this campaign's staged tree. A probe already on the volume is part of that total, not an addition to it, so a resumed draw is charged nothing for what it will skip.",
+    "_df_is_not_the_quota": "df at the mount reports the backing cluster, not this volume's quota, so capacity comes from the provisioned size the provider sold"
+  },
+  "staged_index": {
+    "schema": "aadistill.autoinit.c2_probe_volume_index/v2",
+    "campaign_id": "c2-behavioural-12probe-v1",
+    "staged_utc": "2026-09-23T16:51:29+00:00",
+    "mount": "/durable",
+    "probe_root": "/durable/c2-behavioural-12probe-v1/probes",
+    "probes": {
+      "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638": {
+        "source_attempt": "attempt12",
+        "artifact_digest": "d9af797a565291b3ed0da58e040922c6ffd8a22b5856f2fca193465850510a16",
+        "bytes": 2384241184,
+        "scored": false
+      },
+      "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711": {
+        "source_attempt": "attempt5",
+        "artifact_digest": "fc27d599bda027bd5223f02a2c5713f67e749389ce7c85530576a4cfa6029060",
+        "bytes": 2385070201,
+        "scored": true
+      },
+      "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010": {
+        "source_attempt": "attempt5",
+        "artifact_digest": "172699354a3756e703a3d7ce23993bf9baaffdca90aa8dcea3afa127661b6aed",
+        "bytes": 2385073708,
+        "scored": true
+      },
+      "confirmation.B.s1916380711": {
+        "source_attempt": "attempt5",
+        "artifact_digest": "4243f522ba80d1c5c3f43324db54d91cc97a735bfc18600ae49b4a1a955ba714",
+        "bytes": 2385049384,
+        "scored": true
+      },
+      "confirmation.B.s1936324010": {
+        "source_attempt": "attempt5",
+        "artifact_digest": "58297504e12d2710a3b7083d3d07acbb93a493af07d053f643157d6bc1f91e68",
+        "bytes": 2385029571,
+        "scored": true
+      },
+      "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081": {
+        "source_attempt": "attempt5",
+        "artifact_digest": "9d1b1e3f904657b29b71f4a090e15997623cfbcef4937233c4f1db41f5e14e8f",
+        "bytes": 2385109995,
+        "scored": true
+      },
+      "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081": {
+        "source_attempt": "attempt5",
+        "artifact_digest": "388bdf66a0a42f948e758779d04bfafea5dee073f18ca404fd2a869a3a5370c0",
+        "bytes": 2385111125,
+        "scored": true
+      },
+      "screening.7da1e4e2254e59766581e777b8066b7e.s616738081": {
+        "source_attempt": "attempt5",
+        "artifact_digest": "bbdea0842bb82410a2b97b07fec8a6f28c926eaaa59055dffb6b92b088a0d0ac",
+        "bytes": 2385159310,
+        "scored": true
+      },
+      "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081": {
+        "source_attempt": "attempt5",
+        "artifact_digest": "f2388763e126ac003e589bbc3cde7d4bbe3a15bc017e6da686742d6e066934db",
+        "bytes": 2385081698,
+        "scored": true
+      }
+    },
+    "total_bytes": 21464926176,
+    "_means": "these bytes were copied from the campaign's durable root and re-hashed here. They are NOT admitted to the experiment by this file; the consuming pod does that."
+  },
+  "staged": true,
+  "teardown": {
+    "pod_id": "rjbxi6lv2j6w0i",
+    "why": "staging complete",
+    "attempts": [
+      {
+        "method": "runpodctl remove pod",
+        "verified_transport": true,
+        "ok": true,
+        "returncode": 0,
+        "response": "pod \"rjbxi6lv2j6w0i\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead",
+        "error": null
+      }
+    ],
+    "verified_gone": true,
+    "last_status": "ABSENT",
+    "elapsed_minutes": 63.735,
+    "quoted_usd_per_hour": 0.06,
+    "gpu_usd": 0.0637,
+    "_verification": "termination is confirmed by polling the control plane until the pod stops billing; the terminate call's own exit status has never been treated as proof"
+  },
+  "money": {
+    "gpu_usd": 0.0637,
+    "quoted_usd_per_hour": 0.06,
+    "elapsed_minutes": 63.735,
+    "_disk_note": "container disk and the network volume are billed by the provider separately from compute and are reconciled in the campaign ledger, not here"
+  },
+  "finished_utc": "2026-09-23T16:51:34+00:00",
+  "cumulative_gpu_usd": 0.0637,
+  "terminal": "ALL_STAGED"
+}
