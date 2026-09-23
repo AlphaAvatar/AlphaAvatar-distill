@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-23T11:11:21+00:00",
+  "created_utc": "2026-09-23T11:17:46+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 1735,
-    "bytes": 56636184,
+    "files": 1736,
+    "bytes": 56651983,
     "by_disposition": {
       "keep_canonical": 187,
-      "keep_immutable": 1351,
+      "keep_immutable": 1352,
       "keep_referenced": 182,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 757,
+      "immutable_record": 758,
       "index": 8,
       "narrative": 475,
       "raw_execution_artifact": 474,
@@ -5031,6 +5031,7 @@
         "logs/stages/stage-1/phase_c2_behavioural/analyses/consumer_derived_working_set_20260923.md",
         "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
         "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_resume_preregistration.json",
+        "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/governance/grant.json",
         "logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/closeout/outcome.json",
         "logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/governance/grant.json",
         "logs/stages/stage-1/phase_c2_behavioural/runs/attempt6/governance/grant.json",
@@ -5432,7 +5433,7 @@
     {
       "path": "logs/README.md",
       "size_bytes": 6400,
-      "sha256": "bb21246ad8150a323b5d44cfbabaed8e29eb75d5403f85e595c0d6b2f3e3a318",
+      "sha256": "893cfc9198e4b1b32a1a17f04ff4896009466a1af4ac2e9b51d44df5556218eb",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -6134,8 +6135,8 @@
     },
     {
       "path": "logs/index.json",
-      "size_bytes": 77231,
-      "sha256": "23229b9c9cc504f871e331294883897a43cf917d42c330f4fb41fe0928a4be35",
+      "size_bytes": 77574,
+      "sha256": "bc2bdd756aae9ecd0e5ec4e036bfc5978a8ecf84d516902d0997d06fde85cd74",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -7424,7 +7425,7 @@
     {
       "path": "logs/stages/README.md",
       "size_bytes": 1494,
-      "sha256": "893d7fe0d721c509426081163e88fc9de66407fe2db01e6fea1ec5f601540f69",
+      "sha256": "af77c20087341a925fcd456720d865fde6dc6c1accf38fd2fbd21db58f3217ec",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -7443,7 +7444,7 @@
     {
       "path": "logs/stages/index.json",
       "size_bytes": 72044,
-      "sha256": "5d9c7fa4fd0f761a388b04dd886785a71689f688641b299a1e787112d06d4341",
+      "sha256": "62834be74cdfd8af5f4e2706c584f0e0a8945e5a1f833683ddd5d0377ee7cbdd",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -7480,7 +7481,7 @@
     {
       "path": "logs/stages/stage-1/README.md",
       "size_bytes": 10133,
-      "sha256": "c8f6e9eee11521af08f12bc6ad3787693318eb3305c6165d870049cb98b0bf2c",
+      "sha256": "4b351c06954e7eb9d93b73fbae6482e0ee7c7b7150c87522616b5ff9840ea8ca",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -23931,8 +23932,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/README.md",
-      "size_bytes": 797,
-      "sha256": "74c92a23ff395f663b47384a9e2edc3860b97443f558e0ba41299bb73f6d521a",
+      "size_bytes": 830,
+      "sha256": "5c201bb0f2b10575a4279e975b69d3ef286a6edbe6310a7256394f11c3e0c3e3",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -24031,7 +24032,7 @@
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
       "size_bytes": 44730,
-      "sha256": "da584c59816fe4e3aa89b44245289b44b510e2f2f6109dfaa3262e03ddabd692",
+      "sha256": "54a49f70bbf185dac32cdd3c9c07b9f1132596829ad4960d0a6f8cadc08f6514",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -24120,6 +24121,20 @@
       "path": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt1/governance/readiness.json",
       "size_bytes": 14504,
       "sha256": "09951c45dfc21f073e46764b0ce1eac6a83292472f36fdd31e95bcb861c7ef4a",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/governance/grant.json",
+      "size_bytes": 15376,
+      "sha256": "10f03355a0e74270a6c989a75c695eea5d9702970c064b7b09f22a84826b034d",
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
@@ -31559,8 +31574,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11735,
-      "sha256": "bb38c9e5d9bb4ad32e65b9cdd24a12bfa78c8d4ca543c9c0030deaeab1c90780",
+      "size_bytes": 11782,
+      "sha256": "40410ad790a9fd49b6bd5ce7e836f89605164a80fa782b50b0a1a8a234aedb70",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
