@@ -1726,6 +1726,21 @@ def restore_campaign_probes(ctx: SessionContext) -> bool:
     #: an absent file cannot say which.
     import tempfile
 
+    #: THE WORKDIR, BEFORE ANYTHING IS COPIED INTO IT. `scp` does not create a
+    #: target's parent, setup does not create this directory, and the driver --
+    #: which does -- has not run yet. So the manifest was the first thing
+    #: written to a path nothing had made.
+    #:
+    #: It was invisible for two separate reasons at once. In production the
+    #: WEIGHTS leg used to run first and made its own destinations per probe on
+    #: the way through, so the workdir always existed by the time the manifest
+    #: went; P8.4 stopped the weights moving and left the manifest first. In
+    #: the tests the `scp` fake created the target's parent, which the real tool
+    #: never does, so every path through here was certified against a more
+    #: permissive transport than the one that runs. attempt10 cleared all ten
+    #: gates and the pod's own suite and then died here for $0.09.
+    ctx.target.run(f"mkdir -p {WORKDIR} {EVIDENCE_DIR}", timeout=60)
+
     with tempfile.TemporaryDirectory() as tmp:
         local = Path(tmp) / "campaign_continuation.json"
         local.write_text(json.dumps(manifest, indent=1) + "\n")

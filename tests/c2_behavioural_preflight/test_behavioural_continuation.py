@@ -205,7 +205,17 @@ def transport(monkeypatch):
                 rc = 1
                 continue
             d = dest / s.name if (dest.is_dir() or target.endswith("/")) else dest
-            d.parent.mkdir(parents=True, exist_ok=True)
+            #: REAL `scp` DOES NOT CREATE THE TARGET'S PARENT. It fails with
+            #: "No such file or directory", and this fake used to create it --
+            #: a stub more permissive than the tool it stands in for, which is
+            #: how it certified a push into a directory nothing had made. The
+            #: manifest push had no `mkdir -p` and every test passed; attempt10
+            #: then died on it for $0.09, after clearing all ten gates and the
+            #: pod's own suite. Invisible until P8.4 stopped the weights leg
+            #: from running first and creating the workdir on its way through.
+            if not d.parent.is_dir():
+                rc = 1
+                continue
             if s.is_dir():
                 shutil.copytree(s, d, dirs_exist_ok=True)
             else:

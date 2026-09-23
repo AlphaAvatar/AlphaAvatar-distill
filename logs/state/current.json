@@ -22,9 +22,9 @@
   "note": "attempt6 has no readiness record, authorization or bundle yet; its grant is written. Nothing needs pre-staging: no probe's weights have a remaining consumer, so volume_gate passes with no staging record."
  },
  "budget": {
-  "cumulative_spend_usd": 333.4954,
+  "cumulative_spend_usd": 333.5869,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 36.5046,
+  "remaining_usd": 36.4131,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -137,12 +137,12 @@
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
   "experiment_id": "phase_c2_behavioural",
-  "run_id": "attempt10",
-  "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10",
+  "run_id": "attempt11",
+  "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11",
   "outcome": "not recorded, and no closeout has been written for this run",
   "index": "logs/index.json",
   "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
-  "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt9"
+  "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",

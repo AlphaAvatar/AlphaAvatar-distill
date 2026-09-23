@@ -282,7 +282,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 38,
+  "runs_current": 39,
   "runs_unrecorded": 11,
   "legacy_components": 77,
   "by_experiment": {
@@ -342,9 +342,9 @@
     "total": 4
    },
    "phase_c2_behavioural": {
-    "recorded": 5,
+    "recorded": 6,
     "unrecorded": 5,
-    "total": 10
+    "total": 11
    },
    "phase_c2_full_search": {
     "recorded": 3,
@@ -1279,6 +1279,19 @@
   },
   {
    "experiment_id": "phase_c2_behavioural",
+   "run_id": "attempt10",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10",
+    "manifest": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/manifest.json"
+   },
+   "manifest_sha256": "bd5128259f3614a9d143abe62daed30fe1c0c47803f17bd79923b55205a38fbd",
+   "n_components": 5
+  },
+  {
+   "experiment_id": "phase_c2_behavioural",
    "run_id": "attempt3",
    "stage": "1",
    "layout": "stage_grouped",
@@ -1516,10 +1529,10 @@
   },
   {
    "experiment_id": "phase_c2_behavioural",
-   "run_id": "attempt10",
-   "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10",
+   "run_id": "attempt11",
+   "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11",
    "n_files": 1,
-   "digest": "39a97bba6ff2d7bb50fe11ec6b5c667320b6d280557cba7aec6246d1748c1bbb",
+   "digest": "e9018c1b83b5540f2b17776a41d35a26e682d082f347e96a00ee288d3d504eb9",
    "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   },
   {

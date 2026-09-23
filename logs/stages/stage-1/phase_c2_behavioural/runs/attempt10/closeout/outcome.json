@@ -1,0 +1,46 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_closeout/v1",
+ "run_id": "attempt10",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "RETIRED_PRE_SCIENCE_CONTINUATION_INPUTS_DID_NOT_MATERIALIZE",
+ "provider_resource_created": true,
+ "money": {
+  "all_in_usd": 0.0915,
+  "gpu_usd": 0.0901,
+  "disk_usd": 0.0014,
+  "elapsed_minutes": 4.96,
+  "_basis": "GPU actual from the session record plus container disk derived at THIS attempt's own authorization rate, both ceiled to the 4-decimal quantum"
+ },
+ "closed_utc": "2026-09-23T12:05:00+00:00",
+ "what_happened": "Real progress: the pod came up, and setup COMPLETED -- including the CPU test gate that ended attempt9. The store-derivation repair worked, so the sweep's 209-passed/28-skipped picture matched the machine. The transfer preflight then ran and printed all ten probes as evidence-only, 0.008 GiB required against 22.21 GiB avoided.\n\nThe session aborted pushing the continuation manifest: `scp: /workspace/aad/artifacts/autoinit/c2_behavioural/campaign_continuation.json: No such file or directory`. The pod was deleted 5.0 minutes in and the provider confirmed it gone.",
+ "root_cause": "`scp` does not create its target's parent, setup does not create the behavioural workdir, and the driver -- which does -- had not run yet. So the manifest was the first thing written to a path nothing had made.\n\nIt was hidden by two independent things at once. In production the WEIGHTS leg used to run before the manifest and created its own destinations per probe on the way through, so the workdir always existed by the time the manifest went; AGENTS.md P8.4 stopped the weights moving and left the manifest first. In the tests the `scp` fake called `d.parent.mkdir(parents=True, exist_ok=True)` -- a stub more permissive than the tool it stands in for -- so every path through the restore step was certified against a transport that cannot fail the way the real one does.",
+ "repair": "One `mkdir -p` of the workdir and the evidence root before either leg. And the fake now refuses an scp whose target parent does not exist, exactly as real scp does: with that alone and no production change, 25 tests in the module fail, which is the pod's failure reproduced at $0. With the mkdir they all pass. The fake's permissiveness was the more important defect of the two, because it is what let the first one through.",
+ "regression": "237 passed on the dev box; 209 passed and 28 skipped under a pod-like filesystem. The 25-test reproduction is the mutation evidence: remove the mkdir and they fail again.",
+ "why_a_fresh_chain": "the repair is in the launcher, which is an entry point of the executable closure, so the closure moved and attempt10's authorization and bundle no longer bind this tree.",
+ "consumed": "$0.0915 all-in for 4.96 minutes of L40S. One provider resource, created and provider-confirmed deleted. No training, no scoring, no measurement: the abort is before any formal science.",
+ "gates_passed_at_zero": [
+  "session_commit_and_lineage",
+  "scope_gate",
+  "plan_binding_gate",
+  "source_binding_gate",
+  "destination_gate",
+  "container_gate",
+  "volume_gate",
+  "campaign_continuation_gate",
+  "readiness_gate",
+  "bundle_staged_gate"
+ ],
+ "gate_that_refused": null,
+ "failed_after_gates_at": "continuation input materialization, after setup completed",
+ "what_went_right": "the two repairs this attempt carried both held: the draw was not pinned to a datacenter and acquired a machine in five minutes, and the pod's own test gate passed where attempt9's had refused on 27 failures and a skip-set divergence.",
+ "preserved": [
+  "governance/grant.json",
+  "governance/readiness.json",
+  "governance/authorization.json",
+  "governance/bundle.json",
+  "runtime/session.json",
+  "runtime/launch.log",
+  "runtime/watchdog_fn825nav4mykic.jsonl"
+ ],
+ "authorizes": "nothing"
+}
