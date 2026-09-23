@@ -39,6 +39,7 @@ from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 from experiments.phase_c2 import behavioural as BH  # noqa: E402
+from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
 from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
 
 import autoinit_c2_behavioural_launch as L  # noqa: E402
@@ -135,8 +136,24 @@ def test_the_launcher_applies_no_second_contingency_or_recovery_reserve():
     assert spec.setup_minutes == 0.0 and spec.transfer_minutes == 0.0
     assert spec.arms == 0 and spec.steps_per_arm == 0
     named = {p.name for p in spec.other_phases}
-    assert "materialize_arms" in named
-    assert any(n.endswith("_probes_train_and_score") for n in named), named
+    #: DERIVED FROM THE WORK, not assumed. A phase exists when the campaign
+    #: still owes that kind of work: `materialize_arms` when an arm is owed,
+    #: a train-and-score phase when an untrained probe is. Once every probe is
+    #: trained and scored, neither is owed and neither should appear -- which
+    #: is the state this campaign reached at attempt13, and it made a test
+    #: that hard-coded both fail for being right.
+    work = BC.remaining_work(REPO, state=BC.campaign_state(
+        L.campaign_store(BG.CAMPAIGN_ID, L.DURABLE_STORE)))
+    if work["arms_needed"]:
+        assert "materialize_arms" in named, named
+    if work["probes_untrained"]:
+        assert any(n.endswith("_probes_train_and_score") for n in named), named
+    if work["probes_trained_not_scored"]:
+        assert any(n.endswith("_probes_score_only") for n in named), named
+    if not work["probes_remaining"]:
+        assert not any(n.endswith(("_probes_train_and_score",
+                                   "_probes_score_only")) for n in named), (
+            f"the campaign owes no probe and still priced one: {named}")
     assert {r.name for r in spec.soft_stop_reserves} == {
         "probe_model_contingency", "probe_duration_risk",
         "generation_length_risk"}

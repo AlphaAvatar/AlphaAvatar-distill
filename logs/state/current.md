@@ -9,15 +9,32 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing** except a 40 GB network volume at
-`$0.004/h`, retained until C2 closeout. Provider reports no pods.
+**Nothing is running and nothing is billing.** The provider reports zero pods
+and zero network volumes: `59qt99zeg5` was deleted at C2 closeout, after
+verifying every probe it held had its original on this host.
 
-**The transfer that was running has been stopped on a standing rule.** Eight of
-the ten completed probes had reached the volume; the remaining two are
-completed and validly scored, so no remaining authorized operation reads their
-weights and there was nothing to justify moving them. The eight are sunk
-operational cost, may stay until teardown, and are **not** a required input by
-virtue of being present. `$0.7148` all-in for the whole staging campaign.
+**C2 IS SCIENTIFICALLY CLOSED: the behavioural selection returned `NO_GO`.**
+The advanced candidate does not displace incumbent **B**. `delta -0.008235`
+(exactly −7/850), `lcb -0.016863`, against a +0.010 SESOI, at the
+pre-registered bootstrap seed `834816710`. Twelve probes trained and scored,
+all five driver stages passed, and the plan hash never moved across thirteen
+chains. NO_GO is a complete terminal result of the frozen rule, not a failure:
+C2 names no new incumbent, and C3 is separately authorized and unreachable
+from here. Owner:
+[`c2_behavioural_verdict_20260923.md`](../stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md).
+
+**One reproducibility limitation, and it is real.** Probe 11's 950 per-sample
+rows and its `result.json` were never collected: `secure_probe_evidence`
+iterated the session's *announced* units, and a probe that attempt13 *restored*
+and then *scored* was announced by attempt12, so its new evidence had no
+collector. Eleven of twelve probes hold complete rows; the twelfth does not.
+The verdict is recorded with its delta, bound and seed, and is **not
+independently recomputable from the archive**. `campaign_state` shows the gap
+by reporting 11 complete and 1 trained-but-unscored while the pod scored
+twelve. The collector is repaired; nothing was re-run, because
+`what_a_resume_may_never_do` forbids continuing after a complete verdict.
+Re-scoring that probe from its preserved weights would restore
+archive-reproducibility and is a maintainer's decision, left open.
 
 **Artifacts follow consumers, not campaigns** — AGENTS.md **P8.4**, adopted
 2026-09-23 as a standing rule for C2, C3, C4, Stage 2/3 and every later stage.
@@ -105,13 +122,17 @@ trainer hit `No space left on device` writing probe 11; all ten completed
 probes are trained, scored and durable off-pod with their per-prompt rows.
 **There is no verdict**, and that is R5 working: the estimand is a paired
 difference over three seeds and four confirmation probes are not that quantity.
-`$19.7041`. Campaign settled **`$22.2466`** of `$42.0000`; project
-**`$331.4509`** of `$370.0000`, leaving `$38.5491`.
+`$19.7041`. The remaining two probes were measured by attempt12 (which trained
+one and preserved it unscored) and attempt13 (which restored it, scored it
+without retraining, trained B, and returned the verdict). Campaign settled
+**`$28.5891`** of `$42.0000`; project **`$339.7876`** of `$370.0000`, leaving
+`$30.2124`.
 
-**GO is already arithmetically excluded** — both completed confirmation seeds
-put the candidate behind B (−0.0036, −0.0035) and the frozen rule needs 2 of 3
-positive. NO_GO versus INCONCLUSIVE still needs the third seed and the
-bootstrap. B scored `0.0412` on the confirmation battery against C1's
+**GO was arithmetically excluded before the third seed ran** — both completed
+confirmation seeds put the candidate behind B (−0.0036, −0.0035) and the frozen
+rule needs 2 of 3 positive. The third seed, measured by attempt12 and attempt13,
+did not change the direction, and the rule returned **`NO_GO`** with
+`delta −0.008235` and `lcb −0.016863`. B scored `0.0412` on the confirmation battery against C1's
 treatment pooling `105/2550 = 0.0412` on the same battery, so B reproduces its
 own lineage and the `0.0247` screening figure was a disjoint, harder prompt
 set rather than a regression.
@@ -1285,7 +1306,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$337.0663` spent of `$370.0000`, leaving `$32.9337` |
+| project cap | `$339.7876` spent of `$370.0000`, leaving `$30.2124` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

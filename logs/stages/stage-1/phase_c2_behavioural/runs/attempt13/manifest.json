@@ -1,0 +1,37 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c2_behavioural",
+ "run_id": "attempt13",
+ "root": "phase_c2_behavioural/runs/attempt13",
+ "artifact_spec": "phase_c2_behavioural_session_v1",
+ "plan": {
+  "session": "autoinit-phase-c2-behavioural",
+  "plan_id": "autoinit.v1.phase_c2.behavioural",
+  "campaign_id": "c2-behavioural-12probe-v1",
+  "run_attempt": "attempt13",
+  "session_commit": "922d126ab5e30840a478fee00998a8a8e84b00cd",
+  "bundle": "aad_autoinit_922d126a.bundle",
+  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+  "protocol_sha256": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_c2_behavioural_launch.py",
+  "driver": "scripts/pod/autoinit_c2_behavioural_driver.py"
+ },
+ "status": {
+  "authorizes": "nothing",
+  "terminates_at": "decide",
+  "decides": "the C2 incumbent, under the frozen Phase-C rule, or no incumbent at all"
+ },
+ "roles": {
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "grant": "governance/grant.json",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "e2697b26632179b26c1dcfaa519c791983d799e3a6d7a7f4da042da96cd700dd"
+}

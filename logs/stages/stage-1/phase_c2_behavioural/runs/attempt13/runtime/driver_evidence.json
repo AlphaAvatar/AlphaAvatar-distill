@@ -1,0 +1,316 @@
+{
+  "schema": "aadistill.autoinit.c2_behavioural_evidence/v1",
+  "run_id": "autoinit.v1.phase_c2.behavioural",
+  "campaign": "c2-behavioural-12probe-v1",
+  "run_attempt": "attempt13",
+  "started_utc": "2026-09-23T17:35:43.221277+00:00",
+  "stages": {
+    "P": {
+      "passed": true,
+      "finished_utc": "2026-09-23T17:57:53.544137+00:00",
+      "spend_usd": 0.6239,
+      "candidates": 5,
+      "arms_materialized": [
+        "B"
+      ],
+      "arms_needed": [
+        "B"
+      ],
+      "b_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+      "b_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "b_materialized": true
+    },
+    "S": {
+      "passed": true,
+      "finished_utc": "2026-09-23T17:57:54.159667+00:00",
+      "spend_usd": 0.6241,
+      "probes": 6,
+      "gate": "all 6 screening probes are trained and scored"
+    },
+    "R": {
+      "passed": true,
+      "finished_utc": "2026-09-23T17:57:54.160880+00:00",
+      "spend_usd": 0.6241,
+      "ranked": [
+        {
+          "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
+          "correct_overall": 0.0353,
+          "anchor_correct_overall": 0.0247,
+          "delta_vs_b": 0.0106,
+          "frozen_search_rank": 4,
+          "screening_position": 0
+        },
+        {
+          "state_id": "1d2844488f3ad630414c3cd69b6fa395",
+          "correct_overall": 0.0282,
+          "anchor_correct_overall": 0.0247,
+          "delta_vs_b": 0.0035,
+          "frozen_search_rank": 2,
+          "screening_position": 1
+        },
+        {
+          "state_id": "d005dfb27e7bb5adc46eb988ae79e2a9",
+          "correct_overall": 0.0247,
+          "anchor_correct_overall": 0.0247,
+          "delta_vs_b": 0.0,
+          "frozen_search_rank": 0,
+          "screening_position": 2
+        },
+        {
+          "state_id": "7da1e4e2254e59766581e777b8066b7e",
+          "correct_overall": 0.0235,
+          "anchor_correct_overall": 0.0247,
+          "delta_vs_b": -0.0012,
+          "frozen_search_rank": 1,
+          "screening_position": 3
+        },
+        {
+          "state_id": "88086555a6662b206e00ae28fc9d3ca3",
+          "correct_overall": 0.0129,
+          "anchor_correct_overall": 0.0247,
+          "delta_vs_b": -0.0118,
+          "frozen_search_rank": 3,
+          "screening_position": 4
+        }
+      ],
+      "advanced": {
+        "state_id": "1a2b5b030e7e4e202fda3a810ed53c5f",
+        "correct_overall": 0.0353,
+        "anchor_correct_overall": 0.0247,
+        "delta_vs_b": 0.0106,
+        "frozen_search_rank": 4,
+        "screening_position": 0,
+        "advanced": true,
+        "margin_over_runner_up": 0.0071,
+        "tie_broken": false,
+        "_tie_break_rule": "the frozen full-search ordering, then the state id. Both were fixed before any behavioural datum existed."
+      },
+      "emits_verdict": false
+    },
+    "C": {
+      "passed": true,
+      "finished_utc": "2026-09-23T19:46:22.243224+00:00",
+      "spend_usd": 2.5946,
+      "probes": 6,
+      "arm": "1a2b5b030e7e4e202fda3a810ed53c5f"
+    },
+    "D": {
+      "passed": true,
+      "finished_utc": "2026-09-23T19:46:28.470542+00:00",
+      "spend_usd": 2.5965,
+      "terminal_state": "NO_GO",
+      "delta": -0.008235294117647058,
+      "lcb": -0.016862745098039214,
+      "bootstrap_seed": 834816710
+    }
+  },
+  "durable_units": [
+    {
+      "unit_id": "incumbent_b",
+      "kind": "arm_initialization",
+      "campaign": "c2-behavioural-12probe-v1",
+      "run_attempt": "attempt13",
+      "announced_utc": "2026-09-23T17:57:52.538950+00:00",
+      "path": "/workspace/aad/artifacts/autoinit/c2_behavioural/arms/incumbent_b/steps/03_attention",
+      "identity": {
+        "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+        "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+        "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+        "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+        "num_parameters": 596049920,
+        "tokenizer_sha256": null,
+        "total_bytes": 1192135096
+      },
+      "identity_error": null,
+      "authorizes": "nothing. Preservation and reuse are separate decisions: this checkpoint may not be pooled, resumed or reused across formal attempts without an explicit retry contract."
+    },
+    {
+      "unit_id": "confirmation.B.s1523147638",
+      "kind": "probe",
+      "campaign": "c2-behavioural-12probe-v1",
+      "run_attempt": "attempt13",
+      "announced_utc": "2026-09-23T19:26:48.044999+00:00",
+      "path": "/workspace/aad/artifacts/stage3/c2_behavioural/confirmation.B.s1523147638/checkpoints/step_001023/model",
+      "identity": {
+        "artifact_digest": "7fe8f2f905b57adffb70e1457a0333990869481138a5d17821203ee9fbbeb929",
+        "weights_digest": "24805499b405c2287ee50c3a739b7118b354567b9a8bd7ddf1edbfe4ef1e6e94",
+        "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+        "single_shard_sha256": "420289872cec0039847121a28fd1065f8745c36498fe3ce08f4a544a69d77563",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+        "num_parameters": 596049920,
+        "tokenizer_sha256": null,
+        "total_bytes": 2384234968
+      },
+      "identity_error": null,
+      "authorizes": "nothing. Preservation and reuse are separate decisions: this checkpoint may not be pooled, resumed or reused across formal attempts without an explicit retry contract.",
+      "rung": "confirmation",
+      "arm": "B",
+      "seed": 1523147638,
+      "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342"
+    }
+  ],
+  "probes_trained": 12,
+  "probes_scored": 12,
+  "continuation": {
+    "manifest": "/workspace/aad/artifacts/autoinit/c2_behavioural/campaign_continuation.json",
+    "restored": [
+      {
+        "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638",
+        "pod_path": "/durable/c2-behavioural-12probe-v1/probes/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638",
+        "scored": false
+      }
+    ],
+    "n": 1,
+    "evidence_restored": [
+      {
+        "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711"
+      },
+      {
+        "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010"
+      },
+      {
+        "probe_id": "confirmation.B.s1916380711",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/confirmation.B.s1916380711"
+      },
+      {
+        "probe_id": "confirmation.B.s1936324010",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/confirmation.B.s1936324010"
+      },
+      {
+        "probe_id": "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081"
+      },
+      {
+        "probe_id": "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/screening.1d2844488f3ad630414c3cd69b6fa395.s616738081"
+      },
+      {
+        "probe_id": "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/screening.7da1e4e2254e59766581e777b8066b7e.s616738081"
+      },
+      {
+        "probe_id": "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/screening.88086555a6662b206e00ae28fc9d3ca3.s616738081"
+      },
+      {
+        "probe_id": "screening.B.s616738081",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/screening.B.s616738081"
+      },
+      {
+        "probe_id": "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+        "evidence_path": "/workspace/aad/artifacts/autoinit/c2_behavioural/evidence/screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081"
+      }
+    ],
+    "n_evidence": 10,
+    "_two_admission_paths": "a probe whose WEIGHTS a remaining operation reads is re-identified from the bytes that arrived here. A completed and validly scored probe is admitted on its descriptor and its hash-checked rows, because nothing remaining reads its checkpoint and moving one would be bytes for no consumer.",
+    "committed_candidate": "1a2b5b030e7e4e202fda3a810ed53c5f",
+    "arms_needed": [
+      "B"
+    ],
+    "_re_identified_here": "every restored probe's bytes reproduced the identity its campaign announced, at the path on THIS pod. The manifest and the destination ack are records; the bytes are the evidence."
+  },
+  "resume": {
+    "restored": [
+      {
+        "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638",
+        "scored": false
+      },
+      {
+        "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+        "scored": true
+      },
+      {
+        "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+        "scored": true
+      },
+      {
+        "probe_id": "confirmation.B.s1916380711",
+        "scored": true
+      },
+      {
+        "probe_id": "confirmation.B.s1936324010",
+        "scored": true
+      },
+      {
+        "probe_id": "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+        "scored": true
+      },
+      {
+        "probe_id": "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+        "scored": true
+      },
+      {
+        "probe_id": "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+        "scored": true
+      },
+      {
+        "probe_id": "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+        "scored": true
+      },
+      {
+        "probe_id": "screening.B.s616738081",
+        "scored": true
+      },
+      {
+        "probe_id": "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+        "scored": true
+      }
+    ],
+    "rejected": [],
+    "campaign": "c2-behavioural-12probe-v1"
+  },
+  "elapsed_min": 130.75,
+  "spend_usd": 2.5965,
+  "stages_completed": [
+    "P",
+    "S",
+    "R",
+    "C",
+    "D"
+  ],
+  "intermediates_released": [
+    {
+      "arm": "incumbent_b",
+      "removed_steps": [
+        "depth.causal_kl_greedy_v1",
+        "ffn.activation_importance_v0",
+        "width.global_pca_v0"
+      ],
+      "freed_gib": 10.64,
+      "failed": [],
+      "kept": "/workspace/aad/artifacts/autoinit/c2_behavioural/arms/incumbent_b/steps/03_attention"
+    }
+  ],
+  "probe_workdirs_released": [
+    {
+      "released": [],
+      "failed": [],
+      "freed_gib": 0.0,
+      "kept": [],
+      "refused_outside_workspace": []
+    }
+  ],
+  "probe_headroom": [
+    {
+      "probe": "confirmation.B.s1523147638",
+      "free_bytes": 67284148224,
+      "free_gib": 62.663,
+      "need_gib": 13.324,
+      "transient_bytes": 9536798720,
+      "retained_bytes": 4769999360,
+      "need_bytes": 14306798080,
+      "checkpoint": {
+        "num_parameters": 596049920,
+        "save_dtype": "float32",
+        "bytes_per_parameter": 4,
+        "extra_bytes": 800000,
+        "bytes": 2384999680,
+        "gib": 2.221
+      },
+      "keep_last": 1
+    }
+  ]
+}

@@ -1235,6 +1235,48 @@ def _scp_from_pod(ctx: SessionContext, remote: str, dest: Path, *,
         capture_output=True, timeout=None).returncode
 
 
+def probes_owed_evidence(ctx: SessionContext,
+                         units: list) -> list[tuple[str, Path]]:
+    """(probe id, destination) for every probe whose evidence this session owes.
+
+    TWO SOURCES, and the second was missing. A probe this session TRAINED is
+    announced, arrives in `units`, and its evidence follows its bytes. A probe
+    this session RESTORED and then SCORED is never announced -- it was
+    announced by the attempt that trained it -- so it never appeared here, and
+    the rows it produced stayed on the pod.
+
+    attempt13 scored the restored eleventh probe, the verdict consumed that
+    score, the pod was deleted, and the 950 rows behind it were never
+    collected. The verdict is recorded and eleven of twelve probes' rows are
+    archived; the twelfth's are gone, so the bootstrap cannot be recomputed
+    from the archive. Evidence that decides a verdict must come home.
+
+    A restored probe's evidence lands beside the copy it was restored FROM, at
+    its `source_attempt`, not under this run: one directory per probe, so
+    `campaign_state` does not see the same probe half-described under two
+    attempts.
+    """
+    owed: dict[str, Path] = {}
+    for unit in units:
+        uid = str(unit.get("unit_id") or "")
+        if uid:
+            owed[uid] = probe_destination(ctx, uid)
+    restored = ((ctx.evidence.get("campaign_restore") or {}).get("probes")
+                or [])
+    for entry in restored:
+        pid = str(entry.get("probe_id") or "")
+        attempt = str(entry.get("source_attempt") or "")
+        if not pid or pid in owed:
+            continue
+        if not attempt:
+            #: Without the attempt that produced it there is no one directory
+            #: to write beside, and guessing would scatter a probe's evidence.
+            continue
+        owed[pid] = (campaign_store(ctx.auth.campaign_id, ctx.args.ckpt_store)
+                     / attempt / pid)
+    return sorted(owed.items())
+
+
 def secure_probe_evidence(ctx: SessionContext, units: list) -> list:
     """Pull each probe's SCIENCE evidence beside its bytes, during the run.
 
@@ -1262,9 +1304,7 @@ def secure_probe_evidence(ctx: SessionContext, units: list) -> list:
     import shutil
 
     secured: list[dict] = []
-    for unit in units:
-        unit_id = unit["unit_id"]
-        dest = probe_destination(ctx, unit_id)
+    for unit_id, dest in probes_owed_evidence(ctx, units):
         if not dest.is_dir():
             #: The bytes have not landed yet; the evidence follows them.
             continue

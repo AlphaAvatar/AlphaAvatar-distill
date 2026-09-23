@@ -1,0 +1,57 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_closeout/v1",
+ "run_id": "attempt13",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "COMPLETE_VERDICT_NO_GO",
+ "verdict": {
+  "terminal_state": "NO_GO",
+  "delta": -0.008235294117647058,
+  "lcb": -0.016862745098039214,
+  "bootstrap_seed": 834816710,
+  "sesoi": 0.010,
+  "_delta_is": "the paired difference in correct_overall between the advanced candidate 1a2b5b030e7e4e202fda3a810ed53c5f and incumbent B across the three frozen confirmation seeds. Exactly -7/850 on the battery's 850 scorable prompts.",
+  "_lcb_is": "the lower confidence bound from the stratified cluster bootstrap at the pre-registered seed. -14.33/850.",
+  "_why_no_go": "the candidate is WORSE than the incumbent, and the lower bound is nowhere near the +0.010 SESOI. This is not a marginal call: GO was already arithmetically unreachable from the first two seeds (-0.00353 each), and the third did not change the direction.",
+  "_consequence": "the C2 behavioural selection names NO new incumbent. B stands. NO_GO is a complete terminal result of the frozen rule, not a failure of the experiment."
+ },
+ "provider_resource_created": true,
+ "money": {
+  "all_in_usd": 2.657,
+  "gpu_usd": 2.6169,
+  "disk_usd": 0.0401,
+  "elapsed_minutes": 144.05,
+  "_basis": "GPU actual from the session record plus container disk derived at THIS attempt's own authorization rate, both ceiled to the 4-decimal quantum"
+ },
+ "closed_utc": "2026-09-23T20:15:00+00:00",
+ "what_happened": "All five stages passed and the campaign reached its verdict. Stage P rebuilt incumbent B's arm alone -- the candidate's was not rebuilt, because that probe already held its trained checkpoint. S and R passed on the restored evidence and the committed ranking. Stage C restored the eleventh probe's weights from the volume, re-identified them on the pod, scored it under `score_existing` WITHOUT retraining, then trained and scored incumbent B at the third confirmation seed. Stage D applied the frozen rule and returned NO_GO.\n\nprobes_trained 12, probes_scored 12. The driver exited 0 and the pod was deleted behind its teardown gate: 144.05 minutes, $2.6570, provider-confirmed gone.",
+ "the_resume_worked": "probe 11 went from trained-and-unscored to scored in 28 minutes of stage C -- attestation plus scoring alone, against the ~87 minutes a retrain-and-score would have cost. Its bytes were re-identified at the new local path before the journal admitted them, which is R2's third check, at the consuming pod. R3 was honoured: it was not retrained, its initialization was not rebuilt, and it was priced as score-only.",
+ "AN_EVIDENCE_GAP_THAT_LIMITS_REPRODUCIBILITY": {
+  "what_is_missing": "probe 11's 950 per-sample rows and its result.json. Its probe_record.json on the durable destination is the pre-scoring copy from attempt12 and carries no score.",
+  "what_is_present": "11 of 12 probes hold 950 rows and a result.json each. The verdict itself is recorded above with its delta, its lower bound and the bootstrap seed that produced them.",
+  "root_cause": "`secure_probe_evidence` iterated the session's ANNOUNCED durable units. A probe is announced by the attempt that trains it, so a probe this session RESTORED and then SCORED never appeared in that list, and the evidence it produced had no collector. The pod was then deleted by its own teardown gate and the rows went with it.",
+  "consequence": "the verdict was validly produced under the frozen rule and IS NOT INDEPENDENTLY RECOMPUTABLE FROM THE ARCHIVE, because one of the twelve probes' rows are absent. AGENTS.md P4 is explicit that a result which cannot be reproduced from its logged state is not a valid result, and that sentence applies to the recomputation, not to the execution.",
+  "visible_in_the_bookkeeping": "`campaign_state` reads the durable destination and therefore reports 11 complete and 1 trained-but-unscored, while the pod scored 12 and the verdict consumed all 12. The archive cannot show that probe 11 was scored.",
+  "repaired_so_it_cannot_recur": "`probes_owed_evidence` now unions the announced units with the probes this session restored, and a restored probe's evidence lands beside the copy it was restored from at its own source_attempt, so one directory describes one probe.",
+  "what_is_NOT_done_about_it": "nothing was re-run. The campaign has a complete valid verdict, and `what_a_resume_may_never_do` forbids continuing after one. Re-scoring probe 11 from its preserved and re-identified weights is technically possible and would restore archive-reproducibility, but it would be a NEW measurement taken after a terminal result, which is a maintainer's decision and not an engineering repair."
+ },
+ "stages": {"P": "passed -- B's arm rebuilt; the candidate's was not, per the resume contract",
+            "S": "passed -- every screening probe already scored",
+            "R": "passed -- committed ranking read",
+            "C": "passed -- probe 11 restored and scored, B trained and scored",
+            "D": "passed -- NO_GO"},
+ "gates_passed_at_zero": [
+  "session_commit_and_lineage", "scope_gate", "plan_binding_gate",
+  "source_binding_gate", "destination_gate", "container_gate",
+  "volume_gate", "campaign_continuation_gate", "readiness_gate",
+  "bundle_staged_gate"
+ ],
+ "preserved": [
+  "governance/grant.json", "governance/readiness.json",
+  "governance/authorization.json", "governance/bundle.json",
+  "runtime/session.json", "runtime/launch.log",
+  "runtime/driver_evidence.json", "runtime/driver_run.log",
+  "runtime/watchdog_agzedo7w6usi71.jsonl",
+  "incumbent B's probe at the durable destination under attempt13/, with its 950 rows and result.json, re-identified from the delivered bytes"
+ ],
+ "authorizes": "nothing. A verdict authorizes no further C2 work: C3 is separately authorized and unreachable from here."
+}

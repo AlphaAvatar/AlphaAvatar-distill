@@ -4,28 +4,32 @@
  "experiment": "phase_c2_behavioural",
  "kind": "engineering infrastructure; not a scientific result",
  "authorizes": "nothing",
- "status": "COMPLETE and CLOSED 2026-09-23. Stopped by the maintainer's standing rule that artifacts follow consumers rather than campaigns: eight of ten completed probe checkpoints had already transferred and the remaining two had no consumer, so the transfer ended rather than finishing.",
+ "status": "COMPLETE and CLOSED 2026-09-23. Reopened for a third round once attempt12 trained a probe and left it unscored: that checkpoint's bytes became the first in this campaign with a real consumer, because `score_existing` reads the model. v3 staged it, attempt13 restored and scored it, and the volume was then deleted at C2 closeout.",
  "opened_utc": "2026-09-23T18:00:00Z",
- "closed_utc": "2026-09-23T05:37:57+00:00",
- "booked_usd": 0.7148,
- "_booked_usd_basis": "the provider account balance delta across the whole campaign: $80.0378314134 at the start, $79.3230251094 at close. It covers the 40 GB network volume, two toy rehearsals, and every staging draw including the four that were refused in under a minute each. It is the balance rather than a sum of self-reported GPU figures because the final run was stopped before it could compute its own, and because the volume and container disk are billed separately from compute and the runner never sees them.",
+ "closed_utc": "2026-09-23T20:20:00+00:00",
+ "booked_usd": 0.7791,
+ "_booked_usd_basis": "v1+v2 from the provider account balance delta across those rounds ($80.0378314134 -> $79.3230251094 = $0.7148). v3 from the staging tool's own teardown figure ($0.0637 for 63.7 min at $0.06/h) plus $0.0006 for a draw the load backstop refused. The two bases differ and are stated separately rather than blended. The whole envelope window, measured the same way as v1+v2 -- $80.0378314134 at the campaign's start to $72.8731645539 at C2 closeout -- is $7.1646, of which $7.1216 is attributable to named attempts and rounds and $0.0431 to network-volume storage and container-disk rounding that no per-attempt derivation captures.",
  "envelope": "the $25.00 remaining-C2 stage envelope authorized 2026-09-23; NOT the $42.0000 formal behavioural campaign ceiling, which governs the scientific campaign alone",
  "rounds": [
   "v1",
-  "v2"
+  "v2",
+  "v3"
  ],
  "what_it_bought": {
   "volume": "59qt99zeg5, 40 GB, EU-NL-1, mounted at /durable",
-  "probes_on_the_volume": 8,
-  "gib_on_the_volume": 18.6,
-  "_not_a_dependency": "volume_gate asks only for probes whose WEIGHTS a remaining operation reads. This campaign has none, so the eight are sunk operational cost that may remain until teardown and are not a required input by virtue of being present."
+  "probes_on_the_volume": 9,
+  "gib_on_the_volume": 20.8,
+  "_not_a_dependency": "volume_gate asks only for probes whose WEIGHTS a remaining operation reads. This campaign has none, so the eight are sunk operational cost that may remain until teardown and are not a required input by virtue of being present.",
+  "_the_one_that_mattered": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638, trained by attempt12 and unscored. It is the only probe this campaign ever restored weights for, and restoring it is what let attempt13 score it in 28 minutes instead of retraining it in 87 -- which R3 forbids anyway."
  },
  "what_it_taught": [
   "RunPod's cheapest CPU hosts run at 29-42 load per vCPU as the norm, and a draw can decay ten-fold mid-transfer; gate on in-flight throughput, never on load",
   "df at a network-volume mount reports the backing cluster (534 TB), not the volume's quota",
   "a capacity check must charge a resumed draw nothing for the probes it is about to skip",
-  "the whole transfer was unnecessary: 8.1 MiB of evidence, not 22.21 GiB of weights, is what a continuation's consumers read"
+  "the whole transfer was unnecessary: 8.1 MiB of evidence, not 22.21 GiB of weights, is what a continuation's consumers read",
+  "the staging tool plans from campaign membership, not from consumers: it announced '11 probes, 24.43 GiB to stage' when one probe's weights were wanted. Filtering --campaign-root to a hardlink view of what belongs on the volume moved 2.22 GiB instead of ~4.8 GiB and kept the index truthful.",
+  "its teardown is in a `finally`, not an `except Exception`, so a KeyboardInterrupt still releases the pod -- which is what made stopping a live transfer safe. An `except Exception` teardown would have leaked it."
  ],
- "teardown": "the volume is retained until C2 closeout so the eight probes need not be re-derived if a later authorized operation ever reads them, then deleted",
+ "teardown": "network volume 59qt99zeg5 DELETED at C2 closeout on 2026-09-23; the provider reports zero pods and zero volumes. Every probe it held had its original on the launcher host, verified before deletion, so nothing unique was destroyed.",
  "package_id": "c2_stage_envelope_20260923"
 }
