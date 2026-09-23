@@ -763,6 +763,27 @@ def continuation_all_in_usd(ctx: SessionContext, work: dict) -> float:
     return gpu + disk_per_minute * minutes
 
 
+def _predecessor_disk_rate(ctx: SessionContext, attempt: str) -> float:
+    """Container-disk dollars per minute for ONE PRIOR attempt. `$0`.
+
+    From that attempt's own authorization, because that is the provisioning it
+    actually ran under. Falls back to this session's rate only when the
+    predecessor has no readable authorization — a resource that billed under
+    terms nobody can find is better priced at today's rate than not at all,
+    and `prior_attempt_actual` already refuses an attempt whose cost or minutes
+    are missing.
+    """
+    path = REPO_ROOT / auth_path_for(attempt)
+    try:
+        auth = json.loads(path.read_text())
+        minutes = float(auth["hard_runtime_minutes"])
+        if minutes > 0:
+            return float(auth["disk_hard_usd"]) / minutes
+    except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+        pass
+    return float(ctx.auth.disk_hard_usd) / float(ctx.auth.hard_runtime_minutes)
+
+
 def prior_attempt_actual(ctx: SessionContext, attempt: str) -> dict:
     """One predecessor's ACTUAL all-in spend, GPU and disk. Or UNKNOWN.
 
@@ -847,11 +868,27 @@ def prior_attempt_actual(ctx: SessionContext, attempt: str) -> dict:
                             f"actual_usd={gpu!r} and "
                             f"elapsed_minutes={minutes!r}; a resource that "
                             "billed cannot be accounted from either alone")}
-    #: The authorization's own disk price per minute: `disk_hard_usd` is what
-    #: the provisioned volume costs over `hard_runtime_minutes`, so the rate is
-    #: that quotient. One basis for the ceiling and for the predecessor.
-    disk_per_minute = (float(ctx.auth.disk_hard_usd)
-                       / float(ctx.auth.hard_runtime_minutes))
+    #: THE PREDECESSOR'S OWN disk price per minute, from the authorization IT
+    #: ran under -- not from this session's. `disk_hard_usd` is what the
+    #: provisioned volume costs over `hard_runtime_minutes`, so the rate is
+    #: that quotient, and each attempt has its own because each is authorized
+    #: separately.
+    #:
+    #: This read `ctx.auth`, describing it as "one basis for the ceiling and
+    #: for the predecessor". Those are two different quantities wearing one
+    #: name: the rate that prices MY ceiling, and the rate a PREDECESSOR was
+    #: actually billed at. attempt5's container disk cannot become more
+    #: expensive because attempt10 was authorized for a shorter window, but
+    #: under the old reading it did -- and since both the disk and the all-in
+    #: are CEILED, the re-derivation drifted a quantum at a time away from the
+    #: closeouts those attempts published. attempt10's reconciliation gate then
+    #: refused its own launch over $0.0003 of arithmetic that described no
+    #: spending.
+    #:
+    #: Read this way the two agree by construction: every published closeout of
+    #: this campaign reproduces exactly, because a predecessor's cost is now
+    #: derived from the same rate it was derived from when it was published.
+    disk_per_minute = _predecessor_disk_rate(ctx, attempt)
     #: Rounded UP to the 4-decimal quantum every amount in this programme
     #: uses. A derived SPEND accumulating against a ceiling rounds up, the way
     #: `money()` ceils its amounts: rounding a predecessor's cost to nearest

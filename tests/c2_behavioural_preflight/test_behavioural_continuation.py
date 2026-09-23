@@ -1605,6 +1605,55 @@ def test_bytes_without_a_descriptor_are_preserved_but_not_consumable(
 # cumulative all-in, and UNKNOWN
 # ---------------------------------------------------------------------------
 
+def test_a_predecessor_is_priced_at_its_OWN_disk_rate(tmp_path, repo):
+    """Whose rate prices a predecessor's container disk. Driven APART.
+
+    It used `ctx.auth`, this session's. Those are two quantities wearing one
+    name -- the rate that prices MY ceiling, and the rate a PREDECESSOR was
+    billed at -- and attempt5's disk cannot become more expensive because
+    attempt10 was authorized for a shorter window. Since both the disk and the
+    all-in are CEILED, the re-derivation drifted a quantum at a time away from
+    the closeouts those attempts published, and attempt10's reconciliation
+    gate refused its own launch at $0 over $0.0003 that described no spending.
+
+    The two rates are driven far apart here on purpose: while they coincide, a
+    gate reading either passes every test.
+    """
+    import json as _json
+    import math as _math
+
+    _run_manifest(repo, "attempt1")
+    _session_record(repo, "attempt1", actual_usd=10.90, elapsed_minutes=600.0)
+
+    #: The predecessor's own authorization: a much cheaper disk than this
+    #: session's, so the two derivations cannot be confused.
+    own_disk, own_minutes = 0.0600, 600.0
+    auth_p = (repo / L.auth_path_for("attempt1"))
+    auth_p.parent.mkdir(parents=True, exist_ok=True)
+    auth_p.write_text(_json.dumps({
+        "disk_hard_usd": own_disk,
+        "hard_runtime_minutes": own_minutes}, indent=1) + "\n")
+
+    ctx = _Ctx(_Pod(tmp_path / "pod2"), tmp_path / "store", "attempt2")
+    actual = L.prior_attempt_actual(ctx, "attempt1")
+
+    want = _math.ceil(own_disk / own_minutes * 600.0 * 10_000) / 10_000
+    assert actual["disk_usd"] == pytest.approx(want, abs=1e-9), (
+        "the predecessor's disk was priced at this session's rate, not the "
+        "rate it actually ran under")
+    assert actual["disk_usd"] != pytest.approx(_expected_disk_usd(600.0),
+                                               abs=1e-9), (
+        "the two rates were not actually driven apart, so this proves nothing")
+
+    #: And with no authorization to read, it falls back rather than refusing:
+    #: a resource that billed under terms nobody can find is better priced at
+    #: today's rate than not at all.
+    auth_p.unlink()
+    fallback = L.prior_attempt_actual(ctx, "attempt1")
+    assert fallback["disk_usd"] == pytest.approx(_expected_disk_usd(600.0),
+                                                 abs=1e-9)
+
+
 def test_prior_disk_actual_enters_cumulative_campaign_spend(tmp_path, repo):
     """A ten-hour predecessor's disk is real money and was being dropped."""
     _run_manifest(repo, "attempt1")

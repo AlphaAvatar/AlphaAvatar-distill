@@ -5,7 +5,11 @@
  "terminal": "RETIRED_PRE_SCIENCE_SETUP_GATE_FAILED",
  "provider_resource_created": true,
  "money": {
-  "all_in_usd": 0.11
+  "all_in_usd": 0.1146,
+  "gpu_usd": 0.1128,
+  "disk_usd": 0.0018,
+  "elapsed_minutes": 6.21,
+  "_not_the_launcher_log_figure": "the launcher printed '6.2 min, $0.11' and that is GPU ONLY. The provider bills the provisioned container disk for the pod's whole lifetime and the runner never sees it, so all-in is the GPU actual plus disk derived from the authorization's own disk rate times elapsed minutes. Publishing the log figure understated this attempt by $0.0046 and the next attempt's reconciliation gate refused the launch at $0 over exactly that."
  },
  "closed_utc": "2026-09-23T10:20:00+00:00",
  "what_happened": "The volume repair worked: with no datacenter pin the draw found an L40S within five minutes, where attempt8 had been refused eight times over 35 minutes in EU-NL-1. Pod 4yumqr65qp5c00 came up at $1.09/h and SSH answered in 0.5 min.\n\nSetup then failed at its CPU test gate. 27 cases in tests/c2_behavioural_preflight failed on the pod and one skipped that the launch-bound sweep had not skipped, so the gate refused twice over -- on the failures and on the skip-set divergence. No science ran. The pod was deleted 6.2 minutes in and the provider confirmed it gone.",

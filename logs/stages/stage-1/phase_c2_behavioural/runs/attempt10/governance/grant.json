@@ -13,13 +13,13 @@
  "reviewed_baseline": {
   "origin_main": "8966ae12cd5f898928b2df443601a8936e03ba1e",
   "_origin_main_is_the_reviewed_baseline": "the commit the maintainer's execute-to-completion authorization was given at. It is NOT the commit this chain runs from: the durable-backend change and the session-ceiling repair landed after it, under that authorization's own engineering autonomy. The issuer re-derives the plan hash, the closure, the closure file count and the proposal hash live and refuses a disagreement, so the session commit is bound by those rather than by this field.",
-  "proposal_sha256": "7a121cbb1808c2ea00aaed4ba3cd57d1555328b361a476c7efb9de6d5eac9205",
+  "proposal_sha256": "ada1e43fa194b2c7fadaf33d50fb77787f11535435abd4c6b928216f682f1b6e",
   "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
-  "executable_closure": "f2857c1f4fbe5d90e61ba50bae86ac87a54358d55e3c9f24d6971b4526c41433",
+  "executable_closure": "51369c03da813900f5ab4a7e973568968677e44494d54c4e9a8ba00b27536dfe",
   "closure_files": 136,
   "resume_preregistration_sha256": "4cbfae158cfd3886e21ca6be0abe3e1ed77790f2b9c903d5f09c037fc8f96aa5",
   "_the_issuer_rederives_these": "every identity here is re-derived live at issuance and a disagreement is a refusal. They are recorded so a reader can see WHAT was reviewed, not so anything trusts the copy.",
-  "_what_moved_since_the_reviewed_baseline": "eight ordinary engineering amendments, each recorded above, each inside the maintainer's 2026-09-23 execute-to-completion authorization. Five chains were consumed before any science: four at $0 (three dry-run defects and one unnecessary datacenter pin) and attempt9 at $0.11, which reached a real pod and failed its test gate. The closure is now f2857c1f4fbe5d90e61ba50bae86ac87a54358d55e3c9f24d6971b4526c41433 over 136 files and the proposal 7a121cbb1808c2ea00aaed4ba3cd57d1555328b361a476c7efb9de6d5eac9205, whose numbers are unchanged. THE PLAN HASH HAS NEVER MOVED (31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705) and no science has changed.",
+  "_what_moved_since_the_reviewed_baseline": "nine ordinary engineering amendments, each recorded above, each inside the maintainer's 2026-09-23 execute-to-completion authorization. The closure is now 51369c03da813900f5ab4a7e973568968677e44494d54c4e9a8ba00b27536dfe over 136 files and the proposal ada1e43fa194b2c7fadaf33d50fb77787f11535435abd4c6b928216f682f1b6e. THE PLAN HASH HAS NEVER MOVED (31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705) and no science has changed.",
   "plan_hash_is_the_reviewed_one": true,
   "engineering_amendments": [
    {
@@ -68,6 +68,13 @@
     "cost": "$0.11 -- 6.2 minutes of L40S, one resource, provider-confirmed deleted",
     "retired": "attempt9",
     "verified": "sweep and an independent `unshare -r -m` + tmpfs reproduction now agree exactly: 208 passed, 28 skipped, rc=0 with the store absent, against 236 passed and 0 skipped with it present. audit_skip_predicates resolves all 27 normalized_by_contract."
+   },
+   {
+    "n": 9,
+    "what": "a predecessor's container disk is priced at the rate from ITS OWN authorization instead of this session's. attempt10's own reconciliation gate refused its launch at $0: the campaign reconciled to $22.3614 from the session records and $22.3566 from the published closeouts. $0.0046 of that was a real error -- attempt9's closeout published the launcher's GPU-only log figure ($0.11) rather than its all-in ($0.1146) -- and the remaining $0.0003 was arithmetic describing no spending: both the disk and the all-in are CEILED, so re-deriving a predecessor at a rate that changes every attempt drifts a quantum at a time away from what that attempt published.",
+    "why_it_is_engineering": "cost accounting, not science. Read at its own rate, every published closeout of this campaign now reproduces EXACTLY -- attempt3 $2.5425, attempt5 $19.7041, attempt9 $0.1146, total $22.3612 both ways -- so the two readings agree by construction rather than within a tolerance.",
+    "cost": "$0.0000; the gate refused before provider contact",
+    "retired": "nothing; attempt10's chain was rebuilt before its first launch"
    }
   ]
  },
@@ -96,17 +103,17 @@
  ],
  "approved_money": {
   "max_rate_usd_per_hour": 1.09,
-  "expected_all_in_usd": 19.6434,
-  "gpu_hard_usd": 19.3475,
-  "disk_hard_usd": 0.2959,
-  "all_in_usd": 19.6434,
+  "expected_all_in_usd": 19.6388,
+  "gpu_hard_usd": 19.343,
+  "disk_hard_usd": 0.2958,
+  "all_in_usd": 19.6388,
   "campaign_all_in_usd": 42.0,
   "stage_envelope_all_in_usd": 25.0,
   "gpu": "NVIDIA L40S",
   "container_disk_gb": 120,
   "_three_amounts_not_two": "all_in_usd bounds ONE session and equals gpu_hard_usd + disk_hard_usd. campaign_all_in_usd is CUMULATIVE across every run attempt and provider resource of this campaign, including settled spend, and is the only figure campaign_continuation_gate charges prior spend against. stage_envelope_all_in_usd is the maintainer's 2026-09-23 allowance for ALL remaining C2 work including supporting engineering infrastructure outside the formal campaign -- the probe pre-staging is on it, not on the campaign ceiling.",
-  "_the_session_ceiling_is_shortened": "a fresh session derives to $33.2099 over 1800.53 minutes. This campaign has settled $22.3566 of its $42.0 ceiling, so the session is authorized for $19.6434 over 1065.0 minutes -- what the campaign has left, floored. Nothing scientific is shortened: the work owes 491.51 minutes.",
-  "_settled_campaign_spend_usd": 22.3566,
+  "_the_session_ceiling_is_shortened": "a fresh session derives to $33.2099 over 1800.53 minutes. This campaign has settled $22.3612 of its $42.0 ceiling, so the session is authorized for $19.6388 over 1064.75 minutes -- what the campaign has left, floored. Nothing scientific is shortened: the work owes 491.51 minutes.",
+  "_settled_campaign_spend_usd": 22.3612,
   "_settled_per_attempt": {
    "attempt1": 0.0,
    "attempt2": 0.0,
@@ -116,7 +123,7 @@
    "attempt6": 0.0,
    "attempt7": 0.0,
    "attempt8": 0.0,
-   "attempt9": 0.11
+   "attempt9": 0.1146
   },
   "_basis": "the reviewed proposal basis at a quoted L40S securePrice of $1.09/h. Issuance re-quotes the live securePrice and derives the SESSION terms mechanically from it. The campaign ceiling is not a function of the rate and no re-quote may move it.",
   "_the_working_set_is_consumer_derived": "this continuation moves 8.1 MiB of descriptors, scores, per-sample rows and hashes -- not 22.21 GiB of checkpoints. Ten completed probes are validly scored, so no remaining authorized operation reads their weights.",
