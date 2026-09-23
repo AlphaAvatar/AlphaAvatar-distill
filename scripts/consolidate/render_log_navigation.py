@@ -100,13 +100,51 @@ def _run_outcome(root: Path, run_root: str | None, *, recorded: bool) -> str:
         doc = json.loads(path.read_text())
     except Exception as exc:                                    # noqa: BLE001
         return f"a closeout exists at {run_root} and does not parse: {exc}"
-    classification = str(doc.get("classification")
+    classification = str(_closeout_verdict(doc)
                          or "no classification stated").rstrip(". ")
-    budget = doc.get("budget") or {}
-    cost = budget.get("this_attempt")
+    cost = _closeout_cost(doc)
     money = f", ${float(cost):.4f}" if isinstance(cost, (int, float)) else ""
     prefix = "recorded; " if recorded else "not recorded; "
     return f"{prefix}{classification}{money}"
+
+
+#: WHERE A CLOSEOUT KEEPS ITS VERDICT AND ITS COST, across the experiments that
+#: write one. There are two families and this read only the first, so for the
+#: eight `phase_c2_behavioural` closeouts it silently produced "no
+#: classification stated" and dropped the money — a snapshot describing a run
+#: whose own closeout plainly said `RETIRED_AT_ZERO_NO_RESOURCE_ACQUIRED` and
+#: `$0.0000`. It went unnoticed because the newest run had never been one of
+#: them at a moment when a snapshot was regenerated.
+#:
+#: Ordered alternatives rather than a schema registry: the point is to read
+#: what is there, and a silent degradation is worse than either a loud refusal
+#: or a second key name.
+VERDICT_KEYS: tuple[str, ...] = ("classification", "terminal")
+COST_PATHS: tuple[tuple[str, ...], ...] = (
+    ("budget", "this_attempt"),      # phase_c2, baseline_completion, full_search, replay
+    ("cost", "this_attempt"),        # replay
+    ("money", "all_in_usd"),         # behavioural
+    ("money", "spent_usd"),          # behavioural, before all_in_usd existed
+)
+
+
+def _closeout_verdict(doc: dict) -> str | None:
+    for key in VERDICT_KEYS:
+        value = doc.get(key)
+        if isinstance(value, str) and value.strip():
+            return value
+    return None
+
+
+def _closeout_cost(doc: dict) -> float | None:
+    for path in COST_PATHS:
+        value: object = doc
+        for key in path:
+            value = value.get(key) if isinstance(value, dict) else None
+        #: `bool` is an `int`; a flag must never be rendered as a dollar figure.
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return float(value)
+    return None
 
 
 def load(rel: str, root: Path) -> dict:

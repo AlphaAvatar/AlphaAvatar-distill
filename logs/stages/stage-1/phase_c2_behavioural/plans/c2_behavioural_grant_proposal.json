@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-23T05:40:13.039075+00:00",
+ "proposed_utc": "2026-09-23T08:44:08.867234+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -18,7 +18,7 @@
    "descriptor_before_scoring": "each probe's training record \u2014 rung, arm, seed, initialization digest, config hash \u2014 is written when training finishes and BEFORE scoring starts, so a scoring failure leaves bytes that can still be shown to be that probe. Bytes without it are preserved and not consumable: re-identification proves what a file is, never which measurement it is.",
    "unscored_probes_resume_at_scoring": "a restored probe with no valid score is scored, never retrained, and charges the battery only.",
    "why_bytes_not_just_identities": "a probe trained but not validly scored resumes AT SCORING and scoring reads the weights. Retraining it is forbidden, so the weights have to travel.",
-   "cost": "a probe's DEPLOYABLE model is 2.221 GiB -- 596,049,920 parameters in the recipe's float32 save dtype -- so ten of them are 22.2 GiB. Copied onto the pod during the session, over the dev box's measured 0.49-0.91 MB/s uplink, that was about 585 minutes of BILLED time, because an scp to a pod happens after the pod exists -- and at that price it was unaffordable against what the campaign has left. RESOLVED 2026-09-23: the probes are pre-staged onto a provider network VOLUME, written once through a $0.06/h CPU pod with every file re-hashed from the bytes that landed, and each later pod ATTACHES it. There is no session-time transfer at all; what remains on the meter is re-reading and re-identifying them, reserved at 45 minutes. The uplink is a HOST cap rather than a per-connection one -- parallel streams starve each other rather than adding -- so no arrangement of transfers during the session would have made this affordable. An object store was built and never run: every one reachable from here needs an account only a maintainer can create, and the Hugging Face account that exists has 2.62 GiB of private headroom against 22.2 GiB needed."
+   "cost": "a probe's DEPLOYABLE model is 2.221 GiB -- 596,049,920 parameters in the recipe's float32 save dtype -- so ten of them are 22.2 GiB. Copied onto the pod during the session, over the dev box's measured 0.49-0.91 MB/s uplink, that was about 585 minutes of BILLED time, because an scp to a pod happens after the pod exists -- and at that price it was unaffordable against what the campaign has left. RESOLVED 2026-09-23 in two steps. First the probes were pre-staged onto a provider network VOLUME, written once through a $0.06/h CPU pod with every file re-hashed from the bytes that landed, so a later pod could ATTACH them instead of receiving them and the reserve fell to re-identification. Then, under AGENTS.md P8.4, the weights stopped moving entirely: all ten completed probes are validly scored, nothing remaining reads a checkpoint, and the verdict consumes rows and scores. The working set is 8.1 MiB of evidence against 22.21 GiB -- 0.035% -- the reserve is 10 minutes, and no volume is attached, which also unpins the draw from the volume's single datacenter. The uplink is a HOST cap rather than a per-connection one -- parallel streams starve each other rather than adding -- so no arrangement of transfers during the session would have made this affordable. An object store was built and never run: every one reachable from here needs an account only a maintainer can create, and the Hugging Face account that exists has 2.62 GiB of private headroom against 22.2 GiB needed."
   },
   "_two_ceilings_not_one": "campaign_all_in_hard_usd bounds the CAMPAIGN across every resource and run attempt it takes, ALL-IN: each predecessor's GPU actual plus its container disk, derived from this authorization's own disk rate times that resource's elapsed minutes, because the runner records GPU only. A created resource whose cost cannot be read is UNKNOWN and refuses, never $0. all_in_hard_usd bounds only THIS session, and is what the window, the watchdog and every in-pod spend check are built from. The two were the same number until attempt3 spent $2.5425 without reaching a verdict; raising the campaign ceiling to fund another attempt must not, and does not, lengthen a session. A continuation is budgeted on the work the campaign still OWES \u2014 its incomplete probes, the arms those need rebuilt, and the restore \u2014 never on a fresh full session, which refused every continuation by construction. If the remainder does not fit, the gate refuses and returns to the maintainer: the experiment is not shortened and neither ceiling is raised."
  },
@@ -548,7 +548,7 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "366bebc46b8ec9e04ff21de0729a9f3f9d20f8bb1c423c769bbc573e5adb1a6c",
+  "digest": "40bb610a2b884b0d24c8d5c6ba0cc466cda43ea9a70408bb3e2c8f442478a151",
   "n_files": 135,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
@@ -599,5 +599,5 @@
   "grant": "THIS PROPOSAL REQUESTS AND AUTHORIZES NOTHING. It is the document a maintainer decision is made against; it is not that decision, and it permits no grant, readiness record, authorization, bundle or provider resource. Whether a launch chain exists, and how far it has been built, is recorded per attempt under `runs/<attempt>/governance/` and is NOT restated here: this document's hash is what a grant binds, so a field that tracked the chain would move the identity the moment the chain advanced."
  },
  "_proposal_sha256_excludes": "proposal_sha256 covers this document EXCEPT ['proposal_sha256', 'proposed_utc']. proposed_utc is a wall clock and would make the identity change on every regeneration of an unchanged tree; the hash is a function of the proposal's content, so a grant can bind it and the issuer can re-derive it.",
- "proposal_sha256": "c5a889c01a59a3df254fb1d184ba7418fef2b47f2279e075179db30ab387d844"
+ "proposal_sha256": "41eb19352e1a2db4b3de21b56d499579160f01c0e784781413adc2973e975f20"
 }

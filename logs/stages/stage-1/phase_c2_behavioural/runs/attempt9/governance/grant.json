@@ -1,0 +1,163 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_grant/v1",
+ "contract_id": "phase_c2.behavioural_grant/v1",
+ "_what_this_is": "What a person approved, in the fields only a person can fill. The issuer re-derives every identity beside it and refuses on any disagreement, so this document cannot introduce a binding nobody checks.",
+ "granted_by": "maintainer",
+ "granted_utc": "2026-09-23",
+ "_granted_utc_is_real_utc": "taken from datetime.now(timezone.utc) in code rather than typed. Issuance refuses a grant dated after the current UTC date.",
+ "run_id": "attempt9",
+ "experiment_id": "phase_c2_behavioural",
+ "stage_id": "1",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "_the_authorization_this_records": "the maintainer retired the approval-per-step workflow on 2026-09-23 and authorized C2 to be executed to completion: external backend setup, real validation, pre-staging, continuation integration, chain preparation and execution, ordinary failure diagnosis, engineering repair, retry, the final confirmation pair, the frozen verdict, evidence consolidation and closeout -- without returning for intermediate review. Ordinary engineering failures are to be diagnosed, repaired and retried autonomously inside the envelope below rather than escalated. A chain that aborts before formal measurement begins is an engineering subrun: it consumes its one-use chain even at $0, and the incrementing attempt number is not a scope expansion.",
+ "reviewed_baseline": {
+  "origin_main": "8966ae12cd5f898928b2df443601a8936e03ba1e",
+  "_origin_main_is_the_reviewed_baseline": "the commit the maintainer's execute-to-completion authorization was given at. It is NOT the commit this chain runs from: the durable-backend change and the session-ceiling repair landed after it, under that authorization's own engineering autonomy. The issuer re-derives the plan hash, the closure, the closure file count and the proposal hash live and refuses a disagreement, so the session commit is bound by those rather than by this field.",
+  "proposal_sha256": "41eb19352e1a2db4b3de21b56d499579160f01c0e784781413adc2973e975f20",
+  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+  "executable_closure": "40bb610a2b884b0d24c8d5c6ba0cc466cda43ea9a70408bb3e2c8f442478a151",
+  "closure_files": 135,
+  "resume_preregistration_sha256": "4cbfae158cfd3886e21ca6be0abe3e1ed77790f2b9c903d5f09c037fc8f96aa5",
+  "_the_issuer_rederives_these": "every identity here is re-derived live at issuance and a disagreement is a refusal. They are recorded so a reader can see WHAT was reviewed, not so anything trusts the copy.",
+  "_what_moved_since_the_reviewed_baseline": "seven ordinary engineering amendments, each recorded above, each inside the maintainer's 2026-09-23 execute-to-completion authorization. Four chains were consumed at $0 by aborts before provider contact or before acquisition: three defects in the dry-run mechanism itself and one unnecessary datacenter pin. The closure is now 40bb610a2b884b0d24c8d5c6ba0cc466cda43ea9a70408bb3e2c8f442478a151 and the proposal 41eb19352e1a2db4b3de21b56d499579160f01c0e784781413adc2973e975f20, whose numbers are unchanged. THE PLAN HASH HAS NEVER MOVED (31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705) and no science has changed.",
+  "plan_hash_is_the_reviewed_one": true,
+  "engineering_amendments": [
+   {
+    "n": 1,
+    "what": "the durable backend became a provider network volume rather than an object store; the object-store route needs an account this environment cannot create",
+    "moved_the_closure": true
+   },
+   {
+    "n": 2,
+    "what": "a session ceiling is shortened to what its campaign has left; settled spend has one owner and the gate reconciles the two readings; destination_gate charges the remainder",
+    "moved_the_closure": true
+   },
+   {
+    "n": 3,
+    "what": "the continuation's working set is derived from CONSUMERS rather than campaign membership, under AGENTS.md P8.4. A completed and validly scored probe contributes evidence; its checkpoint is archival. 8.1 MiB, not 22.21 GiB",
+    "moved_the_closure": true
+   },
+   {
+    "n": 4,
+    "what": "the $0 dry run's output run id used a hyphen, which run_layout refuses; attempt6 was retired at $0 before provider contact and this is the repair",
+    "moved_the_closure": true
+   },
+   {
+    "n": 5,
+    "what": "a dry run's own run directory was enumerated as a prior campaign RESOURCE, so the rehearsal refused the launch it had just rehearsed. Both enumerations now exclude it and the suffix has one owner. attempt7 retired at $0",
+    "moved_the_closure": true
+   },
+   {
+    "n": 6,
+    "what": "the network volume is attached only when a remaining operation reads a pre-staged checkpoint. Attaching it pins the draw to the volume's single datacenter, and attempt8 was refused an L40S in EU-NL-1 eight times over 35 minutes while `volume_gate` correctly reported that no probe needs its weights on the pod. AGENTS.md P8.4 applied to the acquisition constraint rather than only to the bytes: a constraint accepted in order to move bytes must fall away with the consumer that justified it.",
+    "why_it_is_engineering": "provider placement and volume attachment are acquisition mechanics. No arm, seed, battery, recovery recipe, scoring rule or decision rule moved, and the plan hash is unchanged.",
+    "cost": "$0.0000 -- eight create calls, no pod id returned on any of them",
+    "retired": "attempt8, at $0, after all ten pre-provider gates passed"
+   },
+   {
+    "n": 7,
+    "what": "four records and comments still described the continuation as attaching a volume and reserving 45 minutes to re-hash 22.2 GiB, which amendment 3 had already made false. The proposal, the continuation price, the reserve basis and the transport comment now state what is actually moved. Separately, the log-navigation generator read a closeout's verdict and cost under one schema only, so it rendered 'no classification stated' with no money for all eight behavioural closeouts; it now reads both families.",
+    "why_it_is_engineering": "record and generator accuracy. Every numeric figure in the regenerated proposal and price is byte-identical -- verified by diffing all numbers in both documents -- so no amount changed.",
+    "cost": "$0.0000",
+    "retired": "nothing; found while validating attempt9's chain"
+   }
+  ]
+ },
+ "covers": "the REMAINDER of ONE Phase-C2 behavioural selection campaign: the third frozen confirmation seed for the candidate screening advanced and for incumbent B, and the frozen Phase-C GO / NO_GO / INCONCLUSIVE decision rule over all six confirmation probes. The ten probes already trained, scored and verified off-pod are CONSUMED, never retrained. Same-campaign continuation only, under preregistered R1-R10.",
+ "terminal_results": [
+  "GO",
+  "NO_GO",
+  "INCONCLUSIVE"
+ ],
+ "_any_terminal_result_ends_the_campaign": "a complete GO, NO_GO or INCONCLUSIVE is a valid terminal result and ends this campaign. None of them is a reason to start another attempt.",
+ "explicitly_not_authorized": [
+  "any beam search",
+  "any new Full Search",
+  "any re-ranking of the frozen Top-5",
+  "any regeneration of the selection",
+  "any B state-eval remeasurement",
+  "any fourth seed",
+  "any tie-break rung beyond the frozen rule",
+  "any forced winner",
+  "any retraining of the ten completed probes",
+  "any C3 work",
+  "any C4 work",
+  "any C1 rerun",
+  "any Replay rerun",
+  "any frozen scientific protocol change"
+ ],
+ "approved_money": {
+  "max_rate_usd_per_hour": 1.09,
+  "expected_all_in_usd": 19.7533,
+  "gpu_hard_usd": 19.4558,
+  "disk_hard_usd": 0.2975,
+  "all_in_usd": 19.7533,
+  "campaign_all_in_usd": 42.0,
+  "stage_envelope_all_in_usd": 25.0,
+  "gpu": "NVIDIA L40S",
+  "container_disk_gb": 120,
+  "_three_amounts_not_two": "all_in_usd bounds ONE session and equals gpu_hard_usd + disk_hard_usd. campaign_all_in_usd is CUMULATIVE across every run attempt and provider resource of this campaign, including settled spend, and is the only figure campaign_continuation_gate charges prior spend against. stage_envelope_all_in_usd is the maintainer's 2026-09-23 allowance for ALL remaining C2 work including supporting engineering infrastructure outside the formal campaign -- the probe pre-staging is on it, not on the campaign ceiling.",
+  "_the_session_ceiling_is_shortened": "a fresh session derives to $33.2099 over 1800.53 minutes. This campaign has settled $22.2466 of its $42.0 ceiling, so the session is authorized for $19.7533 over 1070.96 minutes -- what the campaign has left, floored. Nothing scientific is shortened: the work owes 491.51 minutes.",
+  "_settled_campaign_spend_usd": 22.2466,
+  "_settled_per_attempt": {
+   "attempt1": 0.0,
+   "attempt2": 0.0,
+   "attempt3": 2.5425,
+   "attempt4": 0.0,
+   "attempt5": 19.7041,
+   "attempt6": 0.0,
+   "attempt7": 0.0,
+   "attempt8": 0.0
+  },
+  "_basis": "the reviewed proposal basis at a quoted L40S securePrice of $1.09/h. Issuance re-quotes the live securePrice and derives the SESSION terms mechanically from it. The campaign ceiling is not a function of the rate and no re-quote may move it.",
+  "_the_working_set_is_consumer_derived": "this continuation moves 8.1 MiB of descriptors, scores, per-sample rows and hashes -- not 22.21 GiB of checkpoints. Ten completed probes are validly scored, so no remaining authorized operation reads their weights.",
+  "_prior_attempts": "attempts 1, 2, 4, 6 and 7 retired at $0 before provider contact, each for a launcher repair that moved the executable closure. attempt3 spent $2.5425 and stopped in stage P on ENOSPC. attempt5 spent $19.7041, measured ten of twelve probes and stopped on ENOSPC without a verdict. Its ten probes are consumed as evidence and are never retrained."
+ },
+ "live_rate_issuance_rule": [
+  "re-query the provider's live gpuTypes.securePrice",
+  "derive the authorization terms mechanically from that live rate",
+  "bind rate_usd_per_hour, hard_runtime_minutes, gpu_hard_usd, disk_hard_usd and all_in_hard_usd distinctly",
+  "retain the reviewed scientific runtime and work scope",
+  "do not shorten the scientific experiment merely because the provider price increased",
+  "do not extend runtime or work because the provider price decreased",
+  "if the live quote materially changes the dollar authorization from the reviewed basis, STOP and return to the maintainer before creating the provider resource",
+  "a provider-returned rate above the authorized rate must refuse and tear down under the existing fail-closed contract"
+ ],
+ "one_use": true,
+ "max_provider_resources": 1,
+ "_one_use_is_per_chain": "this grant authorizes ONE launch chain. A replacement resource inside the same campaign is a new run attempt with a fresh chain, permitted under R1-R10 and bounded by the SAME cumulative campaign ceiling above -- not by a new allocation.",
+ "provider_placement": {
+  "data_center": null,
+  "_why_unconstrained": "DERIVED, not fixed. A datacenter constraint exists only to attach a network volume, and this session attaches none: all ten completed probes are validly scored, so nothing reads a pre-staged checkpoint, and the two probes this session trains are preserved the other way -- pulled to the launcher host by `_fetch_and_verify` and re-identified there. Pinning EU-NL-1 anyway is what left attempt8 unable to acquire a machine at all.",
+  "network_volume_id": null,
+  "volume_mount_path": null,
+  "_the_volume_still_exists": "59qt99zeg5 holds eight completed probes plus a partial ninth as sunk operational cost, retained until C2 teardown. It is not a required input by virtue of being present.",
+  "_this_field_is_descriptive": "nothing consumes it. Placement is decided by `volume_attachment` from the remaining work, and the launcher clears volume, mount and datacenter together when no consumer reads the volume."
+ },
+ "autonomous_engineering_repair": {
+  "permitted": "inside this scientific scope, the $42.0000 cumulative campaign ceiling and the $25.00 stage envelope, ordinary engineering failures are handled autonomously: preserve evidence, confirm teardown and non-billing, diagnose, minimal repair, focused regression, fresh run identity and chain where required, continue. No approval is needed after each ordinary failure, and an aborted pre-science launcher invocation is an engineering subrun rather than a retried experiment.",
+  "stop_and_return_if": [
+   "the $25.00 remaining-C2 stage envelope cannot cover a minimum credible path to completion",
+   "the frozen scientific question becomes unanswerable without changing the hypothesis, arms, endpoint, battery, seed design or decision rule",
+   "a necessary irreversible action would destroy unique historical or frozen evidence",
+   "human authentication, account or payment interaction is physically required and cannot be completed here",
+   "provider or account state creates billing or resource ownership that cannot safely be reconciled",
+   "a complete valid verdict already exists"
+  ]
+ },
+ "on_identity_mismatch": "an arm whose rebuilt digest does not match the frozen record is a SCIENTIFIC FINDING and a stop condition, not a retryable engineering failure. The path is deterministic and would diverge identically on a retry. Preserve, tear down, and return it to review unchanged.",
+ "execution_chain": [
+  "grant",
+  "launch-bound readiness",
+  "commit only the readiness record",
+  "authorization",
+  "commit only the authorization artifact",
+  "exact-session bundle",
+  "final live quote and all pre-provider gates",
+  "provider resource",
+  "formal behavioural execution",
+  "evidence collection, closeout, provider-confirmed teardown"
+ ],
+ "_ordering_is_binding": "the binding-sensitive steps may not be skipped or reordered. The bundle must carry the authorization, so the authorization must exist first; and the lineage check permits exactly one tracked path to differ between the authorized base and the session commit.",
+ "authorizes": "one launch chain of attempt9, and nothing else."
+}

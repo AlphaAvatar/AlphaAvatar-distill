@@ -137,12 +137,12 @@
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
   "experiment_id": "phase_c2_behavioural",
-  "run_id": "attempt6",
-  "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt6",
-  "outcome": "not recorded, and no closeout has been written for this run",
+  "run_id": "attempt8",
+  "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt8",
+  "outcome": "recorded; RETIRED_AT_ZERO_NO_RESOURCE_ACQUIRED, $0.0000",
   "index": "logs/index.json",
-  "state": "no run manifest, and only governance inputs are present: PREPARED but not executed",
-  "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt5"
+  "state": "recorded: the run wrote its own manifest",
+  "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt8"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",

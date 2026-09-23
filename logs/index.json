@@ -282,8 +282,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 36,
-  "runs_unrecorded": 9,
+  "runs_current": 37,
+  "runs_unrecorded": 10,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -342,9 +342,9 @@
     "total": 4
    },
    "phase_c2_behavioural": {
-    "recorded": 3,
-    "unrecorded": 3,
-    "total": 6
+    "recorded": 4,
+    "unrecorded": 4,
+    "total": 8
    },
    "phase_c2_full_search": {
     "recorded": 3,
@@ -1317,6 +1317,19 @@
    "n_components": 5
   },
   {
+   "experiment_id": "phase_c2_behavioural",
+   "run_id": "attempt8",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt8",
+    "manifest": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt8/manifest.json"
+   },
+   "manifest_sha256": "02c09aca530e7d0bac1e65f9b0bf49f82383158afb40240f0b0b9e411be6e215",
+   "n_components": 5
+  },
+  {
    "experiment_id": "phase_c2_full_search",
    "run_id": "attempt1",
    "stage": "1",
@@ -1500,9 +1513,17 @@
    "experiment_id": "phase_c2_behavioural",
    "run_id": "attempt6",
    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt6",
-   "n_files": 1,
-   "digest": "6f87b299cdefe838d239612caa156a35e68e8764a00669346cc5a4f0cdb0d787",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 5,
+   "digest": "cdcda5592049504f53b733e1891fc99de6b48f2bdaaa6f7d80a92bb1da58ec46",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_c2_behavioural",
+   "run_id": "attempt7",
+   "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt7",
+   "n_files": 5,
+   "digest": "de587ebc1ea63529fa76fcc97ea89429f54eb645899526e3b347f9ca8a0f2a69",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   },
   {
    "experiment_id": "phase_c2_replay",

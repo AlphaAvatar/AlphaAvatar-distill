@@ -105,17 +105,24 @@ RELEASE_ACK_REL = "artifacts/autoinit/c2_behavioural/release_acks"
 #:    then belonged to somebody else's network and moved with time of day,
 #:    routing and load. Multiplying by a number that moves does not produce a
 #:    bound.
-#: 3. This. The bytes are pre-staged onto a provider network volume that the
-#:    pod ATTACHES, so **there is no session-time transfer at all**. What
-#:    remains on the meter is re-identification: the driver reads every probe's
-#:    weights from the volume and rebuilds its identity, and the launcher host
-#:    re-reads its own copies before naming them.
+#: 3. A provider network volume the pod ATTACHES, so there is no session-time
+#:    transfer and the meter carries only re-identification — the driver reads
+#:    every probe's weights from the volume and rebuilds its identity.
+#: 4. This. **Nothing.** Under AGENTS.md P8.4 the weights of a completed and
+#:    validly scored probe are not restored at all: nothing remaining reads
+#:    them, so there is neither a transfer nor a re-identification to reserve
+#:    for. What travels is the lightweight evidence the verdict actually
+#:    consumes — the probe record, the result, the per-sample rows and the
+#:    durable ack — copied from the launcher host's own store.
 #:
-#: So this reserves the minutes that verification costs, not a transfer's. At
-#: 45 minutes, 22.2 GiB of reading-and-hashing needs only ~8.6 MB/s to fit,
-#: roughly an order of magnitude under what a network volume plus sha256
-#: sustains. It stays a RESERVE because volume read throughput is still
-#: somebody else's property and a cold cache is still possible.
+#: So this reserves the minutes that reading 8.1 MiB of evidence costs, not a
+#: transfer's and no longer 22.2 GiB of hashing. It stays a RESERVE rather than
+#: a measurement because the destination filesystem is somebody else's property
+#: and a cold cache is still possible.
+#:
+#: Option 3 remains implemented and is what a probe in the trained-but-unscored
+#: state would use, because scoring genuinely consumes the model. It is simply
+#: not what THIS campaign needs: all ten completed probes are scored.
 #:
 #: An observed verification time is recorded as DIAGNOSTIC evidence. It does
 #: not become this number.
@@ -128,13 +135,15 @@ PROBE_AVAILABILITY_RESERVE_MINUTES = 45.0
 #: not moving.
 EVIDENCE_RESERVE_MINUTES = 10.0
 PROBE_AVAILABILITY_RESERVE_BASIS = (
-    "a conservative reserve for re-identifying pre-staged probes on the "
-    "replacement pod, revised 2026-09-23, NOT a measured or claimed "
-    "throughput. The probes are on an attached network volume and are never "
-    "transferred during a session, so what is reserved is the cost of reading "
-    "and hashing them. 22.2 GiB inside 45 minutes is ~8.6 MB/s, far under "
-    "what a volume read plus sha256 sustains; an observed time is recorded as "
-    "diagnostic and never promoted to this figure.")
+    "a conservative reserve for making this campaign's completed probes "
+    "available to the replacement pod, revised 2026-09-23, NOT a measured or "
+    "claimed throughput. What is reserved depends on what a remaining "
+    "operation actually reads (AGENTS.md P8.4): for a probe that is trained "
+    "but not validly scored, its weights, because scoring consumes the model; "
+    "for a completed and validly scored probe, only the lightweight evidence "
+    "the verdict consumes, because its checkpoint is archival and is not "
+    "restored. An observed time is recorded as diagnostic and never promoted "
+    "to this figure.")
 
 
 class ContinuationError(RuntimeError):

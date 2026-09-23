@@ -46,7 +46,22 @@ all-in. The `$370` project envelope does not move.
 advanced candidate and for B, then the frozen decision rule. Ten of twelve are
 trained, scored and durable off-pod. Owner:
 [`continuation_price.json`](../stages/stage-1/phase_c2_behavioural/analyses/continuation_price.json)
-— hard all-in `$9.0656`, campaign `$31.3122` of `$42.0000`.
+— hard all-in `$8.4201`, campaign `$30.6667` of `$42.0000`, headroom
+`$11.3333`.
+
+**behavioural attempt8 was retired at `$0` without acquiring a machine.** All
+**ten** pre-provider gates passed — the first chain to clear every one — and
+then eight consecutive create calls over 35 minutes were refused with "no
+longer any instances available with the requested specifications". The session
+had pinned itself to **EU-NL-1** in order to attach the network volume, and
+`volume_gate` had just reported that no probe needs its weights on the pod. It
+narrowed its own hardware supply to one datacenter to attach a volume nothing
+was going to read. No pod id was ever returned, so nothing billed. The
+repair derives the attachment from need and clears volume, mount and
+datacenter together when no remaining operation reads a pre-staged
+checkpoint — P8.4 applied to the acquisition constraint, not just to the
+bytes. Owner:
+[`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_behavioural/runs/attempt8/closeout/outcome.json).
 
 **The durable backend is a network volume, not an object store.** The
 object-store route was built, tested and never run: every store reachable from
@@ -54,9 +69,13 @@ this environment needs an account creation and payment step only a maintainer
 can complete, and the Hugging Face account that exists has **2.62 GiB** of
 private headroom — bisected at `$0` through the LFS batch endpoint — against
 22.21 GiB needed. A volume needs no credential anywhere, and attaching it
-removes the transfer from the billed session entirely: the reserve fell from 90
-minutes to 45, and what those 45 minutes buy is now honest — re-reading and
-re-identifying the probes, not moving them. `runtime/durable_store.py` and
+removes the transfer from the billed session entirely. **It is then not
+attached at all**, because P8.4 left nothing for it to carry: the reserve is
+**10 minutes** for re-reading 8.1 MiB of evidence, and a session that attaches
+the volume anyway buys a one-datacenter draw for no consumer — which is how
+attempt8 failed. The volume is a restore *source* only; a newly trained probe
+is preserved the other way, by `_fetch_and_verify` pulling it to the launcher
+host and re-identifying it there. `runtime/durable_store.py` and
 `experiments/durable_stores.py` are kept, annotated as having no production
 caller. Owner:
 [`durable_backend_decision_20260923.md`](../stages/stage-1/phase_c2_behavioural/analyses/durable_backend_decision_20260923.md).
@@ -123,10 +142,15 @@ Repaired, and the repairs are the point rather than the number:
   before each probe and refuses if it cannot hold the next one, so a wrong
   derivation costs a clean stop with every finished probe durable.
 
-**Nothing is prepared for launch.** The next chain is attempt6 and it has no
-grant, readiness record, authorization or bundle; attempts 1–5 hold theirs as
-consumed evidence, attempt4's having been consumed at `$0` by a dry run that
-recorded a run — which is why that flag now writes to a separate run id. Owner: [`current.json`](current.json) `:: prepared_launch`.
+**Nothing is prepared for launch.** The next chain is **attempt9** and it has
+no grant, readiness record, authorization or bundle; attempts 1–8 hold theirs
+as consumed evidence. Four of those were consumed at `$0`: attempt4 by a dry
+run that recorded a run (which is why that flag now writes to a separate run
+id), attempt6 and attempt7 by two further defects in the dry-run mechanism
+itself, and attempt8 by a provider that had no L40S in the one datacenter the
+session had pinned itself to. Each was found for free, which is what the
+rehearsal is for — but a launcher repair moves the executable closure, so each
+costs a fresh chain. Owner: [`current.json`](current.json) `:: prepared_launch`.
 
 **attempt3 FAILED in stage P and there is no verdict.** Not `NO_GO`, not
 `INCONCLUSIVE` — those are complete results of a run that measured something.
@@ -161,12 +185,13 @@ jobs, which is why a gate reading either passed every test:
 
 ```text
 session (fresh)    1800.53 min · GPU 32.7097 · disk 0.5002 · all-in 33.2099
-session (attempt6) 1070.96 min · GPU 19.4558 · disk 0.2975 · all-in 19.7533
+session (continued) 1070.96 min · GPU 19.4558 · disk 0.2975 · all-in 19.7533
 campaign                                                    all-in 42.0000
 ```
 
-The attempt6 session line is the fresh derivation SHORTENED to what the
-campaign has left after `$22.2466` settled. The campaign figure is the
+The continued session line is the fresh derivation SHORTENED to what the
+campaign has left after `$22.2466` settled, and it is re-derived per attempt —
+unchanged across attempts 6 to 9 because no attempt since has settled a cent. The campaign figure is the
 maintainer's; the two session lines are derived.
 
 `all_in_hard_usd` bounds ONE attempt and is what the window, the watchdog and
@@ -311,10 +336,12 @@ Derived, not inherited: storage **120 GB**, converted GiB→GB through the
 repository's recorded basis. At a live `$1.09/h` L40S quote the ceiling is
 **`$33.2099` all-in** (`$32.7097` GPU + `$0.5002` disk) with `$23.8832`
 expected — up from `$30.8918` because the arms are now built rather than
-staged. Project headroom if attempt6's shortened ceiling were spent in full:
+staged. Project headroom if the shortened session ceiling were spent in full:
 **`$18.7958`**,
-derived by `write_c2_behavioural_proposal.py` from the corrected `$311.7468`
-cumulative.
+derived by `write_c2_behavioural_proposal.py` from the `$311.7468` cumulative
+**as it stood when the proposal was written**. The live project figure is
+`$333.3808` (above); this paragraph records the proposal's own derivation and
+is not a second opinion about today's balance.
 
 What is built: the launch governance and its one-use authorization type, the
 launcher with eight `$0` prechecks, a **standalone** driver (it does *not*

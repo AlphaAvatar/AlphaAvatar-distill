@@ -89,3 +89,45 @@
   probe's weights — a re-scoring under a changed scorer, a distillation from a
   probe, a diagnostic that loads one. The state machine already has a route for
   that; it is the explicit-authorization branch.
+
+---
+
+## Amendment, same day — the rule also governs the acquisition constraint
+
+The first application of this rule stopped at the bytes. **attempt8 then failed
+to acquire a machine at all**, and the cause was the same defect one level up.
+
+Attaching the campaign volume pins the draw to the volume's single datacenter,
+because a volume can only be attached from where it lives. attempt8 asked for
+an L40S **in EU-NL-1** and was told "no longer any instances available with the
+requested specifications" eight times over 35 minutes. `volume_gate` had passed
+moments earlier with the correct finding that **no probe needs its weights on
+the pod**. So the session narrowed its own hardware supply to one datacenter in
+order to attach a volume nothing was going to read.
+
+The comment above `CAMPAIGN_VOLUME_ID` had written the failure down in advance —
+"if the datacenter has no L40S the session cannot launch" — and called it "the
+price of not paying for the transfer". That was true while a transfer was
+owed. Once the transfer wasn't owed, the price was being paid for nothing.
+
+**What changed.** `volume_attachment` derives the attachment from the remaining
+work and clears volume, mount and datacenter together when nothing reads a
+pre-staged checkpoint. The decision and the normalization are one function,
+because the clearing had been a bare `if` in `main` — the one place no test
+reaches, which is exactly where a mutation would have survived.
+
+**Why no volume is needed even though attempt9 trains two fresh probes.** The
+volume is a restore *source* and only that. Durability runs the other way:
+`_fetch_and_verify` pulls each announced unit to the launcher host's
+`--ckpt-store` over scp and re-identifies it from the bytes that land, and the
+evidence leg is copied from that same host store. Both directions were
+enumerated before the constraint was dropped, rather than inferred from the one
+that prompted the question.
+
+**The generalization.** A consumer justifies moving bytes (P8.4) *and* it
+justifies every constraint accepted in order to move them — a pinned
+datacenter, a pinned region, an image, a volume, a mount. When the consumer
+disappears, the constraint must disappear with it. A constraint whose only
+purpose was to enable a transfer that is no longer owed is not conservative;
+it is a narrower resource pool bought for nothing, and here it cost a whole
+launch chain.

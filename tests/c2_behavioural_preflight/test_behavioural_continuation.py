@@ -2646,6 +2646,84 @@ def test_the_gate_refuses_a_mount_that_would_cover_the_checkout(
         assert "All three are required" in why
 
 
+def test_the_volume_is_attached_only_when_a_probe_needs_its_weights(
+        tmp_path, repo, transport):
+    """The DRAW CONSTRAINT follows a consumer, not the campaign.
+
+    Attaching the volume pins acquisition to its one datacenter, and attempt8
+    died there: eight create calls over forty minutes, "no longer any
+    instances available with the requested specifications" from EU-NL-1, for a
+    volume no remaining operation was going to read. `$0`, but the chain was
+    consumed.
+
+    Both directions are asserted, because a derivation that always answered
+    one way would pass half of this on its own.
+    """
+    store = tmp_path / "store"
+    pod1 = _Pod(tmp_path / "pod1")
+    transport.pods["fake-host"] = pod1
+    pid, arm, seed = _screening_ids()[0]
+
+    #: An UNSCORED probe: scoring reads the weights, so the constraint buys
+    #: something and the session accepts it.
+    _secure(_Ctx(pod1, store, "attempt1"),
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)])
+    args = _Ctx(_Pod(tmp_path / "pod2"), store, "attempt2").args
+    attach = L.volume_attachment(args)
+    assert attach["attach"] is True
+    assert attach["probes"] == [pid]
+    #: And the triple survives, or the gate would refuse the very restore the
+    #: session is attaching for.
+    assert (args.network_volume_id, args.volume_mount_path,
+            args.data_center_ids) == (L.CAMPAIGN_VOLUME_ID, L.VOLUME_MOUNT,
+                                      L.VOLUME_DATACENTER)
+
+    #: The SAME probe, scored. Nothing reads its checkpoint now: the verdict
+    #: consumes rows and scores, and a newly trained probe is preserved by
+    #: `_fetch_and_verify` to the launcher host, not to the volume.
+    pod3 = _Pod(tmp_path / "pod3")
+    transport.pods["fake-host"] = pod3
+    store2 = tmp_path / "store2"
+    _secure(_Ctx(pod3, store2, "attempt1"),
+            [_produce(pod3, pid, rung="screening", arm=arm, seed=seed,
+                      scored=True)])
+    args = _Ctx(pod3, store2, "attempt2").args
+    attach = L.volume_attachment(args)
+    assert attach["attach"] is False
+    assert attach["probes"] == []
+    assert "no remaining operation reads a pre-staged checkpoint" in attach["why"]
+    #: THE POINT: the draw is no longer pinned to one datacenter.
+    assert (args.network_volume_id, args.volume_mount_path,
+            args.data_center_ids) == ("", "", "")
+
+
+def test_an_unattached_session_pins_no_datacenter_and_claims_no_pod_root(
+        tmp_path, repo, transport):
+    """What `attach: False` must actually produce, at the two surfaces.
+
+    The command line is the one that mattered: a `--data-center-ids` the
+    session had no use for is what starved the draw. And `volume_probe_root`
+    must not answer with a path rooted at `/`, which would record the bytes as
+    living somewhere they have never been.
+    """
+    from aadistill.infrastructure.session_runner import SessionRunner
+
+    ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt2")
+    assert L.volume_probe_root(ctx).startswith(L.VOLUME_MOUNT)
+
+    #: An empty store owes no restore, so resolving against it is what a
+    #: session with nothing to fetch really does — not a hand-cleared fixture.
+    assert L.volume_attachment(ctx.args)["attach"] is False
+    assert L.volume_probe_root(ctx) == ""
+
+    flags = SessionRunner.attached_volume(
+        type("R", (), {"a": ctx.args, "ws": "/workspace"})())
+    assert "--data-center-ids" not in flags
+    assert "--network-volume-id" not in flags
+    assert flags == ("--volume-in-gb", "0")
+
+
 def test_the_launcher_refuses_a_volume_index_for_another_campaign(
         tmp_path, repo, transport):
     """One experiment's probes may never be pooled into another's."""

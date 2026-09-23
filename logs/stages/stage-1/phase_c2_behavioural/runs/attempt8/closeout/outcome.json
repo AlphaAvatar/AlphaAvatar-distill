@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_closeout/v1",
+ "run_id": "attempt8",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "RETIRED_AT_ZERO_NO_RESOURCE_ACQUIRED",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0
+ },
+ "closed_utc": "2026-09-23T08:07:00+00:00",
+ "what_happened": "Every one of the TEN pre-provider gates passed, including the two that had refused attempt6 and attempt7. The budget resolved to 339 expected minutes, $6.16 expected, $8.29 hard against $19.46 authorized, at the quoted L40S securePrice of $1.09/h.\n\nThe session then could not acquire a machine. Eight consecutive create calls over 35 minutes were each answered \"There are no longer any instances available with the requested specifications\", no pod id was ever returned, and the session aborted with exit 11. The provider quote had already recorded stock as Low before the first call.\n\nThe requested specification was narrow for one reason: the session asked for an L40S IN EU-NL-1, because that is where network volume 59qt99zeg5 lives and a volume can only be attached from its own datacenter. It asked for that volume even though `volume_gate` had just reported, correctly, that no probe needs its weights on the pod -- the ten completed probes contribute 8.06 MiB of evidence and their 22.213 GiB of checkpoints have no remaining consumer. So the session pinned itself to a single datacenter's L40S supply to attach a volume nothing was going to read.",
+ "root_cause": "The volume attachment was an unconditional default, so the DRAW CONSTRAINT followed the campaign rather than a consumer. This is AGENTS.md P8.4 one level up from the bytes: the rule had been applied to what gets transferred, and the acquisition constraint that existed only to enable that transfer was left behind. The module comment above CAMPAIGN_VOLUME_ID had predicted the failure in as many words -- \"if the datacenter has no L40S the session cannot launch\" -- and treated it as a fixed price rather than a conditional one.",
+ "repair": "`volume_attachment` now derives the attachment from the remaining work and CLEARS volume, mount and datacenter together when no remaining operation reads a pre-staged checkpoint, so the draw may take an L40S in any secure datacenter. The decision and the normalization are one step, because the clearing had been a bare `if` in `main` where no test reaches it. `volume_probe_root` answers \"\" rather than a path rooted at `/` when nothing is mounted. Confirmed by enumeration that the volume is a restore SOURCE only: a newly trained probe is preserved by `_fetch_and_verify` to the launcher host's --ckpt-store and re-identified there, and the evidence leg is copied from that same host store, so a session training two fresh probes needs no volume in either direction.",
+ "regression": "Four mutations of the new derivation -- always attach, never attach, decide without clearing, and a probe root that ignores an empty mount -- each fail the two new tests; the unmutated tree passes. The frozen scientific identities are unmoved: plan hash 31088b981499, protocol 7cc8c2c15e97.",
+ "why_a_fresh_chain": "the repair is in the launcher, the launcher is an entry point of the executable closure, so the closure moved and attempt8's authorization and bundle no longer bind this tree.",
+ "consumed": "nothing. Eight create calls, no id returned on any of them, so no resource exists and nothing billed -- recorded as confirmed_not_billing with the eight raw provider responses kept beside the session record. The chain was consumed at $0.",
+ "gates_passed_at_zero": [
+  "session_commit_and_lineage",
+  "scope_gate",
+  "plan_binding_gate",
+  "source_binding_gate",
+  "destination_gate",
+  "container_gate",
+  "volume_gate",
+  "campaign_continuation_gate",
+  "readiness_gate",
+  "bundle_staged_gate"
+ ],
+ "gate_that_refused": null,
+ "failed_after_gates_at": "provider acquisition",
+ "preserved": [
+  "governance/grant.json",
+  "governance/readiness.json",
+  "governance/authorization.json",
+  "governance/bundle.json",
+  "runtime/session.json",
+  "runtime/create_raw_d1_a1.txt .. create_raw_d1_a8.txt"
+ ],
+ "authorizes": "nothing"
+}

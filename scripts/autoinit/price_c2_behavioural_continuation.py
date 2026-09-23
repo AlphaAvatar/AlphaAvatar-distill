@@ -127,10 +127,16 @@ def price(repo_root: Path, *, backend_usd: float, rate: float,
             "reserve_minutes": minutes,
             "_reserve_is_not_a_throughput": BC.PROBE_AVAILABILITY_RESERVE_BASIS,
             "_no_session_time_transfer": (
-                "the probes are pre-staged onto a provider network volume the "
-                "pod attaches, so a continuation transfers nothing. These "
-                "bytes are READ and re-hashed on the pod; they do not cross "
-                "the network while the meter runs."),
+                "a continuation moves only what a remaining operation reads "
+                "(AGENTS.md P8.4). A probe that is trained but not validly "
+                "scored has its weights restored from the attached network "
+                "volume, because scoring consumes the model, and those bytes "
+                "are read on the pod rather than crossing the network while "
+                "the meter runs. A completed and validly scored probe "
+                "contributes its lightweight evidence and nothing else: its "
+                "checkpoint is archival, and for this campaign all ten "
+                "completed probes are in that state, so no weights are "
+                "restored and no volume is attached at all."),
             "bytes_to_verify": nbytes,
             "gib_to_verify": round(nbytes / 2**30, 3),
             "weights_probes": t["weights"]["n"],
@@ -233,9 +239,11 @@ def _components(d: dict, rate: float, disk_per_min: float,
                                        "on a fresh filesystem"},
         "probe_availability_reserve": {
             **usd(availability_minutes),
-            "_is": "re-reading and re-identifying the pre-staged probes on "
-                   "the pod. No bytes cross the network while the meter runs; "
-                   "they were written to the attached volume beforehand."},
+            "_is": "making this campaign's completed probes available to the "
+                   "pod: weights re-read and re-identified from the attached "
+                   "volume for any probe still owed a score, and lightweight "
+                   "evidence only for a probe already validly scored. This "
+                   "campaign owes no score, so it is the evidence leg."},
         "session_overhead": {**usd(overhead),
                              "_is": "setup, bundle transfer, teacher fetch, "
                                     "machine gates, artifact synchronisation"},

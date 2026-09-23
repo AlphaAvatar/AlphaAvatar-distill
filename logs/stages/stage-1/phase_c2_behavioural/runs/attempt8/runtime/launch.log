@@ -1,0 +1,62 @@
+[06:59:04] budget: expected 339 min $6.16 · soft $7.75 · hard $8.29 (authorized $19.46)
+[06:59:05] NVIDIA L40S $1.09/h, stock Low
+[06:59:05] session commit 041b45876521 verified: harness digests to 92a1e332ad25…, carries the authorization and only logs/stages/stage-1/phase_c2_behavioural/runs/attempt8/governance/authorization.json differs from the authorized base
+[06:59:05] scope OK: behavioural selection with recovery training, and nothing else reachable
+[06:59:05] plan binding OK (31088b981499…)
+[06:59:06] source binding OK (135 files, 92a1e332ad25…)
+[06:59:06] destination OK: 19.6 GiB free at /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1 for the 2 probe(s) owed, 4.4 GiB (of 26.7 GiB for the whole protocol; the rest is already there)
+[06:59:06] container OK: 120 GB (111.8 GiB) provisioned for a 74.3 GiB peak local residency, 37.5 GiB spare
+[06:59:06] volume OK: no probe needs its weights on the pod — 10 completed probe(s) contribute 8.06 MiB of evidence and their 22.213 GiB of checkpoints have no remaining consumer
+[06:59:06] campaign continuation OK: $22.2466 all-in settled ($21.9115 GPU + $0.3351 disk) across 7 prior attempt(s) plus $8.4201 for the remaining 2 probes is inside the $42.0000 campaign ceiling, and every prior resource is provider-confirmed released
+[06:59:07] readiness OK (launch_bound, PASS, {'error': 0, 'failed': 0, 'passed': 234, 'skipped': 0})
+[06:59:11] bundle OK (041b45876521…)
+[06:59:12] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 6 local assets
+[06:59:13] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[07:04:13] attempt 2: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[07:09:14] attempt 3: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[07:14:14] attempt 4: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[07:19:15] attempt 5: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[07:24:15] attempt 6: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[07:29:16] attempt 7: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[07:34:16] attempt 8: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[07:34:16] ABORT: could not create a pod

@@ -1579,12 +1579,37 @@ def test_the_latest_run_outcome_is_derived_from_that_runs_own_closeout():
     assert latest["run_id"] in latest["root"]
     if path.is_file():
         closeout = json.loads(path.read_text())
-        assert closeout["attempt"] == latest["run_id"], (
+        #: TWO CLOSEOUT FAMILIES, and `latest_run` can name a run from either:
+        #: `attempt`/`classification`/`budget.this_attempt` for phase_c2,
+        #: baseline completion, full search and replay, and
+        #: `run_id`/`terminal`/`money.*` for the behavioural campaign. This read
+        #: the first spelling unconditionally, so it passed only while the
+        #: newest run happened to belong to that family — and the producer had
+        #: the same blind spot, silently rendering "no classification stated"
+        #: with no cost for the other eight. The alternatives are spelled out
+        #: here rather than imported from the generator: a test that asks its
+        #: subject what to expect cannot catch the subject being wrong.
+        ident = closeout.get("attempt") or closeout.get("run_id")
+        assert ident == latest["run_id"], (
             "the closeout read is not the named run's")
-        #: The outcome must be THIS run's classification and cost.
-        assert closeout["classification"].rstrip(". ") in latest["outcome"]
-        cost = closeout["budget"]["this_attempt"]
-        assert f"${float(cost):.4f}" in latest["outcome"]
+
+        verdict = closeout.get("classification") or closeout.get("terminal")
+        assert verdict, f"{path} states neither a classification nor a terminal"
+        assert verdict.rstrip(". ") in latest["outcome"], (
+            f"the snapshot says {latest['outcome']!r} while the closeout says "
+            f"{verdict!r}")
+
+        cost = None
+        for a, b in (("budget", "this_attempt"), ("cost", "this_attempt"),
+                     ("money", "all_in_usd"), ("money", "spent_usd")):
+            value = (closeout.get(a) or {}).get(b)
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                cost = float(value)
+                break
+        assert cost is not None, f"{path} records no cost for this attempt"
+        assert f"${cost:.4f}" in latest["outcome"], (
+            f"the snapshot says {latest['outcome']!r} and the closeout's own "
+            f"cost is ${cost:.4f}")
     else:
         #: No closeout: the outcome must SAY so rather than borrow one, and the
         #: index must agree the run has not executed.

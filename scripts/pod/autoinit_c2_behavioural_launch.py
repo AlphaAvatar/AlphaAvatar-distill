@@ -115,9 +115,17 @@ DURABLE_STORE = "/home/ecs-user/aad-artifacts/phase_c2_behavioural"
 #: the probes are simply present when the pod boots.
 #:
 #: A volume lives in ONE datacenter and a pod can attach it only from there, so
-#: `VOLUME_DATACENTER` constrains the draw. That is a real constraint on
-#: acquisition — if the datacenter has no L40S the session cannot launch — and
-#: it is the price of not paying for the transfer.
+#: naming one CONSTRAINS THE DRAW to that datacenter. That is a real constraint
+#: on acquisition, this comment predicted it would bite, and it did: attempt8
+#: spent forty minutes being told "no longer any instances available with the
+#: requested specifications" by EU-NL-1 and never created a pod.
+#:
+#: So the attachment is DERIVED FROM NEED, by `volume_attachment` — it is worth
+#: a one-datacenter pool exactly when some remaining operation reads the bytes
+#: on it, and worth nothing otherwise. A session that attaches it for no
+#: consumer pays the whole constraint for none of the benefit, which is the
+#: same defect as moving the bytes themselves (AGENTS.md P8.4) one level up: the
+#: CONSTRAINT was following the campaign rather than a consumer.
 CAMPAIGN_VOLUME_ID = "59qt99zeg5"
 CAMPAIGN_VOLUME_GB = 40
 VOLUME_DATACENTER = "EU-NL-1"
@@ -589,6 +597,63 @@ def volume_gate(ctx: SessionContext) -> tuple[bool, str]:
     gib = sum(int(staged[p].get("bytes") or 0) for p in restorable) / 2**30
     return True, (f"volume OK: {len(restorable)} probe(s), {gib:.2f} GiB "
                   f"pre-staged on {volume} in {centre}, mounted at {mount}")
+
+
+def volume_attachment(args) -> dict:
+    """Resolve whether this session attaches the campaign volume. `$0`.
+
+    DERIVED FROM NEED, and it **clears `args`** when the answer is no, rather
+    than returning a verdict for a caller to apply. The clearing was a single
+    `if` in `main`, which is the one place no test reaches: the gates and
+    `SessionRunner.create` both read these args, so the normalization and the
+    decision have to be the same step or a mutation to either is invisible.
+
+    Attaching a volume pins the draw to ONE datacenter, and the campaign's
+    volume lives in `VOLUME_DATACENTER`. That is worth paying when some
+    remaining operation reads the bytes on it, and it is worth nothing at all
+    otherwise — attempt8 paid the entire constraint for no consumer and failed
+    eight consecutive create calls over forty minutes because EU-NL-1 had no
+    L40S. Nothing was created and nothing billed, but the chain was consumed.
+
+    The volume is a RESTORE SOURCE and only that. It is not where a newly
+    trained probe is preserved: `_fetch_and_verify` pulls each announced unit
+    to `--ckpt-store` on the launcher host and re-identifies it there, so a
+    session that trains two fresh probes still needs no volume. Nor does the
+    evidence leg, which is copied from the host's durable store. So when no
+    probe's weights have a consumer, all three of volume, mount and datacenter
+    fall away together and the draw may take an L40S anywhere.
+
+    Reads the durable store a second time — `campaign_remaining_work` caches
+    per-context and the context does not exist yet. A probe arriving between
+    the two reads would make this skip a volume that `volume_gate` then
+    demands, and the gate REFUSES rather than launching without it, which is
+    the safe direction.
+    """
+    state = BC.campaign_state(campaign_store(BG.CAMPAIGN_ID, args.ckpt_store),
+                              exclude_attempt=args.run_id)
+    work = BC.remaining_work(REPO_ROOT, state=state)
+    t = work["transfer"]
+    probes = list(t["weights"]["probes"])
+    if probes:
+        return {
+            "attach": True, "probes": probes,
+            "why": (f"{len(probes)} probe(s) need their weights on the pod "
+                    f"({t['weights']['gib']} GiB), so the session attaches "
+                    f"{args.network_volume_id} and accepts the "
+                    f"{args.data_center_ids} draw"),
+        }
+    args.network_volume_id = ""
+    args.volume_mount_path = ""
+    args.data_center_ids = ""
+    return {
+        "attach": False, "probes": [],
+        "why": ("no remaining operation reads a pre-staged checkpoint — "
+                f"{t['evidence']['n']} completed probe(s) contribute "
+                f"{t['evidence']['mib']} MiB of evidence and "
+                f"{t['skipped_weights']['gib']} GiB of checkpoints have no "
+                "consumer — so no volume is attached and the draw is not "
+                "pinned to one datacenter"),
+    }
 
 
 def campaign_attempts(campaign_id: str, *, exclude: str = "",
@@ -1518,8 +1583,17 @@ def volume_probe_root(ctx: SessionContext) -> str:
     recorded per probe inside the staged index rather than in the path, because
     a continuation restores by probe id and a path segment naming an attempt
     would have to be guessed by whoever builds the manifest.
+
+    EMPTY when no volume is attached, rather than a path rooted at `/`. A
+    session whose probes all have their weights already, or need none, mounts
+    nothing (`volume_attachment`), and recording `/<campaign>/probes` as though
+    it were a real location would tell a later reader the bytes were somewhere
+    they have never been.
     """
-    return f"{ctx.args.volume_mount_path}/{ctx.auth.campaign_id}/probes"
+    mount = str(getattr(ctx.args, "volume_mount_path", "") or "").strip()
+    if not mount:
+        return ""
+    return f"{mount}/{ctx.auth.campaign_id}/probes"
 
 
 def restore_campaign_probes(ctx: SessionContext) -> bool:
@@ -2037,7 +2111,9 @@ def build_parser() -> argparse.ArgumentParser:
                          "reports the backing cluster, not the quota")
     ap.add_argument("--data-center-ids", default=VOLUME_DATACENTER,
                     help="a volume can only be attached from its own "
-                         "datacenter, so the draw is constrained to it")
+                         "datacenter, so the draw is constrained to it. "
+                         "CLEARED, with the volume, when no remaining "
+                         "operation reads a pre-staged checkpoint")
     ap.add_argument("--token-src",
                     default=str(Path.home() / ".cache/huggingface/token"))
     ap.add_argument("--runpod-config",
@@ -2151,6 +2227,15 @@ def main() -> int:
                       roles=BEHAVIOURAL_RUN_ROLES)
     assert args.out == session_record_path(layout_run_id), (
         args.out, layout_run_id)
+
+    #: THE VOLUME IS ATTACHED ONLY IF SOMETHING READS IT, and this must happen
+    #: before `run_session`: the gates and `SessionRunner.create` both read
+    #: these args, so deciding here is what makes them agree. Attaching pins
+    #: the draw to one datacenter, which is why it is not a harmless default —
+    #: see `volume_attachment`.
+    attachment = volume_attachment(args)
+    print(f"volume: {'attached' if attachment['attach'] else 'not attached'} — "
+          f"{attachment['why']}\n")
 
     #: `record_run` in a `finally`, not after a successful return. A run_session
     #: that RAISES leaves the run directory populated and unrecorded, and the
