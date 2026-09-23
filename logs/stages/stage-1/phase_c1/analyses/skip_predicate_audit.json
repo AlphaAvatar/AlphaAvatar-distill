@@ -8,16 +8,16 @@
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
   "filesystem_premise_onpod": 46,
-  "filesystem_premise_unresolved": 6,
+  "filesystem_premise_unresolved": 7,
   "gpu": 2,
   "optional_dependency": 9,
   "repository_content": 4,
   "staged_artifact": 3,
   "unrecognised": 29,
-  "unstaged_artifact": 12
+  "unstaged_artifact": 11
  },
- "n_differs_on_pod": 29,
- "n_unrecognised": 35,
+ "n_differs_on_pod": 28,
+ "n_unrecognised": 36,
  "n_registered": 44,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
@@ -155,6 +155,7 @@
   "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
   "tests/autoinit/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims",
   "tests/autoinit/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
+  "tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk",
   "tests/data/test_c1_battery.py::require_role",
   "tests/data/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
   "tests/data/test_dataset.py::tokenizer",
@@ -871,19 +872,19 @@
   },
   {
    "file": "tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py",
-   "line": 134,
+   "line": 141,
    "kind": "pytest.skip",
    "function": "test_the_footprint_reproduces_a_real_probe_on_disk",
    "condition": "not probes",
-   "expanded": "not probes | probes=sorted(store.glob(\"*/model.safetensors\")) if store.is_dir() else [] | store=Path(\"/home/ecs-user/aad-artifacts/phase_c2_behavioural/\"\n                     \"c2-behavioural-12probe-v1/attempt5\")",
-   "signal": "unstaged_artifact",
-   "verdict": "differs_on_pod",
-   "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
+   "expanded": "not probes | probes=sorted(store.glob(\"*/model.safetensors\")) if store.is_dir() else [] | store=host_local_store() / \"phase_c2_behavioural\"\n                 / \"c2-behavioural-12probe-v1\" / \"attempt5\"",
+   "signal": "filesystem_premise_unresolved",
+   "verdict": "unknown",
+   "why": "an existence check whose path this audit could not read from source; a human must say what it inspects",
    "nodeid": "tests/c2_behavioural_preflight/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
    "parity": "normalized_by_contract",
-   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
+   "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
   },
   {
    "file": "tests/data/test_c1_battery.py",
@@ -2121,5 +2122,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "e14c66bb9d8633dc5a9099fb26ddf9c67ee7b8414c1214e7d8bdbac88f6e0b19"
+ "digest": "f7d7be3268d9f36abed2345dc75a6cc3b72e27c927fe64727c0cae859ac6f727"
 }
