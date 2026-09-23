@@ -46,7 +46,7 @@ from experiments.phase_c2 import scoring as C2S  # noqa: E402
 import autoinit_c2_behavioural_launch as L  # noqa: E402
 import autoinit_c2_behavioural_driver as D  # noqa: E402
 
-from conftest import needs_host_local_stores  # noqa: E402
+from _host_local_stores import needs_host_local_stores  # noqa: E402
 
 GPU_HARD, DISK_HARD, RUNTIME = 32.7097, 0.5002, 1800.53
 ALL_IN = round(GPU_HARD + DISK_HARD, 4)

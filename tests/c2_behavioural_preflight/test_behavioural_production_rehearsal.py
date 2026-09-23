@@ -47,7 +47,7 @@ from experiments.phase_c2 import behavioural_decision as BD
 from experiments.phase_c2 import behavioural_governance as BG
 from experiments.phase_c2 import behavioural_schedule as SCH
 
-from conftest import needs_host_local_stores  # noqa: E402
+from _host_local_stores import needs_host_local_stores  # noqa: E402
 
 N_PROMPTS, N_SCORABLE = 950, 850
 STRATA = ("gsm8k", "math_verified", "multihop", "rag", "knowledge", "tool")

@@ -1,5 +1,14 @@
 """What this scope can and cannot certify about a pod.
 
+NOT a `conftest.py`, deliberately. `tests/` carries no `__init__.py`, so pytest
+puts each test directory on `sys.path` and a bare `from conftest import X`
+resolves to whichever one landed first. `tests/pod` and `tests/autoinit` both
+import their own helpers that way, so a `conftest` here shadowed theirs and
+broke 9 modules at collection the moment more than one scope ran together. A
+pod would never have seen it -- it collects this directory alone -- which is
+exactly the kind of divergence this file exists to remove. Hence a unique name,
+leading underscore so nothing collects it as a test.
+
 This directory is the ONE test directory a behavioural session's pod does not
 ignore, so every case here runs inside a paid session's blocking gate. That
 makes it the wrong place to depend on anything only the dev box holds — and 27

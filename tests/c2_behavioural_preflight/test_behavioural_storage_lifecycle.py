@@ -39,7 +39,9 @@ from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
 import autoinit_c2_behavioural_launch as L  # noqa: E402
 import autoinit_c2_behavioural_driver as D  # noqa: E402
 
-from conftest import needs_host_local_stores  # noqa: E402
+from _host_local_stores import needs_host_local_stores  # noqa: E402
+
+from aadistill.runtime.cpu_test_env import host_local_store  # noqa: E402
 
 
 # --- 1. the generic byte model takes every dtype as an argument -------------
@@ -127,8 +129,13 @@ class TestTheGenericByteModel:
 
         A storage model whose only evidence is itself is what this replaces.
         """
-        store = Path("/home/ecs-user/aad-artifacts/phase_c2_behavioural/"
-                     "c2-behavioural-12probe-v1/attempt5")
+        #: Located through `$HOME`, like every other reach into the host store.
+        #: Written absolute, this path survived the simulator's fresh empty HOME
+        #: while `candidate_manifest` below did not, so the guard found real
+        #: probes, declined to skip, and the case FAILED in the sweep while
+        #: SKIPPING on the pod. That divergence is what the gate compares.
+        store = (host_local_store() / "phase_c2_behavioural"
+                 / "c2-behavioural-12probe-v1" / "attempt5")
         probes = sorted(store.glob("*/model.safetensors")) if store.is_dir() else []
         if not probes:
             pytest.skip("no real probe on this host to check the model against")
