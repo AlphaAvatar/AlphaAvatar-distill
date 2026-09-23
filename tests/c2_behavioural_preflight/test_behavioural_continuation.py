@@ -1397,6 +1397,55 @@ def test_training_from_an_unbuilt_arm_is_refused(tmp_path, repo):
         SCH.Probe("screening", "some-arm", 1, "a" * 64, "/arms/some-arm"))
 
 
+def test_attest_packages_a_checkpoint_THIS_POD_HOLDS(tmp_path, monkeypatch):
+    """The real `attest`'s sample selection, which every other test stubs out.
+
+    That is why this survived: `attest` is a seam, every driver fake replaces
+    it, and the injected function became the only unexecuted code on the path.
+    It took `next(iter(self.training.values()))` to get any trained
+    checkpoint -- safe only while every journal entry held weights on this pod.
+
+    Under P8.4 a completed and validly scored probe is admitted as EVIDENCE:
+    rows, score, descriptor, hashes, and no `model_dir`, because nothing
+    remaining reads its checkpoint. So a continuation's journal leads with ten
+    such entries and the real call raised `KeyError: 'model_dir'`. attempt12
+    trained the eleventh probe, announced it durable and died here before
+    scoring it: $2.14, and 62 minutes of formal training the resume contract
+    now has to carry rather than repeat.
+    """
+    drv = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
+    drv.audit = tmp_path / "audit"
+    drv.audit.mkdir(parents=True, exist_ok=True)
+    drv.a = type("A", (), {"eval_dir": str(tmp_path / "eval"),
+                           "image_digest": "sha256:deadbeef"})()
+
+    seen: list[str] = []
+    monkeypatch.setattr(D, "build_evaluation_package",
+                        lambda src, **kw: seen.append(str(src)))
+    #: Stops after the selection, which is what is under test.
+    drv.gate = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("gated"))
+
+    #: A continuation's journal: evidence-only entries, no weights anywhere.
+    drv.training = {f"screening.arm{i}.s1": {"evidence_only": True}
+                    for i in range(3)}
+    with pytest.raises(D.C2DriverError, match="evidence-only"):
+        drv.attest(tmp_path / "battery_v1")
+    assert not seen, "it packaged something with no checkpoint on this pod"
+
+    #: Now one locally trained probe among them -- the attempt12 state.
+    local = tmp_path / "trained" / "model"
+    _write_checkpoint(local)
+    drv.training["zz.confirmation.local.s2"] = {"model_dir": str(local)}
+    #: And a restored entry whose recorded path does NOT exist here, which is
+    #: what a predecessor's `model_dir` looks like on a replacement resource.
+    drv.training["aa.stale.s3"] = {"model_dir": "/workspace/gone/model"}
+
+    with pytest.raises(RuntimeError, match="gated"):
+        drv.attest(tmp_path / "battery_v1")
+    assert seen == [str(local)], (
+        f"attest packaged {seen}, not the one checkpoint this pod holds")
+
+
 class _NeverTrains(_StageP):
     """`train_one` is a defect here: a restored probe must never be retrained."""
 

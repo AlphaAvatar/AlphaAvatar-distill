@@ -1,0 +1,59 @@
+volume: not attached — no remaining operation reads a pre-staged checkpoint — 10 completed probe(s) contribute 8.06 MiB of evidence and 22.213 GiB of checkpoints have no consumer — so no volume is attached and the draw is not pinned to one datacenter
+
+[13:25:38] budget: expected 339 min $6.16 · soft $7.75 · hard $8.29 (authorized $18.05)
+[13:25:39] NVIDIA L40S $1.09/h, stock None
+[13:25:39] session commit 64e45780b01b verified: harness digests to faaea402924c…, carries the authorization and only logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/governance/authorization.json differs from the authorized base
+[13:25:39] scope OK: behavioural selection with recovery training, and nothing else reachable
+[13:25:39] plan binding OK (31088b981499…)
+[13:25:40] source binding OK (136 files, faaea402924c…)
+[13:25:40] destination OK: 19.5 GiB free at /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1 for the 2 probe(s) owed, 4.4 GiB (of 26.7 GiB for the whole protocol; the rest is already there)
+[13:25:40] container OK: 120 GB (111.8 GiB) provisioned for a 74.3 GiB peak local residency, 37.5 GiB spare
+[13:25:40] volume OK: no probe needs its weights on the pod — 10 completed probe(s) contribute 8.06 MiB of evidence and their 22.213 GiB of checkpoints have no remaining consumer
+[13:25:40] campaign continuation OK: $23.6707 all-in settled ($23.3140 GPU + $0.3567 disk) across 11 prior attempt(s) plus $8.4201 for the remaining 2 probes is inside the $42.0000 campaign ceiling, and every prior resource is provider-confirmed released
+[13:25:41] readiness OK (launch_bound, PASS, {'error': 0, 'failed': 0, 'passed': 231, 'skipped': 8})
+[13:25:46] bundle OK (64e45780b01b…)
+[13:25:47] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 6 local assets
+[13:25:47] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[13:30:48] watchdog detached — hard 457 min = $8.29
+[13:30:48] created vmer6occrfdxcp at $1.09/h
+[13:31:22] TCP 22 at 160.250.71.215:57170 after 0.6 min
+[13:31:24] draw 1: ssh reachable — $0.01
+[13:32:22] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04
+[13:32:22] draw 1: running setup
+[13:39:06] draw 1: setup complete — $0.15
+[13:39:06] transfer preflight: 10 objects required, 0.008 GiB required; 10 checkpoint(s) skipped, 22.21 GiB avoided
+[13:39:06]   confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   confirmation.B.s1916380711                       completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   confirmation.B.s1936324010                       completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   screening.1a2b5b030e7e4e202fda3a810ed53c5f.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   screening.1d2844488f3ad630414c3cd69b6fa395.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   screening.7da1e4e2254e59766581e777b8066b7e.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   screening.88086555a6662b206e00ae28fc9d3ca3.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   screening.B.s616738081                           completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:39:06]   screening.d005dfb27e7bb5adc46eb988ae79e2a9.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[13:40:50] campaign evidence: 10 scored probe(s), 8.06 MiB at /workspace/aad/artifacts/autoinit/c2_behavioural/evidence; their 22.213 GiB of checkpoints were not moved and have no remaining consumer
+[13:40:50] campaign restore: no probe needs its WEIGHTS on this pod — every held probe is completed and validly scored, so nothing remaining reads a checkpoint
+[13:40:55] driver detached, pid 4000, confirmed by descriptor_probe — $0.18
+[13:42:05]   2026-09-23T13:40:54Z MARKER:STAGE_START:P — $0.20
+[13:55:24]   2026-09-23T13:54:47Z MARKER:C2_BEHAVIOURAL_DURABLE_UNIT:1a2b5b030e7e4e202fda3a810ed53c5f — $0.45
+[14:26:54]   2026-09-23T14:26:27Z MARKER:STAGE_START:C — $1.02
+[15:28:45]   2026-09-23T15:27:57Z MARKER:C2_BEHAVIOURAL_FAILED — $2.14
+[15:28:45] the session stopped before its verdict. Whatever probes FINISHED are fetched and verified first. A provenance mismatch on an arm is a scientific finding, not a retryable engineering failure, and goes to review unchanged.
+[15:28:45] polling ended: C2_BEHAVIOURAL_FAILED — $2.14
+[15:29:17]   manifest rc=0
+1 file(s) across 1 class(es) -> /workspace/manifest.json
+  final_required: 1 · mutable_snapshot: 0 · final_streams_quiescent: True
+[15:33:01]   probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638: rc=0, 2.22 GiB -> /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt12/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638 [re-identified from the delivered bytes]
+[15:33:13]   probe confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638 evidence: ['probe_record.json']
+[15:33:13] teardown gate: allowed=True failed=training_complete
+[15:33:13] deleting pod (gate passed after C2_BEHAVIOURAL_FAILED)
+[15:33:24] pod deleted — 122.6 min, $2.23; provider confirms gone: True
+
+autoinit-phase-c2-behavioural INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/session.json. the behavioural selection is a TERMINUS: it names a C2 incumbent or it does not, and NO_GO and INCONCLUSIVE are complete results. C3 is separately authorized and unreachable from here.
+LAUNCH_EXIT=11

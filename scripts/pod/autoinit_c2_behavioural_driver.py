@@ -1497,7 +1497,31 @@ class C2BehaviouralDriver:
         certify a confirmation probe. The generation protocol itself is
         observed from a real engine probe, exactly as C1 does it.
         """
-        sample = next(iter(self.training.values()))
+        #: A journal entry whose CHECKPOINT IS ON THIS POD, chosen
+        #: deterministically. This took whichever entry iterated first, which
+        #: was safe only while every entry held weights here. Under AGENTS.md
+        #: P8.4 a completed and validly scored probe is admitted as EVIDENCE --
+        #: rows, score, descriptor, hashes, and no `model_dir`, because nothing
+        #: remaining reads its checkpoint -- so a continuation's journal leads
+        #: with ten such entries and this raised `KeyError: 'model_dir'`.
+        #:
+        #: attempt12 trained the eleventh probe, announced it durable, and died
+        #: here before scoring it: $2.14, and 62 minutes of formal training that
+        #: the resume contract then has to carry rather than repeat.
+        #:
+        #: Sorted rather than first-found so the attestation packages the same
+        #: checkpoint on a rerun of the same state.
+        sample = next((self.training[k] for k in sorted(self.training)
+                       if (self.training[k].get("model_dir")
+                           and Path(self.training[k]["model_dir"]).is_dir())),
+                      None)
+        if sample is None:
+            raise C2DriverError(
+                "the attestation packages a real trained checkpoint and this "
+                f"rung's journal holds none on this pod: {sorted(self.training)}"
+                " are all evidence-only. It runs after the first probe of the "
+                "rung is trained, so reaching it with no local checkpoint means "
+                "the ordering in `run_rung` changed.")
         package = Path(self.a.eval_dir) / "_attestation_package"
         build_evaluation_package(
             Path(sample["model_dir"]), tokenizer_source=TOKENIZER_SOURCE,
