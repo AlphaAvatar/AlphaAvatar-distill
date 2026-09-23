@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.autoinit.c2_probe_volume_staging/v1",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "volume_id": "59qt99zeg5",
+ "terminal": "ALL_STAGED",
+ "finished_utc": "2026-09-23T00:00:00+00:00",
+ "probes": [
+  {
+   "probe_id": "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+   "verified": true,
+   "bytes": 2147483648,
+   "source_attempt": "attempt1"
+  }
+ ]
+}

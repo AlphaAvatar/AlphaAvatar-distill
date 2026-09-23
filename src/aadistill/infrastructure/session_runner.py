@@ -44,7 +44,9 @@ from .artifact_gate import ArtifactManifest, evaluate_teardown, verify_extracted
 from .log_relay import LogRelay, RelaySpec
 from .provider import RunPodProvider, read_api_key
 from .remote import JobSpec, SSHTarget, probe, start_detached
-from .session import SessionContext, SessionSpec, missing_arguments
+from .session import (
+    SessionContext, SessionSpec, SessionSpecError, missing_arguments,
+)
 
 #: The pod's workspace and checkout roots are NOT here. They were `WS` and
 #: `REPO` module constants, consumed by nineteen f-strings that build remote
@@ -383,6 +385,51 @@ class SessionRunner:
         return True
 
     # -- 3. create ---------------------------------------------------------
+    def attached_volume(self) -> tuple[str, ...]:
+        """Provider flags for a pre-existing network volume, or nothing.
+
+        A session may bring bytes that were put in place while nothing
+        expensive was billing — a campaign's completed probes, a large frozen
+        asset — by attaching a volume the provider already holds instead of
+        transferring them onto the pod's own disk on the meter.
+
+        OPTIONAL BY CONSTRUCTION. A launcher that defines no
+        `--network-volume-id` attaches nothing and produces exactly the command
+        line it produced before, which is why this is read with `getattr`:
+        "this session attaches no volume" is the status quo for every existing
+        launcher and must not become a required declaration for all of them.
+
+        The mount path is REQUIRED once a volume is named, and deliberately has
+        no default here. Providers default it to the same directory a session
+        typically checks out into, which for this project is
+        `ExecutionCommands.workspace_root` — silently mounting a shared volume
+        over that would put a session's working tree on network storage and let
+        two sessions share it. A launcher that wants a volume says where it
+        goes, and the refusal below names the workspace this deployment
+        actually declares rather than a path guessed here.
+
+        `--volume-in-gb` is omitted when a volume is attached: the pod's own
+        ephemeral volume and an attached network volume are alternatives, and
+        asking for both invites the provider to arbitrate between them.
+        """
+        volume = str(getattr(self.a, "network_volume_id", "") or "").strip()
+        if not volume:
+            return ("--volume-in-gb", "0")
+        mount = str(getattr(self.a, "volume_mount_path", "") or "").strip()
+        if not mount:
+            raise SessionSpecError(
+                "a network volume was named but no --volume-mount-path. The "
+                f"provider would default it to this session's workspace root "
+                f"({self.ws}), and mounting shared storage over a checkout is "
+                "not a thing to discover from a running pod.")
+        #: A volume exists in ONE datacenter and a pod can only attach it from
+        #: there, so the draw must be constrained to that datacenter or the
+        #: create silently succeeds somewhere the volume is not.
+        centre = str(getattr(self.a, "data_center_ids", "") or "").strip()
+        return ("--network-volume-id", volume,
+                "--volume-mount-path", mount,
+                *(("--data-center-ids", centre) if centre else ()))
+
     def create(self) -> bool:
         deadline = (datetime.now(timezone.utc)
                     + timedelta(minutes=self.plan.hard_terminate_minutes))
@@ -390,7 +437,8 @@ class SessionRunner:
             raw = subprocess.run(
                 [self.cli, "pod", "create", "--image", self.a.image,
                  "--gpu-id", self.a.gpu, "--gpu-count", "1",
-                 "--container-disk-in-gb", str(self.a.disk_gb), "--volume-in-gb", "0",
+                 "--container-disk-in-gb", str(self.a.disk_gb),
+                 *self.attached_volume(),
                  *(("--min-cuda-version", self.spec.commands.min_cuda_version)
                    if self.spec.commands.min_cuda_version else ()),
                  "--ports", "22/tcp",

@@ -101,6 +101,33 @@ FROZEN_EXPECT = "configs/experiments/phase_c2/behavioural_frozen_assets.json"
 #: the preflight reads here, so "is this probe already durable" has one answer.
 DURABLE_STORE = "/home/ecs-user/aad-artifacts/phase_c2_behavioural"
 
+#: THE PRE-STAGED BACKEND. A provider network volume holding this campaign's
+#: completed probes, written by `scripts/autoinit/stage_c2_probes_to_volume.py`
+#: while nothing expensive was billing, and attached to every later pod of the
+#: campaign.
+#:
+#: It exists because the alternative is worse in every direction. The bytes are
+#: on the launcher host, the host's uplink is ~0.72 MB/s, and 22.2 GiB is
+#: therefore ~9 hours — of L40S time, if the transfer happens during the
+#: session. Paying the most expensive machine in the budget to watch a slow
+#: upload is how a continuation stops fitting its own ceiling. Attaching a
+#: volume removes the transfer from the experiment instead of budgeting for it:
+#: the probes are simply present when the pod boots.
+#:
+#: A volume lives in ONE datacenter and a pod can attach it only from there, so
+#: `VOLUME_DATACENTER` constrains the draw. That is a real constraint on
+#: acquisition — if the datacenter has no L40S the session cannot launch — and
+#: it is the price of not paying for the transfer.
+CAMPAIGN_VOLUME_ID = "59qt99zeg5"
+CAMPAIGN_VOLUME_GB = 40
+VOLUME_DATACENTER = "EU-NL-1"
+
+#: Where the volume is mounted on the pod. NOT `/workspace`, which is the
+#: provider's default and this project's checkout root: mounting shared
+#: network storage over the working tree would put a session's repository on
+#: the volume and let two sessions share it.
+VOLUME_MOUNT = "/durable"
+
 
 def campaign_store(campaign_id: str, store: str | Path = DURABLE_STORE) -> Path:
     """This CAMPAIGN's durable root. The campaign owns its probes, not a run.
@@ -345,18 +372,46 @@ def destination_gate(ctx: SessionContext) -> tuple[bool, str]:
     sched = BH.schedule(REPO_ROOT)
     req = BH.storage_requirement(BH.candidate_manifest(REPO_ROOT), sched,
                                  REPO_ROOT)
-    need = int(float(req["durable_backend"]["gib"]) * 2**30)
+    #: THE PROBES THIS SESSION WILL PRODUCE, not the whole protocol's.
+    #:
+    #: This charged the full twelve-probe requirement — 26.654 GiB — against
+    #: free space, every time. That is right for a fresh campaign and wrong for
+    #: a continuation, because the probes already in the store are already
+    #: OCCUPYING it: their bytes are counted as a need while being subtracted
+    #: from the supply. This campaign holds ten of twelve, `free` is 16.4 GiB,
+    #: and the gate refused a session whose real appetite is two probes and
+    #: 4.4 GiB.
+    #:
+    #: The remaining probes come from the same derivation the budget and the
+    #: continuation gate use, so a session cannot be admitted for work it was
+    #: not funded for or refused for work it does not owe.
+    per_probe = int(float(
+        req["components_gib"]["_probe_checkpoint_footprint"]["gib"]) * 2**30)
+    work = campaign_remaining_work(ctx)
+    owed = int(work["n_probes_remaining"])
+    need = per_probe * owed
+    total = int(float(req["durable_backend"]["gib"]) * 2**30)
+    ctx.evidence["durable_destination"] = {
+        "store": str(store), "free_bytes": free,
+        "probes_owed": owed, "bytes_per_probe": per_probe,
+        "need_bytes": need, "whole_protocol_need_bytes": total,
+        "_need_is_the_remainder": (
+            "the probes this session will produce. A probe already in the "
+            "store occupies it; charging its bytes as a need while also "
+            "subtracting them from the supply counts them twice and refuses a "
+            "continuation whose real appetite is what it still owes."),
+    }
     if free < need:
         return False, (
-            f"{store} has {free / 2**30:.1f} GiB free and the "
-            f"{sched['total_probes']} probes it must hold need "
-            f"{need / 2**30:.1f} GiB "
-            f"({req['components_gib']['_probe_checkpoint_footprint']['gib']} "
-            "GiB each, the save footprint of this recipe's dtype). A run that "
-            "trains work it cannot preserve is a run that will lose it.")
+            f"{store} has {free / 2**30:.1f} GiB free and the {owed} probe(s) "
+            f"this session still owes need {need / 2**30:.1f} GiB "
+            f"({per_probe / 2**30:.3f} GiB each, the save footprint of this "
+            "recipe's dtype). A run that trains work it cannot preserve is a "
+            "run that will lose it.")
     return True, (f"destination OK: {free / 2**30:.1f} GiB free at {store} for "
-                  f"{need / 2**30:.1f} GiB of probes (durable requirement, "
-                  "derived from the recipe's save dtype)")
+                  f"the {owed} probe(s) owed, {need / 2**30:.1f} GiB "
+                  f"(of {total / 2**30:.1f} GiB for the whole protocol; the "
+                  "rest is already there)")
 
 
 def container_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -407,6 +462,118 @@ def container_gate(ctx: SessionContext) -> tuple[bool, str]:
     return True, (f"container OK: {gb} GB ({have_gib:.1f} GiB) provisioned for "
                   f"a {peak_gib:.1f} GiB peak local residency, "
                   f"{have_gib - peak_gib:.1f} GiB spare")
+
+
+#: Where the staging tool records what it put on the volume, and the ONLY
+#: evidence available at `$0` that the volume holds anything. The gate below
+#: reads these; the pod re-checks the bytes themselves.
+#:
+#: Under the experiment's own `validations/`, beside the CUDA campaigns, and
+#: deliberately NOT under `runs/`: pre-staging is engineering infrastructure,
+#: not a run attempt, and a directory under `runs/` would be summed into this
+#: campaign's settled spend by `campaign_attempts` and
+#: `settled_campaign_all_in`. Its cost belongs to the stage envelope, not to
+#: the campaign's scientific ceiling.
+#:
+#: The ROOT is the fact; the glob is derived from it, so the fixture that has
+#: to make this directory writable and the gate that reads it cannot end up
+#: with two spellings of one path.
+#: DERIVED from `rel_run_dir`, the one function that knows the log convention,
+#: rather than written out: relocating `logs/` has silently repointed declared
+#: paths in this repository before, and a literal here would make the gate read
+#: an empty directory and report a staged volume as unstaged.
+STAGING_RECORD_ROOT = str(
+    Path(rel_run_dir(EXPERIMENT_ID, "_", STAGE_ID)).parent.parent
+    / "validations" / "durable-staging")
+STAGING_RECORD_GLOB = f"{STAGING_RECORD_ROOT}/*/staging_record.json"
+
+
+def staged_probe_index(repo_root: str | Path = REPO_ROOT,
+                       *, campaign_id: str, volume_id: str) -> dict:
+    """What the launcher host believes is on the volume, from staging records.
+
+    Every completed staging run for THIS campaign onto THIS volume, merged by
+    probe id with the most recent staging winning. A record that did not reach
+    `ALL_STAGED` is ignored: it may have verified some probes, but a run that
+    could not confirm its own resource was released is not evidence about what
+    survived it.
+    """
+    out: dict[str, dict] = {}
+    records: list[tuple[str, dict]] = []
+    for path in sorted(Path(repo_root).glob(STAGING_RECORD_GLOB)):
+        try:
+            rec = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if (rec.get("campaign_id") != campaign_id
+                or rec.get("volume_id") != volume_id
+                or rec.get("terminal") != "ALL_STAGED"):
+            continue
+        records.append((str(rec.get("finished_utc") or ""), rec))
+    #: BY THE KEY ONLY. `sorted` on the pairs falls through to comparing the
+    #: dicts whenever two runs share a timestamp, which raises — and two
+    #: staging runs finishing in the same second is ordinary, not exotic.
+    for _, rec in sorted(records, key=lambda pair: pair[0]):
+        for probe in rec.get("probes") or []:
+            if probe.get("verified"):
+                out[probe["probe_id"]] = probe
+    return out
+
+
+def volume_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """The pre-staged probes must exist BEFORE a pod is drawn. `$0`.
+
+    A continuation's completed probes now arrive by having been written to an
+    attached network volume in advance, rather than by being copied onto the
+    pod while it bills. That removes ~9 hours of L40S time from every attempt
+    and it introduces exactly one new way to fail: launching against a volume
+    that does not hold what the campaign needs.
+
+    That failure is cheap here and expensive anywhere else. On the pod it
+    surfaces after setup, after the image pull, after the teacher is
+    materialized — and it is unrecoverable, because the protocol forbids
+    retraining a completed probe, so the session can only abort.
+
+    A campaign that owes no restore passes: a fresh campaign has no probe to
+    pre-stage, and demanding a staging record from it would refuse the first
+    attempt of every future campaign.
+    """
+    work = campaign_remaining_work(ctx)
+    restorable = list(work["restore"]["probes"])
+    if not restorable:
+        return True, ("volume OK: this campaign holds no verified probe, so "
+                      "nothing is pre-staged and nothing is owed")
+
+    volume = str(getattr(ctx.args, "network_volume_id", "") or "").strip()
+    mount = str(getattr(ctx.args, "volume_mount_path", "") or "").strip()
+    centre = str(getattr(ctx.args, "data_center_ids", "") or "").strip()
+    if not (volume and mount and centre):
+        return False, (
+            f"this campaign owes a restore of {len(restorable)} probe(s) and "
+            f"the session names volume={volume!r} mount={mount!r} "
+            f"datacenter={centre!r}. All three are required: a volume with no "
+            "datacenter is drawn where it cannot attach, and a volume with no "
+            "mount path defaults to /workspace, the checkout root.")
+    if mount == "/workspace":
+        return False, (
+            "the volume mount path is /workspace, which is this project's "
+            "checkout root. Mounting shared network storage over the working "
+            "tree would put the session's repository on the volume.")
+
+    staged = staged_probe_index(REPO_ROOT, campaign_id=ctx.auth.campaign_id,
+                                volume_id=volume)
+    missing = [p for p in restorable if p not in staged]
+    if missing:
+        return False, (
+            f"{len(missing)} of {len(restorable)} probe(s) this campaign must "
+            f"restore were never verified onto volume {volume}: "
+            f"{missing[:4]}{'…' if len(missing) > 4 else ''}. Stage them with "
+            "scripts/autoinit/stage_c2_probes_to_volume.py before launching; "
+            "a completed probe may not be retrained, so a pod that finds them "
+            "absent can only abort.")
+    gib = sum(int(staged[p].get("bytes") or 0) for p in restorable) / 2**30
+    return True, (f"volume OK: {len(restorable)} probe(s), {gib:.2f} GiB "
+                  f"pre-staged on {volume} in {centre}, mounted at {mount}")
 
 
 def campaign_attempts(campaign_id: str, *, exclude: str = "",
@@ -736,6 +903,33 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
             "INCONCLUSIVE are all complete results, and none of them is a "
             "reason to start another attempt. There is nothing here to "
             "continue.")
+
+    #: TWO READERS OF ONE QUANTITY, RECONCILED. This gate reconciles each
+    #: predecessor RESOURCE under R9 — GPU actual plus a disk term derived from
+    #: the authorization's own rate — while the issuer caps this session's
+    #: ceiling using the figure each attempt PUBLISHED in its closeout. Both
+    #: are needed and they answer slightly different questions, which is
+    #: exactly why they must not be allowed to drift: a session capped against
+    #: one total and charged against the other can exceed its campaign's
+    #: ceiling with every gate it passed saying yes.
+    published = BG.settled_campaign_all_in(REPO_ROOT)
+    ctx.evidence["campaign"]["settled_campaign_published_usd"] = published
+    #: DIRECTIONAL. Only one of the two disagreements is dangerous. If the
+    #: published total is SMALLER than what this gate reconciles, the issuer
+    #: capped the session against too little settled spend and the session has
+    #: room the campaign does not have. If it is larger, the cap was stricter
+    #: than necessary — safe, and refusing it would block a launch over an
+    #: over-conservative number.
+    if published["total_usd"] < settled - BG.DOLLAR_QUANTUM_USD:
+        return False, (
+            f"campaign {campaign} reconciles to ${settled:.4f} settled from "
+            f"its predecessors' session records and to "
+            f"${published['total_usd']:.4f} from the closeouts those attempts "
+            f"published ({published['per_attempt']}). The issuer capped this "
+            "session's ceiling against the second figure and this gate charges "
+            "the first, so a disagreement means the session could be "
+            "authorized for more than the campaign has left. Reconcile the "
+            "closeouts before launching.")
 
     if settled + planned > approved + BG.DOLLAR_QUANTUM_USD:
         return False, (
@@ -1285,8 +1479,19 @@ def probes_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
 #: Where a replacement pod's restored probes land, and where the manifest that
 #: names them lives. NEW paths: the producing pod's absolute `model_dir` does
 #: not exist on a replacement resource and must not be the truth about one.
-RESTORE_DIR = f"{WORKDIR}/restored"
 RESTORE_MANIFEST = f"{WORKDIR}/campaign_continuation.json"
+
+
+def volume_probe_root(ctx: SessionContext) -> str:
+    """Where this campaign's pre-staged probes are, on the attached volume.
+
+    The layout is the staging tool's and is FLAT — one directory per probe id,
+    mirroring how `campaign_state` keys its probes. The producing attempt is
+    recorded per probe inside the staged index rather than in the path, because
+    a continuation restores by probe id and a path segment naming an attempt
+    would have to be guessed by whoever builds the manifest.
+    """
+    return f"{ctx.args.volume_mount_path}/{ctx.auth.campaign_id}/probes"
 
 
 def restore_campaign_probes(ctx: SessionContext) -> bool:
@@ -1304,41 +1509,50 @@ def restore_campaign_probes(ctx: SessionContext) -> bool:
     point — a probe restored after the driver had begun would be a probe the
     campaign journal had already decided was absent.
 
-    What travels, and from where:
+    What is here, and from where:
 
-    * the BYTES, from the durable destination on this host — the only copy that
-      survived the previous pod. Only probes whose `durable_ack.json` records a
-      destination-side re-identification that MATCHED are eligible;
-    * their science evidence, because the remaining stages read the score and
-      the per-sample rows, not the weights;
+    * the BYTES are ALREADY ON THE POD, on the attached network volume, put
+      there by `stage_c2_probes_to_volume.py` while nothing expensive was
+      billing. Only probes whose `durable_ack.json` records a destination-side
+      re-identification that MATCHED were eligible to be staged, and only they
+      are named here;
+    * their science evidence travelled with them, because the remaining stages
+      read the score and the per-sample rows, not the weights;
     * the campaign's screening commitment, if it has one;
-    * a small manifest naming each probe's NEW pod path and the identity the
-      driver must reproduce there.
+    * a small manifest naming each probe's pod path and the identity the driver
+      must reproduce there.
 
-    This is the expensive step of a continuation and it is priced as one: the
-    restore minutes are a phase in the remaining-work decomposition the
-    continuation gate checks, so a restore that does not fit the campaign
-    ceiling is refused before a pod exists rather than discovered on a meter.
+    **What changed, and why it is not a weakening.** This step used to `scp`
+    22.2 GiB from the launcher host onto a billing pod, and was priced as the
+    expensive phase of a continuation. The bytes still have to be on the pod
+    and still have to re-identify there — R2 and R6 are untouched, and the
+    driver's check is the same check against the same announced identity. What
+    moved is only *when* the copy was paid for: once, onto a volume, at CPU
+    prices, instead of once per attempt at L40S prices. The launcher-host
+    re-identification below still happens, so the three-point check the resume
+    policy describes — at the destination, on the host, and on the consuming
+    pod — is intact.
     """
     work = campaign_remaining_work(ctx)
     state = work["_state"]
+    pod_root = volume_probe_root(ctx)
     manifest = BC.build_manifest(
         REPO_ROOT, campaign_id=ctx.auth.campaign_id,
         run_attempt=ctx.args.run_id, state=state, work=work,
-        pod_root=RESTORE_DIR)
+        pod_root=pod_root)
     ctx.evidence["campaign_restore"] = {
         "n_probes": len(manifest["probes"]),
         "gib": work["restore"]["gib"],
         "bounded_minutes": work["restore"]["minutes"],
         "committed_candidate": manifest["committed_candidate"],
-        "pod_root": RESTORE_DIR,
+        "pod_root": pod_root,
+        "transport": "pre-staged network volume; no session-time transfer",
         "probes": [],
     }
 
     #: The manifest always travels, even empty: the driver must be able to tell
     #: "this campaign restored nothing" from "the restore step never ran", and
     #: an absent file cannot say which.
-    ctx.target.run(f"mkdir -p {RESTORE_DIR}", timeout=60)
     import tempfile
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -1364,9 +1578,48 @@ def restore_campaign_probes(ctx: SessionContext) -> bool:
         LeafDurabilityError, verify_transferred_leaf,
     )
 
+    #: THE VOLUME'S OWN INDEX, read once. It records which attempt each staged
+    #: copy came from. Probe ids are unique within a campaign and
+    #: `campaign_state` collapses them across attempts, so without this a stale
+    #: copy from an earlier attempt could sit under exactly the right name and
+    #: fail re-identification only on the paid pod — a correct refusal arriving
+    #: at the most expensive possible moment.
+    index_path = f"{pod_root}/staged_index.json"
+    raw = ctx.target.run(f"cat {index_path} 2>/dev/null", timeout=120)
+    try:
+        staged = json.loads(raw.stdout or "{}")
+    except json.JSONDecodeError as exc:
+        ctx.say(f"ABORT: {index_path} on the volume is unreadable ({exc}). "
+                "The pre-staged probes cannot be shown to belong to this "
+                "campaign.")
+        return False
+    if staged.get("campaign_id") != ctx.auth.campaign_id:
+        ctx.say(f"ABORT: the volume holds probes staged for campaign "
+                f"{staged.get('campaign_id')!r}, not {ctx.auth.campaign_id!r}. "
+                "One experiment's probes may never be pooled into another.")
+        return False
+    ctx.evidence["campaign_restore"]["staged_index"] = {
+        "campaign_id": staged.get("campaign_id"),
+        "staged_utc": staged.get("staged_utc"),
+        "n_staged": len(staged.get("probes") or {}),
+    }
+
     adapter = get_adapter("qwen3")
     for entry in manifest["probes"]:
         pid, source = entry["probe_id"], Path(entry["durable_path"])
+        staged_here = (staged.get("probes") or {}).get(pid)
+        if not staged_here:
+            ctx.say(f"ABORT: {pid} is named for restore and was never staged "
+                    "onto the volume. The protocol forbids retraining a "
+                    "completed probe, so there is nothing safe to do here.")
+            return False
+        if staged_here.get("source_attempt") != entry["source_attempt"]:
+            ctx.say(f"ABORT: {pid} was staged from "
+                    f"{staged_here.get('source_attempt')!r} and this "
+                    f"campaign's state names {entry['source_attempt']!r}. The "
+                    "copy on the volume is not the measurement the manifest "
+                    "identifies.")
+            return False
         #: RE-IDENTIFIED HERE TOO, before a byte is sent. The ack says these
         #: bytes matched when they landed; it does not say they still do. An
         #: ack is a record, and a record is not a checkpoint.
@@ -1392,38 +1645,38 @@ def restore_campaign_probes(ctx: SessionContext) -> bool:
                 {"probe_id": pid, "sent": False, "why": why})
             return False
 
-        dest = f"{RESTORE_DIR}/{pid}"
-        ctx.target.run(f"mkdir -p {dest}", timeout=60)
-        #: The launcher's OWN timeout, not the shared runner's hardcoded 600 s
-        #: for `local_assets`: one 1.11 GiB probe needs far longer than that
-        #: against this uplink, and continuation attempt 2 died on exactly that
-        #: arithmetic. `--restore-limit-min` is sized from the same bound the
-        #: continuation gate priced.
-        out = subprocess.run(
-            ["timeout", f"{ctx.args.restore_limit_min}m", *ctx.scp, "-r",
-             *[str(p) for p in sorted(source.iterdir()) if p.is_file()],
-             f"root@{ctx.host}:{dest}/"],
-            capture_output=True, timeout=None)
-        probe = ctx.target.run(
-            f"test -s {dest}/model.safetensors && test -s {dest}/config.json "
-            f"&& echo PRESENT=1 || echo PRESENT=0", timeout=120)
+        #: PRESENCE ON THE VOLUME. Not a transfer: the bytes were put here
+        #: before this pod existed. The files checked are the ones the driver
+        #: and the verdict actually read — the weights, the config that
+        #: identifies them, and, for a scored probe, the per-sample rows the
+        #: decision rule consumes. A score whose rows did not survive is not a
+        #: usable score, and finding that out in stage D would waste the run.
+        dest = entry["pod_path"]
+        needed = ["model.safetensors", "config.json", "probe_record.json"]
+        if entry["scored"]:
+            needed += ["result.json", "per_sample.jsonl"]
+        test = " && ".join(f"test -s {dest}/{n}" for n in needed)
+        probe = ctx.target.run(f"{test} && echo PRESENT=1 || echo PRESENT=0",
+                               timeout=120)
         present = "PRESENT=1" in probe.stdout
         ctx.evidence["campaign_restore"]["probes"].append({
-            "probe_id": pid, "sent": out.returncode == 0, "present": present,
+            "probe_id": pid, "pre_staged": True, "present": present,
             "bytes": entry["bytes"], "scored": entry["scored"],
-            "destination_reverified": True, "pod_path": dest})
-        ctx.say(f"  restored {pid}: rc={out.returncode} present={present} "
-                f"({entry['bytes'] / 2**30:.2f} GiB)")
-        if out.returncode != 0 or not present:
-            ctx.say(f"ABORT: {pid} did not arrive on the pod. The driver would "
-                    "treat a completed probe as absent and the protocol "
-                    "forbids retraining it, so there is nothing safe to do "
-                    "here but stop.")
+            "source_attempt": entry["source_attempt"],
+            "destination_reverified": True, "pod_path": dest,
+            "files_checked": needed})
+        ctx.say(f"  pre-staged {pid}: present={present} "
+                f"({entry['bytes'] / 2**30:.2f} GiB) at {dest}")
+        if not present:
+            ctx.say(f"ABORT: {pid} is not readable on the volume at {dest}. "
+                    "The driver would treat a completed probe as absent and "
+                    "the protocol forbids retraining it, so there is nothing "
+                    "safe to do here but stop.")
             return False
 
-    ctx.say(f"campaign restore: {len(manifest['probes'])} verified probe(s) on "
-            f"the pod at {RESTORE_DIR}; the driver re-identifies each one THERE "
-            "before admitting it")
+    ctx.say(f"campaign restore: {len(manifest['probes'])} verified probe(s) "
+            f"pre-staged on the volume at {pod_root}; the driver "
+            "re-identifies each one THERE before admitting it")
     return True
 
 
@@ -1631,6 +1884,10 @@ def spec(args) -> SessionSpec:
             source_binding_gate,
             destination_gate,
             container_gate,
+            #: BEFORE the money gate, because "the bytes this continuation
+            #: needs are not staged" is a cheaper and more actionable refusal
+            #: than "the campaign cannot afford the work those bytes feed".
+            volume_gate,
             campaign_continuation_gate,
             readiness_gate,
             #: LAST, because it is the only gate that touches the network.
@@ -1670,12 +1927,23 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--ckpt-store", default=DURABLE_STORE,
                     help="where finished probes are secured off-pod")
     ap.add_argument("--ckpt-fetch-limit-min", type=int, default=20)
-    #: The RESTORE direction, which is the slow one: the dev-box uplink is
-    #: bounded at 0.23 MB/s, so one 1.11 GiB probe needs ~80 minutes. The
-    #: shared runner's hardcoded 600 s for `local_assets` is why the restore
-    #: does not go through them -- continuation attempt 2 died on exactly that
-    #: arithmetic, staging exactly this size.
-    ap.add_argument("--restore-limit-min", type=int, default=150)
+    #: THE PRE-STAGED BACKEND. A continuation's probes are already on this
+    #: volume when the pod boots, so the restore direction — which used to be
+    #: the slow one, ~9 hours of L40S time against a 0.72 MB/s uplink — is a
+    #: presence and identity check rather than a transfer. `--restore-limit-min`
+    #: is gone with the transfer it bounded.
+    ap.add_argument("--network-volume-id", default=CAMPAIGN_VOLUME_ID,
+                    help="provider network volume holding this campaign's "
+                         "pre-staged probes")
+    ap.add_argument("--volume-mount-path", default=VOLUME_MOUNT,
+                    help="where that volume is mounted on the pod; never "
+                         "/workspace, which is the checkout root")
+    ap.add_argument("--volume-gb", type=int, default=CAMPAIGN_VOLUME_GB,
+                    help="the volume's provisioned size; df at the mount "
+                         "reports the backing cluster, not the quota")
+    ap.add_argument("--data-center-ids", default=VOLUME_DATACENTER,
+                    help="a volume can only be attached from its own "
+                         "datacenter, so the draw is constrained to it")
     ap.add_argument("--token-src",
                     default=str(Path.home() / ".cache/huggingface/token"))
     ap.add_argument("--runpod-config",

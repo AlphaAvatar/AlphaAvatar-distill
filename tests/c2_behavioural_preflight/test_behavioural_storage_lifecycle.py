@@ -318,6 +318,40 @@ class TestTheReleaseBoundary:
         assert (tmp_path / "work" / "p2" / "model" / "w.bin").is_file(), (
             "an unacked probe was released; its bytes may be the only copy")
 
+    def test_a_path_outside_the_pods_workspace_is_never_deleted(
+            self, tmp_path, monkeypatch):
+        """A pod mounts a volume holding this campaign's pre-staged probes.
+
+        They are shared with every future attempt of the campaign and, for
+        those bytes, the only copy that is not on the launcher host. This loop
+        deletes directories named by journal entries, and a RESTORED probe's
+        entry points at the volume: it carries no `out_dir` today, so nothing
+        reaches it — but that is a property of one dictionary literal in
+        `restore_campaign`, which is too thin a thing to stand between an
+        `rmtree` and every later attempt's probes.
+
+        Acked, present, and outside. It must be refused, and refused LOUDLY:
+        `failed` is what makes the caller stop, and a silent skip would leave
+        the storage bound looking satisfied.
+        """
+        monkeypatch.setattr(D, "REPO", tmp_path)
+        drv = self._driver(tmp_path, ["p1"], ["p1", "restored"])
+        volume = tmp_path.parent / "durable" / "restored"
+        volume.mkdir(parents=True, exist_ok=True)
+        (volume / "model.safetensors").write_bytes(b"y" * 4096)
+        drv.training["restored"] = {"out_dir": str(volume)}
+
+        out = drv.release_acked_probe_workdirs()
+        assert (volume / "model.safetensors").is_file(), (
+            "the shared volume's copy was deleted by a pod")
+        assert out["released"] == ["p1"]
+        #: REPORTED, not FAILED: `failed` is what stops the session, and it
+        #: means the LOCAL storage bound was falsified. An external path was
+        #: never part of that bound, so refusing it must not end a run.
+        assert out["failed"] == []
+        assert any("outside this session's workspace" in f
+                   for f in out["refused_outside_workspace"]), out
+
     def test_an_unacked_probe_is_not_an_error(self, tmp_path, monkeypatch):
         """The launcher pulls asynchronously, so a probe that finished moments
         ago legitimately has no ack yet."""
@@ -325,7 +359,7 @@ class TestTheReleaseBoundary:
         drv = self._driver(tmp_path, ["p1"], [])
         out = drv.release_acked_probe_workdirs()
         assert out == {"released": [], "failed": [], "freed_gib": 0.0,
-                       "kept": ["p1"]}
+                       "kept": ["p1"], "refused_outside_workspace": []}
 
     def test_a_failed_release_fails_closed(self, tmp_path, monkeypatch):
         """The storage bound assumes the release happened; if it did not, no

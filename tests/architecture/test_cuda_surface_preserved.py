@@ -458,6 +458,35 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "accelerator's rate, which priced one continuation above a fresh "
             "session.",
      }),
+    ("8966ae12cd5f898928b2df443601a8936e03ba1e",
+     "a session may attach a volume the provider already holds",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "DECLARED SEMANTIC CHANGE, additive and optional. `create` now "
+            "splices `attached_volume()` where it used to hardcode "
+            "`--volume-in-gb 0`, so a session can attach a provider network "
+            "volume that already holds bytes it needs, at a mount path it "
+            "names, in the datacenter the volume lives in. A launcher that "
+            "defines none of `--network-volume-id`, `--volume-mount-path` or "
+            "`--data-center-ids` produces the identical command line it "
+            "produced before -- which is why they are read with `getattr`: "
+            "attaching nothing is the status quo for every existing launcher "
+            "and must not become something they opt out of. A volume named "
+            "without a mount path RAISES, because the provider's default is "
+            "`/workspace`, this project's checkout root, and mounting shared "
+            "network storage over a session's working tree is not a thing to "
+            "discover from a running pod. No provider, volume id, datacenter, "
+            "experiment or campaign is encoded here; all four are arguments. "
+            "It exists because the C2 behavioural continuation had to put "
+            "22.2 GiB of completed probes on each replacement pod, the "
+            "launcher host's uplink is ~0.5 MB/s, and copying them during the "
+            "session charged ~9 hours of L40S time per attempt. Written once "
+            "to a volume at CPU prices, they are simply present when the pod "
+            "boots. THE OBJECT-STORE ROUTE DECLARED IN THE PREVIOUS ROUND WAS "
+            "SUPERSEDED BEFORE IT RAN -- every S3-compatible backend reachable "
+            "from here needs an account this environment cannot create, and "
+            "`runtime/durable_store.py` still has no production caller.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.

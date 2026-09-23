@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-22. The human view. Every number here has an owner named
+**Updated:** 2026-09-23. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,16 +9,68 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running. Nothing is billing.** Pod `0x48foz4j4xkcg` was deleted
-behind its teardown gate after 1068.3 min; the provider confirms it is gone and
-an account-wide list returns `[]`.
+**A `$0.06/h` CPU pod is copying this campaign's ten completed probes onto a
+provider network volume, and that is the only thing billing.** Pod
+`3lyghvymmpg5ud`, created 2026-09-23 18:11 UTC. 22.21 GiB at a
+launcher-host uplink of ~0.48 MB/s is about fourteen hours of wall clock and
+about `$0.55`. Nothing scientific is running. Volume `59qt99zeg5`, 40 GB,
+`EU-NL-1`, mounted at `/durable`; the tool is
+[`stage_c2_probes_to_volume.py`](../../scripts/autoinit/stage_c2_probes_to_volume.py)
+and it re-hashes every file from the bytes that landed.
+
+**C2 is under execute-to-completion authorization.** The maintainer retired the
+approval-per-step workflow on 2026-09-23 and granted an additional **`$25.00`
+all-in stage envelope** for all remaining C2 work — engineering validation,
+formal execution, ordinary retries, container disk, external storage,
+transport, teardown — to be managed internally rather than per category. The
+formal behavioural **campaign** ceiling stays at **`$42.0000`** cumulative
+all-in. The `$370` project envelope does not move.
+
+**What C2 still owes is two probes.** The third confirmation seed for the
+advanced candidate and for B, then the frozen decision rule. Ten of twelve are
+trained, scored and durable off-pod. Owner:
+[`continuation_price.json`](../stages/stage-1/phase_c2_behavioural/analyses/continuation_price.json)
+— hard all-in `$9.0656`, campaign `$31.3122` of `$42.0000`.
+
+**The durable backend is a network volume, not an object store.** The
+object-store route was built, tested and never run: every store reachable from
+this environment needs an account creation and payment step only a maintainer
+can complete, and the Hugging Face account that exists has **2.62 GiB** of
+private headroom — bisected at `$0` through the LFS batch endpoint — against
+22.21 GiB needed. A volume needs no credential anywhere, and attaching it
+removes the transfer from the billed session entirely: the reserve fell from 90
+minutes to 45, and what those 45 minutes buy is now honest — re-reading and
+re-identifying the probes, not moving them. `runtime/durable_store.py` and
+`experiments/durable_stores.py` are kept, annotated as having no production
+caller. Owner:
+[`durable_backend_decision_20260923.md`](../stages/stage-1/phase_c2_behavioural/analyses/durable_backend_decision_20260923.md).
+
+**A session may no longer be authorized to spend past what its campaign has
+left.** The continuation gate charged the campaign for the work a session
+PLANS; nothing charged it for what that session could cost if the work went
+wrong, because `all_in_hard_usd` came from the frozen full-session
+decomposition and was the same figure for the first attempt and the fifth. With
+`$2.5425` settled that was safe by one cent. With `$22.2466` settled a full
+session would have been authorized to reach `$55.4565` against a `$42.0000`
+campaign ceiling, and every gate it passed would have said yes. The ceiling is
+now shortened to the campaign's remaining money — `$19.7533` over 1070.96
+minutes — with the runtime shortened alongside it and the limit floored rather
+than rounded. The work owes 491.51 minutes, so nothing scientific is shortened.
+Owner: `behavioural_governance.session_ceiling_under_campaign`.
+
+**Settled campaign spend has one owner now.** It was derived in the pricer and
+again inside the launcher's gate, and the issuer derives a session ceiling from
+it — so two readers disagreeing would cap a session against one figure and
+charge it against another. `behavioural_governance.settled_campaign_all_in`
+reads the closeouts; the gate keeps its stricter per-resource R9 reconciliation
+and refuses when the two disagree in the dangerous direction.
 
 **attempt5 measured ten of twelve probes and then ran out of disk.** The
 trainer hit `No space left on device` writing probe 11; all ten completed
 probes are trained, scored and durable off-pod with their per-prompt rows.
 **There is no verdict**, and that is R5 working: the estimand is a paired
 difference over three seeds and four confirmation probes are not that quantity.
-`$19.7041`. Campaign settled **`$22.2466`** of `$35.7600`; project
+`$19.7041`. Campaign settled **`$22.2466`** of `$42.0000`; project
 **`$331.4509`** of `$370.0000`, leaving `$38.5491`.
 
 **GO is already arithmetically excluded** — both completed confirmation seeds
@@ -55,9 +107,10 @@ Repaired, and the repairs are the point rather than the number:
   before each probe and refuses if it cannot hold the next one, so a wrong
   derivation costs a clean stop with every finished probe durable.
 
-**And nothing is prepared for launch.** attempt4 has no grant, no readiness
-record, no authorization and no bundle; attempts 1–3 hold theirs as consumed
-evidence. Owner: [`current.json`](current.json) `:: prepared_launch`.
+**Nothing is prepared for launch.** The next chain is attempt6 and it has no
+grant, readiness record, authorization or bundle; attempts 1–5 hold theirs as
+consumed evidence, attempt4's having been consumed at `$0` by a dry run that
+recorded a run — which is why that flag now writes to a separate run id. Owner: [`current.json`](current.json) `:: prepared_launch`.
 
 **attempt3 FAILED in stage P and there is no verdict.** Not `NO_GO`, not
 `INCONCLUSIVE` — those are complete results of a run that measured something.
@@ -79,21 +132,26 @@ is verified". Nothing released it. Repaired: intermediates are now freed after
 the identity gate and after the durable announcement. 120 GB remains correct;
 peak residency with the repair is ~59 GiB.
 
-**The campaign ceiling was raised and attempt4 is NOT yet authorized to launch.**
+**The campaign ceiling has been raised twice.**
 attempt3 spent `$2.5425` and produced no probe, so a fresh full attempt no
 longer fitted under the original `$33.2099`. The maintainer raised the
-**cumulative campaign** ceiling to **`$35.7600`** (+`$2.5501`) on 2026-09-20 and
-held attempt4 at NO-GO pending three `$0` repairs, now complete and awaiting
-independent review. No science changed: the plan hash has never moved and is
+**cumulative campaign** ceiling to **`$35.7600`** (+`$2.5501`) on 2026-09-20,
+and to **`$42.0000`** on 2026-09-23 alongside the execute-to-completion
+authorization. No science changed: the plan hash has never moved and is
 still `31088b98…`.
 
 **The two ceilings are now separate numbers.** They were one figure doing two
 jobs, which is why a gate reading either passed every test:
 
 ```text
-session   1800.53 min · GPU 32.7097 · disk 0.5002 · all-in 33.2099   derived
-campaign                                            all-in 35.7600   maintainer
+session (fresh)    1800.53 min · GPU 32.7097 · disk 0.5002 · all-in 33.2099
+session (attempt6) 1070.96 min · GPU 19.4558 · disk 0.2975 · all-in 19.7533
+campaign                                                    all-in 42.0000
 ```
+
+The attempt6 session line is the fresh derivation SHORTENED to what the
+campaign has left after `$22.2466` settled. The campaign figure is the
+maintainer's; the two session lines are derived.
 
 `all_in_hard_usd` bounds ONE attempt and is what the window, the watchdog and
 every in-pod spend check are built from. `campaign_all_in_hard_usd` bounds the
@@ -135,8 +193,8 @@ provider confirms it is gone and an account-wide list returns `[]`.
 **The C2 behavioural launch is AUTHORIZED and the chain is being built.** An
 independent final review returned **GO** on `197088e` and the maintainer
 granted the spend: campaign `c2-behavioural-12probe-v1`, a
-**cumulative** all-in ceiling of `$33.2099` — **since raised to `$35.7600`**,
-see above — across every run attempt and
+**cumulative** all-in ceiling of `$33.2099` — **since raised to `$35.7600`
+and then to `$42.0000`**, see above — across every run attempt and
 provider resource, at a quoted L40S securePrice of `$1.09/h`. (The grant's
 `granted_utc = 2026-09-21` is the timezone anomaly noted above; the real date
 was 2026-09-20 UTC.) The live
@@ -237,7 +295,8 @@ Derived, not inherited: storage **120 GB**, converted GiB→GB through the
 repository's recorded basis. At a live `$1.09/h` L40S quote the ceiling is
 **`$33.2099` all-in** (`$32.7097` GPU + `$0.5002` disk) with `$23.8832`
 expected — up from `$30.8918` because the arms are now built rather than
-staged. Project headroom if a full attempt4 were spent in full: **`$25.0433`**,
+staged. Project headroom if attempt6's shortened ceiling were spent in full:
+**`$18.7958`**,
 derived by `write_c2_behavioural_proposal.py` from the corrected `$311.7468`
 cumulative.
 
@@ -483,7 +542,7 @@ was made. Owners:
 (regenerate with `scripts/autoinit/write_c2_behavioural_proposal.py`) and
 [`c2_behavioural_resume_preregistration.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_resume_preregistration.json).
 
-**Nothing is running. Nothing is billing.** Replay campaign: `$4.77` authorized,
+**No scientific run is in flight.** Replay campaign: `$4.77` authorized,
 `$3.27` spent across nine attempts, `$1.50` left and no further replay owed.
 Project: `$309.2043` of `$370.0000` — owner
 `scripts/consolidate/derive_budget.py --json :: project`.

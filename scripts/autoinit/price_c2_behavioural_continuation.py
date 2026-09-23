@@ -57,47 +57,32 @@ class _Ctx:
 
 
 def settled_campaign_all_in(repo_root: Path) -> dict:
-    """What the campaign has already spent, ALL-IN, from the closeouts.
+    """What the campaign has already spent, ALL-IN. DELEGATED, not re-derived.
 
-    Read from each attempt's own `money.all_in_usd`, which is the figure the
-    project balance uses, rather than summed from GPU actuals.
+    This function used to read the closeouts itself. That made it a second
+    owner of a quantity the issuer also needs — and the issuer derives a
+    session ceiling from it, so two readers disagreeing would cap a session
+    against one figure while charging it against another.
     """
-    root = repo_root / "logs/stages/stage-1/phase_c2_behavioural/runs"
-    per_attempt, total = {}, 0.0
-    for d in sorted(root.iterdir()) if root.is_dir() else []:
-        f = d / "closeout/outcome.json"
-        if not f.is_file():
-            continue
-        doc = json.loads(f.read_text())
-        money = doc.get("money") or {}
-        v = money.get("all_in_usd")
-        if v is None:
-            v = 0.0 if doc.get("provider_resource_created") is False else None
-        if v is None:
-            raise SystemExit(
-                f"{d.name}: its closeout states no all-in cost and does not "
-                "affirm that no provider resource was created, so settled "
-                "campaign spend is UNKNOWN and cannot be defaulted to $0")
-        per_attempt[d.name] = float(v)
-        total += float(v)
-    return {"per_attempt": per_attempt, "total_usd": round(total, 4)}
+    return BG.settled_campaign_all_in(repo_root)
 
 
 def price(repo_root: Path, *, backend_usd: float, rate: float,
-          transport_reserve_minutes: float | None = None,
-          observed_transfer_minutes: float | None = None) -> dict:
+          availability_reserve_minutes: float | None = None,
+          observed_verification_minutes: float | None = None) -> dict:
     store = Path("/home/ecs-user/aad-artifacts/phase_c2_behavioural") / BG.CAMPAIGN_ID
     state = BC.campaign_state(store)
     work = BC.remaining_work(repo_root, state=state)
 
-    #: THE TRANSPORT RESERVE, not a rate times bytes. Network throughput
-    #: varies with time of day, routing and provider load, so a measurement of
-    #: it is an observation rather than a constant, and pricing a hard bound
-    #: on one would be wrong by however much it has moved since.
+    #: THE AVAILABILITY RESERVE, not a rate times bytes. The probes are
+    #: pre-staged onto an attached network volume, so a continuation moves
+    #: nothing: what is reserved is the billed cost of re-reading and
+    #: re-hashing them on the pod, and volume read throughput is still
+    #: somebody else's property rather than a constant.
     nbytes = int(work["restore"]["bytes"])
-    reserve = (float(transport_reserve_minutes)
-               if transport_reserve_minutes is not None
-               else BC.TRANSPORT_RESERVE_MINUTES)
+    reserve = (float(availability_reserve_minutes)
+               if availability_reserve_minutes is not None
+               else BC.PROBE_AVAILABILITY_RESERVE_MINUTES)
     minutes = BC.restore_minutes(nbytes, reserve)
     d = BH.session_decomposition(
         repo_root, materialization_minutes=work["materialization_minutes"],
@@ -135,20 +120,26 @@ def price(repo_root: Path, *, backend_usd: float, rate: float,
         "_derived_by": ("scripts/autoinit/price_c2_behavioural_continuation.py "
                         "-- every figure from the production functions the "
                         "launcher calls, never restated beside them"),
-        "transport": {
+        "probe_availability": {
             "reserve_minutes": minutes,
-            "_reserve_is_not_a_throughput": BC.TRANSPORT_RESERVE_BASIS,
-            "bytes_to_move": nbytes,
-            "gib_to_move": round(nbytes / 2**30, 3),
+            "_reserve_is_not_a_throughput": BC.PROBE_AVAILABILITY_RESERVE_BASIS,
+            "_no_session_time_transfer": (
+                "the probes are pre-staged onto a provider network volume the "
+                "pod attaches, so a continuation transfers nothing. These "
+                "bytes are READ and re-hashed on the pod; they do not cross "
+                "the network while the meter runs."),
+            "bytes_to_verify": nbytes,
+            "gib_to_verify": round(nbytes / 2**30, 3),
             "implied_mb_per_second_at_the_reserve": round(
                 nbytes / (minutes * 60) / 1e6, 2),
-            "observed_transfer_minutes": observed_transfer_minutes,
+            "observed_verification_minutes": observed_verification_minutes,
             "_observed_is_diagnostic": (
-                "a real transfer time, if one has been taken. It is evidence "
-                "that the path works and roughly how it performed on one "
-                "occasion. It is NOT the bound and is never promoted to one: "
-                "re-running a transfer to refine it would spend billed time "
-                "manufacturing false precision about a number that moves."),
+                "a real verification time, if one has been taken. It is "
+                "evidence that the path works and roughly how it performed on "
+                "one occasion. It is NOT the bound and is never promoted to "
+                "one: re-running it to refine the figure would spend billed "
+                "time manufacturing false precision about a number that "
+                "moves."),
             "durable_backend_usd": backend_usd,
         },
         "work_owed": {k: v for k, v in work.items()
@@ -158,7 +149,7 @@ def price(repo_root: Path, *, backend_usd: float, rate: float,
         "window": {"expected_minutes": d["expected_minutes"],
                    "hard_minutes": d["hard_minutes"]},
         "components_hard_usd": _components(d, rate, disk_per_min, minutes,
-                                            work, backend_usd),
+                                           work, backend_usd),
         "money": {
             "rate_usd_per_hour": float(terms["rate_usd_per_hour"]),
             "disk_usd_per_minute": round(disk_per_min, 8),
@@ -194,13 +185,13 @@ def price(repo_root: Path, *, backend_usd: float, rate: float,
 
 
 def _components(d: dict, rate: float, disk_per_min: float,
-                transport_minutes: float, work: dict,
+                availability_minutes: float, work: dict,
                 backend_usd: float) -> dict:
     """The hard bound, split into what each part of it BUYS.
 
     A single total says whether a continuation fits; it does not say what
-    would change if the transport got cheaper or the science got larger. The
-    split is the thing a maintainer decides against.
+    would change if the probes became cheaper to make available or the science
+    got larger. The split is the thing a maintainer decides against.
     """
     phases = dict(d["expected_phases"])
     probe_phase = next((m for n, m in d["expected_phases"]
@@ -227,9 +218,11 @@ def _components(d: dict, rate: float, disk_per_min: float,
         "arm_materialization": {**usd(arms),
                                 "_is": "rebuilding the arms those probes need "
                                        "on a fresh filesystem"},
-        "transport_reserve": {**usd(transport_minutes),
-                              "_is": "a conservative reserve for a "
-                                     "time-varying transfer, not a rate"},
+        "probe_availability_reserve": {
+            **usd(availability_minutes),
+            "_is": "re-reading and re-identifying the pre-staged probes on "
+                   "the pod. No bytes cross the network while the meter runs; "
+                   "they were written to the attached volume beforehand."},
         "session_overhead": {**usd(overhead),
                              "_is": "setup, bundle transfer, teacher fetch, "
                                     "machine gates, artifact synchronisation"},
@@ -253,10 +246,10 @@ def _components(d: dict, rate: float, disk_per_min: float,
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--transport-reserve-minutes", type=float, default=None,
+    ap.add_argument("--availability-reserve-minutes", type=float, default=None,
                     help="override the named conservative reserve. Not a "
                          "throughput: a reserve. Omit to use the declared one.")
-    ap.add_argument("--observed-transfer-minutes", type=float, default=None,
+    ap.add_argument("--observed-verification-minutes", type=float, default=None,
                     help="a real transfer time, recorded as DIAGNOSTIC "
                          "evidence. It never becomes the bound.")
     ap.add_argument("--backend-usd", type=float, default=0.0)
@@ -265,8 +258,8 @@ def main(argv=None) -> int:
     ap.add_argument("--write", action="store_true")
     a = ap.parse_args(argv)
     out = price(REPO, backend_usd=a.backend_usd, rate=a.rate,
-                transport_reserve_minutes=a.transport_reserve_minutes,
-                observed_transfer_minutes=a.observed_transfer_minutes)
+                availability_reserve_minutes=a.availability_reserve_minutes,
+                observed_verification_minutes=a.observed_verification_minutes)
     print(json.dumps(out, indent=1))
     if a.write:
         p = REPO / ANALYSIS

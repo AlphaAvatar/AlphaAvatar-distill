@@ -15,9 +15,15 @@ pass to change nothing. A generator that is not at a fixed point is the whole
 failure mode: it means the committed document and the tree disagree, and the
 sweep is the most expensive possible way to find that out.
 
-It is NOT a test suite. Nothing here executes pytest, and it must stay that way
-— the point is that it costs seconds. `--write` regenerates; without it,
-nothing is modified and drift is reported.
+It is NOT a test suite. Nothing here executes pytest, and it must stay that
+way — the point is that it costs seconds.
+
+`--write` does NOT control whether anything is written. The generators write
+in place, always, because running them is how drift is detected; what the
+flag controls is whether the resulting change is reported as a PROBLEM or
+accepted as the regeneration you asked for. Timestamp-only changes are
+reverted either way, so a plain run leaves the tree as it found it unless a
+document genuinely disagreed with the tree.
 
 The launch preconditions it also checks are the ones the chain silently
 depends on:
@@ -53,6 +59,15 @@ sys.path.insert(0, str(REPO / "scripts"))
 GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("skip-predicate audit",
      ("scripts/autoinit/audit_skip_predicates.py", "--write")),
+    #: THE EXECUTABLE CLOSURE SNAPSHOT. Missing from this list until
+    #: 2026-09-23, when a core edit left `configs/experiments/phase_c1/
+    #: executable_closure.json` describing a tree that no longer existed and
+    #: twelve session-contract tests refused with "re-run derive_closure.py".
+    #: That is exactly the failure this tool's docstring describes — a derived
+    #: record nobody regenerated — and it was not covered by the tool that
+    #: exists to cover it.
+    ("closure snapshot",
+     ("scripts/architecture/derive_closure.py", "--write")),
     ("run index",
      ("scripts/architecture/record_run_index.py", "--write")),
     ("stage index",

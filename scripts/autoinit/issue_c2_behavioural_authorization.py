@@ -341,17 +341,26 @@ def main(argv=None) -> int:
     #: reviewed, and the grant's own rule is to stop and return. This compares
     #: the SESSION ceilings: the campaign ceiling is not a function of the rate,
     #: so a live quote can never justify moving it.
-    terms = BG.authorization_terms(REPO_ROOT, rate_usd_per_hour=args.rate,
-                                   campaign_all_in_hard_usd=campaign_ceiling)
+    #: SETTLED CAMPAIGN SPEND, read live from the closeouts rather than from
+    #: the grant. A session may not be authorized to spend past what its
+    #: campaign has left, and the figure that bounds it must be the one the
+    #: campaign actually published — not a number typed into a grant beside it,
+    #: which is where a stale total would enter unreviewed.
+    settled = BG.settled_campaign_all_in(REPO_ROOT)
+    terms = BG.authorization_terms(
+        REPO_ROOT, rate_usd_per_hour=args.rate,
+        campaign_all_in_hard_usd=campaign_ceiling,
+        settled_campaign_all_in_usd=settled["total_usd"])
     drift = abs(float(terms["all_in_hard_usd"]) - float(approved["all_in_usd"]))
     if drift > MATERIAL_USD:
         raise SystemExit(
-            f"at the live rate ${args.rate}/h this session's ceiling derives "
-            f"to ${terms['all_in_hard_usd']} and the grant approves "
-            f"${approved['all_in_usd']} — a ${drift:.4f} change. That is a "
-            "materially different dollar authorization from the reviewed "
-            "basis. STOP and return to the maintainer before creating a "
-            "provider resource.")
+            f"at the live rate ${args.rate}/h, with ${settled['total_usd']} "
+            f"already settled against a ${campaign_ceiling} campaign ceiling, "
+            f"this session's ceiling derives to ${terms['all_in_hard_usd']} "
+            f"and the grant approves ${approved['all_in_usd']} — a "
+            f"${drift:.4f} change. That is a materially different dollar "
+            "authorization from the reviewed basis. STOP and return to the "
+            "maintainer before creating a provider resource.")
 
     live = BG.current_executable(REPO_ROOT)
     plan_hash = BG.plan_hash(REPO_ROOT)

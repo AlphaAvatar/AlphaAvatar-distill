@@ -68,10 +68,10 @@
   "_two_authorizations_never_one": "the behavioural figures are shown so a review can see both halves at once, NOT because this proposal covers them. That session's candidate identities do not exist until this search commits a Top-5, so it cannot be authorized yet even in principle."
  },
  "bound_identities_the_issuer_will_reproduce": {
-  "full_search_harness_digest": "dd870bdbb694739a2fd054fe35aa454b238f26a01cfbbf62cb8def6ffdc665aa",
+  "full_search_harness_digest": "6f3407a54892138bcb266a167089a5b76e0ff1c630b3f714881966fd2be8ca01",
   "full_search_harness_n_files": 91,
   "full_search_plan_hash": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da",
-  "full_search_pricing_sha256": "b781fbb82e16267664e504565a26dc0481a22ed7e81c77ca4e9446bbb4649049",
+  "full_search_pricing_sha256": "dccae6bee85813c3e67ac4ec69aea962a727f7480cdd8df2fdb92831f8f1df43",
   "joint_space_total_leaves": 578,
   "joint_space_decomposed_leaves": 576,
   "joint_space_allowed_impls": [

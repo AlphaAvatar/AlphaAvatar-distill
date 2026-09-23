@@ -13,9 +13,9 @@ So this module answers three questions, all on the launcher host, all at `$0`:
    campaign, because it dies with the pod.
 2. **What does the campaign still owe?** Mechanically, from that state: which
    probes remain, which arms their remaining probes need rebuilt, and how long
-   restoring the verified ones costs.
-3. **What travels to the replacement pod?** A small manifest plus the verified
-   bytes and evidence it names.
+   making the verified ones usable on a fresh pod costs.
+3. **What does the replacement pod read?** A small manifest naming each probe's
+   pod path and the identity it must reproduce there.
 
 What it does NOT do is decide whether a continuation may run. That is
 `campaign_continuation_gate`'s, and the answer depends on money and on whether
@@ -24,9 +24,16 @@ property of the probes.
 
 **The bytes are not ceremony.** A restored probe that was trained but not
 validly scored resumes AT SCORING under the preregistered policy, and scoring
-reads the weights. That is why a manifest of identities would not be enough and
-the checkpoint itself has to land on the replacement pod, at a new path, and be
-re-identified there.
+reads the weights. That is why a manifest of identities would not be enough:
+the checkpoint itself has to be readable on the replacement pod, at a path on
+that machine, and be re-identified there.
+
+**How the bytes get there is an infrastructure question, not a protocol one.**
+They were copied onto a billing pod once per attempt; they are now pre-staged
+onto a provider network volume that each pod attaches, which removes ~9 hours
+of accelerator time from every continuation. What the resume policy requires —
+that the bytes be present on the consuming pod and re-identify there against
+the identity the campaign announced — is unchanged, and so is the check.
 """
 from __future__ import annotations
 
@@ -64,35 +71,44 @@ RANKING_NAME = "c2_screening_ranking.json"
 #: pod's copy is the only one and releasing it would be a durability race.
 RELEASE_ACK_REL = "artifacts/autoinit/c2_behavioural/release_acks"
 
-#: BILLED MINUTES RESERVED FOR THE RESTORE. A budget reserve, not a throughput
-#: claim, and that distinction is the point.
+#: BILLED MINUTES RESERVED FOR MAKING A CAMPAIGN'S VERIFIED PROBES USABLE ON A
+#: REPLACEMENT POD. A budget reserve, not a throughput claim, and that
+#: distinction is the point.
 #:
-#: This was `RESTORE_MB_PER_SECOND = 0.23` — the slowest recorded dev-box
-#: uplink — multiplied by the bytes. That was the right shape while the dev box
-#: PUSHED to an already-billing pod: the rate was the binding constraint and a
-#: bound takes the slowest observation. It is the wrong shape now. The bytes
-#: are pre-staged to a durable backend while nothing is billing, and the pod
-#: PULLS them, so what remains on the meter is a datacenter-to-datacenter
-#: fetch whose rate depends on time of day, routing and provider load.
+#: This quantity has had three shapes, and each one was right for a different
+#: architecture:
 #:
-#: No single measurement of that is a stable constant, and repeatedly
-#: benchmarking it would spend GPU time manufacturing false precision about a
-#: number that moves. So the campaign reserves minutes instead. At this
-#: reserve, 22.2 GiB of probes needs only ~4.4 MB/s to fit — roughly an order
-#: of magnitude under what object storage to a datacenter pod does on a bad
-#: day — and if a transfer is faster the session simply finishes sooner,
-#: because the reserve bounds the bill rather than scheduling the work.
+#: 1. `RESTORE_MB_PER_SECOND = 0.23` × bytes — correct while the dev box PUSHED
+#:    to an already-billing pod. The uplink was the binding constraint and a
+#:    bound takes the slowest observation.
+#: 2. A flat 90-minute transport reserve — correct once the bytes were to be
+#:    pre-staged to an object store and PULLED by the pod, because the rate
+#:    then belonged to somebody else's network and moved with time of day,
+#:    routing and load. Multiplying by a number that moves does not produce a
+#:    bound.
+#: 3. This. The bytes are pre-staged onto a provider network volume that the
+#:    pod ATTACHES, so **there is no session-time transfer at all**. What
+#:    remains on the meter is re-identification: the driver reads every probe's
+#:    weights from the volume and rebuilds its identity, and the launcher host
+#:    re-reads its own copies before naming them.
 #:
-#: An observed transfer time is recorded as DIAGNOSTIC evidence. It does not
-#: become this number.
-TRANSPORT_RESERVE_MINUTES = 90.0
-TRANSPORT_RESERVE_BASIS = (
-    "a conservative reserve for transport variability, approved 2026-09-23, "
-    "NOT a measured or claimed throughput. Network rates vary with time of "
-    "day, routing and provider load, so one measurement is not a constant and "
-    "re-measuring it is not evidence. 22.2 GiB inside 90 minutes is ~4.4 MB/s, "
-    "far under what a datacenter fetch sustains; an observed time is recorded "
-    "as diagnostic and never promoted to this figure.")
+#: So this reserves the minutes that verification costs, not a transfer's. At
+#: 45 minutes, 22.2 GiB of reading-and-hashing needs only ~8.6 MB/s to fit,
+#: roughly an order of magnitude under what a network volume plus sha256
+#: sustains. It stays a RESERVE because volume read throughput is still
+#: somebody else's property and a cold cache is still possible.
+#:
+#: An observed verification time is recorded as DIAGNOSTIC evidence. It does
+#: not become this number.
+PROBE_AVAILABILITY_RESERVE_MINUTES = 45.0
+PROBE_AVAILABILITY_RESERVE_BASIS = (
+    "a conservative reserve for re-identifying pre-staged probes on the "
+    "replacement pod, revised 2026-09-23, NOT a measured or claimed "
+    "throughput. The probes are on an attached network volume and are never "
+    "transferred during a session, so what is reserved is the cost of reading "
+    "and hashing them. 22.2 GiB inside 45 minutes is ~8.6 MB/s, far under "
+    "what a volume read plus sha256 sustains; an observed time is recorded as "
+    "diagnostic and never promoted to this figure.")
 
 
 class ContinuationError(RuntimeError):
@@ -300,7 +316,7 @@ def arm_minutes(repo_root: str | Path = REPO_ROOT) -> dict[str, float]:
 
 
 def restore_minutes(total_bytes: int,
-                    reserve_minutes: float = TRANSPORT_RESERVE_MINUTES
+                    reserve_minutes: float = PROBE_AVAILABILITY_RESERVE_MINUTES
                     ) -> float:
     """Billed minutes RESERVED for the restore. Flat, and deliberately so.
 
@@ -437,8 +453,8 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
             "bytes": restore_bytes,
             "gib": round(restore_bytes / 2**30, 3),
             "minutes": minutes,
-            "reserve_minutes": TRANSPORT_RESERVE_MINUTES,
-            "_basis": TRANSPORT_RESERVE_BASIS,
+            "reserve_minutes": PROBE_AVAILABILITY_RESERVE_MINUTES,
+            "_basis": PROBE_AVAILABILITY_RESERVE_BASIS,
         },
         "decomposition": decomposition,
         "_a_completed_probe_is_never_retrained": (

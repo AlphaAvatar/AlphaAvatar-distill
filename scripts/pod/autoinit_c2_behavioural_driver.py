@@ -1128,7 +1128,8 @@ class C2BehaviouralDriver:
         """
         import shutil
 
-        out = {"released": [], "failed": [], "freed_gib": 0.0, "kept": []}
+        out = {"released": [], "failed": [], "freed_gib": 0.0, "kept": [],
+               "refused_outside_workspace": []}
         ack_dir = REPO / BC.RELEASE_ACK_REL
         try:
             acked = {f.stem for f in ack_dir.glob("*.json")}
@@ -1143,6 +1144,32 @@ class C2BehaviouralDriver:
                 continue
             local = (REPO / d) if not str(d).startswith("/") else Path(d)
             if not local.is_dir():
+                continue
+            #: CONTAINMENT, and this one is not a formality. A pod now mounts
+            #: a network volume holding the campaign's pre-staged probes —
+            #: shared with every future attempt and, for those bytes, the only
+            #: copy that is not on the launcher host. This loop deletes
+            #: directories named by journal entries, and a restored probe's
+            #: entry points AT the volume. It carries no `out_dir` today, so
+            #: nothing here reaches it; that is a property of one dictionary
+            #: literal in `restore_campaign`, which is far too thin a thing to
+            #: stand between an `rmtree` and every later attempt's probes.
+            #:
+            #: `release_intermediates` has had this guard since it deleted
+            #: inside an arm's workdir. This one deletes probe workdirs and
+            #: never had it.
+            if not local.resolve().is_relative_to(REPO.resolve()):
+                #: REPORTED, NOT FAILED. The raise below exists because the
+                #: storage bound assumes each probe's LOCAL workdir is freed;
+                #: a path outside this workspace was never part of that bound
+                #: and refusing to delete it falsifies nothing. Putting it in
+                #: `failed` would stop a session over a condition that costs
+                #: the pod no disk at all.
+                out["refused_outside_workspace"].append(
+                    f"{name}: {local} is outside this session's workspace "
+                    f"({REPO}). Nothing here may delete a path the pod does "
+                    "not own — a restored probe lives on a shared volume and "
+                    "is the campaign's only off-host copy.")
                 continue
             if name not in acked:
                 #: Not an error. The launcher pulls asynchronously, so a probe
@@ -1160,6 +1187,9 @@ class C2BehaviouralDriver:
                 out["failed"].append(f"{name}: {exc}")
         out["freed_gib"] = round(freed / 2**30, 3)
         self.ev.setdefault("probe_workdirs_released", []).append(out)
+        if out["refused_outside_workspace"]:
+            say("  REFUSED to release outside this workspace: "
+                f"{out['refused_outside_workspace']}")
         if out["released"] or out["failed"]:
             say(f"  released {len(out['released'])} probe workdir(s), "
                 f"{out['freed_gib']:.2f} GiB"

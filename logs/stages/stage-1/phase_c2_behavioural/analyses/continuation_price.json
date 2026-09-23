@@ -2,14 +2,15 @@
  "schema": "aadistill.autoinit.c2_behavioural_continuation_price/v1",
  "authorizes": "nothing",
  "_derived_by": "scripts/autoinit/price_c2_behavioural_continuation.py -- every figure from the production functions the launcher calls, never restated beside them",
- "transport": {
-  "reserve_minutes": 90.0,
-  "_reserve_is_not_a_throughput": "a conservative reserve for transport variability, approved 2026-09-23, NOT a measured or claimed throughput. Network rates vary with time of day, routing and provider load, so one measurement is not a constant and re-measuring it is not evidence. 22.2 GiB inside 90 minutes is ~4.4 MB/s, far under what a datacenter fetch sustains; an observed time is recorded as diagnostic and never promoted to this figure.",
-  "bytes_to_move": 23850825745,
-  "gib_to_move": 22.213,
-  "implied_mb_per_second_at_the_reserve": 4.42,
-  "observed_transfer_minutes": null,
-  "_observed_is_diagnostic": "a real transfer time, if one has been taken. It is evidence that the path works and roughly how it performed on one occasion. It is NOT the bound and is never promoted to one: re-running a transfer to refine it would spend billed time manufacturing false precision about a number that moves.",
+ "probe_availability": {
+  "reserve_minutes": 45.0,
+  "_reserve_is_not_a_throughput": "a conservative reserve for re-identifying pre-staged probes on the replacement pod, revised 2026-09-23, NOT a measured or claimed throughput. The probes are on an attached network volume and are never transferred during a session, so what is reserved is the cost of reading and hashing them. 22.2 GiB inside 45 minutes is ~8.6 MB/s, far under what a volume read plus sha256 sustains; an observed time is recorded as diagnostic and never promoted to this figure.",
+  "_no_session_time_transfer": "the probes are pre-staged onto a provider network volume the pod attaches, so a continuation transfers nothing. These bytes are READ and re-hashed on the pod; they do not cross the network while the meter runs.",
+  "bytes_to_verify": 23850825745,
+  "gib_to_verify": 22.213,
+  "implied_mb_per_second_at_the_reserve": 8.83,
+  "observed_verification_minutes": null,
+  "_observed_is_diagnostic": "a real verification time, if one has been taken. It is evidence that the path works and roughly how it performed on one occasion. It is NOT the bound and is never promoted to one: re-running it to refine the figure would spend billed time manufacturing false precision about a number that moves.",
   "durable_backend_usd": 0.0
  },
  "work_owed": {
@@ -23,8 +24,8 @@
   "materialization_minutes": 60.3
  },
  "window": {
-  "expected_minutes": 419.31,
-  "hard_minutes": 536.51
+  "expected_minutes": 374.31,
+  "hard_minutes": 491.51
  },
  "components_hard_usd": {
   "scientific_work": {
@@ -41,12 +42,12 @@
    "all_in_usd": 1.1122,
    "_is": "rebuilding the arms those probes need on a fresh filesystem"
   },
-  "transport_reserve": {
-   "minutes": 90.0,
-   "gpu_usd": 1.635,
-   "disk_usd": 0.025,
-   "all_in_usd": 1.66,
-   "_is": "a conservative reserve for a time-varying transfer, not a rate"
+  "probe_availability_reserve": {
+   "minutes": 45.0,
+   "gpu_usd": 0.8175,
+   "disk_usd": 0.0125,
+   "all_in_usd": 0.83,
+   "_is": "re-reading and re-identifying the pre-staged probes on the pod. No bytes cross the network while the meter runs; they were written to the attached volume beforehand."
   },
   "session_overhead": {
    "minutes": 95.0,
@@ -81,12 +82,12 @@
  "money": {
   "rate_usd_per_hour": 1.09,
   "disk_usd_per_minute": 0.00027781,
-  "expected_gpu_usd": 7.6175,
-  "expected_disk_usd": 0.1165,
-  "expected_all_in_usd": 7.734,
-  "hard_gpu_usd": 9.7466,
-  "hard_disk_usd": 0.149,
-  "hard_all_in_usd": 9.8956,
+  "expected_gpu_usd": 6.8,
+  "expected_disk_usd": 0.104,
+  "expected_all_in_usd": 6.904,
+  "hard_gpu_usd": 8.9291,
+  "hard_disk_usd": 0.1365,
+  "hard_all_in_usd": 9.0656,
   "_all_in_includes": "GPU at the live rate PLUS the separately billed container disk, derived by autoinit_c2_behavioural_launch :: continuation_all_in_usd. A GPU-only figure is not an all-in figure and must not be labelled as one."
  },
  "campaign": {
@@ -99,14 +100,14 @@
    "attempt5": 19.7041
   },
   "ceiling_all_in_usd": 42.0,
-  "settled_plus_hard_plus_backend_usd": 32.1422,
+  "settled_plus_hard_plus_backend_usd": 31.3122,
   "fits": true,
-  "headroom_usd": 9.8578
+  "headroom_usd": 10.6878
  },
  "project": {
   "cumulative_usd": 331.4509,
   "cap_usd": 370.0,
-  "worst_case_usd": 341.3465,
+  "worst_case_usd": 340.5165,
   "fits": true
  }
 }

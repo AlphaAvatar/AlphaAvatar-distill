@@ -550,16 +550,30 @@ def test_the_live_snapshot_records_the_terminal_phase_b_state():
             assert record.is_file(), record
             assert json.loads(record.read_text())["verdict"] in (
                 "GO", "NO-GO", "INCONCLUSIVE")
-    #: The same expiry, one phase later. This required C2 to say "NOT STARTED",
-    #: which was true until C2's Search-1 ran and computed the B->C comparison.
-    #: What this module owns is that no LATER phase is live while it is about
-    #: Phase B, so the assertion is that C2 is not started OR not authorized to
-    #: start — never that it is running.
+    #: THE SAME EXPIRY, TWICE OVER, AND IT IS WORTH SAYING WHAT EXPIRED.
+    #:
+    #: This required C2 to say "NOT STARTED", which was true until C2's
+    #: Search-1 ran. It was then relaxed to "not started OR not authorized —
+    #: never running", which was true until 2026-09-23, when the maintainer
+    #: authorized C2 to be executed to completion and it began running. By then
+    #: it was also failing on CASE: the snapshot said "NOT authorized" and the
+    #: pattern wanted "NOT AUTHORIZED".
+    #:
+    #: A test in the Phase-B module cannot own C2's project state — that state
+    #: moves whenever C2 does, and pinning it here makes a Phase-B contract
+    #: test fail for reasons that have nothing to do with Phase B. What this
+    #: module legitimately owns is that a later phase is not claimed to have
+    #: DECIDED something it has not: an incumbent named, or a verdict reached,
+    #: in a snapshot, with no record cited.
     c2_status = state["phase_c"]["c2"]["status"]
-    assert re.search(r"NOT STARTED|NOT AUTHORIZED|NOT FUNDED", c2_status), (
-        f"C2's status claims neither un-started nor unauthorized: {c2_status!r}")
-    assert not re.search(r"\b(RUNNING|IN PROGRESS|LAUNCHED)\b", c2_status, re.I), (
-        f"C2 is described as live in the snapshot: {c2_status!r}")
+    verdicts = re.findall(r"\b(GO|NO_GO|NO-GO|INCONCLUSIVE)\b", c2_status)
+    assert not verdicts, (
+        f"C2's status claims the verdict(s) {verdicts} in a snapshot; a "
+        f"terminal result belongs in the run record that produced it: "
+        f"{c2_status!r}")
+    assert "no verdict" in c2_status.lower() or "FROZEN" in c2_status, (
+        "C2's status neither states that it has no verdict yet nor names what "
+        f"is frozen: {c2_status!r}")
     #: Nothing that needs a GPU may be claimed as built. This read a
     #: `not_built` key naming the "pre-ATTENTION parent"; the snapshot has since
     #: been condensed and carries the same fact on `incumbent`, which states

@@ -1,5 +1,20 @@
 """A durable object store for checkpoint directories, with no vendor in it.
 
+**STATUS (2026-09-23): NO PRODUCTION CALLER.** This module was written for a
+route that was superseded before it ever ran. The plan was to pre-stage a
+campaign's completed checkpoints into a remote object store and have each
+replacement resource fetch them with pre-signed links; every such store
+reachable from this environment requires an account-creation and payment step
+that only a maintainer can perform. The application layer now pre-stages those
+bytes onto a block volume the provider already holds and each resource
+attaches, which needs no credential anywhere and removes the fetch from the
+billed session entirely.
+
+It is kept because the contract it encodes -- that a transfer's identity cannot
+be skipped -- is generic and outlives the backend question, and because it
+names no provider to go stale. Do not read its presence as evidence that this
+project has an object-store backend. It does not.
+
 WHY THIS EXISTS. A completed unit of work has to survive the provider resource
 that produced it, and a replacement resource has to be able to consume it. The
 two legs have opposite constraints:

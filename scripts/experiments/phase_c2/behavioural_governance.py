@@ -21,6 +21,7 @@ import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_json
@@ -402,9 +403,138 @@ AUTHORIZATION_AMOUNT_FIELDS: tuple[str, ...] = (
 CAMPAIGN_AMOUNT_FIELD = "campaign_all_in_hard_usd"
 
 
+#: Where each attempt of this campaign records what it actually cost. The
+#: closeout's `money.all_in_usd` is the AUTHORITATIVE figure -- it is what the
+#: project ledger reads -- and it is all-in: `cost.actual_usd` carries GPU
+#: alone, because the runner reads GPU alone from the provider and container
+#: disk is billed separately.
+#:
+#: DERIVED from `rel_run_dir`, the one function that knows the log convention,
+#: rather than written out. Relocating `logs/` has silently repointed declared
+#: executables in this repository before, and a hardcoded path here would
+#: enumerate nothing and report a campaign's paid predecessors as free.
+EXPERIMENT_ID = "phase_c2_behavioural"
+STAGE_ID = "1"
+
+
+def campaign_runs_rel() -> str:
+    """This campaign's run directories, repo-relative."""
+    from experiments.run_layout import rel_run_dir
+
+    return str(Path(rel_run_dir(EXPERIMENT_ID, "_", STAGE_ID)).parent)
+
+
+def settled_campaign_all_in(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """What this campaign has ALREADY spent, all-in, from its own closeouts.
+
+    THE CANONICAL OWNER of this quantity. It had two derivations -- one in the
+    continuation pricer and one inside the launcher's gate -- and they answer
+    slightly different questions: the gate reconciles each predecessor RESOURCE
+    under R9 and refuses an unknown one, while this reads the settled figure
+    each attempt published. Both are needed, but only one of them may be the
+    number a ceiling is derived from, or a session could be capped against one
+    figure and charged against the other.
+
+    This is the one a ceiling is derived from, because it is independent of any
+    authorization: the gate's disk term is a function of the authorization's
+    own disk rate, and capping an authorization with a figure derived FROM that
+    authorization is circular.
+
+    An attempt whose cost is genuinely unknown RAISES. It is never defaulted to
+    `$0`: a predecessor that billed an unknown amount is a stop condition, and
+    treating it as free is how a cumulative ceiling stops being cumulative.
+    """
+    root = Path(repo_root) / campaign_runs_rel()
+    per_attempt: dict[str, float] = {}
+    total = 0.0
+    for d in sorted(root.iterdir()) if root.is_dir() else []:
+        outcome = d / "closeout/outcome.json"
+        if not outcome.is_file():
+            continue
+        doc = json.loads(outcome.read_text())
+        value = (doc.get("money") or {}).get("all_in_usd")
+        if value is None:
+            #: An affirmative "no resource was created" is a STATED $0, which
+            #: is different from a missing figure.
+            value = 0.0 if doc.get("provider_resource_created") is False else None
+        if value is None:
+            raise BehaviouralGovernanceError(
+                f"{d.name}: its closeout states no all-in cost and does not "
+                "affirm that no provider resource was created, so settled "
+                "campaign spend is UNKNOWN and cannot be defaulted to $0")
+        per_attempt[d.name] = float(value)
+        total += float(value)
+    return {"per_attempt": per_attempt, "total_usd": round(total, 4)}
+
+
+def session_ceiling_under_campaign(hard: Mapping[str, Any], *,
+                                   rate_usd_per_hour: float,
+                                   campaign_all_in_hard_usd: float,
+                                   settled_campaign_all_in_usd: float,
+                                   ) -> dict[str, Any]:
+    """One session's amounts, shortened to what the campaign can still fund.
+
+    **The gap this closes.** The continuation gate charges the campaign ceiling
+    for the work a continuation PLANS. Nothing charged it for what that session
+    could cost if the work went wrong: `all_in_hard_usd` came from the frozen
+    full-session decomposition and was the same figure for the first attempt
+    and the fifth. While settled spend was small that was safe by accident —
+    attempt5 ran with `$2.5425` settled against a `$35.76` campaign ceiling and
+    a `$33.2099` session ceiling, which fits by one cent. It stops being safe
+    the moment settled spend is large: `$22.2466` settled plus a `$33.2099`
+    session is `$55.4565` against a `$42.0000` campaign ceiling, so a session
+    that hung would bill straight through the campaign's bound while every
+    gate it passed said yes.
+
+    So a session may be authorized for no more than the campaign has left. The
+    runtime is shortened with the money, because a window the money does not
+    fund is the defect this whole separation exists to prevent — and it is
+    shortened by FLOORING: a limit rounds down, or the amount it derives sits
+    a fraction above what was actually available.
+
+    This does not shrink the SCIENCE. It shrinks the runaway bound. Whether the
+    remaining work still fits inside the shortened window is a different
+    question, asked by `campaign_continuation_gate`, which knows what the work
+    is; this function does not and must not guess.
+    """
+    full_all_in = float(hard["all_in_usd"])
+    full_minutes = float(hard["minutes"])
+    settled = max(0.0, float(settled_campaign_all_in_usd))
+    available = float(campaign_all_in_hard_usd) - settled
+    if available <= 0:
+        raise BehaviouralGovernanceError(
+            f"the campaign has spent ${settled:.4f} of its "
+            f"${float(campaign_all_in_hard_usd):.4f} ceiling and has nothing "
+            "left to fund a session with. Remaining money is not permission, "
+            "and absent money is a refusal.")
+    if available >= full_all_in:
+        return {"minutes": full_minutes, "gpu_usd": float(hard["gpu_usd"]),
+                "disk_usd": float(hard["disk_usd"]), "all_in_usd": full_all_in,
+                "shortened": False, "campaign_available_usd": round(available, 4)}
+
+    #: Per-minute cost of the WHOLE session: GPU at the live rate plus the
+    #: separately billed container disk, derived from the full window's own
+    #: figures so the disk rate is the one the authorization carries.
+    disk_per_minute = float(hard["disk_usd"]) / full_minutes
+    per_minute = rate_usd_per_hour / 60.0 + disk_per_minute
+    minutes = math.floor(available / per_minute * 100) / 100.0
+    gpu = minutes / 60.0 * rate_usd_per_hour
+    disk = disk_per_minute * minutes
+    return {"minutes": minutes, "gpu_usd": round(gpu, 4),
+            "disk_usd": round(disk, 4), "all_in_usd": round(gpu + disk, 4),
+            "shortened": True, "campaign_available_usd": round(available, 4),
+            "_full_session_would_have_been": {
+                "minutes": full_minutes, "all_in_usd": full_all_in},
+            "_why": (
+                "the campaign's remaining money, not the frozen full-session "
+                "derivation, because a session may never be authorized to "
+                "spend past its campaign's cumulative ceiling")}
+
+
 def authorization_terms(repo_root: str | Path = REPO_ROOT, *,
                         rate_usd_per_hour: float,
                         campaign_all_in_hard_usd: float,
+                        settled_campaign_all_in_usd: float = 0.0,
                         provision_gb: int = PROVISION_GB) -> dict[str, Any]:
     """The amounts an authorization carries, derived MECHANICALLY at a live rate.
 
@@ -426,12 +556,19 @@ def authorization_terms(repo_root: str | Path = REPO_ROOT, *,
             "an authorization cannot be derived at a non-positive rate")
     c = ceiling(repo_root, gpu_rate_usd_per_hour=rate_usd_per_hour,
                 provision_gb=provision_gb)
-    hard, expected = c["hard_ceiling"], c["expected"]
+    full, expected = c["hard_ceiling"], c["expected"]
+    #: SHORTENED TO WHAT THE CAMPAIGN HAS LEFT. A session ceiling larger than
+    #: the campaign's remaining money is a runaway bound that every gate would
+    #: pass; see `session_ceiling_under_campaign`.
+    hard = session_ceiling_under_campaign(
+        full, rate_usd_per_hour=rate_usd_per_hour,
+        campaign_all_in_hard_usd=campaign_all_in_hard_usd,
+        settled_campaign_all_in_usd=settled_campaign_all_in_usd)
     #: The campaign ceiling is a MAINTAINER NUMBER, not a derivation: it is
     #: whatever decision funds this campaign, and it is passed in rather than
     #: computed so nothing here can quietly grant more of it.
     campaign = float(campaign_all_in_hard_usd)
-    if campaign < float(hard["all_in_usd"]) - DOLLAR_QUANTUM_USD:
+    if campaign < float(full["all_in_usd"]) - DOLLAR_QUANTUM_USD:
         raise BehaviouralGovernanceError(
             f"the campaign ceiling ${campaign} is below one session's all-in "
             f"${hard['all_in_usd']}. A campaign that cannot fund a single "
@@ -456,7 +593,22 @@ def authorization_terms(repo_root: str | Path = REPO_ROOT, *,
         "gpu_hard_usd": float(hard["gpu_usd"]),
         "disk_hard_usd": float(hard["disk_usd"]),
         "all_in_hard_usd": float(hard["all_in_usd"]),
-        "expected_all_in_usd": float(expected["all_in_usd"]),
+        #: CLAMPED TO THE CEILING. `expected` is the FULL protocol's expected
+        #: cost; when the ceiling has been shortened to what the campaign has
+        #: left, a full session's expectation can exceed this session's hard
+        #: bound, and "expected $23.88, hard $19.75" is not a forecast, it is
+        #: two quantities that cannot both be about the same session. The
+        #: authoritative expectation for a continuation is the launcher's own
+        #: plan, which prices the REMAINING work; this field is recorded, not
+        #: spent against.
+        "expected_all_in_usd": min(float(expected["all_in_usd"]),
+                                   float(hard["all_in_usd"])),
+        "_expected_is_clamped_to_the_ceiling": (
+            "the frozen decomposition's expected cost is for the WHOLE "
+            "protocol. A session shortened to the campaign's remaining money "
+            "may have a smaller ceiling than that, and an expected figure "
+            "above a hard bound describes no session. What this session "
+            "expects to spend comes from the launcher's remaining-work plan."),
         "provisioned_disk_gb": int(provision_gb),
         "campaign_id": CAMPAIGN_ID,
         "_rate_is_live_at_issuance": (

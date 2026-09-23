@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 100,
- "digest": "5de6157eef720791fede5dacc089df2a6f0cd8c34616080f60a5678debe2bb5d",
+ "digest": "9810a1e37f1d1dd0b05cae73399b120bc1180f4608f7fbef43d32d8e81a984e1",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -319,8 +319,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "sha256": "9919bd8c4e68fc1823b96ced027dd24c287d1eb804c9ceb69f4fee119d80b95a",
-   "bytes": 63211
+   "sha256": "5902c1032d4f3c90649eba0d40869ee637249127f85f82c7118ffc0e9c00c862",
+   "bytes": 65909
   },
   {
    "path": "src/aadistill/infrastructure/watchdog.py",

@@ -1,5 +1,11 @@
 """Concrete durable-store backends. The APPLICATION layer, where vendors live.
 
+**STATUS (2026-09-23): NO PRODUCTION CALLER.** See
+`aadistill.runtime.durable_store`. The S3-compatible route these backends were
+written for needs an account this environment cannot create, and the C2
+behavioural campaign pre-stages its probes onto an attached provider network
+volume instead. Nothing in the launch path imports this module.
+
 `aadistill.runtime.durable_store` defines what a backend must do and composes
 it with identity checking. It names no provider, because a provider is an
 operational choice that changes between experiments and stages. These are the
