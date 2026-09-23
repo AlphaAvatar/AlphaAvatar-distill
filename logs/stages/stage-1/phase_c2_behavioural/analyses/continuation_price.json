@@ -3,12 +3,19 @@
  "authorizes": "nothing",
  "_derived_by": "scripts/autoinit/price_c2_behavioural_continuation.py -- every figure from the production functions the launcher calls, never restated beside them",
  "probe_availability": {
-  "reserve_minutes": 45.0,
+  "reserve_minutes": 10.0,
   "_reserve_is_not_a_throughput": "a conservative reserve for re-identifying pre-staged probes on the replacement pod, revised 2026-09-23, NOT a measured or claimed throughput. The probes are on an attached network volume and are never transferred during a session, so what is reserved is the cost of reading and hashing them. 22.2 GiB inside 45 minutes is ~8.6 MB/s, far under what a volume read plus sha256 sustains; an observed time is recorded as diagnostic and never promoted to this figure.",
   "_no_session_time_transfer": "the probes are pre-staged onto a provider network volume the pod attaches, so a continuation transfers nothing. These bytes are READ and re-hashed on the pod; they do not cross the network while the meter runs.",
-  "bytes_to_verify": 23850825745,
-  "gib_to_verify": 22.213,
-  "implied_mb_per_second_at_the_reserve": 8.83,
+  "bytes_to_verify": 8446976,
+  "gib_to_verify": 0.008,
+  "weights_probes": 0,
+  "weights_gib": 0.0,
+  "evidence_probes": 10,
+  "evidence_mib": 8.06,
+  "checkpoints_skipped": 10,
+  "gib_avoided": 22.213,
+  "_artifacts_follow_consumers": "a completed and validly scored probe contributes evidence; its checkpoint is archival and is restored only when a remaining authorized computation reads the weights",
+  "implied_mb_per_second_at_the_reserve": 0.01,
   "observed_verification_minutes": null,
   "_observed_is_diagnostic": "a real verification time, if one has been taken. It is evidence that the path works and roughly how it performed on one occasion. It is NOT the bound and is never promoted to one: re-running it to refine the figure would spend billed time manufacturing false precision about a number that moves.",
   "durable_backend_usd": 0.0
@@ -24,8 +31,8 @@
   "materialization_minutes": 60.3
  },
  "window": {
-  "expected_minutes": 374.31,
-  "hard_minutes": 491.51
+  "expected_minutes": 339.31,
+  "hard_minutes": 456.51
  },
  "components_hard_usd": {
   "scientific_work": {
@@ -43,10 +50,10 @@
    "_is": "rebuilding the arms those probes need on a fresh filesystem"
   },
   "probe_availability_reserve": {
-   "minutes": 45.0,
-   "gpu_usd": 0.8175,
-   "disk_usd": 0.0125,
-   "all_in_usd": 0.83,
+   "minutes": 10.0,
+   "gpu_usd": 0.1817,
+   "disk_usd": 0.0028,
+   "all_in_usd": 0.1844,
    "_is": "re-reading and re-identifying the pre-staged probes on the pod. No bytes cross the network while the meter runs; they were written to the attached volume beforehand."
   },
   "session_overhead": {
@@ -82,12 +89,12 @@
  "money": {
   "rate_usd_per_hour": 1.09,
   "disk_usd_per_minute": 0.00027781,
-  "expected_gpu_usd": 6.8,
-  "expected_disk_usd": 0.104,
-  "expected_all_in_usd": 6.904,
-  "hard_gpu_usd": 8.9291,
-  "hard_disk_usd": 0.1365,
-  "hard_all_in_usd": 9.0656,
+  "expected_gpu_usd": 6.1641,
+  "expected_disk_usd": 0.0943,
+  "expected_all_in_usd": 6.2584,
+  "hard_gpu_usd": 8.2933,
+  "hard_disk_usd": 0.1268,
+  "hard_all_in_usd": 8.4201,
   "_all_in_includes": "GPU at the live rate PLUS the separately billed container disk, derived by autoinit_c2_behavioural_launch :: continuation_all_in_usd. A GPU-only figure is not an all-in figure and must not be labelled as one."
  },
  "campaign": {
@@ -100,14 +107,14 @@
    "attempt5": 19.7041
   },
   "ceiling_all_in_usd": 42.0,
-  "settled_plus_hard_plus_backend_usd": 31.3122,
+  "settled_plus_hard_plus_backend_usd": 30.6667,
   "fits": true,
-  "headroom_usd": 10.6878
+  "headroom_usd": 11.3333
  },
  "project": {
-  "cumulative_usd": 331.4509,
+  "cumulative_usd": 333.3808,
   "cap_usd": 370.0,
-  "worst_case_usd": 340.5165,
+  "worst_case_usd": 341.8009,
   "fits": true
  }
 }

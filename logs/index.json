@@ -1501,7 +1501,7 @@
    "run_id": "attempt6",
    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt6",
    "n_files": 1,
-   "digest": "d2837a4967ca3966b4939f20345ce7f616ff60c2b7e634342ef0bf0a440c7592",
+   "digest": "6f87b299cdefe838d239612caa156a35e68e8764a00669346cc5a4f0cdb0d787",
    "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   },
   {

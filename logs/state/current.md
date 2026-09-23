@@ -9,14 +9,30 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**A `$0.06/h` CPU pod is copying this campaign's ten completed probes onto a
-provider network volume, and that is the only thing billing.** Pod
-`3lyghvymmpg5ud`, created 2026-09-23 18:11 UTC. 22.21 GiB at a
-launcher-host uplink of ~0.48 MB/s is about fourteen hours of wall clock and
-about `$0.55`. Nothing scientific is running. Volume `59qt99zeg5`, 40 GB,
-`EU-NL-1`, mounted at `/durable`; the tool is
-[`stage_c2_probes_to_volume.py`](../../scripts/autoinit/stage_c2_probes_to_volume.py)
-and it re-hashes every file from the bytes that landed.
+**Nothing is running. Nothing is billing** except a 40 GB network volume at
+`$0.004/h`, retained until C2 closeout. Provider reports no pods.
+
+**The transfer that was running has been stopped on a standing rule.** Eight of
+the ten completed probes had reached the volume; the remaining two are
+completed and validly scored, so no remaining authorized operation reads their
+weights and there was nothing to justify moving them. The eight are sunk
+operational cost, may stay until teardown, and are **not** a required input by
+virtue of being present. `$0.7148` all-in for the whole staging campaign.
+
+**Artifacts follow consumers, not campaigns** — AGENTS.md **P8.4**, adopted
+2026-09-23 as a standing rule for C2, C3, C4, Stage 2/3 and every later stage.
+Never move a large artifact onto an execution resource because it exists or
+belongs to the same campaign; ask what exact downstream operation will read the
+bytes, and if there is none, do not move them. A completed and validly scored
+probe contributes evidence; its checkpoint is archival. For this campaign the
+working set is **8.1 MiB against 22.21 GiB — 0.035% of the bytes**. Owner:
+[`consumer_derived_working_set_20260923.md`](../stages/stage-1/phase_c2_behavioural/analyses/consumer_derived_working_set_20260923.md).
+
+**The project cumulative was under-reporting by `$1.9299`.** `project_balance`
+summed run closeouts alone, and an engineering campaign is not a run — so four
+CUDA validations and the durable staging reached their packages' books and
+nothing else. Corrected to **`$333.3808`** of `$370.0000`, leaving `$36.6192`.
+Owner: `derive_budget.py :: project_balance`.
 
 **C2 is under execute-to-completion authorization.** The maintainer retired the
 approval-per-step workflow on 2026-09-23 and granted an additional **`$25.00`
@@ -1242,7 +1258,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$331.4509` spent of `$370.0000`, leaving `$38.5491` |
+| project cap | `$333.3808` spent of `$370.0000`, leaving `$36.6192` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

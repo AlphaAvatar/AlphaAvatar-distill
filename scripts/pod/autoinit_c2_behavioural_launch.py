@@ -539,10 +539,20 @@ def volume_gate(ctx: SessionContext) -> tuple[bool, str]:
     attempt of every future campaign.
     """
     work = campaign_remaining_work(ctx)
-    restorable = list(work["restore"]["probes"])
+    #: THE PROBES WHOSE WEIGHTS A REMAINING OPERATION READS, and nobody else.
+    #: This asked for every probe the campaign held, which made the gate demand
+    #: a 22.21 GiB pre-stage to satisfy no consumer: a completed and validly
+    #: scored probe's checkpoint is archival evidence, and its rows travel on
+    #: the evidence leg. Artifacts follow consumers, not campaigns.
+    restorable = list(work["transfer"]["weights"]["probes"])
     if not restorable:
-        return True, ("volume OK: this campaign holds no verified probe, so "
-                      "nothing is pre-staged and nothing is owed")
+        return True, (
+            "volume OK: no probe needs its weights on the pod — "
+            f"{work['transfer']['evidence']['n']} completed probe(s) "
+            f"contribute {work['transfer']['evidence']['mib']} MiB of "
+            f"evidence and their "
+            f"{work['transfer']['skipped_weights']['gib']} GiB of checkpoints "
+            "have no remaining consumer")
 
     volume = str(getattr(ctx.args, "network_volume_id", "") or "").strip()
     mount = str(getattr(ctx.args, "volume_mount_path", "") or "").strip()
@@ -938,7 +948,8 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
             f"{len(prior)} prior run attempt(s) and the work it still owes — "
             f"{work['n_probes_remaining']} probes, "
             f"{len(work['arms_needed'])} arm rebuild(s) and "
-            f"{work['restore']['gib']} GiB of probe restore — bounds at "
+            f"{work['transfer']['weights']['gib']} GiB of probe restore — "
+            "bounds at "
             f"${planned:.4f} all-in, which is ${settled + planned:.4f} against "
             f"an approved CAMPAIGN ceiling of ${approved:.4f} (one session's "
             f"all-in is ${float(ctx.auth.all_in_hard_usd):.4f}). The campaign "
@@ -1481,6 +1492,13 @@ def probes_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
 #: not exist on a replacement resource and must not be the truth about one.
 RESTORE_MANIFEST = f"{WORKDIR}/campaign_continuation.json"
 
+#: Where a completed probe's LIGHTWEIGHT EVIDENCE lands. On the container disk,
+#: not the volume: it is 8.1 MiB for this whole campaign, it is copied fresh
+#: each session from the launcher host's durable store, and the verdict reads
+#: it. Putting it on the shared volume would make ten sessions write the same
+#: small files to one place for no gain.
+EVIDENCE_DIR = f"{WORKDIR}/evidence"
+
 
 def volume_probe_root(ctx: SessionContext) -> str:
     """Where this campaign's pre-staged probes are, on the attached volume.
@@ -1539,15 +1557,37 @@ def restore_campaign_probes(ctx: SessionContext) -> bool:
     manifest = BC.build_manifest(
         REPO_ROOT, campaign_id=ctx.auth.campaign_id,
         run_attempt=ctx.args.run_id, state=state, work=work,
-        pod_root=pod_root)
+        pod_root=pod_root, evidence_root=EVIDENCE_DIR)
+
+    #: THE MANDATORY TRANSFER PREFLIGHT, derived and printed before anything
+    #: moves. An execution sanity check, not an approval gate: it does not stop
+    #: to ask, and a set smaller than an earlier conservative implementation
+    #: produced is not a reason to return.
+    plan = BC.transfer_plan(state, work)
+    ctx.say(f"transfer preflight: {plan['summary']}")
+    for row in plan["rows"]:
+        ctx.say(f"  {row['artifact'][:46]:48s} {row['state'][:34]:36s} "
+                f"{row['decision']}")
+    t = work["transfer"]
     ctx.evidence["campaign_restore"] = {
-        "n_probes": len(manifest["probes"]),
-        "gib": work["restore"]["gib"],
-        "bounded_minutes": work["restore"]["minutes"],
+        "n_weights_probes": t["weights"]["n"],
+        "weights_gib": t["weights"]["gib"],
+        "n_evidence_probes": t["evidence"]["n"],
+        "evidence_mib": t["evidence"]["mib"],
+        "skipped_checkpoints": t["skipped_weights"]["n"],
+        "avoided_gib": t["skipped_weights"]["gib"],
+        "bounded_minutes": t["minutes"],
+        "transfer_plan": plan,
         "committed_candidate": manifest["committed_candidate"],
         "pod_root": pod_root,
-        "transport": "pre-staged network volume; no session-time transfer",
+        "evidence_root": EVIDENCE_DIR,
+        "transport": (
+            "weights come from the attached network volume when a remaining "
+            "operation reads them; a completed probe's checkpoint is archival "
+            "and is not moved. Evidence is copied fresh from the launcher "
+            "host's durable store."),
         "probes": [],
+        "evidence": [],
     }
 
     #: The manifest always travels, even empty: the driver must be able to tell
@@ -1567,10 +1607,52 @@ def restore_campaign_probes(ctx: SessionContext) -> bool:
                 f"{(rc.stderr or b'')[-200:]!r}")
         return False
 
+    #: THE EVIDENCE LEG. A completed and validly scored probe contributes
+    #: per-sample rows, a score, a descriptor, seeds, battery identities and
+    #: hashes -- 8.1 MiB for this whole campaign against 22.21 GiB of weights
+    #: nothing remaining reads. It is copied fresh from the launcher host's
+    #: durable store rather than staged, because at this size staging it would
+    #: be more machinery than transfer.
+    for entry in manifest["evidence"]:
+        pid, source = entry["probe_id"], Path(entry["durable_path"])
+        dest = entry["pod_path"]
+        missing = [n for n in entry["files"] if not (source / n).is_file()]
+        if missing:
+            ctx.say(f"ABORT: {pid}'s evidence is incomplete on this host: "
+                    f"{missing} absent. The verdict reads these rows; a score "
+                    "without them is not a usable score.")
+            return False
+        ctx.target.run(f"mkdir -p {dest}", timeout=60)
+        out = subprocess.run(
+            list(ctx.scp) + [str(source / n) for n in entry["files"]]
+            + [f"root@{ctx.host}:{dest}/"],
+            capture_output=True, timeout=600)
+        check = ctx.target.run(
+            " && ".join(f"test -s {dest}/{n}" for n in entry["files"])
+            + " && echo PRESENT=1 || echo PRESENT=0", timeout=120)
+        present = "PRESENT=1" in check.stdout
+        ctx.evidence["campaign_restore"]["evidence"].append({
+            "probe_id": pid, "sent": out.returncode == 0, "present": present,
+            "pod_path": dest, "files": entry["files"],
+            "weights_transferred": False,
+            "_why_no_weights": (
+                "completed and validly scored: no remaining authorized "
+                "operation reads this checkpoint")})
+        if out.returncode != 0 or not present:
+            ctx.say(f"ABORT: {pid}'s evidence did not reach the pod "
+                    f"(rc={out.returncode}, present={present}). The verdict "
+                    "reads these rows.")
+            return False
+    if manifest["evidence"]:
+        ctx.say(f"campaign evidence: {len(manifest['evidence'])} scored "
+                f"probe(s), {t['evidence']['mib']} MiB at {EVIDENCE_DIR}; "
+                f"their {t['skipped_weights']['gib']} GiB of checkpoints were "
+                "not moved and have no remaining consumer")
+
     if not manifest["probes"]:
-        ctx.say("campaign restore: nothing to restore — this campaign holds no "
-                "destination-verified probe, so the pod starts from the "
-                "protocol's first probe")
+        ctx.say("campaign restore: no probe needs its WEIGHTS on this pod — "
+                "every held probe is completed and validly scored, so nothing "
+                "remaining reads a checkpoint")
         return True
 
     from aadistill.initialization.specs.arch import get_adapter
@@ -1651,10 +1733,11 @@ def restore_campaign_probes(ctx: SessionContext) -> bool:
         #: identifies them, and, for a scored probe, the per-sample rows the
         #: decision rule consumes. A score whose rows did not survive is not a
         #: usable score, and finding that out in stage D would waste the run.
+        #: Only probes whose WEIGHTS a remaining operation reads reach here,
+        #: so the files checked are the ones the scorer needs. A scored probe's
+        #: rows travel on the evidence leg above and are checked there.
         dest = entry["pod_path"]
         needed = ["model.safetensors", "config.json", "probe_record.json"]
-        if entry["scored"]:
-            needed += ["result.json", "per_sample.jsonl"]
         test = " && ".join(f"test -s {dest}/{n}" for n in needed)
         probe = ctx.target.run(f"{test} && echo PRESENT=1 || echo PRESENT=0",
                                timeout=120)
@@ -1674,9 +1757,10 @@ def restore_campaign_probes(ctx: SessionContext) -> bool:
                     "safe to do here but stop.")
             return False
 
-    ctx.say(f"campaign restore: {len(manifest['probes'])} verified probe(s) "
-            f"pre-staged on the volume at {pod_root}; the driver "
-            "re-identifies each one THERE before admitting it")
+    ctx.say(f"campaign restore: {len(manifest['probes'])} probe(s) whose "
+            f"weights a remaining operation reads are pre-staged on the volume "
+            f"at {pod_root}; the driver re-identifies each one THERE before "
+            "admitting it")
     return True
 
 
@@ -1733,7 +1817,7 @@ def budget_work(args) -> dict:
             #: probe owes the battery only.
             "train_and_score_probes": work["n_train_and_score"],
             "score_only_probes": work["n_score_only"],
-            "restore_minutes": work["restore"]["minutes"]}
+            "restore_minutes": work["transfer"]["minutes"]}
 
 
 def budget(args) -> BudgetSpec:

@@ -74,16 +74,19 @@ def price(repo_root: Path, *, backend_usd: float, rate: float,
     state = BC.campaign_state(store)
     work = BC.remaining_work(repo_root, state=state)
 
-    #: THE AVAILABILITY RESERVE, not a rate times bytes. The probes are
-    #: pre-staged onto an attached network volume, so a continuation moves
-    #: nothing: what is reserved is the billed cost of re-reading and
-    #: re-hashing them on the pod, and volume read throughput is still
-    #: somebody else's property rather than a constant.
-    nbytes = int(work["restore"]["bytes"])
+    #: THE AVAILABILITY RESERVE, not a rate times bytes, and chosen by WHAT
+    #: ACTUALLY MOVES. A completed and validly scored probe's checkpoint has no
+    #: remaining consumer, so it is not moved and not read; what this campaign
+    #: still transfers is 8.1 MiB of per-sample rows and descriptors. Reserving
+    #: the weights figure for bytes that are not moving is how a continuation
+    #: came to be priced for a sixteen-hour transfer it does not perform.
+    t = work["transfer"]
+    nbytes = int(t["weights"]["bytes"]) + int(t["evidence"]["bytes"])
     reserve = (float(availability_reserve_minutes)
                if availability_reserve_minutes is not None
                else BC.PROBE_AVAILABILITY_RESERVE_MINUTES)
-    minutes = BC.restore_minutes(nbytes, reserve)
+    minutes = BC.availability_minutes(int(t["weights"]["bytes"]),
+                                      int(t["evidence"]["bytes"]), reserve)
     d = BH.session_decomposition(
         repo_root, materialization_minutes=work["materialization_minutes"],
         train_and_score_probes=work["n_train_and_score"],
@@ -130,6 +133,16 @@ def price(repo_root: Path, *, backend_usd: float, rate: float,
                 "the network while the meter runs."),
             "bytes_to_verify": nbytes,
             "gib_to_verify": round(nbytes / 2**30, 3),
+            "weights_probes": t["weights"]["n"],
+            "weights_gib": t["weights"]["gib"],
+            "evidence_probes": t["evidence"]["n"],
+            "evidence_mib": t["evidence"]["mib"],
+            "checkpoints_skipped": t["skipped_weights"]["n"],
+            "gib_avoided": t["skipped_weights"]["gib"],
+            "_artifacts_follow_consumers": (
+                "a completed and validly scored probe contributes evidence; "
+                "its checkpoint is archival and is restored only when a "
+                "remaining authorized computation reads the weights"),
             "implied_mb_per_second_at_the_reserve": round(
                 nbytes / (minutes * 60) / 1e6, 2),
             "observed_verification_minutes": observed_verification_minutes,

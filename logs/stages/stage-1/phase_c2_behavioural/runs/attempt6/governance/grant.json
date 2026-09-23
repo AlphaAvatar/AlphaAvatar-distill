@@ -13,13 +13,13 @@
  "reviewed_baseline": {
   "origin_main": "8966ae12cd5f898928b2df443601a8936e03ba1e",
   "_origin_main_is_the_reviewed_baseline": "the commit the maintainer's execute-to-completion authorization was given at. It is NOT the commit this chain runs from: the durable-backend change and the session-ceiling repair landed after it, under that authorization's own engineering autonomy. The issuer re-derives the plan hash, the closure, the closure file count and the proposal hash live and refuses a disagreement, so the session commit is bound by those rather than by this field.",
-  "proposal_sha256": "d17124969449233626f2f3217ec3f04060101ed9309585d61c3cef860f1e6dab",
+  "proposal_sha256": "c5a889c01a59a3df254fb1d184ba7418fef2b47f2279e075179db30ab387d844",
   "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
-  "executable_closure": "479840dab7e2cdabdffecd1026e1b3a0254c8ad6c482f6c85b6c536b9436afbf",
+  "executable_closure": "366bebc46b8ec9e04ff21de0729a9f3f9d20f8bb1c423c769bbc573e5adb1a6c",
   "closure_files": 135,
   "resume_preregistration_sha256": "4cbfae158cfd3886e21ca6be0abe3e1ed77790f2b9c903d5f09c037fc8f96aa5",
   "_the_issuer_rederives_these": "every identity here is re-derived live at issuance and a disagreement is a refusal. They are recorded so a reader can see WHAT was reviewed, not so anything trusts the copy.",
-  "_what_moved_since_the_reviewed_baseline": "the durable backend became a provider network volume rather than an object store (the object-store route needs an account this environment cannot create); the session ceiling is now shortened to what the campaign has left; settled campaign spend has one owner and the gate reconciles the two readings. All are engineering. THE PLAN HASH HAS NEVER MOVED and no science has changed.",
+  "_what_moved_since_the_reviewed_baseline": "the durable backend became a provider network volume rather than an object store (the object-store route needs an account this environment cannot create); the session ceiling is now shortened to what the campaign has left; settled campaign spend has one owner and the gate reconciles the two readings; destination_gate charges the remainder; and the continuation's working set is derived from CONSUMERS rather than from campaign membership, under the maintainer's standing rule adopted as AGENTS.md P8.4 -- a completed and validly scored probe contributes evidence and its checkpoint is archival. All are engineering. THE PLAN HASH HAS NEVER MOVED and no science has changed.",
   "plan_hash_is_the_reviewed_one": true
  },
  "covers": "the REMAINDER of ONE Phase-C2 behavioural selection campaign: the third frozen confirmation seed for the candidate screening advanced and for incumbent B, and the frozen Phase-C GO / NO_GO / INCONCLUSIVE decision rule over all six confirmation probes. The ten probes already trained, scored and verified off-pod are CONSUMED, never retrained. Same-campaign continuation only, under preregistered R1-R10.",
@@ -65,7 +65,8 @@
    "attempt4": 0.0,
    "attempt5": 19.7041
   },
-  "_basis": "the reviewed proposal basis at a quoted L40S securePrice of $1.09/h. Issuance re-quotes the live securePrice and derives the SESSION terms mechanically from it. The campaign ceiling is not a function of the rate and no re-quote may move it."
+  "_basis": "the reviewed proposal basis at a quoted L40S securePrice of $1.09/h. Issuance re-quotes the live securePrice and derives the SESSION terms mechanically from it. The campaign ceiling is not a function of the rate and no re-quote may move it.",
+  "_the_working_set_is_consumer_derived": "this continuation moves 8.1 MiB of descriptors, scores, per-sample rows and hashes -- not 22.21 GiB of checkpoints. Ten completed probes are validly scored, so no remaining authorized operation reads their weights."
  },
  "live_rate_issuance_rule": [
   "re-query the provider's live gpuTypes.securePrice",

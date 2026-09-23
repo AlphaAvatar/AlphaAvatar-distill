@@ -480,6 +480,118 @@ suite, launch-bound sweep (if applicable), GPU validation (if applicable).
 
 Tests are evidence for the work. They are not the work.
 
+### P8.4. Move artifacts by consumer need, not by existence
+
+Never materialize, restore, upload, download, copy or retain a large artifact
+on an execution resource merely because the artifact exists or belongs to the
+same campaign. **Data movement must be justified by a concrete downstream
+consumer.**
+
+Before any substantial artifact transfer, classify each artifact by lifecycle
+state and ask:
+
+> What exact downstream operation will read these bytes?
+
+If there is no such operation, do not move the bytes.
+
+#### Probe-state rule
+
+For recovery/evaluation probes, use this default state machine.
+
+**1. Completed + validly scored** — trained, checkpoint identity valid, scoring
+complete, scoring evidence valid.
+
+Required on a continuation resource: **lightweight scientific evidence only**.
+Checkpoint weights: **DO NOT RESTORE by default.** A completed and scored
+checkpoint is archival evidence, not an execution dependency. Restore it only
+if a later explicitly authorized scientific operation genuinely consumes the
+model weights.
+
+**2. Trained + durable + not validly scored.**
+
+Required: **checkpoint weights, descriptor, identity** — because scoring
+genuinely consumes the model. Restore the existing checkpoint and resume at
+scoring. Do not retrain it.
+
+**3. Not trained.** There are no checkpoint bytes to restore. Materialize the
+required initialization and execute the originally authorized training
+normally.
+
+**4. Invalid measurement.** Do not infer the action from the existence of
+checkpoint bytes; determine whether the checkpoint itself remains
+scientifically valid. Valid training with an invalid scorer → reuse the
+checkpoint and rerun scoring if the protocol permits. Invalid training → the
+checkpoint is not reusable scientific evidence. Unknown provenance or an
+identity mismatch → preserve for diagnosis, admit and consume nothing.
+
+#### Evidence and model bytes are different things
+
+Do not conflate the **evidence needed to make a scientific decision** with the
+**model bytes needed to execute compute**. A final behavioural decision
+normally consumes per-sample outputs, scores, descriptors, seeds, battery
+identities and hashes — not the checkpoint that originally produced those
+outputs. If the consumer needs only the score and the evidence, transporting
+multi-GiB weights is unnecessary.
+
+#### Durable storage is not a mirror of every pod
+
+A durable backend exists to provide survival across resource loss, provenance,
+resumability when bytes are actually needed, and archival retention where
+required. It does not imply copying every durable object to every replacement
+resource. Instead:
+
+```text
+durable store
+        ↓
+derive remaining work
+        ↓
+derive actual consumers
+        ↓
+materialize only the artifacts those consumers require
+```
+
+A replacement resource should start with the **minimum sufficient working
+set**, not a mirror of campaign history.
+
+#### Mandatory transfer preflight
+
+Before moving a substantial amount of data, derive and record, per artifact:
+its state, size, destination, consumer, why the bytes are required, and when
+they will be read. For a large transfer set, print a compact summary before
+execution:
+
+```text
+N objects required · X GiB required · N objects skipped · Y GiB avoided
+```
+
+This is an execution sanity check, **not** a maintainer approval gate. Do not
+stop and ask for permission after deriving it; execute the minimal correct set.
+
+#### Cost and time
+
+Treat unnecessary data movement as an engineering defect. Optimize scientific
+correctness first, then minimum necessary data movement, then runtime and cost.
+Do not optimize by weakening correctness — but do not pay to move unused bytes.
+A transfer that costs no GPU dollars can still waste hours and delay the
+programme, so `$0` does not mean free.
+
+#### Interaction with stage-level autonomy
+
+This rule introduces no new review checkpoint. Within an approved stage, the
+agent has authority to detect over-materialization, stop unnecessary transfers,
+fix continuation logic, reduce the working set, clean up obsolete temporary
+copies, and continue. **Do not return for approval merely because the
+optimized transfer set is smaller than an earlier conservative
+implementation.** Reducing unnecessary infrastructure work without changing the
+frozen scientific protocol is ordinary engineering.
+
+#### Standing rule
+
+**Artifacts follow consumers, not campaigns.** Completed and scored probes
+contribute evidence, not automatically checkpoint bytes. Restore model weights
+only when a remaining authorized computation actually reads them. This applies
+across all stages and all artifact types, not only C2 probes.
+
 ### P9. Match training and deployment numerics when possible
 
 If the target deployment is INT8, INT4, FP8, MXFP4, or another low-precision mode, prefer training, recovery, and evaluation paths that simulate or match deployment numerics as closely as practical.

@@ -59,6 +59,25 @@ RECORD_NAME = "probe_record.json"
 RESULT_NAME = "result.json"
 PER_SAMPLE_NAME = "per_sample.jsonl"
 
+#: THE LIGHTWEIGHT SCIENTIFIC EVIDENCE, and the whole working set a completed
+#: probe contributes to a continuation.
+#:
+#: A final behavioural decision consumes per-sample outputs, scores,
+#: descriptors, seeds, battery identities and hashes. It does not consume the
+#: model checkpoint that produced those outputs. For this campaign that is
+#: 8.1 MiB against 22.21 GiB -- 0.035% of the bytes -- so conflating the two
+#: bought a sixteen-hour transfer for nothing.
+#:
+#: The ack is here because it carries the announced artifact identity, which
+#: stays provenance for a probe whose weights do not travel.
+EVIDENCE_NAMES: tuple[str, ...] = (RECORD_NAME, RESULT_NAME, PER_SAMPLE_NAME,
+                                   ACK_NAME)
+
+
+def _evidence_bytes(directory: Path) -> int:
+    return sum((directory / n).stat().st_size for n in EVIDENCE_NAMES
+               if (directory / n).is_file())
+
 #: The campaign's screening commitment, at the campaign root rather than under
 #: an attempt: the commitment belongs to the experiment, and a later attempt
 #: must honour the one its campaign made.
@@ -101,6 +120,13 @@ RELEASE_ACK_REL = "artifacts/autoinit/c2_behavioural/release_acks"
 #: An observed verification time is recorded as DIAGNOSTIC evidence. It does
 #: not become this number.
 PROBE_AVAILABILITY_RESERVE_MINUTES = 45.0
+
+#: The same reserve for a working set that is EVIDENCE ONLY. Copying 8.1 MiB
+#: and hash-checking ten per-sample files is seconds of work; ten minutes is
+#: the same kind of conservative reserve applied to a quantity three orders of
+#: magnitude smaller, rather than the weights figure applied to bytes that are
+#: not moving.
+EVIDENCE_RESERVE_MINUTES = 10.0
 PROBE_AVAILABILITY_RESERVE_BASIS = (
     "a conservative reserve for re-identifying pre-staged probes on the "
     "replacement pod, revised 2026-09-23, NOT a measured or claimed "
@@ -315,32 +341,35 @@ def arm_minutes(repo_root: str | Path = REPO_ROOT) -> dict[str, float]:
     return out
 
 
-def restore_minutes(total_bytes: int,
-                    reserve_minutes: float = PROBE_AVAILABILITY_RESERVE_MINUTES
-                    ) -> float:
-    """Billed minutes RESERVED for the restore. Flat, and deliberately so.
+def availability_minutes(weights_bytes: int, evidence_bytes: int,
+                         reserve_minutes: float = PROBE_AVAILABILITY_RESERVE_MINUTES,
+                         evidence_reserve_minutes: float = EVIDENCE_RESERVE_MINUTES
+                         ) -> float:
+    """Billed minutes reserved for making the required working set usable.
 
-    It took `total_bytes` and a rate. That was right when the dev box pushed
-    to a billing pod and the uplink was the binding constraint; it is wrong
-    for a pre-staged pull, where the rate is a time-varying property of
-    somebody else's network. Multiplying bytes by a number that moves does not
-    make the product a bound -- it makes it a bound that is wrong by however
-    much the number moved since it was measured.
+    Flat within each class, and that is deliberate: it reserves against a rate
+    nobody owns rather than multiplying bytes by a number that moves.
 
-    `total_bytes` is still taken, and still reported, because how much has to
-    move is a real property of the work. It just no longer decides the money:
-    a reserve that covers a bad day covers a good one too.
+    What is new is that the class is chosen by WHAT ACTUALLY MOVES. The old
+    figure charged the full weights reserve whenever the campaign held any
+    probe at all, including a campaign whose entire remaining working set is
+    8.1 MiB of per-sample rows. A reserve for reading and hashing 22 GiB is not
+    a reserve for reading and hashing eight megabytes.
+
+    * weights travel  -> the full reserve, because a probe's checkpoint is
+      read and re-identified on the pod before the journal admits it;
+    * evidence only    -> the evidence reserve, which covers copying a few
+      megabytes and hash-checking the rows;
+    * nothing travels  -> nothing. A fresh campaign holds no probe, and
+      charging it would have moved the FROZEN full-session ceiling.
     """
-    if reserve_minutes <= 0:
-        raise ContinuationError("a transport reserve must be positive")
-    #: NOTHING TO MOVE COSTS NOTHING. A fresh campaign holds no verified probe,
-    #: so there is no transfer to reserve for -- and charging one would have
-    #: raised the FROZEN session ceiling from $33.2099, which is exactly what
-    #: the reserve must not do. The reserve covers a transfer's variability; it
-    #: is not a fee for existing.
-    if total_bytes <= 0:
-        return 0.0
-    return round(float(reserve_minutes), 2)
+    if reserve_minutes <= 0 or evidence_reserve_minutes <= 0:
+        raise ContinuationError("an availability reserve must be positive")
+    if weights_bytes > 0:
+        return round(float(reserve_minutes), 2)
+    if evidence_bytes > 0:
+        return round(float(evidence_reserve_minutes), 2)
+    return 0.0
 
 
 def remaining_work(repo_root: str | Path = REPO_ROOT, *,
@@ -419,9 +448,33 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
             "materialization cannot be priced from a guess")
     materialization = round(sum(per_arm[a] for a in arms_needed), 2)
 
-    restorable = sorted(pid for pid in expected if pid in held)
-    restore_bytes = sum(int(held[pid]["bytes"]) for pid in restorable)
-    minutes = restore_minutes(restore_bytes)
+    #: ARTIFACTS FOLLOW CONSUMERS, NOT CAMPAIGNS.
+    #:
+    #: Every probe this campaign holds used to be restored, all of it, because
+    #: it existed and belonged to the campaign. For ten completed probes that
+    #: is 22.21 GiB of model weights, and the only thing that reads them is
+    #: the scorer — which a completed probe has already been through.
+    #:
+    #: So the question asked of each held probe is now: what exact downstream
+    #: operation will read these bytes?
+    #:
+    #: * TRAINED AND NOT VALIDLY SCORED -> the scorer reads the weights. Its
+    #:   checkpoint travels, is re-identified on the pod, and resumes at
+    #:   scoring. It is never retrained.
+    #: * COMPLETED AND VALIDLY SCORED -> nothing remaining reads the weights.
+    #:   The verdict consumes per-sample rows, scores, descriptors, seeds,
+    #:   battery identities and hashes. Those travel; 8.1 MiB against
+    #:   22.21 GiB, 0.035% of the bytes. The checkpoint stays archival.
+    #: * NOT TRAINED -> there are no bytes to move. Its initialization arm is
+    #:   materialized and it is trained normally.
+    weights_probes = sorted(unscored)
+    evidence_probes = sorted(pid for pid in complete if pid in held)
+    skipped_probes = evidence_probes
+    weights_bytes = sum(int(held[pid]["bytes"]) for pid in weights_probes)
+    evidence_bytes = sum(_evidence_bytes(Path(held[pid]["durable_path"]))
+                         for pid in evidence_probes)
+    skipped_bytes = sum(int(held[pid]["bytes"]) for pid in skipped_probes)
+    minutes = availability_minutes(weights_bytes, evidence_bytes)
 
     decomposition = BH.session_decomposition(
         repo_root, materialization_minutes=materialization,
@@ -447,13 +500,36 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
             "one wins is decided by screening scores, and a cost proxy must "
             "never decide which candidate's bytes exist."),
         "materialization_minutes": materialization,
-        "restore": {
-            "probes": restorable,
-            "n": len(restorable),
-            "bytes": restore_bytes,
-            "gib": round(restore_bytes / 2**30, 3),
+        "transfer": {
+            "weights": {
+                "probes": weights_probes,
+                "n": len(weights_probes),
+                "bytes": weights_bytes,
+                "gib": round(weights_bytes / 2**30, 3),
+                "consumer": "score_existing -- the scorer reads the model",
+            },
+            "evidence": {
+                "probes": evidence_probes,
+                "n": len(evidence_probes),
+                "bytes": evidence_bytes,
+                "mib": round(evidence_bytes / 2**20, 2),
+                "files": list(EVIDENCE_NAMES),
+                "consumer": (
+                    "behavioural_decision.confirm -- the verdict reads the "
+                    "per-sample rows, and assert_reuse_matches reads the "
+                    "descriptor"),
+            },
+            "skipped_weights": {
+                "probes": skipped_probes,
+                "n": len(skipped_probes),
+                "bytes": skipped_bytes,
+                "gib": round(skipped_bytes / 2**30, 3),
+                "why": (
+                    "completed and validly scored: no remaining authorized "
+                    "operation reads these weights. A completed checkpoint is "
+                    "archival evidence, not an execution dependency."),
+            },
             "minutes": minutes,
-            "reserve_minutes": PROBE_AVAILABILITY_RESERVE_MINUTES,
             "_basis": PROBE_AVAILABILITY_RESERVE_BASIS,
         },
         "decomposition": decomposition,
@@ -473,28 +549,94 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
 # what travels
 # ---------------------------------------------------------------------------
 
+def transfer_plan(state: dict[str, Any], work: dict[str, Any]) -> dict[str, Any]:
+    """Every artifact this continuation would move, classified by CONSUMER.
+
+    The standing rule: never materialize, restore, upload, download, copy or
+    retain a large artifact on an execution resource merely because it exists
+    or belongs to the same campaign. Before a substantial transfer, each
+    artifact is classified by lifecycle state and asked *what exact downstream
+    operation will read these bytes?* If there is no such operation, the bytes
+    do not move.
+
+    This is that derivation, recorded. It is an execution sanity check and not
+    an approval gate: nothing here stops to ask, and a smaller set than an
+    earlier conservative implementation produced is not a reason to return.
+    """
+    rows: list[dict[str, Any]] = []
+    t = work["transfer"]
+    for pid in t["weights"]["probes"]:
+        held = state["probes"][pid]
+        rows.append({
+            "artifact": pid, "state": "trained+durable+not validly scored",
+            "bytes": int(held["bytes"]),
+            "destination": "replacement pod",
+            "consumer": "score_existing",
+            "why_bytes_are_required": "scoring reads the model weights",
+            "when_they_will_be_read": "stage S or C, at that probe's rung",
+            "decision": "RESTORE"})
+    for pid in t["evidence"]["probes"]:
+        held = state["probes"][pid]
+        rows.append({
+            "artifact": pid, "state": "completed+validly scored",
+            "bytes": int(held["bytes"]),
+            "evidence_bytes": _evidence_bytes(Path(held["durable_path"])),
+            "destination": "replacement pod",
+            "consumer": "confirm (per-sample rows) / assert_reuse_matches "
+                        "(descriptor)",
+            "why_bytes_are_required": (
+                "the verdict reads the rows and the schedule reads the "
+                "descriptor. The CHECKPOINT has no remaining consumer."),
+            "when_they_will_be_read": "stage R and stage D",
+            "decision": "EVIDENCE ONLY -- weights not transferred"})
+    required = t["weights"]["bytes"] + t["evidence"]["bytes"]
+    avoided = t["skipped_weights"]["bytes"]
+    summary = (
+        f"{t['weights']['n'] + t['evidence']['n']} objects required, "
+        f"{required / 2**30:.3f} GiB required; "
+        f"{t['skipped_weights']['n']} checkpoint(s) skipped, "
+        f"{avoided / 2**30:.2f} GiB avoided")
+    return {
+        "rows": rows,
+        "required_objects": t["weights"]["n"] + t["evidence"]["n"],
+        "required_bytes": required,
+        "skipped_objects": t["skipped_weights"]["n"],
+        "avoided_bytes": avoided,
+        "summary": summary,
+        "_rule": (
+            "artifacts follow consumers, not campaigns. A completed and "
+            "validly scored probe contributes evidence; its checkpoint is "
+            "archival and is restored only when a remaining authorized "
+            "computation actually reads the weights."),
+    }
+
+
 def build_manifest(repo_root: str | Path = REPO_ROOT, *,
                    campaign_id: str, run_attempt: str,
                    state: dict[str, Any], work: dict[str, Any],
-                   pod_root: str) -> dict[str, Any]:
+                   pod_root: str, evidence_root: str) -> dict[str, Any]:
     """The small document a replacement pod reads to continue this campaign.
 
-    Small on purpose: identities, scores and destinations. The bytes travel
-    beside it and the pod re-identifies them from the path the manifest names —
-    the old pod's absolute `model_dir` appears NOWHERE in here, because it does
-    not exist on a replacement resource and must not be the truth about one.
+    Small on purpose: identities, scores and destinations. The old pod's
+    absolute `model_dir` appears NOWHERE in here, because it does not exist on
+    a replacement resource and must not be the truth about one.
+
+    **Two sections, because a probe contributes one of two different things.**
+    `probes` are the ones whose WEIGHTS a remaining operation reads — trained
+    and not validly scored, which resume at scoring. `evidence` are the
+    completed and validly scored ones, which contribute per-sample rows,
+    scores, descriptors, seeds, battery identities and hashes, and whose
+    checkpoints stay archival. The pod re-identifies the first from bytes and
+    hash-checks the second against the hashes its own score record carries.
     """
-    entries = []
-    for pid in work["restore"]["probes"]:
+    def _descriptor(pid: str) -> dict[str, Any]:
         held = state["probes"][pid]
         record = held.get("record") or {}
-        entries.append({
+        return {
             "probe_id": pid,
             "source_attempt": held["attempt"],
             "durable_path": held["durable_path"],
-            "pod_path": f"{pod_root}/{pid}",
             "identity": held["identity"],
-            "bytes": held["bytes"],
             "scored": held["scored"],
             #: The descriptor fields the driver re-checks against the rung's
             #: own descriptor. A continuation may consume; it may not
@@ -509,16 +651,41 @@ def build_manifest(repo_root: str | Path = REPO_ROOT, *,
             "result_sha256": (held.get("score") or {}).get("result_sha256"),
             "per_sample_sha256": (held.get("score") or {}).get(
                 "per_sample_sha256"),
-        })
+        }
+
+    entries = []
+    for pid in work["transfer"]["weights"]["probes"]:
+        held = state["probes"][pid]
+        entries.append({**_descriptor(pid),
+                        "pod_path": f"{pod_root}/{pid}",
+                        "bytes": held["bytes"],
+                        "needs": "weights",
+                        "consumer": "score_existing"})
+    evidence = []
+    for pid in work["transfer"]["evidence"]["probes"]:
+        evidence.append({**_descriptor(pid),
+                         "pod_path": f"{evidence_root}/{pid}",
+                         "files": list(EVIDENCE_NAMES),
+                         "needs": "evidence",
+                         "consumer": "confirm / assert_reuse_matches"})
     return {
         "schema": SCHEMA,
         "authorizes": "nothing",
         "campaign_id": campaign_id,
         "run_attempt": run_attempt,
         "pod_root": pod_root,
+        "evidence_root": evidence_root,
         "committed_ranking": state.get("committed_ranking"),
         "committed_candidate": state.get("committed_candidate"),
         "probes": entries,
+        "evidence": evidence,
+        "_two_sections": (
+            "`probes` need their WEIGHTS because a remaining operation reads "
+            "them -- trained and not validly scored, resuming at scoring. "
+            "`evidence` are completed and validly scored: the verdict reads "
+            "their rows and the schedule reads their descriptor, and nothing "
+            "reads their checkpoints. Moving those would be 22.21 GiB to "
+            "satisfy no consumer."),
         "remaining": {
             "probes": work["probes_remaining"],
             "arms_needed": work["arms_needed"],

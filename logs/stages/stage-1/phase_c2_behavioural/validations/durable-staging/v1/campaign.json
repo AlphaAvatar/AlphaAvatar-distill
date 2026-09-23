@@ -1,0 +1,31 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "campaign_id": "c2-durable-staging",
+ "experiment": "phase_c2_behavioural",
+ "kind": "engineering infrastructure; not a scientific result",
+ "authorizes": "nothing",
+ "status": "COMPLETE and CLOSED 2026-09-23. Stopped by the maintainer's standing rule that artifacts follow consumers rather than campaigns: eight of ten completed probe checkpoints had already transferred and the remaining two had no consumer, so the transfer ended rather than finishing.",
+ "opened_utc": "2026-09-23T18:00:00Z",
+ "closed_utc": "2026-09-23T05:37:57+00:00",
+ "booked_usd": 0.7148,
+ "_booked_usd_basis": "the provider account balance delta across the whole campaign: $80.0378314134 at the start, $79.3230251094 at close. It covers the 40 GB network volume, two toy rehearsals, and every staging draw including the four that were refused in under a minute each. It is the balance rather than a sum of self-reported GPU figures because the final run was stopped before it could compute its own, and because the volume and container disk are billed separately from compute and the runner never sees them.",
+ "envelope": "the $25.00 remaining-C2 stage envelope authorized 2026-09-23; NOT the $42.0000 formal behavioural campaign ceiling, which governs the scientific campaign alone",
+ "rounds": [
+  "v1",
+  "v2"
+ ],
+ "what_it_bought": {
+  "volume": "59qt99zeg5, 40 GB, EU-NL-1, mounted at /durable",
+  "probes_on_the_volume": 8,
+  "gib_on_the_volume": 18.6,
+  "_not_a_dependency": "volume_gate asks only for probes whose WEIGHTS a remaining operation reads. This campaign has none, so the eight are sunk operational cost that may remain until teardown and are not a required input by virtue of being present."
+ },
+ "what_it_taught": [
+  "RunPod's cheapest CPU hosts run at 29-42 load per vCPU as the norm, and a draw can decay ten-fold mid-transfer; gate on in-flight throughput, never on load",
+  "df at a network-volume mount reports the backing cluster (534 TB), not the volume's quota",
+  "a capacity check must charge a resumed draw nothing for the probes it is about to skip",
+  "the whole transfer was unnecessary: 8.1 MiB of evidence, not 22.21 GiB of weights, is what a continuation's consumers read"
+ ],
+ "teardown": "the volume is retained until C2 closeout so the eight probes need not be re-derived if a later authorized operation ever reads them, then deleted",
+ "package_id": "c2_stage_envelope_20260923"
+}

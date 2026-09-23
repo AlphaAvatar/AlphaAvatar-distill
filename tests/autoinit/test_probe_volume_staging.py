@@ -254,6 +254,31 @@ def test_a_run_that_created_nothing_needs_no_teardown():
 # what the tool reads, and what it never reads
 # ---------------------------------------------------------------------------
 
+def test_a_resumed_draw_is_not_charged_for_the_probes_it_will_skip():
+    """THE double-count, on the third draw of the real run.
+
+    With seven probes already staged, `occupied + need` read
+    16.70 + 23.85 = 40.55 GB against a 40 GB volume and refused — and then
+    refused every remaining draw, which is how a loop bounded by a draw count
+    burns through it. The bytes already there were counted BOTH as occupied and
+    as still to be written.
+
+    `need` is the FINAL size of this campaign's tree, so what must fit is that
+    total beside whatever else shares the volume. This is the same error
+    `destination_gate` had on the launcher host, made again here an hour after
+    it was fixed there — which is why both now carry the reason in the code.
+    """
+    src = (REPO / "scripts/autoinit/stage_c2_probes_to_volume.py").read_text()
+    body = src[src.index("def main("):]
+    block = body[body.index("capacity = a.volume_gb"):
+                 body.index('say(f"volume mounted')]
+    assert "others = max(0, occupied - ours)" in block
+    assert "if others + need > capacity:" in block
+    assert "if occupied + need > capacity:" not in block, (
+        "the double-count is back: a resumed draw would be charged for the "
+        "probes it is about to skip")
+
+
 def test_capacity_comes_from_the_provisioned_size_and_never_from_df():
     """`df` at the mount reports the BACKING CLUSTER, not the volume's quota.
 

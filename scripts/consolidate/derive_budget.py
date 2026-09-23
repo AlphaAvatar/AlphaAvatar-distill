@@ -206,21 +206,31 @@ def project_sessions(root: Path) -> list[dict]:
     return out
 
 
-def project_balance(root: Path, pkg: dict, cap: float | None) -> dict:
+def project_balance(root: Path, pkg: dict, cap: float | None,
+                    campaigns: list[dict] | None = None) -> dict:
     """The PROJECT cumulative, across every experiment, from one stated anchor.
 
-    `anchor + every recorded closeout cost`. The anchor is the maintainer's
-    stated project total at the moment the current package opened, and every
-    run that predates it records no cost — so the sum is exactly the spend
-    since, with nothing double counted. That is an invariant rather than a
-    coincidence, so it is stated here and the runs that carry no cost are NAMED:
-    adding a cost to a pre-anchor closeout would break it, and this is where a
-    reader would look.
+    `anchor + every recorded closeout cost + every engineering campaign
+    booked since the anchor`. The anchor is the maintainer's stated project
+    total at the moment the current package opened, and every run that predates
+    it records no cost — so the sum is exactly the spend since, with nothing
+    double counted. That is an invariant rather than a coincidence, so it is
+    stated here and the runs that carry no cost are NAMED: adding a cost to a
+    pre-anchor closeout would break it, and this is where a reader would look.
 
-    It is kept apart from the formal/engineering/package balances above on
-    purpose. Those are one experiment's execution package; this is the whole
-    project's cap. An unused package allowance does not become another
-    experiment's headroom, and nothing here transfers it.
+    **The campaign term was missing, and it hid real money.** This read run
+    closeouts alone. An engineering campaign is not a run — it has no
+    `closeout/outcome.json` — so four CUDA validations and the C2 durable
+    staging, `$1.9699` between them, were charged to their packages' books and
+    to nothing else. The project cumulative is the whole project's cap, and a
+    dollar spent on a provider counts against it whichever book authorized it.
+    Campaigns authorized BEFORE the anchor are already inside it and are
+    excluded, by the same rule that excludes pre-anchor runs.
+
+    It is still kept apart from the formal/engineering/package balances above.
+    Those are one experiment's execution package; this is the whole project's
+    cap, and an unused package allowance does not become another experiment's
+    headroom.
     """
     #: From the MAINTAINER's own package decision, which states the project
     #: total at the moment it opened. The renderer used to read this anchor off
@@ -240,13 +250,39 @@ def project_balance(root: Path, pkg: dict, cap: float | None) -> dict:
     for s in priced:
         by_experiment[s["experiment_id"]] = round(
             by_experiment.get(s["experiment_id"], 0.0) + s["cost_usd"], 4)
-    cumulative = round(float(anchor) + since, 4)
+    #: EVERY ENGINEERING CAMPAIGN THAT IS NOT ALREADY INSIDE THE ANCHOR. A
+    #: campaign attributed `before_this_package` predates the anchor and is
+    #: counted in it; one attributed to any package that opened at or after it
+    #: is not. An `unknown` is NAMED and excluded rather than folded in as
+    #: zero, because a project total over unestablished attribution is not a
+    #: figure a launch may rest on.
+    camps = list(campaigns or [])
+    counted = [c for c in camps
+               if c.get("cost_usd") is not None
+               and c.get("attribution") in ("this_package", "other_package")]
+    campaign_since = round(sum(c["cost_usd"] for c in counted), 4)
+    campaign_unknown = [c.get("campaign") for c in camps
+                        if c.get("attribution") == "unknown"]
+    cumulative = round(float(anchor) + since + campaign_since, 4)
     return {
         "cap_usd": float(cap),
         "anchor_usd": float(anchor),
+        "engineering_campaign_spend_since_anchor_usd": campaign_since,
+        "engineering_campaigns_counted": [
+            {"campaign": c.get("campaign"), "cost_usd": c["cost_usd"],
+             "attribution": c["attribution"]} for c in counted],
+        "engineering_campaigns_unattributed": campaign_unknown,
+        "_campaigns_are_counted_here": (
+            "an engineering campaign is not a run and has no closeout, so it "
+            "reached its package's book and nothing else. A dollar spent on a "
+            "provider counts against the project cap whichever book "
+            "authorized it."),
         "_anchor_is": ("the project total when the current package opened, "
                        "stated by the maintainer and never back-computed"),
         "spent_since_anchor_usd": since,
+        "_spent_since_anchor_is_runs_only": (
+            "closeout costs from run records; the engineering campaign term is "
+            "reported separately above and both are in cumulative_spend_usd"),
         "cumulative_spend_usd": cumulative,
         "remaining_usd": round(float(cap) - cumulative, 4),
         "contributions_by_experiment": dict(sorted(by_experiment.items())),
@@ -330,7 +366,7 @@ def derive(root: Path = REPO_ROOT) -> dict:
         #: and nothing else, so the one number every document quotes as
         #: "cumulative project spend" was maintained by hand in several places
         #: and could not include a non-C1 session at all.
-        "project": project_balance(root, pkg, project_cap),
+        "project": project_balance(root, pkg, project_cap, campaigns),
         "engineering_campaigns": campaigns,
         "pending_reconciliation": [c["campaign"] for c in unattributed],
         #: `None` when anything is unreconciled: an arithmetic summary computed

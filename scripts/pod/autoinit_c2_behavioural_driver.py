@@ -357,6 +357,7 @@ class C2BehaviouralDriver:
             #: launcher always ships a manifest, so its absence means the
             #: restore step never ran and this is not a continuation.
             summary = {"manifest": None, "restored": [], "n": 0,
+                        "evidence_restored": [], "n_evidence": 0,
                         "arms_needed": None,
                         "_means": ("no continuation manifest; nothing to adopt "
                                    "and every arm is owed")}
@@ -385,6 +386,64 @@ class C2BehaviouralDriver:
                             else None)
 
         (self.audit / "probes").mkdir(parents=True, exist_ok=True)
+
+        #: THE EVIDENCE SECTION FIRST, because it is what this campaign mostly
+        #: consists of. A completed and validly scored probe's checkpoint has
+        #: no remaining consumer and was not moved; what arrived is its
+        #: descriptor, its score and the per-sample rows the verdict reads.
+        #:
+        #: The journal entry is marked `evidence_only` so `reidentify` does not
+        #: look for weights that were deliberately left archival, and carries
+        #: no `model_dir` at all: a path that cannot be checked is not
+        #: evidence, and inventing one here is how a later reader would come to
+        #: believe a checkpoint is present.
+        evidence_restored: list[dict[str, Any]] = []
+        for entry in manifest.get("evidence", []):
+            pid = Path(entry["pod_path"])
+            name = entry["probe_id"]
+            if not entry.get("score"):
+                raise C2DriverError(
+                    f"{name}: named in the evidence section with no score. "
+                    "The only reason to admit a probe without its weights is "
+                    "that its measurement is already complete, and a probe "
+                    "that has not been scored resumes AT SCORING -- which "
+                    "reads the model, so its weights must travel.")
+            record = {
+                "probe_id": name, "campaign": self.a.campaign,
+                "rung": entry.get("rung"), "arm": entry.get("arm"),
+                "seed": entry.get("seed"),
+                "initialization_artifact_digest":
+                    entry.get("initialization_artifact_digest"),
+                "config_sha256": entry.get("config_sha256"),
+                "complete": True,
+                "evidence_only": True,
+                "restored_from": {
+                    "campaign": manifest["campaign_id"],
+                    "source_attempt": entry.get("source_attempt"),
+                    "durable_path": entry.get("durable_path"),
+                    "evidence_path": str(pid),
+                },
+                "durable": {"identity": entry.get("identity")},
+                "_weights_are_archival": (
+                    "completed and validly scored: no remaining authorized "
+                    "operation reads this checkpoint, so it stays in the "
+                    "durable store and is not on this resource. The recorded "
+                    "identity is the one its campaign announced, kept as "
+                    "provenance."),
+            }
+            #: The rows the verdict reads, re-pointed at this pod's copies and
+            #: hash-checked against what the score itself records. A truncated
+            #: per-sample file is caught here rather than inside the decision
+            #: rule.
+            record["score"] = self._restore_score_evidence(
+                name, pid, dict(entry["score"]))
+            (self.audit / "probes" / f"{name}.json").write_text(
+                json.dumps(record, indent=2, default=str) + "\n")
+            evidence_restored.append({"probe_id": name,
+                                      "evidence_path": str(pid)})
+            say(f"  evidence {name}: descriptor and hash-checked rows; "
+                "weights archival")
+
         restored: list[dict[str, Any]] = []
         for entry in manifest.get("probes", []):
             pid = entry["probe_id"]
@@ -463,6 +522,14 @@ class C2BehaviouralDriver:
 
         summary = {
             "manifest": str(path), "restored": restored, "n": len(restored),
+            "evidence_restored": evidence_restored,
+            "n_evidence": len(evidence_restored),
+            "_two_admission_paths": (
+                "a probe whose WEIGHTS a remaining operation reads is "
+                "re-identified from the bytes that arrived here. A completed "
+                "and validly scored probe is admitted on its descriptor and "
+                "its hash-checked rows, because nothing remaining reads its "
+                "checkpoint and moving one would be bytes for no consumer."),
             "committed_candidate": manifest.get("committed_candidate"),
             "arms_needed": (None if self.arms_needed is None
                             else sorted(self.arms_needed)),
@@ -619,7 +686,31 @@ class C2BehaviouralDriver:
                 "completed one.")
 
     def reidentify(self, entry: Mapping[str, Any]) -> tuple[bool, str]:
-        """Do the bytes on disk still ARE the probe this entry describes?"""
+        """Do the bytes on disk still ARE the probe this entry describes?
+
+        **An EVIDENCE-ONLY entry has no bytes here to check, by design.** A
+        completed and validly scored probe contributes per-sample rows, a
+        score, a descriptor and hashes; no remaining authorized operation reads
+        its checkpoint, so the checkpoint is archival and was never moved onto
+        this resource. Re-identifying weights that are deliberately absent
+        would refuse every such probe.
+
+        What binds one instead is not weaker for being smaller: the descriptor
+        is checked against the schedule's own by `assert_reuse_matches`, and
+        the rows the verdict reads are hash-checked against the hashes the
+        score record itself carries, by `_restore_score_evidence`. What is not
+        re-derived is the artifact identity of a checkpoint nothing will
+        execute -- which the maintainer has ruled is archival evidence rather
+        than an execution dependency.
+        """
+        if entry.get("evidence_only"):
+            if not entry.get("score"):
+                return False, (
+                    "an evidence-only entry carries no score; the only reason "
+                    "to admit one without its weights is that its measurement "
+                    "is already complete")
+            return True, ("evidence-only: descriptor and hash-checked rows, "
+                          "weights archival and not on this resource")
         durable = (entry.get("durable") or {})
         identity = durable.get("identity")
         if not identity:
@@ -1187,6 +1278,9 @@ class C2BehaviouralDriver:
                 out["failed"].append(f"{name}: {exc}")
         out["freed_gib"] = round(freed / 2**30, 3)
         self.ev.setdefault("probe_workdirs_released", []).append(out)
+        if out["refused_outside_workspace"]:
+            say("  REFUSED to release outside this workspace: "
+                f"{out['refused_outside_workspace']}")
         if out["refused_outside_workspace"]:
             say("  REFUSED to release outside this workspace: "
                 f"{out['refused_outside_workspace']}")

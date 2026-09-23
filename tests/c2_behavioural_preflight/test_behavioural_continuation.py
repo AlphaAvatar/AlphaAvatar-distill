@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -124,9 +125,19 @@ class _Target:
         #: probes now live on an attached volume, so a rewrite that knew only
         #: `/workspace` would send every presence check to a path outside the
         #: fixture and report absence for probes that are there.
+        #: AT PATH BOUNDARIES ONLY. A plain `str.replace` of the mount prefix
+        #: rewrites it wherever it appears, including inside a FILENAME:
+        #: `.../evidence/<pid>/durable_ack.json` contains `/durable`, so the
+        #: naive version turned it into `.../<pid><pod-root>/durable_ack.json`
+        #: and the presence check reported a file that had arrived perfectly as
+        #: absent. A fixture that fabricates a failure is worse than one that
+        #: misses a real one, because the failure it invents is investigated.
         rewritten = command
         for prefix in ("/workspace", L.VOLUME_MOUNT):
-            rewritten = rewritten.replace(prefix, str(self.pod.local(prefix)))
+            rewritten = re.sub(
+                re.escape(prefix) + r"(?=/|\s|$)",
+                str(self.pod.local(prefix)).replace("\\", "\\\\"),
+                rewritten)
         out = subprocess.run(["bash", "-c", rewritten], capture_output=True,
                              text=True, timeout=timeout)
         return type("R", (), {"returncode": out.returncode,
@@ -680,37 +691,53 @@ def test_a_replacement_pod_restores_probes_from_the_durable_destination(
     assert manifest_path.is_file(), "the manifest must always travel"
     manifest = json.loads(manifest_path.read_text())
     assert manifest["campaign_id"] == BG.CAMPAIGN_ID
-    assert len(manifest["probes"]) == 3
-    for entry in manifest["probes"]:
+
+    #: ARTIFACTS FOLLOW CONSUMERS. All three probes are completed and validly
+    #: scored, so nothing remaining reads their weights and none of them is in
+    #: the `probes` section at all. What travels is their evidence.
+    assert manifest["probes"] == [], (
+        "a completed and validly scored probe's checkpoint was named for "
+        "restore; no remaining operation reads it")
+    assert len(manifest["evidence"]) == 3
+    for entry in manifest["evidence"]:
         #: No entry DIRECTS the pod at the producing pod's location. The
         #: announced identity travels verbatim and its `path` is provenance
         #: that verification never reads; what the driver acts on is
-        #: `pod_path`, and that is under this pod's restore root.
+        #: `pod_path`.
         assert "model_dir" not in entry
-        assert entry["pod_path"].startswith(
-            f"{L.VOLUME_MOUNT}/{BG.CAMPAIGN_ID}/probes")
+        assert entry["pod_path"].startswith(L.EVIDENCE_DIR)
         assert "_train" not in entry["pod_path"]
         assert "_train" not in entry["durable_path"]
         landed = pod2.local(entry["pod_path"])
-        assert (landed / "model.safetensors").is_file()
-        assert (landed / "config.json").is_file()
-        assert (landed / BC.PER_SAMPLE_NAME).is_file()
+        for name in BC.EVIDENCE_NAMES:
+            assert (landed / name).is_file(), name
+        #: And the checkpoint is NOT there. That is the point.
+        assert not (landed / "model.safetensors").exists(), (
+            "22 GiB of weights followed evidence nothing reads")
     #: And nothing outside the identities mentions the producing pod at all.
     without_identities = json.dumps(
         [{k: v for k, v in e.items() if k != "identity"}
-         for e in manifest["probes"]])
+         for e in manifest["evidence"]])
     assert "_train" not in without_identities
 
 
 def test_the_replacement_driver_re_identifies_at_the_new_local_path(
         tmp_path, repo, transport):
-    """The driver's own admission, on bytes that are on ITS filesystem."""
+    """The driver's own admission, on bytes that are on ITS filesystem.
+
+    Two probes, and they are admitted by DIFFERENT routes because they are in
+    different lifecycle states. The unscored one's weights are what the scorer
+    will read, so they travel and are re-identified from the bytes that arrived
+    here. The scored one contributes rows the verdict reads; its checkpoint has
+    no remaining consumer and stays archival.
+    """
     store = tmp_path / "store"
     pod1, pod2 = _Pod(tmp_path / "pod1"), _Pod(tmp_path / "pod2")
     transport.pods["fake-host"] = pod1
-    ids = _screening_ids()[:2]
-    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)
-             for pid, arm, seed in ids]
+    scored_id, unscored_id = [p for p, _, _ in _screening_ids()[:2]]
+    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=pid != unscored_id)
+             for pid, arm, seed in _screening_ids()[:2]]
     _secure(_Ctx(pod1, store, "attempt1"), units)
     shutil.rmtree(pod1.root)
     transport.pods["fake-host"] = pod2
@@ -719,17 +746,25 @@ def test_the_replacement_driver_re_identifies_at_the_new_local_path(
 
     driver = _driver(pod2, "attempt2")
     summary = driver.restore_campaign()
-    assert summary["n"] == 2
+    assert summary["n"] == 1, "only the unscored probe's weights travel"
+    assert summary["n_evidence"] == 1
     journal = driver.load_campaign_journal()
     assert sorted(r["probe_id"] for r in journal["restored"]) == sorted(
-        p for p, _, _ in ids)
+        [scored_id, unscored_id])
     assert journal["rejected"] == []
-    #: The journal's model_dir is on THIS pod, and the score's evidence too.
-    for pid, _, _ in ids:
-        entry = driver.training[pid]
-        assert entry["model_dir"].startswith(str(pod2.root))
-        assert Path(driver.scores[pid]["per_sample_path"]).is_file()
-        assert "_train" not in entry["model_dir"]
+
+    #: The unscored one: weights on THIS pod, re-identified from them.
+    entry = driver.training[unscored_id]
+    assert entry["model_dir"].startswith(str(pod2.root))
+    assert "_train" not in entry["model_dir"]
+    assert not entry.get("evidence_only")
+
+    #: The scored one: no model_dir at all, because a path that cannot be
+    #: checked is not evidence, and its rows are here and hash-checked.
+    scored = driver.training[scored_id]
+    assert scored["evidence_only"] is True
+    assert "model_dir" not in scored
+    assert Path(driver.scores[scored_id]["per_sample_path"]).is_file()
 
 
 def test_a_restored_probe_whose_bytes_changed_in_transit_is_refused(
@@ -742,7 +777,10 @@ def test_a_restored_probe_whose_bytes_changed_in_transit_is_refused(
     pod1, pod2 = _Pod(tmp_path / "pod1"), _Pod(tmp_path / "pod2")
     transport.pods["fake-host"] = pod1
     pid, arm, seed = _screening_ids()[0]
-    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)
+    #: UNSCORED, because only a probe whose weights the scorer will read
+    #: travels. A completed and validly scored probe's checkpoint is archival.
+    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)
              for pid, arm, seed in _screening_ids()[:1]]
     _secure(_Ctx(pod1, store, "attempt1"), units)
     shutil.rmtree(pod1.root)
@@ -770,7 +808,10 @@ def test_the_launcher_refuses_to_ship_a_probe_that_no_longer_verifies(
     store = tmp_path / "store"
     pod1, pod2 = _Pod(tmp_path / "pod1"), _Pod(tmp_path / "pod2")
     transport.pods["fake-host"] = pod1
-    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)
+    #: UNSCORED, because only a probe whose weights the scorer will read
+    #: travels. A completed and validly scored probe's checkpoint is archival.
+    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)
              for pid, arm, seed in _screening_ids()[:1]]
     _secure(_Ctx(pod1, store, "attempt1"), units)
     shutil.rmtree(pod1.root)
@@ -827,8 +868,17 @@ def _pod_view(pod: _Pod) -> Path:
     raw = pod.local(L.RESTORE_MANIFEST).read_text()
     manifest = json.loads(raw)
     manifest["pod_root"] = str(pod.local(manifest["pod_root"]))
-    for entry in manifest["probes"]:
-        entry["pod_path"] = str(pod.local(entry["pod_path"]))
+    if manifest.get("evidence_root"):
+        manifest["evidence_root"] = str(pod.local(manifest["evidence_root"]))
+    #: BOTH SECTIONS. `probes` are the ones whose weights a remaining
+    #: operation reads; `evidence` are the completed and validly scored ones,
+    #: whose rows the verdict reads and whose checkpoints stay archival. A
+    #: mapping applied to one and not the other sent the driver at a
+    #: pod-absolute evidence path that does not exist on this host, and it
+    #: refused a probe whose rows had arrived perfectly.
+    for section in ("probes", "evidence"):
+        for entry in manifest.get(section) or []:
+            entry["pod_path"] = str(pod.local(entry["pod_path"]))
     out = pod.root / "continuation_view.json"
     out.write_text(json.dumps(manifest, indent=1) + "\n")
     return out
@@ -978,7 +1028,7 @@ def test_a_trained_but_unscored_probe_owes_its_scoring_not_its_training(
     assert ids[2][0] in work["probes_remaining"]
     assert len(work["probes_complete"]) == 2
     #: Its bytes are restored anyway, because scoring needs them.
-    assert ids[2][0] in work["restore"]["probes"]
+    assert ids[2][0] in work["transfer"]["weights"]["probes"]
     landed = pod2.local(
         f"{L.VOLUME_MOUNT}/{BG.CAMPAIGN_ID}/probes/{ids[2][0]}")
     assert (landed / "model.safetensors").is_file()
@@ -1028,7 +1078,7 @@ def test_a_fresh_campaign_prices_the_full_authorized_session(tmp_path):
     work = BC.remaining_work(REPO, state=state)
     assert work["n_probes_remaining"] == 12
     assert len(work["arms_needed"]) == 6
-    assert work["restore"]["minutes"] == 0.0
+    assert work["transfer"]["minutes"] == 0.0
     d = work["decomposition"]
     assert (d["expected_minutes"], d["hard_minutes"]) == (1294.87, 1800.53), (
         "a fresh campaign must still price exactly the authorized session")
@@ -1128,88 +1178,50 @@ def test_a_cheaper_card_does_not_buy_more_remaining_work(tmp_path):
 def test_the_restore_is_a_named_reserve_not_a_throughput_claim():
     """A rate was the right shape for a push; it is wrong for everything since.
 
-    While the dev box PUSHED to an already-billing pod, the uplink was the
-    binding constraint and a bound took the slowest observation. Then the bytes
-    were to be pre-staged and PULLED, and the rate became somebody else's
-    network, moving with time of day, routing and load. Now they are on an
-    attached volume and there is no session-time transfer at all — what is
-    reserved is the cost of re-reading and re-hashing them.
+    This quantity has had four shapes. `RESTORE_MB_PER_SECOND` times bytes was
+    right while the dev box PUSHED to an already-billing pod. A flat transport
+    reserve was right once the bytes were to be pulled from an object store,
+    because the rate then belonged to somebody else's network. A flat
+    verification reserve was right once the bytes sat on an attached volume and
+    were only read. And now the class is chosen by WHAT ACTUALLY MOVES, because
+    a campaign whose whole remaining working set is 8.1 MiB of per-sample rows
+    was being charged the reserve for reading and hashing 22 GiB.
 
-    Through all three the invariant is the same and it is what this pins: the
-    figure is a RESERVE, flat in bytes, never a rate. The exact number is
-    allowed to move when the architecture does; a rate creeping back in is not.
+    Through all four the invariant is what this pins: the figure is a RESERVE,
+    flat within its class, never a rate. The exact numbers may move when the
+    architecture does; a rate creeping back in may not.
     """
     for word in ("NOT a measured", "reserve", "diagnostic"):
         assert word in BC.PROBE_AVAILABILITY_RESERVE_BASIS, word
     assert not hasattr(BC, "RESTORE_MB_PER_SECOND"), (
         "the rate is back; a time-varying quantity must not be a hard bound")
-    assert not hasattr(BC, "TRANSPORT_RESERVE_MINUTES"), (
-        "the old name still resolves, so a caller can read a reserve whose "
-        "documented basis no longer describes what the session does")
+    assert not hasattr(BC, "TRANSPORT_RESERVE_MINUTES")
+    assert not hasattr(BC, "restore_minutes"), (
+        "the old entry point still resolves, so a caller can get the weights "
+        "reserve for a working set that is evidence only")
 
-    #: FLAT: the same reserve whatever has to be made available. Ten probes and
-    #: one cost the same reserved minutes, because the reserve bounds the BILL
-    #: and not the schedule -- faster verification just finishes sooner.
+    weights = BC.PROBE_AVAILABILITY_RESERVE_MINUTES
+    evidence = BC.EVIDENCE_RESERVE_MINUTES
+    assert 0 < evidence < weights, (
+        "an evidence-only working set is three orders of magnitude smaller "
+        "than a weights one and must not be reserved the same minutes")
+
+    #: FLAT WITHIN A CLASS: one probe's weights and ten cost the same reserved
+    #: minutes, because the reserve bounds the BILL and not the schedule.
     one, ten = int(2.22 * 2**30), int(22.2 * 2**30)
-    reserve = BC.PROBE_AVAILABILITY_RESERVE_MINUTES
-    assert reserve > 0
-    assert BC.restore_minutes(one) == BC.restore_minutes(ten) == reserve
+    assert BC.availability_minutes(one, 0) == weights
+    assert BC.availability_minutes(ten, 0) == weights
+    #: Evidence beside weights does not add a second reserve.
+    assert BC.availability_minutes(ten, 8 << 20) == weights
 
-    #: And it is not a fee for existing: a campaign with nothing to make
-    #: available is charged nothing, which is what keeps the FROZEN full-session
-    #: ceiling where it is.
-    assert BC.restore_minutes(0) == 0.0
+    #: EVIDENCE ONLY gets the evidence reserve, whatever the skipped weights
+    #: would have been.
+    assert BC.availability_minutes(0, 8 << 20) == evidence
+    assert BC.availability_minutes(0, 1) == evidence
 
-    #: AND NOTHING TO MOVE COSTS NOTHING. A fresh campaign holds no verified
-    #: probe, so there is no transfer to reserve for. Charging one raised the
-    #: FROZEN session ceiling from $33.2099 -- the one thing a reserve for
-    #: operational variance must never do.
-    assert BC.restore_minutes(0) == 0.0
-
-    #: And it is conservative in the direction that matters: 22.2 GiB inside
-    #: the reserve needs only a few MB/s, far under a datacenter fetch.
-    implied = ten / (90.0 * 60) / 1e6
-    assert implied < 6.0, f"the reserve implies {implied:.1f} MB/s, not conservative"
-
-    with pytest.raises(BC.ContinuationError):
-        BC.restore_minutes(one, reserve_minutes=0)
-    #: NOT monotone in bytes any more, and deliberately: the reserve bounds
-    #: the BILL for a transfer whose rate is not ours to predict, so twice the
-    #: bytes reserves the same minutes. The old assertion was right for a
-    #: rate-times-bytes bound and is wrong for a reserve.
-    assert BC.restore_minutes(2 * ten) == BC.restore_minutes(ten)
-
-
-# ---------------------------------------------------------------------------
-# the destination gate, and the `campaign_attempts` cases with no run record
-# ---------------------------------------------------------------------------
-
-def test_the_destination_gate_checks_the_volume_the_fetcher_writes_to(
-        tmp_path, repo):
-    """One flag decides where probes are secured, and every consumer reads it.
-
-    The gate checked the `DURABLE_STORE` constant while `probe_destination`
-    honoured `--ckpt-store`, so an operator passing a different store would
-    have had capacity verified on a volume nothing writes to — a durability
-    check that is green about the wrong disk. No test called this gate at all,
-    which is how the two came apart.
-    """
-    ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt1")
-    ok, why = L.destination_gate(ctx)
-    root = L.campaign_store(BG.CAMPAIGN_ID, ctx.args.ckpt_store)
-    #: WHICH VOLUME, not whether it happens to be big enough. The verdict here
-    #: depends on how much room the test host's tmpfs has, and it flipped when
-    #: the durable requirement was corrected from the understated 13.3 GiB to
-    #: the real 26.7 GiB -- a correct repair turning a test red for a reason
-    #: the test is not about. What must hold either way is that the gate reads
-    #: the store the fetcher writes to and SAYS which one it read.
-    assert str(root) in why, why
-    assert L.probe_destination(ctx, "screening.B.s1").is_relative_to(root)
-    #: And the capacity arithmetic it applies is the derived durable
-    #: requirement, whichever way it came out.
-    req = BH.storage_requirement(BH.candidate_manifest(REPO),
-                                 BH.schedule(REPO), REPO)
-    assert f"{req['durable_backend']['gib']:.1f}" in why.replace(",", ""), why
+    #: And nothing at all is charged nothing: a fresh campaign holds no probe,
+    #: and charging it would move the FROZEN full-session ceiling.
+    assert BC.availability_minutes(0, 0) == 0.0
 
 
 def test_the_destination_gate_refuses_an_unusable_store(tmp_path, repo):
@@ -2509,7 +2521,7 @@ def test_a_fresh_campaign_owes_no_pre_staging(tmp_path, repo, transport):
     ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "empty", "attempt1")
     ok, why = L.volume_gate(ctx)
     assert ok, why
-    assert "holds no verified probe" in why
+    assert "no probe needs its weights" in why
 
 
 def test_the_gate_refuses_a_continuation_whose_probes_were_never_staged(
@@ -2524,7 +2536,10 @@ def test_the_gate_refuses_a_continuation_whose_probes_were_never_staged(
     pod1 = _Pod(tmp_path / "pod1")
     transport.pods["fake-host"] = pod1
     ids = _screening_ids()[:2]
-    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)
+    #: UNSCORED: the gate asks for the probes whose WEIGHTS a remaining
+    #: operation reads, and a completed and validly scored probe has none.
+    units = [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)
              for pid, arm, seed in ids]
     _secure(_Ctx(pod1, store, "attempt1"), units)
 
@@ -2555,7 +2570,8 @@ def test_only_a_completed_staging_run_for_this_campaign_and_volume_counts(
     transport.pods["fake-host"] = pod1
     pid, arm, seed = _screening_ids()[0]
     _secure(_Ctx(pod1, store, "attempt1"),
-            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)])
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)])
     ctx = _Ctx(_Pod(tmp_path / "pod2"), store, "attempt2")
 
     #: A run that could not confirm its own resource was released is not
@@ -2586,7 +2602,8 @@ def test_the_gate_refuses_a_mount_that_would_cover_the_checkout(
     transport.pods["fake-host"] = pod1
     pid, arm, seed = _screening_ids()[0]
     _secure(_Ctx(pod1, store, "attempt1"),
-            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)])
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)])
     _staging_record(repo, "stage1", probes=[pid])
 
     ctx = _Ctx(_Pod(tmp_path / "pod2"), store, "attempt2")
@@ -2612,7 +2629,8 @@ def test_the_launcher_refuses_a_volume_index_for_another_campaign(
     transport.pods["fake-host"] = pod1
     pid, arm, seed = _screening_ids()[0]
     _secure(_Ctx(pod1, store, "attempt1"),
-            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)])
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)])
     shutil.rmtree(pod1.root)
     transport.pods["fake-host"] = pod2
     root = _prestage(pod2, store)
@@ -2640,7 +2658,8 @@ def test_the_launcher_refuses_a_copy_staged_from_a_different_attempt(
     transport.pods["fake-host"] = pod1
     pid, arm, seed = _screening_ids()[0]
     _secure(_Ctx(pod1, store, "attempt1"),
-            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)])
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)])
     shutil.rmtree(pod1.root)
     transport.pods["fake-host"] = pod2
     root = _prestage(pod2, store)
@@ -2663,7 +2682,8 @@ def test_a_probe_named_for_restore_but_absent_from_the_volume_aborts(
     transport.pods["fake-host"] = pod1
     ids = _screening_ids()[:2]
     _secure(_Ctx(pod1, store, "attempt1"),
-            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)
              for pid, arm, seed in ids])
     shutil.rmtree(pod1.root)
     transport.pods["fake-host"] = pod2
@@ -2675,12 +2695,15 @@ def test_a_probe_named_for_restore_but_absent_from_the_volume_aborts(
     assert any("never staged onto the volume" in m for m in ctx.said)
 
 
-def test_the_restore_moves_no_bytes(tmp_path, repo, transport):
-    """The point of the volume: a continuation transfers nothing.
+def test_the_restore_moves_no_weights_for_a_completed_probe(
+        tmp_path, repo, transport):
+    """What the volume and the consumer rule buy, counted in scp calls.
 
     `scp` is the substituted seam in this module, so the transport fixture
-    records every call. A continuation must make exactly one — the manifest —
-    and never one per probe.
+    records every call. Three completed and validly scored probes cost: one
+    manifest, plus one evidence copy each. What they do NOT cost is a
+    checkpoint — not over the wire, because it is pre-staged, and not at all,
+    because nothing remaining reads it.
     """
     store = tmp_path / "store"
     pod1, pod2 = _Pod(tmp_path / "pod1"), _Pod(tmp_path / "pod2")
@@ -2697,16 +2720,29 @@ def test_the_restore_moves_no_bytes(tmp_path, repo, transport):
     ctx = _Ctx(pod2, store, "attempt2")
     assert L.restore_campaign_probes(ctx) is True, ctx.said
     sent = transport.calls[before:]
-    assert len(sent) == 1, (
-        f"a continuation sent {len(sent)} scp calls; the probes are "
-        "pre-staged and only the manifest travels")
+    assert len(sent) == 1 + 3, (
+        f"a continuation sent {len(sent)} scp calls; expected the manifest "
+        "plus one evidence copy per completed probe")
     assert any(a.endswith("campaign_continuation.json") for a in sent[0])
-    #: And the probes really are readable where the driver will look.
-    for entry in json.loads(
-            pod2.local(L.RESTORE_MANIFEST).read_text())["probes"]:
+
+    #: Not one call carries a checkpoint.
+    for call in sent:
+        assert not any(a.endswith("model.safetensors") for a in call), call
+
+    #: And the preflight says so, in the numbers.
+    ev = ctx.evidence["campaign_restore"]
+    assert ev["n_weights_probes"] == 0
+    assert ev["n_evidence_probes"] == 3
+    assert ev["skipped_checkpoints"] == 3
+    assert ev["avoided_gib"] >= 0.0
+    assert "GiB avoided" in ev["transfer_plan"]["summary"]
+
+    #: The rows the verdict reads are on the pod; the weights are not.
+    manifest = json.loads(pod2.local(L.RESTORE_MANIFEST).read_text())
+    for entry in manifest["evidence"]:
         landed = pod2.local(entry["pod_path"])
-        assert (landed / "model.safetensors").is_file()
         assert (landed / BC.PER_SAMPLE_NAME).is_file()
+        assert not (landed / "model.safetensors").exists()
 
 
 def test_an_indexed_probe_whose_bytes_are_not_on_the_volume_aborts(
@@ -2724,7 +2760,8 @@ def test_an_indexed_probe_whose_bytes_are_not_on_the_volume_aborts(
     transport.pods["fake-host"] = pod1
     ids = _screening_ids()[:2]
     _secure(_Ctx(pod1, store, "attempt1"),
-            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed,
+                      scored=False)
              for pid, arm, seed in ids])
     shutil.rmtree(pod1.root)
     transport.pods["fake-host"] = pod2
@@ -2744,10 +2781,11 @@ def test_a_scored_probe_whose_rows_did_not_survive_is_caught_before_the_verdict(
         tmp_path, repo, transport):
     """The decision rule reads per-sample ROWS, not the summary.
 
-    A scored probe whose `per_sample.jsonl` is missing has weights that
-    re-identify perfectly and a score that cannot decide anything. Discovering
-    that in stage D wastes the entire run, so the presence check asks for the
-    files the REMAINING STAGES read, not merely for a checkpoint.
+    A completed probe contributes evidence and nothing else, so its rows are
+    the whole of what it brings. If they are missing on the launcher host the
+    continuation has nothing to decide with, and discovering that in stage D
+    wastes the entire run — which is why the check is on the host, before a
+    byte is sent, rather than a presence test after.
     """
     store = tmp_path / "store"
     pod1, pod2 = _Pod(tmp_path / "pod1"), _Pod(tmp_path / "pod2")
@@ -2757,15 +2795,20 @@ def test_a_scored_probe_whose_rows_did_not_survive_is_caught_before_the_verdict(
             [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)])
     shutil.rmtree(pod1.root)
     transport.pods["fake-host"] = pod2
-    root = _prestage(pod2, store)
+    _prestage(pod2, store)
 
-    index = json.loads((root / "staged_index.json").read_text())
-    assert index["probes"][pid]["scored"] is True
-    (root / pid / BC.PER_SAMPLE_NAME).unlink()
-
+    held = BC.campaign_state(L.campaign_store(BG.CAMPAIGN_ID, store))
+    #: `campaign_state` reads a probe whose rows are gone as UNSCORED, which is
+    #: correct and a different route -- so the case this covers is rows that
+    #: exist for the state read and are removed before the transfer.
+    assert held["probes"][pid]["scored"] is True
     ctx = _Ctx(pod2, store, "attempt2")
+    work = L.campaign_remaining_work(ctx)
+    assert pid in work["transfer"]["evidence"]["probes"]
+    (Path(held["probes"][pid]["durable_path"]) / BC.PER_SAMPLE_NAME).unlink()
+
     assert L.restore_campaign_probes(ctx) is False
-    assert any("not readable on the volume" in m for m in ctx.said)
+    assert any("evidence is incomplete on this host" in m for m in ctx.said)
 
 
 # ---------------------------------------------------------------------------
@@ -3028,3 +3071,81 @@ def test_the_launcher_and_the_governance_module_name_one_runs_root():
     assert BG.EXPERIMENT_ID == L.EXPERIMENT_ID
     assert BG.STAGE_ID == L.STAGE_ID
     assert BG.campaign_runs_rel() == L.runs_root_rel()
+
+
+def test_a_campaign_of_only_scored_probes_needs_no_staging_at_all(
+        tmp_path, repo, transport):
+    """The gate must not ask for what has no consumer.
+
+    This is C2's actual state: ten completed and validly scored probes and two
+    untrained ones. If the gate asks for every held probe it demands a
+    22.21 GiB pre-stage to satisfy nobody — and then refuses a launch whose
+    real working set is 8.1 MiB of rows. A mutation that widened the gate back
+    to every held probe passed every other test in this module.
+    """
+    store = tmp_path / "store"
+    pod1 = _Pod(tmp_path / "pod1")
+    transport.pods["fake-host"] = pod1
+    ids = _screening_ids()[:3]
+    _secure(_Ctx(pod1, store, "attempt1"),
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)
+             for pid, arm, seed in ids])
+
+    ctx = _Ctx(_Pod(tmp_path / "pod2"), store, "attempt2")
+    work = L.campaign_remaining_work(ctx)
+    assert work["transfer"]["weights"]["n"] == 0
+    assert work["transfer"]["evidence"]["n"] == 3
+    assert work["transfer"]["skipped_weights"]["n"] == 3
+
+    #: NO staging record exists, and the gate passes anyway, because nothing
+    #: needs staging.
+    ok, why = L.volume_gate(ctx)
+    assert ok, why
+    assert "no probe needs its weights" in why
+    assert "have no remaining consumer" in why
+
+
+def test_an_unscored_probe_may_not_be_admitted_as_evidence(tmp_path, repo,
+                                                           transport):
+    """A probe that has not been scored resumes AT SCORING, and scoring reads
+    the model. Admitting one on its descriptor alone would let the scorer run
+    against weights that are not there — and the whole reason a completed
+    probe may travel light is that its measurement is already finished."""
+    store = tmp_path / "store"
+    pod1, pod2 = _Pod(tmp_path / "pod1"), _Pod(tmp_path / "pod2")
+    transport.pods["fake-host"] = pod1
+    pid, arm, seed = _screening_ids()[0]
+    _secure(_Ctx(pod1, store, "attempt1"),
+            [_produce(pod1, pid, rung="screening", arm=arm, seed=seed)])
+    shutil.rmtree(pod1.root)
+    transport.pods["fake-host"] = pod2
+    _prestage(pod2, store)
+    ctx = _Ctx(pod2, store, "attempt2")
+    assert L.restore_campaign_probes(ctx) is True, ctx.said
+
+    #: Strip the score from the evidence entry the pod will read.
+    view = pod2.local(L.RESTORE_MANIFEST)
+    manifest = json.loads(view.read_text())
+    assert manifest["evidence"] and manifest["evidence"][0]["score"]
+    manifest["evidence"][0]["score"] = None
+    view.write_text(json.dumps(manifest, indent=1) + "\n")
+
+    driver = _driver(pod2, "attempt2")
+    with pytest.raises(D.C2DriverError, match="no score"):
+        driver.restore_campaign()
+
+
+def test_the_journal_refuses_an_evidence_entry_without_a_score(tmp_path,
+                                                               monkeypatch):
+    """The same rule at the other admission point.
+
+    `reidentify` short-circuits for an evidence-only entry because there are
+    deliberately no weights to check. That shortcut must not become a way in
+    for an entry that has neither weights nor a completed measurement.
+    """
+    drv = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
+    ok, why = drv.reidentify({"evidence_only": True,
+                              "score": {"result_sha256": "x"}})
+    assert ok and "evidence-only" in why
+    ok, why = drv.reidentify({"evidence_only": True})
+    assert not ok and "no score" in why

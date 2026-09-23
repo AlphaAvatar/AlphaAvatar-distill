@@ -1,15 +1,12 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-23T18:00:00Z",
+ "generated_utc": "2026-09-23T05:30:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, each with its owner named. Human view: logs/state/current.md. History: logs/budget/decisions.md. Index: logs/README.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
-  "paid_compute": true,
-  "pods": 1,
-  "pod_id": "3lyghvymmpg5ud",
-  "what": "a $0.06/h CPU pod copying this campaign's ten completed probes onto network volume 59qt99zeg5 (40 GB, EU-NL-1), so later pods attach them instead of paying an L40S to receive them",
-  "record": "logs/shared/c2_durable_staging/stage1/evidence/staging_record.json",
-  "_verified": "an account-wide provider query names this pod and no other"
+  "paid_compute": false,
+  "pods": 0,
+  "_verified": "an account-wide provider query returns [] after teardown; a 40 GB network volume at $0.004/h is retained until C2 closeout and holds eight completed probes that are sunk cost, not a dependency"
  },
  "authorized": {
   "any": true,
@@ -22,12 +19,12 @@
  "prepared_launch": {
   "any": false,
   "run": null,
-  "note": "attempt6 has no grant, readiness record, authorization or bundle. The chain is built after the probes verify on the volume: volume_gate refuses a continuation whose probes were never staged, at $0 rather than on a pod that cannot retrain them."
+  "note": "attempt6 has no readiness record, authorization or bundle yet; its grant is written. Nothing needs pre-staging: no probe's weights have a remaining consumer, so volume_gate passes with no staging record."
  },
  "budget": {
-  "cumulative_spend_usd": 331.4509,
+  "cumulative_spend_usd": 333.3808,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 38.5491,
+  "remaining_usd": 36.6192,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -184,5 +181,5 @@
   ],
   "owner": "logs/stages/stage-1/phase_c2_behavioural/plans/"
  },
- "next": "finish pre-staging the ten probes onto the network volume, then build and execute the attempt6 chain. Its session ceiling is SHORTENED to the campaign's remaining money: $19.7533 over 1070.96 minutes, against 491.51 minutes of work."
+ "next": "build and execute the attempt6 chain. Its working set is 8.1 MiB of evidence, not 22.21 GiB of weights: artifacts follow consumers (AGENTS.md P8.4). Session ceiling $19.7533 over 1070.96 minutes against 491.51 minutes of work."
 }

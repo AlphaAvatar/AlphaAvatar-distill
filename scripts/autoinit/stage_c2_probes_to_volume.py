@@ -832,25 +832,56 @@ def main(argv: list[str] | None = None) -> int:
                 raise StagingError(
                     "--volume-gb must state the provisioned size of the network "
                     "volume; df cannot answer this and a guess is not a bound")
-            capacity = a.volume_gb * 10**9          # the provider sells GB, not GiB
-            used = pod.run(f"du -sb {MOUNT} 2>/dev/null | cut -f1",
-                           timeout=1800).stdout.strip()
-            occupied = int(used) if used.isdigit() else 0
-            ev["volume"] = {"provisioned_gb": a.volume_gb,
-                            "capacity_bytes": capacity,
-                            "occupied_bytes_at_start": occupied,
-                            "need_bytes": need,
-                            "_df_is_not_the_quota": (
-                                "df at the mount reports the backing cluster, not "
-                                "this volume's quota, so free space is derived "
-                                "from the provisioned size the provider sold")}
-            if occupied + need > capacity:
+            capacity = a.volume_gb * 10**9      # the provider sells GB, not GiB
+
+            def _du(path: str) -> int:
+                out = pod.run(
+                    f"du -sb {shlex.quote(path)} 2>/dev/null | cut -f1",
+                    timeout=1800).stdout.strip()
+                return int(out) if out.isdigit() else 0
+
+            #: `need` IS THE FINAL FOOTPRINT OF OUR OWN TREE, NOT AN INCREMENT.
+            #:
+            #: This compared `occupied + need` against the capacity, and on the
+            #: third draw -- with seven probes already staged -- that read
+            #: 16.70 + 23.85 = 40.55 GB against a 40 GB volume and refused.
+            #: The bytes already on the volume were counted BOTH as occupied
+            #: and as still to be written: exactly the double-count
+            #: `destination_gate` had on the launcher host, made again here, in
+            #: the same session, an hour after fixing it there.
+            #:
+            #: So what has to fit is this campaign's total beside whatever ELSE
+            #: shares the volume, and a resumed draw is charged nothing for the
+            #: probes it is about to skip.
+            occupied = _du(MOUNT)
+            ours = _du(remote_root)
+            others = max(0, occupied - ours)
+            ev["volume"] = {
+                "provisioned_gb": a.volume_gb,
+                "capacity_bytes": capacity,
+                "occupied_bytes_at_start": occupied,
+                "ours_bytes_at_start": ours,
+                "other_bytes_on_the_volume": others,
+                "need_bytes": need,
+                "_need_is_a_total_not_an_increment": (
+                    "need is the final size of this campaign's staged tree. A "
+                    "probe already on the volume is part of that total, not "
+                    "an addition to it, so a resumed draw is charged nothing "
+                    "for what it will skip."),
+                "_df_is_not_the_quota": (
+                    "df at the mount reports the backing cluster, not this "
+                    "volume's quota, so capacity comes from the provisioned "
+                    "size the provider sold")}
+            if others + need > capacity:
                 raise StagingError(
-                    f"the volume is {a.volume_gb} GB and already holds "
-                    f"{occupied / 10**9:.2f} GB; {need / 10**9:.2f} GB more would "
-                    "exceed it")
+                    f"the volume is {a.volume_gb} GB and "
+                    f"{others / 10**9:.2f} GB of it belongs to something other "
+                    f"than this campaign; this campaign's staged tree totals "
+                    f"{need / 10**9:.2f} GB, which would exceed it")
             say(f"volume mounted at {MOUNT}: {a.volume_gb} GB provisioned, "
-                f"{occupied / 10**9:.2f} GB occupied, {need / 10**9:.2f} GB to write")
+                f"{ours / 10**9:.2f} GB already staged here, "
+                f"{others / 10**9:.2f} GB other, "
+                f"{need / 10**9:.2f} GB total needed")
             #: AFTER the mount is proven and BEFORE 22 GiB is committed to this
             #: draw. Uses real probe bytes, so it exercises the same read path.
             pod.require_transport_floor(
