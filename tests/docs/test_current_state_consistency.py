@@ -195,6 +195,80 @@ class TestTheSnapshotStatesTheRequiredFacts:
         blob = "\n".join(v for _, v in strings(snapshot()))
         assert re.search(pattern, blob, re.I), f"the snapshot does not state {fact}"
 
+    def test_the_stage_ladder_is_stated_exactly_once_and_in_full(self):
+        """The other half of the stale-claim check above.
+
+        Deleting a contradiction is not the same as stating the fact: a
+        snapshot that had simply dropped `phase_c.c2.status` would satisfy
+        every negative pattern while telling a reader nothing. The ladder is
+        the one field a next-stage agent reads first, so it is checked
+        structurally rather than by prose search.
+        """
+        assert snapshot()["stage_ladder"] == {
+            "C0": "COMPLETE",
+            "C1": "COMPLETE / GO",
+            "C2": "CLOSED WITHOUT PROMOTION",
+            "C3": "NOT STARTED",
+            "next_scientific_stage": "C3",
+        }
+
+    @pytest.mark.parametrize("key,value,fact", [
+        ("decision", "CLOSED WITHOUT PROMOTION", "the stage's disposition"),
+        ("canonical_no_go_claimed", False, "that no canonical verdict is claimed"),
+        ("new_incumbent_named_by_c2", None, "that C2 named no new incumbent"),
+        ("probes_remaining", 0, "that no probes are owed"),
+        ("further_scientific_spend", "NOT AUTHORIZED",
+         "that no further C2 scientific spend is authorized"),
+        ("observations_averaged_or_ranked", False,
+         "that the two observations are neither averaged nor ranked"),
+    ])
+    def test_the_closure_states_each_fact_machine_readably(self, key, value, fact):
+        """Parametrized so one missing field cannot hide behind five present
+        ones -- and typed, because a prose field saying "no incumbent" is not
+        something a consumer can branch on."""
+        c = snapshot()["c2_closure"]
+        assert key in c, f"the closure does not record {fact}"
+        assert c[key] == value, f"{key} is {c[key]!r}, not {value!r}"
+
+    def test_every_field_that_names_c2_s_position_agrees_with_the_ladder(self):
+        """The contradiction that actually happened, checked across ALL owners.
+
+        `stage_ladder`, `phase_c.c2`, `c2_closure`, `behavioural_session` and
+        `latest_run` each state something about where C2 stands. Any one of
+        them drifting is the defect; asking only the ladder would not have
+        caught it, because the ladder was already correct while three other
+        fields said C2 was running.
+        """
+        s = snapshot()
+        closed = "CLOSED WITHOUT PROMOTION"
+        for path, got in (
+                ("stage_ladder.C2", s["stage_ladder"]["C2"]),
+                ("phase_c.c2.status", s["phase_c"]["c2"]["status"]),
+                ("c2_closure.decision", s["c2_closure"]["decision"]),
+                ("behavioural_session.state", s["behavioural_session"]["state"]),
+                ("latest_run._c2_state", s["latest_run"]["_c2_state"])):
+            assert closed in got, f"{path} does not say {closed}: {got!r}"
+
+        #: And the two independent "nothing is owed" owners agree numerically.
+        assert (s["phase_c"]["c2"]["probes_owed"]
+                == s["c2_closure"]["probes_remaining"] == 0)
+        assert s["prepared_launch"]["any"] is False
+
+        #: Structurally, not by prose. A mutation that re-added `phase_c.c2.owed`
+        #: with different wording survived every phrase pattern above and the
+        #: count check too -- the counts still said zero while a field named
+        #: `owed` described the work. A key that names outstanding work is the
+        #: claim, whatever it happens to say, so the closed stage may not carry
+        #: one at all. `priced` goes with it: a price for work nobody owes.
+        for gone in ("owed", "priced"):
+            assert gone not in s["phase_c"]["c2"], (
+                f"phase_c.c2 carries a `{gone}` field while the stage is "
+                f"closed and owes nothing: {s['phase_c']['c2'][gone]!r}")
+        #: C3 is not blocked on C2 naming an incumbent -- C2 named none, and
+        #: the old precondition would read as C3 being permanently blocked.
+        assert s["phase_c"]["c3"].startswith("NOT STARTED")
+        assert not re.search(r"cannot start before C2 names", s["phase_c"]["c3"])
+
     def test_the_migration_is_stated_as_engineering_not_as_a_c1_result(self):
         """Asked of the migration's OWN field, not of the whole snapshot.
 
@@ -218,6 +292,27 @@ class TestTheSnapshotStatesTheRequiredFacts:
          "the GPU validation was authorized, run and closed"),
         (r"\$?267\.8598\b", "that cumulative is superseded by $267.8998"),
         (r"\$?15\.9002\b", "that remaining figure is superseded by $15.8602"),
+        #: C2 closed WITHOUT PROMOTION on 2026-09-24, and the snapshot kept
+        #: saying it was running: `phase_c.c2.status` claimed "the behavioural
+        #: selection among them is RUNNING: ten of twelve probes measured, two
+        #: owed", `next` said "build and execute the attempt6 chain", and
+        #: `behavioural_session` said "PROPOSAL ONLY" -- all while the
+        #: top-level blocker already said the stage was closed and owed
+        #: nothing. A reader had no way to tell which field was current.
+        #:
+        #: Each pattern targets the CLAIM, not the token: `attempt6` and
+        #: `attempt15` still appear legitimately in fields that say the
+        #: attempt6 grant confers nothing and that attempt15 must not happen,
+        #: and a bare token search would refuse those negations too.
+        (r"selection among them is RUNNING|C2[^.]{0,40}\bis RUNNING\b",
+         "C2 is closed, not running"),
+        (r"\btwo owed\b|still owes|owes (two|2) probes",
+         "C2 owes no probes; all twelve were trained and scored"),
+        (r"(build and )?execute the attempt6 chain|finish pre-staging",
+         "no C2 launch is prepared and none may be"),
+        (r"PROPOSAL ONLY", "the behavioural session ran and is closed"),
+        (r"C2 is under execute-to-completion",
+         "that authorization is spent and closed"),
     ])
     def test_the_stale_claim_is_gone(self, pattern, why):
         """The other half. A snapshot that states the new fact while still

@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-24T13:10:11+00:00",
+  "created_utc": "2026-09-24T15:33:08+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1836,
-    "bytes": 61220057,
+    "bytes": 61218789,
     "by_disposition": {
       "keep_canonical": 190,
       "keep_immutable": 1449,
@@ -5177,7 +5177,6 @@
         "logs/stages/stage-3/e8/plans/e8_preregistration.md",
         "logs/stages/stage-3/history/EXPERIMENTS.md",
         "logs/state/artifact_manifests.md",
-        "logs/state/current.json",
         "logs/state/current.md",
         "logs/state/supported_models.md",
         "scripts/architecture/core_ownership.py",
@@ -24181,8 +24180,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json",
-        "logs/state/current.json"
+        "logs/maintenance/inventories/log_inventory.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -33222,8 +33220,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11883,
-      "sha256": "defd264fcb3dc8fa3797c2e322e1d23027935e8863c534bca1b675aa7dd6a62d",
+      "size_bytes": 11945,
+      "sha256": "082eaac0d9c3c420f0c5082d2368f4cc316f9b0fa4017dac83e975d4d896280e",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -33266,8 +33264,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 100702,
-      "sha256": "2e130f81ae91d1800972655be6e903cb96033a3ffcafd5806172f4f1226fb029",
+      "size_bytes": 99372,
+      "sha256": "a7146777808b926f7ac378878b0cb14966959b9efdcdfc795de7d5aa693968b9",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

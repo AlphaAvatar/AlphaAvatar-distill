@@ -6,7 +6,8 @@
  "running": {
   "paid_compute": false,
   "pods": 0,
-  "_verified": "an account-wide provider query returns [] after teardown; a 40 GB network volume at $0.004/h is retained until C2 closeout and holds eight completed probes that are sunk cost, not a dependency"
+  "network_volumes": 0,
+  "_verified": "an account-wide provider query returns [] for both pods and network volumes. Both campaign volumes -- 59qt99zeg5 (40 GB) and a0zqgxsm7p (10 GB) -- are deleted."
  },
  "authorized": {
   "any": true,
@@ -19,7 +20,7 @@
  "prepared_launch": {
   "any": false,
   "run": null,
-  "note": "attempt6 has no readiness record, authorization or bundle yet; its grant is written. Nothing needs pre-staging: no probe's weights have a remaining consumer, so volume_gate passes with no staging record."
+  "note": "no C2 launch is prepared and none may be: C2 is closed and further C2 scientific spend is not authorized. The attempt6 grant written during the campaign is historical and confers nothing -- no readiness record, authorization or bundle exists for it. C3 has no chain of any kind."
  },
  "budget": {
   "cumulative_spend_usd": 341.9702,
@@ -116,14 +117,14 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "Search-1 DONE and FROZEN; B->C COMPUTED; the full joint re-search COMPLETE with an accepted, frozen Top-5 whose checkpoints are reconstructed exact and durable. The behavioural selection among them is RUNNING: ten of twelve probes measured, two owed, no verdict.",
+   "status": "CLOSED WITHOUT PROMOTION (maintainer decision 2026-09-24). Search-1 DONE and FROZEN; B->C COMPUTED; the full joint re-search COMPLETE with an accepted, frozen Top-5, reconstructed exact and durable. All 12 behavioural probes trained and scored. No canonical verdict, no new incumbent; B stands.",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "campaign": "c2-behavioural-12probe-v1",
-   "owed": "the third confirmation seed for the advanced candidate and for B, then the frozen decision rule",
-   "priced": "logs/stages/stage-1/phase_c2_behavioural/analyses/continuation_price.json",
-   "top_5": "5/5 exact and durable -- logs/stages/stage-1/phase_c2_replay/"
+   "top_5": "5/5 exact and durable -- logs/stages/stage-1/phase_c2_replay/",
+   "probes_owed": 0,
+   "closure": "see the top-level `c2_closure`"
   },
-  "c3": "NOT STARTED. causal-KL ATTENTION isolation on the C2 incumbent; cannot start before C2 names one, and the operator does not exist yet.",
+  "c3": "NOT STARTED, and the next scientific stage. causal-KL ATTENTION isolation. C2 named no new incumbent, so a C3 design starts from B = the frozen C1 treatment unless its own design review decides otherwise; the operator does not exist yet. To be designed and authorized independently from the final C2 remote HEAD. NOT authorized and NOT prepared.",
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
  "storage": {
@@ -132,7 +133,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOTHING IS BLOCKED and nothing is authorized to spend. C2 is CLOSED WITHOUT PROMOTION by maintainer decision 2026-09-24: no new incumbent, B from C1 stands, no probes owed, and further C2 scientific spend is NOT authorized.",
+ "blocker": "NOTHING IS BLOCKED and NO SPEND IS AUTHORIZED. C2 is CLOSED WITHOUT PROMOTION by maintainer decision 2026-09-24: no new incumbent, B from C1 stands, no probes owed, and further C2 scientific spend is NOT authorized.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -173,7 +174,7 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "build and execute the attempt6 chain. Its working set is 8.1 MiB of evidence, not 22.21 GiB of weights: artifacts follow consumers (AGENTS.md P8.4). Session ceiling $19.7533 over 1070.96 minutes against 491.51 minutes of work.",
+ "next": "design and authorize C3 from the final C2 remote HEAD. Nothing is prepared and nothing may launch. No C2 work remains.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",

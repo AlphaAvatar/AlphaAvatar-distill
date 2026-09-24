@@ -710,9 +710,16 @@ def render_readiness(root: Path) -> str:
         "earlier one launched under | [`stages/stage-1/`](../stages/stage-1/) |")
     lines.append(
         "| launch-bound for the next session | "
+        #: The not-prepared branch used to say a sweep "is owed", which asserts
+        #: that a launch is coming. This view cannot know that -- after C2
+        #: closed with no further spend authorized, the same fact meant the
+        #: opposite -- so it states what it observes and leaves "owed" to the
+        #: section that owns whether anything is authorized.
         + ("**PREPARED**" if v["launch_bound_ready"]
-           else "**not prepared** — a launch-bound sweep on the final clean "
-                "pre-authorization tree is owed")
+           else "**not prepared** — no launch-bound sweep describes the "
+                "current tree. Whether one is owed depends on whether a "
+                "launch is authorized, which this file's launch-chain "
+                "section owns")
         + " | this file's launch-chain section |")
     if v["launch_bound_failures"]:
         f = v["launch_bound_failures"][-1]

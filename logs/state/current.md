@@ -71,20 +71,21 @@ whichever book authorized it. The total itself is **not restated here** — it i
 derived on every render; read the `project cap` row of the summary table.
 Owner: `derive_budget.py :: project_balance`.
 
-**C2 is under execute-to-completion authorization.** The maintainer retired the
-approval-per-step workflow on 2026-09-23 and granted an additional **`$25.00`
-all-in stage envelope** for all remaining C2 work — engineering validation,
-formal execution, ordinary retries, container disk, external storage,
-transport, teardown — to be managed internally rather than per category. The
-formal behavioural **campaign** ceiling stays at **`$42.0000`** cumulative
-all-in. The `$370` project envelope does not move.
+**C2's execute-to-completion authorization is SPENT and CLOSED.** It was
+granted on 2026-09-23 — a `$25.00` all-in stage envelope for all remaining C2
+work, managed internally rather than per category, under a `$42.0000`
+cumulative behavioural campaign ceiling. That window is over: the maintainer
+closed C2 without promotion on 2026-09-24 and **no further C2 scientific spend
+is authorized**. Remaining allowance under either figure is not permission and
+must not be spent. The `$370` project envelope never moved.
 
-**What C2 still owes is two probes.** The third confirmation seed for the
-advanced candidate and for B, then the frozen decision rule. Ten of twelve are
-trained, scored and durable off-pod. Owner:
-[`continuation_price.json`](../stages/stage-1/phase_c2_behavioural/analyses/continuation_price.json)
-— hard all-in `$8.4201`, campaign `$30.6667` of `$42.0000`, headroom
-`$11.3333`.
+**C2 owes no probes.** All twelve were trained and scored — six screening, six
+confirmation. What the stage did *not* produce is a promotion verdict: the six
+confirmation probes do not form one uniform evaluation-protocol field, so no
+canonical NO_GO is claimed and no new incumbent is named. **B, the frozen C1
+treatment, remains the accepted incumbent by absence of a valid challenger.**
+Owner:
+[`c2_behavioural_verdict_20260923.md`](../stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md).
 
 **behavioural attempt8 was retired at `$0` without acquiring a machine.** All
 **ten** pre-provider gates passed — the first chain to clear every one — and
@@ -1239,12 +1240,12 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C1 — fixed-path ATTENTION isolation, **CLOSED by a `GO` verdict**. C2 Search-1 is **DONE and FROZEN** and its B→C comparison has been **reviewed and accepted** as search-stage evidence; the local Search-2 refinement is **WITHDRAWN**, and C2 now continues as a **full joint re-search → Top-5 → behavioural selection under Phase-C/C1 discipline**, designed and priced but **NOT FUNDED**. C3 (causal-KL isolation on the C2 incumbent) and C4 (conditional re-search) are not started | [`phase_c2/plans/phase_c2_full_search_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C0 **COMPLETE**. C1 — fixed-path ATTENTION isolation, **CLOSED by a `GO` verdict**. C2 — **CLOSED WITHOUT PROMOTION** (maintainer decision 2026-09-24): Search-1 DONE and FROZEN, the local Search-2 refinement WITHDRAWN, the full joint re-search COMPLETE with an accepted frozen Top-5, screening complete, and all twelve behavioural probes trained and scored — but the confirmation field mixed evaluation-protocol identities, so **no canonical promotion verdict is claimed and no new incumbent is named**. **B, the frozen C1 treatment, remains the accepted incumbent.** C3 (causal-KL isolation) is **NOT STARTED** and is the next scientific stage | [`phase_c2/plans/phase_c2_full_search_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
-| launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4 and completion attempts 5–8. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The next chain cannot be built until the full search is funded | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
-| last attempt | **baseline completion attempt 8 — COMPLETE, `$0.5872`.** Both stages passed, B was rebuilt to digest `53e30566…`, measured **once** on the frozen suite, and the B→C comparison was computed; the pod was deleted behind its teardown gate after 32.32 min. Attempts 5, 6 and 7 aborted before any measurement for `$0.1033` between them | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
-| blocker | **THE FORMAL FULL-SEARCH CHAIN IS BUILT AND UNCONSUMED; THE LAUNCH REVIEW IS OWED — and so is a frozen-record decision the performance round created, see the suite section.** The cap rose to `$370.0000` on 2026-09-17, so the standing beam-6 chain's `$59.0009` of ceilings — GPU **and** separately billed disk — FITS the `$72.1205` remaining with `$13.1196` to spare, an accounting envelope, **not** a spend authorization and not transferable to C3/C4. That headroom roughly doubled on 2026-09-18 because the measured performance round took the search's bounding minutes from `1826.57` to `1445.54`; the beam width was not touched. C2c asks only whether the selected C beats the incumbent **B** after the frozen 0.86M recovery, on **12 probes**. The real-GPU engineering validation of the search driver is **PASSED and CLOSED** for `$0.1453`, and the chain it validated is now built — with three repairs an independent review found before any pod existed: the shared setup script had **no `c2_full_search` authorization branch**, so a formal pod would have completed paid setup and the whole test gate and then refused; the storage walk counted parents, children and leaves but **not the expanded ancestors the search never releases**, understating the peak; and the ceiling was **GPU runtime only** while the launcher provisioned hundreds of GB of separately billed disk. The chain is: launcher, grant contract, launch-bound readiness, one-use authorization type and issuer, derived executable closure over 90 files, bundle transport, artifact contract and live budget position, with eleven `$0` gates and 45 exercised checks. The live securePrice was re-quoted at `$1.09/h` — **unchanged** — so the beam-6 ceiling rests on re-derived minutes rather than on a coincidence: `$26.2606` GPU plus `$1.3385` disk, `$27.5992` for the session. **No grant is approved, so no authorization is issued and nothing is consumed.** What a review reads is [`phase_c2_full_search_grant_proposal.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_grant_proposal.json), which approves nothing and which the issuer refuses. Narrower beams are scientific **alternatives**, never a way to fit the cap. Nothing may start — the search session, the behavioural session, the withdrawn Search-2, C3 and any remeasurement of B each need a decision, and the two C2 sessions need **separate** authorizations | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4, baseline completion 5–8, and behavioural 1–14. **No C2 chain may be built:** the stage is closed and no further C2 scientific spend is authorized. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. C3 has no chain of any kind | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
+| last attempt | **behavioural attempt14 — COMPLETE, `$2.0670`.** It reconstructed probe 11's evaluation for the P4 repair and reproduced the terminal state with a recorded two-prompt discrepancy, which is preserved rather than resolved. It also left a pod billing ~116 min behind a blocked artifact gate; that defect is repaired and accounted as PHB-HA-026/027 | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
+| blocker | **NOTHING IS BLOCKED, AND NO SPEND IS AUTHORIZED.** C2 is **CLOSED WITHOUT PROMOTION**: no probes owed, no canonical verdict claimed, no new incumbent, **B stands by absence of a valid challenger**, no C2 launch prepared, and **no further C2 scientific spend authorized** — remaining allowance under the `$25.00` stage envelope or the `$42.0000` campaign ceiling is not permission. C3 is **NOT STARTED** and is the next scientific stage; it will be designed and authorized independently from the final C2 remote HEAD, and its accounting envelope is not transferable from C2 | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## Readiness
@@ -1255,7 +1256,7 @@ floor. A complete valid verdict ends the round.
 | --- | --- | --- |
 | latest POINTED-TO sweep — C1 attempt18 | **launch_bound — PASS**, swept at `e80eb60b`; **does not describe the current tree** | [`c1_pod_environment_verification.json`](../stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json) |
 | every other experiment's readiness | **run-owned and not pointed at from here** — one record per attempt, under that attempt's `governance/readiness.json`, so a later sweep cannot overwrite what an earlier one launched under | [`stages/stage-1/`](../stages/stage-1/) |
-| launch-bound for the next session | **not prepared** — a launch-bound sweep on the final clean pre-authorization tree is owed | this file's launch-chain section |
+| launch-bound for the next session | **not prepared** — no launch-bound sweep describes the current tree. Whether one is owed depends on whether a launch is authorized, which this file's launch-chain section owns | this file's launch-chain section |
 | last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../stages/stage-1/phase_c1/history/readiness_history.json) |
 
 *Generated from the record by `scripts/consolidate/render_log_navigation.py`; do not edit by hand — it went stale within hours when it was prose.*
