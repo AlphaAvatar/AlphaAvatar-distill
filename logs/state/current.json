@@ -70,7 +70,7 @@
   "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
  "next_starting_point": {
-  "status": "C0 COMPLETE. C1 COMPLETE/GO. C2 CLOSED WITHOUT PROMOTION -- search and screening completed, behavioural confirmation executed, observations pointed NO_GO, but the final confirmation evidence mixed evaluation-protocol identities, so no canonical promotion verdict is claimed and no new incumbent is named.",
+  "status": "C0 COMPLETE. C1 COMPLETE/GO. C2 CLOSED WITHOUT PROMOTION -- the full joint re-search completed, its Top-5 ACCEPTED and FROZEN, screening completed, behavioural confirmation executed, observations pointed NO_GO, but the final confirmation evidence mixed evaluation-protocol identities, so no canonical promotion verdict is claimed and no new incumbent is named.",
   "accepted_incumbent": "B = frozen C1 treatment",
   "then": "design and authorize C3 from this remote HEAD, starting from B unless the next-stage design review decides otherwise.",
   "not_next": "no C2 re-evaluation, no uniform six-probe replay, no new seeds, no attempt15, no C2 spend of any kind."
@@ -132,7 +132,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOTHING IS BLOCKED and nothing is authorized to spend. C2 is CLOSED WITHOUT PROMOTION by maintainer decision 2026-09-24: no new incumbent, B from C1 stands, and further C2 scientific spend is NOT authorized. C2 owes no probes. C3 is the next scientific stage and is NOT started; it will be designed and authorized independently from the current remote HEAD.",
+ "blocker": "NOTHING IS BLOCKED and nothing is authorized to spend. C2 is CLOSED WITHOUT PROMOTION by maintainer decision 2026-09-24: no new incumbent, B from C1 stands, no probes owed, and further C2 scientific spend is NOT authorized.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -184,7 +184,6 @@
  "c2_closure": {
   "decision": "CLOSED WITHOUT PROMOTION",
   "decided_utc": "2026-09-24",
-  "decided_by": "maintainer",
   "new_incumbent_named_by_c2": null,
   "accepted_incumbent_after_c2": "B = frozen C1 treatment",
   "why_b_stands": "no valid C2 challenger displaced it",
