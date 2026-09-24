@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-24T11:08:34.847058+00:00",
+ "proposed_utc": "2026-09-24T13:09:00.117888+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -548,7 +548,7 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "c18ba524fc6308404345cdd577739058803177c84f08a7449726c7511d59702d",
+  "digest": "c41f0c7a01b4d5acf04eae0186f417b59e2908950a0d708d6101620a7be83be0",
   "n_files": 138,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
@@ -599,5 +599,5 @@
   "grant": "THIS PROPOSAL REQUESTS AND AUTHORIZES NOTHING. It is the document a maintainer decision is made against; it is not that decision, and it permits no grant, readiness record, authorization, bundle or provider resource. Whether a launch chain exists, and how far it has been built, is recorded per attempt under `runs/<attempt>/governance/` and is NOT restated here: this document's hash is what a grant binds, so a field that tracked the chain would move the identity the moment the chain advanced."
  },
  "_proposal_sha256_excludes": "proposal_sha256 covers this document EXCEPT ['proposal_sha256', 'proposed_utc']. proposed_utc is a wall clock and would make the identity change on every regeneration of an unchanged tree; the hash is a function of the proposal's content, so a grant can bind it and the issuer can re-derive it.",
- "proposal_sha256": "5442f7b1a431c96f7e96b9f1e10a287d11d6bed05ed7180a227cba19e34fa227"
+ "proposal_sha256": "6f90404582578bce0e7772345d053161f42d5671df25fe1bdc7c087de07e10a0"
 }

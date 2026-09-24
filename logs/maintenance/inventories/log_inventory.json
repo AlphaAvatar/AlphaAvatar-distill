@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-24T12:19:24+00:00",
+  "created_utc": "2026-09-24T13:10:11+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -24248,7 +24248,7 @@
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
       "size_bytes": 44731,
-      "sha256": "99f7285c20ed375850b0266c2ab504bc3062e89948dcae703e93452c83e0f537",
+      "sha256": "4b40600f1ce8781e224229a53d5c6e0f4f9e1c72bdd809d26a7dcee4c67ff18b",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
