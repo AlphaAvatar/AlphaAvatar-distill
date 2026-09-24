@@ -150,10 +150,25 @@ def test_the_launcher_applies_no_second_contingency_or_recovery_reserve():
         assert any(n.endswith("_probes_train_and_score") for n in named), named
     if work["probes_trained_not_scored"]:
         assert any(n.endswith("_probes_score_only") for n in named), named
-    if not work["probes_remaining"]:
-        assert not any(n.endswith(("_probes_train_and_score",
-                                   "_probes_score_only")) for n in named), (
-            f"the campaign owes no probe and still priced one: {named}")
+    #: MAGNITUDE, not name presence. The decomposition keeps its phase names
+    #: for shape stability and prices zero for work that is not owed -- a
+    #: `0_probes_train_and_score` phase at 0.0 minutes is a named zero, not a
+    #: mispriced probe. An earlier version of this assertion tested for the
+    #: NAME and fired on exactly that, once the campaign reached 12/12 and
+    #: nothing remained.
+    minutes = {p.name: float(p.minutes) for p in spec.other_phases}
+    if not work["probes_untrained"]:
+        for n, m in minutes.items():
+            if n.endswith("_probes_train_and_score"):
+                assert m == 0.0, f"{n} priced {m} minutes with nothing to train"
+    if not work["probes_trained_not_scored"]:
+        for n, m in minutes.items():
+            if n.endswith("_probes_score_only"):
+                assert m == 0.0, f"{n} priced {m} minutes with nothing to score"
+    if not work["arms_needed"]:
+        assert minutes.get("materialize_arms", 0.0) == 0.0, (
+            f"materialize_arms priced {minutes.get('materialize_arms')} "
+            "minutes with no arm owed")
     assert {r.name for r in spec.soft_stop_reserves} == {
         "probe_model_contingency", "probe_duration_risk",
         "generation_length_risk"}
