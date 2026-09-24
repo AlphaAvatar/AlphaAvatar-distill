@@ -1397,6 +1397,59 @@ def test_training_from_an_unbuilt_arm_is_refused(tmp_path, repo):
         SCH.Probe("screening", "some-arm", 1, "a" * 64, "/arms/some-arm"))
 
 
+def BC_campaign_store(ctx):
+    """The campaign root the launcher itself derives, not a second spelling."""
+    return L.campaign_store(ctx.auth.campaign_id, ctx.args.ckpt_store)
+
+
+def test_a_restored_probe_scored_here_is_owed_its_evidence_too(tmp_path):
+    """The gap that cost C2 its P4 reproducibility, as a test.
+
+    `secure_probe_evidence` iterated the session's ANNOUNCED units. A probe is
+    announced by the attempt that TRAINS it, so the probe attempt13 restored
+    and then scored was announced by attempt12, never entered that list, and
+    the 950 rows it produced stayed on the pod until the teardown gate deleted
+    it. Eleven of twelve probes had rows; the verdict could not be recomputed
+    from the archive.
+
+    A restored probe's evidence belongs beside the copy it was restored FROM,
+    at its own `source_attempt`, not under this run: one directory per probe,
+    so `campaign_state` never sees the same probe half-described twice.
+    """
+    ctx = _Ctx(_Pod(tmp_path / "pod"), tmp_path / "store", "attempt14")
+    store = BC_campaign_store(ctx)
+
+    #: Trained here: announced, and its evidence follows its bytes into THIS
+    #: run's directory.
+    announced = [{"unit_id": "confirmation.B.s1523147638"}]
+    #: Restored here and about to be scored: announced by attempt12.
+    ctx.evidence["campaign_restore"] = {"probes": [
+        {"probe_id": "confirmation.cand.s1523147638",
+         "source_attempt": "attempt12"},
+        #: No source attempt: there is no one directory to write beside, and
+        #: guessing would scatter a probe's evidence across the campaign.
+        {"probe_id": "confirmation.orphan.s1", "source_attempt": ""},
+    ]}
+
+    owed = dict(L.probes_owed_evidence(ctx, announced))
+    assert set(owed) == {"confirmation.B.s1523147638",
+                         "confirmation.cand.s1523147638"}, sorted(owed)
+    assert owed["confirmation.B.s1523147638"] == store / "attempt14" / "confirmation.B.s1523147638"
+    assert owed["confirmation.cand.s1523147638"] == (
+        store / "attempt12" / "confirmation.cand.s1523147638"), (
+        "a restored probe's evidence was written under this run instead of "
+        "beside the copy it was restored from")
+
+    #: Announced AND restored is one probe, not two, and the announced
+    #: destination wins because that is where its bytes landed.
+    ctx.evidence["campaign_restore"]["probes"].append(
+        {"probe_id": "confirmation.B.s1523147638",
+         "source_attempt": "attempt5"})
+    again = dict(L.probes_owed_evidence(ctx, announced))
+    assert len(again) == 2, sorted(again)
+    assert again["confirmation.B.s1523147638"] == store / "attempt14" / "confirmation.B.s1523147638"
+
+
 def test_attest_packages_a_checkpoint_THIS_POD_HOLDS(tmp_path, monkeypatch):
     """The real `attest`'s sample selection, which every other test stubs out.
 

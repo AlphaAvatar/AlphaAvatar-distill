@@ -1,0 +1,212 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_grant/v1",
+ "contract_id": "phase_c2.behavioural_grant/v1",
+ "_what_this_is": "What a person approved, in the fields only a person can fill. The issuer re-derives every identity beside it and refuses on any disagreement, so this document cannot introduce a binding nobody checks.",
+ "granted_by": "maintainer",
+ "granted_utc": "2026-09-23",
+ "_granted_utc_is_real_utc": "taken from datetime.now(timezone.utc) in code rather than typed. Issuance refuses a grant dated after the current UTC date.",
+ "run_id": "attempt14",
+ "experiment_id": "phase_c2_behavioural",
+ "stage_id": "1",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "_the_authorization_this_records": "the maintainer reviewed remote b126eecf on 2026-09-24, ACCEPTED the C2 runtime execution, the terminal NO_GO observation, the budget accounting and the provider teardown, and withheld final scientific closure on ONE narrow ground: the archive does not satisfy P4, because probe 11's 950 per-sample rows and its result.json were never collected. This chain is the authorized repair and nothing else.\n\nREPRODUCTION ONLY. Do not retrain any probe. Do not add a seed. Do not modify the scientific protocol. Do not reopen screening or candidate selection. Do not rerun the other eleven probes. Use the preserved, identity-verified checkpoint for confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638 and re-run its evaluation under exactly the frozen confirmation protocol, then recompute the frozen decision from the now-complete archive.\n\nAcceptance is conditional on REPRODUCING NO_GO. If the reconstruction materially disagrees with the attempt13 runtime observation or changes the frozen decision, the discrepancy is recorded and the work stops at that scientific boundary -- it is not concealed and not averaged.",
+ "reviewed_baseline": {
+  "origin_main": "8966ae12cd5f898928b2df443601a8936e03ba1e",
+  "_origin_main_is_the_reviewed_baseline": "the commit the maintainer's execute-to-completion authorization was given at. It is NOT the commit this chain runs from: the durable-backend change and the session-ceiling repair landed after it, under that authorization's own engineering autonomy. The issuer re-derives the plan hash, the closure, the closure file count and the proposal hash live and refuses a disagreement, so the session commit is bound by those rather than by this field.",
+  "proposal_sha256": "e1885f69ceb5cb0b5b20f3e9bf7d4b73a16690419ab91e261041db95c5e1a1d1",
+  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
+  "executable_closure": "1a93aa06fb467d153d1a57eddfb295d1f53d4921227c51836b68d5e70b6a4abb",
+  "closure_files": 136,
+  "resume_preregistration_sha256": "4cbfae158cfd3886e21ca6be0abe3e1ed77790f2b9c903d5f09c037fc8f96aa5",
+  "_the_issuer_rederives_these": "every identity here is re-derived live at issuance and a disagreement is a refusal. They are recorded so a reader can see WHAT was reviewed, not so anything trusts the copy.",
+  "_what_moved_since_the_reviewed_baseline": "thirteen ordinary engineering amendments. The reviewer accepted the C2 runtime, the NO_GO observation, the accounting and the teardown at remote b126eecf, and this chain repairs P4 only. The closure is now 1a93aa06fb467d153d1a57eddfb295d1f53d4921227c51836b68d5e70b6a4abb over 136 files and the proposal e1885f69ceb5cb0b5b20f3e9bf7d4b73a16690419ab91e261041db95c5e1a1d1. THE PLAN HASH HAS NEVER MOVED (31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705).",
+  "plan_hash_is_the_reviewed_one": true,
+  "engineering_amendments": [
+   {
+    "n": 1,
+    "what": "the durable backend became a provider network volume rather than an object store; the object-store route needs an account this environment cannot create",
+    "moved_the_closure": true
+   },
+   {
+    "n": 2,
+    "what": "a session ceiling is shortened to what its campaign has left; settled spend has one owner and the gate reconciles the two readings; destination_gate charges the remainder",
+    "moved_the_closure": true
+   },
+   {
+    "n": 3,
+    "what": "the continuation's working set is derived from CONSUMERS rather than campaign membership, under AGENTS.md P8.4. A completed and validly scored probe contributes evidence; its checkpoint is archival. 8.1 MiB, not 22.21 GiB",
+    "moved_the_closure": true
+   },
+   {
+    "n": 4,
+    "what": "the $0 dry run's output run id used a hyphen, which run_layout refuses; attempt6 was retired at $0 before provider contact and this is the repair",
+    "moved_the_closure": true
+   },
+   {
+    "n": 5,
+    "what": "a dry run's own run directory was enumerated as a prior campaign RESOURCE, so the rehearsal refused the launch it had just rehearsed. Both enumerations now exclude it and the suffix has one owner. attempt7 retired at $0",
+    "moved_the_closure": true
+   },
+   {
+    "n": 6,
+    "what": "the network volume is attached only when a remaining operation reads a pre-staged checkpoint. Attaching it pins the draw to the volume's single datacenter, and attempt8 was refused an L40S in EU-NL-1 eight times over 35 minutes while `volume_gate` correctly reported that no probe needs its weights on the pod. AGENTS.md P8.4 applied to the acquisition constraint rather than only to the bytes: a constraint accepted in order to move bytes must fall away with the consumer that justified it.",
+    "why_it_is_engineering": "provider placement and volume attachment are acquisition mechanics. No arm, seed, battery, recovery recipe, scoring rule or decision rule moved, and the plan hash is unchanged.",
+    "cost": "$0.0000 -- eight create calls, no pod id returned on any of them",
+    "retired": "attempt8, at $0, after all ten pre-provider gates passed"
+   },
+   {
+    "n": 7,
+    "what": "four records and comments still described the continuation as attaching a volume and reserving 45 minutes to re-hash 22.2 GiB, which amendment 3 had already made false. The proposal, the continuation price, the reserve basis and the transport comment now state what is actually moved. Separately, the log-navigation generator read a closeout's verdict and cost under one schema only, so it rendered 'no classification stated' with no money for all eight behavioural closeouts; it now reads both families.",
+    "why_it_is_engineering": "record and generator accuracy. Every numeric figure in the regenerated proposal and price is byte-identical -- verified by diffing all numbers in both documents -- so no amount changed.",
+    "cost": "$0.0000",
+    "retired": "nothing; found while validating attempt9's chain"
+   },
+   {
+    "n": 8,
+    "what": "the two behavioural durable stores are located through $HOME by `cpu_test_env.host_local_store` instead of hardcoded absolute paths, and the 27 preflight cases that read them carry a skipif keyed on the store's presence. attempt9 acquired a machine in five minutes -- the amendment-6 repair working -- and then failed the pod's own test gate, because those 27 cases read a store no pod receives and the launch-bound sweep could not see it: an absolute path is immune to the simulator's fresh empty HOME, so a sweep whose whole purpose is to describe the pod's tree passed 236/236 on a machine state no pod can reproduce. The 28 resulting skips are DECLARED in the behavioural readiness contract as `host_local_durable_stores`, which pins the expectation in both directions: the gate now refuses if one of them runs on a pod as well as if an undeclared one skips. A readiness record can therefore only be produced from a pod-like sweep, which is what launch-bound readiness is supposed to describe.",
+    "why_it_is_engineering": "test-environment parity. No arm, seed, battery, recovery recipe, scoring rule or decision rule moved; the plan hash is unchanged. The closure grew by one file, `cpu_test_env.py`, pulled in transitively because the store derivation now goes through it.",
+    "cost": "$0.11 -- 6.2 minutes of L40S, one resource, provider-confirmed deleted",
+    "retired": "attempt9",
+    "verified": "sweep and an independent `unshare -r -m` + tmpfs reproduction now agree exactly: 208 passed, 28 skipped, rc=0 with the store absent, against 236 passed and 0 skipped with it present. audit_skip_predicates resolves all 27 normalized_by_contract."
+   },
+   {
+    "n": 9,
+    "what": "a predecessor's container disk is priced at the rate from ITS OWN authorization instead of this session's. attempt10's own reconciliation gate refused its launch at $0: the campaign reconciled to $22.3614 from the session records and $22.3566 from the published closeouts. $0.0046 of that was a real error -- attempt9's closeout published the launcher's GPU-only log figure ($0.11) rather than its all-in ($0.1146) -- and the remaining $0.0003 was arithmetic describing no spending: both the disk and the all-in are CEILED, so re-deriving a predecessor at a rate that changes every attempt drifts a quantum at a time away from what that attempt published.",
+    "why_it_is_engineering": "cost accounting, not science. Read at its own rate, every published closeout of this campaign now reproduces EXACTLY -- attempt3 $2.5425, attempt5 $19.7041, attempt9 $0.1146, total $22.3612 both ways -- so the two readings agree by construction rather than within a tolerance.",
+    "cost": "$0.0000; the gate refused before provider contact",
+    "retired": "nothing; attempt10's chain was rebuilt before its first launch"
+   },
+   {
+    "n": 10,
+    "what": "the continuation step creates the pod workdir and evidence root before copying into them, and the tests' `scp` fake no longer creates a target's parent. attempt10 cleared all ten gates AND the pod's own test suite -- the two repairs it carried both held -- and then failed pushing the continuation manifest: scp does not create its target's parent, setup does not create that directory, and the driver that does had not run. Hidden in production because the WEIGHTS leg used to run first and made its destinations on the way through, and hidden in test because the fake was more permissive than real scp.",
+    "why_it_is_engineering": "input materialization on the pod. No arm, seed, battery, recipe, scoring rule or decision rule moved; the plan hash is unchanged.",
+    "cost": "$0.0915 -- 4.96 minutes of L40S, one resource, provider-confirmed deleted",
+    "retired": "attempt10",
+    "verified": "with the fake made strict and no production change, 25 tests in the module fail -- the pod's failure reproduced at $0. With the mkdir: 237 passed on the dev box, 209 passed and 28 skipped pod-like."
+   },
+   {
+    "n": 11,
+    "what": "the storage bound reads the candidates' parameter count from the frozen selection instead of from `candidate_manifest`, which joins that selection to durable products only the freezing machine holds. attempt11 reached stage C -- P, S and R passed, both arms built and announced durable -- and raised in `require_probe_headroom` before training anything, because the fallback branch it took is reached by every CONTINUATION and only by a continuation, so its first execution was on a paid pod fifty-one minutes in.",
+    "why_it_is_engineering": "a storage bound's input. Nothing was trained and nothing was scored -- probes_trained 0, probes_scored 0 -- so no measurement began, none was retried and no science was pooled. No arm, seed, battery, recipe, scoring rule or decision rule moved; the plan hash is unchanged.",
+    "cost": "$1.2180 -- 66.03 minutes of L40S, one resource, provider-confirmed deleted",
+    "retired": "attempt11",
+    "and_a_skip_that_hid_it": "the tests covering that branch were the ones amendment 8 had marked `needs_host_local_stores`. They failed with the store hidden and I read that as 'these cases need host bytes' rather than 'the code under test wrongly needs host bytes'. The declared skip set is now 8, down from 28: twenty cases run under a pod-like filesystem again, and what remains genuinely needs the products' byte sizes."
+   },
+   {
+    "n": 12,
+    "what": "the staging tool's plan was filtered to the probes the volume should hold. It announced '11 probes, 24.43 GiB to stage' because it plans from campaign membership, and two of those are completed, validly scored and read by nothing -- P8.4 applied to what a pod restores but not to what the staging tool plans. Filtering `--campaign-root` to a hardlink view of the nine probes that belong there moved 2.22 GiB instead of ~4.8 GiB and kept the index truthful.",
+    "why_it_is_engineering": "data movement. No arm, seed, battery, recipe, scoring rule or decision rule moved.",
+    "cost": "$0.0637 for the staging pod, plus $0.0006 on a draw the load backstop refused",
+    "retired": "nothing; attempt12 was already retired"
+   },
+   {
+    "n": 13,
+    "what": "`recompute_c2_behavioural_decision.py` recomputes the frozen verdict from the committed archive through `behavioural_decision.confirm`, refusing a partial field; the attempt13 closeout's explanation of NO_GO was corrected to cite `ucb_one_sided < SESOI`, which is the criterion the rule actually reads, rather than the LCB; `probes_owed_evidence` unions announced units with restored probes so a restored-and-scored probe's evidence is collected; and the volume constants point at a 10 GB replacement.",
+    "why_it_is_engineering": "evidence collection, a corrected description of an unchanged rule, and a $0 archive recompute. No arm, seed, battery, recipe, scoring rule or decision rule moved; the plan hash is unchanged. The reconstruction re-runs an evaluation that was already executed, on the same bytes under the same protocol.",
+    "cost": "$0.0643 staging v4 plus this session",
+    "retired": "nothing; attempt13 closed with a verdict"
+   }
+  ]
+ },
+ "covers": "the REMAINDER of ONE Phase-C2 behavioural selection campaign: the third frozen confirmation seed for the candidate screening advanced and for incumbent B, and the frozen Phase-C GO / NO_GO / INCONCLUSIVE decision rule over all six confirmation probes. The ten probes already trained, scored and verified off-pod are CONSUMED, never retrained. Same-campaign continuation only, under preregistered R1-R10.",
+ "terminal_results": [
+  "GO",
+  "NO_GO",
+  "INCONCLUSIVE"
+ ],
+ "_any_terminal_result_ends_the_campaign": "a complete GO, NO_GO or INCONCLUSIVE is a valid terminal result and ends this campaign. None of them is a reason to start another attempt.",
+ "explicitly_not_authorized": [
+  "any beam search",
+  "any new Full Search",
+  "any re-ranking of the frozen Top-5",
+  "any regeneration of the selection",
+  "any B state-eval remeasurement",
+  "any fourth seed",
+  "any tie-break rung beyond the frozen rule",
+  "any forced winner",
+  "any retraining of the ten completed probes",
+  "any C3 work",
+  "any C4 work",
+  "any C1 rerun",
+  "any Replay rerun",
+  "any frozen scientific protocol change"
+ ],
+ "approved_money": {
+  "max_rate_usd_per_hour": 1.09,
+  "expected_all_in_usd": 13.4108,
+  "gpu_hard_usd": 13.2088,
+  "disk_hard_usd": 0.202,
+  "all_in_usd": 13.4108,
+  "campaign_all_in_usd": 42.0,
+  "stage_envelope_all_in_usd": 25.0,
+  "gpu": "NVIDIA L40S",
+  "container_disk_gb": 120,
+  "_three_amounts_not_two": "all_in_usd bounds ONE session and equals gpu_hard_usd + disk_hard_usd. campaign_all_in_usd is CUMULATIVE across every run attempt and provider resource of this campaign, including settled spend, and is the only figure campaign_continuation_gate charges prior spend against. stage_envelope_all_in_usd is the maintainer's 2026-09-23 allowance for ALL remaining C2 work including supporting engineering infrastructure outside the formal campaign -- the probe pre-staging is on it, not on the campaign ceiling.",
+  "_the_session_ceiling_is_shortened": "the campaign has settled $28.5891 of its $42.0 ceiling, so the session is authorized for $13.4108 over 727.09 minutes -- what the campaign has left, floored. The reproduction owes one score-only probe and no arm: 165.23 expected minutes, $4.3767 hard.",
+  "_settled_campaign_spend_usd": 28.5891,
+  "_settled_per_attempt": {
+   "attempt1": 0.0,
+   "attempt2": 0.0,
+   "attempt3": 2.5425,
+   "attempt4": 0.0,
+   "attempt5": 19.7041,
+   "attempt6": 0.0,
+   "attempt7": 0.0,
+   "attempt8": 0.0,
+   "attempt9": 0.1146,
+   "attempt10": 0.0915,
+   "attempt11": 1.218,
+   "attempt12": 2.2614,
+   "attempt13": 2.657
+  },
+  "_basis": "the reviewed proposal basis at a quoted L40S securePrice of $1.09/h. Issuance re-quotes the live securePrice and derives the SESSION terms mechanically from it. The campaign ceiling is not a function of the rate and no re-quote may move it.",
+  "_the_working_set_is_consumer_derived": "this continuation moves 8.1 MiB of descriptors, scores, per-sample rows and hashes -- not 22.21 GiB of checkpoints. Ten completed probes are validly scored, so no remaining authorized operation reads their weights.",
+  "_prior_attempts": "attempts 1, 2, 4, 6 and 7 retired at $0 before provider contact, each for a launcher repair that moved the executable closure. attempt3 spent $2.5425 and stopped in stage P on ENOSPC. attempt5 spent $19.7041, measured ten of twelve probes and stopped on ENOSPC without a verdict. Its ten probes are consumed as evidence and are never retrained."
+ },
+ "live_rate_issuance_rule": [
+  "re-query the provider's live gpuTypes.securePrice",
+  "derive the authorization terms mechanically from that live rate",
+  "bind rate_usd_per_hour, hard_runtime_minutes, gpu_hard_usd, disk_hard_usd and all_in_hard_usd distinctly",
+  "retain the reviewed scientific runtime and work scope",
+  "do not shorten the scientific experiment merely because the provider price increased",
+  "do not extend runtime or work because the provider price decreased",
+  "if the live quote materially changes the dollar authorization from the reviewed basis, STOP and return to the maintainer before creating the provider resource",
+  "a provider-returned rate above the authorized rate must refuse and tear down under the existing fail-closed contract"
+ ],
+ "one_use": true,
+ "max_provider_resources": 1,
+ "_one_use_is_per_chain": "this grant authorizes ONE launch chain. A replacement resource inside the same campaign is a new run attempt with a fresh chain, permitted under R1-R10 and bounded by the SAME cumulative campaign ceiling above -- not by a new allocation.",
+ "provider_placement": {
+  "data_center": "EU-NL-1",
+  "network_volume_id": "a0zqgxsm7p",
+  "volume_mount_path": "/durable",
+  "_why": "the scorer reads probe 11's checkpoint, so its weights have a consumer and the weights leg reads from an attached volume. 10 GB rather than 40: one probe, not nine.",
+  "_staged": "validations/durable-staging/v4"
+ },
+ "autonomous_engineering_repair": {
+  "permitted": "inside this scientific scope, the $42.0000 cumulative campaign ceiling and the $25.00 stage envelope, ordinary engineering failures are handled autonomously: preserve evidence, confirm teardown and non-billing, diagnose, minimal repair, focused regression, fresh run identity and chain where required, continue. No approval is needed after each ordinary failure, and an aborted pre-science launcher invocation is an engineering subrun rather than a retried experiment.",
+  "stop_and_return_if": [
+   "the $25.00 remaining-C2 stage envelope cannot cover a minimum credible path to completion",
+   "the frozen scientific question becomes unanswerable without changing the hypothesis, arms, endpoint, battery, seed design or decision rule",
+   "a necessary irreversible action would destroy unique historical or frozen evidence",
+   "human authentication, account or payment interaction is physically required and cannot be completed here",
+   "provider or account state creates billing or resource ownership that cannot safely be reconciled",
+   "a complete valid verdict already exists"
+  ]
+ },
+ "on_identity_mismatch": "an arm whose rebuilt digest does not match the frozen record is a SCIENTIFIC FINDING and a stop condition, not a retryable engineering failure. The path is deterministic and would diverge identically on a retry. Preserve, tear down, and return it to review unchanged.",
+ "execution_chain": [
+  "grant",
+  "launch-bound readiness",
+  "commit only the readiness record",
+  "authorization",
+  "commit only the authorization artifact",
+  "exact-session bundle",
+  "final live quote and all pre-provider gates",
+  "provider resource",
+  "formal behavioural execution",
+  "evidence collection, closeout, provider-confirmed teardown"
+ ],
+ "_ordering_is_binding": "the binding-sensitive steps may not be skipped or reordered. The bundle must carry the authorization, so the authorization must exist first; and the lineage check permits exactly one tracked path to differ between the authorized base and the session commit.",
+ "authorizes": "one launch chain of attempt14, and nothing else."
+}
