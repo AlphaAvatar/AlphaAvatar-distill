@@ -1,4 +1,9 @@
-# 2026-09-23 — C2 behavioural selection: NO_GO
+# 2026-09-23 — C2 behavioural selection: CLOSED WITHOUT PROMOTION
+
+*The runtime observation was `NO_GO`, and it is recorded in full below. It is
+not the stage's verdict: an index or a reader taking the title alone must not
+come away with "C2 proved NO_GO", which is exactly what the maintainer
+declined to conclude.*
 
 > ## C2 CLOSED WITHOUT PROMOTION — maintainer decision, 2026-09-24
 >
@@ -88,9 +93,21 @@
   This is not a marginal call. GO was already arithmetically unreachable after
   the first two seeds (−0.00353 each); the third did not change the direction.
 
-  **NO_GO is a complete terminal result of the frozen rule**, not a failure of
-  the experiment. C2 names no new incumbent. B stands. C3 is separately
-  authorized and unreachable from here.
+  **What this observation is, and is not.** The frozen rule ran to a terminal
+  state on the evidence it was given, and the direction is consistent across
+  every seed and both reconstructions. It is **not** a canonical scientific
+  NO_GO, because the six probes it pooled do not form one uniform
+  evaluation-protocol field — see "The confound, established". The maintainer
+  declined to elevate it, and the stage is CLOSED WITHOUT PROMOTION. What
+  follows from that is narrower than a NO_GO would be: C2 names no new
+  incumbent, and **B stands because no valid challenger displaced it**, not
+  because the candidate was shown to be worse. C3 is separately authorized and
+  unreachable from here.
+
+  The distinction is not a formality. A canonical NO_GO would be evidence
+  *against* this candidate that a later stage could rely on; this is an absence
+  of admissible evidence either way, and a future stage that wants to rule on
+  the same candidate would have to measure it again under one protocol.
 
 - **What was executed:** twelve probes — six screening, one mechanical ranking,
   six confirmation — then one verdict. All five driver stages passed.
@@ -198,7 +215,10 @@ blocks needed to judge them under that rule. Unjudgeable is not comparable, and
 it is not incomparable; it is unjudgeable, and that is why no canonical estimate
 is claimed.
 
-**Now enforced.** `behavioural_decision.assert_one_measurement_protocol`
+**Now enforced.** `aadistill.evaluation.measurement_field.assert_one_measurement_protocol`
+— in the core, beside the `paired_stats` arithmetic it guards, so C3 and C4
+inherit it by importing core rather than by importing a C2 script; the C2
+module keeps a thin wrapper that only translates the error type. It
 refuses a confirmation field that cannot be shown to share one measurement
 protocol, and `confirm` requires the protocol identities rather than accepting
 them optionally. Run against this archive today it exits 3 and writes nothing:

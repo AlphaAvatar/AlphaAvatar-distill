@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-24T10:58:51+00:00",
+  "created_utc": "2026-09-24T11:10:03+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1836,
-    "bytes": 61212289,
+    "bytes": 61213613,
     "by_disposition": {
       "keep_canonical": 190,
       "keep_immutable": 1449,
@@ -16254,7 +16254,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 117976,
-      "sha256": "57d9402534723b15dbad85a31c81c0512daca7dd78d255600215329558921c68",
+      "sha256": "e6a8e590fc25ee4261ecb0a9429519c410f20782451fb41a6c5b6b304c084769",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -24142,8 +24142,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md",
-      "size_bytes": 13263,
-      "sha256": "a563a0d1d4ba47739c97d1a68086be69d32b748b900364b3ac576639a74744d3",
+      "size_bytes": 14587,
+      "sha256": "1ef9380ec3b7545de765f4324540254dab054d78a42cc3ceb365246274d87ac2",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -24243,7 +24243,7 @@
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
       "size_bytes": 44731,
-      "sha256": "73ae3beb406994fae5cccf40595910078074dda54344ab5aa013f3a2e4f47fd6",
+      "sha256": "99f7285c20ed375850b0266c2ab504bc3062e89948dcae703e93452c83e0f537",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
