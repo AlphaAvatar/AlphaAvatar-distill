@@ -6,14 +6,14 @@
   "reserve_minutes": 45.0,
   "_reserve_is_not_a_throughput": "a conservative reserve for making this campaign's completed probes available to the replacement pod, revised 2026-09-23, NOT a measured or claimed throughput. What is reserved depends on what a remaining operation actually reads (AGENTS.md P8.4): for a probe that is trained but not validly scored, its weights, because scoring consumes the model; for a completed and validly scored probe, only the lightweight evidence the verdict consumes, because its checkpoint is archival and is not restored. An observed time is recorded as diagnostic and never promoted to this figure.",
   "_no_session_time_transfer": "a continuation moves only what a remaining operation reads (AGENTS.md P8.4). A probe that is trained but not validly scored has its weights restored from the attached network volume, because scoring consumes the model, and those bytes are read on the pod rather than crossing the network while the meter runs. A completed and validly scored probe contributes its lightweight evidence and nothing else: its checkpoint is archival, and for this campaign all ten completed probes are in that state, so no weights are restored and no volume is attached at all.",
-  "bytes_to_verify": 2392688160,
-  "gib_to_verify": 2.228,
+  "bytes_to_verify": 2393518182,
+  "gib_to_verify": 2.229,
   "weights_probes": 1,
   "weights_gib": 2.22,
-  "evidence_probes": 10,
-  "evidence_mib": 8.06,
-  "checkpoints_skipped": 10,
-  "gib_avoided": 22.213,
+  "evidence_probes": 11,
+  "evidence_mib": 8.85,
+  "checkpoints_skipped": 11,
+  "gib_avoided": 24.434,
   "_artifacts_follow_consumers": "a completed and validly scored probe contributes evidence; its checkpoint is archival and is restored only when a remaining authorized computation reads the weights",
   "implied_mb_per_second_at_the_reserve": 0.89,
   "observed_verification_minutes": null,
@@ -21,31 +21,29 @@
   "durable_backend_usd": 0.0
  },
  "work_owed": {
-  "n_probes_remaining": 2,
-  "n_train_and_score": 1,
+  "n_probes_remaining": 1,
+  "n_train_and_score": 0,
   "n_score_only": 1,
-  "arms_needed": [
-   "B"
-  ],
-  "materialization_minutes": 30.15
+  "arms_needed": [],
+  "materialization_minutes": 0
  },
  "window": {
-  "expected_minutes": 282.38,
-  "hard_minutes": 393.29
+  "expected_minutes": 165.23,
+  "hard_minutes": 237.29
  },
  "components_hard_usd": {
   "scientific_work": {
-   "minutes": 87.0,
-   "gpu_usd": 1.5805,
-   "disk_usd": 0.0242,
-   "all_in_usd": 1.6047,
+   "minutes": 0.0,
+   "gpu_usd": 0.0,
+   "disk_usd": 0.0,
+   "all_in_usd": 0.0,
    "_is": "training and scoring the probes the campaign still owes"
   },
   "arm_materialization": {
-   "minutes": 30.15,
-   "gpu_usd": 0.5477,
-   "disk_usd": 0.0084,
-   "all_in_usd": 0.5561,
+   "minutes": 0.0,
+   "gpu_usd": 0.0,
+   "disk_usd": 0.0,
+   "all_in_usd": 0.0,
    "_is": "rebuilding the arms those probes need on a fresh filesystem"
   },
   "probe_availability_reserve": {
@@ -63,10 +61,10 @@
    "_is": "setup, bundle transfer, teacher fetch, machine gates, artifact synchronisation"
   },
   "variability_reserves": {
-   "minutes": 80.91,
-   "gpu_usd": 1.4699,
-   "disk_usd": 0.0225,
-   "all_in_usd": 1.4923,
+   "minutes": 42.06,
+   "gpu_usd": 0.7641,
+   "disk_usd": 0.0117,
+   "all_in_usd": 0.7758,
    "_is": "the frozen probe model's own contingency and duration risk"
   },
   "teardown_recovery_reserve": {
@@ -88,21 +86,22 @@
  "money": {
   "rate_usd_per_hour": 1.09,
   "disk_usd_per_minute": 0.00027781,
-  "expected_gpu_usd": 5.1299,
-  "expected_disk_usd": 0.0784,
-  "expected_all_in_usd": 5.2084,
-  "hard_gpu_usd": 7.1448,
-  "hard_disk_usd": 0.1093,
-  "hard_all_in_usd": 7.254,
+  "expected_gpu_usd": 3.0017,
+  "expected_disk_usd": 0.0459,
+  "expected_all_in_usd": 3.0476,
+  "hard_gpu_usd": 4.3108,
+  "hard_disk_usd": 0.0659,
+  "hard_all_in_usd": 4.3767,
   "_all_in_includes": "GPU at the live rate PLUS the separately billed container disk, derived by autoinit_c2_behavioural_launch :: continuation_all_in_usd. A GPU-only figure is not an all-in figure and must not be labelled as one."
  },
  "campaign": {
-  "settled_all_in_usd": 25.9321,
+  "settled_all_in_usd": 28.5891,
   "settled_per_attempt": {
    "attempt1": 0.0,
    "attempt10": 0.0915,
    "attempt11": 1.218,
    "attempt12": 2.2614,
+   "attempt13": 2.657,
    "attempt2": 0.0,
    "attempt3": 2.5425,
    "attempt4": 0.0,
@@ -113,14 +112,14 @@
    "attempt9": 0.1146
   },
   "ceiling_all_in_usd": 42.0,
-  "settled_plus_hard_plus_backend_usd": 33.1861,
+  "settled_plus_hard_plus_backend_usd": 32.9658,
   "fits": true,
-  "headroom_usd": 8.8139
+  "headroom_usd": 9.0342
  },
  "project": {
-  "cumulative_usd": 337.0663,
+  "cumulative_usd": 339.7876,
   "cap_usd": 370.0,
-  "worst_case_usd": 344.3203,
+  "worst_case_usd": 344.1643,
   "fits": true
  }
 }

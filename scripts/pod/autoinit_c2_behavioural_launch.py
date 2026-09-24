@@ -136,8 +136,13 @@ DURABLE_STORE = str(host_local_store() / "phase_c2_behavioural")
 #: consumer pays the whole constraint for none of the benefit, which is the
 #: same defect as moving the bytes themselves (AGENTS.md P8.4) one level up: the
 #: CONSTRAINT was following the campaign rather than a consumer.
-CAMPAIGN_VOLUME_ID = "59qt99zeg5"
-CAMPAIGN_VOLUME_GB = 40
+#: `59qt99zeg5`, 40 GB, held the nine probes the campaign staged and was deleted
+#: at C2 closeout. This one replaces it for the P4 reproducibility repair, and
+#: it is 10 GB rather than 40 because exactly one probe's weights now have a
+#: consumer: the scorer reads probe 11's checkpoint and nothing else. Sizing the
+#: backend to the working set is the same rule as not moving the bytes.
+CAMPAIGN_VOLUME_ID = "a0zqgxsm7p"
+CAMPAIGN_VOLUME_GB = 10
 VOLUME_DATACENTER = "EU-NL-1"
 
 #: Where the volume is mounted on the pod. NOT `/workspace`, which is the
