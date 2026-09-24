@@ -73,13 +73,26 @@ def _rows(seed: int, correct_rate: float, usable_rate: float) -> list[dict]:
     return out
 
 
+#: The protocol identities a real scorer writes into `result.json`. The
+#: recompute builds `confirm`'s `protocols` from these, and the gate refuses a
+#: field that cannot show they match -- so a fixture omitting them is refused
+#: for a reason that has nothing to do with the arithmetic under test.
+BATTERY = {"artifact": "c1_confirmation_v1", "content_sha256": "a" * 64}
+SCORING = {"contract": "c1_confirmation_scoring@v1", "digest": "b" * 64}
+METRIC = {"contract": "c1_confirmation_scoring@v1", "schema": "CAPABILITY_V1"}
+FINGERPRINT = "c" * 64
+
+
 def _archive(root: Path, *, treatment_correct: float, incumbent_correct: float,
-             usable: float = 0.95) -> Path:
+             usable: float = 0.95, fingerprints: dict | None = None) -> Path:
     """A complete six-probe confirmation archive, laid out as the real one is.
 
     Probes are spread across attempt directories on purpose: the real campaign
     has the candidate's third seed under `attempt12` and the incumbent's under
     `attempt13`, and the walker has to collapse them into one experiment.
+
+    `fingerprints` overrides individual probes' generation protocol, keyed
+    `(arm, seed)`, to build the mixed-protocol field the real campaign has.
     """
     store = root / "c2-behavioural-12probe-v1"
     rule = BD.decision_rule(REPO)
@@ -104,6 +117,11 @@ def _archive(root: Path, *, treatment_correct: float, incumbent_correct: float,
                 "seed": seed,
                 "correct_overall": sum(r["correct"] for r in scorable) / len(scorable),
                 "usable_rollout_rate": sum(r["usable"] for r in rows) / len(rows),
+                "battery": dict(BATTERY),
+                "scoring_contract": dict(SCORING),
+                "metric_contract": dict(METRIC),
+                "generation_protocol_fingerprint": (fingerprints or {}).get(
+                    (arm, seed), FINGERPRINT),
             }, indent=1) + "\n")
             (d / "probe_record.json").write_text(json.dumps({
                 "probe_id": pid, "rung": "confirmation", "arm": arm,
@@ -197,3 +215,39 @@ def test_the_walker_prefers_the_copy_that_carries_the_rows(tmp_path):
     chosen = found[rich.name]
     assert chosen["has_rows"] and chosen["has_result"], (
         f"the walker took the rowless copy at {chosen['attempt']}")
+
+
+def test_it_refuses_the_mixed_protocol_field_the_REAL_archive_has(tmp_path):
+    """C2's own shape: six readable probes, three generation protocols.
+
+    This is the defect that closed C2 without promotion. Every row file is
+    valid, every probe is complete, the walker finds all six and the arithmetic
+    runs — so nothing in the recompute before the gate can tell that the third
+    seed's pair was measured under two different protocols. The paired interval
+    over such a field has no estimand, and a script that printed a verdict for
+    it would be publishing a number for a comparison nobody made.
+
+    Refusal must be a clean exit with nothing written, not a traceback: this
+    path runs against the real archive.
+    """
+    store = _archive(tmp_path, treatment_correct=0.26, incumbent_correct=0.34,
+                     fingerprints={
+                         (SCH.ANCHOR, sorted(BD.decision_rule(REPO).seeds)[2]):
+                             "d" * 64,
+                         (CANDIDATE, sorted(BD.decision_rule(REPO).seeds)[2]):
+                             "e" * 64,
+                     })
+    out = tmp_path / "decision.json"
+    rc = RC.main(["--store", str(store), "--out", str(out)])
+    assert rc == 3, f"a mixed-protocol field produced exit {rc}"
+    assert not out.exists(), (
+        "it published a decision record for a field spanning three protocols")
+
+    #: And the same archive with ONE protocol decides normally, so the refusal
+    #: is attributable to the mixing and not to the fixture.
+    ok = tmp_path / "uniform"
+    ok.mkdir()
+    store2 = _archive(ok, treatment_correct=0.26, incumbent_correct=0.34)
+    out2 = ok / "decision.json"
+    assert RC.main(["--store", str(store2), "--out", str(out2)]) == 0
+    assert json.loads(out2.read_text())["terminal_state"] == "NO_GO"

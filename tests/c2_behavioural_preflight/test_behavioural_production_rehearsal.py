@@ -169,6 +169,20 @@ class _Rehearsal(D.C2BehaviouralDriver):
             "result_path": str(per_sample), "result_sha256": "rehearsed",
             "correct_overall": sum(r["correct"] for r in scorable) / len(scorable),
             "usable_rollout_rate": sum(r["usable"] for r in rows) / len(rows),
+            #: HOW this probe was measured, as a real scorer's result.json
+            #: records it. Stage D now refuses a confirmation field that cannot
+            #: be shown to share one measurement protocol, so a rehearsal whose
+            #: scores omitted these would fail at the gate rather than at the
+            #: behaviour it exists to rehearse -- and a fixture that omits what
+            #: the producer writes is not rehearsing the producer. Uniform
+            #: across probes here, which is the passing case; the mixed case is
+            #: covered by tests/autoinit/test_measurement_protocol_gate.py.
+            "battery": {"artifact": "c1_confirmation_v1",
+                        "content_sha256": "r" * 64},
+            "scoring_contract": {"contract": "c1_confirmation_scoring@v1",
+                                 "digest": "s" * 64},
+            "metric_contract": {"contract": "c1_confirmation_scoring@v1"},
+            "generation_protocol_fingerprint": "g" * 64,
         }
 
 

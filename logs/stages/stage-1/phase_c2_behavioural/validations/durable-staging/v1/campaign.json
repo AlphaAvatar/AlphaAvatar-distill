@@ -4,23 +4,26 @@
  "experiment": "phase_c2_behavioural",
  "kind": "engineering infrastructure; not a scientific result",
  "authorizes": "nothing",
- "status": "COMPLETE and CLOSED 2026-09-23. Reopened for a third round once attempt12 trained a probe and left it unscored: that checkpoint's bytes became the first in this campaign with a real consumer, because `score_existing` reads the model. v3 staged it, attempt13 restored and scored it, and the volume was then deleted at C2 closeout.",
+ "status": "COMPLETE and CLOSED 2026-09-24. Four rounds. v1+v2 staged eight of the ten attempt5 probes before the standing consumer rule stopped the rest; v3 staged the probe attempt12 trained and left unscored so attempt13 could score it; v4 staged that same probe again, onto a 10 GB replacement volume, so attempt14 could RECONSTRUCT its evaluation for the P4 repair. Both volumes are deleted and the provider reports none.",
  "opened_utc": "2026-09-23T18:00:00Z",
- "closed_utc": "2026-09-23T20:20:00+00:00",
- "booked_usd": 0.7791,
- "_booked_usd_basis": "v1+v2 from the provider account balance delta across those rounds ($80.0378314134 -> $79.3230251094 = $0.7148). v3 from the staging tool's own teardown figure ($0.0637 for 63.7 min at $0.06/h) plus $0.0006 for a draw the load backstop refused. The two bases differ and are stated separately rather than blended. The whole envelope window, measured the same way as v1+v2 -- $80.0378314134 at the campaign's start to $72.8731645539 at C2 closeout -- is $7.1646, of which $7.1216 is attributable to named attempts and rounds and $0.0431 to network-volume storage and container-disk rounding that no per-attempt derivation captures.",
+ "closed_utc": "2026-09-24T09:30:00+00:00",
+ "booked_usd": 0.8947,
+ "_booked_usd_basis": "Reconciled to the PROVIDER, not to the sum of the parts. The envelope window's account balance delta is $80.0378314134 -> $70.7336584514 = $9.3042. Named attempts 9-14 account for $8.4095 and the four staging rounds' own teardown figures for $0.8516 -- v1+v2 $0.7148 as a balance delta, v3 $0.0637, v4 $0.0725, plus $0.0006 for a draw the v3 load backstop refused. That leaves $0.0431 of real provider spend in no record: NETWORK-VOLUME STORAGE, which bills by size-hours across both volumes and which no per-attempt derivation captures. It is booked here because this campaign owns the volumes, so the ledger now sums to the account delta exactly rather than leaving a silent hole. The bases differ and are stated separately rather than blended.",
  "envelope": "the $25.00 remaining-C2 stage envelope authorized 2026-09-23; NOT the $42.0000 formal behavioural campaign ceiling, which governs the scientific campaign alone",
  "rounds": [
   "v1",
   "v2",
-  "v3"
+  "v3",
+  "v4"
  ],
  "what_it_bought": {
   "volume": "59qt99zeg5, 40 GB, EU-NL-1, mounted at /durable",
   "probes_on_the_volume": 9,
   "gib_on_the_volume": 20.8,
   "_not_a_dependency": "volume_gate asks only for probes whose WEIGHTS a remaining operation reads. This campaign has none, so the eight are sunk operational cost that may remain until teardown and are not a required input by virtue of being present.",
-  "_the_one_that_mattered": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638, trained by attempt12 and unscored. It is the only probe this campaign ever restored weights for, and restoring it is what let attempt13 score it in 28 minutes instead of retraining it in 87 -- which R3 forbids anyway."
+  "_the_one_that_mattered": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638, trained by attempt12 and unscored. It is the only probe this campaign ever restored weights for, and restoring it is what let attempt13 score it in 28 minutes instead of retraining it in 87 -- which R3 forbids anyway.",
+  "_v4": "the same checkpoint as v3, staged to a 10 GB volume rather than 40 because exactly one probe's weights had a consumer. Sizing the backend to the working set is the same rule as not moving the bytes.",
+  "_volume_storage": "$0.0431 across 59qt99zeg5 (40 GB) and a0zqgxsm7p (10 GB) for their lifetimes. Small, and previously invisible: a GPU-hour figure does not contain it, which is the same class of omission as pricing a session on compute alone."
  },
  "what_it_taught": [
   "RunPod's cheapest CPU hosts run at 29-42 load per vCPU as the norm, and a draw can decay ten-fold mid-transfer; gate on in-flight throughput, never on load",
@@ -30,6 +33,6 @@
   "the staging tool plans from campaign membership, not from consumers: it announced '11 probes, 24.43 GiB to stage' when one probe's weights were wanted. Filtering --campaign-root to a hardlink view of what belongs on the volume moved 2.22 GiB instead of ~4.8 GiB and kept the index truthful.",
   "its teardown is in a `finally`, not an `except Exception`, so a KeyboardInterrupt still releases the pod -- which is what made stopping a live transfer safe. An `except Exception` teardown would have leaked it."
  ],
- "teardown": "network volume 59qt99zeg5 DELETED at C2 closeout on 2026-09-23; the provider reports zero pods and zero volumes. Every probe it held had its original on the launcher host, verified before deletion, so nothing unique was destroyed.",
+ "teardown": "both volumes DELETED: 59qt99zeg5 (40 GB) at the first C2 closeout and a0zqgxsm7p (10 GB) after the P4 repair. In each case every probe the volume held was verified to have its original on the launcher host before deletion, so nothing unique was destroyed. The provider reports zero volumes.",
  "package_id": "c2_stage_envelope_20260923"
 }

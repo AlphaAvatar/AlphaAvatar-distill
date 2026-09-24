@@ -166,7 +166,139 @@ def decision_rule(repo_root: str | Path = REPO_ROOT) -> C2DecisionRule:
     )
 
 
-def confirm(per_sample, *, rule: C2DecisionRule) -> dict[str, Any]:
+#: The identities every probe of one confirmation field must establish before a
+#: paired interval over them means anything. Six valid row files measured under
+#: different evaluation protocols are six measurements of different things, and
+#: averaging them produces a number with no estimand.
+#:
+#: C2 is why this exists. Its confirmation field carried a uniform battery,
+#: scoring contract and metric contract, and THREE distinct generation protocol
+#: fingerprints: the four attempt5 probes on one, incumbent B's third seed on a
+#: second, and the candidate's third seed on a third. The paired difference at
+#: that seed was therefore computed across two protocols -- a confound inside
+#: the pair, on the seed with the largest magnitude. Nothing refused it.
+PROTOCOL_IDENTITY_FIELDS = ("battery", "scoring_contract", "metric_contract")
+
+#: Compared through the project's OWN rule, not by equality, and deliberately
+#: separate from the fields above. `generation_compat` v2 demotes the NVIDIA
+#: driver patch to recorded-not-material because the field named `image_digest`
+#: is really `imageName@driver` and the provider assigns whatever host is free,
+#: so exact equality over a fingerprint containing it is a host lottery. That
+#: rule needs the expanded protocol and runtime blocks; a fingerprint alone
+#: cannot be demoted, only compared.
+GENERATION_IDENTITY_FIELD = "generation_protocol_fingerprint"
+
+
+def assert_one_measurement_protocol(
+        protocols: Mapping[Any, Mapping[str, Any]], *,
+        context: str = "confirmation field") -> dict[str, Any]:
+    """Refuse unless every probe establishes ONE compatible measurement protocol.
+
+    FAILS CLOSED, in both directions that matter:
+
+    * identities that are present and DIFFER -> refused;
+    * identities that are ABSENT, or a generation protocol that differs and
+      cannot be judged under `generation_compat` v2 because the expanded
+      protocol and runtime blocks were never recorded -> also refused, because
+      "not shown to be comparable" is not "comparable".
+
+    `protocols` maps each probe key to what that probe recorded about how it was
+    measured. A probe may additionally carry `protocol` and `runtime` blocks, in
+    which case the generation protocol is compared through
+    `require_comparable` -- the rule that already owns this question -- instead
+    of by fingerprint equality.
+
+    Returns the comparison so a caller can record what was equal and what was
+    merely recorded. Generic on purpose: C3 and C4 inherit it.
+    """
+    from aadistill.initialization.planning.generation_compat import (
+        ComparabilityError, comparable_generation_identity, require_comparable,
+    )
+
+    if not protocols:
+        raise BehaviouralDecisionError(
+            f"the {context} declares no measurement protocol for any probe. A "
+            "paired interval over probes whose protocols are unknown has no "
+            "estimand; this refuses rather than producing a number.")
+
+    report: dict[str, Any] = {"probes": {str(k): {} for k in protocols},
+                              "uniform": {}, "compared_by": {}}
+
+    missing: dict[str, list[str]] = {}
+    for key, rec in protocols.items():
+        absent = [f for f in (*PROTOCOL_IDENTITY_FIELDS, GENERATION_IDENTITY_FIELD)
+                  if rec.get(f) in (None, "", {}, [])]
+        if absent:
+            missing[str(key)] = absent
+    if missing:
+        raise BehaviouralDecisionError(
+            f"the {context} cannot be shown to share one measurement protocol: "
+            f"{missing} record no value for those identities. Absent is not "
+            "equal; this refuses rather than assuming they matched.")
+
+    for field in PROTOCOL_IDENTITY_FIELDS:
+        seen = {_stable(rec.get(field)) for rec in protocols.values()}
+        report["uniform"][field] = len(seen) == 1
+        report["compared_by"][field] = "exact identity"
+        if len(seen) != 1:
+            raise BehaviouralDecisionError(
+                f"the {context} spans {len(seen)} distinct {field} identities. "
+                "Probes measured against different batteries, scoring "
+                "contracts or metric contracts are measurements of different "
+                f"things: {sorted(s[:80] for s in seen)}")
+
+    #: The generation protocol, through the rule that owns it.
+    fingerprints = {_stable(r.get(GENERATION_IDENTITY_FIELD))
+                    for r in protocols.values()}
+    report["generation_fingerprints"] = sorted(f[:64] for f in fingerprints)
+    if len(fingerprints) == 1:
+        report["uniform"][GENERATION_IDENTITY_FIELD] = True
+        report["compared_by"][GENERATION_IDENTITY_FIELD] = "exact identity"
+        return report
+
+    report["uniform"][GENERATION_IDENTITY_FIELD] = False
+    expanded = {k: r for k, r in protocols.items()
+                if r.get("protocol") and r.get("runtime")}
+    if len(expanded) != len(protocols):
+        raise BehaviouralDecisionError(
+            f"the {context} spans {len(fingerprints)} distinct generation "
+            f"protocol fingerprints, and {len(protocols) - len(expanded)} of "
+            f"{len(protocols)} probes did not record the expanded protocol and "
+            "runtime blocks that `generation_compat` v2 needs to judge "
+            "comparability. That rule demotes the NVIDIA driver patch to "
+            "recorded-not-material, so differing fingerprints MIGHT be "
+            "comparable -- but it cannot be applied to a fingerprint alone. "
+            "Unjudgeable is refused, not assumed comparable. Fingerprints: "
+            f"{report['generation_fingerprints']}")
+
+    report["compared_by"][GENERATION_IDENTITY_FIELD] = (
+        "generation_runtime_comparability@v2")
+    keys = list(expanded)
+    base = comparable_generation_identity(protocol=expanded[keys[0]]["protocol"],
+                                          runtime=expanded[keys[0]]["runtime"])
+    for other in keys[1:]:
+        try:
+            require_comparable(
+                comparable_generation_identity(
+                    protocol=expanded[other]["protocol"],
+                    runtime=expanded[other]["runtime"]),
+                base, context=f"{context}: {other} vs {keys[0]}")
+        except ComparabilityError as exc:
+            raise BehaviouralDecisionError(
+                f"the {context} is not one measurement protocol: {exc}") from exc
+    report["uniform"][GENERATION_IDENTITY_FIELD] = "comparable under v2"
+    return report
+
+
+def _stable(value: Any) -> str:
+    import json as _json
+
+    return (_json.dumps(value, sort_keys=True)
+            if isinstance(value, (dict, list)) else str(value))
+
+
+def confirm(per_sample, *, rule: C2DecisionRule,
+            protocols: Mapping[Any, Mapping[str, Any]]) -> dict[str, Any]:
     """The frozen three-way verdict, from the six confirmation probes' rows.
 
     `per_sample` maps `(arm, seed) -> that probe's per-prompt rows`, exactly the
@@ -201,6 +333,21 @@ def confirm(per_sample, *, rule: C2DecisionRule) -> dict[str, Any]:
         raise BehaviouralDecisionError(
             f"the confirmation rung is six probes; got {len(per_sample)}. A "
             "verdict from a partial field is not the preregistered experiment.")
+
+    #: BEFORE any arithmetic. A paired interval over probes that were not
+    #: measured alike has no estimand, and C2's field -- three distinct
+    #: generation protocol fingerprints across six probes, two of them inside
+    #: one seed's pair -- reached a verdict because nothing asked. `protocols`
+    #: is required rather than optional so a caller cannot omit it and get a
+    #: number anyway.
+    protocol_report = assert_one_measurement_protocol(
+        protocols, context="confirmation field")
+    if set(map(str, protocols)) != set(map(str, per_sample)):
+        raise BehaviouralDecisionError(
+            "the protocols declared and the probes measured are different "
+            f"sets: {sorted(map(str, protocols))} vs "
+            f"{sorted(map(str, per_sample))}. A protocol record that does not "
+            "name the probe it describes certifies nothing about it.")
     seeds = sorted(rule.seeds)
     seen = sorted({int(s) for _, s in per_sample})
     if seen != seeds:
@@ -247,6 +394,7 @@ def confirm(per_sample, *, rule: C2DecisionRule) -> dict[str, Any]:
             f"of C2's terminal states {TERMINAL_STATES}")
     return {
         "rule": rule.as_dict(),
+        "measurement_protocol": protocol_report,
         "n_prompts": len(d),
         "bootstrap": boot,
         "bootstrap_seed_used": rule.bootstrap_seed,

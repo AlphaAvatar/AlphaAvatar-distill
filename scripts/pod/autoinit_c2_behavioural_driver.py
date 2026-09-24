@@ -1980,7 +1980,25 @@ class C2BehaviouralDriver:
             rows[(arm, probe.seed)] = [
                 json.loads(line) for line in path.open() if line.strip()]
 
-        decision = BD.confirm(rows, rule=self.rule)
+        #: The protocol each probe was measured under, from its own score
+        #: record, plus the expanded blocks when this session attested them.
+        #: `confirm` refuses a field that cannot be shown to share one
+        #: measurement protocol -- which C2's could not.
+        protocols: dict[tuple[str, int], dict] = {}
+        for probe in self.confirmation:
+            s = self.scores[probe.probe_id]
+            arm = (BD.INCUMBENT_ARM if probe.arm == SCH.ANCHOR
+                   else BD.TREATMENT_ARM)
+            rec = {f: s.get(f) for f in ("battery", "scoring_contract",
+                                         "metric_contract",
+                                         "generation_protocol_fingerprint")}
+            attested = getattr(self, "evaluation_protocol", None)
+            if isinstance(attested, dict):
+                rec["protocol"] = attested.get("evaluation_protocol")
+                rec["runtime"] = attested.get("runtime")
+            protocols[(arm, probe.seed)] = rec
+
+        decision = BD.confirm(rows, rule=self.rule, protocols=protocols)
         decision["advanced_candidate"] = self.advanced["state_id"]
         decision["anchor"] = self.anchor["artifact_digest"]
         decision["probe_results"] = {

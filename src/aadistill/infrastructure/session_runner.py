@@ -214,6 +214,7 @@ class SessionRunner:
         #: The provider resource the detached watchdog already owns, so a second
         #: call cannot start a second backstop against the same pod.
         self._watchdog_for = ""
+        self._watchdog_pid = 0
         self.price = None
         self.plan = None
         self.endpoint = ("", "")
@@ -562,10 +563,16 @@ class SessionRunner:
                "--authorized-usd", str(self.auth.hard_cap_usd),
                "--journal", str(journal), "--poll-seconds", "60"]
         out = open(self.scr / self._watchdog_journal_name(self.pod_id, "out"), "w")
-        subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT,
-                         stdin=subprocess.DEVNULL, cwd=self.repo_root,
-                         env={**os.environ, "PYTHONPATH": str(self.repo_root / "src")},
-                         start_new_session=True)
+        proc = subprocess.Popen(
+            cmd, stdout=out, stderr=subprocess.STDOUT,
+            stdin=subprocess.DEVNULL, cwd=self.repo_root,
+            env={**os.environ, "PYTHONPATH": str(self.repo_root / "src")},
+            start_new_session=True)
+        #: KEPT, so ownership can be VERIFIED rather than asserted. The blocked
+        #: teardown path used to say "the watchdog remains the backstop" without
+        #: checking; if the watchdog had died, that sentence was the only thing
+        #: standing between a blocked gate and an unbounded bill.
+        self._watchdog_pid = proc.pid
         self._watchdog_for = self.pod_id
         self.ev.setdefault("watchdog_journals", []).append(str(journal))
         self.ev["watchdog_owns_pod"] = self.pod_id
@@ -1107,8 +1114,30 @@ class SessionRunner:
                  f"failed={decision.failed_check}{risk}")
         self.save()
         if not decision.allowed:
-            self.say("GATE BLOCKED — the runner is NOT deleting the pod; the "
-                     "watchdog remains the backstop")
+            #: THE INVARIANT: every created billing resource has an owner until
+            #: the provider confirms it gone. Preserving a pod whose required
+            #: artifact is only on it is right, and it is only right while
+            #: something will still terminate it -- so ownership is verified
+            #: here instead of asserted.
+            owner = self.verify_watchdog_owns_pod()
+            self.ev["blocked_teardown_ownership"] = owner
+            self.save()
+            if owner["owned"]:
+                self.say(
+                    f"GATE BLOCKED — pod retained for evidence; ownership "
+                    f"VERIFIED: watchdog pid {owner['pid']} is live and holds "
+                    f"{self.pod_id} to a {self.plan.hard_terminate_minutes:.0f} "
+                    f"min hard cap")
+                return False
+            #: No live owner. Artifact preservation cannot outrank leaving a
+            #: resource billing with nobody to stop it: the evidence that could
+            #: be collected already was, under the reduced spec above.
+            self.say(
+                f"GATE BLOCKED and NO LIVE OWNER ({owner['why']}) — tearing "
+                "down rather than leaving an ownerless billing resource. What "
+                "was collectable has been collected; what was not is recorded "
+                "as lost in the manifest above.")
+            self.teardown_now("gate blocked with no live watchdog owner")
             return False
         # Never "clean" when the secured gate said otherwise: the reason a pod is
         # being deleted must carry the fact that its products are not off-pod.
@@ -1201,6 +1230,58 @@ class SessionRunner:
                                  if released.get("pod_id") else None),
             "release": released,
         })
+
+    def verify_watchdog_owns_pod(self) -> dict[str, Any]:
+        """Is a live watchdog still holding THIS pod to a hard cap? `$0`.
+
+        Asked instead of assumed. The blocked-teardown path preserves a pod so
+        a required artifact that exists only on it is not destroyed, and that
+        is only defensible while something will still terminate the pod. When
+        this returns `owned=False` the caller tears down rather than returning
+        with a resource nobody owns.
+
+        Liveness alone is not ownership: pids are reused, so the process must
+        also still name this pod on its command line. A signal-0 check that
+        passed on a recycled pid would report ownership that does not exist --
+        which is the same class of error as the sentence this replaces.
+        """
+        pid = int(getattr(self, "_watchdog_pid", 0) or 0)
+        out: dict[str, Any] = {"pod_id": self.pod_id, "pid": pid,
+                               "owned": False, "why": ""}
+        if not self.pod_id:
+            out["why"] = "no pod id; nothing was created"
+            out["owned"] = True     # nothing to own
+            return out
+        if not pid:
+            out["why"] = "no watchdog was launched for this resource"
+            return out
+        if self._watchdog_for != self.pod_id:
+            out["why"] = (f"the watchdog was launched for {self._watchdog_for!r}, "
+                          f"not {self.pod_id!r}")
+            return out
+        try:
+            os.kill(pid, 0)
+        except (ProcessLookupError, PermissionError) as exc:
+            out["why"] = f"pid {pid} is not running ({type(exc).__name__})"
+            return out
+        except OSError as exc:                                  # noqa: BLE001
+            out["why"] = f"pid {pid} liveness unreadable ({exc})"
+            return out
+        #: Pid reuse: confirm it is still OUR watchdog for THIS pod.
+        try:
+            cmdline = Path(f"/proc/{pid}/cmdline").read_bytes().decode(
+                "utf-8", "replace")
+        except OSError as exc:                                  # noqa: BLE001
+            out["why"] = f"pid {pid} is live but its cmdline is unreadable ({exc})"
+            return out
+        if self.pod_id not in cmdline or "watchdog" not in cmdline:
+            out["why"] = (f"pid {pid} is live but is not this pod's watchdog; "
+                          "the pid was reused")
+            return out
+        out["owned"] = True
+        out["why"] = f"watchdog pid {pid} is live and names {self.pod_id}"
+        out["hard_minutes"] = float(self.plan.hard_terminate_minutes)
+        return out
 
     def teardown_now(self, why: str) -> None:
         self.say(f"deleting pod ({why})")

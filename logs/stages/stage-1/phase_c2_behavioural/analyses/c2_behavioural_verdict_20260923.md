@@ -1,13 +1,39 @@
 # 2026-09-23 — C2 behavioural selection: NO_GO
 
-> **Superseded in two ways by the P4 repair of 2026-09-24.** This document
-> explained NO_GO through the **LCB**, which is a *GO* criterion; the rule
-> produces NO_GO from `ucb_one_sided < SESOI`. And probe 11's rows, absent when
-> this was written, were reconstructed — giving a slightly different aggregate.
-> The complete record is
-> [`c2_behavioural_decision_recomputed.json`](c2_behavioural_decision_recomputed.json)
-> and [`attempt14/closeout/outcome.json`](../runs/attempt14/closeout/outcome.json).
-> What is *unchanged* is the terminal state and every qualitative conclusion below.
+> ## C2 CLOSED WITHOUT PROMOTION — maintainer decision, 2026-09-24
+>
+> **This document must not be read as "C2 scientifically proved NO_GO."** The
+> maintainer closed C2 without promotion and explicitly declined to elevate the
+> NO_GO estimate into a canonical scientific result, because the confirmation
+> field mixed evaluation-protocol identities.
+>
+> ```text
+> new C2 incumbent            NONE
+> accepted incumbent after C2 B = frozen C1 treatment
+> why B stands                no valid C2 challenger displaced it
+> ```
+>
+> B stands **by absence of valid promotion evidence**, not because a clean
+> canonical NO_GO experiment ruled against the candidate.
+>
+> The full joint search and screening did produce a candidate. The behavioural
+> confirmation did not produce a sufficiently clean, protocol-consistent result
+> that could replace the accepted incumbent.
+>
+> The attempt13 and attempt14 observations below remain historical evidence and
+> are deliberately left intact. Both carry the limitation that the final
+> confirmation evidence does not form one uniform evaluation-protocol field.
+> Further C2 scientific spend is not authorized; no re-evaluation, no uniform
+> six-probe replay, no new seeds, no attempt15.
+>
+> Two corrections this document originally got wrong, kept visible rather than
+> silently edited:
+>
+> 1. it explained NO_GO through the **LCB**, which is a *GO* criterion. The rule
+>    produces NO_GO from `ucb_one_sided < SESOI`.
+> 2. it attributed the attempt13/attempt14 difference to **greedy-decoding
+>    nondeterminism**. That was asserted, not established. See
+>    "The confound, established" below.
 
 - **Verdict, as attempt13's runtime observed it:**
 
@@ -49,10 +75,10 @@
   11: its seed delta is −17/850 where attempt13 measured −15/850, and the
   pooled delta −23/2550 against −21/2550. The terminal state, the criterion,
   the bootstrap seed, the guardrail outcome and the sign of every per-seed
-  delta are identical. The likely cause is serving-engine non-determinism under
-  greedy decoding — this repository's own Stage-4 notes record that decoding is
-  not batch-invariant even within one stack, and the two runs used different
-  physical L40S instances. It is recorded, not averaged.
+  delta are identical.
+
+  Both figures stand. Neither is averaged with the other and neither is
+  selected as more correct — see "The confound, established".
 
   The advanced candidate `1a2b5b030e7e4e202fda3a810ed53c5f` does **not**
   displace incumbent **B**. It is *worse* by 0.82 points of `correct_overall`
@@ -134,6 +160,62 @@ See the banner at the top and
 
 ---
 
+## The confound, established
+
+The six confirmation probes do **not** form one uniform evaluation-protocol
+field. Read off each probe's own `result.json`:
+
+| attempt | arm | seed | `generation_protocol_fingerprint` |
+| --- | --- | --- | --- |
+| 5 | candidate | 1916380711 | `e9d8da97…` |
+| 5 | candidate | 1936324010 | `e9d8da97…` |
+| 5 | B | 1916380711 | `e9d8da97…` |
+| 5 | B | 1936324010 | `e9d8da97…` |
+| 13 | **B** | **1523147638** | **`af7beb55…`** |
+| 12 → 14 | **candidate** | **1523147638** | **`bbba93df…`** |
+
+Battery content identity, scoring contract and metric contract are **uniform
+across all six**. The generation protocol is not: three distinct fingerprints,
+and the two seeds measured wholly within attempt5 are internally consistent
+while **the third seed's pair spans two different protocols** — B under one,
+the candidate under another.
+
+So the confound is *inside the pair*, on the seed with the largest magnitude
+(−0.02) and the one whose delta moved by two prompts between attempt13 and
+attempt14. Protocol/runtime drift is therefore a live alternative explanation
+for that difference, and it cannot be separated from any candidate-versus-B
+effect at that seed using this evidence.
+
+**What is not claimed.** That greedy-decoding nondeterminism caused the two
+changed prompts. That was the first explanation offered here and it was
+asserted rather than established. The runs did differ in NVIDIA driver patch
+(`@580.173.02` for attempt13, `@580.126.20` for attempt14), and
+`generation_compat` v2 deliberately treats a patch move *within one branch* as
+recorded-not-material — so the driver alone does not establish incomparability
+either. What is established is that the recorded generation protocol identities
+differ and that the archive does not carry the expanded protocol and runtime
+blocks needed to judge them under that rule. Unjudgeable is not comparable, and
+it is not incomparable; it is unjudgeable, and that is why no canonical estimate
+is claimed.
+
+**Now enforced.** `behavioural_decision.assert_one_measurement_protocol`
+refuses a confirmation field that cannot be shown to share one measurement
+protocol, and `confirm` requires the protocol identities rather than accepting
+them optionally. Run against this archive today it exits 3 and writes nothing:
+
+```text
+REFUSING: the confirmation field spans 3 distinct generation protocol
+fingerprints, and 6 of 6 probes did not record the expanded protocol and
+runtime blocks that `generation_compat` v2 needs to judge comparability.
+Unjudgeable is refused, not assumed comparable.
+```
+
+C3 and C4 inherit the gate. It compares battery, scoring contract and metric
+contract by identity, and the generation protocol through the project's own
+comparability rule rather than by fingerprint equality — because that
+fingerprint transitively contains the fused `imageName@driver` field, and exact
+equality over it would make every comparison a host lottery.
+
 ## Money
 
 ```text
@@ -144,12 +226,17 @@ formal behavioural campaign   $30.6561 of $42.0000   (headroom $11.3439)
   attempts 1, 2, 4, 6, 7, 8: $0.0000
 
 $25 remaining-C2 stage envelope   $9.3042 spent   (unused $15.6958)
-  the provider balance delta across the whole window,
-  $80.0378314134 -> $70.7336584514. Named attempts and staging rounds
-  account for $9.2611; the rest is network-volume storage and
-  container-disk rounding that no per-attempt derivation captures.
+  RECONCILED TO THE PROVIDER, not to the sum of the parts. The account
+  balance delta across the whole window is
+  $80.0378314134 -> $70.7336584514 = $9.3042, and the ledger now sums
+  to exactly that: attempts 9-14 $8.4095 + the staging campaign $0.8947.
+  The staging figure includes $0.0431 of NETWORK-VOLUME STORAGE that no
+  per-attempt derivation captures -- previously a silent hole, now booked
+  to the campaign that owns the volumes.
 
-project cumulative   $341.9271 of $370.0000   (remaining $28.0729)
+project cumulative   $341.9702 of $370.0000   (remaining $28.0298)
+  derived by `derive_budget.py`, not transcribed. $0.0431 higher than the
+  figure quoted before the volume storage was attributed.
 ```
 
 ## Provider state

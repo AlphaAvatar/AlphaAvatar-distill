@@ -4,7 +4,7 @@
  "authorizes": "nothing",
  "plan_id": "autoinit.v1.phase_c2.behavioural",
  "session_id": "autoinit-phase-c2-behavioural",
- "proposed_utc": "2026-09-24T08:55:58.032257+00:00",
+ "proposed_utc": "2026-09-24T10:54:32.611625+00:00",
  "plan_hash": "31088b981499777cede9822adf6d011494f2de7fec29e59906eea147a8c9d705",
  "campaign": {
   "campaign_id": "c2-behavioural-12probe-v1",
@@ -518,13 +518,13 @@
    "_why": "the C1 execution package funds C1 formal sessions and its own GPU engineering validation, at a per-session ceiling derived for that work. This is a different experiment with a ceiling derived from its own topology, so it needs its own authorization and must not be presented as fitting inside a remainder reserved for something else. Dividing the wrong balance by the wrong per-session ceiling is how this repository once came to state that three full-ceiling sessions were fundable when two were.",
    "_the_envelope_is_not_permission": "fitting the project envelope is an accounting fact. It is not launch permission and never has been."
   },
-  "cumulative_spend_usd": 341.8546,
+  "cumulative_spend_usd": 341.9702,
   "cumulative_cap_usd": 370.0,
   "authorized_cap_usd": 370.0,
-  "remaining_before_usd": 28.1454,
+  "remaining_before_usd": 28.0298,
   "this_ceiling_all_in_usd": 33.2099,
-  "cumulative_if_fully_spent_usd": 375.0645,
-  "headroom_after_usd": -5.0645,
+  "cumulative_if_fully_spent_usd": 375.1801,
+  "headroom_after_usd": -5.1801,
   "_no_cap_increase_requested": true,
   "_remaining_is_not_permission": true,
   "_not_permission": "remaining headroom is not authorization. A paid run needs a maintainer-written grant naming this session."
@@ -548,8 +548,8 @@
   "any C3 or C4 work"
  ],
  "executable_closure": {
-  "digest": "1a93aa06fb467d153d1a57eddfb295d1f53d4921227c51836b68d5e70b6a4abb",
-  "n_files": 136,
+  "digest": "aadca4c25ed9a7d2e6c336b67df6d70945beb08ce4a2c4e6d3ccbcf437ce4db3",
+  "n_files": 137,
   "entry_points": [
    "scripts/pod/autoinit_c2_behavioural_launch.py",
    "scripts/pod/autoinit_c2_behavioural_driver.py",
@@ -599,5 +599,5 @@
   "grant": "THIS PROPOSAL REQUESTS AND AUTHORIZES NOTHING. It is the document a maintainer decision is made against; it is not that decision, and it permits no grant, readiness record, authorization, bundle or provider resource. Whether a launch chain exists, and how far it has been built, is recorded per attempt under `runs/<attempt>/governance/` and is NOT restated here: this document's hash is what a grant binds, so a field that tracked the chain would move the identity the moment the chain advanced."
  },
  "_proposal_sha256_excludes": "proposal_sha256 covers this document EXCEPT ['proposal_sha256', 'proposed_utc']. proposed_utc is a wall clock and would make the identity change on every regeneration of an unchanged tree; the hash is a function of the proposal's content, so a grant can bind it and the issuer can re-derive it.",
- "proposal_sha256": "3bfe36c754c2696504000a8d3e09a2db01688d2a5bd7c777821a24dd9e4c24f1"
+ "proposal_sha256": "a811a57c19f9019c822ce8f98b8257b7edee337bf9d47e866bcd6eb1ad5b4251"
 }

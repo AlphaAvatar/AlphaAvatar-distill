@@ -22,9 +22,9 @@
   "note": "attempt6 has no readiness record, authorization or bundle yet; its grant is written. Nothing needs pre-staging: no probe's weights have a remaining consumer, so volume_gate passes with no staging record."
  },
  "budget": {
-  "cumulative_spend_usd": 341.8546,
+  "cumulative_spend_usd": 341.9702,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 28.1454,
+  "remaining_usd": 28.0298,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
   "engineering_remaining_usd": 6.0,
@@ -70,10 +70,10 @@
   "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
  "next_starting_point": {
-  "status": "C1 CLOSED by a GO verdict. The C2 full joint re-search is COMPLETE, its Top-5 ACCEPTED and FROZEN, its checkpoints reconstructed exact and durable, the replay campaign CLOSED. C2's behavioural selection is RUNNING under execute-to-completion authorization.",
-  "then": "finish pre-staging the probes, then attempt6: grant, sweep -> readiness -> authorization -> bundle, re-quoting the rate at issuance. Two probes and the frozen decision rule. GO is arithmetically excluded; NO_GO and INCONCLUSIVE are both complete results. After the decision, STOP.",
-  "not_next": "no Full Search rerun, no re-ranking of the 14 leaves, no B remeasurement outside the 12-probe protocol, no fourth seed, no retraining of the ten completed probes, no C3 or C4, no further replay.",
-  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/continuation_price.json"
+  "status": "C0 COMPLETE. C1 COMPLETE/GO. C2 CLOSED WITHOUT PROMOTION -- search and screening completed, behavioural confirmation executed, observations pointed NO_GO, but the final confirmation evidence mixed evaluation-protocol identities, so no canonical promotion verdict is claimed and no new incumbent is named.",
+  "accepted_incumbent": "B = frozen C1 treatment",
+  "then": "design and authorize C3 from this remote HEAD, starting from B unless the next-stage design review decides otherwise.",
+  "not_next": "no C2 re-evaluation, no uniform six-probe replay, no new seeds, no attempt15, no C2 spend of any kind."
  },
  "read_order": [
   "logs/README.md -- START HERE, the index"
@@ -132,7 +132,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOTHING IS BLOCKED. C2 is under execute-to-completion authorization (2026-09-23): a $25.00 all-in envelope for all remaining C2 work, and a $42.0000 cumulative ceiling on the formal behavioural campaign. C2 owes two probes -- the third confirmation seed for the advanced candidate and for B -- and then the frozen decision rule. No Full Search rerun, no re-ranking, no B remeasurement outside the 12-probe protocol, no fourth seed, no C3/C4.",
+ "blocker": "NOTHING IS BLOCKED and nothing is authorized to spend. C2 is CLOSED WITHOUT PROMOTION by maintainer decision 2026-09-24: no new incumbent, B from C1 stands, and further C2 scientific spend is NOT authorized. C2 owes no probes. C3 is the next scientific stage and is NOT started; it will be designed and authorized independently from the current remote HEAD.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -142,7 +142,8 @@
   "outcome": "recorded; REPRODUCTION_COMPLETE_NO_GO_REPRODUCED_WITH_A_RECORDED_DISCREPANCY, $2.0670",
   "index": "logs/index.json",
   "state": "recorded: the run wrote its own manifest",
-  "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14"
+  "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14",
+  "_c2_state": "CLOSED WITHOUT PROMOTION; no probes owed"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
@@ -167,19 +168,33 @@
   "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
  },
  "behavioural_session": {
-  "authorized": false,
-  "state": "IMPLEMENTED; PROPOSAL ONLY",
-  "protocol": "12 probes exact: 6 screening, 6 confirmation. Only confirmation may name the C2 incumbent.",
-  "arms_transport": "materialize_on_pod_from_pinned_paths: six 1.19 GB arms fit neither transport, so each is rebuilt digest-pinned and identity-gated. 155.83 bounded min. Not a search.",
-  "money": "$23.8832 expected / $33.2099 hard / 120 GB at $1.09/h; headroom $27.5858",
-  "not_created": [
-   "grant",
-   "readiness_record",
-   "authorization",
-   "bundle",
-   "provider resource"
-  ],
-  "owner": "logs/stages/stage-1/phase_c2_behavioural/plans/"
+  "state": "CLOSED WITHOUT PROMOTION",
+  "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
+  "chains_consumed": 14,
+  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "build and execute the attempt6 chain. Its working set is 8.1 MiB of evidence, not 22.21 GiB of weights: artifacts follow consumers (AGENTS.md P8.4). Session ceiling $19.7533 over 1070.96 minutes against 491.51 minutes of work."
+ "next": "build and execute the attempt6 chain. Its working set is 8.1 MiB of evidence, not 22.21 GiB of weights: artifacts follow consumers (AGENTS.md P8.4). Session ceiling $19.7533 over 1070.96 minutes against 491.51 minutes of work.",
+ "stage_ladder": {
+  "C0": "COMPLETE",
+  "C1": "COMPLETE / GO",
+  "C2": "CLOSED WITHOUT PROMOTION",
+  "C3": "NOT STARTED",
+  "next_scientific_stage": "C3"
+ },
+ "c2_closure": {
+  "decision": "CLOSED WITHOUT PROMOTION",
+  "decided_utc": "2026-09-24",
+  "decided_by": "maintainer",
+  "new_incumbent_named_by_c2": null,
+  "accepted_incumbent_after_c2": "B = frozen C1 treatment",
+  "why_b_stands": "no valid C2 challenger displaced it",
+  "canonical_no_go_claimed": false,
+  "limitation": "mixed evaluation-protocol identities in the confirmation field",
+  "attempt13_delta": -0.008235294117647058,
+  "attempt14_reconstructed_delta": -0.009019607843137253,
+  "observations_averaged_or_ranked": false,
+  "further_scientific_spend": "NOT AUTHORIZED",
+  "probes_remaining": 0,
+  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
+ }
 }

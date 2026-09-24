@@ -139,7 +139,30 @@ def main(argv: list[str] | None = None) -> int:
             "n_rows": len(rows[(arm, p["seed"])]),
         }
 
-    decision = BD.confirm(rows, rule=rule)
+    #: What each probe recorded about HOW it was measured. `confirm` refuses a
+    #: field that cannot be shown to share one measurement protocol, which is
+    #: the check C2's confirmation field never had.
+    protocols: dict[tuple[str, int], dict] = {}
+    for pid, p_ in sorted(probes.items()):
+        arm = (BD.INCUMBENT_ARM if p_["arm"] == SCH.ANCHOR
+               else BD.TREATMENT_ARM)
+        res = json.loads(p_["result_path"].read_text())
+        protocols[(arm, p_["seed"])] = {
+            f: res.get(f) for f in ("battery", "scoring_contract",
+                                    "metric_contract",
+                                    "generation_protocol_fingerprint")}
+
+    try:
+        decision = BD.confirm(rows, rule=rule, protocols=protocols)
+    except BD.BehaviouralDecisionError as exc:
+        #: A refusal, not a crash. The field is readable and still cannot
+        #: support the frozen rule, which is the whole point of the gate.
+        print(f"\nREFUSING: {exc}")
+        print("\nNo decision record was written. A paired interval over probes "
+              "that were not measured alike has no estimand, and this exits "
+              "non-zero rather than producing a number that looks like one.")
+        return 3
+    decision["measurement_protocol_gate"] = "passed"
     decision["_recomputed_from"] = "the committed archive, not a pod"
     decision["_why"] = (
         "P4 reproducibility repair. attempt13's runtime produced this verdict "

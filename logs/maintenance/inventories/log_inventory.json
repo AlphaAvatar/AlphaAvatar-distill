@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-24T08:56:58+00:00",
+  "created_utc": "2026-09-24T10:56:21+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1836,
-    "bytes": 61202922,
+    "bytes": 61207649,
     "by_disposition": {
       "keep_canonical": 190,
       "keep_immutable": 1449,
@@ -16254,7 +16254,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 117976,
-      "sha256": "5f0395723e9ebbc420b032ee33cfb55ae14629e0cba4dbd306f707a01580e50f",
+      "sha256": "57d9402534723b15dbad85a31c81c0512daca7dd78d255600215329558921c68",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -24142,12 +24142,13 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md",
-      "size_bytes": 9076,
-      "sha256": "07a3c8ea0f09ba24827466f02f263557534b4e653e6d22789753bfcca2f03dd6",
+      "size_bytes": 13263,
+      "sha256": "a563a0d1d4ba47739c97d1a68086be69d32b748b900364b3ac576639a74744d3",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json"
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/state/current.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -24242,7 +24243,7 @@
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
       "size_bytes": 44731,
-      "sha256": "83e214a8156a9a04c944cb635d3afc7b44defd04e8c42aa2d392b85a5ce875b3",
+      "sha256": "73ae3beb406994fae5cccf40595910078074dda54344ab5aa013f3a2e4f47fd6",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -27036,8 +27037,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/validations/durable-staging/v1/campaign.json",
-      "size_bytes": 3548,
-      "sha256": "10286d05cc7ecd37ca5214e6f4e58ae2cf2fa82c4427494e67dffa04753a7e13",
+      "size_bytes": 4279,
+      "sha256": "0f66a4238cdc5e780c7d6afc20cb5c082a3551001469538746fc68c9d11dba88",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -33216,8 +33217,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 11767,
-      "sha256": "e04b8682bcea7f282661c745a3234fdbd1dea97266187130e78170bb10164d0e",
+      "size_bytes": 11991,
+      "sha256": "93648bec571ba5cd722f66f3b737692979bb08b1f25c4250489c7091021f8a68",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -33260,8 +33261,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 101117,
-      "sha256": "ad64d36c89edb151a29df4bdcc11c0f680343ed7c67519461a3543020956ec1b",
+      "size_bytes": 100702,
+      "sha256": "2e130f81ae91d1800972655be6e903cb96033a3ffcafd5806172f4f1226fb029",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
