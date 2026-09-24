@@ -282,8 +282,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 42,
-  "runs_unrecorded": 11,
+  "runs_current": 43,
+  "runs_unrecorded": 10,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -342,8 +342,8 @@
     "total": 4
    },
    "phase_c2_behavioural": {
-    "recorded": 9,
-    "unrecorded": 5,
+    "recorded": 10,
+    "unrecorded": 4,
     "total": 14
    },
    "phase_c2_full_search": {
@@ -1331,6 +1331,19 @@
   },
   {
    "experiment_id": "phase_c2_behavioural",
+   "run_id": "attempt14",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14",
+    "manifest": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/manifest.json"
+   },
+   "manifest_sha256": "ff940d54dbb2d3ea4f0eec9402f4dc3348b5bb960ce7cd3039257b65a6ed866b",
+   "n_components": 5
+  },
+  {
+   "experiment_id": "phase_c2_behavioural",
    "run_id": "attempt3",
    "stage": "1",
    "layout": "stage_grouped",
@@ -1565,14 +1578,6 @@
    "n_files": 5,
    "digest": "bf1e6127ec8a72de71df641322876a633e80ddb79d06ab5ef9e3093275c2570f",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
-  },
-  {
-   "experiment_id": "phase_c2_behavioural",
-   "run_id": "attempt14",
-   "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14",
-   "n_files": 1,
-   "digest": "1e9a951b8cffba953eaddb8b9056ab3f0838eba5cd14727d073c7227bf5dd2e3",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   },
   {
    "experiment_id": "phase_c2_behavioural",

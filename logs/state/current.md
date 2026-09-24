@@ -9,32 +9,59 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running and nothing is billing.** The provider reports zero pods
-and zero network volumes: `59qt99zeg5` was deleted at C2 closeout, after
-verifying every probe it held had its original on this host.
+**Nothing is running and nothing is billing.** Zero pods and zero network
+volumes: `59qt99zeg5` was deleted at the first C2 closeout and `a0zqgxsm7p`,
+the 10 GB volume the P4 repair used, after it.
 
-**C2 IS SCIENTIFICALLY CLOSED: the behavioural selection returned `NO_GO`.**
-The advanced candidate does not displace incumbent **B**. `delta -0.008235`
-(exactly −7/850), `lcb -0.016863`, against a +0.010 SESOI, at the
-pre-registered bootstrap seed `834816710`. Twelve probes trained and scored,
-all five driver stages passed, and the plan hash never moved across thirteen
-chains. NO_GO is a complete terminal result of the frozen rule, not a failure:
-C2 names no new incumbent, and C3 is separately authorized and unreachable
+**C2 returned `NO_GO`, and the archive can now recompute it.** The advanced
+candidate does not displace incumbent **B**. Twelve probes trained and scored,
+all five driver stages passed, and the plan hash never moved across fourteen
+chains. C2 names no new incumbent; C3 is separately authorized and unreachable
 from here. Owner:
 [`c2_behavioural_verdict_20260923.md`](../stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md).
 
-**One reproducibility limitation, and it is real.** Probe 11's 950 per-sample
-rows and its `result.json` were never collected: `secure_probe_evidence`
-iterated the session's *announced* units, and a probe that attempt13 *restored*
-and then *scored* was announced by attempt12, so its new evidence had no
-collector. Eleven of twelve probes hold complete rows; the twelfth does not.
-The verdict is recorded with its delta, bound and seed, and is **not
-independently recomputable from the archive**. `campaign_state` shows the gap
-by reporting 11 complete and 1 trained-but-unscored while the pod scored
-twelve. The collector is repaired; nothing was re-run, because
-`what_a_resume_may_never_do` forbids continuing after a complete verdict.
-Re-scoring that probe from its preserved weights would restore
-archive-reproducibility and is a maintainer's decision, left open.
+```text
+terminal_state   NO_GO
+delta            -0.009019607843137253
+lcb_one_sided    -0.017647058823529408
+ucb_one_sided    -0.0003921568627450984   <  SESOI 0.010   -> NO_GO
+seed_robustness  0 positive of 2 required
+guardrails       passed · catastrophic_violations []
+bootstrap_seed   834816710
+```
+
+**`ucb_one_sided < SESOI` is the criterion, not the LCB.** The frozen rule uses
+the lower bound for GO and the upper bound for NO_GO, the runtime recorded only
+delta/lcb/seed, and the first closeout cited the wrong bound. Corrected on the
+reviewer's statistical correction of 2026-09-24.
+
+**The P4 repair is done and its cost is stated.** Probe 11's rows were never
+collected, so for one day the verdict could not be recomputed from committed
+evidence and the reviewer withheld final closure on that ground alone.
+attempt14 restored the same identity-verified checkpoint, re-ran its evaluation
+under the frozen protocol, and
+[`c2_behavioural_decision_recomputed.json`](../stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_decision_recomputed.json)
+now reproduces the pod's own decision **bit for bit**. `campaign_state` reports
+12/12 complete.
+
+**One discrepancy, recorded rather than averaged.** The reconstruction differs
+from attempt13's measurement by **2 prompts in 850** on probe 11 — its seed
+delta is −17/850 where attempt13 measured −15/850. Terminal state, criterion,
+bootstrap seed, guardrails and the sign of every per-seed delta are identical.
+The likely cause is serving-engine non-determinism under greedy decoding; the
+rows in the archive are the reconstruction's, not attempt13's, which no longer
+exist. Whether that satisfies "consistent with the original runtime
+observation" is the reviewer's call and is **pending**.
+
+**A teardown hazard worth more than this session.** attempt14's artifact
+collector exited 5 on a required pattern that matched nothing, the teardown gate
+correctly refused to delete a pod whose required artifact was only on it, and
+the launcher then exited — leaving a pod billing with no owner for ~116 minutes
+until it was removed by hand after its evidence was rescued over ssh. The gate
+and the return are each right alone and wrong together. Not fixed here: the
+launcher's exit semantics is an architecture question and the reviewer asked
+that governance not be redesigned inside this repair. Owner:
+[`attempt14/closeout/outcome.json`](../stages/stage-1/phase_c2_behavioural/runs/attempt14/closeout/outcome.json).
 
 **Artifacts follow consumers, not campaigns** — AGENTS.md **P8.4**, adopted
 2026-09-23 as a standing rule for C2, C3, C4, Stage 2/3 and every later stage.
@@ -1306,7 +1333,7 @@ these by hand; run the deriver.**
 | formal sessions | `$22.8249` of `$45.4425` |
 | GPU engineering | `$6.0000` of `$6.0000` |
 | package | `$28.8249` of `$51.4425` |
-| project cap | `$339.7876` spent of `$370.0000`, leaving `$30.2124` |
+| project cap | `$341.8546` spent of `$370.0000`, leaving `$28.1454` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

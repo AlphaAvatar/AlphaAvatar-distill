@@ -3,33 +3,33 @@
  "authorizes": "nothing",
  "_derived_by": "scripts/autoinit/price_c2_behavioural_continuation.py -- every figure from the production functions the launcher calls, never restated beside them",
  "probe_availability": {
-  "reserve_minutes": 45.0,
+  "reserve_minutes": 10.0,
   "_reserve_is_not_a_throughput": "a conservative reserve for making this campaign's completed probes available to the replacement pod, revised 2026-09-23, NOT a measured or claimed throughput. What is reserved depends on what a remaining operation actually reads (AGENTS.md P8.4): for a probe that is trained but not validly scored, its weights, because scoring consumes the model; for a completed and validly scored probe, only the lightweight evidence the verdict consumes, because its checkpoint is archival and is not restored. An observed time is recorded as diagnostic and never promoted to this figure.",
   "_no_session_time_transfer": "a continuation moves only what a remaining operation reads (AGENTS.md P8.4). A probe that is trained but not validly scored has its weights restored from the attached network volume, because scoring consumes the model, and those bytes are read on the pod rather than crossing the network while the meter runs. A completed and validly scored probe contributes its lightweight evidence and nothing else: its checkpoint is archival, and for this campaign all ten completed probes are in that state, so no weights are restored and no volume is attached at all.",
-  "bytes_to_verify": 2393518182,
-  "gib_to_verify": 2.229,
-  "weights_probes": 1,
-  "weights_gib": 2.22,
-  "evidence_probes": 11,
-  "evidence_mib": 8.85,
-  "checkpoints_skipped": 11,
-  "gib_avoided": 24.434,
+  "bytes_to_verify": 10147212,
+  "gib_to_verify": 0.009,
+  "weights_probes": 0,
+  "weights_gib": 0.0,
+  "evidence_probes": 12,
+  "evidence_mib": 9.68,
+  "checkpoints_skipped": 12,
+  "gib_avoided": 26.655,
   "_artifacts_follow_consumers": "a completed and validly scored probe contributes evidence; its checkpoint is archival and is restored only when a remaining authorized computation reads the weights",
-  "implied_mb_per_second_at_the_reserve": 0.89,
+  "implied_mb_per_second_at_the_reserve": 0.02,
   "observed_verification_minutes": null,
   "_observed_is_diagnostic": "a real verification time, if one has been taken. It is evidence that the path works and roughly how it performed on one occasion. It is NOT the bound and is never promoted to one: re-running it to refine the figure would spend billed time manufacturing false precision about a number that moves.",
   "durable_backend_usd": 0.0
  },
  "work_owed": {
-  "n_probes_remaining": 1,
+  "n_probes_remaining": 0,
   "n_train_and_score": 0,
-  "n_score_only": 1,
+  "n_score_only": 0,
   "arms_needed": [],
   "materialization_minutes": 0
  },
  "window": {
-  "expected_minutes": 165.23,
-  "hard_minutes": 237.29
+  "expected_minutes": 105.0,
+  "hard_minutes": 144.5
  },
  "components_hard_usd": {
   "scientific_work": {
@@ -47,24 +47,24 @@
    "_is": "rebuilding the arms those probes need on a fresh filesystem"
   },
   "probe_availability_reserve": {
-   "minutes": 45.0,
-   "gpu_usd": 0.8175,
-   "disk_usd": 0.0125,
-   "all_in_usd": 0.83,
+   "minutes": 10.0,
+   "gpu_usd": 0.1817,
+   "disk_usd": 0.0028,
+   "all_in_usd": 0.1844,
    "_is": "making this campaign's completed probes available to the pod: weights re-read and re-identified from the attached volume for any probe still owed a score, and lightweight evidence only for a probe already validly scored. This campaign owes no score, so it is the evidence leg."
   },
   "session_overhead": {
-   "minutes": 120.23,
-   "gpu_usd": 2.1842,
-   "disk_usd": 0.0334,
-   "all_in_usd": 2.2176,
+   "minutes": 95.0,
+   "gpu_usd": 1.7258,
+   "disk_usd": 0.0264,
+   "all_in_usd": 1.7522,
    "_is": "setup, bundle transfer, teacher fetch, machine gates, artifact synchronisation"
   },
   "variability_reserves": {
-   "minutes": 42.06,
-   "gpu_usd": 0.7641,
-   "disk_usd": 0.0117,
-   "all_in_usd": 0.7758,
+   "minutes": 9.5,
+   "gpu_usd": 0.1726,
+   "disk_usd": 0.0026,
+   "all_in_usd": 0.1752,
    "_is": "the frozen probe model's own contingency and duration risk"
   },
   "teardown_recovery_reserve": {
@@ -86,22 +86,23 @@
  "money": {
   "rate_usd_per_hour": 1.09,
   "disk_usd_per_minute": 0.00027781,
-  "expected_gpu_usd": 3.0017,
-  "expected_disk_usd": 0.0459,
-  "expected_all_in_usd": 3.0476,
-  "hard_gpu_usd": 4.3108,
-  "hard_disk_usd": 0.0659,
-  "hard_all_in_usd": 4.3767,
+  "expected_gpu_usd": 1.9075,
+  "expected_disk_usd": 0.0292,
+  "expected_all_in_usd": 1.9367,
+  "hard_gpu_usd": 2.6251,
+  "hard_disk_usd": 0.0401,
+  "hard_all_in_usd": 2.6652,
   "_all_in_includes": "GPU at the live rate PLUS the separately billed container disk, derived by autoinit_c2_behavioural_launch :: continuation_all_in_usd. A GPU-only figure is not an all-in figure and must not be labelled as one."
  },
  "campaign": {
-  "settled_all_in_usd": 28.5891,
+  "settled_all_in_usd": 30.6561,
   "settled_per_attempt": {
    "attempt1": 0.0,
    "attempt10": 0.0915,
    "attempt11": 1.218,
    "attempt12": 2.2614,
    "attempt13": 2.657,
+   "attempt14": 2.067,
    "attempt2": 0.0,
    "attempt3": 2.5425,
    "attempt4": 0.0,
@@ -112,14 +113,14 @@
    "attempt9": 0.1146
   },
   "ceiling_all_in_usd": 42.0,
-  "settled_plus_hard_plus_backend_usd": 32.9658,
+  "settled_plus_hard_plus_backend_usd": 33.3213,
   "fits": true,
-  "headroom_usd": 9.0342
+  "headroom_usd": 8.6787
  },
  "project": {
-  "cumulative_usd": 339.7876,
+  "cumulative_usd": 341.8546,
   "cap_usd": 370.0,
-  "worst_case_usd": 344.1643,
+  "worst_case_usd": 344.5198,
   "fits": true
  }
 }

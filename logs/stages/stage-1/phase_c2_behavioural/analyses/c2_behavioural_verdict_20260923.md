@@ -1,6 +1,15 @@
 # 2026-09-23 — C2 behavioural selection: NO_GO
 
-- **Verdict:**
+> **Superseded in two ways by the P4 repair of 2026-09-24.** This document
+> explained NO_GO through the **LCB**, which is a *GO* criterion; the rule
+> produces NO_GO from `ucb_one_sided < SESOI`. And probe 11's rows, absent when
+> this was written, were reconstructed — giving a slightly different aggregate.
+> The complete record is
+> [`c2_behavioural_decision_recomputed.json`](c2_behavioural_decision_recomputed.json)
+> and [`attempt14/closeout/outcome.json`](../runs/attempt14/closeout/outcome.json).
+> What is *unchanged* is the terminal state and every qualitative conclusion below.
+
+- **Verdict, as attempt13's runtime observed it:**
 
   ```text
   terminal_state   NO_GO
@@ -9,6 +18,41 @@
   SESOI            +0.010
   bootstrap_seed   834816710               (pre-registered)
   ```
+
+  The runtime recorded only delta, lcb and the seed — a truncated projection of
+  `decide()`'s output, which also returns `ucb_one_sided`. **The bound that
+  actually produces NO_GO was therefore not in the record at all**, and citing
+  the LCB for it was wrong:
+
+  ```text
+  GO    : lcb_one_sided > 0 AND delta >= SESOI AND >=2/3 seed deltas > 0
+          AND no veto
+  NO-GO : ucb_one_sided < SESOI OR a behavioural veto fires
+  otherwise INCONCLUSIVE
+  ```
+
+  Reconstructed, the full criteria read:
+
+  ```text
+  terminal_state   NO_GO
+  delta            -0.009019607843137253
+  lcb_one_sided    -0.017647058823529408
+  ucb_one_sided    -0.0003921568627450984   <  SESOI 0.010   -> NO_GO
+  seed_robustness  0 positive of 2 required
+  guardrails       passed · catastrophic_violations []
+  ```
+
+  So NO_GO comes purely from the interval excluding the smallest effect worth
+  having. No veto fired.
+
+  **The reconstruction differs from the runtime by 2 prompts of 850** on probe
+  11: its seed delta is −17/850 where attempt13 measured −15/850, and the
+  pooled delta −23/2550 against −21/2550. The terminal state, the criterion,
+  the bootstrap seed, the guardrail outcome and the sign of every per-seed
+  delta are identical. The likely cause is serving-engine non-determinism under
+  greedy decoding — this repository's own Stage-4 notes record that decoding is
+  not batch-invariant even within one stack, and the two runs used different
+  physical L40S instances. It is recorded, not averaged.
 
   The advanced candidate `1a2b5b030e7e4e202fda3a810ed53c5f` does **not**
   displace incumbent **B**. It is *worse* by 0.82 points of `correct_overall`
@@ -40,9 +84,12 @@
 
 ---
 
-## The reproducibility limitation, stated plainly
+## The reproducibility limitation — RESOLVED 2026-09-24
 
-**Probe 11's 950 per-sample rows and its `result.json` were never collected.**
+**Probe 11's 950 per-sample rows and its `result.json` were never collected**,
+and for one day the archive could not recompute this verdict. The reviewer
+withheld C2's final closure on exactly that ground. What follows is the gap
+as it stood; the repair is at the end of the section.
 
 Eleven of twelve probes hold complete evidence — 950 rows and a result each.
 The twelfth does not. Its `probe_record.json` at the durable destination is the
@@ -72,42 +119,47 @@ units with the probes a session restored, and a restored probe's evidence lands
 beside the copy it was restored from, at its own `source_attempt`, so one
 directory describes one probe.
 
-**Not acted on beyond that.** Nothing was re-run. The campaign has a complete
-valid verdict and `what_a_resume_may_never_do` forbids continuing after one.
-Re-scoring probe 11 from its preserved, re-identified weights would restore
-archive-reproducibility and is technically available — the checkpoint and its
-descriptor are intact — but it would be a **new measurement taken after a
-terminal result**. That is a maintainer's decision, not an engineering repair,
-and it is left open rather than taken.
+**And then repaired, on the reviewer's authorization.** Re-scoring probe 11
+from its preserved weights is a new measurement after a terminal result, which
+is a maintainer's decision and not an engineering repair — so it was left open
+here, and the reviewer authorized it as a reproduction-only P4 repair on
+2026-09-24. attempt14 restored the same identity-verified checkpoint, re-ran
+its evaluation under the frozen protocol, and the archive now recomputes the
+verdict independently. `campaign_state` reports twelve complete probes.
+
+The cost of that repair is honest about what it is: the rows in the archive are
+the **reconstruction's**, and they differ from attempt13's by 2 prompts in 850.
+See the banner at the top and
+[`attempt14/closeout/outcome.json`](../runs/attempt14/closeout/outcome.json).
 
 ---
 
 ## Money
 
 ```text
-formal behavioural campaign   $28.5891 of $42.0000   (headroom $13.4109)
-  attempt3   $2.5425    attempt10  $0.0915
-  attempt5  $19.7041    attempt11  $1.2180
+formal behavioural campaign   $30.6561 of $42.0000   (headroom $11.3439)
+  attempt3   $2.5425    attempt10  $0.0915    attempt13  $2.6570
+  attempt5  $19.7041    attempt11  $1.2180    attempt14  $2.0670
   attempt9   $0.1146    attempt12  $2.2614
-                        attempt13  $2.6570
   attempts 1, 2, 4, 6, 7, 8: $0.0000
 
-$25 remaining-C2 stage envelope   $7.1647 spent   (unused $17.8353)
-  measured as the provider balance delta across the whole window,
-  $80.0378314134 -> $72.8731645539; $7.1216 attributable to named
-  attempts and staging rounds, $0.0431 to volume storage and
-  container-disk rounding no per-attempt derivation captures
+$25 remaining-C2 stage envelope   $9.3042 spent   (unused $15.6958)
+  the provider balance delta across the whole window,
+  $80.0378314134 -> $70.7336584514. Named attempts and staging rounds
+  account for $9.2611; the rest is network-volume storage and
+  container-disk rounding that no per-attempt derivation captures.
 
-project cumulative   $339.7876 of $370.0000   (remaining $30.2124)
+project cumulative   $341.9271 of $370.0000   (remaining $28.0729)
 ```
 
 ## Provider state
 
-Zero pods, zero network volumes. Network volume `59qt99zeg5` was deleted at
-closeout after verifying every probe it held had its original on the launcher
-host, so nothing unique was destroyed.
+Zero pods, zero network volumes. `59qt99zeg5` was deleted at the first
+closeout and `a0zqgxsm7p` — the 10 GB volume the P4 repair used — after it, in
+both cases having verified that every probe they held had its original on the
+launcher host, so nothing unique was destroyed.
 
-## Thirteen chains, and what each cost
+## Fourteen chains, and what each cost
 
 Four were consumed at `$0` before any provider contact, five on real pods
 before any science, and the last two carried the science:
@@ -120,7 +172,8 @@ before any science, and the last two carried the science:
 | 10 | `scp` does not create its target's parent, and the test fake did | `$0.0915` |
 | 11 | the storage bound asked a host-only manifest for a parameter count | `$1.2180` |
 | 12 | `attest` took the first journal entry, which is now evidence-only — **trained probe 11** | `$2.2614` |
-| 13 | **NO_GO** | `$2.6570` |
+| 13 | **NO_GO** — and it trained B, scored the restored probe 11, and decided | `$2.6570` |
+| 14 | **NO_GO reproduced** from the reconstructed evidence; the teardown gate blocked on a required artifact and the pod was removed by hand | `$2.0670` |
 
 Every one of those five pod failures was a consequence of the consumer-derived
 working set (P8.4) meeting a consumer nobody had enumerated. The rule was

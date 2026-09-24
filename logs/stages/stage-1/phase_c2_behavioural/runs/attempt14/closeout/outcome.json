@@ -1,0 +1,79 @@
+{
+ "schema": "aadistill.autoinit.c2_behavioural_closeout/v1",
+ "run_id": "attempt14",
+ "campaign_id": "c2-behavioural-12probe-v1",
+ "terminal": "REPRODUCTION_COMPLETE_NO_GO_REPRODUCED_WITH_A_RECORDED_DISCREPANCY",
+ "provider_resource_created": true,
+ "money": {
+  "all_in_usd": 2.067,
+  "_basis": "the provider account balance delta across the P4 repair window, $72.8731645539 to $70.7336584514 = $2.1395, less the staging v4 pod's own reported $0.0725. It covers this pod and the 10 GB volume's storage. The launcher exited before recording a teardown, so its session record carries no cost and the balance delta is the authoritative figure.",
+  "_why_not_the_session_record": "the teardown gate blocked, the launcher exited without deleting the pod, and the pod was removed by hand. Nothing wrote an elapsed time or an actual."
+ },
+ "closed_utc": "2026-09-24T09:00:00+00:00",
+ "what_this_was": "the narrow P4 reproducibility repair the reviewer authorized at remote b126eecf: reproduction-only reconstruction of probe 11's evaluation evidence from its preserved, identity-verified checkpoint, then recomputation of the frozen decision from the complete archive. No probe was retrained, no seed added, no protocol modified, no selection reopened, and the other eleven probes were not rerun.",
+ "what_happened": "Stages P, S and R completed in about twenty seconds because nothing was owed: arms_needed was empty, every screening probe was already scored, and the ranking was read from the commitment. Stage C restored probe 11's weights from volume a0zqgxsm7p, re-identified them on the pod, and re-ran its evaluation under the frozen confirmation protocol -- same battery, same tokenizer binding, same scorer, and the same greedy sampling pinned in uncapped_eval.py (temperature 0.0, top_p 1.0, top_k -1). Stage D applied the frozen rule. The driver reached C2_BEHAVIOURAL_ALL_DONE.",
+ "verdict_reproduced": {
+  "terminal_state": "NO_GO",
+  "delta": -0.009019607843137253,
+  "lcb_one_sided": -0.017647058823529408,
+  "ucb_one_sided": -0.0003921568627450984,
+  "sesoi": 0.01,
+  "bootstrap_seed": 834816710,
+  "criteria": {
+   "lcb_above_zero": false,
+   "point_at_or_above_sesoi": false,
+   "seed_robustness": {"n_positive": 0, "required": 2, "passed": false},
+   "guardrails_passed": true,
+   "ucb_below_sesoi": true
+  },
+  "per_seed_delta_correct": [-0.02, -0.0035294117647058825, -0.0035294117647058825],
+  "usable_pooled_delta": 0.003157894736842105,
+  "catastrophic_violations": [],
+  "_what_produces_NO_GO": "ucb_below_sesoi. The one-sided upper bound is -0.000392 and the SESOI is +0.010, so the interval excludes the smallest effect worth having. No veto fired and no guardrail failed. The attempt13 closeout explained NO_GO through the LCB, which is a GO criterion; the reviewer's correction is right and this record states the criterion the rule actually reads."
+ },
+ "archive_is_now_independently_recomputable": {
+  "how": "scripts/autoinit/recompute_c2_behavioural_decision.py reads the six confirmation probes out of the durable destination and runs decision_inputs -> paired_differences -> stratified_cluster_bootstrap(seed=834816710) -> decide through behavioural_decision.confirm, the same function stage D calls.",
+  "result": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_decision_recomputed.json",
+  "verified_against_the_pod": "the archive recompute reproduces this pod's own c2_decision.json BIT FOR BIT -- delta, both bounds, sesoi, criteria, per-seed deltas, usable deltas, bootstrap seed and n_prompts all identical. So the recompute path is validated against the driver's computation rather than merely agreeing with its conclusion.",
+  "refusal_is_tested": "against the archive before the rows were installed, the same script named probe 11, exited 2 and wrote nothing. It does not decide on a partial field."
+ },
+ "THE_DISCREPANCY_RECORDED_NOT_AVERAGED": {
+  "what_differs": "probe 11's aggregate. The reconstruction is not identical to what attempt13's runtime measured.",
+  "probe_11_seed_delta": {
+   "attempt13_runtime_inferred": -0.017647058823529411,
+   "attempt13_as_fraction": "-15/850",
+   "attempt14_reconstruction": -0.02,
+   "attempt14_as_fraction": "-17/850",
+   "difference_in_prompts": 2,
+   "_inference_basis": "delta is the mean of the three per-seed deltas. The other two seeds' rows are archived and unchanged, so their deltas are identical in both runs and the third seed's is arithmetically recoverable from attempt13's recorded pooled delta."
+  },
+  "pooled_delta": {"attempt13": "-21/2550", "attempt14": "-23/2550"},
+  "what_does_NOT_differ": "the terminal state, the criterion that produced it, the bootstrap seed, the guardrail outcome, the seed-robustness count and the sign of every per-seed delta. Both runs are far below the +0.010 SESOI.",
+  "most_likely_cause": "serving-engine non-determinism under greedy decoding. This repository's own Stage-4 notes state that decoding is not even batch-invariant within a single stack, the two runs used different physical L40S instances, and 2 prompts in 850 is 0.24% of that probe's scorable set. The checkpoint bytes were identity-verified before use and the battery, tokenizer, scorer and sampling parameters were the same code.",
+  "what_this_means_for_the_archive": "the archive can now recompute NO_GO independently, which is what P4 asked for. But the rows it holds for probe 11 are the RECONSTRUCTION's rows, not attempt13's, which no longer exist. A re-measurement of the same checkpoint under a non-deterministic engine is not the identical measurement, and the record says so rather than presenting the reconstruction as a recovery of the original.",
+  "not_my_call": "the reviewer's acceptance condition was that the verdict reproduce AND that the reproduced probe-11 aggregate be consistent with the original runtime observation. The first is met. The second is a judgement the reviewer reserved, and the instruction on material disagreement was to record it and stop at that boundary rather than conceal or average it. That is what this record does."
+ },
+ "AN_OPERATIONAL_DEFECT_WORTH_MORE_THAN_THIS_SESSION": {
+  "what_happened": "the artifact collector exited 5 -- MISSING session_evidence [final_required]: audit/autoinit_c2_behavioural/probes (no file matched the pattern) -- so the teardown gate blocked at required_files_present and the launcher exited WITHOUT deleting the pod, by design, leaving the watchdog as the only backstop. The pod billed for about 116 minutes and was removed by hand after its evidence was rescued over ssh.",
+  "the_gate_was_right": "it must not delete a pod while a required artifact is only on it. That rule is what made the rescue possible.",
+  "the_hazard": "a blocked gate plus an exiting launcher leaves a provider resource running with no owner. The gate refusing and the launcher returning are each correct alone and wrong together.",
+  "what_is_NOT_established": "why the same spec and the same collector behaved differently in attempt13, which matched 1 of 4 required patterns and exited 0, and attempt14, which matched 3 and exited 5. The spec file and collect_artifacts.py are byte-identical between the two bundles -- verified by diffing the commits. No root cause is claimed here.",
+  "deliberately_not_fixed_here": "the launcher's exit semantics when a gate blocks is an architecture question, and the reviewer asked that the governance architecture not be redesigned inside this narrow repair. Recorded as debt for C3 planning."
+ },
+ "stages": {"P": "passed -- nothing owed, no arm built",
+            "S": "passed -- every screening probe already scored",
+            "R": "passed -- committed ranking read",
+            "C": "passed -- probe 11 restored, re-identified and re-evaluated; NOT retrained",
+            "D": "passed -- NO_GO"},
+ "preserved": [
+  "governance/grant.json", "governance/readiness.json",
+  "governance/authorization.json", "governance/bundle.json",
+  "runtime/session.json", "runtime/launch.log",
+  "runtime/watchdog_6rwnh4rd9woxt7.jsonl",
+  "evidence/c2_decision.json", "evidence/driver_evidence.json",
+  "evidence/c2_attested_protocol_c1_confirmation_v1.json",
+  "probe 11's reconstructed 950 rows and result.json, installed beside its checkpoint at the durable destination under attempt12/"
+ ],
+ "provider": "pod 6rwnh4rd9woxt7 removed and confirmed gone; network volume a0zqgxsm7p deleted; the provider reports zero pods and zero volumes.",
+ "authorizes": "nothing."
+}

@@ -1,0 +1,71 @@
+volume: attached — 1 probe(s) need their weights on the pod (2.22 GiB), so the session attaches a0zqgxsm7p and accepts the EU-NL-1 draw
+
+[06:36:14] budget: expected 165 min $3.00 · soft $3.77 · hard $4.31 (authorized $13.21)
+[06:36:14] NVIDIA L40S $1.09/h, stock Low
+[06:36:14] session commit 0033cb10a886 verified: harness digests to 1a93aa06fb46…, carries the authorization and only logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/governance/authorization.json differs from the authorized base
+[06:36:14] scope OK: behavioural selection with recovery training, and nothing else reachable
+[06:36:14] plan binding OK (31088b981499…)
+[06:36:15] source binding OK (136 files, 1a93aa06fb46…)
+[06:36:15] destination OK: 14.8 GiB free at /home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1 for the 1 probe(s) owed, 2.2 GiB (of 26.7 GiB for the whole protocol; the rest is already there)
+[06:36:16] container OK: 120 GB (111.8 GiB) provisioned for a 74.3 GiB peak local residency, 37.5 GiB spare
+[06:36:16] volume OK: 1 probe(s), 2.22 GiB pre-staged on a0zqgxsm7p in EU-NL-1, mounted at /durable
+[06:36:16] campaign continuation OK: $28.5891 all-in settled ($28.1582 GPU + $0.4309 disk) across 13 prior attempt(s) plus $4.3767 for the remaining 1 probes is inside the $42.0000 campaign ceiling, and every prior resource is provider-confirmed released
+[06:36:16] readiness OK (launch_bound, PASS, {'error': 0, 'failed': 0, 'passed': 233, 'skipped': 8})
+[06:36:21] bundle OK (0033cb10a886…)
+[06:36:22] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 6 local assets
+[06:36:22] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[06:41:23] attempt 2: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[06:46:23] attempt 3: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[06:51:24] watchdog detached — hard 237 min = $4.31
+[06:51:24] created 6rwnh4rd9woxt7 at $1.09/h
+[06:51:35] TCP 22 at 91.199.227.82:32449 after 0.2 min
+[06:51:38] draw 1: ssh reachable — $0.00
+[06:52:36] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.20
+[06:52:36] draw 1: running setup
+[06:57:53] draw 1: setup complete — $0.12
+[06:57:53] transfer preflight: 12 objects required, 2.229 GiB required; 11 checkpoint(s) skipped, 24.43 GiB avoided
+[06:57:53]   confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.   trained+durable+not validly scored   RESTORE
+[06:57:53]   confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   confirmation.B.s1523147638                       completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   confirmation.B.s1916380711                       completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   confirmation.B.s1936324010                       completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   screening.1a2b5b030e7e4e202fda3a810ed53c5f.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   screening.1d2844488f3ad630414c3cd69b6fa395.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   screening.7da1e4e2254e59766581e777b8066b7e.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   screening.88086555a6662b206e00ae28fc9d3ca3.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   screening.B.s616738081                           completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:57:53]   screening.d005dfb27e7bb5adc46eb988ae79e2a9.s61   completed+validly scored             EVIDENCE ONLY -- weights not transferred
+[06:59:39] campaign evidence: 11 scored probe(s), 8.85 MiB at /workspace/aad/artifacts/autoinit/c2_behavioural/evidence; their 24.434 GiB of checkpoints were not moved and have no remaining consumer
+[06:59:45]   pre-staged confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638: present=True (2.22 GiB) at /durable/c2-behavioural-12probe-v1/probes/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638
+[06:59:45] campaign restore: 1 probe(s) whose weights a remaining operation reads are pre-staged on the volume at /durable/c2-behavioural-12probe-v1/probes; the driver re-identifies each one THERE before admitting it
+[06:59:50] driver detached, pid 4128, confirmed by descriptor_probe — $0.15
+[07:00:59]   2026-09-24T07:00:11Z MARKER:STAGE_START:C — $0.17
+[07:27:50]   2026-09-24T07:27:18Z MARKER:C2_BEHAVIOURAL_ALL_DONE — $0.66
+[07:27:50] polling ended: C2_BEHAVIOURAL_ALL_DONE — $0.66
+[07:29:01]   manifest rc=5
+3 file(s) across 1 class(es) -> /workspace/manifest.json
+  final_required: 3 · mutable_snapshot: 0 · final_streams_quiescent: False
+  MISSING session_evidence [final_required]: audit/autoinit_c2_behavioural/probes (no file matched the pattern)
+required artifacts are absent or unfinished; find them before teardown — this is the point in the session where that is still possible
+[07:29:13] teardown gate: allowed=False failed=required_files_present
+[07:29:13] GATE BLOCKED — the runner is NOT deleting the pod; the watchdog remains the backstop
+
+autoinit-phase-c2-behavioural INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/runtime/session.json. the behavioural selection is a TERMINUS: it names a C2 incumbent or it does not, and NO_GO and INCONCLUSIVE are complete results. C3 is separately authorized and unreachable from here.
+runner is NOT deleting the pod; the watchdog remains the backstop
+LAUNCH_EXIT=11

@@ -1,0 +1,203 @@
+{
+  "rule": {
+    "plan_hash": "7cc8c2c15e977200933f387d3d9e722a5069ca4e28724f64c2357407488bd4da",
+    "seeds": [
+      1936324010,
+      1916380711,
+      1523147638
+    ],
+    "sesoi": 0.01,
+    "seed_robustness_min_positive": 2,
+    "usable_pooled_min_delta": -0.05,
+    "usable_per_seed_min_delta": -0.1,
+    "bootstrap_seed": 834816710,
+    "bootstrap_iterations": 20000,
+    "alpha": 0.05,
+    "catastrophic_candidate_max": 0.1,
+    "catastrophic_control_min": 0.4,
+    "battery_asset_id": "c1_confirmation_v1",
+    "battery_content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c"
+  },
+  "n_prompts": 850,
+  "bootstrap": {
+    "delta": -0.009019607843137253,
+    "lcb_one_sided": -0.017647058823529408,
+    "ucb_one_sided": -0.0003921568627450984,
+    "ci_two_sided_low": -0.019215686274509803,
+    "ci_two_sided_high": 0.0011764705882352938,
+    "level": 0.95,
+    "iterations": 20000,
+    "seed": 834816710,
+    "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+    "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+    "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+    "n_prompts": 850,
+    "n_strata": 6,
+    "resamples": "prompts within strata; seeds are FIXED BLOCKS, not resampled",
+    "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds"
+  },
+  "bootstrap_seed_used": 834816710,
+  "c1_default_bootstrap_seed_not_used": 816109261,
+  "per_seed_delta_correct": [
+    -0.02,
+    -0.0035294117647058825,
+    -0.0035294117647058825
+  ],
+  "usable_pooled_delta": 0.003157894736842105,
+  "usable_per_seed_delta": [
+    0.030526315789473683,
+    -0.04842105263157895,
+    0.02736842105263158
+  ],
+  "catastrophic_violations": [],
+  "audit": {
+    "n_prompts": 950,
+    "n_scorable": 850,
+    "seeds": [
+      1523147638,
+      1916380711,
+      1936324010
+    ],
+    "arms": [
+      "incumbent",
+      "treatment"
+    ],
+    "strata_sizes": {
+      "gsm8k": 150,
+      "math_verified": 150,
+      "multihop": 150,
+      "rag": 150,
+      "knowledge": 150,
+      "tool": 100
+    },
+    "usable_counts": {
+      "incumbent": {
+        "1523147638": 652,
+        "1916380711": 651,
+        "1936324010": 564
+      },
+      "treatment": {
+        "1523147638": 681,
+        "1916380711": 605,
+        "1936324010": 590
+      }
+    },
+    "usable_denominator": "950 prompts per probe; behaviour is measurable where correctness has no oracle",
+    "correct_denominator": "850 scorable prompts; code is behaviour-only",
+    "catastrophic_operands": {
+      "candidate": "treatment",
+      "control": "incumbent"
+    }
+  },
+  "decision": {
+    "verdict": "NO-GO",
+    "delta": -0.009019607843137253,
+    "lcb_one_sided": -0.017647058823529408,
+    "ucb_one_sided": -0.0003921568627450984,
+    "ci_two_sided": [
+      -0.019215686274509803,
+      0.0011764705882352938
+    ],
+    "sesoi": 0.01,
+    "criteria": {
+      "lcb_above_zero": false,
+      "point_at_or_above_sesoi": false,
+      "seed_robustness": {
+        "n_positive": 0,
+        "required": 2,
+        "passed": false
+      },
+      "guardrails_passed": true,
+      "ucb_below_sesoi": true
+    },
+    "per_seed_delta": [
+      -0.02,
+      -0.0035294117647058825,
+      -0.0035294117647058825
+    ],
+    "usable": {
+      "pooled_delta": 0.003157894736842105,
+      "per_seed_delta": [
+        0.030526315789473683,
+        -0.04842105263157895,
+        0.02736842105263158
+      ]
+    },
+    "vetoes": [],
+    "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+    "no_forced_winner": true
+  },
+  "terminal_state": "NO_GO",
+  "_arms": {
+    "incumbent": "frozen_c1_treatment_b",
+    "treatment": "the candidate screening advanced"
+  },
+  "_spelling": "the frozen rule emits 'NO-GO'; C2's terminal vocabulary spells it 'NO_GO'. Same state.",
+  "_recomputed_from": "the committed archive, not a pod",
+  "_why": "P4 reproducibility repair. attempt13's runtime produced this verdict and its rows for probe 11 were never collected; that probe's evaluation was reconstructed from its preserved, identity-verified checkpoint under the frozen protocol, and the decision then recomputed here from the complete six-probe field.",
+  "probe_fingerprints": {
+    "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638": {
+      "arm": "1a2b5b030e7e4e202fda3a810ed53c5f",
+      "decision_arm": "treatment",
+      "seed": 1523147638,
+      "source_attempt": "attempt12",
+      "per_sample_sha256": "9801c020be1ec8870bbbd8ff656ad9906049ce187acd05a0c957bd4d2bd77350",
+      "result_sha256": "23cecb3de7fee62ca1e2fd6dd662a3f35852dfc032b4512b807e73e9e63edbec",
+      "n_rows": 950
+    },
+    "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711": {
+      "arm": "1a2b5b030e7e4e202fda3a810ed53c5f",
+      "decision_arm": "treatment",
+      "seed": 1916380711,
+      "source_attempt": "attempt5",
+      "per_sample_sha256": "7a32430596424fb5d00c2976406a1829e57bb154f28b206d005c59f6bf8a153d",
+      "result_sha256": "e0d7dc25909769ecaba3074da76c55dedb36faecd52237c6a751d18fef9626b0",
+      "n_rows": 950
+    },
+    "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010": {
+      "arm": "1a2b5b030e7e4e202fda3a810ed53c5f",
+      "decision_arm": "treatment",
+      "seed": 1936324010,
+      "source_attempt": "attempt5",
+      "per_sample_sha256": "cf1b4e38f2a44cca4a7fed44fa57601b289ec38e2caa473180e76573c4c74a25",
+      "result_sha256": "342e264f0348704786a6821ccf42b376bb1916f985134eabae5d7d8a16e3e892",
+      "n_rows": 950
+    },
+    "confirmation.B.s1523147638": {
+      "arm": "B",
+      "decision_arm": "incumbent",
+      "seed": 1523147638,
+      "source_attempt": "attempt13",
+      "per_sample_sha256": "8a8627d014ab11fedde09567b7bf0aea087cf5509d2d10214dfd4533ae8f6a4a",
+      "result_sha256": "598794b6f285159b456e3068de352f03429ca6c6790b740d94d407157b3e1304",
+      "n_rows": 950
+    },
+    "confirmation.B.s1916380711": {
+      "arm": "B",
+      "decision_arm": "incumbent",
+      "seed": 1916380711,
+      "source_attempt": "attempt5",
+      "per_sample_sha256": "d70395ebd3e0d4b8c64b30fa68d7cc1793b5cb1013e283fc259e4f5d54a85f62",
+      "result_sha256": "1d467b28aa0ac3c758a0827c4812844081890067157b17c2e794c875ac04a95b",
+      "n_rows": 950
+    },
+    "confirmation.B.s1936324010": {
+      "arm": "B",
+      "decision_arm": "incumbent",
+      "seed": 1936324010,
+      "source_attempt": "attempt5",
+      "per_sample_sha256": "7d2bc4f9623e7f2bed2ba8e9ba8d9fd5f3a1f7c4425f7c48b79020775aaa13d9",
+      "result_sha256": "bfad93f99173b288c9d7d5779c62a626e1ea8394b6ee1b7328fc3125f3009a92",
+      "n_rows": 950
+    }
+  },
+  "runtime_comparison": {
+    "runtime_terminal_state": "NO_GO",
+    "recomputed_terminal_state": "NO_GO",
+    "terminal_state_agrees": true,
+    "runtime_delta": -0.008235294117647058,
+    "recomputed_delta": -0.009019607843137253,
+    "runtime_lcb": -0.016862745098039214,
+    "recomputed_lcb": -0.017647058823529408
+  }
+}

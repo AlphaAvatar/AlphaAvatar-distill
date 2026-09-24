@@ -1,0 +1,176 @@
+{
+  "schema": "aadistill.autoinit.c2_attested_protocol/v1",
+  "generated_utc": "2026-09-24T07:03:14.317899+00:00",
+  "battery": "c1_confirmation_v1",
+  "runtime": {
+    "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.20",
+    "torch": "2.11.0+cu128",
+    "transformers": "5.13.1",
+    "cuda_runtime": "12.8",
+    "gpu": "NVIDIA L40S",
+    "driver": null
+  },
+  "generation_source_digest": {
+    "digest": "67a500201a329e83d0fe1c1f100d259fba5edd8172fc8c0f0fa8d6acc00738c4",
+    "files": [
+      {
+        "path": "scripts/evaluation/uncapped_eval.py",
+        "sha256": "277e373c781811ab3cc712bb67c4693cd3ff3217cbd65f32bc80913513181063",
+        "bytes": 30226
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/degeneration.py",
+        "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+        "bytes": 5245
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared set"
+  },
+  "generation_protocol_fingerprint": "bbba93df3a419ffcb3c4763d269a96ed154c4a56b3723e1d618f7e5f5e190d27",
+  "scoring_contract": {
+    "contract": "c1_confirmation_scoring@v1",
+    "contract_id": "c1_confirmation_scoring",
+    "version": 1,
+    "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+    "files": [
+      {
+        "path": "scripts/autoinit/audit_tool_scoring.py",
+        "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+        "bytes": 10268
+      },
+      {
+        "path": "scripts/autoinit/score_c1_confirmation.py",
+        "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+        "bytes": 14964
+      },
+      {
+        "path": "scripts/autoinit/score_recovery_search.py",
+        "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+        "bytes": 22149
+      },
+      {
+        "path": "scripts/experiments/phase_c1/scoring.py",
+        "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+        "bytes": 12056
+      },
+      {
+        "path": "src/aadistill/data/tools.py",
+        "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+        "bytes": 6043
+      },
+      {
+        "path": "src/aadistill/data/verify.py",
+        "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+        "bytes": 7594
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/capability.py",
+        "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+        "bytes": 19568
+      },
+      {
+        "path": "src/aadistill/evaluation/strict_answer.py",
+        "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+        "bytes": 7628
+      },
+      {
+        "path": "src/aadistill/evaluation/usable_rollout.py",
+        "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+        "bytes": 6155
+      },
+      {
+        "path": "src/aadistill/initialization/planning/recovery.py",
+        "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+        "bytes": 110776
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+    "semantic_parent": "recovery_search_scoring@v2",
+    "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+    "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+    "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+  },
+  "evaluation_protocol": {
+    "evaluation_protocol_hash": "bff263fb1816e9f9b69e273f7350cf32da64b15cebc44f39164c89ce0479e816",
+    "generation": {
+      "generation_source_digest": "67a500201a329e83d0fe1c1f100d259fba5edd8172fc8c0f0fa8d6acc00738c4",
+      "generation_source_set_version": 1,
+      "vllm_version": "0.27.1",
+      "transformers_version": "5.15.0",
+      "torch_version": "2.13.0+cu130",
+      "dtype": "bfloat16",
+      "gpu_memory_utilization": 0.9,
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "enforce_eager": false,
+      "tokenizer_source": "the evaluated checkpoint",
+      "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "protocol": "project",
+      "system_message": "You are a helpful Assistant.",
+      "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+      "chat_template_kwargs_json": "{}",
+      "thinking_mode": "template-default (not overridden)",
+      "trained_context": 8192,
+      "context_len_override": null,
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false,
+      "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+      "stop_token_ids": [
+        151645
+      ],
+      "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+      "degeneration_stop": true,
+      "degeneration_check_every": 256,
+      "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+      "runtime_digest": "1cc94014df34ef89ed37099b7a1e65a42b56514e76f1b58ec2a7aacaec323c48",
+      "protocol_id": "recovery_generation",
+      "version": 1,
+      "generation_protocol_fingerprint": "bbba93df3a419ffcb3c4763d269a96ed154c4a56b3723e1d618f7e5f5e190d27",
+      "is_materialized": true,
+      "unmaterialized_fields": [],
+      "excluded_by_design": [
+        "the checkpoint being generated from"
+      ],
+      "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+    },
+    "scoring_contract": "c1_confirmation_scoring@v1",
+    "scoring_digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+    "battery": {
+      "artifact": "c1_confirmation_v1",
+      "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+      "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c"
+    },
+    "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+    "notes": {}
+  },
+  "evaluation_protocol_hash": "bff263fb1816e9f9b69e273f7350cf32da64b15cebc44f39164c89ce0479e816",
+  "tokenizer": {
+    "source_rule": "the evaluated checkpoint",
+    "packaged_from": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "sidecar_sha256": {
+      "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+      "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+      "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+    },
+    "observed_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+    "observed_chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+  },
+  "_per_rung": "attested once per battery. An attestation naming one rung's battery cannot certify the other's probes.",
+  "report_sha256": "9177dc3b8c4b2c896d7421fde6ed6ad25b6a46b59d4daa70e9987bea96403a85"
+}
