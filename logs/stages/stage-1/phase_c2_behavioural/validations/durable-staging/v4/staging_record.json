@@ -1,0 +1,142 @@
+{
+  "schema": "aadistill.autoinit.c2_probe_volume_staging/v1",
+  "authorizes": "nothing",
+  "_contract": "One staging run: the campaign's verified probes copied onto a provider network volume and re-hashed from the bytes that landed there. This is transport infrastructure. It admits nothing into the experiment \u2014 a continuation still re-identifies every probe against the identity its campaign announced, on the pod that consumes it.",
+  "run_id": "c2-durable-staging-5",
+  "campaign_id": "c2-behavioural-12probe-v1",
+  "volume_id": "a0zqgxsm7p",
+  "data_center": "EU-NL-1",
+  "mount": "/durable",
+  "started_utc": "2026-09-24T05:17:49+00:00",
+  "probes": [
+    {
+      "probe_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638",
+      "action": "staged",
+      "verified": true,
+      "bytes": 2384241184,
+      "seconds": 4217.6,
+      "observed_mb_per_second": 0.565,
+      "source_attempt": "attempt12",
+      "artifact_digest": "d9af797a565291b3ed0da58e040922c6ffd8a22b5856f2fca193465850510a16"
+    }
+  ],
+  "local_rsync": "/usr/bin/rsync",
+  "source": {
+    "campaign_root": "/home/ecs-user/aad-scratch/c2b-p4-root",
+    "probe_count": 1,
+    "total_bytes": 2384241184,
+    "files_hashed": 6,
+    "source_attempts": [
+      "attempt12"
+    ]
+  },
+  "draws": [
+    {
+      "draw": 1,
+      "pod_id": "l0fy4sukjoht6d",
+      "terminal": "STAGED",
+      "error": null,
+      "teardown": {
+        "pod_id": "l0fy4sukjoht6d",
+        "why": "staging complete",
+        "attempts": [
+          {
+            "method": "runpodctl remove pod",
+            "verified_transport": true,
+            "ok": true,
+            "returncode": 0,
+            "response": "pod \"l0fy4sukjoht6d\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead",
+            "error": null
+          }
+        ],
+        "verified_gone": true,
+        "last_status": "ABSENT",
+        "elapsed_minutes": 72.541,
+        "quoted_usd_per_hour": 0.06,
+        "gpu_usd": 0.0725,
+        "_verification": "termination is confirmed by polling the control plane until the pod stops billing; the terminate call's own exit status has never been treated as proof"
+      },
+      "money": {
+        "gpu_usd": 0.0725,
+        "quoted_usd_per_hour": 0.06,
+        "elapsed_minutes": 72.541,
+        "_disk_note": "container disk and the network volume are billed by the provider separately from compute and are reconciled in the campaign ledger, not here"
+      },
+      "host_health": {
+        "load1": 60.02,
+        "cpus": 2,
+        "load_per_cpu": 30.01,
+        "limit_per_cpu": 100.0
+      },
+      "transport_floor": {
+        "sampled_mib": 32,
+        "seconds": 64.3,
+        "observed_mb_per_second": 0.522,
+        "floor_mb_per_second": 0.15,
+        "_observed_is_diagnostic": "one observation of a rate that moves. It is recorded, and it is never promoted into a schedule or a bound."
+      }
+    }
+  ],
+  "draw": 1,
+  "create_raw": "{\n  \"containerDiskInGb\": 15,\n  \"costPerHr\": 0.06,\n  \"createdAt\": \"2026-09-24 05:17:59.086 +0000 UTC\",\n  \"desiredStatus\": \"RUNNING\",\n  \"env\": {\n    \"PUBLIC_KEY\": \"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPHyLTGGhfoY+v3w7CEP8xX0shw4wzWxHnJDqsh60731 alphaavatar-runpod\\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X+f7hsoLZFbJeFXGStjQiea01LsDIFDE5LdnKCrOjGQK10BvmiW593WTL27OChjStN+xb0zMIyTu/rKas9wNL5msNlUbljmwwj4pIPTEMK31FPhUiBpy2vTlHrH1hdNapHX9nh5iOTTvgZV/Vu+a2lxZvdTFkl5GtTLs2TGsHSmKijnrPro2j++BLUd69VTvW8tFsN/w6VALIAnmrt23wUq15Chjhgs3Ar2SI9A/Ww5+T6aRnP6nOKk+DPGAB5RIVL1Rla88sG3lyraNVSFpBfC8tDnyq7PO6uzolWBJ+Dw4I9HP9eia5IJcGRoi+pGCD0Ml0bFmSQiA1coT2zw1 runpodctl-ssh-key\"\n  },\n  \"gpuCount\": 0,\n  \"id\": \"l0fy4sukjoht6d\",\n  \"imageName\": \"runpod/base:1.0.2-ubuntu2404\",\n  \"lastStatusChange\": \"Rented by User: Thu Sep 24 2026 05:17:59 GMT+0000 (Coordinated Universal Time)\",\n  \"machine\": {\n    \"dataCenterId\": \"EU-NL-1\",\n    \"diskThroughputMBps\": 7178,\n    \"gpuId\": \"unknown\",\n    \"location\": \"NL\",\n    \"maxDownloadSpeedMbps\": 8662,\n    \"maxUploadSpeedMbps\": 8493,\n    \"reservedCountVersion\": 188591,\n    \"secureCloud\": true,\n    \"supportPublicIp\": true\n  },\n  \"memoryInGb\": 4,\n  \"name\": \"aad-c2-durable-staging-5\",\n  \"ports\": [\n    \"22/tcp\"\n  ],\n  \"vcpuCount\": 2,\n  \"volumeInGb\": 0,\n  \"volumeMountPath\": \"/durable\"\n}\n",
+  "pod_id": "l0fy4sukjoht6d",
+  "pod_started_utc": "2026-09-24T05:17:59+00:00",
+  "quoted_usd_per_hour": 0.06,
+  "volume": {
+    "provisioned_gb": 10,
+    "capacity_bytes": 10000000000,
+    "occupied_bytes_at_start": 0,
+    "ours_bytes_at_start": 0,
+    "other_bytes_on_the_volume": 0,
+    "need_bytes": 2384241184,
+    "_need_is_a_total_not_an_increment": "need is the final size of this campaign's staged tree. A probe already on the volume is part of that total, not an addition to it, so a resumed draw is charged nothing for what it will skip.",
+    "_df_is_not_the_quota": "df at the mount reports the backing cluster, not this volume's quota, so capacity comes from the provisioned size the provider sold"
+  },
+  "staged_index": {
+    "schema": "aadistill.autoinit.c2_probe_volume_index/v2",
+    "campaign_id": "c2-behavioural-12probe-v1",
+    "staged_utc": "2026-09-24T06:30:26+00:00",
+    "mount": "/durable",
+    "probe_root": "/durable/c2-behavioural-12probe-v1/probes",
+    "probes": {
+      "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638": {
+        "source_attempt": "attempt12",
+        "artifact_digest": "d9af797a565291b3ed0da58e040922c6ffd8a22b5856f2fca193465850510a16",
+        "bytes": 2384241184,
+        "scored": false
+      }
+    },
+    "total_bytes": 2384241184,
+    "_means": "these bytes were copied from the campaign's durable root and re-hashed here. They are NOT admitted to the experiment by this file; the consuming pod does that."
+  },
+  "staged": true,
+  "teardown": {
+    "pod_id": "l0fy4sukjoht6d",
+    "why": "staging complete",
+    "attempts": [
+      {
+        "method": "runpodctl remove pod",
+        "verified_transport": true,
+        "ok": true,
+        "returncode": 0,
+        "response": "pod \"l0fy4sukjoht6d\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead",
+        "error": null
+      }
+    ],
+    "verified_gone": true,
+    "last_status": "ABSENT",
+    "elapsed_minutes": 72.541,
+    "quoted_usd_per_hour": 0.06,
+    "gpu_usd": 0.0725,
+    "_verification": "termination is confirmed by polling the control plane until the pod stops billing; the terminate call's own exit status has never been treated as proof"
+  },
+  "money": {
+    "gpu_usd": 0.0725,
+    "quoted_usd_per_hour": 0.06,
+    "elapsed_minutes": 72.541,
+    "_disk_note": "container disk and the network volume are billed by the provider separately from compute and are reconciled in the campaign ledger, not here"
+  },
+  "finished_utc": "2026-09-24T06:30:32+00:00",
+  "cumulative_gpu_usd": 0.0725,
+  "terminal": "ALL_STAGED"
+}
