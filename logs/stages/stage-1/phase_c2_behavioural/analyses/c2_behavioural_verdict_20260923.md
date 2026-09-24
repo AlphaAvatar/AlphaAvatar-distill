@@ -215,7 +215,7 @@ blocks needed to judge them under that rule. Unjudgeable is not comparable, and
 it is not incomparable; it is unjudgeable, and that is why no canonical estimate
 is claimed.
 
-**Now enforced.** `aadistill.evaluation.measurement_field.assert_one_measurement_protocol`
+**Now enforced.** `aadistill.evaluation.protocol_field.assert_one_measurement_protocol`
 — in the core, beside the `paired_stats` arithmetic it guards, so C3 and C4
 inherit it by importing core rather than by importing a C2 script; the C2
 module keeps a thin wrapper that only translates the error type. It

@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-24T11:10:03+00:00",
+  "created_utc": "2026-09-24T12:11:27+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1836,
-    "bytes": 61213613,
+    "bytes": 61215897,
     "by_disposition": {
       "keep_canonical": 190,
       "keep_immutable": 1449,
@@ -5522,8 +5522,8 @@
     },
     {
       "path": "docs/core-provenance.md",
-      "size_bytes": 21838,
-      "sha256": "2e51ec979dbbe8587627e00956092d01433fc7c2f82408d8f17080c649b46a20",
+      "size_bytes": 24125,
+      "sha256": "60f9a7ce81ad0b6a72991674e95971fbc36aebf9fba34a539eef8e7c0586f8d3",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -5532,6 +5532,7 @@
         "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_post_freeze_changes.json",
         "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json",
         "scripts/architecture/core_ownership.py",
+        "src/aadistill/evaluation/protocol_field.py",
         "src/aadistill/infrastructure/budget.py",
         "src/aadistill/infrastructure/bundle_transport.py",
         "src/aadistill/infrastructure/log_relay.py",
@@ -5539,10 +5540,12 @@
         "src/aadistill/infrastructure/session_runner.py",
         "src/aadistill/initialization/planning/recovery.py",
         "src/aadistill/initialization/planning/search.py",
-        "src/aadistill/runtime/setup_steps.py"
+        "src/aadistill/runtime/setup_steps.py",
+        "tests/architecture/test_cuda_surface_preserved.py"
       ],
       "referenced_by_executable": [
         "scripts/architecture/core_ownership.py",
+        "src/aadistill/evaluation/protocol_field.py",
         "src/aadistill/infrastructure/budget.py",
         "src/aadistill/infrastructure/bundle_transport.py",
         "src/aadistill/infrastructure/log_relay.py",
@@ -5550,11 +5553,12 @@
         "src/aadistill/infrastructure/session_runner.py",
         "src/aadistill/initialization/planning/recovery.py",
         "src/aadistill/initialization/planning/search.py",
-        "src/aadistill/runtime/setup_steps.py"
+        "src/aadistill/runtime/setup_steps.py",
+        "tests/architecture/test_cuda_surface_preserved.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/architecture/core_ownership.py, src/aadistill/infrastructure/budget.py, src/aadistill/infrastructure/bundle_transport.py"
+      "disposition_reason": "named by scripts/architecture/core_ownership.py, src/aadistill/evaluation/protocol_field.py, src/aadistill/infrastructure/budget.py"
     },
     {
       "path": "logs/README.md",
@@ -24142,11 +24146,12 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md",
-      "size_bytes": 14587,
-      "sha256": "1ef9380ec3b7545de765f4324540254dab054d78a42cc3ceb365246274d87ac2",
+      "size_bytes": 14584,
+      "sha256": "83a851252ee8ebd53931c672f0e23bcd12b28048a0739dd7f11494f73b0a4924",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "docs/core-provenance.md",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/state/current.json"
       ],

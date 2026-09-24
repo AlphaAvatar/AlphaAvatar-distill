@@ -1,8 +1,8 @@
 """Does a set of measurements form ONE admissible field?
 
 A paired estimate pools several measurements and reports one interval. That is
-only a quantity if every measurement was made the same way. Six valid row files
-measured under different evaluation protocols are six measurements of different
+only a quantity if every measurement was made the same way. Valid row files
+measured under different evaluation protocols are measurements of different
 things, and pooling them produces a number with no estimand.
 
 This is the admission rule for that question, and it FAILS CLOSED. It sits
@@ -12,15 +12,18 @@ owns whether two runtimes are comparable -- rather than inventing a second
 interpretation of "same protocol".
 
 Nothing here names an experiment, an arm, a battery or a stage: the keys are
-opaque and the field's name is a parameter, so every stage inherits it.
+opaque and the field's name is a parameter, so every stage inherits it. The
+observed failure that motivated it -- its stage, its member counts and its
+fingerprints -- is recorded in `docs/core-provenance.md` and in that stage's
+own analysis, not here, because core does not carry this project's run labels.
 
-The failure it was written for: C2's behavioural confirmation field carried a
-uniform battery, scoring contract and metric contract, and THREE distinct
-generation protocol fingerprints -- four probes on one, the incumbent's third
-seed on a second, the candidate's third seed on a third. The paired difference
-at that seed was therefore computed across two protocols: a confound inside the
-pair, on the seed with the largest magnitude. Nothing refused it, the interval
-was reported, and the stage had to be closed without a promotion verdict.
+The failure mode, stated generically: a field whose battery, scoring contract
+and metric contract are all uniform can still span several generation
+protocols, because members accumulate over time, across images and hosts. When
+two members of the SAME pair were measured under different protocols, the
+confound sits inside the pair, and no amount of downstream care recovers the
+estimand. Every cheap check answers "is this data valid", which is a different
+question from "is this data one measurement".
 """
 from __future__ import annotations
 
@@ -28,11 +31,11 @@ import json
 from typing import Any, Mapping
 
 
-class MeasurementFieldError(Exception):
+class ProtocolFieldError(Exception):
     """The measurements do not form one admissible field."""
 
 
-#: Compared by exact identity. A probe scored against a different battery,
+#: Compared by exact identity. A member scored against a different battery,
 #: scoring contract or metric contract is measuring something else, and no
 #: runtime-comparability argument can rescue that.
 PROTOCOL_IDENTITY_FIELDS = ("battery", "scoring_contract", "metric_contract")
@@ -78,12 +81,12 @@ def assert_one_measurement_protocol(
     )
 
     if not protocols:
-        raise MeasurementFieldError(
+        raise ProtocolFieldError(
             f"the {context} declares no measurement protocol for any entry. A "
             "paired interval over measurements whose protocols are unknown has "
             "no estimand; this refuses rather than producing a number.")
 
-    report: dict[str, Any] = {"probes": {str(k): {} for k in protocols},
+    report: dict[str, Any] = {"members": {str(k): {} for k in protocols},
                               "uniform": {}, "compared_by": {}}
 
     missing: dict[str, list[str]] = {}
@@ -93,7 +96,7 @@ def assert_one_measurement_protocol(
         if absent:
             missing[str(key)] = absent
     if missing:
-        raise MeasurementFieldError(
+        raise ProtocolFieldError(
             f"the {context} cannot be shown to share one measurement protocol: "
             f"{missing} record no value for those identities. Absent is not "
             "equal; this refuses rather than assuming they matched.")
@@ -103,7 +106,7 @@ def assert_one_measurement_protocol(
         report["uniform"][field] = len(seen) == 1
         report["compared_by"][field] = "exact identity"
         if len(seen) != 1:
-            raise MeasurementFieldError(
+            raise ProtocolFieldError(
                 f"the {context} spans {len(seen)} distinct {field} identities. "
                 "Measurements against different batteries, scoring contracts "
                 "or metric contracts are measurements of different things: "
@@ -122,7 +125,7 @@ def assert_one_measurement_protocol(
     expanded = {k: r for k, r in protocols.items()
                 if r.get("protocol") and r.get("runtime")}
     if len(expanded) != len(protocols):
-        raise MeasurementFieldError(
+        raise ProtocolFieldError(
             f"the {context} spans {len(fingerprints)} distinct generation "
             f"protocol fingerprints, and {len(protocols) - len(expanded)} of "
             f"{len(protocols)} entries did not record the expanded protocol "
@@ -146,7 +149,7 @@ def assert_one_measurement_protocol(
                     runtime=expanded[other]["runtime"]),
                 base, context=f"{context}: {other} vs {keys[0]}")
         except ComparabilityError as exc:
-            raise MeasurementFieldError(
+            raise ProtocolFieldError(
                 f"the {context} is not one measurement protocol: {exc}") from exc
     report["uniform"][GENERATION_IDENTITY_FIELD] = "comparable under v2"
     return report

@@ -538,3 +538,42 @@ carry:
     E7 preregisters one `lambda_extra` and runs no sweep. That is only safe if
     # logged config computes, which is exactly what P4 forbids. Opting in per
 ```
+
+### `src/aadistill/evaluation/protocol_field.py`
+
+The admission rule that refuses a pooled or paired field unless every member
+establishes one compatible measurement protocol. What core cannot say, and what
+paid for it:
+
+C2's behavioural confirmation field pooled **six** probes into one paired
+interval. Every row file was valid, every probe complete, the strata checks
+passed, the bootstrap seed `834816710` was pre-registered, and the frozen rule
+ran to a terminal `NO_GO` with `delta −0.008235` / `ucb_one_sided −0.000392`.
+The field spanned **three** distinct `generation_protocol_fingerprint` values —
+`e9d8da97…` for the four probes measured inside attempt5, `af7beb55…` for
+incumbent B's third seed (attempt13) and `bbba93df…` for the candidate's third
+seed (attempt12 → attempt14). The pair at that third seed therefore straddled
+two protocols, on the seed with the largest magnitude and the one whose delta
+moved by two prompts between attempt13 and attempt14.
+
+Nothing refused it. The interval was reported, and the maintainer closed the
+stage **without promotion** rather than as a NO_GO — a materially weaker
+outcome, because a canonical NO_GO is evidence against a candidate that a later
+stage can rely on, while this is an absence of admissible evidence either way.
+
+Two specifics the mechanism encodes:
+
+* **Fail closed on unjudgeable, not only on unequal.** All six probes lacked the
+  expanded protocol and runtime blocks, so `generation_compat` v2 — which
+  deliberately demotes the NVIDIA driver patch, because `image_digest` is really
+  `imageName@driver` and the provider assigns whatever host is free — could not
+  be applied. "Not shown to be comparable" is not "comparable".
+* **Do not reach for nondeterminism first.** The attempt13/attempt14 two-prompt
+  difference was originally attributed here to greedy-decoding nondeterminism.
+  That was asserted, not established, and the maintainer corrected it; the
+  established fact is differing recorded protocol identities. The runs did also
+  differ in driver patch (`@580.173.02` vs `@580.126.20`), which under v2 is
+  recorded-not-material and so settles nothing on its own.
+
+Owner of the full account:
+`logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md`.

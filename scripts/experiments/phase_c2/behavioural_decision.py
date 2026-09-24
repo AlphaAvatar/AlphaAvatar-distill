@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from aadistill.evaluation import measurement_field as MF
+from aadistill.evaluation import protocol_field as PF
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -169,7 +169,7 @@ def decision_rule(repo_root: str | Path = REPO_ROOT) -> C2DecisionRule:
 
 
 #: The admission rule lives in the CORE, beside the paired arithmetic it
-#: guards: `aadistill.evaluation.measurement_field`. Nothing in it names C2, so
+#: guards: `aadistill.evaluation.protocol_field`. Nothing in it names C2, so
 #: C3 and C4 inherit it by importing core rather than by importing a C2 script
 #: -- placement is what makes a rule inheritable, not genericity alone.
 #:
@@ -179,8 +179,8 @@ def decision_rule(repo_root: str | Path = REPO_ROOT) -> C2DecisionRule:
 #: second, and the candidate's third seed on a third. The paired difference at
 #: that seed was therefore computed across two protocols -- a confound inside
 #: the pair, on the seed with the largest magnitude. Nothing refused it.
-PROTOCOL_IDENTITY_FIELDS = MF.PROTOCOL_IDENTITY_FIELDS
-GENERATION_IDENTITY_FIELD = MF.GENERATION_IDENTITY_FIELD
+PROTOCOL_IDENTITY_FIELDS = PF.PROTOCOL_IDENTITY_FIELDS
+GENERATION_IDENTITY_FIELD = PF.GENERATION_IDENTITY_FIELD
 
 
 def assert_one_measurement_protocol(
@@ -194,8 +194,8 @@ def assert_one_measurement_protocol(
     path and surface as a traceback on a paid pod instead of exit 3.
     """
     try:
-        return MF.assert_one_measurement_protocol(protocols, context=context)
-    except MF.MeasurementFieldError as exc:
+        return PF.assert_one_measurement_protocol(protocols, context=context)
+    except PF.ProtocolFieldError as exc:
         raise BehaviouralDecisionError(str(exc)) from exc
 
 

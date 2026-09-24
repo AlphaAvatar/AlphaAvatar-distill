@@ -487,6 +487,46 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "from here needs an account this environment cannot create, and "
             "`runtime/durable_store.py` still has no production caller.",
      }),
+    ("d7dbf1ad78acb584bb28715f7e4b292dbdccadba",
+     "the protocol-field admission rule, and ownership of a blocked teardown",
+     {
+        "src/aadistill/evaluation/protocol_field.py":
+            "NEW MODULE. The admission rule that refuses a pooled or paired "
+            "field unless every member establishes ONE compatible measurement "
+            "protocol: battery, scoring-contract and metric-contract identity "
+            "by equality, and the generation protocol through "
+            "`generation_compat`'s `require_comparable` rather than by "
+            "fingerprint equality, because that rule already owns whether two "
+            "runtimes are comparable and deliberately demotes the NVIDIA "
+            "driver patch. THIS IS A DECLARED SEMANTIC CHANGE by virtue of "
+            "being new executable core. It FAILS CLOSED in three directions -- "
+            "identities that differ, identities that are absent, and a "
+            "generation protocol that differs but cannot be judged because the "
+            "expanded protocol and runtime blocks were never recorded -- "
+            "because 'not shown to be comparable' is not 'comparable'. It "
+            "names no experiment, arm, battery, stage or seed: the keys are "
+            "opaque, the field's name is a caller argument, and two tests "
+            "assert both the source and the BASENAME are free of this "
+            "project's experiment tokens. It sits beside `paired_stats`, the "
+            "arithmetic it guards. One application caller exists, a thin "
+            "wrapper that only translates the error type; the reason the rule "
+            "was paid for is in `docs/core-provenance.md`.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "`verify_watchdog_owns_pod`, and the blocked-teardown branch of "
+            "`collect_and_teardown` now acting on it. THIS IS A DECLARED "
+            "SEMANTIC CHANGE to provider ownership: the branch previously "
+            "asserted 'the watchdog remains the backstop' and checked "
+            "nothing, and a blocked artifact gate therefore returned leaving a "
+            "pod that nothing was known to be watching. Ownership now requires "
+            "all three of a live pid, a watchdog launched for THIS pod, and a "
+            "`/proc/<pid>/cmdline` naming both -- the third because pids are "
+            "reused and a recycled pid answers `kill(pid, 0)` identically. "
+            "Owned is UNCHANGED behaviour (retain for evidence); unowned now "
+            "tears the resource down. The watchdog pid is captured at launch "
+            "and read defensively, so a spawn object without a readable pid "
+            "degrades to 'ownership cannot be established' instead of raising "
+            "immediately after a pod starts billing.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.

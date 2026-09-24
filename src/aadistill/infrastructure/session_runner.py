@@ -572,7 +572,14 @@ class SessionRunner:
         #: teardown path used to say "the watchdog remains the backstop" without
         #: checking; if the watchdog had died, that sentence was the only thing
         #: standing between a blocked gate and an unbounded bill.
-        self._watchdog_pid = proc.pid
+        #:
+        #: Read DEFENSIVELY. The pid is evidence about a backstop, not part of
+        #: acquiring the resource, and this line runs immediately after a pod
+        #: starts billing: a spawn object without a readable pid must degrade
+        #: to "ownership cannot be established" -- which tears the pod down --
+        #: and never raise here, because raising at this point abandons a
+        #: billing resource in exactly the way this repair exists to prevent.
+        self._watchdog_pid = int(getattr(proc, "pid", 0) or 0)
         self._watchdog_for = self.pod_id
         self.ev.setdefault("watchdog_journals", []).append(str(journal))
         self.ev["watchdog_owns_pod"] = self.pod_id
