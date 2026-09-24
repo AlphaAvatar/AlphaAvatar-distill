@@ -2155,6 +2155,60 @@
     "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
    ],
    "entry_sha256": "a48c1cc347596c436322c781678c63ce06f4593bcefde645ec3fd565b0ea08bd"
+  },
+  {
+   "amendment_id": "PHB-HA-026",
+   "schema_version": 1,
+   "recorded_utc": "2026-09-24T10:57:26+00:00",
+   "reviewed_base_commit": "c0615c44",
+   "source_repair_commit": "c0615c446e5cec829e6f7e85082d86b63a0731aa",
+   "source_repair_parent": "d7dbf1ad78acb584bb28715f7e4b292dbdccadba",
+   "previous_live_digest": "f38bc4545ac86dde888793d2988a3ac455600e6df9394aebf52964883be78dd2",
+   "new_live_digest": "8b2a6ff9fc59f2425135ba4953275cb2cb1c051826dcbe07dc29f664236c9f72",
+   "changed_files": [
+    "src/aadistill/infrastructure/session_runner.py"
+   ],
+   "file_sha256_before": {
+    "src/aadistill/infrastructure/session_runner.py": "5902c1032d4f3c90649eba0d40869ee637249127f85f82c7118ffc0e9c00c862"
+   },
+   "file_sha256_after": {
+    "src/aadistill/infrastructure/session_runner.py": "b75848b5ffa01031fe4eeab84bbb234882fff77cb61aeea65f13a4acf21e9835"
+   },
+   "patch_sha256": "7b85fc19038aba4bfa00eada30cac096d48e6da102f07fecfbf90e76181a1d28",
+   "numstat": {
+    "src/aadistill/infrastructure/session_runner.py": [
+     87,
+     6
+    ]
+   },
+   "numstat_rule": "git diff --numstat <parent> <commit> -- <changed_files>",
+   "additive_only": false,
+   "lines_removed": 6,
+   "_additive_only_is_derived": "from `numstat` above, the measured `git diff --numstat` of this repair. An additive entry here is still HISTORICAL accounting and still confers nothing -- `launch_compatible_with_frozen_preregistration` is False either way. The legacy additive note is sealed by hash and cannot take a new entry, so a purely additive post-freeze change to the shared runtime has no other recorder.",
+   "historical_only": true,
+   "launch_compatible_with_frozen_preregistration": false,
+   "phase_b_science_changed": false,
+   "phase_b_results_changed": false,
+   "operational_classification": "post-provider resource ownership, watchdog establishment and verified teardown",
+   "what": "SessionRunner gained verify_watchdog_owns_pod, and collect_and_teardown's blocked branch now tears the pod down when it cannot establish a live owner instead of asserting that the watchdog is a backstop. attempt14 left an L40S billing for about 116 minutes with nobody to stop it: the artifact collector exited 5, the teardown gate refused to delete the pod holding the only copy of a required artifact, and the launcher returned. Ownership is now pid liveness AND the watchdog having been launched for THIS pod AND /proc/<pid>/cmdline naming both the pod and the watchdog, because a reused pid answers kill(pid, 0) as readily as the real one. Nothing scientific changes: no arm, seed, dataset, scorer, decision rule or budget is touched, and the preserve-for-evidence outcome is unchanged whenever an owner is verified.",
+   "why_the_owner_is_shared_session_runner": "The defect is in SessionRunner.collect_and_teardown and SessionRunner's watchdog launch, the only place a watchdog pid exists and the only place the blocked-collection branch is taken. Every phase that acquires a provider resource runs this code -- Phase A, Phase B, the continuations, C1, C2 and the preflight -- so all of them shared the defect and all of them receive the repair. It cannot be fixed from a caller: no caller can see the watchdog pid, and the blocked branch returns before any caller regains control.",
+   "why_a_c1_only_override_was_rejected": "This is historical accounting, not a launch permission. It confers nothing and no launch reads it. The Phase-B frozen preregistration is not made launch-compatible by this entry, and the C1 readiness record's binding of the live executable is a separate committed record that a future C1 launch must re-derive for itself rather than inherit from here.",
+   "maintainer_authorization": "maintainer review #2, 2026-09-24: the five $0 C2 closeout repairs, of which repair 2 (orphan-resource ownership) is a change to shared infrastructure",
+   "does_not_authorize": [
+    "any Phase-B execution",
+    "re-freezing the Phase-B preregistration",
+    "reinterpreting the completed Phase-B result",
+    "launch compatibility with the frozen preregistration",
+    "any relaxation of autoinit_phase_b_launch.preregistration_gate"
+   ],
+   "previous_entry_sha256": "a48c1cc347596c436322c781678c63ce06f4593bcefde645ec3fd565b0ea08bd",
+   "also_affected_hash_bound_sets": [
+    "aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+    "experiments.phase_b.continuation.CONTINUATION_SOURCE_FILES_V2",
+    "experiments.phase_c1.authorization.C1_HARNESS_SOURCE_FILES_V1"
+   ],
+   "entry_sha256": "4db5af10ae602fab40d8710378e6e912576cbdd7efc2ae391ff47e1bf69796ec"
   }
  ]
 }

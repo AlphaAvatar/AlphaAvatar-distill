@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-24T10:56:21+00:00",
+  "created_utc": "2026-09-24T10:58:51+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 1836,
-    "bytes": 61207649,
+    "bytes": 61212289,
     "by_disposition": {
       "keep_canonical": 190,
       "keep_immutable": 1449,
@@ -14362,8 +14362,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_historical_amendments.json",
-      "size_bytes": 145838,
-      "sha256": "ac3894bb11e54e0082a4d6a09d478717e71fc562ff8c6450490ae80309768bf3",
+      "size_bytes": 150478,
+      "sha256": "1aebb4ea9f0b42a1d8cd23f7c833d34cbe74235989a5fb717a8e0bba2d68a89c",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
