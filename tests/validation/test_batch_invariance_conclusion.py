@@ -43,26 +43,43 @@ def derive():
     return _module().derive_conclusion
 
 
+#: The FULL field set the conclusion reads from each stage.
+#:
+#: Not a convenient subset. `derive_conclusion` now RAISES when a stage that ran
+#: is missing a field it asks for, because it silently returned `None` for a
+#: field whose name had drifted from the stage that emits it. A fixture holding
+#: fewer fields than the real stages would reinstate exactly that blind spot, so
+#: `test_the_fixture_carries_every_field_the_conclusion_reads` parses the
+#: production source and fails when this drifts.
+CLEAN_STAGES: dict = {
+    "repeatability": {"both_shapes_internally_deterministic": True},
+    "case_matrix": {"comparisons": {
+        "A_vs_B": {"bitwise_identical": True, "max_abs": 0.0},
+        "C_vs_D": {"bitwise_identical": True, "max_abs": 0.0},
+        "A_vs_E": {"bitwise_identical": True, "max_abs": 0.0},
+    }},
+    "first_divergence": {"first_tap_that_is_not_bit_identical": None},
+    "gemm_isolation": {"a_bare_gemm_is_shape_dependent": False},
+    "length_sweep": {"padding_alone_is_inert": True,
+                     "batch_size_alone_moves_it": False},
+    "backend_matrix": {"backends_diverging": [], "backends_exact": ["sdpa"],
+                       "every_backend_diverges": False,
+                       "no_backend_diverges": True},
+    "reduction_control": {"applicable": True,
+                          "divergence_removed_by_disabling": False},
+    "statistics_decomposition": {"every_batch_size_bit_identical": True},
+    "ffn_selection": {"selection_is_batch_invariant": True,
+                      "n_layers_with_moved_selection": 0,
+                      "selection_is_batch_invariant_at_every_ratio_and_size": True,
+                      "headline_micro_batch_size": 4,
+                      "headline_keep_ratio": 0.5},
+    "causal_kl": {"max_rel_diff": 0.0, "item_ranking_identical": True},
+}
+
+
 def _report(**stages) -> dict:
     """A report whose stages are all clean unless a test says otherwise."""
-    base = {
-        "repeatability": {"both_shapes_internally_deterministic": True},
-        "case_matrix": {"comparisons": {
-            "A_vs_B": {"bitwise_identical": True, "max_abs": 0.0},
-            "C_vs_D": {"bitwise_identical": True, "max_abs": 0.0},
-            "A_vs_E": {"bitwise_identical": True, "max_abs": 0.0},
-        }},
-        "first_divergence": {"first_tap_that_is_not_bit_identical": None},
-        "gemm_isolation": {"a_bare_gemm_is_shape_dependent": False},
-        "length_sweep": {"padding_alone_is_inert": True,
-                         "batch_size_alone_moves_it": False},
-        "backend_matrix": {"backends_diverging": [], "backends_exact": ["sdpa"],
-                           "every_backend_diverges": False,
-                           "no_backend_diverges": True},
-        "ffn_selection": {"selection_is_batch_invariant": True,
-                          "n_layers_with_moved_selection": 0},
-        "causal_kl": {"max_rel_diff": 0.0, "item_ranking_identical": True},
-    }
+    base = {name: dict(fields) for name, fields in CLEAN_STAGES.items()}
     base.update(stages)
     return {"stages": base, "model": {"attention": {
         "config._attn_implementation": "sdpa"}}}
@@ -180,10 +197,113 @@ def test_driver_is_unknown_when_the_sweep_did_not_run(derive):
 
 def test_the_decision_fields_come_from_their_stages(derive):
     out = derive(_report(
-        ffn_selection={"selection_is_batch_invariant": False,
+        ffn_selection={**CLEAN_STAGES["ffn_selection"],
+                       "selection_is_batch_invariant": False,
                        "n_layers_with_moved_selection": 26},
         causal_kl={"max_rel_diff": 7.06e-3, "item_ranking_identical": False}))
     assert out["ffn_selection_is_batch_invariant"] is False
     assert out["ffn_layers_with_moved_selection"] == 26
     assert out["causal_kl_max_rel_diff"] == pytest.approx(7.06e-3)
     assert out["causal_kl_item_ranking_identical"] is False
+
+
+def test_the_fixture_carries_every_field_the_conclusion_reads():
+    """The fixture must not be a convenient subset of the real stage outputs.
+
+    `derive_conclusion` raises on a missing field, which only helps if the
+    fixture is as complete as the stages are. This reads the `got("stage",
+    "field")` calls straight out of the production source, so adding a field
+    there and forgetting it here fails HERE rather than on a paid pod.
+    """
+    import ast
+    tree = ast.parse(SCRIPT.read_text())
+    fn = next(n for n in ast.walk(tree)
+              if isinstance(n, ast.FunctionDef) and n.name == "derive_conclusion")
+    required: dict[str, set] = {}
+    for node in ast.walk(fn):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == "got" and len(node.args) >= 2
+                and all(isinstance(a, ast.Constant) for a in node.args[:2])):
+            required.setdefault(node.args[0].value, set()).add(node.args[1].value)
+    assert required, "no got() calls were parsed; the shape of this test is wrong"
+    missing = {stage: sorted(fields - set(CLEAN_STAGES.get(stage, {})))
+               for stage, fields in required.items()
+               if fields - set(CLEAN_STAGES.get(stage, {}))}
+    assert not missing, (
+        f"CLEAN_STAGES is missing fields derive_conclusion reads: {missing}")
+
+
+def _conclusion_reads() -> dict[str, set]:
+    """The (stage, field) pairs `derive_conclusion` asks for, from the source."""
+    import ast
+    fn = next(n for n in ast.walk(ast.parse(SCRIPT.read_text()))
+              if isinstance(n, ast.FunctionDef) and n.name == "derive_conclusion")
+    reads: dict[str, set] = {}
+    for node in ast.walk(fn):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == "got" and len(node.args) >= 2
+                and all(isinstance(a, ast.Constant) for a in node.args[:2])):
+            reads.setdefault(node.args[0].value, set()).add(node.args[1].value)
+    return reads
+
+
+def test_every_field_the_conclusion_reads_is_a_key_some_stage_writes():
+    """Close the loop on the OTHER side of the rename.
+
+    The fixture test proves the fixture is complete; it cannot notice a stage
+    renaming a field it emits, because the tests read the fixture. Renaming
+    `selection_is_batch_invariant_at_every_ratio_and_size` in the STAGE passed
+    every test while the conclusion went on reading the old name — which on a
+    real report is the silent `None` this whole strictness exists to prevent.
+
+    So: every field the conclusion reads must appear somewhere in the module as
+    a dict key written OUTSIDE `derive_conclusion`. Coarse on purpose — it
+    cannot tell which stage writes it — but a rename breaks it, which is the
+    failure that matters.
+    """
+    import ast
+    tree = ast.parse(SCRIPT.read_text())
+    conclusion = next(n for n in ast.walk(tree)
+                      if isinstance(n, ast.FunctionDef)
+                      and n.name == "derive_conclusion")
+    conclusion_nodes = set(map(id, ast.walk(conclusion)))
+    written: set = set()
+    for node in ast.walk(tree):
+        if id(node) in conclusion_nodes:
+            continue
+        if isinstance(node, ast.Dict):
+            written |= {k.value for k in node.keys
+                        if isinstance(k, ast.Constant) and isinstance(k.value, str)}
+        elif (isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Constant)
+              and isinstance(node.slice.value, str)):
+            written.add(node.slice.value)
+        elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+              and node.func.attr in {"update", "setdefault"}):
+            for arg in node.args:
+                if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                    written.add(arg.value)
+
+    orphans = sorted({f for fields in _conclusion_reads().values() for f in fields}
+                     - written)
+    assert not orphans, (
+        "derive_conclusion reads fields no stage writes anywhere in the module; "
+        f"a rename on the producing side would go silent: {orphans}")
+
+
+def test_a_stage_that_ran_but_lacks_a_field_raises(derive):
+    """The strictness itself, exercised. A complete fixture never triggers it."""
+    report = _report()
+    del report["stages"]["ffn_selection"]["headline_keep_ratio"]
+    with pytest.raises(KeyError, match="headline_keep_ratio"):
+        derive(report)
+
+
+@pytest.mark.parametrize("marker", [
+    {"ran": False, "reason": "statistics decomposition did not run"},
+    {"error": "RuntimeError: CUDA out of memory"},
+])
+def test_a_stage_that_declared_itself_absent_does_not_raise(derive, marker):
+    """`ran: False` and an error are legitimate silence, not typos."""
+    out = derive(_report(ffn_selection=marker))
+    assert out["ffn_selection_is_batch_invariant"] is None
+    assert out["divergence_locus"] == "no_divergence_observed"

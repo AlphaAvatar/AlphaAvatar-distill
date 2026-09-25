@@ -775,25 +775,55 @@ def stage_statistics_decomposition(cfg, ctx) -> dict:
     def grab(_m, args):
         captured.append(args[0].detach())
 
-    # (a) the live statistic, both shapes, through the production collector.
-    states = {}
-    for bs in (1, int(cfg["micro_batch_size"])):
+    # (a) the live statistic, through the production collector, at EVERY micro
+    #     batch size under test. The rejected finding quoted bs=1 vs bs=3 and
+    #     DEFAULT_MICRO_BATCH_SIZE is 4, so measuring one of them would leave
+    #     the comparison inexact in the one place it has to be exact.
+    #
+    #     `residual_sqsum` is [P, H, H] float64 -- 1.94 GiB at a 4B parent -- so
+    #     the reference state is held and each batched state is compared and
+    #     released, rather than accumulating one per sweep point.
+    def collect(bs):
         collector = ActivationStatsCollector(
             model, [adapter.stream_out_projections(b)["ffn_out"]
                     for b in adapter.blocks(model)])
         try:
             for batch in micro_batches(items, bs, pad_id=pad, device=device):
                 collector.process_batch(batch)
-            states[bs] = collector.state()
+            return collector.state()
         finally:
             collector.close()
-    ref_state, bat_state = states[1], states[int(cfg["micro_batch_size"])]
-    live = {name: compare(ref_state[name].float(), bat_state[name].float())
-            for name in ("ffn_abs_sum", "ffn_sq_sum", "residual_sum")}
-    live["token_counts_identical"] = bool(
-        torch.equal(ref_state["token_counts"], bat_state["token_counts"]))
-    live["residual_count_identical"] = bool(
-        torch.equal(ref_state["residual_count"], bat_state["residual_count"]))
+
+    ref_state = collect(1)
+    sweep, kept_importance = {}, {1: ref_state}
+    for bs in cfg["micro_batch_sweep"]:
+        bs = int(bs)
+        if bs == 1:
+            continue
+        bat_state = collect(bs)
+        row = {name: compare(ref_state[name].float(), bat_state[name].float())
+               for name in ("ffn_abs_sum", "ffn_sq_sum", "residual_sum")}
+        row["residual_sqsum"] = compare(ref_state["residual_sqsum"].float(),
+                                        bat_state["residual_sqsum"].float())
+        row["token_counts_identical"] = bool(
+            torch.equal(ref_state["token_counts"], bat_state["token_counts"]))
+        row["residual_count_identical"] = bool(
+            torch.equal(ref_state["residual_count"], bat_state["residual_count"]))
+        row["every_accumulator_bit_identical"] = all(
+            row[name]["bitwise_identical"] for name in
+            ("ffn_abs_sum", "ffn_sq_sum", "residual_sum", "residual_sqsum"))
+        sweep[bs] = row
+        #: Only the FFN term survives the sweep -- [L, I] float64, ~2.8 MiB --
+        #: because that is all `ffn_neuron_importance` reads. Keeping whole
+        #: states would be ~2 GiB each.
+        kept_importance[bs] = {
+            "ffn_abs_sum": bat_state["ffn_abs_sum"],
+            "residual_count": bat_state["residual_count"]}
+        del bat_state
+        if device.startswith("cuda"):
+            torch.cuda.empty_cache()
+    live = sweep.get(int(cfg["micro_batch_size"]),
+                     sweep[min(sweep)] if sweep else {})
 
     # (b) the SAME items' down_proj inputs, captured in both shapes.
     handle = down.register_forward_pre_hook(grab)
@@ -817,7 +847,12 @@ def stage_statistics_decomposition(cfg, ctx) -> dict:
         handle.remove()
 
     out = {"layer": layer, "n_items": len(items),
+           "item_lengths": [int(i["input_ids"].shape[1]) for i in items],
            "micro_batch_size": int(cfg["micro_batch_size"]),
+           "micro_batch_sweep": [int(b) for b in cfg["micro_batch_sweep"]],
+           "by_micro_batch_size": sweep,
+           "every_batch_size_bit_identical": bool(sweep) and all(
+               r["every_accumulator_bit_identical"] for r in sweep.values()),
            "live_collector_state": live}
     if solo_rows.shape != batched_rows.shape:
         out["forward_drift"] = {"comparable": False,
@@ -843,7 +878,7 @@ def stage_statistics_decomposition(cfg, ctx) -> dict:
             "float64 accumulation grouping alone, activations held identical",
         "live_collector_state": "what the operator actually consumes = both",
     }
-    ctx["stats_states"] = states
+    ctx["stats_states"] = kept_importance
     return out
 
 
@@ -856,48 +891,100 @@ def stage_ffn_selection(cfg, ctx) -> dict:
     A moved statistic only matters if it moves a DECISION, and a moved decision
     only means something relative to how far apart the two neurons at the cutoff
     were. Both are reported; neither is summarised into a verdict here.
+
+    Swept over the SAME keep ratios the rejected finding quoted -- 0.32, 0.50,
+    0.75, 0.90 -- and over every micro batch size the statistics stage
+    collected, so "26 of 28 at keep=0.32" has a like-for-like counterpart here
+    instead of a nearby number measured differently.
     """
     import torch
     from aadistill.initialization.transforms.project import ffn_neuron_importance
 
     states = ctx.get("stats_states")
-    if not states:
+    if not states or 1 not in states:
         return {"ran": False, "reason": "statistics decomposition did not run"}
     model, adapter = ctx["model"], ctx["adapter"]
     ref_state = states[1]
-    bat_state = states[int(cfg["micro_batch_size"])]
-    keep_ratio = float(cfg["ffn_keep_ratio"])
+    others = sorted(b for b in states if b != 1)
+    if not others:
+        return {"ran": False, "reason": "only one micro batch size was collected"}
 
-    rows, moved = [], 0
+    #: Importance is `E[|a_j|] * ||down_proj column j||_2`, and the column norms
+    #: are a property of the WEIGHTS -- identical in every arm by construction.
+    #: Computed once, so a per-layer loop does not re-reduce a [H, I] matrix
+    #: four times per keep ratio.
+    importance = {}
     for index, block in enumerate(adapter.blocks(model)):
         w_down = adapter.stream_out_projections(block)["ffn_out"].weight.detach().cpu()
-        imp_ref = ffn_neuron_importance(ref_state, index, w_down)
-        imp_bat = ffn_neuron_importance(bat_state, index, w_down)
-        keep = max(1, int(round(imp_ref.numel() * keep_ratio)))
-        sel_ref = torch.topk(imp_ref, keep).indices.sort().values
-        sel_bat = torch.topk(imp_bat, keep).indices.sort().values
-        same = bool(torch.equal(sel_ref, sel_bat))
-        moved += 0 if same else 1
-        ordered = imp_ref.sort(descending=True).values
-        # The gap the decision turned on: last kept vs first dropped.
-        margin = float(ordered[keep - 1] - ordered[keep]) if keep < ordered.numel() else float("inf")
-        scale = float(ordered[keep - 1])
-        drift = compare(imp_ref, imp_bat)
-        rows.append({
-            "layer": index, "keep": keep, "selection_identical": same,
-            "n_differing": int((sel_ref != sel_bat).sum()) if not same else 0,
-            "cutoff_margin_abs": margin,
-            "cutoff_margin_relative": margin / scale if scale else None,
-            "importance_max_abs_drift": drift["max_abs"],
-            "importance_rel_l2_drift": drift["rel_l2"],
-            "drift_exceeds_margin": bool(drift["max_abs"] > margin),
-        })
+        importance[index] = {
+            bs: ffn_neuron_importance(state, index, w_down)
+            for bs, state in ((1, ref_state), *((b, states[b]) for b in others))}
+
+    by_ratio: dict = {}
+    for ratio in cfg["ffn_keep_ratios"]:
+        ratio = float(ratio)
+        per_bs: dict = {}
+        for bs in others:
+            rows, moved = [], 0
+            for index in sorted(importance):
+                imp_ref, imp_bat = importance[index][1], importance[index][bs]
+                keep = max(1, int(round(imp_ref.numel() * ratio)))
+                sel_ref = torch.topk(imp_ref, keep).indices.sort().values
+                sel_bat = torch.topk(imp_bat, keep).indices.sort().values
+                same = bool(torch.equal(sel_ref, sel_bat))
+                moved += 0 if same else 1
+                ordered = imp_ref.sort(descending=True).values
+                # The gap the decision turned on: last kept vs first dropped.
+                margin = (float(ordered[keep - 1] - ordered[keep])
+                          if keep < ordered.numel() else float("inf"))
+                scale = float(ordered[keep - 1])
+                drift = compare(imp_ref, imp_bat)
+                rows.append({
+                    "layer": index, "keep": keep, "selection_identical": same,
+                    #: Set difference, not an elementwise compare of two sorted
+                    #: index vectors -- those can disagree in many positions
+                    #: because ONE neuron was swapped, which reads as a much
+                    #: larger change than occurred.
+                    "n_neurons_swapped": len(
+                        set(sel_ref.tolist()) - set(sel_bat.tolist())),
+                    "cutoff_margin_abs": margin,
+                    "cutoff_margin_relative": margin / scale if scale else None,
+                    "importance_max_abs_drift": drift["max_abs"],
+                    "importance_rel_l2_drift": drift["rel_l2"],
+                    "drift_exceeds_margin": bool(drift["max_abs"] > margin),
+                })
+            per_bs[bs] = {
+                "n_layers": len(rows),
+                "n_layers_with_moved_selection": moved,
+                "selection_is_batch_invariant": moved == 0,
+                "total_neurons_swapped": sum(r["n_neurons_swapped"] for r in rows),
+                "min_cutoff_margin_relative": min(
+                    (r["cutoff_margin_relative"] for r in rows
+                     if r["cutoff_margin_relative"] is not None), default=None),
+                "n_layers_where_drift_exceeds_margin": sum(
+                    1 for r in rows if r["drift_exceeds_margin"]),
+                "per_layer": rows,
+            }
+        by_ratio[f"{ratio:.2f}"] = per_bs
+
+    default_bs = int(cfg["micro_batch_size"])
+    headline_bs = default_bs if default_bs in others else others[0]
+    headline = by_ratio[f"{float(cfg['ffn_keep_ratio']):.2f}"][headline_bs]
     return {
-        "keep_ratio": keep_ratio,
-        "n_layers": len(rows),
-        "n_layers_with_moved_selection": moved,
-        "selection_is_batch_invariant": moved == 0,
-        "per_layer": rows,
+        "ran": True,
+        "keep_ratios": [float(r) for r in cfg["ffn_keep_ratios"]],
+        "micro_batch_sizes_compared_against_1": others,
+        "by_keep_ratio": by_ratio,
+        #: The headline pair is DEFAULT_MICRO_BATCH_SIZE at the recipe's own
+        #: keep ratio -- the configuration a formal run would actually execute.
+        "headline_micro_batch_size": headline_bs,
+        "headline_keep_ratio": float(cfg["ffn_keep_ratio"]),
+        "n_layers": headline["n_layers"],
+        "n_layers_with_moved_selection": headline["n_layers_with_moved_selection"],
+        "selection_is_batch_invariant": headline["selection_is_batch_invariant"],
+        "selection_is_batch_invariant_at_every_ratio_and_size": all(
+            sub["selection_is_batch_invariant"]
+            for per_bs in by_ratio.values() for sub in per_bs.values()),
         "_reading": ("cutoff_margin is the importance gap the decision turned "
                      "on; a drift far below every margin cannot move a "
                      "selection, and one above some margin will move it "
@@ -1038,6 +1125,12 @@ DEFAULTS: dict = {
     "focal_layer": 17,
     "bypass_layer": 17,
     "ffn_keep_ratio": 0.5,
+    #: The four the rejected finding quoted, so its "26 of 28 at keep=0.32" has
+    #: a like-for-like counterpart rather than a nearby number.
+    "ffn_keep_ratios": [0.32, 0.50, 0.75, 0.90],
+    #: 3 because the finding quoted bs=1 vs bs=3; 4 because that is
+    #: DEFAULT_MICRO_BATCH_SIZE and therefore what a formal run would execute.
+    "micro_batch_sweep": [1, 2, 3, 4],
     "gemm_rows": 512,
     "gemm_pad": 128,
     "batch_sweep": [1, 2, 3, 4, 8],
@@ -1130,9 +1223,30 @@ def derive_conclusion(report: dict) -> dict:
     s = report["stages"]
 
     def got(stage, *path, default=None):
+        """A field from a stage, or `default` if that stage has nothing to say.
+
+        A stage that did not run, errored, or declared `ran: False` legitimately
+        has no fields, and its absence is UNKNOWN. A stage that DID run and is
+        missing the key being asked for is a typo, and it raises: this function
+        returned `None` for
+        `selection_is_batch_invariant_at_every_ratio_and_batch_size` while the
+        stage emitted `..._at_every_ratio_and_size`, and the conclusion carried
+        a silent `None` into a field advertising a real answer.
+        """
         node = s.get(stage)
-        for key in path:
-            if not isinstance(node, dict) or key not in node:
+        if not isinstance(node, dict) or "error" in node or node.get("ran") is False:
+            return default
+        for depth, key in enumerate(path):
+            if not isinstance(node, dict):
+                return default
+            if key not in node:
+                if depth == 0:
+                    raise KeyError(
+                        f"stage {stage!r} ran but has no field {key!r}; "
+                        f"it has {sorted(k for k in node if not k.startswith('_'))}")
+                #: Nested paths index DATA (a comparison name, a batch size),
+                #: not a field contract, so an absent one is a legitimate
+                #: "this run did not produce that case".
                 return default
             node = node[key]
         return node
@@ -1216,6 +1330,17 @@ def derive_conclusion(report: dict) -> dict:
         "ffn_selection_is_batch_invariant": selection_invariant,
         "ffn_layers_with_moved_selection":
             got("ffn_selection", "n_layers_with_moved_selection"),
+        #: The headline pair is DEFAULT_MICRO_BATCH_SIZE at the recipe's keep
+        #: ratio. This one is over EVERY swept ratio and size, so a reader
+        #: cannot mistake "the configuration we run" for "any configuration".
+        "ffn_selection_invariant_at_every_ratio_and_batch_size":
+            got("ffn_selection",
+                "selection_is_batch_invariant_at_every_ratio_and_size"),
+        "ffn_headline_micro_batch_size":
+            got("ffn_selection", "headline_micro_batch_size"),
+        "ffn_headline_keep_ratio": got("ffn_selection", "headline_keep_ratio"),
+        "statistics_bit_identical_at_every_batch_size":
+            got("statistics_decomposition", "every_batch_size_bit_identical"),
         "causal_kl_max_rel_diff": got("causal_kl", "max_rel_diff"),
         "causal_kl_item_ranking_identical":
             got("causal_kl", "item_ranking_identical"),
