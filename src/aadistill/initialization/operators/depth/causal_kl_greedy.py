@@ -31,6 +31,7 @@ from aadistill.initialization.statistics.contribution import (
     bypassed_blocks,
     domain_balanced_score,
     forward_kl_mean,
+    forward_kl_mean_batch,
     expected_evaluations,
     greedy_removal,
 )
@@ -173,14 +174,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
                 t0 = time.perf_counter()
-                refs = (reference.get_batch(group) if batch_size > 1
-                        else [reference.get(group.items[0])])
+                if batch_size > 1:
+                    refs = reference.reference_block(group)
+                else:
+                    refs = reference.get(group.items[0])
                 if cuda_sync:
                     cuda_sync()
                 t1 = time.perf_counter()
-                abls = (_forward_logits_batch(model, group, compute, skip)
-                        if batch_size > 1
-                        else [_forward_logits(model, group.items[0], compute, skip)])
+                if batch_size > 1:
+                    abls = _forward_logit_block(model, group, compute, skip)
+                else:
+                    abls = _forward_logits(model, group.items[0], compute, skip)
                 if cuda_sync:
                     cuda_sync()
                 t2 = time.perf_counter()
@@ -188,21 +192,32 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 timing["ablated_seconds"] += t2 - t1
                 timing["ablated_forwards"] += 1
                 timing["ablated_items"] += len(group.items)
-                #: FORWARD KL ONLY, and ONE CALL PER ORIGINAL ITEM. This
-                #: operator's objective is forward KL and it read exactly
-                #: `sums["kl"]` from a six-quantity reduction -- 17,420 times
-                #: per expansion. `forward_kl_mean` computes that one quantity
-                #: with the same float32 log-softmax, the same chunk boundaries
-                #: and the same float64 accumulation, and skips the reverse-KL
-                #: term, both cross-entropy gathers and both argmaxes.
+                #: FORWARD KL ONLY, and ONE VALUE PER ORIGINAL ITEM.
                 #:
-                #: Batching moved the FORWARD, not the reduction and not the
-                #: weighting: an item that shared a forward with three others
-                #: still contributes exactly one KL to exactly one subtype, over
-                #: its own prediction positions.
-                for item, ref, abl in zip(group.items, refs, abls):
-                    per_subtype.setdefault(item["subtype"], []).append(
-                        forward_kl_mean(ref, abl, chunk=512))
+                #: At batch_size > 1 the `[B, T_pred, V]` block goes straight
+                #: into the masked reducer: no split into B tensors, no Python
+                #: loop, no B host synchronisations. `forward_kl_mean_batch`
+                #: returns `[B]` per-item means over each item's OWN valid
+                #: positions -- never a token-weighted pool, which would hand a
+                #: 1000-position item ten times the influence of a 100-position
+                #: one and change the objective.
+                #:
+                #: Batching moved the FORWARD and the reduction's schedule. It
+                #: did not move the estimand or the weighting: an item that
+                #: shared a forward with three others still contributes exactly
+                #: one KL to exactly one subtype, and the subtype/domain
+                #: aggregation below is untouched.
+                if batch_size > 1:
+                    values = forward_kl_mean_batch(
+                        refs, abls, group.prediction_mask().to(abls.device),
+                        chunk=512)
+                    #: ONE host transfer for the whole batch.
+                    for item, value in zip(group.items, values.tolist()):
+                        per_subtype.setdefault(item["subtype"], []).append(value)
+                        timing["distortion_calls"] += 1
+                else:
+                    per_subtype.setdefault(group.items[0]["subtype"], []).append(
+                        forward_kl_mean(refs, abls, chunk=512))
                     timing["distortion_calls"] += 1
                 timing["distortion_seconds"] += time.perf_counter() - t2
                 del abls
@@ -326,6 +341,25 @@ def _forward_logits_batch(model, batch, device: str, skip=frozenset()):
         return batch.split_predictions(model(ids, attention_mask=mask).logits[:, :-1])
     with bypassed_blocks(model, skip):
         return batch.split_predictions(model(ids, attention_mask=mask).logits[:, :-1])
+
+
+@torch.no_grad()
+def _forward_logit_block(model, batch, device: str, skip=frozenset()):
+    """The same forward, left as ONE ``[B, T_pred, V]`` block.
+
+    The hot path does not split. `forward_kl_mean_batch` reduces the block
+    against its prediction mask and returns one KL per row, so splitting into B
+    tensors and calling the scalar reducer B times would add a Python loop, B
+    host synchronisations and B small kernel launches for no scientific
+    difference. `_forward_logits_batch` above still returns the split form,
+    because the reference CACHE stores per-item rows.
+    """
+    ids = batch.input_ids.to(device)
+    mask = batch.attention_mask.to(device)
+    if not skip:
+        return model(ids, attention_mask=mask).logits[:, :-1]
+    with bypassed_blocks(model, skip):
+        return model(ids, attention_mask=mask).logits[:, :-1]
 
 
 @torch.no_grad()
@@ -467,51 +501,79 @@ class _ReferenceLogits:
         return computed
 
     def get_batch(self, batch) -> list[torch.Tensor]:
-        """References for a whole micro-batch, in row order.
+        """References for a whole micro-batch, in row order, as per-item rows.
 
-        One batched forward serves every row that is not already resident. The
-        admission policy is untouched — the same items are kept, decided by the
-        same mixture order — but a row that is *not* admitted still gets its
-        reference from the forward this batch already performed, instead of a
-        second single-item forward. That strictly reduces work in `partial` and
-        `recomputed` mode and changes nothing about which tensors are cached.
+        Kept for callers that want the split form. The KL hot path uses
+        :meth:`reference_block`, which never splits.
+        """
+        block = self.reference_block(batch)
+        return batch.split_predictions(block)
+
+    def reference_block(self, batch) -> torch.Tensor:
+        """The intact parent's ``[B, T_pred, V]`` logits for THIS canonical batch.
+
+        **The forward's composition does not depend on what is cached.** Three
+        states, and only the first two differ in how much work they do:
+
+        * *fully cached* — no forward at all. That is what the cache is for, and
+          it is the one case where skipping is free of consequence: the rows are
+          reassembled into the canonical padded shape, and the padding they are
+          written around is excluded by the caller's prediction mask, so it can
+          hold anything.
+        * *fully uncached* — one intact forward over the whole batch.
+        * *partially cached* — one intact forward over the **whole batch**
+          anyway, not over a sub-batch of the missing rows.
+
+        That last case used to build a smaller `ItemBatch` of just the missing
+        rows. It produced the same per-item logits to within float tolerance,
+        but through a different batch width and therefore a different kernel
+        shape — which made the numeric path a function of how much memory the
+        host happened to have free, and put the boundary between "cached" and
+        "recomputed" *inside* a scientific measurement. A runtime cache hit must
+        never move batch membership, batch shape or position alignment. The
+        price is one redundant forward on the single boundary batch, which is
+        the right trade for a result that does not depend on runtime state.
         """
         rows = list(batch.items)
-        out: list[torch.Tensor | None] = [None] * len(rows)
-        missing = []
+        cached = [self._cache.get(item["item_id"]) for item in rows]
+        if all(c is not None for c in cached):
+            self.hits += len(rows)
+            return self._assemble(batch, cached)
+
+        block = _forward_logit_block(self.model, batch, self.device)
         for index, item in enumerate(rows):
-            hit = self._cache.get(item["item_id"])
-            if hit is not None:
+            item_id = item["item_id"]
+            if cached[index] is not None:
                 self.hits += 1
-                out[index] = hit
+                continue
+            if item_id in self.admitted:
+                #: CLONE the item's VALID PREDICTION SLICE only. A row of this
+                #: block is a view into `[B, T_max, V]`, so caching it unchanged
+                #: would pin the whole padded block — every other item's logits
+                #: and all the padding — for the lifetime of the search, while
+                #: `_item_bytes` went on sizing this cache at
+                #: `(T_i - 1) * V * itemsize`. That is the budget whose being
+                #: wrong once already cost a 33.8 GiB overrun.
+                length = batch.lengths[index]
+                self._cache[item_id] = block[index, :length - 1].clone()
+                self.fills += 1
             else:
-                missing.append(index)
-        if missing:
-            #: Only the rows that are actually missing, so a fully cached batch
-            #: performs no forward at all — the property the whole cache exists
-            #: for.
-            sub = (batch if len(missing) == len(rows)
-                   else build_batch([rows[i] for i in missing],
-                                    pad_id=batch.pad_id, device=self.device))
-            computed = _forward_logits_batch(self.model, sub, self.device)
-            for slot, logits in zip(missing, computed):
-                item_id = rows[slot]["item_id"]
-                out[slot] = logits
-                if item_id in self.admitted:
-                    #: CLONED, and this is a memory-safety requirement rather
-                    #: than tidiness. `split_predictions` returns VIEWS into the
-                    #: batch's `[B, T_max, V]` logits, so caching one would keep
-                    #: that whole block alive — padding included — for the
-                    #: lifetime of the search. `_item_bytes` sizes this cache at
-                    #: `(T_i - 1) * V * itemsize` per item, so a view would make
-                    #: the admission budget describe a fraction of what is
-                    #: actually resident, on the ONE path whose budget already
-                    #: had to be repaired after a 33.8 GiB overrun.
-                    self._cache[item_id] = logits.clone()
-                    self.fills += 1
-                else:
-                    self.recomputes += 1
-        return [t for t in out if t is not None]
+                self.recomputes += 1
+        return block
+
+    def _assemble(self, batch, rows: list[torch.Tensor]) -> torch.Tensor:
+        """Cached per-item rows back into the canonical padded block.
+
+        Built at the batch's own width so the shape a fully cached batch hands
+        the reducer is the shape a forward would have produced. Padding is left
+        at zero and is never read: the caller masks it out.
+        """
+        width = batch.input_ids.shape[1] - 1
+        block = torch.zeros(len(rows), width, rows[0].shape[-1],
+                            dtype=rows[0].dtype, device=rows[0].device)
+        for index, row in enumerate(rows):
+            block[index, :row.shape[0]] = row
+        return block
 
     def decision(self) -> dict[str, Any]:
         n_items = len(self._item_bytes)

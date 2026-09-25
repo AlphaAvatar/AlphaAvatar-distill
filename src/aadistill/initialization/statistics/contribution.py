@@ -228,6 +228,92 @@ def forward_kl_mean(
     return (float(total.item()) if resident else float(total)) / positions
 
 
+@torch.no_grad()
+def forward_kl_mean_batch(
+    ref_logits: torch.Tensor,
+    abl_logits: torch.Tensor,
+    prediction_mask: torch.Tensor,
+    *,
+    chunk: int = 512,
+) -> torch.Tensor:
+    """Per-item mean forward KL over a padded batch. One scalar per ROW.
+
+    ``ref_logits`` / ``abl_logits`` are ``[B, T_pred, V]`` and
+    ``prediction_mask`` is ``[B, T_pred]`` bool over the positions each item
+    really predicts. Returns ``[B]``, where ``out[i]`` is the mean forward KL of
+    item ``i`` over **item i's own** valid positions — the same quantity
+    :func:`forward_kl_mean` returns for that item alone.
+
+    **This is a per-item mean, not a pooled one, and the difference is the
+    objective.** Reducing as ``(kl * mask).sum() / mask.sum()`` over the whole
+    batch would be a token-weighted batch mean: an item with 1000 positions at
+    KL 0.1 beside one with 100 at 0.5 would give ~0.136 instead of
+    ``[0.1, 0.5]``, silently handing the long item ten times the influence. The
+    callers here weight items by *subtype and domain*, deliberately and equally,
+    so the per-row denominator is the whole point of the mask.
+
+    **The numerical contract is :func:`forward_kl_mean`'s, unchanged:** float32
+    ``log_softmax`` on upcast inputs, chunks along the SEQUENCE-POSITION axis at
+    the same boundaries (0:512, 512:1024, …), a float32 per-chunk reduction,
+    float64 accumulation, and accumulators kept where the logits are. Chunking
+    is not a formality — it was measured to matter at ~9e-8 relative — and it
+    walks the original position axis rather than a flattened list of valid
+    positions, so every item keeps the boundaries it would have had alone
+    regardless of how long its neighbours are.
+
+    **And it bounds memory.** A single ``[B, T, V]`` softmax at a ~152k
+    vocabulary is a large transient; chunking to ``[B, chunk, V]`` keeps the
+    peak proportional to ``chunk`` rather than to the longest item in the batch.
+    Batching exists to use the accelerator better, not to trade utilisation for
+    an uncontrolled memory spike.
+
+    The result stays on the logits' device. A caller that needs host floats
+    converts once for the whole batch — one synchronisation instead of B.
+    """
+    if ref_logits.shape != abl_logits.shape:
+        raise ValueError(f"logit shape mismatch: {tuple(ref_logits.shape)} vs "
+                         f"{tuple(abl_logits.shape)}")
+    if ref_logits.dim() != 3:
+        raise ValueError(
+            f"expected [B, T_pred, V] logits, got {tuple(ref_logits.shape)}; "
+            "the scalar oracle is `forward_kl_mean`")
+    rows, positions = int(ref_logits.shape[0]), int(ref_logits.shape[1])
+    if prediction_mask.shape != (rows, positions):
+        raise ValueError(
+            f"prediction mask {tuple(prediction_mask.shape)} does not describe "
+            f"logits {tuple(ref_logits.shape)[:2]}")
+    if positions == 0:
+        raise ValueError("no positions to reduce")
+    mask = prediction_mask.to(ref_logits.device).bool()
+    counts = mask.sum(dim=1)
+    empty = (counts == 0).nonzero().flatten().tolist()
+    if empty:
+        raise ValueError(
+            f"rows {empty} have no valid prediction positions; an item that "
+            "predicts nothing has no mean KL and must not reach this reducer")
+
+    #: Same two accumulation paths the scalar oracle has, and for the same
+    #: reason: the device branch is one no CPU-only test would otherwise reach,
+    #: so `_reduce_on_device` stays a named seam a test can override to drive it
+    #: with host tensors.
+    resident = _reduce_on_device(ref_logits.device)
+    #: float64 per ROW. The accumulator is [B] rather than a scalar precisely so
+    #: that no two items' KL ever meet before their own means are formed.
+    total = torch.zeros(rows, dtype=torch.float64,
+                        device=ref_logits.device if resident else "cpu")
+    for a in range(0, positions, chunk):
+        b = min(a + chunk, positions)
+        p_log = F.log_softmax(ref_logits[:, a:b].float(), dim=-1)
+        q_log = F.log_softmax(abl_logits[:, a:b].float(), dim=-1)
+        per_pos = (p_log.exp() * (p_log - q_log)).sum(-1)          # [B, chunk]
+        #: Masked BEFORE the row sum, so a padded position contributes exactly
+        #: zero rather than a garbage KL scaled by a garbage denominator.
+        per_pos = per_pos * mask[:, a:b].to(per_pos.dtype)
+        chunk_sum = per_pos.sum(dim=1).double()                    # [B]
+        total += chunk_sum if resident else chunk_sum.cpu()
+    return total / counts.to(total.device).double()
+
+
 def _reduce_on_device(device: torch.device) -> bool:
     """Whether to keep the accumulators where the logits are.
 

@@ -250,3 +250,164 @@ def test_timing_is_recorded_and_stays_out_of_the_metrics(
     assert "timing" not in outcome.trace
     for key in outcome.local_metrics.values:
         assert "second" not in key and "timing" not in key
+
+
+# --- the canonical batch: cache state must not move the scientific forward ---
+
+
+def _cache_for(teacher, items, share, monkeypatch):
+    """A cache forced into `cached` / `partial` / `recomputed` by its budget."""
+    probe = depth_module._ReferenceLogits(teacher, items, "cpu")
+    frac = depth_module._ReferenceLogits.BUDGET_FRACTION
+    monkeypatch.setattr(depth_module, "_available_memory_bytes",
+                        lambda device: (int(probe.estimate_bytes * share / frac),
+                                        "test"))
+    return depth_module._ReferenceLogits(teacher, items, "cpu")
+
+
+def _ragged_items(n=4, vocab=128, seed=77):
+    """Deliberately ragged, so a sub-batch of missing rows would pad differently."""
+    torch.manual_seed(seed)
+    lengths = (31, 12, 24, 9)[:n]
+    return [{"item_id": f"i{k}",
+             "input_ids": torch.randint(1, vocab, (1, L)),
+             "domain": "general" if k % 2 else "math",
+             "subtype": "text" if k % 2 else "arith"}
+            for k, L in enumerate(lengths)]
+
+
+@pytest.mark.parametrize("share,expected_mode",
+                         [(10.0, "cached"), (0.5, "partial"), (0.0, "recomputed")])
+def test_the_reference_block_has_the_canonical_shape_in_every_cache_mode(
+        teacher, monkeypatch, share, expected_mode):
+    """The shape the reducer sees must not depend on runtime memory state.
+
+    A partially cached batch used to build a SMALLER `ItemBatch` of only the
+    missing rows. The per-item logits agreed to within float tolerance, but the
+    batch width — and therefore the kernel shape and the reduction schedule —
+    became a function of how much memory the host happened to have free. That
+    put the boundary between "cached" and "recomputed" inside a scientific
+    measurement.
+    """
+    from aadistill.initialization.calibration.batching import build_batch, resolve_pad_id
+
+    items = _ragged_items()
+    batch = build_batch(items, pad_id=resolve_pad_id(teacher))
+    cache = _cache_for(teacher, items, share, monkeypatch)
+    assert cache.mode == expected_mode, cache.mode
+
+    block = cache.reference_block(batch)
+    width = batch.input_ids.shape[1] - 1
+    assert block.shape[0] == len(items)
+    assert block.shape[1] == width, (
+        f"{expected_mode}: the reference block is {block.shape[1]} wide but the "
+        f"canonical batch is {width}; cache state changed the forward's shape")
+
+    #: Warm it and ask again — the shape must still be canonical, which is the
+    #: case a partial cache would previously have got wrong.
+    again = cache.reference_block(batch)
+    assert again.shape == block.shape
+
+
+def test_every_cache_mode_reduces_to_the_same_per_item_kl(teacher, monkeypatch):
+    """Same numbers in all three modes, compared against the scalar oracle.
+
+    This is what the canonical-batch rule buys: the KL an item receives does not
+    depend on whether its neighbours happened to be resident.
+    """
+    from aadistill.initialization.calibration.batching import build_batch, resolve_pad_id
+    from aadistill.initialization.statistics.contribution import (
+        forward_kl_mean, forward_kl_mean_batch)
+
+    items = _ragged_items()
+    batch = build_batch(items, pad_id=resolve_pad_id(teacher))
+    #: `bypassed_blocks` refuses a KV cache, because a cache is indexed by
+    #: layer_idx and a filtered layer list no longer matches it. The operator
+    #: turns this off in `apply`; a test that reaches the bypass directly owes
+    #: the same precondition.
+    teacher.config.use_cache = False
+    skip = frozenset({1})
+    ablated = depth_module._forward_logit_block(teacher, batch, "cpu", skip)
+    mask = batch.prediction_mask()
+
+    per_mode = {}
+    for share, mode in ((10.0, "cached"), (0.5, "partial"), (0.0, "recomputed")):
+        cache = _cache_for(teacher, items, share, monkeypatch)
+        assert cache.mode == mode
+        block = cache.reference_block(batch)
+        per_mode[mode] = forward_kl_mean_batch(block, ablated, mask).tolist()
+
+    #: All three agree with each other...
+    for mode, values in per_mode.items():
+        for other, others in per_mode.items():
+            for a, b in zip(values, others):
+                assert abs(a - b) < 1e-9, f"{mode} vs {other}: {a} != {b}"
+    #: ...and with the scalar oracle, per item.
+    reference_rows = depth_module._forward_logits_batch(teacher, batch, "cpu")
+    ablated_rows = batch.split_predictions(ablated)
+    for index, (r, a) in enumerate(zip(reference_rows, ablated_rows)):
+        want = forward_kl_mean(r, a)
+        got = per_mode["cached"][index]
+        assert abs(got - want) < 1e-6, f"item {index}: {got} vs oracle {want}"
+
+
+def test_a_partial_boundary_inside_a_micro_batch_still_forwards_the_whole_batch(
+        teacher, monkeypatch):
+    """The specific case the rule is about: some rows admitted, some not."""
+    from aadistill.initialization.calibration.batching import build_batch, resolve_pad_id
+
+    items = _ragged_items()
+    batch = build_batch(items, pad_id=resolve_pad_id(teacher))
+    cache = _cache_for(teacher, items, 0.5, monkeypatch)
+    assert 0 < len(cache.admitted) < len(items), (
+        "fixture does not straddle the admission boundary")
+
+    seen = []
+    real = depth_module._forward_logit_block
+
+    def watching(model, b, device, skip=frozenset()):
+        seen.append(b.size)
+        return real(model, b, device, skip)
+
+    monkeypatch.setattr(depth_module, "_forward_logit_block", watching)
+    cache.reference_block(batch)      # first pass: nothing resident
+    cache.reference_block(batch)      # second: the admitted rows now are
+    assert seen == [len(items), len(items)], (
+        f"reference forwards ran at batch sizes {seen}; a partially cached "
+        "batch must still forward the WHOLE canonical batch, not a sub-batch "
+        "of the missing rows")
+
+
+def test_a_fully_cached_batch_performs_no_forward_at_all(teacher, monkeypatch):
+    from aadistill.initialization.calibration.batching import build_batch, resolve_pad_id
+
+    items = _ragged_items()
+    batch = build_batch(items, pad_id=resolve_pad_id(teacher))
+    cache = _cache_for(teacher, items, 10.0, monkeypatch)
+    cache.reference_block(batch)
+
+    calls = []
+    real = depth_module._forward_logit_block
+    monkeypatch.setattr(depth_module, "_forward_logit_block",
+                        lambda *a, **k: (calls.append(1), real(*a, **k))[1])
+    cache.reference_block(batch)
+    assert not calls, "a fully cached batch ran a forward anyway"
+
+
+def test_a_cached_row_owns_its_storage_and_is_only_its_valid_slice(
+        teacher, monkeypatch):
+    """Budget correctness: `(T_i - 1) * V`, not the padded batch block."""
+    from aadistill.initialization.calibration.batching import build_batch, resolve_pad_id
+
+    items = _ragged_items()
+    batch = build_batch(items, pad_id=resolve_pad_id(teacher))
+    cache = _cache_for(teacher, items, 10.0, monkeypatch)
+    cache.reference_block(batch)
+    for index, item in enumerate(items):
+        row = cache._cache.get(item["item_id"])
+        assert row is not None
+        assert row._base is None, (
+            f"{item['item_id']} is cached as a VIEW, pinning the padded block")
+        assert row.shape[0] == int(item["input_ids"].shape[1]) - 1, (
+            f"{item['item_id']} cached {row.shape[0]} positions; its valid "
+            "prediction slice is shorter")

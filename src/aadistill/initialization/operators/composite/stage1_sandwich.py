@@ -129,8 +129,15 @@ class CompositeStage1SandwichV0(OperatorImplementation):
         # do is multiply a host projection by a device weight.
         compute = model_device(parent)
         state = cfg.get("activation_state")
+        #: Whether this invocation COLLECTED statistics or was handed them.
+        #: Recorded because the two are different executions: a supplied state
+        #: was measured elsewhere, possibly on another parent, and no micro-batch
+        #: size of this invocation had anything to do with it. Reporting a batch
+        #: size for a pass that never ran would describe work this operator did
+        #: not do.
+        stats_supplied = state is not None
+        batch_size = ctx.execution.micro_batch_size
         if state is None:
-            batch_size = ctx.execution.micro_batch_size
             state = ctx.cached_stats(lambda: collect_activation_stats(
                 adapter, parent, ctx.calibration_items,
                 compute, batch_size=batch_size))
@@ -165,7 +172,11 @@ class CompositeStage1SandwichV0(OperatorImplementation):
                 impl_id=self.impl_id, objective=self.objective,
                 reference="parent_state", values=values,
                 detail={"depth_map_source": diag["depth_map_source"]}),
-            trace={"micro_batch_size": ctx.execution.micro_batch_size,
+            trace={"activation_stats": ("supplied_by_caller" if stats_supplied
+                                       else "collected_here"),
+                   #: `None` when nothing was collected, so a reader cannot take
+                   #: a batch size as evidence that a statistics pass ran.
+                   "micro_batch_size": None if stats_supplied else batch_size,
                    "kept_layers": diag["kept_teacher_layers"],
                    "removed_layers": diag["removed_teacher_layers"],
                    "source": diag["depth_map_source"]},

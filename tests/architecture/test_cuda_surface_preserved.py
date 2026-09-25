@@ -648,6 +648,52 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "NOTE: this file is on the HISTORICAL CUDA surface; that validation "
             "is not repointed at this change and a new one is owed.",
      }),
+    ("6a349e03630d6d01f4a4010cc0e9086a11fa4a25",
+     "one shared masked batched per-item KL reduction",
+     {
+        "src/aadistill/initialization/statistics/contribution.py":
+            "NEW `forward_kl_mean_batch(ref, abl, prediction_mask, chunk=512) "
+            "-> [B]`: the shared masked batched per-item forward-KL reduction "
+            "every initialization causal operator is to use. ONE mean per row "
+            "over that row's OWN valid positions -- deliberately NOT "
+            "`(kl*mask).sum()/mask.sum()`, which is a token-weighted batch mean "
+            "and would hand a 1000-position item ten times the influence of a "
+            "100-position one. `forward_kl_mean`'s numerical contract carries "
+            "over unchanged (float32 log_softmax, chunks along the SEQUENCE-"
+            "POSITION axis at the same boundaries, float32 per-chunk reduction, "
+            "float64 accumulation, accumulators where the logits are); the "
+            "float64 accumulator is [B] so no two items meet before their means "
+            "are formed. `forward_kl_mean` and `distortion` are UNCHANGED and "
+            "remain the scalar oracles.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "the batch>1 hot path keeps `[B, T_pred, V]` through to the reducer "
+            "instead of splitting into B tensors and looping. "
+            "`_forward_logit_block` returns the block; "
+            "`_ReferenceLogits.reference_block` makes the reference forward's "
+            "COMPOSITION independent of cache state -- a partially cached batch "
+            "now forwards the WHOLE canonical batch rather than a sub-batch of "
+            "the missing rows, so batch width and position alignment no longer "
+            "depend on how much memory was free. A cached row is cloned as its "
+            "valid prediction slice only, so the cache budget still describes "
+            "what is resident. Estimand, subtype mean and domain balance are "
+            "untouched; batch_size=1 still takes the per-item reference path.",
+        "src/aadistill/initialization/statistics/collect.py":
+            "`ActivationStatsCollector` no longer walks `model.model.layers` or "
+            "`layer.mlp.down_proj`. It takes the ordered FFN-output projections "
+            "from its caller, as the attention collector already did, and the "
+            "adapter resolves them BY ROLE. Same statistics, same numbers; the "
+            "family knowledge moves to where a new architecture would add it.",
+        "src/aadistill/initialization/adapters/qwen3.py":
+            "`stats_collector` resolves `stream_out_projections(block)['ffn_out']` "
+            "per block and hands the list to the collector. NOTE: on the "
+            "HISTORICAL CUDA surface; that validation is not repointed and the "
+            "new one is owed.",
+        "src/aadistill/initialization/operators/composite/stage1_sandwich.py":
+            "the trace distinguishes statistics SUPPLIED by the caller from "
+            "statistics this invocation COLLECTED, and reports "
+            "`micro_batch_size: None` in the supplied case -- a batch size for a "
+            "pass that never ran would describe work the operator did not do.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.
@@ -694,10 +740,17 @@ HISTORICAL_SURFACE_SUCCESSORS = {
 }
 
 #: The surface the NEXT real-CUDA validation must cover: every file whose
-#: semantics materially determine a batched calibration forward. Derived from
-#: the execution path, not inherited -- `batching.py` and the topology-local
-#: statistics module are here because the batched result depends on them, and
-#: `weight_proxy` / `positional` are absent because they run no forward.
+#: semantics materially determine a batched calibration forward.
+#:
+#: **HAND-MAINTAINED, and deliberately not called a derived closure.** Nothing
+#: computes it: it was written by reading the batched execution path, and it
+#: stays correct only while someone keeps reading. The repository DOES have a
+#: derived closure -- `configs/experiments/phase_c1/executable_closure.json`,
+#: produced by walking import edges -- and conflating the two would let a reader
+#: assume a machine is checking this list when none is. What the tests below
+#: check is narrower and honest: that every path on it exists, that the two
+#: no-forward operators are absent, and that each forwarding operator is
+#: present. That is a consistency check on a human list, not a derivation.
 CURRENT_CUDA_SURFACE = (
     "src/aadistill/initialization/calibration/batching.py",
     "src/aadistill/initialization/execution.py",
@@ -997,6 +1050,7 @@ def test_the_prose_sweep_actually_covered_the_core():
 #: current round and to appear on the current validation surface.
 HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION = (
     "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
 )
 
 
@@ -1015,9 +1069,12 @@ def test_no_declared_change_touches_the_validated_surface():
         "declared core changes touch the historical CUDA surface without being "
         f"listed as pending revalidation: {unexplained}")
     for path in HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION:
-        assert path in declared_from(len(ROUNDS) - 1), (
-            f"{path} claims a revalidation exception but the current round does "
-            "not declare it")
+        #: Declared by SOME round on this branch, not necessarily the latest:
+        #: `fixed_path.py` was changed in the package/batching round and not
+        #: touched again since, so demanding the newest round re-declare an
+        #: unchanged file would force a false declaration.
+        assert path in declared_from(0), (
+            f"{path} claims a revalidation exception but no round declares it")
         assert path in CURRENT_CUDA_SURFACE, (
             f"{path} changed under a historical CUDA pin and is not on the "
             "current validation surface, so nothing would ever re-validate it")

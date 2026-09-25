@@ -606,3 +606,37 @@ def test_every_batcher_refusal_raises_batchingerror_not_nameerror():
     for index, case in enumerate(cases):
         with pytest.raises(BatchingError):
             case()
+
+
+def test_composite_records_whether_it_collected_statistics_or_was_handed_them(
+        model, items):
+    """A batch size is evidence that a statistics pass RAN.
+
+    `composite.stage1_sandwich_v0` accepts a pre-computed `activation_state`.
+    When it does, this invocation collected nothing, so reporting its configured
+    micro-batch size would describe work it did not do — and a reader comparing
+    traces would see two runs that look identically batched when only one of
+    them measured anything.
+    """
+    from aadistill.initialization.operators.composite.stage1_sandwich import (
+        COMPOSITE_STAGE1_SANDWICH_V0 as COMPOSITE)
+    from aadistill.initialization.operators._common import collect_activation_stats
+
+    target = ArchSpec.of("qwen3", {**TEACHER_GEOMETRY, "hidden_size": 16,
+                                   "num_hidden_layers": 4,
+                                   "intermediate_size": 24,
+                                   "num_attention_heads": 2})
+
+    collected = COMPOSITE.apply(context(model, items, 4, target))
+    assert collected.trace["activation_stats"] == "collected_here"
+    assert collected.trace["micro_batch_size"] == 4
+
+    state = collect_activation_stats(QWEN3_ADAPTER, model, items, "cpu",
+                                     batch_size=1)
+    ctx = context(model, items, 4, target)
+    ctx.config = {**ctx.config, "activation_state": state}
+    supplied = COMPOSITE.apply(ctx)
+    assert supplied.trace["activation_stats"] == "supplied_by_caller"
+    assert supplied.trace["micro_batch_size"] is None, (
+        "a supplied state was reported with this invocation's batch size, which "
+        "claims a statistics pass that never ran")

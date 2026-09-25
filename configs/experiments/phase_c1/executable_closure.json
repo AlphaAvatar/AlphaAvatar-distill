@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 105,
- "digest": "c1436bf980b4229df5780203ab316672c3a39264a39d61806a123e231684130a",
+ "digest": "f7b60b71accf7b948081b279cb39b4b8057df87e8a14b75f0d367c5ba94dff75",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -334,8 +334,8 @@
   },
   {
    "path": "src/aadistill/initialization/adapters/qwen3.py",
-   "sha256": "2e247cd8f59f2003aa4fec5fda5a90ae825373d6f2a845b8c711a11dd2e8fd4c",
-   "bytes": 10527
+   "sha256": "308e2c84384ea584ac426b77a201f75798680056705e7f79a57ba6a994a929d9",
+   "bytes": 10928
   },
   {
    "path": "src/aadistill/initialization/calibration/batching.py",
@@ -404,8 +404,8 @@
   },
   {
    "path": "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
-   "sha256": "c0128d467ec0a0368cc61fe00bc919f9208f5bce4d1a5d10c7ffb15da0ad0531",
-   "bytes": 8981
+   "sha256": "1631c5735f942196dcf243fc6bfaca4537c2da7cc26aa27b739a647c19824bd5",
+   "bytes": 9743
   },
   {
    "path": "src/aadistill/initialization/operators/depth/_common.py",
@@ -414,8 +414,8 @@
   },
   {
    "path": "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
-   "sha256": "19b05e8f35c6bb0c2884fc22fa2dca7390bc44161b770806f6b927bb798538a7",
-   "bytes": 34925
+   "sha256": "2476059adbfbcf7443b0b55212a6164ab68a844980d3d0914a733745d594fa9b",
+   "bytes": 37790
   },
   {
    "path": "src/aadistill/initialization/operators/depth/positional.py",
@@ -479,13 +479,13 @@
   },
   {
    "path": "src/aadistill/initialization/statistics/collect.py",
-   "sha256": "63ee8f29200660e2ab8fbbcec17b22b79158268bc9d779443314d2a6c1245b32",
-   "bytes": 11180
+   "sha256": "7cf6141a6967889b065f7c8ea198d34ccb7568fe503b119575facce21d5c57eb",
+   "bytes": 12929
   },
   {
    "path": "src/aadistill/initialization/statistics/contribution.py",
-   "sha256": "4828c7e9e3628a1859f07922cc45751819332a350aa2b0b66f372ca1380864d1",
-   "bytes": 21202
+   "sha256": "1c346a21b1d4a3ea9066d7e2d6563128d312693d3676a03f825aa20cac2d3993",
+   "bytes": 25793
   },
   {
    "path": "src/aadistill/initialization/statistics/spec.py",

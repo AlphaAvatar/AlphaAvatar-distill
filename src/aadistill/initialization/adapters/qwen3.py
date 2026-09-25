@@ -224,7 +224,14 @@ class Qwen3Adapter(ArchitectureAdapter):
         return spec["num_attention_heads"], spec["num_key_value_heads"], spec["head_dim"]
 
     def stats_collector(self, model: Any) -> ActivationStatsCollector:
-        return ActivationStatsCollector(model)
+        #: The adapter resolves the modules BY ROLE and hands them over; the
+        #: collector holds no module-tree knowledge of its own. Same contract as
+        #: the attention statistics, which have taken their projections from the
+        #: caller since they were written.
+        return ActivationStatsCollector(
+            model,
+            [self.stream_out_projections(block)["ffn_out"]
+             for block in self.blocks(model)])
 
 
 #: The instance, NOT a registration. Registering at import made the registry's

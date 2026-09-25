@@ -29,20 +29,37 @@ from __future__ import annotations
 import torch
 
 
-def _decoder_layers(model):
-    layers = getattr(getattr(model, "model", None), "layers", None)
-    if layers is None:
-        raise ValueError(f"Cannot locate decoder layers on {type(model).__name__}")
-    return layers
-
-
 class ActivationStatsCollector:
-    def __init__(self, model):
+    """Streaming residual/FFN sufficient statistics.
+
+    **Family knowledge belongs to the adapter, not here.** This used to walk
+    `model.model.layers` and reach into `layer.mlp.down_proj`, which is the one
+    module tree Qwen3 happens to have — so a family with a different FFN
+    attribute name, or an MoE block with several down projections, could not use
+    this collector without editing it. It now takes the ordered FFN-output
+    projections from its caller, exactly as
+    `AttentionHeadStatsCollector` takes the attention-output ones, and
+    `ArchitectureAdapter.stats_collector` resolves them by ROLE
+    (`stream_out_projections(block)["ffn_out"]`). Adding an architecture is then
+    writing an adapter rather than editing statistics code.
+
+    `ffn_out_projections` is optional only so that existing callers constructing
+    `ActivationStatsCollector(model)` keep working; when it is omitted the
+    adapter for the model's family is resolved and asked, which is the same
+    answer by the same route.
+    """
+
+    def __init__(self, model, ffn_out_projections=None):
         self.model = model
         # Read from the weights, never from a config field or a caller's intent.
         self.device = next(model.parameters()).device
-        layers = _decoder_layers(model)
-        self.num_layers = len(layers)
+        modules = (list(ffn_out_projections) if ffn_out_projections is not None
+                   else _ffn_out_projections_via_adapter(model))
+        if not modules:
+            raise ValueError(
+                "no FFN-output projections were supplied and the adapter "
+                "resolved none; this collector does not discover them")
+        self.num_layers = len(modules)
         self.hidden_size = model.config.hidden_size
         self.intermediate_size = model.config.intermediate_size
         self.vocab_size = model.config.vocab_size
@@ -81,12 +98,14 @@ class ActivationStatsCollector:
         self._valid_mask = None
 
         self._hooks = []
-        for idx, layer in enumerate(layers):
-            down_proj = getattr(getattr(layer, "mlp", None), "down_proj", None)
-            if down_proj is None:
-                raise ValueError(f"Layer {idx} has no mlp.down_proj; unsupported architecture")
+        for idx, projection in enumerate(modules):
+            if not hasattr(projection, "register_forward_pre_hook"):
+                raise ValueError(
+                    f"ffn_out_projections[{idx}] is {type(projection).__name__}, "
+                    "which cannot be hooked; expected a module with "
+                    "register_forward_pre_hook")
             self._hooks.append(
-                down_proj.register_forward_pre_hook(self._make_ffn_hook(idx))
+                projection.register_forward_pre_hook(self._make_ffn_hook(idx))
             )
 
     def _make_ffn_hook(self, idx: int):
@@ -222,6 +241,19 @@ class ActivationStatsCollector:
             "tokens_processed": self.res_count,
             "tensors": {k: [list(v.shape), str(v.dtype)] for k, v in state.items()},
         }
+
+
+def _ffn_out_projections_via_adapter(model):
+    """The FFN-output projection of every block, in block order, BY ROLE.
+
+    Imported inside the function because `specs.arch` imports nothing from this
+    module and the reverse edge would be a cycle at import time.
+    """
+    from aadistill.initialization.specs.arch import adapter_for_config
+
+    adapter = adapter_for_config(model.config)
+    return [adapter.stream_out_projections(block)["ffn_out"]
+            for block in adapter.blocks(model)]
 
 
 def residual_covariance(state: dict[str, torch.Tensor], point: int) -> tuple[torch.Tensor, torch.Tensor]:

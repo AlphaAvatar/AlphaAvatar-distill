@@ -97,14 +97,15 @@ def digest_pinned_replay_is_buildable(repo_root: Path | str = REPO) -> bool:
     """
     import sys
     sys.path.insert(0, str(Path(repo_root) / "scripts"))
-    try:
-        from experiments.phase_c2 import replay_specs as R
-    except Exception:
-        return False
+    #: Import errors are NOT swallowed. A broad `except Exception: return False`
+    #: here would report "the replay is not buildable" for a syntax error, a
+    #: missing dependency or a typo in the import path -- silently skipping the
+    #: suite that would have caught it. Only the ONE outcome this predicate is
+    #: about is caught: the guard deciding the tree has moved.
+    from experiments.phase_c2 import replay_specs as R
+
     try:
         R.assert_operators_unmoved(Path(repo_root))
     except R.ReplaySourceError:
-        return False
-    except Exception:
         return False
     return True

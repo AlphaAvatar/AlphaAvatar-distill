@@ -224,21 +224,25 @@ def test_a_cached_reference_is_computed_once_per_item(
     """
     calls: list[str] = []
     real_single = depth_module._forward_logits
-    real_batch = depth_module._forward_logits_batch
+    real_block = depth_module._forward_logit_block
 
     def counting_single(model, item, device, skip=frozenset()):
         if not skip:
             calls.append(item["item_id"])
         return real_single(model, item, device, skip)
 
-    def counting_batch(model, batch, device, skip=frozenset()):
+    def counting_block(model, batch, device, skip=frozenset()):
+        #: Every ROW of the batch, because the canonical-batch rule means a
+        #: reference forward covers the whole batch even when only some of its
+        #: rows were missing. Counting the call once would hide exactly the
+        #: redundancy this test is measuring.
         if not skip:
             calls.extend(i["item_id"] for i in batch.items)
-        return real_batch(model, batch, device, skip)
+        return real_block(model, batch, device, skip)
 
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setattr(depth_module, "_forward_logits", counting_single)
-    monkeypatch.setattr(depth_module, "_forward_logits_batch", counting_batch)
+    monkeypatch.setattr(depth_module, "_forward_logit_block", counting_block)
     try:
         apply_depth(teacher, teacher_spec, target_spec, calibration_items,
                     profile, cached=True, batch_size=batch_size)
