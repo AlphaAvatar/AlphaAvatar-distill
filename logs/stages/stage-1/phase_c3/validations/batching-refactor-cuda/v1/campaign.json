@@ -6,6 +6,23 @@
  "scope": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/scope.json",
  "all_in_ceiling_usd": 0.25,
  "teardown_reserve_usd": 0.05,
- "subruns": [],
- "settled_usd": 0.0
+ "subruns": [
+  {
+   "subrun_id": "brc_20260926_a1",
+   "pod_id": "vx55ur6camdmgl",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 1.117,
+   "cost_usd": 0.0205,
+   "cost_basis": "elapsed x confirmed secure rate + container disk",
+   "verdict": "FAIL",
+   "failure_class": "environment",
+   "failure": "the image's python is PEP 668 externally-managed, so `pip install transformers` refused rather than installing; numpy also absent",
+   "repair": "pip --break-system-packages --no-cache-dir, and install numpy too",
+   "teardown_confirmed": true,
+   "executed_source_sha": "ebb157273190592e5540790919f5d6d5d40e2320",
+   "reached": "repo clone OK, torch 2.9.1+cu128 OK, CUDA True, L40S detected"
+  }
+ ],
+ "settled_usd": 0.0205
 }
