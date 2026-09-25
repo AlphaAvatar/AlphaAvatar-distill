@@ -222,12 +222,29 @@ for _ in $(seq 1 30); do $SSH true 2>/dev/null && break; sleep 5; done
 # The remote payload is a SEPARATE file, rendered and shipped rather than
 # embedded in an unquoted heredoc. Attempt a2 cost $0.0214 because backticks
 # inside an unquoted heredoc were executed by the LOCAL shell.
+#
+# Rendered from `git show ${COMMIT}:`, NOT from the working tree. The pod checks
+# out ${COMMIT}, so shipping the working copy would let an uncommitted edit run
+# against committed source and leave a record naming a commit that never
+# produced it. Reading from the object store makes the two the same by
+# construction rather than by my remembering the tree was clean.
 REMOTE_SH="${OUT}/remote.sh"
+REMOTE_SRC="scripts/pod/batch_invariance_diagnostic_remote.sh"
+if ! git -C "$REPO_DIR" show "${COMMIT}:${REMOTE_SRC}" > "${REMOTE_SH}.in" 2>/dev/null; then
+  say "commit ${COMMIT} does not contain ${REMOTE_SRC}; nothing to ship"
+  exit 4
+fi
 sed -e "s|@BRANCH@|${BRANCH}|g" \
     -e "s|@COMMIT@|${COMMIT}|g" \
     -e "s|@RUN_ID@|${RUN_ID}|g" \
-    "${REPO_DIR}/scripts/pod/batch_invariance_diagnostic_remote.sh" > "$REMOTE_SH"
-say "shipping remote payload ($(wc -l < "$REMOTE_SH") lines)"
+    "${REMOTE_SH}.in" > "$REMOTE_SH"
+rm -f "${REMOTE_SH}.in"
+if grep -q '@[A-Z_]\{2,\}@' "$REMOTE_SH"; then
+  say "unsubstituted placeholder in the rendered payload:"
+  grep -n '@[A-Z_]\{2,\}@' "$REMOTE_SH" | tee -a "$LOG"
+  exit 4
+fi
+say "shipping remote payload from ${COMMIT} ($(wc -l < "$REMOTE_SH") lines)"
 
 say "setup + diagnostic (bounded at ${MAX_SECONDS}s)"
 timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
