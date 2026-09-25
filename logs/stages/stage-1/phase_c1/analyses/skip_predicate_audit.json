@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 233,
+ "modules_scanned": 234,
  "test_ignores": [],
  "n_predicates": 125,
  "by_signal": {
@@ -1100,7 +1100,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 504,
+   "line": 526,
    "kind": "pytest.skip",
    "function": "test_every_cited_path_including_untracked_really_exists",
    "condition": "not (REPO / \"artifacts/stage0/qwen3_4b_thinking_v1\").is_dir()",
@@ -1116,7 +1116,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 779,
+   "line": 801,
    "kind": "pytest.skip",
    "function": "test_a_committed_record_still_names_its_own_raw_output",
    "condition": "not (REPO / named).is_file()",
@@ -1132,7 +1132,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 986,
+   "line": 1054,
    "kind": "pytest.skip",
    "function": "test_state_md_agrees_with_the_record_it_links_to",
    "condition": "named and not (REPO / named).is_file()",
@@ -1148,7 +1148,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1158,
+   "line": 1226,
    "kind": "pytest.skip",
    "function": "test_the_frozen_battery_manifest_verifies",
    "condition": "not p.is_file()",
@@ -1164,7 +1164,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1171,
+   "line": 1239,
    "kind": "pytest.skip",
    "function": "test_it_matches_the_canonical_store",
    "condition": "not (a.is_file() and b.is_file())",
@@ -2238,5 +2238,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "3476789a58acc9c0b5c328829ca9ca550aef448bc94fcab3dc97a149c672a37d"
+ "digest": "905cab03bcc04bff61e58a319b5db3074a0e00f81f8bb18e2c86df40e15ef744"
 }
