@@ -134,7 +134,12 @@ say "ssh ${SSH_HOST}:${SSH_PORT}"
 SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15 -p ${SSH_PORT} root@${SSH_HOST}"
 for _ in $(seq 1 30); do $SSH true 2>/dev/null && break; sleep 5; done
 
-# --- run --------------------------------------------------------------------
+# --- run ---
+# NOTE: this heredoc is UNQUOTED so ${BRANCH}/${COMMIT}/${RUN_ID} expand here.
+# That means the LOCAL shell also performs command substitution on it: a
+# backtick in a COMMENT inside this block is executed on the dev box, which is
+# how attempt a2 ran 'pip install transformers' locally and sent nonsense to
+# the pod for $0.0214. No backticks and no unescaped $( below this line.-----------------------------------------------------------------
 say "setup + validation (bounded at ${MAX_SECONDS}s)"
 timeout "${MAX_SECONDS}" $SSH bash -s <<REMOTE >>"$LOG" 2>&1
 set -euo pipefail
@@ -149,9 +154,9 @@ git checkout --quiet ${COMMIT}
 echo "SOURCE_SHA=\$(git rev-parse HEAD)"
 python -c "import torch;print('torch',torch.__version__,'cuda',torch.cuda.is_available(),torch.cuda.get_device_name(0))"
 # The RunPod pytorch image marks its python EXTERNALLY-MANAGED (PEP 668), so a
-# plain `pip install` refuses with a hint rather than installing -- attempt a1
+# plain 'pip install' refuses with a hint rather than installing -- attempt a1
 # died there in 9 seconds. In a disposable container the override is the right
-# answer; there is no system package manager to conflict with. `numpy` is also
+# answer; there is no system package manager to conflict with. 'numpy' is also
 # absent from the image and torch warns about it on import.
 pip install -q --break-system-packages --no-cache-dir \
     numpy transformers huggingface_hub safetensors 2>&1 | tail -3
