@@ -89,6 +89,46 @@ else:
 PY
 [ $? -eq 0 ] || { say "PARENT UNAVAILABLE"; note "parent_missing"; exit 23; }
 
+# --- the a4 object ----------------------------------------------------------
+# The rejected finding was measured on the 596M stage-1 student, NOT on the
+# parent. Confirming, refining or superseding it means measuring the SAME
+# checkpoint; the parent is measured too, because that is what C3's operators
+# actually calibrate on. Reporting one as though it were the other is the kind
+# of substitution this whole investigation exists to stop making.
+say "fetching the 596M a4 checkpoint from the relay"
+python3 - <<'PY'
+import hashlib, os, pathlib, sys, time
+from huggingface_hub import snapshot_download
+PINNED = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
+for attempt in range(4):
+    try:
+        root = snapshot_download(
+            "AlphaAvatar/aadistill-artifacts", repo_type="model",
+            allow_patterns=["stage1/qwen3_0p6b_init_v0/checkpoint/*"],
+            local_dir="/workspace/a4ckpt", token=os.environ["HF_TOKEN"])
+        break
+    except Exception as exc:
+        print(f"  attempt {attempt+1}: {exc}", flush=True)
+        time.sleep(10 * (attempt + 1))
+else:
+    sys.exit("A4 CHECKPOINT FETCH FAILED")
+d = pathlib.Path(root) / "stage1/qwen3_0p6b_init_v0/checkpoint"
+w = d / "model.safetensors"
+got = hashlib.sha256(w.read_bytes()).hexdigest()
+if got != PINNED:
+    sys.exit(f"A4 CHECKPOINT HASH MISMATCH: {got} != {PINNED}")
+print(f"  a4 checkpoint at {d}, weights sha256 {got}", flush=True)
+PY
+A4_OK=$?
+A4_CKPT=/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint
+if [ "$A4_OK" -ne 0 ]; then
+  # NOT fatal: the parent runs are the ones C3's decisions depend on, and a
+  # session that reached them is worth more than one that refused at setup.
+  say "a4 checkpoint unavailable; the parent runs proceed and this is recorded"
+  note "a4_checkpoint_unavailable"
+  A4_CKPT=""
+fi
+
 # --- environment C: the one the science runs in -----------------------------
 say "building /opt/train offline from the relay wheelhouse"
 command -v uv >/dev/null || curl -LsSf "https://astral.sh/uv/0.11.11/install.sh" | sh
@@ -146,20 +186,29 @@ print('  /opt/train: torch', torch.__version__, '| transformers', transformers._
 " || { say "/opt/train UNUSABLE"; note "train_env_unusable"; exit 28; }
 
 # --- the diagnostic ---------------------------------------------------------
-# Three runs, each a complete report. Ordered so the most decisive comes first:
-# if the session is cut short, the science environment's answer exists.
+# Two OBJECTS and two RUNTIMES, ordered so the most decisive runs first: if the
+# session is cut short, the answer C3 depends on already exists.
 #
-#   C-sdpa    the science runtime, the default attention backend
-#   C-eager   the science runtime, eager attention -- the CPU rehearsal found
-#             eager and sdpa-MATH diverging while FLASH was exact, so the
-#             backend the decision stages run under is not a detail
-#   B-image   the image's own torch 2.9.1+cu130, to test whether the runtime
-#             itself explains the a4 result
+#   parent, C, sdpa    the 4B teacher under the SCIENCE runtime. This is the
+#                      object C3's operators actually calibrate on, so this is
+#                      the run a C3 reproducibility claim rests on.
+#   parent, C, eager   same object and runtime, eager attention. The CPU
+#                      rehearsal found eager and SDPA-MATH diverging while
+#                      SDPA-FLASH was exact, so the backend the decision stages
+#                      run under is not a detail.
+#   a4_596m, C, sdpa   the checkpoint the REJECTED FINDING was measured on.
+#                      Without it this session could only report something
+#                      adjacent to the a4 claim, never CONFIRMED / REFINED /
+#                      SUPERSEDED.
+#   a4_596m, B, sdpa   the same object under the image's own torch 2.9.1+cu130,
+#                      which is the closest reachable neighbour of a4's own
+#                      unpinned runtime. This is the environment control: it
+#                      asks whether the runtime alone moves the answer.
 run_one() {
-  local label="$1" python="$2" attn="$3"
+  local label="$1" python="$2" attn="$3" ckpt="$4"
   local dir="${OUTROOT}/${label}"
   mkdir -p "$dir"
-  say "diagnostic ${label} (python=${python} attn=${attn:-default})"
+  say "diagnostic ${label} (python=${python} attn=${attn:-default} ckpt=${ckpt:-hub-parent})"
   local t=$(date -u +%s)
   # Full output to a file that travels back with the report; only the tail to
   # the launcher log. A diagnostic whose stderr was truncated to fit a console
@@ -169,7 +218,8 @@ run_one() {
   AAD_REQUIREMENTS="requirements-cu128.txt" \
   PYTHONPATH=src:scripts "$python" scripts/validation/batch_invariance_diagnostic.py \
       --run-id "@RUN_ID@-${label}" --device cuda --dtype bfloat16 \
-      ${attn:+--attn "$attn"} --out "$dir" > "${dir}/stdout.log" 2>&1
+      ${attn:+--attn "$attn"} ${ckpt:+--checkpoint "$ckpt"} \
+      --out "$dir" > "${dir}/stdout.log" 2>&1
   local rc=$?
   tail -40 "${dir}/stdout.log"
   say "  ${label} rc=${rc} in $(( $(date -u +%s) - t ))s"
@@ -177,8 +227,11 @@ run_one() {
 }
 
 cd /workspace/repo
-run_one C_science_sdpa /opt/train/bin/python sdpa
-run_one C_science_eager /opt/train/bin/python eager
+run_one parent_C_science_sdpa  /opt/train/bin/python sdpa  ""
+run_one parent_C_science_eager /opt/train/bin/python eager ""
+if [ -n "$A4_CKPT" ]; then
+  run_one a4_596m_C_science_sdpa /opt/train/bin/python sdpa "$A4_CKPT"
+fi
 
 # Environment B needs transformers; it comes from the SAME wheelhouse, pinned to
 # the same 5.13.1, so the only variable between B and C is torch itself.
@@ -186,7 +239,12 @@ say "environment B: image python + wheelhouse transformers 5.13.1"
 python3 -m pip install -q --break-system-packages --no-cache-dir --no-index \
   --find-links "$WHEELHOUSE" transformers==5.13.1 tokenizers safetensors huggingface_hub numpy 2>&1 | tail -3
 if python3 -c "import torch, transformers, numpy" 2>/dev/null; then
-  run_one B_image_sdpa python3 sdpa
+  python3 -c "import torch;print('  env B torch', torch.__version__)"
+  if [ -n "$A4_CKPT" ]; then
+    run_one a4_596m_B_image_sdpa python3 sdpa "$A4_CKPT"
+  else
+    run_one parent_B_image_sdpa python3 sdpa ""
+  fi
 else
   say "  environment B not constructible; recording that rather than guessing"
   note "env_b_unavailable"
