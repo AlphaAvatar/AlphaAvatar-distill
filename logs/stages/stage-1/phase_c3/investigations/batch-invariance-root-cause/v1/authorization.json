@@ -1,0 +1,39 @@
+{
+ "schema": "aadistill.validation_authorization/v1",
+ "investigation_id": "batch_invariance_root_cause_v1",
+ "granted_utc": "2026-09-26T04:55:00Z",
+ "granted_by": "maintainer, batch-invariance root-cause investigation instruction",
+ "quote": "Diagnostic ceiling raised to $3.00 cumulative (including the $0.0822 already spent).",
+ "authorizes": "controlled GPU diagnostic sessions that MEASURE batch invariance. They change no operator, no default and no identity semantics.",
+
+ "all_in_ceiling_usd": 3.0,
+ "_ceiling_is_cumulative": "across every resource and subrun of this investigation. A rerun does NOT reset it and a replacement resource does NOT receive a fresh allocation.",
+ "_inherits_prior_spend": {
+  "campaign": "batching_refactor_cuda",
+  "usd": 0.0822,
+  "_where_it_is_booked": "It stays booked on the batching-refactor-cuda campaign record, which is where derive_budget.py reads it from. This investigation's own campaign.json carries it under `inherited_spend`, which the deriver does NOT sum — deliberately, so the project book counts those four subruns exactly once. Do not move them into `subruns` to make the file look tidier: that is a double count."
+ },
+
+ "separate_from": {
+  "c3_stage_envelope_usd": 25.0,
+  "_note": "this $3.00 is NOT charged against the C3 science envelope, and C3 remains NOT STARTED"
+ },
+
+ "gpu_class": "L40S",
+ "dtype": "bfloat16",
+ "capability_floor": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 40,
+  "_why_40": "the run holds a bf16 parent while a second model is materialized -- fp32 at 16.1 GiB in the dtype control, or a second backend in the matrix"
+ },
+
+ "scientific_use": false,
+ "promotes": null,
+ "does_not_authorize": [
+  "formal C3 science of any kind",
+  "training a recovery probe or evaluating the C1 confirmation battery",
+  "changing DEFAULT_MICRO_BATCH_SIZE, state identity semantics, operator definitions, C3 seeds or the recovery recipe",
+  "spending any part of the C3 $25.00 stage envelope"
+ ]
+}

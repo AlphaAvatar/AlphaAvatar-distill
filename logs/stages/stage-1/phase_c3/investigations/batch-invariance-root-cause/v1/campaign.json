@@ -1,0 +1,36 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "_contract": "The canonical owner of this investigation's COSTS. The ceiling is owned by authorization.json, which this file points at. scripts/pod/batch_invariance_budget.py reads both and derives the session limit; the launcher carries no copy of any of it, because two places holding the same number is how one of them comes to be wrong. Read before each paid action. A rerun does NOT reset it and a replacement resource does NOT receive a fresh allocation.",
+ "campaign_id": "batch_invariance_root_cause",
+ "scope": "logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/scope.json",
+
+ "authorization": "logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/authorization.json",
+ "_authorization_is_a_PATH_not_an_object": "derive_budget.engineering_campaigns resolves `granted_utc` by reading this field as a relative path. An inline object leaves the date unresolved, the attribution `unknown`, and `full_ceiling_sessions_fundable` correctly refusing to answer -- which is what the first draft of this file did.",
+ "_the_ceiling_is_NOT_restated_here": "It lives in authorization.json and nowhere else. This file held a copy, and while two ceilings are equal a gate reading either one passes every test; the copy is only discovered when they diverge, which is the moment it matters.",
+
+ "inherited_spend": [
+  {"campaign": "batching_refactor_cuda", "subrun_id": "brc_20260926_a1", "cost_usd": 0.0205},
+  {"campaign": "batching_refactor_cuda", "subrun_id": "brc_20260926_a2", "cost_usd": 0.0214},
+  {"campaign": "batching_refactor_cuda", "subrun_id": "brc_20260926_a3", "cost_usd": 0.0232},
+  {"campaign": "batching_refactor_cuda", "subrun_id": "brc_20260926_a4", "cost_usd": 0.0171}
+ ],
+ "_inherited_total_is_derived": "0.0822, recomputed from the four components above rather than copied from the prior campaign's stated total. A roll-up total has silently dropped $0.0073 in this project before.",
+
+ "teardown_reserve_usd": 0.1,
+ "_teardown_reserve": "Held back from every session ceiling so a teardown can always be paid for. RunPod's --terminate-after backstop has never been observed to fire in this project, so teardown is a verification poll, not an assumption.",
+
+ "subruns": [],
+
+ "rate_basis": {
+  "gpu": "NVIDIA L40S",
+  "usd_per_hour": 1.09,
+  "_field": "securePrice, NOT communityPrice. The launcher prices on securePrice and a report that quoted $0.79 from communityPrice was acted on by a maintainer once.",
+  "container_disk_gb": 120,
+  "container_disk_usd_per_gb_month": 0.1,
+  "_disk_is_billed_separately": "A GPU-only ceiling once missed $1.69 of container disk and nothing in that record disagreed."
+ },
+
+ "_how_the_launcher_uses_this": "scripts/pod/batch_invariance_budget.py sums inherited_spend plus every subruns[].cost_usd, subtracts that from authorization.json's all_in_ceiling_usd, subtracts teardown_reserve_usd, FLOORS the result to the cent, caps it at one session's worth, and reports `ok: no` when what remains cannot fund a useful attempt. The launcher refuses on `no`; it does not re-decide.",
+
+ "_inherited_spend_is_NOT_summed_by_derive_budget": "Deliberate. derive_budget.engineering_campaigns sums `subruns` only, and those four subruns are already booked on the batching-refactor-cuda campaign record it also discovers. They appear here so THIS investigation's $3.00 ceiling sees them, and nowhere else, so the project book counts them exactly once."
+}

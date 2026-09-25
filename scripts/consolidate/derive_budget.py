@@ -51,6 +51,10 @@ PACKAGE = "configs/experiments/phase_c1/authorization.json"
 RUN_INDEX = "logs/index.json"
 CAMPAIGN = "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/campaign.json"
 
+#: What makes a `campaign.json` an engineering campaign. Discovery keys on this
+#: rather than on where the file sits — see `_campaign_records`.
+ENGINEERING_CAMPAIGN_SCHEMA = "aadistill.engineering_campaign/v1"
+
 #: The experiment whose sessions spend the formal allowance. An instance fact,
 #: which is why it is here in the application layer and not in the core.
 FORMAL_EXPERIMENT = "phase_c1"
@@ -445,9 +449,36 @@ def _campaign_records(root: Path) -> list[Path]:
     So it searches by NAME rather than by a path shape. A campaign contributes
     the day it exists, at whatever depth the log layout happens to use, and the
     next reorganization does not silently zero the engineering book again.
+
+    The name was only HALF of that, though: it still required a `validations`
+    path component, which is a path shape wearing a different hat. The C3
+    batch-invariance root-cause campaign sits under `investigations/` — it is a
+    diagnostic, not a validation — and its `$3.00` ceiling would have been
+    invisible to the project book for exactly the reason above.
+
+    So the path component is gone and the only filter is EXCLUSIONARY: a
+    `campaign.json` is a campaign unless it declares a schema saying it is
+    something else. Requiring the right schema was the obvious version and it is
+    wrong in the same direction as the glob — a record that simply forgot its
+    `schema` line would vanish from the book, which is the under-report this
+    function exists to prevent. Under-counting must be hard to cause; a false
+    positive is loud, because `engineering_campaigns` will report it as
+    `unknown` rather than as zero.
     """
-    found = {p.resolve(): p for p in root.rglob("campaign.json")
-             if "validations" in p.parts and ".git" not in p.parts}
+    found = {}
+    for path in root.rglob("campaign.json"):
+        if ".git" in path.parts:
+            continue
+        try:
+            schema = json.loads(path.read_text()).get("schema")
+        except (OSError, ValueError):
+            #: Kept, deliberately. `engineering_campaigns` classifies an
+            #: unreadable record `unknown`, and "I could not read it" and "it
+            #: cost nothing" are different facts.
+            found[path.resolve()] = path
+            continue
+        if schema in (None, ENGINEERING_CAMPAIGN_SCHEMA):
+            found[path.resolve()] = path
     return sorted(found.values())
 
 

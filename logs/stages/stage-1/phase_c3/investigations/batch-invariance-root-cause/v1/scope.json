@@ -1,0 +1,97 @@
+{
+ "schema": "aadistill.validation_scope/v1",
+ "_contract": "WHAT this investigation answers and what it must not be read as. DIAGNOSTIC only. It authorizes nothing, promotes nothing, and does not start C3.",
+ "investigation_id": "batch_invariance_root_cause_v1",
+ "opened_utc": "2026-09-26T06:40:00Z",
+
+ "question": "Same checkpoint, same tokens, same positions, same dtype, same backend: does evaluating a calibration item ALONE and evaluating it BESIDE others give the same scientific decision, and if not, which operation first stops agreeing?",
+
+ "why_it_exists": {
+  "prior_record": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/finding.json",
+  "_prior_record_is_untouched": "That finding is historical evidence and is NOT rewritten, deleted or repointed by this investigation. This record supersedes it only if and when its own evidence says so, and says which of CONFIRMED / REFINED / SUPERSEDED applies.",
+  "why_the_prior_finding_was_insufficient": [
+   "the decisive numbers were produced by ad-hoc scripts on the pod, not by a committed executable, so they cannot be re-derived from the tree",
+   "the environment was unpinned: image runpod/pytorch:1.0.3-cu1281 (torch 2.9.1+cu128) plus `pip install transformers` with no version constraint",
+   "a single relative-error headline (4.88e-02) stood alone, with no distributional statistics and no decision-level metric beside it",
+   "no repeatability control: nothing established that either shape was internally deterministic before a cross-shape difference was attributed",
+   "the attribution to bf16 was made without isolating the GEMM, the attention backend, the reduction policy, the padded width or the batch size from one another"
+  ]
+ },
+
+ "the_three_runtimes_this_repository_contains": {
+  "_why_this_matters": "Which one a number came from is exactly what the rejected finding could not say. They are enumerated here BEFORE the run so the report can be read against them.",
+  "A_rejected_a4": {
+   "image": "runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404",
+   "torch": "2.9.1+cu128",
+   "transformers": "unpinned, whatever pip resolved on 2026-09-26",
+   "used_by": "the a4 validation only"
+  },
+  "B_engineering_validations": {
+   "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "interpreter": "the image's own python",
+   "torch": "2.9.1+cu130",
+   "used_by": "cuda-stage-f, phase_c2 full-search-cuda, and other engineering CUDA checks",
+   "evidence": "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/runs/cuda_stage_f_20260910_s2/artifacts/cuda_engineering/cuda_stage_f_20260910_s2/environment.json"
+  },
+  "C_formal_science": {
+   "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "interpreter": "/opt/train/bin/python (python 3.12)",
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "installed": "offline from the relay wheelhouse transfer/wheelhouse_cu128_cp312 per requirements-cu128.txt",
+   "used_by": "every formal operator search and every formal recovery probe",
+   "evidence": [
+    "scripts/experiments/deployment.py -> POD_IMAGE['remote_python'] == /opt/train/bin/python",
+    "logs/stages/stage-1/phase_c1/runs/attempt17/evidence/c1_evidence.json",
+    "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_attested_evaluation_protocol.json"
+   ],
+   "_this_is_the_one_that_governs": "C3's operator decisions are produced here, so a claim about C3's reproducibility has to be measured here."
+  }
+ },
+
+ "in_scope": [
+  "whether each execution shape is internally deterministic at all, measured before any cross-shape claim",
+  "a case matrix that varies mask presence, batch shape, neighbour CONTENT, raggedness and padding one at a time",
+  "layer-by-layer first-divergence localization through adapter roles",
+  "whether a bare GEMM is already shape-dependent at this dtype",
+  "whether torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction removes it",
+  "the attention backend matrix: eager, and each SDPA kernel the build exposes",
+  "padded width and batch size swept independently of one another",
+  "forward drift versus statistics-reduction-order drift, separated",
+  "FFN top-k selection and the cutoff margins the decisions turned on",
+  "causal KL solo versus batched, the quantity a C3 DEPTH search reads",
+  "float32 as a CONTROL on the dtype hypothesis"
+ ],
+
+ "out_of_scope": [
+  "formal C3 science of any kind. C3 remains NOT STARTED.",
+  "any change to DEFAULT_MICRO_BATCH_SIZE",
+  "any change to scientific or state identity semantics",
+  "any change to operator scientific definitions, C3 seeds or the recovery recipe",
+  "training any recovery probe or evaluating the C1 confirmation battery",
+  "the depth_span_map issue, which is recorded elsewhere and is not repaired here",
+  "model quality of any kind"
+ ],
+
+ "float32_is_a_diagnostic_not_a_proposal": "The deployment numeric is bf16 and nothing in this investigation argues for running an operator search in float32. Its only job is to say whether a divergence is a property of bf16's reduction width.",
+
+ "what_a_result_here_may_authorize": "nothing. The outcome is a recommendation returned to review, per the maintainer's clause on outcomes A-D.",
+
+ "executable": "scripts/validation/batch_invariance_diagnostic.py",
+ "_executable_contract": "Every number any conclusion rests on is emitted by this file into report.json, and the verdict is COMPUTED from those stage outputs by derive_conclusion() rather than written beside them. tests/validation/test_batch_invariance_conclusion.py tables that function and has been mutation-checked.",
+
+ "prior_zero_cost_evidence": {
+  "_what_a_cpu_rehearsal_can_and_cannot_answer": "A CPU float32 run answers a DIFFERENT question from a CUDA bf16 one and cannot close this investigation. It is recorded because it executed every line of the diagnostic for real at toy scale, which is what a pod session must not be spent discovering.",
+  "runs": 5,
+  "model": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (596M, 28 layers)",
+  "device": "cpu", "dtype": "float32",
+  "defects_the_rehearsal_found_and_fixed": [
+   "first_divergence retained both passes of every tap and was OOM-killed at 15.8 GiB; it now compares incrementally",
+   "the case matrix's six logit blocks were held to the end of the run and starved the later stages",
+   "the calibration profile was requested as `calib.domain_balanced@1`; the qualified id carries a `v`, and a broad `except` turned the resulting TypeError into a silent fall-through to random token ids",
+   "derive_conclusion read `not every_backend_diverges` as `some backend is exact`, and returned locus `attention_backend_kernel` for a run in which nothing diverged at all",
+   "the ladder returned `undetermined` for a run whose padding sweep had named the knob exactly; `padded_width_dependent` and an independent `divergence_driver` axis were added"
+  ],
+  "_the_last_two_are_the_point": "Both were verdict defects, found by running the real executable rather than by reading it, and both would have been paid for on a pod."
+ }
+}

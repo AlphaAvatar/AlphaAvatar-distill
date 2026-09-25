@@ -100,10 +100,32 @@ class TestTheBudgetIsDerivedNotRestated:
                 == pytest.approx(derived["package"]["allowance_usd"]))
 
     def test_the_package_book_agrees_with_the_sessions(self, derived):
+        """Each allowance balances against ITS OWN sources, and they sum.
+
+        This asserted `sum(sessions) == package.spent`, which held only while
+        the engineering allowance had never been touched. The first engineering
+        campaign charged to this package — the C3 batching-refactor CUDA
+        validation, `$0.0822` — made it fail, and the arithmetic it was failing
+        about was correct: sessions spend the FORMAL allowance and campaigns
+        spend the ENGINEERING one, and `package` is their sum. So the check is
+        now the three equalities that are actually true, which is strictly more
+        than the one it replaced.
+        """
         priced = [s for s in derived["sessions"] if s["cost_usd"] is not None]
         assert priced, "no session cost was read at all"
         assert sum(s["cost_usd"] for s in priced) == pytest.approx(
-            derived["package"]["spent_usd"], abs=1e-4)
+            derived["formal"]["spent_usd"], abs=1e-4)
+
+        charged = [c for c in derived["engineering_campaigns"]
+                   if c["attribution"] == "this_package"]
+        assert sum(c["cost_usd"] for c in charged) == pytest.approx(
+            derived["engineering"]["spent_usd"], abs=1e-4)
+
+        #: The four limits bind SEPARATELY and do not transfer, but the package
+        #: is definitionally the two of them together.
+        assert (derived["formal"]["spent_usd"]
+                + derived["engineering"]["spent_usd"]) == pytest.approx(
+                    derived["package"]["spent_usd"], abs=1e-4)
 
     def test_the_snapshot_carries_what_the_deriver_computes(self, derived):
         """The snapshot may hold the numbers; it may not hold DIFFERENT ones."""
@@ -796,11 +818,11 @@ class TestEngineeringSpendIsAttributedByPackage:
         return m
 
     def _campaign(self, root: Path, name: str, *, cost, granted=None,
-                  package_id=None, status="OPEN"):
-        d = root / "logs/validations" / name / "v1"
+                  package_id=None, status="OPEN", where="logs/validations"):
+        d = root / where / name / "v1"
         d.mkdir(parents=True, exist_ok=True)
         camp = {"campaign_id": name, "booked_usd": cost, "status": status,
-                "authorization": f"logs/validations/{name}/v1/authorization.json"}
+                "authorization": f"{where}/{name}/v1/authorization.json"}
         if package_id:
             camp["package_id"] = package_id
         (d / "campaign.json").write_text(json.dumps(camp))
@@ -836,6 +858,52 @@ class TestEngineeringSpendIsAttributedByPackage:
         assert len(got) == 2
         assert sum(c["cost_usd"] for c in got
                    if c["attribution"] == "this_package") == 0.75
+
+    def test_a_campaign_outside_validations_is_found(self, tmp_path):
+        """Discovery must not depend on which word the log layout used.
+
+        The glob was fixed once already, from `logs/validations/*/*/` to a
+        search by name — and the search by name kept requiring a `validations`
+        path component, which is the same mistake in a smaller font. The C3
+        batch-invariance root-cause campaign lives under `investigations/`,
+        because it is a diagnostic and not a validation, and its `$3.00`
+        ceiling would have been invisible to the project book.
+        """
+        m = self._mod()
+        self._campaign(tmp_path, "a-validation", cost=0.5,
+                       granted="2026-09-12T00:00:00Z")
+        self._campaign(tmp_path, "an-investigation", cost=0.25,
+                       granted="2026-09-13T00:00:00Z",
+                       where="logs/stages/stage-1/phase_c3/investigations")
+        got = [m._attribute(c, "pkg", "2026-09-11")
+               for c in m.engineering_campaigns(tmp_path)]
+        assert len(got) == 2, [c["campaign"] for c in got]
+        assert any("investigations" in c["campaign"] for c in got)
+        assert sum(c["cost_usd"] for c in got
+                   if c["attribution"] == "this_package") == 0.75
+
+    def test_a_record_that_forgot_its_schema_is_still_counted(self, tmp_path):
+        """Under-counting must be hard to cause.
+
+        Keying discovery on `schema == "aadistill.engineering_campaign/v1"` was
+        the obvious filter and is wrong in the same direction as the glob: a
+        record that simply omitted the line would vanish from the book. Only a
+        record declaring itself something ELSE is excluded.
+        """
+        m = self._mod()
+        d = self._campaign(tmp_path, "no-schema", cost=0.75,
+                           granted="2026-09-12T00:00:00Z")
+        assert "schema" not in json.loads((d / "campaign.json").read_text())
+        got = m.engineering_campaigns(tmp_path)
+        assert [c["cost_usd"] for c in got] == [0.75]
+
+    def test_a_document_declaring_another_schema_is_not_a_campaign(self, tmp_path):
+        m = self._mod()
+        d = tmp_path / "logs/other/thing"
+        d.mkdir(parents=True)
+        (d / "campaign.json").write_text(json.dumps(
+            {"schema": "something.else/v1", "booked_usd": 999.0}))
+        assert m.engineering_campaigns(tmp_path) == []
 
     def test_an_explicit_package_id_beats_the_date(self, tmp_path):
         m = self._mod()

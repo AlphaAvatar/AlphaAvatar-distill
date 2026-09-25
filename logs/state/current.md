@@ -12,6 +12,12 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **Nothing is running and nothing is billing.** Zero pods and zero network
 volumes; both `59qt99zeg5` and `a0zqgxsm7p` are deleted.
 
+**The live work is the C3 batch-invariance root-cause investigation**, on
+branch `review/c3-operator-batching`, which is **not merged into `main`**. See
+[C3 — the refactor is on review](#c3--the-refactor-is-on-review-and-c3-has-not-started)
+below. **C3 itself remains NOT STARTED and its `$25.00` stage envelope is
+untouched.**
+
 ## Stage ladder
 
 ```text
@@ -148,8 +154,9 @@ one and preserved it unscored) and attempt13 (which restored it, scored it
 without retraining, trained B, and returned the verdict), and attempt14
 reproduced probe 11 for `$2.0670`. The authoritative totals are derived, not
 restated here — see the `project cap` row of the summary table and
-`budget` in `current.json`, both written by `derive_budget.py`: campaign
-settled **`$30.6561`** of `$42.0000`, project **`$341.9702`** of `$370.0000`.
+`budget` in `current.json`, both written by `derive_budget.py`. This sentence
+used to restate them anyway, and went stale the moment the C3 engineering
+campaign booked `$0.0822`.
 
 **GO was arithmetically excluded before the third seed ran** — both completed
 confirmation seeds put the candidate behind B (−0.0036, −0.0035) and the frozen
@@ -1248,6 +1255,78 @@ floor. A complete valid verdict ends the round.
 | blocker | **NOTHING IS BLOCKED, AND NO SPEND IS AUTHORIZED.** C2 is **CLOSED WITHOUT PROMOTION**: no probes owed, no canonical verdict claimed, no new incumbent, **B stands by absence of a valid challenger**, no C2 launch prepared, and **no further C2 scientific spend authorized** — remaining allowance under the `$25.00` stage envelope or the `$42.0000` campaign ceiling is not permission. C3 is **NOT STARTED** and is the next scientific stage; it will be designed and authorized independently from the final C2 remote HEAD, and its accounting envelope is not transferable from C2 | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
+## C3 — the refactor is on review, and C3 has not started
+
+**Branch `review/c3-operator-batching`. NOT merged into `main`.** `main` is
+still `ab53ba14`. Everything in this section is engineering; no C3 science has
+run and the C3 `$25.00` stage envelope is untouched.
+
+**What the branch contains.** The operator-topology migration
+(`operators/{attention/gqa,ffn/dense,width/residual,depth,composite}`) and
+calibration micro-batching, delivered as one refactor. Batch size is a
+**runtime** input — `ExecutionConfig`, threaded through `OperatorContext` and
+never hashed — so it cannot enter a state identity. `batch_size=1` is
+bit-identical to the pre-refactor path for all six operators. Every
+initialization-side KL over variable-length items goes through one masked
+batched per-item reduction, `forward_kl_mean_batch`; a pooled
+`sum(KL*mask)/sum(mask)` is a token-weighted batch mean, is a different
+objective, and is refused by test.
+
+**The a4 CUDA finding was returned to review as insufficiently attributed.**
+Four subruns totalling `$0.0822` produced a headline — a batched forward
+differing from a solo one by `4.88e-02` relative on the logits in bf16, with
+FFN top-k selection moving in 26 of 28 layers — and the maintainer rejected the
+attribution on 2026-09-26. Two reasons, both accepted: the decisive numbers
+came from ad-hoc scripts rather than a committed executable, and the
+environment was unpinned. The record is **kept unchanged** as history:
+[`finding.json`](../stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/finding.json).
+
+**Nothing was applied in response to it.** `DEFAULT_MICRO_BATCH_SIZE` is still
+`4`; state identity semantics are unchanged; no operator definition, seed or
+recipe moved.
+
+**This repository contains three runtimes, and which one a number came from is
+the point.** The formal operator search executes under `/opt/train` — python
+3.12, **torch 2.11.0+cu128, transformers 5.13.1**, installed offline from the
+relay wheelhouse (`POD_IMAGE['remote_python']`, and C1 attempts 17/18 evidence).
+The engineering CUDA validations run under the image's own python, **torch
+2.9.1+cu130**. The rejected a4 run used a third: image `1.0.3-cu1281`, torch
+2.9.1+cu128, and `pip install transformers` with no version pin.
+
+**The root-cause investigation is the current work.** Ceiling **`$3.00`
+cumulative, inheriting the `$0.0822`** already spent; `$2.9178` remains and no
+part of it is C3's envelope. Its executable is
+`scripts/validation/batch_invariance_diagnostic.py`, and the point of it is
+that every number a conclusion rests on is emitted by that file: the verdict is
+COMPUTED by `derive_conclusion()` from the stage outputs rather than written
+beside them, and that function is tabled and mutation-checked in
+`tests/validation/test_batch_invariance_conclusion.py`. Records:
+[`scope.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/scope.json),
+[`authorization.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/authorization.json),
+[`campaign.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/campaign.json).
+
+**Five `$0` CPU rehearsals ran the real executable before any pod existed**, and
+found five defects in it — two of them verdict defects that would have been
+paid for. The largest: `derive_conclusion` read "not every backend diverges" as
+"some backend is exact", and returned locus `attention_backend_kernel` for a run
+in which nothing diverged at all.
+
+**A CPU float32 run answers a different question and closes nothing**, but it
+is worth recording what it saw on a 596M checkpoint: eager and SDPA-MATH
+attention diverge solo-vs-batched by `1.8e-04` while SDPA-FLASH is exactly
+`0`; a bare GEMM is **not** shape-dependent; the focal row is provably
+independent of neighbour tokens; and the knob is **padded width**, not batch
+size — at fixed length, batch sizes 1/2/3/4/8 are bit-identical, while padding
+the same item by 8/64/128 positions moves it. The GPU bf16 measurement has not
+been made.
+
+**Two corrections to the previous round's report.** It claimed `0` new failing
+nodeids against `ab53ba14`; there were **three**, all found here and all now
+fixed: `test_every_pod_script_is_classified` (two new `scripts/pod` entries
+never catalogued) and two budget-snapshot tests left stale by the `$0.0822`
+booking. It also stated the formal environment as torch 2.9.1+cu130, which is
+the engineering runtime, not the one the science runs in.
+
 ## Readiness
 
 <!-- readiness:begin -->
@@ -1327,9 +1406,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$22.8249` of `$45.4425` |
-| GPU engineering | `$6.0000` of `$6.0000` |
-| package | `$28.8249` of `$51.4425` |
-| project cap | `$341.9702` spent of `$370.0000`, leaving `$28.0298` |
+| GPU engineering | `$5.9178` of `$6.0000` |
+| package | `$28.7427` of `$51.4425` |
+| project cap | `$342.0524` spent of `$370.0000`, leaving `$27.9476` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 
