@@ -216,11 +216,17 @@ run_one() {
   AAD_CONTAINER_IMAGE="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404" \
   AAD_WHEELHOUSE_SOURCE="AlphaAvatar/aadistill-artifacts:transfer/wheelhouse_cu128_cp312" \
   AAD_REQUIREMENTS="requirements-cu128.txt" \
-  PYTHONPATH=src:scripts "$python" scripts/validation/batch_invariance_diagnostic.py \
+  PYTHONPATH=src:scripts timeout "${RUN_MAX_S:-1500}" \
+  "$python" scripts/validation/batch_invariance_diagnostic.py \
       --run-id "@RUN_ID@-${label}" --device cuda --dtype bfloat16 \
       ${attn:+--attn "$attn"} ${ckpt:+--checkpoint "$ckpt"} \
       --out "$dir" > "${dir}/stdout.log" 2>&1
   local rc=$?
+  #: Per-run, not just per-session. The session bound would let one hung run
+  #: consume the budget of the three that had not started, and those three are
+  #: the comparison -- a single report cannot say whether the runtime or the
+  #: object moved the answer. 1500 s against an expected 200-400 s.
+  [ "$rc" = "124" ] && say "  ${label} EXCEEDED ${RUN_MAX_S:-1500}s and was stopped"
   tail -40 "${dir}/stdout.log"
   say "  ${label} rc=${rc} in $(( $(date -u +%s) - t ))s"
   echo "${label} rc=${rc}" >> "${OUTROOT}/run_status.txt"
