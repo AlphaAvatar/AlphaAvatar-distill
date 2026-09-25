@@ -72,13 +72,24 @@ STARTED_EPOCH=$(date -u +%s)
 
 say() { echo "[$(date -u +%H:%M:%S)] $*" | tee -a "$LOG"; }
 
-if [ -z "${HF_TOKEN:-}" ]; then
-  say "HF_TOKEN is unset. The wheelhouse and the calibration mixture both live"
-  say "on the private relay, and a missing credential surfaces as"
-  say "RepositoryNotFoundError -- which reads like a missing repo. Refusing to"
-  say "create a pod that cannot obtain its inputs."
+# --- the relay credential ---------------------------------------------------
+# The wheelhouse and the calibration mixture both live on the private relay, and
+# a missing credential surfaces on the pod as RepositoryNotFoundError -- which
+# reads like a missing repo, not a missing token. So it is resolved HERE, at $0,
+# and a pod is not created without one.
+#
+# Not from $HF_TOKEN alone: this dev box authenticates from the stored login and
+# has no such variable, so the env-var-only check refused a fully authenticated
+# machine. `get_token()` is the same resolution `huggingface_hub` itself uses.
+HF_TOKEN="${HF_TOKEN:-$("${REPO_DIR}/.venv/bin/python" -c \
+  'from huggingface_hub import get_token; print(get_token() or "")' 2>/dev/null)}"
+if [ -z "$HF_TOKEN" ]; then
+  say "no Hugging Face credential: neither \$HF_TOKEN nor a stored login."
+  say "The wheelhouse and the calibration mixture are both on the private"
+  say "relay. Refusing to create a pod that cannot obtain its inputs."
   exit 4
 fi
+export HF_TOKEN
 
 KEY=$(grep -i apikey ~/.runpod/config.toml | sed "s/.*= *//;s/[\"']//g")
 gql() {
