@@ -257,8 +257,13 @@ say "remote finished rc=${RC}"
 # and $2.82 of verified checkpoints were once deleted by a collector that ran
 # only on a clean terminal state.
 say "fetching evidence"
+# `:/workspace/out/.` is the old scp idiom and the SFTP-backed scp in current
+# OpenSSH rejects it outright -- "error: unexpected filename: ." -- so the first
+# attempt fetched nothing even though there was nothing to fetch. Copying the
+# DIRECTORY works on both; the reports land under ${OUT}/out/ and the search
+# below is by name, not by path.
 scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P "${SSH_PORT}" \
-    "root@${SSH_HOST}:/workspace/out/." "${OUT}/" >>"$LOG" 2>&1 \
+    "root@${SSH_HOST}:/workspace/out" "${OUT}/" >>"$LOG" 2>&1 \
   || say "WARNING: could not fetch /workspace/out"
 FOUND=$(find "$OUT" -name report.json | wc -l)
 say "retrieved ${FOUND} report(s)"

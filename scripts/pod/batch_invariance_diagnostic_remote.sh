@@ -26,6 +26,28 @@ note() { echo "$*" >> "${OUTROOT}/session_notes.txt"; }
 say "host: $(nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader || echo '(no nvidia-smi)')"
 say "image python: $(python3 -c 'import torch;print("torch",torch.__version__)' 2>&1 | tail -1)"
 
+# --- the fetch bootstrap ----------------------------------------------------
+# The image's python has torch and no `huggingface_hub`, and every input below
+# -- the calibration mixture, the wheelhouse, the parent -- arrives through it.
+# The first attempt died here in 4 seconds for $0.0485 because this step did not
+# exist; the formal setup script has had it since the beginning.
+#
+# PINNED to the wheelhouse's own 1.23.0. This is a BOOTSTRAP dependency used to
+# download bytes, not part of any measured environment -- the measurements run
+# under /opt/train -- but an unconstrained `pip install` is the specific thing
+# that got the a4 finding rejected, and pinning it costs nothing.
+say "bootstrap: huggingface_hub==1.23.0 into the image python"
+python3 -m pip install -q --no-input --break-system-packages \
+    "huggingface_hub[hf_transfer]==1.23.0" 2>&1 | tail -3
+python3 -c "import huggingface_hub as h; print('  huggingface_hub', h.__version__)" \
+  || { say "BOOTSTRAP FAILED: no huggingface_hub"; note "bootstrap_failed"; exit 19; }
+# hf_transfer only if it actually imports: the env var makes the hub RAISE when
+# it is missing, which would turn a speedup into a failure.
+if python3 -c "import hf_transfer" 2>/dev/null; then
+  export HF_HUB_ENABLE_HF_TRANSFER=1
+  say "  hf_transfer enabled (3.82 GiB wheelhouse + 7.6 GiB parent to pull)"
+fi
+
 # --- source -----------------------------------------------------------------
 cd /workspace
 git clone --quiet --branch @BRANCH@ --depth 60 \
