@@ -130,9 +130,10 @@ class CompositeStage1SandwichV0(OperatorImplementation):
         compute = model_device(parent)
         state = cfg.get("activation_state")
         if state is None:
+            batch_size = ctx.execution.micro_batch_size
             state = ctx.cached_stats(lambda: collect_activation_stats(
-                adapter, parent, (i["input_ids"] for i in ctx.calibration_items),
-                compute))
+                adapter, parent, ctx.calibration_items,
+                compute, batch_size=batch_size))
         state = stats_to(state, compute)
 
         dtype = model_dtype(adapter, parent)
@@ -164,7 +165,8 @@ class CompositeStage1SandwichV0(OperatorImplementation):
                 impl_id=self.impl_id, objective=self.objective,
                 reference="parent_state", values=values,
                 detail={"depth_map_source": diag["depth_map_source"]}),
-            trace={"kept_layers": diag["kept_teacher_layers"],
+            trace={"micro_batch_size": ctx.execution.micro_batch_size,
+                   "kept_layers": diag["kept_teacher_layers"],
                    "removed_layers": diag["removed_teacher_layers"],
                    "source": diag["depth_map_source"]},
             artifacts={"init_diagnostics": {

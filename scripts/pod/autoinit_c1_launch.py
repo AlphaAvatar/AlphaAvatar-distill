@@ -1379,7 +1379,7 @@ def spec(args) -> SessionSpec:
 def _plan_hash() -> str:
     """The frozen C1IsolationPlan's hash, rebuilt rather than transcribed."""
     from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
 
     attention_activation.register(replace=True)
     battery = json.loads((REPO_ROOT / BATTERY_IDENTITY).read_text())

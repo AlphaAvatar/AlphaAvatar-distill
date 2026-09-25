@@ -17,6 +17,13 @@ measure it and rank it — a silent corruption that reads as a real result. Rand
 initialization is kept (rather than a skip-init fast path) precisely so this
 check has something to fail on.
 
+**What is NOT here.** `head_rows` moved to
+``operators/attention/gqa/_common.py`` when the operators were organised by
+topology: concatenated-per-head row arithmetic is a GQA fact, and its only
+consumers were the two grouped-head operators. What remains below is genuinely
+kind-neutral — child construction, parameter-identity copying, and the one
+activation-statistics pass that FFN, RESIDUAL_WIDTH and COMPOSITE_STAGE1 share.
+
 Copying is by **parameter identity**, not by name: ``copy_block_except`` takes the
 set of child parameters the operator will assign itself and carries the rest
 across positionally. A name-based rule would put ``self_attn.q_proj.weight`` into
@@ -25,9 +32,15 @@ this file, which is exactly the family knowledge that belongs in an adapter.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 import torch
+
+from aadistill.initialization.calibration.batching import (
+    micro_batches,
+    resolve_pad_id,
+)
 
 from aadistill.initialization.specs.arch import ArchitectureAdapter, ArchSpec
 
@@ -106,23 +119,11 @@ def copy_embeddings_and_final_norm(builder: ChildBuilder, adapter: ArchitectureA
                    adapter.final_norm(parent).weight)
 
 
-def head_rows(heads: list[int], head_dim: int, device: Any = None) -> torch.Tensor:
-    """Row indices for a set of attention heads, on the device that will be
-    indexed.
-
-    An index built from a Python list lands on the host whatever it is about to
-    slice. Some torch ops accept that and some raise; relying on which is worse
-    than either. `device` is not optional in practice — every caller in the
-    search passes the weight's device — but it defaults to None so a caller that
-    only wants the arithmetic is not forced to invent one.
-    """
-    rows = torch.tensor([h * head_dim + i for h in heads for i in range(head_dim)])
-    return rows if device is None else rows.to(device)
-
-
 @torch.no_grad()
 def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
-                             token_batches, device: str = "cpu") -> dict[str, torch.Tensor]:
+                             token_batches, device: str = "cpu", *,
+                             batch_size: int = 1,
+                             pad_id: int | None = None) -> dict[str, torch.Tensor]:
     """Streaming sufficient statistics for the model **as it is now**.
 
     The whole reason width and FFN selection are re-run per state rather than
@@ -130,11 +131,36 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
     residual second moments and the FFN activation distribution are no longer the
     teacher's. E8a's central negative result — a full-width proxy mispredicting
     the compressed initializer — is what this re-collection is answering.
+
+    This is the one forward loop FFN, RESIDUAL_WIDTH and COMPOSITE share, so
+    micro-batching is implemented here once rather than three times.
+    ``batch_size=1`` keeps the original one-item-per-forward path exactly,
+    including calling ``process`` rather than ``process_batch``; anything larger
+    pads groups of items together and the collector reduces over real tokens
+    only.
+
+    ``token_batches`` accepts either bare ``[1, T]`` id tensors (what the
+    operators have always passed) or full calibration items; batching needs only
+    the ids, and taking both means no call site has to change shape to opt in.
     """
+    items = [it if isinstance(it, Mapping) else {"input_ids": it}
+             for it in token_batches]
     collector = adapter.stats_collector(model)
     try:
-        for ids in token_batches:
-            collector.process(ids.to(device))
+        if batch_size <= 1:
+            for item in items:
+                collector.process(item["input_ids"].to(device))
+        else:
+            if not hasattr(collector, "process_batch"):
+                raise TypeError(
+                    f"{type(collector).__name__} has no `process_batch`, so it "
+                    f"cannot honour batch_size={batch_size}. Pass batch_size=1 "
+                    "for the per-item reference path, or give the collector a "
+                    "batched entry point — do not let it silently pad.")
+            resolved_pad = (resolve_pad_id(model) if pad_id is None else int(pad_id))
+            for batch in micro_batches(items, batch_size, pad_id=resolved_pad,
+                                       device=device):
+                collector.process_batch(batch)
     finally:
         collector.close()
     return collector.state()

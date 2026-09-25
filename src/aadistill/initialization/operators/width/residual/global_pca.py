@@ -101,9 +101,10 @@ class WidthGlobalPCAV0(OperatorImplementation):
         # working copy is moved to the parent's ACTUAL device here — explicitly,
         # once, and freed when this call returns.
         compute = model_device(parent)
+        batch_size = ctx.execution.micro_batch_size
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
-            adapter, parent, (i["input_ids"] for i in ctx.calibration_items),
-            compute)), compute)
+            adapter, parent, ctx.calibration_items,
+            compute, batch_size=batch_size)), compute)
 
         # Same point set and weights as the incumbent recipe: all pre-norm stream
         # states plus the post-final-norm point, ends upweighted 9/8.
@@ -157,6 +158,7 @@ class WidthGlobalPCAV0(OperatorImplementation):
                 },
                 detail={"stats_tokens": int(state["residual_count"][0])}),
             trace={"source": "global_activation_pca", "scale_compensation": scale,
+                   "micro_batch_size": batch_size,
                    "d_parent": d_p, "d_child": d_c},
             artifacts={"projection_diagnostics": {
                 k: v for k, v in proj_diag.items() if k != "points"}},

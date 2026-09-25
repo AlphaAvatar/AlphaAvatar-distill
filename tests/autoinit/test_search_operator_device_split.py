@@ -97,7 +97,7 @@ def test_the_split_actually_bites_when_the_transfer_is_removed(
     chance to transfer, by pre-labelling them AFTER `stats_to` would have run —
     and requires the split to catch it.
     """
-    from aadistill.initialization.operators import width as width_module
+    from aadistill.initialization.operators.width.residual import global_pca as width_module
 
     labelled = on_cache_device(real_stats(teacher, calibration_items))
     original = width_module.stats_to
@@ -189,7 +189,7 @@ def test_the_depth_operator_keeps_its_reference_and_ablations_together(
     """`depth.causal_kl_greedy_v1` reads no statistics, so the split says
     nothing about it. What applies to it is that the reference logits it caches
     and the ablated forwards it compares them against are on one device."""
-    from aadistill.initialization.operators import depth as depth_module
+    from aadistill.initialization.operators.depth import causal_kl_greedy as depth_module
 
     impl = get_implementation("depth.causal_kl_greedy_v1")
     ctx = OperatorContext(
@@ -213,7 +213,7 @@ def test_the_depth_operator_keeps_its_reference_and_ablations_together(
 def test_the_attention_index_lands_on_the_weight_it_slices():
     """Category 3: an index built from a Python list is host-side whatever it
     is about to slice."""
-    from aadistill.initialization.operators._common import head_rows
+    from aadistill.initialization.operators.attention.gqa._common import head_rows
 
     weight = torch.zeros(8, 4)
     rows = head_rows([0, 2], 2, device=weight.device)

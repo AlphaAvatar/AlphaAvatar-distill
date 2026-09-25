@@ -1,21 +1,20 @@
-"""DEPTH implementations: which blocks survive.
+"""``depth.causal_kl_greedy_v1`` — iterative greedy block removal by forward KL.
 
-Two algorithms, deliberately kept as separate immutable ids because they have
-been measured to disagree almost completely — for 36 -> 28 they share one removed
-layer out of eight, and the causal search preserved the full-width teacher
-distribution 3.11x better while initializing 2.8 nats worse once composed with
-width/FFN/attention compression. Which is right is the open question the search
-exists to answer, so both stay registered and neither is a default.
-
-``depth.positional_v0`` wraps ``init.sandwich.depth_span_map``; the map it
-produces at 36 -> 28 is the one behind the canonical Stage-1 checkpoint
-``86fbba78...``.
-
-``depth.causal_kl_greedy_v1`` wraps ``init.contribution`` — block bypass, forward
-KL against the *unbypassed parent*, domain-balanced aggregation, iterative greedy
+Wraps :mod:`aadistill.initialization.statistics.contribution`: block bypass,
+forward KL against the *unbypassed parent*, domain-balanced aggregation, greedy
 removal with a stated tie-break. It is re-run against whatever checkpoint it is
 handed, which is what makes it conditional rather than a precomputed teacher
 decision.
+
+It has been measured to disagree almost completely with ``depth.positional_v0``
+— for 36 -> 28 they share one removed layer out of eight — so both stay
+registered and neither is a default.
+
+**This is the only DEPTH implementation that runs model forwards**, and it runs
+a great many: one per candidate subset per calibration item. Those forwards are
+micro-batched (see :mod:`aadistill.initialization.calibration.batching`); the
+per-item KL, the subtype mean and the domain balance above it are untouched by
+that, because batching moves the forward and not the reduction.
 """
 
 from __future__ import annotations
@@ -36,17 +35,16 @@ from aadistill.initialization.statistics.contribution import (
     greedy_removal,
 )
 from aadistill.initialization.device import model_device
-from aadistill.initialization.transforms.sandwich import depth_span_map
 from aadistill.initialization.specs.arch import (
     ArchitectureAdapter,
     ArchSpec,
     Capability,
 )
 from aadistill.initialization.specs.metrics import OperatorLocalMetrics
-from aadistill.initialization.operators._common import (
-    ChildBuilder,
-    copy_embeddings_and_final_norm,
-    copy_module_except,
+from aadistill.initialization.calibration.batching import (
+    build_batch,
+    micro_batches,
+    resolve_pad_id,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
@@ -56,70 +54,10 @@ from aadistill.initialization.operators.base import (
     OperatorOutcome,
     OperatorPlan,
 )
-
-DEPTH_FIELD = "num_hidden_layers"
-
-
-def _build_child_with_layers(ctx: OperatorContext, kept: list[int]) -> Any:
-    """A child holding exactly the parent blocks ``kept``, in order, verbatim."""
-    adapter = ctx.adapter
-    new_spec = ctx.parent_spec.replace(**{DEPTH_FIELD: len(kept)})
-    builder = ChildBuilder(adapter, ctx.model, new_spec, seed=ctx.seed)
-    parent_blocks = adapter.blocks(ctx.model)
-    child_blocks = adapter.blocks(builder.model)
-    for dst, src_idx in zip(child_blocks, kept):
-        copy_module_except(builder, parent_blocks[src_idx], dst)
-    copy_embeddings_and_final_norm(builder, adapter, ctx.model)
-    return builder.finish()
-
-
-class DepthPositionalV0(OperatorImplementation):
-    impl_id = "depth.positional_v0"
-    kind = "DEPTH"
-    version = 0
-    description = (
-        "Positional pairwise merge in a middle band: ~1/5 of the surviving 1:1 "
-        "layers stay before the band, the rest after, so both the earliest and "
-        "the latest blocks map 1:1. The incumbent map behind qwen3_0p6b_init_v0.")
-    required_capabilities = frozenset({Capability.BLOCK_LIST})
-    modifies = frozenset({DEPTH_FIELD})
-    preserves = frozenset({"hidden_size", "intermediate_size", "num_attention_heads",
-                           "num_key_value_heads", "head_dim", "vocab_size",
-                           "tie_word_embeddings"})
-    calibration = CalibrationNeed.NONE
-    objective = "none (fixed positional heuristic; no measurement is taken)"
-    deterministic = True
-    requires_seed = False
-    produces = ("depth_map",)
-    target_validation = "result num_hidden_layers equals the target exactly"
-
-    def plan(self, spec: ArchSpec, target: ArchSpec, adapter: ArchitectureAdapter,
-             config: Mapping[str, Any] | None = None) -> OperatorPlan:
-        depth_span_map(spec[DEPTH_FIELD], target[DEPTH_FIELD])  # raises if infeasible
-        return OperatorPlan(
-            impl_id=self.impl_id,
-            result_spec=spec.replace(**{DEPTH_FIELD: target[DEPTH_FIELD]}),
-            forward_passes=0, stats_passes=0,
-            notes="no calibration; the map is a function of the two layer counts")
-
-    def apply(self, ctx: OperatorContext) -> OperatorOutcome:
-        spans = depth_span_map(ctx.parent_spec[DEPTH_FIELD],
-                               ctx.target_spec[DEPTH_FIELD])
-        kept = [s["representative"] for s in spans]
-        model = _build_child_with_layers(ctx, kept)
-        removed = sorted(set(range(ctx.parent_spec[DEPTH_FIELD])) - set(kept))
-        return OperatorOutcome(
-            model=model,
-            local_metrics=OperatorLocalMetrics(
-                impl_id=self.impl_id,
-                objective=self.objective,
-                reference="none",
-                values={"op.depth.positional.n_removed": float(len(removed))},
-                detail={"note": "a positional heuristic takes no measurement, so it "
-                                "reports no comparable objective value"}),
-            trace={"kept_layers": kept, "removed_layers": removed,
-                   "spans": spans, "source": "positional_pairwise_merge"},
-        )
+from aadistill.initialization.operators.depth._common import (
+    DEPTH_FIELD,
+    _build_child_with_layers,
+)
 
 
 class DepthCausalKLGreedyV1(OperatorImplementation):
@@ -184,6 +122,22 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         # `forward_kl_mean` both keep their accumulators wherever the logits are.
         reference = _ReferenceLogits(model, items, compute)
 
+        #: The micro-batch grouping, built ONCE and reused for every candidate
+        #: subset. Two reasons it is not rebuilt per candidate: the padded id
+        #: tensors are identical for all 260 of them, and a grouping that could
+        #: differ between candidates would make the comparison between them
+        #: depend on something other than the skip set.
+        #:
+        #: `batch_size == 1` keeps the original per-item calls — `reference.get`
+        #: and `_forward_logits`, not their batched twins — so the reference
+        #: path is the code that produced every frozen DEPTH decision, not a
+        #: batched path that happens to agree with it.
+        batch_size = ctx.execution.micro_batch_size
+        groups = list(micro_batches(
+            items, batch_size,
+            pad_id=(resolve_pad_id(model) if batch_size > 1 else 0),
+            device=compute))
+
         # Operational timings, kept OUT of every returned metric and hash.
         #
         # The phase split is honest only across a synchronization boundary. On
@@ -197,9 +151,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         cuda_sync = (torch.cuda.synchronize
                      if sync_split and torch.device(compute).type == "cuda"
                      else None)
+        #: `ablated_forwards` counts FORWARD PASSES, which at `batch_size > 1`
+        #: is fewer than the number of items — that reduction is the entire
+        #: point of batching, so the field keeps its literal meaning and
+        #: `ablated_items` is added beside it rather than redefining it. A
+        #: reader comparing this run against a pre-batching telemetry file
+        #: should compare `ablated_items`, which is what `ablated_forwards`
+        #: counted when every forward held one item.
         timing = {"reference_seconds": 0.0, "ablated_seconds": 0.0,
                   "distortion_seconds": 0.0, "item_seconds": 0.0,
                   "candidate_subsets": 0, "ablated_forwards": 0,
+                  "ablated_items": 0, "micro_batch_size": batch_size,
                   "distortion_calls": 0, "split_is_attributed": bool(cuda_sync)
                   or torch.device(compute).type != "cuda"}
 
@@ -207,36 +169,43 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             per_subtype: dict[str, list[float]] = {}
             timing["candidate_subsets"] += 1
             item_started = time.perf_counter()
-            for item in items:
+            for group in groups:
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
                 t0 = time.perf_counter()
-                ref = reference.get(item)
+                refs = (reference.get_batch(group) if batch_size > 1
+                        else [reference.get(group.items[0])])
                 if cuda_sync:
                     cuda_sync()
                 t1 = time.perf_counter()
-                abl = _forward_logits(model, item, compute, skip)
+                abls = (_forward_logits_batch(model, group, compute, skip)
+                        if batch_size > 1
+                        else [_forward_logits(model, group.items[0], compute, skip)])
                 if cuda_sync:
                     cuda_sync()
                 t2 = time.perf_counter()
-                #: FORWARD KL ONLY. This operator's objective is forward KL
-                #: and it read exactly `sums["kl"]` from a six-quantity
-                #: reduction -- 17,420 times per expansion. `forward_kl_mean`
-                #: computes that one quantity with the same float32
-                #: log-softmax, the same chunk boundaries and the same float64
-                #: accumulation, and skips the reverse-KL term, both
-                #: cross-entropy gathers and both argmaxes. With no CE the
-                #: targets are not needed either, which is why `tgt` no longer
-                #: reaches the reduction.
-                kl = forward_kl_mean(ref, abl, chunk=512)
-                t3 = time.perf_counter()
                 timing["reference_seconds"] += t1 - t0
                 timing["ablated_seconds"] += t2 - t1
-                timing["distortion_seconds"] += t3 - t2
                 timing["ablated_forwards"] += 1
-                timing["distortion_calls"] += 1
-                per_subtype.setdefault(item["subtype"], []).append(kl)
-                del abl
+                timing["ablated_items"] += len(group.items)
+                #: FORWARD KL ONLY, and ONE CALL PER ORIGINAL ITEM. This
+                #: operator's objective is forward KL and it read exactly
+                #: `sums["kl"]` from a six-quantity reduction -- 17,420 times
+                #: per expansion. `forward_kl_mean` computes that one quantity
+                #: with the same float32 log-softmax, the same chunk boundaries
+                #: and the same float64 accumulation, and skips the reverse-KL
+                #: term, both cross-entropy gathers and both argmaxes.
+                #:
+                #: Batching moved the FORWARD, not the reduction and not the
+                #: weighting: an item that shared a forward with three others
+                #: still contributes exactly one KL to exactly one subtype, over
+                #: its own prediction positions.
+                for item, ref, abl in zip(group.items, refs, abls):
+                    per_subtype.setdefault(item["subtype"], []).append(
+                        forward_kl_mean(ref, abl, chunk=512))
+                    timing["distortion_calls"] += 1
+                timing["distortion_seconds"] += time.perf_counter() - t2
+                del abls
             timing["item_seconds"] += time.perf_counter() - item_started
             means = {k: sum(v) / len(v) for k, v in per_subtype.items()}
             primary, _ = domain_balanced_score(means, domains)
@@ -297,7 +266,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     "op.depth.causal_kl.evaluations": float(result["evaluations"]),
                 },
                 detail={"removal_order": result["removal_order"]}),
-            trace={"kept_layers": kept, "removed_layers": result["removed"],
+            trace={"micro_batch_size": batch_size,
+                   "kept_layers": kept, "removed_layers": result["removed"],
                    "removal_order": result["removal_order"],
                    "source": "causal_kl_greedy"},
             # The memory decision is an artifact, NOT part of the trace. The
@@ -318,6 +288,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         )
 
 
+
 def _domain_map(items) -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
     for item in items:
@@ -325,6 +296,36 @@ def _domain_map(items) -> dict[str, list[str]]:
         if item["subtype"] not in subs:
             subs.append(item["subtype"])
     return {k: sorted(v) for k, v in sorted(out.items())}
+
+
+@torch.no_grad()
+def _forward_logits_batch(model, batch, device: str, skip=frozenset()):
+    """One micro-batch's prediction-position logits, one tensor per ORIGINAL item.
+
+    The batched twin of `_forward_logits`, and it returns a *list* rather than a
+    padded block on purpose: every consumer of this operator measures per item,
+    so the padding is undone here, once, and nothing downstream has to know a
+    batch existed. Element ``i`` is exactly what ``_forward_logits`` would have
+    returned for that item — ``[L_i - 1, V]``, same positions, same dtype, same
+    device — so the per-item `forward_kl_mean` reduction that follows is the
+    same call over the same shape with the same chunk boundaries.
+
+    The `attention_mask` is passed, and it is honest to say that under **right**
+    padding it is defensive rather than load-bearing: causality already stops a
+    real token at position ``i < L`` from reaching a pad at ``>= L``, and
+    dropping the mask here was measured to change the real-position logits by
+    exactly ``0.0``. What is load-bearing is the right padding itself — it keeps
+    every real token at the position index it occupies alone, so the RoPE phase
+    is unchanged. The mask is kept because it costs nothing, because it is
+    required the instant anything pads on the other side, and because a reader
+    should not have to re-derive the causality argument to trust this line.
+    """
+    ids = batch.input_ids.to(device)
+    mask = batch.attention_mask.to(device)
+    if not skip:
+        return batch.split_predictions(model(ids, attention_mask=mask).logits[:, :-1])
+    with bypassed_blocks(model, skip):
+        return batch.split_predictions(model(ids, attention_mask=mask).logits[:, :-1])
 
 
 @torch.no_grad()
@@ -464,6 +465,53 @@ class _ReferenceLogits:
         else:
             self.recomputes += 1
         return computed
+
+    def get_batch(self, batch) -> list[torch.Tensor]:
+        """References for a whole micro-batch, in row order.
+
+        One batched forward serves every row that is not already resident. The
+        admission policy is untouched — the same items are kept, decided by the
+        same mixture order — but a row that is *not* admitted still gets its
+        reference from the forward this batch already performed, instead of a
+        second single-item forward. That strictly reduces work in `partial` and
+        `recomputed` mode and changes nothing about which tensors are cached.
+        """
+        rows = list(batch.items)
+        out: list[torch.Tensor | None] = [None] * len(rows)
+        missing = []
+        for index, item in enumerate(rows):
+            hit = self._cache.get(item["item_id"])
+            if hit is not None:
+                self.hits += 1
+                out[index] = hit
+            else:
+                missing.append(index)
+        if missing:
+            #: Only the rows that are actually missing, so a fully cached batch
+            #: performs no forward at all — the property the whole cache exists
+            #: for.
+            sub = (batch if len(missing) == len(rows)
+                   else build_batch([rows[i] for i in missing],
+                                    pad_id=batch.pad_id, device=self.device))
+            computed = _forward_logits_batch(self.model, sub, self.device)
+            for slot, logits in zip(missing, computed):
+                item_id = rows[slot]["item_id"]
+                out[slot] = logits
+                if item_id in self.admitted:
+                    #: CLONED, and this is a memory-safety requirement rather
+                    #: than tidiness. `split_predictions` returns VIEWS into the
+                    #: batch's `[B, T_max, V]` logits, so caching one would keep
+                    #: that whole block alive — padding included — for the
+                    #: lifetime of the search. `_item_bytes` sizes this cache at
+                    #: `(T_i - 1) * V * itemsize` per item, so a view would make
+                    #: the admission budget describe a fraction of what is
+                    #: actually resident, on the ONE path whose budget already
+                    #: had to be repaired after a 33.8 GiB overrun.
+                    self._cache[item_id] = logits.clone()
+                    self.fills += 1
+                else:
+                    self.recomputes += 1
+        return [t for t in out if t is not None]
 
     def decision(self) -> dict[str, Any]:
         n_items = len(self._item_bytes)
@@ -631,5 +679,7 @@ def _host_available_memory_bytes() -> tuple[int | None, str]:
 #: contents depend on who had imported what first, which is the same coupling
 #: the adapter bootstrap removed. `aadistill.initialization.operators.register`
 #: is the one place the shipped operators are registered.
-DEPTH_POSITIONAL_V0 = DepthPositionalV0()
+
+
+#: The instance, NOT a registration.
 DEPTH_CAUSAL_KL_GREEDY_V1 = DepthCausalKLGreedyV1()

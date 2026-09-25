@@ -553,7 +553,7 @@ def stage_memory(cfg: dict, teacher, items, report: dict,
     cache has evidence instead of a hope.
     """
     import torch
-    from aadistill.initialization.operators.depth import (
+    from aadistill.initialization.operators.depth.causal_kl_greedy import (
         _ReferenceLogits, memory_snapshot)
 
     before = memory_snapshot(device)

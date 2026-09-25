@@ -1,0 +1,247 @@
+{
+ "schema": "aadistill.artifact_cleanup/v1",
+ "performed_utc": "2026-09-25T05:41:45Z",
+ "campaign": "c2-behavioural-12probe-v1",
+ "what": "C2 behavioural probe MODEL WEIGHTS only (model.safetensors). No logs, evaluations, scores, manifests, protocol or provider evidence was removed, and no calibration or canonical input was touched.",
+ "why": "P8.4 -- artifacts follow consumers, not campaigns. C2 is CLOSED WITHOUT PROMOTION, all 12 probes are trained and validly scored, probes owed = 0, and no further C2 scientific spend is authorized. A completed and scored probe contributes EVIDENCE; its weights are archival and have no current consumer. C3 starts from B, which is a different checkpoint entirely.",
+ "preconditions_verified_per_probe": [
+  "probe completed",
+  "validly scored (result.json)",
+  "raw per-sample evaluation retained (per_sample.jsonl)",
+  "probe record retained (probe_record.json)",
+  "content hash retained (c2_durable_unit.json:identity.artifact_digest)",
+  "initialization identity retained (initialization_artifact_digest)",
+  "destination re-identification retained (durable_ack.json)",
+  "no active or preregistered consumer",
+  "not the standing incumbent B",
+  "not the only copy of a non-reconstructible canonical input"
+ ],
+ "explicitly_not_touched": {
+  "standing_incumbent_B": "the frozen C1 treatment; reconstructed from the C1 constructor at spec hash 3a233a9017b3 and not stored in this tree",
+  "top_5_candidate_initializations": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay (5.7 GiB, 5/5 exact)",
+  "phase_b_incumbent": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6 (1.2 GiB)",
+  "evidence": "every probe's result.json, per_sample.jsonl, probe_record.json, config.json, generation_config.json, durable_ack.json and c2_durable_unit.json remain in place"
+ },
+ "reconstructibility": "Each probe is a recovery training run from a recorded initialization under a frozen recipe and seed. Re-creating one would cost GPU time that is NOT authorized; the deletion is therefore a deliberate decision that these weights are not needed again, not a claim that they are cheap to rebuild.",
+ "n_units": 12,
+ "bytes_removed": 28610819616,
+ "gib_removed": 26.646,
+ "units": [
+  {
+   "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638",
+   "run_id": "attempt12",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt12/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "d9af797a565291b3ed0da58e040922c6ffd8a22b5856f2fca193465850510a16",
+   "initialization_artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "confirmation.B.s1523147638",
+   "run_id": "attempt13",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt13/confirmation.B.s1523147638/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "7fe8f2f905b57adffb70e1457a0333990869481138a5d17821203ee9fbbeb929",
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/confirmation.B.s1523147638/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "fc27d599bda027bd5223f02a2c5713f67e749389ce7c85530576a4cfa6029060",
+   "initialization_artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1916380711/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "172699354a3756e703a3d7ce23993bf9baaffdca90aa8dcea3afa127661b6aed",
+   "initialization_artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1936324010/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "confirmation.B.s1916380711",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1916380711/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "4243f522ba80d1c5c3f43324db54d91cc97a735bfc18600ae49b4a1a955ba714",
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/confirmation.B.s1916380711/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "confirmation.B.s1936324010",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/confirmation.B.s1936324010/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "58297504e12d2710a3b7083d3d07acbb93a493af07d053f643157d6bc1f91e68",
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/confirmation.B.s1936324010/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "9d1b1e3f904657b29b71f4a090e15997623cfbcef4937233c4f1db41f5e14e8f",
+   "initialization_artifact_digest": "b045c60189ceb321c429a9f0847ffb3513ec374811195f432affab8995c171cf",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/screening.1a2b5b030e7e4e202fda3a810ed53c5f.s616738081/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "screening.1d2844488f3ad630414c3cd69b6fa395.s616738081",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.1d2844488f3ad630414c3cd69b6fa395.s616738081/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "388bdf66a0a42f948e758779d04bfafea5dee073f18ca404fd2a869a3a5370c0",
+   "initialization_artifact_digest": "a25271ad0898ac3727ed4ed496fb7569299932f864f0d54a48b9b2deb9b4da41",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/screening.1d2844488f3ad630414c3cd69b6fa395.s616738081/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "screening.7da1e4e2254e59766581e777b8066b7e.s616738081",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.7da1e4e2254e59766581e777b8066b7e.s616738081/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "bbdea0842bb82410a2b97b07fec8a6f28c926eaaa59055dffb6b92b088a0d0ac",
+   "initialization_artifact_digest": "181245b694316ed10dc299597cffbb97b4ece547c2f488a9c31c446b3e22210a",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/screening.7da1e4e2254e59766581e777b8066b7e.s616738081/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "screening.88086555a6662b206e00ae28fc9d3ca3.s616738081",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.88086555a6662b206e00ae28fc9d3ca3.s616738081/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "f2388763e126ac003e589bbc3cde7d4bbe3a15bc017e6da686742d6e066934db",
+   "initialization_artifact_digest": "d0d26ed3fee7f976935439ecba8b059f38e51d92d7b1672e6f467e6251938860",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/screening.88086555a6662b206e00ae28fc9d3ca3.s616738081/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "screening.B.s616738081",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.B.s616738081/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "4e6045a76f2e2d52ff888cd727d0e8cd8c987ded7f0211a5813dc95f9eaecd60",
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/screening.B.s616738081/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  },
+  {
+   "unit_id": "screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081",
+   "run_id": "attempt5",
+   "deleted_path": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt5/screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081/model.safetensors",
+   "bytes": 2384234968,
+   "artifact_digest": "5577dbab1083268dc767d66a51efc527f6b93923d6765509c487c4c958414e9a",
+   "initialization_artifact_digest": "5d042dcc80212cfda0b97e10e21fca9c62574274bdc0d7e62a57e03a9e48f184",
+   "pod_path_when_produced": "/workspace/aad/artifacts/stage3/c2_behavioural/screening.d005dfb27e7bb5adc46eb988ae79e2a9.s616738081/checkpoints/step_001023/model",
+   "retained_beside_it": [
+    "c2_durable_unit.json",
+    "config.json",
+    "durable_ack.json",
+    "generation_config.json",
+    "per_sample.jsonl",
+    "probe_record.json",
+    "result.json"
+   ]
+  }
+ ]
+}

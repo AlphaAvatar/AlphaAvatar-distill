@@ -324,8 +324,12 @@ def test_the_harness_set_covers_the_launcher_driver_and_c1_science():
                      "scripts/experiments/phase_c1/session.py",
                      "scripts/experiments/phase_c1/isolation.py",
                      "src/aadistill/initialization/planning/fixed_path.py",
-                     "src/aadistill/initialization/operators/attention_activation.py",
-                     "src/aadistill/initialization/statistics/attention.py",
+                     #: The C1 science modules at their LIVE paths. `C1_EXECUTABLE`
+                     #: is derived from the tree, so this list moves with it; the
+                     #: HISTORICAL C1 harness declaration is a different constant
+                     #: and is deliberately not touched.
+                     "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+                     "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
                      "src/aadistill/initialization/planning/recovery.py",
                      "scripts/autoinit/score_recovery_search.py"):
         assert required in C1_EXECUTABLE, required

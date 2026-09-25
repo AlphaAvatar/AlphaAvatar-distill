@@ -52,6 +52,7 @@ from aadistill.initialization.calibration.profiles import (
 )
 from aadistill.initialization.specs.metrics import StateEvalSuite, StateEvaluation
 from aadistill.initialization.device import model_device
+from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
 from aadistill.initialization.statistics.spec import (
     DEFAULT_STATS_SPEC,
     StatsCache,
@@ -300,11 +301,16 @@ class BeamSearch:
         measurer: Measurer,
         root_spec: ArchSpec | None = None,
         deadline: "Deadline | None" = None,
+        execution: ExecutionConfig = DEFAULT_EXECUTION,
     ) -> None:
         self.adapter = adapter
         self.config = config
         #: Runtime only. Never hashed — see `Deadline`.
         self.deadline = deadline
+        #: Runtime only, for the same reason and by the same rule: HOW the
+        #: operators run. Deliberately NOT a `SearchConfig` field, because that
+        #: dataclass "fixes a search run, and therefore everything that hashes".
+        self.execution = execution
         self.root_teacher_id = root_teacher_id
         self.root_teacher_sha256 = root_teacher_sha256
         self.root_loader = root_loader
@@ -610,6 +616,7 @@ class BeamSearch:
             config=dict(operator_config),
             stats_cache=self.stats_cache,
             stats_cache_key=self._stats_key(parent, profile),
+            execution=self.execution,
             deadline=self.deadline)
 
         # Before the expansion, so a budget already spent does not buy one more

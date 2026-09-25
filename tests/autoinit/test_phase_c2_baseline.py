@@ -46,7 +46,7 @@ from experiments.phase_c2 import baseline as B  # noqa: E402
 @pytest.fixture
 def registered():
     """`attention.activation_importance_v1` is not a shipped default."""
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
     from experiments.phase_c2.search_space import register_c2_operators
 
     register_c2_operators()

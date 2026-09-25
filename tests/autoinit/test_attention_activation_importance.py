@@ -20,15 +20,15 @@ from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
 from aadistill.initialization.calibration.profiles import NO_CALIBRATION  # noqa: E402
 from aadistill.initialization.operators import get_implementation  # noqa: E402
-from aadistill.initialization.operators import attention_activation  # noqa: E402
-from aadistill.initialization.operators.attention_activation import (  # noqa: E402
+from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention.gqa.activation_importance import (  # noqa: E402
     ATTENTION_STATS_SPEC,
     attention_out_projection,
     select_q_heads_by_score,
 )
 from aadistill.initialization.operators.base import OperatorContext  # noqa: E402
 from aadistill.initialization.statistics.spec import DEFAULT_STATS_SPEC  # noqa: E402
-from aadistill.initialization.statistics.attention import (  # noqa: E402
+from aadistill.initialization.operators.attention.gqa._statistics import (  # noqa: E402
     AttentionHeadStatsCollector,
     head_write_energy,
 )

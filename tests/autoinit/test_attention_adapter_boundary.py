@@ -35,8 +35,12 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.device import model_device  # noqa: E402
-from aadistill.initialization.operators import attention_activation  # noqa: E402
-from aadistill.initialization.operators.attention_activation import (  # noqa: E402
+from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
+#: The grouped-head selection topology, shared by every GQA algorithm. These
+#: used to live inside the one operator that consumed them; they are the
+#: topology's contract, not that operator's, and the adapter-boundary tests
+#: below are about the topology.
+from aadistill.initialization.operators.attention.gqa._common import (  # noqa: E402
     ATTN_OUT_ROLE,
     QUERY_ROLE,
     attention_out_projection,
@@ -47,7 +51,7 @@ from aadistill.initialization.operators.base import (  # noqa: E402
     OperatorContext,
     get_implementation,
 )
-from aadistill.initialization.statistics.attention import AttentionHeadStatsCollector  # noqa: E402
+from aadistill.initialization.operators.attention.gqa._statistics import AttentionHeadStatsCollector  # noqa: E402
 
 ADAPTER = get_adapter("qwen3")
 IMPL = "attention.activation_importance_v1"
@@ -141,7 +145,7 @@ def test_the_collector_refuses_something_it_cannot_hook():
 
 def test_mutation_the_collector_source_names_no_family_attribute():
     """Reintroducing the walk must be visible, not merely unlikely."""
-    import aadistill.initialization.statistics.attention as AS
+    import aadistill.initialization.operators.attention.gqa._statistics as AS
 
     src = Path(AS.__file__).read_text()
     code = "\n".join(line for line in src.splitlines()

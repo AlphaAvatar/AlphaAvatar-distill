@@ -24,10 +24,11 @@ Size: `n_layers * n_heads * head_dim^2` float64. At the Phase-C1 parent
 residual second moments already cost — so this adds a small fraction of an
 existing budget rather than a new one.
 
-**Accumulate on the model's device.** The existing residual/FFN collector carries
-a comment earned the hard way: accumulating anywhere else is a cross-device add,
-and that is what killed Phase-A attempt 7. The same rule applies here, and
-`state()` moves the result to the host once, at the end.
+**Accumulate on the model's device.** Accumulating anywhere else is a
+cross-device add on every hooked call. The same rule the residual/FFN collector
+follows applies here, and `state()` moves the result to the host once, at the
+end. (This project has paid for the alternative; see
+`docs/core-provenance.md`.)
 
 Hooking the attention-output projection's *input* is deliberate: it already holds
 the concatenated per-head outputs, so nothing about the attention kernel, the GQA
@@ -86,6 +87,9 @@ class AttentionHeadStatsCollector:
             self.num_layers, self.num_heads, self.head_dim, self.head_dim,
             dtype=torch.float64, device=self.device)
         self.token_count = 0
+        #: See `_keep_valid`. `None` outside a padded forward, so a hook that
+        #: fires from a caller running the model directly reads "no padding".
+        self._valid_mask = None
 
         self._hooks = [m.register_forward_pre_hook(self._make_hook(i))
                        for i, m in enumerate(modules)]
@@ -103,6 +107,7 @@ class AttentionHeadStatsCollector:
                     f"layer {idx}: o_proj input width {flat.shape[-1]} != "
                     f"num_heads*head_dim ({expected}); the head layout this "
                     "collector assumes does not hold for this model")
+            flat = self._keep_valid(flat)
             a = flat.to(torch.float64).reshape(-1, self.num_heads, self.head_dim)
             # per head: sum_t a_h a_h^T  ->  (heads, head_dim, head_dim)
             self.head_sqsum[idx] += torch.einsum("thi,thj->hij", a, a)
@@ -110,11 +115,50 @@ class AttentionHeadStatsCollector:
                 self.token_count += a.shape[0]
         return hook
 
+    def _keep_valid(self, flat: torch.Tensor) -> torch.Tensor:
+        """Drop padded rows, or return the tensor untouched when none are padded.
+
+        `M_h = sum_t a_h a_h^T` and `token_count` are sums over **calibration**
+        tokens. A padded position contributes a garbage `a_h` and would inflate
+        both, which would change every head's score and therefore the selection.
+        When nothing is padded — every `process` call, and any batch of
+        equal-length items — this is a no-op, so the unbatched path performs the
+        operations it always did.
+        """
+        mask = self._valid_mask
+        if mask is None:
+            return flat
+        if mask.shape[0] != flat.shape[0]:
+            raise ValueError(
+                f"attention output has {flat.shape[0]} rows but the batch mask "
+                f"covers {mask.shape[0]}; the hooked projection did not receive "
+                "the batch this collector is processing")
+        return flat[mask]
+
     @torch.no_grad()
     def process(self, input_ids: torch.Tensor) -> None:
+        """One unpadded sequence. The reference path, routed through the batched
+        one so a single accumulation rule serves both."""
         if input_ids.dim() == 1:
             input_ids = input_ids.unsqueeze(0)
-        self.model(input_ids.to(self.device))
+        self._run(input_ids.to(self.device), attention_mask=None)
+
+    @torch.no_grad()
+    def process_batch(self, batch) -> None:
+        """A padded :class:`ItemBatch`. Same sufficient statistic, real tokens only."""
+        self._run(batch.input_ids.to(self.device),
+                  attention_mask=batch.attention_mask.to(self.device))
+
+    def _run(self, input_ids: torch.Tensor,
+             attention_mask: torch.Tensor | None) -> None:
+        padded = (attention_mask is not None
+                  and bool((attention_mask == 0).any()))
+        self._valid_mask = (attention_mask.reshape(-1).bool() if padded else None)
+        try:
+            self.model(input_ids, **({"attention_mask": attention_mask}
+                                     if attention_mask is not None else {}))
+        finally:
+            self._valid_mask = None
 
     def close(self) -> None:
         for h in self._hooks:
@@ -163,8 +207,8 @@ def head_write_energy(state: dict[str, torch.Tensor], layer: int,
         raise ValueError(
             f"o_proj input width {w.shape[-1]} != num_heads*head_dim "
             f"({num_heads * head_dim})")
-    # FAIL CLOSED, and do not repair it here. C1 attempt 9 died on this exact
-    # product with the statistics on the host and `o_proj.weight` on cuda:0.
+    # FAIL CLOSED, and do not repair it here. A host-resident statistic meeting
+    # a device-resident `o_proj.weight` raises, and that is the correct outcome.
     # Transferring silently would make this function guess which device the
     # caller meant, and hide a caller that forgot to build a working copy; the
     # co-location is the CALLER's contract (`attention_activation.apply` moves

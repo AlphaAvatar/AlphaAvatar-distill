@@ -118,7 +118,7 @@ class DeviceObservations:
 def observing(module):
     """Install the observers around one execution, then remove them.
 
-    `module` is `aadistill.initialization.operators.attention_activation`,
+    `module` is `aadistill.initialization.operators.attention.gqa.activation_importance`,
     passed in rather than imported here so this file names no experiment and a
     test can drive it against the same production module. Both `stats_to` and
     `head_write_energy` are bound INTO that module's namespace by its imports,

@@ -31,7 +31,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 import aadistill.initialization  # noqa: F401,E402
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
-from aadistill.initialization.operators import depth as depth_module  # noqa: E402
+from aadistill.initialization.execution import ExecutionConfig  # noqa: E402
+from aadistill.initialization.operators.depth import causal_kl_greedy as depth_module  # noqa: E402
 from aadistill.initialization.operators.base import (  # noqa: E402
     OperatorContext,
     get_implementation,
@@ -41,20 +42,28 @@ ADAPTER = get_adapter("qwen3")
 IMPL = "depth.causal_kl_greedy_v1"
 
 
-def apply_depth(model, parent_spec, target_spec, items, profile, *, cached: bool):
-    """Run the operator with the cache forced on or off."""
+def apply_depth(model, parent_spec, target_spec, items, profile, *, cached: bool,
+                batch_size: int | None = None):
+    """Run the operator with the cache forced on or off.
+
+    ``batch_size`` selects the execution path: ``1`` is the per-item reference
+    path, anything larger micro-batches. It is an execution property and the
+    cache contract is the same on both, which is why the tests below run both.
+    """
     original = depth_module._ReferenceLogits.__init__
 
     def patched(self, *args, **kwargs):
         original(self, *args, **kwargs)
         self.enabled = cached
 
+    execution = (ExecutionConfig() if batch_size is None
+                 else ExecutionConfig(micro_batch_size=batch_size))
     depth_module._ReferenceLogits.__init__ = patched
     try:
         return get_implementation(IMPL).execute(OperatorContext(
             adapter=ADAPTER, model=model, parent_spec=parent_spec,
             target_spec=target_spec, profile=profile, calibration_items=items,
-            seed=1234))
+            seed=1234, execution=execution))
     finally:
         depth_module._ReferenceLogits.__init__ = original
 
@@ -199,22 +208,40 @@ def test_the_reference_is_the_unbypassed_parent_even_when_recomputed(
     assert len(set(scores)) > 1, "every candidate scored identically"
 
 
+@pytest.mark.parametrize("batch_size", [1, 2, 64])
 def test_a_cached_reference_is_computed_once_per_item(
-        teacher, teacher_spec, target_spec, calibration_items, profile):
-    """The whole point of the cache: (evals + 1) * n_items, not 2 * evals."""
-    calls: list[str] = []
-    real_forward = depth_module._forward_logits
+        teacher, teacher_spec, target_spec, calibration_items, profile,
+        batch_size):
+    """The whole point of the cache: (evals + 1) * n_items, not 2 * evals.
 
-    def counting(model, item, device, skip=frozenset()):
+    Counted on **both** execution paths, and over both entry points. Micro-
+    batching moved the reference forward from `_forward_logits` to
+    `_forward_logits_batch`, so a counter watching only the first silently
+    observed nothing and passed — which is how this test first failed after the
+    batching refactor, on instrumentation rather than on the property. The
+    property itself is per-item and holds regardless of how many items share a
+    forward, so it is asserted per item here.
+    """
+    calls: list[str] = []
+    real_single = depth_module._forward_logits
+    real_batch = depth_module._forward_logits_batch
+
+    def counting_single(model, item, device, skip=frozenset()):
         if not skip:
             calls.append(item["item_id"])
-        return real_forward(model, item, device, skip)
+        return real_single(model, item, device, skip)
+
+    def counting_batch(model, batch, device, skip=frozenset()):
+        if not skip:
+            calls.extend(i["item_id"] for i in batch.items)
+        return real_batch(model, batch, device, skip)
 
     monkeypatch = pytest.MonkeyPatch()
-    monkeypatch.setattr(depth_module, "_forward_logits", counting)
+    monkeypatch.setattr(depth_module, "_forward_logits", counting_single)
+    monkeypatch.setattr(depth_module, "_forward_logits_batch", counting_batch)
     try:
         apply_depth(teacher, teacher_spec, target_spec, calibration_items,
-                    profile, cached=True)
+                    profile, cached=True, batch_size=batch_size)
     finally:
         monkeypatch.undo()
     assert sorted(calls) == sorted(i["item_id"] for i in calibration_items), (

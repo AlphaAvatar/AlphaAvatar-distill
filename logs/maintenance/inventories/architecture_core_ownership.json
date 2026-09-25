@@ -17,14 +17,12 @@
  "findings": [],
  "_deferred": "Instance prose inside the real-CUDA-validated execution surface. Reported, not rewritten: the review that accepted execution SHA 7027a8f4 directed that this surface not be modified. Not an exemption -- removing a path from CUDA_VALIDATED_SURFACE makes its findings count again.",
  "deferred_surface": [
-  "src/aadistill/initialization/operators/attention_activation.py",
-  "src/aadistill/initialization/statistics/attention.py",
   "src/aadistill/initialization/device.py",
   "src/aadistill/initialization/planning/fixed_path.py",
   "src/aadistill/initialization/adapters/__init__.py",
   "src/aadistill/initialization/adapters/qwen3.py"
  ],
- "deferred_total": 16,
+ "deferred_total": 10,
  "deferred_findings": [
   {
    "rule": "instance_prose",
@@ -91,52 +89,10 @@
   },
   {
    "rule": "instance_prose",
-   "path": "src/aadistill/initialization/operators/attention_activation.py",
-   "line": 21,
-   "name": "doc:Phase B",
-   "why": "a phase/attempt from this project's run history ('Phase B') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
-  },
-  {
-   "rule": "instance_prose",
-   "path": "src/aadistill/initialization/operators/attention_activation.py",
-   "line": 25,
-   "name": "doc:Phase-A",
-   "why": "a phase/attempt from this project's run history ('Phase-A') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
-  },
-  {
-   "rule": "instance_prose",
-   "path": "src/aadistill/initialization/operators/attention_activation.py",
-   "line": 241,
-   "name": "cmt:C1 attempt",
-   "why": "a phase/attempt from this project's run history ('C1 attempt') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
-  },
-  {
-   "rule": "instance_prose",
-   "path": "src/aadistill/initialization/operators/attention_activation.py",
-   "line": 244,
-   "name": "cmt:Attempt 9",
-   "why": "a phase/attempt from this project's run history ('Attempt 9') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
-  },
-  {
-   "rule": "instance_prose",
    "path": "src/aadistill/initialization/planning/fixed_path.py",
-   "line": 560,
+   "line": 564,
    "name": "doc:C1 session",
    "why": "a phase/attempt from this project's run history ('C1 session') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
-  },
-  {
-   "rule": "instance_prose",
-   "path": "src/aadistill/initialization/statistics/attention.py",
-   "line": 29,
-   "name": "doc:Phase-A",
-   "why": "a phase/attempt from this project's run history ('Phase-A') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
-  },
-  {
-   "rule": "instance_prose",
-   "path": "src/aadistill/initialization/statistics/attention.py",
-   "line": 166,
-   "name": "cmt:C1 attempt",
-   "why": "a phase/attempt from this project's run history ('C1 attempt') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
   }
  ],
  "authorizes": "nothing"

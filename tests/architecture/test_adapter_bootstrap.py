@@ -57,7 +57,7 @@ class TestNothingRegistersOnImport:
         out = in_fresh_process("""
             import aadistill.initialization.planning.search
             import aadistill.initialization.operators.depth
-            import aadistill.initialization.operators.attention
+            import aadistill.initialization.operators.attention.gqa.weight_proxy
             from aadistill.initialization.specs.arch import registered_families
             print(registered_families())
         """)

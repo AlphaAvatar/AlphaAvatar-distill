@@ -872,10 +872,13 @@ STAGE_1 = [
               'then-current path src/aadistill/autoinit/operators/depth.py',
               field="scientific_use", equals=False),
             E("scripts/autoinit/measure_causal_depth_runtime.py", "the measurement"),
-            E("src/aadistill/initialization/operators/depth.py",
+            E("src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
               "the Stage-1 structural operator whose runtime it prices — the "
-              "same module, at the path the initialization-core migration moved "
-              "it to"),
+              "same algorithm, cited at its LIVE path. It has moved twice: the "
+              "initialization-core migration renamed the package, and the "
+              "2026-09-25 topology migration split the flat depth module into "
+              "its two algorithms. The run's own harness records name the paths "
+              "that existed when it ran and are not rewritten"),
         ],
         external_material=[],
         decisions=[],

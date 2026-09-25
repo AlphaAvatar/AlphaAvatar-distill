@@ -29,7 +29,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.device import apply_cpu_budget, cpu_budget  # noqa: E402
-from aadistill.initialization.operators.depth import _forward_logits  # noqa: E402
+from aadistill.initialization.operators.depth.causal_kl_greedy import _forward_logits  # noqa: E402
 from aadistill.initialization.planning.search import (  # noqa: E402
     Deadline,
     SearchDeadlineExceeded,
@@ -76,7 +76,7 @@ def test_the_operator_source_carries_no_cpu_transfer_on_the_scoring_path():
     every number is identical. Only the wall clock changes, and only on a GPU."""
     import re
 
-    src = (REPO / "src/aadistill/initialization/operators/depth.py").read_text()
+    src = (REPO / "src/aadistill/initialization/operators/depth/causal_kl_greedy.py").read_text()
     code = "\n".join(l for l in src.splitlines()
                      if not l.lstrip().startswith("#"))
     # Docstrings explain the removed transfer; strip them before looking.

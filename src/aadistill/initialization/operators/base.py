@@ -42,6 +42,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
 from aadistill.initialization.specs.arch import ArchitectureAdapter, ArchSpec
 from aadistill.initialization.calibration.profiles import CalibrationProfile
 from aadistill.initialization.calibration.profiles import CalibrationNeed
@@ -132,6 +133,11 @@ class OperatorContext:
     #: impossible rather than merely discouraged. `None` disables sharing.
     stats_cache: Any = None
     stats_cache_key: str | None = None
+    #: HOW this invocation runs, as opposed to WHAT it computes. Never hashed
+    #: and never part of `OperatorStep.identity()`: two invocations differing
+    #: only here are the same scientific state. See
+    #: `aadistill.initialization.execution`.
+    execution: ExecutionConfig = field(default_factory=lambda: DEFAULT_EXECUTION)
     #: The search's wall-clock budget, or None. An operator whose work is
     #: measured in hours is expected to call `deadline.check(...)` inside its own
     #: loop: `depth.causal_kl_greedy_v1` ran 10.78 h against a 3.0 h budget

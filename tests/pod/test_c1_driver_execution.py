@@ -139,7 +139,7 @@ def test_all_c1_paths_are_c1_owned():
 
 @pytest.fixture
 def treatment_registered():
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
 
     attention_activation.register(replace=True)
     yield

@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
 from aadistill.initialization.calibration.profiles import (  # noqa: E402

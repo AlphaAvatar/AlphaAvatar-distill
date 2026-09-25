@@ -44,7 +44,7 @@ def registered():
     Leaking it would make any sibling test that enumerates the registry depend
     on whether this file ran first.
     """
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
 
     SS.register_c2_operators()
     try:

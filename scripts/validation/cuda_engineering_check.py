@@ -255,7 +255,7 @@ def run_suffix_case(cfg: dict, *, device: str, dtype_name: str,
     """
     from aadistill.initialization.calibration.profiles import (
         register_profile, unregister_profile)
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
     from aadistill.initialization.planning.fixed_path import (
         VerifiedSuffix, materialize_fixed_path, materialize_fixed_path_suffix,
         write_suffix_execution_record)
@@ -289,7 +289,7 @@ def _suffix_body(cfg, case, geometry, work, profile, adapter, build_root, *,
                  device, dtype_name, observing, VerifiedSuffix,
                  materialize, materialize_suffix, write_record) -> dict:
     import torch
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
     from aadistill.initialization.planning.fixed_path import (
         FixedPathSpec, FixedPathStep)
     from aadistill.initialization.specs.arch import ArchSpec

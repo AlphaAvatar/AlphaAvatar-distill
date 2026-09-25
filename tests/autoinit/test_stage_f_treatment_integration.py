@@ -40,7 +40,7 @@ from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathError,
     write_suffix_execution_record,
 )
-from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 from aadistill.initialization.operators.base import get_implementation  # noqa: E402
 
 from device_split import CrossDeviceUse, on_cache_device  # noqa: E402

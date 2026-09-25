@@ -84,9 +84,10 @@ class FFNActivationImportanceV0(OperatorImplementation):
         # derived from it and `topk` on it produces the index that slices parent
         # weights, so both must be where the weights are.
         compute = model_device(parent)
+        batch_size = ctx.execution.micro_batch_size
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
-            adapter, parent, (i["input_ids"] for i in ctx.calibration_items),
-            compute)), compute)
+            adapter, parent, ctx.calibration_items,
+            compute, batch_size=batch_size)), compute)
 
         new_spec = ctx.parent_spec.replace(**{FFN_FIELD: keep})
         builder = ChildBuilder(adapter, parent, new_spec, seed=ctx.seed)
@@ -131,6 +132,7 @@ class FFNActivationImportanceV0(OperatorImplementation):
                 },
                 detail={"per_layer_retained_share": retained_shares}),
             trace={"source": "activation_importance_topk",
+                   "micro_batch_size": batch_size,
                    "kept_fraction": keep / ctx.parent_spec[FFN_FIELD]},
             artifacts={"kept_neurons": kept_per_layer},
         )

@@ -47,7 +47,7 @@ def load(path: Path, name: str):
 
 @pytest.fixture(scope="module")
 def registered():
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
     from experiments.phase_c2.search_space import register_c2_operators
 
     register_c2_operators()

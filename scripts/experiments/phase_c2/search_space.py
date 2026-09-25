@@ -415,7 +415,7 @@ def register_c2_operators() -> None:
     explicit is correct; assuming somebody else did it is not.
     """
     from aadistill.initialization.adapters import register_builtin_adapters
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
     from aadistill.initialization.operators.register import (
         register_builtin_operators)
 

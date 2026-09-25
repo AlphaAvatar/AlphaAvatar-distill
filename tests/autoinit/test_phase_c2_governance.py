@@ -115,11 +115,14 @@ def test_the_closure_contains_what_a_c2_session_actually_runs():
             "src/aadistill/infrastructure/provider.py",
             "src/aadistill/infrastructure/remote.py",
             "src/aadistill/infrastructure/budget.py",
-            #: the operators the search composes
-            "src/aadistill/initialization/operators/attention_activation.py",
-            "src/aadistill/initialization/operators/depth.py",
-            "src/aadistill/initialization/operators/ffn.py",
-            "src/aadistill/initialization/operators/width.py",
+            #: the operators the search composes, at their LIVE paths. This
+            #: list describes what a C2 session would run today, so the 2026-09-25
+            #: topology migration moves it; the historical declarations that name
+            #: the old flat paths are elsewhere and are deliberately unchanged.
+            "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+            "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+            "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+            "src/aadistill/initialization/operators/width/residual/global_pca.py",
             "src/aadistill/initialization/planning/ranking.py",
             #: the declared non-python inputs
             "scripts/pod/autoinit_preflight_setup.sh",

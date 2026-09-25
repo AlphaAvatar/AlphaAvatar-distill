@@ -204,7 +204,7 @@ def test_the_operator_no_longer_asks_for_targets():
     """
     import ast
 
-    body = (REPO / "src/aadistill/initialization/operators/depth.py").read_text()
+    body = (REPO / "src/aadistill/initialization/operators/depth/causal_kl_greedy.py").read_text()
     tree = ast.parse(body)
     #: THE CAUSAL-KL CLASS's apply. depth.py defines two operators and
     #: `depth.positional_v0` comes first, so taking the first `apply` in the

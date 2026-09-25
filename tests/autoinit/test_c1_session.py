@@ -12,7 +12,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 
 from experiments.phase_c1 import session as C  # noqa: E402
-from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 from aadistill.initialization.operators import registered_implementations  # noqa: E402
 
 

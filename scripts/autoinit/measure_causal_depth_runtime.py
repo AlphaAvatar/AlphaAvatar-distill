@@ -191,7 +191,7 @@ def run_measurement(model, items, device, *, n_layers: int,
     have died inside lines no $0 path had ever run; a measurement job whose body
     only ever runs on a GPU would be the fifth.
     """
-    from aadistill.initialization.operators.depth import (
+    from aadistill.initialization.operators.depth.causal_kl_greedy import (
         _forward_logits,
         _ReferenceLogits,
     )

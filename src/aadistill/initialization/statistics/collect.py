@@ -15,9 +15,13 @@ Accumulation is float64 because residual streams contain large-magnitude
 outlier dimensions; float32 accumulation would lose precision in the
 ``E[xx^T] - mu mu^T`` centering step downstream.
 
-Sequences are processed one at a time (batch size 1) so no padding-mask
-handling can silently corrupt the statistics. Throughput on this stage is
-dominated by the teacher forward pass, not by batching.
+Sequences may be processed one at a time (``process``) or in padded micro-batches
+(``process_batch``). Both reduce over **real token positions only**: a padded
+position never reaches a sum, a second moment or a token count. ``process`` is
+the reference path and is implemented as a one-row batch, so there is one
+accumulation rule rather than two that could drift apart; when nothing is padded
+the mask is skipped entirely and the arithmetic is the arithmetic this collector
+has always performed.
 """
 
 from __future__ import annotations
@@ -70,6 +74,12 @@ class ActivationStatsCollector:
         self.token_counts = torch.zeros(self.vocab_size, dtype=torch.int64,
                                         device=dev)
 
+        #: Set for the duration of one forward when that forward is padded, and
+        #: `None` otherwise. Initialized here so a hook that fires outside
+        #: `_accumulate` — a caller running the model directly while the hooks
+        #: are attached — reads "nothing is padded" rather than an AttributeError.
+        self._valid_mask = None
+
         self._hooks = []
         for idx, layer in enumerate(layers):
             down_proj = getattr(getattr(layer, "mlp", None), "down_proj", None)
@@ -81,33 +91,93 @@ class ActivationStatsCollector:
 
     def _make_ffn_hook(self, idx: int):
         def hook(_module, args):
-            a = args[0].detach().reshape(-1, self.intermediate_size).to(torch.float64)
+            a = args[0].detach().reshape(-1, self.intermediate_size)
+            a = self._keep_valid(a).to(torch.float64)
             self.ffn_abs_sum[idx] += a.abs().sum(0)
             self.ffn_sq_sum[idx] += (a * a).sum(0)
         return hook
 
+    def _keep_valid(self, flat: torch.Tensor) -> torch.Tensor:
+        """Drop padded rows from a ``[B*T, ...]`` tensor.
+
+        Returns the tensor UNTOUCHED when nothing is padded — which is every
+        ``process`` call, and every batch whose items happen to share a length.
+        That is not only a saving: it means the unbatched reference path
+        performs exactly the operations it performed before this collector
+        learned to batch, so its accumulators are bit-identical rather than
+        merely equivalent.
+        """
+        mask = self._valid_mask
+        if mask is None:
+            return flat
+        if mask.shape[0] != flat.shape[0]:
+            raise ValueError(
+                f"activation has {flat.shape[0]} rows but the batch mask "
+                f"covers {mask.shape[0]}; the hooked module did not receive "
+                "the batch this collector is processing")
+        return flat[mask]
+
     @torch.no_grad()
     def process(self, input_ids: torch.Tensor) -> int:
-        """Accumulate statistics from one unpadded sequence of shape (1, T)."""
+        """Accumulate statistics from one unpadded sequence of shape (1, T).
+
+        The reference path. Kept as its own entry point — every existing caller
+        uses it — and implemented through the batched one so the two cannot
+        diverge.
+        """
         if input_ids.dim() != 2 or input_ids.shape[0] != 1:
             raise ValueError(f"Expected shape (1, T), got {tuple(input_ids.shape)}")
-        out = self.model(input_ids.to(self.model.device), output_hidden_states=True)
-        hs = out.hidden_states
-        assert len(hs) == self.res_sum.shape[0], (
-            f"Expected {self.res_sum.shape[0]} hidden state points, got {len(hs)}"
-        )
-        n_tokens = input_ids.shape[1]
-        for point, h in enumerate(hs):
-            x = h[0].to(torch.float64)
-            self.res_sum[point] += x.sum(0)
-            self.res_sqsum[point] += x.T @ x
-        self.res_count += n_tokens
-        # On the accumulator's device: `bincount` on the host would produce a
-        # host tensor and the `+=` would be the same cross-device add again.
-        self.token_counts += torch.bincount(
-            input_ids[0].to(self.token_counts.device), minlength=self.vocab_size
-        )
-        return n_tokens
+        return self._accumulate(input_ids.to(self.model.device),
+                                attention_mask=None)
+
+    @torch.no_grad()
+    def process_batch(self, batch) -> int:
+        """Accumulate statistics from a padded :class:`ItemBatch`.
+
+        The sufficient statistics are identical in definition to the per-item
+        path: `sum_t x`, `sum_t x x^T`, `sum_t |a|`, `sum_t a^2` and the token
+        histogram, all over the batch's **real** tokens. Only the order in which
+        the accelerator adds them moves.
+        """
+        return self._accumulate(batch.input_ids.to(self.model.device),
+                                attention_mask=batch.attention_mask.to(
+                                    self.model.device))
+
+    def _accumulate(self, input_ids: torch.Tensor,
+                    attention_mask: torch.Tensor | None) -> int:
+        padded = (attention_mask is not None
+                  and bool((attention_mask == 0).any()))
+        #: Read by the FFN hooks during the forward below, and cleared after it.
+        #: `None` means "nothing is padded", which is what keeps the reference
+        #: path free of an indexing op it never had.
+        self._valid_mask = (attention_mask.reshape(-1).bool() if padded else None)
+        try:
+            out = self.model(
+                input_ids,
+                output_hidden_states=True,
+                **({"attention_mask": attention_mask}
+                   if attention_mask is not None else {}))
+            hs = out.hidden_states
+            assert len(hs) == self.res_sum.shape[0], (
+                f"Expected {self.res_sum.shape[0]} hidden state points, got {len(hs)}"
+            )
+            for point, h in enumerate(hs):
+                x = self._keep_valid(h.reshape(-1, self.hidden_size)).to(torch.float64)
+                self.res_sum[point] += x.sum(0)
+                self.res_sqsum[point] += x.T @ x
+            flat_ids = input_ids.reshape(-1)
+            if self._valid_mask is not None:
+                flat_ids = flat_ids[self._valid_mask]
+            n_tokens = int(flat_ids.shape[0])
+            self.res_count += n_tokens
+            # On the accumulator's device: `bincount` on the host would produce a
+            # host tensor and the `+=` would be the same cross-device add again.
+            self.token_counts += torch.bincount(
+                flat_ids.to(self.token_counts.device), minlength=self.vocab_size
+            )
+            return n_tokens
+        finally:
+            self._valid_mask = None
 
     def close(self) -> None:
         for h in self._hooks:

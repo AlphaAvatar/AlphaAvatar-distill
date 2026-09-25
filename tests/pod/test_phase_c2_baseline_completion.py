@@ -243,9 +243,16 @@ def test_the_protocol_binds_the_identities_it_claims_to():
     assert len(bound["evaluator_implementation_sha256"]) == 4
     drift = _live_evaluator_drift()
     moved = sorted(p for p, v in drift.items() if not v["matches"])
-    assert moved == ["src/aadistill/initialization/planning/metrics.py"], (
-        f"bound evaluator files that no longer match the tree: {moved}. One is "
-        "expected and recorded; a different set is an undocumented change.")
+    #: Read from the lineage record rather than hardcoded, so a file that
+    #: drifts WITHOUT an entry there still fails. The list grew from one to two
+    #: when the operator/batching round threaded a defaulted `execution`
+    #: parameter through `fixed_path.py`; each mover carries its own reason.
+    documented = sorted(m["path"] for m in
+                        json.loads(LINEAGE.read_text())["moved_files"])
+    assert moved == documented, (
+        f"bound evaluator files that no longer match the tree: {moved}. Each "
+        f"must be recorded in the evaluator lineage; documented: {documented}. "
+        "An undocumented change is what this refuses.")
     for path, entry in drift.items():
         assert len(entry["frozen"]) == 64 and len(entry["live"]) == 64, path
     #: And the reason is written down where a reader will look, not only here.
@@ -578,11 +585,16 @@ def test_the_frozen_contract_refuses_a_replay_under_the_optimized_evaluator(
 
     drift = _live_evaluator_drift()
     moved = sorted(p for p, v in drift.items() if not v["matches"])
-    assert moved == ["src/aadistill/initialization/planning/metrics.py"], (
+    #: Read from the lineage record rather than hardcoded, so a file that
+    #: drifts WITHOUT an entry there still fails. The list grew from one to two
+    #: when the operator/batching round threaded a defaulted `execution`
+    #: parameter through `fixed_path.py`; each mover carries its own reason.
+    documented = sorted(m["path"] for m in
+                        json.loads(LINEAGE.read_text())["moved_files"])
+    assert moved == documented, (
         "the set of bound evaluator files that no longer match the tree is "
-        f"{moved}. Exactly one is expected to have moved -- the state-eval "
-        "reduction -- and it is recorded in the evaluator-lineage decision. A "
-        "different set means something else drifted and needs its own reading.")
+        f"{moved}; the lineage records {documented}. Every mover needs its own "
+        "reading -- an unrecorded one means something else drifted.")
 
     loads: list[str] = []
     monkeypatch.setattr(D.BaselineCompletionDriver, "load_original_teacher",

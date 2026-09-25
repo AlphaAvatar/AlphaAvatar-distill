@@ -577,3 +577,33 @@ Two specifics the mechanism encodes:
 
 Owner of the full account:
 `logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md`.
+
+## GQA attention operators — provenance relocated 2026-09-25
+
+Moved out of `operators/attention/gqa/_statistics.py` and
+`operators/attention/gqa/activation_importance.py` when the operators were
+organised by topology. The mechanisms stayed; only this project's
+campaign-instance detail moved here, which is what
+`tests/architecture/test_core_ownership.py::instance_prose` asks for.
+
+**Accumulating attention statistics off the model's device.** Phase-A attempt 7
+died on a cross-device add in the residual/FFN collector. The per-head second
+moment follows the same rule for the same reason: the hook receives activations
+from the model, so an accumulator anywhere else is a cross-device add on every
+call. `state()` performs the single host transfer at the end.
+
+**`head_write_energy` fails closed on a device mismatch.** C1 attempt 9 handed
+`state()`'s host-resident snapshot straight to that function, where it met
+`o_proj.weight` on `cuda:0` and raised. The repair was a per-invocation working
+copy in the caller (`stats_to`), not a silent transfer inside the function: a
+transfer there would guess which device the caller meant and hide a caller that
+forgot to build the copy.
+
+**Why `activation_importance` is its own module.** `operators/attention.py` and
+`operators/__init__.py` were both members of `CONTINUATION_SOURCE_FILES_V2`, the
+executable source set Phase B's closed preregistration binds to digest
+`a5ce6311789e…`. Adding a class to either would have moved that digest and left
+a frozen historical document describing code that did not exist when it ran.
+(The 2026-09-25 topology migration moved those files anyway, prospectively and
+by maintainer instruction; the historical declarations were preserved exactly
+and now refuse, which is the intended behaviour.)

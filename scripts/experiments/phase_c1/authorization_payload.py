@@ -86,7 +86,7 @@ def frozen_plan_hash(repo_root: str | Path = ".") -> str:
     """
     from experiments.phase_c1 import session as CS
     from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan, derive_recovery_seeds
-    from aadistill.initialization.operators import attention_activation
+    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
 
     cfg = load_config(repo_root)
     attention_activation.register(replace=True)

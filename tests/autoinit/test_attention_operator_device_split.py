@@ -35,12 +35,12 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
 from aadistill.initialization.device import model_device  # noqa: E402
-from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 from aadistill.initialization.operators.base import (  # noqa: E402
     OperatorContext,
     get_implementation,
 )
-from aadistill.initialization.statistics.attention import head_write_energy  # noqa: E402
+from aadistill.initialization.operators.attention.gqa._statistics import head_write_energy  # noqa: E402
 
 from device_split import CrossDeviceUse, on_cache_device  # noqa: E402
 from factory_placement import RecordFactories  # noqa: E402
@@ -50,7 +50,7 @@ IMPL = "attention.activation_importance_v1"
 
 def out_projections_of(model):
     """The attention-output projections, resolved the way production does."""
-    from aadistill.initialization.operators.attention_activation import attention_out_projection
+    from aadistill.initialization.operators.attention.gqa._common import attention_out_projection
     return [attention_out_projection(ADAPTER, b) for b in ADAPTER.blocks(model)]
 
 
@@ -177,7 +177,7 @@ def test_A4_the_device_accumulator_is_released_after_the_snapshot(
 
 
 def test_A5_a_released_collector_refuses_to_report_state(teacher, geo):
-    from aadistill.initialization.statistics.attention import AttentionHeadStatsCollector
+    from aadistill.initialization.operators.attention.gqa._statistics import AttentionHeadStatsCollector
 
     c = AttentionHeadStatsCollector(teacher, out_projections_of(teacher),
                                     num_heads=geo["num_attention_heads"],
@@ -234,7 +234,7 @@ def test_B3_mutation_an_unplaced_empty_is_caught_even_though_cpu_math_works():
     A test that only checked the returned numbers could never see this, which is
     why the defect reached a paid pod behind the first one.
     """
-    import aadistill.initialization.statistics.attention as AS
+    import aadistill.initialization.operators.attention.gqa._statistics as AS
 
     src = Path(AS.__file__).read_text()
     assert "device=w.device" in src, "the placement was removed"
@@ -257,7 +257,7 @@ def test_B4_the_co_location_check_fails_closed():
 
 def test_B4b_the_check_names_both_devices_and_the_owner_of_the_transfer():
     """A fail-closed error is only useful if it says whose job the fix is."""
-    import aadistill.initialization.statistics.attention as AS
+    import aadistill.initialization.operators.attention.gqa._statistics as AS
 
     src = Path(AS.__file__).read_text()
     block = src.split("def head_write_energy")[1]

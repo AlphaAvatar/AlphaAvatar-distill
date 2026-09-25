@@ -527,17 +527,155 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "degrades to 'ownership cannot be established' instead of raising "
             "immediately after a pod starts billing.",
      }),
+    ("ab53ba1422afd6324efb4964e129dfabb581dd10",
+     "operators organised by topology, and calibration forwards micro-batched",
+     {
+        "src/aadistill/initialization/calibration/batching.py":
+            "NEW. The one place a sequence of calibration items becomes padded "
+            "micro-batches and per-item results come back out: right padding so "
+            "real tokens keep the position index they occupy alone, an explicit "
+            "attention_mask, true per-row lengths, and `split_predictions` / "
+            "`valid_tokens` to undo the padding. Batch size is configuration-"
+            "driven with a stated default and 1 is the reference path. Family-, "
+            "operator- and stage-neutral.",
+        "src/aadistill/initialization/statistics/collect.py":
+            "`process_batch` beside `process`, and ONE accumulation rule serving "
+            "both: residual moments, FFN moments and the token histogram now "
+            "reduce over a valid-position mask. Padded positions reach no "
+            "accumulator. `process` is implemented as a one-row batch and its "
+            "numbers are bit-identical -- the mask is skipped entirely when "
+            "nothing is padded, so the reference path performs the operations it "
+            "always did.",
+        "src/aadistill/initialization/operators/_common.py":
+            "`collect_activation_stats` gained `batch_size`/`pad_id` and accepts "
+            "items as well as bare id tensors, so FFN, RESIDUAL_WIDTH and "
+            "COMPOSITE_STAGE1 share one batched forward loop instead of three. "
+            "`head_rows` LEFT for `attention/gqa/_common.py`: concatenated-per-"
+            "head row arithmetic is a GQA fact, not a kind-neutral one.",
+        "src/aadistill/initialization/planning/search.py":
+            "`OperatorStep.config_hash` now also excludes "
+            "`calibration_micro_batch_size`. That hash feeds `compute_state_id`, "
+            "so leaving the key in would make a state id depend on the hardware "
+            "a run happened to fit. Inert on every existing record -- no current "
+            "path puts the key in `operator_config`, so the hashed dict is empty "
+            "before and after.",
+        "src/aadistill/initialization/operators/__init__.py":
+            "re-exports follow the new module paths; no behaviour.",
+        "src/aadistill/initialization/operators/register.py":
+            "imports follow the new module paths. Registration stays explicit "
+            "and `attention.activation_importance_v1` stays out of "
+            "`BUILTIN_OPERATORS`.",
+        "src/aadistill/initialization/operators/attention/__init__.py":
+            "NEW package. Names only; registers nothing.",
+        "src/aadistill/initialization/operators/attention/gqa/__init__.py":
+            "NEW package. Names only; registers nothing.",
+        "src/aadistill/initialization/operators/attention/gqa/_common.py":
+            "NEW. The grouped-head selection topology every GQA algorithm "
+            "shares, moved here unchanged from the operator and the kind-neutral "
+            "_common: `head_rows`, the `q`/`attn_out` role resolution, "
+            "`select_q_heads_by_score`, and the MHA/divisibility applicability "
+            "rule now named once instead of restated per operator.",
+        "src/aadistill/initialization/operators/attention/gqa/_statistics.py":
+            "MOVED from `statistics/attention.py` -- the per-query-head second "
+            "moment is a GQA sufficient statistic, not a universal one. Gained "
+            "`process_batch` and a valid-position mask so padding cannot inflate "
+            "`M_h` or `attn_token_count`.",
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py":
+            "MOVED from `operators/attention_activation.py`. impl_id, kind, "
+            "version, capabilities, calibration need and selection semantics "
+            "unchanged; the statistics pass is micro-batched and the topology "
+            "helpers are imported rather than defined here.",
+        "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py":
+            "MOVED from `operators/attention.py`. Weight-only, runs no forward; "
+            "only its `head_rows` import moved.",
+        "src/aadistill/initialization/operators/ffn/__init__.py":
+            "NEW package. Names only; registers nothing.",
+        "src/aadistill/initialization/operators/ffn/dense/__init__.py":
+            "NEW package. Names only; registers nothing.",
+        "src/aadistill/initialization/operators/ffn/dense/activation_importance.py":
+            "MOVED from `operators/ffn.py`; resolves and passes a micro-batch "
+            "size. Selection unchanged.",
+        "src/aadistill/initialization/operators/width/__init__.py":
+            "NEW package. Names only; registers nothing.",
+        "src/aadistill/initialization/operators/width/residual/__init__.py":
+            "NEW package. Names only; registers nothing.",
+        "src/aadistill/initialization/operators/width/residual/global_pca.py":
+            "MOVED from `operators/width.py`; resolves and passes a micro-batch "
+            "size. Kind stays RESIDUAL_WIDTH and impl_id stays "
+            "`width.global_pca_v0`.",
+        "src/aadistill/initialization/operators/depth/__init__.py":
+            "NEW package. Names only; registers nothing.",
+        "src/aadistill/initialization/operators/depth/_common.py":
+            "NEW. `DEPTH_FIELD` and `_build_child_with_layers`, which both DEPTH "
+            "algorithms share. No topology level under DEPTH: removing a decoder "
+            "block is the same operation whatever is inside it.",
+        "src/aadistill/initialization/operators/depth/positional.py":
+            "SPLIT out of `operators/depth.py` unchanged. Takes no measurement "
+            "and runs no forward.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "SPLIT out of `operators/depth.py`, and the one operator whose "
+            "forwards are micro-batched: `_forward_logits_batch` and "
+            "`_ReferenceLogits.get_batch`. THE SCORE IS UNCHANGED -- one "
+            "`forward_kl_mean` per ORIGINAL item over its own prediction "
+            "positions with the same chunk boundaries, then the same subtype mean "
+            "and the same domain balance. A cached reference is CLONED off the "
+            "padded block so the cache's own byte budget still describes what is "
+            "resident. Telemetry gained `ablated_items` beside `ablated_forwards`, "
+            "which now counts forwards rather than items.",
+        "src/aadistill/initialization/operators/composite/__init__.py":
+            "NEW package. Names only; registers nothing.",
+        "src/aadistill/initialization/operators/composite/stage1_sandwich.py":
+            "MOVED from `operators/composite.py`; reads the micro-batch size "
+            "from `ctx.execution`. The monolithic recipe itself is untouched.",
+        "src/aadistill/initialization/execution.py":
+            "NEW. `ExecutionConfig` — HOW an operator runs, structurally "
+            "separated from the `config` mapping that is hashed into "
+            "`OperatorStep.config_hash` and therefore into the state id. Batch "
+            "size lives here so it CANNOT fork a scientific identity; the "
+            "alternative, excluding a key by name when hashing, would make the "
+            "exclusion list the real definition of 'scientific' and would fork "
+            "every state id the first time someone forgot to extend it.",
+        "src/aadistill/initialization/operators/base.py":
+            "`OperatorContext` gained `execution: ExecutionConfig`, defaulting "
+            "to the shared default. Additive: every existing construction "
+            "behaves exactly as before, and the field is deliberately not "
+            "readable from `OperatorStep.identity()`.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "`materialize_fixed_path`, `materialize_fixed_path_suffix` and the "
+            "shared step loop take `execution` and pass it into the context — "
+            "the same runtime-only treatment `deadline` already had. No "
+            "operator ordering, gating, identity or artifact behaviour moves. "
+            "NOTE: this file is on the HISTORICAL CUDA surface; that validation "
+            "is not repointed at this change and a new one is owed.",
+     }),
 )
 
 #: The tip the CURRENT round was reviewed at.
 REVIEWED_TIP = ROUNDS[-1][0]
 
-#: The GPU-validated execution commit. Named here because it is what the
-#: preserved surface's bytes are claimed to still match.
-EXECUTION_SHA = "7027a8f4c0a7684c892b483a2193025cc26c1b58"
+# --- historical CUDA validation, and the current one ------------------------
+#
+# These are two different facts and this file keeps them apart.
+#
+# The HISTORICAL validation ran on 2026-09-10 at execution SHA 7027a8f4 against
+# the flat operator layout. That fact is immutable and is not repointed: the
+# evidence names the bytes it actually executed, and no later refactor can make
+# that SHA validate code it never saw. Three of the six paths it names no longer
+# exist, because the topology migration moved them -- so the correct CURRENT
+# assertion about the historical surface is an explicit REFUSAL to revalidate
+# it here, not a demand that yesterday's experiment resolve against today's
+# packages.
+#
+# The CURRENT validation is a separate record with its own SHA and its own
+# surface, derived from what the batched execution path actually reads rather
+# than inherited from the old tuple.
 
-#: Verbatim from the review's clause 5, resolved to files.
-CUDA_VALIDATED_SURFACE = (
+#: The GPU execution commit of the 2026-09-10 validation. Historical.
+HISTORICAL_EXECUTION_SHA = "7027a8f4c0a7684c892b483a2193025cc26c1b58"
+
+#: Verbatim from that review's clause 5, resolved to the files as they were
+#: named THEN. Preserved exactly; not repointed at the migrated paths.
+HISTORICAL_CUDA_VALIDATED_SURFACE = (
     "src/aadistill/initialization/operators/attention_activation.py",
     "src/aadistill/initialization/statistics/attention.py",
     "src/aadistill/initialization/device.py",
@@ -546,6 +684,67 @@ CUDA_VALIDATED_SURFACE = (
     "src/aadistill/initialization/adapters/qwen3.py",
 )
 
+#: Where each moved path's content went, so the refusal can say so rather than
+#: merely reporting an absence.
+HISTORICAL_SURFACE_SUCCESSORS = {
+    "src/aadistill/initialization/operators/attention_activation.py":
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/statistics/attention.py":
+        "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+}
+
+#: The surface the NEXT real-CUDA validation must cover: every file whose
+#: semantics materially determine a batched calibration forward. Derived from
+#: the execution path, not inherited -- `batching.py` and the topology-local
+#: statistics module are here because the batched result depends on them, and
+#: `weight_proxy` / `positional` are absent because they run no forward.
+CURRENT_CUDA_SURFACE = (
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+)
+
+#: Backwards-compatible alias for the constraint that a declared core change may
+#: not quietly cover a file the HISTORICAL review pinned.
+CUDA_VALIDATED_SURFACE = HISTORICAL_CUDA_VALIDATED_SURFACE
+
+
+#: Core modules a later round MOVED, mapped to where their content went.
+#:
+#: A declaration names the path a change landed on *at the time that round was
+#: reviewed*. When a later round reorganises the package, an earlier round's
+#: declared path can stop existing — and then it is in the expected set forever
+#: while the live diff can never report it again, because a deleted file has no
+#: content to classify as semantic.
+#:
+#: The fix is NOT to edit the earlier round: that round really did declare that
+#: path, and rewriting it would falsify what was reviewed. The two things are
+#: simply different questions — *what did that round declare* (historical) and
+#: *what does the tree contain now* (current) — and this table is the join
+#: between them. An entry is only admissible when the round that performed the
+#: move declares the destination, which the assertion below enforces.
+MOVED_BY_A_LATER_ROUND: dict[str, tuple[str, ...]] = {
+    "src/aadistill/initialization/operators/depth.py": (
+        "src/aadistill/initialization/operators/depth/_common.py",
+        "src/aadistill/initialization/operators/depth/positional.py",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    ),
+}
+
 
 def declared_from(round_index: int) -> dict[str, str]:
     """Every semantic change declared by this round and every later one.
@@ -553,10 +752,22 @@ def declared_from(round_index: int) -> dict[str, str]:
     Measured from an older base, a later round's declared change is also in the
     diff -- so the expected set for round i is the union from i onward, and
     nothing else is admissible.
+
+    A path a later round moved away is dropped, because the tree cannot report
+    it any more; its successors are declared by the round that moved it and are
+    checked like any other entry.
     """
     out: dict[str, str] = {}
     for _tip, _label, changes in ROUNDS[round_index:]:
         out.update(changes)
+    for gone, successors in MOVED_BY_A_LATER_ROUND.items():
+        if gone in out and not Path(gone).exists():
+            missing = [s for s in successors if s not in out]
+            assert not missing, (
+                f"{gone} was moved but its successors are undeclared: {missing}. "
+                "A move is only accounted for when the round that performed it "
+                "declares where the content went.")
+            out.pop(gone)
     return out
 
 
@@ -614,29 +825,92 @@ def is_semantic(base: str, path: str) -> bool:
     return shape(before) != shape((REPO / path).read_text())
 
 
-# --- 1. the preserved surface did not move ----------------------------------
+# --- 1. the two CUDA validations, kept apart --------------------------------
 
-@pytest.mark.parametrize("path", CUDA_VALIDATED_SURFACE)
-def test_the_validated_file_is_byte_identical_to_the_reviewed_tip(path):
-    assert (REPO / path).is_file(), path
-    before = git("show", f"{REVIEWED_TIP}:{path}")
-    assert (REPO / path).read_text() == before, (
-        f"{path} is on the CUDA-validated execution surface and has changed. "
-        "Report whether a CUDA rerun is required; do not claim execution SHA "
-        f"{EXECUTION_SHA[:8]} validates it.")
+@pytest.mark.parametrize("path", HISTORICAL_CUDA_VALIDATED_SURFACE)
+def test_the_historical_surface_is_either_intact_or_explicitly_not_revalidatable(path):
+    """One assertion, two admissible outcomes, and no third.
+
+    A path the migration did not touch must still be byte-identical to the
+    commit the GPU evidence names -- that claim is unchanged and still checked.
+
+    A path the migration MOVED cannot satisfy that and must not pretend to: the
+    file is gone, its content lives somewhere the 2026-09-10 run never executed,
+    and the honest current statement is that the historical validation is not
+    revalidatable against this tree. What is forbidden is the middle case -- a
+    file still sitting at its historical path with different bytes, which would
+    let `7027a8f4` appear to validate code it never saw.
+    """
+    live = REPO / path
+    successor = HISTORICAL_SURFACE_SUCCESSORS.get(path)
+    if not live.is_file():
+        assert successor is not None, (
+            f"{path} is on the historical CUDA surface, is absent from the tree, "
+            "and no successor is recorded. An unexplained absence is exactly "
+            "what this check exists to refuse.")
+        assert (REPO / successor).is_file(), (
+            f"{path} was moved to {successor}, which does not exist either")
+        assert git("show", f"{HISTORICAL_EXECUTION_SHA}:{path}"), (
+            "the historical bytes must remain retrievable from the commit the "
+            "evidence names, which is what keeps the old fact true")
+        return
+    if path in HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION:
+        #: Changed on purpose, declared, and owed a NEW validation. The old
+        #: evidence is explicitly NOT claimed for it -- which is the whole
+        #: point of saying so here instead of quietly widening the tuple.
+        assert path in CURRENT_CUDA_SURFACE
+        return
+    assert live.read_text() == git("show", f"{HISTORICAL_EXECUTION_SHA}:{path}"), (
+        f"{path} still sits at its historical path but its bytes differ from "
+        f"execution SHA {HISTORICAL_EXECUTION_SHA[:8]}. Either restore it or "
+        "move it and record a successor; do not let the old evidence appear to "
+        "cover new code.")
 
 
-@pytest.mark.parametrize("path", CUDA_VALIDATED_SURFACE)
-def test_it_is_also_identical_to_the_gpu_execution_commit(path):
-    """The stronger form: identical to the commit that actually ran on CUDA,
-    not merely to the tip this session started from."""
-    assert (REPO / path).read_text() == git("show", f"{EXECUTION_SHA}:{path}"), (
-        f"{path} differs from the commit the GPU evidence names")
+def test_the_historical_validation_is_not_repointed_at_the_new_code():
+    """The specific misreport item 4 forbids.
+
+    No file the migration created may be listed on the historical surface. If
+    one ever were, `7027a8f4` would be claimed to have validated code written
+    weeks after it ran.
+    """
+    born_after = {
+        "src/aadistill/initialization/calibration/batching.py",
+        "src/aadistill/initialization/execution.py",
+        *HISTORICAL_SURFACE_SUCCESSORS.values(),
+    }
+    assert not (born_after & set(HISTORICAL_CUDA_VALIDATED_SURFACE)), (
+        "the historical CUDA surface names code that did not exist when it ran")
 
 
-def test_none_of_them_appears_in_this_sessions_diff(changed_core):
-    overlap = sorted(set(changed_core) & set(CUDA_VALIDATED_SURFACE))
-    assert overlap == [], f"validated surface touched: {overlap}"
+def test_the_current_surface_is_derived_from_the_batched_execution_path():
+    """Minimal but truthful: every file on it exists and actually participates."""
+    for path in CURRENT_CUDA_SURFACE:
+        assert (REPO / path).is_file(), f"current CUDA surface names {path}"
+    # The two operators that run no calibration forward are deliberately absent.
+    for absent in ("operators/attention/gqa/weight_proxy.py",
+                   "operators/depth/positional.py"):
+        assert f"src/aadistill/initialization/{absent}" not in CURRENT_CUDA_SURFACE, (
+            f"{absent} performs no calibration forward; batching cannot change "
+            "its result, so it does not belong on the batched-execution surface")
+    # ... and every operator that DOES run one is present.
+    for required in ("attention/gqa/activation_importance",
+                     "depth/causal_kl_greedy",
+                     "ffn/dense/activation_importance",
+                     "width/residual/global_pca",
+                     "composite/stage1_sandwich"):
+        assert any(required in p for p in CURRENT_CUDA_SURFACE), required
+    assert "src/aadistill/initialization/calibration/batching.py" in CURRENT_CUDA_SURFACE
+
+
+def test_no_declared_change_hides_behind_the_historical_surface(changed_core):
+    """A file still at a historical path must not be edited silently."""
+    still_there = [p for p in HISTORICAL_CUDA_VALIDATED_SURFACE
+                   if (REPO / p).is_file()]
+    overlap = sorted(set(changed_core) & set(still_there)
+                     - set(declared_from(len(ROUNDS) - 1)))
+    assert overlap == [], (
+        f"historical surface touched without declaring it: {overlap}")
 
 
 # --- 2. every other change is prose-only, or declared ----------------------
@@ -716,8 +990,37 @@ def test_the_prose_sweep_actually_covered_the_core():
         "sweep was expected to reach far more than that")
 
 
+#: Historical-surface files this round deliberately changed, each owing the NEW
+#: CUDA validation rather than claiming cover from the old one. Kept as an
+#: explicit, reviewable list: a file may not drift onto the validated surface
+#: silently, and the test below requires every entry to be declared by the
+#: current round and to appear on the current validation surface.
+HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION = (
+    "src/aadistill/initialization/planning/fixed_path.py",
+)
+
+
 def test_no_declared_change_touches_the_validated_surface():
-    assert not (set(declared_from(0)) & set(CUDA_VALIDATED_SURFACE))
+    """A declared change may not silently cover a historically pinned file.
+
+    The exception is narrow and named. `fixed_path.py` is on the 2026-09-10
+    surface AND had to gain the `execution` parameter, because that file is
+    where the fixed-path route builds an `OperatorContext`. That does not make
+    the old evidence cover it — it makes a NEW validation owed, which is why
+    every exception must also be on `CURRENT_CUDA_SURFACE`.
+    """
+    touched = set(declared_from(0)) & set(HISTORICAL_CUDA_VALIDATED_SURFACE)
+    unexplained = sorted(touched - set(HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION))
+    assert unexplained == [], (
+        "declared core changes touch the historical CUDA surface without being "
+        f"listed as pending revalidation: {unexplained}")
+    for path in HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION:
+        assert path in declared_from(len(ROUNDS) - 1), (
+            f"{path} claims a revalidation exception but the current round does "
+            "not declare it")
+        assert path in CURRENT_CUDA_SURFACE, (
+            f"{path} changed under a historical CUDA pin and is not on the "
+            "current validation surface, so nothing would ever re-validate it")
 
 
 # --- the geometries the validation ran are unchanged too --------------------
@@ -725,6 +1028,6 @@ def test_no_declared_change_touches_the_validated_surface():
 def test_the_two_validation_geometries_are_unchanged():
     """`suffix_narrow` and `suffix_mid`, from the config the check reads."""
     cfg = "configs/validation/cuda_engineering.json"
-    assert (REPO / cfg).read_text() == git("show", f"{EXECUTION_SHA}:{cfg}"), (
+    assert (REPO / cfg).read_text() == git("show", f"{HISTORICAL_EXECUTION_SHA}:{cfg}"), (
         "the validation workload changed; the accepted evidence describes a "
         "different configuration")

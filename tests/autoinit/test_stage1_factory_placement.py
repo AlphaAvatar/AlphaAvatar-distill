@@ -196,7 +196,7 @@ def test_the_audited_host_only_allocations_are_still_host_only():
     """
     import inspect
 
-    from aadistill.initialization.operators import attention as attn_op
+    from aadistill.initialization.operators.attention.gqa import weight_proxy as attn_op
     from aadistill.initialization.transforms import sandwich as sw
 
     for mod, marker in ((attn_op, "A host diagnostic, deliberately"),

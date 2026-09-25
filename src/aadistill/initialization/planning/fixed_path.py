@@ -52,6 +52,7 @@ from aadistill.initialization.calibration.profiles import (
     profile_for,
 )
 from aadistill.initialization.calibration.items import prepare_calibration_items
+from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
 from aadistill.initialization.device import model_device
 from aadistill.initialization.operators.base import OperatorContext, get_implementation
 from aadistill.initialization.statistics.spec import (
@@ -365,6 +366,7 @@ def materialize_fixed_path(
     calibration_items: Mapping[str, Sequence[Any]] | None = None,
     on_step: Callable[[StepResult], None] | None = None,
     deadline: Any = None,
+    execution: ExecutionConfig = DEFAULT_EXECUTION,
 ) -> list[StepResult]:
     """Apply every step in order, identifying and gating each intermediate.
 
@@ -394,7 +396,7 @@ def materialize_fixed_path(
         parent_spec=adapter.spec_of(model), parent_digest=None,
         workdir=workdir, repo_root=repo_root, stats_cache=stats_cache,
         calibration_items=calibration_items, on_step=on_step,
-        deadline=deadline)
+        deadline=deadline, execution=execution)
 
 
 def _run_steps(
@@ -411,6 +413,7 @@ def _run_steps(
     calibration_items: Mapping[str, Sequence[Any]] | None,
     on_step: Callable[[StepResult], None] | None,
     deadline: Any,
+    execution: ExecutionConfig = DEFAULT_EXECUTION,
 ) -> list[StepResult]:
     """The step loop, walked by ORIGINAL index.
 
@@ -474,6 +477,7 @@ def _run_steps(
             target_spec=spec.target_spec, profile=profile,
             calibration_items=items, seed=spec.seed, device=spec.device,
             workdir=work, config=dict(operator_config),
+            execution=execution,
             stats_cache=cache,
             stats_cache_key=(
                 None if parent_digest is None else stats_cache_key(
@@ -656,6 +660,7 @@ def materialize_fixed_path_suffix(
     calibration_items: Mapping[str, Sequence[Any]] | None = None,
     on_step: Callable[[StepResult], None] | None = None,
     deadline: Any = None,
+    execution: ExecutionConfig = DEFAULT_EXECUTION,
 ) -> tuple[list[StepResult], dict[str, Any]]:
     """Execute the tail of a frozen path from an ALREADY-VERIFIED parent.
 
@@ -714,7 +719,7 @@ def materialize_fixed_path_suffix(
         parent_digest=reident.artifact_digest,
         workdir=workdir, repo_root=repo_root, stats_cache=stats_cache,
         calibration_items=calibration_items, on_step=on_step,
-        deadline=deadline)
+        deadline=deadline, execution=execution)
 
     evidence = {
         **premise,

@@ -115,6 +115,8 @@ def default_kind_from_script() -> str:
 #: Launcher modules that define `spec`/`build_parser` and could NOT be parsed.
 #: Populated by `launchers()`; asserted empty below.
 UNPARSEABLE: list[str] = []
+#: (module, exception) for launchers whose spec refuses on this tree.
+UNBUILDABLE: list[tuple[str, str]] = []
 
 
 def launchers() -> dict[str, tuple[str, str]]:
@@ -139,7 +141,19 @@ def launchers() -> dict[str, tuple[str, str]]:
             #: aggregate assertion naming a kind several layers from the cause.
             UNPARSEABLE.append(mod_name)
             continue
-        session = mod.spec(args)
+        try:
+            session = mod.spec(args)
+        except Exception as exc:
+            #: Same rule as UNPARSEABLE above, for the next way a launcher can
+            #: decline to be constructed: its spec refuses on THIS tree. The
+            #: C2 replay launcher does exactly that now — it is pinned to
+            #: attempt 3's artifact digests and the topology migration moved the
+            #: operator bytes those came from, so building a spec would be
+            #: promising a replay this tree cannot perform. Recorded rather than
+            #: allowed to abort the whole enumeration, because one launcher
+            #: declining must not make the dispatch probe untestable.
+            UNBUILDABLE.append((mod_name, type(exc).__name__))
+            continue
         loader = session.authorization_loader
         cls = getattr(loader, "__self__", None)
         found[mod_name] = (session.setup.env.get("SESSION_KIND", DEFAULT_KIND),
@@ -259,3 +273,18 @@ def test_the_continuation_branch_asserts_it_cannot_repurchase_the_search():
     assert "PhaseBAuthorization" not in body, (
         "the continuation branch reaches for the full Phase-B loader, whose grant "
         "authorizes the search this session must not run")
+
+
+def test_a_launcher_that_refuses_to_build_is_recorded_not_swallowed():
+    """The enumeration must stay honest about who declined, and why.
+
+    The C2 replay launcher refuses on this tree by design: its spec is pinned to
+    attempt 3's artifact digests, and the 2026-09-25 topology migration moved
+    the operator bytes those digests were produced by. That refusal is correct
+    and is asserted directly in `tests/autoinit/test_c2_replay_specs.py`; what
+    this pins is that it is RECORDED here rather than silently dropping a
+    launcher out of the dispatch probe.
+    """
+    assert [m for m, _ in UNBUILDABLE] == ["autoinit_c2_replay_launch"], (
+        f"unexpected set of launchers that refused to build: {UNBUILDABLE}")
+    assert UNBUILDABLE[0][1] == "ReplaySourceError"

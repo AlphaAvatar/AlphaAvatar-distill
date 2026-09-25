@@ -35,8 +35,8 @@ from aadistill.initialization.operators._common import (
     ChildBuilder,
     copy_embeddings_and_final_norm,
     copy_module_except,
-    head_rows,
 )
+from aadistill.initialization.operators.attention.gqa._common import head_rows
 from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
     OperatorContext,

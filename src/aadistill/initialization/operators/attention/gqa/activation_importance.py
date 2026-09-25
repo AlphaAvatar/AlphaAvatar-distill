@@ -16,16 +16,14 @@ per-GQA-group retention, same deterministic tie-break, same weight slicing, same
 `modifies`/`preserves` sets. Only the importance signal moves. That is what makes
 Phase C1 an isolation test rather than two changes at once.
 
-**Why this lives in its own module.** `operators/attention.py` and
-`operators/__init__.py` are both members of `CONTINUATION_SOURCE_FILES_V2`, the
-executable source set that Phase B's closed preregistration binds to digest
-`a5ce6311789e…`. Adding a class to either file moves that digest, which would
-leave a frozen historical document describing code that did not exist when it
-ran — and the fix for that is never to regenerate the document. A new module is
-not in the declared set, so the Phase-A/B executable identity is untouched. This
-is exactly the extension route `operators/__init__` documents: "an implementation
-defined elsewhere joins by calling ``register_implementation`` — no edit here,
-and none to the search engine."
+**Why this lives in its own module.** An implementation joins the library by
+registering, never by being added to an existing operator module: editing one
+would move the digest of any declared executable source set that names it, and
+a frozen historical document must keep describing the code that actually ran.
+The extension route is the one `operators/__init__` documents — "an
+implementation defined elsewhere joins by calling ``register_implementation``".
+The specific set and digest this avoided are recorded in
+`docs/core-provenance.md`.
 
 **Registration is an explicit call, not an import side effect.** The first
 version of this module registered at import, and the full suite caught what that
@@ -48,7 +46,7 @@ from typing import Any
 
 import torch
 
-from aadistill.initialization.statistics.attention import (
+from aadistill.initialization.operators.attention.gqa._statistics import (
     AttentionHeadStatsCollector,
     head_write_energy,
 )
@@ -65,7 +63,17 @@ from aadistill.initialization.operators._common import (
     ChildBuilder,
     copy_embeddings_and_final_norm,
     copy_module_except,
+)
+from aadistill.initialization.operators.attention.gqa._common import (
+    attention_out_projection,
     head_rows,
+    query_projection,
+    refuse_unless_reducible_within_groups,
+    select_q_heads_by_score,
+)
+from aadistill.initialization.calibration.batching import (
+    micro_batches,
+    resolve_pad_id,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
@@ -91,65 +99,6 @@ ATTENTION_STATS_SPEC = StatsSpec(
     quantities=("attn_head_sqsum", "attn_token_count"),
 )
 
-
-#: The adapter role names this operator consumes. Family module-tree knowledge —
-#: `.model.layers`, `.self_attn`, `.q_proj`, `.o_proj` — lives in the adapter and
-#: nowhere else, so adding an architecture means writing an adapter rather than
-#: editing an operator. These two constants are the whole coupling.
-ATTN_OUT_ROLE = "attn_out"
-QUERY_ROLE = "q"
-
-
-def attention_out_projection(adapter: ArchitectureAdapter, block: Any) -> Any:
-    """The linear that writes attention's result into the residual stream."""
-    roles = adapter.stream_out_projections(block)
-    if ATTN_OUT_ROLE not in roles:
-        raise UnsupportedCapability(
-            f"the {adapter.family} adapter exposes stream-out roles "
-            f"{sorted(roles)} and not {ATTN_OUT_ROLE!r}; this operator scores "
-            "heads by what they write through that projection and cannot "
-            "proceed without it")
-    return roles[ATTN_OUT_ROLE]
-
-
-def query_projection(adapter: ArchitectureAdapter, block: Any) -> Any:
-    """The linear that reads the residual stream into query space."""
-    roles = adapter.stream_in_projections(block)
-    if QUERY_ROLE not in roles:
-        raise UnsupportedCapability(
-            f"the {adapter.family} adapter exposes stream-in roles "
-            f"{sorted(roles)} and not {QUERY_ROLE!r}; this operator selects "
-            "query heads and cannot proceed without it")
-    #: role -> (linear, preceding norm). Only the linear is sliced here; the
-    #: norm is untouched, because selecting query heads changes the output width
-    #: of this projection and not the residual width it reads.
-    return roles[QUERY_ROLE][0]
-
-
-def select_q_heads_by_score(scores: Sequence[float] | torch.Tensor, n_q_heads: int,
-                            n_kv_heads: int, keep_q: int) -> list[int]:
-    """Per-GQA-group top-k by a precomputed score. Deterministic.
-
-    Same grouping and same retention arithmetic as
-    ``init.sandwich.select_q_heads`` — only the score differs — so the two
-    ATTENTION implementations share a selection topology and the C1 contrast is
-    the importance signal alone.
-
-    Ties break by **ascending head index**, stated rather than inherited from
-    sort stability, because a silent tie-break is exactly what makes a replay
-    irreproducible.
-    """
-    if n_q_heads % n_kv_heads or keep_q % n_kv_heads:
-        raise ValueError("Q heads must be divisible by KV heads (GQA grouping)")
-    per_g_t, per_g_s = n_q_heads // n_kv_heads, keep_q // n_kv_heads
-    if per_g_s > per_g_t:
-        raise ValueError(f"cannot keep {per_g_s} of {per_g_t} Q heads per group")
-    kept: list[int] = []
-    for g in range(n_kv_heads):
-        group = range(g * per_g_t, (g + 1) * per_g_t)
-        top = sorted(group, key=lambda h: (-float(scores[h]), h))[:per_g_s]
-        kept.extend(sorted(top))
-    return kept
 
 
 class AttentionActivationImportanceV1(OperatorImplementation):
@@ -181,27 +130,12 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         if not ok:
             return ok, reason
         n_q, n_kv, _ = adapter.head_groups(spec)
-        keep_q = target[HEADS_FIELD]
-        if keep_q > n_q:
-            return False, "cannot add query heads"
-        #: Named before the divisibility test, which would otherwise refuse this
-        #: with an arithmetic message that hides the real reason. Under MHA every
-        #: query head owns its KV head, so dropping a query head necessarily
-        #: drops a KV head — and this operator's contract is that KV heads,
-        #: head_dim and the GQA grouping are PRESERVED. There is no approximation
-        #: to fall back on, so it refuses rather than silently redefining the
-        #: transformation.
-        if n_kv == n_q and keep_q != n_q:
-            return False, (
-                f"multi-head attention ({n_q}Q/{n_kv}KV): reducing to {keep_q} "
-                f"query heads cannot preserve {n_kv} KV heads, because under MHA "
-                "each query head has its own. This operator preserves KV heads by "
-                "contract; reducing them is a different transformation and needs "
-                "a different operator.")
-        if keep_q % n_kv:
-            return False, (f"target {keep_q} query heads is not divisible "
-                           f"by {n_kv} KV heads")
-        return True, "ok"
+        #: The grouped-head reduction rule, shared with every other algorithm of
+        #: this topology rather than restated per operator — two copies of an
+        #: applicability rule is two chances for them to disagree about which
+        #: geometries an operator may run on.
+        return refuse_unless_reducible_within_groups(n_q, n_kv,
+                                                     target[HEADS_FIELD])
 
     def plan(self, spec: ArchSpec, target: ArchSpec, adapter: ArchitectureAdapter,
              config: Mapping[str, Any] | None = None) -> OperatorPlan:
@@ -233,16 +167,29 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                            for b in adapter.blocks(parent)]
         collector = AttentionHeadStatsCollector(parent, out_projections,
                                                 num_heads=n_q, head_dim=head_dim)
+        #: Micro-batched, and `1` is the per-item reference path — it calls
+        #: `process` exactly as this loop always did, so the frozen C1 selection
+        #: is reproduced by construction rather than by tolerance. Larger sizes
+        #: pad groups together and the collector's mask keeps padded positions
+        #: out of `M_h` and out of `attn_token_count`.
+        batch_size = ctx.execution.micro_batch_size
         try:
-            for item in ctx.calibration_items:
-                collector.process(item["input_ids"].to(compute))
+            if batch_size <= 1:
+                for item in ctx.calibration_items:
+                    collector.process(item["input_ids"].to(compute))
+            else:
+                for batch in micro_batches(ctx.calibration_items, batch_size,
+                                           pad_id=resolve_pad_id(parent),
+                                           device=compute):
+                    collector.process_batch(batch)
         finally:
             collector.close()
-        #: THE TRANSFER BOUNDARY, and the defect C1 attempt 9 died on.
+        #: THE TRANSFER BOUNDARY, and a defect this project has already paid
+        #: for once (`docs/core-provenance.md`).
         #:
         #: `state()` returns a HOST-RESIDENT snapshot on purpose — that is the
-        #: evidence/cache form, and it is what gets hashed and kept. Attempt 9
-        #: then handed it straight to `head_write_energy`, where it met
+        #: evidence/cache form, and it is what gets hashed and kept. Handing it
+        #: straight to `head_write_energy` meets
         #: `o_proj.weight` on cuda:0: `RuntimeError: Expected all tensors to be
         #: on the same device`. Nothing about the persistent cache POLICY was
         #: wrong; what was missing was the per-invocation working copy.
@@ -293,6 +240,10 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                 },
                 detail={"per_layer_retained_share": retained}),
             trace={"source": "activation_write_energy_per_group_topk",
+                   # Execution evidence, not identity: `OperatorStep.identity()`
+                   # does not read `trace`, and the batch size changes no
+                   # estimand. Recorded so a run's evidence states how it ran.
+                   "micro_batch_size": batch_size,
                    "score": "mean_t ||W_o,h a_h(t)||^2",
                    "stats_spec": ATTENTION_STATS_SPEC.spec_hash,
                    "calibration_tokens": int(stats["attn_token_count"]),

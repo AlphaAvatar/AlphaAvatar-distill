@@ -11,7 +11,7 @@ An implementation defined elsewhere joins by calling ``register_implementation``
 edit here, and none to the search engine.
 """
 
-from aadistill.initialization.operators.attention import ATTENTION_WEIGHT_PROXY_V0
+from aadistill.initialization.operators.attention.gqa.weight_proxy import ATTENTION_WEIGHT_PROXY_V0
 from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
     ATTENTION,
@@ -38,16 +38,15 @@ from aadistill.initialization.operators.base import (
     verify_ledger,
     write_ledger,
 )
-from aadistill.initialization.operators.composite import (
+from aadistill.initialization.operators.composite.stage1_sandwich import (
     COMPOSITE_STAGE1,
     COMPOSITE_STAGE1_SANDWICH_V0,
 )
-from aadistill.initialization.operators.depth import (
-    DEPTH_CAUSAL_KL_GREEDY_V1,
-    DEPTH_POSITIONAL_V0,
-)
-from aadistill.initialization.operators.ffn import FFN_ACTIVATION_IMPORTANCE_V0
-from aadistill.initialization.operators.width import WIDTH_GLOBAL_PCA_V0
+from aadistill.initialization.operators.depth.causal_kl_greedy import (
+    DEPTH_CAUSAL_KL_GREEDY_V1)
+from aadistill.initialization.operators.depth.positional import DEPTH_POSITIONAL_V0
+from aadistill.initialization.operators.ffn.dense.activation_importance import FFN_ACTIVATION_IMPORTANCE_V0
+from aadistill.initialization.operators.width.residual.global_pca import WIDTH_GLOBAL_PCA_V0
 
 #: The v1 search library. Deliberately small: the first question is whether
 #: conditional operator order plus calibration choice plus beam selection works

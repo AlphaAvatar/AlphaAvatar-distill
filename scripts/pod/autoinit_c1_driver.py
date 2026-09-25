@@ -88,7 +88,7 @@ from aadistill.initialization.planning.generation import (
     observe_generation_protocol,
 )
 from experiments.source_sets import generation_source_digest
-from aadistill.initialization.operators import attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Explicit: importing the core no longer registers a mixture.

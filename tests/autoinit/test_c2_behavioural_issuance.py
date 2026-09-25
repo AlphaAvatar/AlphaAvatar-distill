@@ -245,29 +245,39 @@ class TestTheProposalIdentityIsReproducible:
         c = dict(a, proposed_utc="1999-01-01T00:00:00+00:00")
         assert w.proposal_identity(c) == w.proposal_identity(a)
 
-    def test_the_committed_document_is_what_the_builder_produces(self):
-        """Excluding only what the identity excludes.
+    def test_the_committed_document_is_self_consistent(self):
+        """What still holds for a CLOSED campaign's proposal.
 
-        A byte-identical check is impossible while `proposed_utc` is in the
-        document, and removing the timestamp would lose real provenance. So
-        the comparison is over exactly the content the hash covers.
+        This used to also require the live builder to reproduce the committed
+        document. That was the right property while C2 could still launch: a
+        stale proposal would then have described a tree the session would not
+        run. C2 is CLOSED WITHOUT PROMOTION, probes owed 0 and no further C2
+        scientific spend is authorized, so the document is a record of what was
+        proposed under the tree that existed then — and regenerating it against
+        today's tree would make a closed campaign's proposal describe an
+        executable it never had.
+
+        What is still worth asserting, and is asserted here, is that the
+        document's own recorded identity matches its own content. That is the
+        property that detects tampering, and it is independent of the tree.
         """
         w = self._writer()
-        fresh = w.build()
         committed = json.loads(PROPOSAL.read_text())
-        assert w.proposal_identity(fresh) == w.proposal_identity(committed)
-        assert committed["proposal_sha256"] == w.proposal_identity(committed)
-        for k in w.IDENTITY_EXCLUDES:
-            fresh.pop(k, None)
-            committed.pop(k, None)
-        #: Through a JSON round-trip, because that is what the committed
-        #: document IS: the builder returns tuples where the file holds lists,
-        #: and `sha256_json` canonicalizes both to the same bytes. Comparing
-        #: the live objects raw reports a difference the identity does not
-        #: have, which would make this test fail on a correct tree.
-        assert json.loads(json.dumps(fresh)) == committed, (
-            "the committed proposal is stale; regenerate it with "
-            "write_c2_behavioural_proposal.py --write")
+        assert committed["proposal_sha256"] == w.proposal_identity(committed), (
+            "the committed proposal's recorded identity does not match its own "
+            "content; it has been edited since it was written")
+
+    def test_the_live_builder_diverges_because_the_tree_moved_after_c2_closed(self):
+        """The divergence, stated rather than left as an absence.
+
+        The 2026-09-25 operator/batching round moved source the builder digests.
+        Asserting the divergence keeps it visible: if the two ever agreed again
+        it would mean either the proposal was regenerated against a later tree
+        or the tree was reverted, and both deserve a reader.
+        """
+        w = self._writer()
+        committed = json.loads(PROPOSAL.read_text())
+        assert w.proposal_identity(w.build()) != w.proposal_identity(committed)
 
     def test_a_content_change_still_moves_the_identity(self):
         """Mutation: excluding fields must not exclude the document.

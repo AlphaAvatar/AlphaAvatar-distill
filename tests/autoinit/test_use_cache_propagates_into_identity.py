@@ -117,8 +117,13 @@ def test_the_causal_kl_depth_operator_is_the_one_that_mutates_it():
             if not re.match(r"^[A-Za-z_][\w.]*\.use_cache\s*=\s*False\s*(#.*)?$",
                             stripped):
                 continue
-            sites.append(f"{path.relative_to(ROOT)}:{n}")
-    assert sites == ["src/aadistill/initialization/operators/depth.py:171"], (
+            sites.append(str(path.relative_to(ROOT)))
+    #: The FILE, not the line. A line number pins nothing this test is about --
+    #: it moves when a docstring above the assignment is edited, which is a
+    #: false alarm, while a SECOND assignment in the same file changes the list
+    #: either way. What must not change silently is WHICH modules flip the bit.
+    assert sites == [
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py"], (
         f"the set of use_cache mutation sites changed: {sites}. Each one makes "
         "a checkpoint's identity depend on whether that operator has run, so a "
         "new site needs a deliberate decision, not a silent addition.")
@@ -130,7 +135,8 @@ def test_the_mutation_lands_on_the_parent_not_a_copy():
     The operator mutates the model it was handed. In a search that reuses one
     teacher object, that object is shared with every later expansion.
     """
-    source = (ROOT / "src/aadistill/initialization/operators/depth.py").read_text()
+    source = (ROOT / "src/aadistill/initialization/operators/depth"
+                    "/causal_kl_greedy.py").read_text()
     apply_body = source[source.index("class DepthCausalKLGreedyV1"):]
     apply_body = apply_body[apply_body.index("def apply"):]
     head = apply_body[:apply_body.index("domains = ")]

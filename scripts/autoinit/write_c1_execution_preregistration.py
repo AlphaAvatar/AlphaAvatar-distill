@@ -55,8 +55,8 @@ from experiments.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATIO
 from experiments.phase_c1.scoring import C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
 from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
 from experiments.calibration import register_builtin_profiles  # noqa: E402
-from aadistill.initialization.operators import attention_activation  # noqa: E402
-from aadistill.initialization.operators.attention_activation import ATTENTION_STATS_SPEC  # noqa: E402
+from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
+from aadistill.initialization.operators.attention.gqa.activation_importance import ATTENTION_STATS_SPEC  # noqa: E402
 from experiments.recipes import E1_KD_HEAVY_0860K  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
@@ -87,8 +87,8 @@ C1_SOURCE_FILES: tuple[str, ...] = (
     "scripts/experiments/phase_c1/isolation.py",
     "scripts/experiments/phase_c1/session.py",
     "src/aadistill/initialization/planning/fixed_path.py",
-    "src/aadistill/initialization/operators/attention_activation.py",
-    "src/aadistill/initialization/statistics/attention.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
     "scripts/data/battery_render.py",
     "scripts/data/build_c1_confirmation_battery.py",
     "scripts/autoinit/verify_c1_battery_isolation.py",

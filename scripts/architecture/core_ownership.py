@@ -109,9 +109,15 @@ INSTANCE_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
 #: number the merge gate reads. Removing a file from this tuple must make its
 #: findings count, and adding one must be justified by the CUDA acceptance --
 #: `tests/architecture/test_core_ownership.py` pins the membership.
+#: The 2026-09-25 topology migration moved two of these and, in doing so, ended
+#: their deferral rather than carrying it to the new paths. Their findings now
+#: COUNT, which is exactly what the paragraph above requires of a removal — and
+#: they were resolved the way the rule prescribes, by relocating this project's
+#: campaign-instance prose to `docs/core-provenance.md` and keeping the
+#: mechanism. The historical CUDA surface itself is NOT edited here; it is
+#: preserved verbatim in `tests/architecture/test_cuda_surface_preserved.py`
+#: as `HISTORICAL_CUDA_VALIDATED_SURFACE`.
 CUDA_VALIDATED_SURFACE: tuple[str, ...] = (
-    "src/aadistill/initialization/operators/attention_activation.py",
-    "src/aadistill/initialization/statistics/attention.py",
     "src/aadistill/initialization/device.py",
     "src/aadistill/initialization/planning/fixed_path.py",
     "src/aadistill/initialization/adapters/__init__.py",

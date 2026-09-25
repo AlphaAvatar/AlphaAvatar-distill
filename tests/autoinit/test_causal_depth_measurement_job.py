@@ -141,7 +141,7 @@ def test_the_job_uses_the_operators_own_reference_cache():
 
 
 def test_the_cache_decision_is_reported_and_is_the_operators_own():
-    from aadistill.initialization.operators.depth import _ReferenceLogits
+    from aadistill.initialization.operators.depth.causal_kl_greedy import _ReferenceLogits
 
     model = tiny_teacher()
     items = toy_items(model.config.vocab_size)

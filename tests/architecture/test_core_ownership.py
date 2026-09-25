@@ -382,15 +382,42 @@ class TestTheDeferralIsBoundedAndVisible:
     membership is pinned here rather than left to the scanner.
     """
 
-    def test_it_is_exactly_the_surface_the_review_named(self):
-        assert set(OWN.CUDA_VALIDATED_SURFACE) == {
-            "src/aadistill/initialization/operators/attention_activation.py",
-            "src/aadistill/initialization/statistics/attention.py",
-            "src/aadistill/initialization/device.py",
-            "src/aadistill/initialization/planning/fixed_path.py",
-            "src/aadistill/initialization/adapters/__init__.py",
-            "src/aadistill/initialization/adapters/qwen3.py",
-        }
+    #: What the 2026-09-10 review's clause 5 named, verbatim. A HISTORICAL
+    #: fact, preserved here so the live deferral can be checked against it
+    #: rather than drifting silently.
+    REVIEW_NAMED_SURFACE = {
+        "src/aadistill/initialization/operators/attention_activation.py",
+        "src/aadistill/initialization/statistics/attention.py",
+        "src/aadistill/initialization/device.py",
+        "src/aadistill/initialization/planning/fixed_path.py",
+        "src/aadistill/initialization/adapters/__init__.py",
+        "src/aadistill/initialization/adapters/qwen3.py",
+    }
+
+    def test_the_live_deferral_is_the_review_surface_minus_what_has_moved(self):
+        """Two different questions, and this is the join between them.
+
+        The review named a set of PATHS. A deferral can only defer a file that
+        exists, so once the topology migration moved two of them the live
+        deferral is the review's set minus those — and their findings then
+        COUNT, which is precisely what the constant's own docstring requires of
+        a removal. They were not quietly dropped: their campaign-instance prose
+        was relocated to `docs/core-provenance.md`, which is the repair the
+        `instance_prose` rule prescribes.
+
+        What this refuses is the two ways of getting it wrong: repointing the
+        deferral at the NEW paths (which would extend a historical review to
+        code it never saw) and dropping a path that is still sitting there.
+        """
+        live = set(OWN.CUDA_VALIDATED_SURFACE)
+        moved_away = {p for p in self.REVIEW_NAMED_SURFACE
+                      if not (REPO / p).is_file()}
+        assert live == self.REVIEW_NAMED_SURFACE - moved_away, (
+            "the live deferral is neither the review's surface nor that surface "
+            "minus what the tree no longer has")
+        assert not (live - self.REVIEW_NAMED_SURFACE), (
+            "the deferral names a file the review never did; a historical "
+            "acceptance cannot be extended to new code by editing a tuple")
 
     def test_every_deferred_path_exists(self):
         """A deferral naming a file that is gone silently shrinks the gate."""
