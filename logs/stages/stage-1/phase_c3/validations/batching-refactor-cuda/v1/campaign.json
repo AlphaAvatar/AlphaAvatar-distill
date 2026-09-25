@@ -1,0 +1,11 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "_contract": "Cumulative cost of this validation across every resource and subrun. Read before each paid action; refuses when the remaining allowance cannot fund a useful attempt plus the teardown reserve. A rerun does NOT reset it.",
+ "campaign_id": "batching_refactor_cuda",
+ "authorization": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/authorization.json",
+ "scope": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/scope.json",
+ "all_in_ceiling_usd": 0.25,
+ "teardown_reserve_usd": 0.05,
+ "subruns": [],
+ "settled_usd": 0.0
+}

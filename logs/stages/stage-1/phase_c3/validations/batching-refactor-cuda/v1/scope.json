@@ -1,0 +1,33 @@
+{
+ "schema": "aadistill.validation_scope/v1",
+ "_contract": "WHAT this validation answers and what it must not be read as. ENGINEERING only. It authorizes nothing and promotes nothing.",
+ "validation_id": "batching_refactor_cuda_v1",
+ "question": "Do the execution paths changed by the operator-topology and calibration-batching refactor run correctly on a real L40S in bf16, and does batch>1 agree with the scalar oracle?",
+ "in_scope": [
+  "forward_kl_mean_batch on CUDA: per-item means, padding exclusion, chunking",
+  "GQA attention statistics: valid-token accumulation, head selection",
+  "shared FFN/WIDTH/COMPOSITE batched statistics pass",
+  "depth.causal_kl_greedy_v1 batched, in all three reference-cache modes",
+  "canonical batch shape independent of cache state",
+  "real Qwen-family checkpoint bytes through the changed plumbing",
+  "device/dtype placement, adapter role resolution, ExecutionConfig plumbing"
+ ],
+ "out_of_scope": [
+  "model quality of any kind",
+  "any behavioural or correctness metric",
+  "formal C3 science",
+  "the historical 2026-09-10 validation at execution SHA 7027a8f4, which is untouched and describes a different workload on the pre-migration layout"
+ ],
+ "no_forward_operators_not_gpu_validated": {
+  "attention.weight_proxy_v0": "weight-only; no calibration forward to batch",
+  "depth.positional_v0": "positional heuristic; takes no measurement"
+ },
+ "findings_recorded_during_rehearsal": [
+  {
+   "finding": "transforms.sandwich.depth_span_map emits a student index one past the end at EXACTLY 2x depth compression (4->2, 8->4); 6->4 and the real 36->28 are unaffected",
+   "status": "PRE-EXISTING, untouched by this refactor, NOT fixed here",
+   "why_not_fixed": "unrelated to batching; repairing it inside a validation would put an unreviewed change on the paid source closure",
+   "found_by": "$0 host rehearsal, before any provider resource existed"
+  }
+ ]
+}

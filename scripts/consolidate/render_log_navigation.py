@@ -221,10 +221,16 @@ STAGE_INDEX = "logs/stages/index.json"
 #: — Stage 3's pre-layout experiment chronology is the only one today. They are
 #: named here so that enumerating experiments does not pick them up, and so the
 #: stage index is not asked for a row that would have to invent one.
-STAGE_AREAS = ("history",)
+#: `phase_c3` is an AREA, not an experiment id: C3 material -- its validation
+#: now, its preregistration, probes and decision later -- is filed beneath it,
+#: exactly as the earlier phases were. Declared here because the index refuses
+#: a directory nothing wrote down, which is the bargain every experiment row
+#: makes too.
+STAGE_AREAS = ("history", "phase_c3")
 
 STAGE_AREA_PURPOSE = {
     "history": "records spanning this stage's experiments, kept verbatim",
+    "phase_c3": "Phase C3 material: the ATTENTION causal-KL isolation and the\n                 engineering validation of the machinery it runs on",
 }
 
 #: What each stage IS, in the pipeline's own terms (AGENTS.md section 4). The

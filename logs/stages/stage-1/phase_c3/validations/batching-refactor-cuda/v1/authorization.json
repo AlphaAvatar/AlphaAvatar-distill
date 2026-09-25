@@ -1,0 +1,23 @@
+{
+ "schema": "aadistill.validation_authorization/v1",
+ "validation_id": "batching_refactor_cuda_v1",
+ "granted_utc": "2026-09-25T20:25:35Z",
+ "granted_by": "maintainer, final C3 execute-to-completion authorization",
+ "authorizes": "ONE focused real-CUDA engineering validation of the refactor",
+ "all_in_ceiling_usd": 0.25,
+ "_ceiling_is_cumulative": "across every resource and subrun of this validation. A rerun does NOT reset it and a replacement resource does NOT receive a fresh allocation.",
+ "separate_from": {
+  "c3_stage_envelope_usd": 25.0,
+  "_note": "this $0.25 is NOT charged against the C3 science envelope"
+ },
+ "gpu_class": "L40S",
+ "dtype": "bfloat16",
+ "capability_floor": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 8
+ },
+ "source_commit_at_authorization": "ae83e9d75d9c84089c5ee39900da14e5e7739b22",
+ "scientific_use": false,
+ "promotes": null
+}

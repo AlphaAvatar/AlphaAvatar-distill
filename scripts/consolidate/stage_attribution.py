@@ -702,6 +702,39 @@ STAGE_1 = [
             "incumbent."),
     ),
     dict(
+        id="batching_refactor_cuda",
+        kind="engineering",
+        stage_id="1",
+        status="in progress — engineering evidence, authorizes nothing",
+        title="Operator topology + calibration batching — real-CUDA validation",
+        canonical_config="configs/validation/batching_refactor_cuda.json",
+        evidence=[
+            E("logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/"
+              "v1/scope.json",
+              "what it answers, what it is not, and the pre-existing "
+              "depth_span_map finding the $0 rehearsal turned up"),
+            E("logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/"
+              "v1/authorization.json",
+              "its engineering authorization and the $0.25 cumulative ceiling, "
+              "separate from the C3 science envelope"),
+            E("logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/"
+              "v1/campaign.json",
+              "cumulative cost across every resource and subrun"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination=(
+            "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda"),
+        classification_reason=(
+            "Stage 1 for the same reason the other CUDA validations are: what "
+            "it validates is Stage-1 initialization machinery. `engineering`, "
+            "not an experiment -- it trains nothing, measures no behaviour and "
+            "ranks nothing. Filed under `phase_c3` because the refactor it "
+            "certifies is what C3 will execute on, and kept SEPARATE from the "
+            "2026-09-10 validation because that one ran a different workload "
+            "on the pre-migration flat layout at its own execution SHA."),
+    ),
+    dict(
         id="c2_full_search_perf",
         kind="engineering",
         stage_id="1",

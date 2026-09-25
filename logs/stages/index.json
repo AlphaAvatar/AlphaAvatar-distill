@@ -22,7 +22,7 @@
   "non_experiment_rows": {
    "alias": 1,
    "arm": 1,
-   "engineering": 3,
+   "engineering": 4,
    "engineering-measurement": 1,
    "experiment-spanning": 1,
    "pipeline-activity": 6,
@@ -152,7 +152,7 @@
     "experiments": 10,
     "experiments_with_logs": 10,
     "runs": 92,
-    "canonical_configs": 11,
+    "canonical_configs": 12,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -164,6 +164,7 @@
     "configs/experiments/phase_c2/full_search_authorization.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
     "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
+    "configs/validation/batching_refactor_cuda.json",
     "configs/validation/c2_full_search_cuda.json",
     "configs/validation/c2_full_search_performance.json",
     "configs/validation/c2_state_eval_certification.json",
@@ -643,6 +644,33 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "Stage 1 because it selects a Stage-1 initialization, even though its instrument is a Stage-3 recovery probe. It is separate from `phase_c2_full_search` because the search ranks on frozen cheap metrics and explicitly cannot promote, and separate from `phase_c2_replay` because that reconstructed artifacts and decided nothing. This is the only experiment that may name a C2 incumbent."
+  },
+  {
+   "experiment_id": "batching_refactor_cuda",
+   "stage_id": "1",
+   "classification": "engineering",
+   "status": "in progress \u2014 engineering evidence, authorizes nothing",
+   "title": "Operator topology + calibration batching \u2014 real-CUDA validation",
+   "question": null,
+   "canonical_path": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda",
+   "canonical_config": "configs/validation/batching_refactor_cuda.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/scope.json",
+     "says": "what it answers, what it is not, and the pre-existing depth_span_map finding the $0 rehearsal turned up"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/authorization.json",
+     "says": "its engineering authorization and the $0.25 cumulative ceiling, separate from the C3 science envelope"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/campaign.json",
+     "says": "cumulative cost across every resource and subrun"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "Stage 1 for the same reason the other CUDA validations are: what it validates is Stage-1 initialization machinery. `engineering`, not an experiment -- it trains nothing, measures no behaviour and ranks nothing. Filed under `phase_c3` because the refactor it certifies is what C3 will execute on, and kept SEPARATE from the 2026-09-10 validation because that one ran a different workload on the pre-migration flat layout at its own execution SHA."
   },
   {
    "experiment_id": "c2_full_search_perf",

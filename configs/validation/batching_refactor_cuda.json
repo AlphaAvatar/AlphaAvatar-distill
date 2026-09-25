@@ -1,0 +1,102 @@
+{
+ "schema": "aadistill.batching_refactor_cuda_validation/v1",
+ "_contract": "Inputs for the real-CUDA engineering check of the operator-topology + calibration-batching refactor at review/c3-operator-batching. ENGINEERING validation, not science: it answers 'do the changed execution paths run on a real device without a placement, dtype, masking or reduction error, and does batch>1 agree with the scalar oracle', and nothing about model quality. It trains nothing, measures no behaviour, produces no correct_overall, and ranks nothing for promotion. Every artifact it writes is disposable. AUTHORIZES NOTHING.",
+ "_not_the_historical_validation": "The 2026-09-10 validation at execution SHA 7027a8f4 and its config configs/validation/cuda_engineering.json are UNTOUCHED and describe a different workload on the pre-migration flat layout. This is a separate current record with its own SHA, its own derived closure and its own surface.",
+ "validation_id": "batching_refactor_cuda_v1",
+ "family": "qwen3",
+ "adapter": "qwen3",
+ "dtype": "bfloat16",
+ "_why_bf16": "What the formal paths run. Validating device integration in fp32 would leave the dtype the operators actually use unverified, and bf16 is also why the capability floor is cc >= 8.0 -- the dtype is NOT lowered to make a cheaper unsupported device pass.",
+ "seed": 20260926,
+ "capability_requirement": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 8,
+  "_owner": "the authorization for this validation declares the floor; it is restated here because the pod-side check enforces it before any work, and a floor only the launcher knows is a floor the check cannot apply."
+ },
+ "geometry": {
+  "_why_a_toy": "The changed code is device/dtype/masking/reduction plumbing, not anything that depends on parameter count. A toy geometry exercises every changed line on the real device in seconds, and stage `real_checkpoint` separately proves the plumbing survives real Qwen-family checkpoint BYTES. Spending L40S minutes on a 4B forward to re-learn that a mask excludes padding would buy nothing.",
+  "hidden_size": 128,
+  "num_hidden_layers": 4,
+  "intermediate_size": 256,
+  "num_attention_heads": 8,
+  "num_key_value_heads": 4,
+  "head_dim": 16,
+  "vocab_size": 1024,
+  "tie_word_embeddings": true
+ },
+ "target": {
+  "hidden_size": 64,
+  "num_hidden_layers": 3,
+  "intermediate_size": 128,
+  "num_attention_heads": 4,
+  "num_key_value_heads": 4,
+  "head_dim": 16,
+  "vocab_size": 1024,
+  "tie_word_embeddings": true
+ },
+ "calibration": {
+  "_why_ragged": "Equal lengths pad nothing, and every masking defect in this refactor is invisible without padding. The lengths straddle the 512 chunk boundary on purpose so the KL reducer's chunk walk is exercised on a real device rather than only in a CPU unit test.",
+  "n_items": 6,
+  "lengths": [
+   37,
+   513,
+   12,
+   512,
+   129,
+   514
+  ]
+ },
+ "micro_batch_sizes": [
+  1,
+  3
+ ],
+ "_why_these_batch_sizes": "1 is the reference path and must reproduce the scalar oracle; 3 does not divide 6 evenly, so the final micro-batch is short and the batcher's last-group handling is exercised rather than assumed.",
+ "kl": {
+  "chunk": 512,
+  "_chunk_is_the_frozen_one": "The reducer chunks along the sequence-position axis at the same boundaries the scalar oracle uses. Changing it here would validate a schedule the operators do not run.",
+  "max_relative_drift": 0.001,
+  "_tolerance_basis": "bf16 forwards reschedule under batching, so batch>1 cannot be bit-identical to batch=1. The bound is a REPORTING threshold for the engineering check; the scientific question -- whether drift can move a decision -- is answered per operator by comparing drift against that operator's own decision margin, which stage `depth` records."
+ },
+ "stages": {
+  "kl_primitive": {
+   "enabled": true,
+   "_question": "Does forward_kl_mean_batch run on CUDA in bf16, exclude padded positions exactly, and return per-item means that match the scalar oracle row by row?"
+  },
+  "attention_stats": {
+   "enabled": true,
+   "_question": "Does the GQA per-head second moment accumulate only valid calibration tokens on a real device, and does batch>1 select the same query heads as batch=1?"
+  },
+  "shared_stats": {
+   "enabled": true,
+   "_question": "Do FFN, RESIDUAL_WIDTH and COMPOSITE_STAGE1 reach the same selections through the one shared batched statistics pass, with the adapter resolving ffn_out by role?"
+  },
+  "depth": {
+   "enabled": true,
+   "_question": "Does the causal-KL depth operator execute batched on CUDA in all three reference-cache modes, keep the canonical batch shape when partially cached, and reach the same removal order as the reference path? Records drift against the round's own decision margin."
+  },
+  "real_checkpoint": {
+   "enabled": true,
+   "_question": "Does a real Qwen-family checkpoint load on CUDA in bf16, run a ragged padded batch through the adapter's resolved roles, and reload after materialization with the expected spec?",
+   "_source": "resolved at runtime from the repository's canonical stage-1 initialization if present; skipped with a recorded reason when the pod has no real checkpoint, because a toy geometry already covers every changed line and this stage exists only to prove the plumbing survives real bytes.",
+   "source": {
+    "local_paths": [
+     "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+     "artifacts/stage1/qwen3_0p6b_init_v0"
+    ],
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_path": "stage1/qwen3_0p6b_init_v0/checkpoint",
+    "expected_weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+    "_why_the_relay": "A pod has no local artifacts and the dev-box uplink is 0.72 MB/s, so shipping 1.2 GB from here would cost ~28 minutes of billed GPU to prove something a pod->HF download proves in seconds. The relay is the transfer route this project already uses, and the weights hash is pinned so the bytes are the ones the manifest names.",
+    "relay_revision": null,
+    "_revision_is_not_pinned_and_why": "logs/state/artifact_manifests.md records revision b955bd2f79b03a5418e2b8ca518a35faf047f085 for this artifact, and that revision NO LONGER RESOLVES on the relay (404 RevisionNotFound, checked at $0 before any pod existed; the path itself is present on main). The manifest is historical evidence and is NOT rewritten. What pins these bytes instead is `expected_weights_sha256`, which the stage verifies by hashing the downloaded file and refusing on a mismatch -- a content identity, which is what the manifest's own hash field always was. A revision that has moved cannot make the bytes wrong; a hash that does not match can.",
+    "requires_token": true,
+    "_token": "the relay is private, so the pod needs HF_TOKEN in its environment; a missing credential surfaces as RepositoryNotFoundError, which means 'no credential', not 'no repo'"
+   }
+  }
+ },
+ "declared_non_python_inputs": [
+  "configs/validation/batching_refactor_cuda.json"
+ ],
+ "_depth_ratio_note": "The COMPOSITE target compresses 4 -> 3 layers (ratio 1.33), close to the real recipe's 36 -> 28 (1.29). It is deliberately NOT 4 -> 2: `transforms.sandwich.depth_span_map` emits a student index one past the end at EXACTLY 2x depth compression (4->2 and 8->4 both do; 6->4 and 36->28 do not), which makes `init_student` raise IndexError. That is a pre-existing latent defect in code this refactor did not touch, found by the $0 rehearsal, recorded in the validation scope, and deliberately NOT fixed here -- it is unrelated to batching and repairing it inside a validation would put an unreviewed change on the paid source closure."
+}
