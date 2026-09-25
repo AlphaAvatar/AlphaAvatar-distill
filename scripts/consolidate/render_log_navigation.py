@@ -742,18 +742,27 @@ def render_readiness(root: Path) -> str:
     return "\n".join(lines)
 
 
-def render_budget(root: Path) -> str:
+def render_budget(root: Path, snapshot_budget: dict | None = None) -> str:
     """The four limits, from the deriver.
 
     They were a hand-typed table sitting directly under the sentence "do not
     restate these by hand; run the deriver". Attempt 14 booked `$0.3999` and
     every figure in it was `$0.40` wrong the next minute.
+
+    `snapshot_budget` is the block `main` is ABOUT to write. Passing it matters:
+    the project row used to be read from `current.json` ON DISK, which the same
+    invocation had not written yet, so one `--write` left `current.md` showing
+    the previous run's project total and `test_the_two_state_views_agree_on_money`
+    failing until someone ran the renderer a second time. A renderer that needs
+    two passes to converge is one a launch chain can call once and ship a
+    disagreeing pair.
     """
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from derive_budget import derive as derive_budget
 
     d = derive_budget(root)
-    snap = json.loads((root / SNAPSHOT).read_text()).get("budget") or {}
+    snap = (snapshot_budget if snapshot_budget is not None
+            else json.loads((root / SNAPSHOT).read_text()).get("budget") or {})
     rows = [("formal sessions", d["formal"]),
             ("GPU engineering", d["engineering"]),
             ("package", d["package"])]
@@ -957,7 +966,7 @@ def main() -> int:
     i2, j2 = state_text.index(R_BEGIN), state_text.index(R_END) + len(R_END)
     new_state = state_text[:i2] + render_readiness(root) + state_text[j2:]
     i4, j4 = new_state.index(B_BEGIN), new_state.index(B_END) + len(B_END)
-    new_state = new_state[:i4] + render_budget(root) + new_state[j4:]
+    new_state = new_state[:i4] + render_budget(root, b) + new_state[j4:]
 
     #: `logs/README.md`'s stage table comes from the same index as the stage
     #: READMEs. Two hand-maintained copies of one mapping is how the root README
