@@ -46,11 +46,21 @@ A4_CLAIMS = {
         "here": ("fp32_control", "case_matrix", "comparisons", "A_vs_E", "rel_l2"),
         "says": "the same comparison in float32 is orders of magnitude smaller",
     },
-    "ffn_importance_statistic_drift": {
+    "ffn_activation_statistic_drift": {
         "a4_value_key": "ffn_importance_statistic_drift_bs1_vs_bs3_bf16_relative",
         "here": ("statistics_decomposition", "by_micro_batch_size", "3",
                  "ffn_abs_sum", "rel_l2"),
         "says": "the FFN activation statistic moves between bs=1 and bs=3",
+    },
+    #: The IMPORTANCE drift, which is the quantity a4's key actually names.
+    #: `importance = E[|a|] * ||down_proj col||`, and the column norms are a
+    #: property of the weights, identical in every arm -- so this and the
+    #: statistic above track each other closely and are NOT the same number.
+    #: Both are reported rather than one standing in for the other.
+    "ffn_importance_drift": {
+        "a4_value_key": "ffn_importance_statistic_drift_bs1_vs_bs3_bf16_relative",
+        "here": ("__derived__", "max_importance_rel_l2_drift_bs3"),
+        "says": "the per-neuron importance the top-k reads moves at bs=3",
     },
     "causal_kl_relative": {
         "a4_value_key": "causal_KL_solo_vs_batched_real_model_bf16_relative",
@@ -113,6 +123,25 @@ def environments(reports: dict) -> dict:
     }
 
 
+def _derived(report: dict, name: str):
+    """A quantity the report holds per-layer and the comparison needs summarised.
+
+    Computed here rather than added to the diagnostic, because the diagnostic
+    that produced these reports is the one a pod already ran: changing its
+    output shape now would mean the numbers and the reader disagreed about which
+    executable emitted them, which is the defect under investigation.
+    """
+    if name == "max_importance_rel_l2_drift_bs3":
+        sel = report["stages"].get("ffn_selection") or {}
+        ratio = f"{float(sel.get('headline_keep_ratio', 0.5)):.2f}"
+        per_bs = dig(sel, "by_keep_ratio", ratio) or {}
+        rows = dig(per_bs, "3", "per_layer")
+        if not rows:
+            return None
+        return max(r["importance_rel_l2_drift"] for r in rows)
+    return None
+
+
 def adjudicate(reports: dict, a4: dict) -> dict:
     """Each a4 claim against the same quantity measured here.
 
@@ -126,7 +155,10 @@ def adjudicate(reports: dict, a4: dict) -> dict:
         a4_value = a4_values.get(spec["a4_value_key"])
         per_report = {}
         for label, r in reports.items():
-            here = dig(r["stages"], *spec["here"])
+            if spec["here"][0] == "__derived__":
+                here = _derived(r, spec["here"][1])
+            else:
+                here = dig(r["stages"], *spec["here"])
             if here is None:
                 continue
             row = {"measured": here, "a4": a4_value}
