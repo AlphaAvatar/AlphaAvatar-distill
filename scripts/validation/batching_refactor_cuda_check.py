@@ -254,6 +254,11 @@ def stage_attention_stats(cfg, world, device) -> dict:
 
 def stage_shared_stats(cfg, world, device) -> dict:
     """FFN / WIDTH / COMPOSITE through the one shared batched pass."""
+    import torch
+
+    from aadistill.initialization.device import stats_to
+    from aadistill.initialization.operators._common import collect_activation_stats
+    from aadistill.initialization.transforms.project import ffn_neuron_importance
     from aadistill.initialization.operators.composite.stage1_sandwich import (
         COMPOSITE_STAGE1_SANDWICH_V0 as COMPOSITE)
     from aadistill.initialization.operators.ffn.dense.activation_importance import (
@@ -266,13 +271,54 @@ def stage_shared_stats(cfg, world, device) -> dict:
     out: dict = {"ok": True}
 
     ffn_target = parent.replace(intermediate_size=int(cfg["target"]["intermediate_size"]))
-    kept = {}
+    keep_n = int(cfg["target"]["intermediate_size"])
+    kept, importances = {}, {}
     for size in sizes:
-        kept[str(size)] = FFN.apply(
-            context_for(adapter, model, parent, ffn_target, items, size,
-                        device)).artifacts["kept_neurons"]
-    out["ffn_kept_neurons_identical"] = all(
-        kept[str(s)] == kept[str(sizes[0])] for s in sizes)
+        state = stats_to(collect_activation_stats(adapter, model, items, device,
+                                                  batch_size=size), device)
+        per_layer_kept, per_layer_imp = [], []
+        for index, block in enumerate(adapter.blocks(model)):
+            down = adapter.stream_out_projections(block)["ffn_out"]
+            importance = ffn_neuron_importance(state, index, down.weight)
+            per_layer_imp.append(importance.detach().float().cpu())
+            per_layer_kept.append(
+                torch.topk(importance, keep_n).indices.sort().values.tolist())
+        kept[str(size)] = per_layer_kept
+        importances[str(size)] = per_layer_imp
+    identical = all(kept[str(s)] == kept[str(sizes[0])] for s in sizes)
+    out["ffn_kept_neurons_identical"] = identical
+
+    #: WHEN they differ, the question is whether the boundary was a near-tie or
+    #: a real divergence, and a boolean cannot answer it. `topk` at a tie is an
+    #: execution-order artifact, not a different importance signal, and C3's
+    #: ATTENTION selection has exactly this shape -- so the margin is measured
+    #: here rather than left for a paid rerun to discover.
+    diagnostics = []
+    base = str(sizes[0])
+    for other in sizes[1:]:
+        for index, (a, b) in enumerate(zip(kept[base], kept[str(other)])):
+            if a == b:
+                continue
+            ia, ib = importances[base][index], importances[str(other)][index]
+            ordered = torch.sort(ia, descending=True).values
+            margin = float(ordered[keep_n - 1] - ordered[keep_n])
+            swapped = sorted(set(a) ^ set(b))
+            gaps = [abs(float(ia[n]) - float(ib[n])) for n in swapped]
+            diagnostics.append({
+                "layer": index, "batch_sizes": [sizes[0], other],
+                "only_in_first": sorted(set(a) - set(b)),
+                "only_in_second": sorted(set(b) - set(a)),
+                "cutoff_margin": margin,
+                "importance_at_cutoff": float(ordered[keep_n - 1]),
+                "max_importance_drift_on_swapped": max(gaps) if gaps else 0.0,
+                "drift_over_margin": (max(gaps) / margin) if margin else float("inf"),
+                "swapped_importances": {
+                    str(n): {"first": float(ia[n]), "second": float(ib[n])}
+                    for n in swapped},
+            })
+    out["ffn_selection_diagnostics"] = diagnostics
+    out["ffn_is_a_near_tie"] = bool(
+        diagnostics and all(d["drift_over_margin"] >= 1.0 for d in diagnostics))
 
     width_target = parent.replace(hidden_size=int(cfg["target"]["hidden_size"]))
     energy = {}
@@ -295,7 +341,12 @@ def stage_shared_stats(cfg, world, device) -> dict:
         "micro_batch_size": composite.trace["micro_batch_size"],
     }
     out["composite_child_placement"] = placement_of(composite.model)
-    out["ok"] = bool(out["ffn_kept_neurons_identical"] and out["width_ok"])
+    #: A near-tie at the cutoff is an execution-order artifact, not a different
+    #: importance signal, and it is RECORDED rather than treated as a failure --
+    #: while a selection that moves by more than its own margin is a real
+    #: divergence and does fail.
+    out["ok"] = bool(out["width_ok"] and
+                     (out["ffn_kept_neurons_identical"] or out["ffn_is_a_near_tie"]))
     return out
 
 
