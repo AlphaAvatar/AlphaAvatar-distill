@@ -54,7 +54,22 @@
    "failure": "shared_stats reported ffn_kept_neurons_identical=false on CUDA bf16. The same geometry and seed on CPU bf16 selects IDENTICAL neurons, so this is a device-specific reduction-order effect that no CPU run could have surfaced -- which is what a real device validation is for. The stage recorded only a boolean, so it could not say whether the cutoff was a near-tie",
    "repair": "instrument the FFN cutoff: record the differing neurons, their importances under each batch size, the rank-k/rank-k+1 margin, and drift/margin. A near-tie is an execution-order artifact and is recorded; a selection moving by more than its own margin still fails",
    "teardown_confirmed": true
+  },
+  {
+   "subrun_id": "brc_20260926_a4",
+   "pod_id": "6rmod2085xd313",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 0.936,
+   "cost_usd": 0.0171,
+   "cost_basis": "elapsed x confirmed secure rate + container disk",
+   "verdict": "FAIL",
+   "failure_class": "material-scientific-finding",
+   "executed_source_sha": "f85aa8d894e444960ac84e8a26e1ac9ce042153f",
+   "reached": "all five stages ran on the L40S; the instrumented FFN boundary was measured",
+   "teardown_confirmed": true
   }
  ],
- "settled_usd": 0.0651
+ "settled_usd": 0.0822,
+ "verdict": "STOPPED - material scientific finding, returned to review"
 }

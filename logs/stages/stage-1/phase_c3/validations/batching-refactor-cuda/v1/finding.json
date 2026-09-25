@@ -1,0 +1,35 @@
+{
+ "schema": "aadistill.validation_finding/v1",
+ "_contract": "A MATERIAL SCIENTIFIC FINDING, not an engineering defect. It authorizes nothing and changes nothing; it returns a design question to review, per the contract's PART A clause 9.",
+ "finding": "In bf16 on a real 596M model, a padded batched forward differs from a solo forward by ~4.9e-02 relative on the logits. That is the dtype through 28 layers, not a masking or batching defect: the same comparison in float32 is 9.1e-06.",
+ "measurements": {
+  "batched_vs_solo_logits_bf16_relative": 0.0488,
+  "batched_vs_solo_logits_fp32_relative": 9.144e-06,
+  "ffn_importance_statistic_drift_bs1_vs_bs3_bf16_relative": 0.02167,
+  "ffn_layers_with_a_different_selection_real_model": "26 of 28 at keep=0.32, 26/28 at 0.50, 27/28 at 0.75, 22/28 at 0.90",
+  "ffn_min_relative_cutoff_margin_real_model": 2.372e-05,
+  "causal_KL_solo_vs_batched_real_model_bf16_relative": 0.007064,
+  "_kl_partly_cancels": "a causal KL compares two forwards under the SAME batch composition, so the perturbation largely cancels: 7.1e-03 against 4.9e-02 raw. An activation STATISTIC has nothing to cancel against."
+ },
+ "what_is_NOT_wrong": [
+  "the batching arithmetic: float32 batched-vs-solo is 9.1e-06",
+  "the masking: poisoning padded positions changes per-item KL by exactly 0.0, on CUDA",
+  "the KL reducer: max relative drift vs the scalar oracle 1.02e-07 on CUDA, and bit-identical at B=1",
+  "the attention statistics or DEPTH on the toy: identical selections and removal order on the L40S"
+ ],
+ "why_it_matters": [
+  "operators whose output is a dense top-k over activation statistics -- ffn.activation_importance_v0 and attention.activation_importance_v1 -- are not reproducible across micro_batch_size in bf16 on a real model",
+  "DEFAULT_MICRO_BATCH_SIZE is currently 4, so a formal run would NOT reproduce the pre-refactor selections, and the C3 fixed prefix's pre-ATTENTION parent digest eea90c91... would not reproduce",
+  "C3's own treatment arm is a per-GQA-group top-k, so it has the same exposure"
+ ],
+ "the_conservative_remedy_not_taken_autonomously": {
+  "change": "DEFAULT_MICRO_BATCH_SIZE = 1",
+  "effect": "every operator reproduces the pre-refactor numbers bit-for-bit -- batch_size=1 is already proven bit-identical -- so frozen decisions are preserved exactly and batching remains available and validated for any caller that opts in after measuring its own margins",
+  "cost": "C3's causal scorer would lose the batching speedup it was designed around, which changes the C3 runtime and therefore the $25 envelope's arithmetic. That is a budget and design question, not an engineering one, which is why it is returned rather than decided here."
+ },
+ "spend": {
+  "this_validation_usd": 0.0822,
+  "ceiling_usd": 0.25,
+  "unspent_usd": 0.1678
+ }
+}

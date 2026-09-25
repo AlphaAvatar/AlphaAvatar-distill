@@ -312,13 +312,26 @@ def stage_shared_stats(cfg, world, device) -> dict:
                 "importance_at_cutoff": float(ordered[keep_n - 1]),
                 "max_importance_drift_on_swapped": max(gaps) if gaps else 0.0,
                 "drift_over_margin": (max(gaps) / margin) if margin else float("inf"),
+                #: The principled question, and the one the ratio above only
+                #: hints at: are the two swapped neurons separated by MORE than
+                #: the numerical drift? If not, the signal does not distinguish
+                #: them and which one top-k returns is an execution-order
+                #: artifact rather than a different importance ordering.
+                "separation_between_swapped": (
+                    abs(float(ia[sorted(set(a) - set(b))[0]])
+                        - float(ia[sorted(set(b) - set(a))[0]]))
+                    if (set(a) - set(b)) and (set(b) - set(a)) else float("inf")),
                 "swapped_importances": {
                     str(n): {"first": float(ia[n]), "second": float(ib[n])}
                     for n in swapped},
             })
     out["ffn_selection_diagnostics"] = diagnostics
-    out["ffn_is_a_near_tie"] = bool(
-        diagnostics and all(d["drift_over_margin"] >= 1.0 for d in diagnostics))
+    #: Indistinguishable iff every swap's own separation is within the drift
+    #: that batching introduces. Stated as a comparison between two MEASURED
+    #: quantities rather than a tolerance someone chose after seeing the result.
+    out["ffn_is_a_near_tie"] = bool(diagnostics and all(
+        d["separation_between_swapped"] <= d["max_importance_drift_on_swapped"]
+        for d in diagnostics))
 
     width_target = parent.replace(hidden_size=int(cfg["target"]["hidden_size"]))
     energy = {}
@@ -495,10 +508,47 @@ def stage_real_checkpoint(cfg, world, device) -> dict:
         / max(abs(forward_kl_mean(ref[i, :L - 1], other[i, :L - 1],
                                   chunk=int(cfg["kl"]["chunk"]))), 1e-12)
         for i, L in enumerate(batch.lengths))
+    #: THE DECISIVE FFN CASE. A toy random FFN has densely packed importances,
+    #: so its k-th and (k+1)-th neurons are separated in the seventh significant
+    #: figure and top-k at that boundary is decided by reduction order. A real
+    #: trained model is the case that matters, and it is already loaded here.
+    from aadistill.initialization.device import stats_to
+    from aadistill.initialization.operators._common import collect_activation_stats
+    from aadistill.initialization.transforms.project import ffn_neuron_importance
+
+    keep_n = max(1, int(model.config.intermediate_size) // 2)
+    real_sel, real_margins = {}, []
+    for size in (1, 3):
+        state = stats_to(collect_activation_stats(adapter, model, items, device,
+                                                  batch_size=size), device)
+        layers = []
+        for index, block in enumerate(adapter.blocks(model)):
+            down = adapter.stream_out_projections(block)["ffn_out"]
+            importance = ffn_neuron_importance(state, index, down.weight)
+            layers.append(torch.topk(importance, keep_n).indices.sort().values.tolist())
+            if size == 1:
+                ordered = torch.sort(importance, descending=True).values
+                real_margins.append(float(ordered[keep_n - 1] - ordered[keep_n])
+                                    / max(float(ordered[keep_n - 1]), 1e-12))
+        real_sel[size] = layers
+    ffn_identical = real_sel[1] == real_sel[3]
+    ffn_diff_layers = sum(1 for a, b in zip(real_sel[1], real_sel[3]) if a != b)
+
     return {
         "ok": bool(torch.isfinite(values).all()
-                   and drift <= float(cfg["kl"]["max_relative_drift"])),
+                   and drift <= float(cfg["kl"]["max_relative_drift"])
+                   and ffn_identical),
         "skipped": False,
+        "real_ffn_selection_identical_across_batch_sizes": ffn_identical,
+        "real_ffn_layers_that_differ": ffn_diff_layers,
+        "real_ffn_layers_total": len(real_sel[1]),
+        "real_ffn_keep_per_layer": keep_n,
+        "real_ffn_min_relative_cutoff_margin": min(real_margins) if real_margins else None,
+        "_why_this_is_the_case_that_matters": (
+            "a trained model's FFN importance distribution is spread, so the "
+            "cutoff is not a seventh-significant-figure tie the way a random "
+            "toy's is; if selection is stable here, the toy divergence is a "
+            "fixture artifact rather than a property of the operator"),
         "origin": origin,
         "source": str(source),
         "weights_sha256": weights_sha,
