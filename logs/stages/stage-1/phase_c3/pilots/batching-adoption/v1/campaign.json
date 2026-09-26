@@ -47,6 +47,24 @@
    "second_defect": "MINE, and it is why this attempt has a record at all: the launcher's fallback pod-id regex `\\b[a-z0-9]{13,16}\\b` matched the word `specifications` out of that error, so a REFUSED create yielded a pod id, a watchdog was started against it, and the script polled a pod that had never existed. No resource was billing, but the same bug against a partially-created pod would have been an unowned one.",
    "repair": "recognise the provider's refusal text; require a digit in the fallback id; and CONFIRM the id against `myself { pods }` before starting a watchdog, because the provider is the only authority on whether a pod exists.",
    "teardown": "nothing to tear down; confirmed pods 0, networkVolumes 0"
+  },
+  {
+   "subrun_id": "c3pilot_20260927_a3",
+   "pod_id": "css25bbu7ueqla",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 2.133,
+   "cost_usd": 0.0391,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately",
+   "executed_source_sha": "4a7d122b",
+   "verdict": "FAIL",
+   "failure_class": "engineering",
+   "stage_reached": "input check, before the root teacher and before any GPU work",
+   "failure": "the launcher pushed ONE of the two required mixtures. `ssh` reads standard input by default, the push loop's standard input WAS the derived listing, and so the first `ssh mkdir` swallowed the remaining line. The pilot refused two minutes later for exactly the input the loop had eaten.",
+   "what_worked": "this is a1's failure caught by a1's repair. The same missing mixture cost $0.7209 and 24 minutes on a1; here --check-inputs refused it in 2 minutes for $0.0391, before the root teacher was fetched and before any GPU work, with the reason named in check_inputs.log.",
+   "repair": "read the listing on fd 3, pass `ssh -n`, and COUNT what was pushed against what was required -- 'the loop ran' and 'the loop ran to the end' are different claims and a3 could not tell them apart. Three $0 tests, one of which executes the failing and the fixed loop shapes against a stdin-draining stand-in.",
+   "teardown": "confirmed by provider query: pods 0, networkVolumes 0"
   }
  ]
 }

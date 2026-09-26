@@ -362,3 +362,62 @@ def test_the_launcher_confirms_the_pod_with_the_provider():
         "started against it")
     assert "no longer any instances" in src, (
         "the launcher does not recognise the provider's refusal text")
+
+
+# --- the push loop must survive a command that reads stdin ----------------
+
+def test_the_push_loop_does_not_feed_its_listing_to_ssh(tmp_path):
+    """EXECUTED, as shell, against a stand-in that drains stdin.
+
+    Attempt a3 pushed the FIRST mixture and stopped. `ssh` reads standard
+    input by default and the loop's standard input WAS the listing, so the
+    first `ssh mkdir` swallowed the remaining lines; the pilot then refused
+    two minutes later for exactly the input the loop had eaten. A textual
+    check for `<&3` would pass on a loop that still had the bug somewhere
+    else, so this runs the shape.
+    """
+    listing = tmp_path / "inputs.jsonl"
+    listing.write_text("a\nb\nc\n")
+    #: `drain` stands in for ssh: it reads all of standard input, as ssh does.
+    broken = f"""
+    n=0
+    while read -r l; do n=$((n+1)); cat > /dev/null; done < {listing}
+    echo $n
+    """
+    fixed = f"""
+    n=0
+    while read -r l <&3; do n=$((n+1)); cat > /dev/null; done 3< {listing} < /dev/null
+    echo $n
+    """
+    got_broken = subprocess.run(["bash", "-c", broken], capture_output=True,
+                                text=True, timeout=60, stdin=subprocess.DEVNULL)
+    got_fixed = subprocess.run(["bash", "-c", fixed], capture_output=True,
+                               text=True, timeout=60, stdin=subprocess.DEVNULL)
+    assert got_broken.stdout.strip() == "1", (
+        "the failing shape no longer fails; this test proves nothing")
+    assert got_fixed.stdout.strip() == "3", got_fixed.stdout + got_fixed.stderr
+
+
+def test_the_launcher_uses_the_stdin_safe_shape_and_counts_what_it_pushed():
+    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    push = src[src.index("pushing the calibration mixtures"):
+               src.index("# --- run ---")]
+    assert "<&3" in push and "3<" in push, (
+        "the push loop still reads its listing on standard input")
+    assert "$SSH -n" in push, "ssh in the loop can still consume the listing"
+    assert "PUSHED" in push and "WANT" in push, (
+        '"the loop ran" and "the loop ran to the end" are different claims '
+        "and a3 could not tell them apart")
+
+
+def test_every_ssh_invocation_inside_a_loop_passes_dash_n():
+    """Not only the one that bit. Any `$SSH` in a `while read` body has it."""
+    import re
+
+    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    for body in re.findall(r"while read[^\n]*\n(.*?)\ndone", src, re.S):
+        for line in body.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("$SSH ") and not stripped.startswith("$SSH -n"):
+                raise AssertionError(
+                    f"ssh without -n inside a read loop: {stripped!r}")

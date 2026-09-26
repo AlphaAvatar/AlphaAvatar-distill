@@ -324,19 +324,35 @@ for _ in $(seq 1 30); do $SSH true 2>/dev/null && break; sleep 5; done
 # --- push the mixtures -------------------------------------------------------
 # BEFORE the payload runs, so a transport failure costs seconds rather than a
 # wheelhouse build and a root-teacher download.
+# READ ON FD 3, and `ssh -n`. Attempt a3 pushed the FIRST mixture and stopped:
+# `ssh` reads standard input by default, and the loop's standard input WAS the
+# listing, so the first `ssh mkdir` swallowed the remaining lines. The pilot
+# then refused two minutes later for exactly the input the loop had eaten.
+# Either fix alone is sufficient; both are here because the failure is silent
+# and costs a paid acquisition to observe.
 say "pushing the calibration mixtures"
-$SSH "mkdir -p /workspace/mixtures" >>"$LOG" 2>&1
-while read -r line; do
+$SSH -n "mkdir -p /workspace/mixtures" >>"$LOG" 2>&1
+PUSHED=0
+while read -r line <&3; do
   [ -z "$line" ] && continue
   REL=$(printf '%s' "$line" | python3 -c "import json,sys;print(json.load(sys.stdin)['items_path'])")
   DIR=$(dirname "$REL")
-  $SSH "mkdir -p /workspace/mixtures/${DIR}" >>"$LOG" 2>&1
+  $SSH -n "mkdir -p /workspace/mixtures/${DIR}" >>"$LOG" 2>&1
   timeout 300 scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
       -P "${SSH_PORT}" "${REPO_DIR}/${REL}" \
       "root@${SSH_HOST}:/workspace/mixtures/${REL}" >>"$LOG" 2>&1 \
     || { say "FAILED to push ${REL}"; exit 3; }
+  PUSHED=$((PUSHED + 1))
   say "  pushed ${REL}"
-done < "$INPUTS"
+done 3< "$INPUTS"
+#: COUNTED, because "the loop ran" and "the loop ran to the end" are different
+#: claims and a3 could not tell them apart.
+WANT=$(grep -c . "$INPUTS")
+if [ "$PUSHED" -ne "$WANT" ]; then
+  say "pushed ${PUSHED} of ${WANT} required mixtures; refusing to continue"
+  exit 3
+fi
+say "pushed ${PUSHED}/${WANT} required mixtures"
 
 # --- run --------------------------------------------------------------------
 say "setup + pilot (bounded at ${MAX_SECONDS}s)"
@@ -354,7 +370,7 @@ say "remote finished rc=${RC}"
 # those weights -- the decision reads scores, digests and per-item values, all
 # of which are JSON. The checkpoints stay on the pod and die with it.
 say "fetching evidence (JSON and logs only; checkpoints stay on the pod)"
-$SSH "cd /workspace/out && find . \( -name '*.json' -o -name '*.log' -o -name '*.txt' -o -name '*.jsonl' \) -not -path './*/work/*' -print0 | tar --null -czf /workspace/evidence.tgz --files-from=-" >>"$LOG" 2>&1 \
+$SSH -n "cd /workspace/out && find . \( -name '*.json' -o -name '*.log' -o -name '*.txt' -o -name '*.jsonl' \) -not -path './*/work/*' -print0 | tar --null -czf /workspace/evidence.tgz --files-from=-" >>"$LOG" 2>&1 \
   || say "WARNING: could not pack the evidence"
 timeout 600 scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P "${SSH_PORT}" \
     "root@${SSH_HOST}:/workspace/evidence.tgz" "${OUT}/evidence.tgz" >>"$LOG" 2>&1 \
