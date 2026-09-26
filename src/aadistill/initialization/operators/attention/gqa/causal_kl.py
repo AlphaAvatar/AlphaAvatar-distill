@@ -58,6 +58,7 @@ registering at import would add a branch to searches that never asked for one.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Mapping, Sequence
 from contextlib import contextmanager
 from typing import Any
@@ -287,8 +288,22 @@ class AttentionCausalKLV1(OperatorImplementation):
         #: are still appended in group order, so every mean below is over the
         #: same values in the same order that the ablation-outer nesting would
         #: have produced.
+        #: BOUNDED PROGRESS, AND THE DEADLINE CHECKED WHERE THE COST IS.
+        #:
+        #: 896 ablations over 67 items is tens of minutes to hours. The DEPTH
+        #: search learned this the expensive way -- attempt 10 was silent for
+        #: 10 h 47 m and nobody could tell a working search from a stalled
+        #: one -- so this prints one line per (group, layer), which is 28 lines
+        #: per group rather than 896, and checks the wall clock at the same
+        #: instant. The two questions ("where is it?" and "has it run too
+        #: long?") are asked together because they are asked for the same
+        #: reason.
+        started = time.monotonic()
+        total_units = len(groups) * len(out_projections)
+        unit = 0
+
         physical_invocations = 0
-        for group in groups:
+        for g_index, group in enumerate(groups):
             if batch_size > 1:
                 reference = _forward_block(model, group, compute)
                 mask = group.prediction_mask().to(reference.device)
@@ -319,6 +334,20 @@ class AttentionCausalKLV1(OperatorImplementation):
                                 group.items[0]["subtype"], []).append(
                                     forward_kl_mean(reference, ablated, chunk=512))
                         del ablated
+                    unit += 1
+                    mins = (time.monotonic() - started) / 60.0
+                    rate = physical_invocations / mins if mins > 0 else 0.0
+                    print(f"attention.causal_kl_v1: group {g_index + 1}/"
+                          f"{len(groups)} layer {layer + 1}/"
+                          f"{len(out_projections)} · {unit}/{total_units} units "
+                          f"· {physical_invocations} forwards · {mins:.1f} min "
+                          f"· {rate:.1f} fwd/min", flush=True)
+                    if ctx.deadline is not None:
+                        ctx.deadline.check(
+                            f"attention.causal_kl_v1 group {g_index + 1}/"
+                            f"{len(groups)} layer {layer + 1}/"
+                            f"{len(out_projections)} "
+                            f"({physical_invocations} forwards done)")
             finally:
                 del reference
 
@@ -389,6 +418,7 @@ class AttentionCausalKLV1(OperatorImplementation):
                    "valid_tokens": valid_tokens,
                    "padded_positions": int(padded_positions),
                    "ablations": len(blocks) * n_q,
+                   "seconds": round(time.monotonic() - started, 3),
                    "q_heads": [n_q, keep_q], "kv_heads": n_kv},
             artifacts={"kept_heads": kept_per_layer},
         )

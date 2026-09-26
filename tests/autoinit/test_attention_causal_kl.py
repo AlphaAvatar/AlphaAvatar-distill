@@ -34,6 +34,7 @@ from aadistill.initialization.operators.base import (  # noqa: E402
     OperatorContext, OperatorError,
 )
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
+from dataclasses import replace  # noqa: E402
 
 from conftest import build_tiny_model  # noqa: E402
 
@@ -225,6 +226,82 @@ def test_the_forwards_do_pass_use_cache_false():
         calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)]
         kwargs = {k.arg for c in calls for k in c.keywords}
         assert "use_cache" in kwargs, f"{fn.__name__} does not pass use_cache"
+
+
+# --- the deadline, and staying visible ------------------------------------
+
+
+class _Deadline:
+    """`OperatorContext.deadline`'s contract: `.check(what)` raises or returns.
+
+    Modelled on `C1OperatorDeadline`, which raises `C1DriverError` once the
+    session's soft stop is reached.
+    """
+
+    def __init__(self, allow: int):
+        self.allow, self.calls = allow, []
+
+    def check(self, what: str) -> None:
+        self.calls.append(what)
+        if len(self.calls) > self.allow:
+            raise RuntimeError(f"budget exhausted: {what}")
+
+
+def test_the_deadline_stops_the_scorer(geo, target):
+    """897 corpus passes is tens of minutes to hours. Without this the only
+    thing between an overrun and the cost watchdog is nothing -- which is how
+    DEPTH ran 10.78 h against a 3.0 h budget."""
+    model = build_tiny_model(GEOMETRY)
+    deadline = _Deadline(allow=2)
+    with pytest.raises(RuntimeError, match="budget exhausted"):
+        impl = get_implementation("attention.causal_kl_v1")
+        ctx = context(model, geo, target, items())
+        impl.execute(replace(ctx, deadline=deadline))
+    assert len(deadline.calls) == 3, "it kept going after the refusal"
+
+
+def test_a_stop_still_leaves_the_model_intact(geo, target):
+    """The `finally` has to survive the exception, not only the happy path."""
+    model = build_tiny_model(GEOMETRY)
+    before = [p.detach().clone() for p in model.parameters()]
+    with pytest.raises(RuntimeError):
+        impl = get_implementation("attention.causal_kl_v1")
+        ctx = context(model, geo, target, items())
+        impl.execute(replace(ctx, deadline=_Deadline(allow=1)))
+    assert all(torch.equal(a, b) for a, b in zip(before, model.parameters()))
+
+
+def test_the_deadline_message_says_where_it_was(geo, target):
+    """A stop that cannot say how far it got is a stop nobody can price."""
+    model = build_tiny_model(GEOMETRY)
+    deadline = _Deadline(allow=10_000)
+    impl = get_implementation("attention.causal_kl_v1")
+    impl.execute(replace(context(model, geo, target, items()),
+                         deadline=deadline))
+    assert deadline.calls, "the deadline was never consulted"
+    assert all("attention.causal_kl_v1" in c for c in deadline.calls)
+    assert "forwards done" in deadline.calls[-1]
+    #: One check per (group, layer), not per ablation: 896 checks and 896
+    #: printed lines would bury the signal they exist to produce.
+    n_groups, n_layers = len(items()), GEOMETRY["num_hidden_layers"]
+    assert len(deadline.calls) == n_groups * n_layers
+
+
+def test_no_deadline_is_still_allowed(geo, target):
+    """`ctx.deadline` is None on every path that does not budget one."""
+    model = build_tiny_model(GEOMETRY)
+    out = run(model, geo, target, items())
+    assert out.trace["seconds"] >= 0
+
+
+def test_progress_is_printed_and_bounded(geo, target, capfd):
+    model = build_tiny_model(GEOMETRY)
+    run(model, geo, target, items())
+    lines = [ln for ln in capfd.readouterr().out.splitlines()
+             if ln.startswith("attention.causal_kl_v1:")]
+    assert lines, "the scorer ran silently"
+    assert len(lines) == len(items()) * GEOMETRY["num_hidden_layers"]
+    assert "forwards" in lines[-1] and "fwd/min" in lines[-1]
 
 
 # --- structural contract, identical to the other ATTENTION operators -------
