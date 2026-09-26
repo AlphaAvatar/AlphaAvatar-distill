@@ -558,40 +558,61 @@ def operator_cost(impl: OperatorImplementation, parent_spec: ArchSpec,
             cached_fraction=depth_cached_fraction)
         notes = (f"{plan.notes}; mean {avg_layers:.2f} surviving blocks per "
                  f"evaluation; intact reference {depth_reference_mode}")
-    elif plan.forward_passes:
-        #: THE GENERIC FORWARD-CONSUMING CASE, and it did not exist.
-        #:
-        #: Before this branch, an operator that declares `forward_passes` and
-        #: no `stats_passes` matched neither arm and fell through to
-        #: `flops = 0` -- so a plan declaring tens of thousands of model
-        #: forwards priced at exactly zero GPU seconds. The only forward-heavy
-        #: operator in the library happened to be named in the branch above, so
-        #: the hole stayed invisible: the first implementation to walk into it
-        #: would be a NEW one, arriving with a plan nobody had priced.
-        #:
-        #: `OperatorPlan.forward_passes` is the contract, so that is what is
-        #: read. No implementation id, model family, head count, item count or
-        #: device appears here; an operator prices itself by declaring how many
-        #: passes over the calibration tokens it will run.
-        flops = (plan.forward_passes * calibration_tokens
-                 * forward_flops_per_token(parent_spec, seq_len))
-        notes = (f"{plan.notes}; {plan.forward_passes} declared forward passes "
-                 f"over {calibration_tokens} calibration tokens")
-    elif plan.stats_passes:
-        # One forward with hooks, then a float64 eigendecomposition or top-k.
-        flops = calibration_tokens * forward_flops_per_token(parent_spec, seq_len)
-        if include_stats:
-            stats_low = hardware.seconds_for(flops)
-            stats_high = calibration_tokens * CPU_STATS_SECONDS_PER_TOKEN
-            notes = (f"{plan.notes}; statistics pass priced as a range: "
-                     "GPU-forward-only lower bound vs the measured CPU end-to-end rate")
-        else:
-            # The pass is charged ONCE for this (parent, profile) by the caller,
-            # because `StatsCache` shares it across every stats-consuming operator
-            # at that parent. Charging it here as well would bill the same
-            # collection to composite AND ffn AND width.
-            notes = f"{plan.notes}; statistics pass charged once per (parent, profile)"
-        flops = 0.0  # accounted inside the stats bounds instead of twice
+    else:
+        #: ADDITIVE, not exclusive. `OperatorPlan` exposes `forward_passes` and
+        #: `stats_passes` independently and does not forbid declaring both, so
+        #: pricing must not quietly assume they are alternatives -- an `if/elif`
+        #: documents a mutual exclusion the TYPE does not enforce, and the first
+        #: operator to declare both would have half its work priced at zero.
+        #: Today's shipped operators declare exactly one, so this changes no
+        #: existing number; it means the next one does not have to.
+        if plan.forward_passes:
+            #: THE GENERIC FORWARD-CONSUMING CASE, and it did not exist.
+            #:
+            #: Before it, an operator declaring `forward_passes` and no
+            #: `stats_passes` matched neither arm and fell through to
+            #: `flops = 0` -- a plan declaring tens of thousands of model
+            #: forwards priced at exactly zero GPU seconds. The only
+            #: forward-heavy operator in the library happened to be named in
+            #: the branch above, so the hole stayed invisible: the first
+            #: implementation to walk into it would be a NEW one, arriving
+            #: with a plan nobody had priced.
+            #:
+            #: `OperatorPlan.forward_passes` is the contract, so that is what
+            #: is read. No implementation id, model family, head count, item
+            #: count or device appears here; an operator prices itself by
+            #: declaring how many passes over the calibration tokens it runs.
+            flops += (plan.forward_passes * calibration_tokens
+                      * forward_flops_per_token(parent_spec, seq_len))
+            notes = (f"{plan.notes}; {plan.forward_passes} declared forward "
+                     f"passes over {calibration_tokens} calibration tokens")
+        if plan.stats_passes:
+            # One forward with hooks, then a float64 eigendecomposition or top-k.
+            #:
+            #: The declared count is READ, not assumed to be one corpus
+            #: equivalent. `plan` is built with `n_calibration_items = 1` above, so a
+            #: declaration of `max(n_items, 1)` arrives here as 1 and
+            #: `stats_passes` is a count of CORPUS-EQUIVALENT passes. Scaling
+            #: by it is therefore both correct for every shipped operator and
+            #: generic for one that declares more than a single sweep.
+            per_pass = calibration_tokens * forward_flops_per_token(parent_spec,
+                                                                    seq_len)
+            stats_flops = plan.stats_passes * per_pass
+            if include_stats:
+                stats_low = hardware.seconds_for(stats_flops)
+                stats_high = (plan.stats_passes * calibration_tokens
+                              * CPU_STATS_SECONDS_PER_TOKEN)
+                notes = (f"{notes}; statistics pass priced as a range: "
+                         "GPU-forward-only lower bound vs the measured CPU "
+                         "end-to-end rate")
+            else:
+                # The pass is charged ONCE for this (parent, profile) by the
+                # caller, because `StatsCache` shares it across every
+                # stats-consuming operator at that parent. Charging it here as
+                # well would bill the same collection to composite AND ffn AND
+                # width.
+                notes = (f"{notes}; statistics pass charged once per "
+                         "(parent, profile)")
 
     child_bytes = checkpoint_bytes(child_spec, adapter)
     parent_bytes = checkpoint_bytes(parent_spec, adapter)

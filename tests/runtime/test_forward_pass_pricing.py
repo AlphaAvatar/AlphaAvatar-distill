@@ -52,6 +52,20 @@ def _specs():
     return parent, parent
 
 
+def _reducible():
+    """A parent and a target that EVERY shipped operator can plan against.
+
+    `_specs()` returns parent == target, which DEPTH rightly refuses -- there
+    is nothing to remove. A registry walk needs a target that reduces every
+    structural field, or it silently exercises only the operators that happen
+    to tolerate a no-op.
+    """
+    parent, _ = _specs()
+    target = parent.replace(num_hidden_layers=2, intermediate_size=256,
+                            num_attention_heads=4, hidden_size=128)
+    return parent, target
+
+
 class _ForwardOnly(OperatorImplementation):
     """Declares forwards and no statistics. The case that priced at zero."""
 
@@ -197,7 +211,7 @@ def test_the_existing_depth_operator_is_unaffected():
     """
     from aadistill.initialization.operators.register import BUILTIN_OPERATORS
 
-    parent, target = _specs()
+    parent, target = _reducible()
     assert BUILTIN_OPERATORS, "no shipped operators to check"
     for impl in BUILTIN_OPERATORS:
         if impl.impl_id == "depth.causal_kl_greedy_v1":
@@ -206,3 +220,79 @@ def test_the_existing_depth_operator_is_unaffected():
         assert plan.forward_passes == 0, (
             f"{impl.impl_id} declares forwards; its price now changes and that "
             "needs a deliberate review, not a silent one")
+
+
+# --- the two declarations are ADDITIVE, not alternatives --------------------
+
+
+class _Both(_ForwardOnly):
+    """Declares forwards AND statistics. `OperatorPlan` permits it."""
+
+    impl_id = "synthetic.forward_and_stats_v0"
+
+    def __init__(self, passes: int, stats: int):
+        super().__init__(passes)
+        self._stats = stats
+
+    def plan(self, spec, target, adapter, config=None):
+        return OperatorPlan(impl_id=self.impl_id, result_spec=spec,
+                            forward_passes=self._passes,
+                            stats_passes=self._stats, notes="synthetic")
+
+
+def _both_cost(passes: int, stats: int, *, include_stats: bool = True):
+    parent, target = _specs()
+    return operator_cost(_Both(passes, stats), parent, target, QWEN3_ADAPTER,
+                         calibration_tokens=10_000, seq_len=1024,
+                         hardware=HARDWARE, include_stats=include_stats)
+
+
+def test_declaring_both_prices_both():
+    """An `if/elif` documents an exclusion the TYPE does not enforce.
+
+    `OperatorPlan` exposes the two counts independently and forbids nothing, so
+    the first operator to declare both would have had half its work priced at
+    zero.
+    """
+    both = _both_cost(1_000, 1)
+    forwards_only = _cost(1_000)
+    assert both.flops == pytest.approx(forwards_only.flops)
+    assert both.stats_seconds_low > 0, "the statistics half was dropped"
+
+
+def test_the_forward_half_is_unaffected_by_the_stats_declaration():
+    assert _both_cost(500, 1).flops == pytest.approx(_both_cost(500, 3).flops)
+
+
+def test_more_declared_stats_passes_cost_more():
+    """Do not assume one corpus-equivalent sweep is all anyone can declare."""
+    one, three = _both_cost(0, 1), _both_cost(0, 3)
+    assert three.stats_seconds_low == pytest.approx(3 * one.stats_seconds_low)
+    assert three.stats_seconds_high == pytest.approx(3 * one.stats_seconds_high)
+
+
+def test_operator_plan_does_not_forbid_declaring_both():
+    """The premise of the additive branch, asserted rather than assumed.
+
+    If `OperatorPlan` ever DOES enforce mutual exclusion, this fails and the
+    additive pricing can be simplified -- which is the point of pinning it.
+    """
+    parent, _ = _specs()
+    plan = OperatorPlan(impl_id="x", result_spec=parent,
+                        forward_passes=5, stats_passes=7)
+    assert (plan.forward_passes, plan.stats_passes) == (5, 7)
+
+
+def test_shipped_operators_still_declare_exactly_one_kind():
+    """So this change moves no existing number, which is why it is safe now."""
+    from aadistill.initialization.operators.register import BUILTIN_OPERATORS
+
+    parent, target = _reducible()
+    checked = 0
+    for impl in BUILTIN_OPERATORS:
+        plan = impl.plan(parent, target, QWEN3_ADAPTER, {"n_calibration_items": 1})
+        checked += 1
+        assert not (plan.forward_passes and plan.stats_passes), (
+            f"{impl.impl_id} declares both; its price changes and that needs a "
+            "deliberate review")
+    assert checked == len(BUILTIN_OPERATORS), "an operator was skipped"

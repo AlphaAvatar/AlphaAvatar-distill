@@ -126,11 +126,31 @@ class FixedPathStep:
     #: Optional artifact digest this step's output is pinned to.
     expected_artifact_digest: str | None = None
     label: str = ""
+    #: Extra operator configuration for THIS step, merged over the config the
+    #: executor derives. Absent by default, and ABSENT FROM `as_dict` when it
+    #: is empty -- `FixedPathSpec.spec_hash` is `sha256_json(as_dict())`, so a
+    #: new key present unconditionally would move every historical fixed-path
+    #: hash, including the C1 preregistration's. A step that declares nothing
+    #: therefore serializes exactly as it did before this field existed.
+    #:
+    #: It exists because one operator's output is measurably sensitive to a
+    #: numerical choice: `attention.causal_kl_v1` selects a different head map
+    #: at a different calibration forward batch size, so two runs that can
+    #: materialize different children must not share a step identity. Binding
+    #: that at the STEP rather than repository-wide is the narrow form -- no
+    #: other operator's identity moves.
+    config: Mapping[str, Any] | None = None
 
     def as_dict(self) -> dict[str, Any]:
-        return {"impl_id": self.impl_id, "profile_id": self.profile_id,
-                "expected_artifact_digest": self.expected_artifact_digest,
-                "label": self.label}
+        out: dict[str, Any] = {
+            "impl_id": self.impl_id, "profile_id": self.profile_id,
+            "expected_artifact_digest": self.expected_artifact_digest,
+            "label": self.label}
+        if self.config:
+            #: Sorted, so two equal configs built in different key orders hash
+            #: identically -- the same property `ArchSpec` relies on.
+            out["config"] = {k: self.config[k] for k in sorted(self.config)}
+        return out
 
 
 @dataclass(frozen=True)
@@ -355,6 +375,21 @@ def require_root_on_declared_device(model: Any, spec: FixedPathSpec) -> str:
     return verify_root_placement(model, spec.device)["resolved"]
 
 
+def step_operator_config(step: FixedPathStep, n_items: int) -> dict[str, Any]:
+    """The config one step's operator is applied with.
+
+    The derived part (`n_calibration_items`) plus whatever the step itself
+    declares, the step winning. Empty for every historical step, so this is an
+    identity for them -- and it is a named function rather than two lines
+    inside the executor so that a test can show the merge happens without
+    materializing a 4B checkpoint to find out.
+    """
+    config: dict[str, Any] = {"n_calibration_items": n_items}
+    if step.config:
+        config.update(step.config)
+    return config
+
+
 def materialize_fixed_path(
     spec: FixedPathSpec,
     *,
@@ -469,7 +504,7 @@ def _run_steps(
                 f"{spec.path_id} step {i} ({impl.impl_id}): not applicable to "
                 f"{parent_spec.describe()} — {reason}")
 
-        operator_config = {"n_calibration_items": len(items)}
+        operator_config = step_operator_config(step, len(items))
         plan = impl.plan(parent_spec, spec.target_spec, adapter, operator_config)
 
         ctx = OperatorContext(
