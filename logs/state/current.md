@@ -1565,6 +1565,82 @@ under. An a4-style CUDA validation is that kind of session, so naming that
 runtime was reasonable — it is simply not the one the operator search executes
 in. Both were measured here, and they agree.
 
+### The C3 batching-adoption pilot: implemented, priced, NOT launched
+
+The acceptance question moved, by maintainer decision: not *does padded
+batching reproduce every top-k choice* but *is the B4 causal scorer materially
+faster while producing a practically equivalent downstream model after frozen
+recovery*. Two arms differing in one config value.
+
+**`attention.causal_kl_v1` exists** at
+[`operators/attention/gqa/causal_kl.py`](../../src/aadistill/initialization/operators/attention/gqa/causal_kl.py).
+Each query head is scored by one-shot causal ablation — forward KL of the
+parent against the parent with that head's `o_proj` column block zeroed,
+aggregated domain-balanced exactly as DEPTH aggregates — then the shared
+per-GQA-group top-k selects. One shot, no rescoring, no joint search.
+
+Three properties are load-bearing and each is tested by execution, not
+assertion:
+
+* **zeroing the columns equals deleting the head, bit-for-bit.** Checked
+  against an independent deletion mechanism (zeroing the head's *input* to
+  `o_proj`), because the same mechanism twice would be a tautology. The
+  columns are restored in a `finally`, and a full scoring run leaves every
+  parameter of the model it was handed unchanged.
+* **the batch size is hashed, not runtime.** Alone among the operators it
+  reads `calibration_forward_batch_size` from its own step config and never
+  `ctx.execution` — an AST check enforces that the source cannot mention
+  `micro_batch_size`. An undeclared batch size is `1`, never the
+  process-wide default of `4`.
+* **it joins nothing by being imported.** Absent from `BUILTIN_OPERATORS`,
+  registered only by an explicit `register()`, and the regenerated C1
+  executable closure still names 105 files without it.
+
+**The prefix had two real defects, both found by the maintainer and both
+fixed.** `prefix_steps()` gave all three pre-ATTENTION operators
+`calib.domain_balanced@v1`; WIDTH actually ran against
+`calib.reasoning_heavy@v2`, so the replay would have reconstructed a
+*different* parent — refused by the digest gate, but only after paying for the
+replay. And `step_operator_config` let a step override `n_calibration_items`,
+which would have PLANNED an operator against 8 items while EXECUTING it
+against 67; it now fails closed, and the test that had blessed the override is
+reversed.
+
+**The B=1 pin is now proved by running the pilot's own path.** `replay_prefix`
+is the single function that materializes anything for this pilot, it takes no
+`execution` parameter, and the evidence reads the batch size each prefix
+operator *recorded* after a real toy execution. The earlier version asserted
+that a call it had just written passed a `1`, which a pilot that forgot the
+argument entirely would also have passed.
+
+**Pricing is conservative and arm-identical**, derived by
+[`phase_c3/pricing.py`](../../scripts/experiments/phase_c3/pricing.py) from the
+frozen mixture through the real loader and the real grouper:
+
+| | groups | item-forward equiv. | physical invocations | padded positions | pad/valid |
+| --- | --- | --- | --- | --- | --- |
+| B1 | 67 | 60,099 | 60,099 | 0 | 0.0000 |
+| B4 | 17 | 60,099 | 15,249 | 21,978 | 0.3673 |
+
+67 items, 59,830 valid tokens, 28 layers x 32 heads = 896 ablations plus one
+reference. `operator_cost` cannot price the two arms differently — it has no
+config parameter — so ~1130 GPU-seconds per arm, about `$0.68` for both at an
+*estimated* `$1.09/h`. **That is not a quote**; the live `securePrice` is
+re-queried immediately before acquisition, and
+`L40S_MEASURED.price_per_hour_usd = $0.99` is historical profile metadata that
+must never be used as one.
+
+**The padding overhead is the pilot's most useful pre-run number.** B4
+computes 36.7% more token-positions than B1. A 1.25x speedup gate is therefore
+asking the packing to win back that overhead *and* a quarter again — which is
+exactly why the gate was predeclared rather than chosen afterwards.
+
+**Not done, and not authorized.** No pilot campaign or authorization document
+exists, no launcher, no `$5.00` ceiling created, no paid execution. Formal C3
+remains **NOT STARTED** with its `$25.00` stage envelope untouched, and the
+pilot seed `1139220455` is pilot-only — there is still **no frozen C3 seed
+set**.
+
 ## Readiness
 
 <!-- readiness:begin -->

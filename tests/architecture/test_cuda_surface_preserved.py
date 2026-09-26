@@ -734,6 +734,27 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "CHANGE: one previously-accepted input is now refused, and config "
             "key order no longer reaches the hash. No existing step declares a "
             "config, so no historical identity moves.",
+        "src/aadistill/initialization/operators/attention/gqa/causal_kl.py":
+            "NEW MODULE: `attention.causal_kl_v1`, the C3 candidate. THIS IS A "
+            "DECLARED SEMANTIC CHANGE by construction -- new executable core is "
+            "semantic whatever it contains. It scores each query head by "
+            "one-shot causal ablation (forward KL of the parent against the "
+            "parent with that head's o_proj column block zeroed), aggregated "
+            "domain-balanced exactly as DEPTH aggregates, then keeps the "
+            "top-scoring heads per GQA group through the shared selection "
+            "topology. One shot, not greedy: no rescoring after a removal. "
+            "It moves nothing that already existed -- it is a NEW module "
+            "precisely so that adding it edits no file a frozen source set "
+            "pins, it is absent from `BUILTIN_OPERATORS`, importing it "
+            "registers nothing, and no C1 entry point reaches it (the "
+            "regenerated closure still names 105 files and does not include "
+            "it). ALONE among the operators it reads its calibration forward "
+            "batch size from its own hashed step config rather than from "
+            "`ctx.execution`, because padded batching is measured to move this "
+            "family of decisions and so belongs in the identity. "
+            "NOT YET CUDA-VALIDATED: it runs forwards on the calibration "
+            "mixture, so it joins `CURRENT_CUDA_SURFACE` and owes the new "
+            "validation rather than claiming cover from the 2026-09-10 one.",
      }),
 )
 
@@ -803,6 +824,7 @@ CURRENT_CUDA_SURFACE = (
     "src/aadistill/initialization/operators/attention/gqa/_common.py",
     "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
     "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
     "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
     "src/aadistill/initialization/operators/depth/_common.py",
     "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",

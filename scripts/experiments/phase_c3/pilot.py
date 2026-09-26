@@ -30,15 +30,22 @@ from __future__ import annotations
 
 import hashlib
 
+from collections.abc import Callable, Mapping, Sequence
+from pathlib import Path
+from typing import Any
+
 from aadistill.initialization.execution import ExecutionConfig
-from aadistill.initialization.planning.fixed_path import FixedPathStep
+from aadistill.initialization.planning.fixed_path import (
+    FixedPathSpec, FixedPathStep, StepResult, materialize_fixed_path)
+from aadistill.initialization.specs.arch import ArchSpec
 
 __all__ = [
     "PREFIX_EXECUTION", "PREFIX_STEPS", "CAUSAL_IMPL_ID",
     "FROZEN_PARENT_DIGEST", "CAUSAL_PROFILE_ID", "BATCH_SIZE_CONFIG_KEY",
     "PILOT_SEED_NAMESPACE", "C0_PREREGISTRATION_SHA256", "CAUSAL_STEP_LABEL",
-    "C1_PATH_RECORD", "C1_ARM_IDENTITIES",
+    "C1_PATH_RECORD", "C1_ARM_IDENTITIES", "root_binding",
     "prefix_steps", "causal_step", "derive_pilot_seed", "PILOT_SEED",
+    "target_spec", "arm_spec", "replay_prefix", "ARM_IDS",
 ]
 
 #: EXPLICIT, and deliberately not `DEFAULT_EXECUTION`. See the module docstring.
@@ -151,3 +158,89 @@ def derive_pilot_seed(base: str = C0_PREREGISTRATION_SHA256,
 
 
 PILOT_SEED = derive_pilot_seed()
+
+
+#: The two arms, named once. The batch size is the arm.
+ARM_IDS = {1: "causal-B1", 4: "causal-B4"}
+
+
+def _path_record(repo_root: str | Path) -> dict:
+    import json
+
+    return json.loads((Path(repo_root) / C1_PATH_RECORD).read_text())["path"]
+
+
+def root_binding(repo_root: str | Path = ".") -> tuple[str, str]:
+    """`(root_repo_id, root_revision)`, READ from the committed path record.
+
+    The first version of this module wrote `"main"` here. The frozen path
+    pins `768f209d…`, and `main` is a moving reference: the pilot would have
+    replayed the prefix from whatever that tag pointed at on the day it ran,
+    which is not the checkpoint the frozen parent came from. Nothing about
+    the root is retyped now, and a test compares this against the record.
+    """
+    path = _path_record(repo_root)
+    repo_id, revision = path["root_repo_id"], path["root_revision"]
+    if len(revision) != 40 or not all(c in "0123456789abcdef" for c in revision):
+        raise ValueError(
+            f"the committed root revision {revision!r} is not a pinned commit "
+            "sha; a moving reference cannot reproduce the frozen parent")
+    return repo_id, revision
+
+
+def target_spec(repo_root: str | Path = ".") -> ArchSpec:
+    """The ATTENTION target, read from the committed C1 path record.
+
+    Not restated here. The pilot reuses the exact frozen path, and a target
+    typed into this module could drift from the one that path was built for.
+    """
+    path = _path_record(repo_root)
+    return ArchSpec.of(path["family"], path["target_spec"])
+
+
+def arm_spec(batch_size: int, *, repo_root: str | Path = ".",
+             device: str = "cpu", seed: int = 0,
+             pin_parent: bool = True,
+             max_shard_size: str | int | None = None) -> FixedPathSpec:
+    """One arm's complete path: the frozen prefix plus the causal step.
+
+    THE ONLY DIFFERENCE BETWEEN THE TWO ARMS IS `batch_size`. Both are built
+    by this function from the same prefix, so "identical by construction" is a
+    property of the code rather than a claim about it.
+    """
+    target = target_spec(repo_root)
+    repo_id, revision = root_binding(repo_root)
+    steps = tuple(prefix_steps(pin_parent=pin_parent)) + (causal_step(batch_size),)
+    return FixedPathSpec(
+        path_id=f"autoinit.v1.phase_c3.pilot.{ARM_IDS[int(batch_size)]}",
+        family=target.family, target_spec=target, steps=steps,
+        root_repo_id=repo_id, root_revision=revision,
+        device=device, seed=seed, max_shard_size=max_shard_size)
+
+
+def replay_prefix(
+    spec: FixedPathSpec,
+    *,
+    adapter: Any,
+    root_loader: Callable[[], Any],
+    workdir: str | Path,
+    repo_root: str | Path = ".",
+    calibration_items: Mapping[str, Sequence[Any]] | None = None,
+    on_step: Callable[[StepResult], None] | None = None,
+    deadline: Any = None,
+) -> list[StepResult]:
+    """THE ONE PLACE the pilot materializes anything. B1, explicitly.
+
+    Every caller -- the launcher, the driver, the $0 readiness evidence --
+    goes through this function, so there is exactly one line in the pilot that
+    decides which execution mode the frozen prefix replays under. A test that
+    built its own `materialize_fixed_path` call could not detect this function
+    forgetting to pass `PREFIX_EXECUTION`; running this one can.
+
+    `execution` is NOT a parameter. Making it one would put the decision back
+    in the caller, which is the coupling `PREFIX_EXECUTION` exists to remove.
+    """
+    return materialize_fixed_path(
+        spec, adapter=adapter, root_loader=root_loader, workdir=workdir,
+        repo_root=repo_root, calibration_items=calibration_items,
+        on_step=on_step, deadline=deadline, execution=PREFIX_EXECUTION)
