@@ -1409,6 +1409,41 @@ That is why the pre-refactor code was reproducible: it always put one item in a
 forward. The refactor did not introduce this — it made the execution shape a
 variable, and this property was already there.
 
+### The split-K causal control — the intervention that had never been run
+
+**Review found a material defect in the diagnostic, and it is mine.**
+`torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False` does
+**not** disable split-K. torch's parser is explicit — `if isinstance(value, bool):
+return value, True` — so the boolean form turns off reduced-precision
+accumulation and leaves `allow_splitk = True`. Only the tuple form reaches the
+second flag. My stage called itself "turn off bf16 split-k reduction" and its
+`_reading` said the knob did not remove the divergence, a conclusion drawn at
+the LOGIT level while the per-projection table underneath already showed
+`attn_out` and `ffn_out` going **bit-exact** under the boolean and k/v halving.
+I reported the summary and missed my own data.
+
+**The three states are now named** so the ambiguity cannot recur: `default`,
+`reduced_precision_off_splitk_on` (what actually ran), and
+`reduced_precision_off_splitk_off`. Historical reports are unchanged.
+
+**Two facts the runtime supplied, not my reading of it:**
+
+* torch **2.9.1+cu130 cannot express the tuple at all** —
+  `set_allow_bf16_reduction_cublas expects a bool`. Recorded UNSUPPORTED.
+* torch **2.11.0+cu128 accepts `(False, False)` at the setter and refuses at
+  the first GEMM** — `allow_splitk=False requires the cuBLASLt backend`, raised
+  inside `F.linear`. Attempt `bi_20260926_d4` (`$0.0934`) lost four stages to
+  this because `supported` meant "setattr returned".
+
+**Three repairs, and the third is the one that matters scientifically.**
+`supported` now means a real bf16 GEMM executed under the policy. The BLAS
+library is selected explicitly and its readback checked, because
+`preferred_blas_library` can accept a name and leave the backend where it was.
+And a **fourth control**, `cublaslt_defaults`, isolates the backend switch
+alone — `allow_splitk=False` requires cuBLASLt, so the intervention changes two
+things, and without that control an improvement could not be attributed to
+either. `improvement_attributable_to` is a derived field for exactly that.
+
 **What it means for C3, stated but NOT acted on.** Operators whose output is a
 dense top-k over activation statistics are not reproducible across
 `micro_batch_size` on this hardware in bf16, and `DEFAULT_MICRO_BATCH_SIZE` is
