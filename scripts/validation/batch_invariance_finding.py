@@ -386,6 +386,74 @@ def mechanism(reports: dict) -> dict:
     return out
 
 
+def subsample_sensitivity(reports: dict) -> dict:
+    """Does the DECISION claim survive the full mixture, or was 8 items too few?
+
+    The prediction was recorded before this ran, in `fullmix_prediction.json`:
+    the relative statistic drift should fall by roughly sqrt(8) ~ 2.8x because
+    the sum grows ~8x while its reordering error grows ~sqrt(8), and the
+    selection should still move because at 8 items the drift already exceeds the
+    minimum cutoff margin by two to four orders of magnitude.
+
+    Pairs are matched by label: `X` against `X_fullmix`. Nothing is compared
+    across objects or runtimes.
+    """
+    out: dict = {"pairs": {}}
+    for label in sorted(reports):
+        base = f"{label}_fullmix"
+        if base not in reports:
+            continue
+        small, large = reports[label], reports[base]
+
+        def read(r):
+            sd = r["stages"].get("statistics_decomposition") or {}
+            sel = r["stages"].get("ffn_selection") or {}
+            ratio = f"{float(sel.get('headline_keep_ratio', 0.5)):.2f}"
+            per_bs = dig(sel, "by_keep_ratio", ratio) or {}
+            return {
+                "n_items": dig(r, "calibration", "n_items"),
+                "n_tokens": sum(dig(r, "calibration", "lengths") or []),
+                "ffn_abs_sum_rel_l2_bs4": dig(
+                    sd, "by_micro_batch_size", "4", "ffn_abs_sum", "rel_l2"),
+                "layers_moved_at_headline_bs4": dig(
+                    per_bs, "4", "n_layers_with_moved_selection"),
+                "n_layers": dig(per_bs, "4", "n_layers"),
+                "min_cutoff_margin_relative_bs4": dig(
+                    per_bs, "4", "min_cutoff_margin_relative"),
+                "invariant_at_every_ratio_and_size": sel.get(
+                    "selection_is_batch_invariant_at_every_ratio_and_size"),
+                "by_keep_ratio_bs4": {
+                    ratio_k: dig(per, "4", "n_layers_with_moved_selection")
+                    for ratio_k, per in (sel.get("by_keep_ratio") or {}).items()},
+            }
+
+        a, b = read(small), read(large)
+        drift_ratio = (a["ffn_abs_sum_rel_l2_bs4"] / b["ffn_abs_sum_rel_l2_bs4"]
+                       if a["ffn_abs_sum_rel_l2_bs4"] and b["ffn_abs_sum_rel_l2_bs4"]
+                       else None)
+        out["pairs"][label] = {
+            "subsample": a,
+            "full_mixture": b,
+            "drift_fell_by": drift_ratio,
+            #: The prediction, as a checkable proposition rather than prose.
+            "prediction_drift_falls_2x_to_4x": (
+                2.0 <= drift_ratio <= 4.0 if drift_ratio else None),
+            "prediction_selection_still_moves": (
+                b["invariant_at_every_ratio_and_size"] is False),
+            "decision_claim_survives_the_full_mixture": (
+                b["layers_moved_at_headline_bs4"] is not None
+                and b["layers_moved_at_headline_bs4"] > 0),
+        }
+    if out["pairs"]:
+        out["decision_claim_survives_everywhere_it_was_tested"] = all(
+            v["decision_claim_survives_the_full_mixture"]
+            for v in out["pairs"].values())
+    out["_prediction_record"] = ("logs/stages/stage-1/phase_c3/investigations/"
+                                 "batch-invariance-root-cause/v1/"
+                                 "fullmix_prediction.json")
+    return out
+
+
 def build(reports: dict) -> dict:
     a4 = {}
     p = REPO / A4_FINDING
@@ -411,6 +479,7 @@ def build(reports: dict) -> dict:
         "executables": _executables(reports),
         "a4_claims_adjudicated": checks,
         "mechanism": mechanism(reports),
+        "subsample_sensitivity": subsample_sensitivity(reports),
         **v,
         "localization": {
             label: {
