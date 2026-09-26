@@ -263,9 +263,13 @@ BF16_SPLIT_K = "allow_bf16_reduced_precision_reduction_split_k"
 
 #: The three states this investigation must keep apart. Named, so that a report
 #: can never again call two different things "disabled".
-CONTROL_A = "default"
-CONTROL_B = "reduced_precision_off_splitk_on"
-CONTROL_C = "reduced_precision_off_splitk_off"
+CONTROL_A = "default"                                  # cuBLAS,   True/True
+CONTROL_B = "reduced_precision_off_splitk_on"          # cuBLAS,   False/True
+#: The backend switch ALONE. `allow_splitk=False` requires cuBLASLt, so the
+#: intervention changes the BLAS library as well as the split-K flag -- and
+#: without this control an improvement could not be attributed to either one.
+CONTROL_D = "cublaslt_defaults"                        # cuBLASLt, True/True
+CONTROL_C = "reduced_precision_off_splitk_off"         # cuBLASLt, False/False
 
 
 def read_bf16_policy() -> dict:
@@ -284,19 +288,101 @@ def read_bf16_policy() -> dict:
     return out
 
 
-def set_bf16_policy(reduced: bool, splitk: bool | None) -> dict:
-    """Request a policy, then READ BACK what the runtime accepted.
+def _restore(before: dict, before_blas: str) -> None:
+    """Put the policy and the BLAS backend back where the run found them.
 
-    `splitk=None` means "use the boolean form", which is control B and leaves
-    split-K on. A build that cannot express `splitk=False` is recorded
-    UNSUPPORTED rather than silently given the boolean, because that
-    substitution is the whole defect being corrected.
+    Both, not just the policy: a stage that selected cuBLASLt and restored only
+    the reduction flags would leave every later stage on a different BLAS
+    library than the one whose numbers it is being compared against.
+    """
+    set_bf16_policy(bool(before["allow_reduced_precision"]),
+                    before["allow_splitk"] if before["allow_splitk_readable"]
+                    else None,
+                    before_blas if "<" not in before_blas else None)
+
+
+def read_blas_backend():
+    """Which BLAS library CUDA matmuls will use. cuBLAS unless told otherwise."""
+    import torch
+
+    try:
+        return str(torch.backends.cuda.preferred_blas_library())
+    except Exception as exc:                                # noqa: BLE001
+        return f"<unreadable: {type(exc).__name__}: {exc}>"
+
+
+def set_blas_backend(name: str | None) -> dict:
+    """Select cuBLAS or cuBLASLt. Needed because `allow_splitk=False` requires Lt.
+
+    This is NOT a free plumbing detail: switching the BLAS library is itself a
+    numerical change, so an arm that changes it is changing two things and
+    needs its own control. See `CONTROL_D`.
+    """
+    import torch
+
+    out = {"requested": name, "error": None}
+    if name is not None:
+        try:
+            torch.backends.cuda.preferred_blas_library(name)
+        except Exception as exc:                            # noqa: BLE001
+            out["error"] = f"{type(exc).__name__}: {exc}"
+    out["readback"] = read_blas_backend()
+    #: Did it STICK? `preferred_blas_library` can accept a name and leave the
+    #: backend where it was -- on a CPU-only build it does exactly that. A
+    #: request that silently no-ops would make control C look like a cuBLASLt
+    #: arm while it ran on cuBLAS, which is the one mistake this whole round
+    #: exists to stop repeating.
+    out["honoured"] = (
+        name is None
+        or (isinstance(out["readback"], str)
+            and name.lower() in out["readback"].lower()))
+    return out
+
+
+def _policy_runs_a_gemm() -> dict:
+    """Does a real bf16 GEMM actually EXECUTE under the policy now in force?
+
+    THE fix for the defect that cost attempt d4. `setattr` accepted
+    `(False, False)` and returned; torch defers the validation, and the refusal
+    -- "allow_splitk=False requires the cuBLASLt backend" -- arrived from
+    inside `F.linear` on the first real matmul, killing four stages that had
+    been told the policy was supported.
+
+    So `supported` now means "a GEMM ran", not "the setter returned". A
+    64x256 @ 256x64 bf16 matmul costs nothing and is the only honest test.
+    """
+    import torch
+
+    if not torch.cuda.is_available():
+        return {"probed": False,
+                "reason": "no CUDA; this policy is a cuBLAS setting and is "
+                          "inert here, so a probe would pass vacuously"}
+    try:
+        a = torch.randn(64, 256, device="cuda", dtype=torch.bfloat16)
+        b = torch.randn(256, 64, device="cuda", dtype=torch.bfloat16)
+        (a @ b).sum().item()          # .item() forces the launch to complete
+        return {"probed": True, "ran": True, "error": None}
+    except Exception as exc:                                # noqa: BLE001
+        return {"probed": True, "ran": False,
+                "error": f"{type(exc).__name__}: {exc}"}
+
+
+def set_bf16_policy(reduced: bool, splitk: bool | None,
+                    blas: str | None = None) -> dict:
+    """Request a policy, read it back, and PROVE a GEMM runs under it.
+
+    `splitk=None` means the boolean form, which is control B and leaves split-K
+    on. A build that cannot express `splitk=False` -- or a backend that will
+    not honour it -- is recorded UNSUPPORTED rather than silently given the
+    boolean, because that substitution is the whole defect being corrected.
     """
     import torch
 
     matmul = torch.backends.cuda.matmul
-    requested = {"allow_reduced_precision": reduced, "allow_splitk": splitk}
-    result = {"requested": requested, "supported": None, "error": None}
+    requested = {"allow_reduced_precision": reduced, "allow_splitk": splitk,
+                 "blas_library": blas}
+    result = {"requested": requested, "supported": None, "error": None,
+              "blas": set_blas_backend(blas)}
     try:
         if splitk is None:
             setattr(matmul, BF16_REDUCED, bool(reduced))
@@ -304,17 +390,25 @@ def set_bf16_policy(reduced: bool, splitk: bool | None) -> dict:
         else:
             setattr(matmul, BF16_REDUCED, (bool(reduced), bool(splitk)))
             result["form"] = "tuple"
-        result["supported"] = True
+        result["setter_accepted"] = True
     except (TypeError, AttributeError, RuntimeError) as exc:
-        result["supported"] = False
+        result["setter_accepted"] = False
         result["error"] = f"{type(exc).__name__}: {exc}"
         result["form"] = "UNSUPPORTED"
+
     result["readback"] = read_bf16_policy()
-    #: Did the runtime actually DO what was asked? A request that silently
-    #: lands somewhere else is the failure mode this whole section exists for.
+    #: The setter returning is NOT support. Only a GEMM running is.
+    probe = _policy_runs_a_gemm() if result["setter_accepted"] else {
+        "probed": False, "reason": "the setter itself refused"}
+    result["gemm_probe"] = probe
+    result["supported"] = bool(
+        result["setter_accepted"] and probe.get("ran", not probe.get("probed")))
+    if not result["supported"] and not result["error"]:
+        result["error"] = probe.get("error")
+
     rb = result["readback"]
     result["honoured"] = (
-        result["supported"] is True
+        result["supported"]
         and rb["allow_reduced_precision"] == bool(reduced)
         and (splitk is None or rb["allow_splitk"] == bool(splitk)))
     return result
@@ -675,15 +769,17 @@ def stage_bf16_controls(cfg, ctx) -> dict:
     import torch
 
     before = read_bf16_policy()
+    before_blas = read_blas_backend()
     controls = {
-        CONTROL_A: (True, None),      # whatever the build ships, restated
-        CONTROL_B: (False, None),     # the boolean form: split-K STAYS ON
-        CONTROL_C: (False, False),    # the tuple form: split-K OFF
+        CONTROL_A: (True, None, "cublas"),    # the historical default
+        CONTROL_B: (False, None, "cublas"),   # boolean form: split-K STAYS ON
+        CONTROL_D: (True, None, "cublaslt"),  # the BACKEND change, alone
+        CONTROL_C: (False, False, "cublaslt"),  # the intervention
     }
     out: dict = {"policy_before": before, "controls": {}}
     try:
-        for name, (reduced, splitk) in controls.items():
-            applied = set_bf16_policy(reduced, splitk)
+        for name, (reduced, splitk, blas) in controls.items():
+            applied = set_bf16_policy(reduced, splitk, blas)
             row = {"policy": applied}
             if applied["supported"]:
                 row["gemm"] = stage_gemm_isolation(cfg, ctx)
@@ -696,18 +792,22 @@ def stage_bf16_controls(cfg, ctx) -> dict:
                     "UNSUPPORTED rather than substituting the boolean form")
             out["controls"][name] = row
     finally:
-        #: Restore whatever the build started with, via the tuple when the
-        #: build has one, so the rest of the run is not left under a policy
-        #: this stage chose.
-        set_bf16_policy(bool(before["allow_reduced_precision"]),
-                        before["allow_splitk"]
-                        if before["allow_splitk_readable"] else None)
+        _restore(before, before_blas)
 
-    a, b, c = (out["controls"].get(k) or {} for k in
-               (CONTROL_A, CONTROL_B, CONTROL_C))
+    c = out["controls"].get(CONTROL_C) or {}
+    out["blas_before"] = before_blas
     out["tuple_form_supported"] = bool((c.get("policy") or {}).get("supported"))
     out["split_k_state"] = {
         name: ((row.get("policy") or {}).get("readback") or {}).get("allow_splitk")
+        for name, row in out["controls"].items()}
+    out["blas_library"] = {
+        name: ((row.get("policy") or {}).get("blas") or {}).get("readback")
+        for name, row in out["controls"].items()}
+    out["blas_request_honoured"] = {
+        name: ((row.get("policy") or {}).get("blas") or {}).get("honoured")
+        for name, row in out["controls"].items()}
+    out["gemm_probe_ran"] = {
+        name: ((row.get("policy") or {}).get("gemm_probe") or {}).get("ran")
         for name, row in out["controls"].items()}
 
     def moved(row):
@@ -725,15 +825,39 @@ def stage_bf16_controls(cfg, ctx) -> dict:
     out["split_k_off_is_strictly_better_than_boolean"] = (
         CONTROL_B in still and CONTROL_C in still
         and set(still[CONTROL_C]) < set(still[CONTROL_B]))
+    #: ATTRIBUTION. `allow_splitk=False` requires cuBLASLt, so control C
+    #: changes the BLAS library AND the flag. Control D changes only the
+    #: library. Without comparing the two, an improvement at C could be either.
+    d = out["controls"].get(CONTROL_D) or {}
+    if CONTROL_D in still and CONTROL_C in still:
+        only_lt, both = set(still[CONTROL_D]), set(still[CONTROL_C])
+        out["backend_switch_alone_fixes_it"] = not only_lt
+        out["split_k_flag_adds_something_beyond_the_backend"] = bool(
+            both < only_lt)
+        out["improvement_attributable_to"] = (
+            "cublaslt_backend_alone" if not only_lt
+            else "the_split_k_flag" if both < only_lt
+            else "neither" if both == only_lt else "undetermined")
+    else:
+        out["backend_switch_alone_fixes_it"] = None
+        out["split_k_flag_adds_something_beyond_the_backend"] = None
+        out["improvement_attributable_to"] = "undetermined"
+
     out["_reading"] = {
-        CONTROL_A: "allow_reduced_precision=True,  allow_splitk=True",
-        CONTROL_B: "allow_reduced_precision=False, allow_splitk=True  "
+        CONTROL_A: "cuBLAS,   allow_reduced_precision=True,  allow_splitk=True",
+        CONTROL_B: "cuBLAS,   allow_reduced_precision=False, allow_splitk=True  "
                    "<- what the previous round actually ran",
-        CONTROL_C: "allow_reduced_precision=False, allow_splitk=False "
+        CONTROL_D: "cuBLASLt, allow_reduced_precision=True,  allow_splitk=True  "
+                   "<- the BACKEND change alone, so C is attributable",
+        CONTROL_C: "cuBLASLt, allow_reduced_precision=False, allow_splitk=False "
                    "<- the intervention that had never been performed",
         "_the_boolean_does_not_disable_split_k":
             "torch's parser returns (value, True) for a bool; only the tuple "
             "form reaches the second flag",
+        "_and_the_tuple_needs_cublaslt":
+            "torch accepts (False, False) at the setter and then raises inside "
+            "F.linear unless the BLAS library is cuBLASLt -- which is why every "
+            "policy here is proved by running a real bf16 GEMM under it",
     }
     return out
 
@@ -751,14 +875,13 @@ def stage_solo_preservation(cfg, ctx) -> dict:
     model, focal, device = ctx["model"], ctx["focal"], ctx["device"]
     ids, L = focal.to(device), focal.shape[1]
     before = read_bf16_policy()
+    before_blas = read_blas_backend()
     try:
-        set_bf16_policy(bool(before["allow_reduced_precision"]),
-                        before["allow_splitk"]
-                        if before["allow_splitk_readable"] else None)
+        set_bf16_policy(True, None, "cublas")
         with torch.no_grad():
             solo_default = model(ids).logits[0, :L].clone()
 
-        applied = set_bf16_policy(False, False)
+        applied = set_bf16_policy(False, False, "cublaslt")
         if not applied["supported"]:
             return {"ran": False, "reason": "tuple policy unsupported",
                     "policy": applied}
@@ -773,9 +896,7 @@ def stage_solo_preservation(cfg, ctx) -> dict:
             bi, bm, _ = _ragged(focal, ctx["others"], ctx)
             batch_splitk_off = model(bi, attention_mask=bm).logits[0, :L].clone()
     finally:
-        set_bf16_policy(bool(before["allow_reduced_precision"]),
-                        before["allow_splitk"]
-                        if before["allow_splitk_readable"] else None)
+        _restore(before, before_blas)
 
     solo_vs_solo = compare_logits(solo_default, solo_splitk_off)
     batch_vs_default = compare_logits(solo_default, batch_splitk_off)
@@ -1334,11 +1455,14 @@ def stage_operator_acceptance(cfg, ctx) -> dict:
         return ffn_state, attn_state
 
     before = read_bf16_policy()
+    before_blas = read_blas_backend()
     results: dict = {}
-    wanted = {CONTROL_A: (True, None), CONTROL_C: (False, False)}
+    wanted = {CONTROL_A: (True, None, "cublas"),
+              CONTROL_D: (True, None, "cublaslt"),
+              CONTROL_C: (False, False, "cublaslt")}
     try:
-        for name, (reduced, splitk) in wanted.items():
-            applied = set_bf16_policy(reduced, splitk)
+        for name, (reduced, splitk, blas) in wanted.items():
+            applied = set_bf16_policy(reduced, splitk, blas)
             if not applied["supported"]:
                 results[name] = {"ran": False, "policy": applied}
                 continue
@@ -1381,9 +1505,7 @@ def stage_operator_acceptance(cfg, ctx) -> dict:
             if device.startswith("cuda"):
                 torch.cuda.empty_cache()
     finally:
-        set_bf16_policy(bool(before["allow_reduced_precision"]),
-                        before["allow_splitk"]
-                        if before["allow_splitk_readable"] else None)
+        _restore(before, before_blas)
 
     c = results.get(CONTROL_C) or {}
     return {
@@ -1441,26 +1563,25 @@ def stage_performance(cfg, ctx) -> dict:
             collector.close()
 
     before = read_bf16_policy()
+    before_blas = read_blas_backend()
     out: dict = {"n_items": len(items),
                  "n_items_available": len(ctx["items"]),
                  "_items_are_capped": len(items) < len(ctx["items"]),
                  "total_tokens": sum(int(i["input_ids"].shape[1]) for i in items)}
     bs = int(cfg["micro_batch_size"])
     try:
-        set_bf16_policy(True, None)
+        set_bf16_policy(True, None, "cublas")
         timed(bs)                                  # warm the kernels, discard
         out[f"default_bs{bs}_seconds"] = timed(bs)
         out["default_bs1_seconds"] = timed(1)
-        applied = set_bf16_policy(False, False)
+        applied = set_bf16_policy(False, False, "cublaslt")
         out["splitk_off_supported"] = bool(applied["supported"])
         if applied["supported"]:
             timed(bs)
             out[f"splitk_off_bs{bs}_seconds"] = timed(bs)
             out["splitk_off_bs1_seconds"] = timed(1)
     finally:
-        set_bf16_policy(bool(before["allow_reduced_precision"]),
-                        before["allow_splitk"]
-                        if before["allow_splitk_readable"] else None)
+        _restore(before, before_blas)
 
     d_b = out.get(f"default_bs{bs}_seconds")
     s_b = out.get(f"splitk_off_bs{bs}_seconds")
@@ -1830,6 +1951,11 @@ def derive_conclusion(report: dict) -> dict:
         "split_k_off_makes_every_gemm_exact": splitk_off_exact,
         "split_k_off_beats_reduced_precision_off_alone": splitk_off_better,
         "split_k_state_by_control": got("bf16_controls", "split_k_state"),
+        "blas_library_by_control": got("bf16_controls", "blas_library"),
+        "improvement_attributable_to": got("bf16_controls",
+                                           "improvement_attributable_to"),
+        "backend_switch_alone_fixes_it": got("bf16_controls",
+                                             "backend_switch_alone_fixes_it"),
         "projections_still_shape_dependent_by_control": got(
             "bf16_controls", "projections_still_shape_dependent"),
         "historical_solo_output_is_preserved": solo_preserved,

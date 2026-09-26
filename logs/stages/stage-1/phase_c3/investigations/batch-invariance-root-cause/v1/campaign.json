@@ -121,6 +121,32 @@
    "teardown_confirmed": true,
    "watchdog": "started, pid 3361881, stopped by the trap after teardown",
    "no_science_ran": true
+  },
+  {
+   "subrun_id": "bi_20260926_d4",
+   "pod_id": "0a8u02ydq58xai",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 5.067,
+   "cost_usd": 0.0934,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x quoted secure rate, plus container disk billed separately",
+   "executed_source_sha": "45b79a77fdce85c2dec7e42346c0a87115f93103",
+   "verdict": "PARTIAL",
+   "failure_class": "engineering",
+   "what_it_established": [
+    "torch 2.9.1+cu130 genuinely cannot express the tuple: `set_allow_bf16_reduction_cublas expects a bool`. Recorded UNSUPPORTED from the runtime, which answers the brief's question about that runtime and does not need re-running.",
+    "torch 2.11.0+cu128 ACCEPTS the tuple at the setter and then refuses at the first GEMM: RuntimeError inside F.linear, 'allow_splitk=False requires the cuBLASLt backend'."
+   ],
+   "failure": "`set_bf16_policy` reported supported=True because the setter returned. torch defers validation to the first matmul, so the two parent runs died in stage_gemm_isolation rather than recording UNSUPPORTED.",
+   "repair": [
+    "select cuBLASLt with torch.backends.cuda.preferred_blas_library before requesting allow_splitk=False",
+    "validate every policy with a real bf16 GEMM before calling it supported -- a setter that defers validation makes `supported` a lie",
+    "add a FOURTH control isolating the backend switch alone (cuBLASLt with reduced=True, splitk=True), because the intervention now changes two things and an improvement must be attributable to one of them"
+   ],
+   "teardown_confirmed": true,
+   "watchdog": "started, pid 3426915, stopped by the trap after teardown",
+   "no_science_ran": true
   }
  ],
  "rate_basis": {
