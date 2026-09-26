@@ -269,3 +269,56 @@ def test_a_prefix_step_gaining_a_config_would_change_its_hash():
     loaded = FixedPathStep(impl_id=bare.impl_id, profile_id=bare.profile_id,
                            config={"anything": 1})
     assert sha256_json(bare.as_dict()) != sha256_json(loaded.as_dict())
+
+
+def test_the_arm_constructor_refuses_before_the_operator_is_registered():
+    """A launcher that forgets `causal_kl.register()` must fail HERE, at $0.
+
+    IN A SUBPROCESS, because the registry is process-global: in this session a
+    sibling test's fixture has already filled it, so an in-process check would
+    pass no matter what `arm_spec` does. `FixedPathSpec.__post_init__` resolves
+    every step's implementation, so the refusal is structural -- but only a
+    clean process can show it.
+    """
+    import subprocess
+
+    probe = (
+        "import sys; sys.path[:0] = ['src', 'scripts'];"
+        "from aadistill.initialization.operators.register import"
+        " register_builtin_operators;"
+        "register_builtin_operators();"
+        "from experiments.phase_c3 import pilot;"
+        "\ntry:\n"
+        "    pilot.arm_spec(1)\n"
+        "    print('NO_REFUSAL')\n"
+        "except Exception as exc:\n"
+        "    print(type(exc).__name__)\n"
+    )
+    done = subprocess.run([sys.executable, "-c", probe], cwd=REPO,
+                          capture_output=True, text=True)
+    assert done.returncode == 0, done.stderr
+    assert done.stdout.strip() != "NO_REFUSAL", (
+        "arm_spec built a path for an unregistered operator; a launcher that "
+        "forgot to register would discover it on the pod")
+    assert "Error" in done.stdout or "Unknown" in done.stdout, done.stdout
+
+
+def test_the_arm_constructor_succeeds_once_it_is_registered():
+    """The other half, so the refusal above cannot be passing for a wrong
+    reason -- a typo in the probe would also "refuse"."""
+    import subprocess
+
+    probe = (
+        "import sys; sys.path[:0] = ['src', 'scripts'];"
+        "from aadistill.initialization.operators.register import"
+        " register_builtin_operators;"
+        "register_builtin_operators();"
+        "from aadistill.initialization.operators.attention.gqa import causal_kl;"
+        "causal_kl.register();"
+        "from experiments.phase_c3 import pilot;"
+        "print(pilot.arm_spec(4).steps[3].impl_id)"
+    )
+    done = subprocess.run([sys.executable, "-c", probe], cwd=REPO,
+                          capture_output=True, text=True)
+    assert done.returncode == 0, done.stderr
+    assert done.stdout.strip() == "attention.causal_kl_v1"
