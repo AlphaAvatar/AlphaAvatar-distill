@@ -180,17 +180,30 @@ def test_a_missing_authorization_is_refused_not_defaulted(mod, records,
 
 
 def test_the_real_records_derive_a_usable_session():
-    """The live records, through the real module. No fixtures."""
+    """The live records, through the real module. No fixtures.
+
+    This pinned `spent == 0.0822` and went red the first time the campaign
+    booked a subrun -- which is every paid action, i.e. exactly when the check
+    matters least and costs most. A live figure is not an assertion; the
+    PROPERTIES are.
+    """
     mod = _module()
-    d = mod.derive(
-        REPO / "logs/stages/stage-1/phase_c3/investigations"
-               "/batch-invariance-root-cause/v1/campaign.json",
-        session_cap_usd=2.50, rate_usd_per_hour=1.09)
+    campaign = (REPO / "logs/stages/stage-1/phase_c3/investigations"
+                       "/batch-invariance-root-cause/v1/campaign.json")
+    d = mod.derive(campaign, session_cap_usd=2.50, rate_usd_per_hour=1.09)
     assert d["campaign_ceiling"] == 3.0
-    #: The four batching-refactor-cuda subruns, carried forward.
-    assert d["spent"] == pytest.approx(0.0822)
-    assert d["ok"] is True
+
+    #: Recomputed from the file, so the test cannot drift from the record.
+    doc = json.loads(campaign.read_text())
+    expected = sum(float(e["cost_usd"])
+                   for key in ("inherited_spend", "subruns")
+                   for e in doc[key])
+    assert d["spent"] == pytest.approx(expected)
+    #: The four carried-forward batching-refactor-cuda subruns are always in it.
+    assert d["spent"] >= 0.0822
+    assert d["remaining"] == pytest.approx(3.0 - expected)
     assert 0 < d["session_ceiling"] <= 2.50
+    assert d["ok"] is (d["session_ceiling"] >= mod.MIN_USEFUL_USD)
 
 
 def test_the_cli_prints_seven_shell_readable_fields(capsys):
