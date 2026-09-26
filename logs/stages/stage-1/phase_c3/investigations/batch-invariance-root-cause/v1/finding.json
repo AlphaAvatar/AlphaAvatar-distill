@@ -1,0 +1,816 @@
+{
+ "schema": "aadistill.validation_finding/v1",
+ "_contract": "DERIVED, not written. Every number here was read from a report.json emitted by batch_invariance_diagnostic.py, and the verdict is computed by scripts/validation/batch_invariance_finding.py. It authorizes nothing and changes nothing.",
+ "investigation_id": "batch_invariance_root_cause_v1",
+ "derived_utc": "2026-09-25T23:59:25.712996+00:00",
+ "supersedes_or_adjudicates": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/finding.json",
+ "_the_prior_record_is_not_rewritten": "It is historical evidence. This record states what its claims do and do not reproduce; it does not edit them.",
+ "reports": [
+  "a4_596m_B_image_sdpa",
+  "a4_596m_C_science_sdpa",
+  "parent_C_science_eager",
+  "parent_C_science_sdpa"
+ ],
+ "environments": {
+  "a4_596m_B_image_sdpa": {
+   "torch": "2.9.1+cu130",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.159.03",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "params_hidden": 1024,
+   "params_layers": 28
+  },
+  "a4_596m_C_science_sdpa": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.159.03",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "params_hidden": 1024,
+   "params_layers": 28
+  },
+  "parent_C_science_eager": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.159.03",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "attn_requested": "eager",
+   "attn_resolved": "eager",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "params_hidden": 2560,
+   "params_layers": 36
+  },
+  "parent_C_science_sdpa": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.159.03",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "params_hidden": 2560,
+   "params_layers": 36
+  }
+ },
+ "a4_claims_adjudicated": {
+  "bf16_batched_vs_solo_logits_relative": {
+   "claim": "a padded batched forward differs from a solo one on the logits",
+   "a4_reported": 0.0488,
+   "measured_here": {
+    "a4_596m_B_image_sdpa": {
+     "measured": 0.1603345423936844,
+     "a4": 0.0488,
+     "ratio_here_over_a4": 3.285543901509926,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "a4_596m_C_science_sdpa": {
+     "measured": 0.15590862929821014,
+     "a4": 0.0488,
+     "ratio_here_over_a4": 3.1948489610288964,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "parent_C_science_eager": {
+     "measured": 0.015722760930657387,
+     "a4": 0.0488,
+     "ratio_here_over_a4": 0.32218772398888085,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "parent_C_science_sdpa": {
+     "measured": 0.012187184765934944,
+     "a4": 0.0488,
+     "ratio_here_over_a4": 0.24973739274456852,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    }
+   },
+   "_field_path": [
+    "case_matrix",
+    "comparisons",
+    "A_vs_E",
+    "rel_l2"
+   ]
+  },
+  "fp32_batched_vs_solo_logits_relative": {
+   "claim": "the same comparison in float32 is orders of magnitude smaller",
+   "a4_reported": 9.144e-06,
+   "measured_here": {
+    "a4_596m_B_image_sdpa": {
+     "measured": 6.822955128882313e-06,
+     "a4": 9.144e-06,
+     "ratio_here_over_a4": 0.7461674462907167,
+     "same_order_of_magnitude": true,
+     "differs_by_more_than_10x": false
+    },
+    "a4_596m_C_science_sdpa": {
+     "measured": 9.214320016326383e-06,
+     "a4": 9.144e-06,
+     "ratio_here_over_a4": 1.0076902904993859,
+     "same_order_of_magnitude": true,
+     "differs_by_more_than_10x": false
+    },
+    "parent_C_science_eager": {
+     "measured": 4.33910645369906e-06,
+     "a4": 9.144e-06,
+     "ratio_here_over_a4": 0.47453045206682637,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "parent_C_science_sdpa": {
+     "measured": 4.33910645369906e-06,
+     "a4": 9.144e-06,
+     "ratio_here_over_a4": 0.47453045206682637,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    }
+   },
+   "_field_path": [
+    "fp32_control",
+    "case_matrix",
+    "comparisons",
+    "A_vs_E",
+    "rel_l2"
+   ]
+  },
+  "ffn_activation_statistic_drift": {
+   "claim": "the FFN activation statistic moves between bs=1 and bs=3",
+   "a4_reported": 0.02167,
+   "measured_here": {
+    "a4_596m_B_image_sdpa": {
+     "measured": 0.033492978662252426,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 1.545592001026877,
+     "same_order_of_magnitude": true,
+     "differs_by_more_than_10x": false
+    },
+    "a4_596m_C_science_sdpa": {
+     "measured": 0.03374212607741356,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 1.5570893436739068,
+     "same_order_of_magnitude": true,
+     "differs_by_more_than_10x": false
+    },
+    "parent_C_science_eager": {
+     "measured": 0.0009853924857452512,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 0.045472657394797014,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": true
+    },
+    "parent_C_science_sdpa": {
+     "measured": 0.0007534109172411263,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 0.0347674627245559,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": true
+    }
+   },
+   "_field_path": [
+    "statistics_decomposition",
+    "by_micro_batch_size",
+    "3",
+    "ffn_abs_sum",
+    "rel_l2"
+   ]
+  },
+  "ffn_importance_drift": {
+   "claim": "the per-neuron importance the top-k reads moves at bs=3",
+   "a4_reported": 0.02167,
+   "measured_here": {
+    "a4_596m_B_image_sdpa": {
+     "measured": 0.044552579522132874,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 2.055956600006132,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "a4_596m_C_science_sdpa": {
+     "measured": 0.045539893209934235,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 2.101517914625484,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "parent_C_science_eager": {
+     "measured": 0.0030661022756248713,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 0.14149064492962027,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "parent_C_science_sdpa": {
+     "measured": 0.001848834683187306,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 0.08531770573084015,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": true
+    }
+   },
+   "_field_path": [
+    "__derived__",
+    "max_importance_rel_l2_drift_bs3"
+   ]
+  },
+  "causal_kl_relative": {
+   "claim": "the scored causal KL moves solo vs batched",
+   "a4_reported": 0.007064,
+   "measured_here": {
+    "a4_596m_B_image_sdpa": {
+     "measured": 0.14354455811396477,
+     "a4": 0.007064,
+     "ratio_here_over_a4": 20.320577309451412,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": true
+    },
+    "a4_596m_C_science_sdpa": {
+     "measured": 0.12123487290698397,
+     "a4": 0.007064,
+     "ratio_here_over_a4": 17.162354601781423,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": true
+    },
+    "parent_C_science_eager": {
+     "measured": 0.0571121026075763,
+     "a4": 0.007064,
+     "ratio_here_over_a4": 8.084952237765615,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "parent_C_science_sdpa": {
+     "measured": 0.030786932785375837,
+     "a4": 0.007064,
+     "ratio_here_over_a4": 4.358286068144937,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    }
+   },
+   "_field_path": [
+    "causal_kl",
+    "max_rel_diff"
+   ]
+  }
+ },
+ "mechanism": {
+  "per_report": {
+   "a4_596m_B_image_sdpa": {
+    "gemm_shape_solo": [
+     1,
+     512
+    ],
+    "gemm_shape_batched": [
+     4,
+     640
+    ],
+    "projections_bit_identical": {
+     "q": {
+      "shape": [
+       1024,
+       2048
+      ],
+      "reduction_depth_over_output_width": 0.5
+     },
+     "k": {
+      "shape": [
+       1024,
+       1024
+      ],
+      "reduction_depth_over_output_width": 1.0
+     },
+     "v": {
+      "shape": [
+       1024,
+       1024
+      ],
+      "reduction_depth_over_output_width": 1.0
+     },
+     "gate": {
+      "shape": [
+       1024,
+       3072
+      ],
+      "reduction_depth_over_output_width": 0.3333
+     },
+     "up": {
+      "shape": [
+       1024,
+       3072
+      ],
+      "reduction_depth_over_output_width": 0.3333
+     },
+     "lm_head": {
+      "shape": [
+       1024,
+       151936
+      ],
+      "reduction_depth_over_output_width": 0.0067
+     }
+    },
+    "projections_shape_dependent": {
+     "attn_out": {
+      "shape": [
+       2048,
+       1024
+      ],
+      "reduction_depth_over_output_width": 2.0,
+      "max_abs": 0.00048828125,
+      "rel_l2": 0.002121125580742955
+     },
+     "ffn_out": {
+      "shape": [
+       3072,
+       1024
+      ],
+      "reduction_depth_over_output_width": 3.0,
+      "max_abs": 0.0009765625,
+      "rel_l2": 0.0031767862383276224
+     }
+    },
+    "max_K_over_N_among_exact": 1.0,
+    "min_K_over_N_among_shape_dependent": 2.0,
+    "K_over_N_separates_the_two_groups": true,
+    "fp32_gemm_also_shape_dependent": true,
+    "bf16_over_fp32_logit_magnitude": 28044.061884669478,
+    "logits_max_abs_with_bf16_reduced_precision_reduction_on": 9.5078125,
+    "logits_max_abs_with_it_off": 2.6875,
+    "knob_removes_the_divergence": false,
+    "collector_reduction_order_drift_at_fixed_activations": 0.0,
+    "forward_drift_max_abs": 4.875,
+    "solo_unpadded_vs_itself": 0.0
+   },
+   "a4_596m_C_science_sdpa": {
+    "gemm_shape_solo": [
+     1,
+     512
+    ],
+    "gemm_shape_batched": [
+     4,
+     640
+    ],
+    "projections_bit_identical": {
+     "q": {
+      "shape": [
+       1024,
+       2048
+      ],
+      "reduction_depth_over_output_width": 0.5
+     },
+     "k": {
+      "shape": [
+       1024,
+       1024
+      ],
+      "reduction_depth_over_output_width": 1.0
+     },
+     "v": {
+      "shape": [
+       1024,
+       1024
+      ],
+      "reduction_depth_over_output_width": 1.0
+     },
+     "gate": {
+      "shape": [
+       1024,
+       3072
+      ],
+      "reduction_depth_over_output_width": 0.3333
+     },
+     "up": {
+      "shape": [
+       1024,
+       3072
+      ],
+      "reduction_depth_over_output_width": 0.3333
+     },
+     "lm_head": {
+      "shape": [
+       1024,
+       151936
+      ],
+      "reduction_depth_over_output_width": 0.0067
+     }
+    },
+    "projections_shape_dependent": {
+     "attn_out": {
+      "shape": [
+       2048,
+       1024
+      ],
+      "reduction_depth_over_output_width": 2.0,
+      "max_abs": 0.00048828125,
+      "rel_l2": 0.002121125813573599
+     },
+     "ffn_out": {
+      "shape": [
+       3072,
+       1024
+      ],
+      "reduction_depth_over_output_width": 3.0,
+      "max_abs": 0.0009765625,
+      "rel_l2": 0.003176786471158266
+     }
+    },
+    "max_K_over_N_among_exact": 1.0,
+    "min_K_over_N_among_shape_dependent": 2.0,
+    "K_over_N_separates_the_two_groups": true,
+    "fp32_gemm_also_shape_dependent": true,
+    "bf16_over_fp32_logit_magnitude": 19339.181911613567,
+    "logits_max_abs_with_bf16_reduced_precision_reduction_on": 8.97265625,
+    "logits_max_abs_with_it_off": 2.203125,
+    "knob_removes_the_divergence": false,
+    "collector_reduction_order_drift_at_fixed_activations": 0.0,
+    "forward_drift_max_abs": 5.546875,
+    "solo_unpadded_vs_itself": 0.0
+   },
+   "parent_C_science_eager": {
+    "gemm_shape_solo": [
+     1,
+     512
+    ],
+    "gemm_shape_batched": [
+     4,
+     640
+    ],
+    "projections_bit_identical": {
+     "q": {
+      "shape": [
+       2560,
+       4096
+      ],
+      "reduction_depth_over_output_width": 0.625
+     },
+     "gate": {
+      "shape": [
+       2560,
+       9728
+      ],
+      "reduction_depth_over_output_width": 0.2632
+     },
+     "up": {
+      "shape": [
+       2560,
+       9728
+      ],
+      "reduction_depth_over_output_width": 0.2632
+     },
+     "lm_head": {
+      "shape": [
+       2560,
+       151936
+      ],
+      "reduction_depth_over_output_width": 0.0168
+     }
+    },
+    "projections_shape_dependent": {
+     "k": {
+      "shape": [
+       2560,
+       1024
+      ],
+      "reduction_depth_over_output_width": 2.5,
+      "max_abs": 0.0009765625,
+      "rel_l2": 0.0033229284454137087
+     },
+     "v": {
+      "shape": [
+       2560,
+       1024
+      ],
+      "reduction_depth_over_output_width": 2.5,
+      "max_abs": 0.0009765625,
+      "rel_l2": 0.0032100630924105644
+     },
+     "attn_out": {
+      "shape": [
+       4096,
+       2560
+      ],
+      "reduction_depth_over_output_width": 1.6,
+      "max_abs": 0.0009765625,
+      "rel_l2": 0.002671897644177079
+     },
+     "ffn_out": {
+      "shape": [
+       9728,
+       2560
+      ],
+      "reduction_depth_over_output_width": 3.8,
+      "max_abs": 0.00390625,
+      "rel_l2": 0.0035018455237150192
+     }
+    },
+    "max_K_over_N_among_exact": 0.625,
+    "min_K_over_N_among_shape_dependent": 1.6,
+    "K_over_N_separates_the_two_groups": true,
+    "fp32_gemm_also_shape_dependent": true,
+    "bf16_over_fp32_logit_magnitude": 1291.6013806925732,
+    "logits_max_abs_with_bf16_reduced_precision_reduction_on": 2.765625,
+    "logits_max_abs_with_it_off": 7.328125,
+    "knob_removes_the_divergence": false,
+    "collector_reduction_order_drift_at_fixed_activations": 0.0,
+    "forward_drift_max_abs": 2.2841796875,
+    "solo_unpadded_vs_itself": 0.0
+   },
+   "parent_C_science_sdpa": {
+    "gemm_shape_solo": [
+     1,
+     512
+    ],
+    "gemm_shape_batched": [
+     4,
+     640
+    ],
+    "projections_bit_identical": {
+     "q": {
+      "shape": [
+       2560,
+       4096
+      ],
+      "reduction_depth_over_output_width": 0.625
+     },
+     "gate": {
+      "shape": [
+       2560,
+       9728
+      ],
+      "reduction_depth_over_output_width": 0.2632
+     },
+     "up": {
+      "shape": [
+       2560,
+       9728
+      ],
+      "reduction_depth_over_output_width": 0.2632
+     },
+     "lm_head": {
+      "shape": [
+       2560,
+       151936
+      ],
+      "reduction_depth_over_output_width": 0.0168
+     }
+    },
+    "projections_shape_dependent": {
+     "k": {
+      "shape": [
+       2560,
+       1024
+      ],
+      "reduction_depth_over_output_width": 2.5,
+      "max_abs": 0.0009765625,
+      "rel_l2": 0.0033229284454137087
+     },
+     "v": {
+      "shape": [
+       2560,
+       1024
+      ],
+      "reduction_depth_over_output_width": 2.5,
+      "max_abs": 0.0009765625,
+      "rel_l2": 0.0032100630924105644
+     },
+     "attn_out": {
+      "shape": [
+       4096,
+       2560
+      ],
+      "reduction_depth_over_output_width": 1.6,
+      "max_abs": 0.0009765625,
+      "rel_l2": 0.002671897644177079
+     },
+     "ffn_out": {
+      "shape": [
+       9728,
+       2560
+      ],
+      "reduction_depth_over_output_width": 3.8,
+      "max_abs": 0.00390625,
+      "rel_l2": 0.0035018455237150192
+     }
+    },
+    "max_K_over_N_among_exact": 0.625,
+    "min_K_over_N_among_shape_dependent": 1.6,
+    "K_over_N_separates_the_two_groups": true,
+    "fp32_gemm_also_shape_dependent": true,
+    "bf16_over_fp32_logit_magnitude": 875.6619530119141,
+    "logits_max_abs_with_bf16_reduced_precision_reduction_on": 1.875,
+    "logits_max_abs_with_it_off": 2.609375,
+    "knob_removes_the_divergence": false,
+    "collector_reduction_order_drift_at_fixed_activations": 0.0,
+    "forward_drift_max_abs": 1.3046875,
+    "solo_unpadded_vs_itself": 0.0
+   }
+  },
+  "holds_under_every_runtime_measured": true,
+  "runtimes_measured": [
+   "2.11.0+cu128",
+   "2.9.1+cu130"
+  ],
+  "fp32_removes_the_shape_dependence": false,
+  "collector_reduction_order_contributes": false,
+  "bs1_unpadded_is_exact_everywhere": true,
+  "_reading": "a projection whose GEMM is bit-identical across shapes and one whose GEMM is not, measured side by side on the same weights, is the mechanism; `fp32_removes_the_shape_dependence` says whether the dtype is the CAUSE or the SCALE, and `collector_reduction_order_contributes` rules the accumulator in or out"
+ },
+ "verdict": "CONFIRMED",
+ "why": "FFN top-k selection moves between micro batch sizes on the same object a4 measured, under the pinned science runtime",
+ "_verdict_turns_on": "FFN top-k SELECTION, not a logit norm: a magnitude that moves no decision changes no operator output",
+ "objects_adjudicated": [
+  "a4_596m_B_image_sdpa",
+  "a4_596m_C_science_sdpa"
+ ],
+ "_a4_measured_the_596m_student": true,
+ "_object_geometry": {
+  "a4_596m_B_image_sdpa": {
+   "hidden_size": 1024,
+   "num_hidden_layers": 28,
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
+  },
+  "a4_596m_C_science_sdpa": {
+   "hidden_size": 1024,
+   "num_hidden_layers": 28,
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
+  }
+ },
+ "_pool_selection": "reports whose label names the a4 object, falling back to every report when none does; the geometry above is what a reader should check that against",
+ "sweep_reported": {
+  "a4_596m_B_image_sdpa": false,
+  "a4_596m_C_science_sdpa": false
+ },
+ "_reports_without_a_sweep": [],
+ "selection": {
+  "a4_596m_B_image_sdpa": {
+   "headline_layers_moved": 26,
+   "n_layers": 28,
+   "invariant_everywhere": false,
+   "by_keep_ratio": {
+    "0.32": {
+     "2": 26,
+     "3": 26,
+     "4": 26
+    },
+    "0.50": {
+     "2": 24,
+     "3": 24,
+     "4": 26
+    },
+    "0.75": {
+     "2": 26,
+     "3": 26,
+     "4": 26
+    },
+    "0.90": {
+     "2": 25,
+     "3": 25,
+     "4": 23
+    }
+   }
+  },
+  "a4_596m_C_science_sdpa": {
+   "headline_layers_moved": 26,
+   "n_layers": 28,
+   "invariant_everywhere": false,
+   "by_keep_ratio": {
+    "0.32": {
+     "2": 25,
+     "3": 25,
+     "4": 25
+    },
+    "0.50": {
+     "2": 25,
+     "3": 25,
+     "4": 26
+    },
+    "0.75": {
+     "2": 25,
+     "3": 25,
+     "4": 25
+    },
+    "0.90": {
+     "2": 26,
+     "3": 26,
+     "4": 25
+    }
+   }
+  }
+ },
+ "localization": {
+  "a4_596m_B_image_sdpa": {
+   "locus": "gemm_level_shape_dependent_accumulation",
+   "driver": "padded_width_and_batch_size",
+   "deterministic": true,
+   "bare_gemm_shape_dependent": true,
+   "padding_alone_is_inert": false,
+   "batch_size_alone_moves_it": true,
+   "backends_diverging": [
+    "eager",
+    "sdpa",
+    "sdpa:CUDNN_ATTENTION",
+    "sdpa:MATH"
+   ],
+   "backends_exact": [],
+   "removed_by_disabling_bf16_reduced_precision_reduction": false,
+   "first_divergent_tap": "L00.out.attn_out",
+   "forward_drift_max_abs": 4.875,
+   "reduction_order_drift_max_abs": 0.0,
+   "causal_kl_max_rel_diff": 0.14354455811396477,
+   "causal_kl_item_ranking_identical": false
+  },
+  "a4_596m_C_science_sdpa": {
+   "locus": "gemm_level_shape_dependent_accumulation",
+   "driver": "padded_width_and_batch_size",
+   "deterministic": true,
+   "bare_gemm_shape_dependent": true,
+   "padding_alone_is_inert": false,
+   "batch_size_alone_moves_it": true,
+   "backends_diverging": [
+    "eager",
+    "sdpa",
+    "sdpa:CUDNN_ATTENTION",
+    "sdpa:MATH"
+   ],
+   "backends_exact": [],
+   "removed_by_disabling_bf16_reduced_precision_reduction": false,
+   "first_divergent_tap": "L00.out.attn_out",
+   "forward_drift_max_abs": 5.546875,
+   "reduction_order_drift_max_abs": 0.0,
+   "causal_kl_max_rel_diff": 0.12123487290698397,
+   "causal_kl_item_ranking_identical": false
+  },
+  "parent_C_science_eager": {
+   "locus": "gemm_level_shape_dependent_accumulation",
+   "driver": "padded_width_and_batch_size",
+   "deterministic": true,
+   "bare_gemm_shape_dependent": true,
+   "padding_alone_is_inert": false,
+   "batch_size_alone_moves_it": true,
+   "backends_diverging": [
+    "eager",
+    "sdpa",
+    "sdpa:CUDNN_ATTENTION",
+    "sdpa:MATH"
+   ],
+   "backends_exact": [],
+   "removed_by_disabling_bf16_reduced_precision_reduction": false,
+   "first_divergent_tap": "L00.in.q",
+   "forward_drift_max_abs": 2.2841796875,
+   "reduction_order_drift_max_abs": 0.0,
+   "causal_kl_max_rel_diff": 0.0571121026075763,
+   "causal_kl_item_ranking_identical": false
+  },
+  "parent_C_science_sdpa": {
+   "locus": "gemm_level_shape_dependent_accumulation",
+   "driver": "padded_width_and_batch_size",
+   "deterministic": true,
+   "bare_gemm_shape_dependent": true,
+   "padding_alone_is_inert": false,
+   "batch_size_alone_moves_it": true,
+   "backends_diverging": [
+    "eager",
+    "sdpa",
+    "sdpa:CUDNN_ATTENTION",
+    "sdpa:MATH"
+   ],
+   "backends_exact": [],
+   "removed_by_disabling_bf16_reduced_precision_reduction": false,
+   "first_divergent_tap": "L00.in.q",
+   "forward_drift_max_abs": 1.3046875,
+   "reduction_order_drift_max_abs": 0.0,
+   "causal_kl_max_rel_diff": 0.030786932785375837,
+   "causal_kl_item_ranking_identical": false
+  }
+ },
+ "authorizes": null,
+ "changes": null,
+ "_c3_status": "NOT STARTED"
+}

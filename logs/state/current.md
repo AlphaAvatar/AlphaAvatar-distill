@@ -12,11 +12,16 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **Nothing is running and nothing is billing.** Zero pods and zero network
 volumes; both `59qt99zeg5` and `a0zqgxsm7p` are deleted.
 
-**The live work is the C3 batch-invariance root-cause investigation**, on
-branch `review/c3-operator-batching`, which is **not merged into `main`**. See
+**The C3 batch-invariance root-cause investigation is MEASURED and its finding
+is derived**, on branch `review/c3-operator-batching`, which is **not merged
+into `main`**. In one line: a batched forward is not the same computation as a
+solo one because a GEMM whose reduction is deep relative to its output width
+reduces in a shape-dependent order, and in bf16 that moves an FFN top-k in most
+layers. See
 [C3 — the refactor is on review](#c3--the-refactor-is-on-review-and-c3-has-not-started)
-below. **C3 itself remains NOT STARTED and its `$25.00` stage envelope is
-untouched.**
+below. **Nothing was changed in response** — no default, no identity semantics,
+no operator definition. **C3 itself remains NOT STARTED and its `$25.00` stage
+envelope is untouched.**
 
 ## Stage ladder
 
@@ -1311,14 +1316,75 @@ paid for. The largest: `derive_conclusion` read "not every backend diverges" as
 "some backend is exact", and returned locus `attention_backend_kernel` for a run
 in which nothing diverged at all.
 
-**A CPU float32 run answers a different question and closes nothing**, but it
-is worth recording what it saw on a 596M checkpoint: eager and SDPA-MATH
-attention diverge solo-vs-batched by `1.8e-04` while SDPA-FLASH is exactly
-`0`; a bare GEMM is **not** shape-dependent; the focal row is provably
-independent of neighbour tokens; and the knob is **padded width**, not batch
-size — at fixed length, batch sizes 1/2/3/4/8 are bit-identical, while padding
-the same item by 8/64/128 positions moves it. The GPU bf16 measurement has not
-been made.
+**The measurement was made: four reports, one L40S, `$0.1005`, 5.45 minutes.**
+Attempt `bi_20260926_d2`, pod `c6btbh69ql85ng`, teardown provider-confirmed.
+Cumulative diagnostic spend `$0.2312` of `$3.00`. Owner:
+[`finding.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/finding.json),
+**derived** by `scripts/validation/batch_invariance_finding.py` from the four
+raw reports in
+[`evidence/`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/evidence/),
+not typed.
+
+**Verdict: the a4 finding is CONFIRMED in substance and its cause is
+relocated.** On the a4 checkpoint under the pinned science runtime, FFN top-k
+selection moves in **25–26 of 28 layers at every keep ratio and every micro
+batch size** — a4 reported 22–27 of 28 across the same four ratios. On the
+**parent**, which is what C3's operators actually calibrate on, it is worse:
+**32–36 of 36**.
+
+**The cause is a shape-dependent GEMM, not attention, not masking, not the
+operator code, and not the dtype alone.** Only some projections move, and what
+separates them is the reduction depth over the output width, `K/N` — the
+split-K signature:
+
+| | exact, `K/N` | shape-dependent, `K/N` |
+| --- | --- | --- |
+| parent | q `0.63`, gate `0.26`, up `0.26`, lm_head `0.017` | k `2.5`, v `2.5`, attn_out `1.6`, ffn_out `3.8` |
+| 596M | q `0.5`, k `1.0`, v `1.0`, gate `0.33`, up `0.33`, lm_head `0.0067` | attn_out `2.0`, ffn_out `3.0` |
+
+Every bit-identical projection has `K/N ≤ 1.0`; every divergent one `≥ 1.6`.
+The separation is clean in all four reports.
+
+**Four things it is NOT**, each measured rather than argued:
+
+* **not nondeterminism** — each shape repeats itself bit-identically, 3×;
+* **not cross-row contamination** — the focal row is *exactly* independent of
+  neighbour token content (`C_vs_D` bitwise identical), and an all-ones mask
+  changes nothing (`A_vs_B` identical). Batching changes the schedule, not the
+  arithmetic's inputs;
+* **not attention** — every backend diverges and none is exact (eager, sdpa,
+  sdpa:MATH, sdpa:CUDNN). On Qwen3's GQA with a mask, SDPA falls back to math
+  anyway: flash, memory-efficient and cuDNN all report themselves disabled;
+* **not the collector's accumulation order** — re-summing the *same* captured
+  activations in both groupings drifts by exactly `0.000e+00`. The forward
+  moved; the float64 accumulator did not.
+
+**The dtype is the scale, not the cause.** float32 has the *same* shape-dependent
+GEMM — `fp32_gemm_also_shape_dependent` is `true` in all four reports — but the
+logit-level magnitude is `876×` to `28,044×` smaller. So "that is the dtype
+through 28 layers" was the wrong reading of the right observation.
+`torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction = False`
+does **not** remove it either, and on the parent it made the logit `max_abs`
+*worse* (`1.88 → 2.61`).
+
+**The runtime was not the explanation.** torch `2.11.0+cu128` (science) and
+`2.9.1+cu130` (engineering) give the same answer on the same checkpoint: 26
+layers moved either way, statistic drift `3.374e-02` vs `3.349e-02`. Pinning the
+environment was the right thing to demand and it changed nothing.
+
+**`batch_size=1` with no padding is exactly bit-identical, in every sweep.**
+That is why the pre-refactor code was reproducible: it always put one item in a
+forward. The refactor did not introduce this — it made the execution shape a
+variable, and this property was already there.
+
+**What it means for C3, stated but NOT acted on.** Operators whose output is a
+dense top-k over activation statistics are not reproducible across
+`micro_batch_size` on this hardware in bf16, and `DEFAULT_MICRO_BATCH_SIZE` is
+`4`. The causal-KL scorer is affected more mildly — the mean moves `0.14%`–`0.43%`
+on the parent because both sides share a batch composition and the perturbation
+largely cancels — but the per-item **ranking is not preserved**. Nothing here
+has been changed in response: no default, no identity semantics, no operator
+definition. That is a maintainer decision.
 
 **Two corrections to the previous round's report.** It claimed `0` new failing
 nodeids against `ab53ba14`; there were **three**, all found here and all now
@@ -1406,9 +1472,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$22.8249` of `$45.4425` |
-| GPU engineering | `$5.8693` of `$6.0000` |
-| package | `$28.6942` of `$51.4425` |
-| project cap | `$342.1009` spent of `$370.0000`, leaving `$27.8991` |
+| GPU engineering | `$5.7688` of `$6.0000` |
+| package | `$28.5937` of `$51.4425` |
+| project cap | `$342.2014` spent of `$370.0000`, leaving `$27.7986` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

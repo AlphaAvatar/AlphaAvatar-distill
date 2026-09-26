@@ -267,6 +267,99 @@ def verdict(reports: dict, checks: dict) -> dict:
     }
 
 
+def mechanism(reports: dict) -> dict:
+    """WHERE the shape dependence lives, derived from the GEMM isolation.
+
+    The interesting structure is that only SOME projections move. Reporting
+    which, with their shapes, is what turns "bf16 is imprecise" into a
+    mechanism a reader can check -- and the exact-vs-divergent split is data,
+    not an interpretation.
+    """
+    out: dict = {"per_report": {}}
+    for label, r in reports.items():
+        g = r["stages"].get("gemm_isolation") or {}
+        rows = g.get("per_projection") or {}
+        if not rows:
+            continue
+        #: K/N -- the reduction depth over the output width. A GEMM with too
+        #: few output tiles to fill the device is the one a library splits
+        #: along K, and a split-K reduction combines its partial sums in an
+        #: order that depends on the tile grid, which depends on M. So this
+        #: ratio, not the dtype and not the layer, is what should separate the
+        #: two groups if the cause is split-K. Reported so a reader can check
+        #: the separation rather than take the reading on trust.
+        def kn(v):
+            return v["in_features"] / v["out_features"]
+
+        exact = {n: {"shape": [v["in_features"], v["out_features"]],
+                     "reduction_depth_over_output_width": round(kn(v), 4)}
+                 for n, v in rows.items() if v["bitwise_identical"]}
+        moved = {n: {"shape": [v["in_features"], v["out_features"]],
+                     "reduction_depth_over_output_width": round(kn(v), 4),
+                     "max_abs": v["max_abs"], "rel_l2": v["rel_l2"]}
+                 for n, v in rows.items() if not v["bitwise_identical"]}
+        f32 = r["stages"].get("fp32_control") or {}
+        rc = r["stages"].get("reduction_control") or {}
+        sd = r["stages"].get("statistics_decomposition") or {}
+        out["per_report"][label] = {
+            "gemm_shape_solo": g.get("shape_solo"),
+            "gemm_shape_batched": g.get("shape_batched"),
+            "projections_bit_identical": exact,
+            "projections_shape_dependent": moved,
+            "max_K_over_N_among_exact": (
+                max(v["reduction_depth_over_output_width"] for v in exact.values())
+                if exact else None),
+            "min_K_over_N_among_shape_dependent": (
+                max(0.0, min(v["reduction_depth_over_output_width"]
+                             for v in moved.values())) if moved else None),
+            "K_over_N_separates_the_two_groups": (
+                bool(exact) and bool(moved)
+                and max(v["reduction_depth_over_output_width"]
+                        for v in exact.values())
+                <= min(v["reduction_depth_over_output_width"]
+                       for v in moved.values())),
+            "fp32_gemm_also_shape_dependent": dig(
+                f32, "gemm", "a_bare_gemm_is_shape_dependent"),
+            "bf16_over_fp32_logit_magnitude": dig(
+                f32, "ratio_bf16_over_fp32", "A_vs_E"),
+            "logits_max_abs_with_bf16_reduced_precision_reduction_on":
+                rc.get("max_abs_on"),
+            "logits_max_abs_with_it_off": rc.get("max_abs_off"),
+            "knob_removes_the_divergence": rc.get("divergence_removed_by_disabling"),
+            "collector_reduction_order_drift_at_fixed_activations": dig(
+                sd, "reduction_order_drift_at_fixed_activations", "max_abs"),
+            "forward_drift_max_abs": dig(sd, "forward_drift", "max_abs"),
+            "solo_unpadded_vs_itself": dig(
+                r, "stages", "length_sweep", "vary_padding_at_batch_size_1", 0,
+                "max_abs"),
+        }
+
+    #: The cross-report facts a single report cannot establish.
+    per = out["per_report"]
+    runtimes = {label: dig(r, "environment", "torch") for label, r in reports.items()}
+    out["holds_under_every_runtime_measured"] = (
+        len(set(runtimes.values())) > 1
+        and all(v["projections_shape_dependent"] for v in per.values()))
+    out["runtimes_measured"] = sorted(set(runtimes.values()))
+    out["fp32_removes_the_shape_dependence"] = (
+        all(v["fp32_gemm_also_shape_dependent"] is False for v in per.values())
+        if per and all(v["fp32_gemm_also_shape_dependent"] is not None
+                       for v in per.values()) else None)
+    out["collector_reduction_order_contributes"] = any(
+        (v["collector_reduction_order_drift_at_fixed_activations"] or 0) > 0
+        for v in per.values())
+    out["bs1_unpadded_is_exact_everywhere"] = all(
+        v["solo_unpadded_vs_itself"] == 0.0 for v in per.values()
+        if v["solo_unpadded_vs_itself"] is not None)
+    out["_reading"] = (
+        "a projection whose GEMM is bit-identical across shapes and one whose "
+        "GEMM is not, measured side by side on the same weights, is the "
+        "mechanism; `fp32_removes_the_shape_dependence` says whether the dtype "
+        "is the CAUSE or the SCALE, and "
+        "`collector_reduction_order_contributes` rules the accumulator in or out")
+    return out
+
+
 def build(reports: dict) -> dict:
     a4 = {}
     p = REPO / A4_FINDING
@@ -290,6 +383,7 @@ def build(reports: dict) -> dict:
         "reports": sorted(reports),
         "environments": environments(reports),
         "a4_claims_adjudicated": checks,
+        "mechanism": mechanism(reports),
         **v,
         "localization": {
             label: {

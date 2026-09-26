@@ -51,6 +51,41 @@
    "teardown_confirmed": true,
    "watchdog": "started, pid 3344959, stopped by the trap after teardown",
    "no_science_ran": true
+  },
+  {
+   "subrun_id": "bi_20260926_d2",
+   "pod_id": "c6btbh69ql85ng",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 5.45,
+   "cost_usd": 0.1005,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x quoted secure rate, plus container disk billed separately",
+   "executed_source_sha": "500fefb046c06506bd893678c114af28fccb2bcb",
+   "verdict": "COMPLETE",
+   "reports": [
+    "parent_C_science_sdpa",
+    "parent_C_science_eager",
+    "a4_596m_C_science_sdpa",
+    "a4_596m_B_image_sdpa"
+   ],
+   "runtimes_measured": [
+    "torch 2.11.0+cu128 / transformers 5.13.1 under /opt/train (the formal science runtime)",
+    "torch 2.9.1+cu130 under the image python (the engineering-validation runtime)"
+   ],
+   "setup_seconds": 106,
+   "per_report_seconds": [
+    72,
+    71,
+    19,
+    19
+   ],
+   "teardown_confirmed": true,
+   "watchdog": "started, pid 3349885, stopped by the trap after teardown",
+   "evidence": "logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/evidence/",
+   "finding": "logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/finding.json",
+   "no_science_ran": true,
+   "_no_science_ran": "This is a DIAGNOSTIC. It trained nothing, evaluated no battery, produced no candidate and changed no operator. C3 remains NOT STARTED."
   }
  ],
  "rate_basis": {
