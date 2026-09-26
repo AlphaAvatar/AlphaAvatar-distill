@@ -1,0 +1,388 @@
+{
+  "run_id": "bi_20260926_d7-a4_596m_parallel_b1",
+  "started_utc": "2026-09-26T11:31:10.887854+00:00",
+  "question": "does submitting N independent [1, T_i] forwards to N CUDA streams give bit-identical logits to running them one at a time",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "answers_the_concurrency_question": true,
+  "config": {
+    "source": {
+      "local_paths": [],
+      "relay_repo": null,
+      "relay_path": null,
+      "hub_id": "Qwen/Qwen3-4B-Thinking-2507"
+    },
+    "calibration_profile": "calib.domain_balanced@v1",
+    "n_items": 8,
+    "concurrency": 4,
+    "concurrency_sweep": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "bypass_layer": 17,
+    "reducer_contract_rel_bound": 1e-06,
+    "focal_length": 512,
+    "neighbour_lengths": [
+      384,
+      640,
+      256
+    ],
+    "seed": 20260926,
+    "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
+  },
+  "executable": {
+    "file": "batch_invariance_diagnostic.py",
+    "sha256": "ede44aeaf40199661887c6ae89c31fab44d7c301bbf641e0cb98b3adb9566f3d",
+    "git_head": "158ec92fe9a3758f25eab749b47b4d9b0c4f9aaf",
+    "this_file_is_clean_at_git_head": true
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.8.0-134-generic-x86_64-with-glibc2.39",
+    "torch": "2.11.0+cu128",
+    "torch_cuda_build": "12.8",
+    "torch_cudnn": 91900,
+    "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "wheelhouse_source": "AlphaAvatar/aadistill-artifacts:transfer/wheelhouse_cu128_cp312",
+    "requirements_file": "requirements-cu128.txt",
+    "transformers": "5.13.1",
+    "tokenizers": "0.22.2",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.23.0",
+    "numpy": "2.5.1",
+    "triton": "3.6.0",
+    "gpu": "NVIDIA L40S",
+    "compute_capability": "8.9",
+    "total_vram_gib": 44.392,
+    "driver_bf16_supported": true,
+    "nvidia_driver": "580.159.03",
+    "numerics": {
+      "float32_matmul_precision": "highest",
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "deterministic_algorithms": false,
+      "cuda.matmul.allow_bf16_reduced_precision_reduction": true,
+      "cuda.matmul.allow_bf16_reduced_precision_reduction_split_k": true,
+      "cuda.matmul.allow_fp16_reduced_precision_reduction": true,
+      "cuda.matmul.allow_fp16_reduced_precision_reduction_split_k": true,
+      "cuda.matmul.allow_tf32": false,
+      "_split_k_is_readable": true,
+      "cudnn.allow_tf32": true
+    }
+  },
+  "stages": {
+    "logits_invariance": {
+      "concurrency": 4,
+      "stream_assignment": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "per_item": [
+        {
+          "item_index": 0,
+          "item_id": "general/fineweb-40000",
+          "length": 629,
+          "stream": 0,
+          "n": 95567744,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rms": 0.0,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.0,
+          "cosine": 1.0,
+          "bitwise_identical": true,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0,
+          "argmax_agreement": 1.0,
+          "top5_set_agreement": 1.0,
+          "top20_set_agreement": 1.0
+        },
+        {
+          "item_index": 1,
+          "item_id": "general/fineweb-40001",
+          "length": 234,
+          "stream": 1,
+          "n": 35553024,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rms": 0.0,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.0,
+          "cosine": 0.9999998807907104,
+          "bitwise_identical": true,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0,
+          "argmax_agreement": 1.0,
+          "top5_set_agreement": 1.0,
+          "top20_set_agreement": 1.0
+        },
+        {
+          "item_index": 2,
+          "item_id": "general/fineweb-40002",
+          "length": 527,
+          "stream": 2,
+          "n": 80070272,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rms": 0.0,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.0,
+          "cosine": 1.0,
+          "bitwise_identical": true,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0,
+          "argmax_agreement": 1.0,
+          "top5_set_agreement": 1.0,
+          "top20_set_agreement": 1.0
+        },
+        {
+          "item_index": 3,
+          "item_id": "general/fineweb-40003",
+          "length": 646,
+          "stream": 3,
+          "n": 98150656,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rms": 0.0,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.0,
+          "cosine": 1.0,
+          "bitwise_identical": true,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0,
+          "argmax_agreement": 1.0,
+          "top5_set_agreement": 1.0,
+          "top20_set_agreement": 1.0
+        }
+      ],
+      "every_item_bitwise_identical": true,
+      "max_abs_over_items": 0.0,
+      "min_argmax_agreement": 1.0,
+      "_standard": "bitwise. The shape, the operator path and the numerical policy are unchanged, so anything else means the schedule moved the arithmetic."
+    },
+    "repeatability": {
+      "repeats": 3,
+      "per_item": [
+        {
+          "item_index": 0,
+          "bitwise_identical_across_repeats": true,
+          "max_abs_between_repeats": 0.0
+        },
+        {
+          "item_index": 1,
+          "bitwise_identical_across_repeats": true,
+          "max_abs_between_repeats": 0.0
+        },
+        {
+          "item_index": 2,
+          "bitwise_identical_across_repeats": true,
+          "max_abs_between_repeats": 0.0
+        },
+        {
+          "item_index": 3,
+          "bitwise_identical_across_repeats": true,
+          "max_abs_between_repeats": 0.0
+        }
+      ],
+      "all_repeats_bitwise_identical": true
+    },
+    "stream_assignment": {
+      "identity": {
+        "assignment": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "every_item_bitwise_identical": true,
+        "max_abs": 0.0
+      },
+      "reversed": {
+        "assignment": [
+          3,
+          2,
+          1,
+          0
+        ],
+        "every_item_bitwise_identical": true,
+        "max_abs": 0.0
+      },
+      "rotated": {
+        "assignment": [
+          1,
+          2,
+          3,
+          0
+        ],
+        "every_item_bitwise_identical": true,
+        "max_abs": 0.0
+      },
+      "result_is_independent_of_stream_identity": true
+    },
+    "throughput": {
+      "per_concurrency": [
+        {
+          "concurrency": 1,
+          "tokens": 629,
+          "sequential_seconds": 0.029892313003074378,
+          "parallel_seconds": 0.03987303702160716,
+          "speedup": 0.7496873886700871,
+          "sequential_peak_vram_gib": 1.6963691711425781,
+          "parallel_peak_vram_gib": 1.7122383117675781,
+          "extra_vram_gib": 0.015869140625
+        },
+        {
+          "concurrency": 2,
+          "tokens": 863,
+          "sequential_seconds": 0.06185461702989414,
+          "parallel_seconds": 0.05873992998385802,
+          "speedup": 1.0530250384515618,
+          "sequential_peak_vram_gib": 1.7122383117675781,
+          "parallel_peak_vram_gib": 1.8607335090637207,
+          "extra_vram_gib": 0.14849519729614258
+        },
+        {
+          "concurrency": 4,
+          "tokens": 2036,
+          "sequential_seconds": 0.11981836101040244,
+          "parallel_seconds": 0.11900145601248369,
+          "speedup": 1.0068646638897683,
+          "sequential_peak_vram_gib": 2.1326518058776855,
+          "parallel_peak_vram_gib": 2.5260262489318848,
+          "extra_vram_gib": 0.3933744430541992
+        },
+        {
+          "concurrency": 8,
+          "tokens": 3824,
+          "sequential_seconds": 0.23556859197560698,
+          "parallel_seconds": 0.24712361895944923,
+          "speedup": 0.9532419157970556,
+          "sequential_peak_vram_gib": 2.5937376022338867,
+          "parallel_peak_vram_gib": 3.5380444526672363,
+          "extra_vram_gib": 0.9443068504333496
+        }
+      ],
+      "best_speedup": 1.0530250384515618,
+      "best_concurrency": 2,
+      "concurrency_is_operationally_useful": false,
+      "_threshold": "10% is the bar for 'useful'. Stated before the measurement, because a 2% speedup would not justify a stream executor and it must not be argued into one."
+    },
+    "causal_kl": {
+      "bypassed_layer": 17,
+      "per_item": [
+        {
+          "item_id": "general/fineweb-40000",
+          "length": 629,
+          "kl_sequential_scalar_oracle": 1.1305839149815262,
+          "kl_parallel_batched_reducer": 1.1305839149815262,
+          "abs_diff": 0.0,
+          "rel_diff": 0.0,
+          "identical": true
+        },
+        {
+          "item_id": "general/fineweb-40001",
+          "length": 234,
+          "kl_sequential_scalar_oracle": 0.2306269535179302,
+          "kl_parallel_batched_reducer": 0.2306269535179302,
+          "abs_diff": 0.0,
+          "rel_diff": 0.0,
+          "identical": true
+        },
+        {
+          "item_id": "general/fineweb-40002",
+          "length": 527,
+          "kl_sequential_scalar_oracle": 0.14628917001499422,
+          "kl_parallel_batched_reducer": 0.14628916842855882,
+          "abs_diff": 1.5864353997141478e-09,
+          "rel_diff": 1.0844517058587062e-08,
+          "identical": false
+        },
+        {
+          "item_id": "general/fineweb-40003",
+          "length": 646,
+          "kl_sequential_scalar_oracle": 1.9433941981589147,
+          "kl_parallel_batched_reducer": 1.9433941981589147,
+          "abs_diff": 0.0,
+          "rel_diff": 0.0,
+          "identical": true
+        }
+      ],
+      "every_item_bitwise_identical": false,
+      "max_abs_diff": 1.5864353997141478e-09,
+      "max_rel_diff": 1.0844517058587062e-08,
+      "item_ranking_identical": true,
+      "reducer_contract_rel_bound": 1e-06,
+      "within_reducer_contract": true,
+      "_bound_was_declared_before_the_run": true,
+      "_model_forward_stayed_b1": true
+    }
+  },
+  "stage_status": {
+    "logits_invariance": "ok",
+    "repeatability": "ok",
+    "stream_assignment": "ok",
+    "throughput": "ok",
+    "causal_kl": "ok"
+  },
+  "bf16_policy": {
+    "allow_reduced_precision": true,
+    "allow_reduced_precision_readable": true,
+    "allow_splitk": true,
+    "allow_splitk_readable": true
+  },
+  "blas_library": "_BlasBackend.Cublas",
+  "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "model": {
+    "hidden_size": 1024,
+    "num_hidden_layers": 28,
+    "vocab_size": 151936,
+    "param_dtype": "torch.bfloat16"
+  },
+  "calibration": {
+    "requested": "calib.domain_balanced@v1",
+    "kind": "frozen_calibration_mixture",
+    "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+    "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+    "n_items": 8,
+    "lengths": [
+      629,
+      234,
+      527,
+      646,
+      672,
+      317,
+      309,
+      490
+    ]
+  },
+  "scheduler": "streams",
+  "conclusion": {
+    "parallel_b1_verdict": "PARALLEL_B1_EXACT_BUT_NO_SPEEDUP",
+    "logits_bitwise_identical_to_sequential": true,
+    "parallel_waves_repeat_bitwise": true,
+    "independent_of_stream_identity": true,
+    "best_speedup": 1.0530250384515618,
+    "best_concurrency": 2,
+    "concurrency_is_operationally_useful": false,
+    "causal_kl_reached": true,
+    "causal_kl_within_reducer_contract": true,
+    "causal_kl_max_rel_diff": 1.0844517058587062e-08,
+    "causal_kl_ranking_identical": true,
+    "causal_kl_bitwise_identical": false,
+    "_verdict_rule": "invariant means exact AND repeatable AND independent of stream identity; only then does speed decide between the two passing outcomes"
+  },
+  "finished_utc": "2026-09-26T11:31:18.537543+00:00"
+}

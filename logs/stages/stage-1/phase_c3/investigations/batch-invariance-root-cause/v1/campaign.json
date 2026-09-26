@@ -198,6 +198,31 @@
    "teardown_confirmed": true,
    "watchdog": "started, pid 3438828, stopped by the trap after teardown",
    "no_science_ran": true
+  },
+  {
+   "subrun_id": "bi_20260926_d7",
+   "pod_id": "y1rg8rsl4qy4lp",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 2.233,
+   "cost_usd": 0.0412,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x quoted secure rate, plus container disk billed separately",
+   "executed_source_sha": "158ec92fe9a3758f25eab749b47b4d9b0c4f9aaf",
+   "verdict": "COMPLETE",
+   "purpose": "parallel independent B=1 item forwards on CUDA streams vs sequential B=1, under the HISTORICAL numerical policy",
+   "reports": [
+    "parent_parallel_b1",
+    "a4_596m_parallel_b1"
+   ],
+   "per_report_seconds": [
+    15,
+    11
+   ],
+   "result": "PARALLEL_B1_EXACT_BUT_NO_SPEEDUP on both objects",
+   "teardown_confirmed": true,
+   "watchdog": "started, pid 3471239, stopped by the trap after teardown",
+   "no_science_ran": true
   }
  ],
  "rate_basis": {

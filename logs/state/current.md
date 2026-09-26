@@ -12,8 +12,10 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **Nothing is running and nothing is billing.** Zero pods and zero network
 volumes; both `59qt99zeg5` and `a0zqgxsm7p` are deleted.
 
-**The C3 batch-invariance root-cause investigation is MEASURED and its finding
-is derived**, on branch `review/c3-operator-batching`, which is **not merged
+**Padded tensor batching is not invariant; parallel B=1 item forwards ARE.**
+Bitwise identical to sequential B=1 on both objects, repeatable, independent of
+stream identity — but no useful speedup (best `1.034×`). The investigation is
+MEASURED and its findings are derived, on branch `review/c3-operator-batching`, which is **not merged
 into `main`**. In one line: a batched forward is not the same computation as a
 solo one because a GEMM whose reduction is deep relative to its output width
 reduces in a shape-dependent order, and in bf16 that moves an FFN top-k in most
@@ -1492,6 +1494,53 @@ by running a real bf16 GEMM under it. torch `2.9.1+cu130` cannot express the
 tuple at all: `set_allow_bf16_reduction_cublas expects a bool`. Recorded
 UNSUPPORTED.
 
+### Parallel independent B=1 item forwards — EXACT, and no faster
+
+**A different architecture from padded tensor batching**, and the distinction
+is the point: each item is presented to the model as `[1, T_i]` exactly as it
+was historically — no padding, no batch dimension, the same attention path, the
+**historical** numerical policy with no split-K intervention. Only the schedule
+changes: N forwards submitted to N CUDA streams, one synchronize.
+
+**Verdict `PARALLEL_B1_EXACT_BUT_NO_SPEEDUP`, on both objects**
+(`bi_20260926_d7`, pod `y1rg8rsl4qy4lp`, `$0.0412`, 26 s of compute).
+
+The scientific requirement passes completely:
+
+| check | parent 4B | 596M |
+| --- | --- | --- |
+| logits vs sequential B=1 | **bitwise identical**, `max_abs 0.000e+00` | **bitwise identical** |
+| 3 parallel waves repeat | bitwise | bitwise |
+| identity / reversed / rotated stream assignment | all bitwise | all bitwise |
+| causal KL vs scalar oracle | `1.101e-07` rel, inside the `1e-6` bound | `1.084e-08` |
+| causal-KL item ranking | identical | identical |
+
+The causal-KL bar is the reducer's own validated contract rather than
+bitwise — that comparison is the scalar oracle against the batched reducer, two
+reductions of the same logits, and the bound was declared before the run. The
+**forwards** are what must be bitwise, and they are.
+
+**But concurrency buys nothing here.** Best speedup `1.034×` on the parent and
+`1.053×` on the 596M, against a `1.10×` bar declared before the measurement:
+
+| concurrency | parent seq → par | 596M seq → par |
+| --- | --- | --- |
+| 1 | `0.0412 → 0.0435` (`0.947×`) | `0.0299 → 0.0399` (`0.750×`) |
+| 2 | `0.0792 → 0.0779` (`1.018×`) | `0.0619 → 0.0587` (`1.053×`) |
+| 4 | `0.1615 → 0.1562` (`1.034×`) | `0.1198 → 0.1190` (`1.007×`) |
+| 8 | — | `0.2356 → 0.2471` (`0.953×`) |
+
+Peak VRAM rises modestly: parent `8.13 → 8.96 GiB` at c=4, 596M `2.59 → 3.54`
+at c=8. The likely mechanism is simply that a 4B forward already saturates the
+L40S, so concurrent streams find no idle SMs — there is nothing to overlap.
+
+**Scope, so this is not over-read:** the throughput figures are for **plain
+forwards only**. The real calibration workload also carries the float64
+`residual_sqsum` accumulation, which is not in this measurement. Phase 3 (the
+statistics path with per-item buffers merged in item order) was **not built** —
+the review's own outcome for this result is to return with the throughput
+evidence and decide whether the concurrency machinery is worth retaining.
+
 **What it means for C3, stated but NOT acted on.** Operators whose output is a
 dense top-k over activation statistics are not reproducible across
 `micro_batch_size` on this hardware in bf16, and `DEFAULT_MICRO_BATCH_SIZE` is
@@ -1628,9 +1677,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$22.8249` of `$45.4425` |
-| GPU engineering | `$5.3093` of `$6.0000` |
-| package | `$28.1342` of `$51.4425` |
-| project cap | `$342.6609` spent of `$370.0000`, leaving `$27.3391` |
+| GPU engineering | `$5.2681` of `$6.0000` |
+| package | `$28.0930` of `$51.4425` |
+| project cap | `$342.7021` spent of `$370.0000`, leaving `$27.2979` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 
