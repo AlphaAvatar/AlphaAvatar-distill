@@ -227,11 +227,12 @@ print('  /opt/train: torch', torch.__version__, '| transformers', transformers._
 #                      unpinned runtime. This is the environment control: it
 #                      asks whether the runtime alone moves the answer.
 run_one() {
-  local label="$1" python="$2" attn="$3" ckpt="$4" only="${5:-}" nitems="${6:-}"
+  local label="$1" python="$2" attn="$3" ckpt="$4" only="${5:-}" nitems="${6:-}" \
+        policy="${7:-}"
   local dir="${OUTROOT}/${label}"
   mkdir -p "$dir"
   say "diagnostic ${label} (python=${python} attn=${attn:-default} ckpt=${ckpt:-hub-parent}" \
-      "only=${only:-all} n_items=${nitems:-default})"
+      "only=${only:-all} n_items=${nitems:-default} policy=${policy:-default})"
   local t=$(date -u +%s)
   # Full output to a file that travels back with the report; only the tail to
   # the launcher log. A diagnostic whose stderr was truncated to fit a console
@@ -244,6 +245,7 @@ run_one() {
       --run-id "@RUN_ID@-${label}" --device cuda --dtype bfloat16 \
       ${attn:+--attn "$attn"} ${ckpt:+--checkpoint "$ckpt"} \
       ${only:+--only "$only"} ${nitems:+--n-items "$nitems"} \
+      ${policy:+--bf16-policy "$policy"} \
       --out "$dir" > "${dir}/stdout.log" 2>&1
   local rc=$?
   #: Per-run, not just per-session. The session bound would let one hung run
@@ -258,49 +260,23 @@ run_one() {
 
 cd /workspace/repo
 
-# --- the split-K causal control ---------------------------------------------
-# A NARROW CONTINUATION, not the diagnostic matrix again. The previous session
-# established determinism, mask exactness, neighbour independence, backend
-# breadth, zero collector-reduction drift, bare-GEMM shape dependence, the fp32
-# magnitude collapse, and exact cross-session reproduction. None of that is
-# bought twice.
+# --- Outcome B: localize what split-K-off did NOT fix -----------------------
+# The control has already answered. Forbidding split-K (with cuBLASLt, which it
+# requires) makes every bare GEMM bit-exact on both checkpoints, and on the
+# parent the EQUAL-LENGTH batch becomes bit-identical to solo. It does not fix
+# the ragged padded path, it does not preserve the historical solo output, and
+# FFN selection still moves in 31 of 36 layers.
 #
-# What had never been asked: `allow_bf16_reduced_precision_reduction = False`
-# is a BOOL, and torch's parser returns `(value, True)` for a bool -- split-K
-# stayed ON. Only the tuple form reaches the second flag. So the controls are:
-#
-#   default                           reduced=True   splitk=True
-#   reduced_precision_off_splitk_on   reduced=False  splitk=True   <- the old run
-#   reduced_precision_off_splitk_off  reduced=False  splitk=False  <- the new one
-#
-# Verified at $0 from the pytorch sources: v2.11.0 supports the tuple and
-# exposes a readable `..._split_k`; v2.9.1 does not. The 2.9.1 arm therefore
-# expects UNSUPPORTED and records it rather than substituting the boolean.
-SPLITK_STAGES=bf16_controls,solo_preservation,operator_acceptance,performance
-MIX=${FULL_MIXTURE_ITEMS:-67}
-
-# The parent first: it is the object C3's operators calibrate on, so if the
-# session is cut short the decisive arm exists.
-run_one parent_splitk /opt/train/bin/python sdpa "" "$SPLITK_STAGES" "$MIX"
+# So the remaining question is the narrow one the review names for Outcome B:
+# under split-K off, WHERE does solo first stop agreeing with a ragged batch?
+# `--bf16-policy splitk_off` applies the policy before the model loads, so the
+# case matrix and the layer-by-layer tap walk are measured under it rather than
+# under whatever the build ships. The run REFUSES if the policy is unavailable.
+run_one parent_localize_under_splitk_off /opt/train/bin/python sdpa "" \
+        case_matrix,first_divergence 8 splitk_off
 if [ -n "$A4_CKPT" ]; then
-  run_one a4_596m_splitk /opt/train/bin/python sdpa "$A4_CKPT" \
-          "$SPLITK_STAGES" "$MIX"
-fi
-
-# The historical engineering runtime. Expected to report the tuple UNSUPPORTED
-# on torch 2.9.1 -- which is itself the answer to "does the tuple API behave
-# differently there", and costs one short run to establish from the runtime
-# rather than from my reading of its source.
-say "environment B: image python + wheelhouse transformers 5.13.1"
-python3 -m pip install -q --break-system-packages --no-cache-dir --no-index \
-  --find-links "$WHEELHOUSE" transformers==5.13.1 tokenizers safetensors huggingface_hub numpy 2>&1 | tail -3
-if python3 -c "import torch, transformers, numpy" 2>/dev/null; then
-  python3 -c "import torch;print('  env B torch', torch.__version__)"
-  run_one b_image_splitk_api_probe python3 sdpa "${A4_CKPT}" \
-          bf16_controls 8
-else
-  say "  environment B not constructible; recording that rather than guessing"
-  note "env_b_unavailable"
+  run_one a4_596m_localize_under_splitk_off /opt/train/bin/python sdpa "$A4_CKPT" \
+          case_matrix,first_divergence 8 splitk_off
 fi
 
 say "done; reports:"

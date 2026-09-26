@@ -828,19 +828,38 @@ def stage_bf16_controls(cfg, ctx) -> dict:
     #: ATTRIBUTION. `allow_splitk=False` requires cuBLASLt, so control C
     #: changes the BLAS library AND the flag. Control D changes only the
     #: library. Without comparing the two, an improvement at C could be either.
-    d = out["controls"].get(CONTROL_D) or {}
-    if CONTROL_D in still and CONTROL_C in still:
-        only_lt, both = set(still[CONTROL_D]), set(still[CONTROL_C])
+    if all(k in still for k in (CONTROL_A, CONTROL_B, CONTROL_D, CONTROL_C)):
+        base = set(still[CONTROL_A])
+        only_rp, only_lt = set(still[CONTROL_B]), set(still[CONTROL_D])
+        both = set(still[CONTROL_C])
+        out["fixed_by_reduced_precision_off_alone"] = sorted(base - only_rp)
+        out["fixed_by_cublaslt_alone"] = sorted(base - only_lt)
+        out["fixed_only_by_the_combination"] = sorted(
+            base - both - (base - only_rp) - (base - only_lt))
         out["backend_switch_alone_fixes_it"] = not only_lt
-        out["split_k_flag_adds_something_beyond_the_backend"] = bool(
-            both < only_lt)
+        out["reduced_precision_off_alone_fixes_it"] = not only_rp
+        out["split_k_flag_adds_something_beyond_the_backend"] = bool(both < only_lt)
+        #: The two single changes may repair DISJOINT subsets, in which case
+        #: neither is "the cause" and only the combination is sufficient.
+        #: Collapsing that to one label would be the same over-reading the
+        #: boolean/tuple confusion already produced once.
+        complementary = bool(
+            (base - only_rp) and (base - only_lt)
+            and not ((base - only_rp) & (base - only_lt)))
+        out["the_two_changes_repair_disjoint_sets"] = complementary
         out["improvement_attributable_to"] = (
             "cublaslt_backend_alone" if not only_lt
+            else "reduced_precision_off_alone" if not only_rp
+            else "both_changes_are_needed_and_repair_disjoint_sets"
+            if complementary and not both
             else "the_split_k_flag" if both < only_lt
             else "neither" if both == only_lt else "undetermined")
     else:
-        out["backend_switch_alone_fixes_it"] = None
-        out["split_k_flag_adds_something_beyond_the_backend"] = None
+        for k in ("backend_switch_alone_fixes_it",
+                  "reduced_precision_off_alone_fixes_it",
+                  "split_k_flag_adds_something_beyond_the_backend",
+                  "the_two_changes_repair_disjoint_sets"):
+            out[k] = None
         out["improvement_attributable_to"] = "undetermined"
 
     out["_reading"] = {
@@ -2019,6 +2038,16 @@ def main(argv=None) -> int:
     ap.add_argument("--micro-batch-size", type=int, default=None)
     ap.add_argument("--only", default=None,
                     help="comma-separated stage names; default is all")
+    ap.add_argument("--bf16-policy", default="default",
+                    choices=["default", "reduced_off", "cublaslt", "splitk_off"],
+                    help="apply a bf16/BLAS policy for the WHOLE run, so stages "
+                         "that do not set one themselves (case_matrix, "
+                         "first_divergence, causal_kl) are measured under it. "
+                         "`splitk_off` is cuBLASLt with reduced precision and "
+                         "split-K both off, and requires a build that can "
+                         "express it -- the run REFUSES rather than silently "
+                         "falling back, because a report labelled splitk_off "
+                         "that ran under cuBLAS is the defect this round fixed.")
     ap.add_argument("--attn", default=None,
                     help="attn_implementation for the MAIN model (eager, sdpa). "
                          "Default is whatever transformers selects. The backend "
@@ -2072,6 +2101,25 @@ def main(argv=None) -> int:
     cfg["checkpoint"] = args.checkpoint or resolve_checkpoint(cfg)
     report["checkpoint"] = cfg["checkpoint"]
     say(f"checkpoint {cfg['checkpoint']}")
+
+    #: BEFORE the model loads, so every forward in the run sees it.
+    wanted = {"default": (True, None, "cublas"),
+              "reduced_off": (False, None, "cublas"),
+              "cublaslt": (True, None, "cublaslt"),
+              "splitk_off": (False, False, "cublaslt")}[args.bf16_policy]
+    applied = set_bf16_policy(*wanted)
+    report["run_bf16_policy"] = {"requested": args.bf16_policy, "applied": applied}
+    if not applied["supported"]:
+        say(f"the requested bf16 policy {args.bf16_policy!r} is not supported "
+            f"here: {applied['error']}")
+        say("refusing to run: a report labelled with a policy it did not run "
+            "under is worse than no report")
+        (out_dir / "report.json").write_text(json.dumps(report, indent=2) + "\n")
+        return NOT_RUN
+    say(f"bf16 policy {args.bf16_policy}: "
+        f"reduced={applied['readback']['allow_reduced_precision']} "
+        f"splitk={applied['readback']['allow_splitk']} "
+        f"blas={applied['blas']['readback']}")
 
     model, adapter = load_model(cfg, device, args.dtype, attn=args.attn)
     report["requested_attn_implementation"] = args.attn

@@ -147,6 +147,32 @@
    "teardown_confirmed": true,
    "watchdog": "started, pid 3426915, stopped by the trap after teardown",
    "no_science_ran": true
+  },
+  {
+   "subrun_id": "bi_20260926_d5",
+   "pod_id": "zosdyrzqvw6jwg",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 8.367,
+   "cost_usd": 0.1543,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x quoted secure rate, plus container disk billed separately",
+   "executed_source_sha": "821185d53cce3dc42ce58b9dedc97e15f6a0de19",
+   "verdict": "COMPLETE",
+   "purpose": "the split-K causal control, with four bf16/BLAS arms",
+   "reports": [
+    "parent_splitk",
+    "a4_596m_splitk",
+    "b_image_splitk_api_probe"
+   ],
+   "per_report_seconds": [
+    322,
+    61,
+    6
+   ],
+   "teardown_confirmed": true,
+   "watchdog": "started, pid 3432490, stopped by the trap after teardown",
+   "no_science_ran": true
   }
  ],
  "rate_basis": {
