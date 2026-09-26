@@ -1582,9 +1582,11 @@ in. Both were measured here, and they agree.
 
 ## The full suite is not green: 11 failures, one family
 
-**Current measurement, 2026-09-26 at `50056199` on a clean tree: 11 failed,
-4881 passed, 228 skipped** over all of `tests/`, in 46m20s — the identical set
-to the run at `a76cce7f`, before the split-K continuation. Those eleven are
+**Current measurement, 2026-09-26 at `5c287faf` on a clean tree: 11 failed,
+4881 passed, 228 skipped** over all of `tests/`, in 45m50s — the identical
+set to the runs at `50056199` and `a76cce7f`, and the same set that is red
+at `ab53ba14`. Zero new and zero fixed across the split-K continuation and
+the parallel-item round. Those eleven are
 **exactly** the set that is red at `ab53ba14`, the pre-refactor base — checked
 by running the same nodeids in a detached worktree at that commit. **Zero new
 failures** from the batching/topology refactor or from this investigation.

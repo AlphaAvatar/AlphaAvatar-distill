@@ -558,6 +558,25 @@ def operator_cost(impl: OperatorImplementation, parent_spec: ArchSpec,
             cached_fraction=depth_cached_fraction)
         notes = (f"{plan.notes}; mean {avg_layers:.2f} surviving blocks per "
                  f"evaluation; intact reference {depth_reference_mode}")
+    elif plan.forward_passes:
+        #: THE GENERIC FORWARD-CONSUMING CASE, and it did not exist.
+        #:
+        #: Before this branch, an operator that declares `forward_passes` and
+        #: no `stats_passes` matched neither arm and fell through to
+        #: `flops = 0` -- so a plan declaring tens of thousands of model
+        #: forwards priced at exactly zero GPU seconds. The only forward-heavy
+        #: operator in the library happened to be named in the branch above, so
+        #: the hole stayed invisible: the first implementation to walk into it
+        #: would be a NEW one, arriving with a plan nobody had priced.
+        #:
+        #: `OperatorPlan.forward_passes` is the contract, so that is what is
+        #: read. No implementation id, model family, head count, item count or
+        #: device appears here; an operator prices itself by declaring how many
+        #: passes over the calibration tokens it will run.
+        flops = (plan.forward_passes * calibration_tokens
+                 * forward_flops_per_token(parent_spec, seq_len))
+        notes = (f"{plan.notes}; {plan.forward_passes} declared forward passes "
+                 f"over {calibration_tokens} calibration tokens")
     elif plan.stats_passes:
         # One forward with hooks, then a float64 eigendecomposition or top-k.
         flops = calibration_tokens * forward_flops_per_token(parent_spec, seq_len)
