@@ -1,6 +1,6 @@
 {
-  "run_id": "bi_20260926_d2-a4_596m_C_science_sdpa",
-  "started_utc": "2026-09-25T23:55:06.401912+00:00",
+  "run_id": "bi_20260926_d3-a4_596m_C_science_sdpa",
+  "started_utc": "2026-09-26T00:15:53.279777+00:00",
   "question": "does evaluating a calibration item alone and beside others give the same scientific decision, and if not, which operation first stops agreeing",
   "device": "cuda",
   "dtype": "bfloat16",
@@ -63,9 +63,15 @@
     "seed": 20260925,
     "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
   },
+  "executable": {
+    "file": "batch_invariance_diagnostic.py",
+    "sha256": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+    "git_head": "85c81f611defe70eff965f82d7b9087cd5114762",
+    "this_file_is_clean_at_git_head": true
+  },
   "environment": {
     "python": "3.12.3",
-    "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+    "platform": "Linux-6.17.0-29-generic-x86_64-with-glibc2.39",
     "torch": "2.11.0+cu128",
     "torch_cuda_build": "12.8",
     "torch_cudnn": 91900,
@@ -7624,7 +7630,9 @@
       "length_sweep",
       "gemm_isolation",
       "backend_matrix",
-      "first_divergence"
+      "first_divergence",
+      "statistics_decomposition",
+      "ffn_selection"
     ],
     "divergence_locus": "gemm_level_shape_dependent_accumulation",
     "divergence_driver": "padded_width_and_batch_size",
@@ -7653,5 +7661,5 @@
     "causal_kl_item_ranking_identical": false,
     "_derivation": "locus (WHERE): nondeterminism first; then, only if SOME stage observed a divergence at all, a bare GEMM, then a backend that diverges while another is exact, then every backend diverging, then anything between a GEMM and the logits, then padded width as the weakest localization. driver (WHAT) is independent and comes from the length sweep, which varies padded width and batch size one at a time."
   },
-  "finished_utc": "2026-09-25T23:55:23.186564+00:00"
+  "finished_utc": "2026-09-26T00:16:09.918617+00:00"
 }

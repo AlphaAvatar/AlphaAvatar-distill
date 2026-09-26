@@ -2,14 +2,16 @@
  "schema": "aadistill.validation_finding/v1",
  "_contract": "DERIVED, not written. Every number here was read from a report.json emitted by batch_invariance_diagnostic.py, and the verdict is computed by scripts/validation/batch_invariance_finding.py. It authorizes nothing and changes nothing.",
  "investigation_id": "batch_invariance_root_cause_v1",
- "derived_utc": "2026-09-26T00:09:07.709781+00:00",
+ "derived_utc": "2026-09-26T00:21:13.561343+00:00",
  "supersedes_or_adjudicates": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/finding.json",
  "_the_prior_record_is_not_rewritten": "It is historical evidence. This record states what its claims do and do not reproduce; it does not edit them.",
  "reports": [
   "a4_596m_B_image_sdpa",
   "a4_596m_C_science_sdpa",
+  "a4_596m_C_science_sdpa_fullmix",
   "parent_C_science_eager",
-  "parent_C_science_sdpa"
+  "parent_C_science_sdpa",
+  "parent_C_science_sdpa_fullmix"
  ],
  "environments": {
   "a4_596m_B_image_sdpa": {
@@ -27,9 +29,9 @@
    "calibration": "frozen_calibration_mixture",
    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
    "calibration_n_items": 8,
-   "executable_sha256": null,
-   "executable_git_head": null,
-   "executable_clean_at_head": null,
+   "executable_sha256": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "executable_git_head": "85c81f611defe70eff965f82d7b9087cd5114762",
+   "executable_clean_at_head": true,
    "stages_run": [
     "backend_matrix",
     "case_matrix",
@@ -61,9 +63,9 @@
    "calibration": "frozen_calibration_mixture",
    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
    "calibration_n_items": 8,
-   "executable_sha256": null,
-   "executable_git_head": null,
-   "executable_clean_at_head": null,
+   "executable_sha256": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "executable_git_head": "85c81f611defe70eff965f82d7b9087cd5114762",
+   "executable_clean_at_head": true,
    "stages_run": [
     "backend_matrix",
     "case_matrix",
@@ -75,6 +77,31 @@
     "length_sweep",
     "reduction_control",
     "repeatability",
+    "statistics_decomposition"
+   ],
+   "params_hidden": 1024,
+   "params_layers": 28
+  },
+  "a4_596m_C_science_sdpa_fullmix": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.159.03",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 67,
+   "executable_sha256": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "executable_git_head": "85c81f611defe70eff965f82d7b9087cd5114762",
+   "executable_clean_at_head": true,
+   "stages_run": [
+    "ffn_selection",
     "statistics_decomposition"
    ],
    "params_hidden": 1024,
@@ -95,9 +122,9 @@
    "calibration": "frozen_calibration_mixture",
    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
    "calibration_n_items": 8,
-   "executable_sha256": null,
-   "executable_git_head": null,
-   "executable_clean_at_head": null,
+   "executable_sha256": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "executable_git_head": "85c81f611defe70eff965f82d7b9087cd5114762",
+   "executable_clean_at_head": true,
    "stages_run": [
     "backend_matrix",
     "case_matrix",
@@ -129,9 +156,9 @@
    "calibration": "frozen_calibration_mixture",
    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
    "calibration_n_items": 8,
-   "executable_sha256": null,
-   "executable_git_head": null,
-   "executable_clean_at_head": null,
+   "executable_sha256": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "executable_git_head": "85c81f611defe70eff965f82d7b9087cd5114762",
+   "executable_clean_at_head": true,
    "stages_run": [
     "backend_matrix",
     "case_matrix",
@@ -147,24 +174,46 @@
    ],
    "params_hidden": 2560,
    "params_layers": 36
+  },
+  "parent_C_science_sdpa_fullmix": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.159.03",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 67,
+   "executable_sha256": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "executable_git_head": "85c81f611defe70eff965f82d7b9087cd5114762",
+   "executable_clean_at_head": true,
+   "stages_run": [
+    "ffn_selection",
+    "statistics_decomposition"
+   ],
+   "params_hidden": 2560,
+   "params_layers": 36
   }
  },
  "executables": {
   "per_report": {
-   "a4_596m_B_image_sdpa": null,
-   "a4_596m_C_science_sdpa": null,
-   "parent_C_science_eager": null,
-   "parent_C_science_sdpa": null
+   "a4_596m_B_image_sdpa": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "a4_596m_C_science_sdpa": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "a4_596m_C_science_sdpa_fullmix": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "parent_C_science_eager": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "parent_C_science_sdpa": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917",
+   "parent_C_science_sdpa_fullmix": "6f096fc5c07e14e595ef78bc76f08076c2750ca7009ab900d9b63f0ffc5b5917"
   },
-  "distinct_executables": 0,
-  "all_reports_share_one_executable": false,
+  "distinct_executables": 1,
+  "all_reports_share_one_executable": true,
   "_absent_means_older": "a report with no `executable` block predates the field; its code identity is the session's recorded source sha, not this file",
-  "reports_without_an_executable_identity": [
-   "a4_596m_B_image_sdpa",
-   "a4_596m_C_science_sdpa",
-   "parent_C_science_eager",
-   "parent_C_science_sdpa"
-  ]
+  "reports_without_an_executable_identity": []
  },
  "a4_claims_adjudicated": {
   "bf16_batched_vs_solo_logits_relative": {
@@ -266,6 +315,13 @@
      "same_order_of_magnitude": true,
      "differs_by_more_than_10x": false
     },
+    "a4_596m_C_science_sdpa_fullmix": {
+     "measured": 0.0035026075784116983,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 0.16163394455060906,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
     "parent_C_science_eager": {
      "measured": 0.0009853924857452512,
      "a4": 0.02167,
@@ -277,6 +333,13 @@
      "measured": 0.0007534109172411263,
      "a4": 0.02167,
      "ratio_here_over_a4": 0.0347674627245559,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": true
+    },
+    "parent_C_science_sdpa_fullmix": {
+     "measured": 0.00036646437365561724,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 0.016911138608934808,
      "same_order_of_magnitude": false,
      "differs_by_more_than_10x": true
     }
@@ -307,6 +370,13 @@
      "same_order_of_magnitude": false,
      "differs_by_more_than_10x": false
     },
+    "a4_596m_C_science_sdpa_fullmix": {
+     "measured": 0.004569382406771183,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 0.21086213229216352,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
     "parent_C_science_eager": {
      "measured": 0.0030661022756248713,
      "a4": 0.02167,
@@ -318,6 +388,13 @@
      "measured": 0.001848834683187306,
      "a4": 0.02167,
      "ratio_here_over_a4": 0.08531770573084015,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": true
+    },
+    "parent_C_science_sdpa_fullmix": {
+     "measured": 0.001782875508069992,
+     "a4": 0.02167,
+     "ratio_here_over_a4": 0.08227390438717085,
      "same_order_of_magnitude": false,
      "differs_by_more_than_10x": true
     }
@@ -727,12 +804,91 @@
   "bs1_unpadded_is_exact_everywhere": true,
   "_reading": "a projection whose GEMM is bit-identical across shapes and one whose GEMM is not, measured side by side on the same weights, is the mechanism; `fp32_removes_the_shape_dependence` says whether the dtype is the CAUSE or the SCALE, and `collector_reduction_order_contributes` rules the accumulator in or out"
  },
+ "subsample_sensitivity": {
+  "pairs": {
+   "a4_596m_C_science_sdpa": {
+    "subsample": {
+     "n_items": 8,
+     "n_tokens": 3824,
+     "ffn_abs_sum_rel_l2_bs4": 0.03931969776749611,
+     "layers_moved_at_headline_bs4": 26,
+     "n_layers": 28,
+     "min_cutoff_margin_relative_bs4": 6.467353737980964e-06,
+     "invariant_at_every_ratio_and_size": false,
+     "by_keep_ratio_bs4": {
+      "0.32": 25,
+      "0.50": 26,
+      "0.75": 25,
+      "0.90": 25
+     }
+    },
+    "full_mixture": {
+     "n_items": 67,
+     "n_tokens": 59830,
+     "ffn_abs_sum_rel_l2_bs4": 0.002823730232194066,
+     "layers_moved_at_headline_bs4": 21,
+     "n_layers": 28,
+     "min_cutoff_margin_relative_bs4": 1.3651287946610554e-05,
+     "invariant_at_every_ratio_and_size": false,
+     "by_keep_ratio_bs4": {
+      "0.32": 20,
+      "0.50": 21,
+      "0.75": 23,
+      "0.90": 18
+     }
+    },
+    "drift_fell_by": 13.92473591110165,
+    "prediction_drift_falls_2x_to_4x": false,
+    "prediction_selection_still_moves": true,
+    "decision_claim_survives_the_full_mixture": true
+   },
+   "parent_C_science_sdpa": {
+    "subsample": {
+     "n_items": 8,
+     "n_tokens": 3824,
+     "ffn_abs_sum_rel_l2_bs4": 0.0010941611835733056,
+     "layers_moved_at_headline_bs4": 34,
+     "n_layers": 36,
+     "min_cutoff_margin_relative_bs4": 1.9448434609884416e-07,
+     "invariant_at_every_ratio_and_size": false,
+     "by_keep_ratio_bs4": {
+      "0.32": 35,
+      "0.50": 34,
+      "0.75": 32,
+      "0.90": 34
+     }
+    },
+    "full_mixture": {
+     "n_items": 67,
+     "n_tokens": 59830,
+     "ffn_abs_sum_rel_l2_bs4": 0.0004182787088211626,
+     "layers_moved_at_headline_bs4": 34,
+     "n_layers": 36,
+     "min_cutoff_margin_relative_bs4": 2.6040464591388546e-06,
+     "invariant_at_every_ratio_and_size": false,
+     "by_keep_ratio_bs4": {
+      "0.32": 31,
+      "0.50": 34,
+      "0.75": 30,
+      "0.90": 31
+     }
+    },
+    "drift_fell_by": 2.6158663123375003,
+    "prediction_drift_falls_2x_to_4x": true,
+    "prediction_selection_still_moves": true,
+    "decision_claim_survives_the_full_mixture": true
+   }
+  },
+  "decision_claim_survives_everywhere_it_was_tested": true,
+  "_prediction_record": "logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/fullmix_prediction.json"
+ },
  "verdict": "CONFIRMED",
  "why": "FFN top-k selection moves between micro batch sizes on the same object a4 measured, under the pinned science runtime",
  "_verdict_turns_on": "FFN top-k SELECTION, not a logit norm: a magnitude that moves no decision changes no operator output",
  "objects_adjudicated": [
   "a4_596m_B_image_sdpa",
-  "a4_596m_C_science_sdpa"
+  "a4_596m_C_science_sdpa",
+  "a4_596m_C_science_sdpa_fullmix"
  ],
  "_a4_measured_the_596m_student": true,
  "_object_geometry": {
@@ -745,12 +901,18 @@
    "hidden_size": 1024,
    "num_hidden_layers": 28,
    "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
+  },
+  "a4_596m_C_science_sdpa_fullmix": {
+   "hidden_size": 1024,
+   "num_hidden_layers": 28,
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
   }
  },
  "_pool_selection": "reports whose label names the a4 object, falling back to every report when none does; the geometry above is what a reader should check that against",
  "sweep_reported": {
   "a4_596m_B_image_sdpa": false,
-  "a4_596m_C_science_sdpa": false
+  "a4_596m_C_science_sdpa": false,
+  "a4_596m_C_science_sdpa_fullmix": false
  },
  "_reports_without_a_sweep": [],
  "selection": {
@@ -807,6 +969,33 @@
      "4": 25
     }
    }
+  },
+  "a4_596m_C_science_sdpa_fullmix": {
+   "headline_layers_moved": 21,
+   "n_layers": 28,
+   "invariant_everywhere": false,
+   "by_keep_ratio": {
+    "0.32": {
+     "2": 20,
+     "3": 23,
+     "4": 20
+    },
+    "0.50": {
+     "2": 23,
+     "3": 22,
+     "4": 21
+    },
+    "0.75": {
+     "2": 21,
+     "3": 22,
+     "4": 23
+    },
+    "0.90": {
+     "2": 19,
+     "3": 19,
+     "4": 18
+    }
+   }
   }
  },
  "localization": {
@@ -852,6 +1041,22 @@
    "causal_kl_max_rel_diff": 0.12123487290698397,
    "causal_kl_item_ranking_identical": false
   },
+  "a4_596m_C_science_sdpa_fullmix": {
+   "locus": "observed_but_not_localized",
+   "driver": null,
+   "deterministic": null,
+   "bare_gemm_shape_dependent": null,
+   "padding_alone_is_inert": null,
+   "batch_size_alone_moves_it": null,
+   "backends_diverging": null,
+   "backends_exact": null,
+   "removed_by_disabling_bf16_reduced_precision_reduction": null,
+   "first_divergent_tap": null,
+   "forward_drift_max_abs": 5.546875,
+   "reduction_order_drift_max_abs": 0.0,
+   "causal_kl_max_rel_diff": null,
+   "causal_kl_item_ranking_identical": null
+  },
   "parent_C_science_eager": {
    "locus": "gemm_level_shape_dependent_accumulation",
    "driver": "padded_width_and_batch_size",
@@ -893,6 +1098,22 @@
    "reduction_order_drift_max_abs": 0.0,
    "causal_kl_max_rel_diff": 0.030786932785375837,
    "causal_kl_item_ranking_identical": false
+  },
+  "parent_C_science_sdpa_fullmix": {
+   "locus": "observed_but_not_localized",
+   "driver": null,
+   "deterministic": null,
+   "bare_gemm_shape_dependent": null,
+   "padding_alone_is_inert": null,
+   "batch_size_alone_moves_it": null,
+   "backends_diverging": null,
+   "backends_exact": null,
+   "removed_by_disabling_bf16_reduced_precision_reduction": null,
+   "first_divergent_tap": null,
+   "forward_drift_max_abs": 2.3818359375,
+   "reduction_order_drift_max_abs": 0.0,
+   "causal_kl_max_rel_diff": null,
+   "causal_kl_item_ranking_identical": null
   }
  },
  "authorizes": null,

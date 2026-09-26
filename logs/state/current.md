@@ -1290,13 +1290,17 @@ environment was unpinned. The record is **kept unchanged** as history:
 `4`; state identity semantics are unchanged; no operator definition, seed or
 recipe moved.
 
-**This repository contains three runtimes, and which one a number came from is
-the point.** The formal operator search executes under `/opt/train` — python
-3.12, **torch 2.11.0+cu128, transformers 5.13.1**, installed offline from the
-relay wheelhouse (`POD_IMAGE['remote_python']`, and C1 attempts 17/18 evidence).
-The engineering CUDA validations run under the image's own python, **torch
-2.9.1+cu130**. The rejected a4 run used a third: image `1.0.3-cu1281`, torch
-2.9.1+cu128, and `pip install transformers` with no version pin.
+**This repository contains FOUR runtimes, and which one a number came from is
+the point.** The formal operator search and every recovery probe execute under
+`/opt/train` — python 3.12, **torch 2.11.0+cu128, transformers 5.13.1**,
+installed offline from the relay wheelhouse
+(`POD_IMAGE['remote_python']`, and C1 attempts 17/18 evidence). Rollout runs in
+a deliberately separate `/opt/vllm` at torch 2.13.0+cu130 / transformers 5.15.0
+— `continuation_b/runs/attempt5/continuation_evidence.json` shows both inside
+one formal run. The engineering CUDA validations run the image's own python at
+**torch 2.9.1+cu130 / transformers 5.17.0** (`c2_full_search_cuda`,
+`c2_full_search_perf`). The rejected a4 run used a fourth: image `1.0.3-cu1281`,
+torch 2.9.1+cu128, and `pip install transformers` with no version pin.
 
 **The root-cause investigation is the current work.** Ceiling **`$3.00`
 cumulative, inheriting the `$0.0822`** already spent; `$2.9178` remains and no
@@ -1316,9 +1320,12 @@ paid for. The largest: `derive_conclusion` read "not every backend diverges" as
 "some backend is exact", and returned locus `attention_backend_kernel` for a run
 in which nothing diverged at all.
 
-**The measurement was made: four reports, one L40S, `$0.1005`, 5.45 minutes.**
-Attempt `bi_20260926_d2`, pod `c6btbh69ql85ng`, teardown provider-confirmed.
-Cumulative diagnostic spend `$0.2312` of `$3.00`. Owner:
+**The measurement was made: six reports, one L40S, `$0.1694`, 9.2 minutes.**
+Attempt `bi_20260926_d3`, pod `hdwsp4btdq5t1n`, teardown provider-confirmed, all
+six from ONE executable (`6f096fc5…`). It follows `d2`, which answered the root
+cause on four reports for `$0.1005` and whose numbers `d3` reproduces — a
+cross-session check that cost `$0.10` and was worth it. Cumulative diagnostic
+spend `$0.4006` of `$3.00`. Owner:
 [`finding.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/finding.json),
 **derived** by `scripts/validation/batch_invariance_finding.py` from the four
 raw reports in
@@ -1331,6 +1338,24 @@ selection moves in **25–26 of 28 layers at every keep ratio and every micro
 batch size** — a4 reported 22–27 of 28 across the same four ratios. On the
 **parent**, which is what C3's operators actually calibrate on, it is worse:
 **32–36 of 36**.
+
+**It is not a subsample artefact, and the prediction that said so was half
+wrong.** Those numbers read 8 of the mixture's 67 items, so a prediction was
+recorded and committed BEFORE the check
+([`fullmix_prediction.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/fullmix_prediction.json)):
+the relative drift should fall by roughly `sqrt(8) ≈ 2.8×`, and the selection
+should still move. At all 67 items (59,830 tokens):
+
+| | drift at bs=4 | fell by | layers moved, keep 0.50 |
+| --- | --- | --- | --- |
+| parent | `1.094e-03` → `4.183e-04` | **2.62×** | 34/36 → **34/36** |
+| a4 596M | `3.932e-02` → `2.824e-03` | **13.92×** | 26/28 → **21/28** |
+
+The `2–4×` prediction holds for the parent and is **wrong by 3.5× for the
+596M** — recorded as a miss rather than reinterpreted. The consequence claim
+survives on both: the minimum relative cutoff margin also grew (`1.9e-07` →
+`2.6e-06` on the parent), and the drift still exceeds it by two orders of
+magnitude.
 
 **The cause is a shape-dependent GEMM, not attention, not masking, not the
 operator code, and not the dtype alone.** Only some projections move, and what
@@ -1390,8 +1415,16 @@ definition. That is a maintainer decision.
 nodeids against `ab53ba14`; there were **three**, all found here and all now
 fixed: `test_every_pod_script_is_classified` (two new `scripts/pod` entries
 never catalogued) and two budget-snapshot tests left stale by the `$0.0822`
-booking. It also stated the formal environment as torch 2.9.1+cu130, which is
-the engineering runtime, not the one the science runs in.
+booking.
+
+**And a correction to my own correction.** I wrote that the `torch 2.9.1+cu130 /
+transformers 5.17.0` pair named in the investigation brief did not describe the
+formal environment. That is true, but I first reported finding no record of
+transformers 5.17.0 at all, and there is one: it is exactly what the
+`c2_full_search_cuda` and `c2_full_search_perf` engineering validations ran
+under. An a4-style CUDA validation is that kind of session, so naming that
+runtime was reasonable — it is simply not the one the operator search executes
+in. Both were measured here, and they agree.
 
 ## Readiness
 
@@ -1472,9 +1505,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$22.8249` of `$45.4425` |
-| GPU engineering | `$5.7688` of `$6.0000` |
-| package | `$28.5937` of `$51.4425` |
-| project cap | `$342.2014` spent of `$370.0000`, leaving `$27.7986` |
+| GPU engineering | `$5.5994` of `$6.0000` |
+| package | `$28.4243` of `$51.4425` |
+| project cap | `$342.3708` spent of `$370.0000`, leaving `$27.6292` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 
